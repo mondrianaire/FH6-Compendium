@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "game": "Forza Horizon 6",
+  "game_released": "2026-05-19",
+  "captured": "2026-06-07",
+  "note": "Adjustable ranges depend on installed upgrades (e.g. race springs/diff unlock sliders). Values below are typical exposed ranges and consensus baselines from a 3-week-old meta. Treat all baselines as starting points to be road-tuned.",
+  "tuning_order": [
+    "tires",
+    "springs",
+    "ride_height",
+    "alignment",
+    "anti_roll_bars",
+    "damping",
+    "brakes",
+    "differential",
+    "aero",
+    "gearing"
+  ],
+  "categories": [
+    {
+      "id": "tires",
+      "label": "Tire Pressure",
+      "tune_first": true,
+      "variables": [
+        { "id": "tire_pressure_front", "label": "Front tire pressure", "unit": "psi", "typical_min": 15.0, "typical_max": 50.0, "baseline_awd_circuit": 28.0, "confidence": "probable" },
+        { "id": "tire_pressure_rear", "label": "Rear tire pressure", "unit": "psi", "typical_min": 15.0, "typical_max": 50.0, "baseline_awd_circuit": 27.5, "confidence": "probable" }
+      ],
+      "principle": "Lower pressure = larger contact patch, more grip, smoother load transfer. Higher = sharper response, lower grip ceiling. A 3 psi shift meaningfully changes behavior. Tune to ~31-33 psi hot."
+    },
+    {
+      "id": "gearing",
+      "label": "Gearing",
+      "tune_last": true,
+      "variables": [
+        { "id": "final_drive", "label": "Final drive ratio", "unit": "ratio", "typical_min": 2.0, "typical_max": 6.0, "confidence": "probable" },
+        { "id": "individual_gears", "label": "Individual gear ratios (1..n)", "unit": "ratio", "confidence": "probable" }
+      ],
+      "principle": "Short gearing = faster accel, lower top speed. Long = slower accel, higher top end. Must be tuned while driving — do it last. Shorter final drive for touge/city hairpins; longer for highway speed zones."
+    },
+    {
+      "id": "alignment",
+      "label": "Alignment",
+      "variables": [
+        { "id": "camber_front", "label": "Front camber", "unit": "deg", "typical_min": -5.0, "typical_max": 5.0, "baseline": -1.2, "confidence": "probable" },
+        { "id": "camber_rear", "label": "Rear camber", "unit": "deg", "typical_min": -5.0, "typical_max": 5.0, "baseline": -1.0, "confidence": "probable" },
+        { "id": "toe_front", "label": "Front toe", "unit": "deg", "typical_min": -1.0, "typical_max": 1.0, "baseline": 0.0, "confidence": "probable" },
+        { "id": "toe_rear", "label": "Rear toe", "unit": "deg", "typical_min": -1.0, "typical_max": 1.0, "baseline": 0.0, "confidence": "probable" },
+        { "id": "caster", "label": "Caster", "unit": "deg", "typical_min": 1.0, "typical_max": 7.0, "baseline": 5.5, "confidence": "probable" }
+      ],
+      "principle": "Modest negative camber for cornering grip without killing straight-line traction. Higher caster sharpens turn-in and self-centering."
+    },
+    {
+      "id": "anti_roll_bars",
+      "label": "Anti-Roll Bars",
+      "variables": [
+        { "id": "arb_front", "label": "Front ARB stiffness", "unit": "scale", "typical_min": 1.0, "typical_max": 65.0, "confidence": "probable" },
+        { "id": "arb_rear", "label": "Rear ARB stiffness", "unit": "scale", "typical_min": 1.0, "typical_max": 65.0, "confidence": "probable" }
+      ],
+      "principle": "Balances rotation. Stiffer front = less understeer-correcting grip front / more stable; stiffer rear = more rotation. Tune relative to drivetrain bias."
+    },
+    {
+      "id": "springs",
+      "label": "Springs",
+      "tune_early": true,
+      "variables": [
+        { "id": "spring_front", "label": "Front spring rate", "unit": "lb/in or kgf", "confidence": "probable" },
+        { "id": "spring_rear", "label": "Rear spring rate", "unit": "lb/in or kgf", "confidence": "probable" }
+      ],
+      "principle": "Stiffer for smooth road/circuit, softer for dirt/cross-country compliance. Set after tires, before alignment."
+    },
+    {
+      "id": "ride_height",
+      "label": "Ride Height",
+      "variables": [
+        { "id": "ride_height_front", "label": "Front ride height", "unit": "in/cm", "confidence": "probable" },
+        { "id": "ride_height_rear", "label": "Rear ride height", "unit": "in/cm", "confidence": "probable" }
+      ],
+      "principle": "Lower = lower CG, more road grip. Raise for dirt/cross-country to avoid bottoming out."
+    },
+    {
+      "id": "damping",
+      "label": "Damping",
+      "variables": [
+        { "id": "bump_front", "label": "Front bump stiffness", "unit": "scale", "confidence": "probable" },
+        { "id": "bump_rear", "label": "Rear bump stiffness", "unit": "scale", "confidence": "probable" },
+        { "id": "rebound_front", "label": "Front rebound stiffness", "unit": "scale", "confidence": "probable" },
+        { "id": "rebound_rear", "label": "Rear rebound stiffness", "unit": "scale", "confidence": "probable" }
+      ],
+      "principle": "Rebound controls how fast the spring returns (~1.5-2x bump as a start). Bump controls compression. Softer damping for rough/dirt surfaces."
+    },
+    {
+      "id": "aero",
+      "label": "Aerodynamics / Downforce",
+      "variables": [
+        { "id": "downforce_front", "label": "Front downforce", "unit": "scale", "confidence": "probable" },
+        { "id": "downforce_rear", "label": "Rear downforce", "unit": "scale", "confidence": "probable" }
+      ],
+      "principle": "More downforce = more cornering grip, lower top speed. Min for drag/top-speed, max for technical circuits — costs PI."
+    },
+    {
+      "id": "brakes",
+      "label": "Braking",
+      "variables": [
+        { "id": "brake_balance", "label": "Brake balance (front %)", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline": 52.0, "confidence": "probable" },
+        { "id": "brake_pressure", "label": "Brake pressure", "unit": "%", "typical_min": 50.0, "typical_max": 150.0, "baseline": 100.0, "confidence": "probable" }
+      ],
+      "principle": "Forward balance = stable braking; rearward = more trail-braking rotation. Lower pressure if locking up under ABS-off."
+    },
+    {
+      "id": "differential",
+      "label": "Differential",
+      "variables": [
+        { "id": "diff_accel", "label": "Acceleration lock", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 55.0, "confidence": "probable" },
+        { "id": "diff_decel", "label": "Deceleration lock", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 15.0, "confidence": "probable" },
+        { "id": "diff_center", "label": "AWD center balance (rear %)", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_awd": 75.0, "confidence": "probable" }
+      ],
+      "principle": "0% open, 100% locked. AWD road meta: rear ~55% accel / ~15% decel, center 70-80% rear for launch traction plus rotation."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "captured": "2026-06-07",
+  "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",
+  "sources": [
+    { "id": "official-release", "tier": "primary", "title": "FH6 Release Timing", "url": "https://forza.net/news/forza-horizon-6-coming-may-2026", "used_for": "release date 2026-05-19, setting (Japan/Tokyo)" },
+    { "id": "wikipedia", "tier": "expert", "title": "Forza Horizon 6 — Wikipedia", "url": "https://en.wikipedia.org/wiki/Forza_Horizon_6", "used_for": "release/setting confirmation" },
+    { "id": "pcgamer", "tier": "expert", "title": "Best cars for each race type", "url": "https://www.pcgamer.com/games/racing/forza-horizon-6-best-cars/", "used_for": "road/dirt meta cars" },
+    { "id": "games.gg", "tier": "expert", "title": "Tuning guide + full car tier list", "url": "https://games.gg/forza-horizon-6/guides/forza-horizon-6-tuning-guide/", "used_for": "tuning variables, tier list" },
+    { "id": "egamersworld", "tier": "community", "title": "Best cars by class tier list", "url": "https://egamersworld.com/blog/forza-horizon-6-best-cars-by-class-s1-s2-a-b-tier--z7ymGyRVd2", "used_for": "S1/S2 meta, GT-R NISMO price/acquisition" },
+    { "id": "forzatune", "tier": "expert", "title": "Updated Forza Tuning Guide", "url": "https://forzatune.com/guide/the-fully-updated-forza-tuning-guide/", "used_for": "tuning fundamentals" },
+    { "id": "ggwtb", "tier": "community", "title": "Upgrade order & build strategy", "url": "https://ggwtb.com/blog/forza-horizon-6-tuning-guide-best-upgrade-order--build-strategy--and-baseline-settings", "used_for": "upgrade order, baselines" },
+    { "id": "dexerto", "tier": "expert", "title": "Best rally cars tier list", "url": "https://www.dexerto.com/wikis/forza-horizon-6/best-rally-cars-tier-list/", "used_for": "dirt/rally meta" },
+    { "id": "gamingpromax", "tier": "community", "title": "Best rally & cross-country cars", "url": "https://gamingpromax.com/forza-horizon-6-best-rally-cross-country-cars/", "used_for": "cross-country meta" },
+    { "id": "game8", "tier": "community", "title": "Off-road & car info pages", "url": "https://game8.co/games/Forza-Horizon-6/archives/602024", "used_for": "off-road cars, car data" },
+    { "id": "grindnstrat", "tier": "community", "title": "Best dirt cars tier list", "url": "https://grindnstrat.com/forza-horizon-6-best-cars-tier-list-best-dirt-cars/", "used_for": "dirt meta confirmation" },
+    { "id": "tiktok-sharecodes", "tier": "community", "title": "GT-R drag/drift share codes", "url": "https://www.tiktok.com/discover/best-tune-code-for-the-gtr-nismo-r-35-in-forza-horizon-6", "used_for": "drag share codes (low confidence — verify in-game)" }
+  ]
+}

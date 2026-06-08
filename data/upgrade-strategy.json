@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "captured": "2026-06-07",
+  "confidence": "probable",
+  "note": "Consensus build philosophy from early FH6 guides. The fastest builds are usually NOT the highest-horsepower builds — grip and control first, power last.",
+  "upgrade_order": [
+    { "step": 1, "category": "Tires & front grip", "detail": "Compound + front tire WIDTH. Widening front tires is now a valuable, PI-cheap grip fix before jumping to full compound.", "confidence": "verified" },
+    { "step": 2, "category": "Brakes", "detail": "Race brakes for braking stability and rotation.", "confidence": "probable" },
+    { "step": 3, "category": "Suspension", "detail": "Race springs/ARBs/dampers to unlock the tuning sliders.", "confidence": "verified" },
+    { "step": 4, "category": "Weight reduction", "detail": "Rarely wasted PI — improves braking, rotation, accel, and stability simultaneously.", "confidence": "verified" },
+    { "step": 5, "category": "Drivetrain", "detail": "AWD swap where traction-limited (see drivetrain rules). Decided by discipline.", "confidence": "verified" },
+    { "step": 6, "category": "Power (engine/turbo/swap)", "detail": "Add power LAST, only up to what the chassis can deploy. Heavy engine swaps suit power tracks/sprints, hurt tight layouts.", "confidence": "verified" }
+  ],
+  "drivetrain_rules": {
+    "road_racing": "AWD not mandatory; RWD can set faster clean laps but AWD launches harder, exits safer, survives contact. AWD favored online for consistency.",
+    "off_road_dirt_cross_country": "AWD dominates.",
+    "early_meta_power_split": "30/70 front-to-rear is the early consensus AWD split — launch traction with rear-biased rotation.",
+    "confidence": "probable"
+  },
+  "engine_swap_notes": {
+    "heavy_v8_swap": "6.2L V8 swap is fast on power tracks/sprints but adds serious weight — reconsider on tight/touge layouts.",
+    "principle": "Conversions decide the car's ceiling. Get the conversion wrong and tuning only hides the damage.",
+    "confidence": "probable"
+  },
+  "build_principles": [
+    "Keep most cars within 1-2 classes of stock; large class jumps create unstable builds unless the chassis is strong.",
+    "On tight circuits/touge the winner brakes cleanly, turns in hard, stays stable, and exits without wasting grip.",
+    "Spend PI on what the track rewards: top speed for highway zones, grip/brakes for technical routes."
+  ]
+}

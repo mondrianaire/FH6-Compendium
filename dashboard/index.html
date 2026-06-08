@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FH6 Tuning Decision Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">FH6</span>
+      <div>
+        <h1>Tuning Decision Dashboard</h1>
+        <p class="subtitle">Forza Horizon 6 — car &amp; mod purchase recommendations</p>
+      </div>
+    </div>
+    <div class="meta-stamp" id="metaStamp"></div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="recommend">🏁 Recommend a Car</button>
+    <button class="tab" data-tab="cars">🚗 Meta Car Database</button>
+    <button class="tab" data-tab="variables">🔧 Tuning Variables</button>
+    <button class="tab" data-tab="strategy">📈 Upgrade Strategy</button>
+  </nav>
+
+  <main>
+    <!-- RECOMMEND -->
+    <section id="recommend" class="panel active">
+      <div class="controls">
+        <label>Discipline
+          <select id="fDiscipline"></select>
+        </label>
+        <label>PI Class
+          <select id="fClass"></select>
+        </label>
+        <label>Max budget (credits)
+          <input id="fBudget" type="number" min="0" step="10000" placeholder="any" />
+        </label>
+        <label class="check"><input type="checkbox" id="fFreeOnly" /> Free / earnable only</label>
+        <button id="resetBtn" class="ghost">Reset</button>
+      </div>
+      <p class="result-count" id="resultCount"></p>
+      <div id="recoCards" class="card-grid"></div>
+    </section>
+
+    <!-- CARS -->
+    <section id="cars" class="panel">
+      <div id="carTableWrap"></div>
+    </section>
+
+    <!-- VARIABLES -->
+    <section id="variables" class="panel">
+      <p class="hint" id="varOrder"></p>
+      <div id="varCats"></div>
+    </section>
+
+    <!-- STRATEGY -->
+    <section id="strategy" class="panel">
+      <div id="strategyContent"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <span>Local database • <code>data/*.json</code> → <code>db.js</code></span>
+    <span id="footStamp"></span>
+  </footer>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

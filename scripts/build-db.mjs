@@ -12,6 +12,7 @@ const db = {
   tuningVariables: read("tuning-variables.json"),
   metaCars: read("meta-cars.json"),
   upgradeStrategy: read("upgrade-strategy.json"),
+  progression: read("progression.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

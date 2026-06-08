@@ -237,8 +237,79 @@
       </div>`;
   }
 
+  // ---- progression ----
+  function buildProgress() {
+    const p = DB.progression;
+    const stack = p.credit_multiplier_stack;
+    const host = document.getElementById("progressContent");
+
+    const roadmap = p.roadmap.map((ph) => `
+      <div class="strat-step">
+        <div class="strat-num">${ph.phase}</div>
+        <div>
+          <h4>${ph.title} <span class="conf ${confClass(ph.confidence)}">${confLabel(ph.confidence)}</span></h4>
+          <ul class="why" style="margin:6px 0 0;padding-left:18px">${ph.actions.map((a) => `<li>${a}</li>`).join("")}</ul>
+        </div>
+      </div>`).join("");
+
+    const multiplier = `
+      <div class="block">
+        <h3>Credit multiplier stack — turn assists OFF on real races</h3>
+        <p class="why">${stack.note}</p>
+        <div class="tune-grid" style="grid-template-columns:1fr auto">
+          ${stack.modifiers.map((m) => `<div>${m.setting}</div><div style="color:var(--accent);text-align:right">+${m.bonus_pct}%</div>`).join("")}
+          <div style="border-top:1px solid var(--line);padding-top:6px"><strong>Approx total</strong></div>
+          <div style="border-top:1px solid var(--line);padding-top:6px;text-align:right;color:var(--accent)"><strong>+${stack.approx_total_pct}%</strong></div>
+        </div>
+        <p class="why">${stack.extra}</p>
+      </div>`;
+
+    const methods = `
+      <h3 style="margin-top:24px">Farming methods, ranked</h3>
+      <div class="card-grid">
+        ${p.methods.map((m) => {
+          const codes = m.setup && m.setup.eventlab_codes
+            ? m.setup.eventlab_codes.map((c) => `<div class="share"><code>${c.code}</code> — ${c.name}: ${c.use}</div>`).join("") : "";
+          const car = m.setup && (m.setup.car || (m.setup.cars && m.setup.cars.join(", ")));
+          return `
+          <div class="car-card" style="cursor:default">
+            <div class="card-row" style="margin-top:0">
+              <span class="badge tier-${m.type === "active" ? "A" : m.type === "passive" || m.type === "weekly" ? "S" : "B"}">${m.type.toUpperCase()}</span>
+              <span class="conf ${confClass(m.confidence)}">${confLabel(m.confidence)}</span>
+            </div>
+            <h3>${m.name}</h3>
+            <p class="why" style="margin:6px 0">${m.yield}</p>
+            <div class="chips">
+              <span class="chip">rate: ${m.rate}</span>
+              <span class="chip">effort: ${m.effort}</span>
+              <span class="chip">risk: ${m.risk}</span>
+            </div>
+            ${car ? `<p class="why" style="margin:8px 0 0"><strong>Car:</strong> ${car}</p>` : ""}
+            ${m.setup && m.setup.premium_alt ? `<p class="why" style="margin:4px 0 0"><strong>Premium alt:</strong> ${m.setup.premium_alt}</p>` : ""}
+            ${codes}
+            ${m.tip ? `<p class="why" style="margin:8px 0 0;color:var(--accent2)">💡 ${m.tip}</p>` : ""}
+          </div>`;
+        }).join("")}
+      </div>`;
+
+    const excl = `
+      <div class="block" style="border-color:var(--warn)">
+        <h3>⚠️ Excluded on purpose</h3>
+        <ul>${p.exclusions.map((e) => `<li><strong>${e.what}</strong> — ${e.why_excluded}</li>`).join("")}</ul>
+      </div>`;
+
+    host.innerHTML = `
+      <p class="hint">${p.goal}</p>
+      <h3 style="margin-top:20px">The optimal path (do these in order)</h3>
+      ${roadmap}
+      ${multiplier}
+      ${methods}
+      ${excl}`;
+  }
+
   // ---- init ----
   render();
+  buildProgress();
   buildTable();
   buildVariables();
   buildStrategy();

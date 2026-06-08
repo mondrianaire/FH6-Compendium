@@ -860,6 +860,201 @@ window.FH6_DB = {
       "Spend PI on what the track rewards: top speed for highway zones, grip/brakes for technical routes."
     ]
   },
+  "progression": {
+    "schema_version": "1.0.0",
+    "captured": "2026-06-07",
+    "goal": "Maximize progress-per-hour for a brand-new save: credits, XP, skill points, and Super Wheelspins, then convert them into the meta cars + tunes in the car database.",
+    "exclusions": [
+      {
+        "what": "Credit/duplication glitches (e.g. '20 million in 5 minutes' videos)",
+        "why_excluded": "Patchable, can corrupt a save, and risk account action. Every method below is legitimate.",
+        "confidence": "verified"
+      }
+    ],
+    "roadmap": [
+      {
+        "phase": 1,
+        "title": "Prologue & Qualifiers — unlock the systems (first ~30-60 min)",
+        "actions": [
+          "Blitz the Prologue/Horizon Qualifiers — you don't need to 'win', just finish to unlock the full progression system, homes, PR stunts, and the map.",
+          "Use the 3 free starter cars (Nissan Silvia, GMC Jimmy, Toyota Celica GT-Four) — they carry you through the first two wristband tiers.",
+          "Do NOT spend on the Autoshow yet. Cash is your bottleneck; don't burn it before the credit engine is running."
+        ],
+        "confidence": "verified"
+      },
+      {
+        "phase": 2,
+        "title": "First few hours — buy the daily-wheelspin house & farm XP",
+        "actions": [
+          "FIRST big purchase goal: the player home that grants a DAILY WHEELSPIN. Permanent free pulls every day — highest ROI early buy.",
+          "Fast XP: at every race start grid press Up on the d-pad + Right Bumper for a quickshot photo — one of the fastest level-up tricks.",
+          "Grab AFTERMARKET cars parked on the map — steep discounts vs Autoshow.",
+          "Hit Speed Traps, Danger Signs, Drift Zones between races — the final wristband needs more Festival XP than you'd expect, so bank it early."
+        ],
+        "confidence": "verified"
+      },
+      {
+        "phase": 3,
+        "title": "Build the credit engine — skill-point farm + multipliers",
+        "actions": [
+          "Buy a fresh 1998 Subaru Impreza 22B STI from the Autoshow/Car Collection — it doubles as your A-class dirt meta car AND the best skill-point farm car.",
+          "Load an EventLab skill-point track (see methods), stack multipliers, and farm. ~10 skill points every ~21s is achievable.",
+          "On REAL races, turn assists OFF for the credit bonus stack (see multiplier table) — up to ~+50% credits per race.",
+          "Spend skill points in Car Mastery trees to unlock credit bonuses, Wheelspins, and Super Wheelspins."
+        ],
+        "confidence": "probable"
+      },
+      {
+        "phase": 4,
+        "title": "Snowball — Super Wheelspins, Festival Playlist, optional flipping",
+        "actions": [
+          "Convert skill points to Super Wheelspins: buy fresh cars via Car Collection, spend ~30 SP per car to claim its Super Wheelspin reward, repeat. (Buy from Autoshow/Car Collection so the reward is still unclaimed.)",
+          "Do the weekly FESTIVAL PLAYLIST every season: points at 40/50/80% thresholds unlock cosmetics, a car at 50%, and the treasure car / Super Wheelspin pack at 80% — plus free credits from Seasonal Challenges.",
+          "Optional active money: Auction House sniping — buy cars listed below market, relist near average, bank the margin."
+        ],
+        "confidence": "verified"
+      },
+      {
+        "phase": 5,
+        "title": "Cash out into meta — buy & tune the best cars",
+        "actions": [
+          "With a steady credit + wheelspin flow, buy the meta cars from the Recommend tab (WRX STI is 30k and dual-purpose; GT-R NISMO is free via the Touge & Street Collection Journal).",
+          "Apply the upgrade order (grip/brakes/weight first, power last) and the tune baselines.",
+          "Finish the final wristband (Festival-XP gated) to open the endgame island/content."
+        ],
+        "confidence": "probable"
+      }
+    ],
+    "credit_multiplier_stack": {
+      "note": "Stacks PER RACE. Turn these assists off (you can re-enable for skill-farm tracks). Approximate early-meta values.",
+      "confidence": "probable",
+      "modifiers": [
+        {
+          "setting": "Manual gearbox",
+          "bonus_pct": 15
+        },
+        {
+          "setting": "ABS off",
+          "bonus_pct": 15
+        },
+        {
+          "setting": "Traction control off",
+          "bonus_pct": 10
+        },
+        {
+          "setting": "Stability control off",
+          "bonus_pct": 10
+        }
+      ],
+      "approx_total_pct": 50,
+      "extra": "Raising AI difficulty also increases payouts — push it as high as you can still win at."
+    },
+    "methods": [
+      {
+        "id": "skillpoint-superwheelspin",
+        "name": "Skill-point farm → Super Wheelspins",
+        "type": "active",
+        "yield": "Best repeatable credit+car source. ~10 skill points / ~21s on the right track; ~30 SP converts a fresh car's Car Mastery into a Super Wheelspin.",
+        "rate": "~10 skill points / 21s (sustained)",
+        "requirements": "A high-multiplier car (1998 Subaru Impreza 22B STI is the meta pick) + Car Mastery skill points",
+        "setup": {
+          "car": "1998 Subaru Impreza 22B STI (buy fresh from Autoshow/Car Collection)",
+          "eventlab_codes": [
+            {
+              "code": "861 224 889",
+              "name": "Fastest Max Skill Points",
+              "use": "short loop — drive a line of multiplier objects, then Restart"
+            },
+            {
+              "code": "401 393 298",
+              "name": "Ultra Fast Colossus",
+              "use": "~1hr+ track, ideal for AFK/long runs"
+            }
+          ],
+          "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin"
+        },
+        "tip": "Turn ALL assists ON for skill-farm tracks so the game handles steering/braking while you maintain speed and hit multipliers.",
+        "effort": "high",
+        "risk": "none (legit)",
+        "confidence": "probable"
+      },
+      {
+        "id": "afk-eventlab",
+        "name": "AFK auto-drive EventLab farm",
+        "type": "passive",
+        "yield": "~2,300 credits + ~1,000 XP per lap while the car drives itself.",
+        "rate": "~2,300 cr + ~1,000 XP / lap (unattended)",
+        "requirements": "An EventLab circuit/Time Attack with auto-drive + a rubber band on the accelerator",
+        "setup": {
+          "cars": [
+            "Toyota Tacoma Forza Edition",
+            "Lexus LFA Forza Edition",
+            "Nissan Silvia S13"
+          ],
+          "tracks": [
+            "Hokubu Time Attack",
+            "Ultra Fast Colossus (code 401 393 298)"
+          ]
+        },
+        "tip": "Best for earning while away from the controller — lower hourly than active farming but zero effort.",
+        "effort": "none",
+        "risk": "none (legit)",
+        "confidence": "probable"
+      },
+      {
+        "id": "difficulty-multipliers",
+        "name": "Assist-off credit multipliers",
+        "type": "modifier",
+        "yield": "Up to ~+50% credits on EVERY race you run.",
+        "rate": "+50% per race (stacked)",
+        "requirements": "Just toggle assists off (manual gearbox, ABS, TC, stability)",
+        "setup": {},
+        "tip": "Free money multiplier — apply to all real racing. Raise AI difficulty for even more.",
+        "effort": "low",
+        "risk": "harder to win — scale to your skill",
+        "confidence": "probable"
+      },
+      {
+        "id": "daily-wheelspin-house",
+        "name": "Daily-wheelspin house",
+        "type": "passive",
+        "yield": "A free Wheelspin every day, permanently. Plus other homes give permanent point multipliers.",
+        "rate": "1 free Wheelspin/day forever",
+        "requirements": "Buy the specific player home that grants the daily wheelspin",
+        "setup": {},
+        "tip": "Make this your first major credit sink — compounding free value.",
+        "effort": "one-time",
+        "risk": "none",
+        "confidence": "verified"
+      },
+      {
+        "id": "festival-playlist",
+        "name": "Weekly Festival Playlist",
+        "type": "weekly",
+        "yield": "Free cars, credits, Wheelspins & Super Wheelspins each season. Thresholds: 40% cosmetic, 50% car, 80% treasure car / Super Wheelspin pack.",
+        "rate": "per-season reward bundle",
+        "requirements": "Complete seasonal/weekly Playlist events during the active season",
+        "setup": {},
+        "tip": "Replaces FH5 Forzathon. Cheapest way to get exclusive cars you can't buy — do it every week.",
+        "effort": "medium",
+        "risk": "none",
+        "confidence": "verified"
+      },
+      {
+        "id": "auction-house-flip",
+        "name": "Auction House sniping/flipping",
+        "type": "active",
+        "yield": "Margin on cars bought below market and relisted near average. Fastest active money when the market moves.",
+        "rate": "variable (market-dependent)",
+        "requirements": "Time + knowledge of car values; starting capital",
+        "setup": {},
+        "tip": "Higher skill ceiling; best once you know which cars hold value.",
+        "effort": "high",
+        "risk": "market timing; capital tied up",
+        "confidence": "probable"
+      }
+    ]
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",
@@ -947,6 +1142,48 @@ window.FH6_DB = {
         "title": "GT-R drag/drift share codes",
         "url": "https://www.tiktok.com/discover/best-tune-code-for-the-gtr-nismo-r-35-in-forza-horizon-6",
         "used_for": "drag share codes (low confidence — verify in-game)"
+      },
+      {
+        "id": "skycoach-credits",
+        "tier": "community",
+        "title": "How to farm credits",
+        "url": "https://skycoach.gg/blog/forza-horizon-6/articles/how-to-farm-credits",
+        "used_for": "credit methods, assist-off multiplier %s"
+      },
+      {
+        "id": "ggwtb-skillfarm",
+        "tier": "community",
+        "title": "Fastest skill point / wheelspin / XP / credit farm",
+        "url": "https://ggwtb.com/blog/forza-horizon-6-fastest-skill-point-super-wheelspin--xp--and-credit-farm-guide",
+        "used_for": "22B STI skill farm rate, EventLab codes, Revuelto conversion"
+      },
+      {
+        "id": "vgc-farm",
+        "tier": "expert",
+        "title": "Best credit, skill point & wheelspin farm methods",
+        "url": "https://www.videogameschronicle.com/guide/forza-horizon-6-credit-skill-point-farm-share-codes/",
+        "used_for": "skill-point farm confirmation, share codes"
+      },
+      {
+        "id": "forza-fandom-playlist",
+        "tier": "expert",
+        "title": "FH6 Festival Playlist",
+        "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist",
+        "used_for": "Festival Playlist mechanics, reward thresholds"
+      },
+      {
+        "id": "redbull-beginner",
+        "tier": "expert",
+        "title": "FH6 beginner tips",
+        "url": "https://www.redbull.com/us-en/forza-horizon-6-tips-for-beginners",
+        "used_for": "starter cars, photo XP, daily-wheelspin house, early roadmap"
+      },
+      {
+        "id": "kotaku-beginner",
+        "tier": "expert",
+        "title": "13 things to know before playing FH6",
+        "url": "https://kotaku.com/13-things-to-know-before-playing-forza-horizon-6-xbox-guide-open-world-2000695715",
+        "used_for": "early progression order, aftermarket map cars"
       }
     ]
   },

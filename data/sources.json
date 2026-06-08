@@ -19,6 +19,35 @@
     { "id": "vgc-farm", "tier": "expert", "title": "Best credit, skill point & wheelspin farm methods", "url": "https://www.videogameschronicle.com/guide/forza-horizon-6-credit-skill-point-farm-share-codes/", "used_for": "skill-point farm confirmation, share codes" },
     { "id": "forza-fandom-playlist", "tier": "expert", "title": "FH6 Festival Playlist", "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist", "used_for": "Festival Playlist mechanics, reward thresholds" },
     { "id": "redbull-beginner", "tier": "expert", "title": "FH6 beginner tips", "url": "https://www.redbull.com/us-en/forza-horizon-6-tips-for-beginners", "used_for": "starter cars, photo XP, daily-wheelspin house, early roadmap" },
-    { "id": "kotaku-beginner", "tier": "expert", "title": "13 things to know before playing FH6", "url": "https://kotaku.com/13-things-to-know-before-playing-forza-horizon-6-xbox-guide-open-world-2000695715", "used_for": "early progression order, aftermarket map cars" }
-  ]
+    { "id": "kotaku-beginner", "tier": "expert", "title": "13 things to know before playing FH6", "url": "https://kotaku.com/13-things-to-know-before-playing-forza-horizon-6-xbox-guide-open-world-2000695715", "used_for": "early progression order, aftermarket map cars" },
+
+    { "id": "game8-db", "tier": "primary", "title": "game8 FH6 car database (independent)", "url": "https://game8.co/games/Forza-Horizon-6/archives/600753", "used_for": "VERIFICATION: GT-R NISMO 220k price, journal reward, off-road car list, F-450" },
+    { "id": "forza-fandom", "tier": "expert", "title": "Forza Fandom wiki (independent)", "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist", "used_for": "VERIFICATION: Festival Playlist points system, Gemera Car Pass, BRZ FE" },
+    { "id": "kudosprime", "tier": "primary", "title": "kudosprime FH6 stat sheets (independent)", "url": "https://www.kudosprime.com/fh6/car_sheet.php?id=549", "used_for": "VERIFICATION: WRX STI 30k price/stats" },
+    { "id": "forums-forza", "tier": "primary", "title": "Official Forza forums — Playlist & tune threads", "url": "https://forums.forza.net/t/fh6-festival-playlist-events-and-rewards-may-21-may-28-series-01-week-1/828507", "used_for": "VERIFICATION: Festival Playlist points (20/40/80), drag tune hub" },
+    { "id": "gtplanet", "tier": "expert", "title": "GTPlanet FH6 discussion (community forum)", "url": "https://www.gtplanet.net/forum/threads/forza-horizon-6-general-discussion.434110/", "used_for": "VERIFICATION: AWD-swap meta direction, engine-swap/weight tradeoffs (qualitative)" },
+    { "id": "forzatune", "tier": "expert", "title": "ForzaTune authority guide (independent)", "url": "https://forzatune.com/guide/the-fully-updated-forza-tuning-guide/", "used_for": "VERIFICATION: variable set, tune order (puts alignment before springs — disputes SEO order)" },
+    { "id": "forzafire-drivetrain", "tier": "community", "title": "ForzaFire drivetrain tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-drivetrain-tuning-guide", "used_for": "VERIFICATION: diff baselines contradict 55/15 (gives 100/45)" },
+    { "id": "codmunity-drag", "tier": "community", "title": "CODMunity FH6 drag tune DB", "url": "https://codmunity.gg/forza/drag", "used_for": "VERIFICATION: real GT-R FE drag code 514752751; retracts unverified TikTok codes" },
+    { "id": "ggwtb-afk-colossus", "tier": "community", "title": "AFK Colossus ~1M cr/hr method", "url": "https://ggwtb.com/blog/best-forza-horizon-6-credit-farm-afk-colossus-method-for-nearly-1m-credits-per-hour", "used_for": "VERIFICATION: AFK farm real rate ~140k/lap (corrects 2,300/lap error)" },
+    { "id": "dotesports", "tier": "expert", "title": "Dotesports FH6 best-car guides", "url": "https://dotesports.com/forza/news/forza-horizon-6-best-car-every-class", "used_for": "VERIFICATION: Gemera, AMG One, FXX-K Evo S2 picks" },
+    { "id": "gamerguides-journal", "tier": "expert", "title": "All Journal reward cars in FH6", "url": "https://www.gamerguides.com/forza-horizon-6/guide/getting-started/gameplay/all-journal-reward-cars-in-fh6", "used_for": "VERIFICATION: GT-R NISMO free via Collection Journal Tier 3" }
+  ],
+  "verification_pass": {
+    "date": "2026-06-08",
+    "method": "3 independent research agents cross-checked every v1/v2 claim against forums + independent databases, weighted for source independence.",
+    "headline": "Most QUALITATIVE claims held up (AWD meta, grip-before-power, starter cars, free GT-R path, share codes exist). Several NUMERIC claims were wrong or fabricated and have been corrected or downgraded.",
+    "corrections": [
+      "GT-R NISMO price 270k -> 220k (game8 DB).",
+      "AFK farm rate ~2,300 cr/lap -> ~140k cr/lap (~900k-1M/hr); car = Tacoma FE only.",
+      "Festival Playlist '40/50/80%' -> points system (20/40/80 PTS) per official forums.",
+      "Assist multiplier %s (+15/+15/+10/+10) downgraded to CONTESTED — likely SEO-fabricated; AI difficulty is the real lever.",
+      "Diff baseline 55%/15% downgraded to CONTESTED — sources give 100%/45% or 50-70%/10-15%.",
+      "'30/70 power split' clarified as the diff CENTER BALANCE, not a separate slider.",
+      "Drag share codes 113601876/109333743 retracted (unverifiable); real code 514752751.",
+      "22B 'best A-class rally' downgraded to probable (single-origin SEO).",
+      "Gemera flagged Car Pass (paid DLC); AMG One often free via FH5 save; best CC car is 1999 Viper GTS ACR FE (VIP).",
+      "Photo trick clarified: Festival/Promo XP (not player level), two presses not a chord."
+    ]
+  }
 }

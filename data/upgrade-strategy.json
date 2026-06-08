@@ -14,7 +14,7 @@
   "drivetrain_rules": {
     "road_racing": "AWD not mandatory; RWD can set faster clean laps but AWD launches harder, exits safer, survives contact. AWD favored online for consistency.",
     "off_road_dirt_cross_country": "AWD dominates.",
-    "early_meta_power_split": "30/70 front-to-rear is the early consensus AWD split — launch traction with rear-biased rotation.",
+    "early_meta_power_split": "30/70 front-to-rear is the early consensus AWD bias — launch traction with rear-biased rotation. NOTE: this is NOT a separate slider; it's the differential CENTER BALANCE set to ~70% rear. Don't look for a distinct 'power split' tuning option.",
     "confidence": "probable"
   },
   "engine_swap_notes": {

@@ -25,7 +25,7 @@
       "title": "First few hours — buy the daily-wheelspin house & farm XP",
       "actions": [
         "FIRST big purchase goal: the player home that grants a DAILY WHEELSPIN. Permanent free pulls every day — highest ROI early buy.",
-        "Fast XP: at every race start grid press Up on the d-pad + Right Bumper for a quickshot photo — one of the fastest level-up tricks.",
+        "Fast Festival/Promo XP (NOT general player level — corrected): at the race start grid press Up on the d-pad to open Photo Mode, THEN Right Bumper for a quickshot (two presses, not a chord). Photographing new cars on the grid yields ~10 Festival XP each (~60–70 per race) toward wristband progress.",
         "Grab AFTERMARKET cars parked on the map — steep discounts vs Autoshow.",
         "Hit Speed Traps, Danger Signs, Drift Zones between races — the final wristband needs more Festival XP than you'd expect, so bank it early."
       ],
@@ -47,7 +47,7 @@
       "title": "Snowball — Super Wheelspins, Festival Playlist, optional flipping",
       "actions": [
         "Convert skill points to Super Wheelspins: buy fresh cars via Car Collection, spend ~30 SP per car to claim its Super Wheelspin reward, repeat. (Buy from Autoshow/Car Collection so the reward is still unclaimed.)",
-        "Do the weekly FESTIVAL PLAYLIST every season: points at 40/50/80% thresholds unlock cosmetics, a car at 50%, and the treasure car / Super Wheelspin pack at 80% — plus free credits from Seasonal Challenges.",
+        "Do the weekly FESTIVAL PLAYLIST every season. CORRECTED: rewards are a POINTS system (per official Forza forums) — weekly reward cars around 20 PTS and 40 PTS, and an 80-PT Series reward — NOT the '40/50/80%' thresholds the SEO guides claim. Plus free credits from Seasonal Challenges.",
         "Optional active money: Auction House sniping — buy cars listed below market, relist near average, bank the margin."
       ],
       "confidence": "verified"
@@ -64,24 +64,24 @@
     }
   ],
   "credit_multiplier_stack": {
-    "note": "Stacks PER RACE. Turn these assists off (you can re-enable for skill-farm tracks). Approximate early-meta values.",
-    "confidence": "probable",
+    "note": "DIRECTION is correct (manual + assists off → more credits), but the exact per-toggle percentages below are CONTESTED. They appear only in a self-copying cluster of SEO guides with no primary/official confirmation. Historically Forza applies one aggregate difficulty/assist modifier, not neat per-toggle values — so treat these as a rough guide, verify the in-game total yourself.",
+    "confidence": "contested",
     "modifiers": [
-      { "setting": "Manual gearbox", "bonus_pct": 15 },
-      { "setting": "ABS off", "bonus_pct": 15 },
-      { "setting": "Traction control off", "bonus_pct": 10 },
-      { "setting": "Stability control off", "bonus_pct": 10 }
+      { "setting": "Manual gearbox", "bonus_pct": 15, "note": "unverified exact value" },
+      { "setting": "ABS off", "bonus_pct": 15, "note": "unverified exact value" },
+      { "setting": "Traction control off", "bonus_pct": 10, "note": "unverified exact value" },
+      { "setting": "Stability control off", "bonus_pct": 10, "note": "unverified exact value" }
     ],
     "approx_total_pct": 50,
-    "extra": "Raising AI difficulty also increases payouts — push it as high as you can still win at."
+    "extra": "Raising AI difficulty (Highly Skilled / Unbeatable) is the bigger, well-established lever — push it as high as you can still win at."
   },
   "methods": [
     {
       "id": "skillpoint-superwheelspin",
       "name": "Skill-point farm → Super Wheelspins",
       "type": "active",
-      "yield": "Best repeatable credit+car source. ~10 skill points / ~21s on the right track; ~30 SP converts a fresh car's Car Mastery into a Super Wheelspin.",
-      "rate": "~10 skill points / 21s (sustained)",
+      "yield": "Best repeatable credit+car source. The method (22B + EventLab loop → Car Mastery → Super Wheelspin) is well corroborated, but the exact '~10 SP / 21s' rate and '~30 SP per Super Wheelspin' are single-source figures — directionally right, exact numbers unverified.",
+      "rate": "~10 skill points / 21s (single-source, unverified exact rate)",
       "requirements": "A high-multiplier car (1998 Subaru Impreza 22B STI is the meta pick) + Car Mastery skill points",
       "setup": {
         "car": "1998 Subaru Impreza 22B STI (buy fresh from Autoshow/Car Collection)",
@@ -89,7 +89,7 @@
           { "code": "861 224 889", "name": "Fastest Max Skill Points", "use": "short loop — drive a line of multiplier objects, then Restart" },
           { "code": "401 393 298", "name": "Ultra Fast Colossus", "use": "~1hr+ track, ideal for AFK/long runs" }
         ],
-        "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin"
+        "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin (single-source claim — plausible, lightly held)"
       },
       "tip": "Turn ALL assists ON for skill-farm tracks so the game handles steering/braking while you maintain speed and hit multipliers.",
       "effort": "high",
@@ -98,18 +98,19 @@
     },
     {
       "id": "afk-eventlab",
-      "name": "AFK auto-drive EventLab farm",
+      "name": "AFK auto-drive 'Colossus' farm",
       "type": "passive",
-      "yield": "~2,300 credits + ~1,000 XP per lap while the car drives itself.",
-      "rate": "~2,300 cr + ~1,000 XP / lap (unattended)",
-      "requirements": "An EventLab circuit/Time Attack with auto-drive + a rubber band on the accelerator",
+      "yield": "~140,000 credits per lap (≈900k–1M cr/hour) on the Colossus Rivals route with AutoDrive. XP is effectively capped per lap, not a big XP source.",
+      "rate": "~140k cr / lap, ~900k–1M cr/hr (CORRECTED — earlier '2,300 cr/lap' figure was ~60x too low)",
+      "requirements": "The Colossus route in AutoDrive + a wired controller (rubber band on accelerator)",
       "setup": {
-        "cars": ["Toyota Tacoma Forza Edition", "Lexus LFA Forza Edition", "Nissan Silvia S13"],
-        "tracks": ["Hokubu Time Attack", "Ultra Fast Colossus (code 401 393 298)"]
+        "cars": ["Toyota Tacoma Forza Edition (its credit-boost perk is the corroborated pick)"],
+        "uncorroborated_cars": ["Lexus LFA FE / Nissan Silvia S13 — claimed elsewhere but NOT confirmed; prefer the Tacoma FE"],
+        "tracks": ["The Colossus (AutoDrive Rivals)"]
       },
-      "tip": "Best for earning while away from the controller — lower hourly than active farming but zero effort.",
+      "tip": "This is the single best PASSIVE credit method by far. Hourly rate rivals active farming with zero effort — make it your overnight/AFK earner.",
       "effort": "none",
-      "risk": "none (legit)",
+      "risk": "none (legit AutoDrive feature; not a glitch)",
       "confidence": "probable"
     },
     {
@@ -129,7 +130,7 @@
       "id": "daily-wheelspin-house",
       "name": "Daily-wheelspin house",
       "type": "passive",
-      "yield": "A free Wheelspin every day, permanently. Plus other homes give permanent point multipliers.",
+      "yield": "A free Wheelspin every day, permanently (sources call it the 'Tokyo City House'). Plus other homes give permanent point multipliers. Exact name/price varies by source (~3M cr quoted) — treat the figure as soft.",
       "rate": "1 free Wheelspin/day forever",
       "requirements": "Buy the specific player home that grants the daily wheelspin",
       "setup": {},

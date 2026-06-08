@@ -11,8 +11,8 @@
     cross_country: "Cross Country", drag: "Drag"
   };
   const fmtCr = (n) => n == null ? "—" : n.toLocaleString("en-US") + " cr";
-  const confClass = (c) => c === "verified" ? "conf-verified" : "conf-probable";
-  const confLabel = (c) => c === "verified" ? "✅ verified" : "🟡 probable";
+  const confClass = (c) => c === "verified" ? "conf-verified" : c === "contested" ? "conf-contested" : "conf-probable";
+  const confLabel = (c) => c === "verified" ? "✅ verified" : c === "contested" ? "⚠️ contested" : "🟡 probable";
 
   // ---- stamps ----
   document.getElementById("metaStamp").textContent =
@@ -133,7 +133,7 @@
         <dt>Disciplines</dt><dd>${c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", ")}</dd>
         <dt>Drivetrain</dt><dd>${c.drivetrain_stock} stock → ${c.recommended_drivetrain}</dd>
         <dt>Power split</dt><dd>${c.power_split || "—"}</dd>
-        <dt>Price</dt><dd>${fmtCr(c.price_credits)}</dd>
+        <dt>Price</dt><dd>${fmtCr(c.price_credits)}${c.price_note ? `<br><span class="why" style="font-size:12px">${c.price_note}</span>` : ""}</dd>
         <dt>Acquisition</dt><dd>${c.acquisition || "—"}</dd>
         <dt>Value rating</dt><dd>${c.value_rating}/10</dd>
       </dl>

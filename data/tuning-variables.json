@@ -4,6 +4,7 @@
   "game_released": "2026-05-19",
   "captured": "2026-06-07",
   "note": "Adjustable ranges depend on installed upgrades (e.g. race springs/diff unlock sliders). Values below are typical exposed ranges and consensus baselines from a 3-week-old meta. Treat all baselines as starting points to be road-tuned.",
+  "tuning_order_note": "Order is broadly agreed but the springs-vs-alignment position is disputed: the ForzaTune authority puts ALIGNMENT before springs, while most SEO guides put springs first. Gearing-last is universal. Tires-first is universal.",
   "tuning_order": [
     "tires",
     "springs",
@@ -110,11 +111,11 @@
       "id": "differential",
       "label": "Differential",
       "variables": [
-        { "id": "diff_accel", "label": "Acceleration lock", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 55.0, "confidence": "probable" },
-        { "id": "diff_decel", "label": "Deceleration lock", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 15.0, "confidence": "probable" },
+        { "id": "diff_accel", "label": "Acceleration lock", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 55.0, "confidence": "contested" },
+        { "id": "diff_decel", "label": "Deceleration lock", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 15.0, "confidence": "contested" },
         { "id": "diff_center", "label": "AWD center balance (rear %)", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_awd": 75.0, "confidence": "probable" }
       ],
-      "principle": "0% open, 100% locked. AWD road meta: rear ~55% accel / ~15% decel, center 70-80% rear for launch traction plus rotation."
+      "principle": "0% open, 100% locked. CONTESTED baseline: the accel/decel figures vary wildly across sources — ForzaFire says rear 100% accel / 45% decel, grindout says 50-70% / 10-15%, our 55%/15% matches neither cleanly. Use as a rough starting point and road-tune. Center 70-80% rear is well-agreed. NOTE: 'center 75% rear' is the SAME setting people call a '30/70 power split' — there is no separate front/rear power slider."
     }
   ]
 }

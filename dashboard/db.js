@@ -6,6 +6,7 @@ window.FH6_DB = {
     "game_released": "2026-05-19",
     "captured": "2026-06-07",
     "note": "Adjustable ranges depend on installed upgrades (e.g. race springs/diff unlock sliders). Values below are typical exposed ranges and consensus baselines from a 3-week-old meta. Treat all baselines as starting points to be road-tuned.",
+    "tuning_order_note": "Order is broadly agreed but the springs-vs-alignment position is disputed: the ForzaTune authority puts ALIGNMENT before springs, while most SEO guides put springs first. Gearing-last is universal. Tires-first is universal.",
     "tuning_order": [
       "tires",
       "springs",
@@ -267,7 +268,7 @@ window.FH6_DB = {
             "typical_min": 0,
             "typical_max": 100,
             "baseline_rwd_awd_rear": 55,
-            "confidence": "probable"
+            "confidence": "contested"
           },
           {
             "id": "diff_decel",
@@ -276,7 +277,7 @@ window.FH6_DB = {
             "typical_min": 0,
             "typical_max": 100,
             "baseline_rwd_awd_rear": 15,
-            "confidence": "probable"
+            "confidence": "contested"
           },
           {
             "id": "diff_center",
@@ -288,14 +289,14 @@ window.FH6_DB = {
             "confidence": "probable"
           }
         ],
-        "principle": "0% open, 100% locked. AWD road meta: rear ~55% accel / ~15% decel, center 70-80% rear for launch traction plus rotation."
+        "principle": "0% open, 100% locked. CONTESTED baseline: the accel/decel figures vary wildly across sources — ForzaFire says rear 100% accel / 45% decel, grindout says 50-70% / 10-15%, our 55%/15% matches neither cleanly. Use as a rough starting point and road-tune. Center 70-80% rear is well-agreed. NOTE: 'center 75% rear' is the SAME setting people call a '30/70 power split' — there is no separate front/rear power slider."
       }
     ]
   },
   "metaCars": {
     "schema_version": "1.0.0",
     "captured": "2026-06-07",
-    "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift with community discovery and balance patches. Prices/acquisition marked 'unknown' were not yet confirmed by a reliable source. Confidence: verified = stated by multiple independent guides; probable = single/early-consensus source.",
+    "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift. VERIFIED 2026-06-08 against independent databases (game8, Fandom, kudosprime, CODMunity) and forums (forums.forza.net, GTPlanet). Key fix: GT-R NISMO price corrected 270k→220k. Many SEO tier-lists plagiarize each other — superlatives without independent backing were downgraded. Confidence: verified = multiple INDEPENDENT sources; probable = single/early-consensus; contested = sources disagree.",
     "pi_classes": {
       "D": "100-500",
       "C": "501-600",
@@ -325,8 +326,9 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
-        "price_credits": 270000,
-        "acquisition": "Autoshow; also final reward of Touge & Street Rivals Collection Journal (earnable free)",
+        "price_credits": 220000,
+        "price_note": "game8 database lists 220,000 cr; the 270,000 figure circulating in SEO tier-lists is unconfirmed. Free path verified: Touge & Street Rivals Collection Journal, Tier 3 reward.",
+        "acquisition": "Autoshow; also a Tier-3 reward of the Touge & Street Rivals Collection Journal (earnable free)",
         "tier": "S",
         "value_rating": 9,
         "upgrade_priority": [
@@ -425,7 +427,7 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
         "price_credits": null,
-        "acquisition": "Early Car Pass addition (price unconfirmed)",
+        "acquisition": "Car Pass exclusive (PAID DLC, added ~2026-05-28) — not buyable with credits alone",
         "tier": "S",
         "value_rating": 9,
         "upgrade_priority": [
@@ -462,7 +464,7 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
         "price_credits": null,
-        "acquisition": "Autoshow / high-end (PI ~900 S2)",
+        "acquisition": "Autoshow / high-end (PI ~900 S2); often unlockable FREE if you have a Forza Horizon 5 save",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -473,9 +475,11 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Considered the ultimate endgame S2 car for top-level events.",
+        "why": "Consistently cited as the best overall / top S2 car. Note: the Ferrari FXX-K Evo is named by several independent sources as a co-best S2 do-everything pick worth comparing.",
         "confidence": "verified",
         "sources": [
+          "dexerto",
+          "dotesports",
           "egamersworld"
         ]
       },
@@ -524,6 +528,7 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
         "price_credits": 30000,
+        "price_note": "30,000 cr verified across game8, Fandom, and kudosprime (independent databases). Stock car is a B-class base; the A-class listing here reflects a typical dirt build, not its stock PI.",
         "acquisition": "Autoshow",
         "tier": "S",
         "value_rating": 10,
@@ -569,11 +574,11 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Overall best rally car — iconic AWD, the meta pick for A-Class dirt.",
-        "confidence": "verified",
+        "why": "Frequently called the best A-class rally car — but this 'best overall' crown comes only from a cluster of SEO tier-lists with identical phrasing; no independent community source (game8/forums) corroborates it yet. Strong pick, unverified superlative.",
+        "confidence": "probable",
         "sources": [
-          "dexerto",
-          "gamingpromax"
+          "gamingpromax",
+          "games.gg"
         ]
       },
       {
@@ -687,11 +692,11 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Best S1+ off-road / cross-country car — incredibly fast and lightweight.",
+        "why": "Strong S1+ off-road pick. NOTE: game8's off-road guide ranks the 1999 Dodge Viper GTS ACR Forza Edition (9.9 off-road, VIP/Premium-gated) as the best-overall cross-country car; this entry is the right idea but the ACR FE is the true top pick if you have VIP.",
         "confidence": "probable",
         "sources": [
-          "gamingpromax",
-          "game8"
+          "game8",
+          "gamingpromax"
         ]
       },
       {
@@ -776,26 +781,25 @@ window.FH6_DB = {
         },
         "share_codes": [
           {
-            "code": "113 601 876",
-            "purpose": "AWD drag, ~6.197s 1/4 mile",
-            "confidence": "probable"
-          },
-          {
-            "code": "109 333 743",
-            "purpose": "RWD-swap max-traction drag, ~6.083s 1/4 mile",
-            "confidence": "probable"
-          },
-          {
-            "code": "934 309 906",
-            "purpose": "Drift tune (R35)",
+            "code": "514 752 751",
+            "purpose": "Top GT-R FE drag tune per CODMunity community DB",
             "confidence": "probable"
           }
         ],
-        "why": "Premier drag platform; community share codes already running low-6-second quarter miles.",
+        "share_codes_retracted": {
+          "codes": [
+            "113 601 876",
+            "109 333 743",
+            "934 309 906"
+          ],
+          "reason": "These (from a TikTok aggregator) could not be found in ANY independent source; cited times (6.197s/6.083s) don't match community builds (~6.05s). Treat as unverified/likely fabricated. Verify any code in-game before trusting."
+        },
+        "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game.",
         "confidence": "probable",
         "sources": [
-          "tiktok-sharecodes",
-          "game8"
+          "codmunity-drag",
+          "forza-fandom-gtr",
+          "forums-forza-tunes"
         ]
       }
     ]
@@ -846,7 +850,7 @@ window.FH6_DB = {
     "drivetrain_rules": {
       "road_racing": "AWD not mandatory; RWD can set faster clean laps but AWD launches harder, exits safer, survives contact. AWD favored online for consistency.",
       "off_road_dirt_cross_country": "AWD dominates.",
-      "early_meta_power_split": "30/70 front-to-rear is the early consensus AWD split — launch traction with rear-biased rotation.",
+      "early_meta_power_split": "30/70 front-to-rear is the early consensus AWD bias — launch traction with rear-biased rotation. NOTE: this is NOT a separate slider; it's the differential CENTER BALANCE set to ~70% rear. Don't look for a distinct 'power split' tuning option.",
       "confidence": "probable"
     },
     "engine_swap_notes": {
@@ -887,7 +891,7 @@ window.FH6_DB = {
         "title": "First few hours — buy the daily-wheelspin house & farm XP",
         "actions": [
           "FIRST big purchase goal: the player home that grants a DAILY WHEELSPIN. Permanent free pulls every day — highest ROI early buy.",
-          "Fast XP: at every race start grid press Up on the d-pad + Right Bumper for a quickshot photo — one of the fastest level-up tricks.",
+          "Fast Festival/Promo XP (NOT general player level — corrected): at the race start grid press Up on the d-pad to open Photo Mode, THEN Right Bumper for a quickshot (two presses, not a chord). Photographing new cars on the grid yields ~10 Festival XP each (~60–70 per race) toward wristband progress.",
           "Grab AFTERMARKET cars parked on the map — steep discounts vs Autoshow.",
           "Hit Speed Traps, Danger Signs, Drift Zones between races — the final wristband needs more Festival XP than you'd expect, so bank it early."
         ],
@@ -909,7 +913,7 @@ window.FH6_DB = {
         "title": "Snowball — Super Wheelspins, Festival Playlist, optional flipping",
         "actions": [
           "Convert skill points to Super Wheelspins: buy fresh cars via Car Collection, spend ~30 SP per car to claim its Super Wheelspin reward, repeat. (Buy from Autoshow/Car Collection so the reward is still unclaimed.)",
-          "Do the weekly FESTIVAL PLAYLIST every season: points at 40/50/80% thresholds unlock cosmetics, a car at 50%, and the treasure car / Super Wheelspin pack at 80% — plus free credits from Seasonal Challenges.",
+          "Do the weekly FESTIVAL PLAYLIST every season. CORRECTED: rewards are a POINTS system (per official Forza forums) — weekly reward cars around 20 PTS and 40 PTS, and an 80-PT Series reward — NOT the '40/50/80%' thresholds the SEO guides claim. Plus free credits from Seasonal Challenges.",
           "Optional active money: Auction House sniping — buy cars listed below market, relist near average, bank the margin."
         ],
         "confidence": "verified"
@@ -926,36 +930,40 @@ window.FH6_DB = {
       }
     ],
     "credit_multiplier_stack": {
-      "note": "Stacks PER RACE. Turn these assists off (you can re-enable for skill-farm tracks). Approximate early-meta values.",
-      "confidence": "probable",
+      "note": "DIRECTION is correct (manual + assists off → more credits), but the exact per-toggle percentages below are CONTESTED. They appear only in a self-copying cluster of SEO guides with no primary/official confirmation. Historically Forza applies one aggregate difficulty/assist modifier, not neat per-toggle values — so treat these as a rough guide, verify the in-game total yourself.",
+      "confidence": "contested",
       "modifiers": [
         {
           "setting": "Manual gearbox",
-          "bonus_pct": 15
+          "bonus_pct": 15,
+          "note": "unverified exact value"
         },
         {
           "setting": "ABS off",
-          "bonus_pct": 15
+          "bonus_pct": 15,
+          "note": "unverified exact value"
         },
         {
           "setting": "Traction control off",
-          "bonus_pct": 10
+          "bonus_pct": 10,
+          "note": "unverified exact value"
         },
         {
           "setting": "Stability control off",
-          "bonus_pct": 10
+          "bonus_pct": 10,
+          "note": "unverified exact value"
         }
       ],
       "approx_total_pct": 50,
-      "extra": "Raising AI difficulty also increases payouts — push it as high as you can still win at."
+      "extra": "Raising AI difficulty (Highly Skilled / Unbeatable) is the bigger, well-established lever — push it as high as you can still win at."
     },
     "methods": [
       {
         "id": "skillpoint-superwheelspin",
         "name": "Skill-point farm → Super Wheelspins",
         "type": "active",
-        "yield": "Best repeatable credit+car source. ~10 skill points / ~21s on the right track; ~30 SP converts a fresh car's Car Mastery into a Super Wheelspin.",
-        "rate": "~10 skill points / 21s (sustained)",
+        "yield": "Best repeatable credit+car source. The method (22B + EventLab loop → Car Mastery → Super Wheelspin) is well corroborated, but the exact '~10 SP / 21s' rate and '~30 SP per Super Wheelspin' are single-source figures — directionally right, exact numbers unverified.",
+        "rate": "~10 skill points / 21s (single-source, unverified exact rate)",
         "requirements": "A high-multiplier car (1998 Subaru Impreza 22B STI is the meta pick) + Car Mastery skill points",
         "setup": {
           "car": "1998 Subaru Impreza 22B STI (buy fresh from Autoshow/Car Collection)",
@@ -971,7 +979,7 @@ window.FH6_DB = {
               "use": "~1hr+ track, ideal for AFK/long runs"
             }
           ],
-          "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin"
+          "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin (single-source claim — plausible, lightly held)"
         },
         "tip": "Turn ALL assists ON for skill-farm tracks so the game handles steering/braking while you maintain speed and hit multipliers.",
         "effort": "high",
@@ -980,25 +988,25 @@ window.FH6_DB = {
       },
       {
         "id": "afk-eventlab",
-        "name": "AFK auto-drive EventLab farm",
+        "name": "AFK auto-drive 'Colossus' farm",
         "type": "passive",
-        "yield": "~2,300 credits + ~1,000 XP per lap while the car drives itself.",
-        "rate": "~2,300 cr + ~1,000 XP / lap (unattended)",
-        "requirements": "An EventLab circuit/Time Attack with auto-drive + a rubber band on the accelerator",
+        "yield": "~140,000 credits per lap (≈900k–1M cr/hour) on the Colossus Rivals route with AutoDrive. XP is effectively capped per lap, not a big XP source.",
+        "rate": "~140k cr / lap, ~900k–1M cr/hr (CORRECTED — earlier '2,300 cr/lap' figure was ~60x too low)",
+        "requirements": "The Colossus route in AutoDrive + a wired controller (rubber band on accelerator)",
         "setup": {
           "cars": [
-            "Toyota Tacoma Forza Edition",
-            "Lexus LFA Forza Edition",
-            "Nissan Silvia S13"
+            "Toyota Tacoma Forza Edition (its credit-boost perk is the corroborated pick)"
+          ],
+          "uncorroborated_cars": [
+            "Lexus LFA FE / Nissan Silvia S13 — claimed elsewhere but NOT confirmed; prefer the Tacoma FE"
           ],
           "tracks": [
-            "Hokubu Time Attack",
-            "Ultra Fast Colossus (code 401 393 298)"
+            "The Colossus (AutoDrive Rivals)"
           ]
         },
-        "tip": "Best for earning while away from the controller — lower hourly than active farming but zero effort.",
+        "tip": "This is the single best PASSIVE credit method by far. Hourly rate rivals active farming with zero effort — make it your overnight/AFK earner.",
         "effort": "none",
-        "risk": "none (legit)",
+        "risk": "none (legit AutoDrive feature; not a glitch)",
         "confidence": "probable"
       },
       {
@@ -1018,7 +1026,7 @@ window.FH6_DB = {
         "id": "daily-wheelspin-house",
         "name": "Daily-wheelspin house",
         "type": "passive",
-        "yield": "A free Wheelspin every day, permanently. Plus other homes give permanent point multipliers.",
+        "yield": "A free Wheelspin every day, permanently (sources call it the 'Tokyo City House'). Plus other homes give permanent point multipliers. Exact name/price varies by source (~3M cr quoted) — treat the figure as soft.",
         "rate": "1 free Wheelspin/day forever",
         "requirements": "Buy the specific player home that grants the daily wheelspin",
         "setup": {},
@@ -1184,8 +1192,102 @@ window.FH6_DB = {
         "title": "13 things to know before playing FH6",
         "url": "https://kotaku.com/13-things-to-know-before-playing-forza-horizon-6-xbox-guide-open-world-2000695715",
         "used_for": "early progression order, aftermarket map cars"
+      },
+      {
+        "id": "game8-db",
+        "tier": "primary",
+        "title": "game8 FH6 car database (independent)",
+        "url": "https://game8.co/games/Forza-Horizon-6/archives/600753",
+        "used_for": "VERIFICATION: GT-R NISMO 220k price, journal reward, off-road car list, F-450"
+      },
+      {
+        "id": "forza-fandom",
+        "tier": "expert",
+        "title": "Forza Fandom wiki (independent)",
+        "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist",
+        "used_for": "VERIFICATION: Festival Playlist points system, Gemera Car Pass, BRZ FE"
+      },
+      {
+        "id": "kudosprime",
+        "tier": "primary",
+        "title": "kudosprime FH6 stat sheets (independent)",
+        "url": "https://www.kudosprime.com/fh6/car_sheet.php?id=549",
+        "used_for": "VERIFICATION: WRX STI 30k price/stats"
+      },
+      {
+        "id": "forums-forza",
+        "tier": "primary",
+        "title": "Official Forza forums — Playlist & tune threads",
+        "url": "https://forums.forza.net/t/fh6-festival-playlist-events-and-rewards-may-21-may-28-series-01-week-1/828507",
+        "used_for": "VERIFICATION: Festival Playlist points (20/40/80), drag tune hub"
+      },
+      {
+        "id": "gtplanet",
+        "tier": "expert",
+        "title": "GTPlanet FH6 discussion (community forum)",
+        "url": "https://www.gtplanet.net/forum/threads/forza-horizon-6-general-discussion.434110/",
+        "used_for": "VERIFICATION: AWD-swap meta direction, engine-swap/weight tradeoffs (qualitative)"
+      },
+      {
+        "id": "forzatune",
+        "tier": "expert",
+        "title": "ForzaTune authority guide (independent)",
+        "url": "https://forzatune.com/guide/the-fully-updated-forza-tuning-guide/",
+        "used_for": "VERIFICATION: variable set, tune order (puts alignment before springs — disputes SEO order)"
+      },
+      {
+        "id": "forzafire-drivetrain",
+        "tier": "community",
+        "title": "ForzaFire drivetrain tuning guide",
+        "url": "https://www.forzafire.com/guides/forza-horizon-6-drivetrain-tuning-guide",
+        "used_for": "VERIFICATION: diff baselines contradict 55/15 (gives 100/45)"
+      },
+      {
+        "id": "codmunity-drag",
+        "tier": "community",
+        "title": "CODMunity FH6 drag tune DB",
+        "url": "https://codmunity.gg/forza/drag",
+        "used_for": "VERIFICATION: real GT-R FE drag code 514752751; retracts unverified TikTok codes"
+      },
+      {
+        "id": "ggwtb-afk-colossus",
+        "tier": "community",
+        "title": "AFK Colossus ~1M cr/hr method",
+        "url": "https://ggwtb.com/blog/best-forza-horizon-6-credit-farm-afk-colossus-method-for-nearly-1m-credits-per-hour",
+        "used_for": "VERIFICATION: AFK farm real rate ~140k/lap (corrects 2,300/lap error)"
+      },
+      {
+        "id": "dotesports",
+        "tier": "expert",
+        "title": "Dotesports FH6 best-car guides",
+        "url": "https://dotesports.com/forza/news/forza-horizon-6-best-car-every-class",
+        "used_for": "VERIFICATION: Gemera, AMG One, FXX-K Evo S2 picks"
+      },
+      {
+        "id": "gamerguides-journal",
+        "tier": "expert",
+        "title": "All Journal reward cars in FH6",
+        "url": "https://www.gamerguides.com/forza-horizon-6/guide/getting-started/gameplay/all-journal-reward-cars-in-fh6",
+        "used_for": "VERIFICATION: GT-R NISMO free via Collection Journal Tier 3"
       }
-    ]
+    ],
+    "verification_pass": {
+      "date": "2026-06-08",
+      "method": "3 independent research agents cross-checked every v1/v2 claim against forums + independent databases, weighted for source independence.",
+      "headline": "Most QUALITATIVE claims held up (AWD meta, grip-before-power, starter cars, free GT-R path, share codes exist). Several NUMERIC claims were wrong or fabricated and have been corrected or downgraded.",
+      "corrections": [
+        "GT-R NISMO price 270k -> 220k (game8 DB).",
+        "AFK farm rate ~2,300 cr/lap -> ~140k cr/lap (~900k-1M/hr); car = Tacoma FE only.",
+        "Festival Playlist '40/50/80%' -> points system (20/40/80 PTS) per official forums.",
+        "Assist multiplier %s (+15/+15/+10/+10) downgraded to CONTESTED — likely SEO-fabricated; AI difficulty is the real lever.",
+        "Diff baseline 55%/15% downgraded to CONTESTED — sources give 100%/45% or 50-70%/10-15%.",
+        "'30/70 power split' clarified as the diff CENTER BALANCE, not a separate slider.",
+        "Drag share codes 113601876/109333743 retracted (unverifiable); real code 514752751.",
+        "22B 'best A-class rally' downgraded to probable (single-origin SEO).",
+        "Gemera flagged Car Pass (paid DLC); AMG One often free via FH5 save; best CC car is 1999 Viper GTS ACR FE (VIP).",
+        "Photo trick clarified: Festival/Promo XP (not player level), two presses not a chord."
+      ]
+    }
   },
-  "builtAt": "2026-06-07"
+  "builtAt": "2026-06-08"
 };

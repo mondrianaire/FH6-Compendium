@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "captured": "2026-06-07",
-  "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift with community discovery and balance patches. Prices/acquisition marked 'unknown' were not yet confirmed by a reliable source. Confidence: verified = stated by multiple independent guides; probable = single/early-consensus source.",
+  "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift. VERIFIED 2026-06-08 against independent databases (game8, Fandom, kudosprime, CODMunity) and forums (forums.forza.net, GTPlanet). Key fix: GT-R NISMO price corrected 270k→220k. Many SEO tier-lists plagiarize each other — superlatives without independent backing were downgraded. Confidence: verified = multiple INDEPENDENT sources; probable = single/early-consensus; contested = sources disagree.",
   "pi_classes": {
     "D": "100-500", "C": "501-600", "B": "601-700", "A": "701-800",
     "S1": "801-900", "S2": "901-998", "X": "999"
@@ -17,8 +17,9 @@
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
-      "price_credits": 270000,
-      "acquisition": "Autoshow; also final reward of Touge & Street Rivals Collection Journal (earnable free)",
+      "price_credits": 220000,
+      "price_note": "game8 database lists 220,000 cr; the 270,000 figure circulating in SEO tier-lists is unconfirmed. Free path verified: Touge & Street Rivals Collection Journal, Tier 3 reward.",
+      "acquisition": "Autoshow; also a Tier-3 reward of the Touge & Street Rivals Collection Journal (earnable free)",
       "tier": "S",
       "value_rating": 9,
       "upgrade_priority": ["front tire width/compound", "brakes", "race suspension", "weight reduction", "modest power"],
@@ -82,7 +83,7 @@
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
       "price_credits": null,
-      "acquisition": "Early Car Pass addition (price unconfirmed)",
+      "acquisition": "Car Pass exclusive (PAID DLC, added ~2026-05-28) — not buyable with credits alone",
       "tier": "S",
       "value_rating": 9,
       "upgrade_priority": ["front grip", "brakes", "suspension", "weight reduction", "minimal power"],
@@ -105,15 +106,15 @@
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
       "price_credits": null,
-      "acquisition": "Autoshow / high-end (PI ~900 S2)",
+      "acquisition": "Autoshow / high-end (PI ~900 S2); often unlockable FREE if you have a Forza Horizon 5 save",
       "tier": "S",
       "value_rating": 8,
       "upgrade_priority": ["front grip", "brakes", "downforce", "suspension"],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Considered the ultimate endgame S2 car for top-level events.",
+      "why": "Consistently cited as the best overall / top S2 car. Note: the Ferrari FXX-K Evo is named by several independent sources as a co-best S2 do-everything pick worth comparing.",
       "confidence": "verified",
-      "sources": ["egamersworld"]
+      "sources": ["dexerto", "dotesports", "egamersworld"]
     },
     {
       "id": "gr-supra-2020",
@@ -145,6 +146,7 @@
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
       "price_credits": 30000,
+      "price_note": "30,000 cr verified across game8, Fandom, and kudosprime (independent databases). Stock car is a B-class base; the A-class listing here reflects a typical dirt build, not its stock PI.",
       "acquisition": "Autoshow",
       "tier": "S",
       "value_rating": 10,
@@ -171,9 +173,9 @@
       "upgrade_priority": ["dirt/rally tires", "soften suspension", "raise ride height", "power"],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Overall best rally car — iconic AWD, the meta pick for A-Class dirt.",
-      "confidence": "verified",
-      "sources": ["dexerto", "gamingpromax"]
+      "why": "Frequently called the best A-class rally car — but this 'best overall' crown comes only from a cluster of SEO tier-lists with identical phrasing; no independent community source (game8/forums) corroborates it yet. Strong pick, unverified superlative.",
+      "confidence": "probable",
+      "sources": ["gamingpromax", "games.gg"]
     },
     {
       "id": "lancer-evo-2004",
@@ -251,9 +253,9 @@
       "upgrade_priority": ["AWD swap", "off-road tires", "raise ride height", "suspension"],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Best S1+ off-road / cross-country car — incredibly fast and lightweight.",
+      "why": "Strong S1+ off-road pick. NOTE: game8's off-road guide ranks the 1999 Dodge Viper GTS ACR Forza Edition (9.9 off-road, VIP/Premium-gated) as the best-overall cross-country car; this entry is the right idea but the ACR FE is the true top pick if you have VIP.",
       "confidence": "probable",
-      "sources": ["gamingpromax", "game8"]
+      "sources": ["game8", "gamingpromax"]
     },
     {
       "id": "can-am-maverick-2018",
@@ -311,13 +313,15 @@
       "upgrade_priority": ["max power", "drag tires", "drag-specific gearing", "weight reduction"],
       "tune_baseline": { "note": "Drag builds use locked launch diff + dedicated short gearing; road-tune the launch." },
       "share_codes": [
-        { "code": "113 601 876", "purpose": "AWD drag, ~6.197s 1/4 mile", "confidence": "probable" },
-        { "code": "109 333 743", "purpose": "RWD-swap max-traction drag, ~6.083s 1/4 mile", "confidence": "probable" },
-        { "code": "934 309 906", "purpose": "Drift tune (R35)", "confidence": "probable" }
+        { "code": "514 752 751", "purpose": "Top GT-R FE drag tune per CODMunity community DB", "confidence": "probable" }
       ],
-      "why": "Premier drag platform; community share codes already running low-6-second quarter miles.",
+      "share_codes_retracted": {
+        "codes": ["113 601 876", "109 333 743", "934 309 906"],
+        "reason": "These (from a TikTok aggregator) could not be found in ANY independent source; cited times (6.197s/6.083s) don't match community builds (~6.05s). Treat as unverified/likely fabricated. Verify any code in-game before trusting."
+      },
+      "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game.",
       "confidence": "probable",
-      "sources": ["tiktok-sharecodes", "game8"]
+      "sources": ["codmunity-drag", "forza-fandom-gtr", "forums-forza-tunes"]
     }
   ]
 }

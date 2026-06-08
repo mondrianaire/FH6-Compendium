@@ -34,6 +34,34 @@
       "sources": ["pcgamer", "games.gg", "egamersworld"]
     },
     {
+      "id": "golf-r-2021",
+      "name": "Volkswagen Golf R",
+      "year": 2021,
+      "class": "B",
+      "stock_pi": 546,
+      "disciplines": ["road", "touge_street", "dirt_rally"],
+      "drivetrain_stock": "AWD",
+      "recommended_drivetrain": "AWD (keep it)",
+      "power_split": "diff center ~60% rear",
+      "price_credits": 29000,
+      "price_note": "29,000 cr, B-class PI 546 — confirmed by game8 (independent DB). 288 hp AWD 'Super Hot Hatch'.",
+      "acquisition": "Autoshow (always available to buy)",
+      "tier": "A",
+      "value_rating": 9,
+      "beginner_pick": true,
+      "upgrade_priority": ["race tires/compound + front tire width", "race brakes", "race suspension (unlocks sliders)", "weight reduction", "keep power modest to stay in B"],
+      "tune_baseline": {
+        "tire_psi_front": 26.0, "tire_psi_rear": 26.0,
+        "diff_accel": 68, "diff_decel": 28, "diff_center_rear": 60,
+        "brake_balance_front": 50,
+        "note": "Beginner B-class road tune (adapted from a ForzaFire community build). Full numbers: final drive 3.81; camber -0.5 F/R; toe 0; caster 6.5; springs ~7500 F/R; ride height 12.3 F/R; ARB 37 F / 39.5 R; bump 4.9 F / 6.9 R; rebound 7.5 F / 10.4 R; downforce 252 F/R; brakes 50%/100%. Community numbers (probable) — road-tune the gearing yourself."
+      },
+      "share_codes": [],
+      "why": "The best AWD all-rounder in B-class and the ideal FIRST tuning project for a new player: cheap (29k), AWD so it's forgiving and hard to spin, and the natural in-game cousin of a real Golf GTI. Learn the whole tuning menu on this before touching faster cars.",
+      "confidence": "verified",
+      "sources": ["game8-db", "forza-fandom", "forzafire-drivetrain"]
+    },
+    {
       "id": "nsx-type-s-2022",
       "name": "Acura NSX Type S",
       "year": 2022,

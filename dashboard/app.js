@@ -13,6 +13,8 @@
   const fmtCr = (n) => n == null ? "—" : n.toLocaleString("en-US") + " cr";
   const confClass = (c) => c === "verified" ? "conf-verified" : c === "contested" ? "conf-contested" : "conf-probable";
   const confLabel = (c) => c === "verified" ? "✅ verified" : c === "contested" ? "⚠️ contested" : "🟡 probable";
+  const fh6Class = (c) => c === "fh6_confirmed" ? "conf-verified" : c === "needs_ingame" ? "conf-contested" : "conf-probable";
+  const fh6Label = (c) => c === "fh6_confirmed" ? "✅ FH6" : c === "needs_ingame" ? "❌ in-game" : "🟡 FH6";
 
   // ---- stamps ----
   document.getElementById("metaStamp").textContent =
@@ -195,15 +197,23 @@
     host.innerHTML = tv.categories.map((cat) => `
       <div class="varcat">
         <h3>${cat.label}
+          ${cat.fh6_tab ? `<span class="flag tab-flag">${cat.fh6_tab} tab</span>` : ""}
           ${cat.tune_first ? '<span class="flag">tune first</span>' : ""}
           ${cat.tune_last ? '<span class="flag">tune last</span>' : ""}
           ${cat.tune_early ? '<span class="flag">tune early</span>' : ""}
         </h3>
+        ${cat.gating ? `<p class="gating"><strong>Unlocks:</strong> ${cat.gating}</p>` : ""}
+        ${cat.fh6_note ? `<p class="fh6note">${cat.fh6_note}</p>` : ""}
         <p class="principle">${cat.principle || ""}</p>
         ${cat.variables.map((v) => {
           const base = v.baseline ?? v.baseline_awd_circuit ?? v.baseline_awd ?? v.baseline_rwd_awd_rear;
           const rng = (v.typical_min != null && v.typical_max != null) ? `${v.typical_min} – ${v.typical_max} ${v.unit || ""}` : (v.unit || "");
-          return `<div class="var-line"><span>${v.label}${base != null ? ` <span class="flag">base ${base}</span>` : ""}</span><span class="rng">${rng}</span></div>`;
+          const fh6 = v.fh6 ? `<span class="conf ${fh6Class(v.fh6)}" title="${v.range_note || ""}">${fh6Label(v.fh6)}</span>` : "";
+          const poles = v.poles ? `<div class="poles">${v.poles}</div>` : "";
+          return `<div class="var-line">
+            <span>${v.label}${base != null ? ` <span class="flag">base ${base}</span>` : ""} ${fh6}${poles}</span>
+            <span class="rng">${rng}</span>
+          </div>`;
         }).join("")}
       </div>`).join("");
   }

@@ -31,8 +31,53 @@
     { "id": "codmunity-drag", "tier": "community", "title": "CODMunity FH6 drag tune DB", "url": "https://codmunity.gg/forza/drag", "used_for": "VERIFICATION: real GT-R FE drag code 514752751; retracts unverified TikTok codes" },
     { "id": "ggwtb-afk-colossus", "tier": "community", "title": "AFK Colossus ~1M cr/hr method", "url": "https://ggwtb.com/blog/best-forza-horizon-6-credit-farm-afk-colossus-method-for-nearly-1m-credits-per-hour", "used_for": "VERIFICATION: AFK farm real rate ~140k/lap (corrects 2,300/lap error)" },
     { "id": "dotesports", "tier": "expert", "title": "Dotesports FH6 best-car guides", "url": "https://dotesports.com/forza/news/forza-horizon-6-best-car-every-class", "used_for": "VERIFICATION: Gemera, AMG One, FXX-K Evo S2 picks" },
-    { "id": "gamerguides-journal", "tier": "expert", "title": "All Journal reward cars in FH6", "url": "https://www.gamerguides.com/forza-horizon-6/guide/getting-started/gameplay/all-journal-reward-cars-in-fh6", "used_for": "VERIFICATION: GT-R NISMO free via Collection Journal Tier 3" }
+    { "id": "gamerguides-journal", "tier": "expert", "title": "All Journal reward cars in FH6", "url": "https://www.gamerguides.com/forza-horizon-6/guide/getting-started/gameplay/all-journal-reward-cars-in-fh6", "used_for": "VERIFICATION: GT-R NISMO free via Collection Journal Tier 3" },
+
+    { "id": "in-game-screenshot", "tier": "primary", "title": "Player in-game Tune screen (2014 Golf R)", "url": "n/a — user-provided screenshot 2026-06-08", "used_for": "GROUND TRUTH: 2014 Golf R at PI 589 displays as B class; performance readouts (lateral G 1.11/1.13, 0-60 4.66s, top 163.3 mph, braking 122/310.7 ft, aero balance 0.52); current alignment (camber -2.0F/-1.5R, toe 0/0, caster 5.0). PROVES FH6 class boundaries shifted ~100 PI down vs FH5." },
+    { "id": "in-game-recording", "tier": "primary", "title": "Player in-game Tune-menu screen recording (2014 Golf R, all 9 tabs)", "url": "n/a — user-provided 20s mp4 2026-06-08, frames extracted via ffmpeg", "used_for": "GROUND TRUTH for ALL 9 tab structures: section names, slider lists, directional pole labels, displayed units (PSI / LB/IN / IN / deg), verbatim lock banners, and the padlock-+-banner lock behavior. Pole corrections: Aero = Speed<->Cornering; Brake balance = Rear<->Front; Gearing = Speed<->Acceleration. Observed build: race springs/dampers + alignment + tire pressure unlocked; gearing/ARB/aero/brake/diff LOCKED." },
+    { "id": "forza-labs-db", "tier": "primary", "title": "ForzaLabs FH6 car database (independent)", "url": "https://forza.labsgg.com/manufacturers/volkswagen", "used_for": "2014 Golf R PI 536 / 27k cr / B class; model-year ladder 2010=526/20k, 2014=536/27k, 2021=546/29k. CONFIRMED by in-game screenshot (B class)." },
+    { "id": "dexerto", "tier": "expert", "title": "Dexerto FH6 car wiki (independent)", "url": "https://www.dexerto.com/wikis/forza-horizon-6/cars/2010-volkswagen-golf-r/", "used_for": "2010 Golf R 526/B/20k/AWD cross-checks ForzaLabs (validates the DB and the shifted B-class boundary)" },
+    { "id": "forzahorizoncar-wiki", "tier": "community", "title": "FH6 tuning & PI class wiki (UNRELIABLE on classes)", "url": "https://forzahorizoncar.com/en/wiki/guides/tuning.html", "used_for": "RETRACTED: claimed FH6 B = 601-700 (the old FH4/FH5 table). DISPROVEN by in-game screenshot (589 = B). Example of SEO parroting the pre-FH6 boundaries." },
+
+    { "id": "forzafire-fh6-tires", "tier": "community", "title": "ForzaFire FH6 Tires & Rims tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-tires-and-rims-tuning-guide", "used_for": "FH6 UI STRUCTURE (dated 2026-05-20): tire pressure F/R range 1.0-3.8 bar; independent F/R tire WIDTH in mm; compound/width live in parts menu" },
+    { "id": "forzafire-fh6-drivetrain", "tier": "community", "title": "ForzaFire FH6 Drivetrain tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-drivetrain-tuning-guide", "used_for": "FH6 UI STRUCTURE (2026-05-20): transmission tiers/final-drive gating; up to 10 gears; AWD diff = Front/Rear/Center sections; center = % torque to rear ('30/70 split'); brake balance Front<->Rear" },
+    { "id": "forzafire-fh6-handling", "tier": "community", "title": "ForzaFire FH6 Platform & Handling tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-platform-and-handling-tuning-guide", "used_for": "FH6 UI STRUCTURE (2026-05-20): ARB 1.00-65.00; springs+ride-height grouped in Springs tab; damping = Bump+Rebound per axle" },
+    { "id": "forzafire-fh6-aero", "tier": "community", "title": "ForzaFire FH6 Aero & Appearance tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-aero-and-appearance-tuning-guide", "used_for": "FH6 UI STRUCTURE (2026-05-20): downforce unit kgf/lb; F/R downforce gated by race bumper/wing; Aero Balance + Aero Efficiency Performance-panel readouts" },
+    { "id": "game8-fh6-tuning", "tier": "community", "title": "game8 FH6 tuning DB", "url": "https://game8.co/games/Forza-Horizon-6/archives/601974", "used_for": "FH6 UI STRUCTURE (2026-05-26): full tab order confirming no separate Ride Height tab; compound pressure targets; speed graph; ARB 1.0/65.0; brake balance 50% default" },
+    { "id": "keengamer-fh6-tuning", "tier": "community", "title": "KeenGamer FH6 tuning guide", "url": "https://www.keengamer.com/articles/guides/forza-horizon-6-tuning-guide-best-settings-for-all-car-builds/", "used_for": "FH6 UI STRUCTURE: tab order; ride height under Springs tab" },
+    { "id": "destructoid-fh6-tuning", "tier": "expert", "title": "Destructoid FH6 tuning guide (all sliders)", "url": "https://www.destructoid.com/complete-forza-horizon-6-tuning-guide-all-sliders-explained/", "used_for": "FH6 UI STRUCTURE (2026-05-20): up to 10 gears; 4-slider damping; brake = balance+pressure; AWD diff front/rear/center" },
+    { "id": "gamerant-fh6-tuning", "tier": "expert", "title": "Game Rant FH6 tuning guide", "url": "https://gamerant.com/forza-horizon-6-tuning-guide-how-tune-cars/", "used_for": "FH6 UI STRUCTURE (2026-06-05): tune-menu section list; AWD front/rear/center diffs; final-drive direction" },
+    { "id": "grindout-fh6-tuning", "tier": "community", "title": "Grindout FH6 tuning guide", "url": "https://grindout.com/forza-6/guides/tuning", "used_for": "FH6 UI STRUCTURE (2026-05-26): aero slider part-gating; brake-balance un-inverted in FH6; practical diff caps" },
+    { "id": "gamingpromax-fh6-balance", "tier": "community", "title": "GamingProMax FH6 mechanical/aero balance system", "url": "https://gamingpromax.com/forza-horizon-6-car-tuning-guide-mechanical-balance-system/", "used_for": "FH6 NEW mechanic: Aero Balance ~0.40-0.50 tuning target" },
+    { "id": "calculators-games-fh6", "tier": "community", "title": "calculators.games FH6 transmission/tuning calculators", "url": "https://calculators.games/en/forza-horizon-6/transmission-optimizer", "used_for": "FH6: up to 10-speed; springs lb/in (US locale); ARB 1-65 (corroboration only — third-party tool layout, not in-game UI)" },
+    { "id": "apexspeedcraft-fh6", "tier": "community", "title": "ApexSpeedcraft Forza tuning reference (FH6 update)", "url": "https://apexspeedcraft.wordpress.com/2026/04/25/forza-horizon-tuning-reference/", "used_for": "FH6 (post-launch update 2026-05-24): springs kgf/mm or lb/in; ARB 1-65. NOTE original post pre-release — used only for corroboration" }
   ],
+  "fh6_ui_structure_pass": {
+    "date": "2026-06-08",
+    "method": "4 parallel research agents restricted to FH6-only sources (dated >= 2026-05-19 AND explicitly naming FH6), seeded by the PRIMARY in-game Alignment screenshot. Each agent reported per-source FH6-verification basis; the parent vetted provenance before codifying into tuning-variables.json v2.0.",
+    "rejected": [
+      "forums.forza.net ARB/dampening threads (Forza Motorsport 7, 2018).",
+      "fh6.willgameguide.com suspension guide (dated 2026-05-18, pre-release).",
+      "forzatune.com fully-updated guide (mixes FH6 + FM2023 + older; numeric FH5-tagged claims excluded).",
+      "apexspeedcraft original post (2026-04-25 pre-release) — only its post-launch update used, for corroboration."
+    ],
+    "confirmed_structure": "9 tabs (Tires, Gearing, Alignment, Antiroll Bars, Springs, Damping, Aero, Brake, Differential); no separate Ride Height tab (it is in Springs); ARB 1-65; damping = Bump+Rebound per axle; AWD diff = Front/Rear/Center; center balance = '30/70 split'; aero sliders part-gated; Aero Balance ~0.40-0.50 is a new FH6 target.",
+    "needs_ingame_capture": "Literal pole-label TEXT on most tabs, and numeric min/max on Gearing/Springs/RideHeight/Damping/Aero/Brake-pressure/Diff. The 'damping 1-20' scale and 'aero lbf' unit are FH5 carryovers, NOT FH6-verified. One screenshot per tab would close these gaps."
+  },
+  "fh6_ui_screenshot_pass": {
+    "date": "2026-06-08",
+    "source": "in-game-recording (20s mp4 of all 9 tabs, 2014 Golf R PI 589)",
+    "result": "ALL 9 tab structures upgraded from web-researched to PRIMARY screenshot-verified in tuning-variables.json v2.1. Section names, slider lists, pole labels, displayed units, and lock banners are now confirmed.",
+    "corrections_vs_web_research": [
+      "Aero downforce poles are 'Speed <-> Cornering' (web guessed 'less/more').",
+      "Brake balance poles are 'Rear <-> Front' (left=Rear, right=Front).",
+      "Gearing poles are 'Speed <-> Acceleration'; observed car is 6-speed.",
+      "Springs unit confirmed LB/IN, Ride Height IN, Tire pressure PSI (US locale).",
+      "Damping 'Soft <-> Stiff' confirmed; the FH5 '1-20' scale label was never shown (values are unitless one-decimal).",
+      "Locked tabs render as padlock icons + a yellow 'UNLOCKED BY INSTALLING <PART>' banner — NOT 'N/A'."
+    ],
+    "still_open": "Only ABSOLUTE slider min/max end-stops remain unverified (the menu never prints them); these stay as franchise-convention estimates."
+  },
   "verification_pass": {
     "date": "2026-06-08",
     "method": "3 independent research agents cross-checked every v1/v2 claim against forums + independent databases, weighted for source independence.",

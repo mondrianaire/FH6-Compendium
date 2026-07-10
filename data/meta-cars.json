@@ -3,9 +3,10 @@
   "captured": "2026-06-07",
   "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift. VERIFIED 2026-06-08 against independent databases (game8, Fandom, kudosprime, CODMunity) and forums (forums.forza.net, GTPlanet). Key fix: GT-R NISMO price corrected 270k→220k. Many SEO tier-lists plagiarize each other — superlatives without independent backing were downgraded. Confidence: verified = multiple INDEPENDENT sources; probable = single/early-consensus; contested = sources disagree.",
   "pi_classes": {
-    "D": "100-500", "C": "501-600", "B": "601-700", "A": "701-800",
-    "S1": "801-900", "S2": "901-998", "X": "999"
+    "D": "100-400", "C": "401-500", "B": "501-600", "A": "601-700",
+    "S1": "701-800", "S2": "801-900", "R": "901+"
   },
+  "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game.",
   "disciplines": ["road", "touge_street", "dirt_rally", "cross_country", "drag"],
   "cars": [
     {
@@ -60,6 +61,38 @@
       "why": "The best AWD all-rounder in B-class and the ideal FIRST tuning project for a new player: cheap (29k), AWD so it's forgiving and hard to spin, and the natural in-game cousin of a real Golf GTI. Learn the whole tuning menu on this before touching faster cars.",
       "confidence": "verified",
       "sources": ["game8-db", "forza-fandom", "forzafire-drivetrain"]
+    },
+    {
+      "id": "golf-r-2014",
+      "name": "Volkswagen Golf R",
+      "year": 2014,
+      "class": "B",
+      "stock_pi": 536,
+      "disciplines": ["road", "touge_street", "dirt_rally"],
+      "drivetrain_stock": "AWD",
+      "recommended_drivetrain": "AWD (keep it — Haldex 4MOTION)",
+      "power_split": "diff center ~70% rear (the '30/70 split')",
+      "price_credits": 27000,
+      "price_note": "27,000 cr, stock PI 536 — confirmed by ForzaLabs DB; 2010 sibling (526/20k/AWD) cross-checks between ForzaLabs and Dexerto. ~296 hp 2.0L I4 turbo AWD 'Super Hot Hatch', ~1,495 kg.",
+      "class_note": "B class CONFIRMED by in-game screenshot: shows 'B 589' on a built example, and stock 536 is also B. FH6 B is ~501-600 (shifted down from the FH4/FH5 601-700). ForzaLabs/Dexerto 'B' labels were CORRECT; the golf-r-2021 entry's 'B' at 546 is also correct. See pi_classes_note.",
+      "acquisition": "Autoshow (always available to buy)",
+      "tier": "A",
+      "value_rating": 9,
+      "beginner_pick": true,
+      "upgrade_priority": ["sport/race tires + front tire WIDTH", "race brakes (PI-cheap)", "race suspension (unlocks sliders)", "weight reduction", "keep AWD", "minimal power LAST — at ~589 there is only ~11 PI to the 600 B cap, so the car is upgrade-complete: TUNE, don't add parts"],
+      "tune_baseline": {
+        "tire_psi_front": 27.0, "tire_psi_rear": 27.0,
+        "diff_accel": 50, "diff_decel": 20, "diff_center_rear": 72,
+        "brake_balance_front": 52,
+        "note": "B-class road/touge starting point (Haldex 2.0T chassis). Tire psi cold, target ~31-33 hot. Alignment refined vs a real 589-PI build that ran -2.0 F / -1.5 R camber, caster 5.0: recommend camber -1.3 F / -1.0 R (less front scrub, better braking; less rear camber for AWD exit grip) and caster 6.5 (sharper turn-in, self-centering — near-free gain). Toe 0/0 (optional +0.1 rear-in for high-speed stability). Springs near-stiff for tarmac; ride height lowest without bottoming; ARB 32 F / 38 R (stiffer rear to rotate vs AWD push); bump 5.0 F / 6.5 R; rebound 8.0 F / 10.0 R; brakes 52%/100%; gearing road-tune LAST (shorten final drive for touge). Diff accel/decel are CONTESTED across sources — start here, road-tune. Probable starting points.",
+        "observed_build_589pi": "From player screenshot + screen recording: lateral G 1.11 (60mph) / 1.13 (120mph); 0-60 4.66s, 0-100 12.07s, top speed 163.3 mph; braking 60-0 122.0 ft, 100-0 310.7 ft; mech balance 0.44, aero balance 0.52, aero efficiency 0.848. Observed tune values: tire psi 27.0/27.0; alignment camber -2.0F/-1.5R, toe 0/0, caster 5.0; springs 838.0F/661.7R lb/in; ride height 7.2F/6.9R in; damping rebound 13.2F/9.4R, bump 8.3F/5.9R.",
+        "observed_build_locked_tabs": "IMPORTANT: this 589 build has NOT installed race brakes, race ARBs, sport/race differential, sport/race transmission, or race aero — so the Brake, Antiroll Bars, Differential, Gearing, and Aero tabs are LOCKED (padlock + 'UNLOCKED BY INSTALLING...' banner). My earlier ARB (32/38), brake balance (52%), and diff (center 72% / accel 50 / decel 20) recommendations are INAPPLICABLE until those race parts are installed. Currently tunable: Tires, Alignment, Springs, Damping only.",
+        "dirt_variant": "For dirt_rally: rally tires, raise ride height, soften springs+dampers ~30%, drop tire psi ~3, raise diff decel lock for stability, slightly more rear center bias."
+      },
+      "share_codes": [],
+      "why": "The Mk7 sibling of the golf-r-2021 beginner pick, ~2k cheaper (27k) and 10 PI lower stock. Same forgiving Haldex AWD hot-hatch platform — an ideal first tuning project. Its home is B class (cap ~600), where a grip-maxed build dominates road/touge.",
+      "confidence": "verified",
+      "sources": ["forza-labs-db", "dexerto", "in-game-screenshot"]
     },
     {
       "id": "nsx-type-s-2022",

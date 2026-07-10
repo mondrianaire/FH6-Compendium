@@ -90,9 +90,14 @@ td.price { font-variant-numeric: tabular-nums; }
 .varcat { background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
 .varcat h3 { margin: 0 0 4px; }
 .varcat .principle { color: var(--muted); font-size: 13px; margin: 4px 0 12px; }
-.var-line { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; }
-.var-line .rng { color: var(--muted); font-variant-numeric: tabular-nums; }
+.var-line { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.var-line .rng { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.var-line .poles { color: var(--muted); font-size: 11px; margin-top: 2px; }
 .flag { font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-left: 8px; background: var(--bg3); color: var(--accent); }
+.flag.tab-flag { background: var(--bg3); color: var(--muted); }
+.varcat .gating { color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
+.varcat .gating strong { color: var(--txt); }
+.varcat .fh6note { color: var(--muted); font-size: 12px; margin: 2px 0 6px; padding: 8px 10px; background: var(--bg3); border-radius: 8px; }
 
 .hint { color: var(--muted); font-size: 13px; background: var(--bg2); border: 1px solid var(--line); padding: 12px; border-radius: 10px; }
 .strat-step { display: flex; gap: 14px; background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 10px; }

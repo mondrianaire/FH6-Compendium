@@ -339,7 +339,7 @@ window.FH6_DB = {
             "pole_text_verified": true,
             "observed_on_build": 7.2,
             "fh6": "fh6_confirmed",
-            "range_note": "IN (US locale); per-car range"
+            "range_note": "IN (US locale); per-car range. VERIFIED example: 2014 Golf R front slider = 6.9 (min) to 8.1 (max) in — confirms absolute end-stops ARE car-specific and this chassis rides high."
           },
           {
             "id": "ride_height_rear",
@@ -698,7 +698,8 @@ window.FH6_DB = {
           "diff_decel": 28,
           "diff_center_rear": 60,
           "brake_balance_front": 50,
-          "note": "Beginner B-class road tune (adapted from a ForzaFire community build). Full numbers: final drive 3.81; camber -0.5 F/R; toe 0; caster 6.5; springs ~7500 F/R; ride height 12.3 F/R; ARB 37 F / 39.5 R; bump 4.9 F / 6.9 R; rebound 7.5 F / 10.4 R; downforce 252 F/R; brakes 50%/100%. Community numbers (probable) — road-tune the gearing yourself."
+          "note": "Beginner B-class road tune (adapted from a ForzaFire community build). Full numbers: final drive 3.81; camber -0.5 F/R; toe 0; caster 6.5; springs ~800 lb/in scale F/R; ride height near slider minimum; ARB 37 F / 39.5 R; bump 4.9 F / 6.9 R; rebound 7.5 F / 10.4 R; downforce 252 F/R; brakes 50%/100%. Community numbers (probable) — road-tune the gearing yourself.",
+          "note_datafix": "CORRECTED 2026-06-08: ForzaFire's 'springs ~7500' and 'ride height 12.3' figures were garbled/metric and are wrong for the in-game US-locale display. In-game footage of the 2014 sibling (same Haldex platform) reads springs ~838F/662R lb/in and ride height in INCHES (front slider range 6.9-8.1 on the 2014). Treat spring rate as the ~hundreds-lb/in scale and ride height as inches, per-car."
         },
         "share_codes": [],
         "why": "The best AWD all-rounder in B-class and the ideal FIRST tuning project for a new player: cheap (29k), AWD so it's forgiving and hard to spin, and the natural in-game cousin of a real Golf GTI. Learn the whole tuning menu on this before touching faster cars.",
@@ -746,7 +747,7 @@ window.FH6_DB = {
           "diff_center_rear": 72,
           "brake_balance_front": 52,
           "note": "B-class road/touge starting point (Haldex 2.0T chassis). Tire psi cold, target ~31-33 hot. Alignment refined vs a real 589-PI build that ran -2.0 F / -1.5 R camber, caster 5.0: recommend camber -1.3 F / -1.0 R (less front scrub, better braking; less rear camber for AWD exit grip) and caster 6.5 (sharper turn-in, self-centering — near-free gain). Toe 0/0 (optional +0.1 rear-in for high-speed stability). Springs near-stiff for tarmac; ride height lowest without bottoming; ARB 32 F / 38 R (stiffer rear to rotate vs AWD push); bump 5.0 F / 6.5 R; rebound 8.0 F / 10.0 R; brakes 52%/100%; gearing road-tune LAST (shorten final drive for touge). Diff accel/decel are CONTESTED across sources — start here, road-tune. Probable starting points.",
-          "observed_build_589pi": "From player screenshot + screen recording: lateral G 1.11 (60mph) / 1.13 (120mph); 0-60 4.66s, 0-100 12.07s, top speed 163.3 mph; braking 60-0 122.0 ft, 100-0 310.7 ft; mech balance 0.44, aero balance 0.52, aero efficiency 0.848. Observed tune values: tire psi 27.0/27.0; alignment camber -2.0F/-1.5R, toe 0/0, caster 5.0; springs 838.0F/661.7R lb/in; ride height 7.2F/6.9R in; damping rebound 13.2F/9.4R, bump 8.3F/5.9R.",
+          "observed_build_589pi": "From player screenshot + screen recording: lateral G 1.11 (60mph) / 1.13 (120mph); 0-60 4.66s, 0-100 12.07s, top speed 163.3 mph; braking 60-0 122.0 ft, 100-0 310.7 ft; mech balance 0.44, aero balance 0.52, aero efficiency 0.848. Observed tune values: tire psi 27.0/27.0; alignment camber -2.0F/-1.5R, toe 0/0, caster 5.0; springs 838.0F/661.7R lb/in; ride height 7.2F/6.9R in; damping rebound 13.2F/9.4R, bump 8.3F/5.9R. VERIFIED slider range: front ride height 6.9 (min) - 8.1 (max) in — this chassis rides high and cannot be slammed, so 'lower ride height' means set to 6.9.",
           "observed_build_locked_tabs": "IMPORTANT: this 589 build has NOT installed race brakes, race ARBs, sport/race differential, sport/race transmission, or race aero — so the Brake, Antiroll Bars, Differential, Gearing, and Aero tabs are LOCKED (padlock + 'UNLOCKED BY INSTALLING...' banner). My earlier ARB (32/38), brake balance (52%), and diff (center 72% / accel 50 / decel 20) recommendations are INAPPLICABLE until those race parts are installed. Currently tunable: Tires, Alignment, Springs, Damping only.",
           "dirt_variant": "For dirt_rally: rally tires, raise ride height, soften springs+dampers ~30%, drop tire psi ~3, raise diff decel lock for stability, slightly more rear center bias."
         },

@@ -111,7 +111,7 @@
       "variables": [
         { "id": "spring_front", "label": "Front spring rate", "section": "Springs", "axis": "front", "unit": "lb/in", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 838.0, "fh6": "fh6_confirmed", "range_note": "LB/IN (US locale); per-car range, end-stops not displayed" },
         { "id": "spring_rear", "label": "Rear spring rate", "section": "Springs", "axis": "rear", "unit": "lb/in", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 661.7, "fh6": "fh6_confirmed" },
-        { "id": "ride_height_front", "label": "Front ride height", "section": "Ride Height", "axis": "front", "unit": "in", "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 7.2, "fh6": "fh6_confirmed", "range_note": "IN (US locale); per-car range" },
+        { "id": "ride_height_front", "label": "Front ride height", "section": "Ride Height", "axis": "front", "unit": "in", "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 7.2, "fh6": "fh6_confirmed", "range_note": "IN (US locale); per-car range. VERIFIED example: 2014 Golf R front slider = 6.9 (min) to 8.1 (max) in — confirms absolute end-stops ARE car-specific and this chassis rides high." },
         { "id": "ride_height_rear", "label": "Rear ride height", "section": "Ride Height", "axis": "rear", "unit": "in", "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 6.9, "fh6": "fh6_confirmed" }
       ],
       "principle": "Stiffer springs for smooth road/circuit, softer for dirt compliance. Lower ride height = lower CG/more road grip; raise for dirt. The in-game Description notes softening front springs vs rear increases front grip / reduces understeer.",

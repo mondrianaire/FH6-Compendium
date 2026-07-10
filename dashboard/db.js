@@ -1366,29 +1366,44 @@ window.FH6_DB = {
         "id": "skillpoint-superwheelspin",
         "name": "Skill-point farm → Super Wheelspins",
         "type": "active",
-        "yield": "Best repeatable credit+car source. The method (22B + EventLab loop → Car Mastery → Super Wheelspin) is well corroborated, but the exact '~10 SP / 21s' rate and '~30 SP per Super Wheelspin' are single-source figures — directionally right, exact numbers unverified.",
-        "rate": "~10 skill points / 21s (single-source, unverified exact rate)",
-        "requirements": "A high-multiplier car (1998 Subaru Impreza 22B STI is the meta pick) + Car Mastery skill points",
+        "verified": "2026-07-10 (re-verified against July-2026 sources + player playtest this session)",
+        "yield": "Best repeatable credit+car source: 22B + EventLab destruction loop → Car Mastery → Super Wheelspins. Method CONFIRMED still current — no patch (v375.327 Jun 15, v379.939 Jun 18, v382.893 Jun 23) touched skill points, skill score, EventLab, or Car Mastery.",
+        "rate": "Hard cap 10 Skill Points PER RUN. ~1 SP per 10,000 banked Skill Score; the 22B at 9x needs ~56,000 score to hit the 10-cap (a default 5x car needs ~100,000). Score past the cap is wasted. Per-hour rate is route/skill dependent and CONTESTED across sources (~766 to ~1,700 SP/hr) — do not treat any exact SP/hr as verified.",
+        "requirements": "1998 Subaru Impreza 22B STI + its multiplier Car Mastery perks UNLOCKED (bootstrap: grind initial SP by hand to buy the perks first, then it snowballs).",
         "setup": {
-          "car": "1998 Subaru Impreza 22B STI (buy fresh from Autoshow/Car Collection)",
+          "car": "1998 Subaru Impreza 22B STI — 86,000 cr, Autoshow. Inherent 9x skill-chain multiplier.",
+          "perks_priority": [
+            "Where the Fun Begins — chain builds 2.5x faster (buy first)",
+            "Show Me Your Moves — +20% skill score",
+            "Multi Maxer — unlocks the 9x multiplier CAP (the big one)",
+            "Spinball Wizard — converts SP into an instant Super Wheelspin (buy AFTER the multiplier stack)"
+          ],
           "eventlab_codes": [
+            {
+              "code": "890 169 683",
+              "name": "(objects-below-map)",
+              "use": "RECOMMENDED active farm — high-value objects sit below the map so the car keeps full speed while still smashing them (~24s/run). Fixes the auto-line speed-cap problem."
+            },
             {
               "code": "861 224 889",
               "name": "Fastest Max Skill Points",
-              "use": "short loop — drive a line of multiplier objects, then Restart"
+              "use": "active short loop — drive the multiplier line manually, bank, Restart"
             },
             {
               "code": "401 393 298",
               "name": "Ultra Fast Colossus",
-              "use": "~1hr+ track, ideal for AFK/long runs"
+              "use": "enclosed-corridor track built for hands-off/AFK smashing (but see auto-drive caveat)"
             }
           ],
-          "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin (single-source claim — plausible, lightly held)"
+          "code_freshness_fallback": "Community codes can be removed at any time. Never-stale source: in-game EventLab → Popular/Most Played tab → search 'skill points'. Those are guaranteed live.",
+          "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin, then sell back on Auction House. Also cited: 1999 Dodge Viper GTS ACR conversion ~6.56M cr/hr (single-source, 🟡)."
         },
-        "tip": "Turn ALL assists ON for skill-farm tracks so the game handles steering/braking while you maintain speed and hit multipliers.",
+        "critical_do_not": "DO NOT run the farm on AUTO DRIVE. Hotfix v379.939 (2026-06-18) rebalanced Auto Drive so it no longer pays rewards when the game detects you aren't actively driving ('not intended to earn credits without actively playing'). Auto Drive ALSO speed-caps the car and drifts onto the racing line, breaking the skill chain. This is the #1 reason a 'MAX' map pays out far under its rating. DRIVE MANUALLY.",
+        "settings": "Damage & Tire Wear = Cosmetic (Simulation slows you after smashes). Keep Traction/Stability/Steering-Assist ON to avoid spinning out and breaking the chain. Shifting = Manual gives a small multiplier bonus. Drivatar Difficulty is IRRELEVANT to a solo skill gauntlet (no AI) — its +30% CR only applies to actual races.",
+        "technique": "Build the chain, then BANK before it breaks (a chain that ends in a crash = wasted score). Bank repeatedly within one run until it stops paying (you've hit the 10 cap), THEN Pause → Restart to reset the cap. Repeating the same run without restarting hits diminishing returns.",
         "effort": "high",
-        "risk": "none (legit)",
-        "confidence": "probable"
+        "risk": "none (legit; no exploit — survives all patches to date)",
+        "confidence": "verified"
       },
       {
         "id": "afk-eventlab",
@@ -1792,6 +1807,48 @@ window.FH6_DB = {
         "title": "ApexSpeedcraft Forza tuning reference (FH6 update)",
         "url": "https://apexspeedcraft.wordpress.com/2026/04/25/forza-horizon-tuning-reference/",
         "used_for": "FH6 (post-launch update 2026-05-24): springs kgf/mm or lb/in; ARB 1-65. NOTE original post pre-release — used only for corroboration"
+      },
+      {
+        "id": "forza-support-patch-0615",
+        "tier": "primary",
+        "title": "FH6 Release Notes June 15 2026 (v375.327)",
+        "url": "https://support.forza.net/hc/en-us/articles/52554154006547-FH6-Release-Notes-June-15th-2026",
+        "used_for": "PRIMARY patch notes: v375.327 = drag tire nerf + XP curve; did NOT touch skill points/EventLab/Car Mastery"
+      },
+      {
+        "id": "fh6wiki-patches",
+        "tier": "expert",
+        "title": "FH6 patch history",
+        "url": "https://forzahorizon6wiki.com/en/patches/",
+        "used_for": "Full patch list: v375.327 (Jun 15), v379.939 (Jun 18), v382.893 (Jun 23, latest). None nerfed skill farming"
+      },
+      {
+        "id": "purexbox-autodrive-nerf",
+        "tier": "expert",
+        "title": "FH6 removes two exploits (Auto Drive + Eliminator)",
+        "url": "https://www.purexbox.com/news/2026/06/forza-horizon-6-removes-two-major-exploits-in-latest-xbox-and-pc-update",
+        "used_for": "VERIFIED: hotfix v379.939 (Jun 18) rebalanced Auto Drive rewards ('not intended to earn credits without actively playing') — explains under-max skill farm runs on auto-drive"
+      },
+      {
+        "id": "jakelee-skillfarm",
+        "tier": "community",
+        "title": "Jake Lee — FH6 skill-point & wheelspin farming",
+        "url": "https://jakelee.co.uk/forza-horizon-6-skillpoint-farming/",
+        "used_for": "Independent methodical guide: 22B, code 890169683 (objects below map), perk stack, ~766 SP/hr, score-to-SP math"
+      },
+      {
+        "id": "game8-skillfarm",
+        "tier": "community",
+        "title": "game8 FH6 — How to Farm Skill Points",
+        "url": "https://game8.co/games/Forza-Horizon-6/archives/601239",
+        "used_for": "Score→SP conversion (~10k score = 1 SP), 10-SP-per-run cap, bank-before-break"
+      },
+      {
+        "id": "timesaver-skillfarm",
+        "tier": "community",
+        "title": "timesaver.gg FH6 skill-points farming guide (2026)",
+        "url": "https://timesaver.gg/blog/forza-horizon-6-skill-points-farming-guide",
+        "used_for": "22B 9x needs ~56k score for 10-cap vs 100k for 5x; codes 861224889/401393298"
       }
     ],
     "fh6_ui_structure_pass": {

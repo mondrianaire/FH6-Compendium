@@ -1460,11 +1460,23 @@ window.FH6_DB = {
         "id": "festival-playlist",
         "name": "Weekly Festival Playlist",
         "type": "weekly",
-        "yield": "Free cars, credits, Wheelspins & Super Wheelspins each season. Thresholds: 40% cosmetic, 50% car, 80% treasure car / Super Wheelspin pack.",
-        "rate": "per-season reward bundle",
-        "requirements": "Complete seasonal/weekly Playlist events during the active season",
-        "setup": {},
-        "tip": "Replaces FH5 Forzathon. Cheapest way to get exclusive cars you can't buy — do it every week.",
+        "verified": "2026-07-10",
+        "yield": "Free playlist-EXCLUSIVE cars (can't be bought anywhere), plus credits, Wheelspins & Super Wheelspins. POINTS system (NOT the old FH5 percentages): earn points from activities, hit thresholds. Series 2 model: 20 pts + 40 pts = the two season car sets; 80 pts + 160 pts (across all 4 weeks of the series) = the two series cars.",
+        "rate": "~40 pts/week clears BOTH season cars (~50-65% of available points). 80/160 series cars need most activities across all 4 seasons.",
+        "requirements": "A Series = 4 Seasons, each 1 week. Complete seasonal events, PR stunts, Forzathon, dailies, The Trial, etc. during the active week.",
+        "setup": {
+          "optimal_order": [
+            "Daily Challenges first (24h timers, expire; ~5,000 cr + 1 pt each)",
+            "Photo Challenge (free, ~30s)",
+            "Seasonal Championships/Events in PI order, LOWEST first",
+            "PR Stunts + Forzathon picked off while driving between events (no special trips)",
+            "The Trial (~10 pts) with a Convoy for an easy win — only if chasing the 80/160 series cars",
+            "Treasure Hunt last"
+          ],
+          "current_rewards": "Specific cars rotate each series — check forza.net/fh6playlists for the active week."
+        },
+        "tip": "Replaces FH5 Forzathon. Cheapest way to get exclusive cars you can't buy — do it every week. Never skip a week: the 80/160 series cars accumulate across all 4 seasons, and Playlist History rewards build across many series.",
+        "completion_100pct": "SEPARATE from playlist reward cars. Full 100% (Horizon Play badges) is currently TIME-GATED (some cars only unlock in future series) AND blocked by bugs. As of 2026-07-10 two badges are BUGGED and acknowledged (bug FH6BR-1887): (1) 'LINK Clean Sweep' — complete all Forza LINK skills — currently unfinishable; (2) the 10,000 speed-skill badge — only tracks in Horizon Racing/Custom Racing, not all Horizon Play. DO NOT grind these — precedent (the Horizon Play level-100 bug) shows a fix may auto-credit progress, making manual grinding wasted effort. For the completable grinds (250x each online mode): use CUSTOM RACING instead of Horizon Racing — it counts the same but lets you set a high class and turn OFF collisions, so you finish fast with a meta car without being punted. Source: r/ForzaHorizon6 (2026-07-08, OP + multiple commenters + official bug tracker). Confidence 🟡 community.",
         "effort": "medium",
         "risk": "none",
         "confidence": "verified"
@@ -1851,6 +1863,27 @@ window.FH6_DB = {
         "title": "timesaver.gg FH6 skill-points farming guide (2026)",
         "url": "https://timesaver.gg/blog/forza-horizon-6-skill-points-farming-guide",
         "used_for": "22B 9x needs ~56k score for 10-cap vs 100k for 5x; codes 861224889/401393298"
+      },
+      {
+        "id": "timesaver-festival",
+        "tier": "community",
+        "title": "timesaver.gg FH6 Festival Playlist guide (Jun 2026)",
+        "url": "https://timesaver.gg/blog/forza-horizon-6-festival-playlist-guide",
+        "used_for": "Series 2 thresholds (20/40 season, 80/160 series); optimal order (dailies>photo>events>PR>Trial>treasure); ~40 pts = both season cars"
+      },
+      {
+        "id": "forza-fh6playlists",
+        "tier": "primary",
+        "title": "Official FH6 Festival Playlist (current week)",
+        "url": "https://forza.net/fh6playlists",
+        "used_for": "Current-week playlist rewards (rotates each series)"
+      },
+      {
+        "id": "reddit-link-cleansweep",
+        "tier": "community",
+        "title": "r/ForzaHorizon6 — 'Link Clean Sweep' completion bug thread",
+        "url": "https://redd.it/1uqept6",
+        "used_for": "2026-07-08: LINK Clean Sweep + 10k speed-skill badges BUGGED/acknowledged (FH6BR-1887); Custom-Racing completion trick; 100% is time-gated across series. Confidence: community (OP + commenters + bug tracker)"
       }
     ],
     "fh6_ui_structure_pass": {

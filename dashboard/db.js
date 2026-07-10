@@ -1382,7 +1382,7 @@ window.FH6_DB = {
             {
               "code": "890 169 683",
               "name": "(objects-below-map)",
-              "use": "RECOMMENDED active farm — high-value objects sit below the map so the car keeps full speed while still smashing them (~24s/run). Fixes the auto-line speed-cap problem."
+              "use": "RECOMMENDED. Run: EventLab > Play Event > search code > favourite > Solo > set Steering = AUTO-STEERING > hold accelerator to the finish > Restart. ~45s/loop = 10 SP (the per-run max). Objects below the map keep full speed. Set Steering to Auto-Steering, NOT manual, and keep TCS/STM ON so the car holds the object line."
             },
             {
               "code": "861 224 889",
@@ -1398,8 +1398,9 @@ window.FH6_DB = {
           "code_freshness_fallback": "Community codes can be removed at any time. Never-stale source: in-game EventLab → Popular/Most Played tab → search 'skill points'. Those are guaranteed live.",
           "premium_alt": "2024 Lamborghini Revuelto (365k cr): 39 SP into its tree = 3 Wheelspins + 1 Super Wheelspin, then sell back on Auction House. Also cited: 1999 Dodge Viper GTS ACR conversion ~6.56M cr/hr (single-source, 🟡)."
         },
-        "critical_do_not": "DO NOT run the farm on AUTO DRIVE. Hotfix v379.939 (2026-06-18) rebalanced Auto Drive so it no longer pays rewards when the game detects you aren't actively driving ('not intended to earn credits without actively playing'). Auto Drive ALSO speed-caps the car and drifts onto the racing line, breaking the skill chain. This is the #1 reason a 'MAX' map pays out far under its rating. DRIVE MANUALLY.",
-        "settings": "Damage & Tire Wear = Cosmetic (Simulation slows you after smashes). Keep Traction/Stability/Steering-Assist ON to avoid spinning out and breaking the chain. Shifting = Manual gives a small multiplier bonus. Drivatar Difficulty is IRRELEVANT to a solo skill gauntlet (no AI) — its +30% CR only applies to actual races.",
+        "auto_steering_vs_auto_drive": "IMPORTANT distinction. AUTO-STEERING (a Steering assist — you still hold the throttle = actively playing) is FINE and is exactly what map 890 169 683 requires. AUTO DRIVE (the full hands-off accessibility feature) is DIFFERENT and was rebalanced by hotfix v379.939 (2026-06-18) to stop paying rewards when idle — do NOT use Auto Drive. Use Auto-Steering + hold throttle yourself.",
+        "difficulty_bonus_is_credits_only": "VERIFIED: the Difficulty Bonus (the on-screen '+X% DIFFICULTY BONUS CR') is CREDITS ONLY — it does NOTHING for skill points. Skill points come purely from Skill Score (chain x the car's 9x multiplier), capped at 10/run. Cranking difficulty to +100% adds ZERO skill points. WORSE: reaching high difficulty requires turning assists OFF, which makes the 22B spin/veer off the object line and BREAK the combo before it banks 10 — a common reason a run pays under max. Save high-difficulty setups for CREDIT farming in real races.",
+        "settings": "Damage & Tire Wear = Cosmetic (Simulation slows you after smashes). Keep Traction/Stability ON + Steering = Auto-Steering to hold the object line and avoid spinning out. Shifting = Manual gives a small multiplier bonus. Drivatar Difficulty is IRRELEVANT to a solo skill gauntlet (no AI) and its CR bonus does not apply to skill points.",
         "technique": "Build the chain, then BANK before it breaks (a chain that ends in a crash = wasted score). Bank repeatedly within one run until it stops paying (you've hit the 10 cap), THEN Pause → Restart to reset the cap. Repeating the same run without restarting hits diminishing returns.",
         "effort": "high",
         "risk": "none (legit; no exploit — survives all patches to date)",

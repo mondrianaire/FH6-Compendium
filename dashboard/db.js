@@ -892,6 +892,8 @@ window.FH6_DB = {
       },
       {
         "id": "amg-one-2021",
+        "also_viable_in": [],
+        "detune_note": "Do NOT detune below S2: board-absent in every lower class (forza.guide, all road tracks). Lower classes belong to lightweight cars built UP (Beat '91, Ford GT '05, Elise) — a detuned 1.7t hybrid hypercar carries dead weight into a PI cap that punishes it. Inference from board absence + lightweight-meta pattern, not a tested claim.",
         "name": "Mercedes-AMG One",
         "year": 2021,
         "class": "S2",
@@ -981,6 +983,13 @@ window.FH6_DB = {
       },
       {
         "id": "wrx-sti-2004",
+        "also_viable_in": [
+          {
+            "class": "B",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks: WRX '04 #15 in B — boards actually run it as a B build more than A"
+          }
+        ],
         "name": "Subaru Impreza WRX STI",
         "year": 2004,
         "class": "A",
@@ -1020,6 +1029,28 @@ window.FH6_DB = {
       },
       {
         "id": "impreza-22b-sti",
+        "also_viable_in": [
+          {
+            "class": "B",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #11 B"
+          },
+          {
+            "class": "S1",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #10 S1"
+          },
+          {
+            "class": "S2",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #8 S2"
+          },
+          {
+            "class": "B",
+            "discipline": "road",
+            "evidence": "appears on Ito/Tateyama/Satta Sprint B road boards (forza.guide) — weaker signal, sprint tracks only"
+          }
+        ],
         "name": "Subaru Impreza 22B STi",
         "year": 1998,
         "class": "A",
@@ -1119,6 +1150,13 @@ window.FH6_DB = {
       },
       {
         "id": "brz-fe-2022",
+        "also_viable_in": [
+          {
+            "class": "A",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #15 A + multiple trail boards (Waterfall, Takashiro, Gauntlet, Hirosaki)"
+          }
+        ],
         "name": "Subaru BRZ Forza Edition",
         "year": 2022,
         "class": "A",
@@ -1161,6 +1199,23 @@ window.FH6_DB = {
       },
       {
         "id": "viper-fe",
+        "also_viable_in": [
+          {
+            "class": "S2",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #2 S2"
+          },
+          {
+            "class": "S1",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #11 S1; #1 on Taiyaki/Cherry Field S1 boards"
+          },
+          {
+            "class": "R",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #5 R"
+          }
+        ],
         "name": "Dodge Viper Forza Edition",
         "year": 1999,
         "class": "S1",
@@ -1228,6 +1283,13 @@ window.FH6_DB = {
       },
       {
         "id": "f450-super-duty",
+        "also_viable_in": [
+          {
+            "class": "D",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #7 D; #1 D on Sotoyama/Taiyaki/Nukabira/Waterfall trails"
+          }
+        ],
         "name": "Ford F-450 Super Duty DRW",
         "year": 2020,
         "class": "D-B",
@@ -1258,6 +1320,13 @@ window.FH6_DB = {
       },
       {
         "id": "gtr-black-fe-2012",
+        "also_viable_in": [
+          {
+            "class": "S2",
+            "discipline": "drag",
+            "evidence": "the CODMunity reference tune (514752751) is literally an S2 850 build — its drag home IS S2 despite the S1 class label"
+          }
+        ],
         "name": "Nissan GT-R Black Edition Forza Edition",
         "year": 2012,
         "class": "S1",
@@ -1323,6 +1392,23 @@ window.FH6_DB = {
       },
       {
         "id": "miata-fe-1994",
+        "also_viable_in": [
+          {
+            "class": "S1",
+            "discipline": "road",
+            "evidence": "forza.guide: #1 S1 on The Colossus"
+          },
+          {
+            "class": "S1",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #4 S1"
+          },
+          {
+            "class": "S2",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide dirt all-tracks #4 S2"
+          }
+        ],
         "name": "Mazda MX-5 Miata Forza Edition",
         "year": 1994,
         "class": "S2",
@@ -3762,5 +3848,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-07-11T16:52Z"
+  "builtAt": "2026-07-11T20:14Z"
 };

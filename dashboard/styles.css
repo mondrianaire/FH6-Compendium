@@ -99,6 +99,13 @@ td.price { font-variant-numeric: tabular-nums; }
 .acq-medium { color: var(--warn); }
 .acq-hard { color: #f0883e; }
 .acq-premium { color: #bc8cff; }
+.cov-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.cov-table th { padding: 4px 6px; color: var(--muted); text-align: left; white-space: nowrap; }
+.cov-table td { padding: 4px 6px; border: 1px solid var(--line); cursor: pointer; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cov-table td.cov-owned { background: rgba(63, 185, 80, .18); color: var(--accent); font-weight: 600; }
+.cov-table td.cov-have { background: rgba(210, 153, 34, .14); }
+.cov-table td.cov-gap { color: var(--muted); opacity: .45; cursor: default; }
+.cov-table td:not(.cov-gap):hover { outline: 1px solid var(--accent); }
 .flag.tab-flag { background: var(--bg3); color: var(--muted); }
 .varcat .gating { color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
 .varcat .gating strong { color: var(--txt); }

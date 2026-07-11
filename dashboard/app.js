@@ -78,18 +78,39 @@
     return c.price_credits === 0 || a.includes("free") || a.includes("reward") || a.includes("collection journal") || a.includes("wheelspin");
   }
 
+  // class strings like "D-B" span classes; expand to the full list
+  const CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"];
+  function expandClass(cls) {
+    if (!cls) return [];
+    if (cls.includes("-")) {
+      const [lo, hi] = cls.split("-");
+      const i = CLASS_ORDER.indexOf(lo), j = CLASS_ORDER.indexOf(hi);
+      if (i >= 0 && j >= i) return CLASS_ORDER.slice(i, j + 1);
+    }
+    return [cls];
+  }
+  // does car c have an evidenced fit for (discipline d, class cl)? "" = wildcard
+  function fitsSlot(c, d, cl) {
+    const av = c.also_viable_in || [];
+    if (d && cl) return (expandClass(c.class).includes(cl) && c.disciplines.includes(d)) ||
+      av.some((v) => v.class === cl && v.discipline === d);
+    if (d) return c.disciplines.includes(d) || av.some((v) => v.discipline === d);
+    if (cl) return expandClass(c.class).includes(cl) || av.some((v) => v.class === cl);
+    return true;
+  }
+
   function render() {
     const d = fDiscipline.value, cl = fClass.value;
     const budget = fBudget.value ? Number(fBudget.value) : null;
     const freeOnly = fFreeOnly.checked;
 
     let list = cars.filter((c) => {
-      if (d && !c.disciplines.includes(d)) return false;
-      if (cl && c.class !== cl) return false;
+      if (!fitsSlot(c, d, cl)) return false;
       if (budget != null && c.price_credits != null && c.price_credits > budget) return false;
       if (freeOnly && !isFree(c)) return false;
       return true;
     });
+    drawMatrix();
 
     // rank: tier S>A>B, then value_rating, then known price asc
     const tierRank = { S: 0, A: 1, B: 2 };
@@ -106,6 +127,53 @@
     grid.innerHTML = "";
     if (!list.length) { grid.innerHTML = "<p class='empty'>No cars match these filters. Loosen the budget or class.</p>"; return; }
     list.forEach((c, i) => grid.appendChild(card(c, i === 0)));
+  }
+
+  // ---- class × format coverage matrix ----
+  function bestForSlot(d, cl) {
+    const tierRank = { S: 0, A: 1, B: 2 };
+    return cars.filter((c) => fitsSlot(c, d, cl)).sort((a, b) =>
+      (tierRank[a.tier] - tierRank[b.tier]) ||
+      (b.value_rating - a.value_rating) ||
+      ((a.price_credits ?? Infinity) - (b.price_credits ?? Infinity)))[0] || null;
+  }
+
+  function drawMatrix() {
+    const host = document.getElementById("covMatrix");
+    if (!host) return;
+    let covered = 0, ownedCount = 0;
+    const total = CLASS_ORDER.length * disciplines.length;
+    const rows = CLASS_ORDER.map((cl) => {
+      const cells = disciplines.map((d) => {
+        const pick = bestForSlot(d, cl);
+        if (pick) { covered++; if (isOwned(pick.id)) ownedCount++; }
+        const cellClass = !pick ? "cov-gap" : isOwned(pick.id) ? "cov-owned" : "cov-have";
+        const viaNote = pick && !(expandClass(pick.class).includes(cl) && pick.disciplines.includes(d)) ? " ↗" : "";
+        const label = pick ? `${pick.name}${viaNote}${isOwned(pick.id) ? " ✓" : ""}` : "—";
+        const title = pick
+          ? `${pick.year} ${pick.name} (tier ${pick.tier}${viaNote ? ", cross-class build — see card for evidence" : ""})${isOwned(pick.id) ? " — owned" : ""}`
+          : "GAP: no evidenced competitive pick in the database yet";
+        return `<td class="${cellClass}" data-d="${d}" data-cl="${cl}" title="${title}">${label}</td>`;
+      }).join("");
+      return `<tr><th>${cl}</th>${cells}</tr>`;
+    }).join("");
+
+    host.innerHTML = `
+      <div class="block" style="margin-top:0">
+        <div class="card-row" style="margin-top:0">
+          <h3 style="margin:0">Class × format coverage — a competitive car for every slot</h3>
+          <span class="conf conf-probable">${covered}/${total} slots covered · ${ownedCount} owned</span>
+        </div>
+        <div style="overflow-x:auto;margin-top:8px"><table class="cov-table">
+          <thead><tr><th></th>${disciplines.map((d) => `<th>${DISCIPLINE_LABEL[d] || d}</th>`).join("")}</tr></thead>
+          <tbody>${rows}</tbody></table></div>
+        <p class="why" style="margin:8px 0 0">🟩 owned · 🟨 pick exists, not owned yet · dim = GAP (no evidenced pick — research needed). ↗ = cross-class build backed by leaderboard evidence, not the car's home class. Click a cell to filter the cards below.</p>
+      </div>`;
+    host.querySelectorAll("td[data-d]").forEach((td) =>
+      td.addEventListener("click", () => {
+        fDiscipline.value = td.dataset.d; fClass.value = td.dataset.cl; render();
+        document.getElementById("resultCount").scrollIntoView({ behavior: "smooth", block: "center" });
+      }));
   }
 
   function card(c, top) {
@@ -173,6 +241,10 @@
       <p class="why">${c.why}</p>
       ${c.leaderboard_meta ? `<h3>Leaderboard reality check (2026-07-11)</h3><p class="fh6note">${c.leaderboard_meta}</p>` : ""}
       ${c.disciplines_note ? `<p class="fh6note">${c.disciplines_note}</p>` : ""}
+      ${c.also_viable_in && c.also_viable_in.length ? `
+        <h3>Also viable in (evidence-backed)</h3>
+        <ul class="why">${c.also_viable_in.map((v) => `<li><strong>${v.class} ${DISCIPLINE_LABEL[v.discipline] || v.discipline}</strong> — ${v.evidence}</li>`).join("")}</ul>` : ""}
+      ${c.detune_note ? `<p class="fh6note">⚠️ ${c.detune_note}</p>` : ""}
       <h3>Mod / upgrade priority (buy in this order)</h3>
       <ol class="why">${c.upgrade_priority.map((u) => `<li>${u}</li>`).join("")}</ol>
       ${tuneHtml}

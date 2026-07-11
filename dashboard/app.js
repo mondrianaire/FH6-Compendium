@@ -373,6 +373,96 @@
       ${excl}`;
   }
 
+  // ---- eliminator ----
+  function buildEliminator() {
+    const e = DB.eliminatorTips;
+    if (!e) return;
+    const host = document.getElementById("eliminatorContent");
+    const PHASE_LABEL = {
+      early_game: "🌱 Early game", mid_game: "⚔️ Mid game", head_to_head: "🏎️ Head-to-Head",
+      final_showdown: "🏁 Final Showdown", general: "📋 General"
+    };
+    const ov = e.mode_overview;
+    const fact = (f) => `${f.value} <span class="conf ${confClass(f.confidence)}">${confLabel(f.confidence)}</span>`;
+
+    const overview = `
+      <div class="block">
+        <h3>How the mode works</h3>
+        <p class="why">${ov.what}</p>
+        <dl class="kv">
+          <dt>Players</dt><dd>${fact(ov.player_count)}</dd>
+          <dt>Starter car</dt><dd>${fact(ov.starter_car)}</dd>
+          <dt>Arena</dt><dd>${fact(ov.map_context)}</dd>
+          <dt>Where</dt><dd>${fact(ov.hub_context)}</dd>
+        </dl>
+      </div>`;
+
+    const mechanics = `
+      <h3 style="margin-top:24px">Mechanics</h3>
+      ${e.mechanics.map((m) => `
+        <div class="block">
+          <h4 style="margin:0 0 6px">${m.name} <span class="conf ${confClass(m.confidence)}">${confLabel(m.confidence)}</span></h4>
+          <p class="why" style="margin:0">${m.detail}</p>
+          ${m.note ? `<p class="why" style="font-size:12px;color:var(--muted);margin:6px 0 0">${m.note}</p>` : ""}
+        </div>`).join("")}`;
+
+    const levels = `
+      <div class="block">
+        <h3>Car Drop levels <span class="conf ${confClass(e.car_levels.confidence)}">${confLabel(e.car_levels.confidence)}</span></h3>
+        <p class="fh6note">${e.car_levels.note}</p>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Lv</th><th>Reported cars</th><th>Role</th></tr></thead>
+          <tbody>${e.car_levels.levels.map((l) => `
+            <tr><td><span class="badge tier-${l.level >= 9 ? "S" : l.level >= 5 ? "A" : "B"}">${l.level}</span></td>
+            <td>${l.cars.join(", ")}</td><td class="why" style="font-size:12px">${l.role}</td></tr>`).join("")}
+          </tbody></table></div>
+      </div>`;
+
+    const phases = ["early_game", "mid_game", "head_to_head", "final_showdown", "general"];
+    const tips = phases.map((ph) => {
+      const list = e.tips.filter((t) => t.phase === ph);
+      if (!list.length) return "";
+      return `
+        <h3 style="margin-top:24px">${PHASE_LABEL[ph]}</h3>
+        <div class="card-grid">
+          ${list.map((t) => `
+            <div class="car-card" style="cursor:default">
+              <div class="card-row" style="margin-top:0">
+                <span class="conf ${confClass(t.confidence)}">${confLabel(t.confidence)}</span>
+              </div>
+              <h3 style="font-size:14px">${t.tip}</h3>
+              <p class="why" style="margin:6px 0 0">${t.why}</p>
+              <p class="why" style="font-size:11px;color:var(--muted);margin:8px 0 0">sources: ${t.sources.join(", ")}</p>
+            </div>`).join("")}
+        </div>`;
+    }).join("");
+
+    const patches = `
+      <div class="block">
+        <h3>Patch history</h3>
+        ${e.patch_history.map((p) => `
+          <div class="strat-step">
+            <div class="strat-num" style="font-size:11px">${p.date.slice(5)}</div>
+            <div><p class="why" style="margin:0">${p.event} <span class="conf ${confClass(p.confidence)}">${confLabel(p.confidence)}</span></p></div>
+          </div>`).join("")}
+      </div>`;
+
+    const retracted = e.retracted && e.retracted.length ? `
+      <div class="block" style="border-color:var(--warn)">
+        <h3>⚠️ Excluded on purpose</h3>
+        <ul>${e.retracted.map((r) => `<li><strong>${r.what}</strong> — ${r.why}</li>`).join("")}</ul>
+      </div>` : "";
+
+    host.innerHTML = `
+      <p class="hint">${e.meta_disclaimer}</p>
+      ${overview}
+      ${levels}
+      ${mechanics}
+      ${tips}
+      ${patches}
+      ${retracted}`;
+  }
+
   // ---- init ----
   render();
   buildProgress();
@@ -380,4 +470,5 @@
   buildVariables();
   buildStrategy();
   buildRivals();
+  buildEliminator();
 })();

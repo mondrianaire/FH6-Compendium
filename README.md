@@ -16,6 +16,7 @@ data/                      ← the database (source of truth, hand-curated JSON)
   tuning-variables.json    full tuning parameter schema (ranges, units, baselines, tune order)
   meta-cars.json           top meta cars per class/discipline (price, drivetrain, mods, tunes)
   upgrade-strategy.json    upgrade/buy order + drivetrain rules + build principles
+  eliminator-tips.json     Eliminator (battle royale): mechanics, car-drop levels, phase-by-phase tips
   sources.json             every source used, with tier + what it informed
 scripts/
   build-db.mjs             compiles data/*.json → dashboard/db.js (window.FH6_DB)
@@ -31,7 +32,8 @@ research/
 1. Open `dashboard/index.html` in any browser (double-click).
 2. **Recommend a Car** tab: pick discipline / class / budget → ranked picks.
    Click a card for mods-to-buy order, tune baseline, and share codes.
-3. Other tabs: full car table, tuning-variable reference, upgrade strategy.
+3. Other tabs: full car table, tuning-variable reference, upgrade strategy,
+   Rivals tracks, and Eliminator (battle-royale mechanics + tips by match phase).
 
 ## Updating the data
 

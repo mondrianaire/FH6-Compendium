@@ -247,6 +247,45 @@
       </div>`;
   }
 
+  // ---- rivals ----
+  function buildRivals() {
+    const rt = DB.rivalsTracks;
+    if (!rt) return;
+    const host = document.getElementById("rivalsContent");
+    const h = rt.board_reading_heuristic;
+    const heur = `
+      <div class="block">
+        <h3>How to read a Rivals board <span class="conf conf-verified">method</span></h3>
+        <p class="why">${h.purpose}</p>
+        <ol class="why">${h.rules.map((r) => `<li>${r}</li>`).join("")}</ol>
+      </div>`;
+    const tracks = rt.tracks.map((t) => {
+      const rows = ((t.leaderboard_snapshot && t.leaderboard_snapshot.top) || []).map((r) => `
+        <tr><td>${r.pos}</td><td>${r.driver}</td><td>${r.car}</td>
+          <td>${r.pi}</td><td>${r.drivetrain || ""}</td>
+          <td class="rng">${r.time}</td><td class="why" style="font-size:12px">${r.flag || ""}</td></tr>`).join("");
+      const snap = t.leaderboard_snapshot || {};
+      return `
+      <div class="block">
+        <div class="card-row" style="margin-top:0">
+          <h3 style="margin:0">${t.name} — ${t.class} class</h3>
+          <span class="conf conf-probable">${t.location || ""}</span>
+        </div>
+        <p class="why"><strong>Character:</strong> ${t.character}</p>
+        <p class="fh6note"><strong>Board (${snap.date || ""}, ${snap.filter || ""}):</strong> ${t.board_state}</p>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>#</th><th>Driver</th><th>Car</th><th>PI</th><th>DT</th><th>Time</th><th>Flag</th></tr></thead>
+          <tbody>${rows}</tbody></table></div>
+        <p class="why"><strong>Pick:</strong> ${t.recommended_car}</p>
+        <p class="why"><strong>Build:</strong> ${t.recommended_build}</p>
+        <p class="fh6note"><strong>Key insight:</strong> ${t.key_insight}</p>
+        ${t.targets ? `<p class="why"><strong>Targets:</strong> ${t.targets.realistic_first} → stretch: ${t.targets.stretch}</p>` : ""}
+        <p class="why" style="font-size:12px;color:var(--muted)">${t.confidence || ""}</p>
+      </div>`;
+    }).join("");
+    host.innerHTML = `<p class="hint">${rt.note}</p>` + heur + tracks;
+  }
+
   // ---- progression ----
   function buildProgress() {
     const p = DB.progression;
@@ -323,4 +362,5 @@
   buildTable();
   buildVariables();
   buildStrategy();
+  buildRivals();
 })();

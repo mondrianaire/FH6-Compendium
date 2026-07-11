@@ -1496,6 +1496,104 @@ window.FH6_DB = {
       }
     ]
   },
+  "rivalsTracks": {
+    "schema_version": "1.0.0",
+    "captured": "2026-07-10",
+    "note": "Rivals leaderboard-prep dataset. Per track: the meta car/build to be competitive PLUS how to READ the board first — because the car is often NOT the bottleneck. Always verify a suspect top time by downloading its ghost in-game.",
+    "board_reading_heuristic": {
+      "purpose": "Read a Rivals leaderboard critically before copying anyone or picking a target.",
+      "rules": [
+        "CONTESTED vs SOFT: on a solved board the top ~10 sit within ~1-2s. A big spread (25s+ across the top 10) = SOFT/uncontested board — almost nobody is tryharding, so CAR CHOICE BARELY MATTERS; a clean optimized lap alone climbs the ranks.",
+        "OUTLIER = SUSPECT: if the #1 (or top few) beat the main clean-lap CLUSTER by more than ~10% of laptime, treat them as suspect. Usual cause is a CUT / DIRTY lap the game failed to invalidate (most common), not skill. A 25s gap on a 90s lap means the route got shorter, not that the driver is 25s better.",
+        "AI / DEV SEED TIMES: names like 'AI Test#######' are developer/AI benchmark entries, not real players — ignore them as targets.",
+        "HACKING is the LEAST likely explanation of a fast-but-plausible time (e.g. 1:05). Real hacks are absurd (sub-0:30 / 0:00.000). Console is locked down; hacking is mainly a PC-mod concern.",
+        "VERIFY WITH THE GHOST: download the suspect ghost and watch it. Cuts corners / clips walls / teleports / impossible speed = dirty or hacked, ignore. Clean fast line = legit and beatable with practice.",
+        "PICK THE RIGHT TARGET: race the CLEAN-LAP CLUSTER, not the outliers. Use Change Filter -> Friends / Region and any clean-lap filter to strip out junk.",
+        "UNDER-PI CAN WIN on technical tracks: the fastest runs sometimes sit well below the class PI cap (grip/control beats raw power). Don't reflexively max PI."
+      ]
+    },
+    "tracks": [
+      {
+        "id": "electric-town-circuit-a",
+        "name": "Electric Town Circuit",
+        "location": "Akihabara, Tokyo",
+        "discipline": "road",
+        "class": "A",
+        "character": "Tight technical urban street circuit — short straights, 90-degree corners, walls close. Grip / braking / corner-exit matter far more than top speed.",
+        "board_state": "SOFT / uncontested (2026-07-10). Global top 11 spanned 1:05.127 -> 1:32.755 (27s). Clean-lap cluster ~1:28-1:32 at 700 PI. Top 1-4 are outliers (suspect cut/dirty; #3 'AI Test071831' is a seed time).",
+        "leaderboard_snapshot": {
+          "date": "2026-07-10",
+          "filter": "Global",
+          "your_standing": "top 53% of 4,594,418 players",
+          "top": [
+            {
+              "pos": 1,
+              "driver": "MortalYard2398",
+              "car": "Toyota Supra '20",
+              "pi": 616,
+              "drivetrain": "RWD",
+              "time": "1:05.127",
+              "assists": "ABS on, TCS off, STM off, Auto",
+              "flag": "SUSPECT — 8.5s clear of #2; likely cut/dirty. Verify by ghost."
+            },
+            {
+              "pos": 2,
+              "driver": "IrateAunt4120",
+              "car": "Porsche 718 GTS",
+              "pi": 675,
+              "drivetrain": "RWD",
+              "time": "1:13.699",
+              "flag": "strongest plausible clean lap"
+            },
+            {
+              "pos": 3,
+              "driver": "AI Test071831",
+              "car": "Audi RS 7 '21",
+              "pi": 700,
+              "drivetrain": "AWD",
+              "time": "1:19.737",
+              "flag": "AI / dev seed time — not a real target"
+            },
+            {
+              "pos": 4,
+              "driver": "Good Good5799",
+              "car": "Toyota Supra '20",
+              "pi": 616,
+              "drivetrain": "RWD",
+              "time": "1:22.615"
+            },
+            {
+              "pos": 5,
+              "driver": "RozekUx",
+              "car": "Dodge Viper '99",
+              "pi": 700,
+              "drivetrain": "RWD",
+              "time": "1:28.969"
+            },
+            {
+              "pos": "6-11",
+              "driver": "pack",
+              "car": "Supra '20 / BMW i8 / GR86 '22 / City E II '84 / Ford GT '05 x2",
+              "pi": 700,
+              "time": "1:30.262 - 1:32.755",
+              "flag": "clean-lap cluster — realistic legit band"
+            }
+          ]
+        },
+        "recommended_car": "Toyota Supra '20 (RWD) — most-represented on the board (3x, incl. #1 & #4); already in the meta DB (gr-supra-2020).",
+        "recommended_build": "Grip-focused, and DO NOT max PI — the two fastest Supras run ~616 PI, not the 700 cap (lighter/more controllable beats maxed power on this tight circuit). Tires/brakes/suspension first, keep power modest. Assists: ABS on, TCS off, STM off, gearing Automatic. Short final drive for the 90-degree corners; add downforce (top speed is irrelevant here).",
+        "key_insight": "THE CAR IS NOT THE BOTTLENECK. #1 on a 616 Supra beats a maxed 700 Audi RS7 by 14s — that gap is racing line + clean laps, not the car. A single clean optimized lap vaults you from top 53% into roughly the top 10% on this soft board.",
+        "targets": {
+          "realistic_first": "beat ~1:13 (#2 — strongest plausible clean lap)",
+          "stretch": "1:05 (#1) — but verify it isn't a cut lap via ghost download before treating it as real"
+        },
+        "confidence": "leaderboard = primary (in-game screenshot 2026-07-10); car/build meta = probable (A-class meta still forming)",
+        "sources": [
+          "in-game-leaderboard-electrictown"
+        ]
+      }
+    ]
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",
@@ -1884,6 +1982,13 @@ window.FH6_DB = {
         "title": "r/ForzaHorizon6 — 'Link Clean Sweep' completion bug thread",
         "url": "https://redd.it/1uqept6",
         "used_for": "2026-07-08: LINK Clean Sweep + 10k speed-skill badges BUGGED/acknowledged (FH6BR-1887); Custom-Racing completion trick; 100% is time-gated across series. Confidence: community (OP + commenters + bug tracker)"
+      },
+      {
+        "id": "in-game-leaderboard-electrictown",
+        "tier": "primary",
+        "title": "Player in-game Rivals leaderboard — Electric Town Circuit, A class",
+        "url": "n/a — user-provided screenshot 2026-07-10",
+        "used_for": "GROUND TRUTH: global top-11 times/cars/PI/assists for Electric Town Circuit A. Shows a SOFT board (1:05-1:32 spread), Supra '20 x3 incl #1, fastest runs at 616 PI (under cap), TCS/STM off universal, 'AI Test071831' seed time. Re-confirms A-class = 601-700 (616 & 700 both 'A')."
       }
     ],
     "fh6_ui_structure_pass": {

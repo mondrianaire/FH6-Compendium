@@ -16,7 +16,8 @@
   const fh6Class = (c) => c === "fh6_confirmed" ? "conf-verified" : c === "needs_ingame" ? "conf-contested" : "conf-probable";
   const fh6Label = (c) => c === "fh6_confirmed" ? "✅ FH6" : c === "needs_ingame" ? "❌ in-game" : "🟡 FH6";
   const acqLabel = (d) => d === "easy" ? "🟢 easy to get" : d === "medium" ? "🟡 some effort"
-    : (d === "hard" || d === "hard-unconfirmed") ? "🔴 hard / luck-gated" : "";
+    : (d === "hard" || d === "hard-unconfirmed") ? "🔴 luck-gated grind"
+    : d === "premium" ? "💰 premium (real money)" : "";
   const tuneConf = (c) => c === "player-verified" ? "✅ verified" : c === "sourced-unverified" ? "🟡 sourced"
     : c === "suspect" ? "❌ suspect" : "ℹ️ method";
   const tuneLine = (t) => {
@@ -200,7 +201,7 @@
           ${["all", "owned", "missing"].map((f) =>
             `<button class="chip garage-filter" data-f="${f}" style="cursor:pointer;border:1px solid ${garageFilter === f ? "var(--accent)" : "var(--line)"}">${f === "all" ? "All" : f === "owned" ? "✓ Owned" : "◯ Missing"}</button>`).join("")}
         </div>
-        <p class="why" style="margin:10px 0 0">Tick a car when you get it. Difficulty: 🟢 buy anytime / free-guaranteed · 🟡 deterministic effort (aftermarket spawn, auction) · 🔴 luck- or pay-gated. Click a row for the full card (use case, tunes, how to get it, easy alternatives).</p>
+        <p class="why" style="margin:10px 0 0">Tick a car when you get it. Difficulty: 🟢 buy anytime / free-guaranteed · 🟡 deterministic effort (aftermarket spawn, auction) · 🔴 luck-gated grind (wheelspin RNG / limited-time — money can't help) · 💰 premium (paid DLC/VIP — guaranteed, but costs real money). Click a row for the full card (use case, tunes, how to get it, easy alternatives).</p>
       </div>`;
     header.querySelectorAll(".garage-filter").forEach((b) =>
       b.addEventListener("click", () => { garageFilter = b.dataset.f; drawGarage(); }));
@@ -213,7 +214,7 @@
       if (sortKey === "tier") { av = tierRank[av]; bv = tierRank[bv]; }
       if (sortKey === "owned") { av = isOwned(a.id) ? 0 : 1; bv = isOwned(b.id) ? 0 : 1; }
       if (sortKey === "acquisition_difficulty") {
-        const dRank = { easy: 0, medium: 1, hard: 2, "hard-unconfirmed": 2 };
+        const dRank = { easy: 0, medium: 1, hard: 2, "hard-unconfirmed": 2, premium: 3 };
         av = dRank[a.acquisition_difficulty] ?? 3; bv = dRank[b.acquisition_difficulty] ?? 3;
       }
       if (sortKey === "name") return sortDir * String(av).localeCompare(String(bv));

@@ -34,9 +34,11 @@ research/
 2. **Recommend a Car** tab: pick discipline / class / budget → ranked picks.
    Click a card for mods-to-buy order, tune baseline, and share codes.
 3. **Garage Tracker** tab: every meta car with its use case and an
-   acquisition-difficulty indicator (🟢 easy / 🟡 medium / 🔴 hard). Tick cars as
-   you collect them — owned state persists in your browser (localStorage), never
-   in the data files.
+   acquisition-difficulty indicator (🟢 easy / 🟡 medium / 🔴 luck-gated grind /
+   💰 premium = real-money DLC). "Hard" and "paid" are deliberately separate:
+   🔴 means money can't help (wheelspin RNG, limited-time), 💰 means guaranteed
+   but costs actual currency. Tick cars as you collect them — owned state
+   persists in your browser (localStorage), never in the data files.
 4. Other tabs: tuning-variable reference, upgrade strategy, Rivals tracks, and
    Eliminator (battle-royale mechanics + tips by match phase).
 

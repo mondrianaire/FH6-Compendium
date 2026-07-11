@@ -629,10 +629,11 @@ window.FH6_DB = {
       "drag"
     ],
     "acquisition_difficulty_scale": {
-      "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' (luck/limited), always offer an 'easy' alternative.",
-      "easy": "Autoshow (buy anytime with credits) OR a guaranteed free reward (Journal tier, Collection). No luck.",
-      "medium": "Requires a specific action but is deterministic: Barn Find, aftermarket-shop spawn, Auction House, a specific championship/reward.",
-      "hard": "Luck- or time-gated: Wheelspin/Super Wheelspin RNG only, limited-time Festival Playlist exclusive, or paid DLC/VIP."
+      "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' or 'premium', always offer an 'easy' alternative. SPLIT 2026-07-11: 'hard' used to lump luck-gated grinds with paid DLC — those are opposite experiences (time+dice vs money+guaranteed), so paid content is now its own 'premium' category.",
+      "easy": "Autoshow (buy anytime with credits) OR a guaranteed free reward (Journal tier, Collection). No luck, no money.",
+      "medium": "Requires a specific action but is deterministic and free: Barn Find, aftermarket-shop spawn, Auction House, a specific championship/reward.",
+      "hard": "Luck- or time-gated, no amount of money helps: Wheelspin/Super Wheelspin RNG only, or limited-time Festival Playlist exclusive.",
+      "premium": "REAL MONEY: paid DLC, Car Pass, VIP Membership, or paid edition. Guaranteed once purchased — zero luck, zero grind, but costs actual currency."
     },
     "cars": [
       {
@@ -885,7 +886,7 @@ window.FH6_DB = {
           "egamersworld",
           "games.gg"
         ],
-        "acquisition_difficulty": "hard",
+        "acquisition_difficulty": "premium",
         "easy_alternative": "For a free S2 road car, the Mercedes-AMG One (FH5 loyalty, free) — or any Autoshow S2.",
         "alt_tune_note": "Car Pass DLC only. Without it, use the easy alternative Mercedes-AMG One (free FH5 loyalty) with ITS own road tune (see amg-one-2021 tunes) — the Gemera's tunes can't be applied without the Gemera."
       },
@@ -1189,7 +1190,7 @@ window.FH6_DB = {
           "game8",
           "gamingpromax"
         ],
-        "acquisition_difficulty": "hard",
+        "acquisition_difficulty": "premium",
         "easy_alternative": "For cross-country without paying: Subaru BRZ FE (aftermarket spawn at Sotoyama Ski Resort, medium), or an Autoshow off-road pick.",
         "alt_tune_note": "VIP-DLC only. Without it, use the easy alternative Subaru BRZ FE (aftermarket spawn) with ITS own cross-country tune (see brz-fe-2022 tunes) — the Viper FE's tunes can't be applied without the Viper FE."
       },
@@ -3761,5 +3762,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-07-11T16:24Z"
+  "builtAt": "2026-07-11T16:52Z"
 };

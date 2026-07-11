@@ -98,6 +98,7 @@ td.price { font-variant-numeric: tabular-nums; }
 .acq-easy { color: var(--accent); }
 .acq-medium { color: var(--warn); }
 .acq-hard { color: #f0883e; }
+.acq-premium { color: #bc8cff; }
 .flag.tab-flag { background: var(--bg3); color: var(--muted); }
 .varcat .gating { color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
 .varcat .gating strong { color: var(--txt); }

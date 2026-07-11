@@ -285,6 +285,7 @@
         ${t.alternatives_if_hard ? `<p class="why"><strong>Alternatives:</strong> ${t.alternatives_if_hard}</p>` : ""}
         <p class="why"><strong>Build:</strong> ${t.recommended_build}</p>
         ${t.how_to_get_the_tune ? `<p class="why"><strong>Getting a tune:</strong> ${t.how_to_get_the_tune}</p>` : ""}
+        ${t.tune_browser_warning ? `<p class="fh6note">⚠️ ${t.tune_browser_warning}</p>` : ""}
         <p class="fh6note"><strong>Key insight:</strong> ${t.key_insight}</p>
         ${t.targets ? `<p class="why"><strong>Targets:</strong> ${t.targets.realistic_first} → stretch: ${t.targets.stretch}</p>` : ""}
         <p class="why" style="font-size:12px;color:var(--muted)">${t.confidence || ""}</p>

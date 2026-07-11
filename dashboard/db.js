@@ -668,7 +668,8 @@ window.FH6_DB = {
           "pcgamer",
           "games.gg",
           "egamersworld"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "golf-r-2021",
@@ -714,7 +715,8 @@ window.FH6_DB = {
           "game8-db",
           "forza-fandom",
           "forzafire-drivetrain"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "golf-r-2014",
@@ -764,7 +766,8 @@ window.FH6_DB = {
           "forza-labs-db",
           "dexerto",
           "in-game-screenshot"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "nsx-type-s-2022",
@@ -778,8 +781,8 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD (hybrid)",
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
-        "price_credits": null,
-        "acquisition": "Autoshow (price unconfirmed)",
+        "price_credits": 193000,
+        "acquisition": "Autoshow ~193,000 cr (buy anytime). Also a story/showcase reward. No luck.",
         "tier": "A",
         "value_rating": 7,
         "upgrade_priority": [
@@ -794,7 +797,8 @@ window.FH6_DB = {
         "confidence": "probable",
         "sources": [
           "games.gg"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "bmw-m5-2022",
@@ -807,8 +811,8 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
-        "price_credits": null,
-        "acquisition": "Autoshow (very accessible)",
+        "price_credits": 150000,
+        "acquisition": "Autoshow ~150,000 cr (the FH6 car is the M5 CS). Appears in the Wheelspin pool but is NOT wheelspin-exclusive.",
         "tier": "A",
         "value_rating": 7,
         "upgrade_priority": [
@@ -823,7 +827,8 @@ window.FH6_DB = {
         "confidence": "probable",
         "sources": [
           "egamersworld"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "gemera-2024",
@@ -837,7 +842,7 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
         "price_credits": null,
-        "acquisition": "Car Pass exclusive (PAID DLC, added ~2026-05-28) — not buyable with credits alone",
+        "acquisition": "PAID DLC only: Car Pass ($29.99, added 2026-05-28) or $2.99 individually. Car Pass owners claim it free then can re-buy in Autoshow for cr; there is NO credits path without the DLC.",
         "tier": "S",
         "value_rating": 9,
         "upgrade_priority": [
@@ -860,7 +865,9 @@ window.FH6_DB = {
         "sources": [
           "egamersworld",
           "games.gg"
-        ]
+        ],
+        "acquisition_difficulty": "hard",
+        "easy_alternative": "For a free S2 road car, the Mercedes-AMG One (FH5 loyalty, free) — or any Autoshow S2."
       },
       {
         "id": "amg-one-2021",
@@ -874,7 +881,7 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
         "price_credits": null,
-        "acquisition": "Autoshow / high-end (PI ~900 S2); often unlockable FREE if you have a Forza Horizon 5 save",
+        "acquisition": "FREE via FH5 Loyalty Reward — play Forza Horizon 5 on the same Xbox account and it auto-adds to your FH6 garage on launch. Deterministic & free (requires a qualifying FH5 save; not a credits purchase).",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -891,7 +898,8 @@ window.FH6_DB = {
           "dexerto",
           "dotesports",
           "egamersworld"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "gr-supra-2020",
@@ -905,8 +913,8 @@ window.FH6_DB = {
         "drivetrain_stock": "RWD",
         "recommended_drivetrain": "RWD or AWD swap",
         "power_split": "30/70 F/R (if AWD swapped)",
-        "price_credits": 42750,
-        "acquisition": "Autoshow (~42,750 cr, buy anytime) — ALSO free via Journal 'Discovery' Tier 4 reward. Confirmed by game8.",
+        "price_credits": 45000,
+        "acquisition": "Autoshow ~45,000 cr (buy anytime) — ALSO free via Journal 'Discovery' Tier 4. Confirmed by game8 + dexerto. (Base price is 45,000; the earlier 42,750 was a discounted/resale figure.)",
         "acquisition_difficulty": "easy",
         "tier": "S",
         "value_rating": 8,
@@ -961,7 +969,8 @@ window.FH6_DB = {
           "dexerto",
           "gamingpromax",
           "grindnstrat"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "impreza-22b-sti",
@@ -974,8 +983,8 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
-        "price_credits": null,
-        "acquisition": "Autoshow (price unconfirmed)",
+        "price_credits": 86000,
+        "acquisition": "Autoshow ~86,000 cr (81,700 with VIP). The skill-farm car — cheap to re-buy repeatedly.",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -991,7 +1000,8 @@ window.FH6_DB = {
         "sources": [
           "gamingpromax",
           "games.gg"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "lancer-evo-2004",
@@ -1004,8 +1014,8 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
-        "price_credits": null,
-        "acquisition": "Autoshow",
+        "price_credits": 30000,
+        "acquisition": "Autoshow ~30,000 cr (buy anytime). Also in the Deluxe/Premium Welcome Pack.",
         "tier": "A",
         "value_rating": 8,
         "upgrade_priority": [
@@ -1021,7 +1031,8 @@ window.FH6_DB = {
         "sources": [
           "dexerto",
           "gamingpromax"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "focus-rs",
@@ -1034,8 +1045,8 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD",
         "power_split": "30/70 F/R",
-        "price_credits": null,
-        "acquisition": "Autoshow",
+        "price_credits": 37000,
+        "acquisition": "Autoshow ~37,000 cr (buy anytime). Also a free Car Collection Tier-2 / garage reward.",
         "tier": "A",
         "value_rating": 7,
         "upgrade_priority": [
@@ -1049,7 +1060,8 @@ window.FH6_DB = {
         "confidence": "probable",
         "sources": [
           "dexerto"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "brz-fe-2022",
@@ -1079,12 +1091,13 @@ window.FH6_DB = {
         "confidence": "probable",
         "sources": [
           "gamingpromax"
-        ]
+        ],
+        "acquisition_difficulty": "medium"
       },
       {
         "id": "viper-fe",
         "name": "Dodge Viper Forza Edition",
-        "year": 2017,
+        "year": 1999,
         "class": "S1",
         "disciplines": [
           "cross_country"
@@ -1093,7 +1106,7 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD swap",
         "power_split": "30/70 F/R",
         "price_credits": null,
-        "acquisition": "Reward/Wheelspin (unconfirmed)",
+        "acquisition": "VIP Membership DLC only (~$19.99, or bundled in the Premium Edition); once VIP is owned, claim via My Horizon > Gifts. NOT Wheelspin (corrects skycoach). In-game value ~500,000 cr. NOTE: this is the 1999 Viper GTS ACR FE, not a 2017.",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -1109,7 +1122,9 @@ window.FH6_DB = {
         "sources": [
           "game8",
           "gamingpromax"
-        ]
+        ],
+        "acquisition_difficulty": "hard",
+        "easy_alternative": "For cross-country without paying: Subaru BRZ FE (aftermarket spawn at Sotoyama Ski Resort, medium), or an Autoshow off-road pick."
       },
       {
         "id": "can-am-maverick-2018",
@@ -1122,8 +1137,8 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD",
         "power_split": "AWD",
-        "price_credits": null,
-        "acquisition": "Autoshow",
+        "price_credits": 16000,
+        "acquisition": "Autoshow ~16,000 cr (base roster; not on the rare/Wheelspin list). Exact price single-sourced.",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -1138,7 +1153,8 @@ window.FH6_DB = {
         "sources": [
           "game8",
           "gamingpromax"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "f450-super-duty",
@@ -1151,8 +1167,8 @@ window.FH6_DB = {
         "drivetrain_stock": "AWD/4WD",
         "recommended_drivetrain": "4WD",
         "power_split": "AWD",
-        "price_credits": null,
-        "acquisition": "Autoshow",
+        "price_credits": 65000,
+        "acquisition": "Autoshow ~65,000 cr (standard DRW Platinum). NOTE: the F-450 FORZA EDITION is a different car and is Wheelspin-only (hard) — don't conflate.",
         "tier": "A",
         "value_rating": 7,
         "upgrade_priority": [
@@ -1165,7 +1181,8 @@ window.FH6_DB = {
         "confidence": "probable",
         "sources": [
           "gamingpromax"
-        ]
+        ],
+        "acquisition_difficulty": "easy"
       },
       {
         "id": "gtr-black-fe-2012",
@@ -1179,8 +1196,8 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD (or RWD swap for max-traction drag spec)",
         "power_split": "drag-specific",
         "price_credits": null,
-        "acquisition": "Wheelspin per skycoach — but NEEDS RE-VERIFY: skycoach's acquisition labels proved unreliable (it wrongly called the Miata FE 'Wheelspin only' when it's actually an aftermarket-shop spawn). Check whether this GT-R FE also has a deterministic path (aftermarket spawn / Playlist) before trusting 'Wheelspin'.",
-        "acquisition_difficulty": "hard-unconfirmed",
+        "acquisition": "Wheelspin / Super Wheelspin RNG only (also findable on the Auction House). CONFIRMED hard across game8/MitchCactus/allthings.how — no deterministic path (skycoach was RIGHT on this one). In-game value ~750,000 cr.",
+        "acquisition_difficulty": "hard",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -1213,7 +1230,8 @@ window.FH6_DB = {
           "codmunity-drag",
           "forza-fandom-gtr",
           "forums-forza-tunes"
-        ]
+        ],
+        "easy_alternative": "The standard non-FE 2012 Nissan GT-R Black Edition — Autoshow ~80,000 cr — is a near-identical S2 drag platform (the FE only adds a Speed-Skills star)."
       },
       {
         "id": "miata-fe-1994",

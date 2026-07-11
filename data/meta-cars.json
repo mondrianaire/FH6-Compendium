@@ -3,11 +3,22 @@
   "captured": "2026-06-07",
   "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift. VERIFIED 2026-06-08 against independent databases (game8, Fandom, kudosprime, CODMunity) and forums (forums.forza.net, GTPlanet). Key fix: GT-R NISMO price corrected 270k→220k. Many SEO tier-lists plagiarize each other — superlatives without independent backing were downgraded. Confidence: verified = multiple INDEPENDENT sources; probable = single/early-consensus; contested = sources disagree.",
   "pi_classes": {
-    "D": "100-400", "C": "401-500", "B": "501-600", "A": "601-700",
-    "S1": "701-800", "S2": "801-900", "R": "901+"
+    "D": "100-400",
+    "C": "401-500",
+    "B": "501-600",
+    "A": "601-700",
+    "S1": "701-800",
+    "S2": "801-900",
+    "R": "901+"
   },
   "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game.",
-  "disciplines": ["road", "touge_street", "dirt_rally", "cross_country", "drag"],
+  "disciplines": [
+    "road",
+    "touge_street",
+    "dirt_rally",
+    "cross_country",
+    "drag"
+  ],
   "acquisition_difficulty_scale": {
     "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' (luck/limited), always offer an 'easy' alternative.",
     "easy": "Autoshow (buy anytime with credits) OR a guaranteed free reward (Journal tier, Collection). No luck.",
@@ -20,7 +31,10 @@
       "name": "Nissan GT-R NISMO",
       "year": 2024,
       "class": "S1",
-      "disciplines": ["road", "touge_street"],
+      "disciplines": [
+        "road",
+        "touge_street"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
@@ -29,16 +43,31 @@
       "acquisition": "Autoshow; also a Tier-3 reward of the Touge & Street Rivals Collection Journal (earnable free)",
       "tier": "S",
       "value_rating": 9,
-      "upgrade_priority": ["front tire width/compound", "brakes", "race suspension", "weight reduction", "modest power"],
+      "upgrade_priority": [
+        "front tire width/compound",
+        "brakes",
+        "race suspension",
+        "weight reduction",
+        "modest power"
+      ],
       "tune_baseline": {
-        "tire_psi_front": 28.0, "tire_psi_rear": 27.5,
-        "diff_accel": 55, "diff_decel": 15, "diff_center_rear": 75,
-        "brake_balance_front": 52, "note": "Use AWD-circuit baseline; road-tune gearing per route."
+        "tire_psi_front": 28,
+        "tire_psi_rear": 27.5,
+        "diff_accel": 55,
+        "diff_decel": 15,
+        "diff_center_rear": 75,
+        "brake_balance_front": 52,
+        "note": "Use AWD-circuit baseline; road-tune gearing per route."
       },
       "share_codes": [],
       "why": "Unmatched AWD launch in S1; menace in Touge and street events. 600+ hp means AWD is needed to avoid wheelspin. Light tuning pushes it into higher classes. Free path via Collection Journal makes it the best-value S1 buy.",
       "confidence": "verified",
-      "sources": ["pcgamer", "games.gg", "egamersworld"]
+      "sources": [
+        "pcgamer",
+        "games.gg",
+        "egamersworld"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "golf-r-2021",
@@ -46,7 +75,11 @@
       "year": 2021,
       "class": "B",
       "stock_pi": 546,
-      "disciplines": ["road", "touge_street", "dirt_rally"],
+      "disciplines": [
+        "road",
+        "touge_street",
+        "dirt_rally"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD (keep it)",
       "power_split": "diff center ~60% rear",
@@ -56,10 +89,19 @@
       "tier": "A",
       "value_rating": 9,
       "beginner_pick": true,
-      "upgrade_priority": ["race tires/compound + front tire width", "race brakes", "race suspension (unlocks sliders)", "weight reduction", "keep power modest to stay in B"],
+      "upgrade_priority": [
+        "race tires/compound + front tire width",
+        "race brakes",
+        "race suspension (unlocks sliders)",
+        "weight reduction",
+        "keep power modest to stay in B"
+      ],
       "tune_baseline": {
-        "tire_psi_front": 26.0, "tire_psi_rear": 26.0,
-        "diff_accel": 68, "diff_decel": 28, "diff_center_rear": 60,
+        "tire_psi_front": 26,
+        "tire_psi_rear": 26,
+        "diff_accel": 68,
+        "diff_decel": 28,
+        "diff_center_rear": 60,
         "brake_balance_front": 50,
         "note": "Beginner B-class road tune (adapted from a ForzaFire community build). Full numbers: final drive 3.81; camber -0.5 F/R; toe 0; caster 6.5; springs ~800 lb/in scale F/R; ride height near slider minimum; ARB 37 F / 39.5 R; bump 4.9 F / 6.9 R; rebound 7.5 F / 10.4 R; downforce 252 F/R; brakes 50%/100%. Community numbers (probable) — road-tune the gearing yourself.",
         "note_datafix": "CORRECTED 2026-06-08: ForzaFire's 'springs ~7500' and 'ride height 12.3' figures were garbled/metric and are wrong for the in-game US-locale display. In-game footage of the 2014 sibling (same Haldex platform) reads springs ~838F/662R lb/in and ride height in INCHES (front slider range 6.9-8.1 on the 2014). Treat spring rate as the ~hundreds-lb/in scale and ride height as inches, per-car."
@@ -67,7 +109,12 @@
       "share_codes": [],
       "why": "The best AWD all-rounder in B-class and the ideal FIRST tuning project for a new player: cheap (29k), AWD so it's forgiving and hard to spin, and the natural in-game cousin of a real Golf GTI. Learn the whole tuning menu on this before touching faster cars.",
       "confidence": "verified",
-      "sources": ["game8-db", "forza-fandom", "forzafire-drivetrain"]
+      "sources": [
+        "game8-db",
+        "forza-fandom",
+        "forzafire-drivetrain"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "golf-r-2014",
@@ -75,7 +122,11 @@
       "year": 2014,
       "class": "B",
       "stock_pi": 536,
-      "disciplines": ["road", "touge_street", "dirt_rally"],
+      "disciplines": [
+        "road",
+        "touge_street",
+        "dirt_rally"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD (keep it — Haldex 4MOTION)",
       "power_split": "diff center ~70% rear (the '30/70 split')",
@@ -86,10 +137,20 @@
       "tier": "A",
       "value_rating": 9,
       "beginner_pick": true,
-      "upgrade_priority": ["sport/race tires + front tire WIDTH", "race brakes (PI-cheap)", "race suspension (unlocks sliders)", "weight reduction", "keep AWD", "minimal power LAST — at ~589 there is only ~11 PI to the 600 B cap, so the car is upgrade-complete: TUNE, don't add parts"],
+      "upgrade_priority": [
+        "sport/race tires + front tire WIDTH",
+        "race brakes (PI-cheap)",
+        "race suspension (unlocks sliders)",
+        "weight reduction",
+        "keep AWD",
+        "minimal power LAST — at ~589 there is only ~11 PI to the 600 B cap, so the car is upgrade-complete: TUNE, don't add parts"
+      ],
       "tune_baseline": {
-        "tire_psi_front": 27.0, "tire_psi_rear": 27.0,
-        "diff_accel": 50, "diff_decel": 20, "diff_center_rear": 72,
+        "tire_psi_front": 27,
+        "tire_psi_rear": 27,
+        "diff_accel": 50,
+        "diff_decel": 20,
+        "diff_center_rear": 72,
         "brake_balance_front": 52,
         "note": "B-class road/touge starting point (Haldex 2.0T chassis). Tire psi cold, target ~31-33 hot. Alignment refined vs a real 589-PI build that ran -2.0 F / -1.5 R camber, caster 5.0: recommend camber -1.3 F / -1.0 R (less front scrub, better braking; less rear camber for AWD exit grip) and caster 6.5 (sharper turn-in, self-centering — near-free gain). Toe 0/0 (optional +0.1 rear-in for high-speed stability). Springs near-stiff for tarmac; ride height lowest without bottoming; ARB 32 F / 38 R (stiffer rear to rotate vs AWD push); bump 5.0 F / 6.5 R; rebound 8.0 F / 10.0 R; brakes 52%/100%; gearing road-tune LAST (shorten final drive for touge). Diff accel/decel are CONTESTED across sources — start here, road-tune. Probable starting points.",
         "observed_build_589pi": "From player screenshot + screen recording: lateral G 1.11 (60mph) / 1.13 (120mph); 0-60 4.66s, 0-100 12.07s, top speed 163.3 mph; braking 60-0 122.0 ft, 100-0 310.7 ft; mech balance 0.44, aero balance 0.52, aero efficiency 0.848. Observed tune values: tire psi 27.0/27.0; alignment camber -2.0F/-1.5R, toe 0/0, caster 5.0; springs 838.0F/661.7R lb/in; ride height 7.2F/6.9R in; damping rebound 13.2F/9.4R, bump 8.3F/5.9R. VERIFIED slider range: front ride height 6.9 (min) - 8.1 (max) in — this chassis rides high and cannot be slammed, so 'lower ride height' means set to 6.9.",
@@ -99,118 +160,188 @@
       "share_codes": [],
       "why": "The Mk7 sibling of the golf-r-2021 beginner pick, ~2k cheaper (27k) and 10 PI lower stock. Same forgiving Haldex AWD hot-hatch platform — an ideal first tuning project. Its home is B class (cap ~600), where a grip-maxed build dominates road/touge.",
       "confidence": "verified",
-      "sources": ["forza-labs-db", "dexerto", "in-game-screenshot"]
+      "sources": [
+        "forza-labs-db",
+        "dexerto",
+        "in-game-screenshot"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "nsx-type-s-2022",
       "name": "Acura NSX Type S",
       "year": 2022,
       "class": "S1",
-      "disciplines": ["road", "touge_street"],
+      "disciplines": [
+        "road",
+        "touge_street"
+      ],
       "drivetrain_stock": "AWD (hybrid)",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
-      "price_credits": null,
-      "acquisition": "Autoshow (price unconfirmed)",
+      "price_credits": 193000,
+      "acquisition": "Autoshow ~193,000 cr (buy anytime). Also a story/showcase reward. No luck.",
       "tier": "A",
       "value_rating": 7,
-      "upgrade_priority": ["front grip", "brakes", "suspension", "weight reduction"],
+      "upgrade_priority": [
+        "front grip",
+        "brakes",
+        "suspension",
+        "weight reduction"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Strong S1 all-rounder; balanced hybrid AWD for technical road/touge.",
       "confidence": "probable",
-      "sources": ["games.gg"]
+      "sources": [
+        "games.gg"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "bmw-m5-2022",
       "name": "BMW M5",
       "year": 2022,
       "class": "S1",
-      "disciplines": ["road"],
+      "disciplines": [
+        "road"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
-      "price_credits": null,
-      "acquisition": "Autoshow (very accessible)",
+      "price_credits": 150000,
+      "acquisition": "Autoshow ~150,000 cr (the FH6 car is the M5 CS). Appears in the Wheelspin pool but is NOT wheelspin-exclusive.",
       "tier": "A",
       "value_rating": 7,
-      "upgrade_priority": ["weight reduction", "front grip", "brakes", "suspension"],
+      "upgrade_priority": [
+        "weight reduction",
+        "front grip",
+        "brakes",
+        "suspension"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Benefits enormously from an AWD tune; cheap and accessible from Autoshow — strong budget S1 entry.",
       "confidence": "probable",
-      "sources": ["egamersworld"]
+      "sources": [
+        "egamersworld"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "gemera-2024",
       "name": "Koenigsegg Gemera",
       "year": 2024,
       "class": "S2",
-      "disciplines": ["road"],
+      "disciplines": [
+        "road"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
       "price_credits": null,
-      "acquisition": "Car Pass exclusive (PAID DLC, added ~2026-05-28) — not buyable with credits alone",
+      "acquisition": "PAID DLC only: Car Pass ($29.99, added 2026-05-28) or $2.99 individually. Car Pass owners claim it free then can re-buy in Autoshow for cr; there is NO credits path without the DLC.",
       "tier": "S",
       "value_rating": 9,
-      "upgrade_priority": ["front grip", "brakes", "suspension", "weight reduction", "minimal power"],
+      "upgrade_priority": [
+        "front grip",
+        "brakes",
+        "suspension",
+        "weight reduction",
+        "minimal power"
+      ],
       "tune_baseline": {
-        "tire_psi_front": 28.0, "tire_psi_rear": 27.5,
-        "diff_accel": 55, "diff_decel": 15, "diff_center_rear": 75
+        "tire_psi_front": 28,
+        "tire_psi_rear": 27.5,
+        "diff_accel": 55,
+        "diff_decel": 15,
+        "diff_center_rear": 75
       },
       "share_codes": [],
       "why": "Best all-around S2 car in the current meta.",
       "confidence": "verified",
-      "sources": ["egamersworld", "games.gg"]
+      "sources": [
+        "egamersworld",
+        "games.gg"
+      ],
+      "acquisition_difficulty": "hard",
+      "easy_alternative": "For a free S2 road car, the Mercedes-AMG One (FH5 loyalty, free) — or any Autoshow S2."
     },
     {
       "id": "amg-one-2021",
       "name": "Mercedes-AMG One",
       "year": 2021,
       "class": "S2",
-      "disciplines": ["road"],
+      "disciplines": [
+        "road"
+      ],
       "drivetrain_stock": "AWD (hybrid)",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
       "price_credits": null,
-      "acquisition": "Autoshow / high-end (PI ~900 S2); often unlockable FREE if you have a Forza Horizon 5 save",
+      "acquisition": "FREE via FH5 Loyalty Reward — play Forza Horizon 5 on the same Xbox account and it auto-adds to your FH6 garage on launch. Deterministic & free (requires a qualifying FH5 save; not a credits purchase).",
       "tier": "S",
       "value_rating": 8,
-      "upgrade_priority": ["front grip", "brakes", "downforce", "suspension"],
+      "upgrade_priority": [
+        "front grip",
+        "brakes",
+        "downforce",
+        "suspension"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Consistently cited as the best overall / top S2 car. Note: the Ferrari FXX-K Evo is named by several independent sources as a co-best S2 do-everything pick worth comparing.",
       "confidence": "verified",
-      "sources": ["dexerto", "dotesports", "egamersworld"]
+      "sources": [
+        "dexerto",
+        "dotesports",
+        "egamersworld"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "gr-supra-2020",
       "name": "Toyota GR Supra",
       "year": 2020,
       "class": "A",
-      "disciplines": ["road", "touge_street"],
+      "disciplines": [
+        "road",
+        "touge_street"
+      ],
       "drivetrain_stock": "RWD",
       "recommended_drivetrain": "RWD or AWD swap",
       "power_split": "30/70 F/R (if AWD swapped)",
-      "price_credits": 42750,
-      "acquisition": "Autoshow (~42,750 cr, buy anytime) — ALSO free via Journal 'Discovery' Tier 4 reward. Confirmed by game8.",
+      "price_credits": 45000,
+      "acquisition": "Autoshow ~45,000 cr (buy anytime) — ALSO free via Journal 'Discovery' Tier 4. Confirmed by game8 + dexerto. (Base price is 45,000; the earlier 42,750 was a discounted/resale figure.)",
       "acquisition_difficulty": "easy",
       "tier": "S",
       "value_rating": 8,
-      "upgrade_priority": ["front grip", "brakes", "weight reduction", "suspension", "power"],
+      "upgrade_priority": [
+        "front grip",
+        "brakes",
+        "weight reduction",
+        "suspension",
+        "power"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Exceptionally versatile A-class all-rounder; clean baseline for road and touge. Cheap, RNG-free acquisition makes it an easy progression pick.",
       "confidence": "verified",
-      "sources": ["pcgamer", "games.gg", "game8"]
+      "sources": [
+        "pcgamer",
+        "games.gg",
+        "game8"
+      ]
     },
     {
       "id": "wrx-sti-2004",
       "name": "Subaru Impreza WRX STI",
       "year": 2004,
       "class": "A",
-      "disciplines": ["dirt_rally", "cross_country"],
+      "disciplines": [
+        "dirt_rally",
+        "cross_country"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
@@ -219,79 +350,126 @@
       "acquisition": "Autoshow",
       "tier": "S",
       "value_rating": 10,
-      "upgrade_priority": ["dirt/rally tires", "suspension (soften for dirt)", "raise ride height", "weight reduction", "power"],
-      "tune_baseline": { "note": "Soften springs/damping and raise ride height vs. road baseline for dirt compliance." },
+      "upgrade_priority": [
+        "dirt/rally tires",
+        "suspension (soften for dirt)",
+        "raise ride height",
+        "weight reduction",
+        "power"
+      ],
+      "tune_baseline": {
+        "note": "Soften springs/damping and raise ride height vs. road baseline for dirt compliance."
+      },
       "share_codes": [],
       "why": "Most consistent rally pick across multiple classes and, at 30,000 cr, arguably the best value car in the entire game for dirt/rally.",
       "confidence": "verified",
-      "sources": ["dexerto", "gamingpromax", "grindnstrat"]
+      "sources": [
+        "dexerto",
+        "gamingpromax",
+        "grindnstrat"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "impreza-22b-sti",
       "name": "Subaru Impreza 22B STi",
       "year": 1998,
       "class": "A",
-      "disciplines": ["dirt_rally"],
+      "disciplines": [
+        "dirt_rally"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
-      "price_credits": null,
-      "acquisition": "Autoshow (price unconfirmed)",
+      "price_credits": 86000,
+      "acquisition": "Autoshow ~86,000 cr (81,700 with VIP). The skill-farm car — cheap to re-buy repeatedly.",
       "tier": "S",
       "value_rating": 8,
-      "upgrade_priority": ["dirt/rally tires", "soften suspension", "raise ride height", "power"],
+      "upgrade_priority": [
+        "dirt/rally tires",
+        "soften suspension",
+        "raise ride height",
+        "power"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Frequently called the best A-class rally car — but this 'best overall' crown comes only from a cluster of SEO tier-lists with identical phrasing; no independent community source (game8/forums) corroborates it yet. Strong pick, unverified superlative.",
       "confidence": "probable",
-      "sources": ["gamingpromax", "games.gg"]
+      "sources": [
+        "gamingpromax",
+        "games.gg"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "lancer-evo-2004",
       "name": "Mitsubishi Lancer Evolution",
       "year": 2004,
       "class": "A",
-      "disciplines": ["dirt_rally"],
+      "disciplines": [
+        "dirt_rally"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
-      "price_credits": null,
-      "acquisition": "Autoshow",
+      "price_credits": 30000,
+      "acquisition": "Autoshow ~30,000 cr (buy anytime). Also in the Deluxe/Premium Welcome Pack.",
       "tier": "A",
       "value_rating": 8,
-      "upgrade_priority": ["dirt/rally tires", "soften suspension", "raise ride height", "power"],
+      "upgrade_priority": [
+        "dirt/rally tires",
+        "soften suspension",
+        "raise ride height",
+        "power"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Nearly identical role to the WRX STI with slightly higher stats across the board.",
       "confidence": "verified",
-      "sources": ["dexerto", "gamingpromax"]
+      "sources": [
+        "dexerto",
+        "gamingpromax"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "focus-rs",
       "name": "Ford Focus RS",
       "year": 2017,
       "class": "A",
-      "disciplines": ["dirt_rally"],
+      "disciplines": [
+        "dirt_rally"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "30/70 F/R",
-      "price_credits": null,
-      "acquisition": "Autoshow",
+      "price_credits": 37000,
+      "acquisition": "Autoshow ~37,000 cr (buy anytime). Also a free Car Collection Tier-2 / garage reward.",
       "tier": "A",
       "value_rating": 7,
-      "upgrade_priority": ["dirt/rally tires", "suspension", "power"],
+      "upgrade_priority": [
+        "dirt/rally tires",
+        "suspension",
+        "power"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Scrappy default dirt choice — high speed, acceleration, and off-road handling.",
       "confidence": "probable",
-      "sources": ["dexerto"]
+      "sources": [
+        "dexerto"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "brz-fe-2022",
       "name": "Subaru BRZ Forza Edition",
       "year": 2022,
       "class": "A",
-      "disciplines": ["cross_country", "road"],
+      "disciplines": [
+        "cross_country",
+        "road"
+      ],
       "drivetrain_stock": "RWD",
       "recommended_drivetrain": "AWD swap for cross country",
       "power_split": "30/70 F/R",
@@ -299,106 +477,168 @@
       "acquisition": "Aftermarket Car at Sotoyama Ski Resort",
       "tier": "A",
       "value_rating": 7,
-      "upgrade_priority": ["AWD swap", "all-terrain/rally tires", "raise ride height", "suspension"],
+      "upgrade_priority": [
+        "AWD swap",
+        "all-terrain/rally tires",
+        "raise ride height",
+        "suspension"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Handles both off-road and pavement at A-Class — flexible cross-country pick.",
       "confidence": "probable",
-      "sources": ["gamingpromax"]
+      "sources": [
+        "gamingpromax"
+      ],
+      "acquisition_difficulty": "medium"
     },
     {
       "id": "viper-fe",
       "name": "Dodge Viper Forza Edition",
-      "year": 2017,
+      "year": 1999,
       "class": "S1",
-      "disciplines": ["cross_country"],
+      "disciplines": [
+        "cross_country"
+      ],
       "drivetrain_stock": "RWD",
       "recommended_drivetrain": "AWD swap",
       "power_split": "30/70 F/R",
       "price_credits": null,
-      "acquisition": "Reward/Wheelspin (unconfirmed)",
+      "acquisition": "VIP Membership DLC only (~$19.99, or bundled in the Premium Edition); once VIP is owned, claim via My Horizon > Gifts. NOT Wheelspin (corrects skycoach). In-game value ~500,000 cr. NOTE: this is the 1999 Viper GTS ACR FE, not a 2017.",
       "tier": "S",
       "value_rating": 8,
-      "upgrade_priority": ["AWD swap", "off-road tires", "raise ride height", "suspension"],
+      "upgrade_priority": [
+        "AWD swap",
+        "off-road tires",
+        "raise ride height",
+        "suspension"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Strong S1+ off-road pick. NOTE: game8's off-road guide ranks the 1999 Dodge Viper GTS ACR Forza Edition (9.9 off-road, VIP/Premium-gated) as the best-overall cross-country car; this entry is the right idea but the ACR FE is the true top pick if you have VIP.",
       "confidence": "probable",
-      "sources": ["game8", "gamingpromax"]
+      "sources": [
+        "game8",
+        "gamingpromax"
+      ],
+      "acquisition_difficulty": "hard",
+      "easy_alternative": "For cross-country without paying: Subaru BRZ FE (aftermarket spawn at Sotoyama Ski Resort, medium), or an Autoshow off-road pick."
     },
     {
       "id": "can-am-maverick-2018",
       "name": "Can-Am Maverick X RS Turbo R",
       "year": 2018,
       "class": "B",
-      "disciplines": ["cross_country"],
+      "disciplines": [
+        "cross_country"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD",
       "power_split": "AWD",
-      "price_credits": null,
-      "acquisition": "Autoshow",
+      "price_credits": 16000,
+      "acquisition": "Autoshow ~16,000 cr (base roster; not on the rare/Wheelspin list). Exact price single-sourced.",
       "tier": "S",
       "value_rating": 8,
-      "upgrade_priority": ["minimal — strong stock off-road", "tires", "suspension"],
+      "upgrade_priority": [
+        "minimal — strong stock off-road",
+        "tires",
+        "suspension"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "9.8 off-road stat — nearly impossible to beat on rough terrain in B-Class.",
       "confidence": "verified",
-      "sources": ["game8", "gamingpromax"]
+      "sources": [
+        "game8",
+        "gamingpromax"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "f450-super-duty",
       "name": "Ford F-450 Super Duty DRW",
       "year": 2020,
       "class": "D-B",
-      "disciplines": ["cross_country"],
+      "disciplines": [
+        "cross_country"
+      ],
       "drivetrain_stock": "AWD/4WD",
       "recommended_drivetrain": "4WD",
       "power_split": "AWD",
-      "price_credits": null,
-      "acquisition": "Autoshow",
+      "price_credits": 65000,
+      "acquisition": "Autoshow ~65,000 cr (standard DRW Platinum). NOTE: the F-450 FORZA EDITION is a different car and is Wheelspin-only (hard) — don't conflate.",
       "tier": "A",
       "value_rating": 7,
-      "upgrade_priority": ["minimal tuning needed", "tires"],
+      "upgrade_priority": [
+        "minimal tuning needed",
+        "tires"
+      ],
       "tune_baseline": null,
       "share_codes": [],
       "why": "Best D-through-B cross-country pick — heavy-duty clearance and off-road fundamentals with minimal tuning investment.",
       "confidence": "probable",
-      "sources": ["gamingpromax"]
+      "sources": [
+        "gamingpromax"
+      ],
+      "acquisition_difficulty": "easy"
     },
     {
       "id": "gtr-black-fe-2012",
       "name": "Nissan GT-R Black Edition Forza Edition",
       "year": 2012,
       "class": "S1",
-      "disciplines": ["drag"],
+      "disciplines": [
+        "drag"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD (or RWD swap for max-traction drag spec)",
       "power_split": "drag-specific",
       "price_credits": null,
-      "acquisition": "Wheelspin per skycoach — but NEEDS RE-VERIFY: skycoach's acquisition labels proved unreliable (it wrongly called the Miata FE 'Wheelspin only' when it's actually an aftermarket-shop spawn). Check whether this GT-R FE also has a deterministic path (aftermarket spawn / Playlist) before trusting 'Wheelspin'.",
-      "acquisition_difficulty": "hard-unconfirmed",
+      "acquisition": "Wheelspin / Super Wheelspin RNG only (also findable on the Auction House). CONFIRMED hard across game8/MitchCactus/allthings.how — no deterministic path (skycoach was RIGHT on this one). In-game value ~750,000 cr.",
+      "acquisition_difficulty": "hard",
       "tier": "S",
       "value_rating": 8,
-      "upgrade_priority": ["max power", "drag tires", "drag-specific gearing", "weight reduction"],
-      "tune_baseline": { "note": "Drag builds use locked launch diff + dedicated short gearing; road-tune the launch." },
+      "upgrade_priority": [
+        "max power",
+        "drag tires",
+        "drag-specific gearing",
+        "weight reduction"
+      ],
+      "tune_baseline": {
+        "note": "Drag builds use locked launch diff + dedicated short gearing; road-tune the launch."
+      },
       "share_codes": [
-        { "code": "514 752 751", "purpose": "Top GT-R FE drag tune per CODMunity community DB", "confidence": "probable" }
+        {
+          "code": "514 752 751",
+          "purpose": "Top GT-R FE drag tune per CODMunity community DB",
+          "confidence": "probable"
+        }
       ],
       "share_codes_retracted": {
-        "codes": ["113 601 876", "109 333 743", "934 309 906"],
+        "codes": [
+          "113 601 876",
+          "109 333 743",
+          "934 309 906"
+        ],
         "reason": "These (from a TikTok aggregator) could not be found in ANY independent source; cited times (6.197s/6.083s) don't match community builds (~6.05s). Treat as unverified/likely fabricated. Verify any code in-game before trusting."
       },
       "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game.",
       "confidence": "probable",
-      "sources": ["codmunity-drag", "forza-fandom-gtr", "forums-forza-tunes"]
+      "sources": [
+        "codmunity-drag",
+        "forza-fandom-gtr",
+        "forums-forza-tunes"
+      ],
+      "easy_alternative": "The standard non-FE 2012 Nissan GT-R Black Edition — Autoshow ~80,000 cr — is a near-identical S2 drag platform (the FE only adds a Speed-Skills star)."
     },
     {
       "id": "miata-fe-1994",
       "name": "Mazda MX-5 Miata Forza Edition",
       "year": 1994,
       "class": "S2",
-      "disciplines": ["drag"],
+      "disciplines": [
+        "drag"
+      ],
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD (drivetrain 🟡 — one source says RWD)",
       "power_split": "drag-specific",
@@ -407,12 +647,23 @@
       "acquisition_difficulty": "medium",
       "tier": "S",
       "value_rating": 8,
-      "upgrade_priority": ["comes drag-ready (S2 850 preset + drag tires)", "tune gearing to strip", "diff/launch"],
-      "tune_baseline": { "note": "Ships with an S2 850 drag preset, drag tires, widebody, Viper-derived twin-turbo V10, + a Skills boost. Drag-tune per the drag guide (gearing first, high accel diff, low rear psi)." },
+      "upgrade_priority": [
+        "comes drag-ready (S2 850 preset + drag tires)",
+        "tune gearing to strip",
+        "diff/launch"
+      ],
+      "tune_baseline": {
+        "note": "Ships with an S2 850 drag preset, drag tires, widebody, Viper-derived twin-turbo V10, + a Skills boost. Drag-tune per the drag guide (gearing first, high accel diff, low rear psi)."
+      },
       "share_codes": [],
       "why": "Widely rated the best drag car in FH6 (pre-fitted drag tires, elite launch/accel). Crucially, its acquisition is MEDIUM not hard: a targeted aftermarket-shop reload-buy, not Wheelspin RNG — corrected 2026-07-10 after a player flagged skycoach's wrong 'Wheelspin only' label.",
       "confidence": "verified",
-      "sources": ["game8", "gamesradar-drag", "meinmmo-miata", "gamingpromax"]
+      "sources": [
+        "game8",
+        "gamesradar-drag",
+        "meinmmo-miata",
+        "gamingpromax"
+      ]
     }
   ]
 }

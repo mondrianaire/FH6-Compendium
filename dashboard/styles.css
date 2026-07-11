@@ -94,6 +94,10 @@ td.price { font-variant-numeric: tabular-nums; }
 .var-line .rng { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .var-line .poles { color: var(--muted); font-size: 11px; margin-top: 2px; }
 .flag { font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-left: 8px; background: var(--bg3); color: var(--accent); }
+.acq { font-size: 12px; font-weight: 600; }
+.acq-easy { color: var(--accent); }
+.acq-medium { color: var(--warn); }
+.acq-hard { color: #f0883e; }
 .flag.tab-flag { background: var(--bg3); color: var(--muted); }
 .varcat .gating { color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
 .varcat .gating strong { color: var(--txt); }

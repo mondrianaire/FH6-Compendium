@@ -743,6 +743,7 @@
       "3. In-game Tune Browser filtered to the correct SURFACE (never a raw car search — that surfaces drag tunes)."
     ],
     "verify_loop": "Your testing is what promotes 🟡 -> ✅ (or gets a dead/❌ code pulled). Report back on any code you load.",
-    "codes_are_car_specific": "A share code ONLY loads on the exact car it was made for (you browse tunes for the car you currently have). So a HARD car's tune code is useless unless you own that car — and its EASY ALTERNATIVE needs its OWN tune (in-game, filtered to the right Surface), never the hard car's code. Rule: never point a player at a code for a car they can't get."
+    "codes_are_car_specific": "A share code ONLY loads on the exact car it was made for (you browse tunes for the car you currently have). So a HARD car's tune code is useless unless you own that car — and its EASY ALTERNATIVE needs its OWN tune (in-game, filtered to the right Surface), never the hard car's code. Rule: never point a player at a code for a car they can't get.",
+    "by_discipline": "Sourcing depends on the discipline CONVERGENCE (see tuning-templates.json). HIGH-convergence disciplines (drag) -> APPLY THE DISCIPLINE TEMPLATE, do not hunt per-car codes. LOW-convergence (road/touge) -> download the fastest clean-lap tune; bespoke matters. MEDIUM (dirt/cross-country) -> template + in-game Surface filter."
   }
 }

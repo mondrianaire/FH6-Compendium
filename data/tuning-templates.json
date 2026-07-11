@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0.0",
+  "captured": "2026-07-10",
+  "note": "Per-DISCIPLINE tuning models. Each captures the variables that actually determine performance, a near-formula baseline (the 'template'), sub-variants, and HOW MUCH bespoke tuning matters (convergence). This is the layer between tuning-variables.json (the UI structure) and per-car tunes: for high-convergence disciplines (drag) you APPLY THE TEMPLATE instead of hunting per-car codes; for low-convergence ones (circuit) bespoke tunes + driver line dominate.",
+  "convergence_scale": {
+    "high": "Cars are nearly FLAT within a class (fractions of a second). The tune is a near-solved formula; car choice barely matters. -> APPLY THE TEMPLATE; don't code-hunt.",
+    "medium": "Cars cluster but setup + car traits (traction, compliance) create real gaps. Template gets you ~80%; refine for the car/route.",
+    "low": "Wide spread; bespoke tune + racing line + car choice all matter (e.g. a 27s circuit-board spread). -> download the fastest clean-lap tune; the template is only a starting point."
+  },
+  "templates": [
+    {
+      "id": "drag",
+      "discipline": "drag",
+      "label": "Drag (straight line)",
+      "convergence": "high",
+      "convergence_note": "Within a class the field is FLAT — fractions of a second. PI caps power-to-weight and the tune is a formula, so car choice barely matters. NOT flat across classes, and strip length shifts the winner.",
+      "tune_sourcing": "APPLY THIS TEMPLATE — per-car drag codes barely differ; don't waste time hunting them (that's also where fake TikTok codes live). Just apply the formula to any good-launching car.",
+      "key_variables": [
+        "1. Gearing matched to the strip — THE lever (tune on-track)",
+        "2. Launch traction: drivetrain + weight transfer (AWD hooks best off the line)",
+        "3. Power-to-weight — but PI-capped, so cars cluster; pick a PI-efficient chassis",
+        "4. Strip length (1/8 vs 1/4 vs 1-mile) — decides launch-vs-top-speed bias"
+      ],
+      "template": {
+        "gearing": "Tune on-track: SHORT final drive for 1/8-mile, LONGER for the 1-mile; hit the rev limiter right at the line. Biggest single lever.",
+        "differential": "High accel lock (AWD ~100 F / 100 R, center ~55-60% rear); low decel lock.",
+        "tires": "Rear ~15-20 psi (launch contact patch), Front ~45-50 psi (cut rolling drag). Drag compound.",
+        "aero": "MINIMUM both ends (toward Speed) — downforce is pure drag in a straight line.",
+        "alignment": "Minimal: low camber (~-0.5), toe 0.",
+        "springs_ride_damping": "Stiff / low / stiff — not a meaningful drag lever.",
+        "brakes": "Irrelevant to the run.",
+        "launch": "Rev to peak torque, feed throttle to balance bog-vs-spin. AWD lets you be aggressive."
+      },
+      "variants": [
+        { "name": "1/8 mile", "deltas": "Shortest gearing, launch-max; AWD dominates (Dodge Demon, Miata FE)." },
+        { "name": "1/4 mile", "deltas": "Balanced; tuned Jesko / Sian trade wins with the FE cars." },
+        { "name": "1-mile airstrip", "deltas": "Longest gearing, top-speed king (Hennessey Venom F5), aero-min; RWD fine." }
+      ],
+      "car_selection": "Pick by launch + PI-efficiency, not raw name. Best: Miata FE (aftermarket spawn, medium) and GT-R Black FE (Wheelspin, hard). AWD for short strips; light/RWD + aero-min for the mile.",
+      "confidence": "verified",
+      "sources": ["bossdown-drag", "gamesradar-drag", "codmunity-drag", "in-game-recording"]
+    },
+    {
+      "id": "road",
+      "discipline": "road",
+      "label": "Road / Circuit",
+      "convergence": "low",
+      "convergence_note": "Wide spread — grip, braking, rotation, aero balance, gearing and the DRIVER's line all interact. On a soft board a clean lap in a competent car beats the field; on a solved board the bespoke tune + line decide it.",
+      "tune_sourcing": "DOWNLOAD the fastest clean-lap tune from the Rivals leaderboard, or in-game Tune Browser > Surface: ROAD. Bespoke tunes genuinely matter here — the template is only a starting point.",
+      "key_variables": [
+        "1. Racing line / clean laps (driver — often the biggest gap of all)",
+        "2. Grip: tire compound + pressure",
+        "3. Braking stability + corner entry",
+        "4. Corner-exit traction (diff + deployable power)",
+        "5. Rotation (ARB balance, mechanical balance ~0.55-0.65)",
+        "6. Aero balance (~0.40-0.50) and gearing matched to the track"
+      ],
+      "template": {
+        "tires": "~28 F / 27 R psi cold (target 31-33 hot). Road Race compound or Slicks.",
+        "alignment": "Camber ~-1.2 F / -1.0 R; caster 6.0-6.5; toe 0.",
+        "anti_roll_bars": "Stiffer REAR than front to rotate (fights the usual understeer); tune toward Mech. Balance ~0.60.",
+        "springs_ride_height": "Moderate-stiff for tarmac; ride height low (to the slider min for the car).",
+        "damping": "Rebound ~1.5-2x bump.",
+        "brakes": "~52% front, 100% pressure.",
+        "differential": "Accel ~40-60% (deployable exit), center ~70% rear on AWD; NOT locked.",
+        "aero": "Add downforce; target Aero Balance ~0.40-0.50.",
+        "gearing": "Tune to the track — short final drive for technical, longer for high-speed."
+      },
+      "variants": [
+        { "name": "Technical / street circuit", "deltas": "More downforce, SHORT gearing, grip-max. UNDER-PI can win (lighter/more controllable) — see Electric Town." },
+        { "name": "High-speed circuit", "deltas": "Less aero, LONGER gearing, top-end matters more." }
+      ],
+      "car_selection": "Car choice + bespoke tune both matter. But read the board first: a soft/uncontested board makes the car nearly irrelevant vs a clean lap.",
+      "confidence": "probable",
+      "sources": ["forzafire-fh6-handling", "gamingpromax-fh6-balance", "in-game-leaderboard-electrictown"]
+    },
+    {
+      "id": "touge_street",
+      "discipline": "touge_street",
+      "label": "Touge / Street",
+      "convergence": "low",
+      "convergence_note": "Like Road but tighter and more technical, with walls close. Rewards rotation, braking, and corner-exit over top speed even more than circuit.",
+      "tune_sourcing": "Leaderboard-download or in-game Surface: Road/Street. Bespoke tunes matter.",
+      "key_variables": [
+        "1. Line + braking points (driver)",
+        "2. Turn-in / rotation (caster, ARB rear bias)",
+        "3. Corner-exit traction (diff)",
+        "4. Grip, and SHORT gearing for the hairpins"
+      ],
+      "template": {
+        "base": "= the ROAD template, tightened:",
+        "gearing": "SHORTER final drive (hairpins > straights).",
+        "anti_roll_bars": "Slightly more rear bias for sharper rotation.",
+        "aero": "More downforce; top speed is nearly irrelevant.",
+        "alignment": "Caster toward max for turn-in."
+      },
+      "variants": [
+        { "name": "Downhill", "deltas": "Braking stability paramount; slightly forward brake bias." },
+        { "name": "Uphill/mixed", "deltas": "Corner-exit traction and power delivery matter more." }
+      ],
+      "car_selection": "Nimble AWD (forgiving) or a light RWD you can rotate. Same as Road picks.",
+      "confidence": "probable",
+      "sources": ["forzafire-fh6-handling", "apexspeedcraft-fh6"]
+    },
+    {
+      "id": "dirt_rally",
+      "discipline": "dirt_rally",
+      "label": "Dirt / Rally",
+      "convergence": "medium",
+      "convergence_note": "Cars cluster but drivetrain (AWD) and suspension compliance create real gaps. Template gets you most of the way; refine for the route roughness.",
+      "tune_sourcing": "In-game Tune Browser > Surface: Dirt / Rally, or leaderboard-download.",
+      "key_variables": [
+        "1. AWD traction on a loose surface",
+        "2. Suspension COMPLIANCE (soft springs + damping — soak bumps, keep tires planted)",
+        "3. Ride height raised (avoid bottoming)",
+        "4. Rally tires; diff decel lock for off-throttle stability"
+      ],
+      "template": {
+        "tires": "Rally compound; lower psi (~25-28).",
+        "springs": "Soft.",
+        "ride_height": "Raised (well above the road min).",
+        "damping": "Soft (compliance over sharpness).",
+        "anti_roll_bars": "Soft both ends.",
+        "differential": "Higher DECEL lock for stability; moderate accel; rear-ish center (AWD).",
+        "aero": "Low.",
+        "alignment": "Less negative camber than road; toe ~0.",
+        "gearing": "For the route; usually shorter than road."
+      },
+      "variants": [
+        { "name": "Smooth dirt", "deltas": "Firmer than rough; a touch lower ride height." },
+        { "name": "Rough rally", "deltas": "Softest suspension, highest ride height, most compliance." }
+      ],
+      "car_selection": "AWD dominates. Compliance and traction beat outright grip. Focus RS / Evo / STI / Golf R class.",
+      "confidence": "probable",
+      "sources": ["dexerto", "grindnstrat", "forzafire-fh6-handling"]
+    },
+    {
+      "id": "cross_country",
+      "discipline": "cross_country",
+      "label": "Cross Country",
+      "convergence": "medium",
+      "convergence_note": "Roughest surface with jumps. The car's off-road stat and durability matter as much as tune; AWD is near-mandatory.",
+      "tune_sourcing": "In-game Tune Browser > Surface: Cross Country, or leaderboard-download.",
+      "key_variables": [
+        "1. AWD + high off-road stat car",
+        "2. Max suspension travel / softest damping (land jumps, keep contact)",
+        "3. Max ride height (clear obstacles)",
+        "4. Off-road tires; durability"
+      ],
+      "template": {
+        "base": "= the DIRT template, pushed further:",
+        "ride_height": "Toward MAX.",
+        "springs_damping": "Softest that doesn't bottom or wallow.",
+        "tires": "Off-road compound.",
+        "differential": "Traction-biased with decel stability for landings.",
+        "aero": "Minimal / irrelevant."
+      },
+      "variants": [
+        { "name": "Open desert", "deltas": "Top speed + stability over jumps." },
+        { "name": "Technical trail", "deltas": "Compliance + low-speed traction." }
+      ],
+      "car_selection": "High off-road-stat AWD: Can-Am Maverick (B), the trucks, Viper GTS ACR FE / BRZ FE (A). Off-road stat > power here.",
+      "confidence": "probable",
+      "sources": ["gamingpromax", "game8", "dexerto"]
+    }
+  ]
+}

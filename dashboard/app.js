@@ -260,6 +260,42 @@
       </div>`;
   }
 
+  // ---- tuning templates ----
+  function buildTemplates() {
+    const tt = DB.tuningTemplates;
+    if (!tt) return;
+    const host = document.getElementById("templatesContent");
+    const convClass = (c) => c === "high" ? "conf-verified" : c === "low" ? "conf-contested" : "conf-probable";
+    const convLabel = (c) => c === "high" ? "🟢 high convergence (apply template)" : c === "low" ? "🔴 low (bespoke tune + line matter)" : "🟡 medium";
+    const cards = tt.templates.map((t) => {
+      const tmpl = Object.entries(t.template || {}).map(([k, v]) =>
+        `<div class="var-line"><span><strong>${k.replace(/_/g, " ")}</strong></span><span class="rng" style="max-width:62%;white-space:normal;text-align:right">${v}</span></div>`).join("");
+      const vars = (t.key_variables || []).map((v) => `<li>${v}</li>`).join("");
+      const variants = (t.variants || []).map((v) => `<li><strong>${v.name}:</strong> ${v.deltas}</li>`).join("");
+      return `
+      <div class="block">
+        <div class="card-row" style="margin-top:0">
+          <h3 style="margin:0">${t.label}</h3>
+          <span class="conf ${convClass(t.convergence)}">${convLabel(t.convergence)}</span>
+        </div>
+        <p class="why">${t.convergence_note}</p>
+        <p class="fh6note"><strong>Getting a tune:</strong> ${t.tune_sourcing}</p>
+        <h4 style="margin:12px 0 4px">What actually matters</h4>
+        <ol class="why" style="margin:0;padding-left:18px">${vars}</ol>
+        <h4 style="margin:12px 0 4px">Template (baseline settings)</h4>
+        ${tmpl}
+        ${variants ? `<h4 style="margin:12px 0 4px">Variants</h4><ul class="why" style="margin:0;padding-left:18px">${variants}</ul>` : ""}
+        <p class="why" style="margin-top:10px"><strong>Car choice:</strong> ${t.car_selection}</p>
+        <p class="conf ${confClass(t.confidence)}" style="font-size:12px">${confLabel(t.confidence)}</p>
+      </div>`;
+    }).join("");
+    const scale = `<div class="block"><h3>Convergence — how much the tune/car matters by discipline</h3>
+      <p class="why">🟢 <strong>high:</strong> ${tt.convergence_scale.high}</p>
+      <p class="why">🟡 <strong>medium:</strong> ${tt.convergence_scale.medium}</p>
+      <p class="why">🔴 <strong>low:</strong> ${tt.convergence_scale.low}</p></div>`;
+    host.innerHTML = `<p class="hint">${tt.note}</p>` + scale + cards;
+  }
+
   // ---- rivals ----
   function buildRivals() {
     const rt = DB.rivalsTracks;
@@ -379,5 +415,6 @@
   buildTable();
   buildVariables();
   buildStrategy();
+  buildTemplates();
   buildRivals();
 })();

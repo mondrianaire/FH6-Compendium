@@ -2,6 +2,13 @@
   "schema_version": "1.0.0",
   "captured": "2026-06-07",
   "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift. VERIFIED 2026-06-08 against independent databases (game8, Fandom, kudosprime, CODMunity) and forums (forums.forza.net, GTPlanet). Key fix: GT-R NISMO price corrected 270k→220k. Many SEO tier-lists plagiarize each other — superlatives without independent backing were downgraded. Confidence: verified = multiple INDEPENDENT sources; probable = single/early-consensus; contested = sources disagree.",
+  "meta_recheck": {
+    "date": "2026-07-11",
+    "verdict": "Dataset re-verified ~5 weeks after capture. STILL VALID for its purpose (progression picks: what to buy, for which discipline, and how hard to get) with the per-car annotations below. Prices/acquisition unchanged — no patch touched car stats or the economy of buying cars.",
+    "patch_audit": "PRIMARY (official release notes read 2026-07-11): v375.327 Jun 15 = drag-tire CORNERING nerf only (Playground: 'Drag times and Drag Leaderboards will be unaffected') + XP curve; v379.939 Jun 18 = Eliminator credits-exploit fix + Auto-Drive reward rebalance (economy, not cars); v382.893 Jun 23 = stability + badge fixes. NO July patch exists as of 2026-07-11. No car stats, prices, or acquisition paths were changed by any patch since capture.",
+    "two_metas_note": "There are now TWO distinct 'metas'. (1) SEO-guide consensus (grindout 2026-07-07 still names GT-R NISMO/S1, GR Supra '20/A, AMG One/S2, Golf R '21/B) — this matches our picks and is the right frame for PROGRESSION buys. (2) LEADERBOARD usage (forza.guide, Rivals-derived, updated 2026-06-23, cross-validated against our own 2026-07-10 Electric Town screenshot): top boards are dominated by lightweight kei cars (Honda Beat '91 is the #1 most-picked car in A, B and D road AND A, B dirt) and hard-to-get FE/race cars (Mazda Furai, 787B, LFA FE, Exige WTAC). Where a pick diverges from leaderboard reality it now carries a leaderboard_meta note. For tryhard Rivals grinding, read the leaderboard_meta field; for value progression, the tier/value ratings stand.",
+    "series2_note": "Series 2 'Horizon Decades' (Jun 18-Jul 16) added ~10-14 cars (911 Turbo S Leichtbau, Exige Cup 430, Cerbera Speed 12, Saleen S7 LM, Rallye Golf '89, ...). None crack current tier lists' top picks yet; they are limited-time Playlist rewards (acquisition_difficulty hard once their week passes). Not added as picks — collect them while available if convenient."
+  },
   "pi_classes": {
     "D": "100-400",
     "C": "401-500",
@@ -61,6 +68,8 @@
       },
       "share_codes": [],
       "why": "Unmatched AWD launch in S1; menace in Touge and street events. 600+ hp means AWD is needed to avoid wheelspin. Light tuning pushes it into higher classes. Free path via Collection Journal makes it the best-value S1 buy.",
+      "use_case": "S1 road & touge all-rounder — forgiving AWD, free via Journal; the default S1 progression buy",
+      "leaderboard_meta": "2026-07-11 check: SEO lists (grindout 7/7) still crown it S1 — but it is ABSENT from forza.guide's S1 road top-15 (leaderboard usage); it shows up at #14 in S2 instead (players build it INTO S2). For S1 Rivals tryharding the boards favor Acura NSX '22 / Viper '08 / 911 GT3 RS '23. Still a great progression buy.",
       "confidence": "verified",
       "sources": [
         "pcgamer",
@@ -108,6 +117,8 @@
       },
       "share_codes": [],
       "why": "The best AWD all-rounder in B-class and the ideal FIRST tuning project for a new player: cheap (29k), AWD so it's forgiving and hard to spin, and the natural in-game cousin of a real Golf GTI. Learn the whole tuning menu on this before touching faster cars.",
+      "use_case": "First tuning project / forgiving B-class daily — learn the tune menu here",
+      "leaderboard_meta": "2026-07-11 check: still a grindout (7/7) B-class S-tier pick. Not in forza.guide's B road top-15 (that board is kei-car territory: Honda Beat '91 #1, Civic '97 #2) — expected; this is a learning/progression pick, not a board-chaser.",
       "confidence": "verified",
       "sources": [
         "game8-db",
@@ -159,6 +170,7 @@
       },
       "share_codes": [],
       "why": "The Mk7 sibling of the golf-r-2021 beginner pick, ~2k cheaper (27k) and 10 PI lower stock. Same forgiving Haldex AWD hot-hatch platform — an ideal first tuning project. Its home is B class (cap ~600), where a grip-maxed build dominates road/touge.",
+      "use_case": "Budget first tuning project (the user's actual current car) — B-class road/touge/dirt",
       "confidence": "verified",
       "sources": [
         "forza-labs-db",
@@ -191,10 +203,13 @@
       ],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Strong S1 all-rounder; balanced hybrid AWD for technical road/touge.",
-      "confidence": "probable",
+      "why": "Strong S1 all-rounder; balanced hybrid AWD for technical road/touge. UPGRADED 2026-07-11: forza.guide (Rivals-leaderboard-derived) ranks it the #1 most-picked S1 road car — actual board usage, not SEO opinion. This is now the strongest-evidenced S1 road pick in the DB.",
+      "use_case": "The real S1 road meta car per leaderboard usage — technical circuits and touge",
+      "leaderboard_meta": "2026-07-11: #1 most-picked S1 car across all road tracks on forza.guide (updated 6/23), appearing on nearly every circuit's S1 board. Confidence upgraded probable→verified on this basis (independent of the single SEO source).",
+      "confidence": "verified",
       "sources": [
-        "games.gg"
+        "games.gg",
+        "forza-guide-meta"
       ],
       "acquisition_difficulty": "easy"
     },
@@ -222,6 +237,8 @@
       "tune_baseline": null,
       "share_codes": [],
       "why": "Benefits enormously from an AWD tune; cheap and accessible from Autoshow — strong budget S1 entry.",
+      "use_case": "Budget S1 road entry — comfortable AWD sedan, not a board-chaser",
+      "leaderboard_meta": "2026-07-11: absent from all forza.guide leaderboard lists — zero top-board usage. Keep as a comfort/budget buy only; if you want S1 board pace, the NSX '22 costs ~43k more and IS the meta.",
       "confidence": "probable",
       "sources": [
         "egamersworld"
@@ -259,6 +276,8 @@
       },
       "share_codes": [],
       "why": "Best all-around S2 car in the current meta.",
+      "use_case": "Paid-DLC S2 speed monster — best on long high-speed routes (Colossus, Coastline)",
+      "leaderboard_meta": "2026-07-11: leaderboard-VALIDATED for its niche — #1 S2 on The Colossus and Coastline Sprint (forza.guide 6/23). On tight S2 circuits the boards instead run Mazda Furai / 787B / LFA FE (all hard-to-get FE/race cars). If you own the Car Pass, this is the S2 long-track pick.",
       "confidence": "verified",
       "sources": [
         "egamersworld",
@@ -291,6 +310,8 @@
       "tune_baseline": null,
       "share_codes": [],
       "why": "Consistently cited as the best overall / top S2 car. Note: the Ferrari FXX-K Evo is named by several independent sources as a co-best S2 do-everything pick worth comparing.",
+      "use_case": "Free S2 flagship (FH5 loyalty) — the no-spend answer to S2 road",
+      "leaderboard_meta": "2026-07-11: grindout (7/7) still names it S2 king, but its forza.guide leaderboard presence is MARGINAL (appears on Shikisai/Kawazu boards only). S2 boards are ruled by Furai/787B/LFA FE — all wheelspin/rare cars. Verdict: still the best FREE S2 car; not the outright S2 meta.",
       "confidence": "verified",
       "sources": [
         "dexerto",
@@ -326,6 +347,8 @@
       "tune_baseline": null,
       "share_codes": [],
       "why": "Exceptionally versatile A-class all-rounder; clean baseline for road and touge. Cheap, RNG-free acquisition makes it an easy progression pick.",
+      "use_case": "A-class road/touge value pick — cheap, free via Journal, tunes for anything",
+      "leaderboard_meta": "2026-07-11: SEO lists (timesaver 6/10, grindout 7/7) still crown it best A-class. Leaderboard picture is weaker: NOT in forza.guide's A road all-tracks top-15 (that list runs Ford GT '05 #1, Honda Beat '91 #2); it appears on the Electric Town A board only — which matches our own 7/10 screenshot (Supra x3 in the clean cluster there). Verdict: top VALUE pick, mid on boards.",
       "confidence": "verified",
       "sources": [
         "pcgamer",
@@ -359,7 +382,7 @@
       "price_note": "30,000 cr verified across game8, Fandom, and kudosprime (independent databases). Stock car is a B-class base; the A-class listing here reflects a typical dirt build, not its stock PI.",
       "acquisition": "Autoshow",
       "tier": "S",
-      "value_rating": 10,
+      "value_rating": 9,
       "upgrade_priority": [
         "dirt/rally tires",
         "suspension (soften for dirt)",
@@ -371,8 +394,10 @@
         "note": "Soften springs/damping and raise ride height vs. road baseline for dirt compliance."
       },
       "share_codes": [],
-      "why": "Most consistent rally pick across multiple classes and, at 30,000 cr, arguably the best value car in the entire game for dirt/rally.",
-      "confidence": "verified",
+      "why": "Most consistent rally pick across multiple classes and, at 30,000 cr, arguably the best value car in the entire game for dirt/rally. RECHECK 2026-07-11: the superlative has SOFTENED — dexerto's updated rally list now puts the '04 at B-tier (behind Evo VIII MR / Focus RS at S), and on forza.guide dirt boards the '04 shows up mainly as a B-CLASS build (#15 B dirt; the '05 WRX ranks higher in A). Still the best 30k you can spend on rally; no longer the consensus #1.",
+      "use_case": "Cheapest serious rally starter (30k) — build it for B/A dirt; value king, not board king",
+      "leaderboard_meta": "2026-07-11: forza.guide dirt — WRX '04 #15 in B class (players run it in B, not A); WRX '05 #10 in A. Dexerto moved '04 to B-tier. Tier kept S for value; treat 'best rally car' claims as superseded by the Evo VIII MR.",
+      "confidence": "contested",
       "sources": [
         "dexerto",
         "gamingpromax",
@@ -403,11 +428,14 @@
       ],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Frequently called the best A-class rally car — but this 'best overall' crown comes only from a cluster of SEO tier-lists with identical phrasing; no independent community source (game8/forums) corroborates it yet. Strong pick, unverified superlative.",
-      "confidence": "probable",
+      "why": "Frequently called the best A-class rally car. UPGRADE 2026-07-11: the superlative is now leaderboard-CORROBORATED — forza.guide dirt boards show the 22B at #4 in A class all-tracks, plus top-15 in B, S1 AND S2 dirt (players build it across four classes). The June skepticism ('SEO cluster, no independent corroboration') is resolved.",
+      "use_case": "A-class dirt board car + the skill-farm workhorse — one car, two jobs",
+      "leaderboard_meta": "2026-07-11: forza.guide dirt all-tracks — #4 A, #8 S2, #10 S1, #11 B. Broadest class coverage of any rally car in the DB. Confidence probable→verified.",
+      "confidence": "verified",
       "sources": [
         "gamingpromax",
-        "games.gg"
+        "games.gg",
+        "forza-guide-meta"
       ],
       "acquisition_difficulty": "easy"
     },
@@ -424,8 +452,8 @@
       "power_split": "30/70 F/R",
       "price_credits": 30000,
       "acquisition": "Autoshow ~30,000 cr (buy anytime). Also in the Deluxe/Premium Welcome Pack.",
-      "tier": "A",
-      "value_rating": 8,
+      "tier": "S",
+      "value_rating": 9,
       "upgrade_priority": [
         "dirt/rally tires",
         "soften suspension",
@@ -434,11 +462,14 @@
       ],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Nearly identical role to the WRX STI with slightly higher stats across the board.",
+      "why": "Nearly identical role to the WRX STI with slightly higher stats across the board. PROMOTED 2026-07-11: multiple updated sources (dexerto rally S-tier; forzahorizonhub 'best rally car in the game') now rank the Evo VIII MR ABOVE the WRX '04, and forza.guide dirt boards corroborate (Evo VIII works/MR variants in A/S1/S2 top-15s). The 30k Evo has quietly become the stronger of the two budget rally twins.",
+      "use_case": "The budget rally pick that overtook the WRX — A-class dirt, 30k",
+      "leaderboard_meta": "2026-07-11: dexerto updated list = S-tier (WRX '04 = B-tier); forza.guide dirt shows Evo VIII WP top-15 in A/S1/S2 and Evo TME/Evo III variants strong in A/B. Tier raised A→S.",
       "confidence": "verified",
       "sources": [
         "dexerto",
-        "gamingpromax"
+        "gamingpromax",
+        "forza-guide-meta"
       ],
       "acquisition_difficulty": "easy"
     },
@@ -464,8 +495,10 @@
       ],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Scrappy default dirt choice — high speed, acceleration, and off-road handling.",
-      "confidence": "probable",
+      "why": "Scrappy default dirt choice — high speed, acceleration, and off-road handling. RECHECK 2026-07-11: CONTESTED — dexerto's updated rally list rates the '17 Focus RS S-tier, but it is absent from every forza.guide dirt leaderboard top-15 (zero board usage). One of these is wrong; the boards are the harder evidence.",
+      "use_case": "Cheap A-class dirt alternative if you dislike the Subaru/Evo feel",
+      "leaderboard_meta": "2026-07-11: dexerto = S-tier vs forza.guide = absent from all dirt boards. Confidence downgraded to contested; prefer the Evo VIII or 22B first.",
+      "confidence": "contested",
       "sources": [
         "dexerto"
       ],
@@ -496,7 +529,9 @@
       "tune_baseline": null,
       "share_codes": [],
       "why": "Handles both off-road and pavement at A-Class — flexible cross-country pick.",
-      "confidence": "probable",
+      "use_case": "Free-player's FE off-roader — cross-country + dirt without VIP/wheelspin luck",
+      "leaderboard_meta": "2026-07-11: leaderboard-corroborated — #15 A dirt all-tracks on forza.guide plus multiple trail boards (Waterfall, Takashiro, Gauntlet, Hirosaki). game8's off-road guide still names it the free-player backup to the Viper FE. Confidence probable→verified.",
+      "confidence": "verified",
       "sources": [
         "gamingpromax"
       ],
@@ -526,7 +561,9 @@
       "tune_baseline": null,
       "share_codes": [],
       "why": "Strong S1+ off-road pick. NOTE: game8's off-road guide ranks the 1999 Dodge Viper GTS ACR Forza Edition (9.9 off-road, VIP/Premium-gated) as the best-overall cross-country car; this entry is the right idea but the ACR FE is the true top pick if you have VIP.",
-      "confidence": "probable",
+      "use_case": "VIP owners' cross-country/dirt monster — top S1+ off-road if you have the DLC",
+      "leaderboard_meta": "2026-07-11: strongly leaderboard-corroborated — forza.guide dirt all-tracks #2 in S2, #11 in S1, #5 in R, and #1 on several individual boards (Taiyaki S1, Cherry Field S1). game8 (5/24 update) still ranks it best overall off-road. Confidence probable→verified.",
+      "confidence": "verified",
       "sources": [
         "game8",
         "gamingpromax"
@@ -557,6 +594,8 @@
       "tune_baseline": null,
       "share_codes": [],
       "why": "9.8 off-road stat — nearly impossible to beat on rough terrain in B-Class.",
+      "use_case": "16k B-class cross-country cheat code — works nearly stock",
+      "leaderboard_meta": "2026-07-11: no leaderboard read available — forza.guide covers road+dirt Rivals only, not cross-country. game8's off-road guide no longer surfaces it in its tier summary (their A pick is now the Mercedes X-Class '18). Keeping on B cross-country value; watch for a CC data source.",
       "confidence": "verified",
       "sources": [
         "game8",
@@ -586,7 +625,9 @@
       "tune_baseline": null,
       "share_codes": [],
       "why": "Best D-through-B cross-country pick — heavy-duty clearance and off-road fundamentals with minimal tuning investment.",
-      "confidence": "probable",
+      "use_case": "Low-class cross-country truck — D-B events with near-zero tuning effort",
+      "leaderboard_meta": "2026-07-11: corroborated twice — game8 (5/24) still ranks it top D-B cross-country, AND it shows real board usage on forza.guide dirt (#7 D all-tracks, #1 D on Sotoyama/Taiyaki/Nukabira/Waterfall trails). Confidence probable→verified.",
+      "confidence": "verified",
       "sources": [
         "gamingpromax"
       ],
@@ -632,7 +673,9 @@
         ],
         "reason": "These (from a TikTok aggregator) could not be found in ANY independent source; cited times (6.197s/6.083s) don't match community builds (~6.05s). Treat as unverified/likely fabricated. Verify any code in-game before trusting."
       },
-      "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game.",
+      "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game. RECHECK 2026-07-11: the Jun 15 drag-tire nerf did NOT touch drag events (Playground: 'Drag times and Drag Leaderboards will be unaffected'), and CODMunity still lists this car/code as its featured drag tune (page updated 6/27). Pick stands.",
+      "use_case": "Drag-strip specialist (if wheelspin luck delivers one) — otherwise buy the non-FE twin",
+      "leaderboard_meta": "2026-07-11: CODMunity drag DB (updated 6/27) still features this exact car + code 514752751 as the top drag entry. Drag meta unchanged by patches.",
       "confidence": "probable",
       "sources": [
         "codmunity-drag",
@@ -660,8 +703,11 @@
       "year": 1994,
       "class": "S2",
       "disciplines": [
-        "drag"
+        "drag",
+        "road",
+        "dirt_rally"
       ],
+      "disciplines_note": "EXPANDED 2026-07-11: originally catalogued drag-only, but forza.guide leaderboards show the MX-5 FE '94 is a cross-discipline monster — #1 S2 on Highway Circuit, #1 S1 on The Colossus, #1 S2 on The Gauntlet, and top-5 S1/S2 across nearly every dirt track. The 500k aftermarket buy now covers three disciplines, not one.",
       "drivetrain_stock": "AWD",
       "recommended_drivetrain": "AWD (drivetrain 🟡 — one source says RWD)",
       "power_split": "drag-specific",
@@ -679,7 +725,9 @@
         "note": "Ships with an S2 850 drag preset, drag tires, widebody, Viper-derived twin-turbo V10, + a Skills boost. Drag-tune per the drag guide (gearing first, high accel diff, low rear psi)."
       },
       "share_codes": [],
-      "why": "Widely rated the best drag car in FH6 (pre-fitted drag tires, elite launch/accel). Crucially, its acquisition is MEDIUM not hard: a targeted aftermarket-shop reload-buy, not Wheelspin RNG — corrected 2026-07-10 after a player flagged skycoach's wrong 'Wheelspin only' label.",
+      "why": "Widely rated the best drag car in FH6 (pre-fitted drag tires, elite launch/accel). Crucially, its acquisition is MEDIUM not hard: a targeted aftermarket-shop reload-buy, not Wheelspin RNG — corrected 2026-07-10 after a player flagged skycoach's wrong 'Wheelspin only' label. UPGRADED 2026-07-11: leaderboards reveal it is arguably the best VALUE deterministic car in the game — top boards in drag, highway road AND dirt (see disciplines_note).",
+      "use_case": "The 500k do-everything FE: drag strips, highway/Colossus road boards, and S1/S2 dirt",
+      "leaderboard_meta": "2026-07-11: forza.guide — #1 S2 Highway Circuit, #1 S1 The Colossus, #1 S2 The Gauntlet, #4 S1 + #4 S2 dirt all-tracks (top-5 on ~15 individual dirt boards). The single most board-present deterministic-acquisition car in the dataset.",
       "confidence": "verified",
       "sources": [
         "game8",

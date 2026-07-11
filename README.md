@@ -4,10 +4,11 @@ A local database of FH6 tuning variables and current meta cars, plus a
 double-click dashboard that recommends **which car and which mods to buy** for a
 given discipline, PI class, and budget.
 
-> ⚠️ **Meta freshness.** FH6 released **2026-05-19**. This dataset was captured
-> **2026-06-07** — the game is ~3 weeks old and the meta is *actively forming*.
-> Every claim carries a confidence tag (✅ verified across multiple guides /
-> 🟡 probable from a single early source). Re-run research as the meta settles.
+> ⚠️ **Meta freshness.** FH6 released **2026-05-19**. Dataset captured
+> **2026-06-07**, re-verified **2026-07-11** (patch audit + leaderboard-usage
+> cross-check via forza.guide — see `meta_recheck` in `data/meta-cars.json`).
+> Every claim carries a confidence tag (✅ verified / 🟡 probable / ⚠️ contested).
+> Re-run research as the meta settles.
 
 ## Layout
 
@@ -32,8 +33,12 @@ research/
 1. Open `dashboard/index.html` in any browser (double-click).
 2. **Recommend a Car** tab: pick discipline / class / budget → ranked picks.
    Click a card for mods-to-buy order, tune baseline, and share codes.
-3. Other tabs: full car table, tuning-variable reference, upgrade strategy,
-   Rivals tracks, and Eliminator (battle-royale mechanics + tips by match phase).
+3. **Garage Tracker** tab: every meta car with its use case and an
+   acquisition-difficulty indicator (🟢 easy / 🟡 medium / 🔴 hard). Tick cars as
+   you collect them — owned state persists in your browser (localStorage), never
+   in the data files.
+4. Other tabs: tuning-variable reference, upgrade strategy, Rivals tracks, and
+   Eliminator (battle-royale mechanics + tips by match phase).
 
 ## Updating the data
 

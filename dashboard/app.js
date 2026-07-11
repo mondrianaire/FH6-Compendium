@@ -329,6 +329,8 @@
         </div>`;
     };
     const fmtBadge = (f) => f === "endurance" ? "🏁 endurance" : f === "sprint" ? "➡️ sprint" : "🔁 circuit";
+    const profBadge = (p) => !p ? "" : ({ "technical": "🟣 technical", "mixed-technical": "🔵 mixed-tech", "mixed": "⚪ mixed", "mixed-fast": "🟠 mixed-fast", "high-speed": "🔴 high-speed" }[p] || p);
+    const cfBadge = (c) => c === "verified" ? '<span class="conf conf-verified">✅ verified</span>' : c === "probable" ? '<span class="conf conf-probable">🟡 probable</span>' : c === "speculation" ? '<span class="conf conf-contested">❓ speculation</span>' : "";
     const tracks = rt.tracks.map((t) => {
       const done = t.status === "analyzed" && (t.class_analyses || []).length;
       const body = done
@@ -341,7 +343,9 @@
           <span class="conf ${done ? "conf-verified" : "conf-probable"}">${done ? "✅ analyzed" : "scaffold"}</span>
         </div>
         <p class="why" style="font-size:12px;color:var(--muted)">${t.region || ""}${t.location ? " · " + t.location : ""}</p>
-        <p class="why"><strong>Character:</strong> ${t.character} ${t.character_confidence === "inferred" ? '<span class="conf conf-contested">🟡 inferred</span>' : ""}</p>
+        ${t.speed_profile ? `<div class="card-row" style="margin-top:0"><span class="acq">${profBadge(t.speed_profile)}</span><span style="font-size:12px;color:var(--muted)">${t.drivetrain_bias ? "DT: " + t.drivetrain_bias : ""}${t.length ? " · " + String(t.length).slice(0, 48) : ""}</span></div>` : ""}
+        <p class="why"><strong>Character:</strong> ${t.character} ${cfBadge(t.character_confidence)}</p>
+        ${t.research && t.research.caveat ? `<p class="why" style="font-size:11px;color:var(--muted)">⚠️ ${t.research.caveat}</p>` : ""}
         ${body}
       </div>`;
     }).join("");

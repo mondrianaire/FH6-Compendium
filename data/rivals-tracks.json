@@ -19,23 +19,76 @@
   "scaffold_todo": "To complete a track: send an in-game Rivals leaderboard screenshot for it + the class you race. I'll add a class_analyses entry (board read, recommended car+acquisition, tune source, targets).",
   "tracks": [
     {
-      "id": "electric-town-circuit", "name": "Electric Town Circuit", "location": "Akihabara", "region": "Tokyo City",
-      "format": "circuit", "discipline": "road", "template_ref": "road",
+      "id": "electric-town-circuit",
+      "name": "Electric Town Circuit",
+      "location": "Akihabara",
+      "region": "Tokyo City",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
       "character": "Tight technical urban street circuit — short straights, 90-degree corners, walls close. Grip/braking/corner-exit >> top speed.",
-      "character_confidence": "verified", "status": "analyzed",
+      "character_confidence": "verified",
+      "status": "analyzed",
       "class_analyses": [
         {
           "class": "A",
           "board_state": "SOFT/uncontested (2026-07-10). Global top 11 spanned 1:05.127 -> 1:32.755 (27s). Clean-lap cluster ~1:28-1:32 at 700 PI. Top 1-4 are outliers (suspect cut/dirty; #3 'AI Test071831' is a seed time).",
           "leaderboard_snapshot": {
-            "date": "2026-07-10", "filter": "Global", "your_standing": "top 53% of 4,594,418 players",
+            "date": "2026-07-10",
+            "filter": "Global",
+            "your_standing": "top 53% of 4,594,418 players",
             "top": [
-              { "pos": 1, "driver": "MortalYard2398", "car": "Toyota Supra '20", "pi": 616, "drivetrain": "RWD", "time": "1:05.127", "flag": "SUSPECT — 8.5s clear; likely cut/dirty. Verify by ghost." },
-              { "pos": 2, "driver": "IrateAunt4120", "car": "Porsche 718 GTS", "pi": 675, "drivetrain": "RWD", "time": "1:13.699", "flag": "strongest plausible clean lap" },
-              { "pos": 3, "driver": "AI Test071831", "car": "Audi RS 7 '21", "pi": 700, "drivetrain": "AWD", "time": "1:19.737", "flag": "AI/dev seed time" },
-              { "pos": 4, "driver": "Good Good5799", "car": "Toyota Supra '20", "pi": 616, "drivetrain": "RWD", "time": "1:22.615" },
-              { "pos": 5, "driver": "RozekUx", "car": "Dodge Viper '99", "pi": 700, "drivetrain": "RWD", "time": "1:28.969" },
-              { "pos": "6-11", "driver": "pack", "car": "Supra '20 / BMW i8 / GR86 / City E II / Ford GT '05 x2", "pi": 700, "time": "1:30.262 - 1:32.755", "flag": "clean-lap cluster — realistic legit band" }
+              {
+                "pos": 1,
+                "driver": "MortalYard2398",
+                "car": "Toyota Supra '20",
+                "pi": 616,
+                "drivetrain": "RWD",
+                "time": "1:05.127",
+                "flag": "SUSPECT — 8.5s clear; likely cut/dirty. Verify by ghost."
+              },
+              {
+                "pos": 2,
+                "driver": "IrateAunt4120",
+                "car": "Porsche 718 GTS",
+                "pi": 675,
+                "drivetrain": "RWD",
+                "time": "1:13.699",
+                "flag": "strongest plausible clean lap"
+              },
+              {
+                "pos": 3,
+                "driver": "AI Test071831",
+                "car": "Audi RS 7 '21",
+                "pi": 700,
+                "drivetrain": "AWD",
+                "time": "1:19.737",
+                "flag": "AI/dev seed time"
+              },
+              {
+                "pos": 4,
+                "driver": "Good Good5799",
+                "car": "Toyota Supra '20",
+                "pi": 616,
+                "drivetrain": "RWD",
+                "time": "1:22.615"
+              },
+              {
+                "pos": 5,
+                "driver": "RozekUx",
+                "car": "Dodge Viper '99",
+                "pi": 700,
+                "drivetrain": "RWD",
+                "time": "1:28.969"
+              },
+              {
+                "pos": "6-11",
+                "driver": "pack",
+                "car": "Supra '20 / BMW i8 / GR86 / City E II / Ford GT '05 x2",
+                "pi": 700,
+                "time": "1:30.262 - 1:32.755",
+                "flag": "clean-lap cluster — realistic legit band"
+              }
             ]
           },
           "recommended_car": "Toyota Supra '20 (RWD) — most-represented on the board (3x, incl #1 & #4); in the meta DB (gr-supra-2020).",
@@ -43,34 +96,646 @@
           "how_to_get_the_tune": "616 PI is NOT searchable (it was a bespoke under-cap build). Download the fastest CLEAN Supra driver's shared tune from the leaderboard (e.g. #4/#6), or Tune Browser > 2020 GR Supra > Surface: ROAD > A class > sort by rating. '616' just means grip-focused, not a target.",
           "tune_browser_warning": "A raw car search mixes disciplines and DRAG tunes are most-downloaded — a drag tune CANNOT CORNER (drag tires lost all lateral grip in the 2026-06-15 patch, locked diff, no aero: washes straight above ~30 mph). Pick a ROAD tune; check Upgrades>Tires compound isn't 'Drag'.",
           "key_insight": "CAR IS NOT THE BOTTLENECK. #1 on a 616 Supra beats a maxed 700 Audi by 14s — that's line + clean laps. A single clean lap vaults you from top 53% to ~top 10% here.",
-          "targets": { "realistic_first": "beat ~1:13 (#2)", "stretch": "1:05 (#1) — verify it isn't a cut lap via ghost first" },
+          "targets": {
+            "realistic_first": "beat ~1:13 (#2)",
+            "stretch": "1:05 (#1) — verify it isn't a cut lap via ghost first"
+          },
           "confidence": "leaderboard = primary (screenshot 2026-07-10); car/build = probable",
-          "sources": ["in-game-leaderboard-electrictown"]
+          "sources": [
+            "in-game-leaderboard-electrictown"
+          ]
         }
       ]
     },
-
-    { "id": "shirakawa-circuit", "name": "Shirakawa Circuit", "location": "Shirakawa-style village", "region": "Minamino", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Historic gassho-village setting — likely flowing rural/mixed. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "daikoku-circuit", "name": "Daikoku Circuit", "location": "Daikoku PA (expressway junction)", "region": "Tokyo City", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Named for the Daikoku expressway junction/car-meet PA — likely HIGH-SPEED highway loop. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "hokubu-circuit", "name": "Hokubu Circuit", "location": "Hokubu (northern) region", "region": "Hokubu", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Northern region — mixed. INFERRED, confirm.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "soni-circuit", "name": "Soni Circuit", "location": "Soni plateau (Fuji/Tokyo views)", "region": "Takashiro", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Scenic plateau — flowing, mixed medium-speed. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "narai-juku-circuit", "name": "Narai-juku Circuit", "location": "Narai-juku historic post town", "region": "Shimanoyama", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Narrow historic post-town streets — TIGHT/technical (like Electric Town). INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "shimanoyama-circuit", "name": "Shimanoyama Circuit", "location": "Shimanoyama mountains", "region": "Shimanoyama", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Mountain area (known drift/jump spots) — technical/touge-like. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "irokawa-circuit", "name": "Irokawa Circuit", "location": "Irokawa", "region": "Nangan", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Southern coastal/rural — mixed. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "highway-circuit", "name": "Highway Circuit", "location": "Tokyo expressways", "region": "Tokyo City", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Highway — HIGH-SPEED, top-end + long gearing matter. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "legend-island-circuit", "name": "Legend Island Circuit", "location": "Legend Island", "region": "Legend Island", "format": "circuit", "discipline": "road", "template_ref": "road", "character": "Festival island — flowing/mixed. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "the-goliath", "name": "The Goliath", "location": "Full perimeter of Japan", "region": "Legend Island", "format": "endurance", "discipline": "road", "template_ref": "road", "character": "53.1 mi single lap around all of Japan — ENDURANCE, every surface/speed; balanced all-rounder + tire wear. Gold Wristband locked.", "character_confidence": "verified", "status": "scaffold", "class_analyses": [] },
-    { "id": "the-colossus", "name": "The Colossus", "location": "Highway loop", "region": "Shimanoyama", "format": "endurance", "discipline": "road", "template_ref": "road", "character": "23.4 mi highway loop built for S2 900 hypercars — HIGH-SPEED endurance (top speed king). Gold Wristband locked. (Also the AFK credit-farm loop.)", "character_confidence": "verified", "status": "scaffold", "class_analyses": [] },
-
-    { "id": "festival-sprint", "name": "Festival Sprint", "location": "Near the Horizon Festival site", "region": "Ohtani", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Point-to-point near the festival — mixed. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "tokyo-railway-sprint", "name": "Tokyo Railway Sprint", "location": "Urban, follows the railway", "region": "Minamino", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Urban point-to-point along rail lines — technical urban. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "shikisai-sprint", "name": "Shikisai Sprint", "location": "Shikisai (seasonal scenery)", "region": "Hokubu", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Scenic rural sprint — mixed. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "coastline-sprint", "name": "Coastline Sprint", "location": "Coastal road", "region": "Nangan", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Coastal — HIGH-SPEED flowing sweepers. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "satta-sprint", "name": "Satta Sprint", "location": "Satta Pass (Tomei, Fuji view)", "region": "Ito", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Coastal pass — HIGH-SPEED with sweepers. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "venus-sprint", "name": "Venus Sprint", "location": "Takashiro", "region": "Takashiro", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Mixed. INFERRED, confirm.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "ito-sprint", "name": "Ito Sprint", "location": "Ito (Izu coast/mountain)", "region": "Ito", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Coastal/mountain mixed — flowing. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "shimanoyama-sprint", "name": "Shimanoyama Sprint", "location": "Shimanoyama mountains", "region": "Shimanoyama", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Mountain point-to-point — technical/touge (downhill likely). INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "seaside-park-sprint", "name": "Seaside Park Sprint", "location": "Seaside park", "region": "Ito", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Seaside — HIGH-SPEED. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] },
-    { "id": "tateyama-kurobe-sprint", "name": "Tateyama Kurobe Sprint", "location": "Tateyama Kurobe Alpine Route", "region": "Sotoyama", "format": "sprint", "discipline": "road", "template_ref": "road", "character": "Alpine mountain route — TECHNICAL, elevation, tight. INFERRED.", "character_confidence": "inferred", "status": "scaffold", "class_analyses": [] }
-  ]
+    {
+      "id": "shirakawa-circuit",
+      "name": "Shirakawa Circuit",
+      "location": "Shirakawa-style village",
+      "region": "Minamino",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Surface: tarmac/paved road race. Character: described by FH6 sources as \"a short technical circuit with plenty of long, sweeping corners that keep the pace fast\" — flowing momentum layout dominated by medium-to-fast sweepers rather than stop-and-go hairpins. No long straights, tight hairpins, notable elevation, or wall-lined sections are called out in any source. Located in the Minamino region near the Shirakawa-go village / golf course area (sources disagree on exact edge: mapmaster says northern side, one search snippet says near the southern edge of the golf course — minor, not tuning-relevant). Entry-level event, no wristband requirement.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed",
+      "drivetrain_bias": "either",
+      "length": "~4.0 miles total; 2 laps (~2 mi / ~3.2 km per lap). One search snippet gave \"3.2 KM\" which lines up as the per-lap figure vs the 4.0 mi / 6.4 km two-lap total.",
+      "research": {
+        "verdict": "PLAUSIBLE",
+        "ingame_verified": true,
+        "inferred_was": "flowing rural/mixed",
+        "caveat": "The lone description literally leads with \"short TECHNICAL circuit,\" so \"mixed-technical\" is an equally valid tightening; \"mixed\" is the safe center label. Real-world-vs-in-game mismatch risk is LOW here (the source describes a race circuit, and metadata cross-matches across three sources), but the driving-character basis is a SINGLE thin auto-generated wiki (game.wiki) — do not treat it as multi-source confirmed. The claim's stated three-source corroboration of the phrase does not exist.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://game.wiki/forza-horizon-6/shirakawa-circuit",
+          "https://www.youtube.com/watch?v=4KyzEZiwwmQ",
+          "https://www.youtube.com/watch?v=jsEiy3CoOow"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "daikoku-circuit",
+      "name": "Daikoku Circuit",
+      "location": "Daikoku PA (expressway junction)",
+      "region": "Tokyo City",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Fast-paced circuit on extra-wide, expressway-grade asphalt (Daikoku PA / Wangan interchange setting) with big-radius sweepers and loop-ramp curves; wide roads give plenty of overtaking room. High average speed (~118 mph on an S1 rival lap) but still a cornered circuit, not a flat-out highway. Surface: smooth sealed asphalt; concrete barrier walls line the expressway sections. Some elevation change on the interchange ramps. Runs Spring / Clear / Morning with no traffic (distinct from the night Daikoku Chase street race).",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-fast",
+      "drivetrain_bias": "either",
+      "length": "3.3 miles total, 2 laps (~1.65 mi per lap)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "high-speed highway loop (Daikoku PA)",
+        "caveat": "The \"objectively fast ~118 mph\" evidence is from an S1 Rivals lap, whereas the event itself is Class B-600; B-class cars would average notably less, so the raw-speed figure is somewhat inflated (the in-game \"fast-paced/extra-wide\" description supports fast regardless). The circuit sits on the real Daikoku/Wangan expressway, so name and profile happen to coincide, though the verdict rests on the in-game description rather than the name. A couple of low-quality content-farm pages (u4n, gamingpromax) describe it as \"tight/technical,\" conflicting with the primary aggregators — they appear to conflate the circuit with the Daikoku car-meet island and are weighted lower.",
+        "sources": [
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://www.youtube.com/watch?v=xelUqHz87CU (Daikoku Circuit S1 Rival 00:50.454)",
+          "https://www.youtube.com/watch?v=JXDnlVSwwE4 (Daikoku Circuit gameplay)"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "hokubu-circuit",
+      "name": "Hokubu Circuit",
+      "location": "Hokubu (northern) region",
+      "region": "Hokubu",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Short circuit on the eastern coast of the Hokubu region (NE map), in forested/coastal terrain above a peninsula with road stretches over water near the Irabuohashi Bridge. Blends long sweeping bends with heavy braking zones and tight technical corner exits (\"short and technical, corner exits matter more than top speed\"). First two corners have noticeable undulation; final corner sequence is technical and satisfying. Elevation change throughout. Surface: sealed asphalt/tarmac, touge-style narrow road; walls not emphasized in sources. Braking, rotation, and high-downforce dominate over top-end.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-technical",
+      "drivetrain_bias": "RWD",
+      "length": "4.7 mi total, 3 laps (~1.57 mi/lap). Lap runs ~45-58s in a fast S1 car.",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "mixed",
+        "caveat": "Two soft spots keep this short of airtight. (1) Real-world-vs-in-game naming: the claim's \"Irabuohashi Bridge\" is an author embellishment not found in FH6 sources — those only mention \"three stretches of road going over water\" near a NE peninsula; the actual Irabu Ohashi bridge is in Okinawa/Miyako (far south), which contradicts the stated northern location, so that specific name is unverified and likely wrong even though the underlying in-game \"roads over water\" feature is real. (2) Source independence is moderate: OverTake.gg and sippycupmom share near-identical wording (possible common or AI-generated origin), though ForzaFactory independently corroborates the technical/high-downforce angle. Given the strong flow-state / long-sweeping-bends language, plain \"mixed\" remains a defensible alternative to \"mixed-technical.\"",
+        "sources": [
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forzafactory.com/festival_playlists/forza-horizon-6-hokubu-region-time-attack-guide/",
+          "https://ggwtb.com/blog/forza-horizon-6-tuning-guide-best-s1-upgrades-and-pro-setup-for-competitive-road-racing",
+          "https://ggwtb.com/blog/best-time-attack-car-in-forza-horizon-6-fastest-builds-ranked-by-lap-time",
+          "https://www.overtake.gg/news/5-racetracks-you-can-find-in-forza-horizon-6.4492/",
+          "https://forza.tools/circuit-tune/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "soni-circuit",
+      "name": "Soni Circuit",
+      "location": "Soni plateau (Fuji/Tokyo views)",
+      "region": "Takashiro",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Twisty, undulating purpose-built circuit with real elevation change. Opens with two proper corners, then DROPS into a hairpin (good divebomb spot), immediately followed by a corner too tight to get two cars through side-by-side. Signature closing feature is a long QUADRUPLE-APEX final corner (a flowing sustained sweeper). Explicitly \"quite undulating\" and \"perfect for drifting.\" Paved/tarmac, has a pit lane/area; runoff-style facilities (no heavy street walls noted). Scenic highland setting with Mt Fuji and Tokyo views. Central/north Takashiro, north of Hokubu.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-technical",
+      "drivetrain_bias": "AWD",
+      "length": "~4.8 mi total over 4 laps in the Festival Playlist instance (~1.2 mi/lap short circuit)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "scenic plateau, flowing mixed",
+        "caveat": "Mild overstatement risk: the OverTake source itself calls the layout \"relatively simple\" and \"big enough to go racing in any car,\" which softens the claim's stronger \"sharp twisty corners dominate / clearly MORE technical\" framing — \"technical-leaning\" sits at the top of what the source supports rather than being unambiguous. The specific \"~1.2mi lap\" length is the claim author's own addition and is not stated in any source found. Evidence is single expert-tier article (OverTake) plus corroborating listings/videos, not a primary/official route map, so confidence is strong but one notch below hard primary. The FH6 \"Soni\" circuit only borrows the real place name; there is no scenic-grassland real-world feature driving the profile, so no real-world-vs-in-game mismatch.",
+        "sources": [
+          "https://www.overtake.gg/news/5-racetracks-you-can-find-in-forza-horizon-6.4492/",
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://www.youtube.com/watch?v=p0WKmbCFUTU",
+          "https://www.youtube.com/watch?v=fFj_JXmphaY"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "narai-juku-circuit",
+      "name": "Narai-juku Circuit",
+      "location": "Narai-juku historic post town",
+      "region": "Shimanoyama",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Documented in-game description: \"A quick circuit that favours an aggressive cornering approach to build momentum lap on lap.\" Community track review calls it \"akin to a proper race track\" and \"a great practice/tuning area\" (36+ laps run against unbeatable AI). Signals a flowing, momentum-preserving asphalt circuit where carrying speed through corners matters, NOT a stop-and-go hairpin track. Corner count, elevation profile, chicanes, walls, and surface specifics are NOT explicitly documented by any source found (surface is standard tarmac by Road Racing category). Located on the northern side of the Shimanoyama region; runs Spring / Clear / Early Afternoon.",
+      "character_confidence": "probable",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed",
+      "drivetrain_bias": "either",
+      "length": "4.4 mi total over 3 laps (~1.47 mi per lap)",
+      "research": {
+        "verdict": "PLAUSIBLE",
+        "ingame_verified": false,
+        "inferred_was": "tight/technical historic post-town streets",
+        "caveat": "Real-world Narai-juku is a slow, narrow Nakasendo post town (Nagano) — a pedestrian street, not a race circuit — so there is NO real-world layout to lean on; FH6's circuit merely borrows the in-game place name. The profile therefore cannot be inferred from the real place and rests entirely on one FH6 database's character blurb, which is single-origin and, per this project's own June-2026 verification, much FH6 web content is self-copying AI/SEO text of unconfirmed authenticity. \"mixed-fast\" remains within the plausible range but is not established; \"mixed\" or \"mixed-technical\" are equally consistent with the evidence.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event (mapmaster.io FH6 DB — full event entry: location, description, 3 laps/4.4mi, A700 Total Supercars, Blue Wristband, Spring/Clear/Early Afternoon)",
+          "https://forza.labsgg.com/all-race-tracks (labsgg FH6 track DB — Narai-Juku Circuit = Road Race, 4.4 mi, 3 laps; corroborates format/length)",
+          "https://guides4gamers.com/forza-horizon-6/pois/road-racing/ (unlock 'Mech My Day (Blue)', restriction A-700 Total Supercars)",
+          "https://www.facebook.com/groups/fh5group/posts/4342703715988015/ (community track review: 'akin to a proper race track', 'great practice/tuning area', 36 laps vs unbeatable AI)",
+          "https://www.youtube.com/watch?v=f29TsNwciRQ (gameplay: Narai Juku road racing, 2020 Corvette C8 Stingray / RWD)",
+          "https://www.youtube.com/watch?v=TlLun1jo4iA (Monthly Rivals spec car: Porsche 911 Turbo S Leichtbau '93 / AWD)"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "shimanoyama-circuit",
+      "name": "Shimanoyama Circuit",
+      "location": "Shimanoyama mountains",
+      "region": "Shimanoyama",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Purpose-built drift-style circuit: linked free-flowing / sweeping corners with momentum emphasis (can hold a gear through much of it), plus at least one tighter corner needing a braking/careful line. Short compact loop with some elevation change. Run with slow/quirky domestic + kei cars (Eclectic Domestics class: e.g., Honda Beat, Nissan Figaro). NOT a hairpin-heavy touge; no long straights/highway. Wall/surface specifics not confirmed by a source.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed",
+      "drivetrain_bias": "AWD",
+      "length": "3.4 mi total, 5 laps (~0.68 mi/lap) — a compact \"Short Circuit\" loop",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "technical/touge mountain",
+        "caveat": "Two sub-claims are weaker than the core finding. (1) The feature note \"at least one tighter corner needing a braking/careful line\" is NOT supported and is arguably contradicted: allthings.how states the layout \"avoids tight braking corners.\" Treat that detail as unconfirmed. (2) \"Mixed\" describes corner VARIETY, not pace — because this is a drift circuit run with ~63hp kei/domestic cars (Honda Beat, Figaro) on a very short ~0.68 mi/lap loop, actual on-track speed is low despite the \"free-flowing\" wording; do not read \"mixed\" as fast. Real-world-vs-in-game note: the region's real association is with drift/jump spots, which happens to align with an in-game DRIFT circuit, but the in-game confirmation here rests on actual FH6 route sources, not that coincidence.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://steamcommunity.com/app/2483190/discussions/0/653730014598254084/",
+          "https://gamerant.com/forza-horizon-6-how-complete-short-circuit-daily-challenge/",
+          "https://www.youtube.com/watch?v=ur3oV6lpFEI",
+          "https://www.youtube.com/watch?v=3MWAGvHkyHc",
+          "https://www.youtube.com/watch?v=LO9TEgVfzJc"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "irokawa-circuit",
+      "name": "Irokawa Circuit",
+      "location": "Irokawa",
+      "region": "Nangan",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Loops around the Irokawa Space Centre on the southern side of the Nangan region (industrial/facility setting, NOT coastal). Defining element is a steep downhill section leading into a heavy-braking hairpin, explicitly flagged as the track's hardest corner. Short ~1.17mi lap implies several corners with some flow between the technical sections. Conditions: Spring, cloudy, early afternoon. No source confirmed long straights, sweepers, wall proximity, or surface transitions.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-technical",
+      "drivetrain_bias": "either",
+      "length": "3.5 mi total over 3 laps (~1.17 mi per lap, short lap)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "coastal/rural mixed",
+        "caveat": "Only ONE corner is described in any source (the downhill-into-hairpin); the rest of the \"mixed-technical\" balance is inferred from the short lap length, so plain \"mixed\" would also be defensible — treat the technical lean as probable, not certain. Also, the claim's \"industrial/facility setting, NOT coastal\" is slightly overstated: real space centres sit on the coast and Nangan is described as having coastal highways, so the Irokawa Space Centre loop may well be coastal-adjacent; the correction holds on driving CHARACTER (technical facility loop, not coastal sweepers) rather than on geography being non-coastal.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event (describes the actual in-game route: circuit, 3 laps/3.5mi, loops Irokawa Space Centre, steep downhill into a braking hairpin, S1 800 Eclectic Domestics)",
+          "https://forza.labsgg.com/all-race-tracks (corroborates format=circuit, 3.5 mi, 3 laps)",
+          "https://guides4gamers.com/forza-horizon-6/pois/road-racing/ (confirms event exists, unlock, Eclectic Domestics restriction; no route detail)",
+          "https://www.youtube.com/watch?v=ezcbAGZdfrM (Irokawa Circuit Honda Beat gameplay; title only, weak signal toward agility)"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "highway-circuit",
+      "name": "Highway Circuit",
+      "location": "Tokyo expressways",
+      "region": "Tokyo City",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Elevated Tokyo \"Highway Loop\" (C1-inspired). Long full-throttle straights linked by fast sweeping/banked bends, tunnel and elevated sections, and highway on/off-ramp connector corners rather than slow hairpins. Smooth asphalt surface; concrete barrier walls line the expressway, so wall proximity/precision matters at speed. Minimal low-speed technical content per event description. Dry (Summer, Cloudy, Early Afternoon).",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "high-speed",
+      "drivetrain_bias": "RWD",
+      "length": "2 laps, 8.7 mi total (~4.35 mi per lap)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "high-speed highway",
+        "caveat": "The claim's detailed feature list (C1-inspired, tunnels, elevated sections, concrete barrier walls/expressway, banked bends, on/off-ramp connectors, \"minimal low-speed technical content\") is NOT found in any source — mapmaster does not mention \"C1,\" \"elevated,\" \"expressway,\" or \"banked.\" Those are plausible real-world-Tokyo-informed embellishments, not sourced facts. They do not contradict the high-speed profile, but they overstate what the sources actually verify; the high-speed classification itself rests only on the sourced word \"full-throttle\" plus the S1-800 class.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://guides4gamers.com/forza-horizon-6/pois/road-racing/",
+          "https://mitchcactus.co/blog/forza-horizon-6/forza-horizon-6-tokyo-highway-culture/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "legend-island-circuit",
+      "name": "Legend Island Circuit",
+      "location": "Legend Island",
+      "region": "Legend Island",
+      "format": "circuit",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Dedicated multi-lap sealed-asphalt circuit on the fictional endgame Legend Island. In-game description: \"challenging turns and blazing fast pace.\" Community sources call it \"the best high-speed asphalt track in the game,\" built for R-class hypercar pace (Valkyrie, Exige WTAC) with a high-speed rhythm that rewards clean lines. So: fast, top-end-relevant, but with genuine corners (not a highway blast like the island's Colossus/Goliath). Notably \"punishes unstable tuning setups\" — stability/traction matter. NOT documented in any source: turn-by-turn geometry (hairpin count, chicanes), elevation profile, or wall/barrier layout — do not assume these.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-fast",
+      "drivetrain_bias": "either",
+      "length": "~8.8 mi total, 3 laps (~2.9 mi/lap), R class (998 PI)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "flowing/mixed festival island",
+        "caveat": "Residual real-vs-in-game and precision risks: (1) The exact in-game event description \"challenging turns and blazing fast pace\" could not be verified verbatim in any fetched source — its substance (turns + speed) is corroborated, but treat the literal quote as unconfirmed. (2) Two of the sources the claim cites for CHARACTER actually don't support it: the EZG blog only covers Legend Island as a region and forza.labsgg only lists format (type/laps/distance); neither describes driving character. The character support genuinely comes from mitchcactus and 2upskill/mmogah instead. (3) A minority of (AI-summarized) sources call it \"highly technical\" / rewarding \"precise driving over raw speed,\" so the degree of top-end bias carries some uncertainty — plain \"mixed\" is a defensible fallback if the fast-lean is overstated. (4) Turn-by-turn geometry, elevation, and barrier layout remain undocumented, as the claim correctly states.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://www.ezg.com/blog/forza-horizon-6-progression-strategy-for-unlocking-legend-island-without-wasting-time",
+          "https://2upskill.com/forza-horizon-6-legend-island-guide-how-to-unlock-the-elite-endgame-island-fast/",
+          "https://www.youtube.com/watch?v=TDGq3E1Uoys",
+          "https://mitchcactus.co/blog/forza-horizon-6/all-about-forza-horizon-6-legend-island/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "the-goliath",
+      "name": "The Goliath",
+      "location": "Full perimeter of Japan",
+      "region": "Legend Island",
+      "format": "endurance",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Dominated by long freeway/highway straights (top-end matters, \"build your lead\") but broken up by technical mountain-pass sections with tight switchbacks/hairpins that \"punish late braking,\" plus coastal sweepers and elevation change. Predominantly tarmac; a couple sources claim minor off-road/city segments (unverified, conflicting). City/highway walls present. Class R 998 \"Track Life,\" summer/clear/afternoon. Starts on Legend Island (SE corner of Japan map).",
+      "character_confidence": "probable",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-fast",
+      "drivetrain_bias": "either",
+      "length": "~53.1 mi single lap (some guides state ~50 mi / ~80 km); one full perimeter loop of Japan, ~20-25 min per lap",
+      "research": {
+        "verdict": "PLAUSIBLE",
+        "ingame_verified": false,
+        "inferred_was": "53.1mi full-Japan lap, all surfaces/speeds",
+        "caveat": "Franchise-pattern vs in-game mismatch risk: a \"Goliath\" (longest map-looping circuit mixing highway with other roads) exists in every prior Forza Horizon, so the \"freeway + technical mountain mix\" profile may be pattern-matched from the series template rather than FH6's actual layout. The FH5-Mexico hallucination in one aggregator shows sources conflate titles. The route's EXISTENCE and general highway-dominant character are well attested for FH6, but the specific \"mixed-fast\" profile and feature list are inferred from a non-independent SEO cluster, not verified against a primary in-game source; distance and several features are wrong or unconfirmed.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://mitchcactus.co/blog/forza-horizon-6/goliath-race-all-details-about-the-biggest-race-in-fh6/",
+          "https://gamingpromax.com/forza-horizon-6-goliath-race-guide-colossus/",
+          "https://forzahorizoncar.com/en/cars/best-goliath-cars.html",
+          "https://easytune.app/blog/awd-tune-guide"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "the-colossus",
+      "name": "The Colossus",
+      "location": "Highway loop",
+      "region": "Shimanoyama",
+      "format": "endurance",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Single closed \"highway loop\" on the NE side of Shimanoyama. Character = long full-throttle highway straights/sweepers where top speed dominates; community gameplay report: \"basically zero low speed corners, only high and mid speed, and super long full throttle segments.\" A handful of high/mid-speed corners plus a few hard braking zones next to highway walls/barriers (\"hit the wall hard or brake almost to a standstill\"); NO low-speed hairpins. Dry tarmac, Summer / Clear / Early Afternoon. Speeds reported ~420 kph / 300+ mph on the straights.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-fast",
+      "drivetrain_bias": "either",
+      "length": "23.4 mi, 1 lap, ~7 min (verbatim mapmaster.io + labsgg agree). NOTE: some blog/wiki sources claim ~50mi/80km whole-map loop — treated as conflation with a Goliath-style event, not the Shimanoyama Colossus.",
+      "research": {
+        "verdict": "REFUTED",
+        "ingame_verified": true,
+        "inferred_was": "23.4mi highway loop, high-speed hypercars",
+        "caveat": "Real-world/prior-game mismatch risk is high: \"The Colossus\" and \"The Goliath\" are recurring Forza-tradition endurance names (FH4/FH5), and the FH6 guide web is (per this project's own methodology note) dominated by SEO/AI-generated tier-lists that copy each other and may be importing FH5's Colossus/Goliath characteristics rather than describing FH6's actual route. The most trustworthy signal is the Steam player testimony (independent of the SEO cluster), which supports a fast-but-technical mixed-fast route with hard braking zones — not a pure high-speed straight-line event. Fundamental facts still conflict across sources (length 23.4 vs ~50mi; lap time ~7 vs 20-25min), so treat even the confirmed 23.4mi/high-speed-loop details as probable, not settled.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event (verbatim: 'One colossal lap around the entire highway loop', 'Class S2 900 Hypercars', '1 Lap (23.4 mi)', ~7 min, NE Shimanoyama, Gold Wristband, Summer/Clear/Early Afternoon)",
+          "https://forza.labsgg.com/all-race-tracks (The Colossus: Road Race circuit, '23.4 mi 1 lap'; Shimanoyama region events)",
+          "https://game8.co/games/Forza-Horizon-6/archives/602037 (best cars; 'high top speed car that still has good handling to take on some of the sharp turns'; 'no outright best car')",
+          "https://steamcommunity.com/app/2483190/discussions/0/839503389267096486/ (community: 'basically zero low speed corners, only high and mid speed, and super long full throttle segments'; RWD 300+mph builds 'not easy to use'; AI top-speed rubber-banding)",
+          "https://gamingpromax.com/forza-horizon-6-goliath-race-guide-colossus/ (blog claiming ~50mi/80km freeway loop + tight mountain passes — likely Goliath conflation; R-class)",
+          "https://forzahorizon6wiki.wiki/ (calls it 'longest Goliath in series history', 'freeway loop', Legend Island; no Shimanoyama mention)",
+          "https://fandomwire.com/best-cars-for-the-colossus-race-forza-horizon-6/ (top cars: Centenario AWD, Venom F5 RWD, AMG One)"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "festival-sprint",
+      "name": "Festival Sprint",
+      "location": "Near the Horizon Festival site",
+      "region": "Ohtani",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Tarmac point-to-point that runs straight through the open Horizon Festival Site grounds (flat, wide plazas) then exits \"out the other side\" into surrounding Ohtani roads. FH6-source description emphasizes speed/flow and scenery (\"speeds right through\"), pointing to fast sweepers and momentum sections rather than a tight-hairpin touge. Surrounding Ohtani terrain includes forested elevation/mountain roads (evidenced by the neighboring Festival Chase event) plus wide festival flats, so expect some elevation change and a few medium corners bridging the fast sections. No confirmed hairpin count, wall/barrier density, or turn-by-turn layout in any source. Surface: tarmac (Road Racing category, not dirt/street).",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-fast",
+      "drivetrain_bias": "AWD",
+      "length": "~4.9 mi, 1 lap (point-to-point)",
+      "research": {
+        "verdict": "PLAUSIBLE",
+        "ingame_verified": true,
+        "inferred_was": "mixed near festival",
+        "caveat": "Real-world vs in-game mismatch risk is LOW here (the description references the in-game Horizon Festival Site, not a real place), but the route text is marketing/flavor copy, not a corner-by-corner analysis, so the \"mixed\" (medium-corner) half of mixed-fast is inferred — partly from the neighboring \"Festival Chase,\" which forza.labsgg.com actually classifies as a Street race (different discipline), a weak bridge. Minor source discrepancies: region is labeled \"Ohtani\" (mapmaster) vs \"Horizon Festival\" (labsgg) — consistent since the Festival Site sits in Ohtani; and labsgg lists no car restriction while mapmaster specifies B600 Super Hot Hatch — a gap, not a contradiction. To upgrade PLAUSIBLE to CONFIRMED, verify actual corner character against in-game footage or a leaderboard ghost.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://www.u4n.com/news/forza-horizon-6-festival-chase-street-racing-event-guide.html",
+          "https://www.gosunoob.com/forza-horizon-6/ (Festival Sprint Super Hot Hatch tune guide, B600 confirmed via search index)",
+          "https://www.pcgamer.com/games/racing/forza-horizon-6-festival-loop-speed-zone-location/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "tokyo-railway-sprint",
+      "name": "Tokyo Railway Sprint",
+      "location": "Urban, follows the railway",
+      "region": "Minamino",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Urban Tokyo City street course in the southern Minamino region. Corner-dominated: the event's own description says it \"requires on-rails cornering ability to get ahead of the pack,\" so grip/braking/rotation through street corners is the differentiator rather than top-end. Asphalt/road surface, city-street setting (expect 90-degree junctions, medium straights between blocks, and close barriers/walls typical of urban FH6 courses). \"Railway/on-rails\" is thematic wordplay — no source confirms the route physically hugs a rail line, though elevated Tokyo rail scenery is plausible. Not a hairpin crawl: an S2 leaderboard WR of 1:45.3 over 4.2 mi (~144 mph avg) implies meaningful flowing/fast sections between the technical corners. Elevation not documented.",
+      "character_confidence": "probable",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed",
+      "drivetrain_bias": "either",
+      "length": "4.2 miles, point-to-point sprint (single run, no laps)",
+      "research": {
+        "verdict": "PLAUSIBLE",
+        "ingame_verified": false,
+        "inferred_was": "technical urban along rail",
+        "caveat": "Real-world-vs-in-game mismatch risk is HIGH on the CHARACTER (not the metadata): \"on-rails cornering\" is wordplay on the track name \"Railway,\" and the corner-dominance is bootstrapped from that pun rather than any layout source — exactly the name-inference failure mode. The 4.2 mi / ~144 mph S2 average is real hard evidence that argues the course carries meaningful speed, so the true profile could be mixed-technical (as claimed) OR mixed-fast; \"mixed\" is the central estimate. To actually confirm, watch the WR/gameplay footage (e.g. youtube.com/watch?v=olG4GInYVPw) and count technical corners vs sustained straights. The DB entry should stay character_confidence=\"inferred\"/\"probable\" — not upgraded to a verified in-game route character.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event (verbatim event description + 4.2mi, Sprint, Minamino southern side, B-600 Japan, Green wristband)",
+          "https://guides4gamers.com/forza-horizon-6/pois/road-racing/ (independent confirm: B-600 Japan, unlock via Pier Pressure (Green), road-racing event #21/22)",
+          "https://guides4gamers.com/forza-horizon-6/maps/japan/ (confirms B-600 restriction + Pier Pressure Green unlock)",
+          "https://www.youtube.com/watch?v=olG4GInYVPw (S2 WR 1:45.315 over 4.2mi = ~144mph avg, implies flowing/fast sections)",
+          "https://forza.labsgg.com/all-race-tracks (FH6 race DB consulted; event not separately listed under that exact name)",
+          "https://www.youtube.com/watch?v=IfuqyDjDmg8 (B-600 gameplay walkthrough — visual route detail, text not extractable)",
+          "https://www.youtube.com/watch?v=X4wjNCADz38",
+          "https://www.youtube.com/watch?v=yAZnMSI-tyI"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "shikisai-sprint",
+      "name": "Shikisai Sprint",
+      "location": "Shikisai (seasonal scenery)",
+      "region": "Hokubu",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Route (from mapmaster.io, describing the actual FH6 event): \"Cut a winding path through the Hokubu Region and under the highways before looping back.\" So: predominantly winding/twisty asphalt with tight-to-medium corners, passing UNDER highway overpasses (underpass detours, not high-speed highway driving), then looping back toward the start. Surface: asphalt (confirmed by forza.labsgg). Region: Northern Hokubu, documented (via the Hokubu Time Attack guide) as \"technical\" with \"tight corners\" that \"favor high-downforce builds over pure top speed.\" Class restriction: A-700 Modern Super Saloons (heavier sedan platforms). Conditions: Spring / Clear / Late Afternoon. No explicit source data on hairpin count, elevation change, or walls specific to Shikisai.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-technical",
+      "drivetrain_bias": "either",
+      "length": "4.8 miles, 1 lap, point-to-point sprint (loops back near start)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "scenic rural mixed",
+        "caveat": "Confirmation rests primarily on one specialist site (mapmaster.io) for the Shikisai-specific route text; I did not analyze actual gameplay footage (BMW M4 '21 and \"how to find\" YouTube videos exist but were not watched) to independently count corners/straights over the 4.8 mi. The \"technical\" region evidence comes from a DIFFERENT Hokubu event (S1 circuit Time Attack), so it is region-level, not Shikisai-specific. Minor terminology tension: it is billed as a SPRINT yet mapmaster says \"looping back\" and labsgg says \"1 lap\" — not a speed-profile contradiction, but worth noting. The precise \"weighted toward grip/handling\" nuance vs neutral \"mixed\" is interpretive; the route text supports a technical lean but a hidden faster connecting section over 4.8 mi cannot be fully excluded without footage. Given the project's own caution that much FH6 guide content is SEO/AI-generated, treat the CONFIRMED verdict as high-but-not-absolute; the per-event uniqueness and the explicit no-high-speed-flag are what lift it above PLAUSIBLE.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://guides4gamers.com/forza-horizon-6/pois/road-racing/",
+          "https://forzafactory.com/festival_playlists/forza-horizon-6-hokubu-region-time-attack-guide/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "coastline-sprint",
+      "name": "Coastline Sprint",
+      "location": "Coastal road",
+      "region": "Nangan",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Two-part coastal sprint. Technical/twisty first half through the Nangan Region (rewards precise braking, sweeping asphalt curves, ocean-side), transitioning to a flat-out high-speed back half running toward Tokyo City (rewards top-end/raw horsepower). Surface: paved asphalt throughout. Corners are described as \"sweeping\" curves, not tight hairpins; no explicit mention of hairpins or heavy elevation. Start grid sits on the coastal edge in the SW corner of the map.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed",
+      "drivetrain_bias": "AWD",
+      "length": "5.0 miles, 1 lap (point-to-point sprint)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "high-speed coastal flowing",
+        "caveat": "Provenance is community-tier fan sites (mapmaster.io + u4n.com), not a Forza-primary source or the player's own in-game leaderboard/screenshot. The event blurb may be mapmaster.io's editorial phrasing rather than a literal verbatim in-game string, so the claim's \"quoted verbatim\" / confidence=\"verified\" framing is slightly stronger than the evidence class strictly warrants — best treated as probable-to-verified. Either way the description is grounded in the actual traced in-game route (a route-mapping site), so the \"mixed\" character holds. The project's own rivals-tracks.json scope note that mapmaster.io provides \"names/regions/format only\" is inaccurate — the site does carry per-event narrative descriptions.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event (in-game event description: 'Twist and turn through the Nangan Region before hitting a flat-out back half towards Tokyo City'; Sprint, 5.0 mi, 1 lap, A-700 Modern Super Saloons, Pink Wristband unlock)",
+          "https://forza.labsgg.com/all-race-tracks (Coastline Sprint: Sprint/point-to-point, 5.0 mi, 1 lap, paved asphalt)",
+          "https://www.u4n.com/news/master-the-coastline-sprint-in-forza-horizon-6-location-season-adjustments-and-bug-fixes.html ('sweeping asphalt curves... rewards both precise braking and raw horsepower'; coastal SW-corner start; A-700 Modern Super Saloons; unlock via Off Piste/Pink event)"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "satta-sprint",
+      "name": "Satta Sprint",
+      "location": "Satta Pass (Tomei, Fuji view)",
+      "region": "Ito",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "FH6 in-game description reads: \"A flat-out charge through the Ito Region to really test your nerve and control at top speeds\" — i.e. dominated by long full-throttle sections where top-end and high-speed stability matter, not tight cornering. Runs through the southwestern side of the Ito region. Set in Summer, Clear weather, Sunrise. Real-world namesake (Satta Pass, Shizuoka) is a coastal/elevated pass above the Tomei Expressway and Suruga Bay, consistent with sweeping high-speed road, but in-game specifics on walls, exact elevation and sweeper geometry are NOT explicitly documented in the sources found.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "high-speed",
+      "drivetrain_bias": "either",
+      "length": "5.1 miles, point-to-point, 1 \"lap\" (single run)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "high-speed coastal pass (Tomei)",
+        "caveat": "Real-world-vs-in-game note: the actual Satta Pass (Satta Toge, Shizuoka) is a narrow, winding viewpoint road, so a name-based guess could plausibly have read \"technical\" — the \"high-speed\" characterization comes specifically from the FH6 in-game blurb, not the real place, which is good but means name and reality diverge. Source-depth note: the route-CHARACTER claim (high-speed) rests essentially on mapmaster's single in-game blurb; labsgg and guides4gamers confirm the event/format/length/restriction but do not independently describe driving character, and gameplay footage was not frame-verified for corner geometry. Confidence in high-speed is strong but the speed-profile corroboration is effectively single-source. In-game specifics on walls, exact elevation, and sweeper geometry remain undocumented in the sources found.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://guides4gamers.com/forza-horizon-6/pois/road-racing/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "venus-sprint",
+      "name": "Venus Sprint",
+      "location": "Takashiro",
+      "region": "Takashiro",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Narrow, twisting mountain road climbing from Takashiro (NE side) up toward the Sotoyama region — net uphill elevation gain. Tight switchbacks/hairpins with guardrail-lined drops (walls close, low run-off) characteristic of the Takashiro pass (FH6's Mt. Haruna / Initial D analogue), transitioning near the top into the alpine gateway where hairpins are separated by some longer straights/sweepers. Tarmac surface, Spring/Clear/Early Afternoon (dry grip). Forced car class: A-700 \"Total Muscle\" (heavy, high-torque, RWD-stock).",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "technical",
+      "drivetrain_bias": "AWD",
+      "length": "5.0 miles, 1 lap (point-to-point sprint)",
+      "research": {
+        "verdict": "PLAUSIBLE",
+        "ingame_verified": true,
+        "inferred_was": "mixed (uncertain)",
+        "caveat": "Real-world/adjacent-track mismatch risk: the \"mixed\" straights/sweepers and the Initial-D/Mt-Haruna hairpin framing come from the real Takashiro-to-Sotoyama geography and the neighboring Sotoyama alpine event (tateyama-kurobe-sprint), NOT from any FH6 description of Venus Sprint's own layout. Only a thin general blurb (\"narrow, twisting mountain road\") exists; no source details corners/straights/elevation. Venus Sprint sits on the Takashiro side, so the alpine sweepers the claim invokes likely belong to the adjacent track. YouTube gameplay of the route exists but was not frame-verified, so a faster mid-section cannot be fully ruled out — hence technical is the best-supported label, with mixed-technical only a generous upper bound.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://guides4gamers.com/forza-horizon-6/maps/japan/",
+          "https://gamingpromax.com/forza-horizon-6-best-roads-mountain-passes-expressways-rural-routes/",
+          "https://apexspeedcraft.com/2026/06/16/fh6-touge-guide-post-drag-tire-nerf-best-cars-builds-what-actually-works-now/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "ito-sprint",
+      "name": "Ito Sprint",
+      "location": "Ito (Izu coast/mountain)",
+      "region": "Ito",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Coastal point-to-point along the eastern coast of the Ito Region. Described as \"twists and turns along the coastal roads\" — winding, corner-dominant character (cornering/grip emphasis, NOT a top-end course). No hairpins, elevation, sweepers, or walls are explicitly specified by sources; coastal seawalls are likely but unconfirmed. Surface: open asphalt. Class S1 800 Modern Supercars; Summer/Cloudy/Morning; requires Orange Wristband Access. Deliberately contrasted by the guide with the nearby Satta Sprint (a \"flat-out charge at top speeds\"), confirming Ito Sprint is the technical/cornering event of the two, not the high-speed one.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-technical",
+      "drivetrain_bias": "AWD",
+      "length": "5.8 miles, 1 lap (point-to-point)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "coastal/mountain mixed",
+        "caveat": "Real-world-vs-in-game mismatch was the original risk and it resolved in the claim's favor: the dropped \"mountain\" trait was the name-inference, and it was correctly removed. Two residual cautions. (1) The \"technical\" CHARACTER rests primarily on mapmaster.io's single descriptive sentence; forza.labsgg only corroborates distance/laps/type, not the prose. The exact sub-label (\"mixed-technical\" vs plain \"technical\") is a judgment call on a 5.8-mi coastal road that likely has flowing sections — profile is confirmed at the character level, not turn-by-turn, and finer features (hairpins, seawalls, elevation) remain unconfirmed as the claim itself states. (2) Naming-confusion hazard for future passes: FH6 also has a separate \"Ito Half-Mile\" DRAG event in the same area — do not conflate it with the \"Ito Sprint\" road race.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "shimanoyama-sprint",
+      "name": "Shimanoyama Sprint",
+      "location": "Shimanoyama mountains",
+      "region": "Shimanoyama",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Coastal/shoreline roads on the SW side of the Shimanoyama region — predominantly fast, flowing sealed tarmac (\"flat-out coastal sprint\"). Punctuated by at least one \"very sharp right turn\" that is the main hard-braking/technical pinch point. Mild elevation from adjacent inland hills; no street-circuit walls (this is open road, distinct from the Shimanoyama Charge street race and the Shimanoyama drift Circuit). Class S2 900 \"Extreme Track Toys\"; Summer, Clear Post-Rain, Late Afternoon conditions. Runs as a Road Racing event unlocked via Purple/Launch Control wristband.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-fast",
+      "drivetrain_bias": "AWD",
+      "length": "~4.0 miles, 1 lap (point-to-point sprint)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "technical/touge mountain, downhill",
+        "caveat": "Both corroborating sources are third-party community/guide databases (mapmaster.io, forza.labsgg.com), not the official Forza site, so residual risk of database inaccuracy remains. The place name literally means \"island mountain,\" which would naturally mislead toward a mountain/touge profile; the coastal reading depends on trusting the in-game route blurb over the name. One WebFetch summary also loosely mentioned \"mountain driving,\" and \"mild elevation from adjacent inland hills\" is plausible, but the dominant character per sources is coastal/fast, keeping mixed-fast (not high-speed, not technical) the best fit.",
+        "sources": [
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://www.youtube.com/watch?v=5pTw3Hx4iB0 (FH6 How to Find Shimanoyama Sprint Road Race Location)",
+          "https://game.wiki/forza-horizon-6/shimanoyama-region (region page; returned 403 on fetch, referenced via search snippet describing coastal terrain)"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "seaside-park-sprint",
+      "name": "Seaside Park Sprint",
+      "location": "Seaside park",
+      "region": "Ito",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Coastal/seaside point-to-point sprint along the southern coast of Ito that passes through Legend Island. Per the only detailed in-game route description (mapmaster.io): \"a mix of flat-out speed and sudden tight turns demand the driver's full focus\" — i.e., fast coastal straights/sweepers punctuated by abrupt tight corners. Tarmac surface; coastal roads (likely barriers/walls, but not confirmed). Elevation profile and specific hairpin/sweeper counts NOT documented by sources. Restriction: Hypercars (S2 900). Conditions per mapmaster: Summer, cloudy, dawn.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed",
+      "drivetrain_bias": "AWD",
+      "length": "4.5 mi, 1 lap (point-to-point)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "high-speed seaside",
+        "caveat": "The descriptive route blurb rests on a single source (mapmaster.io); labsgg corroborates only the metrics, not the wording. No source quantifies corner/sweeper counts, hairpin count, or elevation, so the exact sub-flavor is not pinned down — the route could lean \"mixed-fast\" (long coastal straights with a few punctuating tight corners) rather than evenly mixed, though \"sudden tight turns... demand the driver's full focus\" argues against a top-end-dominant read. The \"S2 900\" class detail in the claim is an inference from the \"Hypercars\" restriction (mapmaster/labsgg state \"Hypercars\" without an explicit numeric PI cap). No frame-by-frame gameplay-video verification of the actual driven line was performed; verdict rests on the official in-game event description plus corroborated metadata.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://guides4gamers.com/forza-horizon-6/pois/road-racing/"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    },
+    {
+      "id": "tateyama-kurobe-sprint",
+      "name": "Tateyama Kurobe Sprint",
+      "location": "Tateyama Kurobe Alpine Route",
+      "region": "Sotoyama",
+      "format": "sprint",
+      "discipline": "road",
+      "template_ref": "road",
+      "character": "Alpine route in Sotoyama with real elevation change; passes through the Tateyama Kurobe \"Snow Corridor\" = narrow section flanked by snow walls (punishing, low runoff). Mix of fast straights/sweepers (high average speed) plus a technical switchback/snow-corridor pinch that forces braking. Tarmac/asphalt surface. Runs roughly east-west through a valley.",
+      "character_confidence": "verified",
+      "status": "scaffold",
+      "class_analyses": [],
+      "speed_profile": "mixed-fast",
+      "drivetrain_bias": "either",
+      "length": "3.8 mi, 1 lap (point-to-point sprint)",
+      "research": {
+        "verdict": "CONFIRMED",
+        "ingame_verified": true,
+        "inferred_was": "technical alpine mountain",
+        "caveat": "Residual risks: (1) The event's OWN restriction is S2-900 Hypercars, not S1 — the 1:39.763 is an S1 Rivals-leaderboard time, so \"S1 world-record\" is a class leaderboard, not the event restriction, and \"hotlap\" is loose wording for a point-to-point sprint. (2) The in-game descriptor \"fast-paced\" is promotional flavor text and no source characterizes the corner-by-corner difficulty; the \"technical pinch\" half of mixed-fast is partly inferred from the real-world Snow Corridor, leaving mild uncertainty between \"mixed-fast\" and \"high-speed.\" (3) Real-world Tateyama Kurobe Alpine Route is a bus/trolley-only switchback road and the real Snow Corridor (Yuki-no-Otani) is a fairly straight walled walking section, so FH6's version is a fictionalized driving interpretation — but this cuts in the claim's favor (in-game plays faster than the name implies), so real-world-vs-in-game mismatch risk is low. (4) Per this project's own methodology note, much of the FH6 guide web is a self-copying SEO/AI cluster; here the cross-corroboration by the official forums, labsgg map data, and a video WR mitigates that.",
+        "sources": [
+          "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+          "https://forza.labsgg.com/all-race-tracks",
+          "https://forzafactory.com/festival_playlists/forza-horizon-6-tateyama-kurobe-alpine-route-speed-zone-guide/",
+          "https://www.youtube.com/watch?v=ygCtFzF3pPw",
+          "https://game.wiki/forza-horizon-6/sotoyama-region",
+          "https://www.speedrun.com/Forza_Horizon_6",
+          "https://forums.forza.net/t/tateyawa-kurobe-sprint/832745"
+        ],
+        "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
+      }
+    }
+  ],
+  "character_research_note": "Track character + speed_profile + drivetrain_bias researched & adversarially verified 2026-07-10 (ultracode). character_confidence: verified = an FH6 source described the in-game route; probable = corroborated but thin; speculation = real-world-name inference only. Leaderboard-based class analyses still come from your screenshots."
 }

@@ -604,6 +604,13 @@ window.FH6_DB = {
     "schema_version": "1.0.0",
     "captured": "2026-06-07",
     "meta_disclaimer": "FH6 launched 2026-05-19. This meta is ~3 weeks old and WILL shift. VERIFIED 2026-06-08 against independent databases (game8, Fandom, kudosprime, CODMunity) and forums (forums.forza.net, GTPlanet). Key fix: GT-R NISMO price corrected 270k→220k. Many SEO tier-lists plagiarize each other — superlatives without independent backing were downgraded. Confidence: verified = multiple INDEPENDENT sources; probable = single/early-consensus; contested = sources disagree.",
+    "meta_recheck": {
+      "date": "2026-07-11",
+      "verdict": "Dataset re-verified ~5 weeks after capture. STILL VALID for its purpose (progression picks: what to buy, for which discipline, and how hard to get) with the per-car annotations below. Prices/acquisition unchanged — no patch touched car stats or the economy of buying cars.",
+      "patch_audit": "PRIMARY (official release notes read 2026-07-11): v375.327 Jun 15 = drag-tire CORNERING nerf only (Playground: 'Drag times and Drag Leaderboards will be unaffected') + XP curve; v379.939 Jun 18 = Eliminator credits-exploit fix + Auto-Drive reward rebalance (economy, not cars); v382.893 Jun 23 = stability + badge fixes. NO July patch exists as of 2026-07-11. No car stats, prices, or acquisition paths were changed by any patch since capture.",
+      "two_metas_note": "There are now TWO distinct 'metas'. (1) SEO-guide consensus (grindout 2026-07-07 still names GT-R NISMO/S1, GR Supra '20/A, AMG One/S2, Golf R '21/B) — this matches our picks and is the right frame for PROGRESSION buys. (2) LEADERBOARD usage (forza.guide, Rivals-derived, updated 2026-06-23, cross-validated against our own 2026-07-10 Electric Town screenshot): top boards are dominated by lightweight kei cars (Honda Beat '91 is the #1 most-picked car in A, B and D road AND A, B dirt) and hard-to-get FE/race cars (Mazda Furai, 787B, LFA FE, Exige WTAC). Where a pick diverges from leaderboard reality it now carries a leaderboard_meta note. For tryhard Rivals grinding, read the leaderboard_meta field; for value progression, the tier/value ratings stand.",
+      "series2_note": "Series 2 'Horizon Decades' (Jun 18-Jul 16) added ~10-14 cars (911 Turbo S Leichtbau, Exige Cup 430, Cerbera Speed 12, Saleen S7 LM, Rallye Golf '89, ...). None crack current tier lists' top picks yet; they are limited-time Playlist rewards (acquisition_difficulty hard once their week passes). Not added as picks — collect them while available if convenient."
+    },
     "pi_classes": {
       "D": "100-400",
       "C": "401-500",
@@ -663,6 +670,8 @@ window.FH6_DB = {
         },
         "share_codes": [],
         "why": "Unmatched AWD launch in S1; menace in Touge and street events. 600+ hp means AWD is needed to avoid wheelspin. Light tuning pushes it into higher classes. Free path via Collection Journal makes it the best-value S1 buy.",
+        "use_case": "S1 road & touge all-rounder — forgiving AWD, free via Journal; the default S1 progression buy",
+        "leaderboard_meta": "2026-07-11 check: SEO lists (grindout 7/7) still crown it S1 — but it is ABSENT from forza.guide's S1 road top-15 (leaderboard usage); it shows up at #14 in S2 instead (players build it INTO S2). For S1 Rivals tryharding the boards favor Acura NSX '22 / Viper '08 / 911 GT3 RS '23. Still a great progression buy.",
         "confidence": "verified",
         "sources": [
           "pcgamer",
@@ -710,6 +719,8 @@ window.FH6_DB = {
         },
         "share_codes": [],
         "why": "The best AWD all-rounder in B-class and the ideal FIRST tuning project for a new player: cheap (29k), AWD so it's forgiving and hard to spin, and the natural in-game cousin of a real Golf GTI. Learn the whole tuning menu on this before touching faster cars.",
+        "use_case": "First tuning project / forgiving B-class daily — learn the tune menu here",
+        "leaderboard_meta": "2026-07-11 check: still a grindout (7/7) B-class S-tier pick. Not in forza.guide's B road top-15 (that board is kei-car territory: Honda Beat '91 #1, Civic '97 #2) — expected; this is a learning/progression pick, not a board-chaser.",
         "confidence": "verified",
         "sources": [
           "game8-db",
@@ -761,6 +772,7 @@ window.FH6_DB = {
         },
         "share_codes": [],
         "why": "The Mk7 sibling of the golf-r-2021 beginner pick, ~2k cheaper (27k) and 10 PI lower stock. Same forgiving Haldex AWD hot-hatch platform — an ideal first tuning project. Its home is B class (cap ~600), where a grip-maxed build dominates road/touge.",
+        "use_case": "Budget first tuning project (the user's actual current car) — B-class road/touge/dirt",
         "confidence": "verified",
         "sources": [
           "forza-labs-db",
@@ -793,10 +805,13 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Strong S1 all-rounder; balanced hybrid AWD for technical road/touge.",
-        "confidence": "probable",
+        "why": "Strong S1 all-rounder; balanced hybrid AWD for technical road/touge. UPGRADED 2026-07-11: forza.guide (Rivals-leaderboard-derived) ranks it the #1 most-picked S1 road car — actual board usage, not SEO opinion. This is now the strongest-evidenced S1 road pick in the DB.",
+        "use_case": "The real S1 road meta car per leaderboard usage — technical circuits and touge",
+        "leaderboard_meta": "2026-07-11: #1 most-picked S1 car across all road tracks on forza.guide (updated 6/23), appearing on nearly every circuit's S1 board. Confidence upgraded probable→verified on this basis (independent of the single SEO source).",
+        "confidence": "verified",
         "sources": [
-          "games.gg"
+          "games.gg",
+          "forza-guide-meta"
         ],
         "acquisition_difficulty": "easy"
       },
@@ -824,6 +839,8 @@ window.FH6_DB = {
         "tune_baseline": null,
         "share_codes": [],
         "why": "Benefits enormously from an AWD tune; cheap and accessible from Autoshow — strong budget S1 entry.",
+        "use_case": "Budget S1 road entry — comfortable AWD sedan, not a board-chaser",
+        "leaderboard_meta": "2026-07-11: absent from all forza.guide leaderboard lists — zero top-board usage. Keep as a comfort/budget buy only; if you want S1 board pace, the NSX '22 costs ~43k more and IS the meta.",
         "confidence": "probable",
         "sources": [
           "egamersworld"
@@ -861,6 +878,8 @@ window.FH6_DB = {
         },
         "share_codes": [],
         "why": "Best all-around S2 car in the current meta.",
+        "use_case": "Paid-DLC S2 speed monster — best on long high-speed routes (Colossus, Coastline)",
+        "leaderboard_meta": "2026-07-11: leaderboard-VALIDATED for its niche — #1 S2 on The Colossus and Coastline Sprint (forza.guide 6/23). On tight S2 circuits the boards instead run Mazda Furai / 787B / LFA FE (all hard-to-get FE/race cars). If you own the Car Pass, this is the S2 long-track pick.",
         "confidence": "verified",
         "sources": [
           "egamersworld",
@@ -894,6 +913,8 @@ window.FH6_DB = {
         "tune_baseline": null,
         "share_codes": [],
         "why": "Consistently cited as the best overall / top S2 car. Note: the Ferrari FXX-K Evo is named by several independent sources as a co-best S2 do-everything pick worth comparing.",
+        "use_case": "Free S2 flagship (FH5 loyalty) — the no-spend answer to S2 road",
+        "leaderboard_meta": "2026-07-11: grindout (7/7) still names it S2 king, but its forza.guide leaderboard presence is MARGINAL (appears on Shikisai/Kawazu boards only). S2 boards are ruled by Furai/787B/LFA FE — all wheelspin/rare cars. Verdict: still the best FREE S2 car; not the outright S2 meta.",
         "confidence": "verified",
         "sources": [
           "dexerto",
@@ -938,6 +959,8 @@ window.FH6_DB = {
         "tune_baseline": null,
         "share_codes": [],
         "why": "Exceptionally versatile A-class all-rounder; clean baseline for road and touge. Cheap, RNG-free acquisition makes it an easy progression pick.",
+        "use_case": "A-class road/touge value pick — cheap, free via Journal, tunes for anything",
+        "leaderboard_meta": "2026-07-11: SEO lists (timesaver 6/10, grindout 7/7) still crown it best A-class. Leaderboard picture is weaker: NOT in forza.guide's A road all-tracks top-15 (that list runs Ford GT '05 #1, Honda Beat '91 #2); it appears on the Electric Town A board only — which matches our own 7/10 screenshot (Supra x3 in the clean cluster there). Verdict: top VALUE pick, mid on boards.",
         "confidence": "verified",
         "sources": [
           "pcgamer",
@@ -971,7 +994,7 @@ window.FH6_DB = {
         "price_note": "30,000 cr verified across game8, Fandom, and kudosprime (independent databases). Stock car is a B-class base; the A-class listing here reflects a typical dirt build, not its stock PI.",
         "acquisition": "Autoshow",
         "tier": "S",
-        "value_rating": 10,
+        "value_rating": 9,
         "upgrade_priority": [
           "dirt/rally tires",
           "suspension (soften for dirt)",
@@ -983,8 +1006,10 @@ window.FH6_DB = {
           "note": "Soften springs/damping and raise ride height vs. road baseline for dirt compliance."
         },
         "share_codes": [],
-        "why": "Most consistent rally pick across multiple classes and, at 30,000 cr, arguably the best value car in the entire game for dirt/rally.",
-        "confidence": "verified",
+        "why": "Most consistent rally pick across multiple classes and, at 30,000 cr, arguably the best value car in the entire game for dirt/rally. RECHECK 2026-07-11: the superlative has SOFTENED — dexerto's updated rally list now puts the '04 at B-tier (behind Evo VIII MR / Focus RS at S), and on forza.guide dirt boards the '04 shows up mainly as a B-CLASS build (#15 B dirt; the '05 WRX ranks higher in A). Still the best 30k you can spend on rally; no longer the consensus #1.",
+        "use_case": "Cheapest serious rally starter (30k) — build it for B/A dirt; value king, not board king",
+        "leaderboard_meta": "2026-07-11: forza.guide dirt — WRX '04 #15 in B class (players run it in B, not A); WRX '05 #10 in A. Dexerto moved '04 to B-tier. Tier kept S for value; treat 'best rally car' claims as superseded by the Evo VIII MR.",
+        "confidence": "contested",
         "sources": [
           "dexerto",
           "gamingpromax",
@@ -1015,11 +1040,14 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Frequently called the best A-class rally car — but this 'best overall' crown comes only from a cluster of SEO tier-lists with identical phrasing; no independent community source (game8/forums) corroborates it yet. Strong pick, unverified superlative.",
-        "confidence": "probable",
+        "why": "Frequently called the best A-class rally car. UPGRADE 2026-07-11: the superlative is now leaderboard-CORROBORATED — forza.guide dirt boards show the 22B at #4 in A class all-tracks, plus top-15 in B, S1 AND S2 dirt (players build it across four classes). The June skepticism ('SEO cluster, no independent corroboration') is resolved.",
+        "use_case": "A-class dirt board car + the skill-farm workhorse — one car, two jobs",
+        "leaderboard_meta": "2026-07-11: forza.guide dirt all-tracks — #4 A, #8 S2, #10 S1, #11 B. Broadest class coverage of any rally car in the DB. Confidence probable→verified.",
+        "confidence": "verified",
         "sources": [
           "gamingpromax",
-          "games.gg"
+          "games.gg",
+          "forza-guide-meta"
         ],
         "acquisition_difficulty": "easy"
       },
@@ -1036,8 +1064,8 @@ window.FH6_DB = {
         "power_split": "30/70 F/R",
         "price_credits": 30000,
         "acquisition": "Autoshow ~30,000 cr (buy anytime). Also in the Deluxe/Premium Welcome Pack.",
-        "tier": "A",
-        "value_rating": 8,
+        "tier": "S",
+        "value_rating": 9,
         "upgrade_priority": [
           "dirt/rally tires",
           "soften suspension",
@@ -1046,11 +1074,14 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Nearly identical role to the WRX STI with slightly higher stats across the board.",
+        "why": "Nearly identical role to the WRX STI with slightly higher stats across the board. PROMOTED 2026-07-11: multiple updated sources (dexerto rally S-tier; forzahorizonhub 'best rally car in the game') now rank the Evo VIII MR ABOVE the WRX '04, and forza.guide dirt boards corroborate (Evo VIII works/MR variants in A/S1/S2 top-15s). The 30k Evo has quietly become the stronger of the two budget rally twins.",
+        "use_case": "The budget rally pick that overtook the WRX — A-class dirt, 30k",
+        "leaderboard_meta": "2026-07-11: dexerto updated list = S-tier (WRX '04 = B-tier); forza.guide dirt shows Evo VIII WP top-15 in A/S1/S2 and Evo TME/Evo III variants strong in A/B. Tier raised A→S.",
         "confidence": "verified",
         "sources": [
           "dexerto",
-          "gamingpromax"
+          "gamingpromax",
+          "forza-guide-meta"
         ],
         "acquisition_difficulty": "easy"
       },
@@ -1076,8 +1107,10 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Scrappy default dirt choice — high speed, acceleration, and off-road handling.",
-        "confidence": "probable",
+        "why": "Scrappy default dirt choice — high speed, acceleration, and off-road handling. RECHECK 2026-07-11: CONTESTED — dexerto's updated rally list rates the '17 Focus RS S-tier, but it is absent from every forza.guide dirt leaderboard top-15 (zero board usage). One of these is wrong; the boards are the harder evidence.",
+        "use_case": "Cheap A-class dirt alternative if you dislike the Subaru/Evo feel",
+        "leaderboard_meta": "2026-07-11: dexerto = S-tier vs forza.guide = absent from all dirt boards. Confidence downgraded to contested; prefer the Evo VIII or 22B first.",
+        "confidence": "contested",
         "sources": [
           "dexerto"
         ],
@@ -1108,7 +1141,9 @@ window.FH6_DB = {
         "tune_baseline": null,
         "share_codes": [],
         "why": "Handles both off-road and pavement at A-Class — flexible cross-country pick.",
-        "confidence": "probable",
+        "use_case": "Free-player's FE off-roader — cross-country + dirt without VIP/wheelspin luck",
+        "leaderboard_meta": "2026-07-11: leaderboard-corroborated — #15 A dirt all-tracks on forza.guide plus multiple trail boards (Waterfall, Takashiro, Gauntlet, Hirosaki). game8's off-road guide still names it the free-player backup to the Viper FE. Confidence probable→verified.",
+        "confidence": "verified",
         "sources": [
           "gamingpromax"
         ],
@@ -1147,7 +1182,9 @@ window.FH6_DB = {
         "tune_baseline": null,
         "share_codes": [],
         "why": "Strong S1+ off-road pick. NOTE: game8's off-road guide ranks the 1999 Dodge Viper GTS ACR Forza Edition (9.9 off-road, VIP/Premium-gated) as the best-overall cross-country car; this entry is the right idea but the ACR FE is the true top pick if you have VIP.",
-        "confidence": "probable",
+        "use_case": "VIP owners' cross-country/dirt monster — top S1+ off-road if you have the DLC",
+        "leaderboard_meta": "2026-07-11: strongly leaderboard-corroborated — forza.guide dirt all-tracks #2 in S2, #11 in S1, #5 in R, and #1 on several individual boards (Taiyaki S1, Cherry Field S1). game8 (5/24 update) still ranks it best overall off-road. Confidence probable→verified.",
+        "confidence": "verified",
         "sources": [
           "game8",
           "gamingpromax"
@@ -1179,6 +1216,8 @@ window.FH6_DB = {
         "tune_baseline": null,
         "share_codes": [],
         "why": "9.8 off-road stat — nearly impossible to beat on rough terrain in B-Class.",
+        "use_case": "16k B-class cross-country cheat code — works nearly stock",
+        "leaderboard_meta": "2026-07-11: no leaderboard read available — forza.guide covers road+dirt Rivals only, not cross-country. game8's off-road guide no longer surfaces it in its tier summary (their A pick is now the Mercedes X-Class '18). Keeping on B cross-country value; watch for a CC data source.",
         "confidence": "verified",
         "sources": [
           "game8",
@@ -1208,7 +1247,9 @@ window.FH6_DB = {
         "tune_baseline": null,
         "share_codes": [],
         "why": "Best D-through-B cross-country pick — heavy-duty clearance and off-road fundamentals with minimal tuning investment.",
-        "confidence": "probable",
+        "use_case": "Low-class cross-country truck — D-B events with near-zero tuning effort",
+        "leaderboard_meta": "2026-07-11: corroborated twice — game8 (5/24) still ranks it top D-B cross-country, AND it shows real board usage on forza.guide dirt (#7 D all-tracks, #1 D on Sotoyama/Taiyaki/Nukabira/Waterfall trails). Confidence probable→verified.",
+        "confidence": "verified",
         "sources": [
           "gamingpromax"
         ],
@@ -1254,7 +1295,9 @@ window.FH6_DB = {
           ],
           "reason": "These (from a TikTok aggregator) could not be found in ANY independent source; cited times (6.197s/6.083s) don't match community builds (~6.05s). Treat as unverified/likely fabricated. Verify any code in-game before trusting."
         },
-        "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game.",
+        "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game. RECHECK 2026-07-11: the Jun 15 drag-tire nerf did NOT touch drag events (Playground: 'Drag times and Drag Leaderboards will be unaffected'), and CODMunity still lists this car/code as its featured drag tune (page updated 6/27). Pick stands.",
+        "use_case": "Drag-strip specialist (if wheelspin luck delivers one) — otherwise buy the non-FE twin",
+        "leaderboard_meta": "2026-07-11: CODMunity drag DB (updated 6/27) still features this exact car + code 514752751 as the top drag entry. Drag meta unchanged by patches.",
         "confidence": "probable",
         "sources": [
           "codmunity-drag",
@@ -1283,8 +1326,11 @@ window.FH6_DB = {
         "year": 1994,
         "class": "S2",
         "disciplines": [
-          "drag"
+          "drag",
+          "road",
+          "dirt_rally"
         ],
+        "disciplines_note": "EXPANDED 2026-07-11: originally catalogued drag-only, but forza.guide leaderboards show the MX-5 FE '94 is a cross-discipline monster — #1 S2 on Highway Circuit, #1 S1 on The Colossus, #1 S2 on The Gauntlet, and top-5 S1/S2 across nearly every dirt track. The 500k aftermarket buy now covers three disciplines, not one.",
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD (drivetrain 🟡 — one source says RWD)",
         "power_split": "drag-specific",
@@ -1302,7 +1348,9 @@ window.FH6_DB = {
           "note": "Ships with an S2 850 drag preset, drag tires, widebody, Viper-derived twin-turbo V10, + a Skills boost. Drag-tune per the drag guide (gearing first, high accel diff, low rear psi)."
         },
         "share_codes": [],
-        "why": "Widely rated the best drag car in FH6 (pre-fitted drag tires, elite launch/accel). Crucially, its acquisition is MEDIUM not hard: a targeted aftermarket-shop reload-buy, not Wheelspin RNG — corrected 2026-07-10 after a player flagged skycoach's wrong 'Wheelspin only' label.",
+        "why": "Widely rated the best drag car in FH6 (pre-fitted drag tires, elite launch/accel). Crucially, its acquisition is MEDIUM not hard: a targeted aftermarket-shop reload-buy, not Wheelspin RNG — corrected 2026-07-10 after a player flagged skycoach's wrong 'Wheelspin only' label. UPGRADED 2026-07-11: leaderboards reveal it is arguably the best VALUE deterministic car in the game — top boards in drag, highway road AND dirt (see disciplines_note).",
+        "use_case": "The 500k do-everything FE: drag strips, highway/Colossus road boards, and S1/S2 dirt",
+        "leaderboard_meta": "2026-07-11: forza.guide — #1 S2 Highway Circuit, #1 S1 The Colossus, #1 S2 The Gauntlet, #4 S1 + #4 S2 dirt all-tracks (top-5 on ~15 individual dirt boards). The single most board-present deterministic-acquisition car in the dataset.",
         "confidence": "verified",
         "sources": [
           "game8",
@@ -2688,6 +2736,435 @@ window.FH6_DB = {
       }
     ]
   },
+  "eliminatorTips": {
+    "schema_version": "1.0.0",
+    "captured": "2026-07-11",
+    "meta_disclaimer": "The Eliminator is FH6's battle-royale mode inside Horizon Play. Researched 2026-07-11 (~8 weeks post-launch). Mechanics claims cross-checked across timesaver.gg, gamingpromax, bossdown, u4n, mitchcactus, a Steam player thread, and TWO PRIMARY sources (official Forza Support FAQ + June 18 2026 release notes, both read directly). CAUTION: several Eliminator guides share near-identical wording (timesaver/u4n car lists), so 'multiple sources' does not always mean independent — claims that only cluster sites make are tagged probable, not verified. forzahorizoncar.com's car-tier list is explicitly speculative and contradicts everyone else; it is excluded (that site was already retracted once in this project for parroting FH5 PI classes).",
+    "confidence_legend": {
+      "verified": "Multiple independent sources agree, or primary (official/in-game) evidence.",
+      "probable": "Single source or a cluster of possibly-copied sources; plausible, not independently confirmed.",
+      "contested": "Sources disagree — both versions recorded, verify in-game."
+    },
+    "mode_overview": {
+      "what": "Up to 72 players free-roam a shrinking arena on the Japan map. Everyone spawns in the same Level 1 starter car, upgrades via Car Drops (Levels 1-10) or by winning horn-initiated Head-to-Head sprint races (loser is eliminated), until a Final Showdown sprint decides the winner.",
+      "player_count": {
+        "value": 72,
+        "confidence": "verified",
+        "note": "Same cap as FH5; stated by multiple FH6 guides."
+      },
+      "starter_car": {
+        "value": "1984 Honda City (Level 1)",
+        "confidence": "verified",
+        "note": "Replaces FH5's VW Beetle. Consistent across timesaver, gamingpromax, lootbar."
+      },
+      "map_context": {
+        "value": "Japan: dense Tokyo urban blocks, touge mountain passes, forests, rice fields. More technical and tighter than FH5's Mexico — head-to-heads punish overdriving more.",
+        "confidence": "probable"
+      },
+      "hub_context": {
+        "value": "One of the modes inside Horizon Play, FH6's unified online hub that replaced FH5's Horizon Open.",
+        "confidence": "probable"
+      }
+    },
+    "mechanics": [
+      {
+        "id": "car-drops",
+        "name": "Car Drops",
+        "detail": "Cars rated Level 1-10 sit parked around the arena, marked by columns of purple/pink signal smoke visible from long range (some guides also mention a drone marker). Drive into the smoke to claim. The drop's level is displayed before you commit.",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator",
+          "u4n-eliminator-cars",
+          "lootbar-eliminator"
+        ]
+      },
+      {
+        "id": "drop-spawns",
+        "name": "Drop spawn behavior",
+        "detail": "Drops are randomized per match, drawn from a pool of fixed possible spawn locations — you cannot farm a specific car at a specific spot. u4n suggests checking mountain ridges, warehouse/dock clusters, bridges/tunnels/landmarks, and forest valleys.",
+        "confidence": "probable",
+        "sources": [
+          "u4n-eliminator-cars",
+          "timesaver-eliminator"
+        ]
+      },
+      {
+        "id": "drop-respawn",
+        "name": "Drop taken by someone else",
+        "detail": "If another player reaches a drop first, it respawns elsewhere (gamingpromax). Single-source claim — verify in-game.",
+        "confidence": "probable",
+        "sources": [
+          "gamingpromax-eliminator"
+        ]
+      },
+      {
+        "id": "head-to-head",
+        "name": "Head-to-Head challenges",
+        "detail": "Get near another player and honk your horn to challenge them to a short point-to-point sprint to a marked finish. Loser is eliminated from the match on the spot — no respawns. You cannot collect Car Drops while a Head-to-Head is active (single source).",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator",
+          "bossdown-eliminator",
+          "mitchcactus-eliminator"
+        ]
+      },
+      {
+        "id": "h2h-win-reward",
+        "name": "What the winner gets — CONTESTED",
+        "detail": "Version A (timesaver, bossdown): the winner automatically takes the better of the two cars if there is a level difference. Version B (gamingpromax): the winner chooses between taking the opponent's car OR upgrading their current car by one level. mitchcactus says only 'the winner receives an upgrade choice'. Either way the practical takeaway is identical: beating a higher-level driver upgrades you on the spot. Verify the exact prompt in-game.",
+        "confidence": "contested",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator",
+          "bossdown-eliminator",
+          "mitchcactus-eliminator"
+        ]
+      },
+      {
+        "id": "zone",
+        "name": "Shrinking arena",
+        "detail": "A pink dome contracts in stages. Caught outside the wall, a countdown timer eliminates you if you don't get back inside. The shrink forces contact; late-match drops become scarce.",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "bossdown-eliminator",
+          "lootbar-eliminator"
+        ]
+      },
+      {
+        "id": "final-showdown",
+        "name": "Final Showdown",
+        "detail": "When roughly 8-12 drivers remain, every survivor races to a single revealed finish point; first across the line wins the whole match. gamingpromax adds a 30-second countdown before it begins (single source).",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator",
+          "bossdown-eliminator"
+        ]
+      },
+      {
+        "id": "rewards",
+        "name": "Rewards",
+        "detail": "Every session earns Horizon Play XP regardless of placement (rank 1-100, badge every 10 levels); each Horizon Play level up to 25 also grants Festival Points toward the single-player Wristband. Eliminator-specific Mode Milestone badges (play N events, reach Final Showdown N times, win N times) grant bonus XP. No exclusive car is guaranteed for a single win. Playlist seasonal challenges frequently include Eliminator objectives.",
+        "confidence": "probable",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator",
+          "egamersworld-wristbands"
+        ],
+        "note": "Reward structure consistent across guides but not yet checked against a primary source; the numbers (25, 1-100) match FH6's general progression docs."
+      },
+      {
+        "id": "autodrive-nerf",
+        "name": "Auto Drive reward rebalance (June 18, 2026)",
+        "detail": "Rewards in some game modes were rebalanced so they can no longer be farmed AFK with Auto Drive, after an Eliminator credits exploit paid out hundreds of millions of credits per match. Do not build any farming plan around Eliminator payouts — the economy there was explicitly rebalanced.",
+        "confidence": "verified",
+        "sources": [
+          "forza-support-eliminator-faq",
+          "forza-support-notes-jun18",
+          "traxion-eliminator-exploit"
+        ]
+      }
+    ],
+    "car_levels": {
+      "note": "INDEPENDENCE WARNING: the Level 3-10 clusters below appear with near-identical wording on timesaver.gg and u4n — one likely copied the other, so treat as a single source until confirmed in-game. The Level 2 list appears only on u4n. Levels are per-car fixed within a match pool but the roster may rotate with series updates.",
+      "confidence": "probable",
+      "levels": [
+        {
+          "level": 1,
+          "cars": [
+            "Honda City '84 (starter)"
+          ],
+          "role": "Escape it ASAP — handles terribly, especially off-road."
+        },
+        {
+          "level": 2,
+          "cars": [
+            "Abarth 131",
+            "Abarth 595",
+            "BMW 2002 Turbo",
+            "Honda Civic CRX Mugen",
+            "Subaru Legacy '92",
+            "Toyota Tacoma TRD Pro"
+          ],
+          "role": "Marginal upgrades; the Legacy and Tacoma at least cope with dirt."
+        },
+        {
+          "level": 3,
+          "cars": [
+            "Ford Bronco",
+            "Land Rover Defender '20",
+            "Mitsubishi Lancer Evo III",
+            "Peugeot 205 T16"
+          ],
+          "role": "First genuinely useful tier — all four are AWD/off-road capable."
+        },
+        {
+          "level": 4,
+          "cars": [
+            "(shares pool reporting with L3 in sources)"
+          ],
+          "role": "See level 3 — guides report these as a 3-4 band."
+        },
+        {
+          "level": 5,
+          "cars": [
+            "Alumi Craft Class 1 Buggy",
+            "BMW X5 M",
+            "Audi RS6 '09",
+            "Rivian R1T"
+          ],
+          "role": "Strong mid-game: fast AND terrain-proof. Reported as a 5-6 band."
+        },
+        {
+          "level": 6,
+          "cars": [
+            "(5-6 band, see above)"
+          ],
+          "role": ""
+        },
+        {
+          "level": 7,
+          "cars": [
+            "Lamborghini Urus",
+            "Porsche 911 Rallye",
+            "Nissan GT-R '17",
+            "Subaru WRX STI ARX Supercar"
+          ],
+          "role": "Late-game all-rounders. Reported as a 7-8 band."
+        },
+        {
+          "level": 8,
+          "cars": [
+            "(7-8 band, see above)"
+          ],
+          "role": ""
+        },
+        {
+          "level": 9,
+          "cars": [
+            "Jaguar C-X75",
+            "Porsche 911 Turbo S"
+          ],
+          "role": "Top speed, but watch terrain — reported as a 9-10 band."
+        },
+        {
+          "level": 10,
+          "cars": [
+            "Mercedes-AMG ONE"
+          ],
+          "role": "The ceiling. Wins most head-to-heads on pavement; still loses to a buggy in a forest."
+        }
+      ]
+    },
+    "tips": [
+      {
+        "id": "early-any-upgrade",
+        "phase": "early_game",
+        "tip": "Take the nearest drop that raises your level — don't cross half the map for a 'better' car.",
+        "why": "Going from Level 1 to 3-4 fast matters more than car choice. Every minute in the Honda City is a minute you lose any forced head-to-head. A nearby Level 3 beats a distant Level 4.",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "bossdown-eliminator",
+          "lootbar-eliminator"
+        ]
+      },
+      {
+        "id": "early-no-fights",
+        "phase": "early_game",
+        "tip": "Default opening: collect first, challenge later — avoid fights while still in the starter car.",
+        "why": "In identical cars a head-to-head is a coin flip on spawn position (community confirms spawn proximity to the waypoint often decides it). A loss is elimination; a drop is free progress.",
+        "confidence": "verified",
+        "sources": [
+          "gamingpromax-eliminator",
+          "mitchcactus-eliminator",
+          "steam-eliminator-thread"
+        ]
+      },
+      {
+        "id": "early-bully-alt",
+        "phase": "early_game",
+        "tip": "CONTESTED alternative: timesaver instead advises grabbing your first head-to-head win immediately, camping the Festival-site spawn cluster for Level 1 opponents.",
+        "why": "Logic: a win over any opponent levels you without hunting drops, and early opponents are all in equal cars so skill decides. This directly contradicts the 'collect first' consensus — it's a playstyle fork (aggressive vs safe), not a settled fact. The safe line is better until you know the duel micro-game.",
+        "confidence": "contested",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator"
+        ]
+      },
+      {
+        "id": "challenge-down",
+        "phase": "mid_game",
+        "tip": "Only challenge drivers at your level or below.",
+        "why": "A Level 10 beats a Level 3 in almost any duel — level difference dominates skill. Challenging up is a coin flip at best; challenging down or even keeps the odds on your side.",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "bossdown-eliminator"
+        ]
+      },
+      {
+        "id": "steal-up",
+        "phase": "mid_game",
+        "tip": "If you're confident in a matchup, beating a HIGHER-level driver is the fastest upgrade in the mode.",
+        "why": "The winner ends up with the better car (whether automatically or via choice — see contested h2h-win-reward mechanic). Pick these fights only on terrain that favors you, e.g. your AWD vs their hypercar in a forest.",
+        "confidence": "verified",
+        "sources": [
+          "bossdown-eliminator",
+          "timesaver-eliminator"
+        ]
+      },
+      {
+        "id": "awd-over-level",
+        "phase": "mid_game",
+        "tip": "Prefer an AWD / rally / off-road car at a LOWER level over a faster road car.",
+        "why": "Japan's arena is mud, grass, gravel, forest and rice paddies between every road. A grippy mid-level car you can drive straight through a forest is worth more than a hypercar that bogs down off-road. Community consensus: AWD dominates.",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator",
+          "lootbar-eliminator"
+        ]
+      },
+      {
+        "id": "cut-offroad",
+        "phase": "head_to_head",
+        "tip": "In duels and the Showdown, point the car at the checkpoint and cut straight across terrain — the road is almost never the fastest line.",
+        "why": "There is no routing etiquette: plow through forests, fields and embankments. Opponents who politely follow roads lose. This is why the AWD rule above exists.",
+        "confidence": "verified",
+        "sources": [
+          "timesaver-eliminator",
+          "gamingpromax-eliminator"
+        ]
+      },
+      {
+        "id": "duel-positioning",
+        "phase": "head_to_head",
+        "tip": "Initiate challenges when YOU are positioned well: facing open ground / toward the duel space, ideally between the opponent and likely finish direction.",
+        "why": "Players report duels being decided by who started closer to or facing the waypoint. You control WHEN a challenge starts — honk when the geometry favors you, not when you've just overshot a hairpin.",
+        "confidence": "probable",
+        "sources": [
+          "mitchcactus-eliminator",
+          "steam-eliminator-thread"
+        ]
+      },
+      {
+        "id": "control-over-throttle",
+        "phase": "head_to_head",
+        "tip": "Drive at ~90% commitment instead of 100% throttle.",
+        "why": "FH6's touge roads and tight urban blocks punish overdriving; one wall-hit in a duel is elimination. Smooth beats fast in a 40-second sprint.",
+        "confidence": "probable",
+        "sources": [
+          "lootbar-eliminator"
+        ]
+      },
+      {
+        "id": "hide-when-weak",
+        "phase": "mid_game",
+        "tip": "Stationary cars don't appear on the minimap — park in a forest or behind a building to avoid being hunted while weak.",
+        "why": "Movement is what shows up to hunters. Going dark lets you wait out a bad car situation or let a nearby high-level bully pass. Single-source claim (gamingpromax) — verify before relying on it.",
+        "confidence": "probable",
+        "sources": [
+          "gamingpromax-eliminator"
+        ]
+      },
+      {
+        "id": "showdown-position",
+        "phase": "final_showdown",
+        "tip": "As the player count approaches ~12, pre-position near the arena center with open ground around you — but outside the busiest cluster.",
+        "why": "The finish can be revealed in any direction; center minimizes worst-case distance. Open ground means you launch at speed when it triggers (there's a ~30s countdown per one source). Avoiding the cluster keeps you out of last-second challenge griefs and pile-ups.",
+        "confidence": "verified",
+        "sources": [
+          "gamingpromax-eliminator",
+          "bossdown-eliminator",
+          "lootbar-eliminator"
+        ]
+      },
+      {
+        "id": "showdown-route",
+        "phase": "final_showdown",
+        "tip": "Showdown routing: confirm the destination FIRST, then commit to the cleanest reliable line — usually the diagonal across country, not the highway.",
+        "why": "Map knowledge wins Showdowns: shortcuts through fields and off-road paths beat straight-line speed, and a stable high-level AWD car survives the mixed terrain. One blind cliff or river crossing loses the match at the finish line.",
+        "confidence": "verified",
+        "sources": [
+          "gamingpromax-eliminator",
+          "mitchcactus-eliminator",
+          "timesaver-eliminator"
+        ]
+      },
+      {
+        "id": "let-them-fight",
+        "phase": "mid_game",
+        "tip": "Let other players duel each other and thin the field — you don't earn anything extra for kills you didn't need.",
+        "why": "Every duel removes one player for free from your perspective. Your win condition is the Showdown, not a kill count; only fight for upgrades or when cornered.",
+        "confidence": "probable",
+        "sources": [
+          "bossdown-eliminator",
+          "lootbar-eliminator"
+        ]
+      },
+      {
+        "id": "daily-challenge-win",
+        "phase": "general",
+        "tip": "Playlist/daily objectives worded 'complete a Head-to-Head' actually require you to WIN the duel, not just take part.",
+        "why": "timesaver flags this explicitly; losing (= elimination) doesn't credit the challenge. Budget a few matches for it.",
+        "confidence": "probable",
+        "sources": [
+          "timesaver-eliminator"
+        ]
+      },
+      {
+        "id": "no-credit-farm",
+        "phase": "general",
+        "tip": "Don't treat Eliminator as a credit farm — its payouts were explicitly rebalanced after the June 2026 Auto Drive exploit.",
+        "why": "The exploit paid hundreds of millions per match; the June 18 hotfix patched it, rolled exploiters back to 10M cr, and rebalanced mode rewards against AFK farming. Play it for XP, badges and Playlist objectives.",
+        "confidence": "verified",
+        "sources": [
+          "forza-support-eliminator-faq",
+          "forza-support-notes-jun18"
+        ]
+      },
+      {
+        "id": "expect-luck",
+        "phase": "general",
+        "tip": "Calibrate expectations: individual matches are luck-heavy — drop RNG and duel spawn positions matter as much as pace. Grind wins across many matches, not one.",
+        "why": "Steam-thread consensus: 'if you get lucky and find a good car, you win'; players report being trapped by terrain or losing duels off spawn geometry. The skill expression is in aggregate decision quality (which fights, which cars, where to be), not any single match.",
+        "confidence": "probable",
+        "sources": [
+          "steam-eliminator-thread"
+        ]
+      }
+    ],
+    "patch_history": [
+      {
+        "date": "2026-06-15",
+        "event": "Eliminator matchmaking temporarily disabled while Playground investigated a credits exploit (Auto Drive farming paying out unintended amounts).",
+        "confidence": "verified",
+        "sources": [
+          "forza-support-eliminator-faq",
+          "traxion-eliminator-exploit"
+        ]
+      },
+      {
+        "date": "2026-06-18",
+        "event": "Series 2 Hotfix 1 (v379.939): exploit fixed, Eliminator restored, mode rewards rebalanced vs Auto Drive. All players gifted a 2021 McLaren Sabre (Message Center → Gifts). Exploiters rolled back to max 10M credits; no bans.",
+        "confidence": "verified",
+        "sources": [
+          "forza-support-notes-jun18",
+          "forza-support-eliminator-faq"
+        ]
+      }
+    ],
+    "retracted": [
+      {
+        "what": "forzahorizoncar.com Eliminator car-tier list (Civic Type R / Chiron Supersport / Valkyrie etc.) and its 'three-drop rule'.",
+        "why": "The list is self-described as speculative, contradicts the timesaver/u4n roster, and the site was already retracted in this project (meta-cars.json) for parroting FH5 PI classes as FH6 fact. No unique claim from it is included."
+      }
+    ]
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",
@@ -3111,6 +3588,133 @@ window.FH6_DB = {
         "title": "Mein-MMO — Unlock the Mazda MX-5 Miata FE '94",
         "url": "https://mein-mmo.de/en/forza-horizon-6-unlock-mazda-mx-5-miata-fe-94-this-is-how-you-get-one-of-the-best-cars-for-speed-traps-and-drag-races,1568245/",
         "used_for": "VERIFIED Miata FE acquisition: aftermarket spot N of Drag Meet, reload until it spawns, 500k (450k discounted) — NOT Wheelspin. Corrects skycoach."
+      },
+      {
+        "id": "forza-support-eliminator-faq",
+        "tier": "primary",
+        "title": "Official Forza Support — The Eliminator & Auto Drive FAQ",
+        "url": "https://support.forza.net/hc/en-us/articles/52613640745875-The-Eliminator-Support-FAQ",
+        "used_for": "PRIMARY (read in browser 2026-07-11): Eliminator disabled for credits exploit, restored via hotfix; McLaren Sabre '21 gift (Message Center → Gifts); exploiters rolled back to 10M cr, no bans; Auto Drive reward rebalance rationale"
+      },
+      {
+        "id": "forza-support-notes-jun18",
+        "tier": "primary",
+        "title": "Official FH6 Release Notes June 18 2026 (Series 2 Hotfix 1, v379.939)",
+        "url": "https://support.forza.net/hc/en-us/articles/52691021223315-FH6-Release-Notes-June-18th-2026",
+        "used_for": "PRIMARY (read in browser 2026-07-11): exploit fix, Eliminator restored, mode-reward rebalance vs Auto Drive, Sabre gift"
+      },
+      {
+        "id": "traxion-eliminator-exploit",
+        "tier": "expert",
+        "title": "Traxion — FH6 gifts free car after Eliminator exploit",
+        "url": "https://traxion.gg/forza-horizon-6-to-gift-free-car-to-all-players-after-eliminator-mode-exploit-discovered/",
+        "used_for": "VERIFICATION of shutdown timeline + hundreds-of-millions exploit scale (independent games outlet)"
+      },
+      {
+        "id": "timesaver-eliminator",
+        "tier": "community",
+        "title": "timesaver.gg FH6 Eliminator guide (2026)",
+        "url": "https://timesaver.gg/blog/forza-horizon-6-eliminator-guide",
+        "used_for": "72 players, Honda City '84 starter, drop/H2H/zone/Showdown mechanics, rewards, strategy tips, 'complete = win' daily-challenge gotcha. WARNING: car-level list shares wording with u4n — not independent"
+      },
+      {
+        "id": "gamingpromax-eliminator",
+        "tier": "community",
+        "title": "GamingProMax FH6 Eliminator guide",
+        "url": "https://gamingpromax.com/forza-horizon-6-eliminator-guide/",
+        "used_for": "H2H winner-gets-CHOICE claim (contested vs timesaver's auto-take), 30s Showdown countdown, drop respawn, no-drops-during-H2H, minimap-invisibility-when-stationary, rewards structure"
+      },
+      {
+        "id": "bossdown-eliminator",
+        "tier": "community",
+        "title": "BossDown FH6 Eliminator guide",
+        "url": "https://bossdown.com/guides/forza-horizon-6-eliminator-guide/",
+        "used_for": "challenge-down rule, steal-up tactic, let-them-fight endgame, common mistakes list"
+      },
+      {
+        "id": "u4n-eliminator-cars",
+        "tier": "community",
+        "title": "U4N — FH6 Eliminator cars & drop locations list",
+        "url": "https://www.u4n.com/news/list-of-forza-horizon-6-eliminator-cars-drops-locations.html",
+        "used_for": "Level 2 car list (only source); L3-10 bands (wording matches timesaver — treat as one source); randomized drops from fixed spawn pool",
+        "reliability_note": "currency-seller blog — cross-check before trusting unique claims"
+      },
+      {
+        "id": "mitchcactus-eliminator",
+        "tier": "community",
+        "title": "MitchCactus FH6 Eliminator guide",
+        "url": "https://mitchcactus.co/blog/forza-horizon-6/forza-horizon-6-eliminator-guide/",
+        "used_for": "duel positioning (face the arena center), Showdown routing discipline; confirms 'winner receives an upgrade choice' (vague)"
+      },
+      {
+        "id": "lootbar-eliminator",
+        "tier": "community",
+        "title": "LootBar — FH6 Eliminator mode overview",
+        "url": "https://www.lootbar.com/blog/en/forza-horizon-6-the-eliminator-mode.html",
+        "used_for": "90%-control-over-100%-throttle tip, AWD final-circle consensus, zone countdown (via search snippet)"
+      },
+      {
+        "id": "steam-eliminator-thread",
+        "tier": "community",
+        "title": "Steam FH6 forum — Eliminator discussion",
+        "url": "https://steamcommunity.com/app/2483190/discussions/0/573791755377468625/",
+        "used_for": "PLAYER SENTIMENT: luck-heavy verdict, duel spawn-position complaints, terrain trap spots, cut-corner meta — grounds the 'expect luck' tip"
+      },
+      {
+        "id": "egamersworld-wristbands",
+        "tier": "community",
+        "title": "eGamersWorld — FH6 leveling & wristbands",
+        "url": "https://egamersworld.com/blog/forza-horizon-6-leveling-guide-wristbands-explanat-6QxVs8AgKN",
+        "used_for": "Horizon Play XP → Festival Points (levels ≤25) → Wristband chain corroboration"
+      },
+      {
+        "id": "forzahorizoncar-eliminator",
+        "tier": "community",
+        "title": "forzahorizoncar.com Eliminator guides (UNRELIABLE)",
+        "url": "https://forzahorizoncar.com/en/wiki/eliminator-mode-guide.html",
+        "used_for": "RETRACTED: self-described speculative car list (Chiron/Valkyrie/Type R) contradicts the timesaver/u4n roster; site previously retracted for FH5 PI-class parroting. Nothing unique used"
+      },
+      {
+        "id": "forza-guide-meta",
+        "tier": "expert",
+        "title": "forza.guide — FH6 Meta Cars (Rivals-leaderboard-derived, per class & track)",
+        "url": "https://forza.guide/meta",
+        "used_for": "META RECHECK 2026-07-11: most-picked cars by leaderboard appearances, road + dirt, per class AND per track (updated 6/23/2026). CROSS-VALIDATED against our primary 7/10 Electric Town screenshot (both show Supra '20/GR86 '22/Ford GT '05 on that A board) — the strongest independent meta signal we have. Drove: NSX '22 ↑verified (#1 S1 road), 22B ↑verified (#4 A dirt), Evo VIII ↑S-tier, Miata FE disciplines expanded (highway/Colossus/dirt #1s), WRX '04 softened, Focus RS contested (board-absent), Viper FE/BRZ FE/F-450 corroborated. LIMIT: covers road+dirt Rivals only — no cross-country or drag boards."
+      },
+      {
+        "id": "grindout-tierlist-0707",
+        "tier": "community",
+        "title": "Grindout FH6 car tier list (updated 2026-07-07)",
+        "url": "https://grindout.com/forza-6/guides/car-tier-list",
+        "used_for": "META RECHECK 2026-07-11: freshest SEO tier list — still names GT-R NISMO (S1), GR Supra '20 (A), AMG One (S2), Golf R '21 (B S-tier alt). Confirms the SEO-consensus meta did NOT shift through Jul 7"
+      },
+      {
+        "id": "timesaver-bestcars-0610",
+        "tier": "community",
+        "title": "timesaver.gg FH6 best cars by class & use case (2026-06-10)",
+        "url": "https://timesaver.gg/blog/forza-horizon-6-best-cars",
+        "used_for": "META RECHECK cross-check: Supra A + Gemera S2 agree; names Huracán EVO for S1 and 917 LH FE for off-road (single-source, luck-gated — not adopted); AE86 Trueno FE '~323mph drag/top-speed' claim noted but unadopted (single source)"
+      },
+      {
+        "id": "forza-support-notes-jun23",
+        "tier": "primary",
+        "title": "Official FH6 Release Notes June 23 2026 (Series 2 Hotfix 2, v382.893)",
+        "url": "https://support.forza.net/hc/en-us/articles/52840653118867-FH6-Release-Notes-June-23rd-2026",
+        "used_for": "PRIMARY (read in browser 2026-07-11): stability + badge fixes ONLY — no car balance. Also confirms June 23 is the LATEST patch as of 2026-07-11 (sidebar lists no July notes)"
+      },
+      {
+        "id": "bossdown-dragnerf",
+        "tier": "community",
+        "title": "BossDown — FH6 drag tire nerf explained + retune",
+        "url": "https://bossdown.com/guides/forza-horizon-6-drag-tires-nerf-tuning/",
+        "used_for": "META RECHECK: Jun 15 nerf = cornering grip only; quotes Playground 'Drag times and Drag Leaderboards will be unaffected' — drag picks survive; road/touge drag-tire cheese dead (lightweight RWD back on top, consistent with forza.guide kei-car boards)"
+      },
+      {
+        "id": "forzahorizonhub-rally",
+        "tier": "community",
+        "title": "ForzaHorizonHub — best dirt/rally cars",
+        "url": "https://forzahorizonhub.com/guides/forza-horizon-6-best-dirt-rally-cars",
+        "used_for": "META RECHECK: 'Evo VIII MR is the best rally car in the game' + WRX '04 still best-value — second source for the Evo>WRX flip (with dexerto's updated B-tier WRX placement)"
       }
     ],
     "fh6_ui_structure_pass": {
@@ -3157,5 +3761,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "unstamped"
+  "builtAt": "2026-07-11T16:24Z"
 };

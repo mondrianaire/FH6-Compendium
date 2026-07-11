@@ -8,6 +8,12 @@
       "port": 8000
     },
     {
+      "name": "dashboard (python 8642)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8642", "--directory", "dashboard"],
+      "port": 8642
+    },
+    {
       "name": "dashboard (node/serve)",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["-y", "serve", "dashboard", "-l", "3000"],

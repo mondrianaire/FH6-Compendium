@@ -26,6 +26,18 @@
     return `<div style="padding:4px 0">${head}${t.note ? `<br><span style="font-size:11px;color:var(--muted)">${t.note}</span>` : ""}</div>`;
   };
 
+  // ---- owned-car tracking (localStorage — user state stays local; data/*.json stays facts-only) ----
+  const OWNED_KEY = "fh6_owned_cars";
+  let owned = {};
+  try { owned = JSON.parse(localStorage.getItem(OWNED_KEY)) || {}; } catch (e) { owned = {}; }
+  const isOwned = (id) => !!owned[id];
+  function setOwned(id, val) {
+    if (val) owned[id] = true; else delete owned[id];
+    try { localStorage.setItem(OWNED_KEY, JSON.stringify(owned)); } catch (e) { /* private mode: state won't persist */ }
+    drawGarage();
+    render();
+  }
+
   // ---- stamps ----
   document.getElementById("metaStamp").textContent =
     "Meta captured " + DB.metaCars.captured + " — game is new; rankings will shift with patches.";
@@ -101,7 +113,7 @@
     el.innerHTML = `
       <div class="card-row" style="margin-top:0">
         <span class="badge tier-${c.tier}">${top ? "★ TOP PICK • " : ""}TIER ${c.tier}</span>
-        <span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span>
+        <span>${isOwned(c.id) ? '<span class="conf conf-verified">✓ owned</span> ' : ""}<span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span></span>
       </div>
       <h3>${c.year} ${c.name}</h3>
       <div class="card-row"><span>${c.class} class · ${c.recommended_drivetrain}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
@@ -140,7 +152,11 @@
     document.getElementById("modalContent").innerHTML = `
       <span class="badge tier-${c.tier}">TIER ${c.tier}</span>
       <span class="conf ${confClass(c.confidence)}" style="margin-left:8px">${confLabel(c.confidence)}</span>
+      <label style="float:right;cursor:pointer;font-size:13px;user-select:none">
+        <input type="checkbox" id="modalOwn" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer;vertical-align:-2px"> I own this
+      </label>
       <h2>${c.year} ${c.name}</h2>
+      ${c.use_case ? `<p class="why" style="margin:2px 0 10px"><strong>Use case:</strong> ${c.use_case}</p>` : ""}
       <dl class="kv">
         <dt>Class</dt><dd>${c.class} (${classes[c.class] || "?"})</dd>
         <dt>Disciplines</dt><dd>${c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", ")}</dd>
@@ -154,51 +170,87 @@
       </dl>
       <h3>Why this car</h3>
       <p class="why">${c.why}</p>
+      ${c.leaderboard_meta ? `<h3>Leaderboard reality check (2026-07-11)</h3><p class="fh6note">${c.leaderboard_meta}</p>` : ""}
+      ${c.disciplines_note ? `<p class="fh6note">${c.disciplines_note}</p>` : ""}
       <h3>Mod / upgrade priority (buy in this order)</h3>
       <ol class="why">${c.upgrade_priority.map((u) => `<li>${u}</li>`).join("")}</ol>
       ${tuneHtml}
       ${shareHtml}
     `;
+    document.getElementById("modalOwn").addEventListener("change", (e) => setOwned(c.id, e.target.checked));
     modal.classList.remove("hidden");
   }
 
-  // ---- car table ----
-  function buildTable() {
-    const cols = [
-      ["name", "Car"], ["class", "Class"], ["tier", "Tier"],
-      ["recommended_drivetrain", "Drivetrain"], ["price_credits", "Price"],
-      ["value_rating", "Value"], ["confidence", "Conf"]
-    ];
-    let sortKey = "tier", sortDir = 1;
-    const wrap = document.getElementById("carTableWrap");
+  // ---- garage tracker (car table + owned tracking) ----
+  let garageFilter = "all"; // all | owned | missing
+  let sortKey = "tier", sortDir = 1;
 
-    function draw() {
-      const tierRank = { S: 0, A: 1, B: 2 };
-      const sorted = [...cars].sort((a, b) => {
-        let av = a[sortKey], bv = b[sortKey];
-        if (sortKey === "tier") { av = tierRank[av]; bv = tierRank[bv]; }
-        if (sortKey === "name") return sortDir * String(av).localeCompare(String(bv));
-        av = av ?? -Infinity; bv = bv ?? -Infinity;
-        return sortDir * (av > bv ? 1 : av < bv ? -1 : 0);
-      });
-      wrap.innerHTML = `<table><thead><tr>${cols.map((c) => `<th data-k="${c[0]}">${c[1]}</th>`).join("")}</tr></thead>
-        <tbody>${sorted.map((c) => `<tr data-id="${c.id}">
-          <td>${c.year} ${c.name}</td>
-          <td>${c.class}</td>
-          <td><span class="badge tier-${c.tier}">${c.tier}</span></td>
-          <td>${c.recommended_drivetrain}</td>
-          <td class="price">${fmtCr(c.price_credits)}</td>
-          <td>${c.value_rating}/10</td>
-          <td class="conf ${confClass(c.confidence)}">${c.confidence === "verified" ? "✅" : "🟡"}</td>
-        </tr>`).join("")}</tbody></table>`;
-      wrap.querySelectorAll("th").forEach((th) => th.addEventListener("click", () => {
-        const k = th.dataset.k; if (k === sortKey) sortDir *= -1; else { sortKey = k; sortDir = 1; } draw();
-      }));
-      wrap.querySelectorAll("tbody tr").forEach((tr) =>
-        tr.addEventListener("click", () => openModal(cars.find((c) => c.id === tr.dataset.id))));
-    }
-    draw();
+  function drawGarage() {
+    const ownedCount = cars.filter((c) => isOwned(c.id)).length;
+    const pct = Math.round((ownedCount / cars.length) * 100);
+    const header = document.getElementById("garageHeader");
+    header.innerHTML = `
+      <div class="block" style="margin-top:0">
+        <div class="card-row" style="margin-top:0">
+          <h3 style="margin:0">Garage: ${ownedCount} / ${cars.length} meta cars owned</h3>
+          <span class="conf conf-probable">tracked locally in this browser</span>
+        </div>
+        <div class="value-bar" style="margin-top:8px"><span style="width:${pct}%"></span></div>
+        <div class="chips" style="margin-top:10px">
+          ${["all", "owned", "missing"].map((f) =>
+            `<button class="chip garage-filter" data-f="${f}" style="cursor:pointer;border:1px solid ${garageFilter === f ? "var(--accent)" : "var(--line)"}">${f === "all" ? "All" : f === "owned" ? "✓ Owned" : "◯ Missing"}</button>`).join("")}
+        </div>
+        <p class="why" style="margin:10px 0 0">Tick a car when you get it. Difficulty: 🟢 buy anytime / free-guaranteed · 🟡 deterministic effort (aftermarket spawn, auction) · 🔴 luck- or pay-gated. Click a row for the full card (use case, tunes, how to get it, easy alternatives).</p>
+      </div>`;
+    header.querySelectorAll(".garage-filter").forEach((b) =>
+      b.addEventListener("click", () => { garageFilter = b.dataset.f; drawGarage(); }));
+
+    const tierRank = { S: 0, A: 1, B: 2 };
+    let list = cars.filter((c) =>
+      garageFilter === "owned" ? isOwned(c.id) : garageFilter === "missing" ? !isOwned(c.id) : true);
+    const sorted = [...list].sort((a, b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (sortKey === "tier") { av = tierRank[av]; bv = tierRank[bv]; }
+      if (sortKey === "owned") { av = isOwned(a.id) ? 0 : 1; bv = isOwned(b.id) ? 0 : 1; }
+      if (sortKey === "acquisition_difficulty") {
+        const dRank = { easy: 0, medium: 1, hard: 2, "hard-unconfirmed": 2 };
+        av = dRank[a.acquisition_difficulty] ?? 3; bv = dRank[b.acquisition_difficulty] ?? 3;
+      }
+      if (sortKey === "name") return sortDir * String(av).localeCompare(String(bv));
+      av = av ?? -Infinity; bv = bv ?? -Infinity;
+      return sortDir * (av > bv ? 1 : av < bv ? -1 : 0);
+    });
+
+    const cols = [
+      ["owned", "✓"], ["name", "Car"], ["use_case", "Use case"],
+      ["acquisition_difficulty", "Get it"], ["class", "Class"], ["tier", "Tier"],
+      ["price_credits", "Price"], ["value_rating", "Value"], ["confidence", "Conf"]
+    ];
+    const wrap = document.getElementById("carTableWrap");
+    wrap.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>${cols.map((c) => `<th data-k="${c[0]}">${c[1]}</th>`).join("")}</tr></thead>
+      <tbody>${sorted.map((c) => `<tr data-id="${c.id}" style="${isOwned(c.id) ? "opacity:.65" : ""}">
+        <td><input type="checkbox" class="own-check" data-id="${c.id}" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer"></td>
+        <td>${c.year} ${c.name}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
+        <td class="why" style="font-size:12px;max-width:300px">${c.use_case || (c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", "))}</td>
+        <td><span class="acq acq-${(c.acquisition_difficulty || "").split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></td>
+        <td>${c.class}</td>
+        <td><span class="badge tier-${c.tier}">${c.tier}</span></td>
+        <td class="price">${fmtCr(c.price_credits)}</td>
+        <td>${c.value_rating}/10</td>
+        <td class="conf ${confClass(c.confidence)}">${c.confidence === "verified" ? "✅" : c.confidence === "contested" ? "⚠️" : "🟡"}</td>
+      </tr>`).join("")}</tbody></table></div>
+      ${!sorted.length ? `<p class="empty">No cars in this filter${garageFilter === "owned" ? " — tick some checkboxes as you collect" : ""}.</p>` : ""}`;
+    wrap.querySelectorAll("th").forEach((th) => th.addEventListener("click", () => {
+      const k = th.dataset.k; if (k === sortKey) sortDir *= -1; else { sortKey = k; sortDir = 1; } drawGarage();
+    }));
+    wrap.querySelectorAll(".own-check").forEach((cb) => {
+      cb.addEventListener("click", (e) => e.stopPropagation());
+      cb.addEventListener("change", () => setOwned(cb.dataset.id, cb.checked));
+    });
+    wrap.querySelectorAll("tbody tr").forEach((tr) =>
+      tr.addEventListener("click", () => openModal(cars.find((c) => c.id === tr.dataset.id))));
   }
+  function buildTable() { drawGarage(); }
 
   // ---- variables ----
   function buildVariables() {
@@ -443,6 +495,96 @@
       ${excl}`;
   }
 
+  // ---- eliminator ----
+  function buildEliminator() {
+    const e = DB.eliminatorTips;
+    if (!e) return;
+    const host = document.getElementById("eliminatorContent");
+    const PHASE_LABEL = {
+      early_game: "🌱 Early game", mid_game: "⚔️ Mid game", head_to_head: "🏎️ Head-to-Head",
+      final_showdown: "🏁 Final Showdown", general: "📋 General"
+    };
+    const ov = e.mode_overview;
+    const fact = (f) => `${f.value} <span class="conf ${confClass(f.confidence)}">${confLabel(f.confidence)}</span>`;
+
+    const overview = `
+      <div class="block">
+        <h3>How the mode works</h3>
+        <p class="why">${ov.what}</p>
+        <dl class="kv">
+          <dt>Players</dt><dd>${fact(ov.player_count)}</dd>
+          <dt>Starter car</dt><dd>${fact(ov.starter_car)}</dd>
+          <dt>Arena</dt><dd>${fact(ov.map_context)}</dd>
+          <dt>Where</dt><dd>${fact(ov.hub_context)}</dd>
+        </dl>
+      </div>`;
+
+    const mechanics = `
+      <h3 style="margin-top:24px">Mechanics</h3>
+      ${e.mechanics.map((m) => `
+        <div class="block">
+          <h4 style="margin:0 0 6px">${m.name} <span class="conf ${confClass(m.confidence)}">${confLabel(m.confidence)}</span></h4>
+          <p class="why" style="margin:0">${m.detail}</p>
+          ${m.note ? `<p class="why" style="font-size:12px;color:var(--muted);margin:6px 0 0">${m.note}</p>` : ""}
+        </div>`).join("")}`;
+
+    const levels = `
+      <div class="block">
+        <h3>Car Drop levels <span class="conf ${confClass(e.car_levels.confidence)}">${confLabel(e.car_levels.confidence)}</span></h3>
+        <p class="fh6note">${e.car_levels.note}</p>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Lv</th><th>Reported cars</th><th>Role</th></tr></thead>
+          <tbody>${e.car_levels.levels.map((l) => `
+            <tr><td><span class="badge tier-${l.level >= 9 ? "S" : l.level >= 5 ? "A" : "B"}">${l.level}</span></td>
+            <td>${l.cars.join(", ")}</td><td class="why" style="font-size:12px">${l.role}</td></tr>`).join("")}
+          </tbody></table></div>
+      </div>`;
+
+    const phases = ["early_game", "mid_game", "head_to_head", "final_showdown", "general"];
+    const tips = phases.map((ph) => {
+      const list = e.tips.filter((t) => t.phase === ph);
+      if (!list.length) return "";
+      return `
+        <h3 style="margin-top:24px">${PHASE_LABEL[ph]}</h3>
+        <div class="card-grid">
+          ${list.map((t) => `
+            <div class="car-card" style="cursor:default">
+              <div class="card-row" style="margin-top:0">
+                <span class="conf ${confClass(t.confidence)}">${confLabel(t.confidence)}</span>
+              </div>
+              <h3 style="font-size:14px">${t.tip}</h3>
+              <p class="why" style="margin:6px 0 0">${t.why}</p>
+              <p class="why" style="font-size:11px;color:var(--muted);margin:8px 0 0">sources: ${t.sources.join(", ")}</p>
+            </div>`).join("")}
+        </div>`;
+    }).join("");
+
+    const patches = `
+      <div class="block">
+        <h3>Patch history</h3>
+        ${e.patch_history.map((p) => `
+          <div class="strat-step">
+            <div class="strat-num" style="font-size:11px">${p.date.slice(5)}</div>
+            <div><p class="why" style="margin:0">${p.event} <span class="conf ${confClass(p.confidence)}">${confLabel(p.confidence)}</span></p></div>
+          </div>`).join("")}
+      </div>`;
+
+    const retracted = e.retracted && e.retracted.length ? `
+      <div class="block" style="border-color:var(--warn)">
+        <h3>⚠️ Excluded on purpose</h3>
+        <ul>${e.retracted.map((r) => `<li><strong>${r.what}</strong> — ${r.why}</li>`).join("")}</ul>
+      </div>` : "";
+
+    host.innerHTML = `
+      <p class="hint">${e.meta_disclaimer}</p>
+      ${overview}
+      ${levels}
+      ${mechanics}
+      ${tips}
+      ${patches}
+      ${retracted}`;
+  }
+
   // ---- init ----
   render();
   buildProgress();
@@ -451,4 +593,5 @@
   buildStrategy();
   buildTemplates();
   buildRivals();
+  buildEliminator();
 })();

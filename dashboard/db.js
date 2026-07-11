@@ -1214,6 +1214,11 @@ window.FH6_DB = {
             "class": "R",
             "discipline": "dirt_rally",
             "evidence": "forza.guide dirt all-tracks #5 R"
+          },
+          {
+            "class": "R",
+            "discipline": "cross_country",
+            "evidence": "PROBABLE fill (audit decision 2026-07-11): the R-CC research found NO valid new car - the proposed Tacoma FE was refuted on source-independence. The Viper FE tops game8's 'S1 and above' CC tier and is #5 R on forza.guide dirt boards; no dedicated R-CC source exists. R cross-country events are rare - treat this slot as near-irrelevant."
           }
         ],
         "name": "Dodge Viper Forza Edition",
@@ -1464,6 +1469,461 @@ window.FH6_DB = {
             "note": "SUSPECT: circulates as a WR code but is NOT on CODMunity or any reputable DB. Same origin class as codes I already retracted. Test at your own risk and report — do not trust until confirmed."
           }
         ]
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "kudosprime",
+          "game8-perclass",
+          "game8",
+          "gamerant-fh6-meta",
+          "forza-guide-meta"
+        ],
+        "also_viable_in": [
+          {
+            "class": "B",
+            "discipline": "road",
+            "evidence": "forza.guide: #1 most-picked B road car all-tracks"
+          },
+          {
+            "class": "A",
+            "discipline": "road",
+            "evidence": "forza.guide: #2 most-picked A road car all-tracks"
+          },
+          {
+            "class": "A",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide: #1 most-picked A dirt car all-tracks"
+          },
+          {
+            "class": "B",
+            "discipline": "dirt_rally",
+            "evidence": "forza.guide: #1 most-picked B dirt car all-tracks"
+          }
+        ],
+        "id": "honda-beat-1991",
+        "name": "Honda Beat",
+        "year": 1991,
+        "disciplines": [
+          "road",
+          "touge_street"
+        ],
+        "drivetrain_stock": "RWD (mid-engine kei)",
+        "recommended_drivetrain": "RWD",
+        "power_split": "RWD",
+        "price_credits": 15000,
+        "acquisition": "Autoshow 15,000 cr (also Wheelspin pool; game8 additionally lists a free Journal reward at Regional Mascots Tier 2 - single-sourced, treat as bonus path).",
+        "acquisition_difficulty": "easy",
+        "tier": "S",
+        "value_rating": 10,
+        "upgrade_priority": [
+          "build to the D400 cap: tires first",
+          "race suspension",
+          "keep it light - the 760 kg IS the weapon"
+        ],
+        "why": "The kei-car meta incarnate. #1 most-picked D-class road car on forza.guide Rivals usage (verified per-track: #1 Narai-juku/Hokubu/Seaside Park), independently recommended by game8's per-class guide. Stock D 283 leaves ~117 PI of headroom. Takes the D touge slot too after the workflow's original pick (Mitsubishi #269 Minicab TA, Time Attack Car Pack $9.99) was refuted as a general pick - the Minicab tops ONLY the Shimanoyama board and is a premium specialist, not the consensus.",
+        "use_case": "15k covers two D slots (road + touge) - and the same car is the #1 most-picked car on A, B and D boards game-wide",
+        "leaderboard_meta": "2026-07-11 (workflow-verified against forza.guide directly): #1 D road all-tracks; on tight touge circuits #1 or #2 on most D boards. GameRant counterpoint picks (Peel P50/S800/Civic '86) noted; no competing consensus.",
+        "confidence": "verified",
+        "slot_note": "D touge premium specialist: Mitsubishi #269 Minicab TA (Time Attack Car Pack, $9.99) - #1 D handling on forza.labsgg (6.9 vs next-best 5.3) and #1 on the Shimanoyama D board, but board-absent elsewhere. CONTESTED as a general pick; buy only if you live on Shimanoyama.",
+        "class": "D"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "game8",
+          "kudosprime",
+          "gamerant-fh6-meta",
+          "dexerto",
+          "forza-guide-meta"
+        ],
+        "also_viable_in": [],
+        "id": "integra-type-r-2001",
+        "name": "Acura Integra Type-R",
+        "year": 2001,
+        "disciplines": [
+          "road"
+        ],
+        "drivetrain_stock": "FWD",
+        "recommended_drivetrain": "FWD",
+        "power_split": "FWD",
+        "price_credits": 65000,
+        "acquisition": "Autoshow 65,000 cr (also Wheelspin pool). No unlock gate.",
+        "acquisition_difficulty": "easy",
+        "tier": "S",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "tires/compound",
+          "race suspension",
+          "light weight reduction to the C500 cap"
+        ],
+        "why": "#1 most-picked C road car on forza.guide usage data; GameRant's leaderboard-derived meta puts the 2001 Integra Type R top-3 C road; Dexerto C tier list A-tier. Stock C 471 FWD with standout handling for the class. TRIM FOOTNOTE: forza.guide lists an ambiguous 'Acura Integra' - the 2001 Type-R identification rests on GameRant; co-meta with the Toyota Celica SS-II '03 (12,000 cr), which GameRant actually orders first.",
+        "use_case": "C-class road board car - cheap, Autoshow, no-drama FWD",
+        "confidence": "verified",
+        "easy_alternative": "Toyota Celica SS-II '03 - 12,000 cr Autoshow, GameRant's #1 C road; the budget co-meta pick.",
+        "class": "C"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "kudosprime",
+          "pcgamer",
+          "dexerto",
+          "game8-perclass",
+          "forza-guide-meta"
+        ],
+        "also_viable_in": [],
+        "id": "fxxk-evo-2018",
+        "name": "Ferrari FXX-K Evo",
+        "year": 2018,
+        "disciplines": [
+          "road"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD",
+        "power_split": "RWD",
+        "price_credits": 4500000,
+        "acquisition": "Autoshow 4,500,000 cr (kudosprime: 'Autoshow + Wheelspin', R 957 stock). EASY taxonomy-wise but NOT cheap - budget a farm session. Do not confuse with the FXX-K Evo 'Welcome Pack' variant (premium DLC).",
+        "acquisition_difficulty": "easy",
+        "tier": "S",
+        "value_rating": 7,
+        "upgrade_priority": [
+          "already R 957 stock - tune, don't build",
+          "downforce/gearing per track"
+        ],
+        "why": "AUDIT-SWAPPED PRIMARY: the workflow's finder picked the Valkyrie AMR Pro, but adversarial verification showed the standard FXX-K Evo is better corroborated (PC Gamer: 'most consistent R-Class car' for road; Dexerto R S-tier; kudosprime handling 9.5 + braking 10 - a tick ABOVE the Valkyrie's 9.4) at near-identical price. Valkyrie AMR Pro (4.2M, R 989) remains a CONTESTED handling-specialist alternative - both leaderboard-derived sources omit it.",
+        "use_case": "The obtainable R-class road car - board kings (787B, Exige WTAC) are grind/luck-gated",
+        "leaderboard_meta": "2026-07-11: forza.guide R road boards are ruled by the Mazda 787B (#1, Barn/Treasure-find acquisition - deterministic but a long endgame grind) and race/FE cars. FXX-K Evo is the top straight-purchase option; budget alternative: Ultima Evolution Coupe 1020 (150,000 cr, on game8's R road list).",
+        "confidence": "verified",
+        "easy_alternative": "Ultima Evolution Coupe 1020 - 150,000 cr Autoshow (game8 R road list) if 4.5M is out of reach.",
+        "class": "R"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "forza-guide-meta",
+          "game8",
+          "codmunity-drag",
+          "gamerant-fh6-meta"
+        ],
+        "also_viable_in": [
+          {
+            "class": "C",
+            "discipline": "road",
+            "evidence": "forza.guide: #3 most-picked C road car all-tracks"
+          }
+        ],
+        "id": "civic-type-r-1997",
+        "name": "Honda Civic Type R",
+        "year": 1997,
+        "disciplines": [
+          "touge_street"
+        ],
+        "drivetrain_stock": "FWD",
+        "recommended_drivetrain": "FWD",
+        "power_split": "FWD",
+        "price_credits": 30000,
+        "acquisition": "Autoshow 30,000 cr (game8 + CODMunity agree; a 28,500 figure circulating is a discounted price). Common Wheelspin drop.",
+        "acquisition_difficulty": "easy",
+        "tier": "A",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "tires",
+          "suspension",
+          "short gearing for hairpins",
+          "stay at the C500 cap"
+        ],
+        "why": "Most consistent C-class car on the tight technical mountain circuits (forza.guide: #1 C on Irokawa/Hokubu boards). AUDIT DOWNGRADE verified->probable: the touge mapping is a proxy from technical-circuit boards (forza.guide has no touge discipline), and it is the top NORMAL-car pick - some touge boards favor kei/Minicab cheese above it.",
+        "use_case": "C-class touge/street pick - the classic FWD momentum car on hairpins",
+        "confidence": "probable",
+        "easy_alternative": "Toyota Celica SS-II '03 - 12,000 cr Autoshow; #1 on the Narai-juku C board.",
+        "class": "C"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "game8",
+          "forza-labs-db",
+          "gamerant-touge",
+          "kudosprime",
+          "forza-guide-meta"
+        ],
+        "also_viable_in": [],
+        "id": "cayman-gt3-wtac-2005",
+        "name": "Porsche Cayman GT3 WTAC",
+        "year": 2005,
+        "disciplines": [
+          "touge_street"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD",
+        "power_split": "RWD",
+        "price_credits": 180000,
+        "acquisition": "Autoshow 180,000 cr (game8, ForzaLabs, GameRant agree; kudosprime is a 3-vs-1 OUTLIER claiming Time Attack Car Pack DLC - game8's own pack contents list does not include it. If it turns out pack-gated, difficulty becomes premium; verify in-game on first purchase).",
+        "acquisition_difficulty": "easy",
+        "tier": "S",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "stock S2 856 purpose-built time-attack car - tune only",
+          "gearing per pass"
+        ],
+        "why": "Purpose-built time-attack car sitting in S2 stock (PI 856): light (1,200 kg), slicks, extreme grip profile - exactly what tight touge wants. Present on the S2 technical-circuit boards; GameRant's touge guide recommends it across S1/S2/R touge. The S2 boards' kings (Furai/787B/LFA FE) are all luck/grind-gated; this is the obtainable one.",
+        "use_case": "S2 touge - obtainable time-attack special; also the R-touge budget stopgap when upgraded",
+        "confidence": "verified",
+        "easy_alternative": "Lamborghini Essenza SCV12 - 1,500,000 cr Autoshow; consensus 'best overall S2' pick, more of an open-circuit car.",
+        "class": "S2"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "game8-perclass",
+          "game8",
+          "gamerant-touge",
+          "u4n-exige",
+          "forza-guide-meta"
+        ],
+        "also_viable_in": [],
+        "id": "exige-wtac-2018",
+        "name": "Lotus Scura Motorsports Exige WTAC",
+        "year": 2018,
+        "disciplines": [
+          "touge_street"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD",
+        "power_split": "RWD",
+        "price_credits": null,
+        "acquisition": "NOT purchasable (Autoshow/Auction House excluded; in-game value 400,000 cr). Earned from the Collection Journal Road Racing page - game8 calls it the Tier 5 reward; u4n/fandom describe the same unlock as winning every Road Racing event (~9,360 festival points). Deterministic but a LONG grind.",
+        "acquisition_difficulty": "medium",
+        "tier": "S",
+        "value_rating": 7,
+        "upgrade_priority": [
+          "stock R 998 - tune only"
+        ],
+        "why": "Heads every R-class list for tight technical tracks: first in game8's R touge list, present in GameRant's touge meta, #1 R on multiple forza.guide technical-circuit boards (Narai-juku, Shimanoyama, Soni). R 998, handling 9.2.",
+        "use_case": "R-class touge king - the Road Racing Journal grind's payoff",
+        "confidence": "verified",
+        "easy_alternative": "Porsche Cayman GT3 WTAC - 180,000 cr Autoshow, upgraded from S2 856 into R; the stopgap while you grind the Journal.",
+        "class": "R"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "forza-guide-meta",
+          "forza-labs-db",
+          "game8",
+          "dexerto",
+          "game8-perclass"
+        ],
+        "also_viable_in": [],
+        "id": "gmc-jimmy-1970",
+        "name": "GMC Jimmy (K5)",
+        "year": 1970,
+        "disciplines": [
+          "dirt_rally"
+        ],
+        "drivetrain_stock": "AWD/4WD",
+        "recommended_drivetrain": "4WD",
+        "power_split": "AWD",
+        "price_credits": 60000,
+        "acquisition": "Autoshow 60,000 cr. Several sources note a C500-tuned Jimmy is one of the free starter-car options after the Initial Drive - you may already own one.",
+        "acquisition_difficulty": "easy",
+        "tier": "S",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "rally tires",
+          "raise ride height",
+          "soften suspension",
+          "power to the C500 cap"
+        ],
+        "why": "#1 most-picked C dirt car on forza.guide usage data; ForzaLabs ranks it #2 C-class overall flagging it the rally/dirt specialist; game8 8.7 off-road, AWD, rally tires stock. PI wrinkle: stock C 416 (game8) - the PI-500 figure some sites list is the pre-tuned starter version.",
+        "use_case": "C-class dirt - the boards' pick, probably already in your garage",
+        "confidence": "verified",
+        "easy_alternative": "Toyota Celica GT-Four ST205 '94 - 27,000 cr Autoshow (also a starter-car choice); AWD WRC pedigree.",
+        "class": "C"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "mitchcactus-cc",
+          "game8",
+          "gamerant-fh6-meta"
+        ],
+        "also_viable_in": [],
+        "id": "brocky-bronco-2017",
+        "name": "Ford #25 'Brocky' Ultra4 Bronco RTR",
+        "year": 2017,
+        "disciplines": [
+          "cross_country"
+        ],
+        "drivetrain_stock": "AWD",
+        "recommended_drivetrain": "AWD",
+        "power_split": "AWD",
+        "price_credits": 75000,
+        "acquisition": "Guaranteed FREE at Journal 'Master Explorer' Tier 3 (game8, hand-verified 2026-07-11); GameRant also lists Autoshow 75,000 cr. Either way deterministic.",
+        "acquisition_difficulty": "easy",
+        "tier": "A",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "already an Ultra4 race truck (off-road 10 stock)",
+          "build up from A 644 toward low S2"
+        ],
+        "why": "Purpose-built Ultra4 off-road race truck: perfect 10 off-road, 600 hp, AWD. MitchCactus's ranked CC guide calls it 'the strongest S1 choice for open routes' (exact quote is S1-bracketed - it BUILDS INTO LOW S2, not a natural 900 build). CONTESTED: bossdown names the Sesto Elemento for S2 CC instead; no leaderboard source covers cross-country at all.",
+        "use_case": "S2 (and S1) cross-country without VIP - the free-player answer to the Viper FE",
+        "confidence": "contested",
+        "easy_alternative": null,
+        "class": "A-S2"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "game8-perclass",
+          "game8",
+          "dexerto",
+          "codmunity-drag"
+        ],
+        "also_viable_in": [],
+        "id": "supervan-iii-1972",
+        "name": "Reliant Supervan III",
+        "year": 1972,
+        "disciplines": [
+          "drag"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD",
+        "power_split": "RWD",
+        "price_credits": 39000,
+        "acquisition": "Autoshow 39,000 cr (game8, Dexerto, CODMunity agree). Also a Wheelspin drop.",
+        "acquisition_difficulty": "easy",
+        "tier": "B",
+        "value_rating": 6,
+        "upgrade_priority": [
+          "engine swap",
+          "drag tires",
+          "gearing"
+        ],
+        "why": "game8's per-class guide names it the best D-class drag car - the ONLY source making an explicit D-drag call (drag guides otherwise cover S1/S2/R only). 1,004 lb with launch 4.5 stock. CAVEAT: no source verifies the popular bike-engine-swap build stays under the D400 cap - verify in-game.",
+        "use_case": "D-class drag meme that works - 39k",
+        "confidence": "probable",
+        "easy_alternative": null,
+        "class": "D"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "game8-perclass",
+          "game8",
+          "codmunity-drag",
+          "dexerto"
+        ],
+        "also_viable_in": [
+          {
+            "class": "A",
+            "discipline": "drag",
+            "evidence": "CODMunity community A700 drag tune + active FH6 build-video scene (verified); the C500 build is the single-source one"
+          }
+        ],
+        "id": "peel-p50-1962",
+        "name": "Peel P50",
+        "year": 1962,
+        "disciplines": [
+          "drag"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD",
+        "power_split": "RWD",
+        "price_credits": 21000,
+        "acquisition": "Autoshow 21,000 cr (game8 + CODMunity). Wheelspin drop too. Do NOT confuse with the promo-locked Peel P50 Trolli Edition.",
+        "acquisition_difficulty": "easy",
+        "tier": "A",
+        "value_rating": 7,
+        "upgrade_priority": [
+          "motorcycle engine swap (new in FH6)",
+          "drag tires",
+          "gearing to the class cap"
+        ],
+        "why": "The classic Forza swapped-microcar drag exploit, alive in FH6: ~310 lb + bike-engine swaps. A700 build is VERIFIED (CODMunity's only listed P50 community tune is an A700 drag build; active build-video scene, ~790-800 hp). C500 build is PROBABLE - rests on game8's per-class table alone.",
+        "use_case": "One 21k microcar covers BOTH C and A drag slots",
+        "confidence": "verified",
+        "easy_alternative": "Reliant Supervan III - 39,000 cr; game8's other low-class drag pick if the P50 is too silly.",
+        "class": "C"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "gamerstation-bdrag",
+          "kudosprime",
+          "windowscentral-drag"
+        ],
+        "also_viable_in": [],
+        "id": "audi-rs6-2009",
+        "name": "Audi RS 6",
+        "year": 2009,
+        "disciplines": [
+          "drag"
+        ],
+        "drivetrain_stock": "AWD",
+        "recommended_drivetrain": "AWD",
+        "power_split": "AWD",
+        "price_credits": 42000,
+        "acquisition": "Autoshow 42,000 cr (hand-verified vs kudosprime 2026-07-11: B 598 stock, 'Autoshow + Wheelspin').",
+        "acquisition_difficulty": "easy",
+        "tier": "B",
+        "value_rating": 6,
+        "upgrade_priority": [
+          "drag tires",
+          "launch/diff",
+          "modest power - B 598 stock leaves almost no PI headroom, tune within the cap"
+        ],
+        "why": "AUDIT-PROMOTED PRIMARY: the finder's pick (Shelby Cobra 427 S/C, 3M cr) was REFUTED - its #1 came from GamerStation's self-described stock-spec heuristic and RWD launch contradicts the AWD drag meta (Windows Central: AWD swap 'flat-out better for times'). The RS 6 is the top AWD entry on that same B-class ranking, matches the AWD-launch meta, and costs 42k not 3M. Whole slot is soft: no leaderboard data exists for B drag.",
+        "use_case": "B-class drag - AWD launch on a budget (soft slot, best available evidence)",
+        "confidence": "probable",
+        "easy_alternative": "VW Golf R '21 (already in the meta DB) - cited during verification as a genuinely competitive AWD B-class option; zero extra credits if owned.",
+        "class": "B"
+      },
+      {
+        "tune_baseline": null,
+        "share_codes": [],
+        "sources": [
+          "gamerant-dragtest",
+          "game8",
+          "forza-labs-db"
+        ],
+        "also_viable_in": [],
+        "id": "tacoma-trd-pro-fe-2019",
+        "name": "Toyota Tacoma TRD Pro Forza Edition",
+        "year": 2019,
+        "disciplines": [
+          "drag"
+        ],
+        "drivetrain_stock": "RWD (per game8 - unusual for a truck, not independently confirmed)",
+        "recommended_drivetrain": "stock preset",
+        "power_split": "drag-specific",
+        "price_credits": null,
+        "acquisition": "VIP Membership DLC only (~$19.99 standalone or in Premium Edition); granted via Gifts, NOT purchasable with credits, and per GameRant not currently auction-tradable. In-game value 500,000 cr.",
+        "acquisition_difficulty": "premium",
+        "tier": "S",
+        "value_rating": 6,
+        "upgrade_priority": [
+          "comes pre-tuned: R 998, accel 10.0, launch 10.0, slicks",
+          "drag tires + gearing shave it further (GameRant: 8.5s stock -> 7.6s quarter-mile)"
+        ],
+        "why": "GameRant's TESTED drag guide names it best drag car (timed runs at Irokawa quarter-mile); forza.labsgg rates it #1 R-class overall. AUDIT DOWNGRADE verified->probable: a grindout citation was exposed as false during verification and forza.labsgg is overall-ratings not drag-specific - the drag-specific evidence is GameRant's testing alone. NOTE: it was also proposed for R cross-country and REFUTED there (conflated sources) - this entry is drag-only.",
+        "use_case": "R-class drag for VIP owners - pre-tuned 10/10 accel/launch out of the box",
+        "confidence": "probable",
+        "easy_alternative": "Koenigsegg Jesko - 3,500,000 cr Autoshow (kudosprime-verified), stock S2 899 so any upgrade makes it R; the no-DLC path. Our GT-R Black FE (if wheelspin luck delivered one) also builds past S2 into R.",
+        "class": "R"
       }
     ],
     "tune_sourcing_policy": {
@@ -1482,6 +1942,11 @@ window.FH6_DB = {
       "verify_loop": "Your testing is what promotes 🟡 -> ✅ (or gets a dead/❌ code pulled). Report back on any code you load.",
       "codes_are_car_specific": "A share code ONLY loads on the exact car it was made for (you browse tunes for the car you currently have). So a HARD car's tune code is useless unless you own that car — and its EASY ALTERNATIVE needs its OWN tune (in-game, filtered to the right Surface), never the hard car's code. Rule: never point a player at a code for a car they can't get.",
       "by_discipline": "Sourcing depends on the discipline CONVERGENCE (see tuning-templates.json). HIGH-convergence disciplines (drag) -> APPLY THE DISCIPLINE TEMPLATE, do not hunt per-car codes. LOW-convergence (road/touge) -> download the fastest clean-lap tune; bespoke matters. MEDIUM (dirt/cross-country) -> template + in-game Surface filter."
+    },
+    "coverage_gap_fill": {
+      "date": "2026-07-11",
+      "method": "15 matrix gaps researched by a multi-pass agent workflow: one finder per slot (seeded with forza.guide leaderboard data where available), 3 adversarial verifiers per pick (existence/class-fit, independent-meta, acquisition/price audit), refill round for refuted picks, completeness audit. Audit corrections applied before this write: R-road primary swapped to FXX-K Evo; D-touge primary swapped to Honda Beat (Minicab TA demoted to premium specialist note); B-drag primary is the verifier-promoted Audi RS 6 (Cobra 427 refuted); R cross-country resolved onto the existing Viper FE (probable) - no valid new car exists for it; confidence downgrades applied (C touge, R drag -> probable). Two prices re-verified by hand against kudosprime/game8 (RS 6 42k, Brocky 75k).",
+      "known_weakness": "The whole drag column below S1 leans on game8's single per-class table - every low-class drag pick is capped at 'probable'. Re-check if a drag meta source for low classes appears."
     }
   },
   "upgradeStrategy": {
@@ -3802,6 +4267,63 @@ window.FH6_DB = {
         "title": "ForzaHorizonHub — best dirt/rally cars",
         "url": "https://forzahorizonhub.com/guides/forza-horizon-6-best-dirt-rally-cars",
         "used_for": "META RECHECK: 'Evo VIII MR is the best rally car in the game' + WRX '04 still best-value — second source for the Evo>WRX flip (with dexerto's updated B-tier WRX placement)"
+      },
+      {
+        "id": "game8-perclass",
+        "tier": "community",
+        "title": "game8 — FH6 Best Cars for Each Class (per-class × per-format table)",
+        "url": "https://game8.co/games/Forza-Horizon-6/archives/601596",
+        "used_for": "GAP FILL 2026-07-11: the only source with explicit per-class calls for EVERY format. KNOWN WEAKNESS: the low-class drag column (Supervan D, P50 C) rests on this table alone — those picks are capped at 'probable'"
+      },
+      {
+        "id": "gamerant-fh6-meta",
+        "tier": "expert",
+        "title": "GameRant — FH6 best cars each class (Rivals-leaderboard-derived)",
+        "url": "https://gamerant.com/forza-horizon-6-best-cars-each-class-fh6-meta/",
+        "used_for": "GAP FILL: independent leaderboard-derived meta — corroborates Integra Type R (C road), diverges on D road (P50/S800/Civic '86 vs Beat) — divergences recorded in entries"
+      },
+      {
+        "id": "gamerant-touge",
+        "tier": "expert",
+        "title": "GameRant — FH6 best touge/street cars",
+        "url": "https://gamerant.com/forza-horizon-6-best-cars-touge-street-racing-fh6/",
+        "used_for": "GAP FILL: Cayman GT3 WTAC (S1/S2/R touge) + Exige WTAC (R touge) corroboration"
+      },
+      {
+        "id": "gamerant-dragtest",
+        "tier": "expert",
+        "title": "GameRant — FH6 best drag car (timed testing)",
+        "url": "https://gamerant.com/fh6-best-drag-car/",
+        "used_for": "GAP FILL: Tacoma TRD Pro FE tested at Irokawa quarter-mile (8.5s stock / 7.6s upgraded) — the only drag-SPECIFIC R-class evidence; VIP-exclusivity + no-auction note"
+      },
+      {
+        "id": "gamerstation-bdrag",
+        "tier": "community",
+        "title": "GamerStation — FH6 B-class drag ranking (heuristic)",
+        "url": "https://gamerstation.gg/tools/forza-horizon-6/best-cars/drag/b",
+        "used_for": "GAP FILL: only dedicated B-drag ranking; self-described stock-spec HEURISTIC (its #1 Cobra 427 was refuted on the AWD-launch meta; used only for the RS 6 as top AWD entry)"
+      },
+      {
+        "id": "mitchcactus-cc",
+        "tier": "community",
+        "title": "MitchCactus — FH6 best cross-country cars (ranked)",
+        "url": "https://mitchcactus.co/blog/forza-horizon-6/best-cross-country-cars-forza-horizon-6/",
+        "used_for": "GAP FILL: Brocky Ultra4 Bronco 'strongest S1 choice for open routes' (S1-bracketed quote — builds to low S2, not 900); bossdown dissents (Sesto Elemento) → S2 CC pick is contested"
+      },
+      {
+        "id": "windowscentral-drag",
+        "tier": "expert",
+        "title": "Windows Central — FH6 drag meta & tuning",
+        "url": "https://www.windowscentral.com/gaming/forza/forza-horizon-6-best-drag-cars-and-tuning-setups-to-dominate-the-leaderboards",
+        "used_for": "GAP FILL: FH6 drag meta frame — AWD swap 'flat-out better for times', drag tires mandatory; grounds the B-drag Cobra refutation and RS 6 promotion"
+      },
+      {
+        "id": "u4n-exige",
+        "tier": "community",
+        "title": "U4N — how to get the Lotus Exige WTAC",
+        "url": "https://www.u4n.com/news/how-to-get-the-lotus-exige-wtac-in-forza-horizon-6.html",
+        "used_for": "GAP FILL: Exige WTAC not purchasable — Collection Journal Road Racing unlock (win every road race, ~9,360 pts); cross-checked vs game8 'Tier 5 reward' framing",
+        "reliability_note": "currency-seller blog — used only for acquisition mechanics, cross-checked with game8/fandom"
       }
     ],
     "fh6_ui_structure_pass": {
@@ -3848,5 +4370,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-07-11T20:14Z"
+  "builtAt": "2026-07-11T20:46Z"
 };

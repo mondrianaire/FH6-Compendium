@@ -1179,7 +1179,8 @@ window.FH6_DB = {
         "recommended_drivetrain": "AWD (or RWD swap for max-traction drag spec)",
         "power_split": "drag-specific",
         "price_credits": null,
-        "acquisition": "Reward/Wheelspin (unconfirmed)",
+        "acquisition": "Wheelspin per skycoach — but NEEDS RE-VERIFY: skycoach's acquisition labels proved unreliable (it wrongly called the Miata FE 'Wheelspin only' when it's actually an aftermarket-shop spawn). Check whether this GT-R FE also has a deterministic path (aftermarket spawn / Playlist) before trusting 'Wheelspin'.",
+        "acquisition_difficulty": "hard-unconfirmed",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -1212,6 +1213,40 @@ window.FH6_DB = {
           "codmunity-drag",
           "forza-fandom-gtr",
           "forums-forza-tunes"
+        ]
+      },
+      {
+        "id": "miata-fe-1994",
+        "name": "Mazda MX-5 Miata Forza Edition",
+        "year": 1994,
+        "class": "S2",
+        "disciplines": [
+          "drag"
+        ],
+        "drivetrain_stock": "AWD",
+        "recommended_drivetrain": "AWD (drivetrain 🟡 — one source says RWD)",
+        "power_split": "drag-specific",
+        "price_credits": 500000,
+        "acquisition": "Aftermarket Car spot just NORTH of the Festival Kilometre Drag Meet (main Horizon Festival site). RELOAD the map (do a race or restart the game) until it appears — usually a few reloads — then BUY for 500,000 cr (sometimes 450k at a 10% discount). NOT Wheelspin-only (corrects skycoach). 500k is trivially farmable via the AFK/skill-farm methods.",
+        "acquisition_difficulty": "medium",
+        "tier": "S",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "comes drag-ready (S2 850 preset + drag tires)",
+          "tune gearing to strip",
+          "diff/launch"
+        ],
+        "tune_baseline": {
+          "note": "Ships with an S2 850 drag preset, drag tires, widebody, Viper-derived twin-turbo V10, + a Skills boost. Drag-tune per the drag guide (gearing first, high accel diff, low rear psi)."
+        },
+        "share_codes": [],
+        "why": "Widely rated the best drag car in FH6 (pre-fitted drag tires, elite launch/accel). Crucially, its acquisition is MEDIUM not hard: a targeted aftermarket-shop reload-buy, not Wheelspin RNG — corrected 2026-07-10 after a player flagged skycoach's wrong 'Wheelspin only' label.",
+        "confidence": "verified",
+        "sources": [
+          "game8",
+          "gamesradar-drag",
+          "meinmmo-miata",
+          "gamingpromax"
         ]
       }
     ]
@@ -1999,6 +2034,20 @@ window.FH6_DB = {
         "title": "Player in-game Rivals leaderboard — Electric Town Circuit, A class",
         "url": "n/a — user-provided screenshot 2026-07-10",
         "used_for": "GROUND TRUTH: global top-11 times/cars/PI/assists for Electric Town Circuit A. Shows a SOFT board (1:05-1:32 spread), Supra '20 x3 incl #1, fastest runs at 616 PI (under cap), TCS/STM off universal, 'AI Test071831' seed time. Re-confirms A-class = 601-700 (616 & 700 both 'A')."
+      },
+      {
+        "id": "gamesradar-drag",
+        "tier": "expert",
+        "title": "GamesRadar — Best FH6 drag cars",
+        "url": "https://www.gamesradar.com/games/forza-horizon/forza-horizon-6-best-drag-cars/",
+        "used_for": "Miata FE = best drag car; aftermarket-spawn acquisition"
+      },
+      {
+        "id": "meinmmo-miata",
+        "tier": "expert",
+        "title": "Mein-MMO — Unlock the Mazda MX-5 Miata FE '94",
+        "url": "https://mein-mmo.de/en/forza-horizon-6-unlock-mazda-mx-5-miata-fe-94-this-is-how-you-get-one-of-the-best-cars-for-speed-traps-and-drag-races,1568245/",
+        "used_for": "VERIFIED Miata FE acquisition: aftermarket spot N of Drag Meet, reload until it spawns, 500k (450k discounted) — NOT Wheelspin. Corrects skycoach."
       }
     ],
     "fh6_ui_structure_pass": {

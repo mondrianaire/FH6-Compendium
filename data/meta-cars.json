@@ -376,7 +376,8 @@
       "recommended_drivetrain": "AWD (or RWD swap for max-traction drag spec)",
       "power_split": "drag-specific",
       "price_credits": null,
-      "acquisition": "Reward/Wheelspin (unconfirmed)",
+      "acquisition": "Wheelspin per skycoach — but NEEDS RE-VERIFY: skycoach's acquisition labels proved unreliable (it wrongly called the Miata FE 'Wheelspin only' when it's actually an aftermarket-shop spawn). Check whether this GT-R FE also has a deterministic path (aftermarket spawn / Playlist) before trusting 'Wheelspin'.",
+      "acquisition_difficulty": "hard-unconfirmed",
       "tier": "S",
       "value_rating": 8,
       "upgrade_priority": ["max power", "drag tires", "drag-specific gearing", "weight reduction"],
@@ -391,6 +392,27 @@
       "why": "Premier drag platform (2012 model, S2 850 preset) — confirmed by CODMunity and multiple YouTube tuners. Specific share codes must be verified in-game.",
       "confidence": "probable",
       "sources": ["codmunity-drag", "forza-fandom-gtr", "forums-forza-tunes"]
+    },
+    {
+      "id": "miata-fe-1994",
+      "name": "Mazda MX-5 Miata Forza Edition",
+      "year": 1994,
+      "class": "S2",
+      "disciplines": ["drag"],
+      "drivetrain_stock": "AWD",
+      "recommended_drivetrain": "AWD (drivetrain 🟡 — one source says RWD)",
+      "power_split": "drag-specific",
+      "price_credits": 500000,
+      "acquisition": "Aftermarket Car spot just NORTH of the Festival Kilometre Drag Meet (main Horizon Festival site). RELOAD the map (do a race or restart the game) until it appears — usually a few reloads — then BUY for 500,000 cr (sometimes 450k at a 10% discount). NOT Wheelspin-only (corrects skycoach). 500k is trivially farmable via the AFK/skill-farm methods.",
+      "acquisition_difficulty": "medium",
+      "tier": "S",
+      "value_rating": 8,
+      "upgrade_priority": ["comes drag-ready (S2 850 preset + drag tires)", "tune gearing to strip", "diff/launch"],
+      "tune_baseline": { "note": "Ships with an S2 850 drag preset, drag tires, widebody, Viper-derived twin-turbo V10, + a Skills boost. Drag-tune per the drag guide (gearing first, high accel diff, low rear psi)." },
+      "share_codes": [],
+      "why": "Widely rated the best drag car in FH6 (pre-fitted drag tires, elite launch/accel). Crucially, its acquisition is MEDIUM not hard: a targeted aftermarket-shop reload-buy, not Wheelspin RNG — corrected 2026-07-10 after a player flagged skycoach's wrong 'Wheelspin only' label.",
+      "confidence": "verified",
+      "sources": ["game8", "gamesradar-drag", "meinmmo-miata", "gamingpromax"]
     }
   ]
 }

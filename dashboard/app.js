@@ -148,7 +148,7 @@
         <dt>Power split</dt><dd>${c.power_split || "—"}</dd>
         <dt>Price</dt><dd>${fmtCr(c.price_credits)}${c.price_note ? `<br><span class="why" style="font-size:12px">${c.price_note}</span>` : ""}</dd>
         ${c.acquisition_difficulty ? `<dt>Get it</dt><dd><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span>${c.acquisition ? `<br><span class="why" style="font-size:12px">${c.acquisition}</span>` : ""}${c.easy_alternative ? `<br><span class="why" style="font-size:12px"><strong>Easy alternative:</strong> ${c.easy_alternative}</span>` : ""}</dd>` : ""}
-        ${c.tunes && c.tunes.length ? `<dt>Tunes</dt><dd>${c.tunes.map(tuneLine).join("")}</dd>` : ""}
+        ${c.tunes && c.tunes.length ? `<dt>Tunes</dt><dd>${c.tunes.map(tuneLine).join("")}${c.alt_tune_note ? `<div style="font-size:11px;color:var(--warn);margin-top:4px">⚠️ ${c.alt_tune_note}</div>` : ""}</dd>` : (c.alt_tune_note ? `<dt>Tunes</dt><dd><div style="font-size:11px;color:var(--warn)">⚠️ ${c.alt_tune_note}</div></dd>` : "")}
         <dt>Acquisition</dt><dd>${c.acquisition || "—"}</dd>
         <dt>Value rating</dt><dd>${c.value_rating}/10</dd>
       </dl>

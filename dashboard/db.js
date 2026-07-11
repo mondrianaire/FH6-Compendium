@@ -867,7 +867,8 @@ window.FH6_DB = {
           "games.gg"
         ],
         "acquisition_difficulty": "hard",
-        "easy_alternative": "For a free S2 road car, the Mercedes-AMG One (FH5 loyalty, free) — or any Autoshow S2."
+        "easy_alternative": "For a free S2 road car, the Mercedes-AMG One (FH5 loyalty, free) — or any Autoshow S2.",
+        "alt_tune_note": "Car Pass DLC only. Without it, use the easy alternative Mercedes-AMG One (free FH5 loyalty) with ITS own road tune (see amg-one-2021 tunes) — the Gemera's tunes can't be applied without the Gemera."
       },
       {
         "id": "amg-one-2021",
@@ -899,7 +900,16 @@ window.FH6_DB = {
           "dotesports",
           "egamersworld"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "tunes": [
+          {
+            "method": "In-game Tune Browser > 2021 Mercedes-AMG One > filter Surface = Road > sort by rating > download top. This is the free (FH5-loyalty) alternative to the DLC-gated Gemera for S2 road.",
+            "surface": "road",
+            "source": "in-game Tune Browser",
+            "confidence": "method",
+            "player_verified": false
+          }
+        ]
       },
       {
         "id": "gr-supra-2020",
@@ -1102,7 +1112,16 @@ window.FH6_DB = {
         "sources": [
           "gamingpromax"
         ],
-        "acquisition_difficulty": "medium"
+        "acquisition_difficulty": "medium",
+        "tunes": [
+          {
+            "method": "In-game Tune Browser > 2022 Subaru BRZ FE > filter Surface = Cross Country (or Dirt) > sort by rating > download top. This is the easy-acquisition alternative to the VIP-gated Viper FE for cross-country.",
+            "surface": "cross_country",
+            "source": "in-game Tune Browser",
+            "confidence": "method",
+            "player_verified": false
+          }
+        ]
       },
       {
         "id": "viper-fe",
@@ -1134,7 +1153,8 @@ window.FH6_DB = {
           "gamingpromax"
         ],
         "acquisition_difficulty": "hard",
-        "easy_alternative": "For cross-country without paying: Subaru BRZ FE (aftermarket spawn at Sotoyama Ski Resort, medium), or an Autoshow off-road pick."
+        "easy_alternative": "For cross-country without paying: Subaru BRZ FE (aftermarket spawn at Sotoyama Ski Resort, medium), or an Autoshow off-road pick.",
+        "alt_tune_note": "VIP-DLC only. Without it, use the easy alternative Subaru BRZ FE (aftermarket spawn) with ITS own cross-country tune (see brz-fe-2022 tunes) — the Viper FE's tunes can't be applied without the Viper FE."
       },
       {
         "id": "can-am-maverick-2018",
@@ -1254,7 +1274,8 @@ window.FH6_DB = {
             "player_verified": false,
             "note": "The reputably-sourced GT-R Black FE drag code. Load it and report so it can flip to player-verified."
           }
-        ]
+        ],
+        "alt_tune_note": "Don't own the GT-R FE? Its code 514 752 751 WON'T load on another car. Use the standard non-FE 2012 GT-R Black Edition (Autoshow 80k) with its OWN in-game drag tune (Surface: Drag) — or just use the Miata FE you already own (see its tunes)."
       },
       {
         "id": "miata-fe-1994",
@@ -1323,7 +1344,8 @@ window.FH6_DB = {
         "2. A sourced code from the library below (🟡) -> load it, then tell me and it becomes ✅ player-verified.",
         "3. In-game Tune Browser filtered to the correct SURFACE (never a raw car search — that surfaces drag tunes)."
       ],
-      "verify_loop": "Your testing is what promotes 🟡 -> ✅ (or gets a dead/❌ code pulled). Report back on any code you load."
+      "verify_loop": "Your testing is what promotes 🟡 -> ✅ (or gets a dead/❌ code pulled). Report back on any code you load.",
+      "codes_are_car_specific": "A share code ONLY loads on the exact car it was made for (you browse tunes for the car you currently have). So a HARD car's tune code is useless unless you own that car — and its EASY ALTERNATIVE needs its OWN tune (in-game, filtered to the right Surface), never the hard car's code. Rule: never point a player at a code for a car they can't get."
     }
   },
   "upgradeStrategy": {

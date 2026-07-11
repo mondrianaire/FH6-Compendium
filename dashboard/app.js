@@ -308,35 +308,48 @@
         <p class="why">${h.purpose}</p>
         <ol class="why">${h.rules.map((r) => `<li>${r}</li>`).join("")}</ol>
       </div>`;
-    const tracks = rt.tracks.map((t) => {
-      const rows = ((t.leaderboard_snapshot && t.leaderboard_snapshot.top) || []).map((r) => `
+    const analysis = (a) => {
+      const rows = ((a.leaderboard_snapshot && a.leaderboard_snapshot.top) || []).map((r) => `
         <tr><td>${r.pos}</td><td>${r.driver}</td><td>${r.car}</td>
           <td>${r.pi}</td><td>${r.drivetrain || ""}</td>
           <td class="rng">${r.time}</td><td class="why" style="font-size:12px">${r.flag || ""}</td></tr>`).join("");
-      const snap = t.leaderboard_snapshot || {};
+      const snap = a.leaderboard_snapshot || {};
+      return `
+        <div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px">
+          <div class="card-row" style="margin-top:0"><h4 style="margin:0">${a.class} class</h4><span class="conf conf-probable">${(snap.your_standing) || ""}</span></div>
+          ${a.board_state ? `<p class="fh6note"><strong>Board (${snap.date || ""}, ${snap.filter || ""}):</strong> ${a.board_state}</p>` : ""}
+          ${rows ? `<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Driver</th><th>Car</th><th>PI</th><th>DT</th><th>Time</th><th>Flag</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
+          ${a.recommended_car ? `<p class="why"><strong>Pick:</strong> ${a.recommended_car}</p>` : ""}
+          ${a.acquisition ? `<p class="gating"><strong>How to get it:</strong> ${a.acquisition}</p>` : ""}
+          ${a.how_to_get_the_tune ? `<p class="why"><strong>Getting a tune:</strong> ${a.how_to_get_the_tune}</p>` : ""}
+          ${a.tune_browser_warning ? `<p class="fh6note">⚠️ ${a.tune_browser_warning}</p>` : ""}
+          ${a.key_insight ? `<p class="fh6note"><strong>Key insight:</strong> ${a.key_insight}</p>` : ""}
+          ${a.targets ? `<p class="why"><strong>Targets:</strong> ${a.targets.realistic_first} → stretch: ${a.targets.stretch}</p>` : ""}
+          <p class="why" style="font-size:12px;color:var(--muted)">${a.confidence || ""}</p>
+        </div>`;
+    };
+    const fmtBadge = (f) => f === "endurance" ? "🏁 endurance" : f === "sprint" ? "➡️ sprint" : "🔁 circuit";
+    const tracks = rt.tracks.map((t) => {
+      const done = t.status === "analyzed" && (t.class_analyses || []).length;
+      const body = done
+        ? (t.class_analyses.map(analysis).join(""))
+        : `<p class="why" style="color:var(--warn)">⏳ Awaiting leaderboard — send an in-game Rivals screenshot for this event + the class you race, and I'll fill in the board read, car, acquisition & tune source.</p>`;
       return `
       <div class="block">
         <div class="card-row" style="margin-top:0">
-          <h3 style="margin:0">${t.name} — ${t.class} class</h3>
-          <span class="conf conf-probable">${t.location || ""}</span>
+          <h3 style="margin:0">${t.name} <span class="flag tab-flag">${fmtBadge(t.format)}</span></h3>
+          <span class="conf ${done ? "conf-verified" : "conf-probable"}">${done ? "✅ analyzed" : "scaffold"}</span>
         </div>
-        <p class="why"><strong>Character:</strong> ${t.character}</p>
-        <p class="fh6note"><strong>Board (${snap.date || ""}, ${snap.filter || ""}):</strong> ${t.board_state}</p>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>#</th><th>Driver</th><th>Car</th><th>PI</th><th>DT</th><th>Time</th><th>Flag</th></tr></thead>
-          <tbody>${rows}</tbody></table></div>
-        <p class="why"><strong>Pick:</strong> ${t.recommended_car}</p>
-        ${t.acquisition ? `<p class="gating"><strong>How to get it:</strong> ${t.acquisition}</p>` : ""}
-        ${t.alternatives_if_hard ? `<p class="why"><strong>Alternatives:</strong> ${t.alternatives_if_hard}</p>` : ""}
-        <p class="why"><strong>Build:</strong> ${t.recommended_build}</p>
-        ${t.how_to_get_the_tune ? `<p class="why"><strong>Getting a tune:</strong> ${t.how_to_get_the_tune}</p>` : ""}
-        ${t.tune_browser_warning ? `<p class="fh6note">⚠️ ${t.tune_browser_warning}</p>` : ""}
-        <p class="fh6note"><strong>Key insight:</strong> ${t.key_insight}</p>
-        ${t.targets ? `<p class="why"><strong>Targets:</strong> ${t.targets.realistic_first} → stretch: ${t.targets.stretch}</p>` : ""}
-        <p class="why" style="font-size:12px;color:var(--muted)">${t.confidence || ""}</p>
+        <p class="why" style="font-size:12px;color:var(--muted)">${t.region || ""}${t.location ? " · " + t.location : ""}</p>
+        <p class="why"><strong>Character:</strong> ${t.character} ${t.character_confidence === "inferred" ? '<span class="conf conf-contested">🟡 inferred</span>' : ""}</p>
+        ${body}
       </div>`;
     }).join("");
-    host.innerHTML = `<p class="hint">${rt.note}</p>` + heur + tracks;
+    const doneN = rt.tracks.filter((t) => t.status === "analyzed").length;
+    const summary = `<div class="block"><h3>Road Racing Rivals — ${doneN}/${rt.tracks.length} analyzed</h3>
+      <p class="why">${rt.scaffold_todo || ""}</p>
+      <p class="why" style="font-size:12px;color:var(--muted)">${rt.scope || ""}</p></div>`;
+    host.innerHTML = `<p class="hint">${rt.note}</p>` + heur + summary + tracks;
   }
 
   // ---- progression ----

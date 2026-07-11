@@ -1638,104 +1638,386 @@ window.FH6_DB = {
     ]
   },
   "rivalsTracks": {
-    "schema_version": "1.0.0",
+    "schema_version": "2.0.0",
     "captured": "2026-07-10",
-    "note": "Rivals leaderboard-prep dataset. Per track: the meta car/build to be competitive PLUS how to READ the board first — because the car is often NOT the bottleneck. Always verify a suspect top time by downloading its ghost in-game.",
+    "note": "Rivals leaderboard-prep dataset. Structure: one entry per TRACK (metadata + inferred character + road-template link), each holding a class_analyses[] you fill in from an in-game leaderboard screenshot. Scaffolded tracks say 'awaiting leaderboard'. Read the board with board_reading_heuristic BEFORE trusting any top time; source tunes per the discipline template (road = low convergence -> download the fastest clean-lap tune).",
+    "scope": "All 22 FH6 Road Racing events (12 Circuits + 10 Sprints), source: mapmaster.io. Character per track is INFERRED from the real-world location (🟡) until confirmed against the in-game layout / leaderboard.",
     "board_reading_heuristic": {
       "purpose": "Read a Rivals leaderboard critically before copying anyone or picking a target.",
       "rules": [
-        "CONTESTED vs SOFT: on a solved board the top ~10 sit within ~1-2s. A big spread (25s+ across the top 10) = SOFT/uncontested board — almost nobody is tryharding, so CAR CHOICE BARELY MATTERS; a clean optimized lap alone climbs the ranks.",
-        "OUTLIER = SUSPECT: if the #1 (or top few) beat the main clean-lap CLUSTER by more than ~10% of laptime, treat them as suspect. Usual cause is a CUT / DIRTY lap the game failed to invalidate (most common), not skill. A 25s gap on a 90s lap means the route got shorter, not that the driver is 25s better.",
-        "AI / DEV SEED TIMES: names like 'AI Test#######' are developer/AI benchmark entries, not real players — ignore them as targets.",
-        "HACKING is the LEAST likely explanation of a fast-but-plausible time (e.g. 1:05). Real hacks are absurd (sub-0:30 / 0:00.000). Console is locked down; hacking is mainly a PC-mod concern.",
-        "VERIFY WITH THE GHOST: download the suspect ghost and watch it. Cuts corners / clips walls / teleports / impossible speed = dirty or hacked, ignore. Clean fast line = legit and beatable with practice.",
-        "PICK THE RIGHT TARGET: race the CLEAN-LAP CLUSTER, not the outliers. Use Change Filter -> Friends / Region and any clean-lap filter to strip out junk.",
-        "UNDER-PI CAN WIN on technical tracks: the fastest runs sometimes sit well below the class PI cap (grip/control beats raw power). Don't reflexively max PI."
+        "CONTESTED vs SOFT: on a solved board the top ~10 sit within ~1-2s. A big spread (25s+) = SOFT board — car choice barely matters; a clean optimized lap climbs the ranks.",
+        "OUTLIER = SUSPECT: if the top few beat the clean-lap CLUSTER by >~10% of laptime, suspect a CUT/DIRTY lap the game didn't invalidate (most common), not skill.",
+        "AI/DEV SEED TIMES: names like 'AI Test#######' are benchmark entries, not real players — ignore as targets.",
+        "HACKING is the LEAST likely cause of a fast-but-plausible time; real hacks are absurd (sub-0:30). Console is locked.",
+        "VERIFY WITH THE GHOST: download the suspect ghost — cuts/teleports = dirty; clean fast line = legit and beatable.",
+        "PICK THE RIGHT TARGET: race the clean-lap cluster; use Change Filter -> Friends/Region + any clean-lap filter.",
+        "UNDER-PI CAN WIN on technical tracks: fastest runs sometimes sit below the class cap (grip/control > raw power)."
       ]
     },
+    "tune_sourcing": "Road = LOW convergence (see tuning-templates.json): download the fastest CLEAN-lap driver's shared tune from the leaderboard, or in-game Tune Browser > Surface: ROAD (never a raw car search — that surfaces drag tunes that can't corner). The road template is a starting point, not the answer.",
+    "scaffold_todo": "To complete a track: send an in-game Rivals leaderboard screenshot for it + the class you race. I'll add a class_analyses entry (board read, recommended car+acquisition, tune source, targets).",
     "tracks": [
       {
-        "id": "electric-town-circuit-a",
+        "id": "electric-town-circuit",
         "name": "Electric Town Circuit",
-        "location": "Akihabara, Tokyo",
+        "location": "Akihabara",
+        "region": "Tokyo City",
+        "format": "circuit",
         "discipline": "road",
-        "class": "A",
-        "character": "Tight technical urban street circuit — short straights, 90-degree corners, walls close. Grip / braking / corner-exit matter far more than top speed.",
-        "board_state": "SOFT / uncontested (2026-07-10). Global top 11 spanned 1:05.127 -> 1:32.755 (27s). Clean-lap cluster ~1:28-1:32 at 700 PI. Top 1-4 are outliers (suspect cut/dirty; #3 'AI Test071831' is a seed time).",
-        "leaderboard_snapshot": {
-          "date": "2026-07-10",
-          "filter": "Global",
-          "your_standing": "top 53% of 4,594,418 players",
-          "top": [
-            {
-              "pos": 1,
-              "driver": "MortalYard2398",
-              "car": "Toyota Supra '20",
-              "pi": 616,
-              "drivetrain": "RWD",
-              "time": "1:05.127",
-              "assists": "ABS on, TCS off, STM off, Auto",
-              "flag": "SUSPECT — 8.5s clear of #2; likely cut/dirty. Verify by ghost."
+        "template_ref": "road",
+        "character": "Tight technical urban street circuit — short straights, 90-degree corners, walls close. Grip/braking/corner-exit >> top speed.",
+        "character_confidence": "verified",
+        "status": "analyzed",
+        "class_analyses": [
+          {
+            "class": "A",
+            "board_state": "SOFT/uncontested (2026-07-10). Global top 11 spanned 1:05.127 -> 1:32.755 (27s). Clean-lap cluster ~1:28-1:32 at 700 PI. Top 1-4 are outliers (suspect cut/dirty; #3 'AI Test071831' is a seed time).",
+            "leaderboard_snapshot": {
+              "date": "2026-07-10",
+              "filter": "Global",
+              "your_standing": "top 53% of 4,594,418 players",
+              "top": [
+                {
+                  "pos": 1,
+                  "driver": "MortalYard2398",
+                  "car": "Toyota Supra '20",
+                  "pi": 616,
+                  "drivetrain": "RWD",
+                  "time": "1:05.127",
+                  "flag": "SUSPECT — 8.5s clear; likely cut/dirty. Verify by ghost."
+                },
+                {
+                  "pos": 2,
+                  "driver": "IrateAunt4120",
+                  "car": "Porsche 718 GTS",
+                  "pi": 675,
+                  "drivetrain": "RWD",
+                  "time": "1:13.699",
+                  "flag": "strongest plausible clean lap"
+                },
+                {
+                  "pos": 3,
+                  "driver": "AI Test071831",
+                  "car": "Audi RS 7 '21",
+                  "pi": 700,
+                  "drivetrain": "AWD",
+                  "time": "1:19.737",
+                  "flag": "AI/dev seed time"
+                },
+                {
+                  "pos": 4,
+                  "driver": "Good Good5799",
+                  "car": "Toyota Supra '20",
+                  "pi": 616,
+                  "drivetrain": "RWD",
+                  "time": "1:22.615"
+                },
+                {
+                  "pos": 5,
+                  "driver": "RozekUx",
+                  "car": "Dodge Viper '99",
+                  "pi": 700,
+                  "drivetrain": "RWD",
+                  "time": "1:28.969"
+                },
+                {
+                  "pos": "6-11",
+                  "driver": "pack",
+                  "car": "Supra '20 / BMW i8 / GR86 / City E II / Ford GT '05 x2",
+                  "pi": 700,
+                  "time": "1:30.262 - 1:32.755",
+                  "flag": "clean-lap cluster — realistic legit band"
+                }
+              ]
             },
-            {
-              "pos": 2,
-              "driver": "IrateAunt4120",
-              "car": "Porsche 718 GTS",
-              "pi": 675,
-              "drivetrain": "RWD",
-              "time": "1:13.699",
-              "flag": "strongest plausible clean lap"
+            "recommended_car": "Toyota Supra '20 (RWD) — most-represented on the board (3x, incl #1 & #4); in the meta DB (gr-supra-2020).",
+            "acquisition": "EASY. Autoshow ~45,000 cr (buy anytime) AND free via Journal 'Discovery' Tier 4. No RNG.",
+            "how_to_get_the_tune": "616 PI is NOT searchable (it was a bespoke under-cap build). Download the fastest CLEAN Supra driver's shared tune from the leaderboard (e.g. #4/#6), or Tune Browser > 2020 GR Supra > Surface: ROAD > A class > sort by rating. '616' just means grip-focused, not a target.",
+            "tune_browser_warning": "A raw car search mixes disciplines and DRAG tunes are most-downloaded — a drag tune CANNOT CORNER (drag tires lost all lateral grip in the 2026-06-15 patch, locked diff, no aero: washes straight above ~30 mph). Pick a ROAD tune; check Upgrades>Tires compound isn't 'Drag'.",
+            "key_insight": "CAR IS NOT THE BOTTLENECK. #1 on a 616 Supra beats a maxed 700 Audi by 14s — that's line + clean laps. A single clean lap vaults you from top 53% to ~top 10% here.",
+            "targets": {
+              "realistic_first": "beat ~1:13 (#2)",
+              "stretch": "1:05 (#1) — verify it isn't a cut lap via ghost first"
             },
-            {
-              "pos": 3,
-              "driver": "AI Test071831",
-              "car": "Audi RS 7 '21",
-              "pi": 700,
-              "drivetrain": "AWD",
-              "time": "1:19.737",
-              "flag": "AI / dev seed time — not a real target"
-            },
-            {
-              "pos": 4,
-              "driver": "Good Good5799",
-              "car": "Toyota Supra '20",
-              "pi": 616,
-              "drivetrain": "RWD",
-              "time": "1:22.615"
-            },
-            {
-              "pos": 5,
-              "driver": "RozekUx",
-              "car": "Dodge Viper '99",
-              "pi": 700,
-              "drivetrain": "RWD",
-              "time": "1:28.969"
-            },
-            {
-              "pos": "6-11",
-              "driver": "pack",
-              "car": "Supra '20 / BMW i8 / GR86 '22 / City E II '84 / Ford GT '05 x2",
-              "pi": 700,
-              "time": "1:30.262 - 1:32.755",
-              "flag": "clean-lap cluster — realistic legit band"
-            }
-          ]
-        },
-        "recommended_car": "Toyota Supra '20 (RWD) — most-represented on the board (3x, incl. #1 & #4); already in the meta DB (gr-supra-2020).",
-        "acquisition": "EASY. Autoshow ~42,750 cr (buy anytime, zero RNG), AND free via Journal 'Discovery' Tier 4. No luck, no DLC — a friendly progression pick.",
-        "alternatives_if_hard": "Not needed here (Supra is easy). If you'd rather run AWD for forgiveness on this tight circuit: Toyota GR86 '22 (Autoshow, cheap, RWD) or an AWD Autoshow production car like the Audi RS7 '21 — both standard buys (verify price in-game). Avoid Wheelspin-only/Playlist-exclusive cars for a track where the car isn't the bottleneck anyway.",
-        "recommended_build": "Grip-focused, and DO NOT max PI — the two fastest Supras run ~616 PI, not the 700 cap (lighter/more controllable beats maxed power on this tight circuit). Tires/brakes/suspension first, keep power modest. Assists: ABS on, TCS off, STM off, gearing Automatic. Short final drive for the 90-degree corners; add downforce (top speed is irrelevant here).",
-        "key_insight": "THE CAR IS NOT THE BOTTLENECK. #1 on a 616 Supra beats a maxed 700 Audi RS7 by 14s — that gap is racing line + clean laps, not the car. A single clean optimized lap vaults you from top 53% into roughly the top 10% on this soft board.",
-        "how_to_get_the_tune": "616 PI is NOT a searchable tune — it was a bespoke under-cap build; the Tune Browser can't filter by exact PI and most people build to the class cap (A 700). To source a tune: (1) BEST — on the Rivals leaderboard, select the fast Supra time (#1 or the #4 at 616) and view/download THEIR tune (if shared); or (2) Tune Browser > search 2020 GR Supra > filter A class > pick a ROAD tune. '616' just means grip-focused, not a hard target.",
-        "tune_browser_warning": "CRITICAL: searching a car mixes ALL disciplines, and DRAG tunes are the most-downloaded (farming meta) — so 'sort by downloads' can hand you a drag build. A drag tune CANNOT CORNER: it has drag tires (which the 2026-06-15 patch stripped of ALL lateral grip), a locked diff, and no downforce — the car washes straight above ~30 mph. Only pick tunes tagged/described for ROAD/Circuit; avoid Drag/Drift/Speed-Trap/Standing-Mile. 10-sec check: Upgrades > Tires > Compound — if it says 'Drag', that's the problem. A road build uses a road Race/Sport compound or Slicks, downforce, and a diff accel lock ~40-60% (not locked).",
-        "targets": {
-          "realistic_first": "beat ~1:13 (#2 — strongest plausible clean lap)",
-          "stretch": "1:05 (#1) — but verify it isn't a cut lap via ghost download before treating it as real"
-        },
-        "confidence": "leaderboard = primary (in-game screenshot 2026-07-10); car/build meta = probable (A-class meta still forming)",
-        "sources": [
-          "in-game-leaderboard-electrictown"
+            "confidence": "leaderboard = primary (screenshot 2026-07-10); car/build = probable",
+            "sources": [
+              "in-game-leaderboard-electrictown"
+            ]
+          }
         ]
+      },
+      {
+        "id": "shirakawa-circuit",
+        "name": "Shirakawa Circuit",
+        "location": "Shirakawa-style village",
+        "region": "Minamino",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Historic gassho-village setting — likely flowing rural/mixed. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "daikoku-circuit",
+        "name": "Daikoku Circuit",
+        "location": "Daikoku PA (expressway junction)",
+        "region": "Tokyo City",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Named for the Daikoku expressway junction/car-meet PA — likely HIGH-SPEED highway loop. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "hokubu-circuit",
+        "name": "Hokubu Circuit",
+        "location": "Hokubu (northern) region",
+        "region": "Hokubu",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Northern region — mixed. INFERRED, confirm.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "soni-circuit",
+        "name": "Soni Circuit",
+        "location": "Soni plateau (Fuji/Tokyo views)",
+        "region": "Takashiro",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Scenic plateau — flowing, mixed medium-speed. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "narai-juku-circuit",
+        "name": "Narai-juku Circuit",
+        "location": "Narai-juku historic post town",
+        "region": "Shimanoyama",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Narrow historic post-town streets — TIGHT/technical (like Electric Town). INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "shimanoyama-circuit",
+        "name": "Shimanoyama Circuit",
+        "location": "Shimanoyama mountains",
+        "region": "Shimanoyama",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Mountain area (known drift/jump spots) — technical/touge-like. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "irokawa-circuit",
+        "name": "Irokawa Circuit",
+        "location": "Irokawa",
+        "region": "Nangan",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Southern coastal/rural — mixed. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "highway-circuit",
+        "name": "Highway Circuit",
+        "location": "Tokyo expressways",
+        "region": "Tokyo City",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Highway — HIGH-SPEED, top-end + long gearing matter. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "legend-island-circuit",
+        "name": "Legend Island Circuit",
+        "location": "Legend Island",
+        "region": "Legend Island",
+        "format": "circuit",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Festival island — flowing/mixed. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "the-goliath",
+        "name": "The Goliath",
+        "location": "Full perimeter of Japan",
+        "region": "Legend Island",
+        "format": "endurance",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "53.1 mi single lap around all of Japan — ENDURANCE, every surface/speed; balanced all-rounder + tire wear. Gold Wristband locked.",
+        "character_confidence": "verified",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "the-colossus",
+        "name": "The Colossus",
+        "location": "Highway loop",
+        "region": "Shimanoyama",
+        "format": "endurance",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "23.4 mi highway loop built for S2 900 hypercars — HIGH-SPEED endurance (top speed king). Gold Wristband locked. (Also the AFK credit-farm loop.)",
+        "character_confidence": "verified",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "festival-sprint",
+        "name": "Festival Sprint",
+        "location": "Near the Horizon Festival site",
+        "region": "Ohtani",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Point-to-point near the festival — mixed. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "tokyo-railway-sprint",
+        "name": "Tokyo Railway Sprint",
+        "location": "Urban, follows the railway",
+        "region": "Minamino",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Urban point-to-point along rail lines — technical urban. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "shikisai-sprint",
+        "name": "Shikisai Sprint",
+        "location": "Shikisai (seasonal scenery)",
+        "region": "Hokubu",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Scenic rural sprint — mixed. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "coastline-sprint",
+        "name": "Coastline Sprint",
+        "location": "Coastal road",
+        "region": "Nangan",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Coastal — HIGH-SPEED flowing sweepers. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "satta-sprint",
+        "name": "Satta Sprint",
+        "location": "Satta Pass (Tomei, Fuji view)",
+        "region": "Ito",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Coastal pass — HIGH-SPEED with sweepers. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "venus-sprint",
+        "name": "Venus Sprint",
+        "location": "Takashiro",
+        "region": "Takashiro",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Mixed. INFERRED, confirm.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "ito-sprint",
+        "name": "Ito Sprint",
+        "location": "Ito (Izu coast/mountain)",
+        "region": "Ito",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Coastal/mountain mixed — flowing. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "shimanoyama-sprint",
+        "name": "Shimanoyama Sprint",
+        "location": "Shimanoyama mountains",
+        "region": "Shimanoyama",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Mountain point-to-point — technical/touge (downhill likely). INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "seaside-park-sprint",
+        "name": "Seaside Park Sprint",
+        "location": "Seaside park",
+        "region": "Ito",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Seaside — HIGH-SPEED. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
+      },
+      {
+        "id": "tateyama-kurobe-sprint",
+        "name": "Tateyama Kurobe Sprint",
+        "location": "Tateyama Kurobe Alpine Route",
+        "region": "Sotoyama",
+        "format": "sprint",
+        "discipline": "road",
+        "template_ref": "road",
+        "character": "Alpine mountain route — TECHNICAL, elevation, tight. INFERRED.",
+        "character_confidence": "inferred",
+        "status": "scaffold",
+        "class_analyses": []
       }
     ]
   },
@@ -2368,6 +2650,13 @@ window.FH6_DB = {
         "title": "Bossdown — FH6 drag tune guide",
         "url": "https://bossdown.com/guides/forza-horizon-6-drag-tune-guide/",
         "used_for": "Drag tuning priority order (gearing #1, launch, diff, tires) — basis of the drag discipline template"
+      },
+      {
+        "id": "mapmaster-roadraces",
+        "tier": "community",
+        "title": "MapMaster — FH6 Road Racing Event locations",
+        "url": "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+        "used_for": "The full list of all 22 Road Racing events (12 Circuits + 10 Sprints) with names/regions/format — basis of the rivals-tracks scaffold"
       },
       {
         "id": "meinmmo-miata",

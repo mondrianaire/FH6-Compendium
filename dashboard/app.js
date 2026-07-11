@@ -17,6 +17,14 @@
   const fh6Label = (c) => c === "fh6_confirmed" ? "✅ FH6" : c === "needs_ingame" ? "❌ in-game" : "🟡 FH6";
   const acqLabel = (d) => d === "easy" ? "🟢 easy to get" : d === "medium" ? "🟡 some effort"
     : (d === "hard" || d === "hard-unconfirmed") ? "🔴 hard / luck-gated" : "";
+  const tuneConf = (c) => c === "player-verified" ? "✅ verified" : c === "sourced-unverified" ? "🟡 sourced"
+    : c === "suspect" ? "❌ suspect" : "ℹ️ method";
+  const tuneLine = (t) => {
+    const head = t.code
+      ? `<code>${t.code}</code> <span class="acq">${tuneConf(t.confidence)}</span> <span style="font-size:11px;color:var(--muted)">${t.surface || ""}${t.source ? " · " + t.source : ""}</span>`
+      : `<span class="acq">${tuneConf(t.confidence)}</span> ${t.method || ""}`;
+    return `<div style="padding:4px 0">${head}${t.note ? `<br><span style="font-size:11px;color:var(--muted)">${t.note}</span>` : ""}</div>`;
+  };
 
   // ---- stamps ----
   document.getElementById("metaStamp").textContent =
@@ -140,6 +148,7 @@
         <dt>Power split</dt><dd>${c.power_split || "—"}</dd>
         <dt>Price</dt><dd>${fmtCr(c.price_credits)}${c.price_note ? `<br><span class="why" style="font-size:12px">${c.price_note}</span>` : ""}</dd>
         ${c.acquisition_difficulty ? `<dt>Get it</dt><dd><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span>${c.acquisition ? `<br><span class="why" style="font-size:12px">${c.acquisition}</span>` : ""}${c.easy_alternative ? `<br><span class="why" style="font-size:12px"><strong>Easy alternative:</strong> ${c.easy_alternative}</span>` : ""}</dd>` : ""}
+        ${c.tunes && c.tunes.length ? `<dt>Tunes</dt><dd>${c.tunes.map(tuneLine).join("")}</dd>` : ""}
         <dt>Acquisition</dt><dd>${c.acquisition || "—"}</dd>
         <dt>Value rating</dt><dd>${c.value_rating}/10</dd>
       </dl>

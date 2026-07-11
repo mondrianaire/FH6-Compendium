@@ -933,6 +933,16 @@ window.FH6_DB = {
           "pcgamer",
           "games.gg",
           "game8"
+        ],
+        "tunes": [
+          {
+            "method": "Rivals: for a specific track, download the fastest CLEAN-lap Supra driver's shared tune (e.g. Electric Town #4/#6). Otherwise Tune Browser > 2020 GR Supra > filter Surface = ROAD > A class > sort by rating > download top. Filtering to ROAD is what avoids the drag-tune trap.",
+            "surface": "road",
+            "source": "Rivals leaderboard / in-game Tune Browser",
+            "confidence": "method",
+            "player_verified": false,
+            "note": "No reputably-PUBLISHED road code found (value sites like GamerStation give sliders, not codes; CODMunity road coverage is thin). The good road Supra tunes live in-game."
+          }
         ]
       },
       {
@@ -1231,7 +1241,20 @@ window.FH6_DB = {
           "forza-fandom-gtr",
           "forums-forza-tunes"
         ],
-        "easy_alternative": "The standard non-FE 2012 Nissan GT-R Black Edition — Autoshow ~80,000 cr — is a near-identical S2 drag platform (the FE only adds a Speed-Skills star)."
+        "easy_alternative": "The standard non-FE 2012 Nissan GT-R Black Edition — Autoshow ~80,000 cr — is a near-identical S2 drag platform (the FE only adds a Speed-Skills star).",
+        "tunes": [
+          {
+            "code": "514 752 751",
+            "surface": "drag",
+            "class": "S2",
+            "source": "CODMunity",
+            "source_url": "https://codmunity.gg/forza/drag",
+            "confidence": "sourced-unverified",
+            "checked": "2026-07-10 (confirmed present on the CODMunity drag page)",
+            "player_verified": false,
+            "note": "The reputably-sourced GT-R Black FE drag code. Load it and report so it can flip to player-verified."
+          }
+        ]
       },
       {
         "id": "miata-fe-1994",
@@ -1265,9 +1288,43 @@ window.FH6_DB = {
           "gamesradar-drag",
           "meinmmo-miata",
           "gamingpromax"
+        ],
+        "tunes": [
+          {
+            "method": "In-game Tune Browser > search 1994 Mazda MX-5 Miata FE > filter Surface = DRAG > sort by rating > download the top one. The Miata FE is THE drag car, so strong drag tunes are plentiful in-game.",
+            "surface": "drag",
+            "source": "in-game Tune Browser",
+            "confidence": "method",
+            "player_verified": false
+          },
+          {
+            "code": "927 894 145",
+            "surface": "drag",
+            "source": "TikTok/SEO (claimed 'world record', ~1,743 hp)",
+            "source_url": "n/a",
+            "confidence": "suspect",
+            "checked": "2026-07-10 (NOT found on CODMunity — unverifiable origin)",
+            "player_verified": false,
+            "note": "SUSPECT: circulates as a WR code but is NOT on CODMunity or any reputable DB. Same origin class as codes I already retracted. Test at your own risk and report — do not trust until confirmed."
+          }
         ]
       }
-    ]
+    ],
+    "tune_sourcing_policy": {
+      "note": "How this app hands you a DOWNLOADABLE tune (you won't self-tune). NEVER fabricate a code.",
+      "confidence_levels": {
+        "player-verified": "✅ you loaded it in-game and confirmed it works — trusted",
+        "sourced-unverified": "🟡 published by a REPUTABLE source (CODMunity, a Rivals leaderboard, a known creator) but not yet loaded — try it and report",
+        "suspect": "❌ circulating on TikTok/SEO with NO reputable source — likely fake/stale; test at your own risk",
+        "method": "ℹ️ no code — use the named in-game path (Rivals leaderboard-download, or Tune Browser filtered to the right Surface)"
+      },
+      "priority": [
+        "1. Rivals track -> download the fastest CLEAN-lap driver's shared tune from the leaderboard (real, fastest, track-matched).",
+        "2. A sourced code from the library below (🟡) -> load it, then tell me and it becomes ✅ player-verified.",
+        "3. In-game Tune Browser filtered to the correct SURFACE (never a raw car search — that surfaces drag tunes)."
+      ],
+      "verify_loop": "Your testing is what promotes 🟡 -> ✅ (or gets a dead/❌ code pulled). Report back on any code you load."
+    }
   },
   "upgradeStrategy": {
     "schema_version": "1.0.0",

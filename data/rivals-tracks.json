@@ -735,7 +735,97 @@
         ],
         "pass": "ultracode wf_4036acbd-0ad 2026-07-10"
       }
+    },
+    {
+      "id": "irokawa-drag",
+      "name": "Irokawa Space Centre Drag",
+      "location": "Irokawa Space Center",
+      "region": "Nangan",
+      "format": "drag",
+      "discipline": "drag",
+      "template_ref": "drag",
+      "character": "Short straight-line drag (~quarter mile). Launch + first-gear traction decide it far more than top speed.",
+      "character_confidence": "verified",
+      "speed_profile": "drag-short",
+      "length": "~0.2-0.25 mi (near 1/4-mile; the paired Drag Meet is the classic Quarter Mile)",
+      "strip_bias": "SHORT — launch-dominated; AWD hooks hardest; SHORTEST gearing. The launch IS the race here.",
+      "status": "analyzed",
+      "class_analyses": [],
+      "drag_playbook": {
+        "approach": "Apply the DRAG discipline template (Tuning Templates tab). HIGH-convergence discipline: the tune is a formula — don't hunt per-car codes, apply the template and tune GEARING to this strip.",
+        "gearing": "SHORTEST — maximise off-the-line accel; you won't reach top speed. Hit the limiter late.",
+        "car_by_class": {
+          "S2 (850)": "Mazda MX-5 Miata FE (BEST; medium acq — aftermarket reload-spawn 500k) or Nissan GT-R Black Edition FE (hard — Wheelspin/AH). Both 10.0 launch/accel.",
+          "S1": "Nissan GT-R NISMO (AWD) — or build up the standard non-FE 2012 GT-R Black Edition (Autoshow 80k) into an S1 drag spec.",
+          "A and below": "Meta still forming (FH6 is young). RULE: pick the car in your class with the best Speed / Acceleration / LAUNCH stats, favor AWD for the launch, and pick a PI-efficient chassis — then apply the drag template. (Send me a class board and I'll pin the exact car.)"
+        },
+        "launch": "The launch is ~everything on a short strip. Rev to peak torque, feed throttle to balance bog-vs-spin; AWD = be aggressive. Practice the reaction + first shift.",
+        "confidence": "verified (template + S2 cars); lower-class per-car picks = probable (meta forming)"
+      }
+    },
+    {
+      "id": "ito-airfield-drag",
+      "name": "Ito Airfield Drag",
+      "location": "Ito Airfield",
+      "region": "Minamino",
+      "format": "drag",
+      "discipline": "drag",
+      "template_ref": "drag",
+      "character": "Half-mile straight-line drag. Balanced: hook cleanly off the line AND carry to a strong terminal speed.",
+      "character_confidence": "verified",
+      "speed_profile": "drag-medium",
+      "length": "0.5 mi (half-mile)",
+      "strip_bias": "MEDIUM — balances launch and top-end; MEDIUM gearing. Both AWD launch and power-to-weight matter.",
+      "status": "analyzed",
+      "class_analyses": [],
+      "drag_playbook": {
+        "approach": "Apply the DRAG discipline template. HIGH-convergence: apply the formula, tune GEARING to this strip length.",
+        "gearing": "MEDIUM — reach the limiter in top gear right at the line; balance accel vs terminal speed.",
+        "car_by_class": {
+          "S2 (850)": "Mazda MX-5 Miata FE (BEST; medium acq — aftermarket reload-spawn 500k) or Nissan GT-R Black Edition FE (hard — Wheelspin/AH). Both 10.0 launch/accel.",
+          "S1": "Nissan GT-R NISMO (AWD) — or build up the standard non-FE 2012 GT-R Black Edition (Autoshow 80k) into an S1 drag spec.",
+          "A and below": "Meta still forming (FH6 is young). RULE: pick the car in your class with the best Speed / Acceleration / LAUNCH stats, favor AWD for the launch, and pick a PI-efficient chassis — then apply the drag template. (Send me a class board and I'll pin the exact car.)"
+        },
+        "launch": "Launch matters, but a clean first ~4s + gearing that tops out at the line wins. Rev to peak torque, feed throttle.",
+        "confidence": "verified (template + S2 cars); lower-class per-car picks = probable (meta forming)"
+      }
+    },
+    {
+      "id": "festival-km-drag",
+      "name": "Festival Kilometre Drag",
+      "location": "Horizon Festival site",
+      "region": "Ohtani",
+      "format": "drag",
+      "discipline": "drag",
+      "template_ref": "drag",
+      "character": "1 km straight-line drag. Longest strip -> top-end power + gearing dominate; pure-launch cars lose their edge.",
+      "character_confidence": "verified",
+      "speed_profile": "drag-long",
+      "length": "~1 km (0.6 mi)",
+      "strip_bias": "LONG — top speed + LONGER gearing matter most; the launch matters least of the three (still don't fluff it). Light/RWD + aero-min can beat launch-only cars.",
+      "status": "analyzed",
+      "class_analyses": [],
+      "drag_playbook": {
+        "approach": "Apply the DRAG discipline template. HIGH-convergence: apply the formula, tune GEARING to this strip length.",
+        "gearing": "LONGER — you have room to reach a high terminal speed; don't over-shorten or you'll top out early.",
+        "car_by_class": {
+          "S2 (850)": "Mazda MX-5 Miata FE (BEST; medium acq — aftermarket reload-spawn 500k) or Nissan GT-R Black Edition FE (hard — Wheelspin/AH). Both 10.0 launch/accel.",
+          "S1": "Nissan GT-R NISMO (AWD) — or build up the standard non-FE 2012 GT-R Black Edition (Autoshow 80k) into an S1 drag spec.",
+          "A and below": "Meta still forming (FH6 is young). RULE: pick the car in your class with the best Speed / Acceleration / LAUNCH stats, favor AWD for the launch, and pick a PI-efficient chassis — then apply the drag template. (Send me a class board and I'll pin the exact car.)"
+        },
+        "launch": "Least launch-dominated of the three, but still rev to peak torque and feed throttle. Power-to-weight + top-end carry the km.",
+        "confidence": "verified (template + S2 cars); lower-class per-car picks = probable (meta forming)"
+      }
     }
   ],
-  "character_research_note": "Track character + speed_profile + drivetrain_bias researched & adversarially verified 2026-07-10 (ultracode). character_confidence: verified = an FH6 source described the in-game route; probable = corroborated but thin; speculation = real-world-name inference only. Leaderboard-based class analyses still come from your screenshots."
+  "character_research_note": "Track character + speed_profile + drivetrain_bias researched & adversarially verified 2026-07-10 (ultracode). character_confidence: verified = an FH6 source described the in-game route; probable = corroborated but thin; speculation = real-world-name inference only. Leaderboard-based class analyses still come from your screenshots.",
+  "drag_module": {
+    "status": "complete (template-driven)",
+    "note": "FH6 has only 3 drag Rivals events (source: mapmaster). Drag is HIGH-convergence, so the module is complete via the DRAG discipline template + strip-length gearing + a car-selection rule, with NO leaderboard screenshot needed. Success then comes down to the LAUNCH (player skill the app can't tune). S2 best cars verified (Miata FE / GT-R FE); lower-class per-car picks await a class board.",
+    "events": [
+      "irokawa-drag",
+      "ito-airfield-drag",
+      "festival-km-drag"
+    ]
+  }
 }

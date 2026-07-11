@@ -331,29 +331,46 @@
     const fmtBadge = (f) => f === "endurance" ? "🏁 endurance" : f === "sprint" ? "➡️ sprint" : "🔁 circuit";
     const profBadge = (p) => !p ? "" : ({ "technical": "🟣 technical", "mixed-technical": "🔵 mixed-tech", "mixed": "⚪ mixed", "mixed-fast": "🟠 mixed-fast", "high-speed": "🔴 high-speed" }[p] || p);
     const cfBadge = (c) => c === "verified" ? '<span class="conf conf-verified">✅ verified</span>' : c === "probable" ? '<span class="conf conf-probable">🟡 probable</span>' : c === "speculation" ? '<span class="conf conf-contested">❓ speculation</span>' : "";
-    const tracks = rt.tracks.map((t) => {
-      const done = t.status === "analyzed" && (t.class_analyses || []).length;
-      const body = done
-        ? (t.class_analyses.map(analysis).join(""))
-        : `<p class="why" style="color:var(--warn)">⏳ Awaiting leaderboard — send an in-game Rivals screenshot for this event + the class you race, and I'll fill in the board read, car, acquisition & tune source.</p>`;
+    const dragBody = (t) => {
+      const pb = t.drag_playbook || {};
+      const cars = pb.car_by_class ? Object.entries(pb.car_by_class).map(([k, v]) =>
+        `<div class="var-line"><span><strong>${k}</strong></span><span class="rng" style="max-width:68%;white-space:normal;text-align:right">${v}</span></div>`).join("") : "";
       return `
+        <p class="fh6note"><strong>Strip:</strong> ${t.strip_bias || ""}</p>
+        <p class="why"><strong>Approach:</strong> ${pb.approach || ""}</p>
+        <p class="why"><strong>Gearing:</strong> ${pb.gearing || ""}</p>
+        ${cars ? `<h4 style="margin:10px 0 4px">Car by class</h4>${cars}` : ""}
+        <p class="why"><strong>Launch:</strong> ${pb.launch || ""}</p>
+        <p class="why" style="font-size:12px;color:var(--muted)">${pb.confidence || ""}</p>`;
+    };
+    const card = (t, bodyHtml, badge) => `
       <div class="block">
         <div class="card-row" style="margin-top:0">
           <h3 style="margin:0">${t.name} <span class="flag tab-flag">${fmtBadge(t.format)}</span></h3>
-          <span class="conf ${done ? "conf-verified" : "conf-probable"}">${done ? "✅ analyzed" : "scaffold"}</span>
+          <span class="conf ${badge.cls}">${badge.txt}</span>
         </div>
-        <p class="why" style="font-size:12px;color:var(--muted)">${t.region || ""}${t.location ? " · " + t.location : ""}</p>
-        ${t.speed_profile ? `<div class="card-row" style="margin-top:0"><span class="acq">${profBadge(t.speed_profile)}</span><span style="font-size:12px;color:var(--muted)">${t.drivetrain_bias ? "DT: " + t.drivetrain_bias : ""}${t.length ? " · " + String(t.length).slice(0, 48) : ""}</span></div>` : ""}
+        <p class="why" style="font-size:12px;color:var(--muted)">${t.region || ""}${t.location ? " · " + t.location : ""}${t.length ? " · " + String(t.length).slice(0, 40) : ""}</p>
+        ${t.speed_profile && t.discipline === "road" ? `<div class="card-row" style="margin-top:0"><span class="acq">${profBadge(t.speed_profile)}</span><span style="font-size:12px;color:var(--muted)">${t.drivetrain_bias ? "DT: " + t.drivetrain_bias : ""}</span></div>` : ""}
         <p class="why"><strong>Character:</strong> ${t.character} ${cfBadge(t.character_confidence)}</p>
         ${t.research && t.research.caveat ? `<p class="why" style="font-size:11px;color:var(--muted)">⚠️ ${t.research.caveat}</p>` : ""}
-        ${body}
+        ${bodyHtml}
       </div>`;
+    const roadTracks = rt.tracks.filter((t) => t.discipline === "road");
+    const dragTracks = rt.tracks.filter((t) => t.discipline === "drag");
+    const roadCards = roadTracks.map((t) => {
+      const done = t.status === "analyzed" && (t.class_analyses || []).length;
+      const body = done ? t.class_analyses.map(analysis).join("")
+        : `<p class="why" style="color:var(--warn)">⏳ Awaiting leaderboard — send an in-game Rivals screenshot for this event + the class you race, and I'll fill in the board read, car, acquisition & tune source.</p>`;
+      return card(t, body, done ? { cls: "conf-verified", txt: "✅ analyzed" } : { cls: "conf-probable", txt: "scaffold" });
     }).join("");
-    const doneN = rt.tracks.filter((t) => t.status === "analyzed").length;
-    const summary = `<div class="block"><h3>Road Racing Rivals — ${doneN}/${rt.tracks.length} analyzed</h3>
+    const dragCards = dragTracks.map((t) => card(t, dragBody(t), { cls: "conf-verified", txt: "✅ template-driven" })).join("");
+    const roadDone = roadTracks.filter((t) => t.status === "analyzed").length;
+    const summary = `<div class="block"><h3>Road Racing Rivals — ${roadDone}/${roadTracks.length} analyzed</h3>
       <p class="why">${rt.scaffold_todo || ""}</p>
       <p class="why" style="font-size:12px;color:var(--muted)">${rt.scope || ""}</p></div>`;
-    host.innerHTML = `<p class="hint">${rt.note}</p>` + heur + summary + tracks;
+    const dragSummary = dragTracks.length ? `<div class="block"><h3>Drag Rivals — ${dragTracks.length}/${dragTracks.length} ✅ complete (template-driven)</h3>
+      <p class="why">${(rt.drag_module && rt.drag_module.note) || ""}</p></div>` : "";
+    host.innerHTML = `<p class="hint">${rt.note}</p>` + heur + summary + roadCards + dragSummary + dragCards;
   }
 
   // ---- progression ----

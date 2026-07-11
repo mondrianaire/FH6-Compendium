@@ -8,6 +8,12 @@
   },
   "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game.",
   "disciplines": ["road", "touge_street", "dirt_rally", "cross_country", "drag"],
+  "acquisition_difficulty_scale": {
+    "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' (luck/limited), always offer an 'easy' alternative.",
+    "easy": "Autoshow (buy anytime with credits) OR a guaranteed free reward (Journal tier, Collection). No luck.",
+    "medium": "Requires a specific action but is deterministic: Barn Find, aftermarket-shop spawn, Auction House, a specific championship/reward.",
+    "hard": "Luck- or time-gated: Wheelspin/Super Wheelspin RNG only, limited-time Festival Playlist exclusive, or paid DLC/VIP."
+  },
   "cars": [
     {
       "id": "gtr-nismo-2024",
@@ -187,16 +193,17 @@
       "drivetrain_stock": "RWD",
       "recommended_drivetrain": "RWD or AWD swap",
       "power_split": "30/70 F/R (if AWD swapped)",
-      "price_credits": null,
-      "acquisition": "Autoshow",
+      "price_credits": 42750,
+      "acquisition": "Autoshow (~42,750 cr, buy anytime) — ALSO free via Journal 'Discovery' Tier 4 reward. Confirmed by game8.",
+      "acquisition_difficulty": "easy",
       "tier": "S",
       "value_rating": 8,
       "upgrade_priority": ["front grip", "brakes", "weight reduction", "suspension", "power"],
       "tune_baseline": null,
       "share_codes": [],
-      "why": "Exceptionally versatile A-class all-rounder; clean baseline for road and touge.",
+      "why": "Exceptionally versatile A-class all-rounder; clean baseline for road and touge. Cheap, RNG-free acquisition makes it an easy progression pick.",
       "confidence": "verified",
-      "sources": ["pcgamer", "games.gg"]
+      "sources": ["pcgamer", "games.gg", "game8"]
     },
     {
       "id": "wrx-sti-2004",

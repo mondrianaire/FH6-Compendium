@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dashboard (python)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8000", "--directory", "dashboard"],
+      "port": 8000
+    },
+    {
+      "name": "dashboard (node/serve)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "dashboard", "-l", "3000"],
+      "port": 3000
+    }
+  ]
+}

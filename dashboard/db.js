@@ -621,6 +621,12 @@ window.FH6_DB = {
       "cross_country",
       "drag"
     ],
+    "acquisition_difficulty_scale": {
+      "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' (luck/limited), always offer an 'easy' alternative.",
+      "easy": "Autoshow (buy anytime with credits) OR a guaranteed free reward (Journal tier, Collection). No luck.",
+      "medium": "Requires a specific action but is deterministic: Barn Find, aftermarket-shop spawn, Auction House, a specific championship/reward.",
+      "hard": "Luck- or time-gated: Wheelspin/Super Wheelspin RNG only, limited-time Festival Playlist exclusive, or paid DLC/VIP."
+    },
     "cars": [
       {
         "id": "gtr-nismo-2024",
@@ -899,8 +905,9 @@ window.FH6_DB = {
         "drivetrain_stock": "RWD",
         "recommended_drivetrain": "RWD or AWD swap",
         "power_split": "30/70 F/R (if AWD swapped)",
-        "price_credits": null,
-        "acquisition": "Autoshow",
+        "price_credits": 42750,
+        "acquisition": "Autoshow (~42,750 cr, buy anytime) — ALSO free via Journal 'Discovery' Tier 4 reward. Confirmed by game8.",
+        "acquisition_difficulty": "easy",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -912,11 +919,12 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
-        "why": "Exceptionally versatile A-class all-rounder; clean baseline for road and touge.",
+        "why": "Exceptionally versatile A-class all-rounder; clean baseline for road and touge. Cheap, RNG-free acquisition makes it an easy progression pick.",
         "confidence": "verified",
         "sources": [
           "pcgamer",
-          "games.gg"
+          "games.gg",
+          "game8"
         ]
       },
       {
@@ -1581,6 +1589,8 @@ window.FH6_DB = {
           ]
         },
         "recommended_car": "Toyota Supra '20 (RWD) — most-represented on the board (3x, incl. #1 & #4); already in the meta DB (gr-supra-2020).",
+        "acquisition": "EASY. Autoshow ~42,750 cr (buy anytime, zero RNG), AND free via Journal 'Discovery' Tier 4. No luck, no DLC — a friendly progression pick.",
+        "alternatives_if_hard": "Not needed here (Supra is easy). If you'd rather run AWD for forgiveness on this tight circuit: Toyota GR86 '22 (Autoshow, cheap, RWD) or an AWD Autoshow production car like the Audi RS7 '21 — both standard buys (verify price in-game). Avoid Wheelspin-only/Playlist-exclusive cars for a track where the car isn't the bottleneck anyway.",
         "recommended_build": "Grip-focused, and DO NOT max PI — the two fastest Supras run ~616 PI, not the 700 cap (lighter/more controllable beats maxed power on this tight circuit). Tires/brakes/suspension first, keep power modest. Assists: ABS on, TCS off, STM off, gearing Automatic. Short final drive for the 90-degree corners; add downforce (top speed is irrelevant here).",
         "key_insight": "THE CAR IS NOT THE BOTTLENECK. #1 on a 616 Supra beats a maxed 700 Audi RS7 by 14s — that gap is racing line + clean laps, not the car. A single clean optimized lap vaults you from top 53% into roughly the top 10% on this soft board.",
         "targets": {

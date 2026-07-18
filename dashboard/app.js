@@ -613,6 +613,32 @@
           </tbody></table></div>
       </div>`;
 
+    const whereToDrop = e.where_to_drop ? `
+      <div class="block" style="border-color:var(--accent)">
+        <h3>📍 Where to drop</h3>
+        <p class="fh6note">${e.where_to_drop.verdict}</p>
+        <ul class="why">${e.where_to_drop.usable_guidance.map((g) => `
+          <li><span class="conf ${confClass(g.confidence)}">${confLabel(g.confidence)}</span> ${g.tip}${g.note ? ` <span style="color:var(--muted)">(${g.note})</span>` : ""}</li>`).join("")}
+        </ul>
+      </div>` : "";
+
+    const playbook = e.playbook ? `
+      <div class="block">
+        <h3>⏱️ Minute-by-minute playbook</h3>
+        <p class="fh6note">${e.playbook.note}</p>
+        ${e.playbook.steps.map((s) => `
+          <div class="strat-step">
+            <div class="strat-num" style="font-size:10px;min-width:74px">${s.phase}</div>
+            <div><p class="why" style="margin:0">${s.action} <span class="conf ${confClass(s.confidence)}">${confLabel(s.confidence)}</span></p></div>
+          </div>`).join("")}
+      </div>` : "";
+
+    const research = e.research_state ? `
+      <div class="block">
+        <h3>🔬 Open questions (as of ${e.research_state.as_of})</h3>
+        <ul class="why">${e.research_state.next_actions.map((a) => `<li>${a}</li>`).join("")}</ul>
+      </div>` : "";
+
     const phases = ["early_game", "mid_game", "head_to_head", "final_showdown", "general"];
     const tips = phases.map((ph) => {
       const list = e.tips.filter((t) => t.phase === ph);
@@ -651,11 +677,14 @@
     host.innerHTML = `
       <p class="hint">${e.meta_disclaimer}</p>
       ${overview}
+      ${whereToDrop}
+      ${playbook}
       ${levels}
       ${mechanics}
       ${tips}
       ${patches}
-      ${retracted}`;
+      ${retracted}
+      ${research}`;
   }
 
   // ---- drift guide ----

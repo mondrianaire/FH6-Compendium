@@ -479,7 +479,8 @@
         "games.gg",
         "forza-guide-meta"
       ],
-      "acquisition_difficulty": "easy"
+      "acquisition_difficulty": "easy",
+      "price_note": "PATCH 2026-07-13 (official notes, Bug 4388342): price 'adjusted to better reflect the value of the car' - the 86,000 cr figure PREDATES this and the new price is not yet confirmed (direction unstated; a legendary rally icon likely went UP). VERIFY IN-GAME - this is the skill-farm rebuy car, so the farm's economics may have changed."
     },
     {
       "id": "lancer-evo-2004",
@@ -1345,5 +1346,6 @@
     "date": "2026-07-11",
     "method": "15 matrix gaps researched by a multi-pass agent workflow: one finder per slot (seeded with forza.guide leaderboard data where available), 3 adversarial verifiers per pick (existence/class-fit, independent-meta, acquisition/price audit), refill round for refuted picks, completeness audit. Audit corrections applied before this write: R-road primary swapped to FXX-K Evo; D-touge primary swapped to Honda Beat (Minicab TA demoted to premium specialist note); B-drag primary is the verifier-promoted Audi RS 6 (Cobra 427 refuted); R cross-country resolved onto the existing Viper FE (probable) - no valid new car exists for it; confidence downgrades applied (C touge, R drag -> probable). Two prices re-verified by hand against kudosprime/game8 (RS 6 42k, Brocky 75k).",
     "known_weakness": "The whole drag column below S1 leans on game8's single per-class table - every low-class drag pick is capped at 'probable'. Re-check if a drag meta source for low classes appears."
-  }
+  },
+  "leaderboard_reset_note": "2026-07-13 patch: ALL Rivals Leaderboards were RESET (official notes: unrealistic drag-tire-era and glitch entries wiped; clean Journal unlocks preserved). Every leaderboard-derived signal captured before 2026-07-13 (forza.guide usage data 6/23, our Electric Town snapshot 7/10) describes PRE-WIPE boards. Car-meta conclusions likely still hold (the same cars should repopulate), but specific times/standings are historical. PR Stunt boards face a future wipe too. Re-verify leaderboard_meta claims as boards repopulate."
 }

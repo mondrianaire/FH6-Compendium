@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "captured": "2026-07-11",
-  "meta_disclaimer": "The Eliminator is FH6's battle-royale mode inside Horizon Play. Researched 2026-07-11 (~8 weeks post-launch). Mechanics claims cross-checked across timesaver.gg, gamingpromax, bossdown, u4n, mitchcactus, a Steam player thread, and TWO PRIMARY sources (official Forza Support FAQ + June 18 2026 release notes, both read directly). CAUTION: several Eliminator guides share near-identical wording (timesaver/u4n car lists), so 'multiple sources' does not always mean independent — claims that only cluster sites make are tagged probable, not verified. forzahorizoncar.com's car-tier list is explicitly speculative and contradicts everyone else; it is excluded (that site was already retracted once in this project for parroting FH5 PI classes).",
+  "captured": "2026-07-18",
+  "meta_disclaimer": "The Eliminator is FH6's battle-royale mode inside Horizon Play. Researched 2026-07-11, patch-updated 2026-07-18 (Jul 13 notes read directly) (~8 weeks post-launch). Mechanics claims cross-checked across timesaver.gg, gamingpromax, bossdown, u4n, mitchcactus, a Steam player thread, and TWO PRIMARY sources (official Forza Support FAQ + June 18 2026 release notes, both read directly). CAUTION: several Eliminator guides share near-identical wording (timesaver/u4n car lists), so 'multiple sources' does not always mean independent — claims that only cluster sites make are tagged probable, not verified. forzahorizoncar.com's car-tier list is explicitly speculative and contradicts everyone else; it is excluded (that site was already retracted once in this project for parroting FH5 PI classes). REFRESH 2026-07-18: 30-agent verified re-sweep (6 angles, adversarial verification, completeness audit) + Series 3 patch notes read directly. Two contested mechanics RESOLVED (winner's choice; no declining duels). The where-to-drop question closed as a VERIFIED NEGATIVE - see where_to_drop.",
   "confidence_legend": {
     "verified": "Multiple independent sources agree, or primary (official/in-game) evidence.",
     "probable": "Single source or a cluster of possibly-copied sources; plausible, not independently confirmed.",
@@ -9,10 +9,24 @@
   },
   "mode_overview": {
     "what": "Up to 72 players free-roam a shrinking arena on the Japan map. Everyone spawns in the same Level 1 starter car, upgrades via Car Drops (Levels 1-10) or by winning horn-initiated Head-to-Head sprint races (loser is eliminated), until a Final Showdown sprint decides the winner.",
-    "player_count": { "value": 72, "confidence": "verified", "note": "Same cap as FH5; stated by multiple FH6 guides." },
-    "starter_car": { "value": "1984 Honda City (Level 1)", "confidence": "verified", "note": "Replaces FH5's VW Beetle. Consistent across timesaver, gamingpromax, lootbar." },
-    "map_context": { "value": "Japan: dense Tokyo urban blocks, touge mountain passes, forests, rice fields. More technical and tighter than FH5's Mexico — head-to-heads punish overdriving more.", "confidence": "probable" },
-    "hub_context": { "value": "One of the modes inside Horizon Play, FH6's unified online hub that replaced FH5's Horizon Open.", "confidence": "probable" }
+    "player_count": {
+      "value": 72,
+      "confidence": "verified",
+      "note": "Same cap as FH5; stated by multiple FH6 guides."
+    },
+    "starter_car": {
+      "value": "1984 Honda City (Level 1)",
+      "confidence": "verified",
+      "note": "Replaces FH5's VW Beetle. Consistent across timesaver, gamingpromax, lootbar."
+    },
+    "map_context": {
+      "value": "Japan: dense Tokyo urban blocks, touge mountain passes, forests, rice fields. More technical and tighter than FH5's Mexico — head-to-heads punish overdriving more.",
+      "confidence": "probable"
+    },
+    "hub_context": {
+      "value": "One of the modes inside Horizon Play, FH6's unified online hub that replaced FH5's Horizon Open.",
+      "confidence": "probable"
+    }
   },
   "mechanics": [
     {
@@ -20,56 +34,89 @@
       "name": "Car Drops",
       "detail": "Cars rated Level 1-10 sit parked around the arena, marked by columns of purple/pink signal smoke visible from long range (some guides also mention a drone marker). Drive into the smoke to claim. The drop's level is displayed before you commit.",
       "confidence": "verified",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator", "u4n-eliminator-cars", "lootbar-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator",
+        "u4n-eliminator-cars",
+        "lootbar-eliminator"
+      ]
     },
     {
       "id": "drop-spawns",
-      "name": "Drop spawn behavior",
-      "detail": "Drops are randomized per match, drawn from a pool of fixed possible spawn locations — you cannot farm a specific car at a specific spot. u4n suggests checking mountain ridges, warehouse/dock clusters, bridges/tunnels/landmarks, and forest valleys.",
-      "confidence": "probable",
-      "sources": ["u4n-eliminator-cars", "timesaver-eliminator"]
+      "name": "Drop spawn behavior - DOWNGRADED to contested",
+      "detail": "The 'randomized from fixed spawn locations' model is CONTESTED as of 2026-07-18: no public source names a single spawn point, no map site has an Eliminator layer, and Steam reports describe haphazard spawns and regional droughts that fit a fluid model. Do not invest in memorizing spots. Urban density (Tokyo City area) is the only reliably-reported pattern.",
+      "confidence": "contested",
+      "sources": [
+        "u4n-eliminator-cars",
+        "timesaver-eliminator"
+      ]
     },
     {
       "id": "drop-respawn",
       "name": "Drop taken by someone else",
       "detail": "If another player reaches a drop first, it respawns elsewhere (gamingpromax). Single-source claim — verify in-game.",
       "confidence": "probable",
-      "sources": ["gamingpromax-eliminator"]
+      "sources": [
+        "gamingpromax-eliminator"
+      ]
     },
     {
       "id": "head-to-head",
       "name": "Head-to-Head challenges",
       "detail": "Get near another player and honk your horn to challenge them to a short point-to-point sprint to a marked finish. Loser is eliminated from the match on the spot — no respawns. You cannot collect Car Drops while a Head-to-Head is active (single source).",
       "confidence": "verified",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator", "bossdown-eliminator", "mitchcactus-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator",
+        "bossdown-eliminator",
+        "mitchcactus-eliminator"
+      ]
     },
     {
       "id": "h2h-win-reward",
-      "name": "What the winner gets — CONTESTED",
-      "detail": "Version A (timesaver, bossdown): the winner automatically takes the better of the two cars if there is a level difference. Version B (gamingpromax): the winner chooses between taking the opponent's car OR upgrading their current car by one level. mitchcactus says only 'the winner receives an upgrade choice'. Either way the practical takeaway is identical: beating a higher-level driver upgrades you on the spot. Verify the exact prompt in-game.",
-      "confidence": "contested",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator", "bossdown-eliminator", "mitchcactus-eliminator"]
+      "name": "What the winner gets - RESOLVED 2026-07-18",
+      "detail": "RESOLVED (was contested): the winner gets a CHOICE - take the loser's car OR upgrade your current car by one level (max Level 10). It is NOT an automatic 'winner takes the better car'. Practical: beating an identical Level 1 car is never wasted (take the +1), and challenge players whose car you actually WANT for the terrain.",
+      "confidence": "verified",
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator",
+        "bossdown-eliminator",
+        "mitchcactus-eliminator"
+      ],
+      "note": "Multi-source resolution incl. independent wording across guides; the 'automatic take' version traced to a smaller copy-cluster."
     },
     {
       "id": "zone",
       "name": "Shrinking arena",
       "detail": "A pink dome contracts in stages. Caught outside the wall, a countdown timer eliminates you if you don't get back inside. The shrink forces contact; late-match drops become scarce.",
       "confidence": "verified",
-      "sources": ["timesaver-eliminator", "bossdown-eliminator", "lootbar-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "bossdown-eliminator",
+        "lootbar-eliminator"
+      ]
     },
     {
       "id": "final-showdown",
       "name": "Final Showdown",
       "detail": "When roughly 8-12 drivers remain, every survivor races to a single revealed finish point; first across the line wins the whole match. gamingpromax adds a 30-second countdown before it begins (single source).",
       "confidence": "verified",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator", "bossdown-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator",
+        "bossdown-eliminator"
+      ]
     },
     {
       "id": "rewards",
       "name": "Rewards",
       "detail": "Every session earns Horizon Play XP regardless of placement (rank 1-100, badge every 10 levels); each Horizon Play level up to 25 also grants Festival Points toward the single-player Wristband. Eliminator-specific Mode Milestone badges (play N events, reach Final Showdown N times, win N times) grant bonus XP. No exclusive car is guaranteed for a single win. Playlist seasonal challenges frequently include Eliminator objectives.",
       "confidence": "probable",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator", "egamersworld-wristbands"],
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator",
+        "egamersworld-wristbands"
+      ],
       "note": "Reward structure consistent across guides but not yet checked against a primary source; the numbers (25, 1-100) match FH6's general progression docs."
     },
     {
@@ -77,23 +124,132 @@
       "name": "Auto Drive reward rebalance (June 18, 2026)",
       "detail": "Rewards in some game modes were rebalanced so they can no longer be farmed AFK with Auto Drive, after an Eliminator credits exploit paid out hundreds of millions of credits per match. Do not build any farming plan around Eliminator payouts — the economy there was explicitly rebalanced.",
       "confidence": "verified",
-      "sources": ["forza-support-eliminator-faq", "forza-support-notes-jun18", "traxion-eliminator-exploit"]
+      "sources": [
+        "forza-support-eliminator-faq",
+        "forza-support-notes-jun18",
+        "traxion-eliminator-exploit"
+      ]
+    },
+    {
+      "id": "h2h-requests-setting",
+      "name": "Head-to-Head Requests setting (patched 2026-07-13)",
+      "detail": "A 'Head-to-Head Requests' session setting exists. Before the Jul 13 patch, disabling it in your session ALSO disabled challenges against you in The Eliminator (Bug 4447380) - accidental duel immunity some players used as a dodge. FIXED: you can no longer make yourself unchallengeable this way. If you played before Jul 13 and 'never got challenged', this was probably why.",
+      "confidence": "verified",
+      "sources": [
+        "forza-support-notes-jul13"
+      ]
+    },
+    {
+      "id": "h2h-no-decline",
+      "name": "You CANNOT decline an incoming challenge",
+      "detail": "You only control whether YOU initiate - if someone in horn range challenges you, the duel starts. Spacing is the only dodge: never drift within horn range of a car you couldn't beat to a random marker, route around clusters, and use stationary=off-minimap to control who finds you. (The pre-Jul-13 settings-toggle immunity is patched.)",
+      "confidence": "verified",
+      "sources": [
+        "mitchcactus-eliminator",
+        "forza-support-notes-jul13"
+      ]
+    },
+    {
+      "id": "drop-map-icons",
+      "name": "Do drops show on the map? - CONTESTED",
+      "detail": "One early source (bossdown, May 30) claims drops appear as numbered map icons; every other post-release source describes smoke-column visibility only, and the bossdown article never mentions smoke at all (credibility flag). Weight: probably NOT on the map. ONE in-game check settles it: open the full map next to a visible smoke column (check minimap and pause-map separately) and report back.",
+      "confidence": "contested",
+      "sources": [
+        "bossdown-eliminator",
+        "lootbar-eliminator",
+        "u4n-eliminator-cars"
+      ]
     }
   ],
   "car_levels": {
     "note": "INDEPENDENCE WARNING: the Level 3-10 clusters below appear with near-identical wording on timesaver.gg and u4n — one likely copied the other, so treat as a single source until confirmed in-game. The Level 2 list appears only on u4n. Levels are per-car fixed within a match pool but the roster may rotate with series updates.",
     "confidence": "probable",
     "levels": [
-      { "level": 1, "cars": ["Honda City '84 (starter)"], "role": "Escape it ASAP — handles terribly, especially off-road." },
-      { "level": 2, "cars": ["Abarth 131", "Abarth 595", "BMW 2002 Turbo", "Honda Civic CRX Mugen", "Subaru Legacy '92", "Toyota Tacoma TRD Pro"], "role": "Marginal upgrades; the Legacy and Tacoma at least cope with dirt." },
-      { "level": 3, "cars": ["Ford Bronco", "Land Rover Defender '20", "Mitsubishi Lancer Evo III", "Peugeot 205 T16"], "role": "First genuinely useful tier — all four are AWD/off-road capable." },
-      { "level": 4, "cars": ["(shares pool reporting with L3 in sources)"], "role": "See level 3 — guides report these as a 3-4 band." },
-      { "level": 5, "cars": ["Alumi Craft Class 1 Buggy", "BMW X5 M", "Audi RS6 '09", "Rivian R1T"], "role": "Strong mid-game: fast AND terrain-proof. Reported as a 5-6 band." },
-      { "level": 6, "cars": ["(5-6 band, see above)"], "role": "" },
-      { "level": 7, "cars": ["Lamborghini Urus", "Porsche 911 Rallye", "Nissan GT-R '17", "Subaru WRX STI ARX Supercar"], "role": "Late-game all-rounders. Reported as a 7-8 band." },
-      { "level": 8, "cars": ["(7-8 band, see above)"], "role": "" },
-      { "level": 9, "cars": ["Jaguar C-X75", "Porsche 911 Turbo S"], "role": "Top speed, but watch terrain — reported as a 9-10 band." },
-      { "level": 10, "cars": ["Mercedes-AMG ONE"], "role": "The ceiling. Wins most head-to-heads on pavement; still loses to a buggy in a forest." }
+      {
+        "level": 1,
+        "cars": [
+          "Honda City '84 (starter)"
+        ],
+        "role": "Escape it ASAP — handles terribly, especially off-road."
+      },
+      {
+        "level": 2,
+        "cars": [
+          "Abarth 131",
+          "Abarth 595",
+          "BMW 2002 Turbo",
+          "Honda Civic CRX Mugen",
+          "Subaru Legacy '92",
+          "Toyota Tacoma TRD Pro"
+        ],
+        "role": "Marginal upgrades; the Legacy and Tacoma at least cope with dirt."
+      },
+      {
+        "level": 3,
+        "cars": [
+          "Ford Bronco",
+          "Land Rover Defender '20",
+          "Mitsubishi Lancer Evo III",
+          "Peugeot 205 T16"
+        ],
+        "role": "First genuinely useful tier — all four are AWD/off-road capable."
+      },
+      {
+        "level": 4,
+        "cars": [
+          "(shares pool reporting with L3 in sources)"
+        ],
+        "role": "See level 3 — guides report these as a 3-4 band."
+      },
+      {
+        "level": 5,
+        "cars": [
+          "Toyota #1 T100 Baja Truck '93 (replaced Alumicraft Jul 13; L5-6 placement INFERRED from one-for-one swap wording - unconfirmed in-game; RWD, off-road 10)",
+          "BMW X5 M",
+          "Audi RS6 '09",
+          "Rivian R1T"
+        ],
+        "role": "Strong mid-game: fast AND terrain-proof. Reported as a 5-6 band. Roster rotates via patches - Alumicraft swapped out 2026-07-13."
+      },
+      {
+        "level": 6,
+        "cars": [
+          "(5-6 band, see above)"
+        ],
+        "role": ""
+      },
+      {
+        "level": 7,
+        "cars": [
+          "Lamborghini Urus",
+          "Porsche 911 Rallye",
+          "Nissan GT-R '17",
+          "Subaru WRX STI ARX Supercar"
+        ],
+        "role": "Late-game all-rounders. Reported as a 7-8 band."
+      },
+      {
+        "level": 8,
+        "cars": [
+          "(7-8 band, see above)"
+        ],
+        "role": ""
+      },
+      {
+        "level": 9,
+        "cars": [
+          "Jaguar C-X75",
+          "Porsche 911 Turbo S"
+        ],
+        "role": "Top speed, but watch terrain — reported as a 9-10 band."
+      },
+      {
+        "level": 10,
+        "cars": [
+          "Mercedes-AMG ONE"
+        ],
+        "role": "The ceiling. Wins most head-to-heads on pavement; still loses to a buggy in a forest."
+      }
     ]
   },
   "tips": [
@@ -103,7 +259,11 @@
       "tip": "Take the nearest drop that raises your level — don't cross half the map for a 'better' car.",
       "why": "Going from Level 1 to 3-4 fast matters more than car choice. Every minute in the Honda City is a minute you lose any forced head-to-head. A nearby Level 3 beats a distant Level 4.",
       "confidence": "verified",
-      "sources": ["timesaver-eliminator", "bossdown-eliminator", "lootbar-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "bossdown-eliminator",
+        "lootbar-eliminator"
+      ]
     },
     {
       "id": "early-no-fights",
@@ -111,7 +271,11 @@
       "tip": "Default opening: collect first, challenge later — avoid fights while still in the starter car.",
       "why": "In identical cars a head-to-head is a coin flip on spawn position (community confirms spawn proximity to the waypoint often decides it). A loss is elimination; a drop is free progress.",
       "confidence": "verified",
-      "sources": ["gamingpromax-eliminator", "mitchcactus-eliminator", "steam-eliminator-thread"]
+      "sources": [
+        "gamingpromax-eliminator",
+        "mitchcactus-eliminator",
+        "steam-eliminator-thread"
+      ]
     },
     {
       "id": "early-bully-alt",
@@ -119,7 +283,10 @@
       "tip": "CONTESTED alternative: timesaver instead advises grabbing your first head-to-head win immediately, camping the Festival-site spawn cluster for Level 1 opponents.",
       "why": "Logic: a win over any opponent levels you without hunting drops, and early opponents are all in equal cars so skill decides. This directly contradicts the 'collect first' consensus — it's a playstyle fork (aggressive vs safe), not a settled fact. The safe line is better until you know the duel micro-game.",
       "confidence": "contested",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator"
+      ]
     },
     {
       "id": "challenge-down",
@@ -127,7 +294,10 @@
       "tip": "Only challenge drivers at your level or below.",
       "why": "A Level 10 beats a Level 3 in almost any duel — level difference dominates skill. Challenging up is a coin flip at best; challenging down or even keeps the odds on your side.",
       "confidence": "verified",
-      "sources": ["timesaver-eliminator", "bossdown-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "bossdown-eliminator"
+      ]
     },
     {
       "id": "steal-up",
@@ -135,15 +305,22 @@
       "tip": "If you're confident in a matchup, beating a HIGHER-level driver is the fastest upgrade in the mode.",
       "why": "The winner ends up with the better car (whether automatically or via choice — see contested h2h-win-reward mechanic). Pick these fights only on terrain that favors you, e.g. your AWD vs their hypercar in a forest.",
       "confidence": "verified",
-      "sources": ["bossdown-eliminator", "timesaver-eliminator"]
+      "sources": [
+        "bossdown-eliminator",
+        "timesaver-eliminator"
+      ]
     },
     {
       "id": "awd-over-level",
       "phase": "mid_game",
-      "tip": "Prefer an AWD / rally / off-road car at a LOWER level over a faster road car.",
-      "why": "Japan's arena is mud, grass, gravel, forest and rice paddies between every road. A grippy mid-level car you can drive straight through a forest is worth more than a hypercar that bogs down off-road. Community consensus: AWD dominates.",
-      "confidence": "verified",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator", "lootbar-eliminator"]
+      "tip": "Two-sided car rule: keep a grippy AWD/off-roader through Level 5-6, but from Level 7 up prioritize CLIMBING to L9-10 - the top cars out-pace trucks even on bad surfaces.",
+      "why": "REFINED 2026-07-18: the old blanket 'AWD > level' was half right. Early/mid, terrain capability beats level (Japan's arena is mud/grass/forest between every road). Late, raw pace wins even off-road - e.g. a 911 Turbo S beats trucks uphill in snow per current-meta reporting. Note the L5-6 AWD grabs are now X5M / RS6 '09 / Rivian R1T - the new T100 Baja Truck is RWD (niche pick for pure-mud routes).",
+      "confidence": "probable",
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator",
+        "lootbar-eliminator"
+      ]
     },
     {
       "id": "cut-offroad",
@@ -151,15 +328,21 @@
       "tip": "In duels and the Showdown, point the car at the checkpoint and cut straight across terrain — the road is almost never the fastest line.",
       "why": "There is no routing etiquette: plow through forests, fields and embankments. Opponents who politely follow roads lose. This is why the AWD rule above exists.",
       "confidence": "verified",
-      "sources": ["timesaver-eliminator", "gamingpromax-eliminator"]
+      "sources": [
+        "timesaver-eliminator",
+        "gamingpromax-eliminator"
+      ]
     },
     {
       "id": "duel-positioning",
       "phase": "head_to_head",
       "tip": "Initiate challenges when YOU are positioned well: facing open ground / toward the duel space, ideally between the opponent and likely finish direction.",
-      "why": "Players report duels being decided by who started closer to or facing the waypoint. You control WHEN a challenge starts — honk when the geometry favors you, not when you've just overshot a hairpin.",
+      "why": "UPGRADED 2026-07-18 with the momentum-tax model: to honk you must close to horn range, so you're usually chasing at speed, committed to THEIR travel direction - when the marker drops behind the pair (roughly half the time) the 180 costs YOU 3-4s that a slower/stationary opponent doesn't pay. So: bleed speed and square up before honking; better yet, be the stationary one who gets honked. Marker placement itself is RNG per all sources - no placement rule favors either player.",
       "confidence": "probable",
-      "sources": ["mitchcactus-eliminator", "steam-eliminator-thread"]
+      "sources": [
+        "mitchcactus-eliminator",
+        "steam-eliminator-thread"
+      ]
     },
     {
       "id": "control-over-throttle",
@@ -167,7 +350,9 @@
       "tip": "Drive at ~90% commitment instead of 100% throttle.",
       "why": "FH6's touge roads and tight urban blocks punish overdriving; one wall-hit in a duel is elimination. Smooth beats fast in a 40-second sprint.",
       "confidence": "probable",
-      "sources": ["lootbar-eliminator"]
+      "sources": [
+        "lootbar-eliminator"
+      ]
     },
     {
       "id": "hide-when-weak",
@@ -175,15 +360,21 @@
       "tip": "Stationary cars don't appear on the minimap — park in a forest or behind a building to avoid being hunted while weak.",
       "why": "Movement is what shows up to hunters. Going dark lets you wait out a bad car situation or let a nearby high-level bully pass. Single-source claim (gamingpromax) — verify before relying on it.",
       "confidence": "probable",
-      "sources": ["gamingpromax-eliminator"]
+      "sources": [
+        "gamingpromax-eliminator"
+      ]
     },
     {
       "id": "showdown-position",
       "phase": "final_showdown",
       "tip": "As the player count approaches ~12, pre-position near the arena center with open ground around you — but outside the busiest cluster.",
-      "why": "The finish can be revealed in any direction; center minimizes worst-case distance. Open ground means you launch at speed when it triggers (there's a ~30s countdown per one source). Avoiding the cluster keeps you out of last-second challenge griefs and pile-ups.",
-      "confidence": "verified",
-      "sources": ["gamingpromax-eliminator", "bossdown-eliminator", "lootbar-eliminator"]
+      "why": "The finish can be revealed in any direction; center minimizes worst-case distance. Open ground means you launch at speed when it triggers (there's a ~30s countdown per one source). Avoiding the cluster keeps you out of last-second challenge griefs and pile-ups. REFRESH 2026-07-18: the 8-12 trigger + 30s countdown are FH4/FH5-lineage specs not yet FH6-reconfirmed (downgrade to probable); challenges reportedly disable during the Showdown; be MOVING in a loose arc at reveal rather than parked.",
+      "confidence": "probable",
+      "sources": [
+        "gamingpromax-eliminator",
+        "bossdown-eliminator",
+        "lootbar-eliminator"
+      ]
     },
     {
       "id": "showdown-route",
@@ -191,7 +382,11 @@
       "tip": "Showdown routing: confirm the destination FIRST, then commit to the cleanest reliable line — usually the diagonal across country, not the highway.",
       "why": "Map knowledge wins Showdowns: shortcuts through fields and off-road paths beat straight-line speed, and a stable high-level AWD car survives the mixed terrain. One blind cliff or river crossing loses the match at the finish line.",
       "confidence": "verified",
-      "sources": ["gamingpromax-eliminator", "mitchcactus-eliminator", "timesaver-eliminator"]
+      "sources": [
+        "gamingpromax-eliminator",
+        "mitchcactus-eliminator",
+        "timesaver-eliminator"
+      ]
     },
     {
       "id": "let-them-fight",
@@ -199,7 +394,10 @@
       "tip": "Let other players duel each other and thin the field — you don't earn anything extra for kills you didn't need.",
       "why": "Every duel removes one player for free from your perspective. Your win condition is the Showdown, not a kill count; only fight for upgrades or when cornered.",
       "confidence": "probable",
-      "sources": ["bossdown-eliminator", "lootbar-eliminator"]
+      "sources": [
+        "bossdown-eliminator",
+        "lootbar-eliminator"
+      ]
     },
     {
       "id": "daily-challenge-win",
@@ -207,7 +405,9 @@
       "tip": "Playlist/daily objectives worded 'complete a Head-to-Head' actually require you to WIN the duel, not just take part.",
       "why": "timesaver flags this explicitly; losing (= elimination) doesn't credit the challenge. Budget a few matches for it.",
       "confidence": "probable",
-      "sources": ["timesaver-eliminator"]
+      "sources": [
+        "timesaver-eliminator"
+      ]
     },
     {
       "id": "no-credit-farm",
@@ -215,7 +415,10 @@
       "tip": "Don't treat Eliminator as a credit farm — its payouts were explicitly rebalanced after the June 2026 Auto Drive exploit.",
       "why": "The exploit paid hundreds of millions per match; the June 18 hotfix patched it, rolled exploiters back to 10M cr, and rebalanced mode rewards against AFK farming. Play it for XP, badges and Playlist objectives.",
       "confidence": "verified",
-      "sources": ["forza-support-eliminator-faq", "forza-support-notes-jun18"]
+      "sources": [
+        "forza-support-eliminator-faq",
+        "forza-support-notes-jun18"
+      ]
     },
     {
       "id": "expect-luck",
@@ -223,7 +426,42 @@
       "tip": "Calibrate expectations: individual matches are luck-heavy — drop RNG and duel spawn positions matter as much as pace. Grind wins across many matches, not one.",
       "why": "Steam-thread consensus: 'if you get lucky and find a good car, you win'; players report being trapped by terrain or losing duels off spawn geometry. The skill expression is in aggregate decision quality (which fights, which cars, where to be), not any single match.",
       "confidence": "probable",
-      "sources": ["steam-eliminator-thread"]
+      "sources": [
+        "steam-eliminator-thread"
+      ]
+    },
+    {
+      "id": "spawn-pick",
+      "phase": "early_game",
+      "tip": "Never accept the default spawn: pre-position your freeroam reticule before queueing, then actively pick an urban-density region in the pick window.",
+      "why": "Spawn selection is player-controlled (short pick window; miss it and you're auto-placed near your reticule). Urban Tokyo is the only reliably-reported drop-dense region. Pick-window mechanics are FH4/FH5-spec, unconfirmed for FH6 - verify once in-game.",
+      "confidence": "probable",
+      "sources": [
+        "timesaver-eliminator",
+        "u4n-eliminator-cars"
+      ]
+    },
+    {
+      "id": "region-flavored-duels",
+      "phase": "mid_game",
+      "tip": "Pick fights by biome: force duels in Tokyo's tight grid (barriers, 90-degree corners) when you're the better driver; avoid open farmland (Nangan/Minamino/Hokubu) duels against faster cars - they're pure pace.",
+      "why": "Region character is verified (city = technical, farmland = open); the specific duel-meta mapping is single-source (gamingpromax). Its 'uphill equalizes level gaps' sub-claim is CONTESTED - convention-contrary and contradicted by the only organic datapoint - so don't bank on uphill saving an under-leveled car.",
+      "confidence": "probable",
+      "sources": [
+        "gamingpromax-eliminator"
+      ]
+    },
+    {
+      "id": "post-patch-aggression",
+      "phase": "general",
+      "tip": "Post-Jul-13: nobody is settings-immune to challenges anymore - don't skip parked/passive players as targets, and expect the duel-dodger crowd to be bad at defending duels.",
+      "why": "The Freeroam H2H-Requests toggle no longer carries into the Eliminator (Bug 4447380; the exploit was openly taught on YouTube). Only settings-immunity died - mid-duel/drop-capture/Showdown states still can't be challenged. 'More aggression than Series 2' is speculation, not sourced.",
+      "confidence": "verified",
+      "sources": [
+        "forza-support-notes-jul13",
+        "forza-net-series3",
+        "mitchcactus-series3"
+      ]
     }
   ],
   "patch_history": [
@@ -231,19 +469,123 @@
       "date": "2026-06-15",
       "event": "Eliminator matchmaking temporarily disabled while Playground investigated a credits exploit (Auto Drive farming paying out unintended amounts).",
       "confidence": "verified",
-      "sources": ["forza-support-eliminator-faq", "traxion-eliminator-exploit"]
+      "sources": [
+        "forza-support-eliminator-faq",
+        "traxion-eliminator-exploit"
+      ]
     },
     {
       "date": "2026-06-18",
       "event": "Series 2 Hotfix 1 (v379.939): exploit fixed, Eliminator restored, mode rewards rebalanced vs Auto Drive. All players gifted a 2021 McLaren Sabre (Message Center → Gifts). Exploiters rolled back to max 10M credits; no bans.",
       "confidence": "verified",
-      "sources": ["forza-support-notes-jun18", "forza-support-eliminator-faq"]
+      "sources": [
+        "forza-support-notes-jun18",
+        "forza-support-eliminator-faq"
+      ]
+    },
+    {
+      "date": "2026-07-13",
+      "event": "v398.92.0: (1) Car-drop roster change - the 2021 Alumicraft #122 Class 1 Buggy was SWAPPED OUT for the 1993 Toyota #1 T100 Baja Truck (Bug 4378156). (2) Fixed: disabling Head-to-Head Requests in your session no longer also disables them in The Eliminator (Bug 4447380) - the accidental duel-immunity dodge is gone.",
+      "confidence": "verified",
+      "sources": [
+        "forza-support-notes-jul13"
+      ]
     }
   ],
   "retracted": [
     {
       "what": "forzahorizoncar.com Eliminator car-tier list (Civic Type R / Chiron Supersport / Valkyrie etc.) and its 'three-drop rule'.",
       "why": "The list is self-described as speculative, contradicts the timesaver/u4n roster, and the site was already retracted in this project (meta-cars.json) for parroting FH5 PI classes as FH6 fact. No unique claim from it is included."
+    },
+    {
+      "what": "Claim that Series 3 Week 1 (Jul 16-23) includes a 'Complete a Head-to-Head in The Eliminator' playlist challenge.",
+      "why": "REFUTED in verification: The Eliminator is not on the S3W1 playlist at all. The 'complete = win' gotcha stays recorded for whenever Eliminator objectives DO rotate back in."
+    },
+    {
+      "what": "forzahorizoncar.com Eliminator LOCATION content (Mount Yoshida Summit, Shibuya camping, etc.) - now formally blacklisted for location claims.",
+      "why": "Self-declared pre-release speculation (last updated before launch; 'Nothing written here represents official confirmation'). Mt. Fuji is a non-drivable backdrop in FH6."
     }
-  ]
+  ],
+  "where_to_drop": {
+    "verdict": "VERIFIED NEGATIVE (2026-07-18): after a full adversarial sweep, NO public source names any Eliminator drop spawn point and no interactive map site (forza.labsgg, fh6wiki, mapmaster) has an Eliminator layer. The vague zone archetypes (docks/warehouses, dense urban, mountain ridges, forest valleys) remain the ceiling of public knowledge. Location intel likely lives in video content (TikTok/YouTube) - re-sweep planned once Series 3 video guides land.",
+    "usable_guidance": [
+      {
+        "tip": "Spawn pick: you get a short window to choose your start location before the match; if you miss it you are auto-placed near your freeroam map reticule - so PRE-POSITION the reticule over your preferred region BEFORE queueing.",
+        "confidence": "probable",
+        "note": "Pick-window details are FH4/FH5 spec, not FH6-confirmed."
+      },
+      {
+        "tip": "Pick urban drop density: Tokyo City is the only reliably-reported high-density drop region.",
+        "confidence": "probable"
+      },
+      {
+        "tip": "Navigational anchors - GEOGRAPHY VERIFIED, DROP-RELEVANCE INFERRED (no source ties spawns to them): industrial-docks sweep = Daikoku PA / Bayshore-Wangan expressway loop (fast exits after a grab); urban sweep = the Shibuya - Tokyo Tower - Akihabara triangle.",
+        "confidence": "probable",
+        "note": "These make the vague archetypes drivable; they are NOT confirmed drop clusters."
+      },
+      {
+        "tip": "BLACKLISTED: forzahorizoncar.com's named locations ('Mount Yoshida Summit', Shibuya camping) are self-declared PRE-RELEASE speculation - do not pre-position from them.",
+        "confidence": "verified"
+      }
+    ]
+  },
+  "playbook": {
+    "note": "Assembled 2026-07-18 from the verified sweep. Confidence is PER LINE - the zone clock rests on a single source (lootbar, currency-seller blog) and late-game beats on a small Steam-thread sample. Treat timings as approximate.",
+    "steps": [
+      {
+        "phase": "queue",
+        "action": "Before queueing: park your freeroam reticule on your target region (becomes your spawn if you miss the pick window). In the pick window choose urban density.",
+        "confidence": "probable"
+      },
+      {
+        "phase": "0:00 spawn",
+        "action": "360-degree spin for smoke columns, then move IMMEDIATELY - there is NO grace period, horns are live from spawn (Steam reports of being challenged within seconds). A stationary Level 1 near a popular spawn is free elimination.",
+        "confidence": "probable"
+      },
+      {
+        "phase": "0:00-2:00",
+        "action": "Nearest drop first, always - anything off Level 1. L3+ = a fighting chance. Do not cross half the map for a marginal upgrade.",
+        "confidence": "verified"
+      },
+      {
+        "phase": "~2:00 Stage 2 shrink",
+        "action": "Zone clock (single-source): Stage 2 ~2:00 in, Stage 3 ~1:45 later, Stage 4 ~1:30 later, Showdown ~30s after. Each pull roughly halves the area. Center yourself on the DASHED (next) circle, not the current dome. You have ~60s of out-of-zone survival - budget those seconds like a resource for edge drops.",
+        "confidence": "probable"
+      },
+      {
+        "phase": "mid-game",
+        "action": "Leveling gates (contested synthesis): initiate nothing until L5; aim to be L7-8 in a car you can actually drive by Stage 3; chase L9-10 drops only if they sit on your rotation path. Keep the AWD/off-roader through L5-6; from L7 up, prioritize climbing to L9-10 - top-end cars out-pace trucks even on bad surfaces.",
+        "confidence": "contested"
+      },
+      {
+        "phase": "duels",
+        "action": "Ambush initiation: circle the target, bleed speed, square your nose toward open ground / the arena middle, THEN honk - never mid-chase (the chaser carries the momentum tax when the marker drops behind the pair). Marker placement is effectively RNG - the 'biased toward center' idea is UNSOURCED inference; the real rationale is momentum. When reversed: handbrake J-turn, not a wide arc.",
+        "confidence": "probable"
+      },
+      {
+        "phase": "late shrink",
+        "action": "Small-arena flip (anecdote, n=2): once the circle is tiny, punching UP at higher-level cars gets viable - short sprints blunt raw pace and the small arena makes marker placement more predictable. A stolen high-level car right before Showdown is the dream line.",
+        "confidence": "contested"
+      },
+      {
+        "phase": "~13 players left",
+        "action": "Stop hunting - the Showdown window is close and an unfinished duel is wasted position. Pre-position near the next-circle center with open ground; challenges are reportedly DISABLED during the Showdown itself.",
+        "confidence": "probable"
+      },
+      {
+        "phase": "Showdown",
+        "action": "Be MOVING in a loose arc when the finish reveals (30s countdown; the 8-12-player trigger and countdown are FH4/FH5-lineage specs, not FH6-reconfirmed). Guides' consensus is center positioning; the 'park on the far edge facing open ground' line is player theory. Rule out finish directions that lack map-border distance (coastal sides). Then cut the diagonal - the road is almost never the fastest line.",
+        "confidence": "probable"
+      }
+    ]
+  },
+  "research_state": {
+    "as_of": "2026-07-18",
+    "next_actions": [
+      "ONE in-game match settles two contested mechanics: (a) do drops show as map icons (check minimap AND pause map next to a smoke column), (b) does the spawn-pick window exist in FH6 and how long is it.",
+      "Re-sweep in 1-2 weeks: Series 3 is 2 days old and location intel concentrates in video content that text crawling can't reach - wait for S3 video guides.",
+      "Verify the T100's drop level band in-game (currently inferred).",
+      "22B Autoshow price changed in the Jul 13 patch (direction unknown) - check in-game; it affects skill-farm rebuy economics."
+    ]
+  }
 }

@@ -658,6 +658,150 @@
       ${retracted}`;
   }
 
+  // ---- drift guide ----
+  function buildDrift() {
+    const g = DB.driftGuide;
+    if (!g) return;
+    const host = document.getElementById("driftContent");
+
+    // Visual: how a sliding car actually moves (momentum vs nose angle vs countersteer)
+    const svg = `
+    <svg viewBox="0 0 840 480" role="img" aria-label="Drift physics diagram" style="width:100%;height:auto;max-width:840px;display:block;margin:0 auto">
+      <defs>
+        <marker id="mArrow" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="#00d27a"/></marker>
+        <marker id="nArrow" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="#2f81f7"/></marker>
+      </defs>
+      <!-- momentum (line of travel) -->
+      <path d="M 360 452 C 360 372 375 302 392 250 C 410 197 430 150 452 108" stroke="#00d27a" stroke-width="11" fill="none" marker-end="url(#mArrow)" opacity="0.9"/>
+      <!-- nose-angle direction (dashed) -->
+      <line x1="420" y1="196" x2="492" y2="78" stroke="#2f81f7" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#nArrow)"/>
+      <!-- car, rotated to a drift angle relative to travel -->
+      <g transform="rotate(30 392 250)">
+        <line x1="360" y1="312" x2="360" y2="352" stroke="#f0883e" stroke-width="4" opacity="0.5" stroke-dasharray="2 6"/>
+        <line x1="424" y1="312" x2="424" y2="352" stroke="#f0883e" stroke-width="4" opacity="0.5" stroke-dasharray="2 6"/>
+        <rect x="352" y="282" width="13" height="28" rx="3" fill="#12161c"/>
+        <rect x="419" y="282" width="13" height="28" rx="3" fill="#12161c"/>
+        <g transform="rotate(-30 392 206)">
+          <rect x="352" y="192" width="13" height="28" rx="3" fill="#12161c"/>
+          <rect x="419" y="192" width="13" height="28" rx="3" fill="#12161c"/>
+        </g>
+        <rect x="360" y="190" width="64" height="120" rx="13" fill="#d3dae4" stroke="#0e1116" stroke-width="2"/>
+        <rect x="366" y="193" width="52" height="9" rx="3" fill="#9aa4b0"/>
+        <rect x="369" y="212" width="46" height="40" rx="7" fill="#33404f"/>
+      </g>
+      <!-- labels + leaders -->
+      <g font-family="system-ui, -apple-system, sans-serif">
+        <line x1="232" y1="262" x2="360" y2="300" stroke="#2a313c" stroke-width="1.5"/>
+        <text x="40" y="238" fill="#00d27a" font-size="17" font-weight="700">MOMENTUM</text>
+        <text x="40" y="260" fill="#8b97a7" font-size="13">where the car actually</text>
+        <text x="40" y="277" fill="#8b97a7" font-size="13">travels — barely changes</text>
+
+        <line x1="520" y1="96" x2="492" y2="80" stroke="#2a313c" stroke-width="1.5"/>
+        <text x="524" y="86" fill="#2f81f7" font-size="17" font-weight="700">NOSE ANGLE</text>
+        <text x="524" y="107" fill="#8b97a7" font-size="13">where it POINTS —</text>
+        <text x="524" y="124" fill="#8b97a7" font-size="13">not where you go</text>
+
+        <line x1="536" y1="266" x2="432" y2="214" stroke="#2a313c" stroke-width="1.5"/>
+        <text x="540" y="250" fill="#e6edf3" font-size="17" font-weight="700">COUNTERSTEER</text>
+        <text x="540" y="271" fill="#8b97a7" font-size="13">front wheels point back</text>
+        <text x="540" y="288" fill="#8b97a7" font-size="13">toward travel — this</text>
+        <text x="540" y="305" fill="#8b97a7" font-size="13">CATCHES the slide</text>
+
+        <line x1="238" y1="408" x2="372" y2="330" stroke="#2a313c" stroke-width="1.5"/>
+        <text x="40" y="404" fill="#f0883e" font-size="17" font-weight="700">REAR SLID OUT</text>
+        <text x="40" y="425" fill="#8b97a7" font-size="13">tyres broke traction —</text>
+        <text x="40" y="442" fill="#8b97a7" font-size="13">throttle controls how far</text>
+      </g>
+    </svg>`;
+
+    const balance = `
+      <div class="block">
+        <h3>Throttle = your angle dial</h3>
+        <p class="why">Drifting lives in the narrow band between two mistakes. Feather the throttle to stay in the middle.</p>
+        <div style="height:16px;border-radius:8px;background:linear-gradient(90deg,#f0883e 0%,#e3b341 28%,#00d27a 50%,#e3b341 72%,#f0883e 100%);margin:14px 0 6px"></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
+          <span>◀ too little<br>bogs &amp; straightens</span>
+          <span style="color:var(--accent);text-align:center;font-weight:700">THE DRIFT<br>feather here</span>
+          <span style="text-align:right">too much ▶<br>spins out backwards</span>
+        </div>
+      </div>`;
+
+    const concept = `
+      <div class="block">
+        <h3>${g.concept.headline}</h3>
+        <ul class="why">${g.concept.points.map((p) => `<li>${p}</li>`).join("")}</ul>
+      </div>`;
+
+    const failures = `
+      <div class="block">
+        <h3>Fix your two problems</h3>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>What's happening</th><th>Why</th><th>Fix</th></tr></thead>
+          <tbody>${g.failure_modes.map((f) => `<tr>
+            <td><strong>${f.symptom}</strong></td>
+            <td class="why" style="font-size:13px">${f.cause}</td>
+            <td class="why" style="font-size:13px;color:var(--accent)">${f.fix}</td>
+          </tr>`).join("")}</tbody>
+        </table></div>
+      </div>`;
+
+    const scoring = `
+      <div class="block">
+        <h3>Drift Zone scoring <span class="conf ${confClass(g.scoring.confidence)}">${confLabel(g.scoring.confidence)}</span></h3>
+        <p class="why" style="font-size:16px;color:var(--txt)"><code style="font-size:15px">${g.scoring.formula}</code></p>
+        <p class="why"><strong>The #1 lever — chaining:</strong> ${g.scoring.multiplier_note}</p>
+        <p class="why"><strong>Entry:</strong> ${g.scoring.entry}</p>
+        <p class="why"><strong>Width:</strong> ${g.scoring.width}</p>
+      </div>`;
+
+    const checklist = `
+      <div class="block">
+        <h3>Pre-run checklist</h3>
+        <ul class="why">${g.settings_checklist.map((s) => `<li>${s}</li>`).join("")}</ul>
+      </div>`;
+
+    const drill = `
+      <div class="block" style="border-color:var(--accent2)">
+        <h3>🎯 Practice drill (do this first)</h3>
+        <p class="why">${g.practice_drill}</p>
+      </div>`;
+
+    const tune = `
+      <div class="block">
+        <h3>Getting a drift tune</h3>
+        <p class="why"><strong>Easiest:</strong> ${g.tune.easiest}</p>
+        <p class="why"><strong>If you tune manually:</strong> ${g.tune.manual_essentials}</p>
+      </div>`;
+
+    const acqDot = (d) => d === "easy" ? "🟢" : d === "medium" ? "🟡" : "🔴";
+    const cars = `
+      <h3 style="margin-top:24px">Meta drift cars</h3>
+      <div class="card-grid">
+        ${g.meta_cars.map((c) => `
+          <div class="car-card" style="cursor:default">
+            <div class="card-row" style="margin-top:0">
+              <span class="badge tier-${c.class === "S1" || c.class === "S2" ? "S" : c.class === "A" ? "A" : "B"}">${c.class} class</span>
+              <span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span>
+            </div>
+            <h3 style="font-size:15px">${c.name}</h3>
+            <div class="card-row"><span>${acqDot(c.get)} ${c.acquisition}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
+            <p class="why" style="margin:8px 0 0">${c.note}</p>
+          </div>`).join("")}
+      </div>`;
+
+    host.innerHTML = `
+      <p class="hint">${g.meta_disclaimer}</p>
+      <div class="block"><h3 style="margin-top:0">How a slide actually works</h3>${svg}</div>
+      ${concept}
+      ${balance}
+      ${failures}
+      ${scoring}
+      ${cars}
+      ${tune}
+      ${checklist}
+      ${drill}`;
+  }
+
   // ---- init ----
   render();
   buildProgress();
@@ -666,5 +810,6 @@
   buildStrategy();
   buildTemplates();
   buildRivals();
+  buildDrift();
   buildEliminator();
 })();

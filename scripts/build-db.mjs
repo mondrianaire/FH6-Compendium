@@ -16,6 +16,7 @@ const db = {
   rivalsTracks: read("rivals-tracks.json"),
   tuningTemplates: read("tuning-templates.json"),
   eliminatorTips: read("eliminator-tips.json"),
+  driftGuide: read("drift-guide.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

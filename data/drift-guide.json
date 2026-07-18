@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "captured": "2026-07-18",
+  "meta_disclaimer": "Drift Zone scoring mechanics + technique, verified against independent sources (game8, GamesRadar, Steam community). Car prices confirmed on game8. Technique is stable driving-model knowledge, not patch-sensitive.",
+  "concept": {
+    "headline": "A sliding car goes where its MOMENTUM carries it — not where the front wheels point.",
+    "points": [
+      "MOMENTUM = the car's actual direction of travel. It keeps arcing through the corner and changes slowly (it's a heavy object in motion).",
+      "NOSE ANGLE = where the car points. It's swung sideways because the REAR tyres lost grip and slid out.",
+      "The FRONT tyres still grip. Countersteering (turning toward the slide) makes them pull against the spin — it CATCHES the rear so you don't spin, it does NOT send you the wrong way.",
+      "Throttle is your ANGLE dial: more gas = more angle/rotation, less gas = the rear regains grip and the car straightens. You feather it.",
+      "To end a drift: ease off throttle so the rear grips again, then centre the wheel. The car only slides when you provoke it."
+    ]
+  },
+  "scoring": {
+    "formula": "Score = angle × speed × duration × multiplier",
+    "multiplier_note": "The multiplier grows EXPONENTIALLY the longer you hold ONE unbroken slide. Straightening the wheel resets it to zero. A single long chain beats many short drifts — one 600K slide > three 200K slides.",
+    "entry": "Enter already sideways: tap the handbrake + flick the wheel just BEFORE the start line, ~50–80 mph, so you're at full angle the instant scoring begins.",
+    "width": "Use the full width of the road. Wider, bigger-angle slides score far more than tight narrow ones.",
+    "confidence": "verified"
+  },
+  "failure_modes": [
+    {
+      "symptom": "You spin out and end up backwards",
+      "cause": "Too much throttle + not enough countersteer → the rear rotates past the point you can catch it.",
+      "fix": "Ease OFF the throttle and add MORE countersteer (steer into the slide), and catch it early — small correction beats a big one."
+    },
+    {
+      "symptom": "You run out of speed / it straightens",
+      "cause": "Too much angle (sideways tyres scrub off your speed), or you lifted fully off the gas.",
+      "fix": "Reduce the angle (point more forward) and FEED IN more throttle to keep momentum."
+    }
+  ],
+  "settings_checklist": [
+    "Traction Control: OFF (it kills the wheelspin you need)",
+    "Stability Control: OFF (it auto-straightens the car and fights your angle)",
+    "Shifting: MANUAL (control power delivery mid-slide)",
+    "Stay in 2nd or 3rd gear mid-drift — too low a gear = snappy wheelspin that spins you",
+    "Smooth inputs — stab the throttle or yank the wheel and you snap around"
+  ],
+  "practice_drill": "Skip scored zones for 10 min. On a long empty road, get the rear out and hold ONE steady slide in a straight line using only countersteer + throttle feathering. Rear steps out too far → ease gas + add counter; it starts to straighten → add gas. Hold it a few seconds, then take that same balance through corners — and never straighten the wheel between them.",
+  "tune": {
+    "easiest": "Don't hand-tune your first drift car. In Upgrade & Tune → Find Tuning Setups, download a top-rated DRIFT tune for the car — it installs the angle kit, drift diff and tyres and sets the sliders.",
+    "manual_essentials": "RWD · steering-angle upgrade · rear differential ~100% accel / low decel · rear tyre pressure a bit higher than front · ~400–600 hp (over-powering makes it uncontrollable, not better)."
+  },
+  "meta_cars": [
+    { "name": "Formula Drift #64 Forsberg Nissan Z", "class": "S1", "price_credits": 200000, "acquisition": "Autoshow (standard car, not DLC)", "get": "medium", "note": "Current all-around drift meta king — best balance of scoring and control.", "confidence": "verified" },
+    { "name": "Formula Drift #777 Nissan 240SX", "class": "A", "price_credits": 150000, "acquisition": "Autoshow — OR FREE via Drift Club Japan (Journal Tier 4)", "get": "easy", "note": "Best value. The Drift Club Japan side story gives this to you free.", "confidence": "verified" },
+    { "name": "Formula Drift GR Supra MkIV", "class": "S1", "price_credits": null, "acquisition": "FREE via the Drift Club Japan side story", "get": "easy", "note": "Free alongside the #777 — do Drift Club Japan and you get two top drift cars for nothing.", "confidence": "verified" },
+    { "name": "Nissan Silvia (S13 / S15)", "class": "B", "price_credits": null, "acquisition": "Autoshow (cheap)", "get": "easy", "note": "BEST car to LEARN on — smooth, predictable oversteer you can actually catch. Use ~400 hp.", "confidence": "probable" },
+    { "name": "Toyota Sprinter Trueno GT Apex (AE86)", "class": "B", "price_credits": null, "acquisition": "Autoshow (cheap)", "get": "easy", "note": "Light, forgiving RWD — a classic beginner drift trainer.", "confidence": "probable" }
+  ],
+  "sources": ["game8-fd64", "game8-fd777", "gamesradar-drift", "steam-driftscore"]
+}

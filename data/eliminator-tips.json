@@ -490,6 +490,14 @@
       "sources": [
         "forza-support-notes-jul13"
       ]
+    },
+    {
+      "date": "2026-07-20",
+      "event": "Series 3 Hotfix 1 (v403.798): drift fixes only (clutch-kick restored for Manual w/Clutch; the same fix REMOVED handbrake instant-shifting, which some drag builds abused; Horizon Drifting Session crash fixed). NO Eliminator changes - the Jul 13 state stands.",
+      "confidence": "verified",
+      "sources": [
+        "forza-support-notes-jul20"
+      ]
     }
   ],
   "retracted": [

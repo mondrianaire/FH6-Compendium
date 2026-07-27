@@ -27,6 +27,45 @@
     return `<div style="padding:4px 0">${head}${t.note ? `<br><span style="font-size:11px;color:var(--muted)">${t.note}</span>` : ""}</div>`;
   };
 
+  // ---- tune-code tooltips (zero screen-space; 53Rain codes surface on hover) ----
+  const tnorm = (s) => (s || "").toLowerCase()
+    .replace(/\([^)]*\)/g, " ").replace(/\b(19|20)\d\d\b/g, " ")
+    .replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  const TCODE_INDEX = ((DB.tuneCodes && DB.tuneCodes.classes) || []).flatMap((cl) =>
+    cl.cars.filter((c) => c.code).map((c) => ({
+      code: c.code, note: c.note || "", cls: cl.class, car: c.car,
+      tokens: new Set(tnorm(c.car).split(" ").filter(Boolean))
+    })));
+  // conservative fuzzy match: same make + >=3 shared tokens (avoids cross-generation mismatches)
+  function matchTuneCode(name) {
+    const qt = tnorm(name).split(" ").filter(Boolean);
+    if (!qt.length) return null;
+    const make = qt[0];
+    let best = null, bs = 0;
+    for (const e of TCODE_INDEX) {
+      if (!e.tokens.has(make)) continue;
+      const shared = qt.filter((t) => e.tokens.has(t)).length;
+      if (shared > bs && shared >= 3) { best = e; bs = shared; }
+    }
+    return best;
+  }
+  // curated codes (attached directly to a car) win over fuzzy matches
+  function curatedCode(carObj) {
+    if (!carObj) return null;
+    if (carObj.tune_code) return { code: carObj.tune_code, note: carObj.tune_source || "", src: carObj.tune_source || "53Rain" };
+    const t = (carObj.tunes || []).find((x) => x.code); if (t) return { code: t.code, note: t.note || "", src: t.source || "" };
+    const s = (carObj.share_codes || []).find((x) => x.code); if (s) return { code: s.code, note: s.purpose || "", src: s.source || "" };
+    return null;
+  }
+  // returns a tiny 🔑 with the code in a native tooltip, or "" if no code is known
+  function codeTip(name, carObj) {
+    let c = curatedCode(carObj);
+    if (!c) { const m = matchTuneCode(name); if (m) c = { code: m.code, note: m.note, src: "53Rain " + m.cls }; }
+    if (!c || !c.code) return "";
+    const title = `Tune code ${c.code}${c.note ? " — " + c.note : ""}${c.src ? " · " + c.src : ""} · verify in-game (Find Tuning Setups)`;
+    return ` <span class="code-key" title="${title.replace(/"/g, "&quot;")}">🔑</span>`;
+  }
+
   // ---- owned-car tracking (localStorage — user state stays local; data/*.json stays facts-only) ----
   const OWNED_KEY = "fh6_owned_cars";
   let owned = {};
@@ -149,7 +188,7 @@
         if (pick) { covered++; if (isOwned(pick.id)) ownedCount++; }
         const cellClass = !pick ? "cov-gap" : isOwned(pick.id) ? "cov-owned" : "cov-have";
         const viaNote = pick && !(expandClass(pick.class).includes(cl) && pick.disciplines.includes(d)) ? " ↗" : "";
-        const label = pick ? `${pick.name}${viaNote}${isOwned(pick.id) ? " ✓" : ""}` : "—";
+        const label = pick ? `${pick.name}${viaNote}${isOwned(pick.id) ? " ✓" : ""}${codeTip(pick.name, pick)}` : "—";
         const title = pick
           ? `${pick.year} ${pick.name} (tier ${pick.tier}${viaNote ? ", cross-class build — see card for evidence" : ""})${isOwned(pick.id) ? " — owned" : ""}`
           : "GAP: no evidenced competitive pick in the database yet";
@@ -184,7 +223,7 @@
         <span class="badge tier-${c.tier}">${top ? "★ TOP PICK • " : ""}TIER ${c.tier}</span>
         <span>${isOwned(c.id) ? '<span class="conf conf-verified">✓ owned</span> ' : ""}<span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span></span>
       </div>
-      <h3>${c.year} ${c.name}</h3>
+      <h3>${c.year} ${c.name}${codeTip(c.name, c)}</h3>
       <div class="card-row"><span>${c.class} class · ${c.recommended_drivetrain}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
       ${c.acquisition_difficulty ? `<div class="card-row"><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></div>` : ""}
       <div class="value-bar"><span style="width:${c.value_rating * 10}%"></span></div>
@@ -224,7 +263,7 @@
       <label style="float:right;cursor:pointer;font-size:13px;user-select:none">
         <input type="checkbox" id="modalOwn" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer;vertical-align:-2px"> I own this
       </label>
-      <h2>${c.year} ${c.name}</h2>
+      <h2>${c.year} ${c.name}${codeTip(c.name, c)}</h2>
       ${c.use_case ? `<p class="why" style="margin:2px 0 10px"><strong>Use case:</strong> ${c.use_case}</p>` : ""}
       <dl class="kv">
         <dt>Class</dt><dd>${c.class} (${classes[c.class] || "?"})</dd>
@@ -303,7 +342,7 @@
     wrap.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>${cols.map((c) => `<th data-k="${c[0]}">${c[1]}</th>`).join("")}</tr></thead>
       <tbody>${sorted.map((c) => `<tr data-id="${c.id}" style="${isOwned(c.id) ? "opacity:.65" : ""}">
         <td><input type="checkbox" class="own-check" data-id="${c.id}" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer"></td>
-        <td>${c.year} ${c.name}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
+        <td>${c.year} ${c.name}${codeTip(c.name, c)}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
         <td class="why" style="font-size:12px;max-width:300px">${c.use_case || (c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", "))}</td>
         <td><span class="acq acq-${(c.acquisition_difficulty || "").split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></td>
         <td>${c.class}</td>
@@ -812,10 +851,9 @@
               <span class="badge tier-${c.class === "S1" || c.class === "S2" ? "S" : c.class === "A" ? "A" : "B"}">${c.class} class</span>
               <span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span>
             </div>
-            <h3 style="font-size:15px">${c.name}</h3>
+            <h3 style="font-size:15px">${c.name}${codeTip(c.name, c)}</h3>
             <div class="card-row"><span>${acqDot(c.get)} ${c.acquisition}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
             <p class="why" style="margin:8px 0 0">${c.note}</p>
-            ${c.tune_code ? `<div class="share" style="margin-top:8px"><code>${c.tune_code}</code> — ${c.tune_source || "share code"}</div>` : ""}
           </div>`).join("")}
       </div>`;
 

@@ -94,6 +94,10 @@ tr.row-meta { background: rgba(0,210,122,.09); }
 tr.row-meta td:first-child { border-left: 3px solid var(--accent); }
 #tunecodes td code { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
 
+/* zero-space tune-code affordance */
+.code-key { cursor: help; font-size: 0.85em; opacity: 0.75; vertical-align: baseline; }
+.code-key:hover { opacity: 1; }
+
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--bg); cursor: pointer; }

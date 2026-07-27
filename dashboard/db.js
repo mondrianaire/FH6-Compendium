@@ -3799,6 +3799,14 @@ window.FH6_DB = {
         "sources": [
           "forza-support-notes-jul13"
         ]
+      },
+      {
+        "date": "2026-07-20",
+        "event": "Series 3 Hotfix 1 (v403.798): drift fixes only (clutch-kick restored for Manual w/Clutch; the same fix REMOVED handbrake instant-shifting, which some drag builds abused; Horizon Drifting Session crash fixed). NO Eliminator changes - the Jul 13 state stands.",
+        "confidence": "verified",
+        "sources": [
+          "forza-support-notes-jul20"
+        ]
       }
     ],
     "retracted": [
@@ -5282,6 +5290,13 @@ window.FH6_DB = {
         "url": "https://www.iggm.com/news/fh6-series-3-italian-exotics-festival-playlist-rewards-new-features",
         "used_for": "ELIMINATOR REFRESH: corroborates Rivals wipe rationale (drag-tire-era times); non-overlapping detail set vs mitchcactus (passed copy-cluster check)",
         "reliability_note": "currency-seller blog — details cross-checked before use"
+      },
+      {
+        "id": "forza-support-notes-jul20",
+        "tier": "primary",
+        "title": "Official FH6 Release Notes July 20 2026 (Series 3 Hotfix 1, v403.798)",
+        "url": "https://support.forza.net/hc/en-us/articles/53563977535123-FH6-Release-Notes-July-20-2026",
+        "used_for": "PRIMARY (read in browser 2026-07-27): drift fixes only — clutch-kick restored, handbrake instant-shift exploit removed (minor drag-tune relevance), drifting-session crash. NO Eliminator changes; latest patch as of 2026-07-27"
       }
     ],
     "fh6_ui_structure_pass": {

@@ -19,19 +19,23 @@
   </header>
 
   <nav class="tabs">
-    <button class="tab active" data-tab="recommend">🏁 Recommend a Car</button>
+    <button class="tab active" data-tab="recommend">🚗 Cars</button>
     <button class="tab" data-tab="progress">🚀 Progress Plan</button>
-    <button class="tab" data-tab="cars">🚗 Garage Tracker</button>
     <button class="tab" data-tab="tuning">🔧 Tuning</button>
-    <button class="tab" data-tab="tunecodes">🔑 Tune Codes</button>
     <button class="tab" data-tab="rivals">🏆 Rivals Tracks</button>
     <button class="tab" data-tab="drift">💨 Drift Guide</button>
     <button class="tab" data-tab="eliminator">💀 Eliminator</button>
   </nav>
 
   <main>
-    <!-- RECOMMEND -->
+    <!-- CARS (merged: recommend + garage tracker + tune codes) -->
     <section id="recommend" class="panel active">
+      <div class="subnav">
+        <a href="#sec-reco">Recommend</a>
+        <a href="#sec-garage">Garage tracker</a>
+        <a href="#sec-codes">Tune codes</a>
+      </div>
+      <h2 class="section-title" id="sec-reco">🏁 Recommend a car</h2>
       <div id="covMatrix"></div>
       <div class="controls">
         <label>Discipline
@@ -48,17 +52,18 @@
       </div>
       <p class="result-count" id="resultCount"></p>
       <div id="recoCards" class="card-grid"></div>
+
+      <h2 class="section-title" id="sec-garage">🚗 Garage tracker — tick cars as you collect them</h2>
+      <div id="garageHeader"></div>
+      <div id="carTableWrap"></div>
+
+      <h2 class="section-title" id="sec-codes">🔑 Tune codes — full 53Rain list (searchable)</h2>
+      <div id="tuneCodesContent"></div>
     </section>
 
     <!-- PROGRESS -->
     <section id="progress" class="panel">
       <div id="progressContent"></div>
-    </section>
-
-    <!-- CARS / GARAGE TRACKER -->
-    <section id="cars" class="panel">
-      <div id="garageHeader"></div>
-      <div id="carTableWrap"></div>
     </section>
 
     <!-- TUNING (merged: variables + upgrade strategy + templates — same concept) -->
@@ -75,11 +80,6 @@
       <div id="strategyContent"></div>
       <h2 class="section-title" id="sec-templates">🎯 Tuning templates — per-discipline baselines</h2>
       <div id="templatesContent"></div>
-    </section>
-
-    <!-- TUNE CODES (full 53Rain import) -->
-    <section id="tunecodes" class="panel">
-      <div id="tuneCodesContent"></div>
     </section>
 
     <!-- RIVALS -->

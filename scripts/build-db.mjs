@@ -18,6 +18,7 @@ const db = {
   eliminatorTips: read("eliminator-tips.json"),
   driftGuide: read("drift-guide.json"),
   tuneCodes: read("tune-codes.json"),
+  tuneRaw: read("tune-raw.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

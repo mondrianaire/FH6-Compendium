@@ -5352,6 +5352,64 @@ window.FH6_DB = {
       }
     ]
   },
+  "tuneRaw": {
+    "schema_version": "1.0.0",
+    "captured": "2026-07-18",
+    "note": "Raw tune SLIDER values, where a tuner publishes them (ForzaFire / gamerstation / fh6tunes.app). A bare share code can't be decoded, so raw data only exists where the build is published with numbers. The dashboard runs a deterministic inferFocus() over these to classify what each tune is built for. Add entries as raw data is sourced; code-only tunes (e.g. most 53Rain codes) have no raw and show 'code only'.",
+    "inference_legend": {
+      "note": "Focus is INFERRED heuristically from the sliders, not stated by the tuner. Signals: tyre psi (grip vs response), final drive (accel/technical vs top-speed), downforce (cornering vs low-drag), brake balance (stability vs rotation), rear diff accel lock (power-down/rotation vs smooth traction)."
+    },
+    "tunes": [
+      {
+        "match_car": "Volkswagen Golf R",
+        "class": "B",
+        "code": null,
+        "source": "ForzaFire",
+        "url": "https://www.forzafire.com/build/2022-volkswagen-golf-r-13938",
+        "surface": "road",
+        "raw": {
+          "tire_psi_f": 26,
+          "tire_psi_r": 26,
+          "final_drive": 3.81,
+          "gears": [
+            3.21,
+            2.26,
+            1.75,
+            1.42,
+            1.15,
+            0.96,
+            0.96
+          ],
+          "camber_f": -0.5,
+          "camber_r": -0.5,
+          "toe_f": 0,
+          "toe_r": 0,
+          "caster": 6.5,
+          "arb_f": 37,
+          "arb_r": 39.5,
+          "spring_f": 7500.5,
+          "spring_r": 7500.5,
+          "ride_f": 12.3,
+          "ride_r": 12.3,
+          "bump_f": 4.9,
+          "bump_r": 6.9,
+          "rebound_f": 7.5,
+          "rebound_r": 10.4,
+          "df_f": 252,
+          "df_r": 252,
+          "brake_bal": 50,
+          "brake_press": 100,
+          "diff_accel_f": 23,
+          "diff_decel_f": 13,
+          "diff_accel_r": 68,
+          "diff_decel_r": 28,
+          "diff_center": 60,
+          "drivetrain": "AWD",
+          "aspiration": "Single Turbo"
+        }
+      }
+    ]
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",

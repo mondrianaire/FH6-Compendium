@@ -72,6 +72,41 @@
     return ` <span class="code-key" title="${title.replace(/"/g, "&quot;")}">🔑</span>`;
   }
 
+  // ---- raw tune data + deterministic focus inference ----
+  const RAW_TUNES = (DB.tuneRaw && DB.tuneRaw.tunes) || [];
+  function rawTuneFor(name) {
+    const q = tnorm(name);
+    return RAW_TUNES.find((t) => { const m = tnorm(t.match_car); return q.includes(m) || m.includes(q); }) || null;
+  }
+  // infer what a tune is BUILT FOR, purely from its slider values (heuristic, labelled as such)
+  function inferFocus(r) {
+    const sig = [];
+    const psi = ((r.tire_psi_f ?? 0) + (r.tire_psi_r ?? 0)) / 2;
+    if (psi) sig.push(psi < 28 ? `Low tyre pressure (${psi.toFixed(1)} psi) → maximises grip`
+      : psi > 32 ? `High tyre pressure (${psi.toFixed(1)} psi) → response over outright grip`
+      : `Mid tyre pressure (${psi.toFixed(1)} psi) → balanced`);
+    const fd = r.final_drive;
+    if (fd != null) sig.push(fd >= 3.8 ? `Short final drive (${fd}) → acceleration/technical, not top speed`
+      : fd <= 3.0 ? `Long final drive (${fd}) → top-speed biased` : `Mid final drive (${fd}) → balanced accel/top-end`);
+    const df = (r.df_f ?? 0) + (r.df_r ?? 0);
+    if (r.df_f != null || r.df_r != null) sig.push(df >= 200 ? `High downforce (${df} lb) → cornering grip (circuit/touge)`
+      : df === 0 ? `Zero downforce → low-drag top-speed/drag build` : `Light downforce (${df} lb) → mild cornering aid`);
+    if (r.brake_bal != null) sig.push(r.brake_bal > 54 ? `Front brake bias (${r.brake_bal}%) → stable braking`
+      : r.brake_bal < 46 ? `Rear brake bias (${r.brake_bal}%) → trail-brake rotation` : `Neutral brake balance (${r.brake_bal}%)`);
+    if (r.diff_accel_r != null) sig.push(r.diff_accel_r >= 80 ? `High rear accel lock (${r.diff_accel_r}%) → aggressive power-down/rotation`
+      : r.diff_accel_r <= 40 ? `Loose diff (${r.diff_accel_r}% accel) → smooth traction` : `Moderate diff lock (${r.diff_accel_r}% accel)`);
+    // ride height omitted: absolute value is car-dependent (no reliable baseline) — inferring dirt/road from it misleads
+    // primary label
+    const grip = psi && psi < 28, shortG = fd >= 3.8, aero = df >= 200, longG = fd <= 3.0, noAero = df === 0;
+    let primary = "Balanced road";
+    if (noAero && longG) primary = "Top-speed / drag";
+    else if (r.diff_accel_r >= 85 && r.brake_bal < 46) primary = "Drift / rotation";
+    else if (aero && shortG && grip) primary = "Grip / technical (touge / circuit)";
+    else if (grip && (shortG || aero)) primary = "Grip-biased road";
+    else if (longG) primary = "Speed-biased road";
+    return { primary, signals: sig };
+  }
+
   // ---- owned-car tracking (localStorage — user state stays local; data/*.json stays facts-only) ----
   const OWNED_KEY = "fh6_owned_cars";
   let owned = {};
@@ -266,6 +301,35 @@
       <h3>Community share codes</h3>
       ${c.share_codes.map((s) => `<div class="share"><code>${s.code}</code> — ${s.purpose} <span class="conf ${confClass(s.confidence)}">${confLabel(s.confidence)}</span></div>`).join("")}` : "";
 
+    const rt = rawTuneFor(c.name);
+    const rawHtml = rt ? (() => {
+      const r = rt.raw, f = inferFocus(r);
+      const row = (label, val) => val == null ? "" : `<div class="var-line"><span>${label}</span><span class="rng">${val}</span></div>`;
+      return `
+      <h3>Raw tune data + inferred focus <span class="conf conf-probable">${rt.source}</span></h3>
+      <div class="fh6note" style="margin-bottom:10px">
+        <strong>Inferred focus: ${f.primary}</strong>
+        <div style="font-size:12px;color:var(--muted);margin:2px 0 6px">Read heuristically from the sliders below — not stated by the tuner.</div>
+        <ul class="why" style="margin:0;padding-left:18px">${f.signals.map((s) => `<li>${s}</li>`).join("")}</ul>
+      </div>
+      <div>
+        ${row("Tyre psi F/R", `${r.tire_psi_f} / ${r.tire_psi_r}`)}
+        ${row("Final drive", r.final_drive)}
+        ${row("Camber F/R", `${r.camber_f} / ${r.camber_r}°`)}
+        ${row("Caster", r.caster)}
+        ${row("Anti-roll F/R", `${r.arb_f} / ${r.arb_r}`)}
+        ${row("Springs F/R", `${r.spring_f} / ${r.spring_r}`)}
+        ${row("Ride height F/R", `${r.ride_f} / ${r.ride_r} in`)}
+        ${row("Bump F/R", `${r.bump_f} / ${r.bump_r}`)}
+        ${row("Rebound F/R", `${r.rebound_f} / ${r.rebound_r}`)}
+        ${row("Downforce F/R", `${r.df_f} / ${r.df_r} lb`)}
+        ${row("Brake bal / press", `${r.brake_bal}% / ${r.brake_press}%`)}
+        ${row("Diff rear acc/dec", `${r.diff_accel_r}% / ${r.diff_decel_r}%`)}
+        ${row("Diff centre", r.diff_center != null ? `${r.diff_center}% rear` : null)}
+      </div>
+      ${rt.url ? `<p class="why" style="font-size:11px;margin-top:6px"><a href="${rt.url}" target="_blank" style="color:var(--accent2)">source build ↗</a></p>` : ""}`;
+    })() : "";
+
     document.getElementById("modalContent").innerHTML = `
       <span class="badge tier-${c.tier}">TIER ${c.tier}</span>
       <span class="conf ${confClass(c.confidence)}" style="margin-left:8px">${confLabel(c.confidence)}</span>
@@ -297,6 +361,7 @@
       <ol class="why">${c.upgrade_priority.map((u) => `<li>${u}</li>`).join("")}</ol>
       ${tuneHtml}
       ${shareHtml}
+      ${rawHtml}
     `;
     document.getElementById("modalOwn").addEventListener("change", (e) => setOwned(c.id, e.target.checked));
     modal.querySelector(".modal-box").classList.remove("wide");

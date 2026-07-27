@@ -87,6 +87,9 @@ button.ghost:hover { border-color: var(--accent); }
 .subnav { position: sticky; top: 0; background: var(--bg); display: flex; gap: 8px; padding: 10px 0; z-index: 5; flex-wrap: wrap; }
 .subnav a { font-size: 13px; color: var(--accent2); text-decoration: none; background: var(--bg2); border: 1px solid var(--line); padding: 6px 12px; border-radius: 8px; }
 .subnav a:hover { border-color: var(--accent); }
+.subnav-btn { font: inherit; font-size: 13px; color: var(--accent); background: var(--bg2); border: 1px solid var(--line); padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+.subnav-btn:hover { border-color: var(--accent); }
+.modal-box.wide { max-width: 820px; }
 
 /* tune codes table */
 input[type="text"] { background: var(--bg3); color: var(--txt); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; min-width: 200px; }

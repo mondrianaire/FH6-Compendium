@@ -235,8 +235,9 @@
 
   // ---- modal ----
   const modal = document.getElementById("modal");
-  document.getElementById("modalClose").addEventListener("click", () => modal.classList.add("hidden"));
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); });
+  const closeModal = () => { modal.classList.add("hidden"); modal.querySelector(".modal-box").classList.remove("wide"); };
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
   function openModal(c) {
     const tb = c.tune_baseline;
@@ -290,6 +291,7 @@
       ${shareHtml}
     `;
     document.getElementById("modalOwn").addEventListener("change", (e) => setOwned(c.id, e.target.checked));
+    modal.querySelector(".modal-box").classList.remove("wide");
     modal.classList.remove("hidden");
   }
 
@@ -870,11 +872,11 @@
       ${drill}`;
   }
 
-  // ---- tune codes (full 53Rain import) ----
-  function buildTuneCodes() {
+  // ---- tune codes (full 53Rain import) — opened as a modal overlay from the Cars page ----
+  function openTuneCodesOverlay() {
     const tc = DB.tuneCodes;
     if (!tc) return;
-    const host = document.getElementById("tuneCodesContent");
+    const host = document.getElementById("modalContent");
     const rows = [];
     tc.classes.forEach((cl) => cl.cars.forEach((c) => rows.push({ ...c, class: cl.class })));
     const metaCount = rows.filter((r) => r.tag === "meta").length;
@@ -900,13 +902,14 @@
     }
 
     host.innerHTML = `
-      <p class="hint">${tc.disclaimer}</p>
-      <div class="controls">
+      <h2 style="margin-top:0">🔑 Tune codes — 53Rain</h2>
+      <p class="why" style="font-size:12px;margin-top:0">${tc.disclaimer}</p>
+      <div class="controls" style="margin-bottom:12px">
         <label>Search car<input type="text" id="tcSearch" placeholder="e.g. Supra, 240SX, Golf, Miata"></label>
         <div class="chips" id="tcClass" style="align-self:flex-end">
           ${["", "B", "A", "S1"].map((c) => `<button class="chip tc-cls" data-c="${c}" style="cursor:pointer">${c || "All"}</button>`).join("")}
         </div>
-        <span class="why" style="font-size:12px;align-self:flex-end">${rows.length} codes · ${metaCount} 🟢 Meta picks · source: <a href="${tc.source_url}" target="_blank" style="color:var(--accent2)">${tc.source}</a></span>
+        <span class="why" style="font-size:12px;align-self:flex-end">${rows.length} codes · ${metaCount} 🟢 Meta · <a href="${tc.source_url}" target="_blank" style="color:var(--accent2)">${tc.source}</a></span>
       </div>
       <div id="tcTableWrap"></div>`;
     const search = document.getElementById("tcSearch");
@@ -918,6 +921,9 @@
       draw();
     }));
     draw();
+    modal.querySelector(".modal-box").classList.add("wide");
+    modal.classList.remove("hidden");
+    search.focus();
   }
 
   // ---- init ----
@@ -930,5 +936,6 @@
   buildRivals();
   buildDrift();
   buildEliminator();
-  buildTuneCodes();
+  const allCodesBtn = document.getElementById("allCodesBtn");
+  if (allCodesBtn) allCodesBtn.addEventListener("click", openTuneCodesOverlay);
 })();

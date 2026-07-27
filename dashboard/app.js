@@ -13,6 +13,12 @@
   const fmtCr = (n) => n == null ? "—" : n.toLocaleString("en-US") + " cr";
   const confClass = (c) => c === "verified" ? "conf-verified" : c === "contested" ? "conf-contested" : "conf-probable";
   const confLabel = (c) => c === "verified" ? "✅ verified" : c === "contested" ? "⚠️ contested" : "🟡 probable";
+  // 53Rain tune-meta strength (drives ranking): meta > favourite > road > (untagged)
+  const TM_RANK = { meta: 0, favorite: 1, road: 2 };
+  const tuneMetaRank = (c) => TM_RANK[c && c.tune_meta] ?? 3;
+  const tmBadge = (c) => !c ? "" : c.tune_meta === "meta" ? '<span class="badge tm-meta">53Rain META</span>'
+    : c.tune_meta === "favorite" ? '<span class="badge tm-fav">53Rain FAV</span>'
+    : c.tune_meta === "road" ? '<span class="badge tm-road">53Rain ROAD</span>' : "";
   const fh6Class = (c) => c === "fh6_confirmed" ? "conf-verified" : c === "needs_ingame" ? "conf-contested" : "conf-probable";
   const fh6Label = (c) => c === "fh6_confirmed" ? "✅ FH6" : c === "needs_ingame" ? "❌ in-game" : "🟡 FH6";
   const acqLabel = (d) => d === "easy" ? "🟢 easy to get" : d === "medium" ? "🟡 some effort"
@@ -154,13 +160,14 @@
     // rank: tier S>A>B, then value_rating, then known price asc
     const tierRank = { S: 0, A: 1, B: 2 };
     list.sort((a, b) =>
+      (tuneMetaRank(a) - tuneMetaRank(b)) ||
       (tierRank[a.tier] - tierRank[b.tier]) ||
       (b.value_rating - a.value_rating) ||
       ((a.price_credits ?? Infinity) - (b.price_credits ?? Infinity))
     );
 
     document.getElementById("resultCount").textContent =
-      `${list.length} car${list.length === 1 ? "" : "s"} match — ranked by tier, then value.`;
+      `${list.length} car${list.length === 1 ? "" : "s"} match — 53Rain tune-meta picks first, then tier & value.`;
 
     const grid = document.getElementById("recoCards");
     grid.innerHTML = "";
@@ -172,6 +179,7 @@
   function bestForSlot(d, cl) {
     const tierRank = { S: 0, A: 1, B: 2 };
     return cars.filter((c) => fitsSlot(c, d, cl)).sort((a, b) =>
+      (tuneMetaRank(a) - tuneMetaRank(b)) ||
       (tierRank[a.tier] - tierRank[b.tier]) ||
       (b.value_rating - a.value_rating) ||
       ((a.price_credits ?? Infinity) - (b.price_credits ?? Infinity)))[0] || null;
@@ -220,7 +228,7 @@
     el.className = "car-card";
     el.innerHTML = `
       <div class="card-row" style="margin-top:0">
-        <span class="badge tier-${c.tier}">${top ? "★ TOP PICK • " : ""}TIER ${c.tier}</span>
+        <span>${tmBadge(c)}<span class="badge tier-${c.tier}">${top ? "★ TOP PICK • " : ""}TIER ${c.tier}</span></span>
         <span>${isOwned(c.id) ? '<span class="conf conf-verified">✓ owned</span> ' : ""}<span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span></span>
       </div>
       <h3>${c.year} ${c.name}${codeTip(c.name, c)}</h3>

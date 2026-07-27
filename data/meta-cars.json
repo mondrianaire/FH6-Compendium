@@ -721,7 +721,13 @@
       "tune_baseline": null,
       "share_codes": [],
       "tunes": [
-        { "code": "202 410 695", "surface": "cross-country / accel", "source": "53Rain's Tune List", "confidence": "sourced-unverified", "note": "53Rain's B-class F-450 build — flagged 'Meta' (green) + 'Accel' on his list." }
+        {
+          "code": "202 410 695",
+          "surface": "cross-country / accel",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "53Rain's B-class F-450 build — flagged 'Meta' (green) + 'Accel' on his list."
+        }
       ],
       "why": "Best D-through-B cross-country pick — heavy-duty clearance and off-road fundamentals with minimal tuning investment.",
       "use_case": "Low-class cross-country truck — D-B events with near-zero tuning effort",
@@ -730,7 +736,8 @@
       "sources": [
         "gamingpromax"
       ],
-      "acquisition_difficulty": "easy"
+      "acquisition_difficulty": "easy",
+      "tune_meta": "meta"
     },
     {
       "id": "gtr-black-fe-2012",
@@ -877,7 +884,8 @@
           "player_verified": false,
           "note": "SUSPECT: circulates as a WR code but is NOT on CODMunity or any reputable DB. Same origin class as codes I already retracted. Test at your own risk and report — do not trust until confirmed."
         }
-      ]
+      ],
+      "tune_meta": "meta"
     },
     {
       "tune_baseline": null,
@@ -1333,6 +1341,709 @@
       "confidence": "probable",
       "easy_alternative": "Koenigsegg Jesko - 3,500,000 cr Autoshow (kudosprime-verified), stock S2 899 so any upgrade makes it R; the no-DLC path. Our GT-R Black FE (if wheelspin luck delivered one) also builds past S2 into R.",
       "class": "R"
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "mustang-gt-fastback-1968",
+      "name": "Ford Mustang GT 2+2 Fastback",
+      "year": 1968,
+      "class": "B",
+      "price_credits": 119000,
+      "acquisition": "Autoshow ~119,000 cr (buy anytime). game8 119k / forzalabs 113k.",
+      "acquisition_difficulty": "easy",
+      "tier": "S",
+      "value_rating": 9,
+      "tune_meta": "meta",
+      "why": "53Rain's flagged BEST B-class build and genuinely attainable at 119k from the Autoshow — a rare cheap-AND-meta pick.",
+      "use_case": "B-class road — 53Rain's top B build, cheap to get",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "580 008 746",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "53Rain's 'Best B Class' pick."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "charger-rt-1969",
+      "name": "Dodge Charger R/T",
+      "year": 1969,
+      "class": "B",
+      "price_credits": null,
+      "acquisition": "Treasure Car (world scavenger hunt), Minamino region — NOT in Autoshow. Listed value ~224,000 cr.",
+      "acquisition_difficulty": "medium",
+      "tier": "S",
+      "value_rating": 7,
+      "tune_meta": "meta",
+      "why": "53Rain green Meta B build. Free once you do the Treasure Car hunt, so no credits needed — just legwork.",
+      "use_case": "B-class road muscle — 53Rain meta, Treasure Car hunt to unlock",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "691 006 652",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Best balance of speed & power'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "miura-p400-1967",
+      "name": "Lamborghini Miura P400",
+      "year": 1967,
+      "class": "B",
+      "price_credits": 1700000,
+      "acquisition": "Autoshow 1,700,000 cr (buy anytime).",
+      "acquisition_difficulty": "easy",
+      "tier": "A",
+      "value_rating": 5,
+      "tune_meta": "road",
+      "why": "53Rain 'Purist Road' B build. Buyable but pricey at 1.7M.",
+      "use_case": "B-class purist road — pretty but 1.7M",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "108 578 169",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Purist Road'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "challenger-rt-1970",
+      "name": "Dodge Challenger R/T",
+      "year": 1970,
+      "class": "B",
+      "price_credits": null,
+      "acquisition": "Wheelspin / Super Wheelspin ONLY (RNG) — not sold. Listed value ~525,000 cr.",
+      "acquisition_difficulty": "hard",
+      "tier": "A",
+      "value_rating": 3,
+      "tune_meta": "road",
+      "why": "53Rain 'Purist Road' B build, but locked behind Wheelspin RNG — money can't buy it.",
+      "use_case": "B-class purist road — Wheelspin-gated",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "600 747 199",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Purist Road'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "dino-246-1969",
+      "name": "Ferrari Dino 246 GT",
+      "year": 1969,
+      "class": "B",
+      "price_credits": 390000,
+      "acquisition": "Autoshow 390,000 cr (buy anytime).",
+      "acquisition_difficulty": "easy",
+      "tier": "A",
+      "value_rating": 7,
+      "tune_meta": "road",
+      "why": "53Rain 'Purist Road' B build; mid-price and always buyable.",
+      "use_case": "B-class purist road — 390k Autoshow",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "949 542 966",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Purist Road'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "viper-gts-acr-1999",
+      "name": "Dodge Viper GTS ACR",
+      "year": 1999,
+      "class": "A",
+      "price_credits": 68000,
+      "acquisition": "Autoshow 68,000 cr (buy anytime). NOTE: distinct from the Viper GTS ACR Forza Edition (DLC/VIP).",
+      "acquisition_difficulty": "easy",
+      "tier": "S",
+      "value_rating": 9,
+      "tune_meta": "meta",
+      "why": "53Rain green Meta A build AND cheap at 68k — one of the best value tune-meta picks on the whole list.",
+      "use_case": "A-class road — 53Rain meta, only 68k",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "148 883 549",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Low Drag Purist'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "cobra-daytona-1965",
+      "name": "Shelby Cobra Daytona Coupe",
+      "year": 1965,
+      "class": "A",
+      "price_credits": 20000000,
+      "acquisition": "Autoshow 20,000,000 cr (buy anytime) — one of the most expensive cars in the game.",
+      "acquisition_difficulty": "easy",
+      "tier": "S",
+      "value_rating": 4,
+      "tune_meta": "meta",
+      "why": "53Rain green Meta A build with a world-record note — but it costs 20 MILLION credits. Elite if you can afford it.",
+      "use_case": "A-class road — 53Rain WR meta, 20M CR wall",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "213 110 769",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Sekibe WR'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "stingray-427-1967",
+      "name": "Chevrolet Corvette Stingray 427",
+      "year": 1967,
+      "class": "A",
+      "price_credits": null,
+      "acquisition": "NOT in Autoshow — unlocked via the 2020 Corvette Stingray Coupe's Car Mastery tree (or Auction House). Value ~135,000 cr.",
+      "acquisition_difficulty": "medium",
+      "tier": "A",
+      "value_rating": 6,
+      "tune_meta": "favorite",
+      "why": "53Rain favourite A build. Unlock via another Corvette's Mastery tree — deterministic but indirect.",
+      "use_case": "A-class road muscle — Mastery-tree unlock",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "879 457 887",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'2nd Strongest Muscle?'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "cobra-427-1965",
+      "name": "Shelby Cobra 427",
+      "year": 1965,
+      "class": "A",
+      "price_credits": null,
+      "acquisition": "Car Collection Journal Tier 26 reward (value 3,000,000 cr). kudosprime lists Autoshow+Wheelspin — conflict; game8/destructoid say Journal.",
+      "acquisition_difficulty": "medium",
+      "tier": "A",
+      "value_rating": 5,
+      "tune_meta": "favorite",
+      "why": "53Rain favourite A build. Free via a deep Collection Journal tier if you grind it.",
+      "use_case": "A-class road — Journal Tier 26 reward",
+      "confidence": "probable",
+      "tunes": [
+        {
+          "code": "134 583 555",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "Updated 7/14."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "300slr-1955",
+      "name": "Mercedes-Benz 300 SLR",
+      "year": 1955,
+      "class": "A",
+      "price_credits": 60000000,
+      "acquisition": "Autoshow 60,000,000 cr — the second-most-expensive car in the game.",
+      "acquisition_difficulty": "easy",
+      "tier": "A",
+      "value_rating": 3,
+      "tune_meta": "favorite",
+      "why": "53Rain favourite A build, but at 60M credits it's a trophy purchase, not a practical pick.",
+      "use_case": "A-class road — 53Rain fav, 60M CR",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "134 284 011",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Handling, Low Drag'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "giulia-tz2-1965",
+      "name": "Alfa Romeo Giulia TZ2",
+      "year": 1965,
+      "class": "A",
+      "price_credits": null,
+      "acquisition": "NOT in Autoshow — Journal reward at Horizon Promo Tier 13 (value ~1,200,000 cr).",
+      "acquisition_difficulty": "medium",
+      "tier": "A",
+      "value_rating": 6,
+      "tune_meta": "favorite",
+      "why": "53Rain favourite A build, praised as easy to drive. Free via a mid Journal tier.",
+      "use_case": "A-class road all-rounder — Journal reward",
+      "confidence": "probable",
+      "tunes": [
+        {
+          "code": "149 106 584",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'All around very good + easy drive'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "AWD",
+      "recommended_drivetrain": "AWD (53Rain build)",
+      "disciplines": [
+        "road",
+        "dirt_rally"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "rallye-golf-1989",
+      "name": "Volkswagen Rallye Golf",
+      "year": 1989,
+      "class": "A",
+      "price_credits": null,
+      "acquisition": "Limited-time Festival Playlist reward (Series 2 Summer, ~20 pts) — the season has passed, so Auction House only now.",
+      "acquisition_difficulty": "hard",
+      "tier": "A",
+      "value_rating": 3,
+      "tune_meta": "favorite",
+      "why": "53Rain favourite A build (AWD, so decent on dirt too), but it was a limited-time Playlist car — time-gated now.",
+      "use_case": "A-class road/dirt AWD — passed Playlist reward",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "127 979 312",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Strong'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "m5-e39-2003",
+      "name": "BMW M5",
+      "year": 2003,
+      "class": "A",
+      "price_credits": 47000,
+      "acquisition": "Autoshow 47,000 cr (buy anytime). The E39.",
+      "acquisition_difficulty": "easy",
+      "tier": "A",
+      "value_rating": 8,
+      "tune_meta": "road",
+      "why": "53Rain 'Purist' A build and dirt-cheap at 47k — an easy attainable road pick.",
+      "use_case": "A-class purist road — 47k Autoshow",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "401 007 065",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Purist'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "tomica-skyline-1983",
+      "name": "Nissan #11 Tomica Skyline",
+      "year": 1983,
+      "class": "S1",
+      "price_credits": null,
+      "acquisition": "FREE Barn Find (Ito region), unlocked after Master Explorer in the Discover Japan journal.",
+      "acquisition_difficulty": "medium",
+      "tier": "S",
+      "value_rating": 9,
+      "tune_meta": "meta",
+      "why": "53Rain green Meta S1 build and FREE via a Barn Find — the standout attainable S1 tune-meta pick.",
+      "use_case": "S1 road — 53Rain meta, free Barn Find",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "164 877 483",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Very Strong / Handling Focused'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "alfa-33-stradale-1968",
+      "name": "Alfa Romeo 33 Stradale",
+      "year": 1968,
+      "class": "S1",
+      "price_credits": 3500000,
+      "acquisition": "Autoshow 3,500,000 cr (buy anytime; also a Wheelspin prize).",
+      "acquisition_difficulty": "easy",
+      "tier": "S",
+      "value_rating": 5,
+      "tune_meta": "meta",
+      "why": "53Rain green Meta S1 build. Always buyable but 3.5M credits.",
+      "use_case": "S1 road — 53Rain meta, 3.5M CR",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "114 004 471",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "53Rain green Meta."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "cerbera-speed12-1998",
+      "name": "TVR Cerbera Speed 12",
+      "year": 1998,
+      "class": "S1",
+      "price_credits": null,
+      "acquisition": "Series 2 'Horizon Decades' Festival Playlist reward (20 pts) — season passed, Auction House only now.",
+      "acquisition_difficulty": "hard",
+      "tier": "S",
+      "value_rating": 3,
+      "tune_meta": "meta",
+      "why": "53Rain green Meta S1 build, but a passed limited-time Playlist car — can't earn it now, only Auction House.",
+      "use_case": "S1 road — 53Rain meta, passed Playlist reward",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "939 513 860",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "53Rain green Meta."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "schuppan-962cr-1993",
+      "name": "Schuppan 962CR",
+      "year": 1993,
+      "class": "S1",
+      "price_credits": null,
+      "acquisition": "Series 2 'Horizon Decades' Festival Playlist reward (40 pts) — season passed, Auction House only now.",
+      "acquisition_difficulty": "hard",
+      "tier": "A",
+      "value_rating": 3,
+      "tune_meta": "favorite",
+      "why": "53Rain favourite S1 build, all-around strong — but a passed Playlist exclusive.",
+      "use_case": "S1 road all-rounder — passed Playlist reward",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "625 356 323",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Very Good All Around'."
+        }
+      ]
+    },
+    {
+      "drivetrain_stock": "RWD",
+      "recommended_drivetrain": "RWD (53Rain build)",
+      "disciplines": [
+        "road"
+      ],
+      "tune_baseline": null,
+      "sources": [
+        "53rain-tunelist",
+        "game8-db",
+        "kudosprime"
+      ],
+      "upgrade_priority": [
+        "Download 53Rain's share code — it installs the full build",
+        "then fine-tune gearing to the track"
+      ],
+      "id": "m4-welcome-2021",
+      "name": "BMW M4 Competition Coupe (Welcome Pack)",
+      "year": 2021,
+      "class": "S1",
+      "price_credits": 150000,
+      "acquisition": "PAID Welcome Pack DLC (bundled with Deluxe/Premium editions); after that, Autoshow 150,000 cr.",
+      "acquisition_difficulty": "premium",
+      "tier": "A",
+      "value_rating": 4,
+      "tune_meta": "favorite",
+      "why": "53Rain favourite S1 build, called easy to drive — but the car needs paid DLC to unlock.",
+      "use_case": "S1 road — easy-driving 53Rain fav, DLC-gated",
+      "confidence": "verified",
+      "tunes": [
+        {
+          "code": "288 862 355",
+          "surface": "road",
+          "source": "53Rain's Tune List",
+          "confidence": "sourced-unverified",
+          "note": "'Use if you dont like dirt, its easy'."
+        }
+      ]
     }
   ],
   "tune_sourcing_policy": {

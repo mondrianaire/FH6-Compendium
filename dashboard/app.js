@@ -815,6 +815,7 @@
             <h3 style="font-size:15px">${c.name}</h3>
             <div class="card-row"><span>${acqDot(c.get)} ${c.acquisition}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
             <p class="why" style="margin:8px 0 0">${c.note}</p>
+            ${c.tune_code ? `<div class="share" style="margin-top:8px"><code>${c.tune_code}</code> — ${c.tune_source || "share code"}</div>` : ""}
           </div>`).join("")}
       </div>`;
 

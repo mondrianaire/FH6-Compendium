@@ -620,7 +620,7 @@ window.FH6_DB = {
       "S2": "801-900",
       "R": "901+"
     },
-    "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game.",
+    "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game. CORROBORATED 2026-07-18 by 53Rain's Tune List (community tuner): its FH6 build sections are capped at exactly B 600 / A 700 / S1 800 — an independent expert confirmation of the shifted caps (matches this table's B≤600, A≤700, S1≤800). Confidence on B/A/S1 caps raised toward verified.",
     "disciplines": [
       "road",
       "touge_street",
@@ -972,6 +972,13 @@ window.FH6_DB = {
         ],
         "tunes": [
           {
+            "code": "700 022 932",
+            "surface": "road / all-around",
+            "source": "53Rain's Tune List",
+            "confidence": "sourced-unverified",
+            "note": "53Rain's published GR Supra build. CAVEAT: it's an S1-800 build, so it will NOT be legal for A-class events (it exceeds A). Use it for S1 racing, or detune / grab an A-class code for A events. This is the reputably-published code the note below said was missing."
+          },
+          {
             "method": "Rivals: for a specific track, download the fastest CLEAN-lap Supra driver's shared tune (e.g. Electric Town #4/#6). Otherwise Tune Browser > 2020 GR Supra > filter Surface = ROAD > A class > sort by rating > download top. Filtering to ROAD is what avoids the drag-tune trap.",
             "surface": "road",
             "source": "Rivals leaderboard / in-game Tune Browser",
@@ -1315,6 +1322,15 @@ window.FH6_DB = {
         ],
         "tune_baseline": null,
         "share_codes": [],
+        "tunes": [
+          {
+            "code": "202 410 695",
+            "surface": "cross-country / accel",
+            "source": "53Rain's Tune List",
+            "confidence": "sourced-unverified",
+            "note": "53Rain's B-class F-450 build — flagged 'Meta' (green) + 'Accel' on his list."
+          }
+        ],
         "why": "Best D-through-B cross-country pick — heavy-duty clearance and off-road fundamentals with minimal tuning investment.",
         "use_case": "Low-class cross-country truck — D-B events with near-zero tuning effort",
         "leaderboard_meta": "2026-07-11: corroborated twice — game8 (5/24) still ranks it top D-B cross-country, AND it shows real board usage on forza.guide dirt (#7 D all-tracks, #1 D on Sotoyama/Taiyaki/Nukabira/Waterfall trails). Confidence probable→verified.",
@@ -3944,6 +3960,8 @@ window.FH6_DB = {
         "acquisition": "Autoshow — OR FREE via Drift Club Japan (Journal Tier 4)",
         "get": "easy",
         "note": "Best value. The Drift Club Japan side story gives this to you free.",
+        "tune_code": "213 803 717",
+        "tune_source": "53Rain's Tune List (S1 build)",
         "confidence": "verified"
       },
       {
@@ -3971,6 +3989,8 @@ window.FH6_DB = {
         "acquisition": "Autoshow (cheap)",
         "get": "easy",
         "note": "Light, forgiving RWD — a classic beginner drift trainer.",
+        "tune_code": "174 568 603",
+        "tune_source": "53Rain's Tune List (B build)",
         "confidence": "probable"
       }
     ],
@@ -4385,6 +4405,13 @@ window.FH6_DB = {
         "used_for": "Miata FE = best drag car; aftermarket-spawn acquisition"
       },
       {
+        "id": "53rain-tunelist",
+        "tier": "expert",
+        "title": "53Rain's Tune List (community tuner share-code DB, view-only Google Sheet)",
+        "url": "https://docs.google.com/spreadsheets/d/19sGnavfTsp3iPYN_OnNmPBW87I0Pz2ODuNFFhZgaU8g",
+        "used_for": "User-supplied 2026-07-18. Reputable tuner's share codes per car, organised by class block: B (cap 600), A (cap 700), S1 (cap 800), Car·Sharecode·Notes columns; legend green=Meta / yellow=favourite / blue=road. INDEPENDENTLY CORROBORATES the shifted FH6 class caps (B=600/A=700/S1=800). Codes ingested for cars we track: GR Supra 700 022 932 (S1 build), F-450 202 410 695 (B), FD #777 240SX 213 803 717 (S1), AE86 Sprinter Trueno 174 568 603 (B). Sheet blocks viewer download (owner security setting) — read visually via browser, not exportable."
+      },
+      {
         "id": "bossdown-drag",
         "tier": "community",
         "title": "Bossdown — FH6 drag tune guide",
@@ -4663,5 +4690,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-07-18T16:05Z"
+  "builtAt": "2026-07-18"
 };

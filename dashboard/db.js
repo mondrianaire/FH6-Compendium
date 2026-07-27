@@ -4001,6 +4001,644 @@ window.FH6_DB = {
       "steam-driftscore"
     ]
   },
+  "tuneCodes": {
+    "schema_version": "1.0.0",
+    "captured": "2026-07-18",
+    "source": "53Rain's Tune List",
+    "source_url": "https://docs.google.com/spreadsheets/d/19sGnavfTsp3iPYN_OnNmPBW87I0Pz2ODuNFFhZgaU8g",
+    "disclaimer": "Full import of 53Rain's Tune List (FH6 tab), user-supplied 2026-07-18. The sheet blocks viewer download (owner security setting), so these were TRANSCRIBED BY EYE from the rendered grid — a wrong digit is possible. Confidence: sourced-unverified. Always confirm a code in-game before trusting it (Upgrade & Tune → Find Tuning Setups → enter code). Class caps confirm the shifted FH6 model: B=600, A=700, S1=800.",
+    "legend": {
+      "meta": "53Rain's Meta pick (green)",
+      "favorite": "Personal favourite (yellow)",
+      "road": "Road / Purist build (blue)"
+    },
+    "classes": [
+      {
+        "class": "B",
+        "cap": 600,
+        "cars": [
+          {
+            "car": "Lamborghini 1967 Miura P400",
+            "code": "108 578 169",
+            "note": "Purist Road",
+            "tag": "road"
+          },
+          {
+            "car": "Dodge 1970 Challenger R/7",
+            "code": "600 747 199",
+            "note": "Purist Road",
+            "tag": "road"
+          },
+          {
+            "car": "Toyota 2017 JPN Taxi",
+            "code": "126 257 704",
+            "note": ""
+          },
+          {
+            "car": "Volkswagen 1963 Beetle",
+            "code": "871 995 243",
+            "note": "Updated 5/30"
+          },
+          {
+            "car": "Honda 1991 CR-X SIR",
+            "code": "322 820 677",
+            "note": "Strong B Dirt"
+          },
+          {
+            "car": "Nissan 1987 BE-1",
+            "code": "164 035 349",
+            "note": ""
+          },
+          {
+            "car": "Nissan 1989 PAO",
+            "code": "188 143 346",
+            "note": "Updated 5/31 with suspension"
+          },
+          {
+            "car": "Nissan 1991 Figaro",
+            "code": "897 641 242",
+            "note": "Updated 5/31 with suspension"
+          },
+          {
+            "car": "Datsun 1970 510",
+            "code": "109 023 226",
+            "note": "Updated 6/1 with widebody + p/w"
+          },
+          {
+            "car": "Volkswagen 1963 Type 2 De Luxe",
+            "code": "223 924 651",
+            "note": "Updated 5/30"
+          },
+          {
+            "car": "Chevrolet 1970 El Camino SS 454",
+            "code": "945 603 770",
+            "note": ""
+          },
+          {
+            "car": "Ferrari 1969 Dino 246 GT",
+            "code": "949 542 966",
+            "note": "Purist Road",
+            "tag": "road"
+          },
+          {
+            "car": "Chevrolet 1970 Chevelle SS 454",
+            "code": "168 221 562",
+            "note": "All around, best at sprints"
+          },
+          {
+            "car": "Chevrolet 1969 Camaro SS Coupe",
+            "code": "171 942 132",
+            "note": "Worse Chevelle, still strong"
+          },
+          {
+            "car": "Dodge 1969 Charger R/T",
+            "code": "691 006 652",
+            "note": "Best balance of speed & power",
+            "tag": "meta"
+          },
+          {
+            "car": "Ford 2020 Super Duty F-450",
+            "code": "202 410 695",
+            "note": "Accel",
+            "tag": "meta"
+          },
+          {
+            "car": "Hennessey 2019 Ford F-150 VelociRaptor 6x6",
+            "code": "430 709 894",
+            "note": "Cross Country stock tire"
+          },
+          {
+            "car": "DeBerti 2019 Ford Super Duty F-250 'Transformer'",
+            "code": "153 687 507",
+            "note": "Updated 6/13, more stable rear"
+          },
+          {
+            "car": "Mercedes-Benz 1954 300 SL Coupe",
+            "code": "672 504 521",
+            "note": ""
+          },
+          {
+            "car": "Nissan 1993 240SX",
+            "code": "162 691 178",
+            "note": ""
+          },
+          {
+            "car": "Nissan 1994 Fairlady Z Version S Twin Turbo",
+            "code": "133 496 910",
+            "note": "Purist Do-Luck parts"
+          },
+          {
+            "car": "BMW 1973 2002 Turbo",
+            "code": "183 687 982",
+            "note": ""
+          },
+          {
+            "car": "Volkswagen 1989 Rallye Golf",
+            "code": "109 248 459",
+            "note": ""
+          },
+          {
+            "car": "Toyota 1985 Sprinter Trueno GT Apex (AE86)",
+            "code": "174 568 603",
+            "note": ""
+          },
+          {
+            "car": "Abarth 1980 Fiat 131",
+            "code": "172 597 747",
+            "note": ""
+          },
+          {
+            "car": "Ford 2020 Super Duty F-450 FE",
+            "code": "201 799 981",
+            "note": ""
+          },
+          {
+            "car": "Lincoln 1962 Continental",
+            "code": "125 337 331",
+            "note": ""
+          },
+          {
+            "car": "Ford 1968 Mustang GT 2+2 Fastback",
+            "code": "580 008 746",
+            "note": "Best B Class",
+            "tag": "meta"
+          },
+          {
+            "car": "Jeep 2012 Wrangler Rubicon",
+            "code": "167 013 924",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "class": "A",
+        "cap": 700,
+        "cars": [
+          {
+            "car": "Ford 1985 RS200 Evolution",
+            "code": "109 672 061",
+            "note": ""
+          },
+          {
+            "car": "Ford #2 GT40 MK II",
+            "code": "284 206 676",
+            "note": "Smooth"
+          },
+          {
+            "car": "Dodge 1968 Dart Hemi Super Stock",
+            "code": "100 463 901",
+            "note": "Good accel, bad turning"
+          },
+          {
+            "car": "Dodge 1970 Challenger R/T",
+            "code": "169 452 854",
+            "note": "Updated 6/16"
+          },
+          {
+            "car": "Ford 2020 Super Duty F-450 FE",
+            "code": "638 635 588",
+            "note": "Updated 6/1"
+          },
+          {
+            "car": "Jaguar 1961 E-Type",
+            "code": "170 250 691",
+            "note": ""
+          },
+          {
+            "car": "Alfa 1965 Giulia Sprint GTA Stradale",
+            "code": "159 551 207",
+            "note": "Very strong"
+          },
+          {
+            "car": "Dodge 199? Viper GTS ACR",
+            "code": "148 883 549",
+            "note": "Low Drag Purist",
+            "tag": "meta"
+          },
+          {
+            "car": "Holden 1988 Torana A9x",
+            "code": "553 303 353",
+            "note": ""
+          },
+          {
+            "car": "Chevrolet 1967 Corvette Stingray 427",
+            "code": "879 457 887",
+            "note": "2nd strongest muscle?",
+            "tag": "favorite"
+          },
+          {
+            "car": "Shelby 1965 Cobra 427",
+            "code": "134 583 555",
+            "note": "Updated 7/14",
+            "tag": "favorite"
+          },
+          {
+            "car": "BMW 2003 M5",
+            "code": "401 007 065",
+            "note": "Purist",
+            "tag": "road"
+          },
+          {
+            "car": "DeLorean 1982 DMC-12",
+            "code": "379 776 669",
+            "note": "Updated 5/30, improved P/W ratio"
+          },
+          {
+            "car": "Chevrolet 1960 Corvette",
+            "code": "131 052 733",
+            "note": ""
+          },
+          {
+            "car": "Chevrolet 2006 Corvette Z06",
+            "code": "241 339 381",
+            "note": "Purist, sprints",
+            "tag": "road"
+          },
+          {
+            "car": "McLaren 1993 F1",
+            "code": "150 205 672",
+            "note": "Drags :("
+          },
+          {
+            "car": "Ferrari 1962 250 GT Berlinetta Lusso",
+            "code": "404 868 887",
+            "note": ""
+          },
+          {
+            "car": "Ford 1968 Mustang GT 2+2 Fastback",
+            "code": "740 051 319",
+            "note": ""
+          },
+          {
+            "car": "Chevrolet 1969 Nova Super Sport 396",
+            "code": "110 647 035",
+            "note": "Non-Viper V10 Dirt :)"
+          },
+          {
+            "car": "Lancia 1974 Stratos HF Stradale",
+            "code": "152 639 683",
+            "note": ""
+          },
+          {
+            "car": "Lamborghini 1988 Countach LP5000 QV",
+            "code": "104 013 054",
+            "note": "Surprisingly quick"
+          },
+          {
+            "car": "Mercedes-Benz 1955 300 SLR",
+            "code": "134 284 011",
+            "note": "Handling, low drag",
+            "tag": "favorite"
+          },
+          {
+            "car": "Mercedes-Benz 2012 C 63 AMG Coupe Black Series",
+            "code": "937 243 999",
+            "note": ""
+          },
+          {
+            "car": "Honda 1992 NSX-R",
+            "code": "663 021 411",
+            "note": ""
+          },
+          {
+            "car": "Chevrolet 1970 Camaro Z28",
+            "code": "764 152 406",
+            "note": ""
+          },
+          {
+            "car": "Dodge 2008 Viper SRT-10 ACR",
+            "code": "545 354 312",
+            "note": "All around"
+          },
+          {
+            "car": "Pontiac 1987 Firebird Trans Am GTA",
+            "code": "591 245 496",
+            "note": ""
+          },
+          {
+            "car": "Alfa Romeo 1965 Giulia TZ2",
+            "code": "149 106 584",
+            "note": "All around very good + easy drive",
+            "tag": "favorite"
+          },
+          {
+            "car": "Hennessey 2019 Ford F-150 VelociRaptor 6x6",
+            "code": "714 315 159",
+            "note": "Cross Country"
+          },
+          {
+            "car": "Toyota 2013 86 'Stories'",
+            "code": "112 814 121",
+            "note": "Mid but easy"
+          },
+          {
+            "car": "Dodge 199? Viper GTS ACR",
+            "code": "115 424 048",
+            "note": ""
+          },
+          {
+            "car": "Shelby 1965 Cobra Daytona Coupe",
+            "code": "213 110 769",
+            "note": "Sekibe WR",
+            "tag": "meta"
+          },
+          {
+            "car": "Volkswagen 1989 Rallye Golf",
+            "code": "127 979 312",
+            "note": "Strong",
+            "tag": "favorite"
+          },
+          {
+            "car": "Mazda 1992 RX-7 Type R",
+            "code": "141 860 809",
+            "note": ""
+          },
+          {
+            "car": "Mercedes-Benz 1990 190 E 2.5-16 Evolution II",
+            "code": "136 585 600",
+            "note": ""
+          },
+          {
+            "car": "Ferrari 1962 250 GTO",
+            "code": "100 692 047",
+            "note": "WIP but strong"
+          },
+          {
+            "car": "Dodge 2006 Ram SRT-10",
+            "code": "178 789 811",
+            "note": ""
+          },
+          {
+            "car": "RJ Anderson 2016 #37 Polaris RZR Pro 2 Truck",
+            "code": "752 135 550",
+            "note": ""
+          },
+          {
+            "car": "Ford 2024 Mustang GT",
+            "code": "152 685 434",
+            "note": ""
+          },
+          {
+            "car": "Ford 1993 Mustang SVT Cobra R",
+            "code": "122 950 564",
+            "note": "No aero"
+          },
+          {
+            "car": "Ferrari 1967 275 GTB4 Spider",
+            "code": "473 980 745",
+            "note": ""
+          },
+          {
+            "car": "Ferrari 1984 288 GTO",
+            "code": "121 622 553",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "class": "S1",
+        "cap": 800,
+        "cars": [
+          {
+            "car": "Porsche 1970 #3 917 LH",
+            "code": "675 532 920",
+            "note": "Bad on non-dirt"
+          },
+          {
+            "car": "Nissan 1983 #11 Tomica Skyline",
+            "code": "164 877 483",
+            "note": "Very strong / handling focused",
+            "tag": "meta"
+          },
+          {
+            "car": "Audi 2009 R8 LMS",
+            "code": "636 549 789",
+            "note": "Updated 6/14 (off meta)"
+          },
+          {
+            "car": "Schuppan 1993 962CR",
+            "code": "625 356 323",
+            "note": "Very good all around",
+            "tag": "favorite"
+          },
+          {
+            "car": "Wuling 202? Sunshine S FE",
+            "code": "746 779 138",
+            "note": "Heavy handling"
+          },
+          {
+            "car": "TVR 2018 Griffith",
+            "code": "177 853 634",
+            "note": ""
+          },
+          {
+            "car": "Ford 1966 #2 GT40 MK II",
+            "code": "179 482 376",
+            "note": "Good dirt grip, rip on road"
+          },
+          {
+            "car": "Chevrolet 2019 Corvette ZR1",
+            "code": "160 783 761",
+            "note": "All around good"
+          },
+          {
+            "car": "Mercedes-Benz 1955 300 SLR",
+            "code": "",
+            "note": "Holy cow why does it work (code not legible in source — verify)"
+          },
+          {
+            "car": "Alfa Romeo 1965 Giulia TZ2",
+            "code": "183 105 185",
+            "note": "Holy accel, no road grip"
+          },
+          {
+            "car": "BMW 2021 M4 Comp Coupe (Welcome Pack)",
+            "code": "288 862 355",
+            "note": "Use if you don't like dirt, it's easy",
+            "tag": "favorite"
+          },
+          {
+            "car": "Lancia 1974 Stratos HF Stradale",
+            "code": "882 481 630",
+            "note": "Hell on wheels"
+          },
+          {
+            "car": "Mazda 1994 MX-5 Miata Forza Edition",
+            "code": "519 139 209",
+            "note": "Updated 6/21",
+            "tag": "meta"
+          },
+          {
+            "car": "Ford 1968 Mustang GT 2+2 Fastback FE",
+            "code": "178 690 248",
+            "note": "Only place it's useable?"
+          },
+          {
+            "car": "Lamborghini 2012 Aventador LP700-4",
+            "code": "587 863 968",
+            "note": ""
+          },
+          {
+            "car": "McLaren 2014 650S Spider",
+            "code": "498 074 373",
+            "note": "Good all around"
+          },
+          {
+            "car": "Ford 2016 Mustang Shelby GT350R",
+            "code": "481 400 053",
+            "note": "Good all around"
+          },
+          {
+            "car": "Ariel 2016 Nomad",
+            "code": "868 505 271",
+            "note": "Good on only dirt"
+          },
+          {
+            "car": "Lancia 1986 Delta S4",
+            "code": "147 737 889",
+            "note": ""
+          },
+          {
+            "car": "Nissan 1989 S-Cargo FE",
+            "code": "592 409 255",
+            "note": "Drives rough but she's kinda fast af"
+          },
+          {
+            "car": "Formula Drift 1997 #777 Nissan 240SX",
+            "code": "213 803 717",
+            "note": ""
+          },
+          {
+            "car": "Formula Drift 2017 #117 599 GTB Fiorano",
+            "code": "739 840 880",
+            "note": ""
+          },
+          {
+            "car": "Formula Drift 2015 #13 Ford Mustang",
+            "code": "116 167 855",
+            "note": ""
+          },
+          {
+            "car": "Formula Drift 2013 #777 Chevrolet Corvette",
+            "code": "269 084 037",
+            "note": "Best of FD cars"
+          },
+          {
+            "car": "Porsche 1998 911 GT1 Strassenversion",
+            "code": "615 823 273",
+            "note": "Handling"
+          },
+          {
+            "car": "Chevrolet 2018 Camaro ZL1 1LE",
+            "code": "122 048 283",
+            "note": "All around very good"
+          },
+          {
+            "car": "Chevrolet 2015 Corvette Z06",
+            "code": "133 808 419",
+            "note": ""
+          },
+          {
+            "car": "Lotus 2018 Exige Cup 430",
+            "code": "123 582 166",
+            "note": ""
+          },
+          {
+            "car": "Lamborghini 2022 Countach LPI 800-4",
+            "code": "124 795 002",
+            "note": ""
+          },
+          {
+            "car": "McLaren 2020 620R",
+            "code": "106 682 299",
+            "note": ""
+          },
+          {
+            "car": "Honda 2005 NSX-R",
+            "code": "125 061 379",
+            "note": ""
+          },
+          {
+            "car": "Pagani 2010 Zonda Cinque Roadster",
+            "code": "113 413 896",
+            "note": ""
+          },
+          {
+            "car": "BAC 2014 Mono",
+            "code": "671 239 699",
+            "note": ""
+          },
+          {
+            "car": "Mitsubishi 2001 Lancer Evo VI GSR TME",
+            "code": "105 816 310",
+            "note": ""
+          },
+          {
+            "car": "McLaren 1997 F1 GT",
+            "code": "130 783 386",
+            "note": ""
+          },
+          {
+            "car": "Chevrolet 2020 Corvette Stingray Coupe",
+            "code": "703 631 835",
+            "note": "Good all around"
+          },
+          {
+            "car": "Alfa Romeo 1968 33 Stradale",
+            "code": "114 004 471",
+            "note": "",
+            "tag": "meta"
+          },
+          {
+            "car": "Audi 2023 R8 Coupe V10 GT RWD",
+            "code": "173 506 407",
+            "note": ""
+          },
+          {
+            "car": "Mazda 1973 RX-3 FE",
+            "code": "177 606 901",
+            "note": "Fast af"
+          },
+          {
+            "car": "Jaguar 1991 Sport XJR-15",
+            "code": "412 523 666",
+            "note": ""
+          },
+          {
+            "car": "Ferrari 1970 512",
+            "code": "162 849 094",
+            "note": ""
+          },
+          {
+            "car": "TVR 1998 Cerbera Speed 12",
+            "code": "939 513 860",
+            "note": "",
+            "tag": "meta"
+          },
+          {
+            "car": "Toyota 2020 GR Supra",
+            "code": "700 022 932",
+            "note": ""
+          },
+          {
+            "car": "Lexus 2010 LFA",
+            "code": "912 256 298",
+            "note": ""
+          },
+          {
+            "car": "Ferrari 2005 FXX",
+            "code": "165 058 526",
+            "note": ""
+          },
+          {
+            "car": "Shelby 1965 Cobra 427",
+            "code": "117 326 764",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",

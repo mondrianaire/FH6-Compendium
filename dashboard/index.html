@@ -22,9 +22,8 @@
     <button class="tab active" data-tab="recommend">🏁 Recommend a Car</button>
     <button class="tab" data-tab="progress">🚀 Progress Plan</button>
     <button class="tab" data-tab="cars">🚗 Garage Tracker</button>
-    <button class="tab" data-tab="variables">🔧 Tuning Variables</button>
-    <button class="tab" data-tab="strategy">📈 Upgrade Strategy</button>
-    <button class="tab" data-tab="templates">🎯 Tuning Templates</button>
+    <button class="tab" data-tab="tuning">🔧 Tuning</button>
+    <button class="tab" data-tab="tunecodes">🔑 Tune Codes</button>
     <button class="tab" data-tab="rivals">🏆 Rivals Tracks</button>
     <button class="tab" data-tab="drift">💨 Drift Guide</button>
     <button class="tab" data-tab="eliminator">💀 Eliminator</button>
@@ -62,20 +61,25 @@
       <div id="carTableWrap"></div>
     </section>
 
-    <!-- VARIABLES -->
-    <section id="variables" class="panel">
+    <!-- TUNING (merged: variables + upgrade strategy + templates — same concept) -->
+    <section id="tuning" class="panel">
+      <div class="subnav">
+        <a href="#sec-vars">What each setting does</a>
+        <a href="#sec-strategy">Upgrade / buy order</a>
+        <a href="#sec-templates">Discipline templates</a>
+      </div>
+      <h2 class="section-title" id="sec-vars">🔧 Tuning variables — what each setting does</h2>
       <p class="hint" id="varOrder"></p>
       <div id="varCats"></div>
-    </section>
-
-    <!-- STRATEGY -->
-    <section id="strategy" class="panel">
+      <h2 class="section-title" id="sec-strategy">📈 Upgrade strategy — buy order &amp; build philosophy</h2>
       <div id="strategyContent"></div>
+      <h2 class="section-title" id="sec-templates">🎯 Tuning templates — per-discipline baselines</h2>
+      <div id="templatesContent"></div>
     </section>
 
-    <!-- TEMPLATES -->
-    <section id="templates" class="panel">
-      <div id="templatesContent"></div>
+    <!-- TUNE CODES (full 53Rain import) -->
+    <section id="tunecodes" class="panel">
+      <div id="tuneCodesContent"></div>
     </section>
 
     <!-- RIVALS -->

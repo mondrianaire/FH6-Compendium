@@ -330,7 +330,7 @@
     const tv = DB.tuningVariables;
     document.getElementById("varOrder").innerHTML =
       "<strong>Tune in this order:</strong> " + tv.tuning_order.map((t, i) => `${i + 1}. ${t.replace(/_/g, " ")}`).join("  →  ") +
-      `<br><span style="color:var(--warn)">${tv.note}</span>`;
+      `<br><span style="color:var(--warn)">${tv.note || tv.tuning_order_note || ""}</span>`;
     const host = document.getElementById("varCats");
     host.innerHTML = tv.categories.map((cat) => `
       <div class="varcat">
@@ -832,6 +832,56 @@
       ${drill}`;
   }
 
+  // ---- tune codes (full 53Rain import) ----
+  function buildTuneCodes() {
+    const tc = DB.tuneCodes;
+    if (!tc) return;
+    const host = document.getElementById("tuneCodesContent");
+    const rows = [];
+    tc.classes.forEach((cl) => cl.cars.forEach((c) => rows.push({ ...c, class: cl.class })));
+    const metaCount = rows.filter((r) => r.tag === "meta").length;
+    let q = "", clsFilter = "";
+    const tagBadge = (t) => t === "meta" ? '<span class="badge tier-S">META</span>'
+      : t === "favorite" ? '<span class="badge tier-A">FAV</span>'
+      : t === "road" ? '<span class="badge tier-B">ROAD</span>' : "";
+
+    function draw() {
+      const ql = q.toLowerCase();
+      const list = rows.filter((r) => (!clsFilter || r.class === clsFilter) && (!ql || r.car.toLowerCase().includes(ql)));
+      const body = list.map((r) => `<tr class="${r.tag === "meta" ? "row-meta" : ""}">
+        <td>${r.car}</td>
+        <td><code>${r.code || "—"}</code></td>
+        <td>${r.class}</td>
+        <td>${tagBadge(r.tag)}</td>
+        <td class="why" style="font-size:12px">${r.note || ""}</td>
+      </tr>`).join("");
+      document.getElementById("tcTableWrap").innerHTML = `<div style="overflow-x:auto"><table>
+        <thead><tr><th>Car</th><th>Share code</th><th>Class</th><th>Tag</th><th>Notes</th></tr></thead>
+        <tbody>${body}</tbody></table></div>
+        <p class="why" style="margin-top:8px">${list.length} of ${rows.length} codes shown${clsFilter ? " · class " + clsFilter : ""}${q ? " · \"" + q + "\"" : ""}.</p>`;
+    }
+
+    host.innerHTML = `
+      <p class="hint">${tc.disclaimer}</p>
+      <div class="controls">
+        <label>Search car<input type="text" id="tcSearch" placeholder="e.g. Supra, 240SX, Golf, Miata"></label>
+        <div class="chips" id="tcClass" style="align-self:flex-end">
+          ${["", "B", "A", "S1"].map((c) => `<button class="chip tc-cls" data-c="${c}" style="cursor:pointer">${c || "All"}</button>`).join("")}
+        </div>
+        <span class="why" style="font-size:12px;align-self:flex-end">${rows.length} codes · ${metaCount} 🟢 Meta picks · source: <a href="${tc.source_url}" target="_blank" style="color:var(--accent2)">${tc.source}</a></span>
+      </div>
+      <div id="tcTableWrap"></div>`;
+    const search = document.getElementById("tcSearch");
+    search.addEventListener("input", () => { q = search.value; draw(); });
+    host.querySelectorAll(".tc-cls").forEach((b) => b.addEventListener("click", () => {
+      clsFilter = b.dataset.c;
+      host.querySelectorAll(".tc-cls").forEach((x) => x.style.borderColor = "var(--line)");
+      b.style.borderColor = "var(--accent)";
+      draw();
+    }));
+    draw();
+  }
+
   // ---- init ----
   render();
   buildProgress();
@@ -842,4 +892,5 @@
   buildRivals();
   buildDrift();
   buildEliminator();
+  buildTuneCodes();
 })();

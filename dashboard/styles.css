@@ -81,6 +81,19 @@ button.ghost:hover { border-color: var(--accent); }
 .conf-probable { color: var(--warn); }
 .conf-contested { color: #f0883e; }
 
+/* merged Tuning tab */
+.section-title { font-size: 20px; margin: 34px 0 14px; padding-top: 22px; border-top: 2px solid var(--line); }
+.section-title:first-of-type { border-top: none; padding-top: 4px; }
+.subnav { position: sticky; top: 0; background: var(--bg); display: flex; gap: 8px; padding: 10px 0; z-index: 5; flex-wrap: wrap; }
+.subnav a { font-size: 13px; color: var(--accent2); text-decoration: none; background: var(--bg2); border: 1px solid var(--line); padding: 6px 12px; border-radius: 8px; }
+.subnav a:hover { border-color: var(--accent); }
+
+/* tune codes table */
+input[type="text"] { background: var(--bg3); color: var(--txt); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; min-width: 200px; }
+tr.row-meta { background: rgba(0,210,122,.09); }
+tr.row-meta td:first-child { border-left: 3px solid var(--accent); }
+#tunecodes td code { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--bg); cursor: pointer; }

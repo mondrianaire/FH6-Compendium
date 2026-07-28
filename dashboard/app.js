@@ -10,6 +10,33 @@
     road: "Road", touge_street: "Touge / Street", dirt_rally: "Dirt / Rally",
     cross_country: "Cross Country", drag: "Drag"
   };
+  // what tuning attributes each race category rewards — shown under the coverage-matrix headers
+  const DISCIPLINE_TUNING = {
+    road: "grip + balanced power, moderate downforce",
+    touge_street: "cornering grip, brakes, downforce, short gearing",
+    dirt_rally: "soft suspension, AWD, raised ride height, rally tyres",
+    cross_country: "max ride height, AWD, off-road tyres, durability",
+    drag: "launch + gearing + power, minimal aero, drag tyres"
+  };
+  // normalise free-text acquisition into one of ~9 canonical methods (homogenised "Get it")
+  const acqDot = (d) => !d ? "" : d.startsWith("easy") ? "🟢" : d.startsWith("medium") ? "🟡" : d.startsWith("hard") ? "🔴" : d === "premium" ? "💰" : "";
+  function acqMethod(c) {
+    const a = (c.acquisition || "").toLowerCase();
+    const has = (...k) => k.some((x) => a.includes(x));
+    // primary Autoshow wins over keywords in disambiguation notes (e.g. "distinct from the ... DLC variant")
+    if (a.includes("autoshow") && has("buy anytime", "always available") && !has("not in autoshow", "not sold")) return "Autoshow";
+    if (has("mastery")) return "Car Mastery";
+    if (has("treasure")) return "Treasure Car";
+    if (has("barn find")) return "Barn Find";
+    if (has("aftermarket")) return "Aftermarket spawn";
+    if (has("wheelspin")) return "Wheelspin (RNG)";
+    if (has("playlist")) return has("passed", "ended", "auction house only", "over") ? "Playlist reward (ended)" : "Playlist reward";
+    if (has("journal", "collection", "tier", "promo")) return "Journal reward";
+    if (has("welcome pack", "deluxe", "premium edition", "vip", " dlc", "paid ")) return "Paid DLC";
+    if (has("auction")) return "Auction House";
+    if (a.includes("autoshow") && !has("not in autoshow", "not sold in the autoshow", "not sold in autoshow")) return "Autoshow";
+    return c.acquisition_difficulty === "easy" ? "Autoshow" : c.acquisition_difficulty === "premium" ? "Paid DLC" : c.acquisition_difficulty === "hard" ? "Wheelspin (RNG)" : "Special reward";
+  }
   const fmtCr = (n) => n == null ? "—" : n.toLocaleString("en-US") + " cr";
   const confClass = (c) => c === "verified" ? "conf-verified" : c === "contested" ? "conf-contested" : "conf-probable";
   const confLabel = (c) => c === "verified" ? "✅ verified" : c === "contested" ? "⚠️ contested" : "🟡 probable";
@@ -247,7 +274,7 @@
           <span class="conf conf-probable">${covered}/${total} slots covered · ${ownedCount} owned</span>
         </div>
         <div style="overflow-x:auto;margin-top:8px"><table class="cov-table">
-          <thead><tr><th></th>${disciplines.map((d) => `<th>${DISCIPLINE_LABEL[d] || d}</th>`).join("")}</tr></thead>
+          <thead><tr><th></th>${disciplines.map((d) => `<th>${DISCIPLINE_LABEL[d] || d}${DISCIPLINE_TUNING[d] ? `<span class="col-tune">${DISCIPLINE_TUNING[d]}</span>` : ""}</th>`).join("")}</tr></thead>
           <tbody>${rows}</tbody></table></div>
         <p class="why" style="margin:8px 0 0">🟩 owned · 🟨 pick exists, not owned yet · dim = GAP (no evidenced pick — research needed). ↗ = cross-class build backed by leaderboard evidence, not the car's home class. Click a cell to filter the cards below.</p>
       </div>`;
@@ -344,11 +371,11 @@
         <dt>Drivetrain</dt><dd>${c.drivetrain_stock} stock → ${c.recommended_drivetrain}</dd>
         <dt>Power split</dt><dd>${c.power_split || "—"}</dd>
         <dt>Price</dt><dd>${fmtCr(c.price_credits)}${c.price_note ? `<br><span class="why" style="font-size:12px">${c.price_note}</span>` : ""}</dd>
-        ${c.acquisition_difficulty ? `<dt>Get it</dt><dd><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span>${c.acquisition ? `<br><span class="why" style="font-size:12px">${c.acquisition}</span>` : ""}${c.easy_alternative ? `<br><span class="why" style="font-size:12px"><strong>Easy alternative:</strong> ${c.easy_alternative}</span>` : ""}</dd>` : ""}
+        ${c.acquisition_difficulty ? `<dt>Get it</dt><dd><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}" title="${(c.acquisition || "").replace(/"/g, "&quot;")}">${acqDot(c.acquisition_difficulty)} ${acqMethod(c)}</span></dd>` : ""}
         ${c.tunes && c.tunes.length ? `<dt>Tunes</dt><dd>${c.tunes.map(tuneLine).join("")}${c.alt_tune_note ? `<div style="font-size:11px;color:var(--warn);margin-top:4px">⚠️ ${c.alt_tune_note}</div>` : ""}</dd>` : (c.alt_tune_note ? `<dt>Tunes</dt><dd><div style="font-size:11px;color:var(--warn)">⚠️ ${c.alt_tune_note}</div></dd>` : "")}
-        <dt>Acquisition</dt><dd>${c.acquisition || "—"}</dd>
         <dt>Value rating</dt><dd>${c.value_rating}/10</dd>
       </dl>
+      ${c.easy_alternative ? `<h3>Easier alternative</h3><p class="why">${c.easy_alternative}</p>` : ""}
       <h3>Why this car</h3>
       <p class="why">${c.why}</p>
       ${c.leaderboard_meta ? `<h3>Leaderboard reality check (2026-07-11)</h3><p class="fh6note">${c.leaderboard_meta}</p>` : ""}

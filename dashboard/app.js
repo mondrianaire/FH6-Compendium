@@ -134,6 +134,24 @@
     return { primary, signals: sig };
   }
 
+  // ---- tune resolution: bind a tune to EVERY recommendation (car-specific code, else class+format template) ----
+  const TMPL_BY_DISC = { road: "Road", touge_street: "Touge", dirt_rally: "Dirt", cross_country: "Cross", drag: "Drag" };
+  function pickTemplate(disc) {
+    const k = TMPL_BY_DISC[disc]; if (!k) return null;
+    return ((DB.tuningTemplates && DB.tuningTemplates.templates) || []).find((t) => (t.label || "").includes(k)) || null;
+  }
+  function resolveTune(c) {
+    const cur = curatedCode(c);
+    if (cur && cur.code) return { level: "car", code: cur.code, source: cur.src || "community", note: cur.note };
+    const m = matchTuneCode(c.name);
+    if (m) return { level: "car", code: m.code, source: "53Rain " + m.cls };
+    const disc = (c.disciplines || [])[0];
+    const tmpl = pickTemplate(disc);
+    if (tmpl) return { level: "template", discipline: disc, tmpl };
+    return null;
+  }
+  const tuneChip = (c) => { const t = resolveTune(c); return !t ? "" : t.level === "car" ? "🔑 car code" : `📋 ${DISCIPLINE_LABEL[t.discipline] || "format"} template`; };
+
   // ---- owned-car tracking (localStorage — user state stays local; data/*.json stays facts-only) ----
   const OWNED_KEY = "fh6_owned_cars";
   let owned = {};
@@ -307,7 +325,7 @@
       <div class="card-row"><span>${c.class} class · ${c.recommended_drivetrain}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
       ${c.acquisition_difficulty ? `<div class="card-row"><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></div>` : ""}
       <div class="value-bar"><span style="width:${c.value_rating * 10}%"></span></div>
-      <div class="chips">${c.disciplines.map((d) => `<span class="chip">${DISCIPLINE_LABEL[d] || d}</span>`).join("")}</div>
+      <div class="chips"><span class="chip">${tuneChip(c)}</span>${c.disciplines.map((d) => `<span class="chip">${DISCIPLINE_LABEL[d] || d}</span>`).join("")}</div>
     `;
     el.addEventListener("click", () => openModal(c));
     return el;
@@ -388,6 +406,19 @@
       ${c.easy_alternative ? `<h3>Easier alternative</h3><p class="why">${c.easy_alternative}</p>` : ""}
       <h3>Why this car</h3>
       <p class="why">${c.why}</p>
+      ${(() => {
+        const t = resolveTune(c);
+        if (!t) return "";
+        if (t.level === "car") return `<h3>Recommended tune <span class="conf conf-probable">🟡 mildly verified</span></h3>
+          <div class="share"><code>${t.code}</code> — car-specific · ${t.source}${t.note ? " · " + t.note : ""}</div>
+          <p class="why" style="font-size:11px;margin-top:4px">From a reputable community source — verify in-game (Find Tuning Setups).</p>`;
+        const tm = t.tmpl;
+        const settings = Object.entries(tm.template || {}).slice(0, 8).map(([k, v]) => `<div class="var-line"><span>${k.replace(/_/g, " ")}</span><span class="rng" style="max-width:60%;white-space:normal;text-align:right">${v}</span></div>`).join("");
+        return `<h3>Recommended tune <span class="conf conf-contested">📋 ${DISCIPLINE_LABEL[t.discipline] || t.discipline} template</span></h3>
+          <p class="why" style="font-size:13px">No car-specific published code sourced yet — start from the <strong>${DISCIPLINE_LABEL[t.discipline] || t.discipline}</strong> baseline (matched to this car's class &amp; format, not car-specific):</p>
+          <div>${settings}</div>
+          <p class="why" style="font-size:11px">${tm.tune_sourcing || "Full template + how-to in the Tuning tab."}</p>`;
+      })()}
       ${c.leaderboard_meta ? `<h3>Leaderboard reality check (2026-07-11)</h3><p class="fh6note">${c.leaderboard_meta}</p>` : ""}
       ${c.disciplines_note ? `<p class="fh6note">${c.disciplines_note}</p>` : ""}
       ${c.also_viable_in && c.also_viable_in.length ? `

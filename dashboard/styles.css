@@ -99,6 +99,9 @@ button.ghost:hover { border-color: var(--accent); }
 /* coverage-matrix header: tuning-attribute subtitle */
 .cov-table th { vertical-align: top; }
 .col-tune { display: block; font-weight: 400; font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.25; max-width: 130px; white-space: normal; }
+.cov-table td { vertical-align: top; }
+.cell-top { font-weight: 600; }
+.cell-alt { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
 /* tune codes table */
 input[type="text"] { background: var(--bg3); color: var(--txt); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; min-width: 200px; }

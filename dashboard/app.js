@@ -246,6 +246,15 @@
       (b.value_rating - a.value_rating) ||
       ((a.price_credits ?? Infinity) - (b.price_credits ?? Infinity)))[0] || null;
   }
+  // top-N ranked picks for a slot (multi-car, not just the single best)
+  function topForSlot(d, cl, n) {
+    const tierRank = { S: 0, A: 1, B: 2 };
+    return cars.filter((c) => fitsSlot(c, d, cl)).sort((a, b) =>
+      (tuneMetaRank(a) - tuneMetaRank(b)) ||
+      (tierRank[a.tier] - tierRank[b.tier]) ||
+      (b.value_rating - a.value_rating) ||
+      ((a.price_credits ?? Infinity) - (b.price_credits ?? Infinity))).slice(0, n || 3);
+  }
 
   function drawMatrix() {
     const host = document.getElementById("covMatrix");
@@ -254,14 +263,15 @@
     const total = CLASS_ORDER.length * disciplines.length;
     const rows = CLASS_ORDER.map((cl) => {
       const cells = disciplines.map((d) => {
-        const pick = bestForSlot(d, cl);
+        const picks = topForSlot(d, cl, 3);
+        const pick = picks[0];
         if (pick) { covered++; if (isOwned(pick.id)) ownedCount++; }
         const cellClass = !pick ? "cov-gap" : isOwned(pick.id) ? "cov-owned" : "cov-have";
-        const viaNote = pick && !(expandClass(pick.class).includes(cl) && pick.disciplines.includes(d)) ? " ↗" : "";
-        const label = pick ? `${pick.name}${viaNote}${isOwned(pick.id) ? " ✓" : ""}${codeTip(pick.name, pick)}` : "—";
-        const title = pick
-          ? `${pick.year} ${pick.name} (tier ${pick.tier}${viaNote ? ", cross-class build — see card for evidence" : ""})${isOwned(pick.id) ? " — owned" : ""}`
-          : "GAP: no evidenced competitive pick in the database yet";
+        const nm = (p) => `${p.name}${!(expandClass(p.class).includes(cl) && p.disciplines.includes(d)) ? " ↗" : ""}${isOwned(p.id) ? " ✓" : ""}`;
+        const label = pick
+          ? `<div class="cell-top">${nm(pick)}${codeTip(pick.name, pick)}</div>${picks.slice(1).map((p) => `<div class="cell-alt">${nm(p)}${codeTip(p.name, p)}</div>`).join("")}`
+          : "—";
+        const title = pick ? `Top picks: ${picks.map((p) => `${p.year} ${p.name} (${p.tier})`).join("  ·  ")}` : "GAP: no evidenced pick in the database yet";
         return `<td class="${cellClass}" data-d="${d}" data-cl="${cl}" title="${title}">${label}</td>`;
       }).join("");
       return `<tr><th>${cl}</th>${cells}</tr>`;
@@ -276,7 +286,7 @@
         <div style="overflow-x:auto;margin-top:8px"><table class="cov-table">
           <thead><tr><th></th>${disciplines.map((d) => `<th>${DISCIPLINE_LABEL[d] || d}${DISCIPLINE_TUNING[d] ? `<span class="col-tune">${DISCIPLINE_TUNING[d]}</span>` : ""}</th>`).join("")}</tr></thead>
           <tbody>${rows}</tbody></table></div>
-        <p class="why" style="margin:8px 0 0">🟩 owned · 🟨 pick exists, not owned yet · dim = GAP (no evidenced pick — research needed). ↗ = cross-class build backed by leaderboard evidence, not the car's home class. Click a cell to filter the cards below.</p>
+        <p class="why" style="margin:8px 0 0">Each cell shows the <strong>top ~3 picks</strong> (bold = best, then runners-up). 🟩 owned · 🟨 pick exists, not owned yet · dim = GAP. ↗ = cross-class build backed by leaderboard evidence. Click a cell for the full ranked list below.</p>
       </div>`;
     host.querySelectorAll("td[data-d]").forEach((td) =>
       td.addEventListener("click", () => {
@@ -1026,6 +1036,40 @@
     search.focus();
   }
 
+  // ---- where to find good tunes ----
+  function buildTuners() {
+    const t = DB.tuners;
+    if (!t) return;
+    const host = document.getElementById("tunersContent");
+    const sheets = t.tuners.filter((x) => x.kind === "sheet");
+    const gts = t.tuners.filter((x) => x.kind === "gamertag");
+    host.innerHTML = `
+      <div class="block" style="border-color:var(--warn)">
+        <h3 style="margin-top:0">Why the in-game tune finder misleads you</h3>
+        <p class="why">${t.the_gap}</p>
+      </div>
+      <div class="block">
+        <h3>How to actually find a good tune</h3>
+        <ol class="why">${t.how_to_find.map((s) => `<li>${s}</li>`).join("")}</ol>
+      </div>
+      <h3 style="margin-top:20px">Trusted tuners with public sheets <span class="conf conf-probable">ingestible</span></h3>
+      <div class="card-grid">
+        ${sheets.map((s) => `
+          <div class="car-card" style="cursor:default">
+            <div class="card-row" style="margin-top:0"><span class="badge tm-road">SHEET</span><span class="conf ${confClass(s.confidence)}">${confLabel(s.confidence)}</span></div>
+            <h3 style="font-size:15px">${s.name}</h3>
+            <p class="why" style="margin:6px 0">${s.specialty}</p>
+            ${s.sheet_url ? `<a href="${s.sheet_url}" target="_blank" style="color:var(--accent2);font-size:13px">open sheet ↗</a>` : ""}
+          </div>`).join("")}
+      </div>
+      <h3 style="margin-top:20px">Trusted tuners — search their gamertag in the Tune Browser</h3>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Gamertag</th><th>Known for</th></tr></thead>
+        <tbody>${gts.map((g) => `<tr><td><strong>${g.name}</strong></td><td class="why" style="font-size:13px">${g.specialty}</td></tr>`).join("")}</tbody>
+      </table></div>
+      <p class="why" style="font-size:12px;margin-top:10px">${t.note} Source: <a href="${t.source_url}" target="_blank" style="color:var(--accent2)">${t.source}</a></p>`;
+  }
+
   // ---- init ----
   render();
   buildProgress();
@@ -1036,6 +1080,7 @@
   buildRivals();
   buildDrift();
   buildEliminator();
+  buildTuners();
   const allCodesBtn = document.getElementById("allCodesBtn");
   if (allCodesBtn) allCodesBtn.addEventListener("click", openTuneCodesOverlay);
 })();

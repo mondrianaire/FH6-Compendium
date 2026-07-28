@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "captured": "2026-07-28",
+  "source": "r/ForzaHorizon6 'comprehensive list of good tuners' (via web.archive.org 2026-06-21 snapshot) + comments",
+  "source_url": "https://www.reddit.com/r/ForzaHorizon6/comments/1ttog2h/",
+  "disclaimer": "Tuner names + their public spreadsheets are facts extracted from a community post; long Google-doc IDs were transcribed from an archived screenshot and should be verified against the source post. Verify any share code in-game before trusting.",
+  "the_gap": "The in-game Tune Browser sorts by DOWNLOADS / recency, which rewards early + popular uploads, not the best tune. That's why 'top' in-game tunes often differ from the ones enthusiasts post online. The fix is to pull tunes BY CREATOR (known good tuners) rather than by download count.",
+  "how_to_find": [
+    "In Upgrade & Tune → Find Tuning Setups, search by the CREATOR's gamertag (from the trusted roster below), not just 'most downloaded'.",
+    "Or use a tuner's public spreadsheet — they list exact share codes per car/class (like 53Rain's, already imported here).",
+    "Match the tune STYLE to yourself: 'purist' = drivable, wins lobbies, not the outright fastest; 'meta' = fastest but twitchy; 'power/accel' = lower handling, you have to actually drive it. Controller players usually want purist/drivable.",
+    "VERIFY it: run the event's Rivals leaderboard and hotlap against the top clean ghost — if their tune is shared, download it directly."
+  ],
+  "tuners": [
+    { "name": "53Rain", "kind": "sheet", "specialty": "General, all classes (B/A/S1) — already imported into this app", "sheet_url": "https://docs.google.com/spreadsheets/d/19sGnavfTsp3iPYN_OnNmPBW87I0Pz2ODuNFFhZgaU8g", "confidence": "verified" },
+    { "name": "GBR Ozzy", "kind": "sheet", "specialty": "Very comprehensive general tune sheet", "sheet_url": "https://docs.google.com/spreadsheets/d/1FQ29uIAWVEJDT41sx9bEoqz0BGLpOi9MdA2hp0uzP9w", "confidence": "probable" },
+    { "name": "aTTaX Johnson Racing", "kind": "sheet", "specialty": "General tune sheet", "sheet_url": "https://docs.google.com/spreadsheets/d/1F3xqy6yodUmnuua08YU-fet4KDDolbaoNZRiZ9U8yxk", "confidence": "probable" },
+    { "name": "kleis", "kind": "sheet", "specialty": "General tune sheet", "sheet_url": "https://docs.google.com/spreadsheets/d/1Lv3OzABIpX8_vlXS5zuOXMmrBVhpuLsU", "confidence": "probable" },
+    { "name": "LogikJ", "kind": "sheet", "specialty": "FH6 SEASONAL sheet (updated per Playlist series)", "sheet_url": "https://docs.google.com/spreadsheets/d/1ZDLQ1Jg6E6VWfMZUZX-GWflVRl75xSYPj4NHUYwZnLo", "confidence": "probable" },
+    { "name": "OxGRIDRUNR", "kind": "sheet", "specialty": "DRIFT tunes", "sheet_url": "https://docs.google.com/spreadsheets/d/1CRKW7Kmpqz7AZeNDD4WL4A9CoT-ldFRFPOaxTFLYzMY", "confidence": "probable" },
+    { "name": "Noa Miyako", "kind": "sheet", "specialty": "General (QQ doc, CN); highly-downloaded in-game tunes", "sheet_url": "https://docs.qq.com/sheet/DYWZVRWR0dnh3aHhZ", "confidence": "probable" },
+    { "name": "SilvaSUPERBEE", "kind": "gamertag", "specialty": "Purist builds for American cars — not the fastest but win lobbies if not vs meta", "sheet_url": null, "confidence": "probable" },
+    { "name": "Grandma Driving", "kind": "gamertag", "specialty": "Power/accel builds with lower handling — you drive the car", "sheet_url": null, "confidence": "probable" },
+    { "name": "DonJoewonSong", "kind": "gamertag", "specialty": "Easy-to-drive tunes (slightly slower than meta)", "sheet_url": null, "confidence": "probable" },
+    { "name": "Isuckatdriving", "kind": "gamertag", "specialty": "Top tuner; uses Xbox controller", "sheet_url": null, "confidence": "probable" },
+    { "name": "Howzer", "kind": "gamertag", "specialty": "Controller-friendly tunes", "sheet_url": null, "confidence": "probable" },
+    { "name": "K1Z Gray (uwu RV12)", "kind": "gamertag", "specialty": "Noted for a Charger R/T B-class touge tune", "sheet_url": null, "confidence": "probable" }
+  ],
+  "note": "The full Reddit post lists dozens more trusted gamertags — search any of them in the in-game Tune Browser. The sheet-maintainers above are the ingestible ones (GBR Ozzy, LogikJ seasonal, and OxGRIDRUNR drift are the best expansion candidates after 53Rain)."
+}

@@ -19,6 +19,7 @@ const db = {
   driftGuide: read("drift-guide.json"),
   tuneCodes: read("tune-codes.json"),
   tuneRaw: read("tune-raw.json"),
+  tuners: read("tuners.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

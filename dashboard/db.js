@@ -728,7 +728,16 @@ window.FH6_DB = {
           "forza-fandom",
           "forzafire-drivetrain"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "tunes": [
+          {
+            "code": "139 397 763",
+            "surface": "sourced",
+            "source": "ForzaTunes (Klaufromgod)",
+            "confidence": "sourced-unverified",
+            "note": "B Street-Racing (road) AWD build. 🟡 digits from index — verify in-game."
+          }
+        ]
       },
       {
         "id": "golf-r-2014",
@@ -814,7 +823,16 @@ window.FH6_DB = {
           "games.gg",
           "forza-guide-meta"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "tunes": [
+          {
+            "code": "574 092 301",
+            "surface": "sourced",
+            "source": "codmunity (K1Z Jumpy)",
+            "confidence": "sourced-unverified",
+            "note": "S1 800 road build (201 mph / 2.28s). 🟡 verify digits in-game."
+          }
+        ]
       },
       {
         "id": "bmw-m5-2022",
@@ -888,7 +906,16 @@ window.FH6_DB = {
         ],
         "acquisition_difficulty": "premium",
         "easy_alternative": "For a free S2 road car, the Mercedes-AMG One (FH5 loyalty, free) — or any Autoshow S2.",
-        "alt_tune_note": "Car Pass DLC only. Without it, use the easy alternative Mercedes-AMG One (free FH5 loyalty) with ITS own road tune (see amg-one-2021 tunes) — the Gemera's tunes can't be applied without the Gemera."
+        "alt_tune_note": "Car Pass DLC only. Without it, use the easy alternative Mercedes-AMG One (free FH5 loyalty) with ITS own road tune (see amg-one-2021 tunes) — the Gemera's tunes can't be applied without the Gemera.",
+        "tunes": [
+          {
+            "code": "155 872 916",
+            "surface": "sourced",
+            "source": "codmunity (KillerSpectre21)",
+            "confidence": "sourced-unverified",
+            "note": "Purist S2 900 road. 🟡 verify digits in-game."
+          }
+        ]
       },
       {
         "id": "amg-one-2021",
@@ -926,6 +953,13 @@ window.FH6_DB = {
         ],
         "acquisition_difficulty": "easy",
         "tunes": [
+          {
+            "code": "161 681 721",
+            "surface": "sourced",
+            "source": "codmunity (ESV Mars)",
+            "confidence": "sourced-unverified",
+            "note": "Road S2 900. 🟡 verify digits in-game."
+          },
           {
             "method": "In-game Tune Browser > 2021 Mercedes-AMG One > filter Surface = Road > sort by rating > download top. This is the free (FH5-loyalty) alternative to the DLC-gated Gemera for S2 road.",
             "surface": "road",
@@ -1032,7 +1066,16 @@ window.FH6_DB = {
           "gamingpromax",
           "grindnstrat"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "tunes": [
+          {
+            "code": "151 784 979",
+            "surface": "sourced",
+            "source": "ForzaFire (Hades4u)",
+            "confidence": "sourced-unverified",
+            "note": "Built B600 dirt/cross — right car+surface; ADAPT PI to A. Page-verified code."
+          }
+        ]
       },
       {
         "id": "impreza-22b-sti",
@@ -1089,7 +1132,16 @@ window.FH6_DB = {
           "forza-guide-meta"
         ],
         "acquisition_difficulty": "easy",
-        "price_note": "PATCH 2026-07-13 (official notes, Bug 4388342): price 'adjusted to better reflect the value of the car' - the 86,000 cr figure PREDATES this and the new price is not yet confirmed (direction unstated; a legendary rally icon likely went UP). VERIFY IN-GAME - this is the skill-farm rebuy car, so the farm's economics may have changed."
+        "price_note": "PATCH 2026-07-13 (official notes, Bug 4388342): price 'adjusted to better reflect the value of the car' - the 86,000 cr figure PREDATES this and the new price is not yet confirmed (direction unstated; a legendary rally icon likely went UP). VERIFY IN-GAME - this is the skill-farm rebuy car, so the farm's economics may have changed.",
+        "tunes": [
+          {
+            "code": "282 820 649",
+            "surface": "sourced",
+            "source": "ForzaTunes",
+            "confidence": "sourced-unverified",
+            "note": "S1 rally build — right car+surface; ADAPT PI to A. Page-verified code."
+          }
+        ]
       },
       {
         "id": "lancer-evo-2004",
@@ -1260,7 +1312,16 @@ window.FH6_DB = {
         ],
         "acquisition_difficulty": "premium",
         "easy_alternative": "For cross-country without paying: Subaru BRZ FE (aftermarket spawn at Sotoyama Ski Resort, medium), or an Autoshow off-road pick.",
-        "alt_tune_note": "VIP-DLC only. Without it, use the easy alternative Subaru BRZ FE (aftermarket spawn) with ITS own cross-country tune (see brz-fe-2022 tunes) — the Viper FE's tunes can't be applied without the Viper FE."
+        "alt_tune_note": "VIP-DLC only. Without it, use the easy alternative Subaru BRZ FE (aftermarket spawn) with ITS own cross-country tune (see brz-fe-2022 tunes) — the Viper FE's tunes can't be applied without the Viper FE.",
+        "tunes": [
+          {
+            "code": "157 911 408",
+            "surface": "sourced",
+            "source": "ForzaFire (Hades4u)",
+            "confidence": "sourced-unverified",
+            "note": "S2 dirt/cross build — right surface; ADAPT PI to S1. Page-verified code."
+          }
+        ]
       },
       {
         "id": "can-am-maverick-2018",
@@ -1695,7 +1756,16 @@ window.FH6_DB = {
         "use_case": "S2 touge - obtainable time-attack special; also the R-touge budget stopgap when upgraded",
         "confidence": "verified",
         "easy_alternative": "Lamborghini Essenza SCV12 - 1,500,000 cr Autoshow; consensus 'best overall S2' pick, more of an open-circuit car.",
-        "class": "S2"
+        "class": "S2",
+        "tunes": [
+          {
+            "code": "172 235 182",
+            "surface": "sourced",
+            "source": "community (WTAC build)",
+            "confidence": "sourced-unverified",
+            "note": "S2 WTAC grip / road-attack. 🟡 provenance video — verify in-game."
+          }
+        ]
       },
       {
         "tune_baseline": null,
@@ -1729,7 +1799,16 @@ window.FH6_DB = {
         "use_case": "R-class touge king - the Road Racing Journal grind's payoff",
         "confidence": "verified",
         "easy_alternative": "Porsche Cayman GT3 WTAC - 180,000 cr Autoshow, upgraded from S2 856 into R; the stopgap while you grind the Journal.",
-        "class": "R"
+        "class": "R",
+        "tunes": [
+          {
+            "code": "127 465 833",
+            "surface": "sourced",
+            "source": "community (grip/time-attack)",
+            "confidence": "sourced-unverified",
+            "note": "R grip / road build. 🟡 provenance video — verify in-game."
+          }
+        ]
       },
       {
         "tune_baseline": null,
@@ -1766,7 +1845,16 @@ window.FH6_DB = {
         "use_case": "C-class dirt - the boards' pick, probably already in your garage",
         "confidence": "verified",
         "easy_alternative": "Toyota Celica GT-Four ST205 '94 - 27,000 cr Autoshow (also a starter-car choice); AWD WRC pedigree.",
-        "class": "C"
+        "class": "C",
+        "tunes": [
+          {
+            "code": "155 767 670",
+            "surface": "sourced",
+            "source": "ForzaFire (Hades4u)",
+            "confidence": "sourced-unverified",
+            "note": "A700 cross-country build — off-road; ADAPT to C dirt. Page-verified code."
+          }
+        ]
       },
       {
         "tune_baseline": null,
@@ -1875,7 +1963,16 @@ window.FH6_DB = {
         "use_case": "One 21k microcar covers BOTH C and A drag slots",
         "confidence": "verified",
         "easy_alternative": "Reliant Supervan III - 39,000 cr; game8's other low-class drag pick if the P50 is too silly.",
-        "class": "C"
+        "class": "C",
+        "tunes": [
+          {
+            "code": "531 816 165",
+            "surface": "sourced",
+            "source": "Dexerto wiki",
+            "confidence": "sourced-unverified",
+            "note": "Speed tune (drag-adjacent). Reputable wiki — verify in-game."
+          }
+        ]
       },
       {
         "tune_baseline": null,

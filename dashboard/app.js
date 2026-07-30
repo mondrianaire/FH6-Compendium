@@ -1029,6 +1029,45 @@
           <p class="why" style="margin:4px 0 0"><strong>Fix:</strong> ${m.fix}</p>
         </div>`).join("")}`;
 
+    // Touge-appropriate codes: no pass-specific tunes exist, but touge shares the technical-tarmac meta,
+    // so surface the best grip/purist ROAD tunes proven on tight technical circuits, filtered to each pass's class.
+    const TOUGE_CLASSES = ["B", "A", "S1", "S2"];
+    const eventsByClass = {};
+    ((g.events && g.events.list) || []).forEach((e) => { (eventsByClass[e.class] = eventsByClass[e.class] || []).push(e.name); });
+    function tougeCodesForClass(cls, n = 4) {
+      return POOL.filter((t) => t.class === cls && t.discipline === "road")
+        .map((t) => {
+          const txt = [t.focus, t.notes, t.build].join(" ");
+          let s = 0;
+          if (/circuit|narai|juku|shirakawa|legend island|coastline|\b\d{2}\.\d\b/i.test(txt)) s += 5; // proven on a technical circuit (map + laptime)
+          if (/purist|grip/i.test(txt)) s += 3;
+          if (/allround|road/i.test(txt)) s += 1;
+          if (META_CREATORS.has((t.creator || "").toLowerCase())) s += 2;
+          return { t, s };
+        })
+        .filter((o) => o.s > 0)
+        .sort((a, b) => b.s - a.s)
+        .slice(0, n).map((o) => o.t);
+    }
+    const tougeCodes = `
+      <h3 style="margin-top:24px">🔑 Touge-appropriate tune codes <span class="conf conf-probable">🟡 circuit-derived</span></h3>
+      <p class="why">There are <strong>no tunes for the touge passes themselves</strong> — but touge shares the technical-tarmac meta, so these are the best transferable codes from the ${POOL.length}-tune pool: <strong>grip / purist road tunes proven on tight technical circuits</strong> (Narai Juku, Shirakawa…), filtered to each pass's class. A strong starting point — then bias slightly further toward corner-exit for a downhill pass.</p>
+      ${TOUGE_CLASSES.map((cls) => {
+        const picks = tougeCodesForClass(cls, 4);
+        if (!picks.length) return "";
+        const evs = (eventsByClass[cls] || []).join(", ");
+        return `<div class="block">
+          <h4 style="margin:0 0 8px">${clsBadge(cls)}${evs ? ` <span class="why">${evs}</span>` : ""}</h4>
+          <div style="overflow-x:auto"><table>
+            <thead><tr><th>Car</th><th>Code</th><th>Tuner</th><th>Proven on</th></tr></thead>
+            <tbody>${picks.map((t) => `<tr>
+              <td>${t.car}</td><td><code>${t.code}</code></td>
+              <td class="why">${t.creator || t.source}${META_CREATORS.has((t.creator || "").toLowerCase()) ? ' <span class="badge tier-S" style="font-size:9px">curated</span>' : ""}</td>
+              <td class="why" style="font-size:12px">${t.focus || ""}</td></tr>`).join("")}</tbody>
+          </table></div>
+        </div>`;
+      }).join("")}`;
+
     const tuners = g.tuners_codes ? `
       <div class="block" style="border-color:var(--warn);margin-top:24px">
         <h3 style="margin-top:0">🔑 Tunes for touge ${conf(g.tuners_codes.confidence)}</h3>
@@ -1044,7 +1083,7 @@
 
     host.innerHTML = `
       <p class="hint">${g.meta_disclaimer}</p>
-      ${overview}${events}${metaCars}${build}${technique}${overtaking}${settings}${mistakes}${tuners}${research}`;
+      ${overview}${events}${metaCars}${build}${technique}${overtaking}${settings}${mistakes}${tougeCodes}${tuners}${research}`;
   }
 
   // ---- drift guide ----

@@ -960,26 +960,34 @@
         <h3 style="margin-top:0">What Touge is ${conf(ov.confidence)}</h3>
         <p class="why">${ov.what}</p>
         <p class="why"><strong>How it differs:</strong> ${ov.how_it_differs}</p>
+        ${ov.leaderboard_note ? `<p class="fh6note"><strong>Leaderboards:</strong> ${ov.leaderboard_note}</p>` : ""}
         ${ov.reported_unconfirmed ? `<p class="fh6note">🟡 ${ov.reported_unconfirmed}</p>` : ""}
       </div>`;
 
+    const dirTag = (d) => /^downhill/.test(d) ? '<span class="conf conf-probable">↓ downhill</span>' : /unverified/.test(d) ? '<span class="conf conf-contested">? dir.</span>' : `<span class="why">${d}</span>`;
     const events = g.events ? `
       <div class="block">
         <h3>The touge events ${conf(g.events.confidence)}</h3>
         <p class="fh6note">${g.events.note}</p>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>Pass</th><th>Region</th><th>Class</th><th>Length</th></tr></thead>
-          <tbody>${g.events.list.map((e) => `<tr><td>${e.name}</td><td class="why">${e.region}</td><td>${clsBadge(e.class)} <span class="why" style="font-size:11px">≤${e.cap}</span></td><td class="why">${e.length_mi} mi</td></tr>`).join("")}</tbody>
-        </table></div>
+        ${g.events.list.map((e) => `
+          <div style="border-top:1px solid var(--line);padding-top:8px;margin-top:8px">
+            <div class="card-row" style="margin-top:0"><h4 style="margin:0">${e.name} ${clsBadge(e.class)} <span class="why" style="font-size:11px">≤${e.cap} · ${e.length_mi}mi · ${e.laps || 1} lap · ${e.region}</span></h4>${dirTag(e.direction || "")}</div>
+            <p class="why" style="margin:4px 0 0"><strong>Character:</strong> ${e.character}</p>
+            ${e.unlock ? `<p class="why" style="font-size:12px;margin:3px 0 0"><strong>Find it:</strong> ${e.unlock}</p>` : ""}
+            ${e.lean ? `<p class="why" style="font-size:12px;margin:3px 0 0"><strong>Build lean</strong> ${conf(e.lean_confidence || "inference")}: ${e.lean}</p>` : ""}
+          </div>`).join("")}
       </div>` : "";
 
     const metaCars = `
       <h3 style="margin-top:24px">🏁 Meta cars by class</h3>
+      ${g.meta_cars_note ? `<p class="why">${g.meta_cars_note}</p>` : ""}
+      ${g.drivetrain_verdict ? `<p class="fh6note"><strong>Drivetrain verdict:</strong> ${g.drivetrain_verdict}</p>` : ""}
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Class</th><th>Car</th><th>Why</th><th></th></tr></thead>
+        <thead><tr><th>Class</th><th>Car</th><th>DT</th><th>Why</th><th></th></tr></thead>
         <tbody>${g.meta_cars.map((c) => `<tr>
           <td>${clsBadge(c.class)}</td>
-          <td>${c.year} ${c.manufacturer} ${c.model}${codeTip(c.manufacturer + " " + c.model, { class: c.class, disciplines: ["touge_street"] })}</td>
+          <td>${c.year ? c.year + " " : ""}${c.manufacturer} ${c.model}${codeTip(c.manufacturer + " " + c.model, { class: c.class, disciplines: ["touge_street"] })}</td>
+          <td class="why" style="font-size:11px">${c.drivetrain || ""}</td>
           <td class="why" style="font-size:12px">${c.why}</td>
           <td>${conf(c.confidence)}</td></tr>`).join("")}</tbody>
       </table></div>`;
@@ -1068,11 +1076,28 @@
         </div>`;
       }).join("")}`;
 
-    const tuners = g.tuners_codes ? `
-      <div class="block" style="border-color:var(--warn);margin-top:24px">
-        <h3 style="margin-top:0">🔑 Tunes for touge ${conf(g.tuners_codes.confidence)}</h3>
-        <p class="why">${g.tuners_codes.note}</p>
-        <ul class="why">${g.tuners_codes.tuners.map((t) => `<li><strong>${t.name}</strong> — ${t.note}</li>`).join("")}</ul>
+    const codes = g.codes ? `
+      <h3 style="margin-top:24px">🔑 Actual touge tunes</h3>
+      <div class="block" style="border-color:var(--warn)">
+        <p class="why" style="margin-top:0"><strong>No verified codes exist</strong> — ${g.codes.why_no_verified_codes}</p>
+      </div>
+      ${(g.codes.attributed_unverified && g.codes.attributed_unverified.length) ? `
+        <h4 style="margin:16px 0 6px">Attributed, single-source, untested <span class="conf conf-probable">🟡 verify in-game</span></h4>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Class</th><th>Car</th><th>Code</th><th>By</th><th>Note</th></tr></thead>
+          <tbody>${g.codes.attributed_unverified.map((c) => `<tr>
+            <td>${clsBadge(c.class)}</td><td>${c.car}</td>
+            <td><code>${c.code}</code></td><td class="why">${c.tuner}</td>
+            <td class="why" style="font-size:12px">${c.why}</td></tr>`).join("")}</tbody>
+        </table></div>` : ""}
+      ${(g.codes.resources && g.codes.resources.length) ? `
+        <h4 style="margin:16px 0 6px">Where to find touge tunes / boards</h4>
+        <ul class="why">${g.codes.resources.map((r) => `<li><strong>${r.name}</strong> — ${r.note}</li>`).join("")}</ul>` : ""}` : "";
+
+    const consensus = g.community_consensus ? `
+      <div class="block" style="margin-top:24px">
+        <h3 style="margin-top:0">🗣️ Community consensus</h3>
+        <p class="why">${g.community_consensus}</p>
       </div>` : "";
 
     const research = g.research_state ? `
@@ -1083,7 +1108,7 @@
 
     host.innerHTML = `
       <p class="hint">${g.meta_disclaimer}</p>
-      ${overview}${events}${metaCars}${build}${technique}${overtaking}${settings}${mistakes}${tougeCodes}${tuners}${research}`;
+      ${overview}${events}${metaCars}${build}${technique}${overtaking}${settings}${mistakes}${codes}${tougeCodes}${consensus}${research}`;
   }
 
   // ---- drift guide ----

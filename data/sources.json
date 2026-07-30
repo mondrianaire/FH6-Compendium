@@ -694,7 +694,7 @@
     ]
   },
   "distrusted_copyclusters": {
-    "note": "SEO/AI-content-farm sites flagged during the 2026-07-30 touge research as a single copy-cluster (identical phrasing) masquerading as independent corroboration, plus auto-generated tune calculators. Treat any one of them as ONE community-origin source at best; never trust their PI/class values or tune numbers. gamingpromax specifically parrots stale FH5-era PI (e.g. WRX STI A 822) impossible under FH6 caps.",
+    "note": "SEO/AI-content-farm sites flagged during the 2026-07-30 touge research as a single copy-cluster (identical phrasing) masquerading as independent corroboration, plus auto-generated tune calculators. Treat any one of them as ONE community-origin source at best; never trust their PI/class values or tune numbers. gamingpromax specifically parrots stale FH5-era PI (e.g. WRX STI A 822) impossible under FH6 caps. [2026-07-30 touge deep-dive: added pixelnitro (misfiles pass classes), fh6guide.org, dialed-racing.com auto-calculator, + unvetted leads].",
     "added": "2026-07-30",
     "sites": [
       "gamingpromax.com (class placements only — parrots FH5 PI)",
@@ -705,7 +705,13 @@
       "runescape3money.com",
       "starcitizenguides.net",
       "forza.tools (auto-calculator, unattributed)",
-      "xmodhub.com"
+      "xmodhub.com",
+      "pixelnitro.com (misfiles FH6 pass classes)",
+      "fh6guide.org (auto-generated, no attribution)",
+      "dialed-racing.com (auto-calculator)",
+      "allthings.how",
+      "switchbladegaming.com",
+      "techwiser.com"
     ]
   }
 }

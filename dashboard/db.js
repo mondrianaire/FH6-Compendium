@@ -8423,9 +8423,9 @@ window.FH6_DB = {
         "manufacturer": "BMW",
         "model": "M2 Competition Coupe",
         "year": 2020,
-        "rarity": null,
-        "meta_note": "Sport coupe; competitive-ish A/S1. Single-source membership (destructoid) — verify",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Sport coupe; competitive-ish A/S1. Single-source membership (destructoid) — verify [rarity garage-verified]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Casey Currie Motorsports",
@@ -8439,9 +8439,9 @@ window.FH6_DB = {
         "manufacturer": "Chevrolet",
         "model": "Corvette",
         "year": 1960,
-        "rarity": null,
-        "meta_note": "Classic; collector",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Classic; collector [rarity garage-verified]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Dodge",
@@ -8479,9 +8479,9 @@ window.FH6_DB = {
         "manufacturer": "Ferrari",
         "model": "F355 Berlinetta",
         "year": 1994,
-        "rarity": null,
-        "meta_note": "Classic supercar; collector. Not in game8 (destructoid+racinggames)",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Classic supercar; collector. Not in game8 (destructoid+racinggames) [rarity garage-verified]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Jaguar",
@@ -8495,9 +8495,9 @@ window.FH6_DB = {
         "manufacturer": "Mercedes-AMG",
         "model": "GT 4-Door Coupé",
         "year": 2018,
-        "rarity": null,
-        "meta_note": "Performance sedan; road",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Performance sedan; road [rarity garage-verified]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Mercedes-Benz",
@@ -8535,17 +8535,17 @@ window.FH6_DB = {
         "manufacturer": "Toyota",
         "model": "Sports 800",
         "year": 1965,
-        "rarity": null,
-        "meta_note": "Classic kei; collector. Not in game8 (destructoid+racinggames)",
-        "confidence": "unknown"
+        "rarity": "Rare",
+        "meta_note": "Classic kei; collector. Not in game8 (destructoid+racinggames) [rarity garage-verified]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Toyota",
         "model": "Soarer 2.5 GT-T",
         "year": 1997,
-        "rarity": null,
-        "meta_note": "Drift/collector. Membership single-source (racinggames); year corrected to 1997 to match garage",
-        "confidence": "unknown"
+        "rarity": "Rare",
+        "meta_note": "Drift/collector. Membership single-source (racinggames); year corrected to 1997 to match garage [rarity garage-verified]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Ford",
@@ -8567,9 +8567,9 @@ window.FH6_DB = {
         "manufacturer": "Ford",
         "model": "M-Sport Fiesta RS",
         "year": 2017,
-        "rarity": null,
-        "meta_note": "Rally car; competitive rally/off-road",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Rally car; competitive rally/off-road [rarity garage-verified]",
+        "confidence": "verified"
       }
     ]
   },

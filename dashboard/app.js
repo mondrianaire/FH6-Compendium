@@ -704,16 +704,51 @@
       </div>`;
     const roadTracks = rt.tracks.filter((t) => t.discipline === "road");
     const dragTracks = rt.tracks.filter((t) => t.discipline === "drag");
+
+    // ---- meta-inferred per-track picks (until a leaderboard capture upgrades a track) ----
+    // Best road-meta cars, biased by the track's speed profile, each bound to a real pool tune code.
+    const tierRank = { S: 0, A: 1, B: 2 };
+    function metaPicksForTrack(t, n = 3) {
+      const prof = t.speed_profile || "";
+      const tech = /technical/.test(prof), fast = /high-speed|fast/.test(prof);
+      return cars.filter((c) => (c.disciplines || []).includes("road"))
+        .map((c) => {
+          let bias = 0;
+          const touge = (c.disciplines || []).includes("touge_street");
+          if (tech && touge) bias -= 1;      // technical layout → favour handling/touge cars
+          if (fast && !touge) bias -= 1;      // fast layout → favour speed-biased cars
+          return { c, bias };
+        })
+        .sort((x, y) => (x.bias - y.bias) || (tuneMetaRank(x.c) - tuneMetaRank(y.c)) ||
+          ((tierRank[x.c.tier] ?? 9) - (tierRank[y.c.tier] ?? 9)) || (y.c.value_rating - x.c.value_rating))
+        .slice(0, n).map((o) => o.c);
+    }
+    function pickLine(c) {
+      const t = resolveTune(c);
+      const code = t && t.code
+        ? ` — <code>${t.code}</code> <span class="why" style="font-size:11px">${t.creator || t.source || ""}</span>`
+        : ` — <span class="why" style="font-size:11px">no bound code; pick a ROAD tune in the 🔑 browser</span>`;
+      return `<li>${c.name} <span class="badge tier-${c.tier}">${c.class}</span>${code}</li>`;
+    }
+    function metaInferredBlock(t) {
+      const picks = metaPicksForTrack(t, 3);
+      if (!picks.length) return "";
+      return `<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px">
+        <p class="why" style="margin:0 0 4px"><strong>Meta-inferred picks</strong> <span class="conf conf-probable">🟡 not board-verified</span> — top road-meta cars for this ${t.speed_profile || "road"} layout, each bound to a real tune code from the ingested pool. Verify at your race class; a leaderboard capture upgrades this to board-verified.</p>
+        <ul class="why" style="margin:4px 0 0">${picks.map(pickLine).join("")}</ul>
+      </div>`;
+    }
+
     const roadCards = roadTracks.map((t) => {
       const done = t.status === "analyzed" && (t.class_analyses || []).length;
       const body = done ? t.class_analyses.map(analysis).join("")
-        : `<p class="why" style="color:var(--warn)">⏳ Awaiting leaderboard — send an in-game Rivals screenshot for this event + the class you race, and I'll fill in the board read, car, acquisition & tune source.</p>`;
-      return card(t, body, done ? { cls: "conf-verified", txt: "✅ analyzed" } : { cls: "conf-probable", txt: "scaffold" });
+        : `<p class="why" style="color:var(--warn)">⏳ No board capture yet — send an in-game Rivals screenshot for this event + your race class to upgrade to a board-verified read.</p>${metaInferredBlock(t)}`;
+      return card(t, body, done ? { cls: "conf-verified", txt: "✅ board-verified" } : { cls: "conf-probable", txt: "🟡 meta-inferred" });
     }).join("");
     const dragCards = dragTracks.map((t) => card(t, dragBody(t), { cls: "conf-verified", txt: "✅ template-driven" })).join("");
     const roadDone = roadTracks.filter((t) => t.status === "analyzed").length;
-    const summary = `<div class="block"><h3>Road Racing Rivals — ${roadDone}/${roadTracks.length} analyzed</h3>
-      <p class="why">${rt.scaffold_todo || ""}</p>
+    const summary = `<div class="block"><h3>Road Racing Rivals — ${roadDone}/${roadTracks.length} board-verified</h3>
+      <p class="why">Every track shows <strong>meta-inferred picks</strong> (best road-meta car + a real tune code from the ${(DB.tunerSheets && DB.tunerSheets.tunes.length) || 0}-tune pool) right now; a leaderboard screenshot upgrades a track to <strong>board-verified</strong> (the actual most-represented clean-lap car). ${rt.scaffold_todo || ""}</p>
       <p class="why" style="font-size:12px;color:var(--muted)">${rt.scope || ""}</p></div>`;
     const dragSummary = dragTracks.length ? `<div class="block"><h3>Drag Rivals — ${dragTracks.length}/${dragTracks.length} ✅ complete (template-driven)</h3>
       <p class="why">${(rt.drag_module && rt.drag_module.note) || ""}</p></div>` : "";

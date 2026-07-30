@@ -14,7 +14,7 @@
   "tuners": [
     { "name": "53Rain", "kind": "sheet", "specialty": "General, all classes (B/A/S1) — already imported into this app", "sheet_url": "https://docs.google.com/spreadsheets/d/19sGnavfTsp3iPYN_OnNmPBW87I0Pz2ODuNFFhZgaU8g", "confidence": "verified" },
     { "name": "GBR Ozzy", "kind": "sheet", "specialty": "Very comprehensive general tune sheet", "sheet_url": "https://docs.google.com/spreadsheets/d/1FQ29uIAWVEJDT41sx9bEoqz0BGLpOi9MdA2hp0uzP9w", "confidence": "probable" },
-    { "name": "aTTaX Johnson Racing", "kind": "sheet", "specialty": "General tune sheet", "sheet_url": "https://docs.google.com/spreadsheets/d/1F3xqy6yodUmnuua08YU-fet4KDDolbaoNZRiZ9U8yxk", "confidence": "probable" },
+    { "name": "aTTaX Johnson Racing", "kind": "sheet", "specialty": "General tune sheet", "sheet_url": "https://docs.google.com/spreadsheets/d/1F3xqy6yodUmnuua08YU-fet4KDDoIbaoNZRiZ9U8yxk", "confidence": "probable" },
     { "name": "kleis", "kind": "sheet", "specialty": "General tune sheet", "sheet_url": "https://docs.google.com/spreadsheets/d/1Lv3OzABIpX8_vlXS5zuOXMmrBVhpuLsU", "confidence": "probable" },
     { "name": "LogikJ", "kind": "sheet", "specialty": "FH6 SEASONAL sheet (updated per Playlist series)", "sheet_url": "https://docs.google.com/spreadsheets/d/1ZDLQ1Jg6E6VWfMZUZX-GWflVRl75xSYPj4NHUYwZnLo", "confidence": "probable" },
     { "name": "OxGRIDRUNR", "kind": "sheet", "specialty": "DRIFT tunes", "sheet_url": "https://docs.google.com/spreadsheets/d/1CRKW7Kmpqz7AZeNDD4WL4A9CoT-ldFRFPOaxTFLYzMY", "confidence": "probable" },

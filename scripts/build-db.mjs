@@ -22,6 +22,7 @@ const db = {
   tuners: read("tuners.json"),
   ownedCars: read("owned-cars.json"),
   wheelspinCars: read("wheelspin-cars.json"),
+  tunerSheets: read("tuner-sheets.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

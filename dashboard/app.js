@@ -156,7 +156,9 @@
   const OWNED_KEY = "fh6_owned_cars";
   let owned = {};
   try { owned = JSON.parse(localStorage.getItem(OWNED_KEY)) || {}; } catch (e) { owned = {}; }
-  const isOwned = (id) => !!owned[id];
+  // seeded from the real garage read (owned-cars.json) — these show owned by default; localStorage adds more
+  const SEED_OWNED = new Set((DB.ownedCars && DB.ownedCars.owned_meta_ids) || []);
+  const isOwned = (id) => !!owned[id] || SEED_OWNED.has(id);
   function setOwned(id, val) {
     if (val) owned[id] = true; else delete owned[id];
     try { localStorage.setItem(OWNED_KEY, JSON.stringify(owned)); } catch (e) { /* private mode: state won't persist */ }

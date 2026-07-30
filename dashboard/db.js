@@ -5615,6 +5615,2514 @@ window.FH6_DB = {
     ],
     "note": "The full Reddit post lists dozens more trusted gamertags — search any of them in the in-game Tune Browser. The sheet-maintainers above are the ingestible ones (GBR Ozzy, LogikJ seasonal, and OxGRIDRUNR drift are the best expansion candidates after 53Rain)."
   },
+  "ownedCars": {
+    "schema_version": "1.0.0",
+    "captured": "2026-07-29",
+    "owner": "PwnyS1aystation",
+    "total_in_game": 281,
+    "source": "in-game My Cars screen-read (research/garage-capture.md) + screenshots/ backup",
+    "cars": [
+      {
+        "manufacturer": "Subaru",
+        "model": "Impreza 22B-STi Version",
+        "year": 1998,
+        "class": "S2",
+        "pi": "898",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Abarth",
+        "model": "124 Spider",
+        "year": 2017,
+        "class": "C",
+        "pi": "450",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Abarth",
+        "model": "595 Esseesse",
+        "year": 1968,
+        "class": "S1",
+        "pi": "800",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Abarth",
+        "model": "Fiat 131",
+        "year": 1980,
+        "class": "D",
+        "pi": "399",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Acura",
+        "model": "NSX Type S",
+        "year": 2022,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Acura",
+        "model": "RSX Type S",
+        "year": 2002,
+        "class": "C",
+        "pi": "462",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Acura",
+        "model": "Integra Type R",
+        "year": 2001,
+        "class": "C",
+        "pi": "471",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Alfa Romeo",
+        "model": "Giulia Quadrifoglio",
+        "year": 2017,
+        "class": "A",
+        "pi": "667",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Alfa Romeo",
+        "model": "4C",
+        "year": 2014,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Alfa Romeo",
+        "model": "8C Competizione",
+        "year": 2007,
+        "class": "A",
+        "pi": "635",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Alfa Romeo",
+        "model": "155 Q4",
+        "year": 1992,
+        "class": "C",
+        "pi": "439",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Alfa Romeo",
+        "model": "Giulia Sprint GTA Stradale",
+        "year": 1965,
+        "class": "D",
+        "pi": "379",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Alumicraft",
+        "model": "#6165 Trick Truck",
+        "year": 2022,
+        "class": "C",
+        "pi": "485",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Alumicraft",
+        "model": "Class 10 Race Car",
+        "year": 2015,
+        "class": "B",
+        "pi": "532",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "AMG Transport Dynamics",
+        "model": "M12S Warthog CST",
+        "year": 2554,
+        "class": "A",
+        "pi": "663",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ariel",
+        "model": "Nomad",
+        "year": 2016,
+        "class": null,
+        "pi": null,
+        "rarity": "",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Ariel",
+        "model": "Atom 500 V8",
+        "year": 2013,
+        "class": "S2",
+        "pi": "825",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS e-tron GT",
+        "year": 2021,
+        "class": "A",
+        "pi": "677",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS 7 Sportback",
+        "year": 2021,
+        "class": "A",
+        "pi": "655",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS 3 Sedan",
+        "year": 2020,
+        "class": "A",
+        "pi": "617",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS 4 Avant",
+        "year": 2018,
+        "class": "A",
+        "pi": "637",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "S1",
+        "year": 2015,
+        "class": "B",
+        "pi": "527",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS 5 Coupé",
+        "year": 2011,
+        "class": "A",
+        "pi": "613",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS 3 Sportback",
+        "year": 2011,
+        "class": "B",
+        "pi": "565",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "TT RS Coupé",
+        "year": 2010,
+        "class": "B",
+        "pi": "593",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS 4",
+        "year": 2006,
+        "class": "B",
+        "pi": "593",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "RS 4 Avant",
+        "year": 2001,
+        "class": "B",
+        "pi": "544",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "#2 Audi Sport Quattro S1",
+        "year": 1986,
+        "class": "S1",
+        "pi": "726",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Austin-Healey",
+        "model": "3000 MKIII",
+        "year": 1965,
+        "class": "D",
+        "pi": "352",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Bentley",
+        "model": "Continental GT Convertible",
+        "year": 2021,
+        "class": "A",
+        "pi": "649",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "X6 M Competition",
+        "year": 2024,
+        "class": "S1",
+        "pi": "800",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "Z4 Roadster",
+        "year": 2019,
+        "class": "A",
+        "pi": "634",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "X5 M",
+        "year": 2011,
+        "class": "B",
+        "pi": "546",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M3",
+        "year": 2005,
+        "class": "B",
+        "pi": "554",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M5 CS",
+        "year": 2022,
+        "class": "S1",
+        "pi": "730",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M4 GTS",
+        "year": 2016,
+        "class": "S1",
+        "pi": "711",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M3",
+        "year": 2008,
+        "class": "A",
+        "pi": "699",
+        "rarity": "Common; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M5",
+        "year": 2003,
+        "class": "B",
+        "pi": "580",
+        "rarity": "Common; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M2 Competition Coupé",
+        "year": 2020,
+        "class": "A",
+        "pi": "656",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "i8",
+        "year": 2015,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M3",
+        "year": 1997,
+        "class": "B",
+        "pi": "549",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M5",
+        "year": 1995,
+        "class": "B",
+        "pi": "516",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M5",
+        "year": 1988,
+        "class": "C",
+        "pi": "469",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "Isetta 300 Export",
+        "year": 1957,
+        "class": "D",
+        "pi": "100",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Cadillac",
+        "model": "CT5-V Blackwing",
+        "year": 2022,
+        "class": "S1",
+        "pi": "701",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Cadillac",
+        "model": "CT4-V Blackwing",
+        "year": 2022,
+        "class": "A",
+        "pi": "650",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Cadillac",
+        "model": "ATS-V",
+        "year": 2016,
+        "class": "A",
+        "pi": "601",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Cadillac",
+        "model": "XTS Limousine",
+        "year": 2013,
+        "class": "B",
+        "pi": "518",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Can-Am",
+        "model": "Maverick X RS Turbo R",
+        "year": 2018,
+        "class": "B",
+        "pi": "568",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette Z06",
+        "year": 2023,
+        "class": "S1",
+        "pi": "763",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette Stingray Coupe",
+        "year": 2020,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Camaro ZL1 1LE",
+        "year": 2018,
+        "class": "S1",
+        "pi": "728",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette Z06",
+        "year": 2002,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Impala Super Sport",
+        "year": 1996,
+        "class": "C",
+        "pi": "407",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette ZR-1",
+        "year": 1995,
+        "class": "B",
+        "pi": "576",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Monte Carlo Super Sport",
+        "year": 1988,
+        "class": "D",
+        "pi": "282",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Impala Super Sport",
+        "year": 1964,
+        "class": "C",
+        "pi": "427",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Camaro Z28",
+        "year": 1979,
+        "class": "D",
+        "pi": "364",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette",
+        "year": 1960,
+        "class": "C",
+        "pi": "428",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette ZR-1",
+        "year": 1970,
+        "class": "C",
+        "pi": "497",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Datsun",
+        "model": "510",
+        "year": 1970,
+        "class": "D",
+        "pi": "143",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "De Tomaso",
+        "model": "Pantera GT5",
+        "year": 1984,
+        "class": "B",
+        "pi": "562",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "DeBerti",
+        "model": "Performance Truck",
+        "year": 2019,
+        "class": "S1",
+        "pi": "717",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Challenger SRT Super Stock",
+        "year": 2022,
+        "class": "A",
+        "pi": "695",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Charger Daytona Hemi",
+        "year": 1969,
+        "class": "C",
+        "pi": "479",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Challenger SRT Demon",
+        "year": 2018,
+        "class": "A",
+        "pi": "678",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Charger R/T",
+        "year": 1969,
+        "class": "C",
+        "pi": "417",
+        "rarity": "Treasure Car",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Viper GTS ACR",
+        "year": 1999,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "FXX-K Evo",
+        "year": 2018,
+        "class": "R",
+        "pi": "957",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "812 Superfast",
+        "year": 2017,
+        "class": "S1",
+        "pi": "780",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "F12TDF",
+        "year": 2015,
+        "class": "S1",
+        "pi": "788",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "458 Speciale",
+        "year": 2013,
+        "class": "S1",
+        "pi": "768",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "F50",
+        "year": 1995,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "Dino 246 GT",
+        "year": 1969,
+        "class": "C",
+        "pi": "428",
+        "rarity": "Epic; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "599XX Evolution",
+        "year": 2012,
+        "class": "S2",
+        "pi": "894",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "F355 Berlinetta",
+        "year": 1994,
+        "class": "B",
+        "pi": "588",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "599XX",
+        "year": 2010,
+        "class": "S2",
+        "pi": "840",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "250 GTO",
+        "year": 1962,
+        "class": "S1",
+        "pi": "800",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Mustang Dark Horse",
+        "year": 2024,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Fiesta ST",
+        "year": 2023,
+        "class": "C",
+        "pi": "500",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Focus ST",
+        "year": 2022,
+        "class": "B",
+        "pi": "594",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Super Duty F-450",
+        "year": 2020,
+        "class": "R",
+        "pi": "929",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "GT",
+        "year": 2017,
+        "class": "S1",
+        "pi": "757",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "#14 Rahal Letterman Mustang RTR",
+        "year": 2017,
+        "class": "S1",
+        "pi": "772",
+        "rarity": "Epic; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "M-Sport Fiesta RS",
+        "year": 2017,
+        "class": "S1",
+        "pi": "707",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Focus RS",
+        "year": 2017,
+        "class": "B",
+        "pi": "588",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Mustang Shelby GT350R",
+        "year": 2016,
+        "class": "S1",
+        "pi": "721",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "FPV Limited Edition Pursuit",
+        "year": 2014,
+        "class": "B",
+        "pi": "563",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Mustang Shelby GT500",
+        "year": 2013,
+        "class": "S1",
+        "pi": "715",
+        "rarity": "Rare; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Crown Victoria Police Interceptor",
+        "year": 2010,
+        "class": "D",
+        "pi": "354",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Mustang SVT Cobra R",
+        "year": 2000,
+        "class": "B",
+        "pi": "528",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Escort RS Cosworth",
+        "year": 1992,
+        "class": "S1",
+        "pi": "720",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "F-150 XLT Lariat",
+        "year": 1986,
+        "class": "D",
+        "pi": "263",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "GT",
+        "year": 2005,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Treasure Car",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Supervan 3",
+        "year": 1994,
+        "class": "S1",
+        "pi": "740",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Sierra Cosworth RS500",
+        "year": 1987,
+        "class": "C",
+        "pi": "484",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "RS200 Evolution",
+        "year": 1985,
+        "class": "S1",
+        "pi": "710",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Focus RS",
+        "year": 2003,
+        "class": "C",
+        "pi": "484",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Mustang SVT Cobra R",
+        "year": 1993,
+        "class": "C",
+        "pi": "432",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "F-150 XLT Lariat Forza Edition",
+        "year": 1986,
+        "class": "S2",
+        "pi": "850",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "#5 Escort RS1800 MKII",
+        "year": 1977,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Mustang GT 2+2",
+        "year": 1968,
+        "class": "R",
+        "pi": "925",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "De Luxe Five-Window Coupe",
+        "year": 1932,
+        "class": "D",
+        "pi": "100",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Formula Drift",
+        "model": "#64 Forsberg Racing Nissan Z",
+        "year": 2023,
+        "class": "S2",
+        "pi": "885",
+        "rarity": "Epic; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Formula Drift",
+        "model": "#117 599 GTB Fiorano",
+        "year": 2007,
+        "class": "S1",
+        "pi": "767",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "GMC",
+        "model": "Typhoon",
+        "year": 1992,
+        "class": "C",
+        "pi": "435",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "GMC",
+        "model": "Jimmy",
+        "year": 1970,
+        "class": "C",
+        "pi": "500",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Civic Type R",
+        "year": 2023,
+        "class": "A",
+        "pi": "620",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "E",
+        "year": 2022,
+        "class": "D",
+        "pi": "398",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Civic Type R",
+        "year": 2018,
+        "class": "A",
+        "pi": "608",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Civic Type R",
+        "year": 2015,
+        "class": "B",
+        "pi": "585",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "NSX-R",
+        "year": 2005,
+        "class": "B",
+        "pi": "570",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Civic Type R",
+        "year": 2004,
+        "class": "B",
+        "pi": "533",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Prelude Si",
+        "year": 1994,
+        "class": "C",
+        "pi": "410",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Acty",
+        "year": 1994,
+        "class": "D",
+        "pi": "100",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "NSX-R",
+        "year": 1992,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Beat",
+        "year": 1991,
+        "class": null,
+        "pi": null,
+        "rarity": "one per class S1/A/B/C/D",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "City E II",
+        "year": 1984,
+        "class": "D",
+        "pi": "203",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "S2000",
+        "year": 2003,
+        "class": "B",
+        "pi": "503",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Civic Type R",
+        "year": 1997,
+        "class": "C",
+        "pi": "430",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "HSV",
+        "model": "GTS Maloo Limited Edition",
+        "year": 2014,
+        "class": "A",
+        "pi": "629",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "HSV",
+        "model": "Gen-F GTS",
+        "year": 2014,
+        "class": "A",
+        "pi": "601",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Hyundai",
+        "model": "Ioniq 5 N",
+        "year": 2023,
+        "class": "A",
+        "pi": "657",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Hyundai",
+        "model": "Veloster N",
+        "year": 2019,
+        "class": "B",
+        "pi": "532",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Jaguar",
+        "model": "Sport XJR-15",
+        "year": 1991,
+        "class": "S1",
+        "pi": "716",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Jeep",
+        "model": "Grand Cherokee Trackhawk",
+        "year": 2018,
+        "class": "A",
+        "pi": "631",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Jeep",
+        "model": "Trailcat",
+        "year": 2016,
+        "class": "A",
+        "pi": "635",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Lamborghini",
+        "model": "Miura P400",
+        "year": 1967,
+        "class": "B",
+        "pi": "505",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Lancia",
+        "model": "Delta HF Integrale Evo",
+        "year": 1992,
+        "class": "C",
+        "pi": "489",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Lancia",
+        "model": "Delta S4",
+        "year": 1986,
+        "class": "B",
+        "pi": "600",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Lancia",
+        "model": "Stratos HF Stradale",
+        "year": 1974,
+        "class": "C",
+        "pi": "483",
+        "rarity": "Treasure Car",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Land Rover",
+        "model": "Range Rover Sport SVR",
+        "year": 2015,
+        "class": "A",
+        "pi": "604",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Lexus",
+        "model": "RC F",
+        "year": 2015,
+        "class": "A",
+        "pi": "623",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Lincoln",
+        "model": "Continental",
+        "year": 1962,
+        "class": "D",
+        "pi": "267",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Lucid",
+        "model": "Air Sapphire",
+        "year": 2024,
+        "class": "S2",
+        "pi": "820",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Maserati",
+        "model": "MC20",
+        "year": 2022,
+        "class": "S1",
+        "pi": "753",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Maserati",
+        "model": "MC12",
+        "year": 2004,
+        "class": "S1",
+        "pi": "800",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Maserati",
+        "model": "Ghibli Cup",
+        "year": 1997,
+        "class": "B",
+        "pi": "591",
+        "rarity": "Rare; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "MX-5 Cup",
+        "year": 2017,
+        "class": "B",
+        "pi": "586",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "Mazdaspeed MX-5",
+        "year": 2005,
+        "class": "C",
+        "pi": "469",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "MX-5 Miata",
+        "year": 1994,
+        "class": "B",
+        "pi": "600",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "RX-3",
+        "year": 1973,
+        "class": "D",
+        "pi": "328",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "MX-5",
+        "year": 2013,
+        "class": "C",
+        "pi": "432",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "MX-5 Miata Forza Edition",
+        "year": 1994,
+        "class": "S2",
+        "pi": "900",
+        "rarity": "Forza Edition; multiple copies",
+        "fe": true,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "RX-7 Type R",
+        "year": 1992,
+        "class": "B",
+        "pi": "548",
+        "rarity": "Rare; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "Mazdaspeed 3",
+        "year": 2010,
+        "class": "B",
+        "pi": "536",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "McLaren",
+        "model": "Artura",
+        "year": 2023,
+        "class": "S1",
+        "pi": "766",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "McLaren",
+        "model": "570S Coupé",
+        "year": 2015,
+        "class": "S1",
+        "pi": "788",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "McLaren",
+        "model": "Sabre",
+        "year": 2021,
+        "class": "S2",
+        "pi": "900",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "McLaren",
+        "model": "Speedtail",
+        "year": 2019,
+        "class": "S2",
+        "pi": "835",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-AMG",
+        "model": "GT Black Series",
+        "year": 2021,
+        "class": "S1",
+        "pi": "782",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-AMG",
+        "model": "GT S",
+        "year": 2015,
+        "class": "A",
+        "pi": "691",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-AMG",
+        "model": "GT 4-Door Coupé",
+        "year": 2018,
+        "class": "A",
+        "pi": "664",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-AMG",
+        "model": "GT R",
+        "year": 2017,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "X-Class",
+        "year": 2018,
+        "class": "D",
+        "pi": "258",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "AMG CLK GTR",
+        "year": 1998,
+        "class": "S1",
+        "pi": "713",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "G 65 AMG",
+        "year": 2013,
+        "class": "B",
+        "pi": "530",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "190 E 2.5-16 Evolution II",
+        "year": 1990,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "SL 65 AMG Black Series",
+        "year": 2009,
+        "class": "A",
+        "pi": "699",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "MG",
+        "model": "Metro 6R4",
+        "year": 1986,
+        "class": "A",
+        "pi": "685",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mini",
+        "model": "Cooper S",
+        "year": 1965,
+        "class": "D",
+        "pi": "158",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mitsubishi",
+        "model": "Lancer Evolution X GSR",
+        "year": 2008,
+        "class": "B",
+        "pi": "534",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mitsubishi",
+        "model": "Lancer Evolution VIII MR",
+        "year": 2004,
+        "class": "B",
+        "pi": "555",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mitsubishi",
+        "model": "Lancer Evolution VI",
+        "year": 2001,
+        "class": "B",
+        "pi": "574",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mitsubishi",
+        "model": "Lancer Evolution III",
+        "year": 1995,
+        "class": "B",
+        "pi": "517",
+        "rarity": "Treasure Car",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Mitsubishi",
+        "model": "GTO",
+        "year": 1997,
+        "class": "C",
+        "pi": "495",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Z Nismo",
+        "year": 2024,
+        "class": "A",
+        "pi": "652",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "370Z Nismo",
+        "year": 2019,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "GT-R Black Edition R35",
+        "year": 2012,
+        "class": "S1",
+        "pi": "800",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "GT-R Black Edition Forza Edition",
+        "year": 2012,
+        "class": "S2",
+        "pi": "852",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Fairlady Z",
+        "year": 2003,
+        "class": "B",
+        "pi": "534",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Silvia K's Aero",
+        "year": 1998,
+        "class": "C",
+        "pi": "494",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Stagea RS Four V",
+        "year": 1997,
+        "class": "C",
+        "pi": "439",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Figaro",
+        "year": 1991,
+        "class": "D",
+        "pi": "234",
+        "rarity": "Treasure Car",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "S-Cargo Forza Edition",
+        "year": 1989,
+        "class": "S1",
+        "pi": "800",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "BE-1",
+        "year": 1987,
+        "class": "D",
+        "pi": "175",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Gloria Gran Turismo",
+        "year": 1995,
+        "class": "C",
+        "pi": "498",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Pulsar GTI-R",
+        "year": 1990,
+        "class": "C",
+        "pi": "486",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Pao",
+        "year": 1989,
+        "class": "D",
+        "pi": "145",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Safari Turbo",
+        "year": 1985,
+        "class": "D",
+        "pi": "123",
+        "rarity": "Treasure Car",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Silvia K's",
+        "year": 1994,
+        "class": "C",
+        "pi": "499",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Silvia K's",
+        "year": 1989,
+        "class": "S2",
+        "pi": "846",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "S-Cargo",
+        "year": 1989,
+        "class": "D",
+        "pi": "131",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "Skyline 2000GT-R",
+        "year": 1971,
+        "class": "D",
+        "pi": "380",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Opel",
+        "model": "Manta 400",
+        "year": 1984,
+        "class": "B",
+        "pi": "576",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Peel",
+        "model": "P50",
+        "year": 1962,
+        "class": "S1",
+        "pi": "716",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Penhall",
+        "model": "The Cholla",
+        "year": 2011,
+        "class": "B",
+        "pi": "541",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Peugeot",
+        "model": "207 Super 2000",
+        "year": 2007,
+        "class": "A",
+        "pi": "632",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Peugeot",
+        "model": "205 Rallye",
+        "year": 1991,
+        "class": "D",
+        "pi": "350",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Plymouth",
+        "model": "Cuda 426 Hemi",
+        "year": 1971,
+        "class": "C",
+        "pi": "441",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Polaris",
+        "model": "RZR Pro XP Ultimate",
+        "year": 2021,
+        "class": "C",
+        "pi": "496",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Pontiac",
+        "model": "Firebird Trans Am",
+        "year": 1977,
+        "class": "D",
+        "pi": "311",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "911 Rallye",
+        "year": 2023,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "Taycan Turbo S",
+        "year": 2020,
+        "class": "S1",
+        "pi": "725",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "911 GT2 RS",
+        "year": 2018,
+        "class": "S2",
+        "pi": "883",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "Macan LPR Rally Raid",
+        "year": 2018,
+        "class": "B",
+        "pi": "528",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "911 Turbo 3.3",
+        "year": 1982,
+        "class": "B",
+        "pi": "550",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "918 Spyder",
+        "year": 2014,
+        "class": "S2",
+        "pi": "858",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "#3 917 LH Forza Edition",
+        "year": 1970,
+        "class": "X",
+        "pi": "999",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "944 Turbo",
+        "year": 1989,
+        "class": "B",
+        "pi": "539",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Radical",
+        "model": "RXC Turbo",
+        "year": 2015,
+        "class": "S2",
+        "pi": "842",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Ram",
+        "model": "1500 TRX",
+        "year": 2024,
+        "class": "B",
+        "pi": "514",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Reliant",
+        "model": "Supervan III",
+        "year": 1972,
+        "class": "D",
+        "pi": "100",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Renault",
+        "model": "Megane R.S.",
+        "year": 2018,
+        "class": "B",
+        "pi": "547",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Renault",
+        "model": "Megane RS 250",
+        "year": 2010,
+        "class": "B",
+        "pi": "538",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Renault",
+        "model": "Mégane R26.R",
+        "year": 2008,
+        "class": "B",
+        "pi": "561",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Renault",
+        "model": "Clio Williams",
+        "year": 1993,
+        "class": "D",
+        "pi": "400",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Renault",
+        "model": "5 Turbo",
+        "year": 1980,
+        "class": "C",
+        "pi": "417",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "RJ Anderson",
+        "model": "#37 Polaris RZR Pro 2 Truck",
+        "year": 2021,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Saleen",
+        "model": "S7 LM",
+        "year": 2017,
+        "class": "S2",
+        "pi": "835",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Sierra Cars",
+        "model": "RX3",
+        "year": 2021,
+        "class": "A",
+        "pi": "635",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "SRT",
+        "model": "Viper GTS",
+        "year": 2013,
+        "class": "S1",
+        "pi": "800",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "WRX STI ARX Supercar",
+        "year": 2018,
+        "class": "S1",
+        "pi": "744",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "WRX STI",
+        "year": 2015,
+        "class": "B",
+        "pi": "555",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "WRX STI",
+        "year": 2011,
+        "class": "B",
+        "pi": "547",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "Impreza WRX STI",
+        "year": 2008,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "Legacy B4 2.0 GT",
+        "year": 2005,
+        "class": "B",
+        "pi": "549",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "Impreza WRX STI",
+        "year": 2005,
+        "class": "B",
+        "pi": "570",
+        "rarity": "Common; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "Impreza WRX STI",
+        "year": 2004,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Common; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "Vivio RX-R Forza Edition",
+        "year": 1994,
+        "class": "S2",
+        "pi": "900",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "Legacy RS",
+        "year": 1990,
+        "class": "B",
+        "pi": "561",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "GR86",
+        "year": 2022,
+        "class": "B",
+        "pi": "556",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "86",
+        "year": 2013,
+        "class": "C",
+        "pi": "460",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Soarer 2.5 GT-T",
+        "year": 1997,
+        "class": "C",
+        "pi": "491",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "GR Yaris",
+        "year": 2021,
+        "class": "B",
+        "pi": "600",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Crown Super Deluxe",
+        "year": 2005,
+        "class": "D",
+        "pi": "181",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "MR2 GT",
+        "year": 1995,
+        "class": "B",
+        "pi": "522",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "GR Supra",
+        "year": 2020,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Supra RZ",
+        "year": 1998,
+        "class": "B",
+        "pi": "529",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Celica GT-Four ST205",
+        "year": 1994,
+        "class": "C",
+        "pi": "500",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Supra 2.0 GT",
+        "year": 1992,
+        "class": "C",
+        "pi": "453",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "2000GT",
+        "year": 1969,
+        "class": "D",
+        "pi": "377",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Sera",
+        "year": 1991,
+        "class": "D",
+        "pi": "344",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Sports 800",
+        "year": 1965,
+        "class": "D",
+        "pi": "141",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Sprinter Trueno GT Apex AE86",
+        "year": 1985,
+        "class": "D",
+        "pi": "376",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "TVR",
+        "model": "Sagaris",
+        "year": 2005,
+        "class": "A",
+        "pi": "672",
+        "rarity": "Rare; multiple copies",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Ultima",
+        "model": "Evolution Coupe 1020",
+        "year": 2015,
+        "class": "R",
+        "pi": "925",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "Golf GTI 16V MK2",
+        "year": 1992,
+        "class": "D",
+        "pi": "400",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "Golf GTI",
+        "year": 1983,
+        "class": "D",
+        "pi": "314",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "Beetle",
+        "year": 1963,
+        "class": "A",
+        "pi": "672",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Wuling",
+        "model": "Hongguang Mini EV",
+        "year": 2022,
+        "class": "A",
+        "pi": "695",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Wuling",
+        "model": "Sunshine S Forza Edition",
+        "year": 2020,
+        "class": "R",
+        "pi": "998",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "Golf R",
+        "year": 2021,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "Golf R",
+        "year": 2014,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Common; MANY copies — signature car",
+        "fe": false,
+        "multiple_copies": true
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "#34 Andretti Rally Cross Golf",
+        "year": 2017,
+        "class": "S1",
+        "pi": "764",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "Scirocco R",
+        "year": 2011,
+        "class": "B",
+        "pi": "548",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false
+      },
+      {
+        "manufacturer": "Volkswagen",
+        "model": "Corrado VR6",
+        "year": 1995,
+        "class": "C",
+        "pi": "426",
+        "rarity": "Common",
+        "fe": false,
+        "multiple_copies": false
+      }
+    ],
+    "owned_meta_ids": [
+      "golf-r-2021",
+      "golf-r-2014",
+      "nsx-type-s-2022",
+      "bmw-m5-2022",
+      "gr-supra-2020",
+      "wrx-sti-2004",
+      "impreza-22b-sti",
+      "lancer-evo-2004",
+      "focus-rs",
+      "can-am-maverick-2018",
+      "f450-super-duty",
+      "gtr-black-fe-2012",
+      "miata-fe-1994",
+      "honda-beat-1991",
+      "integra-type-r-2001",
+      "fxxk-evo-2018",
+      "civic-type-r-1997",
+      "gmc-jimmy-1970",
+      "supervan-iii-1972",
+      "peel-p50-1962",
+      "mustang-gt-fastback-1968",
+      "charger-rt-1969",
+      "miura-p400-1967",
+      "dino-246-1969",
+      "viper-gts-acr-1999",
+      "m5-e39-2003"
+    ],
+    "ratification_note": "26/48 meta cars owned. 4 fuzzy-match FALSE POSITIVES caught + excluded during ratification 2026-07-29: Nissan GT-R NISMO (own GT-R Black Ed, not R35 Nismo), Mercedes-AMG One (own AMG GT variants), Audi RS 6 (own RS 3/4/5/7/e-tron), Alfa Giulia TZ2 (own Giulia Quadrifoglio + Sprint GTA Stradale)."
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",
@@ -6311,5 +8819,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-07-28"
+  "builtAt": "2026-07-29"
 };

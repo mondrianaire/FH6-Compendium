@@ -449,10 +449,11 @@
       ${(() => {
         const t = resolveTune(c);
         if (!t) return "";
-        if (t.level === "car") return `<h3>Recommended tune <span class="conf conf-probable">🟡 mildly verified</span></h3>
-          <div class="share"><code>${t.code}</code> — car-specific · ${t.source}${t.note ? " · " + t.note : ""}</div>
+        if (t.code) return `<h3>Recommended tune <span class="conf conf-probable">🟡 mildly verified</span></h3>
+          <div class="share"><code>${t.code}</code> — ${t.creator ? t.creator : "car-specific"} · ${t.source || ""}${t.note ? " · " + t.note : ""}</div>
           <p class="why" style="font-size:11px;margin-top:4px">From a reputable community source — verify in-game (Find Tuning Setups).</p>`;
         const tm = t.tmpl;
+        if (!tm) return "";
         const settings = Object.entries(tm.template || {}).slice(0, 8).map(([k, v]) => `<div class="var-line"><span>${k.replace(/_/g, " ")}</span><span class="rng" style="max-width:60%;white-space:normal;text-align:right">${v}</span></div>`).join("");
         return `<h3>Recommended tune <span class="conf conf-contested">📋 ${DISCIPLINE_LABEL[t.discipline] || t.discipline} template</span></h3>
           <p class="why" style="font-size:13px">No car-specific published code sourced yet — start from the <strong>${DISCIPLINE_LABEL[t.discipline] || t.discipline}</strong> baseline (matched to this car's class &amp; format, not car-specific):</p>

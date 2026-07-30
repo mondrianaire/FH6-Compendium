@@ -41983,6 +41983,704 @@ window.FH6_DB = {
       }
     ]
   },
+  "tunerRoster": {
+    "schema_version": "1.0.0",
+    "captured": "2026-07-30",
+    "origin": "Flamesty, r/ForzaHorizon6 — 'My comprehensive list of good tuners and leaderboard/rivals ghosts' (last updated 2026-06-16)",
+    "workflow": "In FH6's Friends & Followed tab you can filter tunes to only these curated tuners, and select their Rivals ghost on a track to study their line/car. Follow via the Xbox app (search the gamertag).",
+    "confidence": "sourced — community-curated roster, not personally verified",
+    "specialty_index": {
+      "drift": [
+        "OxGRIDRUNR",
+        "KoSharko"
+      ],
+      "drag": [
+        "KoSharko",
+        "aiolos5656"
+      ],
+      "pr_stunt": [
+        "RFND Domodel",
+        "SSharku",
+        "trviis",
+        "KoSharko"
+      ],
+      "offroad_dirt": [
+        "KapienPL",
+        "Rocklxd",
+        "BakeMyCupcake",
+        "Cast Haste",
+        "DzevoX",
+        "ghostMan2117",
+        "TheDannny"
+      ],
+      "powerbuilds": [
+        "Pudding n Puff",
+        "Wilfredo OvO",
+        "EGAO no HANA",
+        "Nalak28"
+      ],
+      "seasonal": [
+        "LogikJ",
+        "Saeenu"
+      ],
+      "fwd": [
+        "Ash46Desync",
+        "JSR Chronic",
+        "TPR Hydra"
+      ],
+      "road_street_top_picks": [
+        "LetzeLU",
+        "ESV Mars",
+        "K1Z Bard",
+        "trviis"
+      ],
+      "prolific_high_coverage": [
+        "SlowBakedPanda",
+        "The Whovian Dr"
+      ],
+      "wheel_players": [
+        "|Jimka|"
+      ]
+    },
+    "tools_and_communities": [
+      {
+        "name": "FH6 Tune Finder",
+        "kind": "tool",
+        "platform": "Windows Store app",
+        "by": "ESV Lawrence",
+        "note": "Standalone tune-finder app."
+      },
+      {
+        "name": "Open Tune Discord (OPTN)",
+        "kind": "discord",
+        "note": "Community tuning help."
+      },
+      {
+        "name": "Forza Team Wars Discord",
+        "kind": "discord",
+        "note": "Competitive; home of wheel tuner |Jimka| and admin scaans / owner N7 Matsura."
+      },
+      {
+        "name": "Horizon Racing Academy",
+        "kind": "community",
+        "note": "GT-style license training; under construction as of post date."
+      },
+      {
+        "name": "aTTaX Johnson",
+        "kind": "youtube",
+        "note": "Tuning tutorial videos + own tune sheet."
+      },
+      {
+        "name": "giron228",
+        "kind": "youtube",
+        "note": "Well-regarded tune-guide video."
+      }
+    ],
+    "flamesty_recommendations": {
+      "if_only_a_few_to_follow": [
+        "LetzeLU (road)",
+        "KapienPL (dirt)",
+        "ESV Mars (road)",
+        "K1Z Bard (road)",
+        "trviis (PR stunt)"
+      ],
+      "learn_to_tune_yourself": [
+        "aTTaX Johnson (videos)",
+        "giron228 (videos)",
+        "join Open Tune Discord or Horizon Racing Academy"
+      ],
+      "note": "Most listed players use Xbox controllers; a few (Isuckatdriving/Grandma Driving, K1Z Howzer) are keyboard players."
+    },
+    "gamertags": [
+      {
+        "gt": "Aeroplane7616",
+        "team": "BEan"
+      },
+      {
+        "gt": "AgeraMonokkp",
+        "notes": "Fast cars — Stunt Party / Goliath"
+      },
+      {
+        "gt": "Akatoyaa"
+      },
+      {
+        "gt": "Alafatar",
+        "team": "nuts",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "AMS Carver",
+        "notes": "Unconventional tunes"
+      },
+      {
+        "gt": "AnoNyMe5331",
+        "team": "nuts",
+        "notes": "Top rivals competitor"
+      },
+      {
+        "gt": "Ash46Desync",
+        "notes": "Mainly FWD builds"
+      },
+      {
+        "gt": "ATK Mang0",
+        "team": "*1%*"
+      },
+      {
+        "gt": "aTTaX Johnson",
+        "notes": "YouTuber, own spreadsheet, slightly slower"
+      },
+      {
+        "gt": "AuhgNehzX"
+      },
+      {
+        "gt": "BakeMyCupcake",
+        "notes": "Mainly offroad/dirt"
+      },
+      {
+        "gt": "BIGpoppaKEGdog"
+      },
+      {
+        "gt": "Blu9ty",
+        "team": "BEan",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "BluecarterEX"
+      },
+      {
+        "gt": "Cast Haste",
+        "notes": "Mainly offroad/dirt"
+      },
+      {
+        "gt": "Cirno1X",
+        "notes": "aka PTW Cirno"
+      },
+      {
+        "gt": "coach lbn",
+        "notes": "lowercase L not uppercase i"
+      },
+      {
+        "gt": "CybrexzzZ"
+      },
+      {
+        "gt": "Danx986399",
+        "team": "GRT",
+        "notes": "Competitive team"
+      },
+      {
+        "gt": "DarkZ704"
+      },
+      {
+        "gt": "DEX CODCAOS",
+        "team": "GRT"
+      },
+      {
+        "gt": "Don Joewon Song",
+        "notes": "Comparatively slower but still decent (DJS)"
+      },
+      {
+        "gt": "DzevoX",
+        "notes": "Dirt"
+      },
+      {
+        "gt": "EGAO no HANA",
+        "notes": "Was a powerbuilds tuner"
+      },
+      {
+        "gt": "EgoismG60",
+        "team": "BEan"
+      },
+      {
+        "gt": "ESV Aventra",
+        "team": "ESV",
+        "notes": "Pro tuners/Rivals"
+      },
+      {
+        "gt": "ESV Barcode",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Birdy",
+        "team": "ESV",
+        "notes": "aka vBxrdy"
+      },
+      {
+        "gt": "ESV Boberts",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Green",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Griffin",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Justin",
+        "team": "ESV",
+        "notes": "Streamer"
+      },
+      {
+        "gt": "ESV Kartz",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Lawrence",
+        "team": "ESV",
+        "notes": "Creator of FH6 Tune Finder (Windows store)"
+      },
+      {
+        "gt": "ESV Mars",
+        "team": "ESV",
+        "notes": "Top player, tuner, streamer"
+      },
+      {
+        "gt": "ESV Muzz",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Pav",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Pipes",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Rapture",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Rykker",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Scottsin",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Troot",
+        "team": "ESV",
+        "notes": "Last logged in ~1.5 yrs ago (per comments)"
+      },
+      {
+        "gt": "ESV Vini",
+        "team": "ESV"
+      },
+      {
+        "gt": "ESV Voided",
+        "team": "ESV"
+      },
+      {
+        "gt": "F1R Antoine",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "F1R Ashh",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "F1R Devvo",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "F1R Poproki",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "Fenrir3268",
+        "team": "LDAC"
+      },
+      {
+        "gt": "Flyingdashujun",
+        "team": "ZGC"
+      },
+      {
+        "gt": "furtiveee"
+      },
+      {
+        "gt": "G1THRONE518"
+      },
+      {
+        "gt": "ghostMan2117",
+        "notes": "Dirt"
+      },
+      {
+        "gt": "giron228",
+        "notes": "Nice tune-guide video on YouTube"
+      },
+      {
+        "gt": "GOD T8T"
+      },
+      {
+        "gt": "GoodReiShun"
+      },
+      {
+        "gt": "Grandma Driving",
+        "notes": "aka Isuckatdriving, keyboard player; power/accel builds"
+      },
+      {
+        "gt": "GreetedDust8",
+        "team": "1%"
+      },
+      {
+        "gt": "GRT Kaike",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "GRT PRETO",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "HLundh",
+        "team": "1%"
+      },
+      {
+        "gt": "IceFrice8724"
+      },
+      {
+        "gt": "Inayamei",
+        "team": "1%"
+      },
+      {
+        "gt": "JakeGTR9",
+        "team": "RiZE"
+      },
+      {
+        "gt": "K1ssMyDuck"
+      },
+      {
+        "gt": "K1Z Bala",
+        "team": "K1Z",
+        "notes": "aka balanarus"
+      },
+      {
+        "gt": "K1Z Bard",
+        "team": "K1Z",
+        "notes": "aka vChrono; top road pick"
+      },
+      {
+        "gt": "K1Z Batdca",
+        "team": "K1Z"
+      },
+      {
+        "gt": "K1Z Diogo",
+        "team": "K1Z",
+        "notes": "aka DiogoSilva2004"
+      },
+      {
+        "gt": "K1Z Gray",
+        "team": "K1Z",
+        "notes": "aka uwu rv12; has tunes on LogikJ's sheet"
+      },
+      {
+        "gt": "K1Z Hikari",
+        "team": "K1Z"
+      },
+      {
+        "gt": "K1Z Howzer",
+        "team": "K1Z",
+        "notes": "Alien keyboard player"
+      },
+      {
+        "gt": "K1Z Jeremy",
+        "team": "K1Z"
+      },
+      {
+        "gt": "K1Z Jumpy",
+        "team": "K1Z",
+        "notes": "aka JumpyArdvarkITA"
+      },
+      {
+        "gt": "K1Z Levy",
+        "team": "K1Z",
+        "notes": "Top rivals"
+      },
+      {
+        "gt": "K1Z Rotelia",
+        "team": "K1Z"
+      },
+      {
+        "gt": "K1Z Shinu",
+        "team": "K1Z"
+      },
+      {
+        "gt": "K1Z Suimin",
+        "team": "K1Z"
+      },
+      {
+        "gt": "K1Z XNDR2",
+        "team": "K1Z",
+        "notes": "Top rivals for handling tracks"
+      },
+      {
+        "gt": "KapienPL",
+        "team": "1%",
+        "notes": "OFFROAD LEGEND"
+      },
+      {
+        "gt": "KcnaXii",
+        "team": "nood"
+      },
+      {
+        "gt": "keerj",
+        "team": "BEan"
+      },
+      {
+        "gt": "KilianFirebold",
+        "team": "BEan"
+      },
+      {
+        "gt": "Koarsse",
+        "team": "RiZE"
+      },
+      {
+        "gt": "KoSharko",
+        "notes": "Drag tunes and PR Stunts"
+      },
+      {
+        "gt": "Kril Driving"
+      },
+      {
+        "gt": "LES Aston08",
+        "notes": "Competitive Rivals ghost"
+      },
+      {
+        "gt": "LetzeLU",
+        "team": "1%",
+        "notes": "aka C0RVETTE GS aka VNX Letz; top road pick"
+      },
+      {
+        "gt": "LogikJ",
+        "team": "R3",
+        "notes": "SEASONAL TUNES; own sheet"
+      },
+      {
+        "gt": "lphanhan"
+      },
+      {
+        "gt": "Marethu1",
+        "team": "RFND"
+      },
+      {
+        "gt": "MetalxPhoenix",
+        "team": "1%"
+      },
+      {
+        "gt": "Minnjju",
+        "team": "BEan"
+      },
+      {
+        "gt": "Mustuff124",
+        "team": "ZGC"
+      },
+      {
+        "gt": "Myra Driving"
+      },
+      {
+        "gt": "N7 Matsura",
+        "notes": "Owner of Team Wars"
+      },
+      {
+        "gt": "Nalak28",
+        "team": "1%",
+        "notes": "Streamer"
+      },
+      {
+        "gt": "NDL Avocado",
+        "team": "nood"
+      },
+      {
+        "gt": "NDL Cifer",
+        "team": "nood",
+        "notes": "aka JoeyCifer"
+      },
+      {
+        "gt": "NDL Ramen",
+        "team": "nood",
+        "notes": "aka TopTierRamen"
+      },
+      {
+        "gt": "NDL Samu",
+        "team": "nood"
+      },
+      {
+        "gt": "Noa Miyako",
+        "notes": "Legit popular tuner; own sheet (Tencent Docs)"
+      },
+      {
+        "gt": "Noa Seako"
+      },
+      {
+        "gt": "nyasmowisher"
+      },
+      {
+        "gt": "OnlyNaps",
+        "team": "1%"
+      },
+      {
+        "gt": "OxGRIDRUNR",
+        "team": "RFND",
+        "notes": "DRIFT TUNER; own drift sheet"
+      },
+      {
+        "gt": "ProfessorOW"
+      },
+      {
+        "gt": "PTW AusaX",
+        "team": "P2W*"
+      },
+      {
+        "gt": "PTW Subzero",
+        "team": "P2W*"
+      },
+      {
+        "gt": "Pudding n Puff",
+        "notes": "POWERBUILDS"
+      },
+      {
+        "gt": "QuasarPole"
+      },
+      {
+        "gt": "RazkinzMango",
+        "team": "RiZE"
+      },
+      {
+        "gt": "Rexazr"
+      },
+      {
+        "gt": "RFND Domodel",
+        "team": "RFND",
+        "notes": "PR Stunt tunes"
+      },
+      {
+        "gt": "Rocklxd",
+        "notes": "OFFROAD LEGEND"
+      },
+      {
+        "gt": "Sa1monBark",
+        "team": "ODGA"
+      },
+      {
+        "gt": "Saeenu",
+        "notes": "Used to do seasonal tunes (now LogikJ)"
+      },
+      {
+        "gt": "SakuraMxSPD"
+      },
+      {
+        "gt": "scaans",
+        "notes": "Admin of Team Wars"
+      },
+      {
+        "gt": "SebastianV5X"
+      },
+      {
+        "gt": "SeeyeahBoss",
+        "team": "AcAw"
+      },
+      {
+        "gt": "ShaggyScroll660",
+        "team": "RFND"
+      },
+      {
+        "gt": "SilvaSUPERBEE",
+        "notes": "Purist builds for American cars; can win lobbies"
+      },
+      {
+        "gt": "SlowBakedPanda",
+        "notes": "Tunes A LOT — high chance a car has their tune"
+      },
+      {
+        "gt": "snosaes"
+      },
+      {
+        "gt": "SSharku",
+        "notes": "PR Stunt tunes"
+      },
+      {
+        "gt": "StoryVS TTV",
+        "team": "nuts"
+      },
+      {
+        "gt": "SulexPagMan"
+      },
+      {
+        "gt": "Syokora996"
+      },
+      {
+        "gt": "TachibanaRuis"
+      },
+      {
+        "gt": "TheDannny",
+        "team": "#OPR",
+        "notes": "More offroad than road"
+      },
+      {
+        "gt": "trviis",
+        "team": "nuts",
+        "notes": "PR Stunt and Rivals master; top road pick"
+      },
+      {
+        "gt": "Unimog Driving"
+      },
+      {
+        "gt": "uwu RV12",
+        "notes": "aka K1Z Gray, RV12 enjoyer"
+      },
+      {
+        "gt": "VNX Ruinz",
+        "team": "GRT",
+        "notes": "Top player"
+      },
+      {
+        "gt": "Wa1nutRoyal",
+        "notes": "Top rivals"
+      },
+      {
+        "gt": "WIL Eclipse"
+      },
+      {
+        "gt": "Wilfredo OvO",
+        "notes": "Powerbuild"
+      },
+      {
+        "gt": "wood2GR",
+        "team": "nood"
+      },
+      {
+        "gt": "XSW 4002"
+      },
+      {
+        "gt": "ZaZ490",
+        "team": "BEan"
+      },
+      {
+        "gt": "zoltan rr"
+      },
+      {
+        "gt": "zombiejesus52",
+        "team": "RFND"
+      },
+      {
+        "gt": "JSR Chronic",
+        "notes": "From comments — lower-class FWD cars; Motorsport refugee"
+      },
+      {
+        "gt": "TPR Hydra",
+        "notes": "From comments — formerly WIL Hydra"
+      },
+      {
+        "gt": "The Whovian Dr",
+        "notes": "From comments — active on FH6, 15-20 tunes and growing"
+      },
+      {
+        "gt": "|Jimka|",
+        "notes": "From comments — top Rivals tuner for WHEEL; in Forza Team Wars Discord"
+      }
+    ]
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",

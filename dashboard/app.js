@@ -1205,7 +1205,7 @@
     host.innerHTML = `
       <div class="block" style="margin-top:0">
         <h3 style="margin-top:0">🎰 Wheelspin &amp; Forza Edition cars</h3>
-        <p class="why">These cars <strong>can't be bought</strong> — only won from Wheelspins / Super Wheelspins (RNG) or reward drops, so they're the collectibles worth tracking. Rows show what you <strong>own</strong> vs still <strong>need</strong>. <strong>Meta value</strong> = whether it's a competitive pick (matched against the 48-car meta list). ● dot = source confidence (green cross-source, amber single-source, orange unverified). Community data omits credit values &amp; per-car rarity, so those aren't shown.</p>
+        <p class="why">These cars <strong>can't be bought</strong> — only won from Wheelspins / Super Wheelspins (RNG) or reward drops, so they're the collectibles worth tracking. Rows show what you <strong>own</strong> vs still <strong>need</strong>. <strong>Rarity</strong> is the in-game gem tier (grey Common → blue Rare → purple Epic → gold Legendary → green FE); a <strong>✓</strong> means it's confirmed from your garage, otherwise it's from game8 + forzalabs. <strong>Meta value</strong> = whether it's a competitive pick (matched against the 48-car meta list). ● dot = source confidence. No reliable source publishes credit values, so those aren't shown.</p>
       </div>
 
       <h3>Forza Edition roster — you have ${feHave} / ${fe.length}</h3>

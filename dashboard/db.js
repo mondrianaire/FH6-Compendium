@@ -8609,15 +8609,30 @@ window.FH6_DB = {
         "tuner": "LogikJ",
         "id": "1ZDLQ1Jg6E6VWfMZUZX-GWflVRl75xSYPj4NHUYwZnLo",
         "tabs": [
+          "🛠️LogikJ's Tunes",
           "LogikJ's Tunes - CBA12RD",
           "LogikJ's Tunes - D-R"
         ],
-        "rawTunes": 564
+        "rawTunes": 894
+      },
+      {
+        "tuner": "K1Z Gray",
+        "id": "1ZDLQ1Jg6E6VWfMZUZX-GWflVRl75xSYPj4NHUYwZnLo",
+        "tabs": [
+          "K1Z Gray's Tunes"
+        ],
+        "rawTunes": 77
       }
     ],
+    "not_ingested": [
+      "LogikJ seasonal 'Series 1/2/3 × season' tabs — heavy overlap with the master tune list (dedupe would collapse); event-specific picks only",
+      "LogikJ '🏁Online Racing Tune Picks' + 'aiolos5656 Tunes/Drag' — <5 parseable codes / messy merged layout; low yield",
+      "kleis codes — live in cell hyperlinks that CSV export omits (kept as codeless recommendations)",
+      "Noa Miyako (docs.qq.com) — Tencent Docs, no CSV/gviz API; needs separate DOM scrape"
+    ],
     "counts": {
-      "coded_tunes_raw": 1937,
-      "coded_tunes_unique": 1549,
+      "coded_tunes_raw": 2344,
+      "coded_tunes_unique": 1659,
       "kleis_recommendations": 580
     },
     "tunes": [
@@ -10911,7 +10926,10 @@ window.FH6_DB = {
         "date": "",
         "notes": "",
         "source": "aTTaX Johnson Racing",
-        "tab": "Horizon 6"
+        "tab": "Horizon 6",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Aston Martin Valkyrie",
@@ -10962,7 +10980,10 @@ window.FH6_DB = {
         "date": "",
         "notes": "",
         "source": "aTTaX Johnson Racing",
-        "tab": "Horizon 6"
+        "tab": "Horizon 6",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Honda #21 Hardrace/JDMyard Civic WTAC",
@@ -13216,7 +13237,10 @@ window.FH6_DB = {
         "date": "23/05/2026",
         "notes": "Slick",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Ariel Nomad",
@@ -13347,7 +13371,10 @@ window.FH6_DB = {
         "date": "17/07/2026",
         "notes": "Off-Road",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "Aston Martin DB7 GT",
@@ -13526,7 +13553,10 @@ window.FH6_DB = {
         "date": "23/05/2026",
         "notes": "Slick",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Aston Martin Vulcan",
@@ -19089,7 +19119,10 @@ window.FH6_DB = {
         "date": "07/06/2026",
         "notes": "Rally",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Datsun 2000 Roadster",
@@ -19201,7 +19234,10 @@ window.FH6_DB = {
         "date": "17/07/2026",
         "notes": "Off-Road",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "De Tomaso Pantera GT5",
@@ -19249,7 +19285,10 @@ window.FH6_DB = {
         "date": "17/07/2026",
         "notes": "Standard",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "De Tomaso Pantera GT5",
@@ -20448,7 +20487,10 @@ window.FH6_DB = {
         "date": "29/05/2026",
         "notes": "Slick",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Dodge Viper ACR",
@@ -21381,7 +21423,10 @@ window.FH6_DB = {
         "date": "23/07/2026",
         "notes": "Rally",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "Ferrari 458 Speciale",
@@ -21688,7 +21733,10 @@ window.FH6_DB = {
         "date": "16/07/2026",
         "notes": "Off-Road",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "Ferrari Dino 246 GT",
@@ -22027,7 +22075,10 @@ window.FH6_DB = {
         "date": "15/07/2026",
         "notes": "Off-Road",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "Ferrari F80",
@@ -22059,7 +22110,10 @@ window.FH6_DB = {
         "date": "15/07/2026",
         "notes": "Rally",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Ferrari F80",
@@ -22139,7 +22193,10 @@ window.FH6_DB = {
         "date": "21/06/2026",
         "notes": "Off-Road",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "K1Z Gray"
+        ]
       },
       {
         "car": "Ferrari FXX-K Evo \"Welcome Pack\"",
@@ -22353,7 +22410,10 @@ window.FH6_DB = {
         "date": "23/07/2026",
         "notes": "Off-Road",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "Ferrari Portofino",
@@ -22385,7 +22445,10 @@ window.FH6_DB = {
         "date": "22/07/2026",
         "notes": "Semi-Slick",
         "source": "GBR Ozzy",
-        "tab": "🛠️FH6 Tune List"
+        "tab": "🛠️FH6 Tune List",
+        "also_in": [
+          "LogikJ"
+        ]
       },
       {
         "car": "Ferrari Roma",
@@ -30348,6 +30411,105 @@ window.FH6_DB = {
         "tab": "Sheet1"
       },
       {
+        "car": "1980 Abarth Fiat 131",
+        "class": "C",
+        "code": "851 298 488",
+        "creator": "LogikJ",
+        "focus": "C Dirt Rally AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "15 Jul 26",
+        "notes": "Online, Seasonal Trial Total Rally - Easy to use and good pace · Classic Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1980 Abarth Fiat 131",
+        "class": "B",
+        "code": "863 617 619",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "23 Jul 26",
+        "notes": "Online - Nice and Easy to drive · Classic Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2017 Abarth 124 Spider",
+        "class": "B",
+        "code": "288 301 076",
+        "creator": "LogikJ",
+        "focus": "B Dirt AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "25 Jul 26",
+        "notes": "Online - Allround very easy, decent pace · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2017 Abarth 124 Spider",
+        "class": "B",
+        "code": "138 283 412",
+        "creator": "LogikJ",
+        "focus": "B Road AWD Grip",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "25 Jul 26",
+        "notes": "Online - Very easy grip car · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2017 Abarth 124 Spider",
+        "class": "A",
+        "code": "773 309 331",
+        "creator": "LogikJ",
+        "focus": "Road AWD Full Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "3.2L I6",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "26 Jul 26",
+        "notes": "Online - Nice allround car, easy to use · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2023 Acura Integra A-Spec",
+        "class": "B",
+        "code": "136 216 830",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "18 May 26",
+        "notes": "Online Grip/Handling Tracks · Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
         "car": "2001 Acura Integra Type R",
         "class": "C",
         "code": "850 841 163",
@@ -30361,7 +30523,7 @@ window.FH6_DB = {
         "date": "21 May 26",
         "notes": "Online + Seasonal Easy · Retro Hot Hatch",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -30380,558 +30542,154 @@ window.FH6_DB = {
         "date": "25 May 26",
         "notes": "Online Grip Easy · Retro Hot Hatch",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
       },
       {
-        "car": "1973 BMW 2002 Turbo",
-        "class": "C",
-        "code": "135 809 098",
+        "car": "2014 Alfa Romeo 4C",
+        "class": "A",
+        "code": "201 469 236",
         "creator": "LogikJ",
-        "focus": "C Road/Street Purist WhiteWalls",
+        "focus": "Road Purist Grip Slow",
         "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Vintage WW",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "11 Jun 26",
-        "notes": "Online, Seasonal · Classic Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1973 BMW 2002 Turbo",
-        "class": "C",
-        "code": "923 888 496",
-        "creator": "LogikJ",
-        "focus": "C Road/Street AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "2.0L I4 VVT",
-        "build": "AWD Stock Look",
-        "date": "11 Jun 26",
-        "notes": "Online, Seasonal - Easy + Good Accel · Classic Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1988 BMW M3 (E30)",
-        "class": "C",
-        "code": "711 332 749",
-        "creator": "LogikJ",
-        "focus": "C Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1988 BMW M3 (E30)",
-        "class": "C",
-        "code": "170 326 664",
-        "creator": "LogikJ",
-        "focus": "C Road AWD Online/Seasonal Easy",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "AWD + BMW Aero",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1988 BMW M5 (E28)",
-        "class": "C",
-        "code": "956 083 727",
-        "creator": "LogikJ",
-        "focus": "C Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1988 BMW M5 (E28)",
-        "class": "C",
-        "code": "125 231 664",
-        "creator": "LogikJ",
-        "focus": "C Road AWD Online/Seasonal",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "AWD Full Aero",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Chevrolet Silverado LT Trail Boss",
-        "class": "C",
-        "code": "381 491 293",
-        "creator": "LogikJ",
-        "focus": "C Dirt/CC Strong Offmeta Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "8.4L V10",
-        "build": "Stock Look",
-        "date": "15 Jun 26",
-        "notes": "Online, Rivals, Seasonal - Strong off meta · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1970 Datsun 510",
-        "class": "C",
-        "code": "126 382 786",
-        "creator": "LogikJ",
-        "focus": "C Road/Street Purist Decent",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Street",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "10 Jun 26",
-        "notes": "Online, Seasonal - Decent pace for purist · Classic Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1970 Datsun 510",
-        "class": "C",
-        "code": "149 313 458",
-        "creator": "LogikJ",
-        "focus": "C Road/Street AWD + Aero Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Vintage WW",
-        "engine": "2.0L I4 VVT",
-        "build": "AWD FA No Widebody",
-        "date": "10 Jun 26",
-        "notes": "Online, Seasonal - Strong accel · Classic Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Ford Escort RS Cosworth",
-        "class": "C",
-        "code": "166 822 072",
-        "creator": "LogikJ",
-        "focus": "C Dirt Rally Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal - Easy to drive · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1999 Ford Racing Puma",
-        "class": "C",
-        "code": "120 782 412",
-        "creator": "LogikJ",
-        "focus": "C Dirt Rally AWD",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD Stock Look",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal - Strong - Momentum car · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
-        "class": "C",
-        "code": "157 524 421",
-        "creator": "LogikJ",
-        "focus": "C Dirt/CC Rivals Meta Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "8.4L V10",
-        "build": "Stock Look",
-        "date": "7 Jun 26",
-        "notes": "Rivals Meta, Use handbrake to help turn in · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Ford Super Duty F-450 DRW PLATINUM Forza Edition",
-        "class": "C",
-        "code": "100 319 101",
-        "creator": "LogikJ",
-        "focus": "C Dirt/CC Slow but Easy - Shift @ 3700 RPM",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "5.0L V8 Turbo Diesel",
-        "build": "Open Bed 26in Rims",
-        "date": "22 Jun 26",
-        "notes": "No accel or top end, shift before redline to maximize diesel. Best for circuits · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1970 GMC Jimmy",
-        "class": "C",
-        "code": "718 851 410",
-        "creator": "LogikJ",
-        "focus": "Dirt/CC Qualifier",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "15 May 26",
-        "notes": "Qualifiers Offroad · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 GMC Typhoon",
-        "class": "C",
-        "code": "107 883 506",
-        "creator": "LogikJ",
-        "focus": "C Dirt/CC Strong Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist + Rear Rim Profile",
-        "date": "1 Jun 26",
-        "notes": "Online, Rivals, Seasonal · Sports Utility Heroes",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1986 Honda Civic SI",
-        "class": "C",
-        "code": "140 151 099",
-        "creator": "LogikJ",
-        "focus": "C Road/Street Grip Easy",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "1.6L I4 VVT",
-        "build": "Stock Look",
-        "date": "21 May 26",
-        "notes": "Grip - Online + Seasonal · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1997 Honda Civic Type R (EK9)",
-        "class": "C",
-        "code": "158 737 209",
-        "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Street",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "21 May 26",
-        "notes": "Online + Seasonal Easy · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Jeep JT",
-        "class": "C",
-        "code": "153 838 391",
-        "creator": "LogikJ",
-        "focus": "C Dirt/CC Purist Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "14 Jun 26",
-        "notes": "Online, Rivals - Decent pace + very easy · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Jeep JT",
-        "class": "C",
-        "code": "141 239 341",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Allround Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "14 Jun 26",
-        "notes": "Online - Best on circuits + very easy · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1974 Lancia Stratos HF Stradale",
-        "class": "C",
-        "code": "122 431 559",
-        "creator": "LogikJ",
-        "focus": "C Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "16 Jun 26",
-        "notes": "Online Easy · Classic Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1990 Nissan Pulsar GTI-R",
-        "class": "C",
-        "code": "316 113 924",
-        "creator": "LogikJ",
-        "focus": "C Dirt Rally Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.0L I4 VVT",
-        "build": "Stock Look",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal - Fairly strong overall and easy · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1989 Nissan Silvia K's (S13)",
-        "class": "C",
-        "code": "173 080 482",
-        "creator": "LogikJ",
-        "focus": "Purist Qualifiers",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "15 May 26",
-        "notes": "Qualifiers, Online · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1993 Renault Clio Williams",
-        "class": "C",
-        "code": "149 973 709",
-        "creator": "LogikJ",
-        "focus": "C Road Purist Grip",
-        "drivetrain": "FWD",
         "discipline": "road",
         "tire": "Rally",
         "engine": "Stock",
         "build": "Purist",
-        "date": "13 Jun 26",
-        "notes": "Onlijne, Seasonal - Very easy · Retro Hot Hatch",
+        "date": "22 Jul 26",
+        "notes": "Purist Grip - not fast but very easy to use · Modern Sports Cars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "tab": "🛠️LogikJ's Tunes"
       },
       {
-        "car": "1990 Subaru LEGACY RS",
-        "class": "C",
-        "code": "114 538 503",
+        "car": "2014 Alfa Romeo 4C",
+        "class": "A",
+        "code": "179 800 646",
         "creator": "LogikJ",
-        "focus": "C Dirt Rally Purist Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "24 Jun 26",
-        "notes": "Online, Seasonal - Very easy to drive · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1999 Toyota Altezza RS200 Z Edition",
-        "class": "C",
-        "code": "225 950 073",
-        "creator": "LogikJ",
-        "focus": "C Road/Street Purist Easy",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "23 May 26",
-        "notes": "Online · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1994 Toyota Celica GT-Four ST205",
-        "class": "C",
-        "code": "880 951 746",
-        "creator": "LogikJ",
-        "focus": "Purist Qualifiers",
+        "focus": "Road AWD Stock Look",
         "drivetrain": "AWD",
         "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "15 May 26",
-        "notes": "Qualifers, Online - Faster + Easier than silvia · Retro Rally",
+        "tire": "Rally",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "22 Jul 26",
+        "notes": "Online, Seasonal - Allround easy grip car · Modern Sports Cars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "tab": "🛠️LogikJ's Tunes"
       },
       {
-        "car": "1994 Toyota Celica GT-Four ST205",
-        "class": "C",
-        "code": "126 606 600",
+        "car": "2014 Alfa Romeo 4C",
+        "class": "A",
+        "code": "160 332 230",
         "creator": "LogikJ",
-        "focus": "Offroad Qualifiers",
+        "focus": "Road AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Offroad",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "29 Jul 26",
+        "notes": "Online, Seasonal - Easy and fun dirt car, decent pace · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2014 Alfa Romeo 4C",
+        "class": "S1",
+        "code": "743 131 402",
+        "creator": "LogikJ",
+        "focus": "S1 Road Strong Accel",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "3.2L I6",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "22 Jul 26",
+        "notes": "Online, Seasonal Forza - Strong accel, decent allrounder · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2007 Alfa Romeo 8C Competizione",
+        "class": "A",
+        "code": "945 810 913",
+        "creator": "LogikJ",
+        "focus": "Road AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "16 Jul 26",
+        "notes": "Online, Seasonal - Easy AWD car · GT Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2017 Alfa Romeo Giulia Quadrifoglio",
+        "class": "A",
+        "code": "172 155 266",
+        "creator": "LogikJ",
+        "focus": "Dirt AWD Stock Look",
         "drivetrain": "AWD",
         "discipline": "dirt/offroad",
         "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "No Aero, Oettinger Type RE Rims",
-        "date": "21 May 26",
-        "notes": "Seasonal, Qualifiers Offroad - Easy · Retro Rally",
+        "engine": "4.7L V8",
+        "build": "AWD Stock Look",
+        "date": "22 Jul 26",
+        "notes": "Online, Seasonal Saloon - Decent allround, good accel · Modern Super Saloons",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "tab": "🛠️LogikJ's Tunes"
       },
       {
-        "car": "2016 Toyota Land Cruiser Arctic Trucks AT37",
-        "class": "C",
-        "code": "604 013 819",
-        "creator": "LogikJ",
-        "focus": "C Dirt/CC Offroad Allround",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "7 Jun 26",
-        "notes": "Online · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2023 Acura Integra A-Spec",
+        "car": "2003 Aston Martin DB7 GT",
         "class": "B",
-        "code": "136 216 830",
+        "code": "227 273 527",
         "creator": "LogikJ",
-        "focus": "Road Purist Grip",
-        "drivetrain": "FWD",
+        "focus": "",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "16 Jul 26",
+        "notes": "Online - Fairly slow Purist, use on sprints and in slow lobbies · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2003 Aston Martin DB7 GT",
+        "class": "A",
+        "code": "100 066 666",
+        "creator": "LogikJ",
+        "focus": "",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Offroad",
+        "engine": "7.0L V12",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "16 Jul 26",
+        "notes": "Online Lobbies, more power and faster overall than no aero version · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2009 Audi R8 LMS",
+        "class": "S1",
+        "code": "311 807 794",
+        "creator": "LogikJ",
+        "focus": "S1 Road AWD Strong Grip",
+        "drivetrain": "AWD",
         "discipline": "road",
         "tire": "Rally",
         "engine": "Stock",
-        "build": "Purist",
-        "date": "18 May 26",
-        "notes": "Online Grip/Handling Tracks · Hot Hatch",
+        "build": "AWD Stock Look",
+        "date": "2 Jul 26",
+        "notes": "Offmeta Grip Car · Extreme Track Toys",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -30950,1413 +30708,45 @@ window.FH6_DB = {
         "date": "17 Jun 26",
         "notes": "Online, Seasonal Trial - Very Easy Drive · Retro Rally",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
       },
       {
-        "car": "2002 Chevrolet Corvette Z06 (C5)",
-        "class": "B",
-        "code": "974 752 713",
+        "car": "1973 BMW 2002 Turbo",
+        "class": "C",
+        "code": "135 809 098",
         "creator": "LogikJ",
-        "focus": "B Road AWD Grip",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "AWD Full Aero Superturismo Rims",
-        "date": "24 Jun 26",
-        "notes": "Online - Decent pace and extremely easy to drive · Retro Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1995 Chevrolet Corvette ZR-1 (C4)",
-        "class": "B",
-        "code": "183 792 690",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
+        "focus": "C Road/Street Purist WhiteWalls",
         "drivetrain": "RWD",
         "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "24 Jun 26",
-        "notes": "Online, Seasonal Retro Muscle - Purist RWD · Retro Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Chevrolet Silverado LT Trail Boss",
-        "class": "B",
-        "code": "240 331 656",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Purist Online Lobby Chill",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist + Rear Rim Profile",
-        "date": "15 Jun 26",
-        "notes": "Online Purist - Use in open lobby if you want something slower than Meta build · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Chevrolet Silverado LT Trail Boss",
-        "class": "B",
-        "code": "921 998 263",
-        "creator": "LogikJ",
-        "focus": "B Cross Country Sprint Meta",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "8.4L V10",
-        "build": "WedsSport SA-97 Rims",
-        "date": "15 Jun 26",
-        "notes": "Online, Rivals, Seasonal - CC Sprints Meta · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1969 Dodge Charger R/T",
-        "class": "B",
-        "code": "911 776 084",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC AWD Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD Stock Look No Aero",
-        "date": "24 May 26",
-        "notes": "Online · Classic Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2006 Dodge Ram SRT-10",
-        "class": "B",
-        "code": "119 723 667",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Strong Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "2 Jul 26",
-        "notes": "Online - Fairly strong purist for CC · Modern Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1994 Ferrari F355 Berlinetta",
-        "class": "B",
-        "code": "266 380 870",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "12 Jun 26",
-        "notes": "Online - Nice to drive · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1986 Ford F-150 XLT Lariat",
-        "class": "B",
-        "code": "170 437 334",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Allround Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "5.8L V8 DSC",
-        "build": "Stock Look + Rear Rim + Race Gearbox",
-        "date": "18 Jun 26",
-        "notes": "Online, Seasonal - Decently strong, has proper gears too · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2003 Ford Focus RS (Mk 1)",
-        "class": "B",
-        "code": "485 090 188",
-        "creator": "LogikJ",
-        "focus": "Road Purist Grip",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "1 Jul 26",
-        "notes": "Online, Total FWD - Easy to drive · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2009 Ford Focus RS (Mk 2.5)",
-        "class": "B",
-        "code": "759 521 860",
-        "creator": "LogikJ",
-        "focus": "Road Purist Grip",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "1 Jul 26",
-        "notes": "Online, Total FWD - Easy to drive, kind of slow · Super Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1968 Ford Mustang GT 2+2 Fastback",
-        "class": "B",
-        "code": "587 585 833",
-        "creator": "LogikJ",
-        "focus": "Dirt/CC Meta Handbrake Simulator",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero",
-        "date": "5 Jun 26",
-        "notes": "Rivals - Use handbrake a lot it needs it · Classic Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
-        "class": "B",
-        "code": "299 964 368",
-        "creator": "LogikJ",
-        "focus": "B Road Very Strong (Stock Look)",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "8.4L V10",
-        "build": "Stock Look",
-        "date": "29 Jun 26",
-        "notes": "Online, Rivals - Very strong AWD accel for road - 06.5 shira clean def does low 06s · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
-        "class": "B",
-        "code": "260 362 006",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Meta Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "8.4L V10",
-        "build": "Stock Look",
-        "date": "29 Jun 26",
-        "notes": "Online, Rivals Meta - Very strong on circuits, has Oka CC wr currently · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1970 GMC Jimmy",
-        "class": "B",
-        "code": "951 549 038",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Purist Allround Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist + Rear Rim",
-        "date": "13 Jun 26",
-        "notes": "Online - Easy, Best on circuits · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1970 GMC Jimmy",
-        "class": "B",
-        "code": "118 439 850",
-        "creator": "LogikJ",
-        "focus": "Cross Country Power Rivals",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "Racing 7.2L V8",
-        "build": "Stock Look + Rear Rim",
-        "date": "13 Jun 26",
-        "notes": "Best for Cross Country instead of dirt · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1991 GMC Syclone",
-        "class": "B",
-        "code": "135 338 183",
-        "creator": "LogikJ",
-        "focus": "Road Purist Race Gearbox",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Street",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal - Race Gearbox, Easy · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1991 GMC Syclone",
-        "class": "B",
-        "code": "177 134 214",
-        "creator": "LogikJ",
-        "focus": "Dirt Rally/CC Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "24 Jun 26",
-        "notes": "Online, Seasonal - Nice to drive, decently strong even with the weak gearbox · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 GMC Typhoon",
-        "class": "B",
-        "code": "131 551 645",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "1 Jun 26",
-        "notes": "Online, Seasonal · Sports Utility Heroes",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1997 Honda Civic Type R (EK9)",
-        "class": "B",
-        "code": "149 737 010",
-        "creator": "LogikJ",
-        "focus": "Road Purist Allround Strong",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Street",
-        "engine": "Stock",
-        "build": "Purist + 215mm fronts",
-        "date": "1 Jul 26",
-        "notes": "Online, Trial - Very strong purist · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2004 Honda Civic Type R (EP3)",
-        "class": "B",
-        "code": "518 756 308",
-        "creator": "LogikJ",
-        "focus": "Road Purist Grip",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist (Max front width)",
-        "date": "17 May 26",
-        "notes": "Online · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2008 Honda Civic Type R (FD2)",
-        "class": "B",
-        "code": "950 100 014",
-        "creator": "LogikJ",
-        "focus": "Road Purist Grip",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
+        "tire": "Vintage WW",
         "engine": "Stock",
         "build": "Purist",
         "date": "11 Jun 26",
-        "notes": "Online - Easy · Retro Super Saloons",
+        "notes": "Online, Seasonal · Classic Sports Cars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
       },
       {
-        "car": "2007 Honda Civic Type R (FN2)",
-        "class": "B",
-        "code": "847 481 065",
+        "car": "1973 BMW 2002 Turbo",
+        "class": "C",
+        "code": "923 888 496",
         "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "1 Jul 26",
-        "notes": "Online, Total FWD - Very easy and nice to drive · Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2005 Honda NSX-R ('05)",
-        "class": "B",
-        "code": "131 634 468",
-        "creator": "LogikJ",
-        "focus": "Road/Street Purist",
-        "drivetrain": "RWD",
+        "focus": "C Road/Street AWD Stock Look",
+        "drivetrain": "AWD",
         "discipline": "road",
         "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "20 May 26",
-        "notes": "Online · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Honda NSX-R ('92)",
-        "class": "B",
-        "code": "126 326 350",
-        "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "3 Jun 26",
-        "notes": "Online, Seasonal - Easy to drive · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1994 Honda Prelude Si",
-        "class": "B",
-        "code": "145 910 160",
-        "creator": "LogikJ",
-        "focus": "B ROad K20",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
         "engine": "2.0L I4 VVT",
-        "build": "Stock Look",
-        "date": "4 Jun 26",
-        "notes": "Online, Nice to drive · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2003 Honda S2000",
-        "class": "B",
-        "code": "765 861 342",
-        "creator": "LogikJ",
-        "focus": "B Road Purist - Enkei rims, Mugen Hood, Honda Wing",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Street",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "30 May 26",
-        "notes": "Online · Modern Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Jeep Grand Cherokee Trackhawk",
-        "class": "B",
-        "code": "944 742 322",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Stock Look + Rear Rim Profile",
-        "date": "2 Jul 26",
-        "notes": "Online, Seasonal - Easy · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1986 Lancia Delta S4",
-        "class": "B",
-        "code": "175 156 737",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally Purist Grip",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal - Easy and Very nice to drive · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1974 Lancia Stratos HF Stradale",
-        "class": "B",
-        "code": "126 464 916",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally AWD Grip",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
         "build": "AWD Stock Look",
-        "date": "16 Jun 26",
-        "notes": "Online - Easy grip for circuits · Classic Rally",
+        "date": "11 Jun 26",
+        "notes": "Online, Seasonal - Easy + Good Accel · Classic Sports Cars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Land Rover Defender 110 X",
-        "class": "B",
-        "code": "138 402 954",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Rear Aero (Not Visible) Stock Rims",
-        "date": "2 Jul 26",
-        "notes": "Online, Seasonal - Decent on handling stuff, cannot see rear aero · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2015 Land Rover Range Rover Sport SVR",
-        "class": "B",
-        "code": "540 136 599",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Purist Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist + Rear Rim Profile",
-        "date": "2 Jun 26",
-        "notes": "Online Very nice to drive · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2015 Land Rover Range Rover Sport SVR",
-        "class": "B",
-        "code": "108 179 073",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "5.2L V10",
-        "build": "Stock Look + Rear Rim Profile",
-        "date": "2 Jul 26",
-        "notes": "Online, Seasonal - Decently Strong with V10 swap · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2010 Mazda Mazdaspeed 3",
-        "class": "B",
-        "code": "601 959 496",
-        "creator": "LogikJ",
-        "focus": "Road Purist / Togue Grip",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "28 May 26",
-        "notes": "Online + Togue Easy · Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2017 Mazda MX-5 Cup",
-        "class": "B",
-        "code": "140 998 267",
-        "creator": "LogikJ",
-        "focus": "B Road Grip",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Full Aero",
-        "date": "28 May 26",
-        "notes": "Togue Grip · Track Toys",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1987 Mercedes-Benz AMG Hammer Coupe",
-        "class": "B",
-        "code": "133 046 889",
-        "creator": "LogikJ",
-        "focus": "B Dirt AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD No Aero Stock Rims",
-        "date": "18 Jun 26",
-        "notes": "Online, Seasonal - Kinda slow but easy to drive · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Mercedes-Benz X-Class",
-        "class": "B",
-        "code": "116 983 594",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Strong Off Meta",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "5.2L V10",
-        "build": "Widebody No Aero",
-        "date": "25 May 26",
-        "notes": "Rivals, Online Strong · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1965 MINI Cooper S",
-        "class": "B",
-        "code": "239 900 156",
-        "creator": "LogikJ",
-        "focus": "B Dirt AWD Strong No Widebody",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.0L I4 VVT",
-        "build": "AWD, Compomotive ML Rims",
-        "date": "10 Jul 26",
-        "notes": "Online Lobbies - Strong B Dirt Car, good accel · Classic Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1995 Mitsubishi Eclipse GSX",
-        "class": "B",
-        "code": "138 854 814",
-        "creator": "LogikJ",
-        "focus": "Road Purist Allround",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Street",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "2 Jun 26",
-        "notes": "Onliune, Seasonal - Easy · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2006 Mitsubishi Lancer Evolution IX MR",
-        "class": "B",
-        "code": "811 459 629",
-        "creator": "LogikJ",
-        "focus": "B Dirt Purist Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "",
-        "notes": "Online - Easy · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2008 Mitsubishi Lancer Evolution X GSR",
-        "class": "B",
-        "code": "966 163 983",
-        "creator": "LogikJ",
-        "focus": "B600 Dirt Rally Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "6.2L V8",
-        "build": "Stock Look Power no WR",
-        "date": "1 Jul 26",
-        "notes": "Online, Seasonal - Fairly slow compared to the Subarus · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1995 Mitsubishi Montero Exceed 2800 TD",
-        "class": "B",
-        "code": "827 402 544",
-        "creator": "LogikJ",
-        "focus": "B700 Dirt/CC Strong V8",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "6.2L V8",
-        "build": "Stock Lock",
-        "date": "18 May 26",
-        "notes": "Online + Seasonal - Strong + Nice to drive · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1995 Mitsubishi Montero Exceed 2800 TD",
-        "class": "B",
-        "code": "260 728 282",
-        "creator": "LogikJ",
-        "focus": "B Cross Country Sprints Power",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "Racing 7.2L V8",
-        "build": "Stock Look + 20in Rims",
-        "date": "24 Jun 26",
-        "notes": "Online, Rivals, Seasonal - Offmeta pace on CC sprints, strong accel · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1987 Nissan Be-1",
-        "class": "B",
-        "code": "172 385 513",
-        "creator": "LogikJ",
-        "focus": "B Road FWD Grip",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "2.0L I4 VVT",
-        "build": "Stock Look",
-        "date": "31 May 26",
-        "notes": "Online Circuits · Eclectic Domestics",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2003 Nissan Fairlady Z",
-        "class": "B",
-        "code": "136 922 275",
-        "creator": "LogikJ",
-        "focus": "Road Purist Nismo",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist (Nismo Kit)",
-        "date": "15 May 26",
-        "notes": "Online · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1995 Nissan Gloria Gran Turismo",
-        "class": "B",
-        "code": "497 244 422",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally AWD Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD Stock Look",
-        "date": "24 Jun 26",
-        "notes": "Online, Seasonal - Easy + nice to drive · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1989 Nissan Silvia K's (S13)",
-        "class": "B",
-        "code": "511 675 067",
-        "creator": "LogikJ",
-        "focus": "B Road RWD Spec R Engine",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "No Aero - Spec R Engine + AR904 Rims",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Nissan Skyline GT-R",
-        "class": "B",
-        "code": "911 324 908",
-        "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist - 305mm rears",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2000 Nissan Skyline GT-R V Spec II",
-        "class": "B",
-        "code": "179 825 629",
-        "creator": "LogikJ",
-        "focus": "Road Purist Thicc",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "3 Jun 26",
-        "notes": "Online, Seasonal - Easy but slow · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1984 Opel Manta 400",
-        "class": "B",
-        "code": "488 494 207",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally AWD",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "3.2L I6",
-        "build": "AWD Stock Look",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal - Could also likely be used on road too Stocks are (Rally) · Rally Monsters",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Porsche Cayenne Turbo",
-        "class": "B",
-        "code": "182 119 804",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "4.0L F6",
-        "build": "Stock Look + Rear Rim Profile",
-        "date": "2 Jul 26",
-        "notes": "Online, Seasonal - Easy · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2024 Ram 1500 TRX",
-        "class": "B",
-        "code": "632 734 871",
-        "creator": "LogikJ",
-        "focus": "Dirt/CC Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Stock, Street Bumper + Rim Profile",
-        "date": "10 Jun 26",
-        "notes": "Online decently quick · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2024 Ram 1500 TRX",
-        "class": "B",
-        "code": "166 619 043",
-        "creator": "LogikJ",
-        "focus": "B Cross Country Only Power Sprints",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
-        "engine": "8.4L V10",
-        "build": "Big Rims, Street Bumpers",
-        "date": "10 Jun 26",
-        "notes": "Offmeta CC Rivals · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2008 Renault Mégane R26.R",
-        "class": "B",
-        "code": "811 022 439",
-        "creator": "LogikJ",
-        "focus": "Road Grip Stock Look K20",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "2.0L I4 VVT",
-        "build": "Purist",
-        "date": "1 Jul 26",
-        "notes": "Online, Total FWD - Easy to drive and decent pace with the Honda swap · Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1998 Subaru Impreza 22B-STi Version",
-        "class": "B",
-        "code": "755 364 258",
-        "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "14 Jun 26",
-        "notes": "Online - Easy and Nice · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2004 Subaru IMPREZA WRX STI (GD1)",
-        "class": "B",
-        "code": "653 682 935",
-        "creator": "LogikJ",
-        "focus": "B700 Strong Dirt Rally",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock Look",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal Strong & Easy · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2005 Subaru IMPREZA WRX STI (GD2)",
-        "class": "B",
-        "code": "264 112 972",
-        "creator": "LogikJ",
-        "focus": "B600 Dirt Rally Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock Look",
-        "date": "1 Jul 26",
-        "notes": "Online, Seasonal - Probably fastest modern rally car · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2008 Subaru IMPREZA WRX STI (GR)",
-        "class": "B",
-        "code": "171 386 623",
-        "creator": "LogikJ",
-        "focus": "B600 Dirt Rally Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock Look",
-        "date": "1 Jul 26",
-        "notes": "Online, Seasonal - A little slower than 04 and 05 but still good · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2005 Subaru LEGACY B4 2.0 GT",
-        "class": "B",
-        "code": "106 960 335",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "1 Jun 26",
-        "notes": "Online, Seasonal · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2019 Subaru STI S209",
-        "class": "B",
-        "code": "446 838 321",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally Strong Grip",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock Look",
-        "date": "8 Jun 26",
-        "notes": "Online - Nice to drive · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2022 Subaru WRX",
-        "class": "B",
-        "code": "865 826 962",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally Stock Look Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock Look",
-        "date": "8 Jun 26",
-        "notes": "Online, Campaign, Seasonals - Easy to drive · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2015 Subaru WRX STI (GT)",
-        "class": "B",
-        "code": "137 454 315",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally Stock Look Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock Look",
-        "date": "21 Jun 26",
-        "notes": "Online, Campaign, Seasonals - Easy to drive · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1994 Toyota Celica GT-Four ST205",
-        "class": "B",
-        "code": "132 999 502",
-        "creator": "LogikJ",
-        "focus": "B Dirt Stock Look Easy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock look",
-        "date": "21 May 26",
-        "notes": "Online + Seasonal · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2003 Toyota Celica Sport Specialty II",
-        "class": "B",
-        "code": "182 893 646",
-        "creator": "LogikJ",
-        "focus": "Road Purist Strong",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "3 Jun 26",
-        "notes": "Online Very Strong, Seasonal · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2021 Toyota GR Yaris",
-        "class": "B",
-        "code": "141 045 607",
-        "creator": "LogikJ",
-        "focus": "B700 Dirt Rally Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.4L F4",
-        "build": "Stock Look",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal Easy · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2022 Toyota GR86",
-        "class": "B",
-        "code": "402 454 924",
-        "creator": "LogikJ",
-        "focus": "B Road Purist Grip",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "23 May 26",
-        "notes": "Online + Seasonal Grip Easy to drive · Modern Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2025 Toyota Land Cruiser",
-        "class": "B",
-        "code": "171 176 306",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist + Rear Rim Profile",
-        "date": "19 May 26",
-        "notes": "Online + Seasonal · Sports Utility Heroes",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2025 Toyota Land Cruiser",
-        "class": "B",
-        "code": "388 213 018",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC V8",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "6.2L V8",
-        "build": "Stock Look + Rear Rim",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal · Sports Utility Heroes",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2016 Toyota Land Cruiser Arctic Trucks AT37",
-        "class": "B",
-        "code": "674 506 782",
-        "creator": "LogikJ",
-        "focus": "B Dirt/CC Race tire not Stocks",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "6.2L V8",
-        "build": "Street front bumper",
-        "date": "7 Jun 26",
-        "notes": "Online Circuits · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1965 Toyota Sports 800 Fanta Edition",
-        "class": "B",
-        "code": "120 758 386",
-        "creator": "LogikJ",
-        "focus": "B Dirt AWD",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD No Aero",
-        "date": "18 May 26",
-        "notes": "Online + Seasonal · Classic Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1996 Toyota Starlet Glanza V",
-        "class": "B",
-        "code": "448 570 917",
-        "creator": "LogikJ",
-        "focus": "B Road K20 Varis Kit (Faster than purist)",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "2.0L I4 VVT",
-        "build": "Varis Kit",
-        "date": "12 Jun 26",
-        "notes": "Online - Easy to use · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1996 Toyota Starlet Glanza V",
-        "class": "B",
-        "code": "146 074 833",
-        "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "12 Jun 26",
-        "notes": "Online - Easy to use · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1996 Toyota Starlet Glanza V",
-        "class": "B",
-        "code": "162 559 941",
-        "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Offroad",
-        "engine": "2.0L I4 VVT",
-        "build": "AWD Varis Kit",
-        "date": "12 Jun 26",
-        "notes": "Online - Fairly strong overall · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1998 Toyota Supra RZ",
-        "class": "B",
-        "code": "123 744 040",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "3 Jun 26",
-        "notes": "Online + Seasonal · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1983 Volvo 242 Turbo Evolution",
-        "class": "B",
-        "code": "381 550 924",
-        "creator": "LogikJ",
-        "focus": "B Dirt Rally AWD",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "3.2L I6",
-        "build": "AWD Stock Look",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal - Easy + nice to drive · Classic Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -32375,10 +30765,64 @@ window.FH6_DB = {
         "date": "3 Jun 26",
         "notes": "Online - Slow but easy and nice to drive · Modern Super Saloons",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
+      },
+      {
+        "car": "1988 BMW M3 (E30)",
+        "class": "C",
+        "code": "711 332 749",
+        "creator": "LogikJ",
+        "focus": "C Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1988 BMW M3 (E30)",
+        "class": "C",
+        "code": "170 326 664",
+        "creator": "LogikJ",
+        "focus": "C Road AWD Online/Seasonal Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "AWD + BMW Aero",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2008 BMW M3 (E92)",
+        "class": "A",
+        "code": "838 429 135",
+        "creator": "LogikJ",
+        "focus": "Dirt AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "22 Jul 26",
+        "notes": "Online, Seasonal - Easy and nice to use, stock engine · Modern Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
       },
       {
         "car": "2010 BMW M3 GTS",
@@ -32394,7 +30838,7 @@ window.FH6_DB = {
         "date": "29 Jun 26",
         "notes": "Online Lobbies - Drives nice, sounds nice · Track Toys",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -32413,7 +30857,45 @@ window.FH6_DB = {
         "date": "23 May 26",
         "notes": "Online grip very easy · Modern Super Saloons",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1988 BMW M5 (E28)",
+        "class": "C",
+        "code": "956 083 727",
+        "creator": "LogikJ",
+        "focus": "C Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1988 BMW M5 (E28)",
+        "class": "C",
+        "code": "125 231 664",
+        "creator": "LogikJ",
+        "focus": "C Road AWD Online/Seasonal",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "AWD Full Aero",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -32432,7 +30914,7 @@ window.FH6_DB = {
         "date": "2 Jul 26",
         "notes": "Online, Seasonal = Quite strong CC · Sports Utility Heroes, Heavy Hitter",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -32451,1356 +30933,7 @@ window.FH6_DB = {
         "date": "10 Jun 26",
         "notes": "Online, Seasonal - Easy and nice to drive · Modern Muscle",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1982 DeLorean DMC-12",
-        "class": "A",
-        "code": "824 692 584",
-        "creator": "LogikJ",
-        "focus": "A Road AWD No Aero",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Racing 3.0L V8",
-        "build": "AWD Stock Look",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal - Decent · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1982 DeLorean DMC-12",
-        "class": "A",
-        "code": "323 774 113",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Full Aero Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "5.0L V10",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "17 Jun 26",
-        "notes": "Online, Seasonal - Quite Strong · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1969 Dodge Charger R/T",
-        "class": "A",
-        "code": "473 404 218",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC AWD Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "6.2L V8 DSC",
-        "build": "AWD Stock Look No Aero",
-        "date": "24 May 26",
-        "notes": "Online · Classic Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2006 Dodge Ram SRT-10",
-        "class": "A",
-        "code": "121 555 835",
-        "creator": "LogikJ",
-        "focus": "Road AWD Strong Allround",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero (Ram Aero) Stock Rims",
-        "date": "3 Jul 26",
-        "notes": "Online - Strong Allround, strong accel · Modern Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2007 Ferrari 430 Scuderia",
-        "class": "A",
-        "code": "839 564 883",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD No Aero",
-        "date": "13 Jun 26",
-        "notes": "Online - Very easy and nice to drive · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2007 Ferrari 430 Scuderia",
-        "class": "A",
-        "code": "504 057 752",
-        "creator": "LogikJ",
-        "focus": "A Dirt AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD No Aero",
-        "date": "13 Jun 26",
-        "notes": "Online Easy · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Ferrari 512 TR",
-        "class": "A",
-        "code": "852 583 050",
-        "creator": "LogikJ",
-        "focus": "Road Purist Easy",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "26 Jun 26",
-        "notes": "Online, Seasonal - Easy to use for Purist and Strong too · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Ferrari 512 TR",
-        "class": "A",
-        "code": "177 304 034",
-        "creator": "LogikJ",
-        "focus": "Road AWD Full Aero Easy",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "26 Jun 26",
-        "notes": "Online, Seasonal - Very easy and nice to drive · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1994 Ferrari F355 Berlinetta",
-        "class": "A",
-        "code": "154 868 691",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Full Aero Quick",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Full Aero + 1 tick front width",
-        "date": "13 Jun 26",
-        "notes": "Online - Quite strong and easy · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2001 Ford #4 Ford Focus RS",
-        "class": "A",
-        "code": "139 502 091",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC circuits",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "18 May 26",
-        "notes": "Online · Rally Monsters",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2022 Ford F-150 Lightning",
-        "class": "A",
-        "code": "481 176 672",
-        "creator": "LogikJ",
-        "focus": "Strong Cross Country Power",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "AWD Stock Look",
-        "date": "2 Jul 26",
-        "notes": "Online, Rivals - Very strong on Cross Country · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2024 Ford Mustang Dark Horse",
-        "class": "A",
-        "code": "131 138 911",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Full Aero Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "18 Jun 26",
-        "notes": "Online, Togue - Strong · Modern Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Ford Mustang RTR Spec 5",
-        "class": "A",
-        "code": "806 744 863",
-        "creator": "LogikJ",
-        "focus": "Road AWD Strong Allround",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "8 Jul 26",
-        "notes": "Online, Seasona, Trial - Strong and easy · Modern Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Ford Mustang RTR Spec 5",
-        "class": "A",
-        "code": "604 682 988",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "11 Jun 26",
-        "notes": "Online - Slow but easy and nice to drive · Modern Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1991 GMC Syclone",
-        "class": "A",
-        "code": "112 127 169",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Full Aero Very Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal, Rivals - Off meta pace, very strong · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1991 GMC Syclone",
-        "class": "A",
-        "code": "121 618 624",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC Off Meta Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "24 Jun 26",
-        "notes": "Online, Seasonal, Rivals - Off meta pace, very strong and fun to drive · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1991 Honda Beat",
-        "class": "A",
-        "code": "674 158 844",
-        "creator": "LogikJ",
-        "focus": "Off Meta Dirt Circuits + Time Attack",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "1.6L I4 VVT",
-        "build": "AWD Full Aero",
-        "date": "21 May 26",
-        "notes": "Very strong dirt circuits - low 53 on Sekibe · Eclectic Domestics",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1991 Honda Beat",
-        "class": "A",
-        "code": "135 376 681",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Handling Very Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "1.6L I4 VVT",
-        "build": "AWD Full Aero (195mm fronts)",
-        "date": "10 Jun 26",
-        "notes": "Online, Rivals, Seasonal - Meta or Offmeta place on most stuff · Eclectic Domestics",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2008 Honda Civic Type R (FD2)",
-        "class": "A",
-        "code": "705 687 430",
-        "creator": "LogikJ",
-        "focus": "Road Purist Grip",
-        "drivetrain": "FWD",
-        "discipline": "road",
-        "tire": "Semi-Slicks",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "11 Jun 26",
-        "notes": "Online · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2005 Honda NSX-R ('05)",
-        "class": "A",
-        "code": "447 024 784",
-        "creator": "LogikJ",
-        "focus": "Road AWD Full Aero Stock Engine",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "1 Jul 26",
-        "notes": "Online, Seasonal - Easy and fast · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Honda NSX-R ('92)",
-        "class": "A",
-        "code": "107 966 807",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "10 Jun 26",
-        "notes": "Online, Seasonal - Easy to drive · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Honda NSX-R ('92)",
-        "class": "A",
-        "code": "131 886 325",
-        "creator": "LogikJ",
-        "focus": "Road AWD Widebody Grip/Time Attack",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "3.2L I6",
-        "build": "AWD Widebody Full Aero",
-        "date": "10 Jun 26",
-        "notes": "Online, Rivals, Seasonal - Very easy to drive · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2015 Honda Ridgeline Baja Trophy Truck",
-        "class": "A",
-        "code": "202 560 817",
-        "creator": "LogikJ",
-        "focus": "A800 Dirt/CC",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "4.8L V10",
-        "build": "AWD Stock Look",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal · Unlimited Offroad",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2014 HSV GEN-F GTS",
-        "class": "A",
-        "code": "137 244 620",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "8 Jul 26",
-        "notes": "Online, Seasonal - Fairly easy for purist, not that fast though especially compared to AWD · Modern Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2014 HSV GEN-F GTS",
-        "class": "A",
-        "code": "251 125 561",
-        "creator": "LogikJ",
-        "focus": "Road AWD Allround Very Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "8 Jul 26",
-        "notes": "Online, Seasonal, Rivals - Offmeta AWD, very strong overall · Modern Muscle",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1993 Jaguar XJ220",
-        "class": "A",
-        "code": "438 013 497",
-        "creator": "LogikJ",
-        "focus": "Road AWD Full Aero Grip",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "6.0L V12",
-        "build": "AWD Full Aero Stock Rims",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal Trial - Easy to drive · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Jeep Grand Cherokee Trackhawk",
-        "class": "A",
-        "code": "130 735 231",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC Widebody Stock Engine",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Widebody Stock Rims",
-        "date": "2 Jul 26",
-        "notes": "Online, Seasonal - Easy, Grip · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2016 Jeep Trailcat",
-        "class": "A",
-        "code": "157 328 353",
-        "creator": "LogikJ",
-        "focus": "A800 Dirt/CC Allround",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal · Unlimited Offroad",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2012 Jeep Wrangler Rubicon",
-        "class": "A",
-        "code": "151 607 175",
-        "creator": "LogikJ",
-        "focus": "Dirt/CC Strong OffMeta",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Stock Look",
-        "date": "8 Jul 26",
-        "notes": "Online, Seasonal - A little harder to drive but offmeta pace very strong · Pickups & 4x4's",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1988 Lamborghini Countach LP5000 QV",
-        "class": "A",
-        "code": "621 100 583",
-        "creator": "LogikJ",
-        "focus": "Road Purist Fast",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "24 Jun 26",
-        "notes": "Online, Seasonal Retro Supercars - Strong Purist · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2012 Lamborghini Gallardo LP570-4 Spyder Performante",
-        "class": "A",
-        "code": "145 876 680",
-        "creator": "LogikJ",
-        "focus": "A Road Allround Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Full Aero Stock Rims",
-        "date": "4 Jul 26",
-        "notes": "Quite strong all around, lacking a little high speed · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2012 Lamborghini Gallardo LP570-4 Spyder Performante",
-        "class": "A",
-        "code": "123 939 474",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "4 Jul 26",
-        "notes": "Decent allaround purist - easy to drive · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2019 Lamborghini Urus",
-        "class": "A",
-        "code": "151 745 529",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "5.2L V10",
-        "build": "Stock Look",
-        "date": "28 May 26",
-        "notes": "Online · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Land Rover Defender 110 X",
-        "class": "A",
-        "code": "900 725 130",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Rear Aero (Not Visible) Stock Rims",
-        "date": "2 Jul 26",
-        "notes": "Online, Seasonal - Decent on handling stuff, cannot see rear aero · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2015 Land Rover Range Rover Sport SVR",
-        "class": "A",
-        "code": "129 423 092",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC Purist Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Rear Rim Profile/Konig Interflow Rims",
-        "date": "2 Jun 26",
-        "notes": "Online Nice & Easy - Strongest Purist SUV · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2010 Lexus LFA",
-        "class": "A",
-        "code": "118 466 397",
-        "creator": "LogikJ",
-        "focus": "Dirt AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD No Aero Stock Rims",
-        "date": "4 Jul 26",
-        "notes": "Online easy AWD but not very fast, lacking accel · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2015 Lexus RC F",
-        "class": "A",
-        "code": "157 114 284",
-        "creator": "LogikJ",
-        "focus": "A Road/Street AWD LFA Engine No Aero",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "4.8L V10",
-        "build": "AWD Swapped Stock Look",
-        "date": "21 May 26",
-        "notes": "Online + Seasonal Easy · Modern Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2023 Lotus Emira",
-        "class": "A",
-        "code": "149 483 242",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Stock Look",
-        "date": "6 Jun 26",
-        "notes": "Online - Very easy and nice to drive · Modern Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2023 Lotus Emira",
-        "class": "A",
-        "code": "614 604 548",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "6 Jun 26",
-        "notes": "Online · Modern Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2015 McLaren 570S Coupé",
-        "class": "A",
-        "code": "661 217 039",
-        "creator": "LogikJ",
-        "focus": "Dirt AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "6.1L V12",
-        "build": "AWD Stock Look",
-        "date": "4 Jul 26",
-        "notes": "Online Lobbies - Great lobby car, looks good with stock wing moving · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2017 Mercedes-AMG GT R",
-        "class": "A",
-        "code": "894 449 376",
-        "creator": "LogikJ",
-        "focus": "A700 Road or Dirt AWD",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "6.2L V8",
-        "build": "AWD Volk Racing G16 Rims",
-        "date": "9 Jul 26",
-        "notes": "Online - Easy to drive, usable on road or dirt · Super GT",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1998 Mercedes-Benz AMG CLK GTR",
-        "class": "A",
-        "code": "113 745 403",
-        "creator": "LogikJ",
-        "focus": "A Class Grip Allround - Use on Road or Dirt it works for both",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD Full Aero",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal - Offroad tires combined with high grip means it works offroad and on road too. Very easy · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1987 Mercedes-Benz AMG Hammer Coupe",
-        "class": "A",
-        "code": "471 164 852",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Stock Look CLK Engine",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "6.9L V12 TT",
-        "build": "AWD No Aero Stock Rims",
-        "date": "18 Jun 26",
-        "notes": "Online - Easy but careful with back end at high speed hes lacking rear DF · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2013 Mercedes-Benz G 65 AMG",
-        "class": "A",
-        "code": "935 102 707",
-        "creator": "LogikJ",
-        "focus": "Dirt/CC Widebody Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Widebody Stock Rims",
-        "date": "12 Jul 26",
-        "notes": "Online, Seasonal - Strong overall pace · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Mercedes-Benz X-Class",
-        "class": "A",
-        "code": "118 260 950",
-        "creator": "LogikJ",
-        "focus": "CC Rivals Meta",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "WB No Aero + Supercharger",
-        "date": "25 May 26",
-        "notes": "Rivals, Online Meta · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2006 Mitsubishi Lancer Evolution IX MR",
-        "class": "A",
-        "code": "122 334 272",
-        "creator": "LogikJ",
-        "focus": "A Dirt Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "24 May 26",
-        "notes": "Online - Easy · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2001 Mitsubishi Lancer Evolution VI GSR TM Edition",
-        "class": "A",
-        "code": "360 060 901",
-        "creator": "LogikJ",
-        "focus": "A Dirt Purist Easy V2",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "21 May 26",
-        "notes": "Online + Seasonal Nice to drive · Retro Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2004 Mitsubishi Lancer Evolution VIII MR Welcome Pack",
-        "class": "A",
-        "code": "516 939 958",
-        "creator": "LogikJ",
-        "focus": "Dirt Purist Grippy",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "21 May 26",
-        "notes": "Online + Seasonal · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2010 Nissan 370Z",
-        "class": "A",
-        "code": "280 739 854",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Stock Look",
-        "date": "7 Jun 26",
-        "notes": "Online · Modern Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1989 Nissan Silvia K's (S13)",
-        "class": "A",
-        "code": "609 533 291",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Full Aero Strong",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "3.2L I6",
-        "build": "AWD Widebody Full Aero I6",
-        "date": "28 May 26",
-        "notes": "Online + Seasonal Strong · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1992 Nissan Skyline GT-R",
-        "class": "A",
-        "code": "161 102 713",
-        "creator": "LogikJ",
-        "focus": "Road Purist Cams",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist - Cams shift at redline",
-        "date": "21 May 26",
-        "notes": "Online + Seasonal · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2000 Nissan Skyline GT-R V Spec II",
-        "class": "A",
-        "code": "619 487 154",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "1 Jul 26",
-        "notes": "Online, Seasonal - Easy but fairly slow · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2000 Nissan Skyline GT-R V Spec II",
-        "class": "A",
-        "code": "133 423 664",
-        "creator": "LogikJ",
-        "focus": "Road Widebody Aero LFA",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "4.8L V10",
-        "build": "Do-Luck Bodykit, Top Secret Wing - No weight reduction LFA Engine",
-        "date": "1 Jul 26",
-        "notes": "Online, Seasonal - Much faster than purist unfortunately · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1984 Opel Manta 400",
-        "class": "A",
-        "code": "203 816 990",
-        "creator": "LogikJ",
-        "focus": "A Dirt Rally AWD Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "3.2L I6",
-        "build": "AWD Stock Look",
-        "date": "12 Jul 26",
-        "notes": "Online, Seasonal Rally Monster - Very Strong overall dirt car and drives really nice too · Rally Monsters",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2007 Peugeot 207 Super 2000",
-        "class": "A",
-        "code": "707 326 774",
-        "creator": "LogikJ",
-        "focus": "Dirt Rally Strong Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "12 Jul 26",
-        "notes": "Online, Seasonal - Easy and nice to use, strong for purist · Rally Monsters",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1987 Porsche 959",
-        "class": "A",
-        "code": "141 879 325",
-        "creator": "LogikJ",
-        "focus": "Road Purist Grip",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "25 Jun 26",
-        "notes": "Online, Seasonal Retro - Grip Very Easy and Nice · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1985 Porsche #185 959 Prodrive Rally Raid",
-        "class": "A",
-        "code": "807 267 123",
-        "creator": "LogikJ",
-        "focus": "Dirt Rally Allround",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Stock Look",
-        "date": "9 Jul 26",
-        "notes": "Online, Seasonal - Nice to drive · Rally Monsters",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1993 Porsche 928 GTS",
-        "class": "A",
-        "code": "151 728 863",
-        "creator": "LogikJ",
-        "focus": "Dirt AWD Stock Look Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "5.2L V10",
-        "build": "AWD Stock Look + 1 tick front width",
-        "date": "5 Jul 26",
-        "notes": "Online - very strong accel and overall pace · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2018 Porsche Cayenne Turbo",
-        "class": "A",
-        "code": "616 660 933",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC Very Stong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "5.2L V10",
-        "build": "Stock Look + Rear Rim Profile",
-        "date": "2 Jul 26",
-        "notes": "Online, Seasonal - Offmeta strong, fastest sport utility hero · Sports Utility Heroes, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2024 Ram 1500 TRX",
-        "class": "A",
-        "code": "135 821 060",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC Allround Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Stock, Street Bumper + Rim Profile",
-        "date": "10 Jun 26",
-        "notes": "Online, Rivals, Seasonal - Quite Strong · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2004 Subaru IMPREZA WRX STI (GD1)",
-        "class": "A",
-        "code": "848 004 844",
-        "creator": "LogikJ",
-        "focus": "A Dirt Online GT3",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "4.0L F6",
-        "build": "Stock Look",
-        "date": "30 May 26",
-        "notes": "Online · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2019 Subaru STI S209",
-        "class": "A",
-        "code": "136 469 189",
-        "creator": "LogikJ",
-        "focus": "A Dirt Widebody F6",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "4.0L F6",
-        "build": "Widebody FA",
-        "date": "8 Jun 26",
-        "notes": "Online - Grip Easy · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2019 Subaru STI S209",
-        "class": "A",
-        "code": "797 468 573",
-        "creator": "LogikJ",
-        "focus": "A Road Widebody Grip Easy",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "2.4L F4",
-        "build": "Widebody FA",
-        "date": "8 Jun 26",
-        "notes": "Online - Extremely easy and nice to drive · Modern Rally",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1999 Toyota Altezza RS200 Z Edition",
-        "class": "A",
-        "code": "172 680 687",
-        "creator": "LogikJ",
-        "focus": "A Dirt AWD +RC TRD Kit",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD No Aero - TRD Bodykit and Race Roll Cage",
-        "date": "21 Jun 26",
-        "notes": "Online - Updated with RC and TRD Kit, drives a lot nicer with the race cage · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1999 Toyota Altezza RS200 Z Edition",
-        "class": "A",
-        "code": "130 659 132",
-        "creator": "LogikJ",
-        "focus": "A Road/Street AWD No Aero",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD No Aero",
-        "date": "",
-        "notes": "Online · Retro Super Saloons",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2023 Toyota GR Corolla",
-        "class": "A",
-        "code": "841 941 818",
-        "creator": "LogikJ",
-        "focus": "Dirt Rally Purist",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "9 Jul 26",
-        "notes": "Online, Seasonal - Fairly slow unfortunately · Super Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2022 Toyota GR86",
-        "class": "A",
-        "code": "184 957 505",
-        "creator": "LogikJ",
-        "focus": "A Road AWD Easy",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Swapped Stock Look",
-        "date": "21 May 26",
-        "notes": "Online + Seasonal Easy and nice to drive · Modern Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2025 Toyota Land Cruiser",
-        "class": "A",
-        "code": "150 331 503",
-        "creator": "LogikJ",
-        "focus": "A Dirt/CC Very Strong",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Stock Look + Rear Rim",
-        "date": "11 Jun 26",
-        "notes": "Online, Rivals, Seasonal - Offmeta pace, strong accel · Sports Utility Heroes",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2005 TVR Sagaris",
-        "class": "A",
-        "code": "154 648 095",
-        "creator": "LogikJ",
-        "focus": "Road Purist",
-        "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "1 Jul 26",
-        "notes": "Online, Seasonal - Not too fast but easy · Retro Sports Cars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2017 Volkswagen #34 Andretti Rally Cross Beetle",
-        "class": "A",
-        "code": "180 605 939",
-        "creator": "LogikJ",
-        "focus": "A Dirt Rally Grip",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "2.0L F4 T Rally",
-        "build": "ADV.1 ADV7 M.V2 CS Rims",
-        "date": "12 Jul 26",
-        "notes": "Online, Seasonal - Best for handling tracks, easy to use · Rally Monsters",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2009 Audi R8 LMS",
-        "class": "S1",
-        "code": "311 807 794",
-        "creator": "LogikJ",
-        "focus": "S1 Road AWD Strong Grip",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Stock Look",
-        "date": "2 Jul 26",
-        "notes": "Offmeta Grip Car · Extreme Track Toys",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33819,7 +30952,670 @@ window.FH6_DB = {
         "date": "2 Jun 26",
         "notes": "Online - Strong and Easy · Modern Supercars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2002 Chevrolet Corvette Z06 (C5)",
+        "class": "B",
+        "code": "974 752 713",
+        "creator": "LogikJ",
+        "focus": "B Road AWD Grip",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "AWD Full Aero Superturismo Rims",
+        "date": "24 Jun 26",
+        "notes": "Online - Decent pace and extremely easy to drive · Retro Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1995 Chevrolet Corvette ZR-1 (C4)",
+        "class": "B",
+        "code": "183 792 690",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "24 Jun 26",
+        "notes": "Online, Seasonal Retro Muscle - Purist RWD · Retro Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Chevrolet Silverado LT Trail Boss",
+        "class": "C",
+        "code": "381 491 293",
+        "creator": "LogikJ",
+        "focus": "C Dirt/CC Strong Offmeta Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "8.4L V10",
+        "build": "Stock Look",
+        "date": "15 Jun 26",
+        "notes": "Online, Rivals, Seasonal - Strong off meta · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Chevrolet Silverado LT Trail Boss",
+        "class": "B",
+        "code": "240 331 656",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Purist Online Lobby Chill",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist + Rear Rim Profile",
+        "date": "15 Jun 26",
+        "notes": "Online Purist - Use in open lobby if you want something slower than Meta build · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Chevrolet Silverado LT Trail Boss",
+        "class": "B",
+        "code": "921 998 263",
+        "creator": "LogikJ",
+        "focus": "B Cross Country Sprint Meta",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "8.4L V10",
+        "build": "WedsSport SA-97 Rims",
+        "date": "15 Jun 26",
+        "notes": "Online, Rivals, Seasonal - CC Sprints Meta · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1970 Datsun 510",
+        "class": "C",
+        "code": "126 382 786",
+        "creator": "LogikJ",
+        "focus": "C Road/Street Purist Decent",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Street",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "10 Jun 26",
+        "notes": "Online, Seasonal - Decent pace for purist · Classic Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1970 Datsun 510",
+        "class": "C",
+        "code": "149 313 458",
+        "creator": "LogikJ",
+        "focus": "C Road/Street AWD + Aero Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Vintage WW",
+        "engine": "2.0L I4 VVT",
+        "build": "AWD FA No Widebody",
+        "date": "10 Jun 26",
+        "notes": "Online, Seasonal - Strong accel · Classic Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1982 DeLorean DMC-12",
+        "class": "C",
+        "code": "361 101 472",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "29 Jul 26",
+        "notes": "Online, Seasonal Retro Sports - Very easy and nice to drive purist · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1982 DeLorean DMC-12",
+        "class": "A",
+        "code": "824 692 584",
+        "creator": "LogikJ",
+        "focus": "A Road AWD No Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing 3.0L V8",
+        "build": "AWD Stock Look",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal - Decent · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1982 DeLorean DMC-12",
+        "class": "A",
+        "code": "323 774 113",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Full Aero Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "5.0L V10",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal - Quite Strong · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1969 Dodge Charger R/T",
+        "class": "A",
+        "code": "473 404 218",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC AWD Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "6.2L V8 DSC",
+        "build": "AWD Stock Look No Aero",
+        "date": "24 May 26",
+        "notes": "Online · Classic Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1969 Dodge Charger R/T",
+        "class": "B",
+        "code": "911 776 084",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC AWD Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look No Aero",
+        "date": "24 May 26",
+        "notes": "Online · Classic Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2006 Dodge Ram SRT-10",
+        "class": "B",
+        "code": "119 723 667",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Strong Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "2 Jul 26",
+        "notes": "Online - Fairly strong purist for CC · Modern Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2006 Dodge Ram SRT-10",
+        "class": "A",
+        "code": "121 555 835",
+        "creator": "LogikJ",
+        "focus": "Road AWD Strong Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero (Ram Aero) Stock Rims",
+        "date": "3 Jul 26",
+        "notes": "Online - Strong Allround, strong accel · Modern Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2007 Ferrari 430 Scuderia",
+        "class": "A",
+        "code": "839 564 883",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD No Aero",
+        "date": "13 Jun 26",
+        "notes": "Online - Very easy and nice to drive · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2007 Ferrari 430 Scuderia",
+        "class": "A",
+        "code": "504 057 752",
+        "creator": "LogikJ",
+        "focus": "A Dirt AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD No Aero",
+        "date": "13 Jun 26",
+        "notes": "Online Easy · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2009 Ferrari 458 Italia",
+        "class": "S1",
+        "code": "118 399 557",
+        "creator": "LogikJ",
+        "focus": "S1 Road AWD Full Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "5.2L V10",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "22 Jul 26",
+        "notes": "Online, Seasonal - Decent pace, easy grip car · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2013 Ferrari 458 Speciale",
+        "class": "S1",
+        "code": "852 550 177",
+        "creator": "LogikJ",
+        "focus": "S1 Road AWD Full Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "22 Jul 26",
+        "notes": "Online, Seasonal - Easy and nice to drive, average pace · Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1992 Ferrari 512 TR",
+        "class": "A",
+        "code": "852 583 050",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "26 Jun 26",
+        "notes": "Online, Seasonal - Easy to use for Purist and Strong too · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 Ferrari 512 TR",
+        "class": "A",
+        "code": "177 304 034",
+        "creator": "LogikJ",
+        "focus": "Road AWD Full Aero Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "26 Jun 26",
+        "notes": "Online, Seasonal - Very easy and nice to drive · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1969 Ferrari Dino 246 GT",
+        "class": "B",
+        "code": "901 291 077",
+        "creator": "LogikJ",
+        "focus": "Road RWD Stock Look",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "3.2L I6",
+        "build": "Stock Look RWD",
+        "date": "15 Jul 26",
+        "notes": "Online, Seasonal Forzathon - Easy to drive RWD grip - stock engine too slow unfortunately · Rare Classics",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1969 Ferrari Dino 246 GT",
+        "class": "A",
+        "code": "725 568 442",
+        "creator": "LogikJ",
+        "focus": "Road AWD Full Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "3.2L I6",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "15 Jul 26",
+        "notes": "Online, Seasonal - Easy allround, average pace · Rare Classics",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2002 Ferrari Enzo Ferrari",
+        "class": "S1",
+        "code": "917 399 636",
+        "creator": "LogikJ",
+        "focus": "Road AWD Full Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "22 Jul 26",
+        "notes": "Online, Seasonal - Decent pace, good lobby car · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1994 Ferrari F355 Berlinetta",
+        "class": "B",
+        "code": "266 380 870",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "12 Jun 26",
+        "notes": "Online - Nice to drive · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1994 Ferrari F355 Berlinetta",
+        "class": "A",
+        "code": "154 868 691",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Full Aero Quick",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Full Aero + 1 tick front width",
+        "date": "13 Jun 26",
+        "notes": "Online - Quite strong and easy · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2001 Ford #4 Ford Focus RS",
+        "class": "A",
+        "code": "139 502 091",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC circuits",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "18 May 26",
+        "notes": "Online · Rally Monsters",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2010 Ford Crown Victoria Police Interceptor",
+        "class": "B",
+        "code": "713 077 113",
+        "creator": "LogikJ",
+        "focus": "B Dirt AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "8.4L V10",
+        "build": "AWD Stock Rims",
+        "date": "18 Jul 26",
+        "notes": "Online, Seasonal - Strong allround dirt · Retro Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1992 Ford Escort RS Cosworth",
+        "class": "C",
+        "code": "166 822 072",
+        "creator": "LogikJ",
+        "focus": "C Dirt Rally Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal - Easy to drive · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2003 Ford F-150 SVT Lightning",
+        "class": "A",
+        "code": "481 176 672",
+        "creator": "LogikJ",
+        "focus": "Strong Cross Country Power",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "AWD Stock Look",
+        "date": "2 Jul 26",
+        "notes": "Online, Rivals - Very strong on Cross Country · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1986 Ford F-150 XLT Lariat",
+        "class": "B",
+        "code": "170 437 334",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Allround Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.8L V8 DSC",
+        "build": "Stock Look + Rear Rim + Race Gearbox",
+        "date": "18 Jun 26",
+        "notes": "Online, Seasonal - Decently strong, has proper gears too · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2003 Ford Focus RS (Mk 1)",
+        "class": "B",
+        "code": "485 090 188",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "1 Jul 26",
+        "notes": "Online, Total FWD - Easy to drive · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2009 Ford Focus RS (Mk 2.5)",
+        "class": "B",
+        "code": "759 521 860",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "1 Jul 26",
+        "notes": "Online, Total FWD - Easy to drive, kind of slow · Super Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2024 Ford Mustang Dark Horse",
+        "class": "A",
+        "code": "131 138 911",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Full Aero Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "18 Jun 26",
+        "notes": "Online, Togue - Strong · Modern Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1968 Ford Mustang GT 2+2 Fastback",
+        "class": "B",
+        "code": "587 585 833",
+        "creator": "LogikJ",
+        "focus": "Dirt/CC Meta Handbrake Simulator",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero",
+        "date": "5 Jun 26",
+        "notes": "Rivals - Use handbrake a lot it needs it · Classic Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Ford Mustang RTR Spec 5",
+        "class": "A",
+        "code": "806 744 863",
+        "creator": "LogikJ",
+        "focus": "Road AWD Strong Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "8 Jul 26",
+        "notes": "Online, Seasona, Trial - Strong and easy · Modern Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Ford Mustang RTR Spec 5",
+        "class": "A",
+        "code": "604 682 988",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "11 Jun 26",
+        "notes": "Online - Slow but easy and nice to drive · Modern Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33838,7 +31634,26 @@ window.FH6_DB = {
         "date": "",
         "notes": "Online, Seasonal - Decent pace · Track Toys",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1999 Ford Racing Puma",
+        "class": "C",
+        "code": "120 782 412",
+        "creator": "LogikJ",
+        "focus": "C Dirt Rally AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal - Strong - Momentum car · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33857,7 +31672,118 @@ window.FH6_DB = {
         "date": "3 Jun 26",
         "notes": "Online, Seasonal - Strong, although somewhat challenging to drive · Rally Monsters",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
+        "class": "D",
+        "code": "703 292 734",
+        "creator": "LogikJ",
+        "focus": "D Dirt/CC Rivals Meta Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "8.4L V10",
+        "build": "Stock Look",
+        "date": "7 Jun 26",
+        "notes": "Rivals Meta, Use handbrake to help turn in · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
+        "class": "C",
+        "code": "157 524 421",
+        "creator": "LogikJ",
+        "focus": "C Dirt/CC Rivals Meta Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "8.4L V10",
+        "build": "Stock Look",
+        "date": "7 Jun 26",
+        "notes": "Rivals Meta, Use handbrake to help turn in · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
+        "class": "B",
+        "code": "299 964 368",
+        "creator": "LogikJ",
+        "focus": "B Road Very Strong (Stock Look)",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "Stock Look",
+        "date": "29 Jun 26",
+        "notes": "Online, Rivals - Very strong AWD accel for road - 06.5 shira clean def does low 06s · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
+        "class": "B",
+        "code": "260 362 006",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Meta Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "8.4L V10",
+        "build": "Stock Look",
+        "date": "29 Jun 26",
+        "notes": "Online, Rivals Meta - Very strong on circuits, has Oka CC wr currently · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Ford Super Duty F-450 DRW PLATINUM Forza Edition",
+        "class": "A",
+        "code": "170 285 561",
+        "creator": "LogikJ",
+        "focus": "A Road Allround Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "No box Wld Racing Alumastar Beadlock",
+        "date": "19 Jul 26",
+        "notes": "Online, Rivals - Strong allround · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2020 Ford Super Duty F-450 DRW PLATINUM Forza Edition",
+        "class": "C",
+        "code": "100 319 101",
+        "creator": "LogikJ",
+        "focus": "C Dirt/CC Slow but Easy - Shift @ 3700 RPM",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "5.0L V8 Turbo Diesel",
+        "build": "Open Bed 26in Rims",
+        "date": "22 Jun 26",
+        "notes": "No accel or top end, shift before redline to maximize diesel. Best for circuits · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33876,7 +31802,178 @@ window.FH6_DB = {
         "date": "16 Jun 26",
         "notes": "Online - Good at sprints, not easy to use but fairly fast if you get it right · Drift Cars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1970 GMC Jimmy",
+        "class": "C",
+        "code": "718 851 410",
+        "creator": "LogikJ",
+        "focus": "Dirt/CC Qualifier",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "15 May 26",
+        "notes": "Qualifiers Offroad · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1970 GMC Jimmy",
+        "class": "B",
+        "code": "951 549 038",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Purist Allround Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist + Rear Rim",
+        "date": "13 Jun 26",
+        "notes": "Online - Easy, Best on circuits · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1970 GMC Jimmy",
+        "class": "B",
+        "code": "118 439 850",
+        "creator": "LogikJ",
+        "focus": "Cross Country Power Rivals",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "Racing 7.2L V8",
+        "build": "Stock Look + Rear Rim",
+        "date": "13 Jun 26",
+        "notes": "Best for Cross Country instead of dirt · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 GMC Syclone",
+        "class": "B",
+        "code": "135 338 183",
+        "creator": "LogikJ",
+        "focus": "Road Purist Race Gearbox",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Street",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal - Race Gearbox, Easy · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 GMC Syclone",
+        "class": "B",
+        "code": "177 134 214",
+        "creator": "LogikJ",
+        "focus": "Dirt Rally/CC Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "24 Jun 26",
+        "notes": "Online, Seasonal - Nice to drive, decently strong even with the weak gearbox · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 GMC Syclone",
+        "class": "A",
+        "code": "112 127 169",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Full Aero Very Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal, Rivals - Off meta pace, very strong · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 GMC Syclone",
+        "class": "A",
+        "code": "121 618 624",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC Off Meta Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "24 Jun 26",
+        "notes": "Online, Seasonal, Rivals - Off meta pace, very strong and fun to drive · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 GMC Typhoon",
+        "class": "C",
+        "code": "107 883 506",
+        "creator": "LogikJ",
+        "focus": "C Dirt/CC Strong Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist + Rear Rim Profile",
+        "date": "1 Jun 26",
+        "notes": "Online, Rivals, Seasonal · Sports Utility Heroes",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 GMC Typhoon",
+        "class": "B",
+        "code": "131 551 645",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "1 Jun 26",
+        "notes": "Online, Seasonal · Sports Utility Heroes",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33895,7 +31992,7 @@ window.FH6_DB = {
         "date": "4 Jun 26",
         "notes": "Online, Seasonal - Easy + Nice to drive · Super GT",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33914,7 +32011,958 @@ window.FH6_DB = {
         "date": "4 Jun 26",
         "notes": "Online, Seasonal - Easy + Nice to drive · Super GT",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 Honda Beat",
+        "class": "D",
+        "code": "111 556 173",
+        "creator": "LogikJ",
+        "focus": "D RWD Purist Seasonal",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist, OZ Superturismo Rims",
+        "date": "28 May 26",
+        "notes": "Seasonal Road · Eclectic Domestics",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 Honda Beat",
+        "class": "D",
+        "code": "972 008 252",
+        "creator": "LogikJ",
+        "focus": "D Road AWD Seasonal Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "AWD Full Aero + OZ Superturismo Rims",
+        "date": "28 May 26",
+        "notes": "Rivals + Seasonal Road · Eclectic Domestics",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 Honda Beat",
+        "class": "A",
+        "code": "674 158 844",
+        "creator": "LogikJ",
+        "focus": "Off Meta Dirt Circuits + Time Attack",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "1.6L I4 VVT",
+        "build": "AWD Full Aero",
+        "date": "21 May 26",
+        "notes": "Very strong dirt circuits - low 53 on Sekibe · Eclectic Domestics",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1991 Honda Beat",
+        "class": "A",
+        "code": "135 376 681",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Handling Very Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "1.6L I4 VVT",
+        "build": "AWD Full Aero (195mm fronts)",
+        "date": "10 Jun 26",
+        "notes": "Online, Rivals, Seasonal - Meta or Offmeta place on most stuff · Eclectic Domestics",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1986 Honda Civic SI",
+        "class": "D",
+        "code": "151 869 422",
+        "creator": "LogikJ",
+        "focus": "Road AWD Seasonal/Rivals Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "1.6L I4 VVT",
+        "build": "AWD Full Aero",
+        "date": "17 Jun 26",
+        "notes": "Seasonal, Rivals - Stock tires lacking a little grip but is fast · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1986 Honda Civic SI",
+        "class": "C",
+        "code": "140 151 099",
+        "creator": "LogikJ",
+        "focus": "C Road/Street Grip Easy",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "1.6L I4 VVT",
+        "build": "Stock Look",
+        "date": "21 May 26",
+        "notes": "Grip - Online + Seasonal · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1997 Honda Civic Type R (EK9)",
+        "class": "C",
+        "code": "158 737 209",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Street",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "21 May 26",
+        "notes": "Online + Seasonal Easy · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1997 Honda Civic Type R (EK9)",
+        "class": "B",
+        "code": "149 737 010",
+        "creator": "LogikJ",
+        "focus": "Road Purist Allround Strong",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Street",
+        "engine": "Stock",
+        "build": "Purist + 215mm fronts",
+        "date": "1 Jul 26",
+        "notes": "Online, Trial - Very strong purist · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2004 Honda Civic Type R (EP3)",
+        "class": "B",
+        "code": "518 756 308",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist (Max front width)",
+        "date": "17 May 26",
+        "notes": "Online · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2008 Honda Civic Type R (FD2)",
+        "class": "B",
+        "code": "950 100 014",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "11 Jun 26",
+        "notes": "Online - Easy · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2008 Honda Civic Type R (FD2)",
+        "class": "A",
+        "code": "705 687 430",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Semi-Slicks",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "11 Jun 26",
+        "notes": "Online · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2007 Honda Civic Type R (FN2)",
+        "class": "B",
+        "code": "847 481 065",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "1 Jul 26",
+        "notes": "Online, Total FWD - Very easy and nice to drive · Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2005 Honda NSX-R ('05)",
+        "class": "B",
+        "code": "131 634 468",
+        "creator": "LogikJ",
+        "focus": "Road/Street Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "20 May 26",
+        "notes": "Online · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2005 Honda NSX-R ('05)",
+        "class": "A",
+        "code": "447 024 784",
+        "creator": "LogikJ",
+        "focus": "Road AWD Full Aero Stock Engine",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "1 Jul 26",
+        "notes": "Online, Seasonal - Easy and fast · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 Honda NSX-R ('92)",
+        "class": "B",
+        "code": "126 326 350",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "3 Jun 26",
+        "notes": "Online, Seasonal - Easy to drive · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 Honda NSX-R ('92)",
+        "class": "A",
+        "code": "107 966 807",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "10 Jun 26",
+        "notes": "Online, Seasonal - Easy to drive · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 Honda NSX-R ('92)",
+        "class": "A",
+        "code": "131 886 325",
+        "creator": "LogikJ",
+        "focus": "Road AWD Widebody Grip/Time Attack",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "3.2L I6",
+        "build": "AWD Widebody Full Aero",
+        "date": "10 Jun 26",
+        "notes": "Online, Rivals, Seasonal - Very easy to drive · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1994 Honda Prelude Si",
+        "class": "B",
+        "code": "145 910 160",
+        "creator": "LogikJ",
+        "focus": "B ROad K20",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "2.0L I4 VVT",
+        "build": "Stock Look",
+        "date": "4 Jun 26",
+        "notes": "Online, Nice to drive · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2015 Honda Ridgeline Baja Trophy Truck",
+        "class": "A",
+        "code": "202 560 817",
+        "creator": "LogikJ",
+        "focus": "A800 Dirt/CC",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "4.8L V10",
+        "build": "AWD Stock Look",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal · Unlimited Offroad",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2003 Honda S2000",
+        "class": "B",
+        "code": "765 861 342",
+        "creator": "LogikJ",
+        "focus": "B Road Purist - Enkei rims, Mugen Hood, Honda Wing",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Street",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "30 May 26",
+        "notes": "Online · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2014 HSV GEN-F GTS",
+        "class": "A",
+        "code": "137 244 620",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "8 Jul 26",
+        "notes": "Online, Seasonal - Fairly easy for purist, not that fast though especially compared to AWD · Modern Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2014 HSV GEN-F GTS",
+        "class": "A",
+        "code": "251 125 561",
+        "creator": "LogikJ",
+        "focus": "Road AWD Allround Very Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "8 Jul 26",
+        "notes": "Online, Seasonal, Rivals - Offmeta AWD, very strong overall · Modern Muscle",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1993 Jaguar XJ220",
+        "class": "A",
+        "code": "438 013 497",
+        "creator": "LogikJ",
+        "focus": "Road AWD Full Aero Grip",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "6.0L V12",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal Trial - Easy to drive · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Jeep Grand Cherokee Trackhawk",
+        "class": "B",
+        "code": "944 742 322",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Stock Look + Rear Rim Profile",
+        "date": "2 Jul 26",
+        "notes": "Online, Seasonal - Easy · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Jeep Grand Cherokee Trackhawk",
+        "class": "A",
+        "code": "130 735 231",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC Widebody Stock Engine",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Widebody Stock Rims",
+        "date": "2 Jul 26",
+        "notes": "Online, Seasonal - Easy, Grip · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Jeep JT",
+        "class": "C",
+        "code": "153 838 391",
+        "creator": "LogikJ",
+        "focus": "C Dirt/CC Purist Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "14 Jun 26",
+        "notes": "Online, Rivals - Decent pace + very easy · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Jeep JT",
+        "class": "C",
+        "code": "141 239 341",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Allround Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "14 Jun 26",
+        "notes": "Online - Best on circuits + very easy · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2016 Jeep Trailcat",
+        "class": "A",
+        "code": "157 328 353",
+        "creator": "LogikJ",
+        "focus": "A800 Dirt/CC Allround",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal · Unlimited Offroad",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2012 Jeep Wrangler Rubicon",
+        "class": "A",
+        "code": "151 607 175",
+        "creator": "LogikJ",
+        "focus": "Dirt/CC Strong OffMeta",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Stock Look",
+        "date": "8 Jul 26",
+        "notes": "Online, Seasonal - A little harder to drive but offmeta pace very strong · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1988 Lamborghini Countach LP5000 QV",
+        "class": "A",
+        "code": "621 100 583",
+        "creator": "LogikJ",
+        "focus": "Road Purist Fast",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "24 Jun 26",
+        "notes": "Online, Seasonal Retro Supercars - Strong Purist · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2012 Lamborghini Gallardo LP570-4 Spyder Performante",
+        "class": "A",
+        "code": "145 876 680",
+        "creator": "LogikJ",
+        "focus": "A Road Allround Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Full Aero Stock Rims",
+        "date": "4 Jul 26",
+        "notes": "Quite strong all around, lacking a little high speed · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2012 Lamborghini Gallardo LP570-4 Spyder Performante",
+        "class": "A",
+        "code": "123 939 474",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "4 Jul 26",
+        "notes": "Decent allaround purist - easy to drive · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2022 Lamborghini Huracán Tecnica",
+        "class": "S1",
+        "code": "140 853 169",
+        "creator": "LogikJ",
+        "focus": "S1 Road (This car has bugged hitbox, AVOID Narai and Curbs)",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "Full Aero",
+        "date": "15 Jul 26",
+        "notes": "Online, Seasonal - This car like many other cars in Forza has a bugged hitbox and will die on many curbs in the game, Narai circuit is the worst offender and electric town is bad too. There is no way to tune fix this it is a known game bug. Be careful which playlist you use · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2020 Lamborghini Huracán STO",
+        "class": "S1",
+        "code": "995 548 003",
+        "creator": "LogikJ",
+        "focus": "S1 Road Strong Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Stock Look",
+        "date": "16 Jul 26",
+        "notes": "Online, Seasonal, Rivals - Very strong AWD car, offmeta · Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2024 Lamborghini Temerario",
+        "class": "A",
+        "code": "115 600 608",
+        "creator": "LogikJ",
+        "focus": "Road Allround Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "5.2L V10",
+        "build": "Full Aero Stock Rims",
+        "date": "24 Jul 26",
+        "notes": "Nice allround easy Lobby car - fairly strong pace too · Hypercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2024 Lamborghini Temerario",
+        "class": "A",
+        "code": "524 665 007",
+        "creator": "LogikJ",
+        "focus": "Dirt Allround Good",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.2L V10",
+        "build": "Full Aero Stock Rims",
+        "date": "24 Jul 26",
+        "notes": "Nice allround easy Lobby car - fairly strong pace too · Hypercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2019 Lamborghini Urus",
+        "class": "A",
+        "code": "151 745 529",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.2L V10",
+        "build": "Stock Look",
+        "date": "28 May 26",
+        "notes": "Online · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 Lancia Delta HF Integrale EVO",
+        "class": "C",
+        "code": "183 212 479",
+        "creator": "LogikJ",
+        "focus": "C Dirt Rally",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Superturismo Rims + Street Hood lights",
+        "date": "15 Jul 26",
+        "notes": "Online, Seasonal Trial Total Rally - Easy · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1986 Lancia Delta S4",
+        "class": "B",
+        "code": "899 875 417",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "15 Jul 26",
+        "notes": "Online, Seasonal - Easy and Very nice to drive · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1986 Lancia Delta S4",
+        "class": "B",
+        "code": "175 156 737",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally Purist Grip",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal - Easy and Very nice to drive · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1974 Lancia Stratos HF Stradale",
+        "class": "C",
+        "code": "122 431 559",
+        "creator": "LogikJ",
+        "focus": "C Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "16 Jun 26",
+        "notes": "Online Easy · Classic Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1974 Lancia Stratos HF Stradale",
+        "class": "B",
+        "code": "126 464 916",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally AWD Grip",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "16 Jun 26",
+        "notes": "Online - Easy grip for circuits · Classic Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Land Rover Defender 110 X",
+        "class": "B",
+        "code": "138 402 954",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Rear Aero (Not Visible) Stock Rims",
+        "date": "2 Jul 26",
+        "notes": "Online, Seasonal - Decent on handling stuff, cannot see rear aero · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2020 Land Rover Defender 110 X",
+        "class": "A",
+        "code": "900 725 130",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Rear Aero (Not Visible) Stock Rims",
+        "date": "2 Jul 26",
+        "notes": "Online, Seasonal - Decent on handling stuff, cannot see rear aero · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2015 Land Rover Range Rover Sport SVR",
+        "class": "B",
+        "code": "540 136 599",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Purist Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist + Rear Rim Profile",
+        "date": "2 Jun 26",
+        "notes": "Online Very nice to drive · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2015 Land Rover Range Rover Sport SVR",
+        "class": "B",
+        "code": "108 179 073",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.2L V10",
+        "build": "Stock Look + Rear Rim Profile",
+        "date": "2 Jul 26",
+        "notes": "Online, Seasonal - Decently Strong with V10 swap · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2015 Land Rover Range Rover Sport SVR",
+        "class": "A",
+        "code": "129 423 092",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC Purist Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Rear Rim Profile/Konig Interflow Rims",
+        "date": "2 Jun 26",
+        "notes": "Online Nice & Easy - Strongest Purist SUV · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2010 Lexus LFA",
+        "class": "A",
+        "code": "118 466 397",
+        "creator": "LogikJ",
+        "focus": "Dirt AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD No Aero Stock Rims",
+        "date": "4 Jul 26",
+        "notes": "Online easy AWD but not very fast, lacking accel · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2015 Lexus RC F",
+        "class": "A",
+        "code": "157 114 284",
+        "creator": "LogikJ",
+        "focus": "A Road/Street AWD LFA Engine No Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "4.8L V10",
+        "build": "AWD Swapped Stock Look",
+        "date": "21 May 26",
+        "notes": "Online + Seasonal Easy · Modern Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2023 Lotus Emira",
+        "class": "A",
+        "code": "149 483 242",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "6 Jun 26",
+        "notes": "Online - Very easy and nice to drive · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2023 Lotus Emira",
+        "class": "A",
+        "code": "614 604 548",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "6 Jun 26",
+        "notes": "Online · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33933,7 +32981,93 @@ window.FH6_DB = {
         "date": "6 Jun 26",
         "notes": "Online · Modern Sports Cars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1997 Maserati Ghibli Cup",
+        "class": "B",
+        "code": "756 726 852",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Street",
+        "engine": "Stock",
+        "build": "Purist Stock Rims",
+        "date": "22 Jul 26",
+        "notes": "Online - Purist lobby chiller · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1997 Maserati Ghibli Cup",
+        "class": "A",
+        "code": "722 826 762",
+        "creator": "LogikJ",
+        "focus": "Dirt AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "22 Jul 26",
+        "notes": "Online - Decent lobby car, good pace · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1997 Maserati Ghibli Cup",
+        "class": "A",
+        "code": "106 176 090",
+        "creator": "LogikJ",
+        "focus": "Road AWD Full Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Full Aero Stock Rims",
+        "date": "22 Jul 26",
+        "notes": "Online - Lobby chill allround car · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2010 Mazda Mazdaspeed 3",
+        "class": "B",
+        "code": "601 959 496",
+        "creator": "LogikJ",
+        "focus": "Road Purist / Togue Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "28 May 26",
+        "notes": "Online + Togue Easy · Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2017 Mazda MX-5 Cup",
+        "class": "B",
+        "code": "140 998 267",
+        "creator": "LogikJ",
+        "focus": "B Road Grip",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Full Aero",
+        "date": "28 May 26",
+        "notes": "Togue Grip · Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33952,7 +33086,26 @@ window.FH6_DB = {
         "date": "8 Jul 26",
         "notes": "Online, Seasonal - Decently strong allround, easy and nice to drive · Modern Supercars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2015 McLaren 570S Coupé",
+        "class": "A",
+        "code": "661 217 039",
+        "creator": "LogikJ",
+        "focus": "Dirt AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "6.1L V12",
+        "build": "AWD Stock Look",
+        "date": "4 Jul 26",
+        "notes": "Online Lobbies - Great lobby car, looks good with stock wing moving · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
@@ -33971,10 +33124,1937 @@ window.FH6_DB = {
         "date": "4 Jul 26",
         "notes": "Online Lobbies - Slow car, take in non competitive lobbies only · Retro Supercars",
         "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
+        "tab": "🛠️LogikJ's Tunes",
         "also_in": [
           "LogikJ"
         ]
+      },
+      {
+        "car": "2020 Mercedes-AMG GT Black Series Welcome Pack",
+        "class": "S2",
+        "code": "117 260 132",
+        "creator": "LogikJ",
+        "focus": "S2 Road AWD Accel V2",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "AWD",
+        "date": "13 Jun 26",
+        "notes": "Online · Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2017 Mercedes-AMG GT R",
+        "class": "A",
+        "code": "894 449 376",
+        "creator": "LogikJ",
+        "focus": "A700 Road or Dirt AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "6.2L V8",
+        "build": "AWD Volk Racing G16 Rims",
+        "date": "9 Jul 26",
+        "notes": "Online - Easy to drive, usable on road or dirt · Super GT",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2017 Mercedes-AMG GT R",
+        "class": "S1",
+        "code": "466 802 563",
+        "creator": "LogikJ",
+        "focus": "S1 Dirt Strong Accel",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.2L V10",
+        "build": "AWD Stock Look",
+        "date": "Jul 28 2026",
+        "notes": "Online - Strong overall dirt car, has good accel · Super GT",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2017 Mercedes-AMG GT R",
+        "class": "S1",
+        "code": "125 349 855",
+        "creator": "LogikJ",
+        "focus": "S1 Road AWD",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "5.2L V10",
+        "build": "AWD Stock Look",
+        "date": "9 Jul 26",
+        "notes": "Online - Easy to use but mediocre pace · Super GT",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1998 Mercedes-Benz AMG CLK GTR",
+        "class": "A",
+        "code": "113 745 403",
+        "creator": "LogikJ",
+        "focus": "A Class Grip Allround - Use on Road or Dirt it works for both",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Full Aero",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal - Offroad tires combined with high grip means it works offroad and on road too. Very easy · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1998 Mercedes-Benz AMG CLK GTR",
+        "class": "S1",
+        "code": "648 444 434",
+        "creator": "LogikJ",
+        "focus": "S1 Dirt Grip Meta",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Full Aero Heavy Rims",
+        "date": "13 Jul 26",
+        "notes": "Rivals Grip Meta · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1998 Mercedes-Benz AMG CLK GTR",
+        "class": "S2",
+        "code": "335 600 643",
+        "creator": "LogikJ",
+        "focus": "S2 Dirt",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing V12",
+        "build": "AWD Full Aero Heavy Rims",
+        "date": "28 Jun 26",
+        "notes": "Rivals - Off meta on some tracks but the MX5 FE is king so pointless. Is on race sus so will struggle with CC/big jumps or water · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1987 Mercedes-Benz AMG Hammer Coupe",
+        "class": "B",
+        "code": "133 046 889",
+        "creator": "LogikJ",
+        "focus": "B Dirt AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD No Aero Stock Rims",
+        "date": "18 Jun 26",
+        "notes": "Online, Seasonal - Kinda slow but easy to drive · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1987 Mercedes-Benz AMG Hammer Coupe",
+        "class": "A",
+        "code": "471 164 852",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Stock Look CLK Engine",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "6.9L V12 TT",
+        "build": "AWD No Aero Stock Rims",
+        "date": "18 Jun 26",
+        "notes": "Online - Easy but careful with back end at high speed hes lacking rear DF · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2013 Mercedes-Benz G 65 AMG",
+        "class": "A",
+        "code": "935 102 707",
+        "creator": "LogikJ",
+        "focus": "Dirt/CC Widebody Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Widebody Stock Rims",
+        "date": "12 Jul 26",
+        "notes": "Online, Seasonal - Strong overall pace · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Mercedes-Benz X-Class",
+        "class": "A",
+        "code": "118 260 950",
+        "creator": "LogikJ",
+        "focus": "CC Rivals Meta",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "WB No Aero + Supercharger",
+        "date": "25 May 26",
+        "notes": "Rivals, Online Meta · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Mercedes-Benz X-Class",
+        "class": "B",
+        "code": "116 983 594",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Strong Off Meta",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.2L V10",
+        "build": "Widebody No Aero",
+        "date": "25 May 26",
+        "notes": "Rivals, Online Strong · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1965 MINI Cooper S",
+        "class": "B",
+        "code": "239 900 156",
+        "creator": "LogikJ",
+        "focus": "B Dirt AWD Strong No Widebody",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.0L I4 VVT",
+        "build": "AWD, Compomotive ML Rims",
+        "date": "10 Jul 26",
+        "notes": "Online Lobbies - Strong B Dirt Car, good accel · Classic Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1965 MINI Cooper S",
+        "class": "C",
+        "code": "969 769 799",
+        "creator": "LogikJ",
+        "focus": "C Dirt Rally AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Compomotive ML Rims",
+        "date": "15 Jul 26",
+        "notes": "Online, Seasonal Trial Total Rally - Easy · Classic Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1995 Mitsubishi Eclipse GSX",
+        "class": "C",
+        "code": "145 872 670",
+        "creator": "LogikJ",
+        "focus": "Road/Street Purist Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "29 Jul 26",
+        "notes": "Online, Seasonal Retro Sports Car - Easy purist, decent pace · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1995 Mitsubishi Eclipse GSX",
+        "class": "B",
+        "code": "138 854 814",
+        "creator": "LogikJ",
+        "focus": "Road Purist Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Street",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "2 Jun 26",
+        "notes": "Onliune, Seasonal - Easy · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2006 Mitsubishi Lancer Evolution IX MR",
+        "class": "A",
+        "code": "122 334 272",
+        "creator": "LogikJ",
+        "focus": "A Dirt Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "24 May 26",
+        "notes": "Online - Easy · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2006 Mitsubishi Lancer Evolution IX MR",
+        "class": "B",
+        "code": "811 459 629",
+        "creator": "LogikJ",
+        "focus": "B Dirt Purist Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "",
+        "notes": "Online - Easy · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2001 Mitsubishi Lancer Evolution VI GSR TM Edition",
+        "class": "A",
+        "code": "360 060 901",
+        "creator": "LogikJ",
+        "focus": "A Dirt Purist Easy V2",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "21 May 26",
+        "notes": "Online + Seasonal Nice to drive · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2004 Mitsubishi Lancer Evolution VIII MR Welcome Pack",
+        "class": "A",
+        "code": "516 939 958",
+        "creator": "LogikJ",
+        "focus": "Dirt Purist Grippy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "21 May 26",
+        "notes": "Online + Seasonal · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2008 Mitsubishi Lancer Evolution X GSR",
+        "class": "B",
+        "code": "966 163 983",
+        "creator": "LogikJ",
+        "focus": "B600 Dirt Rally Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "6.2L V8",
+        "build": "Stock Look Power no WR",
+        "date": "1 Jul 26",
+        "notes": "Online, Seasonal - Fairly slow compared to the Subarus · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1995 Mitsubishi Montero Exceed 2800 TD",
+        "class": "B",
+        "code": "827 402 544",
+        "creator": "LogikJ",
+        "focus": "B700 Dirt/CC Strong V8",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "6.2L V8",
+        "build": "Stock Lock",
+        "date": "18 May 26",
+        "notes": "Online + Seasonal - Strong + Nice to drive · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1995 Mitsubishi Montero Exceed 2800 TD",
+        "class": "B",
+        "code": "260 728 282",
+        "creator": "LogikJ",
+        "focus": "B Cross Country Sprints Power",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "Racing 7.2L V8",
+        "build": "Stock Look + 20in Rims",
+        "date": "24 Jun 26",
+        "notes": "Online, Rivals, Seasonal - Offmeta pace on CC sprints, strong accel · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2010 Nissan 370Z",
+        "class": "A",
+        "code": "280 739 854",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Stock Look",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "7 Jun 26",
+        "notes": "Online · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1987 Nissan Be-1",
+        "class": "B",
+        "code": "172 385 513",
+        "creator": "LogikJ",
+        "focus": "B Road FWD Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "2.0L I4 VVT",
+        "build": "Stock Look",
+        "date": "31 May 26",
+        "notes": "Online Circuits · Eclectic Domestics",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2003 Nissan Fairlady Z",
+        "class": "B",
+        "code": "136 922 275",
+        "creator": "LogikJ",
+        "focus": "Road Purist Nismo",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist (Nismo Kit)",
+        "date": "15 May 26",
+        "notes": "Online · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1995 Nissan Gloria Gran Turismo",
+        "class": "B",
+        "code": "497 244 422",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally AWD Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "24 Jun 26",
+        "notes": "Online, Seasonal - Easy + nice to drive · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2012 Nissan GT-R Black Edition (R35)",
+        "class": "S1",
+        "code": "173 764 672",
+        "creator": "LogikJ",
+        "focus": "S1 Road Widebody",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "4.8L V10",
+        "build": "Widebody Full Aero LFA",
+        "date": "3 Jun 26",
+        "notes": "Online, Seasonal · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1972 Nissan Patrol",
+        "class": "C",
+        "code": "158 767 825",
+        "creator": "LogikJ",
+        "focus": "Dirt/CC Strong Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "26 Jul 26",
+        "notes": "Online, Rivals - Very strong purist grip good for circuits · Offroad",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1972 Nissan Patrol",
+        "class": "D",
+        "code": "494 294 362",
+        "creator": "LogikJ",
+        "focus": "Dirt Circuit Rivals",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "26 Jul 26",
+        "notes": "Circuit Rivals Meta - Currently has WR on Sunflower Scramble · Offroad",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1990 Nissan Pulsar GTI-R",
+        "class": "C",
+        "code": "316 113 924",
+        "creator": "LogikJ",
+        "focus": "C Dirt Rally Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.0L I4 VVT",
+        "build": "Stock Look",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal - Fairly strong overall and easy · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1989 Nissan Silvia K's (S13)",
+        "class": "C",
+        "code": "173 080 482",
+        "creator": "LogikJ",
+        "focus": "Purist Qualifiers",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "15 May 26",
+        "notes": "Qualifiers, Online · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1989 Nissan Silvia K's (S13)",
+        "class": "B",
+        "code": "511 675 067",
+        "creator": "LogikJ",
+        "focus": "B Road RWD Spec R Engine",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "No Aero - Spec R Engine + AR904 Rims",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1989 Nissan Silvia K's (S13)",
+        "class": "A",
+        "code": "609 533 291",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Full Aero Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "3.2L I6",
+        "build": "AWD Widebody Full Aero I6",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal Strong · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 Nissan Skyline GT-R",
+        "class": "B",
+        "code": "911 324 908",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist - 305mm rears",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1992 Nissan Skyline GT-R",
+        "class": "A",
+        "code": "161 102 713",
+        "creator": "LogikJ",
+        "focus": "Road Purist Cams",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist - Cams shift at redline",
+        "date": "21 May 26",
+        "notes": "Online + Seasonal · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2000 Nissan Skyline GT-R V Spec II",
+        "class": "B",
+        "code": "179 825 629",
+        "creator": "LogikJ",
+        "focus": "Road Purist Thicc",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "3 Jun 26",
+        "notes": "Online, Seasonal - Easy but slow · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2000 Nissan Skyline GT-R V Spec II",
+        "class": "A",
+        "code": "619 487 154",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "1 Jul 26",
+        "notes": "Online, Seasonal - Easy but fairly slow · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2000 Nissan Skyline GT-R V Spec II",
+        "class": "A",
+        "code": "133 423 664",
+        "creator": "LogikJ",
+        "focus": "Road Widebody Aero LFA",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "4.8L V10",
+        "build": "Do-Luck Bodykit, Top Secret Wing - No weight reduction LFA Engine",
+        "date": "1 Jul 26",
+        "notes": "Online, Seasonal - Much faster than purist unfortunately · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2010 Noble M600",
+        "class": "S1",
+        "code": "108 915 493",
+        "creator": "LogikJ",
+        "focus": "S1 Road AWD Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "AWD Full Aero RV12",
+        "date": "3 Jun 26",
+        "notes": "Online, Seasonal Strong Top End · Modern Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1984 Opel Manta 400",
+        "class": "B",
+        "code": "488 494 207",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal - Could also likely be used on road too Stocks are (Rally) · Rally Monsters",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1984 Opel Manta 400",
+        "class": "A",
+        "code": "203 816 990",
+        "creator": "LogikJ",
+        "focus": "A Dirt Rally AWD Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "12 Jul 26",
+        "notes": "Online, Seasonal Rally Monster - Very Strong overall dirt car and drives really nice too · Rally Monsters",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2007 Peugeot 207 Super 2000",
+        "class": "A",
+        "code": "707 326 774",
+        "creator": "LogikJ",
+        "focus": "Dirt Rally Strong Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "12 Jul 26",
+        "notes": "Online, Seasonal - Easy and nice to use, strong for purist · Rally Monsters",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1985 Porsche #185 959 Prodrive Rally Raid",
+        "class": "A",
+        "code": "807 267 123",
+        "creator": "LogikJ",
+        "focus": "Dirt Rally Allround",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Stock Look",
+        "date": "9 Jul 26",
+        "notes": "Online, Seasonal - Nice to drive · Rally Monsters",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2021 Porsche 911 GT3 (992)",
+        "class": "S1",
+        "code": "174 965 393",
+        "creator": "LogikJ",
+        "focus": "Road AWD Rv12",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "AWD, Full Aero RV12",
+        "date": "30 May 26",
+        "notes": "Online · Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2021 Porsche 911 GT3 (992)",
+        "class": "S1",
+        "code": "353 895 644",
+        "creator": "LogikJ",
+        "focus": "Road Purist Slow",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "30 May 26",
+        "notes": "Online · Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1993 Porsche 928 GTS",
+        "class": "A",
+        "code": "151 728 863",
+        "creator": "LogikJ",
+        "focus": "Dirt AWD Stock Look Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.2L V10",
+        "build": "AWD Stock Look + 1 tick front width",
+        "date": "5 Jul 26",
+        "notes": "Online - very strong accel and overall pace · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1987 Porsche 959",
+        "class": "A",
+        "code": "141 879 325",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "25 Jun 26",
+        "notes": "Online, Seasonal Retro - Grip Very Easy and Nice · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Porsche Cayenne Turbo",
+        "class": "B",
+        "code": "182 119 804",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "4.0L F6",
+        "build": "Stock Look + Rear Rim Profile",
+        "date": "2 Jul 26",
+        "notes": "Online, Seasonal - Easy · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 Porsche Cayenne Turbo",
+        "class": "A",
+        "code": "616 660 933",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC Very Stong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "5.2L V10",
+        "build": "Stock Look + Rear Rim Profile",
+        "date": "2 Jul 26",
+        "notes": "Online, Seasonal - Offmeta strong, fastest sport utility hero · Sports Utility Heroes, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2024 Ram 1500 TRX",
+        "class": "B",
+        "code": "632 734 871",
+        "creator": "LogikJ",
+        "focus": "Dirt/CC Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Stock, Street Bumper + Rim Profile",
+        "date": "10 Jun 26",
+        "notes": "Online decently quick · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2024 Ram 1500 TRX",
+        "class": "B",
+        "code": "166 619 043",
+        "creator": "LogikJ",
+        "focus": "B Cross Country Only Power Sprints",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Stock",
+        "engine": "8.4L V10",
+        "build": "Big Rims, Street Bumpers",
+        "date": "10 Jun 26",
+        "notes": "Offmeta CC Rivals · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2024 Ram 1500 TRX",
+        "class": "A",
+        "code": "135 821 060",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC Allround Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Stock, Street Bumper + Rim Profile",
+        "date": "10 Jun 26",
+        "notes": "Online, Rivals, Seasonal - Quite Strong · Pickups & 4x4's, Heavy Hitter",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1993 Renault Clio Williams",
+        "class": "C",
+        "code": "149 973 709",
+        "creator": "LogikJ",
+        "focus": "C Road Purist Grip",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "13 Jun 26",
+        "notes": "Onlijne, Seasonal - Very easy · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2008 Renault Mégane R26.R",
+        "class": "B",
+        "code": "811 022 439",
+        "creator": "LogikJ",
+        "focus": "Road Grip Stock Look K20",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "2.0L I4 VVT",
+        "build": "Purist",
+        "date": "1 Jul 26",
+        "notes": "Online, Total FWD - Easy to drive and decent pace with the Honda swap · Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1998 Subaru Impreza 22B-STi Version",
+        "class": "B",
+        "code": "755 364 258",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "14 Jun 26",
+        "notes": "Online - Easy and Nice · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2004 Subaru IMPREZA WRX STI (GD1)",
+        "class": "B",
+        "code": "653 682 935",
+        "creator": "LogikJ",
+        "focus": "B700 Strong Dirt Rally",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock Look",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal Strong & Easy · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2004 Subaru IMPREZA WRX STI (GD1)",
+        "class": "A",
+        "code": "848 004 844",
+        "creator": "LogikJ",
+        "focus": "A Dirt Online GT3",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "4.0L F6",
+        "build": "Stock Look",
+        "date": "30 May 26",
+        "notes": "Online · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2005 Subaru IMPREZA WRX STI (GD2)",
+        "class": "B",
+        "code": "264 112 972",
+        "creator": "LogikJ",
+        "focus": "B600 Dirt Rally Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock Look",
+        "date": "1 Jul 26",
+        "notes": "Online, Seasonal - Probably fastest modern rally car · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2008 Subaru IMPREZA WRX STI (GR)",
+        "class": "B",
+        "code": "171 386 623",
+        "creator": "LogikJ",
+        "focus": "B600 Dirt Rally Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock Look",
+        "date": "1 Jul 26",
+        "notes": "Online, Seasonal - A little slower than 04 and 05 but still good · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2005 Subaru LEGACY B4 2.0 GT",
+        "class": "B",
+        "code": "106 960 335",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "1 Jun 26",
+        "notes": "Online, Seasonal · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1990 Subaru LEGACY RS",
+        "class": "C",
+        "code": "114 538 503",
+        "creator": "LogikJ",
+        "focus": "C Dirt Rally Purist Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "24 Jun 26",
+        "notes": "Online, Seasonal - Very easy to drive · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2019 Subaru STI S209",
+        "class": "B",
+        "code": "446 838 321",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally Strong Grip",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock Look",
+        "date": "8 Jun 26",
+        "notes": "Online - Nice to drive · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2019 Subaru STI S209",
+        "class": "A",
+        "code": "136 469 189",
+        "creator": "LogikJ",
+        "focus": "A Dirt Widebody F6",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "4.0L F6",
+        "build": "Widebody FA",
+        "date": "8 Jun 26",
+        "notes": "Online - Grip Easy · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2019 Subaru STI S209",
+        "class": "A",
+        "code": "797 468 573",
+        "creator": "LogikJ",
+        "focus": "A Road Widebody Grip Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "2.4L F4",
+        "build": "Widebody FA",
+        "date": "8 Jun 26",
+        "notes": "Online - Extremely easy and nice to drive · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2022 Subaru WRX",
+        "class": "B",
+        "code": "865 826 962",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally Stock Look Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock Look",
+        "date": "8 Jun 26",
+        "notes": "Online, Campaign, Seasonals - Easy to drive · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2015 Subaru WRX STI (GT)",
+        "class": "B",
+        "code": "137 454 315",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally Stock Look Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock Look",
+        "date": "21 Jun 26",
+        "notes": "Online, Campaign, Seasonals - Easy to drive · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1993 Toyota #1 T100 Baja Truck",
+        "class": "S1",
+        "code": "103 302 013",
+        "creator": "LogikJ",
+        "focus": "S1 Dirt/CC Maxed PI Slow Compared to FH4 :(",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Stock Look",
+        "date": "8 Jun 26",
+        "notes": "Online, Open · Unlimited Offroad",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1999 Toyota Altezza RS200 Z Edition",
+        "class": "A",
+        "code": "172 680 687",
+        "creator": "LogikJ",
+        "focus": "A Dirt AWD +RC TRD Kit",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD No Aero - TRD Bodykit and Race Roll Cage",
+        "date": "21 Jun 26",
+        "notes": "Online - Updated with RC and TRD Kit, drives a lot nicer with the race cage · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1999 Toyota Altezza RS200 Z Edition",
+        "class": "A",
+        "code": "130 659 132",
+        "creator": "LogikJ",
+        "focus": "A Road/Street AWD No Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD No Aero",
+        "date": "",
+        "notes": "Online · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1999 Toyota Altezza RS200 Z Edition",
+        "class": "C",
+        "code": "225 950 073",
+        "creator": "LogikJ",
+        "focus": "C Road/Street Purist Easy",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "23 May 26",
+        "notes": "Online · Retro Super Saloons",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1994 Toyota Celica GT-Four ST205",
+        "class": "B",
+        "code": "132 999 502",
+        "creator": "LogikJ",
+        "focus": "B Dirt Stock Look Easy",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock look",
+        "date": "21 May 26",
+        "notes": "Online + Seasonal · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1994 Toyota Celica GT-Four ST205",
+        "class": "C",
+        "code": "880 951 746",
+        "creator": "LogikJ",
+        "focus": "Purist Qualifiers",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "15 May 26",
+        "notes": "Qualifers, Online - Faster + Easier than silvia · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1994 Toyota Celica GT-Four ST205",
+        "class": "C",
+        "code": "126 606 600",
+        "creator": "LogikJ",
+        "focus": "Offroad Qualifiers",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "No Aero, Oettinger Type RE Rims",
+        "date": "21 May 26",
+        "notes": "Seasonal, Qualifiers Offroad - Easy · Retro Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2003 Toyota Celica Sport Specialty II",
+        "class": "C",
+        "code": "150 673 640",
+        "creator": "LogikJ",
+        "focus": "Road Purist Grip Strong",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "29 Jul 26",
+        "notes": "Online, Seasonal Retro Sports Cars - Strong allround grip purist · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2003 Toyota Celica Sport Specialty II",
+        "class": "C",
+        "code": "144 642 889",
+        "creator": "LogikJ",
+        "focus": "Road/Street AWD Strong",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "AWD Stock Look",
+        "date": "28 Jul 26",
+        "notes": "Online, Seasonal Retro Sports, Rivals - Very strong stock look awd · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "2003 Toyota Celica Sport Specialty II",
+        "class": "B",
+        "code": "182 893 646",
+        "creator": "LogikJ",
+        "focus": "Road Purist Strong",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "3 Jun 26",
+        "notes": "Online Very Strong, Seasonal · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2023 Toyota GR Corolla",
+        "class": "A",
+        "code": "841 941 818",
+        "creator": "LogikJ",
+        "focus": "Dirt Rally Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "9 Jul 26",
+        "notes": "Online, Seasonal - Fairly slow unfortunately · Super Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2021 Toyota GR Yaris",
+        "class": "B",
+        "code": "141 045 607",
+        "creator": "LogikJ",
+        "focus": "B700 Dirt Rally Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.4L F4",
+        "build": "Stock Look",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal Easy · Modern Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2022 Toyota GR86",
+        "class": "A",
+        "code": "184 957 505",
+        "creator": "LogikJ",
+        "focus": "A Road AWD Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Swapped Stock Look",
+        "date": "21 May 26",
+        "notes": "Online + Seasonal Easy and nice to drive · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2022 Toyota GR86",
+        "class": "B",
+        "code": "402 454 924",
+        "creator": "LogikJ",
+        "focus": "B Road Purist Grip",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "23 May 26",
+        "notes": "Online + Seasonal Grip Easy to drive · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1995 Toyota J&J Motorsport Supra WTAC",
+        "class": "S1",
+        "code": "174 858 718",
+        "creator": "LogikJ",
+        "focus": "S1 Road AWD Grip",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "AWD Heavy Rims + Rear Rim",
+        "date": "2 Jul 26",
+        "notes": "Seasonal, Time Attack Grip · Extreme Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2025 Toyota Land Cruiser",
+        "class": "B",
+        "code": "171 176 306",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Purist",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist + Rear Rim Profile",
+        "date": "19 May 26",
+        "notes": "Online + Seasonal · Sports Utility Heroes",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2025 Toyota Land Cruiser",
+        "class": "B",
+        "code": "388 213 018",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC V8",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "6.2L V8",
+        "build": "Stock Look + Rear Rim",
+        "date": "28 May 26",
+        "notes": "Online + Seasonal · Sports Utility Heroes",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2025 Toyota Land Cruiser",
+        "class": "A",
+        "code": "150 331 503",
+        "creator": "LogikJ",
+        "focus": "A Dirt/CC Very Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Stock Look + Rear Rim",
+        "date": "11 Jun 26",
+        "notes": "Online, Rivals, Seasonal - Offmeta pace, strong accel · Sports Utility Heroes",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2016 Toyota Land Cruiser Arctic Trucks AT37",
+        "class": "C",
+        "code": "604 013 819",
+        "creator": "LogikJ",
+        "focus": "C Dirt/CC Offroad Allround",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "7 Jun 26",
+        "notes": "Online · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2016 Toyota Land Cruiser Arctic Trucks AT37",
+        "class": "B",
+        "code": "674 506 782",
+        "creator": "LogikJ",
+        "focus": "B Dirt/CC Race tire not Stocks",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "6.2L V8",
+        "build": "Street front bumper",
+        "date": "7 Jun 26",
+        "notes": "Online Circuits · Pickups & 4x4's",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1965 Toyota Sports 800 Fanta Edition",
+        "class": "B",
+        "code": "120 758 386",
+        "creator": "LogikJ",
+        "focus": "B Dirt AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD No Aero",
+        "date": "18 May 26",
+        "notes": "Online + Seasonal · Classic Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1996 Toyota Starlet Glanza V",
+        "class": "B",
+        "code": "448 570 917",
+        "creator": "LogikJ",
+        "focus": "B Road K20 Varis Kit (Faster than purist)",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "2.0L I4 VVT",
+        "build": "Varis Kit",
+        "date": "12 Jun 26",
+        "notes": "Online - Easy to use · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1996 Toyota Starlet Glanza V",
+        "class": "B",
+        "code": "146 074 833",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "FWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "12 Jun 26",
+        "notes": "Online - Easy to use · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1996 Toyota Starlet Glanza V",
+        "class": "B",
+        "code": "162 559 941",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Offroad",
+        "engine": "2.0L I4 VVT",
+        "build": "AWD Varis Kit",
+        "date": "12 Jun 26",
+        "notes": "Online - Fairly strong overall · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1998 Toyota Supra RZ",
+        "class": "B",
+        "code": "123 744 040",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "3 Jun 26",
+        "notes": "Online + Seasonal · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2019 Toyota Tacoma TRD Pro Forza Edition",
+        "class": "S2",
+        "code": "116 330 274",
+        "creator": "LogikJ",
+        "focus": "S2 Offroad Grip",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Racing 7.2L V8",
+        "build": "Stock Look",
+        "date": "8 Jul 26",
+        "notes": "Grip Rivals, Seasonal - Easy · Extreme Track Toys",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1998 TVR Cerbera Speed 12",
+        "class": "S1",
+        "code": "167 609 465",
+        "creator": "LogikJ",
+        "focus": "S1 Dirt Allround Off Meta",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero Heavy Rims",
+        "date": "27 Jun 26",
+        "notes": "Online, Rivals - Strong Offmeta · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1998 TVR Cerbera Speed 12",
+        "class": "S1",
+        "code": "475 387 328",
+        "creator": "LogikJ",
+        "focus": "S1 Road AWD Full Aero",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "8.4L V10",
+        "build": "AWD Full Aero Heavy Rims + Max rear rim size",
+        "date": "27 Jun 26",
+        "notes": "Online - Easy to drive, has no top end · Retro Supercars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2005 TVR Sagaris",
+        "class": "A",
+        "code": "154 648 095",
+        "creator": "LogikJ",
+        "focus": "Road Purist",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "1 Jul 26",
+        "notes": "Online, Seasonal - Not too fast but easy · Retro Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2017 Volkswagen #34 Andretti Rally Cross Beetle",
+        "class": "A",
+        "code": "180 605 939",
+        "creator": "LogikJ",
+        "focus": "A Dirt Rally Grip",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "2.0L F4 T Rally",
+        "build": "ADV.1 ADV7 M.V2 CS Rims",
+        "date": "12 Jul 26",
+        "notes": "Online, Seasonal - Best for handling tracks, easy to use · Rally Monsters",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2017 Volkswagen #34 Andretti Rally Cross Beetle",
+        "class": "S1",
+        "code": "125 692 379",
+        "creator": "LogikJ",
+        "focus": "S1 Dirt",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "Front Aero Advan RS-DF Rims",
+        "date": "12 Jul 26",
+        "notes": "Online, Seasonal Rally Monsters - Fairly slow overall compared to Quattro and RS200 · Rally Monsters",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1983 Volkswagen Golf GTI",
+        "class": "D",
+        "code": "144 158 256",
+        "creator": "LogikJ",
+        "focus": "Seasonal Road AWD",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Stock",
+        "engine": "Stock",
+        "build": "AWD Full Aero",
+        "date": "17 Jun 26",
+        "notes": "Seasonal AWD 1980s Easy but slow - use 1986 civic · Retro Hot Hatch",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "1983 Volvo 242 Turbo Evolution",
+        "class": "B",
+        "code": "381 550 924",
+        "creator": "LogikJ",
+        "focus": "B Dirt Rally AWD",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "17 Jun 26",
+        "notes": "Online, Seasonal - Easy + nice to drive · Classic Rally",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes",
+        "also_in": [
+          "LogikJ"
+        ]
+      },
+      {
+        "car": "2018 TVR Griffith",
+        "class": "A",
+        "code": "450 538 752",
+        "creator": "LogikJ",
+        "focus": "A Class Allround - Use on Road or Dirt",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "Stock",
+        "build": "AWD Full Aero Superturismo Rims",
+        "date": "29 Jul 26",
+        "notes": "Online, Seasonal - Easy allround lobby car for either dirt or road · Modern Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1969 Nissan Fairlady Z 432",
+        "class": "B",
+        "code": "149 706 890",
+        "creator": "LogikJ",
+        "focus": "Road Purist Easy",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Purist",
+        "date": "29 Jul 26",
+        "notes": "Online, Seasonal - Easy average pace Purist · Classic Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
+      },
+      {
+        "car": "1969 Nissan Fairlady Z 432",
+        "class": "B",
+        "code": "157 785 282",
+        "creator": "LogikJ",
+        "focus": "Dirt AWD Strong",
+        "drivetrain": "AWD",
+        "discipline": "dirt/offroad",
+        "tire": "Offroad",
+        "engine": "3.2L I6",
+        "build": "AWD Stock Look",
+        "date": "29 Jul 26",
+        "notes": "Online, Seasonal - Strong pace dirt car · Classic Sports Cars",
+        "source": "LogikJ",
+        "tab": "🛠️LogikJ's Tunes"
       },
       {
         "car": "2017 Mercedes-AMG GT R",
@@ -33996,365 +35076,1108 @@ window.FH6_DB = {
         ]
       },
       {
-        "car": "2017 Mercedes-AMG GT R",
-        "class": "S1",
-        "code": "125 349 855",
-        "creator": "LogikJ",
-        "focus": "S1 Road AWD",
+        "car": "2019 Apollo Intensa Emozione",
+        "class": "S2",
+        "code": "468 714 904",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Slicks",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2023 Aston Martin Valkyrie",
+        "class": "S2",
+        "code": "103 482 103",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "7.0L V12",
+        "build": "Vulcan engine",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2017 Aston Martin Vulcan AMR Pro",
+        "class": "S2",
+        "code": "103 541 548",
+        "creator": "K1Z Gray",
+        "focus": "RWD Allround",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2009 Audi R8 LMS",
+        "class": "S2",
+        "code": "110 603 772",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround pi flex",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2021 BMW M4 Competition Coupé 'Welcome Pack'",
+        "class": "S2",
+        "code": "182 927 806",
+        "creator": "K1Z Gray",
+        "focus": "ThankfulBard261",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "5.0L V10",
+        "build": "Full Aero 09 M5 engine",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2012 Ferrari 599XX Evolution",
+        "class": "S2",
+        "code": "258 415 854",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1989 Ferrari F40 C",
+        "class": "S2",
+        "code": "163 182 715",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "4.5L V8",
+        "build": "458 engine",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1989 Ferrari F40 C",
+        "class": "S2",
+        "code": "120 507 764",
+        "creator": "K1Z Gray",
+        "focus": "AWD Power",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1996 Ferrari F50 GT",
+        "class": "S2",
+        "code": "724 601 623",
+        "creator": "K1Z Gray",
+        "focus": "AWD Sprints",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2005 Ferrari FXX",
+        "class": "S2",
+        "code": "153 632 333",
+        "creator": "K1Z Gray",
+        "focus": "sorry about the ride height",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Super Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2014 Ferrari FXX K",
+        "class": "S2",
+        "code": "111 123 368",
+        "creator": "K1Z Gray",
+        "focus": "RWD Allround",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Drift",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2013 Ferrari LaFerrari",
+        "class": "S2",
+        "code": "145 050 874",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Racing V12",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2020 Gordon Murray Automotive T.50",
+        "class": "S2",
+        "code": "124 823 085",
+        "creator": "K1Z Gray",
+        "focus": "slow but easy",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "Stock",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2021 Hennessey Venom F5",
+        "class": "S2",
+        "code": "127 141 473",
+        "creator": "K1Z Gray",
+        "focus": "Slayology",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1992 Honda #21 Hardrace/JDMYard Civic WTAC",
+        "class": "S2",
+        "code": "100 934 440",
+        "creator": "K1Z Gray",
+        "focus": "front width",
+        "drivetrain": "FWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "Stock",
+        "build": "1 tick off max front width",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2001 Honda #33 Integra WTAC",
+        "class": "S2",
+        "code": "117 534 622",
+        "creator": "K1Z Gray",
+        "focus": "super duper mega ultra giga mega integra",
+        "drivetrain": "FWD",
+        "discipline": "",
+        "tire": "Super Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2004 Honda #52 Evasive Motorsports S2000 WTAC",
+        "class": "S2",
+        "code": "482 208 585",
+        "creator": "K1Z Gray",
+        "focus": "AWD Handling",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2017 Koenigsegg Agera RS",
+        "class": "S2",
+        "code": "519 750 752",
+        "creator": "K1Z Gray",
+        "focus": "It's a CCGT",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "5.0L V8",
+        "build": "CCGT engine",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2008 Koenigsegg CCGT",
+        "class": "S2",
+        "code": "865 318 237",
+        "creator": "K1Z Gray",
+        "focus": "RWD Allround",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Drift",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2024 Koenigsegg Gemera",
+        "class": "S2",
+        "code": "128 439 824",
+        "creator": "K1Z Gray",
+        "focus": "Queenology",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Drift",
+        "engine": "Stock",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2020 Koenigsegg Jesko",
+        "class": "S2",
+        "code": "816 704 535",
+        "creator": "K1Z Gray",
+        "focus": "insectivore",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2016 Lamborghini Centenario LP 770-4",
+        "class": "S2",
+        "code": "140 474 919",
+        "creator": "K1Z Gray",
+        "focus": "steering the ship",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "Racing V12",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1999 Lamborghini Diablo GTR",
+        "class": "S2",
+        "code": "136 491 433",
+        "creator": "K1Z Gray",
+        "focus": "Welcome Back FH5",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2020 Lamborghini Essenza SCV12",
+        "class": "S2",
+        "code": "357 300 055",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2020 Lamborghini Huracan STO",
+        "class": "S2",
+        "code": "122 550 746",
+        "creator": "K1Z Gray",
+        "focus": "lumber jumber",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "Racing V12",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2011 Lamborghini Sesto Elemento",
+        "class": "S2",
+        "code": "972 419 705",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
         "drivetrain": "AWD",
         "discipline": "road",
         "tire": "Rally",
         "engine": "5.2L V10",
-        "build": "AWD Stock Look",
-        "date": "9 Jul 26",
-        "notes": "Online - Easy to use but mediocre pace · Super GT",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "build": "Huracan engine Full Aero",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "1998 Mercedes-Benz AMG CLK GTR",
-        "class": "S1",
-        "code": "648 444 434",
-        "creator": "LogikJ",
-        "focus": "S1 Dirt Grip Meta",
+        "car": "2010 Lexus LFA FE",
+        "class": "S2",
+        "code": "906 184 221",
+        "creator": "K1Z Gray",
+        "focus": "Lexus SUS SAUCE (S2 AWD)",
         "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "AWD Full Aero Heavy Rims",
-        "date": "13 Jul 26",
-        "notes": "Rivals Grip Meta · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "discipline": "",
+        "tire": "Super Slicks",
+        "engine": "5.2L V10",
+        "build": "R8 LMS engine",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "2012 Nissan GT-R Black Edition (R35)",
-        "class": "S1",
-        "code": "173 764 672",
-        "creator": "LogikJ",
-        "focus": "S1 Road Widebody",
+        "car": "1997 Lotus Elise GT1",
+        "class": "S2",
+        "code": "128 495 263",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
         "drivetrain": "AWD",
         "discipline": "road",
-        "tire": "Rally",
-        "engine": "4.8L V10",
-        "build": "Widebody Full Aero LFA",
-        "date": "3 Jun 26",
-        "notes": "Online, Seasonal · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "tire": "Super Slicks",
+        "engine": "5.2L V10",
+        "build": "Huracan engine",
+        "date": "",
+        "notes": "Road · Retro Supercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "2010 Noble M600",
-        "class": "S1",
-        "code": "108 915 493",
-        "creator": "LogikJ",
-        "focus": "S1 Road AWD Strong",
+        "car": "2018 Lotus Exige Cup 430",
+        "class": "S2",
+        "code": "390 948 891",
+        "creator": "K1Z Gray",
+        "focus": "RWD Accel",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Slicks",
+        "engine": "5.2L V10",
+        "build": "Huracan engine",
+        "date": "",
+        "notes": "Road · Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2018 KTM X-Bow GT4",
+        "class": "S2",
+        "code": "157 644 517",
+        "creator": "K1Z Gray",
+        "focus": "S2 Road",
         "drivetrain": "AWD",
         "discipline": "road",
-        "tire": "Rally",
+        "tire": "Super Slicks",
         "engine": "Racing V12",
-        "build": "AWD Full Aero RV12",
-        "date": "3 Jun 26",
-        "notes": "Online, Seasonal Strong Top End · Modern Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "2021 Porsche 911 GT3 (992)",
-        "class": "S1",
-        "code": "174 965 393",
-        "creator": "LogikJ",
-        "focus": "Road AWD Rv12",
+        "car": "2004 Maserati MC12",
+        "class": "S2",
+        "code": "737 709 414",
+        "creator": "K1Z Gray",
+        "focus": "S2 Sprints",
         "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
+        "discipline": "",
+        "tire": "Super Slicks",
         "engine": "Racing V12",
-        "build": "AWD, Full Aero RV12",
-        "date": "30 May 26",
-        "notes": "Online · Track Toys",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Retro Supercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "2021 Porsche 911 GT3 (992)",
-        "class": "S1",
-        "code": "353 895 644",
-        "creator": "LogikJ",
-        "focus": "Road Purist Slow",
+        "car": "2008 Maserati MC12 Versione Corsa",
+        "class": "S2",
+        "code": "215 911 240",
+        "creator": "K1Z Gray",
+        "focus": "RWD Allround",
         "drivetrain": "RWD",
         "discipline": "road",
         "tire": "Rally",
-        "engine": "Stock",
-        "build": "Purist",
-        "date": "30 May 26",
-        "notes": "Online · Track Toys",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "1993 Toyota #1 T100 Baja Truck",
-        "class": "S1",
-        "code": "103 302 013",
-        "creator": "LogikJ",
-        "focus": "S1 Dirt/CC Maxed PI Slow Compared to FH4 :(",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Stock Look",
-        "date": "8 Jun 26",
-        "notes": "Online, Open · Unlimited Offroad",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1995 Toyota J&J Motorsport Supra WTAC",
-        "class": "S1",
-        "code": "174 858 718",
-        "creator": "LogikJ",
-        "focus": "S1 Road AWD Grip",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "Stock",
-        "build": "AWD Heavy Rims + Rear Rim",
-        "date": "2 Jul 26",
-        "notes": "Seasonal, Time Attack Grip · Extreme Track Toys",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1998 TVR Cerbera Speed 12",
-        "class": "S1",
-        "code": "167 609 465",
-        "creator": "LogikJ",
-        "focus": "S1 Dirt Allround Off Meta",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero Heavy Rims",
-        "date": "27 Jun 26",
-        "notes": "Online, Rivals - Strong Offmeta · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "1998 TVR Cerbera Speed 12",
-        "class": "S1",
-        "code": "475 387 328",
-        "creator": "LogikJ",
-        "focus": "S1 Road AWD Full Aero",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Rally",
-        "engine": "8.4L V10",
-        "build": "AWD Full Aero Heavy Rims + Max rear rim size",
-        "date": "27 Jun 26",
-        "notes": "Online - Easy to drive, has no top end · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2017 Volkswagen #34 Andretti Rally Cross Beetle",
-        "class": "S1",
-        "code": "125 692 379",
-        "creator": "LogikJ",
-        "focus": "S1 Dirt",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Stock",
-        "build": "Front Aero Advan RS-DF Rims",
-        "date": "12 Jul 26",
-        "notes": "Online, Seasonal Rally Monsters - Fairly slow overall compared to Quattro and RS200 · Rally Monsters",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Mercedes-AMG GT Black Series Welcome Pack",
+        "car": "1991 Mazda #55 Mazda 787B",
         "class": "S2",
-        "code": "117 260 132",
-        "creator": "LogikJ",
-        "focus": "S2 Road AWD Accel V2",
+        "code": "132 434 567",
+        "creator": "K1Z Gray",
+        "focus": "OG Furai",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Super Slicks",
+        "engine": "2.0L R3",
+        "build": "Furai engine",
+        "date": "",
+        "notes": "Road · Retro Racers",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2008 Mazda Furai",
+        "class": "S2",
+        "code": "118 867 198",
+        "creator": "K1Z Gray",
+        "focus": "S2 Meta",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1994 Mazda MX-5 Miata Forza Edition",
+        "class": "S2",
+        "code": "170 595 380",
+        "creator": "K1Z Gray",
+        "focus": "worst car they've ever added",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Drift",
+        "engine": "Stock",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Retro Sports Cars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2015 McLaren 570S Coupé",
+        "class": "S1",
+        "code": "560 144 672",
+        "creator": "K1Z Gray",
+        "focus": "S1 Road",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Slicks",
+        "engine": "5.2L V10",
+        "build": "Huracan engine Full Aero",
+        "date": "",
+        "notes": "Road · Modern Supercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2021 McLaren 765LT Coupe",
+        "class": "S2",
+        "code": "165 881 975",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "5.2L V10",
+        "build": "Huracan engine Full Aero",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1997 McLaren F1 GT",
+        "class": "S2",
+        "code": "599 325 985",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Stock",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Retro Supercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2013 McLaren P1",
+        "class": "S2",
+        "code": "151 859 601",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "4.0L V8TT",
+        "build": "Senna engine Full Aero",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2021 Mercedes-AMG Mercedes-AMG ONE",
+        "class": "S2",
+        "code": "110 761 147",
+        "creator": "K1Z Gray",
+        "focus": "AWD Handling",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "4.0L V8-TT",
+        "build": "GT Black Series engine",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2020 Mercedes-AMG GT Black Series 'Welcome Pack'",
+        "class": "S2",
+        "code": "131 802 149",
+        "creator": "K1Z Gray",
+        "focus": "AWD Accel",
         "drivetrain": "AWD",
         "discipline": "road",
         "tire": "Rally",
         "engine": "Racing V12",
-        "build": "AWD",
-        "date": "13 Jun 26",
-        "notes": "Online · Track Toys",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "build": "",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
         "car": "1998 Mercedes-Benz AMG CLK GTR",
         "class": "S2",
-        "code": "335 600 643",
-        "creator": "LogikJ",
-        "focus": "S2 Dirt",
+        "code": "751 485 535",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
         "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
+        "discipline": "road",
+        "tire": "Super Slicks",
         "engine": "Racing V12",
-        "build": "AWD Full Aero Heavy Rims",
-        "date": "28 Jun 26",
-        "notes": "Rivals - Off meta on some tracks but the MX5 FE is king so pointless. Is on race sus so will struggle with CC/big jumps or water · Retro Supercars",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Retro Supercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2005 Mitsubishi #1 Sierra Sierra Enterprises Lancer Evolution Time Attack",
+        "class": "S2",
+        "code": "743 633 217",
+        "creator": "K1Z Gray",
+        "focus": "GRIP GOD",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "1.6L I4 - Turbo Rally",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1983 Nissan #11 Tomica Skyline Turbo Super Silhouette",
+        "class": "S2",
+        "code": "141 248 367",
+        "creator": "K1Z Gray",
+        "focus": "AWD Accel",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Slicks",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Retro Racers",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1998 Nissan #23 Pennzoil Nismo Skyline GT-R",
+        "class": "S2",
+        "code": "639 236 522",
+        "creator": "K1Z Gray",
+        "focus": "AWD Handling",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "4.8L V10",
+        "build": "LFA engine",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1993 Nissan #32 Skyline WTAC 'Xtreme GTR'",
+        "class": "S2",
+        "code": "148 023 520",
+        "creator": "K1Z Gray",
+        "focus": "prime LogikJ weight",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1998 Nissan R390 (GT1)",
+        "class": "S2",
+        "code": "201 954 894",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "4.8L V10",
+        "build": "LFA engine Full Aero",
+        "date": "",
+        "notes": "Road · Retro Supercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1989 Nissan S-Cargo Forza Edition",
+        "class": "S2",
+        "code": "593 323 756",
+        "creator": "K1Z Gray",
+        "focus": "K1Z Gray THREATENS to share new tunes….",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2016 Pagani Huayra BC Coupe",
+        "class": "S2",
+        "code": "161 220 567",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Racing V12",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2021 Pagani Huayra R",
+        "class": "S2",
+        "code": "126 394 020",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2021 Pagani Huayra R",
+        "class": "S2",
+        "code": "747 209 460",
+        "creator": "K1Z Gray",
+        "focus": "RWD Allround",
+        "drivetrain": "RWD",
+        "discipline": "road",
+        "tire": "Drift",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2010 Pagani Zonda Cinque Roadster",
+        "class": "S2",
+        "code": "101 369 732",
+        "creator": "K1Z Gray",
+        "focus": "CeIeb 17",
+        "drivetrain": "AWD",
+        "discipline": "",
+        "tire": "Super Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2009 Pagani Zonda R",
+        "class": "S2",
+        "code": "131 940 042",
+        "creator": "K1Z Gray",
+        "focus": "S2 Powerbuild",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Drift",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2019 Porsche #70 Porsche Motorsport 935",
+        "class": "S2",
+        "code": "139 472 599",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1998 Porsche 911 GT1 Strassenversion",
+        "class": "S2",
+        "code": "123 153 425",
+        "creator": "K1Z Gray",
+        "focus": "S2 Powerbuild",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Drift",
+        "engine": "4.6L V8 Hybrid",
+        "build": "918 engine Full Aero",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2018 Porsche 911 GT2 RS",
+        "class": "S2",
+        "code": "683 805 287",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Racing V12",
+        "build": "Widebody",
+        "date": "",
+        "notes": "Road · Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2019 Porsche 911 GT3 RS",
+        "class": "S2",
+        "code": "678 939 324",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Racing V12",
+        "build": "Full Aero",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2023 Porsche 911 GT3 RS",
+        "class": "S2",
+        "code": "742 685 618",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2014 Porsche 918 Spyder",
+        "class": "S2",
+        "code": "624 917 755",
+        "creator": "K1Z Gray",
+        "focus": "AWD Grip",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "3.8 F6TT",
+        "build": "911 GT2 RS engine Full Aero",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2005 Porsche Cayman GT3 WTAC",
+        "class": "S2",
+        "code": "137 336 958",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "2015 Radical RXC Turbo",
+        "class": "S2",
+        "code": "806 130 421",
+        "creator": "K1Z Gray",
+        "focus": "S2 Road",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "5.2L V10",
+        "build": "Huracan engine",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1993 Schuppan 962CR",
+        "class": "S2",
+        "code": "672 518 568",
+        "creator": "K1Z Gray",
+        "focus": "AWD Allround",
+        "drivetrain": "AWD",
+        "discipline": "road",
+        "tire": "Super Slicks",
+        "engine": "3.8 F6TT",
+        "build": "911 GT2 RS engine",
+        "date": "",
+        "notes": "Road · Retro Supercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1994 Subaru Vivio RX-R FE",
+        "class": "S2",
+        "code": "114 268 362",
+        "creator": "K1Z Gray",
+        "focus": "remove FEs from the game",
+        "drivetrain": "FWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
+      },
+      {
+        "car": "1995 Toyota J&J Motorsport Supra WTAC",
+        "class": "S2",
+        "code": "168 450 637",
+        "creator": "K1Z Gray",
+        "focus": "S2 Powerbuild",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Race",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
         "car": "2019 Toyota Tacoma TRD Pro Forza Edition",
         "class": "S2",
-        "code": "116 330 274",
-        "creator": "LogikJ",
-        "focus": "S2 Offroad Grip",
+        "code": "125 598 547",
+        "creator": "K1Z Gray",
+        "focus": "Regular Slick",
         "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Offroad",
-        "engine": "Racing 7.2L V8",
-        "build": "Stock Look",
-        "date": "8 Jul 26",
-        "notes": "Grip Rivals, Seasonal - Easy · Extreme Track Toys",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
-      },
-      {
-        "car": "2020 Ford Super Duty F-450 DRW PLATINUM",
-        "class": "D",
-        "code": "703 292 734",
-        "creator": "LogikJ",
-        "focus": "D Dirt/CC Rivals Meta Stock Look",
-        "drivetrain": "AWD",
-        "discipline": "dirt/offroad",
-        "tire": "Stock",
+        "discipline": "",
+        "tire": "Slicks",
         "engine": "8.4L V10",
-        "build": "Stock Look",
-        "date": "7 Jun 26",
-        "notes": "Rivals Meta, Use handbrake to help turn in · Pickups & 4x4's, Heavy Hitter",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "build": "Viper engine",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "1991 Honda Beat",
-        "class": "D",
-        "code": "111 556 173",
-        "creator": "LogikJ",
-        "focus": "D RWD Purist Seasonal",
+        "car": "2015 Ultima Evolution Coupe 1020",
+        "class": "S2",
+        "code": "114 265 938",
+        "creator": "K1Z Gray",
+        "focus": "smoothie",
         "drivetrain": "RWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "Purist, OZ Superturismo Rims",
-        "date": "28 May 26",
-        "notes": "Seasonal Road · Eclectic Domestics",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "discipline": "",
+        "tire": "Drift",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "1991 Honda Beat",
-        "class": "D",
-        "code": "972 008 252",
-        "creator": "LogikJ",
-        "focus": "D Road AWD Seasonal Easy",
+        "car": "2015 Ultima Evolution Coupe 1020",
+        "class": "S2",
+        "code": "180 399 373",
+        "creator": "K1Z Gray",
+        "focus": "All Wheels Driving",
         "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "AWD Full Aero + OZ Superturismo Rims",
-        "date": "28 May 26",
-        "notes": "Rivals + Seasonal Road · Eclectic Domestics",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Racing V12",
+        "build": "",
+        "date": "",
+        "notes": "Road · Extreme Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "1986 Honda Civic SI",
-        "class": "D",
-        "code": "151 869 422",
-        "creator": "LogikJ",
-        "focus": "Road AWD Seasonal/Rivals Strong",
+        "car": "2020 Wuling Sunshine S Forza Edition",
+        "class": "S2",
+        "code": "896 597 514",
+        "creator": "K1Z Gray",
+        "focus": "Xiaomi Maf08 6L Air Fryer",
         "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "1.6L I4 VVT",
-        "build": "AWD Full Aero",
-        "date": "17 Jun 26",
-        "notes": "Seasonal, Rivals - Stock tires lacking a little grip but is fast · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "discipline": "",
+        "tire": "Super Slicks",
+        "engine": "Stock",
+        "build": "",
+        "date": "",
+        "notes": "Road · Track Toys",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       },
       {
-        "car": "1983 Volkswagen Golf GTI",
-        "class": "D",
-        "code": "144 158 256",
-        "creator": "LogikJ",
-        "focus": "Seasonal Road AWD",
-        "drivetrain": "AWD",
-        "discipline": "road",
-        "tire": "Stock",
-        "engine": "Stock",
-        "build": "AWD Full Aero",
-        "date": "17 Jun 26",
-        "notes": "Seasonal AWD 1980s Easy but slow - use 1986 civic · Retro Hot Hatch",
-        "source": "LogikJ",
-        "tab": "LogikJ's Tunes - CBA12RD",
-        "also_in": [
-          "LogikJ"
-        ]
+        "car": "2019 Zenvo TSR-S",
+        "class": "S2",
+        "code": "131 922 718",
+        "creator": "K1Z Gray",
+        "focus": "S2 Powerbuild",
+        "drivetrain": "RWD",
+        "discipline": "",
+        "tire": "Rally",
+        "engine": "Racing 7.2L V8",
+        "build": "",
+        "date": "",
+        "notes": "Road · Hypercars",
+        "source": "K1Z Gray",
+        "tab": "K1Z Gray's Tunes"
       }
     ],
     "kleis_recommendations": [

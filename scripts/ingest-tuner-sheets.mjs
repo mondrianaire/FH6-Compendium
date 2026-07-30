@@ -22,7 +22,11 @@ function parseCSV(t) {
   return rows;
 }
 const cell = (r, i) => (i == null || r[i] == null ? "" : String(r[i]).replace(/\s+/g, " ").trim());
-const normCode = (s) => { const m = (s || "").match(CODE); return m ? m[0].replace(/\s+/g, " ") : ""; };
+const normCode = (s) => {
+  const m = (s || "").match(CODE); if (!m) return "";
+  const d = m[0].replace(/\D/g, "");
+  return d.length === 9 ? `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}` : m[0].replace(/\s+/g, " ");
+};
 const normClass = (s) => {
   const k = (s || "").toUpperCase().replace(/[-\s]*CLASS/g, "").replace(/[^A-Z0-9]/g, "").trim();
   return ["D", "C", "B", "A", "S1", "S2", "X", "R"].includes(k) ? k : (k || "");
@@ -60,9 +64,21 @@ const SOURCES = [
     discipline: "drift",
   },
   {
-    tuner: "LogikJ", id: "1ZDLQ1Jg6E6VWfMZUZX-GWflVRl75xSYPj4NHUYwZnLo", tabs: ["LogikJ's Tunes - CBA12RD", "LogikJ's Tunes - D-R"],
+    tuner: "LogikJ", id: "1ZDLQ1Jg6E6VWfMZUZX-GWflVRl75xSYPj4NHUYwZnLo", tabs: ["🛠️LogikJ's Tunes", "LogikJ's Tunes - CBA12RD", "LogikJ's Tunes - D-R"],
     map: { year: 0, make: 1, model: 2, category: 3, focus: 5, class: 6, drivetrain: 8, engine: 9, build: 10, tire: 11, discipline: 12, usage: 13, date: 14, code: 15 },
   },
+  {
+    // Guest tuner hosted on LogikJ's sheet — same column layout.
+    tuner: "K1Z Gray", id: "1ZDLQ1Jg6E6VWfMZUZX-GWflVRl75xSYPj4NHUYwZnLo", tabs: ["K1Z Gray's Tunes"],
+    map: { year: 0, make: 1, model: 2, category: 3, focus: 5, class: 6, drivetrain: 8, engine: 9, build: 10, tire: 11, discipline: 12, usage: 13, date: 14, code: 15 },
+  },
+];
+// Deliberately NOT ingested (logged for transparency, not silently dropped):
+const SKIPPED = [
+  "LogikJ seasonal 'Series 1/2/3 × season' tabs — heavy overlap with the master tune list (dedupe would collapse); event-specific picks only",
+  "LogikJ '🏁Online Racing Tune Picks' + 'aiolos5656 Tunes/Drag' — <5 parseable codes / messy merged layout; low yield",
+  "kleis codes — live in cell hyperlinks that CSV export omits (kept as codeless recommendations)",
+  "Noa Miyako (docs.qq.com) — Tencent Docs, no CSV/gviz API; needs separate DOM scrape",
 ];
 
 function buildTune(src, tab, r) {
@@ -136,6 +152,7 @@ async function run() {
     fh6_only: true,
     caveat: "CSV export omits hyperlink targets, so kleis (codes in links) is ingested codeless as a recommendation index. Some sheet tabs mix FH5-era entries; only FH6-labelled tabs were pulled.",
     sources: sourceStats,
+    not_ingested: SKIPPED,
     counts: { coded_tunes_raw: all.length, coded_tunes_unique: tunes.length, kleis_recommendations: kleisRecs.length },
     tunes,
     kleis_recommendations: kleisRecs,

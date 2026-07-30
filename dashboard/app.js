@@ -82,6 +82,35 @@
     }
     return best;
   }
+  // ---- ingested tuner-sheet pool (1600+ community codes) ----
+  const POOL = ((DB.tunerSheets && DB.tunerSheets.tunes) || []).map((t) => ({
+    ...t, tokens: new Set(tnorm(t.car).split(" ").filter(Boolean)),
+  }));
+  const META_CREATORS = new Set(
+    Object.values((DB.tunerRoster && DB.tunerRoster.specialty_index) || {}).flat().map((s) => s.toLowerCase())
+  );
+  // map a dashboard discipline key → a pool discipline bucket
+  const DISC_BUCKET = { road: "road", touge_street: "road", street: "road", dirt_rally: "dirt/offroad", cross_country: "dirt/offroad", offroad: "dirt/offroad", drift: "drift", drag: "drag" };
+  // best pool tune for a car: make + ≥2 shared tokens, prefer class, then discipline, then a curated ("good") tuner
+  function poolMatch(name, cls, buckets) {
+    const qt = tnorm(name).split(" ").filter(Boolean);
+    if (!qt.length || !POOL.length) return null;
+    const make = qt[0];
+    let best = null, bestScore = -1;
+    for (const e of POOL) {
+      if (!e.tokens.has(make)) continue;
+      const shared = qt.filter((t) => e.tokens.has(t)).length;
+      if (shared < 2) continue;
+      let score = shared * 10;
+      if (cls && e.class === cls) score += 8;
+      if (buckets && buckets.size && e.discipline && buckets.has(e.discipline)) score += 5;
+      if (META_CREATORS.has((e.creator || "").toLowerCase())) score += 2;
+      if (score > bestScore) { bestScore = score; best = e; }
+    }
+    return best;
+  }
+  const bucketsFor = (carObj) => new Set(((carObj && carObj.disciplines) || []).map((d) => DISC_BUCKET[d]).filter(Boolean));
+
   // curated codes (attached directly to a car) win over fuzzy matches
   function curatedCode(carObj) {
     if (!carObj) return null;
@@ -93,6 +122,7 @@
   // returns a tiny 🔑 with the code in a native tooltip, or "" if no code is known
   function codeTip(name, carObj) {
     let c = curatedCode(carObj);
+    if (!c) { const p = poolMatch(name, carObj && carObj.class, bucketsFor(carObj)); if (p) c = { code: p.code, note: [p.focus, p.creator].filter(Boolean).join(" · "), src: p.source }; }
     if (!c) { const m = matchTuneCode(name); if (m) c = { code: m.code, note: m.note, src: "53Rain " + m.cls }; }
     if (!c || !c.code) return "";
     const title = `Tune code ${c.code}${c.note ? " — " + c.note : ""}${c.src ? " · " + c.src : ""} · verify in-game (Find Tuning Setups)`;
@@ -143,6 +173,8 @@
   function resolveTune(c) {
     const cur = curatedCode(c);
     if (cur && cur.code) return { level: "car", code: cur.code, source: cur.src || "community", note: cur.note };
+    const p = poolMatch(c.name, c.class, bucketsFor(c));
+    if (p) return { level: "pool", code: p.code, source: p.source, creator: p.creator, note: [p.focus, p.discipline].filter(Boolean).join(" · ") };
     const m = matchTuneCode(c.name);
     if (m) return { level: "car", code: m.code, source: "53Rain " + m.cls };
     const disc = (c.disciplines || [])[0];
@@ -150,7 +182,13 @@
     if (tmpl) return { level: "template", discipline: disc, tmpl };
     return null;
   }
-  const tuneChip = (c) => { const t = resolveTune(c); return !t ? "" : t.level === "car" ? "🔑 car code" : `📋 ${DISCIPLINE_LABEL[t.discipline] || "format"} template`; };
+  const tuneChip = (c) => {
+    const t = resolveTune(c);
+    if (!t) return "";
+    if (t.level === "template") return `📋 ${DISCIPLINE_LABEL[t.discipline] || "format"} template`;
+    if (t.level === "pool") return `🔑 ${t.creator ? t.creator + " code" : "community code"}`;
+    return "🔑 car code";
+  };
 
   // ---- owned-car tracking (localStorage — user state stays local; data/*.json stays facts-only) ----
   const OWNED_KEY = "fh6_owned_cars";
@@ -1017,52 +1055,55 @@
 
   // ---- tune codes (full 53Rain import) — opened as a modal overlay from the Cars page ----
   function openTuneCodesOverlay() {
-    const tc = DB.tuneCodes;
-    if (!tc) return;
     const host = document.getElementById("modalContent");
+    // merge 53Rain (DB.tuneCodes) + ingested tuner-sheet pool (DB.tunerSheets), dedupe by code
     const rows = [];
-    tc.classes.forEach((cl) => cl.cars.forEach((c) => rows.push({ ...c, class: cl.class })));
-    const metaCount = rows.filter((r) => r.tag === "meta").length;
-    let q = "", clsFilter = "";
-    const tagBadge = (t) => t === "meta" ? '<span class="badge tier-S">META</span>'
-      : t === "favorite" ? '<span class="badge tier-A">FAV</span>'
-      : t === "road" ? '<span class="badge tier-B">ROAD</span>' : "";
+    ((DB.tuneCodes && DB.tuneCodes.classes) || []).forEach((cl) => cl.cars.forEach((c) =>
+      c.code && rows.push({ car: c.car, code: c.code, class: cl.class, creator: "53Rain", discipline: "", focus: c.note || "", source: "53Rain", meta: c.tag === "meta" })));
+    POOL.forEach((t) => rows.push({ car: t.car, code: t.code, class: t.class || "", creator: t.creator || t.source, discipline: t.discipline || "", focus: t.focus || "", source: t.source, meta: META_CREATORS.has((t.creator || "").toLowerCase()) }));
+    const seen = new Set(); const all = [];
+    for (const r of rows) { if (seen.has(r.code)) continue; seen.add(r.code); all.push(r); }
+
+    const classes = [...new Set(all.map((r) => r.class).filter(Boolean))].sort((a, b) => CLASS_ORDER.indexOf(a) - CLASS_ORDER.indexOf(b));
+    const discs = [...new Set(all.map((r) => r.discipline).filter(Boolean))].sort();
+    let q = "", clsFilter = "", discFilter = "";
+    const CAP = 400;
 
     function draw() {
       const ql = q.toLowerCase();
-      const list = rows.filter((r) => (!clsFilter || r.class === clsFilter) && (!ql || r.car.toLowerCase().includes(ql)));
-      const body = list.map((r) => `<tr class="${r.tag === "meta" ? "row-meta" : ""}">
+      const list = all.filter((r) =>
+        (!clsFilter || r.class === clsFilter) &&
+        (!discFilter || r.discipline === discFilter) &&
+        (!ql || r.car.toLowerCase().includes(ql) || (r.creator || "").toLowerCase().includes(ql)));
+      const shown = list.slice(0, CAP);
+      const body = shown.map((r) => `<tr class="${r.meta ? "row-meta" : ""}">
         <td>${r.car}</td>
-        <td><code>${r.code || "—"}</code></td>
-        <td>${r.class}</td>
-        <td>${tagBadge(r.tag)}</td>
-        <td class="why" style="font-size:12px">${r.note || ""}</td>
+        <td><code>${r.code}</code></td>
+        <td>${r.class || "—"}</td>
+        <td>${r.discipline || "—"}</td>
+        <td>${r.creator || ""}${r.meta ? ' <span class="badge tier-S" style="font-size:9px">curated</span>' : ""}<br><span class="why" style="font-size:11px">${r.source}</span></td>
+        <td class="why" style="font-size:12px">${r.focus || ""}</td>
       </tr>`).join("");
       document.getElementById("tcTableWrap").innerHTML = `<div style="overflow-x:auto"><table>
-        <thead><tr><th>Car</th><th>Share code</th><th>Class</th><th>Tag</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Car</th><th>Code</th><th>Class</th><th>Discipline</th><th>Tuner / source</th><th>Focus / notes</th></tr></thead>
         <tbody>${body}</tbody></table></div>
-        <p class="why" style="margin-top:8px">${list.length} of ${rows.length} codes shown${clsFilter ? " · class " + clsFilter : ""}${q ? " · \"" + q + "\"" : ""}.</p>`;
+        <p class="why" style="margin-top:8px">${list.length} of ${all.length} codes${list.length > CAP ? ` (showing first ${CAP} — refine search)` : ""}${clsFilter ? " · " + clsFilter : ""}${discFilter ? " · " + discFilter : ""}${q ? ' · "' + q + '"' : ""}.</p>`;
     }
+    const chip = (val, cur, cls) => `<button class="chip ${cls}" data-v="${val}" style="cursor:pointer;${val === cur ? "border-color:var(--accent);color:var(--accent)" : ""}">${val || "All"}</button>`;
 
     host.innerHTML = `
-      <h2 style="margin-top:0">🔑 Tune codes — 53Rain</h2>
-      <p class="why" style="font-size:12px;margin-top:0">${tc.disclaimer}</p>
+      <h2 style="margin-top:0">🔑 Tune codes — ${all.length} across ${new Set(all.map((r) => r.source)).size} sources</h2>
+      <p class="why" style="font-size:12px;margin-top:0">Community share codes ingested from the curated tuner sheets (53Rain, GBR Ozzy, LogikJ, aTTaX, OxGRIDRUNR, K1Z Gray). <b>Sourced-unverified</b> — verify in-game via Find Tuning Setups. Rows highlighted are by curated "good tuners".</p>
       <div class="controls" style="margin-bottom:12px">
-        <label>Search car<input type="text" id="tcSearch" placeholder="e.g. Supra, 240SX, Golf, Miata"></label>
-        <div class="chips" id="tcClass" style="align-self:flex-end">
-          ${["", "B", "A", "S1"].map((c) => `<button class="chip tc-cls" data-c="${c}" style="cursor:pointer">${c || "All"}</button>`).join("")}
-        </div>
-        <span class="why" style="font-size:12px;align-self:flex-end">${rows.length} codes · ${metaCount} 🟢 Meta · <a href="${tc.source_url}" target="_blank" style="color:var(--accent2)">${tc.source}</a></span>
+        <label>Search car or tuner<input type="text" id="tcSearch" placeholder="e.g. Supra, 240SX, KapienPL, Golf"></label>
       </div>
+      <div class="chips" style="margin-bottom:6px"><span class="why" style="font-size:11px;align-self:center">Class:</span> ${["", ...classes].map((c) => chip(c, clsFilter, "tc-cls")).join("")}</div>
+      <div class="chips" style="margin-bottom:12px"><span class="why" style="font-size:11px;align-self:center">Discipline:</span> ${["", ...discs].map((d) => chip(d, discFilter, "tc-disc")).join("")}</div>
       <div id="tcTableWrap"></div>`;
     const search = document.getElementById("tcSearch");
     search.addEventListener("input", () => { q = search.value; draw(); });
-    host.querySelectorAll(".tc-cls").forEach((b) => b.addEventListener("click", () => {
-      clsFilter = b.dataset.c;
-      host.querySelectorAll(".tc-cls").forEach((x) => x.style.borderColor = "var(--line)");
-      b.style.borderColor = "var(--accent)";
-      draw();
-    }));
+    host.querySelectorAll(".tc-cls").forEach((b) => b.addEventListener("click", () => { clsFilter = b.dataset.v; host.querySelectorAll(".tc-cls").forEach((x) => { x.style.borderColor = "var(--line)"; x.style.color = "var(--muted)"; }); b.style.borderColor = "var(--accent)"; b.style.color = "var(--accent)"; draw(); }));
+    host.querySelectorAll(".tc-disc").forEach((b) => b.addEventListener("click", () => { discFilter = b.dataset.v; host.querySelectorAll(".tc-disc").forEach((x) => { x.style.borderColor = "var(--line)"; x.style.color = "var(--muted)"; }); b.style.borderColor = "var(--accent)"; b.style.color = "var(--accent)"; draw(); }));
     draw();
     modal.querySelector(".modal-box").classList.add("wide");
     modal.classList.remove("hidden");

@@ -21,6 +21,7 @@ const db = {
   tuneRaw: read("tune-raw.json"),
   tuners: read("tuners.json"),
   ownedCars: read("owned-cars.json"),
+  wheelspinCars: read("wheelspin-cars.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

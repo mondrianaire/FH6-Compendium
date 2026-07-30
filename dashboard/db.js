@@ -5619,7 +5619,7 @@ window.FH6_DB = {
     "schema_version": "1.0.0",
     "captured": "2026-07-29",
     "owner": "PwnyS1aystation",
-    "total_in_game": 281,
+    "total_in_game": 284,
     "source": "in-game My Cars screen-read (research/garage-capture.md) + screenshots/ backup",
     "cars": [
       {
@@ -8091,6 +8091,39 @@ window.FH6_DB = {
         "rarity": "Common",
         "fe": false,
         "multiple_copies": false
+      },
+      {
+        "manufacturer": "Peugeot",
+        "model": "205 Turbo 16",
+        "year": 1984,
+        "class": "C",
+        "pi": "500",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-29"
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "#23 Pennzoil Nismo Skyline",
+        "year": 1998,
+        "class": "S2",
+        "pi": "848",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-29"
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "NSX-R GT",
+        "year": 2005,
+        "class": "A",
+        "pi": "608",
+        "rarity": "Barn Find",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-29"
       }
     ],
     "owned_meta_ids": [
@@ -8122,6 +8155,174 @@ window.FH6_DB = {
       "m5-e39-2003"
     ],
     "ratification_note": "26/48 meta cars owned. 4 fuzzy-match FALSE POSITIVES caught + excluded during ratification 2026-07-29: Nissan GT-R NISMO (own GT-R Black Ed, not R35 Nismo), Mercedes-AMG One (own AMG GT variants), Audi RS 6 (own RS 3/4/5/7/e-tron), Alfa Giulia TZ2 (own Giulia Quadrifoglio + Sprint GTA Stradale)."
+  },
+  "wheelspinCars": {
+    "_note": "Wheelspin / Forza-Edition exclusive roster. FE cars and listed wheelspin-exclusives cannot be bought from the Autoshow — only won from Wheelspins/Super Wheelspins (RNG) or select reward drops. Data is community-sourced and inconsistent across sites; confidence tags reflect cross-source agreement, not certainty. NO source publishes credit values or per-car rarity tiers, so those are omitted. Owned/needed status is computed at render time from data/owned-cars.json.",
+    "sources": [
+      "https://game8.co/games/Forza-Horizon-6/archives/600768",
+      "https://insider-gaming.com/forza-horizon-6-wheelspin-exclusive-cars/",
+      "https://racinggames.gg/article/forza-horizon-6-wheelspins-all-exclusive-cars-how-to-get-super-wheelspins-fast",
+      "https://www.destructoid.com/all-wheelspin-exclusive-cars-in-forza-horizon-6-and-how-to-get-them/"
+    ],
+    "fe_count_estimate": "8 cross-source-verified; disputed 5-9. Owner's garage holds 10 FE cars, so real in-game total is >8.",
+    "forza_edition": [
+      {
+        "manufacturer": "Ford",
+        "model": "Mustang GT 2+2 Fastback Forza Edition",
+        "year": 1968,
+        "meta_note": "Muscle/road build; collectible, not flagged meta",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "F-150 XLT Lariat Forza Edition",
+        "year": 1986,
+        "meta_note": "Pre-tuned truck; skill/credit-boost perk",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Super Duty F-450 DRW Platinum Forza Edition",
+        "year": 2020,
+        "meta_note": "Heavy truck; novelty collectible",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "190E 2.5-16 Evolution II Forza Edition",
+        "year": 1990,
+        "meta_note": "DTM icon; desirable collectible FE",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "S-Cargo Forza Edition",
+        "year": 1989,
+        "meta_note": "Meme/novelty; high collectible appeal",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "GT-R Black Edition (R35) Forza Edition",
+        "year": 2012,
+        "meta_note": "Pre-tuned GT-R; most meta-relevant FE of the set",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "#3 917 LH Forza Edition",
+        "year": 1970,
+        "meta_note": "Le Mans classic; prized collectible",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Wuling",
+        "model": "Sunshine S Forza Edition",
+        "year": 2020,
+        "meta_note": "Novelty van; year disputed (2013 vs 2020)",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Mazda",
+        "model": "MX-5 Miata Forza Edition",
+        "year": 1994,
+        "meta_note": "Single-source list; CONFIRMED owned in-game",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "Vivio RX-R Forza Edition",
+        "year": 1994,
+        "meta_note": "Single-source list; CONFIRMED owned in-game",
+        "confidence": "probable"
+      }
+    ],
+    "wheelspin_exclusive": [
+      {
+        "manufacturer": "Koenigsegg",
+        "model": "One:1",
+        "year": 2015,
+        "meta_note": "Top-tier road-race hypercar",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Hennessey",
+        "model": "Venom GT",
+        "year": 2012,
+        "meta_note": "Top-speed / drag hypercar",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Rimac",
+        "model": "Nevera",
+        "year": 2021,
+        "meta_note": "EV hypercar; huge acceleration",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Lamborghini",
+        "model": "Sesto Elemento",
+        "year": 2011,
+        "meta_note": "Lightweight; historically strong road-race meta",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "McLaren",
+        "model": "620R",
+        "year": 2021,
+        "meta_note": "Road-race meta (racinggames.gg)",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "F8 Tributo",
+        "year": 2019,
+        "meta_note": "Road-race meta (racinggames.gg)",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Dart HEMI Super Stock",
+        "year": 1968,
+        "meta_note": "Drag-racing meta",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Formula Drift #13 Mustang",
+        "year": 2015,
+        "meta_note": "Drift meta (competition car)",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Formula Drift #43 Viper SRT10",
+        "year": 2006,
+        "meta_note": "Drift meta (competition car)",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "240SX",
+        "year": 1993,
+        "meta_note": "Popular drift-build base",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "AMG CLK GTR",
+        "year": 1998,
+        "meta_note": "Rare GT1 homologation; prized collectible",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Lamborghini",
+        "model": "Diablo GTR",
+        "year": 1999,
+        "meta_note": "Rare race-spec Diablo; collectible",
+        "confidence": "probable"
+      }
+    ]
   },
   "sources": {
     "captured": "2026-06-07",

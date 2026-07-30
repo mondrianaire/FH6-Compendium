@@ -305,3 +305,18 @@ Format: `Manufacturer — Model (year) [class PI, rarity]`
 - Volkswagen — Corrado VR6 (1995) [C 426, Common]
 
 ## END OF GARAGE — CAPTURE COMPLETE (Wuling = last manufacturer)
+
+## Recently Obtained (incremental updates)
+
+Workflow: owner uploads a screenshot of the in-game **My Cars → Recently Obtained**
+(or ALL CARS) view; new-to-DB models are appended to `data/owned-cars.json` and
+re-ratified against the 48-car meta list.
+
+### 2026-07-29 (ALL CARS screenshot)
+Cross-checked ~12 shown cars; most already tracked. Genuinely new:
+- **Peugeot 205 Turbo 16 (1984)** — C 500, Barn Find (Group B rally; distinct from owned 205 Rallye)
+- **Nissan #23 Pennzoil Nismo Skyline (1998)** — S2 848, Barn Find (race car)
+- **Honda NSX-R GT (2005)** — A 608, Barn Find (distinct from owned NSX-R B570)
+
+Meta reconciliation: none of the three are on the 48-car meta list → owned_meta_ids unchanged (26/48).
+Total owned models: 247 → 250.

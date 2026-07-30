@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "captured": "2026-07-29",
   "owner": "PwnyS1aystation",
-  "total_in_game": 281,
+  "total_in_game": 284,
   "source": "in-game My Cars screen-read (research/garage-capture.md) + screenshots/ backup",
   "cars": [
     {
@@ -2474,6 +2474,39 @@
       "rarity": "Common",
       "fe": false,
       "multiple_copies": false
+    },
+    {
+      "manufacturer": "Peugeot",
+      "model": "205 Turbo 16",
+      "year": 1984,
+      "class": "C",
+      "pi": "500",
+      "rarity": "Barn Find",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-29"
+    },
+    {
+      "manufacturer": "Nissan",
+      "model": "#23 Pennzoil Nismo Skyline",
+      "year": 1998,
+      "class": "S2",
+      "pi": "848",
+      "rarity": "Barn Find",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-29"
+    },
+    {
+      "manufacturer": "Honda",
+      "model": "NSX-R GT",
+      "year": 2005,
+      "class": "A",
+      "pi": "608",
+      "rarity": "Barn Find",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-29"
     }
   ],
   "owned_meta_ids": [

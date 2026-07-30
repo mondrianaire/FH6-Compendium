@@ -194,9 +194,13 @@
   const OWNED_KEY = "fh6_owned_cars";
   let owned = {};
   try { owned = JSON.parse(localStorage.getItem(OWNED_KEY)) || {}; } catch (e) { owned = {}; }
-  // seeded from the real garage read (owned-cars.json) — these show owned by default; localStorage adds more
-  const SEED_OWNED = new Set((DB.ownedCars && DB.ownedCars.owned_meta_ids) || []);
+  // Public build: visitors start with an EMPTY garage and track their own via localStorage (above).
+  // The owner's captured garage (owned-cars.json) is opt-in DEMO data, loaded via the button in the Garage tracker.
+  const SEED_KEY = "fh6_load_demo_garage";
+  const seedOn = (() => { try { return localStorage.getItem(SEED_KEY) === "1"; } catch (e) { return false; } })();
+  const SEED_OWNED = new Set(seedOn ? ((DB.ownedCars && DB.ownedCars.owned_meta_ids) || []) : []);
   const isOwned = (id) => !!owned[id] || SEED_OWNED.has(id);
+  const setDemoGarage = (on) => { try { on ? localStorage.setItem(SEED_KEY, "1") : localStorage.removeItem(SEED_KEY); } catch (e) { /* private mode */ } location.reload(); };
   function setOwned(id, val) {
     if (val) owned[id] = true; else delete owned[id];
     try { localStorage.setItem(OWNED_KEY, JSON.stringify(owned)); } catch (e) { /* private mode: state won't persist */ }
@@ -495,11 +499,14 @@
         <div class="chips" style="margin-top:10px">
           ${["all", "owned", "missing"].map((f) =>
             `<button class="chip garage-filter" data-f="${f}" style="cursor:pointer;border:1px solid ${garageFilter === f ? "var(--accent)" : "var(--line)"}">${f === "all" ? "All" : f === "owned" ? "✓ Owned" : "◯ Missing"}</button>`).join("")}
+          <button class="chip" id="demoGarageBtn" style="cursor:pointer;margin-left:8px">${seedOn ? "✕ Clear demo garage" : "⬇ Load demo garage (owner's collection)"}</button>
         </div>
         <p class="why" style="margin:10px 0 0">Tick a car when you get it. Difficulty: 🟢 buy anytime / free-guaranteed · 🟡 deterministic effort (aftermarket spawn, auction) · 🔴 luck-gated grind (wheelspin RNG / limited-time — money can't help) · 💰 premium (paid DLC/VIP — guaranteed, but costs real money). Click a row for the full card (use case, tunes, how to get it, easy alternatives).</p>
       </div>`;
     header.querySelectorAll(".garage-filter").forEach((b) =>
       b.addEventListener("click", () => { garageFilter = b.dataset.f; drawGarage(); }));
+    const demoBtn = header.querySelector("#demoGarageBtn");
+    if (demoBtn) demoBtn.addEventListener("click", () => setDemoGarage(!seedOn));
 
     const tierRank = { S: 0, A: 1, B: 2 };
     let list = cars.filter((c) =>

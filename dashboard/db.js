@@ -4811,6 +4811,368 @@ window.FH6_DB = {
       "steam-driftscore"
     ]
   },
+  "tougeGuide": {
+    "schema_version": "1.0.0",
+    "captured": "2026-07-30",
+    "meta_disclaimer": "Touge = FH6's brand-new discipline of fixed class-capped 1v1 mountain-pass duels. Assembled from two independent research passes (2026-07-30). Event format verified across 4 independent trusted sources (forza.labsgg primary race-type DB, mapmaster, ScreenRant, GameRant). Car meta = GameRant (expert) + game8 (community) two-source convergence; single-source picks flagged. Tune direction validated against the project's existing touge_street template. Driving technique is stable driving-model knowledge (slow-in/fast-out, trail-braking, late apex), FH6-flavored. ANTI-FABRICATION NOTES: (1) FH6 does NOT model brake thermal fade — the downhill risk is gravity-driven overspeed, not fading brakes. (2) gamingpromax lists impossible PI values (WRX STI 'A 822', GT-R NISMO 'S1 891') that exceed FH6 caps (A=700, S1=800) — parroted FH5 numbers, used for car-name flavor only, never class placement. (3) NO verifiable touge-specific share codes exist on trustworthy sources; sites claiming them (forza.tools, armadaboost, xmodhub) are auto-generated/seller tier and were rejected. (4) A copy-cluster of SEO sites (gamingpromax, novus-vektra, armadaboost, jiswarrior, destinyhelp, runescape3money, starcitizenguides) was treated as ONE community source, not independent corroboration.",
+    "confidence_legend": {
+      "verified": "≥2 independent trustworthy sources agree, or primary/official/in-game evidence, or stable driving-model knowledge.",
+      "probable": "Single source, or a cluster of possibly-copied sources; plausible, not independently confirmed.",
+      "contested": "Trustworthy sources actively disagree — direction given, exact values to be tuned by feel."
+    },
+    "overview": {
+      "what": "Touge is a distinct, named FH6 race discipline: fixed head-to-head 1v1 duels against a single AI rival on narrow Japanese mountain passes. Each is one run, point-to-point (1 lap), first-to-the-finish-wins — no circuit laps, no mid-race respawn to the track. Events are class-capped, found by exploration (NOT unlocked through the wristband progression), and confirmed in-game by the 'Touge & Street Rivals Collection Journal'.",
+      "how_it_differs": "Unlike circuit or open-road races there is effectively ONE fast line per corner and almost no room to overtake, so track position and a clean launch matter more than raw speed. Roads are tight with severe, unforgiving run-wide penalties (no runoff), rewarding handling, braking precision and corner-exit control over top speed. It's a 1v1 duel, not a pack race — as much about defending your line as pace. The car/tune meta overlaps technical road racing but pushes every priority further toward corner-exit and away from top speed.",
+      "confidence": "verified",
+      "reported_unconfirmed": "Reportedly run downhill on open public roads with oncoming traffic and no barriers (single-source, GameRant) — verify in-game. An online 'Touge Showdown' variant adds a points/scoring layer (incl. a ~5,000pt pass bonus) that is DISTINCT from these solo first-to-finish events."
+    },
+    "events": {
+      "note": "Five fixed touge events reported across mapmaster/ScreenRant/GameRant (exact count 🟡 rests partly on SEO sources — verify in-game). Class cap in brackets; per-route direction (downhill vs uphill) is single-source and unconfirmed.",
+      "confidence": "probable",
+      "list": [
+        {
+          "name": "Mt. Haruna",
+          "region": "Takashiro",
+          "class": "B",
+          "cap": 600,
+          "length_mi": 4.3
+        },
+        {
+          "name": "Hakone Nanamagari",
+          "region": "Nangan",
+          "class": "B",
+          "cap": 600,
+          "length_mi": 1.7
+        },
+        {
+          "name": "Bandai Azuma",
+          "region": "Shimanoyama",
+          "class": "A",
+          "cap": 700,
+          "length_mi": 2.9
+        },
+        {
+          "name": "Norikura Skyline",
+          "region": "Sotoyama",
+          "class": "S1",
+          "cap": 800,
+          "length_mi": 3.6
+        },
+        {
+          "name": "Arashiyama Takao",
+          "region": "Minamino",
+          "class": "S2",
+          "cap": 900,
+          "length_mi": 3
+        }
+      ]
+    },
+    "meta_cars": [
+      {
+        "manufacturer": "Nissan",
+        "model": "GT-R NISMO (R35)",
+        "year": 2024,
+        "class": "S1",
+        "why": "AWD launch + ~600hp = forgiving traction on tight exits and in traffic-heavy street events; the safe S1 touge default. Free via the Touge & Street Rivals Collection Journal (Tier 3).",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette Stingray Coupe (C8)",
+        "year": 2020,
+        "class": "S1",
+        "why": "Named for both A and S1 touge by two independent trusted sources; balanced mid-engine RWD that rotates cleanly. Cheap Autoshow buy (~65k).",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Viper SRT-10 ACR",
+        "year": 2008,
+        "class": "S1",
+        "why": "Both trusted sources list it S1 touge; high-downforce RWD track special for skilled rotation.",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "Cayman GT3 WTAC",
+        "year": 2005,
+        "class": "S1",
+        "why": "Purpose-built time-attack grip; named S1/S2 touge by both sources. Autoshow (~180k).",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette Stingray Coupe (C8)",
+        "year": 2020,
+        "class": "A",
+        "why": "Both trusted sources also list the C8 as an A-class touge all-rounder; forgiving RWD rotation, cheap acquisition.",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Beat",
+        "year": 1991,
+        "class": "A",
+        "why": "Kei momentum car; both trusted sources name it across B/A/S1, and project board data has it #1 most-picked on A/B/D road boards. Nimble, under-PI wins on hairpins. Cheap (~15k).",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Sprinter Trueno GT Apex FE (AE86)",
+        "year": 1985,
+        "class": "B",
+        "why": "The iconic touge RWD momentum car; expert + community name it the budget B touge pick, and 53Rain's list carries a B tune code (174 568 603).",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "Beat",
+        "year": 1991,
+        "class": "B",
+        "why": "Same kei momentum car dominates B touge per game8; one ~15k buy covers multiple class slots.",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Honda",
+        "model": "City E II (Turbo II)",
+        "year": 1987,
+        "class": "B",
+        "why": "game8's alternate B-class touge kei pick. Single trusted source — verify before promoting.",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Lotus",
+        "model": "Scura Motorsports Exige WTAC",
+        "year": 2018,
+        "class": "R",
+        "why": "Both sources' R-class touge king; grind-gated (Road Racing Collection Journal). Board-topper, not a progression buy.",
+        "confidence": "verified"
+      }
+    ],
+    "build_attributes": [
+      {
+        "attribute": "Downforce / aero",
+        "guidance": "HIGHER than a speed build — add front+rear downforce, aero balance ~0.40–0.50. Top speed is nearly irrelevant.",
+        "why": "Tight switchbacks reward mid-corner grip and stability over straight-line speed; both trusted sources define touge cars as 'high downforce'.",
+        "confidence": "verified"
+      },
+      {
+        "attribute": "Gearing / final drive",
+        "guidance": "SHORTER final drive than road/speed builds — bias for acceleration out of hairpins, not top end.",
+        "why": "Passes are dominated by low-speed corner exits; you never reach top gear.",
+        "confidence": "verified"
+      },
+      {
+        "attribute": "Drivetrain (RWD vs AWD)",
+        "guidance": "AWD grip tune = forgiving default (traction on tight exits + street traffic). RWD with a drift-to-grip balance = more rotation for skilled drivers. FWD viable in A class.",
+        "why": "GameRant: AWD 'forgives mistakes', RWD 'requires precision'. This is the core touge drivetrain-choice answer.",
+        "confidence": "verified"
+      },
+      {
+        "attribute": "Tire compound",
+        "guidance": "Race / Road-Race compound on tarmac passes. Rally only for mixed-surface passes.",
+        "why": "Touge tarmac is still tarmac — max grip compound; stock compounds insufficient.",
+        "confidence": "verified"
+      },
+      {
+        "attribute": "Brake balance",
+        "guidance": "Bias toward the FRONT (~52% front) for predictable corner-entry braking; push slightly more forward on DOWNHILL passes.",
+        "why": "Trail-braking stability into tight corners; downhill loads the front.",
+        "confidence": "verified"
+      },
+      {
+        "attribute": "Differential",
+        "guidance": "Install a race diff (biggest handling upgrade). Direction: loose-ish decel to rotate on entry, moderate accel to deploy on exit; on AWD bias the centre toward rear (~70–75%) so it steers like RWD. Exact %s CONTESTED — road-tune them.",
+        "why": "Rotation on entry + traction on exit is the whole game on a pass. Exact numbers only appear on an unattributed auto-calculator (rejected); the DB already flags diff baselines contested.",
+        "confidence": "contested"
+      },
+      {
+        "attribute": "Anti-roll bars",
+        "guidance": "Rear ARB is the main rotation lever. Convention: stiffer rear = more rotation vs understeer. NOTE conflict: one source says SOFTEN the rear to aid rotation — the sign is disputed; tune to taste and keep it drivable on bumpy passes.",
+        "why": "Rotation is critical on hairpins but sources disagree on the direction of the rear-ARB adjustment.",
+        "confidence": "contested"
+      },
+      {
+        "attribute": "Ride height / springs / alignment",
+        "guidance": "Ride height at minimum (tarmac); springs moderate-stiff; caster toward max for sharp turn-in; camber ~-1.2 to -1.7 front.",
+        "why": "Touge is tight tarmac, so the road-circuit baseline applies, tightened for turn-in.",
+        "confidence": "verified"
+      }
+    ],
+    "technique": [
+      {
+        "phase": "launch",
+        "tip": "Nail a clean, wheelspin-free launch to take the first corner and the inside line.",
+        "why": "On a road where passing is hard, leading from turn one often decides the whole duel; a half-second gap compounds.",
+        "confidence": "probable"
+      },
+      {
+        "phase": "entry",
+        "tip": "Brake EARLIER than a wide circuit tells you to, then trail off the brake to the apex (trail-braking) to rotate the car and kill understeer. Use the full road width on the way in.",
+        "why": "Slow-in/fast-out with a late apex opens the exit; trailing the brake shifts weight forward so the front bites in tight second-gear turns. This is the single skill that separates touge winners.",
+        "confidence": "verified"
+      },
+      {
+        "phase": "mid-corner",
+        "tip": "Aim for a LATE apex and hold the one fast line precisely and repeatably. When leading, put the car on the inside line so the chaser has nowhere to go.",
+        "why": "There is usually only one fast way through each corner; owning it turns your line into a defensive wall. Wandering off-line invites an overtake.",
+        "confidence": "probable"
+      },
+      {
+        "phase": "exit",
+        "tip": "Get back to throttle only once the car is pointed at the exit; prioritize a clean exit over a hasty, hot entry.",
+        "why": "Corner-exit speed carries down the next straight; a tidy exit beats a fast-but-messy entry on a point-to-point pass.",
+        "confidence": "verified"
+      },
+      {
+        "phase": "downhill",
+        "tip": "Brake earlier and hold the brake a touch longer than on the flat; respect that gravity is adding speed for you.",
+        "why": "Gravity increases entry speed, so the danger is overspeed running you wide into a no-runoff edge. FH6 does not model brake fade — this is about overspeed, not fading brakes.",
+        "confidence": "verified"
+      },
+      {
+        "phase": "uphill",
+        "tip": "Carry momentum — brake a little less, keep the engine in its power band, and avoid scrubbing speed you can't easily rebuild against the climb.",
+        "why": "Climbing bleeds speed naturally, so preserving momentum and exit drive matters more than aggressive entry braking.",
+        "confidence": "probable"
+      }
+    ],
+    "overtaking": [
+      {
+        "tip": "Only attempt a pass where the road actually opens up; on the tightest corners accept there is no room and don't try.",
+        "why": "Diving into an un-passable hairpin just crashes you or loses time; spend energy where a move is physically possible.",
+        "confidence": "probable"
+      },
+      {
+        "tip": "When chasing, apply pressure and wait for the leader to run wide, then take the inside on exit.",
+        "why": "On a no-runoff road the leader's mistake is your best (often only) opening; forcing the pass usually ends in contact.",
+        "confidence": "probable"
+      },
+      {
+        "tip": "When leading, cover the inside line into corners rather than weaving to block.",
+        "why": "Holding the inside denies the fast line without the speed/control loss that weaving costs you.",
+        "confidence": "probable"
+      },
+      {
+        "tip": "In the online 'Touge Showdown' scoring variant a completed pass is worth a large flat point bonus — prioritize it. (Does NOT apply to the solo first-to-finish events.)",
+        "why": "It's the single biggest scoring event in that mode; solo events are simply first-to-the-line.",
+        "confidence": "probable"
+      }
+    ],
+    "settings": [
+      {
+        "setting": "Stability Control (STM)",
+        "recommendation": "OFF",
+        "why": "STM auto-straightens the car and fights the rotation you need through tight hairpins; it caps how sharp your turn-in can be.",
+        "confidence": "verified"
+      },
+      {
+        "setting": "Traction Control (TCS)",
+        "recommendation": "ON for a new player (esp. powerful cars); OFF later for pace",
+        "why": "Kills wheelspin on corner exit out of slow hairpins so you don't spin; costs a little acceleration you won't miss while learning.",
+        "confidence": "verified"
+      },
+      {
+        "setting": "ABS",
+        "recommendation": "ON for a new player; OFF once trail-braking is comfortable",
+        "why": "Prevents lock-up under the hard braking touge demands; on is the safe default, off allows finer trail-braking later.",
+        "confidence": "verified"
+      },
+      {
+        "setting": "Braking / Driving line",
+        "recommendation": "Corners only (braking line)",
+        "why": "Shows braking markers so you can learn each corner's brake point without a full racing-line crutch.",
+        "confidence": "verified"
+      },
+      {
+        "setting": "Steering",
+        "recommendation": "Normal (controller); Simulation only once comfortable",
+        "why": "Normal is more forgiving on a controller for the constant second-gear direction changes; Simulation adds precision for advanced players.",
+        "confidence": "verified"
+      },
+      {
+        "setting": "Transmission",
+        "recommendation": "Manual (Automatic is a fine start)",
+        "why": "Manual lets you control power delivery on exit and hold the right gear through a hairpin; auto is acceptable while learning the lines.",
+        "confidence": "verified"
+      }
+    ],
+    "mistakes": [
+      {
+        "symptom": "Understeer / running wide on switchbacks and hairpins",
+        "cause": "Entering too hot with a circuit mindset — too much speed and/or no trail-brake to rotate the car.",
+        "fix": "Brake earlier, commit to slow-in/fast-out, and trail the brake to the apex so the front bites; pick a nimble car and keep TCS on."
+      },
+      {
+        "symptom": "Chaser keeps diving up the inside and passing you",
+        "cause": "Braking too early into corners, which hands them the inside line.",
+        "fix": "Learn each corner's braking marker and brake later but controlled; when leading, position on the inside line to defend it."
+      },
+      {
+        "symptom": "Running off the road on downhill sections / overspeeding into corners",
+        "cause": "Gravity adding entry speed on the descent with no runoff to catch a mistake (NOT brake fade — FH6 doesn't model it).",
+        "fix": "Brake earlier and hold longer than on the flat; treat downhill entries as slower than they look and don't chase entry speed."
+      },
+      {
+        "symptom": "Spinning out of slow corners / can't put the power down",
+        "cause": "Too much power or a heavy AWD build for a second-gear pass, with traction assists off.",
+        "fix": "Favor a light, handling-focused car over raw power, keep TCS on while learning, and feed throttle only once pointed at the exit."
+      }
+    ],
+    "tuners_codes": {
+      "note": "NO verified touge-specific share codes exist on trustworthy sources (sites claiming them — forza.tools, armadaboost, xmodhub — are auto-generated/seller tier and were rejected, same trap the project's drag data got burned by). The actionable path is following road/street specialists in-game (Friends & Followed → filter tunes to them → study their Rivals ghost on a technical track), or adapting 53Rain road/purist codes. Search these tuners in the 🔑 All tune codes browser.",
+      "confidence": "verified",
+      "tuners": [
+        {
+          "name": "K1Z XNDR2",
+          "note": "'Top rivals for handling tracks' — the most touge-relevant tuner in the roster."
+        },
+        {
+          "name": "LetzeLU",
+          "note": "Road/street top-pick tuner (aka C0RVETTE GS / VNX Letz)."
+        },
+        {
+          "name": "ESV Mars",
+          "note": "Road/street top pick; top player + streamer."
+        },
+        {
+          "name": "K1Z Bard",
+          "note": "Road/street top pick (aka vChrono)."
+        },
+        {
+          "name": "trviis",
+          "note": "PR-stunt + Rivals master; top road pick."
+        },
+        {
+          "name": "Toyota AE86 Sprinter Trueno GT Apex (B)",
+          "note": "53Rain road code 174 568 603 — adaptable to touge (road/purist, not touge-labelled). Verify in-game."
+        }
+      ]
+    },
+    "research_state": {
+      "as_of": "2026-07-30",
+      "next_actions": [
+        "In-game capture: confirm the touge event count (reported 5) and the Touge & Street Rivals Journal structure.",
+        "In-game capture: confirm per-route direction (downhill vs uphill) and whether events run with live oncoming traffic.",
+        "In-game capture: baseline one AWD and one RWD touge tune to settle the contested diff/ARB numbers (direction is known, values are not).",
+        "Confirm the ~5,000pt pass bonus is exclusive to the online Touge Showdown scoring mode, not the solo events."
+      ]
+    },
+    "sources": [
+      "https://forza.labsgg.com/all-race-tracks",
+      "https://mapmaster.io/games/forza-horizon-6/guides/Touge%20Racing%20Event",
+      "https://screenrant.com/forza-horizon-6-all-touge-race-locations/",
+      "https://gamerant.com/forza-horizon-6-best-cars-touge-street-racing-fh6/",
+      "https://game8.co/games/Forza-Horizon-6/archives/601596",
+      "https://www.pcgamer.com/games/racing/forza-horizon-6-best-cars/",
+      "https://forza.guide/meta",
+      "https://bossdown.com/guides/forza-horizon-6-touge-showdown-guide/",
+      "https://www.gamesradar.com/games/forza-horizon/forza-horizon-6-assists/",
+      "https://drivingfast.net/racing-line/",
+      "https://blayze.io/blog/car-racing/trailbraking-into-hairpins",
+      "https://en.wikipedia.org/wiki/Trail_braking"
+    ]
+  },
   "tuneCodes": {
     "schema_version": "1.0.0",
     "captured": "2026-07-18",
@@ -43374,6 +43736,21 @@ window.FH6_DB = {
         "22B 'best A-class rally' downgraded to probable (single-origin SEO).",
         "Gemera flagged Car Pass (paid DLC); AMG One often free via FH5 save; best CC car is 1999 Viper GTS ACR FE (VIP).",
         "Photo trick clarified: Festival/Promo XP (not player level), two presses not a chord."
+      ]
+    },
+    "distrusted_copyclusters": {
+      "note": "SEO/AI-content-farm sites flagged during the 2026-07-30 touge research as a single copy-cluster (identical phrasing) masquerading as independent corroboration, plus auto-generated tune calculators. Treat any one of them as ONE community-origin source at best; never trust their PI/class values or tune numbers. gamingpromax specifically parrots stale FH5-era PI (e.g. WRX STI A 822) impossible under FH6 caps.",
+      "added": "2026-07-30",
+      "sites": [
+        "gamingpromax.com (class placements only — parrots FH5 PI)",
+        "novus-vektra.com",
+        "armadaboost.com",
+        "jiswarrior.github.io",
+        "destinyhelp.com",
+        "runescape3money.com",
+        "starcitizenguides.net",
+        "forza.tools (auto-calculator, unattributed)",
+        "xmodhub.com"
       ]
     }
   },

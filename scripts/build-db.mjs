@@ -17,6 +17,7 @@ const db = {
   tuningTemplates: read("tuning-templates.json"),
   eliminatorTips: read("eliminator-tips.json"),
   driftGuide: read("drift-guide.json"),
+  tougeGuide: read("touge-guide.json"),
   tuneCodes: read("tune-codes.json"),
   tuneRaw: read("tune-raw.json"),
   tuners: read("tuners.json"),

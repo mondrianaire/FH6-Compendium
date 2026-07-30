@@ -909,6 +909,108 @@
       ${research}`;
   }
 
+  // ---- touge guide ----
+  function buildTouge() {
+    const g = DB.tougeGuide;
+    if (!g) return;
+    const host = document.getElementById("tougeContent");
+    const clsTier = (c) => /S2|S1|^R$/.test(c) ? "S" : c === "A" ? "A" : "B";
+    const clsBadge = (c) => `<span class="badge tier-${clsTier(c)}">${c}</span>`;
+    const conf = (c) => `<span class="conf ${confClass(c)}">${confLabel(c)}</span>`;
+    const ov = g.overview;
+
+    const overview = `
+      <div class="block">
+        <h3 style="margin-top:0">What Touge is ${conf(ov.confidence)}</h3>
+        <p class="why">${ov.what}</p>
+        <p class="why"><strong>How it differs:</strong> ${ov.how_it_differs}</p>
+        ${ov.reported_unconfirmed ? `<p class="fh6note">🟡 ${ov.reported_unconfirmed}</p>` : ""}
+      </div>`;
+
+    const events = g.events ? `
+      <div class="block">
+        <h3>The touge events ${conf(g.events.confidence)}</h3>
+        <p class="fh6note">${g.events.note}</p>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Pass</th><th>Region</th><th>Class</th><th>Length</th></tr></thead>
+          <tbody>${g.events.list.map((e) => `<tr><td>${e.name}</td><td class="why">${e.region}</td><td>${clsBadge(e.class)} <span class="why" style="font-size:11px">≤${e.cap}</span></td><td class="why">${e.length_mi} mi</td></tr>`).join("")}</tbody>
+        </table></div>
+      </div>` : "";
+
+    const metaCars = `
+      <h3 style="margin-top:24px">🏁 Meta cars by class</h3>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Class</th><th>Car</th><th>Why</th><th></th></tr></thead>
+        <tbody>${g.meta_cars.map((c) => `<tr>
+          <td>${clsBadge(c.class)}</td>
+          <td>${c.year} ${c.manufacturer} ${c.model}${codeTip(c.manufacturer + " " + c.model, { class: c.class, disciplines: ["touge_street"] })}</td>
+          <td class="why" style="font-size:12px">${c.why}</td>
+          <td>${conf(c.confidence)}</td></tr>`).join("")}</tbody>
+      </table></div>`;
+
+    const build = `
+      <h3 style="margin-top:24px">🔧 What a touge tune prioritizes</h3>
+      ${g.build_attributes.map((a) => `
+        <div class="block">
+          <h4 style="margin:0 0 6px">${a.attribute} ${conf(a.confidence)}</h4>
+          <p class="why" style="margin:0"><strong>${a.guidance}</strong></p>
+          <p class="why" style="font-size:12px;color:var(--muted);margin:6px 0 0">${a.why}</p>
+        </div>`).join("")}`;
+
+    const PHASE_LABEL = { launch: "🚦 Launch", entry: "↘️ Entry", "mid-corner": "🎯 Mid-corner", exit: "↗️ Exit", downhill: "⛰️ Downhill", uphill: "🏔️ Uphill" };
+    const technique = `
+      <h3 style="margin-top:24px">💡 Driving technique</h3>
+      <div class="card-grid">
+        ${g.technique.map((t) => `
+          <div class="car-card" style="cursor:default">
+            <div class="card-row" style="margin-top:0"><span class="chip">${PHASE_LABEL[t.phase] || t.phase}</span>${conf(t.confidence)}</div>
+            <h3 style="font-size:14px;margin-top:8px">${t.tip}</h3>
+            <p class="why" style="margin:6px 0 0">${t.why}</p>
+          </div>`).join("")}
+      </div>`;
+
+    const overtaking = `
+      <div class="block" style="margin-top:24px">
+        <h3 style="margin-top:0">↔️ Overtaking on narrow roads</h3>
+        <ul class="why">${g.overtaking.map((o) => `<li>${conf(o.confidence)} ${o.tip}<br><span style="color:var(--muted)">${o.why}</span></li>`).join("")}</ul>
+      </div>`;
+
+    const settings = `
+      <div class="block">
+        <h3 style="margin-top:0">🎛️ Assist / setting recommendations</h3>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Setting</th><th>For a new touge player</th><th>Why</th></tr></thead>
+          <tbody>${g.settings.map((s) => `<tr><td>${s.setting}</td><td><strong>${s.recommendation}</strong> ${conf(s.confidence)}</td><td class="why" style="font-size:12px">${s.why}</td></tr>`).join("")}</tbody>
+        </table></div>
+      </div>`;
+
+    const mistakes = `
+      <h3 style="margin-top:24px">⚠️ Common mistakes → fixes</h3>
+      ${g.mistakes.map((m) => `
+        <div class="block">
+          <h4 style="margin:0 0 4px;color:var(--warn)">${m.symptom}</h4>
+          <p class="why" style="margin:0"><strong>Cause:</strong> ${m.cause}</p>
+          <p class="why" style="margin:4px 0 0"><strong>Fix:</strong> ${m.fix}</p>
+        </div>`).join("")}`;
+
+    const tuners = g.tuners_codes ? `
+      <div class="block" style="border-color:var(--warn);margin-top:24px">
+        <h3 style="margin-top:0">🔑 Tunes for touge ${conf(g.tuners_codes.confidence)}</h3>
+        <p class="why">${g.tuners_codes.note}</p>
+        <ul class="why">${g.tuners_codes.tuners.map((t) => `<li><strong>${t.name}</strong> — ${t.note}</li>`).join("")}</ul>
+      </div>` : "";
+
+    const research = g.research_state ? `
+      <div class="block">
+        <h3>🔬 Open questions (as of ${g.research_state.as_of})</h3>
+        <ul class="why">${g.research_state.next_actions.map((a) => `<li>${a}</li>`).join("")}</ul>
+      </div>` : "";
+
+    host.innerHTML = `
+      <p class="hint">${g.meta_disclaimer}</p>
+      ${overview}${events}${metaCars}${build}${technique}${overtaking}${settings}${mistakes}${tuners}${research}`;
+  }
+
   // ---- drift guide ----
   function buildDrift() {
     const g = DB.driftGuide;
@@ -1275,6 +1377,7 @@
   buildTemplates();
   buildRivals();
   buildDrift();
+  buildTouge();
   buildEliminator();
   buildTuners();
   const allCodesBtn = document.getElementById("allCodesBtn");

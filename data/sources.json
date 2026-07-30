@@ -2,105 +2,653 @@
   "captured": "2026-06-07",
   "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",
   "sources": [
-    { "id": "official-release", "tier": "primary", "title": "FH6 Release Timing", "url": "https://forza.net/news/forza-horizon-6-coming-may-2026", "used_for": "release date 2026-05-19, setting (Japan/Tokyo)" },
-    { "id": "wikipedia", "tier": "expert", "title": "Forza Horizon 6 — Wikipedia", "url": "https://en.wikipedia.org/wiki/Forza_Horizon_6", "used_for": "release/setting confirmation" },
-    { "id": "pcgamer", "tier": "expert", "title": "Best cars for each race type", "url": "https://www.pcgamer.com/games/racing/forza-horizon-6-best-cars/", "used_for": "road/dirt meta cars" },
-    { "id": "games.gg", "tier": "expert", "title": "Tuning guide + full car tier list", "url": "https://games.gg/forza-horizon-6/guides/forza-horizon-6-tuning-guide/", "used_for": "tuning variables, tier list" },
-    { "id": "egamersworld", "tier": "community", "title": "Best cars by class tier list", "url": "https://egamersworld.com/blog/forza-horizon-6-best-cars-by-class-s1-s2-a-b-tier--z7ymGyRVd2", "used_for": "S1/S2 meta, GT-R NISMO price/acquisition" },
-    { "id": "forzatune", "tier": "expert", "title": "Updated Forza Tuning Guide", "url": "https://forzatune.com/guide/the-fully-updated-forza-tuning-guide/", "used_for": "tuning fundamentals" },
-    { "id": "ggwtb", "tier": "community", "title": "Upgrade order & build strategy", "url": "https://ggwtb.com/blog/forza-horizon-6-tuning-guide-best-upgrade-order--build-strategy--and-baseline-settings", "used_for": "upgrade order, baselines" },
-    { "id": "dexerto", "tier": "expert", "title": "Best rally cars tier list", "url": "https://www.dexerto.com/wikis/forza-horizon-6/best-rally-cars-tier-list/", "used_for": "dirt/rally meta" },
-    { "id": "gamingpromax", "tier": "community", "title": "Best rally & cross-country cars", "url": "https://gamingpromax.com/forza-horizon-6-best-rally-cross-country-cars/", "used_for": "cross-country meta" },
-    { "id": "game8", "tier": "community", "title": "Off-road & car info pages", "url": "https://game8.co/games/Forza-Horizon-6/archives/602024", "used_for": "off-road cars, car data" },
-    { "id": "grindnstrat", "tier": "community", "title": "Best dirt cars tier list", "url": "https://grindnstrat.com/forza-horizon-6-best-cars-tier-list-best-dirt-cars/", "used_for": "dirt meta confirmation" },
-    { "id": "tiktok-sharecodes", "tier": "community", "title": "GT-R drag/drift share codes", "url": "https://www.tiktok.com/discover/best-tune-code-for-the-gtr-nismo-r-35-in-forza-horizon-6", "used_for": "drag share codes (low confidence — verify in-game)" },
-    { "id": "skycoach-credits", "tier": "community", "title": "How to farm credits", "url": "https://skycoach.gg/blog/forza-horizon-6/articles/how-to-farm-credits", "used_for": "credit methods, assist-off multiplier %s" },
-    { "id": "ggwtb-skillfarm", "tier": "community", "title": "Fastest skill point / wheelspin / XP / credit farm", "url": "https://ggwtb.com/blog/forza-horizon-6-fastest-skill-point-super-wheelspin--xp--and-credit-farm-guide", "used_for": "22B STI skill farm rate, EventLab codes, Revuelto conversion" },
-    { "id": "vgc-farm", "tier": "expert", "title": "Best credit, skill point & wheelspin farm methods", "url": "https://www.videogameschronicle.com/guide/forza-horizon-6-credit-skill-point-farm-share-codes/", "used_for": "skill-point farm confirmation, share codes" },
-    { "id": "forza-fandom-playlist", "tier": "expert", "title": "FH6 Festival Playlist", "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist", "used_for": "Festival Playlist mechanics, reward thresholds" },
-    { "id": "redbull-beginner", "tier": "expert", "title": "FH6 beginner tips", "url": "https://www.redbull.com/us-en/forza-horizon-6-tips-for-beginners", "used_for": "starter cars, photo XP, daily-wheelspin house, early roadmap" },
-    { "id": "kotaku-beginner", "tier": "expert", "title": "13 things to know before playing FH6", "url": "https://kotaku.com/13-things-to-know-before-playing-forza-horizon-6-xbox-guide-open-world-2000695715", "used_for": "early progression order, aftermarket map cars" },
-
-    { "id": "game8-db", "tier": "primary", "title": "game8 FH6 car database (independent)", "url": "https://game8.co/games/Forza-Horizon-6/archives/600753", "used_for": "VERIFICATION: GT-R NISMO 220k price, journal reward, off-road car list, F-450" },
-    { "id": "forza-fandom", "tier": "expert", "title": "Forza Fandom wiki (independent)", "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist", "used_for": "VERIFICATION: Festival Playlist points system, Gemera Car Pass, BRZ FE" },
-    { "id": "kudosprime", "tier": "primary", "title": "kudosprime FH6 stat sheets (independent)", "url": "https://www.kudosprime.com/fh6/car_sheet.php?id=549", "used_for": "VERIFICATION: WRX STI 30k price/stats" },
-    { "id": "forums-forza", "tier": "primary", "title": "Official Forza forums — Playlist & tune threads", "url": "https://forums.forza.net/t/fh6-festival-playlist-events-and-rewards-may-21-may-28-series-01-week-1/828507", "used_for": "VERIFICATION: Festival Playlist points (20/40/80), drag tune hub" },
-    { "id": "gtplanet", "tier": "expert", "title": "GTPlanet FH6 discussion (community forum)", "url": "https://www.gtplanet.net/forum/threads/forza-horizon-6-general-discussion.434110/", "used_for": "VERIFICATION: AWD-swap meta direction, engine-swap/weight tradeoffs (qualitative)" },
-    { "id": "forzatune", "tier": "expert", "title": "ForzaTune authority guide (independent)", "url": "https://forzatune.com/guide/the-fully-updated-forza-tuning-guide/", "used_for": "VERIFICATION: variable set, tune order (puts alignment before springs — disputes SEO order)" },
-    { "id": "forzafire-drivetrain", "tier": "community", "title": "ForzaFire drivetrain tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-drivetrain-tuning-guide", "used_for": "VERIFICATION: diff baselines contradict 55/15 (gives 100/45)" },
-    { "id": "codmunity-drag", "tier": "community", "title": "CODMunity FH6 drag tune DB", "url": "https://codmunity.gg/forza/drag", "used_for": "VERIFICATION: real GT-R FE drag code 514752751; retracts unverified TikTok codes" },
-    { "id": "ggwtb-afk-colossus", "tier": "community", "title": "AFK Colossus ~1M cr/hr method", "url": "https://ggwtb.com/blog/best-forza-horizon-6-credit-farm-afk-colossus-method-for-nearly-1m-credits-per-hour", "used_for": "VERIFICATION: AFK farm real rate ~140k/lap (corrects 2,300/lap error)" },
-    { "id": "dotesports", "tier": "expert", "title": "Dotesports FH6 best-car guides", "url": "https://dotesports.com/forza/news/forza-horizon-6-best-car-every-class", "used_for": "VERIFICATION: Gemera, AMG One, FXX-K Evo S2 picks" },
-    { "id": "gamerguides-journal", "tier": "expert", "title": "All Journal reward cars in FH6", "url": "https://www.gamerguides.com/forza-horizon-6/guide/getting-started/gameplay/all-journal-reward-cars-in-fh6", "used_for": "VERIFICATION: GT-R NISMO free via Collection Journal Tier 3" },
-
-    { "id": "in-game-screenshot", "tier": "primary", "title": "Player in-game Tune screen (2014 Golf R)", "url": "n/a — user-provided screenshot 2026-06-08", "used_for": "GROUND TRUTH: 2014 Golf R at PI 589 displays as B class; performance readouts (lateral G 1.11/1.13, 0-60 4.66s, top 163.3 mph, braking 122/310.7 ft, aero balance 0.52); current alignment (camber -2.0F/-1.5R, toe 0/0, caster 5.0). PROVES FH6 class boundaries shifted ~100 PI down vs FH5." },
-    { "id": "in-game-recording", "tier": "primary", "title": "Player in-game Tune-menu screen recording (2014 Golf R, all 9 tabs)", "url": "n/a — user-provided 20s mp4 2026-06-08, frames extracted via ffmpeg", "used_for": "GROUND TRUTH for ALL 9 tab structures: section names, slider lists, directional pole labels, displayed units (PSI / LB/IN / IN / deg), verbatim lock banners, and the padlock-+-banner lock behavior. Pole corrections: Aero = Speed<->Cornering; Brake balance = Rear<->Front; Gearing = Speed<->Acceleration. Observed build: race springs/dampers + alignment + tire pressure unlocked; gearing/ARB/aero/brake/diff LOCKED." },
-    { "id": "forza-labs-db", "tier": "primary", "title": "ForzaLabs FH6 car database (independent)", "url": "https://forza.labsgg.com/manufacturers/volkswagen", "used_for": "2014 Golf R PI 536 / 27k cr / B class; model-year ladder 2010=526/20k, 2014=536/27k, 2021=546/29k. CONFIRMED by in-game screenshot (B class)." },
-    { "id": "dexerto", "tier": "expert", "title": "Dexerto FH6 car wiki (independent)", "url": "https://www.dexerto.com/wikis/forza-horizon-6/cars/2010-volkswagen-golf-r/", "used_for": "2010 Golf R 526/B/20k/AWD cross-checks ForzaLabs (validates the DB and the shifted B-class boundary)" },
-    { "id": "forzahorizoncar-wiki", "tier": "community", "title": "FH6 tuning & PI class wiki (UNRELIABLE on classes)", "url": "https://forzahorizoncar.com/en/wiki/guides/tuning.html", "used_for": "RETRACTED: claimed FH6 B = 601-700 (the old FH4/FH5 table). DISPROVEN by in-game screenshot (589 = B). Example of SEO parroting the pre-FH6 boundaries." },
-
-    { "id": "forzafire-fh6-tires", "tier": "community", "title": "ForzaFire FH6 Tires & Rims tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-tires-and-rims-tuning-guide", "used_for": "FH6 UI STRUCTURE (dated 2026-05-20): tire pressure F/R range 1.0-3.8 bar; independent F/R tire WIDTH in mm; compound/width live in parts menu" },
-    { "id": "forzafire-fh6-drivetrain", "tier": "community", "title": "ForzaFire FH6 Drivetrain tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-drivetrain-tuning-guide", "used_for": "FH6 UI STRUCTURE (2026-05-20): transmission tiers/final-drive gating; up to 10 gears; AWD diff = Front/Rear/Center sections; center = % torque to rear ('30/70 split'); brake balance Front<->Rear" },
-    { "id": "forzafire-fh6-handling", "tier": "community", "title": "ForzaFire FH6 Platform & Handling tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-platform-and-handling-tuning-guide", "used_for": "FH6 UI STRUCTURE (2026-05-20): ARB 1.00-65.00; springs+ride-height grouped in Springs tab; damping = Bump+Rebound per axle" },
-    { "id": "forzafire-fh6-aero", "tier": "community", "title": "ForzaFire FH6 Aero & Appearance tuning guide", "url": "https://www.forzafire.com/guides/forza-horizon-6-aero-and-appearance-tuning-guide", "used_for": "FH6 UI STRUCTURE (2026-05-20): downforce unit kgf/lb; F/R downforce gated by race bumper/wing; Aero Balance + Aero Efficiency Performance-panel readouts" },
-    { "id": "game8-fh6-tuning", "tier": "community", "title": "game8 FH6 tuning DB", "url": "https://game8.co/games/Forza-Horizon-6/archives/601974", "used_for": "FH6 UI STRUCTURE (2026-05-26): full tab order confirming no separate Ride Height tab; compound pressure targets; speed graph; ARB 1.0/65.0; brake balance 50% default" },
-    { "id": "keengamer-fh6-tuning", "tier": "community", "title": "KeenGamer FH6 tuning guide", "url": "https://www.keengamer.com/articles/guides/forza-horizon-6-tuning-guide-best-settings-for-all-car-builds/", "used_for": "FH6 UI STRUCTURE: tab order; ride height under Springs tab" },
-    { "id": "destructoid-fh6-tuning", "tier": "expert", "title": "Destructoid FH6 tuning guide (all sliders)", "url": "https://www.destructoid.com/complete-forza-horizon-6-tuning-guide-all-sliders-explained/", "used_for": "FH6 UI STRUCTURE (2026-05-20): up to 10 gears; 4-slider damping; brake = balance+pressure; AWD diff front/rear/center" },
-    { "id": "gamerant-fh6-tuning", "tier": "expert", "title": "Game Rant FH6 tuning guide", "url": "https://gamerant.com/forza-horizon-6-tuning-guide-how-tune-cars/", "used_for": "FH6 UI STRUCTURE (2026-06-05): tune-menu section list; AWD front/rear/center diffs; final-drive direction" },
-    { "id": "grindout-fh6-tuning", "tier": "community", "title": "Grindout FH6 tuning guide", "url": "https://grindout.com/forza-6/guides/tuning", "used_for": "FH6 UI STRUCTURE (2026-05-26): aero slider part-gating; brake-balance un-inverted in FH6; practical diff caps" },
-    { "id": "gamingpromax-fh6-balance", "tier": "community", "title": "GamingProMax FH6 mechanical/aero balance system", "url": "https://gamingpromax.com/forza-horizon-6-car-tuning-guide-mechanical-balance-system/", "used_for": "FH6 NEW mechanic: Aero Balance ~0.40-0.50 tuning target" },
-    { "id": "calculators-games-fh6", "tier": "community", "title": "calculators.games FH6 transmission/tuning calculators", "url": "https://calculators.games/en/forza-horizon-6/transmission-optimizer", "used_for": "FH6: up to 10-speed; springs lb/in (US locale); ARB 1-65 (corroboration only — third-party tool layout, not in-game UI)" },
-    { "id": "apexspeedcraft-fh6", "tier": "community", "title": "ApexSpeedcraft Forza tuning reference (FH6 update)", "url": "https://apexspeedcraft.wordpress.com/2026/04/25/forza-horizon-tuning-reference/", "used_for": "FH6 (post-launch update 2026-05-24): springs kgf/mm or lb/in; ARB 1-65. NOTE original post pre-release — used only for corroboration" },
-
-    { "id": "forza-support-patch-0615", "tier": "primary", "title": "FH6 Release Notes June 15 2026 (v375.327)", "url": "https://support.forza.net/hc/en-us/articles/52554154006547-FH6-Release-Notes-June-15th-2026", "used_for": "PRIMARY patch notes: v375.327 = drag tire nerf + XP curve; did NOT touch skill points/EventLab/Car Mastery" },
-    { "id": "fh6wiki-patches", "tier": "expert", "title": "FH6 patch history", "url": "https://forzahorizon6wiki.com/en/patches/", "used_for": "Full patch list: v375.327 (Jun 15), v379.939 (Jun 18), v382.893 (Jun 23, latest). None nerfed skill farming" },
-    { "id": "purexbox-autodrive-nerf", "tier": "expert", "title": "FH6 removes two exploits (Auto Drive + Eliminator)", "url": "https://www.purexbox.com/news/2026/06/forza-horizon-6-removes-two-major-exploits-in-latest-xbox-and-pc-update", "used_for": "VERIFIED: hotfix v379.939 (Jun 18) rebalanced Auto Drive rewards ('not intended to earn credits without actively playing') — explains under-max skill farm runs on auto-drive" },
-    { "id": "jakelee-skillfarm", "tier": "community", "title": "Jake Lee — FH6 skill-point & wheelspin farming", "url": "https://jakelee.co.uk/forza-horizon-6-skillpoint-farming/", "used_for": "Independent methodical guide: 22B, code 890169683 (objects below map), perk stack, ~766 SP/hr, score-to-SP math" },
-    { "id": "game8-skillfarm", "tier": "community", "title": "game8 FH6 — How to Farm Skill Points", "url": "https://game8.co/games/Forza-Horizon-6/archives/601239", "used_for": "Score→SP conversion (~10k score = 1 SP), 10-SP-per-run cap, bank-before-break" },
-    { "id": "timesaver-skillfarm", "tier": "community", "title": "timesaver.gg FH6 skill-points farming guide (2026)", "url": "https://timesaver.gg/blog/forza-horizon-6-skill-points-farming-guide", "used_for": "22B 9x needs ~56k score for 10-cap vs 100k for 5x; codes 861224889/401393298" },
-    { "id": "timesaver-festival", "tier": "community", "title": "timesaver.gg FH6 Festival Playlist guide (Jun 2026)", "url": "https://timesaver.gg/blog/forza-horizon-6-festival-playlist-guide", "used_for": "Series 2 thresholds (20/40 season, 80/160 series); optimal order (dailies>photo>events>PR>Trial>treasure); ~40 pts = both season cars" },
-    { "id": "forza-fh6playlists", "tier": "primary", "title": "Official FH6 Festival Playlist (current week)", "url": "https://forza.net/fh6playlists", "used_for": "Current-week playlist rewards (rotates each series)" },
-    { "id": "reddit-link-cleansweep", "tier": "community", "title": "r/ForzaHorizon6 — 'Link Clean Sweep' completion bug thread", "url": "https://redd.it/1uqept6", "used_for": "2026-07-08: LINK Clean Sweep + 10k speed-skill badges BUGGED/acknowledged (FH6BR-1887); Custom-Racing completion trick; 100% is time-gated across series. Confidence: community (OP + commenters + bug tracker)" },
-    { "id": "in-game-leaderboard-electrictown", "tier": "primary", "title": "Player in-game Rivals leaderboard — Electric Town Circuit, A class", "url": "n/a — user-provided screenshot 2026-07-10", "used_for": "GROUND TRUTH: global top-11 times/cars/PI/assists for Electric Town Circuit A. Shows a SOFT board (1:05-1:32 spread), Supra '20 x3 incl #1, fastest runs at 616 PI (under cap), TCS/STM off universal, 'AI Test071831' seed time. Re-confirms A-class = 601-700 (616 & 700 both 'A')." },
-    { "id": "gamesradar-drag", "tier": "expert", "title": "GamesRadar — Best FH6 drag cars", "url": "https://www.gamesradar.com/games/forza-horizon/forza-horizon-6-best-drag-cars/", "used_for": "Miata FE = best drag car; aftermarket-spawn acquisition" },
-    { "id": "53rain-tunelist", "tier": "expert", "title": "53Rain's Tune List (community tuner share-code DB, view-only Google Sheet)", "url": "https://docs.google.com/spreadsheets/d/19sGnavfTsp3iPYN_OnNmPBW87I0Pz2ODuNFFhZgaU8g", "used_for": "User-supplied 2026-07-18. Reputable tuner's share codes per car, organised by class block: B (cap 600), A (cap 700), S1 (cap 800), Car·Sharecode·Notes columns; legend green=Meta / yellow=favourite / blue=road. INDEPENDENTLY CORROBORATES the shifted FH6 class caps (B=600/A=700/S1=800). Codes ingested for cars we track: GR Supra 700 022 932 (S1 build), F-450 202 410 695 (B), FD #777 240SX 213 803 717 (S1), AE86 Sprinter Trueno 174 568 603 (B). Sheet blocks viewer download (owner security setting) — read visually via browser, not exportable." },
-    { "id": "bossdown-drag", "tier": "community", "title": "Bossdown — FH6 drag tune guide", "url": "https://bossdown.com/guides/forza-horizon-6-drag-tune-guide/", "used_for": "Drag tuning priority order (gearing #1, launch, diff, tires) — basis of the drag discipline template" },
-    { "id": "mapmaster-roadraces", "tier": "community", "title": "MapMaster — FH6 Road Racing Event locations", "url": "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event", "used_for": "The full list of all 22 Road Racing events (12 Circuits + 10 Sprints) with names/regions/format — basis of the rivals-tracks scaffold" },
-    { "id": "meinmmo-miata", "tier": "expert", "title": "Mein-MMO — Unlock the Mazda MX-5 Miata FE '94", "url": "https://mein-mmo.de/en/forza-horizon-6-unlock-mazda-mx-5-miata-fe-94-this-is-how-you-get-one-of-the-best-cars-for-speed-traps-and-drag-races,1568245/", "used_for": "VERIFIED Miata FE acquisition: aftermarket spot N of Drag Meet, reload until it spawns, 500k (450k discounted) — NOT Wheelspin. Corrects skycoach." },
-
-    { "id": "forza-support-eliminator-faq", "tier": "primary", "title": "Official Forza Support — The Eliminator & Auto Drive FAQ", "url": "https://support.forza.net/hc/en-us/articles/52613640745875-The-Eliminator-Support-FAQ", "used_for": "PRIMARY (read in browser 2026-07-11): Eliminator disabled for credits exploit, restored via hotfix; McLaren Sabre '21 gift (Message Center → Gifts); exploiters rolled back to 10M cr, no bans; Auto Drive reward rebalance rationale" },
-    { "id": "forza-support-notes-jun18", "tier": "primary", "title": "Official FH6 Release Notes June 18 2026 (Series 2 Hotfix 1, v379.939)", "url": "https://support.forza.net/hc/en-us/articles/52691021223315-FH6-Release-Notes-June-18th-2026", "used_for": "PRIMARY (read in browser 2026-07-11): exploit fix, Eliminator restored, mode-reward rebalance vs Auto Drive, Sabre gift" },
-    { "id": "traxion-eliminator-exploit", "tier": "expert", "title": "Traxion — FH6 gifts free car after Eliminator exploit", "url": "https://traxion.gg/forza-horizon-6-to-gift-free-car-to-all-players-after-eliminator-mode-exploit-discovered/", "used_for": "VERIFICATION of shutdown timeline + hundreds-of-millions exploit scale (independent games outlet)" },
-    { "id": "timesaver-eliminator", "tier": "community", "title": "timesaver.gg FH6 Eliminator guide (2026)", "url": "https://timesaver.gg/blog/forza-horizon-6-eliminator-guide", "used_for": "72 players, Honda City '84 starter, drop/H2H/zone/Showdown mechanics, rewards, strategy tips, 'complete = win' daily-challenge gotcha. WARNING: car-level list shares wording with u4n — not independent" },
-    { "id": "gamingpromax-eliminator", "tier": "community", "title": "GamingProMax FH6 Eliminator guide", "url": "https://gamingpromax.com/forza-horizon-6-eliminator-guide/", "used_for": "H2H winner-gets-CHOICE claim (contested vs timesaver's auto-take), 30s Showdown countdown, drop respawn, no-drops-during-H2H, minimap-invisibility-when-stationary, rewards structure" },
-    { "id": "bossdown-eliminator", "tier": "community", "title": "BossDown FH6 Eliminator guide", "url": "https://bossdown.com/guides/forza-horizon-6-eliminator-guide/", "used_for": "challenge-down rule, steal-up tactic, let-them-fight endgame, common mistakes list" },
-    { "id": "u4n-eliminator-cars", "tier": "community", "title": "U4N — FH6 Eliminator cars & drop locations list", "url": "https://www.u4n.com/news/list-of-forza-horizon-6-eliminator-cars-drops-locations.html", "used_for": "Level 2 car list (only source); L3-10 bands (wording matches timesaver — treat as one source); randomized drops from fixed spawn pool", "reliability_note": "currency-seller blog — cross-check before trusting unique claims" },
-    { "id": "mitchcactus-eliminator", "tier": "community", "title": "MitchCactus FH6 Eliminator guide", "url": "https://mitchcactus.co/blog/forza-horizon-6/forza-horizon-6-eliminator-guide/", "used_for": "duel positioning (face the arena center), Showdown routing discipline; confirms 'winner receives an upgrade choice' (vague)" },
-    { "id": "lootbar-eliminator", "tier": "community", "title": "LootBar — FH6 Eliminator mode overview", "url": "https://www.lootbar.com/blog/en/forza-horizon-6-the-eliminator-mode.html", "used_for": "90%-control-over-100%-throttle tip, AWD final-circle consensus, zone countdown (via search snippet)" },
-    { "id": "steam-eliminator-thread", "tier": "community", "title": "Steam FH6 forum — Eliminator discussion", "url": "https://steamcommunity.com/app/2483190/discussions/0/573791755377468625/", "used_for": "PLAYER SENTIMENT: luck-heavy verdict, duel spawn-position complaints, terrain trap spots, cut-corner meta — grounds the 'expect luck' tip" },
-    { "id": "egamersworld-wristbands", "tier": "community", "title": "eGamersWorld — FH6 leveling & wristbands", "url": "https://egamersworld.com/blog/forza-horizon-6-leveling-guide-wristbands-explanat-6QxVs8AgKN", "used_for": "Horizon Play XP → Festival Points (levels ≤25) → Wristband chain corroboration" },
-    { "id": "forzahorizoncar-eliminator", "tier": "community", "title": "forzahorizoncar.com Eliminator guides (UNRELIABLE)", "url": "https://forzahorizoncar.com/en/wiki/eliminator-mode-guide.html", "used_for": "RETRACTED: self-described speculative car list (Chiron/Valkyrie/Type R) contradicts the timesaver/u4n roster; site previously retracted for FH5 PI-class parroting. Nothing unique used" },
-
-    { "id": "forza-guide-meta", "tier": "expert", "title": "forza.guide — FH6 Meta Cars (Rivals-leaderboard-derived, per class & track)", "url": "https://forza.guide/meta", "used_for": "META RECHECK 2026-07-11: most-picked cars by leaderboard appearances, road + dirt, per class AND per track (updated 6/23/2026). CROSS-VALIDATED against our primary 7/10 Electric Town screenshot (both show Supra '20/GR86 '22/Ford GT '05 on that A board) — the strongest independent meta signal we have. Drove: NSX '22 ↑verified (#1 S1 road), 22B ↑verified (#4 A dirt), Evo VIII ↑S-tier, Miata FE disciplines expanded (highway/Colossus/dirt #1s), WRX '04 softened, Focus RS contested (board-absent), Viper FE/BRZ FE/F-450 corroborated. LIMIT: covers road+dirt Rivals only — no cross-country or drag boards." },
-    { "id": "grindout-tierlist-0707", "tier": "community", "title": "Grindout FH6 car tier list (updated 2026-07-07)", "url": "https://grindout.com/forza-6/guides/car-tier-list", "used_for": "META RECHECK 2026-07-11: freshest SEO tier list — still names GT-R NISMO (S1), GR Supra '20 (A), AMG One (S2), Golf R '21 (B S-tier alt). Confirms the SEO-consensus meta did NOT shift through Jul 7" },
-    { "id": "timesaver-bestcars-0610", "tier": "community", "title": "timesaver.gg FH6 best cars by class & use case (2026-06-10)", "url": "https://timesaver.gg/blog/forza-horizon-6-best-cars", "used_for": "META RECHECK cross-check: Supra A + Gemera S2 agree; names Huracán EVO for S1 and 917 LH FE for off-road (single-source, luck-gated — not adopted); AE86 Trueno FE '~323mph drag/top-speed' claim noted but unadopted (single source)" },
-    { "id": "forza-support-notes-jun23", "tier": "primary", "title": "Official FH6 Release Notes June 23 2026 (Series 2 Hotfix 2, v382.893)", "url": "https://support.forza.net/hc/en-us/articles/52840653118867-FH6-Release-Notes-June-23rd-2026", "used_for": "PRIMARY (read in browser 2026-07-11): stability + badge fixes ONLY — no car balance. Also confirms June 23 is the LATEST patch as of 2026-07-11 (sidebar lists no July notes)" },
-    { "id": "bossdown-dragnerf", "tier": "community", "title": "BossDown — FH6 drag tire nerf explained + retune", "url": "https://bossdown.com/guides/forza-horizon-6-drag-tires-nerf-tuning/", "used_for": "META RECHECK: Jun 15 nerf = cornering grip only; quotes Playground 'Drag times and Drag Leaderboards will be unaffected' — drag picks survive; road/touge drag-tire cheese dead (lightweight RWD back on top, consistent with forza.guide kei-car boards)" },
-    { "id": "forzahorizonhub-rally", "tier": "community", "title": "ForzaHorizonHub — best dirt/rally cars", "url": "https://forzahorizonhub.com/guides/forza-horizon-6-best-dirt-rally-cars", "used_for": "META RECHECK: 'Evo VIII MR is the best rally car in the game' + WRX '04 still best-value — second source for the Evo>WRX flip (with dexerto's updated B-tier WRX placement)" },
-
-    { "id": "game8-perclass", "tier": "community", "title": "game8 — FH6 Best Cars for Each Class (per-class × per-format table)", "url": "https://game8.co/games/Forza-Horizon-6/archives/601596", "used_for": "GAP FILL 2026-07-11: the only source with explicit per-class calls for EVERY format. KNOWN WEAKNESS: the low-class drag column (Supervan D, P50 C) rests on this table alone — those picks are capped at 'probable'" },
-    { "id": "gamerant-fh6-meta", "tier": "expert", "title": "GameRant — FH6 best cars each class (Rivals-leaderboard-derived)", "url": "https://gamerant.com/forza-horizon-6-best-cars-each-class-fh6-meta/", "used_for": "GAP FILL: independent leaderboard-derived meta — corroborates Integra Type R (C road), diverges on D road (P50/S800/Civic '86 vs Beat) — divergences recorded in entries" },
-    { "id": "gamerant-touge", "tier": "expert", "title": "GameRant — FH6 best touge/street cars", "url": "https://gamerant.com/forza-horizon-6-best-cars-touge-street-racing-fh6/", "used_for": "GAP FILL: Cayman GT3 WTAC (S1/S2/R touge) + Exige WTAC (R touge) corroboration" },
-    { "id": "gamerant-dragtest", "tier": "expert", "title": "GameRant — FH6 best drag car (timed testing)", "url": "https://gamerant.com/fh6-best-drag-car/", "used_for": "GAP FILL: Tacoma TRD Pro FE tested at Irokawa quarter-mile (8.5s stock / 7.6s upgraded) — the only drag-SPECIFIC R-class evidence; VIP-exclusivity + no-auction note" },
-    { "id": "gamerstation-bdrag", "tier": "community", "title": "GamerStation — FH6 B-class drag ranking (heuristic)", "url": "https://gamerstation.gg/tools/forza-horizon-6/best-cars/drag/b", "used_for": "GAP FILL: only dedicated B-drag ranking; self-described stock-spec HEURISTIC (its #1 Cobra 427 was refuted on the AWD-launch meta; used only for the RS 6 as top AWD entry)" },
-    { "id": "mitchcactus-cc", "tier": "community", "title": "MitchCactus — FH6 best cross-country cars (ranked)", "url": "https://mitchcactus.co/blog/forza-horizon-6/best-cross-country-cars-forza-horizon-6/", "used_for": "GAP FILL: Brocky Ultra4 Bronco 'strongest S1 choice for open routes' (S1-bracketed quote — builds to low S2, not 900); bossdown dissents (Sesto Elemento) → S2 CC pick is contested" },
-    { "id": "windowscentral-drag", "tier": "expert", "title": "Windows Central — FH6 drag meta & tuning", "url": "https://www.windowscentral.com/gaming/forza/forza-horizon-6-best-drag-cars-and-tuning-setups-to-dominate-the-leaderboards", "used_for": "GAP FILL: FH6 drag meta frame — AWD swap 'flat-out better for times', drag tires mandatory; grounds the B-drag Cobra refutation and RS 6 promotion" },
-    { "id": "u4n-exige", "tier": "community", "title": "U4N — how to get the Lotus Exige WTAC", "url": "https://www.u4n.com/news/how-to-get-the-lotus-exige-wtac-in-forza-horizon-6.html", "used_for": "GAP FILL: Exige WTAC not purchasable — Collection Journal Road Racing unlock (win every road race, ~9,360 pts); cross-checked vs game8 'Tier 5 reward' framing", "reliability_note": "currency-seller blog — used only for acquisition mechanics, cross-checked with game8/fandom" },
-    { "id": "forza-support-notes-jul13", "tier": "primary", "title": "Official FH6 Release Notes July 13 2026 (v398.92.0)", "url": "https://support.forza.net/hc/en-us/articles/53336026605587-FH6-Release-Notes-July-13th-2026", "used_for": "PRIMARY (read in browser 2026-07-18): Eliminator drop-roster swap (Alumicraft Class 1 Buggy → Toyota #1 T100 Baja Truck '93); H2H-Requests/Eliminator duel-immunity bug fixed; ALL Rivals leaderboards RESET (drag-tire/glitch purge, Journal unlocks kept); 22B price 'adjusted'; PR-stunt locked-tune exploit fixed; LINK Clean Sweep journal fix" },
-    { "id": "forza-net-series3", "tier": "primary", "title": "Official forza.net — Series 3 'Italian Exotics' release notes", "url": "https://forza.net/news/forza-horizon-6-series-3-release-notes", "used_for": "PRIMARY: patch live Mon Jul 13 5:00PM UTC, Playlist from Thu Jul 16 2:30PM UTC; exploit fixes incl. 'XP and credit farming using Auto Drive while AFK', 'Skill Points farming from Estates', Eliminator un-challengeable fix; Auction House price cap removed for non-Autoshow cars" },
-    { "id": "mitchcactus-series3", "tier": "community", "title": "MitchCactus — Series 3 patch notes analysis (Jul 15)", "url": "https://mitchcactus.co/blog/forza-horizon-6/forza-horizon-6-series-3-patch-notes-rivals-reset-afk-farms-nerfed/", "used_for": "ELIMINATOR REFRESH: independent wording on the H2H settings-conflict exploit ('sneaky setting conflict'), Rivals full wipe, AFK Auto Drive + Estate skill-point farm fixes. NOTE: its auction-cap framing ('stabilize economy') loses to the official wording (cap removed for non-Autoshow cars)" },
-    { "id": "iggm-series3", "tier": "community", "title": "IGGM — Series 3 overview (Jul 14)", "url": "https://www.iggm.com/news/fh6-series-3-italian-exotics-festival-playlist-rewards-new-features", "used_for": "ELIMINATOR REFRESH: corroborates Rivals wipe rationale (drag-tire-era times); non-overlapping detail set vs mitchcactus (passed copy-cluster check)", "reliability_note": "currency-seller blog — details cross-checked before use" },
-    { "id": "forza-support-notes-jul20", "tier": "primary", "title": "Official FH6 Release Notes July 20 2026 (Series 3 Hotfix 1, v403.798)", "url": "https://support.forza.net/hc/en-us/articles/53563977535123-FH6-Release-Notes-July-20-2026", "used_for": "PRIMARY (read in browser 2026-07-27): drift fixes only — clutch-kick restored, handbrake instant-shift exploit removed (minor drag-tune relevance), drifting-session crash. NO Eliminator changes; latest patch as of 2026-07-27" }
+    {
+      "id": "official-release",
+      "tier": "primary",
+      "title": "FH6 Release Timing",
+      "url": "https://forza.net/news/forza-horizon-6-coming-may-2026",
+      "used_for": "release date 2026-05-19, setting (Japan/Tokyo)"
+    },
+    {
+      "id": "wikipedia",
+      "tier": "expert",
+      "title": "Forza Horizon 6 — Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Forza_Horizon_6",
+      "used_for": "release/setting confirmation"
+    },
+    {
+      "id": "pcgamer",
+      "tier": "expert",
+      "title": "Best cars for each race type",
+      "url": "https://www.pcgamer.com/games/racing/forza-horizon-6-best-cars/",
+      "used_for": "road/dirt meta cars"
+    },
+    {
+      "id": "games.gg",
+      "tier": "expert",
+      "title": "Tuning guide + full car tier list",
+      "url": "https://games.gg/forza-horizon-6/guides/forza-horizon-6-tuning-guide/",
+      "used_for": "tuning variables, tier list"
+    },
+    {
+      "id": "egamersworld",
+      "tier": "community",
+      "title": "Best cars by class tier list",
+      "url": "https://egamersworld.com/blog/forza-horizon-6-best-cars-by-class-s1-s2-a-b-tier--z7ymGyRVd2",
+      "used_for": "S1/S2 meta, GT-R NISMO price/acquisition"
+    },
+    {
+      "id": "forzatune",
+      "tier": "expert",
+      "title": "Updated Forza Tuning Guide",
+      "url": "https://forzatune.com/guide/the-fully-updated-forza-tuning-guide/",
+      "used_for": "tuning fundamentals"
+    },
+    {
+      "id": "ggwtb",
+      "tier": "community",
+      "title": "Upgrade order & build strategy",
+      "url": "https://ggwtb.com/blog/forza-horizon-6-tuning-guide-best-upgrade-order--build-strategy--and-baseline-settings",
+      "used_for": "upgrade order, baselines"
+    },
+    {
+      "id": "dexerto",
+      "tier": "expert",
+      "title": "Best rally cars tier list",
+      "url": "https://www.dexerto.com/wikis/forza-horizon-6/best-rally-cars-tier-list/",
+      "used_for": "dirt/rally meta"
+    },
+    {
+      "id": "gamingpromax",
+      "tier": "community",
+      "title": "Best rally & cross-country cars",
+      "url": "https://gamingpromax.com/forza-horizon-6-best-rally-cross-country-cars/",
+      "used_for": "cross-country meta"
+    },
+    {
+      "id": "game8",
+      "tier": "community",
+      "title": "Off-road & car info pages",
+      "url": "https://game8.co/games/Forza-Horizon-6/archives/602024",
+      "used_for": "off-road cars, car data"
+    },
+    {
+      "id": "grindnstrat",
+      "tier": "community",
+      "title": "Best dirt cars tier list",
+      "url": "https://grindnstrat.com/forza-horizon-6-best-cars-tier-list-best-dirt-cars/",
+      "used_for": "dirt meta confirmation"
+    },
+    {
+      "id": "tiktok-sharecodes",
+      "tier": "community",
+      "title": "GT-R drag/drift share codes",
+      "url": "https://www.tiktok.com/discover/best-tune-code-for-the-gtr-nismo-r-35-in-forza-horizon-6",
+      "used_for": "drag share codes (low confidence — verify in-game)"
+    },
+    {
+      "id": "skycoach-credits",
+      "tier": "community",
+      "title": "How to farm credits",
+      "url": "https://skycoach.gg/blog/forza-horizon-6/articles/how-to-farm-credits",
+      "used_for": "credit methods, assist-off multiplier %s"
+    },
+    {
+      "id": "ggwtb-skillfarm",
+      "tier": "community",
+      "title": "Fastest skill point / wheelspin / XP / credit farm",
+      "url": "https://ggwtb.com/blog/forza-horizon-6-fastest-skill-point-super-wheelspin--xp--and-credit-farm-guide",
+      "used_for": "22B STI skill farm rate, EventLab codes, Revuelto conversion"
+    },
+    {
+      "id": "vgc-farm",
+      "tier": "expert",
+      "title": "Best credit, skill point & wheelspin farm methods",
+      "url": "https://www.videogameschronicle.com/guide/forza-horizon-6-credit-skill-point-farm-share-codes/",
+      "used_for": "skill-point farm confirmation, share codes"
+    },
+    {
+      "id": "forza-fandom-playlist",
+      "tier": "expert",
+      "title": "FH6 Festival Playlist",
+      "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist",
+      "used_for": "Festival Playlist mechanics, reward thresholds"
+    },
+    {
+      "id": "redbull-beginner",
+      "tier": "expert",
+      "title": "FH6 beginner tips",
+      "url": "https://www.redbull.com/us-en/forza-horizon-6-tips-for-beginners",
+      "used_for": "starter cars, photo XP, daily-wheelspin house, early roadmap"
+    },
+    {
+      "id": "kotaku-beginner",
+      "tier": "expert",
+      "title": "13 things to know before playing FH6",
+      "url": "https://kotaku.com/13-things-to-know-before-playing-forza-horizon-6-xbox-guide-open-world-2000695715",
+      "used_for": "early progression order, aftermarket map cars"
+    },
+    {
+      "id": "game8-db",
+      "tier": "primary",
+      "title": "game8 FH6 car database (independent)",
+      "url": "https://game8.co/games/Forza-Horizon-6/archives/600753",
+      "used_for": "VERIFICATION: GT-R NISMO 220k price, journal reward, off-road car list, F-450"
+    },
+    {
+      "id": "forza-fandom",
+      "tier": "expert",
+      "title": "Forza Fandom wiki (independent)",
+      "url": "https://forza.fandom.com/wiki/Forza_Horizon_6/Festival_Playlist",
+      "used_for": "VERIFICATION: Festival Playlist points system, Gemera Car Pass, BRZ FE"
+    },
+    {
+      "id": "kudosprime",
+      "tier": "primary",
+      "title": "kudosprime FH6 stat sheets (independent)",
+      "url": "https://www.kudosprime.com/fh6/car_sheet.php?id=549",
+      "used_for": "VERIFICATION: WRX STI 30k price/stats"
+    },
+    {
+      "id": "forums-forza",
+      "tier": "primary",
+      "title": "Official Forza forums — Playlist & tune threads",
+      "url": "https://forums.forza.net/t/fh6-festival-playlist-events-and-rewards-may-21-may-28-series-01-week-1/828507",
+      "used_for": "VERIFICATION: Festival Playlist points (20/40/80), drag tune hub"
+    },
+    {
+      "id": "gtplanet",
+      "tier": "expert",
+      "title": "GTPlanet FH6 discussion (community forum)",
+      "url": "https://www.gtplanet.net/forum/threads/forza-horizon-6-general-discussion.434110/",
+      "used_for": "VERIFICATION: AWD-swap meta direction, engine-swap/weight tradeoffs (qualitative)"
+    },
+    {
+      "id": "forzatune",
+      "tier": "expert",
+      "title": "ForzaTune authority guide (independent)",
+      "url": "https://forzatune.com/guide/the-fully-updated-forza-tuning-guide/",
+      "used_for": "VERIFICATION: variable set, tune order (puts alignment before springs — disputes SEO order)"
+    },
+    {
+      "id": "forzafire-drivetrain",
+      "tier": "community",
+      "title": "ForzaFire drivetrain tuning guide",
+      "url": "https://www.forzafire.com/guides/forza-horizon-6-drivetrain-tuning-guide",
+      "used_for": "VERIFICATION: diff baselines contradict 55/15 (gives 100/45)"
+    },
+    {
+      "id": "codmunity-drag",
+      "tier": "community",
+      "title": "CODMunity FH6 drag tune DB",
+      "url": "https://codmunity.gg/forza/drag",
+      "used_for": "VERIFICATION: real GT-R FE drag code 514752751; retracts unverified TikTok codes"
+    },
+    {
+      "id": "ggwtb-afk-colossus",
+      "tier": "community",
+      "title": "AFK Colossus ~1M cr/hr method",
+      "url": "https://ggwtb.com/blog/best-forza-horizon-6-credit-farm-afk-colossus-method-for-nearly-1m-credits-per-hour",
+      "used_for": "VERIFICATION: AFK farm real rate ~140k/lap (corrects 2,300/lap error)"
+    },
+    {
+      "id": "dotesports",
+      "tier": "expert",
+      "title": "Dotesports FH6 best-car guides",
+      "url": "https://dotesports.com/forza/news/forza-horizon-6-best-car-every-class",
+      "used_for": "VERIFICATION: Gemera, AMG One, FXX-K Evo S2 picks"
+    },
+    {
+      "id": "gamerguides-journal",
+      "tier": "expert",
+      "title": "All Journal reward cars in FH6",
+      "url": "https://www.gamerguides.com/forza-horizon-6/guide/getting-started/gameplay/all-journal-reward-cars-in-fh6",
+      "used_for": "VERIFICATION: GT-R NISMO free via Collection Journal Tier 3"
+    },
+    {
+      "id": "in-game-screenshot",
+      "tier": "primary",
+      "title": "Player in-game Tune screen (2014 Golf R)",
+      "url": "n/a — user-provided screenshot 2026-06-08",
+      "used_for": "GROUND TRUTH: 2014 Golf R at PI 589 displays as B class; performance readouts (lateral G 1.11/1.13, 0-60 4.66s, top 163.3 mph, braking 122/310.7 ft, aero balance 0.52); current alignment (camber -2.0F/-1.5R, toe 0/0, caster 5.0). PROVES FH6 class boundaries shifted ~100 PI down vs FH5."
+    },
+    {
+      "id": "in-game-recording",
+      "tier": "primary",
+      "title": "Player in-game Tune-menu screen recording (2014 Golf R, all 9 tabs)",
+      "url": "n/a — user-provided 20s mp4 2026-06-08, frames extracted via ffmpeg",
+      "used_for": "GROUND TRUTH for ALL 9 tab structures: section names, slider lists, directional pole labels, displayed units (PSI / LB/IN / IN / deg), verbatim lock banners, and the padlock-+-banner lock behavior. Pole corrections: Aero = Speed<->Cornering; Brake balance = Rear<->Front; Gearing = Speed<->Acceleration. Observed build: race springs/dampers + alignment + tire pressure unlocked; gearing/ARB/aero/brake/diff LOCKED."
+    },
+    {
+      "id": "forza-labs-db",
+      "tier": "primary",
+      "title": "ForzaLabs FH6 car database (independent)",
+      "url": "https://forza.labsgg.com/manufacturers/volkswagen",
+      "used_for": "2014 Golf R PI 536 / 27k cr / B class; model-year ladder 2010=526/20k, 2014=536/27k, 2021=546/29k. CONFIRMED by in-game screenshot (B class)."
+    },
+    {
+      "id": "dexerto",
+      "tier": "expert",
+      "title": "Dexerto FH6 car wiki (independent)",
+      "url": "https://www.dexerto.com/wikis/forza-horizon-6/cars/2010-volkswagen-golf-r/",
+      "used_for": "2010 Golf R 526/B/20k/AWD cross-checks ForzaLabs (validates the DB and the shifted B-class boundary)"
+    },
+    {
+      "id": "forzahorizoncar-wiki",
+      "tier": "community",
+      "title": "FH6 tuning & PI class wiki (UNRELIABLE on classes)",
+      "url": "https://forzahorizoncar.com/en/wiki/guides/tuning.html",
+      "used_for": "RETRACTED: claimed FH6 B = 601-700 (the old FH4/FH5 table). DISPROVEN by in-game screenshot (589 = B). Example of SEO parroting the pre-FH6 boundaries."
+    },
+    {
+      "id": "forzafire-fh6-tires",
+      "tier": "community",
+      "title": "ForzaFire FH6 Tires & Rims tuning guide",
+      "url": "https://www.forzafire.com/guides/forza-horizon-6-tires-and-rims-tuning-guide",
+      "used_for": "FH6 UI STRUCTURE (dated 2026-05-20): tire pressure F/R range 1.0-3.8 bar; independent F/R tire WIDTH in mm; compound/width live in parts menu"
+    },
+    {
+      "id": "forzafire-fh6-drivetrain",
+      "tier": "community",
+      "title": "ForzaFire FH6 Drivetrain tuning guide",
+      "url": "https://www.forzafire.com/guides/forza-horizon-6-drivetrain-tuning-guide",
+      "used_for": "FH6 UI STRUCTURE (2026-05-20): transmission tiers/final-drive gating; up to 10 gears; AWD diff = Front/Rear/Center sections; center = % torque to rear ('30/70 split'); brake balance Front<->Rear"
+    },
+    {
+      "id": "forzafire-fh6-handling",
+      "tier": "community",
+      "title": "ForzaFire FH6 Platform & Handling tuning guide",
+      "url": "https://www.forzafire.com/guides/forza-horizon-6-platform-and-handling-tuning-guide",
+      "used_for": "FH6 UI STRUCTURE (2026-05-20): ARB 1.00-65.00; springs+ride-height grouped in Springs tab; damping = Bump+Rebound per axle"
+    },
+    {
+      "id": "forzafire-fh6-aero",
+      "tier": "community",
+      "title": "ForzaFire FH6 Aero & Appearance tuning guide",
+      "url": "https://www.forzafire.com/guides/forza-horizon-6-aero-and-appearance-tuning-guide",
+      "used_for": "FH6 UI STRUCTURE (2026-05-20): downforce unit kgf/lb; F/R downforce gated by race bumper/wing; Aero Balance + Aero Efficiency Performance-panel readouts"
+    },
+    {
+      "id": "game8-fh6-tuning",
+      "tier": "community",
+      "title": "game8 FH6 tuning DB",
+      "url": "https://game8.co/games/Forza-Horizon-6/archives/601974",
+      "used_for": "FH6 UI STRUCTURE (2026-05-26): full tab order confirming no separate Ride Height tab; compound pressure targets; speed graph; ARB 1.0/65.0; brake balance 50% default"
+    },
+    {
+      "id": "keengamer-fh6-tuning",
+      "tier": "community",
+      "title": "KeenGamer FH6 tuning guide",
+      "url": "https://www.keengamer.com/articles/guides/forza-horizon-6-tuning-guide-best-settings-for-all-car-builds/",
+      "used_for": "FH6 UI STRUCTURE: tab order; ride height under Springs tab"
+    },
+    {
+      "id": "destructoid-fh6-tuning",
+      "tier": "expert",
+      "title": "Destructoid FH6 tuning guide (all sliders)",
+      "url": "https://www.destructoid.com/complete-forza-horizon-6-tuning-guide-all-sliders-explained/",
+      "used_for": "FH6 UI STRUCTURE (2026-05-20): up to 10 gears; 4-slider damping; brake = balance+pressure; AWD diff front/rear/center"
+    },
+    {
+      "id": "gamerant-fh6-tuning",
+      "tier": "expert",
+      "title": "Game Rant FH6 tuning guide",
+      "url": "https://gamerant.com/forza-horizon-6-tuning-guide-how-tune-cars/",
+      "used_for": "FH6 UI STRUCTURE (2026-06-05): tune-menu section list; AWD front/rear/center diffs; final-drive direction"
+    },
+    {
+      "id": "grindout-fh6-tuning",
+      "tier": "community",
+      "title": "Grindout FH6 tuning guide",
+      "url": "https://grindout.com/forza-6/guides/tuning",
+      "used_for": "FH6 UI STRUCTURE (2026-05-26): aero slider part-gating; brake-balance un-inverted in FH6; practical diff caps"
+    },
+    {
+      "id": "gamingpromax-fh6-balance",
+      "tier": "community",
+      "title": "GamingProMax FH6 mechanical/aero balance system",
+      "url": "https://gamingpromax.com/forza-horizon-6-car-tuning-guide-mechanical-balance-system/",
+      "used_for": "FH6 NEW mechanic: Aero Balance ~0.40-0.50 tuning target"
+    },
+    {
+      "id": "calculators-games-fh6",
+      "tier": "community",
+      "title": "calculators.games FH6 transmission/tuning calculators",
+      "url": "https://calculators.games/en/forza-horizon-6/transmission-optimizer",
+      "used_for": "FH6: up to 10-speed; springs lb/in (US locale); ARB 1-65 (corroboration only — third-party tool layout, not in-game UI)"
+    },
+    {
+      "id": "apexspeedcraft-fh6",
+      "tier": "community",
+      "title": "ApexSpeedcraft Forza tuning reference (FH6 update)",
+      "url": "https://apexspeedcraft.wordpress.com/2026/04/25/forza-horizon-tuning-reference/",
+      "used_for": "FH6 (post-launch update 2026-05-24): springs kgf/mm or lb/in; ARB 1-65. NOTE original post pre-release — used only for corroboration"
+    },
+    {
+      "id": "forza-support-patch-0615",
+      "tier": "primary",
+      "title": "FH6 Release Notes June 15 2026 (v375.327)",
+      "url": "https://support.forza.net/hc/en-us/articles/52554154006547-FH6-Release-Notes-June-15th-2026",
+      "used_for": "PRIMARY patch notes: v375.327 = drag tire nerf + XP curve; did NOT touch skill points/EventLab/Car Mastery"
+    },
+    {
+      "id": "fh6wiki-patches",
+      "tier": "expert",
+      "title": "FH6 patch history",
+      "url": "https://forzahorizon6wiki.com/en/patches/",
+      "used_for": "Full patch list: v375.327 (Jun 15), v379.939 (Jun 18), v382.893 (Jun 23, latest). None nerfed skill farming"
+    },
+    {
+      "id": "purexbox-autodrive-nerf",
+      "tier": "expert",
+      "title": "FH6 removes two exploits (Auto Drive + Eliminator)",
+      "url": "https://www.purexbox.com/news/2026/06/forza-horizon-6-removes-two-major-exploits-in-latest-xbox-and-pc-update",
+      "used_for": "VERIFIED: hotfix v379.939 (Jun 18) rebalanced Auto Drive rewards ('not intended to earn credits without actively playing') — explains under-max skill farm runs on auto-drive"
+    },
+    {
+      "id": "jakelee-skillfarm",
+      "tier": "community",
+      "title": "Jake Lee — FH6 skill-point & wheelspin farming",
+      "url": "https://jakelee.co.uk/forza-horizon-6-skillpoint-farming/",
+      "used_for": "Independent methodical guide: 22B, code 890169683 (objects below map), perk stack, ~766 SP/hr, score-to-SP math"
+    },
+    {
+      "id": "game8-skillfarm",
+      "tier": "community",
+      "title": "game8 FH6 — How to Farm Skill Points",
+      "url": "https://game8.co/games/Forza-Horizon-6/archives/601239",
+      "used_for": "Score→SP conversion (~10k score = 1 SP), 10-SP-per-run cap, bank-before-break"
+    },
+    {
+      "id": "timesaver-skillfarm",
+      "tier": "community",
+      "title": "timesaver.gg FH6 skill-points farming guide (2026)",
+      "url": "https://timesaver.gg/blog/forza-horizon-6-skill-points-farming-guide",
+      "used_for": "22B 9x needs ~56k score for 10-cap vs 100k for 5x; codes 861224889/401393298"
+    },
+    {
+      "id": "timesaver-festival",
+      "tier": "community",
+      "title": "timesaver.gg FH6 Festival Playlist guide (Jun 2026)",
+      "url": "https://timesaver.gg/blog/forza-horizon-6-festival-playlist-guide",
+      "used_for": "Series 2 thresholds (20/40 season, 80/160 series); optimal order (dailies>photo>events>PR>Trial>treasure); ~40 pts = both season cars"
+    },
+    {
+      "id": "forza-fh6playlists",
+      "tier": "primary",
+      "title": "Official FH6 Festival Playlist (current week)",
+      "url": "https://forza.net/fh6playlists",
+      "used_for": "Current-week playlist rewards (rotates each series)"
+    },
+    {
+      "id": "reddit-link-cleansweep",
+      "tier": "community",
+      "title": "r/ForzaHorizon6 — 'Link Clean Sweep' completion bug thread",
+      "url": "https://redd.it/1uqept6",
+      "used_for": "2026-07-08: LINK Clean Sweep + 10k speed-skill badges BUGGED/acknowledged (FH6BR-1887); Custom-Racing completion trick; 100% is time-gated across series. Confidence: community (OP + commenters + bug tracker)"
+    },
+    {
+      "id": "in-game-leaderboard-electrictown",
+      "tier": "primary",
+      "title": "Player in-game Rivals leaderboard — Electric Town Circuit, A class",
+      "url": "n/a — user-provided screenshot 2026-07-10",
+      "used_for": "GROUND TRUTH: global top-11 times/cars/PI/assists for Electric Town Circuit A. Shows a SOFT board (1:05-1:32 spread), Supra '20 x3 incl #1, fastest runs at 616 PI (under cap), TCS/STM off universal, 'AI Test071831' seed time. Re-confirms A-class = 601-700 (616 & 700 both 'A')."
+    },
+    {
+      "id": "gamesradar-drag",
+      "tier": "expert",
+      "title": "GamesRadar — Best FH6 drag cars",
+      "url": "https://www.gamesradar.com/games/forza-horizon/forza-horizon-6-best-drag-cars/",
+      "used_for": "Miata FE = best drag car; aftermarket-spawn acquisition"
+    },
+    {
+      "id": "53rain-tunelist",
+      "tier": "expert",
+      "title": "53Rain's Tune List (community tuner share-code DB, view-only Google Sheet)",
+      "url": "https://docs.google.com/spreadsheets/d/19sGnavfTsp3iPYN_OnNmPBW87I0Pz2ODuNFFhZgaU8g",
+      "used_for": "User-supplied 2026-07-18. Reputable tuner's share codes per car, organised by class block: B (cap 600), A (cap 700), S1 (cap 800), Car·Sharecode·Notes columns; legend green=Meta / yellow=favourite / blue=road. INDEPENDENTLY CORROBORATES the shifted FH6 class caps (B=600/A=700/S1=800). Codes ingested for cars we track: GR Supra 700 022 932 (S1 build), F-450 202 410 695 (B), FD #777 240SX 213 803 717 (S1), AE86 Sprinter Trueno 174 568 603 (B). Sheet blocks viewer download (owner security setting) — read visually via browser, not exportable."
+    },
+    {
+      "id": "bossdown-drag",
+      "tier": "community",
+      "title": "Bossdown — FH6 drag tune guide",
+      "url": "https://bossdown.com/guides/forza-horizon-6-drag-tune-guide/",
+      "used_for": "Drag tuning priority order (gearing #1, launch, diff, tires) — basis of the drag discipline template"
+    },
+    {
+      "id": "mapmaster-roadraces",
+      "tier": "community",
+      "title": "MapMaster — FH6 Road Racing Event locations",
+      "url": "https://mapmaster.io/games/forza-horizon-6/guides/Road%20Racing%20Event",
+      "used_for": "The full list of all 22 Road Racing events (12 Circuits + 10 Sprints) with names/regions/format — basis of the rivals-tracks scaffold"
+    },
+    {
+      "id": "meinmmo-miata",
+      "tier": "expert",
+      "title": "Mein-MMO — Unlock the Mazda MX-5 Miata FE '94",
+      "url": "https://mein-mmo.de/en/forza-horizon-6-unlock-mazda-mx-5-miata-fe-94-this-is-how-you-get-one-of-the-best-cars-for-speed-traps-and-drag-races,1568245/",
+      "used_for": "VERIFIED Miata FE acquisition: aftermarket spot N of Drag Meet, reload until it spawns, 500k (450k discounted) — NOT Wheelspin. Corrects skycoach."
+    },
+    {
+      "id": "forza-support-eliminator-faq",
+      "tier": "primary",
+      "title": "Official Forza Support — The Eliminator & Auto Drive FAQ",
+      "url": "https://support.forza.net/hc/en-us/articles/52613640745875-The-Eliminator-Support-FAQ",
+      "used_for": "PRIMARY (read in browser 2026-07-11): Eliminator disabled for credits exploit, restored via hotfix; McLaren Sabre '21 gift (Message Center → Gifts); exploiters rolled back to 10M cr, no bans; Auto Drive reward rebalance rationale"
+    },
+    {
+      "id": "forza-support-notes-jun18",
+      "tier": "primary",
+      "title": "Official FH6 Release Notes June 18 2026 (Series 2 Hotfix 1, v379.939)",
+      "url": "https://support.forza.net/hc/en-us/articles/52691021223315-FH6-Release-Notes-June-18th-2026",
+      "used_for": "PRIMARY (read in browser 2026-07-11): exploit fix, Eliminator restored, mode-reward rebalance vs Auto Drive, Sabre gift"
+    },
+    {
+      "id": "traxion-eliminator-exploit",
+      "tier": "expert",
+      "title": "Traxion — FH6 gifts free car after Eliminator exploit",
+      "url": "https://traxion.gg/forza-horizon-6-to-gift-free-car-to-all-players-after-eliminator-mode-exploit-discovered/",
+      "used_for": "VERIFICATION of shutdown timeline + hundreds-of-millions exploit scale (independent games outlet)"
+    },
+    {
+      "id": "timesaver-eliminator",
+      "tier": "community",
+      "title": "timesaver.gg FH6 Eliminator guide (2026)",
+      "url": "https://timesaver.gg/blog/forza-horizon-6-eliminator-guide",
+      "used_for": "72 players, Honda City '84 starter, drop/H2H/zone/Showdown mechanics, rewards, strategy tips, 'complete = win' daily-challenge gotcha. WARNING: car-level list shares wording with u4n — not independent"
+    },
+    {
+      "id": "gamingpromax-eliminator",
+      "tier": "community",
+      "title": "GamingProMax FH6 Eliminator guide",
+      "url": "https://gamingpromax.com/forza-horizon-6-eliminator-guide/",
+      "used_for": "H2H winner-gets-CHOICE claim (contested vs timesaver's auto-take), 30s Showdown countdown, drop respawn, no-drops-during-H2H, minimap-invisibility-when-stationary, rewards structure"
+    },
+    {
+      "id": "bossdown-eliminator",
+      "tier": "community",
+      "title": "BossDown FH6 Eliminator guide",
+      "url": "https://bossdown.com/guides/forza-horizon-6-eliminator-guide/",
+      "used_for": "challenge-down rule, steal-up tactic, let-them-fight endgame, common mistakes list"
+    },
+    {
+      "id": "u4n-eliminator-cars",
+      "tier": "community",
+      "title": "U4N — FH6 Eliminator cars & drop locations list",
+      "url": "https://www.u4n.com/news/list-of-forza-horizon-6-eliminator-cars-drops-locations.html",
+      "used_for": "Level 2 car list (only source); L3-10 bands (wording matches timesaver — treat as one source); randomized drops from fixed spawn pool",
+      "reliability_note": "currency-seller blog — cross-check before trusting unique claims"
+    },
+    {
+      "id": "mitchcactus-eliminator",
+      "tier": "community",
+      "title": "MitchCactus FH6 Eliminator guide",
+      "url": "https://mitchcactus.co/blog/forza-horizon-6/forza-horizon-6-eliminator-guide/",
+      "used_for": "duel positioning (face the arena center), Showdown routing discipline; confirms 'winner receives an upgrade choice' (vague)"
+    },
+    {
+      "id": "lootbar-eliminator",
+      "tier": "community",
+      "title": "LootBar — FH6 Eliminator mode overview",
+      "url": "https://www.lootbar.com/blog/en/forza-horizon-6-the-eliminator-mode.html",
+      "used_for": "90%-control-over-100%-throttle tip, AWD final-circle consensus, zone countdown (via search snippet)"
+    },
+    {
+      "id": "steam-eliminator-thread",
+      "tier": "community",
+      "title": "Steam FH6 forum — Eliminator discussion",
+      "url": "https://steamcommunity.com/app/2483190/discussions/0/573791755377468625/",
+      "used_for": "PLAYER SENTIMENT: luck-heavy verdict, duel spawn-position complaints, terrain trap spots, cut-corner meta — grounds the 'expect luck' tip"
+    },
+    {
+      "id": "egamersworld-wristbands",
+      "tier": "community",
+      "title": "eGamersWorld — FH6 leveling & wristbands",
+      "url": "https://egamersworld.com/blog/forza-horizon-6-leveling-guide-wristbands-explanat-6QxVs8AgKN",
+      "used_for": "Horizon Play XP → Festival Points (levels ≤25) → Wristband chain corroboration"
+    },
+    {
+      "id": "forzahorizoncar-eliminator",
+      "tier": "community",
+      "title": "forzahorizoncar.com Eliminator guides (UNRELIABLE)",
+      "url": "https://forzahorizoncar.com/en/wiki/eliminator-mode-guide.html",
+      "used_for": "RETRACTED: self-described speculative car list (Chiron/Valkyrie/Type R) contradicts the timesaver/u4n roster; site previously retracted for FH5 PI-class parroting. Nothing unique used"
+    },
+    {
+      "id": "forza-guide-meta",
+      "tier": "expert",
+      "title": "forza.guide — FH6 Meta Cars (Rivals-leaderboard-derived, per class & track)",
+      "url": "https://forza.guide/meta",
+      "used_for": "META RECHECK 2026-07-11: most-picked cars by leaderboard appearances, road + dirt, per class AND per track (updated 6/23/2026). CROSS-VALIDATED against our primary 7/10 Electric Town screenshot (both show Supra '20/GR86 '22/Ford GT '05 on that A board) — the strongest independent meta signal we have. Drove: NSX '22 ↑verified (#1 S1 road), 22B ↑verified (#4 A dirt), Evo VIII ↑S-tier, Miata FE disciplines expanded (highway/Colossus/dirt #1s), WRX '04 softened, Focus RS contested (board-absent), Viper FE/BRZ FE/F-450 corroborated. LIMIT: covers road+dirt Rivals only — no cross-country or drag boards."
+    },
+    {
+      "id": "grindout-tierlist-0707",
+      "tier": "community",
+      "title": "Grindout FH6 car tier list (updated 2026-07-07)",
+      "url": "https://grindout.com/forza-6/guides/car-tier-list",
+      "used_for": "META RECHECK 2026-07-11: freshest SEO tier list — still names GT-R NISMO (S1), GR Supra '20 (A), AMG One (S2), Golf R '21 (B S-tier alt). Confirms the SEO-consensus meta did NOT shift through Jul 7"
+    },
+    {
+      "id": "timesaver-bestcars-0610",
+      "tier": "community",
+      "title": "timesaver.gg FH6 best cars by class & use case (2026-06-10)",
+      "url": "https://timesaver.gg/blog/forza-horizon-6-best-cars",
+      "used_for": "META RECHECK cross-check: Supra A + Gemera S2 agree; names Huracán EVO for S1 and 917 LH FE for off-road (single-source, luck-gated — not adopted); AE86 Trueno FE '~323mph drag/top-speed' claim noted but unadopted (single source)"
+    },
+    {
+      "id": "forza-support-notes-jun23",
+      "tier": "primary",
+      "title": "Official FH6 Release Notes June 23 2026 (Series 2 Hotfix 2, v382.893)",
+      "url": "https://support.forza.net/hc/en-us/articles/52840653118867-FH6-Release-Notes-June-23rd-2026",
+      "used_for": "PRIMARY (read in browser 2026-07-11): stability + badge fixes ONLY — no car balance. Also confirms June 23 is the LATEST patch as of 2026-07-11 (sidebar lists no July notes)"
+    },
+    {
+      "id": "bossdown-dragnerf",
+      "tier": "community",
+      "title": "BossDown — FH6 drag tire nerf explained + retune",
+      "url": "https://bossdown.com/guides/forza-horizon-6-drag-tires-nerf-tuning/",
+      "used_for": "META RECHECK: Jun 15 nerf = cornering grip only; quotes Playground 'Drag times and Drag Leaderboards will be unaffected' — drag picks survive; road/touge drag-tire cheese dead (lightweight RWD back on top, consistent with forza.guide kei-car boards)"
+    },
+    {
+      "id": "forzahorizonhub-rally",
+      "tier": "community",
+      "title": "ForzaHorizonHub — best dirt/rally cars",
+      "url": "https://forzahorizonhub.com/guides/forza-horizon-6-best-dirt-rally-cars",
+      "used_for": "META RECHECK: 'Evo VIII MR is the best rally car in the game' + WRX '04 still best-value — second source for the Evo>WRX flip (with dexerto's updated B-tier WRX placement)"
+    },
+    {
+      "id": "game8-perclass",
+      "tier": "community",
+      "title": "game8 — FH6 Best Cars for Each Class (per-class × per-format table)",
+      "url": "https://game8.co/games/Forza-Horizon-6/archives/601596",
+      "used_for": "GAP FILL 2026-07-11: the only source with explicit per-class calls for EVERY format. KNOWN WEAKNESS: the low-class drag column (Supervan D, P50 C) rests on this table alone — those picks are capped at 'probable'"
+    },
+    {
+      "id": "gamerant-fh6-meta",
+      "tier": "expert",
+      "title": "GameRant — FH6 best cars each class (Rivals-leaderboard-derived)",
+      "url": "https://gamerant.com/forza-horizon-6-best-cars-each-class-fh6-meta/",
+      "used_for": "GAP FILL: independent leaderboard-derived meta — corroborates Integra Type R (C road), diverges on D road (P50/S800/Civic '86 vs Beat) — divergences recorded in entries"
+    },
+    {
+      "id": "gamerant-touge",
+      "tier": "expert",
+      "title": "GameRant — FH6 best touge/street cars",
+      "url": "https://gamerant.com/forza-horizon-6-best-cars-touge-street-racing-fh6/",
+      "used_for": "GAP FILL: Cayman GT3 WTAC (S1/S2/R touge) + Exige WTAC (R touge) corroboration"
+    },
+    {
+      "id": "gamerant-dragtest",
+      "tier": "expert",
+      "title": "GameRant — FH6 best drag car (timed testing)",
+      "url": "https://gamerant.com/fh6-best-drag-car/",
+      "used_for": "GAP FILL: Tacoma TRD Pro FE tested at Irokawa quarter-mile (8.5s stock / 7.6s upgraded) — the only drag-SPECIFIC R-class evidence; VIP-exclusivity + no-auction note"
+    },
+    {
+      "id": "gamerstation-bdrag",
+      "tier": "community",
+      "title": "GamerStation — FH6 B-class drag ranking (heuristic)",
+      "url": "https://gamerstation.gg/tools/forza-horizon-6/best-cars/drag/b",
+      "used_for": "GAP FILL: only dedicated B-drag ranking; self-described stock-spec HEURISTIC (its #1 Cobra 427 was refuted on the AWD-launch meta; used only for the RS 6 as top AWD entry)"
+    },
+    {
+      "id": "mitchcactus-cc",
+      "tier": "community",
+      "title": "MitchCactus — FH6 best cross-country cars (ranked)",
+      "url": "https://mitchcactus.co/blog/forza-horizon-6/best-cross-country-cars-forza-horizon-6/",
+      "used_for": "GAP FILL: Brocky Ultra4 Bronco 'strongest S1 choice for open routes' (S1-bracketed quote — builds to low S2, not 900); bossdown dissents (Sesto Elemento) → S2 CC pick is contested"
+    },
+    {
+      "id": "windowscentral-drag",
+      "tier": "expert",
+      "title": "Windows Central — FH6 drag meta & tuning",
+      "url": "https://www.windowscentral.com/gaming/forza/forza-horizon-6-best-drag-cars-and-tuning-setups-to-dominate-the-leaderboards",
+      "used_for": "GAP FILL: FH6 drag meta frame — AWD swap 'flat-out better for times', drag tires mandatory; grounds the B-drag Cobra refutation and RS 6 promotion"
+    },
+    {
+      "id": "u4n-exige",
+      "tier": "community",
+      "title": "U4N — how to get the Lotus Exige WTAC",
+      "url": "https://www.u4n.com/news/how-to-get-the-lotus-exige-wtac-in-forza-horizon-6.html",
+      "used_for": "GAP FILL: Exige WTAC not purchasable — Collection Journal Road Racing unlock (win every road race, ~9,360 pts); cross-checked vs game8 'Tier 5 reward' framing",
+      "reliability_note": "currency-seller blog — used only for acquisition mechanics, cross-checked with game8/fandom"
+    },
+    {
+      "id": "forza-support-notes-jul13",
+      "tier": "primary",
+      "title": "Official FH6 Release Notes July 13 2026 (v398.92.0)",
+      "url": "https://support.forza.net/hc/en-us/articles/53336026605587-FH6-Release-Notes-July-13th-2026",
+      "used_for": "PRIMARY (read in browser 2026-07-18): Eliminator drop-roster swap (Alumicraft Class 1 Buggy → Toyota #1 T100 Baja Truck '93); H2H-Requests/Eliminator duel-immunity bug fixed; ALL Rivals leaderboards RESET (drag-tire/glitch purge, Journal unlocks kept); 22B price 'adjusted'; PR-stunt locked-tune exploit fixed; LINK Clean Sweep journal fix"
+    },
+    {
+      "id": "forza-net-series3",
+      "tier": "primary",
+      "title": "Official forza.net — Series 3 'Italian Exotics' release notes",
+      "url": "https://forza.net/news/forza-horizon-6-series-3-release-notes",
+      "used_for": "PRIMARY: patch live Mon Jul 13 5:00PM UTC, Playlist from Thu Jul 16 2:30PM UTC; exploit fixes incl. 'XP and credit farming using Auto Drive while AFK', 'Skill Points farming from Estates', Eliminator un-challengeable fix; Auction House price cap removed for non-Autoshow cars"
+    },
+    {
+      "id": "mitchcactus-series3",
+      "tier": "community",
+      "title": "MitchCactus — Series 3 patch notes analysis (Jul 15)",
+      "url": "https://mitchcactus.co/blog/forza-horizon-6/forza-horizon-6-series-3-patch-notes-rivals-reset-afk-farms-nerfed/",
+      "used_for": "ELIMINATOR REFRESH: independent wording on the H2H settings-conflict exploit ('sneaky setting conflict'), Rivals full wipe, AFK Auto Drive + Estate skill-point farm fixes. NOTE: its auction-cap framing ('stabilize economy') loses to the official wording (cap removed for non-Autoshow cars)"
+    },
+    {
+      "id": "iggm-series3",
+      "tier": "community",
+      "title": "IGGM — Series 3 overview (Jul 14)",
+      "url": "https://www.iggm.com/news/fh6-series-3-italian-exotics-festival-playlist-rewards-new-features",
+      "used_for": "ELIMINATOR REFRESH: corroborates Rivals wipe rationale (drag-tire-era times); non-overlapping detail set vs mitchcactus (passed copy-cluster check)",
+      "reliability_note": "currency-seller blog — details cross-checked before use"
+    },
+    {
+      "id": "forza-support-notes-jul20",
+      "tier": "primary",
+      "title": "Official FH6 Release Notes July 20 2026 (Series 3 Hotfix 1, v403.798)",
+      "url": "https://support.forza.net/hc/en-us/articles/53563977535123-FH6-Release-Notes-July-20-2026",
+      "used_for": "PRIMARY (read in browser 2026-07-27): drift fixes only — clutch-kick restored, handbrake instant-shift exploit removed (minor drag-tune relevance), drifting-session crash. NO Eliminator changes; latest patch as of 2026-07-27"
+    }
   ],
   "fh6_ui_structure_pass": {
     "date": "2026-06-08",
@@ -143,6 +691,21 @@
       "22B 'best A-class rally' downgraded to probable (single-origin SEO).",
       "Gemera flagged Car Pass (paid DLC); AMG One often free via FH5 save; best CC car is 1999 Viper GTS ACR FE (VIP).",
       "Photo trick clarified: Festival/Promo XP (not player level), two presses not a chord."
+    ]
+  },
+  "distrusted_copyclusters": {
+    "note": "SEO/AI-content-farm sites flagged during the 2026-07-30 touge research as a single copy-cluster (identical phrasing) masquerading as independent corroboration, plus auto-generated tune calculators. Treat any one of them as ONE community-origin source at best; never trust their PI/class values or tune numbers. gamingpromax specifically parrots stale FH5-era PI (e.g. WRX STI A 822) impossible under FH6 caps.",
+    "added": "2026-07-30",
+    "sites": [
+      "gamingpromax.com (class placements only — parrots FH5 PI)",
+      "novus-vektra.com",
+      "armadaboost.com",
+      "jiswarrior.github.io",
+      "destinyhelp.com",
+      "runescape3money.com",
+      "starcitizenguides.net",
+      "forza.tools (auto-calculator, unattributed)",
+      "xmodhub.com"
     ]
   }
 }

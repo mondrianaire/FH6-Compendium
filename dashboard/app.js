@@ -209,9 +209,13 @@
   }
 
   // ---- stamps ----
+  // "Updated" = when the compendium was last built/deployed (self-updating via build stamp).
+  // Meta-car rankings carry their own capture + re-verify provenance (in the data + footer).
+  const reverify = DB.metaCars.meta_recheck && DB.metaCars.meta_recheck.date;
   document.getElementById("metaStamp").textContent =
-    "Meta captured " + DB.metaCars.captured + " — game is new; rankings will shift with patches.";
-  document.getElementById("footStamp").textContent = "Built " + DB.builtAt;
+    "Updated " + DB.builtAt + (reverify ? " · meta re-verified " + reverify : "") + " — FH6 is live; rankings shift with patches.";
+  document.getElementById("footStamp").textContent =
+    "Built " + DB.builtAt + " · meta captured " + DB.metaCars.captured;
 
   // ---- tabs ----
   document.querySelectorAll(".tab").forEach((t) =>
@@ -1360,6 +1364,17 @@
     if (!oc || !ws) return;
     const host = document.getElementById("wheelspinContent");
 
+    // per-visitor wheelspin tracking (localStorage) — independent of the owner's garage capture
+    const WS_OWNED_KEY = "fh6_wheelspin_owned";
+    let wsOwned = {};
+    try { wsOwned = JSON.parse(localStorage.getItem(WS_OWNED_KEY)) || {}; } catch (e) { wsOwned = {}; }
+    const wsKey = (mfr, model, year) => tnorm((mfr || "") + " " + (model || "")) + "|" + (year || "");
+    const toggleWs = (k) => {
+      if (wsOwned[k]) delete wsOwned[k]; else wsOwned[k] = true;
+      try { localStorage.setItem(WS_OWNED_KEY, JSON.stringify(wsOwned)); } catch (e) { /* private mode */ }
+      buildWheelspin();
+    };
+
     // fuzzy owned-lookup over the transcribed garage (model + manufacturer, ±1yr)
     const ownedIndex = oc.cars.map((c) => ({
       toks: tnorm((c.model || "") + " " + (c.manufacturer || "")).split(" ").filter((w) => w.length > 1),
@@ -1413,26 +1428,33 @@
 
     const cleanRar = (r) => r ? r.split(";")[0].trim() : null;
     const enrich = (list) => list.map((c) => {
-      const g = ownedMatch(c.manufacturer, c.model, c.year);
+      // garage cross-reference only when the owner's demo garage is loaded; otherwise per-visitor ticks only
+      const g = seedOn ? ownedMatch(c.manufacturer, c.model, c.year) : null;
       const m = metaMatch(c.manufacturer, c.model, c.year);
       const gRar = g ? cleanRar(g.raw.rarity) : null;
-      // owned → use the real in-game rarity from the garage (authoritative); else the researched value
-      return { ...c, owned: !!g, m, rarity: gRar || c.rarity, rarityVerified: !!gRar };
+      const key = wsKey(c.manufacturer, c.model, c.year);
+      const owned = !!wsOwned[key] || !!g;
+      // rarity ✓ = confirmed from the owner's in-game garage (only when demo loaded); else researched value
+      return { ...c, key, owned, m, rarity: gRar || c.rarity, rarityVerified: !!gRar };
     });
     const rarRank = (r) => { const k = (r || "").toLowerCase(); return k.includes("legendary") ? 5 : k.includes("forza") ? 5 : k.includes("epic") ? 4 : k.includes("rare") ? 3 : k.includes("common") ? 2 : 0; };
     const rowSort = (a, b) => (a.owned - b.owned) || (rarRank(b.rarity) - rarRank(a.rarity)) || ((b.m ? b.m.value_rating : 0) - (a.m ? a.m.value_rating : 0));
 
+    const ownCell = (c) => `<td style="text-align:center"><input type="checkbox" class="ws-own" data-k="${c.key}" ${c.owned ? "checked" : ""} title="tick if you own it (saved in this browser)"></td>`;
+
     const fe = enrich(ws.forza_edition).sort(rowSort);
     const feHave = fe.filter((c) => c.owned).length;
     const feRows = fe.map((c) => `<tr${c.owned ? "" : ' style="opacity:.85"'}>
+      ${ownCell(c)}
       <td>${confDot(c.confidence)} ${c.year} ${c.manufacturer} ${c.model.replace(/ ?forza edition/i, " FE")}</td>
-      <td>${rarBadge("Forza Edition", c.owned)}</td>
+      <td>${rarBadge("Forza Edition", c.rarityVerified)}</td>
       <td>${statusCell(c.owned)}</td>
       <td>${metaVal(c.m, c.meta_note)}</td></tr>`).join("");
 
     const wx = enrich(ws.wheelspin_exclusive).sort(rowSort);
     const wxHave = wx.filter((c) => c.owned).length;
     const wxRows = wx.map((c) => `<tr${c.owned ? "" : ' style="opacity:.85"'}>
+      ${ownCell(c)}
       <td>${confDot(c.confidence)} ${c.year} ${c.manufacturer} ${c.model}</td>
       <td>${rarBadge(c.rarity, c.rarityVerified)}</td>
       <td>${statusCell(c.owned)}</td>
@@ -1449,29 +1471,30 @@
         return yok && shared >= Math.max(2, Math.min(dt.length, rt.length) - 1);
       });
     };
-    const extraFe = oc.cars.filter((c) => c.fe).filter((c) => !onRoster(c));
+    const extraFe = seedOn ? oc.cars.filter((c) => c.fe).filter((c) => !onRoster(c)) : [];
     const extraRows = extraFe.map((c) => `<tr><td>${c.year} ${c.manufacturer} ${c.model.replace(/ ?forza edition/i, " FE")}</td><td><span class="badge tm-meta">✓ OWNED</span></td><td class="why" style="font-size:12px">${c.class || ""} ${c.pi || ""} — beyond the cross-source roster</td></tr>`).join("");
 
     host.innerHTML = `
       <div class="block" style="margin-top:0">
         <h3 style="margin-top:0">🎰 Wheelspin &amp; Forza Edition cars</h3>
-        <p class="why">These cars <strong>can't be bought</strong> — only won from Wheelspins / Super Wheelspins (RNG) or reward drops, so they're the collectibles worth tracking. Rows show what you <strong>own</strong> vs still <strong>need</strong>. <strong>Rarity</strong> is the in-game gem tier (grey Common → blue Rare → purple Epic → gold Legendary → green FE); a <strong>✓</strong> means it's confirmed from your garage, otherwise it's from game8 + forzalabs. <strong>Meta value</strong> = whether it's a competitive pick (matched against the 48-car meta list). ● dot = source confidence. No reliable source publishes credit values, so those aren't shown.</p>
+        <p class="why">These cars <strong>can't be bought</strong> — only won from Wheelspins / Super Wheelspins (RNG) or reward drops, so they're the collectibles worth tracking. <strong>Tick the ✓ box</strong> on the ones you own — it's saved in this browser (localStorage), private to you. <strong>Rarity</strong> is the in-game gem tier (grey Common → blue Rare → purple Epic → gold Legendary → green FE). <strong>Meta value</strong> = whether it's a competitive pick (matched against the 48-car meta list). ● dot = source confidence. No reliable source publishes credit values, so those aren't shown.${seedOn ? " <em>Demo garage loaded: rows also reflect the owner's captured collection, and a rarity ✓ means it's confirmed in-game.</em>" : ""}</p>
       </div>
 
-      <h3>Forza Edition roster — you have ${feHave} / ${fe.length}</h3>
-      <p class="why">The FE set the community sources agree on. You own <strong>all cross-source-verified FE cars</strong> plus extras below.</p>
+      <h3>Forza Edition roster — ${feHave} / ${fe.length} owned</h3>
+      <p class="why">The FE set the community sources agree on — the full collectible checklist. Tick what you have.</p>
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Car</th><th>Rarity</th><th>Status</th><th>Meta value</th></tr></thead>
+        <thead><tr><th>✓</th><th>Car</th><th>Rarity</th><th>Status</th><th>Meta value</th></tr></thead>
         <tbody>${feRows}</tbody></table></div>
-      ${extraFe.length ? `<h4 style="margin:18px 0 6px">Extra FE cars you own (not on the cross-source roster) — ${extraFe.length}</h4>
+      ${extraFe.length ? `<h4 style="margin:18px 0 6px">Extra FE cars in the demo garage (not on the cross-source roster) — ${extraFe.length}</h4>
       <div style="overflow-x:auto"><table><thead><tr><th>Car</th><th>Status</th><th>Note</th></tr></thead><tbody>${extraRows}</tbody></table></div>` : ""}
 
-      <h3 style="margin-top:26px">Wheelspin-exclusive meta cars — you have ${wxHave} / ${wx.length}</h3>
-      <p class="why">Non-FE cars that are still Wheelspin-only. NEED rows are your highest-value luck-gated targets — grind Super Wheelspins (Playlist / level-up rewards) for these.</p>
+      <h3 style="margin-top:26px">Wheelspin-exclusive meta cars — ${wxHave} / ${wx.length} owned</h3>
+      <p class="why">Non-FE cars that are still Wheelspin-only. The NEED rows are the highest-value luck-gated targets — grind Super Wheelspins (Playlist / level-up rewards) for these.</p>
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Car</th><th>Rarity</th><th>Status</th><th>Meta value</th></tr></thead>
+        <thead><tr><th>✓</th><th>Car</th><th>Rarity</th><th>Status</th><th>Meta value</th></tr></thead>
         <tbody>${wxRows}</tbody></table></div>
-      <p class="why" style="font-size:12px;margin-top:14px">Roster from game8 · insider-gaming · racinggames.gg · destructoid (4 independent sources). Community counts disagree (FE total reported 5–9); your garage holds ${oc.cars.filter((c) => c.fe).length} FE cars, so the real in-game total is higher than any single list. New Wheelspin pulls: add them via the <em>Recently Obtained</em> screenshot workflow.</p>`;
+      <p class="why" style="font-size:12px;margin-top:14px">Roster from game8 · insider-gaming · racinggames.gg · destructoid (4 independent sources). Community counts disagree (FE total reported 5–9), so the real in-game total may be higher than any single list.</p>`;
+    host.querySelectorAll(".ws-own").forEach((cb) => cb.addEventListener("change", () => toggleWs(cb.dataset.k)));
   }
 
   // ---- init ----

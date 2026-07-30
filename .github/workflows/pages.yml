@@ -22,11 +22,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      # Rebuild the browser bundle from data/*.json so the deploy is never stale (no deps needed)
+      # Rebuild the browser bundle from data/*.json so the deploy is never stale (no deps needed).
+      # Stamp with the deploy date so the in-app "Updated" banner is always current.
       - name: Build db.js bundle
-        run: node scripts/build-db.mjs
-        env:
-          BUILD_STAMP: ${{ github.sha }}
+        run: BUILD_STAMP="$(date -u +%Y-%m-%d)" node scripts/build-db.mjs
       - name: Disable Jekyll
         run: touch dashboard/.nojekyll
       - name: Upload dashboard/ as the Pages artifact

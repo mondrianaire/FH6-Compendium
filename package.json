@@ -1,0 +1,14 @@
+{
+  "name": "fh6-tuning-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local FH6 tuning decision database + dashboard (vanilla JS, no build step). Node is used only for the data-build and dev tests.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-db.mjs",
+    "test": "node scripts/smoke-test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  }
+}

@@ -1113,15 +1113,23 @@
     // fuzzy owned-lookup over the transcribed garage (model + manufacturer, ±1yr)
     const ownedIndex = oc.cars.map((c) => ({
       toks: tnorm((c.model || "") + " " + (c.manufacturer || "")).split(" ").filter((w) => w.length > 1),
+      codes: tnorm((c.model || "") + " " + (c.manufacturer || "")).split(" ").filter((w) => /\d/.test(w)),
       year: c.year, raw: c,
     }));
-    const ownsCar = (mfr, model, year) => {
-      const dt = tnorm(model + " " + mfr).split(" ").filter((w) => w.length > 1);
+    // Returns the matching garage car (with real in-game rarity) or null.
+    // Distinguishing model-code tokens (zr1, 6x6, gt3, m2, "4"…) MUST match exactly —
+    // this is what stops false positives like "Corvette ZR1" matching a plain Stingray.
+    const ownedMatch = (mfr, model, year) => {
+      const full = tnorm(model + " " + mfr).split(" ");
+      const dt = full.filter((w) => w.length > 1);
+      const keys = full.filter((w) => /\d/.test(w)); // incl. single-digit codes ("4" vs "2")
       return ownedIndex.find((o) => {
         const yok = !year || !o.year || Math.abs(o.year - year) <= 1;
+        if (!yok) return false;
+        if (!keys.every((k) => o.codes.includes(k))) return false;
         const shared = dt.filter((w) => o.toks.includes(w)).length;
-        return yok && shared >= Math.max(2, Math.min(dt.length, o.toks.length) - 1);
-      }) ? true : false;
+        return shared >= Math.max(2, Math.min(dt.length, o.toks.length) - 1);
+      }) || null;
     };
     // cross-reference our 48-car meta list for a meta-value read
     const metaMatch = (mfr, model, year) => {
@@ -1136,6 +1144,16 @@
     const confDot = (cf) => cf === "verified" ? '<span class="conf conf-verified" title="cross-source verified">●</span>'
       : cf === "probable" ? '<span class="conf conf-probable" title="single/partial source">●</span>'
       : '<span class="conf conf-contested" title="unverified">●</span>';
+    const rarBadge = (r, verified) => {
+      const k = (r || "").toLowerCase();
+      const cls = k.includes("legendary") ? "rar-legendary" : k.includes("epic") ? "rar-epic"
+        : k.includes("rare") ? "rar-rare" : k.includes("forza") ? "rar-fe"
+        : k.includes("barn") ? "rar-barn" : k.includes("common") ? "rar-common" : "rar-unknown";
+      const label = r ? r.replace(/forza edition/i, "FE") : "?";
+      const title = !r ? " title=\"rarity not published by any reliable source\""
+        : verified ? " title=\"confirmed in your garage (in-game)\"" : " title=\"community-researched rarity\"";
+      return `<span class="badge ${cls}"${title}>${label}${verified ? " ✓" : ""}</span>`;
+    };
     const statusCell = (owned) => owned
       ? '<span class="badge tm-meta">✓ OWNED</span>'
       : '<span class="badge tier-B">NEED</span>';
@@ -1143,17 +1161,22 @@
       ? `<span class="conf conf-verified">meta: tier ${m.tier} · ${m.value_rating}/10${m.tune_meta ? " · 53Rain " + m.tune_meta : ""}</span>`
       : `<span class="why" style="font-size:12px">${note || "collector"}</span>`;
 
+    const cleanRar = (r) => r ? r.split(";")[0].trim() : null;
     const enrich = (list) => list.map((c) => {
-      const owned = ownsCar(c.manufacturer, c.model, c.year);
+      const g = ownedMatch(c.manufacturer, c.model, c.year);
       const m = metaMatch(c.manufacturer, c.model, c.year);
-      return { ...c, owned, m };
+      const gRar = g ? cleanRar(g.raw.rarity) : null;
+      // owned → use the real in-game rarity from the garage (authoritative); else the researched value
+      return { ...c, owned: !!g, m, rarity: gRar || c.rarity, rarityVerified: !!gRar };
     });
-    const rowSort = (a, b) => (a.owned - b.owned) || (b.m ? b.m.value_rating : 0) - (a.m ? a.m.value_rating : 0);
+    const rarRank = (r) => { const k = (r || "").toLowerCase(); return k.includes("legendary") ? 5 : k.includes("forza") ? 5 : k.includes("epic") ? 4 : k.includes("rare") ? 3 : k.includes("common") ? 2 : 0; };
+    const rowSort = (a, b) => (a.owned - b.owned) || (rarRank(b.rarity) - rarRank(a.rarity)) || ((b.m ? b.m.value_rating : 0) - (a.m ? a.m.value_rating : 0));
 
     const fe = enrich(ws.forza_edition).sort(rowSort);
     const feHave = fe.filter((c) => c.owned).length;
     const feRows = fe.map((c) => `<tr${c.owned ? "" : ' style="opacity:.85"'}>
       <td>${confDot(c.confidence)} ${c.year} ${c.manufacturer} ${c.model.replace(/ ?forza edition/i, " FE")}</td>
+      <td>${rarBadge("Forza Edition", c.owned)}</td>
       <td>${statusCell(c.owned)}</td>
       <td>${metaVal(c.m, c.meta_note)}</td></tr>`).join("");
 
@@ -1161,6 +1184,7 @@
     const wxHave = wx.filter((c) => c.owned).length;
     const wxRows = wx.map((c) => `<tr${c.owned ? "" : ' style="opacity:.85"'}>
       <td>${confDot(c.confidence)} ${c.year} ${c.manufacturer} ${c.model}</td>
+      <td>${rarBadge(c.rarity, c.rarityVerified)}</td>
       <td>${statusCell(c.owned)}</td>
       <td>${metaVal(c.m, c.meta_note)}</td></tr>`).join("");
 
@@ -1187,7 +1211,7 @@
       <h3>Forza Edition roster — you have ${feHave} / ${fe.length}</h3>
       <p class="why">The FE set the community sources agree on. You own <strong>all cross-source-verified FE cars</strong> plus extras below.</p>
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Car</th><th>Status</th><th>Meta value</th></tr></thead>
+        <thead><tr><th>Car</th><th>Rarity</th><th>Status</th><th>Meta value</th></tr></thead>
         <tbody>${feRows}</tbody></table></div>
       ${extraFe.length ? `<h4 style="margin:18px 0 6px">Extra FE cars you own (not on the cross-source roster) — ${extraFe.length}</h4>
       <div style="overflow-x:auto"><table><thead><tr><th>Car</th><th>Status</th><th>Note</th></tr></thead><tbody>${extraRows}</tbody></table></div>` : ""}
@@ -1195,7 +1219,7 @@
       <h3 style="margin-top:26px">Wheelspin-exclusive meta cars — you have ${wxHave} / ${wx.length}</h3>
       <p class="why">Non-FE cars that are still Wheelspin-only. NEED rows are your highest-value luck-gated targets — grind Super Wheelspins (Playlist / level-up rewards) for these.</p>
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Car</th><th>Status</th><th>Meta value</th></tr></thead>
+        <thead><tr><th>Car</th><th>Rarity</th><th>Status</th><th>Meta value</th></tr></thead>
         <tbody>${wxRows}</tbody></table></div>
       <p class="why" style="font-size:12px;margin-top:14px">Roster from game8 · insider-gaming · racinggames.gg · destructoid (4 independent sources). Community counts disagree (FE total reported 5–9); your garage holds ${oc.cars.filter((c) => c.fe).length} FE cars, so the real in-game total is higher than any single list. New Wheelspin pulls: add them via the <em>Recently Obtained</em> screenshot workflow.</p>`;
   }

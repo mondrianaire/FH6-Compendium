@@ -8157,26 +8157,31 @@ window.FH6_DB = {
     "ratification_note": "26/48 meta cars owned. 4 fuzzy-match FALSE POSITIVES caught + excluded during ratification 2026-07-29: Nissan GT-R NISMO (own GT-R Black Ed, not R35 Nismo), Mercedes-AMG One (own AMG GT variants), Audi RS 6 (own RS 3/4/5/7/e-tron), Alfa Giulia TZ2 (own Giulia Quadrifoglio + Sprint GTA Stradale)."
   },
   "wheelspinCars": {
-    "_note": "Wheelspin / Forza-Edition exclusive roster. FE cars and listed wheelspin-exclusives cannot be bought from the Autoshow — only won from Wheelspins/Super Wheelspins (RNG) or select reward drops. Data is community-sourced and inconsistent across sites; confidence tags reflect cross-source agreement, not certainty. NO source publishes credit values or per-car rarity tiers, so those are omitted. Owned/needed status is computed at render time from data/owned-cars.json.",
+    "_note": "Wheelspin / Forza-Edition exclusive roster. FE cars and listed wheelspin-exclusives cannot be bought from the Autoshow — only won from Wheelspins/Super Wheelspins (RNG) or select reward drops. Membership is cross-source verified (game8 + destructoid + racinggames overlap; union ~48). Rarity: authoritative for marquee/competitive cars (game8 per-car pages + forzalabs wheelspin-stats agree); genuinely 'unknown' for the long tail — NO trustworthy source publishes rarity in list form, and content-farm rarity values were rejected as unverifiable (one mislabeled the Rimac Nevera 'Rare' vs game8's Legendary). Owned/needed status is computed at render time from data/owned-cars.json.",
     "sources": [
       "https://game8.co/games/Forza-Horizon-6/archives/600768",
-      "https://insider-gaming.com/forza-horizon-6-wheelspin-exclusive-cars/",
+      "https://forza.labsgg.com/forza-horizon-6/wheelspin-stats",
+      "https://www.destructoid.com/all-wheelspin-exclusive-cars-in-forza-horizon-6-and-how-to-get-them/",
       "https://racinggames.gg/article/forza-horizon-6-wheelspins-all-exclusive-cars-how-to-get-super-wheelspins-fast",
-      "https://www.destructoid.com/all-wheelspin-exclusive-cars-in-forza-horizon-6-and-how-to-get-them/"
+      "https://www.kudosprime.com/fh6/carlist.php",
+      "https://insider-gaming.com/forza-horizon-6-wheelspin-exclusive-cars/"
     ],
-    "fe_count_estimate": "8 cross-source-verified; disputed 5-9. Owner's garage holds 10 FE cars, so real in-game total is >8.",
+    "rarity_note": "23 cars carry verified/probable rarity (17 competitive/marquee + 6 FE confirmed by forzalabs); ~23 long-tail cars are honest 'unknown' (rarity recoverable only via per-car game8 pages — a future grind). Forza Edition is its own rarity tier (forzalabs-confirmed, franchise-standard).",
+    "fe_count_estimate": "8 cross-source-verified FE; owner's garage holds 10 (MX-5 FE + Vivio RX-R FE beyond the canonical 8), so real in-game total is >8.",
     "forza_edition": [
       {
         "manufacturer": "Ford",
         "model": "Mustang GT 2+2 Fastback Forza Edition",
         "year": 1968,
-        "meta_note": "Muscle/road build; collectible, not flagged meta",
+        "rarity": "Forza Edition",
+        "meta_note": "Muscle/road build; collectible + perk car",
         "confidence": "verified"
       },
       {
         "manufacturer": "Ford",
         "model": "F-150 XLT Lariat Forza Edition",
         "year": 1986,
+        "rarity": "Forza Edition",
         "meta_note": "Pre-tuned truck; skill/credit-boost perk",
         "confidence": "verified"
       },
@@ -8184,20 +8189,23 @@ window.FH6_DB = {
         "manufacturer": "Ford",
         "model": "Super Duty F-450 DRW Platinum Forza Edition",
         "year": 2020,
+        "rarity": "Forza Edition",
         "meta_note": "Heavy truck; novelty collectible",
         "confidence": "verified"
       },
       {
         "manufacturer": "Mercedes-Benz",
-        "model": "190E 2.5-16 Evolution II Forza Edition",
+        "model": "190 E 2.5-16 Evolution II Forza Edition",
         "year": 1990,
-        "meta_note": "DTM icon; desirable collectible FE",
+        "rarity": "Forza Edition",
+        "meta_note": "DTM icon; desirable collectible FE (forzalabs-confirmed FE tier)",
         "confidence": "verified"
       },
       {
         "manufacturer": "Nissan",
         "model": "S-Cargo Forza Edition",
         "year": 1989,
+        "rarity": "Forza Edition",
         "meta_note": "Meme/novelty; high collectible appeal",
         "confidence": "verified"
       },
@@ -8205,20 +8213,23 @@ window.FH6_DB = {
         "manufacturer": "Nissan",
         "model": "GT-R Black Edition (R35) Forza Edition",
         "year": 2012,
-        "meta_note": "Pre-tuned GT-R; most meta-relevant FE of the set",
+        "rarity": "Forza Edition",
+        "meta_note": "Pre-tuned GT-R; most meta-relevant FE (forzalabs-confirmed FE tier)",
         "confidence": "verified"
       },
       {
         "manufacturer": "Porsche",
         "model": "#3 917 LH Forza Edition",
         "year": 1970,
-        "meta_note": "Le Mans classic; prized collectible",
+        "rarity": "Forza Edition",
+        "meta_note": "Le Mans classic; prized collectible + fast",
         "confidence": "verified"
       },
       {
         "manufacturer": "Wuling",
         "model": "Sunshine S Forza Edition",
         "year": 2020,
+        "rarity": "Forza Edition",
         "meta_note": "Novelty van; year disputed (2013 vs 2020)",
         "confidence": "verified"
       },
@@ -8226,14 +8237,16 @@ window.FH6_DB = {
         "manufacturer": "Mazda",
         "model": "MX-5 Miata Forza Edition",
         "year": 1994,
-        "meta_note": "Single-source list; CONFIRMED owned in-game",
+        "rarity": "Forza Edition",
+        "meta_note": "Beyond the canonical-8; CONFIRMED owned in-game",
         "confidence": "probable"
       },
       {
         "manufacturer": "Subaru",
         "model": "Vivio RX-R Forza Edition",
         "year": 1994,
-        "meta_note": "Single-source list; CONFIRMED owned in-game",
+        "rarity": "Forza Edition",
+        "meta_note": "Beyond the canonical-8; CONFIRMED owned in-game",
         "confidence": "probable"
       }
     ],
@@ -8242,85 +8255,321 @@ window.FH6_DB = {
         "manufacturer": "Koenigsegg",
         "model": "One:1",
         "year": 2015,
-        "meta_note": "Top-tier road-race hypercar",
-        "confidence": "probable"
+        "rarity": "Legendary",
+        "meta_note": "S2 890; elite top-speed/drag hypercar + prestige collector",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Hennessey",
         "model": "Venom GT",
         "year": 2012,
-        "meta_note": "Top-speed / drag hypercar",
-        "confidence": "probable"
+        "rarity": "Legendary",
+        "meta_note": "S2 845 top-speed special; drag/top-speed competitive",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "599XX Evolution",
+        "year": 2012,
+        "rarity": "Legendary",
+        "meta_note": "S2 894 track-only; one of the fastest, strong road-race/track",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Rimac",
         "model": "Nevera",
         "year": 2021,
-        "meta_note": "EV hypercar; huge acceleration",
+        "rarity": "Legendary",
+        "meta_note": "R-class (913) EV hypercar; brutal acceleration, top drag/launch",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Apollo",
+        "model": "Intensa Emozione",
+        "year": 2019,
+        "rarity": "Legendary",
+        "meta_note": "R-class (916) extreme track hypercar; strong R/S2 pick",
         "confidence": "probable"
       },
       {
         "manufacturer": "Lamborghini",
         "model": "Sesto Elemento",
         "year": 2011,
-        "meta_note": "Lightweight; historically strong road-race meta",
+        "rarity": "Legendary",
+        "meta_note": "S2 871 ultralight; razor handling, competitive road-race",
         "confidence": "probable"
       },
       {
         "manufacturer": "McLaren",
         "model": "620R",
         "year": 2021,
-        "meta_note": "Road-race meta (racinggames.gg)",
-        "confidence": "probable"
-      },
-      {
-        "manufacturer": "Ferrari",
-        "model": "F8 Tributo",
-        "year": 2019,
-        "meta_note": "Road-race meta (racinggames.gg)",
-        "confidence": "probable"
-      },
-      {
-        "manufacturer": "Dodge",
-        "model": "Dart HEMI Super Stock",
-        "year": 1968,
-        "meta_note": "Drag-racing meta",
-        "confidence": "probable"
-      },
-      {
-        "manufacturer": "Ford",
-        "model": "Formula Drift #13 Mustang",
-        "year": 2015,
-        "meta_note": "Drift meta (competition car)",
-        "confidence": "probable"
-      },
-      {
-        "manufacturer": "Dodge",
-        "model": "Formula Drift #43 Viper SRT10",
-        "year": 2006,
-        "meta_note": "Drift meta (competition car)",
-        "confidence": "probable"
-      },
-      {
-        "manufacturer": "Nissan",
-        "model": "240SX",
-        "year": 1993,
-        "meta_note": "Popular drift-build base",
+        "rarity": "Legendary",
+        "meta_note": "S1 773 track toy; competitive S1 road-race",
         "confidence": "probable"
       },
       {
         "manufacturer": "Mercedes-Benz",
         "model": "AMG CLK GTR",
         "year": 1998,
-        "meta_note": "Rare GT1 homologation; prized collectible",
+        "rarity": "Legendary",
+        "meta_note": "S1 713 GT1 homologation icon; collector + capable S1",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "288 GTO",
+        "year": 1984,
+        "rarity": "Legendary",
+        "meta_note": "A 643 retro supercar; A-class competitive + collector",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "F8 Tributo",
+        "year": 2019,
+        "rarity": "Legendary",
+        "meta_note": "Modern S1/S2 Ferrari; competitive road-race",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Lamborghini",
+        "model": "Centenario LP 770-4",
+        "year": 2016,
+        "rarity": "Legendary",
+        "meta_note": "S2 hypercar; competitive. Membership forzalabs-only — needs 2nd confirmation",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette ZR1",
+        "year": 2019,
+        "rarity": "Epic",
+        "meta_note": "S1 778; solid competitive S1 road-race",
+        "confidence": "verified"
+      },
+      {
+        "manufacturer": "Lamborghini",
+        "model": "Aventador LP700-4",
+        "year": 2012,
+        "rarity": "Epic",
+        "meta_note": "S1 753; mid-tier S1, leans collector (distinct from LP700-4 FE)",
         "confidence": "probable"
       },
       {
         "manufacturer": "Lamborghini",
         "model": "Diablo GTR",
         "year": 1999,
-        "meta_note": "Rare race-spec Diablo; collectible",
+        "rarity": "Epic",
+        "meta_note": "S2 823 race variant; collector + mid competitive. Also rotates into Italian Exotics dealership",
         "confidence": "probable"
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "911 GT2",
+        "year": 1995,
+        "rarity": "Epic",
+        "meta_note": "A 644 retro; A-class competitive + collector",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Formula Drift",
+        "model": "#13 Ford Mustang",
+        "year": 2015,
+        "rarity": "Epic",
+        "meta_note": "S1 739 RWD purpose-built drift car; competitive drift",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Formula Drift",
+        "model": "#43 Dodge Viper SRT-10",
+        "year": 2006,
+        "rarity": "Epic",
+        "meta_note": "S1 748 purpose-built drift car; competitive drift",
+        "confidence": "probable"
+      },
+      {
+        "manufacturer": "Aston Martin",
+        "model": "DBS Superleggera",
+        "year": 2019,
+        "rarity": null,
+        "meta_note": "GT road car; collector-leaning (year 2018 vs 2019 disputed)",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Aston Martin",
+        "model": "Valhalla Concept Car",
+        "year": 2019,
+        "rarity": null,
+        "meta_note": "Hybrid hypercar; likely competitive S2/R",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Audi",
+        "model": "Sport quattro",
+        "year": 1983,
+        "rarity": null,
+        "meta_note": "Group B rally icon; collector/rally",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Bentley",
+        "model": "Bentayga",
+        "year": 2016,
+        "rarity": null,
+        "meta_note": "Luxury SUV; novelty/collector",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "BMW",
+        "model": "M2 Competition Coupe",
+        "year": 2020,
+        "rarity": null,
+        "meta_note": "Sport coupe; competitive-ish A/S1. Single-source membership (destructoid) — verify",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Casey Currie Motorsports",
+        "model": "#4402 Ultra 4 Trophy Jeep",
+        "year": 2019,
+        "rarity": null,
+        "meta_note": "Off-road race truck; competitive off-road",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Chevrolet",
+        "model": "Corvette",
+        "year": 1960,
+        "rarity": null,
+        "meta_note": "Classic; collector",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Challenger R/T",
+        "year": 1970,
+        "rarity": null,
+        "meta_note": "Classic muscle; collector/drag",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Dart HEMI Super Stock",
+        "year": 1968,
+        "rarity": null,
+        "meta_note": "Drag-oriented muscle; drag",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Dodge",
+        "model": "Viper ACR",
+        "year": 2016,
+        "rarity": null,
+        "meta_note": "S1 track special; competitive road-race",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "512 TR",
+        "year": 1992,
+        "rarity": null,
+        "meta_note": "Classic supercar; collector",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Ferrari",
+        "model": "F355 Berlinetta",
+        "year": 1994,
+        "rarity": null,
+        "meta_note": "Classic supercar; collector. Not in game8 (destructoid+racinggames)",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Jaguar",
+        "model": "E-Type",
+        "year": 1961,
+        "rarity": null,
+        "meta_note": "Classic; collector",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Mercedes-AMG",
+        "model": "GT 4-Door Coupé",
+        "year": 2018,
+        "rarity": null,
+        "meta_note": "Performance sedan; road",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Mercedes-Benz",
+        "model": "G 63 AMG 6x6",
+        "year": 2014,
+        "rarity": null,
+        "meta_note": "Off-road novelty; collector",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Nissan",
+        "model": "240SX",
+        "year": 1993,
+        "rarity": null,
+        "meta_note": "Popular drift base; drift build potential",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Porsche",
+        "model": "911 GT3 RS",
+        "year": 2019,
+        "rarity": null,
+        "meta_note": "S1 track; competitive road-race. Not in racinggames list",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "RJ Anderson",
+        "model": "#37 Polaris RZR Pro 4 Truck",
+        "year": 2021,
+        "rarity": null,
+        "meta_note": "Off-road race buggy; competitive off-road",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Sports 800",
+        "year": 1965,
+        "rarity": null,
+        "meta_note": "Classic kei; collector. Not in game8 (destructoid+racinggames)",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Toyota",
+        "model": "Soarer 2.5 GT-T",
+        "year": 1997,
+        "rarity": null,
+        "meta_note": "Drift/collector. Membership single-source (racinggames); year corrected to 1997 to match garage",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "F-150 Lightning",
+        "year": 2022,
+        "rarity": null,
+        "meta_note": "EV truck; novelty/collector",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "Ranger T6 Rally Raid",
+        "year": 2014,
+        "rarity": null,
+        "meta_note": "Rally-raid; competitive off-road",
+        "confidence": "unknown"
+      },
+      {
+        "manufacturer": "Ford",
+        "model": "M-Sport Fiesta RS",
+        "year": 2017,
+        "rarity": null,
+        "meta_note": "Rally car; competitive rally/off-road",
+        "confidence": "unknown"
       }
     ]
   },

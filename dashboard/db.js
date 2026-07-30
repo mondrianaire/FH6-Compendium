@@ -8166,7 +8166,7 @@ window.FH6_DB = {
       "https://www.kudosprime.com/fh6/carlist.php",
       "https://insider-gaming.com/forza-horizon-6-wheelspin-exclusive-cars/"
     ],
-    "rarity_note": "23 cars carry verified/probable rarity (17 competitive/marquee + 6 FE confirmed by forzalabs); ~23 long-tail cars are honest 'unknown' (rarity recoverable only via per-car game8 pages — a future grind). Forza Edition is its own rarity tier (forzalabs-confirmed, franchise-standard).",
+    "rarity_note": "Rarity now RESOLVED for all listed cars: 17 marquee (game8+forzalabs) + 7 garage-verified + 16 game8-per-car-page lookups. Forza Edition is its own rarity tier. No content-farm data used.",
     "fe_count_estimate": "8 cross-source-verified FE; owner's garage holds 10 (MX-5 FE + Vivio RX-R FE beyond the canonical 8), so real in-game total is >8.",
     "forza_edition": [
       {
@@ -8391,33 +8391,33 @@ window.FH6_DB = {
         "manufacturer": "Aston Martin",
         "model": "DBS Superleggera",
         "year": 2019,
-        "rarity": null,
-        "meta_note": "GT road car; collector-leaning (year 2018 vs 2019 disputed)",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "GT road car; collector-leaning (year 2018 vs 2019 disputed) [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Aston Martin",
         "model": "Valhalla Concept Car",
         "year": 2019,
-        "rarity": null,
-        "meta_note": "Hybrid hypercar; likely competitive S2/R",
-        "confidence": "unknown"
+        "rarity": "Legendary",
+        "meta_note": "Hybrid hypercar; likely competitive S2/R [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Audi",
         "model": "Sport quattro",
         "year": 1983,
-        "rarity": null,
-        "meta_note": "Group B rally icon; collector/rally",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Group B rally icon; collector/rally [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Bentley",
         "model": "Bentayga",
         "year": 2016,
-        "rarity": null,
-        "meta_note": "Luxury SUV; novelty/collector",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Luxury SUV; novelty/collector [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "BMW",
@@ -8431,9 +8431,9 @@ window.FH6_DB = {
         "manufacturer": "Casey Currie Motorsports",
         "model": "#4402 Ultra 4 Trophy Jeep",
         "year": 2019,
-        "rarity": null,
-        "meta_note": "Off-road race truck; competitive off-road",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Off-road race truck; competitive off-road [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Chevrolet",
@@ -8447,33 +8447,33 @@ window.FH6_DB = {
         "manufacturer": "Dodge",
         "model": "Challenger R/T",
         "year": 1970,
-        "rarity": null,
-        "meta_note": "Classic muscle; collector/drag",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Classic muscle; collector/drag [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Dodge",
         "model": "Dart HEMI Super Stock",
         "year": 1968,
-        "rarity": null,
-        "meta_note": "Drag-oriented muscle; drag",
-        "confidence": "unknown"
+        "rarity": "Legendary",
+        "meta_note": "Drag-oriented muscle; drag [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Dodge",
         "model": "Viper ACR",
         "year": 2016,
-        "rarity": null,
-        "meta_note": "S1 track special; competitive road-race",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "S1 track special; competitive road-race [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Ferrari",
         "model": "512 TR",
         "year": 1992,
-        "rarity": null,
-        "meta_note": "Classic supercar; collector",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Classic supercar; collector [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Ferrari",
@@ -8487,9 +8487,9 @@ window.FH6_DB = {
         "manufacturer": "Jaguar",
         "model": "E-Type",
         "year": 1961,
-        "rarity": null,
-        "meta_note": "Classic; collector",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Classic; collector [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Mercedes-AMG",
@@ -8503,33 +8503,33 @@ window.FH6_DB = {
         "manufacturer": "Mercedes-Benz",
         "model": "G 63 AMG 6x6",
         "year": 2014,
-        "rarity": null,
-        "meta_note": "Off-road novelty; collector",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Off-road novelty; collector [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Nissan",
         "model": "240SX",
         "year": 1993,
-        "rarity": null,
-        "meta_note": "Popular drift base; drift build potential",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Popular drift base; drift build potential [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Porsche",
         "model": "911 GT3 RS",
         "year": 2019,
-        "rarity": null,
-        "meta_note": "S1 track; competitive road-race. Not in racinggames list",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "S1 track; competitive road-race. Not in racinggames list [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "RJ Anderson",
         "model": "#37 Polaris RZR Pro 4 Truck",
         "year": 2021,
-        "rarity": null,
-        "meta_note": "Off-road race buggy; competitive off-road",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Off-road race buggy; competitive off-road [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Toyota",
@@ -8551,17 +8551,17 @@ window.FH6_DB = {
         "manufacturer": "Ford",
         "model": "F-150 Lightning",
         "year": 2022,
-        "rarity": null,
-        "meta_note": "EV truck; novelty/collector",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "EV truck; novelty/collector [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Ford",
         "model": "Ranger T6 Rally Raid",
         "year": 2014,
-        "rarity": null,
-        "meta_note": "Rally-raid; competitive off-road",
-        "confidence": "unknown"
+        "rarity": "Epic",
+        "meta_note": "Rally-raid; competitive off-road [rarity: game8+forzalabs]",
+        "confidence": "verified"
       },
       {
         "manufacturer": "Ford",
@@ -9269,5 +9269,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-07-29"
+  "builtAt": "2026-07-30"
 };

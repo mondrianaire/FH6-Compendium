@@ -2832,6 +2832,74 @@
       "fe": false,
       "multiple_copies": false,
       "added": "2026-07-31"
+    },
+    {
+      "manufacturer": "Lotus",
+      "model": "Scura Motorsports Exige WTAC",
+      "year": 2018,
+      "class": "R",
+      "pi": "998",
+      "rarity": "Legendary",
+      "note": "touge R-class king now owned",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-31"
+    },
+    {
+      "manufacturer": "Lamborghini",
+      "model": "Diablo SV",
+      "year": 1997,
+      "class": "A",
+      "pi": "649",
+      "rarity": "Barn Find",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-31"
+    },
+    {
+      "manufacturer": "Mitsubishi",
+      "model": "#1 Sierra Sierra Enterprises",
+      "year": 2005,
+      "class": "R",
+      "pi": "962",
+      "rarity": "Barn Find",
+      "note": "trophy truck; name truncated on screen",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-31"
+    },
+    {
+      "manufacturer": "Hyundai",
+      "model": "i20 N",
+      "year": 2021,
+      "class": "B",
+      "pi": "564",
+      "rarity": "Rare",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-31"
+    },
+    {
+      "manufacturer": "Lexus",
+      "model": "LFA Forza Edition",
+      "year": 2010,
+      "class": "S2",
+      "pi": "900",
+      "rarity": "Forza Edition",
+      "fe": true,
+      "multiple_copies": false,
+      "added": "2026-07-31"
+    },
+    {
+      "manufacturer": "Ferrari",
+      "model": "Portofino",
+      "year": 2018,
+      "class": "S1",
+      "pi": "714",
+      "rarity": "Epic",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-31"
     }
   ],
   "owned_meta_ids": [
@@ -2863,5 +2931,5 @@
     "m5-e39-2003"
   ],
   "ratification_note": "26/48 meta cars owned. 4 fuzzy-match FALSE POSITIVES caught + excluded during ratification 2026-07-29: Nissan GT-R NISMO (own GT-R Black Ed, not R35 Nismo), Mercedes-AMG One (own AMG GT variants), Audi RS 6 (own RS 3/4/5/7/e-tron), Alfa Giulia TZ2 (own Giulia Quadrifoglio + Sprint GTA Stradale).",
-  "count_reconciliation": "In-game owned = 337 (2026-07-30, after deleting duplicate Viper GTS ACR copies). We catalogue 256 UNIQUE models; the ~81-car gap is remaining duplicate copies (same model owned multiple times — 15 models flagged multiple_copies). Unique-model list is the tracking source of truth; total_in_game is the raw in-game tally."
+  "count_reconciliation": "In-game owned = 337 (2026-07-31). We catalogue 285 UNIQUE models after the full Recently-Added capture pass; the ~52-car gap is duplicate copies. Unique-model list is the tracking source of truth."
 }

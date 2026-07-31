@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "captured": "2026-07-29",
   "owner": "PwnyS1aystation",
-  "total_in_game": 284,
+  "total_in_game": 290,
   "source": "in-game My Cars screen-read (research/garage-capture.md) + screenshots/ backup",
   "cars": [
     {
@@ -2507,6 +2507,74 @@
       "fe": false,
       "multiple_copies": false,
       "added": "2026-07-29"
+    },
+    {
+      "manufacturer": "Ford",
+      "model": "#25 'Brocky' Ultimate",
+      "year": 2017,
+      "class": "A",
+      "pi": "644",
+      "rarity": "Epic",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-30"
+    },
+    {
+      "manufacturer": "Ford",
+      "model": "Transit Supersportvan",
+      "year": 2011,
+      "class": "D",
+      "pi": "235",
+      "rarity": "Rare",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-30"
+    },
+    {
+      "manufacturer": "Ford",
+      "model": "Super Duty F-450 DRW",
+      "year": 2020,
+      "class": "D",
+      "pi": "379",
+      "rarity": "Common",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-30",
+      "note": "base/non-FE variant (distinct from the F-450 DRW Platinum Forza Edition)"
+    },
+    {
+      "manufacturer": "Toyota",
+      "model": "86 'Stories'",
+      "year": 2013,
+      "class": "A",
+      "pi": "685",
+      "rarity": "Legendary",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-30",
+      "note": "special edition (distinct from base 2013 Toyota 86)"
+    },
+    {
+      "manufacturer": "Mercedes-Benz",
+      "model": "300 SLR",
+      "year": 1955,
+      "class": "B",
+      "pi": "599",
+      "rarity": "Legendary",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-30"
+    },
+    {
+      "manufacturer": "Lamborghini",
+      "model": "Urus",
+      "year": 2019,
+      "class": "A",
+      "pi": "659",
+      "rarity": "Rare",
+      "fe": false,
+      "multiple_copies": false,
+      "added": "2026-07-30"
     }
   ],
   "owned_meta_ids": [

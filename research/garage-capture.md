@@ -320,3 +320,14 @@ Cross-checked ~12 shown cars; most already tracked. Genuinely new:
 
 Meta reconciliation: none of the three are on the 48-car meta list → owned_meta_ids unchanged (26/48).
 Total owned models: 247 → 250.
+
+### 2026-07-30 (live computer-use capture — My Cars/ALL CARS, NEW-badged)
+Cross-checked visible NEW-badged cars against the DB. Already-tracked (unraced dupes, not new): Impreza WRX STI '05, 190E Evo II FE, Viper GTS ACR. Genuinely new (6):
+- Ford #25 'Brocky' Ultimate (2017) — Epic, A 644 (offroad Ultra4)
+- Ford Transit Supersportvan (2011) — Rare, D 235
+- Ford Super Duty F-450 DRW (2020) — Common, D 379 (base, distinct from the F-450 Platinum FE)
+- Toyota 86 'Stories' (2013) — Legendary, A 685 (special edition, distinct from base 86)
+- Mercedes-Benz 300 SLR (1955) — Legendary, B 599
+- Lamborghini Urus (2019) — Rare, A 659
+
+Meta reconciliation: none of the 6 are on the 48-car meta list → owned_meta_ids unchanged. Total models 250→256; total_in_game →290. Note: capture zoom hit a black frame (game anti-capture); read from the full screenshot.

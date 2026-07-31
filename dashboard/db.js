@@ -6121,7 +6121,7 @@ window.FH6_DB = {
     "schema_version": "1.0.0",
     "captured": "2026-07-29",
     "owner": "PwnyS1aystation",
-    "total_in_game": 290,
+    "total_in_game": 337,
     "source": "in-game My Cars screen-read (research/garage-capture.md) + screenshots/ backup",
     "cars": [
       {
@@ -8724,7 +8724,8 @@ window.FH6_DB = {
       "viper-gts-acr-1999",
       "m5-e39-2003"
     ],
-    "ratification_note": "26/48 meta cars owned. 4 fuzzy-match FALSE POSITIVES caught + excluded during ratification 2026-07-29: Nissan GT-R NISMO (own GT-R Black Ed, not R35 Nismo), Mercedes-AMG One (own AMG GT variants), Audi RS 6 (own RS 3/4/5/7/e-tron), Alfa Giulia TZ2 (own Giulia Quadrifoglio + Sprint GTA Stradale)."
+    "ratification_note": "26/48 meta cars owned. 4 fuzzy-match FALSE POSITIVES caught + excluded during ratification 2026-07-29: Nissan GT-R NISMO (own GT-R Black Ed, not R35 Nismo), Mercedes-AMG One (own AMG GT variants), Audi RS 6 (own RS 3/4/5/7/e-tron), Alfa Giulia TZ2 (own Giulia Quadrifoglio + Sprint GTA Stradale).",
+    "count_reconciliation": "In-game owned = 337 (2026-07-30, after deleting duplicate Viper GTS ACR copies). We catalogue 256 UNIQUE models; the ~81-car gap is remaining duplicate copies (same model owned multiple times — 15 models flagged multiple_copies). Unique-model list is the tracking source of truth; total_in_game is the raw in-game tally."
   },
   "wheelspinCars": {
     "_note": "Wheelspin / Forza-Edition exclusive roster. FE cars and listed wheelspin-exclusives cannot be bought from the Autoshow — only won from Wheelspins/Super Wheelspins (RNG) or select reward drops. Membership is cross-source verified (game8 + destructoid + racinggames overlap; union ~48). Rarity: authoritative for marquee/competitive cars (game8 per-car pages + forzalabs wheelspin-stats agree); genuinely 'unknown' for the long tail — NO trustworthy source publishes rarity in list form, and content-farm rarity values were rejected as unverifiable (one mislabeled the Rimac Nevera 'Rare' vs game8's Legendary). Owned/needed status is computed at render time from data/owned-cars.json.",

@@ -331,3 +331,13 @@ Cross-checked visible NEW-badged cars against the DB. Already-tracked (unraced d
 - Lamborghini Urus (2019) — Rare, A 659
 
 Meta reconciliation: none of the 6 are on the 48-car meta list → owned_meta_ids unchanged. Total models 250→256; total_in_game →290. Note: capture zoom hit a black frame (game anti-capture); read from the full screenshot.
+
+### 2026-07-31 (live capture, page 1 of Recently Added — transition-aware)
+Capture works when the screen is static; the game blacks the capture during any scroll/transition (that was the "black screenshot" problem — timing, not a block; confirmed via burst showing content between black frames). Correct grant = the MSIX package (Microsoft.ForteBaseGame). Page 1 new cars added (6):
+- Subaru BRZ Forza Edition (2022) — FE, A 700
+- Aston Martin DBS Superleggera (2019) — Epic, S1 736 [wheelspin-exclusive now owned]
+- Lexus LC 500 (2021) — Rare, B 592
+- Lamborghini Essenza SCV12 (2020) — Legendary [PI/class cut off — backfill] [wheelspin-exclusive now owned]
+- Hyundai N Vision 74 (2022) — Rare [PI/class cut off — backfill]
+- Lamborghini Diablo GTR (1999) — Epic [PI/class cut off — backfill] [wheelspin-exclusive now owned]
+Also corrected #25 'Brocky' name Ultimate->Ultra4. Unique models 256->262. Pages beyond 1 not yet captured (black-on-scroll friction).

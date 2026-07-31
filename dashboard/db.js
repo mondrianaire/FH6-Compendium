@@ -8629,7 +8629,7 @@ window.FH6_DB = {
       },
       {
         "manufacturer": "Ford",
-        "model": "#25 'Brocky' Ultimate",
+        "model": "#25 'Brocky' Ultra4",
         "year": 2017,
         "class": "A",
         "pi": "644",
@@ -8694,6 +8694,76 @@ window.FH6_DB = {
         "fe": false,
         "multiple_copies": false,
         "added": "2026-07-30"
+      },
+      {
+        "manufacturer": "Subaru",
+        "model": "BRZ Forza Edition",
+        "year": 2022,
+        "class": "A",
+        "pi": "700",
+        "rarity": "Forza Edition",
+        "fe": true,
+        "multiple_copies": false,
+        "added": "2026-07-31"
+      },
+      {
+        "manufacturer": "Aston Martin",
+        "model": "DBS Superleggera",
+        "year": 2019,
+        "class": "S1",
+        "pi": "736",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-31",
+        "note": "wheelspin-exclusive (roster) now owned"
+      },
+      {
+        "manufacturer": "Lexus",
+        "model": "LC 500",
+        "year": 2021,
+        "class": "B",
+        "pi": "592",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-31"
+      },
+      {
+        "manufacturer": "Lamborghini",
+        "model": "Essenza SCV12",
+        "year": 2020,
+        "class": "",
+        "pi": "",
+        "rarity": "Legendary",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-31",
+        "note": "PI/class cut off in capture; wheelspin-exclusive now owned"
+      },
+      {
+        "manufacturer": "Hyundai",
+        "model": "N Vision 74",
+        "year": 2022,
+        "class": "",
+        "pi": "",
+        "rarity": "Rare",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-31",
+        "note": "PI/class cut off in capture"
+      },
+      {
+        "manufacturer": "Lamborghini",
+        "model": "Diablo GTR",
+        "year": 1999,
+        "class": "",
+        "pi": "",
+        "rarity": "Epic",
+        "fe": false,
+        "multiple_copies": false,
+        "added": "2026-07-31",
+        "note": "PI/class cut off in capture; wheelspin-exclusive now owned"
       }
     ],
     "owned_meta_ids": [

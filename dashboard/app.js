@@ -70,13 +70,20 @@
       tokens: new Set(tnorm(c.car).split(" ").filter(Boolean))
     })));
   // conservative fuzzy match: same make + >=3 shared tokens (avoids cross-generation mismatches)
+  // Non-distinguishing tokens: shared across many cars, so they must NOT be enough to match on their own.
+  // (e.g. "Forza Edition" is a suffix on dozens of cars — matching on make + "forza edition" alone binds
+  //  the wrong car, e.g. BRZ FE -> Vivio RX-R FE.)
+  const GENERIC_TOK = new Set(["forza", "edition", "the"]);
+  const modelToks = (qt, make) => qt.filter((t) => t !== make && !GENERIC_TOK.has(t));
   function matchTuneCode(name) {
     const qt = tnorm(name).split(" ").filter(Boolean);
     if (!qt.length) return null;
     const make = qt[0];
+    const model = modelToks(qt, make);
     let best = null, bs = 0;
     for (const e of TCODE_INDEX) {
       if (!e.tokens.has(make)) continue;
+      if (!model.some((t) => e.tokens.has(t))) continue; // must share a real model token, not just make + suffix
       const shared = qt.filter((t) => e.tokens.has(t)).length;
       if (shared > bs && shared >= 3) { best = e; bs = shared; }
     }
@@ -96,12 +103,15 @@
     const qt = tnorm(name).split(" ").filter(Boolean);
     if (!qt.length || !POOL.length) return null;
     const make = qt[0];
+    const model = modelToks(qt, make); // distinguishing (non-make, non-suffix) tokens
     let best = null, bestScore = -1;
     for (const e of POOL) {
       if (!e.tokens.has(make)) continue;
+      const sharedModel = model.filter((t) => e.tokens.has(t)).length;
+      if (sharedModel < 1) continue; // MUST match the real model — not just make + "forza edition"
       const shared = qt.filter((t) => e.tokens.has(t)).length;
       if (shared < 2) continue;
-      let score = shared * 10;
+      let score = sharedModel * 12 + shared * 6; // weight real-model matches above generic overlap
       if (cls && e.class === cls) score += 8;
       if (buckets && buckets.size && e.discipline && buckets.has(e.discipline)) score += 5;
       if (META_CREATORS.has((e.creator || "").toLowerCase())) score += 2;

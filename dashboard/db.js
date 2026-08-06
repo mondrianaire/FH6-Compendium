@@ -2629,7 +2629,7 @@ window.FH6_DB = {
       },
       {
         "drivetrain_stock": "RWD",
-        "recommended_drivetrain": "RWD (53Rain build)",
+        "recommended_drivetrain": "AWD (LogikJ road build)",
         "disciplines": [
           "road"
         ],
@@ -2658,11 +2658,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "939 513 860",
+            "code": "475 387 328",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "LogikJ sheet",
             "confidence": "sourced-unverified",
-            "note": "53Rain green Meta."
+            "note": "S1 Road, AWD Full Aero. Replaces 53Rain code 939 513 860 that did not load (that code is actually an SR1 Rain S1-DIRT tune per GBR Ozzy sheet — mis-transcribed as road)."
           }
         ]
       },

@@ -2502,11 +2502,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "127 979 312",
+            "code": "127 252 543",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "GBR Ozzy sheet (K1Z Bard)",
             "confidence": "sourced-unverified",
-            "note": "'Strong'."
+            "note": "A-class road purist. Replaces stale 53Rain code 127 979 312 that did not load in-game (2026-07-31)."
           }
         ]
       },
@@ -44294,5 +44294,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-07-31"
+  "builtAt": "2026-08-06"
 };

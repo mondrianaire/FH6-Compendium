@@ -2111,11 +2111,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "691 006 652",
+            "code": "100 304 375",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "SilvaSUPERBEE / aTTaX Johnson Racing sheet",
             "confidence": "sourced-unverified",
-            "note": "'Best balance of speed & power'."
+            "note": "Acceleration-Speed. Replaces mis-categorized DIRT code 691 006 652 (was labeled road)."
           }
         ]
       },
@@ -2306,11 +2306,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "213 110 769",
+            "code": "489 324 083",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "SilvaSUPERBEE / GBR Ozzy sheet",
             "confidence": "sourced-unverified",
-            "note": "'Sekibe WR'."
+            "note": "Purist. Replaces mis-categorized DIRT code 213 110 769 (was labeled road)."
           }
         ]
       },
@@ -2345,11 +2345,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "879 457 887",
+            "code": "149 333 502",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "K1Z Bard / aTTaX Johnson Racing sheet",
             "confidence": "sourced-unverified",
-            "note": "'2nd Strongest Muscle?'."
+            "note": "Allround. Replaces mis-categorized DIRT code 879 457 887 (was labeled road)."
           }
         ]
       },
@@ -2423,11 +2423,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "134 284 011",
+            "code": "545 759 342",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "LetzeLu / aTTaX Johnson Racing sheet",
             "confidence": "sourced-unverified",
-            "note": "'Handling, Low Drag'."
+            "note": "Allround. Replaces mis-categorized DIRT code 134 284 011 (was labeled road)."
           }
         ]
       },
@@ -2462,11 +2462,11 @@ window.FH6_DB = {
         "confidence": "probable",
         "tunes": [
           {
-            "code": "149 106 584",
+            "code": "181 975 677",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "K1Z Bard / aTTaX Johnson Racing sheet",
             "confidence": "sourced-unverified",
-            "note": "'All around very good + easy drive'."
+            "note": "Allround. Replaces mis-categorized DIRT code 149 106 584 (was labeled road)."
           }
         ]
       },
@@ -2580,11 +2580,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "164 877 483",
+            "code": "123 653 642",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "K1Z Bard / GBR Ozzy sheet",
             "confidence": "sourced-unverified",
-            "note": "'Very Strong / Handling Focused'."
+            "note": "S1 Road. Replaces mis-categorized DIRT code 164 877 483 (was labeled road)."
           }
         ]
       },
@@ -2619,11 +2619,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "114 004 471",
+            "code": "743 131 402",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "LogikJ / LogikJ sheet",
             "confidence": "sourced-unverified",
-            "note": "53Rain green Meta."
+            "note": "S1 Road Strong Accel. Replaces mis-categorized DIRT code 114 004 471 (was labeled road)."
           }
         ]
       },
@@ -2736,11 +2736,11 @@ window.FH6_DB = {
         "confidence": "verified",
         "tunes": [
           {
-            "code": "288 862 355",
+            "code": "100 176 394",
             "surface": "road",
-            "source": "53Rain's Tune List",
+            "source": "K1Z Bard / GBR Ozzy sheet",
             "confidence": "sourced-unverified",
-            "note": "'Use if you dont like dirt, its easy'."
+            "note": "S1 Road. Replaces mis-categorized DIRT code 288 862 355 (was labeled road)."
           }
         ]
       }

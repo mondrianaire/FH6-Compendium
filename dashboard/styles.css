@@ -147,6 +147,9 @@ td.price { font-variant-numeric: tabular-nums; }
 .cov-table td.cov-have { background: rgba(210, 153, 34, .14); }
 .cov-table td.cov-gap { color: var(--muted); opacity: .45; cursor: default; }
 .cov-table td:not(.cov-gap):hover { outline: 1px solid var(--accent); }
+.fx-row { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 3px; flex-wrap: wrap; }
+.fx-axis { flex: 0 1 42px; min-width: 14px; border-top: 1px dashed var(--line); height: 0; }
+.fx-label { color: var(--muted); }
 .flag.tab-flag { background: var(--bg3); color: var(--muted); }
 .varcat .gating { color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
 .varcat .gating strong { color: var(--txt); }

@@ -597,6 +597,31 @@
       `<span style="width:9px;height:9px;border-radius:50%;display:inline-block;${phases.includes(p) ? `background:${CM_PC[p - 1]}` : "border:1px solid var(--line)"}"></span>`).join("")}</span>`;
   }
 
+  // direction-effect icons: rotate (red, loosens) / push+stability (blue, tightens) / neutral axes
+  const FX_ICONS = {
+    rotate: '<path d="M11.5 3.5 A5 5 0 1 0 12.3 8.3"/><path d="M9.2 1.6 L12.4 3.6 L9.2 5.4 Z" fill="currentColor" stroke="none"/>',
+    push: '<path d="M2 11.5 Q7 10.5 11 5"/><path d="M11.9 2.8 L12 6.6 L8.8 4.9 Z" fill="currentColor" stroke="none"/>',
+    stability: '<path d="M3.5 2 V12 M10.5 2 V12"/><circle cx="7" cy="7" r="1.6" fill="currentColor" stroke="none"/>',
+    grip: '<circle cx="7" cy="5.5" r="3.2"/><path d="M2.5 11.5 H11.5"/>',
+    response: '<path d="M8 1.5 L3.5 8 H6.5 L6 12.5 L10.5 6.5 H7.5 Z" fill="currentColor" stroke="none"/>',
+    speed: '<path d="M2.5 3.5 L6.5 7 L2.5 10.5 M7.5 3.5 L11.5 7 L7.5 10.5"/>',
+    accel: '<path d="M2.5 11.5 H11.5 V3.5 Z" fill="currentColor" stroke="none" opacity="0.85"/>',
+    travel: '<path d="M7 3.2 V10.8 M4.8 5 L7 2.4 L9.2 5 M4.8 9 L7 11.6 L9.2 9"/>',
+    flat: '<path d="M2.5 10.5 H11.5"/><rect x="5" y="7.2" width="4" height="2.4" rx="0.6" fill="currentColor" stroke="none"/>',
+    stop: '<circle cx="7" cy="7" r="4.5"/><path d="M5 7 H9"/>',
+  };
+  const FX_COLOR = { rotate: "#e66767", push: "#4b96f3", stability: "#4b96f3" };
+  const fxIcon = (kind) => `<svg viewBox="0 0 14 14" width="13" height="13" style="vertical-align:-2px" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${FX_ICONS[kind] || ""}</svg>`;
+  function fxRow(v) {
+    const e = v.effect;
+    if (!e) return v.poles ? `<div class="poles">${v.poles}</div>` : "";
+    const side = (d, dir) => {
+      const col = FX_COLOR[d.kind] || "var(--muted)";
+      return `<span style="color:${col};white-space:nowrap">${dir === "lo" ? "lower ◀&nbsp;" : ""}${fxIcon(d.kind)} <span class="fx-label">${d.label}</span>${dir === "hi" ? "&nbsp;▶ raise" : ""}</span>`;
+    };
+    return `<div class="fx-row" title="${(v.poles || "").replace(/"/g, "&quot;")}">${side(e.down, "lo")}<span class="fx-axis"></span>${side(e.up, "hi")}</div>`;
+  }
+
   function buildVariables() {
     const sm = DB.tuningVariables.situational_model;
     if (sm) {
@@ -699,10 +724,9 @@
           const base = v.baseline ?? v.baseline_awd_circuit ?? v.baseline_awd ?? v.baseline_rwd_awd_rear;
           const rng = (v.typical_min != null && v.typical_max != null) ? `${v.typical_min} – ${v.typical_max} ${v.unit || ""}` : (v.unit || "");
           const fh6 = v.fh6 ? `<span class="conf ${fh6Class(v.fh6)}" title="${v.range_note || ""}">${fh6Label(v.fh6)}</span>` : "";
-          const poles = v.poles ? `<div class="poles">${v.poles}</div>` : "";
           const dots = v.phases ? phaseDots(v.phases) : "";
           return `<div class="var-line">
-            <span>${v.label}${dots}${base != null ? ` <span class="flag">base ${base}</span>` : ""} ${fh6}${poles}</span>
+            <span>${v.label}${dots}${base != null ? ` <span class="flag">base ${base}</span>` : ""} ${fh6}${fxRow(v)}</span>
             <span class="rng">${rng}</span>
           </div>`;
         }).join("")}

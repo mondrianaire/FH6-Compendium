@@ -115,6 +115,9 @@ window.FH6_DB = {
           "in-game-recording",
           "forzafire-fh6-tires",
           "game8-fh6-tuning"
+        ],
+        "phases": [
+          3
         ]
       },
       {
@@ -157,6 +160,10 @@ window.FH6_DB = {
           "in-game-recording",
           "forzafire-fh6-drivetrain",
           "destructoid-fh6-tuning"
+        ],
+        "phases": [
+          4,
+          5
         ]
       },
       {
@@ -184,7 +191,10 @@ window.FH6_DB = {
             "poles": "Negative ↔ Positive",
             "pole_text_verified": true,
             "observed_on_build": -2,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              3
+            ]
           },
           {
             "id": "camber_rear",
@@ -198,7 +208,10 @@ window.FH6_DB = {
             "poles": "Negative ↔ Positive",
             "pole_text_verified": true,
             "observed_on_build": -1.5,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              3
+            ]
           },
           {
             "id": "toe_front",
@@ -212,7 +225,11 @@ window.FH6_DB = {
             "poles": "In ↔ Out",
             "pole_text_verified": true,
             "observed_on_build": 0,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              2,
+              5
+            ]
           },
           {
             "id": "toe_rear",
@@ -226,7 +243,11 @@ window.FH6_DB = {
             "poles": "In ↔ Out",
             "pole_text_verified": true,
             "observed_on_build": 0,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              1,
+              5
+            ]
           },
           {
             "id": "caster",
@@ -240,13 +261,22 @@ window.FH6_DB = {
             "poles": "Low ↔ High",
             "pole_text_verified": true,
             "observed_on_build": 5,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              2
+            ]
           }
         ],
         "principle": "Modest negative camber for cornering grip without killing straight-line braking (the in-game Description warns too much negative camber cuts straight-line braking & accel). Higher caster sharpens turn-in and self-centering.",
         "sources": [
           "in-game-recording",
           "in-game-screenshot"
+        ],
+        "phases": [
+          1,
+          2,
+          3,
+          5
         ]
       },
       {
@@ -291,6 +321,9 @@ window.FH6_DB = {
           "in-game-recording",
           "forzafire-fh6-handling",
           "game8-fh6-tuning"
+        ],
+        "phases": [
+          3
         ]
       },
       {
@@ -316,7 +349,10 @@ window.FH6_DB = {
             "pole_text_verified": true,
             "observed_on_build": 838,
             "fh6": "fh6_confirmed",
-            "range_note": "LB/IN (US locale); per-car range, end-stops not displayed"
+            "range_note": "LB/IN (US locale); per-car range, end-stops not displayed",
+            "phases": [
+              3
+            ]
           },
           {
             "id": "spring_rear",
@@ -327,7 +363,10 @@ window.FH6_DB = {
             "poles": "Soft ↔ Stiff",
             "pole_text_verified": true,
             "observed_on_build": 661.7,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              3
+            ]
           },
           {
             "id": "ride_height_front",
@@ -339,7 +378,11 @@ window.FH6_DB = {
             "pole_text_verified": true,
             "observed_on_build": 7.2,
             "fh6": "fh6_confirmed",
-            "range_note": "IN (US locale); per-car range. VERIFIED example: 2014 Golf R front slider = 6.9 (min) to 8.1 (max) in — confirms absolute end-stops ARE car-specific and this chassis rides high."
+            "range_note": "IN (US locale); per-car range. VERIFIED example: 2014 Golf R front slider = 6.9 (min) to 8.1 (max) in — confirms absolute end-stops ARE car-specific and this chassis rides high.",
+            "phases": [
+              3,
+              5
+            ]
           },
           {
             "id": "ride_height_rear",
@@ -350,7 +393,11 @@ window.FH6_DB = {
             "poles": "Low ↔ High",
             "pole_text_verified": true,
             "observed_on_build": 6.9,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              3,
+              5
+            ]
           }
         ],
         "principle": "Stiffer springs for smooth road/circuit, softer for dirt compliance. Lower ride height = lower CG/more road grip; raise for dirt. The in-game Description notes softening front springs vs rear increases front grip / reduces understeer.",
@@ -358,6 +405,10 @@ window.FH6_DB = {
           "in-game-recording",
           "game8-fh6-tuning",
           "forzafire-fh6-handling"
+        ],
+        "phases": [
+          3,
+          5
         ]
       },
       {
@@ -423,6 +474,10 @@ window.FH6_DB = {
           "in-game-recording",
           "forzafire-fh6-handling",
           "game8-fh6-tuning"
+        ],
+        "phases": [
+          2,
+          5
         ]
       },
       {
@@ -463,6 +518,10 @@ window.FH6_DB = {
           "in-game-recording",
           "forzafire-fh6-aero",
           "gamingpromax-fh6-balance"
+        ],
+        "phases": [
+          3,
+          5
         ]
       },
       {
@@ -489,7 +548,11 @@ window.FH6_DB = {
             "poles": "Rear ↔ Front",
             "pole_text_verified": true,
             "fh6": "fh6_confirmed",
-            "range_note": "left pole Rear, right pole Front; numeric end-stops not displayed (locked). Description: forward bias = stability, rearward = more oversteer under braking"
+            "range_note": "left pole Rear, right pole Front; numeric end-stops not displayed (locked). Description: forward bias = stability, rearward = more oversteer under braking",
+            "phases": [
+              1,
+              2
+            ]
           },
           {
             "id": "brake_pressure",
@@ -501,7 +564,10 @@ window.FH6_DB = {
             "poles": "Low ↔ High",
             "pole_text_verified": true,
             "fh6": "fh6_confirmed",
-            "range_note": "default ~100%; end-stops not displayed (locked)"
+            "range_note": "default ~100%; end-stops not displayed (locked)",
+            "phases": [
+              1
+            ]
           }
         ],
         "principle": "Forward balance = stable braking; rearward = more trail-braking rotation/oversteer. Lower pressure if locking up under ABS-off.",
@@ -509,6 +575,10 @@ window.FH6_DB = {
           "in-game-recording",
           "forzafire-fh6-drivetrain",
           "game8-fh6-tuning"
+        ],
+        "phases": [
+          1,
+          2
         ]
       },
       {
@@ -535,7 +605,10 @@ window.FH6_DB = {
             "poles": "Low ↔ High",
             "pole_text_verified": true,
             "fh6": "fh6_confirmed",
-            "range_note": "AWD/FWD only; end-stops not displayed (locked)"
+            "range_note": "AWD/FWD only; end-stops not displayed (locked)",
+            "phases": [
+              4
+            ]
           },
           {
             "id": "diff_front_decel",
@@ -547,7 +620,10 @@ window.FH6_DB = {
             "typical_max": 100,
             "poles": "Low ↔ High",
             "pole_text_verified": true,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              2
+            ]
           },
           {
             "id": "diff_rear_accel",
@@ -561,7 +637,10 @@ window.FH6_DB = {
             "poles": "Low ↔ High",
             "pole_text_verified": true,
             "fh6": "fh6_confirmed",
-            "range_note": "RWD/AWD; baseline CONTESTED across FH6 web sources"
+            "range_note": "RWD/AWD; baseline CONTESTED across FH6 web sources",
+            "phases": [
+              4
+            ]
           },
           {
             "id": "diff_rear_decel",
@@ -574,7 +653,10 @@ window.FH6_DB = {
             "baseline_rwd_awd_rear": 20,
             "poles": "Low ↔ High",
             "pole_text_verified": true,
-            "fh6": "fh6_confirmed"
+            "fh6": "fh6_confirmed",
+            "phases": [
+              2
+            ]
           },
           {
             "id": "diff_center",
@@ -588,7 +670,11 @@ window.FH6_DB = {
             "poles": "Front ↔ Rear",
             "pole_text_verified": true,
             "fh6": "fh6_confirmed",
-            "range_note": "AWD-only; right pole = Rear; '30/70 split' = ~70 toward Rear"
+            "range_note": "AWD-only; right pole = Rear; '30/70 split' = ~70 toward Rear",
+            "phases": [
+              3,
+              4
+            ]
           }
         ],
         "principle": "0% open, 100% locked. Accel lock = on-throttle coupling; decel lock = off-throttle/braking stability. Accel/decel baselines CONTESTED across FH6 web — road-tune. Center 70-80% rear is well-agreed for AWD. The in-game Description confirms higher Accel = locks more quickly under power.",
@@ -596,6 +682,11 @@ window.FH6_DB = {
           "in-game-recording",
           "forzafire-fh6-drivetrain",
           "gamerant-fh6-tuning"
+        ],
+        "phases": [
+          2,
+          3,
+          4
         ]
       }
     ],
@@ -667,7 +758,8 @@ window.FH6_DB = {
         "Test in the phase you changed (the Tune Lab's rotation-entry and rotation-exit gates are split for this reason).",
         "Describe any slider as a full sentence: component -> phase -> end -> speed. Example: rear rebound softer = rear keeps grip during the transient after lift/brake = less ENTRY oversteer, strongest on bumps.",
         "ESCALATION RULE: one phase wrong -> slider (use the phase map). EVERY phase short on grip -> STOP TUNING; the total grip budget is too small and the fix is the BUILD (compound first, then weight, then power-for-grip PI reallocation) or the car choice. Sliders redistribute grip; they never create it."
-      ]
+      ],
+      "glyph_note": "Every slider category in the reference below carries a mini corner glyph: lit segments = the phases where it acts (1 braking, 2 turn-in, 3 mid, 4 exit, 5 straight/crest). Variables that differ from their category (e.g. caster vs camber) carry their own phase dots."
     },
     "build_phase": {
       "added": "2026-07-27",
@@ -44770,5 +44862,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-09T21:45Z"
+  "builtAt": "2026-08-09T22:20Z"
 };

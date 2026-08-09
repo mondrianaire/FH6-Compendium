@@ -570,6 +570,33 @@
   function buildTable() { drawGarage(); }
 
   // ---- variables ----
+  // corner-map constants shared by the big phase map and the per-category glyphs
+  // 5-slot categorical palette validated (dataviz six-checks) against surface #161b22
+  const CM_PC = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
+  const CM_SHORT = ["Braking", "Turn-in", "Mid-corner", "Exit", "Straight/crest"];
+  const CM_SEGS = [
+    "M 50 262 L 330 262",
+    "M 330 262 Q 385 262 415 240",
+    "M 415 240 A 50 50 0 1 0 415 140",
+    "M 415 140 Q 385 118 330 118",
+    "M 330 118 L 50 118",
+  ];
+  const CM_RIBBON = "M 50 262 L 330 262 Q 385 262 415 240 A 50 50 0 1 0 415 140 Q 385 118 330 118 L 50 118";
+  // mini glyph: same geometry, lit segments = active phases (1-indexed)
+  function miniCorner(phases, w) {
+    const title = "Acts in: " + phases.map((p) => `${p} ${CM_SHORT[p - 1]}`).join(", ");
+    return `<svg viewBox="0 0 620 320" width="${w || 88}" height="${Math.round((w || 88) * 0.52)}" style="vertical-align:middle" role="img" aria-label="${title}"><title>${title}</title>
+      <path d="${CM_RIBBON}" fill="none" stroke="var(--bg3)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+      ${CM_SEGS.map((d, i) => phases.includes(i + 1)
+        ? `<path d="${d}" fill="none" stroke="${CM_PC[i]}" stroke-width="18" stroke-linecap="round"/>` : "").join("")}
+    </svg>`;
+  }
+  function phaseDots(phases) {
+    const title = "Acts in: " + phases.map((p) => `${p} ${CM_SHORT[p - 1]}`).join(", ");
+    return `<span title="${title}" style="display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px">${[1, 2, 3, 4, 5].map((p) =>
+      `<span style="width:9px;height:9px;border-radius:50%;display:inline-block;${phases.includes(p) ? `background:${CM_PC[p - 1]}` : "border:1px solid var(--line)"}"></span>`).join("")}</span>`;
+  }
+
   function buildVariables() {
     const sm = DB.tuningVariables.situational_model;
     if (sm) {
@@ -577,19 +604,9 @@
       const el = document.createElement("div");
       el.className = "block";
       el.style.borderColor = "var(--accent)";
-      // 5-slot categorical palette validated (dataviz six-checks) against surface #161b22
-      const PC = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
-      const SHORT = ["Braking", "Turn-in", "Mid-corner", "Exit", "Straight/crest"];
-      const SEGS = [
-        "M 50 262 L 330 262",
-        "M 330 262 Q 385 262 415 240",
-        "M 415 240 A 50 50 0 1 0 415 140",
-        "M 415 140 Q 385 118 330 118",
-        "M 330 118 L 50 118",
-      ];
+      const PC = CM_PC, SHORT = CM_SHORT, SEGS = CM_SEGS, ribbon = CM_RIBBON;
       const CHIP = [[190, 262], [382, 249], [478, 191], [382, 131], [190, 118]];
       const LABEL = [[190, 296], [398, 285], [545, 191], [398, 100], [190, 96]];
-      const ribbon = "M 50 262 L 330 262 Q 385 262 415 240 A 50 50 0 1 0 415 140 Q 385 118 330 118 L 50 118";
       const allSliders = [];
       sm.phase_map.forEach((p) => p.active_sliders.forEach((s) => { if (!allSliders.includes(s)) allSliders.push(s); }));
 
@@ -666,9 +683,10 @@
       "<strong>Then tune in this order:</strong> " + tv.tuning_order.map((t, i) => `${i + 1}. ${t.replace(/_/g, " ")}`).join("  →  ") +
       `<br><span style="color:var(--warn)">${tv.note || tv.tuning_order_note || ""}</span>`;
     const host = document.getElementById("varCats");
-    host.innerHTML = tv.categories.map((cat) => `
+    const glyphLegend = sm && sm.glyph_note ? `<p class="why" style="margin:14px 0 6px">${miniCorner([1, 2, 3, 4, 5], 64)} ${sm.glyph_note}</p>` : "";
+    host.innerHTML = glyphLegend + tv.categories.map((cat) => `
       <div class="varcat">
-        <h3>${cat.label}
+        <h3>${cat.phases ? miniCorner(cat.phases, 92) + " " : ""}${cat.label}
           ${cat.fh6_tab ? `<span class="flag tab-flag">${cat.fh6_tab} tab</span>` : ""}
           ${cat.tune_first ? '<span class="flag">tune first</span>' : ""}
           ${cat.tune_last ? '<span class="flag">tune last</span>' : ""}
@@ -682,8 +700,9 @@
           const rng = (v.typical_min != null && v.typical_max != null) ? `${v.typical_min} – ${v.typical_max} ${v.unit || ""}` : (v.unit || "");
           const fh6 = v.fh6 ? `<span class="conf ${fh6Class(v.fh6)}" title="${v.range_note || ""}">${fh6Label(v.fh6)}</span>` : "";
           const poles = v.poles ? `<div class="poles">${v.poles}</div>` : "";
+          const dots = v.phases ? phaseDots(v.phases) : "";
           return `<div class="var-line">
-            <span>${v.label}${base != null ? ` <span class="flag">base ${base}</span>` : ""} ${fh6}${poles}</span>
+            <span>${v.label}${dots}${base != null ? ` <span class="flag">base ${base}</span>` : ""} ${fh6}${poles}</span>
             <span class="rng">${rng}</span>
           </div>`;
         }).join("")}

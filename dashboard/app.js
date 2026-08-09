@@ -588,8 +588,11 @@
       host.parentNode.insertBefore(el, host.nextSibling);
     }
     const tv = DB.tuningVariables;
+    const bp = tv.build_phase;
     document.getElementById("varOrder").innerHTML =
-      "<strong>Tune in this order:</strong> " + tv.tuning_order.map((t, i) => `${i + 1}. ${t.replace(/_/g, " ")}`).join("  →  ") +
+      (bp ? `<span style="color:var(--accent)"><strong>STEP 0 — BUILD TO CLASS FIRST.</strong> ${bp.principle}</span><br>` +
+        `<span style="font-size:12px">${bp.steps.join("<br>")}</span><br><br>` : "") +
+      "<strong>Then tune in this order:</strong> " + tv.tuning_order.map((t, i) => `${i + 1}. ${t.replace(/_/g, " ")}`).join("  →  ") +
       `<br><span style="color:var(--warn)">${tv.note || tv.tuning_order_note || ""}</span>`;
     const host = document.getElementById("varCats");
     host.innerHTML = tv.categories.map((cat) => `

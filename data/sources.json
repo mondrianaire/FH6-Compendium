@@ -648,6 +648,14 @@
       "title": "Official FH6 Release Notes July 20 2026 (Series 3 Hotfix 1, v403.798)",
       "url": "https://support.forza.net/hc/en-us/articles/53563977535123-FH6-Release-Notes-July-20-2026",
       "used_for": "PRIMARY (read in browser 2026-07-27): drift fixes only — clutch-kick restored, handbrake instant-shift exploit removed (minor drag-tune relevance), drifting-session crash. NO Eliminator changes; latest patch as of 2026-07-27"
+    },
+    {
+      "id": "iggm-downgrading",
+      "tier": "community",
+      "title": "IGGM — FH6 cars downgrading guide",
+      "url": "https://www.iggm.com/news/fh6-cars-downgrading-how-to-modify-components-make-understated-yet-remain-practical",
+      "used_for": "BUILD PHASE (2026-07-27): confirms FH6 downgrade mechanics exist (reset-to-stock, part removal, downgrade components for PI reduction) — corroborates the player-confirmed class-down build path (570S into A)",
+      "reliability_note": "currency-seller blog — used only to corroborate the mechanic's existence alongside ForzaFire + player confirmation"
     }
   ],
   "fh6_ui_structure_pass": {

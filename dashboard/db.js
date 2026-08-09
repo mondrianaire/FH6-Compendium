@@ -667,6 +667,23 @@ window.FH6_DB = {
         "Test in the phase you changed (the Tune Lab's rotation-entry and rotation-exit gates are split for this reason).",
         "Describe any slider as a full sentence: component -> phase -> end -> speed. Example: rear rebound softer = rear keeps grip during the transient after lift/brake = less ENTRY oversteer, strongest on bumps."
       ]
+    },
+    "build_phase": {
+      "added": "2026-07-27",
+      "principle": "STEP 0 — BUILD BEFORE YOU TUNE. The tuning order below is the SLIDER sequence for a finished build. Before any slider matters you must land the car in its target class with the right parts — and that includes DOWNGRADING. Sliders redistribute the grip your parts bought; they cannot change the PI.",
+      "steps": [
+        "1. Pick the target class/PI for the event (e.g. A 700 for an A-class Rivals board).",
+        "2. If the car is ABOVE the target class, downgrade it down INTO class: Street/Sport transmission (often cheaper PI than Race), remove aero (below ~B600 downforce is wasted PI anyway), softer tire compound, smaller brakes, engine downgrades where offered. PLAYER-CONFIRMED: class-down builds are real and required — e.g. a McLaren 570S never reaches A-class without downgrade parts.",
+        "3. If BELOW target, spend PI grip-first per the upgrade strategy (tires/suspension/brakes before power).",
+        "4. Lock the drivetrain decision (AWD swap or not) BEFORE fine-tuning — it changes which diff tabs even exist.",
+        "5. Only now does the slider order below apply. Changing a part later invalidates tuning work — parts reset some sliders and shift every balance."
+      ],
+      "confidence": "verified for the mechanic (IGGM downgrading guide + ForzaFire transmission-downgrade PI notes + player confirmation); the specific cheapest-downgrade path is car-specific — find it in the upgrade screen sorted by PI delta",
+      "sources": [
+        "iggm-downgrading",
+        "forzafire-drivetrain",
+        "player (570S-to-A build)"
+      ]
     }
   },
   "metaCars": {
@@ -44670,6 +44687,14 @@ window.FH6_DB = {
         "title": "Official FH6 Release Notes July 20 2026 (Series 3 Hotfix 1, v403.798)",
         "url": "https://support.forza.net/hc/en-us/articles/53563977535123-FH6-Release-Notes-July-20-2026",
         "used_for": "PRIMARY (read in browser 2026-07-27): drift fixes only — clutch-kick restored, handbrake instant-shift exploit removed (minor drag-tune relevance), drifting-session crash. NO Eliminator changes; latest patch as of 2026-07-27"
+      },
+      {
+        "id": "iggm-downgrading",
+        "tier": "community",
+        "title": "IGGM — FH6 cars downgrading guide",
+        "url": "https://www.iggm.com/news/fh6-cars-downgrading-how-to-modify-components-make-understated-yet-remain-practical",
+        "used_for": "BUILD PHASE (2026-07-27): confirms FH6 downgrade mechanics exist (reset-to-stock, part removal, downgrade components for PI reduction) — corroborates the player-confirmed class-down build path (570S into A)",
+        "reliability_note": "currency-seller blog — used only to corroborate the mechanic's existence alongside ForzaFire + player confirmation"
       }
     ],
     "fh6_ui_structure_pass": {
@@ -44737,5 +44762,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-09T14:54Z"
+  "builtAt": "2026-08-09T15:34Z"
 };

@@ -665,5 +665,22 @@
       "Test in the phase you changed (the Tune Lab's rotation-entry and rotation-exit gates are split for this reason).",
       "Describe any slider as a full sentence: component -> phase -> end -> speed. Example: rear rebound softer = rear keeps grip during the transient after lift/brake = less ENTRY oversteer, strongest on bumps."
     ]
+  },
+  "build_phase": {
+    "added": "2026-07-27",
+    "principle": "STEP 0 — BUILD BEFORE YOU TUNE. The tuning order below is the SLIDER sequence for a finished build. Before any slider matters you must land the car in its target class with the right parts — and that includes DOWNGRADING. Sliders redistribute the grip your parts bought; they cannot change the PI.",
+    "steps": [
+      "1. Pick the target class/PI for the event (e.g. A 700 for an A-class Rivals board).",
+      "2. If the car is ABOVE the target class, downgrade it down INTO class: Street/Sport transmission (often cheaper PI than Race), remove aero (below ~B600 downforce is wasted PI anyway), softer tire compound, smaller brakes, engine downgrades where offered. PLAYER-CONFIRMED: class-down builds are real and required — e.g. a McLaren 570S never reaches A-class without downgrade parts.",
+      "3. If BELOW target, spend PI grip-first per the upgrade strategy (tires/suspension/brakes before power).",
+      "4. Lock the drivetrain decision (AWD swap or not) BEFORE fine-tuning — it changes which diff tabs even exist.",
+      "5. Only now does the slider order below apply. Changing a part later invalidates tuning work — parts reset some sliders and shift every balance."
+    ],
+    "confidence": "verified for the mechanic (IGGM downgrading guide + ForzaFire transmission-downgrade PI notes + player confirmation); the specific cheapest-downgrade path is car-specific — find it in the upgrade screen sorted by PI delta",
+    "sources": [
+      "iggm-downgrading",
+      "forzafire-drivetrain",
+      "player (570S-to-A build)"
+    ]
   }
 }

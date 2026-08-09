@@ -19,15 +19,47 @@
     "car": "2014 Volkswagen Golf R",
     "pi": 589,
     "class": "B",
-    "unlocked_tabs": ["Tires", "Alignment", "Springs", "Damping"],
-    "locked_tabs": ["Gearing (no Sport/Race transmission)", "Antiroll Bars (no Race ARB)", "Aero (no Race front bumper)", "Brake (no Race brakes)", "Differential (no Sport/Race diff)"],
+    "unlocked_tabs": [
+      "Tires",
+      "Alignment",
+      "Springs",
+      "Damping"
+    ],
+    "locked_tabs": [
+      "Gearing (no Sport/Race transmission)",
+      "Antiroll Bars (no Race ARB)",
+      "Aero (no Race front bumper)",
+      "Brake (no Race brakes)",
+      "Differential (no Sport/Race diff)"
+    ],
     "note": "This 589 build spent its PI on suspension (race springs/dampers + adjustable alignment & tire pressure) but has NOT installed race brakes, ARBs, differential, transmission, or aero — so those tabs are currently un-tunable. Tuning recommendations for locked tabs only apply AFTER installing the matching race part."
   },
-  "tabs": ["Tires", "Gearing", "Alignment", "Antiroll Bars", "Springs", "Damping", "Aero", "Brake", "Differential"],
+  "tabs": [
+    "Tires",
+    "Gearing",
+    "Alignment",
+    "Antiroll Bars",
+    "Springs",
+    "Damping",
+    "Aero",
+    "Brake",
+    "Differential"
+  ],
   "tabs_note": "Verified FH6 tab bar (from footage). There is NO separate 'Ride Height' tab — ride height is a section inside the SPRINGS tab. ✅",
   "ui_layout": "Every tab: LEFT 'Performance' readout panel (Braking Distance 60-0/100-0, Lateral Gs 60/120 mph, Acceleration & Speed 0-60/0-100/Top Speed, Miscellaneous: Mech. Balance / Aero Balance / Aero Efficiency); CENTER sliders grouped under green section headers showing the two directional poles; RIGHT 'Description' panel for the focused slider. ✅ confirmed across all tabs.",
   "tuning_order_note": "Order is broadly agreed; gearing-last and tires-first are universal. This is the TUNING SEQUENCE (methodology), not the tab layout — ride height is set inside the Springs tab even though it is a distinct tuning step.",
-  "tuning_order": ["tires", "springs", "ride_height", "alignment", "anti_roll_bars", "damping", "brakes", "differential", "aero", "gearing"],
+  "tuning_order": [
+    "tires",
+    "springs",
+    "ride_height",
+    "alignment",
+    "anti_roll_bars",
+    "damping",
+    "brakes",
+    "differential",
+    "aero",
+    "gearing"
+  ],
   "non_slider_tuning_fh6": {
     "note": "Two FH6 grip levers are NOT Tune-tab sliders — they are selected in the parts/upgrade (Customization) menu:",
     "tire_width": "Tire WIDTH is adjustable independently front/rear in millimeters. Widening the front is a cheap PI grip lever. ✅ FH6 (web) / not a Tune-tab slider.",
@@ -38,149 +70,600 @@
       "id": "tires",
       "label": "Tire Pressure",
       "fh6_tab": "Tires",
-      "section_headers": ["Tire Pressure"],
+      "section_headers": [
+        "Tire Pressure"
+      ],
       "tune_first": true,
       "gating": "Always tunable (no upgrade required — unlocked on the observed build).",
       "fh6_note": "Section 'Tire Pressure' with poles Low ↔ High, unit PSI. Front + Rear sliders. Width & compound are parts-menu items.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "tire_pressure_front", "label": "Front tire pressure", "section": "Tire Pressure", "axis": "front", "unit": "psi", "typical_min": 14.0, "typical_max": 55.0, "baseline_awd_circuit": 28.0, "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 27.0, "fh6": "fh6_confirmed", "range_note": "PSI confirmed on screen; absolute end-stops not displayed" },
-        { "id": "tire_pressure_rear", "label": "Rear tire pressure", "section": "Tire Pressure", "axis": "rear", "unit": "psi", "typical_min": 14.0, "typical_max": 55.0, "baseline_awd_circuit": 27.5, "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 27.0, "fh6": "fh6_confirmed" }
+        {
+          "id": "tire_pressure_front",
+          "label": "Front tire pressure",
+          "section": "Tire Pressure",
+          "axis": "front",
+          "unit": "psi",
+          "typical_min": 14.0,
+          "typical_max": 55.0,
+          "baseline_awd_circuit": 28.0,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "observed_on_build": 27.0,
+          "fh6": "fh6_confirmed",
+          "range_note": "PSI confirmed on screen; absolute end-stops not displayed"
+        },
+        {
+          "id": "tire_pressure_rear",
+          "label": "Rear tire pressure",
+          "section": "Tire Pressure",
+          "axis": "rear",
+          "unit": "psi",
+          "typical_min": 14.0,
+          "typical_max": 55.0,
+          "baseline_awd_circuit": 27.5,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "observed_on_build": 27.0,
+          "fh6": "fh6_confirmed"
+        }
       ],
       "principle": "Lower pressure = larger contact patch, more grip. Higher = sharper response, lower grip ceiling. Target ~31-33 psi HOT (the in-game Description confirms: low psi maximises contact patch but too low overheats; high psi adds response but can cause sudden grip loss).",
-      "sources": ["in-game-recording", "forzafire-fh6-tires", "game8-fh6-tuning"]
+      "sources": [
+        "in-game-recording",
+        "forzafire-fh6-tires",
+        "game8-fh6-tuning"
+      ]
     },
     {
       "id": "gearing",
       "label": "Gearing",
       "fh6_tab": "Gearing",
-      "section_headers": ["Forward Gears"],
+      "section_headers": [
+        "Forward Gears"
+      ],
       "tune_last": true,
       "gating": "UNLOCKED BY INSTALLING SPORT OR RACE TRANSMISSION UPGRADES (verbatim in-game banner). Sport unlocks Final Drive; Race unlocks individual gears + up to 10 speeds.",
       "fh6_note": "Section 'Forward Gears', poles Speed ↔ Acceleration. Sliders: Final Drive + one per gear (observed build = 6-speed: 1st-6th). A speed graph (RPM x1000, axis 3-7) vs (mph, axis 0-180) is shown bottom-right. LOCKED on the observed build.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "final_drive", "label": "Final drive ratio", "section": "Forward Gears", "axis": "single", "unit": "ratio", "poles": "Speed ↔ Acceleration", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "right pole = Acceleration (higher final drive = shorter gears = more accel, less top speed — per in-game Description). Numeric end-stops not displayed." },
-        { "id": "individual_gears", "label": "Individual gear ratios (1st..Nth; up to 10 with Race trans)", "section": "Forward Gears", "axis": "per_gear", "unit": "ratio", "poles": "Speed ↔ Acceleration", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "observed car = 6-speed; numeric end-stops not displayed" }
+        {
+          "id": "final_drive",
+          "label": "Final drive ratio",
+          "section": "Forward Gears",
+          "axis": "single",
+          "unit": "ratio",
+          "poles": "Speed ↔ Acceleration",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "right pole = Acceleration (higher final drive = shorter gears = more accel, less top speed — per in-game Description). Numeric end-stops not displayed."
+        },
+        {
+          "id": "individual_gears",
+          "label": "Individual gear ratios (1st..Nth; up to 10 with Race trans)",
+          "section": "Forward Gears",
+          "axis": "per_gear",
+          "unit": "ratio",
+          "poles": "Speed ↔ Acceleration",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "observed car = 6-speed; numeric end-stops not displayed"
+        }
       ],
       "principle": "Short gearing = faster accel, lower top speed. Set Final Drive so the top gear's line just reaches the end of the speed graph. Tune LAST, while driving — shorter for touge hairpins, longer for highway zones.",
-      "sources": ["in-game-recording", "forzafire-fh6-drivetrain", "destructoid-fh6-tuning"]
+      "sources": [
+        "in-game-recording",
+        "forzafire-fh6-drivetrain",
+        "destructoid-fh6-tuning"
+      ]
     },
     {
       "id": "alignment",
       "label": "Alignment",
       "fh6_tab": "Alignment",
-      "section_headers": ["Camber", "Toe", "Front Caster"],
+      "section_headers": [
+        "Camber",
+        "Toe",
+        "Front Caster"
+      ],
       "gating": "Camber/Toe/Caster unlocked on the observed build (adjustable suspension fitted).",
       "fh6_note": "Sections: 'Camber' (poles Negative ↔ Positive), 'Toe' (poles In ↔ Out), 'Front Caster' (poles Low ↔ High). All in degrees.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "camber_front", "label": "Front camber", "section": "Camber", "axis": "front", "unit": "deg", "typical_min": -5.0, "typical_max": 5.0, "baseline": -1.3, "poles": "Negative ↔ Positive", "pole_text_verified": true, "observed_on_build": -2.0, "fh6": "fh6_confirmed" },
-        { "id": "camber_rear", "label": "Rear camber", "section": "Camber", "axis": "rear", "unit": "deg", "typical_min": -5.0, "typical_max": 5.0, "baseline": -1.0, "poles": "Negative ↔ Positive", "pole_text_verified": true, "observed_on_build": -1.5, "fh6": "fh6_confirmed" },
-        { "id": "toe_front", "label": "Front toe", "section": "Toe", "axis": "front", "unit": "deg", "typical_min": -1.0, "typical_max": 1.0, "baseline": 0.0, "poles": "In ↔ Out", "pole_text_verified": true, "observed_on_build": 0.0, "fh6": "fh6_confirmed" },
-        { "id": "toe_rear", "label": "Rear toe", "section": "Toe", "axis": "rear", "unit": "deg", "typical_min": -1.0, "typical_max": 1.0, "baseline": 0.0, "poles": "In ↔ Out", "pole_text_verified": true, "observed_on_build": 0.0, "fh6": "fh6_confirmed" },
-        { "id": "caster", "label": "Front caster (Angle)", "section": "Front Caster", "axis": "single", "unit": "deg", "typical_min": 1.0, "typical_max": 7.0, "baseline": 6.5, "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 5.0, "fh6": "fh6_confirmed" }
+        {
+          "id": "camber_front",
+          "label": "Front camber",
+          "section": "Camber",
+          "axis": "front",
+          "unit": "deg",
+          "typical_min": -5.0,
+          "typical_max": 5.0,
+          "baseline": -1.3,
+          "poles": "Negative ↔ Positive",
+          "pole_text_verified": true,
+          "observed_on_build": -2.0,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "camber_rear",
+          "label": "Rear camber",
+          "section": "Camber",
+          "axis": "rear",
+          "unit": "deg",
+          "typical_min": -5.0,
+          "typical_max": 5.0,
+          "baseline": -1.0,
+          "poles": "Negative ↔ Positive",
+          "pole_text_verified": true,
+          "observed_on_build": -1.5,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "toe_front",
+          "label": "Front toe",
+          "section": "Toe",
+          "axis": "front",
+          "unit": "deg",
+          "typical_min": -1.0,
+          "typical_max": 1.0,
+          "baseline": 0.0,
+          "poles": "In ↔ Out",
+          "pole_text_verified": true,
+          "observed_on_build": 0.0,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "toe_rear",
+          "label": "Rear toe",
+          "section": "Toe",
+          "axis": "rear",
+          "unit": "deg",
+          "typical_min": -1.0,
+          "typical_max": 1.0,
+          "baseline": 0.0,
+          "poles": "In ↔ Out",
+          "pole_text_verified": true,
+          "observed_on_build": 0.0,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "caster",
+          "label": "Front caster (Angle)",
+          "section": "Front Caster",
+          "axis": "single",
+          "unit": "deg",
+          "typical_min": 1.0,
+          "typical_max": 7.0,
+          "baseline": 6.5,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "observed_on_build": 5.0,
+          "fh6": "fh6_confirmed"
+        }
       ],
       "principle": "Modest negative camber for cornering grip without killing straight-line braking (the in-game Description warns too much negative camber cuts straight-line braking & accel). Higher caster sharpens turn-in and self-centering.",
-      "sources": ["in-game-recording", "in-game-screenshot"]
+      "sources": [
+        "in-game-recording",
+        "in-game-screenshot"
+      ]
     },
     {
       "id": "anti_roll_bars",
       "label": "Anti-Roll Bars",
       "fh6_tab": "Antiroll Bars",
-      "section_headers": ["Antiroll Bars"],
+      "section_headers": [
+        "Antiroll Bars"
+      ],
       "gating": "UNLOCKED BY INSTALLING RACE FRONT ANTIROLL BAR UPGRADES (verbatim banner). Front and rear each need their Race ARB part. LOCKED on the observed build.",
       "fh6_note": "Single section 'Antiroll Bars', poles Soft ↔ Stiff, unitless scale. Front + Rear sliders.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "arb_front", "label": "Front ARB stiffness", "section": "Antiroll Bars", "axis": "front", "unit": "scale", "typical_min": 1.0, "typical_max": 65.0, "poles": "Soft ↔ Stiff", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "1.00-65.00 scale per FH6 web sources; on-screen end-stops not displayed" },
-        { "id": "arb_rear", "label": "Rear ARB stiffness", "section": "Antiroll Bars", "axis": "rear", "unit": "scale", "typical_min": 1.0, "typical_max": 65.0, "poles": "Soft ↔ Stiff", "pole_text_verified": true, "fh6": "fh6_confirmed" }
+        {
+          "id": "arb_front",
+          "label": "Front ARB stiffness",
+          "section": "Antiroll Bars",
+          "axis": "front",
+          "unit": "scale",
+          "typical_min": 1.0,
+          "typical_max": 65.0,
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "1.00-65.00 scale per FH6 web sources; on-screen end-stops not displayed"
+        },
+        {
+          "id": "arb_rear",
+          "label": "Rear ARB stiffness",
+          "section": "Antiroll Bars",
+          "axis": "rear",
+          "unit": "scale",
+          "typical_min": 1.0,
+          "typical_max": 65.0,
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed"
+        }
       ],
       "principle": "Balances rotation. Stiffer front = more stable/less rotation; stiffer rear = more rotation. AWD hot hatch: softer front / stiffer rear to fight understeer.",
-      "sources": ["in-game-recording", "forzafire-fh6-handling", "game8-fh6-tuning"]
+      "sources": [
+        "in-game-recording",
+        "forzafire-fh6-handling",
+        "game8-fh6-tuning"
+      ]
     },
     {
       "id": "springs",
       "label": "Springs (incl. Ride Height)",
       "fh6_tab": "Springs",
-      "section_headers": ["Springs", "Ride Height"],
+      "section_headers": [
+        "Springs",
+        "Ride Height"
+      ],
       "tune_early": true,
       "gating": "Race Springs (coilovers) unlock spring rate + ride height. Unlocked on the observed build.",
       "fh6_note": "Section 'Springs' (poles Soft ↔ Stiff, unit LB/IN) + section 'Ride Height' (poles Low ↔ High, unit IN) — BOTH inside the Springs tab. No separate Ride Height tab, no bump-stop field.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "spring_front", "label": "Front spring rate", "section": "Springs", "axis": "front", "unit": "lb/in", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 838.0, "fh6": "fh6_confirmed", "range_note": "LB/IN (US locale); per-car range, end-stops not displayed" },
-        { "id": "spring_rear", "label": "Rear spring rate", "section": "Springs", "axis": "rear", "unit": "lb/in", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 661.7, "fh6": "fh6_confirmed" },
-        { "id": "ride_height_front", "label": "Front ride height", "section": "Ride Height", "axis": "front", "unit": "in", "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 7.2, "fh6": "fh6_confirmed", "range_note": "IN (US locale); per-car range. VERIFIED example: 2014 Golf R front slider = 6.9 (min) to 8.1 (max) in — confirms absolute end-stops ARE car-specific and this chassis rides high." },
-        { "id": "ride_height_rear", "label": "Rear ride height", "section": "Ride Height", "axis": "rear", "unit": "in", "poles": "Low ↔ High", "pole_text_verified": true, "observed_on_build": 6.9, "fh6": "fh6_confirmed" }
+        {
+          "id": "spring_front",
+          "label": "Front spring rate",
+          "section": "Springs",
+          "axis": "front",
+          "unit": "lb/in",
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "observed_on_build": 838.0,
+          "fh6": "fh6_confirmed",
+          "range_note": "LB/IN (US locale); per-car range, end-stops not displayed"
+        },
+        {
+          "id": "spring_rear",
+          "label": "Rear spring rate",
+          "section": "Springs",
+          "axis": "rear",
+          "unit": "lb/in",
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "observed_on_build": 661.7,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "ride_height_front",
+          "label": "Front ride height",
+          "section": "Ride Height",
+          "axis": "front",
+          "unit": "in",
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "observed_on_build": 7.2,
+          "fh6": "fh6_confirmed",
+          "range_note": "IN (US locale); per-car range. VERIFIED example: 2014 Golf R front slider = 6.9 (min) to 8.1 (max) in — confirms absolute end-stops ARE car-specific and this chassis rides high."
+        },
+        {
+          "id": "ride_height_rear",
+          "label": "Rear ride height",
+          "section": "Ride Height",
+          "axis": "rear",
+          "unit": "in",
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "observed_on_build": 6.9,
+          "fh6": "fh6_confirmed"
+        }
       ],
       "principle": "Stiffer springs for smooth road/circuit, softer for dirt compliance. Lower ride height = lower CG/more road grip; raise for dirt. The in-game Description notes softening front springs vs rear increases front grip / reduces understeer.",
-      "sources": ["in-game-recording", "game8-fh6-tuning", "forzafire-fh6-handling"]
+      "sources": [
+        "in-game-recording",
+        "game8-fh6-tuning",
+        "forzafire-fh6-handling"
+      ]
     },
     {
       "id": "damping",
       "label": "Damping",
       "fh6_tab": "Damping",
-      "section_headers": ["Rebound Stiffness", "Bump Stiffness"],
+      "section_headers": [
+        "Rebound Stiffness",
+        "Bump Stiffness"
+      ],
       "gating": "Race Springs/Dampers unlock damping. Unlocked on the observed build.",
       "fh6_note": "Section 'Rebound Stiffness' (F/R) + section 'Bump Stiffness' (F/R), both poles Soft ↔ Stiff. Unitless, one-decimal values.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "rebound_front", "label": "Front rebound stiffness", "section": "Rebound Stiffness", "axis": "front", "unit": "scale", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 13.2, "fh6": "fh6_confirmed", "range_note": "unitless one-decimal; end-stops not displayed" },
-        { "id": "rebound_rear", "label": "Rear rebound stiffness", "section": "Rebound Stiffness", "axis": "rear", "unit": "scale", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 9.4, "fh6": "fh6_confirmed" },
-        { "id": "bump_front", "label": "Front bump stiffness", "section": "Bump Stiffness", "axis": "front", "unit": "scale", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 8.3, "fh6": "fh6_confirmed" },
-        { "id": "bump_rear", "label": "Rear bump stiffness", "section": "Bump Stiffness", "axis": "rear", "unit": "scale", "poles": "Soft ↔ Stiff", "pole_text_verified": true, "observed_on_build": 5.9, "fh6": "fh6_confirmed" }
+        {
+          "id": "rebound_front",
+          "label": "Front rebound stiffness",
+          "section": "Rebound Stiffness",
+          "axis": "front",
+          "unit": "scale",
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "observed_on_build": 13.2,
+          "fh6": "fh6_confirmed",
+          "range_note": "unitless one-decimal; end-stops not displayed"
+        },
+        {
+          "id": "rebound_rear",
+          "label": "Rear rebound stiffness",
+          "section": "Rebound Stiffness",
+          "axis": "rear",
+          "unit": "scale",
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "observed_on_build": 9.4,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "bump_front",
+          "label": "Front bump stiffness",
+          "section": "Bump Stiffness",
+          "axis": "front",
+          "unit": "scale",
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "observed_on_build": 8.3,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "bump_rear",
+          "label": "Rear bump stiffness",
+          "section": "Bump Stiffness",
+          "axis": "rear",
+          "unit": "scale",
+          "poles": "Soft ↔ Stiff",
+          "pole_text_verified": true,
+          "observed_on_build": 5.9,
+          "fh6": "fh6_confirmed"
+        }
       ],
       "principle": "Rebound controls extension speed (~1.5-2x bump as a start); bump controls compression. The observed build runs rebound > bump on both axles (F 13.2/8.3, R 9.4/5.9). Softer damping for rough/dirt surfaces.",
-      "sources": ["in-game-recording", "forzafire-fh6-handling", "game8-fh6-tuning"]
+      "sources": [
+        "in-game-recording",
+        "forzafire-fh6-handling",
+        "game8-fh6-tuning"
+      ]
     },
     {
       "id": "aero",
       "label": "Aerodynamics / Downforce",
       "fh6_tab": "Aero",
-      "section_headers": ["Downforce"],
+      "section_headers": [
+        "Downforce"
+      ],
       "gating": "UNLOCKED BY INSTALLING RACE FRONT BUMPER UPGRADES (front) / race rear wing (rear) — verbatim banner. LOCKED on the observed build.",
       "fh6_note": "Section 'Downforce', poles Speed ↔ Cornering (NOT 'less/more'), Front + Rear sliders, part-gated. Aero Balance & Aero Efficiency are Performance-panel readouts (observed 0.52 / 0.848, shown even with stock aero). FH6 tip: target Aero Balance ~0.40-0.50.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "downforce_front", "label": "Front downforce", "section": "Downforce", "axis": "front", "unit": "kgf or lb", "poles": "Speed ↔ Cornering", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "poles confirmed Speed<->Cornering; unit not visible (locked) — FH6 web says kgf/lb; range car-specific" },
-        { "id": "downforce_rear", "label": "Rear downforce", "section": "Downforce", "axis": "rear", "unit": "kgf or lb", "poles": "Speed ↔ Cornering", "pole_text_verified": true, "fh6": "fh6_confirmed" }
+        {
+          "id": "downforce_front",
+          "label": "Front downforce",
+          "section": "Downforce",
+          "axis": "front",
+          "unit": "kgf or lb",
+          "poles": "Speed ↔ Cornering",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "poles confirmed Speed<->Cornering; unit not visible (locked) — FH6 web says kgf/lb; range car-specific"
+        },
+        {
+          "id": "downforce_rear",
+          "label": "Rear downforce",
+          "section": "Downforce",
+          "axis": "rear",
+          "unit": "kgf or lb",
+          "poles": "Speed ↔ Cornering",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed"
+        }
       ],
       "principle": "More downforce (toward Cornering) = more grip, lower top speed. Toward Speed = less drag/higher top end. In FH6 watch Aero Balance (~0.40-0.50) rather than just maxing front. Description confirms: lower Balance = more understeer, higher = more oversteer.",
-      "sources": ["in-game-recording", "forzafire-fh6-aero", "gamingpromax-fh6-balance"]
+      "sources": [
+        "in-game-recording",
+        "forzafire-fh6-aero",
+        "gamingpromax-fh6-balance"
+      ]
     },
     {
       "id": "brakes",
       "label": "Braking",
       "fh6_tab": "Brake",
-      "section_headers": ["Braking Force (Balance)", "Braking Force (Pressure)"],
+      "section_headers": [
+        "Braking Force (Balance)",
+        "Braking Force (Pressure)"
+      ],
       "gating": "UNLOCKED BY INSTALLING RACE BRAKE UPGRADES (verbatim banner). LOCKED on the observed build.",
       "fh6_note": "Two 'Braking Force' sections: Balance (poles Rear ↔ Front — left is Rear, right is Front) and Pressure (poles Low ↔ High). Part-gated.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "brake_balance", "label": "Brake balance", "section": "Braking Force (Balance)", "axis": "single", "unit": "% (toward Front)", "typical_min": 0.0, "typical_max": 100.0, "baseline": 52.0, "poles": "Rear ↔ Front", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "left pole Rear, right pole Front; numeric end-stops not displayed (locked). Description: forward bias = stability, rearward = more oversteer under braking" },
-        { "id": "brake_pressure", "label": "Brake pressure", "section": "Braking Force (Pressure)", "axis": "single", "unit": "%", "baseline": 100.0, "poles": "Low ↔ High", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "default ~100%; end-stops not displayed (locked)" }
+        {
+          "id": "brake_balance",
+          "label": "Brake balance",
+          "section": "Braking Force (Balance)",
+          "axis": "single",
+          "unit": "% (toward Front)",
+          "typical_min": 0.0,
+          "typical_max": 100.0,
+          "baseline": 52.0,
+          "poles": "Rear ↔ Front",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "left pole Rear, right pole Front; numeric end-stops not displayed (locked). Description: forward bias = stability, rearward = more oversteer under braking"
+        },
+        {
+          "id": "brake_pressure",
+          "label": "Brake pressure",
+          "section": "Braking Force (Pressure)",
+          "axis": "single",
+          "unit": "%",
+          "baseline": 100.0,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "default ~100%; end-stops not displayed (locked)"
+        }
       ],
       "principle": "Forward balance = stable braking; rearward = more trail-braking rotation/oversteer. Lower pressure if locking up under ABS-off.",
-      "sources": ["in-game-recording", "forzafire-fh6-drivetrain", "game8-fh6-tuning"]
+      "sources": [
+        "in-game-recording",
+        "forzafire-fh6-drivetrain",
+        "game8-fh6-tuning"
+      ]
     },
     {
       "id": "differential",
       "label": "Differential",
       "fh6_tab": "Differential",
-      "section_headers": ["Front", "Rear", "CENTER"],
+      "section_headers": [
+        "Front",
+        "Rear",
+        "CENTER"
+      ],
       "gating": "UNLOCKED BY INSTALLING RACE OR SPORT DIFFERENTIAL UPGRADES (verbatim banner). LOCKED on the observed build.",
       "fh6_note": "AWD layout (observed): THREE sections — 'Front' (Acceleration + Deceleration, poles Low ↔ High), 'Rear' (Acceleration + Deceleration, poles Low ↔ High), and 'CENTER' (Balance, poles Front ↔ Rear). RWD would show Rear only; FWD Front only. The Center Balance IS the '30/70 power split'.",
       "fh6_confidence": "fh6_confirmed",
       "variables": [
-        { "id": "diff_front_accel", "label": "Front acceleration lock", "section": "Front", "axis": "front", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "poles": "Low ↔ High", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "AWD/FWD only; end-stops not displayed (locked)" },
-        { "id": "diff_front_decel", "label": "Front deceleration lock", "section": "Front", "axis": "front", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "poles": "Low ↔ High", "pole_text_verified": true, "fh6": "fh6_confirmed" },
-        { "id": "diff_rear_accel", "label": "Rear acceleration lock", "section": "Rear", "axis": "rear", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 50.0, "poles": "Low ↔ High", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "RWD/AWD; baseline CONTESTED across FH6 web sources" },
-        { "id": "diff_rear_decel", "label": "Rear deceleration lock", "section": "Rear", "axis": "rear", "unit": "%", "typical_min": 0.0, "typical_max": 100.0, "baseline_rwd_awd_rear": 20.0, "poles": "Low ↔ High", "pole_text_verified": true, "fh6": "fh6_confirmed" },
-        { "id": "diff_center", "label": "Center balance (Front ↔ Rear)", "section": "CENTER", "axis": "center", "unit": "% to rear", "typical_min": 0.0, "typical_max": 100.0, "baseline_awd": 72.0, "poles": "Front ↔ Rear", "pole_text_verified": true, "fh6": "fh6_confirmed", "range_note": "AWD-only; right pole = Rear; '30/70 split' = ~70 toward Rear" }
+        {
+          "id": "diff_front_accel",
+          "label": "Front acceleration lock",
+          "section": "Front",
+          "axis": "front",
+          "unit": "%",
+          "typical_min": 0.0,
+          "typical_max": 100.0,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "AWD/FWD only; end-stops not displayed (locked)"
+        },
+        {
+          "id": "diff_front_decel",
+          "label": "Front deceleration lock",
+          "section": "Front",
+          "axis": "front",
+          "unit": "%",
+          "typical_min": 0.0,
+          "typical_max": 100.0,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "diff_rear_accel",
+          "label": "Rear acceleration lock",
+          "section": "Rear",
+          "axis": "rear",
+          "unit": "%",
+          "typical_min": 0.0,
+          "typical_max": 100.0,
+          "baseline_rwd_awd_rear": 50.0,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "RWD/AWD; baseline CONTESTED across FH6 web sources"
+        },
+        {
+          "id": "diff_rear_decel",
+          "label": "Rear deceleration lock",
+          "section": "Rear",
+          "axis": "rear",
+          "unit": "%",
+          "typical_min": 0.0,
+          "typical_max": 100.0,
+          "baseline_rwd_awd_rear": 20.0,
+          "poles": "Low ↔ High",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed"
+        },
+        {
+          "id": "diff_center",
+          "label": "Center balance (Front ↔ Rear)",
+          "section": "CENTER",
+          "axis": "center",
+          "unit": "% to rear",
+          "typical_min": 0.0,
+          "typical_max": 100.0,
+          "baseline_awd": 72.0,
+          "poles": "Front ↔ Rear",
+          "pole_text_verified": true,
+          "fh6": "fh6_confirmed",
+          "range_note": "AWD-only; right pole = Rear; '30/70 split' = ~70 toward Rear"
+        }
       ],
       "principle": "0% open, 100% locked. Accel lock = on-throttle coupling; decel lock = off-throttle/braking stability. Accel/decel baselines CONTESTED across FH6 web — road-tune. Center 70-80% rear is well-agreed for AWD. The in-game Description confirms higher Accel = locks more quickly under power.",
-      "sources": ["in-game-recording", "forzafire-fh6-drivetrain", "gamerant-fh6-tuning"]
+      "sources": [
+        "in-game-recording",
+        "forzafire-fh6-drivetrain",
+        "gamerant-fh6-tuning"
+      ]
     }
-  ]
+  ],
+  "situational_model": {
+    "added": "2026-07-27",
+    "confidence": "probable — standard race-engineering doctrine consistent with all seven tuning-guide sources; the Tune Lab's phase-split tests are how each row gets FH6-verified",
+    "principle": "A slider only does anything while its component carries load. 'Increases oversteer' really means 'shifts grip rearward IN THE PHASE where this part works'. Full slider description = component x corner phase x which end x speed regime.",
+    "three_questions": [
+      "WHEN is it active? Weight moves braking -> turn-in -> mid-corner -> exit; each slider participates only in some phases.",
+      "WHICH END does it stiffen or free? The stiffer end loses grip in its phase (the seesaw).",
+      "AT WHAT SPEED? Below ~60-80 mph mechanical settings decide balance; above, aero dominates and mechanical fades. Hairpin push + sweeper snap = two problems, two sliders."
+    ],
+    "phase_map": [
+      {
+        "phase": "Braking (straight)",
+        "loaded": "front tires + brake system",
+        "active_sliders": [
+          "brake pressure",
+          "brake balance"
+        ],
+        "inert": "diff accel, aero balance barely (speed-dependent)"
+      },
+      {
+        "phase": "Turn-in (transient, first ~0.5s of weight shift)",
+        "loaded": "dampers",
+        "active_sliders": [
+          "bump",
+          "rebound",
+          "diff decel",
+          "caster"
+        ],
+        "inert": "ARBs/springs haven't taken the load yet — this is why rebound fixes turn-in but not mid-corner push"
+      },
+      {
+        "phase": "Mid-corner (steady state)",
+        "loaded": "springs + ARBs + camber + tire pressure",
+        "active_sliders": [
+          "ARB F/R",
+          "springs F/R",
+          "camber",
+          "tire PSI"
+        ],
+        "inert": "dampers (finished moving), diff accel (no throttle yet)"
+      },
+      {
+        "phase": "Exit (on throttle)",
+        "loaded": "rear tires + driveline",
+        "active_sliders": [
+          "diff accel",
+          "center torque split (AWD)",
+          "rear ARB/springs (share)"
+        ],
+        "inert": "diff decel, brake settings"
+      },
+      {
+        "phase": "Straights / crests / bumps",
+        "loaded": "aero + toe + compliance",
+        "active_sliders": [
+          "rear toe-in",
+          "aero F/R",
+          "rebound (crests)",
+          "ride height (bumps)"
+        ],
+        "inert": "diff (mostly), camber"
+      }
+    ],
+    "habits": [
+      "Diagnose by PHASE before touching a slider: name where in the corner the problem happens — that eliminates ~80% of the menu.",
+      "Test in the phase you changed (the Tune Lab's rotation-entry and rotation-exit gates are split for this reason).",
+      "Describe any slider as a full sentence: component -> phase -> end -> speed. Example: rear rebound softer = rear keeps grip during the transient after lift/brake = less ENTRY oversteer, strongest on bumps."
+    ]
+  }
 }

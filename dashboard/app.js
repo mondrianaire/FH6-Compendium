@@ -571,6 +571,22 @@
 
   // ---- variables ----
   function buildVariables() {
+    const sm = DB.tuningVariables.situational_model;
+    if (sm) {
+      const host = document.getElementById("varOrder");
+      const el = document.createElement("div");
+      el.className = "block";
+      el.style.borderColor = "var(--accent)";
+      el.innerHTML = `
+        <h3>When does each slider actually act? <span class="conf conf-probable">🟡 doctrine</span></h3>
+        <p class="why"><strong>${sm.principle}</strong></p>
+        <ol class="why">${sm.three_questions.map((q) => `<li>${q}</li>`).join("")}</ol>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Corner phase</th><th>What carries load</th><th>Sliders ACTIVE here</th><th>Inert here (don't bother)</th></tr></thead>
+          <tbody>${sm.phase_map.map((r) => `<tr><td><strong>${r.phase}</strong></td><td class="why" style="font-size:12px">${r.loaded}</td><td>${r.active_sliders.join(", ")}</td><td class="why" style="font-size:12px">${r.inert}</td></tr>`).join("")}</tbody></table></div>
+        <ul class="why" style="margin-top:8px">${sm.habits.map((h) => `<li>${h}</li>`).join("")}</ul>`;
+      host.parentNode.insertBefore(el, host.nextSibling);
+    }
     const tv = DB.tuningVariables;
     document.getElementById("varOrder").innerHTML =
       "<strong>Tune in this order:</strong> " + tv.tuning_order.map((t, i) => `${i + 1}. ${t.replace(/_/g, " ")}`).join("  →  ") +

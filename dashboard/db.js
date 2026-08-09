@@ -598,7 +598,76 @@ window.FH6_DB = {
           "gamerant-fh6-tuning"
         ]
       }
-    ]
+    ],
+    "situational_model": {
+      "added": "2026-07-27",
+      "confidence": "probable — standard race-engineering doctrine consistent with all seven tuning-guide sources; the Tune Lab's phase-split tests are how each row gets FH6-verified",
+      "principle": "A slider only does anything while its component carries load. 'Increases oversteer' really means 'shifts grip rearward IN THE PHASE where this part works'. Full slider description = component x corner phase x which end x speed regime.",
+      "three_questions": [
+        "WHEN is it active? Weight moves braking -> turn-in -> mid-corner -> exit; each slider participates only in some phases.",
+        "WHICH END does it stiffen or free? The stiffer end loses grip in its phase (the seesaw).",
+        "AT WHAT SPEED? Below ~60-80 mph mechanical settings decide balance; above, aero dominates and mechanical fades. Hairpin push + sweeper snap = two problems, two sliders."
+      ],
+      "phase_map": [
+        {
+          "phase": "Braking (straight)",
+          "loaded": "front tires + brake system",
+          "active_sliders": [
+            "brake pressure",
+            "brake balance"
+          ],
+          "inert": "diff accel, aero balance barely (speed-dependent)"
+        },
+        {
+          "phase": "Turn-in (transient, first ~0.5s of weight shift)",
+          "loaded": "dampers",
+          "active_sliders": [
+            "bump",
+            "rebound",
+            "diff decel",
+            "caster"
+          ],
+          "inert": "ARBs/springs haven't taken the load yet — this is why rebound fixes turn-in but not mid-corner push"
+        },
+        {
+          "phase": "Mid-corner (steady state)",
+          "loaded": "springs + ARBs + camber + tire pressure",
+          "active_sliders": [
+            "ARB F/R",
+            "springs F/R",
+            "camber",
+            "tire PSI"
+          ],
+          "inert": "dampers (finished moving), diff accel (no throttle yet)"
+        },
+        {
+          "phase": "Exit (on throttle)",
+          "loaded": "rear tires + driveline",
+          "active_sliders": [
+            "diff accel",
+            "center torque split (AWD)",
+            "rear ARB/springs (share)"
+          ],
+          "inert": "diff decel, brake settings"
+        },
+        {
+          "phase": "Straights / crests / bumps",
+          "loaded": "aero + toe + compliance",
+          "active_sliders": [
+            "rear toe-in",
+            "aero F/R",
+            "rebound (crests)",
+            "ride height (bumps)"
+          ],
+          "inert": "diff (mostly), camber"
+        }
+      ],
+      "habits": [
+        "Diagnose by PHASE before touching a slider: name where in the corner the problem happens — that eliminates ~80% of the menu.",
+        "Test in the phase you changed (the Tune Lab's rotation-entry and rotation-exit gates are split for this reason).",
+        "Describe any slider as a full sentence: component -> phase -> end -> speed. Example: rear rebound softer = rear keeps grip during the transient after lift/brake = less ENTRY oversteer, strongest on bumps."
+      ]
+    }
   },
   "metaCars": {
     "schema_version": "1.0.0",
@@ -44668,5 +44737,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-09T14:25Z"
+  "builtAt": "2026-08-09T14:54Z"
 };

@@ -577,15 +577,86 @@
       const el = document.createElement("div");
       el.className = "block";
       el.style.borderColor = "var(--accent)";
+      // 5-slot categorical palette validated (dataviz six-checks) against surface #161b22
+      const PC = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
+      const SHORT = ["Braking", "Turn-in", "Mid-corner", "Exit", "Straight/crest"];
+      const SEGS = [
+        "M 50 262 L 330 262",
+        "M 330 262 Q 385 262 415 240",
+        "M 415 240 A 50 50 0 1 0 415 140",
+        "M 415 140 Q 385 118 330 118",
+        "M 330 118 L 50 118",
+      ];
+      const CHIP = [[190, 262], [382, 249], [478, 191], [382, 131], [190, 118]];
+      const LABEL = [[190, 296], [398, 285], [545, 191], [398, 100], [190, 96]];
+      const ribbon = "M 50 262 L 330 262 Q 385 262 415 240 A 50 50 0 1 0 415 140 Q 385 118 330 118 L 50 118";
+      const allSliders = [];
+      sm.phase_map.forEach((p) => p.active_sliders.forEach((s) => { if (!allSliders.includes(s)) allSliders.push(s); }));
+
       el.innerHTML = `
         <h3>When does each slider actually act? <span class="conf conf-probable">🟡 doctrine</span></h3>
         <p class="why"><strong>${sm.principle}</strong></p>
-        <ol class="why">${sm.three_questions.map((q) => `<li>${q}</li>`).join("")}</ol>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>Corner phase</th><th>What carries load</th><th>Sliders ACTIVE here</th><th>Inert here (don't bother)</th></tr></thead>
-          <tbody>${sm.phase_map.map((r) => `<tr><td><strong>${r.phase}</strong></td><td class="why" style="font-size:12px">${r.loaded}</td><td>${r.active_sliders.join(", ")}</td><td class="why" style="font-size:12px">${r.inert}</td></tr>`).join("")}</tbody></table></div>
-        <ul class="why" style="margin-top:8px">${sm.habits.map((h) => `<li>${h}</li>`).join("")}</ul>`;
+        <p class="why" style="margin:8px 0 4px"><strong>Find a slider</strong> (click to light up its phases) — or click a track zone:</p>
+        <div class="chips" id="cmapSliders">${allSliders.map((s) => `<span class="chip cmap-chip" data-s="${s}" style="cursor:pointer">${s}</span>`).join("")}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:10px">
+          <svg id="cmapSvg" viewBox="0 0 620 320" style="flex:1 1 380px;max-width:640px;min-width:320px" role="img" aria-label="Corner phase map">
+            <path d="${ribbon}" fill="none" stroke="var(--bg3)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="50,254 70,262 50,270" fill="var(--muted)"/>
+            <text x="84" y="243" fill="var(--muted)" font-size="11">travel →</text>
+            ${SEGS.map((d, i) => `<path class="cmap-seg" data-i="${i}" d="${d}" fill="none" stroke="${PC[i]}" stroke-width="10" stroke-linecap="round"/>`).join("")}
+            ${SEGS.map((d, i) => `<path class="cmap-hit" data-i="${i}" d="${d}" fill="none" stroke="rgba(0,0,0,0)" stroke-width="34" style="cursor:pointer"/>`).join("")}
+            ${CHIP.map((c, i) => `<g class="cmap-chipdot" data-i="${i}" style="cursor:pointer"><circle cx="${c[0]}" cy="${c[1]}" r="11" fill="${PC[i]}"/><text x="${c[0]}" y="${c[1] + 4}" text-anchor="middle" fill="#0e1116" font-size="12" font-weight="700">${i + 1}</text></g>`).join("")}
+            ${LABEL.map((c, i) => `<text x="${c[0]}" y="${c[1]}" text-anchor="${i === 2 ? "start" : "middle"}" fill="var(--text, #e6edf3)" font-size="12">${SHORT[i]}</text>`).join("")}
+          </svg>
+          <div id="cmapDetail" style="flex:1 1 260px;min-width:250px"></div>
+        </div>
+        <details style="margin-top:10px"><summary class="why" style="cursor:pointer">Table view (same data)</summary>
+          <div style="overflow-x:auto;margin-top:8px"><table>
+            <thead><tr><th>Corner phase</th><th>What carries load</th><th>Sliders ACTIVE here</th><th>Inert here (don't bother)</th></tr></thead>
+            <tbody>${sm.phase_map.map((r, i) => `<tr><td><span style="color:${PC[i]}">●</span> <strong>${r.phase}</strong></td><td class="why" style="font-size:12px">${r.loaded}</td><td>${r.active_sliders.join(", ")}</td><td class="why" style="font-size:12px">${r.inert}</td></tr>`).join("")}</tbody></table></div>
+        </details>
+        <ol class="why" style="margin-top:10px">${sm.three_questions.map((q) => `<li>${q}</li>`).join("")}</ol>
+        <ul class="why" style="margin-top:4px">${sm.habits.map((h) => `<li>${h}</li>`).join("")}</ul>`;
       host.parentNode.insertBefore(el, host.nextSibling);
+
+      const segEls = el.querySelectorAll(".cmap-seg");
+      const chipEls = el.querySelectorAll(".cmap-chip");
+      const detail = el.querySelector("#cmapDetail");
+      function paint(activeIdxs, selSlider) {
+        segEls.forEach((s) => {
+          const i = +s.dataset.i;
+          const on = activeIdxs.includes(i);
+          s.style.opacity = on ? "1" : "0.25";
+          s.setAttribute("stroke-width", on ? "13" : "10");
+        });
+        chipEls.forEach((c) => {
+          c.style.borderColor = c.dataset.s === selSlider ? PC[activeIdxs[0] ?? 0] : "";
+          c.style.color = c.dataset.s === selSlider ? "var(--text, #e6edf3)" : "";
+        });
+      }
+      function showPhase(i) {
+        const p = sm.phase_map[i];
+        paint([i], null);
+        detail.innerHTML = `
+          <h4 style="margin:0 0 6px"><span style="color:${PC[i]}">●</span> ${p.phase}</h4>
+          <p class="why" style="margin:0"><strong>What carries load:</strong> ${p.loaded}</p>
+          <p class="why" style="margin:8px 0 4px"><strong>Active sliders — the only ones that matter here:</strong></p>
+          <div class="chips">${p.active_sliders.map((s) => `<span class="chip" style="border:1px solid ${PC[i]}">${s}</span>`).join("")}</div>
+          <p class="why" style="margin:8px 0 0;color:var(--muted)"><strong>Inert here:</strong> ${p.inert}</p>`;
+      }
+      function showSlider(name) {
+        const idxs = sm.phase_map.map((p, i) => p.active_sliders.some((s) => s === name) ? i : -1).filter((i) => i >= 0);
+        paint(idxs, name);
+        detail.innerHTML = `
+          <h4 style="margin:0 0 6px">${name}</h4>
+          <p class="why" style="margin:0">Acts in <strong>${idxs.length}</strong> phase${idxs.length === 1 ? "" : "s"}:</p>
+          <ul class="why" style="margin:6px 0 0">${idxs.map((i) => `<li><span style="color:${PC[i]}">●</span> <strong>${SHORT[i]}</strong> — ${sm.phase_map[i].loaded}</li>`).join("")}</ul>
+          <p class="why" style="margin:8px 0 0;color:var(--muted)">Everywhere else this slider does nothing — don't reach for it there.</p>`;
+      }
+      el.querySelectorAll(".cmap-hit, .cmap-chipdot").forEach((h) =>
+        h.addEventListener("click", () => showPhase(+h.dataset.i)));
+      chipEls.forEach((c) => c.addEventListener("click", () => showSlider(c.dataset.s)));
+      showPhase(1);
     }
     const tv = DB.tuningVariables;
     const bp = tv.build_phase;

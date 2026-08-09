@@ -673,7 +673,7 @@ window.FH6_DB = {
       "principle": "STEP 0 — BUILD BEFORE YOU TUNE. The tuning order below is the SLIDER sequence for a finished build. Before any slider matters you must land the car in its target class with the right parts — and that includes DOWNGRADING. Sliders redistribute the grip your parts bought; they cannot change the PI.",
       "steps": [
         "1. Pick the target class/PI for the event (e.g. A 700 for an A-class Rivals board).",
-        "2. If the car is ABOVE the target class, downgrade it down INTO class: Street/Sport transmission (often cheaper PI than Race), remove aero (below ~B600 downforce is wasted PI anyway), softer tire compound, smaller brakes, engine downgrades where offered. PLAYER-CONFIRMED: class-down builds are real and required — e.g. a McLaren 570S never reaches A-class without downgrade parts.",
+        "2. If the car is ABOVE the target class, downgrade it down INTO class: Street/Sport transmission (often cheaper PI than Race), remove aero (below ~B600 downforce is wasted PI anyway), softer tire compound, smaller brakes, engine downgrades where offered. PLAYER-CONFIRMED: class-down builds are real and required — e.g. a McLaren 570S never reaches A-class without downgrade parts. GEARBOX NUANCE: see gearbox_rule — the race 10-speed can be the CHEAPEST box (player-verified on the 570S), so check its PI against Street/Sport before assuming downgrades are the only savings.",
         "3. If BELOW target, spend PI grip-first per the upgrade strategy (tires/suspension/brakes before power).",
         "4. Lock the drivetrain decision (AWD swap or not) BEFORE fine-tuning — it changes which diff tabs even exist.",
         "5. Only now does the slider order below apply. Changing a part later invalidates tuning work — parts reset some sliders and shift every balance."
@@ -683,7 +683,14 @@ window.FH6_DB = {
         "iggm-downgrading",
         "forzafire-drivetrain",
         "player (570S-to-A build)"
-      ]
+      ],
+      "gearbox_rule": {
+        "added": "2026-07-27",
+        "fact": "PLAYER-VERIFIED (570S, 2026-07-27): the race 10-SPEED is the LOWEST-PI transmission — FH6's PI model apparently charges for shift losses, so more gears = lower rated performance = cheaper PI. This INVERTS the FH5-era assumption that closer ratios cost more.",
+        "doctrine": "For PI-capped builds: take the 10-speed (cheapest fully-adjustable box), compress your working ratios into gears 1-6/7, and park the top gears as tall overdrives the car never reaches on track. The car drives like a 7-speed, rates like a 10-speed, and the PI savings buy grip. The Sport (final-drive-only) box remains the alternative when you don't need ratio control at all.",
+        "caveats": "Verified on one car so far — check whether the 10-speed-is-cheapest pattern holds across cars before treating it as universal. The shift tax is only neutralized if you actually tune the spacing; a stock-spaced 10-speed still shifts constantly.",
+        "confidence": "player-verified (single car)"
+      }
     }
   },
   "metaCars": {
@@ -44762,5 +44769,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-09T20:28Z"
+  "builtAt": "2026-08-09T21:30Z"
 };

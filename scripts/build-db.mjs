@@ -25,6 +25,7 @@ const db = {
   wheelspinCars: read("wheelspin-cars.json"),
   tunerSheets: read("tuner-sheets.json"),
   tunerRoster: read("tuner-roster.json"),
+  tuneLab: read("tuning-test-battery.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

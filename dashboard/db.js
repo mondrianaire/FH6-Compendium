@@ -43583,6 +43583,374 @@ window.FH6_DB = {
       }
     ]
   },
+  "tuneLab": {
+    "schema_version": "1.0.0",
+    "created": "2026-07-27",
+    "purpose": "A repeatable test battery that finds each car's USABLE WINDOW on every tuning slider — so a from-scratch tune can be fitted to a specific course archetype or PI class with evidence instead of guesswork. A 'reasonable limit' here means: the slider range inside which the car still passes the relevant test; outside it, a named symptom appears.",
+    "confidence": "method — the battery is designed from verified instruments + the project's slider-pole data, but the battery AS A WHOLE is untested. Each test promotes to player-verified as Jett runs it and reports.",
+    "lab_conditions": {
+      "rivals_is_the_lab": "Rivals events run FIXED weather and time of day — the only repeatable test environment in the game. Free-roam has weather drift; never compare runs across different free-roam sessions.",
+      "one_variable": "Change ONE slider between iterations. Two changes that both 'feel faster' can be one gain hiding one loss.",
+      "noise_control": "Driver variance is the biggest error source. Use 3-lap MEDIANS (not best laps), judge via ghost SECTOR deltas rather than whole-lap feel, and freeze your assist config across every test (board meta: ABS on, TCS off, STM off).",
+      "bisection": "To find a limit: start at the baseline value, jump the slider to its extreme. If the test FAILS, move halfway back toward baseline; repeat until it passes. The last failing and first passing values bracket the limit. ~4 iterations brackets any slider to useful precision.",
+      "record_everything": "Every found limit goes in results_log with the car, surface, and the symptom at the limit. A window without its symptom is half a data point."
+    },
+    "instrumentation": [
+      {
+        "id": "perf-panel",
+        "what": "Tune-screen Performance panel: lateral G @60/@120 mph, 0-60, 0-100, top speed, braking 60-0 ft and 100-0 ft, mechanical balance, aero balance, aero efficiency.",
+        "status": "verified — player screenshots/recording 2026-06-08 (Golf R session)",
+        "use": "INSTANT static bisection with zero driving. If a readout responds to a slider, you can find that slider's knee-point in a minute from the menu."
+      },
+      {
+        "id": "telemetry",
+        "what": "Driving telemetry overlay: per-tire temps (inner/middle/outer), live/hot PSI, suspension travel.",
+        "status": "needs_ingame — FH5 had it (hold the extras button); FH6 keybind and data set UNVERIFIED. First telemetry test should start by confirming the overlay exists and what it shows.",
+        "use": "Ground truth for camber (temp spread), cold-vs-hot pressure, and bottoming-out."
+      },
+      {
+        "id": "rivals-ghost",
+        "what": "Own-ghost sector deltas + 3-lap median lap times on a fixed Rivals event.",
+        "status": "verified",
+        "use": "The only truth that matters at the end. Every accepted change must survive the lap supertest."
+      },
+      {
+        "id": "drag-times",
+        "what": "Drag-strip Rivals times (fixed distance, fixed surface).",
+        "status": "verified",
+        "use": "Launch/gearing scoring with no cornering noise."
+      }
+    ],
+    "test_zero": {
+      "name": "Sensitivity matrix — run this ONCE before everything",
+      "procedure": "On a settled build, move each slider from min to max while watching the Performance panel. Record WHICH readouts move and roughly how much. Some readouts may respond only to PARTS, not sliders — knowing which sliders are panel-visible vs drive-to-measure decides which battery track (static vs dynamic) each slider uses.",
+      "output": "A slider × readout sensitivity map. This is the highest-value 20 minutes in the whole battery: it converts unknown sliders into free static tests.",
+      "status": "not_run"
+    },
+    "static_tests": [
+      {
+        "id": "aero-window",
+        "name": "Aero balance window",
+        "sliders": [
+          "aero_front",
+          "aero_rear"
+        ],
+        "measure": "Aero Balance readout (and Aero Efficiency)",
+        "procedure": "Hold total downforce roughly constant, shift F/R split, watch the balance readout. Then find min-total and max-total downforce that keep balance in the window.",
+        "pass": "Balance 0.42-0.50 (slightly forward of mechanical balance for stability; project data: 0.40-0.50 target band, 0.52 observed on the Golf).",
+        "fail_symptom": "Below window = high-speed push (front washes); above = high-speed loose (rear light).",
+        "confidence": "probable — band from gamingpromax + observed build; verify the band per car class"
+      },
+      {
+        "id": "braking-floor",
+        "name": "Braking distance floor",
+        "sliders": [
+          "brake_pressure",
+          "brake_balance"
+        ],
+        "measure": "60-0 and 100-0 readouts",
+        "procedure": "Bisect pressure upward until the panel distance stops improving — that's the panel's knee. The true limit (lockup) is found in the dynamic braking test; the panel knee is your starting point.",
+        "pass": "Panel distance within a few ft of the best value found",
+        "fail_symptom": "Distances worsen past the knee (modeled lockup)",
+        "confidence": "method"
+      },
+      {
+        "id": "gearing-envelope",
+        "name": "Gearing envelope (final drive)",
+        "sliders": [
+          "final_drive"
+        ],
+        "measure": "Top Speed and 0-60/0-100 readouts",
+        "procedure": "Bisect FD between 'too long' (0-60 degrades, top speed unreachable on course) and 'too short' (top speed below the course's Vmax need). Course Vmax needs come from course_fitting archetypes.",
+        "pass": "Top speed ≥ course Vmax need AND 0-60 within 0.2s of the best achievable at that constraint",
+        "fail_symptom": "Redline mid-straight (too short) or dead acceleration out of slow corners (too long)",
+        "confidence": "method"
+      }
+    ],
+    "dynamic_tests": [
+      {
+        "id": "hot-pressure",
+        "name": "Hot tire pressure",
+        "venue": "Any Rivals circuit, 3 minutes at race pace",
+        "sliders": [
+          "tire_psi_front",
+          "tire_psi_rear"
+        ],
+        "measure": "Hot PSI via telemetry (needs_ingame); fallback: lateral-G validation lap + slide feel",
+        "pass": "Hot pressure 31-33 PSI both axles (project band: cold 27-28 road / ~3 lower dirt)",
+        "fail_symptom": "Over: skittish, small contact patch, snap breakaway. Under: mushy turn-in, slow response, overheating shoulders.",
+        "limit_finding": "Cold-PSI window per axle = the range that lands hot pressure in band after 3 minutes",
+        "confidence": "probable — 31-33 band is community consensus, verify per compound"
+      },
+      {
+        "id": "camber-temp",
+        "name": "Camber by temperature spread",
+        "venue": "Longest steady corner on the test course (or a roundabout at steady speed)",
+        "sliders": [
+          "camber_front",
+          "camber_rear"
+        ],
+        "measure": "Inner/middle/outer tire temps immediately after the corner (telemetry, needs_ingame)",
+        "pass": "Inner edge 10-15°F hotter than outer, middle in between",
+        "fail_symptom": "Outer hottest = not enough negative camber (add). Inner scorched + middle cold = too much (reduce).",
+        "limit_finding": "No-telemetry fallback: bisect camber on ghost sector delta through the longest corner — the delta knee IS the limit",
+        "confidence": "method — classic race doctrine, FH6 telemetry unverified"
+      },
+      {
+        "id": "braking-stability",
+        "name": "Braking stability & true lockup",
+        "venue": "Drag strip or straight with a fixed brake marker",
+        "sliders": [
+          "brake_pressure",
+          "brake_balance"
+        ],
+        "measure": "Stopping point vs marker; visual lockup; car rotation under braking",
+        "pass": "Straight stop, no lock flare, real distance within ~5% of panel figure",
+        "fail_symptom": "Pressure too high: fronts lock (straight slide). Balance too far back: rear walks sideways under braking — the scarier failure.",
+        "limit_finding": "Raise pressure until first lockup, back off one notch = pressure ceiling. Then move balance rearward until the tail stirs, back off 2% = balance floor.",
+        "confidence": "method"
+      },
+      {
+        "id": "rotation-entry",
+        "name": "Corner-entry rotation (understeer gate)",
+        "venue": "Benchmark hairpin (pick ONE per course and reuse it)",
+        "sliders": [
+          "arb_front (down)",
+          "caster (up)",
+          "diff_decel (down)",
+          "toe_out_front (tiny)"
+        ],
+        "measure": "Ghost sector delta through the hairpin + apex-hit subjective",
+        "pass": "Apex reachable at target entry speed without early-apex push; sector delta neutral or better",
+        "fail_symptom": "Push past apex = still understeering (keep going). Nose darts / rear nervous on entry = overshot (back off last change).",
+        "limit_finding": "One slider at a time in the listed order; the order IS the doctrine (cheapest fix first)",
+        "confidence": "probable — slider poles verified from tune-screen recording; order is doctrine"
+      },
+      {
+        "id": "rotation-exit",
+        "name": "Corner-exit traction (oversteer gate)",
+        "venue": "Same benchmark hairpin, focus on throttle-on phase",
+        "sliders": [
+          "diff_accel (down)",
+          "arb_rear (down)",
+          "rebound_rear (down)",
+          "center_torque_forward (AWD)"
+        ],
+        "measure": "Earliest full-throttle point vs ghost; correction count",
+        "pass": "Full throttle one car-length past apex with zero countersteer",
+        "fail_symptom": "Wheelspin/slide on exit = too much diff lock or rear too stiff",
+        "limit_finding": "Diff accel ceiling = highest value with a clean full-throttle exit; that ceiling differs road (~40-60%) vs dirt (higher for predictability)",
+        "confidence": "probable"
+      },
+      {
+        "id": "compliance-kerbs",
+        "name": "Kerb & bump compliance",
+        "venue": "Curb-heavy chicane or the course's roughest section",
+        "sliders": [
+          "springs (down)",
+          "bump (down)",
+          "ride_height (up)",
+          "rebound (mid)"
+        ],
+        "measure": "Car settles within ~1 oscillation after the kerb; line held; no bottoming (sparks/thud)",
+        "pass": "Can attack the kerb repeatedly with a consistent line",
+        "fail_symptom": "Skip/hop off kerbs = too stiff (springs/bump). Wallowing after = too soft on rebound. Sparks/scrape = ride height below the course floor.",
+        "limit_finding": "Springs: bisect down from calculator value until wallow appears, up until skip appears — that's THE window. Ride height floor: lower one notch at a time on the worst compression until first scrape, then +1 notch = course floor.",
+        "confidence": "method"
+      },
+      {
+        "id": "high-speed-stability",
+        "name": "High-speed stability",
+        "venue": "Fastest sweeper/straight on course, flat out",
+        "sliders": [
+          "toe_in_rear (+0.1 to +0.3)",
+          "aero_rear (up)",
+          "rebound_front (up)"
+        ],
+        "measure": "Steering-correction count at Vmax; snap events",
+        "pass": "Hands-steady at Vmax through the sweeper",
+        "fail_symptom": "Wandering = rear toe 0 with loose rear; snap on lift = rebound/aero rear insufficient",
+        "limit_finding": "Rear toe-in is nearly free stability but costs a hair of rotation — find the minimum that passes",
+        "confidence": "probable"
+      },
+      {
+        "id": "lap-supertest",
+        "name": "The lap supertest (every accepted change re-earns its place)",
+        "venue": "The target Rivals course",
+        "sliders": [
+          "(whatever changed)"
+        ],
+        "measure": "3-lap median vs stored ghost; sector deltas",
+        "pass": "Median improves, OR target sector improves without losing more elsewhere",
+        "fail_symptom": "A change that 'feels better' but tests slower — revert it. Feel lies; medians don't.",
+        "limit_finding": "This is the arbiter for every window the other tests propose",
+        "confidence": "verified — this is just measurement discipline"
+      }
+    ],
+    "symptom_matrix": [
+      {
+        "symptom": "Understeer on entry (won't turn in)",
+        "phase": "entry",
+        "primary": "front ARB softer",
+        "secondary": "caster up",
+        "tertiary": "diff decel down",
+        "verify_test": "rotation-entry"
+      },
+      {
+        "symptom": "Understeer mid-corner (steady push)",
+        "phase": "mid",
+        "primary": "front camber more negative",
+        "secondary": "front tire PSI toward band",
+        "tertiary": "front springs softer",
+        "verify_test": "camber-temp + rotation-entry"
+      },
+      {
+        "symptom": "Understeer on exit (throttle push, AWD)",
+        "phase": "exit",
+        "primary": "center torque more rearward",
+        "secondary": "front diff accel down",
+        "tertiary": "rear ARB stiffer (small)",
+        "verify_test": "rotation-exit"
+      },
+      {
+        "symptom": "Oversteer on entry (rear steps in on brake/lift)",
+        "phase": "entry",
+        "primary": "brake balance forward",
+        "secondary": "rear rebound softer",
+        "tertiary": "diff decel down",
+        "verify_test": "braking-stability"
+      },
+      {
+        "symptom": "Oversteer on exit (wheelspin slide)",
+        "phase": "exit",
+        "primary": "diff accel down",
+        "secondary": "rear ARB softer",
+        "tertiary": "rear tire PSI down 0.5",
+        "verify_test": "rotation-exit"
+      },
+      {
+        "symptom": "Unstable under braking (tail wags)",
+        "phase": "braking",
+        "primary": "brake balance forward 2%",
+        "secondary": "rear rebound softer",
+        "tertiary": "rear toe-in +0.1",
+        "verify_test": "braking-stability"
+      },
+      {
+        "symptom": "Bouncy over rough surface",
+        "phase": "any",
+        "primary": "bump down",
+        "secondary": "springs down",
+        "tertiary": "ride height up",
+        "verify_test": "compliance-kerbs"
+      },
+      {
+        "symptom": "Floaty after crests, slow to settle",
+        "phase": "any",
+        "primary": "rebound up",
+        "secondary": "springs up (small)",
+        "tertiary": "—",
+        "verify_test": "compliance-kerbs"
+      },
+      {
+        "symptom": "Wanders at top speed",
+        "phase": "straight",
+        "primary": "rear toe-in +0.1",
+        "secondary": "aero rear up",
+        "tertiary": "caster up",
+        "verify_test": "high-speed-stability"
+      },
+      {
+        "symptom": "Kerbs throw the car off line",
+        "phase": "kerbs",
+        "primary": "bump down",
+        "secondary": "ride height up 1 notch",
+        "tertiary": "ARBs softer",
+        "verify_test": "compliance-kerbs"
+      }
+    ],
+    "course_fitting": {
+      "note": "Which tests DOMINATE per course archetype (archetypes from the Rivals track data). Run the dominant tests on that course's own benchmark corners — a window found on the wrong course is the wrong window.",
+      "archetypes": [
+        {
+          "archetype": "technical urban (Electric Town class)",
+          "dominant_tests": [
+            "braking-stability",
+            "rotation-entry",
+            "compliance-kerbs"
+          ],
+          "gearing": "short FD — top speed irrelevant",
+          "aero": "max usable, balance in window"
+        },
+        {
+          "archetype": "touge / mountain pass",
+          "dominant_tests": [
+            "rotation-entry",
+            "rotation-exit",
+            "compliance-kerbs",
+            "camber-temp"
+          ],
+          "gearing": "short-mid FD, 2nd-4th gear spacing matters most",
+          "aero": "moderate"
+        },
+        {
+          "archetype": "highway / Colossus-class flow",
+          "dominant_tests": [
+            "gearing-envelope",
+            "high-speed-stability",
+            "aero-window"
+          ],
+          "gearing": "FD for course Vmax",
+          "aero": "low — efficiency over grip"
+        },
+        {
+          "archetype": "dirt / rally",
+          "dominant_tests": [
+            "compliance-kerbs (as rough-surface)",
+            "rotation-exit",
+            "hot-pressure (lower band)"
+          ],
+          "gearing": "short FD, tall 1st for loose-surface launch",
+          "aero": "low-moderate (calculator: balance 0.45)"
+        },
+        {
+          "archetype": "drag",
+          "dominant_tests": [
+            "braking-floor (irrelevant) — use the drag TEMPLATE",
+            "drag-times as the only metric"
+          ],
+          "gearing": "template-driven",
+          "aero": "none/minimum"
+        }
+      ]
+    },
+    "class_fitting": {
+      "note": "PI class decides WHERE in each window you sit. The battery finds the window; the class picks the point.",
+      "rules": [
+        "D-B: PI is scarce and grip is king — sit at the grip edge of every window (max compliance, modest power). Panel braking/lateral-G per PI point spent is the best value metric.",
+        "A-S1: balanced — windows are widest here; the lap supertest arbitrates.",
+        "S2-R: stability tests gain weight (high-speed-stability, aero-window) because speeds make instability terminal; expect to give up rotation for stability."
+      ]
+    },
+    "results_log": {
+      "instructions": "One row per found limit. The window is the deliverable; the symptom at the limit is the evidence. Report rows in-session and they get added here — this log is what makes the next tune START from knowledge.",
+      "example_row": {
+        "car": "golf-r-2014",
+        "class": "B",
+        "surface": "road",
+        "course": "Electric Town",
+        "slider": "brake_pressure",
+        "window": [
+          "100%",
+          "115%"
+        ],
+        "symptom_at_limit": "front lockup into the hairpin at 120%",
+        "date": "YYYY-MM-DD",
+        "test": "braking-stability"
+      },
+      "rows": []
+    }
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",
@@ -44300,5 +44668,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-09T13:52Z"
+  "builtAt": "2026-08-09T14:25Z"
 };

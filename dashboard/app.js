@@ -1507,6 +1507,70 @@
     host.querySelectorAll(".ws-own").forEach((cb) => cb.addEventListener("change", () => toggleWs(cb.dataset.k)));
   }
 
+  // ---- tune lab ----
+  function buildTuneLab() {
+    const L = DB.tuneLab;
+    const host = document.getElementById("labContent");
+    if (!L || !host) return;
+    const testCard = (t, dynamic) => `
+      <div class="car-card" style="cursor:default">
+        <div class="card-row" style="margin-top:0">
+          <span class="badge tier-${dynamic ? "A" : "B"}">${dynamic ? "DRIVE" : "MENU"}</span>
+          <span class="conf ${confClass(t.confidence?.split(" ")[0])}">${t.confidence?.split(" ")[0] || "method"}</span>
+        </div>
+        <h3 style="font-size:14px">${t.name}</h3>
+        ${t.venue ? `<p class="why" style="margin:4px 0 0"><strong>Venue:</strong> ${t.venue}</p>` : ""}
+        <p class="why" style="margin:6px 0 0"><strong>Sliders:</strong> ${t.sliders.join(", ")}</p>
+        <p class="why" style="margin:6px 0 0"><strong>Measure:</strong> ${t.measure}</p>
+        ${t.procedure ? `<p class="why" style="margin:6px 0 0">${t.procedure}</p>` : ""}
+        <p class="why" style="margin:6px 0 0;color:var(--accent)"><strong>PASS:</strong> ${t.pass}</p>
+        <p class="why" style="margin:4px 0 0;color:var(--warn)"><strong>FAIL:</strong> ${t.fail_symptom}</p>
+        ${t.limit_finding ? `<p class="why" style="margin:6px 0 0"><strong>Limit:</strong> ${t.limit_finding}</p>` : ""}
+      </div>`;
+    const rows = (L.results_log.rows || []);
+    host.innerHTML = `
+      <p class="hint">${L.purpose}</p>
+      <div class="block">
+        <h3>Lab rules — non-negotiable</h3>
+        <ul class="why">${Object.entries(L.lab_conditions).map(([k, v]) => `<li><strong>${k.replace(/_/g, " ")}:</strong> ${v}</li>`).join("")}</ul>
+      </div>
+      <div class="block">
+        <h3>Instruments</h3>
+        ${L.instrumentation.map((i) => `<p class="why" style="margin:4px 0"><span class="conf ${i.status.startsWith("verified") ? "conf-verified" : "conf-contested"}">${i.status.startsWith("verified") ? "✅" : "❌ verify in-game"}</span> <strong>${i.id}:</strong> ${i.what} — ${i.use}</p>`).join("")}
+      </div>
+      <div class="block" style="border-color:var(--accent)">
+        <h3>Test 0 — ${L.test_zero.name} <span class="conf conf-contested">${L.test_zero.status}</span></h3>
+        <p class="why">${L.test_zero.procedure}</p>
+        <p class="fh6note">${L.test_zero.output}</p>
+      </div>
+      <h3 style="margin-top:20px">Static tests (from the tune menu — no driving)</h3>
+      <div class="card-grid">${L.static_tests.map((t) => testCard(t, false)).join("")}</div>
+      <h3 style="margin-top:20px">Dynamic tests (on track)</h3>
+      <div class="card-grid">${L.dynamic_tests.map((t) => testCard(t, true)).join("")}</div>
+      <div class="block">
+        <h3>Symptom → slider matrix</h3>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Symptom</th><th>Phase</th><th>1st response</th><th>2nd</th><th>3rd</th><th>Verify with</th></tr></thead>
+          <tbody>${L.symptom_matrix.map((s) => `<tr><td>${s.symptom}</td><td>${s.phase}</td><td><strong>${s.primary}</strong></td><td>${s.secondary}</td><td>${s.tertiary}</td><td class="why" style="font-size:11px">${s.verify_test}</td></tr>`).join("")}</tbody></table></div>
+      </div>
+      <div class="block">
+        <h3>Fitting to a course / class</h3>
+        <p class="why">${L.course_fitting.note}</p>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Archetype</th><th>Dominant tests</th><th>Gearing</th><th>Aero</th></tr></thead>
+          <tbody>${L.course_fitting.archetypes.map((a) => `<tr><td>${a.archetype}</td><td class="why" style="font-size:12px">${a.dominant_tests.join(", ")}</td><td class="why" style="font-size:12px">${a.gearing}</td><td class="why" style="font-size:12px">${a.aero}</td></tr>`).join("")}</tbody></table></div>
+        <ul class="why" style="margin-top:8px">${L.class_fitting.rules.map((r) => `<li>${r}</li>`).join("")}</ul>
+      </div>
+      <div class="block" style="border-color:${rows.length ? "var(--accent)" : "var(--warn)"}">
+        <h3>Results log — found windows (${rows.length})</h3>
+        <p class="why">${L.results_log.instructions}</p>
+        ${rows.length ? `<div style="overflow-x:auto"><table>
+          <thead><tr><th>Car</th><th>Course</th><th>Slider</th><th>Window</th><th>Symptom at limit</th><th>Date</th></tr></thead>
+          <tbody>${rows.map((r) => `<tr><td>${r.car}</td><td>${r.course}</td><td>${r.slider}</td><td><strong>${r.window[0]} – ${r.window[1]}</strong></td><td class="why" style="font-size:12px">${r.symptom_at_limit}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>`
+        : `<p class="empty">No windows logged yet. Start with Test 0, then report findings in-session — example row shape: ${JSON.stringify(L.results_log.example_row.slider)} window ${JSON.stringify(L.results_log.example_row.window)}.</p>`}
+      </div>`;
+  }
+
   // ---- init ----
   render();
   buildWheelspin();
@@ -1520,6 +1584,7 @@
   buildTouge();
   buildEliminator();
   buildTuners();
+  buildTuneLab();
   const allCodesBtn = document.getElementById("allCodesBtn");
   if (allCodesBtn) allCodesBtn.addEventListener("click", openTuneCodesOverlay);
 })();

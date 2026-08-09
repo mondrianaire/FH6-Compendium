@@ -663,7 +663,8 @@
     "habits": [
       "Diagnose by PHASE before touching a slider: name where in the corner the problem happens — that eliminates ~80% of the menu.",
       "Test in the phase you changed (the Tune Lab's rotation-entry and rotation-exit gates are split for this reason).",
-      "Describe any slider as a full sentence: component -> phase -> end -> speed. Example: rear rebound softer = rear keeps grip during the transient after lift/brake = less ENTRY oversteer, strongest on bumps."
+      "Describe any slider as a full sentence: component -> phase -> end -> speed. Example: rear rebound softer = rear keeps grip during the transient after lift/brake = less ENTRY oversteer, strongest on bumps.",
+      "ESCALATION RULE: one phase wrong -> slider (use the phase map). EVERY phase short on grip -> STOP TUNING; the total grip budget is too small and the fix is the BUILD (compound first, then weight, then power-for-grip PI reallocation) or the car choice. Sliders redistribute grip; they never create it."
     ]
   },
   "build_phase": {

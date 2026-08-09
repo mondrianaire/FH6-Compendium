@@ -2144,7 +2144,7 @@
     }
   ],
   "tune_sourcing_policy": {
-    "note": "How this app hands you a DOWNLOADABLE tune (you won't self-tune). NEVER fabricate a code.",
+    "note": "How this app hands you a tune. DOCTRINE SHIFT 2026-07-27: the player NOW SELF-TUNES from scratch (see self_tuning_shift). Downloadable codes remain for quick wins; the growth path is baselines + the tune order + the forza.tools calculator. NEVER fabricate a code.",
     "confidence_levels": {
       "player-verified": "✅ you loaded it in-game and confirmed it works — trusted",
       "sourced-unverified": "🟡 published by a REPUTABLE source (CODMunity, a Rivals leaderboard, a known creator) but not yet loaded — try it and report",
@@ -2158,7 +2158,13 @@
     ],
     "verify_loop": "Your testing is what promotes 🟡 -> ✅ (or gets a dead/❌ code pulled). Report back on any code you load.",
     "codes_are_car_specific": "A share code ONLY loads on the exact car it was made for (you browse tunes for the car you currently have). So a HARD car's tune code is useless unless you own that car — and its EASY ALTERNATIVE needs its OWN tune (in-game, filtered to the right Surface), never the hard car's code. Rule: never point a player at a code for a car they can't get.",
-    "by_discipline": "Sourcing depends on the discipline CONVERGENCE (see tuning-templates.json). HIGH-convergence disciplines (drag) -> APPLY THE DISCIPLINE TEMPLATE, do not hunt per-car codes. LOW-convergence (road/touge) -> download the fastest clean-lap tune; bespoke matters. MEDIUM (dirt/cross-country) -> template + in-game Surface filter."
+    "by_discipline": "Sourcing depends on the discipline CONVERGENCE (see tuning-templates.json). HIGH-convergence disciplines (drag) -> APPLY THE DISCIPLINE TEMPLATE, do not hunt per-car codes. LOW-convergence (road/touge) -> download the fastest clean-lap tune; bespoke matters. MEDIUM (dirt/cross-country) -> template + in-game Surface filter.",
+    "self_tuning_shift": {
+      "date": "2026-07-27",
+      "fact": "PLAYER-CONFIRMED: FH6 downloaded tunes are LOCKED — you cannot view their settings or modify them. A code can be DRIVEN but never used as a starting point, reference, or learning material. Every self-made tune therefore starts from scratch.",
+      "implication": "The original policy premise ('you won't self-tune — the app hands you codes') is obsolete as the primary path. New priority for a MODIFIABLE tune: (1) the car's tune_baseline block here, (2) the discipline template (tuning-templates.json) for high-convergence surfaces, (3) the tuning-variables tab for tune ORDER, slider poles, and part-gating, (4) forza.tools calculator (state is URL-encoded — a link pre-fills the whole build; enter the car's slider MIN-MAX ranges, not current values). Downloaded codes stay relevant ONLY where you don't need to iterate: one-off Rivals runs and template-shaped drag builds.",
+      "own_tunes": "The player's own tunes are the only editable ones in the game. They can be shared to get codes — logging them as entries makes them player-verified BY DEFINITION and builds a personal library the locked-tune ecosystem can't offer."
+    }
   },
   "coverage_gap_fill": {
     "date": "2026-07-11",

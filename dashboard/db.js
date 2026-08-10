@@ -1090,7 +1090,8 @@ window.FH6_DB = {
     "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game. CORROBORATED 2026-07-18 by 53Rain's Tune List (community tuner): its FH6 build sections are capped at exactly B 600 / A 700 / S1 800 — an independent expert confirmation of the shifted caps (matches this table's B≤600, A≤700, S1≤800). Confidence on B/A/S1 caps raised toward verified.",
     "disciplines": [
       "road",
-      "touge_street",
+      "touge",
+      "street",
       "dirt_rally",
       "cross_country",
       "drag"
@@ -1110,7 +1111,8 @@ window.FH6_DB = {
         "class": "S1",
         "disciplines": [
           "road",
-          "touge_street"
+          "touge",
+          "street"
         ],
         "drivetrain_stock": "AWD",
         "recommended_drivetrain": "AWD",
@@ -1146,7 +1148,8 @@ window.FH6_DB = {
           "games.gg",
           "egamersworld"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "street_note": "STREET tag is INFERENCE-grade: the car headlines the game's own 'Touge & Street Rivals' journal and its high-speed stable AWD profile fits classless night P2P with traffic. No street-specific meta source yet."
       },
       {
         "id": "golf-r-2021",
@@ -1156,7 +1159,7 @@ window.FH6_DB = {
         "stock_pi": 546,
         "disciplines": [
           "road",
-          "touge_street",
+          "touge",
           "dirt_rally"
         ],
         "drivetrain_stock": "AWD",
@@ -1214,7 +1217,7 @@ window.FH6_DB = {
         "stock_pi": 536,
         "disciplines": [
           "road",
-          "touge_street",
+          "touge",
           "dirt_rally"
         ],
         "drivetrain_stock": "AWD",
@@ -1265,7 +1268,7 @@ window.FH6_DB = {
         "class": "S1",
         "disciplines": [
           "road",
-          "touge_street"
+          "touge"
         ],
         "drivetrain_stock": "AWD (hybrid)",
         "recommended_drivetrain": "AWD",
@@ -1443,7 +1446,7 @@ window.FH6_DB = {
         "class": "A",
         "disciplines": [
           "road",
-          "touge_street"
+          "touge"
         ],
         "drivetrain_stock": "RWD",
         "recommended_drivetrain": "RWD or AWD swap",
@@ -1966,7 +1969,8 @@ window.FH6_DB = {
         "disciplines": [
           "drag",
           "road",
-          "dirt_rally"
+          "dirt_rally",
+          "street"
         ],
         "disciplines_note": "EXPANDED 2026-07-11: originally catalogued drag-only, but forza.guide leaderboards show the MX-5 FE '94 is a cross-discipline monster — #1 S2 on Highway Circuit, #1 S1 on The Colossus, #1 S2 on The Gauntlet, and top-5 S1/S2 across nearly every dirt track. The 500k aftermarket buy now covers three disciplines, not one.",
         "drivetrain_stock": "AWD",
@@ -2015,7 +2019,8 @@ window.FH6_DB = {
             "note": "SUSPECT: circulates as a WR code but is NOT on CODMunity or any reputable DB. Same origin class as codes I already retracted. Test at your own risk and report — do not trust until confirmed."
           }
         ],
-        "tune_meta": "meta"
+        "tune_meta": "meta",
+        "street_note": "STREET tag is INFERENCE-grade: #1 S1/S2 on the long flat-out boards (Colossus/Highway) — the profile street's classless night P2P rewards. No street-specific meta source yet."
       },
       {
         "tune_baseline": null,
@@ -2054,7 +2059,7 @@ window.FH6_DB = {
         "year": 1991,
         "disciplines": [
           "road",
-          "touge_street"
+          "touge"
         ],
         "drivetrain_stock": "RWD (mid-engine kei)",
         "recommended_drivetrain": "RWD",
@@ -2168,7 +2173,7 @@ window.FH6_DB = {
         "name": "Honda Civic Type R",
         "year": 1997,
         "disciplines": [
-          "touge_street"
+          "touge"
         ],
         "drivetrain_stock": "FWD",
         "recommended_drivetrain": "FWD",
@@ -2205,7 +2210,7 @@ window.FH6_DB = {
         "name": "Porsche Cayman GT3 WTAC",
         "year": 2005,
         "disciplines": [
-          "touge_street"
+          "touge"
         ],
         "drivetrain_stock": "RWD",
         "recommended_drivetrain": "RWD",
@@ -2249,7 +2254,7 @@ window.FH6_DB = {
         "name": "Lotus Scura Motorsports Exige WTAC",
         "year": 2018,
         "disciplines": [
-          "touge_street"
+          "touge"
         ],
         "drivetrain_stock": "RWD",
         "recommended_drivetrain": "RWD",
@@ -3240,7 +3245,15 @@ window.FH6_DB = {
       "method": "15 matrix gaps researched by a multi-pass agent workflow: one finder per slot (seeded with forza.guide leaderboard data where available), 3 adversarial verifiers per pick (existence/class-fit, independent-meta, acquisition/price audit), refill round for refuted picks, completeness audit. Audit corrections applied before this write: R-road primary swapped to FXX-K Evo; D-touge primary swapped to Honda Beat (Minicab TA demoted to premium specialist note); B-drag primary is the verifier-promoted Audi RS 6 (Cobra 427 refuted); R cross-country resolved onto the existing Viper FE (probable) - no valid new car exists for it; confidence downgrades applied (C touge, R drag -> probable). Two prices re-verified by hand against kudosprime/game8 (RS 6 42k, Brocky 75k).",
       "known_weakness": "The whole drag column below S1 leans on game8's single per-class table - every low-class drag pick is capped at 'probable'. Re-check if a drag meta source for low classes appears."
     },
-    "leaderboard_reset_note": "2026-07-13 patch: ALL Rivals Leaderboards were RESET (official notes: unrealistic drag-tire-era and glitch entries wiped; clean Journal unlocks preserved). Every leaderboard-derived signal captured before 2026-07-13 (forza.guide usage data 6/23, our Electric Town snapshot 7/10) describes PRE-WIPE boards. Car-meta conclusions likely still hold (the same cars should repopulate), but specific times/standings are historical. PR Stunt boards face a future wipe too. Re-verify leaderboard_meta claims as boards repopulate."
+    "leaderboard_reset_note": "2026-07-13 patch: ALL Rivals Leaderboards were RESET (official notes: unrealistic drag-tire-era and glitch entries wiped; clean Journal unlocks preserved). Every leaderboard-derived signal captured before 2026-07-13 (forza.guide usage data 6/23, our Electric Town snapshot 7/10) describes PRE-WIPE boards. Car-meta conclusions likely still hold (the same cars should repopulate), but specific times/standings are historical. PR Stunt boards face a future wipe too. Re-verify leaderboard_meta claims as boards repopulate.",
+    "discipline_split": {
+      "date": "2026-07-30",
+      "change": "touge_street SPLIT into 'touge' and 'street' — they are different FH6 event types with different builds. TOUGE (verified, touge-guide.json): 5 CLASS-CAPPED 1v1 single-lap mountain duels, no traffic, exploration-found. STREET (verified: techwiser + mapmaster + u4n, 3 independent): 15 point-to-point NIGHT races on public roads WITH civilian traffic, no barriers, NO CLASS RESTRICTIONS, no unlock gate.",
+      "build_implications": "Touge builds: class-capped grip/momentum (rotation, compliance, short gearing — power you can't deploy is wasted PI). Street builds: CLASSLESS — bring the fastest STABLE car you own; braking stability and high-speed stability dominate (traffic gaps, no barriers); night visibility punishes twitchy cars; top-end matters on public-road straights.",
+      "matrix_note": "Street is EXCLUDED from the class x format coverage matrix on purpose: with no class caps, 'a competitive car per class' is meaningless there — one fastest-stable car covers all street events.",
+      "migration": "All 9 touge_street car tags became 'touge' (their evidence came from class-capped technical-pass boards and the touge guide). Street tags start at 2 inference-grade picks (flagged in street_note) pending street-specific research.",
+      "confidence": "event-type split verified; street car picks inference-grade until a street meta source lands"
+    }
   },
   "upgradeStrategy": {
     "schema_version": "1.0.0",
@@ -4463,8 +4476,8 @@ window.FH6_DB = {
         ]
       },
       {
-        "id": "touge_street",
-        "discipline": "touge_street",
+        "id": "touge",
+        "discipline": "touge",
         "label": "Touge / Street",
         "convergence": "low",
         "convergence_note": "Like Road but tighter and more technical, with walls close. Rewards rotation, braking, and corner-exit over top speed even more than circuit.",
@@ -4497,7 +4510,8 @@ window.FH6_DB = {
         "sources": [
           "forzafire-fh6-handling",
           "apexspeedcraft-fh6"
-        ]
+        ],
+        "split_note": "Renamed touge_street -> touge (2026-07-30 discipline split). This template is the class-capped MOMENTUM build. Street (classless night P2P) has NO template yet - use the Road template on your fastest stable car + stability bias until street research lands."
       },
       {
         "id": "dirt_rally",
@@ -45165,5 +45179,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T02:26Z"
+  "builtAt": "2026-08-10T02:35Z"
 };

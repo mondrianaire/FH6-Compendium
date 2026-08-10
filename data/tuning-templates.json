@@ -32,13 +32,27 @@
         "launch": "Rev to peak torque, feed throttle to balance bog-vs-spin. AWD lets you be aggressive."
       },
       "variants": [
-        { "name": "1/8 mile", "deltas": "Shortest gearing, launch-max; AWD dominates (Dodge Demon, Miata FE)." },
-        { "name": "1/4 mile", "deltas": "Balanced; tuned Jesko / Sian trade wins with the FE cars." },
-        { "name": "1-mile airstrip", "deltas": "Longest gearing, top-speed king (Hennessey Venom F5), aero-min; RWD fine." }
+        {
+          "name": "1/8 mile",
+          "deltas": "Shortest gearing, launch-max; AWD dominates (Dodge Demon, Miata FE)."
+        },
+        {
+          "name": "1/4 mile",
+          "deltas": "Balanced; tuned Jesko / Sian trade wins with the FE cars."
+        },
+        {
+          "name": "1-mile airstrip",
+          "deltas": "Longest gearing, top-speed king (Hennessey Venom F5), aero-min; RWD fine."
+        }
       ],
       "car_selection": "Pick by launch + PI-efficiency, not raw name. Best: Miata FE (aftermarket spawn, medium) and GT-R Black FE (Wheelspin, hard). AWD for short strips; light/RWD + aero-min for the mile.",
       "confidence": "verified",
-      "sources": ["bossdown-drag", "gamesradar-drag", "codmunity-drag", "in-game-recording"]
+      "sources": [
+        "bossdown-drag",
+        "gamesradar-drag",
+        "codmunity-drag",
+        "in-game-recording"
+      ]
     },
     {
       "id": "road",
@@ -67,16 +81,26 @@
         "gearing": "Tune to the track — short final drive for technical, longer for high-speed."
       },
       "variants": [
-        { "name": "Technical / street circuit", "deltas": "More downforce, SHORT gearing, grip-max. UNDER-PI can win (lighter/more controllable) — see Electric Town." },
-        { "name": "High-speed circuit", "deltas": "Less aero, LONGER gearing, top-end matters more." }
+        {
+          "name": "Technical / street circuit",
+          "deltas": "More downforce, SHORT gearing, grip-max. UNDER-PI can win (lighter/more controllable) — see Electric Town."
+        },
+        {
+          "name": "High-speed circuit",
+          "deltas": "Less aero, LONGER gearing, top-end matters more."
+        }
       ],
       "car_selection": "Car choice + bespoke tune both matter. But read the board first: a soft/uncontested board makes the car nearly irrelevant vs a clean lap.",
       "confidence": "probable",
-      "sources": ["forzafire-fh6-handling", "gamingpromax-fh6-balance", "in-game-leaderboard-electrictown"]
+      "sources": [
+        "forzafire-fh6-handling",
+        "gamingpromax-fh6-balance",
+        "in-game-leaderboard-electrictown"
+      ]
     },
     {
-      "id": "touge_street",
-      "discipline": "touge_street",
+      "id": "touge",
+      "discipline": "touge",
       "label": "Touge / Street",
       "convergence": "low",
       "convergence_note": "Like Road but tighter and more technical, with walls close. Rewards rotation, braking, and corner-exit over top speed even more than circuit.",
@@ -95,12 +119,22 @@
         "alignment": "Caster toward max for turn-in."
       },
       "variants": [
-        { "name": "Downhill", "deltas": "Braking stability paramount; slightly forward brake bias." },
-        { "name": "Uphill/mixed", "deltas": "Corner-exit traction and power delivery matter more." }
+        {
+          "name": "Downhill",
+          "deltas": "Braking stability paramount; slightly forward brake bias."
+        },
+        {
+          "name": "Uphill/mixed",
+          "deltas": "Corner-exit traction and power delivery matter more."
+        }
       ],
       "car_selection": "Nimble AWD (forgiving) or a light RWD you can rotate. Same as Road picks.",
       "confidence": "probable",
-      "sources": ["forzafire-fh6-handling", "apexspeedcraft-fh6"]
+      "sources": [
+        "forzafire-fh6-handling",
+        "apexspeedcraft-fh6"
+      ],
+      "split_note": "Renamed touge_street -> touge (2026-07-30 discipline split). This template is the class-capped MOMENTUM build. Street (classless night P2P) has NO template yet - use the Road template on your fastest stable car + stability bias until street research lands."
     },
     {
       "id": "dirt_rally",
@@ -127,12 +161,22 @@
         "gearing": "For the route; usually shorter than road."
       },
       "variants": [
-        { "name": "Smooth dirt", "deltas": "Firmer than rough; a touch lower ride height." },
-        { "name": "Rough rally", "deltas": "Softest suspension, highest ride height, most compliance." }
+        {
+          "name": "Smooth dirt",
+          "deltas": "Firmer than rough; a touch lower ride height."
+        },
+        {
+          "name": "Rough rally",
+          "deltas": "Softest suspension, highest ride height, most compliance."
+        }
       ],
       "car_selection": "AWD dominates. Compliance and traction beat outright grip. Focus RS / Evo / STI / Golf R class.",
       "confidence": "probable",
-      "sources": ["dexerto", "grindnstrat", "forzafire-fh6-handling"]
+      "sources": [
+        "dexerto",
+        "grindnstrat",
+        "forzafire-fh6-handling"
+      ]
     },
     {
       "id": "cross_country",
@@ -156,12 +200,22 @@
         "aero": "Minimal / irrelevant."
       },
       "variants": [
-        { "name": "Open desert", "deltas": "Top speed + stability over jumps." },
-        { "name": "Technical trail", "deltas": "Compliance + low-speed traction." }
+        {
+          "name": "Open desert",
+          "deltas": "Top speed + stability over jumps."
+        },
+        {
+          "name": "Technical trail",
+          "deltas": "Compliance + low-speed traction."
+        }
       ],
       "car_selection": "High off-road-stat AWD: Can-Am Maverick (B), the trucks, Viper GTS ACR FE / BRZ FE (A). Off-road stat > power here.",
       "confidence": "probable",
-      "sources": ["gamingpromax", "game8", "dexerto"]
+      "sources": [
+        "gamingpromax",
+        "game8",
+        "dexerto"
+      ]
     }
   ]
 }

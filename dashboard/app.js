@@ -7,12 +7,14 @@
   const classes = DB.metaCars.pi_classes;
   const disciplines = DB.metaCars.disciplines;
   const DISCIPLINE_LABEL = {
-    road: "Road", touge_street: "Touge / Street", dirt_rally: "Dirt / Rally",
-    cross_country: "Cross Country", drag: "Drag"
+    road: "Road", touge: "Touge (1v1 duels)", street: "Street (night/traffic)", touge_street: "Touge / Street",
+    dirt_rally: "Dirt / Rally", cross_country: "Cross Country", drag: "Drag"
   };
   // what tuning attributes each race category rewards — shown under the coverage-matrix headers
   const DISCIPLINE_TUNING = {
     road: "grip + balanced power, moderate downforce",
+    touge: "class-capped momentum: cornering grip, rotation, compliance, short gearing",
+    street: "classless: fastest STABLE car — braking + high-speed stability, top-end",
     touge_street: "cornering grip, brakes, downforce, short gearing",
     dirt_rally: "soft suspension, AWD, raised ride height, rally tyres",
     cross_country: "max ride height, AWD, off-road tyres, durability",
@@ -97,7 +99,7 @@
     Object.values((DB.tunerRoster && DB.tunerRoster.specialty_index) || {}).flat().map((s) => s.toLowerCase())
   );
   // map a dashboard discipline key → a pool discipline bucket
-  const DISC_BUCKET = { road: "road", touge_street: "road", street: "road", dirt_rally: "dirt/offroad", cross_country: "dirt/offroad", offroad: "dirt/offroad", drift: "drift", drag: "drag" };
+  const DISC_BUCKET = { road: "road", touge_street: "road", touge: "road", street: "road", dirt_rally: "dirt/offroad", cross_country: "dirt/offroad", offroad: "dirt/offroad", drift: "drift", drag: "drag" };
   // best pool tune for a car: make + ≥2 shared tokens, prefer class, then discipline, then a curated ("good") tuner
   function poolMatch(name, cls, buckets) {
     const qt = tnorm(name).split(" ").filter(Boolean);
@@ -175,7 +177,7 @@
   }
 
   // ---- tune resolution: bind a tune to EVERY recommendation (car-specific code, else class+format template) ----
-  const TMPL_BY_DISC = { road: "Road", touge_street: "Touge", dirt_rally: "Dirt", cross_country: "Cross", drag: "Drag" };
+  const TMPL_BY_DISC = { road: "Road", touge_street: "Touge", touge: "Touge", street: "Road", dirt_rally: "Dirt", cross_country: "Cross", drag: "Drag" };
   function pickTemplate(disc) {
     const k = TMPL_BY_DISC[disc]; if (!k) return null;
     return ((DB.tuningTemplates && DB.tuningTemplates.templates) || []).find((t) => (t.label || "").includes(k)) || null;
@@ -335,10 +337,12 @@
   function drawMatrix() {
     const host = document.getElementById("covMatrix");
     if (!host) return;
+    // street is excluded on purpose: no class caps there, so class x format is meaningless
+    const MD = disciplines.filter((d) => d !== "street");
     let covered = 0, ownedCount = 0;
-    const total = CLASS_ORDER.length * disciplines.length;
+    const total = CLASS_ORDER.length * MD.length;
     const rows = CLASS_ORDER.map((cl) => {
-      const cells = disciplines.map((d) => {
+      const cells = MD.map((d) => {
         const picks = topForSlot(d, cl, 3);
         const pick = picks[0];
         if (pick) { covered++; if (isOwned(pick.id)) ownedCount++; }
@@ -360,9 +364,14 @@
           <span class="conf conf-probable">${covered}/${total} slots covered · ${ownedCount} owned</span>
         </div>
         <div style="overflow-x:auto;margin-top:8px"><table class="cov-table">
-          <thead><tr><th></th>${disciplines.map((d) => `<th>${DISCIPLINE_LABEL[d] || d}${DISCIPLINE_TUNING[d] ? `<span class="col-tune">${DISCIPLINE_TUNING[d]}</span>` : ""}</th>`).join("")}</tr></thead>
+          <thead><tr><th></th>${MD.map((d) => `<th>${DISCIPLINE_LABEL[d] || d}${DISCIPLINE_TUNING[d] ? `<span class="col-tune">${DISCIPLINE_TUNING[d]}</span>` : ""}</th>`).join("")}</tr></thead>
           <tbody>${rows}</tbody></table></div>
         <p class="why" style="margin:8px 0 0">Each cell shows the <strong>top ~3 picks</strong> (bold = best, then runners-up). 🟩 owned · 🟨 pick exists, not owned yet · dim = GAP. ↗ = cross-class build backed by leaderboard evidence. Click a cell for the full ranked list below.</p>
+        ${DB.metaCars.discipline_split ? `
+        <div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px">
+          <strong>🌃 Street Racing has no column on purpose.</strong>
+          <span class="why">Street events (15 night point-to-point, civilian traffic, no barriers) have <strong>NO class restrictions</strong> — "a car per class" is meaningless there. Bring your fastest STABLE car: braking + high-speed stability beat everything, night + traffic punish twitchy builds. Current inference-grade picks (no street meta source yet): filter the cards by <em>Street</em>.</span>
+        </div>` : ""}
       </div>`;
     host.querySelectorAll("td[data-d]").forEach((td) =>
       td.addEventListener("click", () => {
@@ -869,7 +878,7 @@
       return cars.filter((c) => (c.disciplines || []).includes("road"))
         .map((c) => {
           let bias = 0;
-          const touge = (c.disciplines || []).includes("touge_street");
+          const touge = (c.disciplines || []).includes("touge_street") || (c.disciplines || []).includes("touge");
           if (tech && touge) bias -= 1;      // technical layout → favour handling/touge cars
           if (fast && !touge) bias -= 1;      // fast layout → favour speed-biased cars
           return { c, bias };
@@ -1140,7 +1149,7 @@
         <thead><tr><th>Class</th><th>Car</th><th>DT</th><th>Why</th><th></th></tr></thead>
         <tbody>${g.meta_cars.map((c) => `<tr>
           <td>${clsBadge(c.class)}</td>
-          <td>${c.year ? c.year + " " : ""}${c.manufacturer} ${c.model}${codeTip(c.manufacturer + " " + c.model, { class: c.class, disciplines: ["touge_street"] })}</td>
+          <td>${c.year ? c.year + " " : ""}${c.manufacturer} ${c.model}${codeTip(c.manufacturer + " " + c.model, { class: c.class, disciplines: ["touge"] })}</td>
           <td class="why" style="font-size:11px">${c.drivetrain || ""}</td>
           <td class="why" style="font-size:12px">${c.why}</td>
           <td>${conf(c.confidence)}</td></tr>`).join("")}</tbody>

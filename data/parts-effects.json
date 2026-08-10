@@ -239,14 +239,78 @@
             "pi": 790,
             "cost_cr": 2200
           }
-        ]
+        ],
+        "platform_chassis": {
+          "note": "Measured 2026-08-10 from Street-WR base (3,665 lb, S1 798, 834/731). Absolutes per option.",
+          "weight_reduction": [
+            {
+              "part": "Stock Weight Reduction",
+              "weight_lb": 3747,
+              "pi": 793
+            },
+            {
+              "part": "Street Weight Reduction",
+              "weight_lb": 3665,
+              "pi": 798,
+              "note": "installed at capture"
+            },
+            {
+              "part": "Sport Weight Reduction",
+              "weight_lb": 3461,
+              "pi": 812,
+              "cost_cr": 1550
+            },
+            {
+              "part": "Race Weight Reduction",
+              "weight_lb": 3134,
+              "pi": 831,
+              "cost_cr": 2350,
+              "note": "the donor's tier (3,148 observed); +33 PI from Street"
+            }
+          ],
+          "chassis_reinforcement": [
+            {
+              "part": "Stock (no cage)",
+              "weight_lb": 3616,
+              "pi": 795
+            },
+            {
+              "part": "Race Chassis Reinforcement / Roll Cage",
+              "weight_lb": 3665,
+              "pi": 798,
+              "note": "cage = +49 lb, +3 PI"
+            }
+          ],
+          "spring_and_dampers": [
+            {
+              "part": "Stock Spring and Dampers",
+              "weight_lb": 3667,
+              "pi": 799,
+              "note": "ride height baseline -0.94in shown on owned thumb"
+            },
+            {
+              "part": "Rally Spring and Dampers",
+              "weight_lb": 3665,
+              "pi": 798,
+              "note": "EFFICIENCY STAR: -1 PI vs STOCK while unlocking spring/damper/alignment tuning — negative-PI adjustability, the donor's trick"
+            },
+            {
+              "part": "Drift Spring and Dampers",
+              "weight_lb": 3667,
+              "pi": 799,
+              "cost_cr": 2050,
+              "note": "ride height -2.55 in"
+            }
+          ]
+        }
       },
       "donor_solution": {
         "target": "834 hp / 731 ft-lb / 3,148 lb / 54% front / stock 8,382cc block (case study 3 donor pane)",
         "finding_1": "UNREACHABLE from Sport Centrifugal: with the complete menu measured, no part or additive combination lands +4/+8 (closest: Race Intake 839/731 — torque exact, hp 5 over; Sport Pistons 837/730). Player's report confirmed by exhaustive data.",
         "finding_2": "SOLVED AND PLAYER-VERIFIED 2026-08-10: STREET Centrifugal (757/669) + Race Intercooler (+58/+46) + Race Fuel System (+13/+12) + Race Oil/Cooling (+6/+5) = ~834/732 additive — hp exact, torque within 1 (interaction/rounding). Corroboration: intercooler+oil weight sits FORWARD (front% 52->53->54 with weight strip = donor's 54%); Race Oil's -2 PI fits the donor tuner's PI-squeezing pattern (rally suspension, rally tires).",
         "verify": "Swap aspiration to Street Centrifugal, install Race Intercooler + Race Fuel System + Race Oil/Cooling, read absolutes. Expect 834/731-732. Then weight ladder toward 3,148 (heavy strip ~-540 from that config) and PI to exactly 800.",
-        "verified": "CONFIRMED IN-GAME: Street Centrifugal + Race Intercooler + Race Fuel System + Race Oil/Cooling = 834 hp / 731 ft-lb EXACT (pane-read). The additive delta model held to the digit across an aspiration-base transfer. First engine fully reverse-engineered from a locked tune via measured previews + subset-sum."
+        "verified": "CONFIRMED IN-GAME: Street Centrifugal + Race Intercooler + Race Fuel System + Race Oil/Cooling = 834 hp / 731 ft-lb EXACT (pane-read). The additive delta model held to the digit across an aspiration-base transfer. First engine fully reverse-engineered from a locked tune via measured previews + subset-sum.",
+        "chassis_reconstruction": "2026-08-10: Race WR (+33 PI) proves the donor carries NO race brakes/ARBs/diff/cage — donor = engine + AWD + rally compound + rally S&D + Race WR + stock chassis parts = near-slider-less PI-max build (2nd confirmed instance of the pattern: top S1 tuners sell adjustability for weight/power). Player fork paths quantified: A exact-mimic (sell all extras, Race WR, ~3,134 @ <=800, no chassis sliders) / B balanced (sell cage + one family, Sport WR, ~3,412 @ ~800) / C current (3,665 @ 798, 517 lb tax). Pending: PI readouts of race brakes/ARBs/diff stock-downgrades to solve B exactly."
       }
     },
     {
@@ -313,6 +377,7 @@
   ],
   "pi_efficiency_stars": [
     "Viper ACR 2016: Race Oil/Cooling (-2 PI, +6 hp/+5 tq), Sport Oil (-1 PI, +3/+3), Street Intercooler (0 PI, +13/+10), Race Flywheel (0 PI, -2 lb), Street Centrifugal SC (cheapest aspiration PI on both measured engines)",
-    "Pattern: oil/cooling family runs PI-negative on supercharged builds (2nd engine confirming); 10-speed race transmission lowest-PI box (player's gearbox rule) — check the discount per build, it was only 1 PI on the 4C"
+    "Pattern: oil/cooling family runs PI-negative on supercharged builds (2nd engine confirming); 10-speed race transmission lowest-PI box (player's gearbox rule) — check the discount per build, it was only 1 PI on the 4C",
+    "Viper ACR 2016: Rally Spring & Dampers cost 1 PI LESS than stock suspension while unlocking spring/damper/alignment sliders — negative-PI full suspension tuning. Generalize: check rally S&D pricing on every S1 build."
   ]
 }

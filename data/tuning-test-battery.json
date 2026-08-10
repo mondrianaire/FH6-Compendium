@@ -9,7 +9,8 @@
     "noise_control": "Driver variance is the biggest error source. Use 3-lap MEDIANS (not best laps), judge via ghost SECTOR deltas rather than whole-lap feel, and freeze your assist config across every test (board meta: ABS on, TCS off, STM off).",
     "bisection": "To find a limit: start at the baseline value, jump the slider to its extreme. If the test FAILS, move halfway back toward baseline; repeat until it passes. The last failing and first passing values bracket the limit. ~4 iterations brackets any slider to useful precision.",
     "record_everything": "Every found limit goes in results_log with the car, surface, and the symptom at the limit. A window without its symptom is half a data point.",
-    "tire_temperature": "Rivals restarts reset tire temperature — tires are STONE COLD for the first ~1-2 minutes. NEVER judge grip, balance, or a compound change during the cold window (discovered via fork B slicks, 2026-08-10: four consecutive crashes, all within 20s of restart). Warm 2-3 minutes at pace before any handling verdict; slicks are most cold-sensitive, rally least."
+    "tire_temperature": "Rivals restarts reset tire temperature — tires are STONE COLD for the first ~1-2 minutes. NEVER judge grip, balance, or a compound change during the cold window (discovered via fork B slicks, 2026-08-10: four consecutive crashes, all within 20s of restart). Warm 2-3 minutes at pace before any handling verdict; slicks are most cold-sensitive, rally least.",
+    "telemetry_capture": "Telemetry analysis workflow: drive the test section with the overlay on the relevant page, record 10-30s video, frame-extract. Per-wheel speed = per-corner wheelspin detection; live camber = direct contact-patch observation. The overlay + video + frame-reading = the lab's full-resolution instrument."
   },
   "instrumentation": [
     {
@@ -20,9 +21,10 @@
     },
     {
       "id": "telemetry",
-      "what": "Driving telemetry overlay: per-tire temps (inner/middle/outer), live/hot PSI, suspension travel.",
-      "status": "needs_ingame — FH5 had it (hold the extras button); FH6 keybind and data set UNVERIFIED. First telemetry test should start by confirming the overlay exists and what it shows.",
-      "use": "Ground truth for camber (temp spread), cold-vs-hot pressure, and bottoming-out."
+      "what": "Confirmed pages: 'Heat' = per-tire Inner/Middle/Outer temps (F), all four corners, live. 'Tires, Misc.' = per-corner temp, LIVE hot pressure (psi), tire wear %, per-wheel speed (per-corner wheelspin detection), and LIVE DYNAMIC CAMBER (actual wheel angle under load). More pages may exist beyond the two captured. Capture method: drive + cycle pages + record video, then frame-extract.",
+      "status": "PLAYER-VERIFIED 2026-08-10 (video, Viper ACR on the Goliath) — FH6 telemetry overlay confirmed with Previous/Next page cycling.",
+      "use": "Ground truth for camber (temp spread), cold-vs-hot pressure, and bottoming-out.",
+      "sample_data": "Viper ACR, rally 24/24 cold: hot psi 27.1-28.7 at 176-190F cruise; touge corners spike fronts to 205-238F; mid-corner FL spread 294.9/287.2/278.9 (inner +16F, just past the 10-15F camber pass band). Live camber observed swinging -0.41 to -3.07 deg with load."
     },
     {
       "id": "rivals-ghost",
@@ -95,11 +97,11 @@
         "tire_psi_front",
         "tire_psi_rear"
       ],
-      "measure": "Hot PSI via telemetry (needs_ingame); fallback: lateral-G validation lap + slide feel",
+      "measure": "Hot PSI via telemetry 'Tires, Misc.' page (VERIFIED instrument) — live per-corner psi while driving",
       "pass": "Hot pressure 31-33 PSI both axles (project band: cold 27-28 road / ~3 lower dirt)",
       "fail_symptom": "Over: skittish, small contact patch, snap breakaway. Under: mushy turn-in, slow response, overheating shoulders.",
       "limit_finding": "Cold-PSI window per axle = the range that lands hot pressure in band after 3 minutes",
-      "confidence": "probable — 31-33 band is community consensus, verify per compound"
+      "confidence": "runnable — instrument verified 2026-08-10; 31-33 hot band is race-compound consensus, rally band TBD (first data: 24/24 cold -> 27-28.7 hot)"
     },
     {
       "id": "camber-temp",
@@ -109,11 +111,11 @@
         "camber_front",
         "camber_rear"
       ],
-      "measure": "Inner/middle/outer tire temps immediately after the corner (telemetry, needs_ingame)",
+      "measure": "Inner/middle/outer temps via telemetry 'Heat' page (VERIFIED instrument), immediately after the corner",
       "pass": "Inner edge 10-15°F hotter than outer, middle in between",
       "fail_symptom": "Outer hottest = not enough negative camber (add). Inner scorched + middle cold = too much (reduce).",
       "limit_finding": "No-telemetry fallback: bisect camber on ghost sector delta through the longest corner — the delta knee IS the limit",
-      "confidence": "method — classic race doctrine, FH6 telemetry unverified"
+      "confidence": "runnable — instrument verified 2026-08-10; BONUS instrument: 'Tires, Misc.' live dynamic camber lets you watch the loaded tire's actual angle mid-corner directly"
     },
     {
       "id": "braking-stability",

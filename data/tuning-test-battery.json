@@ -235,7 +235,7 @@
       "phase": "entry",
       "primary": "brake balance forward",
       "secondary": "rear rebound softer",
-      "tertiary": "diff decel down",
+      "tertiary": "diff decel UP (corrected 2026-08-10 — in-game Description, primary: raising rear Decel 'can reduce lift off oversteer'; the old 'down' entry fed a live coaching error)",
       "verify_test": "braking-stability"
     },
     {
@@ -580,6 +580,10 @@
         {
           "date": "2026-08-10",
           "entry": "FORK BASELINE PANEL @ S1 776: latG 1.24@60 / 1.45@120 (strong aero spread), braking 98.6ft/244.0ft, 0-60 2.634, 0-100 5.352, top 195.7, mech balance 0.64, aero balance 0.33, aero eff 0.802."
+        },
+        {
+          "date": "2026-08-10",
+          "entry": "Full slider-state capture at S1 776 (post-revert: STOCK springs/dampers/brakes — alignment/damping/brake tabs LOCKED; race ARBs 29.9F/45.8R; race diff F30/10 R55/13 C60R; adjustable aero MAXED 128F/260R = balance 0.33; tires 24F/26R rally; 10-speed FD 4.41, ratios 4.17/2.93/2.29/1.86/1.56/1.31/1.13/0.95/0.82/0.70). 3-agent adversarial audit of the slider plan: all directions approved; restructured — R0 rear psi 26->24 FIRST (rear-high stagger contradicts every DB reference; tires are tune-first in the DB order), R1 trimmed to 28 (DB-anchored; 35 only if under-delivers), R2 center 68R, R3 front accel 20 gated, R4 rear ARB ~38 (partial whip relief only — ARBs are phase-3), R4b front ARB ~34 fallback, R5 rear wing 218 GATED on fast-sweeper-specific push. OPEN: Mech Balance polarity (0.64 may be FRONT share, matching the aero-balance convention — settle with a known-distribution screenshot before any 'rear-heavy'-justified change). ESCALATION: if whip survives R0/R1/R4/R4b, re-install race springs/dampers — rebound is the whip's true owner and is locked. PLAYER QUESTION answered: not buying suspension/brake parts = PI arbitrage + no ungoverned defaults + fewer variables; no inherent handling benefit; a part earns its PI when a symptom needs a slider only it provides."
         }
       ]
     },

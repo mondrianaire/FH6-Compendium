@@ -45346,7 +45346,7 @@ window.FH6_DB = {
           "latG": 1.28,
           "braking_bar": 8.1
         },
-        "build_notes": "Stock 8.4L block (no displacement work); engine to 834/731 via subset-sum previews (+189/+131, torque-heavy = FI suspect); weight -225 net; front-biased aero 0.57 via wiggle-read; PI exactly 800; all pane rows dashed.",
+        "build_notes": "Stock 8.4L block; ENGINE SOLVED: Street Centrifugal SC + Race Intercooler + Race Fuel System + Race Oil/Cooling = 834/731 exact. EXPLICIT parts list (correction 2026-08-10 — ARBs/diff/brakes had been buried in a parenthetical, violating the specificity rule): AWD swap; Rally compound; Rally Springs & Dampers; RACE ANTI-ROLL BARS (separate part — unlocks the ARB tab for the 40F/34R values); RACE DIFFERENTIAL (unlocks 20/10, 45/28, 68R); RACE BRAKES (unlocks 55/100; donor braking bar 8.1 suggests it runs them); weight ladder to 3,148; aero to balance 0.57; PI exactly 800 WITH the three unlock parts counted.",
         "starting_sliders": {
           "tires": [
             24,
@@ -45477,7 +45477,8 @@ window.FH6_DB = {
           "structural_limits": "mass (floor ~3,050), engine curve shape (menu has NO cams/exhaust/valves/ignition), ~214 mph S1 top end (class question vs the Centenario ghost unresolved)",
           "fatal_flaw_candidate": "SLOW CORNERS (mirror of the 4C): below ~60 the wing sleeps and rally rubber must rotate 3,148 lb mechanically — hairpin push + tight-exit wheelspin expected. Mitigation ladder: diff work (transfers from 4C) -> front tire width -> momentum lines -> compound swap (last; unravels the PI thesis).",
           "course_fit": "Goliath = flow/sweepers/straights = aero country; the weakness maps onto the lap's smallest slice — likely why this car emerged as closest to the Centenario."
-        }
+        },
+        "sheet_rule": "RULE (2nd occurrence of this error class): every slider value in a build sheet must have its UNLOCK PART as an explicit numbered shop step — parentheticals are not instructions."
       }
     }
   },

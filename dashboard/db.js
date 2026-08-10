@@ -45088,10 +45088,10 @@ window.FH6_DB = {
               "measured": "2026-08-10, player"
             },
             {
-              "part": "Street Camshaft",
+              "part": "UNIDENTIFIED small part (+3/+3)",
               "hp": 3,
               "torque_ftlb": 3,
-              "measured": "PREDICTED by subset-sum (sport-out lands -3/-3 short of target); verify via shop preview"
+              "measured": "PLAYER-CORRECTED: no 'Street Camshaft' exists — cam ladder on this engine is Stock/Sport/Race. The +3/+3 is a SEPARATE part in an untouched row (Air Filter/Intake, Exhaust, Fuel System, Ignition — first tiers); identify by shop preview."
             },
             {
               "part": "Intercooler",
@@ -45112,7 +45112,7 @@ window.FH6_DB = {
               "measured": "installed; delta still unreported (likely ~0 hp, rotational mass)"
             }
           ],
-          "residual": "SOLVED: no subset of installed parts sums to -40/-6, but the TIER SWAP does — Camshaft Sport->Street = -43-9 then +3+3 = exactly -40/-6. LogikJ engine spec: 4.69L V8 swap + centrifugal supercharger + intercooler + oil/cooling + flywheel + STREET cams. Lesson: subset-sum must include part TIERS, not just part presence — tier ladders hide the small deltas.",
+          "residual": "CORRECTED SOLUTION: Camshaft -> Stock (-43/-9, lands 620/457), then install the one untouched-row part whose preview reads exactly +3/+3 (hunt first tiers of Air Filter, Exhaust, Fuel System, Ignition) -> 623/460. Lesson logged: part-tier LADDERS differ per engine (this one has no Street cam tier) — never name a tier without the player's menu confirming it exists.",
           "intercooler_anomaly": "RESOLVED: build includes a centrifugal supercharger (previously unmentioned) — intercooler is functional, no NA anomaly. The 4.69L swap itself is NA (F136-consistent); the FI is aftermarket."
         },
         "tuning_session_plan": "2026-08-10: player deferring slider work until after a test drive; wants to learn sliders together via the dashboard (corner-phase map -> symptom matrix -> one-change-at-a-time with panel readouts). KEY CONSTRAINT: exact LogikJ spec is nearly slider-less (street suspension = no spring/damper/ARB/alignment sliders; stock trans = no gearing). Teaching car = player's race-suspension FORK (full sliders, same 800); reference lap = the green 4C (LogikJ original). A/B those two, then tune the fork against the reference.",

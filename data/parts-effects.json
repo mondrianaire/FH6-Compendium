@@ -438,6 +438,23 @@
               },
               "mech_balance_both": 0.49
             }
+          },
+          "driveline": {
+            "finding": "Race Driveline = +1 PI, -11.2 lb vs stock (measured at race-WR base: stock 3,090/806, race 3,079/807). Nearly free like everything else on this chassis.",
+            "options": [
+              {
+                "part": "Stock Driveline",
+                "weight_lb": 3090,
+                "pi": "S2 806 (at race WR, winged, clean)"
+              },
+              {
+                "part": "Race Driveline",
+                "weight_lb": 3079,
+                "pi": "S2 807",
+                "delta": "+1 PI, -11.2 lb",
+                "cost_cr": 2350
+              }
+            ]
           }
         }
       },

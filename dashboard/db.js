@@ -44416,6 +44416,28 @@ window.FH6_DB = {
         "test": "braking-stability"
       },
       "rows": []
+    },
+    "cornering_envelope": {
+      "added": "2026-07-28",
+      "concept": "The car's max-holdable corner is a CURVE, not a number: radius = v^2 / (g x latG), and latG itself = mechanical grip (constant) + aero grip (grows with v^2). The Performance panel's TWO lateral-G readouts (@60 and @120 mph) pin both components exactly - so the whole envelope is measurable from the tune menu, per build, in seconds.",
+      "model": "latG(v) = a + b*v^2 fitted through the two panel points; max corner speed for radius r solves v^2 = g*r*latG(v) -> v = sqrt(g*r*a / (1 - g*r*b)). Units: ft, ft/s, g=32.17.",
+      "slider_mapping": {
+        "lift_whole_curve_mechanical": [
+          "tire compound & pressure (biggest)",
+          "front/rear camber",
+          "ARB & spring BALANCE (the first axle to give up sets the radius - balancing reclaims wasted grip)",
+          "ride height (CoG, small)"
+        ],
+        "bend_fast_end_aero": [
+          "front/rear downforce - invisible in slow hairpins, dominant in fast sweepers"
+        ],
+        "ceiling_build_not_sliders": [
+          "tire compound tier and weight set the ceiling; sliders approach it (escalation rule)"
+        ]
+      },
+      "workflow": "Read latG@60 and latG@120 off the Performance panel -> enter in the widget -> the envelope draws. After any phase-3 slider change, re-read the panel: mech sliders move the @60 number, aero moves the spread between the two. This is the static half of the camber/pressure tests - the panel IS the instrument.",
+      "defaults_note": "Widget defaults to the verified Golf R observed build (1.11 @60 / 1.13 @120, player screenshot 2026-06-08) so it renders real data before you enter your own.",
+      "confidence": "model = standard vehicle dynamics; panel readouts = verified instrument; the a+b*v^2 fit assumes the panel's two points are steady-state limits, which matches their in-game description"
     }
   },
   "sources": {
@@ -45143,5 +45165,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-09T22:25Z"
+  "builtAt": "2026-08-10T02:26Z"
 };

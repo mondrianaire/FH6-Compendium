@@ -1671,6 +1671,23 @@
         <h3>Instruments</h3>
         ${L.instrumentation.map((i) => `<p class="why" style="margin:4px 0"><span class="conf ${i.status.startsWith("verified") ? "conf-verified" : "conf-contested"}">${i.status.startsWith("verified") ? "✅" : "❌ verify in-game"}</span> <strong>${i.id}:</strong> ${i.what} — ${i.use}</p>`).join("")}
       </div>
+      ${L.cornering_envelope ? `
+      <div class="block" style="border-color:var(--accent2)">
+        <h3>Cornering envelope — your car's maximum corner, as a curve <span class="conf conf-verified">✅ panel-measured</span></h3>
+        <p class="why">${L.cornering_envelope.concept}</p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:8px 0">
+          <label class="why">Lateral G @ 60 mph <input id="envG60" type="number" step="0.01" value="1.11" style="width:70px"></label>
+          <label class="why">@ 120 mph <input id="envG120" type="number" step="0.01" value="1.13" style="width:70px"></label>
+          <label class="why">Corner radius (ft) <input id="envR" type="number" step="10" value="300" style="width:80px"></label>
+          <span class="why" id="envAnswer" style="color:var(--accent)"></span>
+        </div>
+        <svg id="envChart" viewBox="0 0 640 300" style="width:100%;max-width:680px"></svg>
+        <p class="why" style="font-size:12px;margin:6px 0 0">
+          <span style="color:#199e70">■ solid green zone of influence</span> — <strong>mechanical sliders lift the whole curve</strong>: ${L.cornering_envelope.slider_mapping.lift_whole_curve_mechanical.join("; ")}.
+          <span style="color:#d55181">■ magenta</span> — <strong>aero bends the fast end only</strong>: ${L.cornering_envelope.slider_mapping.bend_fast_end_aero.join("; ")}.
+          Ceiling: ${L.cornering_envelope.slider_mapping.ceiling_build_not_sliders.join("; ")}.</p>
+        <p class="fh6note">${L.cornering_envelope.workflow} (Defaults: ${L.cornering_envelope.defaults_note})</p>
+      </div>` : ""}
       <div class="block" style="border-color:var(--accent)">
         <h3>Test 0 — ${L.test_zero.name} <span class="conf conf-contested">${L.test_zero.status}</span></h3>
         <p class="why">${L.test_zero.procedure}</p>
@@ -1702,6 +1719,68 @@
           <tbody>${rows.map((r) => `<tr><td>${r.car}</td><td>${r.course}</td><td>${r.slider}</td><td><strong>${r.window[0]} – ${r.window[1]}</strong></td><td class="why" style="font-size:12px">${r.symptom_at_limit}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>`
         : `<p class="empty">No windows logged yet. Start with Test 0, then report findings in-session — example row shape: ${JSON.stringify(L.results_log.example_row.slider)} window ${JSON.stringify(L.results_log.example_row.window)}.</p>`}
       </div>`;
+
+    // ---- cornering envelope chart ----
+    const chart = document.getElementById("envChart");
+    if (chart) {
+      const G = 32.17, MPH = 1.46667;
+      const X0 = 52, X1 = 620, Y0 = 262, Y1 = 18, RMAX = 1000, VMAX = 200;
+      const xr = (r) => X0 + (r / RMAX) * (X1 - X0);
+      const yv = (v) => Y0 - (v / VMAX) * (Y0 - Y1);
+      // latG(v) = a + b v^2 (v in ft/s) fitted through the two panel points
+      const fit = (g60, g120) => {
+        const b = (g120 - g60) / (14400 - 3600) / (MPH * MPH);
+        return { a: g60 - b * (60 * MPH) ** 2, b };
+      };
+      const vmaxAt = (r, f) => {
+        const den = 1 - G * r * f.b;
+        if (den <= 0.02) return VMAX + 50;
+        return Math.sqrt((G * r * f.a) / den) / MPH;
+      };
+      const curvePts = (f) => {
+        let s = "";
+        for (let r = 20; r <= RMAX; r += 10) s += `${xr(r).toFixed(1)},${yv(Math.min(vmaxAt(r, f), VMAX)).toFixed(1)} `;
+        return s.trim();
+      };
+      function drawEnv() {
+        const g60 = parseFloat(document.getElementById("envG60").value) || 1.11;
+        const g120 = parseFloat(document.getElementById("envG120").value) || g60;
+        const f = fit(g60, g120);
+        const fMech = fit(g60 + 0.07, g120 + 0.07);
+        const fAero = { a: f.a, b: Math.max(f.b, 0) * 2.5 + 1.2e-6 };
+        const ticksX = [0, 200, 400, 600, 800, 1000];
+        const ticksY = [0, 50, 100, 150, 200];
+        chart.innerHTML = `
+          ${ticksY.map((v) => `<line x1="${X0}" y1="${yv(v)}" x2="${X1}" y2="${yv(v)}" stroke="var(--line)" stroke-width="0.6"/><text x="${X0 - 8}" y="${yv(v) + 4}" text-anchor="end" fill="var(--muted)" font-size="11">${v}</text>`).join("")}
+          ${ticksX.map((r) => `<text x="${xr(r)}" y="${Y0 + 16}" text-anchor="middle" fill="var(--muted)" font-size="11">${r}</text>`).join("")}
+          <text x="${(X0 + X1) / 2}" y="${Y0 + 32}" text-anchor="middle" fill="var(--muted)" font-size="11">corner radius (ft)</text>
+          <text x="14" y="${(Y0 + Y1) / 2}" fill="var(--muted)" font-size="11" transform="rotate(-90 14 ${(Y0 + Y1) / 2})" text-anchor="middle">max corner speed (mph)</text>
+          <polyline points="${curvePts(fAero)}" fill="none" stroke="#d55181" stroke-width="1.6" stroke-dasharray="5 4"/>
+          <polyline points="${curvePts(fMech)}" fill="none" stroke="#199e70" stroke-width="1.6" stroke-dasharray="5 4"/>
+          <polyline points="${curvePts(f)}" fill="none" stroke="var(--accent2)" stroke-width="2.4"/>
+          <text x="${X1 - 4}" y="${yv(Math.min(vmaxAt(RMAX, f), VMAX)) - 6}" text-anchor="end" fill="var(--accent2)" font-size="11">your car</text>
+          <text x="${X1 - 4}" y="${yv(Math.min(vmaxAt(RMAX, fMech), VMAX)) - 18}" text-anchor="end" fill="#199e70" font-size="11">+ mechanical work (+0.07 G)</text>
+          <text x="${X1 - 4}" y="${yv(Math.min(vmaxAt(RMAX, fAero), VMAX)) + 14}" text-anchor="end" fill="#d55181" font-size="11">+ downforce (fast end bends up)</text>
+          <line id="envGuide" x1="0" y1="0" x2="0" y2="0" stroke="var(--warn)" stroke-width="1" opacity="0"/>`;
+        const r = parseFloat(document.getElementById("envR").value) || 300;
+        const v = vmaxAt(r, f);
+        document.getElementById("envAnswer").textContent =
+          `→ a ${r} ft corner holds ~${v > VMAX ? "200+" : v.toFixed(0)} mph (grip gives up above that)`;
+        const gd = document.getElementById("envGuide");
+        gd.setAttribute("x1", xr(r)); gd.setAttribute("x2", xr(r));
+        gd.setAttribute("y1", Y0); gd.setAttribute("y2", yv(Math.min(v, VMAX)));
+        gd.setAttribute("opacity", "0.8");
+      }
+      ["envG60", "envG120", "envR"].forEach((id) =>
+        document.getElementById(id).addEventListener("input", drawEnv));
+      chart.addEventListener("mousemove", (ev) => {
+        const rect = chart.getBoundingClientRect();
+        const r = Math.max(20, Math.min(RMAX, ((ev.clientX - rect.left) / rect.width * 640 - X0) / (X1 - X0) * RMAX));
+        document.getElementById("envR").value = Math.round(r / 10) * 10;
+        drawEnv();
+      });
+      drawEnv();
+    }
   }
 
   // ---- init ----

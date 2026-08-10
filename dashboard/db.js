@@ -3572,7 +3572,41 @@ window.FH6_DB = {
           "verify Z/28 2015 stock A 695 in-game"
         ]
       }
-    ]
+    ],
+    "top_speed_kings": {
+      "date": "2026-08-10",
+      "ranking": [
+        {
+          "car": "Toyota AE86 Trueno Forza Edition",
+          "mph": 325,
+          "how": "'Travis tune' code 125 771 360 (sourced-unverified): 2JZ swap, AWD, race turbo + anti-lag, rally suspension, slicks, lightest rims, ZERO aero",
+          "acquisition": "FE — luck-gated unless owned",
+          "confidence": "probable — multi-site consensus (ggwtb/timesaver; possible cluster). NOTE: vindicates the timesaver claim we flagged 'unadopted single-source' on 2026-07-11"
+        },
+        {
+          "car": "Nissan GT-R Black Edition FE",
+          "mph": 307,
+          "how": "drag-focused tune",
+          "acquisition": "wheelspin (our existing drag pick)",
+          "confidence": "probable"
+        },
+        {
+          "car": "Hennessey Venom F5",
+          "mph": 306,
+          "how": "fastest STOCK car; tune for more",
+          "acquisition": "Autoshow — the buy-now answer",
+          "confidence": "probable"
+        },
+        {
+          "car": "Ultima Evolution Coupe 1020",
+          "mph": "300+",
+          "how": "top-speed tune",
+          "acquisition": "Autoshow ~150,000 cr — budget 300-club",
+          "confidence": "probable"
+        }
+      ],
+      "formula": "power + minimum drag (no aero) + tall clean gearing (top gear's line just reaches the speed-graph end) + high tire pressure + minimal stability aids (touch of rear toe-in). All-gears builds: the 10-speed earns its keep here."
+    }
   },
   "upgradeStrategy": {
     "schema_version": "1.0.0",
@@ -45419,7 +45453,7 @@ window.FH6_DB = {
         "tier": "community",
         "title": "timesaver.gg FH6 best cars by class & use case (2026-06-10)",
         "url": "https://timesaver.gg/blog/forza-horizon-6-best-cars",
-        "used_for": "META RECHECK cross-check: Supra A + Gemera S2 agree; names Huracán EVO for S1 and 917 LH FE for off-road (single-source, luck-gated — not adopted); AE86 Trueno FE '~323mph drag/top-speed' claim noted but unadopted (single source)"
+        "used_for": "META RECHECK cross-check: Supra A + Gemera S2 agree; names Huracán EVO for S1 and 917 LH FE for off-road (single-source, luck-gated — not adopted); AE86 Trueno FE '~323mph drag/top-speed' claim noted but unadopted (single source) | UPDATE 2026-08-10: the AE86 Trueno FE ~323mph claim flagged here as unadopted single-source is NOW CORROBORATED (ggwtb 325mph Travis-tune guide + timesaver fastest-cars ranking) — adopted into top_speed_kings."
       },
       {
         "id": "forza-support-notes-jun23",
@@ -45630,5 +45664,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T12:06Z"
+  "builtAt": "2026-08-10T13:11Z"
 };

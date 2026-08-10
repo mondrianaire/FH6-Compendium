@@ -485,6 +485,39 @@
       "pi_checksum_as_arbiter": "Drift vs Rally springs cost different PI. With the rest of the build matched, whichever choice lands total PI EXACTLY on the tune's number (here S1 800) is the tuner's actual part — evidence, not guesswork.",
       "confidence": "catalog gap player-verified; same-sliders rule FH5-inherited + guide-consistent (probable); pane hypothesis untested"
     },
-    "doctrine": "PLAYER-STATED 2026-08-10: the protocol's deliverable is the DISCRETE PARTS MANIFEST, not slider values. Sliders are ephemeral — Jett re-fits them to their own driving regardless. Parts are where the tuner's intelligence lives: how the PI budget was allocated across drivetrain/engine/weight/grip is the unrecoverable-by-guessing knowledge. Every decoded build gets recorded as a manifest with per-part evidence tiers (verified = pane row or direct observation; probable = delta inference; open = PI-checksum residual)."
+    "doctrine": "PLAYER-STATED 2026-08-10: the protocol's deliverable is the DISCRETE PARTS MANIFEST, not slider values. Sliders are ephemeral — Jett re-fits them to their own driving regardless. Parts are where the tuner's intelligence lives: how the PI budget was allocated across drivetrain/engine/weight/grip is the unrecoverable-by-guessing knowledge. Every decoded build gets recorded as a manifest with per-part evidence tiers (verified = pane row or direct observation; probable = delta inference; open = PI-checksum residual).",
+    "case_study_2": {
+      "car": "Alfa Romeo 4C 2014",
+      "tune": "'S1 Road Strong Accel' by LogikJ (Tuner Rank 20, created 2026-07-23), A 644 -> S1 800",
+      "captured": "2026-08-10 — full 3-surface capture: stock car stat pages + built car stat pages + tune compare pane; built car confirmed IDENTICAL to the tune's New column (tune applied)",
+      "read_directly": [
+        "RWD -> AWD swap (pane)",
+        "Sport -> RALLY tire compound (pane) — on a ROAD build; 2nd sighting of the rally-rubber PI-efficiency trick on an S1 meta build (1st: ford351guy Viper Goliath)",
+        "Street -> Street suspension (pane) — tuner SKIPPED adjustable suspension entirely, spending the PI on power; a no-sliders build",
+        "ENGINE SWAP (My Cars page): displacement 1.74L -> 4.69L — stock turbo-four replaced; identify swap by matching 4.69L in the menu"
+      ],
+      "inferred_probable": [
+        "Substantial weight reduction: 2,072 -> 1,981 lb net (-91) over AWD + larger engine mass; true strip ~250-350 lb",
+        "Modest aero (visible rear wing): balance 0.33 -> 0.37, efficiency 0.866 -> 0.821"
+      ],
+      "targets": {
+        "power_hp": 623,
+        "torque_ftlb": 460,
+        "weight_lb": 1981,
+        "front_pct": 47,
+        "top_speed_mph": 205.8,
+        "zero_sixty_s": 2.248,
+        "lateral_g": 1.27,
+        "mech_balance": 0.69,
+        "pi": 800
+      },
+      "unknowns": [
+        "transmission tier (count gears on the applied build)",
+        "brakes (small 5.2->5.8 braking delta suggests near-stock)",
+        "exact swap identity + engine parts (bisect to 623/460 at exactly 800)"
+      ]
+    },
+    "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
+    "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating."
   }
 }

@@ -45155,8 +45155,19 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "RACE SPRINGS/DAMPERS + RACE BRAKES INSTALLED with the starting window: entry push/steering-while-braking 'all but solved' (prediction confirmed — parts at near-defaults beat all prior slider work). REMAINING: speed-inverted steering — lively/jittery slow, no turning at speed. DIAGNOSIS (envelope doctrine): mech balance 0.61 vs aero balance 0.42 = two different cars; grip mix slides rearward as v-squared aero floods in at 0.42 front share -> understeer scaling with speed. FIX: rear wing 177 -> 140 (panel 0.48), then 128 (0.50 = slider ceiling with front maxed); beyond that = parts question (front aero piece with cap > 128 lb). Slow-speed jitter deliberately deferred (mechanical car's native agility); if still unwanted after fast-end fix: rebound -0.5 both OR ARBs +2 both, one at a time. Re-check fast kink + heavy braking after each wing cut."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "RANGE DATUM: 4C race rear wing slider = [156, 260] lb (player); front race bumper caps at 128. TRUE aero-balance ceiling with these parts = 128/284 = 0.45 (not 0.50). Plan: rear -> 156 (floor), test fast section at 0.45. If front still starves: (1) front camber -1.5 -> -2.0 (owned slider, adds loaded-tire grip in sustained fast corners), (2) shop-check other rear wings for a lower floor, (3) front aero part with cap > 128, (4) accept 0.45 + entry discipline. NOT recommended: dragging mech balance down toward aero (softer front) — fixes fast at the cost of worse slow-speed liveliness."
           }
-        ]
+        ],
+        "slider_ranges_observed": {
+          "aero_rear_race_wing_lb": [
+            156,
+            260
+          ],
+          "aero_front_race_bumper_lb_max": 128
+        }
       },
       "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
       "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",

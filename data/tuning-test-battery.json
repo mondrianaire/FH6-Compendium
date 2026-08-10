@@ -943,7 +943,64 @@
       "slider_gap": "2026-08-10: back-to-back vs the donor = 'wildly different, WAY off' — EXPECTED on this chassis: the free-slider ACR means the donor's build is mostly invisible slider values (opposite of the slider-less 4C donor; parts parity != behavior parity here). Plus a WING hardware gap discovered visually (donor has one, replica doesn't — FH6 base ACR may not include the big wing; aero menu previews pending). CONVERGENCE PLAN: (1) match the wing, verify pane 0.57/~0.798; (2) donor telemetry session — extract camber/pressures/diff-character/gearing from the locked tune; (3) transcribe to the replica, A/B; (4) phase-method the damper/ARB/brake remainder vs the donor reference lap. RESOLVED IN LARGE PART: the replica was WINGLESS (stock wing = -11 PI, adjustable, +14 lb) — hardware, not sliders, was the main gap. Plan: wing on -> weight tier up to <=800 -> donor telemetry session on equal hardware. REVERSED AGAIN: donor aero signature = WINGLESS (0.57/0.798 exact); the wing sighting was mistaken (or the Centenario). Both cars were wingless during the 'wildly different' A/B -> the gap IS sliders; telemetry extraction is the whole game. Plan: wing OFF (match donor), fill to 800 with weight, donor telemetry session, transcribe, phase-method remainder. Wing variant preserved as a Setup Manager fork after convergence. FINAL FORM: donor = WING INSTALLED + rear downforce slid low (player drove it; signature range explains the numbers). Aero sliders recovered by matching the panel to 0.57/0.798. Ledger reopened with the wing's -11: race-WR-lands-exactly-800 prediction live again. LEDGER GAP = 6 (race WR previews 806 on the clean winged config). Hunt order: driveline (never priced — prime suspect), cage (+3 if present), rims (fill-era suspect), front aero menu (existence unverified). Subset summing to -6 = the donor's remaining spec. WEIGHT EQUATION CLOSED: donor 3,148 = our race-WR 3,090 + cage 49 + stock driveline 11 (= 3,150, rounding). Donor runs STOCK driveline + CAGE. PI residual ~6-9 remains vs donor's exact 800 — last unexplored menus: RIMS (fill-era suspect, style+size carry PI) and FRONT AERO (existence unverified). If empty: invoke functional certification and move to sliders.",
       "parts_chapter": "CLOSED 2026-08-10 — full donor manifest recovered (see parts-effects.json donor_solution.final_manifest). Remaining: slider layer — aero recovered via signature match; telemetry drive for camber/psi/gearing/diff character; phase method for springs/dampers/brake balance vs the donor reference ghost.",
       "donor_identity": "'344 2.1G Strong Sprint Allrounder V5' by SlowBakedPanda — TUNER RANK 1, created 2026-07-13 (leaderboard-reset day). The name advertises 2.1G (high-speed lateral, envelope-verifiable).",
-      "replica_scoreboard": "PARTS LAYER COMPLETE (pane-certified): 834/731 exact, Rally/Rally, AWD, both EXACTLY S1 800, weight within 10 lb (3,158 vs 3,148 — rim-model noise). Remaining deltas are pure sliders with pane-given targets: aero 0.57/0.773 (donor is PARTWAY down, not at the wingless floor — target updated from 0.798), mech balance 0.63, top speed 214.2, 0-60 2.109, latG 1.28 checksum."
+      "replica_scoreboard": "PARTS LAYER COMPLETE (pane-certified): 834/731 exact, Rally/Rally, AWD, both EXACTLY S1 800, weight within 10 lb (3,158 vs 3,148 — rim-model noise). Remaining deltas are pure sliders with pane-given targets: aero 0.57/0.773 (donor is PARTWAY down, not at the wingless floor — target updated from 0.798), mech balance 0.63, top speed 214.2, 0-60 2.109, latG 1.28 checksum.",
+      "aero_sliders_recovered": {
+        "donor_values": "Front 457 (MAX) / Rear 116 (MIN) — matched the donor signature 0.57 balance / 0.773 efficiency to the third digit on both readouts simultaneously (player 4-corner sweep, 2026-08-10). Oversteer-biased per the in-game doc (higher balance = more oversteer): max nose, minimum tail — the Rank-1 tuner's high-speed turn-in bet.",
+        "aero_response_map": [
+          {
+            "front_lb": 152,
+            "rear_lb": 504,
+            "balance": 0.32,
+            "efficiency": 0.755,
+            "top_mph": 211.3,
+            "latG": [
+              1.27,
+              1.5
+            ],
+            "braking_100_0_ft": 189.0
+          },
+          {
+            "front_lb": 152,
+            "rear_lb": 116,
+            "balance": 0.44,
+            "efficiency": 0.799,
+            "top_mph": 223.6,
+            "latG": [
+              1.25,
+              1.42
+            ],
+            "braking_100_0_ft": 193.2
+          },
+          {
+            "front_lb": 457,
+            "rear_lb": 116,
+            "balance": 0.57,
+            "efficiency": 0.773,
+            "top_mph": 215.3,
+            "latG": [
+              1.27,
+              1.48
+            ],
+            "braking_100_0_ft": 189.9,
+            "note": "THE DONOR"
+          },
+          {
+            "front_lb": 457,
+            "rear_lb": 504,
+            "balance": 0.44,
+            "efficiency": 0.728,
+            "top_mph": 204.2,
+            "latG": [
+              1.29,
+              1.57
+            ],
+            "braking_100_0_ft": 184.8,
+            "note": "grip-max alternative: +0.09G @120 and best braking for -11 mph"
+          }
+        ],
+        "model_lesson": "Viper aero balance is NOT the slider-lb ratio (457/573=0.80 vs panel 0.57) — large per-car BODY aero terms on both ends; the 4C matched pure ratio because it lacks them. Signature-MATCHING works where signature-computing fails; per-car aero models differ.",
+        "remaining": "mech balance 0.50 -> 0.63 (springs/ARB split, panel-matched), gearing to 214.2 top / 2.109 0-60. Then telemetry/phase for dampers, diff %, brake balance, pressures."
+      }
     },
     "panel_matching_doctrine": "SLIDER EXTRACTION VIA PANEL-MATCHING (the day's capstone technique): the compare pane provides per-row TARGETS and the Performance panel live-simulates slider changes — so every panel-visible quantity (aero balance/efficiency, mechanical balance, top speed, 0-60, latG) can be converged to the donor's values from the MENU, no driving required. Only dampers, diff %, brake balance, and pressures remain for telemetry + phase-method. The certified-replica loop extends into the slider layer."
   }

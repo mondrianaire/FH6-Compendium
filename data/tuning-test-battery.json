@@ -628,6 +628,10 @@
         {
           "date": "2026-08-10",
           "entry": "CORRECTION (player: sweep read 0.38->0.33, not 0.36->0.33 — 0.36 was a mid-slide value): the 'lazy readout' conclusion in the previous entry is RETRACTED. Every observed value (0.38, 0.36, 0.33) is the pure ratio for rear >= 208, and nothing above 0.38 ever displayed — plus the panel showed IDENTICAL top speed (204.5) and efficiency (0.819) at rear=208 and rear=156. NEW LEADING MODEL: the wing's physical effect FLOORS at ~208 lb; the slider's 156-208 stretch is a dead zone; the row was truthful and this hardware's aero-balance ceiling is 0.38, not 0.45. CONFIRM: slide 260->156 slowly — expect climb to 0.38 at 208 then FREEZE through 208-156; if it keeps climbing toward 0.45, revert to display-bug model. IF FLOOR CONFIRMS: wing-trim path exhausted at 0.38; remaining fast-corner levers = front camber -1.5 -> -2.0 (next single change), front aero part with cap > 128, or acceptance + entry discipline."
+        },
+        {
+          "date": "2026-08-10",
+          "entry": "FLOOR CONFIRMED (player had already swept both directions): Balance row ranges ONLY 0.33-0.38 across the full wing slider. Effective wing range = [~208, 260] lb; slider 156-208 = dead zone; AERO BALANCE CEILING = 0.38 on this hardware — the 0.42/0.45 targets were never reachable. Mystery closed. NEXT: front camber -1.5 -> -2.0 (single change) then fast-section verdict; failing that, front aero part with cap > 128 or acceptance + entry-speed discipline. GAME MECHANIC DISCOVERED (player, via sweep): FH6 slider DISPLAYED ranges can exceed the part's EFFECTIVE range — nominal minimums are not physical minimums; find true edges by sweeping while watching the panel readout stop moving."
         }
       ],
       "slider_ranges_observed": {
@@ -643,6 +647,9 @@
     "baseline_rule": "Before trusting delta narratives, verify the Previous/baseline car is stock: cross-check bars + hp + weight + top speed + 0-60 + latG against a car-database stock sheet (kudosprime/calculators.games). A livery icon on the card is NOT evidence of modification. New-column targets are absolute and never depend on this check.",
     "allocation_insight": "TWO DIFFERENT 800s: same car, same PI, different part allocation = measurably different cars. The compare pane's live diff QUANTIFIES allocation choices (e.g. race suspension + brakes vs one weight tier + engine trim: -0.29s 0-60 for the weight build). PI-identity is not build-identity — matching the PI number certifies nothing; matching every Car Stat row does.",
     "pane_blind_spots": "The compare pane CANNOT see: transmission tier/gear count, driveline, differential tier, tire width, track width (and brakes only indirectly via the braking bar). DOCTRINE REFINEMENT: 'certified replica' = all visible rows matched + PI exact — functionally certified, but blind-spot parts can differ underneath. Driving forensics covers some blind spots: HUD gear count (transmission), 0-60 convergence at equal weight (gearbox character), diff behavior on corner exit.",
-    "video_forensics_note": "Short gameplay clips are a first-class instrument: frame extraction reads HUD speed/gear/skill-popups per instant. The skill system doubles as telemetry — DRIFT skills during a grip lap = rear slip detected; 'Great Speed' stamps entry speeds; wrecked-scenery skills timestamp off-track moments. 8-10s of video around one corner beats any verbal description."
+    "video_forensics_note": "Short gameplay clips are a first-class instrument: frame extraction reads HUD speed/gear/skill-popups per instant. The skill system doubles as telemetry — DRIFT skills during a grip lap = rear slip detected; 'Great Speed' stamps entry speeds; wrecked-scenery skills timestamp off-track moments. 8-10s of video around one corner beats any verbal description.",
+    "fh6_mechanics_discovered": [
+      "Aero slider nominal range can exceed effective range (4C race wing: slider [156-260], physical [~208-260]) — sweep-and-watch to find true edges (player-verified 2026-08-10)"
+    ]
   }
 }

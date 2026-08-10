@@ -677,6 +677,13 @@
       "title": "Player screenshots — GR Supra '20 full tune-tab min/max sweep (11 captures)",
       "url": "n/a — user-provided screenshots 2026-08-10",
       "used_for": "GROUND TRUTH: complete slider ranges for the Supra A700 build (PSI 15-55, camber/toe ±5, caster 1-7, ARB 1-65, springs 283-1414.8, ride height 4.8-6.1, damping 1-20, aero 192-377/273-563, brake 0-100/0-200, diff 0-100); panel live-sim behavior (SIMULATING/FAILED states) verifying the perf-panel instrument"
+    },
+    {
+      "id": "in-game-tune-compare-pane",
+      "tier": "primary",
+      "title": "In-game tune-browser compare pane + My Cars stat pages (player screenshots 2026-08-10)",
+      "url": "in-game screenshots (Viper GTS ACR '99 'S1 Goliath' by ford351guy; Viper ACR '16 garage card)",
+      "used_for": "build_forensics protocol: Previous-vs-New diff exposes Suspension/Compound/Drivetrain rows + all replication targets pre-download; My Cars pages expose displacement/front%/weight post-download"
     }
   ],
   "fh6_ui_structure_pass": {

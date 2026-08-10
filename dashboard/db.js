@@ -45462,7 +45462,22 @@ window.FH6_DB = {
             }
           ]
         },
-        "engine_solved": "2026-08-10: 834/731 LANDED — Street Centrifugal SC + Race Intercooler + Race Fuel System + Race Oil/Cooling (subset-sum from the parts-effects table, verified exact). Current state: 3,663 lb, aero balance already 0.57 (donor match), mech 0.49, S1 789. REMAINING: weight ladder to 3,148 (-515, front% should walk toward 54), PI to exactly 800, then the starting-slider scheme."
+        "engine_solved": "2026-08-10: 834/731 LANDED — Street Centrifugal SC + Race Intercooler + Race Fuel System + Race Oil/Cooling (subset-sum from the parts-effects table, verified exact). Current state: 3,663 lb, aero balance already 0.57 (donor match), mech 0.49, S1 789. REMAINING: weight ladder to 3,148 (-515, front% should walk toward 54), PI to exactly 800, then the starting-slider scheme.",
+        "core_build_assessment": {
+          "date": "2026-08-10",
+          "verdict": "The anti-4C: strengths live where the 4C died; the fatal-flaw candidate is the mirror image.",
+          "strengths_structural": [
+            "Aero platform: two-ended adjustable range (0.44-0.57 observed), donor runs FRONT-biased 0.57; mech-aero gap only 0.06 (4C started 0.23) -> speed-morph structurally absent",
+            "Rally tires are arbitrage HERE (aero covers the compound's high-speed deficit; latG 1.28 at 3,100+ lb on rally proves it) vs fatal on the aeroless 4C",
+            "Stability free: long wheelbase, front engine, 54/46, 3,148 lb — no whip/dartiness; rally compound = temperature-honest testing from lap 1",
+            "Torque-fat V10 + modest blower = automatic-friendly delivery",
+            "Ceiling proven by R 982 tune: 1,307hp/3,050lb/1.76G/Braking 10 on this chassis"
+          ],
+          "tunable": "exit push (center/front accel), entry (rear decel/brake balance), aero balance (wide range), gearing, full spring/ARB/damper set (rally susp = all sliders). FLAG: current mech 0.49 vs donor 0.63 — close it with front-stiffer spring/ARB split + finish the weight ladder, else the replica won't feel like the donor.",
+          "structural_limits": "mass (floor ~3,050), engine curve shape (menu has NO cams/exhaust/valves/ignition), ~214 mph S1 top end (class question vs the Centenario ghost unresolved)",
+          "fatal_flaw_candidate": "SLOW CORNERS (mirror of the 4C): below ~60 the wing sleeps and rally rubber must rotate 3,148 lb mechanically — hairpin push + tight-exit wheelspin expected. Mitigation ladder: diff work (transfers from 4C) -> front tire width -> momentum lines -> compound swap (last; unravels the PI thesis).",
+          "course_fit": "Goliath = flow/sweepers/straights = aero country; the weakness maps onto the lap's smallest slice — likely why this car emerged as closest to the Centenario."
+        }
       }
     }
   },

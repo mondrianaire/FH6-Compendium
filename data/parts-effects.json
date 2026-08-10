@@ -7,7 +7,8 @@
     "The green thumbnail badge ('POWER +X hp') omits torque entirely — never subset-hunt by badges, always read the preview panel's absolute pair.",
     "Aspiration options are FAMILIES with Street/Sport/Race tiers; the Aspiration menu previews only each family's entry tier (tier-ladder rule, discovered on this car).",
     "Some parts carry ZERO or NEGATIVE PI while adding power — the PI-efficiency stars below. These are near-mandatory on capped builds.",
-    "The top-left header PI LAGS behind part changes (read 798 while the true config previewed 790) — always trust the preview panel's PI, never the header."
+    "The top-left header PI LAGS behind part changes (read 798 while the true config previewed 790) — always trust the preview panel's PI, never the header.",
+    "The shop preview's Y Toggle cycles to an Aerodynamics panel showing per-option efficiency/balance/mech-balance — aero signatures are readable per part before buying."
   ],
   "engines": [
     {
@@ -407,7 +408,7 @@
             ]
           },
           "rear_wing": {
-            "finding": "THE HEADLINE PART: 'Dodge - Stock Rear Wing' = MINUS 11 PI (798 wingless -> 787 winged), +14 lb, ADJUSTABLE badge (unlocks aero downforce sliders), 0 cr. The deepest negative-PI part measured in the project. FH6's base 2016 ACR configuration is WINGLESS ('Dodge - Remove Wing') — the wing must be installed.",
+            "finding": "THE HEADLINE PART: 'Dodge - Stock Rear Wing' = MINUS 11 PI (798 wingless -> 787 winged), +14 lb, ADJUSTABLE badge (unlocks aero downforce sliders), 0 cr. The deepest negative-PI part measured in the project. FH6's base 2016 ACR configuration is WINGLESS ('Dodge - Remove Wing') — the wing must be installed. REVERSAL (2026-08-10, Y-toggle aero panel): the DONOR runs NO WING — its pane signature (0.57 balance / 0.798 efficiency) matches Remove Wing EXACTLY on two independent values. The donor PAID +11 PI for winglessness: a deliberate Goliath bet (top speed + 14 lb + agility over downforce) — the most expensive single choice in an otherwise ruthlessly PI-squeezed build. The wing remains a -11 PI gift for GRIP-philosophy builds; for the donor mimic it comes OFF. Also: the shop's Y-toggle shows per-part aero signatures (efficiency/balance/mech) — another preview instrument.",
             "options": [
               {
                 "part": "Dodge - Remove Wing",
@@ -424,7 +425,19 @@
                 "pi": 787,
                 "note": "ADJUSTABLE — negative 11 PI"
               }
-            ]
+            ],
+            "aero_signatures": {
+              "Dodge - Remove Wing": {
+                "efficiency": 0.798,
+                "balance": 0.57
+              },
+              "Dodge - Stock Rear Wing": {
+                "efficiency": 0.764,
+                "balance": 0.44,
+                "note": "adjustable"
+              },
+              "mech_balance_both": 0.49
+            }
           }
         }
       },

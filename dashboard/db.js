@@ -45490,7 +45490,7 @@ window.FH6_DB = {
         },
         "sheet_rule": "RULE (2nd occurrence of this error class): every slider value in a build sheet must have its UNLOCK PART as an explicit numbered shop step — parentheticals are not instructions.",
         "ladder_state": "2026-08-10: engine 834/731 EXACT, aero balance 0.57 (donor match), top 222.3 (gearing defaults), mech 0.51 (donor 0.63 — tuning-session job), S1 790, weight 3,653. WEIGHT CRUNCH: -505 lb needed on 10 PI — impossible, proving the donor lacks some of our pane-blind extras (X-brace/brakes/ARBs/flywheel). Give-back doctrine: X-brace first; then the FORK CHOICE — match 3,148 by selling brakes/ARBs (lose sliders) vs keep tunability ~100-150 lb heavy. Recommended: keep tunability (fork serves the driver, brake balance solved entry twice).",
-        "slider_gap": "2026-08-10: back-to-back vs the donor = 'wildly different, WAY off' — EXPECTED on this chassis: the free-slider ACR means the donor's build is mostly invisible slider values (opposite of the slider-less 4C donor; parts parity != behavior parity here). Plus a WING hardware gap discovered visually (donor has one, replica doesn't — FH6 base ACR may not include the big wing; aero menu previews pending). CONVERGENCE PLAN: (1) match the wing, verify pane 0.57/~0.798; (2) donor telemetry session — extract camber/pressures/diff-character/gearing from the locked tune; (3) transcribe to the replica, A/B; (4) phase-method the damper/ARB/brake remainder vs the donor reference lap. RESOLVED IN LARGE PART: the replica was WINGLESS (stock wing = -11 PI, adjustable, +14 lb) — hardware, not sliders, was the main gap. Plan: wing on -> weight tier up to <=800 -> donor telemetry session on equal hardware."
+        "slider_gap": "2026-08-10: back-to-back vs the donor = 'wildly different, WAY off' — EXPECTED on this chassis: the free-slider ACR means the donor's build is mostly invisible slider values (opposite of the slider-less 4C donor; parts parity != behavior parity here). Plus a WING hardware gap discovered visually (donor has one, replica doesn't — FH6 base ACR may not include the big wing; aero menu previews pending). CONVERGENCE PLAN: (1) match the wing, verify pane 0.57/~0.798; (2) donor telemetry session — extract camber/pressures/diff-character/gearing from the locked tune; (3) transcribe to the replica, A/B; (4) phase-method the damper/ARB/brake remainder vs the donor reference lap. RESOLVED IN LARGE PART: the replica was WINGLESS (stock wing = -11 PI, adjustable, +14 lb) — hardware, not sliders, was the main gap. Plan: wing on -> weight tier up to <=800 -> donor telemetry session on equal hardware. REVERSED AGAIN: donor aero signature = WINGLESS (0.57/0.798 exact); the wing sighting was mistaken (or the Centenario). Both cars were wingless during the 'wildly different' A/B -> the gap IS sliders; telemetry extraction is the whole game. Plan: wing OFF (match donor), fill to 800 with weight, donor telemetry session, transcribe, phase-method remainder. Wing variant preserved as a Setup Manager fork after convergence."
       }
     }
   },
@@ -45503,7 +45503,8 @@ window.FH6_DB = {
       "The green thumbnail badge ('POWER +X hp') omits torque entirely — never subset-hunt by badges, always read the preview panel's absolute pair.",
       "Aspiration options are FAMILIES with Street/Sport/Race tiers; the Aspiration menu previews only each family's entry tier (tier-ladder rule, discovered on this car).",
       "Some parts carry ZERO or NEGATIVE PI while adding power — the PI-efficiency stars below. These are near-mandatory on capped builds.",
-      "The top-left header PI LAGS behind part changes (read 798 while the true config previewed 790) — always trust the preview panel's PI, never the header."
+      "The top-left header PI LAGS behind part changes (read 798 while the true config previewed 790) — always trust the preview panel's PI, never the header.",
+      "The shop preview's Y Toggle cycles to an Aerodynamics panel showing per-option efficiency/balance/mech-balance — aero signatures are readable per part before buying."
     ],
     "engines": [
       {
@@ -45903,7 +45904,7 @@ window.FH6_DB = {
               ]
             },
             "rear_wing": {
-              "finding": "THE HEADLINE PART: 'Dodge - Stock Rear Wing' = MINUS 11 PI (798 wingless -> 787 winged), +14 lb, ADJUSTABLE badge (unlocks aero downforce sliders), 0 cr. The deepest negative-PI part measured in the project. FH6's base 2016 ACR configuration is WINGLESS ('Dodge - Remove Wing') — the wing must be installed.",
+              "finding": "THE HEADLINE PART: 'Dodge - Stock Rear Wing' = MINUS 11 PI (798 wingless -> 787 winged), +14 lb, ADJUSTABLE badge (unlocks aero downforce sliders), 0 cr. The deepest negative-PI part measured in the project. FH6's base 2016 ACR configuration is WINGLESS ('Dodge - Remove Wing') — the wing must be installed. REVERSAL (2026-08-10, Y-toggle aero panel): the DONOR runs NO WING — its pane signature (0.57 balance / 0.798 efficiency) matches Remove Wing EXACTLY on two independent values. The donor PAID +11 PI for winglessness: a deliberate Goliath bet (top speed + 14 lb + agility over downforce) — the most expensive single choice in an otherwise ruthlessly PI-squeezed build. The wing remains a -11 PI gift for GRIP-philosophy builds; for the donor mimic it comes OFF. Also: the shop's Y-toggle shows per-part aero signatures (efficiency/balance/mech) — another preview instrument.",
               "options": [
                 {
                   "part": "Dodge - Remove Wing",
@@ -45920,7 +45921,19 @@ window.FH6_DB = {
                   "pi": 787,
                   "note": "ADJUSTABLE — negative 11 PI"
                 }
-              ]
+              ],
+              "aero_signatures": {
+                "Dodge - Remove Wing": {
+                  "efficiency": 0.798,
+                  "balance": 0.57
+                },
+                "Dodge - Stock Rear Wing": {
+                  "efficiency": 0.764,
+                  "balance": 0.44,
+                  "note": "adjustable"
+                },
+                "mech_balance_both": 0.49
+              }
             }
           }
         },

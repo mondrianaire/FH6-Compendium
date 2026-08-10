@@ -45159,6 +45159,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "RANGE DATUM: 4C race rear wing slider = [156, 260] lb (player); front race bumper caps at 128. TRUE aero-balance ceiling with these parts = 128/284 = 0.45 (not 0.50). Plan: rear -> 156 (floor), test fast section at 0.45. If front still starves: (1) front camber -1.5 -> -2.0 (owned slider, adds loaded-tire grip in sustained fast corners), (2) shop-check other rear wings for a lower floor, (3) front aero part with cap > 128, (4) accept 0.45 + entry discipline. NOT recommended: dragging mech balance down toward aero (softer front) — fixes fast at the cost of worse slow-speed liveliness."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "PARTS-RESET PLAYER-VERIFIED WITH NUMBERS: after installing race springs/dampers + brakes, panel read aero 0.38 / mech 0.56. The 0.38 is the fingerprint of the aero tab RESETTING on part install — wing range [156,260] midpoint ~208 default: 128/(128+208)=0.381. (build_phase step 5 'parts reset some sliders' promoted to player-verified.) Mech 0.56 is REAL (new 430/480 springs + rake moved it from 0.61). Actions: rear wing to 156 floor (expect 0.45) + full-tab sweep vs known-good list (tires 24/24, ARB 34/35, diff 20/10/45/28/68R, FD 3.82, brakes 55/100). CONVERGENCE METRIC: mech-aero gap 0.19 -> 0.11 — the slow-car/fast-car divergence that predicts the speed-morph is closing. PROTOCOL ADDITION: after ANY part install, sweep all tune tabs against the recorded state before driving."
           }
         ],
         "slider_ranges_observed": {

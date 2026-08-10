@@ -1098,7 +1098,7 @@ window.FH6_DB = {
       "drag"
     ],
     "acquisition_difficulty_scale": {
-      "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' or 'premium', always offer an 'easy' alternative. SPLIT 2026-07-11: 'hard' used to lump luck-gated grinds with paid DLC — those are opposite experiences (time+dice vs money+guaranteed), so paid content is now its own 'premium' category.",
+      "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' or 'premium', always offer an 'easy' alternative. SPLIT 2026-07-11: 'hard' used to lump luck-gated grinds with paid DLC — those are opposite experiences (time+dice vs money+guaranteed), so paid content is now its own 'premium' category. PLAYER-STATE UPDATE 2026-08-01: 200M+ cr banked - price is irrelevant; 'easy' now renders split into 'Autoshow (buy now)' vs 'guaranteed free (play required)', with Autoshow as the true top tier.",
       "easy": "Autoshow (buy anytime with credits) OR a guaranteed free reward (Journal tier, Collection). No luck, no money.",
       "medium": "Requires a specific action but is deterministic and free: Barn Find, aftermarket-shop spawn, Auction House, a specific championship/reward.",
       "hard": "Luck- or time-gated, no amount of money helps: Wheelspin/Super Wheelspin RNG only, or limited-time Festival Playlist exclusive.",
@@ -1150,7 +1150,8 @@ window.FH6_DB = {
           "egamersworld"
         ],
         "acquisition_difficulty": "easy",
-        "street_note": "STREET tag is INFERENCE-grade: the car headlines the game's own 'Touge & Street Rivals' journal and its high-speed stable AWD profile fits classless night P2P with traffic. No street-specific meta source yet."
+        "street_note": "STREET tag is INFERENCE-grade: the car headlines the game's own 'Touge & Street Rivals' journal and its high-speed stable AWD profile fits classless night P2P with traffic. No street-specific meta source yet.",
+        "autoshow": true
       },
       {
         "id": "golf-r-2021",
@@ -1208,7 +1209,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "B Street-Racing (road) AWD build. 🟡 digits from index — verify in-game."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "id": "golf-r-2014",
@@ -1260,7 +1262,8 @@ window.FH6_DB = {
           "dexerto",
           "in-game-screenshot"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "autoshow": true
       },
       {
         "id": "nsx-type-s-2022",
@@ -1303,7 +1306,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S1 800 road build (201 mph / 2.28s). 🟡 verify digits in-game."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "id": "bmw-m5-2022",
@@ -1335,7 +1339,8 @@ window.FH6_DB = {
         "sources": [
           "egamersworld"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "autoshow": true
       },
       {
         "id": "gemera-2024",
@@ -1386,7 +1391,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Purist S2 900 road. 🟡 verify digits in-game."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "id": "amg-one-2021",
@@ -1438,7 +1444,8 @@ window.FH6_DB = {
             "confidence": "method",
             "player_verified": false
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "id": "gr-supra-2020",
@@ -1491,7 +1498,8 @@ window.FH6_DB = {
             "player_verified": false,
             "note": "No reputably-PUBLISHED road code found (value sites like GamerStation give sliders, not codes; CODMunity road coverage is thin). The good road Supra tunes live in-game."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "id": "wrx-sti-2004",
@@ -1546,7 +1554,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Built B600 dirt/cross — right car+surface; ADAPT PI to A. Page-verified code."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "id": "impreza-22b-sti",
@@ -1612,7 +1621,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S1 rally build — right car+surface; ADAPT PI to A. Page-verified code."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "id": "lancer-evo-2004",
@@ -1646,7 +1656,8 @@ window.FH6_DB = {
           "gamingpromax",
           "forza-guide-meta"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "autoshow": true
       },
       {
         "id": "focus-rs",
@@ -1677,7 +1688,8 @@ window.FH6_DB = {
         "sources": [
           "dexerto"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "autoshow": true
       },
       {
         "id": "brz-fe-2022",
@@ -1726,7 +1738,8 @@ window.FH6_DB = {
             "confidence": "method",
             "player_verified": false
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "id": "viper-fe",
@@ -1792,7 +1805,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S2 dirt/cross build — right surface; ADAPT PI to S1. Page-verified code."
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "id": "can-am-maverick-2018",
@@ -1824,7 +1838,8 @@ window.FH6_DB = {
           "game8",
           "gamingpromax"
         ],
-        "acquisition_difficulty": "easy"
+        "acquisition_difficulty": "easy",
+        "autoshow": true
       },
       {
         "id": "f450-super-duty",
@@ -1871,7 +1886,8 @@ window.FH6_DB = {
           "gamingpromax"
         ],
         "acquisition_difficulty": "easy",
-        "tune_meta": "meta"
+        "tune_meta": "meta",
+        "autoshow": true
       },
       {
         "id": "gtr-black-fe-2012",
@@ -1943,7 +1959,8 @@ window.FH6_DB = {
             "note": "The reputably-sourced GT-R Black FE drag code. Load it and report so it can flip to player-verified."
           }
         ],
-        "alt_tune_note": "Don't own the GT-R FE? Its code 514 752 751 WON'T load on another car. Use the standard non-FE 2012 GT-R Black Edition (Autoshow 80k) with its OWN in-game drag tune (Surface: Drag) — or just use the Miata FE you already own (see its tunes)."
+        "alt_tune_note": "Don't own the GT-R FE? Its code 514 752 751 WON'T load on another car. Use the standard non-FE 2012 GT-R Black Edition (Autoshow 80k) with its OWN in-game drag tune (Surface: Drag) — or just use the Miata FE you already own (see its tunes).",
+        "autoshow": false
       },
       {
         "id": "miata-fe-1994",
@@ -2021,7 +2038,8 @@ window.FH6_DB = {
           }
         ],
         "tune_meta": "meta",
-        "street_note": "STREET tag is INFERENCE-grade: #1 S1/S2 on the long flat-out boards (Colossus/Highway) — the profile street's classless night P2P rewards. No street-specific meta source yet."
+        "street_note": "STREET tag is INFERENCE-grade: #1 S1/S2 on the long flat-out boards (Colossus/Highway) — the profile street's classless night P2P rewards. No street-specific meta source yet.",
+        "autoshow": false
       },
       {
         "tune_baseline": null,
@@ -2080,7 +2098,8 @@ window.FH6_DB = {
         "leaderboard_meta": "2026-07-11 (workflow-verified against forza.guide directly): #1 D road all-tracks; on tight touge circuits #1 or #2 on most D boards. GameRant counterpoint picks (Peel P50/S800/Civic '86) noted; no competing consensus.",
         "confidence": "verified",
         "slot_note": "D touge premium specialist: Mitsubishi #269 Minicab TA (Time Attack Car Pack, $9.99) - #1 D handling on forza.labsgg (6.9 vs next-best 5.3) and #1 on the Shimanoyama D board, but board-absent elsewhere. CONTESTED as a general pick; buy only if you live on Shimanoyama.",
-        "class": "D"
+        "class": "D",
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2116,7 +2135,8 @@ window.FH6_DB = {
         "use_case": "C-class road board car - cheap, Autoshow, no-drama FWD",
         "confidence": "verified",
         "easy_alternative": "Toyota Celica SS-II '03 - 12,000 cr Autoshow, GameRant's #1 C road; the budget co-meta pick.",
-        "class": "C"
+        "class": "C",
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2152,7 +2172,8 @@ window.FH6_DB = {
         "leaderboard_meta": "2026-07-11: forza.guide R road boards are ruled by the Mazda 787B (#1, Barn/Treasure-find acquisition - deterministic but a long endgame grind) and race/FE cars. FXX-K Evo is the top straight-purchase option; budget alternative: Ultima Evolution Coupe 1020 (150,000 cr, on game8's R road list).",
         "confidence": "verified",
         "easy_alternative": "Ultima Evolution Coupe 1020 - 150,000 cr Autoshow (game8 R road list) if 4.5M is out of reach.",
-        "class": "R"
+        "class": "R",
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2194,7 +2215,8 @@ window.FH6_DB = {
         "use_case": "C-class touge/street pick - the classic FWD momentum car on hairpins",
         "confidence": "probable",
         "easy_alternative": "Toyota Celica SS-II '03 - 12,000 cr Autoshow; #1 on the Narai-juku C board.",
-        "class": "C"
+        "class": "C",
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2238,7 +2260,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S2 WTAC grip / road-attack. 🟡 provenance video — verify in-game."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2281,7 +2304,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "R grip / road build. 🟡 provenance video — verify in-game."
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "tune_baseline": null,
@@ -2327,7 +2351,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "A700 cross-country build — off-road; ADAPT to C dirt. Page-verified code."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2360,7 +2385,8 @@ window.FH6_DB = {
         "use_case": "S2 (and S1) cross-country without VIP - the free-player answer to the Viper FE",
         "confidence": "contested",
         "easy_alternative": null,
-        "class": "A-S2"
+        "class": "A-S2",
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2395,7 +2421,8 @@ window.FH6_DB = {
         "use_case": "D-class drag meme that works - 39k",
         "confidence": "probable",
         "easy_alternative": null,
-        "class": "D"
+        "class": "D",
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2445,7 +2472,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Speed tune (drag-adjacent). Reputable wiki — verify in-game."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2479,7 +2507,8 @@ window.FH6_DB = {
         "use_case": "B-class drag - AWD launch on a budget (soft slot, best available evidence)",
         "confidence": "probable",
         "easy_alternative": "VW Golf R '21 (already in the meta DB) - cited during verification as a genuinely competitive AWD B-class option; zero extra credits if owned.",
-        "class": "B"
+        "class": "B",
+        "autoshow": true
       },
       {
         "tune_baseline": null,
@@ -2512,7 +2541,8 @@ window.FH6_DB = {
         "use_case": "R-class drag for VIP owners - pre-tuned 10/10 accel/launch out of the box",
         "confidence": "probable",
         "easy_alternative": "Koenigsegg Jesko - 3,500,000 cr Autoshow (kudosprime-verified), stock S2 899 so any upgrade makes it R; the no-DLC path. Our GT-R Black FE (if wheelspin luck delivered one) also builds past S2 into R.",
-        "class": "R"
+        "class": "R",
+        "autoshow": false
       },
       {
         "drivetrain_stock": "RWD",
@@ -2551,7 +2581,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "53Rain's 'Best B Class' pick."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2590,7 +2621,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Acceleration-Speed. Replaces mis-categorized DIRT code 691 006 652 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2629,7 +2661,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "'Purist Road'."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2668,7 +2701,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "'Purist Road'."
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "drivetrain_stock": "RWD",
@@ -2707,7 +2741,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "'Purist Road'."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2746,7 +2781,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "'Low Drag Purist'."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2785,7 +2821,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Purist. Replaces mis-categorized DIRT code 213 110 769 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2824,7 +2861,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Allround. Replaces mis-categorized DIRT code 879 457 887 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2863,7 +2901,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Updated 7/14."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2902,7 +2941,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Allround. Replaces mis-categorized DIRT code 134 284 011 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -2941,7 +2981,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "Allround. Replaces mis-categorized DIRT code 149 106 584 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "AWD",
@@ -2981,7 +3022,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "A-class road purist. Replaces stale 53Rain code 127 979 312 that did not load in-game (2026-07-31)."
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "drivetrain_stock": "RWD",
@@ -3020,7 +3062,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "'Purist'."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -3059,7 +3102,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S1 Road. Replaces mis-categorized DIRT code 164 877 483 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "drivetrain_stock": "RWD",
@@ -3098,7 +3142,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S1 Road Strong Accel. Replaces mis-categorized DIRT code 114 004 471 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": true
       },
       {
         "drivetrain_stock": "RWD",
@@ -3137,7 +3182,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S1 Road, AWD Full Aero. Replaces 53Rain code 939 513 860 that did not load (that code is actually an SR1 Rain S1-DIRT tune per GBR Ozzy sheet — mis-transcribed as road)."
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "drivetrain_stock": "RWD",
@@ -3176,7 +3222,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "'Very Good All Around'."
           }
-        ]
+        ],
+        "autoshow": false
       },
       {
         "drivetrain_stock": "RWD",
@@ -3215,7 +3262,8 @@ window.FH6_DB = {
             "confidence": "sourced-unverified",
             "note": "S1 Road. Replaces mis-categorized DIRT code 288 862 355 (was labeled road)."
           }
-        ]
+        ],
+        "autoshow": true
       }
     ],
     "tune_sourcing_policy": {
@@ -3254,6 +3302,11 @@ window.FH6_DB = {
       "matrix_note": "Street is EXCLUDED from the class x format coverage matrix on purpose: with no class caps, 'a competitive car per class' is meaningless there — one fastest-stable car covers all street events.",
       "migration": "All 9 touge_street car tags became 'touge' (their evidence came from class-capped technical-pass boards and the touge guide). Street tags start at 2 inference-grade picks (flagged in street_note) pending street-specific research.",
       "confidence": "event-type split verified; street car picks inference-grade until a street meta source lands"
+    },
+    "player_state": {
+      "date": "2026-08-01",
+      "credits_banked": "200M+",
+      "implication": "Credit price is NO LONGER a constraint. The acquisition lens shifts from cost to AVAILABILITY: 'Autoshow' = instant one-click at any price (the top tier now); guaranteed free rewards (journal/loyalty) rank BELOW Autoshow since they cost play time; medium/hard/premium unchanged. value_rating still embeds cheapness from the pre-wealth era - read it as pick quality, not price-value."
     }
   },
   "upgradeStrategy": {
@@ -45200,5 +45253,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T03:24Z"
+  "builtAt": "2026-08-10T03:33Z"
 };

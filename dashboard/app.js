@@ -54,6 +54,15 @@
     return c.acquisition_difficulty === "easy" ? "Autoshow" : c.acquisition_difficulty === "premium" ? "Paid DLC" : c.acquisition_difficulty === "hard" ? "Wheelspin (RNG)" : "Special reward";
   }
   const fmtCr = (n) => n == null ? "—" : n.toLocaleString("en-US") + " cr";
+  // when a car has no credit price, the price slot names the source instead (player request 2026-08-01)
+  const priceOrSource = (c) => {
+    if (c.price_credits != null) return fmtCr(c.price_credits);
+    const a = (c.acquisition || "").toLowerCase();
+    if (/vip|car pass|paid dlc|premium edition|time attack car pack/.test(a)) return "💰 DLC";
+    if (/wheelspin/.test(a) && !/not wheelspin/.test(a)) return "🎰 Wheelspin";
+    if (/journal|loyalty|reward|collection/.test(a)) return "🎁 Reward";
+    return "—";
+  };
   const confClass = (c) => c === "verified" ? "conf-verified" : c === "contested" ? "conf-contested" : "conf-probable";
   const confLabel = (c) => c === "verified" ? "✅ verified" : c === "contested" ? "⚠️ contested" : "🟡 probable";
   // 53Rain tune-meta strength (drives ranking): meta > favourite > road > (untagged)
@@ -64,9 +73,22 @@
     : c.tune_meta === "road" ? '<span class="badge tm-road">53Rain ROAD</span>' : "";
   const fh6Class = (c) => c === "fh6_confirmed" ? "conf-verified" : c === "needs_ingame" ? "conf-contested" : "conf-probable";
   const fh6Label = (c) => c === "fh6_confirmed" ? "✅ FH6" : c === "needs_ingame" ? "❌ in-game" : "🟡 FH6";
-  const acqLabel = (d) => d === "easy" ? "🟢 easy to get" : d === "medium" ? "🟡 some effort"
-    : (d === "hard" || d === "hard-unconfirmed") ? "🔴 luck-gated grind"
-    : d === "premium" ? "💰 premium (real money)" : "";
+  // 200M+ cr banked (player_state 2026-08-01): price is irrelevant — availability is the axis.
+  const acqLabel = (dOrCar) => {
+    const c = typeof dOrCar === "object" ? dOrCar : null;
+    const d = c ? c.acquisition_difficulty : dOrCar;
+    if (d === "easy") return c && c.autoshow === false ? "🎁 free — play required" : "🛒 Autoshow — buy now";
+    if (d === "medium") return "🟡 some effort";
+    if (d === "hard" || d === "hard-unconfirmed") return "🔴 luck-gated grind";
+    if (d === "premium") return "💰 premium (real money)";
+    return "";
+  };
+  const acqClass = (dOrCar) => {
+    const c = typeof dOrCar === "object" ? dOrCar : null;
+    const d = c ? c.acquisition_difficulty : dOrCar;
+    if (d === "easy") return c && c.autoshow === false ? "acq-free" : "acq-easy";
+    return "acq-" + String(d || "").split("-")[0];
+  };
   const tuneConf = (c) => c === "player-verified" ? "✅ verified" : c === "sourced-unverified" ? "🟡 sourced"
     : c === "suspect" ? "❌ suspect" : "ℹ️ method";
   const tuneLine = (t) => {
@@ -403,8 +425,8 @@
         <span>${isOwned(c.id) ? '<span class="conf conf-verified">✓ owned</span> ' : ""}<span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span></span>
       </div>
       <h3>${c.year} ${c.name}${codeTip(c.name, c)}</h3>
-      <div class="card-row"><span>${clsBadge(c.class, true)} · ${c.recommended_drivetrain}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
-      ${c.acquisition_difficulty ? `<div class="card-row"><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></div>` : ""}
+      <div class="card-row"><span>${clsBadge(c.class, true)} · ${c.recommended_drivetrain}</span><span class="price">${priceOrSource(c)}</span></div>
+      ${c.acquisition_difficulty ? `<div class="card-row"><span class="acq ${acqClass(c)}">${acqLabel(c)}</span></div>` : ""}
       <div class="value-bar"><span style="width:${c.value_rating * 10}%"></span></div>
       <div class="chips"><span class="chip">${tuneChip(c)}</span>${c.disciplines.map((d) => `<span class="chip">${DISCIPLINE_LABEL[d] || d}</span>`).join("")}</div>
     `;
@@ -479,7 +501,7 @@
         <dt>Disciplines</dt><dd>${c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", ")}</dd>
         <dt>Drivetrain</dt><dd>${c.drivetrain_stock} stock → ${c.recommended_drivetrain}</dd>
         <dt>Power split</dt><dd>${c.power_split || "—"}</dd>
-        <dt>Price</dt><dd>${fmtCr(c.price_credits)}${c.price_note ? `<br><span class="why" style="font-size:12px">${c.price_note}</span>` : ""}</dd>
+        <dt>Price</dt><dd>${priceOrSource(c)}${c.price_note ? `<br><span class="why" style="font-size:12px">${c.price_note}</span>` : ""}</dd>
         ${c.acquisition_difficulty ? `<dt>Get it</dt><dd><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}" title="${(c.acquisition || "").replace(/"/g, "&quot;")}">${acqDot(c.acquisition_difficulty)} ${acqMethod(c)}</span></dd>` : ""}
         ${c.tunes && c.tunes.length ? `<dt>Tunes</dt><dd>${c.tunes.map(tuneLine).join("")}${c.alt_tune_note ? `<div style="font-size:11px;color:var(--warn);margin-top:4px">⚠️ ${c.alt_tune_note}</div>` : ""}</dd>` : (c.alt_tune_note ? `<dt>Tunes</dt><dd><div style="font-size:11px;color:var(--warn)">⚠️ ${c.alt_tune_note}</div></dd>` : "")}
         <dt>Value rating</dt><dd>${c.value_rating}/10</dd>
@@ -538,7 +560,7 @@
             `<button class="chip garage-filter" data-f="${f}" style="cursor:pointer;border:1px solid ${garageFilter === f ? "var(--accent)" : "var(--line)"}">${f === "all" ? "All" : f === "owned" ? "✓ Owned" : "◯ Missing"}</button>`).join("")}
           <button class="chip" id="demoGarageBtn" style="cursor:pointer;margin-left:8px">${seedOn ? "✕ Clear demo garage" : "⬇ Load demo garage (owner's collection)"}</button>
         </div>
-        <p class="why" style="margin:10px 0 0">Tick a car when you get it. Difficulty: 🟢 buy anytime / free-guaranteed · 🟡 deterministic effort (aftermarket spawn, auction) · 🔴 luck-gated grind (wheelspin RNG / limited-time — money can't help) · 💰 premium (paid DLC/VIP — guaranteed, but costs real money). Click a row for the full card (use case, tunes, how to get it, easy alternatives).</p>
+        <p class="why" style="margin:10px 0 0">Tick a car when you get it. Availability (price is no object at 200M+ cr): 🛒 Autoshow — one click, any price · 🎁 guaranteed free but play required (journal/loyalty) · 🟡 deterministic effort (aftermarket spawn, auction) · 🔴 luck-gated grind (wheelspin RNG / limited-time — credits can't help) · 💰 premium (real money). Click a row for the full card.</p>
       </div>`;
     header.querySelectorAll(".garage-filter").forEach((b) =>
       b.addEventListener("click", () => { garageFilter = b.dataset.f; drawGarage(); }));
@@ -572,10 +594,10 @@
         <td><input type="checkbox" class="own-check" data-id="${c.id}" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer"></td>
         <td>${c.year} ${c.name}${codeTip(c.name, c)}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
         <td class="why" style="font-size:12px;max-width:300px">${c.use_case || (c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", "))}</td>
-        <td><span class="acq acq-${(c.acquisition_difficulty || "").split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></td>
+        <td><span class="acq ${acqClass(c)}">${acqLabel(c)}</span></td>
         <td>${clsBadge(c.class)}</td>
         <td><span class="badge tier-${c.tier}">${c.tier}</span></td>
-        <td class="price">${fmtCr(c.price_credits)}</td>
+        <td class="price">${priceOrSource(c)}</td>
         <td>${c.value_rating}/10</td>
         <td class="conf ${confClass(c.confidence)}">${c.confidence === "verified" ? "✅" : c.confidence === "contested" ? "⚠️" : "🟡"}</td>
       </tr>`).join("")}</tbody></table></div>
@@ -1414,7 +1436,7 @@
               <span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span>
             </div>
             <h3 style="font-size:15px">${c.name}${codeTip(c.name, c)}</h3>
-            <div class="card-row"><span>${acqDot(c.get)} ${c.acquisition}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
+            <div class="card-row"><span>${acqDot(c.get)} ${c.acquisition}</span><span class="price">${priceOrSource(c)}</span></div>
             <p class="why" style="margin:8px 0 0">${c.note}</p>
           </div>`).join("")}
       </div>`;

@@ -624,6 +624,10 @@
         {
           "date": "2026-08-10",
           "entry": "AERO-BALANCE MYSTERY SOLVED (pending final confirm): sweep test read 0.36 -> 0.33 sliding rear up to 260 — values match PURE SLIDER RATIO live during movement (0.36 ~ 227 lb, 0.33 = 260 exact). No hidden +53 lb term; the Balance row is a LAZY READOUT that only recomputes on slider movement and displays stale values indefinitely at rest (the persistent 0.38-at-156 was the reset-default leftover). Confirm: slide back to 156, expect 0.38@208 -> 0.42@177 -> 0.45@156. INSTRUMENT RULE: wiggle an aero slider one click and back to force recompute before trusting the Balance row. Net: the car has been AT the 0.45 target since the wing was set; only the display lagged."
+        },
+        {
+          "date": "2026-08-10",
+          "entry": "CORRECTION (player: sweep read 0.38->0.33, not 0.36->0.33 — 0.36 was a mid-slide value): the 'lazy readout' conclusion in the previous entry is RETRACTED. Every observed value (0.38, 0.36, 0.33) is the pure ratio for rear >= 208, and nothing above 0.38 ever displayed — plus the panel showed IDENTICAL top speed (204.5) and efficiency (0.819) at rear=208 and rear=156. NEW LEADING MODEL: the wing's physical effect FLOORS at ~208 lb; the slider's 156-208 stretch is a dead zone; the row was truthful and this hardware's aero-balance ceiling is 0.38, not 0.45. CONFIRM: slide 260->156 slowly — expect climb to 0.38 at 208 then FREEZE through 208-156; if it keeps climbing toward 0.45, revert to display-bug model. IF FLOOR CONFIRMS: wing-trim path exhausted at 0.38; remaining fast-corner levers = front camber -1.5 -> -2.0 (next single change), front aero part with cap > 128, or acceptance + entry discipline."
         }
       ],
       "slider_ranges_observed": {

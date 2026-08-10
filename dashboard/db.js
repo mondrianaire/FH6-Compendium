@@ -44926,7 +44926,7 @@ window.FH6_DB = {
           "id": "tune-browser-compare-pane",
           "priority": 1,
           "when": "BEFORE downloading — works on ANY tune in the browser",
-          "what": "The tune detail pane is the game's own stock-vs-tuned diff: Previous (stock) vs New (tuned) across 13+ Car Stat rows, INCLUDING three outright parts rows — Suspension tier, Tire Compound, Drivetrain. Plus replication targets: power, torque, weight, top speed, 0-60, lateral G, PWR, aero efficiency, aero balance, mechanical balance; the radar bars; base PI -> final PI; and the share code via [P] View Share Code.",
+          "what": "The tune detail pane is the game's own stock-vs-tuned diff: Previous (stock) vs New (tuned) across 13+ Car Stat rows, INCLUDING three outright parts rows — Suspension tier, Tire Compound, Drivetrain. Plus replication targets: power, torque, weight, top speed, 0-60, lateral G, PWR, aero efficiency, aero balance, mechanical balance; the radar bars; base PI -> final PI; and the share code via [P] View Share Code. LIVE DIFF (player-verified 2026-08-10): the Previous column tracks the car's CURRENT setup, not frozen stock — after installing a part, reopening the tune page shows the updated value. Replication is complete when every Previous equals its New.",
           "status": "player-verified 2026-08-10 (Viper GTS ACR '99 tune-browser screenshots). The Car Stat column SCROLLS — check for rows below Drivetrain (brakes/aero tiers may be listed). PLAYER-VERIFIED 2026-08-10: this pane exists ONLY in the Tunes browser — the upgrade shop does NOT show the full Car Stat table while buying parts (per-part deltas only)."
         },
         {
@@ -44947,7 +44947,7 @@ window.FH6_DB = {
           "id": "upgrade-shop-replication",
           "priority": 4,
           "when": "Final step — rebuild the parts list on a second copy",
-          "what": "Solve constraints in this order: (1) install the directly-read parts (drivetrain swap, compound, suspension tier); (2) match displacement; (3) match hp AND torque SIMULTANEOUSLY — the pair collapses aspiration+parts fast because turbos overshoot torque at a given hp; (4) match weight (fixed reduction tiers; remember swaps ADD weight before reduction subtracts); (5) cross-check front % / mechanical balance; (6) PI must land EXACTLY on the tune's number; (7) stat bars are the final checksum. The replica is a functionally identical chassis with UNLOCKED sliders — fit your own tune, using the locked copy's gearing forensics as the starting point.",
+          "what": "Solve constraints in this order: (1) install the directly-read parts (drivetrain swap, compound, suspension tier); (2) match displacement; (3) match hp AND torque SIMULTANEOUSLY — the pair collapses aspiration+parts fast because turbos overshoot torque at a given hp; (4) match weight (fixed reduction tiers; remember swaps ADD weight before reduction subtracts); (5) cross-check front % / mechanical balance; (6) PI must land EXACTLY on the tune's number; (7) stat bars are the final checksum. The replica is a functionally identical chassis with UNLOCKED sliders — fit your own tune, using the locked copy's gearing forensics as the starting point. COMPLETION CRITERION (player-verified): reopen the tune's browser page between shop visits — the live Previous column ticks off each matched row; all-rows-matched + PI exact = certified replica.",
           "status": "method"
         }
       ],
@@ -44957,7 +44957,7 @@ window.FH6_DB = {
         "read_directly": [
           "RWD -> AWD (drivetrain swap)",
           "Standard -> Slick tire compound",
-          "Sport -> Race suspension"
+          "Sport -> Race suspension (satisfied by DRIFT springs — this car has no Race tier; the row is an adjustability bucket, player-verified)"
         ],
         "inferred_probable": [
           "Weight 3,450 -> 3,147 lb: -303 NET despite AWD adding hardware -> maximum weight-reduction tier (+ likely light wheels); true strip ~450-500 lb",
@@ -44969,17 +44969,16 @@ window.FH6_DB = {
         "unknowns": [
           "exact engine parts (bisect to 677 hp / 612 ft-lb at exactly 800 PI)",
           "transmission tier (count gears on the HUD)",
-          "brakes / aero tiers (scroll the Car Stat pane below Drivetrain)",
-          "which adjustable spring tier the tuner ran (no Race option on this car — see catalog_quirks; drift vs rally settled by the PI checksum / purchase-screen preview test)"
+          "brakes / aero tiers (scroll the Car Stat pane below Drivetrain)"
         ],
         "note": "NOT the same car as the garage 2016 Viper ACR build (940 hp / 816 tq / 3,487 lb / 9.0L / RALLY tires / AWD) — two different Vipers, easy to conflate; both S1 800."
       },
-      "confidence": "instruments 1-2 player-verified via screenshots 2026-08-10; delta inferences probable; replication loop is method (untested)",
+      "confidence": "instruments 1-2 + live-diff Previous column + suspension bucket rule player-verified 2026-08-10; delta inferences probable; replication loop validated in progress on the Viper GTS ACR '99",
       "catalog_quirks": {
         "added": "2026-08-10",
         "finding": "PLAYER-VERIFIED: the Viper GTS ACR '99 Springs and Dampers catalog offers only Stock / Drift / Rally — NO Race tier. Part catalogs are CAR-SPECIFIC; never assume the full Street/Sport/Race/Rally/Drift/Offroad ladder exists on a given car.",
         "substitution_rule": "All adjustable spring tiers unlock the SAME slider set (springs, ride height, gates damper tuning) — they differ only in default values and PI cost (guides describe rally springs as race values halved). For a road/circuit replica on a car lacking Race springs: use DRIFT springs (stiff/low road-biased defaults) over Rally (soft/tall dirt defaults), then set your own values.",
-        "pane_label_hypothesis": "The compare pane's 'Suspension' row is probably a coarse ADJUSTABILITY bucket (Stock/Sport/Race), not a part name — so Drift springs likely display as 'Race'. CORRECTED TEST (the purchase-screen preview does NOT exist — player-verified): install Drift springs, then REOPEN the tune's page in the Tunes browser and read the Previous column. OPEN QUESTION with a big payoff: does 'Previous' track the car's CURRENT setup or frozen stock? If current, the pane is a LIVE DIFF between your replica and the target — replicate until every Previous equals its New and the pane itself certifies completion. If frozen stock, capture the pane once and fall back to the PI checksum.",
+        "pane_label_hypothesis": "RESOLVED, PLAYER-VERIFIED 2026-08-10: the 'Suspension' row is a coarse ADJUSTABILITY bucket — after installing DRIFT springs on the Viper GTS ACR '99, the Previous column read 'Race'. Twin confirmation: 'Previous' tracks the car's CURRENT setup (it updated after the install), making the pane a live replica-vs-target diff. Corollary: the case study's stock baselines are valid — the original capture's Previous column (B 598 / Sport / Standard / RWD) shows the car was stock at capture time.",
         "pi_checksum_as_arbiter": "Drift vs Rally springs cost different PI. With the rest of the build matched, whichever choice lands total PI EXACTLY on the tune's number (here S1 800) is the tuner's actual part — evidence, not guesswork.",
         "confidence": "catalog gap player-verified; same-sliders rule FH5-inherited + guide-consistent (probable); pane hypothesis untested"
       }

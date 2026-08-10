@@ -45080,9 +45080,27 @@ window.FH6_DB = {
               "hp": 43,
               "torque_ftlb": 9,
               "measured": "2026-08-10, player"
+            },
+            {
+              "part": "Intercooler",
+              "hp": null,
+              "torque_ftlb": null,
+              "measured": "installed; delta pending player readout. ANOMALY: intercooler on a 4.69L (F136-matching, NA in reality) — either the FH6 swap is factory-FI (check Aspiration row + boost sound) or FH6 intercooler mechanics changed. Probe on test drive."
+            },
+            {
+              "part": "Oil and Cooling",
+              "hp": null,
+              "torque_ftlb": null,
+              "measured": "installed; delta pending player readout"
+            },
+            {
+              "part": "Flywheel",
+              "hp": null,
+              "torque_ftlb": null,
+              "measured": "installed; delta pending player readout"
             }
           ],
-          "residual": "Cams-out = 620/457; LogikJ target 623/460 -> one small part supplies +3hp/+3tq. Hunt by shop preview: highlight air filter/intake, exhaust, flywheel, oil & cooling — the +3/+3 preview is the part."
+          "residual": "Player at 663/466 with 4 parts: Sport Cams (+43/+9) + intercooler + oil/cooling + flywheel (deltas pending). LogikJ = 623/460 (-40/-6). With all four deltas known, the subset summing to exactly -40/-6 identifies LogikJ's engine config uniquely — subset-sum beats bisection."
         },
         "tuning_session_plan": "2026-08-10: player deferring slider work until after a test drive; wants to learn sliders together via the dashboard (corner-phase map -> symptom matrix -> one-change-at-a-time with panel readouts). KEY CONSTRAINT: exact LogikJ spec is nearly slider-less (street suspension = no spring/damper/ARB/alignment sliders; stock trans = no gearing). Teaching car = player's race-suspension FORK (full sliders, same 800); reference lap = the green 4C (LogikJ original). A/B those two, then tune the fork against the reference."
       },

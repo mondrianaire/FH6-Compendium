@@ -45037,7 +45037,8 @@ window.FH6_DB = {
         "pi_checksum_as_arbiter": "Drift vs Rally springs cost different PI. With the rest of the build matched, whichever choice lands total PI EXACTLY on the tune's number (here S1 800) is the tuner's actual part — evidence, not guesswork.",
         "confidence": "catalog gap player-verified; same-sliders rule FH5-inherited + guide-consistent (probable); pane hypothesis untested",
         "suspension_row_addendum": "4C confirms the row reads real installed tiers: player's actual Race springs displayed 'Race' (vs Viper GTS ACR case where DRIFT springs displayed 'Race' — adjustable tiers bucket to 'Race', but Street/Sport display as themselves). Catalogs remain per-car: the 4C offers true Race springs, the Viper does not.",
-        "suspension_row_addendum_2": "Suspension row granularity higher than the bucket theory: displays 'Rally' for rally-tier suspension (2016 Viper ACR donor pane, 2026-08-10). Known displays so far: Street, Sport, Race (incl. drift springs), Rally."
+        "suspension_row_addendum_2": "Suspension row granularity higher than the bucket theory: displays 'Rally' for rally-tier suspension (2016 Viper ACR donor pane, 2026-08-10). Known displays so far: Street, Sport, Race (incl. drift springs), Rally.",
+        "suspension_row_contradiction": "OPEN QUESTION 2026-08-10: a drift tune's pane row displays 'Drift' (Rudss18 Viper ACR tune), but the '99 Viper GTS ACR case showed installed DRIFT springs displaying 'Race'. The row's tier vocabulary is not fully mapped — observed values now: Street, Sport, Rally, Drift, Race. Re-verify the '99 case when convenient; do not rely on the old adjustability-bucket theory."
       },
       "doctrine": "PLAYER-STATED 2026-08-10: the protocol's deliverable is the DISCRETE PARTS MANIFEST, not slider values. Sliders are ephemeral — Jett re-fits them to their own driving regardless. Parts are where the tuner's intelligence lives: how the PI budget was allocated across drivetrain/engine/weight/grip is the unrecoverable-by-guessing knowledge. Every decoded build gets recorded as a manifest with per-part evidence tiers (verified = pane row or direct observation; probable = delta inference; open = PI-checksum residual).",
       "case_study_2": {
@@ -45478,7 +45479,8 @@ window.FH6_DB = {
           "fatal_flaw_candidate": "SLOW CORNERS (mirror of the 4C): below ~60 the wing sleeps and rally rubber must rotate 3,148 lb mechanically — hairpin push + tight-exit wheelspin expected. Mitigation ladder: diff work (transfers from 4C) -> front tire width -> momentum lines -> compound swap (last; unravels the PI thesis).",
           "course_fit": "Goliath = flow/sweepers/straights = aero country; the weakness maps onto the lap's smallest slice — likely why this car emerged as closest to the Centenario."
         },
-        "sheet_rule": "RULE (2nd occurrence of this error class): every slider value in a build sheet must have its UNLOCK PART as an explicit numbered shop step — parentheticals are not instructions."
+        "sheet_rule": "RULE (2nd occurrence of this error class): every slider value in a build sheet must have its UNLOCK PART as an explicit numbered shop step — parentheticals are not instructions.",
+        "ladder_state": "2026-08-10: engine 834/731 EXACT, aero balance 0.57 (donor match), top 222.3 (gearing defaults), mech 0.51 (donor 0.63 — tuning-session job), S1 790, weight 3,653. WEIGHT CRUNCH: -505 lb needed on 10 PI — impossible, proving the donor lacks some of our pane-blind extras (X-brace/brakes/ARBs/flywheel). Give-back doctrine: X-brace first; then the FORK CHOICE — match 3,148 by selling brakes/ARBs (lose sliders) vs keep tunability ~100-150 lb heavy. Recommended: keep tunability (fork serves the driver, brake balance solved entry twice)."
       }
     }
   },

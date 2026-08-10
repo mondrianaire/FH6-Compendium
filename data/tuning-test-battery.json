@@ -612,6 +612,10 @@
         {
           "date": "2026-08-10",
           "entry": "PARTS-RESET PLAYER-VERIFIED WITH NUMBERS: after installing race springs/dampers + brakes, panel read aero 0.38 / mech 0.56. The 0.38 is the fingerprint of the aero tab RESETTING on part install — wing range [156,260] midpoint ~208 default: 128/(128+208)=0.381. (build_phase step 5 'parts reset some sliders' promoted to player-verified.) Mech 0.56 is REAL (new 430/480 springs + rake moved it from 0.61). Actions: rear wing to 156 floor (expect 0.45) + full-tab sweep vs known-good list (tires 24/24, ARB 34/35, diff 20/10/45/28/68R, FD 3.82, brakes 55/100). CONVERGENCE METRIC: mech-aero gap 0.19 -> 0.11 — the slow-car/fast-car divergence that predicts the speed-morph is closing. PROTOCOL ADDITION: after ANY part install, sweep all tune tabs against the recorded state before driving."
+        },
+        {
+          "date": "2026-08-10",
+          "entry": "AERO-BALANCE MODEL FALSIFIED: at sliders 128F/156R (both confirmed on screen) panel reads 0.38, not the slider-ratio 0.45. All PRIOR readings matched pure ratio to 3 digits (260->0.330, 177->0.42, 208-default->0.381). Rest of panel DID respond to the wing cut (efficiency 0.802->0.819, top speed 199.1->204.5, latG@120 1.45->1.43) — physics took the change, Balance row didn't. Disambiguation experiment issued: sweep rear 156->208->260->156 watching the Balance row (live-but-nonlinear = body/rake aero term discovered; frozen = stale readout, re-enter menu). Panel state at S1 788 (parts +12 PI): braking 79.0/195.0 ft (was 99/244 — race brakes), 0-60 2.425, 0-100 5.039, top 204.5, mech 0.56, eff 0.819."
         }
       ],
       "slider_ranges_observed": {

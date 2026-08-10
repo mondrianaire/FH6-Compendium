@@ -44559,7 +44559,8 @@ window.FH6_DB = {
       "one_variable": "Change ONE slider between iterations. Two changes that both 'feel faster' can be one gain hiding one loss.",
       "noise_control": "Driver variance is the biggest error source. Use 3-lap MEDIANS (not best laps), judge via ghost SECTOR deltas rather than whole-lap feel, and freeze your assist config across every test (board meta: ABS on, TCS off, STM off).",
       "bisection": "To find a limit: start at the baseline value, jump the slider to its extreme. If the test FAILS, move halfway back toward baseline; repeat until it passes. The last failing and first passing values bracket the limit. ~4 iterations brackets any slider to useful precision.",
-      "record_everything": "Every found limit goes in results_log with the car, surface, and the symptom at the limit. A window without its symptom is half a data point."
+      "record_everything": "Every found limit goes in results_log with the car, surface, and the symptom at the limit. A window without its symptom is half a data point.",
+      "tire_temperature": "Rivals restarts reset tire temperature — tires are STONE COLD for the first ~1-2 minutes. NEVER judge grip, balance, or a compound change during the cold window (discovered via fork B slicks, 2026-08-10: four consecutive crashes, all within 20s of restart). Warm 2-3 minutes at pace before any handling verdict; slicks are most cold-sensitive, rally least."
     },
     "instrumentation": [
       {
@@ -45203,6 +45204,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "VIDEO 3 (29s, Goliath Rivals launch + first complex, fork B blue 4C): TIRE MARKS visible at 118/103 mph braking into the left complex = REAR stepping under trail braking; slide carries off the INSIDE-left at 93 (guardrail sparks), grass-ride 89-77, brief recovery at 72, overcorrection spears across into right-side forest at 45-26. DIAGNOSIS: fork A's original entry-oversteer symptom resurrected on fork B — prime suspect is DEFAULT SLIDERS (new car: brake balance 50 not 55, rear decel ~15 not 28, damping defaults) — verify sheet Part 2 + weight-corrected springs BEFORE new tuning. If state verified: brake balance 55->57 then rear decel 28->32, one at a time. SILVER LINING: entry speeds 136-127 vs fork A's ~110 — slicks working, braking points need technique inflation (brake earlier, finish braking before turn-in). Recovery lesson: two wheels on grass at 90+ = unwind and brake straight; the spear-across was the recovery, not the tune."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "VIDEO 4 (fork B, Goliath, 24s): drift chain 266->836 through the same first complex at ~100mph, left-side grass exit; TCR icon flashes (3rd sighting — check assists). UNIFYING DIAGNOSIS: every crash in all four videos occurs within ~20s of a fresh Rivals restart = STONE COLD TIRES, and fork B runs the most temperature-sensitive compound (slicks) vs fork A's cold-tolerant rally rubber. In-game tire doc names the mechanic verbatim ('reduce tire temperature... sudden loss of grip') — matches player's 'any little steer and the tires give out all grip'. DECISIVE TEST: warm tires 2-3 min (aggressive straight work / weaving) then attack the same complex — transformation = cold-slick confirmed, fork B never broken, the TEST LOOP was testing cold rubber. Fixes if confirmed: pressures 26/26 or 25/25 (cold patch + faster warm-up), warm-up ritual on restarts (Goliath = 25-min lap, one cold complex is cheap), or semi-slick compromise. LESSON FOR THE LAB: Rivals restarts reset tire temp — never judge a compound/handling change on the first 30 seconds of a run; warm-up is part of lab_conditions now."
           }
         ],
         "slider_ranges_observed": {

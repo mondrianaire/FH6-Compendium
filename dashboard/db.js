@@ -45830,7 +45830,7 @@ window.FH6_DB = {
               ]
             },
             "brakes": {
-              "finding": "NO BRAKE MENU EXISTS for this car (player-verified 2026-08-10) — factory ACR carbon-ceramics are terminal hardware, like the missing cams/exhaust rows. Per-car catalog rule again. OPEN: does the tune menu's Brake tab have sliders by default on this car? (factory-adjustable would be a third free-adjustability gift; locked = brake balance unavailable to everyone including the donor)"
+              "finding": "RESOLVED (player, 2026-08-10): NO brake parts menu exists AND the tune menu's Brake tab is UNLOCKED BY DEFAULT — the factory ACR carbon-ceramics are natively adjustable (balance + pressure sliders, zero parts, zero PI). Completes the ACR free-slider suite: every tuning family on this car costs 0 or negative PI."
             },
             "differential": {
               "finding": "PI-FREE AT EVERY TIER (all preview S1 790 from the cage-less stock-WR base): Stock / Race 2-way (unlocks full diff tuning) / Drift (2,500cr) / Offroad (2,500cr).",

@@ -45492,7 +45492,8 @@ window.FH6_DB = {
     "display_rules": [
       "The green thumbnail badge ('POWER +X hp') omits torque entirely — never subset-hunt by badges, always read the preview panel's absolute pair.",
       "Aspiration options are FAMILIES with Street/Sport/Race tiers; the Aspiration menu previews only each family's entry tier (tier-ladder rule, discovered on this car).",
-      "Some parts carry ZERO or NEGATIVE PI while adding power — the PI-efficiency stars below. These are near-mandatory on capped builds."
+      "Some parts carry ZERO or NEGATIVE PI while adding power — the PI-efficiency stars below. These are near-mandatory on capped builds.",
+      "The top-left header PI LAGS behind part changes (read 798 while the true config previewed 790) — always trust the preview panel's PI, never the header."
     ],
     "engines": [
       {
@@ -45787,7 +45788,47 @@ window.FH6_DB = {
                 "cost_cr": 2050,
                 "note": "ride height -2.55 in"
               }
-            ]
+            ],
+            "anti_roll_bars": {
+              "finding": "PI-FREE AT EVERY TIER (player-captured, cage-less stock-WR base): front stock/sport/race and rear stock/sport/race ALL preview S1 790 — zero PI across the ladder. Race bars also LIGHTER (front: 3,698 vs stock 3,703; rear sport 3,702/stock 3,703). Race ARBs = free sliders + free weight; never a give-back candidate.",
+              "front": [
+                {
+                  "part": "Stock",
+                  "weight_lb": 3703,
+                  "pi": 790
+                },
+                {
+                  "part": "Sport",
+                  "weight_lb": 3701,
+                  "pi": 790,
+                  "cost_cr": 1250
+                },
+                {
+                  "part": "Race",
+                  "weight_lb": 3698,
+                  "pi": 790,
+                  "note": "unlocks front ARB stiffness tuning"
+                }
+              ],
+              "rear": [
+                {
+                  "part": "Stock",
+                  "weight_lb": 3703,
+                  "pi": 790
+                },
+                {
+                  "part": "Sport",
+                  "weight_lb": 3702,
+                  "pi": 790,
+                  "cost_cr": 1250
+                },
+                {
+                  "part": "Race",
+                  "pi": 790,
+                  "note": "unlocks rear ARB stiffness tuning"
+                }
+              ]
+            }
           }
         },
         "donor_solution": {
@@ -45796,7 +45837,7 @@ window.FH6_DB = {
           "finding_2": "SOLVED AND PLAYER-VERIFIED 2026-08-10: STREET Centrifugal (757/669) + Race Intercooler (+58/+46) + Race Fuel System (+13/+12) + Race Oil/Cooling (+6/+5) = ~834/732 additive — hp exact, torque within 1 (interaction/rounding). Corroboration: intercooler+oil weight sits FORWARD (front% 52->53->54 with weight strip = donor's 54%); Race Oil's -2 PI fits the donor tuner's PI-squeezing pattern (rally suspension, rally tires).",
           "verify": "Swap aspiration to Street Centrifugal, install Race Intercooler + Race Fuel System + Race Oil/Cooling, read absolutes. Expect 834/731-732. Then weight ladder toward 3,148 (heavy strip ~-540 from that config) and PI to exactly 800.",
           "verified": "CONFIRMED IN-GAME: Street Centrifugal + Race Intercooler + Race Fuel System + Race Oil/Cooling = 834 hp / 731 ft-lb EXACT (pane-read). The additive delta model held to the digit across an aspiration-base transfer. First engine fully reverse-engineered from a locked tune via measured previews + subset-sum.",
-          "chassis_reconstruction": "2026-08-10: Race WR (+33 PI) proves the donor carries NO race brakes/ARBs/diff/cage — donor = engine + AWD + rally compound + rally S&D + Race WR + stock chassis parts = near-slider-less PI-max build (2nd confirmed instance of the pattern: top S1 tuners sell adjustability for weight/power). Player fork paths quantified: A exact-mimic (sell all extras, Race WR, ~3,134 @ <=800, no chassis sliders) / B balanced (sell cage + one family, Sport WR, ~3,412 @ ~800) / C current (3,665 @ 798, 517 lb tax). Pending: PI readouts of race brakes/ARBs/diff stock-downgrades to solve B exactly."
+          "chassis_reconstruction": "2026-08-10: Race WR (+33 PI) proves the donor carries NO race brakes/ARBs/diff/cage — donor = engine + AWD + rally compound + rally S&D + Race WR + stock chassis parts = near-slider-less PI-max build (2nd confirmed instance of the pattern: top S1 tuners sell adjustability for weight/power). Player fork paths quantified: A exact-mimic (sell all extras, Race WR, ~3,134 @ <=800, no chassis sliders) / B balanced (sell cage + one family, Sport WR, ~3,412 @ ~800) / C current (3,665 @ 798, 517 lb tax). Pending: PI readouts of race brakes/ARBs/diff stock-downgrades to solve B exactly. REVISION: race-WR weights (3,134 WITH cage vs ~3,085 without) fit the donor's 3,148 far better WITH the cage — donor likely KEEPS the cage and closes 800 by running stock brakes + stock diff (combined ~31 PI from the 831 with-cage figure). ARBs are PI-free so the donor may well run race ARBs too. Pending: brake + diff stock-preview PIs — the final two numbers."
         }
       },
       {
@@ -45864,7 +45905,8 @@ window.FH6_DB = {
     "pi_efficiency_stars": [
       "Viper ACR 2016: Race Oil/Cooling (-2 PI, +6 hp/+5 tq), Sport Oil (-1 PI, +3/+3), Street Intercooler (0 PI, +13/+10), Race Flywheel (0 PI, -2 lb), Street Centrifugal SC (cheapest aspiration PI on both measured engines)",
       "Pattern: oil/cooling family runs PI-negative on supercharged builds (2nd engine confirming); 10-speed race transmission lowest-PI box (player's gearbox rule) — check the discount per build, it was only 1 PI on the 4C",
-      "Viper ACR 2016: Rally Spring & Dampers cost 1 PI LESS than stock suspension while unlocking spring/damper/alignment sliders — negative-PI full suspension tuning. Generalize: check rally S&D pricing on every S1 build."
+      "Viper ACR 2016: Rally Spring & Dampers cost 1 PI LESS than stock suspension while unlocking spring/damper/alignment sliders — negative-PI full suspension tuning. Generalize: check rally S&D pricing on every S1 build.",
+      "Viper ACR 2016: ANTI-ROLL BARS are PI-free at every tier and race bars are lighter than stock — free adjustability + free weight. Check ARB PI on every build before assuming they cost anything."
     ]
   },
   "sources": {

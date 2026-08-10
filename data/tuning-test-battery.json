@@ -616,6 +616,10 @@
         {
           "date": "2026-08-10",
           "entry": "AERO-BALANCE MODEL FALSIFIED: at sliders 128F/156R (both confirmed on screen) panel reads 0.38, not the slider-ratio 0.45. All PRIOR readings matched pure ratio to 3 digits (260->0.330, 177->0.42, 208-default->0.381). Rest of panel DID respond to the wing cut (efficiency 0.802->0.819, top speed 199.1->204.5, latG@120 1.45->1.43) — physics took the change, Balance row didn't. Disambiguation experiment issued: sweep rear 156->208->260->156 watching the Balance row (live-but-nonlinear = body/rake aero term discovered; frozen = stale readout, re-enter menu). Panel state at S1 788 (parts +12 PI): braking 79.0/195.0 ft (was 99/244 — race brakes), 0-60 2.425, 0-100 5.039, top 204.5, mech 0.56, eff 0.819."
+        },
+        {
+          "date": "2026-08-10",
+          "entry": "FULL 9-TAB SWEEP (player screenshots): ONLY the aero tab reset on the parts install — tires 24/24, gearing 3.82+ratios, ARBs 34/35, springs 430.2/481.5, RH 3.6/3.6, damping 7.5/8.0+4.5/5.0, brakes 55/100, diff 20/10-45/28-68R all SURVIVED. Micro-gaps vs window (optional): rear toe 0.0 (vs +0.1 in), no rake (3.6/3.6 vs +0.3 rear). AERO-BALANCE MYSTERY QUANTIFIED: 128/156 sliders reading 0.38 implies ~+53 lb rear-equivalent downforce NOT on the sliders — player's theory (parts install changed the calc, e.g. suspension/underbody term) is the leading hypothesis since pre-install readings matched pure slider ratio exactly. ONE-SLIDE TEST issued: rear to 260 — 0.29-0.30 = hidden term confirmed; 0.33 = nonlinear/floored calc; 0.38 = stale row (re-enter menu). Current panel @ S1 788: braking 79.1/195.2, latG 1.24/1.43, 0-60 2.425, 0-100 5.039, top 204.5, mech 0.56, eff 0.819."
         }
       ],
       "slider_ranges_observed": {

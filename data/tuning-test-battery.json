@@ -670,7 +670,7 @@
           "race driveline (only if <=0 PI)",
           "race diff",
           "race springs/dampers + ARBs + brakes",
-          "SPORT compound",
+          "SLICK compound preferred (precedent: ford351guy Viper = Slick+AWD+677hp at S1 800); SEMI-SLICK fallback if PI can't close with supercharger+AWD+race platform intact (give-backs: cams, weight tiers)",
           "front tire width +1 (rear stock)",
           "NO front track width (fork A jitter)",
           "race front bumper 128, NO rear wing"
@@ -727,7 +727,8 @@
           ],
           "center": 68
         },
-        "ab_protocol": "Back-to-back, 3-lap medians: fast sweeper (does B hold 108+?), slow hairpins (jitter without track width), launch. Capture Performance panel baseline first — latG pair is the headline vs fork A's 1.24/1.43."
+        "ab_protocol": "Back-to-back, 3-lap medians: fast sweeper (does B hold 108+?), slow hairpins (jitter without track width), launch. Capture Performance panel baseline first — latG pair is the headline vs fork A's 1.24/1.43.",
+        "compound_note": "Preview both in shop: PI cost + latG pair per compound before buying. psi 27/27 correct for either."
       }
     },
     "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
@@ -737,7 +738,8 @@
     "pane_blind_spots": "The compare pane CANNOT see: transmission tier/gear count, driveline, differential tier, tire width, track width (and brakes only indirectly via the braking bar). DOCTRINE REFINEMENT: 'certified replica' = all visible rows matched + PI exact — functionally certified, but blind-spot parts can differ underneath. Driving forensics covers some blind spots: HUD gear count (transmission), 0-60 convergence at equal weight (gearbox character), diff behavior on corner exit.",
     "video_forensics_note": "Short gameplay clips are a first-class instrument: frame extraction reads HUD speed/gear/skill-popups per instant. The skill system doubles as telemetry — DRIFT skills during a grip lap = rear slip detected; 'Great Speed' stamps entry speeds; wrecked-scenery skills timestamp off-track moments. 8-10s of video around one corner beats any verbal description.",
     "fh6_mechanics_discovered": [
-      "Aero slider nominal range can exceed effective range (4C race wing: slider [156-260], physical [~208-260]) — sweep-and-watch to find true edges (player-verified 2026-08-10)"
+      "Aero slider nominal range can exceed effective range (4C race wing: slider [156-260], physical [~208-260]) — sweep-and-watch to find true edges (player-verified 2026-08-10)",
+      "FH6 tire compound ladder (player-verified on the 4C, 2026-08-10): NO Street/Sport upgrade tiers — Stock -> Semi-Slick -> Slick, plus specialties (Drift, Rally, Offroad, Snow, Drag). The compare pane's 'Sport' label is the STOCK tire's category, not a purchasable tier. Differs from FH5 naming."
     ],
     "panel_baselines_rule": "PANEL BASELINES ARE PER-BUILD, NOT PER-CAR (player-raised 2026-08-10, evidenced in case study 2: swap+AWD moved the 4C 41%->47% front). Any part install — engine parts included — can shift Mech. Balance (mass at the part's location), lateral G and braking (total mass), and all accel numbers; can silently RESET tune tabs; and changes PI. Aero Balance alone is immune to engine mass (pure downforce split — but its ceiling is a property of the aero PARTS, see effective-range mechanic). Protocol after EVERY install: 9-tab sweep vs recorded state, wiggle-and-read the panel, expire all prior baselines."
   }

@@ -45076,33 +45076,47 @@ window.FH6_DB = {
           "engine": "4.69L V8 swap on Alfa Romeo 4C 2014",
           "rows": [
             {
+              "part": "Centrifugal Supercharger",
+              "hp": 77,
+              "torque_ftlb": 54,
+              "measured": "2026-08-10, player"
+            },
+            {
               "part": "Sport Camshaft",
               "hp": 43,
               "torque_ftlb": 9,
               "measured": "2026-08-10, player"
             },
             {
+              "part": "Street Camshaft",
+              "hp": 3,
+              "torque_ftlb": 3,
+              "measured": "PREDICTED by subset-sum (sport-out lands -3/-3 short of target); verify via shop preview"
+            },
+            {
               "part": "Intercooler",
-              "hp": null,
-              "torque_ftlb": null,
-              "measured": "installed; delta pending player readout. ANOMALY: intercooler on a 4.69L (F136-matching, NA in reality) — either the FH6 swap is factory-FI (check Aspiration row + boost sound) or FH6 intercooler mechanics changed. Probe on test drive."
+              "hp": 9,
+              "torque_ftlb": 6,
+              "measured": "2026-08-10, player (functional due to supercharger)"
             },
             {
               "part": "Oil and Cooling",
-              "hp": null,
-              "torque_ftlb": null,
-              "measured": "installed; delta pending player readout"
+              "hp": 7,
+              "torque_ftlb": 6,
+              "measured": "2026-08-10, player"
             },
             {
               "part": "Flywheel",
               "hp": null,
               "torque_ftlb": null,
-              "measured": "installed; delta pending player readout"
+              "measured": "installed; delta still unreported (likely ~0 hp, rotational mass)"
             }
           ],
-          "residual": "Player at 663/466 with 4 parts: Sport Cams (+43/+9) + intercooler + oil/cooling + flywheel (deltas pending). LogikJ = 623/460 (-40/-6). With all four deltas known, the subset summing to exactly -40/-6 identifies LogikJ's engine config uniquely — subset-sum beats bisection."
+          "residual": "SOLVED: no subset of installed parts sums to -40/-6, but the TIER SWAP does — Camshaft Sport->Street = -43-9 then +3+3 = exactly -40/-6. LogikJ engine spec: 4.69L V8 swap + centrifugal supercharger + intercooler + oil/cooling + flywheel + STREET cams. Lesson: subset-sum must include part TIERS, not just part presence — tier ladders hide the small deltas.",
+          "intercooler_anomaly": "RESOLVED: build includes a centrifugal supercharger (previously unmentioned) — intercooler is functional, no NA anomaly. The 4.69L swap itself is NA (F136-consistent); the FI is aftermarket."
         },
-        "tuning_session_plan": "2026-08-10: player deferring slider work until after a test drive; wants to learn sliders together via the dashboard (corner-phase map -> symptom matrix -> one-change-at-a-time with panel readouts). KEY CONSTRAINT: exact LogikJ spec is nearly slider-less (street suspension = no spring/damper/ARB/alignment sliders; stock trans = no gearing). Teaching car = player's race-suspension FORK (full sliders, same 800); reference lap = the green 4C (LogikJ original). A/B those two, then tune the fork against the reference."
+        "tuning_session_plan": "2026-08-10: player deferring slider work until after a test drive; wants to learn sliders together via the dashboard (corner-phase map -> symptom matrix -> one-change-at-a-time with panel readouts). KEY CONSTRAINT: exact LogikJ spec is nearly slider-less (street suspension = no spring/damper/ARB/alignment sliders; stock trans = no gearing). Teaching car = player's race-suspension FORK (full sliders, same 800); reference lap = the green 4C (LogikJ original). A/B those two, then tune the fork against the reference.",
+        "player_additions": "Beyond the manifest, player added: race front bumper + race rear wing (consistent with target aero balance 0.37), rear tire width, front track width. WIDTHS ARE FORENSICALLY INVISIBLE — no compare-pane row shows them; LogikJ's widths unknowable. Rule: if PI won't land exactly with all visible rows matched, revert widths first (the unaccountable variable; they also add weight)."
       },
       "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
       "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",

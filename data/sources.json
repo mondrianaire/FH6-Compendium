@@ -656,6 +656,13 @@
       "url": "https://www.iggm.com/news/fh6-cars-downgrading-how-to-modify-components-make-understated-yet-remain-practical",
       "used_for": "BUILD PHASE (2026-07-27): confirms FH6 downgrade mechanics exist (reset-to-stock, part removal, downgrade components for PI reduction) — corroborates the player-confirmed class-down build path (570S into A)",
       "reliability_note": "currency-seller blog — used only to corroborate the mechanic's existence alongside ForzaFire + player confirmation"
+    },
+    {
+      "id": "in-game-class-badges",
+      "tier": "primary",
+      "title": "Player in-game screenshot — class badge strip (all 8 classes)",
+      "url": "n/a — user-provided screenshot 2026-07-31",
+      "used_for": "GROUND TRUTH: full class ladder incl. R cap 998 and X 999; the in-game badge design language (letter-on-color + cap-on-black pills; D cyan / C yellow / B orange / A red / S1 purple / S2 blue / R magenta / X green) replicated as the dashboard's pi-badge component"
     }
   ],
   "fh6_ui_structure_pass": {

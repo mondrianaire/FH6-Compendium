@@ -135,11 +135,12 @@ td.price { font-variant-numeric: tabular-nums; }
 .var-line .rng { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .var-line .poles { color: var(--muted); font-size: 11px; margin-top: 2px; }
 .flag { font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-left: 8px; background: var(--bg3); color: var(--accent); }
-.acq { font-size: 12px; font-weight: 600; }
-.acq-easy { color: var(--accent); }
-.acq-medium { color: var(--warn); }
-.acq-hard { color: #f0883e; }
-.acq-premium { color: #bc8cff; }
+/* acquisition pills — same shape language as the PI class badges */
+.acq { display: inline-flex; align-items: center; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55); vertical-align: middle; }
+.acq-easy { background: #159a5e; }
+.acq-medium { background: #c2911c; }
+.acq-hard { background: #cf5b2e; }
+.acq-premium { background: #8d5fd3; }
 .cov-table { width: 100%; border-collapse: collapse; font-size: 11px; }
 .cov-table th { padding: 4px 6px; color: var(--muted); text-align: left; white-space: nowrap; }
 .cov-table td { padding: 4px 6px; border: 1px solid var(--line); cursor: pointer; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -147,6 +148,15 @@ td.price { font-variant-numeric: tabular-nums; }
 .cov-table td.cov-have { background: rgba(210, 153, 34, .14); }
 .cov-table td.cov-gap { color: var(--muted); opacity: .45; cursor: default; }
 .cov-table td:not(.cov-gap):hover { outline: 1px solid var(--accent); }
+/* PI class badges — replicates the in-game design language (player screenshot 2026-07-31) */
+.pib { display: inline-flex; align-items: stretch; border-radius: 4px; overflow: hidden; font-size: 11px; font-weight: 800; line-height: 1; vertical-align: middle; }
+.pib b { padding: 3px 5px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55); font-style: normal; }
+.pib i { padding: 3px 5px; background: #0b0d10; color: #fff; font-style: normal; font-weight: 700; }
+.pib-d b { background: #45c8f1; } .pib-c b { background: #f0c530; }
+.pib-b b { background: #f0862d; } .pib-a b { background: #e5414e; }
+.pib-s1 b { background: #a468e8; } .pib-s2 b { background: #2f62e0; }
+.pib-r b { background: #e83c9e; } .pib-x b { background: #2fd05f; }
+.pib-dash { color: var(--muted); margin: 0 3px; font-weight: 700; }
 .fx-row { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 3px; flex-wrap: wrap; }
 .fx-axis { flex: 0 1 42px; min-width: 14px; border-top: 1px dashed var(--line); height: 0; }
 .fx-label { color: var(--muted); }

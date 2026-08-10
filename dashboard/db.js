@@ -1085,9 +1085,10 @@ window.FH6_DB = {
       "A": "601-700",
       "S1": "701-800",
       "S2": "801-900",
-      "R": "901+"
+      "R": "901-998",
+      "X": "999"
     },
-    "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game. CORROBORATED 2026-07-18 by 53Rain's Tune List (community tuner): its FH6 build sections are capped at exactly B 600 / A 700 / S1 800 — an independent expert confirmation of the shifted caps (matches this table's B≤600, A≤700, S1≤800). Confidence on B/A/S1 caps raised toward verified.",
+    "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game. CORROBORATED 2026-07-18 by 53Rain's Tune List (community tuner): its FH6 build sections are capped at exactly B 600 / A 700 / S1 800 — an independent expert confirmation of the shifted caps (matches this table's B≤600, A≤700, S1≤800). Confidence on B/A/S1 caps raised toward verified. UPDATE 2026-07-31 (PRIMARY, player screenshot of in-game class badges): R caps at 998 and X=999 exists as its own class. Badge colors captured from the same screenshot: D cyan, C yellow, B orange, A red, S1 purple, S2 blue, R magenta, X green — now used identically everywhere the dashboard mentions a class.",
     "disciplines": [
       "road",
       "touge",
@@ -45125,6 +45126,13 @@ window.FH6_DB = {
         "url": "https://www.iggm.com/news/fh6-cars-downgrading-how-to-modify-components-make-understated-yet-remain-practical",
         "used_for": "BUILD PHASE (2026-07-27): confirms FH6 downgrade mechanics exist (reset-to-stock, part removal, downgrade components for PI reduction) — corroborates the player-confirmed class-down build path (570S into A)",
         "reliability_note": "currency-seller blog — used only to corroborate the mechanic's existence alongside ForzaFire + player confirmation"
+      },
+      {
+        "id": "in-game-class-badges",
+        "tier": "primary",
+        "title": "Player in-game screenshot — class badge strip (all 8 classes)",
+        "url": "n/a — user-provided screenshot 2026-07-31",
+        "used_for": "GROUND TRUTH: full class ladder incl. R cap 998 and X 999; the in-game badge design language (letter-on-color + cap-on-black pills; D cyan / C yellow / B orange / A red / S1 purple / S2 blue / R magenta / X green) replicated as the dashboard's pi-badge component"
       }
     ],
     "fh6_ui_structure_pass": {
@@ -45192,5 +45200,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T02:46Z"
+  "builtAt": "2026-08-10T03:24Z"
 };

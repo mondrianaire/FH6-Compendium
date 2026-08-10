@@ -5,6 +5,20 @@
 
   const cars = DB.metaCars.cars;
   const classes = DB.metaCars.pi_classes;
+  // PI class badge — in-game design language (player screenshot 2026-07-31)
+  const PI_CAP = { D: 400, C: 500, B: 600, A: 700, S1: 800, S2: 900, R: 998, X: 999 };
+  function clsBadge(cls, cap) {
+    if (!cls) return "";
+    const one = (c, showCap) => {
+      const u = String(c).toUpperCase().trim();
+      if (PI_CAP[u] == null) return `<span class="pib"><b style="background:var(--bg3)">${u}</b></span>`;
+      return `<span class="pib pib-${u.toLowerCase()}"><b>${u}</b>${showCap ? `<i>${PI_CAP[u]}</i>` : ""}</span>`;
+    };
+    const parts = String(cls).split("-").map((x) => x.trim());
+    if (parts.length === 2 && PI_CAP[parts[0].toUpperCase()] != null && PI_CAP[parts[1].toUpperCase()] != null)
+      return `${one(parts[0], false)}<span class="pib-dash">–</span>${one(parts[1], !!cap)}`;
+    return one(cls, !!cap);
+  }
   const disciplines = DB.metaCars.disciplines;
   const DISCIPLINE_LABEL = {
     road: "Road", touge: "Touge (1v1 duels)", street: "Street (night/traffic)", touge_street: "Touge / Street",
@@ -354,7 +368,7 @@
         const title = pick ? `Top picks: ${picks.map((p) => `${p.year} ${p.name} (${p.tier})`).join("  ·  ")}` : "GAP: no evidenced pick in the database yet";
         return `<td class="${cellClass}" data-d="${d}" data-cl="${cl}" title="${title}">${label}</td>`;
       }).join("");
-      return `<tr><th>${cl}</th>${cells}</tr>`;
+      return `<tr><th>${clsBadge(cl, true)}</th>${cells}</tr>`;
     }).join("");
 
     host.innerHTML = `
@@ -389,7 +403,7 @@
         <span>${isOwned(c.id) ? '<span class="conf conf-verified">✓ owned</span> ' : ""}<span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span></span>
       </div>
       <h3>${c.year} ${c.name}${codeTip(c.name, c)}</h3>
-      <div class="card-row"><span>${c.class} class · ${c.recommended_drivetrain}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
+      <div class="card-row"><span>${clsBadge(c.class, true)} · ${c.recommended_drivetrain}</span><span class="price">${fmtCr(c.price_credits)}</span></div>
       ${c.acquisition_difficulty ? `<div class="card-row"><span class="acq acq-${c.acquisition_difficulty.split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></div>` : ""}
       <div class="value-bar"><span style="width:${c.value_rating * 10}%"></span></div>
       <div class="chips"><span class="chip">${tuneChip(c)}</span>${c.disciplines.map((d) => `<span class="chip">${DISCIPLINE_LABEL[d] || d}</span>`).join("")}</div>
@@ -461,7 +475,7 @@
       <h2>${c.year} ${c.name}${codeTip(c.name, c)}</h2>
       ${c.use_case ? `<p class="why" style="margin:2px 0 10px"><strong>Use case:</strong> ${c.use_case}</p>` : ""}
       <dl class="kv">
-        <dt>Class</dt><dd>${c.class} (${classes[c.class] || "?"})</dd>
+        <dt>Class</dt><dd>${clsBadge(c.class, true)} <span class="why" style="font-size:12px">(PI ${classes[c.class] || "span"})</span></dd>
         <dt>Disciplines</dt><dd>${c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", ")}</dd>
         <dt>Drivetrain</dt><dd>${c.drivetrain_stock} stock → ${c.recommended_drivetrain}</dd>
         <dt>Power split</dt><dd>${c.power_split || "—"}</dd>
@@ -491,7 +505,7 @@
       ${c.disciplines_note ? `<p class="fh6note">${c.disciplines_note}</p>` : ""}
       ${c.also_viable_in && c.also_viable_in.length ? `
         <h3>Also viable in (evidence-backed)</h3>
-        <ul class="why">${c.also_viable_in.map((v) => `<li><strong>${v.class} ${DISCIPLINE_LABEL[v.discipline] || v.discipline}</strong> — ${v.evidence}</li>`).join("")}</ul>` : ""}
+        <ul class="why">${c.also_viable_in.map((v) => `<li><strong>${clsBadge(v.class)} ${DISCIPLINE_LABEL[v.discipline] || v.discipline}</strong> — ${v.evidence}</li>`).join("")}</ul>` : ""}
       ${c.detune_note ? `<p class="fh6note">⚠️ ${c.detune_note}</p>` : ""}
       <h3>Mod / upgrade priority (buy in this order)</h3>
       <ol class="why">${c.upgrade_priority.map((u) => `<li>${u}</li>`).join("")}</ol>
@@ -559,7 +573,7 @@
         <td>${c.year} ${c.name}${codeTip(c.name, c)}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
         <td class="why" style="font-size:12px;max-width:300px">${c.use_case || (c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", "))}</td>
         <td><span class="acq acq-${(c.acquisition_difficulty || "").split("-")[0]}">${acqLabel(c.acquisition_difficulty)}</span></td>
-        <td>${c.class}</td>
+        <td>${clsBadge(c.class)}</td>
         <td><span class="badge tier-${c.tier}">${c.tier}</span></td>
         <td class="price">${fmtCr(c.price_credits)}</td>
         <td>${c.value_rating}/10</td>
@@ -827,7 +841,7 @@
       const snap = a.leaderboard_snapshot || {};
       return `
         <div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px">
-          <div class="card-row" style="margin-top:0"><h4 style="margin:0">${a.class} class</h4><span class="conf conf-probable">${(snap.your_standing) || ""}</span></div>
+          <div class="card-row" style="margin-top:0"><h4 style="margin:0">${clsBadge(a.class, true)}</h4><span class="conf conf-probable">${(snap.your_standing) || ""}</span></div>
           ${a.board_state ? `<p class="fh6note"><strong>Board (${snap.date || ""}, ${snap.filter || ""}):</strong> ${a.board_state}</p>` : ""}
           ${rows ? `<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Driver</th><th>Car</th><th>PI</th><th>DT</th><th>Time</th><th>Flag</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
           ${a.recommended_car ? `<p class="why"><strong>Pick:</strong> ${a.recommended_car}</p>` : ""}
@@ -892,7 +906,7 @@
       const code = t && t.code
         ? ` — <code>${t.code}</code> <span class="why" style="font-size:11px">${t.creator || t.source || ""}</span>`
         : ` — <span class="why" style="font-size:11px">no bound code; pick a ROAD tune in the 🔑 browser</span>`;
-      return `<li>${c.name} <span class="badge tier-${c.tier}">${c.class}</span>${code}</li>`;
+      return `<li>${c.name} ${clsBadge(c.class, true)}${code}</li>`;
     }
     function metaInferredBlock(t) {
       const picks = metaPicksForTrack(t, 3);
@@ -1396,7 +1410,7 @@
         ${g.meta_cars.map((c) => `
           <div class="car-card" style="cursor:default">
             <div class="card-row" style="margin-top:0">
-              <span class="badge tier-${c.class === "S1" || c.class === "S2" ? "S" : c.class === "A" ? "A" : "B"}">${c.class} class</span>
+              ${clsBadge(c.class, true)}
               <span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span>
             </div>
             <h3 style="font-size:15px">${c.name}${codeTip(c.name, c)}</h3>
@@ -1444,7 +1458,7 @@
       const body = shown.map((r) => `<tr class="${r.meta ? "row-meta" : ""}">
         <td>${r.car}</td>
         <td><code>${r.code}</code></td>
-        <td>${r.class || "—"}</td>
+        <td>${r.class ? clsBadge(r.class) : "—"}</td>
         <td>${r.discipline || "—"}</td>
         <td>${r.creator || ""}${r.meta ? ' <span class="badge tier-S" style="font-size:9px">curated</span>' : ""}<br><span class="why" style="font-size:11px">${r.source}</span></td>
         <td class="why" style="font-size:12px">${r.focus || ""}</td>
@@ -1624,7 +1638,7 @@
       });
     };
     const extraFe = seedOn ? oc.cars.filter((c) => c.fe).filter((c) => !onRoster(c)) : [];
-    const extraRows = extraFe.map((c) => `<tr><td>${c.year} ${c.manufacturer} ${c.model.replace(/ ?forza edition/i, " FE")}</td><td><span class="badge tm-meta">✓ OWNED</span></td><td class="why" style="font-size:12px">${c.class || ""} ${c.pi || ""} — beyond the cross-source roster</td></tr>`).join("");
+    const extraRows = extraFe.map((c) => `<tr><td>${c.year} ${c.manufacturer} ${c.model.replace(/ ?forza edition/i, " FE")}</td><td><span class="badge tm-meta">✓ OWNED</span></td><td class="why" style="font-size:12px">${c.class ? clsBadge(c.class) : ""} ${c.pi || ""} — beyond the cross-source roster</td></tr>`).join("");
 
     host.innerHTML = `
       <div class="block" style="margin-top:0">

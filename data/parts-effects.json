@@ -345,6 +345,66 @@
           },
           "brakes": {
             "finding": "NO BRAKE MENU EXISTS for this car (player-verified 2026-08-10) — factory ACR carbon-ceramics are terminal hardware, like the missing cams/exhaust rows. Per-car catalog rule again. OPEN: does the tune menu's Brake tab have sliders by default on this car? (factory-adjustable would be a third free-adjustability gift; locked = brake balance unavailable to everyone including the donor)"
+          },
+          "differential": {
+            "finding": "PI-FREE AT EVERY TIER (all preview S1 790 from the cage-less stock-WR base): Stock / Race 2-way (unlocks full diff tuning) / Drift (2,500cr) / Offroad (2,500cr).",
+            "options": [
+              {
+                "part": "Stock Diff",
+                "pi": 790
+              },
+              {
+                "part": "Race Differential 2-Way",
+                "pi": 790,
+                "note": "installed; unlocks full differential tuning"
+              },
+              {
+                "part": "Drift Diff",
+                "pi": 790,
+                "cost_cr": 2500
+              },
+              {
+                "part": "Offroad Diff",
+                "pi": 790,
+                "cost_cr": 2500
+              }
+            ]
+          },
+          "transmission": {
+            "finding": "PI-FREE AT EVERY BOX (all S1 790); differ only in WEIGHT — stock is LIGHTEST.",
+            "options": [
+              {
+                "part": "Stock Transmission",
+                "pi": 790,
+                "weight_lb": 3686
+              },
+              {
+                "part": "Race 7 Speed",
+                "pi": 790,
+                "weight_lb": 3690,
+                "cost_cr": 3000
+              },
+              {
+                "part": "Race 8 Speed",
+                "pi": 790,
+                "cost_cr": 3000
+              },
+              {
+                "part": "Race 9 Speed",
+                "pi": 790,
+                "cost_cr": 3000
+              },
+              {
+                "part": "Race 10 Speed",
+                "pi": 790,
+                "note": "installed"
+              },
+              {
+                "part": "Drift 4 Speed",
+                "pi": 790,
+                "cost_cr": 3000
+              }
+            ]
           }
         }
       },
@@ -354,7 +414,7 @@
         "finding_2": "SOLVED AND PLAYER-VERIFIED 2026-08-10: STREET Centrifugal (757/669) + Race Intercooler (+58/+46) + Race Fuel System (+13/+12) + Race Oil/Cooling (+6/+5) = ~834/732 additive — hp exact, torque within 1 (interaction/rounding). Corroboration: intercooler+oil weight sits FORWARD (front% 52->53->54 with weight strip = donor's 54%); Race Oil's -2 PI fits the donor tuner's PI-squeezing pattern (rally suspension, rally tires).",
         "verify": "Swap aspiration to Street Centrifugal, install Race Intercooler + Race Fuel System + Race Oil/Cooling, read absolutes. Expect 834/731-732. Then weight ladder toward 3,148 (heavy strip ~-540 from that config) and PI to exactly 800.",
         "verified": "CONFIRMED IN-GAME: Street Centrifugal + Race Intercooler + Race Fuel System + Race Oil/Cooling = 834 hp / 731 ft-lb EXACT (pane-read). The additive delta model held to the digit across an aspiration-base transfer. First engine fully reverse-engineered from a locked tune via measured previews + subset-sum.",
-        "chassis_reconstruction": "2026-08-10: Race WR (+33 PI) proves the donor carries NO race brakes/ARBs/diff/cage — donor = engine + AWD + rally compound + rally S&D + Race WR + stock chassis parts = near-slider-less PI-max build (2nd confirmed instance of the pattern: top S1 tuners sell adjustability for weight/power). Player fork paths quantified: A exact-mimic (sell all extras, Race WR, ~3,134 @ <=800, no chassis sliders) / B balanced (sell cage + one family, Sport WR, ~3,412 @ ~800) / C current (3,665 @ 798, 517 lb tax). Pending: PI readouts of race brakes/ARBs/diff stock-downgrades to solve B exactly. REVISION: race-WR weights (3,134 WITH cage vs ~3,085 without) fit the donor's 3,148 far better WITH the cage — donor likely KEEPS the cage and closes 800 by running stock brakes + stock diff (combined ~31 PI from the 831 with-cage figure). ARBs are PI-free so the donor may well run race ARBs too. Pending: brake + diff stock-preview PIs — the final two numbers. BRAKES REMOVED from the model (no such part on this car). Give-back pool re-suspected: DIFF + TRANSMISSION (race 10-speed vs stock — never priced) + DRIVELINE. If those three sum ~28-31, donor = rally springs + race WR + free ARBs + factory brakes + STOCK drivetrain parts (slider-less philosophy fits stock gearbox; 214.2 top speed needs no custom gearing). Pending: three stock-preview PI readouts."
+        "chassis_reconstruction": "2026-08-10: Race WR (+33 PI) proves the donor carries NO race brakes/ARBs/diff/cage — donor = engine + AWD + rally compound + rally S&D + Race WR + stock chassis parts = near-slider-less PI-max build (2nd confirmed instance of the pattern: top S1 tuners sell adjustability for weight/power). Player fork paths quantified: A exact-mimic (sell all extras, Race WR, ~3,134 @ <=800, no chassis sliders) / B balanced (sell cage + one family, Sport WR, ~3,412 @ ~800) / C current (3,665 @ 798, 517 lb tax). Pending: PI readouts of race brakes/ARBs/diff stock-downgrades to solve B exactly. REVISION: race-WR weights (3,134 WITH cage vs ~3,085 without) fit the donor's 3,148 far better WITH the cage — donor likely KEEPS the cage and closes 800 by running stock brakes + stock diff (combined ~31 PI from the 831 with-cage figure). ARBs are PI-free so the donor may well run race ARBs too. Pending: brake + diff stock-preview PIs — the final two numbers. BRAKES REMOVED from the model (no such part on this car). Give-back pool re-suspected: DIFF + TRANSMISSION (race 10-speed vs stock — never priced) + DRIVELINE. If those three sum ~28-31, donor = rally springs + race WR + free ARBs + factory brakes + STOCK drivetrain parts (slider-less philosophy fits stock gearbox; 214.2 top speed needs no custom gearing). Pending: three stock-preview PI readouts. PARADOX (2026-08-10): with diff/trans/ARBs proven PI-free and no brake parts, NOTHING measured explains the donor's ~28 PI gap below the race-WR previews (828-831). The engine combo for 834/731 is unique in the menu. Remaining unmeasured categories: DRIVELINE, TIRE WIDTHS (narrower = PI refund — classic hidden squeeze), RIMS, AERO options. The ~28 PI lives there; readouts pending."
       }
     },
     {
@@ -423,6 +483,7 @@
     "Viper ACR 2016: Race Oil/Cooling (-2 PI, +6 hp/+5 tq), Sport Oil (-1 PI, +3/+3), Street Intercooler (0 PI, +13/+10), Race Flywheel (0 PI, -2 lb), Street Centrifugal SC (cheapest aspiration PI on both measured engines)",
     "Pattern: oil/cooling family runs PI-negative on supercharged builds (2nd engine confirming); 10-speed race transmission lowest-PI box (player's gearbox rule) — check the discount per build, it was only 1 PI on the 4C",
     "Viper ACR 2016: Rally Spring & Dampers cost 1 PI LESS than stock suspension while unlocking spring/damper/alignment sliders — negative-PI full suspension tuning. Generalize: check rally S&D pricing on every S1 build.",
-    "Viper ACR 2016: ANTI-ROLL BARS are PI-free at every tier and race bars are lighter than stock — free adjustability + free weight. Check ARB PI on every build before assuming they cost anything."
+    "Viper ACR 2016: ANTI-ROLL BARS are PI-free at every tier and race bars are lighter than stock — free adjustability + free weight. Check ARB PI on every build before assuming they cost anything.",
+    "VIPER ACR HEADLINE: the ENTIRE slider set is PI-free — rally springs (-1 PI vs stock), ARBs free, differential free at all tiers, every transmission free (weight-only differences). The 4C's ~30-PI adjustability tax does not exist on this chassis; the ACR is structurally a tuner's car. Check per-car — the tax varies from ~30 PI (4C) to zero (ACR)."
   ]
 }

@@ -515,9 +515,11 @@
         "transmission tier (count gears on the applied build)",
         "brakes (small 5.2->5.8 braking delta suggests near-stock)",
         "exact swap identity + engine parts (bisect to 623/460 at exactly 800)"
-      ]
+      ],
+      "baseline_verified": "2026-08-10: player questioned whether the yellow 4C baseline was stock. VERIFIED STOCK by cross-reference — all seven observables (240 hp / 2,072 lb / bars 5.9-5.7-4.8-7.0-5.2-5.0 / 161.2 mph / ~4.4s 0-60 / 1.02 latG) exactly match the kudosprime stock sheet. The card's steering-wheel icon = downloaded LIVERY (TEAMMATE), not a tune — the icon alone does not mean the build is modified. Cross-title note: same car lists as A 755 in FH5 vs A 644 in FH6 — PI rescale between titles (FH5 A caps 800, FH6 A caps 700), not a parts difference."
     },
     "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
-    "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating."
+    "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",
+    "baseline_rule": "Before trusting delta narratives, verify the Previous/baseline car is stock: cross-check bars + hp + weight + top speed + 0-60 + latG against a car-database stock sheet (kudosprime/calculators.games). A livery icon on the card is NOT evidence of modification. New-column targets are absolute and never depend on this check."
   }
 }

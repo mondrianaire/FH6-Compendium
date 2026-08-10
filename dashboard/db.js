@@ -45171,6 +45171,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "FULL 9-TAB SWEEP (player screenshots): ONLY the aero tab reset on the parts install — tires 24/24, gearing 3.82+ratios, ARBs 34/35, springs 430.2/481.5, RH 3.6/3.6, damping 7.5/8.0+4.5/5.0, brakes 55/100, diff 20/10-45/28-68R all SURVIVED. Micro-gaps vs window (optional): rear toe 0.0 (vs +0.1 in), no rake (3.6/3.6 vs +0.3 rear). AERO-BALANCE MYSTERY QUANTIFIED: 128/156 sliders reading 0.38 implies ~+53 lb rear-equivalent downforce NOT on the sliders — player's theory (parts install changed the calc, e.g. suspension/underbody term) is the leading hypothesis since pre-install readings matched pure slider ratio exactly. ONE-SLIDE TEST issued: rear to 260 — 0.29-0.30 = hidden term confirmed; 0.33 = nonlinear/floored calc; 0.38 = stale row (re-enter menu). Current panel @ S1 788: braking 79.1/195.2, latG 1.24/1.43, 0-60 2.425, 0-100 5.039, top 204.5, mech 0.56, eff 0.819."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "AERO-BALANCE MYSTERY SOLVED (pending final confirm): sweep test read 0.36 -> 0.33 sliding rear up to 260 — values match PURE SLIDER RATIO live during movement (0.36 ~ 227 lb, 0.33 = 260 exact). No hidden +53 lb term; the Balance row is a LAZY READOUT that only recomputes on slider movement and displays stale values indefinitely at rest (the persistent 0.38-at-156 was the reset-default leftover). Confirm: slide back to 156, expect 0.38@208 -> 0.42@177 -> 0.45@156. INSTRUMENT RULE: wiggle an aero slider one click and back to force recompute before trusting the Balance row. Net: the car has been AT the 0.45 target since the wing was set; only the display lagged."
           }
         ],
         "slider_ranges_observed": {

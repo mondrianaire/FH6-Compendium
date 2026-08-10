@@ -92,6 +92,14 @@
     if (d === "easy") return c && c.autoshow === false ? "acq-free" : "acq-easy";
     return "acq-" + String(d || "").split("-")[0];
   };
+  // P2W doctrine (player, 2026-08-10): real-money cars are permanently off the table —
+  // struck through + subtle red wash everywhere a car renders. Disputed cars exempt until resolved.
+  // Curated tag ONLY — free-text sniffing false-positives hard ("Vip" matches inside "Viper",
+  // "with VIP" discount asides, "Also in the Welcome Pack" bundle mentions). Real-money cars
+  // missing the tag get fixed in DATA, not sniffed here.
+  const isP2W = (c) => !!c && typeof c === "object" && !c.acquisition_disputed &&
+    c.acquisition_difficulty === "premium";
+  const p2wName = (c, html) => isP2W(c) ? `<s class="p2w-name" title="Pay-to-win: real money only — not expected in the garage">${html}</s>` : html;
   const tuneConf = (c) => c === "player-verified" ? "✅ verified" : c === "sourced-unverified" ? "🟡 sourced"
     : c === "suspect" ? "❌ suspect" : "ℹ️ method";
   const tuneLine = (t) => {
@@ -386,7 +394,7 @@
         const pick = picks[0];
         if (pick) { covered++; if (isOwned(pick.id)) ownedCount++; }
         const cellClass = !pick ? "cov-gap" : isOwned(pick.id) ? "cov-owned" : "cov-have";
-        const nm = (p) => `${p.name}${!(expandClass(p.class).includes(cl) && p.disciplines.includes(d)) ? " ↗" : ""}${isOwned(p.id) ? " ✓" : ""}`;
+        const nm = (p) => `${p2wName(p, p.name)}${!(expandClass(p.class).includes(cl) && p.disciplines.includes(d)) ? " ↗" : ""}${isOwned(p.id) ? " ✓" : ""}`;
         const label = pick
           ? `<div class="cell-top">${nm(pick)}${codeTip(pick.name, pick)}</div>${picks.slice(1).map((p) => `<div class="cell-alt">${nm(p)}${codeTip(p.name, p)}</div>`).join("")}`
           : "—";
@@ -421,13 +429,13 @@
 
   function card(c, top) {
     const el = document.createElement("div");
-    el.className = "car-card";
+    el.className = "car-card" + (isP2W(c) ? " p2w" : "");
     el.innerHTML = `
       <div class="card-row" style="margin-top:0">
         <span>${tmBadge(c)}<span class="badge tier-${c.tier}">${top ? "★ TOP PICK • " : ""}TIER ${c.tier}</span></span>
         <span>${isOwned(c.id) ? '<span class="conf conf-verified">✓ owned</span> ' : ""}<span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span></span>
       </div>
-      <h3>${c.year ? c.year + " " : ""}${c.name}${codeTip(c.name, c)}</h3>
+      <h3>${p2wName(c, `${c.year ? c.year + " " : ""}${c.name}`)}${codeTip(c.name, c)}</h3>
       <div class="card-row"><span>${clsBadge(c.class, true)} · ${c.recommended_drivetrain}</span><span class="price">${priceOrSource(c)}</span></div>
       ${c.acquisition_difficulty ? `<div class="card-row"><span class="acq ${acqClass(c)}">${acqLabel(c)}</span></div>` : ""}
       <div class="value-bar"><span style="width:${c.value_rating * 10}%"></span></div>
@@ -497,7 +505,8 @@
       <label style="float:right;cursor:pointer;font-size:13px;user-select:none">
         <input type="checkbox" id="modalOwn" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer;vertical-align:-2px"> I own this
       </label>
-      <h2>${c.year ? c.year + " " : ""}${c.name}${codeTip(c.name, c)}</h2>
+      <h2>${p2wName(c, `${c.year ? c.year + " " : ""}${c.name}`)}${codeTip(c.name, c)}</h2>
+      ${isP2W(c) ? `<p class="why" style="margin:2px 0 8px;color:var(--warn)">💰 Pay-to-win: real-money only — treated as permanently unavailable.</p>` : ""}
       ${c.use_case ? `<p class="why" style="margin:2px 0 10px"><strong>Use case:</strong> ${c.use_case}</p>` : ""}
       <dl class="kv">
         <dt>Class</dt><dd>${clsBadge(c.class, true)} <span class="why" style="font-size:12px">(PI ${classes[c.class] || "span"})</span></dd>
@@ -593,9 +602,9 @@
     ];
     const wrap = document.getElementById("carTableWrap");
     wrap.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>${cols.map((c) => `<th data-k="${c[0]}">${c[1]}</th>`).join("")}</tr></thead>
-      <tbody>${sorted.map((c) => `<tr data-id="${c.id}" style="${isOwned(c.id) ? "opacity:.65" : ""}">
+      <tbody>${sorted.map((c) => `<tr data-id="${c.id}" class="${isP2W(c) ? "p2w-row" : ""}" style="${isOwned(c.id) ? "opacity:.65" : ""}">
         <td><input type="checkbox" class="own-check" data-id="${c.id}" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer"></td>
-        <td>${c.year ? c.year + " " : ""}${c.name}${codeTip(c.name, c)}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
+        <td>${p2wName(c, `${c.year ? c.year + " " : ""}${c.name}`)}${codeTip(c.name, c)}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
         <td class="why" style="font-size:12px;max-width:300px">${c.use_case || (c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", "))}</td>
         <td><span class="acq ${acqClass(c)}">${acqLabel(c)}</span></td>
         <td>${clsBadge(c.class)}</td>
@@ -931,7 +940,7 @@
       const code = t && t.code
         ? ` — <code>${t.code}</code> <span class="why" style="font-size:11px">${t.creator || t.source || ""}</span>`
         : ` — <span class="why" style="font-size:11px">no bound code; pick a ROAD tune in the 🔑 browser</span>`;
-      return `<li>${c.name} ${clsBadge(c.class, true)}${code}</li>`;
+      return `<li>${p2wName(c, c.name)} ${clsBadge(c.class, true)}${code}</li>`;
     }
     function metaInferredBlock(t) {
       const picks = metaPicksForTrack(t, 3);

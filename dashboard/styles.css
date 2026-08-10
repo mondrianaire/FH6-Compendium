@@ -193,3 +193,18 @@ td.price { font-variant-numeric: tabular-nums; }
 .foot { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .foot code { background: var(--bg2); padding: 2px 6px; border-radius: 4px; }
 .empty { text-align: center; color: var(--muted); padding: 40px; }
+
+/* P2W (player doctrine 2026-08-10): real-money cars are permanently off the table —
+   subtle red wash + strikethrough so they read as "not in my future" at a glance. */
+.car-card.p2w {
+  border-color: rgba(229, 65, 78, 0.4);
+  background: linear-gradient(180deg, rgba(229, 65, 78, 0.08), rgba(229, 65, 78, 0.025)), var(--bg2);
+}
+.car-card.p2w h3 { color: var(--muted); }
+.p2w-name {
+  text-decoration: line-through;
+  text-decoration-color: rgba(229, 65, 78, 0.75);
+  text-decoration-thickness: 1.5px;
+}
+tr.p2w-row td { background: rgba(229, 65, 78, 0.06); }
+tr.p2w-row td:nth-child(2) { color: var(--muted); }

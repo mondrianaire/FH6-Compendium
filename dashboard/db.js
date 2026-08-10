@@ -45320,7 +45320,8 @@ window.FH6_DB = {
       "video_forensics_note": "Short gameplay clips are a first-class instrument: frame extraction reads HUD speed/gear/skill-popups per instant. The skill system doubles as telemetry — DRIFT skills during a grip lap = rear slip detected; 'Great Speed' stamps entry speeds; wrecked-scenery skills timestamp off-track moments. 8-10s of video around one corner beats any verbal description.",
       "fh6_mechanics_discovered": [
         "Aero slider nominal range can exceed effective range (4C race wing: slider [156-260], physical [~208-260]) — sweep-and-watch to find true edges (player-verified 2026-08-10)",
-        "FH6 tire compound ladder (player-verified on the 4C, 2026-08-10): NO Street/Sport upgrade tiers — Stock -> Semi-Slick -> Slick, plus specialties (Drift, Rally, Offroad, Snow, Drag). The compare pane's 'Sport' label is the STOCK tire's category, not a purchasable tier. Differs from FH5 naming."
+        "FH6 tire compound ladder (player-verified on the 4C, 2026-08-10): NO Street/Sport upgrade tiers — Stock -> Semi-Slick -> Slick, plus specialties (Drift, Rally, Offroad, Snow, Drag). The compare pane's 'Sport' label is the STOCK tire's category, not a purchasable tier. Differs from FH5 naming.",
+        "Aspiration options are FAMILIES with internal Street/Sport/Race tiers; the Aspiration menu preview shows only the entry tier (player-discovered on the Viper V10, 2026-08-10). Subset-sum over aspiration must enumerate tier ladders."
       ],
       "panel_baselines_rule": "PANEL BASELINES ARE PER-BUILD, NOT PER-CAR (player-raised 2026-08-10, evidenced in case study 2: swap+AWD moved the 4C 41%->47% front). Any part install — engine parts included — can shift Mech. Balance (mass at the part's location), lateral G and braking (total mass), and all accel numbers; can silently RESET tune tabs; and changes PI. Aero Balance alone is immune to engine mass (pure downforce split — but its ceiling is a property of the aero PARTS, see effective-range mechanic). Protocol after EVERY install: 9-tab sweep vs recorded state, wiggle-and-read the panel, expire all prior baselines.",
       "weight_scaling_rule": "Spring/damper values scale with build weight: a slider sheet is valid ONLY at the weight it was derived for. When mass changes (parts, compound-driven PI rebudgeting), rescale springs and damping proportionally before judging handling. (Learned via fork B: +12% mass on fork A's values = transient breakaway on sharp steering.)",
@@ -45427,8 +45428,39 @@ window.FH6_DB = {
               "cost_cr": 1500
             }
           ],
-          "residual_analysis": "Target 834/731. Residuals: TT +67/+17 (NA-shaped), PDSC +76/+26 (NA-shaped), Cent +77/+62 (torque-heavy — NA parts can't usually fill; REJECTED despite PI bargain). Prediction: donor = Twin Turbo + cams/exhaust combo; PDSC runner-up. Double constraint (exact 834/731 AND exact 800 after ~360lb weight strip) should admit one answer. NA-menu previews pending player readout.",
-          "pattern_note": "Centrifugal SC is again the PI-cheapest aspiration (777 vs 790/794) — same pattern as the 4C. PI-efficiency explains tuner fondness for centrifugal, but the torque signature rules it out HERE."
+          "residual_analysis": "Target 834/731. Residuals: TT +67/+17 (NA-shaped), PDSC +76/+26 (NA-shaped), Cent +77/+62 (torque-heavy — NA parts can't usually fill; REJECTED despite PI bargain). Prediction: donor = Twin Turbo + cams/exhaust combo; PDSC runner-up. Double constraint (exact 834/731 AND exact 800 after ~360lb weight strip) should admit one answer. NA-menu previews pending player readout. SUPERSEDED: aspiration families have internal TIERS (street/sport/race) and the Aspiration menu previews only the ENTRY tier — Sport Centrifugal lands 830/723 (-4/-8 from target). Twin-turbo prediction WRONG; donor = Sport Centrifugal + one small +4/+8 part. Tier-ladder rule added.",
+          "pattern_note": "Centrifugal SC is again the PI-cheapest aspiration (777 vs 790/794) — same pattern as the 4C. PI-efficiency explains tuner fondness for centrifugal, but the torque signature rules it out HERE.",
+          "centrifugal_family_tiers": [
+            {
+              "part": "Street Centrifugal Supercharger",
+              "to": [
+                757,
+                669
+              ],
+              "pi": "S1 777",
+              "installed": true
+            },
+            {
+              "part": "Sport Centrifugal Supercharger",
+              "to": [
+                830,
+                723
+              ],
+              "pi": "S1 786",
+              "cost_cr": 3600,
+              "note": "DONOR MATCH: -4hp/-8tq from target 834/731 — one small torque-leaning part closes it (oil & cooling / intake suspects)"
+            },
+            {
+              "part": "Race Centrifugal Supercharger",
+              "to": [
+                879,
+                761
+              ],
+              "pi": "S1 793",
+              "cost_cr": 5400,
+              "weight_lb": 3563
+            }
+          ]
         }
       }
     }

@@ -650,6 +650,7 @@
     "video_forensics_note": "Short gameplay clips are a first-class instrument: frame extraction reads HUD speed/gear/skill-popups per instant. The skill system doubles as telemetry — DRIFT skills during a grip lap = rear slip detected; 'Great Speed' stamps entry speeds; wrecked-scenery skills timestamp off-track moments. 8-10s of video around one corner beats any verbal description.",
     "fh6_mechanics_discovered": [
       "Aero slider nominal range can exceed effective range (4C race wing: slider [156-260], physical [~208-260]) — sweep-and-watch to find true edges (player-verified 2026-08-10)"
-    ]
+    ],
+    "panel_baselines_rule": "PANEL BASELINES ARE PER-BUILD, NOT PER-CAR (player-raised 2026-08-10, evidenced in case study 2: swap+AWD moved the 4C 41%->47% front). Any part install — engine parts included — can shift Mech. Balance (mass at the part's location), lateral G and braking (total mass), and all accel numbers; can silently RESET tune tabs; and changes PI. Aero Balance alone is immune to engine mass (pure downforce split — but its ceiling is a property of the aero PARTS, see effective-range mechanic). Protocol after EVERY install: 9-tab sweep vs recorded state, wiggle-and-read the panel, expire all prior baselines."
   }
 }

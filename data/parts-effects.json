@@ -13,65 +13,301 @@
       "id": "viper-acr-2016-v10",
       "car": "Dodge Viper ACR 2016",
       "engine": "Stock 8.4L V10 (8,382 cc)",
-      "stock_output": { "hp": 645, "torque_ftlb": 600 },
+      "stock_output": {
+        "hp": 645,
+        "torque_ftlb": 600
+      },
       "measurement_base": {
         "description": "Sport Centrifugal Supercharger installed; AWD + rally compound + rally springs already on the car",
-        "hp": 830, "torque_ftlb": 723, "weight_lb": 3569, "front_pct": 52, "pi": 786
+        "hp": 830,
+        "torque_ftlb": 723,
+        "weight_lb": 3569,
+        "front_pct": 52,
+        "pi": 786
       },
       "captured": "2026-08-10 — player shop-preview screenshots, complete engine menu (8 categories; NO camshaft/exhaust/valves/ignition rows exist on this car's menu)",
       "categories": {
         "aspiration_centrifugal_family": [
-          { "part": "Street Centrifugal Supercharger", "hp": 757, "torque": 669, "weight_lb": 3569, "front_pct": 52, "pi": 777, "cost_cr": 1500 },
-          { "part": "Sport Centrifugal Supercharger", "hp": 830, "torque": 723, "weight_lb": 3569, "front_pct": 52, "pi": 786, "cost_cr": 3600, "note": "measurement base" },
-          { "part": "Race Centrifugal Supercharger", "hp": 879, "torque": 761, "weight_lb": 3563, "front_pct": 52, "pi": 793, "cost_cr": 5400 }
+          {
+            "part": "Street Centrifugal Supercharger",
+            "hp": 757,
+            "torque": 669,
+            "weight_lb": 3569,
+            "front_pct": 52,
+            "pi": 777,
+            "cost_cr": 1500
+          },
+          {
+            "part": "Sport Centrifugal Supercharger",
+            "hp": 830,
+            "torque": 723,
+            "weight_lb": 3569,
+            "front_pct": 52,
+            "pi": 786,
+            "cost_cr": 3600,
+            "note": "measurement base"
+          },
+          {
+            "part": "Race Centrifugal Supercharger",
+            "hp": 879,
+            "torque": 761,
+            "weight_lb": 3563,
+            "front_pct": 52,
+            "pi": 793,
+            "cost_cr": 5400
+          }
         ],
         "displacement": [
-          { "part": "Stock Engine Block", "hp": 830, "torque": 723, "displacement_cc": 8382, "pi": 786 },
-          { "part": "Race Engine Block", "hp": 849, "torque": 740, "delta": [19, 17], "weight_lb": 3569, "displacement_cc": 9000, "pi": 792, "cost_cr": 3700, "note": "9.0L reading on a Viper = this part (cross-ref: the original ford351guy 940hp build showed 9.00L)" }
+          {
+            "part": "Stock Engine Block",
+            "hp": 830,
+            "torque": 723,
+            "displacement_cc": 8382,
+            "pi": 786
+          },
+          {
+            "part": "Race Engine Block",
+            "hp": 849,
+            "torque": 740,
+            "delta": [
+              19,
+              17
+            ],
+            "weight_lb": 3569,
+            "displacement_cc": 9000,
+            "pi": 792,
+            "cost_cr": 3700,
+            "note": "9.0L reading on a Viper = this part (cross-ref: the original ford351guy 940hp build showed 9.00L)"
+          }
         ],
         "pistons_compression": [
-          { "part": "Sport Pistons / Compression", "hp": 837, "torque": 730, "delta": [7, 7], "weight_lb": 3568, "pi": 787, "cost_cr": 2400 },
-          { "part": "Race Pistons / Compression", "hp": 842, "torque": 734, "delta": [12, 11], "weight_lb": 3566, "pi": 790, "cost_cr": 3700 }
+          {
+            "part": "Sport Pistons / Compression",
+            "hp": 837,
+            "torque": 730,
+            "delta": [
+              7,
+              7
+            ],
+            "weight_lb": 3568,
+            "pi": 787,
+            "cost_cr": 2400
+          },
+          {
+            "part": "Race Pistons / Compression",
+            "hp": 842,
+            "torque": 734,
+            "delta": [
+              12,
+              11
+            ],
+            "weight_lb": 3566,
+            "pi": 790,
+            "cost_cr": 3700
+          }
         ],
         "intercooler": [
-          { "part": "Street Intercooler", "hp": 843, "torque": 733, "delta": [13, 10], "weight_lb": 3614, "front_pct": 53, "pi": 786, "delta_pi": 0, "cost_cr": 750, "note": "PI-FREE +13/+10 — efficiency star" },
-          { "part": "Sport Intercooler", "hp": 862, "torque": 748, "delta": [32, 25], "weight_lb": 3629, "front_pct": 53, "pi": 788, "cost_cr": 1450 },
-          { "part": "Race Intercooler", "hp": 888, "torque": 769, "delta": [58, 46], "weight_lb": 3647, "front_pct": 53, "pi": 789, "delta_pi": 3, "cost_cr": 2200, "note": "+58 hp for +3 PI — efficiency star" }
+          {
+            "part": "Street Intercooler",
+            "hp": 843,
+            "torque": 733,
+            "delta": [
+              13,
+              10
+            ],
+            "weight_lb": 3614,
+            "front_pct": 53,
+            "pi": 786,
+            "delta_pi": 0,
+            "cost_cr": 750,
+            "note": "PI-FREE +13/+10 — efficiency star"
+          },
+          {
+            "part": "Sport Intercooler",
+            "hp": 862,
+            "torque": 748,
+            "delta": [
+              32,
+              25
+            ],
+            "weight_lb": 3629,
+            "front_pct": 53,
+            "pi": 788,
+            "cost_cr": 1450
+          },
+          {
+            "part": "Race Intercooler",
+            "hp": 888,
+            "torque": 769,
+            "delta": [
+              58,
+              46
+            ],
+            "weight_lb": 3647,
+            "front_pct": 53,
+            "pi": 789,
+            "delta_pi": 3,
+            "cost_cr": 2200,
+            "note": "+58 hp for +3 PI — efficiency star"
+          }
         ],
         "oil_cooling": [
-          { "part": "Sport Oil / Cooling", "hp": 833, "torque": 726, "delta": [3, 3], "weight_lb": 3590, "front_pct": 53, "pi": 785, "delta_pi": -1, "cost_cr": 1400, "note": "NEGATIVE PI" },
-          { "part": "Race Oil / Cooling", "hp": 836, "torque": 728, "delta": [6, 5], "weight_lb": 3609, "front_pct": 53, "pi": 784, "delta_pi": -2, "cost_cr": 2100, "note": "NEGATIVE PI: +6/+5 AND -2 PI — the free-power champion" }
+          {
+            "part": "Sport Oil / Cooling",
+            "hp": 833,
+            "torque": 726,
+            "delta": [
+              3,
+              3
+            ],
+            "weight_lb": 3590,
+            "front_pct": 53,
+            "pi": 785,
+            "delta_pi": -1,
+            "cost_cr": 1400,
+            "note": "NEGATIVE PI"
+          },
+          {
+            "part": "Race Oil / Cooling",
+            "hp": 836,
+            "torque": 728,
+            "delta": [
+              6,
+              5
+            ],
+            "weight_lb": 3609,
+            "front_pct": 53,
+            "pi": 784,
+            "delta_pi": -2,
+            "cost_cr": 2100,
+            "note": "NEGATIVE PI: +6/+5 AND -2 PI — the free-power champion"
+          }
         ],
         "flywheel": [
-          { "part": "Race Flywheel", "hp": 830, "torque": 723, "delta": [0, 0], "weight_lb": 3567, "delta_weight": -2, "pi": 786, "delta_pi": 0, "cost_cr": 2400, "note": "0 PI, -2 lb rotational — free" }
+          {
+            "part": "Race Flywheel",
+            "hp": 830,
+            "torque": 723,
+            "delta": [
+              0,
+              0
+            ],
+            "weight_lb": 3567,
+            "delta_weight": -2,
+            "pi": 786,
+            "delta_pi": 0,
+            "cost_cr": 2400,
+            "note": "0 PI, -2 lb rotational — free"
+          }
         ],
         "intake": [
-          { "part": "Sport Intake", "hp": 835, "torque": 728, "delta": [5, 5], "weight_lb": 3567, "pi": 787, "cost_cr": 1200 },
-          { "part": "Race Intake", "hp": 839, "torque": 731, "delta": [9, 8], "weight_lb": 3564, "pi": 788, "cost_cr": 1800 }
+          {
+            "part": "Sport Intake",
+            "hp": 835,
+            "torque": 728,
+            "delta": [
+              5,
+              5
+            ],
+            "weight_lb": 3567,
+            "pi": 787,
+            "cost_cr": 1200
+          },
+          {
+            "part": "Race Intake",
+            "hp": 839,
+            "torque": 731,
+            "delta": [
+              9,
+              8
+            ],
+            "weight_lb": 3564,
+            "pi": 788,
+            "cost_cr": 1800
+          }
         ],
         "fuel_system": [
-          { "part": "Race Fuel System", "hp": 843, "torque": 735, "delta": [13, 12], "weight_lb": 3569, "pi": 790, "cost_cr": 2200 }
+          {
+            "part": "Race Fuel System",
+            "hp": 843,
+            "torque": 735,
+            "delta": [
+              13,
+              12
+            ],
+            "weight_lb": 3569,
+            "pi": 790,
+            "cost_cr": 2200
+          }
         ]
       },
       "donor_solution": {
         "target": "834 hp / 731 ft-lb / 3,148 lb / 54% front / stock 8,382cc block (case study 3 donor pane)",
         "finding_1": "UNREACHABLE from Sport Centrifugal: with the complete menu measured, no part or additive combination lands +4/+8 (closest: Race Intake 839/731 — torque exact, hp 5 over; Sport Pistons 837/730). Player's report confirmed by exhaustive data.",
-        "finding_2": "SOLVED (leading, pending install-verify): STREET Centrifugal (757/669) + Race Intercooler (+58/+46) + Race Fuel System (+13/+12) + Race Oil/Cooling (+6/+5) = ~834/732 additive — hp exact, torque within 1 (interaction/rounding). Corroboration: intercooler+oil weight sits FORWARD (front% 52->53->54 with weight strip = donor's 54%); Race Oil's -2 PI fits the donor tuner's PI-squeezing pattern (rally suspension, rally tires).",
-        "verify": "Swap aspiration to Street Centrifugal, install Race Intercooler + Race Fuel System + Race Oil/Cooling, read absolutes. Expect 834/731-732. Then weight ladder toward 3,148 (heavy strip ~-540 from that config) and PI to exactly 800."
+        "finding_2": "SOLVED AND PLAYER-VERIFIED 2026-08-10: STREET Centrifugal (757/669) + Race Intercooler (+58/+46) + Race Fuel System (+13/+12) + Race Oil/Cooling (+6/+5) = ~834/732 additive — hp exact, torque within 1 (interaction/rounding). Corroboration: intercooler+oil weight sits FORWARD (front% 52->53->54 with weight strip = donor's 54%); Race Oil's -2 PI fits the donor tuner's PI-squeezing pattern (rally suspension, rally tires).",
+        "verify": "Swap aspiration to Street Centrifugal, install Race Intercooler + Race Fuel System + Race Oil/Cooling, read absolutes. Expect 834/731-732. Then weight ladder toward 3,148 (heavy strip ~-540 from that config) and PI to exactly 800.",
+        "verified": "CONFIRMED IN-GAME: Street Centrifugal + Race Intercooler + Race Fuel System + Race Oil/Cooling = 834 hp / 731 ft-lb EXACT (pane-read). The additive delta model held to the digit across an aspiration-base transfer. First engine fully reverse-engineered from a locked tune via measured previews + subset-sum."
       }
     },
     {
       "id": "alfa-4c-2014-4p7-swap",
       "car": "Alfa Romeo 4C 2014",
       "engine": "4.69L V8 swap (F136-consistent), NA base ~527 hp",
-      "measurement_base": { "description": "4.69L swap installed, deltas as reported during the fork A/B builds (mixed bases — treat as approximate)", "hp": null },
+      "measurement_base": {
+        "description": "4.69L swap installed, deltas as reported during the fork A/B builds (mixed bases — treat as approximate)",
+        "hp": null
+      },
       "captured": "2026-08-10 — player-reported deltas during case study 2",
       "categories": {
-        "aspiration": [ { "part": "Centrifugal Supercharger", "delta": [77, 54], "note": "tier not recorded" } ],
-        "camshaft": [ { "part": "Sport Camshaft", "delta": [43, 9], "note": "ladder on this engine: Stock/Sport/Race — no Street tier" } ],
-        "intercooler": [ { "part": "Intercooler", "delta": [9, 6], "note": "tier not recorded" } ],
-        "oil_cooling": [ { "part": "Oil and Cooling", "delta": [7, 6] } ],
-        "flywheel": [ { "part": "Flywheel", "delta": [null, null], "note": "installed, delta never read" } ]
+        "aspiration": [
+          {
+            "part": "Centrifugal Supercharger",
+            "delta": [
+              77,
+              54
+            ],
+            "note": "tier not recorded"
+          }
+        ],
+        "camshaft": [
+          {
+            "part": "Sport Camshaft",
+            "delta": [
+              43,
+              9
+            ],
+            "note": "ladder on this engine: Stock/Sport/Race — no Street tier"
+          }
+        ],
+        "intercooler": [
+          {
+            "part": "Intercooler",
+            "delta": [
+              9,
+              6
+            ],
+            "note": "tier not recorded"
+          }
+        ],
+        "oil_cooling": [
+          {
+            "part": "Oil and Cooling",
+            "delta": [
+              7,
+              6
+            ]
+          }
+        ],
+        "flywheel": [
+          {
+            "part": "Flywheel",
+            "delta": [
+              null,
+              null
+            ],
+            "note": "installed, delta never read"
+          }
+        ]
       }
     }
   ],

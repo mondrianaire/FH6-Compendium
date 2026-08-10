@@ -45461,7 +45461,8 @@ window.FH6_DB = {
               "weight_lb": 3563
             }
           ]
-        }
+        },
+        "engine_solved": "2026-08-10: 834/731 LANDED — Street Centrifugal SC + Race Intercooler + Race Fuel System + Race Oil/Cooling (subset-sum from the parts-effects table, verified exact). Current state: 3,663 lb, aero balance already 0.57 (donor match), mech 0.49, S1 789. REMAINING: weight ladder to 3,148 (-515, front% should walk toward 54), PI to exactly 800, then the starting-slider scheme."
       }
     }
   },
@@ -45711,8 +45712,9 @@ window.FH6_DB = {
         "donor_solution": {
           "target": "834 hp / 731 ft-lb / 3,148 lb / 54% front / stock 8,382cc block (case study 3 donor pane)",
           "finding_1": "UNREACHABLE from Sport Centrifugal: with the complete menu measured, no part or additive combination lands +4/+8 (closest: Race Intake 839/731 — torque exact, hp 5 over; Sport Pistons 837/730). Player's report confirmed by exhaustive data.",
-          "finding_2": "SOLVED (leading, pending install-verify): STREET Centrifugal (757/669) + Race Intercooler (+58/+46) + Race Fuel System (+13/+12) + Race Oil/Cooling (+6/+5) = ~834/732 additive — hp exact, torque within 1 (interaction/rounding). Corroboration: intercooler+oil weight sits FORWARD (front% 52->53->54 with weight strip = donor's 54%); Race Oil's -2 PI fits the donor tuner's PI-squeezing pattern (rally suspension, rally tires).",
-          "verify": "Swap aspiration to Street Centrifugal, install Race Intercooler + Race Fuel System + Race Oil/Cooling, read absolutes. Expect 834/731-732. Then weight ladder toward 3,148 (heavy strip ~-540 from that config) and PI to exactly 800."
+          "finding_2": "SOLVED AND PLAYER-VERIFIED 2026-08-10: STREET Centrifugal (757/669) + Race Intercooler (+58/+46) + Race Fuel System (+13/+12) + Race Oil/Cooling (+6/+5) = ~834/732 additive — hp exact, torque within 1 (interaction/rounding). Corroboration: intercooler+oil weight sits FORWARD (front% 52->53->54 with weight strip = donor's 54%); Race Oil's -2 PI fits the donor tuner's PI-squeezing pattern (rally suspension, rally tires).",
+          "verify": "Swap aspiration to Street Centrifugal, install Race Intercooler + Race Fuel System + Race Oil/Cooling, read absolutes. Expect 834/731-732. Then weight ladder toward 3,148 (heavy strip ~-540 from that config) and PI to exactly 800.",
+          "verified": "CONFIRMED IN-GAME: Street Centrifugal + Race Intercooler + Race Fuel System + Race Oil/Cooling = 834 hp / 731 ft-lb EXACT (pane-read). The additive delta model held to the digit across an aspiration-base transfer. First engine fully reverse-engineered from a locked tune via measured previews + subset-sum."
         }
       },
       {

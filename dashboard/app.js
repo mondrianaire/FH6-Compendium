@@ -1720,6 +1720,15 @@
           <tbody>${L.course_fitting.archetypes.map((a) => `<tr><td>${a.archetype}</td><td class="why" style="font-size:12px">${a.dominant_tests.join(", ")}</td><td class="why" style="font-size:12px">${a.gearing}</td><td class="why" style="font-size:12px">${a.aero}</td></tr>`).join("")}</tbody></table></div>
         <ul class="why" style="margin-top:8px">${L.class_fitting.rules.map((r) => `<li>${r}</li>`).join("")}</ul>
       </div>
+      ${L.capture_protocol ? `
+      <div class="block">
+        <h3>📸 Build capture protocol — 3 shots + a sentence</h3>
+        <p class="why">${L.capture_protocol.purpose}</p>
+        <ol class="why">${L.capture_protocol.core_3.map((s) => `<li>${s.replace(/^\d+\.\s*/, "")}</li>`).join("")}</ol>
+        <p class="why"><strong>Instead of upgrade-menu shots:</strong> ${L.capture_protocol.plus_text}</p>
+        <p class="why"><strong>Full record:</strong> ${L.capture_protocol.full_record}</p>
+        <p class="fh6note">${L.capture_protocol.handling_problem}</p>
+      </div>` : ""}
       <div class="block" style="border-color:${rows.length ? "var(--accent)" : "var(--warn)"}">
         <h3>Results log — found windows (${rows.length})</h3>
         <p class="why">${L.results_log.instructions}</p>

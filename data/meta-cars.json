@@ -2511,8 +2511,8 @@
         "car": "Toyota AE86 Trueno Forza Edition",
         "mph": 325,
         "how": "'Travis tune' code 125 771 360 (sourced-unverified): 2JZ swap, AWD, race turbo + anti-lag, rally suspension, slicks, lightest rims, ZERO aero",
-        "acquisition": "FE — luck-gated unless owned",
-        "confidence": "probable — multi-site consensus (ggwtb/timesaver; possible cluster). NOTE: vindicates the timesaver claim we flagged 'unadopted single-source' on 2026-07-11"
+        "acquisition": "PLAYER-CORRECTED 2026-08-10: NOT wheelspin — guaranteed PROGRESSION REWARD at 5,000 Master Explorer points (Discover Japan, ~10/16 chapters; points are separate from Car Collection points). Auction snipe alt ~300-500k. Same Discover Japan tree that gates the Diablo SV barn find.",
+        "confidence": "probable — multi-site consensus (ggwtb/timesaver; possible cluster). NOTE: vindicates the timesaver claim we flagged 'unadopted single-source' on 2026-07-11 Acquisition corrected by player + verified (gamer-guides, operationsports, nerdschalk)."
       },
       {
         "car": "Nissan GT-R Black Edition FE",
@@ -2536,6 +2536,7 @@
         "confidence": "probable"
       }
     ],
-    "formula": "power + minimum drag (no aero) + tall clean gearing (top gear's line just reaches the speed-graph end) + high tire pressure + minimal stability aids (touch of rear toe-in). All-gears builds: the 10-speed earns its keep here."
+    "formula": "power + minimum drag (no aero) + tall clean gearing (top gear's line just reaches the speed-graph end) + high tire pressure + minimal stability aids (touch of rear toe-in). All-gears builds: the 10-speed earns its keep here.",
+    "fe_lesson": "DOCTRINE: 'FE' does NOT default to wheelspin — FH6 FE acquisition paths vary wildly (Miata FE aftermarket, Viper/Tacoma FE VIP, Exige WTAC journal, AE86 FE Discover Japan progression, GT-R Black FE wheelspin). Verify per car; never infer from the FE badge. Second FE-acquisition mislabel caught in this project (first: skycoach's Miata FE; this one was our own inference, caught by the player)."
   }
 }

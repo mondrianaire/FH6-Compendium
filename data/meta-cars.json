@@ -2537,6 +2537,41 @@
       }
     ],
     "formula": "power + minimum drag (no aero) + tall clean gearing (top gear's line just reaches the speed-graph end) + high tire pressure + minimal stability aids (touch of rear toe-in). All-gears builds: the 10-speed earns its keep here.",
-    "fe_lesson": "DOCTRINE: 'FE' does NOT default to wheelspin — FH6 FE acquisition paths vary wildly (Miata FE aftermarket, Viper/Tacoma FE VIP, Exige WTAC journal, AE86 FE Discover Japan progression, GT-R Black FE wheelspin). Verify per car; never infer from the FE badge. Second FE-acquisition mislabel caught in this project (first: skycoach's Miata FE; this one was our own inference, caught by the player)."
+    "fe_lesson": "DOCTRINE: 'FE' does NOT default to wheelspin — FH6 FE acquisition paths vary wildly (Miata FE aftermarket, Viper/Tacoma FE VIP, Exige WTAC journal, AE86 FE Discover Japan progression, GT-R Black FE wheelspin). Verify per car; never infer from the FE badge. Second FE-acquisition mislabel caught in this project (first: skycoach's Miata FE; this one was our own inference, caught by the player).",
+    "dirt_speed": {
+      "researched": "2026-08-10 (16-agent verified sweep + fresh forza.guide browser read)",
+      "headline": "No MEASURED on-dirt top speed exists in any public source — every mph figure below is a tune STAT CARD. The structural answer: uncapped off-road speed belongs to AWD-swapped ROAD hypercars on rally/off-road tires, not to any dedicated off-road car.",
+      "open_terrain_uncapped": [
+        {
+          "car": "Ultima Evolution 1020",
+          "verdict": "THE PICK — community consensus for 3-starring dirt speed zones (AWD swap + off-road tires + max engine, lands R/X). Corroborated by TWO independent evidence types: 2 independent Steam threads AND #4 on the forza.guide R-class dirt all-tracks board (6/23). Already the ~300mph road speed king; Autoshow ~150k. Flagged hard to control.",
+          "confidence": "probable"
+        },
+        {
+          "car": "Hennessey Venom F5",
+          "verdict": "CONTESTED ceiling: single Steam poster claims AWD + rally wheels '490 KM/H' (~304 mph) — exactly its stock ROAD figure, so likely spec-sheet quoting, not a measured dirt run. Autoshow; cheap to test in-game (Tune Lab candidate).",
+          "confidence": "contested"
+        },
+        {
+          "car": "Mazda MX-5 Miata FE '94",
+          "verdict": "Best CODED build: R-class (PI 997) CC tune, code 113757805 by KapienPL, 257.3 mph stat card — highest entry in CODMunity's CC database. FE acquisition UNVERIFIED (per fe_lesson: never infer from the badge).",
+          "confidence": "verified-as-listing"
+        },
+        {
+          "car": "Dodge Viper GTS ACR FE",
+          "verdict": "P2W BENCHMARK ONLY (VIP — excluded from recommendations): Don Joewon Song S2 PR-stunts CC tune, code 450 873 183, 279.2 mph stat card. Quantifies the paywall at ~22 mph over the best non-premium coded build.",
+          "confidence": "verified"
+        }
+      ],
+      "dirt_racing_capped": {
+        "note": "Guides pick dirt metas for CORNER speed, never mph; the metas are slow in a straight line (WRX STI '04 tunes list ~186 mph). Highest STAT-CARD top speeds per class from CODMunity's dirt tune DB (06/08): A: Ferrari 250 GTO '62 256 mph (code 144830316 — near-certainly a gearing artifact, not achievable on dirt); R: Mazda Furai 241.2 (396925463, also a genuine R dirt board meta); S1: WRX STI ARX 238.7 (861708819); BRZ FE S1 dirt 223.7 (746077149).",
+        "confidence": "verified as listings, unmeasured as speeds"
+      },
+      "board_read": "Fresh forza.guide browser read 2026-08-10 — site still shows 6/23 pre-reset data. R dirt all-tracks: #1 Exige WTAC (journal reward), #2 Porsche 917 FE, #3 Tacoma FE (P2W), #4 Ultima 1020, #5 Viper FE (P2W), #8 Huracan Sterrato.",
+      "eliminator_note": "Car choice is MOOT in Eliminator (preset drop cars); drop level + route knowledge > any car. Keep advice drop-car-centric.",
+      "fh5_contamination": "GameRant/Mitchcactus off-road lists carry FH5 leftovers unconfirmed for FH6 (Jeep Trailcat, DeBerti Wrangler/F-250, AMG Warthog) — excluded. Trailcat CC codes exist on CODMunity but presence needs in-game confirmation.",
+      "stock_trivia": "Fastest STOCK offroad-TYPE car: Porsche Macan LPR Rally Raid, 140.7 mph (forza.labsgg) — trivia only.",
+      "build_recipe": "Verified multi-source: AWD mandatory; RALLY tires for dirt racing (FH6 PI-penalizes race slicks on dirt harder than FH5), OFF-ROAD tires for open terrain; center diff 65-80% rear; pressures disputed (24-30 psi spread across sources)."
+    }
   }
 }

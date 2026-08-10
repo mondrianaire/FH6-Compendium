@@ -1409,6 +1409,18 @@
         <p class="why"><strong>Width:</strong> ${g.scoring.width}</p>
       </div>`;
 
+    const smTier = (t) => t === "corroborated" || t === "corroborated-structure" || t === "corroborated-absence" ? "conf-verified"
+      : t === "player-corroborated" ? "conf-verified" : t === "contested" ? "conf-contested" : "conf-probable";
+    const mechanics = g.scoring_mechanics ? `
+      <div class="block" style="border-color:var(--accent2)">
+        <h3>🔬 Scoring mechanics — the deep dive (${g.scoring_mechanics.researched.split(" (")[0]})</h3>
+        <p class="fh6note">Corroboration bar deliberately relaxed (new game): tiers are corroborated / single-source / FH5-inherited / contested — read the tag, not just the claim.</p>
+        ${g.scoring_mechanics.mechanics.map((m) => `
+          <p class="why" style="margin:8px 0 0"><span class="conf ${smTier(m.tier)}">${m.tier}</span> <strong>${m.name}:</strong> ${m.facts}</p>`).join("")}
+        <h4 style="margin:14px 0 4px">⚗️ Experiments that would settle the unknowns</h4>
+        <ul class="why">${g.scoring_mechanics.experiments.map((e) => `<li>${e}</li>`).join("")}</ul>
+      </div>` : "";
+
     const checklist = `
       <div class="block">
         <h3>Pre-run checklist</h3>
@@ -1451,6 +1463,7 @@
       ${balance}
       ${failures}
       ${scoring}
+      ${mechanics}
       ${cars}
       ${tune}
       ${checklist}

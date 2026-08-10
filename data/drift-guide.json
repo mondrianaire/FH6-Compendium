@@ -44,11 +44,155 @@
     "manual_essentials": "RWD · steering-angle upgrade · rear differential ~100% accel / low decel · rear tyre pressure a bit higher than front · ~400–600 hp (over-powering makes it uncontrollable, not better)."
   },
   "meta_cars": [
-    { "name": "Formula Drift #64 Forsberg Nissan Z", "class": "S1", "price_credits": 200000, "acquisition": "Autoshow (standard car, not DLC)", "get": "medium", "note": "Current all-around drift meta king — best balance of scoring and control.", "confidence": "verified" },
-    { "name": "Formula Drift #777 Nissan 240SX", "class": "A", "price_credits": 150000, "acquisition": "Autoshow — OR FREE via Drift Club Japan (Journal Tier 4)", "get": "easy", "note": "Best value. The Drift Club Japan side story gives this to you free.", "tune_code": "213 803 717", "tune_source": "53Rain's Tune List (S1 build)", "confidence": "verified" },
-    { "name": "Formula Drift GR Supra MkIV", "class": "S1", "price_credits": null, "acquisition": "FREE via the Drift Club Japan side story", "get": "easy", "note": "Free alongside the #777 — do Drift Club Japan and you get two top drift cars for nothing.", "confidence": "verified" },
-    { "name": "Nissan Silvia (S13 / S15)", "class": "B", "price_credits": null, "acquisition": "Autoshow (cheap)", "get": "easy", "note": "BEST car to LEARN on — smooth, predictable oversteer you can actually catch. Use ~400 hp.", "confidence": "probable" },
-    { "name": "Toyota Sprinter Trueno GT Apex (AE86)", "class": "B", "price_credits": null, "acquisition": "Autoshow (cheap)", "get": "easy", "note": "Light, forgiving RWD — a classic beginner drift trainer.", "tune_code": "174 568 603", "tune_source": "53Rain's Tune List (B build)", "confidence": "probable" }
+    {
+      "name": "Formula Drift #64 Forsberg Nissan Z",
+      "class": "S1",
+      "price_credits": 200000,
+      "acquisition": "Autoshow (standard car, not DLC)",
+      "get": "medium",
+      "note": "Current all-around drift meta king — best balance of scoring and control.",
+      "confidence": "verified"
+    },
+    {
+      "name": "Formula Drift #777 Nissan 240SX",
+      "class": "A",
+      "price_credits": 150000,
+      "acquisition": "Autoshow — OR FREE via Drift Club Japan (Journal Tier 4)",
+      "get": "easy",
+      "note": "Best value. The Drift Club Japan side story gives this to you free.",
+      "tune_code": "213 803 717",
+      "tune_source": "53Rain's Tune List (S1 build)",
+      "confidence": "verified"
+    },
+    {
+      "name": "Formula Drift GR Supra MkIV",
+      "class": "S1",
+      "price_credits": null,
+      "acquisition": "FREE via the Drift Club Japan side story",
+      "get": "easy",
+      "note": "Free alongside the #777 — do Drift Club Japan and you get two top drift cars for nothing.",
+      "confidence": "verified"
+    },
+    {
+      "name": "Nissan Silvia (S13 / S15)",
+      "class": "B",
+      "price_credits": null,
+      "acquisition": "Autoshow (cheap)",
+      "get": "easy",
+      "note": "BEST car to LEARN on — smooth, predictable oversteer you can actually catch. Use ~400 hp.",
+      "confidence": "probable"
+    },
+    {
+      "name": "Toyota Sprinter Trueno GT Apex (AE86)",
+      "class": "B",
+      "price_credits": null,
+      "acquisition": "Autoshow (cheap)",
+      "get": "easy",
+      "note": "Light, forgiving RWD — a classic beginner drift trainer.",
+      "tune_code": "174 568 603",
+      "tune_source": "53Rain's Tune List (B build)",
+      "confidence": "probable"
+    }
   ],
-  "sources": ["game8-fd64", "game8-fd777", "gamesradar-drift", "steam-driftscore"]
+  "sources": [
+    "game8-fd64",
+    "game8-fd777",
+    "gamesradar-drift",
+    "steam-driftscore"
+  ],
+  "scoring_mechanics": {
+    "researched": "2026-08-10 (79-agent deep dive; corroboration bar RELAXED per player — tiers: corroborated / single-source / fh5-inherited)",
+    "mechanics": [
+      {
+        "id": "multiplier",
+        "name": "Chain multiplier",
+        "tier": "corroborated",
+        "facts": "Grows continuously while ONE slide stays unbroken; resets on straightening, spinning out, or dropping below the slip-angle threshold. HUD-observed reaching x6.8→x7.6+ during continuous drifting (single-source video). The actual growth CURVE (rate/steps/cap timing) is publicly unknown."
+      },
+      {
+        "id": "banking",
+        "name": "Banking rules",
+        "tier": "corroborated",
+        "facts": "Drift Zone points accrue only during the active run and bank when you cross the finish gate — what happens after (spin/crash) is irrelevant (single-source). Rewind PRESERVES accrued zone score, but too many rewinds fails the attempt. Skill chains bank on stopping or changing cars; ~50,000 chain score = 1 skill point. Enter the first gate already sideways — pre-gate chain feeds the multiplier at entry."
+      },
+      {
+        "id": "wall-contact",
+        "name": "Wall contact — CONTRADICTORY",
+        "tier": "contested",
+        "facts": "Guides uniformly claim ANY solid contact zeroes the combo (no light-tap tolerance). But video evidence shows fence/tree hits mid-run with no visible ZONE-score reset, and FH5 had a 'Drift Tap' skill (~1,000 pts) for glancing wall touches that did NOT break the chain — Drift Tap is confirmed to exist in FH6. Best model: SKILL-CHAIN and ZONE-SCORE respond to contact differently, and nobody has isolated which resets when. In-game test would settle it."
+      },
+      {
+        "id": "angle",
+        "name": "Angle behavior",
+        "tier": "corroborated",
+        "facts": "A minimum slip angle gates scoring — shallow four-wheel slides score nothing (single-source). Scoring weights angle + duration over speed; past-90-degree drifts still score (a 90-degree slide held 15s outscores a briefer 120-degree one). Exact minimum angle and any cap: unknown."
+      },
+      {
+        "id": "speed-floor",
+        "name": "Speed floor",
+        "tier": "corroborated-absence",
+        "facts": "No FH6 minimum speed is documented anywhere; runs visibly score at 30-42 mph, one 3-star run stayed in 1st gear throughout, and slow-donut exploits work (no route validation, no forward-progress requirement — players loop one corner to inflate score before crossing the finish). FH5 baseline was ~40 km/h (~25 mph)."
+      },
+      {
+        "id": "transitions",
+        "name": "Transitions / manji",
+        "tier": "corroborated",
+        "facts": "Direction-change spamming is heavily rewarded with NO technical-purity gate — swaying left-right repeatedly scores near-identically to skilled linked drifting. No source documents a DISCRETE transition bonus; the reward comes from keeping one chain alive. No reverse-entry bonus exists in any FH6 or FH5 source."
+      },
+      {
+        "id": "thresholds",
+        "name": "Zone star thresholds",
+        "tier": "corroborated",
+        "facts": "20 Drift Zones with FIXED per-zone 3-star targets: 45,000 (Inner City Run, easiest) to 340,000 (Hakone Nanamagari, hardest). No evidence thresholds scale with car class/PI — BUT an official v398.92.0 note says PR Stunt scoring is 'bucketed by Car Class', which sits unresolved against the fixed-threshold model. Zones are untimed: pure point targets per single run."
+      },
+      {
+        "id": "sessions",
+        "name": "Horizon Drifting Sessions",
+        "tier": "corroborated-structure",
+        "facts": "Officially named mode (Jul 20 patch fixed sessions 'ending abruptly', FH6BR-3988). Championship-style: highest score wins, not a race; entered via Horizon Play; a 'Custom Drifting' variant allows private lobbies with host-set class/drivetrain rules (corroborated incl. official progression article). The mode's internal scoring rules: ZERO public documentation."
+      },
+      {
+        "id": "car-multipliers",
+        "name": "Car skill multipliers",
+        "tier": "player-corroborated",
+        "facts": "Wikis conflict (default chain cap 5x vs 7x; FD cars 7x perk single-source; 22B-STI 9x 'highest in game') — but OUR OWN farm data independently matches the 5x-default / 22B-9x model (measured: 9x needs ~56k score for the 10-SP cap vs ~100k at 5x). Treat 5x default, FD 7x, 22B 9x as the working model. FH5 prior: Hoonicorn 8x."
+      },
+      {
+        "id": "assists",
+        "name": "Assists",
+        "tier": "corroborated",
+        "facts": "TCS/STM off + manual shifting are CAPABILITY requirements, not score modifiers — no source documents any assist-based score bonus/penalty (an FH5-era +35%/+50% claim was REJECTED as fabricated in verification). One n=1 experiment: 8 straight zone failures on automatic, first-try 3-star after switching to manual. Clutch-kick on Manual w/Clutch was broken until Jul 20 (FH6BR-15302)."
+      },
+      {
+        "id": "initiation",
+        "name": "E-brake vs power-slide",
+        "tier": "fh5-inherited",
+        "facts": "No FH6 source documents a scoring difference by initiation type. FH5 tracked 'Drift' and 'E-Drift' as separate skills at the same 100-pt base. Settleable in one session (see experiments)."
+      },
+      {
+        "id": "surface",
+        "name": "Surface effects",
+        "tier": "single-source",
+        "facts": "One n=1 report: a dirt-road Drift Zone effectively unscoreable in WINTER ('really bugged in winter', ~3h of failed attempts). FH5 baseline: drift skills score on any surface. Season may matter more than surface in FH6."
+      },
+      {
+        "id": "coop-link",
+        "name": "Co-op LINK bonus",
+        "tier": "single-source",
+        "facts": "Twin Drift LINK: drift parallel with a teammate 5+ seconds in shared sessions → score x2. FH6-native co-op mechanic worth testing in convoy."
+      },
+      {
+        "id": "drift-attack",
+        "name": "Upcoming: Drift Attack",
+        "tier": "corroborated",
+        "facts": "A NEW mode named 'Drift Attack' debuts hands-on at gamescom (Aug 26-30, 2026, official Xbox announcement) — expect drift scoring news around then; re-sweep after."
+      }
+    ],
+    "experiments": [
+      "SPEED FLOOR (~2 min): hold a steady e-brake slide on flat asphalt, bleed speed slowly, note the HUD speed where points stop ticking.",
+      "INITIATION TYPES (1 session): same corner, same car — e-brake entry, power-slide entry, reverse entry; read the skill popup names and compare points for equal slides. Settles three empty mechanics at once.",
+      "WALL CONTACT ISOLATION: inside a zone, take one deliberate glancing wall tap mid-slide — watch BOTH the skill-chain popup (Drift Tap? chain break?) and the zone points ticker separately. Resolves the guides-vs-video contradiction.",
+      "MULTIPLIER CURVE: screen-record one long unbroken slide with the HUD multiplier visible; the x-vs-time trace IS the curve nobody has published."
+    ]
+  }
 }

@@ -22,7 +22,7 @@
   const disciplines = DB.metaCars.disciplines;
   const DISCIPLINE_LABEL = {
     road: "Road", touge: "Touge (1v1 duels)", street: "Street (night/traffic)", touge_street: "Touge / Street",
-    dirt_rally: "Dirt / Rally", cross_country: "Cross Country", drag: "Drag"
+    dirt_rally: "Dirt / Rally", cross_country: "Cross Country", drag: "Drag", drift: "Drift"
   };
   // what tuning attributes each race category rewards — shown under the coverage-matrix headers
   const DISCIPLINE_TUNING = {
@@ -32,7 +32,8 @@
     touge_street: "cornering grip, brakes, downforce, short gearing",
     dirt_rally: "soft suspension, AWD, raised ride height, rally tyres",
     cross_country: "max ride height, AWD, off-road tyres, durability",
-    drag: "launch + gearing + power, minimal aero, drag tyres"
+    drag: "launch + gearing + power, minimal aero, drag tyres",
+    drift: "RWD only, angle kit, power-to-slide balance — score, not speed"
   };
   // normalise free-text acquisition into one of ~9 canonical methods (homogenised "Get it")
   const acqDot = (d) => !d ? "" : d.startsWith("easy") ? "🟢" : d.startsWith("medium") ? "🟡" : d.startsWith("hard") ? "🔴" : d === "premium" ? "💰" : "";
@@ -213,7 +214,7 @@
   }
 
   // ---- tune resolution: bind a tune to EVERY recommendation (car-specific code, else class+format template) ----
-  const TMPL_BY_DISC = { road: "Road", touge_street: "Touge", touge: "Touge", street: "Road", dirt_rally: "Dirt", cross_country: "Cross", drag: "Drag" };
+  const TMPL_BY_DISC = { road: "Road", touge_street: "Touge", touge: "Touge", street: "Road", drift: "Drift", dirt_rally: "Dirt", cross_country: "Cross", drag: "Drag" };
   function pickTemplate(disc) {
     const k = TMPL_BY_DISC[disc]; if (!k) return null;
     return ((DB.tuningTemplates && DB.tuningTemplates.templates) || []).find((t) => (t.label || "").includes(k)) || null;
@@ -424,7 +425,7 @@
         <span>${tmBadge(c)}<span class="badge tier-${c.tier}">${top ? "★ TOP PICK • " : ""}TIER ${c.tier}</span></span>
         <span>${isOwned(c.id) ? '<span class="conf conf-verified">✓ owned</span> ' : ""}<span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span></span>
       </div>
-      <h3>${c.year} ${c.name}${codeTip(c.name, c)}</h3>
+      <h3>${c.year ? c.year + " " : ""}${c.name}${codeTip(c.name, c)}</h3>
       <div class="card-row"><span>${clsBadge(c.class, true)} · ${c.recommended_drivetrain}</span><span class="price">${priceOrSource(c)}</span></div>
       ${c.acquisition_difficulty ? `<div class="card-row"><span class="acq ${acqClass(c)}">${acqLabel(c)}</span></div>` : ""}
       <div class="value-bar"><span style="width:${c.value_rating * 10}%"></span></div>
@@ -494,7 +495,7 @@
       <label style="float:right;cursor:pointer;font-size:13px;user-select:none">
         <input type="checkbox" id="modalOwn" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer;vertical-align:-2px"> I own this
       </label>
-      <h2>${c.year} ${c.name}${codeTip(c.name, c)}</h2>
+      <h2>${c.year ? c.year + " " : ""}${c.name}${codeTip(c.name, c)}</h2>
       ${c.use_case ? `<p class="why" style="margin:2px 0 10px"><strong>Use case:</strong> ${c.use_case}</p>` : ""}
       <dl class="kv">
         <dt>Class</dt><dd>${clsBadge(c.class, true)} <span class="why" style="font-size:12px">(PI ${classes[c.class] || "span"})</span></dd>
@@ -592,7 +593,7 @@
     wrap.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>${cols.map((c) => `<th data-k="${c[0]}">${c[1]}</th>`).join("")}</tr></thead>
       <tbody>${sorted.map((c) => `<tr data-id="${c.id}" style="${isOwned(c.id) ? "opacity:.65" : ""}">
         <td><input type="checkbox" class="own-check" data-id="${c.id}" ${isOwned(c.id) ? "checked" : ""} style="cursor:pointer"></td>
-        <td>${c.year} ${c.name}${codeTip(c.name, c)}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
+        <td>${c.year ? c.year + " " : ""}${c.name}${codeTip(c.name, c)}${isOwned(c.id) ? ' <span style="color:var(--accent)">✓</span>' : ""}</td>
         <td class="why" style="font-size:12px;max-width:300px">${c.use_case || (c.disciplines.map((d) => DISCIPLINE_LABEL[d] || d).join(", "))}</td>
         <td><span class="acq ${acqClass(c)}">${acqLabel(c)}</span></td>
         <td>${clsBadge(c.class)}</td>

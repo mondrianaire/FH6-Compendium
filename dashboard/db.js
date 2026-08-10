@@ -1095,7 +1095,8 @@ window.FH6_DB = {
       "street",
       "dirt_rally",
       "cross_country",
-      "drag"
+      "drag",
+      "drift"
     ],
     "acquisition_difficulty_scale": {
       "note": "Every car recommendation MUST state how hard the car is to obtain — this is a progression app. Rate on this scale; if a pick is 'hard' or 'premium', always offer an 'easy' alternative. SPLIT 2026-07-11: 'hard' used to lump luck-gated grinds with paid DLC — those are opposite experiences (time+dice vs money+guaranteed), so paid content is now its own 'premium' category. PLAYER-STATE UPDATE 2026-08-01: 200M+ cr banked - price is irrelevant; 'easy' now renders split into 'Autoshow (buy now)' vs 'guaranteed free (play required)', with Autoshow as the true top tier.",
@@ -3264,6 +3265,187 @@ window.FH6_DB = {
           }
         ],
         "autoshow": true
+      },
+      {
+        "id": "fd-forsberg-z",
+        "name": "Formula Drift #64 Forsberg Nissan Z",
+        "year": null,
+        "class": "S1",
+        "disciplines": [
+          "drift"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD (drift doctrine: never AWD for score)",
+        "power_split": "RWD",
+        "price_credits": 200000,
+        "acquisition": "Autoshow (standard car, not DLC)",
+        "autoshow": true,
+        "acquisition_difficulty": "easy",
+        "tier": "S",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "drift suspension + angle kit",
+          "power to the class target",
+          "drift tune (see Drift Guide tab)"
+        ],
+        "tune_baseline": null,
+        "share_codes": [],
+        "why": "Current all-around drift meta king — best balance of scoring and control. [Promoted from the Drift Guide's researched meta 2026-08-10.]",
+        "use_case": "S1 drift meta king — best score/control balance",
+        "confidence": "verified",
+        "sources": [
+          "drift-guide-synthesis"
+        ],
+        "also_viable_in": [],
+        "tunes": []
+      },
+      {
+        "id": "fd-240sx-777",
+        "name": "Formula Drift #777 Nissan 240SX",
+        "year": null,
+        "class": "A",
+        "disciplines": [
+          "drift"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD (drift doctrine: never AWD for score)",
+        "power_split": "RWD",
+        "price_credits": 150000,
+        "acquisition": "Autoshow — OR FREE via Drift Club Japan (Journal Tier 4)",
+        "autoshow": true,
+        "acquisition_difficulty": "easy",
+        "tier": "S",
+        "value_rating": 9,
+        "upgrade_priority": [
+          "drift suspension + angle kit",
+          "power to the class target",
+          "drift tune (see Drift Guide tab)"
+        ],
+        "tune_baseline": null,
+        "share_codes": [],
+        "why": "Best value. The Drift Club Japan side story gives this to you free. [Promoted from the Drift Guide's researched meta 2026-08-10.]",
+        "use_case": "A-class drift + best drift value (free via Drift Club Japan journal)",
+        "confidence": "verified",
+        "sources": [
+          "drift-guide-synthesis"
+        ],
+        "also_viable_in": [],
+        "tunes": [
+          {
+            "code": "213 803 717",
+            "surface": "drift",
+            "source": "53Rain's Tune List (S1 build)",
+            "confidence": "sourced-unverified",
+            "player_verified": false
+          }
+        ]
+      },
+      {
+        "id": "fd-supra-drift",
+        "name": "Formula Drift GR Supra MkIV",
+        "year": null,
+        "class": "S1",
+        "disciplines": [
+          "drift"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD (drift doctrine: never AWD for score)",
+        "power_split": "RWD",
+        "price_credits": null,
+        "acquisition": "FREE via the Drift Club Japan side story (guaranteed side-story reward)",
+        "autoshow": false,
+        "acquisition_difficulty": "easy",
+        "tier": "A",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "drift suspension + angle kit",
+          "power to the class target",
+          "drift tune (see Drift Guide tab)"
+        ],
+        "tune_baseline": null,
+        "share_codes": [],
+        "why": "Free alongside the #777 — do Drift Club Japan and you get two top drift cars for nothing. [Promoted from the Drift Guide's researched meta 2026-08-10.]",
+        "use_case": "Second free Drift Club car — S1 drift alternate",
+        "confidence": "verified",
+        "sources": [
+          "drift-guide-synthesis"
+        ],
+        "also_viable_in": [],
+        "tunes": []
+      },
+      {
+        "id": "silvia-drift",
+        "name": "Nissan Silvia (S13 / S15)",
+        "year": null,
+        "class": "B",
+        "disciplines": [
+          "drift"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD (drift doctrine: never AWD for score)",
+        "power_split": "RWD",
+        "price_credits": null,
+        "acquisition": "Autoshow (cheap)",
+        "autoshow": true,
+        "acquisition_difficulty": "easy",
+        "tier": "A",
+        "value_rating": 7,
+        "upgrade_priority": [
+          "drift suspension + angle kit",
+          "power to the class target",
+          "drift tune (see Drift Guide tab)"
+        ],
+        "tune_baseline": null,
+        "share_codes": [],
+        "why": "BEST car to LEARN on — smooth, predictable oversteer you can actually catch. Use ~400 hp. [Promoted from the Drift Guide's researched meta 2026-08-10.]",
+        "use_case": "THE learner drift car — predictable, catchable oversteer (~400 hp)",
+        "confidence": "probable",
+        "sources": [
+          "drift-guide-synthesis"
+        ],
+        "also_viable_in": [],
+        "tunes": []
+      },
+      {
+        "id": "ae86-drift",
+        "name": "Toyota Sprinter Trueno GT Apex (AE86)",
+        "year": null,
+        "class": "B",
+        "disciplines": [
+          "drift"
+        ],
+        "drivetrain_stock": "RWD",
+        "recommended_drivetrain": "RWD (drift doctrine: never AWD for score)",
+        "power_split": "RWD",
+        "price_credits": null,
+        "acquisition": "Autoshow (cheap)",
+        "autoshow": true,
+        "acquisition_difficulty": "easy",
+        "tier": "A",
+        "value_rating": 8,
+        "upgrade_priority": [
+          "drift suspension + angle kit",
+          "power to the class target",
+          "drift tune (see Drift Guide tab)"
+        ],
+        "tune_baseline": null,
+        "share_codes": [],
+        "why": "Light, forgiving RWD — a classic beginner drift trainer. [Promoted from the Drift Guide's researched meta 2026-08-10.]",
+        "use_case": "B-class drift trainer with a sourced 53Rain build code",
+        "confidence": "probable",
+        "sources": [
+          "drift-guide-synthesis"
+        ],
+        "also_viable_in": [],
+        "tunes": [
+          {
+            "code": "174 568 603",
+            "surface": "drift",
+            "source": "53Rain's Tune List (B build)",
+            "confidence": "sourced-unverified",
+            "player_verified": false
+          }
+        ]
       }
     ],
     "tune_sourcing_policy": {
@@ -45186,6 +45368,13 @@ window.FH6_DB = {
         "title": "Player in-game screenshot — class badge strip (all 8 classes)",
         "url": "n/a — user-provided screenshot 2026-07-31",
         "used_for": "GROUND TRUTH: full class ladder incl. R cap 998 and X 999; the in-game badge design language (letter-on-color + cap-on-black pills; D cyan / C yellow / B orange / A red / S1 purple / S2 blue / R magenta / X green) replicated as the dashboard's pi-badge component"
+      },
+      {
+        "id": "drift-guide-synthesis",
+        "tier": "community",
+        "title": "Project drift guide (multi-agent synthesis, data/drift-guide.json)",
+        "url": "internal — data/drift-guide.json",
+        "used_for": "DRIFT DISCIPLINE (2026-08-10): 5 per-class drift meta cars promoted into the canonical car DB (Forsberg Z S1 verified; #777 240SX A verified + free journal path; FD Supra free; Silvia/AE86 learner tier probable) incl. two 53Rain build codes (sourced-unverified)"
       }
     ],
     "fh6_ui_structure_pass": {
@@ -45253,5 +45442,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T03:33Z"
+  "builtAt": "2026-08-10T07:46Z"
 };

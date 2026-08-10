@@ -45143,6 +45143,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "FULL PLAN APPLIED (batched, new baseline v2): tires 24/24 (R0), rear decel 28 (R1), center 68R (R2), front accel 20 (R3), rear accel 45 (sweeper trigger), ARBs 29.9F/45.8R -> 34F/35R (R4+R4b together), player addition FD 4.41 -> 3.82, wing untouched (R5 cancelled). PANEL EVIDENCE before any driving: 0-60 2.634 -> 2.425, 0-100 5.352 -> 5.074, top 195.7 -> 199.1, braking/latG unchanged — acceleration improved WITH taller gearing = old config was burning launches on wheelspin (panel-verified). Mech balance moved 0.64 -> 0.61 with the ARB rebalance (panel responds to ARB split — sensitivity-map data point). Batch = attribution lost; next drive judges all four symptoms fresh; residual whip after this package measures whether race springs earn their PI (rebound still locked)."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "VIDEO 2 (same corner, baseline v2, 9.1s): SPIN MODE ELIMINATED — zero drift skills fire (v1 chained 232->600); entry improved to 108 in 7th (auto kept tall via gentler throttle); rear planted throughout; car washes STRAIGHT off the outside at 110-120 while accelerating = pure aero-regime front push. Player's 'spin or forced off' = throttle-dependent overdraw of the same rally-tire grip budget. R5 GATE MET on video evidence (fast-corner push + rear verifiably stable at speed): rear wing 260 -> 218, target panel Aero Balance 0.37; bracket to 177 (0.42, DB band floor) if front still washes with rear planted. Post-change re-checks: fastest braking zone + flat kink for rear lightness. Envelope math from panel (1.24/1.45): ~1.4G total at 110 mph -> ~575 ft min radius — this corner at 110+ sits AT the ceiling; honest entry ~105 with throttle held until chevrons straighten. Green-car reference lap through this corner still outstanding (calibrates achievable entry speed)."
           }
         ]
       },

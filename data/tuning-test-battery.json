@@ -40,7 +40,10 @@
     "name": "Sensitivity matrix — run this ONCE before everything",
     "procedure": "On a settled build, move each slider from min to max while watching the Performance panel. Record WHICH readouts move and roughly how much. Some readouts may respond only to PARTS, not sliders — knowing which sliders are panel-visible vs drive-to-measure decides which battery track (static vs dynamic) each slider uses.",
     "output": "A slider × readout sensitivity map. This is the highest-value 20 minutes in the whole battery: it converts unknown sliders into free static tests.",
-    "status": "not_run"
+    "status": "partially verified 2026-08-10",
+    "findings": [
+      "PLAYER-VERIFIED (Supra range sweep screenshots): the Performance panel LIVE-RESIMULATES on slider change — 'SIMULATING...' states observed mid-change, and 'FAILED!' states at extreme configs (the sim cannot complete e.g. braking runs at 0% pressure, top-speed runs at extreme gearing). The panel is a working instrument; FAILED at an extreme is itself a data point (the config is undrivable). Full per-readout sensitivity map still pending — several captures show large readout swings (0-60 3.06s vs 5.9s) that are CONFOUNDED across multiple changed sliders; do single-slider sweeps to attribute."
+    ]
   },
   "static_tests": [
     {

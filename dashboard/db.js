@@ -1500,7 +1500,72 @@ window.FH6_DB = {
             "note": "No reputably-PUBLISHED road code found (value sites like GamerStation give sliders, not codes; CODMunity road coverage is thin). The good road Supra tunes live in-game."
           }
         ],
-        "autoshow": true
+        "autoshow": true,
+        "slider_ranges": {
+          "captured": "2026-08-10 (player screenshots, all tune tabs at min/max — PRIMARY)",
+          "build_context": "A700 build: 359hp/391lbft/2731lbs/51%F, semi-slick, race suspension",
+          "tire_psi": [
+            15,
+            55
+          ],
+          "camber_deg": [
+            -5,
+            5
+          ],
+          "toe_deg": [
+            -5,
+            5
+          ],
+          "caster_deg": [
+            1,
+            7
+          ],
+          "arb": [
+            1,
+            65
+          ],
+          "springs_lbin": [
+            283,
+            1414.8
+          ],
+          "ride_height_in": [
+            4.8,
+            6.1
+          ],
+          "rebound": [
+            1,
+            20
+          ],
+          "bump": [
+            1,
+            20
+          ],
+          "aero_front_lb": [
+            192,
+            377
+          ],
+          "aero_rear_lb": [
+            273,
+            563
+          ],
+          "brake_balance_pct": [
+            0,
+            100
+          ],
+          "brake_pressure_pct": [
+            0,
+            200
+          ],
+          "diff_accel_pct": [
+            0,
+            100
+          ],
+          "diff_decel_pct": [
+            0,
+            100
+          ],
+          "note": "First complete per-car range capture. ARB 1-65 and damping 1-20 match the documented FH6 UI ranges; ride height floor is 4.8 NOT the 4.0 assumed earlier. Ranges may vary per car/parts — capture per car."
+        }
       },
       {
         "id": "wrx-sti-2004",
@@ -44342,7 +44407,10 @@ window.FH6_DB = {
       "name": "Sensitivity matrix — run this ONCE before everything",
       "procedure": "On a settled build, move each slider from min to max while watching the Performance panel. Record WHICH readouts move and roughly how much. Some readouts may respond only to PARTS, not sliders — knowing which sliders are panel-visible vs drive-to-measure decides which battery track (static vs dynamic) each slider uses.",
       "output": "A slider × readout sensitivity map. This is the highest-value 20 minutes in the whole battery: it converts unknown sliders into free static tests.",
-      "status": "not_run"
+      "status": "partially verified 2026-08-10",
+      "findings": [
+        "PLAYER-VERIFIED (Supra range sweep screenshots): the Performance panel LIVE-RESIMULATES on slider change — 'SIMULATING...' states observed mid-change, and 'FAILED!' states at extreme configs (the sim cannot complete e.g. braking runs at 0% pressure, top-speed runs at extreme gearing). The panel is a working instrument; FAILED at an extreme is itself a data point (the config is undrivable). Full per-readout sensitivity map still pending — several captures show large readout swings (0-60 3.06s vs 5.9s) that are CONFOUNDED across multiple changed sliders; do single-slider sweeps to attribute."
+      ]
     },
     "static_tests": [
       {
@@ -45375,6 +45443,13 @@ window.FH6_DB = {
         "title": "Project drift guide (multi-agent synthesis, data/drift-guide.json)",
         "url": "internal — data/drift-guide.json",
         "used_for": "DRIFT DISCIPLINE (2026-08-10): 5 per-class drift meta cars promoted into the canonical car DB (Forsberg Z S1 verified; #777 240SX A verified + free journal path; FD Supra free; Silvia/AE86 learner tier probable) incl. two 53Rain build codes (sourced-unverified)"
+      },
+      {
+        "id": "in-game-supra-ranges",
+        "tier": "primary",
+        "title": "Player screenshots — GR Supra '20 full tune-tab min/max sweep (11 captures)",
+        "url": "n/a — user-provided screenshots 2026-08-10",
+        "used_for": "GROUND TRUTH: complete slider ranges for the Supra A700 build (PSI 15-55, camber/toe ±5, caster 1-7, ARB 1-65, springs 283-1414.8, ride height 4.8-6.1, damping 1-20, aero 192-377/273-563, brake 0-100/0-200, diff 0-100); panel live-sim behavior (SIMULATING/FAILED states) verifying the perf-panel instrument"
       }
     ],
     "fh6_ui_structure_pass": {
@@ -45442,5 +45517,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T07:46Z"
+  "builtAt": "2026-08-10T08:13Z"
 };

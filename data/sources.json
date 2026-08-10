@@ -670,6 +670,13 @@
       "title": "Project drift guide (multi-agent synthesis, data/drift-guide.json)",
       "url": "internal — data/drift-guide.json",
       "used_for": "DRIFT DISCIPLINE (2026-08-10): 5 per-class drift meta cars promoted into the canonical car DB (Forsberg Z S1 verified; #777 240SX A verified + free journal path; FD Supra free; Silvia/AE86 learner tier probable) incl. two 53Rain build codes (sourced-unverified)"
+    },
+    {
+      "id": "in-game-supra-ranges",
+      "tier": "primary",
+      "title": "Player screenshots — GR Supra '20 full tune-tab min/max sweep (11 captures)",
+      "url": "n/a — user-provided screenshots 2026-08-10",
+      "used_for": "GROUND TRUTH: complete slider ranges for the Supra A700 build (PSI 15-55, camber/toe ±5, caster 1-7, ARB 1-65, springs 283-1414.8, ride height 4.8-6.1, damping 1-20, aero 192-377/273-563, brake 0-100/0-200, diff 0-100); panel live-sim behavior (SIMULATING/FAILED states) verifying the perf-panel instrument"
     }
   ],
   "fh6_ui_structure_pass": {

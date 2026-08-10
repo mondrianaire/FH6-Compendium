@@ -431,7 +431,72 @@
           "note": "No reputably-PUBLISHED road code found (value sites like GamerStation give sliders, not codes; CODMunity road coverage is thin). The good road Supra tunes live in-game."
         }
       ],
-      "autoshow": true
+      "autoshow": true,
+      "slider_ranges": {
+        "captured": "2026-08-10 (player screenshots, all tune tabs at min/max — PRIMARY)",
+        "build_context": "A700 build: 359hp/391lbft/2731lbs/51%F, semi-slick, race suspension",
+        "tire_psi": [
+          15.0,
+          55.0
+        ],
+        "camber_deg": [
+          -5.0,
+          5.0
+        ],
+        "toe_deg": [
+          -5.0,
+          5.0
+        ],
+        "caster_deg": [
+          1.0,
+          7.0
+        ],
+        "arb": [
+          1.0,
+          65.0
+        ],
+        "springs_lbin": [
+          283.0,
+          1414.8
+        ],
+        "ride_height_in": [
+          4.8,
+          6.1
+        ],
+        "rebound": [
+          1.0,
+          20.0
+        ],
+        "bump": [
+          1.0,
+          20.0
+        ],
+        "aero_front_lb": [
+          192,
+          377
+        ],
+        "aero_rear_lb": [
+          273,
+          563
+        ],
+        "brake_balance_pct": [
+          0,
+          100
+        ],
+        "brake_pressure_pct": [
+          0,
+          200
+        ],
+        "diff_accel_pct": [
+          0,
+          100
+        ],
+        "diff_decel_pct": [
+          0,
+          100
+        ],
+        "note": "First complete per-car range capture. ARB 1-65 and damping 1-20 match the documented FH6 UI ranges; ride height floor is 4.8 NOT the 4.0 assumed earlier. Ranges may vary per car/parts — capture per car."
+      }
     },
     {
       "id": "wrx-sti-2004",

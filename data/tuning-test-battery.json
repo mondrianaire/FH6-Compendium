@@ -456,7 +456,25 @@
         "transmission tier (count gears on the HUD)",
         "brakes / aero tiers (scroll the Car Stat pane below Drivetrain)"
       ],
-      "note": "NOT the same car as the garage 2016 Viper ACR build (940 hp / 816 tq / 3,487 lb / 9.0L / RALLY tires / AWD) — two different Vipers, easy to conflate; both S1 800."
+      "note": "NOT the same car as the garage 2016 Viper ACR build (940 hp / 816 tq / 3,487 lb / 9.0L / RALLY tires / AWD) — two different Vipers, easy to conflate; both S1 800.",
+      "parts_manifest": {
+        "status": "in progress — replication underway 2026-08-10",
+        "verified": [
+          "AWD drivetrain swap (pane row)",
+          "Slick/race tire compound (pane row)",
+          "Drift springs & dampers (satisfies the 'Race' adjustability bucket; car has no Race spring tier)"
+        ],
+        "probable": [
+          "max weight reduction tier (3,147 lb target over AWD's added mass)",
+          "NA engine path on the 8.0 V10 — cams/exhaust/intake/internals to 677 hp / 612 ft-lb; no forced induction (torque signature)",
+          "race aero front + rear (efficiency 0.845 -> 0.712, balance 0.38)",
+          "race ratio-adjustable transmission (176.6 mph short-gearing trade); gear count TBD from HUD",
+          "race ARBs + adjustable differential (not pane-visible; required for re-tuning, standard tuner practice)"
+        ],
+        "open": [
+          "brakes, rims, remaining small parts — exposed by the PI-exactly-800 residual once verified+probable parts are installed"
+        ]
+      }
     },
     "confidence": "instruments 1-2 + live-diff Previous column + suspension bucket rule player-verified 2026-08-10; delta inferences probable; replication loop validated in progress on the Viper GTS ACR '99",
     "catalog_quirks": {
@@ -466,6 +484,7 @@
       "pane_label_hypothesis": "RESOLVED, PLAYER-VERIFIED 2026-08-10: the 'Suspension' row is a coarse ADJUSTABILITY bucket — after installing DRIFT springs on the Viper GTS ACR '99, the Previous column read 'Race'. Twin confirmation: 'Previous' tracks the car's CURRENT setup (it updated after the install), making the pane a live replica-vs-target diff. Corollary: the case study's stock baselines are valid — the original capture's Previous column (B 598 / Sport / Standard / RWD) shows the car was stock at capture time.",
       "pi_checksum_as_arbiter": "Drift vs Rally springs cost different PI. With the rest of the build matched, whichever choice lands total PI EXACTLY on the tune's number (here S1 800) is the tuner's actual part — evidence, not guesswork.",
       "confidence": "catalog gap player-verified; same-sliders rule FH5-inherited + guide-consistent (probable); pane hypothesis untested"
-    }
+    },
+    "doctrine": "PLAYER-STATED 2026-08-10: the protocol's deliverable is the DISCRETE PARTS MANIFEST, not slider values. Sliders are ephemeral — Jett re-fits them to their own driving regardless. Parts are where the tuner's intelligence lives: how the PI budget was allocated across drivetrain/engine/weight/grip is the unrecoverable-by-guessing knowledge. Every decoded build gets recorded as a manifest with per-part evidence tiers (verified = pane row or direct observation; probable = delta inference; open = PI-checksum residual)."
   }
 }

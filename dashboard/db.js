@@ -45195,6 +45195,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "Camber -2.0F already implemented — push at speed SURVIVES it. GOAL REFRAMED (player): they disliked the green car's handling from the start — the fork was never meant to match the reference; green-car comparison requests withdrawn permanently. The mimic was scaffolding; the goal is a car Jett likes. Remaining: (1) front tire width +1 (funded, last in-identity front-grip lever), (2) COMPOUND DECISION — rally rubber is the last un-revisited LogikJ inheritance; sport compound is the middle path; method: shop-preview the PI delta + read panel latG@60/@120 change BEFORE buying (wiggle-read). If both end: the corner gets a speed number and the build is declared finished."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "FORK B first drive: traction breaks on fast/hard steering inputs. ROOT CAUSE = build-sheet error (mine): spring/damper values were derived at fork A's 2,053 lb; fork B is 2,292 (+12%) -> undersprung/underdamped, body sloshes past the slick's edge on sharp inputs. CORRECTION issued: springs 480/535, rebound 8.4/9.0, bump 5.0/5.6 (12% scale). Secondary factor: slick edge character — narrower slip window than rally's mushy band; rewards progressive hands (adaptation, not sliders). Follow-ups if needed: psi 26/26, rear toe-in +0.15. RULE FOR THE BOOK: slider sheets are valid only at their derivation weight — rescale springs/dampers whenever build mass changes."
           }
         ],
         "slider_ranges_observed": {
@@ -45307,7 +45311,8 @@ window.FH6_DB = {
         "Aero slider nominal range can exceed effective range (4C race wing: slider [156-260], physical [~208-260]) — sweep-and-watch to find true edges (player-verified 2026-08-10)",
         "FH6 tire compound ladder (player-verified on the 4C, 2026-08-10): NO Street/Sport upgrade tiers — Stock -> Semi-Slick -> Slick, plus specialties (Drift, Rally, Offroad, Snow, Drag). The compare pane's 'Sport' label is the STOCK tire's category, not a purchasable tier. Differs from FH5 naming."
       ],
-      "panel_baselines_rule": "PANEL BASELINES ARE PER-BUILD, NOT PER-CAR (player-raised 2026-08-10, evidenced in case study 2: swap+AWD moved the 4C 41%->47% front). Any part install — engine parts included — can shift Mech. Balance (mass at the part's location), lateral G and braking (total mass), and all accel numbers; can silently RESET tune tabs; and changes PI. Aero Balance alone is immune to engine mass (pure downforce split — but its ceiling is a property of the aero PARTS, see effective-range mechanic). Protocol after EVERY install: 9-tab sweep vs recorded state, wiggle-and-read the panel, expire all prior baselines."
+      "panel_baselines_rule": "PANEL BASELINES ARE PER-BUILD, NOT PER-CAR (player-raised 2026-08-10, evidenced in case study 2: swap+AWD moved the 4C 41%->47% front). Any part install — engine parts included — can shift Mech. Balance (mass at the part's location), lateral G and braking (total mass), and all accel numbers; can silently RESET tune tabs; and changes PI. Aero Balance alone is immune to engine mass (pure downforce split — but its ceiling is a property of the aero PARTS, see effective-range mechanic). Protocol after EVERY install: 9-tab sweep vs recorded state, wiggle-and-read the panel, expire all prior baselines.",
+      "weight_scaling_rule": "Spring/damper values scale with build weight: a slider sheet is valid ONLY at the weight it was derived for. When mass changes (parts, compound-driven PI rebudgeting), rescale springs and damping proportionally before judging handling. (Learned via fork B: +12% mass on fork A's values = transient breakaway on sharp steering.)"
     }
   },
   "sources": {

@@ -45380,7 +45380,56 @@ window.FH6_DB = {
           "rear_toe_in": 0.1,
           "fd": "taller than default (automatic lesson)"
         },
-        "r_class_reference": "anklBr8kr69 'R race' tune observed: R 982, 1307hp/1003tq, 3050lb, Race susp, Slick, AWD, 248.7mph, 1.688s, 1.76G, aero 0.44, mech 0.50 — the ceiling if the friend's ghost turns out to be R-class."
+        "r_class_reference": "anklBr8kr69 'R race' tune observed: R 982, 1307hp/1003tq, 3050lb, Race susp, Slick, AWD, 248.7mph, 1.688s, 1.76G, aero 0.44, mech 0.50 — the ceiling if the friend's ghost turns out to be R-class.",
+        "parts_effects_log": {
+          "engine": "Dodge Viper ACR 2016 stock 8.4L V10 (8,382cc), stock 645hp/600tq",
+          "aspiration_options": [
+            {
+              "part": "Twin Turbo",
+              "to": [
+                767,
+                714
+              ],
+              "delta": [
+                122,
+                114
+              ],
+              "weight_delta_lb": 24,
+              "pi_preview": "S1 794",
+              "cost_cr": 1800
+            },
+            {
+              "part": "Positive-Displacement Supercharger",
+              "to": [
+                758,
+                705
+              ],
+              "delta": [
+                113,
+                105
+              ],
+              "weight_delta_lb": 61,
+              "pi_preview": "S1 790",
+              "cost_cr": 1500
+            },
+            {
+              "part": "Centrifugal Supercharger",
+              "to": [
+                757,
+                669
+              ],
+              "delta": [
+                112,
+                69
+              ],
+              "weight_delta_lb": 61,
+              "pi_preview": "S1 777",
+              "cost_cr": 1500
+            }
+          ],
+          "residual_analysis": "Target 834/731. Residuals: TT +67/+17 (NA-shaped), PDSC +76/+26 (NA-shaped), Cent +77/+62 (torque-heavy — NA parts can't usually fill; REJECTED despite PI bargain). Prediction: donor = Twin Turbo + cams/exhaust combo; PDSC runner-up. Double constraint (exact 834/731 AND exact 800 after ~360lb weight strip) should admit one answer. NA-menu previews pending player readout.",
+          "pattern_note": "Centrifugal SC is again the PI-cheapest aspiration (777 vs 790/794) — same pattern as the 4C. PI-efficiency explains tuner fondness for centrifugal, but the torque signature rules it out HERE."
+        }
       }
     }
   },

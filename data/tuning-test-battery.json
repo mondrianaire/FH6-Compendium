@@ -653,7 +653,82 @@
         ],
         "aero_front_race_bumper_lb_max": 128
       },
-      "doctrine_note": "Replication is scaffolding, not destination: Jett decodes builds to LEARN the allocation, then forks toward their own taste. Never treat the reference build's behavior as the success criterion — 'a car I like driving' is."
+      "doctrine_note": "Replication is scaffolding, not destination: Jett decodes builds to LEARN the allocation, then forks toward their own taste. Never treat the reference build's behavior as the success criterion — 'a car I like driving' is.",
+      "fork_b_build_sheet": {
+        "name": "4C-B 'Grip' — sport-compound A/B variant",
+        "created": "2026-08-10",
+        "premise": "Same chassis and philosophy as fork A with ONE core variable changed: SPORT compound instead of rally. Tests whether fork A's residual fast-corner push is the compound ceiling.",
+        "parts_order": [
+          "4.69L V8 swap",
+          "centrifugal supercharger",
+          "intercooler (neg PI)",
+          "oil & cooling (neg PI)",
+          "flywheel (neg PI)",
+          "cams STOCK (flex slot)",
+          "AWD swap",
+          "race 10-speed",
+          "race driveline (only if <=0 PI)",
+          "race diff",
+          "race springs/dampers + ARBs + brakes",
+          "SPORT compound",
+          "front tire width +1 (rear stock)",
+          "NO front track width (fork A jitter)",
+          "race front bumper 128, NO rear wing"
+        ],
+        "pi_fill": "Land exactly 800: under -> weight tiers then sport cams; over -> weight tier down then front width. Sweep all 9 tabs after last part (installs reset sliders).",
+        "sliders": {
+          "tires_psi": [
+            27.0,
+            27.0
+          ],
+          "final_drive": 3.82,
+          "camber": [
+            -2.0,
+            -1.0
+          ],
+          "toe": [
+            0.0,
+            0.1
+          ],
+          "caster": 6.5,
+          "arb": [
+            34,
+            35
+          ],
+          "springs": [
+            430,
+            480
+          ],
+          "ride_height": [
+            3.6,
+            3.6
+          ],
+          "rebound": [
+            7.5,
+            8.0
+          ],
+          "bump": [
+            4.5,
+            5.0
+          ],
+          "aero_front": 128,
+          "aero_rear": "no wing (balance ~0.48, wiggle-read)",
+          "brake": [
+            55,
+            100
+          ],
+          "diff_front": [
+            20,
+            10
+          ],
+          "diff_rear": [
+            45,
+            28
+          ],
+          "center": 68
+        },
+        "ab_protocol": "Back-to-back, 3-lap medians: fast sweeper (does B hold 108+?), slow hairpins (jitter without track width), launch. Capture Performance panel baseline first — latG pair is the headline vs fork A's 1.24/1.43."
+      }
     },
     "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
     "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",

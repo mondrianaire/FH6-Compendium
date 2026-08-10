@@ -98,7 +98,7 @@
   // "with VIP" discount asides, "Also in the Welcome Pack" bundle mentions). Real-money cars
   // missing the tag get fixed in DATA, not sniffed here.
   const isP2W = (c) => !!c && typeof c === "object" && !c.acquisition_disputed &&
-    c.acquisition_difficulty === "premium";
+    (c.acquisition_difficulty === "premium" || c.get === "premium"); // .get = drift-guide's curated field
   const p2wName = (c, html) => isP2W(c) ? `<s class="p2w-name" title="Pay-to-win: real money only — not expected in the garage">${html}</s>` : html;
   const tuneConf = (c) => c === "player-verified" ? "✅ verified" : c === "sourced-unverified" ? "🟡 sourced"
     : c === "suspect" ? "❌ suspect" : "ℹ️ method";
@@ -398,7 +398,7 @@
         const label = pick
           ? `<div class="cell-top">${nm(pick)}${codeTip(pick.name, pick)}</div>${picks.slice(1).map((p) => `<div class="cell-alt">${nm(p)}${codeTip(p.name, p)}</div>`).join("")}`
           : "—";
-        const title = pick ? `Top picks: ${picks.map((p) => `${p.year} ${p.name} (${p.tier})`).join("  ·  ")}` : "GAP: no evidenced pick in the database yet";
+        const title = pick ? `Top picks: ${picks.map((p) => `${isP2W(p) ? "💰 " : ""}${p.year} ${p.name} (${p.tier})`).join("  ·  ")}` : "GAP: no evidenced pick in the database yet";
         return `<td class="${cellClass}" data-d="${d}" data-cl="${cl}" title="${title}">${label}</td>`;
       }).join("");
       return `<tr><th>${clsBadge(cl, true)}</th>${cells}</tr>`;
@@ -1454,12 +1454,12 @@
       <h3 style="margin-top:24px">Meta drift cars</h3>
       <div class="card-grid">
         ${g.meta_cars.map((c) => `
-          <div class="car-card" style="cursor:default">
+          <div class="car-card${isP2W(c) ? " p2w" : ""}" style="cursor:default">
             <div class="card-row" style="margin-top:0">
               ${clsBadge(c.class, true)}
               <span class="conf ${confClass(c.confidence)}">${confLabel(c.confidence)}</span>
             </div>
-            <h3 style="font-size:15px">${c.name}${codeTip(c.name, c)}</h3>
+            <h3 style="font-size:15px">${p2wName(c, c.name)}${codeTip(c.name, c)}</h3>
             <div class="card-row"><span>${acqDot(c.get)} ${c.acquisition}</span><span class="price">${priceOrSource(c)}</span></div>
             <p class="why" style="margin:8px 0 0">${c.note}</p>
           </div>`).join("")}

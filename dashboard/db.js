@@ -44452,6 +44452,19 @@ window.FH6_DB = {
       "workflow": "Read latG@60 and latG@120 off the Performance panel -> enter in the widget -> the envelope draws. After any phase-3 slider change, re-read the panel: mech sliders move the @60 number, aero moves the spread between the two. This is the static half of the camber/pressure tests - the panel IS the instrument.",
       "defaults_note": "Widget defaults to the verified Golf R observed build (1.11 @60 / 1.13 @120, player screenshot 2026-06-08) so it renders real data before you enter your own.",
       "confidence": "model = standard vehicle dynamics; panel readouts = verified instrument; the a+b*v^2 fit assumes the panel's two points are steady-state limits, which matches their in-game description"
+    },
+    "capture_protocol": {
+      "added": "2026-07-30",
+      "purpose": "Minimum screenshots for a session partner (or future you) to fully reconstruct a build. The tune screen shows the Performance panel on every tab, so each tab shot carries the derived stats for free.",
+      "core_3": [
+        "1. TIRES TAB — header (car, PI/class) + pressures + the full Performance panel (lateral G @60/@120 = envelope inputs, 0-60, top speed, braking, balances). Half the build in one shot.",
+        "2. GEARING TAB — final drive, all ratios, gear count (reveals transmission), speed graph.",
+        "3. SPRINGS TAB with a slider SELECTED — rates + ride heights + the slider MIN-MAX range (the calculator input a casual shot misses)."
+      ],
+      "plus_text": "One sentence of parts provenance instead of upgrade-menu shots: swap? compound? aero kit? gearbox tier? Locked tune tabs also reveal missing parts via their banners - mention them.",
+      "full_record": "Core 3 + alignment + damping + diff tabs = 6 shots (AWD) / 5 (RWD) captures every number. ARB/aero/brakes only if unlocked and non-default.",
+      "handling_problem": "Often ONE shot: the tab that owns the problem PHASE (per the phase map) - the Performance panel rides along free.",
+      "confidence": "protocol built on the verified tune-screen layout (Golf R recording 2026-06-08); panel-on-every-tab assumption verified in that footage"
     }
   },
   "sources": {
@@ -45179,5 +45192,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T02:35Z"
+  "builtAt": "2026-08-10T02:46Z"
 };

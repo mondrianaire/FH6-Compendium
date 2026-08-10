@@ -2486,5 +2486,22 @@
     "date": "2026-08-01",
     "credits_banked": "200M+",
     "implication": "Credit price is NO LONGER a constraint. The acquisition lens shifts from cost to AVAILABILITY: 'Autoshow' = instant one-click at any price (the top tier now); guaranteed free rewards (journal/loyalty) rank BELOW Autoshow since they cost play time; medium/hard/premium unchanged. value_rating still embeds cheapness from the pre-wealth era - read it as pick quality, not price-value."
-  }
+  },
+  "evaluated_not_added": [
+    {
+      "car": "Chevrolet Camaro ZL1 (2017)",
+      "evaluated_for": "A-class road",
+      "date": "2026-08-10",
+      "verdict": "DO NOT ADD to A road. Stock S1 727 (RWD, 650hp/650lbft, 3,883 lb, semi-slicks, 55,000 cr Autoshow, Rare) — A700 is a ~27-PI DOWNGRADE build. Zero A-class road board presence (forza.guide browser-checked 2026-08-10: absent from the A all-tracks top-15 AND all 22 per-track A lists); its road home is S1 (Daikoku S1 #2, Shimanoyama S1) — which resolves our 'Chevy Camaro 17' board sightings exactly. The lone positive source (GameRant A-road listing, 2026-06-08) is a contested likely class mix-up; fh6wiki's A-tier claim is recycled FH5 SEO (defines A as 701-800) and concerns the 2018 ZL1 1LE, a separate car.",
+      "known_builds": "Only published A700 road code: 132838053 (Awes0me Beau, CODMunity-syndicated, single origin) — profiles as a DRAG/launch tool (AWD swap, 815hp, 4,142 lb, launch 9.7 / handling 6.3 / braking 5.4), not a circuit car. No grip-focused A700 build documented anywhere. Self-tune grip direction (generic, unverified on this car): keep RWD + semi-slicks, race brakes + race weight reduction, cap engine at bolt-ons.",
+      "niche": "If used at all: S1 road (board-evidenced) or A-class straight-line duty (drag/Eliminator duels/highway) which our road rankings don't measure.",
+      "family_lead": "Camaro Z/28 (2015) is the only A-NATIVE Camaro (stock A 695 per game8 index — individually UNVERIFIED); the candidate if an A-road Camaro is ever wanted.",
+      "in_game_opens": [
+        "ZL1 AWD-swap PI cost (30-80 car-dependent)",
+        "lap-delta test: self-tuned RWD grip ZL1 @700 vs Ford GT '05/Supra at Daikoku or Electric Town",
+        "drive-test code 132838053 (locked — behavior only)",
+        "verify Z/28 2015 stock A 695 in-game"
+      ]
+    }
+  ]
 }

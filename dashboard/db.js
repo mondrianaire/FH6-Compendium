@@ -45036,7 +45036,8 @@ window.FH6_DB = {
         "pane_label_hypothesis": "RESOLVED, PLAYER-VERIFIED 2026-08-10: the 'Suspension' row is a coarse ADJUSTABILITY bucket — after installing DRIFT springs on the Viper GTS ACR '99, the Previous column read 'Race'. Twin confirmation: 'Previous' tracks the car's CURRENT setup (it updated after the install), making the pane a live replica-vs-target diff. Corollary: the case study's stock baselines are valid — the original capture's Previous column (B 598 / Sport / Standard / RWD) shows the car was stock at capture time.",
         "pi_checksum_as_arbiter": "Drift vs Rally springs cost different PI. With the rest of the build matched, whichever choice lands total PI EXACTLY on the tune's number (here S1 800) is the tuner's actual part — evidence, not guesswork.",
         "confidence": "catalog gap player-verified; same-sliders rule FH5-inherited + guide-consistent (probable); pane hypothesis untested",
-        "suspension_row_addendum": "4C confirms the row reads real installed tiers: player's actual Race springs displayed 'Race' (vs Viper GTS ACR case where DRIFT springs displayed 'Race' — adjustable tiers bucket to 'Race', but Street/Sport display as themselves). Catalogs remain per-car: the 4C offers true Race springs, the Viper does not."
+        "suspension_row_addendum": "4C confirms the row reads real installed tiers: player's actual Race springs displayed 'Race' (vs Viper GTS ACR case where DRIFT springs displayed 'Race' — adjustable tiers bucket to 'Race', but Street/Sport display as themselves). Catalogs remain per-car: the 4C offers true Race springs, the Viper does not.",
+        "suspension_row_addendum_2": "Suspension row granularity higher than the bucket theory: displays 'Rally' for rally-tier suspension (2016 Viper ACR donor pane, 2026-08-10). Known displays so far: Street, Sport, Race (incl. drift springs), Rally."
       },
       "doctrine": "PLAYER-STATED 2026-08-10: the protocol's deliverable is the DISCRETE PARTS MANIFEST, not slider values. Sliders are ephemeral — Jett re-fits them to their own driving regardless. Parts are where the tuner's intelligence lives: how the PI budget was allocated across drivetrain/engine/weight/grip is the unrecoverable-by-guessing knowledge. Every decoded build gets recorded as a manifest with per-part evidence tiers (verified = pane row or direct observation; probable = delta inference; open = PI-checksum residual).",
       "case_study_2": {
@@ -45308,7 +45309,8 @@ window.FH6_DB = {
           "top_speed": 188.3,
           "zero_sixty": 2.601,
           "note": "Slick's price on this chassis: -125 hp and +239 lb vs fork A (no weight reduction budget left). @60 latG ~ties fork A (weight cancels compound at low speed); the @120 reading from the tune menu is the decisive pre-drive number (fork A: 1.43). A/B caveat: 3 variables moved (compound+weight+power) — answers 'can a slick 4C hold the corner', not compound-isolated attribution. If B holds: ideal 4C likely between forks (semi-slick + partial weight reduction + mid power)."
-        }
+        },
+        "status": "CHECKPOINTED 2026-08-10 — forks A (rally) and B (slick) both drivable; open items: fork B warm-tire verdict, TCR/assists check. Superseded in priority by the Centenario chase (case study 3)."
       },
       "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
       "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",
@@ -45321,7 +45323,65 @@ window.FH6_DB = {
         "FH6 tire compound ladder (player-verified on the 4C, 2026-08-10): NO Street/Sport upgrade tiers — Stock -> Semi-Slick -> Slick, plus specialties (Drift, Rally, Offroad, Snow, Drag). The compare pane's 'Sport' label is the STOCK tire's category, not a purchasable tier. Differs from FH5 naming."
       ],
       "panel_baselines_rule": "PANEL BASELINES ARE PER-BUILD, NOT PER-CAR (player-raised 2026-08-10, evidenced in case study 2: swap+AWD moved the 4C 41%->47% front). Any part install — engine parts included — can shift Mech. Balance (mass at the part's location), lateral G and braking (total mass), and all accel numbers; can silently RESET tune tabs; and changes PI. Aero Balance alone is immune to engine mass (pure downforce split — but its ceiling is a property of the aero PARTS, see effective-range mechanic). Protocol after EVERY install: 9-tab sweep vs recorded state, wiggle-and-read the panel, expire all prior baselines.",
-      "weight_scaling_rule": "Spring/damper values scale with build weight: a slider sheet is valid ONLY at the weight it was derived for. When mass changes (parts, compound-driven PI rebudgeting), rescale springs and damping proportionally before judging handling. (Learned via fork B: +12% mass on fork A's values = transient breakaway on sharp steering.)"
+      "weight_scaling_rule": "Spring/damper values scale with build weight: a slider sheet is valid ONLY at the weight it was derived for. When mass changes (parts, compound-driven PI rebudgeting), rescale springs and damping proportionally before judging handling. (Learned via fork B: +12% mass on fork A's values = transient breakaway on sharp steering.)",
+      "case_study_3": {
+        "name": "Viper ACR 2016 rebuild — the Centenario chase",
+        "created": "2026-08-10",
+        "context": "Friend set a very competitive Goliath time in a Lamborghini Centenario (class UNKNOWN — asked). Player tried many cars; closest = their 2016 Viper ACR wearing a downloaded S1 800 Goliath tune (NOTE: different tune than the morning's ford351guy state — car now shows 834hp not 940). Mission: recreate the good parts on a fresh stock ACR (Autoshow 275,500) the player owns and self-tunes.",
+        "target_manifest_from_pane": {
+          "pi": "S1 800",
+          "power_hp": 834,
+          "torque_ftlb": 731,
+          "weight_lb": 3148,
+          "front_pct": 54,
+          "displacement_l": 8.38,
+          "suspension": "Rally (PI-arbitrage adjustability — copy it)",
+          "compound": "Rally",
+          "drivetrain": "AWD",
+          "aero_balance": 0.57,
+          "mech_balance": 0.63,
+          "top_speed": 214.2,
+          "zero_sixty": 2.109,
+          "latG": 1.28,
+          "braking_bar": 8.1
+        },
+        "build_notes": "Stock 8.4L block (no displacement work); engine to 834/731 via subset-sum previews (+189/+131, torque-heavy = FI suspect); weight -225 net; front-biased aero 0.57 via wiggle-read; PI exactly 800; all pane rows dashed.",
+        "starting_sliders": {
+          "tires": [
+            24,
+            24
+          ],
+          "diff": "20/10 F, 45/28 R, 68R center",
+          "brake": [
+            55,
+            100
+          ],
+          "springs": [
+            740,
+            630
+          ],
+          "rebound": [
+            9,
+            8.5
+          ],
+          "bump": [
+            5.4,
+            5.1
+          ],
+          "arb": [
+            40,
+            34
+          ],
+          "caster": 6.5,
+          "camber": [
+            -1.5,
+            -1
+          ],
+          "rear_toe_in": 0.1,
+          "fd": "taller than default (automatic lesson)"
+        },
+        "r_class_reference": "anklBr8kr69 'R race' tune observed: R 982, 1307hp/1003tq, 3050lb, Race susp, Slick, AWD, 248.7mph, 1.688s, 1.76G, aero 0.44, mech 0.50 — the ceiling if the friend's ghost turns out to be R-class."
+      }
     }
   },
   "sources": {

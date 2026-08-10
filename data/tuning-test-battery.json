@@ -520,7 +520,21 @@
       "baseline_verified": "2026-08-10: player questioned whether the yellow 4C baseline was stock. VERIFIED STOCK by cross-reference — all seven observables (240 hp / 2,072 lb / bars 5.9-5.7-4.8-7.0-5.2-5.0 / 161.2 mph / ~4.4s 0-60 / 1.02 latG) exactly match the kudosprime stock sheet. The card's steering-wheel icon = downloaded LIVERY (TEAMMATE), not a tune — the icon alone does not mean the build is modified. Cross-title note: same car lists as A 755 in FH5 vs A 644 in FH6 — PI rescale between titles (FH5 A caps 800, FH6 A caps 700), not a parts difference.",
       "replication_log": {
         "2026-08-10 session 2": "Player replica reached EXACTLY S1 800 with swap (4.69L) + AWD + rally compound matched — but as a DIFFERENT 800: race suspension + upgraded brakes (braking 7.4 vs target 5.8) + 663hp/466tq vs the target's street suspension + stock brakes + 623/460 + one more weight tier (2,053 vs 1,981 lb). Pane live-diff quantified the allocation cost: player 0-60 2.537 vs 2.248, top speed 202.5 vs 205.8 — 40 extra hp LOSES to 72 lb + drivetrain-tier differences. Finish list issued: revert springs+brakes to stock, engine -40hp/-6tq (camshaft-first bisection), weight tier up to 1,981, expect all rows to dash out at exactly 800."
-      }
+      },
+      "parts_effects_log": {
+        "note": "PLAYER-MEASURED per-part deltas (shop preview / install-diff) — the first hard parts data in the project. Grow this table with every report.",
+        "engine": "4.69L V8 swap on Alfa Romeo 4C 2014",
+        "rows": [
+          {
+            "part": "Sport Camshaft",
+            "hp": 43,
+            "torque_ftlb": 9,
+            "measured": "2026-08-10, player"
+          }
+        ],
+        "residual": "Cams-out = 620/457; LogikJ target 623/460 -> one small part supplies +3hp/+3tq. Hunt by shop preview: highlight air filter/intake, exhaust, flywheel, oil & cooling — the +3/+3 preview is the part."
+      },
+      "tuning_session_plan": "2026-08-10: player deferring slider work until after a test drive; wants to learn sliders together via the dashboard (corner-phase map -> symptom matrix -> one-change-at-a-time with panel readouts). KEY CONSTRAINT: exact LogikJ spec is nearly slider-less (street suspension = no spring/damper/ARB/alignment sliders; stock trans = no gearing). Teaching car = player's race-suspension FORK (full sliders, same 800); reference lap = the green 4C (LogikJ original). A/B those two, then tune the fork against the reference."
     },
     "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
     "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",

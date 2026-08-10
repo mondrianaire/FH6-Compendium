@@ -44927,7 +44927,7 @@ window.FH6_DB = {
           "priority": 1,
           "when": "BEFORE downloading — works on ANY tune in the browser",
           "what": "The tune detail pane is the game's own stock-vs-tuned diff: Previous (stock) vs New (tuned) across 13+ Car Stat rows, INCLUDING three outright parts rows — Suspension tier, Tire Compound, Drivetrain. Plus replication targets: power, torque, weight, top speed, 0-60, lateral G, PWR, aero efficiency, aero balance, mechanical balance; the radar bars; base PI -> final PI; and the share code via [P] View Share Code.",
-          "status": "player-verified 2026-08-10 (Viper GTS ACR '99 tune-browser screenshots). The Car Stat column SCROLLS — check for rows below Drivetrain (brakes/aero tiers may be listed)."
+          "status": "player-verified 2026-08-10 (Viper GTS ACR '99 tune-browser screenshots). The Car Stat column SCROLLS — check for rows below Drivetrain (brakes/aero tiers may be listed). PLAYER-VERIFIED 2026-08-10: this pane exists ONLY in the Tunes browser — the upgrade shop does NOT show the full Car Stat table while buying parts (per-part deltas only)."
         },
         {
           "id": "my-cars-stat-pages",
@@ -44979,7 +44979,7 @@ window.FH6_DB = {
         "added": "2026-08-10",
         "finding": "PLAYER-VERIFIED: the Viper GTS ACR '99 Springs and Dampers catalog offers only Stock / Drift / Rally — NO Race tier. Part catalogs are CAR-SPECIFIC; never assume the full Street/Sport/Race/Rally/Drift/Offroad ladder exists on a given car.",
         "substitution_rule": "All adjustable spring tiers unlock the SAME slider set (springs, ride height, gates damper tuning) — they differ only in default values and PI cost (guides describe rally springs as race values halved). For a road/circuit replica on a car lacking Race springs: use DRIFT springs (stiff/low road-biased defaults) over Rally (soft/tall dirt defaults), then set your own values.",
-        "pane_label_hypothesis": "The compare pane's 'Suspension' row is probably a coarse ADJUSTABILITY bucket (Stock/Sport/Race), not a part name — so Drift springs likely display as 'Race'. TEST (free): highlight Drift springs in the shop; the purchase screen shows the same Previous->New Car Stat preview — if Suspension flips Sport->Race before buying, confirmed.",
+        "pane_label_hypothesis": "The compare pane's 'Suspension' row is probably a coarse ADJUSTABILITY bucket (Stock/Sport/Race), not a part name — so Drift springs likely display as 'Race'. CORRECTED TEST (the purchase-screen preview does NOT exist — player-verified): install Drift springs, then REOPEN the tune's page in the Tunes browser and read the Previous column. OPEN QUESTION with a big payoff: does 'Previous' track the car's CURRENT setup or frozen stock? If current, the pane is a LIVE DIFF between your replica and the target — replicate until every Previous equals its New and the pane itself certifies completion. If frozen stock, capture the pane once and fall back to the PI checksum.",
         "pi_checksum_as_arbiter": "Drift vs Rally springs cost different PI. With the rest of the build matched, whichever choice lands total PI EXACTLY on the tune's number (here S1 800) is the tuner's actual part — evidence, not guesswork.",
         "confidence": "catalog gap player-verified; same-sliders rule FH5-inherited + guide-consistent (probable); pane hypothesis untested"
       }

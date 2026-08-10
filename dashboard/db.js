@@ -45191,6 +45191,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "STILL PUSHING at 0.48 (wing off) — balance is provably not the limiter (gap 0.08). Ladder: (1) camber -2.0F now (was queued behind wing test), (2) front tire WIDTH +1 step (parts; PI freed by wing removal; last front-grip lever), (3) if both fail -> COMPOUND CEILING conversation: rally rubber at 110+ may be the wall. DECISIVE CALIBRATION (asked 3x now): green 4C through the same fast section at the same entry speed — same compound, reference build. Green pushes too = physics, corner gets an entry number (~100-105), car is done. Green holds = keep hunting."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "Camber -2.0F already implemented — push at speed SURVIVES it. GOAL REFRAMED (player): they disliked the green car's handling from the start — the fork was never meant to match the reference; green-car comparison requests withdrawn permanently. The mimic was scaffolding; the goal is a car Jett likes. Remaining: (1) front tire width +1 (funded, last in-identity front-grip lever), (2) COMPOUND DECISION — rally rubber is the last un-revisited LogikJ inheritance; sport compound is the middle path; method: shop-preview the PI delta + read panel latG@60/@120 change BEFORE buying (wiggle-read). If both end: the corner gets a speed number and the build is declared finished."
           }
         ],
         "slider_ranges_observed": {
@@ -45199,7 +45203,8 @@ window.FH6_DB = {
             260
           ],
           "aero_front_race_bumper_lb_max": 128
-        }
+        },
+        "doctrine_note": "Replication is scaffolding, not destination: Jett decodes builds to LEARN the allocation, then forks toward their own taste. Never treat the reference build's behavior as the success criterion — 'a car I like driving' is."
       },
       "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
       "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",

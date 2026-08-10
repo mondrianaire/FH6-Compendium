@@ -8,7 +8,8 @@
     "Aspiration options are FAMILIES with Street/Sport/Race tiers; the Aspiration menu previews only each family's entry tier (tier-ladder rule, discovered on this car).",
     "Some parts carry ZERO or NEGATIVE PI while adding power — the PI-efficiency stars below. These are near-mandatory on capped builds.",
     "The top-left header PI LAGS behind part changes (read 798 while the true config previewed 790) — always trust the preview panel's PI, never the header.",
-    "The shop preview's Y Toggle cycles to an Aerodynamics panel showing per-option efficiency/balance/mech-balance — aero signatures are readable per part before buying."
+    "The shop preview's Y Toggle cycles to an Aerodynamics panel showing per-option efficiency/balance/mech-balance — aero signatures are readable per part before buying.",
+    "PART PI COSTS ARE CONFIG-DEPENDENT: the PI simulation re-prices parts as the build changes (Viper ARBs previewed free at an early config, cost PI at the final 800-exact ledger). Every 'X PI' row in this table is valid AT ITS MEASUREMENT BASE; re-preview at the current config before trusting a ledger."
   ],
   "engines": [
     {
@@ -342,7 +343,8 @@
                 "pi": 790,
                 "note": "unlocks rear ARB stiffness tuning"
               }
-            ]
+            ],
+            "config_dependence": "At the final near-800 config only ONE race bar fits the ledger (player report) — bars are not universally free; see config-dependence rule. ONE-BAR DOCTRINE: the adjustable bar sets the whole roll-balance ratio; choose the bar you'll push AWAY from stock. Viper fork verdict: REAR (anti-push direction = rear-stiffer, exit-traction = rear-softer — both rear-side moves; wing slider already covers rear aero; front managed via camber/psi)."
           },
           "brakes": {
             "finding": "RESOLVED (player, 2026-08-10): NO brake parts menu exists AND the tune menu's Brake tab is UNLOCKED BY DEFAULT — the factory ACR carbon-ceramics are natively adjustable (balance + pressure sliders, zero parts, zero PI). Completes the ACR free-slider suite: every tuning family on this car costs 0 or negative PI."

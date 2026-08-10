@@ -2327,7 +2327,8 @@ window.FH6_DB = {
             "note": "S2 WTAC grip / road-attack. 🟡 provenance video — verify in-game."
           }
         ],
-        "autoshow": true
+        "autoshow": true,
+        "acquisition_disputed": true
       },
       {
         "tune_baseline": null,
@@ -45517,5 +45518,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "2026-08-10T08:13Z"
+  "builtAt": "2026-08-10T09:55Z"
 };

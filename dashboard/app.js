@@ -78,6 +78,7 @@
   const acqLabel = (dOrCar) => {
     const c = typeof dOrCar === "object" ? dOrCar : null;
     const d = c ? c.acquisition_difficulty : dOrCar;
+    if (c && c.acquisition_disputed) return "⚠️ disputed — see card";
     if (d === "easy") return c && c.autoshow === false ? "🎁 free — play required" : "🛒 Autoshow — buy now";
     if (d === "medium") return "🟡 some effort";
     if (d === "hard" || d === "hard-unconfirmed") return "🔴 luck-gated grind";
@@ -87,6 +88,7 @@
   const acqClass = (dOrCar) => {
     const c = typeof dOrCar === "object" ? dOrCar : null;
     const d = c ? c.acquisition_difficulty : dOrCar;
+    if (c && c.acquisition_disputed) return "acq-disputed";
     if (d === "easy") return c && c.autoshow === false ? "acq-free" : "acq-easy";
     return "acq-" + String(d || "").split("-")[0];
   };

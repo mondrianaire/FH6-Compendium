@@ -45280,6 +45280,21 @@ window.FH6_DB = {
           },
           "ab_protocol": "Back-to-back, 3-lap medians: fast sweeper (does B hold 108+?), slow hairpins (jitter without track width), launch. Capture Performance panel baseline first — latG pair is the headline vs fork A's 1.24/1.43.",
           "compound_note": "Preview both in shop: PI cost + latG pair per compound before buying. psi 27/27 correct for either."
+        },
+        "fork_b_landed_state": {
+          "date": "2026-08-10",
+          "pi": "S1 800 exact",
+          "compound": "SLICK (fit!)",
+          "power_hp": 538,
+          "torque": 400,
+          "weight_lb": 2292,
+          "latG_60": 1.22,
+          "aero_balance": 0.48,
+          "aero_eff": 0.849,
+          "mech_balance": 0.58,
+          "top_speed": 188.3,
+          "zero_sixty": 2.601,
+          "note": "Slick's price on this chassis: -125 hp and +239 lb vs fork A (no weight reduction budget left). @60 latG ~ties fork A (weight cancels compound at low speed); the @120 reading from the tune menu is the decisive pre-drive number (fork A: 1.43). A/B caveat: 3 variables moved (compound+weight+power) — answers 'can a slick 4C hold the corner', not compound-isolated attribution. If B holds: ideal 4C likely between forks (semi-slick + partial weight reduction + mid power)."
         }
       },
       "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",

@@ -44988,6 +44988,13 @@ window.FH6_DB = {
           "when": "Final step — rebuild the parts list on a second copy",
           "what": "Solve constraints in this order: (1) install the directly-read parts (drivetrain swap, compound, suspension tier); (2) match displacement; (3) match hp AND torque SIMULTANEOUSLY — the pair collapses aspiration+parts fast because turbos overshoot torque at a given hp; (4) match weight (fixed reduction tiers; remember swaps ADD weight before reduction subtracts); (5) cross-check front % / mechanical balance; (6) PI must land EXACTLY on the tune's number; (7) stat bars are the final checksum. The replica is a functionally identical chassis with UNLOCKED sliders — fit your own tune, using the locked copy's gearing forensics as the starting point. COMPLETION CRITERION (player-verified): reopen the tune's browser page between shop visits — the live Previous column ticks off each matched row; all-rows-matched + PI exact = certified replica.",
           "status": "method"
+        },
+        {
+          "id": "telemetry-slider-extraction",
+          "priority": 2.5,
+          "when": "The blind-spot piercer: extracting SLIDER values from a LOCKED tune (discovered 2026-08-10, Viper case)",
+          "what": "Telemetry reads physics, not menus — so it works while DRIVING a locked tune. Extractable: alignment camber (live-camber readout rolling straight), cold pressures (hot psi minus the ~3.5 warm-up delta), diff accel character (per-wheel speeds on exit), transmission + FD (gear count + rpm at fixed speed), ride height/rake (photo mode side-by-side). NOT extractable: dampers, ARB stiffness, brake balance, exact diff % — fit those by the phase method with the donor as reference lap.",
+          "status": "method — instrument verified, extraction procedure first applied to the Viper donor"
         }
       ],
       "case_study": {
@@ -45482,7 +45489,8 @@ window.FH6_DB = {
           "course_fit": "Goliath = flow/sweepers/straights = aero country; the weakness maps onto the lap's smallest slice — likely why this car emerged as closest to the Centenario."
         },
         "sheet_rule": "RULE (2nd occurrence of this error class): every slider value in a build sheet must have its UNLOCK PART as an explicit numbered shop step — parentheticals are not instructions.",
-        "ladder_state": "2026-08-10: engine 834/731 EXACT, aero balance 0.57 (donor match), top 222.3 (gearing defaults), mech 0.51 (donor 0.63 — tuning-session job), S1 790, weight 3,653. WEIGHT CRUNCH: -505 lb needed on 10 PI — impossible, proving the donor lacks some of our pane-blind extras (X-brace/brakes/ARBs/flywheel). Give-back doctrine: X-brace first; then the FORK CHOICE — match 3,148 by selling brakes/ARBs (lose sliders) vs keep tunability ~100-150 lb heavy. Recommended: keep tunability (fork serves the driver, brake balance solved entry twice)."
+        "ladder_state": "2026-08-10: engine 834/731 EXACT, aero balance 0.57 (donor match), top 222.3 (gearing defaults), mech 0.51 (donor 0.63 — tuning-session job), S1 790, weight 3,653. WEIGHT CRUNCH: -505 lb needed on 10 PI — impossible, proving the donor lacks some of our pane-blind extras (X-brace/brakes/ARBs/flywheel). Give-back doctrine: X-brace first; then the FORK CHOICE — match 3,148 by selling brakes/ARBs (lose sliders) vs keep tunability ~100-150 lb heavy. Recommended: keep tunability (fork serves the driver, brake balance solved entry twice).",
+        "slider_gap": "2026-08-10: back-to-back vs the donor = 'wildly different, WAY off' — EXPECTED on this chassis: the free-slider ACR means the donor's build is mostly invisible slider values (opposite of the slider-less 4C donor; parts parity != behavior parity here). Plus a WING hardware gap discovered visually (donor has one, replica doesn't — FH6 base ACR may not include the big wing; aero menu previews pending). CONVERGENCE PLAN: (1) match the wing, verify pane 0.57/~0.798; (2) donor telemetry session — extract camber/pressures/diff-character/gearing from the locked tune; (3) transcribe to the replica, A/B; (4) phase-method the damper/ARB/brake remainder vs the donor reference lap."
       }
     }
   },

@@ -924,7 +924,8 @@
               "kind": "stability",
               "label": "stable lift/brake"
             }
-          }
+          },
+          "ingame_doc": "PRIMARY (player screenshot 2026-08-10, FH6 Description panel): 'Increasing the Decel setting makes the differential lock more quickly under deceleration, but excessive differential locking can impair handling. On rear differentials, increasing the Decel setting can reduce lift off oversteer.' Confirms the pole directions verbatim."
         },
         {
           "id": "diff_center",

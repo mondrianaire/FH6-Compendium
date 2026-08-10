@@ -926,7 +926,8 @@ window.FH6_DB = {
                 "kind": "stability",
                 "label": "stable lift/brake"
               }
-            }
+            },
+            "ingame_doc": "PRIMARY (player screenshot 2026-08-10, FH6 Description panel): 'Increasing the Decel setting makes the differential lock more quickly under deceleration, but excessive differential locking can impair handling. On rear differentials, increasing the Decel setting can reduce lift off oversteer.' Confirms the pole directions verbatim."
           },
           {
             "id": "diff_center",
@@ -45117,7 +45118,21 @@ window.FH6_DB = {
         },
         "tuning_session_plan": "2026-08-10: player deferring slider work until after a test drive; wants to learn sliders together via the dashboard (corner-phase map -> symptom matrix -> one-change-at-a-time with panel readouts). KEY CONSTRAINT: exact LogikJ spec is nearly slider-less (street suspension = no spring/damper/ARB/alignment sliders; stock trans = no gearing). Teaching car = player's race-suspension FORK (full sliders, same 800); reference lap = the green 4C (LogikJ original). A/B those two, then tune the fork against the reference.",
         "player_additions": "Beyond the manifest, player added: race front bumper + race rear wing (consistent with target aero balance 0.37), rear tire width, front track width. WIDTHS ARE FORENSICALLY INVISIBLE — no compare-pane row shows them; LogikJ's widths unknowable. Rule: if PI won't land exactly with all visible rows matched, revert widths first (the unaccountable variable; they also add weight).",
-        "player_fork_inventory": "Full player-fork parts inventory (2026-08-10): 4.69L V8 swap + centrifugal supercharger + intercooler + oil/cooling + flywheel + sport cams (pending -> stock) + race transmission 10-SPEED (player's own lowest-PI gearbox rule applied) + race driveline + race differential + race suspension + race front bumper + race rear wing + rear tire width + front track width + AWD + rally compound. Fully instrumented teaching car: every slider family unlocked (gearing, diff, springs/dampers, ARBs, alignment, aero, brakes, tires)."
+        "player_fork_inventory": "Full player-fork parts inventory (2026-08-10): 4.69L V8 swap + centrifugal supercharger + intercooler + oil/cooling + flywheel + sport cams (pending -> stock) + race transmission 10-SPEED (player's own lowest-PI gearbox rule applied) + race driveline + race differential + race suspension + race front bumper + race rear wing + rear tire width + front track width + AWD + rally compound. Fully instrumented teaching car: every slider family unlocked (gearing, diff, springs/dampers, ARBs, alignment, aero, brakes, tires).",
+        "tuning_session_log": [
+          {
+            "date": "2026-08-10",
+            "entry": "SYMPTOMS (fork, all sliders at install defaults): (1) rear slides out braking+turning [phase 1-2 oversteer], (2) severe exit understeer, must slow extra to make corners [phase 4], (3) snappy left-right whipping on transitions."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "DEFAULTS captured (Differential tab): front 30/10, rear 55/15, center 60R. COACHING ERROR + CORRECTION: I advised rear decel DOWN to 15 for the entry slide — backwards; the site's own diff entry and the in-game Description (screenshot) both say UP = stable lift/brake. Corrected plan: rear decel 35, then center 68R, then front accel 20; stability ladder (caster 6.5, rear toe-in 0.1-0.2, soften rebound) queued behind diff verdicts."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "FORK BASELINE PANEL @ S1 776: latG 1.24@60 / 1.45@120 (strong aero spread), braking 98.6ft/244.0ft, 0-60 2.634, 0-100 5.352, top 195.7, mech balance 0.64, aero balance 0.33, aero eff 0.802."
+          }
+        ]
       },
       "value_check_refuted": "PLAYER-VERIFIED 2026-08-10: My Cars card value IGNORES installed parts — stock 4C (A 644) and fully built 4C (S1 800, AWD swap + engine swap) both show 69,350 CR. The 'value delta = parts spend' bound proposed in the Viper case is REFUTED; remove it from the instrument list.",
       "suspension_row_note": "The compare pane's Suspension row tracks real tiers (Street/Sport/Race-bucket). Case study 2 shows Street->Street: top-rank tuners sometimes SKIP adjustable suspension to spend PI on power — do not assume race suspension is always present when replicating.",

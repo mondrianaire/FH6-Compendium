@@ -45554,7 +45554,22 @@ window.FH6_DB = {
         },
         "mech_balance_direction": "PLAYER-DERIVED VIA PANEL (correcting my earlier 'front-stiffer' advice — wrong direction): Mech. Balance rises with front-SOFTER/rear-STIFFER — it reads as the FRONT SHARE of mechanical grip (softer end grips more). Donor 0.63 = front-grippy setup, consistent with their rotation-biased aero. Sane route to the band: springs ~450F/~650R + rear ARB stiffened + front psi -0.5, landing 0.61-0.63."
       },
-      "panel_matching_doctrine": "SLIDER EXTRACTION VIA PANEL-MATCHING (the day's capstone technique): the compare pane provides per-row TARGETS and the Performance panel live-simulates slider changes — so every panel-visible quantity (aero balance/efficiency, mechanical balance, top speed, 0-60, latG) can be converged to the donor's values from the MENU, no driving required. Only dampers, diff %, brake balance, and pressures remain for telemetry + phase-method. The certified-replica loop extends into the slider layer. CAVEAT (2026-08-10, Viper springs): panel aggregates are MANY-TO-ONE — a target matched with pegged sliders (springs 163.6/818.1 for mech 0.62) does not drive like the same number from balanced inputs, and extreme rates exceed damper authority. Match targets with SANE inputs across multiple contributors (springs + ARB + pressures); accept a +/-0.01 band; never chase the last hundredth onto a slider peg."
+      "panel_matching_doctrine": "SLIDER EXTRACTION VIA PANEL-MATCHING (the day's capstone technique): the compare pane provides per-row TARGETS and the Performance panel live-simulates slider changes — so every panel-visible quantity (aero balance/efficiency, mechanical balance, top speed, 0-60, latG) can be converged to the donor's values from the MENU, no driving required. Only dampers, diff %, brake balance, and pressures remain for telemetry + phase-method. The certified-replica loop extends into the slider layer. CAVEAT (2026-08-10, Viper springs): panel aggregates are MANY-TO-ONE — a target matched with pegged sliders (springs 163.6/818.1 for mech 0.62) does not drive like the same number from balanced inputs, and extreme rates exceed damper authority. Match targets with SANE inputs across multiple contributors (springs + ARB + pressures); accept a +/-0.01 band; never chase the last hundredth onto a slider peg.",
+      "steady_state_doctrine": {
+        "added": "2026-08-10",
+        "insight": "The Performance panel is a STEADY-STATE instrument — everything panel-matchable is an equilibrium (latG, top speed, balances, distances). Every value the lock keeps dark (dampers, diff %, brake balance, toe/caster, exact rates) is a TRANSIENT control. A pane-certified replica is certified at every equilibrium and uncertified at every handoff between phases.",
+        "phase_map_of_unknowns": {
+          "phase_1_braking": "certified (panel distances)",
+          "handoff_1_to_2": "DENSEST DARK ZONE: brake balance + rear decel diff + front rebound stack on the brake-release moment — historically the project's crash site (video record)",
+          "phase_2_turn_in": "dark: bump, toe, caster (crispness, whip-class behaviors)",
+          "phase_3_steady": "certified (latG, balances, aero)",
+          "handoff_3_to_4": "dark: accel diffs + center + rear squat damping (throttle timing)",
+          "phase_4_5": "certified (gearing, power)"
+        },
+        "envelope_formulation": "Parts + matched sliders set the ENVELOPE; the dark values set how the car CROSSES its edge and returns. Pressures barely move the envelope's height but set the edge's shape (slope vs cliff).",
+        "course_note": "Flow courses (Goliath) are kind to this uncertainty profile — long equilibria, few handoffs; touge interrogates every handoff constantly.",
+        "final_probe_plan": "Three targeted phase-method drives: (1) brake-release probe into a fast complex [entry stack], (2) throttle-timing probe from a slow corner [diff stack], (3) kerb strike through a fast kink [dampers] — plus the telemetry pass for pressures/camber. Four drives corner all sixteen dark values."
+      }
     }
   },
   "partsEffects": {

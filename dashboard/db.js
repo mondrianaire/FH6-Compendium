@@ -45187,6 +45187,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "PARTS-LEVEL BREAKTHROUGH (player): REMOVING the rear wing entirely -> Aero Balance 0.48. Stock rear body generates ~139 lb effective (128/0.48-128) — BELOW the race wing's 208 floor, unreachable by slider. Aero = three discrete configs: wing-high 0.33, wing-floored 0.38, no-wing 0.48. Mech-aero gap now 0.08 (smallest yet — speed-morph should nearly vanish). TRADE: total rear downforce -33%; video-1 spin-mode risk returns at speed. TEST (wing removal = the single variable; camber -2.0 HELD in queue): (1) does it turn at speed, (2) does the rear stay planted in the fast kink + heavy braking (watch for drift-skill popups). Fallback middle path: shop-check street/sport-tier rear wings for an effective range between 139 and 208. Part change -> tab sweep + PI recheck (budget freed)."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "STILL PUSHING at 0.48 (wing off) — balance is provably not the limiter (gap 0.08). Ladder: (1) camber -2.0F now (was queued behind wing test), (2) front tire WIDTH +1 step (parts; PI freed by wing removal; last front-grip lever), (3) if both fail -> COMPOUND CEILING conversation: rally rubber at 110+ may be the wall. DECISIVE CALIBRATION (asked 3x now): green 4C through the same fast section at the same entry speed — same compound, reference build. Green pushes too = physics, corner gets an entry number (~100-105), car is done. Green holds = keep hunting."
           }
         ],
         "slider_ranges_observed": {

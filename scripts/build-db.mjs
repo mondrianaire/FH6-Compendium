@@ -26,6 +26,7 @@ const db = {
   tunerSheets: read("tuner-sheets.json"),
   tunerRoster: read("tuner-roster.json"),
   tuneLab: read("tuning-test-battery.json"),
+  partsEffects: read("parts-effects.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

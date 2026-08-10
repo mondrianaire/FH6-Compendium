@@ -45199,6 +45199,10 @@ window.FH6_DB = {
           {
             "date": "2026-08-10",
             "entry": "FORK B first drive: traction breaks on fast/hard steering inputs. ROOT CAUSE = build-sheet error (mine): spring/damper values were derived at fork A's 2,053 lb; fork B is 2,292 (+12%) -> undersprung/underdamped, body sloshes past the slick's edge on sharp inputs. CORRECTION issued: springs 480/535, rebound 8.4/9.0, bump 5.0/5.6 (12% scale). Secondary factor: slick edge character — narrower slip window than rally's mushy band; rewards progressive hands (adaptation, not sliders). Follow-ups if needed: psi 26/26, rear toe-in +0.15. RULE FOR THE BOOK: slider sheets are valid only at their derivation weight — rescale springs/dampers whenever build mass changes."
+          },
+          {
+            "date": "2026-08-10",
+            "entry": "VIDEO 3 (29s, Goliath Rivals launch + first complex, fork B blue 4C): TIRE MARKS visible at 118/103 mph braking into the left complex = REAR stepping under trail braking; slide carries off the INSIDE-left at 93 (guardrail sparks), grass-ride 89-77, brief recovery at 72, overcorrection spears across into right-side forest at 45-26. DIAGNOSIS: fork A's original entry-oversteer symptom resurrected on fork B — prime suspect is DEFAULT SLIDERS (new car: brake balance 50 not 55, rear decel ~15 not 28, damping defaults) — verify sheet Part 2 + weight-corrected springs BEFORE new tuning. If state verified: brake balance 55->57 then rear decel 28->32, one at a time. SILVER LINING: entry speeds 136-127 vs fork A's ~110 — slicks working, braking points need technique inflation (brake earlier, finish braking before turn-in). Recovery lesson: two wheels on grass at 90+ = unwind and brake straight; the spear-across was the recovery, not the tune."
           }
         ],
         "slider_ranges_observed": {

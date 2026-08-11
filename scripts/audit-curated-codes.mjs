@@ -12,7 +12,7 @@ const meta = read("meta-cars.json");
 const pool = read("tuner-sheets.json").tunes;
 
 const tnorm = (s) => (s || "").toLowerCase().replace(/\([^)]*\)/g, " ").replace(/\b(19|20)\d\d\b/g, " ").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-const GEN = new Set(["forza", "edition", "the"]);
+const GEN = new Set(["forza", "edition", "the", "formula", "drift", "motorsports"]);
 const poolCodes = new Set(pool.map((t) => t.code));
 const poolIdx = pool.map((t) => ({ ...t, toks: new Set(tnorm(t.car).split(" ").filter((w) => w.length > 1)) }));
 const poolTunesForCar = (name) => {

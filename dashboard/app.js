@@ -122,7 +122,9 @@
   // Non-distinguishing tokens: shared across many cars, so they must NOT be enough to match on their own.
   // (e.g. "Forza Edition" is a suffix on dozens of cars — matching on make + "forza edition" alone binds
   //  the wrong car, e.g. BRZ FE -> Vivio RX-R FE.)
-  const GENERIC_TOK = new Set(["forza", "edition", "the"]);
+  // Category/prefix words shared across many cars — not model identifiers. Matching on these alone
+  // binds the wrong car (BRZ FE↔Vivio FE via "forza edition"; #777 240SX↔599 GTB via "formula drift").
+  const GENERIC_TOK = new Set(["forza", "edition", "the", "formula", "drift", "motorsports"]);
   const modelToks = (qt, make) => qt.filter((t) => t !== make && !GENERIC_TOK.has(t));
   function matchTuneCode(name) {
     const qt = tnorm(name).split(" ").filter(Boolean);

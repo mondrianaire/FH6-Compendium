@@ -47458,6 +47458,116 @@ window.FH6_DB = {
       },
       "car_side": "Some of this is the chassis, not the tune: a long wheelbase rotates slowly and forgivingly; a short one snaps. Mid-engine cars swing their mass hard once past the peak (the 4C); front-engine cars hang their mass ahead of the pivot and self-stabilise (the Viper). RWD gives the cleanest release AND the cleanest catch; AWD trades some release authority for a front axle that rescues you.",
       "tier": "doctrine — assembled from the verified drift slider research (caster/camber/ARB/diff) plus the player-verified grip sessions; the breakaway-margin test is newly proposed and untested"
+    },
+    "chassis_character": {
+      "headline": "Read the chassis before you drive it — weight and front % are on every car screen",
+      "concept": "Yaw behaviour is set by two numbers you can always see. FRONT % decides the RESTORING force: mass ahead of the centre of gravity works like an arrow's head and straightens the car, mass behind it works like a pendulum and amplifies every disturbance. WEIGHT decides INERTIA: a heavy car is slow to start rotating (feels planted) but equally slow to stop once it has (hard to catch). They are independent, which is why there are four distinct chassis personalities rather than a single stable-to-nervous scale.",
+      "axes": {
+        "x": {
+          "label": "Weight (lb)",
+          "min": 1600,
+          "max": 4200,
+          "meaning": "inertia — resistance to starting AND stopping rotation"
+        },
+        "y": {
+          "label": "Front weight %",
+          "min": 40,
+          "max": 60,
+          "meaning": "restoring force — the real stabiliser"
+        }
+      },
+      "quadrants": [
+        {
+          "id": "agile-stable",
+          "x": "light",
+          "y": "front-biased",
+          "name": "Agile & stable",
+          "feel": "Changes direction instantly and still straightens itself — the easiest fast car to drive. Small inputs, quick recovery, forgiving of mistakes.",
+          "tuning": "You have freedom: chase rotation without paying for it. Spend sliders on grip rather than stability.",
+          "color": "#199e70"
+        },
+        {
+          "id": "nervous",
+          "x": "light",
+          "y": "rear-biased",
+          "name": "Nervous & darty",
+          "feel": "Rotates on a thought — and keeps rotating. Wiggles build instead of dying; the wheel needs small hands and a light touch. Rewards precision, punishes correction.",
+          "tuning": "You will LIVE on the stability sliders: rear toe-in, matched rear rebound, rear downforce, and a softer rear bar than instinct suggests.",
+          "color": "#e5414e"
+        },
+        {
+          "id": "gt",
+          "x": "heavy",
+          "y": "front-biased",
+          "name": "Self-damping GT",
+          "feel": "Deafens the wiggles. Disturbances die on their own; the car feels planted at speed and lazy in hairpins. You can be rough with it.",
+          "tuning": "Spend everything on ROTATION and front grip — the chassis is already giving you stability for free.",
+          "color": "#3987e5"
+        },
+        {
+          "id": "widowmaker",
+          "x": "heavy",
+          "y": "rear-biased",
+          "name": "The handful",
+          "feel": "Slow to respond, then unstoppable once the mass is moving. The worst combination for recovery: the rear has both leverage and momentum.",
+          "tuning": "Maximum stability everywhere: rear toe-in, big rear downforce, front-biased brakes, and accept the understeer you tune in — the alternative is a spin you cannot catch.",
+          "color": "#c98500"
+        }
+      ],
+      "reference_cars": [
+        {
+          "name": "Alfa 4C — fork A",
+          "weight": 2053,
+          "front": 47,
+          "note": "the whippy one: mid-engine, short wheelbase, mass behind the pivot"
+        },
+        {
+          "name": "Alfa 4C — fork B (slicks)",
+          "weight": 2292,
+          "front": 47,
+          "note": "same character, more mass — heavier but no more stable in yaw"
+        },
+        {
+          "name": "Viper ACR — S1 replica",
+          "weight": 3148,
+          "front": 54,
+          "note": "the deafening one: front-engine, long wheelbase, mass ahead of the pivot"
+        },
+        {
+          "name": "Viper ACR — stock",
+          "weight": 3747,
+          "front": 52,
+          "note": "before the weight ladder — even more inertia"
+        }
+      ],
+      "reading": [
+        "Front % above ~53 with real mass = the car will damp your wiggles for you. Tune for rotation.",
+        "Front % below ~50 on a light car = the car will amplify them. Budget PI and sliders for stability from the start.",
+        "Weight is NOT stability. Heavy cars feel planted because they are slow to yaw — but the same inertia is what makes them impossible to catch once they do.",
+        "Both numbers move when you build: engine swaps, AWD hardware and weight reduction all shift front % (our Viper went 52 → 54 through its build; the swap and AWD moved the 4C 41 → 47). Re-read them after every part."
+      ],
+      "tier": "doctrine — the physics is standard vehicle dynamics; the reference cars and the 4C-vs-Viper contrast are player-verified from this project's own panels"
+    },
+    "braking_science": {
+      "headline": "Why some cars lock up at 150 and others simply refuse to",
+      "concept": "A wheel locks when brake torque exceeds what the tire can hold, and what the tire can hold is grip x VERTICAL LOAD. At high speed a downforce car is being pressed into the road by hundreds of extra pounds, so its tires can absorb far more braking force before letting go. A car with no downforce has only its own weight at every speed — so the same pedal that works at 60 locks the wheels at 150.",
+      "the_counterintuitive_part": "On a downforce car the danger moment is the END of the braking zone, not the start. Downforce falls away with speed squared, so the load holding your tires down evaporates as you slow — the pedal pressure that was perfect at 150 is now far too much at 70. Most high-speed lock-ups happen late in the zone, not at the initial stab.",
+      "what_makes_a_car_lock_resistant": [
+        "DOWNFORCE — the dominant factor, and the only one that scales with speed. Rear wing and front splitter both add vertical load.",
+        "BRAKE PRESSURE below 100% — a car that physically cannot generate lock-up force will never lock. This is the direct tuning fix and costs stopping distance at low speed.",
+        "COMPOUND — grip is the multiplier on load; slicks resist lock-up at every speed relative to rally or street rubber.",
+        "ABS assist — removes lock-up entirely at a small time cost (board meta runs it ON).",
+        "BRAKE BALANCE — decides WHICH end locks first; a balanced car locks both together, which is also maximum braking."
+      ],
+      "the_panel_test": {
+        "name": "Aero-brake index — computable from any car's Performance panel",
+        "math": "Braking distance scales with speed squared, so with CONSTANT grip a car's 100-0 should be exactly (100/60)² = 2.78 times its 60-0. Divide the real numbers: index = (100-0 ÷ 60-0) ÷ 2.78.",
+        "read": "Index ≈ 1.00 → grip is the same at both speeds: no meaningful downforce, and this car WILL lock at high speed on the same pedal that works low. Index well BELOW 1.00 → the car brakes disproportionately well from high speed: downforce is doing the work, and it is lock-resistant fast and lock-prone slow.",
+        "worked_example": "Viper ACR replica: 79.1 ft and 195.2 ft → (195.2 ÷ 79.1) ÷ 2.78 = 0.89. Below 1.0, so aero is contributing real braking load — consistent with its wing and its 1.28 lateral G.",
+        "use": "Two cars with identical 60-0 figures can behave completely differently at 150. This index tells you which one you can lean on."
+      },
+      "tuning_response": "If it locks at high speed: lower brake PRESSURE (the direct fix), or add downforce (fixes it at speed only). If it locks late in the zone as you slow: that is the downforce fading — ease the pedal progressively as speed bleeds off, which is the same skill as trail-braking. Brake BALANCE never fixes lock-up magnitude; it only chooses which axle goes first.",
+      "tier": "doctrine — standard braking physics; the aero-brake index is newly derived here and the worked example uses this project's own player-verified panel numbers"
     }
   },
   "sources": {

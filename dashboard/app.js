@@ -2067,6 +2067,48 @@
         <p class="why" style="margin-top:10px"><strong>The chassis half:</strong> ${co.car_side}</p>
       </div>` : "";
 
+    // --- chassis character: plot any car from its two visible numbers ---
+    const cc = tz.chassis_character;
+    const ccBlock = cc ? `
+      <div class="block" style="border-color:var(--accent2)">
+        <div class="card-row" style="margin-top:0"><h3 style="margin:0">🧭 ${cc.headline}</h3>${tierPill(cc.tier)}</div>
+        <p class="why">${cc.concept}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:10px">
+          <div style="flex:1 1 400px;min-width:330px">
+            <svg id="ccChart" viewBox="0 0 620 380" class="tz-svg" role="img" aria-label="Chassis character map"></svg>
+          </div>
+          <div style="flex:1 1 280px;min-width:270px">
+            <div class="controls" style="padding:12px">
+              <label>Weight (lb)<input id="ccW" type="number" value="3148" min="1200" max="6000" step="10"></label>
+              <label>Front weight %<input id="ccF" type="number" value="54" min="35" max="70" step="1"></label>
+            </div>
+            <div id="ccRead" style="margin-top:10px"></div>
+          </div>
+        </div>
+        <ul class="why" style="margin-top:10px">${cc.reading.map((r) => `<li>${r}</li>`).join("")}</ul>
+      </div>` : "";
+
+    // --- braking science ---
+    const bs = tz.braking_science;
+    const bsBlock = bs ? `
+      <div class="block">
+        <div class="card-row" style="margin-top:0"><h3 style="margin:0">🛑 ${bs.headline}</h3>${tierPill(bs.tier)}</div>
+        <p class="why">${bs.concept}</p>
+        <p class="why"><strong>The counterintuitive part:</strong> ${bs.the_counterintuitive_part}</p>
+        <ul class="why">${bs.what_makes_a_car_lock_resistant.map((x) => `<li>${x}</li>`).join("")}</ul>
+        <div class="tz-proof"><strong>📐 ${bs.the_panel_test.name}</strong>
+          <p class="why" style="margin:6px 0"><strong>Math:</strong> ${bs.the_panel_test.math}</p>
+          <p class="why" style="margin:6px 0"><strong>Read:</strong> ${bs.the_panel_test.read}</p>
+          <p class="why" style="margin:6px 0"><strong>Worked example:</strong> ${bs.the_panel_test.worked_example}</p>
+          <div class="controls" style="padding:10px;margin-top:8px">
+            <label>60-0 ft<input id="abI60" type="number" value="79.1" step="0.1" min="40" max="300"></label>
+            <label>100-0 ft<input id="abI100" type="number" value="195.2" step="0.1" min="80" max="600"></label>
+          </div>
+          <p id="abOut" class="why" style="margin:8px 0 0;font-size:14px"></p>
+        </div>
+        <p class="why" style="margin-top:10px"><strong>Tuning response:</strong> ${bs.tuning_response}</p>
+      </div>` : "";
+
     // --- ratio doctrine ---
     const rd = tz.ratio_doctrine;
     const ratioBlock = `
@@ -2168,10 +2210,71 @@
     host.innerHTML = `
       <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">🎓 Training Zone — every corner, feeling first</h2>
       <p class="hint">${tz.purpose}</p>
-      ${gripBlock}${coBlock}${ratioBlock}${spectrum}${conditions}
+      ${gripBlock}${ccBlock}${bsBlock}${coBlock}${ratioBlock}${spectrum}${conditions}
       ${legend}
       <h2 class="section-title">🏁 The corner archetypes</h2>
       ${corners}${telBlock}`;
+
+
+    // aero-brake index calculator
+    if (bs) {
+      const upd = () => {
+        const a = +document.getElementById("abI60").value, b = +document.getElementById("abI100").value;
+        const out = document.getElementById("abOut");
+        if (!a || !b) { out.textContent = ""; return; }
+        const idx = (b / a) / 2.778;
+        const verdict = idx < 0.93 ? ["strong aero contribution — lock-resistant at speed, lock-PRONE as you slow", "var(--accent)"]
+          : idx < 0.99 ? ["some aero help at speed", "var(--accent2)"]
+          : idx <= 1.03 ? ["grip is speed-independent — expect the same pedal to lock the wheels at high speed", "var(--warn,#e3b341)"]
+          : ["brakes worse from high speed than physics predicts — check compound, weight or brake bias", "#e5414e"];
+        out.innerHTML = `Aero-brake index = <strong style="color:${verdict[1]}">${idx.toFixed(2)}</strong> — ${verdict[0]}`;
+      };
+      ["abI60", "abI100"].forEach((id) => document.getElementById(id).addEventListener("input", upd));
+      upd();
+    }
+    // chassis character chart
+    if (cc) {
+      const X0 = 62, X1 = 596, Y0 = 320, Y1 = 26;
+      const wMin = cc.axes.x.min, wMax = cc.axes.x.max, fMin = cc.axes.y.min, fMax = cc.axes.y.max;
+      const cxp = (w) => X0 + (Math.max(wMin, Math.min(wMax, w)) - wMin) / (wMax - wMin) * (X1 - X0);
+      const cyp = (f) => Y0 - (Math.max(fMin, Math.min(fMax, f)) - fMin) / (fMax - fMin) * (Y0 - Y1);
+      const MIDW = 2750, MIDF = 50;
+      const quad = (w, f) => (w < MIDW ? (f >= MIDF ? "agile-stable" : "nervous") : (f >= MIDF ? "gt" : "widowmaker"));
+      const qOf = (id) => cc.quadrants.find((q) => q.id === id);
+      const svg = document.getElementById("ccChart");
+      function drawCC() {
+        const w = +document.getElementById("ccW").value || 3000;
+        const f = +document.getElementById("ccF").value || 50;
+        const q = qOf(quad(w, f));
+        const zones = [
+          { id: "agile-stable", x: X0, y: Y1, w: cxp(MIDW) - X0, h: cyp(MIDF) - Y1 },
+          { id: "gt", x: cxp(MIDW), y: Y1, w: X1 - cxp(MIDW), h: cyp(MIDF) - Y1 },
+          { id: "nervous", x: X0, y: cyp(MIDF), w: cxp(MIDW) - X0, h: Y0 - cyp(MIDF) },
+          { id: "widowmaker", x: cxp(MIDW), y: cyp(MIDF), w: X1 - cxp(MIDW), h: Y0 - cyp(MIDF) },
+        ];
+        svg.innerHTML = `
+          ${zones.map((z) => { const qq = qOf(z.id); return `<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" fill="${qq.color}" opacity="${q.id === z.id ? 0.22 : 0.07}"/>
+            <text x="${z.x + z.w / 2}" y="${z.y + 20}" text-anchor="middle" fill="${qq.color}" font-size="12" font-weight="700">${qq.name}</text>`; }).join("")}
+          <line x1="${X0}" y1="${Y0}" x2="${X1}" y2="${Y0}" stroke="var(--line)"/>
+          <line x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y1}" stroke="var(--line)"/>
+          ${[1600, 2200, 2800, 3400, 4000].map((v) => `<text x="${cxp(v)}" y="${Y0 + 16}" text-anchor="middle" fill="var(--muted)" font-size="10">${v}</text>`).join("")}
+          ${[42, 46, 50, 54, 58].map((v) => `<text x="${X0 - 8}" y="${cyp(v) + 4}" text-anchor="end" fill="var(--muted)" font-size="10">${v}%</text>`).join("")}
+          <text x="${(X0 + X1) / 2}" y="${Y0 + 34}" text-anchor="middle" fill="var(--muted)" font-size="11">${cc.axes.x.label} — ${cc.axes.x.meaning}</text>
+          <text x="16" y="${(Y0 + Y1) / 2}" transform="rotate(-90 16 ${(Y0 + Y1) / 2})" text-anchor="middle" fill="var(--muted)" font-size="11">${cc.axes.y.label} — restoring force</text>
+          ${cc.reference_cars.map((r) => `<g><circle cx="${cxp(r.weight)}" cy="${cyp(r.front)}" r="5" fill="var(--muted)" opacity="0.85"><title>${r.name} — ${r.note}</title></circle>
+            <text x="${cxp(r.weight) + 9}" y="${cyp(r.front) + 4}" fill="var(--muted)" font-size="10">${r.name}</text></g>`).join("")}
+          <circle cx="${cxp(w)}" cy="${cyp(f)}" r="9" fill="${q.color}" stroke="#0e1116" stroke-width="2"/>
+          <circle cx="${cxp(w)}" cy="${cyp(f)}" r="15" fill="none" stroke="${q.color}" stroke-width="1.5" opacity="0.6"/>`;
+        document.getElementById("ccRead").innerHTML = `
+          <div class="block" style="margin:0;border-color:${q.color}">
+            <h3 style="margin:0 0 6px;color:${q.color}">${q.name}</h3>
+            <p class="why" style="margin:0 0 8px">${q.feel}</p>
+            <p class="why" style="margin:0"><strong>What you'll be tuning:</strong> ${q.tuning}</p>
+          </div>`;
+      }
+      ["ccW", "ccF"].forEach((id) => document.getElementById(id).addEventListener("input", drawCC));
+      drawCC();
+    }
   }
 
   // ---- init ----

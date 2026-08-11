@@ -46285,17 +46285,113 @@ window.FH6_DB = {
     ]
   },
   "trainingZone": {
-    "schema_version": "1.0.0",
+    "schema_version": "2.0.0",
     "created": "2026-08-10",
-    "purpose": "The Training Zone: every corner type, phase by phase, taught the way the live coaching sessions worked — FEELING first (the words a driver actually says), then the mechanism, then the owning sliders/parts, then the options ladder. Built on the grip-slide spectrum so dirt racing (where grip and drift techniques blend) slots in as a first-class citizen.",
+    "purpose": "The Training Zone: every corner type, phase by phase, taught the way the live coaching sessions worked — FEELING first (the words a driver actually says), then a PICTURE of what the car is physically doing, then the tune rack showing which of the nine tabs own it, then the RATIO PAIRS at both extremes, then the options ladder. Built on the grip-slide spectrum so dirt racing (where grip and drift technique blend) slots in as a first-class citizen.",
+    "tab_order": [
+      "TIRES",
+      "GEARING",
+      "ALIGNMENT",
+      "ANTIROLL BARS",
+      "SPRINGS",
+      "DAMPING",
+      "AERO",
+      "BRAKE",
+      "DIFFERENTIAL"
+    ],
+    "ratio_doctrine": {
+      "headline": "Almost every tuning tab is a FRONT : REAR pair — and a single number means nothing until you know its partner.",
+      "principle": "The RATIO between the pair decides BALANCE: which end of the car runs out of grip first. The MAGNITUDE of the pair decides CHARACTER: how sharp or how forgiving the car is when it gets there. This is why '45 rear anti-roll bar' is not a setting — it is half of a setting. Change one side of a pair and you changed the balance; change both sides together and you changed the character while keeping the balance.",
+      "pairs": [
+        {
+          "tab": "TIRES",
+          "pair": "front PSI : rear PSI",
+          "ratio": "which end breaks away first (higher pressure = smaller patch = lets go sooner)",
+          "magnitude": "overall grip and how fast the tires reach temperature"
+        },
+        {
+          "tab": "GEARING",
+          "pair": "final drive : individual ratios",
+          "ratio": "where each corner's exit lands in the powerband",
+          "magnitude": "acceleration everywhere vs top speed"
+        },
+        {
+          "tab": "ALIGNMENT",
+          "pair": "front camber : rear camber",
+          "ratio": "which end keeps its contact patch flat under lean",
+          "magnitude": "sustained-load grip bought at the cost of straight-line braking"
+        },
+        {
+          "tab": "ALIGNMENT",
+          "pair": "front toe : rear toe",
+          "ratio": "turn-in eagerness vs rear straight-line calm",
+          "magnitude": "stability bought at the cost of tire scrub and top speed"
+        },
+        {
+          "tab": "ANTIROLL BARS",
+          "pair": "front bar : rear bar",
+          "ratio": "THE balance dial — your stiffer end loses grip first",
+          "magnitude": "how quickly the car takes its set in a corner"
+        },
+        {
+          "tab": "SPRINGS",
+          "pair": "front rate : rear rate",
+          "ratio": "balance under load transfer",
+          "magnitude": "compliance over bumps vs body control"
+        },
+        {
+          "tab": "SPRINGS",
+          "pair": "front height : rear height (rake)",
+          "ratio": "static weight bias and aero platform angle",
+          "magnitude": "centre-of-gravity height — lower is better until it bottoms out"
+        },
+        {
+          "tab": "DAMPING",
+          "pair": "rebound : bump (per axle)",
+          "ratio": "how fast load LEAVES an end vs how fast it ARRIVES",
+          "magnitude": "transient violence — the whip lives here"
+        },
+        {
+          "tab": "DAMPING",
+          "pair": "front damping : rear damping",
+          "ratio": "which end settles first after an input",
+          "magnitude": "oscillation control across direction changes"
+        },
+        {
+          "tab": "AERO",
+          "pair": "front downforce : rear downforce",
+          "ratio": "high-speed balance (the panel's Aero Balance number)",
+          "magnitude": "total grip at speed, paid for in drag and top speed"
+        },
+        {
+          "tab": "BRAKE",
+          "pair": "front bias : rear bias",
+          "ratio": "which end locks, and whether the rear keeps grip for cornering",
+          "magnitude": "stopping power vs lock-up threshold (pressure)"
+        },
+        {
+          "tab": "DIFFERENTIAL",
+          "pair": "accel : decel (per axle)",
+          "ratio": "on-power behaviour vs off-power/braking behaviour",
+          "magnitude": "how tied-together that axle's wheels are"
+        },
+        {
+          "tab": "DIFFERENTIAL",
+          "pair": "front : centre : rear (AWD)",
+          "ratio": "where drive goes — and therefore how much steering the front tires can spare",
+          "magnitude": "traction off the line vs rotation in the corner"
+        }
+      ],
+      "reading_rule": "When a car misbehaves, do not ask 'what should this slider be?' Ask 'which pair owns this phase, and is my ratio pointing the wrong way?' Then move ONE side of ONE pair."
+    },
     "spectrum": {
-      "concept": "Grip driving and drifting are not different pages — they are ends of one spectrum, and the position on it is set by SURFACE and INTENT. On tarmac, peak traction is at tiny slip angles: slides are slow, so tuning fights rotation. On LOOSE surfaces, peak traction physically occurs AT significant slip — the tire bites by cutting into the surface — so controlled sliding IS the fast line, and dirt tuning borrows drift sliders at half strength. Full drift maximizes angle and abandons lap time entirely.",
+      "concept": "Grip driving and drifting are not different pages — they are ends of one spectrum, and the position on it is set by SURFACE and INTENT. On tarmac, peak traction is at tiny slip angles: slides are slow, so tuning fights rotation. On LOOSE surfaces, peak traction physically occurs AT significant slip — the tire bites by cutting into the surface — so controlled sliding IS the fast line, and dirt tuning borrows drift sliders at half strength. Full drift maximises angle and abandons lap time entirely.",
       "stations": [
         {
           "id": "tarmac",
           "label": "Tarmac race",
           "slip": "2-8°",
-          "doctrine": "Rotation is the enemy past the apex. Sliders damp and catch it (grip corner map)."
+          "doctrine": "Rotation is the enemy past the apex. Sliders damp it and catch it."
         },
         {
           "id": "dirt",
@@ -46313,41 +46409,41 @@ window.FH6_DB = {
       ]
     },
     "conditions": {
-      "headline": "Before you blame a slider — the conditions layer. These modify EVERYTHING below; every one of them was learned the hard way in live sessions.",
+      "headline": "Before you blame a slider — the conditions layer. These modify EVERYTHING below; every one was learned the hard way in a live session.",
       "checks": [
         {
           "id": "cold-tires",
           "icon": "🥶",
           "feeling": "\"Any little steer and the tires give out all grip.\"",
-          "mechanism": "Tires below operating temperature grip at a fraction of their rating — and compounds differ wildly: slicks are the most cold-sensitive rubber in the game, rally barely cares. Rivals restarts reset tire temp, so the first ~2 minutes of every restart tests cold rubber, not your tune.",
-          "tells": "Every incident happens in the first 20-30s of a run; the same corner works fine mid-session; slicks feel worse than the compound you upgraded from.",
-          "options": "Warm 2-3 min before judging anything (aggressive weaving/braking heats faster) · lower pressures reach operating temp sooner · telemetry Tires page shows live temps · rally compound if the restart-loop matters more than peak grip.",
+          "mechanism": "Tires below operating temperature grip at a fraction of their rating — and compounds differ wildly: slicks are the most cold-sensitive rubber in the game, rally barely cares. Rivals restarts reset tire temperature, so the first ~2 minutes after every restart tests cold rubber, not your tune.",
+          "tells": "Every incident happens in the first 20-30s of a run; the same corner is fine mid-session; the car got WORSE right after you upgraded to a grippier compound.",
+          "options": "Warm 2-3 min before judging anything (weaving and hard braking heat faster) · lower pressures reach temperature sooner · the telemetry Tires page shows live temps · rally compound if restart-loop testing matters more than peak grip.",
           "tier": "player-verified (fork B: four consecutive cold-start crashes, zero warm ones)"
         },
         {
           "id": "speed-regime",
           "icon": "🎭",
-          "feeling": "\"At slow speeds it's twitchy, but at high speed the ability to turn goes completely out the window.\"",
-          "mechanism": "You drive TWO cars: the mechanical car (springs/ARBs/weight — owns low speed) and the aero car (downforce grows with speed²  — owns 80mph+). If Mech. Balance and Aero Balance differ a lot, the car's personality morphs as speed rises.",
-          "tells": "Panel: compare Mech. Balance vs Aero Balance — the GAP is the morph. Gap ≤0.1 = one consistent car.",
-          "options": "Close the gap from the aero side (downforce split) to fix the fast end without touching the slow end · slow-corner complaints → mechanical sliders; fast-corner complaints → aero sliders. Never fix a hairpin with a wing.",
-          "tier": "player-verified (Viper: gap 0.19 → 0.06 across one session)"
+          "feeling": "\"At slow speed it's twitchy, but at high speed the ability to turn goes completely out the window.\"",
+          "mechanism": "You are driving TWO cars: the mechanical car (springs, bars, weight — owns low speed) and the aero car (downforce grows with speed squared — owns 80mph+). When Mech. Balance and Aero Balance differ, the car's personality morphs as speed rises.",
+          "tells": "Compare the panel's Mech. Balance against Aero Balance — the GAP is the morph. A gap of 0.06 is one consistent car; 0.20 is two different cars.",
+          "options": "Close the gap from the AERO side to fix the fast end without disturbing the slow end · slow-corner complaints belong to mechanical sliders, fast-corner complaints to aero. Never fix a hairpin with a wing.",
+          "tier": "player-verified (Viper: gap 0.19 → 0.06 in one session)"
         },
         {
           "id": "compound-ceiling",
           "icon": "🧱",
           "feeling": "\"The balance is right but it STILL pushes / still won't hold the corner.\"",
-          "mechanism": "Sliders distribute grip; the COMPOUND sets the total. When balance tuning stops helping, you've hit the tire's ceiling — the envelope (latG vs speed) is maxed and only parts move it.",
-          "tells": "Both ends give up together; the same corner fails at the same speed no matter the balance; lateral G readouts stop responding to slider changes.",
-          "options": "Tire width (parts, PI) · compound upgrade (big PI — rebudgets the whole build) · accept the corner's entry-speed number · line discipline (momentum lines).",
-          "tier": "player-verified (4C fork A: balance solved to a 0.08 gap, push remained → compound was the wall)"
+          "mechanism": "Sliders distribute grip; the COMPOUND sets the total. When balance tuning stops paying, you have hit the tire's ceiling — the envelope is maxed and only parts move it.",
+          "tells": "Both ends give up together; the same corner fails at the same speed regardless of balance; the lateral-G readouts stop responding to slider changes.",
+          "options": "Tire width (parts, PI) · compound upgrade (big PI — rebudgets the whole build) · accept the corner's entry-speed number · momentum lines instead of V-lines.",
+          "tier": "player-verified (4C fork A: balance solved to a 0.08 gap, push remained — the compound was the wall)"
         },
         {
           "id": "surface",
           "icon": "🏔️",
-          "feeling": "\"On dirt the grip car plows, and drifty driving somehow feels faster.\"",
-          "mechanism": "Loose surfaces move peak traction to LARGE slip angles — the tire grips by digging, not sticking. The fast dirt line carries controlled rotation the tarmac line would call a mistake.",
-          "tells": "Tidy tarmac technique feels slow on dirt; small slides self-correct instead of growing.",
+          "feeling": "\"On dirt the grip car plows, and the drifty guys are somehow faster.\"",
+          "mechanism": "Loose surfaces move peak traction to LARGE slip angles — the tire grips by digging, not sticking. The fast dirt line carries rotation that the tarmac line would call a mistake.",
+          "tells": "Tidy tarmac technique feels slow; small slides self-correct instead of growing; the car rewards an early flick.",
           "options": "Rally compound + soft rally springs · diff accel HIGH (drift philosophy at half strength) · slide before the apex, straight after it · see the Dirt corner archetype below.",
           "tier": "doctrine (dirt chapter seeded — full build next)"
         }
@@ -46358,35 +46454,70 @@ window.FH6_DB = {
         "id": "hairpin",
         "name": "Hairpin",
         "speed": "20-60 mph",
-        "regime": "100% MECHANICAL — the wing is asleep; springs, tires and diff do everything",
-        "geometry": "hairpin",
+        "regime": "100% MECHANICAL — the wing is asleep; tires, springs, bars and diff do everything",
         "phases": [
           {
             "phase": 1,
             "label": "Braking",
             "entries": [
               {
-                "feeling": "\"The back slides out when braking and turning.\"",
-                "mechanism": "Trail-braking stacks three systems on the rear axle at once: brake bias sliding rearward as weight leaves it, the diff's decel lock dragging the driveline, and rebound letting the rear unload too fast. The rear is asked for braking AND cornering grip exactly when it has the least.",
-                "sliders": [
+                "feeling": "\"The back slides out when I'm braking and turning.\"",
+                "mechanism": "Trail-braking stacks three systems on the rear axle at once: brake bias sitting too far rearward while weight leaves that end, the differential's decel lock dragging the driveline, and rebound letting the rear unload too fast. The rear is asked for braking AND cornering grip exactly when it has the least of both.",
+                "visual": {
+                  "heading": -34,
+                  "travel": -12,
+                  "steer": 14,
+                  "loose": "rear",
+                  "weight": "front",
+                  "outcome": "spin",
+                  "caption": "Rear steps out under trail braking — nose points well inside the direction of travel, countersteer already applied"
+                },
+                "rack": {
+                  "primary": [
+                    "BRAKE",
+                    "DIFFERENTIAL"
+                  ],
+                  "secondary": [
+                    "DAMPING",
+                    "TIRES"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Brake balance",
-                    "dir": "forward (55-58%)",
-                    "why": "moves braking work off the starving rear — the #1 fix"
+                    "pair": "Brake balance — front : rear",
+                    "lo": "rear-biased (45%)",
+                    "hi": "front-biased (58%)",
+                    "lo_feel": "the rear does the stopping, locks early and swings the moment you add steering",
+                    "hi_feel": "the nose does the stopping; the rear keeps grip in reserve for cornering",
+                    "target": 78,
+                    "why": "the matrix's PRIMARY fix for entry oversteer — move work off the axle that is already starving"
                   },
                   {
-                    "s": "Rear diff decel",
-                    "dir": "UP (~28-35%)",
-                    "why": "the game's own doc: raising decel lock 'can reduce lift off oversteer'"
+                    "pair": "Rear diff — accel : decel",
+                    "lo": "decel 0-10 (free)",
+                    "hi": "decel 30-40 (locked)",
+                    "lo_feel": "lifting rotates the car instantly — great for drift, terrifying under brakes",
+                    "hi_feel": "the rear wheels stay tied together off-throttle; lift-off oversteer calms down",
+                    "target": 65,
+                    "why": "the game's own description: raising rear Decel 'can reduce lift off oversteer'"
                   },
                   {
-                    "s": "Rear rebound",
-                    "dir": "softer",
-                    "why": "slows how fast the rear unloads under the dive"
+                    "pair": "Rear damping — rebound : bump",
+                    "lo": "soft rebound",
+                    "hi": "stiff rebound",
+                    "lo_feel": "the rear rises lazily as the nose dives — but too soft and it floats",
+                    "hi_feel": "the rear is yanked up fast under the dive and goes light — the classic snap",
+                    "target": 30,
+                    "why": "rebound controls how fast load LEAVES the rear; too stiff and it unloads itself"
                   }
                 ],
-                "options": "Technique first: finish more braking BEFORE turn-in. Then the sliders above, one per test.",
-                "tier": "player-verified (the fix that tamed both the 4C and the Viper replica)"
+                "options": "Technique first: finish more of the braking BEFORE turn-in. Then brake balance, then rear decel, one per test drive.",
+                "tier": "player-verified (the fix that tamed both the 4C and the Viper replica)",
+                "telemetry": [
+                  "Friction — rear circles redline first while the fronts stay green",
+                  "Body Acceleration — the dot sits on the braking edge, then swings sideways as you steer",
+                  "Suspension — front corners compressed, rear extended (the dive that unloads the rear)"
+                ]
               }
             ]
           },
@@ -46395,27 +46526,63 @@ window.FH6_DB = {
             "label": "Turn-in",
             "entries": [
               {
-                "feeling": "\"It just refuses to turn at low speed — I have to slow way below the corner.\"",
-                "mechanism": "Below ~60 mph there is NO aero — mechanical front grip is all that exists, and a heavy/powerful build usually has less of it than the corner wants.",
-                "sliders": [
+                "feeling": "\"It just refuses to turn at low speed — I have to slow way below the corner to make it.\"",
+                "mechanism": "Below roughly 60 mph there is NO aero help — mechanical front grip is all that exists, and a heavy or powerful build usually has less of it than the corner is asking for. The wheels are turned; the car simply travels on.",
+                "visual": {
+                  "heading": -10,
+                  "travel": -8,
+                  "steer": 32,
+                  "loose": "front",
+                  "weight": "front",
+                  "outcome": "wide",
+                  "caption": "Wheels cranked, body barely rotating — the front tires are sliding and the car runs to the outside"
+                },
+                "rack": {
+                  "primary": [
+                    "ANTIROLL BARS",
+                    "TIRES"
+                  ],
+                  "secondary": [
+                    "SPRINGS",
+                    "ALIGNMENT",
+                    "DIFFERENTIAL"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Front ARB",
-                    "dir": "softer",
-                    "why": "softer end grips more — classic anti-push"
+                    "pair": "Anti-roll bars — front : rear",
+                    "lo": "soft front / stiff rear",
+                    "hi": "stiff front / soft rear",
+                    "lo_feel": "the nose bites and the rear rotates around it — lively, can snap",
+                    "hi_feel": "the front lets go first and plows straight on — safe and slow",
+                    "target": 22,
+                    "why": "your STIFFER end loses grip first; a pushing car wants the softer front of the pair"
                   },
                   {
-                    "s": "Front tire pressure",
-                    "dir": "toward the band (27-28 cold road)",
-                    "why": "patch size and response"
+                    "pair": "Tire pressure — front : rear",
+                    "lo": "front lower than rear",
+                    "hi": "front higher than rear",
+                    "lo_feel": "bigger front patch — more bite, slower response",
+                    "hi_feel": "smaller front patch — sharper initial turn, less ultimate grip",
+                    "target": 32,
+                    "why": "at hairpin speeds patch size beats response; drop the front toward the band's floor"
                   },
                   {
-                    "s": "Front camber",
-                    "dir": "more negative helps sustained load, NOT slow flicks",
-                    "why": "slow corners barely lean the tire — camber is the wrong tool here"
+                    "pair": "Springs — front : rear",
+                    "lo": "soft front",
+                    "hi": "stiff front",
+                    "lo_feel": "the nose loads up and digs in on turn-in",
+                    "hi_feel": "the nose stays flat, transfers less load onto the front tires, pushes",
+                    "target": 30,
+                    "why": "same balance logic as the bars, with a compliance cost"
                   }
                 ],
-                "options": "Parts beat sliders here: front tire WIDTH is the honest fix. Line: V-line (deep brake, rotate, point-and-shoot) beats carrying speed.",
-                "tier": "player-verified (Viper assessment: the ACR's one structural weakness)"
+                "options": "Parts beat sliders here: front tire WIDTH is the honest fix. Line: a V-line (deep brake, rotate, point and shoot) beats trying to carry speed.",
+                "tier": "player-verified (Viper assessment: the ACR's one structural weakness)",
+                "telemetry": [
+                  "Friction — FRONT circles go red while the rears stay green (the mirror image of entry oversteer)",
+                  "Heat — front outer edges hottest = the patch is rolling over, not gripping"
+                ]
               }
             ]
           },
@@ -46424,32 +46591,62 @@ window.FH6_DB = {
             "label": "Exit",
             "entries": [
               {
-                "feeling": "\"Any throttle and the tires just spin — and on AWD it stops steering too.\"",
-                "mechanism": "Big torque overwhelms slow-corner grip. THE AWD INSIGHT: the center diff sends power to the FRONT tires too — spinning fronts have no lateral grip, so the steering literally evaporates the moment you stomp. One cause, two sensations.",
-                "sliders": [
+                "feeling": "\"Any throttle and the tires spin — and on AWD the steering disappears at the same time.\"",
+                "mechanism": "Torque overwhelms slow-corner grip. THE AWD INSIGHT: the centre differential sends power to the FRONT tires too — and a spinning tire has almost no lateral grip, so your steering evaporates the instant you stomp. One cause, two sensations.",
+                "visual": {
+                  "heading": -16,
+                  "travel": -12,
+                  "steer": 26,
+                  "loose": "all",
+                  "weight": "rear",
+                  "outcome": "wide",
+                  "caption": "All four spinning under power — steering input present, nothing happening; the car drives straight off the exit"
+                },
+                "rack": {
+                  "primary": [
+                    "DIFFERENTIAL",
+                    "GEARING"
+                  ],
+                  "secondary": [
+                    "TIRES",
+                    "SPRINGS"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Center diff",
-                    "dir": "more rearward (65-70%)",
-                    "why": "frees the fronts to steer instead of spin"
+                    "pair": "Centre diff — front : rear",
+                    "lo": "60% rear",
+                    "hi": "70%+ rear",
+                    "lo_feel": "the front tires are steering AND driving — they do neither well",
+                    "hi_feel": "the fronts are freed to steer; the rear takes the torque hit",
+                    "target": 76,
+                    "why": "the direct fix for AWD steering-evaporation on exit"
                   },
                   {
-                    "s": "Front diff accel",
-                    "dir": "DOWN (~20%)",
-                    "why": "less front lock = less push-and-spin on power"
+                    "pair": "Front diff — accel : decel",
+                    "lo": "accel 20 (open)",
+                    "hi": "accel 40+ (locked)",
+                    "lo_feel": "the fronts pull evenly and keep steering",
+                    "hi_feel": "the fronts lock together and drag the nose wide under power",
+                    "target": 22,
+                    "why": "less front lock = less push while accelerating"
                   },
                   {
-                    "s": "Rear diff accel",
-                    "dir": "raise if the INSIDE rear spins alone",
-                    "why": "locks both rears together"
-                  },
-                  {
-                    "s": "Final drive",
-                    "dir": "taller",
-                    "why": "the automatic-friendly fix — blunts the torque spike every gear"
+                    "pair": "Gearing — final drive : ratios",
+                    "lo": "short FD",
+                    "hi": "tall FD",
+                    "lo_feel": "explosive off the line, overwhelms the tires out of slow corners",
+                    "hi_feel": "torque arrives softer in every gear — the automatic's friend",
+                    "target": 70,
+                    "why": "player-verified: 0-60 IMPROVED (2.63 → 2.43) with TALLER gearing because the wheelspin was eating the launch"
                   }
                 ],
-                "options": "Automatic players: SQUEEZE the throttle — a stomp commands a kickdown, and the downshift IS the torque dump. Taller FD replicates 'short-shifting' when you can't hold gears.",
-                "tier": "player-verified (4C: 0-60 IMPROVED 2.63→2.43 with TALLER gearing — the wheelspin was eating the launch)"
+                "options": "Automatic players: SQUEEZE the throttle — a stomp commands a kickdown, and the downshift IS the torque dump. Taller final drive is how you 'short-shift' when you cannot hold a gear.",
+                "tier": "player-verified",
+                "telemetry": [
+                  "Tires, Misc. — driven wheels read much higher SPEED than the others: wheelspin, measured",
+                  "General — throttle % against the gear the auto picked (the kickdown, caught in the act)"
+                ]
               }
             ]
           }
@@ -46460,34 +46657,68 @@ window.FH6_DB = {
         "name": "High-speed sweeper",
         "speed": "90-140 mph",
         "regime": "AERO — downforce is most of the grip; the mechanical car is a passenger",
-        "geometry": "sweeper",
         "phases": [
           {
             "phase": 1,
             "label": "Entry at speed",
             "entries": [
               {
-                "feeling": "\"If I add even a little steering while braking, the entire thing loses it.\"",
-                "mechanism": "Braking from 150+ transfers huge load forward while the rear's aero load is also bleeding off with speed — steering input on top asks the light rear to corner. Three unknowns stack here on any car: brake bias, decel lock, rebound.",
-                "sliders": [
+                "feeling": "\"If I add even a little steering while braking, the whole thing lets go.\"",
+                "mechanism": "Braking from high speed transfers huge load forward while the rear's aero load is simultaneously bleeding away with speed. Steering on top of that asks a light, unloaded rear to corner. Three invisible systems stack in this half-second: brake bias, decel lock, rebound.",
+                "visual": {
+                  "heading": -40,
+                  "travel": -14,
+                  "steer": 20,
+                  "loose": "rear",
+                  "weight": "front",
+                  "outcome": "spin",
+                  "caption": "Big slip angle developing under braking at speed — the rear has neither weight nor downforce left"
+                },
+                "rack": {
+                  "primary": [
+                    "BRAKE",
+                    "DIFFERENTIAL",
+                    "AERO"
+                  ],
+                  "secondary": [
+                    "DAMPING"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Brake balance",
-                    "dir": "forward",
-                    "why": "the same #1 fix, at higher stakes"
+                    "pair": "Brake balance — front : rear",
+                    "lo": "rear-biased",
+                    "hi": "front-biased (55-58%)",
+                    "lo_feel": "the rear locks under load transfer and the car pivots",
+                    "hi_feel": "stable, straight stops — the rear keeps grip for the steering you are about to add",
+                    "target": 78,
+                    "why": "same #1 fix as the hairpin, at far higher stakes"
                   },
                   {
-                    "s": "Rear wing",
-                    "dir": "keep it — never trim rear aero while entry is unstable",
-                    "why": "rear downforce IS the entry safety net"
+                    "pair": "Aero — front : rear downforce",
+                    "lo": "rear-heavy (low balance)",
+                    "hi": "front-heavy (high balance)",
+                    "lo_feel": "planted rear, pushy nose — safe entries, lazy corners",
+                    "hi_feel": "eager nose, light rear — fast corners, knife-edge entries",
+                    "target": 38,
+                    "why": "NEVER trim rear wing while entry is unstable — rear downforce IS the entry safety net"
                   },
                   {
-                    "s": "Rear diff decel",
-                    "dir": "up",
-                    "why": "stabilizes the lift/brake moment"
+                    "pair": "Rear diff — accel : decel",
+                    "lo": "decel low",
+                    "hi": "decel raised",
+                    "lo_feel": "every lift rotates the car",
+                    "hi_feel": "the rear stays tied together through the brake-release moment",
+                    "target": 62,
+                    "why": "stabilises the exact instant where the crashes happen"
                   }
                 ],
-                "options": "Brake in a straight line, THEN commit. The corner's entry speed is a number (envelope: v = √(g·r·latG)) — find it once, respect it.",
-                "tier": "player-verified (video forensics: every filmed crash began in this half-second)"
+                "options": "Brake in a straight line, then commit. Every corner has an entry-speed number (v = √(g · radius · latG)) — find it once and respect it.",
+                "tier": "player-verified (video forensics: every filmed crash began in this half-second)",
+                "telemetry": [
+                  "Body Acceleration — watch the dot leave the braking edge and cross the circle boundary as steering is added",
+                  "Friction — the rear pair spikes past 100% first"
+                ]
               }
             ]
           },
@@ -46496,22 +46727,53 @@ window.FH6_DB = {
             "label": "Mid-corner",
             "entries": [
               {
-                "feeling": "\"High-speed corners aren't wide enough — it washes to the outside no matter what I do.\"",
-                "mechanism": "Front aero share too small: as speed rises the grip mix slides rearward (aero balance below mech balance), and the front saturates first. OR you're simply over the envelope — above the speed the total grip supports.",
-                "sliders": [
+                "feeling": "\"High-speed corners just aren't wide enough — it washes to the outside no matter what I do.\"",
+                "mechanism": "The front's share of aero is too small: as speed rises the grip mix slides rearward and the front axle saturates first. Or you are simply above the envelope — beyond the speed the total grip can support at that radius.",
+                "visual": {
+                  "heading": -12,
+                  "travel": -8,
+                  "steer": 16,
+                  "loose": "front",
+                  "weight": "neutral",
+                  "outcome": "wide",
+                  "caption": "Body nearly aligned with travel, front tires saturated — a long, helpless drift to the outside kerb"
+                },
+                "rack": {
+                  "primary": [
+                    "AERO",
+                    "ALIGNMENT"
+                  ],
+                  "secondary": [
+                    "ANTIROLL BARS",
+                    "TIRES"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Aero balance",
-                    "dir": "front-ward (raise front / trim rear downforce)",
-                    "why": "the game's doc: 'the lower your Balance value, the more understeer'"
+                    "pair": "Aero — front : rear downforce",
+                    "lo": "low balance (rear-heavy)",
+                    "hi": "high balance (front-heavy)",
+                    "lo_feel": "the faster you go, the more it understeers",
+                    "hi_feel": "the nose keeps biting at speed; the rear becomes the limiting end",
+                    "target": 74,
+                    "why": "the game's description: 'the lower your Balance value, the more understeer'"
                   },
                   {
-                    "s": "Front camber",
-                    "dir": "more negative (-1.5 → -2.0)",
-                    "why": "the loaded outside tire leans hard in sustained G — camber stands it back up. THE high-speed front-grip slider"
+                    "pair": "Camber — front : rear",
+                    "lo": "little front camber",
+                    "hi": "lots of front camber (-2.0+)",
+                    "lo_feel": "the loaded outside tire rolls onto its shoulder and gives up",
+                    "hi_feel": "the outside tire stands flat under lean — the high-speed front-grip slider",
+                    "target": 72,
+                    "why": "camber pays in SUSTAINED load — exactly this corner, and almost nothing in hairpins"
                   }
                 ],
-                "options": "DIAGNOSTIC GOLD: watch the skill popups. DRIFT skill firing = the REAR broke away (add rear grip / less throttle) — no skill, just wide = front push (this row). Two opposite fixes, one on-screen tell.",
-                "tier": "player-verified (the drift-chain diagnosis, videos 1-2)"
+                "options": "DIAGNOSTIC GOLD: watch the skill popups. A DRIFT skill firing means the REAR broke away (opposite problem, opposite fix). No skill and just wide = front push, this row.",
+                "tier": "player-verified (the drift-chain diagnosis, videos 1-2)",
+                "telemetry": [
+                  "Friction — front Peak % climbing while the rears stay comfortable",
+                  "Body Acceleration — lateral G plateaus and refuses to rise: you are at the envelope, not at a balance problem"
+                ]
               }
             ]
           },
@@ -46521,21 +46783,52 @@ window.FH6_DB = {
             "entries": [
               {
                 "feeling": "\"The rear lights up mid-corner when I feed throttle at 100+.\"",
-                "mechanism": "Sustained lateral G is already spending most of the rear's grip; supercharger/turbo torque at high rpm takes the rest. The slide starts driven, then momentum carries it wide.",
-                "sliders": [
+                "mechanism": "Sustained lateral G is already spending most of the rear tires' grip budget; supercharger or turbo torque at high rpm takes the rest. The slide starts driven, then momentum carries it wide.",
+                "visual": {
+                  "heading": -32,
+                  "travel": -16,
+                  "steer": 12,
+                  "loose": "rear",
+                  "weight": "rear",
+                  "outcome": "spin",
+                  "caption": "Power-on rear breakaway in the aero regime — the slide begins driven, then momentum takes over"
+                },
+                "rack": {
+                  "primary": [
+                    "DIFFERENTIAL",
+                    "AERO"
+                  ],
+                  "secondary": [
+                    "GEARING",
+                    "TIRES"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Rear diff accel",
-                    "dir": "DOWN (55 → 45)",
-                    "why": "less lock = the rear lights progressively, not as an axle"
+                    "pair": "Rear diff — accel : decel",
+                    "lo": "accel 40-45",
+                    "hi": "accel 60+",
+                    "lo_feel": "the rear lights progressively, one wheel at a time — recoverable",
+                    "hi_feel": "both rear wheels break as one locked axle — sudden and total",
+                    "target": 26,
+                    "why": "lower accel lock buys progressive breakaway when grip is already spent"
                   },
                   {
-                    "s": "Rear wing",
-                    "dir": "up if the trade is affordable",
-                    "why": "buys exit throttle at the cost of straight speed"
+                    "pair": "Aero — front : rear downforce",
+                    "lo": "more rear wing",
+                    "hi": "less rear wing",
+                    "lo_feel": "exit throttle you can trust, at the cost of straight-line speed",
+                    "hi_feel": "big top speed, and a rear that runs out mid-corner",
+                    "target": 28,
+                    "why": "on a flowing course this is the real trade: 11 mph of top end bought 0.09g and shorter braking"
                   }
                 ],
-                "options": "Throttle discipline: wait for the chevrons to straighten. In automatics, squeeze — the kickdown is the enemy.",
-                "tier": "player-verified"
+                "options": "Throttle discipline: wait for the corner to open before committing. On an automatic, squeeze — the kickdown is the enemy.",
+                "tier": "player-verified",
+                "telemetry": [
+                  "Tires, Misc. — rear wheel speeds jump above the fronts at the moment of throttle",
+                  "Friction — rear circles red, fronts green"
+                ]
               }
             ]
           }
@@ -46543,10 +46836,9 @@ window.FH6_DB = {
       },
       {
         "id": "chicane",
-        "name": "Chicane / transitions",
+        "name": "Chicane / direction changes",
         "speed": "50-100 mph",
-        "regime": "TRANSIENT — the dark layer's home: dampers, toe and bars own everything here",
-        "geometry": "chicane",
+        "regime": "TRANSIENT — the invisible layer's home: damping, toe and bars own everything here",
         "phases": [
           {
             "phase": 2,
@@ -46554,49 +46846,110 @@ window.FH6_DB = {
             "entries": [
               {
                 "feeling": "\"It whips left and right — almost uncontrollably.\"",
-                "mechanism": "Direction changes swing the car's mass across the chassis. If rebound can't control how fast the unloading side springs back, each swap adds energy — the oscillation GROWS. Stiff rear bars and lift-off decel shove add to it.",
-                "sliders": [
+                "mechanism": "Each direction change swings the car's mass across the chassis. If rebound cannot control how fast the unloading side springs back, every swap adds energy instead of absorbing it and the oscillation GROWS. Stiff rear bars and lift-off decel shove add to the pile.",
+                "visual": {
+                  "heading": 26,
+                  "travel": 2,
+                  "steer": -22,
+                  "loose": "rear",
+                  "weight": "neutral",
+                  "outcome": "spin",
+                  "ghost": -24,
+                  "caption": "Yaw oscillation: the rear overshoots one way, the correction overshoots the other — each swap bigger than the last"
+                },
+                "rack": {
+                  "primary": [
+                    "DAMPING",
+                    "ALIGNMENT"
+                  ],
+                  "secondary": [
+                    "ANTIROLL BARS",
+                    "DIFFERENTIAL",
+                    "SPRINGS"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Rebound (esp. rear)",
-                    "dir": "matched to spring rate — up if underdamped",
-                    "why": "the true owner of the whip; springs without damping = a pendulum"
+                    "pair": "Rear damping — rebound : bump",
+                    "lo": "under-damped for the spring",
+                    "hi": "matched to the spring rate",
+                    "lo_feel": "the car is a pendulum — every input keeps ringing",
+                    "hi_feel": "one swap, one settle — the whip dies",
+                    "target": 74,
+                    "why": "THE owner of the whip; stiff springs without matching rebound guarantee oscillation"
                   },
                   {
-                    "s": "Rear diff decel",
-                    "dir": "up",
-                    "why": "every flick involves a lift — decel lock steadies each one"
+                    "pair": "Toe — front : rear",
+                    "lo": "rear toe zero",
+                    "hi": "rear toe-in +0.1 to +0.2",
+                    "lo_feel": "the rear swings freely into every transition",
+                    "hi_feel": "the rear tires resist the flick geometrically — cheap stability",
+                    "target": 76,
+                    "why": "the textbook anti-whip alignment setting"
                   },
                   {
-                    "s": "Rear toe",
-                    "dir": "IN +0.1-0.2",
-                    "why": "the rear resists the flick geometrically"
-                  },
-                  {
-                    "s": "ARBs",
-                    "dir": "avoid stiff-rear splits on light cars",
-                    "why": "'your stiffer end loses grip first'"
+                    "pair": "Anti-roll bars — front : rear",
+                    "lo": "soft front / stiff rear",
+                    "hi": "balanced or front-biased",
+                    "lo_feel": "rotation on demand, and rotation you did not ask for",
+                    "hi_feel": "calmer, safer transitions at the cost of agility",
+                    "target": 62,
+                    "why": "a stiff-rear split on a light car is an oscillation amplifier"
                   }
                 ],
-                "options": "If the whip survives all sliders: it's the BUILD (escalation rule) — the car may be too light/short for its power, or needs adjustable dampers it doesn't have.",
-                "tier": "player-verified (the 4C saga, start to finish)"
+                "options": "If the whip survives every slider, it is the BUILD (escalation rule): the car may be too light and short for its power, or it needs adjustable dampers it does not have.",
+                "tier": "player-verified (the 4C saga, start to finish)",
+                "telemetry": [
+                  "Suspension — the offsets swing left-right and do NOT settle between inputs: oscillation, visible",
+                  "Body Acceleration — the dot ping-pongs across the circle instead of tracing an arc"
+                ]
               },
               {
-                "feeling": "\"It's slow and ponderous through the flick — never settles for the second apex.\"",
-                "mechanism": "The opposite disease: too soft, weight still sloshing from the first input when the second arrives.",
-                "sliders": [
+                "feeling": "\"It's slow and ponderous through the flick — it never settles for the second apex.\"",
+                "mechanism": "The opposite disease: too soft everywhere, so the weight is still sloshing from the first input when the second one arrives.",
+                "visual": {
+                  "heading": 8,
+                  "travel": 4,
+                  "steer": -26,
+                  "loose": "none",
+                  "weight": "neutral",
+                  "outcome": "wide",
+                  "caption": "Lazy transition — the body is still rolling from the first input as the second arrives"
+                },
+                "rack": {
+                  "primary": [
+                    "SPRINGS",
+                    "DAMPING"
+                  ],
+                  "secondary": [
+                    "ANTIROLL BARS"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Springs + rebound",
-                    "dir": "stiffer together",
-                    "why": "faster settle, at the cost of forgiveness"
+                    "pair": "Springs — magnitude (both ends together)",
+                    "lo": "soft pair",
+                    "hi": "stiff pair",
+                    "lo_feel": "forgiving, floaty, slow to change direction",
+                    "hi_feel": "immediate response, punishing over kerbs and bumps",
+                    "target": 66,
+                    "why": "raise BOTH sides to change character without touching balance — the magnitude rule in action"
                   },
                   {
-                    "s": "ARBs",
-                    "dir": "stiffer front-biased",
-                    "why": "crisper roll control"
+                    "pair": "Damping — rebound : bump",
+                    "lo": "soft both",
+                    "hi": "stiff both",
+                    "lo_feel": "wallowy, delayed",
+                    "hi_feel": "crisp, and one notch too far becomes the whip above",
+                    "target": 60,
+                    "why": "crisp and whippy are the same line viewed from opposite sides"
                   }
                 ],
-                "options": "One notch at a time — the line between crisp and whippy is thin, and it's the same line.",
-                "tier": "doctrine"
+                "options": "One notch at a time — the gap between crisp and whippy is thin, and it is the same gap.",
+                "tier": "doctrine",
+                "telemetry": [
+                  "Suspension — offsets change slowly and lag your inputs: the car is still rolling when the next corner arrives"
+                ]
               }
             ]
           }
@@ -46607,34 +46960,59 @@ window.FH6_DB = {
         "name": "Flat-out kink",
         "speed": "130+ mph",
         "regime": "COMMITMENT — one binary question: does it stay flat?",
-        "geometry": "kink",
         "phases": [
           {
             "phase": 5,
             "label": "The commitment",
             "entries": [
               {
-                "feeling": "\"Do I lift or is it flat? It wiggled last lap and I don't trust it.\"",
-                "mechanism": "A kink at 130+ is pure aero + stability. If the rear is aero-light (wing trimmed, balance too front-ward) the car is working exactly at its stability margin — a bump or a lift AT the kink transfers load and can snap it.",
-                "sliders": [
+                "feeling": "\"Do I lift or is it flat? It wiggled last lap and now I don't trust it.\"",
+                "mechanism": "A kink at this speed is pure aero and stability. If the rear is aero-light — wing trimmed, balance too far forward — the car is riding exactly at its stability margin, and a bump or a lift AT the kink transfers just enough load to snap it.",
+                "visual": {
+                  "heading": -14,
+                  "travel": -10,
+                  "steer": 8,
+                  "loose": "limit",
+                  "weight": "neutral",
+                  "outcome": "ok",
+                  "caption": "Everything at the limit but nothing broken — the margin is thin enough that a bump or a lift decides it"
+                },
+                "rack": {
+                  "primary": [
+                    "AERO"
+                  ],
+                  "secondary": [
+                    "ALIGNMENT",
+                    "SPRINGS",
+                    "DAMPING"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Rear downforce",
-                    "dir": "the stability budget — trim it last, after everything else is proven",
-                    "why": "high-speed rear planted-ness IS this corner"
+                    "pair": "Aero — front : rear downforce",
+                    "lo": "rear-loaded (0.42 balance)",
+                    "hi": "front-loaded (0.57 balance)",
+                    "lo_feel": "planted and trustworthy flat out; slower everywhere else",
+                    "hi_feel": "sharp turn-in at speed; the rear becomes a question you ask every lap",
+                    "target": 40,
+                    "why": "rear downforce is the stability budget — spend it last, after everything else is proven"
                   },
                   {
-                    "s": "Aero balance",
-                    "dir": "0.42-0.50 band",
-                    "why": "front enough to steer, rear enough to trust"
-                  },
-                  {
-                    "s": "Rear toe-in",
-                    "dir": "+0.1",
-                    "why": "cheap straight-line insurance"
+                    "pair": "Toe — front : rear",
+                    "lo": "rear toe zero",
+                    "hi": "rear toe-in +0.1",
+                    "lo_feel": "free, floaty at high speed",
+                    "hi_feel": "the rear tracks straight — cheap high-speed insurance",
+                    "target": 72,
+                    "why": "tiny cost, large confidence return on a fast course"
                   }
                 ],
-                "options": "If you must lift, lift BEFORE the kink, never in it. The panel's latG @120 row is this corner's rating — compare it to the kink's demand.",
-                "tier": "player-verified (the wing-trim gate: rear stability evidence required before touching it)"
+                "options": "If you must lift, lift BEFORE the kink, never in it. The panel's lateral G at 120 is this corner's rating — compare it against what the kink demands.",
+                "tier": "player-verified (the wing-trim gate: rear-stability evidence required before trimming)",
+                "telemetry": [
+                  "Body Acceleration — the dot riding the ring edge at high speed with no margin left",
+                  "Friction — all four near their peaks simultaneously"
+                ]
               }
             ]
           }
@@ -46645,75 +47023,371 @@ window.FH6_DB = {
         "name": "Dirt corner (the bridge)",
         "speed": "40-90 mph",
         "regime": "GRIP-SLIDE HYBRID — peak traction lives AT slip on loose surfaces; rotation is a tool with a budget",
-        "geometry": "dirt",
         "status": "SEEDED — the full dirt chapter extends from here (next build)",
         "phases": [
           {
             "phase": 2,
-            "label": "Slide initiation (before the apex!)",
+            "label": "Slide initiation — before the apex",
             "entries": [
               {
                 "feeling": "\"The grip car just plows on dirt — and the drifty guys are somehow faster.\"",
-                "mechanism": "On loose surface the tire grips by DIGGING — peak traction is at 10-25° of slip, not 5°. The fast line rotates the car BEFORE the apex (lift, flick, or brake-slide), so the exit is dead straight while tarmac technique is still mid-turn.",
-                "sliders": [
+                "mechanism": "On a loose surface the tire grips by DIGGING: peak traction is at 10-25° of slip, not 5°. The fast line rotates the car BEFORE the apex — lift, flick or brake-slide — so the exit is already straight while tarmac technique is still mid-turn.",
+                "visual": {
+                  "heading": -38,
+                  "travel": -18,
+                  "steer": 16,
+                  "loose": "all",
+                  "weight": "front",
+                  "outcome": "ok",
+                  "surface": "dirt",
+                  "caption": "Controlled rotation set EARLY — all four tires sliding on purpose, angle established before the apex"
+                },
+                "rack": {
+                  "primary": [
+                    "DIFFERENTIAL",
+                    "TIRES",
+                    "SPRINGS"
+                  ],
+                  "secondary": [
+                    "ALIGNMENT",
+                    "DAMPING"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Diff accel",
-                    "dir": "HIGH (drift philosophy at half strength)",
-                    "why": "locked drive keeps the slide driven and predictable"
+                    "pair": "Rear diff — accel : decel",
+                    "lo": "low accel, high decel (tarmac safe)",
+                    "hi": "high accel, low decel (drift philosophy)",
+                    "lo_feel": "the car resists rotation — it plows and the slide never sets",
+                    "hi_feel": "lift rotates it, throttle sustains it: the dirt technique works",
+                    "target": 74,
+                    "why": "dirt borrows the drift diff at roughly half strength — rotation is a tool here, not a fault"
                   },
                   {
-                    "s": "Rear diff decel",
-                    "dir": "LOWER than tarmac",
-                    "why": "lift-off rotation is the initiation tool here — you WANT some"
+                    "pair": "Springs — front : rear (and magnitude)",
+                    "lo": "soft rally pair",
+                    "hi": "stiff tarmac pair",
+                    "lo_feel": "the tires follow the surface and keep digging — compliance IS grip on dirt",
+                    "hi_feel": "the car skates across the bumps and never bites",
+                    "target": 24,
+                    "why": "on loose surfaces compliance beats body control; this is the biggest single tarmac-to-dirt change"
                   },
                   {
-                    "s": "Springs",
-                    "dir": "soft (rally)",
-                    "why": "compliance over bumps IS grip on dirt"
-                  },
-                  {
-                    "s": "Compound",
-                    "dir": "rally",
-                    "why": "the digging tread"
+                    "pair": "Tire pressure — front : rear",
+                    "lo": "low pressures (~3 psi under road)",
+                    "hi": "road pressures",
+                    "lo_feel": "bigger, softer footprint that digs in",
+                    "hi_feel": "skittery, bouncing over the loose stuff",
+                    "target": 26,
+                    "why": "the rally reference: drop about 3 psi from the road baseline"
                   }
                 ],
-                "options": "Technique: lift-and-turn early, let the car set its angle, throttle straightens it. This is drift's initiation phase grafted onto a race line.",
-                "tier": "doctrine (drift research verified the sliders; dirt-specific tuning = next chapter)"
+                "options": "Technique: lift and turn early, let the car set its own angle, then use throttle to straighten it. This is drift's initiation phase grafted onto a race line.",
+                "tier": "doctrine (drift research verified the sliders; dirt-specific tuning = next chapter)",
+                "telemetry": [
+                  "Friction — all four sliding with peaks ABOVE tarmac numbers and the car still stable: proof the dirt plateau is real",
+                  "Tires, Misc. — wheel speeds differ across the axle while the car tracks true"
+                ]
               }
             ]
           },
           {
             "phase": 4,
-            "label": "Exit (straighten early)",
+            "label": "Exit — straighten early",
             "entries": [
               {
-                "feeling": "\"It slides too far and I spin, or fishtail down the whole straight.\"",
-                "mechanism": "The rotation budget overdrew: the slide outlived the corner. Dirt exits reward getting STRAIGHT early — a sliding exit is a slow exit even on dirt.",
-                "sliders": [
+                "feeling": "\"It slides too far and I spin, or I fishtail down the whole straight.\"",
+                "mechanism": "The rotation budget overdrew: the slide outlived the corner. Dirt exits reward getting STRAIGHT early — a sliding exit is a slow exit even on loose surface.",
+                "visual": {
+                  "heading": -56,
+                  "travel": -20,
+                  "steer": 30,
+                  "loose": "all",
+                  "weight": "rear",
+                  "outcome": "spin",
+                  "surface": "dirt",
+                  "caption": "Over-rotation past the apex — the angle that was a tool has become a spin"
+                },
+                "rack": {
+                  "primary": [
+                    "DIFFERENTIAL",
+                    "ALIGNMENT"
+                  ],
+                  "secondary": [
+                    "TIRES",
+                    "DAMPING"
+                  ]
+                },
+                "ratios": [
                   {
-                    "s": "Center diff (AWD)",
-                    "dir": "slightly more forward than a tarmac build",
-                    "why": "the front pull is spin insurance — the AWD drift lesson applied to racing"
+                    "pair": "Centre diff — front : rear (AWD)",
+                    "lo": "75% rear (racing dirt)",
+                    "hi": "90-100% rear (pure drift)",
+                    "lo_feel": "the front pulls the car straight out of the slide — spin insurance",
+                    "hi_feel": "maximum rotation, maximum angle, no safety net",
+                    "target": 26,
+                    "why": "75-90% rear is the dirt-RACE band; 90-100% is for drift scoring"
                   },
                   {
-                    "s": "Rear diff decel",
-                    "dir": "up a notch if every lift over-rotates",
-                    "why": "budget control"
+                    "pair": "Rear diff — accel : decel",
+                    "lo": "decel free",
+                    "hi": "decel raised a notch",
+                    "lo_feel": "every lift adds more angle — the fishtail feeds itself",
+                    "hi_feel": "lift-off rotation is budgeted, not unlimited",
+                    "target": 58,
+                    "why": "the throttle is your angle dial; decel decides how much the lift adds"
                   },
                   {
-                    "s": "Rear toe-in",
-                    "dir": "+0.1-0.2",
-                    "why": "damps the fishtail"
+                    "pair": "Toe — front : rear",
+                    "lo": "rear toe zero",
+                    "hi": "rear toe-in +0.1 to +0.2",
+                    "lo_feel": "the tail keeps hunting down the straight",
+                    "hi_feel": "the rear settles and tracks",
+                    "target": 74,
+                    "why": "the same anti-fishtail setting the chicane uses"
                   }
                 ],
-                "options": "AWD 75-90% rear is the dirt-race sweet band (vs 90-100 for pure drift): enough front pull to catch, enough rear to rotate.",
-                "tier": "doctrine (AWD drift research, half-strength application)"
+                "options": "AWD at 75-90% rear is the dirt-race sweet band: enough front pull to catch the slide, enough rear bias to rotate on command.",
+                "tier": "doctrine (AWD drift research, half-strength application)",
+                "telemetry": [
+                  "Friction — rear peaks running away from the fronts",
+                  "Body Acceleration — the dot pinned sideways well past the point where it should have unwound"
+                ]
               }
             ]
           }
         ]
       }
-    ]
+    ],
+    "grip_science": {
+      "headline": "Grip is highest RIGHT BEFORE it is lost — and that is the whole game.",
+      "slip_curve": {
+        "concept": "A tire does not grip in proportion to how hard you ask. Grip climbs as slip angle grows, reaches a PEAK, and then FALLS. The fast driver lives at the top of that hill. Past the peak you get less grip AND more angle at the same time — which is why a slide, once started, accelerates itself.",
+        "why_it_feels_sudden": "On tarmac the far side of the peak is a CLIFF: a couple of degrees past the top and grip collapses. That is the 'it just let go with no warning' feeling. Lower pressures, softer compounds and progressive damping do not raise the peak much — they widen it, turning the cliff into a slope you can feel coming.",
+        "surfaces": [
+          {
+            "id": "slick",
+            "label": "Slick / semi-slick (tarmac)",
+            "peak_slip": 7,
+            "peak_grip": 1,
+            "note": "Highest peak, sharpest cliff. Enormous grip if you can live at 7°, brutal punishment at 12°.",
+            "color": "#4b96f3"
+          },
+          {
+            "id": "rally-tarmac",
+            "label": "Rally compound on tarmac",
+            "peak_slip": 9,
+            "peak_grip": 0.82,
+            "note": "Lower peak, slightly kinder fall — the PI-arbitrage trade in one line.",
+            "color": "#e3b341"
+          },
+          {
+            "id": "rally-dirt",
+            "label": "Rally compound on dirt",
+            "peak_slip": 22,
+            "peak_grip": 0.72,
+            "note": "THE BRIDGE: peak moves far right and the top becomes a PLATEAU. The tire grips by digging, so 20° of slip is not a mistake — it is the operating point. This is why dirt rewards sliding and tarmac punishes it.",
+            "color": "#f0883e"
+          }
+        ],
+        "zones": [
+          {
+            "from": 0,
+            "to": 4,
+            "label": "Under-driving — grip in reserve",
+            "tone": "muted"
+          },
+          {
+            "from": 4,
+            "to": 10,
+            "label": "The peak — tarmac lives here",
+            "tone": "good"
+          },
+          {
+            "from": 10,
+            "to": 26,
+            "label": "Past the cliff on tarmac · the plateau on dirt",
+            "tone": "mixed"
+          },
+          {
+            "from": 26,
+            "to": 60,
+            "label": "Drift country — angle is the product, lap time is gone",
+            "tone": "drift"
+          }
+        ]
+      },
+      "traction_circle": {
+        "concept": "Each tire has ONE grip budget and it is spent in every direction at once. Braking uses it, cornering uses it, accelerating uses it — and the total is a VECTOR, not a sum. Draw the budget as a circle: any combination inside the circle is fine, anything outside is a slide.",
+        "why_trail_braking_is_knife_edge": "At 100% braking you are already ON the circle's edge. Add even a small steering input and the combined vector points OUTSIDE it — so the tire lets go, and it lets go at the end you loaded least. This is the exact mechanism behind 'if I add even a little steering while braking, the whole thing lets go'.",
+        "the_trade": "Because it is a circle, the way to buy cornering grip is to give back braking grip. Release the brakes progressively as you add steering and the vector stays on the edge the whole way — that is trail-braking done right, and it is the fastest path through a corner entry.",
+        "tuning_link": "Tuning cannot enlarge one tire's circle (that is compound and load) — but it decides how the four circles are FILLED. Brake balance shifts how much braking each end spends; the differential decides whether the rears spend together or separately; aero inflates all four circles at speed; camber and pressure decide how much of each circle the contact patch can actually reach."
+      },
+      "telemetry_proof": [
+        "FRICTION page = the traction circle made literal, per wheel. Each wheel shows a circle with an orange slip vector and a Peak %. Green ring = that tire is inside its friction limit; red ring = it has been exceeded. Watch which corner goes red FIRST — that is your answer, not a guess.",
+        "BODY ACCELERATION page = the whole-car traction circle: a live dot inside a ring with a numeric G-Force. The dot's distance from centre is how much of the total budget you are using; the direction is where it is being spent (down = braking, sideways = cornering, diagonal = both).",
+        "TIRES, MISC. per-wheel SPEED = a wheelspin and lock-up detector: a spinning wheel reads far higher mph than its neighbours, a locked one reads far lower.",
+        "HEAT page = where the contact patch is actually working (inner/middle/outer) — the camber ground truth."
+      ]
+    },
+    "telemetry": {
+      "headline": "The seven telemetry pages — what each one proves",
+      "how": "Cycle pages with Previous/Next while driving. Record 10-30 seconds of video and read it back frame by frame; the numbers move too fast to read live.",
+      "pages": [
+        {
+          "name": "General",
+          "shows": "Power, Torque, Boost, RPM, Gear, Clutch, E-brake, Steering angle, Throttle %, Brake %, Speed",
+          "proves": "Driver inputs vs car response — the honest record of whether you stomped or squeezed, and where the auto chose to shift."
+        },
+        {
+          "name": "Body Acceleration",
+          "shows": "Whole-car G-force circle with a live dot + numeric G",
+          "proves": "How much of the total grip budget is in use and in which direction — the traction circle, live."
+        },
+        {
+          "name": "Friction",
+          "shows": "Per-wheel friction circles, orange slip vector, Peak % per corner, ring colour green/red",
+          "proves": "WHICH tire exceeded its limit and by how much — the single best grip-loss diagnostic in the game."
+        },
+        {
+          "name": "Tires, Misc.",
+          "shows": "Per-wheel temp, live pressure, wear %, individual wheel SPEED, live dynamic camber",
+          "proves": "Hot pressures (subtract ~3.5 psi for the cold setting), wheelspin/lock-up by wheel-speed mismatch, and what camber the tire actually runs under load."
+        },
+        {
+          "name": "Heat",
+          "shows": "Inner / middle / outer temperature for all four tires",
+          "proves": "Camber correctness — target inner about 10-15°F hotter than outer; outer hottest means not enough negative camber."
+        },
+        {
+          "name": "Suspension",
+          "shows": "Per-corner compression offset %",
+          "proves": "Roll and pitch behaviour, bottoming out, and — watched over a chicane — whether the car is oscillating instead of settling."
+        },
+        {
+          "name": "Damage",
+          "shows": "Per-panel damage plus engine / clutch / transmission / driveline",
+          "proves": "Whether a mid-session performance drop is mechanical rather than a tuning change."
+        }
+      ],
+      "captured": "2026-08-10 — player video, all pages cycled (AE86 on the Tokyo expressway)"
+    },
+    "controllability": {
+      "headline": "Breaks away on command, comes back on command — the dual-character build",
+      "concept": "Two different cars feel 'uncontrollable': the one that snaps sideways at a handbrake tap, and the one that clings until it lets go all at once. Both are failures of the SAME property — the shape of the slip curve and the size of the front's reserve. A car you can break and catch needs three separate qualities, and they are tuned by three different families.",
+      "three_qualities": [
+        {
+          "id": "release",
+          "name": "RELEASE AUTHORITY — can I break it when I choose?",
+          "question": "Does a handbrake tap, a lift, or a stab of throttle reliably start the rotation?",
+          "high": "handbrake tap = instant angle; lift-off rotates on demand",
+          "low": "the car ignores your inputs and understeers on regardless",
+          "sliders": [
+            {
+              "s": "Rear diff DECEL",
+              "dir": "LOW (0-15)",
+              "why": "a locked decel diff FIGHTS the handbrake and the lift — this is the single biggest release lever, and the reason some cars simply refuse to rotate off-throttle"
+            },
+            {
+              "s": "Rear ARB : front ARB",
+              "dir": "rear stiffer",
+              "why": "your stiffer end lets go first — this is you choosing WHICH end breaks"
+            },
+            {
+              "s": "Rear tire pressure",
+              "dir": "higher than front",
+              "why": "smaller rear patch releases earlier and more predictably"
+            },
+            {
+              "s": "Brake balance",
+              "dir": "some rearward bias, or lower overall pressure",
+              "why": "the handbrake and trail-brake both need the rear able to lock"
+            },
+            {
+              "s": "Torque vs rear grip",
+              "dir": "enough power to spin the rears in 2nd-3rd",
+              "why": "throttle-initiation only exists if the engine can outmuscle the tire"
+            }
+          ]
+        },
+        {
+          "id": "catch",
+          "name": "CATCH AUTHORITY — can I get it back?",
+          "question": "When the rear is out, does the front have enough grip and self-centering to pull the car straight?",
+          "high": "countersteer bites instantly, the wheel wants to straighten itself, the car re-hooks cleanly",
+          "low": "you countersteer and nothing happens — the front is sliding too, and the spin completes",
+          "sliders": [
+            {
+              "s": "CASTER",
+              "dir": "HIGH (6.5-7.0)",
+              "why": "THE catch slider — leans the steering axis back so the wheel self-centres and the car catches its own slide; also adds camber as lock grows"
+            },
+            {
+              "s": "Front camber",
+              "dir": "-2 to -3 (more than a pure grip build)",
+              "why": "at big countersteer angles the front tire is heavily leaned — camber keeps its patch flat exactly when you need the catch"
+            },
+            {
+              "s": "Front ARB / springs",
+              "dir": "SOFTER than rear",
+              "why": "the front must out-grip the rear during the catch; softer = more grip"
+            },
+            {
+              "s": "Front tire width / compound",
+              "dir": "as much front as the build allows",
+              "why": "the parts-level version of the same rule — front reserve IS catch authority"
+            },
+            {
+              "s": "AWD centre diff",
+              "dir": "75-90% rear (not 100)",
+              "why": "a trickle of front drive physically PULLS the car straight — the most forgiving catch mechanism in the game"
+            }
+          ]
+        },
+        {
+          "id": "progressive",
+          "name": "PROGRESSIVITY — does it warn me before it goes?",
+          "question": "Is the far side of the grip peak a slope you can feel, or a cliff you fall off?",
+          "high": "the rear eases out over a car length of road; you feel it start and can meter it",
+          "low": "everything is fine, then the car is sideways with no intermediate state",
+          "sliders": [
+            {
+              "s": "Tire pressures",
+              "dir": "toward the lower end of the band",
+              "why": "lower pressure widens the peak — the same total grip, delivered with warning"
+            },
+            {
+              "s": "Damping (rebound especially)",
+              "dir": "softer / matched, never over-stiff",
+              "why": "stiff damping makes load arrive at the tire faster than you can react — instant transitions with no build-up"
+            },
+            {
+              "s": "Springs",
+              "dir": "softer pair",
+              "why": "slower weight transfer = the slide develops at human speed"
+            },
+            {
+              "s": "Compound",
+              "dir": "rally/drift compounds are progressive; slicks are a cliff",
+              "why": "the biggest single influence on peak SHAPE — slicks have the highest peak and the sharpest fall"
+            },
+            {
+              "s": "Weight",
+              "dir": "moderate helps",
+              "why": "very light cars transition faster than you can catch; heavy cars are progressive but need real front grip to recover"
+            }
+          ]
+        }
+      ],
+      "the_measurable_test": {
+        "name": "The breakaway-margin test (Friction telemetry page)",
+        "procedure": "Provoke a slide — handbrake tap or a lift mid-corner — while the telemetry Friction page is up, and record it. Read back the frame at the moment the rear breaks.",
+        "read": "You want the REAR circles red while the FRONT circles are still GREEN with visible margin. That margin IS your catch authority, measured. If all four go red together, the car cannot be caught by anyone — that is a build problem, not a skill problem.",
+        "tune_toward": "Widen the gap: everything that adds front grip (softer front bar, front camber, front width, lower front pressure) or removes rear grip (stiffer rear bar, higher rear pressure) increases breakaway margin. The dual-character car is the one with the LARGEST front-to-rear friction gap that still holds grip when driven tidily."
+      },
+      "car_side": "Some of this is the chassis, not the tune: a long wheelbase rotates slowly and forgivingly; a short one snaps. Mid-engine cars swing their mass hard once past the peak (the 4C); front-engine cars hang their mass ahead of the pivot and self-stabilise (the Viper). RWD gives the cleanest release AND the cleanest catch; AWD trades some release authority for a front axle that rescues you.",
+      "tier": "doctrine — assembled from the verified drift slider research (caster/camber/ARB/diff) plus the player-verified grip sessions; the breakaway-margin test is newly proposed and untested"
+    }
   },
   "sources": {
     "captured": "2026-06-07",

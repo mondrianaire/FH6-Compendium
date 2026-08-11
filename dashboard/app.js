@@ -1868,58 +1868,235 @@
   }
 
   // ---- Training Zone: feeling-first corner school on the grip-slide spectrum ----
+  const TZ_TABS = ["TIRES", "GEARING", "ALIGNMENT", "ANTIROLL BARS", "SPRINGS", "DAMPING", "AERO", "BRAKE", "DIFFERENTIAL"];
+  const TZ_PHASE_DEF = [
+    "Straight-line deceleration. Weight piles onto the front; the rear goes light. Brakes and rear decel-lock rule here.",
+    "The transient. You are asking the car to change direction — dampers, toe and caster own this half-second, and nothing else can fix it.",
+    "Steady state. Load has settled; this is where lateral G, aero balance and mechanical balance are actually measured.",
+    "Power down. The differential decides which wheels drive and how tied together they are; traction is the whole question.",
+    "Full commitment. Aero and gearing only — no more grip is coming, so stability is everything.",
+  ];
+  const TZ_C = { mom: "#00d27a", nose: "#2f81f7", body: "#d3dae4", dark: "#12161c", bad: "#e5414e", warn: "#e3b341", road: "#262d38" };
+
+  // top-down car showing what the chassis is physically doing
+  const TZ_SEGS = [
+    "M 208 300 L 208 214",
+    "M 208 214 L 208 176 Q 208 146 194 122",
+    "M 194 122 Q 180 98 140 88.6",
+    "M 140 88.6 L 88 88",
+    "M 88 88 L 8 88",
+  ];
+  function carDiag(v, ph) {
+    const cx = 208, cy = 186, head = v.heading || 0, trav = v.travel || 0, steer = v.steer || 0;
+    const R = (a) => a * Math.PI / 180;
+    const px = (x, y, a, d) => [x + d * Math.sin(R(a)), y - d * Math.cos(R(a))];
+    const P = (a, d) => px(cx, cy, a, d);
+    const arrow = (a, r0, r1, col, w, dash) => {
+      const [x0, y0] = P(a, r0), [x1, y1] = P(a, r1);
+      const [ax, ay] = px(x1, y1, a, 12), [bx, by] = px(x1, y1, a + 90, 6.5), [dx2, dy2] = px(x1, y1, a - 90, 6.5);
+      return `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"${dash ? ` stroke-dasharray="${dash}"` : ""}/>
+        <polygon points="${ax},${ay} ${bx},${by} ${dx2},${dy2}" fill="${col}"/>`;
+    };
+    const tireCol = (which) => {
+      const L = v.loose;
+      if (L === "all") return TZ_C.bad;
+      if (L === "limit") return TZ_C.warn;
+      if (L === which) return TZ_C.bad;
+      return TZ_C.dark;
+    };
+    const tire = (x, y, col, rot) => `<rect x="${x}" y="${y}" width="10" height="22" rx="2.5" fill="${col}"${rot ? ` transform="rotate(${rot} ${x + 5} ${y + 11})"` : ""}/>`;
+    const ghost = v.ghost != null ? `<g transform="rotate(${v.ghost} ${cx} ${cy})" opacity="0.22">
+        <rect x="${cx - 25}" y="${cy - 47}" width="50" height="94" rx="10" fill="${TZ_C.body}"/></g>` : "";
+    const dirt = v.surface === "dirt";
+    return `<svg viewBox="0 0 416 300" class="tz-svg" role="img" aria-label="${(v.caption || "car behaviour").replace(/"/g, "&quot;")}">
+      <path d="M 208 300 L 208 176 Q 208 96 128 88 L 8 88" fill="none" stroke="${dirt ? "#3a3128" : TZ_C.road}" stroke-width="96" stroke-linejoin="round"/>
+      ${TZ_SEGS.map((sg, i) => `<path d="${sg}" fill="none" stroke="${CM_PC[i]}" stroke-width="${i + 1 === ph ? 13 : 5}" stroke-linecap="round" opacity="${i + 1 === ph ? 1 : 0.22}"/>`).join("")}
+      <path d="M 208 300 L 208 176 Q 208 96 128 88 L 8 88" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="9 9" opacity="0.4"/>
+      ${ph ? `<text x="12" y="292" fill="${CM_PC[ph - 1]}" font-size="12" font-weight="700" font-family="system-ui,-apple-system,sans-serif">PHASE ${ph} · ${CM_SHORT[ph - 1].toUpperCase()}</text>` : ""}
+      ${v.outcome === "wide" || v.outcome === "spin" ? arrow(trav, 52, 128, TZ_C.bad, 3.5, "7 6") : ""}
+      ${ghost}
+      ${arrow(trav, 0, 92, TZ_C.mom, 6)}
+      <g transform="rotate(${head} ${cx} ${cy})">
+        ${tire(cx - 33, cy - 36, tireCol("front"), steer)}
+        ${tire(cx + 23, cy - 36, tireCol("front"), steer)}
+        ${tire(cx - 33, cy + 14, tireCol("rear"), 0)}
+        ${tire(cx + 23, cy + 14, tireCol("rear"), 0)}
+        <rect x="${cx - 25}" y="${cy - 47}" width="50" height="94" rx="10" fill="${TZ_C.body}" stroke="#0e1116" stroke-width="2"/>
+        <rect x="${cx - 19}" y="${cy - 27}" width="38" height="19" rx="3.5" fill="#33404f"/>
+        <rect x="${cx - 16}" y="${cy - 44}" width="32" height="8" rx="2.5" fill="#9aa4b0"/>
+      </g>
+      ${arrow(head, 56, 104, TZ_C.nose, 2.5, "6 5")}
+      <g font-family="system-ui,-apple-system,sans-serif" font-size="11">
+        <text x="10" y="20" fill="${TZ_C.mom}" font-weight="700">MOMENTUM</text><text x="10" y="34" fill="var(--muted)">where it actually goes</text>
+        <text x="10" y="56" fill="${TZ_C.nose}" font-weight="700">NOSE</text><text x="10" y="70" fill="var(--muted)">where it points</text>
+        ${v.loose && v.loose !== "none" ? `<text x="300" y="20" fill="${v.loose === "limit" ? TZ_C.warn : TZ_C.bad}" font-weight="700">${v.loose === "limit" ? "AT THE LIMIT" : (v.loose === "all" ? "ALL FOUR SLIDING" : v.loose.toUpperCase() + " SLIDING")}</text>` : ""}
+        ${v.outcome === "wide" ? `<text x="240" y="284" fill="${TZ_C.bad}" font-weight="700">runs wide →</text>` : ""}
+        ${v.outcome === "spin" ? `<text x="250" y="284" fill="${TZ_C.bad}" font-weight="700">lets go →</text>` : ""}
+        ${dirt ? `<text x="300" y="40" fill="#f0883e" font-weight="700">LOOSE SURFACE</text>` : ""}
+      </g>
+    </svg>`;
+  }
+
+  // the nine tabs, ALWAYS in game order, lit by relevance
+  function tuneRack(rack) {
+    const pri = (rack && rack.primary) || [], sec = (rack && rack.secondary) || [];
+    return `<div class="tz-rack">${TZ_TABS.map((t) => {
+      const st = pri.includes(t) ? "pri" : sec.includes(t) ? "sec" : "off";
+      return `<span class="tz-tab tz-${st}" title="${st === "pri" ? "primary owner of this scenario" : st === "sec" ? "secondary influence" : "inert here — leave it alone"}">${t}</span>`;
+    }).join("")}</div>`;
+  }
+
+  // a front:rear pair shown at BOTH extremes, with the direction this scenario wants
+  function ratioBar(r) {
+    const t = Math.max(4, Math.min(96, r.target != null ? r.target : 50));
+    return `<div class="tz-ratio">
+      <div class="tz-ratio-name">${r.pair}</div>
+      <div class="tz-ratio-grid">
+        <div class="tz-ratio-end tz-left"><strong>${r.lo}</strong><span>${r.lo_feel}</span></div>
+        <div class="tz-ratio-track"><i style="left:${t}%"></i></div>
+        <div class="tz-ratio-end tz-right"><strong>${r.hi}</strong><span>${r.hi_feel}</span></div>
+      </div>
+      <div class="tz-ratio-why">${r.why}</div>
+    </div>`;
+  }
+
   function buildTraining() {
     const tz = DB.trainingZone;
     const host = document.getElementById("trainingContent");
     if (!tz || !host) return;
-    const PC = CM_PC;
-    // per-archetype ribbon geometry, [path, phaseIndex 0-4] — same visual language as the corner map
-    const TZ_GEO = {
-      hairpin: [["M 40 272 L 330 272", 0], ["M 330 272 Q 400 272 428 240", 1], ["M 428 240 A 42 42 0 1 0 428 156", 2], ["M 428 156 Q 400 124 330 124", 3], ["M 330 124 L 40 124", 4]],
-      sweeper: [["M 30 300 L 150 300", 0], ["M 150 300 Q 250 298 330 270", 1], ["M 330 270 Q 470 220 530 140", 2], ["M 530 140 Q 560 95 570 36", 3]],
-      chicane: [["M 30 285 L 160 285", 0], ["M 160 285 Q 255 285 300 235", 1], ["M 300 235 Q 345 185 435 185", 2], ["M 435 185 Q 525 185 572 133", 3]],
-      kink: [["M 30 245 L 240 245", 4], ["M 240 245 Q 330 245 390 215", 2], ["M 390 215 L 590 118", 4]],
-      dirt: [["M 40 272 L 330 272", 0], ["M 330 272 Q 400 272 428 240", 1], ["M 428 240 A 42 42 0 1 0 428 156", 2], ["M 428 156 Q 400 124 330 124", 3], ["M 330 124 L 40 124", 4]]
+    const tierPill = (t) => `<span class="conf ${/player-verified/.test(t) ? "conf-verified" : /contested/.test(t) ? "conf-contested" : "conf-probable"}" title="${(t || "").replace(/"/g, "&quot;")}">${/player-verified/.test(t) ? "✅ player-verified" : /contested/.test(t) ? "⚠️ contested" : "🟡 doctrine"}</span>`;
+
+    // --- grip science: the slip curve ---
+    const gs = tz.grip_science;
+    const SC = { x0: 56, x1: 604, y0: 246, y1: 26, smax: 60, gmax: 1.12 };
+    const sx = (s) => SC.x0 + (s / SC.smax) * (SC.x1 - SC.x0);
+    const sy = (g) => SC.y0 - (g / SC.gmax) * (SC.y0 - SC.y1);
+    const shape = { slick: 2.2, "rally-tarmac": 1.6, "rally-dirt": 0.9 };
+    const curve = (su) => {
+      const a = shape[su.id] || 1.5, pts = [];
+      for (let s = 0.4; s <= SC.smax; s += 0.6) {
+        const x = s / su.peak_slip;
+        pts.push([sx(s), sy(su.peak_grip * Math.pow(x, a) * Math.exp(a * (1 - x)))]);
+      }
+      return pts.map((p, i) => `${i ? "L" : "M"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
     };
-    const ribbonSvg = (geo, extra) => `
-      <svg viewBox="0 0 620 320" style="flex:1 1 320px;max-width:520px;min-width:280px" role="img" aria-label="corner diagram">
-        ${geo.map(([d]) => `<path d="${d}" fill="none" stroke="var(--bg3)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>`).join("")}
-        ${geo.map(([d, i]) => `<path d="${d}" fill="none" stroke="${PC[i]}" stroke-width="11" stroke-linecap="round"/>`).join("")}
-        <polygon points="40,${geo === TZ_GEO.kink ? "237 60,245 40,253" : "264 60,272 40,280"}" fill="var(--muted)"/>
-        ${extra || ""}
-      </svg>`;
-    const dirtExtra = `
-      <path d="M 336 258 Q 402 244 418 196" fill="none" stroke="#e66767" stroke-width="4" stroke-dasharray="8 7" stroke-linecap="round"/>
-      <text x="240" y="215" fill="#e66767" font-size="13" font-weight="700">slide set BEFORE the apex</text>
-      <text x="240" y="232" fill="var(--muted)" font-size="11">exit dead straight — rotation is a budget</text>`;
-    const tierPill = (t) => `<span class="conf ${/player-verified/.test(t) ? "conf-verified" : /contested/.test(t) ? "conf-contested" : "conf-probable"}" title="${t.replace(/"/g, "&quot;")}">${/player-verified/.test(t) ? "✅ player-verified" : /contested/.test(t) ? "⚠️ contested" : "🟡 doctrine"}</span>`;
-    const entryHtml = (ph, e) => `
-      <div class="tz-entry">
-        <div class="card-row" style="margin-top:0">
-          <span style="font-size:12px;color:${PC[ph.phase - 1]}">● Phase ${ph.phase} — ${ph.label}</span>${tierPill(e.tier)}
-        </div>
-        <div class="tz-quote">🗣 ${e.feeling}</div>
-        <p class="why" style="margin:8px 0 6px">${e.mechanism}</p>
-        <div class="chips" style="margin:4px 0">${e.sliders.map((s) =>
-          `<span class="chip tz-slider" title="${s.why.replace(/"/g, "&quot;")}"><strong>${s.s}</strong> → ${s.dir}</span>`).join("")}</div>
-        <p class="why" style="font-size:12px;margin:6px 0 0"><strong>Options:</strong> ${e.options}</p>
-      </div>`;
-    const spectrum = `
+    const zoneCol = { muted: "#2a313c", good: "#00d27a", mixed: "#e3b341", drift: "#e5414e" };
+    const slipSvg = `<svg viewBox="0 0 640 300" class="tz-svg tz-wide" role="img" aria-label="Grip versus slip angle">
+      ${gs.slip_curve.zones.map((z) => `<rect x="${sx(z.from)}" y="${SC.y1}" width="${sx(z.to) - sx(z.from)}" height="${SC.y0 - SC.y1}" fill="${zoneCol[z.tone]}" opacity="0.09"/>`).join("")}
+      <line x1="${SC.x0}" y1="${SC.y0}" x2="${SC.x1}" y2="${SC.y0}" stroke="var(--line)" stroke-width="1.5"/>
+      <line x1="${SC.x0}" y1="${SC.y0}" x2="${SC.x0}" y2="${SC.y1}" stroke="var(--line)" stroke-width="1.5"/>
+      ${[0, 10, 20, 30, 40, 50, 60].map((s) => `<text x="${sx(s)}" y="${SC.y0 + 16}" text-anchor="middle" fill="var(--muted)" font-size="10">${s}°</text>`).join("")}
+      <text x="${(SC.x0 + SC.x1) / 2}" y="${SC.y0 + 32}" text-anchor="middle" fill="var(--muted)" font-size="11">slip angle — how far the tire is sliding vs pointing</text>
+      <text x="14" y="${(SC.y0 + SC.y1) / 2}" transform="rotate(-90 14 ${(SC.y0 + SC.y1) / 2})" text-anchor="middle" fill="var(--muted)" font-size="11">grip</text>
+      ${gs.slip_curve.surfaces.map((su) => `<path d="${curve(su)}" fill="none" stroke="${su.color}" stroke-width="3"/>
+        <circle cx="${sx(su.peak_slip)}" cy="${sy(su.peak_grip)}" r="5" fill="${su.color}"/>
+        <text x="${sx(su.peak_slip)}" y="${sy(su.peak_grip) - 11}" text-anchor="middle" fill="${su.color}" font-size="11" font-weight="700">peak</text>`).join("")}
+      ${gs.slip_curve.zones.map((z, i) => `<text x="${(sx(z.from) + sx(z.to)) / 2}" y="${SC.y1 + (i % 2 ? 26 : 12)}" text-anchor="middle" fill="${zoneCol[z.tone]}" font-size="10" opacity="0.95">${z.label.split(" · ")[0].split(" — ")[0]}</text>`).join("")}
+    </svg>`;
+
+    // --- grip science: the traction circle ---
+    const TC = { cx: 168, cy: 158, r: 108 };
+    const tcArrow = (ang, len, col, w, lbl, dash) => {
+      const x = TC.cx + len * Math.sin(ang * Math.PI / 180), y = TC.cy - len * Math.cos(ang * Math.PI / 180);
+      return `<line x1="${TC.cx}" y1="${TC.cy}" x2="${x}" y2="${y}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"${dash ? ` stroke-dasharray="${dash}"` : ""}/>
+        <circle cx="${x}" cy="${y}" r="5" fill="${col}"/>${lbl ? `<text x="${x + (Math.sin(ang * Math.PI / 180) > 0 ? 10 : -10)}" y="${y + 4}" fill="${col}" font-size="11" font-weight="700" text-anchor="${Math.sin(ang * Math.PI / 180) > 0 ? "start" : "end"}">${lbl}</text>` : ""}`;
+    };
+    const circSvg = `<svg viewBox="0 0 400 300" class="tz-svg" role="img" aria-label="Traction circle">
+      <circle cx="${TC.cx}" cy="${TC.cy}" r="${TC.r}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <circle cx="${TC.cx}" cy="${TC.cy}" r="${TC.r * 0.66}" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 5"/>
+      <line x1="${TC.cx - TC.r}" y1="${TC.cy}" x2="${TC.cx + TC.r}" y2="${TC.cy}" stroke="var(--line)"/>
+      <line x1="${TC.cx}" y1="${TC.cy - TC.r}" x2="${TC.cx}" y2="${TC.cy + TC.r}" stroke="var(--line)"/>
+      <text x="${TC.cx}" y="${TC.cy - TC.r - 8}" text-anchor="middle" fill="var(--muted)" font-size="10">accelerating</text>
+      <text x="${TC.cx}" y="${TC.cy + TC.r + 16}" text-anchor="middle" fill="var(--muted)" font-size="10">braking</text>
+      <text x="${TC.cx - TC.r - 6}" y="${TC.cy - 6}" text-anchor="end" fill="var(--muted)" font-size="10">cornering</text>
+      ${tcArrow(180, TC.r, TZ_C.mom, 4, "100% brake")}
+      ${tcArrow(216, TC.r * 1.34, TZ_C.bad, 4, "+ steering = SLIDE", "7 5")}
+      <path d="M ${TC.cx} ${TC.cy + TC.r} A ${TC.r} ${TC.r} 0 0 1 ${TC.cx - TC.r} ${TC.cy}" fill="none" stroke="${TZ_C.warn}" stroke-width="3.5" stroke-dasharray="8 6"/>
+      <text x="${TC.cx - TC.r + 4}" y="${TC.cy + TC.r - 18}" fill="${TZ_C.warn}" font-size="11" font-weight="700">trail-brake: ride the edge</text>
+      <text x="${TC.cx}" y="${TC.cy + 5}" text-anchor="middle" fill="var(--muted)" font-size="10">safe</text>
+    </svg>`;
+
+    const gripBlock = `
       <div class="block" style="border-color:var(--accent)">
-        <h3>🎚 The grip–slide spectrum <span class="conf conf-probable">🟡 doctrine</span></h3>
-        <p class="why">${tz.spectrum.concept}</p>
-        <div style="height:14px;border-radius:7px;background:linear-gradient(90deg,#4b96f3 0%,#199e70 50%,#e66767 100%);margin:12px 0 6px"></div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-          ${tz.spectrum.stations.map((s) => `<div>
-            <strong>${s.label}</strong> <span class="chip">slip ${s.slip}</span>
-            <p class="why" style="font-size:12px;margin:4px 0 0">${s.doctrine}${s.status ? ` <em>(${s.status})</em>` : ""}</p>
+        <h3>🎯 ${gs.headline}</h3>
+        <p class="why">${gs.slip_curve.concept}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:10px">
+          <div style="flex:1 1 420px;min-width:340px">${slipSvg}
+            <div class="chips" style="margin-top:6px">${gs.slip_curve.surfaces.map((s) => `<span class="chip" style="border-color:${s.color};color:${s.color}" title="${s.note.replace(/"/g, "&quot;")}">${s.label} · peak ~${s.peak_slip}°</span>`).join("")}</div>
+          </div>
+          <div style="flex:1 1 300px;min-width:280px">
+            <p class="why"><strong>Why it feels sudden:</strong> ${gs.slip_curve.why_it_feels_sudden}</p>
+            ${gs.slip_curve.surfaces.map((s) => `<p class="why" style="font-size:12px;margin:6px 0"><span style="color:${s.color}">●</span> <strong>${s.label}</strong> — ${s.note}</p>`).join("")}
+          </div>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+        <h3 style="margin-top:0">⭕ The traction circle — one budget, spent in every direction</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
+          <div style="flex:0 1 380px;min-width:300px">${circSvg}</div>
+          <div style="flex:1 1 300px;min-width:280px">
+            <p class="why">${gs.traction_circle.concept}</p>
+            <p class="why"><strong>Why trail-braking is a knife edge:</strong> ${gs.traction_circle.why_trail_braking_is_knife_edge}</p>
+            <p class="why"><strong>The trade:</strong> ${gs.traction_circle.the_trade}</p>
+            <p class="why"><strong>What tuning actually changes:</strong> ${gs.traction_circle.tuning_link}</p>
+          </div>
+        </div>
+        <div class="tz-proof"><strong>📊 See it yourself — telemetry proof</strong>
+          <ul class="why">${gs.telemetry_proof.map((t) => `<li>${t}</li>`).join("")}</ul>
+        </div>
+      </div>`;
+
+    // --- controllability ---
+    const co = tz.controllability;
+    const coBlock = co ? `
+      <div class="block" style="border-color:var(--accent2)">
+        <div class="card-row" style="margin-top:0"><h3 style="margin:0">🪃 ${co.headline}</h3>${tierPill(co.tier)}</div>
+        <p class="why">${co.concept}</p>
+        <div class="card-grid" style="margin-top:10px">
+          ${co.three_qualities.map((q) => `<div class="car-card" style="cursor:default">
+            <h3 style="font-size:14px">${q.name}</h3>
+            <p class="why" style="font-size:12px;margin:4px 0 8px"><em>${q.question}</em></p>
+            <div class="tz-hilo"><span class="tz-hi">✔ ${q.high}</span><span class="tz-lo">✘ ${q.low}</span></div>
+            <div class="chips" style="margin-top:8px">${q.sliders.map((s) => `<span class="chip tz-slider" title="${s.why.replace(/"/g, "&quot;")}"><strong>${s.s}</strong> → ${s.dir}</span>`).join("")}</div>
           </div>`).join("")}
         </div>
+        <div class="tz-proof"><strong>📊 ${co.the_measurable_test.name}</strong>
+          <p class="why" style="margin:6px 0"><strong>Do:</strong> ${co.the_measurable_test.procedure}</p>
+          <p class="why" style="margin:6px 0"><strong>Read:</strong> ${co.the_measurable_test.read}</p>
+          <p class="why" style="margin:6px 0"><strong>Tune toward:</strong> ${co.the_measurable_test.tune_toward}</p>
+        </div>
+        <p class="why" style="margin-top:10px"><strong>The chassis half:</strong> ${co.car_side}</p>
+      </div>` : "";
+
+    // --- ratio doctrine ---
+    const rd = tz.ratio_doctrine;
+    const ratioBlock = `
+      <div class="block">
+        <h3>⚖️ ${rd.headline}</h3>
+        <p class="why">${rd.principle}</p>
+        <div style="overflow-x:auto;margin-top:10px"><table>
+          <thead><tr><th>Tab</th><th>The pair</th><th>The RATIO decides…</th><th>The MAGNITUDE decides…</th></tr></thead>
+          <tbody>${rd.pairs.map((p) => `<tr><td><span class="tz-tab tz-pri" style="font-size:10px">${p.tab}</span></td><td><strong>${p.pair}</strong></td><td class="why" style="font-size:12px">${p.ratio}</td><td class="why" style="font-size:12px">${p.magnitude}</td></tr>`).join("")}</tbody>
+        </table></div>
+        <p class="why" style="margin-top:10px"><strong>Reading rule:</strong> ${rd.reading_rule}</p>
       </div>`;
+
+    // --- spectrum ---
+    const spectrum = `
+      <div class="block" style="border-color:var(--accent)">
+        <h3>🎚 The grip–slide spectrum</h3>
+        <p class="why">${tz.spectrum.concept}</p>
+        <div style="height:14px;border-radius:7px;background:linear-gradient(90deg,#4b96f3 0%,#f0883e 55%,#e5414e 100%);margin:12px 0 6px"></div>
+        <div class="tz-3col">
+          ${tz.spectrum.stations.map((s) => `<div><strong>${s.label}</strong> <span class="chip">slip ${s.slip}</span>
+            <p class="why" style="font-size:12px;margin:4px 0 0">${s.doctrine}${s.status ? ` <em>(${s.status})</em>` : ""}</p></div>`).join("")}
+        </div>
+      </div>`;
+
+    // --- conditions ---
     const conditions = `
-      <div class="block" style="border-color:var(--warn, #e3b341)">
-        <h3>🧊 ${tz.conditions.headline.split(" — ")[0]} — the conditions layer</h3>
-        <p class="why">${tz.conditions.headline.split(" — ")[1] || ""}</p>
+      <div class="block" style="border-color:var(--warn,#e3b341)">
+        <h3>🧊 Before you blame a slider — the conditions layer</h3>
+        <p class="why">${(tz.conditions.headline.split(" — ")[1] || tz.conditions.headline)}</p>
         <div class="card-grid" style="margin-top:10px">
           ${tz.conditions.checks.map((c) => `<div class="car-card" style="cursor:default">
             <div class="tz-quote">${c.icon} ${c.feeling}</div>
@@ -1930,24 +2107,71 @@
           </div>`).join("")}
         </div>
       </div>`;
+
+    // --- telemetry inventory ---
+    const tel = tz.telemetry;
+    const telBlock = tel ? `
+      <div class="block">
+        <h3>📊 ${tel.headline}</h3>
+        <p class="why"><strong>How:</strong> ${tel.how}</p>
+        <div style="overflow-x:auto;margin-top:8px"><table>
+          <thead><tr><th>Page</th><th>Shows</th><th>Proves</th></tr></thead>
+          <tbody>${tel.pages.map((p) => `<tr><td><strong>${p.name}</strong></td><td class="why" style="font-size:12px">${p.shows}</td><td class="why" style="font-size:12px">${p.proves}</td></tr>`).join("")}</tbody>
+        </table></div>
+        <p class="why" style="font-size:11px;margin-top:6px">${tel.captured}</p>
+      </div>` : "";
+
+    const legend = `
+      <div class="block" style="border-color:var(--accent2)">
+        <h3>🎨 The five phases — one colour each, everywhere on this site</h3>
+        <p class="why">Every corner is five mechanically distinct events, and a slider that rules one of them is usually inert in the others. These colours are the same on the Tuning page's corner map, in the mini-glyphs beside each slider, and on every diagram below — learn them once and the whole site reads faster.</p>
+        <div class="tz-legend">
+          ${CM_SHORT.map((s, i) => `<div class="tz-leg" style="border-top:4px solid ${CM_PC[i]}">
+            <span class="tz-leg-num" style="background:${CM_PC[i]}">${i + 1}</span>
+            <strong>${s}</strong>
+            <span class="why">${TZ_PHASE_DEF[i]}</span>
+          </div>`).join("")}
+        </div>
+      </div>`;
+
+    // --- corner archetypes ---
+    const entryHtml = (ph, e) => `
+      <div class="tz-entry" style="border-left:5px solid ${CM_PC[ph.phase - 1]}">
+        <div class="tz-phase-band" style="background:${CM_PC[ph.phase - 1]}">
+          <span class="tz-phase-num">${ph.phase}</span>
+          <span class="tz-phase-name">${CM_SHORT[ph.phase - 1]}</span>
+          <span class="tz-phase-sub">${ph.label}</span>
+          <span class="tz-phase-tier">${tierPill(e.tier)}</span>
+        </div>
+        <div class="tz-quote">🗣 ${e.feeling}</div>
+        <div class="tz-split">
+          <div class="tz-pic">${carDiag(e.visual || {}, ph.phase)}${e.visual && e.visual.caption ? `<p class="why tz-cap">${e.visual.caption}</p>` : ""}</div>
+          <div class="tz-body">
+            <p class="why" style="margin:0 0 10px">${e.mechanism}</p>
+            ${tuneRack(e.rack)}
+            ${(e.ratios || []).map(ratioBar).join("")}
+            <p class="why" style="font-size:12px;margin:10px 0 0"><strong>Options:</strong> ${e.options}</p>
+            ${e.telemetry ? `<div class="tz-proof"><strong>📊 Confirm it on telemetry</strong><ul class="why">${e.telemetry.map((t) => `<li>${t}</li>`).join("")}</ul></div>` : ""}
+          </div>
+        </div>
+      </div>`;
     const corners = tz.corner_types.map((ct) => `
       <div class="block">
         <div class="card-row" style="margin-top:0">
           <h3 style="margin:0">${ct.name} <span class="chip">${ct.speed}</span></h3>
-          <span class="conf ${ct.id === "dirt-corner" ? "conf-contested" : "conf-probable"}" style="max-width:46%">${ct.regime}</span>
+          <span class="conf ${ct.id === "dirt-corner" ? "conf-contested" : "conf-probable"}" style="max-width:52%">${ct.regime}</span>
         </div>
         ${ct.status ? `<p class="why" style="color:var(--warn,#e3b341);font-size:12px;margin:4px 0 0">🌱 ${ct.status}</p>` : ""}
-        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:8px">
-          ${ribbonSvg(TZ_GEO[ct.geometry] || TZ_GEO.hairpin, ct.geometry === "dirt" ? dirtExtra : "")}
-          <div style="flex:1 1 300px;min-width:280px">
-            ${ct.phases.map((ph) => ph.entries.map((e) => entryHtml(ph, e)).join("")).join("")}
-          </div>
-        </div>
+        ${ct.phases.map((ph) => ph.entries.map((e) => entryHtml(ph, e)).join("")).join("")}
       </div>`).join("");
+
     host.innerHTML = `
       <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">🎓 Training Zone — every corner, feeling first</h2>
       <p class="hint">${tz.purpose}</p>
-      ${spectrum}${conditions}${corners}`;
+      ${gripBlock}${coBlock}${ratioBlock}${spectrum}${conditions}
+      ${legend}
+      <h2 class="section-title">🏁 The corner archetypes</h2>
+      ${corners}${telBlock}`;
   }
 
   // ---- init ----

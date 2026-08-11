@@ -218,3 +218,47 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .tz-entry { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 12px; }
 .tz-entry:first-child { border-top: none; margin-top: 0; padding-top: 0; }
 .tz-slider { border-color: var(--accent2); }
+
+/* Training Zone v2: phase-coloured entries, tune rack, ratio pairs */
+.tz-svg { width: 100%; height: auto; display: block; }
+.tz-wide { max-width: 100%; }
+.tz-quote { font-size: 15px; font-style: italic; color: var(--txt); border-left: 3px solid var(--accent);
+  padding: 7px 11px; background: var(--bg3); border-radius: 0 8px 8px 0; margin: 10px 0; }
+.tz-entry { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 0 14px 14px; margin: 16px 0; overflow: hidden; }
+.tz-phase-band { display: flex; align-items: center; gap: 10px; margin: 0 -14px 4px; padding: 7px 14px; color: #0e1116; }
+.tz-phase-num { font-weight: 800; font-size: 15px; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,0.22); color: #fff; display: grid; place-items: center; }
+.tz-phase-name { font-weight: 800; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; }
+.tz-phase-sub { font-size: 12px; opacity: .75; }
+.tz-phase-tier { margin-left: auto; }
+.tz-split { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.tz-pic { flex: 1 1 340px; min-width: 300px; max-width: 430px; }
+.tz-body { flex: 1 1 340px; min-width: 300px; }
+.tz-cap { font-size: 12px; margin: 4px 0 0; }
+.tz-rack { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 12px; }
+.tz-tab { font-size: 10px; letter-spacing: .03em; padding: 4px 7px; border-radius: 5px; border: 1px solid var(--line); white-space: nowrap; }
+.tz-pri { background: var(--accent); color: #0e1116; border-color: var(--accent); font-weight: 800; }
+.tz-sec { color: var(--accent); border-color: var(--accent); background: transparent; font-weight: 600; }
+.tz-off { color: var(--muted); opacity: .38; }
+.tz-ratio { border-top: 1px solid var(--line); padding-top: 9px; margin-top: 9px; }
+.tz-ratio-name { font-size: 12px; font-weight: 700; color: var(--txt); margin-bottom: 6px; }
+.tz-ratio-grid { display: grid; grid-template-columns: 1fr 90px 1fr; gap: 8px; align-items: center; }
+.tz-ratio-end { font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.tz-ratio-end strong { color: var(--txt); font-size: 11px; }
+.tz-right { text-align: right; }
+.tz-ratio-track { position: relative; height: 8px; border-radius: 4px;
+  background: linear-gradient(90deg, #4b96f3, #2a313c 50%, #e5414e); }
+.tz-ratio-track i { position: absolute; top: -5px; width: 4px; height: 18px; border-radius: 2px;
+  background: var(--accent); transform: translateX(-50%); box-shadow: 0 0 0 2px var(--bg2); }
+.tz-ratio-why { font-size: 11px; color: var(--muted); margin-top: 5px; }
+.tz-proof { border: 1px dashed var(--accent2); border-radius: 8px; padding: 9px 11px; margin-top: 12px; }
+.tz-proof ul { margin: 6px 0 0; padding-left: 18px; }
+.tz-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
+.tz-leg { background: var(--bg3); border-radius: 0 0 8px 8px; padding: 9px 10px; display: flex; flex-direction: column; gap: 4px; }
+.tz-leg-num { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  color: #0e1116; font-weight: 800; font-size: 12px; }
+.tz-leg .why { font-size: 11px; }
+.tz-3col { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.tz-hilo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+.tz-hi { color: var(--accent); } .tz-lo { color: var(--muted); }
+.tz-slider { border-color: var(--accent2); }

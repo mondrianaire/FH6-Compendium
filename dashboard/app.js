@@ -158,6 +158,9 @@
       if (!e.tokens.has(make)) continue;
       const sharedModel = model.filter((t) => e.tokens.has(t)).length;
       if (sharedModel < 1) continue; // MUST match the real model — not just make + "forza edition"
+      // never cross disciplines: a road/drift car must not be handed a dirt build (drift ≠ dirt ≠ road ≠ drag).
+      // (only filters when both the car's discipline and the tune's discipline are known.)
+      if (buckets && buckets.size && e.discipline && !buckets.has(e.discipline)) continue;
       const shared = qt.filter((t) => e.tokens.has(t)).length;
       if (shared < 2) continue;
       let score = sharedModel * 12 + shared * 6; // weight real-model matches above generic overlap

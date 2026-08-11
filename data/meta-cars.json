@@ -2329,11 +2329,10 @@
       "also_viable_in": [],
       "tunes": [
         {
-          "code": "213 803 717",
           "surface": "drift",
-          "source": "53Rain's Tune List (S1 build)",
-          "confidence": "sourced-unverified",
-          "player_verified": false
+          "source": "in-game Drift browser / OxGRIDRUNR",
+          "confidence": "method",
+          "note": "No verified drift share code for the #777 240SX — filter the in-game Tune Browser to Surface: Drift, or follow OxGRIDRUNR (drift specialist). NOTE: code 213 803 717 that circulated for this car is actually an S1 DIRT build (SR1 Rain), not a drift build."
         }
       ]
     },

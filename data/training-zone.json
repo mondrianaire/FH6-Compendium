@@ -727,6 +727,77 @@
                 "Body Acceleration — the dot riding the ring edge at high speed with no margin left",
                 "Friction — all four near their peaks simultaneously"
               ]
+            },
+            {
+              "feeling": "\"At high speed I can wiggle the wheel and it feels like it's about to spin — other cars just deafen the wiggles.\"",
+              "mechanism": "This is YAW DAMPING, not a slide. A small wiggle yaws the car; the rear tires build slip angle and — because the rear axle sits behind the centre of gravity — generate a STRAIGHTENING moment. A stable car's restoring force beats the disturbance and the wobble dies. An unstable one leaves residual yaw behind after each input, so the next wiggle starts from a worse place and the oscillation grows. Polar moment of inertia decides the baseline: mass centralised (mid-engine, short wheelbase) starts AND stops rotating easily — agile and nervous; mass spread with a long wheelbase resists both — the 'deafening' feel.",
+              "visual": {
+                "heading": 7,
+                "travel": 1,
+                "steer": -9,
+                "loose": "none",
+                "weight": "neutral",
+                "outcome": "ok",
+                "ghost": -6,
+                "caption": "Yaw oscillation at speed: each correction leaves residual rotation, and the next input starts from a worse place"
+              },
+              "rack": {
+                "primary": [
+                  "ALIGNMENT",
+                  "DAMPING",
+                  "AERO"
+                ],
+                "secondary": [
+                  "ANTIROLL BARS",
+                  "TIRES",
+                  "SPRINGS"
+                ]
+              },
+              "ratios": [
+                {
+                  "pair": "Toe — front : rear",
+                  "lo": "rear toe 0 / front toe-out",
+                  "hi": "rear toe-in +0.1 to +0.2",
+                  "lo_feel": "every small input yaws the car and nothing pushes back",
+                  "hi_feel": "the rear geometrically resists yaw — wiggles die on their own",
+                  "target": 82,
+                  "why": "THE anti-wiggle setting: nearly free, purely geometric, works at every speed"
+                },
+                {
+                  "pair": "Rear damping — rebound : bump",
+                  "lo": "under-damped for the spring",
+                  "hi": "matched to the spring rate",
+                  "lo_feel": "the car rings like a bell after each input",
+                  "hi_feel": "one input, one settle — the oscillation decays",
+                  "target": 76,
+                  "why": "rebound IS the decay rate of the oscillation"
+                },
+                {
+                  "pair": "Aero — front : rear downforce",
+                  "lo": "more rear wing",
+                  "hi": "less rear wing",
+                  "lo_feel": "stability that GROWS with speed — exactly where you need it",
+                  "hi_feel": "top speed, and a car that gets looser the faster it goes",
+                  "target": 26,
+                  "why": "rear downforce is the only stabiliser that scales with speed² — trimming it is how you buy this symptom"
+                },
+                {
+                  "pair": "Anti-roll bars — front : rear",
+                  "lo": "softer rear",
+                  "hi": "stiffer rear",
+                  "lo_feel": "more rear grip = more restoring force",
+                  "hi_feel": "rear lets go first = the wiggle turns into a slide",
+                  "target": 24,
+                  "why": "same balance dial, judged by stability rather than rotation"
+                }
+              ],
+              "options": "Chassis sets the baseline and you cannot tune it away: low mass + centralised weight + short wheelbase (mid-engine) will always be nervous; long, front-heavy cars self-damp. Read Front % and weight before blaming the tune. If the car must stay nervous, drive it with smaller inputs and let the wheel self-centre rather than steering it back.",
+              "telemetry": [
+                "Suspension — corner offsets swinging left-right and never settling between inputs: the oscillation, measured",
+                "Body Acceleration — the dot ping-pongs across the circle instead of tracing a clean arc",
+                "Friction — rear Peak % spiking with each wiggle while the fronts stay calm: the rear is doing all the correcting"
+              ],
+              "tier": "player-verified (the 4C whip vs the Viper's stability — the same phenomenon at both extremes)"
             }
           ]
         }

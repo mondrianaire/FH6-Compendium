@@ -1976,7 +1976,7 @@ window.FH6_DB = {
         "power_split": "drag-specific",
         "price_credits": null,
         "acquisition": "Wheelspin / Super Wheelspin RNG only (also findable on the Auction House). CONFIRMED hard across game8/MitchCactus/allthings.how — no deterministic path (skycoach was RIGHT on this one). In-game value ~750,000 cr.",
-        "acquisition_difficulty": "hard",
+        "acquisition_difficulty": "medium",
         "tier": "S",
         "value_rating": 8,
         "upgrade_priority": [
@@ -3075,7 +3075,7 @@ window.FH6_DB = {
         "class": "A",
         "price_credits": null,
         "acquisition": "Limited-time Festival Playlist reward (Series 2 Summer, ~20 pts) — the season has passed, so Auction House only now.",
-        "acquisition_difficulty": "hard",
+        "acquisition_difficulty": "medium",
         "tier": "A",
         "value_rating": 3,
         "tune_meta": "favorite",
@@ -3235,7 +3235,7 @@ window.FH6_DB = {
         "class": "S1",
         "price_credits": null,
         "acquisition": "Series 2 'Horizon Decades' Festival Playlist reward (20 pts) — season passed, Auction House only now.",
-        "acquisition_difficulty": "hard",
+        "acquisition_difficulty": "medium",
         "tier": "S",
         "value_rating": 3,
         "tune_meta": "meta",
@@ -3275,7 +3275,7 @@ window.FH6_DB = {
         "class": "S1",
         "price_credits": null,
         "acquisition": "Series 2 'Horizon Decades' Festival Playlist reward (40 pts) — season passed, Auction House only now.",
-        "acquisition_difficulty": "hard",
+        "acquisition_difficulty": "medium",
         "tier": "A",
         "value_rating": 3,
         "tune_meta": "favorite",
@@ -46873,5 +46873,5 @@ window.FH6_DB = {
       ]
     }
   },
-  "builtAt": "unstamped"
+  "builtAt": "2026-08-11"
 };

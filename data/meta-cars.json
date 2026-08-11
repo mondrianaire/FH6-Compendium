@@ -436,27 +436,27 @@
         "captured": "2026-08-10 (player screenshots, all tune tabs at min/max — PRIMARY)",
         "build_context": "A700 build: 359hp/391lbft/2731lbs/51%F, semi-slick, race suspension",
         "tire_psi": [
-          15.0,
-          55.0
+          15,
+          55
         ],
         "camber_deg": [
-          -5.0,
-          5.0
+          -5,
+          5
         ],
         "toe_deg": [
-          -5.0,
-          5.0
+          -5,
+          5
         ],
         "caster_deg": [
-          1.0,
-          7.0
+          1,
+          7
         ],
         "arb": [
-          1.0,
-          65.0
+          1,
+          65
         ],
         "springs_lbin": [
-          283.0,
+          283,
           1414.8
         ],
         "ride_height_in": [
@@ -464,12 +464,12 @@
           6.1
         ],
         "rebound": [
-          1.0,
-          20.0
+          1,
+          20
         ],
         "bump": [
-          1.0,
-          20.0
+          1,
+          20
         ],
         "aero_front_lb": [
           192,
@@ -906,7 +906,7 @@
       "power_split": "drag-specific",
       "price_credits": null,
       "acquisition": "Wheelspin / Super Wheelspin RNG only (also findable on the Auction House). CONFIRMED hard across game8/MitchCactus/allthings.how — no deterministic path (skycoach was RIGHT on this one). In-game value ~750,000 cr.",
-      "acquisition_difficulty": "hard",
+      "acquisition_difficulty": "medium",
       "tier": "S",
       "value_rating": 8,
       "upgrade_priority": [
@@ -2005,7 +2005,7 @@
       "class": "A",
       "price_credits": null,
       "acquisition": "Limited-time Festival Playlist reward (Series 2 Summer, ~20 pts) — the season has passed, so Auction House only now.",
-      "acquisition_difficulty": "hard",
+      "acquisition_difficulty": "medium",
       "tier": "A",
       "value_rating": 3,
       "tune_meta": "favorite",
@@ -2165,7 +2165,7 @@
       "class": "S1",
       "price_credits": null,
       "acquisition": "Series 2 'Horizon Decades' Festival Playlist reward (20 pts) — season passed, Auction House only now.",
-      "acquisition_difficulty": "hard",
+      "acquisition_difficulty": "medium",
       "tier": "S",
       "value_rating": 3,
       "tune_meta": "meta",
@@ -2205,7 +2205,7 @@
       "class": "S1",
       "price_credits": null,
       "acquisition": "Series 2 'Horizon Decades' Festival Playlist reward (40 pts) — season passed, Auction House only now.",
-      "acquisition_difficulty": "hard",
+      "acquisition_difficulty": "medium",
       "tier": "A",
       "value_rating": 3,
       "tune_meta": "favorite",

@@ -64,3 +64,21 @@ for (const f of flags) {
   console.log(`    fix options (right discipline+class in pool): ${f.fixes.length ? f.fixes.join(" | ") : "NONE — needs manual/verify"}`);
 }
 if (!flags.length) console.log("✅ every recommended tune matches its car's discipline and class.");
+
+// ---- acquisition-difficulty categorization ----
+// 🔴 hard means luck-gated / money-can't-help (RNG-only, not sold). A Playlist reward is deterministic
+// effort, and anything with an Auction House / credits path is 🟡 — never 🔴.
+console.log("\n--- acquisition difficulty ---");
+const acqFlags = [];
+for (const c of meta.cars) {
+  const d = c.acquisition_difficulty || "";
+  const a = (c.acquisition || "").toLowerCase();
+  const hasCreditsPath = /playlist|auction|aftermarket|autoshow|treasure|barn find|journal|reward/.test(a);
+  const rngOnly = /only|not sold/.test(a) && /wheelspin|rng/.test(a);
+  if ((d === "hard" || d === "hard-unconfirmed") && hasCreditsPath && !rngOnly)
+    acqFlags.push(`${c.name}: 🔴 hard, but acquisition has a credits/effort path — should be 🟡 medium (${(c.acquisition || "").slice(0, 60)})`);
+  if (d === "easy" && /wheelspin|rng/.test(a) && rngOnly)
+    acqFlags.push(`${c.name}: 🟢 easy, but acquisition is RNG-only — should be 🔴 hard`);
+}
+console.log(`Acquisition mis-categorizations: ${acqFlags.length}`);
+acqFlags.forEach((f) => console.log("  ✗ " + f));

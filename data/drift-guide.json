@@ -194,5 +194,170 @@
       "WALL CONTACT ISOLATION: inside a zone, take one deliberate glancing wall tap mid-slide — watch BOTH the skill-chain popup (Drift Tap? chain break?) and the zone points ticker separately. Resolves the guides-vs-video contradiction.",
       "MULTIPLIER CURVE: screen-record one long unbroken slide with the HUD multiplier visible; the x-vs-time trace IS the curve nobody has published."
     ]
+  },
+  "drift_tuning": {
+    "researched": "2026-08-10 (16-agent verified sweep; FH5-inherited content filtered)",
+    "phase_model": "Drift has its own five phases: INITIATION (breaking traction) -> ANGLE (rotating to target) -> HOLD (throttle=angle dial, countersteer catches) -> TRANSITION (weight swap between directions) -> EXIT (straighten, rehook).",
+    "slider_map": [
+      {
+        "slider": "Caster",
+        "setting": "7.0 (max)",
+        "phases": [
+          "hold",
+          "transition"
+        ],
+        "why": "Leans the steering axis back for self-centering - the wheel snaps back and 'catches' the slide during countersteer and transitions; adds dynamic camber with steering angle.",
+        "tier": "verified"
+      },
+      {
+        "slider": "Camber front",
+        "setting": "-3.0 to -5.0",
+        "phases": [
+          "hold"
+        ],
+        "why": "Pre-tilts the tire so the FULL contact patch lands flat at full countersteer lock - more front bite = more angle held without washing out.",
+        "tier": "verified"
+      },
+      {
+        "slider": "Camber rear",
+        "setting": "~0",
+        "phases": [
+          "hold",
+          "exit"
+        ],
+        "why": "Driven tires keep a predictable hookup angle while sliding.",
+        "tier": "verified"
+      },
+      {
+        "slider": "Toe front",
+        "setting": "0.2-1.0 OUT",
+        "phases": [
+          "initiation",
+          "transition"
+        ],
+        "why": "Speeds initiation and improves countersteer geometry - the inside wheel already points where you want to go mid-slide.",
+        "tier": "verified"
+      },
+      {
+        "slider": "Toe rear",
+        "setting": "0 to 0.3 IN",
+        "phases": [
+          "transition"
+        ],
+        "why": "Zero lets the rear swing freely; a touch of toe-in adds spin resistance in transitions.",
+        "tier": "verified"
+      },
+      {
+        "slider": "ARBs",
+        "setting": "SOFT front / STIFF rear (e.g. 10F/50R)",
+        "phases": [
+          "initiation",
+          "hold"
+        ],
+        "why": "'Your stiffer end loses grip first' - soft front keeps the outside front planted for countersteer; stiff rear breaks traction willingly and holds angle. (Minority school: everything ~95% stiff for snap response.)",
+        "tier": "verified"
+      },
+      {
+        "slider": "Springs",
+        "setting": "SOFT overall (~400/400, or 350-400F/250-300R), slammed, rear 1-2 clicks HIGHER",
+        "phases": [
+          "transition"
+        ],
+        "why": "Soft = progressive, forgiving weight transfer; a stiff drift car 'changes direction violently and spins'. Rear-high rake leans static weight forward for rotation.",
+        "tier": "probable"
+      },
+      {
+        "slider": "Damping",
+        "setting": "Two schools: rebound=spring slider + bump=60% (FH5-inherited formula) vs flat-soft 4.0 everywhere (forza.tools FH6)",
+        "phases": [
+          "transition"
+        ],
+        "why": "Both schools agree: stiff damping = violent side-to-side snap. Stiffen rear rebound slightly if transitions whip too fast.",
+        "tier": "contested-method"
+      },
+      {
+        "slider": "Diff accel/decel",
+        "setting": "90-100% accel / 0-40% decel (Drift Diff preset ~100/10)",
+        "phases": [
+          "initiation",
+          "hold",
+          "exit"
+        ],
+        "why": "THE strongest consensus in drift tuning and identical to our prior doctrine: locked-under-power rear spins both wheels together for sustainable slides; low decel frees lift-off rotation.",
+        "tier": "verified"
+      },
+      {
+        "slider": "Tire pressure",
+        "setting": "CONTESTED: rear-higher camp (30-32R/26-28F, statically cut rear grip) vs front-higher camp (F30-33/R19-27 - underinflate rears, wheelspin heat raises them to ~30-32 equilibrium)",
+        "phases": [
+          "hold"
+        ],
+        "why": "Same goal (less rear grip, predictable breakaway), opposite mechanisms. Our old 'rear PSI > front' doctrine DOWNGRADED to contested - A/B test queued.",
+        "tier": "contested"
+      },
+      {
+        "slider": "Brakes",
+        "setting": "CONTESTED: front 60-62% + lowered pressure (weight forward, rear swings, e-brake corrects) vs rear ~45% (lock rears to initiate)",
+        "phases": [
+          "initiation"
+        ],
+        "why": "Two legitimate initiation philosophies.",
+        "tier": "contested"
+      },
+      {
+        "slider": "Aero",
+        "setting": "High front, minimal rear",
+        "phases": [
+          "hold"
+        ],
+        "why": "Front downforce feeds countersteer grip; rear downforce fights the slide.",
+        "tier": "probable"
+      },
+      {
+        "slider": "Power",
+        "setting": "400-600 hp (sources stretch to 750)",
+        "phases": [
+          "hold"
+        ],
+        "why": "Enough to sustain wheelspin at angle, not so much the rears are overwhelmed.",
+        "tier": "verified"
+      }
+    ],
+    "awd_drifting": {
+      "verdict": "VIABLE and community-standard for drift-ZONE farming and dirt zones; RWD remains the style/competitive skill standard.",
+      "settings": {
+        "center": "75-100% rear (90 the common quote; below ~75 the front 'pulls you straight')",
+        "rear_diff": "100 accel / 0 decel (identical to RWD doctrine)",
+        "front_diff": "unsettled two schools: locked-ish 100/30 vs wide open with only 3-5% front power as 'anti-spin-out insurance'",
+        "power": "500-600 hp"
+      },
+      "feel": "The most forgiving drift config - the front axle's slight pull points the car, initiates on demand, and acts as spin-out insurance. Trades away max angle and style purity.",
+      "when": "Zone star-farming (thresholds 45k-340k), dirt/offroad drift zones (rally tires + AWD confirmed repeatedly), long fast zones IF speed scores (scoring dispute unresolved). Community AWD picks: FD Fairlady Z 'AWD Powerbuild', Honda Acty, F-150 Lariat FE, 22B, rally-suspension Ultima.",
+      "tier": "verified (band + feel), contested (whether speed scores)"
+    },
+    "parts": {
+      "drift_springs_dampers": "Auto-slams (-2.55in on the Viper vs -0.94 stock), unlocks suspension tuning, and is PROBABLY the 'angle kit' - one source: 'Drift Suspension unlocks maximum steering lock'. NO separate angle-kit part exists anywhere (three enumerated loadouts + our own menu captures). A/B test = top of the queue.",
+      "drift_diff": "Unlocks full diff tuning; preset reportedly 100/10; a tuned Race 2-way is functionally equivalent.",
+      "drift_transmission_4speed": "Fewer, longer gears - live in 3rd and flutter throttle. OPTIONAL (race 6/7-speed fine). CAVEAT: if clutch-kick requires non-race transmissions (single-source claim), Drift/Race boxes may forfeit it - test #4.",
+      "drift_compound": "Predictable breakaway; whether it beats drag/snow compounds for lowest asphalt grip is CONTESTED."
+    },
+    "doctrine_changes": [
+      "'RWD + angle kit' RESCOPED: RWD for style/competitive; AWD 75-100% rear verified for zones/dirt. 'Angle kit' as a part name RETIRED - operationally it means Drift Springs & Dampers.",
+      "'Rear PSI > front' DOWNGRADED to contested (credible front-higher heat-soak camp).",
+      "'Diff ~100 accel / low decel' CONFIRMED and strengthened (identical on AWD rear diffs)."
+    ],
+    "test_queue": [
+      "1. Drift Springs steering-lock A/B (photo-mode wheel angle / turning circle) - decides the angle-kit question",
+      "2. Pressure A/B: 31R/27F vs 31F/22R, telemetry hot psi + zone score",
+      "3. Brake balance A/B: 62F/low pressure vs 45R",
+      "4. Clutch-kick transmission gate: stock vs Street vs Race vs Drift boxes (post-v403.798)",
+      "5. Drift vs drag vs snow compound",
+      "6. AWD center sweep 80/90/95 + front-diff schools",
+      "7. Does speed score in zones? (fast-shallow vs slow-deep runs)",
+      "8. Damping: FH5 formula vs flat 4.0",
+      "9. Drift-part PI on non-Viper configs",
+      "10. Rear rake +1-2 clicks rotation delta",
+      "11. Angle-kit-row check on Silvia K's '94 / Spec-R '02"
+    ]
   }
 }

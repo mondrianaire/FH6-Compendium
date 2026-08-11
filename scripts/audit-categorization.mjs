@@ -77,7 +77,8 @@ for (const c of meta.cars) {
   const rngOnly = /only|not sold/.test(a) && /wheelspin|rng/.test(a);
   if ((d === "hard" || d === "hard-unconfirmed") && hasCreditsPath && !rngOnly)
     acqFlags.push(`${c.name}: 🔴 hard, but acquisition has a credits/effort path — should be 🟡 medium (${(c.acquisition || "").slice(0, 60)})`);
-  if (d === "easy" && /wheelspin|rng/.test(a) && rngOnly)
+  const hasBuyPath = /autoshow|buy anytime|,000 cr|\bcredits\b|treasure|barn find|journal|free/.test(a);
+  if (d === "easy" && rngOnly && !hasBuyPath)
     acqFlags.push(`${c.name}: 🟢 easy, but acquisition is RNG-only — should be 🔴 hard`);
 }
 console.log(`Acquisition mis-categorizations: ${acqFlags.length}`);

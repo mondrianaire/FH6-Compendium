@@ -46284,6 +46284,437 @@ window.FH6_DB = {
       "HEAVY-RIM BALLAST (donor Viper, player-confirmed): deliberately heavy rims = negative PI — buy PI with corner mass and spend it on power/weight-reduction where the exchange rate profits. The fourth PI-arbitrage pattern documented (rally compound, rally springs, negative-PI parts, heavy rims)."
     ]
   },
+  "trainingZone": {
+    "schema_version": "1.0.0",
+    "created": "2026-08-10",
+    "purpose": "The Training Zone: every corner type, phase by phase, taught the way the live coaching sessions worked — FEELING first (the words a driver actually says), then the mechanism, then the owning sliders/parts, then the options ladder. Built on the grip-slide spectrum so dirt racing (where grip and drift techniques blend) slots in as a first-class citizen.",
+    "spectrum": {
+      "concept": "Grip driving and drifting are not different pages — they are ends of one spectrum, and the position on it is set by SURFACE and INTENT. On tarmac, peak traction is at tiny slip angles: slides are slow, so tuning fights rotation. On LOOSE surfaces, peak traction physically occurs AT significant slip — the tire bites by cutting into the surface — so controlled sliding IS the fast line, and dirt tuning borrows drift sliders at half strength. Full drift maximizes angle and abandons lap time entirely.",
+      "stations": [
+        {
+          "id": "tarmac",
+          "label": "Tarmac race",
+          "slip": "2-8°",
+          "doctrine": "Rotation is the enemy past the apex. Sliders damp and catch it (grip corner map)."
+        },
+        {
+          "id": "dirt",
+          "label": "Dirt / rally race",
+          "slip": "10-25°",
+          "doctrine": "THE BRIDGE: slide to set the angle BEFORE the apex, exit straight. Drift diff philosophy (high accel lock) + grip braking + soft rally suspension. Rotation is a tool with a budget.",
+          "status": "seeded — full dirt chapter is the next build"
+        },
+        {
+          "id": "drift",
+          "label": "Drift",
+          "slip": "30-60°+",
+          "doctrine": "Angle is the product. Every slider cultivates rotation and then CATCHES it (caster 7.0, toe-out, soft-front/stiff-rear bars, diff locked)."
+        }
+      ]
+    },
+    "conditions": {
+      "headline": "Before you blame a slider — the conditions layer. These modify EVERYTHING below; every one of them was learned the hard way in live sessions.",
+      "checks": [
+        {
+          "id": "cold-tires",
+          "icon": "🥶",
+          "feeling": "\"Any little steer and the tires give out all grip.\"",
+          "mechanism": "Tires below operating temperature grip at a fraction of their rating — and compounds differ wildly: slicks are the most cold-sensitive rubber in the game, rally barely cares. Rivals restarts reset tire temp, so the first ~2 minutes of every restart tests cold rubber, not your tune.",
+          "tells": "Every incident happens in the first 20-30s of a run; the same corner works fine mid-session; slicks feel worse than the compound you upgraded from.",
+          "options": "Warm 2-3 min before judging anything (aggressive weaving/braking heats faster) · lower pressures reach operating temp sooner · telemetry Tires page shows live temps · rally compound if the restart-loop matters more than peak grip.",
+          "tier": "player-verified (fork B: four consecutive cold-start crashes, zero warm ones)"
+        },
+        {
+          "id": "speed-regime",
+          "icon": "🎭",
+          "feeling": "\"At slow speeds it's twitchy, but at high speed the ability to turn goes completely out the window.\"",
+          "mechanism": "You drive TWO cars: the mechanical car (springs/ARBs/weight — owns low speed) and the aero car (downforce grows with speed²  — owns 80mph+). If Mech. Balance and Aero Balance differ a lot, the car's personality morphs as speed rises.",
+          "tells": "Panel: compare Mech. Balance vs Aero Balance — the GAP is the morph. Gap ≤0.1 = one consistent car.",
+          "options": "Close the gap from the aero side (downforce split) to fix the fast end without touching the slow end · slow-corner complaints → mechanical sliders; fast-corner complaints → aero sliders. Never fix a hairpin with a wing.",
+          "tier": "player-verified (Viper: gap 0.19 → 0.06 across one session)"
+        },
+        {
+          "id": "compound-ceiling",
+          "icon": "🧱",
+          "feeling": "\"The balance is right but it STILL pushes / still won't hold the corner.\"",
+          "mechanism": "Sliders distribute grip; the COMPOUND sets the total. When balance tuning stops helping, you've hit the tire's ceiling — the envelope (latG vs speed) is maxed and only parts move it.",
+          "tells": "Both ends give up together; the same corner fails at the same speed no matter the balance; lateral G readouts stop responding to slider changes.",
+          "options": "Tire width (parts, PI) · compound upgrade (big PI — rebudgets the whole build) · accept the corner's entry-speed number · line discipline (momentum lines).",
+          "tier": "player-verified (4C fork A: balance solved to a 0.08 gap, push remained → compound was the wall)"
+        },
+        {
+          "id": "surface",
+          "icon": "🏔️",
+          "feeling": "\"On dirt the grip car plows, and drifty driving somehow feels faster.\"",
+          "mechanism": "Loose surfaces move peak traction to LARGE slip angles — the tire grips by digging, not sticking. The fast dirt line carries controlled rotation the tarmac line would call a mistake.",
+          "tells": "Tidy tarmac technique feels slow on dirt; small slides self-correct instead of growing.",
+          "options": "Rally compound + soft rally springs · diff accel HIGH (drift philosophy at half strength) · slide before the apex, straight after it · see the Dirt corner archetype below.",
+          "tier": "doctrine (dirt chapter seeded — full build next)"
+        }
+      ]
+    },
+    "corner_types": [
+      {
+        "id": "hairpin",
+        "name": "Hairpin",
+        "speed": "20-60 mph",
+        "regime": "100% MECHANICAL — the wing is asleep; springs, tires and diff do everything",
+        "geometry": "hairpin",
+        "phases": [
+          {
+            "phase": 1,
+            "label": "Braking",
+            "entries": [
+              {
+                "feeling": "\"The back slides out when braking and turning.\"",
+                "mechanism": "Trail-braking stacks three systems on the rear axle at once: brake bias sliding rearward as weight leaves it, the diff's decel lock dragging the driveline, and rebound letting the rear unload too fast. The rear is asked for braking AND cornering grip exactly when it has the least.",
+                "sliders": [
+                  {
+                    "s": "Brake balance",
+                    "dir": "forward (55-58%)",
+                    "why": "moves braking work off the starving rear — the #1 fix"
+                  },
+                  {
+                    "s": "Rear diff decel",
+                    "dir": "UP (~28-35%)",
+                    "why": "the game's own doc: raising decel lock 'can reduce lift off oversteer'"
+                  },
+                  {
+                    "s": "Rear rebound",
+                    "dir": "softer",
+                    "why": "slows how fast the rear unloads under the dive"
+                  }
+                ],
+                "options": "Technique first: finish more braking BEFORE turn-in. Then the sliders above, one per test.",
+                "tier": "player-verified (the fix that tamed both the 4C and the Viper replica)"
+              }
+            ]
+          },
+          {
+            "phase": 2,
+            "label": "Turn-in",
+            "entries": [
+              {
+                "feeling": "\"It just refuses to turn at low speed — I have to slow way below the corner.\"",
+                "mechanism": "Below ~60 mph there is NO aero — mechanical front grip is all that exists, and a heavy/powerful build usually has less of it than the corner wants.",
+                "sliders": [
+                  {
+                    "s": "Front ARB",
+                    "dir": "softer",
+                    "why": "softer end grips more — classic anti-push"
+                  },
+                  {
+                    "s": "Front tire pressure",
+                    "dir": "toward the band (27-28 cold road)",
+                    "why": "patch size and response"
+                  },
+                  {
+                    "s": "Front camber",
+                    "dir": "more negative helps sustained load, NOT slow flicks",
+                    "why": "slow corners barely lean the tire — camber is the wrong tool here"
+                  }
+                ],
+                "options": "Parts beat sliders here: front tire WIDTH is the honest fix. Line: V-line (deep brake, rotate, point-and-shoot) beats carrying speed.",
+                "tier": "player-verified (Viper assessment: the ACR's one structural weakness)"
+              }
+            ]
+          },
+          {
+            "phase": 4,
+            "label": "Exit",
+            "entries": [
+              {
+                "feeling": "\"Any throttle and the tires just spin — and on AWD it stops steering too.\"",
+                "mechanism": "Big torque overwhelms slow-corner grip. THE AWD INSIGHT: the center diff sends power to the FRONT tires too — spinning fronts have no lateral grip, so the steering literally evaporates the moment you stomp. One cause, two sensations.",
+                "sliders": [
+                  {
+                    "s": "Center diff",
+                    "dir": "more rearward (65-70%)",
+                    "why": "frees the fronts to steer instead of spin"
+                  },
+                  {
+                    "s": "Front diff accel",
+                    "dir": "DOWN (~20%)",
+                    "why": "less front lock = less push-and-spin on power"
+                  },
+                  {
+                    "s": "Rear diff accel",
+                    "dir": "raise if the INSIDE rear spins alone",
+                    "why": "locks both rears together"
+                  },
+                  {
+                    "s": "Final drive",
+                    "dir": "taller",
+                    "why": "the automatic-friendly fix — blunts the torque spike every gear"
+                  }
+                ],
+                "options": "Automatic players: SQUEEZE the throttle — a stomp commands a kickdown, and the downshift IS the torque dump. Taller FD replicates 'short-shifting' when you can't hold gears.",
+                "tier": "player-verified (4C: 0-60 IMPROVED 2.63→2.43 with TALLER gearing — the wheelspin was eating the launch)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sweeper",
+        "name": "High-speed sweeper",
+        "speed": "90-140 mph",
+        "regime": "AERO — downforce is most of the grip; the mechanical car is a passenger",
+        "geometry": "sweeper",
+        "phases": [
+          {
+            "phase": 1,
+            "label": "Entry at speed",
+            "entries": [
+              {
+                "feeling": "\"If I add even a little steering while braking, the entire thing loses it.\"",
+                "mechanism": "Braking from 150+ transfers huge load forward while the rear's aero load is also bleeding off with speed — steering input on top asks the light rear to corner. Three unknowns stack here on any car: brake bias, decel lock, rebound.",
+                "sliders": [
+                  {
+                    "s": "Brake balance",
+                    "dir": "forward",
+                    "why": "the same #1 fix, at higher stakes"
+                  },
+                  {
+                    "s": "Rear wing",
+                    "dir": "keep it — never trim rear aero while entry is unstable",
+                    "why": "rear downforce IS the entry safety net"
+                  },
+                  {
+                    "s": "Rear diff decel",
+                    "dir": "up",
+                    "why": "stabilizes the lift/brake moment"
+                  }
+                ],
+                "options": "Brake in a straight line, THEN commit. The corner's entry speed is a number (envelope: v = √(g·r·latG)) — find it once, respect it.",
+                "tier": "player-verified (video forensics: every filmed crash began in this half-second)"
+              }
+            ]
+          },
+          {
+            "phase": 3,
+            "label": "Mid-corner",
+            "entries": [
+              {
+                "feeling": "\"High-speed corners aren't wide enough — it washes to the outside no matter what I do.\"",
+                "mechanism": "Front aero share too small: as speed rises the grip mix slides rearward (aero balance below mech balance), and the front saturates first. OR you're simply over the envelope — above the speed the total grip supports.",
+                "sliders": [
+                  {
+                    "s": "Aero balance",
+                    "dir": "front-ward (raise front / trim rear downforce)",
+                    "why": "the game's doc: 'the lower your Balance value, the more understeer'"
+                  },
+                  {
+                    "s": "Front camber",
+                    "dir": "more negative (-1.5 → -2.0)",
+                    "why": "the loaded outside tire leans hard in sustained G — camber stands it back up. THE high-speed front-grip slider"
+                  }
+                ],
+                "options": "DIAGNOSTIC GOLD: watch the skill popups. DRIFT skill firing = the REAR broke away (add rear grip / less throttle) — no skill, just wide = front push (this row). Two opposite fixes, one on-screen tell.",
+                "tier": "player-verified (the drift-chain diagnosis, videos 1-2)"
+              }
+            ]
+          },
+          {
+            "phase": 4,
+            "label": "Exit at speed",
+            "entries": [
+              {
+                "feeling": "\"The rear lights up mid-corner when I feed throttle at 100+.\"",
+                "mechanism": "Sustained lateral G is already spending most of the rear's grip; supercharger/turbo torque at high rpm takes the rest. The slide starts driven, then momentum carries it wide.",
+                "sliders": [
+                  {
+                    "s": "Rear diff accel",
+                    "dir": "DOWN (55 → 45)",
+                    "why": "less lock = the rear lights progressively, not as an axle"
+                  },
+                  {
+                    "s": "Rear wing",
+                    "dir": "up if the trade is affordable",
+                    "why": "buys exit throttle at the cost of straight speed"
+                  }
+                ],
+                "options": "Throttle discipline: wait for the chevrons to straighten. In automatics, squeeze — the kickdown is the enemy.",
+                "tier": "player-verified"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chicane",
+        "name": "Chicane / transitions",
+        "speed": "50-100 mph",
+        "regime": "TRANSIENT — the dark layer's home: dampers, toe and bars own everything here",
+        "geometry": "chicane",
+        "phases": [
+          {
+            "phase": 2,
+            "label": "The flick",
+            "entries": [
+              {
+                "feeling": "\"It whips left and right — almost uncontrollably.\"",
+                "mechanism": "Direction changes swing the car's mass across the chassis. If rebound can't control how fast the unloading side springs back, each swap adds energy — the oscillation GROWS. Stiff rear bars and lift-off decel shove add to it.",
+                "sliders": [
+                  {
+                    "s": "Rebound (esp. rear)",
+                    "dir": "matched to spring rate — up if underdamped",
+                    "why": "the true owner of the whip; springs without damping = a pendulum"
+                  },
+                  {
+                    "s": "Rear diff decel",
+                    "dir": "up",
+                    "why": "every flick involves a lift — decel lock steadies each one"
+                  },
+                  {
+                    "s": "Rear toe",
+                    "dir": "IN +0.1-0.2",
+                    "why": "the rear resists the flick geometrically"
+                  },
+                  {
+                    "s": "ARBs",
+                    "dir": "avoid stiff-rear splits on light cars",
+                    "why": "'your stiffer end loses grip first'"
+                  }
+                ],
+                "options": "If the whip survives all sliders: it's the BUILD (escalation rule) — the car may be too light/short for its power, or needs adjustable dampers it doesn't have.",
+                "tier": "player-verified (the 4C saga, start to finish)"
+              },
+              {
+                "feeling": "\"It's slow and ponderous through the flick — never settles for the second apex.\"",
+                "mechanism": "The opposite disease: too soft, weight still sloshing from the first input when the second arrives.",
+                "sliders": [
+                  {
+                    "s": "Springs + rebound",
+                    "dir": "stiffer together",
+                    "why": "faster settle, at the cost of forgiveness"
+                  },
+                  {
+                    "s": "ARBs",
+                    "dir": "stiffer front-biased",
+                    "why": "crisper roll control"
+                  }
+                ],
+                "options": "One notch at a time — the line between crisp and whippy is thin, and it's the same line.",
+                "tier": "doctrine"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "kink",
+        "name": "Flat-out kink",
+        "speed": "130+ mph",
+        "regime": "COMMITMENT — one binary question: does it stay flat?",
+        "geometry": "kink",
+        "phases": [
+          {
+            "phase": 5,
+            "label": "The commitment",
+            "entries": [
+              {
+                "feeling": "\"Do I lift or is it flat? It wiggled last lap and I don't trust it.\"",
+                "mechanism": "A kink at 130+ is pure aero + stability. If the rear is aero-light (wing trimmed, balance too front-ward) the car is working exactly at its stability margin — a bump or a lift AT the kink transfers load and can snap it.",
+                "sliders": [
+                  {
+                    "s": "Rear downforce",
+                    "dir": "the stability budget — trim it last, after everything else is proven",
+                    "why": "high-speed rear planted-ness IS this corner"
+                  },
+                  {
+                    "s": "Aero balance",
+                    "dir": "0.42-0.50 band",
+                    "why": "front enough to steer, rear enough to trust"
+                  },
+                  {
+                    "s": "Rear toe-in",
+                    "dir": "+0.1",
+                    "why": "cheap straight-line insurance"
+                  }
+                ],
+                "options": "If you must lift, lift BEFORE the kink, never in it. The panel's latG @120 row is this corner's rating — compare it to the kink's demand.",
+                "tier": "player-verified (the wing-trim gate: rear stability evidence required before touching it)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dirt-corner",
+        "name": "Dirt corner (the bridge)",
+        "speed": "40-90 mph",
+        "regime": "GRIP-SLIDE HYBRID — peak traction lives AT slip on loose surfaces; rotation is a tool with a budget",
+        "geometry": "dirt",
+        "status": "SEEDED — the full dirt chapter extends from here (next build)",
+        "phases": [
+          {
+            "phase": 2,
+            "label": "Slide initiation (before the apex!)",
+            "entries": [
+              {
+                "feeling": "\"The grip car just plows on dirt — and the drifty guys are somehow faster.\"",
+                "mechanism": "On loose surface the tire grips by DIGGING — peak traction is at 10-25° of slip, not 5°. The fast line rotates the car BEFORE the apex (lift, flick, or brake-slide), so the exit is dead straight while tarmac technique is still mid-turn.",
+                "sliders": [
+                  {
+                    "s": "Diff accel",
+                    "dir": "HIGH (drift philosophy at half strength)",
+                    "why": "locked drive keeps the slide driven and predictable"
+                  },
+                  {
+                    "s": "Rear diff decel",
+                    "dir": "LOWER than tarmac",
+                    "why": "lift-off rotation is the initiation tool here — you WANT some"
+                  },
+                  {
+                    "s": "Springs",
+                    "dir": "soft (rally)",
+                    "why": "compliance over bumps IS grip on dirt"
+                  },
+                  {
+                    "s": "Compound",
+                    "dir": "rally",
+                    "why": "the digging tread"
+                  }
+                ],
+                "options": "Technique: lift-and-turn early, let the car set its angle, throttle straightens it. This is drift's initiation phase grafted onto a race line.",
+                "tier": "doctrine (drift research verified the sliders; dirt-specific tuning = next chapter)"
+              }
+            ]
+          },
+          {
+            "phase": 4,
+            "label": "Exit (straighten early)",
+            "entries": [
+              {
+                "feeling": "\"It slides too far and I spin, or fishtail down the whole straight.\"",
+                "mechanism": "The rotation budget overdrew: the slide outlived the corner. Dirt exits reward getting STRAIGHT early — a sliding exit is a slow exit even on dirt.",
+                "sliders": [
+                  {
+                    "s": "Center diff (AWD)",
+                    "dir": "slightly more forward than a tarmac build",
+                    "why": "the front pull is spin insurance — the AWD drift lesson applied to racing"
+                  },
+                  {
+                    "s": "Rear diff decel",
+                    "dir": "up a notch if every lift over-rotates",
+                    "why": "budget control"
+                  },
+                  {
+                    "s": "Rear toe-in",
+                    "dir": "+0.1-0.2",
+                    "why": "damps the fishtail"
+                  }
+                ],
+                "options": "AWD 75-90% rear is the dirt-race sweet band (vs 90-100 for pure drift): enough front pull to catch, enough rear to rotate.",
+                "tier": "doctrine (AWD drift research, half-strength application)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",

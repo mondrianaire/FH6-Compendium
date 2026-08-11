@@ -1867,6 +1867,89 @@
     }
   }
 
+  // ---- Training Zone: feeling-first corner school on the grip-slide spectrum ----
+  function buildTraining() {
+    const tz = DB.trainingZone;
+    const host = document.getElementById("trainingContent");
+    if (!tz || !host) return;
+    const PC = CM_PC;
+    // per-archetype ribbon geometry, [path, phaseIndex 0-4] — same visual language as the corner map
+    const TZ_GEO = {
+      hairpin: [["M 40 272 L 330 272", 0], ["M 330 272 Q 400 272 428 240", 1], ["M 428 240 A 42 42 0 1 0 428 156", 2], ["M 428 156 Q 400 124 330 124", 3], ["M 330 124 L 40 124", 4]],
+      sweeper: [["M 30 300 L 150 300", 0], ["M 150 300 Q 250 298 330 270", 1], ["M 330 270 Q 470 220 530 140", 2], ["M 530 140 Q 560 95 570 36", 3]],
+      chicane: [["M 30 285 L 160 285", 0], ["M 160 285 Q 255 285 300 235", 1], ["M 300 235 Q 345 185 435 185", 2], ["M 435 185 Q 525 185 572 133", 3]],
+      kink: [["M 30 245 L 240 245", 4], ["M 240 245 Q 330 245 390 215", 2], ["M 390 215 L 590 118", 4]],
+      dirt: [["M 40 272 L 330 272", 0], ["M 330 272 Q 400 272 428 240", 1], ["M 428 240 A 42 42 0 1 0 428 156", 2], ["M 428 156 Q 400 124 330 124", 3], ["M 330 124 L 40 124", 4]]
+    };
+    const ribbonSvg = (geo, extra) => `
+      <svg viewBox="0 0 620 320" style="flex:1 1 320px;max-width:520px;min-width:280px" role="img" aria-label="corner diagram">
+        ${geo.map(([d]) => `<path d="${d}" fill="none" stroke="var(--bg3)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>`).join("")}
+        ${geo.map(([d, i]) => `<path d="${d}" fill="none" stroke="${PC[i]}" stroke-width="11" stroke-linecap="round"/>`).join("")}
+        <polygon points="40,${geo === TZ_GEO.kink ? "237 60,245 40,253" : "264 60,272 40,280"}" fill="var(--muted)"/>
+        ${extra || ""}
+      </svg>`;
+    const dirtExtra = `
+      <path d="M 336 258 Q 402 244 418 196" fill="none" stroke="#e66767" stroke-width="4" stroke-dasharray="8 7" stroke-linecap="round"/>
+      <text x="240" y="215" fill="#e66767" font-size="13" font-weight="700">slide set BEFORE the apex</text>
+      <text x="240" y="232" fill="var(--muted)" font-size="11">exit dead straight — rotation is a budget</text>`;
+    const tierPill = (t) => `<span class="conf ${/player-verified/.test(t) ? "conf-verified" : /contested/.test(t) ? "conf-contested" : "conf-probable"}" title="${t.replace(/"/g, "&quot;")}">${/player-verified/.test(t) ? "✅ player-verified" : /contested/.test(t) ? "⚠️ contested" : "🟡 doctrine"}</span>`;
+    const entryHtml = (ph, e) => `
+      <div class="tz-entry">
+        <div class="card-row" style="margin-top:0">
+          <span style="font-size:12px;color:${PC[ph.phase - 1]}">● Phase ${ph.phase} — ${ph.label}</span>${tierPill(e.tier)}
+        </div>
+        <div class="tz-quote">🗣 ${e.feeling}</div>
+        <p class="why" style="margin:8px 0 6px">${e.mechanism}</p>
+        <div class="chips" style="margin:4px 0">${e.sliders.map((s) =>
+          `<span class="chip tz-slider" title="${s.why.replace(/"/g, "&quot;")}"><strong>${s.s}</strong> → ${s.dir}</span>`).join("")}</div>
+        <p class="why" style="font-size:12px;margin:6px 0 0"><strong>Options:</strong> ${e.options}</p>
+      </div>`;
+    const spectrum = `
+      <div class="block" style="border-color:var(--accent)">
+        <h3>🎚 The grip–slide spectrum <span class="conf conf-probable">🟡 doctrine</span></h3>
+        <p class="why">${tz.spectrum.concept}</p>
+        <div style="height:14px;border-radius:7px;background:linear-gradient(90deg,#4b96f3 0%,#199e70 50%,#e66767 100%);margin:12px 0 6px"></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          ${tz.spectrum.stations.map((s) => `<div>
+            <strong>${s.label}</strong> <span class="chip">slip ${s.slip}</span>
+            <p class="why" style="font-size:12px;margin:4px 0 0">${s.doctrine}${s.status ? ` <em>(${s.status})</em>` : ""}</p>
+          </div>`).join("")}
+        </div>
+      </div>`;
+    const conditions = `
+      <div class="block" style="border-color:var(--warn, #e3b341)">
+        <h3>🧊 ${tz.conditions.headline.split(" — ")[0]} — the conditions layer</h3>
+        <p class="why">${tz.conditions.headline.split(" — ")[1] || ""}</p>
+        <div class="card-grid" style="margin-top:10px">
+          ${tz.conditions.checks.map((c) => `<div class="car-card" style="cursor:default">
+            <div class="tz-quote">${c.icon} ${c.feeling}</div>
+            <p class="why" style="margin:8px 0 4px">${c.mechanism}</p>
+            <p class="why" style="font-size:12px"><strong>Tells:</strong> ${c.tells}</p>
+            <p class="why" style="font-size:12px"><strong>Options:</strong> ${c.options}</p>
+            <div style="margin-top:6px">${tierPill(c.tier)}</div>
+          </div>`).join("")}
+        </div>
+      </div>`;
+    const corners = tz.corner_types.map((ct) => `
+      <div class="block">
+        <div class="card-row" style="margin-top:0">
+          <h3 style="margin:0">${ct.name} <span class="chip">${ct.speed}</span></h3>
+          <span class="conf ${ct.id === "dirt-corner" ? "conf-contested" : "conf-probable"}" style="max-width:46%">${ct.regime}</span>
+        </div>
+        ${ct.status ? `<p class="why" style="color:var(--warn,#e3b341);font-size:12px;margin:4px 0 0">🌱 ${ct.status}</p>` : ""}
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:8px">
+          ${ribbonSvg(TZ_GEO[ct.geometry] || TZ_GEO.hairpin, ct.geometry === "dirt" ? dirtExtra : "")}
+          <div style="flex:1 1 300px;min-width:280px">
+            ${ct.phases.map((ph) => ph.entries.map((e) => entryHtml(ph, e)).join("")).join("")}
+          </div>
+        </div>
+      </div>`).join("");
+    host.innerHTML = `
+      <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">🎓 Training Zone — every corner, feeling first</h2>
+      <p class="hint">${tz.purpose}</p>
+      ${spectrum}${conditions}${corners}`;
+  }
+
   // ---- init ----
   render();
   buildWheelspin();
@@ -1881,6 +1964,7 @@
   buildEliminator();
   buildTuners();
   buildTuneLab();
+  buildTraining();
   const allCodesBtn = document.getElementById("allCodesBtn");
   if (allCodesBtn) allCodesBtn.addEventListener("click", openTuneCodesOverlay);
 })();

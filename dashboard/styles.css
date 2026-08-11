@@ -208,3 +208,13 @@ td.price { font-variant-numeric: tabular-nums; }
 }
 tr.p2w-row td { background: rgba(229, 65, 78, 0.06); }
 tr.p2w-row td:nth-child(2) { color: var(--muted); }
+
+/* Training Zone: feeling-first entries on the grip-slide spectrum */
+.tz-quote {
+  font-size: 15px; font-style: italic; color: var(--txt);
+  border-left: 3px solid var(--accent); padding: 6px 10px;
+  background: var(--bg3); border-radius: 0 8px 8px 0;
+}
+.tz-entry { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 12px; }
+.tz-entry:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+.tz-slider { border-color: var(--accent2); }

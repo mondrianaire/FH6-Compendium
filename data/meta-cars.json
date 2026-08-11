@@ -2572,5 +2572,183 @@
       "stock_trivia": "Fastest STOCK offroad-TYPE car: Porsche Macan LPR Rally Raid, 140.7 mph (forza.labsgg) — trivia only.",
       "build_recipe": "Verified multi-source: AWD mandatory; RALLY tires for dirt racing (FH6 PI-penalizes race slicks on dirt harder than FH5), OFF-ROAD tires for open terrain; center diff 65-80% rear; pressures disputed (24-30 psi spread across sources)."
     }
+  },
+  "goliath_centenario_field": {
+    "captured": "2026-08-11 (player video of the FH6 tune browser, Goliath search)",
+    "why": "The friend's competitive Goliath time was set in a Centenario. Six published S1 Goliath tunes read off their compare panes to reverse-engineer the field's philosophies.",
+    "base_car": {
+      "car": "Lamborghini Centenario LP 770-4 (2016)",
+      "pi_as_shown": "S1 792",
+      "hp": 759,
+      "torque": 508,
+      "weight_lb": 3693,
+      "pwr": 0.18,
+      "latG": 1.27,
+      "top_speed": 229.1,
+      "zero_sixty": 2.819,
+      "aero_efficiency": 0.844,
+      "aero_balance": 0.43,
+      "mech_balance": 0.58,
+      "compound": "Semi-Slick",
+      "suspension": "Race",
+      "drivetrain": "AWD (native)",
+      "note": "ARRIVES AT S1 792 — only 8 PI below the cap with 759 hp, 229 mph, race suspension and AWD already fitted. There is almost no 'build' to do; every tune is a REBUDGET inside a car that is already at the ceiling."
+    },
+    "universal_pattern": [
+      "All six keep AWD (native — nobody swaps it) and Race suspension.",
+      "All six LOWER aero efficiency (0.844 -> 0.78-0.80): every tuner adds downforce and accepts the drag.",
+      "All six RAISE lateral G (1.27 -> 1.33-1.38) and LOWER top speed (229 -> 195-205).",
+      "All six raise aero balance toward the front (0.43 -> 0.43-0.48).",
+      "Every tune therefore DETUNES POWER to fund grip — the opposite instinct to a straight-line build."
+    ],
+    "tunes": [
+      {
+        "name": "Goliath 24:03",
+        "tuner": "BreznsoizaGustl",
+        "rank": 15,
+        "created": "2026-06-11",
+        "hp": 620,
+        "torque": 425,
+        "weight_lb": 2997,
+        "pwr": 0.19,
+        "latG": 1.38,
+        "top_speed": 194.9,
+        "zero_sixty": 2.932,
+        "aero_eff": 0.79,
+        "aero_balance": 0.45,
+        "mech_balance": 0.54,
+        "compound": "Semi-Slick",
+        "radar": {
+          "accel": 8.8,
+          "speed": 7.3,
+          "braking": 9.4,
+          "launch": 8.5,
+          "handling": 8.4,
+          "offroad": 5.7
+        },
+        "school": "WEIGHT-STRIP / CORNER SPEED — sheds 696 lb and 139 hp; highest lateral G in the field. Claims the fastest lap of the set."
+      },
+      {
+        "name": "Goliath 24:09",
+        "tuner": "BreznsoizaGustl",
+        "rank": 15,
+        "created": "2026-06-10",
+        "hp": null,
+        "torque": 425,
+        "weight_lb": 3000,
+        "latG": 1.38,
+        "aero_eff": 0.79,
+        "aero_balance": 0.45,
+        "mech_balance": 0.55,
+        "compound": "Semi-Slick",
+        "radar": {
+          "accel": 8.8,
+          "speed": 7.3,
+          "braking": 9.4,
+          "launch": 8.5,
+          "handling": 8.4,
+          "offroad": 5.7
+        },
+        "school": "Same school — the earlier revision of the 24:03 (6 seconds slower by its own name)."
+      },
+      {
+        "name": "S1 Goliath Top 100 EZ",
+        "tuner": "Wolfs Rayet",
+        "rank": 20,
+        "created": "2026-07-18",
+        "hp": 699,
+        "torque": 453,
+        "weight_lb": 3160,
+        "pwr": 0.2,
+        "latG": 1.36,
+        "top_speed": 204.9,
+        "zero_sixty": 2.894,
+        "aero_eff": 0.795,
+        "aero_balance": 0.46,
+        "mech_balance": 0.72,
+        "compound": "Semi-Slick",
+        "radar": {
+          "accel": 9.1,
+          "speed": 6.5,
+          "braking": 10,
+          "launch": 10,
+          "handling": 7.6,
+          "offroad": 7.0
+        },
+        "school": "TRACTION / POINT-AND-SHOOT — mech balance 0.72 (extremely front-loaded), Braking 10 AND Launch 10. Newest tune in the field and the only one claiming top-100 capability."
+      },
+      {
+        "name": "S1 Goliath V1",
+        "tuner": "Wolfs Rayet",
+        "rank": 20,
+        "created": "2026-07-14",
+        "torque": 453,
+        "weight_lb": 3211,
+        "pwr": 0.2,
+        "latG": 1.37,
+        "aero_eff": 0.801,
+        "aero_balance": 0.48,
+        "mech_balance": 0.66,
+        "compound": "SLICK",
+        "radar": {
+          "accel": 10,
+          "speed": 6.5,
+          "braking": 10,
+          "launch": 9.6,
+          "handling": 8.3,
+          "offroad": 5.2
+        },
+        "school": "Same tuner's slick-compound predecessor — Accel 10, highest aero balance (0.48). Superseded by the Top 100 EZ four days later, which went BACK to semi-slick."
+      },
+      {
+        "name": "S1 AWD GOLIATH",
+        "tuner": "dBANANAJOEb",
+        "rank": 16,
+        "created": "2026-06-19",
+        "torque": 527,
+        "weight_lb": 3881,
+        "pwr": 0.19,
+        "latG": 1.35,
+        "aero_eff": 0.784,
+        "aero_balance": 0.43,
+        "mech_balance": 0.61,
+        "compound": "SLICK",
+        "radar": {
+          "accel": 8.0,
+          "speed": 8.1,
+          "braking": 10.0,
+          "launch": 6.5,
+          "handling": 8.5,
+          "offroad": 5.5
+        },
+        "school": "MASS + POWER — the only build HEAVIER than stock (+188 lb, almost certainly heavy-rim PI ballast) with torque UP to 527. Best Speed rating (8.1), worst Launch (6.5)."
+      },
+      {
+        "name": "s1 Goliath 26:55",
+        "tuner": "B0n4F1de",
+        "rank": 2,
+        "created": "2026-06-02",
+        "torque": 515,
+        "weight_lb": 3714,
+        "pwr": 0.19,
+        "latG": 1.33,
+        "aero_eff": 0.793,
+        "aero_balance": 0.44,
+        "mech_balance": 0.55,
+        "compound": "Semi-Slick",
+        "radar": {
+          "accel": 10,
+          "speed": 6.5,
+          "braking": 8.7,
+          "launch": 10,
+          "handling": 7.6,
+          "offroad": 5.2
+        },
+        "school": "Near-stock weight, launch-focused. By the highest-ranked tuner in the field (Rank 2) yet claims the SLOWEST time — a caution that tuner rank is popularity, not lap time."
+      }
+    ],
+    "verdict": "Three philosophies, and the named lap times point one way: the WEIGHT-STRIP corner-speed build (24:03) claims 2:52 faster than the heavy launch build (26:55). On a 25-minute lap the field converges on grip over top speed — every tune trades power and Vmax for downforce and lateral G.",
+    "vs_player_viper": "Player's Viper ACR replica: 834 hp / 3,148 lb / latG 1.28 / top 214.2 / PWR 0.26 / aero bal 0.57. Versus the best Centenario (620 hp / 2,997 lb / latG 1.38 / top 194.9 / PWR 0.19): the Viper wins the straights decisively (+19 mph, +0.07 PWR) and loses the corners (-0.10 lateral G). The Centenario field's own consensus says the Goliath rewards the cornering side of that trade — worth testing before assuming the Viper's speed advantage converts to lap time.",
+    "caveats": "Lap times in tune NAMES are tuner claims, not verified leaderboard entries, and conflate driver skill with tune quality. Compare-pane values are exact; radar ratings are compressed. Front weight % is not shown in the tune browser."
   }
 }

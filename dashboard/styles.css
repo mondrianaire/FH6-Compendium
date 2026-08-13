@@ -262,3 +262,15 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .tz-hilo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
 .tz-hi { color: var(--accent); } .tz-lo { color: var(--muted); }
 .tz-slider { border-color: var(--accent2); }
+
+/* Function registry */
+.fx-sig { display: block; font-size: 12px; color: var(--accent); background: var(--bg3);
+  padding: 6px 9px; border-radius: 6px; margin: 6px 0; overflow-x: auto; }
+.fx-expr { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.55;
+  background: var(--bg3); border-left: 3px solid var(--accent2); padding: 9px 11px; border-radius: 0 6px 6px 0;
+  margin: 8px 0; overflow-x: auto; white-space: pre-wrap; color: var(--txt); }
+.fx-in, .fx-bands { width: 100%; margin: 8px 0; font-size: 12px; }
+.fx-in th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.fx-eg { border: 1px dashed var(--accent); border-radius: 8px; padding: 8px 11px; margin: 8px 0; }
+.fx-eg pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.5;
+  margin: 5px 0 0; white-space: pre-wrap; color: var(--txt); }

@@ -1,0 +1,242 @@
+{
+  "schema_version": "1.0.0",
+  "created": "2026-08-11",
+  "purpose": "The single source of truth for every quantitative model this project uses. Each entry is a FUNCTION with a declared signature: named inputs with units and domains, a named output, the basis it rests on, a worked example using this project's own measured numbers, and an honest confidence tier. Prose elsewhere in the database may describe these models; this file defines them.",
+  "why": "The same quantity had been appearing as 'latG', 'lateral G' and 'a + b*v^2' across four files, with units declared in one place and implied in the rest, and project-invented heuristics sitting in the same paragraphs as textbook physics. A reader could not tell which numbers were derived, which were measured, and which were guesses. This registry fixes the notation, states every unit, and tiers every model.",
+  "notation": {
+    "convention": "Symbols are lowercase for scalars, subscripted by axle (f = front, r = rear) or by speed (@60, @120). Functions are named in snake_case and always take explicit units. Any value read from the in-game Performance panel is called a READOUT; any value computed here is DERIVED.",
+    "symbols": [
+      { "sym": "v", "name": "speed", "units": "mph in readouts, ft/s inside formulas (1 mph = 1.4667 ft/s)" },
+      { "sym": "g", "name": "gravitational acceleration", "units": "ft/s²", "value": 32.17 },
+      { "sym": "r", "name": "corner radius", "units": "ft" },
+      { "sym": "latG(v)", "name": "lateral grip at speed v", "units": "g (dimensionless multiples of gravity)", "source": "Performance panel readouts at 60 and 120 mph" },
+      { "sym": "a", "name": "mechanical grip coefficient", "units": "g", "meaning": "the speed-independent half of latG — tires, weight, springs" },
+      { "sym": "b", "name": "aero grip coefficient", "units": "g per (ft/s)²", "meaning": "the speed-squared half of latG — downforce" },
+      { "sym": "d60, d100", "name": "braking distance from 60 and 100 mph to zero", "units": "ft", "source": "Performance panel readouts" },
+      { "sym": "m", "name": "mass", "units": "lb", "source": "car stat readout" },
+      { "sym": "f%", "name": "front weight distribution", "units": "percent", "source": "car stat readout" },
+      { "sym": "pwr", "name": "power-to-weight", "units": "hp/lb", "source": "car stat readout" },
+      { "sym": "k", "name": "spring rate", "units": "lb/in" },
+      { "sym": "p", "name": "tire pressure", "units": "psi" },
+      { "sym": "s", "name": "slip angle", "units": "degrees" },
+      { "sym": "mb, ab", "name": "mechanical balance, aero balance", "units": "dimensionless fraction (front share)", "source": "Performance panel readouts" }
+    ],
+    "tiers": {
+      "physics": "Standard vehicle dynamics — holds regardless of what FH6 does internally.",
+      "fitted": "A physics-shaped model whose parameters are fitted to in-game readouts. Valid where the readouts are valid.",
+      "heuristic": "Invented by this project to compress experience into a number. Useful, directional, NOT a law.",
+      "refuted": "Kept on the record because it was believed and then disproved — so nobody re-derives it."
+    }
+  },
+  "functions": [
+    {
+      "id": "latg_fit",
+      "name": "Fit the grip curve from two panel readouts",
+      "signature": "latg_fit(latG@60, latG@120) -> (a, b)",
+      "expression": "latG(v) = a + b·v²   where v is in ft/s\nb = (latG@120 − latG@60) / (v120² − v60²)\na = latG@60 − b·v60²\nwith v60 = 88.0 ft/s, v120 = 176.0 ft/s",
+      "inputs": [
+        { "sym": "latG@60", "units": "g", "domain": "0.6 – 2.2", "read_from": "Performance panel, Lateral Gs, 60 mph row" },
+        { "sym": "latG@120", "units": "g", "domain": "0.6 – 2.5", "read_from": "Performance panel, Lateral Gs, 120 mph row" }
+      ],
+      "output": { "name": "(a, b)", "meaning": "a = mechanical grip in g; b = aero grip per (ft/s)². Together they define the car's whole grip curve." },
+      "basis": "Downforce rises with the square of speed; mechanical grip does not. Two readouts at two speeds are exactly enough to separate them.",
+      "worked_example": "Viper ACR replica: latG@60 = 1.24, latG@120 = 1.43.\nb = (1.43 − 1.24) / (176² − 88²) = 0.19 / 23,232 = 8.18e-6\na = 1.24 − 8.18e-6 × 7,744 = 1.177 g\nRead: ~1.18 g of the grip is mechanical and available at any speed; the rest arrives with speed.",
+      "tier": "fitted",
+      "used_by": ["cornering_envelope", "Tune Lab envelope chart", "aero-vs-mechanical diagnosis"],
+      "caveats": "Assumes the two panel readouts are steady-state limits (their in-game description says so). A car with zero downforce gives b ≈ 0, which is the correct answer, not an error."
+    },
+    {
+      "id": "cornering_envelope",
+      "name": "Maximum speed a corner of radius r supports",
+      "signature": "v_max(r, a, b) -> mph",
+      "expression": "Cornering requires v² / r ≤ g·latG(v).\nSubstituting latG(v) = a + b·v² and solving:\nv_max = sqrt( g·r·a / (1 − g·r·b) )   [ft/s, convert to mph by ÷1.4667]\nIf (1 − g·r·b) ≤ 0 the car is aero-limited nowhere — the corner is theoretically unbounded and the practical limit is elsewhere.",
+      "inputs": [
+        { "sym": "r", "units": "ft", "domain": "20 – 2000", "read_from": "estimated from the corner, or solved backwards from a speed you know works" },
+        { "sym": "a, b", "units": "g and g/(ft/s)²", "read_from": "latg_fit" }
+      ],
+      "output": { "name": "v_max", "units": "mph", "meaning": "the entry speed above which the tires cannot hold this radius, for THIS build" },
+      "basis": "Circular motion: centripetal acceleration v²/r must not exceed available lateral grip.",
+      "worked_example": "Viper (a = 1.177, b = 8.18e-6) in a 500 ft corner:\ndenominator = 1 − 32.17 × 500 × 8.18e-6 = 0.868\nv_max = sqrt(32.17 × 500 × 1.177 / 0.868) = sqrt(21,810) = 147.7 ft/s = 101 mph.\nRead: that corner is a ~100 mph corner in this car — which is why 110 mph entries kept failing.",
+      "tier": "physics",
+      "used_by": ["Tune Lab envelope chart", "sweeper entry-speed guidance"],
+      "caveats": "Steady-state only — it says nothing about entry transients, and a car can fail below v_max from a bad brake release. Radius estimates are the weakest input; prefer solving backwards from a speed you have actually held."
+    },
+    {
+      "id": "aero_brake_index",
+      "name": "Aero-brake index — how much of the braking is downforce",
+      "signature": "aero_brake_index(d60, d100) -> ratio",
+      "expression": "Under constant grip, braking distance scales with v²:  d100 / d60 = (100/60)² = 2.778\nindex = (d100 / d60) / 2.778",
+      "inputs": [
+        { "sym": "d60", "units": "ft", "domain": "60 – 250", "read_from": "Performance panel, 60 mph – 0 row" },
+        { "sym": "d100", "units": "ft", "domain": "120 – 700", "read_from": "Performance panel, 100 mph – 0 row" }
+      ],
+      "output": {
+        "name": "index", "units": "dimensionless",
+        "bands": [
+          { "range": "< 0.93", "read": "strong downforce contribution — lock-resistant at speed, lock-PRONE as it slows" },
+          { "range": "0.93 – 0.99", "read": "some aero help at speed" },
+          { "range": "0.99 – 1.03", "read": "speed-independent grip — the pedal that works at 60 will lock the wheels at 150" },
+          { "range": "> 1.03", "read": "brakes worse from high speed than physics predicts — check compound, mass or bias" }
+        ]
+      },
+      "basis": "Kinematics (d = v²/2a) plus the fact that downforce adds vertical load only at speed.",
+      "worked_example": "Viper ACR replica: d60 = 79.1 ft, d100 = 195.2 ft.\nindex = (195.2 / 79.1) / 2.778 = 2.468 / 2.778 = 0.89 → strong aero contribution.",
+      "tier": "physics",
+      "used_by": ["Training Zone braking science calculator"],
+      "caveats": "Derived by this project (the algebra is standard, the diagnostic use is ours). Assumes both readouts come from the same tune state — re-read both after any change."
+    },
+    {
+      "id": "grip_per_thrust",
+      "name": "Grip-per-thrust — handling car vs glass rocket",
+      "signature": "grip_per_thrust(latG@120, pwr) -> ratio",
+      "expression": "ratio = latG@120 / pwr",
+      "inputs": [
+        { "sym": "latG@120", "units": "g", "read_from": "Performance panel" },
+        { "sym": "pwr", "units": "hp/lb", "read_from": "car stat readout" }
+      ],
+      "output": {
+        "name": "ratio", "units": "g per (hp/lb)",
+        "bands": [
+          { "range": "≈ 2", "read": "glass rocket — power with nothing holding it down" },
+          { "range": "4 – 5", "read": "balanced build (every car measured in this project lands here)" },
+          { "range": "8+", "read": "handling special — grip bought at the expense of thrust" }
+        ]
+      },
+      "basis": "At a fixed PI cap, power and grip are competing purchases; their ratio reveals which one the builder bought.",
+      "worked_example": "Viper ACR replica: 1.28 / 0.26 = 4.9. 4C fork A: 1.43 / 0.32 = 4.5. Viper R-class tune: 1.76 / 0.43 = 4.1.",
+      "tier": "heuristic",
+      "used_by": ["build-reading protocol"],
+      "caveats": "A COURSE-FIT score, not a quality score — a glass rocket can legitimately win on a straight-heavy lap. The band edges are calibrated on a small sample of this project's own builds."
+    },
+    {
+      "id": "balance_gap",
+      "name": "Balance gap — how much the car's personality changes with speed",
+      "signature": "balance_gap(mb, ab) -> gap",
+      "expression": "gap = | mb − ab |   (mechanical balance minus aero balance, both front-share fractions)",
+      "inputs": [
+        { "sym": "mb", "units": "fraction", "domain": "0.35 – 0.80", "read_from": "Performance panel, Mech. Balance" },
+        { "sym": "ab", "units": "fraction", "domain": "0.25 – 0.70", "read_from": "Performance panel, Aero Balance" }
+      ],
+      "output": {
+        "name": "gap",
+        "bands": [
+          { "range": "≤ 0.08", "read": "one consistent car at all speeds" },
+          { "range": "0.10 – 0.15", "read": "noticeable personality shift as speed rises" },
+          { "range": "≥ 0.18", "read": "two different cars — the machine you learn in hairpins is not the one that arrives at the sweeper" }
+        ]
+      },
+      "basis": "Mechanical grip dominates at low speed and aero at high speed; if their front-shares differ, the effective balance migrates with speed.",
+      "worked_example": "Viper at the start of tuning: mb 0.64, ab 0.33 → gap 0.31 (two cars). After tuning: mb 0.63, ab 0.57 → gap 0.06 (one car). The player-reported 'lively slow, blind fast' symptom tracked this number.",
+      "tier": "heuristic",
+      "used_by": ["Training Zone conditions layer", "speed-regime diagnosis"],
+      "caveats": "The direction of the gap matters as well as its size: aero balance BELOW mechanical means the car understeers more as speed rises; above means it loosens. Band edges are this project's calibration."
+    },
+    {
+      "id": "aero_balance_ratio",
+      "name": "Aero balance from the downforce sliders",
+      "signature": "aero_balance_ratio(df_f, df_r) -> fraction",
+      "expression": "ab = df_f / (df_f + df_r)",
+      "inputs": [
+        { "sym": "df_f, df_r", "units": "lb", "read_from": "Aero tuning tab sliders" }
+      ],
+      "output": { "name": "ab", "units": "fraction" },
+      "basis": "Definition of a front share.",
+      "worked_example": "Alfa 4C: 128 front / 208 rear → 128/336 = 0.381, and the panel read 0.38. Exact.\nViper ACR: 457 front / 116 rear → 0.80 predicted, but the panel read 0.57. NOT exact.",
+      "tier": "refuted",
+      "why_refuted": "Works on some cars and fails on others: the Viper carries large BODY aero contributions at both ends that the sliders never show, so slider ratio ≠ panel balance. Never compute aero balance — READ it from the panel, and recover another car's settings by MATCHING the panel signature rather than calculating it.",
+      "used_by": ["kept as a warning only"],
+      "caveats": "This is the single most instructive failure in the project's modelling: an equation that fit four data points exactly and was still wrong as a general law."
+    },
+    {
+      "id": "slip_curve_model",
+      "name": "Grip versus slip angle (illustrative shape)",
+      "signature": "grip(s; peak_grip, peak_slip, sharpness) -> g",
+      "expression": "grip(s) = D · x^k · e^( k·(1 − x) )   where x = s / s_peak, D = peak grip, k = sharpness\nPeaks at exactly s = s_peak with value D for any k; larger k = sharper cliff.",
+      "inputs": [
+        { "sym": "s", "units": "degrees", "domain": "0 – 60" },
+        { "sym": "D (peak_grip)", "units": "g" },
+        { "sym": "s_peak", "units": "degrees", "typical": "7 slick tarmac, 9 rally tarmac, 22 rally on dirt" },
+        { "sym": "k (sharpness)", "units": "dimensionless", "typical": "2.2 slick, 1.6 rally tarmac, 0.9 dirt" }
+      ],
+      "output": { "name": "grip", "units": "g" },
+      "basis": "A shape function chosen to reproduce the known qualitative behaviour of tire curves (rise, peak, fall) with a single sharpness parameter.",
+      "worked_example": "Used to draw the Training Zone's three surface curves. At k = 2.2 the slick loses ~15% of peak grip only 4° past the peak; at k = 0.9 the dirt curve is still near peak 10° past it — the cliff-versus-plateau contrast.",
+      "tier": "heuristic",
+      "used_by": ["Training Zone grip science chart"],
+      "caveats": "ILLUSTRATIVE ONLY. FH6's real tire model is not published and these parameters are not measured from the game — the curve teaches the concept, it does not predict your car. Do not quote numbers off it."
+    },
+    {
+      "id": "spring_mass_scaling",
+      "name": "Rescale springs and dampers when build mass changes",
+      "signature": "scale(k_old, m_old, m_new) -> k_new",
+      "expression": "k_new = k_old × (m_new / m_old)   — apply the same factor to rebound and bump",
+      "inputs": [
+        { "sym": "k_old", "units": "lb/in" },
+        { "sym": "m_old, m_new", "units": "lb" }
+      ],
+      "output": { "name": "k_new", "units": "lb/in" },
+      "basis": "Suspension frequency depends on k/m; holding the ratio constant preserves the car's character across a mass change.",
+      "worked_example": "4C fork A springs 430/480 at 2,053 lb. Fork B weighs 2,292 lb (+11.6%) → 480/535, with rebound 7.5/8.0 → 8.4/9.0 and bump 4.5/5.0 → 5.0/5.6.",
+      "tier": "physics",
+      "used_by": ["build sheets when a compound or parts change moves mass"],
+      "caveats": "A slider sheet is only valid at the weight it was derived for. This is the correction that fixed fork B's breakaway-on-turn-in."
+    },
+    {
+      "id": "cold_from_hot_psi",
+      "name": "Recover another tune's cold pressures from telemetry",
+      "signature": "cold_psi(hot_psi) -> psi",
+      "expression": "p_cold ≈ p_hot − 3.5",
+      "inputs": [ { "sym": "p_hot", "units": "psi", "read_from": "telemetry Tires, Misc. page after 2–3 minutes at pace" } ],
+      "output": { "name": "p_cold", "units": "psi", "meaning": "the value that was typed into the Tires tab" },
+      "basis": "Observed warm-up rise on this project's own cars (rally compound, 24 psi cold reading 27–28.7 hot).",
+      "tier": "heuristic",
+      "used_by": ["locked-tune slider extraction"],
+      "caveats": "The 3.5 psi offset is from ONE car on ONE compound. Compound, driving intensity and session length all change it — measure your own offset before trusting it on a different car."
+    },
+    {
+      "id": "chassis_quadrant",
+      "name": "Chassis personality from mass and front bias",
+      "signature": "chassis_quadrant(m, f%) -> personality",
+      "expression": "light = m < 2750 lb;  front-biased = f% ≥ 50\n(light, front-biased) → Agile & stable\n(light, rear-biased) → Nervous & darty\n(heavy, front-biased) → Self-damping GT\n(heavy, rear-biased) → The handful",
+      "inputs": [
+        { "sym": "m", "units": "lb", "read_from": "car stat readout" },
+        { "sym": "f%", "units": "percent", "read_from": "car stat readout" }
+      ],
+      "output": { "name": "personality", "meaning": "expected yaw behaviour and which sliders you will be living on" },
+      "basis": "Front bias sets the restoring moment (the real stabiliser); mass sets yaw inertia (slow to start rotating AND slow to stop). They are independent, hence four quadrants rather than one axis.",
+      "worked_example": "Viper 3,148 lb / 54% → Self-damping GT. 4C 2,053 lb / 47% → Nervous & darty. Matches how both cars actually behaved.",
+      "tier": "heuristic",
+      "used_by": ["Training Zone chassis character map"],
+      "caveats": "Wheelbase and engine placement matter as much as these two numbers and are not on the panel. The 2750 lb / 50% thresholds are this project's calibration, not game data."
+    },
+    {
+      "id": "breakaway_margin",
+      "name": "Breakaway margin — how catchable a slide is",
+      "signature": "breakaway_margin(friction_front_peak, friction_rear_peak at the moment of breakaway) -> margin",
+      "expression": "margin = rear_peak% − front_peak%, sampled on the telemetry Friction page at the frame where the rear ring turns red",
+      "inputs": [ { "sym": "front_peak%, rear_peak%", "units": "percent", "read_from": "telemetry Friction page, per-wheel Peak %" } ],
+      "output": { "name": "margin", "meaning": "large positive = the front still has reserve while the rear is gone, so the slide is catchable; near zero = all four let go together and no one can save it" },
+      "basis": "Recovery from oversteer requires front grip in reserve at the moment the rear exceeds its limit.",
+      "tier": "heuristic",
+      "status": "PROPOSED — never yet measured. The Friction page's Peak % scaling is not documented; treat the comparison as ordinal (front vs rear) rather than as a calibrated number.",
+      "used_by": ["controllability chapter"],
+      "caveats": "Until it is run in-game this is a hypothesis with a procedure attached, not a result."
+    },
+    {
+      "id": "pi_ledger",
+      "name": "PI ledger — landing exactly on a class cap",
+      "signature": "solve(target_pi, installed_parts, candidate_parts) -> subset",
+      "expression": "Find the subset of part changes whose PI deltas sum to (target_pi − current_pi), subject to every measured stat target being met simultaneously.",
+      "basis": "Combinatorial search over the measured parts table, constrained by the compare pane's stat targets.",
+      "worked_example": "Viper donor engine: needed +189 hp / +131 ft-lb over stock on the original block. No single part fit; Street Centrifugal + Race Intercooler + Race Fuel System + Race Oil/Cooling summed to 834/731 exactly, and the install confirmed it to the digit.",
+      "tier": "physics",
+      "note": "Exact arithmetic over measured data — the only 'formula' here that produced a prediction later verified perfectly in-game.",
+      "used_by": ["build forensics", "parts-effects decoding"],
+      "caveats": "Part PI costs are CONFIG-DEPENDENT — the game re-prices as the build changes, so a ledger solved at one configuration must be re-previewed at the final one."
+    }
+  ],
+  "housekeeping": {
+    "rule": "New quantitative claims go here FIRST, with units and a tier, and prose elsewhere references them by id. If a model cannot state its units and its domain, it is not ready to be used.",
+    "refuted_kept_deliberately": "aero_balance_ratio stays in the registry as a refuted entry so the mistake is not silently re-made."
+  }
+}

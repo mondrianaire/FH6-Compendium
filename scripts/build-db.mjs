@@ -28,6 +28,7 @@ const db = {
   tuneLab: read("tuning-test-battery.json"),
   partsEffects: read("parts-effects.json"),
   trainingZone: read("training-zone.json"),
+  formulas: read("formulas.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

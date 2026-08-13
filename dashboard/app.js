@@ -2277,6 +2277,55 @@
     }
   }
 
+
+  // ---- Function registry: every quantitative model, one notation ----
+  function buildFormulas() {
+    const F = DB.formulas;
+    const host = document.getElementById("formulaContent");
+    if (!F || !host) return;
+    const TIER = {
+      physics: ["conf-verified", "⚙️ physics", "standard vehicle dynamics — holds regardless of the game"],
+      fitted: ["conf-verified", "📐 fitted", "physics-shaped model fitted to in-game readouts"],
+      heuristic: ["conf-probable", "🟡 heuristic", "invented here to compress experience — directional, not a law"],
+      refuted: ["conf-contested", "❌ refuted", "believed, then disproved — kept so it is not re-derived"],
+    };
+    const fcard = (f) => {
+      const t = TIER[f.tier] || TIER.heuristic;
+      const bands = f.output && f.output.bands
+        ? `<table class="fx-bands"><tbody>${f.output.bands.map((b) => `<tr><td><code>${b.range}</code></td><td class="why">${b.read}</td></tr>`).join("")}</tbody></table>` : "";
+      const ins = (f.inputs || []).map((i) => `<tr><td><code>${i.sym}</code></td><td class="why">${i.units || ""}</td><td class="why">${i.domain || i.typical || ""}</td><td class="why">${i.read_from || ""}</td></tr>`).join("");
+      return `<div class="block" id="fn-${f.id}" style="border-color:${f.tier === "refuted" ? "#e5414e" : f.tier === "heuristic" ? "var(--warn,#e3b341)" : "var(--accent)"}">
+        <div class="card-row" style="margin-top:0">
+          <h3 style="margin:0">${f.name}</h3>
+          <span class="conf ${t[0]}" title="${t[2]}">${t[1]}</span>
+        </div>
+        <code class="fx-sig">${f.signature || f.id}</code>
+        <pre class="fx-expr">${f.expression || ""}</pre>
+        ${ins ? `<table class="fx-in"><thead><tr><th>input</th><th>units</th><th>domain</th><th>read from</th></tr></thead><tbody>${ins}</tbody></table>` : ""}
+        ${f.output ? `<p class="why"><strong>Output — ${f.output.name}${f.output.units ? ` (${f.output.units})` : ""}:</strong> ${f.output.meaning || ""}</p>${bands}` : ""}
+        ${f.basis ? `<p class="why"><strong>Basis:</strong> ${f.basis}</p>` : ""}
+        ${f.worked_example ? `<div class="fx-eg"><strong>Worked example</strong><pre>${f.worked_example}</pre></div>` : ""}
+        ${f.why_refuted ? `<p class="why" style="color:#e5414e"><strong>Why refuted:</strong> ${f.why_refuted}</p>` : ""}
+        ${f.status ? `<p class="why" style="color:var(--warn,#e3b341)"><strong>Status:</strong> ${f.status}</p>` : ""}
+        ${f.note ? `<p class="why"><strong>Note:</strong> ${f.note}</p>` : ""}
+        ${f.caveats ? `<p class="why"><strong>Caveats:</strong> ${f.caveats}</p>` : ""}
+        ${f.used_by ? `<p class="why" style="font-size:11px">Used by: ${f.used_by.join(" · ")}</p>` : ""}
+      </div>`;
+    };
+    host.innerHTML = `
+      <p class="hint">${F.purpose}</p>
+      <div class="block" style="border-color:var(--accent2)">
+        <h3>📏 Notation &amp; units</h3>
+        <p class="why">${F.notation.convention}</p>
+        <div style="overflow-x:auto"><table><thead><tr><th>symbol</th><th>quantity</th><th>units</th><th>where it comes from</th></tr></thead>
+          <tbody>${F.notation.symbols.map((s) => `<tr><td><code>${s.sym}</code></td><td>${s.name}</td><td class="why">${s.units}${s.value ? ` = ${s.value}` : ""}</td><td class="why">${s.source || s.meaning || ""}</td></tr>`).join("")}</tbody></table></div>
+        <div class="tz-3col" style="margin-top:10px">${Object.entries(F.notation.tiers).map(([k, v]) => `<div><strong>${(TIER[k] || ["", k])[1]}</strong><p class="why" style="font-size:12px;margin:3px 0 0">${v}</p></div>`).join("")}</div>
+      </div>
+      <div class="chips" style="margin:10px 0">${F.functions.map((f) => `<a class="chip" href="#fn-${f.id}">${f.name}</a>`).join("")}</div>
+      ${F.functions.map(fcard).join("")}
+      <div class="block"><h3>🧹 Housekeeping</h3><p class="why">${F.housekeeping.rule}</p><p class="why">${F.housekeeping.refuted_kept_deliberately}</p></div>`;
+  }
+
   // ---- init ----
   render();
   buildWheelspin();
@@ -2292,6 +2341,7 @@
   buildTuners();
   buildTuneLab();
   buildTraining();
+  buildFormulas();
   const allCodesBtn = document.getElementById("allCodesBtn");
   if (allCodesBtn) allCodesBtn.addEventListener("click", openTuneCodesOverlay);
 })();

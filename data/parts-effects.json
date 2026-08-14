@@ -692,14 +692,18 @@
         "stock_v12_reference": {
           "note": "Bonus numbers-mode captures on the STOCK 6.5 V12 (2026-08-11): base 759/508/3,693/43%F/6,498cc @ S1 792. Race Engine Block: 778/521 (+19/+13), displacement 6,498 -> 7,000, S1 796 (+4), 5,700 cr.",
           "universal_rule": "RACE ENGINE BLOCK ALWAYS CHANGES DISPLACEMENT — third engine confirmed (Viper 8.4->9.0, V12 6.5->7.0). Whenever a target build's displacement matches stock, the block is DISQUALIFIED from its subset."
+        },
+        "measured_aggregates": {
+          "five_race_bolt_ons": "Exhaust+Fuel+Ignition+Valves+Intake = +88 hp / +60 tq (602/413 -> 690/473, player-measured 2026-08-11; badge sum said +87 — badges under-report and hide torque)",
+          "sport_intake_manifold": "+11 hp / +7 tq exactly (690/473 -> 701/480)"
         }
       },
       "donor_solution": {
         "target": "699 hp / 453 ft-lb / 3,160 lb / 45%F / 5,204cc / S1 800 (Top 100 EZ)",
-        "power_math": "GATE RESOLVED 2026-08-11: race block changes displacement (universal rule) -> DISQUALIFIED (target 5,204cc = stock V10 block). Revised solve without the block: badges available {Exhaust 24, Fuel 19, RaceIM 18, Ignition 16, Valves 15, Intake 13, SportIM 11} (IM tiers exclusive). No subset hits +97 exactly in badge arithmetic; CLOSEST = ALL bolt-ons with SPORT IM: 24+19+16+15+13+11 = +98 badge-sum — lands 699 if rounding cooperates (badges round; absolutes rule). Install order with numbers-panel reads after each part; if the final lands 700-701, trim via the IM tier (Sport 11 <-> none) or Intake; target the exact 699/453 pair.",
+        "power_math": "SOLUTION CLASS ELIMINATED 2026-08-11: player's absolute reads prove NO NA bolt-on subset lands 699/453 — every near-97hp combo over-delivers torque by 20+ (race bolt-ons are torque-rich +60/5 parts; target is +97hp/+40tq, torque-POOR). The only menu part with a high-hp/low-torque signature is the TWIN TURBO (+80 badge). LEADING HYPOTHESIS: donor = Twin Turbo + Race Ignition (+96 badges) ~ 698-699, torque TBD. The tour's S2 813 turbo preview is config-dependent — at the donor's full config it can re-price under the cap. NA assumption retracted.",
         "weight_math": "Race WR lands 3,031; target 3,160 = +129 lb of add-ons on top: cage +54 confirmed candidate, plus wing/bumper/width mass. Front 45% matches race-WR numeric exactly.",
-        "decisive_readout": "RESOLVED — block disqualified. New procedure: V10 swap back ON first (currently the car sits on the stock V12), then bolt-ons with per-part absolute reads.",
-        "status": "engine path revised: all-bolt-ons-except-block, +98 badge-sum, absolutes-guided landing"
+        "decisive_readout": "Turbo absolutes: bare V10 (602/413), highlight Twin Turbo, numbers mode, read the hp/tq pair. Fallback plan B: removal-audit from 690/473 — uninstall one race part at a time reading pairs; five removals = complete per-part hp/tq table, exact solve.",
+        "status": "NA class eliminated; turbo hypothesis pending one preview"
       }
     }
   ],

@@ -45967,7 +45967,7 @@ window.FH6_DB = {
         "checksums": "All pane rows dashed vs the tune + bars 6.5/7.6/9.1/10/10/7.0. The applied black car is the living reference for gear-count and telemetry extraction.",
         "note_on_baseline": "The player's 792 donor shows 224.3 mph / 2.467 vs factory 229.1 / 2.819 at identical hp/weight/PI — GEARING sliders have been touched (sliders never move PI). Parts targets are unaffected; reset gearing to default before judging gearing work.",
         "chassis_read": "3,160 lb / 45% front = the rear-biased-heavy quadrant — the 0.72 mech balance is presumably how the tuner civilizes it (maximum front grip share). Expect the car to NEED that setting; don't 'fix' it toward neutral.",
-        "engine_solve": "2026-08-11: Centenario measured via 154-frame tour (8-agent transcription). V10 swap base = 602/413/3,647/44%/5,204cc @ 761. Candidate EXACT subset for +97hp: Exhaust 24 + Block 28 + Fuel 19 + Valves 15 + Sport IM 11 — gated on whether the Race Engine Block preserves 5,204cc (one numbers-mode preview decides). Weight: race WR 3,031 + ~129 lb add-ons (cage 54 + aero + widths) = 3,160 target, front 45% matches. Player already OWNS: race WR, race IM/TB, flywheel, clutch, race trans, race driveline, race wing — the basket is half the answer already."
+        "engine_solve": "2026-08-11: Centenario measured via 154-frame tour (8-agent transcription). V10 swap base = 602/413/3,647/44%/5,204cc @ 761. Candidate EXACT subset for +97hp: Exhaust 24 + Block 28 + Fuel 19 + Valves 15 + Sport IM 11 — gated on whether the Race Engine Block preserves 5,204cc (one numbers-mode preview decides). Weight: race WR 3,031 + ~129 lb add-ons (cage 54 + aero + widths) = 3,160 target, front 45% matches. Player already OWNS: race WR, race IM/TB, flywheel, clutch, race trans, race driveline, race wing — the basket is half the answer already. || FINAL 2026-08-11: donor engine = V10 swap + Centrifugal Supercharger ONLY (699/453 exact, badge +97). Player action: refund the five race bolt-ons, install the cent, resume walkthrough at Platform."
       }
     }
   },
@@ -46670,14 +46670,47 @@ window.FH6_DB = {
           "measured_aggregates": {
             "five_race_bolt_ons": "Exhaust+Fuel+Ignition+Valves+Intake = +88 hp / +60 tq (602/413 -> 690/473, player-measured 2026-08-11; badge sum said +87 — badges under-report and hide torque)",
             "sport_intake_manifold": "+11 hp / +7 tq exactly (690/473 -> 701/480)"
-          }
+          },
+          "aspiration_v10": [
+            {
+              "part": "Stock - Naturally Aspirated",
+              "hp": 602,
+              "torque": 413,
+              "note": "swap base"
+            },
+            {
+              "part": "Twin Turbo",
+              "hp": 813,
+              "torque": 557,
+              "delta": [
+                211,
+                144
+              ],
+              "pi": "S2 805",
+              "cost_cr": 1800,
+              "note": "massive on the V10 — ruled out"
+            },
+            {
+              "part": "Centrifugal Supercharger",
+              "hp": 699,
+              "torque": 453,
+              "delta": [
+                97,
+                40
+              ],
+              "pi": "S1 764",
+              "cost_cr": 5400,
+              "weight_note": "~+56 lb",
+              "note": "THE DONOR'S ENTIRE ENGINE RECIPE IN ONE PART — badge '+97 hp', pair exact. Third tile, absent from the tour's 2-tile aspiration frames (menu tile variance — enumerate aspiration menus fully)."
+            }
+          ]
         },
         "donor_solution": {
           "target": "699 hp / 453 ft-lb / 3,160 lb / 45%F / 5,204cc / S1 800 (Top 100 EZ)",
-          "power_math": "SOLUTION CLASS ELIMINATED 2026-08-11: player's absolute reads prove NO NA bolt-on subset lands 699/453 — every near-97hp combo over-delivers torque by 20+ (race bolt-ons are torque-rich +60/5 parts; target is +97hp/+40tq, torque-POOR). The only menu part with a high-hp/low-torque signature is the TWIN TURBO (+80 badge). LEADING HYPOTHESIS: donor = Twin Turbo + Race Ignition (+96 badges) ~ 698-699, torque TBD. The tour's S2 813 turbo preview is config-dependent — at the donor's full config it can re-price under the cap. NA assumption retracted.",
+          "power_math": "SOLVED 2026-08-11: donor engine = 5.2L V10 swap + CENTRIFUGAL SUPERCHARGER, zero bolt-ons. 602/413 + (97/40) = 699/453 EXACT, one part, 5,400 cr. Every bolt-on subset failed because the answer wasn't a subset — the torque-lean signature was the centrifugal all along (3rd decoded build on a cent blower: 4C fork, Viper donor, Centenario donor).",
           "weight_math": "Race WR lands 3,031; target 3,160 = +129 lb of add-ons on top: cage +54 confirmed candidate, plus wing/bumper/width mass. Front 45% matches race-WR numeric exactly.",
-          "decisive_readout": "CORRECTED: the turbo preview must be taken ON THE V10 (player previewed on the stock V12 — engine-specific numbers do not transfer). Sequence: install owned 5.2L V10 (602/413/5,204) -> numbers-mode Twin Turbo preview. THE DECIDING NUMBER IS ITS TORQUE LINE: ~+54 (V12-like, 0.68 ratio) = turbo paths ALSO overshoot 453 and the impasse is real; ~+35-45 = Twin Turbo + Race Ignition lands ~698-699/453-460 and the donor closes as a TURBO build. Also check whether the Twin Turbo tile opens a Street/Sport/Race FAMILY (tier-ladder rule) — a softer tier adds solutions if the full turbo overshoots.",
-          "status": "NA class eliminated; turbo hypothesis pending one preview"
+          "decisive_readout": "RESOLVED by the third aspiration tile.",
+          "status": "ENGINE SOLVED — remove the five race bolt-ons (donor runs none), install the centrifugal, proceed to platform"
         }
       }
     ],
@@ -46689,7 +46722,8 @@ window.FH6_DB = {
       "VIPER ACR HEADLINE: the ENTIRE slider set is PI-free — rally springs (-1 PI vs stock), ARBs free, differential free at all tiers, every transmission free (weight-only differences). The 4C's ~30-PI adjustability tax does not exist on this chassis; the ACR is structurally a tuner's car. Check per-car — the tax varies from ~30 PI (4C) to zero (ACR).",
       "VIPER ACR CROWN JEWEL: the Stock Rear Wing is -11 PI with adjustable downforce sliders — the car pays you to take the aero. Completes the everything-free suite: springs -1, ARBs 0, diff 0, gearboxes 0, brakes native, wing -11.",
       "HEAVY-RIM BALLAST (donor Viper, player-confirmed): deliberately heavy rims = negative PI — buy PI with corner mass and spend it on power/weight-reduction where the exchange rate profits. The fourth PI-arbitrage pattern documented (rally compound, rally springs, negative-PI parts, heavy rims).",
-      "Centenario: Rally springs = PI-parity with stock while unlocking three slider families (2nd car); rally/drift/race diffs PI-free (3rd car); 9/10-speed race boxes BELOW race-base PI; race rear wing ~13 PI cheaper than the stock wing (2nd negative-PI wing)."
+      "Centenario: Rally springs = PI-parity with stock while unlocking three slider families (2nd car); rally/drift/race diffs PI-free (3rd car); 9/10-speed race boxes BELOW race-base PI; race rear wing ~13 PI cheaper than the stock wing (2nd negative-PI wing).",
+      "CENTRIFUGAL SUPERCHARGER = THE META ASPIRATION (3rd decoded build): hp-rich, torque-lean, PI-cheap — Centenario V10 cent = +97/+40 @ only +9 PI vs the twin turbo's +211/+144 @ S2. When a target's power delta is hp-heavy, check the blower before any bolt-on arithmetic."
     ]
   },
   "trainingZone": {

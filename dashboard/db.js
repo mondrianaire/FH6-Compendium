@@ -3731,12 +3731,12 @@ window.FH6_DB = {
           "weight_lb": 3160,
           "pwr": 0.2,
           "latG": 1.36,
-          "top_speed": 204.9,
-          "zero_sixty": 2.894,
+          "top_speed": 200.9,
+          "zero_sixty": 2.4,
           "aero_eff": 0.795,
           "aero_balance": 0.46,
           "mech_balance": 0.72,
-          "compound": "Semi-Slick",
+          "compound": "SLICK (corrected 2026-08-11 — yesterday's read said semi-slick; today's pane row is unambiguous)",
           "radar": {
             "accel": 9.1,
             "speed": 6.5,
@@ -3745,7 +3745,8 @@ window.FH6_DB = {
             "handling": 7.6,
             "offroad": 7
           },
-          "school": "TRACTION / POINT-AND-SHOOT — mech balance 0.72 (extremely front-loaded), Braking 10 AND Launch 10. Newest tune in the field and the only one claiming top-100 capability."
+          "school": "TRACTION / POINT-AND-SHOOT — mech balance 0.72 (extremely front-loaded), Braking 10 AND Launch 10. Newest tune in the field and the only one claiming top-100 capability. CORRECTED + DEEPENED (2026-08-11): runs SLICKS on RALLY suspension, and — the headline — an ENGINE SWAP: 5.20L V10 replaces the 6.5 V12 (My Cars displacement read). The 'detune' to 699hp is a smaller, lighter engine.",
+          "suspension": "RALLY (downgraded from the car's native Race — the rally-springs PI trick, third confirmed sighting)"
         },
         {
           "name": "S1 Goliath V1",
@@ -3819,7 +3820,7 @@ window.FH6_DB = {
       ],
       "verdict": "Three philosophies, and the named lap times point one way: the WEIGHT-STRIP corner-speed build (24:03) claims 2:52 faster than the heavy launch build (26:55). On a 25-minute lap the field converges on grip over top speed — every tune trades power and Vmax for downforce and lateral G.",
       "vs_player_viper": "Player's Viper ACR replica: 834 hp / 3,148 lb / latG 1.28 / top 214.2 / PWR 0.26 / aero bal 0.57. Versus the best Centenario (620 hp / 2,997 lb / latG 1.38 / top 194.9 / PWR 0.19): the Viper wins the straights decisively (+19 mph, +0.07 PWR) and loses the corners (-0.10 lateral G). The Centenario field's own consensus says the Goliath rewards the cornering side of that trade — worth testing before assuming the Viper's speed advantage converts to lap time.",
-      "caveats": "Lap times in tune NAMES are tuner claims, not verified leaderboard entries, and conflate driver skill with tune quality. Compare-pane values are exact; radar ratings are compressed. Front weight % is not shown in the tune browser."
+      "caveats": "Lap times in tune NAMES are tuner claims, not verified leaderboard entries, and conflate driver skill with tune quality. Compare-pane values are exact; radar ratings are compressed. Front weight % is not shown in the tune browser. 2026-08-11: two rows of the Top 100 EZ were misread in the first pass (compound, top speed) — corrected from today's dual-scroll captures; treat single-scroll pane reads as provisional."
     }
   },
   "upgradeStrategy": {
@@ -45912,6 +45913,49 @@ window.FH6_DB = {
         "envelope_formulation": "Parts + matched sliders set the ENVELOPE; the dark values set how the car CROSSES its edge and returns. Pressures barely move the envelope's height but set the edge's shape (slope vs cliff).",
         "course_note": "Flow courses (Goliath) are kind to this uncertainty profile — long equilibria, few handoffs; touge interrogates every handoff constantly.",
         "final_probe_plan": "Three targeted phase-method drives: (1) brake-release probe into a fast complex [entry stack], (2) throttle-timing probe from a slow corner [diff stack], (3) kerb strike through a fast kink [dampers] — plus the telemetry pass for pressures/camber. Four drives corner all sixteen dark values."
+      },
+      "case_study_4": {
+        "name": "Centenario 'S1 Goliath Top 100 EZ' replication (Wolfs Rayet, Rank 20, 2026-07-18)",
+        "created": "2026-08-11",
+        "context": "The chosen weapon from the six-tune Goliath field analysis: the traction/point-and-shoot school (Braking 10 + Launch 10, mech balance 0.72). Player owns the tune applied (black Centenario, stats match the pane's New column exactly) plus a stock-ish 792 donor to build on.",
+        "headline_discovery": "ENGINE SWAP DOWN: displacement reads 5.20L vs the stock 6.5 V12 — the tuner swapped in the 5.2 V10. Power 759->699 is a smaller engine, not a detune; the swap also buys weight (-533 total with reduction) and moves distribution (front 45%).",
+        "target_manifest": {
+          "pi": "S1 800 exact",
+          "hp": 699,
+          "torque_ftlb": 453,
+          "weight_lb": 3160,
+          "front_pct": 45,
+          "displacement_l": 5.2,
+          "suspension": "RALLY (downgrade from native Race — PI trick)",
+          "compound": "SLICK",
+          "drivetrain": "AWD (native)",
+          "top_speed": 200.9,
+          "zero_sixty": 2.4,
+          "latG": 1.36,
+          "aero_balance": 0.46,
+          "aero_efficiency": 0.795,
+          "mech_balance": 0.72,
+          "pwr": 0.22,
+          "radar": {
+            "speed": 6.5,
+            "handling": 7.6,
+            "accel": 9.1,
+            "launch": 10,
+            "braking": 10,
+            "offroad": 7
+          }
+        },
+        "build_plan": [
+          "1. Engine swap: find the option showing 5.20 L (expect a 5.2 V10). Preview absolutes; new engine = start a Centenario parts-effects table.",
+          "2. Upgrade the swap toward 699 hp AND 453 ft-lb exactly (subset-sum via shop previews).",
+          "3. Suspension -> Rally Springs and Dampers (likely a PI refund vs native Race).",
+          "4. Compound -> Slick. 5. Weight ladder toward 3,160 (measure the swap's weight change first).",
+          "6. Aero by SIGNATURE MATCH on the panel: Balance 0.46 / Efficiency 0.795 (wiggle-read; never compute from sliders — refuted-model rule).",
+          "7. PI to exactly 800 (config-dependent previews). 8. Sliders: mech balance to 0.72 by panel-matching with SANE inputs (front-soft/rear-stiff direction, the corrected rule), gearing to 200.9 / 2.400."
+        ],
+        "checksums": "All pane rows dashed vs the tune + bars 6.5/7.6/9.1/10/10/7.0. The applied black car is the living reference for gear-count and telemetry extraction.",
+        "note_on_baseline": "The player's 792 donor shows 224.3 mph / 2.467 vs factory 229.1 / 2.819 at identical hp/weight/PI — GEARING sliders have been touched (sliders never move PI). Parts targets are unaffected; reset gearing to default before judging gearing work.",
+        "chassis_read": "3,160 lb / 45% front = the rear-biased-heavy quadrant — the 0.72 mech balance is presumably how the tuner civilizes it (maximum front grip share). Expect the car to NEED that setting; don't 'fix' it toward neutral."
       }
     }
   },

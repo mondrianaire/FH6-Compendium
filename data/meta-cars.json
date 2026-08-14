@@ -2661,12 +2661,12 @@
         "weight_lb": 3160,
         "pwr": 0.2,
         "latG": 1.36,
-        "top_speed": 204.9,
-        "zero_sixty": 2.894,
+        "top_speed": 200.9,
+        "zero_sixty": 2.4,
         "aero_eff": 0.795,
         "aero_balance": 0.46,
         "mech_balance": 0.72,
-        "compound": "Semi-Slick",
+        "compound": "SLICK (corrected 2026-08-11 — yesterday's read said semi-slick; today's pane row is unambiguous)",
         "radar": {
           "accel": 9.1,
           "speed": 6.5,
@@ -2675,7 +2675,8 @@
           "handling": 7.6,
           "offroad": 7.0
         },
-        "school": "TRACTION / POINT-AND-SHOOT — mech balance 0.72 (extremely front-loaded), Braking 10 AND Launch 10. Newest tune in the field and the only one claiming top-100 capability."
+        "school": "TRACTION / POINT-AND-SHOOT — mech balance 0.72 (extremely front-loaded), Braking 10 AND Launch 10. Newest tune in the field and the only one claiming top-100 capability. CORRECTED + DEEPENED (2026-08-11): runs SLICKS on RALLY suspension, and — the headline — an ENGINE SWAP: 5.20L V10 replaces the 6.5 V12 (My Cars displacement read). The 'detune' to 699hp is a smaller, lighter engine.",
+        "suspension": "RALLY (downgraded from the car's native Race — the rally-springs PI trick, third confirmed sighting)"
       },
       {
         "name": "S1 Goliath V1",
@@ -2749,6 +2750,6 @@
     ],
     "verdict": "Three philosophies, and the named lap times point one way: the WEIGHT-STRIP corner-speed build (24:03) claims 2:52 faster than the heavy launch build (26:55). On a 25-minute lap the field converges on grip over top speed — every tune trades power and Vmax for downforce and lateral G.",
     "vs_player_viper": "Player's Viper ACR replica: 834 hp / 3,148 lb / latG 1.28 / top 214.2 / PWR 0.26 / aero bal 0.57. Versus the best Centenario (620 hp / 2,997 lb / latG 1.38 / top 194.9 / PWR 0.19): the Viper wins the straights decisively (+19 mph, +0.07 PWR) and loses the corners (-0.10 lateral G). The Centenario field's own consensus says the Goliath rewards the cornering side of that trade — worth testing before assuming the Viper's speed advantage converts to lap time.",
-    "caveats": "Lap times in tune NAMES are tuner claims, not verified leaderboard entries, and conflate driver skill with tune quality. Compare-pane values are exact; radar ratings are compressed. Front weight % is not shown in the tune browser."
+    "caveats": "Lap times in tune NAMES are tuner claims, not verified leaderboard entries, and conflate driver skill with tune quality. Compare-pane values are exact; radar ratings are compressed. Front weight % is not shown in the tune browser. 2026-08-11: two rows of the Top 100 EZ were misread in the first pass (compound, top speed) — corrected from today's dual-scroll captures; treat single-scroll pane reads as provisional."
   }
 }

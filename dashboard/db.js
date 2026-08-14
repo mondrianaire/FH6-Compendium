@@ -46664,7 +46664,8 @@ window.FH6_DB = {
           ],
           "stock_v12_reference": {
             "note": "Bonus numbers-mode captures on the STOCK 6.5 V12 (2026-08-11): base 759/508/3,693/43%F/6,498cc @ S1 792. Race Engine Block: 778/521 (+19/+13), displacement 6,498 -> 7,000, S1 796 (+4), 5,700 cr.",
-            "universal_rule": "RACE ENGINE BLOCK ALWAYS CHANGES DISPLACEMENT — third engine confirmed (Viper 8.4->9.0, V12 6.5->7.0). Whenever a target build's displacement matches stock, the block is DISQUALIFIED from its subset."
+            "universal_rule": "RACE ENGINE BLOCK ALWAYS CHANGES DISPLACEMENT — third engine confirmed (Viper 8.4->9.0, V12 6.5->7.0). Whenever a target build's displacement matches stock, the block is DISQUALIFIED from its subset.",
+            "twin_turbo_v12": "Twin Turbo on the STOCK 6.5 V12 (numbers mode, 2026-08-11): 759/508 -> 839/562 (+80/+54, ratio 0.68 tq/hp), weight +23 lb, front 43%, S2 807, 1,800 cr."
           },
           "measured_aggregates": {
             "five_race_bolt_ons": "Exhaust+Fuel+Ignition+Valves+Intake = +88 hp / +60 tq (602/413 -> 690/473, player-measured 2026-08-11; badge sum said +87 — badges under-report and hide torque)",
@@ -46675,7 +46676,7 @@ window.FH6_DB = {
           "target": "699 hp / 453 ft-lb / 3,160 lb / 45%F / 5,204cc / S1 800 (Top 100 EZ)",
           "power_math": "SOLUTION CLASS ELIMINATED 2026-08-11: player's absolute reads prove NO NA bolt-on subset lands 699/453 — every near-97hp combo over-delivers torque by 20+ (race bolt-ons are torque-rich +60/5 parts; target is +97hp/+40tq, torque-POOR). The only menu part with a high-hp/low-torque signature is the TWIN TURBO (+80 badge). LEADING HYPOTHESIS: donor = Twin Turbo + Race Ignition (+96 badges) ~ 698-699, torque TBD. The tour's S2 813 turbo preview is config-dependent — at the donor's full config it can re-price under the cap. NA assumption retracted.",
           "weight_math": "Race WR lands 3,031; target 3,160 = +129 lb of add-ons on top: cage +54 confirmed candidate, plus wing/bumper/width mass. Front 45% matches race-WR numeric exactly.",
-          "decisive_readout": "Turbo absolutes: bare V10 (602/413), highlight Twin Turbo, numbers mode, read the hp/tq pair. Fallback plan B: removal-audit from 690/473 — uninstall one race part at a time reading pairs; five removals = complete per-part hp/tq table, exact solve.",
+          "decisive_readout": "CORRECTED: the turbo preview must be taken ON THE V10 (player previewed on the stock V12 — engine-specific numbers do not transfer). Sequence: install owned 5.2L V10 (602/413/5,204) -> numbers-mode Twin Turbo preview. THE DECIDING NUMBER IS ITS TORQUE LINE: ~+54 (V12-like, 0.68 ratio) = turbo paths ALSO overshoot 453 and the impasse is real; ~+35-45 = Twin Turbo + Race Ignition lands ~698-699/453-460 and the donor closes as a TURBO build. Also check whether the Twin Turbo tile opens a Street/Sport/Race FAMILY (tier-ladder rule) — a softer tier adds solutions if the full turbo overshoots.",
           "status": "NA class eliminated; turbo hypothesis pending one preview"
         }
       }

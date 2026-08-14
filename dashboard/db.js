@@ -46661,14 +46661,18 @@ window.FH6_DB = {
               "part": "Race Rear Wing vs stock wing",
               "note": "race wing 751 vs stock wing 764 at that config — the race wing is ~13 PI CHEAPER: negative-PI adjustable wing pattern, second car"
             }
-          ]
+          ],
+          "stock_v12_reference": {
+            "note": "Bonus numbers-mode captures on the STOCK 6.5 V12 (2026-08-11): base 759/508/3,693/43%F/6,498cc @ S1 792. Race Engine Block: 778/521 (+19/+13), displacement 6,498 -> 7,000, S1 796 (+4), 5,700 cr.",
+            "universal_rule": "RACE ENGINE BLOCK ALWAYS CHANGES DISPLACEMENT — third engine confirmed (Viper 8.4->9.0, V12 6.5->7.0). Whenever a target build's displacement matches stock, the block is DISQUALIFIED from its subset."
+          }
         },
         "donor_solution": {
           "target": "699 hp / 453 ft-lb / 3,160 lb / 45%F / 5,204cc / S1 800 (Top 100 EZ)",
-          "power_math": "Need +97 hp over the 602 base. EXACT badge subset: Race Exhaust 24 + Race Engine Block 28 + Race Fuel 19 + Race Valves 15 + Sport IM/TB 11 = 97 — but ONLY if the Race Engine Block keeps displacement at 5,204 (target reads 5.20L). If the block changes displacement, the subset must re-solve from numbers-mode absolutes (badges round).",
+          "power_math": "GATE RESOLVED 2026-08-11: race block changes displacement (universal rule) -> DISQUALIFIED (target 5,204cc = stock V10 block). Revised solve without the block: badges available {Exhaust 24, Fuel 19, RaceIM 18, Ignition 16, Valves 15, Intake 13, SportIM 11} (IM tiers exclusive). No subset hits +97 exactly in badge arithmetic; CLOSEST = ALL bolt-ons with SPORT IM: 24+19+16+15+13+11 = +98 badge-sum — lands 699 if rounding cooperates (badges round; absolutes rule). Install order with numbers-panel reads after each part; if the final lands 700-701, trim via the IM tier (Sport 11 <-> none) or Intake; target the exact 699/453 pair.",
           "weight_math": "Race WR lands 3,031; target 3,160 = +129 lb of add-ons on top: cage +54 confirmed candidate, plus wing/bumper/width mass. Front 45% matches race-WR numeric exactly.",
-          "decisive_readout": "ONE preview settles it: Y-toggle NUMBERS mode, highlight Race Engine Block, read Displacement. 5,204 -> install the 97-subset; changed -> read absolutes per part and re-solve.",
-          "status": "one readout from closure"
+          "decisive_readout": "RESOLVED — block disqualified. New procedure: V10 swap back ON first (currently the car sits on the stock V12), then bolt-ons with per-part absolute reads.",
+          "status": "engine path revised: all-bolt-ons-except-block, +98 badge-sum, absolutes-guided landing"
         }
       }
     ],

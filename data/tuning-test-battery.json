@@ -1061,7 +1061,8 @@
       ],
       "checksums": "All pane rows dashed vs the tune + bars 6.5/7.6/9.1/10/10/7.0. The applied black car is the living reference for gear-count and telemetry extraction.",
       "note_on_baseline": "The player's 792 donor shows 224.3 mph / 2.467 vs factory 229.1 / 2.819 at identical hp/weight/PI — GEARING sliders have been touched (sliders never move PI). Parts targets are unaffected; reset gearing to default before judging gearing work.",
-      "chassis_read": "3,160 lb / 45% front = the rear-biased-heavy quadrant — the 0.72 mech balance is presumably how the tuner civilizes it (maximum front grip share). Expect the car to NEED that setting; don't 'fix' it toward neutral."
+      "chassis_read": "3,160 lb / 45% front = the rear-biased-heavy quadrant — the 0.72 mech balance is presumably how the tuner civilizes it (maximum front grip share). Expect the car to NEED that setting; don't 'fix' it toward neutral.",
+      "engine_solve": "2026-08-11: Centenario measured via 154-frame tour (8-agent transcription). V10 swap base = 602/413/3,647/44%/5,204cc @ 761. Candidate EXACT subset for +97hp: Exhaust 24 + Block 28 + Fuel 19 + Valves 15 + Sport IM 11 — gated on whether the Race Engine Block preserves 5,204cc (one numbers-mode preview decides). Weight: race WR 3,031 + ~129 lb add-ons (cage 54 + aero + widths) = 3,160 target, front 45% matches. Player already OWNS: race WR, race IM/TB, flywheel, clutch, race trans, race driveline, race wing — the basket is half the answer already."
     }
   }
 }

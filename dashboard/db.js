@@ -45966,7 +45966,8 @@ window.FH6_DB = {
         ],
         "checksums": "All pane rows dashed vs the tune + bars 6.5/7.6/9.1/10/10/7.0. The applied black car is the living reference for gear-count and telemetry extraction.",
         "note_on_baseline": "The player's 792 donor shows 224.3 mph / 2.467 vs factory 229.1 / 2.819 at identical hp/weight/PI — GEARING sliders have been touched (sliders never move PI). Parts targets are unaffected; reset gearing to default before judging gearing work.",
-        "chassis_read": "3,160 lb / 45% front = the rear-biased-heavy quadrant — the 0.72 mech balance is presumably how the tuner civilizes it (maximum front grip share). Expect the car to NEED that setting; don't 'fix' it toward neutral."
+        "chassis_read": "3,160 lb / 45% front = the rear-biased-heavy quadrant — the 0.72 mech balance is presumably how the tuner civilizes it (maximum front grip share). Expect the car to NEED that setting; don't 'fix' it toward neutral.",
+        "engine_solve": "2026-08-11: Centenario measured via 154-frame tour (8-agent transcription). V10 swap base = 602/413/3,647/44%/5,204cc @ 761. Candidate EXACT subset for +97hp: Exhaust 24 + Block 28 + Fuel 19 + Valves 15 + Sport IM 11 — gated on whether the Race Engine Block preserves 5,204cc (one numbers-mode preview decides). Weight: race WR 3,031 + ~129 lb add-ons (cage 54 + aero + widths) = 3,160 target, front 45% matches. Player already OWNS: race WR, race IM/TB, flywheel, clutch, race trans, race driveline, race wing — the basket is half the answer already."
       }
     }
   },
@@ -46505,6 +46506,170 @@ window.FH6_DB = {
             }
           ]
         }
+      },
+      {
+        "id": "centenario-2016-v10-swap",
+        "car": "Lamborghini Centenario LP 770-4 (2016)",
+        "engine": "5.2L V10 swap (5,204 cc) — the Top 100 EZ donor engine",
+        "measurement_base": {
+          "description": "V10 swap installed, stock everything else",
+          "hp": 602,
+          "torque_ftlb": 413,
+          "weight_lb": 3647,
+          "front_pct": 44,
+          "pi": 761
+        },
+        "captured": "2026-08-11 — player menu-tour video, 154 frames, 8-agent transcription (bars mode + partial numbers mode). hp deltas from POWER badges; TORQUE UNKNOWN per part (badge-hides-torque rule).",
+        "categories": {
+          "engine_parts_hp_badges": [
+            {
+              "part": "Race Intake",
+              "hp_delta": 13,
+              "pi": 765,
+              "cost_cr": 1800
+            },
+            {
+              "part": "Sport Intake Manifold / Throttle Body",
+              "hp_delta": 11,
+              "pi": 764,
+              "cost_cr": 1450
+            },
+            {
+              "part": "Race Intake Manifold / Throttle Body",
+              "hp_delta": 18,
+              "pi": 768,
+              "note": "OWNED by player"
+            },
+            {
+              "part": "Race Fuel System",
+              "hp_delta": 19,
+              "pi": 767,
+              "cost_cr": 2200
+            },
+            {
+              "part": "Race Valves",
+              "hp_delta": 15,
+              "pi": 766,
+              "cost_cr": 4300
+            },
+            {
+              "part": "Race Exhaust",
+              "hp_delta": 24,
+              "pi": 770,
+              "cost_cr": 2050
+            },
+            {
+              "part": "Race Ignition",
+              "hp_delta": 16,
+              "pi": 766,
+              "cost_cr": 1950
+            },
+            {
+              "part": "Race Engine Block",
+              "hp_delta": 28,
+              "pi": 770,
+              "cost_cr": 4500,
+              "note": "OPEN QUESTION: does it change the 5,204cc displacement? Decides the donor solve."
+            },
+            {
+              "part": "Race Flywheel",
+              "hp_delta": 0,
+              "pi": 762,
+              "note": "Weight -2 lb, OWNED"
+            },
+            {
+              "part": "Twin Turbo",
+              "hp_delta": 80,
+              "pi": "S2 813",
+              "cost_cr": 1800,
+              "note": "over-cap; donor is NA"
+            }
+          ],
+          "engine_swap_menu": [
+            {
+              "part": "Stock 6.5L V12 powertrain",
+              "pi": "S1 795 (at stock-parts config)"
+            },
+            {
+              "part": "5.2L V10",
+              "badge": "POWER -157 hp",
+              "pi": 761,
+              "note": "THE DONOR SWAP — base 602/413/3,647/44%F/5,204cc"
+            },
+            {
+              "part": "Racing V12",
+              "badge": "POWER -9 hp",
+              "pi": "S1 800 EXACTLY",
+              "cost_cr": 57500,
+              "note": "a swap that lands the stock-ish car dead on the cap — untested alternative build seed"
+            },
+            {
+              "part": "6.5L V12 (bigger)",
+              "badge": "POWER +242 hp",
+              "pi": "S2 868",
+              "cost_cr": 75000
+            }
+          ],
+          "drivetrain": [
+            {
+              "part": "RWD Drivetrain swap",
+              "pi": "S2 808",
+              "cost_cr": 10000,
+              "note": "AWD->RWD conversion EXISTS — drift-fork seed"
+            },
+            {
+              "part": "Race Transmission family",
+              "note": "Sport unlocks FD tuning; Race unlocks full ratios; 6-speed shows Accel 9.9/Launch 10 bars; 9/10-speed preview PI BELOW the race base (761 vs 762) — the negative-PI long-box pattern again"
+            },
+            {
+              "part": "Race Clutch / Race Driveline",
+              "note": "OWNED; driveline -20 lb / +1 PI"
+            }
+          ],
+          "platform": [
+            {
+              "part": "Weight Reduction ladder (numbers mode)",
+              "note": "stock 3,647 / Sport -237 -> 3,410 @ 773 / Race -616 -> 3,031 @ 796, front% -> 45. Player OWNS race WR."
+            },
+            {
+              "part": "Spring and Dampers",
+              "note": "Rally = SAME PI as stock (761) unlocking spring/damper/alignment; Drift 762 (RH -2.0); stock springs tile OWNED not INSTALLED (mid-build state)"
+            },
+            {
+              "part": "Race Chassis Reinforcement",
+              "note": "+54 lb, 762, 2,100 cr"
+            },
+            {
+              "part": "Differential",
+              "note": "rally/drift/race ALL 761 — PI-free diff family (pattern confirmed 3rd car)"
+            }
+          ],
+          "tires_rims_aero": [
+            {
+              "part": "Compound menu",
+              "note": "NINE tiles; Drag shows 'GRIP -0.78' badge — compounds print GRIP DELTAS on their thumbnails (new instrument!)"
+            },
+            {
+              "part": "Front tires 255 stock / 265 (+2,600cr, PI 754); Rear 355/375; 21in rims 751",
+              "note": "width/rim rows carry PI both directions"
+            },
+            {
+              "part": "Race Front Bumper",
+              "note": "ADJUSTABLE — unlocks front downforce tuning"
+            },
+            {
+              "part": "Race Rear Wing vs stock wing",
+              "note": "race wing 751 vs stock wing 764 at that config — the race wing is ~13 PI CHEAPER: negative-PI adjustable wing pattern, second car"
+            }
+          ]
+        },
+        "donor_solution": {
+          "target": "699 hp / 453 ft-lb / 3,160 lb / 45%F / 5,204cc / S1 800 (Top 100 EZ)",
+          "power_math": "Need +97 hp over the 602 base. EXACT badge subset: Race Exhaust 24 + Race Engine Block 28 + Race Fuel 19 + Race Valves 15 + Sport IM/TB 11 = 97 — but ONLY if the Race Engine Block keeps displacement at 5,204 (target reads 5.20L). If the block changes displacement, the subset must re-solve from numbers-mode absolutes (badges round).",
+          "weight_math": "Race WR lands 3,031; target 3,160 = +129 lb of add-ons on top: cage +54 confirmed candidate, plus wing/bumper/width mass. Front 45% matches race-WR numeric exactly.",
+          "decisive_readout": "ONE preview settles it: Y-toggle NUMBERS mode, highlight Race Engine Block, read Displacement. 5,204 -> install the 97-subset; changed -> read absolutes per part and re-solve.",
+          "status": "one readout from closure"
+        }
       }
     ],
     "pi_efficiency_stars": [
@@ -46514,7 +46679,8 @@ window.FH6_DB = {
       "Viper ACR 2016: ANTI-ROLL BARS are PI-free at every tier and race bars are lighter than stock — free adjustability + free weight. Check ARB PI on every build before assuming they cost anything.",
       "VIPER ACR HEADLINE: the ENTIRE slider set is PI-free — rally springs (-1 PI vs stock), ARBs free, differential free at all tiers, every transmission free (weight-only differences). The 4C's ~30-PI adjustability tax does not exist on this chassis; the ACR is structurally a tuner's car. Check per-car — the tax varies from ~30 PI (4C) to zero (ACR).",
       "VIPER ACR CROWN JEWEL: the Stock Rear Wing is -11 PI with adjustable downforce sliders — the car pays you to take the aero. Completes the everything-free suite: springs -1, ARBs 0, diff 0, gearboxes 0, brakes native, wing -11.",
-      "HEAVY-RIM BALLAST (donor Viper, player-confirmed): deliberately heavy rims = negative PI — buy PI with corner mass and spend it on power/weight-reduction where the exchange rate profits. The fourth PI-arbitrage pattern documented (rally compound, rally springs, negative-PI parts, heavy rims)."
+      "HEAVY-RIM BALLAST (donor Viper, player-confirmed): deliberately heavy rims = negative PI — buy PI with corner mass and spend it on power/weight-reduction where the exchange rate profits. The fourth PI-arbitrage pattern documented (rally compound, rally springs, negative-PI parts, heavy rims).",
+      "Centenario: Rally springs = PI-parity with stock while unlocking three slider families (2nd car); rally/drift/race diffs PI-free (3rd car); 9/10-speed race boxes BELOW race-base PI; race rear wing ~13 PI cheaper than the stock wing (2nd negative-PI wing)."
     ]
   },
   "trainingZone": {

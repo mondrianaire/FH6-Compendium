@@ -44948,10 +44948,29 @@ window.FH6_DB = {
       "name": "Sensitivity matrix — run this ONCE before everything",
       "procedure": "On a settled build, move each slider from min to max while watching the Performance panel. Record WHICH readouts move and roughly how much. Some readouts may respond only to PARTS, not sliders — knowing which sliders are panel-visible vs drive-to-measure decides which battery track (static vs dynamic) each slider uses.",
       "output": "A slider × readout sensitivity map. This is the highest-value 20 minutes in the whole battery: it converts unknown sliders into free static tests.",
-      "status": "partially verified 2026-08-10",
+      "status": "EXECUTED 2026-08-11 — full 9-tab min/max sweep on the Centenario replica (player screenshots, panel readouts per extreme)",
       "findings": [
         "PLAYER-VERIFIED (Supra range sweep screenshots): the Performance panel LIVE-RESIMULATES on slider change — 'SIMULATING...' states observed mid-change, and 'FAILED!' states at extreme configs (the sim cannot complete e.g. braking runs at 0% pressure, top-speed runs at extreme gearing). The panel is a working instrument; FAILED at an extreme is itself a data point (the config is undrivable). Full per-readout sensitivity map still pending — several captures show large readout swings (0-60 3.06s vs 5.9s) that are CONFOUNDED across multiple changed sliders; do single-slider sweeps to attribute."
-      ]
+      ],
+      "sensitivity_matrix": {
+        "method": "Each tab swept to both extremes; deltas read within each pair (other tabs held). Panel = steady-state simulator; per-pair deltas are the valid measurement.",
+        "panel_VISIBLE": [
+          "GEARING: the biggest lever — FD 6.10 vs 2.20: 0-60 2.383 vs 3.017, top speed 136.1 vs 207.6. The FD-to-top-speed curve is fully mappable from the menu.",
+          "DIFFERENTIAL: LAUNCH owner — all-locked vs all-open: 0-60 4.683 vs 9.300 (!), 0-100 8.65 vs 16.20; locked costs ~7 mph top speed (drag). Steady latG UNCHANGED (cornering effects are dynamic).",
+          "AERO (rear wing 330-800): balance 0.40 -> 0.29, efficiency 0.840 -> 0.800, top 166.7 -> 150.3 (16 mph of drag), latG@120 1.52 -> 1.63, braking 100-0 184.7 -> 179.1. The full envelope trade in one slider.",
+          "BRAKES: pressure 0% = 363/841 ft (no brakes); 100F/200% = 136/314 — WORSE than balanced/moderate (63-64 ft): the panel MODELS LOCKUP; the braking-floor knee is real and interior.",
+          "SPRINGS/RH: mech balance responds (front-soft raised it 0.52 -> 0.57 — direction rule re-confirmed); small braking effects.",
+          "ALIGNMENT: braking 174.3 (full negative camber) vs 182.5 (positive) and 0-60 3.683 vs 4.050 — but latG UNCHANGED either way."
+        ],
+        "panel_INVISIBLE": [
+          "TIRE PRESSURES: 15/15 vs 55/55 psi — latG identical (1.33/1.57), braking within 1.4 ft, top within 0.2 mph. THE PANEL DOES NOT MODEL PRESSURE AT ALL.",
+          "DAMPING: 1.0s vs 20.0s everywhere — every panel row within noise. Fully dynamic.",
+          "ANTIROLL BARS: 1/1 vs 65/65 — latG unchanged; only a small mech-balance shift (0.54 vs 0.57).",
+          "CAMBER (for grip): +/-5 degrees moves braking and launch but latG NOT AT ALL — the panel's steady-state cornering does not reward camber; camber truth lives in the telemetry Heat page only."
+        ],
+        "doctrine_confirmed": "The steady-state doctrine is now EMPIRICAL: the panel sees equilibria (gearing, aero, brakes, launch-lock) and is blind to exactly the dark-layer sliders (pressures, damping, bars, camber-for-grip). Panel-matching can never recover those — telemetry and phase probes are not a fallback, they are the ONLY instrument.",
+        "bonus_rows": "Wing slider range on the race rear wing: [330, 800] lb. Springs range: 164.4-821.8 lb/in, RH 3.1-4.3. Caster range 1.0-7.0. Diff lock = 4.6 SECONDS of 0-60 on this AWD."
+      }
     },
     "static_tests": [
       {
@@ -45968,7 +45987,8 @@ window.FH6_DB = {
         "note_on_baseline": "The player's 792 donor shows 224.3 mph / 2.467 vs factory 229.1 / 2.819 at identical hp/weight/PI — GEARING sliders have been touched (sliders never move PI). Parts targets are unaffected; reset gearing to default before judging gearing work.",
         "chassis_read": "3,160 lb / 45% front = the rear-biased-heavy quadrant — the 0.72 mech balance is presumably how the tuner civilizes it (maximum front grip share). Expect the car to NEED that setting; don't 'fix' it toward neutral.",
         "engine_solve": "2026-08-11: Centenario measured via 154-frame tour (8-agent transcription). V10 swap base = 602/413/3,647/44%/5,204cc @ 761. Candidate EXACT subset for +97hp: Exhaust 24 + Block 28 + Fuel 19 + Valves 15 + Sport IM 11 — gated on whether the Race Engine Block preserves 5,204cc (one numbers-mode preview decides). Weight: race WR 3,031 + ~129 lb add-ons (cage 54 + aero + widths) = 3,160 target, front 45% matches. Player already OWNS: race WR, race IM/TB, flywheel, clutch, race trans, race driveline, race wing — the basket is half the answer already. || FINAL 2026-08-11: donor engine = V10 swap + Centrifugal Supercharger ONLY (699/453 exact, badge +97). Player action: refund the five race bolt-ons, install the cent, resume walkthrough at Platform.",
-        "parts_complete": "2026-08-11: LANDED EXACTLY S1 800. Final config: 5.2L V10 swap + Centrifugal SC (699/453 exact) + rally springs + race WR + slicks + race rear wing + STOCK front bumper + heavy-rim ballast + blind-spot drivetrain stripped. Endgame ledger was closed by preview-at-config (the table plans, the preview prices): heavy rims to 803, then stock front bumper -3 -> 800. Config-dependence datum: the bumper cost 3 PI at the final config vs +1 at the tour's bare config. INFERENCE: the donor also runs the stock front bumper (their exact-800 couldn't absorb it either) — 0.46 aero balance must therefore be reachable with the rear wing slider alone."
+        "parts_complete": "2026-08-11: LANDED EXACTLY S1 800. Final config: 5.2L V10 swap + Centrifugal SC (699/453 exact) + rally springs + race WR + slicks + race rear wing + STOCK front bumper + heavy-rim ballast + blind-spot drivetrain stripped. Endgame ledger was closed by preview-at-config (the table plans, the preview prices): heavy rims to 803, then stock front bumper -3 -> 800. Config-dependence datum: the bumper cost 3 PI at the final config vs +1 at the tour's bare config. INFERENCE: the donor also runs the stock front bumper (their exact-800 couldn't absorb it either) — 0.46 aero balance must therefore be reachable with the rear wing slider alone.",
+        "aero_floor_problem": "SWEEP DISCOVERY: with the STOCK front bumper (fixed front downforce) the aero balance FLOOR is 0.40 at rear=330 — the donor's 0.46 is UNREACHABLE in this config. The earlier stock-bumper inference is CONTRADICTED: Wolfs Rayet must run the RACE front bumper (adjustable front downforce), absorbing its PI somewhere our ledger differs (their rim/cage mix). OPTIONS: (A) reshuffle — cage OFF (-1/-2 PI, -54 lb) + race bumper ON (+3): lands 799-800ish, unlocks front downforce, 0.46 reachable; re-verify weight (~3,100). (B) fork at 0.40 — accept 0.06 more high-speed push than the donor; costs nothing. Given the Goliath is a flow course and the player's Viper experience with front-shy aero, option A is recommended if the ledger closes."
       }
     }
   },

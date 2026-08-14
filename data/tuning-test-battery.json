@@ -64,7 +64,8 @@
         "CAMBER (for grip): +/-5 degrees moves braking and launch but latG NOT AT ALL — the panel's steady-state cornering does not reward camber; camber truth lives in the telemetry Heat page only."
       ],
       "doctrine_confirmed": "The steady-state doctrine is now EMPIRICAL: the panel sees equilibria (gearing, aero, brakes, launch-lock) and is blind to exactly the dark-layer sliders (pressures, damping, bars, camber-for-grip). Panel-matching can never recover those — telemetry and phase probes are not a fallback, they are the ONLY instrument.",
-      "bonus_rows": "Wing slider range on the race rear wing: [330, 800] lb. Springs range: 164.4-821.8 lb/in, RH 3.1-4.3. Caster range 1.0-7.0. Diff lock = 4.6 SECONDS of 0-60 on this AWD."
+      "bonus_rows": "Wing slider range on the race rear wing: [330, 800] lb. Springs range: 164.4-821.8 lb/in, RH 3.1-4.3. Caster range 1.0-7.0. Diff lock = 4.6 SECONDS of 0-60 on this AWD.",
+      "stacking_caveat": "2026-08-14: single-tab extreme sweeps understate COMBINED authority. Mech balance read 0.61-0.66 in per-tab reads but the player reached 0.70 by stacking the springs corner with the ARB split. Panel aggregates must be bounded with cross-tab stacks, not per-tab sweeps."
     }
   },
   "static_tests": [
@@ -1092,7 +1093,8 @@
         "prime_suspect": "FRONT TIRE WIDTH. Tour frames 103-105: 255mm stock (installed) -> 265mm (+3 PI, 2600cr) -> 275mm (+6 PI, PLAYER-OWNED, not installed). Width bars: Hnd UP, Brk UP (donor radar Braking=10). Width-vs-mech effect is the project's known unrun experiment. One hypothesis now explains ALL THREE unreachable rows at once: donor runs RACE FRONT BUMPER (+3) + WIDER FRONTS (+3/+6) instead of our cage + heavy-rim ballast -> aero 0.46 / eff 0.795 / mech 0.72 all follow. Their 800 buys front-grip hardware; ours bought ballast.",
         "ledger_v2_candidates": "PI payers if hypothesis confirms: cage OFF, 21in front rims ('v S1 751' — PI-down, all bars down, more ballast), rear 375 tires (PI-neutral/down at tour config). Close by preview-at-config as always.",
         "experiment_queued": "SAVE SETUP IN SETUP MANAGER FIRST (part installs silently reset tune tabs). Then preview/install 265F or 275F (owned) and wiggle-read the Mech row. A jump of ~+0.03-0.06 confirms; report PI at config.",
-        "doctrine_applied": "Escape hatch fired as designed. Sane band on sliders alone: 0.66-0.69 (front springs 180-230, rear 550-650, front ARB single digits, rear ARB 40s). Do NOT chase 0.72 into the 164/820 corner — that is the exact pegged config that produced the Viper wiggle/spin."
+        "doctrine_applied": "Escape hatch fired as designed. Sane band on sliders alone: 0.66-0.69 (front springs 180-230, rear 550-650, front ARB single digits, rear ARB 40s). Do NOT chase 0.72 into the 164/820 corner — that is the exact pegged config that produced the Viper wiggle/spin.",
+        "CORRECTION_2026-08-14": "Player reached 0.70 'easily' by manipulating ARBs and springs together — the 0.66 ceiling claim is RETRACTED. The stacked spring+ARB authority on this chassis exceeds the sweep-derived budget (the 0.61-0.66 window was read with the ARB split not yet deployed). 0.70 = new highest slider-achieved mech balance project-wide. Residual to donor: 0.02 — inside the panel-matching doctrine band (0.70-0.72 sane beats 0.72 pegged). Lesson for the instrument file: per-tab extreme sweeps UNDERSTATE combined authority — cross-tab stacking (springs corner + ARB corner) must be measured as its own data point. The width experiment is now OPTIONAL for mech; the aero rows (0.46/0.795) remain the only unreachable targets and still point at the race front bumper."
       }
     }
   }

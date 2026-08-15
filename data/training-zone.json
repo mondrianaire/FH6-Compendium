@@ -1282,5 +1282,506 @@
     },
     "tuning_response": "If it locks at high speed: lower brake PRESSURE (the direct fix), or add downforce (fixes it at speed only). If it locks late in the zone as you slow: that is the downforce fading — ease the pedal progressively as speed bleeds off, which is the same skill as trail-braking. Brake BALANCE never fixes lock-up magnitude; it only chooses which axle goes first.",
     "tier": "doctrine — standard braking physics; the aero-brake index is newly derived here and the worked example uses this project's own player-verified panel numbers"
+  },
+  "friction_diagnosis": {
+    "headline": "The Friction page — the oversteer/understeer instrument",
+    "tier": "player-verified (36 s Friction-page run, Shimanoyama circuit, 2026-08-14)",
+    "core_rule": "Whichever AXLE goes red first names the condition. Fronts red while rears green = UNDERSTEER. Rears red while fronts green = OVERSTEER. The PHASE it happens in (our five colours) picks the slider. The first red ring is the diagnosis — every red ring after it is aftermath.",
+    "how_to_capture": [
+      "Drive the section that feels wrong with the Friction page up; record 20-30 s of video (the numbers move too fast to read live).",
+      "Scrub to the moment it felt wrong, then step BACKWARD to the FIRST red ring.",
+      "Read the cell: which axle went red × which phase you were in = one cell of the matrix below.",
+      "Apply that cell's fix, re-run the same section, re-record. One variable at a time."
+    ],
+    "peak_bands": [
+      {
+        "band": "0-60%",
+        "label": "loafing",
+        "color": "#566173",
+        "w": 30,
+        "meaning": "Big reserve — no diagnosis possible here, the tire isn't being asked a question."
+      },
+      {
+        "band": "60-95%",
+        "label": "working",
+        "color": "#00d27a",
+        "w": 25,
+        "meaning": "Loaded and honest. Racing lives here."
+      },
+      {
+        "band": "95-100%",
+        "label": "THE PEAK",
+        "color": "#e3b341",
+        "w": 10,
+        "meaning": "Top of the slip curve — maximum grip. Grip is highest right before it is lost."
+      },
+      {
+        "band": "100-130%",
+        "label": "over",
+        "color": "#f0883e",
+        "w": 15,
+        "meaning": "Past the peak, on the downslope. Ring turns red; scrubbing speed; one small input recovers it."
+      },
+      {
+        "band": "130%+",
+        "label": "sliding",
+        "color": "#e5414e",
+        "w": 20,
+        "meaning": "Deep slide or wheelspin (your launch read 528%). The tire is a passenger until demand drops."
+      }
+    ],
+    "needle": {
+      "concept": "The orange needle is that tire's live force vector — the traction circle from the grip-science section, drawn per wheel. Sideways = cornering. Along the car = drive or braking. DIAGONAL = combined demand: you asked one tire for two jobs. A diagonal needle + red ring is the traction circle being exceeded, live.",
+      "ring_size": "The ring's diameter is the LOAD on that tire. Watch the inside-rear shrink to a dot in a sweeper (your 0:07 frame) — that's load transfer made visible, and why the inside wheel spins first."
+    },
+    "instrument_notes": [
+      "Peak% is a short rolling maximum — it can hold a number ~1 s after the moment passed (your 0:07 frame read 106% on a nearly unloaded wheel). The RING COLOUR is the live truth; the number is the recent worst.",
+      "All four wheels red at 250-1,100% with needles running off-screen is NOT a tire story — it's a collision or physics jolt (your 0:02 launch spike and 0:34 wall hit). Skip those frames.",
+      "One rear red with a forward needle while its twin stays green = inside-wheel spin — accel diff too open. Confirm with the wheel-speed split on the Tires page."
+    ],
+    "matrix": [
+      {
+        "phase": 1,
+        "front": {
+          "name": "Brake lockup — the plough",
+          "tell": "Front needles straight back, fronts red, steering goes light.",
+          "fix": [
+            "Brake pressure down toward the knee (braking-floor test)",
+            "Balance 2-4% rearward",
+            "Only from high speed? That's the pressure ceiling — check your aero-brake index"
+          ]
+        },
+        "rear": {
+          "name": "Braking oversteer — the tail walks",
+          "tell": "Rears red while braking straight, car rotates before you steer.",
+          "fix": [
+            "Brake balance forward",
+            "Decel diff lock down",
+            "Rear toe-in +0.1-0.2 (cheap stability)"
+          ]
+        }
+      },
+      {
+        "phase": 2,
+        "front": {
+          "name": "Trail-brake understeer — two jobs, one tire",
+          "tell": "Front needles DIAGONAL (brake + steer) at the flick, fronts red, nose runs wide.",
+          "fix": [
+            "Driving first: finish more of the braking before you steer",
+            "Caster up — more camber arrives with steering angle",
+            "Front rebound a click softer so the nose takes its set"
+          ]
+        },
+        "rear": {
+          "name": "Lift-off / trail-brake oversteer",
+          "tell": "Rears red the instant you lift or flick; rear needles diagonal.",
+          "fix": [
+            "Decel diff down",
+            "Brake balance forward a notch",
+            "Rear damping — transient layer, panel-dark: tune with the breakaway-margin probe"
+          ]
+        }
+      },
+      {
+        "phase": 3,
+        "front": {
+          "name": "Classic understeer",
+          "tell": "Front needles pure sideways, red, held through the middle of the corner.",
+          "fix": [
+            "Mech balance up: front springs/ARB relatively SOFTER (proven direction)",
+            "Only in fast corners? It's aero, not mech — balance forward",
+            "Check Heat-page camber before touching sliders (conditions layer)"
+          ]
+        },
+        "rear": {
+          "name": "Classic oversteer",
+          "tell": "Rear needles sideways, red, steady state.",
+          "fix": [
+            "Rear ARB/springs relatively softer (mech balance down a touch)",
+            "Speed-dependent? Rear wing up",
+            "Rear camber via the Heat page"
+          ]
+        }
+      },
+      {
+        "phase": 4,
+        "front": {
+          "name": "Power understeer — the AWD push",
+          "tell": "Fronts red as the throttle opens, needles forward + sideways.",
+          "fix": [
+            "Center diff more rearward",
+            "Front accel diff down"
+          ]
+        },
+        "rear": {
+          "name": "Power oversteer / wheelspin",
+          "tell": "Rears red on throttle, needles forward-diagonal. Your launch read 156/528%.",
+          "fix": [
+            "Accel diff down 10-15%",
+            "Front ARB a click stiffer — evens the rear pair's loads",
+            "Taller gearing (FD down) trims wheel torque",
+            "Confirm on Tires page: wheel-speed split"
+          ]
+        }
+      },
+      {
+        "phase": 5,
+        "front": {
+          "name": "Aero understeer",
+          "tell": "Fronts red ONLY in fast corners; the same car turns fine when slow.",
+          "fix": [
+            "Aero balance forward: front aero up (bumper permitting — the 0.40-floor lesson) or rear wing down",
+            "Front ride height lower (rake)"
+          ]
+        },
+        "rear": {
+          "name": "Aero oversteer — the wiggle",
+          "tell": "Rears red or flickering at speed; small steering inputs blossom instead of dying out.",
+          "fix": [
+            "Rear wing up (measured: latG@120 rises with wing)",
+            "Yaw-damping layer — chassis-character map territory (weight, front %)",
+            "Caster up"
+          ]
+        }
+      }
+    ],
+    "both_red": "Both axles red in a corner = OVERDRIVEN. No slider fixes asking all four tires for 110%. Check the conditions layer first (cold tires? compound ceiling? dirt?), then slow the entry. Sustained both-red with big yaw is just a drift — the far end of the grip-slide spectrum.",
+    "your_run": {
+      "context": "Your 36-second Friction-page run, one reading per second, all four wheels. The strip below is the whole video; hover any second for the numbers.",
+      "timeline": [
+        {
+          "t": 1,
+          "fl": 2,
+          "fr": 2,
+          "rl": 3,
+          "rr": 3,
+          "state": "calm"
+        },
+        {
+          "t": 2,
+          "fl": 845,
+          "fr": 1149,
+          "rl": 1140,
+          "rr": 1176,
+          "state": "spike"
+        },
+        {
+          "t": 3,
+          "fl": 17,
+          "fr": 20,
+          "rl": 156,
+          "rr": 528,
+          "state": "rear"
+        },
+        {
+          "t": 4,
+          "fl": 12,
+          "fr": 12,
+          "rl": 52,
+          "rr": 54,
+          "state": "calm"
+        },
+        {
+          "t": 5,
+          "fl": 14,
+          "fr": 13,
+          "rl": 42,
+          "rr": 43,
+          "state": "calm"
+        },
+        {
+          "t": 6,
+          "fl": 138,
+          "fr": 104,
+          "rl": 108,
+          "rr": 62,
+          "state": "spike"
+        },
+        {
+          "t": 7,
+          "fl": 59,
+          "fr": 65,
+          "rl": 73,
+          "rr": 106,
+          "state": "calm"
+        },
+        {
+          "t": 8,
+          "fl": 44,
+          "fr": 38,
+          "rl": 68,
+          "rr": 42,
+          "state": "calm"
+        },
+        {
+          "t": 9,
+          "fl": 138,
+          "fr": 111,
+          "rl": 81,
+          "rr": 39,
+          "state": "front"
+        },
+        {
+          "t": 10,
+          "fl": 30,
+          "fr": 32,
+          "rl": 149,
+          "rr": 138,
+          "state": "rear"
+        },
+        {
+          "t": 11,
+          "fl": 146,
+          "fr": 121,
+          "rl": 86,
+          "rr": 50,
+          "state": "front"
+        },
+        {
+          "t": 12,
+          "fl": 23,
+          "fr": 40,
+          "rl": 114,
+          "rr": 102,
+          "state": "rear"
+        },
+        {
+          "t": 13,
+          "fl": 76,
+          "fr": 97,
+          "rl": 151,
+          "rr": 189,
+          "state": "rear"
+        },
+        {
+          "t": 14,
+          "fl": 156,
+          "fr": 136,
+          "rl": 636,
+          "rr": 562,
+          "state": "both"
+        },
+        {
+          "t": 15,
+          "fl": 56,
+          "fr": 225,
+          "rl": 908,
+          "rr": 573,
+          "state": "both"
+        },
+        {
+          "t": 16,
+          "fl": 287,
+          "fr": 177,
+          "rl": 1098,
+          "rr": 154,
+          "state": "both"
+        },
+        {
+          "t": 17,
+          "fl": 19,
+          "fr": 20,
+          "rl": 35,
+          "rr": 38,
+          "state": "calm"
+        },
+        {
+          "t": 18,
+          "fl": 15,
+          "fr": 17,
+          "rl": 48,
+          "rr": 44,
+          "state": "calm"
+        },
+        {
+          "t": 19,
+          "fl": 10,
+          "fr": 10,
+          "rl": 39,
+          "rr": 32,
+          "state": "calm"
+        },
+        {
+          "t": 20,
+          "fl": 17,
+          "fr": 19,
+          "rl": 28,
+          "rr": 39,
+          "state": "calm"
+        },
+        {
+          "t": 21,
+          "fl": 155,
+          "fr": 185,
+          "rl": 81,
+          "rr": 109,
+          "state": "front"
+        },
+        {
+          "t": 22,
+          "fl": 75,
+          "fr": 138,
+          "rl": 150,
+          "rr": 206,
+          "state": "rear"
+        },
+        {
+          "t": 23,
+          "fl": 102,
+          "fr": 120,
+          "rl": 34,
+          "rr": 58,
+          "state": "front"
+        },
+        {
+          "t": 24,
+          "fl": 10,
+          "fr": 9,
+          "rl": 20,
+          "rr": 23,
+          "state": "calm"
+        },
+        {
+          "t": 25,
+          "fl": 11,
+          "fr": 11,
+          "rl": 22,
+          "rr": 22,
+          "state": "calm"
+        },
+        {
+          "t": 26,
+          "fl": 98,
+          "fr": 194,
+          "rl": 272,
+          "rr": 88,
+          "state": "spike"
+        },
+        {
+          "t": 27,
+          "fl": 111,
+          "fr": 65,
+          "rl": 91,
+          "rr": 185,
+          "state": "spike"
+        },
+        {
+          "t": 28,
+          "fl": 72,
+          "fr": 61,
+          "rl": 60,
+          "rr": 61,
+          "state": "calm"
+        },
+        {
+          "t": 29,
+          "fl": 100,
+          "fr": 123,
+          "rl": 26,
+          "rr": 48,
+          "state": "front"
+        },
+        {
+          "t": 30,
+          "fl": 68,
+          "fr": 55,
+          "rl": 55,
+          "rr": 50,
+          "state": "calm"
+        },
+        {
+          "t": 31,
+          "fl": 17,
+          "fr": 63,
+          "rl": 217,
+          "rr": 212,
+          "state": "rear"
+        },
+        {
+          "t": 32,
+          "fl": 69,
+          "fr": 20,
+          "rl": 224,
+          "rr": 242,
+          "state": "rear"
+        },
+        {
+          "t": 33,
+          "fl": 58,
+          "fr": 50,
+          "rl": 296,
+          "rr": 269,
+          "state": "rear"
+        },
+        {
+          "t": 34,
+          "fl": 357,
+          "fr": 279,
+          "rl": 320,
+          "rr": 264,
+          "state": "spike"
+        },
+        {
+          "t": 35,
+          "fl": 47,
+          "fr": 45,
+          "rl": 59,
+          "rr": 44,
+          "state": "calm"
+        },
+        {
+          "t": 36,
+          "fl": 4,
+          "fr": 4,
+          "rl": 2,
+          "rr": 2,
+          "state": "calm"
+        }
+      ],
+      "moments": [
+        {
+          "t": "0:03",
+          "title": "The launch",
+          "cell": "Exit · rear",
+          "numbers": "F 17/20 · R 156/528",
+          "lesson": "The purest oversteer signature this page can show: fronts loafing at 17%, rears five times past peak. Exit-cell fixes: accel diff down, taller first gear, or squeeze instead of stomp."
+        },
+        {
+          "t": "0:09",
+          "title": "The flick",
+          "cell": "Turn-in · front",
+          "numbers": "F 138/111 · R 81/39",
+          "lesson": "Direction change saturated ONLY the fronts, needles pure sideways — entry understeer. This is damper/caster/toe country: panel-dark, which is exactly why this page exists."
+        },
+        {
+          "t": "0:11",
+          "title": "Mid-corner push",
+          "cell": "Mid · front",
+          "numbers": "F 146/121 · R 86/50",
+          "lesson": "Steady-state understeer — the one condition the tune panel can also see (mech balance). Front relatively softer is the proven direction."
+        },
+        {
+          "t": "0:21-23",
+          "title": "One corner, both diseases",
+          "cell": "Mid · front, then Exit · rear",
+          "numbers": "apex F 155/185 → throttle R 150/206 → exit F 102/120",
+          "lesson": "The same corner produced understeer at apex and power oversteer one second later. Tune by PHASE, not by corner — 'fixing understeer' globally would make the exit slide worse. This is the five-colour doctrine in a single corner."
+        },
+        {
+          "t": "0:31-33",
+          "title": "The tunnel drift",
+          "cell": "spectrum · drift station",
+          "numbers": "R 212-296% sustained, fronts green",
+          "lesson": "Deliberate slide: rears held far past peak for three full seconds while the fronts steer it — the drift end of the grip-slide spectrum, on instruments."
+        },
+        {
+          "t": "0:02 & 0:34",
+          "title": "The impact frames",
+          "cell": "none — skip",
+          "numbers": "all four 264-1,176%",
+          "lesson": "Four red rings at once with needles running off-screen isn't grip data — it's a physics jolt (launch) and a wall. Learn to recognise and discard them."
+        }
+      ]
+    }
   }
 }

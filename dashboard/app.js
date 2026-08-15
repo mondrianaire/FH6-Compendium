@@ -2045,6 +2045,93 @@
         </div>
       </div>`;
 
+    // --- friction diagnosis: the oversteer/understeer instrument ---
+    const fd = tz.friction_diagnosis;
+    let fdBlock = "";
+    if (fd) {
+      const bandBar = `
+        <div style="display:flex;height:30px;border-radius:7px;overflow:hidden;margin:10px 0 4px">
+          ${fd.peak_bands.map((b) => `<div title="${b.meaning.replace(/"/g, "&quot;")}" style="flex:0 0 ${b.w}%;background:${b.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0e1116">${b.label}</div>`).join("")}
+        </div>
+        <div style="display:flex;font-size:10px;color:var(--muted)">
+          ${fd.peak_bands.map((b) => `<div style="flex:0 0 ${b.w}%;text-align:center">${b.band}</div>`).join("")}
+        </div>`;
+      const NC = { cx: 108, cy: 112, r: 66 };
+      const ncA = (dx, dy, col, lbl, ax, ay, dash) => `
+        <line x1="${NC.cx}" y1="${NC.cy}" x2="${NC.cx + dx}" y2="${NC.cy + dy}" stroke="${col}" stroke-width="3.5" stroke-linecap="round"${dash ? ` stroke-dasharray="6 5"` : ""}/>
+        <circle cx="${NC.cx + dx}" cy="${NC.cy + dy}" r="4.5" fill="${col}"/>
+        <text x="${NC.cx + ax}" y="${NC.cy + ay}" text-anchor="middle" fill="${col}" font-size="10" font-weight="700">${lbl}</text>`;
+      const needleSvg = `<svg viewBox="0 0 340 224" class="tz-svg" role="img" aria-label="Reading the needle">
+        <circle cx="${NC.cx}" cy="${NC.cy}" r="${NC.r}" fill="none" stroke="#00d27a" stroke-width="2.5"/>
+        ${ncA(0, -NC.r, "var(--accent2)", "drive", 0, -NC.r - 10)}
+        ${ncA(0, NC.r, TZ_C.mom, "brake", 0, NC.r + 18)}
+        ${ncA(-NC.r, 0, "var(--muted)", "corner", -NC.r - 2, -12)}
+        ${ncA(NC.r, 0, "var(--muted)", "corner", NC.r + 2, -12)}
+        ${ncA(NC.r * 0.94, NC.r * 0.94, TZ_C.bad, "two jobs = red ring", NC.r * 0.35, NC.r + 34, true)}
+        <circle cx="278" cy="66" r="34" fill="none" stroke="#00d27a" stroke-width="2"/>
+        <circle cx="278" cy="158" r="11" fill="none" stroke="#00d27a" stroke-width="2"/>
+        <text x="278" y="112" text-anchor="middle" fill="var(--muted)" font-size="9.5">ring = load</text>
+        <text x="278" y="186" text-anchor="middle" fill="var(--muted)" font-size="9.5">unloaded</text>
+      </svg>`;
+      const fdMatrix = `
+        <div style="overflow-x:auto;margin-top:12px"><table style="min-width:900px">
+          <thead><tr><th style="width:110px"></th>${fd.matrix.map((m) => `<th style="background:${CM_PC[m.phase - 1]}22;border-top:4px solid ${CM_PC[m.phase - 1]}"><span style="color:${CM_PC[m.phase - 1]};font-weight:700">${m.phase} · ${CM_SHORT[m.phase - 1]}</span></th>`).join("")}</tr></thead>
+          <tbody>
+            <tr><td><strong style="color:#2f81f7">FRONTS<br>red first</strong><p class="why" style="font-size:10px;margin:4px 0 0">= understeer family</p></td>
+              ${fd.matrix.map((m) => `<td style="vertical-align:top"><strong style="font-size:12px">${m.front.name}</strong>
+                <p class="why" style="font-size:11px;margin:4px 0"><em>${m.front.tell}</em></p>
+                <ul class="why" style="font-size:11px;margin:4px 0 0;padding-left:16px">${m.front.fix.map((f) => `<li>${f}</li>`).join("")}</ul></td>`).join("")}</tr>
+            <tr><td><strong style="color:#e5414e">REARS<br>red first</strong><p class="why" style="font-size:10px;margin:4px 0 0">= oversteer family</p></td>
+              ${fd.matrix.map((m) => `<td style="vertical-align:top"><strong style="font-size:12px">${m.rear.name}</strong>
+                <p class="why" style="font-size:11px;margin:4px 0"><em>${m.rear.tell}</em></p>
+                <ul class="why" style="font-size:11px;margin:4px 0 0;padding-left:16px">${m.rear.fix.map((f) => `<li>${f}</li>`).join("")}</ul></td>`).join("")}</tr>
+          </tbody>
+        </table></div>`;
+      const stCol = { calm: "#2a313c", front: "#2f81f7", rear: "#e5414e", both: "#a371f7", spike: "#e3b341" };
+      const stLbl = { calm: "within grip", front: "fronts saturated — understeer", rear: "rears saturated — oversteer", both: "all four — drift/overdriven", spike: "impact / physics jolt (discard)" };
+      const run = fd.your_run;
+      const CW = 740 / run.timeline.length;
+      const runStrip = `<svg viewBox="0 0 740 84" class="tz-svg tz-wide" role="img" aria-label="Your run, second by second">
+        ${run.timeline.map((f, i) => `<g><rect x="${(i * CW).toFixed(1)}" y="10" width="${(CW - 1.6).toFixed(1)}" height="44" rx="3" fill="${stCol[f.state]}" opacity="${f.state === "calm" ? 0.55 : 0.95}"><title>0:${String(f.t).padStart(2, "0")} — FL ${f.fl}% · FR ${f.fr}% · RL ${f.rl}% · RR ${f.rr}% — ${stLbl[f.state]}</title></rect>
+          ${f.t % 5 === 0 ? `<text x="${(i * CW + CW / 2).toFixed(1)}" y="72" text-anchor="middle" fill="var(--muted)" font-size="9">0:${String(f.t).padStart(2, "0")}</text>` : ""}</g>`).join("")}
+      </svg>`;
+      fdBlock = `
+      <div class="block" style="border-color:#e5414e">
+        <div class="card-row" style="margin-top:0"><h3 style="margin:0">🩺 ${fd.headline}</h3>${tierPill(fd.tier)}</div>
+        <div class="tz-quote">${fd.core_rule}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:12px">
+          <div style="flex:1 1 400px;min-width:330px">
+            <strong style="font-size:13px">Peak % is your position on the slip curve</strong>
+            ${bandBar}
+            <ul class="why" style="font-size:12px;margin-top:10px">${fd.instrument_notes.map((n) => `<li>${n}</li>`).join("")}</ul>
+          </div>
+          <div style="flex:0 1 360px;min-width:300px">
+            <strong style="font-size:13px">Reading the needle</strong>
+            ${needleSvg}
+            <p class="why" style="font-size:11px;margin:4px 0 0">${fd.needle.ring_size}</p>
+          </div>
+        </div>
+        <h3 style="margin-top:16px">The diagnostic matrix — axle × phase → fix</h3>
+        <p class="why">${fd.needle.concept}</p>
+        ${fdMatrix}
+        <p class="why" style="margin-top:10px"><strong>Both axles red:</strong> ${fd.both_red}</p>
+        <div class="tz-proof" style="margin-top:14px"><strong>📋 The capture workflow</strong>
+          <ol class="why" style="margin:6px 0 0;padding-left:20px">${fd.how_to_capture.map((s) => `<li>${s}</li>`).join("")}</ol>
+        </div>
+        <h3 style="margin-top:16px">📼 Your run, on instruments</h3>
+        <p class="why">${run.context}</p>
+        ${runStrip}
+        <div class="chips" style="margin:4px 0 10px">${Object.keys(stCol).map((k) => `<span class="chip" style="border-color:${stCol[k]};color:${k === "calm" ? "var(--muted)" : stCol[k]}">${stLbl[k]}</span>`).join("")}</div>
+        <div class="card-grid">
+          ${run.moments.map((m) => `<div class="car-card" style="cursor:default">
+            <div class="card-row" style="margin-top:0"><h3 style="font-size:13px;margin:0">${m.t} — ${m.title}</h3><span class="chip">${m.cell}</span></div>
+            <p class="why" style="font-size:11px;margin:6px 0"><code>${m.numbers}</code></p>
+            <p class="why" style="font-size:12px;margin:0">${m.lesson}</p>
+          </div>`).join("")}
+        </div>
+      </div>`;
+    }
+
     // --- controllability ---
     const co = tz.controllability;
     const coBlock = co ? `
@@ -2210,7 +2297,7 @@
     host.innerHTML = `
       <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">🎓 Training Zone — every corner, feeling first</h2>
       <p class="hint">${tz.purpose}</p>
-      ${gripBlock}${ccBlock}${bsBlock}${coBlock}${ratioBlock}${spectrum}${conditions}
+      ${gripBlock}${fdBlock}${ccBlock}${bsBlock}${coBlock}${ratioBlock}${spectrum}${conditions}
       ${legend}
       <h2 class="section-title">🏁 The corner archetypes</h2>
       ${corners}${telBlock}`;

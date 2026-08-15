@@ -29,6 +29,7 @@ const db = {
   partsEffects: read("parts-effects.json"),
   trainingZone: read("training-zone.json"),
   formulas: read("formulas.json"),
+  gameAssets: read("game-assets.json"),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

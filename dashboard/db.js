@@ -49033,6 +49033,115 @@ window.FH6_DB = {
       "refuted_kept_deliberately": "aero_balance_ratio stays in the registry as a refuted entry so the mistake is not silently re-made."
     }
   },
+  "gameAssets": {
+    "schema_version": "1.0.0",
+    "generated": "2026-08-15",
+    "purpose": "Manifest of real in-game UI assets used by the dashboard, plus the cataloged source library for future asset phases. Rule: identify game concepts with the game's own pixels wherever possible.",
+    "live_assets": {
+      "telemetry_pages": {
+        "dir": "dashboard/assets/telemetry",
+        "source": "ShareX video TAMpIOBWBE.mp4 (2026-08-10 23:29) — single city run cycling ALL seven pages, one coherent car/scene",
+        "files": [
+          {
+            "page": "General",
+            "file": "general.jpg",
+            "t": "56s"
+          },
+          {
+            "page": "Body Acceleration",
+            "file": "body-acceleration.jpg",
+            "t": "8s"
+          },
+          {
+            "page": "Tires, Misc.",
+            "file": "tires-misc.jpg",
+            "t": "20s"
+          },
+          {
+            "page": "Suspension",
+            "file": "suspension.jpg",
+            "t": "34s"
+          },
+          {
+            "page": "Friction",
+            "file": "friction.jpg",
+            "t": "44s",
+            "note": "captures a saturated moment: fronts 179/188% red while rears hold — a live understeer signature"
+          },
+          {
+            "page": "Heat",
+            "file": "heat.jpg",
+            "t": "80s"
+          },
+          {
+            "page": "Damage",
+            "file": "damage.jpg",
+            "t": "92s"
+          }
+        ],
+        "used_by": [
+          "Training Zone telemetry table (thumbnail column)",
+          "Friction-diagnosis block (instrument hero)"
+        ]
+      },
+      "class_badges": {
+        "dir": "dashboard/assets/badges",
+        "source": "Screenshot 2026-08-09 232030.png — player-shot strip of all eight PI badges",
+        "files": [
+          "class-d.png",
+          "class-c.png",
+          "class-b.png",
+          "class-a.png",
+          "class-s1.png",
+          "class-s2.png",
+          "class-r.png",
+          "class-x.png",
+          "pi-badges-strip.png"
+        ],
+        "used_by": [
+          "clsBadge() — every PI class chip site-wide now renders the real game badge"
+        ]
+      }
+    },
+    "source_library": {
+      "note": "Cataloged by two workflows (96 Pictures/Screenshots + 110 ShareX captures, 2026-08-15). These are the richest sources for future asset phases — crop coordinates not yet extracted.",
+      "videos": {
+        "TAMpIOBWBE.mp4": "THE telemetry tour — all 7 pages, city run (used for live set)",
+        "mFelGcgNy0.mp4": "Viper Goliath run — Heat + Tires pages (alternate telemetry set)",
+        "IOC4cbmmmA.mp4": "Friction-page McLaren run (the 36 s diagnosis timeline)",
+        "e6oQdW9sLS.mp4": "154-frame Centenario upgrade-menu tour (every parts menu)",
+        "oMz8HANO23.mp4": "Centenario six-tune Goliath field browser tour",
+        "wcBjBx8oJs.mp4": "4C livery browser",
+        "d11J05dwR8.mp4": "touge lap HUD",
+        "TtqkekLxi5/5tNp9A9dEn/4JZ9yx9PHw/jOhRe6jlEu.mp4": "4C circuit laps (HUD only)"
+      },
+      "tune_tab_screens": {
+        "4c_locked_s1_776": "ShareX 15:04 burst — all 9 tabs incl. LOCKED sliders + yellow unlock banners (DJb5QS0F3R alignment, IEQySg6qEb brake, oCZpiH8BBW springs, ox4CLVGzig damping...)",
+        "4c_unlocked_s1_788": "ShareX 16:22 burst — all 9 tabs unlocked with real values (UBmapQ2Qak alignment, NMFokvSlML damping, g8JyGLKSCx springs, jT4CfY6tP3 brake...)",
+        "supra_extremes": "Pictures 2026-08-10 040604-040744 — 8 tabs at min/max (A 700 Supra)",
+        "centenario_extremes": "Pictures 2026-08-14 063117-063323 — 9 tabs at min/max incl. locked front aero padlock (063251)",
+        "use": "slider-catalog category cards: real tab header + slider panel per category; padlock shots for unlock-gating docs"
+      },
+      "upgrade_shop_screens": {
+        "viper_engine": "ShareX 17:43-17:54 — ~30 shots: Aspiration tiles (turbo/supercharger part icons), Intake, Fuel, Ignition, Exhaust, Camshaft, Valves, Displacement, Intercooler, Pistons, Oil, Flywheel",
+        "viper_platform": "ShareX 18:21-18:32 — Weight Reduction, Roll Cage, Springs, ARBs front/rear, Transmission, Differential",
+        "viper_aero_driveline": "ShareX 18:52-19:02 — Rear Wing x4, Driveline x2",
+        "centenario_engine": "Pictures 2026-08-14 055915-062017 — Displacement (block 6,498->7,000), Aspiration V12 + V10 (incl. the Centrifugal SC donor-engine tiles)",
+        "use": "parts-effects rendering (refresh plan phase 3): real part tiles beside measured tables"
+      },
+      "panes_and_stats": {
+        "tune_browser": "ShareX pnCzPeTUNc/zT2UTDt9FS (4C LogikJ pane, gamepad + keyboard variants), Pictures 2026-08-14 032450/032455 (Top 100 EZ pane), 2026-08-10 102409-140746 (Viper + 4C panes)",
+        "my_cars": "Pictures 2026-07-29 230605 (garage grid, rarity banners, richest PI-badge field), 2026-08-10 102132-140652, 2026-08-14 032319-032424 (Centenario stat pages)",
+        "use": "panel-decoder section (refresh plan phase 3): real pane rows beside the row documentation; radar chart identifier"
+      },
+      "misc": {
+        "telemetry_keybinds": "Pictures 2026-08-09 223502 — Controls menu showing Telemetry = T, PgUp/PgDn cycling",
+        "rivals_leaderboard": "Pictures 2026-07-11 003048 — assist columns ABS/TCS/STM/GEAR, drivetrain glyphs",
+        "settings_difficulty": "Pictures 2026-07-10 170324/185258 — assist presets, difficulty CR bonus",
+        "car_mastery": "Pictures 2026-07-26 221725 — perk tree, LEGENDARY tag"
+      }
+    }
+  },
   "sources": {
     "captured": "2026-06-07",
     "hierarchy_note": "Primary (game/official) > expert guide > community consensus > single blog. FH6 is 3 weeks old so most sources are early community/guide tier. No source is yet authoritative on a settled meta.",

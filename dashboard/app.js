@@ -12,7 +12,7 @@
     const one = (c, showCap) => {
       const u = String(c).toUpperCase().trim();
       if (PI_CAP[u] == null) return `<span class="pib"><b style="background:var(--bg3)">${u}</b></span>`;
-      return `<span class="pib pib-${u.toLowerCase()}"><b>${u}</b>${showCap ? `<i>${PI_CAP[u]}</i>` : ""}</span>`;
+      return `<span class="pib pib-${u.toLowerCase()}"><img class="pib-img" src="assets/badges/class-${u.toLowerCase()}.png" alt="${u}" onerror="this.outerHTML='<b>${u}</b>'">${showCap ? `<i>${PI_CAP[u]}</i>` : ""}</span>`;
     };
     const parts = String(cls).split("-").map((x) => x.trim());
     if (parts.length === 2 && PI_CAP[parts[0].toUpperCase()] != null && PI_CAP[parts[1].toUpperCase()] != null)
@@ -2110,6 +2110,11 @@
             ${needleSvg}
             <p class="why" style="font-size:11px;margin:4px 0 0">${fd.needle.ring_size}</p>
           </div>
+          <div style="flex:1 1 320px;min-width:280px">
+            <strong style="font-size:13px">The instrument itself</strong>
+            <a href="assets/telemetry/friction.jpg" target="_blank" title="Friction page — player capture, click for full size"><img src="assets/telemetry/friction.jpg" alt="Friction telemetry page, player capture" style="width:100%;border-radius:8px;margin-top:8px;border:1px solid var(--line)"></a>
+            <p class="why" style="font-size:11px;margin:6px 0 0">Your capture — fronts at 179/188% (red, saturated) while the rears hold: an understeer moment, on instruments. Open telemetry with <code>T</code>, cycle pages with <code>Page Up</code>/<code>Page Down</code>.</p>
+          </div>
         </div>
         <h3 style="margin-top:16px">The diagnostic matrix — axle × phase → fix</h3>
         <p class="why">${fd.needle.concept}</p>
@@ -2239,13 +2244,15 @@
 
     // --- telemetry inventory ---
     const tel = tz.telemetry;
+    const TEL_IMG = { "General": "general", "Body Acceleration": "body-acceleration", "Friction": "friction", "Tires, Misc.": "tires-misc", "Heat": "heat", "Suspension": "suspension", "Damage": "damage" };
+    const telShot = (name, w) => TEL_IMG[name] ? `<a href="assets/telemetry/${TEL_IMG[name]}.jpg" target="_blank" title="${name} — player capture, click for full size"><img src="assets/telemetry/${TEL_IMG[name]}.jpg" alt="${name} telemetry page" style="width:${w || 190}px;border-radius:6px;display:block;border:1px solid var(--line)"></a>` : "";
     const telBlock = tel ? `
       <div class="block">
         <h3>📊 ${tel.headline}</h3>
         <p class="why"><strong>How:</strong> ${tel.how}</p>
         <div style="overflow-x:auto;margin-top:8px"><table>
-          <thead><tr><th>Page</th><th>Shows</th><th>Proves</th></tr></thead>
-          <tbody>${tel.pages.map((p) => `<tr><td><strong>${p.name}</strong></td><td class="why" style="font-size:12px">${p.shows}</td><td class="why" style="font-size:12px">${p.proves}</td></tr>`).join("")}</tbody>
+          <thead><tr><th>The screen</th><th>Page</th><th>Shows</th><th>Proves</th></tr></thead>
+          <tbody>${tel.pages.map((p) => `<tr><td>${telShot(p.name)}</td><td><strong>${p.name}</strong></td><td class="why" style="font-size:12px">${p.shows}</td><td class="why" style="font-size:12px">${p.proves}</td></tr>`).join("")}</tbody>
         </table></div>
         <p class="why" style="font-size:11px;margin-top:6px">${tel.captured}</p>
       </div>` : "";

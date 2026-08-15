@@ -85,6 +85,25 @@ One fact, one file; everything else references.
 
 New data needed: `panel-rows.json` (or a key in tuning-variables) — the panel decoder's backing store: every computed row, movers, traps, Test-Zero visibility. Most content already exists in test-battery prose; this normalizes it.
 
+## The prose budget (core design law — Jett, 2026-08-15)
+
+> "The finished product should have almost no paragraphs at all — visual cues, formatted formulas, charts and graphs."
+
+**Budget: ~1 caption sentence per block.** Everything else is structure. Knowledge is never deleted — it moves into drawers and tooltips.
+
+| Today's prose form | Converts to |
+|---|---|
+| Mechanism explanation | Annotated SVG — the labels live ON the chart, not beside it |
+| Doctrine / rule paragraph | **Rule card**: icon + imperative headline + one consequence line |
+| "Why it works" / evidence prose | **▸ why drawer** (collapsible, closed by default) |
+| Numbers buried in sentences | Stat tiles / **formatted formulas** (sub/sup + fraction layout, not code strings) |
+| Test procedure paragraphs | Numbered step strips with icons |
+| Comparison prose | Side-by-side extremes (the ratio-bar pattern) |
+| Case-study narration | Timeline strips (the friction-run pattern) |
+| Any game concept named in text | The game's own pixels (game-assets.json library) |
+
+Worst offenders (census): grip-science concept paragraphs, situational-model doctrine prose, Tune Lab doctrine blocks, braking-science concept, chassis-character reading list, formula registry worked-example prose. Every phase of this plan applies the budget to whatever it touches; phase 4 sweeps the remainder.
+
 ## Visual language additions
 
 - The five phase colours stay the connective tissue (unchanged).

@@ -2016,17 +2016,29 @@
       <text x="${TC.cx}" y="${TC.cy + 5}" text-anchor="middle" fill="var(--muted)" font-size="10">safe</text>
     </svg>`;
 
+    // visual-first primitives (prose budget: rules + drawers instead of paragraphs)
+    const ruleCard = (ico, head, why, color) => `<div class="tz-rule"${color ? ` style="border-left-color:${color}"` : ""}>
+      <div class="tzr-head"><span class="tzr-ico">${ico}</span><span>${head}</span></div>
+      ${why ? `<details class="tz-why"><summary>why</summary><p>${why}</p></details>` : ""}</div>`;
+    const SURF_SHORT = {
+      slick: "highest peak · sharpest cliff — huge grip at 7°, brutal at 12°",
+      "rally-tarmac": "lower peak · kinder fall — the PI-arbitrage trade",
+      "rally-dirt": "a PLATEAU, not a cliff — 20° of slip IS the operating point",
+    };
     const gripBlock = `
       <div class="block" style="border-color:var(--accent)">
         <h3>🎯 ${gs.headline}</h3>
-        <p class="why">${gs.slip_curve.concept}</p>
         <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:10px">
-          <div style="flex:1 1 420px;min-width:340px">${slipSvg}
-            <div class="chips" style="margin-top:6px">${gs.slip_curve.surfaces.map((s) => `<span class="chip" style="border-color:${s.color};color:${s.color}" title="${s.note.replace(/"/g, "&quot;")}">${s.label} · peak ~${s.peak_slip}°</span>`).join("")}</div>
-          </div>
+          <div style="flex:1 1 420px;min-width:340px">${slipSvg}</div>
           <div style="flex:1 1 300px;min-width:280px">
-            <p class="why"><strong>Why it feels sudden:</strong> ${gs.slip_curve.why_it_feels_sudden}</p>
-            ${gs.slip_curve.surfaces.map((s) => `<p class="why" style="font-size:12px;margin:6px 0"><span style="color:${s.color}">●</span> <strong>${s.label}</strong> — ${s.note}</p>`).join("")}
+            <div style="overflow-x:auto"><table>
+              <thead><tr><th>Tire · surface</th><th>Peak</th><th>Past the peak</th></tr></thead>
+              <tbody>${gs.slip_curve.surfaces.map((s) => `<tr title="${s.note.replace(/"/g, "&quot;")}"><td><span style="color:${s.color}">●</span> <strong style="font-size:12px">${s.label}</strong></td><td style="color:${s.color};font-weight:800">${s.peak_slip}°</td><td class="why" style="font-size:12px">${SURF_SHORT[s.id] || s.note}</td></tr>`).join("")}</tbody>
+            </table></div>
+            <div class="tz-rules" style="grid-template-columns:1fr">
+              ${ruleCard("⚠️", "Past the peak you get LESS grip and MORE angle — a slide feeds itself", gs.slip_curve.concept, "var(--warn)")}
+              ${ruleCard("🧊", "Setup can WIDEN the peak, not raise it — pressure, compound, damping turn the cliff into a slope", gs.slip_curve.why_it_feels_sudden, "var(--accent2)")}
+            </div>
           </div>
         </div>
         <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
@@ -2034,14 +2046,24 @@
         <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
           <div style="flex:0 1 380px;min-width:300px">${circSvg}</div>
           <div style="flex:1 1 300px;min-width:280px">
-            <p class="why">${gs.traction_circle.concept}</p>
-            <p class="why"><strong>Why trail-braking is a knife edge:</strong> ${gs.traction_circle.why_trail_braking_is_knife_edge}</p>
-            <p class="why"><strong>The trade:</strong> ${gs.traction_circle.the_trade}</p>
-            <p class="why"><strong>What tuning actually changes:</strong> ${gs.traction_circle.tuning_link}</p>
+            <div class="tz-rules" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+              ${ruleCard("⭕", "Brake, turn and drive all draw from ONE circle — the total is a vector", gs.traction_circle.concept)}
+              ${ruleCard("🔪", "100% braking = already on the edge; any steering tips the vector outside", gs.traction_circle.why_trail_braking_is_knife_edge, "#e5414e")}
+              ${ruleCard("🤝", "Trail-braking = trading brake for turn while staying ON the rim", gs.traction_circle.the_trade, "var(--warn)")}
+              ${ruleCard("🔧", "Tuning decides how the four circles are FILLED — only compound and load grow them", gs.traction_circle.tuning_link, "var(--accent2)")}
+            </div>
           </div>
         </div>
-        <div class="tz-proof"><strong>📊 See it yourself — telemetry proof</strong>
-          <ul class="why">${gs.telemetry_proof.map((t) => `<li>${t}</li>`).join("")}</ul>
+        <strong style="display:block;margin-top:14px;font-size:13px">📊 See it on the real screens</strong>
+        <div class="tz-proofgrid">
+          ${[["friction", "Friction", "Which tire quit, and by how much — ring + Peak% per wheel. First red = the answer."],
+             ["body-acceleration", "Body Acceleration", "The whole-car budget, live: dot distance = how much, direction = spent on what."],
+             ["tires-misc", "Tires, Misc.", "Wheel-speed split = the spin / lock-up detector."],
+             ["heat", "Heat", "Inner/middle/outer temps = where the patch really works — camber ground truth."]]
+            .map(([slug, name, cap], i) => `<figure title="${(gs.telemetry_proof[i] || "").replace(/"/g, "&quot;")}">
+              <a href="assets/telemetry/${slug}.jpg" target="_blank"><img src="assets/telemetry/${slug}.jpg" alt="${name} page"></a>
+              <figcaption><strong>${name}</strong> — ${cap}</figcaption>
+            </figure>`).join("")}
         </div>
       </div>`;
 

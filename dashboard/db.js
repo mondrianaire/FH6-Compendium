@@ -46003,6 +46003,29 @@ window.FH6_DB = {
           "REFINEMENT_2026-08-14b": "Player clarifies: 0.70 requires front ARB+springs near-full-soft AND rear near-full-stiff — the pegged corner, the exact many-to-one trap config (Viper wiggle/spin precedent). VERDICT RESTORED with better numbers: sane-slider ceiling is ~0.67-0.68; the donor's 0.72-with-a-drivable-tune requires the parts half. Width experiment PROMOTED BACK TO MAINLINE. LEDGER V2 (one restructure fixes mech AND aero): IN = race front bumper (+3-ish, unlocks front aero -> 0.46/0.795 reachable) + 265F or 275F front tires (+3/+6 at tour config, owned 275F; shifts mech from the parts half so sliders can relax to sane values). OUT/payers = roll cage, 21in front rims (PI-down ballast), 375R (neutral/down) — preview-at-config to land 800 exact. ORDER: save setup FIRST (installs wipe tune tabs) -> preview width, read PI+mech wiggle-read -> bumper, read PI+aero -> pay back to 800 -> re-set sliders sane -> gearing/dark layer -> certify."
         }
       }
+    },
+    "telemetry_case_files": {
+      "date": "2026-08-19",
+      "method": "Four favorite builds, full telemetry runs recorded and transcribed (4-agent workflow); panel stats cross-referenced. The first application of the friction-diagnosis framework to real builds.",
+      "cross_build_discovery": "EVERY build ran hot pressures far over the ~32-33 psi slick window (Centenario 37.6-38.4, Exocet 41F/37.7R, F-150 36-39.5 with 2 psi mid-session creep, 620R rears 179-201F vs frozen 120F fronts) and THREE of four showed chronic front-axle saturation (fronts red 103-232% while rears loafed at 25-95%). Locked tunes hide the dark layer — and the dark layer of even Rank-1 tunes contains unchecked errors. Telemetry beats reputation: the replica can beat the donor.",
+      "cases": {
+        "centenario-top100ez": {
+          "verdict": "Chronic mid-corner understeer (fronts 103-232% red every corner, rears 25-52%); all four ~5 psi over; loaded rear camber goes POSITIVE (+0.3/+0.5, outer 26-36F hotter); fronts run 245-260F (20-35F over rears). Brakes/suspension/drivetrain clean.",
+          "fixes": "REPLICA IS UNLOCKED: pressures -4/-5 psi (fronts more), rear camber -1.0 more negative, front ARB -2/-3 clicks or rear +1/+2. Expected: latG ceiling above the observed 1.26-1.37 in-run."
+        },
+        "620r-road-v13": {
+          "verdict": "Split personality: exits clean (860 hp down on rally tires, all green), drift-on-demand works; but grip-phase corners saturate outside front alone (108-135%), fronts NEVER reach temp (120-160F vs rears 179-201F), 3 of 4 corners outer-hottest (camber shy), 1st gear exhausted at 32-40 mph bouncing 8-9k.",
+          "fixes": "Front camber -0.5 more, front pressure -1/-1.5 psi (build temp), FD one notch taller. Needs a replica fork (locked)."
+        },
+        "exocet-handling-meta": {
+          "verdict": "MOST IMPROVABLE. The handling build understeers in every corner (fronts 116-172% red, rears never over 66%) — at 41 psi hot front (8 over), FL middle-hottest (overinflation signature), front camber collapsing to -0.44 loaded (outer-hottest) while rear camber is overdone (44F inner bias on a loafing axle). Ran 1.76-1.81G with the dot at the rim — the platform wants more.",
+          "fixes": "Pressures front -6/-8 psi, rear -4/-5; front camber -0.5/-1.0 MORE negative; rear -0.5 LESS; then a click of roll stiffness rearward. All slider fixes — needs a replica fork (locked)."
+        },
+        "f150-torque-drift": {
+          "verdict": "Excellent drift platform (rears saturate on demand 2,000-3,000% with fronts in reserve; rear camber dialed 15-36F spreads; suspension composed; one-gear 1,700-4,500rpm band). Two flaws: front camber SEVERELY overdone (-7.9 to -8.8 loaded; 127-164F I/O spreads; entry push with fronts red 102-168% before rear breaks) and pressures 36-39.5 hot with rear creep.",
+          "fixes": "Front camber toward -1.5/-2.5 static, pressures down (F -3/-4, R -4/-6) to kill the mid-session balance migration. Slider-only — needs a replica fork (locked)."
+        }
+      }
     }
   },
   "partsEffects": {

@@ -47,10 +47,19 @@ class State:
 
 ST = State()
 
+def cid(p): return f'{p["CarOrdinal"]}|{p["DrivetrainType"]}|{p["NumCylinders"]}|{p["CarPI"]}'
+NAMES_PATH = os.path.join(ROOT, "data", "car-ordinals.json")
+def names_load():
+    try:
+        with open(NAMES_PATH, encoding="utf-8") as f: return json.load(f)
+    except Exception: return {"schema_version": "1.0.0", "cars": {}, "builds": {}}
+def names_save(obj):
+    with open(NAMES_PATH, "w", encoding="utf-8") as f: json.dump(obj, f, indent=2, ensure_ascii=False)
+
 def compact(p, t_mono):
     fl = lambda k: round(p[k], 3)
     return {
-        "t": round(t_mono, 2), "on": p["IsRaceOn"], "car": p["CarOrdinal"], "pi": p["CarPI"], "cls": CLASS.get(p["CarClass"], "?"), "drv": DRIVE.get(p["DrivetrainType"], "?"),
+        "t": round(t_mono, 2), "on": p["IsRaceOn"], "car": p["CarOrdinal"], "cid": cid(p), "pi": p["CarPI"], "cls": CLASS.get(p["CarClass"], "?"), "drv": DRIVE.get(p["DrivetrainType"], "?"), "cyl": p["NumCylinders"],
         "gear": p["Gear"], "mph": round(p["Speed"] * 2.23694, 1), "rpm": round(p["CurrentEngineRpm"]), "maxrpm": round(p["EngineMaxRpm"]),
         "lat": round(p["AccelX"] / G, 2), "lon": round(p["AccelZ"] / G, 2), "yaw": round(math.degrees(p["AngVelY"]), 1),
         "steer": p["Steer"], "thr": p["Accel"], "brk": p["Brake"], "hb": p["HandBrake"], "boost": round(p["Boost"], 1),
@@ -72,8 +81,12 @@ def ingest(p, t_mono):
     with ST.lock:
         ST.latest = c; ST.frames += 1; ST.last_pkt = time.monotonic()
         ST.pps_win.append(ST.last_pkt); ST.pps_win = [x for x in ST.pps_win if ST.last_pkt - x < 2.0]
-        if c["on"] and c["car"] not in ST.cars:
-            ST.cars[c["car"]] = {"ordinal": c["car"], "pi": c["pi"], "class": c["cls"], "drivetrain": c["drv"], "cyl": p["NumCylinders"], "max_rpm": c["maxrpm"], "gears": [], "dyno": [], "live_s": 0}
+        if c["on"] and c["cid"] not in ST.cars:
+            nm = (names_load().get("cars", {}).get(str(c["car"])) or {}).get("name")
+            ST.cars[c["cid"]] = {"id": c["cid"], "ordinal": c["car"], "pi": c["pi"], "class": c["cls"], "drivetrain": c["drv"], "cyl": p["NumCylinders"], "max_rpm": c["maxrpm"], "idle_rpm": round(p["EngineIdleRpm"]), "car_group": p["CarGroup"], "name": nm, "gears": [], "dyno": [], "live_s": 0}
+            new_cfg = dict(ST.cars[c["cid"]])
+        else: new_cfg = None
+    if new_cfg: ST.emit("config", new_cfg)
     # per-second strip
     sec = int(t_mono)
     if ST._sec is None: ST._sec = sec
@@ -87,14 +100,14 @@ def ingest(p, t_mono):
                 rr = max(max(abs(r["slip"]["RL"][2]), abs(r["slip"]["RR"][2])) for r in on)
                 imp = any(abs(r["lat"]) > 3.0 or r["smash"] > 0 for r in on)
                 st = "impact" if imp else ("both" if fr > 1 and rr > 1 else "front" if fr > 1 else "rear" if rr > 1 else "calm")
-                e = {"t": s_prev, "state": st, "car": on[-1]["car"], "mph": round(sum(r["mph"] for r in on) / len(on)), "f": round(fr, 2), "r": round(rr, 2), "g": round(max(abs(r["lat"]) for r in on), 2)}
+                e = {"t": s_prev, "state": st, "car": on[-1]["cid"], "mph": round(sum(r["mph"] for r in on) / len(on)), "f": round(fr, 2), "r": round(rr, 2), "g": round(max(abs(r["lat"]) for r in on), 2)}
             with ST.lock: ST.strip.append(e)
             ST.emit("strip", e)
     ST._sec_rows.append(c)
     # live corner detector (same thresholds as analyzer, simplified phases)
     lat = c["lat"]
     if c["on"] and abs(lat) > 0.35 and ST._corner is None:
-        ST._corner = {"t0": t_mono, "car": c["car"], "rows": [c], "pre": [r for r in ST._sec_rows[-60:]]}
+        ST._corner = {"t0": t_mono, "car": c["cid"], "rows": [c], "pre": [r for r in ST._sec_rows[-60:]]}
     elif ST._corner is not None:
         ST._corner["rows"].append(c)
         if abs(lat) < 0.25 or not c["on"]:
@@ -175,6 +188,9 @@ class H(BaseHTTPRequestHandler):
                     self.wfile.flush(); time.sleep(0.02)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
+        elif self.path.startswith("/cars-map"):
+            body = json.dumps(names_load()).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/session.json"):
             body = json.dumps(ST.session_json or {}).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
@@ -183,6 +199,21 @@ class H(BaseHTTPRequestHandler):
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         else:
             self.send_response(404); self._cors(); self.end_headers()
+    def do_OPTIONS(self):
+        self.send_response(204); self._cors(); self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); self.send_header("Access-Control-Allow-Headers", "Content-Type"); self.end_headers()
+    def do_POST(self):
+        n = int(self.headers.get("Content-Length") or 0); body = json.loads(self.rfile.read(n) or b"{}")
+        obj = names_load(); ok = False
+        if self.path.startswith("/car") and body.get("ordinal") and body.get("name"):
+            obj.setdefault("cars", {})[str(body["ordinal"])] = {"name": str(body["name"]).strip(), "confidence": "player-confirmed", "source": f"dashboard {time.strftime('%Y-%m-%d')}"}; ok = True
+            with ST.lock:
+                for c in ST.cars.values():
+                    if str(c["ordinal"]) == str(body["ordinal"]): c["name"] = obj["cars"][str(body["ordinal"])]["name"]
+        elif self.path.startswith("/build") and body.get("build_id") and body.get("label"):
+            obj.setdefault("builds", {})[str(body["build_id"])] = {"label": str(body["label"]).strip(), "source": f"dashboard {time.strftime('%Y-%m-%d')}", "cid": body.get("cid")}; ok = True
+        if ok: names_save(obj)
+        out = json.dumps({"ok": ok, "cars": obj.get("cars", {}), "builds": obj.get("builds", {})}).encode()
+        self.send_response(200 if ok else 400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out)
 
 def udp_loop(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", port)); sock.settimeout(1.0)

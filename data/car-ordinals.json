@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Learned map of Data Out CarOrdinal -> car name, plus a registry of build signatures. Written by the live daemon (POST /car, POST /build) and by hand. The stream gives the ordinal exactly; the name has to be learned once per car.",
+  "cars": {
+    "3665": {
+      "name": "2021 Sierra Cars 700R",
+      "confidence": "probable",
+      "source": "settings-screen header B 600 at capture time 2026-08-21"
+    }
+  },
+  "builds": {}
+}

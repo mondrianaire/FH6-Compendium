@@ -2394,6 +2394,175 @@
   }
 
 
+  // ---- Telemetry Lab: Lab Run + Decode Bench over Data Out sessions ----
+  function buildLab() {
+    const host = document.getElementById("labContent2");
+    if (!host) return;
+    const sessions = DB.sessions || [];
+    const tzfd = (DB.trainingZone || {}).friction_diagnosis;
+    if (!sessions.length) {
+      host.innerHTML = `<h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">📡 Telemetry Lab</h2><p class="hint">No sessions yet. Record: <code>python scripts/telemetry/fh6_dataout_capture.py --port 9876</code> · Analyze: <code>python scripts/telemetry/analyze_session.py captures/&lt;file&gt;.csv</code> · then rebuild.</p>`;
+      return;
+    }
+    const ST = { calm: "#2a313c", front: "#2f81f7", rear: "#e5414e", both: "#a371f7", impact: "#e3b341", off: "#0b0e12" };
+    const STL = { calm: "within grip", front: "fronts past the limit", rear: "rears past the limit", both: "all four — drift / overdriven", impact: "impact / jolt", off: "not driving" };
+    const CARC = ["#00d27a", "#2f81f7", "#e3b341", "#e83c9e", "#a371f7", "#f0883e"];
+    let mode = "run", sIdx = 0, carSel = null, donor = null, replica = null;
+    const S = () => sessions[sIdx];
+    const car = (s, o) => s.cars.find((c) => c.ordinal === o);
+    const carLbl = (s, o) => { const c = car(s, o); return c ? `#${c.ordinal} · ${c.class} ${c.pi} ${c.drivetrain} ${c.cyl}cyl` : `#${o}`; };
+    const carCol = (s, o) => CARC[Math.max(0, s.cars.findIndex((c) => c.ordinal === o)) % CARC.length];
+    const fmt = (v, d = 2) => (v == null ? "—" : (+v).toFixed(d));
+    const esc = (t) => String(t).replace(/"/g, "&quot;");
+    // tiny SVG line chart: series = [{pts:[[x,y]...], col, label}]
+    const chart = (series, o = {}) => {
+      const w = o.w || 380, h = o.h || 130, L = 36, B = 22, R = 8, T = 8;
+      const xs = series.flatMap((s) => s.pts.map((p) => p[0])), ys = series.flatMap((s) => s.pts.map((p) => p[1]));
+      if (!xs.length) return `<p class="why" style="font-size:11px">no data</p>`;
+      const xmin = o.xmin ?? Math.min(...xs), xmax = o.xmax ?? Math.max(...xs), ymin = o.ymin ?? Math.min(0, ...ys), ymax = o.ymax ?? ((Math.max(...ys) * 1.05) || 1);
+      const X = (x) => L + (x - xmin) / ((xmax - xmin) || 1) * (w - L - R), Y = (y) => T + (1 - (y - ymin) / ((ymax - ymin) || 1)) * (h - T - B);
+      return `<svg viewBox="0 0 ${w} ${h}" class="tz-svg" style="max-width:${w}px">
+        <line x1="${L}" y1="${Y(ymin)}" x2="${w - R}" y2="${Y(ymin)}" stroke="var(--line)"/><line x1="${L}" y1="${T}" x2="${L}" y2="${Y(ymin)}" stroke="var(--line)"/>
+        ${o.hline != null ? `<line x1="${L}" y1="${Y(o.hline)}" x2="${w - R}" y2="${Y(o.hline)}" stroke="#e5414e" stroke-dasharray="4 4" opacity=".7"/><text x="${w - R}" y="${Y(o.hline) - 3}" text-anchor="end" fill="#e5414e" font-size="9">${o.hlabel || ""}</text>` : ""}
+        ${series.map((s) => `<polyline fill="none" stroke="${s.col}" stroke-width="2" points="${s.pts.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ")}"/>`).join("")}
+        <text x="${(L + w) / 2}" y="${h - 6}" text-anchor="middle" fill="var(--muted)" font-size="9">${o.xl || ""}</text>
+        <text x="10" y="${(T + h - B) / 2}" transform="rotate(-90 10 ${(T + h - B) / 2})" text-anchor="middle" fill="var(--muted)" font-size="9">${o.yl || ""}</text>
+        ${[ymin, (ymin + ymax) / 2, ymax].map((v) => `<text x="${L - 3}" y="${Y(v) + 3}" text-anchor="end" fill="var(--muted)" font-size="8">${v.toFixed(v >= 10 ? 0 : 1)}</text>`).join("")}
+        ${[xmin, (xmin + xmax) / 2, xmax].map((v) => `<text x="${X(v)}" y="${h - B + 10}" text-anchor="middle" fill="var(--muted)" font-size="8">${v.toFixed(v >= 100 ? 0 : 1)}</text>`).join("")}
+        ${series.filter((s) => s.label).map((s, i) => `<text x="${w - R}" y="${T + 10 + i * 11}" text-anchor="end" fill="${s.col}" font-size="9">${s.label}</text>`).join("")}
+      </svg>`;
+    };
+    const light = (v, good, ok) => v == null ? `<span class="lab-light" style="background:#3a4250"></span>` : `<span class="lab-light" style="background:${v <= good ? "#00d27a" : v <= ok ? "#e3b341" : "#e5414e"}"></span>`;
+    const cellFor = (c) => {
+      if (!tzfd || !c.first_red) return null;
+      const ph = c.kink ? 5 : c.first_red.phase;
+      const m = tzfd.matrix.find((x) => x.phase === ph); if (!m) return null;
+      const side = c.first_red.axle === "front" ? m.front : m.rear;
+      return { phase: ph, name: side.name, fix: side.fix[0] };
+    };
+
+    function strip(s) {
+      const n = s.strip.length, W = 900, cw = W / n;
+      return `<svg viewBox="0 0 ${W} 70" class="tz-svg tz-wide" role="img" aria-label="Session strip">
+        ${s.strip.map((x, i) => `<g><rect x="${(i * cw).toFixed(2)}" y="6" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="40" fill="${ST[x.state]}" opacity="${x.state === "off" ? 1 : x.state === "calm" ? .6 : .95}"><title>${x.t}s — ${STL[x.state]}${x.mph != null ? ` · ${x.mph} mph · F ${x.f} R ${x.r} · ${x.g} g` : ""}${x.car ? ` · ${carLbl(s, x.car)}` : ""}</title></rect>
+          ${x.car ? `<rect x="${(i * cw).toFixed(2)}" y="48" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="5" fill="${carCol(s, x.car)}"/>` : ""}
+          ${x.t % 60 === 0 ? `<text x="${(i * cw).toFixed(1)}" y="66" fill="var(--muted)" font-size="9">${Math.floor(x.t / 60)}:00</text>` : ""}</g>`).join("")}
+      </svg>
+      <div class="chips" style="margin-top:2px">${Object.keys(ST).map((k) => `<span class="chip" style="border-color:${ST[k]};color:${k === "calm" || k === "off" ? "var(--muted)" : ST[k]}">${STL[k]}</span>`).join("")}</div>`;
+    }
+    function cornerCard(s, c) {
+      const cell = cellFor(c);
+      const fr = c.first_red;
+      return `<div class="lab-corner" style="border-left:4px solid ${carCol(s, c.car)}">
+        <div class="card-row" style="margin-top:0"><strong>${c.dir === "L" ? "⬅" : "➡"} ${c.t0}s · ${c.mph_in}→${c.mph_min} mph · ${c.lat_g_peak} g</strong>
+          ${c.drift ? `<span class="chip" style="border-color:#a371f7;color:#a371f7">drift</span>` : fr ? `<span class="chip" style="border-color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]};color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]}">first red: ${fr.axle} · ph ${c.kink ? 5 : fr.phase}</span>` : `<span class="chip">no saturation</span>`}</div>
+        <div class="lab-ph">${c.phases.map((p) => `<div style="border-color:${CM_PC[p.phase - 1]}" title="${esc(CM_SHORT[p.phase - 1])} · ${p.dur}s">
+            <span style="color:${CM_PC[p.phase - 1]};font-weight:700">${p.phase}</span> F <b style="color:${p.front > 1 ? "#e5414e" : "inherit"}">${p.front}</b><div class="lab-bar"><i style="width:${Math.min(100, p.front * 50)}%;background:${p.front > 1 ? "#2f81f7" : "#566173"}"></i></div>
+            R <b style="color:${p.rear > 1 ? "#e5414e" : "inherit"}">${p.rear}</b><div class="lab-bar"><i style="width:${Math.min(100, p.rear * 50)}%;background:${p.rear > 1 ? "#e5414e" : "#566173"}"></i></div></div>`).join("")}</div>
+        <p class="why" style="font-size:11px;margin:6px 0 0">USI <b>${c.usi > 0 ? "+" : ""}${c.usi}</b> ${c.usi > 0.15 ? "→ understeer" : c.usi < -0.05 ? "→ oversteer" : "→ balanced"}${c.hb ? " · handbrake" : ""}${c.brake_max > 200 ? " · hard brake" : ""}</p>
+        ${cell && !c.drift ? `<p class="why" style="font-size:11px;margin:4px 0 0"><strong>${cell.name}</strong> — ${cell.fix}</p>` : ""}
+      </div>`;
+    }
+    function runView(s) {
+      const cs = carSel ? s.corners.filter((c) => c.car === carSel) : s.corners;
+      const real = cs.filter((c) => !c.drift);
+      const tiles = [[s.rate_pps, "pkt/s"], [s.cars.length, "cars"], [s.corners.length, "corners"], [s.summary.front_limited_corners, "front-limited"], [s.summary.rear_limited_corners, "rear-limited"], [s.summary.drift_corners, "drifts"], [s.launches.length, "launches"], [s.braking.length, "brake events"], [s.summary.impacts, "impacts"]];
+      const launchCharts = s.launches.filter((l) => !carSel || l.car === carSel).slice(0, 4).map((l) => `<div class="car-card" style="cursor:default"><h3 style="font-size:13px;margin:0 0 4px">🚦 Launch @ ${l.t}s · ${carLbl(s, l.car)}</h3>
+        <p class="why" style="font-size:11px;margin:0 0 4px">0-60 <b>${l.zero60_s ?? "—"} s</b> · peak rear slip <b style="color:${l.peak_slip_rear > 1 ? "#e5414e" : "inherit"}">${l.peak_slip_rear}</b> · front ${l.peak_slip_front}</p>
+        ${chart([{ pts: l.trace.map((p) => [p[0], Math.abs(p[3])]), col: "#e5414e", label: "RL slip" }, { pts: l.trace.map((p) => [p[0], Math.abs(p[4])]), col: "#f0883e", label: "RR slip" }, { pts: l.trace.map((p) => [p[0], Math.abs(p[1])]), col: "#2f81f7", label: "FL slip" }], { xl: "s", yl: "slip ratio", hline: 1, hlabel: "limit", ymax: Math.min(8, Math.max(1.5, l.peak_slip_rear * 1.1)) })}</div>`).join("");
+      const brakeRows = s.braking.filter((b) => !carSel || b.car === carSel).map((b) => `<tr><td>${b.t}s</td><td>${carLbl(s, b.car)}</td><td>${b.mph_start}→${b.mph_end}</td><td>${b.decel_g_peak} g</td>
+        <td><div class="lab-bar" style="width:90px;display:inline-block;vertical-align:middle"><i style="width:${Math.min(100, b.front_deficit * 100)}%;background:#2f81f7"></i></div> ${b.front_deficit}</td>
+        <td><div class="lab-bar" style="width:90px;display:inline-block;vertical-align:middle"><i style="width:${Math.min(100, b.rear_deficit * 100)}%;background:#e5414e"></i></div> ${b.rear_deficit}</td>
+        <td>${b.lock === "none" ? `<span class="chip">no lock</span>` : `<span class="chip" style="border-color:#e5414e;color:#e5414e">${b.lock} lock</span>`}</td></tr>`).join("");
+      const gearCards = s.cars.filter((c) => !carSel || c.ordinal === carSel).map((c) => `<div class="car-card" style="cursor:default;border-left:4px solid ${carCol(s, c.ordinal)}"><h3 style="font-size:13px;margin:0 0 4px">⚙️ ${carLbl(s, c.ordinal)} <span class="chip">${c.live_s}s</span></h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap"><table style="font-size:11px"><thead><tr><th>gear</th><th>m/s per krpm</th><th>vs 1st</th></tr></thead><tbody>${c.gears.map((g) => `<tr><td>${g.gear}</td><td>${g.mps_per_krpm}</td><td>${g.rel}</td></tr>`).join("")}</tbody></table>
+        <div>${chart([{ pts: c.dyno.map((d) => [d.rpm, d.hp]), col: "#e3b341", label: "hp" }, { pts: c.dyno.map((d) => [d.rpm, d.tq]), col: "#e83c9e", label: "ft·lb" }], { w: 260, h: 120, xl: "rpm (WOT frames)", yl: "" })}</div></div>
+        <p class="why" style="font-size:10.5px;margin:4px 0 0">tire temp max °F: ${Object.entries(c.temps_max_f).map(([w, v]) => `${w} ${v}`).join(" · ")}</p></div>`).join("");
+      const pulsesByCar = s.cars.map((c) => { const p = s.pulses.filter((x) => x.car === c.ordinal && x.decay_s != null).map((x) => x.decay_s).sort((a, b) => a - b); return p.length ? `${carLbl(s, c.ordinal)}: median decay <b>${p[Math.floor(p.length / 2)].toFixed(2)} s</b> (${p.length} pulses)` : null; }).filter(Boolean);
+      return `
+        <div class="lab-tiles">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+        <div class="block"><h3 style="margin-top:0">📼 Session strip — ${s.id}</h3>${strip(s)}
+          <div class="lab-rail"><span class="chip ${carSel == null ? "on" : ""}" data-car="all">all cars</span>${s.cars.map((c) => `<span class="chip ${carSel === c.ordinal ? "on" : ""}" data-car="${c.ordinal}" style="border-color:${carCol(s, c.ordinal)}">${carLbl(s, c.ordinal)}</span>`).join("")}</div>
+          <p class="why" style="font-size:11px">${s.zero_windows.length} not-driving windows · ${s.impacts.length} impact frames discarded · hover any second for numbers.</p></div>
+        <div class="block" style="border-color:#e5414e"><h3 style="margin-top:0">🩺 Corners — first red ring, by phase</h3>
+          <p class="why" style="font-size:12px">${real.length} grip corners (${cs.length - real.length} drifts hidden from diagnosis): front-limited <b>${real.filter((c) => c.first_red && c.first_red.axle === "front").length}</b> · rear-limited <b>${real.filter((c) => c.first_red && c.first_red.axle === "rear").length}</b> · clean <b>${real.filter((c) => !c.first_red).length}</b></p>
+          <div class="card-grid">${cs.slice(0, 24).map((c) => cornerCard(s, c)).join("")}</div>${cs.length > 24 ? `<p class="why" style="font-size:11px">+${cs.length - 24} more</p>` : ""}</div>
+        <div class="block"><h3 style="margin-top:0">🧪 Test cards detected in this run</h3>
+          <div class="card-grid">${launchCharts}</div>
+          <h3 style="font-size:14px">🛑 Braking events — wheel-speed deficit (lock detector)</h3>
+          <div style="overflow-x:auto"><table><thead><tr><th>t</th><th>car</th><th>mph</th><th>decel</th><th>front deficit</th><th>rear deficit</th><th>verdict</th></tr></thead><tbody>${brakeRows || `<tr><td colspan="7" class="why">none</td></tr>`}</tbody></table></div>
+          <div class="card-grid" style="margin-top:10px">${gearCards}</div>
+          <p class="why" style="font-size:11px;margin-top:8px">🪃 Wiggle (yaw decay after a steering pulse, experimental): ${pulsesByCar.join(" · ") || "no pulses detected"}. 🛏 Bottoming events: <b>${s.summary.bottoming}</b>.</p></div>
+        <div class="block" style="border-color:var(--warn,#e3b341)"><h3 style="margin-top:0">📎 HUD clips — the two things the stream can't carry</h3>
+          <div class="card-grid"><div class="lab-slot"><img src="assets/telemetry/tires-misc.jpg" alt="">Tires, Misc. — hot pressures → cold = hot − 3.5 psi · live camber</div><div class="lab-slot"><img src="assets/telemetry/heat.jpg" alt="">Heat — inner / middle / outer → camber verdict</div></div></div>`;
+    }
+    function benchView(s) {
+      if (donor == null) donor = s.cars[0].ordinal;
+      if (replica == null) replica = (s.cars[1] || s.cars[0]).ordinal;
+      const D = car(s, donor), R = car(s, replica);
+      const dC = "#e3b341", rC = "#00d27a";
+      const pick = (arr, o) => arr.filter((x) => x.car === o);
+      const kinds = [["Launch", pick(s.launches, donor).length && pick(s.launches, replica).length], ["Braking", pick(s.braking, donor).length && pick(s.braking, replica).length], ["Corner", pick(s.corners, donor).length && pick(s.corners, replica).length], ["Gearing", D.gears.length && R.gears.length], ["Dyno", D.dyno.length && R.dyno.length], ["Crest", 1], ["Top-speed pull", 0], ["Wiggle", pick(s.pulses, donor).length && pick(s.pulses, replica).length]];
+      // match metrics
+      const common = D.gears.filter((g) => R.gears.find((h) => h.gear === g.gear));
+      const gearErr = common.length ? Math.sqrt(common.reduce((a, g) => { const h = R.gears.find((x) => x.gear === g.gear); return a + Math.pow((h.mps_per_krpm - g.mps_per_krpm) / g.mps_per_krpm, 2); }, 0) / common.length) * 100 : null;
+      const rpmC = D.dyno.filter((d) => R.dyno.find((e) => e.rpm === d.rpm));
+      const dynoErr = rpmC.length ? Math.sqrt(rpmC.reduce((a, d) => { const e = R.dyno.find((x) => x.rpm === d.rpm); return a + Math.pow((e.hp - d.hp) / Math.max(d.hp, 1), 2); }, 0) / rpmC.length) * 100 : null;
+      const med = (a) => { a = a.slice().sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+      const lD = pick(s.launches, donor)[0], lR = pick(s.launches, replica)[0];
+      const launchErr = lD && lR ? Math.abs(lR.peak_slip_rear - lD.peak_slip_rear) / Math.max(lD.peak_slip_rear, 0.1) * 100 : null;
+      const bD = med(pick(s.braking, donor).map((b) => b.front_deficit - b.rear_deficit)), bR = med(pick(s.braking, replica).map((b) => b.front_deficit - b.rear_deficit));
+      const brakeErr = bD != null && bR != null ? Math.abs(bR - bD) * 100 : null;
+      const uD = med(pick(s.corners, donor).filter((c) => !c.drift).map((c) => c.usi)), uR = med(pick(s.corners, replica).filter((c) => !c.drift).map((c) => c.usi));
+      const usiErr = uD != null && uR != null ? Math.abs(uR - uD) * 100 : null;
+      const pD = med(pick(s.pulses, donor).filter((p) => p.decay_s != null).map((p) => p.decay_s)), pR = med(pick(s.pulses, replica).filter((p) => p.decay_s != null).map((p) => p.decay_s));
+      const pulseErr = pD != null && pR != null ? Math.abs(pR - pD) / Math.max(pD, 0.05) * 100 : null;
+      const ledger = [
+        ["⚙️ Gearing", gearErr, 2, 6, `ladder RMS ${fmt(gearErr, 1)}% over ${common.length} gears`, "FD / individual ratios until the WOT ladder overlays gear by gear"],
+        ["🔧 Engine", dynoErr, 3, 8, `dyno curve RMS ${fmt(dynoErr, 1)}% over ${rpmC.length} rpm bins`, "aspiration tier / bolt-ons until the hp curve AND boost profile overlay — peak hp alone is not proof"],
+        ["🔁 Diff (launch)", launchErr, 10, 25, `peak rear slip ${fmt(lR && lR.peak_slip_rear)} vs donor ${fmt(lD && lD.peak_slip_rear)}`, "accel lock ↑ if replica spins one wheel more; center split toward donor's front/rear slip share"],
+        ["🛑 Brakes", brakeErr, 5, 15, `front−rear deficit ${fmt(bR)} vs donor ${fmt(bD)}`, "balance toward the axle the donor locks LATER; pressure to match the lock threshold"],
+        ["⚖️ Springs / ARBs", usiErr, 5, 15, `corner USI ${fmt(uR, 3)} vs donor ${fmt(uD, 3)}`, "front relatively softer if donor USI is lower (less understeer); ratio first, magnitude second"],
+        ["🪃 Dampers", pulseErr, 15, 40, `yaw-decay ${fmt(pR)} s vs donor ${fmt(pD)} s (experimental)`, "rear rebound / front bump until the decay and crest traces overlay"],
+        ["🪁 Aero", null, 0, 0, "needs a top-speed pull + fast-sweeper probe (not in this session)", "rear wing / front aero until speed-binned lat g and braking overlay"],
+      ];
+      return `
+        <div class="block"><h3 style="margin-top:0">🧬 Decode Bench — donor vs replica, maneuver by maneuver</h3>
+          <p class="why" style="font-size:12px"><strong>Demo data:</strong> two different cars from today's capture stand in for donor and replica, so the ledger is honestly red. Load a donor run + replica run of the same car to use it for real.</p>
+          <div class="lab-bench">
+            <div><strong style="color:${dC}">DONOR</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${donor === c.ordinal ? "on" : ""}" data-donor="${c.ordinal}">${carLbl(s, c.ordinal)}</span>`).join("")}</div></div>
+            <div><strong style="color:${rC}">REPLICA</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${replica === c.ordinal ? "on" : ""}" data-replica="${c.ordinal}">${carLbl(s, c.ordinal)}</span>`).join("")}</div></div>
+          </div>
+          <div class="lab-rail" style="margin-top:10px">${kinds.map(([k, ok]) => `<span class="chip ${ok ? "on" : "missing"}">${ok ? "✓" : "○"} ${k}</span>`).join("")}</div>
+        </div>
+        <div class="lab-bench">
+          <div><h3 style="margin-top:0;font-size:14px">⚙️ Gear ladder</h3>${chart([{ pts: D.gears.map((g) => [g.gear, g.mps_per_krpm]), col: dC, label: "donor" }, { pts: R.gears.map((g) => [g.gear, g.mps_per_krpm]), col: rC, label: "replica" }], { xl: "gear", yl: "m/s per krpm", w: 380 })}</div>
+          <div><h3 style="margin-top:0;font-size:14px">🔧 Dyno (WOT frames)</h3>${chart([{ pts: D.dyno.map((d) => [d.rpm, d.hp]), col: dC, label: "donor hp" }, { pts: R.dyno.map((d) => [d.rpm, d.hp]), col: rC, label: "replica hp" }], { xl: "rpm", yl: "hp", w: 380 })}</div>
+          <div><h3 style="margin-top:0;font-size:14px">🚦 Launch — rear slip ratio</h3>${lD && lR ? chart([{ pts: lD.trace.map((p) => [p[0], Math.max(Math.abs(p[3]), Math.abs(p[4]))]), col: dC, label: "donor" }, { pts: lR.trace.map((p) => [p[0], Math.max(Math.abs(p[3]), Math.abs(p[4]))]), col: rC, label: "replica" }], { xl: "s", yl: "slip", hline: 1, hlabel: "limit", ymax: 6, w: 380 }) : `<p class="why">needs a launch on both</p>`}</div>
+          <div><h3 style="margin-top:0;font-size:14px">🛑 Braking — deficit front vs rear</h3>${chart([{ pts: pick(s.braking, donor).map((b, i) => [i + 1, b.front_deficit]), col: dC, label: "donor F" }, { pts: pick(s.braking, donor).map((b, i) => [i + 1, b.rear_deficit]), col: "#f0883e", label: "donor R" }, { pts: pick(s.braking, replica).map((b, i) => [i + 1, b.front_deficit]), col: rC, label: "replica F" }, { pts: pick(s.braking, replica).map((b, i) => [i + 1, b.rear_deficit]), col: "#2f81f7", label: "replica R" }], { xl: "event #", yl: "deficit", w: 380, ymax: 1.05 })}</div>
+        </div>
+        <div class="block" style="margin-top:14px"><h3 style="margin-top:0">📋 Match ledger — green all the way down = decoded</h3>
+          <div style="overflow-x:auto"><table><thead><tr><th></th><th>slider group</th><th>measured</th><th>turn next</th></tr></thead><tbody>
+            ${ledger.map(([n, v, g, o, m, turn]) => `<tr><td>${light(v, g, o)}</td><td><strong>${n}</strong></td><td class="why" style="font-size:12px">${m}</td><td class="why" style="font-size:12px">${turn}</td></tr>`).join("")}
+          </tbody></table></div>
+          <p class="why" style="font-size:11px;margin-top:8px">Static certification still applies above this ledger: pane rows dashed, radar matched, and the two HUD clips (pressure, camber). The ledger covers what the panel cannot see.</p></div>`;
+    }
+    function render() {
+      const s = S();
+      host.innerHTML = `
+        <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">📡 Telemetry Lab — Data Out sessions</h2>
+        <div class="lab-modes"><button class="lab-mode ${mode === "run" ? "active" : ""}" data-mode="run">🧪 Lab Run</button><button class="lab-mode ${mode === "bench" ? "active" : ""}" data-mode="bench">🧬 Decode Bench</button>
+          ${sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>`}</div>
+        ${mode === "run" ? runView(s) : benchView(s)}`;
+      host.querySelectorAll(".lab-mode").forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
+      host.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : +b.dataset.car; render(); }));
+      host.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = +b.dataset.donor; render(); }));
+      host.querySelectorAll("[data-replica]").forEach((b) => b.addEventListener("click", () => { replica = +b.dataset.replica; render(); }));
+      const sel = host.querySelector("#labSess"); if (sel) sel.addEventListener("change", () => { sIdx = +sel.value; carSel = null; donor = replica = null; render(); });
+    }
+    render();
+  }
+
   // ---- Function registry: every quantitative model, one notation ----
   function buildFormulas() {
     const F = DB.formulas;
@@ -2458,6 +2627,7 @@
   buildTuneLab();
   buildTraining();
   buildFormulas();
+  buildLab();
   const allCodesBtn = document.getElementById("allCodesBtn");
   if (allCodesBtn) allCodesBtn.addEventListener("click", openTuneCodesOverlay);
 })();

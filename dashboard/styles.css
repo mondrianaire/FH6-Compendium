@@ -171,6 +171,30 @@ details.tz-why p { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
 .tz-proofgrid img { width: 100%; border-radius: 6px; border: 1px solid var(--line); display: block; }
 .tz-proofgrid figcaption { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
 .tz-proofgrid figure { margin: 0; }
+
+/* Telemetry Lab (Lab Run + Decode Bench) */
+.lab-modes { display: flex; gap: 8px; margin: 6px 0 14px; flex-wrap: wrap; }
+.lab-mode { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--bg2); color: var(--muted); cursor: pointer; font-weight: 700; font-size: 13px; }
+.lab-mode.active { background: var(--accent); color: #0e1116; border-color: var(--accent); }
+.lab-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 10px 0; }
+.lab-tile { background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; text-align: center; }
+.lab-tile b { display: block; font-size: 20px; line-height: 1.1; }
+.lab-tile span { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.lab-rail { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.lab-rail .chip { cursor: pointer; }
+.lab-rail .chip.on { border-color: var(--accent); color: var(--accent); }
+.lab-rail .chip.missing { opacity: .45; border-style: dashed; }
+.lab-corner { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.lab-corner .lab-ph { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+.lab-ph div { border-top: 4px solid; border-radius: 4px; padding: 4px 6px; font-size: 11px; background: var(--bg3); }
+.lab-bar { height: 6px; border-radius: 3px; background: var(--line); position: relative; margin-top: 3px; }
+.lab-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+.lab-bench { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lab-bench > div { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.lab-light { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
+.lab-slot { border: 2px dashed var(--line); border-radius: 10px; padding: 10px; text-align: center; color: var(--muted); font-size: 12px; }
+.lab-slot img { width: 100%; border-radius: 6px; opacity: .55; }
+@media (max-width: 900px) { .lab-bench { grid-template-columns: 1fr; } }
 .pib-d b { background: #45c8f1; } .pib-c b { background: #f0c530; }
 .pib-b b { background: #f0862d; } .pib-a b { background: #e5414e; }
 .pib-s1 b { background: #a468e8; } .pib-s2 b { background: #2f62e0; }

@@ -1,7 +1,7 @@
 // Compiles the JSON database in /data into a single browser-loadable bundle
 // (dashboard/db.js -> window.FH6_DB) so the dashboard runs from file:// with no server.
 // Run: node scripts/build-db.mjs
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -30,6 +30,8 @@ const db = {
   trainingZone: read("training-zone.json"),
   formulas: read("formulas.json"),
   gameAssets: read("game-assets.json"),
+  sessions: readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json")).sort()
+    .map((f) => JSON.parse(readFileSync(join(root, "data", "sessions", f), "utf8"))),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

@@ -1186,6 +1186,7 @@
       "result": "Peak% == |TireCombinedSlip| x 100, INSTANTANEOUS (hold window 0 beat 0.5 s: median log-error 0.086 vs 0.232). Slip ratio/angle fit far worse. Offset -26.4 s (ShareX mtime lags recording end by ~26 s; align by content, not file time).",
       "examples": "on-screen 800/811 vs stream 803/812; 1,018/1,023 vs 1,019/1,002; 391/297/560/375 vs 390/309/560/426; 153/118/47/34 vs 158/121/59/30. Mismatches only where slip changes fast between 2 s samples.",
       "consequence": "The whole friction-diagnosis framework (first red ring, axle x phase matrix, Peak% bands) is now computable from the stream at 139 Hz with no HUD. Red ring == |CombinedSlip| > 1.0."
-    }
+    },
+    "telemetry_lab": "v0 BUILT 2026-08-21: dashboard tab Telemetry Lab with two views over session JSON (scripts/telemetry/analyze_session.py): LAB RUN = tiles, per-second session strip with car lanes, phase-segmented corner cards (first red ring, USI, matrix cell + fix), launch slip traces, braking wheel-speed-deficit lock table, per-car gear ladder + dyno, yaw-decay + bottoming counts, HUD-clip slots; DECODE BENCH = donor/replica selectors, maneuver rail, overlays (gear ladder, dyno, launch slip, braking deficits), match ledger with traffic lights + turn-next doctrine per slider group. Demo data = different cars from the first capture."
   }
 }

@@ -492,6 +492,35 @@ def main():
                 probes.append({"key": k, "label": label, "count": nk, "required": req, "confidence": None, "ready": False, "present": False, "hint": "not on this course"})
         best = min((e["best_lap"] for e in evs if e["best_lap"]), default=None)
         for e in evs: e["delta_s"] = round(e["best_lap"] - best, 3) if (best and e["best_lap"]) else None
+        # ---- decode battery: the full set of telemetry tests a build decode needs, scoped to this course's windows ----
+        loop_rows = [r for r in live if inwin(r["t"], evs)]
+        car0 = cars.get(co["cars"][0]) if co["cars"] else {}
+        gl = defaultdict(int); rpm_bins = set(); top_s = 0.0; prevt = None; wig = 0
+        for r in loop_rows:
+            if r["Accel"] > 230 and r["CurrentEngineRpm"] > 2500 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10:
+                gl[r["Gear"]] += 1; rpm_bins.add(int(r["CurrentEngineRpm"] // 250) * 250)
+                if car0.get("gears") and r["Gear"] == max((g["gear"] for g in car0["gears"]), default=99) and prevt is not None: top_s += max(0.0, min(0.2, r["t"] - prevt))
+            prevt = r["t"]
+        pulses_here = [p for p in pulses if inwin(p["t"], evs) and p["car"] in co["cars"]]; wig = len(pulses_here)
+        mx = max((g["gear"] for g in (car0.get("gears") or [])), default=0)
+        lo = ((car0.get("idle_rpm") or 1000) + 1500) // 250 * 250; hi = 0.96 * (car0.get("max_rpm") or 0); dbins = [b for b in range(int(lo), int(hi), 250)] or [lo]
+        DB_TESTS = [
+            ("launch", "Standing launch", counts["launch"], 1, "launch → mass, diff center split, accel spin"),
+            ("gears", "Full gear ladder", sum(1 for g in gl if gl[g] >= 15), max(mx, 1), "WOT time in every gear → gearing tab"),
+            ("dyno", "Dyno rev sweep", sum(1 for b in dbins if b in rpm_bins), len(dbins), "full-throttle through the rev range → engine/aspiration curve"),
+            ("top", "Top-speed pull", 1 if top_s >= 4 else 0, 1, "hold top gear WOT 5 s → drag / final drive"),
+            ("brake", "Hard stop 80+", counts["brake"], 2, "threshold brake → balance, lock, decel diff"),
+            ("hairpin", "Hairpin", counts["hairpin"], 1, "low-speed mech balance"),
+            ("medium", "Medium corner", counts["medium"], 1, "mid-speed balance"),
+            ("fast", "Fast sweeper", counts["fast"], 1, "high-speed / aero balance"),
+            ("crest", "Crest / bump", counts["crest"], 1, "spring & damper behaviour"),
+            ("wiggle", "Steering pulse", wig, 3, "yaw damping (experimental)"),
+        ]
+        db = []; ready = 0
+        for k, label, have, need, why in DB_TESTS:
+            ok_ = have >= need; ready += 1 if ok_ else 0
+            db.append({"key": k, "label": label, "have": have, "need": need, "ok": ok_, "why": why})
+        decode = {"ready_n": ready, "total": len(DB_TESTS), "pct": round(ready / len(DB_TESTS), 2), "missing": [t["label"] for t in db if not t["ok"]], "tests": db}
         advice_by_car = {}
         for cid_ in co["cars"]:
             cov_stub = {"overall": round(num / den, 2) if den else 0.0, "probes": probes}
@@ -524,7 +553,7 @@ def main():
                                "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis),
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
-        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out,
+        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out

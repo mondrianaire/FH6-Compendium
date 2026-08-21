@@ -1,14 +1,5 @@
 {
   "schema_version": "1.0.0",
-  "purpose": "User-defined free-roam test circuits for tuning/decode. A loop is a start point (world PosX/PosZ) + radius; every pass back through the start counts as one lap. Marked from the dashboard Live view (POST /mark-start).",
-  "loops": {
-    "probe": {
-      "start": [
-        2552,
-        4855
-      ],
-      "radius": 60,
-      "min_dist": 250
-    }
-  }
+  "purpose": "User-defined free-roam test circuits (Course mode). Mark from the dashboard Live view.",
+  "loops": {}
 }

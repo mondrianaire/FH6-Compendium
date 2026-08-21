@@ -44,11 +44,88 @@ def names_map():
         with open(os.path.join(ROOT, "data", "car-ordinals.json"), encoding="utf-8") as f: return json.load(f).get("cars", {})
     except Exception: return {}
 
+# ---------------- coverage model + advisor ----------------
+PROBES = [  # key, label, required count, weight, hint when incomplete
+    ("hairpin", "Hairpins (< 45 mph)", 3, 1.0, "take {n} more tight corners under 45 mph"),
+    ("medium", "Medium corners (45-85 mph)", 4, 1.0, "{n} more medium-speed corners"),
+    ("fast", "Fast sweepers (> 85 mph)", 3, 1.0, "{n} more sweepers above 85 mph"),
+    ("flick", "Chicane flicks (L-R within 2.5 s)", 2, 0.5, "{n} more quick direction changes"),
+    ("launch", "Launches (0-60 from rest)", 2, 1.0, "{n} more standing launches"),
+    ("brake", "Hard stops from > 80 mph", 3, 1.0, "{n} more hard stops from 80+ mph"),
+    ("crest", "Crests / bumps (car goes light)", 2, 0.5, "{n} more crests at speed"),
+    ("top", "Top-speed pull (WOT in top gear, 5 s)", 1, 0.5, "hold full throttle in top gear for 5 s"),
+    ("wiggle", "Steering pulses > 55 mph", 3, 0.5, "{n} more quick steering pulses at speed (experimental)"),
+    ("dyno", "Dyno rpm coverage (WOT)", 1, 1.0, "full-throttle pulls through the rev range"),
+    ("gears", "Gear ladder", 1, 1.0, "full-throttle time in every gear"),
+    ("warm", "Tires warm (> 150 F) most of the run", 1, 0.5, "keep driving — tires still cold for most frames"),
+]
+
+def coverage_for(cid_, cars, corners, launches, braking, crests, pulses, top_pull, warm_frac):
+    c = cars.get(cid_) or {}
+    grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]
+    counts = {
+        "hairpin": sum(1 for x in grip if x["mph_min"] < 45), "medium": sum(1 for x in grip if 45 <= x["mph_min"] <= 85), "fast": sum(1 for x in grip if x["mph_min"] > 85),
+        "flick": sum(1 for a, b in zip(grip, grip[1:]) if a["dir"] != b["dir"] and 0 <= b["t0"] - a["t1"] <= 2.5),
+        "launch": sum(1 for x in launches if x["car"] == cid_), "brake": sum(1 for x in braking if x["car"] == cid_ and x["mph_start"] >= 80),
+        "crest": sum(1 for x in crests if x["car"] == cid_), "top": 1 if top_pull.get(cid_, 0) >= 5 else 0, "wiggle": sum(1 for x in pulses if x["car"] == cid_),
+    }
+    dyno = c.get("dyno") or []; lo = (c.get("idle_rpm") or 1000) + 1500; hi = c.get("max_rpm") or 0
+    bins = int(max(0, (hi - lo)) // 250) or 1; counts["dyno"] = round(min(1.0, sum(1 for d in dyno if lo <= d["rpm"] <= hi) / bins), 2)
+    g = c.get("gears") or []; mx = max([x["gear"] for x in g], default=0); counts["gears"] = round(len(g) / mx, 2) if mx else 0
+    counts["warm"] = round(warm_frac.get(cid_, 0), 2)
+    probes = []; num = 0; den = 0
+    for key, label, req, wt, hint in PROBES:
+        n = counts[key]; conf = min(1.0, (n / req) if key not in ("dyno", "gears", "warm") else float(n))
+        if key == "warm": conf = 1.0 if n >= 0.6 else n / 0.6
+        need = max(0, req - int(n)) if key not in ("dyno", "gears", "warm") else (0 if conf >= 1 else 1)
+        probes.append({"key": key, "label": label, "count": n, "required": req, "confidence": round(conf, 2), "hint": hint.format(n=need) if conf < 1 else "done"})
+        num += conf * wt; den += wt
+    return {"overall": round(num / den, 2), "probes": probes}
+
+def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med):
+    c = cars.get(cid_) or {}; out = []
+    grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]; n = len(grip)
+    def add(key, text, sev, conf, ev): out.append({"key": key, "text": text, "severity": sev, "confidence": round(max(0, min(1, conf)), 2), "evidence": ev})
+    fr1 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "front" and x["first_red"]["phase"] == 1)
+    fr2 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "front" and x["first_red"]["phase"] == 2)
+    fr3 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "front" and x["first_red"]["phase"] >= 3)
+    rr = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "rear")
+    rr4 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "rear" and x["first_red"]["phase"] == 4)
+    usi = sorted(x["usi"] for x in grip); usim = usi[len(usi) // 2] if usi else None
+    if n >= 2 and fr1 / n >= 0.3: add("brake-lockup", "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.", 3, fr1 / 4, f"{fr1}/{n} corners red on the fronts in phase 1")
+    if n >= 2 and fr2 / n >= 0.25: add("trail-brake", "Trail-brake understeer: finish more braking before steering; caster +0.5 for camber-in-turn.", 2, fr2 / 4, f"{fr2}/{n} corners red on the fronts at turn-in")
+    if (n >= 3 and fr3 / n >= 0.3) or (usim is not None and n >= 4 and usim > 0.15): add("mid-understeer", "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.", 2, max(fr3, 1) / 4 if fr3 else (n / 8), f"USI median {usim:+.3f} over {n} corners; {fr3} mid-corner front reds")
+    if n >= 2 and rr / n >= 0.3: add("rear-limited", "Rear-limited corners: rear ARB/springs softer; on throttle (phase 4) accel diff lock -10%.", 3, rr / 4, f"{rr}/{n} corners red on the rears ({rr4} on exit)")
+    if usim is not None and n >= 4 and usim < -0.05: add("oversteer-balance", "Balance reads oversteer (negative USI): rear relatively softer or rear wing up.", 2, n / 8, f"USI median {usim:+.3f}")
+    L = [x for x in launches if x["car"] == cid_]
+    if L:
+        prs = sorted(x["peak_slip_rear"] for x in L)[len(L) // 2]; pfs = sorted(x["peak_slip_front"] for x in L)[len(L) // 2]
+        if prs > 1.5: add("launch-spin", "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.", 2, len(L) / 2, f"median peak rear slip {prs:.2f} over {len(L)} launches")
+        if pfs > 1.2 and c.get("drivetrain") == "AWD": add("launch-front-spin", "AWD fronts spinning at launch: center split more rearward / front accel diff down.", 2, len(L) / 2, f"median peak front slip {pfs:.2f}")
+    B = [x for x in braking if x["car"] == cid_ and x["mph_start"] >= 60]
+    if len(B) >= 2:
+        fd = sorted(x["front_deficit"] for x in B)[len(B) // 2]; rd = sorted(x["rear_deficit"] for x in B)[len(B) // 2]
+        if fd > 0.35 and rd > 0.35: add("brake-pressure", "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.", 3, len(B) / 3, f"median deficit F {fd:.2f} / R {rd:.2f} over {len(B)} stops")
+        elif fd > rd + 0.1: add("brake-balance-rear", "Fronts lock first: brake balance 2-4% rearward.", 2, len(B) / 3, f"median deficit F {fd:.2f} vs R {rd:.2f}")
+        elif rd > fd + 0.1: add("brake-balance-front", "Rears lock first: brake balance forward, decel diff lock down.", 2, len(B) / 3, f"median deficit R {rd:.2f} vs F {fd:.2f}")
+    tm = temps_med.get(cid_)
+    if tm:
+        fmed = (tm["FL"] + tm["FR"]) / 2; rmed = (tm["RL"] + tm["RR"]) / 2
+        if fmed - rmed > 15: add("front-hot", "Fronts run 15 F+ hotter than rears: the understeer thermal signature — check pressures/camber on the HUD (Tires Misc + Heat).", 1, 0.7, f"median F {fmed:.0f} F vs R {rmed:.0f} F")
+        if max(tm.values()) > 300: add("tires-cooking", "Tire temps past 300 F: pressures likely high and/or sustained wheelspin — HUD pressure check.", 1, 0.6, f"max median {max(tm.values()):.0f} F")
+    nb = sum(1 for x in bott if x["car"] == cid_ and x["mph"] > 40)
+    if nb >= 8: add("bottoming", "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).", 1, min(1, nb / 20), f"{nb} bottoming frames above 40 mph (detector still coarse)")
+    if cov and cov["overall"] < 0.35: add("more-data", "Low coverage: verdicts are provisional — see the probe bars for what to drive next.", 1, 1.0, f"coverage {cov['overall']:.0%}")
+    out.sort(key=lambda a: -(a["severity"] * a["confidence"]))
+    return out
+
 def main():
     path = sys.argv[1]
     outdir = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else os.path.join(ROOT, "data", "sessions")
+    until = float(sys.argv[sys.argv.index("--until") + 1]) if "--until" in sys.argv else None
     os.makedirs(outdir, exist_ok=True)
     rows = load(path)
+    if until is not None: rows = [r for r in rows if r["t_mono"] - rows[0]["t_mono"] <= until]
     if not rows: print("no rows"); return
     t0 = rows[0]["t_mono"]
     for r in rows: r["t"] = r["t_mono"] - t0
@@ -171,8 +248,9 @@ def main():
                 if q["Accel"] < 100 and q["speed_mph"] < 20: break
                 j += 1
             if t60 or (trace and trace[-1][5] > 40):
+                mv = [x for x in trace if x[5] > 5] or trace   # measure slip once rolling (> 5 mph); slip ratio explodes at v~0
                 launches.append({"t": round(r["t"], 1), "car": k0, "zero60_s": round(t60, 2) if t60 else None,
-                                 "peak_slip_rear": round(max(max(abs(x[3]), abs(x[4])) for x in trace), 2), "peak_slip_front": round(max(max(abs(x[1]), abs(x[2])) for x in trace), 2), "trace": trace[:120]})
+                                 "peak_slip_rear": round(max(max(abs(x[3]), abs(x[4])) for x in mv), 2), "peak_slip_front": round(max(max(abs(x[1]), abs(x[2])) for x in mv), 2), "trace": trace[:120]})
             i = j + 1
         else: i += 1
     sess["launches"] = launches
@@ -222,6 +300,25 @@ def main():
         i += 1
     sess["pulses"] = pulses
 
+    # ---- crests, top-speed pull, warm tires, temps medians, coverage + advice per config ----
+    crests = []; top_pull = defaultdict(float); warm_n = defaultdict(int); temps_acc = defaultdict(lambda: {w: [] for w in W})
+    prev_t = None
+    for r in live:
+        k = cid(r)
+        if r["AccelY"] < -0.5 * G and r["speed_mph"] > 50 and (not crests or r["t"] - crests[-1]["t"] > 1.5 or crests[-1]["car"] != k):
+            crests.append({"t": round(r["t"], 1), "car": k, "mph": round(r["speed_mph"]), "g": round(r["AccelY"] / G, 2)})
+        c = cars.get(k)
+        if c and c["gears"] and r["Gear"] == max(g["gear"] for g in c["gears"]) and r["Accel"] > 230 and prev_t is not None: top_pull[k] += max(0.0, min(0.2, r["t"] - prev_t))
+        if all(r["TireTempF" + w] > 150 for w in W): warm_n[k] += 1
+        for w in W: temps_acc[k][w].append(r["TireTempF" + w])
+        prev_t = r["t"]
+    sess["crests"] = crests[:100]
+    warm_frac = {k: warm_n[k] / max(1, c["live_frames"]) for k, c in cars.items()}
+    temps_med = {k: {w: statistics.median(v[w]) for w in W} for k, v in temps_acc.items() if v["FL"]}
+    for c in sess["cars"]:
+        c["coverage"] = coverage_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull, warm_frac)
+        c["advice"] = advice_for(c["id"], cars, corners, launches, braking, bott, c["coverage"], temps_med)
+        c["temps_med_f"] = {w: round(v) for w, v in temps_med.get(c["id"], {}).items()}
     sess["summary"] = {"cars": len(cars), "configs": len(segments), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
                        "front_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "front" and not c["drift"]),
                        "rear_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "rear" and not c["drift"]),

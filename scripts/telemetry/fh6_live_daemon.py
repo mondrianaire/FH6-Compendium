@@ -36,8 +36,8 @@ class State:
         self._corner = None         # open corner accumulator
         self.cars = {}              # ordinal -> info
         self.csv_path = None; self.csv_writer = None; self.csv_file = None
-        self.last_on_t = None; self.live_since_analysis = 0.0; self.analyzing = False
-        self.session_json = None; self.session_path = None
+        self.last_on_t = None; self.live_since_analysis = 0.0; self.drive_since_periodic = 0.0; self.analyzing = False; self.replay = False
+        self.session_json = None; self.session_path = None; self.analysis = None
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
         self.seq = 0
     def emit(self, name, payload):
@@ -138,25 +138,31 @@ def ingest(p, t_mono):
                       "brake_max": max([r["brk"] for r in co["pre"] + rows] or [0]), "hb": any(r["hb"] > 0 for r in rows)}
                 with ST.lock: ST.corners.append(cc)
                 ST.emit("corner", cc)
-    # auto-analysis trigger: driving stopped for > 5 s after >= 15 s of driving since last analysis
+    # auto-analysis triggers: (a) every ~20 s of driving (live suggestions), (b) driving stopped > 5 s after >= 15 s of driving (session close)
     if c["on"]:
-        ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0
+        ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0; ST.drive_since_periodic += 1 / 100.0
+        if ST.drive_since_periodic > 20 and not ST.analyzing and ST.csv_path:
+            ST.drive_since_periodic = 0; threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
     elif ST.last_on_t is not None and t_mono - ST.last_on_t > 5 and ST.live_since_analysis > 15 and not ST.analyzing and ST.csv_path:
-        ST.live_since_analysis = 0; threading.Thread(target=run_analysis, daemon=True).start()
+        ST.live_since_analysis = 0; threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
 
-def run_analysis():
+def run_analysis(until=None, final=True):
     ST.analyzing = True
     try:
         if ST.csv_file: ST.csv_file.flush()
         outdir = os.path.join(ROOT, "data", "sessions")
-        r = subprocess.run([sys.executable, os.path.join(HERE, "analyze_session.py"), ST.csv_path, "--out", outdir], capture_output=True, text=True, timeout=120)
+        cmd = [sys.executable, os.path.join(HERE, "analyze_session.py"), ST.csv_path, "--out", outdir]
+        if ST.replay and until is not None: cmd += ["--until", str(until)]
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
         sid = os.path.splitext(os.path.basename(ST.csv_path))[0]
         path = os.path.join(outdir, sid + ".json")
         if os.path.exists(path):
             with open(path) as f: js = json.load(f)
-            with ST.lock: ST.session_json = js; ST.session_path = path
-            ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})
-            print(f"[analysis] {js['id']} -> {js['summary']}")
+            an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "temps_med_f", "live_s")} for c in js["cars"]]}
+            with ST.lock: ST.session_json = js; ST.session_path = path; ST.analysis = an
+            ST.emit("analysis", an)
+            if final: ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})
+            print(f"[analysis{' final' if final else ''}] {js['id']} -> {js['summary']}")
         else:
             print("[analysis] failed:", r.stdout[-300:], r.stderr[-300:])
     finally:
@@ -173,7 +179,7 @@ class H(BaseHTTPRequestHandler):
             last_seq = ST.seq; last_frame_t = 0.0; last_status = 0.0
             try:
                 # initial snapshot: strip + corners + cars
-                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
+                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
                 self.wfile.write(f"event: snapshot\ndata: {json.dumps(snap)}\n\n".encode()); self.wfile.flush()
                 while True:
                     now = time.monotonic()
@@ -188,6 +194,9 @@ class H(BaseHTTPRequestHandler):
                     self.wfile.flush(); time.sleep(0.02)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
+        elif self.path.startswith("/analysis"):
+            body = json.dumps(ST.analysis or {}).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/cars-map"):
             body = json.dumps(names_load()).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
@@ -252,7 +261,7 @@ def main():
         ST.csv_writer.writerow(["t_wall", "t_mono", "speed_mph", "lat_g", "long_g", "yaw_rate_dps"] + [f"TireTempC{w}" for w in W] + FIELDS)
         print(f"[csv] {ST.csv_path}")
     elif a.replay:
-        ST.csv_path = os.path.abspath(a.replay)   # analysis runs on the replayed file
+        ST.csv_path = os.path.abspath(a.replay); ST.replay = True   # analysis runs on the replayed file, capped at replay time
     srv = ThreadingHTTPServer(("127.0.0.1", a.http), H); srv.daemon_threads = True
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     print(f"[http] http://localhost:{a.http}/events  (SSE)  /session.json  /health")

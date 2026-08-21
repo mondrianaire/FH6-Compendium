@@ -2489,8 +2489,10 @@
         <div>${chart([{ pts: c.dyno.map((d) => [d.rpm, d.hp]), col: "#e3b341", label: "hp" }, { pts: c.dyno.map((d) => [d.rpm, d.tq]), col: "#e83c9e", label: "ft·lb" }], { w: 260, h: 120, xl: "rpm (WOT frames)", yl: "" })}</div></div>
         <p class="why" style="font-size:10.5px;margin:4px 0 0">tire temp max °F: ${Object.entries(c.temps_max_f).map(([w, v]) => `${w} ${v}`).join(" · ")}</p></div>`).join("");
       const pulsesByCar = s.cars.map((c) => { const p = s.pulses.filter((x) => x.car === c.id && x.decay_s != null).map((x) => x.decay_s).sort((a, b) => a - b); return p.length ? `${carLbl(s, c.id)}: median decay <b>${p[Math.floor(p.length / 2)].toFixed(2)} s</b> (${p.length} pulses)` : null; }).filter(Boolean);
+      const adviceCars = s.cars.filter((c) => c.coverage && (!carSel || c.id === carSel));
       return `
         <div class="lab-tiles">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+        ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — per car</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : ""}
         <div class="block"><h3 style="margin-top:0">📼 Session strip — ${s.id}</h3>${strip(s)}
           <div class="lab-rail"><span class="chip ${carSel == null ? "on" : ""}" data-car="all">all cars</span>${s.cars.map((c) => `<span class="chip ${carSel === c.id ? "on" : ""}" data-car="${c.id}" style="border-color:${carCol(s, c.id)}">${carLbl(s, c.id)}</span>`).join("")}</div>
           <p class="why" style="font-size:11px">${s.zero_windows.length} not-driving windows · ${s.impacts.length} impact frames discarded · hover any second for numbers.</p></div>
@@ -2568,6 +2570,26 @@
         <line x1="60" y1="22" x2="60" y2="114" stroke="var(--line)" stroke-width=".5"/><line x1="14" y1="68" x2="106" y2="68" stroke="var(--line)" stroke-width=".5"/>
         <line x1="60" y1="68" x2="60" y2="68" stroke="#f0883e" stroke-width="4" stroke-linecap="round" data-needle="${w}"/>
         <text x="60" y="128" text-anchor="middle" fill="var(--txt)" font-size="14" font-weight="800" data-peak="${w}">—</text></svg>`;
+    // coverage bars + ranked suggestions for one car entry (from analyzer output)
+    const SEV = { 3: "#e5414e", 2: "#e3b341", 1: "#2f81f7" };
+    const adviceBlock = (c, s) => {
+      if (!c || !c.coverage) return "";
+      const cov = c.coverage, adv = c.advice || [];
+      return `<div class="lab-corner" style="border-left:4px solid ${s ? carCol(s, c.id) : "var(--accent)"}">
+        <div class="card-row" style="margin-top:0"><strong>🎯 ${s ? carLbl(s, c.id) : (carName(c) || "#" + c.ordinal) + " · " + c.class + " " + c.pi}</strong><span class="chip" style="border-color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"};color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}">confidence ${Math.round(cov.overall * 100)}%</span></div>
+        <div class="lab-bar" style="height:8px;margin:6px 0 10px"><i style="width:${cov.overall * 100}%;background:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}"></i></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:11px">${cov.probes.map((p) => `<div title="${esc(p.hint)}"><div style="display:flex;justify-content:space-between"><span>${p.label}</span><b style="color:${p.confidence >= 1 ? "#00d27a" : "var(--muted)"}">${p.key === "dyno" || p.key === "gears" || p.key === "warm" ? Math.round(p.count * 100) + "%" : `${p.count}/${p.required}`}</b></div><div class="lab-bar"><i style="width:${p.confidence * 100}%;background:${p.confidence >= 1 ? "#00d27a" : "#2f81f7"}"></i></div>${p.confidence < 1 ? `<span class="why" style="font-size:10px">${p.hint}</span>` : ""}</div>`).join("")}</div>
+        ${adv.length ? `<div style="margin-top:10px">${adv.slice(0, 5).map((a) => `<div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0"><span class="lab-light" style="background:${SEV[a.severity]};margin-top:4px"></span><div style="flex:1"><div style="font-size:12px"><strong>${a.text}</strong></div><div class="why" style="font-size:10.5px">${a.evidence} · confidence ${Math.round(a.confidence * 100)}%</div><div class="lab-bar" style="height:4px;margin-top:3px;max-width:220px"><i style="width:${a.confidence * 100}%;background:${SEV[a.severity]}"></i></div></div></div>`).join("")}</div>` : `<p class="why" style="font-size:11px;margin:8px 0 0">no suggestions yet — drive the probes above</p>`}
+      </div>`;
+    };
+    function paintAdvice() {
+      const el = host.querySelector("#lvAdvice"); if (!el) return;
+      const an = live.analysis;
+      if (!an || !an.cars || !an.cars.length) { el.innerHTML = `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px">first analysis after ~20 s of driving…</p></div>`; return; }
+      const cur = live.frame && live.frame.cid; const order = an.cars.slice().sort((a, b) => (b.id === cur) - (a.id === cur));
+      el.innerHTML = `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"} · ${an.summary.corners} corners · ${an.summary.launches} launches · ${an.summary.braking} stops</span></h3>
+        <div class="card-grid">${order.map((c) => adviceBlock(c, { cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, an.cars.find((y) => y.id === x.id) || {})) : an.cars })).join("")}</div></div>`;
+    }
     function liveView() {
       return `
         <div class="block" style="border-color:#e5414e">
@@ -2577,6 +2599,7 @@
           <div id="lvSession"></div><div id="lvUnknown"></div>
         </div>
         <div class="lab-tiles" id="lvTiles"></div>
+        <div id="lvAdvice"></div>
         <div class="block"><h3 style="margin-top:0">🩺 Friction — live (Peak% = |combined slip| × 100; needle = slip vector; ring red past 1.0)</h3>
           <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,180px));gap:6px;justify-content:center" id="lvCircles">${circleSvg("FL")}${circleSvg("FR")}${circleSvg("RL")}${circleSvg("RR")}</div>
           <div id="lvInputs" style="max-width:520px;margin:10px auto 0"></div></div>
@@ -2617,12 +2640,13 @@
     const W4 = ["FL", "FR", "RL", "RR"];
     function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; }
     function paintCorners() { const el = host.querySelector("#lvCorners"); if (el) el.innerHTML = live.corners.slice(-12).reverse().map((c) => cornerCard(liveS(), c)).join("") || `<p class="why" style="font-size:11px">no corners yet</p>`; }
-    function paintAll() { paintStatus(); paintFrame(); paintStrip(); paintCorners(); }
+    function paintAll() { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintAdvice(); }
     function liveConnect() {
       if (es) { es.close(); es = null; }
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.connected = true; live.err = false; paintAll(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.connected = true; live.err = false; paintAll(); });
+      es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); paintAdvice(); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });

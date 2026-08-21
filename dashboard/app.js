@@ -2574,7 +2574,7 @@
     }
     // ---- LIVE mode: EventSource from the local daemon ----
     let es = null, liveUrl = localStorage.getItem("fh6LiveUrl") || "http://localhost:8765";
-    const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null };
+    const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null, loop: null };
     const liveS = () => ({ cars: live.cars });
     const circleSvg = (w) => `<svg viewBox="0 0 120 130" class="tz-svg" data-wheel="${w}" style="max-width:160px">
         <text x="60" y="12" text-anchor="middle" fill="var(--muted)" font-size="10">${w}</text>
@@ -2637,6 +2637,7 @@
           <div class="card-row" style="margin-top:0"><h3 style="margin:0">🔴 Live — Data Out stream</h3><span id="lvStatus" class="chip">connecting…</span></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)"><button class="lab-mode" id="lvConnect">connect</button><button class="lab-mode" id="lvReset" title="Clear the live screen and start a fresh session (new CSV) on the daemon" style="border-color:#e5414e;color:#e5414e">↺ reset live</button>
             <span class="why" style="font-size:11px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (or <code>--replay captures/&lt;file&gt;.csv</code> to replay a recording live)</span></div>
+          <div id="lvLoop" style="margin-top:8px"></div>
           <div id="lvStint" style="margin-top:8px"></div>
           <div id="lvSession"></div><div id="lvUnknown"></div>
         </div>
@@ -2658,6 +2659,17 @@
       if (se) se.innerHTML = live.session ? `<p class="why" style="font-size:12px;margin:8px 0 0">📦 Session analyzed: <strong>${live.session.id}</strong> — ${live.session.summary ? `${live.session.summary.corners} corners · ${live.session.summary.launches} launches · ${live.session.summary.braking} brake events` : ""} ${live.loaded === live.session.id ? `<button class="lab-mode" id="lvOpen">open in Lab Run</button>` : "(loading…)"}</p>` : "";
       const ob = host.querySelector("#lvOpen"); if (ob) ob.addEventListener("click", () => { sIdx = sessions.findIndex((x) => x.id === live.loaded); mode = "run"; carSel = null; render(); });
       const un = host.querySelector("#lvUnknown"); if (un) { const seen = new Set(); un.innerHTML = live.cars.filter((c) => !carName(c) && !seen.has(c.ordinal) && seen.add(c.ordinal)).map(nameUI).join(""); bindNames(); }
+      const lv = host.querySelector("#lvLoop");
+      if (lv && live.connected) {
+        const lo = live.loop; const lk = lo ? `${lo.name}|${lo.lap}|${lo.last_s}` : "none";
+        if (lv.dataset.k !== lk) {
+          lv.dataset.k = lk;
+          lv.innerHTML = lo ? `<span class="chip" style="border-color:var(--accent2);color:var(--accent2)">📍 loop “${esc(lo.name)}” · lap ${lo.lap}${lo.last_s ? " · last " + lo.last_s + "s" : ""}</span> <button class="lab-mode" id="lvClearLoop" style="padding:3px 8px;font-size:11px">clear loop</button> <span class="why" style="font-size:11px">drive back through the start to complete a lap</span>`
+            : `<button class="lab-mode" id="lvMarkLoop" style="padding:4px 10px;font-size:12px;border-color:var(--accent2);color:var(--accent2)">📍 mark loop start (here)</button> <input id="lvLoopName" placeholder="test loop name — e.g. Exocet proving ground" style="min-width:220px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"> <span class="why" style="font-size:11px">stand at your chosen start/finish, name it, mark — then every lap is timed & position-aligned</span>`;
+          const mb = lv.querySelector("#lvMarkLoop"); if (mb) mb.addEventListener("click", () => { const nm = lv.querySelector("#lvLoopName").value.trim() || "test loop"; fetch(liveUrl + "/mark-start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: nm }) }).then((r) => r.json()).then((r) => { if (r.ok !== false) { live.loop = { name: nm, lap: 0, last_s: null }; lv.dataset.k = ""; paintStatus(); } }).catch(() => {}); });
+          const cb = lv.querySelector("#lvClearLoop"); if (cb) cb.addEventListener("click", () => { fetch(liveUrl + "/clear-loop", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(() => { live.loop = null; lv.dataset.k = ""; paintStatus(); }).catch(() => {}); });
+        }
+      }
       const sv = host.querySelector("#lvStint");
       if (sv && live.connected) {
         const n = live.stint || (st && st.stint) || 0; const lab = (live.tags || {})[String(n)]; const labTxt = lab ? (typeof lab === "string" ? lab : lab.label) : "";
@@ -2697,8 +2709,10 @@
       if (es) { es.close(); es = null; }
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.connected = true; live.err = false; paintAll(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; live.connected = true; live.err = false; paintAll(); });
       es.addEventListener("stint", (e) => { const d = JSON.parse(e.data); live.stint = d.n; paintStatus(); });
+      es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
+      es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label } }); paintStatus(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); paintAdvice(); });
       es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; paintAll(); });

@@ -39,6 +39,7 @@ class State:
         self.last_on_t = None; self.live_since_analysis = 0.0; self.drive_since_periodic = 0.0; self.analyzing = False; self.replay = False
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
+        self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
         self.seq = 0
     def emit(self, name, payload):
@@ -82,6 +83,20 @@ def ingest(p, t_mono):
         ST._zero_since = None; ST.prev_cfg = c["cid"]
     elif ST._zero_since is None: ST._zero_since = t_mono
     c["stint"] = ST.stint
+    ST.last_pos = (p["PosX"], p["PosZ"])
+    # reference-loop live lap counting: each return through the start (after leaving by min_dist) = one lap
+    if ST.loop and c["on"]:
+        lx, lz = ST.loop["start"]; R = ST.loop.get("radius", 60); MIND = ST.loop.get("min_dist", 250)
+        d0 = math.hypot(p["PosX"] - lx, p["PosZ"] - lz)
+        if ST._loop_state == "start":
+            if d0 <= R: ST._loop_state = "in"; ST._loop_away = 0.0; ST._loop_t0 = t_mono
+        else:
+            if ST._loop_prev is not None: ST._loop_away += math.hypot(p["PosX"] - ST._loop_prev[0], p["PosZ"] - ST._loop_prev[1])
+            if ST._loop_away > MIND and d0 <= R:
+                ST.loop_lap += 1; ST.loop_last_s = round(t_mono - (ST._loop_t0 or t_mono), 2)
+                ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s})
+                ST._loop_away = 0.0; ST._loop_t0 = t_mono
+    ST._loop_prev = (p["PosX"], p["PosZ"])
     # CSV row (same layout as capture tool)
     if ST.csv_writer:
         row = [time.time(), t_mono, p["Speed"] * 2.23694, p["AccelX"] / G, p["AccelZ"] / G, math.degrees(p["AngVelY"])]
@@ -194,7 +209,7 @@ class H(BaseHTTPRequestHandler):
             last_seq = ST.seq; last_frame_t = 0.0; last_status = 0.0
             try:
                 # initial snapshot: strip + corners + cars
-                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
+                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "loop": ST.loop and {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "last_s": ST.loop_last_s}, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
                 self.wfile.write(f"event: snapshot\ndata: {json.dumps(snap)}\n\n".encode()); self.wfile.flush()
                 while True:
                     now = time.monotonic()
@@ -205,7 +220,7 @@ class H(BaseHTTPRequestHandler):
                     if fr and now - last_frame_t >= 0.05 and now - lp < 1.0:
                         self.wfile.write(f"event: frame\ndata: {json.dumps(fr)}\n\n".encode()); last_frame_t = now
                     if now - last_status >= 1.0:
-                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
+                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'loop': ST.loop and {'name': ST.loop['name'], 'lap': ST.loop_lap, 'last_s': ST.loop_last_s}, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
                     self.wfile.flush(); time.sleep(0.02)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
@@ -243,6 +258,21 @@ class H(BaseHTTPRequestHandler):
                 os.makedirs(os.path.dirname(tp), exist_ok=True)
                 with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags}, f, indent=2, ensure_ascii=False)
             ST.emit("tag", {"n": n, "label": lab}); ok = True
+        elif self.path.startswith("/mark-start") and body.get("name"):
+            if ST.last_pos is None: ok = False
+            else:
+                name = str(body["name"]).strip()[:60]; lp = {"name": name, "start": [round(ST.last_pos[0]), round(ST.last_pos[1])], "radius": int(body.get("radius") or 60), "min_dist": int(body.get("min_dist") or 250)}
+                rp = os.path.join(ROOT, "data", "reference-loops.json")
+                try:
+                    with open(rp, encoding="utf-8") as f: lobj = json.load(f)
+                except Exception: lobj = {"schema_version": "1.0.0", "loops": {}}
+                lobj.setdefault("loops", {})[name] = {k: lp[k] for k in ("start", "radius", "min_dist")}
+                with open(rp, "w", encoding="utf-8") as f: json.dump(lobj, f, indent=2, ensure_ascii=False)
+                with ST.lock: ST.loop = lp; ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None
+                ST.emit("loop", {"name": name, "start": lp["start"], "lap": 0}); ok = True
+        elif self.path.startswith("/clear-loop"):
+            with ST.lock: ST.loop = None; ST.loop_lap = 0
+            ST.emit("loop", {"name": None}); ok = True
         elif self.path.startswith("/route") and body.get("route_key") and body.get("name"):
             rp = os.path.join(ROOT, "data", "routes.json")
             try:
@@ -264,6 +294,7 @@ def reset_session():
         ST.analysis = None; ST.session_json = None; ST.session_path = None
         ST.last_on_t = None; ST.live_since_analysis = 0.0; ST.drive_since_periodic = 0.0
         ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
+        ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None   # keep the loop DEFINITION, reset its lap count
         ST.events = []; ST.seq += 1
         if ST.csv_file and not ST.replay:
             try: ST.csv_file.close()

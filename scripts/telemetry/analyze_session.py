@@ -414,6 +414,37 @@ def main():
                        "best_lap": round(max((q["BestLap"] for q in rs), default=0), 3) or None, "last_lap": round(max((q["LastLap"] for q in rs), default=0), 3) or None,
                        "distance_m": round(dist), "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": pos[-1] if pos else None,
                        "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "route": (routes.get(key) or {}).get("name")})
+
+    # ---- reference loops: user-defined free-roam test circuits. Each pass through the start point = one lap (a synthetic event). ----
+    loops = {}
+    try:
+        with open(os.path.join(ROOT, "data", "reference-loops.json"), encoding="utf-8") as f: loops = json.load(f).get("loops", {})
+    except Exception: loops = {}
+    for lname, lp in loops.items():
+        lx, lz = lp["start"]; R = lp.get("radius", 60); MIND = lp.get("min_dist", 250)
+        # collect crossings: a lap = leave the radius (travel > MIND from start), then return within radius
+        state = "start"; lap_rows = []; away_dist = 0; prev = None; passes = []
+        for r in live:
+            d0 = math.hypot(r["PosX"] - lx, r["PosZ"] - lz)
+            if state == "start":
+                if d0 <= R: lap_rows = [r]; state = "in"; away_dist = 0
+            elif state == "in":
+                lap_rows.append(r)
+                if prev is not None: away_dist += math.hypot(r["PosX"] - prev["PosX"], r["PosZ"] - prev["PosZ"])
+                if away_dist > MIND and d0 <= R:   # completed a loop
+                    passes.append(lap_rows); lap_rows = [r]; away_dist = 0
+                elif r["t"] - lap_rows[0]["t"] > 600:   # safety: abandon a stuck lap
+                    lap_rows = [r]; away_dist = 0
+            prev = r
+        for i, rs in enumerate(passes, 1):
+            if rs[-1]["t"] - rs[0]["t"] < 5: continue
+            ev_out.append({"t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "car": cid(rs[0]), "stint": rs[0].get("stint"),
+                           "mode": "reference loop", "laps": 1, "lap_index": i,
+                           "best_lap": round(rs[-1]["t"] - rs[0]["t"], 3), "last_lap": round(rs[-1]["t"] - rs[0]["t"], 3),
+                           "distance_m": round(sum(math.hypot(rs[j]["PosX"] - rs[j - 1]["PosX"], rs[j]["PosZ"] - rs[j - 1]["PosZ"]) for j in range(1, len(rs)))),
+                           "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": None,
+                           "start": [round(rs[0]["PosX"]), round(rs[0]["PosZ"])], "end": [round(rs[-1]["PosX"]), round(rs[-1]["PosZ"])],
+                           "route_key": "loop:" + lname, "route": lname})
     sess["events"] = ev_out
     # ---- crests, top-speed pull, warm tires, temps medians, coverage + advice per config ----
     crests = []; top_pull = defaultdict(float); warm_n = defaultdict(int); temps_acc = defaultdict(lambda: {w: [] for w in W})

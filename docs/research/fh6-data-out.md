@@ -57,7 +57,9 @@ Researched: (A) the FH6 Data Out protocol — fields, format, setup, quirks; (B)
 - ✅ CarClass enum is Horizon 0-based: an A 700 car reports 3 (D0 C1 B2 A3 S1 4 S2 5 X 6).
 - ✅ Impact frames show as lat-g spikes (6–10 g) — discard `|lat g| > 3 g` or `SmashableVelDiff > 0` frames, mirroring the friction-page rule.
 - ✅ Gear ratios recovered from WOT frames (1st→4th ratio ladder 1.00 / 1.42 / 1.84 / 2.36) — the gearing tab of a locked tune is now measurable.
-- Still open: `WheelInPuddle` type (no puddles driven), Peak% ≟ CombinedSlip×100 (needs a Friction-HUD clip during a capture), `CarGroup` semantics (47 seen on the A 700 car).
+- ✅ **Peak% == |TireCombinedSlip| × 100, instantaneous.** 38 Friction-page frames cross-correlated against the capture (offsets −60..+60 s, hold windows 0–3 s, three slip series): best fit combined slip / no hold / offset −26.4 s, median log-error 0.086; exact matches at stable moments (800/811 ↔ 803/812; 1,018/1,023 ↔ 1,019/1,002). Slip ratio and slip angle fit far worse. The red ring = combined slip > 1.0. The friction-diagnosis framework is fully computable from the stream.
+- Alignment note: ShareX video mtime lagged the recording end by ~26 s — align HUD clips to captures by content, or start both on a visible event.
+- Still open: `WheelInPuddle` type (no puddles driven), `CarGroup` semantics (47 seen on the A 700 car).
 
 ## Unknowns + stopping criteria
 - **Unresolved, settle on first capture:** (1) `WheelInPuddle` wire type — official FH6 says s32 0/1, FM doc and every FH6 parser read f32 depth (same bytes; the scaffold logs it as f32 and prints the raw value); (2) `IsRaceOn` value in free roam (tools disagree 0 vs 1); (3) whether FH6 goes fully silent when paused or emits zeroed frames; (4) gear encoding (0 = R per one parser; neutral unknown); (5) actual packet rate on Jett's PC (tracks FPS cap?); (6) whether Peak% on the Friction page == `TireCombinedSlip × 100`; (7) `CarGroup` value semantics (FH5 community category table probably applies — ❌).

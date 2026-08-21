@@ -46081,10 +46081,16 @@ window.FH6_DB = {
         "gear_ratios_recovered": "WOT speed/rpm medians: 1st 2.225, 2nd 3.161 (x1.421), 3rd 4.102 (x1.844), 4th 5.246 (x2.358) m/s per krpm — the gearing tab is now directly measurable from a locked tune (mixed across the cars driven; redo per car).",
         "still_open": [
           "WheelInPuddle s32 vs f32 (drive through water)",
-          "Peak% == CombinedSlip*100 (needs Friction-HUD clip alongside a capture)",
           "CarGroup enum meaning",
           "gear 11 = neutral vs shift transient"
         ]
+      },
+      "peak_percent_proof": {
+        "date": "2026-08-21",
+        "method": "38 Friction-page frames transcribed (2 s steps) and cross-correlated against the Data Out capture over offsets -60..+60 s and hold windows 0/0.5/1/2/3 s for combined slip, slip ratio, slip angle.",
+        "result": "Peak% == |TireCombinedSlip| x 100, INSTANTANEOUS (hold window 0 beat 0.5 s: median log-error 0.086 vs 0.232). Slip ratio/angle fit far worse. Offset -26.4 s (ShareX mtime lags recording end by ~26 s; align by content, not file time).",
+        "examples": "on-screen 800/811 vs stream 803/812; 1,018/1,023 vs 1,019/1,002; 391/297/560/375 vs 390/309/560/426; 153/118/47/34 vs 158/121/59/30. Mismatches only where slip changes fast between 2 s samples.",
+        "consequence": "The whole friction-diagnosis framework (first red ring, axle x phase matrix, Peak% bands) is now computable from the stream at 139 Hz with no HUD. Red ring == |CombinedSlip| > 1.0."
       }
     }
   },
@@ -48180,7 +48186,7 @@ window.FH6_DB = {
         "ring_size": "The ring's diameter is the LOAD on that tire. Watch the inside-rear shrink to a dot in a sweeper (your 0:07 frame) — that's load transfer made visible, and why the inside wheel spins first."
       },
       "instrument_notes": [
-        "Peak% is a short rolling maximum — it can hold a number ~1 s after the moment passed (your 0:07 frame read 106% on a nearly unloaded wheel). The RING COLOUR is the live truth; the number is the recent worst.",
+        "Peak% IS the tire's combined slip x 100, live (proven 2026-08-21 against the Data Out stream: |TireCombinedSlip| x 100, no hold window). Ring turns red exactly at 100% = combined slip 1.0. Apparent 'held' readings in 1-second video sampling are real transients, not lag.",
         "All four wheels red at 250-1,100% with needles running off-screen is NOT a tire story — it's a collision or physics jolt (your 0:02 launch spike and 0:34 wall hit). Skip those frames.",
         "One rear red with a forward needle while its twin stays green = inside-wheel spin — accel diff too open. Confirm with the wheel-speed split on the Tires page."
       ],
@@ -48627,7 +48633,8 @@ window.FH6_DB = {
             "lesson": "Four red rings at once with needles running off-screen isn't grip data — it's a physics jolt (launch) and a wall. Learn to recognise and discard them."
           }
         ]
-      }
+      },
+      "data_out": "Every number on this page is one stream field: Peak% = |TireCombinedSlip|x100 per wheel; the needle = the slip vector (TireSlipRatio along the car, TireSlipAngle across it); ring colour = combined slip > 1.0. With Data Out recording, this whole diagnosis runs on the CSV without the HUD."
     }
   },
   "formulas": {

@@ -1335,7 +1335,7 @@
       "ring_size": "The ring's diameter is the LOAD on that tire. Watch the inside-rear shrink to a dot in a sweeper (your 0:07 frame) — that's load transfer made visible, and why the inside wheel spins first."
     },
     "instrument_notes": [
-      "Peak% is a short rolling maximum — it can hold a number ~1 s after the moment passed (your 0:07 frame read 106% on a nearly unloaded wheel). The RING COLOUR is the live truth; the number is the recent worst.",
+      "Peak% IS the tire's combined slip x 100, live (proven 2026-08-21 against the Data Out stream: |TireCombinedSlip| x 100, no hold window). Ring turns red exactly at 100% = combined slip 1.0. Apparent 'held' readings in 1-second video sampling are real transients, not lag.",
       "All four wheels red at 250-1,100% with needles running off-screen is NOT a tire story — it's a collision or physics jolt (your 0:02 launch spike and 0:34 wall hit). Skip those frames.",
       "One rear red with a forward needle while its twin stays green = inside-wheel spin — accel diff too open. Confirm with the wheel-speed split on the Tires page."
     ],
@@ -1782,6 +1782,7 @@
           "lesson": "Four red rings at once with needles running off-screen isn't grip data — it's a physics jolt (launch) and a wall. Learn to recognise and discard them."
         }
       ]
-    }
+    },
+    "data_out": "Every number on this page is one stream field: Peak% = |TireCombinedSlip|x100 per wheel; the needle = the slip vector (TireSlipRatio along the car, TireSlipAngle across it); ring colour = combined slip > 1.0. With Data Out recording, this whole diagnosis runs on the CSV without the HUD."
   }
 }

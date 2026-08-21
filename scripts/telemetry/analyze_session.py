@@ -92,7 +92,58 @@ def strength(n, req):
     """Asymptotic evidence strength: 0.70 at the required count, ~0.91 at 2x, ~0.97 at 3x, -> 1.0."""
     return 1.0 - math.exp(-1.2 * float(n) / max(req, 1e-9))
 
-def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med):
+def course_profile(loop_rows, corners_here, braking_here, launches_here, car0):
+    """What the course DEMANDS — a usage histogram. Absence is information: no straight => gearing/top-end irrelevant here."""
+    if not loop_rows: return None
+    dt = []; prevt = None
+    for r in loop_rows:
+        if prevt is not None and 0 < r["t"] - prevt < 0.5: dt.append((r, r["t"] - prevt))
+        prevt = r["t"]
+    T = sum(d for _, d in dt) or 1e-9
+    frac = {"low_corner": 0.0, "mid_corner": 0.0, "fast_corner": 0.0, "braking": 0.0, "straight": 0.0, "cruise": 0.0}
+    gear_time = defaultdict(float); ys = []
+    for r, d in dt:
+        lat = abs(r["lat_g"]); sp = r["speed_mph"]; ys.append(r.get("PosY", 0.0))
+        if r["Brake"] > 110 and sp > 35: frac["braking"] += d
+        elif lat > 0.5 and sp < 45: frac["low_corner"] += d
+        elif lat > 0.5 and sp <= 85: frac["mid_corner"] += d
+        elif lat > 0.5: frac["fast_corner"] += d
+        elif r["Accel"] > 190 and lat < 0.3 and sp > 55: frac["straight"] += d
+        else: frac["cruise"] += d
+        if r["Gear"] >= 1: gear_time[r["Gear"]] += d
+    for k in frac: frac[k] = round(frac[k] / T, 3)
+    def band(x): return "heavy" if x >= 0.22 else "moderate" if x >= 0.09 else "light" if x >= 0.02 else "absent"
+    max_gear = max((g["gear"] for g in (car0.get("gears") or [])), default=0)
+    gears_used = sorted(g for g, t in gear_time.items() if t / T >= 0.02)
+    top_used = max(gears_used) if gears_used else 0
+    ele_range = round(max(ys) - min(ys), 1) if ys else 0
+    top_speed = round(max((r["speed_mph"] for r in loop_rows), default=0))
+    dims = {
+        "low_corner": {"frac": frac["low_corner"], "band": band(frac["low_corner"])},
+        "mid_corner": {"frac": frac["mid_corner"], "band": band(frac["mid_corner"])},
+        "fast_corner": {"frac": frac["fast_corner"], "band": band(frac["fast_corner"])},
+        "braking": {"frac": frac["braking"], "band": band(frac["braking"])},
+        "straight": {"frac": frac["straight"], "band": band(frac["straight"])},
+        "elevation": {"frac": None, "band": "moderate" if ele_range > 25 else "light" if ele_range > 8 else "absent", "range_m": ele_range},
+        "launch": {"frac": None, "band": "moderate" if launches_here else "absent"},
+    }
+    order = ["low_corner", "mid_corner", "fast_corner", "braking", "straight", "elevation"]
+    lbl = {"low_corner": "low-speed corners", "mid_corner": "medium corners", "fast_corner": "fast sweepers", "braking": "heavy braking", "straight": "straights / top-end", "elevation": "elevation (crests)"}
+    heavy = [lbl[k] for k in order if dims[k]["band"] == "heavy"]
+    absent = [lbl[k] for k in order if dims[k]["band"] == "absent"]
+    notes = []
+    if dims["straight"]["band"] in ("absent", "light"): notes.append(f"no real straight (top speed only {top_speed} mph, gears used {gears_used or '—'}/{max_gear}) — top-end gearing & drag are irrelevant here; tune the gears you use")
+    if dims["elevation"]["band"] == "absent": notes.append("flat (no crests) — spring/damper vertical behaviour isn't tested on this course")
+    if dims["fast_corner"]["band"] == "absent": notes.append("no fast corners — understeer here is mechanical, not aero")
+    return {"dims": dims, "heavy": heavy, "absent": absent, "gears_used": gears_used, "top_gear_used": top_used, "max_gear": max_gear, "top_speed": top_speed, "elevation_range_m": ele_range, "notes": notes, "priority": [lbl[k] for k in sorted(order, key=lambda k: -(dims[k]["frac"] or 0)) if dims[k]["band"] in ("heavy", "moderate")]}
+
+# maps an advice key to the course dimension it depends on (for profile weighting)
+ADV_DIM = {"brake-lockup": "braking", "trail-brake": "braking", "brake-pressure": "braking", "brake-balance-rear": "braking", "brake-balance-front": "braking",
+           "mid-understeer": "corner", "rear-limited": "corner", "oversteer-balance": "corner", "front-hot": "corner", "tires-cooking": "corner",
+           "launch-spin": "launch", "launch-front-spin": "launch", "bottoming": "elevation",
+           "inconclusive-axle": "corner", "inconclusive-usi": "corner", "inconclusive-brake": "braking", "inconclusive-launch": "launch", "more-data": "meta"}
+
+def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med, profile=None):
     c = cars.get(cid_) or {}; out = []
     grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]; n = len(grip)
     def add(key, text, sev, conf, ev): out.append({"key": key, "text": text, "severity": sev, "confidence": round(max(0, min(1, conf)), 2), "evidence": ev})
@@ -151,8 +202,17 @@ def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med):
     nb = sum(1 for x in bott if x["car"] == cid_ and x["mph"] > 40)
     if nb >= 8: add("bottoming", "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).", 1, min(1, nb / 20), f"{nb} bottoming frames above 40 mph (detector still coarse)")
     if cov and cov["overall"] < 0.35: add("more-data", "Low coverage: verdicts are provisional — see the probe bars for what to drive next.", 1, 1.0, f"coverage {cov['overall']:.0%}")
+    if profile:
+        BW = {"heavy": 1.0, "moderate": 0.85, "light": 0.5, "absent": 0.15}; dims = profile["dims"]
+        for a in out:
+            dim = ADV_DIM.get(a["key"], "meta")
+            if dim == "meta": a["course_weight"] = 1.0
+            elif dim == "corner": a["course_weight"] = max(BW[dims["low_corner"]["band"]], BW[dims["mid_corner"]["band"]], BW[dims["fast_corner"]["band"]])
+            else: a["course_weight"] = BW[dims.get(dim, {}).get("band", "moderate")]
+            if a["course_weight"] <= 0.2: a["minor_here"] = True
+    wt = lambda a: a.get("course_weight", 1.0)
     firm = [a for a in out if not a.get("open")]; opn = [a for a in out if a.get("open")]
-    firm.sort(key=lambda a: -(a["severity"] * a["confidence"])); opn.sort(key=lambda a: -a["confidence"])
+    firm.sort(key=lambda a: -(a["severity"] * a["confidence"] * wt(a))); opn.sort(key=lambda a: -(a["confidence"] * wt(a)))
     return firm + opn
 
 def main():
@@ -522,10 +582,11 @@ def main():
             ok_ = have >= need; ready += 1 if ok_ else 0
             db.append({"key": k, "label": label, "have": have, "need": need, "ok": ok_, "why": why})
         decode = {"ready_n": ready, "total": len(DB_TESTS), "pct": round(ready / len(DB_TESTS), 2), "missing": [t["label"] for t in db if not t["ok"]], "tests": db}
+        profile = course_profile(loop_rows, cc, bb, ll, car0)
         advice_by_car = {}
         for cid_ in co["cars"]:
             cov_stub = {"overall": round(num / den, 2) if den else 0.0, "probes": probes}
-            advice_by_car[cid_] = advice_for(cid_, cars, cc, ll, bb, [x for x in bott if inwin(x["t"], evs)], cov_stub, temps_med)
+            advice_by_car[cid_] = advice_for(cid_, cars, cc, ll, bb, [x for x in bott if inwin(x["t"], evs)], cov_stub, temps_med, profile)
         # corner identity: cluster this course's corners by apex position (40 m), order along the route, aggregate per physical corner
         clusters = []
         for c in sorted(cc, key=lambda c: c["t0"]):
@@ -571,7 +632,7 @@ def main():
                                "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
-        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode,
+        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out

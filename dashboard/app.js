@@ -2703,6 +2703,14 @@
   buildTraining();
   buildFormulas();
   buildLab();
+  // deep links: #<tab> opens a tab, #lab-live opens the Telemetry Lab in Live mode
+  const applyHash = () => {
+    const h = (location.hash || "").slice(1); if (!h) return;
+    const [tab, sub] = h.split("-");
+    const b = document.querySelector(`.tab[data-tab="${tab}"]`); if (b) b.click();
+    if (tab === "lab" && sub === "live") { const m = document.querySelector('#labContent2 [data-mode="live"]'); if (m) m.click(); }
+  };
+  applyHash(); window.addEventListener("hashchange", applyHash);
   const allCodesBtn = document.getElementById("allCodesBtn");
   if (allCodesBtn) allCodesBtn.addEventListener("click", openTuneCodesOverlay);
 })();

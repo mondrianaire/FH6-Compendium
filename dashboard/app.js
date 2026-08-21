@@ -2400,10 +2400,7 @@
     if (!host) return;
     const sessions = DB.sessions || [];
     const tzfd = (DB.trainingZone || {}).friction_diagnosis;
-    if (!sessions.length) {
-      host.innerHTML = `<h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">📡 Telemetry Lab</h2><p class="hint">No sessions yet. Record: <code>python scripts/telemetry/fh6_dataout_capture.py --port 9876</code> · Analyze: <code>python scripts/telemetry/analyze_session.py captures/&lt;file&gt;.csv</code> · then rebuild.</p>`;
-      return;
-    }
+    const NOSESS = `<p class="hint">No recorded sessions yet. Live: <code>python scripts/telemetry/fh6_live_daemon.py</code> then the 🔴 Live mode. Post-hoc: <code>fh6_dataout_capture.py</code> → <code>analyze_session.py</code> → rebuild.</p>`;
     const ST = { calm: "#2a313c", front: "#2f81f7", rear: "#e5414e", both: "#a371f7", impact: "#e3b341", off: "#0b0e12" };
     const STL = { calm: "within grip", front: "fronts past the limit", rear: "rears past the limit", both: "all four — drift / overdriven", impact: "impact / jolt", off: "not driving" };
     const CARC = ["#00d27a", "#2f81f7", "#e3b341", "#e83c9e", "#a371f7", "#f0883e"];
@@ -2547,14 +2544,92 @@
           </tbody></table></div>
           <p class="why" style="font-size:11px;margin-top:8px">Static certification still applies above this ledger: pane rows dashed, radar matched, and the two HUD clips (pressure, camber). The ledger covers what the panel cannot see.</p></div>`;
     }
+    // ---- LIVE mode: EventSource from the local daemon ----
+    let es = null, liveUrl = localStorage.getItem("fh6LiveUrl") || "http://localhost:8765";
+    const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null };
+    const liveS = () => ({ cars: live.cars });
+    const circleSvg = (w) => `<svg viewBox="0 0 120 130" class="tz-svg" data-wheel="${w}" style="max-width:160px">
+        <text x="60" y="12" text-anchor="middle" fill="var(--muted)" font-size="10">${w}</text>
+        <circle cx="60" cy="68" r="46" fill="none" stroke="#00d27a" stroke-width="3" data-ring="${w}"/>
+        <circle cx="60" cy="68" r="23" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"/>
+        <line x1="60" y1="22" x2="60" y2="114" stroke="var(--line)" stroke-width=".5"/><line x1="14" y1="68" x2="106" y2="68" stroke="var(--line)" stroke-width=".5"/>
+        <line x1="60" y1="68" x2="60" y2="68" stroke="#f0883e" stroke-width="4" stroke-linecap="round" data-needle="${w}"/>
+        <text x="60" y="128" text-anchor="middle" fill="var(--txt)" font-size="14" font-weight="800" data-peak="${w}">—</text></svg>`;
+    function liveView() {
+      return `
+        <div class="block" style="border-color:#e5414e">
+          <div class="card-row" style="margin-top:0"><h3 style="margin:0">🔴 Live — Data Out stream</h3><span id="lvStatus" class="chip">connecting…</span></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)"><button class="lab-mode" id="lvConnect">connect</button>
+            <span class="why" style="font-size:11px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (or <code>--replay captures/&lt;file&gt;.csv</code> to replay a recording live)</span></div>
+          <div id="lvSession"></div>
+        </div>
+        <div class="lab-tiles" id="lvTiles"></div>
+        <div class="block"><h3 style="margin-top:0">🩺 Friction — live (Peak% = |combined slip| × 100; needle = slip vector; ring red past 1.0)</h3>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,180px));gap:6px;justify-content:center" id="lvCircles">${circleSvg("FL")}${circleSvg("FR")}${circleSvg("RL")}${circleSvg("RR")}</div>
+          <div id="lvInputs" style="max-width:520px;margin:10px auto 0"></div></div>
+        <div class="block"><h3 style="margin-top:0">📼 Session strip — growing</h3><div id="lvStrip"></div></div>
+        <div class="block" style="border-color:#e5414e"><h3 style="margin-top:0">🩺 Corner log — newest first</h3><div class="card-grid" id="lvCorners"></div></div>`;
+    }
+    function paintStatus() {
+      const el = host.querySelector("#lvStatus"); if (!el) return;
+      const st = live.status;
+      el.textContent = !live.connected ? (live.err ? "daemon not reachable — start it, then connect" : "connecting…") : st && st.receiving ? `● receiving ${st.pps} pkt/s · ${st.frames} frames${st.csv ? " · " + st.csv : ""}` : "connected — waiting for packets (drive, or start a replay)";
+      el.style.borderColor = el.style.color = !live.connected ? "#e5414e" : st && st.receiving ? "#00d27a" : "var(--warn,#e3b341)";
+      const se = host.querySelector("#lvSession");
+      if (se) se.innerHTML = live.session ? `<p class="why" style="font-size:12px;margin:8px 0 0">📦 Session analyzed: <strong>${live.session.id}</strong> — ${live.session.summary ? `${live.session.summary.corners} corners · ${live.session.summary.launches} launches · ${live.session.summary.braking} brake events` : ""} ${live.loaded === live.session.id ? `<button class="lab-mode" id="lvOpen">open in Lab Run</button>` : "(loading…)"}</p>` : "";
+      const ob = host.querySelector("#lvOpen"); if (ob) ob.addEventListener("click", () => { sIdx = sessions.findIndex((x) => x.id === live.loaded); mode = "run"; carSel = null; render(); });
+    }
+    function paintFrame() {
+      const f = live.frame; if (!f || !host.querySelector("#lvCircles")) return;
+      for (const w of W4) {
+        const [ratio, angle, comb] = f.slip[w]; const ring = host.querySelector(`[data-ring="${w}"]`), nd = host.querySelector(`[data-needle="${w}"]`), pk = host.querySelector(`[data-peak="${w}"]`);
+        if (!ring) continue;
+        const sat = Math.abs(comb) > 1; ring.setAttribute("stroke", sat ? "#e5414e" : "#00d27a");
+        const sc = 46, cl = (v) => Math.max(-2.2, Math.min(2.2, v));
+        nd.setAttribute("x2", (60 + cl(angle) * sc / 1.0).toFixed(1)); nd.setAttribute("y2", (68 - cl(ratio) * sc / 1.0).toFixed(1));
+        pk.textContent = `${Math.round(Math.abs(comb) * 100)}%`; pk.setAttribute("fill", sat ? "#e5414e" : "var(--txt)");
+      }
+      const tiles = host.querySelector("#lvTiles");
+      if (tiles) tiles.innerHTML = [[f.mph.toFixed(0), "mph"], [f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm, "rpm"], [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"], [f.hp, "hp"], [f.boost.toFixed(1), "boost psi"], [f.on ? `${f.cls} ${f.pi}` : "—", f.on ? `${f.drv} #${f.car}` : "not driving"]]
+        .map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("");
+      const inp = host.querySelector("#lvInputs");
+      if (inp) inp.innerHTML = `<div style="display:grid;grid-template-columns:60px 1fr;gap:4px 8px;font-size:11px;align-items:center">
+          <span>throttle</span><div class="lab-bar" style="height:8px"><i style="width:${f.thr / 2.55}%;background:#00d27a"></i></div>
+          <span>brake</span><div class="lab-bar" style="height:8px"><i style="width:${f.brk / 2.55}%;background:#e5414e"></i></div>
+          <span>steer</span><div class="lab-bar" style="height:8px"><i style="left:${50 + Math.min(50, Math.max(-50, f.steer / 2.54))}%;width:2px;background:#2f81f7"></i><i style="left:50%;width:1px;background:var(--muted)"></i></div>
+          <span>susp</span><div style="display:flex;gap:4px">${f.susp.map((v, i) => `<div class="lab-bar" style="flex:1;height:8px" title="${W4[i]} ${v}"><i style="width:${v * 100}%;background:${v > 0.95 ? "#e5414e" : "#a371f7"}"></i></div>`).join("")}</div>
+          <span>temp °F</span><span>${f.temp.map((v, i) => `${W4[i]} <b>${v}</b>`).join(" · ")}${f.hb ? " · <b style='color:#e3b341'>HANDBRAKE</b>" : ""}</span></div>`;
+    }
+    const W4 = ["FL", "FR", "RL", "RR"];
+    function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; }
+    function paintCorners() { const el = host.querySelector("#lvCorners"); if (el) el.innerHTML = live.corners.slice(-12).reverse().map((c) => cornerCard(liveS(), c)).join("") || `<p class="why" style="font-size:11px">no corners yet</p>`; }
+    function paintAll() { paintStatus(); paintFrame(); paintStrip(); paintCorners(); }
+    function liveConnect() {
+      if (es) { es.close(); es = null; }
+      live.connected = false; live.err = false; paintStatus();
+      try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.connected = true; live.err = false; paintAll(); });
+      es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
+      es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
+      es.addEventListener("corner", (e) => { live.corners.push(JSON.parse(e.data)); paintCorners(); });
+      es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false; paintStatus(); });
+      es.addEventListener("session", (e) => { live.session = JSON.parse(e.data); paintStatus();
+        fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; paintStatus(); } }).catch(() => {}); });
+      es.onerror = () => { live.connected = false; live.err = true; paintStatus(); };
+    }
+    function bindLive() {
+      const b = host.querySelector("#lvConnect"), u = host.querySelector("#lvUrl");
+      if (b) b.addEventListener("click", () => { liveUrl = u.value.trim().replace(/\/$/, ""); localStorage.setItem("fh6LiveUrl", liveUrl); liveConnect(); });
+    }
     function render() {
       const s = S();
       host.innerHTML = `
         <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">📡 Telemetry Lab — Data Out sessions</h2>
-        <div class="lab-modes"><button class="lab-mode ${mode === "run" ? "active" : ""}" data-mode="run">🧪 Lab Run</button><button class="lab-mode ${mode === "bench" ? "active" : ""}" data-mode="bench">🧬 Decode Bench</button>
-          ${sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>`}</div>
-        ${mode === "run" ? runView(s) : benchView(s)}`;
-      host.querySelectorAll(".lab-mode").forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
+        <div class="lab-modes"><button class="lab-mode ${mode === "live" ? "active" : ""}" data-mode="live">🔴 Live</button><button class="lab-mode ${mode === "run" ? "active" : ""}" data-mode="run">🧪 Lab Run</button><button class="lab-mode ${mode === "bench" ? "active" : ""}" data-mode="bench">🧬 Decode Bench</button>
+          ${sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : s ? `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>` : ""}</div>
+        ${mode === "live" ? liveView() : !s ? NOSESS : mode === "run" ? runView(s) : benchView(s)}`;
+      if (mode === "live") { bindLive(); if (!es) liveConnect(); else paintAll(); }
+      host.querySelectorAll(".lab-mode[data-mode]").forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
       host.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : +b.dataset.car; render(); }));
       host.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = +b.dataset.donor; render(); }));
       host.querySelectorAll("[data-replica]").forEach((b) => b.addEventListener("click", () => { replica = +b.dataset.replica; render(); }));

@@ -2407,10 +2407,13 @@
     let mode = "run", sIdx = 0, carSel = null, donor = null, replica = null;
     const S = () => sessions[sIdx];
     const NAMES = () => Object.assign({}, ((DB.carOrdinals || {}).cars) || {}, JSON.parse(localStorage.getItem("fh6CarNames") || "{}"), (typeof live !== "undefined" && live.names) || {});
-    const car = (s, o) => s.cars.find((c) => c.id === o) || s.cars.find((c) => String(c.ordinal) === String(o));
+    const baseId = (o) => String(o).split("#")[0];
+    const stintOf = (o) => (String(o).includes("#") ? +String(o).split("#")[1] : null);
+    const car = (s, o) => { const b = baseId(o); return s.cars.find((c) => c.id === b) || s.cars.find((c) => String(c.ordinal) === b); };
     const carName = (c) => (c && (NAMES()[String(c.ordinal)] || {}).name) || (c && c.name) || null;
-    const carLbl = (s, o) => { const c = car(s, o); if (!c) return `#${o}`; const nm = carName(c); return `${nm ? nm : "#" + c.ordinal} · ${c.class} ${c.pi} ${c.drivetrain} ${c.cyl}cyl`; };
-    const carCol = (s, o) => CARC[Math.max(0, s.cars.findIndex((c) => c.id === o || String(c.ordinal) === String(o))) % CARC.length];
+    const stintLbl = (s, o) => { const n = stintOf(o); if (n == null) return ""; const st = (s.stints || []).find((x) => x.n === n); return ` · run ${n}${st && st.label ? " “" + st.label + "”" : ""}`; };
+    const carLbl = (s, o) => { const c = car(s, o); if (!c) return `#${o}`; const nm = carName(c); return `${nm ? nm : "#" + c.ordinal} · ${c.class} ${c.pi} ${c.drivetrain} ${c.cyl}cyl${stintLbl(s, o)}`; };
+    const carCol = (s, o) => CARC[Math.max(0, s.cars.findIndex((c) => c.id === baseId(o) || String(c.ordinal) === baseId(o))) % CARC.length];
     const candidates = (c) => { const own = ((DB.ownedCars || {}).cars || []); const same = own.filter((x) => x.class === c.class && String(x.pi) === String(c.pi)); const cls = own.filter((x) => x.class === c.class && !same.includes(x)); return [...same, ...cls].map((x) => `${x.year} ${x.manufacturer} ${x.model}`); };
     const nameUI = (c) => carName(c) ? "" : `<div class="lab-name" style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="chip" style="border-color:var(--warn,#e3b341);color:var(--warn,#e3b341)">🏷 unknown car #${c.ordinal}</span><input list="cands-${c.ordinal}" placeholder="which car is this? (${c.class} ${c.pi} ${c.drivetrain})" style="min-width:230px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"><datalist id="cands-${c.ordinal}">${candidates(c).slice(0, 60).map((n) => `<option value="${esc(n)}">`).join("")}</datalist><button class="lab-mode" data-savename="${c.ordinal}" style="padding:4px 10px;font-size:12px">save</button></div>`;
     const sigChips = (c) => c.sig ? `<div class="chips" style="margin-top:4px">${[["build", c.build_id], ["max rpm", c.max_rpm], ["boost", c.sig.boost_max + " psi"], ["peak", c.sig.hp_peak ? `${c.sig.hp_peak} hp @ ${c.sig.rpm_at_peak}` : "—"], ["gears", c.sig.gear_count], ["mass idx", c.sig.mass_idx ?? "—"], ["group", c.car_group]].map(([k, v]) => `<span class="chip" title="${k}">${k} <b>${v}</b></span>`).join("")}</div>` : "";
@@ -2465,7 +2468,7 @@
       const fr = c.first_red;
       return `<div class="lab-corner" style="border-left:4px solid ${carCol(s, c.car)}">
         <div class="card-row" style="margin-top:0"><strong>${c.dir === "L" ? "⬅" : "➡"} ${c.t0}s · ${c.mph_in}→${c.mph_min} mph · ${c.lat_g_peak} g</strong>
-          ${c.drift ? `<span class="chip" style="border-color:#a371f7;color:#a371f7">drift</span>` : fr ? `<span class="chip" style="border-color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]};color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]}">first red: ${fr.axle} · ph ${c.kink ? 5 : fr.phase}</span>` : `<span class="chip">no saturation</span>`}</div>
+          <span>${c.stint ? `<span class="chip" title="run">run ${c.stint}</span> ` : ""}${c.drift ? `<span class="chip" style="border-color:#a371f7;color:#a371f7">drift</span>` : fr ? `<span class="chip" style="border-color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]};color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]}">first red: ${fr.axle} · ph ${c.kink ? 5 : fr.phase}</span>` : `<span class="chip">no saturation</span>`}</span></div>
         <div class="lab-ph">${c.phases.map((p) => `<div style="border-color:${CM_PC[p.phase - 1]}" title="${esc(CM_SHORT[p.phase - 1])} · ${p.dur}s">
             <span style="color:${CM_PC[p.phase - 1]};font-weight:700">${p.phase}</span> F <b style="color:${p.front > 1 ? "#e5414e" : "inherit"}">${p.front}</b><div class="lab-bar"><i style="width:${Math.min(100, p.front * 50)}%;background:${p.front > 1 ? "#2f81f7" : "#566173"}"></i></div>
             R <b style="color:${p.rear > 1 ? "#e5414e" : "inherit"}">${p.rear}</b><div class="lab-bar"><i style="width:${Math.min(100, p.rear * 50)}%;background:${p.rear > 1 ? "#e5414e" : "#566173"}"></i></div></div>`).join("")}</div>
@@ -2493,6 +2496,10 @@
       return `
         <div class="lab-tiles">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — per car</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : ""}
+        ${(s.stints || []).length ? `<div class="block"><h3 style="margin-top:0">🏁 Runs — stints between menu visits (tag them to A/B re-tunes)</h3>
+          <div style="overflow-x:auto"><table><thead><tr><th>run</th><th>car</th><th>window</th><th>label</th><th>corners</th><th>USI med</th><th>front-red</th><th>brake F/R</th><th>launch slip</th><th>ladder</th></tr></thead><tbody>
+            ${s.stints.map((st) => `<tr style="border-left:3px solid ${carCol(s, st.id)}"><td><b>${st.n}</b></td><td>${carLbl(s, st.id).split(" · ").slice(0, 2).join(" · ")}</td><td>${st.t0}–${st.t1}s (${st.live_s}s)</td><td>${st.label ? `<b>${esc(st.label)}</b>` : `<span class="why">—</span>`}</td><td>${st.corners}</td><td>${st.usi_med == null ? "—" : (st.usi_med > 0 ? "+" : "") + st.usi_med.toFixed(3)}</td><td>${st.first_red_front}/${st.corners}</td><td>${st.brake_fd_med == null ? "—" : `${st.brake_fd_med.toFixed(2)}/${(st.brake_rd_med ?? 0).toFixed(2)}`}</td><td>${st.launch_rear_slip == null ? "—" : st.launch_rear_slip.toFixed(2)}</td><td title="${esc(JSON.stringify(st.ladder))}">${Object.keys(st.ladder || {}).length ? (st.ladder_changed === true ? `<span class="chip" style="border-color:#e3b341;color:#e3b341">gearing changed</span>` : st.ladder_changed === false ? `<span class="chip">same gearing</span>` : `<span class="chip">first / n-a</span>`) : "—"}</td></tr>`).join("")}
+          </tbody></table></div><p class="why" style="font-size:11px;margin-top:6px">Same car + same parts + new sliders looks identical in the packet header — the RUN is the unit. Tag runs from the Live screen (“front ARB −2”) and compare two runs in the Decode Bench.</p></div>` : ""}
         <div class="block"><h3 style="margin-top:0">📼 Session strip — ${s.id}</h3>${strip(s)}
           <div class="lab-rail"><span class="chip ${carSel == null ? "on" : ""}" data-car="all">all cars</span>${s.cars.map((c) => `<span class="chip ${carSel === c.id ? "on" : ""}" data-car="${c.id}" style="border-color:${carCol(s, c.id)}">${carLbl(s, c.id)}</span>`).join("")}</div>
           <p class="why" style="font-size:11px">${s.zero_windows.length} not-driving windows · ${s.impacts.length} impact frames discarded · hover any second for numbers.</p></div>
@@ -2513,7 +2520,8 @@
       if (replica == null || !car(s, replica)) replica = (s.cars[1] || s.cars[0]).id;
       const D = car(s, donor), R = car(s, replica);
       const dC = "#e3b341", rC = "#00d27a";
-      const pick = (arr, o) => arr.filter((x) => x.car === o);
+      const pick = (arr, o) => { const b = baseId(o), n = stintOf(o); return arr.filter((x) => x.car === b && (n == null || x.stint === n)); };
+      const stintChips = (sel, attr) => (s.stints || []).filter((st) => st.corners + st.launches + st.braking > 0).map((st) => `<span class="chip ${sel === st.id + "#" + st.n ? "on" : ""}" data-${attr}="${st.id}#${st.n}" title="${st.t0}s–${st.t1}s">run ${st.n}${st.label ? " “" + esc(st.label) + "”" : ""} · ${carLbl(s, st.id).split(" · ")[0]}</span>`).join("");
       const kinds = [["Launch", pick(s.launches, donor).length && pick(s.launches, replica).length], ["Braking", pick(s.braking, donor).length && pick(s.braking, replica).length], ["Corner", pick(s.corners, donor).length && pick(s.corners, replica).length], ["Gearing", D.gears.length && R.gears.length], ["Dyno", D.dyno.length && R.dyno.length], ["Crest", 1], ["Top-speed pull", 0], ["Wiggle", pick(s.pulses, donor).length && pick(s.pulses, replica).length]];
       // match metrics
       const common = D.gears.filter((g) => R.gears.find((h) => h.gear === g.gear));
@@ -2542,13 +2550,13 @@
         <div class="block"><h3 style="margin-top:0">🧬 Decode Bench — donor vs replica, maneuver by maneuver</h3>
           <p class="why" style="font-size:12px"><strong>Demo data:</strong> two different cars from today's capture stand in for donor and replica, so the ledger is honestly red. Load a donor run + replica run of the same car to use it for real.</p>
           <div class="lab-bench">
-            <div><strong style="color:${dC}">DONOR</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${donor === c.id ? "on" : ""}" data-donor="${c.id}">${carLbl(s, c.id)}</span>`).join("")}</div></div>
-            <div><strong style="color:${rC}">REPLICA</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${replica === c.id ? "on" : ""}" data-replica="${c.id}">${carLbl(s, c.id)}</span>`).join("")}</div></div>
+            <div><strong style="color:${dC}">DONOR / RUN A</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${donor === c.id ? "on" : ""}" data-donor="${c.id}">${carLbl(s, c.id)}</span>`).join("")}${stintChips(donor, "donor")}</div></div>
+            <div><strong style="color:${rC}">REPLICA / RUN B</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${replica === c.id ? "on" : ""}" data-replica="${c.id}">${carLbl(s, c.id)}</span>`).join("")}${stintChips(replica, "replica")}</div></div>
           </div>
           <div class="lab-rail" style="margin-top:10px">${kinds.map(([k, ok]) => `<span class="chip ${ok ? "on" : "missing"}">${ok ? "✓" : "○"} ${k}</span>`).join("")}</div>
         </div>
         <div class="lab-bench">
-          <div><h3 style="margin-top:0;font-size:14px">⚙️ Gear ladder</h3>${chart([{ pts: D.gears.map((g) => [g.gear, g.mps_per_krpm]), col: dC, label: "donor" }, { pts: R.gears.map((g) => [g.gear, g.mps_per_krpm]), col: rC, label: "replica" }], { xl: "gear", yl: "m/s per krpm", w: 380 })}</div>
+          <div><h3 style="margin-top:0;font-size:14px">⚙️ Gear ladder</h3>${(() => { const lad = (sel, c) => { const n = stintOf(sel); const st = n != null ? (s.stints || []).find((x) => x.n === n) : null; return st && st.ladder && Object.keys(st.ladder).length ? Object.entries(st.ladder).map(([g, v]) => [+g, v]) : c.gears.map((g) => [g.gear, g.mps_per_krpm]); }; return chart([{ pts: lad(donor, D), col: dC, label: "A" }, { pts: lad(replica, R), col: rC, label: "B" }], { xl: "gear", yl: "m/s per krpm", w: 380 }); })()}</div>
           <div><h3 style="margin-top:0;font-size:14px">🔧 Dyno (WOT frames)</h3>${chart([{ pts: D.dyno.map((d) => [d.rpm, d.hp]), col: dC, label: "donor hp" }, { pts: R.dyno.map((d) => [d.rpm, d.hp]), col: rC, label: "replica hp" }], { xl: "rpm", yl: "hp", w: 380 })}</div>
           <div><h3 style="margin-top:0;font-size:14px">🚦 Launch — rear slip ratio</h3>${lD && lR ? chart([{ pts: lD.trace.map((p) => [p[0], Math.max(Math.abs(p[3]), Math.abs(p[4]))]), col: dC, label: "donor" }, { pts: lR.trace.map((p) => [p[0], Math.max(Math.abs(p[3]), Math.abs(p[4]))]), col: rC, label: "replica" }], { xl: "s", yl: "slip", hline: 1, hlabel: "limit", ymax: 6, w: 380 }) : `<p class="why">needs a launch on both</p>`}</div>
           <div><h3 style="margin-top:0;font-size:14px">🛑 Braking — deficit front vs rear</h3>${chart([{ pts: pick(s.braking, donor).map((b, i) => [i + 1, b.front_deficit]), col: dC, label: "donor F" }, { pts: pick(s.braking, donor).map((b, i) => [i + 1, b.rear_deficit]), col: "#f0883e", label: "donor R" }, { pts: pick(s.braking, replica).map((b, i) => [i + 1, b.front_deficit]), col: rC, label: "replica F" }, { pts: pick(s.braking, replica).map((b, i) => [i + 1, b.rear_deficit]), col: "#2f81f7", label: "replica R" }], { xl: "event #", yl: "deficit", w: 380, ymax: 1.05 })}</div>
@@ -2596,6 +2604,7 @@
           <div class="card-row" style="margin-top:0"><h3 style="margin:0">🔴 Live — Data Out stream</h3><span id="lvStatus" class="chip">connecting…</span></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)"><button class="lab-mode" id="lvConnect">connect</button><button class="lab-mode" id="lvReset" title="Clear the live screen and start a fresh session (new CSV) on the daemon" style="border-color:#e5414e;color:#e5414e">↺ reset live</button>
             <span class="why" style="font-size:11px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (or <code>--replay captures/&lt;file&gt;.csv</code> to replay a recording live)</span></div>
+          <div id="lvStint" style="margin-top:8px"></div>
           <div id="lvSession"></div><div id="lvUnknown"></div>
         </div>
         <div class="lab-tiles" id="lvTiles"></div>
@@ -2609,12 +2618,22 @@
     function paintStatus() {
       const el = host.querySelector("#lvStatus"); if (!el) return;
       const st = live.status;
-      el.textContent = !live.connected ? (live.err ? "daemon not reachable — start it, then connect" : "connecting…") : st && st.receiving ? `● receiving ${st.pps} pkt/s · ${st.frames} frames${st.csv ? " · " + st.csv : ""}` : "connected — waiting for packets (drive, or start a replay)";
-      el.style.borderColor = el.style.color = !live.connected ? "#e5414e" : st && st.receiving ? "#00d27a" : "var(--warn,#e3b341)";
+      const outdated = !!(st && st.stint === undefined);
+      el.textContent = !live.connected ? (live.err ? "daemon not reachable — start it, then connect" : "connecting…") : outdated ? `⚠ daemon is an older build — stop and start it to get live suggestions, runs and reset (still receiving ${st.pps} pkt/s)` : st && st.receiving ? `● receiving ${st.pps} pkt/s · ${st.frames} frames${st.csv ? " · " + st.csv : ""}` : "connected — waiting for packets (drive, or start a replay)";
+      el.style.borderColor = el.style.color = !live.connected ? "#e5414e" : outdated ? "var(--warn,#e3b341)" : st && st.receiving ? "#00d27a" : "var(--warn,#e3b341)";
       const se = host.querySelector("#lvSession");
       if (se) se.innerHTML = live.session ? `<p class="why" style="font-size:12px;margin:8px 0 0">📦 Session analyzed: <strong>${live.session.id}</strong> — ${live.session.summary ? `${live.session.summary.corners} corners · ${live.session.summary.launches} launches · ${live.session.summary.braking} brake events` : ""} ${live.loaded === live.session.id ? `<button class="lab-mode" id="lvOpen">open in Lab Run</button>` : "(loading…)"}</p>` : "";
       const ob = host.querySelector("#lvOpen"); if (ob) ob.addEventListener("click", () => { sIdx = sessions.findIndex((x) => x.id === live.loaded); mode = "run"; carSel = null; render(); });
       const un = host.querySelector("#lvUnknown"); if (un) { const seen = new Set(); un.innerHTML = live.cars.filter((c) => !carName(c) && !seen.has(c.ordinal) && seen.add(c.ordinal)).map(nameUI).join(""); bindNames(); }
+      const sv = host.querySelector("#lvStint");
+      if (sv && live.connected) {
+        const n = live.stint || (st && st.stint) || 0; const lab = (live.tags || {})[String(n)]; const labTxt = lab ? (typeof lab === "string" ? lab : lab.label) : "";
+        if (sv.dataset.n !== String(n) || sv.dataset.lab !== labTxt) {
+          sv.dataset.n = String(n); sv.dataset.lab = labTxt;
+          sv.innerHTML = n ? `<span class="chip" style="border-color:var(--accent);color:var(--accent)">🏁 run ${n}${labTxt ? " “" + esc(labTxt) + "”" : ""}</span> <input id="lvTag" placeholder="tag this run — e.g. front ARB −2" value="${esc(labTxt)}" style="min-width:220px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"> <button class="lab-mode" id="lvTagBtn" style="padding:4px 10px;font-size:12px">🏷 tag run</button> <span class="why" style="font-size:11px">a new run starts every time you come back from the menus</span>` : `<span class="why" style="font-size:11px">run counter starts with the first driving frame</span>`;
+          const tb = sv.querySelector("#lvTagBtn"); if (tb) tb.addEventListener("click", () => { const v = sv.querySelector("#lvTag").value.trim(); fetch(liveUrl + "/tag", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: v, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags, { [String(n)]: { label: v } }); paintStatus(); }).catch(() => {}); });
+        }
+      }
     }
     function paintFrame() {
       const f = live.frame; if (!f || !host.querySelector("#lvCircles")) return;
@@ -2645,7 +2664,9 @@
       if (es) { es.close(); es = null; }
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.connected = true; live.err = false; paintAll(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.connected = true; live.err = false; paintAll(); });
+      es.addEventListener("stint", (e) => { const d = JSON.parse(e.data); live.stint = d.n; paintStatus(); });
+      es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label } }); paintStatus(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); paintAdvice(); });
       es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; paintAll(); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });

@@ -131,6 +131,20 @@ def main():
     for r in rows: r["t"] = r["t_mono"] - t0
     live = [r for r in rows if r["IsRaceOn"] == 1]
     sid = os.path.splitext(os.path.basename(path))[0]; dur = rows[-1]["t"]
+    # ---- stints (runs): a new stint starts when driving resumes after >= 2 s off, or the configuration changes ----
+    tags = {}
+    tpath = os.path.join(ROOT, "data", "sessions", sid + ".tags.json")
+    if os.path.exists(tpath):
+        try:
+            with open(tpath, encoding="utf-8") as f: tags = json.load(f).get("stints", {})
+        except Exception: tags = {}
+    stint_n = 0; zero_since = None; prev_cfg = None; stint_rows = defaultdict(list)
+    for r in rows:
+        if r["IsRaceOn"] == 1:
+            k = cid(r)
+            if prev_cfg is None or (zero_since is not None and r["t"] - zero_since >= 2.0) or k != prev_cfg: stint_n += 1
+            zero_since = None; prev_cfg = k; r["stint"] = stint_n; stint_rows[stint_n].append(r)
+        elif zero_since is None: zero_since = r["t"]
     sess = {"id": sid, "source": path, "frames": len(rows), "duration_s": round(dur, 1), "rate_pps": round(len(rows) / max(dur, 1e-9), 1), "live_frames": len(live)}
     NAMES = names_map()
 
@@ -199,6 +213,8 @@ def main():
     sess["strip"] = strip
 
     # ---- corners ----
+    import bisect
+    T_all = [r["t"] for r in live]
     lat = smooth([r["lat_g"] for r in live], 7); corners = []; i = 0; n = len(live)
     while i < n:
         if abs(lat[i]) > 0.35:
@@ -268,7 +284,7 @@ def main():
                     if q["Speed"] > 3:
                         for w in W:
                             kk = k.get(w)
-                            if kk: d[w] = max(d[w], 1 - q["WheelRotSpeed" + w] / (kk * q["Speed"]))
+                            if kk: d[w] = max(d[w], min(1.0, max(0.0, 1 - q["WheelRotSpeed" + w] / (kk * q["Speed"]))))
                 fd = max(d["FL"], d["FR"]); rd = max(d["RL"], d["RR"])
                 braking.append({"t": round(ev[0]["t"], 1), "car": k0, "mph_start": round(ev[0]["speed_mph"]), "mph_end": round(ev[-1]["speed_mph"]), "dur_s": round(ev[-1]["t"] - ev[0]["t"], 2),
                                 "decel_g_peak": round(max(-q["long_g"] for q in ev), 2), "front_deficit": round(fd, 2), "rear_deficit": round(rd, 2),
@@ -300,6 +316,34 @@ def main():
         i += 1
     sess["pulses"] = pulses
 
+    # ---- per-stint signatures (A/B between re-tunes of the same configuration) ----
+    for ev_list in (corners, launches, braking):
+        for ev in ev_list:
+            i = bisect.bisect_left(T_all, ev.get("t0", ev.get("t")))
+            ev["stint"] = live[min(i, n - 1)]["stint"] if n else None
+    stints = []
+    for sn in sorted(stint_rows):
+        rs = stint_rows[sn]; k = cid(rs[0])
+        gl = defaultdict(list)
+        for r in rs:
+            if r["Accel"] > 230 and r["CurrentEngineRpm"] > 2500 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10: gl[r["Gear"]].append(r["Speed"] / r["CurrentEngineRpm"])
+        lad = {}   # gear -> m/s per krpm (absolute; 1st is too noisy to be a reference)
+        for g in sorted(gl):
+            if len(gl[g]) < 30 or g == 1: continue
+            lad[str(g)] = round(statistics.median(gl[g]) * 1000, 3)
+        sc = [c for c in corners if c.get("stint") == sn and not c["drift"]]; sb = [b for b in braking if b.get("stint") == sn and b["mph_start"] >= 60]; sl = [l for l in launches if l.get("stint") == sn]
+        med = lambda a: (sorted(a)[len(a) // 2] if a else None)
+        st = {"n": sn, "id": k, "t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "live_s": round((rs[-1]["t"] - rs[0]["t"]), 1),
+              "label": (tags.get(str(sn)) or {}).get("label") if isinstance(tags.get(str(sn)), dict) else tags.get(str(sn)),
+              "corners": len(sc), "launches": len(sl), "braking": len(sb), "usi_med": med([c["usi"] for c in sc]), "first_red_front": sum(1 for c in sc if c["first_red"] and c["first_red"]["axle"] == "front"),
+              "brake_fd_med": med([b["front_deficit"] for b in sb]), "brake_rd_med": med([b["rear_deficit"] for b in sb]), "launch_rear_slip": med([l["peak_slip_rear"] for l in sl]),
+              "ladder": lad, "ladder_changed": None}
+        prev = next((x for x in reversed(stints) if x["id"] == k and x["ladder"]), None)
+        if prev and lad:
+            common = [g for g in lad if g in prev["ladder"]]
+            st["ladder_changed"] = (any(abs(lad[g] - prev["ladder"][g]) / prev["ladder"][g] > 0.04 for g in common) if common else None)
+        stints.append(st)
+    sess["stints"] = stints
     # ---- crests, top-speed pull, warm tires, temps medians, coverage + advice per config ----
     crests = []; top_pull = defaultdict(float); warm_n = defaultdict(int); temps_acc = defaultdict(lambda: {w: [] for w in W})
     prev_t = None
@@ -319,7 +363,7 @@ def main():
         c["coverage"] = coverage_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull, warm_frac)
         c["advice"] = advice_for(c["id"], cars, corners, launches, braking, bott, c["coverage"], temps_med)
         c["temps_med_f"] = {w: round(v) for w, v in temps_med.get(c["id"], {}).items()}
-    sess["summary"] = {"cars": len(cars), "configs": len(segments), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
+    sess["summary"] = {"cars": len(cars), "configs": len(segments), "stints": len(stints), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
                        "front_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "front" and not c["drift"]),
                        "rear_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "rear" and not c["drift"]),
                        "drift_corners": sum(1 for c in corners if c["drift"])}

@@ -38,6 +38,7 @@ class State:
         self.csv_path = None; self.csv_writer = None; self.csv_file = None
         self.last_on_t = None; self.live_since_analysis = 0.0; self.drive_since_periodic = 0.0; self.analyzing = False; self.replay = False
         self.session_json = None; self.session_path = None; self.analysis = None
+        self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
         self.seq = 0
     def emit(self, name, payload):
@@ -73,6 +74,13 @@ def compact(p, t_mono):
 def ingest(p, t_mono):
     """Core pipeline for one decoded packet (live or replay)."""
     c = compact(p, t_mono)
+    # stint (run) boundaries: driving resumes after >= 2 s off, or the configuration changes
+    if c["on"]:
+        if ST.prev_cfg is None or (ST._zero_since is not None and t_mono - ST._zero_since >= 2.0) or c["cid"] != ST.prev_cfg:
+            ST.stint += 1; ST.stint_start = t_mono; ST.emit("stint", {"n": ST.stint, "t0": round(t_mono, 1), "id": c["cid"]})
+        ST._zero_since = None; ST.prev_cfg = c["cid"]
+    elif ST._zero_since is None: ST._zero_since = t_mono
+    c["stint"] = ST.stint
     # CSV row (same layout as capture tool)
     if ST.csv_writer:
         row = [time.time(), t_mono, p["Speed"] * 2.23694, p["AccelX"] / G, p["AccelZ"] / G, math.degrees(p["AngVelY"])]
@@ -133,7 +141,7 @@ def ingest(p, t_mono):
                 usi = sum((abs(r["slip"]["FL"][1]) + abs(r["slip"]["FR"][1])) / 2 - (abs(r["slip"]["RL"][1]) + abs(r["slip"]["RR"][1])) / 2 for r in mid) / max(len(mid), 1)
                 drift = sum(max(abs(r["slip"]["RL"][2]), abs(r["slip"]["RR"][2])) for r in rows) / len(rows) > 2.5
                 v_min = min(r["mph"] for r in rows)
-                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "dir": "R" if sign > 0 else "L", "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min),
+                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint, "dir": "R" if sign > 0 else "L", "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min),
                       "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3), "drift": drift, "kink": v_min > 85 and peak < 0.9,
                       "brake_max": max([r["brk"] for r in co["pre"] + rows] or [0]), "hb": any(r["hb"] > 0 for r in rows)}
                 with ST.lock: ST.corners.append(cc)
@@ -141,7 +149,10 @@ def ingest(p, t_mono):
     # auto-analysis triggers: (a) every ~20 s of driving (live suggestions), (b) driving stopped > 5 s after >= 15 s of driving (session close)
     if c["on"]:
         ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0; ST.drive_since_periodic += 1 / 100.0
-        if ST.drive_since_periodic > 20 and not ST.analyzing and ST.csv_path:
+        try: sz = os.path.getsize(ST.csv_path) if ST.csv_path and not ST.replay else 0
+        except Exception: sz = 0
+        period = 20 if sz < 60e6 else 45 if sz < 150e6 else 90   # re-analysis cadence scales with file size (use ↺ reset to start a fresh, fast session)
+        if ST.drive_since_periodic > period and not ST.analyzing and ST.csv_path:
             ST.drive_since_periodic = 0; threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
     elif ST.last_on_t is not None and t_mono - ST.last_on_t > 5 and ST.live_since_analysis > 15 and not ST.analyzing and ST.csv_path:
         ST.live_since_analysis = 0; threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
@@ -150,7 +161,9 @@ def run_analysis(until=None, final=True):
     ST.analyzing = True
     try:
         if ST.csv_file: ST.csv_file.flush()
-        outdir = os.path.join(ROOT, "data", "sessions")
+        # replay analyses go to a scratch dir so they never overwrite the canonical session JSON
+        outdir = os.path.join(ROOT, "data", "sessions") if not ST.replay else os.path.join(ROOT, "captures", "_replay_analysis")
+        os.makedirs(outdir, exist_ok=True)
         cmd = [sys.executable, os.path.join(HERE, "analyze_session.py"), ST.csv_path, "--out", outdir]
         if ST.replay and until is not None: cmd += ["--until", str(until)]
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
@@ -179,7 +192,7 @@ class H(BaseHTTPRequestHandler):
             last_seq = ST.seq; last_frame_t = 0.0; last_status = 0.0
             try:
                 # initial snapshot: strip + corners + cars
-                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
+                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
                 self.wfile.write(f"event: snapshot\ndata: {json.dumps(snap)}\n\n".encode()); self.wfile.flush()
                 while True:
                     now = time.monotonic()
@@ -190,7 +203,7 @@ class H(BaseHTTPRequestHandler):
                     if fr and now - last_frame_t >= 0.05 and now - lp < 1.0:
                         self.wfile.write(f"event: frame\ndata: {json.dumps(fr)}\n\n".encode()); last_frame_t = now
                     if now - last_status >= 1.0:
-                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
+                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
                     self.wfile.flush(); time.sleep(0.02)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
@@ -212,17 +225,25 @@ class H(BaseHTTPRequestHandler):
         self.send_response(204); self._cors(); self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); self.send_header("Access-Control-Allow-Headers", "Content-Type"); self.end_headers()
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0); body = json.loads(self.rfile.read(n) or b"{}")
-        obj = names_load(); ok = False
+        obj = names_load(); ok = False; save_names = False
         if self.path.startswith("/car") and body.get("ordinal") and body.get("name"):
-            obj.setdefault("cars", {})[str(body["ordinal"])] = {"name": str(body["name"]).strip(), "confidence": "player-confirmed", "source": f"dashboard {time.strftime('%Y-%m-%d')}"}; ok = True
+            obj.setdefault("cars", {})[str(body["ordinal"])] = {"name": str(body["name"]).strip(), "confidence": "player-confirmed", "source": f"dashboard {time.strftime('%Y-%m-%d')}"}; ok = save_names = True
             with ST.lock:
                 for c in ST.cars.values():
                     if str(c["ordinal"]) == str(body["ordinal"]): c["name"] = obj["cars"][str(body["ordinal"])]["name"]
         elif self.path.startswith("/reset"):
-            reset_session(); ok = True; obj = names_load()
+            reset_session(); ok = True
+        elif self.path.startswith("/tag") and body.get("label") is not None:
+            lab = str(body["label"]).strip()[:80]; n = int(body.get("stint") or ST.stint)
+            with ST.lock: ST.stint_tags[str(n)] = {"label": lab, "t0": ST.stint_start}
+            if ST.csv_path:
+                sid = os.path.splitext(os.path.basename(ST.csv_path))[0]; tp = os.path.join(ROOT, "data", "sessions", sid + ".tags.json")
+                os.makedirs(os.path.dirname(tp), exist_ok=True)
+                with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags}, f, indent=2, ensure_ascii=False)
+            ST.emit("tag", {"n": n, "label": lab}); ok = True
         elif self.path.startswith("/build") and body.get("build_id") and body.get("label"):
-            obj.setdefault("builds", {})[str(body["build_id"])] = {"label": str(body["label"]).strip(), "source": f"dashboard {time.strftime('%Y-%m-%d')}", "cid": body.get("cid")}; ok = True
-        if ok: names_save(obj)
+            obj.setdefault("builds", {})[str(body["build_id"])] = {"label": str(body["label"]).strip(), "source": f"dashboard {time.strftime('%Y-%m-%d')}", "cid": body.get("cid")}; ok = save_names = True
+        if save_names: names_save(obj)
         out = json.dumps({"ok": ok, "cars": obj.get("cars", {}), "builds": obj.get("builds", {})}).encode()
         self.send_response(200 if ok else 400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out)
 
@@ -232,6 +253,7 @@ def reset_session():
         ST.strip = []; ST.corners = []; ST._corner = None; ST._sec = None; ST._sec_rows = []; ST.cars = {}
         ST.analysis = None; ST.session_json = None; ST.session_path = None
         ST.last_on_t = None; ST.live_since_analysis = 0.0; ST.drive_since_periodic = 0.0
+        ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
         ST.events = []; ST.seq += 1
         if ST.csv_file and not ST.replay:
             try: ST.csv_file.close()

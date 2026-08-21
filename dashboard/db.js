@@ -59743,7 +59743,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 1
         },
         {
           "t0": 50.2,
@@ -59791,7 +59792,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 1
         },
         {
           "t0": 68.8,
@@ -59839,7 +59841,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 255,
-          "hb": true
+          "hb": true,
+          "stint": 1
         },
         {
           "t0": 71,
@@ -59887,7 +59890,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 255,
-          "hb": true
+          "hb": true,
+          "stint": 1
         },
         {
           "t0": 73.2,
@@ -59935,7 +59939,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 1
         },
         {
           "t0": 74.5,
@@ -59983,7 +59988,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 1
         },
         {
           "t0": 147.2,
@@ -60031,7 +60037,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": true
+          "hb": true,
+          "stint": 4
         },
         {
           "t0": 149.5,
@@ -60079,7 +60086,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 151.2,
@@ -60127,7 +60135,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 152.5,
@@ -60175,7 +60184,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 155.2,
@@ -60223,7 +60233,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 156.7,
@@ -60271,7 +60282,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 158.5,
@@ -60319,7 +60331,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 160.4,
@@ -60367,7 +60380,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 162.3,
@@ -60415,7 +60429,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 163.8,
@@ -60463,7 +60478,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 165.5,
@@ -60511,7 +60527,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 167.5,
@@ -60559,7 +60576,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 170.8,
@@ -60607,7 +60625,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 4
         },
         {
           "t0": 177.5,
@@ -60655,7 +60674,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": true
+          "hb": true,
+          "stint": 4
         },
         {
           "t0": 324.5,
@@ -60700,7 +60720,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": true,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 329.3,
@@ -60748,7 +60769,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 330.6,
@@ -60796,7 +60818,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 333.1,
@@ -60844,7 +60867,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 344,
@@ -60892,7 +60916,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 249,
-          "hb": false
+          "hb": false,
+          "stint": 9
         },
         {
           "t0": 345.5,
@@ -60940,7 +60965,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 9
         },
         {
           "t0": 514,
@@ -60988,7 +61014,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 519.3,
@@ -61033,7 +61060,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 521.2,
@@ -61081,7 +61109,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 525,
@@ -61129,7 +61158,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 526.2,
@@ -61177,7 +61207,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 255,
-          "hb": true
+          "hb": true,
+          "stint": 16
         },
         {
           "t0": 534.2,
@@ -61222,7 +61253,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 555.4,
@@ -61267,7 +61299,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 572.9,
@@ -61312,7 +61345,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 581.4,
@@ -61360,7 +61394,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 587.8,
@@ -61408,7 +61443,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 594.1,
@@ -61456,7 +61492,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 248,
-          "hb": false
+          "hb": false,
+          "stint": 16
         },
         {
           "t0": 677.5,
@@ -61501,7 +61538,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": true,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 696.9,
@@ -61549,7 +61587,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 722.2,
@@ -61594,7 +61633,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         }
       ],
       "launches": [
@@ -62349,7 +62389,8 @@ window.FH6_DB = {
               -1.94,
               20.4
             ]
-          ]
+          ],
+          "stint": 1
         },
         {
           "t": 186.3,
@@ -63006,7 +63047,8 @@ window.FH6_DB = {
               -1.07,
               21.6
             ]
-          ]
+          ],
+          "stint": 4
         },
         {
           "t": 316,
@@ -63951,7 +63993,8 @@ window.FH6_DB = {
               0.1,
               178.1
             ]
-          ]
+          ],
+          "stint": 8
         }
       ],
       "braking": [
@@ -63964,7 +64007,8 @@ window.FH6_DB = {
           "decel_g_peak": 1.42,
           "front_deficit": 0.47,
           "rear_deficit": 0.57,
-          "lock": "rear"
+          "lock": "rear",
+          "stint": 1
         },
         {
           "t": 63.4,
@@ -63975,7 +64019,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.29,
           "front_deficit": 0.47,
           "rear_deficit": 0.43,
-          "lock": "front"
+          "lock": "front",
+          "stint": 1
         },
         {
           "t": 68.7,
@@ -63986,7 +64031,8 @@ window.FH6_DB = {
           "decel_g_peak": 1.58,
           "front_deficit": 0.29,
           "rear_deficit": 1,
-          "lock": "rear"
+          "lock": "rear",
+          "stint": 1
         },
         {
           "t": 192.6,
@@ -63997,7 +64043,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.31,
           "front_deficit": 0.4,
           "rear_deficit": 0.44,
-          "lock": "rear"
+          "lock": "rear",
+          "stint": 4
         },
         {
           "t": 330.5,
@@ -64008,7 +64055,8 @@ window.FH6_DB = {
           "decel_g_peak": 1.97,
           "front_deficit": 0,
           "rear_deficit": 0.12,
-          "lock": "none"
+          "lock": "none",
+          "stint": 8
         },
         {
           "t": 344.4,
@@ -64019,7 +64067,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.59,
           "front_deficit": 0.06,
           "rear_deficit": 0.03,
-          "lock": "none"
+          "lock": "none",
+          "stint": 9
         },
         {
           "t": 524.5,
@@ -64030,7 +64079,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.95,
           "front_deficit": 0.46,
           "rear_deficit": 0.39,
-          "lock": "front"
+          "lock": "front",
+          "stint": 16
         },
         {
           "t": 681.7,
@@ -64041,7 +64091,8 @@ window.FH6_DB = {
           "decel_g_peak": 3.25,
           "front_deficit": 0.14,
           "rear_deficit": 0.08,
-          "lock": "none"
+          "lock": "none",
+          "stint": 17
         },
         {
           "t": 691.5,
@@ -64052,7 +64103,8 @@ window.FH6_DB = {
           "decel_g_peak": 3.24,
           "front_deficit": 0.14,
           "rear_deficit": 0.08,
-          "lock": "none"
+          "lock": "none",
+          "stint": 17
         }
       ],
       "bottoming": [
@@ -67321,6 +67373,416 @@ window.FH6_DB = {
           "decay_s": 0.27
         }
       ],
+      "stints": [
+        {
+          "n": 1,
+          "id": "3665|2|1|600",
+          "t0": 3.3,
+          "t1": 75.1,
+          "live_s": 71.8,
+          "label": null,
+          "corners": 1,
+          "launches": 1,
+          "braking": 3,
+          "usi_med": 0.656,
+          "first_red_front": 1,
+          "brake_fd_med": 0.47,
+          "brake_rd_med": 0.57,
+          "launch_rear_slip": 6.91,
+          "ladder": {
+            "2": 3.126,
+            "3": 4.115,
+            "4": 5.246
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 2,
+          "id": "3665|2|1|600",
+          "t0": 82.5,
+          "t1": 96.8,
+          "live_s": 14.3,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 3,
+          "id": "3665|2|1|600",
+          "t0": 123.9,
+          "t1": 124.3,
+          "live_s": 0.4,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 4,
+          "id": "4168|1|6|700",
+          "t0": 126.7,
+          "t1": 223.3,
+          "live_s": 96.6,
+          "label": null,
+          "corners": 1,
+          "launches": 1,
+          "braking": 1,
+          "usi_med": 0.707,
+          "first_red_front": 1,
+          "brake_fd_med": 0.4,
+          "brake_rd_med": 0.44,
+          "launch_rear_slip": 3.6,
+          "ladder": {
+            "2": 3.308,
+            "3": 3.546
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 5,
+          "id": "4168|1|6|700",
+          "t0": 290.1,
+          "t1": 290.9,
+          "live_s": 0.8,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 6,
+          "id": "338|2|12|800",
+          "t0": 291.5,
+          "t1": 292.2,
+          "live_s": 0.7,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 7,
+          "id": "338|2|12|800",
+          "t0": 295,
+          "t1": 297.4,
+          "live_s": 2.4,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 8,
+          "id": "338|2|12|800",
+          "t0": 316,
+          "t1": 335.3,
+          "live_s": 19.3,
+          "label": null,
+          "corners": 4,
+          "launches": 1,
+          "braking": 1,
+          "usi_med": 0.839,
+          "first_red_front": 3,
+          "brake_fd_med": 0,
+          "brake_rd_med": 0.12,
+          "launch_rear_slip": 0.72,
+          "ladder": {
+            "2": 4.773,
+            "3": 6.459,
+            "4": 8.12,
+            "5": 9.915,
+            "6": 11.762
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 9,
+          "id": "338|2|12|800",
+          "t0": 342.8,
+          "t1": 347.5,
+          "live_s": 4.7,
+          "label": null,
+          "corners": 2,
+          "launches": 0,
+          "braking": 1,
+          "usi_med": 1.083,
+          "first_red_front": 2,
+          "brake_fd_med": 0.06,
+          "brake_rd_med": 0.03,
+          "launch_rear_slip": null,
+          "ladder": {
+            "5": 9.913,
+            "6": 11.759
+          },
+          "ladder_changed": false
+        },
+        {
+          "n": 10,
+          "id": "338|2|12|800",
+          "t0": 350.6,
+          "t1": 351.2,
+          "live_s": 0.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 11,
+          "id": "4168|1|6|700",
+          "t0": 354.6,
+          "t1": 358.7,
+          "live_s": 4.1,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 12,
+          "id": "4168|1|6|700",
+          "t0": 363.1,
+          "t1": 368.8,
+          "live_s": 5.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 13,
+          "id": "4168|1|6|700",
+          "t0": 425.5,
+          "t1": 426.3,
+          "live_s": 0.8,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 14,
+          "id": "4232|2|6|800",
+          "t0": 426.8,
+          "t1": 427.4,
+          "live_s": 0.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 15,
+          "id": "4232|2|6|800",
+          "t0": 429.8,
+          "t1": 432.4,
+          "live_s": 2.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 16,
+          "id": "4232|2|6|800",
+          "t0": 511.6,
+          "t1": 598.2,
+          "live_s": 86.6,
+          "label": null,
+          "corners": 9,
+          "launches": 0,
+          "braking": 1,
+          "usi_med": 0.131,
+          "first_red_front": 4,
+          "brake_fd_med": 0.46,
+          "brake_rd_med": 0.39,
+          "launch_rear_slip": null,
+          "ladder": {
+            "2": 2.609,
+            "3": 3.545,
+            "4": 4.631,
+            "5": 5.779,
+            "6": 6.992,
+            "7": 8.271,
+            "8": 9.779
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 17,
+          "id": "4232|2|6|800",
+          "t0": 675.5,
+          "t1": 741.6,
+          "live_s": 66,
+          "label": null,
+          "corners": 3,
+          "launches": 0,
+          "braking": 2,
+          "usi_med": 0.044,
+          "first_red_front": 1,
+          "brake_fd_med": 0.14,
+          "brake_rd_med": 0.08,
+          "launch_rear_slip": null,
+          "ladder": {
+            "4": 4.499,
+            "5": 5.779,
+            "6": 7.006,
+            "7": 8.272,
+            "8": 9.776
+          },
+          "ladder_changed": false
+        },
+        {
+          "n": 18,
+          "id": "4232|2|6|800",
+          "t0": 748.3,
+          "t1": 749.1,
+          "live_s": 0.9,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 19,
+          "id": "4168|1|6|700",
+          "t0": 752.7,
+          "t1": 756.6,
+          "live_s": 4,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 20,
+          "id": "4168|1|6|700",
+          "t0": 761.1,
+          "t1": 763.2,
+          "live_s": 2.1,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 21,
+          "id": "4168|1|6|700",
+          "t0": 774.9,
+          "t1": 810.3,
+          "live_s": 35.4,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        }
+      ],
       "crests": [
         {
           "t": 322.7,
@@ -67380,6 +67842,7 @@ window.FH6_DB = {
       "summary": {
         "cars": 4,
         "configs": 6,
+        "stints": 21,
         "corners": 40,
         "launches": 3,
         "braking": 9,
@@ -67394,11 +67857,377 @@ window.FH6_DB = {
     {
       "id": "fh6_20260821_162805",
       "source": "captures/fh6_20260821_162805.csv",
-      "frames": 177811,
-      "duration_s": 1692,
-      "rate_pps": 105.1,
-      "live_frames": 85726,
+      "frames": 223091,
+      "duration_s": 2167.6,
+      "rate_pps": 102.9,
+      "live_frames": 118257,
       "cars": [
+        {
+          "id": "1155|2|8|700",
+          "ordinal": 1155,
+          "pi": 700,
+          "class": "A",
+          "drivetrain": "AWD",
+          "cyl": 8,
+          "max_rpm": 8500,
+          "idle_rpm": 900,
+          "car_group": 20,
+          "name": "1965 Shelby Cobra Daytona",
+          "live_frames": 45885,
+          "temps_max_f": {
+            "FL": 269,
+            "FR": 277,
+            "RL": 283,
+            "RR": 283
+          },
+          "gears": [
+            {
+              "gear": 1,
+              "mps_per_krpm": 2.019,
+              "rel": 1,
+              "n": 687
+            },
+            {
+              "gear": 2,
+              "mps_per_krpm": 2.97,
+              "rel": 1.471,
+              "n": 1169
+            },
+            {
+              "gear": 3,
+              "mps_per_krpm": 4.007,
+              "rel": 1.985,
+              "n": 2603
+            },
+            {
+              "gear": 4,
+              "mps_per_krpm": 5.158,
+              "rel": 2.555,
+              "n": 3912
+            },
+            {
+              "gear": 5,
+              "mps_per_krpm": 6.27,
+              "rel": 3.106,
+              "n": 5707
+            },
+            {
+              "gear": 6,
+              "mps_per_krpm": 7.274,
+              "rel": 3.603,
+              "n": 3336
+            },
+            {
+              "gear": 7,
+              "mps_per_krpm": 8.295,
+              "rel": 4.109,
+              "n": 5254
+            }
+          ],
+          "dyno": [
+            {
+              "rpm": 2500,
+              "hp": 222,
+              "tq": 446,
+              "n": 12
+            },
+            {
+              "rpm": 2750,
+              "hp": 250,
+              "tq": 458,
+              "n": 11
+            },
+            {
+              "rpm": 3000,
+              "hp": 278,
+              "tq": 470,
+              "n": 12
+            },
+            {
+              "rpm": 3250,
+              "hp": 306,
+              "tq": 475,
+              "n": 21
+            },
+            {
+              "rpm": 3500,
+              "hp": 304,
+              "tq": 437,
+              "n": 65
+            },
+            {
+              "rpm": 3750,
+              "hp": 358,
+              "tq": 484,
+              "n": 38
+            },
+            {
+              "rpm": 4000,
+              "hp": 387,
+              "tq": 495,
+              "n": 37
+            },
+            {
+              "rpm": 4250,
+              "hp": 408,
+              "tq": 494,
+              "n": 54
+            },
+            {
+              "rpm": 4500,
+              "hp": 428,
+              "tq": 491,
+              "n": 51
+            },
+            {
+              "rpm": 4750,
+              "hp": 445,
+              "tq": 487,
+              "n": 54
+            },
+            {
+              "rpm": 5000,
+              "hp": 456,
+              "tq": 472,
+              "n": 109
+            },
+            {
+              "rpm": 5250,
+              "hp": 445,
+              "tq": 427,
+              "n": 229
+            },
+            {
+              "rpm": 5500,
+              "hp": 491,
+              "tq": 458,
+              "n": 495
+            },
+            {
+              "rpm": 5750,
+              "hp": 519,
+              "tq": 464,
+              "n": 1038
+            },
+            {
+              "rpm": 6000,
+              "hp": 535,
+              "tq": 458,
+              "n": 2091
+            },
+            {
+              "rpm": 6250,
+              "hp": 549,
+              "tq": 451,
+              "n": 3264
+            },
+            {
+              "rpm": 6500,
+              "hp": 561,
+              "tq": 445,
+              "n": 4873
+            },
+            {
+              "rpm": 6750,
+              "hp": 565,
+              "tq": 432,
+              "n": 3677
+            },
+            {
+              "rpm": 7000,
+              "hp": 563,
+              "tq": 414,
+              "n": 3658
+            },
+            {
+              "rpm": 7250,
+              "hp": 560,
+              "tq": 401,
+              "n": 2569
+            },
+            {
+              "rpm": 7500,
+              "hp": 552,
+              "tq": 379,
+              "n": 132
+            },
+            {
+              "rpm": 7750,
+              "hp": 493,
+              "tq": 332,
+              "n": 176
+            }
+          ],
+          "k_wheel": {
+            "FL": 3.1385256585877426,
+            "FR": 3.1541968144703336,
+            "RL": 2.8244736522610947,
+            "RR": 2.823349408168756
+          },
+          "live_s": 445.9,
+          "sig": {
+            "boost_max": 8,
+            "hp_peak": 565,
+            "rpm_at_peak": 6750,
+            "tq_peak": 495,
+            "gear_count": 7,
+            "ladder": [
+              1,
+              1.471,
+              1.985,
+              2.555,
+              3.106,
+              3.603,
+              4.109
+            ],
+            "mass_idx": 2393
+          },
+          "build_id": "c2174feb",
+          "coverage": {
+            "overall": 0.97,
+            "probes": [
+              {
+                "key": "hairpin",
+                "label": "Hairpins (< 45 mph)",
+                "count": 15,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "medium",
+                "label": "Medium corners (45-85 mph)",
+                "count": 35,
+                "required": 4,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "fast",
+                "label": "Fast sweepers (> 85 mph)",
+                "count": 19,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "flick",
+                "label": "Chicane flicks (L-R within 2.5 s)",
+                "count": 29,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "launch",
+                "label": "Launches (0-60 from rest)",
+                "count": 5,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "brake",
+                "label": "Hard stops from > 80 mph",
+                "count": 7,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "crest",
+                "label": "Crests / bumps (car goes light)",
+                "count": 34,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "top",
+                "label": "Top-speed pull (WOT in top gear, 5 s)",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "wiggle",
+                "label": "Steering pulses > 55 mph",
+                "count": 240,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "dyno",
+                "label": "Dyno rpm coverage (WOT)",
+                "count": 0.92,
+                "required": 1,
+                "confidence": 0.92,
+                "hint": "full-throttle pulls through the rev range"
+              },
+              {
+                "key": "gears",
+                "label": "Gear ladder",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "warm",
+                "label": "Tires warm (> 150 F) most of the run",
+                "count": 0.39,
+                "required": 1,
+                "confidence": 0.65,
+                "hint": "keep driving — tires still cold for most frames"
+              }
+            ]
+          },
+          "advice": [
+            {
+              "key": "brake-lockup",
+              "text": "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.",
+              "severity": 3,
+              "confidence": 1,
+              "evidence": "37/69 corners red on the fronts in phase 1"
+            },
+            {
+              "key": "brake-pressure",
+              "text": "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.",
+              "severity": 3,
+              "confidence": 1,
+              "evidence": "median deficit F 0.78 / R 0.64 over 8 stops"
+            },
+            {
+              "key": "launch-spin",
+              "text": "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.",
+              "severity": 2,
+              "confidence": 1,
+              "evidence": "median peak rear slip 1.52 over 5 launches"
+            },
+            {
+              "key": "launch-front-spin",
+              "text": "AWD fronts spinning at launch: center split more rearward / front accel diff down.",
+              "severity": 2,
+              "confidence": 1,
+              "evidence": "median peak front slip 3.28"
+            },
+            {
+              "key": "bottoming",
+              "text": "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).",
+              "severity": 1,
+              "confidence": 1,
+              "evidence": "92 bottoming frames above 40 mph (detector still coarse)"
+            }
+          ],
+          "temps_med_f": {
+            "FL": 150,
+            "FR": 148,
+            "RL": 148,
+            "RR": 148
+          }
+        },
         {
           "id": "3852|2|4|700",
           "ordinal": 3852,
@@ -67619,7 +68448,7 @@ window.FH6_DB = {
             "RL": 3.5781042907216203,
             "RR": 3.6099851290168896
           },
-          "live_s": 401.2,
+          "live_s": 409.7,
           "sig": {
             "boost_max": 11,
             "hp_peak": 349,
@@ -68001,7 +68830,7 @@ window.FH6_DB = {
             "RL": 2.7818209921964883,
             "RR": 2.8228963884712748
           },
-          "live_s": 127.9,
+          "live_s": 130.7,
           "sig": {
             "boost_max": 6,
             "hp_peak": 698,
@@ -68162,361 +68991,6 @@ window.FH6_DB = {
             "FR": 204,
             "RL": 169,
             "RR": 169
-          }
-        },
-        {
-          "id": "1155|2|8|700",
-          "ordinal": 1155,
-          "pi": 700,
-          "class": "A",
-          "drivetrain": "AWD",
-          "cyl": 8,
-          "max_rpm": 8500,
-          "idle_rpm": 900,
-          "car_group": 20,
-          "name": "1965 Shelby Cobra Daytona",
-          "live_frames": 13354,
-          "temps_max_f": {
-            "FL": 260,
-            "FR": 241,
-            "RL": 212,
-            "RR": 212
-          },
-          "gears": [
-            {
-              "gear": 1,
-              "mps_per_krpm": 2.022,
-              "rel": 1,
-              "n": 304
-            },
-            {
-              "gear": 2,
-              "mps_per_krpm": 2.955,
-              "rel": 1.461,
-              "n": 637
-            },
-            {
-              "gear": 3,
-              "mps_per_krpm": 4.004,
-              "rel": 1.98,
-              "n": 854
-            },
-            {
-              "gear": 4,
-              "mps_per_krpm": 5.154,
-              "rel": 2.549,
-              "n": 1426
-            },
-            {
-              "gear": 5,
-              "mps_per_krpm": 6.203,
-              "rel": 3.068,
-              "n": 1542
-            },
-            {
-              "gear": 6,
-              "mps_per_krpm": 7.269,
-              "rel": 3.595,
-              "n": 1525
-            },
-            {
-              "gear": 7,
-              "mps_per_krpm": 8.292,
-              "rel": 4.101,
-              "n": 2947
-            }
-          ],
-          "dyno": [
-            {
-              "rpm": 3250,
-              "hp": 281,
-              "tq": 426,
-              "n": 8
-            },
-            {
-              "rpm": 3500,
-              "hp": 313,
-              "tq": 451,
-              "n": 20
-            },
-            {
-              "rpm": 3750,
-              "hp": 364,
-              "tq": 494,
-              "n": 14
-            },
-            {
-              "rpm": 4000,
-              "hp": 391,
-              "tq": 495,
-              "n": 18
-            },
-            {
-              "rpm": 4250,
-              "hp": 409,
-              "tq": 494,
-              "n": 22
-            },
-            {
-              "rpm": 4500,
-              "hp": 429,
-              "tq": 491,
-              "n": 20
-            },
-            {
-              "rpm": 4750,
-              "hp": 445,
-              "tq": 487,
-              "n": 26
-            },
-            {
-              "rpm": 5000,
-              "hp": 465,
-              "tq": 474,
-              "n": 41
-            },
-            {
-              "rpm": 5250,
-              "hp": 482,
-              "tq": 474,
-              "n": 67
-            },
-            {
-              "rpm": 5500,
-              "hp": 501,
-              "tq": 468,
-              "n": 189
-            },
-            {
-              "rpm": 5750,
-              "hp": 522,
-              "tq": 465,
-              "n": 507
-            },
-            {
-              "rpm": 6000,
-              "hp": 535,
-              "tq": 459,
-              "n": 998
-            },
-            {
-              "rpm": 6250,
-              "hp": 549,
-              "tq": 451,
-              "n": 1131
-            },
-            {
-              "rpm": 6500,
-              "hp": 561,
-              "tq": 446,
-              "n": 1947
-            },
-            {
-              "rpm": 6750,
-              "hp": 565,
-              "tq": 432,
-              "n": 1551
-            },
-            {
-              "rpm": 7000,
-              "hp": 563,
-              "tq": 415,
-              "n": 1699
-            },
-            {
-              "rpm": 7250,
-              "hp": 560,
-              "tq": 401,
-              "n": 898
-            },
-            {
-              "rpm": 7500,
-              "hp": 486,
-              "tq": 334,
-              "n": 37
-            },
-            {
-              "rpm": 7750,
-              "hp": 498,
-              "tq": 335,
-              "n": 42
-            }
-          ],
-          "k_wheel": {
-            "FL": 3.1027886199458354,
-            "FR": 3.069738573012384,
-            "RL": 2.833426694451982,
-            "RR": 2.767150543512764
-          },
-          "live_s": 127.1,
-          "sig": {
-            "boost_max": 8,
-            "hp_peak": 565,
-            "rpm_at_peak": 6750,
-            "tq_peak": 495,
-            "gear_count": 7,
-            "ladder": [
-              1,
-              1.461,
-              1.98,
-              2.549,
-              3.068,
-              3.595,
-              4.101
-            ],
-            "mass_idx": 2386
-          },
-          "build_id": "e2865f0f",
-          "coverage": {
-            "overall": 0.89,
-            "probes": [
-              {
-                "key": "hairpin",
-                "label": "Hairpins (< 45 mph)",
-                "count": 5,
-                "required": 3,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "medium",
-                "label": "Medium corners (45-85 mph)",
-                "count": 9,
-                "required": 4,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "fast",
-                "label": "Fast sweepers (> 85 mph)",
-                "count": 9,
-                "required": 3,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "flick",
-                "label": "Chicane flicks (L-R within 2.5 s)",
-                "count": 12,
-                "required": 2,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "launch",
-                "label": "Launches (0-60 from rest)",
-                "count": 3,
-                "required": 2,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "brake",
-                "label": "Hard stops from > 80 mph",
-                "count": 1,
-                "required": 3,
-                "confidence": 0.33,
-                "hint": "2 more hard stops from 80+ mph"
-              },
-              {
-                "key": "crest",
-                "label": "Crests / bumps (car goes light)",
-                "count": 4,
-                "required": 2,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "top",
-                "label": "Top-speed pull (WOT in top gear, 5 s)",
-                "count": 1,
-                "required": 1,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "wiggle",
-                "label": "Steering pulses > 55 mph",
-                "count": 69,
-                "required": 3,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "dyno",
-                "label": "Dyno rpm coverage (WOT)",
-                "count": 0.79,
-                "required": 1,
-                "confidence": 0.79,
-                "hint": "full-throttle pulls through the rev range"
-              },
-              {
-                "key": "gears",
-                "label": "Gear ladder",
-                "count": 1,
-                "required": 1,
-                "confidence": 1,
-                "hint": "done"
-              },
-              {
-                "key": "warm",
-                "label": "Tires warm (> 150 F) most of the run",
-                "count": 0.37,
-                "required": 1,
-                "confidence": 0.62,
-                "hint": "keep driving — tires still cold for most frames"
-              }
-            ]
-          },
-          "advice": [
-            {
-              "key": "brake-lockup",
-              "text": "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.",
-              "severity": 3,
-              "confidence": 1,
-              "evidence": "12/23 corners red on the fronts in phase 1"
-            },
-            {
-              "key": "brake-pressure",
-              "text": "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.",
-              "severity": 3,
-              "confidence": 0.67,
-              "evidence": "median deficit F 1.00 / R 1.00 over 2 stops"
-            },
-            {
-              "key": "launch-spin",
-              "text": "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.",
-              "severity": 2,
-              "confidence": 1,
-              "evidence": "median peak rear slip 1.52 over 3 launches"
-            },
-            {
-              "key": "launch-front-spin",
-              "text": "AWD fronts spinning at launch: center split more rearward / front accel diff down.",
-              "severity": 2,
-              "confidence": 1,
-              "evidence": "median peak front slip 3.94"
-            },
-            {
-              "key": "bottoming",
-              "text": "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).",
-              "severity": 1,
-              "confidence": 0.95,
-              "evidence": "19 bottoming frames above 40 mph (detector still coarse)"
-            },
-            {
-              "key": "mid-understeer",
-              "text": "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.",
-              "severity": 2,
-              "confidence": 0.25,
-              "evidence": "USI median +0.201 over 23 corners; 1 mid-corner front reds"
-            }
-          ],
-          "temps_med_f": {
-            "FL": 141,
-            "FR": 137,
-            "RL": 137,
-            "RR": 137
           }
         },
         {
@@ -68739,7 +69213,7 @@ window.FH6_DB = {
             "RL": 3.783533000443609,
             "RR": 3.850737608756766
           },
-          "live_s": 72.7,
+          "live_s": 74.2,
           "sig": {
             "boost_max": 11,
             "hp_peak": 332,
@@ -68990,7 +69464,7 @@ window.FH6_DB = {
             "RL": 2.7778710412175744,
             "RR": 2.736914465149474
           },
-          "live_s": 61.8,
+          "live_s": 63.2,
           "sig": {
             "boost_max": 7.5,
             "hp_peak": 506,
@@ -69289,7 +69763,7 @@ window.FH6_DB = {
             "RL": 3.595539920376027,
             "RR": 3.598290477306433
           },
-          "live_s": 25,
+          "live_s": 25.6,
           "sig": {
             "boost_max": 0,
             "hp_peak": 63,
@@ -69460,7 +69934,7 @@ window.FH6_DB = {
         {
           "id": "1155|2|8|700",
           "t0": 1397.7,
-          "t1": 1610
+          "t1": 2167.6
         }
       ],
       "impacts": [
@@ -69619,7 +70093,12 @@ window.FH6_DB = {
         1423.3,
         1484.5,
         1484.6,
-        1487.1
+        1487.1,
+        1729.1,
+        1729.2,
+        1729.3,
+        2135.5,
+        2135.6
       ],
       "zero_windows": [
         [
@@ -69784,7 +70263,31 @@ window.FH6_DB = {
         ],
         [
           1610,
-          1692
+          1707.6
+        ],
+        [
+          1755,
+          1784
+        ],
+        [
+          2030.5,
+          2088.1
+        ],
+        [
+          2088.7,
+          2108
+        ],
+        [
+          2137.1,
+          2144.4
+        ],
+        [
+          2147.3,
+          2148.3
+        ],
+        [
+          2148.9,
+          2161.5
         ]
       ],
       "strip": [
@@ -80340,6 +80843,3585 @@ window.FH6_DB = {
         {
           "t": 1691,
           "state": "off"
+        },
+        {
+          "t": 1692,
+          "state": "off"
+        },
+        {
+          "t": 1693,
+          "state": "off"
+        },
+        {
+          "t": 1694,
+          "state": "off"
+        },
+        {
+          "t": 1695,
+          "state": "off"
+        },
+        {
+          "t": 1696,
+          "state": "off"
+        },
+        {
+          "t": 1697,
+          "state": "off"
+        },
+        {
+          "t": 1698,
+          "state": "off"
+        },
+        {
+          "t": 1699,
+          "state": "off"
+        },
+        {
+          "t": 1700,
+          "state": "off"
+        },
+        {
+          "t": 1701,
+          "state": "off"
+        },
+        {
+          "t": 1702,
+          "state": "off"
+        },
+        {
+          "t": 1703,
+          "state": "off"
+        },
+        {
+          "t": 1704,
+          "state": "off"
+        },
+        {
+          "t": 1705,
+          "state": "off"
+        },
+        {
+          "t": 1706,
+          "state": "off"
+        },
+        {
+          "t": 1707,
+          "state": "off"
+        },
+        {
+          "t": 1708,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "f": 0.75,
+          "r": 0.49,
+          "g": 1.09
+        },
+        {
+          "t": 1709,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 0.32,
+          "r": 0.26,
+          "g": 0.69
+        },
+        {
+          "t": 1710,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "f": 0.27,
+          "r": 0.2,
+          "g": 0.48
+        },
+        {
+          "t": 1711,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 105,
+          "f": 1.07,
+          "r": 0.45,
+          "g": 2.05
+        },
+        {
+          "t": 1712,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 105,
+          "f": 0.78,
+          "r": 0.53,
+          "g": 2.49
+        },
+        {
+          "t": 1713,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 108,
+          "f": 2.5,
+          "r": 1.04,
+          "g": 1
+        },
+        {
+          "t": 1714,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 84,
+          "f": 2.91,
+          "r": 2,
+          "g": 1.82
+        },
+        {
+          "t": 1715,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 79,
+          "f": 1.23,
+          "r": 0.85,
+          "g": 2.02
+        },
+        {
+          "t": 1716,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "f": 0.59,
+          "r": 0.39,
+          "g": 0.92
+        },
+        {
+          "t": 1717,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "f": 1.54,
+          "r": 1.38,
+          "g": 2.26
+        },
+        {
+          "t": 1718,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "f": 1.73,
+          "r": 1.18,
+          "g": 2.14
+        },
+        {
+          "t": 1719,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "f": 1.68,
+          "r": 1.22,
+          "g": 1.8
+        },
+        {
+          "t": 1720,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 84,
+          "f": 0.55,
+          "r": 0.47,
+          "g": 1.51
+        },
+        {
+          "t": 1721,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 92,
+          "f": 0.88,
+          "r": 0.47,
+          "g": 1.64
+        },
+        {
+          "t": 1722,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 1.07,
+          "r": 1.04,
+          "g": 1.76
+        },
+        {
+          "t": 1723,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "f": 1.09,
+          "r": 0.98,
+          "g": 2.02
+        },
+        {
+          "t": 1724,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "f": 1.21,
+          "r": 0.77,
+          "g": 1.85
+        },
+        {
+          "t": 1725,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 96,
+          "f": 0.76,
+          "r": 0.52,
+          "g": 0.92
+        },
+        {
+          "t": 1726,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "f": 0.67,
+          "r": 0.51,
+          "g": 1.93
+        },
+        {
+          "t": 1727,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 102,
+          "f": 0.36,
+          "r": 0.23,
+          "g": 1.38
+        },
+        {
+          "t": 1728,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "f": 1.68,
+          "r": 1.57,
+          "g": 2.04
+        },
+        {
+          "t": 1729,
+          "state": "impact",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 1.81,
+          "r": 1.59,
+          "g": 3.54
+        },
+        {
+          "t": 1730,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "f": 1.5,
+          "r": 1.1,
+          "g": 1.46
+        },
+        {
+          "t": 1731,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 97,
+          "f": 0.5,
+          "r": 0.44,
+          "g": 1.31
+        },
+        {
+          "t": 1732,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "f": 0.43,
+          "r": 0.43,
+          "g": 0.51
+        },
+        {
+          "t": 1733,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "f": 3.81,
+          "r": 3.85,
+          "g": 1.94
+        },
+        {
+          "t": 1734,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "f": 1.71,
+          "r": 1.32,
+          "g": 2.52
+        },
+        {
+          "t": 1735,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "f": 1.33,
+          "r": 0.95,
+          "g": 1.64
+        },
+        {
+          "t": 1736,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 0.66,
+          "r": 0.34,
+          "g": 1.67
+        },
+        {
+          "t": 1737,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 96,
+          "f": 0.43,
+          "r": 0.4,
+          "g": 0.75
+        },
+        {
+          "t": 1738,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 104,
+          "f": 0.67,
+          "r": 0.6,
+          "g": 0.13
+        },
+        {
+          "t": 1739,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 111,
+          "f": 0.2,
+          "r": 0.22,
+          "g": 0.15
+        },
+        {
+          "t": 1740,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "f": 0.23,
+          "r": 0.2,
+          "g": 0.23
+        },
+        {
+          "t": 1741,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 102,
+          "f": 3.53,
+          "r": 2.63,
+          "g": 0.12
+        },
+        {
+          "t": 1742,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 66,
+          "f": 1.76,
+          "r": 1.88,
+          "g": 1.63
+        },
+        {
+          "t": 1743,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 49,
+          "f": 2.57,
+          "r": 1.87,
+          "g": 1.94
+        },
+        {
+          "t": 1744,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 57,
+          "f": 1.4,
+          "r": 1.48,
+          "g": 1.53
+        },
+        {
+          "t": 1745,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "f": 1.15,
+          "r": 0.47,
+          "g": 1.15
+        },
+        {
+          "t": 1746,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "f": 1.67,
+          "r": 1.52,
+          "g": 1.97
+        },
+        {
+          "t": 1747,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 52,
+          "f": 1.78,
+          "r": 1.54,
+          "g": 2.28
+        },
+        {
+          "t": 1748,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 62,
+          "f": 1.4,
+          "r": 1.19,
+          "g": 1.23
+        },
+        {
+          "t": 1749,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 74,
+          "f": 0.39,
+          "r": 0.59,
+          "g": 0.66
+        },
+        {
+          "t": 1750,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 85,
+          "f": 0.33,
+          "r": 0.19,
+          "g": 0.47
+        },
+        {
+          "t": 1751,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "f": 0.49,
+          "r": 0.22,
+          "g": 0.84
+        },
+        {
+          "t": 1752,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "f": 2.8,
+          "r": 2.39,
+          "g": 1.39
+        },
+        {
+          "t": 1753,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "f": 1.74,
+          "r": 1.05,
+          "g": 2.29
+        },
+        {
+          "t": 1754,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 3,
+          "f": 9.07,
+          "r": 20.29,
+          "g": 1.67
+        },
+        {
+          "t": 1755,
+          "state": "off"
+        },
+        {
+          "t": 1756,
+          "state": "off"
+        },
+        {
+          "t": 1757,
+          "state": "off"
+        },
+        {
+          "t": 1758,
+          "state": "off"
+        },
+        {
+          "t": 1759,
+          "state": "off"
+        },
+        {
+          "t": 1760,
+          "state": "off"
+        },
+        {
+          "t": 1761,
+          "state": "off"
+        },
+        {
+          "t": 1762,
+          "state": "off"
+        },
+        {
+          "t": 1763,
+          "state": "off"
+        },
+        {
+          "t": 1764,
+          "state": "off"
+        },
+        {
+          "t": 1765,
+          "state": "off"
+        },
+        {
+          "t": 1766,
+          "state": "off"
+        },
+        {
+          "t": 1767,
+          "state": "off"
+        },
+        {
+          "t": 1768,
+          "state": "off"
+        },
+        {
+          "t": 1769,
+          "state": "off"
+        },
+        {
+          "t": 1770,
+          "state": "off"
+        },
+        {
+          "t": 1771,
+          "state": "off"
+        },
+        {
+          "t": 1772,
+          "state": "off"
+        },
+        {
+          "t": 1773,
+          "state": "off"
+        },
+        {
+          "t": 1774,
+          "state": "off"
+        },
+        {
+          "t": 1775,
+          "state": "off"
+        },
+        {
+          "t": 1776,
+          "state": "off"
+        },
+        {
+          "t": 1777,
+          "state": "off"
+        },
+        {
+          "t": 1778,
+          "state": "off"
+        },
+        {
+          "t": 1779,
+          "state": "off"
+        },
+        {
+          "t": 1780,
+          "state": "off"
+        },
+        {
+          "t": 1781,
+          "state": "off"
+        },
+        {
+          "t": 1782,
+          "state": "off"
+        },
+        {
+          "t": 1783,
+          "state": "off"
+        },
+        {
+          "t": 1784,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 3.26,
+          "r": 10.74,
+          "g": 0.47
+        },
+        {
+          "t": 1785,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 7,
+          "f": 15.29,
+          "r": 16.03,
+          "g": 0.87
+        },
+        {
+          "t": 1786,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 12,
+          "f": 13.99,
+          "r": 9.58,
+          "g": 0.73
+        },
+        {
+          "t": 1787,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 33,
+          "f": 5.4,
+          "r": 3.87,
+          "g": 1.24
+        },
+        {
+          "t": 1788,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 45,
+          "f": 1.52,
+          "r": 0.92,
+          "g": 1.89
+        },
+        {
+          "t": 1789,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 43,
+          "f": 1.51,
+          "r": 1.01,
+          "g": 1.92
+        },
+        {
+          "t": 1790,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "f": 0.58,
+          "r": 0.36,
+          "g": 0.84
+        },
+        {
+          "t": 1791,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "f": 0.18,
+          "r": 0.21,
+          "g": 0.25
+        },
+        {
+          "t": 1792,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "f": 0.05,
+          "r": 0.07,
+          "g": 0.12
+        },
+        {
+          "t": 1793,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 49,
+          "f": 1.33,
+          "r": 0.53,
+          "g": 1.48
+        },
+        {
+          "t": 1794,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 41,
+          "f": 1.38,
+          "r": 0.78,
+          "g": 1.64
+        },
+        {
+          "t": 1795,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 32,
+          "f": 0.94,
+          "r": 0.61,
+          "g": 1.98
+        },
+        {
+          "t": 1796,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 25,
+          "f": 0.55,
+          "r": 0.3,
+          "g": 0.55
+        },
+        {
+          "t": 1797,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 18,
+          "f": 1.66,
+          "r": 0.62,
+          "g": 1.03
+        },
+        {
+          "t": 1798,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 11,
+          "f": 1.79,
+          "r": 0.65,
+          "g": 0.91
+        },
+        {
+          "t": 1799,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 10,
+          "f": 1.73,
+          "r": 0.96,
+          "g": 0.64
+        },
+        {
+          "t": 1800,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 29,
+          "f": 1.02,
+          "r": 0.3,
+          "g": 1.27
+        },
+        {
+          "t": 1801,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 23,
+          "f": 0.96,
+          "r": 0.56,
+          "g": 1.31
+        },
+        {
+          "t": 1802,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 20,
+          "f": 1.2,
+          "r": 0.17,
+          "g": 0.69
+        },
+        {
+          "t": 1803,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 23,
+          "f": 1.01,
+          "r": 0.18,
+          "g": 0.67
+        },
+        {
+          "t": 1804,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 26,
+          "f": 0.09,
+          "r": 0.15,
+          "g": 0.2
+        },
+        {
+          "t": 1805,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 29,
+          "f": 0.03,
+          "r": 0.04,
+          "g": 0.09
+        },
+        {
+          "t": 1806,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 27,
+          "f": 0.02,
+          "r": 0.05,
+          "g": 0.07
+        },
+        {
+          "t": 1807,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 24,
+          "f": 0.02,
+          "r": 0.04,
+          "g": 0.08
+        },
+        {
+          "t": 1808,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0.07
+        },
+        {
+          "t": 1809,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.99,
+          "r": 0.21,
+          "g": 0.85
+        },
+        {
+          "t": 1810,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.71,
+          "r": 0.37,
+          "g": 0.89
+        },
+        {
+          "t": 1811,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.3,
+          "r": 0.21,
+          "g": 0.65
+        },
+        {
+          "t": 1812,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.6,
+          "r": 0.11,
+          "g": 0.54
+        },
+        {
+          "t": 1813,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.03,
+          "r": 0.06,
+          "g": 0.1
+        },
+        {
+          "t": 1814,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 18,
+          "f": 1.14,
+          "r": 0.17,
+          "g": 0.63
+        },
+        {
+          "t": 1815,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 14,
+          "f": 1.68,
+          "r": 0.34,
+          "g": 0.71
+        },
+        {
+          "t": 1816,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 11,
+          "f": 0.59,
+          "r": 0.27,
+          "g": 0.27
+        },
+        {
+          "t": 1817,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 10,
+          "f": 0.87,
+          "r": 0.15,
+          "g": 0.32
+        },
+        {
+          "t": 1818,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 9,
+          "f": 1.32,
+          "r": 0.24,
+          "g": 0.46
+        },
+        {
+          "t": 1819,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 8,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0.05
+        },
+        {
+          "t": 1820,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 7,
+          "f": 1.56,
+          "r": 0.21,
+          "g": 0.44
+        },
+        {
+          "t": 1821,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 5,
+          "f": 1.09,
+          "r": 0.34,
+          "g": 0.41
+        },
+        {
+          "t": 1822,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 4,
+          "f": 0.45,
+          "r": 0.26,
+          "g": 0.28
+        },
+        {
+          "t": 1823,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 4,
+          "f": 0.02,
+          "r": 0.01,
+          "g": 0.03
+        },
+        {
+          "t": 1824,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 4,
+          "f": 0.02,
+          "r": 0.02,
+          "g": 0.03
+        },
+        {
+          "t": 1825,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 3,
+          "f": 0.02,
+          "r": 0.02,
+          "g": 0.03
+        },
+        {
+          "t": 1826,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 2,
+          "f": 0.21,
+          "r": 0.1,
+          "g": 0.18
+        },
+        {
+          "t": 1827,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 2,
+          "f": 8.52,
+          "r": 6.33,
+          "g": 0.33
+        },
+        {
+          "t": 1828,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 16,
+          "f": 1.19,
+          "r": 0.78,
+          "g": 0.62
+        },
+        {
+          "t": 1829,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 12,
+          "f": 0.9,
+          "r": 0.19,
+          "g": 0.49
+        },
+        {
+          "t": 1830,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 8,
+          "f": 0.36,
+          "r": 0.17,
+          "g": 0.45
+        },
+        {
+          "t": 1831,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 6,
+          "f": 0.85,
+          "r": 0.23,
+          "g": 0.4
+        },
+        {
+          "t": 1832,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 16,
+          "f": 0.43,
+          "r": 0.41,
+          "g": 0.03
+        },
+        {
+          "t": 1833,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 28,
+          "f": 0.43,
+          "r": 0.49,
+          "g": 0.32
+        },
+        {
+          "t": 1834,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 34,
+          "f": 0.18,
+          "r": 0.25,
+          "g": 0.09
+        },
+        {
+          "t": 1835,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 28,
+          "f": 0.09,
+          "r": 0.1,
+          "g": 0.06
+        },
+        {
+          "t": 1836,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 20,
+          "f": 0.12,
+          "r": 0.21,
+          "g": 0.05
+        },
+        {
+          "t": 1837,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 15,
+          "f": 0.05,
+          "r": 0.05,
+          "g": 0.05
+        },
+        {
+          "t": 1838,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 10,
+          "f": 1.45,
+          "r": 0.22,
+          "g": 0.49
+        },
+        {
+          "t": 1839,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 7,
+          "f": 0.64,
+          "r": 0.18,
+          "g": 0.42
+        },
+        {
+          "t": 1840,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 6,
+          "f": 0.03,
+          "r": 0.02,
+          "g": 0.03
+        },
+        {
+          "t": 1841,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 4,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0.02
+        },
+        {
+          "t": 1842,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 4,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0.02
+        },
+        {
+          "t": 1843,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 2,
+          "f": 0.52,
+          "r": 0.45,
+          "g": 0.02
+        },
+        {
+          "t": 1844,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.2,
+          "g": 0.03
+        },
+        {
+          "t": 1845,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1846,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1847,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1848,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1849,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1850,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1851,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1852,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1853,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1854,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1855,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1856,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1857,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1858,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1859,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1860,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.07,
+          "r": 0.14,
+          "g": 0
+        },
+        {
+          "t": 1861,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.14,
+          "g": 0.01
+        },
+        {
+          "t": 1862,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 8,
+          "f": 8.54,
+          "r": 8.37,
+          "g": 0.18
+        },
+        {
+          "t": 1863,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 25,
+          "f": 0.58,
+          "r": 0.76,
+          "g": 0.1
+        },
+        {
+          "t": 1864,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 21,
+          "f": 0.07,
+          "r": 0.27,
+          "g": 0.09
+        },
+        {
+          "t": 1865,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 20,
+          "f": 1,
+          "r": 0.15,
+          "g": 0.59
+        },
+        {
+          "t": 1866,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 20,
+          "f": 0.7,
+          "r": 0.14,
+          "g": 0.59
+        },
+        {
+          "t": 1867,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 21,
+          "f": 0.04,
+          "r": 0.04,
+          "g": 0.08
+        },
+        {
+          "t": 1868,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.04,
+          "r": 0.04,
+          "g": 0.06
+        },
+        {
+          "t": 1869,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.07,
+          "r": 0.08,
+          "g": 0.08
+        },
+        {
+          "t": 1870,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.57,
+          "r": 0.14,
+          "g": 0.61
+        },
+        {
+          "t": 1871,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 22,
+          "f": 0.92,
+          "r": 0.14,
+          "g": 0.64
+        },
+        {
+          "t": 1872,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 21,
+          "f": 0.71,
+          "r": 0.13,
+          "g": 0.82
+        },
+        {
+          "t": 1873,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 21,
+          "f": 0.12,
+          "r": 0.07,
+          "g": 0.17
+        },
+        {
+          "t": 1874,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 20,
+          "f": 0.84,
+          "r": 0.31,
+          "g": 0.75
+        },
+        {
+          "t": 1875,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 19,
+          "f": 1,
+          "r": 0.3,
+          "g": 0.7
+        },
+        {
+          "t": 1876,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 24,
+          "f": 0.42,
+          "r": 0.27,
+          "g": 0.47
+        },
+        {
+          "t": 1877,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 24,
+          "f": 0.53,
+          "r": 0.14,
+          "g": 0.55
+        },
+        {
+          "t": 1878,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 29,
+          "f": 0.68,
+          "r": 0.32,
+          "g": 0.84
+        },
+        {
+          "t": 1879,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 34,
+          "f": 0.3,
+          "r": 0.32,
+          "g": 0.68
+        },
+        {
+          "t": 1880,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 26,
+          "f": 0.46,
+          "r": 0.19,
+          "g": 0.47
+        },
+        {
+          "t": 1881,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 19,
+          "f": 0.04,
+          "r": 0.08,
+          "g": 0.12
+        },
+        {
+          "t": 1882,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 14,
+          "f": 1.11,
+          "r": 0.28,
+          "g": 0.64
+        },
+        {
+          "t": 1883,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 9,
+          "f": 0.52,
+          "r": 0.15,
+          "g": 0.28
+        },
+        {
+          "t": 1884,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 7,
+          "f": 0.03,
+          "r": 0.02,
+          "g": 0.04
+        },
+        {
+          "t": 1885,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 5,
+          "f": 0.02,
+          "r": 0.02,
+          "g": 0.04
+        },
+        {
+          "t": 1886,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 2,
+          "f": 0.02,
+          "r": 0.02,
+          "g": 0.05
+        },
+        {
+          "t": 1887,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.35,
+          "r": 0.27,
+          "g": 0.05
+        },
+        {
+          "t": 1888,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 9,
+          "f": 8.73,
+          "r": 8.4,
+          "g": 0.1
+        },
+        {
+          "t": 1889,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 16,
+          "f": 1.02,
+          "r": 0.22,
+          "g": 0.56
+        },
+        {
+          "t": 1890,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 16,
+          "f": 1.08,
+          "r": 0.21,
+          "g": 0.59
+        },
+        {
+          "t": 1891,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 21,
+          "f": 0.11,
+          "r": 0.13,
+          "g": 0.07
+        },
+        {
+          "t": 1892,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 17,
+          "f": 0.04,
+          "r": 0.07,
+          "g": 0.07
+        },
+        {
+          "t": 1893,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 12,
+          "f": 0.04,
+          "r": 0.02,
+          "g": 0.05
+        },
+        {
+          "t": 1894,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 9,
+          "f": 0.02,
+          "r": 0.01,
+          "g": 0.05
+        },
+        {
+          "t": 1895,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 6,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0.04
+        },
+        {
+          "t": 1896,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 4,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0.03
+        },
+        {
+          "t": 1897,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 3,
+          "f": 0,
+          "r": 0,
+          "g": 0.04
+        },
+        {
+          "t": 1898,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.44,
+          "r": 0.4,
+          "g": 0.15
+        },
+        {
+          "t": 1899,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 9.62,
+          "r": 7.08,
+          "g": 0.48
+        },
+        {
+          "t": 1900,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 16,
+          "f": 9.41,
+          "r": 5.5,
+          "g": 0.75
+        },
+        {
+          "t": 1901,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 15,
+          "f": 1.54,
+          "r": 0.77,
+          "g": 0.94
+        },
+        {
+          "t": 1902,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 17,
+          "f": 1.89,
+          "r": 0.87,
+          "g": 0.6
+        },
+        {
+          "t": 1903,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 27,
+          "f": 0.69,
+          "r": 0.34,
+          "g": 0.53
+        },
+        {
+          "t": 1904,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 37,
+          "f": 0.44,
+          "r": 0.38,
+          "g": 0.38
+        },
+        {
+          "t": 1905,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 45,
+          "f": 0.43,
+          "r": 0.36,
+          "g": 0.6
+        },
+        {
+          "t": 1906,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 57,
+          "f": 0.44,
+          "r": 0.49,
+          "g": 0.42
+        },
+        {
+          "t": 1907,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "f": 0.43,
+          "r": 0.31,
+          "g": 1.1
+        },
+        {
+          "t": 1908,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 62,
+          "f": 0.48,
+          "r": 0.49,
+          "g": 1.41
+        },
+        {
+          "t": 1909,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "f": 0.58,
+          "r": 0.25,
+          "g": 1.11
+        },
+        {
+          "t": 1910,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "f": 1.34,
+          "r": 0.77,
+          "g": 2.55
+        },
+        {
+          "t": 1911,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "f": 0.4,
+          "r": 0.3,
+          "g": 1.49
+        },
+        {
+          "t": 1912,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "f": 0.26,
+          "r": 0.22,
+          "g": 0.42
+        },
+        {
+          "t": 1913,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "f": 0.27,
+          "r": 0.25,
+          "g": 0.47
+        },
+        {
+          "t": 1914,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 82,
+          "f": 0.45,
+          "r": 0.21,
+          "g": 0.93
+        },
+        {
+          "t": 1915,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "f": 0.9,
+          "r": 0.34,
+          "g": 1.3
+        },
+        {
+          "t": 1916,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "f": 0.61,
+          "r": 0.54,
+          "g": 1.41
+        },
+        {
+          "t": 1917,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 0.22,
+          "r": 0.2,
+          "g": 0.35
+        },
+        {
+          "t": 1918,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "f": 0.28,
+          "r": 0.23,
+          "g": 0.39
+        },
+        {
+          "t": 1919,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 106,
+          "f": 0.48,
+          "r": 0.61,
+          "g": 0.49
+        },
+        {
+          "t": 1920,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 112,
+          "f": 0.56,
+          "r": 0.94,
+          "g": 0.69
+        },
+        {
+          "t": 1921,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 95,
+          "f": 3.31,
+          "r": 2.65,
+          "g": 0.83
+        },
+        {
+          "t": 1922,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 65,
+          "f": 1.53,
+          "r": 1.67,
+          "g": 2.45
+        },
+        {
+          "t": 1923,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 60,
+          "f": 2.41,
+          "r": 1.18,
+          "g": 2.63
+        },
+        {
+          "t": 1924,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "f": 0.65,
+          "r": 0.89,
+          "g": 2.29
+        },
+        {
+          "t": 1925,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "f": 1.58,
+          "r": 1.6,
+          "g": 1.19
+        },
+        {
+          "t": 1926,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 82,
+          "f": 0.75,
+          "r": 0.44,
+          "g": 1.09
+        },
+        {
+          "t": 1927,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "f": 0.58,
+          "r": 0.3,
+          "g": 0.6
+        },
+        {
+          "t": 1928,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "f": 1.22,
+          "r": 1.41,
+          "g": 1.52
+        },
+        {
+          "t": 1929,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 79,
+          "f": 3.08,
+          "r": 2.13,
+          "g": 2.36
+        },
+        {
+          "t": 1930,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 58,
+          "f": 2.08,
+          "r": 2.15,
+          "g": 2.18
+        },
+        {
+          "t": 1931,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 51,
+          "f": 1.16,
+          "r": 1.37,
+          "g": 2.13
+        },
+        {
+          "t": 1932,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "f": 0.53,
+          "r": 0.47,
+          "g": 1.01
+        },
+        {
+          "t": 1933,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 81,
+          "f": 0.42,
+          "r": 0.34,
+          "g": 0.52
+        },
+        {
+          "t": 1934,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "f": 0.33,
+          "r": 0.26,
+          "g": 0.61
+        },
+        {
+          "t": 1935,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 104,
+          "f": 1.92,
+          "r": 1.43,
+          "g": 1.29
+        },
+        {
+          "t": 1936,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 1.05,
+          "r": 1.11,
+          "g": 2.44
+        },
+        {
+          "t": 1937,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "f": 0.5,
+          "r": 0.47,
+          "g": 1.32
+        },
+        {
+          "t": 1938,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "f": 1.28,
+          "r": 0.64,
+          "g": 1.74
+        },
+        {
+          "t": 1939,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 84,
+          "f": 1.16,
+          "r": 0.73,
+          "g": 2.76
+        },
+        {
+          "t": 1940,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 0.41,
+          "r": 0.35,
+          "g": 0.75
+        },
+        {
+          "t": 1941,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 2.43,
+          "r": 1.47,
+          "g": 1.35
+        },
+        {
+          "t": 1942,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "f": 1.83,
+          "r": 1.54,
+          "g": 1.63
+        },
+        {
+          "t": 1943,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "f": 2.23,
+          "r": 1.55,
+          "g": 1.71
+        },
+        {
+          "t": 1944,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 38,
+          "f": 3.03,
+          "r": 3.92,
+          "g": 0.45
+        },
+        {
+          "t": 1945,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 30,
+          "f": 0.53,
+          "r": 0.31,
+          "g": 0.99
+        },
+        {
+          "t": 1946,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 23,
+          "f": 0.94,
+          "r": 0.23,
+          "g": 0.86
+        },
+        {
+          "t": 1947,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 17,
+          "f": 1.53,
+          "r": 0.17,
+          "g": 0.78
+        },
+        {
+          "t": 1948,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 11,
+          "f": 0.42,
+          "r": 0.18,
+          "g": 0.29
+        },
+        {
+          "t": 1949,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 9,
+          "f": 1.61,
+          "r": 0.61,
+          "g": 0.4
+        },
+        {
+          "t": 1950,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 27,
+          "f": 1.08,
+          "r": 1.1,
+          "g": 0.6
+        },
+        {
+          "t": 1951,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 39,
+          "f": 1.46,
+          "r": 1.63,
+          "g": 1.31
+        },
+        {
+          "t": 1952,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 53,
+          "f": 0.49,
+          "r": 0.57,
+          "g": 0.89
+        },
+        {
+          "t": 1953,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "f": 0.32,
+          "r": 0.37,
+          "g": 0.05
+        },
+        {
+          "t": 1954,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "f": 0.53,
+          "r": 0.38,
+          "g": 0.46
+        },
+        {
+          "t": 1955,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "f": 2.9,
+          "r": 2.11,
+          "g": 0.25
+        },
+        {
+          "t": 1956,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "f": 1.61,
+          "r": 1.63,
+          "g": 1.97
+        },
+        {
+          "t": 1957,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 49,
+          "f": 1.63,
+          "r": 0.94,
+          "g": 2.41
+        },
+        {
+          "t": 1958,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 47,
+          "f": 1.4,
+          "r": 1.01,
+          "g": 2.04
+        },
+        {
+          "t": 1959,
+          "state": "rear",
+          "car": "1155|2|8|700",
+          "mph": 51,
+          "f": 0.91,
+          "r": 1.11,
+          "g": 1.76
+        },
+        {
+          "t": 1960,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "f": 0.65,
+          "r": 0.49,
+          "g": 0.71
+        },
+        {
+          "t": 1961,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "f": 0.8,
+          "r": 0.46,
+          "g": 0.83
+        },
+        {
+          "t": 1962,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "f": 0.41,
+          "r": 0.34,
+          "g": 0.74
+        },
+        {
+          "t": 1963,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "f": 0.72,
+          "r": 0.39,
+          "g": 1.81
+        },
+        {
+          "t": 1964,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 92,
+          "f": 3.05,
+          "r": 2.48,
+          "g": 0.64
+        },
+        {
+          "t": 1965,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "f": 0.61,
+          "r": 0.3,
+          "g": 1.03
+        },
+        {
+          "t": 1966,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "f": 1.23,
+          "r": 1.32,
+          "g": 2.14
+        },
+        {
+          "t": 1967,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "f": 1.4,
+          "r": 0.9,
+          "g": 1.81
+        },
+        {
+          "t": 1968,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 100,
+          "f": 0.53,
+          "r": 0.32,
+          "g": 0.91
+        },
+        {
+          "t": 1969,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 109,
+          "f": 0.34,
+          "r": 0.3,
+          "g": 0.58
+        },
+        {
+          "t": 1970,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 118,
+          "f": 0.48,
+          "r": 0.69,
+          "g": 0.13
+        },
+        {
+          "t": 1971,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 124,
+          "f": 0.36,
+          "r": 0.34,
+          "g": 0.54
+        },
+        {
+          "t": 1972,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 127,
+          "f": 3.83,
+          "r": 3.64,
+          "g": 0.25
+        },
+        {
+          "t": 1973,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 112,
+          "f": 0.85,
+          "r": 1,
+          "g": 0.57
+        },
+        {
+          "t": 1974,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 107,
+          "f": 2.89,
+          "r": 1.82,
+          "g": 2.08
+        },
+        {
+          "t": 1975,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 97,
+          "f": 3.11,
+          "r": 2.45,
+          "g": 0.22
+        },
+        {
+          "t": 1976,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "f": 1.61,
+          "r": 1.28,
+          "g": 2.23
+        },
+        {
+          "t": 1977,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 81,
+          "f": 2.44,
+          "r": 1.1,
+          "g": 2.12
+        },
+        {
+          "t": 1978,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "f": 0.51,
+          "r": 0.39,
+          "g": 0.77
+        },
+        {
+          "t": 1979,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 99,
+          "f": 4.7,
+          "r": 4.46,
+          "g": 0.21
+        },
+        {
+          "t": 1980,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "f": 3,
+          "r": 2.65,
+          "g": 1.31
+        },
+        {
+          "t": 1981,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 58,
+          "f": 0.99,
+          "r": 0.6,
+          "g": 1.75
+        },
+        {
+          "t": 1982,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 49,
+          "f": 1.59,
+          "r": 0.85,
+          "g": 2.73
+        },
+        {
+          "t": 1983,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 43,
+          "f": 2.96,
+          "r": 1.25,
+          "g": 2.11
+        },
+        {
+          "t": 1984,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 46,
+          "f": 1.54,
+          "r": 1.24,
+          "g": 2.06
+        },
+        {
+          "t": 1985,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 41,
+          "f": 1.6,
+          "r": 1.29,
+          "g": 2
+        },
+        {
+          "t": 1986,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 53,
+          "f": 1.05,
+          "r": 1.03,
+          "g": 1.26
+        },
+        {
+          "t": 1987,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "f": 1.46,
+          "r": 0.56,
+          "g": 1.08
+        },
+        {
+          "t": 1988,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 74,
+          "f": 1.74,
+          "r": 1.23,
+          "g": 2.78
+        },
+        {
+          "t": 1989,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 68,
+          "f": 0.99,
+          "r": 0.97,
+          "g": 1.6
+        },
+        {
+          "t": 1990,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "f": 1.17,
+          "r": 0.75,
+          "g": 2.11
+        },
+        {
+          "t": 1991,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "f": 0.83,
+          "r": 0.57,
+          "g": 1.4
+        },
+        {
+          "t": 1992,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 0.4,
+          "r": 0.3,
+          "g": 0.27
+        },
+        {
+          "t": 1993,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "f": 0.68,
+          "r": 0.59,
+          "g": 0.24
+        },
+        {
+          "t": 1994,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 110,
+          "f": 3.74,
+          "r": 2.89,
+          "g": 1.62
+        },
+        {
+          "t": 1995,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "f": 3.69,
+          "r": 3.09,
+          "g": 2.3
+        },
+        {
+          "t": 1996,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 0.95,
+          "r": 0.64,
+          "g": 1.89
+        },
+        {
+          "t": 1997,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "f": 0.53,
+          "r": 0.34,
+          "g": 1.36
+        },
+        {
+          "t": 1998,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 79,
+          "f": 1.78,
+          "r": 1.3,
+          "g": 1.69
+        },
+        {
+          "t": 1999,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "f": 1.91,
+          "r": 1.33,
+          "g": 1.79
+        },
+        {
+          "t": 2000,
+          "state": "rear",
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "f": 0.75,
+          "r": 1.07,
+          "g": 2.1
+        },
+        {
+          "t": 2001,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 68,
+          "f": 3.01,
+          "r": 2.71,
+          "g": 1.97
+        },
+        {
+          "t": 2002,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "f": 1.67,
+          "r": 0.97,
+          "g": 1.78
+        },
+        {
+          "t": 2003,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 57,
+          "f": 1.63,
+          "r": 1.24,
+          "g": 2.53
+        },
+        {
+          "t": 2004,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 57,
+          "f": 1.32,
+          "r": 0.91,
+          "g": 2.49
+        },
+        {
+          "t": 2005,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "f": 1,
+          "r": 0.79,
+          "g": 2
+        },
+        {
+          "t": 2006,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 81,
+          "f": 0.52,
+          "r": 0.58,
+          "g": 1.53
+        },
+        {
+          "t": 2007,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 0.48,
+          "r": 0.36,
+          "g": 0.25
+        },
+        {
+          "t": 2008,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 104,
+          "f": 2.15,
+          "r": 0.97,
+          "g": 0.33
+        },
+        {
+          "t": 2009,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 84,
+          "f": 1.43,
+          "r": 1.13,
+          "g": 1.74
+        },
+        {
+          "t": 2010,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 78,
+          "f": 1.37,
+          "r": 1.05,
+          "g": 2.24
+        },
+        {
+          "t": 2011,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "f": 0.57,
+          "r": 0.88,
+          "g": 1.34
+        },
+        {
+          "t": 2012,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "f": 1.61,
+          "r": 0.95,
+          "g": 2.02
+        },
+        {
+          "t": 2013,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 97,
+          "f": 0.57,
+          "r": 0.9,
+          "g": 1.33
+        },
+        {
+          "t": 2014,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 106,
+          "f": 0.85,
+          "r": 0.81,
+          "g": 2.18
+        },
+        {
+          "t": 2015,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 114,
+          "f": 0.39,
+          "r": 0.53,
+          "g": 0.84
+        },
+        {
+          "t": 2016,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "f": 0.3,
+          "r": 0.32,
+          "g": 2.37
+        },
+        {
+          "t": 2017,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 123,
+          "f": 0.24,
+          "r": 0.19,
+          "g": 0.47
+        },
+        {
+          "t": 2018,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 125,
+          "f": 2.75,
+          "r": 1.85,
+          "g": 0.45
+        },
+        {
+          "t": 2019,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "f": 2.07,
+          "r": 1.1,
+          "g": 1.31
+        },
+        {
+          "t": 2020,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 76,
+          "f": 1.61,
+          "r": 0.94,
+          "g": 1.75
+        },
+        {
+          "t": 2021,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "f": 1.07,
+          "r": 0.71,
+          "g": 1.66
+        },
+        {
+          "t": 2022,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 96,
+          "f": 1.2,
+          "r": 1.17,
+          "g": 1.87
+        },
+        {
+          "t": 2023,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 106,
+          "f": 0.63,
+          "r": 0.52,
+          "g": 1.37
+        },
+        {
+          "t": 2024,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "f": 2.88,
+          "r": 1.46,
+          "g": 1.4
+        },
+        {
+          "t": 2025,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "f": 1.68,
+          "r": 1.5,
+          "g": 1.74
+        },
+        {
+          "t": 2026,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 58,
+          "f": 1.48,
+          "r": 1.58,
+          "g": 1.67
+        },
+        {
+          "t": 2027,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 36,
+          "f": 1.96,
+          "r": 1.52,
+          "g": 2.26
+        },
+        {
+          "t": 2028,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 26,
+          "f": 1.7,
+          "r": 0.89,
+          "g": 1.48
+        },
+        {
+          "t": 2029,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 19,
+          "f": 1.53,
+          "r": 0.78,
+          "g": 0.98
+        },
+        {
+          "t": 2030,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 16,
+          "f": 0.05,
+          "r": 0.04,
+          "g": 0.06
+        },
+        {
+          "t": 2031,
+          "state": "off"
+        },
+        {
+          "t": 2032,
+          "state": "off"
+        },
+        {
+          "t": 2033,
+          "state": "off"
+        },
+        {
+          "t": 2034,
+          "state": "off"
+        },
+        {
+          "t": 2035,
+          "state": "off"
+        },
+        {
+          "t": 2036,
+          "state": "off"
+        },
+        {
+          "t": 2037,
+          "state": "off"
+        },
+        {
+          "t": 2038,
+          "state": "off"
+        },
+        {
+          "t": 2039,
+          "state": "off"
+        },
+        {
+          "t": 2040,
+          "state": "off"
+        },
+        {
+          "t": 2041,
+          "state": "off"
+        },
+        {
+          "t": 2042,
+          "state": "off"
+        },
+        {
+          "t": 2043,
+          "state": "off"
+        },
+        {
+          "t": 2044,
+          "state": "off"
+        },
+        {
+          "t": 2045,
+          "state": "off"
+        },
+        {
+          "t": 2046,
+          "state": "off"
+        },
+        {
+          "t": 2047,
+          "state": "off"
+        },
+        {
+          "t": 2048,
+          "state": "off"
+        },
+        {
+          "t": 2049,
+          "state": "off"
+        },
+        {
+          "t": 2050,
+          "state": "off"
+        },
+        {
+          "t": 2051,
+          "state": "off"
+        },
+        {
+          "t": 2052,
+          "state": "off"
+        },
+        {
+          "t": 2053,
+          "state": "off"
+        },
+        {
+          "t": 2054,
+          "state": "off"
+        },
+        {
+          "t": 2055,
+          "state": "off"
+        },
+        {
+          "t": 2056,
+          "state": "off"
+        },
+        {
+          "t": 2057,
+          "state": "off"
+        },
+        {
+          "t": 2058,
+          "state": "off"
+        },
+        {
+          "t": 2059,
+          "state": "off"
+        },
+        {
+          "t": 2060,
+          "state": "off"
+        },
+        {
+          "t": 2061,
+          "state": "off"
+        },
+        {
+          "t": 2062,
+          "state": "off"
+        },
+        {
+          "t": 2063,
+          "state": "off"
+        },
+        {
+          "t": 2064,
+          "state": "off"
+        },
+        {
+          "t": 2065,
+          "state": "off"
+        },
+        {
+          "t": 2066,
+          "state": "off"
+        },
+        {
+          "t": 2067,
+          "state": "off"
+        },
+        {
+          "t": 2068,
+          "state": "off"
+        },
+        {
+          "t": 2069,
+          "state": "off"
+        },
+        {
+          "t": 2070,
+          "state": "off"
+        },
+        {
+          "t": 2071,
+          "state": "off"
+        },
+        {
+          "t": 2072,
+          "state": "off"
+        },
+        {
+          "t": 2073,
+          "state": "off"
+        },
+        {
+          "t": 2074,
+          "state": "off"
+        },
+        {
+          "t": 2075,
+          "state": "off"
+        },
+        {
+          "t": 2076,
+          "state": "off"
+        },
+        {
+          "t": 2077,
+          "state": "off"
+        },
+        {
+          "t": 2078,
+          "state": "off"
+        },
+        {
+          "t": 2079,
+          "state": "off"
+        },
+        {
+          "t": 2080,
+          "state": "off"
+        },
+        {
+          "t": 2081,
+          "state": "off"
+        },
+        {
+          "t": 2082,
+          "state": "off"
+        },
+        {
+          "t": 2083,
+          "state": "off"
+        },
+        {
+          "t": 2084,
+          "state": "off"
+        },
+        {
+          "t": 2085,
+          "state": "off"
+        },
+        {
+          "t": 2086,
+          "state": "off"
+        },
+        {
+          "t": 2087,
+          "state": "off"
+        },
+        {
+          "t": 2088,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 14,
+          "f": 0.04,
+          "r": 0.04,
+          "g": 0.1
+        },
+        {
+          "t": 2089,
+          "state": "off"
+        },
+        {
+          "t": 2090,
+          "state": "off"
+        },
+        {
+          "t": 2091,
+          "state": "off"
+        },
+        {
+          "t": 2092,
+          "state": "off"
+        },
+        {
+          "t": 2093,
+          "state": "off"
+        },
+        {
+          "t": 2094,
+          "state": "off"
+        },
+        {
+          "t": 2095,
+          "state": "off"
+        },
+        {
+          "t": 2096,
+          "state": "off"
+        },
+        {
+          "t": 2097,
+          "state": "off"
+        },
+        {
+          "t": 2098,
+          "state": "off"
+        },
+        {
+          "t": 2099,
+          "state": "off"
+        },
+        {
+          "t": 2100,
+          "state": "off"
+        },
+        {
+          "t": 2101,
+          "state": "off"
+        },
+        {
+          "t": 2102,
+          "state": "off"
+        },
+        {
+          "t": 2103,
+          "state": "off"
+        },
+        {
+          "t": 2104,
+          "state": "off"
+        },
+        {
+          "t": 2105,
+          "state": "off"
+        },
+        {
+          "t": 2106,
+          "state": "off"
+        },
+        {
+          "t": 2107,
+          "state": "off"
+        },
+        {
+          "t": 2108,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 11,
+          "f": 3.71,
+          "r": 1.59,
+          "g": 0.1
+        },
+        {
+          "t": 2109,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 37,
+          "f": 0.35,
+          "r": 0.34,
+          "g": 0.11
+        },
+        {
+          "t": 2110,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "f": 0.23,
+          "r": 0.25,
+          "g": 0.11
+        },
+        {
+          "t": 2111,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "f": 0.18,
+          "r": 0.21,
+          "g": 0.1
+        },
+        {
+          "t": 2112,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 84,
+          "f": 0.17,
+          "r": 0.19,
+          "g": 0.12
+        },
+        {
+          "t": 2113,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 0.27,
+          "r": 0.17,
+          "g": 0.38
+        },
+        {
+          "t": 2114,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "f": 0.19,
+          "r": 0.15,
+          "g": 0.32
+        },
+        {
+          "t": 2115,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 111,
+          "f": 0.29,
+          "r": 0.22,
+          "g": 0.44
+        },
+        {
+          "t": 2116,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "f": 0.6,
+          "r": 0.38,
+          "g": 1.52
+        },
+        {
+          "t": 2117,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 120,
+          "f": 0.66,
+          "r": 0.56,
+          "g": 1.84
+        },
+        {
+          "t": 2118,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 123,
+          "f": 0.9,
+          "r": 0.81,
+          "g": 2.04
+        },
+        {
+          "t": 2119,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 122,
+          "f": 0.9,
+          "r": 0.87,
+          "g": 2.03
+        },
+        {
+          "t": 2120,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 125,
+          "f": 0.6,
+          "r": 0.45,
+          "g": 1.46
+        },
+        {
+          "t": 2121,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 130,
+          "f": 0.12,
+          "r": 0.13,
+          "g": 0.23
+        },
+        {
+          "t": 2122,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "f": 0.35,
+          "r": 0.13,
+          "g": 0.66
+        },
+        {
+          "t": 2123,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 136,
+          "f": 0.62,
+          "r": 0.37,
+          "g": 1.79
+        },
+        {
+          "t": 2124,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 136,
+          "f": 0.97,
+          "r": 0.85,
+          "g": 1.77
+        },
+        {
+          "t": 2125,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 136,
+          "f": 0.98,
+          "r": 0.78,
+          "g": 1.67
+        },
+        {
+          "t": 2126,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 138,
+          "f": 0.31,
+          "r": 0.22,
+          "g": 0.71
+        },
+        {
+          "t": 2127,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 137,
+          "f": 1.16,
+          "r": 0.75,
+          "g": 1.56
+        },
+        {
+          "t": 2128,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 123,
+          "f": 1.28,
+          "r": 0.74,
+          "g": 2.04
+        },
+        {
+          "t": 2129,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "f": 1.7,
+          "r": 0.88,
+          "g": 2.12
+        },
+        {
+          "t": 2130,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 118,
+          "f": 1.72,
+          "r": 1.03,
+          "g": 1.77
+        },
+        {
+          "t": 2131,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 123,
+          "f": 0.61,
+          "r": 0.39,
+          "g": 1.21
+        },
+        {
+          "t": 2132,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 120,
+          "f": 1.21,
+          "r": 0.89,
+          "g": 1.58
+        },
+        {
+          "t": 2133,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 113,
+          "f": 1.5,
+          "r": 0.82,
+          "g": 1.77
+        },
+        {
+          "t": 2134,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "f": 2.13,
+          "r": 1.2,
+          "g": 2.06
+        },
+        {
+          "t": 2135,
+          "state": "impact",
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "f": 2.45,
+          "r": 2.15,
+          "g": 10.27
+        },
+        {
+          "t": 2136,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 51,
+          "f": 1.97,
+          "r": 1,
+          "g": 1.68
+        },
+        {
+          "t": 2137,
+          "state": "off"
+        },
+        {
+          "t": 2138,
+          "state": "off"
+        },
+        {
+          "t": 2139,
+          "state": "off"
+        },
+        {
+          "t": 2140,
+          "state": "off"
+        },
+        {
+          "t": 2141,
+          "state": "off"
+        },
+        {
+          "t": 2142,
+          "state": "off"
+        },
+        {
+          "t": 2143,
+          "state": "off"
+        },
+        {
+          "t": 2144,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 46,
+          "f": 0.3,
+          "r": 0.09,
+          "g": 0.47
+        },
+        {
+          "t": 2145,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 41,
+          "f": 1.61,
+          "r": 0.72,
+          "g": 1.49
+        },
+        {
+          "t": 2146,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 34,
+          "f": 1.91,
+          "r": 1.19,
+          "g": 1.55
+        },
+        {
+          "t": 2147,
+          "state": "off"
+        },
+        {
+          "t": 2148,
+          "state": "rear",
+          "car": "1155|2|8|700",
+          "mph": 24,
+          "f": 0.24,
+          "r": 4.6,
+          "g": 0.89
+        },
+        {
+          "t": 2149,
+          "state": "off"
+        },
+        {
+          "t": 2150,
+          "state": "off"
+        },
+        {
+          "t": 2151,
+          "state": "off"
+        },
+        {
+          "t": 2152,
+          "state": "off"
+        },
+        {
+          "t": 2153,
+          "state": "off"
+        },
+        {
+          "t": 2154,
+          "state": "off"
+        },
+        {
+          "t": 2155,
+          "state": "off"
+        },
+        {
+          "t": 2156,
+          "state": "off"
+        },
+        {
+          "t": 2157,
+          "state": "off"
+        },
+        {
+          "t": 2158,
+          "state": "off"
+        },
+        {
+          "t": 2159,
+          "state": "off"
+        },
+        {
+          "t": 2160,
+          "state": "off"
+        },
+        {
+          "t": 2161,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 2,
+          "f": 2.82,
+          "r": 1.62,
+          "g": 0.11
+        },
+        {
+          "t": 2162,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 25,
+          "f": 3.01,
+          "r": 1.57,
+          "g": 0.11
+        },
+        {
+          "t": 2163,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 46,
+          "f": 0.28,
+          "r": 0.28,
+          "g": 0.1
+        },
+        {
+          "t": 2164,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "f": 0.22,
+          "r": 0.24,
+          "g": 0.1
+        },
+        {
+          "t": 2165,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "f": 0.18,
+          "r": 0.2,
+          "g": 0.11
+        },
+        {
+          "t": 2166,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 0.15,
+          "r": 0.17,
+          "g": 0.09
+        },
+        {
+          "t": 2167,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 97,
+          "f": 0.13,
+          "r": 0.14,
+          "g": 0.1
         }
       ],
       "corners": [
@@ -80389,7 +84471,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 5
         },
         {
           "t0": 136.6,
@@ -80437,7 +84520,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 5
         },
         {
           "t0": 141.5,
@@ -80485,7 +84569,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 5
         },
         {
           "t0": 155.5,
@@ -80533,7 +84618,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 165.9,
@@ -80581,7 +84667,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 189,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 171.9,
@@ -80629,7 +84716,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 223,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 177.6,
@@ -80677,7 +84765,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 179.4,
@@ -80725,7 +84814,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 188.9,
@@ -80773,7 +84863,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 192.6,
@@ -80821,7 +84912,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 197.3,
@@ -80869,7 +84961,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 202.5,
@@ -80917,7 +85010,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 203.4,
@@ -80965,7 +85059,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 208,
@@ -81013,7 +85108,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 40,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 213.5,
@@ -81061,7 +85157,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 222.3,
@@ -81109,7 +85206,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 234.6,
@@ -81157,7 +85255,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 6
         },
         {
           "t0": 278.8,
@@ -81205,7 +85304,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 7
         },
         {
           "t0": 283.9,
@@ -81253,7 +85353,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 7
         },
         {
           "t0": 285.3,
@@ -81301,7 +85402,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 7
         },
         {
           "t0": 290.4,
@@ -81349,7 +85451,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 7
         },
         {
           "t0": 418.8,
@@ -81397,7 +85500,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 420.7,
@@ -81445,7 +85549,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 427,
@@ -81493,7 +85598,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 441.5,
@@ -81541,7 +85647,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 451.3,
@@ -81589,7 +85696,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 452.8,
@@ -81637,7 +85745,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 8
         },
         {
           "t0": 596.3,
@@ -81685,7 +85794,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 10
         },
         {
           "t0": 790.2,
@@ -81733,7 +85843,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 795.8,
@@ -81781,7 +85892,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 815.3,
@@ -81829,7 +85941,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 821.3,
@@ -81877,7 +85990,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 831.5,
@@ -81925,7 +86039,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 834.3,
@@ -81973,7 +86088,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 843.7,
@@ -82018,7 +86134,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 844.9,
@@ -82066,7 +86183,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 853.2,
@@ -82114,7 +86232,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 860.5,
@@ -82162,7 +86281,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 864,
@@ -82210,7 +86330,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 17
         },
         {
           "t0": 1180.7,
@@ -82255,7 +86376,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1184.8,
@@ -82303,7 +86425,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1193.9,
@@ -82351,7 +86474,8 @@ window.FH6_DB = {
           "drift": true,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1199.3,
@@ -82399,7 +86523,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1201.7,
@@ -82447,7 +86572,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1204,
@@ -82495,7 +86621,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1205.3,
@@ -82543,7 +86670,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1207.6,
@@ -82588,7 +86716,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1213.3,
@@ -82636,7 +86765,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 26
         },
         {
           "t0": 1315.5,
@@ -82684,7 +86814,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 31
         },
         {
           "t0": 1320.2,
@@ -82732,7 +86863,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 31
         },
         {
           "t0": 1324.4,
@@ -82780,7 +86912,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 31
         },
         {
           "t0": 1326.5,
@@ -82828,7 +86961,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 31
         },
         {
           "t0": 1414.1,
@@ -82876,7 +87010,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 32
         },
         {
           "t0": 1416.1,
@@ -82921,7 +87056,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 32
         },
         {
           "t0": 1417.4,
@@ -82969,7 +87105,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 32
         },
         {
           "t0": 1418.8,
@@ -83017,7 +87154,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 32
         },
         {
           "t0": 1420,
@@ -83065,7 +87203,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 32
         },
         {
           "t0": 1474.3,
@@ -83110,7 +87249,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 35
         },
         {
           "t0": 1480.8,
@@ -83155,7 +87295,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 35
         },
         {
           "t0": 1485.4,
@@ -83203,7 +87344,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 35
         },
         {
           "t0": 1486.5,
@@ -83251,7 +87393,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 35
         },
         {
           "t0": 1491.8,
@@ -83299,7 +87442,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 35
         },
         {
           "t0": 1496.7,
@@ -83347,7 +87491,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 35
         },
         {
           "t0": 1501.4,
@@ -83395,7 +87540,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 35
         },
         {
           "t0": 1503.6,
@@ -83443,7 +87589,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": true
+          "hb": true,
+          "stint": 35
         },
         {
           "t0": 1532.1,
@@ -83488,7 +87635,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 37
         },
         {
           "t0": 1537.7,
@@ -83533,7 +87681,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 37
         },
         {
           "t0": 1538.8,
@@ -83581,7 +87730,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 37
         },
         {
           "t0": 1587.8,
@@ -83629,7 +87779,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 38
         },
         {
           "t0": 1593.7,
@@ -83677,7 +87828,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 38
         },
         {
           "t0": 1597.5,
@@ -83725,7 +87877,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 38
         },
         {
           "t0": 1601,
@@ -83773,7 +87926,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 38
         },
         {
           "t0": 1602.4,
@@ -83821,7 +87975,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 0,
-          "hb": false
+          "hb": false,
+          "stint": 38
         },
         {
           "t0": 1604.9,
@@ -83869,7 +88024,8 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 38
         },
         {
           "t0": 1608.2,
@@ -83917,7 +88073,2339 @@ window.FH6_DB = {
           "drift": false,
           "kink": false,
           "brake_max": 255,
-          "hb": false
+          "hb": false,
+          "stint": 38
+        },
+        {
+          "t0": 1708.2,
+          "t1": 1709.3,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 78,
+          "mph_min": 78,
+          "lat_g_peak": 1,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.5,
+              "rear": 0.31,
+              "red": "none",
+              "dur": 0.51
+            },
+            {
+              "phase": 2,
+              "front": 0.67,
+              "rear": 0.39,
+              "red": "none",
+              "dur": 0.22
+            },
+            {
+              "phase": 3,
+              "front": 0.75,
+              "rear": 0.49,
+              "red": "none",
+              "dur": 0.51
+            },
+            {
+              "phase": 4,
+              "front": 0.32,
+              "rear": 0.32,
+              "red": "none",
+              "dur": 0.4
+            }
+          ],
+          "first_red": null,
+          "usi": 0.015,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1711.3,
+          "t1": 1712.9,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 104,
+          "mph_min": 104,
+          "lat_g_peak": 2.37,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.27,
+              "rear": 0.2,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.07,
+              "rear": 0.45,
+              "red": "front",
+              "dur": 0.7
+            },
+            {
+              "phase": 3,
+              "front": 0.83,
+              "rear": 0.53,
+              "red": "none",
+              "dur": 0.57
+            },
+            {
+              "phase": 4,
+              "front": 0.41,
+              "rear": 0.45,
+              "red": "none",
+              "dur": 0.4
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.049,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1713.2,
+          "t1": 1714.1,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 108,
+          "mph_min": 97,
+          "lat_g_peak": 0.9,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.07,
+              "rear": 0.53,
+              "red": "front",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 0.57,
+              "rear": 0.36,
+              "red": "none",
+              "dur": 0.15
+            },
+            {
+              "phase": 3,
+              "front": 0.28,
+              "rear": 0.26,
+              "red": "none",
+              "dur": 0.27
+            },
+            {
+              "phase": 4,
+              "front": 2.91,
+              "rear": 2,
+              "red": "both",
+              "dur": 0.4
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.014,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1714.1,
+          "t1": 1716.1,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 95,
+          "mph_min": 79,
+          "lat_g_peak": 1.92,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.91,
+              "rear": 2,
+              "red": "both",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 1.87,
+              "rear": 1.3,
+              "red": "both",
+              "dur": 0.61
+            },
+            {
+              "phase": 3,
+              "front": 1.24,
+              "rear": 0.85,
+              "red": "front",
+              "dur": 1.23
+            },
+            {
+              "phase": 4,
+              "front": 0.31,
+              "rear": 0.27,
+              "red": "none",
+              "dur": 0.14
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.144,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1717,
+          "t1": 1722.5,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 93,
+          "mph_min": 69,
+          "lat_g_peak": 2.11,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.75,
+              "rear": 0.74,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.54,
+              "rear": 1.38,
+              "red": "both",
+              "dur": 0.57
+            },
+            {
+              "phase": 3,
+              "front": 1.73,
+              "rear": 1.22,
+              "red": "both",
+              "dur": 1.54
+            },
+            {
+              "phase": 4,
+              "front": 1.68,
+              "rear": 1.09,
+              "red": "both",
+              "dur": 3.42
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.466,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1723.3,
+          "t1": 1724.6,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 87,
+          "mph_min": 85,
+          "lat_g_peak": 1.93,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.07,
+              "rear": 1.04,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.09,
+              "rear": 0.58,
+              "red": "front",
+              "dur": 0.21
+            },
+            {
+              "phase": 3,
+              "front": 1.21,
+              "rear": 0.98,
+              "red": "front",
+              "dur": 0.64
+            },
+            {
+              "phase": 4,
+              "front": 1.21,
+              "rear": 0.67,
+              "red": "front",
+              "dur": 0.42
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.225,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1726,
+          "t1": 1727.5,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 100,
+          "mph_min": 100,
+          "lat_g_peak": 1.85,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.76,
+              "rear": 0.52,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.54,
+              "rear": 0.34,
+              "red": "none",
+              "dur": 0.29
+            },
+            {
+              "phase": 3,
+              "front": 0.67,
+              "rear": 0.51,
+              "red": "none",
+              "dur": 0.62
+            },
+            {
+              "phase": 4,
+              "front": 0.36,
+              "rear": 0.33,
+              "red": "none",
+              "dur": 0.55
+            }
+          ],
+          "first_red": null,
+          "usi": 0.012,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1733.8,
+          "t1": 1737.2,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 94,
+          "mph_min": 76,
+          "lat_g_peak": 2.4,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.81,
+              "rear": 3.85,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.71,
+              "rear": 1.32,
+              "red": "both",
+              "dur": 0.56
+            },
+            {
+              "phase": 3,
+              "front": 1.44,
+              "rear": 1.03,
+              "red": "both",
+              "dur": 0.56
+            },
+            {
+              "phase": 4,
+              "front": 1.33,
+              "rear": 0.95,
+              "red": "front",
+              "dur": 2.32
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.164,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1742.3,
+          "t1": 1744.8,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 69,
+          "mph_min": 48,
+          "lat_g_peak": 1.86,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.53,
+              "rear": 2.63,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.57,
+              "rear": 1.59,
+              "red": "both",
+              "dur": 0.67
+            },
+            {
+              "phase": 3,
+              "front": 2.57,
+              "rear": 1.87,
+              "red": "both",
+              "dur": 1.05
+            },
+            {
+              "phase": 4,
+              "front": 1.4,
+              "rear": 1.48,
+              "red": "both",
+              "dur": 0.79
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.597,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1745.8,
+          "t1": 1748.6,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 73,
+          "mph_min": 49,
+          "lat_g_peak": 2.14,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.64,
+              "rear": 0.81,
+              "red": "none",
+              "dur": 1.32
+            },
+            {
+              "phase": 2,
+              "front": 1.67,
+              "rear": 1.52,
+              "red": "both",
+              "dur": 0.95
+            },
+            {
+              "phase": 3,
+              "front": 1.78,
+              "rear": 1.54,
+              "red": "both",
+              "dur": 1.03
+            },
+            {
+              "phase": 4,
+              "front": 1.4,
+              "rear": 1.22,
+              "red": "both",
+              "dur": 0.84
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.5,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1752.6,
+          "t1": 1754.6,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 66,
+          "mph_min": 3,
+          "lat_g_peak": 2.24,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.8,
+              "rear": 2.39,
+              "red": "both",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 1.7,
+              "rear": 1.03,
+              "red": "both",
+              "dur": 0.88
+            },
+            {
+              "phase": 3,
+              "front": 1.74,
+              "rear": 1.05,
+              "red": "both",
+              "dur": 0.49
+            },
+            {
+              "phase": 4,
+              "front": 9.07,
+              "rear": 20.29,
+              "red": "both",
+              "dur": 0.6
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.473,
+          "drift": true,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 39
+        },
+        {
+          "t0": 1785.6,
+          "t1": 1787.2,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 12,
+          "mph_min": 3,
+          "lat_g_peak": 0.82,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 13.38,
+              "rear": 16.03,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 15.29,
+              "rear": 13.52,
+              "red": "both",
+              "dur": 0.28
+            },
+            {
+              "phase": 3,
+              "front": 14.19,
+              "rear": 11.24,
+              "red": "both",
+              "dur": 0.23
+            },
+            {
+              "phase": 4,
+              "front": 13.06,
+              "rear": 9.58,
+              "red": "both",
+              "dur": 1.14
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "rear"
+          },
+          "usi": 4.324,
+          "drift": true,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1787.3,
+          "t1": 1789.7,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 30,
+          "mph_min": 30,
+          "lat_g_peak": 1.87,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 13.99,
+              "rear": 9.58,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.21,
+              "rear": 1.44,
+              "red": "both",
+              "dur": 1.27
+            },
+            {
+              "phase": 3,
+              "front": 1.52,
+              "rear": 0.9,
+              "red": "front",
+              "dur": 0.63
+            },
+            {
+              "phase": 4,
+              "front": 0.59,
+              "rear": 1.01,
+              "red": "rear",
+              "dur": 0.53
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.544,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1793.4,
+          "t1": 1794.7,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 50,
+          "mph_min": 39,
+          "lat_g_peak": 1.58,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.31,
+              "rear": 0.1,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.21,
+              "rear": 0.39,
+              "red": "front",
+              "dur": 0.48
+            },
+            {
+              "phase": 3,
+              "front": 1.38,
+              "rear": 0.74,
+              "red": "front",
+              "dur": 0.54
+            },
+            {
+              "phase": 4,
+              "front": 0.41,
+              "rear": 0.78,
+              "red": "none",
+              "dur": 0.33
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.349,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1794.9,
+          "t1": 1796.1,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 38,
+          "mph_min": 28,
+          "lat_g_peak": 1.83,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.38,
+              "rear": 0.78,
+              "red": "front",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.02,
+              "rear": 0.61,
+              "red": "front",
+              "dur": 0.79
+            },
+            {
+              "phase": 3,
+              "front": 0.09,
+              "rear": 0.38,
+              "red": "none",
+              "dur": 0.07
+            },
+            {
+              "phase": 4,
+              "front": 0.07,
+              "rear": 0.3,
+              "red": "none",
+              "dur": 0.38
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.201,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1800.5,
+          "t1": 1801.3,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 31,
+          "mph_min": 25,
+          "lat_g_peak": 1.26,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.73,
+              "rear": 0.96,
+              "red": "front",
+              "dur": 1.32
+            },
+            {
+              "phase": 2,
+              "front": 0.73,
+              "rear": 0.14,
+              "red": "none",
+              "dur": 0.32
+            },
+            {
+              "phase": 3,
+              "front": 1.02,
+              "rear": 0.46,
+              "red": "front",
+              "dur": 0.3
+            },
+            {
+              "phase": 4,
+              "front": 0.49,
+              "rear": 0.56,
+              "red": "none",
+              "dur": 0.23
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.413,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1907.3,
+          "t1": 1909.1,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 63,
+          "mph_min": 61,
+          "lat_g_peak": 1.28,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.44,
+              "rear": 0.49,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.43,
+              "rear": 0.28,
+              "red": "none",
+              "dur": 0.7
+            },
+            {
+              "phase": 3,
+              "front": 0.48,
+              "rear": 0.49,
+              "red": "none",
+              "dur": 0.64
+            },
+            {
+              "phase": 4,
+              "front": 0.29,
+              "rear": 0.35,
+              "red": "none",
+              "dur": 0.48
+            }
+          ],
+          "first_red": null,
+          "usi": 0.008,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1909.6,
+          "t1": 1911.2,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 69,
+          "mph_min": 62,
+          "lat_g_peak": 2.37,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.48,
+              "rear": 0.49,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.34,
+              "rear": 0.72,
+              "red": "front",
+              "dur": 1
+            },
+            {
+              "phase": 3,
+              "front": 0.36,
+              "rear": 0.77,
+              "red": "none",
+              "dur": 0.32
+            },
+            {
+              "phase": 4,
+              "front": 0.36,
+              "rear": 0.35,
+              "red": "none",
+              "dur": 0.28
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": -0.163,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1915.8,
+          "t1": 1916.9,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 87,
+          "mph_min": 86,
+          "lat_g_peak": 1.34,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.67,
+              "rear": 0.34,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.9,
+              "rear": 0.31,
+              "red": "none",
+              "dur": 0.18
+            },
+            {
+              "phase": 3,
+              "front": 0.61,
+              "rear": 0.54,
+              "red": "none",
+              "dur": 0.65
+            },
+            {
+              "phase": 4,
+              "front": 0.21,
+              "rear": 0.19,
+              "red": "none",
+              "dur": 0.23
+            }
+          ],
+          "first_red": null,
+          "usi": -0.11,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1921.7,
+          "t1": 1925.2,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 87,
+          "mph_min": 58,
+          "lat_g_peak": 2.47,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.31,
+              "rear": 2.65,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.56,
+              "rear": 1.7,
+              "red": "both",
+              "dur": 1.1
+            },
+            {
+              "phase": 3,
+              "front": 2.41,
+              "rear": 1.18,
+              "red": "both",
+              "dur": 1.4
+            },
+            {
+              "phase": 4,
+              "front": 1.42,
+              "rear": 1.21,
+              "red": "both",
+              "dur": 0.95
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.289,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1925.3,
+          "t1": 1926.9,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 68,
+          "mph_min": 68,
+          "lat_g_peak": 1.06,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.58,
+              "rear": 1.6,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.87,
+              "rear": 0.85,
+              "red": "none",
+              "dur": 0.08
+            },
+            {
+              "phase": 3,
+              "front": 0.75,
+              "rear": 0.49,
+              "red": "none",
+              "dur": 1.37
+            },
+            {
+              "phase": 4,
+              "front": 0.36,
+              "rear": 0.3,
+              "red": "none",
+              "dur": 0.12
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.087,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1928,
+          "t1": 1930.2,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 98,
+          "mph_min": 65,
+          "lat_g_peak": 2.23,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.5,
+              "rear": 0.37,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.22,
+              "rear": 1.41,
+              "red": "both",
+              "dur": 1.14
+            },
+            {
+              "phase": 3,
+              "front": 3.08,
+              "rear": 2.13,
+              "red": "both",
+              "dur": 0.53
+            },
+            {
+              "phase": 4,
+              "front": 2.27,
+              "rear": 1.68,
+              "red": "both",
+              "dur": 0.55
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.009,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1930.3,
+          "t1": 1932.6,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 63,
+          "mph_min": 48,
+          "lat_g_peak": 2.1,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.08,
+              "rear": 2.13,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 2.08,
+              "rear": 2.15,
+              "red": "both",
+              "dur": 0.49
+            },
+            {
+              "phase": 3,
+              "front": 1.16,
+              "rear": 1.37,
+              "red": "both",
+              "dur": 0.9
+            },
+            {
+              "phase": 4,
+              "front": 0.73,
+              "rear": 0.58,
+              "red": "none",
+              "dur": 0.92
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.25,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1933.6,
+          "t1": 1934.6,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 83,
+          "mph_min": 83,
+          "lat_g_peak": 0.49,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.53,
+              "rear": 0.47,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.35,
+              "rear": 0.25,
+              "red": "none",
+              "dur": 0.03
+            },
+            {
+              "phase": 3,
+              "front": 0.35,
+              "rear": 0.29,
+              "red": "none",
+              "dur": 0.48
+            },
+            {
+              "phase": 4,
+              "front": 0.25,
+              "rear": 0.26,
+              "red": "none",
+              "dur": 0.48
+            }
+          ],
+          "first_red": null,
+          "usi": 0.035,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1935.5,
+          "t1": 1937.5,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 105,
+          "mph_min": 90,
+          "lat_g_peak": 2.23,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.37,
+              "rear": 0.26,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.92,
+              "rear": 1.43,
+              "red": "both",
+              "dur": 0.69
+            },
+            {
+              "phase": 3,
+              "front": 0.95,
+              "rear": 0.67,
+              "red": "none",
+              "dur": 0.57
+            },
+            {
+              "phase": 4,
+              "front": 0.69,
+              "rear": 0.59,
+              "red": "none",
+              "dur": 0.77
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1937.9,
+          "t1": 1939.8,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 92,
+          "mph_min": 82,
+          "lat_g_peak": 2.49,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.76,
+              "rear": 0.67,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.28,
+              "rear": 0.64,
+              "red": "front",
+              "dur": 1.2
+            },
+            {
+              "phase": 3,
+              "front": 1.14,
+              "rear": 0.66,
+              "red": "front",
+              "dur": 0.18
+            },
+            {
+              "phase": 4,
+              "front": 0.65,
+              "rear": 0.73,
+              "red": "none",
+              "dur": 0.52
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.106,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1941.5,
+          "t1": 1943.9,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 90,
+          "mph_min": 55,
+          "lat_g_peak": 1.62,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.43,
+              "rear": 1.47,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.6,
+              "rear": 1.54,
+              "red": "both",
+              "dur": 0.7
+            },
+            {
+              "phase": 3,
+              "front": 2.23,
+              "rear": 1.55,
+              "red": "both",
+              "dur": 1.25
+            },
+            {
+              "phase": 4,
+              "front": 0.25,
+              "rear": 0.56,
+              "red": "none",
+              "dur": 0.48
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.113,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1945.2,
+          "t1": 1946.6,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 32,
+          "mph_min": 22,
+          "lat_g_peak": 0.94,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.03,
+              "rear": 3.92,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.49,
+              "rear": 0.05,
+              "red": "none",
+              "dur": 0.2
+            },
+            {
+              "phase": 3,
+              "front": 0.69,
+              "rear": 0.31,
+              "red": "none",
+              "dur": 1.02
+            },
+            {
+              "phase": 4,
+              "front": 0.3,
+              "rear": 0.21,
+              "red": "none",
+              "dur": 0.15
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.123,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1951,
+          "t1": 1952.5,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 34,
+          "mph_min": 34,
+          "lat_g_peak": 1.22,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.08,
+              "rear": 1.1,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.93,
+              "rear": 0.94,
+              "red": "none",
+              "dur": 0.52
+            },
+            {
+              "phase": 3,
+              "front": 1.46,
+              "rear": 1.63,
+              "red": "both",
+              "dur": 0.55
+            },
+            {
+              "phase": 4,
+              "front": 0.49,
+              "rear": 0.57,
+              "red": "none",
+              "dur": 0.47
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.004,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1956.1,
+          "t1": 1958.1,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 67,
+          "mph_min": 47,
+          "lat_g_peak": 2.21,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.9,
+              "rear": 2.11,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.4,
+              "rear": 1.18,
+              "red": "both",
+              "dur": 0.87
+            },
+            {
+              "phase": 3,
+              "front": 1.63,
+              "rear": 0.94,
+              "red": "front",
+              "dur": 0.7
+            },
+            {
+              "phase": 4,
+              "front": 0.96,
+              "rear": 0.52,
+              "red": "none",
+              "dur": 0.42
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.208,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1958.2,
+          "t1": 1959.7,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 51,
+          "mph_min": 44,
+          "lat_g_peak": 1.99,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.63,
+              "rear": 0.94,
+              "red": "front",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.6,
+              "rear": 0.21,
+              "red": "none",
+              "dur": 0.12
+            },
+            {
+              "phase": 3,
+              "front": 1.4,
+              "rear": 1.11,
+              "red": "both",
+              "dur": 1.07
+            },
+            {
+              "phase": 4,
+              "front": 0.77,
+              "rear": 0.71,
+              "red": "none",
+              "dur": 0.27
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.104,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1961,
+          "t1": 1964.3,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 74,
+          "mph_min": 74,
+          "lat_g_peak": 1.73,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.65,
+              "rear": 0.51,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.8,
+              "rear": 0.46,
+              "red": "none",
+              "dur": 2.76
+            },
+            {
+              "phase": 3,
+              "front": 0.27,
+              "rear": 0.34,
+              "red": "none",
+              "dur": 0.18
+            },
+            {
+              "phase": 4,
+              "front": 2.96,
+              "rear": 0.76,
+              "red": "front",
+              "dur": 0.35
+            }
+          ],
+          "first_red": {
+            "phase": 4,
+            "axle": "front"
+          },
+          "usi": -0.078,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1964.7,
+          "t1": 1967.5,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 87,
+          "mph_min": 80,
+          "lat_g_peak": 2,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.05,
+              "rear": 2.48,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 2.96,
+              "rear": 1.73,
+              "red": "both",
+              "dur": 1.52
+            },
+            {
+              "phase": 3,
+              "front": 1.4,
+              "rear": 1.32,
+              "red": "both",
+              "dur": 1.09
+            },
+            {
+              "phase": 4,
+              "front": 0.31,
+              "rear": 0.4,
+              "red": "none",
+              "dur": 0.25
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.015,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1968.1,
+          "t1": 1969.2,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 96,
+          "mph_min": 96,
+          "lat_g_peak": 0.83,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.4,
+              "rear": 1.13,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.53,
+              "rear": 0.31,
+              "red": "none",
+              "dur": 0.1
+            },
+            {
+              "phase": 3,
+              "front": 0.31,
+              "rear": 0.3,
+              "red": "none",
+              "dur": 0.55
+            },
+            {
+              "phase": 4,
+              "front": 0.22,
+              "rear": 0.23,
+              "red": "none",
+              "dur": 0.38
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "rear"
+          },
+          "usi": -0.02,
+          "drift": false,
+          "kink": true,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1976.1,
+          "t1": 1978.4,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 94,
+          "mph_min": 80,
+          "lat_g_peak": 2.17,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.11,
+              "rear": 2.45,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.61,
+              "rear": 1.28,
+              "red": "both",
+              "dur": 0.7
+            },
+            {
+              "phase": 3,
+              "front": 2.44,
+              "rear": 1.1,
+              "red": "both",
+              "dur": 0.97
+            },
+            {
+              "phase": 4,
+              "front": 0.76,
+              "rear": 0.55,
+              "red": "none",
+              "dur": 0.6
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.288,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1980.3,
+          "t1": 1985.9,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 65,
+          "mph_min": 37,
+          "lat_g_peak": 2.54,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 4.7,
+              "rear": 4.46,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.22,
+              "rear": 1.43,
+              "red": "both",
+              "dur": 1.82
+            },
+            {
+              "phase": 3,
+              "front": 1.06,
+              "rear": 0.29,
+              "red": "front",
+              "dur": 0.28
+            },
+            {
+              "phase": 4,
+              "front": 2.96,
+              "rear": 1.29,
+              "red": "both",
+              "dur": 3.46
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.52,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1986,
+          "t1": 1989.7,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 47,
+          "mph_min": 47,
+          "lat_g_peak": 2.65,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.6,
+              "rear": 1.29,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.74,
+              "rear": 1.23,
+              "red": "both",
+              "dur": 2.77
+            },
+            {
+              "phase": 3,
+              "front": 1.45,
+              "rear": 0.67,
+              "red": "front",
+              "dur": 0.23
+            },
+            {
+              "phase": 4,
+              "front": 0.99,
+              "rear": 0.97,
+              "red": "none",
+              "dur": 0.68
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.419,
+          "drift": false,
+          "kink": false,
+          "brake_max": 217,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1990,
+          "t1": 1991.9,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 69,
+          "mph_min": 69,
+          "lat_g_peak": 1.89,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.55,
+              "rear": 1.23,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.17,
+              "rear": 0.75,
+              "red": "front",
+              "dur": 0.23
+            },
+            {
+              "phase": 3,
+              "front": 1.17,
+              "rear": 0.66,
+              "red": "front",
+              "dur": 0.49
+            },
+            {
+              "phase": 4,
+              "front": 0.86,
+              "rear": 0.57,
+              "red": "none",
+              "dur": 1.17
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.024,
+          "drift": false,
+          "kink": false,
+          "brake_max": 217,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1995.3,
+          "t1": 1998.4,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 99,
+          "mph_min": 80,
+          "lat_g_peak": 2.18,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.74,
+              "rear": 3.09,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.59,
+              "rear": 1.04,
+              "red": "rear",
+              "dur": 0.12
+            },
+            {
+              "phase": 3,
+              "front": 1.2,
+              "rear": 0.64,
+              "red": "front",
+              "dur": 1.4
+            },
+            {
+              "phase": 4,
+              "front": 1.78,
+              "rear": 1.3,
+              "red": "both",
+              "dur": 1.65
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.219,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 1998.7,
+          "t1": 2006.4,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 74,
+          "mph_min": 51,
+          "lat_g_peak": 2.45,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.78,
+              "rear": 1.3,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 3.01,
+              "rear": 2.71,
+              "red": "both",
+              "dur": 4.91
+            },
+            {
+              "phase": 3,
+              "front": 1.32,
+              "rear": 0.6,
+              "red": "front",
+              "dur": 0.6
+            },
+            {
+              "phase": 4,
+              "front": 1.11,
+              "rear": 0.91,
+              "red": "front",
+              "dur": 2.24
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.521,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 2009.1,
+          "t1": 2011.3,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 92,
+          "mph_min": 77,
+          "lat_g_peak": 2.1,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.15,
+              "rear": 0.97,
+              "red": "front",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.43,
+              "rear": 1.13,
+              "red": "both",
+              "dur": 1.3
+            },
+            {
+              "phase": 3,
+              "front": 0.92,
+              "rear": 0.85,
+              "red": "none",
+              "dur": 0.42
+            },
+            {
+              "phase": 4,
+              "front": 0.49,
+              "rear": 0.33,
+              "red": "none",
+              "dur": 0.43
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.16,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 2012.2,
+          "t1": 2013.4,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 90,
+          "mph_min": 88,
+          "lat_g_peak": 1.9,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.69,
+              "rear": 0.88,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.53,
+              "rear": 0.37,
+              "red": "front",
+              "dur": 0.33
+            },
+            {
+              "phase": 3,
+              "front": 1.61,
+              "rear": 0.86,
+              "red": "front",
+              "dur": 0.22
+            },
+            {
+              "phase": 4,
+              "front": 0.42,
+              "rear": 0.95,
+              "red": "none",
+              "dur": 0.67
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.108,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 2019,
+          "t1": 2023.2,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 100,
+          "mph_min": 74,
+          "lat_g_peak": 1.68,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.75,
+              "rear": 1.85,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 2.07,
+              "rear": 1.1,
+              "red": "both",
+              "dur": 1.32
+            },
+            {
+              "phase": 3,
+              "front": 1.61,
+              "rear": 1.17,
+              "red": "both",
+              "dur": 2.44
+            },
+            {
+              "phase": 4,
+              "front": 0.69,
+              "rear": 0.73,
+              "red": "none",
+              "dur": 0.48
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.093,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 2023.7,
+          "t1": 2028.8,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 109,
+          "mph_min": 23,
+          "lat_g_peak": 2.22,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.16,
+              "rear": 1.17,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 2.88,
+              "rear": 1.58,
+              "red": "both",
+              "dur": 3.73
+            },
+            {
+              "phase": 3,
+              "front": 1.71,
+              "rear": 0.69,
+              "red": "front",
+              "dur": 0.37
+            },
+            {
+              "phase": 4,
+              "front": 1.7,
+              "rear": 0.86,
+              "red": "front",
+              "dur": 1.05
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "rear"
+          },
+          "usi": 0.732,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 40
+        },
+        {
+          "t0": 2116.1,
+          "t1": 2120.7,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 115,
+          "mph_min": 115,
+          "lat_g_peak": 2.01,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.29,
+              "rear": 0.22,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.66,
+              "rear": 0.56,
+              "red": "none",
+              "dur": 1.35
+            },
+            {
+              "phase": 3,
+              "front": 0.9,
+              "rear": 0.87,
+              "red": "none",
+              "dur": 2.29
+            },
+            {
+              "phase": 4,
+              "front": 0.65,
+              "rear": 0.5,
+              "red": "none",
+              "dur": 0.99
+            }
+          ],
+          "first_red": null,
+          "usi": 0.142,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 42
+        },
+        {
+          "t0": 2122.9,
+          "t1": 2126.1,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 136,
+          "mph_min": 135,
+          "lat_g_peak": 1.74,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.3,
+              "rear": 0.13,
+              "red": "none",
+              "dur": 1.32
+            },
+            {
+              "phase": 2,
+              "front": 0.49,
+              "rear": 0.32,
+              "red": "none",
+              "dur": 0.78
+            },
+            {
+              "phase": 3,
+              "front": 0.98,
+              "rear": 0.85,
+              "red": "none",
+              "dur": 1.79
+            },
+            {
+              "phase": 4,
+              "front": 0.34,
+              "rear": 0.34,
+              "red": "none",
+              "dur": 0.64
+            }
+          ],
+          "first_red": null,
+          "usi": 0.156,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false,
+          "stint": 42
+        },
+        {
+          "t0": 2127.5,
+          "t1": 2131.1,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 137,
+          "mph_min": 118,
+          "lat_g_peak": 2.05,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.32,
+              "rear": 0.22,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.16,
+              "rear": 0.75,
+              "red": "front",
+              "dur": 0.69
+            },
+            {
+              "phase": 3,
+              "front": 1.72,
+              "rear": 0.93,
+              "red": "front",
+              "dur": 1.98
+            },
+            {
+              "phase": 4,
+              "front": 1.58,
+              "rear": 1.03,
+              "red": "both",
+              "dur": 0.94
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.521,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false,
+          "stint": 42
+        },
+        {
+          "t0": 2145,
+          "t1": 2148.8,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 44,
+          "mph_min": 22,
+          "lat_g_peak": 1.52,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.27,
+              "rear": 0.09,
+              "red": "none",
+              "dur": 0.56
+            },
+            {
+              "phase": 2,
+              "front": 1.02,
+              "rear": 0.29,
+              "red": "front",
+              "dur": 0.47
+            },
+            {
+              "phase": 3,
+              "front": 1.91,
+              "rear": 1.19,
+              "red": "both",
+              "dur": 1.78
+            },
+            {
+              "phase": 4,
+              "front": 0.24,
+              "rear": 4.6,
+              "red": "rear",
+              "dur": 1.55
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.582,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": true,
+          "stint": 43
         }
       ],
       "launches": [
@@ -84864,7 +91352,8 @@ window.FH6_DB = {
               0.1,
               141.4
             ]
-          ]
+          ],
+          "stint": 5
         },
         {
           "t": 590,
@@ -85657,7 +92146,8 @@ window.FH6_DB = {
               -0.95,
               19.7
             ]
-          ]
+          ],
+          "stint": 10
         },
         {
           "t": 692.5,
@@ -86002,7 +92492,8 @@ window.FH6_DB = {
               -0.02,
               72.9
             ]
-          ]
+          ],
+          "stint": 12
         },
         {
           "t": 780,
@@ -86947,7 +93438,8 @@ window.FH6_DB = {
               0.09,
               147.5
             ]
-          ]
+          ],
+          "stint": 17
         },
         {
           "t": 1166.4,
@@ -87892,7 +94384,8 @@ window.FH6_DB = {
               0.11,
               127.5
             ]
-          ]
+          ],
+          "stint": 26
         },
         {
           "t": 1412.5,
@@ -88829,7 +95322,8 @@ window.FH6_DB = {
               0.12,
               87.4
             ]
-          ]
+          ],
+          "stint": 32
         },
         {
           "t": 1466,
@@ -89774,7 +96268,8 @@ window.FH6_DB = {
               0.13,
               122.9
             ]
-          ]
+          ],
+          "stint": 35
         },
         {
           "t": 1523.8,
@@ -90719,7 +97214,1436 @@ window.FH6_DB = {
               0.14,
               120.5
             ]
-          ]
+          ],
+          "stint": 37
+        },
+        {
+          "t": 2108,
+          "car": "1155|2|8|700",
+          "zero60_s": 2.79,
+          "peak_slip_rear": 1.52,
+          "peak_slip_front": 3.28,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0.11,
+              0.03,
+              0.02,
+              0.05,
+              0.04,
+              0.1
+            ],
+            [
+              0.21,
+              0.18,
+              0.16,
+              0.28,
+              0.22,
+              1.1
+            ],
+            [
+              0.31,
+              0.45,
+              0.38,
+              0.62,
+              0.41,
+              3.6
+            ],
+            [
+              0.41,
+              2.11,
+              1.26,
+              1.52,
+              0.83,
+              7.1
+            ],
+            [
+              0.51,
+              3.28,
+              0.86,
+              1.09,
+              0.62,
+              10.6
+            ],
+            [
+              0.62,
+              2.72,
+              0.38,
+              0.7,
+              0.53,
+              13.9
+            ],
+            [
+              0.73,
+              1.27,
+              0.46,
+              0.71,
+              0.57,
+              17.3
+            ],
+            [
+              0.83,
+              0.54,
+              0.42,
+              0.44,
+              0.42,
+              20.8
+            ],
+            [
+              0.93,
+              0.38,
+              0.34,
+              0.35,
+              0.36,
+              23.6
+            ],
+            [
+              1.04,
+              0.35,
+              0.32,
+              0.34,
+              0.34,
+              26.1
+            ],
+            [
+              1.14,
+              0.33,
+              0.31,
+              0.33,
+              0.33,
+              28.6
+            ],
+            [
+              1.24,
+              0.31,
+              0.29,
+              0.31,
+              0.32,
+              31.2
+            ],
+            [
+              1.35,
+              0.27,
+              0.26,
+              0.29,
+              0.29,
+              33.7
+            ],
+            [
+              1.45,
+              0.22,
+              0.21,
+              0.26,
+              0.26,
+              35.3
+            ],
+            [
+              1.55,
+              0.25,
+              0.25,
+              0.28,
+              0.28,
+              37.4
+            ],
+            [
+              1.66,
+              0.26,
+              0.26,
+              0.28,
+              0.28,
+              39.5
+            ],
+            [
+              1.77,
+              0.28,
+              0.26,
+              0.28,
+              0.28,
+              41.8
+            ],
+            [
+              1.87,
+              0.28,
+              0.26,
+              0.28,
+              0.28,
+              44
+            ],
+            [
+              1.97,
+              0.25,
+              0.24,
+              0.27,
+              0.27,
+              45.9
+            ],
+            [
+              2.07,
+              0.22,
+              0.22,
+              0.25,
+              0.25,
+              48
+            ],
+            [
+              2.18,
+              0.2,
+              0.2,
+              0.23,
+              0.23,
+              50.1
+            ],
+            [
+              2.28,
+              0.18,
+              0.18,
+              0.22,
+              0.22,
+              51.3
+            ],
+            [
+              2.38,
+              0.2,
+              0.2,
+              0.22,
+              0.22,
+              53
+            ],
+            [
+              2.49,
+              0.22,
+              0.22,
+              0.24,
+              0.24,
+              54.9
+            ],
+            [
+              2.59,
+              0.2,
+              0.2,
+              0.23,
+              0.23,
+              56.6
+            ],
+            [
+              2.7,
+              0.19,
+              0.18,
+              0.21,
+              0.21,
+              58.5
+            ],
+            [
+              2.8,
+              0.19,
+              0.19,
+              0.2,
+              0.2,
+              60.3
+            ],
+            [
+              2.9,
+              0.19,
+              0.19,
+              0.21,
+              0.21,
+              62
+            ],
+            [
+              3.01,
+              0.19,
+              0.19,
+              0.21,
+              0.21,
+              63.6
+            ],
+            [
+              3.11,
+              0.18,
+              0.18,
+              0.2,
+              0.2,
+              65.1
+            ],
+            [
+              3.22,
+              0.17,
+              0.16,
+              0.19,
+              0.19,
+              66.7
+            ],
+            [
+              3.33,
+              0.14,
+              0.14,
+              0.17,
+              0.17,
+              67.9
+            ],
+            [
+              3.43,
+              0.16,
+              0.16,
+              0.19,
+              0.19,
+              69.3
+            ],
+            [
+              3.54,
+              0.17,
+              0.16,
+              0.18,
+              0.18,
+              70.8
+            ],
+            [
+              3.64,
+              0.17,
+              0.17,
+              0.19,
+              0.19,
+              72.2
+            ],
+            [
+              3.75,
+              0.16,
+              0.15,
+              0.19,
+              0.19,
+              73.7
+            ],
+            [
+              3.86,
+              0.14,
+              0.13,
+              0.16,
+              0.16,
+              75.2
+            ],
+            [
+              3.96,
+              0.16,
+              0.15,
+              0.16,
+              0.16,
+              76.5
+            ],
+            [
+              4.06,
+              0.17,
+              0.17,
+              0.19,
+              0.19,
+              77.8
+            ],
+            [
+              4.16,
+              0.16,
+              0.16,
+              0.17,
+              0.18,
+              79.1
+            ],
+            [
+              4.27,
+              0.14,
+              0.14,
+              0.17,
+              0.18,
+              80.4
+            ],
+            [
+              4.37,
+              0.14,
+              0.14,
+              0.16,
+              0.16,
+              81.8
+            ],
+            [
+              4.48,
+              0.14,
+              0.15,
+              0.17,
+              0.17,
+              83.1
+            ],
+            [
+              4.58,
+              0.13,
+              0.12,
+              0.15,
+              0.15,
+              84.3
+            ],
+            [
+              4.68,
+              0.14,
+              0.13,
+              0.15,
+              0.15,
+              85.4
+            ],
+            [
+              4.79,
+              0.08,
+              0.07,
+              0.09,
+              0.09,
+              86.4
+            ],
+            [
+              4.89,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              87.4
+            ],
+            [
+              4.99,
+              0.13,
+              0.13,
+              0.15,
+              0.15,
+              88.5
+            ],
+            [
+              5.09,
+              0.14,
+              0.13,
+              0.16,
+              0.16,
+              89.6
+            ],
+            [
+              5.19,
+              0.11,
+              0.11,
+              0.14,
+              0.14,
+              90.7
+            ],
+            [
+              5.29,
+              0.13,
+              0.12,
+              0.14,
+              0.14,
+              91.8
+            ],
+            [
+              5.39,
+              0.15,
+              0.14,
+              0.17,
+              0.17,
+              92.8
+            ],
+            [
+              5.49,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              93.9
+            ],
+            [
+              5.59,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              94.9
+            ],
+            [
+              5.7,
+              0.11,
+              0.13,
+              0.13,
+              0.15,
+              95.9
+            ],
+            [
+              5.8,
+              0.12,
+              0.11,
+              0.13,
+              0.15,
+              96.8
+            ],
+            [
+              5.9,
+              0.11,
+              0.12,
+              0.13,
+              0.15,
+              97.9
+            ],
+            [
+              6.01,
+              0.1,
+              0.11,
+              0.12,
+              0.13,
+              98.8
+            ],
+            [
+              6.11,
+              0.09,
+              0.1,
+              0.11,
+              0.13,
+              99.8
+            ],
+            [
+              6.21,
+              0.09,
+              0.1,
+              0.11,
+              0.11,
+              100.7
+            ],
+            [
+              6.31,
+              0.1,
+              0.1,
+              0.12,
+              0.13,
+              101.5
+            ],
+            [
+              6.42,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              102.4
+            ],
+            [
+              6.53,
+              0.12,
+              0.11,
+              0.14,
+              0.14,
+              103.3
+            ],
+            [
+              6.63,
+              0.11,
+              0.12,
+              0.12,
+              0.12,
+              104.1
+            ],
+            [
+              6.74,
+              0.11,
+              0.09,
+              0.13,
+              0.14,
+              104.8
+            ],
+            [
+              6.85,
+              0.11,
+              0.1,
+              0.13,
+              0.13,
+              105.6
+            ],
+            [
+              6.95,
+              0.12,
+              0.11,
+              0.13,
+              0.13,
+              106.4
+            ],
+            [
+              7.05,
+              0.13,
+              0.11,
+              0.14,
+              0.13,
+              107.1
+            ],
+            [
+              7.15,
+              0.11,
+              0.1,
+              0.13,
+              0.12,
+              108
+            ],
+            [
+              7.26,
+              0.11,
+              0.11,
+              0.13,
+              0.12,
+              108.7
+            ],
+            [
+              7.36,
+              0.11,
+              0.11,
+              0.13,
+              0.12,
+              109.5
+            ],
+            [
+              7.47,
+              0.12,
+              0.11,
+              0.14,
+              0.13,
+              110.3
+            ],
+            [
+              7.57,
+              0.09,
+              0.08,
+              0.11,
+              0.11,
+              111.1
+            ],
+            [
+              7.67,
+              0.1,
+              0.1,
+              0.11,
+              0.11,
+              111.8
+            ],
+            [
+              7.77,
+              0.11,
+              0.15,
+              0.14,
+              0.14,
+              112.4
+            ],
+            [
+              7.87,
+              0.09,
+              0.13,
+              0.12,
+              0.1,
+              113.1
+            ],
+            [
+              7.98,
+              0.1,
+              0.13,
+              0.13,
+              0.16,
+              113.7
+            ],
+            [
+              8.08,
+              0.11,
+              0.1,
+              0.14,
+              0.13,
+              114.4
+            ],
+            [
+              8.18,
+              0.12,
+              0.09,
+              0.12,
+              0.09,
+              115.1
+            ],
+            [
+              8.29,
+              0.14,
+              0.09,
+              0.15,
+              0.11,
+              115.6
+            ],
+            [
+              8.39,
+              0.12,
+              0.08,
+              0.14,
+              0.1,
+              116.3
+            ],
+            [
+              8.49,
+              0.16,
+              0.09,
+              0.15,
+              0.09,
+              116.8
+            ],
+            [
+              8.6,
+              0.16,
+              0.08,
+              0.17,
+              0.1,
+              117.2
+            ],
+            [
+              8.7,
+              0.14,
+              0.09,
+              0.16,
+              0.08,
+              117.7
+            ],
+            [
+              8.81,
+              0.14,
+              0.1,
+              0.2,
+              0.11,
+              118.1
+            ],
+            [
+              8.92,
+              0.2,
+              0.1,
+              0.2,
+              0.1,
+              118.5
+            ],
+            [
+              9.02,
+              0.22,
+              0.11,
+              0.22,
+              0.1,
+              118.7
+            ],
+            [
+              9.12,
+              0.21,
+              0.12,
+              0.24,
+              0.11,
+              119
+            ],
+            [
+              9.23,
+              0.2,
+              0.1,
+              0.24,
+              0.1,
+              119.3
+            ],
+            [
+              9.33,
+              0.23,
+              0.12,
+              0.27,
+              0.12,
+              119.5
+            ],
+            [
+              9.44,
+              0.27,
+              0.13,
+              0.29,
+              0.13,
+              119.7
+            ],
+            [
+              9.54,
+              0.18,
+              0.09,
+              0.24,
+              0.1,
+              119.7
+            ],
+            [
+              9.65,
+              0.22,
+              0.11,
+              0.27,
+              0.13,
+              119.9
+            ],
+            [
+              9.75,
+              0.17,
+              0.09,
+              0.22,
+              0.12,
+              120.3
+            ],
+            [
+              9.86,
+              0.2,
+              0.09,
+              0.17,
+              0.11,
+              120.7
+            ],
+            [
+              9.96,
+              0.18,
+              0.09,
+              0.16,
+              0.1,
+              121.1
+            ],
+            [
+              10.07,
+              0.19,
+              0.09,
+              0.16,
+              0.1,
+              121.5
+            ],
+            [
+              10.17,
+              0.16,
+              0.08,
+              0.16,
+              0.09,
+              121.9
+            ],
+            [
+              10.27,
+              0.15,
+              0.08,
+              0.17,
+              0.09,
+              122.2
+            ],
+            [
+              10.38,
+              0.18,
+              0.1,
+              0.2,
+              0.09,
+              122.5
+            ],
+            [
+              10.48,
+              0.21,
+              0.11,
+              0.24,
+              0.1,
+              122.6
+            ],
+            [
+              10.59,
+              0.2,
+              0.1,
+              0.24,
+              0.09,
+              122.7
+            ],
+            [
+              10.7,
+              0.22,
+              0.13,
+              0.28,
+              0.1,
+              122.7
+            ],
+            [
+              10.8,
+              0.27,
+              0.14,
+              0.33,
+              0.12,
+              122.7
+            ],
+            [
+              10.9,
+              0.3,
+              0.19,
+              0.36,
+              0.14,
+              122.6
+            ],
+            [
+              11,
+              0.32,
+              0.17,
+              0.39,
+              0.15,
+              122.5
+            ],
+            [
+              11.11,
+              0.27,
+              0.19,
+              0.39,
+              0.15,
+              122.4
+            ],
+            [
+              11.22,
+              0.28,
+              0.15,
+              0.4,
+              0.17,
+              122.4
+            ],
+            [
+              11.32,
+              0.27,
+              0.16,
+              0.34,
+              0.14,
+              122.4
+            ],
+            [
+              11.43,
+              0.31,
+              0.18,
+              0.38,
+              0.17,
+              122.3
+            ],
+            [
+              11.53,
+              0.27,
+              0.16,
+              0.28,
+              0.12,
+              122.4
+            ],
+            [
+              11.64,
+              0.3,
+              0.19,
+              0.37,
+              0.18,
+              122.5
+            ],
+            [
+              11.74,
+              0.26,
+              0.13,
+              0.27,
+              0.12,
+              122.7
+            ],
+            [
+              11.84,
+              0.26,
+              0.16,
+              0.27,
+              0.13,
+              122.9
+            ],
+            [
+              11.94,
+              0.25,
+              0.13,
+              0.28,
+              0.13,
+              123.1
+            ]
+          ],
+          "stint": 42
+        },
+        {
+          "t": 2161.5,
+          "car": "1155|2|8|700",
+          "zero60_s": 2.79,
+          "peak_slip_rear": 1.52,
+          "peak_slip_front": 2.78,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0.1,
+              0.02,
+              0.02,
+              0.04,
+              0.03,
+              0.1
+            ],
+            [
+              0.21,
+              0.17,
+              0.15,
+              0.26,
+              0.2,
+              1
+            ],
+            [
+              0.31,
+              0.43,
+              0.36,
+              0.6,
+              0.39,
+              3.4
+            ],
+            [
+              0.41,
+              2.12,
+              1.27,
+              1.52,
+              0.84,
+              7.1
+            ],
+            [
+              0.52,
+              2.5,
+              1.12,
+              1.25,
+              0.59,
+              10.8
+            ],
+            [
+              0.62,
+              2.78,
+              0.39,
+              0.69,
+              0.51,
+              14
+            ],
+            [
+              0.73,
+              1.65,
+              0.41,
+              0.67,
+              0.56,
+              17.3
+            ],
+            [
+              0.84,
+              0.52,
+              0.42,
+              0.45,
+              0.42,
+              20.8
+            ],
+            [
+              0.94,
+              0.37,
+              0.34,
+              0.35,
+              0.36,
+              23.6
+            ],
+            [
+              1.04,
+              0.35,
+              0.32,
+              0.34,
+              0.34,
+              26.1
+            ],
+            [
+              1.15,
+              0.33,
+              0.31,
+              0.33,
+              0.33,
+              28.8
+            ],
+            [
+              1.25,
+              0.31,
+              0.29,
+              0.31,
+              0.32,
+              31.4
+            ],
+            [
+              1.35,
+              0.27,
+              0.26,
+              0.29,
+              0.29,
+              33.7
+            ],
+            [
+              1.45,
+              0.21,
+              0.21,
+              0.25,
+              0.25,
+              35.2
+            ],
+            [
+              1.56,
+              0.25,
+              0.25,
+              0.28,
+              0.28,
+              37.4
+            ],
+            [
+              1.67,
+              0.26,
+              0.26,
+              0.28,
+              0.28,
+              39.7
+            ],
+            [
+              1.77,
+              0.28,
+              0.26,
+              0.28,
+              0.28,
+              41.8
+            ],
+            [
+              1.87,
+              0.28,
+              0.26,
+              0.28,
+              0.28,
+              43.9
+            ],
+            [
+              1.97,
+              0.25,
+              0.24,
+              0.27,
+              0.27,
+              45.8
+            ],
+            [
+              2.08,
+              0.22,
+              0.22,
+              0.25,
+              0.25,
+              48.1
+            ],
+            [
+              2.18,
+              0.09,
+              0.09,
+              0.11,
+              0.11,
+              50.2
+            ],
+            [
+              2.28,
+              0.18,
+              0.18,
+              0.22,
+              0.22,
+              51.4
+            ],
+            [
+              2.38,
+              0.2,
+              0.2,
+              0.22,
+              0.22,
+              53.1
+            ],
+            [
+              2.49,
+              0.22,
+              0.22,
+              0.24,
+              0.24,
+              54.9
+            ],
+            [
+              2.59,
+              0.2,
+              0.2,
+              0.23,
+              0.23,
+              56.7
+            ],
+            [
+              2.69,
+              0.19,
+              0.18,
+              0.21,
+              0.21,
+              58.4
+            ],
+            [
+              2.79,
+              0.19,
+              0.18,
+              0.2,
+              0.2,
+              60.1
+            ],
+            [
+              2.9,
+              0.19,
+              0.19,
+              0.21,
+              0.21,
+              61.8
+            ],
+            [
+              3.01,
+              0.19,
+              0.19,
+              0.21,
+              0.21,
+              63.5
+            ],
+            [
+              3.11,
+              0.18,
+              0.18,
+              0.2,
+              0.2,
+              65.2
+            ],
+            [
+              3.21,
+              0.17,
+              0.17,
+              0.19,
+              0.19,
+              66.7
+            ],
+            [
+              3.32,
+              0.14,
+              0.13,
+              0.16,
+              0.16,
+              67.8
+            ],
+            [
+              3.42,
+              0.16,
+              0.16,
+              0.19,
+              0.19,
+              69.1
+            ],
+            [
+              3.52,
+              0.17,
+              0.16,
+              0.18,
+              0.18,
+              70.6
+            ],
+            [
+              3.62,
+              0.17,
+              0.17,
+              0.19,
+              0.19,
+              72
+            ],
+            [
+              3.72,
+              0.16,
+              0.16,
+              0.19,
+              0.2,
+              73.4
+            ],
+            [
+              3.83,
+              0.14,
+              0.13,
+              0.17,
+              0.17,
+              74.8
+            ],
+            [
+              3.93,
+              0.15,
+              0.14,
+              0.15,
+              0.16,
+              76.2
+            ],
+            [
+              4.03,
+              0.17,
+              0.17,
+              0.19,
+              0.19,
+              77.4
+            ],
+            [
+              4.14,
+              0.16,
+              0.16,
+              0.18,
+              0.18,
+              78.8
+            ],
+            [
+              4.24,
+              0.15,
+              0.15,
+              0.18,
+              0.18,
+              80.2
+            ],
+            [
+              4.34,
+              0.14,
+              0.14,
+              0.16,
+              0.16,
+              81.5
+            ],
+            [
+              4.45,
+              0.14,
+              0.15,
+              0.17,
+              0.17,
+              82.7
+            ],
+            [
+              4.55,
+              0.13,
+              0.13,
+              0.16,
+              0.16,
+              83.9
+            ],
+            [
+              4.66,
+              0.13,
+              0.13,
+              0.14,
+              0.14,
+              85.2
+            ],
+            [
+              4.76,
+              0.09,
+              0.09,
+              0.11,
+              0.11,
+              86.4
+            ],
+            [
+              4.86,
+              0.12,
+              0.12,
+              0.14,
+              0.15,
+              87.2
+            ],
+            [
+              4.97,
+              0.13,
+              0.13,
+              0.15,
+              0.15,
+              88.3
+            ],
+            [
+              5.08,
+              0.14,
+              0.13,
+              0.16,
+              0.16,
+              89.5
+            ],
+            [
+              5.18,
+              0.11,
+              0.11,
+              0.14,
+              0.14,
+              90.6
+            ],
+            [
+              5.29,
+              0.12,
+              0.12,
+              0.13,
+              0.14,
+              91.7
+            ],
+            [
+              5.39,
+              0.15,
+              0.14,
+              0.17,
+              0.17,
+              92.7
+            ],
+            [
+              5.49,
+              0.12,
+              0.12,
+              0.15,
+              0.14,
+              93.8
+            ],
+            [
+              5.59,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              94.9
+            ],
+            [
+              5.69,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              95.9
+            ],
+            [
+              5.79,
+              0.12,
+              0.11,
+              0.13,
+              0.14,
+              96.8
+            ],
+            [
+              5.9,
+              0.11,
+              0.11,
+              0.14,
+              0.14,
+              97.9
+            ],
+            [
+              6,
+              0.1,
+              0.1,
+              0.12,
+              0.12,
+              98.8
+            ],
+            [
+              6.1,
+              0.1,
+              0.09,
+              0.12,
+              0.12,
+              99.8
+            ]
+          ],
+          "stint": 44
         }
       ],
       "braking": [
@@ -90732,7 +98656,8 @@ window.FH6_DB = {
           "decel_g_peak": 1.81,
           "front_deficit": 0.14,
           "rear_deficit": 0.19,
-          "lock": "none"
+          "lock": "none",
+          "stint": 6
         },
         {
           "t": 191.4,
@@ -90743,7 +98668,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.23,
           "front_deficit": 0.41,
           "rear_deficit": 0.35,
-          "lock": "front"
+          "lock": "front",
+          "stint": 6
         },
         {
           "t": 234.3,
@@ -90754,7 +98680,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.19,
           "front_deficit": 0.37,
           "rear_deficit": 0.34,
-          "lock": "front"
+          "lock": "front",
+          "stint": 6
         },
         {
           "t": 420.3,
@@ -90765,7 +98692,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.12,
           "front_deficit": 0.19,
           "rear_deficit": 0.22,
-          "lock": "none"
+          "lock": "none",
+          "stint": 8
         },
         {
           "t": 439.9,
@@ -90776,7 +98704,8 @@ window.FH6_DB = {
           "decel_g_peak": 2.11,
           "front_deficit": 0.39,
           "rear_deficit": 0.27,
-          "lock": "front"
+          "lock": "front",
+          "stint": 8
         },
         {
           "t": 597.5,
@@ -90786,8 +98715,9 @@ window.FH6_DB = {
           "dur_s": 4.18,
           "decel_g_peak": 1.29,
           "front_deficit": 0.52,
-          "rear_deficit": 6.7,
-          "lock": "rear"
+          "rear_deficit": 1,
+          "lock": "rear",
+          "stint": 10
         },
         {
           "t": 814.6,
@@ -90798,7 +98728,8 @@ window.FH6_DB = {
           "decel_g_peak": 3.96,
           "front_deficit": 0.24,
           "rear_deficit": 0.13,
-          "lock": "none"
+          "lock": "none",
+          "stint": 17
         },
         {
           "t": 833.5,
@@ -90809,7 +98740,8 @@ window.FH6_DB = {
           "decel_g_peak": 4.15,
           "front_deficit": 0.27,
           "rear_deficit": 0.2,
-          "lock": "none"
+          "lock": "none",
+          "stint": 17
         },
         {
           "t": 1436.2,
@@ -90820,7 +98752,8 @@ window.FH6_DB = {
           "decel_g_peak": 4.08,
           "front_deficit": 1,
           "rear_deficit": 1,
-          "lock": "front"
+          "lock": "front",
+          "stint": 33
         },
         {
           "t": 1597.8,
@@ -90831,7 +98764,80 @@ window.FH6_DB = {
           "decel_g_peak": 1.51,
           "front_deficit": 0.37,
           "rear_deficit": 0.35,
-          "lock": "front"
+          "lock": "front",
+          "stint": 38
+        },
+        {
+          "t": 1741.1,
+          "car": "1155|2|8|700",
+          "mph_start": 120,
+          "mph_end": 84,
+          "dur_s": 0.75,
+          "decel_g_peak": 2.57,
+          "front_deficit": 0.87,
+          "rear_deficit": 0.64,
+          "lock": "front",
+          "stint": 39
+        },
+        {
+          "t": 1752,
+          "car": "1155|2|8|700",
+          "mph_start": 97,
+          "mph_end": 66,
+          "dur_s": 0.62,
+          "decel_g_peak": 2.7,
+          "front_deficit": 0.7,
+          "rear_deficit": 0.52,
+          "lock": "front",
+          "stint": 39
+        },
+        {
+          "t": 1921.1,
+          "car": "1155|2|8|700",
+          "mph_start": 114,
+          "mph_end": 71,
+          "dur_s": 1.12,
+          "decel_g_peak": 2.06,
+          "front_deficit": 0.81,
+          "rear_deficit": 0.64,
+          "lock": "front",
+          "stint": 40
+        },
+        {
+          "t": 1955.4,
+          "car": "1155|2|8|700",
+          "mph_start": 95,
+          "mph_end": 69,
+          "dur_s": 0.67,
+          "decel_g_peak": 2.31,
+          "front_deficit": 0.75,
+          "rear_deficit": 0.51,
+          "lock": "front",
+          "stint": 40
+        },
+        {
+          "t": 1979.5,
+          "car": "1155|2|8|700",
+          "mph_start": 103,
+          "mph_end": 67,
+          "dur_s": 0.7,
+          "decel_g_peak": 2.75,
+          "front_deficit": 0.78,
+          "rear_deficit": 0.64,
+          "lock": "front",
+          "stint": 40
+        },
+        {
+          "t": 2018.4,
+          "car": "1155|2|8|700",
+          "mph_start": 130,
+          "mph_end": 89,
+          "dur_s": 0.8,
+          "decel_g_peak": 2.72,
+          "front_deficit": 0.67,
+          "rear_deficit": 0.44,
+          "lock": "front",
+          "stint": 40
         }
       ],
       "bottoming": [
@@ -95428,6 +103434,2109 @@ window.FH6_DB = {
           "mph": 58,
           "yaw_peak_dps": 9.6,
           "decay_s": null
+        },
+        {
+          "t": 1708,
+          "car": "1155|2|8|700",
+          "mph": 75,
+          "yaw_peak_dps": 28.5,
+          "decay_s": null
+        },
+        {
+          "t": 1710.9,
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "yaw_peak_dps": 8.4,
+          "decay_s": null
+        },
+        {
+          "t": 1711.3,
+          "car": "1155|2|8|700",
+          "mph": 104,
+          "yaw_peak_dps": 33.2,
+          "decay_s": null
+        },
+        {
+          "t": 1712,
+          "car": "1155|2|8|700",
+          "mph": 106,
+          "yaw_peak_dps": 32.1,
+          "decay_s": null
+        },
+        {
+          "t": 1712.8,
+          "car": "1155|2|8|700",
+          "mph": 106,
+          "yaw_peak_dps": 16.6,
+          "decay_s": null
+        },
+        {
+          "t": 1713.1,
+          "car": "1155|2|8|700",
+          "mph": 107,
+          "yaw_peak_dps": 13.7,
+          "decay_s": 0.32
+        },
+        {
+          "t": 1714.4,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 35.1,
+          "decay_s": null
+        },
+        {
+          "t": 1715.5,
+          "car": "1155|2|8|700",
+          "mph": 79,
+          "yaw_peak_dps": 10.6,
+          "decay_s": null
+        },
+        {
+          "t": 1715.9,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "yaw_peak_dps": 15.2,
+          "decay_s": null
+        },
+        {
+          "t": 1716.3,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 13,
+          "decay_s": null
+        },
+        {
+          "t": 1716.6,
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "yaw_peak_dps": 11.8,
+          "decay_s": null
+        },
+        {
+          "t": 1718.4,
+          "car": "1155|2|8|700",
+          "mph": 73,
+          "yaw_peak_dps": 20.6,
+          "decay_s": null
+        },
+        {
+          "t": 1719.5,
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "yaw_peak_dps": 13.5,
+          "decay_s": null
+        },
+        {
+          "t": 1720.2,
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "yaw_peak_dps": 30.3,
+          "decay_s": null
+        },
+        {
+          "t": 1720.7,
+          "car": "1155|2|8|700",
+          "mph": 85,
+          "yaw_peak_dps": 21.7,
+          "decay_s": null
+        },
+        {
+          "t": 1721.2,
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "yaw_peak_dps": 9.6,
+          "decay_s": null
+        },
+        {
+          "t": 1721.4,
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "yaw_peak_dps": 36.9,
+          "decay_s": null
+        },
+        {
+          "t": 1722.3,
+          "car": "1155|2|8|700",
+          "mph": 95,
+          "yaw_peak_dps": 11.8,
+          "decay_s": null
+        },
+        {
+          "t": 1722.8,
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "yaw_peak_dps": 47,
+          "decay_s": null
+        },
+        {
+          "t": 1723.2,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 64.4,
+          "decay_s": null
+        },
+        {
+          "t": 1723.4,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 15.5,
+          "decay_s": null
+        },
+        {
+          "t": 1724.4,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 15.7,
+          "decay_s": null
+        },
+        {
+          "t": 1724.7,
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "yaw_peak_dps": 21.6,
+          "decay_s": null
+        },
+        {
+          "t": 1725.1,
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "yaw_peak_dps": 11.5,
+          "decay_s": null
+        },
+        {
+          "t": 1725.4,
+          "car": "1155|2|8|700",
+          "mph": 96,
+          "yaw_peak_dps": 8.8,
+          "decay_s": null
+        },
+        {
+          "t": 1725.9,
+          "car": "1155|2|8|700",
+          "mph": 99,
+          "yaw_peak_dps": 35.4,
+          "decay_s": null
+        },
+        {
+          "t": 1726.6,
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "yaw_peak_dps": 18.3,
+          "decay_s": null
+        },
+        {
+          "t": 1726.7,
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "yaw_peak_dps": 9.5,
+          "decay_s": null
+        },
+        {
+          "t": 1726.9,
+          "car": "1155|2|8|700",
+          "mph": 102,
+          "yaw_peak_dps": 8.2,
+          "decay_s": 0.21
+        },
+        {
+          "t": 1728,
+          "car": "1155|2|8|700",
+          "mph": 100,
+          "yaw_peak_dps": 50.1,
+          "decay_s": null
+        },
+        {
+          "t": 1729,
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "yaw_peak_dps": 32.8,
+          "decay_s": null
+        },
+        {
+          "t": 1729.3,
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "yaw_peak_dps": 15,
+          "decay_s": null
+        },
+        {
+          "t": 1731.2,
+          "car": "1155|2|8|700",
+          "mph": 95,
+          "yaw_peak_dps": 13.1,
+          "decay_s": null
+        },
+        {
+          "t": 1731.6,
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "yaw_peak_dps": 20,
+          "decay_s": null
+        },
+        {
+          "t": 1732.3,
+          "car": "1155|2|8|700",
+          "mph": 102,
+          "yaw_peak_dps": 9.8,
+          "decay_s": null
+        },
+        {
+          "t": 1734.2,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "yaw_peak_dps": 8.1,
+          "decay_s": null
+        },
+        {
+          "t": 1735.8,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "yaw_peak_dps": 28.2,
+          "decay_s": null
+        },
+        {
+          "t": 1736.4,
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "yaw_peak_dps": 21,
+          "decay_s": null
+        },
+        {
+          "t": 1745,
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "yaw_peak_dps": 21.5,
+          "decay_s": null
+        },
+        {
+          "t": 1745.5,
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "yaw_peak_dps": 39.7,
+          "decay_s": null
+        },
+        {
+          "t": 1748.8,
+          "car": "1155|2|8|700",
+          "mph": 65,
+          "yaw_peak_dps": 8.7,
+          "decay_s": null
+        },
+        {
+          "t": 1749.4,
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "yaw_peak_dps": 11.2,
+          "decay_s": 0.33
+        },
+        {
+          "t": 1750.5,
+          "car": "1155|2|8|700",
+          "mph": 85,
+          "yaw_peak_dps": 11.9,
+          "decay_s": null
+        },
+        {
+          "t": 1750.9,
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "yaw_peak_dps": 16.3,
+          "decay_s": null
+        },
+        {
+          "t": 1752.9,
+          "car": "1155|2|8|700",
+          "mph": 61,
+          "yaw_peak_dps": 46.6,
+          "decay_s": null
+        },
+        {
+          "t": 1790.4,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 23.4,
+          "decay_s": 0.35
+        },
+        {
+          "t": 1906.7,
+          "car": "1155|2|8|700",
+          "mph": 60,
+          "yaw_peak_dps": 10.9,
+          "decay_s": null
+        },
+        {
+          "t": 1907.2,
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "yaw_peak_dps": 28.7,
+          "decay_s": null
+        },
+        {
+          "t": 1908.3,
+          "car": "1155|2|8|700",
+          "mph": 61,
+          "yaw_peak_dps": 23.9,
+          "decay_s": null
+        },
+        {
+          "t": 1908.8,
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "yaw_peak_dps": 9.3,
+          "decay_s": null
+        },
+        {
+          "t": 1909.6,
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "yaw_peak_dps": 47.6,
+          "decay_s": 0.47
+        },
+        {
+          "t": 1911.1,
+          "car": "1155|2|8|700",
+          "mph": 65,
+          "yaw_peak_dps": 8.9,
+          "decay_s": null
+        },
+        {
+          "t": 1911.5,
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "yaw_peak_dps": 11.6,
+          "decay_s": null
+        },
+        {
+          "t": 1912.5,
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "yaw_peak_dps": 9.5,
+          "decay_s": null
+        },
+        {
+          "t": 1913.1,
+          "car": "1155|2|8|700",
+          "mph": 75,
+          "yaw_peak_dps": 8.9,
+          "decay_s": 0.35
+        },
+        {
+          "t": 1914.6,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "yaw_peak_dps": 25.5,
+          "decay_s": null
+        },
+        {
+          "t": 1915.5,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 40.9,
+          "decay_s": null
+        },
+        {
+          "t": 1916.2,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 9,
+          "decay_s": 0.17
+        },
+        {
+          "t": 1918.9,
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "yaw_peak_dps": 12.2,
+          "decay_s": 0.43
+        },
+        {
+          "t": 1920.4,
+          "car": "1155|2|8|700",
+          "mph": 111,
+          "yaw_peak_dps": 8.9,
+          "decay_s": null
+        },
+        {
+          "t": 1920.8,
+          "car": "1155|2|8|700",
+          "mph": 114,
+          "yaw_peak_dps": 9.4,
+          "decay_s": null
+        },
+        {
+          "t": 1922.2,
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "yaw_peak_dps": 48,
+          "decay_s": null
+        },
+        {
+          "t": 1923.4,
+          "car": "1155|2|8|700",
+          "mph": 60,
+          "yaw_peak_dps": 53.7,
+          "decay_s": null
+        },
+        {
+          "t": 1924.3,
+          "car": "1155|2|8|700",
+          "mph": 61,
+          "yaw_peak_dps": 30,
+          "decay_s": null
+        },
+        {
+          "t": 1924.6,
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "yaw_peak_dps": 13.6,
+          "decay_s": null
+        },
+        {
+          "t": 1924.8,
+          "car": "1155|2|8|700",
+          "mph": 65,
+          "yaw_peak_dps": 15.5,
+          "decay_s": null
+        },
+        {
+          "t": 1925.4,
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "yaw_peak_dps": 17.3,
+          "decay_s": null
+        },
+        {
+          "t": 1925.9,
+          "car": "1155|2|8|700",
+          "mph": 76,
+          "yaw_peak_dps": 20.9,
+          "decay_s": null
+        },
+        {
+          "t": 1926.5,
+          "car": "1155|2|8|700",
+          "mph": 82,
+          "yaw_peak_dps": 13.8,
+          "decay_s": null
+        },
+        {
+          "t": 1927.2,
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "yaw_peak_dps": 9.1,
+          "decay_s": null
+        },
+        {
+          "t": 1927.8,
+          "car": "1155|2|8|700",
+          "mph": 96,
+          "yaw_peak_dps": 19.7,
+          "decay_s": null
+        },
+        {
+          "t": 1928.3,
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "yaw_peak_dps": 29.7,
+          "decay_s": null
+        },
+        {
+          "t": 1930,
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "yaw_peak_dps": 55.4,
+          "decay_s": null
+        },
+        {
+          "t": 1931.8,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 28.2,
+          "decay_s": 0.45
+        },
+        {
+          "t": 1932.6,
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "yaw_peak_dps": 14.2,
+          "decay_s": null
+        },
+        {
+          "t": 1933.1,
+          "car": "1155|2|8|700",
+          "mph": 76,
+          "yaw_peak_dps": 14.4,
+          "decay_s": 0.5
+        },
+        {
+          "t": 1933.9,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 8.5,
+          "decay_s": 0.43
+        },
+        {
+          "t": 1935.4,
+          "car": "1155|2|8|700",
+          "mph": 104,
+          "yaw_peak_dps": 37.2,
+          "decay_s": null
+        },
+        {
+          "t": 1936.4,
+          "car": "1155|2|8|700",
+          "mph": 95,
+          "yaw_peak_dps": 29.5,
+          "decay_s": null
+        },
+        {
+          "t": 1937.4,
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "yaw_peak_dps": 16,
+          "decay_s": null
+        },
+        {
+          "t": 1938.2,
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "yaw_peak_dps": 32.1,
+          "decay_s": null
+        },
+        {
+          "t": 1939.3,
+          "car": "1155|2|8|700",
+          "mph": 82,
+          "yaw_peak_dps": 8.8,
+          "decay_s": 0.1
+        },
+        {
+          "t": 1939.6,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 24.3,
+          "decay_s": null
+        },
+        {
+          "t": 1939.9,
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "yaw_peak_dps": 10.9,
+          "decay_s": null
+        },
+        {
+          "t": 1940.3,
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "yaw_peak_dps": 10.3,
+          "decay_s": null
+        },
+        {
+          "t": 1941.4,
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "yaw_peak_dps": 30.5,
+          "decay_s": null
+        },
+        {
+          "t": 1942.5,
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "yaw_peak_dps": 24.1,
+          "decay_s": null
+        },
+        {
+          "t": 1943.6,
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "yaw_peak_dps": 14.9,
+          "decay_s": null
+        },
+        {
+          "t": 1959.7,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 21.1,
+          "decay_s": null
+        },
+        {
+          "t": 1960,
+          "car": "1155|2|8|700",
+          "mph": 59,
+          "yaw_peak_dps": 17.6,
+          "decay_s": null
+        },
+        {
+          "t": 1960.4,
+          "car": "1155|2|8|700",
+          "mph": 65,
+          "yaw_peak_dps": 8.3,
+          "decay_s": 0.2
+        },
+        {
+          "t": 1960.8,
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "yaw_peak_dps": 18.4,
+          "decay_s": null
+        },
+        {
+          "t": 1961.2,
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "yaw_peak_dps": 16.3,
+          "decay_s": 0.53
+        },
+        {
+          "t": 1962,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 10.8,
+          "decay_s": 0.45
+        },
+        {
+          "t": 1962.7,
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "yaw_peak_dps": 10.7,
+          "decay_s": null
+        },
+        {
+          "t": 1963.1,
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "yaw_peak_dps": 24.8,
+          "decay_s": null
+        },
+        {
+          "t": 1963.6,
+          "car": "1155|2|8|700",
+          "mph": 102,
+          "yaw_peak_dps": 22,
+          "decay_s": null
+        },
+        {
+          "t": 1963.9,
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "yaw_peak_dps": 9.9,
+          "decay_s": null
+        },
+        {
+          "t": 1964.9,
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "yaw_peak_dps": 9,
+          "decay_s": null
+        },
+        {
+          "t": 1965.6,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 47.2,
+          "decay_s": null
+        },
+        {
+          "t": 1967.7,
+          "car": "1155|2|8|700",
+          "mph": 92,
+          "yaw_peak_dps": 12.5,
+          "decay_s": null
+        },
+        {
+          "t": 1968,
+          "car": "1155|2|8|700",
+          "mph": 95,
+          "yaw_peak_dps": 18.7,
+          "decay_s": 0.42
+        },
+        {
+          "t": 1971.3,
+          "car": "1155|2|8|700",
+          "mph": 123,
+          "yaw_peak_dps": 10.3,
+          "decay_s": 0.39
+        },
+        {
+          "t": 1974.2,
+          "car": "1155|2|8|700",
+          "mph": 107,
+          "yaw_peak_dps": 23.8,
+          "decay_s": 0.35
+        },
+        {
+          "t": 1975.9,
+          "car": "1155|2|8|700",
+          "mph": 93,
+          "yaw_peak_dps": 20.4,
+          "decay_s": null
+        },
+        {
+          "t": 1976.5,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 34.1,
+          "decay_s": null
+        },
+        {
+          "t": 1977.4,
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "yaw_peak_dps": 13.2,
+          "decay_s": null
+        },
+        {
+          "t": 1977.9,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "yaw_peak_dps": 9.6,
+          "decay_s": null
+        },
+        {
+          "t": 1980.3,
+          "car": "1155|2|8|700",
+          "mph": 66,
+          "yaw_peak_dps": 32.7,
+          "decay_s": null
+        },
+        {
+          "t": 1986.8,
+          "car": "1155|2|8|700",
+          "mph": 58,
+          "yaw_peak_dps": 16.2,
+          "decay_s": null
+        },
+        {
+          "t": 1987.4,
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "yaw_peak_dps": 20.4,
+          "decay_s": null
+        },
+        {
+          "t": 1988.2,
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "yaw_peak_dps": 10.8,
+          "decay_s": 0.13
+        },
+        {
+          "t": 1989.4,
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "yaw_peak_dps": 30.2,
+          "decay_s": null
+        },
+        {
+          "t": 1989.9,
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "yaw_peak_dps": 34.3,
+          "decay_s": null
+        },
+        {
+          "t": 1990.7,
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "yaw_peak_dps": 25.7,
+          "decay_s": null
+        },
+        {
+          "t": 1991.4,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "yaw_peak_dps": 20.7,
+          "decay_s": null
+        },
+        {
+          "t": 1991.8,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 8.9,
+          "decay_s": null
+        },
+        {
+          "t": 1994.1,
+          "car": "1155|2|8|700",
+          "mph": 111,
+          "yaw_peak_dps": 14.1,
+          "decay_s": null
+        },
+        {
+          "t": 1994.7,
+          "car": "1155|2|8|700",
+          "mph": 106,
+          "yaw_peak_dps": 22.8,
+          "decay_s": null
+        },
+        {
+          "t": 1995.1,
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "yaw_peak_dps": 19.4,
+          "decay_s": null
+        },
+        {
+          "t": 1995.4,
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "yaw_peak_dps": 28.9,
+          "decay_s": null
+        },
+        {
+          "t": 1996.2,
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "yaw_peak_dps": 17.4,
+          "decay_s": null
+        },
+        {
+          "t": 1996.6,
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "yaw_peak_dps": 19.3,
+          "decay_s": null
+        },
+        {
+          "t": 1997,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 16.1,
+          "decay_s": null
+        },
+        {
+          "t": 1997.5,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 28,
+          "decay_s": null
+        },
+        {
+          "t": 2000.3,
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "yaw_peak_dps": 44.6,
+          "decay_s": null
+        },
+        {
+          "t": 2001.8,
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "yaw_peak_dps": 18.8,
+          "decay_s": null
+        },
+        {
+          "t": 2002.3,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 29.2,
+          "decay_s": null
+        },
+        {
+          "t": 2003.1,
+          "car": "1155|2|8|700",
+          "mph": 57,
+          "yaw_peak_dps": 57,
+          "decay_s": null
+        },
+        {
+          "t": 2004.4,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 27.7,
+          "decay_s": null
+        },
+        {
+          "t": 2004.6,
+          "car": "1155|2|8|700",
+          "mph": 59,
+          "yaw_peak_dps": 8.7,
+          "decay_s": null
+        },
+        {
+          "t": 2004.9,
+          "car": "1155|2|8|700",
+          "mph": 60,
+          "yaw_peak_dps": 46.2,
+          "decay_s": null
+        },
+        {
+          "t": 2005.8,
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "yaw_peak_dps": 13.1,
+          "decay_s": null
+        },
+        {
+          "t": 2006.1,
+          "car": "1155|2|8|700",
+          "mph": 75,
+          "yaw_peak_dps": 14,
+          "decay_s": 0.5
+        },
+        {
+          "t": 2009.3,
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "yaw_peak_dps": 17.2,
+          "decay_s": null
+        },
+        {
+          "t": 2010.4,
+          "car": "1155|2|8|700",
+          "mph": 78,
+          "yaw_peak_dps": 15.8,
+          "decay_s": null
+        },
+        {
+          "t": 2010.8,
+          "car": "1155|2|8|700",
+          "mph": 79,
+          "yaw_peak_dps": 14,
+          "decay_s": null
+        },
+        {
+          "t": 2011.2,
+          "car": "1155|2|8|700",
+          "mph": 84,
+          "yaw_peak_dps": 11,
+          "decay_s": null
+        },
+        {
+          "t": 2011.4,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 14.5,
+          "decay_s": null
+        },
+        {
+          "t": 2011.6,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 56,
+          "decay_s": null
+        },
+        {
+          "t": 2012.6,
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "yaw_peak_dps": 34.1,
+          "decay_s": null
+        },
+        {
+          "t": 2013.4,
+          "car": "1155|2|8|700",
+          "mph": 96,
+          "yaw_peak_dps": 24.4,
+          "decay_s": 0.62
+        },
+        {
+          "t": 2014.2,
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "yaw_peak_dps": 22.2,
+          "decay_s": null
+        },
+        {
+          "t": 2014.8,
+          "car": "1155|2|8|700",
+          "mph": 109,
+          "yaw_peak_dps": 24.1,
+          "decay_s": null
+        },
+        {
+          "t": 2017.3,
+          "car": "1155|2|8|700",
+          "mph": 122,
+          "yaw_peak_dps": 10,
+          "decay_s": 0.37
+        },
+        {
+          "t": 2019.3,
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "yaw_peak_dps": 23.6,
+          "decay_s": null
+        },
+        {
+          "t": 2019.8,
+          "car": "1155|2|8|700",
+          "mph": 78,
+          "yaw_peak_dps": 26.6,
+          "decay_s": null
+        },
+        {
+          "t": 2020.5,
+          "car": "1155|2|8|700",
+          "mph": 75,
+          "yaw_peak_dps": 18,
+          "decay_s": null
+        },
+        {
+          "t": 2020.7,
+          "car": "1155|2|8|700",
+          "mph": 78,
+          "yaw_peak_dps": 13.3,
+          "decay_s": null
+        },
+        {
+          "t": 2021.2,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "yaw_peak_dps": 28.9,
+          "decay_s": null
+        },
+        {
+          "t": 2022.8,
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "yaw_peak_dps": 18.6,
+          "decay_s": null
+        },
+        {
+          "t": 2023,
+          "car": "1155|2|8|700",
+          "mph": 100,
+          "yaw_peak_dps": 10.5,
+          "decay_s": null
+        },
+        {
+          "t": 2023.7,
+          "car": "1155|2|8|700",
+          "mph": 108,
+          "yaw_peak_dps": 15.6,
+          "decay_s": null
+        },
+        {
+          "t": 2024.2,
+          "car": "1155|2|8|700",
+          "mph": 102,
+          "yaw_peak_dps": 17,
+          "decay_s": null
+        },
+        {
+          "t": 2116,
+          "car": "1155|2|8|700",
+          "mph": 114,
+          "yaw_peak_dps": 12.7,
+          "decay_s": null
+        },
+        {
+          "t": 2116.5,
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "yaw_peak_dps": 19.8,
+          "decay_s": null
+        },
+        {
+          "t": 2118.1,
+          "car": "1155|2|8|700",
+          "mph": 122,
+          "yaw_peak_dps": 23.6,
+          "decay_s": null
+        },
+        {
+          "t": 2119.2,
+          "car": "1155|2|8|700",
+          "mph": 122,
+          "yaw_peak_dps": 14.1,
+          "decay_s": 0.2
+        },
+        {
+          "t": 2122.5,
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "yaw_peak_dps": 8.5,
+          "decay_s": null
+        },
+        {
+          "t": 2122.8,
+          "car": "1155|2|8|700",
+          "mph": 135,
+          "yaw_peak_dps": 18.5,
+          "decay_s": null
+        },
+        {
+          "t": 2123.2,
+          "car": "1155|2|8|700",
+          "mph": 136,
+          "yaw_peak_dps": 20.8,
+          "decay_s": null
+        },
+        {
+          "t": 2123.6,
+          "car": "1155|2|8|700",
+          "mph": 137,
+          "yaw_peak_dps": 20.2,
+          "decay_s": null
+        },
+        {
+          "t": 2124,
+          "car": "1155|2|8|700",
+          "mph": 136,
+          "yaw_peak_dps": 17.9,
+          "decay_s": null
+        },
+        {
+          "t": 2126.1,
+          "car": "1155|2|8|700",
+          "mph": 137,
+          "yaw_peak_dps": 11.3,
+          "decay_s": 0.29
+        },
+        {
+          "t": 2127.4,
+          "car": "1155|2|8|700",
+          "mph": 139,
+          "yaw_peak_dps": 26.6,
+          "decay_s": null
+        },
+        {
+          "t": 2130.7,
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "yaw_peak_dps": 9.8,
+          "decay_s": null
+        },
+        {
+          "t": 2131.1,
+          "car": "1155|2|8|700",
+          "mph": 122,
+          "yaw_peak_dps": 21.7,
+          "decay_s": null
+        },
+        {
+          "t": 2131.5,
+          "car": "1155|2|8|700",
+          "mph": 124,
+          "yaw_peak_dps": 17.3,
+          "decay_s": null
+        },
+        {
+          "t": 2132,
+          "car": "1155|2|8|700",
+          "mph": 126,
+          "yaw_peak_dps": 31.7,
+          "decay_s": null
+        },
+        {
+          "t": 2132.6,
+          "car": "1155|2|8|700",
+          "mph": 118,
+          "yaw_peak_dps": 32.9,
+          "decay_s": null
+        },
+        {
+          "t": 2135.6,
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "yaw_peak_dps": 48.2,
+          "decay_s": null
+        }
+      ],
+      "stints": [
+        {
+          "n": 1,
+          "id": "3852|1|3|700",
+          "t0": 11,
+          "t1": 28.6,
+          "live_s": 17.7,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {
+            "2": 2.248
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 2,
+          "id": "3852|2|4|700",
+          "t0": 67.3,
+          "t1": 75.4,
+          "live_s": 8.1,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 3,
+          "id": "3852|2|4|700",
+          "t0": 96.1,
+          "t1": 96.7,
+          "live_s": 0.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 4,
+          "id": "3852|2|4|700",
+          "t0": 99,
+          "t1": 101.8,
+          "live_s": 2.8,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 5,
+          "id": "3852|2|4|700",
+          "t0": 120,
+          "t1": 141.5,
+          "live_s": 21.5,
+          "label": null,
+          "corners": 3,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": 0.075,
+          "first_red_front": 3,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 1.36,
+          "ladder": {
+            "5": 4.011,
+            "6": 4.805,
+            "7": 5.587,
+            "8": 6.622,
+            "9": 7.733,
+            "10": 9.037
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 6,
+          "id": "3852|2|4|700",
+          "t0": 153.4,
+          "t1": 242.1,
+          "live_s": 88.7,
+          "label": null,
+          "corners": 14,
+          "launches": 0,
+          "braking": 3,
+          "usi_med": 0.234,
+          "first_red_front": 13,
+          "brake_fd_med": 0.37,
+          "brake_rd_med": 0.34,
+          "launch_rear_slip": null,
+          "ladder": {
+            "2": 2.016,
+            "3": 2.684,
+            "4": 3.218,
+            "5": 4.007,
+            "6": 4.802,
+            "7": 5.581,
+            "8": 6.649,
+            "9": 7.732,
+            "10": 9.066
+          },
+          "ladder_changed": false
+        },
+        {
+          "n": 7,
+          "id": "3852|2|4|700",
+          "t0": 276.6,
+          "t1": 294.9,
+          "live_s": 18.3,
+          "label": null,
+          "corners": 4,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": 0.203,
+          "first_red_front": 4,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {
+            "2": 2.101,
+            "3": 2.71,
+            "4": 3.362,
+            "5": 4.015,
+            "6": 4.803,
+            "7": 5.596,
+            "8": 6.662,
+            "9": 7.733
+          },
+          "ladder_changed": true
+        },
+        {
+          "n": 8,
+          "id": "3852|2|4|700",
+          "t0": 408.4,
+          "t1": 456.4,
+          "live_s": 48,
+          "label": null,
+          "corners": 6,
+          "launches": 0,
+          "braking": 2,
+          "usi_med": 0.328,
+          "first_red_front": 6,
+          "brake_fd_med": 0.39,
+          "brake_rd_med": 0.27,
+          "launch_rear_slip": null,
+          "ladder": {
+            "3": 2.534,
+            "4": 3.247,
+            "5": 4.012,
+            "6": 4.806,
+            "7": 5.589,
+            "8": 6.658,
+            "9": 7.728,
+            "10": 9.063
+          },
+          "ladder_changed": true
+        },
+        {
+          "n": 9,
+          "id": "3852|2|4|700",
+          "t0": 510.4,
+          "t1": 516.8,
+          "live_s": 6.5,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 10,
+          "id": "3852|2|4|700",
+          "t0": 521.5,
+          "t1": 602.7,
+          "live_s": 81.2,
+          "label": null,
+          "corners": 1,
+          "launches": 1,
+          "braking": 1,
+          "usi_med": 0.455,
+          "first_red_front": 1,
+          "brake_fd_med": 0.52,
+          "brake_rd_med": 1,
+          "launch_rear_slip": 12.69,
+          "ladder": {
+            "3": 2.704,
+            "4": 3.349,
+            "5": 4.014,
+            "6": 4.801,
+            "7": 5.592
+          },
+          "ladder_changed": true
+        },
+        {
+          "n": 11,
+          "id": "3852|2|4|700",
+          "t0": 684.8,
+          "t1": 685.3,
+          "live_s": 0.5,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 12,
+          "id": "3852|2|4|700",
+          "t0": 688,
+          "t1": 695.4,
+          "live_s": 7.4,
+          "label": null,
+          "corners": 0,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 11.21,
+          "ladder": {
+            "2": 2.744,
+            "3": 3.669
+          },
+          "ladder_changed": true
+        },
+        {
+          "n": 13,
+          "id": "3852|2|4|700",
+          "t0": 700.8,
+          "t1": 702.3,
+          "live_s": 1.5,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 14,
+          "id": "3852|2|4|700",
+          "t0": 753.5,
+          "t1": 754.6,
+          "live_s": 1.1,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 15,
+          "id": "2616|2|10|800",
+          "t0": 755.7,
+          "t1": 756.2,
+          "live_s": 0.5,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 16,
+          "id": "2616|2|10|800",
+          "t0": 758.5,
+          "t1": 761.1,
+          "live_s": 2.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 17,
+          "id": "2616|2|10|800",
+          "t0": 780,
+          "t1": 866.2,
+          "live_s": 86.3,
+          "label": null,
+          "corners": 11,
+          "launches": 1,
+          "braking": 2,
+          "usi_med": 0.221,
+          "first_red_front": 10,
+          "brake_fd_med": 0.27,
+          "brake_rd_med": 0.2,
+          "launch_rear_slip": 3.29,
+          "ladder": {
+            "2": 4.277,
+            "3": 5.811,
+            "4": 7.145,
+            "5": 8.241,
+            "6": 9.12
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 18,
+          "id": "2616|2|10|800",
+          "t0": 887.9,
+          "t1": 896.1,
+          "live_s": 8.2,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 19,
+          "id": "3852|2|4|700",
+          "t0": 905.5,
+          "t1": 914.1,
+          "live_s": 8.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 20,
+          "id": "3852|2|4|700",
+          "t0": 918.7,
+          "t1": 1040,
+          "live_s": 121.3,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 21,
+          "id": "3852|2|4|700",
+          "t0": 1046.4,
+          "t1": 1047.7,
+          "live_s": 1.3,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 22,
+          "id": "3852|2|4|700",
+          "t0": 1051.1,
+          "t1": 1053.1,
+          "live_s": 2,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 23,
+          "id": "3852|2|4|700",
+          "t0": 1134.9,
+          "t1": 1135.7,
+          "live_s": 0.7,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 24,
+          "id": "2866|2|4|800",
+          "t0": 1136.1,
+          "t1": 1136.7,
+          "live_s": 0.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 25,
+          "id": "2866|2|4|800",
+          "t0": 1139.1,
+          "t1": 1141.3,
+          "live_s": 2.3,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 26,
+          "id": "2866|2|4|800",
+          "t0": 1164.5,
+          "t1": 1215.4,
+          "live_s": 50.9,
+          "label": null,
+          "corners": 8,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": 0.016,
+          "first_red_front": 6,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 29.21,
+          "ladder": {
+            "2": 3.012,
+            "3": 3.711,
+            "4": 4.445,
+            "5": 5.148,
+            "6": 5.821,
+            "7": 6.34,
+            "8": 7.23
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 27,
+          "id": "3852|2|4|700",
+          "t0": 1222.2,
+          "t1": 1226,
+          "live_s": 3.8,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 28,
+          "id": "3852|2|4|700",
+          "t0": 1230.5,
+          "t1": 1231.3,
+          "live_s": 0.8,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 29,
+          "id": "3852|2|4|700",
+          "t0": 1291.3,
+          "t1": 1291.8,
+          "live_s": 0.5,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 30,
+          "id": "3852|2|4|700",
+          "t0": 1300.9,
+          "t1": 1301.3,
+          "live_s": 0.4,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 31,
+          "id": "1155|1|8|700",
+          "t0": 1303.6,
+          "t1": 1357.2,
+          "live_s": 53.6,
+          "label": null,
+          "corners": 4,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": -0.053,
+          "first_red_front": 1,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {
+            "2": 4.159
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 32,
+          "id": "1155|2|8|700",
+          "t0": 1397.7,
+          "t1": 1424.5,
+          "live_s": 26.8,
+          "label": null,
+          "corners": 5,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": 0.047,
+          "first_red_front": 4,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 5.69,
+          "ladder": {
+            "2": 2.929,
+            "3": 3.97,
+            "4": 5.134,
+            "5": 6.155
+          },
+          "ladder_changed": null
+        },
+        {
+          "n": 33,
+          "id": "1155|2|8|700",
+          "t0": 1436.2,
+          "t1": 1437.5,
+          "live_s": 1.3,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 1,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": 1,
+          "brake_rd_med": 1,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 34,
+          "id": "1155|2|8|700",
+          "t0": 1440.5,
+          "t1": 1443.3,
+          "live_s": 2.8,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 35,
+          "id": "1155|2|8|700",
+          "t0": 1465.9,
+          "t1": 1504.9,
+          "live_s": 38.9,
+          "label": null,
+          "corners": 8,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": 0.344,
+          "first_red_front": 6,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 1.39,
+          "ladder": {
+            "2": 2.843,
+            "3": 4.009,
+            "4": 5.156,
+            "5": 6.163,
+            "6": 7.272,
+            "7": 8.282
+          },
+          "ladder_changed": false
+        },
+        {
+          "n": 36,
+          "id": "1155|2|8|700",
+          "t0": 1511.6,
+          "t1": 1512.2,
+          "live_s": 0.5,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 37,
+          "id": "1155|2|8|700",
+          "t0": 1523.8,
+          "t1": 1540.9,
+          "live_s": 17.1,
+          "label": null,
+          "corners": 3,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": 0.145,
+          "first_red_front": 1,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 1.52,
+          "ladder": {
+            "2": 2.974,
+            "3": 4.019,
+            "4": 5.174,
+            "5": 6.286,
+            "6": 7.271,
+            "7": 8.31
+          },
+          "ladder_changed": true
+        },
+        {
+          "n": 38,
+          "id": "1155|2|8|700",
+          "t0": 1585.5,
+          "t1": 1610,
+          "live_s": 24.5,
+          "label": null,
+          "corners": 7,
+          "launches": 0,
+          "braking": 1,
+          "usi_med": 0.39,
+          "first_red_front": 7,
+          "brake_fd_med": 0.37,
+          "brake_rd_med": 0.35,
+          "launch_rear_slip": null,
+          "ladder": {
+            "2": 2.732,
+            "3": 3.91,
+            "4": 5.076,
+            "5": 6.054,
+            "6": 7.192,
+            "7": 8.305
+          },
+          "ladder_changed": true
+        },
+        {
+          "n": 39,
+          "id": "1155|2|8|700",
+          "t0": 1707.6,
+          "t1": 1755,
+          "live_s": 47.3,
+          "label": null,
+          "corners": 10,
+          "launches": 0,
+          "braking": 2,
+          "usi_med": 0.049,
+          "first_red_front": 8,
+          "brake_fd_med": 0.87,
+          "brake_rd_med": 0.64,
+          "launch_rear_slip": null,
+          "ladder": {
+            "3": 3.817,
+            "4": 5.147,
+            "5": 6.27,
+            "6": 7.296
+          },
+          "ladder_changed": false
+        },
+        {
+          "n": 40,
+          "id": "1155|2|8|700",
+          "t0": 1784,
+          "t1": 2030.5,
+          "live_s": 246.5,
+          "label": null,
+          "corners": 32,
+          "launches": 0,
+          "braking": 4,
+          "usi_med": 0.106,
+          "first_red_front": 27,
+          "brake_fd_med": 0.78,
+          "brake_rd_med": 0.64,
+          "launch_rear_slip": null,
+          "ladder": {
+            "2": 2.968,
+            "3": 4.015,
+            "4": 5.154,
+            "5": 6.273,
+            "6": 7.257,
+            "7": 8.382
+          },
+          "ladder_changed": true
+        },
+        {
+          "n": 41,
+          "id": "1155|2|8|700",
+          "t0": 2088.1,
+          "t1": 2088.6,
+          "live_s": 0.6,
+          "label": null,
+          "corners": 0,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 42,
+          "id": "1155|2|8|700",
+          "t0": 2108,
+          "t1": 2137.1,
+          "live_s": 29.1,
+          "label": null,
+          "corners": 3,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": 0.156,
+          "first_red_front": 1,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 1.52,
+          "ladder": {
+            "2": 2.974,
+            "3": 4.019,
+            "4": 5.174,
+            "5": 6.287,
+            "6": 7.273,
+            "7": 8.292
+          },
+          "ladder_changed": false
+        },
+        {
+          "n": 43,
+          "id": "1155|2|8|700",
+          "t0": 2144.4,
+          "t1": 2148.9,
+          "live_s": 4.5,
+          "label": null,
+          "corners": 1,
+          "launches": 0,
+          "braking": 0,
+          "usi_med": 0.582,
+          "first_red_front": 1,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": null,
+          "ladder": {},
+          "ladder_changed": null
+        },
+        {
+          "n": 44,
+          "id": "1155|2|8|700",
+          "t0": 2161.5,
+          "t1": 2167.6,
+          "live_s": 6.1,
+          "label": null,
+          "corners": 0,
+          "launches": 1,
+          "braking": 0,
+          "usi_med": null,
+          "first_red_front": 0,
+          "brake_fd_med": null,
+          "brake_rd_med": null,
+          "launch_rear_slip": 1.52,
+          "ladder": {
+            "2": 2.974,
+            "3": 4.019,
+            "4": 5.174,
+            "5": 6.283
+          },
+          "ladder_changed": false
         }
       ],
       "crests": [
@@ -95550,20 +105659,201 @@ window.FH6_DB = {
           "car": "1155|2|8|700",
           "mph": 124,
           "g": -0.51
+        },
+        {
+          "t": 1711.5,
+          "car": "1155|2|8|700",
+          "mph": 105,
+          "g": -0.53
+        },
+        {
+          "t": 1713.2,
+          "car": "1155|2|8|700",
+          "mph": 108,
+          "g": -0.5
+        },
+        {
+          "t": 1722.4,
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "g": -0.54
+        },
+        {
+          "t": 1727.5,
+          "car": "1155|2|8|700",
+          "mph": 102,
+          "g": -0.51
+        },
+        {
+          "t": 1731.6,
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "g": -0.52
+        },
+        {
+          "t": 1733.4,
+          "car": "1155|2|8|700",
+          "mph": 105,
+          "g": -0.51
+        },
+        {
+          "t": 1735.4,
+          "car": "1155|2|8|700",
+          "mph": 78,
+          "g": -0.53
+        },
+        {
+          "t": 1737.9,
+          "car": "1155|2|8|700",
+          "mph": 99,
+          "g": -0.52
+        },
+        {
+          "t": 1748.5,
+          "car": "1155|2|8|700",
+          "mph": 62,
+          "g": -0.5
+        },
+        {
+          "t": 1911.4,
+          "car": "1155|2|8|700",
+          "mph": 67,
+          "g": -0.5
+        },
+        {
+          "t": 1919.7,
+          "car": "1155|2|8|700",
+          "mph": 108,
+          "g": -0.51
+        },
+        {
+          "t": 1925.1,
+          "car": "1155|2|8|700",
+          "mph": 66,
+          "g": -0.59
+        },
+        {
+          "t": 1943,
+          "car": "1155|2|8|700",
+          "mph": 65,
+          "g": -0.52
+        },
+        {
+          "t": 1958,
+          "car": "1155|2|8|700",
+          "mph": 50,
+          "g": -0.51
+        },
+        {
+          "t": 1969.5,
+          "car": "1155|2|8|700",
+          "mph": 109,
+          "g": -0.54
+        },
+        {
+          "t": 1972.8,
+          "car": "1155|2|8|700",
+          "mph": 113,
+          "g": -0.5
+        },
+        {
+          "t": 1975.1,
+          "car": "1155|2|8|700",
+          "mph": 99,
+          "g": -0.56
+        },
+        {
+          "t": 1989.9,
+          "car": "1155|2|8|700",
+          "mph": 69,
+          "g": -0.57
+        },
+        {
+          "t": 1993.2,
+          "car": "1155|2|8|700",
+          "mph": 101,
+          "g": -0.52
+        },
+        {
+          "t": 1994.9,
+          "car": "1155|2|8|700",
+          "mph": 104,
+          "g": -0.58
+        },
+        {
+          "t": 1997.5,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "g": -0.51
+        },
+        {
+          "t": 2002.9,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "g": -0.51
+        },
+        {
+          "t": 2007.9,
+          "car": "1155|2|8|700",
+          "mph": 98,
+          "g": -0.53
+        },
+        {
+          "t": 2011.7,
+          "car": "1155|2|8|700",
+          "mph": 88,
+          "g": -0.52
+        },
+        {
+          "t": 2013.7,
+          "car": "1155|2|8|700",
+          "mph": 99,
+          "g": -0.59
+        },
+        {
+          "t": 2015.5,
+          "car": "1155|2|8|700",
+          "mph": 114,
+          "g": -0.56
+        },
+        {
+          "t": 2020,
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "g": -0.59
+        },
+        {
+          "t": 2022.1,
+          "car": "1155|2|8|700",
+          "mph": 92,
+          "g": -0.56
+        },
+        {
+          "t": 2023.6,
+          "car": "1155|2|8|700",
+          "mph": 107,
+          "g": -0.67
+        },
+        {
+          "t": 2124.9,
+          "car": "1155|2|8|700",
+          "mph": 135,
+          "g": -0.51
         }
       ],
       "summary": {
         "cars": 6,
         "configs": 8,
-        "corners": 75,
-        "launches": 8,
-        "braking": 10,
-        "bottoming": 4432,
-        "pulses": 456,
-        "impacts": 156,
-        "front_limited_corners": 62,
-        "rear_limited_corners": 4,
-        "drift_corners": 1
+        "stints": 44,
+        "corners": 123,
+        "launches": 10,
+        "braking": 16,
+        "bottoming": 4505,
+        "pulses": 627,
+        "impacts": 161,
+        "front_limited_corners": 99,
+        "rear_limited_corners": 6,
+        "drift_corners": 3
       }
     }
   ],

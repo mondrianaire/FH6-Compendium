@@ -4,9 +4,3310 @@
   "cars": {
     "3665": {
       "name": "2021 Sierra Cars 700R",
-      "confidence": "probable",
-      "source": "settings-screen header B 600 at capture time 2026-08-21"
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "247": {
+      "name": "1969 Toyota 2000 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "249": {
+      "name": "1964 Ferrari 250 GTO",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "251": {
+      "name": "1954 Mercedes-Benz 300 SL",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "253": {
+      "name": "1994 Ferrari F355 Berlinetta",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "255": {
+      "name": "1991 Ferrari 512 TR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "260": {
+      "name": "1973 Porsche 911 Carrera RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "261": {
+      "name": "1995 Porsche 911 GT2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "262": {
+      "name": "2004 Porsche 911 GT3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "265": {
+      "name": "1982 Porsche 911 Turbo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "268": {
+      "name": "1989 Porsche 944 Turbo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "269": {
+      "name": "1987 Porsche 959",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "281": {
+      "name": "1968 Plymouth Barracuda",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "289": {
+      "name": "1969 Chevrolet Camaro SS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "292": {
+      "name": "2003 Porsche Carrera GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "295": {
+      "name": "2003 Toyota Celica SS-I",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "296": {
+      "name": "1998 TVR Cerbera",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "299": {
+      "name": "1970 Chevrolet Chevelle",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "302": {
+      "name": "2004 Honda Civic Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "306": {
+      "name": "1965 Shelby Cobra 427",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "309": {
+      "name": "1995 Volkswagen Corrado",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "312": {
+      "name": "1967 Chevrolet Corvette Stingray",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "314": {
+      "name": "2002 Chevrolet Corvette Z06",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "315": {
+      "name": "1970 Chevrolet Corvette ZR1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "316": {
+      "name": "1988 Lamborghini Countach",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "320": {
+      "name": "1991 Honda CRX Si",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "323": {
+      "name": "1992 Lancia Delta",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "324": {
+      "name": "1999 Lamborghini Diablo GTR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "325": {
+      "name": "1997 Lamborghini Diablo SV",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "326": {
+      "name": "1969 Ferrari Dino 246",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "327": {
+      "name": "1995 Mitsubishi Eclipse GSX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "333": {
+      "name": "2002 Ferrari Enzo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "336": {
+      "name": "1961 Jaguar E-Type",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "338": {
+      "name": "1997 McLaren F1 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "340": {
+      "name": "1987 Ferrari F40",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "342": {
+      "name": "1995 Ferrari F50",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "343": {
+      "name": "1969 Nissan Fairlady 432 Z",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "344": {
+      "name": "2003 Nissan Fairlady Z",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "345": {
+      "name": "1994 Nissan Fairlady Z Version S Twin Turbo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "348": {
+      "name": "2005 Ford GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "353": {
+      "name": "1992 Volkswagen Golf GTi 16v Mk2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "357": {
+      "name": "1997 Mitsubishi GTO",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "358": {
+      "name": "1984 Ferrari GTO",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "363": {
+      "name": "1998 Subaru Impreza 22B",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "364": {
+      "name": "2004 Subaru Impreza WRX STi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "365": {
+      "name": "2005 Subaru Impreza WRX STi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "368": {
+      "name": "2001 Acura Integra Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "374": {
+      "name": "2006 Mitsubishi Lancer Evolution IX MR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "378": {
+      "name": "2004 Mitsubishi Lancer Evolution VIII MR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "379": {
+      "name": "2005 Subaru Legacy B4 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "382": {
+      "name": "1997 BMW M3 E36",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "383": {
+      "name": "2005 BMW M3 E46",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "391": {
+      "name": "2004 Maserati MC12",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "398": {
+      "name": "1995 Toyota MR2 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "405": {
+      "name": "2000 Ford Mustang Cobra R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "411": {
+      "name": "2005 Honda NSX-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "412": {
+      "name": "1992 Honda NSX-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "417": {
+      "name": "1987 Buick Regal GNX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "419": {
+      "name": "2006 Audi RS4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "420": {
+      "name": "2003 Audi RS6",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "422": {
+      "name": "2002 Acura RSX Type-S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "423": {
+      "name": "1990 Mazda RX-7",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "427": {
+      "name": "2003 Honda S2000",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "433": {
+      "name": "2005 TVR Sagaris",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "440": {
+      "name": "1994 Nissan Silvia K's",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "455": {
+      "name": "1985 Toyota Sprinter",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "458": {
+      "name": "1974 Lancia Stratos",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "460": {
+      "name": "1992 Toyota Supra 2.0 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "461": {
+      "name": "1998 Toyota Supra RZ",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "483": {
+      "name": "1999 Dodge Viper GTS ACR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "489": {
+      "name": "1993 Jaguar XJ220",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "513": {
+      "name": "1969 Dodge Charger R/T",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "567": {
+      "name": "1998 Nissan R390",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "568": {
+      "name": "1998 Mercedes-Benz CLK GTR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "569": {
+      "name": "2005 Honda NSX-R GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "615": {
+      "name": "2007 Peugeot 207 Super 2000",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "625": {
+      "name": "2007 Honda Civic Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "633": {
+      "name": "1983 Audi Sport Quattro",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "634": {
+      "name": "1980 Renault 5 Turbo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "637": {
+      "name": "1967 Lamborghini Miura P400",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "639": {
+      "name": "1970 Dodge Challenger Hemi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "641": {
+      "name": "1998 Porsche 911 GT1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1006": {
+      "name": "2005 Ferrari FXX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1007": {
+      "name": "2008 Koenigsegg CCGT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1009": {
+      "name": "2008 Mitsubishi Lancer Evolution X GSR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1011": {
+      "name": "2008 BMW M3 E92",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1020": {
+      "name": "1996 Ferrari F50 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1022": {
+      "name": "2007 Ferrari F430 Scuderia",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1023": {
+      "name": "1998 Ferrari F40 Competizione",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1032": {
+      "name": "2008 Alfa Romeo 8C Competizione",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1034": {
+      "name": "1994 Toyota Celica ST205",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1040": {
+      "name": "1981 BMW M1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1041": {
+      "name": "1993 Ford Mustang SVT Cobra R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1042": {
+      "name": "1971 Nissan Skyline 2000 GT-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1045": {
+      "name": "1987 Pontiac Trans Am GTA",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1046": {
+      "name": "2008 Dodge Viper SRT-10 ACR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1052": {
+      "name": "2006 Dodge Ram SRT-10",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1059": {
+      "name": "2008 BMW Z4 M Coupe",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1060": {
+      "name": "2008 Subaru Impreza WRX STi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1063": {
+      "name": "1969 Dodge Charger Daytona",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1064": {
+      "name": "1979 Chevrolet Camaro Z/28",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1069": {
+      "name": "2009 Chevrolet Corvette ZR1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1086": {
+      "name": "2009 Ford Focus RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1090": {
+      "name": "2009 Mercedes-Benz SL 65 AMG",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1093": {
+      "name": "1960 Chevrolet Corvette",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1103": {
+      "name": "2010 Nissan 370Z",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1104": {
+      "name": "1970 Nissan 510",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1105": {
+      "name": "1964 Aston Martin DB5 Vantage",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1108": {
+      "name": "1987 Ford RS200 Evolution",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1110": {
+      "name": "1994 Mazda MX-5 Miata",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1124": {
+      "name": "1980 Fiat 131 Abarth Stradale",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1126": {
+      "name": "2009 BMW M5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1130": {
+      "name": "2011 McLaren MP4-12C",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1131": {
+      "name": "2010 Ferrari 458 Italia",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1150": {
+      "name": "1965 Alfa Romeo Giulia GTA",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1155": {
+      "name": "1965 Shelby Cobra Daytona",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1171": {
+      "name": "2010 Ferrari 599XX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1173": {
+      "name": "2010 Lamborghini Gallardo LP670-4 SV",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1175": {
+      "name": "2010 Pagani Zonda R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1184": {
+      "name": "2009 Audi RS6",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1200": {
+      "name": "2009 Audi R8 LMS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1204": {
+      "name": "2010 Renault Megane RS250",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1215": {
+      "name": "NUL_CAR_00",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1216": {
+      "name": "2011 Audi RS3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1220": {
+      "name": "2010 Audi TT RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1221": {
+      "name": "2010 Mazdaspeed 3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1229": {
+      "name": "2008 Mazda Furai",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1231": {
+      "name": "2010 Volkswagen Golf R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1253": {
+      "name": "2010 Noble M600",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1260": {
+      "name": "2010 Lexus LFA",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1269": {
+      "name": "1973 BMW 2002 Turbo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1270": {
+      "name": "1982 DeLorean DMC-12",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1272": {
+      "name": "1992 Ford Escort RS Cosworth",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1273": {
+      "name": "1997 Honda Civic Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1276": {
+      "name": "1977 Pontiac Firebird Trans Am",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1277": {
+      "name": "1971 Plymouth 'Cuda 426",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1278": {
+      "name": "1973 Ford XB Falcon GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1282": {
+      "name": "1994 Nissan 240SX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1283": {
+      "name": "1957 Ford Thunderbird",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1291": {
+      "name": "1970 Chevrolet El Camino SS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1293": {
+      "name": "1987 Ford Sierra RS500",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1294": {
+      "name": "1992 GMC Syclone",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1295": {
+      "name": "1982 Lancia 037 Stradale",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1296": {
+      "name": "1990 Mercedes-Benz 190E",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1297": {
+      "name": "1988 Mitsubishi Starion ESI-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1299": {
+      "name": "1983 Volvo 242 Turbo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1300": {
+      "name": "1964 Chevrolet Impala SS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1301": {
+      "name": "1956 Jaguar D-Type",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1314": {
+      "name": "1993 McLaren F1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1323": {
+      "name": "2011 Subaru Impreza WRX STi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1330": {
+      "name": "1970 Chevrolet Camaro Z/28",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1332": {
+      "name": "1968 Dodge Dart",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1335": {
+      "name": "1991 Mazda #55 Mazda 787B",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1350": {
+      "name": "2011 BMW X5 M",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1352": {
+      "name": "1970 Dodge Super Bee",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1355": {
+      "name": "1965 Ford Mustang",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1367": {
+      "name": "2003 BMW M5 E39",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1368": {
+      "name": "1988 BMW M5 E28",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1369": {
+      "name": "2009 Pagani Zonda Cinque",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1376": {
+      "name": "1999 Lotus Elise",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1379": {
+      "name": "1996 Chevrolet Impala SS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1381": {
+      "name": "1992 Mitsubishi Galant VR-4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1382": {
+      "name": "1990 Subaru Legacy RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1388": {
+      "name": "2012 BMW M5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1392": {
+      "name": "2011 Lamborghini Sesto Elemento",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1393": {
+      "name": "1992 Alfa Romeo 155",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1394": {
+      "name": "1993 GMC Typhoon",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1395": {
+      "name": "1989 Toyota MR2 SC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1397": {
+      "name": "2011 Koenigsegg Agera",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1398": {
+      "name": "2012 Lamborghini Aventador LP700-4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1417": {
+      "name": "2011 Audi RS5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1418": {
+      "name": "1995 BMW M5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1426": {
+      "name": "2011 Mazda RX-8 R3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1428": {
+      "name": "2011 Volkswagen Scirocco R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1429": {
+      "name": "1969 Chevrolet Nova SS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1435": {
+      "name": "1966 Volkswagen Beetle",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1459": {
+      "name": "1957 Chevrolet Bel Air",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1477": {
+      "name": "2011 Ford Transit SSV",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1478": {
+      "name": "1986 Audi Sport Quattro S2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1480": {
+      "name": "1985 Mazda RX-7",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1481": {
+      "name": "1965 Austin-Healey 3000",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1493": {
+      "name": "1996 BMW 850CSi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1500": {
+      "name": "2012 Mercedes-Benz C63 AMG",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1513": {
+      "name": "1997 Maserati Ghibli",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1514": {
+      "name": "1973 Mazda RX-3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1517": {
+      "name": "1990 Toyota Celica ST185",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1522": {
+      "name": "2012 Jeep Wrangler",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1529": {
+      "name": "1974 Ford Capri",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1532": {
+      "name": "2012 Hennessey Venom GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1533": {
+      "name": "1977 Holden Torana",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1537": {
+      "name": "1973 Toyota Corolla SR5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1549": {
+      "name": "1968 Alfa Romeo 33 Stradale",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1559": {
+      "name": "1955 Mercedes-Benz 300 SLR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1562": {
+      "name": "2013 Viper GTS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1564": {
+      "name": "1953 Chevrolet Corvette",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1568": {
+      "name": "1974 Honda Civic RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1575": {
+      "name": "1988 Chevrolet Monte Carlo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1578": {
+      "name": "1963 Ferrari 250 GT Lusso",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1586": {
+      "name": "1962 Lincoln Continental",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1587": {
+      "name": "1972 Mazda Cosmo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1591": {
+      "name": "1984 Peugeot 205 T16",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1592": {
+      "name": "1974 Toyota Celica GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1598": {
+      "name": "2010 BMW M3 GTS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1599": {
+      "name": "2012 Ferrari 599XX Evolution",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1601": {
+      "name": "2012 Lamborghini Gallardo LP570-4 Spyder Performante",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1607": {
+      "name": "2013 Audi RS4 Avant",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1627": {
+      "name": "2013 Mercedes-Benz G65 AMG",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1650": {
+      "name": "1986 Honda Civic Si",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1651": {
+      "name": "2013 Ariel Atom",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1654": {
+      "name": "2013 Ford Mustang GT500",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1655": {
+      "name": "2013 Subaru BRZ",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1658": {
+      "name": "2013 Mercedes-Benz A45 AMG",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1661": {
+      "name": "1986 Lancia Delta S4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1662": {
+      "name": "1965 Mini Cooper S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1667": {
+      "name": "2013 McLaren P1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "1668": {
+      "name": "1969 Ford Mustang Boss 302",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2002": {
+      "name": "2012 Nissan GT-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2003": {
+      "name": "2013 MINI JCW GP",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2004": {
+      "name": "2013 Mazda MX-5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2006": {
+      "name": "1995 Chevrolet Corvette ZR-1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2007": {
+      "name": "2013 Toyota GT86",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2009": {
+      "name": "2013 Audi RS7",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2010": {
+      "name": "2013 Audi R8 Plus",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2017": {
+      "name": "1968 Fiat 595 SS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2019": {
+      "name": "2003 Ford Focus RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2034": {
+      "name": "2013 Ferrari LaFerrari",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2038": {
+      "name": "2014 Alfa Romeo 4C",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2040": {
+      "name": "2014 BAC Mono",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2042": {
+      "name": "2013 Lamborghini Veneno",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2119": {
+      "name": "1984 Honda CRX Mugen",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2121": {
+      "name": "1994 Honda Prelude",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2128": {
+      "name": "2013 Cadillac XTS Limo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2131": {
+      "name": "2014 Holden HSV GTS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2133": {
+      "name": "2015 BMW i8",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2140": {
+      "name": "1981 Subaru BRAT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2142": {
+      "name": "2014 Volkswagen Golf R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2145": {
+      "name": "2014 Ford Ranger T6 Rally Raid",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2147": {
+      "name": "1986 MG Metro 6R4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2148": {
+      "name": "2013 Mini X-Raid All4 Racing Countryman",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2149": {
+      "name": "1993 Renault Clio Williams",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2151": {
+      "name": "1963 Volkswagen Type 2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2154": {
+      "name": "2014 BMW M4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2161": {
+      "name": "1965 Alfa Romeo Giulia TZ2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2163": {
+      "name": "2015 Honda Civic Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2164": {
+      "name": "2015 Lamborghini Huracan",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2168": {
+      "name": "2015 Subaru WRX STi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2171": {
+      "name": "2005 Mazda MX-5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2175": {
+      "name": "2015 Lexus RC F",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2177": {
+      "name": "2015 Chevrolet Corvette Z06",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2178": {
+      "name": "2001 Audi RS4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2179": {
+      "name": "2015 Audi S1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2180": {
+      "name": "2015 Audi RS6",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2183": {
+      "name": "2015 Chevrolet Camaro Z/28",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2184": {
+      "name": "2015 Ferrari 458 Speciale",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2188": {
+      "name": "2015 Koenigsegg One:1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2205": {
+      "name": "1970 Honda S800",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2216": {
+      "name": "1958 Plymouth Fury",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2217": {
+      "name": "1996 Subaru SVX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2242": {
+      "name": "2015 Mercedes-AMG GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2262": {
+      "name": "2016 Cadillac ATS-V",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2263": {
+      "name": "2015 Dodge Challenger Hellcat",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2267": {
+      "name": "2016 Mazda MX-5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2270": {
+      "name": "1973 Nissan Skyline GT-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2272": {
+      "name": "1969 Datsun 2000",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2290": {
+      "name": "2014 Porsche 918 Spyder",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2297": {
+      "name": "2012 Porsche 911 GT3 RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2357": {
+      "name": "2017 Ford Focus RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2363": {
+      "name": "2016 Ford Phoenix",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2371": {
+      "name": "2016 Ferrari FXX K",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2372": {
+      "name": "1932 Ford Coupe",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2400": {
+      "name": "2016 Ford Shelby GT350R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2412": {
+      "name": "1962 BMW Isetta",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2416": {
+      "name": "1971 Meyers Manx",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2420": {
+      "name": "1984 Opel Manta 400",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2421": {
+      "name": "2016 Cadillac CTS-V Sedan",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2422": {
+      "name": "2016 Holden HSV GTS Maloo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2430": {
+      "name": "2016 Ariel Nomad",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2467": {
+      "name": "2016 Ferrari 488 GTB",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2468": {
+      "name": "2015 Dodge Charger SRT Hellcat",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2469": {
+      "name": "1965 Toyota Sports 800",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2470": {
+      "name": "2016 Aston Martin Vulcan",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2471": {
+      "name": "2016 Mercedes-Benz C63 AMG Coupe",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2472": {
+      "name": "2016 McLaren 570S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2473": {
+      "name": "2016 Audi R8 V10 Plus",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2486": {
+      "name": "2015 Radical RXC Turbo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2489": {
+      "name": "2016 Fiat 695 Abarth",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2494": {
+      "name": "2015 Land Rover Range Rover SVR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2507": {
+      "name": "1955 Chevrolet 150 Utility Sedan",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2512": {
+      "name": "1987 Nissan Skyline GTS-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2515": {
+      "name": "2011 Penhall The Cholla",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2517": {
+      "name": "2014 Ford F-150 Trophy Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2526": {
+      "name": "2016 Koenigsegg Regera",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2527": {
+      "name": "2017 Aston Martin DB11",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2534": {
+      "name": "1993 Porsche 968 Turbo S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2535": {
+      "name": "1993 Porsche 928 GTS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2542": {
+      "name": "2016 Alfa Romeo Giulia",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2544": {
+      "name": "2016 Dodge Viper ACR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2549": {
+      "name": "1970 Porsche #3 917 LH",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2551": {
+      "name": "2015 Ford Pursuit Ute",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2552": {
+      "name": "2015 Alumicraft Class 10 Race Car",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2563": {
+      "name": "1972 Reliant Supervan III",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2566": {
+      "name": "1975 Toyota FJ40",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2568": {
+      "name": "1969 Volkswagen Class 5/1600 Baja Bug",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2569": {
+      "name": "2015 Ultima Evolution Coupe",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2574": {
+      "name": "2554 AMG Transport Dynamics M12 Warthog FAV",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2577": {
+      "name": "2015 Ferrari F12tdf",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2613": {
+      "name": "1970 GMC Jimmy",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2614": {
+      "name": "1968 Ford Mustang GT390",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2616": {
+      "name": "2016 Lamborghini Centenario LP 770-4",
+      "confidence": "player-confirmed",
+      "source": "community table lists the internal codename Urus Bellissima; FM23 table maps 2616 to Centenario; matches the owned V10-swap replica (AWD 10-cyl S1 800)"
+    },
+    "2618": {
+      "name": "2017 Nissan GT-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2625": {
+      "name": "2016 Bentley Bentayga",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2628": {
+      "name": "2016 BMW M4 GTS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2636": {
+      "name": "1993 Toyota #1 T100 Baja Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2647": {
+      "name": "2016 Pagani Huayra",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2649": {
+      "name": "2010 Ford Crown Victoria",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2652": {
+      "name": "1997 Mitsubishi Pajero Evolution",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2654": {
+      "name": "2017 Mercedes-AMG GT R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2659": {
+      "name": "1998 Nissan Silvia K's",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2663": {
+      "name": "2016 RJ Anderson #37 Polaris RZR Pro 2 Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2711": {
+      "name": "2010 Mazdaspeed 3 (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2712": {
+      "name": "1992 Mitsubishi Galant VR-4 (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2713": {
+      "name": "2014 Box Truck (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2714": {
+      "name": "2014 Bus (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2738": {
+      "name": "1995 Nissan GT-R LM",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2739": {
+      "name": "2017 Chevrolet Camaro ZL1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2740": {
+      "name": "2017 Abarth 124 Spider",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2742": {
+      "name": "2017 Jeep Trailcat",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2743": {
+      "name": "2016 Toyota Land Cruiser Arctic",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2745": {
+      "name": "2015 Honda Ridgeline Baja Trophy Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2755": {
+      "name": "2018 Porsche 911 GT2 RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2773": {
+      "name": "2018 Porsche Cayenne",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2792": {
+      "name": "1966 Ford GT40",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2793": {
+      "name": "1967 Ferrari 330 P4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2794": {
+      "name": "1993 Porsche 911 Turbo S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2801": {
+      "name": "1983 Nissan #11 Tomica Skylien Turbo Super Silhouette",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2822": {
+      "name": "1985 Nissan Safari",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2825": {
+      "name": "1971 Lotus Elise GT1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2841": {
+      "name": "2018 Jeep Grand Cherokee Trackhawk",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2866": {
+      "name": "2018 Exomotive Exocet Sport V8 XP-5",
+      "confidence": "player-confirmed",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan) ; matches the owned Exocet handling-meta build (S1 800 AWD 4-cyl swap)"
+    },
+    "2870": {
+      "name": "2018 Honda Civic Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2871": {
+      "name": "2018 Can-Am Maverick",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2872": {
+      "name": "2019 Hyundai Veloster N",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2902": {
+      "name": "2018 Flatbed Truck (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2903": {
+      "name": "2005 Subaru Legacy B4 GT (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2909": {
+      "name": "2018 Dodge Challenger SRT Demon",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2910": {
+      "name": "2017 Koenigsegg Agera RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2935": {
+      "name": "2018 Funco F9",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2937": {
+      "name": "2017 Ford Fiesta GRC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2968": {
+      "name": "2023 Aston Martin Valkyrie",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2974": {
+      "name": "2018 Ferrari 812 Superfast",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2986": {
+      "name": "2017 Mercedes-Benz Unimog",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2987": {
+      "name": "1962 Peel P50",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2992": {
+      "name": "1964 Jaguar E-Type Lightweight",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2993": {
+      "name": "2018 TVR Griffith",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2995": {
+      "name": "1983 Volkswagen Golf GTI",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2996": {
+      "name": "2015 Formula Drift #13 Ford Mustang",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "2997": {
+      "name": "2016 Formula Drift #530 HSV Maloo Gen-F",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3000": {
+      "name": "1997 Formula Drift #777 Nissan 240SX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3003": {
+      "name": "2006 Formula Drift #43 Dodge Viper SRT10",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3007": {
+      "name": "2017 Volkswagen Beetle GRC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3031": {
+      "name": "1985 Porsche #185 959 Prodrive Rally Raid",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3035": {
+      "name": "2018 KTM X-Bow GT4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3037": {
+      "name": "1989 Formula Drift #98 BMW 325I",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3051": {
+      "name": "2017 Ford Fiesta M-Sport",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3055": {
+      "name": "2010 Jaguar C-X75",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3062": {
+      "name": "1970 Ferrari 512 S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3063": {
+      "name": "2018 Mercedes-Benz X-Class",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3064": {
+      "name": "2018 Mercedes-AMG GT4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3072": {
+      "name": "2019 Porsche 911 GT3 RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3082": {
+      "name": "2006 Maserati MC12 Corsa",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3087": {
+      "name": "2014 McLaren 650S Spider",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3088": {
+      "name": "2018 Chevrolet Deberti Drift Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3091": {
+      "name": "2018 Aston Martin Vantage",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3107": {
+      "name": "2014 Mercedes-Benz G63 AMG 6x6",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3108": {
+      "name": "2018 Ford Mustang RTR Spec 5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3110": {
+      "name": "2013 Deberti Wrangler Unlimited",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3117": {
+      "name": "2018 Porsche 718 Cayman GTS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3118": {
+      "name": "2019 Chevrolet Corvette ZR1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3120": {
+      "name": "2019 Lamborghini Urus",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3123": {
+      "name": "2019 Porsche 911 (992)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3128": {
+      "name": "2017 Ford #25 Brocky Ultra4 Bronco RTR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3129": {
+      "name": "2008 Renault Megane R26.R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3132": {
+      "name": "2018 Mini X-Raid John Cooper Works Buggy",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3134": {
+      "name": "2018 Renault Megane RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3141": {
+      "name": "2018 Apollo Intensa Emozione",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3149": {
+      "name": "2018 Chevrolet Camaro 1LE",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3153": {
+      "name": "2019 McLaren 600LT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3156": {
+      "name": "2019 McLaren Speedtail",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3170": {
+      "name": "1994 Ford Supervan 3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3173": {
+      "name": "2019 BMW Z4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3176": {
+      "name": "1987 Mercedes-AMG Hammer",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3180": {
+      "name": "1991 Peugeot 205 Rallye",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3184": {
+      "name": "1977 Ford Escort Mk2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3185": {
+      "name": "2019 Aston Martin DBS Superleggera",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3187": {
+      "name": "2018 Porsche Macan RR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3189": {
+      "name": "2018 Hennessey VelociRaptor 6x6",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3190": {
+      "name": "2003 Ford SVT Lightning",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3198": {
+      "name": "1984 De Tomaso Pantera GT5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3211": {
+      "name": "2019 Aston Martin Vulcan AMR Pro",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3212": {
+      "name": "2019 Zenvo TSR-S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3214": {
+      "name": "2019 Porsche #70 Porsche Motorsport 935",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3225": {
+      "name": "2018 Ferrari Portofino",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3226": {
+      "name": "2017 Ferrari J50",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3227": {
+      "name": "2019 Ferrari 488 Pista",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3228": {
+      "name": "1999 Ford Racing Puma",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3232": {
+      "name": "2013 Formula Drift #777 Chevrolet Corvette",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3235": {
+      "name": "1982 Volkswagen Caddy",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3241": {
+      "name": "2018 Subaru WRX STI ARX Supercar",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3249": {
+      "name": "2018 Formula Drift #117 599 GTB Fiorano",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3250": {
+      "name": "2018 Mercedes-Benz E63 S AMG",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3255": {
+      "name": "2020 Jeep Gladiator",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3257": {
+      "name": "1990 Nissan Pulsar GTI-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3277": {
+      "name": "2020 Ford Mustang GT500",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3282": {
+      "name": "1987 Porsche #203 Porsche AG 961",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3287": {
+      "name": "1991 Jaguar XJR-15",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3288": {
+      "name": "1993 Porsche 962 C RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3289": {
+      "name": "2019 Lamborghini Aventador SVJ",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3293": {
+      "name": "1993 Jaguar XJ220 S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3304": {
+      "name": "1990 Alfa Romeo SE 048SP",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3307": {
+      "name": "2019 Nissan 370Z Nismo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3311": {
+      "name": "2018 Ferrari FXX-K Evo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3312": {
+      "name": "2019 Ferrari Monza SP2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3315": {
+      "name": "2020 Koenigsegg Jesko",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3318": {
+      "name": "2018 Audi RS4 Avant",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3325": {
+      "name": "2003 Aston Martin DB7 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3359": {
+      "name": "2018 Audi e-tron",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3363": {
+      "name": "1998 Nissan #23 Pennzoil Nismo Skyline GT-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3364": {
+      "name": "2019 Aston Martin Valhalla",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3367": {
+      "name": "2020 Ferrari F8 Tributo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3369": {
+      "name": "2020 Chevrolet Corvette",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3371": {
+      "name": "2020 Lamborghini Huracan EVO",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3373": {
+      "name": "2019 Toyota 4Runner TRD Pro",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3374": {
+      "name": "2019 Toyota Tacoma TRD Pro",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3395": {
+      "name": "1967 Renault 8 Gordini",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3400": {
+      "name": "2009 Formula Drift #99 Mazda RX-8",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3402": {
+      "name": "2020 Toyota GR Supra",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3404": {
+      "name": "2020 Ford Bronco R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3411": {
+      "name": "1995 Formula Drift #34 Toyota Supra MKIV",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3412": {
+      "name": "2019 Subaru WRX STi S209",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3413": {
+      "name": "2019 Volkswagen Golf R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3414": {
+      "name": "2020 Land Rover Defender",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3434": {
+      "name": "2020 BMW M2 Competition",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3439": {
+      "name": "2019 Ford F-250 Deberti",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3441": {
+      "name": "2019 Deberti Toyota Tacoma TRD The Performance Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3445": {
+      "name": "2020 Porsche Taycan Turbo S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3449": {
+      "name": "2020 Lotus Evija",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3454": {
+      "name": "2020 Audi RS3 Sedan",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3476": {
+      "name": "2020 Ford F-450 DRW",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3477": {
+      "name": "2020 Chevrolet Silverado LTZ 71",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3482": {
+      "name": "2021 McLaren 765LT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3486": {
+      "name": "2012 Jeep Wrangler Rubicon (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3494": {
+      "name": "1968 Alfa Romeo Autodelta Tipo 33/2 Daytona",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3498": {
+      "name": "2017 Saleen S7 LM",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3518": {
+      "name": "2020 BMW M8",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3520": {
+      "name": "2021 Lexus LC 500",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3523": {
+      "name": "2020 Formula Drift #151 Toyota GR Supra",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3524": {
+      "name": "2019 Formula Drift #411 Toyota Corolla Hatchback",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3533": {
+      "name": "2022 Volkswagen Golf R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3534": {
+      "name": "2021 MINI JCW GP",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3539": {
+      "name": "2020 Sierra Cars #23 Yokohama Alpha",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3540": {
+      "name": "2021 Sierra Cars RX3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3543": {
+      "name": "2022 Pagani Huayra R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3548": {
+      "name": "2020 Wuling Hongguang S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3549": {
+      "name": "2021 Alumicraft #122 Class 1 buggy",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3551": {
+      "name": "2020 Formula Drift #91 BMW M2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3554": {
+      "name": "2005 Mitsubishi #1 Sierra Enterprises Lancer Evolution Time Attack",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3580": {
+      "name": "2019 Aston Martin DBX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3583": {
+      "name": "2021 Audi RS6 Avant",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3584": {
+      "name": "2021 Audi RS7",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3590": {
+      "name": "1973 Chevrolet C/K Pickup",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3594": {
+      "name": "2021 Ferrari Roma",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3595": {
+      "name": "2020 Ferrari SF90 Stradale",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3597": {
+      "name": "1983 Ford F-150",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3599": {
+      "name": "2022 Gordon Murray T.50",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3600": {
+      "name": "2021 Hennessey Venom F5",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3603": {
+      "name": "2019 Casey Currie Motorsports #4402 Ultra 4 Trophy Jeep",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3604": {
+      "name": "2020 Jimco #179 Hammerhead Class 1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3605": {
+      "name": "2019 Jimco #240 Fastball Racing Spec Trophy Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3606": {
+      "name": "2020 Lamborghini Essenza SCV12",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3608": {
+      "name": "2021 Lamborghini Sian Roadster",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3611": {
+      "name": "2022 Maserati MC20",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3616": {
+      "name": "2021 Mercedes-AMG GT Black Series",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3617": {
+      "name": "2022 Mercedes-Benz SL63 AMG",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3622": {
+      "name": "2019 Nissan GT-R Nismo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3625": {
+      "name": "2021 Rimac Nevera",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3629": {
+      "name": "2021 Toyota GR Yaris",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3631": {
+      "name": "2022 Aston Martin Valkyrie AMR Pro",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3645": {
+      "name": "2021 BMW M4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3650": {
+      "name": "2021 Merceds-AMG One",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3655": {
+      "name": "2021 McLaren 620R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3657": {
+      "name": "2022 Rivian R1T",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3661": {
+      "name": "2018 Lotus Exige Cup 430",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3662": {
+      "name": "2021 RJ Anderson #37 Polaris RZR Pro 4 Truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3667": {
+      "name": "2021 Porsche 911 GT3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3668": {
+      "name": "2023 McLaren Artura",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3670": {
+      "name": "2001 Ford Focus WRC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3672": {
+      "name": "2021 Lamborghini Huracan STO",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3678": {
+      "name": "2020 Hyundai i30 N",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3686": {
+      "name": "2021 Polaris RZR Pro XP Factory Racing Limited Edition",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3687": {
+      "name": "2021 Polaris RZR Pro XP Ultimate",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3692": {
+      "name": "2022 Ford F-150 Lightning",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3693": {
+      "name": "2022 Alumicraft #6165 Trick truck",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3698": {
+      "name": "2022 Porsche Mission R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3700": {
+      "name": "2021 McLaren Sabre",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3716": {
+      "name": "2023 Lotus Emira",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3719": {
+      "name": "2022 Cadillac CT4-V Blackwing",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3720": {
+      "name": "2022 Cadillac CT5-V Blackwing",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3722": {
+      "name": "2022 GMC Hummer EV",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3724": {
+      "name": "2022 Ferrari 296 GTB",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3726": {
+      "name": "2023 Acura Integra",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3728": {
+      "name": "2021 Bentley Continental GTC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3735": {
+      "name": "2022 Subaru BRZ",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3736": {
+      "name": "2022 Ford Bronco Raptor",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3737": {
+      "name": "2022 BMW iX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3744": {
+      "name": "2023 Formula Drift #64 Forsberg Racing Nissan Z",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3745": {
+      "name": "2020 Audi R8",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3750": {
+      "name": "1995 Mitsubishi Pajero",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3753": {
+      "name": "2023 Lamborghini Huracan Tecnica",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3755": {
+      "name": "2022 Ford Supervan 4",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3759": {
+      "name": "2020 Lamborghini Huracan Evo Spyder",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3760": {
+      "name": "2022 Porsche 718 Cayman GT4 RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3761": {
+      "name": "2022 Toyota GR86",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3763": {
+      "name": "2023 BMW M2",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3764": {
+      "name": "2022 BMW M5 CS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3766": {
+      "name": "2023 Chevrolet Corvette Z06",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3767": {
+      "name": "2022 Acura NSX Type S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3771": {
+      "name": "2023 Chevrolet Corvette E-Ray",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3773": {
+      "name": "2023 Honda Civic Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3774": {
+      "name": "2023 Lamborghini Countach",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3775": {
+      "name": "2022 Lamborghini Aventador Ultimae",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3781": {
+      "name": "2023 Porsche 911 GT3 RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3783": {
+      "name": "1989 Volkswagen Golf Rallye",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3785": {
+      "name": "1997 Toyota Soarer",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3789": {
+      "name": "2022 Wuling Mini EV",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3795": {
+      "name": "2023 Meyers Manx",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3798": {
+      "name": "2017 Mazda MX-5 Cup",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3811": {
+      "name": "2023 Lucid Air",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3819": {
+      "name": "2022 Subaru WRX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3823": {
+      "name": "2022 Mazda MX-5 RF",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3827": {
+      "name": "2023 Hyundai Ioniq 5 N",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3829": {
+      "name": "2022 Hyundai N Vision 74",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3840": {
+      "name": "2023 Lamborghini Huracan Sterrato",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3846": {
+      "name": "2024 Ford Mustang GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3847": {
+      "name": "2024 Ford Mustang Dark Horse",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3848": {
+      "name": "2023 Toyota Camry TRD",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3849": {
+      "name": "2023 Ford F-150 Raptor R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3850": {
+      "name": "2021 Dodge Durango Hellcat",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3851": {
+      "name": "1991 Toyota Sera",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3852": {
+      "name": "1991 Honda Beat",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan) ; live-tuned car 2026-08-21 (3-cyl stock -> 4-cyl swap, AWD conversion)"
+    },
+    "3854": {
+      "name": "1993 Autozam AZ-1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3855": {
+      "name": "1991 Nissan Figaro",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3856": {
+      "name": "1987 Nissan Be-1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3858": {
+      "name": "1997 Nissan Stagea",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3859": {
+      "name": "1984 Honda City",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3860": {
+      "name": "1989 Nissan S-Cargo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3865": {
+      "name": "1994 Honda Acty",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3880": {
+      "name": "2023 Toyota GR Corolla",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3886": {
+      "name": "1995 Mitsubishi Lancer Evolution III",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3891": {
+      "name": "2024 Lamborghini Revuelto",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3895": {
+      "name": "2020 Mercedes-Benz SLC43 AMG",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3903": {
+      "name": "2023 Ford Fiesta ST",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3904": {
+      "name": "2022 Ford Focus ST",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3908": {
+      "name": "2022 Honda e",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3910": {
+      "name": "2023 Porsche 911 Dakar",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3914": {
+      "name": "1991 Toyota Chaser GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3917": {
+      "name": "2023 Audi R8 GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3918": {
+      "name": "1995 Nissan Gloria",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3921": {
+      "name": "2024 Nissan Z Nismo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3928": {
+      "name": "2022 Hyundai i20 N",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3929": {
+      "name": "1989 Nissan Pao",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3933": {
+      "name": "1997 Toyota Chaser",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3937": {
+      "name": "1970 Honda N600",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3950": {
+      "name": "1967 Ferrari 275 GTB4 Spider",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3953": {
+      "name": "2023 Porsche 911 Turbo S",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3954": {
+      "name": "2024 Chevrolet Camaro ZL1",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3955": {
+      "name": "2024 Ram TRX",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3959": {
+      "name": "2022 Dodge Challenger SRT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3960": {
+      "name": "1994 Subaru Vivio RX-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3964": {
+      "name": "2024 Toyota Prius Prime XSE Premium",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3983": {
+      "name": "2024 BMW X6 M",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "3999": {
+      "name": "2002 Nissan Silvia Spec-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4002": {
+      "name": "2024 Lamborghini Temerario",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4034": {
+      "name": "1972 Honda Z GT",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4038": {
+      "name": "1999 Toyota Altezza",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4055": {
+      "name": "1996 Toyota Starlet Glanza",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4057": {
+      "name": "1997 Nissan Skyline GT-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4069": {
+      "name": "1988 BMW M3",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4081": {
+      "name": "2024 Koenigsegg Gemera",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4084": {
+      "name": "1972 Datsun #269 Attacking The Clock Racing 240Z All Carbon Hillclimb Beast",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4085": {
+      "name": "1990 Mitsubishi #269 Attacking The Clock Racing Minicab Time Attack",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4090": {
+      "name": "2001 Mitsubishi Lancer Evolution VI TME",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4094": {
+      "name": "2024 Nissan GT-R Nismo",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4114": {
+      "name": "1992 Nissan Skyline GT-R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4119": {
+      "name": "1998 Nissan Skyline Autech",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4124": {
+      "name": "2013 Mercedes-Benz G65 AMG (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4125": {
+      "name": "1994 Honda Acty (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4126": {
+      "name": "2022 Honda e (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4127": {
+      "name": "1995 Mitsubishi Pajero (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4128": {
+      "name": "2022 Subaru WRX (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4129": {
+      "name": "1997 Nissan Stagea (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4144": {
+      "name": "1992 Mazda RX-7",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4145": {
+      "name": "1974 Mazda #123 Mad MIke 808 Wagon Fursty",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4147": {
+      "name": "2021 Alfa Romeo Giulia GTAM",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4156": {
+      "name": "2025 Ferrari F80",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4158": {
+      "name": "2010 Lexus LFA (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4160": {
+      "name": "1989 Nissan S-Cargo (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4162": {
+      "name": "1985 Toyota Sprinter (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4163": {
+      "name": "2020 Wuling Sunshine S (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4164": {
+      "name": "2022 Subaru BRZ (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4165": {
+      "name": "1973 Mazda RX-3 (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4166": {
+      "name": "2023 BMW M2 (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4167": {
+      "name": "2012 Nisan GT-R Black Edition R35 (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4168": {
+      "name": "1968 Ford Mustang GT 2+2 Fastback (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4169": {
+      "name": "1990 Mercedes-Benz 190E 2.5-16 Evolution II (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4171": {
+      "name": "1986 Ford F-150 XLT Lariat (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4175": {
+      "name": "2020 Ford F-450 DRW (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4179": {
+      "name": "1990 Nissan #12 Skyline GT-R (BNR32GR.A) JTC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4197": {
+      "name": "1994 Mazda MX-5 Miata (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4198": {
+      "name": "1999 Dodge Viper GTS ACR (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4199": {
+      "name": "2019 Toyota Tacoma TRD Pro (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4200": {
+      "name": "2020 Lotus Evija (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4205": {
+      "name": "1972 Nissan Patrol",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4210": {
+      "name": "2018 Lotus Scura Motorsports Exige WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4211": {
+      "name": "1990 Honda #19 101 Motorsport CRX WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4212": {
+      "name": "1993 Nissan #32 Skyline WTAC XTREME GTR",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4213": {
+      "name": "2000 Nissan #36 Dream Project S15 Silvia WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4214": {
+      "name": "1995 Toyota J&J Motorsport Supra WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4216": {
+      "name": "1994 Honda Acty (RakuRaku Express)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4221": {
+      "name": "2026 GR GT Prototype",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4222": {
+      "name": "1989 Nissan Silvia K's",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4223": {
+      "name": "2000 Nissan Skyline GT-R V-Spec II",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4231": {
+      "name": "2004 Honda #52 Evasive Motorsports S2000 WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4232": {
+      "name": "2005 Porsche Cayman GT3 WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4234": {
+      "name": "2008 Honda Civic Type R",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4238": {
+      "name": "1983 Nissan Skyline 2000 Turbo RS",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4250": {
+      "name": "1985 Toyota Sprinter (Touge Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4251": {
+      "name": "2003 Honda S2000 (Touge Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4252": {
+      "name": "1998 Subaru Impreza 22B (Touge Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4254": {
+      "name": "2021 Honda #33 Integra WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4255": {
+      "name": "2005 Toyota Crown Taxi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4257": {
+      "name": "2017 Toyota JPN Taxi",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4259": {
+      "name": "2013 Toyota 86 Stories",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4260": {
+      "name": "2024 Nissan GT-R Nismo (Unobtainable)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4261": {
+      "name": "1995 Porsche 911 GT2 (Unobtainable)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4263": {
+      "name": "2026 Toyota Scallop (Unobtainable)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4264": {
+      "name": "2018 Ferrari FXX-K Evo (Welcome pack)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4265": {
+      "name": "2021 Mercedes-AMG GT Black Series (Welcome Pack)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4266": {
+      "name": "2021 BMW M4 (Welcome Pack)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4267": {
+      "name": "2004 Mitsubishi Lancer Evolution VIII MR (Welcome Pack)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4268": {
+      "name": "2023 Ford F-150 Raptor R (Welcome Pack)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4277": {
+      "name": "1992 Honda #21 Hardrace/JDMYard Civic WTAC",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4278": {
+      "name": "2025 Toyota Land Cruiser",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4287": {
+      "name": "1994 Subaru Vivio RX-R (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4303": {
+      "name": "2012 Nissan GT-R Black Edition R35 (Touge Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4313": {
+      "name": "1970 Porsche #3 917 LH (Forza Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4315": {
+      "name": "1962 Peel P50 (Trolli Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4332": {
+      "name": "2005 Toyota Crown Taxi (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4333": {
+      "name": "2017 Toyota JPN Taxi (Traffic)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4341": {
+      "name": "2017 Ferrari J50 (Pre Order)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+    },
+    "4342": {
+      "name": "1965 Toyota Sports 800 (Fanta Edition)",
+      "confidence": "community-table",
+      "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
     }
   },
-  "builds": {}
+  "builds": {},
+  "table_source": {
+    "url": "https://gist.githubusercontent.com/HDR/0659d1717bc61504bf83750628963f4f/raw/",
+    "fetched": "2026-08-21",
+    "entries": 660,
+    "note": "years come from internal archive names and are occasionally off; a handful of names are codenames"
+  }
 }

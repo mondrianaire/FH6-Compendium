@@ -49240,13 +49240,3314 @@ window.FH6_DB = {
     "schema_version": "1.0.0",
     "purpose": "Learned map of Data Out CarOrdinal -> car name, plus a registry of build signatures. Written by the live daemon (POST /car, POST /build) and by hand. The stream gives the ordinal exactly; the name has to be learned once per car.",
     "cars": {
+      "247": {
+        "name": "1969 Toyota 2000 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "249": {
+        "name": "1964 Ferrari 250 GTO",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "251": {
+        "name": "1954 Mercedes-Benz 300 SL",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "253": {
+        "name": "1994 Ferrari F355 Berlinetta",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "255": {
+        "name": "1991 Ferrari 512 TR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "260": {
+        "name": "1973 Porsche 911 Carrera RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "261": {
+        "name": "1995 Porsche 911 GT2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "262": {
+        "name": "2004 Porsche 911 GT3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "265": {
+        "name": "1982 Porsche 911 Turbo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "268": {
+        "name": "1989 Porsche 944 Turbo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "269": {
+        "name": "1987 Porsche 959",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "281": {
+        "name": "1968 Plymouth Barracuda",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "289": {
+        "name": "1969 Chevrolet Camaro SS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "292": {
+        "name": "2003 Porsche Carrera GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "295": {
+        "name": "2003 Toyota Celica SS-I",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "296": {
+        "name": "1998 TVR Cerbera",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "299": {
+        "name": "1970 Chevrolet Chevelle",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "302": {
+        "name": "2004 Honda Civic Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "306": {
+        "name": "1965 Shelby Cobra 427",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "309": {
+        "name": "1995 Volkswagen Corrado",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "312": {
+        "name": "1967 Chevrolet Corvette Stingray",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "314": {
+        "name": "2002 Chevrolet Corvette Z06",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "315": {
+        "name": "1970 Chevrolet Corvette ZR1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "316": {
+        "name": "1988 Lamborghini Countach",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "320": {
+        "name": "1991 Honda CRX Si",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "323": {
+        "name": "1992 Lancia Delta",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "324": {
+        "name": "1999 Lamborghini Diablo GTR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "325": {
+        "name": "1997 Lamborghini Diablo SV",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "326": {
+        "name": "1969 Ferrari Dino 246",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "327": {
+        "name": "1995 Mitsubishi Eclipse GSX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "333": {
+        "name": "2002 Ferrari Enzo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "336": {
+        "name": "1961 Jaguar E-Type",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "338": {
+        "name": "1997 McLaren F1 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "340": {
+        "name": "1987 Ferrari F40",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "342": {
+        "name": "1995 Ferrari F50",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "343": {
+        "name": "1969 Nissan Fairlady 432 Z",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "344": {
+        "name": "2003 Nissan Fairlady Z",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "345": {
+        "name": "1994 Nissan Fairlady Z Version S Twin Turbo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "348": {
+        "name": "2005 Ford GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "353": {
+        "name": "1992 Volkswagen Golf GTi 16v Mk2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "357": {
+        "name": "1997 Mitsubishi GTO",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "358": {
+        "name": "1984 Ferrari GTO",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "363": {
+        "name": "1998 Subaru Impreza 22B",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "364": {
+        "name": "2004 Subaru Impreza WRX STi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "365": {
+        "name": "2005 Subaru Impreza WRX STi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "368": {
+        "name": "2001 Acura Integra Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "374": {
+        "name": "2006 Mitsubishi Lancer Evolution IX MR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "378": {
+        "name": "2004 Mitsubishi Lancer Evolution VIII MR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "379": {
+        "name": "2005 Subaru Legacy B4 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "382": {
+        "name": "1997 BMW M3 E36",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "383": {
+        "name": "2005 BMW M3 E46",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "391": {
+        "name": "2004 Maserati MC12",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "398": {
+        "name": "1995 Toyota MR2 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "405": {
+        "name": "2000 Ford Mustang Cobra R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "411": {
+        "name": "2005 Honda NSX-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "412": {
+        "name": "1992 Honda NSX-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "417": {
+        "name": "1987 Buick Regal GNX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "419": {
+        "name": "2006 Audi RS4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "420": {
+        "name": "2003 Audi RS6",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "422": {
+        "name": "2002 Acura RSX Type-S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "423": {
+        "name": "1990 Mazda RX-7",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "427": {
+        "name": "2003 Honda S2000",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "433": {
+        "name": "2005 TVR Sagaris",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "440": {
+        "name": "1994 Nissan Silvia K's",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "455": {
+        "name": "1985 Toyota Sprinter",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "458": {
+        "name": "1974 Lancia Stratos",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "460": {
+        "name": "1992 Toyota Supra 2.0 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "461": {
+        "name": "1998 Toyota Supra RZ",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "483": {
+        "name": "1999 Dodge Viper GTS ACR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "489": {
+        "name": "1993 Jaguar XJ220",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "513": {
+        "name": "1969 Dodge Charger R/T",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "567": {
+        "name": "1998 Nissan R390",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "568": {
+        "name": "1998 Mercedes-Benz CLK GTR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "569": {
+        "name": "2005 Honda NSX-R GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "615": {
+        "name": "2007 Peugeot 207 Super 2000",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "625": {
+        "name": "2007 Honda Civic Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "633": {
+        "name": "1983 Audi Sport Quattro",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "634": {
+        "name": "1980 Renault 5 Turbo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "637": {
+        "name": "1967 Lamborghini Miura P400",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "639": {
+        "name": "1970 Dodge Challenger Hemi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "641": {
+        "name": "1998 Porsche 911 GT1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1006": {
+        "name": "2005 Ferrari FXX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1007": {
+        "name": "2008 Koenigsegg CCGT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1009": {
+        "name": "2008 Mitsubishi Lancer Evolution X GSR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1011": {
+        "name": "2008 BMW M3 E92",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1020": {
+        "name": "1996 Ferrari F50 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1022": {
+        "name": "2007 Ferrari F430 Scuderia",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1023": {
+        "name": "1998 Ferrari F40 Competizione",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1032": {
+        "name": "2008 Alfa Romeo 8C Competizione",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1034": {
+        "name": "1994 Toyota Celica ST205",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1040": {
+        "name": "1981 BMW M1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1041": {
+        "name": "1993 Ford Mustang SVT Cobra R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1042": {
+        "name": "1971 Nissan Skyline 2000 GT-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1045": {
+        "name": "1987 Pontiac Trans Am GTA",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1046": {
+        "name": "2008 Dodge Viper SRT-10 ACR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1052": {
+        "name": "2006 Dodge Ram SRT-10",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1059": {
+        "name": "2008 BMW Z4 M Coupe",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1060": {
+        "name": "2008 Subaru Impreza WRX STi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1063": {
+        "name": "1969 Dodge Charger Daytona",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1064": {
+        "name": "1979 Chevrolet Camaro Z/28",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1069": {
+        "name": "2009 Chevrolet Corvette ZR1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1086": {
+        "name": "2009 Ford Focus RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1090": {
+        "name": "2009 Mercedes-Benz SL 65 AMG",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1093": {
+        "name": "1960 Chevrolet Corvette",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1103": {
+        "name": "2010 Nissan 370Z",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1104": {
+        "name": "1970 Nissan 510",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1105": {
+        "name": "1964 Aston Martin DB5 Vantage",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1108": {
+        "name": "1987 Ford RS200 Evolution",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1110": {
+        "name": "1994 Mazda MX-5 Miata",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1124": {
+        "name": "1980 Fiat 131 Abarth Stradale",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1126": {
+        "name": "2009 BMW M5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1130": {
+        "name": "2011 McLaren MP4-12C",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1131": {
+        "name": "2010 Ferrari 458 Italia",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1150": {
+        "name": "1965 Alfa Romeo Giulia GTA",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1155": {
+        "name": "1965 Shelby Cobra Daytona",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1171": {
+        "name": "2010 Ferrari 599XX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1173": {
+        "name": "2010 Lamborghini Gallardo LP670-4 SV",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1175": {
+        "name": "2010 Pagani Zonda R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1184": {
+        "name": "2009 Audi RS6",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1200": {
+        "name": "2009 Audi R8 LMS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1204": {
+        "name": "2010 Renault Megane RS250",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1215": {
+        "name": "NUL_CAR_00",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1216": {
+        "name": "2011 Audi RS3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1220": {
+        "name": "2010 Audi TT RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1221": {
+        "name": "2010 Mazdaspeed 3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1229": {
+        "name": "2008 Mazda Furai",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1231": {
+        "name": "2010 Volkswagen Golf R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1253": {
+        "name": "2010 Noble M600",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1260": {
+        "name": "2010 Lexus LFA",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1269": {
+        "name": "1973 BMW 2002 Turbo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1270": {
+        "name": "1982 DeLorean DMC-12",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1272": {
+        "name": "1992 Ford Escort RS Cosworth",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1273": {
+        "name": "1997 Honda Civic Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1276": {
+        "name": "1977 Pontiac Firebird Trans Am",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1277": {
+        "name": "1971 Plymouth 'Cuda 426",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1278": {
+        "name": "1973 Ford XB Falcon GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1282": {
+        "name": "1994 Nissan 240SX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1283": {
+        "name": "1957 Ford Thunderbird",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1291": {
+        "name": "1970 Chevrolet El Camino SS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1293": {
+        "name": "1987 Ford Sierra RS500",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1294": {
+        "name": "1992 GMC Syclone",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1295": {
+        "name": "1982 Lancia 037 Stradale",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1296": {
+        "name": "1990 Mercedes-Benz 190E",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1297": {
+        "name": "1988 Mitsubishi Starion ESI-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1299": {
+        "name": "1983 Volvo 242 Turbo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1300": {
+        "name": "1964 Chevrolet Impala SS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1301": {
+        "name": "1956 Jaguar D-Type",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1314": {
+        "name": "1993 McLaren F1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1323": {
+        "name": "2011 Subaru Impreza WRX STi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1330": {
+        "name": "1970 Chevrolet Camaro Z/28",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1332": {
+        "name": "1968 Dodge Dart",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1335": {
+        "name": "1991 Mazda #55 Mazda 787B",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1350": {
+        "name": "2011 BMW X5 M",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1352": {
+        "name": "1970 Dodge Super Bee",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1355": {
+        "name": "1965 Ford Mustang",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1367": {
+        "name": "2003 BMW M5 E39",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1368": {
+        "name": "1988 BMW M5 E28",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1369": {
+        "name": "2009 Pagani Zonda Cinque",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1376": {
+        "name": "1999 Lotus Elise",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1379": {
+        "name": "1996 Chevrolet Impala SS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1381": {
+        "name": "1992 Mitsubishi Galant VR-4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1382": {
+        "name": "1990 Subaru Legacy RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1388": {
+        "name": "2012 BMW M5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1392": {
+        "name": "2011 Lamborghini Sesto Elemento",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1393": {
+        "name": "1992 Alfa Romeo 155",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1394": {
+        "name": "1993 GMC Typhoon",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1395": {
+        "name": "1989 Toyota MR2 SC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1397": {
+        "name": "2011 Koenigsegg Agera",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1398": {
+        "name": "2012 Lamborghini Aventador LP700-4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1417": {
+        "name": "2011 Audi RS5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1418": {
+        "name": "1995 BMW M5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1426": {
+        "name": "2011 Mazda RX-8 R3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1428": {
+        "name": "2011 Volkswagen Scirocco R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1429": {
+        "name": "1969 Chevrolet Nova SS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1435": {
+        "name": "1966 Volkswagen Beetle",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1459": {
+        "name": "1957 Chevrolet Bel Air",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1477": {
+        "name": "2011 Ford Transit SSV",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1478": {
+        "name": "1986 Audi Sport Quattro S2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1480": {
+        "name": "1985 Mazda RX-7",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1481": {
+        "name": "1965 Austin-Healey 3000",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1493": {
+        "name": "1996 BMW 850CSi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1500": {
+        "name": "2012 Mercedes-Benz C63 AMG",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1513": {
+        "name": "1997 Maserati Ghibli",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1514": {
+        "name": "1973 Mazda RX-3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1517": {
+        "name": "1990 Toyota Celica ST185",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1522": {
+        "name": "2012 Jeep Wrangler",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1529": {
+        "name": "1974 Ford Capri",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1532": {
+        "name": "2012 Hennessey Venom GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1533": {
+        "name": "1977 Holden Torana",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1537": {
+        "name": "1973 Toyota Corolla SR5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1549": {
+        "name": "1968 Alfa Romeo 33 Stradale",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1559": {
+        "name": "1955 Mercedes-Benz 300 SLR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1562": {
+        "name": "2013 Viper GTS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1564": {
+        "name": "1953 Chevrolet Corvette",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1568": {
+        "name": "1974 Honda Civic RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1575": {
+        "name": "1988 Chevrolet Monte Carlo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1578": {
+        "name": "1963 Ferrari 250 GT Lusso",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1586": {
+        "name": "1962 Lincoln Continental",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1587": {
+        "name": "1972 Mazda Cosmo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1591": {
+        "name": "1984 Peugeot 205 T16",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1592": {
+        "name": "1974 Toyota Celica GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1598": {
+        "name": "2010 BMW M3 GTS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1599": {
+        "name": "2012 Ferrari 599XX Evolution",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1601": {
+        "name": "2012 Lamborghini Gallardo LP570-4 Spyder Performante",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1607": {
+        "name": "2013 Audi RS4 Avant",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1627": {
+        "name": "2013 Mercedes-Benz G65 AMG",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1650": {
+        "name": "1986 Honda Civic Si",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1651": {
+        "name": "2013 Ariel Atom",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1654": {
+        "name": "2013 Ford Mustang GT500",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1655": {
+        "name": "2013 Subaru BRZ",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1658": {
+        "name": "2013 Mercedes-Benz A45 AMG",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1661": {
+        "name": "1986 Lancia Delta S4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1662": {
+        "name": "1965 Mini Cooper S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1667": {
+        "name": "2013 McLaren P1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "1668": {
+        "name": "1969 Ford Mustang Boss 302",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2002": {
+        "name": "2012 Nissan GT-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2003": {
+        "name": "2013 MINI JCW GP",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2004": {
+        "name": "2013 Mazda MX-5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2006": {
+        "name": "1995 Chevrolet Corvette ZR-1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2007": {
+        "name": "2013 Toyota GT86",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2009": {
+        "name": "2013 Audi RS7",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2010": {
+        "name": "2013 Audi R8 Plus",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2017": {
+        "name": "1968 Fiat 595 SS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2019": {
+        "name": "2003 Ford Focus RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2034": {
+        "name": "2013 Ferrari LaFerrari",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2038": {
+        "name": "2014 Alfa Romeo 4C",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2040": {
+        "name": "2014 BAC Mono",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2042": {
+        "name": "2013 Lamborghini Veneno",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2119": {
+        "name": "1984 Honda CRX Mugen",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2121": {
+        "name": "1994 Honda Prelude",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2128": {
+        "name": "2013 Cadillac XTS Limo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2131": {
+        "name": "2014 Holden HSV GTS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2133": {
+        "name": "2015 BMW i8",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2140": {
+        "name": "1981 Subaru BRAT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2142": {
+        "name": "2014 Volkswagen Golf R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2145": {
+        "name": "2014 Ford Ranger T6 Rally Raid",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2147": {
+        "name": "1986 MG Metro 6R4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2148": {
+        "name": "2013 Mini X-Raid All4 Racing Countryman",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2149": {
+        "name": "1993 Renault Clio Williams",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2151": {
+        "name": "1963 Volkswagen Type 2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2154": {
+        "name": "2014 BMW M4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2161": {
+        "name": "1965 Alfa Romeo Giulia TZ2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2163": {
+        "name": "2015 Honda Civic Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2164": {
+        "name": "2015 Lamborghini Huracan",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2168": {
+        "name": "2015 Subaru WRX STi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2171": {
+        "name": "2005 Mazda MX-5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2175": {
+        "name": "2015 Lexus RC F",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2177": {
+        "name": "2015 Chevrolet Corvette Z06",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2178": {
+        "name": "2001 Audi RS4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2179": {
+        "name": "2015 Audi S1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2180": {
+        "name": "2015 Audi RS6",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2183": {
+        "name": "2015 Chevrolet Camaro Z/28",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2184": {
+        "name": "2015 Ferrari 458 Speciale",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2188": {
+        "name": "2015 Koenigsegg One:1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2205": {
+        "name": "1970 Honda S800",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2216": {
+        "name": "1958 Plymouth Fury",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2217": {
+        "name": "1996 Subaru SVX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2242": {
+        "name": "2015 Mercedes-AMG GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2262": {
+        "name": "2016 Cadillac ATS-V",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2263": {
+        "name": "2015 Dodge Challenger Hellcat",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2267": {
+        "name": "2016 Mazda MX-5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2270": {
+        "name": "1973 Nissan Skyline GT-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2272": {
+        "name": "1969 Datsun 2000",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2290": {
+        "name": "2014 Porsche 918 Spyder",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2297": {
+        "name": "2012 Porsche 911 GT3 RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2357": {
+        "name": "2017 Ford Focus RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2363": {
+        "name": "2016 Ford Phoenix",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2371": {
+        "name": "2016 Ferrari FXX K",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2372": {
+        "name": "1932 Ford Coupe",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2400": {
+        "name": "2016 Ford Shelby GT350R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2412": {
+        "name": "1962 BMW Isetta",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2416": {
+        "name": "1971 Meyers Manx",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2420": {
+        "name": "1984 Opel Manta 400",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2421": {
+        "name": "2016 Cadillac CTS-V Sedan",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2422": {
+        "name": "2016 Holden HSV GTS Maloo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2430": {
+        "name": "2016 Ariel Nomad",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2467": {
+        "name": "2016 Ferrari 488 GTB",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2468": {
+        "name": "2015 Dodge Charger SRT Hellcat",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2469": {
+        "name": "1965 Toyota Sports 800",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2470": {
+        "name": "2016 Aston Martin Vulcan",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2471": {
+        "name": "2016 Mercedes-Benz C63 AMG Coupe",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2472": {
+        "name": "2016 McLaren 570S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2473": {
+        "name": "2016 Audi R8 V10 Plus",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2486": {
+        "name": "2015 Radical RXC Turbo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2489": {
+        "name": "2016 Fiat 695 Abarth",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2494": {
+        "name": "2015 Land Rover Range Rover SVR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2507": {
+        "name": "1955 Chevrolet 150 Utility Sedan",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2512": {
+        "name": "1987 Nissan Skyline GTS-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2515": {
+        "name": "2011 Penhall The Cholla",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2517": {
+        "name": "2014 Ford F-150 Trophy Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2526": {
+        "name": "2016 Koenigsegg Regera",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2527": {
+        "name": "2017 Aston Martin DB11",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2534": {
+        "name": "1993 Porsche 968 Turbo S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2535": {
+        "name": "1993 Porsche 928 GTS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2542": {
+        "name": "2016 Alfa Romeo Giulia",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2544": {
+        "name": "2016 Dodge Viper ACR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2549": {
+        "name": "1970 Porsche #3 917 LH",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2551": {
+        "name": "2015 Ford Pursuit Ute",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2552": {
+        "name": "2015 Alumicraft Class 10 Race Car",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2563": {
+        "name": "1972 Reliant Supervan III",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2566": {
+        "name": "1975 Toyota FJ40",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2568": {
+        "name": "1969 Volkswagen Class 5/1600 Baja Bug",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2569": {
+        "name": "2015 Ultima Evolution Coupe",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2574": {
+        "name": "2554 AMG Transport Dynamics M12 Warthog FAV",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2577": {
+        "name": "2015 Ferrari F12tdf",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2613": {
+        "name": "1970 GMC Jimmy",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2614": {
+        "name": "1968 Ford Mustang GT390",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2616": {
+        "name": "2016 Lamborghini Centenario LP 770-4",
+        "confidence": "player-confirmed",
+        "source": "community table lists the internal codename Urus Bellissima; FM23 table maps 2616 to Centenario; matches the owned V10-swap replica (AWD 10-cyl S1 800)"
+      },
+      "2618": {
+        "name": "2017 Nissan GT-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2625": {
+        "name": "2016 Bentley Bentayga",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2628": {
+        "name": "2016 BMW M4 GTS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2636": {
+        "name": "1993 Toyota #1 T100 Baja Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2647": {
+        "name": "2016 Pagani Huayra",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2649": {
+        "name": "2010 Ford Crown Victoria",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2652": {
+        "name": "1997 Mitsubishi Pajero Evolution",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2654": {
+        "name": "2017 Mercedes-AMG GT R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2659": {
+        "name": "1998 Nissan Silvia K's",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2663": {
+        "name": "2016 RJ Anderson #37 Polaris RZR Pro 2 Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2711": {
+        "name": "2010 Mazdaspeed 3 (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2712": {
+        "name": "1992 Mitsubishi Galant VR-4 (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2713": {
+        "name": "2014 Box Truck (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2714": {
+        "name": "2014 Bus (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2738": {
+        "name": "1995 Nissan GT-R LM",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2739": {
+        "name": "2017 Chevrolet Camaro ZL1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2740": {
+        "name": "2017 Abarth 124 Spider",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2742": {
+        "name": "2017 Jeep Trailcat",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2743": {
+        "name": "2016 Toyota Land Cruiser Arctic",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2745": {
+        "name": "2015 Honda Ridgeline Baja Trophy Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2755": {
+        "name": "2018 Porsche 911 GT2 RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2773": {
+        "name": "2018 Porsche Cayenne",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2792": {
+        "name": "1966 Ford GT40",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2793": {
+        "name": "1967 Ferrari 330 P4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2794": {
+        "name": "1993 Porsche 911 Turbo S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2801": {
+        "name": "1983 Nissan #11 Tomica Skylien Turbo Super Silhouette",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2822": {
+        "name": "1985 Nissan Safari",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2825": {
+        "name": "1971 Lotus Elise GT1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2841": {
+        "name": "2018 Jeep Grand Cherokee Trackhawk",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2866": {
+        "name": "2018 Exomotive Exocet Sport V8 XP-5",
+        "confidence": "player-confirmed",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan) ; matches the owned Exocet handling-meta build (S1 800 AWD 4-cyl swap)"
+      },
+      "2870": {
+        "name": "2018 Honda Civic Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2871": {
+        "name": "2018 Can-Am Maverick",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2872": {
+        "name": "2019 Hyundai Veloster N",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2902": {
+        "name": "2018 Flatbed Truck (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2903": {
+        "name": "2005 Subaru Legacy B4 GT (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2909": {
+        "name": "2018 Dodge Challenger SRT Demon",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2910": {
+        "name": "2017 Koenigsegg Agera RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2935": {
+        "name": "2018 Funco F9",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2937": {
+        "name": "2017 Ford Fiesta GRC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2968": {
+        "name": "2023 Aston Martin Valkyrie",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2974": {
+        "name": "2018 Ferrari 812 Superfast",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2986": {
+        "name": "2017 Mercedes-Benz Unimog",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2987": {
+        "name": "1962 Peel P50",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2992": {
+        "name": "1964 Jaguar E-Type Lightweight",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2993": {
+        "name": "2018 TVR Griffith",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2995": {
+        "name": "1983 Volkswagen Golf GTI",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2996": {
+        "name": "2015 Formula Drift #13 Ford Mustang",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "2997": {
+        "name": "2016 Formula Drift #530 HSV Maloo Gen-F",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3000": {
+        "name": "1997 Formula Drift #777 Nissan 240SX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3003": {
+        "name": "2006 Formula Drift #43 Dodge Viper SRT10",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3007": {
+        "name": "2017 Volkswagen Beetle GRC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3031": {
+        "name": "1985 Porsche #185 959 Prodrive Rally Raid",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3035": {
+        "name": "2018 KTM X-Bow GT4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3037": {
+        "name": "1989 Formula Drift #98 BMW 325I",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3051": {
+        "name": "2017 Ford Fiesta M-Sport",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3055": {
+        "name": "2010 Jaguar C-X75",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3062": {
+        "name": "1970 Ferrari 512 S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3063": {
+        "name": "2018 Mercedes-Benz X-Class",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3064": {
+        "name": "2018 Mercedes-AMG GT4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3072": {
+        "name": "2019 Porsche 911 GT3 RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3082": {
+        "name": "2006 Maserati MC12 Corsa",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3087": {
+        "name": "2014 McLaren 650S Spider",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3088": {
+        "name": "2018 Chevrolet Deberti Drift Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3091": {
+        "name": "2018 Aston Martin Vantage",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3107": {
+        "name": "2014 Mercedes-Benz G63 AMG 6x6",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3108": {
+        "name": "2018 Ford Mustang RTR Spec 5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3110": {
+        "name": "2013 Deberti Wrangler Unlimited",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3117": {
+        "name": "2018 Porsche 718 Cayman GTS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3118": {
+        "name": "2019 Chevrolet Corvette ZR1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3120": {
+        "name": "2019 Lamborghini Urus",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3123": {
+        "name": "2019 Porsche 911 (992)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3128": {
+        "name": "2017 Ford #25 Brocky Ultra4 Bronco RTR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3129": {
+        "name": "2008 Renault Megane R26.R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3132": {
+        "name": "2018 Mini X-Raid John Cooper Works Buggy",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3134": {
+        "name": "2018 Renault Megane RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3141": {
+        "name": "2018 Apollo Intensa Emozione",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3149": {
+        "name": "2018 Chevrolet Camaro 1LE",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3153": {
+        "name": "2019 McLaren 600LT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3156": {
+        "name": "2019 McLaren Speedtail",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3170": {
+        "name": "1994 Ford Supervan 3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3173": {
+        "name": "2019 BMW Z4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3176": {
+        "name": "1987 Mercedes-AMG Hammer",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3180": {
+        "name": "1991 Peugeot 205 Rallye",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3184": {
+        "name": "1977 Ford Escort Mk2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3185": {
+        "name": "2019 Aston Martin DBS Superleggera",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3187": {
+        "name": "2018 Porsche Macan RR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3189": {
+        "name": "2018 Hennessey VelociRaptor 6x6",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3190": {
+        "name": "2003 Ford SVT Lightning",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3198": {
+        "name": "1984 De Tomaso Pantera GT5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3211": {
+        "name": "2019 Aston Martin Vulcan AMR Pro",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3212": {
+        "name": "2019 Zenvo TSR-S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3214": {
+        "name": "2019 Porsche #70 Porsche Motorsport 935",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3225": {
+        "name": "2018 Ferrari Portofino",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3226": {
+        "name": "2017 Ferrari J50",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3227": {
+        "name": "2019 Ferrari 488 Pista",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3228": {
+        "name": "1999 Ford Racing Puma",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3232": {
+        "name": "2013 Formula Drift #777 Chevrolet Corvette",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3235": {
+        "name": "1982 Volkswagen Caddy",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3241": {
+        "name": "2018 Subaru WRX STI ARX Supercar",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3249": {
+        "name": "2018 Formula Drift #117 599 GTB Fiorano",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3250": {
+        "name": "2018 Mercedes-Benz E63 S AMG",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3255": {
+        "name": "2020 Jeep Gladiator",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3257": {
+        "name": "1990 Nissan Pulsar GTI-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3277": {
+        "name": "2020 Ford Mustang GT500",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3282": {
+        "name": "1987 Porsche #203 Porsche AG 961",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3287": {
+        "name": "1991 Jaguar XJR-15",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3288": {
+        "name": "1993 Porsche 962 C RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3289": {
+        "name": "2019 Lamborghini Aventador SVJ",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3293": {
+        "name": "1993 Jaguar XJ220 S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3304": {
+        "name": "1990 Alfa Romeo SE 048SP",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3307": {
+        "name": "2019 Nissan 370Z Nismo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3311": {
+        "name": "2018 Ferrari FXX-K Evo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3312": {
+        "name": "2019 Ferrari Monza SP2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3315": {
+        "name": "2020 Koenigsegg Jesko",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3318": {
+        "name": "2018 Audi RS4 Avant",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3325": {
+        "name": "2003 Aston Martin DB7 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3359": {
+        "name": "2018 Audi e-tron",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3363": {
+        "name": "1998 Nissan #23 Pennzoil Nismo Skyline GT-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3364": {
+        "name": "2019 Aston Martin Valhalla",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3367": {
+        "name": "2020 Ferrari F8 Tributo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3369": {
+        "name": "2020 Chevrolet Corvette",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3371": {
+        "name": "2020 Lamborghini Huracan EVO",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3373": {
+        "name": "2019 Toyota 4Runner TRD Pro",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3374": {
+        "name": "2019 Toyota Tacoma TRD Pro",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3395": {
+        "name": "1967 Renault 8 Gordini",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3400": {
+        "name": "2009 Formula Drift #99 Mazda RX-8",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3402": {
+        "name": "2020 Toyota GR Supra",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3404": {
+        "name": "2020 Ford Bronco R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3411": {
+        "name": "1995 Formula Drift #34 Toyota Supra MKIV",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3412": {
+        "name": "2019 Subaru WRX STi S209",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3413": {
+        "name": "2019 Volkswagen Golf R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3414": {
+        "name": "2020 Land Rover Defender",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3434": {
+        "name": "2020 BMW M2 Competition",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3439": {
+        "name": "2019 Ford F-250 Deberti",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3441": {
+        "name": "2019 Deberti Toyota Tacoma TRD The Performance Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3445": {
+        "name": "2020 Porsche Taycan Turbo S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3449": {
+        "name": "2020 Lotus Evija",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3454": {
+        "name": "2020 Audi RS3 Sedan",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3476": {
+        "name": "2020 Ford F-450 DRW",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3477": {
+        "name": "2020 Chevrolet Silverado LTZ 71",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3482": {
+        "name": "2021 McLaren 765LT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3486": {
+        "name": "2012 Jeep Wrangler Rubicon (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3494": {
+        "name": "1968 Alfa Romeo Autodelta Tipo 33/2 Daytona",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3498": {
+        "name": "2017 Saleen S7 LM",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3518": {
+        "name": "2020 BMW M8",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3520": {
+        "name": "2021 Lexus LC 500",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3523": {
+        "name": "2020 Formula Drift #151 Toyota GR Supra",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3524": {
+        "name": "2019 Formula Drift #411 Toyota Corolla Hatchback",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3533": {
+        "name": "2022 Volkswagen Golf R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3534": {
+        "name": "2021 MINI JCW GP",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3539": {
+        "name": "2020 Sierra Cars #23 Yokohama Alpha",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3540": {
+        "name": "2021 Sierra Cars RX3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3543": {
+        "name": "2022 Pagani Huayra R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3548": {
+        "name": "2020 Wuling Hongguang S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3549": {
+        "name": "2021 Alumicraft #122 Class 1 buggy",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3551": {
+        "name": "2020 Formula Drift #91 BMW M2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3554": {
+        "name": "2005 Mitsubishi #1 Sierra Enterprises Lancer Evolution Time Attack",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3580": {
+        "name": "2019 Aston Martin DBX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3583": {
+        "name": "2021 Audi RS6 Avant",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3584": {
+        "name": "2021 Audi RS7",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3590": {
+        "name": "1973 Chevrolet C/K Pickup",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3594": {
+        "name": "2021 Ferrari Roma",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3595": {
+        "name": "2020 Ferrari SF90 Stradale",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3597": {
+        "name": "1983 Ford F-150",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3599": {
+        "name": "2022 Gordon Murray T.50",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3600": {
+        "name": "2021 Hennessey Venom F5",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3603": {
+        "name": "2019 Casey Currie Motorsports #4402 Ultra 4 Trophy Jeep",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3604": {
+        "name": "2020 Jimco #179 Hammerhead Class 1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3605": {
+        "name": "2019 Jimco #240 Fastball Racing Spec Trophy Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3606": {
+        "name": "2020 Lamborghini Essenza SCV12",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3608": {
+        "name": "2021 Lamborghini Sian Roadster",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3611": {
+        "name": "2022 Maserati MC20",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3616": {
+        "name": "2021 Mercedes-AMG GT Black Series",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3617": {
+        "name": "2022 Mercedes-Benz SL63 AMG",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3622": {
+        "name": "2019 Nissan GT-R Nismo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3625": {
+        "name": "2021 Rimac Nevera",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3629": {
+        "name": "2021 Toyota GR Yaris",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3631": {
+        "name": "2022 Aston Martin Valkyrie AMR Pro",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3645": {
+        "name": "2021 BMW M4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3650": {
+        "name": "2021 Merceds-AMG One",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3655": {
+        "name": "2021 McLaren 620R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3657": {
+        "name": "2022 Rivian R1T",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3661": {
+        "name": "2018 Lotus Exige Cup 430",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3662": {
+        "name": "2021 RJ Anderson #37 Polaris RZR Pro 4 Truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
       "3665": {
         "name": "2021 Sierra Cars 700R",
-        "confidence": "probable",
-        "source": "settings-screen header B 600 at capture time 2026-08-21"
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3667": {
+        "name": "2021 Porsche 911 GT3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3668": {
+        "name": "2023 McLaren Artura",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3670": {
+        "name": "2001 Ford Focus WRC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3672": {
+        "name": "2021 Lamborghini Huracan STO",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3678": {
+        "name": "2020 Hyundai i30 N",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3686": {
+        "name": "2021 Polaris RZR Pro XP Factory Racing Limited Edition",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3687": {
+        "name": "2021 Polaris RZR Pro XP Ultimate",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3692": {
+        "name": "2022 Ford F-150 Lightning",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3693": {
+        "name": "2022 Alumicraft #6165 Trick truck",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3698": {
+        "name": "2022 Porsche Mission R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3700": {
+        "name": "2021 McLaren Sabre",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3716": {
+        "name": "2023 Lotus Emira",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3719": {
+        "name": "2022 Cadillac CT4-V Blackwing",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3720": {
+        "name": "2022 Cadillac CT5-V Blackwing",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3722": {
+        "name": "2022 GMC Hummer EV",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3724": {
+        "name": "2022 Ferrari 296 GTB",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3726": {
+        "name": "2023 Acura Integra",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3728": {
+        "name": "2021 Bentley Continental GTC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3735": {
+        "name": "2022 Subaru BRZ",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3736": {
+        "name": "2022 Ford Bronco Raptor",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3737": {
+        "name": "2022 BMW iX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3744": {
+        "name": "2023 Formula Drift #64 Forsberg Racing Nissan Z",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3745": {
+        "name": "2020 Audi R8",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3750": {
+        "name": "1995 Mitsubishi Pajero",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3753": {
+        "name": "2023 Lamborghini Huracan Tecnica",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3755": {
+        "name": "2022 Ford Supervan 4",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3759": {
+        "name": "2020 Lamborghini Huracan Evo Spyder",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3760": {
+        "name": "2022 Porsche 718 Cayman GT4 RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3761": {
+        "name": "2022 Toyota GR86",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3763": {
+        "name": "2023 BMW M2",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3764": {
+        "name": "2022 BMW M5 CS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3766": {
+        "name": "2023 Chevrolet Corvette Z06",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3767": {
+        "name": "2022 Acura NSX Type S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3771": {
+        "name": "2023 Chevrolet Corvette E-Ray",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3773": {
+        "name": "2023 Honda Civic Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3774": {
+        "name": "2023 Lamborghini Countach",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3775": {
+        "name": "2022 Lamborghini Aventador Ultimae",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3781": {
+        "name": "2023 Porsche 911 GT3 RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3783": {
+        "name": "1989 Volkswagen Golf Rallye",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3785": {
+        "name": "1997 Toyota Soarer",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3789": {
+        "name": "2022 Wuling Mini EV",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3795": {
+        "name": "2023 Meyers Manx",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3798": {
+        "name": "2017 Mazda MX-5 Cup",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3811": {
+        "name": "2023 Lucid Air",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3819": {
+        "name": "2022 Subaru WRX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3823": {
+        "name": "2022 Mazda MX-5 RF",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3827": {
+        "name": "2023 Hyundai Ioniq 5 N",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3829": {
+        "name": "2022 Hyundai N Vision 74",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3840": {
+        "name": "2023 Lamborghini Huracan Sterrato",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3846": {
+        "name": "2024 Ford Mustang GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3847": {
+        "name": "2024 Ford Mustang Dark Horse",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3848": {
+        "name": "2023 Toyota Camry TRD",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3849": {
+        "name": "2023 Ford F-150 Raptor R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3850": {
+        "name": "2021 Dodge Durango Hellcat",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3851": {
+        "name": "1991 Toyota Sera",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3852": {
+        "name": "1991 Honda Beat",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan) ; live-tuned car 2026-08-21 (3-cyl stock -> 4-cyl swap, AWD conversion)"
+      },
+      "3854": {
+        "name": "1993 Autozam AZ-1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3855": {
+        "name": "1991 Nissan Figaro",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3856": {
+        "name": "1987 Nissan Be-1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3858": {
+        "name": "1997 Nissan Stagea",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3859": {
+        "name": "1984 Honda City",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3860": {
+        "name": "1989 Nissan S-Cargo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3865": {
+        "name": "1994 Honda Acty",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3880": {
+        "name": "2023 Toyota GR Corolla",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3886": {
+        "name": "1995 Mitsubishi Lancer Evolution III",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3891": {
+        "name": "2024 Lamborghini Revuelto",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3895": {
+        "name": "2020 Mercedes-Benz SLC43 AMG",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3903": {
+        "name": "2023 Ford Fiesta ST",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3904": {
+        "name": "2022 Ford Focus ST",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3908": {
+        "name": "2022 Honda e",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3910": {
+        "name": "2023 Porsche 911 Dakar",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3914": {
+        "name": "1991 Toyota Chaser GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3917": {
+        "name": "2023 Audi R8 GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3918": {
+        "name": "1995 Nissan Gloria",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3921": {
+        "name": "2024 Nissan Z Nismo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3928": {
+        "name": "2022 Hyundai i20 N",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3929": {
+        "name": "1989 Nissan Pao",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3933": {
+        "name": "1997 Toyota Chaser",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3937": {
+        "name": "1970 Honda N600",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3950": {
+        "name": "1967 Ferrari 275 GTB4 Spider",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3953": {
+        "name": "2023 Porsche 911 Turbo S",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3954": {
+        "name": "2024 Chevrolet Camaro ZL1",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3955": {
+        "name": "2024 Ram TRX",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3959": {
+        "name": "2022 Dodge Challenger SRT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3960": {
+        "name": "1994 Subaru Vivio RX-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3964": {
+        "name": "2024 Toyota Prius Prime XSE Premium",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3983": {
+        "name": "2024 BMW X6 M",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "3999": {
+        "name": "2002 Nissan Silvia Spec-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4002": {
+        "name": "2024 Lamborghini Temerario",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4034": {
+        "name": "1972 Honda Z GT",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4038": {
+        "name": "1999 Toyota Altezza",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4055": {
+        "name": "1996 Toyota Starlet Glanza",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4057": {
+        "name": "1997 Nissan Skyline GT-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4069": {
+        "name": "1988 BMW M3",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4081": {
+        "name": "2024 Koenigsegg Gemera",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4084": {
+        "name": "1972 Datsun #269 Attacking The Clock Racing 240Z All Carbon Hillclimb Beast",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4085": {
+        "name": "1990 Mitsubishi #269 Attacking The Clock Racing Minicab Time Attack",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4090": {
+        "name": "2001 Mitsubishi Lancer Evolution VI TME",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4094": {
+        "name": "2024 Nissan GT-R Nismo",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4114": {
+        "name": "1992 Nissan Skyline GT-R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4119": {
+        "name": "1998 Nissan Skyline Autech",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4124": {
+        "name": "2013 Mercedes-Benz G65 AMG (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4125": {
+        "name": "1994 Honda Acty (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4126": {
+        "name": "2022 Honda e (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4127": {
+        "name": "1995 Mitsubishi Pajero (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4128": {
+        "name": "2022 Subaru WRX (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4129": {
+        "name": "1997 Nissan Stagea (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4144": {
+        "name": "1992 Mazda RX-7",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4145": {
+        "name": "1974 Mazda #123 Mad MIke 808 Wagon Fursty",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4147": {
+        "name": "2021 Alfa Romeo Giulia GTAM",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4156": {
+        "name": "2025 Ferrari F80",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4158": {
+        "name": "2010 Lexus LFA (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4160": {
+        "name": "1989 Nissan S-Cargo (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4162": {
+        "name": "1985 Toyota Sprinter (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4163": {
+        "name": "2020 Wuling Sunshine S (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4164": {
+        "name": "2022 Subaru BRZ (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4165": {
+        "name": "1973 Mazda RX-3 (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4166": {
+        "name": "2023 BMW M2 (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4167": {
+        "name": "2012 Nisan GT-R Black Edition R35 (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4168": {
+        "name": "1968 Ford Mustang GT 2+2 Fastback (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4169": {
+        "name": "1990 Mercedes-Benz 190E 2.5-16 Evolution II (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4171": {
+        "name": "1986 Ford F-150 XLT Lariat (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4175": {
+        "name": "2020 Ford F-450 DRW (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4179": {
+        "name": "1990 Nissan #12 Skyline GT-R (BNR32GR.A) JTC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4197": {
+        "name": "1994 Mazda MX-5 Miata (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4198": {
+        "name": "1999 Dodge Viper GTS ACR (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4199": {
+        "name": "2019 Toyota Tacoma TRD Pro (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4200": {
+        "name": "2020 Lotus Evija (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4205": {
+        "name": "1972 Nissan Patrol",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4210": {
+        "name": "2018 Lotus Scura Motorsports Exige WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4211": {
+        "name": "1990 Honda #19 101 Motorsport CRX WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4212": {
+        "name": "1993 Nissan #32 Skyline WTAC XTREME GTR",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4213": {
+        "name": "2000 Nissan #36 Dream Project S15 Silvia WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4214": {
+        "name": "1995 Toyota J&J Motorsport Supra WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4216": {
+        "name": "1994 Honda Acty (RakuRaku Express)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4221": {
+        "name": "2026 GR GT Prototype",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4222": {
+        "name": "1989 Nissan Silvia K's",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4223": {
+        "name": "2000 Nissan Skyline GT-R V-Spec II",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4231": {
+        "name": "2004 Honda #52 Evasive Motorsports S2000 WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4232": {
+        "name": "2005 Porsche Cayman GT3 WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4234": {
+        "name": "2008 Honda Civic Type R",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4238": {
+        "name": "1983 Nissan Skyline 2000 Turbo RS",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4250": {
+        "name": "1985 Toyota Sprinter (Touge Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4251": {
+        "name": "2003 Honda S2000 (Touge Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4252": {
+        "name": "1998 Subaru Impreza 22B (Touge Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4254": {
+        "name": "2021 Honda #33 Integra WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4255": {
+        "name": "2005 Toyota Crown Taxi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4257": {
+        "name": "2017 Toyota JPN Taxi",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4259": {
+        "name": "2013 Toyota 86 Stories",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4260": {
+        "name": "2024 Nissan GT-R Nismo (Unobtainable)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4261": {
+        "name": "1995 Porsche 911 GT2 (Unobtainable)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4263": {
+        "name": "2026 Toyota Scallop (Unobtainable)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4264": {
+        "name": "2018 Ferrari FXX-K Evo (Welcome pack)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4265": {
+        "name": "2021 Mercedes-AMG GT Black Series (Welcome Pack)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4266": {
+        "name": "2021 BMW M4 (Welcome Pack)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4267": {
+        "name": "2004 Mitsubishi Lancer Evolution VIII MR (Welcome Pack)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4268": {
+        "name": "2023 Ford F-150 Raptor R (Welcome Pack)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4277": {
+        "name": "1992 Honda #21 Hardrace/JDMYard Civic WTAC",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4278": {
+        "name": "2025 Toyota Land Cruiser",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4287": {
+        "name": "1994 Subaru Vivio RX-R (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4303": {
+        "name": "2012 Nissan GT-R Black Edition R35 (Touge Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4313": {
+        "name": "1970 Porsche #3 917 LH (Forza Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4315": {
+        "name": "1962 Peel P50 (Trolli Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4332": {
+        "name": "2005 Toyota Crown Taxi (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4333": {
+        "name": "2017 Toyota JPN Taxi (Traffic)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4341": {
+        "name": "2017 Ferrari J50 (Pre Order)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
+      },
+      "4342": {
+        "name": "1965 Toyota Sports 800 (Fanta Edition)",
+        "confidence": "community-table",
+        "source": "HDR FH6 ordinal gist (cross-checked vs ONYX asset scan)"
       }
     },
-    "builds": {}
+    "builds": {},
+    "table_source": {
+      "url": "https://gist.githubusercontent.com/HDR/0659d1717bc61504bf83750628963f4f/raw/",
+      "fetched": "2026-08-21",
+      "entries": 660,
+      "note": "years come from internal archive names and are occasionally off; a handful of names are codenames"
+    }
   },
   "sessions": [
     {
@@ -49267,7 +52568,7 @@ window.FH6_DB = {
           "max_rpm": 9000,
           "idle_rpm": 800,
           "car_group": 26,
-          "name": null,
+          "name": "2005 Porsche Cayman GT3 WTAC",
           "live_frames": 23074,
           "temps_max_f": {
             "FL": 234,
@@ -49568,7 +52869,7 @@ window.FH6_DB = {
           "max_rpm": 9500,
           "idle_rpm": 1000,
           "car_group": 47,
-          "name": null,
+          "name": "1968 Ford Mustang GT 2+2 Fastback (Forza Edition)",
           "live_frames": 18010,
           "temps_max_f": {
             "FL": 229,
@@ -50209,7 +53510,7 @@ window.FH6_DB = {
           "max_rpm": 8500,
           "idle_rpm": 800,
           "car_group": 12,
-          "name": null,
+          "name": "1997 McLaren F1 GT",
           "live_frames": 3847,
           "temps_max_f": {
             "FL": 251,
@@ -64092,11 +67393,11 @@ window.FH6_DB = {
     },
     {
       "id": "fh6_20260821_162805",
-      "source": "C:\\Users\\mondr\\Documents\\Claude\\Projects\\forza-horizon-6-tuning\\captures\\fh6_20260821_162805.csv",
-      "frames": 56332,
-      "duration_s": 461.4,
-      "rate_pps": 122.1,
-      "live_frames": 30418,
+      "source": "captures/fh6_20260821_162805.csv",
+      "frames": 177811,
+      "duration_s": 1692,
+      "rate_pps": 105.1,
+      "live_frames": 85726,
       "cars": [
         {
           "id": "3852|2|4|700",
@@ -64108,8 +67409,8 @@ window.FH6_DB = {
           "max_rpm": 10000,
           "idle_rpm": 791,
           "car_group": 50,
-          "name": null,
-          "live_frames": 27788,
+          "name": "1991 Honda Beat",
+          "live_frames": 42162,
           "temps_max_f": {
             "FL": 271,
             "FR": 269,
@@ -64119,62 +67420,62 @@ window.FH6_DB = {
           "gears": [
             {
               "gear": 1,
-              "mps_per_krpm": 1.442,
+              "mps_per_krpm": 1.418,
               "rel": 1,
-              "n": 218
+              "n": 286
             },
             {
               "gear": 2,
-              "mps_per_krpm": 2.097,
-              "rel": 1.454,
-              "n": 88
+              "mps_per_krpm": 2.107,
+              "rel": 1.486,
+              "n": 168
             },
             {
               "gear": 3,
-              "mps_per_krpm": 2.663,
-              "rel": 1.846,
-              "n": 295
+              "mps_per_krpm": 2.689,
+              "rel": 1.897,
+              "n": 390
             },
             {
               "gear": 4,
-              "mps_per_krpm": 3.306,
-              "rel": 2.292,
-              "n": 594
+              "mps_per_krpm": 3.322,
+              "rel": 2.343,
+              "n": 640
             },
             {
               "gear": 5,
               "mps_per_krpm": 4.011,
-              "rel": 2.781,
-              "n": 664
+              "rel": 2.83,
+              "n": 707
             },
             {
               "gear": 6,
               "mps_per_krpm": 4.804,
-              "rel": 3.33,
-              "n": 1056
+              "rel": 3.389,
+              "n": 1118
             },
             {
               "gear": 7,
               "mps_per_krpm": 5.587,
-              "rel": 3.873,
-              "n": 1622
+              "rel": 3.942,
+              "n": 1684
             },
             {
               "gear": 8,
               "mps_per_krpm": 6.652,
-              "rel": 4.612,
+              "rel": 4.693,
               "n": 4502
             },
             {
               "gear": 9,
               "mps_per_krpm": 7.732,
-              "rel": 5.36,
+              "rel": 5.454,
               "n": 6960
             },
             {
               "gear": 10,
               "mps_per_krpm": 9.053,
-              "rel": 6.276,
+              "rel": 6.386,
               "n": 2268
             }
           ],
@@ -64199,126 +67500,126 @@ window.FH6_DB = {
             },
             {
               "rpm": 4500,
-              "hp": 156,
-              "tq": 176,
-              "n": 9
-            },
-            {
-              "rpm": 4750,
-              "hp": 166,
-              "tq": 178,
-              "n": 9
-            },
-            {
-              "rpm": 5000,
-              "hp": 176,
-              "tq": 178,
-              "n": 9
-            },
-            {
-              "rpm": 5250,
-              "hp": 186,
-              "tq": 180,
-              "n": 9
-            },
-            {
-              "rpm": 5500,
-              "hp": 195,
-              "tq": 181,
+              "hp": 155,
+              "tq": 175,
               "n": 10
             },
             {
+              "rpm": 4750,
+              "hp": 168,
+              "tq": 183,
+              "n": 11
+            },
+            {
+              "rpm": 5000,
+              "hp": 178,
+              "tq": 185,
+              "n": 13
+            },
+            {
+              "rpm": 5250,
+              "hp": 188,
+              "tq": 185,
+              "n": 13
+            },
+            {
+              "rpm": 5500,
+              "hp": 197,
+              "tq": 185,
+              "n": 15
+            },
+            {
               "rpm": 5750,
-              "hp": 208,
-              "tq": 186,
-              "n": 14
+              "hp": 210,
+              "tq": 187,
+              "n": 18
             },
             {
               "rpm": 6000,
               "hp": 237,
               "tq": 200,
-              "n": 64
+              "n": 73
             },
             {
               "rpm": 6250,
               "hp": 250,
               "tq": 206,
-              "n": 428
+              "n": 444
             },
             {
               "rpm": 6500,
               "hp": 268,
               "tq": 212,
-              "n": 1196
+              "n": 1219
             },
             {
               "rpm": 6750,
               "hp": 280,
               "tq": 215,
-              "n": 1385
+              "n": 1404
             },
             {
               "rpm": 7000,
               "hp": 296,
               "tq": 219,
-              "n": 2069
+              "n": 2106
             },
             {
               "rpm": 7250,
               "hp": 310,
               "tq": 221,
-              "n": 3154
+              "n": 3212
             },
             {
               "rpm": 7500,
               "hp": 322,
               "tq": 223,
-              "n": 2281
+              "n": 2338
             },
             {
               "rpm": 7750,
               "hp": 334,
               "tq": 223,
-              "n": 2879
+              "n": 2933
             },
             {
               "rpm": 8000,
               "hp": 345,
               "tq": 223,
-              "n": 2653
+              "n": 2710
             },
             {
               "rpm": 8250,
               "hp": 349,
               "tq": 220,
-              "n": 1759
+              "n": 1798
             },
             {
               "rpm": 8500,
-              "hp": 307,
+              "hp": 306,
               "tq": 187,
-              "n": 68
+              "n": 85
             },
             {
               "rpm": 8750,
-              "hp": 297,
-              "tq": 175,
-              "n": 135
+              "hp": 298,
+              "tq": 177,
+              "n": 162
             },
             {
               "rpm": 9000,
-              "hp": 310,
-              "tq": 179,
-              "n": 91
+              "hp": 313,
+              "tq": 181,
+              "n": 114
             }
           ],
           "k_wheel": {
-            "FL": 3.6819477484809973,
-            "FR": 3.737909493141787,
-            "RL": 3.5758566990165805,
-            "RR": 3.6101597886515253
+            "FL": 3.6866348209693376,
+            "FR": 3.742468175377831,
+            "RL": 3.5781042907216203,
+            "RR": 3.6099851290168896
           },
-          "live_s": 227.6,
+          "live_s": 401.2,
           "sig": {
             "boost_max": 11,
             "hp_peak": 349,
@@ -64327,29 +67628,29 @@ window.FH6_DB = {
             "gear_count": 10,
             "ladder": [
               1,
-              1.454,
-              1.846,
-              2.292,
-              2.781,
-              3.33,
-              3.873,
-              4.612,
-              5.36,
-              6.276
+              1.486,
+              1.897,
+              2.343,
+              2.83,
+              3.389,
+              3.942,
+              4.693,
+              5.454,
+              6.386
             ],
-            "mass_idx": 1080
+            "mass_idx": 1082
           },
-          "build_id": "62900ca4",
+          "build_id": "b5076c3f",
           "coverage": {
-            "overall": 0.88,
+            "overall": 0.97,
             "probes": [
               {
                 "key": "hairpin",
                 "label": "Hairpins (< 45 mph)",
-                "count": 2,
+                "count": 3,
                 "required": 3,
-                "confidence": 0.67,
-                "hint": "take 1 more tight corners under 45 mph"
+                "confidence": 1,
+                "hint": "done"
               },
               {
                 "key": "medium",
@@ -64378,15 +67679,15 @@ window.FH6_DB = {
               {
                 "key": "launch",
                 "label": "Launches (0-60 from rest)",
-                "count": 1,
+                "count": 3,
                 "required": 2,
-                "confidence": 0.5,
-                "hint": "1 more standing launches"
+                "confidence": 1,
+                "hint": "done"
               },
               {
                 "key": "brake",
                 "label": "Hard stops from > 80 mph",
-                "count": 5,
+                "count": 6,
                 "required": 3,
                 "confidence": 1,
                 "hint": "done"
@@ -64410,7 +67711,7 @@ window.FH6_DB = {
               {
                 "key": "wiggle",
                 "label": "Steering pulses > 55 mph",
-                "count": 200,
+                "count": 207,
                 "required": 3,
                 "confidence": 1,
                 "hint": "done"
@@ -64434,7 +67735,385 @@ window.FH6_DB = {
               {
                 "key": "warm",
                 "label": "Tires warm (> 150 F) most of the run",
-                "count": 0.84,
+                "count": 0.57,
+                "required": 1,
+                "confidence": 0.95,
+                "hint": "keep driving — tires still cold for most frames"
+              }
+            ]
+          },
+          "advice": [
+            {
+              "key": "brake-lockup",
+              "text": "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.",
+              "severity": 3,
+              "confidence": 1,
+              "evidence": "17/28 corners red on the fronts in phase 1"
+            },
+            {
+              "key": "trail-brake",
+              "text": "Trail-brake understeer: finish more braking before steering; caster +0.5 for camber-in-turn.",
+              "severity": 2,
+              "confidence": 1,
+              "evidence": "8/28 corners red on the fronts at turn-in"
+            },
+            {
+              "key": "launch-spin",
+              "text": "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.",
+              "severity": 2,
+              "confidence": 1,
+              "evidence": "median peak rear slip 11.21 over 3 launches"
+            },
+            {
+              "key": "launch-front-spin",
+              "text": "AWD fronts spinning at launch: center split more rearward / front accel diff down.",
+              "severity": 2,
+              "confidence": 1,
+              "evidence": "median peak front slip 9.18"
+            },
+            {
+              "key": "mid-understeer",
+              "text": "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.",
+              "severity": 2,
+              "confidence": 0.5,
+              "evidence": "USI median +0.229 over 28 corners; 2 mid-corner front reds"
+            },
+            {
+              "key": "bottoming",
+              "text": "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).",
+              "severity": 1,
+              "confidence": 1,
+              "evidence": "145 bottoming frames above 40 mph (detector still coarse)"
+            }
+          ],
+          "temps_med_f": {
+            "FL": 184,
+            "FR": 179,
+            "RL": 168,
+            "RR": 168
+          }
+        },
+        {
+          "id": "2616|2|10|800",
+          "ordinal": 2616,
+          "pi": 800,
+          "class": "S1",
+          "drivetrain": "AWD",
+          "cyl": 10,
+          "max_rpm": 10000,
+          "idle_rpm": 900,
+          "car_group": 13,
+          "name": "2016 Lamborghini Centenario LP 770-4",
+          "live_frames": 13444,
+          "temps_max_f": {
+            "FL": 233,
+            "FR": 236,
+            "RL": 203,
+            "RR": 203
+          },
+          "gears": [
+            {
+              "gear": 1,
+              "mps_per_krpm": 2.594,
+              "rel": 1,
+              "n": 209
+            },
+            {
+              "gear": 2,
+              "mps_per_krpm": 4.277,
+              "rel": 1.649,
+              "n": 958
+            },
+            {
+              "gear": 3,
+              "mps_per_krpm": 5.811,
+              "rel": 2.241,
+              "n": 1218
+            },
+            {
+              "gear": 4,
+              "mps_per_krpm": 7.145,
+              "rel": 2.755,
+              "n": 2494
+            },
+            {
+              "gear": 5,
+              "mps_per_krpm": 8.241,
+              "rel": 3.177,
+              "n": 2246
+            },
+            {
+              "gear": 6,
+              "mps_per_krpm": 9.12,
+              "rel": 3.516,
+              "n": 3131
+            }
+          ],
+          "dyno": [
+            {
+              "rpm": 2750,
+              "hp": 206,
+              "tq": 386,
+              "n": 20
+            },
+            {
+              "rpm": 3000,
+              "hp": 228,
+              "tq": 390,
+              "n": 14
+            },
+            {
+              "rpm": 3250,
+              "hp": 253,
+              "tq": 397,
+              "n": 12
+            },
+            {
+              "rpm": 3500,
+              "hp": 280,
+              "tq": 405,
+              "n": 11
+            },
+            {
+              "rpm": 3750,
+              "hp": 299,
+              "tq": 411,
+              "n": 16
+            },
+            {
+              "rpm": 4000,
+              "hp": 318,
+              "tq": 405,
+              "n": 10
+            },
+            {
+              "rpm": 4250,
+              "hp": 187,
+              "tq": 220,
+              "n": 25
+            },
+            {
+              "rpm": 4500,
+              "hp": 362,
+              "tq": 410,
+              "n": 20
+            },
+            {
+              "rpm": 4750,
+              "hp": 401,
+              "tq": 433,
+              "n": 32
+            },
+            {
+              "rpm": 5000,
+              "hp": 429,
+              "tq": 440,
+              "n": 43
+            },
+            {
+              "rpm": 5250,
+              "hp": 453,
+              "tq": 445,
+              "n": 60
+            },
+            {
+              "rpm": 5500,
+              "hp": 471,
+              "tq": 448,
+              "n": 118
+            },
+            {
+              "rpm": 5750,
+              "hp": 501,
+              "tq": 449,
+              "n": 172
+            },
+            {
+              "rpm": 6000,
+              "hp": 531,
+              "tq": 458,
+              "n": 97
+            },
+            {
+              "rpm": 6250,
+              "hp": 553,
+              "tq": 459,
+              "n": 231
+            },
+            {
+              "rpm": 6500,
+              "hp": 584,
+              "tq": 463,
+              "n": 511
+            },
+            {
+              "rpm": 6750,
+              "hp": 602,
+              "tq": 464,
+              "n": 1003
+            },
+            {
+              "rpm": 7000,
+              "hp": 628,
+              "tq": 463,
+              "n": 757
+            },
+            {
+              "rpm": 7250,
+              "hp": 644,
+              "tq": 460,
+              "n": 1166
+            },
+            {
+              "rpm": 7500,
+              "hp": 663,
+              "tq": 456,
+              "n": 1744
+            },
+            {
+              "rpm": 7750,
+              "hp": 676,
+              "tq": 451,
+              "n": 1894
+            },
+            {
+              "rpm": 8000,
+              "hp": 687,
+              "tq": 446,
+              "n": 1346
+            },
+            {
+              "rpm": 8250,
+              "hp": 697,
+              "tq": 437,
+              "n": 846
+            },
+            {
+              "rpm": 8500,
+              "hp": 698,
+              "tq": 431,
+              "n": 108
+            }
+          ],
+          "k_wheel": {
+            "FL": 2.9831466089178242,
+            "FR": 3.0337751427268773,
+            "RL": 2.7818209921964883,
+            "RR": 2.8228963884712748
+          },
+          "live_s": 127.9,
+          "sig": {
+            "boost_max": 6,
+            "hp_peak": 698,
+            "rpm_at_peak": 8500,
+            "tq_peak": 464,
+            "gear_count": 6,
+            "ladder": [
+              1,
+              1.649,
+              2.241,
+              2.755,
+              3.177,
+              3.516
+            ],
+            "mass_idx": null
+          },
+          "build_id": "040933e5",
+          "coverage": {
+            "overall": 0.74,
+            "probes": [
+              {
+                "key": "hairpin",
+                "label": "Hairpins (< 45 mph)",
+                "count": 1,
+                "required": 3,
+                "confidence": 0.33,
+                "hint": "take 2 more tight corners under 45 mph"
+              },
+              {
+                "key": "medium",
+                "label": "Medium corners (45-85 mph)",
+                "count": 1,
+                "required": 4,
+                "confidence": 0.25,
+                "hint": "3 more medium-speed corners"
+              },
+              {
+                "key": "fast",
+                "label": "Fast sweepers (> 85 mph)",
+                "count": 9,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "flick",
+                "label": "Chicane flicks (L-R within 2.5 s)",
+                "count": 3,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "launch",
+                "label": "Launches (0-60 from rest)",
+                "count": 1,
+                "required": 2,
+                "confidence": 0.5,
+                "hint": "1 more standing launches"
+              },
+              {
+                "key": "brake",
+                "label": "Hard stops from > 80 mph",
+                "count": 2,
+                "required": 3,
+                "confidence": 0.67,
+                "hint": "1 more hard stops from 80+ mph"
+              },
+              {
+                "key": "crest",
+                "label": "Crests / bumps (car goes light)",
+                "count": 4,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "top",
+                "label": "Top-speed pull (WOT in top gear, 5 s)",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "wiggle",
+                "label": "Steering pulses > 55 mph",
+                "count": 98,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "dyno",
+                "label": "Dyno rpm coverage (WOT)",
+                "count": 0.8,
+                "required": 1,
+                "confidence": 0.8,
+                "hint": "full-throttle pulls through the rev range"
+              },
+              {
+                "key": "gears",
+                "label": "Gear ladder",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "warm",
+                "label": "Tires warm (> 150 F) most of the run",
+                "count": 0.74,
                 "required": 1,
                 "confidence": 1,
                 "hint": "done"
@@ -64447,42 +68126,1013 @@ window.FH6_DB = {
               "text": "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.",
               "severity": 3,
               "confidence": 1,
-              "evidence": "17/27 corners red on the fronts in phase 1"
+              "evidence": "7/11 corners red on the fronts in phase 1"
             },
             {
-              "key": "trail-brake",
-              "text": "Trail-brake understeer: finish more braking before steering; caster +0.5 for camber-in-turn.",
-              "severity": 2,
-              "confidence": 1,
-              "evidence": "7/27 corners red on the fronts at turn-in"
-            },
-            {
-              "key": "mid-understeer",
-              "text": "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.",
+              "key": "launch-spin",
+              "text": "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.",
               "severity": 2,
               "confidence": 0.5,
-              "evidence": "USI median +0.203 over 27 corners; 2 mid-corner front reds"
-            },
-            {
-              "key": "launch-front-spin",
-              "text": "AWD fronts spinning at launch: center split more rearward / front accel diff down.",
-              "severity": 2,
-              "confidence": 0.5,
-              "evidence": "median peak front slip 2.40"
+              "evidence": "median peak rear slip 3.29 over 1 launches"
             },
             {
               "key": "bottoming",
               "text": "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).",
               "severity": 1,
               "confidence": 1,
-              "evidence": "145 bottoming frames above 40 mph (detector still coarse)"
+              "evidence": "4261 bottoming frames above 40 mph (detector still coarse)"
+            },
+            {
+              "key": "front-hot",
+              "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature — check pressures/camber on the HUD (Tires Misc + Heat).",
+              "severity": 1,
+              "confidence": 0.7,
+              "evidence": "median F 201 F vs R 169 F"
+            },
+            {
+              "key": "mid-understeer",
+              "text": "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.",
+              "severity": 2,
+              "confidence": 0.25,
+              "evidence": "USI median +0.221 over 11 corners; 1 mid-corner front reds"
             }
           ],
           "temps_med_f": {
-            "FL": 192,
-            "FR": 185,
-            "RL": 176,
-            "RR": 176
+            "FL": 199,
+            "FR": 204,
+            "RL": 169,
+            "RR": 169
+          }
+        },
+        {
+          "id": "1155|2|8|700",
+          "ordinal": 1155,
+          "pi": 700,
+          "class": "A",
+          "drivetrain": "AWD",
+          "cyl": 8,
+          "max_rpm": 8500,
+          "idle_rpm": 900,
+          "car_group": 20,
+          "name": "1965 Shelby Cobra Daytona",
+          "live_frames": 13354,
+          "temps_max_f": {
+            "FL": 260,
+            "FR": 241,
+            "RL": 212,
+            "RR": 212
+          },
+          "gears": [
+            {
+              "gear": 1,
+              "mps_per_krpm": 2.022,
+              "rel": 1,
+              "n": 304
+            },
+            {
+              "gear": 2,
+              "mps_per_krpm": 2.955,
+              "rel": 1.461,
+              "n": 637
+            },
+            {
+              "gear": 3,
+              "mps_per_krpm": 4.004,
+              "rel": 1.98,
+              "n": 854
+            },
+            {
+              "gear": 4,
+              "mps_per_krpm": 5.154,
+              "rel": 2.549,
+              "n": 1426
+            },
+            {
+              "gear": 5,
+              "mps_per_krpm": 6.203,
+              "rel": 3.068,
+              "n": 1542
+            },
+            {
+              "gear": 6,
+              "mps_per_krpm": 7.269,
+              "rel": 3.595,
+              "n": 1525
+            },
+            {
+              "gear": 7,
+              "mps_per_krpm": 8.292,
+              "rel": 4.101,
+              "n": 2947
+            }
+          ],
+          "dyno": [
+            {
+              "rpm": 3250,
+              "hp": 281,
+              "tq": 426,
+              "n": 8
+            },
+            {
+              "rpm": 3500,
+              "hp": 313,
+              "tq": 451,
+              "n": 20
+            },
+            {
+              "rpm": 3750,
+              "hp": 364,
+              "tq": 494,
+              "n": 14
+            },
+            {
+              "rpm": 4000,
+              "hp": 391,
+              "tq": 495,
+              "n": 18
+            },
+            {
+              "rpm": 4250,
+              "hp": 409,
+              "tq": 494,
+              "n": 22
+            },
+            {
+              "rpm": 4500,
+              "hp": 429,
+              "tq": 491,
+              "n": 20
+            },
+            {
+              "rpm": 4750,
+              "hp": 445,
+              "tq": 487,
+              "n": 26
+            },
+            {
+              "rpm": 5000,
+              "hp": 465,
+              "tq": 474,
+              "n": 41
+            },
+            {
+              "rpm": 5250,
+              "hp": 482,
+              "tq": 474,
+              "n": 67
+            },
+            {
+              "rpm": 5500,
+              "hp": 501,
+              "tq": 468,
+              "n": 189
+            },
+            {
+              "rpm": 5750,
+              "hp": 522,
+              "tq": 465,
+              "n": 507
+            },
+            {
+              "rpm": 6000,
+              "hp": 535,
+              "tq": 459,
+              "n": 998
+            },
+            {
+              "rpm": 6250,
+              "hp": 549,
+              "tq": 451,
+              "n": 1131
+            },
+            {
+              "rpm": 6500,
+              "hp": 561,
+              "tq": 446,
+              "n": 1947
+            },
+            {
+              "rpm": 6750,
+              "hp": 565,
+              "tq": 432,
+              "n": 1551
+            },
+            {
+              "rpm": 7000,
+              "hp": 563,
+              "tq": 415,
+              "n": 1699
+            },
+            {
+              "rpm": 7250,
+              "hp": 560,
+              "tq": 401,
+              "n": 898
+            },
+            {
+              "rpm": 7500,
+              "hp": 486,
+              "tq": 334,
+              "n": 37
+            },
+            {
+              "rpm": 7750,
+              "hp": 498,
+              "tq": 335,
+              "n": 42
+            }
+          ],
+          "k_wheel": {
+            "FL": 3.1027886199458354,
+            "FR": 3.069738573012384,
+            "RL": 2.833426694451982,
+            "RR": 2.767150543512764
+          },
+          "live_s": 127.1,
+          "sig": {
+            "boost_max": 8,
+            "hp_peak": 565,
+            "rpm_at_peak": 6750,
+            "tq_peak": 495,
+            "gear_count": 7,
+            "ladder": [
+              1,
+              1.461,
+              1.98,
+              2.549,
+              3.068,
+              3.595,
+              4.101
+            ],
+            "mass_idx": 2386
+          },
+          "build_id": "e2865f0f",
+          "coverage": {
+            "overall": 0.89,
+            "probes": [
+              {
+                "key": "hairpin",
+                "label": "Hairpins (< 45 mph)",
+                "count": 5,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "medium",
+                "label": "Medium corners (45-85 mph)",
+                "count": 9,
+                "required": 4,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "fast",
+                "label": "Fast sweepers (> 85 mph)",
+                "count": 9,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "flick",
+                "label": "Chicane flicks (L-R within 2.5 s)",
+                "count": 12,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "launch",
+                "label": "Launches (0-60 from rest)",
+                "count": 3,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "brake",
+                "label": "Hard stops from > 80 mph",
+                "count": 1,
+                "required": 3,
+                "confidence": 0.33,
+                "hint": "2 more hard stops from 80+ mph"
+              },
+              {
+                "key": "crest",
+                "label": "Crests / bumps (car goes light)",
+                "count": 4,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "top",
+                "label": "Top-speed pull (WOT in top gear, 5 s)",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "wiggle",
+                "label": "Steering pulses > 55 mph",
+                "count": 69,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "dyno",
+                "label": "Dyno rpm coverage (WOT)",
+                "count": 0.79,
+                "required": 1,
+                "confidence": 0.79,
+                "hint": "full-throttle pulls through the rev range"
+              },
+              {
+                "key": "gears",
+                "label": "Gear ladder",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "warm",
+                "label": "Tires warm (> 150 F) most of the run",
+                "count": 0.37,
+                "required": 1,
+                "confidence": 0.62,
+                "hint": "keep driving — tires still cold for most frames"
+              }
+            ]
+          },
+          "advice": [
+            {
+              "key": "brake-lockup",
+              "text": "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.",
+              "severity": 3,
+              "confidence": 1,
+              "evidence": "12/23 corners red on the fronts in phase 1"
+            },
+            {
+              "key": "brake-pressure",
+              "text": "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.",
+              "severity": 3,
+              "confidence": 0.67,
+              "evidence": "median deficit F 1.00 / R 1.00 over 2 stops"
+            },
+            {
+              "key": "launch-spin",
+              "text": "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.",
+              "severity": 2,
+              "confidence": 1,
+              "evidence": "median peak rear slip 1.52 over 3 launches"
+            },
+            {
+              "key": "launch-front-spin",
+              "text": "AWD fronts spinning at launch: center split more rearward / front accel diff down.",
+              "severity": 2,
+              "confidence": 1,
+              "evidence": "median peak front slip 3.94"
+            },
+            {
+              "key": "bottoming",
+              "text": "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).",
+              "severity": 1,
+              "confidence": 0.95,
+              "evidence": "19 bottoming frames above 40 mph (detector still coarse)"
+            },
+            {
+              "key": "mid-understeer",
+              "text": "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.",
+              "severity": 2,
+              "confidence": 0.25,
+              "evidence": "USI median +0.201 over 23 corners; 1 mid-corner front reds"
+            }
+          ],
+          "temps_med_f": {
+            "FL": 141,
+            "FR": 137,
+            "RL": 137,
+            "RR": 137
+          }
+        },
+        {
+          "id": "2866|2|4|800",
+          "ordinal": 2866,
+          "pi": 800,
+          "class": "S1",
+          "drivetrain": "AWD",
+          "cyl": 4,
+          "max_rpm": 10000,
+          "idle_rpm": 800,
+          "car_group": 43,
+          "name": "2018 Exomotive Exocet Sport V8 XP-5",
+          "live_frames": 7637,
+          "temps_max_f": {
+            "FL": 283,
+            "FR": 281,
+            "RL": 298,
+            "RR": 298
+          },
+          "gears": [
+            {
+              "gear": 1,
+              "mps_per_krpm": 2.268,
+              "rel": 1,
+              "n": 435
+            },
+            {
+              "gear": 2,
+              "mps_per_krpm": 3.012,
+              "rel": 1.328,
+              "n": 148
+            },
+            {
+              "gear": 3,
+              "mps_per_krpm": 3.711,
+              "rel": 1.636,
+              "n": 224
+            },
+            {
+              "gear": 4,
+              "mps_per_krpm": 4.445,
+              "rel": 1.96,
+              "n": 297
+            },
+            {
+              "gear": 5,
+              "mps_per_krpm": 5.148,
+              "rel": 2.27,
+              "n": 347
+            },
+            {
+              "gear": 6,
+              "mps_per_krpm": 5.821,
+              "rel": 2.567,
+              "n": 802
+            },
+            {
+              "gear": 7,
+              "mps_per_krpm": 6.34,
+              "rel": 2.796,
+              "n": 1173
+            },
+            {
+              "gear": 8,
+              "mps_per_krpm": 7.23,
+              "rel": 3.188,
+              "n": 2273
+            }
+          ],
+          "dyno": [
+            {
+              "rpm": 3250,
+              "hp": 101,
+              "tq": 158,
+              "n": 9
+            },
+            {
+              "rpm": 3500,
+              "hp": 112,
+              "tq": 163,
+              "n": 13
+            },
+            {
+              "rpm": 3750,
+              "hp": 125,
+              "tq": 168,
+              "n": 23
+            },
+            {
+              "rpm": 4000,
+              "hp": 131,
+              "tq": 170,
+              "n": 37
+            },
+            {
+              "rpm": 4250,
+              "hp": 144,
+              "tq": 173,
+              "n": 13
+            },
+            {
+              "rpm": 4500,
+              "hp": 154,
+              "tq": 175,
+              "n": 10
+            },
+            {
+              "rpm": 4750,
+              "hp": 163,
+              "tq": 176,
+              "n": 9
+            },
+            {
+              "rpm": 5000,
+              "hp": 172,
+              "tq": 177,
+              "n": 9
+            },
+            {
+              "rpm": 5250,
+              "hp": 180,
+              "tq": 177,
+              "n": 10
+            },
+            {
+              "rpm": 5500,
+              "hp": 189,
+              "tq": 177,
+              "n": 9
+            },
+            {
+              "rpm": 5750,
+              "hp": 204,
+              "tq": 183,
+              "n": 9
+            },
+            {
+              "rpm": 6000,
+              "hp": 112,
+              "tq": 95,
+              "n": 50
+            },
+            {
+              "rpm": 6250,
+              "hp": 235,
+              "tq": 194,
+              "n": 226
+            },
+            {
+              "rpm": 6500,
+              "hp": 251,
+              "tq": 200,
+              "n": 187
+            },
+            {
+              "rpm": 6750,
+              "hp": 267,
+              "tq": 204,
+              "n": 114
+            },
+            {
+              "rpm": 7000,
+              "hp": 280,
+              "tq": 207,
+              "n": 163
+            },
+            {
+              "rpm": 7250,
+              "hp": 295,
+              "tq": 210,
+              "n": 361
+            },
+            {
+              "rpm": 7500,
+              "hp": 307,
+              "tq": 211,
+              "n": 910
+            },
+            {
+              "rpm": 7750,
+              "hp": 318,
+              "tq": 212,
+              "n": 844
+            },
+            {
+              "rpm": 8000,
+              "hp": 329,
+              "tq": 212,
+              "n": 1631
+            },
+            {
+              "rpm": 8250,
+              "hp": 332,
+              "tq": 210,
+              "n": 1008
+            },
+            {
+              "rpm": 8500,
+              "hp": 322,
+              "tq": 196,
+              "n": 9
+            },
+            {
+              "rpm": 8750,
+              "hp": 319,
+              "tq": 189,
+              "n": 12
+            },
+            {
+              "rpm": 9000,
+              "hp": 320,
+              "tq": 185,
+              "n": 13
+            }
+          ],
+          "k_wheel": {
+            "FL": 3.7454712708991282,
+            "FR": 3.80633482343118,
+            "RL": 3.783533000443609,
+            "RR": 3.850737608756766
+          },
+          "live_s": 72.7,
+          "sig": {
+            "boost_max": 11,
+            "hp_peak": 332,
+            "rpm_at_peak": 8250,
+            "tq_peak": 212,
+            "gear_count": 8,
+            "ladder": [
+              1,
+              1.328,
+              1.636,
+              1.96,
+              2.27,
+              2.567,
+              2.796,
+              3.188
+            ],
+            "mass_idx": null
+          },
+          "build_id": "174b38c3",
+          "coverage": {
+            "overall": 0.71,
+            "probes": [
+              {
+                "key": "hairpin",
+                "label": "Hairpins (< 45 mph)",
+                "count": 1,
+                "required": 3,
+                "confidence": 0.33,
+                "hint": "take 2 more tight corners under 45 mph"
+              },
+              {
+                "key": "medium",
+                "label": "Medium corners (45-85 mph)",
+                "count": 3,
+                "required": 4,
+                "confidence": 0.75,
+                "hint": "1 more medium-speed corners"
+              },
+              {
+                "key": "fast",
+                "label": "Fast sweepers (> 85 mph)",
+                "count": 4,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "flick",
+                "label": "Chicane flicks (L-R within 2.5 s)",
+                "count": 3,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "launch",
+                "label": "Launches (0-60 from rest)",
+                "count": 1,
+                "required": 2,
+                "confidence": 0.5,
+                "hint": "1 more standing launches"
+              },
+              {
+                "key": "brake",
+                "label": "Hard stops from > 80 mph",
+                "count": 0,
+                "required": 3,
+                "confidence": 0,
+                "hint": "3 more hard stops from 80+ mph"
+              },
+              {
+                "key": "crest",
+                "label": "Crests / bumps (car goes light)",
+                "count": 4,
+                "required": 2,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "top",
+                "label": "Top-speed pull (WOT in top gear, 5 s)",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "wiggle",
+                "label": "Steering pulses > 55 mph",
+                "count": 74,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "dyno",
+                "label": "Dyno rpm coverage (WOT)",
+                "count": 0.8,
+                "required": 1,
+                "confidence": 0.8,
+                "hint": "full-throttle pulls through the rev range"
+              },
+              {
+                "key": "gears",
+                "label": "Gear ladder",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "warm",
+                "label": "Tires warm (> 150 F) most of the run",
+                "count": 0.47,
+                "required": 1,
+                "confidence": 0.78,
+                "hint": "keep driving — tires still cold for most frames"
+              }
+            ]
+          },
+          "advice": [
+            {
+              "key": "brake-lockup",
+              "text": "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.",
+              "severity": 3,
+              "confidence": 1,
+              "evidence": "5/8 corners red on the fronts in phase 1"
+            },
+            {
+              "key": "launch-spin",
+              "text": "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.",
+              "severity": 2,
+              "confidence": 0.5,
+              "evidence": "median peak rear slip 29.21 over 1 launches"
+            },
+            {
+              "key": "launch-front-spin",
+              "text": "AWD fronts spinning at launch: center split more rearward / front accel diff down.",
+              "severity": 2,
+              "confidence": 0.5,
+              "evidence": "median peak front slip 28.83"
+            }
+          ],
+          "temps_med_f": {
+            "FL": 141,
+            "FR": 140,
+            "RL": 151,
+            "RR": 151
+          }
+        },
+        {
+          "id": "1155|1|8|700",
+          "ordinal": 1155,
+          "pi": 700,
+          "class": "A",
+          "drivetrain": "RWD",
+          "cyl": 8,
+          "max_rpm": 8000,
+          "idle_rpm": 900,
+          "car_group": 20,
+          "name": "1965 Shelby Cobra Daytona",
+          "live_frames": 6499,
+          "temps_max_f": {
+            "FL": 105,
+            "FR": 105,
+            "RL": 115,
+            "RR": 115
+          },
+          "gears": [
+            {
+              "gear": 1,
+              "mps_per_krpm": 3.062,
+              "rel": 1,
+              "n": 394
+            },
+            {
+              "gear": 2,
+              "mps_per_krpm": 4.159,
+              "rel": 1.358,
+              "n": 379
+            }
+          ],
+          "dyno": [
+            {
+              "rpm": 4750,
+              "hp": 506,
+              "tq": 548,
+              "n": 11
+            },
+            {
+              "rpm": 5000,
+              "hp": 494,
+              "tq": 497,
+              "n": 24
+            },
+            {
+              "rpm": 5250,
+              "hp": 347,
+              "tq": 338,
+              "n": 66
+            },
+            {
+              "rpm": 5500,
+              "hp": 391,
+              "tq": 361,
+              "n": 121
+            },
+            {
+              "rpm": 5750,
+              "hp": 386,
+              "tq": 344,
+              "n": 117
+            },
+            {
+              "rpm": 6000,
+              "hp": 393,
+              "tq": 336,
+              "n": 140
+            },
+            {
+              "rpm": 6250,
+              "hp": 387,
+              "tq": 321,
+              "n": 77
+            },
+            {
+              "rpm": 6500,
+              "hp": 392,
+              "tq": 310,
+              "n": 50
+            },
+            {
+              "rpm": 6750,
+              "hp": 399,
+              "tq": 306,
+              "n": 67
+            },
+            {
+              "rpm": 7000,
+              "hp": 385,
+              "tq": 283,
+              "n": 88
+            }
+          ],
+          "k_wheel": {
+            "FL": 3.1928556684308305,
+            "FR": 3.1904447821155832,
+            "RL": 2.7778710412175744,
+            "RR": 2.736914465149474
+          },
+          "live_s": 61.8,
+          "sig": {
+            "boost_max": 7.5,
+            "hp_peak": 506,
+            "rpm_at_peak": 4750,
+            "tq_peak": 548,
+            "gear_count": 2,
+            "ladder": [
+              1,
+              1.358
+            ],
+            "mass_idx": null
+          },
+          "build_id": "5da2ec7a",
+          "coverage": {
+            "overall": 0.37,
+            "probes": [
+              {
+                "key": "hairpin",
+                "label": "Hairpins (< 45 mph)",
+                "count": 1,
+                "required": 3,
+                "confidence": 0.33,
+                "hint": "take 2 more tight corners under 45 mph"
+              },
+              {
+                "key": "medium",
+                "label": "Medium corners (45-85 mph)",
+                "count": 3,
+                "required": 4,
+                "confidence": 0.75,
+                "hint": "1 more medium-speed corners"
+              },
+              {
+                "key": "fast",
+                "label": "Fast sweepers (> 85 mph)",
+                "count": 0,
+                "required": 3,
+                "confidence": 0,
+                "hint": "3 more sweepers above 85 mph"
+              },
+              {
+                "key": "flick",
+                "label": "Chicane flicks (L-R within 2.5 s)",
+                "count": 1,
+                "required": 2,
+                "confidence": 0.5,
+                "hint": "1 more quick direction changes"
+              },
+              {
+                "key": "launch",
+                "label": "Launches (0-60 from rest)",
+                "count": 0,
+                "required": 2,
+                "confidence": 0,
+                "hint": "2 more standing launches"
+              },
+              {
+                "key": "brake",
+                "label": "Hard stops from > 80 mph",
+                "count": 0,
+                "required": 3,
+                "confidence": 0,
+                "hint": "3 more hard stops from 80+ mph"
+              },
+              {
+                "key": "crest",
+                "label": "Crests / bumps (car goes light)",
+                "count": 1,
+                "required": 2,
+                "confidence": 0.5,
+                "hint": "1 more crests at speed"
+              },
+              {
+                "key": "top",
+                "label": "Top-speed pull (WOT in top gear, 5 s)",
+                "count": 0,
+                "required": 1,
+                "confidence": 0,
+                "hint": "hold full throttle in top gear for 5 s"
+              },
+              {
+                "key": "wiggle",
+                "label": "Steering pulses > 55 mph",
+                "count": 8,
+                "required": 3,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "dyno",
+                "label": "Dyno rpm coverage (WOT)",
+                "count": 0.45,
+                "required": 1,
+                "confidence": 0.45,
+                "hint": "full-throttle pulls through the rev range"
+              },
+              {
+                "key": "gears",
+                "label": "Gear ladder",
+                "count": 1,
+                "required": 1,
+                "confidence": 1,
+                "hint": "done"
+              },
+              {
+                "key": "warm",
+                "label": "Tires warm (> 150 F) most of the run",
+                "count": 0,
+                "required": 1,
+                "confidence": 0,
+                "hint": "keep driving — tires still cold for most frames"
+              }
+            ]
+          },
+          "advice": [
+            {
+              "key": "rear-limited",
+              "text": "Rear-limited corners: rear ARB/springs softer; on throttle (phase 4) accel diff lock -10%.",
+              "severity": 3,
+              "confidence": 0.75,
+              "evidence": "3/4 corners red on the rears (0 on exit)"
+            },
+            {
+              "key": "oversteer-balance",
+              "text": "Balance reads oversteer (negative USI): rear relatively softer or rear wing up.",
+              "severity": 2,
+              "confidence": 0.5,
+              "evidence": "USI median -0.053"
+            },
+            {
+              "key": "trail-brake",
+              "text": "Trail-brake understeer: finish more braking before steering; caster +0.5 for camber-in-turn.",
+              "severity": 2,
+              "confidence": 0.25,
+              "evidence": "1/4 corners red on the fronts at turn-in"
+            }
+          ],
+          "temps_med_f": {
+            "FL": 92,
+            "FR": 91,
+            "RL": 95,
+            "RR": 95
           }
         },
         {
@@ -64495,7 +69145,7 @@ window.FH6_DB = {
           "max_rpm": 10000,
           "idle_rpm": 791,
           "car_group": 50,
-          "name": null,
+          "name": "1991 Honda Beat",
           "live_frames": 2630,
           "temps_max_f": {
             "FL": 117,
@@ -64639,7 +69289,7 @@ window.FH6_DB = {
             "RL": 3.595539920376027,
             "RR": 3.598290477306433
           },
-          "live_s": 21.5,
+          "live_s": 25,
           "sig": {
             "boost_max": 0,
             "hp_peak": 63,
@@ -64780,7 +69430,37 @@ window.FH6_DB = {
         {
           "id": "3852|2|4|700",
           "t0": 67.3,
-          "t1": 456.4
+          "t1": 754.6
+        },
+        {
+          "id": "2616|2|10|800",
+          "t0": 755.7,
+          "t1": 896.1
+        },
+        {
+          "id": "3852|2|4|700",
+          "t0": 905.5,
+          "t1": 1135.7
+        },
+        {
+          "id": "2866|2|4|800",
+          "t0": 1136.1,
+          "t1": 1215.4
+        },
+        {
+          "id": "3852|2|4|700",
+          "t0": 1222.2,
+          "t1": 1301.3
+        },
+        {
+          "id": "1155|1|8|700",
+          "t0": 1303.6,
+          "t1": 1357.2
+        },
+        {
+          "id": "1155|2|8|700",
+          "t0": 1397.7,
+          "t1": 1610
         }
       ],
       "impacts": [
@@ -64826,7 +69506,120 @@ window.FH6_DB = {
         416.6,
         436.9,
         437,
-        438.7
+        438.7,
+        788.2,
+        788.3,
+        788.5,
+        788.6,
+        793.5,
+        793.6,
+        793.7,
+        793.8,
+        793.9,
+        794,
+        794.1,
+        794.2,
+        794.3,
+        794.4,
+        794.5,
+        794.6,
+        794.7,
+        794.8,
+        794.9,
+        795,
+        795.3,
+        795.4,
+        798,
+        798.1,
+        798.2,
+        798.3,
+        798.8,
+        798.9,
+        799,
+        799.1,
+        799.2,
+        799.3,
+        799.4,
+        799.5,
+        799.6,
+        799.7,
+        803.3,
+        803.4,
+        803.5,
+        803.6,
+        807.3,
+        807.4,
+        807.5,
+        807.6,
+        807.7,
+        807.8,
+        807.9,
+        810.4,
+        810.8,
+        810.9,
+        811,
+        811.1,
+        811.2,
+        811.3,
+        811.4,
+        811.5,
+        811.7,
+        811.9,
+        812,
+        812.1,
+        812.2,
+        812.3,
+        812.4,
+        812.5,
+        830,
+        830.1,
+        830.4,
+        830.5,
+        830.6,
+        830.7,
+        830.8,
+        830.9,
+        831,
+        849.7,
+        849.8,
+        849.9,
+        850,
+        850.1,
+        850.2,
+        850.3,
+        850.4,
+        850.5,
+        850.6,
+        850.7,
+        851.2,
+        851.3,
+        851.5,
+        851.6,
+        851.8,
+        855.2,
+        856.3,
+        856.5,
+        856.6,
+        856.7,
+        856.9,
+        1176.5,
+        1176.6,
+        1176.7,
+        1190,
+        1190.1,
+        1190.2,
+        1190.3,
+        1212.2,
+        1212.8,
+        1321.6,
+        1331.5,
+        1422.9,
+        1423,
+        1423.1,
+        1423.3,
+        1484.5,
+        1484.6,
+        1487.1
       ],
       "zero_windows": [
         [
@@ -64863,7 +69656,135 @@ window.FH6_DB = {
         ],
         [
           456.4,
-          461.4
+          510.4
+        ],
+        [
+          516.9,
+          521.5
+        ],
+        [
+          602.7,
+          684.8
+        ],
+        [
+          685.4,
+          688
+        ],
+        [
+          695.5,
+          700.8
+        ],
+        [
+          702.3,
+          753.5
+        ],
+        [
+          754.6,
+          755.7
+        ],
+        [
+          756.2,
+          758.5
+        ],
+        [
+          761.2,
+          780
+        ],
+        [
+          866.2,
+          887.9
+        ],
+        [
+          896.1,
+          905.5
+        ],
+        [
+          914.2,
+          918.7
+        ],
+        [
+          1040,
+          1046.4
+        ],
+        [
+          1047.7,
+          1051.1
+        ],
+        [
+          1051.7,
+          1052.9
+        ],
+        [
+          1053.1,
+          1134.9
+        ],
+        [
+          1136.8,
+          1139.1
+        ],
+        [
+          1141.4,
+          1164.5
+        ],
+        [
+          1213.4,
+          1215.2
+        ],
+        [
+          1215.6,
+          1222.2
+        ],
+        [
+          1226,
+          1230.5
+        ],
+        [
+          1231.3,
+          1291.3
+        ],
+        [
+          1291.8,
+          1300.9
+        ],
+        [
+          1301.4,
+          1303.6
+        ],
+        [
+          1357.2,
+          1397.7
+        ],
+        [
+          1424.5,
+          1436.2
+        ],
+        [
+          1437.6,
+          1440.5
+        ],
+        [
+          1443.5,
+          1465.9
+        ],
+        [
+          1479,
+          1480.1
+        ],
+        [
+          1504.9,
+          1511.6
+        ],
+        [
+          1512.3,
+          1523.8
+        ],
+        [
+          1540.9,
+          1585.5
+        ],
+        [
+          1610,
+          1692
         ]
       ],
       "strip": [
@@ -67749,6 +72670,7676 @@ window.FH6_DB = {
         {
           "t": 461,
           "state": "off"
+        },
+        {
+          "t": 462,
+          "state": "off"
+        },
+        {
+          "t": 463,
+          "state": "off"
+        },
+        {
+          "t": 464,
+          "state": "off"
+        },
+        {
+          "t": 465,
+          "state": "off"
+        },
+        {
+          "t": 466,
+          "state": "off"
+        },
+        {
+          "t": 467,
+          "state": "off"
+        },
+        {
+          "t": 468,
+          "state": "off"
+        },
+        {
+          "t": 469,
+          "state": "off"
+        },
+        {
+          "t": 470,
+          "state": "off"
+        },
+        {
+          "t": 471,
+          "state": "off"
+        },
+        {
+          "t": 472,
+          "state": "off"
+        },
+        {
+          "t": 473,
+          "state": "off"
+        },
+        {
+          "t": 474,
+          "state": "off"
+        },
+        {
+          "t": 475,
+          "state": "off"
+        },
+        {
+          "t": 476,
+          "state": "off"
+        },
+        {
+          "t": 477,
+          "state": "off"
+        },
+        {
+          "t": 478,
+          "state": "off"
+        },
+        {
+          "t": 479,
+          "state": "off"
+        },
+        {
+          "t": 480,
+          "state": "off"
+        },
+        {
+          "t": 481,
+          "state": "off"
+        },
+        {
+          "t": 482,
+          "state": "off"
+        },
+        {
+          "t": 483,
+          "state": "off"
+        },
+        {
+          "t": 484,
+          "state": "off"
+        },
+        {
+          "t": 485,
+          "state": "off"
+        },
+        {
+          "t": 486,
+          "state": "off"
+        },
+        {
+          "t": 487,
+          "state": "off"
+        },
+        {
+          "t": 488,
+          "state": "off"
+        },
+        {
+          "t": 489,
+          "state": "off"
+        },
+        {
+          "t": 490,
+          "state": "off"
+        },
+        {
+          "t": 491,
+          "state": "off"
+        },
+        {
+          "t": 492,
+          "state": "off"
+        },
+        {
+          "t": 493,
+          "state": "off"
+        },
+        {
+          "t": 494,
+          "state": "off"
+        },
+        {
+          "t": 495,
+          "state": "off"
+        },
+        {
+          "t": 496,
+          "state": "off"
+        },
+        {
+          "t": 497,
+          "state": "off"
+        },
+        {
+          "t": 498,
+          "state": "off"
+        },
+        {
+          "t": 499,
+          "state": "off"
+        },
+        {
+          "t": 500,
+          "state": "off"
+        },
+        {
+          "t": 501,
+          "state": "off"
+        },
+        {
+          "t": 502,
+          "state": "off"
+        },
+        {
+          "t": 503,
+          "state": "off"
+        },
+        {
+          "t": 504,
+          "state": "off"
+        },
+        {
+          "t": 505,
+          "state": "off"
+        },
+        {
+          "t": 506,
+          "state": "off"
+        },
+        {
+          "t": 507,
+          "state": "off"
+        },
+        {
+          "t": 508,
+          "state": "off"
+        },
+        {
+          "t": 509,
+          "state": "off"
+        },
+        {
+          "t": 510,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 2,
+          "r": 1.13,
+          "g": 0.11
+        },
+        {
+          "t": 511,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.05,
+          "r": 0.05,
+          "g": 0.01
+        },
+        {
+          "t": 512,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.05,
+          "r": 0.05,
+          "g": 0
+        },
+        {
+          "t": 513,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.05,
+          "r": 0.05,
+          "g": 0
+        },
+        {
+          "t": 514,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.06,
+          "r": 0.06,
+          "g": 0.01
+        },
+        {
+          "t": 515,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.06,
+          "r": 0.05,
+          "g": 0
+        },
+        {
+          "t": 516,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.06,
+          "r": 0.05,
+          "g": 0
+        },
+        {
+          "t": 517,
+          "state": "off"
+        },
+        {
+          "t": 518,
+          "state": "off"
+        },
+        {
+          "t": 519,
+          "state": "off"
+        },
+        {
+          "t": 520,
+          "state": "off"
+        },
+        {
+          "t": 521,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 522,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 523,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 524,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 525,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 526,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 527,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 528,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 529,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 530,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 531,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 532,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 533,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 534,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 535,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 536,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 537,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 538,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 539,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 540,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 541,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 542,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 543,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 544,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 545,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 546,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 547,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 548,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 549,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 550,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 551,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 552,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 553,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 554,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 555,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 556,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 557,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 558,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 559,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 560,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 561,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 562,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 563,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 564,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 565,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 566,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 567,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 568,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 569,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 570,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 571,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 572,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 573,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 574,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 575,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 576,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 577,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 578,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 579,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 580,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 581,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 582,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 583,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 584,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 585,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 586,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 587,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 588,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 589,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 590,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 8,
+          "f": 20.48,
+          "r": 13.29,
+          "g": 0.06
+        },
+        {
+          "t": 591,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 37,
+          "f": 4.24,
+          "r": 2.5,
+          "g": 0.1
+        },
+        {
+          "t": 592,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 59,
+          "f": 0.35,
+          "r": 0.38,
+          "g": 0.05
+        },
+        {
+          "t": 593,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 76,
+          "f": 0.27,
+          "r": 0.27,
+          "g": 0.06
+        },
+        {
+          "t": 594,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 90,
+          "f": 0.26,
+          "r": 0.24,
+          "g": 0.09
+        },
+        {
+          "t": 595,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 102,
+          "f": 0.23,
+          "r": 0.22,
+          "g": 0.12
+        },
+        {
+          "t": 596,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 101,
+          "f": 0.65,
+          "r": 0.28,
+          "g": 1.3
+        },
+        {
+          "t": 597,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 95,
+          "f": 2.86,
+          "r": 3,
+          "g": 2.36
+        },
+        {
+          "t": 598,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 69,
+          "f": 4.71,
+          "r": 4.24,
+          "g": 1.99
+        },
+        {
+          "t": 599,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 45,
+          "f": 4.82,
+          "r": 4.72,
+          "g": 1.98
+        },
+        {
+          "t": 600,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 20,
+          "f": 3.36,
+          "r": 5.01,
+          "g": 0.76
+        },
+        {
+          "t": 601,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 6,
+          "f": 16.32,
+          "r": 31.49,
+          "g": 0.08
+        },
+        {
+          "t": 602,
+          "state": "rear",
+          "car": "3852|2|4|700",
+          "mph": 14,
+          "f": 0.63,
+          "r": 5.93,
+          "g": 0.1
+        },
+        {
+          "t": 603,
+          "state": "off"
+        },
+        {
+          "t": 604,
+          "state": "off"
+        },
+        {
+          "t": 605,
+          "state": "off"
+        },
+        {
+          "t": 606,
+          "state": "off"
+        },
+        {
+          "t": 607,
+          "state": "off"
+        },
+        {
+          "t": 608,
+          "state": "off"
+        },
+        {
+          "t": 609,
+          "state": "off"
+        },
+        {
+          "t": 610,
+          "state": "off"
+        },
+        {
+          "t": 611,
+          "state": "off"
+        },
+        {
+          "t": 612,
+          "state": "off"
+        },
+        {
+          "t": 613,
+          "state": "off"
+        },
+        {
+          "t": 614,
+          "state": "off"
+        },
+        {
+          "t": 615,
+          "state": "off"
+        },
+        {
+          "t": 616,
+          "state": "off"
+        },
+        {
+          "t": 617,
+          "state": "off"
+        },
+        {
+          "t": 618,
+          "state": "off"
+        },
+        {
+          "t": 619,
+          "state": "off"
+        },
+        {
+          "t": 620,
+          "state": "off"
+        },
+        {
+          "t": 621,
+          "state": "off"
+        },
+        {
+          "t": 622,
+          "state": "off"
+        },
+        {
+          "t": 623,
+          "state": "off"
+        },
+        {
+          "t": 624,
+          "state": "off"
+        },
+        {
+          "t": 625,
+          "state": "off"
+        },
+        {
+          "t": 626,
+          "state": "off"
+        },
+        {
+          "t": 627,
+          "state": "off"
+        },
+        {
+          "t": 628,
+          "state": "off"
+        },
+        {
+          "t": 629,
+          "state": "off"
+        },
+        {
+          "t": 630,
+          "state": "off"
+        },
+        {
+          "t": 631,
+          "state": "off"
+        },
+        {
+          "t": 632,
+          "state": "off"
+        },
+        {
+          "t": 633,
+          "state": "off"
+        },
+        {
+          "t": 634,
+          "state": "off"
+        },
+        {
+          "t": 635,
+          "state": "off"
+        },
+        {
+          "t": 636,
+          "state": "off"
+        },
+        {
+          "t": 637,
+          "state": "off"
+        },
+        {
+          "t": 638,
+          "state": "off"
+        },
+        {
+          "t": 639,
+          "state": "off"
+        },
+        {
+          "t": 640,
+          "state": "off"
+        },
+        {
+          "t": 641,
+          "state": "off"
+        },
+        {
+          "t": 642,
+          "state": "off"
+        },
+        {
+          "t": 643,
+          "state": "off"
+        },
+        {
+          "t": 644,
+          "state": "off"
+        },
+        {
+          "t": 645,
+          "state": "off"
+        },
+        {
+          "t": 646,
+          "state": "off"
+        },
+        {
+          "t": 647,
+          "state": "off"
+        },
+        {
+          "t": 648,
+          "state": "off"
+        },
+        {
+          "t": 649,
+          "state": "off"
+        },
+        {
+          "t": 650,
+          "state": "off"
+        },
+        {
+          "t": 651,
+          "state": "off"
+        },
+        {
+          "t": 652,
+          "state": "off"
+        },
+        {
+          "t": 653,
+          "state": "off"
+        },
+        {
+          "t": 654,
+          "state": "off"
+        },
+        {
+          "t": 655,
+          "state": "off"
+        },
+        {
+          "t": 656,
+          "state": "off"
+        },
+        {
+          "t": 657,
+          "state": "off"
+        },
+        {
+          "t": 658,
+          "state": "off"
+        },
+        {
+          "t": 659,
+          "state": "off"
+        },
+        {
+          "t": 660,
+          "state": "off"
+        },
+        {
+          "t": 661,
+          "state": "off"
+        },
+        {
+          "t": 662,
+          "state": "off"
+        },
+        {
+          "t": 663,
+          "state": "off"
+        },
+        {
+          "t": 664,
+          "state": "off"
+        },
+        {
+          "t": 665,
+          "state": "off"
+        },
+        {
+          "t": 666,
+          "state": "off"
+        },
+        {
+          "t": 667,
+          "state": "off"
+        },
+        {
+          "t": 668,
+          "state": "off"
+        },
+        {
+          "t": 669,
+          "state": "off"
+        },
+        {
+          "t": 670,
+          "state": "off"
+        },
+        {
+          "t": 671,
+          "state": "off"
+        },
+        {
+          "t": 672,
+          "state": "off"
+        },
+        {
+          "t": 673,
+          "state": "off"
+        },
+        {
+          "t": 674,
+          "state": "off"
+        },
+        {
+          "t": 675,
+          "state": "off"
+        },
+        {
+          "t": 676,
+          "state": "off"
+        },
+        {
+          "t": 677,
+          "state": "off"
+        },
+        {
+          "t": 678,
+          "state": "off"
+        },
+        {
+          "t": 679,
+          "state": "off"
+        },
+        {
+          "t": 680,
+          "state": "off"
+        },
+        {
+          "t": 681,
+          "state": "off"
+        },
+        {
+          "t": 682,
+          "state": "off"
+        },
+        {
+          "t": 683,
+          "state": "off"
+        },
+        {
+          "t": 684,
+          "state": "off"
+        },
+        {
+          "t": 685,
+          "state": "off"
+        },
+        {
+          "t": 686,
+          "state": "off"
+        },
+        {
+          "t": 687,
+          "state": "off"
+        },
+        {
+          "t": 688,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.48,
+          "r": 0.25,
+          "g": 0.05
+        },
+        {
+          "t": 689,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 690,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 691,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 692,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 8.73,
+          "r": 10.83,
+          "g": 0.08
+        },
+        {
+          "t": 693,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 22,
+          "f": 9.25,
+          "r": 11.72,
+          "g": 0.1
+        },
+        {
+          "t": 694,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 48,
+          "f": 0.48,
+          "r": 0.58,
+          "g": 0.29
+        },
+        {
+          "t": 695,
+          "state": "off"
+        },
+        {
+          "t": 696,
+          "state": "off"
+        },
+        {
+          "t": 697,
+          "state": "off"
+        },
+        {
+          "t": 698,
+          "state": "off"
+        },
+        {
+          "t": 699,
+          "state": "off"
+        },
+        {
+          "t": 700,
+          "state": "off"
+        },
+        {
+          "t": 701,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 65,
+          "f": 0.41,
+          "r": 0.41,
+          "g": 0.52
+        },
+        {
+          "t": 702,
+          "state": "off"
+        },
+        {
+          "t": 703,
+          "state": "off"
+        },
+        {
+          "t": 704,
+          "state": "off"
+        },
+        {
+          "t": 705,
+          "state": "off"
+        },
+        {
+          "t": 706,
+          "state": "off"
+        },
+        {
+          "t": 707,
+          "state": "off"
+        },
+        {
+          "t": 708,
+          "state": "off"
+        },
+        {
+          "t": 709,
+          "state": "off"
+        },
+        {
+          "t": 710,
+          "state": "off"
+        },
+        {
+          "t": 711,
+          "state": "off"
+        },
+        {
+          "t": 712,
+          "state": "off"
+        },
+        {
+          "t": 713,
+          "state": "off"
+        },
+        {
+          "t": 714,
+          "state": "off"
+        },
+        {
+          "t": 715,
+          "state": "off"
+        },
+        {
+          "t": 716,
+          "state": "off"
+        },
+        {
+          "t": 717,
+          "state": "off"
+        },
+        {
+          "t": 718,
+          "state": "off"
+        },
+        {
+          "t": 719,
+          "state": "off"
+        },
+        {
+          "t": 720,
+          "state": "off"
+        },
+        {
+          "t": 721,
+          "state": "off"
+        },
+        {
+          "t": 722,
+          "state": "off"
+        },
+        {
+          "t": 723,
+          "state": "off"
+        },
+        {
+          "t": 724,
+          "state": "off"
+        },
+        {
+          "t": 725,
+          "state": "off"
+        },
+        {
+          "t": 726,
+          "state": "off"
+        },
+        {
+          "t": 727,
+          "state": "off"
+        },
+        {
+          "t": 728,
+          "state": "off"
+        },
+        {
+          "t": 729,
+          "state": "off"
+        },
+        {
+          "t": 730,
+          "state": "off"
+        },
+        {
+          "t": 731,
+          "state": "off"
+        },
+        {
+          "t": 732,
+          "state": "off"
+        },
+        {
+          "t": 733,
+          "state": "off"
+        },
+        {
+          "t": 734,
+          "state": "off"
+        },
+        {
+          "t": 735,
+          "state": "off"
+        },
+        {
+          "t": 736,
+          "state": "off"
+        },
+        {
+          "t": 737,
+          "state": "off"
+        },
+        {
+          "t": 738,
+          "state": "off"
+        },
+        {
+          "t": 739,
+          "state": "off"
+        },
+        {
+          "t": 740,
+          "state": "off"
+        },
+        {
+          "t": 741,
+          "state": "off"
+        },
+        {
+          "t": 742,
+          "state": "off"
+        },
+        {
+          "t": 743,
+          "state": "off"
+        },
+        {
+          "t": 744,
+          "state": "off"
+        },
+        {
+          "t": 745,
+          "state": "off"
+        },
+        {
+          "t": 746,
+          "state": "off"
+        },
+        {
+          "t": 747,
+          "state": "off"
+        },
+        {
+          "t": 748,
+          "state": "off"
+        },
+        {
+          "t": 749,
+          "state": "off"
+        },
+        {
+          "t": 750,
+          "state": "off"
+        },
+        {
+          "t": 751,
+          "state": "off"
+        },
+        {
+          "t": 752,
+          "state": "off"
+        },
+        {
+          "t": 753,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 72,
+          "f": 0.02,
+          "r": 0.08,
+          "g": 0.39
+        },
+        {
+          "t": 754,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 71,
+          "f": 0.01,
+          "r": 0.03,
+          "g": 0.08
+        },
+        {
+          "t": 755,
+          "state": "off"
+        },
+        {
+          "t": 756,
+          "state": "off"
+        },
+        {
+          "t": 757,
+          "state": "off"
+        },
+        {
+          "t": 758,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0.02,
+          "r": 0.02,
+          "g": 0.01
+        },
+        {
+          "t": 759,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.02,
+          "g": 0.04
+        },
+        {
+          "t": 760,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 761,
+          "state": "off"
+        },
+        {
+          "t": 762,
+          "state": "off"
+        },
+        {
+          "t": 763,
+          "state": "off"
+        },
+        {
+          "t": 764,
+          "state": "off"
+        },
+        {
+          "t": 765,
+          "state": "off"
+        },
+        {
+          "t": 766,
+          "state": "off"
+        },
+        {
+          "t": 767,
+          "state": "off"
+        },
+        {
+          "t": 768,
+          "state": "off"
+        },
+        {
+          "t": 769,
+          "state": "off"
+        },
+        {
+          "t": 770,
+          "state": "off"
+        },
+        {
+          "t": 771,
+          "state": "off"
+        },
+        {
+          "t": 772,
+          "state": "off"
+        },
+        {
+          "t": 773,
+          "state": "off"
+        },
+        {
+          "t": 774,
+          "state": "off"
+        },
+        {
+          "t": 775,
+          "state": "off"
+        },
+        {
+          "t": 776,
+          "state": "off"
+        },
+        {
+          "t": 777,
+          "state": "off"
+        },
+        {
+          "t": 778,
+          "state": "off"
+        },
+        {
+          "t": 779,
+          "state": "off"
+        },
+        {
+          "t": 780,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 9,
+          "f": 3.81,
+          "r": 6.84,
+          "g": 0.12
+        },
+        {
+          "t": 781,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 32,
+          "f": 0.21,
+          "r": 0.4,
+          "g": 0.1
+        },
+        {
+          "t": 782,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 50,
+          "f": 0.34,
+          "r": 0.4,
+          "g": 0.38
+        },
+        {
+          "t": 783,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 66,
+          "f": 0.32,
+          "r": 0.29,
+          "g": 0.42
+        },
+        {
+          "t": 784,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 83,
+          "f": 0.18,
+          "r": 0.24,
+          "g": 0.35
+        },
+        {
+          "t": 785,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 96,
+          "f": 0.41,
+          "r": 0.2,
+          "g": 0.49
+        },
+        {
+          "t": 786,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 108,
+          "f": 0.76,
+          "r": 0.45,
+          "g": 1.98
+        },
+        {
+          "t": 787,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 117,
+          "f": 1.2,
+          "r": 0.74,
+          "g": 2.86
+        },
+        {
+          "t": 788,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 124,
+          "f": 1.67,
+          "r": 1.07,
+          "g": 3.49
+        },
+        {
+          "t": 789,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 132,
+          "f": 0.92,
+          "r": 0.29,
+          "g": 1.34
+        },
+        {
+          "t": 790,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 139,
+          "f": 0.86,
+          "r": 0.43,
+          "g": 2.02
+        },
+        {
+          "t": 791,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 144,
+          "f": 1.36,
+          "r": 0.68,
+          "g": 2.52
+        },
+        {
+          "t": 792,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 151,
+          "f": 0.65,
+          "r": 0.47,
+          "g": 2.28
+        },
+        {
+          "t": 793,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 156,
+          "f": 1.67,
+          "r": 1,
+          "g": 3.74
+        },
+        {
+          "t": 794,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 156,
+          "f": 1.82,
+          "r": 0.97,
+          "g": 4.06
+        },
+        {
+          "t": 795,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 156,
+          "f": 1.93,
+          "r": 1.1,
+          "g": 3.31
+        },
+        {
+          "t": 796,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 160,
+          "f": 1.23,
+          "r": 0.52,
+          "g": 2.04
+        },
+        {
+          "t": 797,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 164,
+          "f": 1.38,
+          "r": 0.53,
+          "g": 2.83
+        },
+        {
+          "t": 798,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 161,
+          "f": 2.18,
+          "r": 1.67,
+          "g": 3.34
+        },
+        {
+          "t": 799,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 137,
+          "f": 2.51,
+          "r": 1.31,
+          "g": 3.62
+        },
+        {
+          "t": 800,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 138,
+          "f": 1.7,
+          "r": 0.81,
+          "g": 2.78
+        },
+        {
+          "t": 801,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 143,
+          "f": 0.82,
+          "r": 0.23,
+          "g": 1.44
+        },
+        {
+          "t": 802,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 147,
+          "f": 1.26,
+          "r": 0.5,
+          "g": 2.64
+        },
+        {
+          "t": 803,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 150,
+          "f": 1.32,
+          "r": 0.66,
+          "g": 3.09
+        },
+        {
+          "t": 804,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 154,
+          "f": 0.85,
+          "r": 0.25,
+          "g": 1.64
+        },
+        {
+          "t": 805,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 158,
+          "f": 1.08,
+          "r": 0.34,
+          "g": 2.29
+        },
+        {
+          "t": 806,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 160,
+          "f": 1.25,
+          "r": 0.48,
+          "g": 2.94
+        },
+        {
+          "t": 807,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 162,
+          "f": 1.41,
+          "r": 0.76,
+          "g": 3.67
+        },
+        {
+          "t": 808,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 163,
+          "f": 0.75,
+          "r": 0.23,
+          "g": 1.7
+        },
+        {
+          "t": 809,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 166,
+          "f": 0.5,
+          "r": 0.18,
+          "g": 1.44
+        },
+        {
+          "t": 810,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 157,
+          "f": 2.15,
+          "r": 1.34,
+          "g": 3.36
+        },
+        {
+          "t": 811,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 148,
+          "f": 2.51,
+          "r": 1.12,
+          "g": 3.74
+        },
+        {
+          "t": 812,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 138,
+          "f": 2.49,
+          "r": 1.1,
+          "g": 3.43
+        },
+        {
+          "t": 813,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 138,
+          "f": 1.93,
+          "r": 0.77,
+          "g": 2.5
+        },
+        {
+          "t": 814,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 141,
+          "f": 2.84,
+          "r": 1.11,
+          "g": 1.13
+        },
+        {
+          "t": 815,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 80,
+          "f": 3.03,
+          "r": 1.61,
+          "g": 2.15
+        },
+        {
+          "t": 816,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 76,
+          "f": 1.4,
+          "r": 0.88,
+          "g": 2.44
+        },
+        {
+          "t": 817,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 62,
+          "f": 1.95,
+          "r": 0.81,
+          "g": 2.31
+        },
+        {
+          "t": 818,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 55,
+          "f": 1.63,
+          "r": 1.22,
+          "g": 2.29
+        },
+        {
+          "t": 819,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 67,
+          "f": 0.71,
+          "r": 0.8,
+          "g": 1.13
+        },
+        {
+          "t": 820,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 83,
+          "f": 0.44,
+          "r": 0.25,
+          "g": 0.46
+        },
+        {
+          "t": 821,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 96,
+          "f": 1.16,
+          "r": 0.44,
+          "g": 1.53
+        },
+        {
+          "t": 822,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 109,
+          "f": 1.22,
+          "r": 0.44,
+          "g": 2.49
+        },
+        {
+          "t": 823,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 117,
+          "f": 1.29,
+          "r": 0.47,
+          "g": 2.56
+        },
+        {
+          "t": 824,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 122,
+          "f": 1.55,
+          "r": 0.79,
+          "g": 2.95
+        },
+        {
+          "t": 825,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 128,
+          "f": 0.85,
+          "r": 0.4,
+          "g": 2.07
+        },
+        {
+          "t": 826,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 135,
+          "f": 0.08,
+          "r": 0.17,
+          "g": 0.49
+        },
+        {
+          "t": 827,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 141,
+          "f": 0.11,
+          "r": 0.21,
+          "g": 0.08
+        },
+        {
+          "t": 828,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 147,
+          "f": 0.06,
+          "r": 0.12,
+          "g": 0.07
+        },
+        {
+          "t": 829,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 154,
+          "f": 1.39,
+          "r": 0.66,
+          "g": 2.98
+        },
+        {
+          "t": 830,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 156,
+          "f": 1.74,
+          "r": 0.74,
+          "g": 3.64
+        },
+        {
+          "t": 831,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 159,
+          "f": 0.8,
+          "r": 0.62,
+          "g": 3.12
+        },
+        {
+          "t": 832,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 163,
+          "f": 1.05,
+          "r": 0.4,
+          "g": 2.75
+        },
+        {
+          "t": 833,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 164,
+          "f": 2.66,
+          "r": 1.45,
+          "g": 1.45
+        },
+        {
+          "t": 834,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 90,
+          "f": 3.48,
+          "r": 2.32,
+          "g": 1.66
+        },
+        {
+          "t": 835,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 75,
+          "f": 2.16,
+          "r": 1.72,
+          "g": 2.47
+        },
+        {
+          "t": 836,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 51,
+          "f": 2.14,
+          "r": 2.42,
+          "g": 2.37
+        },
+        {
+          "t": 837,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 44,
+          "f": 2.13,
+          "r": 1.65,
+          "g": 1.87
+        },
+        {
+          "t": 838,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 53,
+          "f": 2.68,
+          "r": 2,
+          "g": 1.71
+        },
+        {
+          "t": 839,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 70,
+          "f": 0.67,
+          "r": 0.47,
+          "g": 0.96
+        },
+        {
+          "t": 840,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 84,
+          "f": 0.08,
+          "r": 0.23,
+          "g": 0.11
+        },
+        {
+          "t": 841,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 96,
+          "f": 0.74,
+          "r": 0.27,
+          "g": 1.19
+        },
+        {
+          "t": 842,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 108,
+          "f": 0.5,
+          "r": 0.19,
+          "g": 0.84
+        },
+        {
+          "t": 843,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 116,
+          "f": 0.7,
+          "r": 0.39,
+          "g": 1.02
+        },
+        {
+          "t": 844,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 123,
+          "f": 0.91,
+          "r": 0.42,
+          "g": 1.35
+        },
+        {
+          "t": 845,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 129,
+          "f": 1.18,
+          "r": 0.66,
+          "g": 2.63
+        },
+        {
+          "t": 846,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 134,
+          "f": 0.84,
+          "r": 0.32,
+          "g": 1.89
+        },
+        {
+          "t": 847,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 139,
+          "f": 0.65,
+          "r": 0.25,
+          "g": 1.16
+        },
+        {
+          "t": 848,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 145,
+          "f": 0.16,
+          "r": 0.19,
+          "g": 0.32
+        },
+        {
+          "t": 849,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 149,
+          "f": 1.64,
+          "r": 0.94,
+          "g": 3.48
+        },
+        {
+          "t": 850,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 137,
+          "f": 1.81,
+          "r": 1.08,
+          "g": 3.46
+        },
+        {
+          "t": 851,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 125,
+          "f": 1.49,
+          "r": 0.82,
+          "g": 3.25
+        },
+        {
+          "t": 852,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 128,
+          "f": 0.51,
+          "r": 0.49,
+          "g": 2.8
+        },
+        {
+          "t": 853,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 135,
+          "f": 1.23,
+          "r": 0.37,
+          "g": 1.86
+        },
+        {
+          "t": 854,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 139,
+          "f": 1.61,
+          "r": 0.85,
+          "g": 2.43
+        },
+        {
+          "t": 855,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 127,
+          "f": 1.61,
+          "r": 0.8,
+          "g": 3.01
+        },
+        {
+          "t": 856,
+          "state": "impact",
+          "car": "2616|2|10|800",
+          "mph": 118,
+          "f": 1.7,
+          "r": 0.86,
+          "g": 3.19
+        },
+        {
+          "t": 857,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 107,
+          "f": 1.56,
+          "r": 0.81,
+          "g": 2.86
+        },
+        {
+          "t": 858,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 106,
+          "f": 1.5,
+          "r": 0.79,
+          "g": 2.81
+        },
+        {
+          "t": 859,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 104,
+          "f": 1.61,
+          "r": 0.81,
+          "g": 2.81
+        },
+        {
+          "t": 860,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 112,
+          "f": 1.31,
+          "r": 0.49,
+          "g": 1.66
+        },
+        {
+          "t": 861,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 120,
+          "f": 1.36,
+          "r": 0.63,
+          "g": 1.89
+        },
+        {
+          "t": 862,
+          "state": "front",
+          "car": "2616|2|10|800",
+          "mph": 127,
+          "f": 1.55,
+          "r": 0.65,
+          "g": 2.95
+        },
+        {
+          "t": 863,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 133,
+          "f": 0.55,
+          "r": 0.52,
+          "g": 2.31
+        },
+        {
+          "t": 864,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 140,
+          "f": 0.58,
+          "r": 0.18,
+          "g": 1.22
+        },
+        {
+          "t": 865,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 146,
+          "f": 0.07,
+          "r": 0.15,
+          "g": 0.68
+        },
+        {
+          "t": 866,
+          "state": "off"
+        },
+        {
+          "t": 867,
+          "state": "off"
+        },
+        {
+          "t": 868,
+          "state": "off"
+        },
+        {
+          "t": 869,
+          "state": "off"
+        },
+        {
+          "t": 870,
+          "state": "off"
+        },
+        {
+          "t": 871,
+          "state": "off"
+        },
+        {
+          "t": 872,
+          "state": "off"
+        },
+        {
+          "t": 873,
+          "state": "off"
+        },
+        {
+          "t": 874,
+          "state": "off"
+        },
+        {
+          "t": 875,
+          "state": "off"
+        },
+        {
+          "t": 876,
+          "state": "off"
+        },
+        {
+          "t": 877,
+          "state": "off"
+        },
+        {
+          "t": 878,
+          "state": "off"
+        },
+        {
+          "t": 879,
+          "state": "off"
+        },
+        {
+          "t": 880,
+          "state": "off"
+        },
+        {
+          "t": 881,
+          "state": "off"
+        },
+        {
+          "t": 882,
+          "state": "off"
+        },
+        {
+          "t": 883,
+          "state": "off"
+        },
+        {
+          "t": 884,
+          "state": "off"
+        },
+        {
+          "t": 885,
+          "state": "off"
+        },
+        {
+          "t": 886,
+          "state": "off"
+        },
+        {
+          "t": 887,
+          "state": "off"
+        },
+        {
+          "t": 888,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 34.45,
+          "r": 31.22,
+          "g": 0
+        },
+        {
+          "t": 889,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 34.45,
+          "r": 31.22,
+          "g": 0
+        },
+        {
+          "t": 890,
+          "state": "both",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 34.45,
+          "r": 31.22,
+          "g": 0.02
+        },
+        {
+          "t": 891,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0,
+          "r": 0.04,
+          "g": 0.02
+        },
+        {
+          "t": 892,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0,
+          "r": 0.04,
+          "g": 0.02
+        },
+        {
+          "t": 893,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0,
+          "r": 0.04,
+          "g": 0.02
+        },
+        {
+          "t": 894,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0,
+          "r": 0.04,
+          "g": 0.02
+        },
+        {
+          "t": 895,
+          "state": "calm",
+          "car": "2616|2|10|800",
+          "mph": 0,
+          "f": 0,
+          "r": 0.04,
+          "g": 0.02
+        },
+        {
+          "t": 896,
+          "state": "off"
+        },
+        {
+          "t": 897,
+          "state": "off"
+        },
+        {
+          "t": 898,
+          "state": "off"
+        },
+        {
+          "t": 899,
+          "state": "off"
+        },
+        {
+          "t": 900,
+          "state": "off"
+        },
+        {
+          "t": 901,
+          "state": "off"
+        },
+        {
+          "t": 902,
+          "state": "off"
+        },
+        {
+          "t": 903,
+          "state": "off"
+        },
+        {
+          "t": 904,
+          "state": "off"
+        },
+        {
+          "t": 905,
+          "state": "off"
+        },
+        {
+          "t": 906,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 907,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 908,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 909,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 910,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 911,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 912,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 913,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 914,
+          "state": "off"
+        },
+        {
+          "t": 915,
+          "state": "off"
+        },
+        {
+          "t": 916,
+          "state": "off"
+        },
+        {
+          "t": 917,
+          "state": "off"
+        },
+        {
+          "t": 918,
+          "state": "off"
+        },
+        {
+          "t": 919,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 920,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 921,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 922,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 923,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 924,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 925,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 926,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 927,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 928,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 929,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 930,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 931,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 932,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 933,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 934,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 935,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 936,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 937,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 938,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 939,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 940,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 941,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 942,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 943,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 944,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 945,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 946,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 947,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 948,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 949,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 950,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 951,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 952,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 953,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 954,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 955,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 956,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 957,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 958,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 959,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 960,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 961,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 962,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 963,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 964,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 965,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 966,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 967,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 968,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 969,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 970,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 971,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 972,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 973,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 974,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 975,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 976,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 977,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 978,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 979,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 980,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 981,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 982,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 983,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 984,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 985,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 986,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 987,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 988,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 989,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 990,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 991,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 992,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 993,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 994,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 995,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 996,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 997,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 998,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 999,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1000,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1001,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1002,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1003,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1004,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1005,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1006,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1007,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1008,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1009,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1010,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1011,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1012,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1013,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1014,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1015,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1016,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1017,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1018,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1019,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1020,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1021,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1022,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1023,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1024,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1025,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1026,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1027,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1028,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1029,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1030,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1031,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1032,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1033,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1034,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1035,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1036,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1037,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1038,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1039,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1040,
+          "state": "off"
+        },
+        {
+          "t": 1041,
+          "state": "off"
+        },
+        {
+          "t": 1042,
+          "state": "off"
+        },
+        {
+          "t": 1043,
+          "state": "off"
+        },
+        {
+          "t": 1044,
+          "state": "off"
+        },
+        {
+          "t": 1045,
+          "state": "off"
+        },
+        {
+          "t": 1046,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1047,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 8.46,
+          "r": 10.74,
+          "g": 0.11
+        },
+        {
+          "t": 1048,
+          "state": "off"
+        },
+        {
+          "t": 1049,
+          "state": "off"
+        },
+        {
+          "t": 1050,
+          "state": "off"
+        },
+        {
+          "t": 1051,
+          "state": "both",
+          "car": "3852|2|4|700",
+          "mph": 12,
+          "f": 2.53,
+          "r": 3.78,
+          "g": 0.1
+        },
+        {
+          "t": 1052,
+          "state": "off"
+        },
+        {
+          "t": 1053,
+          "state": "off"
+        },
+        {
+          "t": 1054,
+          "state": "off"
+        },
+        {
+          "t": 1055,
+          "state": "off"
+        },
+        {
+          "t": 1056,
+          "state": "off"
+        },
+        {
+          "t": 1057,
+          "state": "off"
+        },
+        {
+          "t": 1058,
+          "state": "off"
+        },
+        {
+          "t": 1059,
+          "state": "off"
+        },
+        {
+          "t": 1060,
+          "state": "off"
+        },
+        {
+          "t": 1061,
+          "state": "off"
+        },
+        {
+          "t": 1062,
+          "state": "off"
+        },
+        {
+          "t": 1063,
+          "state": "off"
+        },
+        {
+          "t": 1064,
+          "state": "off"
+        },
+        {
+          "t": 1065,
+          "state": "off"
+        },
+        {
+          "t": 1066,
+          "state": "off"
+        },
+        {
+          "t": 1067,
+          "state": "off"
+        },
+        {
+          "t": 1068,
+          "state": "off"
+        },
+        {
+          "t": 1069,
+          "state": "off"
+        },
+        {
+          "t": 1070,
+          "state": "off"
+        },
+        {
+          "t": 1071,
+          "state": "off"
+        },
+        {
+          "t": 1072,
+          "state": "off"
+        },
+        {
+          "t": 1073,
+          "state": "off"
+        },
+        {
+          "t": 1074,
+          "state": "off"
+        },
+        {
+          "t": 1075,
+          "state": "off"
+        },
+        {
+          "t": 1076,
+          "state": "off"
+        },
+        {
+          "t": 1077,
+          "state": "off"
+        },
+        {
+          "t": 1078,
+          "state": "off"
+        },
+        {
+          "t": 1079,
+          "state": "off"
+        },
+        {
+          "t": 1080,
+          "state": "off"
+        },
+        {
+          "t": 1081,
+          "state": "off"
+        },
+        {
+          "t": 1082,
+          "state": "off"
+        },
+        {
+          "t": 1083,
+          "state": "off"
+        },
+        {
+          "t": 1084,
+          "state": "off"
+        },
+        {
+          "t": 1085,
+          "state": "off"
+        },
+        {
+          "t": 1086,
+          "state": "off"
+        },
+        {
+          "t": 1087,
+          "state": "off"
+        },
+        {
+          "t": 1088,
+          "state": "off"
+        },
+        {
+          "t": 1089,
+          "state": "off"
+        },
+        {
+          "t": 1090,
+          "state": "off"
+        },
+        {
+          "t": 1091,
+          "state": "off"
+        },
+        {
+          "t": 1092,
+          "state": "off"
+        },
+        {
+          "t": 1093,
+          "state": "off"
+        },
+        {
+          "t": 1094,
+          "state": "off"
+        },
+        {
+          "t": 1095,
+          "state": "off"
+        },
+        {
+          "t": 1096,
+          "state": "off"
+        },
+        {
+          "t": 1097,
+          "state": "off"
+        },
+        {
+          "t": 1098,
+          "state": "off"
+        },
+        {
+          "t": 1099,
+          "state": "off"
+        },
+        {
+          "t": 1100,
+          "state": "off"
+        },
+        {
+          "t": 1101,
+          "state": "off"
+        },
+        {
+          "t": 1102,
+          "state": "off"
+        },
+        {
+          "t": 1103,
+          "state": "off"
+        },
+        {
+          "t": 1104,
+          "state": "off"
+        },
+        {
+          "t": 1105,
+          "state": "off"
+        },
+        {
+          "t": 1106,
+          "state": "off"
+        },
+        {
+          "t": 1107,
+          "state": "off"
+        },
+        {
+          "t": 1108,
+          "state": "off"
+        },
+        {
+          "t": 1109,
+          "state": "off"
+        },
+        {
+          "t": 1110,
+          "state": "off"
+        },
+        {
+          "t": 1111,
+          "state": "off"
+        },
+        {
+          "t": 1112,
+          "state": "off"
+        },
+        {
+          "t": 1113,
+          "state": "off"
+        },
+        {
+          "t": 1114,
+          "state": "off"
+        },
+        {
+          "t": 1115,
+          "state": "off"
+        },
+        {
+          "t": 1116,
+          "state": "off"
+        },
+        {
+          "t": 1117,
+          "state": "off"
+        },
+        {
+          "t": 1118,
+          "state": "off"
+        },
+        {
+          "t": 1119,
+          "state": "off"
+        },
+        {
+          "t": 1120,
+          "state": "off"
+        },
+        {
+          "t": 1121,
+          "state": "off"
+        },
+        {
+          "t": 1122,
+          "state": "off"
+        },
+        {
+          "t": 1123,
+          "state": "off"
+        },
+        {
+          "t": 1124,
+          "state": "off"
+        },
+        {
+          "t": 1125,
+          "state": "off"
+        },
+        {
+          "t": 1126,
+          "state": "off"
+        },
+        {
+          "t": 1127,
+          "state": "off"
+        },
+        {
+          "t": 1128,
+          "state": "off"
+        },
+        {
+          "t": 1129,
+          "state": "off"
+        },
+        {
+          "t": 1130,
+          "state": "off"
+        },
+        {
+          "t": 1131,
+          "state": "off"
+        },
+        {
+          "t": 1132,
+          "state": "off"
+        },
+        {
+          "t": 1133,
+          "state": "off"
+        },
+        {
+          "t": 1134,
+          "state": "off"
+        },
+        {
+          "t": 1135,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 11,
+          "f": 0.02,
+          "r": 0.02,
+          "g": 0.09
+        },
+        {
+          "t": 1136,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 0,
+          "f": 0,
+          "r": 0,
+          "g": 0
+        },
+        {
+          "t": 1137,
+          "state": "off"
+        },
+        {
+          "t": 1138,
+          "state": "off"
+        },
+        {
+          "t": 1139,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1140,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.01,
+          "g": 0
+        },
+        {
+          "t": 1141,
+          "state": "off"
+        },
+        {
+          "t": 1142,
+          "state": "off"
+        },
+        {
+          "t": 1143,
+          "state": "off"
+        },
+        {
+          "t": 1144,
+          "state": "off"
+        },
+        {
+          "t": 1145,
+          "state": "off"
+        },
+        {
+          "t": 1146,
+          "state": "off"
+        },
+        {
+          "t": 1147,
+          "state": "off"
+        },
+        {
+          "t": 1148,
+          "state": "off"
+        },
+        {
+          "t": 1149,
+          "state": "off"
+        },
+        {
+          "t": 1150,
+          "state": "off"
+        },
+        {
+          "t": 1151,
+          "state": "off"
+        },
+        {
+          "t": 1152,
+          "state": "off"
+        },
+        {
+          "t": 1153,
+          "state": "off"
+        },
+        {
+          "t": 1154,
+          "state": "off"
+        },
+        {
+          "t": 1155,
+          "state": "off"
+        },
+        {
+          "t": 1156,
+          "state": "off"
+        },
+        {
+          "t": 1157,
+          "state": "off"
+        },
+        {
+          "t": 1158,
+          "state": "off"
+        },
+        {
+          "t": 1159,
+          "state": "off"
+        },
+        {
+          "t": 1160,
+          "state": "off"
+        },
+        {
+          "t": 1161,
+          "state": "off"
+        },
+        {
+          "t": 1162,
+          "state": "off"
+        },
+        {
+          "t": 1163,
+          "state": "off"
+        },
+        {
+          "t": 1164,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 0,
+          "f": 0,
+          "r": 0,
+          "g": 0
+        },
+        {
+          "t": 1165,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 7,
+          "f": 18.46,
+          "r": 19.97,
+          "g": 0.1
+        },
+        {
+          "t": 1166,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 7,
+          "f": 35.86,
+          "r": 39.89,
+          "g": 0.11
+        },
+        {
+          "t": 1167,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 37,
+          "f": 11.81,
+          "r": 12.46,
+          "g": 0.26
+        },
+        {
+          "t": 1168,
+          "state": "front",
+          "car": "2866|2|4|800",
+          "mph": 60,
+          "f": 1.54,
+          "r": 0.51,
+          "g": 0.9
+        },
+        {
+          "t": 1169,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 77,
+          "f": 0.65,
+          "r": 0.28,
+          "g": 0.77
+        },
+        {
+          "t": 1170,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 90,
+          "f": 0.11,
+          "r": 0.18,
+          "g": 0.2
+        },
+        {
+          "t": 1171,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 101,
+          "f": 0.11,
+          "r": 0.17,
+          "g": 0.11
+        },
+        {
+          "t": 1172,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 109,
+          "f": 0.11,
+          "r": 0.17,
+          "g": 0.11
+        },
+        {
+          "t": 1173,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 115,
+          "f": 0.5,
+          "r": 0.38,
+          "g": 1.14
+        },
+        {
+          "t": 1174,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 119,
+          "f": 0.69,
+          "r": 0.49,
+          "g": 2.32
+        },
+        {
+          "t": 1175,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 123,
+          "f": 0.79,
+          "r": 0.62,
+          "g": 2.68
+        },
+        {
+          "t": 1176,
+          "state": "impact",
+          "car": "2866|2|4|800",
+          "mph": 124,
+          "f": 1.05,
+          "r": 0.7,
+          "g": 3.46
+        },
+        {
+          "t": 1177,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 125,
+          "f": 0.7,
+          "r": 0.62,
+          "g": 1.94
+        },
+        {
+          "t": 1178,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 128,
+          "f": 0.58,
+          "r": 0.43,
+          "g": 1.82
+        },
+        {
+          "t": 1179,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 130,
+          "f": 0.41,
+          "r": 0.37,
+          "g": 1.91
+        },
+        {
+          "t": 1180,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 131,
+          "f": 0.41,
+          "r": 0.28,
+          "g": 1.52
+        },
+        {
+          "t": 1181,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "f": 0.58,
+          "r": 0.4,
+          "g": 2.45
+        },
+        {
+          "t": 1182,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "f": 0.84,
+          "r": 0.52,
+          "g": 2.33
+        },
+        {
+          "t": 1183,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "f": 0.59,
+          "r": 0.48,
+          "g": 2.14
+        },
+        {
+          "t": 1184,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 133,
+          "f": 0.35,
+          "r": 0.22,
+          "g": 0.98
+        },
+        {
+          "t": 1185,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "f": 0.62,
+          "r": 0.48,
+          "g": 2.02
+        },
+        {
+          "t": 1186,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "f": 0.81,
+          "r": 0.61,
+          "g": 2.89
+        },
+        {
+          "t": 1187,
+          "state": "front",
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "f": 1.17,
+          "r": 0.91,
+          "g": 2.99
+        },
+        {
+          "t": 1188,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 133,
+          "f": 1.46,
+          "r": 1.3,
+          "g": 2.97
+        },
+        {
+          "t": 1189,
+          "state": "front",
+          "car": "2866|2|4|800",
+          "mph": 133,
+          "f": 1.46,
+          "r": 0.89,
+          "g": 2.76
+        },
+        {
+          "t": 1190,
+          "state": "impact",
+          "car": "2866|2|4|800",
+          "mph": 117,
+          "f": 5.35,
+          "r": 5,
+          "g": 3.26
+        },
+        {
+          "t": 1191,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 101,
+          "f": 7.3,
+          "r": 7.2,
+          "g": 2.29
+        },
+        {
+          "t": 1192,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 83,
+          "f": 9.93,
+          "r": 9.36,
+          "g": 2.03
+        },
+        {
+          "t": 1193,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 68,
+          "f": 9.9,
+          "r": 9.39,
+          "g": 1.75
+        },
+        {
+          "t": 1194,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 55,
+          "f": 28.19,
+          "r": 22.89,
+          "g": 2.08
+        },
+        {
+          "t": 1195,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 30,
+          "f": 29.48,
+          "r": 26.29,
+          "g": 1.59
+        },
+        {
+          "t": 1196,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 18,
+          "f": 13.81,
+          "r": 23.27,
+          "g": 1.25
+        },
+        {
+          "t": 1197,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 41,
+          "f": 2.65,
+          "r": 2.27,
+          "g": 1.51
+        },
+        {
+          "t": 1198,
+          "state": "front",
+          "car": "2866|2|4|800",
+          "mph": 60,
+          "f": 1.58,
+          "r": 0.69,
+          "g": 1.42
+        },
+        {
+          "t": 1199,
+          "state": "front",
+          "car": "2866|2|4|800",
+          "mph": 75,
+          "f": 1.61,
+          "r": 0.77,
+          "g": 1.72
+        },
+        {
+          "t": 1200,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 87,
+          "f": 1.57,
+          "r": 1.12,
+          "g": 2.28
+        },
+        {
+          "t": 1201,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 96,
+          "f": 0.98,
+          "r": 0.88,
+          "g": 1.78
+        },
+        {
+          "t": 1202,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 90,
+          "f": 2.24,
+          "r": 1.62,
+          "g": 2.92
+        },
+        {
+          "t": 1203,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 82,
+          "f": 2.67,
+          "r": 2.63,
+          "g": 2.76
+        },
+        {
+          "t": 1204,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 88,
+          "f": 1.25,
+          "r": 1.23,
+          "g": 1.88
+        },
+        {
+          "t": 1205,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 96,
+          "f": 0.61,
+          "r": 0.47,
+          "g": 1.34
+        },
+        {
+          "t": 1206,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 102,
+          "f": 0.71,
+          "r": 0.53,
+          "g": 1.78
+        },
+        {
+          "t": 1207,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 108,
+          "f": 0.33,
+          "r": 0.27,
+          "g": 0.88
+        },
+        {
+          "t": 1208,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 112,
+          "f": 0.62,
+          "r": 0.51,
+          "g": 2.17
+        },
+        {
+          "t": 1209,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 114,
+          "f": 0.51,
+          "r": 0.49,
+          "g": 2.5
+        },
+        {
+          "t": 1210,
+          "state": "calm",
+          "car": "2866|2|4|800",
+          "mph": 117,
+          "f": 0.46,
+          "r": 0.35,
+          "g": 0.97
+        },
+        {
+          "t": 1211,
+          "state": "both",
+          "car": "2866|2|4|800",
+          "mph": 105,
+          "f": 1.39,
+          "r": 1.08,
+          "g": 2.37
+        },
+        {
+          "t": 1212,
+          "state": "impact",
+          "car": "2866|2|4|800",
+          "mph": 89,
+          "f": 1.8,
+          "r": 2.02,
+          "g": 3.68
+        },
+        {
+          "t": 1213,
+          "state": "off"
+        },
+        {
+          "t": 1214,
+          "state": "off"
+        },
+        {
+          "t": 1215,
+          "state": "off"
+        },
+        {
+          "t": 1216,
+          "state": "off"
+        },
+        {
+          "t": 1217,
+          "state": "off"
+        },
+        {
+          "t": 1218,
+          "state": "off"
+        },
+        {
+          "t": 1219,
+          "state": "off"
+        },
+        {
+          "t": 1220,
+          "state": "off"
+        },
+        {
+          "t": 1221,
+          "state": "off"
+        },
+        {
+          "t": 1222,
+          "state": "off"
+        },
+        {
+          "t": 1223,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.02,
+          "r": 0.03,
+          "g": 0.06
+        },
+        {
+          "t": 1224,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.04,
+          "r": 0.04,
+          "g": 0
+        },
+        {
+          "t": 1225,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.04,
+          "r": 0.04,
+          "g": 0.09
+        },
+        {
+          "t": 1226,
+          "state": "off"
+        },
+        {
+          "t": 1227,
+          "state": "off"
+        },
+        {
+          "t": 1228,
+          "state": "off"
+        },
+        {
+          "t": 1229,
+          "state": "off"
+        },
+        {
+          "t": 1230,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.05,
+          "g": 0
+        },
+        {
+          "t": 1231,
+          "state": "off"
+        },
+        {
+          "t": 1232,
+          "state": "off"
+        },
+        {
+          "t": 1233,
+          "state": "off"
+        },
+        {
+          "t": 1234,
+          "state": "off"
+        },
+        {
+          "t": 1235,
+          "state": "off"
+        },
+        {
+          "t": 1236,
+          "state": "off"
+        },
+        {
+          "t": 1237,
+          "state": "off"
+        },
+        {
+          "t": 1238,
+          "state": "off"
+        },
+        {
+          "t": 1239,
+          "state": "off"
+        },
+        {
+          "t": 1240,
+          "state": "off"
+        },
+        {
+          "t": 1241,
+          "state": "off"
+        },
+        {
+          "t": 1242,
+          "state": "off"
+        },
+        {
+          "t": 1243,
+          "state": "off"
+        },
+        {
+          "t": 1244,
+          "state": "off"
+        },
+        {
+          "t": 1245,
+          "state": "off"
+        },
+        {
+          "t": 1246,
+          "state": "off"
+        },
+        {
+          "t": 1247,
+          "state": "off"
+        },
+        {
+          "t": 1248,
+          "state": "off"
+        },
+        {
+          "t": 1249,
+          "state": "off"
+        },
+        {
+          "t": 1250,
+          "state": "off"
+        },
+        {
+          "t": 1251,
+          "state": "off"
+        },
+        {
+          "t": 1252,
+          "state": "off"
+        },
+        {
+          "t": 1253,
+          "state": "off"
+        },
+        {
+          "t": 1254,
+          "state": "off"
+        },
+        {
+          "t": 1255,
+          "state": "off"
+        },
+        {
+          "t": 1256,
+          "state": "off"
+        },
+        {
+          "t": 1257,
+          "state": "off"
+        },
+        {
+          "t": 1258,
+          "state": "off"
+        },
+        {
+          "t": 1259,
+          "state": "off"
+        },
+        {
+          "t": 1260,
+          "state": "off"
+        },
+        {
+          "t": 1261,
+          "state": "off"
+        },
+        {
+          "t": 1262,
+          "state": "off"
+        },
+        {
+          "t": 1263,
+          "state": "off"
+        },
+        {
+          "t": 1264,
+          "state": "off"
+        },
+        {
+          "t": 1265,
+          "state": "off"
+        },
+        {
+          "t": 1266,
+          "state": "off"
+        },
+        {
+          "t": 1267,
+          "state": "off"
+        },
+        {
+          "t": 1268,
+          "state": "off"
+        },
+        {
+          "t": 1269,
+          "state": "off"
+        },
+        {
+          "t": 1270,
+          "state": "off"
+        },
+        {
+          "t": 1271,
+          "state": "off"
+        },
+        {
+          "t": 1272,
+          "state": "off"
+        },
+        {
+          "t": 1273,
+          "state": "off"
+        },
+        {
+          "t": 1274,
+          "state": "off"
+        },
+        {
+          "t": 1275,
+          "state": "off"
+        },
+        {
+          "t": 1276,
+          "state": "off"
+        },
+        {
+          "t": 1277,
+          "state": "off"
+        },
+        {
+          "t": 1278,
+          "state": "off"
+        },
+        {
+          "t": 1279,
+          "state": "off"
+        },
+        {
+          "t": 1280,
+          "state": "off"
+        },
+        {
+          "t": 1281,
+          "state": "off"
+        },
+        {
+          "t": 1282,
+          "state": "off"
+        },
+        {
+          "t": 1283,
+          "state": "off"
+        },
+        {
+          "t": 1284,
+          "state": "off"
+        },
+        {
+          "t": 1285,
+          "state": "off"
+        },
+        {
+          "t": 1286,
+          "state": "off"
+        },
+        {
+          "t": 1287,
+          "state": "off"
+        },
+        {
+          "t": 1288,
+          "state": "off"
+        },
+        {
+          "t": 1289,
+          "state": "off"
+        },
+        {
+          "t": 1290,
+          "state": "off"
+        },
+        {
+          "t": 1291,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.05,
+          "g": 0
+        },
+        {
+          "t": 1292,
+          "state": "off"
+        },
+        {
+          "t": 1293,
+          "state": "off"
+        },
+        {
+          "t": 1294,
+          "state": "off"
+        },
+        {
+          "t": 1295,
+          "state": "off"
+        },
+        {
+          "t": 1296,
+          "state": "off"
+        },
+        {
+          "t": 1297,
+          "state": "off"
+        },
+        {
+          "t": 1298,
+          "state": "off"
+        },
+        {
+          "t": 1299,
+          "state": "off"
+        },
+        {
+          "t": 1300,
+          "state": "off"
+        },
+        {
+          "t": 1301,
+          "state": "calm",
+          "car": "3852|2|4|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.05,
+          "g": 0
+        },
+        {
+          "t": 1302,
+          "state": "off"
+        },
+        {
+          "t": 1303,
+          "state": "off"
+        },
+        {
+          "t": 1304,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1305,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.04,
+          "g": 0
+        },
+        {
+          "t": 1306,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.04,
+          "g": 0
+        },
+        {
+          "t": 1307,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.04,
+          "g": 0
+        },
+        {
+          "t": 1308,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.04,
+          "g": 0
+        },
+        {
+          "t": 1309,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 8.74,
+          "g": 0.09
+        },
+        {
+          "t": 1310,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 8,
+          "f": 0.03,
+          "r": 7.65,
+          "g": 0.09
+        },
+        {
+          "t": 1311,
+          "state": "front",
+          "car": "1155|1|8|700",
+          "mph": 13,
+          "f": 1.44,
+          "r": 0.35,
+          "g": 0.44
+        },
+        {
+          "t": 1312,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 18,
+          "f": 0.45,
+          "r": 0.39,
+          "g": 0.39
+        },
+        {
+          "t": 1313,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 23,
+          "f": 0.87,
+          "r": 0.53,
+          "g": 0.61
+        },
+        {
+          "t": 1314,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 28,
+          "f": 0.56,
+          "r": 0.91,
+          "g": 0.46
+        },
+        {
+          "t": 1315,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 37,
+          "f": 0.43,
+          "r": 1.15,
+          "g": 0.83
+        },
+        {
+          "t": 1316,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 48,
+          "f": 0.48,
+          "r": 1.06,
+          "g": 0.98
+        },
+        {
+          "t": 1317,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 56,
+          "f": 0.52,
+          "r": 1.16,
+          "g": 0.89
+        },
+        {
+          "t": 1318,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 64,
+          "f": 0.26,
+          "r": 0.59,
+          "g": 0.62
+        },
+        {
+          "t": 1319,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 64,
+          "f": 0.28,
+          "r": 0.39,
+          "g": 0.41
+        },
+        {
+          "t": 1320,
+          "state": "front",
+          "car": "1155|1|8|700",
+          "mph": 62,
+          "f": 1.73,
+          "r": 0.89,
+          "g": 1.87
+        },
+        {
+          "t": 1321,
+          "state": "impact",
+          "car": "1155|1|8|700",
+          "mph": 50,
+          "f": 1.1,
+          "r": 1.38,
+          "g": 3.09
+        },
+        {
+          "t": 1322,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 36,
+          "f": 0.8,
+          "r": 1.23,
+          "g": 1.1
+        },
+        {
+          "t": 1323,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 37,
+          "f": 0.51,
+          "r": 0.94,
+          "g": 1.1
+        },
+        {
+          "t": 1324,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 47,
+          "f": 0.87,
+          "r": 1.05,
+          "g": 1.11
+        },
+        {
+          "t": 1325,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 52,
+          "f": 0.63,
+          "r": 1.43,
+          "g": 1.34
+        },
+        {
+          "t": 1326,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 59,
+          "f": 0.66,
+          "r": 1.02,
+          "g": 1.09
+        },
+        {
+          "t": 1327,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 62,
+          "f": 0.27,
+          "r": 0.35,
+          "g": 1.14
+        },
+        {
+          "t": 1328,
+          "state": "front",
+          "car": "1155|1|8|700",
+          "mph": 54,
+          "f": 3.07,
+          "r": 0.6,
+          "g": 0.6
+        },
+        {
+          "t": 1329,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 46,
+          "f": 0.11,
+          "r": 0.36,
+          "g": 0.17
+        },
+        {
+          "t": 1330,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 37,
+          "f": 0.33,
+          "r": 0.53,
+          "g": 0.17
+        },
+        {
+          "t": 1331,
+          "state": "impact",
+          "car": "1155|1|8|700",
+          "mph": 29,
+          "f": 0.07,
+          "r": 0.36,
+          "g": 0.13
+        },
+        {
+          "t": 1332,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 23,
+          "f": 0.15,
+          "r": 0.3,
+          "g": 0.15
+        },
+        {
+          "t": 1333,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 19,
+          "f": 0.1,
+          "r": 0.18,
+          "g": 0.16
+        },
+        {
+          "t": 1334,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 15,
+          "f": 0.11,
+          "r": 0.09,
+          "g": 0.08
+        },
+        {
+          "t": 1335,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 11,
+          "f": 0.1,
+          "r": 0.09,
+          "g": 0.08
+        },
+        {
+          "t": 1336,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 9,
+          "f": 0.12,
+          "r": 0.09,
+          "g": 0.05
+        },
+        {
+          "t": 1337,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 6,
+          "f": 0.1,
+          "r": 0.08,
+          "g": 0.05
+        },
+        {
+          "t": 1338,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 2,
+          "f": 0.32,
+          "r": 0.23,
+          "g": 0.13
+        },
+        {
+          "t": 1339,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0.01
+        },
+        {
+          "t": 1340,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1341,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1342,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1343,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1344,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1345,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1346,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1347,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.08,
+          "r": 0.09,
+          "g": 0
+        },
+        {
+          "t": 1348,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 0,
+          "f": 0.16,
+          "r": 0.87,
+          "g": 0.12
+        },
+        {
+          "t": 1349,
+          "state": "rear",
+          "car": "1155|1|8|700",
+          "mph": 3,
+          "f": 0.33,
+          "r": 10.12,
+          "g": 0.33
+        },
+        {
+          "t": 1350,
+          "state": "both",
+          "car": "1155|1|8|700",
+          "mph": 9,
+          "f": 1.41,
+          "r": 4.25,
+          "g": 0.71
+        },
+        {
+          "t": 1351,
+          "state": "front",
+          "car": "1155|1|8|700",
+          "mph": 17,
+          "f": 1.54,
+          "r": 0.78,
+          "g": 0.6
+        },
+        {
+          "t": 1352,
+          "state": "front",
+          "car": "1155|1|8|700",
+          "mph": 22,
+          "f": 1.3,
+          "r": 0.61,
+          "g": 0.82
+        },
+        {
+          "t": 1353,
+          "state": "front",
+          "car": "1155|1|8|700",
+          "mph": 18,
+          "f": 1.39,
+          "r": 0.4,
+          "g": 0.74
+        },
+        {
+          "t": 1354,
+          "state": "front",
+          "car": "1155|1|8|700",
+          "mph": 14,
+          "f": 1.27,
+          "r": 0.24,
+          "g": 0.66
+        },
+        {
+          "t": 1355,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 8,
+          "f": 0.17,
+          "r": 0.09,
+          "g": 0.11
+        },
+        {
+          "t": 1356,
+          "state": "calm",
+          "car": "1155|1|8|700",
+          "mph": 6,
+          "f": 0.59,
+          "r": 0.28,
+          "g": 0.39
+        },
+        {
+          "t": 1357,
+          "state": "off"
+        },
+        {
+          "t": 1358,
+          "state": "off"
+        },
+        {
+          "t": 1359,
+          "state": "off"
+        },
+        {
+          "t": 1360,
+          "state": "off"
+        },
+        {
+          "t": 1361,
+          "state": "off"
+        },
+        {
+          "t": 1362,
+          "state": "off"
+        },
+        {
+          "t": 1363,
+          "state": "off"
+        },
+        {
+          "t": 1364,
+          "state": "off"
+        },
+        {
+          "t": 1365,
+          "state": "off"
+        },
+        {
+          "t": 1366,
+          "state": "off"
+        },
+        {
+          "t": 1367,
+          "state": "off"
+        },
+        {
+          "t": 1368,
+          "state": "off"
+        },
+        {
+          "t": 1369,
+          "state": "off"
+        },
+        {
+          "t": 1370,
+          "state": "off"
+        },
+        {
+          "t": 1371,
+          "state": "off"
+        },
+        {
+          "t": 1372,
+          "state": "off"
+        },
+        {
+          "t": 1373,
+          "state": "off"
+        },
+        {
+          "t": 1374,
+          "state": "off"
+        },
+        {
+          "t": 1375,
+          "state": "off"
+        },
+        {
+          "t": 1376,
+          "state": "off"
+        },
+        {
+          "t": 1377,
+          "state": "off"
+        },
+        {
+          "t": 1378,
+          "state": "off"
+        },
+        {
+          "t": 1379,
+          "state": "off"
+        },
+        {
+          "t": 1380,
+          "state": "off"
+        },
+        {
+          "t": 1381,
+          "state": "off"
+        },
+        {
+          "t": 1382,
+          "state": "off"
+        },
+        {
+          "t": 1383,
+          "state": "off"
+        },
+        {
+          "t": 1384,
+          "state": "off"
+        },
+        {
+          "t": 1385,
+          "state": "off"
+        },
+        {
+          "t": 1386,
+          "state": "off"
+        },
+        {
+          "t": 1387,
+          "state": "off"
+        },
+        {
+          "t": 1388,
+          "state": "off"
+        },
+        {
+          "t": 1389,
+          "state": "off"
+        },
+        {
+          "t": 1390,
+          "state": "off"
+        },
+        {
+          "t": 1391,
+          "state": "off"
+        },
+        {
+          "t": 1392,
+          "state": "off"
+        },
+        {
+          "t": 1393,
+          "state": "off"
+        },
+        {
+          "t": 1394,
+          "state": "off"
+        },
+        {
+          "t": 1395,
+          "state": "off"
+        },
+        {
+          "t": 1396,
+          "state": "off"
+        },
+        {
+          "t": 1397,
+          "state": "off"
+        },
+        {
+          "t": 1398,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.19,
+          "r": 0.07,
+          "g": 0.1
+        },
+        {
+          "t": 1399,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0.04
+        },
+        {
+          "t": 1400,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1401,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1402,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1403,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1404,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1405,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1406,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1407,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1408,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1409,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1410,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1411,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.03,
+          "r": 0.03,
+          "g": 0
+        },
+        {
+          "t": 1412,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 7.31,
+          "r": 5.88,
+          "g": 0.13
+        },
+        {
+          "t": 1413,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 23,
+          "f": 8.56,
+          "r": 5.25,
+          "g": 0.15
+        },
+        {
+          "t": 1414,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 43,
+          "f": 1.06,
+          "r": 0.8,
+          "g": 0.64
+        },
+        {
+          "t": 1415,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 58,
+          "f": 0.69,
+          "r": 0.55,
+          "g": 0.33
+        },
+        {
+          "t": 1416,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "f": 0.55,
+          "r": 0.48,
+          "g": 1.24
+        },
+        {
+          "t": 1417,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "f": 1.62,
+          "r": 0.77,
+          "g": 2.59
+        },
+        {
+          "t": 1418,
+          "state": "rear",
+          "car": "1155|2|8|700",
+          "mph": 85,
+          "f": 0.82,
+          "r": 1.03,
+          "g": 2.2
+        },
+        {
+          "t": 1419,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 1.07,
+          "r": 0.96,
+          "g": 2.25
+        },
+        {
+          "t": 1420,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "f": 1.16,
+          "r": 0.57,
+          "g": 2.16
+        },
+        {
+          "t": 1421,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 79,
+          "f": 1.26,
+          "r": 0.64,
+          "g": 1.85
+        },
+        {
+          "t": 1422,
+          "state": "impact",
+          "car": "1155|2|8|700",
+          "mph": 74,
+          "f": 0.82,
+          "r": 0.53,
+          "g": 2.18
+        },
+        {
+          "t": 1423,
+          "state": "impact",
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "f": 0.36,
+          "r": 0.39,
+          "g": 2.24
+        },
+        {
+          "t": 1424,
+          "state": "off"
+        },
+        {
+          "t": 1425,
+          "state": "off"
+        },
+        {
+          "t": 1426,
+          "state": "off"
+        },
+        {
+          "t": 1427,
+          "state": "off"
+        },
+        {
+          "t": 1428,
+          "state": "off"
+        },
+        {
+          "t": 1429,
+          "state": "off"
+        },
+        {
+          "t": 1430,
+          "state": "off"
+        },
+        {
+          "t": 1431,
+          "state": "off"
+        },
+        {
+          "t": 1432,
+          "state": "off"
+        },
+        {
+          "t": 1433,
+          "state": "off"
+        },
+        {
+          "t": 1434,
+          "state": "off"
+        },
+        {
+          "t": 1435,
+          "state": "off"
+        },
+        {
+          "t": 1436,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 47,
+          "f": 4.11,
+          "r": 4.11,
+          "g": 0.21
+        },
+        {
+          "t": 1437,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 3.93,
+          "r": 4.09,
+          "g": 0.17
+        },
+        {
+          "t": 1438,
+          "state": "off"
+        },
+        {
+          "t": 1439,
+          "state": "off"
+        },
+        {
+          "t": 1440,
+          "state": "off"
+        },
+        {
+          "t": 1441,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.02,
+          "g": 0
+        },
+        {
+          "t": 1442,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 0,
+          "f": 0.01,
+          "r": 0.02,
+          "g": 0
+        },
+        {
+          "t": 1443,
+          "state": "off"
+        },
+        {
+          "t": 1444,
+          "state": "off"
+        },
+        {
+          "t": 1445,
+          "state": "off"
+        },
+        {
+          "t": 1446,
+          "state": "off"
+        },
+        {
+          "t": 1447,
+          "state": "off"
+        },
+        {
+          "t": 1448,
+          "state": "off"
+        },
+        {
+          "t": 1449,
+          "state": "off"
+        },
+        {
+          "t": 1450,
+          "state": "off"
+        },
+        {
+          "t": 1451,
+          "state": "off"
+        },
+        {
+          "t": 1452,
+          "state": "off"
+        },
+        {
+          "t": 1453,
+          "state": "off"
+        },
+        {
+          "t": 1454,
+          "state": "off"
+        },
+        {
+          "t": 1455,
+          "state": "off"
+        },
+        {
+          "t": 1456,
+          "state": "off"
+        },
+        {
+          "t": 1457,
+          "state": "off"
+        },
+        {
+          "t": 1458,
+          "state": "off"
+        },
+        {
+          "t": 1459,
+          "state": "off"
+        },
+        {
+          "t": 1460,
+          "state": "off"
+        },
+        {
+          "t": 1461,
+          "state": "off"
+        },
+        {
+          "t": 1462,
+          "state": "off"
+        },
+        {
+          "t": 1463,
+          "state": "off"
+        },
+        {
+          "t": 1464,
+          "state": "off"
+        },
+        {
+          "t": 1465,
+          "state": "off"
+        },
+        {
+          "t": 1466,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 11,
+          "f": 4.11,
+          "r": 1.59,
+          "g": 0.12
+        },
+        {
+          "t": 1467,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 37,
+          "f": 0.53,
+          "r": 0.38,
+          "g": 0.4
+        },
+        {
+          "t": 1468,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 56,
+          "f": 0.27,
+          "r": 0.26,
+          "g": 0.2
+        },
+        {
+          "t": 1469,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 71,
+          "f": 0.28,
+          "r": 0.21,
+          "g": 0.25
+        },
+        {
+          "t": 1470,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 84,
+          "f": 0.17,
+          "r": 0.2,
+          "g": 0.11
+        },
+        {
+          "t": 1471,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 94,
+          "f": 0.14,
+          "r": 0.16,
+          "g": 0.11
+        },
+        {
+          "t": 1472,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 103,
+          "f": 0.15,
+          "r": 0.15,
+          "g": 0.15
+        },
+        {
+          "t": 1473,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 111,
+          "f": 0.25,
+          "r": 0.18,
+          "g": 0.31
+        },
+        {
+          "t": 1474,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "f": 0.71,
+          "r": 0.44,
+          "g": 1.63
+        },
+        {
+          "t": 1475,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "f": 0.84,
+          "r": 0.65,
+          "g": 1.89
+        },
+        {
+          "t": 1476,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 121,
+          "f": 0.84,
+          "r": 0.71,
+          "g": 1.98
+        },
+        {
+          "t": 1477,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 121,
+          "f": 0.84,
+          "r": 0.75,
+          "g": 2.01
+        },
+        {
+          "t": 1478,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 126,
+          "f": 0.37,
+          "r": 0.15,
+          "g": 0.74
+        },
+        {
+          "t": 1479,
+          "state": "off"
+        },
+        {
+          "t": 1480,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 130,
+          "f": 0.33,
+          "r": 0.15,
+          "g": 0.45
+        },
+        {
+          "t": 1481,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "f": 0.67,
+          "r": 0.32,
+          "g": 1.46
+        },
+        {
+          "t": 1482,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 136,
+          "f": 0.87,
+          "r": 0.39,
+          "g": 1.82
+        },
+        {
+          "t": 1483,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 129,
+          "f": 1.93,
+          "r": 1,
+          "g": 2.11
+        },
+        {
+          "t": 1484,
+          "state": "impact",
+          "car": "1155|2|8|700",
+          "mph": 109,
+          "f": 2.2,
+          "r": 1.14,
+          "g": 11.98
+        },
+        {
+          "t": 1485,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 110,
+          "f": 0.98,
+          "r": 0.93,
+          "g": 1.87
+        },
+        {
+          "t": 1486,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 113,
+          "f": 0.9,
+          "r": 0.79,
+          "g": 1.64
+        },
+        {
+          "t": 1487,
+          "state": "impact",
+          "car": "1155|2|8|700",
+          "mph": 118,
+          "f": 1.54,
+          "r": 0.61,
+          "g": 1.63
+        },
+        {
+          "t": 1488,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "f": 1.54,
+          "r": 0.77,
+          "g": 1.76
+        },
+        {
+          "t": 1489,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 109,
+          "f": 2.08,
+          "r": 1.51,
+          "g": 2.12
+        },
+        {
+          "t": 1490,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 106,
+          "f": 2.18,
+          "r": 1.12,
+          "g": 1.72
+        },
+        {
+          "t": 1491,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 112,
+          "f": 0.47,
+          "r": 0.26,
+          "g": 0.66
+        },
+        {
+          "t": 1492,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "f": 1.21,
+          "r": 0.7,
+          "g": 0.82
+        },
+        {
+          "t": 1493,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 99,
+          "f": 1.95,
+          "r": 1.55,
+          "g": 1.83
+        },
+        {
+          "t": 1494,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 89,
+          "f": 2.37,
+          "r": 1.38,
+          "g": 1.84
+        },
+        {
+          "t": 1495,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 91,
+          "f": 2.1,
+          "r": 1.1,
+          "g": 2
+        },
+        {
+          "t": 1496,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 75,
+          "f": 2.65,
+          "r": 1.55,
+          "g": 1.73
+        },
+        {
+          "t": 1497,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "f": 2.78,
+          "r": 2.4,
+          "g": 1.71
+        },
+        {
+          "t": 1498,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 42,
+          "f": 3.85,
+          "r": 2.96,
+          "g": 1.72
+        },
+        {
+          "t": 1499,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 48,
+          "f": 3.38,
+          "r": 2.15,
+          "g": 1.43
+        },
+        {
+          "t": 1500,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "f": 0.26,
+          "r": 0.26,
+          "g": 0.24
+        },
+        {
+          "t": 1501,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 76,
+          "f": 1.57,
+          "r": 0.67,
+          "g": 1.34
+        },
+        {
+          "t": 1502,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 81,
+          "f": 2.03,
+          "r": 1.16,
+          "g": 1.82
+        },
+        {
+          "t": 1503,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "f": 1.05,
+          "r": 0.93,
+          "g": 1.81
+        },
+        {
+          "t": 1504,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "f": 1.4,
+          "r": 1.58,
+          "g": 1.95
+        },
+        {
+          "t": 1505,
+          "state": "off"
+        },
+        {
+          "t": 1506,
+          "state": "off"
+        },
+        {
+          "t": 1507,
+          "state": "off"
+        },
+        {
+          "t": 1508,
+          "state": "off"
+        },
+        {
+          "t": 1509,
+          "state": "off"
+        },
+        {
+          "t": 1510,
+          "state": "off"
+        },
+        {
+          "t": 1511,
+          "state": "off"
+        },
+        {
+          "t": 1512,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 62,
+          "f": 1.02,
+          "r": 1.4,
+          "g": 1.89
+        },
+        {
+          "t": 1513,
+          "state": "off"
+        },
+        {
+          "t": 1514,
+          "state": "off"
+        },
+        {
+          "t": 1515,
+          "state": "off"
+        },
+        {
+          "t": 1516,
+          "state": "off"
+        },
+        {
+          "t": 1517,
+          "state": "off"
+        },
+        {
+          "t": 1518,
+          "state": "off"
+        },
+        {
+          "t": 1519,
+          "state": "off"
+        },
+        {
+          "t": 1520,
+          "state": "off"
+        },
+        {
+          "t": 1521,
+          "state": "off"
+        },
+        {
+          "t": 1522,
+          "state": "off"
+        },
+        {
+          "t": 1523,
+          "state": "off"
+        },
+        {
+          "t": 1524,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 18,
+          "f": 3.03,
+          "r": 1.87,
+          "g": 0.1
+        },
+        {
+          "t": 1525,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 41,
+          "f": 0.31,
+          "r": 0.32,
+          "g": 0.09
+        },
+        {
+          "t": 1526,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 59,
+          "f": 0.22,
+          "r": 0.24,
+          "g": 0.1
+        },
+        {
+          "t": 1527,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 74,
+          "f": 0.18,
+          "r": 0.2,
+          "g": 0.1
+        },
+        {
+          "t": 1528,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "f": 0.27,
+          "r": 0.18,
+          "g": 0.35
+        },
+        {
+          "t": 1529,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 96,
+          "f": 0.23,
+          "r": 0.17,
+          "g": 0.31
+        },
+        {
+          "t": 1530,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 105,
+          "f": 0.23,
+          "r": 0.21,
+          "g": 0.28
+        },
+        {
+          "t": 1531,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 112,
+          "f": 0.27,
+          "r": 0.26,
+          "g": 0.4
+        },
+        {
+          "t": 1532,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "f": 0.66,
+          "r": 0.46,
+          "g": 1.7
+        },
+        {
+          "t": 1533,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "f": 0.73,
+          "r": 0.53,
+          "g": 1.73
+        },
+        {
+          "t": 1534,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 120,
+          "f": 0.99,
+          "r": 0.89,
+          "g": 2.08
+        },
+        {
+          "t": 1535,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 120,
+          "f": 0.81,
+          "r": 0.87,
+          "g": 2.14
+        },
+        {
+          "t": 1536,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 124,
+          "f": 0.25,
+          "r": 0.29,
+          "g": 1.13
+        },
+        {
+          "t": 1537,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 129,
+          "f": 0.46,
+          "r": 0.23,
+          "g": 0.84
+        },
+        {
+          "t": 1538,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 133,
+          "f": 0.48,
+          "r": 0.29,
+          "g": 1.26
+        },
+        {
+          "t": 1539,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 133,
+          "f": 1.21,
+          "r": 0.91,
+          "g": 2.24
+        },
+        {
+          "t": 1540,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 126,
+          "f": 1.29,
+          "r": 0.9,
+          "g": 1.96
+        },
+        {
+          "t": 1541,
+          "state": "off"
+        },
+        {
+          "t": 1542,
+          "state": "off"
+        },
+        {
+          "t": 1543,
+          "state": "off"
+        },
+        {
+          "t": 1544,
+          "state": "off"
+        },
+        {
+          "t": 1545,
+          "state": "off"
+        },
+        {
+          "t": 1546,
+          "state": "off"
+        },
+        {
+          "t": 1547,
+          "state": "off"
+        },
+        {
+          "t": 1548,
+          "state": "off"
+        },
+        {
+          "t": 1549,
+          "state": "off"
+        },
+        {
+          "t": 1550,
+          "state": "off"
+        },
+        {
+          "t": 1551,
+          "state": "off"
+        },
+        {
+          "t": 1552,
+          "state": "off"
+        },
+        {
+          "t": 1553,
+          "state": "off"
+        },
+        {
+          "t": 1554,
+          "state": "off"
+        },
+        {
+          "t": 1555,
+          "state": "off"
+        },
+        {
+          "t": 1556,
+          "state": "off"
+        },
+        {
+          "t": 1557,
+          "state": "off"
+        },
+        {
+          "t": 1558,
+          "state": "off"
+        },
+        {
+          "t": 1559,
+          "state": "off"
+        },
+        {
+          "t": 1560,
+          "state": "off"
+        },
+        {
+          "t": 1561,
+          "state": "off"
+        },
+        {
+          "t": 1562,
+          "state": "off"
+        },
+        {
+          "t": 1563,
+          "state": "off"
+        },
+        {
+          "t": 1564,
+          "state": "off"
+        },
+        {
+          "t": 1565,
+          "state": "off"
+        },
+        {
+          "t": 1566,
+          "state": "off"
+        },
+        {
+          "t": 1567,
+          "state": "off"
+        },
+        {
+          "t": 1568,
+          "state": "off"
+        },
+        {
+          "t": 1569,
+          "state": "off"
+        },
+        {
+          "t": 1570,
+          "state": "off"
+        },
+        {
+          "t": 1571,
+          "state": "off"
+        },
+        {
+          "t": 1572,
+          "state": "off"
+        },
+        {
+          "t": 1573,
+          "state": "off"
+        },
+        {
+          "t": 1574,
+          "state": "off"
+        },
+        {
+          "t": 1575,
+          "state": "off"
+        },
+        {
+          "t": 1576,
+          "state": "off"
+        },
+        {
+          "t": 1577,
+          "state": "off"
+        },
+        {
+          "t": 1578,
+          "state": "off"
+        },
+        {
+          "t": 1579,
+          "state": "off"
+        },
+        {
+          "t": 1580,
+          "state": "off"
+        },
+        {
+          "t": 1581,
+          "state": "off"
+        },
+        {
+          "t": 1582,
+          "state": "off"
+        },
+        {
+          "t": 1583,
+          "state": "off"
+        },
+        {
+          "t": 1584,
+          "state": "off"
+        },
+        {
+          "t": 1585,
+          "state": "off"
+        },
+        {
+          "t": 1586,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 129,
+          "f": 0.62,
+          "r": 0.29,
+          "g": 1.14
+        },
+        {
+          "t": 1587,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 132,
+          "f": 0.45,
+          "r": 0.24,
+          "g": 0.68
+        },
+        {
+          "t": 1588,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "f": 1.5,
+          "r": 1.14,
+          "g": 1.4
+        },
+        {
+          "t": 1589,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "f": 1.09,
+          "r": 1.45,
+          "g": 2.05
+        },
+        {
+          "t": 1590,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 118,
+          "f": 1.36,
+          "r": 0.65,
+          "g": 1.91
+        },
+        {
+          "t": 1591,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "f": 1.45,
+          "r": 0.65,
+          "g": 1.48
+        },
+        {
+          "t": 1592,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 124,
+          "f": 0.54,
+          "r": 0.44,
+          "g": 1.23
+        },
+        {
+          "t": 1593,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 112,
+          "f": 2.5,
+          "r": 1.14,
+          "g": 0.9
+        },
+        {
+          "t": 1594,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 85,
+          "f": 2.24,
+          "r": 1.38,
+          "g": 1.86
+        },
+        {
+          "t": 1595,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 82,
+          "f": 2.3,
+          "r": 1.33,
+          "g": 1.87
+        },
+        {
+          "t": 1596,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 85,
+          "f": 1.81,
+          "r": 0.79,
+          "g": 1.62
+        },
+        {
+          "t": 1597,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 76,
+          "f": 3.02,
+          "r": 2.54,
+          "g": 1.2
+        },
+        {
+          "t": 1598,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 43,
+          "f": 2.11,
+          "r": 2.28,
+          "g": 1.58
+        },
+        {
+          "t": 1599,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 36,
+          "f": 2.85,
+          "r": 1.64,
+          "g": 1.53
+        },
+        {
+          "t": 1600,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 49,
+          "f": 2.69,
+          "r": 1.71,
+          "g": 1.52
+        },
+        {
+          "t": 1601,
+          "state": "calm",
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "f": 0.46,
+          "r": 0.33,
+          "g": 0.6
+        },
+        {
+          "t": 1602,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 76,
+          "f": 1.52,
+          "r": 0.85,
+          "g": 1.31
+        },
+        {
+          "t": 1603,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "f": 1.88,
+          "r": 1.25,
+          "g": 1.81
+        },
+        {
+          "t": 1604,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 81,
+          "f": 1.81,
+          "r": 1.21,
+          "g": 1.97
+        },
+        {
+          "t": 1605,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 81,
+          "f": 1.44,
+          "r": 0.84,
+          "g": 1.9
+        },
+        {
+          "t": 1606,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "f": 1.91,
+          "r": 1.94,
+          "g": 1.87
+        },
+        {
+          "t": 1607,
+          "state": "front",
+          "car": "1155|2|8|700",
+          "mph": 46,
+          "f": 1.54,
+          "r": 0.99,
+          "g": 1.73
+        },
+        {
+          "t": 1608,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 54,
+          "f": 2.62,
+          "r": 1.52,
+          "g": 1.4
+        },
+        {
+          "t": 1609,
+          "state": "both",
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "f": 1.63,
+          "r": 1.4,
+          "g": 1.37
+        },
+        {
+          "t": 1610,
+          "state": "off"
+        },
+        {
+          "t": 1611,
+          "state": "off"
+        },
+        {
+          "t": 1612,
+          "state": "off"
+        },
+        {
+          "t": 1613,
+          "state": "off"
+        },
+        {
+          "t": 1614,
+          "state": "off"
+        },
+        {
+          "t": 1615,
+          "state": "off"
+        },
+        {
+          "t": 1616,
+          "state": "off"
+        },
+        {
+          "t": 1617,
+          "state": "off"
+        },
+        {
+          "t": 1618,
+          "state": "off"
+        },
+        {
+          "t": 1619,
+          "state": "off"
+        },
+        {
+          "t": 1620,
+          "state": "off"
+        },
+        {
+          "t": 1621,
+          "state": "off"
+        },
+        {
+          "t": 1622,
+          "state": "off"
+        },
+        {
+          "t": 1623,
+          "state": "off"
+        },
+        {
+          "t": 1624,
+          "state": "off"
+        },
+        {
+          "t": 1625,
+          "state": "off"
+        },
+        {
+          "t": 1626,
+          "state": "off"
+        },
+        {
+          "t": 1627,
+          "state": "off"
+        },
+        {
+          "t": 1628,
+          "state": "off"
+        },
+        {
+          "t": 1629,
+          "state": "off"
+        },
+        {
+          "t": 1630,
+          "state": "off"
+        },
+        {
+          "t": 1631,
+          "state": "off"
+        },
+        {
+          "t": 1632,
+          "state": "off"
+        },
+        {
+          "t": 1633,
+          "state": "off"
+        },
+        {
+          "t": 1634,
+          "state": "off"
+        },
+        {
+          "t": 1635,
+          "state": "off"
+        },
+        {
+          "t": 1636,
+          "state": "off"
+        },
+        {
+          "t": 1637,
+          "state": "off"
+        },
+        {
+          "t": 1638,
+          "state": "off"
+        },
+        {
+          "t": 1639,
+          "state": "off"
+        },
+        {
+          "t": 1640,
+          "state": "off"
+        },
+        {
+          "t": 1641,
+          "state": "off"
+        },
+        {
+          "t": 1642,
+          "state": "off"
+        },
+        {
+          "t": 1643,
+          "state": "off"
+        },
+        {
+          "t": 1644,
+          "state": "off"
+        },
+        {
+          "t": 1645,
+          "state": "off"
+        },
+        {
+          "t": 1646,
+          "state": "off"
+        },
+        {
+          "t": 1647,
+          "state": "off"
+        },
+        {
+          "t": 1648,
+          "state": "off"
+        },
+        {
+          "t": 1649,
+          "state": "off"
+        },
+        {
+          "t": 1650,
+          "state": "off"
+        },
+        {
+          "t": 1651,
+          "state": "off"
+        },
+        {
+          "t": 1652,
+          "state": "off"
+        },
+        {
+          "t": 1653,
+          "state": "off"
+        },
+        {
+          "t": 1654,
+          "state": "off"
+        },
+        {
+          "t": 1655,
+          "state": "off"
+        },
+        {
+          "t": 1656,
+          "state": "off"
+        },
+        {
+          "t": 1657,
+          "state": "off"
+        },
+        {
+          "t": 1658,
+          "state": "off"
+        },
+        {
+          "t": 1659,
+          "state": "off"
+        },
+        {
+          "t": 1660,
+          "state": "off"
+        },
+        {
+          "t": 1661,
+          "state": "off"
+        },
+        {
+          "t": 1662,
+          "state": "off"
+        },
+        {
+          "t": 1663,
+          "state": "off"
+        },
+        {
+          "t": 1664,
+          "state": "off"
+        },
+        {
+          "t": 1665,
+          "state": "off"
+        },
+        {
+          "t": 1666,
+          "state": "off"
+        },
+        {
+          "t": 1667,
+          "state": "off"
+        },
+        {
+          "t": 1668,
+          "state": "off"
+        },
+        {
+          "t": 1669,
+          "state": "off"
+        },
+        {
+          "t": 1670,
+          "state": "off"
+        },
+        {
+          "t": 1671,
+          "state": "off"
+        },
+        {
+          "t": 1672,
+          "state": "off"
+        },
+        {
+          "t": 1673,
+          "state": "off"
+        },
+        {
+          "t": 1674,
+          "state": "off"
+        },
+        {
+          "t": 1675,
+          "state": "off"
+        },
+        {
+          "t": 1676,
+          "state": "off"
+        },
+        {
+          "t": 1677,
+          "state": "off"
+        },
+        {
+          "t": 1678,
+          "state": "off"
+        },
+        {
+          "t": 1679,
+          "state": "off"
+        },
+        {
+          "t": 1680,
+          "state": "off"
+        },
+        {
+          "t": 1681,
+          "state": "off"
+        },
+        {
+          "t": 1682,
+          "state": "off"
+        },
+        {
+          "t": 1683,
+          "state": "off"
+        },
+        {
+          "t": 1684,
+          "state": "off"
+        },
+        {
+          "t": 1685,
+          "state": "off"
+        },
+        {
+          "t": 1686,
+          "state": "off"
+        },
+        {
+          "t": 1687,
+          "state": "off"
+        },
+        {
+          "t": 1688,
+          "state": "off"
+        },
+        {
+          "t": 1689,
+          "state": "off"
+        },
+        {
+          "t": 1690,
+          "state": "off"
+        },
+        {
+          "t": 1691,
+          "state": "off"
         }
       ],
       "corners": [
@@ -69047,6 +81638,2286 @@ window.FH6_DB = {
           "kink": false,
           "brake_max": 0,
           "hb": false
+        },
+        {
+          "t0": 596.3,
+          "t1": 600,
+          "car": "3852|2|4|700",
+          "dir": "L",
+          "mph_in": 102,
+          "mph_min": 33,
+          "lat_g_peak": 2.33,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.58,
+              "rear": 0.23,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.52,
+              "rear": 0.64,
+              "red": "front",
+              "dur": 0.99
+            },
+            {
+              "phase": 3,
+              "front": 4.06,
+              "rear": 3.53,
+              "red": "both",
+              "dur": 1.07
+            },
+            {
+              "phase": 4,
+              "front": 4.82,
+              "rear": 4.72,
+              "red": "both",
+              "dur": 1.62
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.455,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 790.2,
+          "t1": 792,
+          "car": "2616|2|10|800",
+          "dir": "L",
+          "mph_in": 137,
+          "mph_min": 137,
+          "lat_g_peak": 2.44,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.92,
+              "rear": 0.29,
+              "red": "none",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 0.86,
+              "rear": 0.43,
+              "red": "none",
+              "dur": 0.81
+            },
+            {
+              "phase": 3,
+              "front": 1.36,
+              "rear": 0.68,
+              "red": "front",
+              "dur": 0.56
+            },
+            {
+              "phase": 4,
+              "front": 0.32,
+              "rear": 0.43,
+              "red": "none",
+              "dur": 0.39
+            }
+          ],
+          "first_red": {
+            "phase": 3,
+            "axle": "front"
+          },
+          "usi": 0.35,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 795.8,
+          "t1": 797.8,
+          "car": "2616|2|10|800",
+          "dir": "R",
+          "mph_in": 157,
+          "mph_min": 157,
+          "lat_g_peak": 2.35,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.93,
+              "rear": 1.1,
+              "red": "both",
+              "dur": 1.38
+            },
+            {
+              "phase": 2,
+              "front": 0.96,
+              "rear": 0.42,
+              "red": "none",
+              "dur": 1.14
+            },
+            {
+              "phase": 3,
+              "front": 1.31,
+              "rear": 0.53,
+              "red": "front",
+              "dur": 0.57
+            },
+            {
+              "phase": 4,
+              "front": 0.48,
+              "rear": 0.23,
+              "red": "none",
+              "dur": 0.27
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.21,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 815.3,
+          "t1": 819.3,
+          "car": "2616|2|10|800",
+          "dir": "L",
+          "mph_in": 88,
+          "mph_min": 53,
+          "lat_g_peak": 2.36,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.03,
+              "rear": 1.61,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.99,
+              "rear": 0.96,
+              "red": "front",
+              "dur": 0.47
+            },
+            {
+              "phase": 3,
+              "front": 1.95,
+              "rear": 1.14,
+              "red": "both",
+              "dur": 2.92
+            },
+            {
+              "phase": 4,
+              "front": 1.63,
+              "rear": 1.22,
+              "red": "both",
+              "dur": 0.56
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.626,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 821.3,
+          "t1": 825.6,
+          "car": "2616|2|10|800",
+          "dir": "R",
+          "mph_in": 94,
+          "mph_min": 94,
+          "lat_g_peak": 2.88,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.44,
+              "rear": 0.25,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.18,
+              "rear": 0.44,
+              "red": "front",
+              "dur": 1.65
+            },
+            {
+              "phase": 3,
+              "front": 1.55,
+              "rear": 0.79,
+              "red": "front",
+              "dur": 1.77
+            },
+            {
+              "phase": 4,
+              "front": 1.05,
+              "rear": 0.4,
+              "red": "front",
+              "dur": 0.91
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.332,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 831.5,
+          "t1": 834,
+          "car": "2616|2|10|800",
+          "dir": "L",
+          "mph_in": 159,
+          "mph_min": 123,
+          "lat_g_peak": 2.69,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.74,
+              "rear": 0.74,
+              "red": "front",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 1,
+              "rear": 0.34,
+              "red": "none",
+              "dur": 0.61
+            },
+            {
+              "phase": 3,
+              "front": 1.05,
+              "rear": 0.4,
+              "red": "front",
+              "dur": 0.33
+            },
+            {
+              "phase": 4,
+              "front": 2.66,
+              "rear": 1.45,
+              "red": "both",
+              "dur": 1.64
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.128,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 834.3,
+          "t1": 839.3,
+          "car": "2616|2|10|800",
+          "dir": "R",
+          "mph_in": 102,
+          "mph_min": 42,
+          "lat_g_peak": 2.4,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.66,
+              "rear": 1.45,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 3.48,
+              "rear": 2.32,
+              "red": "both",
+              "dur": 1.15
+            },
+            {
+              "phase": 3,
+              "front": 2.16,
+              "rear": 1.72,
+              "red": "both",
+              "dur": 0.94
+            },
+            {
+              "phase": 4,
+              "front": 2.68,
+              "rear": 2.42,
+              "red": "both",
+              "dur": 2.91
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.569,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 843.7,
+          "t1": 844.6,
+          "car": "2616|2|10|800",
+          "dir": "R",
+          "mph_in": 117,
+          "mph_min": 117,
+          "lat_g_peak": 1.3,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.5,
+              "rear": 0.19,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.7,
+              "rear": 0.42,
+              "red": "none",
+              "dur": 0.57
+            },
+            {
+              "phase": 3,
+              "front": 0.81,
+              "rear": 0.42,
+              "red": "none",
+              "dur": 0.11
+            },
+            {
+              "phase": 4,
+              "front": 0.5,
+              "rear": 0.37,
+              "red": "none",
+              "dur": 0.26
+            }
+          ],
+          "first_red": null,
+          "usi": 0.221,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 844.9,
+          "t1": 847.6,
+          "car": "2616|2|10|800",
+          "dir": "L",
+          "mph_in": 126,
+          "mph_min": 126,
+          "lat_g_peak": 2.6,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.91,
+              "rear": 0.42,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.18,
+              "rear": 0.64,
+              "red": "front",
+              "dur": 0.38
+            },
+            {
+              "phase": 3,
+              "front": 1.18,
+              "rear": 0.66,
+              "red": "front",
+              "dur": 0.41
+            },
+            {
+              "phase": 4,
+              "front": 0.84,
+              "rear": 0.32,
+              "red": "none",
+              "dur": 1.86
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.143,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 853.2,
+          "t1": 854.1,
+          "car": "2616|2|10|800",
+          "dir": "L",
+          "mph_in": 133,
+          "mph_min": 133,
+          "lat_g_peak": 1.8,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.39,
+              "rear": 0.69,
+              "red": "front",
+              "dur": 1.32
+            },
+            {
+              "phase": 2,
+              "front": 1.08,
+              "rear": 0.33,
+              "red": "front",
+              "dur": 0.18
+            },
+            {
+              "phase": 3,
+              "front": 1.23,
+              "rear": 0.37,
+              "red": "front",
+              "dur": 0.57
+            },
+            {
+              "phase": 4,
+              "front": 0.61,
+              "rear": 0.35,
+              "red": "none",
+              "dur": 0.14
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.191,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 860.5,
+          "t1": 863.9,
+          "car": "2616|2|10|800",
+          "dir": "R",
+          "mph_in": 111,
+          "mph_min": 111,
+          "lat_g_peak": 2.89,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.61,
+              "rear": 0.81,
+              "red": "front",
+              "dur": 1.44
+            },
+            {
+              "phase": 2,
+              "front": 1.36,
+              "rear": 0.63,
+              "red": "front",
+              "dur": 1.58
+            },
+            {
+              "phase": 3,
+              "front": 1.55,
+              "rear": 0.65,
+              "red": "front",
+              "dur": 0.92
+            },
+            {
+              "phase": 4,
+              "front": 0.55,
+              "rear": 0.52,
+              "red": "none",
+              "dur": 0.91
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.454,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 864,
+          "t1": 865.3,
+          "car": "2616|2|10|800",
+          "dir": "R",
+          "mph_in": 137,
+          "mph_min": 137,
+          "lat_g_peak": 1.09,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.51,
+              "rear": 0.65,
+              "red": "front",
+              "dur": 1.38
+            },
+            {
+              "phase": 2,
+              "front": 0.57,
+              "rear": 0.15,
+              "red": "none",
+              "dur": 0.06
+            },
+            {
+              "phase": 3,
+              "front": 0.58,
+              "rear": 0.18,
+              "red": "none",
+              "dur": 0.87
+            },
+            {
+              "phase": 4,
+              "front": 0.07,
+              "rear": 0.15,
+              "red": "none",
+              "dur": 0.31
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.057,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1180.7,
+          "t1": 1183.2,
+          "car": "2866|2|4|800",
+          "dir": "R",
+          "mph_in": 132,
+          "mph_min": 131,
+          "lat_g_peak": 2.33,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.41,
+              "rear": 0.24,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.54,
+              "rear": 0.29,
+              "red": "none",
+              "dur": 0.35
+            },
+            {
+              "phase": 3,
+              "front": 0.84,
+              "rear": 0.52,
+              "red": "none",
+              "dur": 1.39
+            },
+            {
+              "phase": 4,
+              "front": 0.57,
+              "rear": 0.28,
+              "red": "none",
+              "dur": 0.74
+            }
+          ],
+          "first_red": null,
+          "usi": 0.058,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1184.8,
+          "t1": 1188.8,
+          "car": "2866|2|4|800",
+          "dir": "R",
+          "mph_in": 133,
+          "mph_min": 132,
+          "lat_g_peak": 2.92,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.36,
+              "rear": 0.23,
+              "red": "none",
+              "dur": 1.35
+            },
+            {
+              "phase": 2,
+              "front": 0.81,
+              "rear": 0.54,
+              "red": "none",
+              "dur": 1.29
+            },
+            {
+              "phase": 3,
+              "front": 1.46,
+              "rear": 1.3,
+              "red": "both",
+              "dur": 2.56
+            },
+            {
+              "phase": 4,
+              "front": 0.23,
+              "rear": 0.14,
+              "red": "none",
+              "dur": 0.13
+            }
+          ],
+          "first_red": {
+            "phase": 3,
+            "axle": "front"
+          },
+          "usi": -0.011,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1193.9,
+          "t1": 1196.4,
+          "car": "2866|2|4|800",
+          "dir": "L",
+          "mph_in": 63,
+          "mph_min": 12,
+          "lat_g_peak": 2.04,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 9.93,
+              "rear": 9.39,
+              "red": "both",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 2.01,
+              "rear": 3.27,
+              "red": "both",
+              "dur": 0.14
+            },
+            {
+              "phase": 3,
+              "front": 9.42,
+              "rear": 10.79,
+              "red": "both",
+              "dur": 0.41
+            },
+            {
+              "phase": 4,
+              "front": 29.48,
+              "rear": 26.29,
+              "red": "both",
+              "dur": 1.99
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -1.205,
+          "drift": true,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1199.3,
+          "t1": 1201.3,
+          "car": "2866|2|4|800",
+          "dir": "L",
+          "mph_in": 73,
+          "mph_min": 73,
+          "lat_g_peak": 2.2,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.6,
+              "rear": 0.69,
+              "red": "front",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.61,
+              "rear": 1.12,
+              "red": "both",
+              "dur": 1.32
+            },
+            {
+              "phase": 3,
+              "front": 1.41,
+              "rear": 1.06,
+              "red": "both",
+              "dur": 0.27
+            },
+            {
+              "phase": 4,
+              "front": 1.24,
+              "rear": 0.75,
+              "red": "front",
+              "dur": 0.43
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.016,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1201.7,
+          "t1": 1203.9,
+          "car": "2866|2|4|800",
+          "dir": "R",
+          "mph_in": 98,
+          "mph_min": 80,
+          "lat_g_peak": 2.87,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.41,
+              "rear": 1.06,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.7,
+              "rear": 0.61,
+              "red": "front",
+              "dur": 0.8
+            },
+            {
+              "phase": 3,
+              "front": 2.67,
+              "rear": 2.37,
+              "red": "both",
+              "dur": 0.79
+            },
+            {
+              "phase": 4,
+              "front": 2.56,
+              "rear": 2.63,
+              "red": "both",
+              "dur": 0.62
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.32,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1204,
+          "t1": 1205,
+          "car": "2866|2|4|800",
+          "dir": "L",
+          "mph_in": 83,
+          "mph_min": 83,
+          "lat_g_peak": 1.79,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.67,
+              "rear": 2.63,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.14,
+              "rear": 0.64,
+              "red": "front",
+              "dur": 0.13
+            },
+            {
+              "phase": 3,
+              "front": 1.25,
+              "rear": 0.55,
+              "red": "front",
+              "dur": 0.39
+            },
+            {
+              "phase": 4,
+              "front": 1.05,
+              "rear": 1.23,
+              "red": "both",
+              "dur": 0.47
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.219,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1205.3,
+          "t1": 1206.9,
+          "car": "2866|2|4|800",
+          "dir": "L",
+          "mph_in": 95,
+          "mph_min": 95,
+          "lat_g_peak": 1.67,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.25,
+              "rear": 1.23,
+              "red": "both",
+              "dur": 1.32
+            },
+            {
+              "phase": 2,
+              "front": 0.71,
+              "rear": 0.52,
+              "red": "none",
+              "dur": 0.85
+            },
+            {
+              "phase": 3,
+              "front": 0.64,
+              "rear": 0.53,
+              "red": "none",
+              "dur": 0.15
+            },
+            {
+              "phase": 4,
+              "front": 0.44,
+              "rear": 0.48,
+              "red": "none",
+              "dur": 0.6
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.039,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1207.6,
+          "t1": 1209.7,
+          "car": "2866|2|4|800",
+          "dir": "R",
+          "mph_in": 109,
+          "mph_min": 109,
+          "lat_g_peak": 2.42,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.44,
+              "rear": 0.48,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.62,
+              "rear": 0.51,
+              "red": "none",
+              "dur": 1.3
+            },
+            {
+              "phase": 3,
+              "front": 0.51,
+              "rear": 0.49,
+              "red": "none",
+              "dur": 0.35
+            },
+            {
+              "phase": 4,
+              "front": 0.51,
+              "rear": 0.41,
+              "red": "none",
+              "dur": 0.49
+            }
+          ],
+          "first_red": null,
+          "usi": -0.004,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1213.3,
+          "t1": 1215.2,
+          "car": "2866|2|4|800",
+          "dir": "R",
+          "mph_in": 90,
+          "mph_min": 0,
+          "lat_g_peak": 0.42,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.8,
+              "rear": 2.02,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.15,
+              "rear": 0.38,
+              "red": "none",
+              "dur": 0
+            },
+            {
+              "phase": 3,
+              "front": 0.19,
+              "rear": 0.39,
+              "red": "none",
+              "dur": 0.04
+            },
+            {
+              "phase": 4,
+              "front": 0.16,
+              "rear": 0.35,
+              "red": "none",
+              "dur": 1.89
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.276,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1315.5,
+          "t1": 1317.5,
+          "car": "1155|1|8|700",
+          "dir": "L",
+          "mph_in": 37,
+          "mph_min": 37,
+          "lat_g_peak": 0.93,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.56,
+              "rear": 0.94,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.4,
+              "rear": 1.04,
+              "red": "rear",
+              "dur": 0.14
+            },
+            {
+              "phase": 3,
+              "front": 0.52,
+              "rear": 1.15,
+              "red": "rear",
+              "dur": 1.64
+            },
+            {
+              "phase": 4,
+              "front": 0.27,
+              "rear": 1.16,
+              "red": "rear",
+              "dur": 0.19
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "rear"
+          },
+          "usi": -0.066,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1320.2,
+          "t1": 1321.3,
+          "car": "1155|1|8|700",
+          "dir": "L",
+          "mph_in": 66,
+          "mph_min": 51,
+          "lat_g_peak": 1.67,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.38,
+              "rear": 0.41,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.73,
+              "rear": 0.89,
+              "red": "front",
+              "dur": 0.69
+            },
+            {
+              "phase": 3,
+              "front": 1.62,
+              "rear": 0.83,
+              "red": "front",
+              "dur": 0.13
+            },
+            {
+              "phase": 4,
+              "front": 0,
+              "rear": 0.83,
+              "red": "none",
+              "dur": 0.28
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.618,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1324.4,
+          "t1": 1326,
+          "car": "1155|1|8|700",
+          "dir": "R",
+          "mph_in": 46,
+          "mph_min": 46,
+          "lat_g_peak": 1.25,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.51,
+              "rear": 0.94,
+              "red": "none",
+              "dur": 1.38
+            },
+            {
+              "phase": 2,
+              "front": 0.87,
+              "rear": 1.05,
+              "red": "rear",
+              "dur": 0.57
+            },
+            {
+              "phase": 3,
+              "front": 0.63,
+              "rear": 1.43,
+              "red": "rear",
+              "dur": 0.81
+            },
+            {
+              "phase": 4,
+              "front": 0.15,
+              "rear": 1.21,
+              "red": "rear",
+              "dur": 0.19
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "rear"
+          },
+          "usi": -0.304,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1326.5,
+          "t1": 1327.6,
+          "car": "1155|1|8|700",
+          "dir": "L",
+          "mph_in": 59,
+          "mph_min": 58,
+          "lat_g_peak": 1.07,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.66,
+              "rear": 1.43,
+              "red": "rear",
+              "dur": 1.38
+            },
+            {
+              "phase": 2,
+              "front": 0.4,
+              "rear": 0.28,
+              "red": "none",
+              "dur": 0.13
+            },
+            {
+              "phase": 3,
+              "front": 0.44,
+              "rear": 0.7,
+              "red": "none",
+              "dur": 0.55
+            },
+            {
+              "phase": 4,
+              "front": 0.16,
+              "rear": 0.35,
+              "red": "none",
+              "dur": 0.47
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "rear"
+          },
+          "usi": -0.053,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1414.1,
+          "t1": 1415,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 36,
+          "mph_min": 36,
+          "lat_g_peak": 0.58,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 8.56,
+              "rear": 5.88,
+              "red": "both",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 0.73,
+              "rear": 0.54,
+              "red": "none",
+              "dur": 0.07
+            },
+            {
+              "phase": 3,
+              "front": 1.06,
+              "rear": 0.8,
+              "red": "front",
+              "dur": 0.73
+            },
+            {
+              "phase": 4,
+              "front": 0.27,
+              "rear": 0.45,
+              "red": "none",
+              "dur": 0.11
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.047,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1416.1,
+          "t1": 1417.1,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 67,
+          "mph_min": 67,
+          "lat_g_peak": 1.14,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.69,
+              "rear": 0.55,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.55,
+              "rear": 0.45,
+              "red": "none",
+              "dur": 0.15
+            },
+            {
+              "phase": 3,
+              "front": 0.5,
+              "rear": 0.43,
+              "red": "none",
+              "dur": 0.46
+            },
+            {
+              "phase": 4,
+              "front": 0.38,
+              "rear": 0.48,
+              "red": "none",
+              "dur": 0.39
+            }
+          ],
+          "first_red": null,
+          "usi": 0.014,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1417.4,
+          "t1": 1418.7,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 79,
+          "mph_min": 79,
+          "lat_g_peak": 2.45,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.76,
+              "rear": 0.48,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.62,
+              "rear": 0.77,
+              "red": "front",
+              "dur": 0.43
+            },
+            {
+              "phase": 3,
+              "front": 1.24,
+              "rear": 0.73,
+              "red": "front",
+              "dur": 0.22
+            },
+            {
+              "phase": 4,
+              "front": 0.57,
+              "rear": 1.03,
+              "red": "rear",
+              "dur": 0.65
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.312,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1418.8,
+          "t1": 1419.8,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 86,
+          "mph_min": 86,
+          "lat_g_peak": 2.06,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.62,
+              "rear": 1.03,
+              "red": "both",
+              "dur": 1.41
+            },
+            {
+              "phase": 2,
+              "front": 0.82,
+              "rear": 0.67,
+              "red": "none",
+              "dur": 0.14
+            },
+            {
+              "phase": 3,
+              "front": 1.07,
+              "rear": 0.96,
+              "red": "front",
+              "dur": 0.66
+            },
+            {
+              "phase": 4,
+              "front": 0.46,
+              "rear": 0.56,
+              "red": "none",
+              "dur": 0.2
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.131,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1420,
+          "t1": 1423.4,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 92,
+          "mph_min": 72,
+          "lat_g_peak": 2.08,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.07,
+              "rear": 0.96,
+              "red": "front",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 0.78,
+              "rear": 0.57,
+              "red": "none",
+              "dur": 0.45
+            },
+            {
+              "phase": 3,
+              "front": 1.26,
+              "rear": 0.64,
+              "red": "front",
+              "dur": 2.63
+            },
+            {
+              "phase": 4,
+              "front": 0.34,
+              "rear": 0.39,
+              "red": "none",
+              "dur": 0.34
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.201,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1474.3,
+          "t1": 1479,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 116,
+          "mph_min": 116,
+          "lat_g_peak": 1.96,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.32,
+              "rear": 0.18,
+              "red": "none",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 0.71,
+              "rear": 0.45,
+              "red": "none",
+              "dur": 0.67
+            },
+            {
+              "phase": 3,
+              "front": 0.84,
+              "rear": 0.75,
+              "red": "none",
+              "dur": 2.62
+            },
+            {
+              "phase": 4,
+              "front": 0.63,
+              "rear": 0.52,
+              "red": "none",
+              "dur": 1.37
+            }
+          ],
+          "first_red": null,
+          "usi": 0.154,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1480.8,
+          "t1": 1482.2,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 131,
+          "mph_min": 131,
+          "lat_g_peak": 1.42,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.33,
+              "rear": 0.15,
+              "red": "none",
+              "dur": 0.73
+            },
+            {
+              "phase": 2,
+              "front": 0.67,
+              "rear": 0.27,
+              "red": "none",
+              "dur": 0.76
+            },
+            {
+              "phase": 3,
+              "front": 0.65,
+              "rear": 0.32,
+              "red": "none",
+              "dur": 0.49
+            },
+            {
+              "phase": 4,
+              "front": 0.25,
+              "rear": 0.17,
+              "red": "none",
+              "dur": 0.12
+            }
+          ],
+          "first_red": null,
+          "usi": 0.032,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1485.4,
+          "t1": 1486.4,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 110,
+          "mph_min": 110,
+          "lat_g_peak": 1.83,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.2,
+              "rear": 1.14,
+              "red": "both",
+              "dur": 1.36
+            },
+            {
+              "phase": 2,
+              "front": 0.98,
+              "rear": 0.93,
+              "red": "none",
+              "dur": 0.42
+            },
+            {
+              "phase": 3,
+              "front": 0.92,
+              "rear": 0.93,
+              "red": "none",
+              "dur": 0.26
+            },
+            {
+              "phase": 4,
+              "front": 0.38,
+              "rear": 0.64,
+              "red": "none",
+              "dur": 0.35
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": -0.034,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1486.5,
+          "t1": 1491,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 113,
+          "mph_min": 105,
+          "lat_g_peak": 2.08,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.98,
+              "rear": 0.93,
+              "red": "none",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 1.54,
+              "rear": 0.77,
+              "red": "front",
+              "dur": 1.79
+            },
+            {
+              "phase": 3,
+              "front": 2.12,
+              "rear": 1.51,
+              "red": "both",
+              "dur": 1.71
+            },
+            {
+              "phase": 4,
+              "front": 2.18,
+              "rear": 1.12,
+              "red": "both",
+              "dur": 0.97
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.74,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1491.8,
+          "t1": 1496.5,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 114,
+          "mph_min": 74,
+          "lat_g_peak": 1.97,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.16,
+              "rear": 0.9,
+              "red": "front",
+              "dur": 1.36
+            },
+            {
+              "phase": 2,
+              "front": 1.7,
+              "rear": 1.55,
+              "red": "both",
+              "dur": 1.86
+            },
+            {
+              "phase": 3,
+              "front": 2.37,
+              "rear": 1.38,
+              "red": "both",
+              "dur": 2.49
+            },
+            {
+              "phase": 4,
+              "front": 2.65,
+              "rear": 1.55,
+              "red": "both",
+              "dur": 0.39
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.757,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1496.7,
+          "t1": 1499.8,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 73,
+          "mph_min": 42,
+          "lat_g_peak": 1.65,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.65,
+              "rear": 1.55,
+              "red": "both",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 1.57,
+              "rear": 0.58,
+              "red": "front",
+              "dur": 0.24
+            },
+            {
+              "phase": 3,
+              "front": 3.85,
+              "rear": 2.96,
+              "red": "both",
+              "dur": 2.63
+            },
+            {
+              "phase": 4,
+              "front": 0.91,
+              "rear": 0.86,
+              "red": "none",
+              "dur": 0.28
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.41,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1501.4,
+          "t1": 1503.4,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 75,
+          "mph_min": 75,
+          "lat_g_peak": 1.79,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.43,
+              "rear": 0.26,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.83,
+              "rear": 0.98,
+              "red": "front",
+              "dur": 0.86
+            },
+            {
+              "phase": 3,
+              "front": 2.03,
+              "rear": 1.16,
+              "red": "both",
+              "dur": 1.05
+            },
+            {
+              "phase": 4,
+              "front": 0.52,
+              "rear": 0.4,
+              "red": "none",
+              "dur": 0.11
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.344,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1503.6,
+          "t1": 1523.8,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 87,
+          "mph_min": 0,
+          "lat_g_peak": 1.89,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.03,
+              "rear": 1.16,
+              "red": "both",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 1.4,
+              "rear": 1.58,
+              "red": "both",
+              "dur": 0.81
+            },
+            {
+              "phase": 3,
+              "front": 1.39,
+              "rear": 4.69,
+              "red": "both",
+              "dur": 7.81
+            },
+            {
+              "phase": 4,
+              "front": 1.02,
+              "rear": 1.4,
+              "red": "both",
+              "dur": 11.59
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.168,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": true
+        },
+        {
+          "t0": 1532.1,
+          "t1": 1536.3,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 116,
+          "mph_min": 116,
+          "lat_g_peak": 2.09,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.37,
+              "rear": 0.26,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.73,
+              "rear": 0.54,
+              "red": "none",
+              "dur": 2.2
+            },
+            {
+              "phase": 3,
+              "front": 0.99,
+              "rear": 0.89,
+              "red": "none",
+              "dur": 1.09
+            },
+            {
+              "phase": 4,
+              "front": 0.74,
+              "rear": 0.5,
+              "red": "none",
+              "dur": 0.92
+            }
+          ],
+          "first_red": null,
+          "usi": 0.145,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1537.7,
+          "t1": 1538.7,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 130,
+          "mph_min": 130,
+          "lat_g_peak": 1.2,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.34,
+              "rear": 0.15,
+              "red": "none",
+              "dur": 1.34
+            },
+            {
+              "phase": 2,
+              "front": 0.48,
+              "rear": 0.29,
+              "red": "none",
+              "dur": 0.6
+            },
+            {
+              "phase": 3,
+              "front": 0.46,
+              "rear": 0.27,
+              "red": "none",
+              "dur": 0.27
+            },
+            {
+              "phase": 4,
+              "front": 0.17,
+              "rear": 0.17,
+              "red": "none",
+              "dur": 0.2
+            }
+          ],
+          "first_red": null,
+          "usi": 0.021,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1538.8,
+          "t1": 1587.1,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 134,
+          "mph_min": 125,
+          "lat_g_peak": 2.19,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.48,
+              "rear": 0.29,
+              "red": "none",
+              "dur": 1.33
+            },
+            {
+              "phase": 2,
+              "front": 0.85,
+              "rear": 0.45,
+              "red": "none",
+              "dur": 0.55
+            },
+            {
+              "phase": 3,
+              "front": 1.21,
+              "rear": 0.91,
+              "red": "front",
+              "dur": 1.09
+            },
+            {
+              "phase": 4,
+              "front": 1.29,
+              "rear": 0.49,
+              "red": "front",
+              "dur": 46.59
+            }
+          ],
+          "first_red": {
+            "phase": 3,
+            "axle": "front"
+          },
+          "usi": 0.208,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1587.8,
+          "t1": 1592.7,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 133,
+          "mph_min": 118,
+          "lat_g_peak": 2.01,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.62,
+              "rear": 0.29,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.5,
+              "rear": 1.14,
+              "red": "both",
+              "dur": 1.34
+            },
+            {
+              "phase": 3,
+              "front": 1.36,
+              "rear": 1.45,
+              "red": "both",
+              "dur": 1.65
+            },
+            {
+              "phase": 4,
+              "front": 1.45,
+              "rear": 0.65,
+              "red": "front",
+              "dur": 1.92
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.273,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1593.7,
+          "t1": 1597,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 104,
+          "mph_min": 82,
+          "lat_g_peak": 1.84,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.5,
+              "rear": 0.98,
+              "red": "front",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.48,
+              "rear": 1.38,
+              "red": "both",
+              "dur": 0.62
+            },
+            {
+              "phase": 3,
+              "front": 2.3,
+              "rear": 1.33,
+              "red": "both",
+              "dur": 2.2
+            },
+            {
+              "phase": 4,
+              "front": 0.72,
+              "rear": 0.62,
+              "red": "none",
+              "dur": 0.52
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.767,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1597.5,
+          "t1": 1600.9,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 77,
+          "mph_min": 32,
+          "lat_g_peak": 1.57,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 3.02,
+              "rear": 2.54,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 2.11,
+              "rear": 2.28,
+              "red": "both",
+              "dur": 1.2
+            },
+            {
+              "phase": 3,
+              "front": 2.85,
+              "rear": 1.92,
+              "red": "both",
+              "dur": 1.84
+            },
+            {
+              "phase": 4,
+              "front": 0.56,
+              "rear": 0.76,
+              "red": "none",
+              "dur": 0.38
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.39,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1601,
+          "t1": 1602,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 58,
+          "mph_min": 58,
+          "lat_g_peak": 0.55,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 2.85,
+              "rear": 1.71,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 0.46,
+              "rear": 0.3,
+              "red": "none",
+              "dur": 0.03
+            },
+            {
+              "phase": 3,
+              "front": 0.42,
+              "rear": 0.33,
+              "red": "none",
+              "dur": 0.6
+            },
+            {
+              "phase": 4,
+              "front": 0.21,
+              "rear": 0.24,
+              "red": "none",
+              "dur": 0.32
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.019,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1602.4,
+          "t1": 1604.6,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 75,
+          "mph_min": 75,
+          "lat_g_peak": 1.95,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 0.51,
+              "rear": 0.33,
+              "red": "none",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.54,
+              "rear": 0.85,
+              "red": "front",
+              "dur": 0.95
+            },
+            {
+              "phase": 3,
+              "front": 1.88,
+              "rear": 1.25,
+              "red": "both",
+              "dur": 1.12
+            },
+            {
+              "phase": 4,
+              "front": 0.47,
+              "rear": 0.7,
+              "red": "none",
+              "dur": 0.18
+            }
+          ],
+          "first_red": {
+            "phase": 2,
+            "axle": "front"
+          },
+          "usi": 0.405,
+          "drift": false,
+          "kink": false,
+          "brake_max": 0,
+          "hb": false
+        },
+        {
+          "t0": 1604.9,
+          "t1": 1608,
+          "car": "1155|2|8|700",
+          "dir": "R",
+          "mph_in": 85,
+          "mph_min": 43,
+          "lat_g_peak": 1.88,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.88,
+              "rear": 1.25,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.29,
+              "rear": 0.63,
+              "red": "front",
+              "dur": 0.52
+            },
+            {
+              "phase": 3,
+              "front": 1.91,
+              "rear": 1.94,
+              "red": "both",
+              "dur": 1.92
+            },
+            {
+              "phase": 4,
+              "front": 1.47,
+              "rear": 0.82,
+              "red": "front",
+              "dur": 0.63
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.544,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
+        },
+        {
+          "t0": 1608.2,
+          "t1": 1609.9,
+          "car": "1155|2|8|700",
+          "dir": "L",
+          "mph_in": 51,
+          "mph_min": 51,
+          "lat_g_peak": 1.37,
+          "phases": [
+            {
+              "phase": 1,
+              "front": 1.91,
+              "rear": 1.94,
+              "red": "both",
+              "dur": 1.47
+            },
+            {
+              "phase": 2,
+              "front": 1.81,
+              "rear": 0.94,
+              "red": "front",
+              "dur": 0.29
+            },
+            {
+              "phase": 3,
+              "front": 2.62,
+              "rear": 1.52,
+              "red": "both",
+              "dur": 1.02
+            },
+            {
+              "phase": 4,
+              "front": 0.5,
+              "rear": 0.74,
+              "red": "none",
+              "dur": 0.37
+            }
+          ],
+          "first_red": {
+            "phase": 1,
+            "axle": "front"
+          },
+          "usi": 0.098,
+          "drift": false,
+          "kink": false,
+          "brake_max": 255,
+          "hb": false
         }
       ],
       "launches": [
@@ -69994,6 +84865,5861 @@ window.FH6_DB = {
               141.4
             ]
           ]
+        },
+        {
+          "t": 590,
+          "car": "3852|2|4|700",
+          "zero60_s": 2.57,
+          "peak_slip_rear": 12.69,
+          "peak_slip_front": 19.58,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0.12,
+              0,
+              0,
+              0,
+              0,
+              0.1
+            ],
+            [
+              0.23,
+              0.02,
+              0.02,
+              0.03,
+              0.03,
+              0.1
+            ],
+            [
+              0.33,
+              12.39,
+              7.13,
+              10.92,
+              11.99,
+              2.7
+            ],
+            [
+              0.45,
+              19.58,
+              0.46,
+              12.17,
+              11.53,
+              6.2
+            ],
+            [
+              0.57,
+              19.26,
+              0.98,
+              12.69,
+              12.11,
+              9.8
+            ],
+            [
+              0.67,
+              17.96,
+              0.5,
+              10.85,
+              9.58,
+              12.9
+            ],
+            [
+              0.77,
+              11.18,
+              0.38,
+              7.77,
+              7.63,
+              15.7
+            ],
+            [
+              0.88,
+              7.07,
+              0.31,
+              4.99,
+              4.69,
+              19.3
+            ],
+            [
+              1,
+              4.23,
+              0.55,
+              2.5,
+              1.78,
+              23.1
+            ],
+            [
+              1.12,
+              2.25,
+              0.78,
+              1.35,
+              1.49,
+              26.8
+            ],
+            [
+              1.22,
+              0.21,
+              0.21,
+              0.33,
+              0.34,
+              29.1
+            ],
+            [
+              1.33,
+              0.33,
+              0.34,
+              0.41,
+              0.41,
+              32.1
+            ],
+            [
+              1.44,
+              0.37,
+              0.38,
+              0.44,
+              0.44,
+              34.8
+            ],
+            [
+              1.55,
+              0.37,
+              0.37,
+              0.45,
+              0.46,
+              38.1
+            ],
+            [
+              1.67,
+              0.21,
+              0.22,
+              0.32,
+              0.32,
+              40.4
+            ],
+            [
+              1.79,
+              0.24,
+              0.25,
+              0.31,
+              0.31,
+              43.2
+            ],
+            [
+              1.89,
+              0.26,
+              0.28,
+              0.34,
+              0.33,
+              45.6
+            ],
+            [
+              2,
+              0.28,
+              0.29,
+              0.37,
+              0.36,
+              48.4
+            ],
+            [
+              2.1,
+              0.27,
+              0.27,
+              0.36,
+              0.36,
+              50.9
+            ],
+            [
+              2.2,
+              0.19,
+              0.18,
+              0.27,
+              0.28,
+              52.2
+            ],
+            [
+              2.32,
+              0.24,
+              0.2,
+              0.27,
+              0.31,
+              54.8
+            ],
+            [
+              2.42,
+              0.21,
+              0.21,
+              0.3,
+              0.31,
+              56.9
+            ],
+            [
+              2.52,
+              0.21,
+              0.21,
+              0.28,
+              0.28,
+              59
+            ],
+            [
+              2.64,
+              0.21,
+              0.22,
+              0.29,
+              0.29,
+              61.4
+            ],
+            [
+              2.74,
+              0.2,
+              0.19,
+              0.27,
+              0.27,
+              63.5
+            ],
+            [
+              2.84,
+              0.15,
+              0.18,
+              0.23,
+              0.22,
+              64.8
+            ],
+            [
+              2.96,
+              0.18,
+              0.17,
+              0.25,
+              0.26,
+              66.8
+            ],
+            [
+              3.07,
+              0.19,
+              0.15,
+              0.21,
+              0.24,
+              68.9
+            ],
+            [
+              3.17,
+              0.17,
+              0.18,
+              0.26,
+              0.26,
+              70.6
+            ],
+            [
+              3.27,
+              0.17,
+              0.18,
+              0.25,
+              0.25,
+              72.4
+            ],
+            [
+              3.39,
+              0.17,
+              0.18,
+              0.21,
+              0.21,
+              74.3
+            ],
+            [
+              3.49,
+              0.01,
+              0.01,
+              0.02,
+              0.02,
+              76
+            ],
+            [
+              3.59,
+              0.15,
+              0.13,
+              0.2,
+              0.21,
+              77.3
+            ],
+            [
+              3.69,
+              0.13,
+              0.14,
+              0.19,
+              0.19,
+              78.7
+            ],
+            [
+              3.81,
+              0.12,
+              0.13,
+              0.19,
+              0.18,
+              80.5
+            ],
+            [
+              3.92,
+              0.15,
+              0.14,
+              0.18,
+              0.18,
+              82.2
+            ],
+            [
+              4.02,
+              0.15,
+              0.16,
+              0.24,
+              0.24,
+              83.6
+            ],
+            [
+              4.14,
+              0.15,
+              0.15,
+              0.2,
+              0.19,
+              85.4
+            ],
+            [
+              4.24,
+              0.12,
+              0.13,
+              0.19,
+              0.19,
+              86.9
+            ],
+            [
+              4.34,
+              0.14,
+              0.14,
+              0.18,
+              0.19,
+              88.3
+            ],
+            [
+              4.44,
+              0.14,
+              0.16,
+              0.22,
+              0.2,
+              89.8
+            ],
+            [
+              4.56,
+              0.08,
+              0.08,
+              0.12,
+              0.11,
+              91
+            ],
+            [
+              4.68,
+              0.11,
+              0.12,
+              0.2,
+              0.2,
+              92.4
+            ],
+            [
+              4.78,
+              0.1,
+              0.1,
+              0.14,
+              0.13,
+              93.7
+            ],
+            [
+              4.88,
+              0.14,
+              0.13,
+              0.2,
+              0.21,
+              94.9
+            ],
+            [
+              4.98,
+              0.11,
+              0.11,
+              0.16,
+              0.17,
+              96.2
+            ],
+            [
+              5.08,
+              0.1,
+              0.11,
+              0.15,
+              0.15,
+              97.4
+            ],
+            [
+              5.18,
+              0.11,
+              0.11,
+              0.15,
+              0.14,
+              98.6
+            ],
+            [
+              5.28,
+              0.14,
+              0.13,
+              0.21,
+              0.22,
+              99.8
+            ],
+            [
+              5.39,
+              0.1,
+              0.11,
+              0.16,
+              0.15,
+              101.3
+            ],
+            [
+              5.49,
+              0.1,
+              0.1,
+              0.15,
+              0.15,
+              102.5
+            ],
+            [
+              5.61,
+              0.09,
+              0.1,
+              0.16,
+              0.15,
+              103.7
+            ],
+            [
+              5.71,
+              0.02,
+              0.02,
+              0.04,
+              0.04,
+              104.2
+            ],
+            [
+              5.83,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              103.8
+            ],
+            [
+              5.95,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              103.4
+            ],
+            [
+              6.06,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              102.9
+            ],
+            [
+              6.16,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              102.5
+            ],
+            [
+              6.28,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              102.1
+            ],
+            [
+              6.38,
+              -0.01,
+              -0.01,
+              -0.03,
+              -0.02,
+              101.6
+            ],
+            [
+              6.5,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.01,
+              101.1
+            ],
+            [
+              6.6,
+              -0.01,
+              -0.01,
+              -0.03,
+              -0.02,
+              100.7
+            ],
+            [
+              6.7,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.01,
+              100.2
+            ],
+            [
+              6.81,
+              -0.02,
+              -0.01,
+              -0.03,
+              -0.01,
+              99.8
+            ],
+            [
+              6.93,
+              0,
+              -0.01,
+              -0.02,
+              -0.01,
+              99.2
+            ],
+            [
+              7.03,
+              0,
+              -0.01,
+              -0.02,
+              -0.01,
+              98.8
+            ],
+            [
+              7.15,
+              0.01,
+              -0.01,
+              -0.03,
+              -0.01,
+              98.1
+            ],
+            [
+              7.25,
+              0.03,
+              0,
+              -0.05,
+              -0.01,
+              97.4
+            ],
+            [
+              7.35,
+              0.04,
+              0,
+              -0.07,
+              -0.01,
+              96.5
+            ],
+            [
+              7.45,
+              -0.18,
+              -0.14,
+              -0.14,
+              -0.04,
+              95.6
+            ],
+            [
+              7.55,
+              -0.68,
+              -0.56,
+              -1.55,
+              -0.65,
+              93.6
+            ],
+            [
+              7.67,
+              -0.6,
+              -0.74,
+              -1.45,
+              -0.61,
+              90.4
+            ],
+            [
+              7.77,
+              -0.78,
+              -0.28,
+              -1.59,
+              -0.91,
+              87.6
+            ],
+            [
+              7.87,
+              -0.8,
+              -0.49,
+              -1.71,
+              -1.12,
+              84.8
+            ],
+            [
+              7.98,
+              -0.77,
+              -0.68,
+              -1.95,
+              -1.29,
+              82.1
+            ],
+            [
+              8.09,
+              -1.07,
+              -0.81,
+              -1.84,
+              -1.03,
+              79.3
+            ],
+            [
+              8.2,
+              -1.45,
+              -0.96,
+              -1.72,
+              -0.6,
+              76
+            ],
+            [
+              8.32,
+              -1.67,
+              -0.8,
+              -1.39,
+              -1.19,
+              73
+            ],
+            [
+              8.42,
+              -1.9,
+              -0.37,
+              -1.58,
+              -1.64,
+              70.8
+            ],
+            [
+              8.52,
+              -1.81,
+              -0.62,
+              -1.94,
+              -1.24,
+              68
+            ],
+            [
+              8.63,
+              -2.19,
+              -0.69,
+              -1.92,
+              -0.98,
+              65.2
+            ],
+            [
+              8.75,
+              -1.96,
+              -0.54,
+              -1.94,
+              -1.26,
+              62.7
+            ],
+            [
+              8.87,
+              -2.17,
+              -0.4,
+              -2.12,
+              -1.08,
+              60
+            ],
+            [
+              8.99,
+              -1.68,
+              -1.45,
+              -2.07,
+              -1.48,
+              56.9
+            ],
+            [
+              9.1,
+              -1.37,
+              -0.73,
+              -3.03,
+              -1.23,
+              54.4
+            ],
+            [
+              9.22,
+              -2.13,
+              -0.38,
+              -1.34,
+              -1.31,
+              51.3
+            ],
+            [
+              9.32,
+              -2.12,
+              -0.44,
+              -1.43,
+              -1.41,
+              49
+            ],
+            [
+              9.42,
+              -1.94,
+              -0.63,
+              -2.41,
+              -1.8,
+              46.6
+            ],
+            [
+              9.54,
+              -0.99,
+              -0.21,
+              -1.02,
+              -1.83,
+              44
+            ],
+            [
+              9.65,
+              -2.91,
+              -0.79,
+              -1.32,
+              -0.47,
+              41.5
+            ],
+            [
+              9.76,
+              -0.66,
+              -2.23,
+              -2.17,
+              -1.38,
+              38.9
+            ],
+            [
+              9.87,
+              -2.33,
+              -2.89,
+              -2.65,
+              -0.34,
+              36
+            ],
+            [
+              9.97,
+              -0.25,
+              -0.67,
+              -0.54,
+              -2.31,
+              33.4
+            ],
+            [
+              10.09,
+              -2.12,
+              -0.23,
+              -0.49,
+              -1.96,
+              30.7
+            ],
+            [
+              10.2,
+              -0.3,
+              -0.23,
+              -0.99,
+              -1.79,
+              27.7
+            ],
+            [
+              10.31,
+              -1.8,
+              -0.93,
+              -0.69,
+              -0.43,
+              25.6
+            ],
+            [
+              10.41,
+              -0.26,
+              -0.97,
+              -1.04,
+              -1.25,
+              22.6
+            ],
+            [
+              10.52,
+              -1.41,
+              -0.16,
+              -0.51,
+              -0.95,
+              19.7
+            ]
+          ]
+        },
+        {
+          "t": 692.5,
+          "car": "3852|2|4|700",
+          "zero60_s": 2.6,
+          "peak_slip_rear": 11.21,
+          "peak_slip_front": 9.18,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0.1,
+              0,
+              0,
+              0,
+              0,
+              0.1
+            ],
+            [
+              0.22,
+              0,
+              0,
+              0,
+              0,
+              0.2
+            ],
+            [
+              0.33,
+              4.58,
+              4.28,
+              7.15,
+              6.87,
+              2.2
+            ],
+            [
+              0.45,
+              8.37,
+              8.41,
+              10.15,
+              9.47,
+              5.8
+            ],
+            [
+              0.55,
+              9.18,
+              8.75,
+              11.16,
+              10.57,
+              8.9
+            ],
+            [
+              0.67,
+              9.05,
+              9.17,
+              10.88,
+              11.21,
+              12.2
+            ],
+            [
+              0.78,
+              5.46,
+              5.4,
+              7.58,
+              7.77,
+              15.9
+            ],
+            [
+              0.9,
+              3.51,
+              3.32,
+              5.71,
+              4.8,
+              19.4
+            ],
+            [
+              1.02,
+              2.84,
+              2.9,
+              3.61,
+              3.62,
+              23.2
+            ],
+            [
+              1.12,
+              1.4,
+              1.74,
+              1.77,
+              2.34,
+              26.8
+            ],
+            [
+              1.22,
+              0.57,
+              0.7,
+              0.82,
+              1.05,
+              30
+            ],
+            [
+              1.33,
+              0.19,
+              0.2,
+              0.33,
+              0.36,
+              32.1
+            ],
+            [
+              1.44,
+              0.19,
+              0.2,
+              0.32,
+              0.35,
+              34.3
+            ],
+            [
+              1.55,
+              0.2,
+              0.22,
+              0.33,
+              0.35,
+              36.9
+            ],
+            [
+              1.65,
+              0.22,
+              0.24,
+              0.33,
+              0.36,
+              39.3
+            ],
+            [
+              1.77,
+              0.25,
+              0.26,
+              0.36,
+              0.38,
+              41.9
+            ],
+            [
+              1.89,
+              0.27,
+              0.29,
+              0.39,
+              0.43,
+              45.1
+            ],
+            [
+              1.99,
+              0.26,
+              0.34,
+              0.37,
+              0.51,
+              47.7
+            ],
+            [
+              2.09,
+              0.25,
+              0.29,
+              0.38,
+              0.51,
+              50.3
+            ],
+            [
+              2.2,
+              0.13,
+              0.16,
+              0.22,
+              0.28,
+              52.5
+            ],
+            [
+              2.3,
+              0.17,
+              0.19,
+              0.25,
+              0.29,
+              54.4
+            ],
+            [
+              2.42,
+              0.19,
+              0.27,
+              0.29,
+              0.4,
+              56.6
+            ],
+            [
+              2.52,
+              0.2,
+              0.33,
+              0.27,
+              0.5,
+              58.5
+            ],
+            [
+              2.64,
+              0.18,
+              0.24,
+              0.25,
+              0.42,
+              60.9
+            ],
+            [
+              2.74,
+              0.19,
+              0.23,
+              0.27,
+              0.41,
+              62.9
+            ],
+            [
+              2.84,
+              0.13,
+              0.16,
+              0.21,
+              0.26,
+              64.9
+            ],
+            [
+              8.25,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              65.9
+            ],
+            [
+              8.35,
+              -0.01,
+              -0.01,
+              -0.04,
+              -0.04,
+              65.6
+            ],
+            [
+              8.45,
+              -0.01,
+              -0.01,
+              -0.03,
+              -0.03,
+              65.3
+            ],
+            [
+              8.55,
+              -0.01,
+              -0.01,
+              -0.03,
+              -0.03,
+              65
+            ],
+            [
+              8.67,
+              -0.01,
+              -0.01,
+              -0.04,
+              -0.03,
+              64.6
+            ],
+            [
+              8.78,
+              -0.01,
+              -0.01,
+              -0.03,
+              -0.03,
+              64.2
+            ],
+            [
+              8.9,
+              -0.02,
+              -0.02,
+              -0.03,
+              -0.04,
+              63.9
+            ],
+            [
+              9,
+              0.03,
+              0.04,
+              0.06,
+              0.08,
+              63.8
+            ],
+            [
+              9.12,
+              0.13,
+              0.14,
+              0.2,
+              0.25,
+              65.1
+            ],
+            [
+              9.22,
+              0.19,
+              0.2,
+              0.25,
+              0.28,
+              67
+            ],
+            [
+              9.34,
+              0.2,
+              0.26,
+              0.28,
+              0.4,
+              69.2
+            ],
+            [
+              9.44,
+              0.11,
+              0.13,
+              0.16,
+              0.22,
+              70.5
+            ],
+            [
+              9.54,
+              0.12,
+              0.15,
+              0.18,
+              0.24,
+              72
+            ],
+            [
+              9.65,
+              0.06,
+              0.04,
+              0.1,
+              0.07,
+              73
+            ],
+            [
+              9.75,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              72.9
+            ]
+          ]
+        },
+        {
+          "t": 780,
+          "car": "2616|2|10|800",
+          "zero60_s": 3.17,
+          "peak_slip_rear": 3.29,
+          "peak_slip_front": 0.47,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0.1,
+              0,
+              0,
+              0.02,
+              0.02,
+              0
+            ],
+            [
+              0.2,
+              -0.08,
+              -0.09,
+              0.63,
+              -0.07,
+              0.7
+            ],
+            [
+              0.31,
+              -0.08,
+              -0.08,
+              0.39,
+              0.16,
+              2.7
+            ],
+            [
+              0.41,
+              0.42,
+              0.44,
+              0.45,
+              0.45,
+              5.1
+            ],
+            [
+              0.51,
+              0.45,
+              0.47,
+              0.62,
+              0.55,
+              8.1
+            ],
+            [
+              0.61,
+              -0.1,
+              -0.1,
+              0.71,
+              0.62,
+              11
+            ],
+            [
+              0.72,
+              0.42,
+              0.44,
+              3.29,
+              2.82,
+              14.1
+            ],
+            [
+              0.82,
+              0.24,
+              0.25,
+              0.34,
+              0.33,
+              17.1
+            ],
+            [
+              0.93,
+              0.22,
+              0.23,
+              0.34,
+              0.35,
+              19.4
+            ],
+            [
+              1.03,
+              -0.04,
+              -0.04,
+              0.36,
+              0.37,
+              21.6
+            ],
+            [
+              1.13,
+              0.19,
+              0.2,
+              0.35,
+              0.36,
+              23.8
+            ],
+            [
+              1.23,
+              -0.03,
+              -0.03,
+              0.34,
+              0.34,
+              25.9
+            ],
+            [
+              1.34,
+              0.07,
+              0.07,
+              0.31,
+              0.31,
+              27.9
+            ],
+            [
+              1.44,
+              0.1,
+              0.1,
+              0.39,
+              0.39,
+              30
+            ],
+            [
+              1.54,
+              0.1,
+              0.1,
+              0.4,
+              0.4,
+              32.3
+            ],
+            [
+              1.64,
+              0.11,
+              0.11,
+              0.39,
+              0.39,
+              34.6
+            ],
+            [
+              1.74,
+              0.05,
+              0.04,
+              0.16,
+              0.17,
+              36.6
+            ],
+            [
+              1.85,
+              -0.01,
+              -0.01,
+              -0.01,
+              -0.01,
+              36.9
+            ],
+            [
+              1.95,
+              0.04,
+              0.05,
+              0.21,
+              0.2,
+              37.5
+            ],
+            [
+              2.05,
+              0.08,
+              0.09,
+              0.31,
+              0.31,
+              39.3
+            ],
+            [
+              2.15,
+              0.1,
+              0.09,
+              0.31,
+              0.31,
+              41.4
+            ],
+            [
+              2.26,
+              0.11,
+              0.11,
+              0.33,
+              0.33,
+              43.6
+            ],
+            [
+              2.36,
+              0.13,
+              0.12,
+              0.4,
+              0.4,
+              45.8
+            ],
+            [
+              2.46,
+              0.11,
+              0.11,
+              0.38,
+              0.38,
+              48.3
+            ],
+            [
+              2.56,
+              0.05,
+              0.05,
+              0.2,
+              0.19,
+              49.7
+            ],
+            [
+              2.66,
+              0.07,
+              0.07,
+              0.24,
+              0.24,
+              51.1
+            ],
+            [
+              2.77,
+              0.08,
+              0.08,
+              0.25,
+              0.25,
+              52.9
+            ],
+            [
+              2.87,
+              0.08,
+              0.08,
+              0.26,
+              0.25,
+              54.7
+            ],
+            [
+              2.98,
+              0.07,
+              0.1,
+              0.21,
+              0.3,
+              56.6
+            ],
+            [
+              3.08,
+              0.09,
+              0.08,
+              0.23,
+              0.28,
+              58.4
+            ],
+            [
+              3.19,
+              0.09,
+              0.08,
+              0.23,
+              0.26,
+              60.3
+            ],
+            [
+              3.29,
+              0.09,
+              0.09,
+              0.24,
+              0.25,
+              62
+            ],
+            [
+              3.39,
+              0.09,
+              0.09,
+              0.25,
+              0.26,
+              63.7
+            ],
+            [
+              3.5,
+              0.08,
+              0.09,
+              0.24,
+              0.24,
+              65.7
+            ],
+            [
+              3.6,
+              0.09,
+              0.08,
+              0.23,
+              0.25,
+              67.5
+            ],
+            [
+              3.7,
+              0.1,
+              0.07,
+              0.26,
+              0.22,
+              69.2
+            ],
+            [
+              3.81,
+              0.08,
+              0.08,
+              0.23,
+              0.21,
+              71
+            ],
+            [
+              3.91,
+              0.1,
+              0.09,
+              0.25,
+              0.24,
+              72.8
+            ],
+            [
+              4.01,
+              0.09,
+              0.08,
+              0.25,
+              0.24,
+              74.5
+            ],
+            [
+              4.11,
+              0.09,
+              0.08,
+              0.21,
+              0.22,
+              76.2
+            ],
+            [
+              4.22,
+              0.1,
+              0.08,
+              0.23,
+              0.24,
+              78
+            ],
+            [
+              4.32,
+              0.08,
+              0.08,
+              0.21,
+              0.21,
+              79.7
+            ],
+            [
+              4.43,
+              0.1,
+              0.09,
+              0.23,
+              0.24,
+              81.3
+            ],
+            [
+              4.53,
+              0.05,
+              0.06,
+              0.16,
+              0.19,
+              82.4
+            ],
+            [
+              4.64,
+              0.06,
+              0.06,
+              0.14,
+              0.16,
+              83.8
+            ],
+            [
+              4.74,
+              0.08,
+              0.08,
+              0.2,
+              0.22,
+              85.2
+            ],
+            [
+              4.84,
+              0.07,
+              0.07,
+              0.17,
+              0.19,
+              86.5
+            ],
+            [
+              4.95,
+              0.06,
+              0.06,
+              0.17,
+              0.17,
+              87.9
+            ],
+            [
+              5.05,
+              0.07,
+              0.07,
+              0.16,
+              0.16,
+              89.3
+            ],
+            [
+              5.16,
+              0.07,
+              0.07,
+              0.19,
+              0.2,
+              90.7
+            ],
+            [
+              5.26,
+              0.06,
+              0.06,
+              0.15,
+              0.15,
+              92.1
+            ],
+            [
+              5.36,
+              0.07,
+              0.06,
+              0.17,
+              0.17,
+              93.4
+            ],
+            [
+              5.47,
+              0.06,
+              0.06,
+              0.14,
+              0.15,
+              94.8
+            ],
+            [
+              5.57,
+              0.07,
+              0.08,
+              0.18,
+              0.17,
+              96.1
+            ],
+            [
+              5.68,
+              0.07,
+              0.06,
+              0.16,
+              0.17,
+              97.5
+            ],
+            [
+              5.78,
+              0.06,
+              0.07,
+              0.16,
+              0.16,
+              98.8
+            ],
+            [
+              5.88,
+              0.06,
+              0.06,
+              0.14,
+              0.15,
+              100.1
+            ],
+            [
+              5.98,
+              0.06,
+              0.06,
+              0.16,
+              0.15,
+              101.3
+            ],
+            [
+              6.09,
+              0.11,
+              0.08,
+              0.21,
+              0.13,
+              102.6
+            ],
+            [
+              6.19,
+              0.13,
+              0.08,
+              0.24,
+              0.1,
+              103.7
+            ],
+            [
+              6.3,
+              0.12,
+              0.07,
+              0.3,
+              0.11,
+              104.9
+            ],
+            [
+              6.4,
+              0.08,
+              0.07,
+              0.27,
+              0.12,
+              106.1
+            ],
+            [
+              6.5,
+              0.07,
+              0.07,
+              0.23,
+              0.12,
+              107.3
+            ],
+            [
+              6.6,
+              0.06,
+              0.05,
+              0.17,
+              0.13,
+              108.5
+            ],
+            [
+              6.71,
+              0.09,
+              0.07,
+              0.17,
+              0.13,
+              109.8
+            ],
+            [
+              6.81,
+              0,
+              0,
+              0,
+              -0.01,
+              110.8
+            ],
+            [
+              6.91,
+              0.1,
+              0.06,
+              0.2,
+              0.08,
+              111.5
+            ],
+            [
+              7.02,
+              0.11,
+              0.06,
+              0.24,
+              0.08,
+              112.5
+            ],
+            [
+              7.12,
+              0.16,
+              0.08,
+              0.27,
+              0.08,
+              113.3
+            ],
+            [
+              7.22,
+              0.07,
+              0.05,
+              0.25,
+              0.08,
+              114.3
+            ],
+            [
+              7.32,
+              0.06,
+              0.05,
+              0.18,
+              0.08,
+              115.2
+            ],
+            [
+              7.43,
+              0.1,
+              0.06,
+              0.21,
+              0.1,
+              116.2
+            ],
+            [
+              7.53,
+              0.09,
+              0.06,
+              0.21,
+              0.08,
+              117.1
+            ],
+            [
+              7.64,
+              0.06,
+              0.04,
+              0.19,
+              0.07,
+              118.1
+            ],
+            [
+              7.74,
+              0.15,
+              0.1,
+              0.25,
+              0.08,
+              118.9
+            ],
+            [
+              7.85,
+              0.16,
+              0.09,
+              0.28,
+              0.08,
+              119.6
+            ],
+            [
+              7.95,
+              0.12,
+              0.05,
+              0.17,
+              0.07,
+              120.5
+            ],
+            [
+              8.05,
+              0.25,
+              0.03,
+              0.28,
+              0.06,
+              121.2
+            ],
+            [
+              8.16,
+              0.1,
+              0.09,
+              0.3,
+              0.07,
+              121.7
+            ],
+            [
+              8.26,
+              0.12,
+              0.16,
+              0.49,
+              0.1,
+              122.3
+            ],
+            [
+              8.37,
+              0.38,
+              0.19,
+              0.52,
+              0.13,
+              122.7
+            ],
+            [
+              8.47,
+              0.25,
+              0.05,
+              0.3,
+              0.25,
+              123.3
+            ],
+            [
+              8.57,
+              0.05,
+              0.04,
+              0.2,
+              0.06,
+              124
+            ],
+            [
+              8.68,
+              0.04,
+              0.03,
+              0.14,
+              0.08,
+              124.8
+            ],
+            [
+              8.78,
+              0.04,
+              0.03,
+              0.1,
+              0.07,
+              125.8
+            ],
+            [
+              8.89,
+              0.07,
+              0.03,
+              0.12,
+              0.08,
+              126.7
+            ],
+            [
+              8.99,
+              0.05,
+              0.03,
+              0.08,
+              0.1,
+              127.6
+            ],
+            [
+              9.1,
+              0.04,
+              0.05,
+              0.1,
+              0.1,
+              128.4
+            ],
+            [
+              9.2,
+              0.05,
+              0.06,
+              0.12,
+              0.12,
+              129.3
+            ],
+            [
+              9.31,
+              0.05,
+              0.04,
+              0.11,
+              0.07,
+              130.1
+            ],
+            [
+              9.41,
+              0.14,
+              0.09,
+              0.21,
+              0.1,
+              130.7
+            ],
+            [
+              9.51,
+              0.08,
+              0.06,
+              0.18,
+              0.11,
+              131.6
+            ],
+            [
+              9.61,
+              0.05,
+              0.05,
+              0.15,
+              0.1,
+              132.4
+            ],
+            [
+              9.71,
+              0.05,
+              0.06,
+              0.11,
+              0.12,
+              133.2
+            ],
+            [
+              9.81,
+              0.04,
+              0.04,
+              0.09,
+              0.11,
+              134
+            ],
+            [
+              9.91,
+              0.04,
+              0.05,
+              0.09,
+              0.11,
+              134.9
+            ],
+            [
+              10.01,
+              0.05,
+              0.05,
+              0.13,
+              0.14,
+              135.6
+            ],
+            [
+              10.12,
+              0.05,
+              0.05,
+              0.09,
+              0.1,
+              136.4
+            ],
+            [
+              10.22,
+              0.03,
+              0.02,
+              0.11,
+              0.1,
+              136.8
+            ],
+            [
+              10.32,
+              0.12,
+              0.08,
+              0.18,
+              0.1,
+              137.4
+            ],
+            [
+              10.43,
+              0.05,
+              0.04,
+              0.15,
+              0.1,
+              138.2
+            ],
+            [
+              10.54,
+              0.05,
+              0.05,
+              0.11,
+              0.09,
+              138.9
+            ],
+            [
+              10.64,
+              0.09,
+              0.06,
+              0.14,
+              0.08,
+              139.6
+            ],
+            [
+              10.74,
+              0.09,
+              0.06,
+              0.16,
+              0.07,
+              140.1
+            ],
+            [
+              10.85,
+              0.05,
+              0.04,
+              0.15,
+              0.07,
+              140.8
+            ],
+            [
+              10.95,
+              0.12,
+              0.07,
+              0.19,
+              0.09,
+              141.4
+            ],
+            [
+              11.06,
+              0.12,
+              0.08,
+              0.2,
+              0.08,
+              141.9
+            ],
+            [
+              11.16,
+              0.19,
+              0.11,
+              0.25,
+              0.11,
+              142.4
+            ],
+            [
+              11.26,
+              0.21,
+              0.12,
+              0.25,
+              0.09,
+              142.8
+            ],
+            [
+              11.37,
+              0.21,
+              0.13,
+              0.29,
+              0.13,
+              143.2
+            ],
+            [
+              11.47,
+              0.09,
+              0.06,
+              0.22,
+              0.09,
+              143.8
+            ],
+            [
+              11.58,
+              0.1,
+              0.09,
+              0.22,
+              0.12,
+              144.3
+            ],
+            [
+              11.68,
+              0.06,
+              0.04,
+              0.13,
+              0.09,
+              145.2
+            ],
+            [
+              11.78,
+              0.05,
+              0.05,
+              0.12,
+              0.1,
+              145.9
+            ],
+            [
+              11.88,
+              0.04,
+              0.03,
+              0.09,
+              0.08,
+              146.7
+            ],
+            [
+              11.99,
+              0.04,
+              0.03,
+              0.08,
+              0.09,
+              147.5
+            ]
+          ]
+        },
+        {
+          "t": 1166.4,
+          "car": "2866|2|4|800",
+          "zero60_s": 2.13,
+          "peak_slip_rear": 29.21,
+          "peak_slip_front": 28.83,
+          "trace": [
+            [
+              0,
+              0.02,
+              -0.01,
+              -14.15,
+              -12.68,
+              0.6
+            ],
+            [
+              0.11,
+              34.13,
+              30.52,
+              35.51,
+              35.87,
+              2.4
+            ],
+            [
+              0.21,
+              28.83,
+              27.67,
+              27.59,
+              29.21,
+              5.7
+            ],
+            [
+              0.31,
+              24.51,
+              25.26,
+              26.34,
+              24.63,
+              9.4
+            ],
+            [
+              0.42,
+              24.14,
+              20.38,
+              23.15,
+              22.19,
+              12.9
+            ],
+            [
+              0.52,
+              17.76,
+              14.68,
+              16.4,
+              17.11,
+              16.4
+            ],
+            [
+              0.62,
+              11.3,
+              12.35,
+              12.99,
+              12.28,
+              19.8
+            ],
+            [
+              0.72,
+              9.53,
+              8,
+              9.69,
+              8.81,
+              23.2
+            ],
+            [
+              0.83,
+              6.78,
+              5.83,
+              6.78,
+              7.28,
+              26.6
+            ],
+            [
+              0.93,
+              3.02,
+              4.19,
+              4.28,
+              4.01,
+              30.4
+            ],
+            [
+              1.04,
+              0.43,
+              0.36,
+              0.62,
+              0.56,
+              34.7
+            ],
+            [
+              1.14,
+              0.22,
+              0.22,
+              0.35,
+              0.35,
+              37.6
+            ],
+            [
+              1.24,
+              0.23,
+              0.23,
+              0.36,
+              0.36,
+              40.3
+            ],
+            [
+              1.34,
+              0.25,
+              0.23,
+              0.36,
+              0.38,
+              43.1
+            ],
+            [
+              1.45,
+              0.08,
+              0.07,
+              0.14,
+              0.14,
+              45.2
+            ],
+            [
+              1.55,
+              0.17,
+              0.17,
+              0.29,
+              0.29,
+              47.7
+            ],
+            [
+              1.66,
+              0.17,
+              0.18,
+              0.28,
+              0.28,
+              50.3
+            ],
+            [
+              1.76,
+              0.17,
+              0.24,
+              0.27,
+              0.3,
+              52.6
+            ],
+            [
+              1.86,
+              0.22,
+              0.65,
+              0.27,
+              0.48,
+              54.7
+            ],
+            [
+              1.96,
+              0.01,
+              0.02,
+              0.04,
+              0.06,
+              57.2
+            ],
+            [
+              2.06,
+              0.14,
+              0.15,
+              0.25,
+              0.25,
+              58.8
+            ],
+            [
+              2.17,
+              0.14,
+              0.13,
+              0.23,
+              0.23,
+              60.7
+            ],
+            [
+              2.27,
+              0.14,
+              0.14,
+              0.22,
+              0.22,
+              62.7
+            ],
+            [
+              2.37,
+              0.15,
+              0.15,
+              0.24,
+              0.23,
+              64.7
+            ],
+            [
+              2.48,
+              0.15,
+              0.15,
+              0.24,
+              0.24,
+              66.8
+            ],
+            [
+              2.58,
+              0.15,
+              0.14,
+              0.24,
+              0.24,
+              68.7
+            ],
+            [
+              2.68,
+              0.01,
+              0.01,
+              0.04,
+              0.04,
+              70.4
+            ],
+            [
+              2.78,
+              0.25,
+              0.11,
+              0.27,
+              0.17,
+              71.7
+            ],
+            [
+              2.88,
+              0.13,
+              0.11,
+              0.23,
+              0.19,
+              73.2
+            ],
+            [
+              2.99,
+              0.13,
+              0.12,
+              0.19,
+              0.19,
+              74.9
+            ],
+            [
+              3.09,
+              0.13,
+              0.13,
+              0.21,
+              0.21,
+              76.4
+            ],
+            [
+              3.19,
+              0.12,
+              0.12,
+              0.21,
+              0.21,
+              78
+            ],
+            [
+              3.29,
+              0.1,
+              0.1,
+              0.16,
+              0.16,
+              79.7
+            ],
+            [
+              3.4,
+              0.1,
+              0.19,
+              0.16,
+              0.23,
+              81.1
+            ],
+            [
+              3.5,
+              0.11,
+              0.13,
+              0.19,
+              0.22,
+              82.7
+            ],
+            [
+              3.61,
+              0.02,
+              0.02,
+              0.05,
+              0.05,
+              84.2
+            ],
+            [
+              3.71,
+              0.09,
+              0.09,
+              0.16,
+              0.16,
+              85.3
+            ],
+            [
+              3.81,
+              0.11,
+              0.11,
+              0.16,
+              0.16,
+              86.6
+            ],
+            [
+              3.91,
+              0.1,
+              0.1,
+              0.17,
+              0.17,
+              87.8
+            ],
+            [
+              4.02,
+              0.09,
+              0.09,
+              0.14,
+              0.14,
+              89
+            ],
+            [
+              4.13,
+              0.11,
+              0.11,
+              0.18,
+              0.17,
+              90.3
+            ],
+            [
+              4.23,
+              0.09,
+              0.09,
+              0.15,
+              0.16,
+              91.6
+            ],
+            [
+              4.34,
+              0.1,
+              0.1,
+              0.15,
+              0.15,
+              92.9
+            ],
+            [
+              4.44,
+              0.1,
+              0.1,
+              0.17,
+              0.17,
+              94.1
+            ],
+            [
+              4.54,
+              0.08,
+              0.09,
+              0.14,
+              0.14,
+              95.2
+            ],
+            [
+              4.64,
+              0.1,
+              0.1,
+              0.14,
+              0.14,
+              96.5
+            ],
+            [
+              4.75,
+              0.04,
+              0.04,
+              0.08,
+              0.08,
+              97.3
+            ],
+            [
+              4.85,
+              0.07,
+              0.08,
+              0.13,
+              0.13,
+              98.3
+            ],
+            [
+              4.95,
+              0.08,
+              0.08,
+              0.12,
+              0.12,
+              99.2
+            ],
+            [
+              5.05,
+              0.08,
+              0.08,
+              0.14,
+              0.14,
+              100.1
+            ],
+            [
+              5.16,
+              0.08,
+              0.08,
+              0.12,
+              0.12,
+              101.1
+            ],
+            [
+              5.27,
+              0.08,
+              0.09,
+              0.15,
+              0.14,
+              102
+            ],
+            [
+              5.37,
+              0.07,
+              0.07,
+              0.12,
+              0.12,
+              102.9
+            ],
+            [
+              5.47,
+              0.06,
+              0.07,
+              0.12,
+              0.11,
+              103.8
+            ],
+            [
+              5.57,
+              0.07,
+              0.08,
+              0.11,
+              0.11,
+              104.7
+            ],
+            [
+              5.68,
+              0.08,
+              0.09,
+              0.13,
+              0.13,
+              105.5
+            ],
+            [
+              5.78,
+              0.09,
+              0.08,
+              0.13,
+              0.14,
+              106.3
+            ],
+            [
+              5.88,
+              0.08,
+              0.08,
+              0.13,
+              0.13,
+              107.2
+            ],
+            [
+              5.99,
+              0.1,
+              0.1,
+              0.14,
+              0.14,
+              108
+            ],
+            [
+              6.09,
+              0.09,
+              0.08,
+              0.15,
+              0.15,
+              108.8
+            ],
+            [
+              6.19,
+              0.08,
+              0.07,
+              0.12,
+              0.12,
+              109.5
+            ],
+            [
+              6.3,
+              0.08,
+              0.09,
+              0.14,
+              0.13,
+              110.3
+            ],
+            [
+              6.4,
+              0.07,
+              0.07,
+              0.12,
+              0.12,
+              110.8
+            ],
+            [
+              6.51,
+              0.07,
+              0.07,
+              0.11,
+              0.11,
+              111.4
+            ],
+            [
+              6.61,
+              0.07,
+              0.07,
+              0.13,
+              0.13,
+              112
+            ],
+            [
+              6.72,
+              0.08,
+              0.08,
+              0.12,
+              0.12,
+              112.6
+            ],
+            [
+              6.82,
+              0.06,
+              0.06,
+              0.11,
+              0.11,
+              113.2
+            ],
+            [
+              6.92,
+              0.07,
+              0.07,
+              0.1,
+              0.1,
+              113.8
+            ],
+            [
+              7.02,
+              0.08,
+              0.07,
+              0.12,
+              0.12,
+              114.3
+            ],
+            [
+              7.13,
+              0.05,
+              0.13,
+              0.1,
+              0.12,
+              114.8
+            ],
+            [
+              7.23,
+              0.09,
+              0.05,
+              0.1,
+              0.17,
+              115.4
+            ],
+            [
+              7.33,
+              0.11,
+              0.04,
+              0.13,
+              0.25,
+              115.8
+            ],
+            [
+              7.44,
+              0.06,
+              0.08,
+              0.12,
+              0.14,
+              116.3
+            ],
+            [
+              7.54,
+              0.1,
+              0.06,
+              0.14,
+              0.15,
+              116.8
+            ],
+            [
+              7.64,
+              0.09,
+              0.06,
+              0.13,
+              0.07,
+              117.3
+            ],
+            [
+              7.75,
+              0.16,
+              0.15,
+              0.18,
+              0.08,
+              117.6
+            ],
+            [
+              7.85,
+              0.12,
+              0.08,
+              0.25,
+              0.13,
+              118
+            ],
+            [
+              7.97,
+              0.13,
+              0.04,
+              0.13,
+              0.08,
+              118.4
+            ],
+            [
+              8.07,
+              0.09,
+              0.06,
+              0.17,
+              0.1,
+              118.8
+            ],
+            [
+              8.18,
+              0.08,
+              0.06,
+              0.12,
+              0.11,
+              119.3
+            ],
+            [
+              8.28,
+              0.07,
+              0.07,
+              0.12,
+              0.11,
+              119.7
+            ],
+            [
+              8.39,
+              0.07,
+              0.08,
+              0.11,
+              0.11,
+              120.2
+            ],
+            [
+              8.49,
+              0.07,
+              0.06,
+              0.11,
+              0.1,
+              120.7
+            ],
+            [
+              8.59,
+              0.15,
+              0.06,
+              0.18,
+              0.09,
+              121
+            ],
+            [
+              8.69,
+              0.25,
+              0.07,
+              0.26,
+              0.1,
+              121.2
+            ],
+            [
+              8.79,
+              0.13,
+              0.05,
+              0.21,
+              0.11,
+              121.4
+            ],
+            [
+              8.9,
+              0.13,
+              0.07,
+              0.16,
+              0.12,
+              121.8
+            ],
+            [
+              9,
+              0.07,
+              0.06,
+              0.12,
+              0.11,
+              122.2
+            ],
+            [
+              9.1,
+              0.07,
+              0.07,
+              0.1,
+              0.1,
+              122.6
+            ],
+            [
+              9.21,
+              0.07,
+              0.06,
+              0.11,
+              0.1,
+              123
+            ],
+            [
+              9.31,
+              0.15,
+              0.06,
+              0.17,
+              0.09,
+              123.3
+            ],
+            [
+              9.41,
+              0.09,
+              0.04,
+              0.16,
+              0.08,
+              123.6
+            ],
+            [
+              9.52,
+              0.1,
+              0.06,
+              0.14,
+              0.09,
+              123.9
+            ],
+            [
+              9.62,
+              0.1,
+              0.02,
+              0.08,
+              0.03,
+              124.1
+            ],
+            [
+              9.72,
+              0.1,
+              0.04,
+              0.16,
+              0.08,
+              124
+            ],
+            [
+              9.82,
+              0.09,
+              0.04,
+              0.12,
+              0.07,
+              124.2
+            ],
+            [
+              9.93,
+              0.18,
+              0.05,
+              0.16,
+              0.07,
+              124.3
+            ],
+            [
+              10.03,
+              0.14,
+              0.05,
+              0.21,
+              0.08,
+              124.4
+            ],
+            [
+              10.13,
+              0.27,
+              0.08,
+              0.23,
+              0.1,
+              124.3
+            ],
+            [
+              10.23,
+              0.27,
+              0.09,
+              0.27,
+              0.11,
+              124.2
+            ],
+            [
+              10.33,
+              0.24,
+              0.06,
+              0.24,
+              0.1,
+              124.1
+            ],
+            [
+              10.43,
+              0.11,
+              0.06,
+              0.2,
+              0.12,
+              124.2
+            ],
+            [
+              10.53,
+              0.23,
+              0.04,
+              0.23,
+              0.08,
+              124.4
+            ],
+            [
+              10.64,
+              0.24,
+              0.05,
+              0.25,
+              0.08,
+              124.6
+            ],
+            [
+              10.74,
+              0.28,
+              0.04,
+              0.25,
+              0.05,
+              124.8
+            ],
+            [
+              10.85,
+              0.45,
+              0.07,
+              0.1,
+              0.17,
+              124.8
+            ],
+            [
+              10.96,
+              0.4,
+              0.1,
+              0.14,
+              0.22,
+              125
+            ],
+            [
+              11.06,
+              0.09,
+              0.08,
+              0.09,
+              0.12,
+              125.3
+            ],
+            [
+              11.16,
+              0.06,
+              0.07,
+              0.1,
+              0.11,
+              125.6
+            ],
+            [
+              11.26,
+              0.07,
+              0.07,
+              0.12,
+              0.12,
+              125.8
+            ],
+            [
+              11.36,
+              0.06,
+              0.06,
+              0.09,
+              0.1,
+              126.1
+            ],
+            [
+              11.47,
+              0.11,
+              0.05,
+              0.14,
+              0.08,
+              126.3
+            ],
+            [
+              11.57,
+              0.08,
+              0.06,
+              0.14,
+              0.11,
+              126.5
+            ],
+            [
+              11.67,
+              0.07,
+              0.07,
+              0.1,
+              0.1,
+              126.8
+            ],
+            [
+              11.78,
+              0.07,
+              0.06,
+              0.11,
+              0.11,
+              127
+            ],
+            [
+              11.88,
+              0.06,
+              0.07,
+              0.11,
+              0.1,
+              127.3
+            ],
+            [
+              11.99,
+              0.07,
+              0.07,
+              0.11,
+              0.11,
+              127.5
+            ]
+          ]
+        },
+        {
+          "t": 1412.5,
+          "car": "1155|2|8|700",
+          "zero60_s": 3.13,
+          "peak_slip_rear": 5.69,
+          "peak_slip_front": 8.55,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0.3
+            ],
+            [
+              0.1,
+              0,
+              0,
+              0,
+              0,
+              0.5
+            ],
+            [
+              0.2,
+              -0.01,
+              -0.01,
+              0.05,
+              0.03,
+              0.6
+            ],
+            [
+              0.3,
+              1.15,
+              1.1,
+              2.54,
+              1.57,
+              1.9
+            ],
+            [
+              0.41,
+              4.87,
+              6.25,
+              5.69,
+              5.26,
+              5.2
+            ],
+            [
+              0.51,
+              7.25,
+              3.8,
+              4.73,
+              5.28,
+              8.2
+            ],
+            [
+              0.61,
+              8.55,
+              1.08,
+              4.79,
+              4.44,
+              11
+            ],
+            [
+              0.72,
+              6.18,
+              1.26,
+              3.72,
+              3.21,
+              14.3
+            ],
+            [
+              0.82,
+              4.17,
+              1.79,
+              2.6,
+              1.84,
+              17.2
+            ],
+            [
+              0.93,
+              2.56,
+              1.24,
+              1.9,
+              2.06,
+              19.8
+            ],
+            [
+              1.03,
+              1.16,
+              0.36,
+              0.62,
+              1.45,
+              23.5
+            ],
+            [
+              1.13,
+              1.4,
+              0.58,
+              0.72,
+              0.8,
+              25.4
+            ],
+            [
+              1.23,
+              0.3,
+              0.52,
+              0.38,
+              0.3,
+              28.5
+            ],
+            [
+              1.34,
+              0.31,
+              0.84,
+              0.31,
+              0.4,
+              30.4
+            ],
+            [
+              1.44,
+              0.32,
+              0.19,
+              0.28,
+              0.38,
+              33
+            ],
+            [
+              1.55,
+              0.11,
+              0.28,
+              0.18,
+              0.09,
+              34.4
+            ],
+            [
+              1.65,
+              0.35,
+              0.45,
+              0.33,
+              0.25,
+              36.1
+            ],
+            [
+              1.75,
+              0.28,
+              0.27,
+              0.75,
+              0.19,
+              37.8
+            ],
+            [
+              1.86,
+              0.27,
+              0.6,
+              0.51,
+              0.29,
+              39.5
+            ],
+            [
+              1.96,
+              0.23,
+              0.53,
+              0.33,
+              0.27,
+              41.7
+            ],
+            [
+              2.06,
+              0.26,
+              0.09,
+              0.31,
+              0.3,
+              43.8
+            ],
+            [
+              2.16,
+              0.79,
+              0.19,
+              0.37,
+              0.21,
+              45.3
+            ],
+            [
+              2.27,
+              0.34,
+              0.24,
+              0.38,
+              0.29,
+              47.3
+            ],
+            [
+              2.37,
+              0.14,
+              0.18,
+              0.43,
+              0.2,
+              49.1
+            ],
+            [
+              2.47,
+              0.22,
+              0.19,
+              0.19,
+              0.24,
+              50.1
+            ],
+            [
+              2.57,
+              0.18,
+              0.11,
+              0.32,
+              0.2,
+              51.8
+            ],
+            [
+              2.68,
+              0.07,
+              0.22,
+              0.41,
+              0.14,
+              53.4
+            ],
+            [
+              2.78,
+              0.25,
+              0.27,
+              0.21,
+              0.22,
+              54.9
+            ],
+            [
+              2.88,
+              0.08,
+              0.24,
+              0.52,
+              0.13,
+              56.3
+            ],
+            [
+              2.99,
+              0.16,
+              0.35,
+              0.29,
+              0.12,
+              58
+            ],
+            [
+              3.09,
+              0.21,
+              0.48,
+              0.22,
+              0.39,
+              59.2
+            ],
+            [
+              3.19,
+              0.2,
+              0.42,
+              0.22,
+              0.27,
+              60.8
+            ],
+            [
+              3.3,
+              0.14,
+              0.51,
+              0.36,
+              0.3,
+              62.1
+            ],
+            [
+              3.4,
+              0.39,
+              0.53,
+              0.23,
+              0.18,
+              63.6
+            ],
+            [
+              3.51,
+              0.33,
+              0.43,
+              0.23,
+              0.22,
+              65
+            ],
+            [
+              3.62,
+              0.27,
+              0.17,
+              0.29,
+              0.17,
+              66
+            ],
+            [
+              3.72,
+              0.14,
+              0.19,
+              0.23,
+              0.13,
+              67.3
+            ],
+            [
+              3.82,
+              0.18,
+              0.19,
+              0.28,
+              0.06,
+              68.3
+            ],
+            [
+              3.93,
+              0.07,
+              0.06,
+              0.32,
+              0.1,
+              69.6
+            ],
+            [
+              4.04,
+              0.1,
+              0.09,
+              0.26,
+              0.16,
+              70.7
+            ],
+            [
+              4.14,
+              0.14,
+              0.09,
+              0.23,
+              0.16,
+              71.9
+            ],
+            [
+              4.24,
+              0.31,
+              0.04,
+              0.26,
+              0.15,
+              72.8
+            ],
+            [
+              4.35,
+              0.21,
+              0.26,
+              0.32,
+              0.2,
+              73.8
+            ],
+            [
+              4.45,
+              0.27,
+              0.11,
+              0.24,
+              0.17,
+              74.9
+            ],
+            [
+              4.55,
+              0.27,
+              0.22,
+              0.22,
+              0.16,
+              76
+            ],
+            [
+              4.66,
+              0.11,
+              0.32,
+              0.16,
+              0.17,
+              77.1
+            ],
+            [
+              4.76,
+              0.18,
+              0.21,
+              0.26,
+              0.17,
+              78.1
+            ],
+            [
+              4.86,
+              0.23,
+              0.44,
+              0.11,
+              0.37,
+              78.9
+            ],
+            [
+              4.97,
+              0.27,
+              0.59,
+              0.24,
+              0.26,
+              79.7
+            ],
+            [
+              5.08,
+              0.25,
+              0.83,
+              0.29,
+              0.31,
+              80.3
+            ],
+            [
+              5.18,
+              0.3,
+              0.87,
+              0.33,
+              0.57,
+              80.8
+            ],
+            [
+              5.28,
+              0.54,
+              0.59,
+              0.17,
+              0.48,
+              81.3
+            ],
+            [
+              5.39,
+              0.16,
+              0.43,
+              0.11,
+              0.42,
+              81.5
+            ],
+            [
+              5.49,
+              0.21,
+              0.33,
+              0.16,
+              0.38,
+              81.6
+            ],
+            [
+              5.59,
+              0.41,
+              0.19,
+              0.21,
+              0.42,
+              82.2
+            ],
+            [
+              5.7,
+              0.34,
+              0.29,
+              0.25,
+              0.42,
+              82.7
+            ],
+            [
+              5.81,
+              0.29,
+              0.13,
+              0.41,
+              0.67,
+              83.4
+            ],
+            [
+              5.91,
+              0.04,
+              0.1,
+              0.26,
+              0.17,
+              84.2
+            ],
+            [
+              6.01,
+              0.07,
+              0.12,
+              0.19,
+              0.08,
+              84.6
+            ],
+            [
+              6.12,
+              0.28,
+              0.1,
+              0.13,
+              0.14,
+              85
+            ],
+            [
+              6.22,
+              0.16,
+              0.23,
+              0.29,
+              0.12,
+              85.7
+            ],
+            [
+              6.32,
+              0.28,
+              0.29,
+              0.42,
+              0.33,
+              86.2
+            ],
+            [
+              6.42,
+              0.39,
+              0.22,
+              0.4,
+              0.11,
+              86.7
+            ],
+            [
+              6.53,
+              0.16,
+              0.23,
+              0.27,
+              0.19,
+              87.3
+            ],
+            [
+              6.63,
+              0.14,
+              0.28,
+              0.55,
+              0.29,
+              87.7
+            ],
+            [
+              6.73,
+              0.56,
+              0.32,
+              0.42,
+              0.37,
+              88.2
+            ],
+            [
+              6.83,
+              0.63,
+              0.22,
+              0.56,
+              0.63,
+              88.5
+            ],
+            [
+              6.94,
+              0.26,
+              0.34,
+              0.39,
+              0.16,
+              89.1
+            ],
+            [
+              7.04,
+              0.25,
+              0.22,
+              0.29,
+              0.12,
+              89.4
+            ],
+            [
+              7.14,
+              0.27,
+              0.18,
+              0.4,
+              0.2,
+              89.7
+            ],
+            [
+              7.24,
+              0.13,
+              0.17,
+              0.3,
+              0.22,
+              90.5
+            ],
+            [
+              7.34,
+              0.15,
+              0.17,
+              0.3,
+              0.33,
+              91.2
+            ],
+            [
+              7.45,
+              0.05,
+              0.16,
+              0.1,
+              0.09,
+              91.8
+            ],
+            [
+              7.55,
+              -0.01,
+              0.04,
+              -0.02,
+              -0.01,
+              91.3
+            ],
+            [
+              7.65,
+              -0.03,
+              -0.01,
+              -0.01,
+              0,
+              90.2
+            ],
+            [
+              7.76,
+              0.08,
+              0.04,
+              0.06,
+              0.14,
+              89.8
+            ],
+            [
+              7.86,
+              0.07,
+              0.03,
+              0.08,
+              0.24,
+              90.3
+            ],
+            [
+              7.96,
+              0.12,
+              0.18,
+              0.09,
+              0.25,
+              90.5
+            ],
+            [
+              8.06,
+              0.17,
+              0.22,
+              0.09,
+              0.13,
+              90.8
+            ],
+            [
+              8.16,
+              0.03,
+              0.12,
+              0.04,
+              0.09,
+              90.5
+            ],
+            [
+              8.27,
+              -0.02,
+              0,
+              -0.02,
+              -0.04,
+              89.4
+            ],
+            [
+              8.37,
+              -0.01,
+              0,
+              -0.02,
+              -0.03,
+              87.9
+            ],
+            [
+              8.48,
+              -0.01,
+              0.02,
+              -0.04,
+              -0.05,
+              86.4
+            ],
+            [
+              8.58,
+              0,
+              0.09,
+              -0.04,
+              -0.06,
+              85
+            ],
+            [
+              8.68,
+              -0.02,
+              0.03,
+              -0.05,
+              -0.07,
+              83.4
+            ],
+            [
+              8.79,
+              -0.02,
+              -0.06,
+              -0.05,
+              -0.11,
+              82
+            ],
+            [
+              8.89,
+              -0.03,
+              -0.02,
+              -0.07,
+              -0.06,
+              81
+            ],
+            [
+              9,
+              -0.03,
+              -0.02,
+              -0.03,
+              -0.04,
+              79.7
+            ],
+            [
+              9.1,
+              -0.03,
+              -0.03,
+              -0.09,
+              -0.06,
+              78.5
+            ],
+            [
+              9.2,
+              -0.02,
+              -0.1,
+              -0.06,
+              -0.09,
+              77.6
+            ],
+            [
+              9.31,
+              -0.03,
+              -0.06,
+              -0.06,
+              -0.09,
+              76.6
+            ],
+            [
+              9.42,
+              -0.02,
+              -0.04,
+              -0.07,
+              -0.15,
+              75.6
+            ],
+            [
+              9.52,
+              -0.04,
+              -0.03,
+              -0.03,
+              -0.1,
+              74.5
+            ],
+            [
+              9.62,
+              -0.02,
+              -0.02,
+              -0.02,
+              -0.08,
+              73.5
+            ],
+            [
+              9.72,
+              0,
+              0.02,
+              -0.01,
+              0.01,
+              72.6
+            ],
+            [
+              9.82,
+              0.03,
+              0.1,
+              0.03,
+              0.07,
+              72.1
+            ],
+            [
+              9.92,
+              0.1,
+              0.32,
+              0.2,
+              0.27,
+              72.3
+            ],
+            [
+              10.03,
+              0.08,
+              0.46,
+              0.13,
+              0.44,
+              73
+            ],
+            [
+              10.13,
+              0.12,
+              0.43,
+              0.15,
+              0.38,
+              74.1
+            ],
+            [
+              10.24,
+              0.13,
+              0.41,
+              0.14,
+              0.28,
+              75.1
+            ],
+            [
+              10.34,
+              0.1,
+              0.36,
+              0.19,
+              0.4,
+              76
+            ],
+            [
+              10.45,
+              0.12,
+              0.12,
+              0.12,
+              0.33,
+              77
+            ],
+            [
+              10.55,
+              0.01,
+              0,
+              0.01,
+              0.05,
+              76.9
+            ],
+            [
+              10.66,
+              0.05,
+              0.03,
+              0.04,
+              0.07,
+              76.6
+            ],
+            [
+              10.76,
+              0.1,
+              0.03,
+              0.1,
+              0.2,
+              77.2
+            ],
+            [
+              10.87,
+              0.22,
+              0.04,
+              0.16,
+              0.15,
+              78.3
+            ],
+            [
+              10.97,
+              0.04,
+              0.1,
+              0.13,
+              0.14,
+              79.3
+            ],
+            [
+              11.07,
+              0.08,
+              0.09,
+              0.23,
+              0.08,
+              80.3
+            ],
+            [
+              11.18,
+              0.14,
+              0.18,
+              0.18,
+              0.29,
+              81.2
+            ],
+            [
+              11.28,
+              0.21,
+              0.12,
+              0.14,
+              0.11,
+              82.3
+            ],
+            [
+              11.39,
+              0.15,
+              0.07,
+              0.16,
+              0.19,
+              83.2
+            ],
+            [
+              11.49,
+              0.07,
+              0.04,
+              0.24,
+              0.13,
+              84.2
+            ],
+            [
+              11.6,
+              0.05,
+              0.26,
+              0.16,
+              0.1,
+              85.2
+            ],
+            [
+              11.71,
+              0.13,
+              0.24,
+              0.1,
+              0.13,
+              86.1
+            ],
+            [
+              11.81,
+              0.24,
+              0.16,
+              0.16,
+              0.29,
+              86.5
+            ],
+            [
+              11.92,
+              0.06,
+              0.08,
+              0.14,
+              0.12,
+              87.4
+            ]
+          ]
+        },
+        {
+          "t": 1466,
+          "car": "1155|2|8|700",
+          "zero60_s": 2.81,
+          "peak_slip_rear": 1.39,
+          "peak_slip_front": 3.94,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0.11,
+              0.02,
+              0.02,
+              0.04,
+              0.03,
+              0.1
+            ],
+            [
+              0.21,
+              0.16,
+              0.14,
+              0.25,
+              0.2,
+              0.9
+            ],
+            [
+              0.31,
+              0.41,
+              0.35,
+              0.58,
+              0.38,
+              3.3
+            ],
+            [
+              0.41,
+              1.82,
+              1.05,
+              1.39,
+              0.73,
+              6.7
+            ],
+            [
+              0.52,
+              3.94,
+              0.4,
+              1.1,
+              0.62,
+              10.4
+            ],
+            [
+              0.62,
+              2.68,
+              0.38,
+              0.73,
+              0.54,
+              13.7
+            ],
+            [
+              0.73,
+              1.08,
+              0.51,
+              0.64,
+              0.5,
+              17.1
+            ],
+            [
+              0.83,
+              0.52,
+              0.41,
+              0.43,
+              0.4,
+              20.3
+            ],
+            [
+              0.93,
+              0.38,
+              0.34,
+              0.35,
+              0.36,
+              23
+            ],
+            [
+              1.03,
+              0.35,
+              0.32,
+              0.34,
+              0.35,
+              25.6
+            ],
+            [
+              1.13,
+              0.33,
+              0.31,
+              0.33,
+              0.33,
+              28.3
+            ],
+            [
+              1.24,
+              0.29,
+              0.33,
+              0.31,
+              0.34,
+              30.9
+            ],
+            [
+              1.34,
+              0.23,
+              0.38,
+              0.27,
+              0.38,
+              33.1
+            ],
+            [
+              1.45,
+              0.2,
+              0.19,
+              0.24,
+              0.25,
+              34.8
+            ],
+            [
+              1.55,
+              0.24,
+              0.25,
+              0.27,
+              0.3,
+              36.9
+            ],
+            [
+              1.65,
+              0.25,
+              0.27,
+              0.27,
+              0.29,
+              39
+            ],
+            [
+              1.75,
+              0.27,
+              0.27,
+              0.27,
+              0.29,
+              41.3
+            ],
+            [
+              1.86,
+              0.26,
+              0.27,
+              0.27,
+              0.3,
+              43.4
+            ],
+            [
+              1.96,
+              0.26,
+              0.24,
+              0.27,
+              0.28,
+              45.2
+            ],
+            [
+              2.07,
+              0.23,
+              0.23,
+              0.25,
+              0.26,
+              47.4
+            ],
+            [
+              2.17,
+              0.21,
+              0.21,
+              0.24,
+              0.24,
+              49.5
+            ],
+            [
+              2.27,
+              0.18,
+              0.16,
+              0.21,
+              0.2,
+              50.8
+            ],
+            [
+              2.37,
+              0.19,
+              0.21,
+              0.23,
+              0.22,
+              52.6
+            ],
+            [
+              2.48,
+              0.22,
+              0.21,
+              0.24,
+              0.23,
+              54.3
+            ],
+            [
+              2.58,
+              0.21,
+              0.2,
+              0.25,
+              0.23,
+              56
+            ],
+            [
+              2.68,
+              0.19,
+              0.18,
+              0.22,
+              0.22,
+              57.9
+            ],
+            [
+              2.78,
+              0.19,
+              0.18,
+              0.2,
+              0.2,
+              59.6
+            ],
+            [
+              2.88,
+              0.22,
+              0.18,
+              0.23,
+              0.2,
+              61.2
+            ],
+            [
+              2.99,
+              0.19,
+              0.19,
+              0.22,
+              0.21,
+              62.9
+            ],
+            [
+              3.1,
+              0.18,
+              0.17,
+              0.21,
+              0.2,
+              64.6
+            ],
+            [
+              3.21,
+              0.17,
+              0.16,
+              0.2,
+              0.19,
+              66.3
+            ],
+            [
+              3.31,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              67.5
+            ],
+            [
+              3.41,
+              0.16,
+              0.16,
+              0.19,
+              0.18,
+              68.8
+            ],
+            [
+              3.52,
+              0.18,
+              0.15,
+              0.2,
+              0.18,
+              70.3
+            ],
+            [
+              3.62,
+              0.17,
+              0.16,
+              0.19,
+              0.18,
+              71.7
+            ],
+            [
+              3.73,
+              0.18,
+              0.16,
+              0.21,
+              0.19,
+              73.1
+            ],
+            [
+              3.83,
+              0.14,
+              0.13,
+              0.18,
+              0.17,
+              74.5
+            ],
+            [
+              3.93,
+              0.14,
+              0.13,
+              0.16,
+              0.15,
+              75.9
+            ],
+            [
+              4.04,
+              0.17,
+              0.16,
+              0.19,
+              0.18,
+              77.2
+            ],
+            [
+              4.14,
+              0.17,
+              0.16,
+              0.18,
+              0.18,
+              78.5
+            ],
+            [
+              4.25,
+              0.15,
+              0.15,
+              0.17,
+              0.18,
+              79.9
+            ],
+            [
+              4.35,
+              0.14,
+              0.14,
+              0.16,
+              0.16,
+              81.2
+            ],
+            [
+              4.45,
+              0.15,
+              0.15,
+              0.17,
+              0.17,
+              82.5
+            ],
+            [
+              4.55,
+              0.14,
+              0.13,
+              0.17,
+              0.17,
+              83.7
+            ],
+            [
+              4.66,
+              0.13,
+              0.13,
+              0.14,
+              0.14,
+              84.9
+            ],
+            [
+              4.76,
+              0.14,
+              0.14,
+              0.16,
+              0.16,
+              86.1
+            ],
+            [
+              4.86,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              86.9
+            ],
+            [
+              4.96,
+              0.13,
+              0.13,
+              0.15,
+              0.15,
+              88
+            ],
+            [
+              5.06,
+              0.14,
+              0.13,
+              0.16,
+              0.16,
+              89
+            ],
+            [
+              5.16,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              90.1
+            ],
+            [
+              5.27,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              91.3
+            ],
+            [
+              5.37,
+              0.14,
+              0.13,
+              0.15,
+              0.15,
+              92.4
+            ],
+            [
+              5.48,
+              0.14,
+              0.14,
+              0.16,
+              0.16,
+              93.4
+            ],
+            [
+              5.58,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              94.5
+            ],
+            [
+              5.68,
+              0.12,
+              0.11,
+              0.13,
+              0.13,
+              95.5
+            ],
+            [
+              5.79,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              96.6
+            ],
+            [
+              5.89,
+              0.12,
+              0.12,
+              0.13,
+              0.13,
+              97.5
+            ],
+            [
+              5.99,
+              0.11,
+              0.11,
+              0.14,
+              0.14,
+              98.4
+            ],
+            [
+              6.1,
+              0.1,
+              0.09,
+              0.11,
+              0.11,
+              99.5
+            ],
+            [
+              6.2,
+              0.09,
+              0.1,
+              0.11,
+              0.11,
+              100.4
+            ],
+            [
+              6.31,
+              0.1,
+              0.1,
+              0.12,
+              0.12,
+              101.3
+            ],
+            [
+              6.41,
+              0.11,
+              0.12,
+              0.14,
+              0.13,
+              102.1
+            ],
+            [
+              6.51,
+              0.12,
+              0.11,
+              0.13,
+              0.13,
+              102.9
+            ],
+            [
+              6.61,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              103.7
+            ],
+            [
+              6.71,
+              0.14,
+              0.15,
+              0.14,
+              0.14,
+              104.5
+            ],
+            [
+              6.81,
+              0.11,
+              0.1,
+              0.14,
+              0.14,
+              105.1
+            ],
+            [
+              6.91,
+              0.1,
+              0.11,
+              0.12,
+              0.13,
+              105.9
+            ],
+            [
+              7.02,
+              0.12,
+              0.12,
+              0.13,
+              0.14,
+              106.7
+            ],
+            [
+              7.12,
+              0.11,
+              0.12,
+              0.13,
+              0.14,
+              107.6
+            ],
+            [
+              7.22,
+              0.1,
+              0.11,
+              0.12,
+              0.12,
+              108.3
+            ],
+            [
+              7.33,
+              0.13,
+              0.1,
+              0.15,
+              0.13,
+              109.1
+            ],
+            [
+              7.43,
+              0.11,
+              0.11,
+              0.13,
+              0.12,
+              109.9
+            ],
+            [
+              7.53,
+              0.1,
+              0.1,
+              0.13,
+              0.12,
+              110.6
+            ],
+            [
+              7.63,
+              0.09,
+              0.09,
+              0.1,
+              0.11,
+              111.3
+            ],
+            [
+              7.74,
+              0.11,
+              0.11,
+              0.12,
+              0.13,
+              112
+            ],
+            [
+              7.84,
+              0.09,
+              0.09,
+              0.11,
+              0.12,
+              112.8
+            ],
+            [
+              7.95,
+              0.1,
+              0.1,
+              0.11,
+              0.12,
+              113.4
+            ],
+            [
+              8.05,
+              0.11,
+              0.11,
+              0.13,
+              0.14,
+              114.2
+            ],
+            [
+              8.15,
+              0.08,
+              0.09,
+              0.1,
+              0.11,
+              114.8
+            ],
+            [
+              8.26,
+              0.11,
+              0.1,
+              0.13,
+              0.12,
+              115.5
+            ],
+            [
+              8.36,
+              0.13,
+              0.09,
+              0.13,
+              0.11,
+              116.1
+            ],
+            [
+              8.47,
+              0.09,
+              0.09,
+              0.12,
+              0.1,
+              116.7
+            ],
+            [
+              8.57,
+              0.09,
+              0.12,
+              0.16,
+              0.1,
+              117.3
+            ],
+            [
+              8.68,
+              0.13,
+              0.08,
+              0.15,
+              0.09,
+              117.8
+            ],
+            [
+              8.78,
+              0.16,
+              0.11,
+              0.19,
+              0.09,
+              118.2
+            ],
+            [
+              8.89,
+              0.17,
+              0.09,
+              0.19,
+              0.09,
+              118.6
+            ],
+            [
+              8.99,
+              0.23,
+              0.12,
+              0.23,
+              0.1,
+              118.8
+            ],
+            [
+              9.09,
+              0.25,
+              0.11,
+              0.24,
+              0.1,
+              119
+            ],
+            [
+              9.19,
+              0.21,
+              0.11,
+              0.3,
+              0.13,
+              119.2
+            ],
+            [
+              9.29,
+              0.26,
+              0.15,
+              0.29,
+              0.12,
+              119.4
+            ],
+            [
+              9.4,
+              0.31,
+              0.14,
+              0.32,
+              0.13,
+              119.4
+            ],
+            [
+              9.5,
+              0.26,
+              0.12,
+              0.27,
+              0.12,
+              119.3
+            ],
+            [
+              9.61,
+              0.25,
+              0.12,
+              0.3,
+              0.13,
+              119.4
+            ],
+            [
+              9.72,
+              0.34,
+              0.14,
+              0.31,
+              0.15,
+              119.5
+            ],
+            [
+              9.82,
+              0.28,
+              0.12,
+              0.28,
+              0.13,
+              119.7
+            ],
+            [
+              9.92,
+              0.24,
+              0.12,
+              0.27,
+              0.13,
+              119.9
+            ],
+            [
+              10.03,
+              0.22,
+              0.1,
+              0.22,
+              0.1,
+              120.2
+            ],
+            [
+              10.13,
+              0.26,
+              0.13,
+              0.26,
+              0.12,
+              120.3
+            ],
+            [
+              10.23,
+              0.22,
+              0.1,
+              0.22,
+              0.1,
+              120.6
+            ],
+            [
+              10.33,
+              0.24,
+              0.12,
+              0.25,
+              0.11,
+              120.7
+            ],
+            [
+              10.44,
+              0.25,
+              0.12,
+              0.25,
+              0.11,
+              120.9
+            ],
+            [
+              10.54,
+              0.24,
+              0.11,
+              0.25,
+              0.11,
+              121
+            ],
+            [
+              10.64,
+              0.23,
+              0.11,
+              0.27,
+              0.11,
+              121.1
+            ],
+            [
+              10.75,
+              0.23,
+              0.13,
+              0.28,
+              0.1,
+              121.2
+            ],
+            [
+              10.85,
+              0.26,
+              0.15,
+              0.31,
+              0.12,
+              121.2
+            ],
+            [
+              10.95,
+              0.28,
+              0.15,
+              0.29,
+              0.12,
+              121.2
+            ],
+            [
+              11.05,
+              0.31,
+              0.17,
+              0.37,
+              0.16,
+              121.2
+            ],
+            [
+              11.15,
+              0.3,
+              0.17,
+              0.32,
+              0.13,
+              121.2
+            ],
+            [
+              11.25,
+              0.3,
+              0.16,
+              0.37,
+              0.17,
+              121.2
+            ],
+            [
+              11.36,
+              0.3,
+              0.14,
+              0.32,
+              0.13,
+              121.2
+            ],
+            [
+              11.46,
+              0.25,
+              0.16,
+              0.33,
+              0.14,
+              121.2
+            ],
+            [
+              11.57,
+              0.21,
+              0.13,
+              0.3,
+              0.12,
+              121.4
+            ],
+            [
+              11.67,
+              0.24,
+              0.18,
+              0.3,
+              0.14,
+              121.6
+            ],
+            [
+              11.77,
+              0.15,
+              0.1,
+              0.21,
+              0.11,
+              122
+            ],
+            [
+              11.87,
+              0.13,
+              0.11,
+              0.17,
+              0.1,
+              122.4
+            ],
+            [
+              11.97,
+              0.14,
+              0.12,
+              0.18,
+              0.13,
+              122.9
+            ]
+          ]
+        },
+        {
+          "t": 1523.8,
+          "car": "1155|2|8|700",
+          "zero60_s": 2.79,
+          "peak_slip_rear": 1.52,
+          "peak_slip_front": 2.72,
+          "trace": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0.11,
+              0.03,
+              0.03,
+              0.05,
+              0.04,
+              0.1
+            ],
+            [
+              0.21,
+              0.17,
+              0.15,
+              0.26,
+              0.2,
+              1
+            ],
+            [
+              0.31,
+              0.45,
+              0.38,
+              0.62,
+              0.41,
+              3.6
+            ],
+            [
+              0.41,
+              2.11,
+              1.26,
+              1.52,
+              0.83,
+              7.1
+            ],
+            [
+              0.52,
+              2.49,
+              1.33,
+              1.05,
+              0.55,
+              10.7
+            ],
+            [
+              0.62,
+              2.72,
+              0.39,
+              0.78,
+              0.55,
+              13.9
+            ],
+            [
+              0.73,
+              1.09,
+              0.52,
+              0.69,
+              0.52,
+              17.3
+            ],
+            [
+              0.83,
+              0.54,
+              0.42,
+              0.44,
+              0.41,
+              20.5
+            ],
+            [
+              0.93,
+              0.38,
+              0.35,
+              0.35,
+              0.36,
+              23.3
+            ],
+            [
+              1.03,
+              0.35,
+              0.32,
+              0.34,
+              0.35,
+              25.8
+            ],
+            [
+              1.14,
+              0.33,
+              0.31,
+              0.33,
+              0.33,
+              28.5
+            ],
+            [
+              1.24,
+              0.31,
+              0.29,
+              0.32,
+              0.32,
+              31.1
+            ],
+            [
+              1.34,
+              0.27,
+              0.26,
+              0.29,
+              0.29,
+              33.4
+            ],
+            [
+              1.45,
+              0.21,
+              0.21,
+              0.25,
+              0.25,
+              35.1
+            ],
+            [
+              1.55,
+              0.25,
+              0.25,
+              0.28,
+              0.28,
+              37.2
+            ],
+            [
+              1.65,
+              0.26,
+              0.26,
+              0.28,
+              0.28,
+              39.3
+            ],
+            [
+              1.75,
+              0.28,
+              0.27,
+              0.28,
+              0.28,
+              41.6
+            ],
+            [
+              1.86,
+              0.28,
+              0.26,
+              0.28,
+              0.28,
+              43.8
+            ],
+            [
+              1.97,
+              0.25,
+              0.24,
+              0.27,
+              0.27,
+              45.6
+            ],
+            [
+              2.07,
+              0.23,
+              0.22,
+              0.25,
+              0.25,
+              47.7
+            ],
+            [
+              2.17,
+              0.21,
+              0.21,
+              0.24,
+              0.23,
+              49.8
+            ],
+            [
+              2.27,
+              0.18,
+              0.18,
+              0.22,
+              0.21,
+              51.1
+            ],
+            [
+              2.37,
+              0.2,
+              0.2,
+              0.22,
+              0.22,
+              52.8
+            ],
+            [
+              2.48,
+              0.22,
+              0.22,
+              0.24,
+              0.23,
+              54.6
+            ],
+            [
+              2.58,
+              0.21,
+              0.21,
+              0.24,
+              0.23,
+              56.3
+            ],
+            [
+              2.68,
+              0.19,
+              0.18,
+              0.21,
+              0.22,
+              58.2
+            ],
+            [
+              2.78,
+              0.19,
+              0.18,
+              0.2,
+              0.2,
+              59.9
+            ],
+            [
+              2.88,
+              0.19,
+              0.19,
+              0.21,
+              0.21,
+              61.5
+            ],
+            [
+              2.99,
+              0.19,
+              0.19,
+              0.21,
+              0.21,
+              63.1
+            ],
+            [
+              3.1,
+              0.18,
+              0.18,
+              0.21,
+              0.21,
+              64.9
+            ],
+            [
+              3.2,
+              0.17,
+              0.17,
+              0.19,
+              0.19,
+              66.4
+            ],
+            [
+              3.3,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              67.6
+            ],
+            [
+              3.41,
+              0.16,
+              0.16,
+              0.19,
+              0.19,
+              68.9
+            ],
+            [
+              3.51,
+              0.16,
+              0.15,
+              0.18,
+              0.18,
+              70.4
+            ],
+            [
+              3.62,
+              0.17,
+              0.17,
+              0.19,
+              0.19,
+              71.9
+            ],
+            [
+              3.72,
+              0.17,
+              0.17,
+              0.19,
+              0.2,
+              73.2
+            ],
+            [
+              3.82,
+              0.14,
+              0.14,
+              0.17,
+              0.17,
+              74.6
+            ],
+            [
+              3.92,
+              0.15,
+              0.14,
+              0.15,
+              0.16,
+              76
+            ],
+            [
+              4.02,
+              0.17,
+              0.16,
+              0.19,
+              0.19,
+              77.2
+            ],
+            [
+              4.13,
+              0.16,
+              0.16,
+              0.18,
+              0.18,
+              78.6
+            ],
+            [
+              4.24,
+              0.15,
+              0.15,
+              0.18,
+              0.18,
+              80
+            ],
+            [
+              4.34,
+              0.13,
+              0.15,
+              0.15,
+              0.17,
+              81.4
+            ],
+            [
+              4.44,
+              0.14,
+              0.15,
+              0.17,
+              0.17,
+              82.5
+            ],
+            [
+              4.55,
+              0.13,
+              0.13,
+              0.16,
+              0.17,
+              83.8
+            ],
+            [
+              4.65,
+              0.13,
+              0.13,
+              0.14,
+              0.15,
+              85
+            ],
+            [
+              4.76,
+              0.14,
+              0.14,
+              0.16,
+              0.17,
+              86.2
+            ],
+            [
+              4.86,
+              0.12,
+              0.12,
+              0.14,
+              0.15,
+              87.1
+            ],
+            [
+              4.97,
+              0.12,
+              0.16,
+              0.14,
+              0.17,
+              88.2
+            ],
+            [
+              5.08,
+              0.13,
+              0.14,
+              0.15,
+              0.17,
+              89.3
+            ],
+            [
+              5.18,
+              0.11,
+              0.12,
+              0.13,
+              0.15,
+              90.5
+            ],
+            [
+              5.29,
+              0.12,
+              0.13,
+              0.13,
+              0.14,
+              91.6
+            ],
+            [
+              5.39,
+              0.14,
+              0.14,
+              0.16,
+              0.17,
+              92.6
+            ],
+            [
+              5.49,
+              0.12,
+              0.13,
+              0.15,
+              0.15,
+              93.7
+            ],
+            [
+              5.59,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              94.8
+            ],
+            [
+              5.69,
+              0.12,
+              0.12,
+              0.14,
+              0.14,
+              95.8
+            ],
+            [
+              5.79,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              96.8
+            ],
+            [
+              5.9,
+              0.12,
+              0.12,
+              0.14,
+              0.13,
+              97.7
+            ],
+            [
+              6,
+              0.13,
+              0.1,
+              0.15,
+              0.12,
+              98.7
+            ],
+            [
+              6.1,
+              0.09,
+              0.09,
+              0.12,
+              0.11,
+              99.7
+            ],
+            [
+              6.2,
+              0.1,
+              0.09,
+              0.12,
+              0.11,
+              100.6
+            ],
+            [
+              6.31,
+              0.11,
+              0.1,
+              0.12,
+              0.11,
+              101.5
+            ],
+            [
+              6.41,
+              0.11,
+              0.12,
+              0.15,
+              0.14,
+              102.3
+            ],
+            [
+              6.52,
+              0.11,
+              0.1,
+              0.13,
+              0.13,
+              103.2
+            ],
+            [
+              6.62,
+              0.13,
+              0.11,
+              0.14,
+              0.12,
+              104
+            ],
+            [
+              6.73,
+              0.08,
+              0.09,
+              0.13,
+              0.12,
+              104.6
+            ],
+            [
+              6.83,
+              0.11,
+              0.1,
+              0.14,
+              0.12,
+              105.4
+            ],
+            [
+              6.93,
+              0.11,
+              0.1,
+              0.12,
+              0.11,
+              106.2
+            ],
+            [
+              7.04,
+              0.13,
+              0.12,
+              0.14,
+              0.13,
+              106.9
+            ],
+            [
+              7.14,
+              0.12,
+              0.11,
+              0.13,
+              0.13,
+              107.7
+            ],
+            [
+              7.24,
+              0.12,
+              0.12,
+              0.14,
+              0.12,
+              108.5
+            ],
+            [
+              7.34,
+              0.11,
+              0.12,
+              0.14,
+              0.12,
+              109.3
+            ],
+            [
+              7.44,
+              0.11,
+              0.11,
+              0.13,
+              0.13,
+              110.1
+            ],
+            [
+              7.54,
+              0.1,
+              0.09,
+              0.12,
+              0.11,
+              110.8
+            ],
+            [
+              7.65,
+              0.08,
+              0.16,
+              0.15,
+              0.1,
+              111.5
+            ],
+            [
+              7.75,
+              0.12,
+              0.08,
+              0.13,
+              0.1,
+              112.2
+            ],
+            [
+              7.85,
+              0.1,
+              0.13,
+              0.16,
+              0.14,
+              112.8
+            ],
+            [
+              7.96,
+              0.11,
+              0.17,
+              0.12,
+              0.16,
+              113.5
+            ],
+            [
+              8.06,
+              0.17,
+              0.15,
+              0.12,
+              0.26,
+              114
+            ],
+            [
+              8.16,
+              0.13,
+              0.12,
+              0.13,
+              0.18,
+              114.7
+            ],
+            [
+              8.26,
+              0.12,
+              0.18,
+              0.11,
+              0.16,
+              115.4
+            ],
+            [
+              8.37,
+              0.15,
+              0.14,
+              0.11,
+              0.13,
+              116
+            ],
+            [
+              8.47,
+              0.11,
+              0.16,
+              0.14,
+              0.13,
+              116.4
+            ],
+            [
+              8.58,
+              0.11,
+              0.15,
+              0.21,
+              0.13,
+              117
+            ],
+            [
+              8.68,
+              0.12,
+              0.08,
+              0.18,
+              0.07,
+              117.6
+            ],
+            [
+              8.78,
+              0.2,
+              0.08,
+              0.17,
+              0.1,
+              117.9
+            ],
+            [
+              8.89,
+              0.1,
+              0.04,
+              0.09,
+              0.03,
+              117.9
+            ],
+            [
+              8.99,
+              -0.01,
+              -0.01,
+              -0.02,
+              -0.02,
+              117.3
+            ],
+            [
+              9.1,
+              0.01,
+              0,
+              0.01,
+              0,
+              116.3
+            ],
+            [
+              9.2,
+              0.12,
+              0.07,
+              0.16,
+              0.07,
+              115.8
+            ],
+            [
+              9.3,
+              0.24,
+              0.14,
+              0.28,
+              0.11,
+              115.8
+            ],
+            [
+              9.41,
+              0.2,
+              0.12,
+              0.26,
+              0.12,
+              116.1
+            ],
+            [
+              9.52,
+              0.21,
+              0.11,
+              0.24,
+              0.12,
+              116.5
+            ],
+            [
+              9.62,
+              0.25,
+              0.12,
+              0.22,
+              0.11,
+              116.8
+            ],
+            [
+              9.72,
+              0.2,
+              0.1,
+              0.23,
+              0.14,
+              117.2
+            ],
+            [
+              9.82,
+              0.15,
+              0.08,
+              0.17,
+              0.1,
+              117.7
+            ],
+            [
+              9.93,
+              0.17,
+              0.09,
+              0.16,
+              0.11,
+              118.2
+            ],
+            [
+              10.03,
+              0.18,
+              0.09,
+              0.16,
+              0.1,
+              118.6
+            ],
+            [
+              10.13,
+              0.19,
+              0.09,
+              0.17,
+              0.11,
+              119
+            ],
+            [
+              10.24,
+              0.17,
+              0.08,
+              0.16,
+              0.09,
+              119.4
+            ],
+            [
+              10.34,
+              0.2,
+              0.09,
+              0.2,
+              0.09,
+              119.7
+            ],
+            [
+              10.44,
+              0.25,
+              0.12,
+              0.23,
+              0.1,
+              119.8
+            ],
+            [
+              10.54,
+              0.23,
+              0.12,
+              0.27,
+              0.11,
+              120
+            ],
+            [
+              10.65,
+              0.22,
+              0.11,
+              0.27,
+              0.1,
+              120.1
+            ],
+            [
+              10.75,
+              0.2,
+              0.09,
+              0.26,
+              0.06,
+              120
+            ],
+            [
+              10.86,
+              0.28,
+              0.15,
+              0.32,
+              0.13,
+              119.8
+            ],
+            [
+              10.96,
+              0.34,
+              0.2,
+              0.36,
+              0.15,
+              119.6
+            ],
+            [
+              11.06,
+              0.37,
+              0.19,
+              0.41,
+              0.17,
+              119.5
+            ],
+            [
+              11.16,
+              0.33,
+              0.21,
+              0.38,
+              0.16,
+              119.4
+            ],
+            [
+              11.26,
+              0.3,
+              0.15,
+              0.41,
+              0.18,
+              119.4
+            ],
+            [
+              11.37,
+              0.24,
+              0.13,
+              0.35,
+              0.14,
+              119.4
+            ],
+            [
+              11.47,
+              0.27,
+              0.19,
+              0.33,
+              0.15,
+              119.5
+            ],
+            [
+              11.57,
+              0.26,
+              0.14,
+              0.27,
+              0.12,
+              119.6
+            ],
+            [
+              11.67,
+              0.26,
+              0.21,
+              0.31,
+              0.14,
+              119.7
+            ],
+            [
+              11.77,
+              0.26,
+              0.13,
+              0.26,
+              0.12,
+              120
+            ],
+            [
+              11.88,
+              0.23,
+              0.13,
+              0.23,
+              0.11,
+              120.3
+            ],
+            [
+              11.99,
+              0.23,
+              0.14,
+              0.29,
+              0.14,
+              120.5
+            ]
+          ]
         }
       ],
       "braking": [
@@ -70038,7 +90764,7 @@ window.FH6_DB = {
           "dur_s": 2.37,
           "decel_g_peak": 2.12,
           "front_deficit": 0.19,
-          "rear_deficit": 0.21,
+          "rear_deficit": 0.22,
           "lock": "none"
         },
         {
@@ -70050,6 +90776,61 @@ window.FH6_DB = {
           "decel_g_peak": 2.11,
           "front_deficit": 0.39,
           "rear_deficit": 0.27,
+          "lock": "front"
+        },
+        {
+          "t": 597.5,
+          "car": "3852|2|4|700",
+          "mph_start": 95,
+          "mph_end": 4,
+          "dur_s": 4.18,
+          "decel_g_peak": 1.29,
+          "front_deficit": 0.52,
+          "rear_deficit": 6.7,
+          "lock": "rear"
+        },
+        {
+          "t": 814.6,
+          "car": "2616|2|10|800",
+          "mph_start": 143,
+          "mph_end": 77,
+          "dur_s": 0.92,
+          "decel_g_peak": 3.96,
+          "front_deficit": 0.24,
+          "rear_deficit": 0.13,
+          "lock": "none"
+        },
+        {
+          "t": 833.5,
+          "car": "2616|2|10|800",
+          "mph_start": 166,
+          "mph_end": 77,
+          "dur_s": 1.21,
+          "decel_g_peak": 4.15,
+          "front_deficit": 0.27,
+          "rear_deficit": 0.2,
+          "lock": "none"
+        },
+        {
+          "t": 1436.2,
+          "car": "1155|2|8|700",
+          "mph_start": 86,
+          "mph_end": 0,
+          "dur_s": 0.95,
+          "decel_g_peak": 4.08,
+          "front_deficit": 1,
+          "rear_deficit": 1,
+          "lock": "front"
+        },
+        {
+          "t": 1597.8,
+          "car": "1155|2|8|700",
+          "mph_start": 68,
+          "mph_end": 42,
+          "dur_s": 0.77,
+          "decel_g_peak": 1.51,
+          "front_deficit": 0.37,
+          "rear_deficit": 0.35,
           "lock": "front"
         }
       ],
@@ -71068,6 +91849,391 @@ window.FH6_DB = {
           "wheel": "RR",
           "travel": 0.99,
           "mph": 125
+        },
+        {
+          "t": 787.7,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.953,
+          "mph": 119
+        },
+        {
+          "t": 788.2,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.951,
+          "mph": 122
+        },
+        {
+          "t": 788.2,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.952,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.958,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.958,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.957,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.963,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.956,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.969,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.956,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.969,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.955,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.974,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.951,
+          "mph": 123
+        },
+        {
+          "t": 788.3,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.968,
+          "mph": 123
+        },
+        {
+          "t": 788.4,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.953,
+          "mph": 123
+        },
+        {
+          "t": 788.4,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.956,
+          "mph": 123
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.967,
+          "mph": 123
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.961,
+          "mph": 123
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.965,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.963,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.968,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.964,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.965,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.963,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.967,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.961,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.966,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.961,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.965,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.962,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.963,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.963,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.961,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.964,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.958,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.965,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.956,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.966,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.957,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.966,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.958,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.965,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.959,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.964,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.959,
+          "mph": 124
+        },
+        {
+          "t": 788.5,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.963,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.96,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.961,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.96,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.958,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.958,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.954,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "FR",
+          "travel": 0.956,
+          "mph": 124
+        },
+        {
+          "t": 788.6,
+          "car": "2616|2|10|800",
+          "wheel": "RR",
+          "travel": 0.956,
+          "mph": 124
         }
       ],
       "pulses": [
@@ -72470,6 +93636,1798 @@ window.FH6_DB = {
           "mph": 124,
           "yaw_peak_dps": 23.8,
           "decay_s": 0.13
+        },
+        {
+          "t": 596.2,
+          "car": "3852|2|4|700",
+          "mph": 102,
+          "yaw_peak_dps": 27.3,
+          "decay_s": 0.1
+        },
+        {
+          "t": 596.6,
+          "car": "3852|2|4|700",
+          "mph": 101,
+          "yaw_peak_dps": 24.9,
+          "decay_s": 0.1
+        },
+        {
+          "t": 694.9,
+          "car": "3852|2|4|700",
+          "mph": 55,
+          "yaw_peak_dps": 19.3,
+          "decay_s": 0.18
+        },
+        {
+          "t": 701,
+          "car": "3852|2|4|700",
+          "mph": 65,
+          "yaw_peak_dps": 17.2,
+          "decay_s": null
+        },
+        {
+          "t": 701.3,
+          "car": "3852|2|4|700",
+          "mph": 64,
+          "yaw_peak_dps": 11.7,
+          "decay_s": 0.2
+        },
+        {
+          "t": 701.7,
+          "car": "3852|2|4|700",
+          "mph": 67,
+          "yaw_peak_dps": 14.1,
+          "decay_s": null
+        },
+        {
+          "t": 702.1,
+          "car": "3852|2|4|700",
+          "mph": 72,
+          "yaw_peak_dps": 15.7,
+          "decay_s": null
+        },
+        {
+          "t": 782.9,
+          "car": "2616|2|10|800",
+          "mph": 55,
+          "yaw_peak_dps": 9.3,
+          "decay_s": 0.15
+        },
+        {
+          "t": 785.9,
+          "car": "2616|2|10|800",
+          "mph": 101,
+          "yaw_peak_dps": 24.8,
+          "decay_s": 0.24
+        },
+        {
+          "t": 786.6,
+          "car": "2616|2|10|800",
+          "mph": 109,
+          "yaw_peak_dps": 31,
+          "decay_s": null
+        },
+        {
+          "t": 787.4,
+          "car": "2616|2|10|800",
+          "mph": 117,
+          "yaw_peak_dps": 32.3,
+          "decay_s": 0.24
+        },
+        {
+          "t": 789.2,
+          "car": "2616|2|10|800",
+          "mph": 129,
+          "yaw_peak_dps": 20.7,
+          "decay_s": null
+        },
+        {
+          "t": 789.6,
+          "car": "2616|2|10|800",
+          "mph": 133,
+          "yaw_peak_dps": 9.3,
+          "decay_s": 0.2
+        },
+        {
+          "t": 790.2,
+          "car": "2616|2|10|800",
+          "mph": 137,
+          "yaw_peak_dps": 14,
+          "decay_s": null
+        },
+        {
+          "t": 790.5,
+          "car": "2616|2|10|800",
+          "mph": 139,
+          "yaw_peak_dps": 23.9,
+          "decay_s": null
+        },
+        {
+          "t": 790.8,
+          "car": "2616|2|10|800",
+          "mph": 141,
+          "yaw_peak_dps": 24.6,
+          "decay_s": 0.3
+        },
+        {
+          "t": 792,
+          "car": "2616|2|10|800",
+          "mph": 148,
+          "yaw_peak_dps": 26.8,
+          "decay_s": 0.27
+        },
+        {
+          "t": 792.6,
+          "car": "2616|2|10|800",
+          "mph": 152,
+          "yaw_peak_dps": 18.6,
+          "decay_s": 0.24
+        },
+        {
+          "t": 794.3,
+          "car": "2616|2|10|800",
+          "mph": 156,
+          "yaw_peak_dps": 21.6,
+          "decay_s": 0.31
+        },
+        {
+          "t": 795.7,
+          "car": "2616|2|10|800",
+          "mph": 157,
+          "yaw_peak_dps": 22.2,
+          "decay_s": null
+        },
+        {
+          "t": 796,
+          "car": "2616|2|10|800",
+          "mph": 158,
+          "yaw_peak_dps": 17.9,
+          "decay_s": 0.24
+        },
+        {
+          "t": 796.5,
+          "car": "2616|2|10|800",
+          "mph": 160,
+          "yaw_peak_dps": 19.9,
+          "decay_s": null
+        },
+        {
+          "t": 796.8,
+          "car": "2616|2|10|800",
+          "mph": 162,
+          "yaw_peak_dps": 21.3,
+          "decay_s": null
+        },
+        {
+          "t": 797.3,
+          "car": "2616|2|10|800",
+          "mph": 164,
+          "yaw_peak_dps": 22.2,
+          "decay_s": 0.22
+        },
+        {
+          "t": 797.7,
+          "car": "2616|2|10|800",
+          "mph": 165,
+          "yaw_peak_dps": 34,
+          "decay_s": null
+        },
+        {
+          "t": 799.3,
+          "car": "2616|2|10|800",
+          "mph": 138,
+          "yaw_peak_dps": 27,
+          "decay_s": null
+        },
+        {
+          "t": 800.4,
+          "car": "2616|2|10|800",
+          "mph": 138,
+          "yaw_peak_dps": 12,
+          "decay_s": null
+        },
+        {
+          "t": 800.7,
+          "car": "2616|2|10|800",
+          "mph": 139,
+          "yaw_peak_dps": 8.2,
+          "decay_s": 0.16
+        },
+        {
+          "t": 801,
+          "car": "2616|2|10|800",
+          "mph": 140,
+          "yaw_peak_dps": 16.3,
+          "decay_s": 0.27
+        },
+        {
+          "t": 801.6,
+          "car": "2616|2|10|800",
+          "mph": 143,
+          "yaw_peak_dps": 14.4,
+          "decay_s": null
+        },
+        {
+          "t": 801.9,
+          "car": "2616|2|10|800",
+          "mph": 145,
+          "yaw_peak_dps": 13.8,
+          "decay_s": null
+        },
+        {
+          "t": 802.2,
+          "car": "2616|2|10|800",
+          "mph": 146,
+          "yaw_peak_dps": 18.5,
+          "decay_s": null
+        },
+        {
+          "t": 802.4,
+          "car": "2616|2|10|800",
+          "mph": 147,
+          "yaw_peak_dps": 25.1,
+          "decay_s": null
+        },
+        {
+          "t": 802.8,
+          "car": "2616|2|10|800",
+          "mph": 148,
+          "yaw_peak_dps": 29,
+          "decay_s": null
+        },
+        {
+          "t": 803.4,
+          "car": "2616|2|10|800",
+          "mph": 149,
+          "yaw_peak_dps": 24,
+          "decay_s": null
+        },
+        {
+          "t": 803.6,
+          "car": "2616|2|10|800",
+          "mph": 150,
+          "yaw_peak_dps": 13.2,
+          "decay_s": 0.21
+        },
+        {
+          "t": 804.7,
+          "car": "2616|2|10|800",
+          "mph": 155,
+          "yaw_peak_dps": 22.6,
+          "decay_s": 0.23
+        },
+        {
+          "t": 805.2,
+          "car": "2616|2|10|800",
+          "mph": 157,
+          "yaw_peak_dps": 27.4,
+          "decay_s": null
+        },
+        {
+          "t": 805.7,
+          "car": "2616|2|10|800",
+          "mph": 158,
+          "yaw_peak_dps": 24.2,
+          "decay_s": null
+        },
+        {
+          "t": 806.2,
+          "car": "2616|2|10|800",
+          "mph": 160,
+          "yaw_peak_dps": 29.9,
+          "decay_s": null
+        },
+        {
+          "t": 806.6,
+          "car": "2616|2|10|800",
+          "mph": 161,
+          "yaw_peak_dps": 23.8,
+          "decay_s": null
+        },
+        {
+          "t": 807,
+          "car": "2616|2|10|800",
+          "mph": 161,
+          "yaw_peak_dps": 28.6,
+          "decay_s": 0.22
+        },
+        {
+          "t": 808.4,
+          "car": "2616|2|10|800",
+          "mph": 163,
+          "yaw_peak_dps": 12.1,
+          "decay_s": null
+        },
+        {
+          "t": 808.7,
+          "car": "2616|2|10|800",
+          "mph": 164,
+          "yaw_peak_dps": 21.8,
+          "decay_s": 0.23
+        },
+        {
+          "t": 809.4,
+          "car": "2616|2|10|800",
+          "mph": 166,
+          "yaw_peak_dps": 12.4,
+          "decay_s": 0.24
+        },
+        {
+          "t": 812.3,
+          "car": "2616|2|10|800",
+          "mph": 141,
+          "yaw_peak_dps": 23,
+          "decay_s": null
+        },
+        {
+          "t": 813.4,
+          "car": "2616|2|10|800",
+          "mph": 138,
+          "yaw_peak_dps": 12.4,
+          "decay_s": null
+        },
+        {
+          "t": 813.6,
+          "car": "2616|2|10|800",
+          "mph": 139,
+          "yaw_peak_dps": 16.6,
+          "decay_s": null
+        },
+        {
+          "t": 813.9,
+          "car": "2616|2|10|800",
+          "mph": 140,
+          "yaw_peak_dps": 10.2,
+          "decay_s": 0.29
+        },
+        {
+          "t": 814.5,
+          "car": "2616|2|10|800",
+          "mph": 143,
+          "yaw_peak_dps": 13.3,
+          "decay_s": 0.26
+        },
+        {
+          "t": 815.6,
+          "car": "2616|2|10|800",
+          "mph": 77,
+          "yaw_peak_dps": 36.4,
+          "decay_s": null
+        },
+        {
+          "t": 816.4,
+          "car": "2616|2|10|800",
+          "mph": 77,
+          "yaw_peak_dps": 11.7,
+          "decay_s": null
+        },
+        {
+          "t": 817.8,
+          "car": "2616|2|10|800",
+          "mph": 59,
+          "yaw_peak_dps": 45.6,
+          "decay_s": null
+        },
+        {
+          "t": 819.3,
+          "car": "2616|2|10|800",
+          "mph": 63,
+          "yaw_peak_dps": 18.1,
+          "decay_s": 0.21
+        },
+        {
+          "t": 821.2,
+          "car": "2616|2|10|800",
+          "mph": 93,
+          "yaw_peak_dps": 16.9,
+          "decay_s": null
+        },
+        {
+          "t": 821.5,
+          "car": "2616|2|10|800",
+          "mph": 97,
+          "yaw_peak_dps": 15.6,
+          "decay_s": null
+        },
+        {
+          "t": 821.8,
+          "car": "2616|2|10|800",
+          "mph": 100,
+          "yaw_peak_dps": 21.9,
+          "decay_s": null
+        },
+        {
+          "t": 822.1,
+          "car": "2616|2|10|800",
+          "mph": 104,
+          "yaw_peak_dps": 22.1,
+          "decay_s": null
+        },
+        {
+          "t": 822.4,
+          "car": "2616|2|10|800",
+          "mph": 107,
+          "yaw_peak_dps": 23.7,
+          "decay_s": null
+        },
+        {
+          "t": 822.6,
+          "car": "2616|2|10|800",
+          "mph": 110,
+          "yaw_peak_dps": 32.1,
+          "decay_s": null
+        },
+        {
+          "t": 823,
+          "car": "2616|2|10|800",
+          "mph": 113,
+          "yaw_peak_dps": 28.1,
+          "decay_s": 0.2
+        },
+        {
+          "t": 823.5,
+          "car": "2616|2|10|800",
+          "mph": 117,
+          "yaw_peak_dps": 34.9,
+          "decay_s": null
+        },
+        {
+          "t": 823.9,
+          "car": "2616|2|10|800",
+          "mph": 119,
+          "yaw_peak_dps": 31.5,
+          "decay_s": null
+        },
+        {
+          "t": 824.7,
+          "car": "2616|2|10|800",
+          "mph": 123,
+          "yaw_peak_dps": 25.9,
+          "decay_s": 0.26
+        },
+        {
+          "t": 825.9,
+          "car": "2616|2|10|800",
+          "mph": 130,
+          "yaw_peak_dps": 9.6,
+          "decay_s": 0.23
+        },
+        {
+          "t": 829.2,
+          "car": "2616|2|10|800",
+          "mph": 152,
+          "yaw_peak_dps": 25.6,
+          "decay_s": null
+        },
+        {
+          "t": 829.5,
+          "car": "2616|2|10|800",
+          "mph": 154,
+          "yaw_peak_dps": 29.5,
+          "decay_s": null
+        },
+        {
+          "t": 830.2,
+          "car": "2616|2|10|800",
+          "mph": 156,
+          "yaw_peak_dps": 32.5,
+          "decay_s": null
+        },
+        {
+          "t": 830.8,
+          "car": "2616|2|10|800",
+          "mph": 157,
+          "yaw_peak_dps": 27.8,
+          "decay_s": 0.27
+        },
+        {
+          "t": 831.4,
+          "car": "2616|2|10|800",
+          "mph": 159,
+          "yaw_peak_dps": 29.7,
+          "decay_s": 0.25
+        },
+        {
+          "t": 831.9,
+          "car": "2616|2|10|800",
+          "mph": 161,
+          "yaw_peak_dps": 32.3,
+          "decay_s": 0.26
+        },
+        {
+          "t": 832.8,
+          "car": "2616|2|10|800",
+          "mph": 163,
+          "yaw_peak_dps": 14.3,
+          "decay_s": 0.22
+        },
+        {
+          "t": 833.2,
+          "car": "2616|2|10|800",
+          "mph": 165,
+          "yaw_peak_dps": 18.9,
+          "decay_s": null
+        },
+        {
+          "t": 838.6,
+          "car": "2616|2|10|800",
+          "mph": 55,
+          "yaw_peak_dps": 12.4,
+          "decay_s": null
+        },
+        {
+          "t": 838.7,
+          "car": "2616|2|10|800",
+          "mph": 56,
+          "yaw_peak_dps": 24.8,
+          "decay_s": 0.21
+        },
+        {
+          "t": 839.5,
+          "car": "2616|2|10|800",
+          "mph": 70,
+          "yaw_peak_dps": 14.4,
+          "decay_s": 0.19
+        },
+        {
+          "t": 841.2,
+          "car": "2616|2|10|800",
+          "mph": 93,
+          "yaw_peak_dps": 21.2,
+          "decay_s": 0.22
+        },
+        {
+          "t": 842.5,
+          "car": "2616|2|10|800",
+          "mph": 108,
+          "yaw_peak_dps": 12.9,
+          "decay_s": 0.21
+        },
+        {
+          "t": 843.6,
+          "car": "2616|2|10|800",
+          "mph": 117,
+          "yaw_peak_dps": 15,
+          "decay_s": null
+        },
+        {
+          "t": 843.9,
+          "car": "2616|2|10|800",
+          "mph": 119,
+          "yaw_peak_dps": 12.8,
+          "decay_s": null
+        },
+        {
+          "t": 844.1,
+          "car": "2616|2|10|800",
+          "mph": 121,
+          "yaw_peak_dps": 14.5,
+          "decay_s": null
+        },
+        {
+          "t": 844.5,
+          "car": "2616|2|10|800",
+          "mph": 123,
+          "yaw_peak_dps": 10,
+          "decay_s": null
+        },
+        {
+          "t": 844.9,
+          "car": "2616|2|10|800",
+          "mph": 126,
+          "yaw_peak_dps": 32,
+          "decay_s": null
+        },
+        {
+          "t": 845.5,
+          "car": "2616|2|10|800",
+          "mph": 129,
+          "yaw_peak_dps": 20,
+          "decay_s": null
+        },
+        {
+          "t": 845.8,
+          "car": "2616|2|10|800",
+          "mph": 130,
+          "yaw_peak_dps": 23.6,
+          "decay_s": 0.24
+        },
+        {
+          "t": 846.5,
+          "car": "2616|2|10|800",
+          "mph": 134,
+          "yaw_peak_dps": 12.6,
+          "decay_s": null
+        },
+        {
+          "t": 846.7,
+          "car": "2616|2|10|800",
+          "mph": 135,
+          "yaw_peak_dps": 15,
+          "decay_s": null
+        },
+        {
+          "t": 847,
+          "car": "2616|2|10|800",
+          "mph": 136,
+          "yaw_peak_dps": 10.7,
+          "decay_s": 0.21
+        },
+        {
+          "t": 851,
+          "car": "2616|2|10|800",
+          "mph": 131,
+          "yaw_peak_dps": 26.5,
+          "decay_s": 0.22
+        },
+        {
+          "t": 853.1,
+          "car": "2616|2|10|800",
+          "mph": 133,
+          "yaw_peak_dps": 22.8,
+          "decay_s": null
+        },
+        {
+          "t": 853.6,
+          "car": "2616|2|10|800",
+          "mph": 136,
+          "yaw_peak_dps": 23.1,
+          "decay_s": null
+        },
+        {
+          "t": 854,
+          "car": "2616|2|10|800",
+          "mph": 138,
+          "yaw_peak_dps": 16.6,
+          "decay_s": null
+        },
+        {
+          "t": 854.4,
+          "car": "2616|2|10|800",
+          "mph": 140,
+          "yaw_peak_dps": 9.7,
+          "decay_s": null
+        },
+        {
+          "t": 854.6,
+          "car": "2616|2|10|800",
+          "mph": 142,
+          "yaw_peak_dps": 36,
+          "decay_s": null
+        },
+        {
+          "t": 855.3,
+          "car": "2616|2|10|800",
+          "mph": 127,
+          "yaw_peak_dps": 17.8,
+          "decay_s": null
+        },
+        {
+          "t": 858.7,
+          "car": "2616|2|10|800",
+          "mph": 108,
+          "yaw_peak_dps": 28.5,
+          "decay_s": 0.28
+        },
+        {
+          "t": 860.4,
+          "car": "2616|2|10|800",
+          "mph": 111,
+          "yaw_peak_dps": 27.3,
+          "decay_s": 0.26
+        },
+        {
+          "t": 861.2,
+          "car": "2616|2|10|800",
+          "mph": 118,
+          "yaw_peak_dps": 22.4,
+          "decay_s": null
+        },
+        {
+          "t": 861.5,
+          "car": "2616|2|10|800",
+          "mph": 120,
+          "yaw_peak_dps": 21.5,
+          "decay_s": null
+        },
+        {
+          "t": 861.9,
+          "car": "2616|2|10|800",
+          "mph": 123,
+          "yaw_peak_dps": 29.9,
+          "decay_s": null
+        },
+        {
+          "t": 862.5,
+          "car": "2616|2|10|800",
+          "mph": 127,
+          "yaw_peak_dps": 29.9,
+          "decay_s": 0.27
+        },
+        {
+          "t": 863.3,
+          "car": "2616|2|10|800",
+          "mph": 132,
+          "yaw_peak_dps": 17.3,
+          "decay_s": 0.21
+        },
+        {
+          "t": 864,
+          "car": "2616|2|10|800",
+          "mph": 137,
+          "yaw_peak_dps": 15.1,
+          "decay_s": 0.24
+        },
+        {
+          "t": 864.5,
+          "car": "2616|2|10|800",
+          "mph": 140,
+          "yaw_peak_dps": 14.4,
+          "decay_s": null
+        },
+        {
+          "t": 864.8,
+          "car": "2616|2|10|800",
+          "mph": 142,
+          "yaw_peak_dps": 10.2,
+          "decay_s": 0.2
+        },
+        {
+          "t": 1169.1,
+          "car": "2866|2|4|800",
+          "mph": 70,
+          "yaw_peak_dps": 20.8,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1169.7,
+          "car": "2866|2|4|800",
+          "mph": 80,
+          "yaw_peak_dps": 15.7,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1173.6,
+          "car": "2866|2|4|800",
+          "mph": 116,
+          "yaw_peak_dps": 17.7,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1174,
+          "car": "2866|2|4|800",
+          "mph": 117,
+          "yaw_peak_dps": 32,
+          "decay_s": null
+        },
+        {
+          "t": 1174.3,
+          "car": "2866|2|4|800",
+          "mph": 118,
+          "yaw_peak_dps": 27.4,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1174.8,
+          "car": "2866|2|4|800",
+          "mph": 121,
+          "yaw_peak_dps": 39.1,
+          "decay_s": null
+        },
+        {
+          "t": 1175.2,
+          "car": "2866|2|4|800",
+          "mph": 122,
+          "yaw_peak_dps": 9.3,
+          "decay_s": 0.09
+        },
+        {
+          "t": 1175.6,
+          "car": "2866|2|4|800",
+          "mph": 123,
+          "yaw_peak_dps": 34.3,
+          "decay_s": null
+        },
+        {
+          "t": 1175.8,
+          "car": "2866|2|4|800",
+          "mph": 124,
+          "yaw_peak_dps": 34.8,
+          "decay_s": null
+        },
+        {
+          "t": 1176.1,
+          "car": "2866|2|4|800",
+          "mph": 124,
+          "yaw_peak_dps": 34.5,
+          "decay_s": 0.17
+        },
+        {
+          "t": 1177,
+          "car": "2866|2|4|800",
+          "mph": 125,
+          "yaw_peak_dps": 34.5,
+          "decay_s": null
+        },
+        {
+          "t": 1177.3,
+          "car": "2866|2|4|800",
+          "mph": 125,
+          "yaw_peak_dps": 8.1,
+          "decay_s": 0.14
+        },
+        {
+          "t": 1177.7,
+          "car": "2866|2|4|800",
+          "mph": 126,
+          "yaw_peak_dps": 20.9,
+          "decay_s": 0.13
+        },
+        {
+          "t": 1178.4,
+          "car": "2866|2|4|800",
+          "mph": 128,
+          "yaw_peak_dps": 20.2,
+          "decay_s": 0.12
+        },
+        {
+          "t": 1178.7,
+          "car": "2866|2|4|800",
+          "mph": 128,
+          "yaw_peak_dps": 33.4,
+          "decay_s": 0.14
+        },
+        {
+          "t": 1179.4,
+          "car": "2866|2|4|800",
+          "mph": 129,
+          "yaw_peak_dps": 24.9,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1180.7,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 28,
+          "decay_s": null
+        },
+        {
+          "t": 1180.9,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 35.9,
+          "decay_s": null
+        },
+        {
+          "t": 1181.2,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 35.9,
+          "decay_s": null
+        },
+        {
+          "t": 1181.5,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 27.8,
+          "decay_s": 0.1
+        },
+        {
+          "t": 1181.8,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 33.3,
+          "decay_s": null
+        },
+        {
+          "t": 1182.1,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 30.6,
+          "decay_s": 0.13
+        },
+        {
+          "t": 1182.5,
+          "car": "2866|2|4|800",
+          "mph": 131,
+          "yaw_peak_dps": 23.6,
+          "decay_s": 0.12
+        },
+        {
+          "t": 1182.9,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 24.1,
+          "decay_s": 0.12
+        },
+        {
+          "t": 1183.1,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 37.3,
+          "decay_s": 0.15
+        },
+        {
+          "t": 1183.9,
+          "car": "2866|2|4|800",
+          "mph": 133,
+          "yaw_peak_dps": 20.1,
+          "decay_s": 0.1
+        },
+        {
+          "t": 1184.8,
+          "car": "2866|2|4|800",
+          "mph": 133,
+          "yaw_peak_dps": 18.5,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1185,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 34,
+          "decay_s": null
+        },
+        {
+          "t": 1185.3,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 21.1,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1185.6,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 25.1,
+          "decay_s": null
+        },
+        {
+          "t": 1185.9,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 39.7,
+          "decay_s": null
+        },
+        {
+          "t": 1186.2,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 24.2,
+          "decay_s": null
+        },
+        {
+          "t": 1186.5,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 14.8,
+          "decay_s": null
+        },
+        {
+          "t": 1186.6,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 19.7,
+          "decay_s": null
+        },
+        {
+          "t": 1186.8,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 28.5,
+          "decay_s": null
+        },
+        {
+          "t": 1187.1,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 37.5,
+          "decay_s": null
+        },
+        {
+          "t": 1187.5,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 33.5,
+          "decay_s": null
+        },
+        {
+          "t": 1187.9,
+          "car": "2866|2|4|800",
+          "mph": 133,
+          "yaw_peak_dps": 31.1,
+          "decay_s": null
+        },
+        {
+          "t": 1188.4,
+          "car": "2866|2|4|800",
+          "mph": 132,
+          "yaw_peak_dps": 8.9,
+          "decay_s": 0.25
+        },
+        {
+          "t": 1188.9,
+          "car": "2866|2|4|800",
+          "mph": 133,
+          "yaw_peak_dps": 34.1,
+          "decay_s": 0.15
+        },
+        {
+          "t": 1189.4,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 25.5,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1189.7,
+          "car": "2866|2|4|800",
+          "mph": 134,
+          "yaw_peak_dps": 22.1,
+          "decay_s": null
+        },
+        {
+          "t": 1191.6,
+          "car": "2866|2|4|800",
+          "mph": 100,
+          "yaw_peak_dps": 30.9,
+          "decay_s": null
+        },
+        {
+          "t": 1192.6,
+          "car": "2866|2|4|800",
+          "mph": 80,
+          "yaw_peak_dps": 28.4,
+          "decay_s": null
+        },
+        {
+          "t": 1192.8,
+          "car": "2866|2|4|800",
+          "mph": 78,
+          "yaw_peak_dps": 27.8,
+          "decay_s": null
+        },
+        {
+          "t": 1193.1,
+          "car": "2866|2|4|800",
+          "mph": 74,
+          "yaw_peak_dps": 109.7,
+          "decay_s": null
+        },
+        {
+          "t": 1198.2,
+          "car": "2866|2|4|800",
+          "mph": 55,
+          "yaw_peak_dps": 37.6,
+          "decay_s": 0.15
+        },
+        {
+          "t": 1198.9,
+          "car": "2866|2|4|800",
+          "mph": 67,
+          "yaw_peak_dps": 28,
+          "decay_s": 0.11
+        },
+        {
+          "t": 1199.2,
+          "car": "2866|2|4|800",
+          "mph": 71,
+          "yaw_peak_dps": 39.9,
+          "decay_s": 0.15
+        },
+        {
+          "t": 1199.7,
+          "car": "2866|2|4|800",
+          "mph": 78,
+          "yaw_peak_dps": 32.5,
+          "decay_s": null
+        },
+        {
+          "t": 1200,
+          "car": "2866|2|4|800",
+          "mph": 82,
+          "yaw_peak_dps": 32.4,
+          "decay_s": null
+        },
+        {
+          "t": 1200.4,
+          "car": "2866|2|4|800",
+          "mph": 85,
+          "yaw_peak_dps": 38.2,
+          "decay_s": null
+        },
+        {
+          "t": 1200.8,
+          "car": "2866|2|4|800",
+          "mph": 90,
+          "yaw_peak_dps": 32.1,
+          "decay_s": 0.14
+        },
+        {
+          "t": 1201.7,
+          "car": "2866|2|4|800",
+          "mph": 98,
+          "yaw_peak_dps": 31.3,
+          "decay_s": null
+        },
+        {
+          "t": 1202,
+          "car": "2866|2|4|800",
+          "mph": 100,
+          "yaw_peak_dps": 23.7,
+          "decay_s": null
+        },
+        {
+          "t": 1202.3,
+          "car": "2866|2|4|800",
+          "mph": 92,
+          "yaw_peak_dps": 48.6,
+          "decay_s": null
+        },
+        {
+          "t": 1203.3,
+          "car": "2866|2|4|800",
+          "mph": 81,
+          "yaw_peak_dps": 20.5,
+          "decay_s": null
+        },
+        {
+          "t": 1203.4,
+          "car": "2866|2|4|800",
+          "mph": 81,
+          "yaw_peak_dps": 16.2,
+          "decay_s": null
+        },
+        {
+          "t": 1203.8,
+          "car": "2866|2|4|800",
+          "mph": 82,
+          "yaw_peak_dps": 44.9,
+          "decay_s": null
+        },
+        {
+          "t": 1204.1,
+          "car": "2866|2|4|800",
+          "mph": 85,
+          "yaw_peak_dps": 33.1,
+          "decay_s": null
+        },
+        {
+          "t": 1204.5,
+          "car": "2866|2|4|800",
+          "mph": 87,
+          "yaw_peak_dps": 22.4,
+          "decay_s": 0.19
+        },
+        {
+          "t": 1205.3,
+          "car": "2866|2|4|800",
+          "mph": 94,
+          "yaw_peak_dps": 22.7,
+          "decay_s": null
+        },
+        {
+          "t": 1205.6,
+          "car": "2866|2|4|800",
+          "mph": 97,
+          "yaw_peak_dps": 23.6,
+          "decay_s": null
+        },
+        {
+          "t": 1206,
+          "car": "2866|2|4|800",
+          "mph": 99,
+          "yaw_peak_dps": 26.2,
+          "decay_s": 0.27
+        },
+        {
+          "t": 1207.5,
+          "car": "2866|2|4|800",
+          "mph": 108,
+          "yaw_peak_dps": 11.1,
+          "decay_s": null
+        },
+        {
+          "t": 1207.8,
+          "car": "2866|2|4|800",
+          "mph": 110,
+          "yaw_peak_dps": 15.2,
+          "decay_s": null
+        },
+        {
+          "t": 1208.1,
+          "car": "2866|2|4|800",
+          "mph": 112,
+          "yaw_peak_dps": 18.6,
+          "decay_s": null
+        },
+        {
+          "t": 1208.4,
+          "car": "2866|2|4|800",
+          "mph": 112,
+          "yaw_peak_dps": 17.1,
+          "decay_s": null
+        },
+        {
+          "t": 1208.6,
+          "car": "2866|2|4|800",
+          "mph": 112,
+          "yaw_peak_dps": 29.9,
+          "decay_s": null
+        },
+        {
+          "t": 1209.1,
+          "car": "2866|2|4|800",
+          "mph": 114,
+          "yaw_peak_dps": 14.8,
+          "decay_s": null
+        },
+        {
+          "t": 1209.4,
+          "car": "2866|2|4|800",
+          "mph": 114,
+          "yaw_peak_dps": 12.9,
+          "decay_s": null
+        },
+        {
+          "t": 1210.4,
+          "car": "2866|2|4|800",
+          "mph": 117,
+          "yaw_peak_dps": 15.4,
+          "decay_s": null
+        },
+        {
+          "t": 1211.3,
+          "car": "2866|2|4|800",
+          "mph": 110,
+          "yaw_peak_dps": 31,
+          "decay_s": null
+        },
+        {
+          "t": 1212.3,
+          "car": "2866|2|4|800",
+          "mph": 91,
+          "yaw_peak_dps": 42.4,
+          "decay_s": null
+        },
+        {
+          "t": 1317.4,
+          "car": "1155|1|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 13.4,
+          "decay_s": null
+        },
+        {
+          "t": 1317.8,
+          "car": "1155|1|8|700",
+          "mph": 59,
+          "yaw_peak_dps": 14.4,
+          "decay_s": null
+        },
+        {
+          "t": 1318.6,
+          "car": "1155|1|8|700",
+          "mph": 64,
+          "yaw_peak_dps": 8.8,
+          "decay_s": null
+        },
+        {
+          "t": 1320.1,
+          "car": "1155|1|8|700",
+          "mph": 66,
+          "yaw_peak_dps": 29.3,
+          "decay_s": null
+        },
+        {
+          "t": 1325.9,
+          "car": "1155|1|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 28.7,
+          "decay_s": null
+        },
+        {
+          "t": 1326.4,
+          "car": "1155|1|8|700",
+          "mph": 59,
+          "yaw_peak_dps": 22.6,
+          "decay_s": null
+        },
+        {
+          "t": 1326.8,
+          "car": "1155|1|8|700",
+          "mph": 59,
+          "yaw_peak_dps": 18.6,
+          "decay_s": null
+        },
+        {
+          "t": 1328,
+          "car": "1155|1|8|700",
+          "mph": 63,
+          "yaw_peak_dps": 12.6,
+          "decay_s": 0.54
+        },
+        {
+          "t": 1415.9,
+          "car": "1155|2|8|700",
+          "mph": 64,
+          "yaw_peak_dps": 29.5,
+          "decay_s": null
+        },
+        {
+          "t": 1416.5,
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "yaw_peak_dps": 21.1,
+          "decay_s": 0.4
+        },
+        {
+          "t": 1417.1,
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "yaw_peak_dps": 46.3,
+          "decay_s": null
+        },
+        {
+          "t": 1418,
+          "car": "1155|2|8|700",
+          "mph": 82,
+          "yaw_peak_dps": 40.9,
+          "decay_s": null
+        },
+        {
+          "t": 1418.7,
+          "car": "1155|2|8|700",
+          "mph": 86,
+          "yaw_peak_dps": 41.9,
+          "decay_s": null
+        },
+        {
+          "t": 1419,
+          "car": "1155|2|8|700",
+          "mph": 87,
+          "yaw_peak_dps": 10.3,
+          "decay_s": null
+        },
+        {
+          "t": 1419.6,
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "yaw_peak_dps": 42.8,
+          "decay_s": null
+        },
+        {
+          "t": 1422.4,
+          "car": "1155|2|8|700",
+          "mph": 72,
+          "yaw_peak_dps": 18.5,
+          "decay_s": null
+        },
+        {
+          "t": 1474.2,
+          "car": "1155|2|8|700",
+          "mph": 115,
+          "yaw_peak_dps": 12.7,
+          "decay_s": null
+        },
+        {
+          "t": 1474.5,
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "yaw_peak_dps": 19.8,
+          "decay_s": null
+        },
+        {
+          "t": 1476.3,
+          "car": "1155|2|8|700",
+          "mph": 121,
+          "yaw_peak_dps": 18.2,
+          "decay_s": null
+        },
+        {
+          "t": 1480.7,
+          "car": "1155|2|8|700",
+          "mph": 131,
+          "yaw_peak_dps": 9.7,
+          "decay_s": null
+        },
+        {
+          "t": 1480.9,
+          "car": "1155|2|8|700",
+          "mph": 132,
+          "yaw_peak_dps": 14.5,
+          "decay_s": null
+        },
+        {
+          "t": 1481.3,
+          "car": "1155|2|8|700",
+          "mph": 133,
+          "yaw_peak_dps": 18.5,
+          "decay_s": null
+        },
+        {
+          "t": 1481.8,
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "yaw_peak_dps": 11,
+          "decay_s": null
+        },
+        {
+          "t": 1482.1,
+          "car": "1155|2|8|700",
+          "mph": 135,
+          "yaw_peak_dps": 28.3,
+          "decay_s": null
+        },
+        {
+          "t": 1482.4,
+          "car": "1155|2|8|700",
+          "mph": 136,
+          "yaw_peak_dps": 27.6,
+          "decay_s": null
+        },
+        {
+          "t": 1483.7,
+          "car": "1155|2|8|700",
+          "mph": 125,
+          "yaw_peak_dps": 35.8,
+          "decay_s": null
+        },
+        {
+          "t": 1485,
+          "car": "1155|2|8|700",
+          "mph": 108,
+          "yaw_peak_dps": 54,
+          "decay_s": null
+        },
+        {
+          "t": 1485.5,
+          "car": "1155|2|8|700",
+          "mph": 110,
+          "yaw_peak_dps": 22.9,
+          "decay_s": null
+        },
+        {
+          "t": 1485.9,
+          "car": "1155|2|8|700",
+          "mph": 111,
+          "yaw_peak_dps": 8.3,
+          "decay_s": null
+        },
+        {
+          "t": 1486,
+          "car": "1155|2|8|700",
+          "mph": 111,
+          "yaw_peak_dps": 17.5,
+          "decay_s": null
+        },
+        {
+          "t": 1486.5,
+          "car": "1155|2|8|700",
+          "mph": 113,
+          "yaw_peak_dps": 16.6,
+          "decay_s": null
+        },
+        {
+          "t": 1487,
+          "car": "1155|2|8|700",
+          "mph": 115,
+          "yaw_peak_dps": 13.2,
+          "decay_s": null
+        },
+        {
+          "t": 1487.4,
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "yaw_peak_dps": 22.9,
+          "decay_s": null
+        },
+        {
+          "t": 1489.2,
+          "car": "1155|2|8|700",
+          "mph": 118,
+          "yaw_peak_dps": 19.2,
+          "decay_s": null
+        },
+        {
+          "t": 1490.2,
+          "car": "1155|2|8|700",
+          "mph": 105,
+          "yaw_peak_dps": 8,
+          "decay_s": null
+        },
+        {
+          "t": 1490.9,
+          "car": "1155|2|8|700",
+          "mph": 108,
+          "yaw_peak_dps": 18.7,
+          "decay_s": null
+        },
+        {
+          "t": 1491.7,
+          "car": "1155|2|8|700",
+          "mph": 113,
+          "yaw_peak_dps": 11.4,
+          "decay_s": 0.28
+        },
+        {
+          "t": 1492.2,
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "yaw_peak_dps": 9.8,
+          "decay_s": null
+        },
+        {
+          "t": 1495.1,
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "yaw_peak_dps": 27,
+          "decay_s": null
+        },
+        {
+          "t": 1501,
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "yaw_peak_dps": 13.1,
+          "decay_s": null
+        },
+        {
+          "t": 1501.9,
+          "car": "1155|2|8|700",
+          "mph": 79,
+          "yaw_peak_dps": 28,
+          "decay_s": null
+        },
+        {
+          "t": 1503.3,
+          "car": "1155|2|8|700",
+          "mph": 85,
+          "yaw_peak_dps": 26.3,
+          "decay_s": null
+        },
+        {
+          "t": 1511.6,
+          "car": "1155|2|8|700",
+          "mph": 70,
+          "yaw_peak_dps": 32.7,
+          "decay_s": null
+        },
+        {
+          "t": 1531.9,
+          "car": "1155|2|8|700",
+          "mph": 115,
+          "yaw_peak_dps": 16.6,
+          "decay_s": null
+        },
+        {
+          "t": 1532.3,
+          "car": "1155|2|8|700",
+          "mph": 117,
+          "yaw_peak_dps": 23.4,
+          "decay_s": null
+        },
+        {
+          "t": 1532.8,
+          "car": "1155|2|8|700",
+          "mph": 116,
+          "yaw_peak_dps": 20.8,
+          "decay_s": null
+        },
+        {
+          "t": 1533.2,
+          "car": "1155|2|8|700",
+          "mph": 116,
+          "yaw_peak_dps": 11.5,
+          "decay_s": null
+        },
+        {
+          "t": 1533.9,
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "yaw_peak_dps": 22.2,
+          "decay_s": null
+        },
+        {
+          "t": 1535.1,
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "yaw_peak_dps": 15.8,
+          "decay_s": 0.22
+        },
+        {
+          "t": 1537.5,
+          "car": "1155|2|8|700",
+          "mph": 129,
+          "yaw_peak_dps": 13.3,
+          "decay_s": null
+        },
+        {
+          "t": 1537.8,
+          "car": "1155|2|8|700",
+          "mph": 131,
+          "yaw_peak_dps": 15,
+          "decay_s": null
+        },
+        {
+          "t": 1538.2,
+          "car": "1155|2|8|700",
+          "mph": 132,
+          "yaw_peak_dps": 12.6,
+          "decay_s": 0.18
+        },
+        {
+          "t": 1538.7,
+          "car": "1155|2|8|700",
+          "mph": 133,
+          "yaw_peak_dps": 14.6,
+          "decay_s": null
+        },
+        {
+          "t": 1538.9,
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "yaw_peak_dps": 25.8,
+          "decay_s": null
+        },
+        {
+          "t": 1540,
+          "car": "1155|2|8|700",
+          "mph": 127,
+          "yaw_peak_dps": 12.9,
+          "decay_s": null
+        },
+        {
+          "t": 1540.1,
+          "car": "1155|2|8|700",
+          "mph": 127,
+          "yaw_peak_dps": 10,
+          "decay_s": null
+        },
+        {
+          "t": 1586,
+          "car": "1155|2|8|700",
+          "mph": 127,
+          "yaw_peak_dps": 8.4,
+          "decay_s": null
+        },
+        {
+          "t": 1586.2,
+          "car": "1155|2|8|700",
+          "mph": 128,
+          "yaw_peak_dps": 20,
+          "decay_s": null
+        },
+        {
+          "t": 1587,
+          "car": "1155|2|8|700",
+          "mph": 130,
+          "yaw_peak_dps": 20.8,
+          "decay_s": null
+        },
+        {
+          "t": 1587.6,
+          "car": "1155|2|8|700",
+          "mph": 132,
+          "yaw_peak_dps": 17.8,
+          "decay_s": null
+        },
+        {
+          "t": 1588.1,
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "yaw_peak_dps": 12.4,
+          "decay_s": null
+        },
+        {
+          "t": 1588.4,
+          "car": "1155|2|8|700",
+          "mph": 134,
+          "yaw_peak_dps": 24.7,
+          "decay_s": null
+        },
+        {
+          "t": 1589.3,
+          "car": "1155|2|8|700",
+          "mph": 126,
+          "yaw_peak_dps": 17.8,
+          "decay_s": null
+        },
+        {
+          "t": 1589.8,
+          "car": "1155|2|8|700",
+          "mph": 118,
+          "yaw_peak_dps": 27.2,
+          "decay_s": null
+        },
+        {
+          "t": 1590.7,
+          "car": "1155|2|8|700",
+          "mph": 119,
+          "yaw_peak_dps": 17.6,
+          "decay_s": null
+        },
+        {
+          "t": 1591.6,
+          "car": "1155|2|8|700",
+          "mph": 120,
+          "yaw_peak_dps": 12.4,
+          "decay_s": 0.18
+        },
+        {
+          "t": 1592.2,
+          "car": "1155|2|8|700",
+          "mph": 122,
+          "yaw_peak_dps": 11.5,
+          "decay_s": null
+        },
+        {
+          "t": 1592.6,
+          "car": "1155|2|8|700",
+          "mph": 124,
+          "yaw_peak_dps": 11.8,
+          "decay_s": null
+        },
+        {
+          "t": 1592.8,
+          "car": "1155|2|8|700",
+          "mph": 126,
+          "yaw_peak_dps": 8.9,
+          "decay_s": 0.35
+        },
+        {
+          "t": 1595.5,
+          "car": "1155|2|8|700",
+          "mph": 82,
+          "yaw_peak_dps": 22,
+          "decay_s": null
+        },
+        {
+          "t": 1596.9,
+          "car": "1155|2|8|700",
+          "mph": 90,
+          "yaw_peak_dps": 15.8,
+          "decay_s": null
+        },
+        {
+          "t": 1600.8,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 18.4,
+          "decay_s": null
+        },
+        {
+          "t": 1601.3,
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "yaw_peak_dps": 13,
+          "decay_s": 0.32
+        },
+        {
+          "t": 1603.2,
+          "car": "1155|2|8|700",
+          "mph": 78,
+          "yaw_peak_dps": 27.2,
+          "decay_s": null
+        },
+        {
+          "t": 1604.4,
+          "car": "1155|2|8|700",
+          "mph": 80,
+          "yaw_peak_dps": 25.8,
+          "decay_s": null
+        },
+        {
+          "t": 1608.5,
+          "car": "1155|2|8|700",
+          "mph": 55,
+          "yaw_peak_dps": 45.1,
+          "decay_s": null
+        },
+        {
+          "t": 1608.9,
+          "car": "1155|2|8|700",
+          "mph": 58,
+          "yaw_peak_dps": 9.6,
+          "decay_s": null
         }
       ],
       "crests": [
@@ -72514,20 +95472,98 @@ window.FH6_DB = {
           "car": "3852|2|4|700",
           "mph": 132,
           "g": -0.51
+        },
+        {
+          "t": 810.4,
+          "car": "2616|2|10|800",
+          "mph": 158,
+          "g": -0.56
+        },
+        {
+          "t": 827.4,
+          "car": "2616|2|10|800",
+          "mph": 140,
+          "g": -0.53
+        },
+        {
+          "t": 844.6,
+          "car": "2616|2|10|800",
+          "mph": 124,
+          "g": -0.51
+        },
+        {
+          "t": 848.2,
+          "car": "2616|2|10|800",
+          "mph": 143,
+          "g": -0.51
+        },
+        {
+          "t": 1201.4,
+          "car": "2866|2|4|800",
+          "mph": 95,
+          "g": -0.51
+        },
+        {
+          "t": 1208.5,
+          "car": "2866|2|4|800",
+          "mph": 112,
+          "g": -0.5
+        },
+        {
+          "t": 1210,
+          "car": "2866|2|4|800",
+          "mph": 115,
+          "g": -0.53
+        },
+        {
+          "t": 1212,
+          "car": "2866|2|4|800",
+          "mph": 97,
+          "g": -0.5
+        },
+        {
+          "t": 1321.1,
+          "car": "1155|1|8|700",
+          "mph": 52,
+          "g": -0.58
+        },
+        {
+          "t": 1418.2,
+          "car": "1155|2|8|700",
+          "mph": 83,
+          "g": -0.53
+        },
+        {
+          "t": 1421.7,
+          "car": "1155|2|8|700",
+          "mph": 77,
+          "g": -0.52
+        },
+        {
+          "t": 1436.4,
+          "car": "1155|2|8|700",
+          "mph": 63,
+          "g": -0.5
+        },
+        {
+          "t": 1483.8,
+          "car": "1155|2|8|700",
+          "mph": 124,
+          "g": -0.51
         }
       ],
       "summary": {
-        "cars": 2,
-        "configs": 2,
-        "corners": 27,
-        "launches": 1,
-        "braking": 5,
-        "bottoming": 145,
-        "pulses": 200,
-        "impacts": 43,
-        "front_limited_corners": 26,
-        "rear_limited_corners": 1,
-        "drift_corners": 0
+        "cars": 6,
+        "configs": 8,
+        "corners": 75,
+        "launches": 8,
+        "braking": 10,
+        "bottoming": 4432,
+        "pulses": 456,
+        "impacts": 156,
+        "front_limited_corners": 62,
+        "rear_limited_corners": 4,
+        "drift_corners": 1
       }
     }
   ],

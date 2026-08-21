@@ -218,11 +218,30 @@ class H(BaseHTTPRequestHandler):
             with ST.lock:
                 for c in ST.cars.values():
                     if str(c["ordinal"]) == str(body["ordinal"]): c["name"] = obj["cars"][str(body["ordinal"])]["name"]
+        elif self.path.startswith("/reset"):
+            reset_session(); ok = True; obj = names_load()
         elif self.path.startswith("/build") and body.get("build_id") and body.get("label"):
             obj.setdefault("builds", {})[str(body["build_id"])] = {"label": str(body["label"]).strip(), "source": f"dashboard {time.strftime('%Y-%m-%d')}", "cid": body.get("cid")}; ok = True
         if ok: names_save(obj)
         out = json.dumps({"ok": ok, "cars": obj.get("cars", {}), "builds": obj.get("builds", {})}).encode()
         self.send_response(200 if ok else 400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out)
+
+def reset_session():
+    """Start a fresh session on request: clear live accumulators and rotate the CSV (live mode)."""
+    with ST.lock:
+        ST.strip = []; ST.corners = []; ST._corner = None; ST._sec = None; ST._sec_rows = []; ST.cars = {}
+        ST.analysis = None; ST.session_json = None; ST.session_path = None
+        ST.last_on_t = None; ST.live_since_analysis = 0.0; ST.drive_since_periodic = 0.0
+        ST.events = []; ST.seq += 1
+        if ST.csv_file and not ST.replay:
+            try: ST.csv_file.close()
+            except Exception: pass
+            ST.csv_path = os.path.join(os.path.dirname(ST.csv_path), f"fh6_{time.strftime('%Y%m%d_%H%M%S')}.csv")
+            ST.csv_file = open(ST.csv_path, "w", newline=""); ST.csv_writer = csv.writer(ST.csv_file)
+            ST.csv_writer.writerow(["t_wall", "t_mono", "speed_mph", "lat_g", "long_g", "yaw_rate_dps"] + [f"TireTempC{w}" for w in W] + FIELDS)
+            ST.frames = 0; ST.t0 = time.monotonic()
+    ST.emit("reset", {"csv": ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})
+    print(f"[reset] new session -> {ST.csv_path}")
 
 def udp_loop(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); sock.bind(("0.0.0.0", port)); sock.settimeout(1.0)

@@ -2594,7 +2594,7 @@
       return `
         <div class="block" style="border-color:#e5414e">
           <div class="card-row" style="margin-top:0"><h3 style="margin:0">🔴 Live — Data Out stream</h3><span id="lvStatus" class="chip">connecting…</span></div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)"><button class="lab-mode" id="lvConnect">connect</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)"><button class="lab-mode" id="lvConnect">connect</button><button class="lab-mode" id="lvReset" title="Clear the live screen and start a fresh session (new CSV) on the daemon" style="border-color:#e5414e;color:#e5414e">↺ reset live</button>
             <span class="why" style="font-size:11px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (or <code>--replay captures/&lt;file&gt;.csv</code> to replay a recording live)</span></div>
           <div id="lvSession"></div><div id="lvUnknown"></div>
         </div>
@@ -2647,6 +2647,7 @@
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
       es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.connected = true; live.err = false; paintAll(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); paintAdvice(); });
+      es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; paintAll(); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
@@ -2657,9 +2658,15 @@
         fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; paintStatus(); } }).catch(() => {}); });
       es.onerror = () => { live.connected = false; live.err = true; paintStatus(); };
     }
+    function liveReset(local) {
+      live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.frame = null; live.cars = [];
+      if (!local && live.connected) fetch(liveUrl + "/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+      render();
+    }
     function bindLive() {
-      const b = host.querySelector("#lvConnect"), u = host.querySelector("#lvUrl");
+      const b = host.querySelector("#lvConnect"), u = host.querySelector("#lvUrl"), r = host.querySelector("#lvReset");
       if (b) b.addEventListener("click", () => { liveUrl = u.value.trim().replace(/\/$/, ""); localStorage.setItem("fh6LiveUrl", liveUrl); liveConnect(); });
+      if (r) r.addEventListener("click", () => liveReset(false));
     }
     function render() {
       const s = S();

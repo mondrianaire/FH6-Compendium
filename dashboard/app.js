@@ -2496,6 +2496,10 @@
       return `
         <div class="lab-tiles">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — per car</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : ""}
+        ${(s.events || []).length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏆 Events — timed modes detected (races · Rivals · time trials)</h3>
+          <div style="overflow-x:auto"><table><thead><tr><th>window</th><th>car</th><th>mode</th><th>laps</th><th>length</th><th>best lap</th><th>final pos</th><th>route</th></tr></thead><tbody>
+            ${s.events.map((e) => { const rn = e.route || ((((DB.routes || {}).routes) || {})[e.route_key] || {}).name || (JSON.parse(localStorage.getItem("fh6Routes") || "{}")[e.route_key] || {}).name; return `<tr style="border-left:3px solid ${carCol(s, e.car)}"><td>${e.t0}–${e.t1}s (${e.duration_s}s)</td><td>${carLbl(s, e.car).split(" · ").slice(0, 2).join(" · ")}</td><td>${e.mode}</td><td>${e.laps || "—"}</td><td>${(e.distance_m / 1000).toFixed(2)} km</td><td>${e.best_lap ? e.best_lap.toFixed(3) + " s" : "—"}</td><td>${e.pos_final ?? "—"}</td><td>${rn ? `<b>${esc(rn)}</b>` : `<span class="lab-route" data-key="${e.route_key}" data-mode="${esc(e.mode)}"><input placeholder="name this route (start ${e.start.join(",")})" style="min-width:180px;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"> <button class="lab-mode" data-saveroute style="padding:3px 8px;font-size:11px">save</button></span>`}</td></tr>`; }).join("")}
+          </tbody></table></div><p class="why" style="font-size:11px;margin-top:6px">No track ordinal exists in FH6 Data Out — a route is recognised by its start position + length (key <code>X_Z_len</code>). Name it once and every later run on it is labelled. Free roam = everything outside these windows.</p></div>` : ""}
         ${(s.stints || []).length ? `<div class="block"><h3 style="margin-top:0">🏁 Runs — stints between menu visits (tag them to A/B re-tunes)</h3>
           <div style="overflow-x:auto"><table><thead><tr><th>run</th><th>car</th><th>window</th><th>label</th><th>corners</th><th>USI med</th><th>front-red</th><th>brake F/R</th><th>launch slip</th><th>ladder</th></tr></thead><tbody>
             ${s.stints.map((st) => `<tr style="border-left:3px solid ${carCol(s, st.id)}"><td><b>${st.n}</b></td><td>${carLbl(s, st.id).split(" · ").slice(0, 2).join(" · ")}</td><td>${st.t0}–${st.t1}s (${st.live_s}s)</td><td>${st.label ? `<b>${esc(st.label)}</b>` : `<span class="why">—</span>`}</td><td>${st.corners}</td><td>${st.usi_med == null ? "—" : (st.usi_med > 0 ? "+" : "") + st.usi_med.toFixed(3)}</td><td>${st.first_red_front}/${st.corners}</td><td>${st.brake_fd_med == null ? "—" : `${st.brake_fd_med.toFixed(2)}/${(st.brake_rd_med ?? 0).toFixed(2)}`}</td><td>${st.launch_rear_slip == null ? "—" : st.launch_rear_slip.toFixed(2)}</td><td title="${esc(JSON.stringify(st.ladder))}">${Object.keys(st.ladder || {}).length ? (st.ladder_changed === true ? `<span class="chip" style="border-color:#e3b341;color:#e3b341">gearing changed</span>` : st.ladder_changed === false ? `<span class="chip">same gearing</span>` : `<span class="chip">first / n-a</span>`) : "—"}</td></tr>`).join("")}
@@ -2649,7 +2653,7 @@
         pk.textContent = `${Math.round(Math.abs(comb) * 100)}%`; pk.setAttribute("fill", sat ? "#e5414e" : "var(--txt)");
       }
       const tiles = host.querySelector("#lvTiles");
-      if (tiles) tiles.innerHTML = [[f.mph.toFixed(0), "mph"], [f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm, "rpm"], [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"], [f.hp, "hp"], [f.boost.toFixed(1), "boost psi"], [f.on ? `${f.cls} ${f.pi}` : "—", f.on ? `${(NAMES()[String(f.car)] || {}).name || "#" + f.car} · ${f.drv} ${f.cyl || ""}cyl` : "not driving"]]
+      if (tiles) tiles.innerHTML = [[f.mph.toFixed(0), "mph"], [f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm, "rpm"], [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"], [f.hp, "hp"], [f.boost.toFixed(1), "boost psi"], [f.on ? `${f.cls} ${f.pi}` : "—", f.on ? `${(NAMES()[String(f.car)] || {}).name || "#" + f.car} · ${f.drv} ${f.cyl || ""}cyl` : "not driving"], [f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "—", f.on && f.ev ? `${(f.dist / 1000).toFixed(2)} km · ${f.lapt ? f.lapt.toFixed(1) + " s" : ""}` : "mode"]]
         .map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("");
       const inp = host.querySelector("#lvInputs");
       if (inp) inp.innerHTML = `<div style="display:grid;grid-template-columns:60px 1fr;gap:4px 8px;font-size:11px;align-items:center">
@@ -2705,6 +2709,12 @@
       host.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; render(); }));
       host.querySelectorAll("[data-replica]").forEach((b) => b.addEventListener("click", () => { replica = b.dataset.replica; render(); }));
       bindNames();
+      host.querySelectorAll("[data-saveroute]").forEach((b) => b.addEventListener("click", () => {
+        const wrap = b.closest(".lab-route"); const v = wrap.querySelector("input").value.trim(); if (!v) return;
+        const key = wrap.dataset.key; const loc = JSON.parse(localStorage.getItem("fh6Routes") || "{}"); loc[key] = { name: v }; localStorage.setItem("fh6Routes", JSON.stringify(loc));
+        fetch(liveUrl + "/route", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: key, name: v, mode: wrap.dataset.mode }) }).catch(() => {});
+        render();
+      }));
       const sel = host.querySelector("#labSess"); if (sel) sel.addEventListener("change", () => { sIdx = +sel.value; carSel = null; donor = replica = null; render(); });
     }
     render();

@@ -380,6 +380,39 @@ def main():
             st["ladder_changed"] = (any(abs(lad[g] - prev["ladder"][g]) / prev["ladder"][g] > 0.04 for g in common) if common else None)
         stints.append(st)
     sess["stints"] = stints
+    # ---- events (timed modes) + route keys: CurrentLap>0 marks races / Rivals / time trials; free roam otherwise ----
+    routes = {}
+    try:
+        with open(os.path.join(ROOT, "data", "routes.json"), encoding="utf-8") as f: routes = json.load(f).get("routes", {})
+    except Exception: routes = {}
+    events = []; cur_ev = None; last_t = None
+    for r in live:
+        inev = r["CurrentLap"] > 0 or r["RacePosition"] > 0
+        if inev:
+            if cur_ev is None or (last_t is not None and r["t"] - last_t > 2.0):
+                if cur_ev: events.append(cur_ev)
+                cur_ev = {"rows": [r]}
+            else: cur_ev["rows"].append(r)
+            last_t = r["t"]
+        elif cur_ev is not None and last_t is not None and r["t"] - last_t > 2.0:
+            events.append(cur_ev); cur_ev = None
+    if cur_ev: events.append(cur_ev)
+    ev_out = []
+    for ev in events:
+        rs = ev["rows"]
+        if rs[-1]["t"] - rs[0]["t"] < 5: continue
+        start = next((q for q in rs if q["DistanceTraveled"] >= 0), rs[0])
+        sx, sz = start["PosX"], start["PosZ"]; ex, ez = rs[-1]["PosX"], rs[-1]["PosZ"]
+        dist = max(q["DistanceTraveled"] for q in rs); laps = max(q["LapNumber"] for q in rs)
+        pos = [q["RacePosition"] for q in rs if q["RacePosition"] > 0]
+        mode = "race" if (pos and (max(pos) > 1 or len(set(pos)) > 1)) else "timed solo (Rivals / time trial)"
+        if laps > 0: mode += " · lapped"
+        key = f"{int(round(sx / 50) * 50)}_{int(round(sz / 50) * 50)}"   # route family = where it starts (aborted runs share it)
+        ev_out.append({"t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "car": cid(rs[0]), "stint": rs[0].get("stint"), "mode": mode, "laps": laps,
+                       "best_lap": round(max((q["BestLap"] for q in rs), default=0), 3) or None, "last_lap": round(max((q["LastLap"] for q in rs), default=0), 3) or None,
+                       "distance_m": round(dist), "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": pos[-1] if pos else None,
+                       "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "route": (routes.get(key) or {}).get("name")})
+    sess["events"] = ev_out
     # ---- crests, top-speed pull, warm tires, temps medians, coverage + advice per config ----
     crests = []; top_pull = defaultdict(float); warm_n = defaultdict(int); temps_acc = defaultdict(lambda: {w: [] for w in W})
     prev_t = None
@@ -399,7 +432,7 @@ def main():
         c["coverage"] = coverage_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull, warm_frac)
         c["advice"] = advice_for(c["id"], cars, corners, launches, braking, bott, c["coverage"], temps_med)
         c["temps_med_f"] = {w: round(v) for w, v in temps_med.get(c["id"], {}).items()}
-    sess["summary"] = {"cars": len(cars), "configs": len(segments), "stints": len(stints), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
+    sess["summary"] = {"cars": len(cars), "configs": len(segments), "stints": len(stints), "events": len(ev_out), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
                        "front_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "front" and not c["drift"]),
                        "rear_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "rear" and not c["drift"]),
                        "drift_corners": sum(1 for c in corners if c["drift"])}

@@ -31,6 +31,7 @@ const db = {
   formulas: read("formulas.json"),
   gameAssets: read("game-assets.json"),
   carOrdinals: read("car-ordinals.json"),
+  routes: read("routes.json"),
   sessions: readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json")).sort()
     .map((f) => JSON.parse(readFileSync(join(root, "data", "sessions", f), "utf8"))),
   sources: read("sources.json"),

@@ -1,0 +1,5 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Learned map of event routes. Key = start position (PosX_PosZ rounded to 50 m) — the route family; length/laps are shown per event. FH6 Data Out has no track ordinal; a route is recognised by where it starts. Named once from the dashboard (POST /route on the daemon).",
+  "routes": {}
+}

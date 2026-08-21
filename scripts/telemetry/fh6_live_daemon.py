@@ -62,6 +62,7 @@ def compact(p, t_mono):
     return {
         "t": round(t_mono, 2), "on": p["IsRaceOn"], "car": p["CarOrdinal"], "cid": cid(p), "pi": p["CarPI"], "cls": CLASS.get(p["CarClass"], "?"), "drv": DRIVE.get(p["DrivetrainType"], "?"), "cyl": p["NumCylinders"],
         "gear": p["Gear"], "mph": round(p["Speed"] * 2.23694, 1), "rpm": round(p["CurrentEngineRpm"]), "maxrpm": round(p["EngineMaxRpm"]),
+        "ev": 1 if (p["CurrentLap"] > 0 or p["RacePosition"] > 0) else 0, "lapn": p["LapNumber"], "rpos": p["RacePosition"], "lapt": round(p["CurrentLap"], 2), "dist": round(p["DistanceTraveled"]),
         "lat": round(p["AccelX"] / G, 2), "lon": round(p["AccelZ"] / G, 2), "yaw": round(math.degrees(p["AngVelY"]), 1),
         "steer": p["Steer"], "thr": p["Accel"], "brk": p["Brake"], "hb": p["HandBrake"], "boost": round(p["Boost"], 1),
         "hp": round(p["Power"] / 745.7), "tq": round(p["Torque"] * 0.7376),
@@ -241,6 +242,14 @@ class H(BaseHTTPRequestHandler):
                 os.makedirs(os.path.dirname(tp), exist_ok=True)
                 with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags}, f, indent=2, ensure_ascii=False)
             ST.emit("tag", {"n": n, "label": lab}); ok = True
+        elif self.path.startswith("/route") and body.get("route_key") and body.get("name"):
+            rp = os.path.join(ROOT, "data", "routes.json")
+            try:
+                with open(rp, encoding="utf-8") as f: robj = json.load(f)
+            except Exception: robj = {"schema_version": "1.0.0", "routes": {}}
+            robj.setdefault("routes", {})[str(body["route_key"])] = {"name": str(body["name"]).strip()[:80], "source": f"dashboard {time.strftime('%Y-%m-%d')}", "mode": body.get("mode")}
+            with open(rp, "w", encoding="utf-8") as f: json.dump(robj, f, indent=2, ensure_ascii=False)
+            ok = True
         elif self.path.startswith("/build") and body.get("build_id") and body.get("label"):
             obj.setdefault("builds", {})[str(body["build_id"])] = {"label": str(body["label"]).strip(), "source": f"dashboard {time.strftime('%Y-%m-%d')}", "cid": body.get("cid")}; ok = save_names = True
         if save_names: names_save(obj)

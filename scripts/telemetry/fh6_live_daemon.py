@@ -188,7 +188,7 @@ def run_analysis(until=None, final=True):
         if os.path.exists(path):
             with open(path) as f: js = json.load(f)
             an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "temps_med_f", "live_s")} for c in js["cars"]],
-                  "courses": js.get("courses", [])[:4], "stints": [{k: st.get(k) for k in ("n", "id", "label", "t0", "t1")} for st in js.get("stints", [])][-20:]}
+                  "courses": js.get("courses", [])[:4], "stints": [{k: st.get(k) for k in ("n", "id", "label", "role", "t0", "t1")} for st in js.get("stints", [])][-20:]}
             with ST.lock: ST.session_json = js; ST.session_path = path; ST.analysis = an
             ST.emit("analysis", an)
             if final: ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})
@@ -250,14 +250,25 @@ class H(BaseHTTPRequestHandler):
                     if str(c["ordinal"]) == str(body["ordinal"]): c["name"] = obj["cars"][str(body["ordinal"])]["name"]
         elif self.path.startswith("/reset"):
             reset_session(); ok = True
-        elif self.path.startswith("/tag") and body.get("label") is not None:
-            lab = str(body["label"]).strip()[:80]; n = int(body.get("stint") or ST.stint)
-            with ST.lock: ST.stint_tags[str(n)] = {"label": lab, "t0": ST.stint_start}
+        elif (self.path.startswith("/tag") or self.path.startswith("/role")) and (body.get("label") is not None or body.get("role") is not None):
+            n = int(body.get("stint") or ST.stint)
+            with ST.lock:
+                cur = dict(ST.stint_tags.get(str(n)) or {})
+                if body.get("label") is not None: cur["label"] = str(body["label"]).strip()[:80]
+                if "role" in body:
+                    role = body["role"]
+                    # a role is exclusive: clear it from any other stint first
+                    if role in ("donor", "replica"):
+                        for k, v in ST.stint_tags.items():
+                            if isinstance(v, dict) and v.get("role") == role: v.pop("role", None)
+                    if role: cur["role"] = role
+                    else: cur.pop("role", None)
+                cur.setdefault("t0", ST.stint_start); ST.stint_tags[str(n)] = cur
             if ST.csv_path:
                 sid = os.path.splitext(os.path.basename(ST.csv_path))[0]; tp = os.path.join(ROOT, "data", "sessions", sid + ".tags.json")
                 os.makedirs(os.path.dirname(tp), exist_ok=True)
                 with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags}, f, indent=2, ensure_ascii=False)
-            ST.emit("tag", {"n": n, "label": lab}); ok = True
+            ST.emit("tag", {"n": n, "label": cur.get("label"), "role": cur.get("role")}); ok = True
         elif self.path.startswith("/mark-start") and body.get("name"):
             if ST.last_pos is None: ok = False
             else:

@@ -371,8 +371,9 @@ def main():
             lad[str(g)] = round(statistics.median(gl[g]) * 1000, 3)
         sc = [c for c in corners if c.get("stint") == sn and not c["drift"]]; sb = [b for b in braking if b.get("stint") == sn and b["mph_start"] >= 60]; sl = [l for l in launches if l.get("stint") == sn]
         med = lambda a: (sorted(a)[len(a) // 2] if a else None)
+        _tg = tags.get(str(sn)) if isinstance(tags.get(str(sn)), dict) else ({"label": tags.get(str(sn))} if tags.get(str(sn)) else {})
         st = {"n": sn, "id": k, "t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "live_s": round((rs[-1]["t"] - rs[0]["t"]), 1),
-              "label": (tags.get(str(sn)) or {}).get("label") if isinstance(tags.get(str(sn)), dict) else tags.get(str(sn)),
+              "label": _tg.get("label"), "role": _tg.get("role"),
               "corners": len(sc), "launches": len(sl), "braking": len(sb), "usi_med": med([c["usi"] for c in sc]), "first_red_front": sum(1 for c in sc if c["first_red"] and c["first_red"]["axle"] == "front"),
               "brake_fd_med": med([b["front_deficit"] for b in sb]), "brake_rd_med": med([b["rear_deficit"] for b in sb]), "launch_rear_slip": med([l["peak_slip_rear"] for l in sl]),
               "ladder": lad, "ladder_changed": None}
@@ -548,9 +549,26 @@ def main():
             per_run = defaultdict(list)
             for m in ms: per_run[m.get("stint")].append(m)
             runs = [{"stint": sn, "n": len(v), "mph_min": med([m["mph_min"] for m in v]), "usi": med([m["usi"] for m in v]), "first_red": max(["front", "rear", "none"], key=lambda a: sum(1 for m in v if (m["first_red"]["axle"] if m["first_red"] else "none") == a)), "lat_g": med([m["lat_g_peak"] for m in v])} for sn, v in sorted(per_run.items(), key=lambda kv: (kv[0] is None, kv[0]))]
+            # ---- driver vs tune: does this corner wash out because it's over-driven, or on every clean lap? ----
+            sat = [m for m in ms if m["first_red"]]; clean = [m for m in ms if not m["first_red"]]
+            limiter = "clean"; note = None
+            if sat:
+                over_by = (med([m["mph_in"] for m in sat]) - med([m["mph_in"] for m in clean])) if clean else None
+                hard_brake = sum(1 for m in sat if m.get("brake_max", 0) > 200 and (m["first_red"] or {}).get("phase") in (1, 2))
+                sat_share = len(sat) / nn
+                dom_ax = "front" if fr["front"] >= fr["rear"] else "rear"
+                if clean and over_by is not None and over_by >= 4:
+                    limiter = "driver"; note = f"washes out on the laps you carry ~{round(over_by)} mph more into it — brake earlier / slower entry, it's speed not setup"
+                elif sat_share >= 0.7 and cons >= 0.6:
+                    limiter = "tune"; note = (f"{dom_ax} gives up on essentially every lap at the same entry speed — {'front softer / mech balance up' if dom_ax == 'front' else 'rear softer / accel diff down'}")
+                elif hard_brake >= max(1, len(sat) // 2) and dom_ax == "front":
+                    limiter = "driver"; note = "front locks when you overlap brake + steering — release the brakes as you turn in (trail off)"
+                else:
+                    limiter = "mixed"; note = f"{dom_ax}-limited but inconsistent — drive it a few more times cleanly to separate technique from setup"
+            worst = limiter in ("tune", "driver", "mixed")
             corner_out.append({"id": f"C{i}", "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
                                "mph_min": med([m["mph_min"] for m in ms]), "mph_in": med([m["mph_in"] for m in ms]), "lat_g": med([m["lat_g_peak"] for m in ms]),
-                               "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis),
+                               "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
         course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode,

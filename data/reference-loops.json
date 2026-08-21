@@ -1,5 +1,1 @@
-{
-  "schema_version": "1.0.0",
-  "purpose": "User-defined free-roam test circuits (Course mode). Mark from the dashboard Live view.",
-  "loops": {}
-}
+{"schema_version":"1.0.0","loops":{}}

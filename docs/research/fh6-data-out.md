@@ -50,6 +50,15 @@ Researched: (A) the FH6 Data Out protocol — fields, format, setup, quirks; (B)
 
 **Author's pick:** A immediately — it costs Jett one setting toggle and a drive, and the first CSV answers the open questions below empirically. Then B, because it turns the battery's hardest tests (yaw damping, breakaway margin, damper judgment) from "feel + video" into measured curves, and recovers the gearing tab outright.
 
+## First live capture (2026-08-21, Xbox-app build) — results
+- ✅ Loopback exemption on `Microsoft.ForteBaseGame_8wekyb3d8bbwe` + Data Out 127.0.0.1:9876 → packets at **~139 pps** (frame rate). Layout self-check **259/259**: the 324-byte struct is correct on this build.
+- ✅ **IsRaceOn = 1 in free roam.** IsRaceOn = 0 frames ARE sent, fully zeroed (17,104 frames across menus/pauses/car swaps) — the stream never went silent (no gap > 0.25 s). The official "not sent during menus/pauses" is loose; detect non-driving by `IsRaceOn == 0`.
+- 🟡 Gear: **0 = reverse and neutral/stationary** (frames seen reversing, stationary, and idle-rolling); **11 = shift-in-progress transient** (339 frames at 24 m/s / 7,556 rpm clustered at upshifts).
+- ✅ CarClass enum is Horizon 0-based: an A 700 car reports 3 (D0 C1 B2 A3 S1 4 S2 5 X 6).
+- ✅ Impact frames show as lat-g spikes (6–10 g) — discard `|lat g| > 3 g` or `SmashableVelDiff > 0` frames, mirroring the friction-page rule.
+- ✅ Gear ratios recovered from WOT frames (1st→4th ratio ladder 1.00 / 1.42 / 1.84 / 2.36) — the gearing tab of a locked tune is now measurable.
+- Still open: `WheelInPuddle` type (no puddles driven), Peak% ≟ CombinedSlip×100 (needs a Friction-HUD clip during a capture), `CarGroup` semantics (47 seen on the A 700 car).
+
 ## Unknowns + stopping criteria
 - **Unresolved, settle on first capture:** (1) `WheelInPuddle` wire type — official FH6 says s32 0/1, FM doc and every FH6 parser read f32 depth (same bytes; the scaffold logs it as f32 and prints the raw value); (2) `IsRaceOn` value in free roam (tools disagree 0 vs 1); (3) whether FH6 goes fully silent when paused or emits zeroed frames; (4) gear encoding (0 = R per one parser; neutral unknown); (5) actual packet rate on Jett's PC (tracks FPS cap?); (6) whether Peak% on the Friction page == `TireCombinedSlip × 100`; (7) `CarGroup` value semantics (FH5 community category table probably applies — ❌).
 - **Could not verify:** the FM7 forum URL cited by one agent; "SimHub default port 5555" (it's DR Sim Manager's); nikidziuba parser; FH6 Tech's inference method (site unreachable). The official Forza forums closed July 2026 — the historic FH4/FH5 struct threads are gone except one Wayback capture.

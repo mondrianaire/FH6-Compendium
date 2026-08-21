@@ -46028,7 +46028,7 @@ window.FH6_DB = {
       }
     },
     "data_out_instrument": {
-      "status": "RESEARCHED 2026-08-19 (docs/research/fh6-data-out.md); capture scaffold written (scripts/telemetry/fh6_dataout_capture.py); first live capture pending",
+      "status": "LIVE 2026-08-21 — first capture succeeded on the Xbox-app build (loopback exemption applied by player); layout self-check 259/259; see first_capture",
       "what": "FH6 Settings > HUD and Gameplay > Data Out: one-way UDP stream, 324-byte fixed packet (FH4/FH5 layout, officially documented 2026-05-15), sent at frame rate while driving only; 127.0.0.1 supported; avoid ports 5200-5300.",
       "replaces_video_for": [
         "Friction page (TireSlipRatio/SlipAngle/CombinedSlip per wheel, normalized: |x|>1 = past the limit)",
@@ -46063,7 +46063,29 @@ window.FH6_DB = {
         "Peak% == CombinedSlip*100?",
         "Store-build loopback exemption needed?"
       ],
-      "setup_note": "Steam: nothing extra. Store/Game Pass: CheckNetIsolation LoopbackExempt -a -n=\"Microsoft.ForteBaseGame_8wekyb3d8bbwe\" (probable, by analogy). Port default 9876."
+      "setup_note": "Steam: nothing extra. Store/Game Pass: CheckNetIsolation LoopbackExempt -a -n=\"Microsoft.ForteBaseGame_8wekyb3d8bbwe\" (probable, by analogy). Port default 9876.",
+      "first_capture": {
+        "file": "captures/fh6_20260821_122523.csv (28,601 frames / 250 s at analysis time)",
+        "rate": "~139 packets/s while sending (median frame dt 7.2 ms) = render frame rate; 114 pps average incl. zeroed periods",
+        "layout": "324 bytes confirmed: |Velocity| == Speed on every sampled live frame; trailing byte 323 always 0",
+        "IsRaceOn": "=1 while driving in FREE ROAM (settled). =0 frames ARE SENT and are FULLY ZEROED (17,104 of them — menus/pause/car change): the official doc's 'not sent' is loose; the stream stays continuous (no gaps >0.25 s) and you detect pause/menu by IsRaceOn==0 or Speed==0&&CarOrdinal==0.",
+        "gear": "0 = reverse AND stationary/neutral-coast (1,518 live frames: 114 reversing, 125 stationary, rest rolling forward at idle rpm); 11 = shift-in-progress transient (339 frames at 24 m/s / 7,556 rpm, clustered around upshifts) — PROBABLE",
+        "CarClass": "A 700 car reported CarClass=3 -> Horizon 0-based enum D0 C1 B2 A3 S1=4 S2=5 X=6 confirmed for A",
+        "cars_seen": {
+          "338": "PI 800 S1 (brief)",
+          "3665": "PI 600 B (2021 Sierra Cars 700R per settings screenshot)",
+          "4168": "PI 700 A, RWD, 6 cyl, CarGroup 47, max rpm 9,500"
+        },
+        "impacts": "lat-g spikes of 6-10 g at t=13.3-13.4 s = physics jolt (no smashable); SmashableVelDiff max 0.21 m/s (tiny hit at 194 s). Rule: discard frames with |lat g| > 3 g or SmashableVelDiff > 0 — same as the friction-frame discard rule.",
+        "tires": "temps F live: fronts med 135/140 max 229/305; rears med 148 max 529 during a wheelspin episode (slip ratio -24.9 RL). Puddle fields all 0.0 (no puddles driven — wire type still unresolved). Rumble never 1; SurfaceRumble max 0.60.",
+        "gear_ratios_recovered": "WOT speed/rpm medians: 1st 2.225, 2nd 3.161 (x1.421), 3rd 4.102 (x1.844), 4th 5.246 (x2.358) m/s per krpm — the gearing tab is now directly measurable from a locked tune (mixed across the cars driven; redo per car).",
+        "still_open": [
+          "WheelInPuddle s32 vs f32 (drive through water)",
+          "Peak% == CombinedSlip*100 (needs Friction-HUD clip alongside a capture)",
+          "CarGroup enum meaning",
+          "gear 11 = neutral vs shift transient"
+        ]
+      }
     }
   },
   "partsEffects": {

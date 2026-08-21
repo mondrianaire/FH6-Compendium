@@ -2520,6 +2520,25 @@
         <div class="block" style="border-color:var(--warn,#e3b341)"><h3 style="margin-top:0">📎 HUD clips — the two things the stream can't carry</h3>
           <div class="card-grid"><div class="lab-slot"><img src="assets/telemetry/tires-misc.jpg" alt="">Tires, Misc. — hot pressures → cold = hot − 3.5 psi · live camber</div><div class="lab-slot"><img src="assets/telemetry/heat.jpg" alt="">Heat — inner / middle / outer → camber verdict</div></div></div>`;
     }
+    // ---- DECODE mode primitives: progress = test completeness ONLY; deliverable = the shop-standardized clone sheet ----
+    const STATCHIP = { measured: ["✅ measured", "#00d27a"], inferred: ["🟡 inferred", "#e3b341"], shop: ["🔍 shop check", "#2f81f7"] };
+    const decodePanel = (c, roleLbl) => {
+      const d = c.decode; if (!d) return "";
+      const col = d.pct >= 1 ? "#00d27a" : d.pct >= 0.6 ? "#e3b341" : "#e5414e";
+      return `<div class="card-row" style="margin-top:0"><strong>🧬 Decode progress — ${roleLbl || ""}${esc(carName(c) || "#" + c.ordinal)}</strong><span class="chip" style="border-color:${col};color:${col}">${d.pct >= 1 ? "ALL TESTS CAPTURED" : d.ready_n + "/" + d.total + " tests"}</span></div>
+        <div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${d.pct * 100}%;background:${col}"></i></div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">${d.tests.map((t) => `<span class="chip" title="${esc(t.why)} — unlocks: ${t.unlocks.join(", ")}" style="border-color:${t.ok ? "#00d27a" : "var(--warn,#e3b341)"};color:${t.ok ? "#00d27a" : "var(--warn,#e3b341)"}">${t.ok ? "✓" : "○"} ${t.label} ${t.have}/${t.need}</span>`).join("")}</div>
+        ${d.missing.length ? `<p class="why" style="font-size:10.5px;margin:5px 0 0">to finish the clone capture: <b>${d.missing.join(" · ")}</b> — anywhere, any road; only these tests gate the sheet</p>` : `<p class="why" style="font-size:10.5px;margin:5px 0 0;color:#00d27a">battery complete — the clone sheet is fully unlocked</p>`}`;
+    };
+    const cloneSheetHtml = (c) => {
+      const cs = c.clone_sheet; if (!cs) return "";
+      const gateLbl = Object.fromEntries((c.decode ? c.decode.tests : []).map((t) => [t.key, t.label]));
+      return `<h3 style="margin-top:0">📋 Clone sheet — ${esc(carName(c) || "#" + c.ordinal)} <span class="chip">✅ ${cs.counts.measured} measured · 🟡 ${cs.counts.inferred} inferred · 🔍 ${cs.counts.shop} shop · ⏳ ${cs.counts.pending} pending</span></h3>
+        <p class="why" style="font-size:11px;margin:2px 0 8px">${esc(cs.pi_note)}</p>
+        <div style="overflow-x:auto"><table style="font-size:11.5px"><thead><tr><th>shop menu</th><th>part</th><th>install / match</th><th>status</th><th style="min-width:200px">how / why</th></tr></thead><tbody>
+        ${cs.menus.map((m) => m.items.map((it, i) => { const sc = STATCHIP[it.status] || ["?", "var(--muted)"]; return `<tr>${i === 0 ? `<td rowspan="${m.items.length}" style="font-weight:700;color:var(--accent2);white-space:nowrap">${m.menu}</td>` : ""}<td style="white-space:nowrap">${it.item}</td><td>${it.pending ? `<span style="color:var(--muted)">⏳ pending — needs <b>${gateLbl[it.gate] || it.gate}</b></span>` : (it.value != null ? `<b>${esc(String(it.value))}</b>` : `<span style="color:var(--muted)">—</span>`)}</td><td style="white-space:nowrap"><span class="chip" style="border-color:${sc[1]};color:${sc[1]}">${sc[0]}</span></td><td class="why" style="font-size:10.5px">${it.note ? esc(it.note) : ""}</td></tr>`; }).join("")).join("")}
+        </tbody></table></div>`;
+    };
     function benchView(s) {
       // auto-pick donor/replica from run roles if the user set them (Live buttons), else fall back to first two cars
       const roleStint = (rl) => { const st = (s.stints || []).find((x) => x.role === rl); return st ? st.id + "#" + st.n : null; };
@@ -2564,7 +2583,8 @@
           </div>
           <div class="lab-rail" style="margin-top:10px">${kinds.map(([k, ok]) => `<span class="chip ${ok ? "on" : "missing"}">${ok ? "✓" : "○"} ${k}</span>`).join("")}</div>
         </div>
-        ${(s.courses || []).filter((co) => co.decode && (co.cars.includes(donor) || co.cars.includes(replica) || co.cars.includes(baseId(donor)) || co.cars.includes(baseId(replica)))).slice(0, 2).map((co) => `<div class="block">${courseBlock(co, s, "decode")}</div>`).join("")}
+        ${D && D.decode ? `<div class="block" style="border-color:#e3b341">${decodePanel(D, "🎯 DONOR · ")}</div>` : ""}
+        ${D && D.clone_sheet ? `<div class="block">${cloneSheetHtml(D)}</div>` : ""}
         <div class="lab-bench">
           <div><h3 style="margin-top:0;font-size:14px">⚙️ Gear ladder</h3>${(() => { const lad = (sel, c) => { const n = stintOf(sel); const st = n != null ? (s.stints || []).find((x) => x.n === n) : null; return st && st.ladder && Object.keys(st.ladder).length ? Object.entries(st.ladder).map(([g, v]) => [+g, v]) : c.gears.map((g) => [g.gear, g.mps_per_krpm]); }; return chart([{ pts: lad(donor, D), col: dC, label: "A" }, { pts: lad(replica, R), col: rC, label: "B" }], { xl: "gear", yl: "m/s per krpm", w: 380 }); })()}</div>
           <div><h3 style="margin-top:0;font-size:14px">🔧 Dyno (WOT frames)</h3>${chart([{ pts: D.dyno.map((d) => [d.rpm, d.hp]), col: dC, label: "donor hp" }, { pts: R.dyno.map((d) => [d.rpm, d.hp]), col: rC, label: "replica hp" }], { xl: "rpm", yl: "hp", w: 380 })}</div>
@@ -2608,7 +2628,7 @@
       const rn = co.name || ((((DB.routes || {}).routes) || {})[co.route_key] || {}).name || (JSON.parse(localStorage.getItem("fh6Routes") || "{}")[co.route_key] || {}).name || `route @ ${co.route_key.replace("_", ", ")}`;
       const cov = co.coverage; const present = cov.probes.filter((p) => p.present), absent = cov.probes.filter((p) => !p.present);
       const carsS = s || { cars: [], stints: [] };
-      const dec = co.decode, prof = co.profile, ctx = arguments[2] || "course";
+      const prof = co.profile;
       const BB = { heavy: "#e5414e", moderate: "#e3b341", light: "#2f81f7", absent: "#3a4250" };
       const DLBL = { low_corner: "low-speed corners", mid_corner: "medium corners", fast_corner: "fast sweepers", braking: "heavy braking", straight: "straights / top-end", elevation: "elevation" };
       const profileCard = prof ? `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
@@ -2617,15 +2637,9 @@
           ${prof.priority.length ? `<p class="why" style="font-size:11px;margin:2px 0"><b>Tune priority here:</b> ${prof.priority.join(" › ")}</p>` : ""}
           ${prof.notes.map((n) => `<p class="why" style="font-size:10.5px;margin:2px 0;color:var(--warn,#e3b341)">⚠ ${n}</p>`).join("")}
         </div>` : "";
-      const decodeCard = dec ? `<div style="margin:8px 0;padding:8px 10px;border:1px solid ${dec.pct >= 1 ? "#00d27a" : "var(--line)"};border-radius:8px;background:var(--bg2)">
-          <div class="card-row" style="margin-top:0"><strong style="font-size:12px">🧬 Decode battery — all tests needed to clone the build</strong><span class="chip" style="border-color:${dec.pct >= 1 ? "#00d27a" : dec.pct >= 0.6 ? "#e3b341" : "#e5414e"};color:${dec.pct >= 1 ? "#00d27a" : dec.pct >= 0.6 ? "#e3b341" : "#e5414e"}">${dec.pct >= 1 ? "DECODE-READY" : "decode " + Math.round(dec.pct * 100) + "%"} · ${dec.ready_n}/${dec.total}</span></div>
-          <div class="lab-bar" style="height:6px;margin:5px 0"><i style="width:${dec.pct * 100}%;background:${dec.pct >= 1 ? "#00d27a" : dec.pct >= 0.6 ? "#e3b341" : "#e5414e"}"></i></div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px">${dec.tests.map((t) => `<span class="chip" title="${esc(t.why)} — ${t.have}/${t.need}" style="border-color:${t.ok ? "#00d27a" : "var(--warn,#e3b341)"};color:${t.ok ? "#00d27a" : "var(--warn,#e3b341)"}">${t.ok ? "✓" : "○"} ${t.label}</span>`).join("")}</div>
-          ${dec.missing.length ? `<p class="why" style="font-size:10.5px;margin:5px 0 0">still needed: <b>${dec.missing.join(" · ")}</b> — this loop can't provide these; drive them on a stretch that can (long straight for dyno/top-end, a crested road for dampers)</p>` : `<p class="why" style="font-size:10.5px;margin:5px 0 0;color:#00d27a">every decode test captured — signature complete, ready to clone</p>`}
-        </div>` : "";
       return `<div class="lab-corner" style="border-left:4px solid var(--accent2)">
         <div class="card-row" style="margin-top:0"><strong>${co.is_loop ? "📍" : "🏟"} ${esc(rn)}</strong><span class="chip" style="border-color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"};color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}">course confidence ${Math.round(cov.overall * 100)}% · ${co.runs} lap${co.runs === 1 ? "" : "s"}${co.best_lap ? " · best " + co.best_lap.toFixed(3) + " s" : ""}</span></div>
-        ${ctx === "decode" ? decodeCard : profileCard}
+        ${profileCard}
         <div class="lab-bar" style="height:8px;margin:6px 0 8px"><i style="width:${cov.overall * 100}%;background:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}"></i></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:11px">${present.map((p) => `<div title="${esc(p.hint)}"><div style="display:flex;justify-content:space-between"><span>${p.ready ? "✓ " : ""}${p.label}</span><b style="color:${p.ready ? "#00d27a" : "var(--muted)"}">${p.count}/${p.required} <span style="font-weight:400;color:var(--muted)">· ${Math.round(p.confidence * 100)}%</span></b></div><div class="lab-bar"><i style="width:${p.confidence * 100}%;background:${p.ready ? "#00d27a" : "#2f81f7"}"></i></div>${p.confidence < 0.97 ? `<span class="why" style="font-size:10px">${p.hint}</span>` : ""}</div>`).join("")}</div>
         ${absent.length ? `<p class="why" style="font-size:10.5px;margin:6px 0 0">not on this course: ${absent.map((p) => p.label).join(" · ")} — excluded from the goal</p>` : ""}
@@ -2649,7 +2663,9 @@
       const cur = live.frame && live.frame.cid; const order = an.cars.slice().sort((a, b) => (b.id === cur) - (a.id === cur));
       const sS = { cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, an.cars.find((y) => y.id === x.id) || {})) : an.cars, stints: an.stints || [] };
       const courses = courseMode() ? (an.courses || []).slice(0, 2) : [];
-      el.innerHTML = `${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — scoped to the event you're running <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"}</span></h3><div class="card-grid">${courses.map((co) => courseBlock(co, sS)).join("")}</div></div>` : ""}
+      const donorSt = (an.stints || []).find((x) => x.role === "donor");
+      const donorCar = donorSt ? an.cars.find((c) => c.id === donorSt.id) : null;
+      el.innerHTML = `${donorCar && donorCar.decode ? `<div class="block" style="border-color:#e3b341">${decodePanel(donorCar, "🎯 DONOR · ")}${donorCar.decode.pct >= 1 ? `<p class="why" style="font-size:11px;margin:6px 0 0;color:#00d27a">clone sheet ready — open the <b>Decode Bench</b> for the full upgrade sheet</p>` : ""}</div>` : ""}${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — scoped to the event you're running <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"}</span></h3><div class="card-grid">${courses.map((co) => courseBlock(co, sS)).join("")}</div></div>` : ""}
         <div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session <span class="chip">${an.summary.corners} corners · ${an.summary.launches} launches · ${an.summary.braking} stops</span></h3>
         <div class="card-grid">${order.map((c) => adviceBlock(c, sS)).join("")}</div></div>`;
     }

@@ -215,6 +215,83 @@ def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med, pro
     firm.sort(key=lambda a: -(a["severity"] * a["confidence"] * wt(a))); opn.sort(key=lambda a: -(a["confidence"] * wt(a)))
     return firm + opn
 
+def decode_battery_for(cid_, cars, corners, launches, braking, crests, pulses, top_pull):
+    """DECODE progress = completeness of the tests needed to clone this build. Per car, session-wide:
+    tests count wherever they were driven — the loop is a convenience, not a requirement."""
+    c = cars.get(cid_) or {}
+    grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]
+    gl = {g["gear"]: g["n"] for g in (c.get("gears") or [])}
+    mx = max(gl, default=0)
+    dyno = c.get("dyno") or []; lo = ((c.get("idle_rpm") or 1000) + 1500) // 250 * 250; hi = 0.96 * (c.get("max_rpm") or 0)
+    dbins = [b for b in range(int(lo), int(hi), 250)] or [lo]; have = {d["rpm"] for d in dyno}
+    TESTS = [
+        ("launch", "Standing launch", sum(1 for x in launches if x["car"] == cid_), 1, "mass index · diff center split · accel spin", ["Weight (mass index)"]),
+        ("gears", "Full gear ladder", sum(1 for g in gl if gl[g] >= 15), max(mx, 1), "WOT time in every gear", ["Transmission", "Gear ratios (tune)"]),
+        ("dyno", "Dyno rev sweep", sum(1 for b in dbins if b in have), len(dbins), "full-throttle through the whole rev range", ["Total output target", "Aspiration"]),
+        ("top", "Top-speed pull", 1 if top_pull.get(cid_, 0) >= 5 else 0, 1, "hold top gear WOT 5 s", ["Gear ratios (tune)", "Aero presence hint"]),
+        ("brake", "Hard stops from 80+", sum(1 for x in braking if x["car"] == cid_ and x["mph_start"] >= 80), 2, "threshold brake — balance / lock threshold", ["Brakes"]),
+        ("hairpin", "Hairpin", sum(1 for x in grip if x["mph_min"] < 45), 1, "low-speed mechanical balance", ["Springs / ARBs (behaviour)"]),
+        ("medium", "Medium corner", sum(1 for x in grip if 45 <= x["mph_min"] <= 85), 1, "mid-speed balance", ["Springs / ARBs (behaviour)"]),
+        ("fast", "Fast sweeper", sum(1 for x in grip if x["mph_min"] > 85), 1, "high-speed / aero balance", ["Aero presence hint"]),
+        ("crest", "Crest / bump", sum(1 for x in crests if x["car"] == cid_), 1, "spring & damper vertical behaviour", ["Dampers (behaviour)"]),
+        ("wiggle", "Steering pulses", sum(1 for x in pulses if x["car"] == cid_), 3, "yaw damping (experimental)", ["Dampers (behaviour)"]),
+    ]
+    tests = [{"key": k, "label": lb, "have": hv, "need": nd, "ok": hv >= nd, "why": why, "unlocks": ul} for k, lb, hv, nd, why, ul in TESTS]
+    ready = sum(1 for t in tests if t["ok"])
+    return {"ready_n": ready, "total": len(tests), "pct": round(ready / len(tests), 2), "missing": [t["label"] for t in tests if not t["ok"]], "tests": tests}
+
+def clone_sheet_for(c, bat):
+    """The decode deliverable: a standardized upgrade sheet organized like the actual in-game upgrade shop menus.
+    Each row = what to install/match, with status: measured (stream fact) / inferred (high-confidence) / shop (needs a shop or HUD check)."""
+    ok = {t["key"]: t["ok"] for t in bat["tests"]}
+    sig = c.get("sig") or {}
+    def row(item, value, status, note=None, gate=None):
+        pend = bool(gate) and not ok.get(gate, False)
+        return {"item": item, "value": None if pend else value, "status": status, "note": note, "gate": gate, "pending": pend}
+    boost = sig.get("boost_max") or 0
+    asp_v = (f"forced induction — peak {boost} psi" if boost > 0.5 else "naturally aspirated (0 psi all session)")
+    asp_n = ("boost ramp shape names the type: laggy = turbo, rpm-linear = centrifugal, flat = positive-displacement" if boost > 0.5 else "any NA power upgrades allowed; no turbo/supercharger installed")
+    lad = c.get("gears") or []
+    lad_v = " · ".join(f"g{g['gear']} {round(g['mps_per_krpm'] * 2.237, 1)}" for g in lad) + " mph/krpm" if lad else None
+    menus = [
+        {"menu": "Conversions", "items": [
+            row("Engine", f"{c['cyl']}-cyl · redline {c['max_rpm']} rpm · idle {c['idle_rpm']}", "measured", "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which"),
+            row("Drivetrain", c["drivetrain"], "measured", "install the drivetrain swap only if the stock layout differs"),
+            row("Aspiration", asp_v, "measured" if boost > 0.5 or ok.get("dyno") else "inferred", asp_n, "dyno" if boost <= 0.5 else None),
+            row("Body kit", None, "shop", "not visible in telemetry — check visually"),
+        ]},
+        {"menu": "Engine", "items": [
+            row("Total output target", (f"{sig.get('hp_peak')} hp @ {sig.get('rpm_at_peak')} rpm · {sig.get('tq_peak')} lb-ft" if sig.get("hp_peak") else None), "measured",
+                f"any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI {c['pi']}", "dyno"),
+        ]},
+        {"menu": "Platform & Handling", "items": [
+            row("Brakes", "race brakes", "inferred", "required for the brake tabs the donor tune uses — assume race"),
+            row("Springs & dampers", "race springs", "inferred", "required for spring/damper tabs — assume race; behaviour match happens on the Bench"),
+            row("Anti-roll bars", "race ARBs", "inferred", "required for ARB tab — assume race"),
+            row("Weight (mass index)", (f"~{sig.get('mass_idx')} (relative index)" if sig.get("mass_idx") else None), "inferred", "brackets the weight-reduction tier once compared against stock", "launch"),
+        ]},
+        {"menu": "Drivetrain", "items": [
+            row("Transmission", (f"{sig.get('gear_count')}-speed → race {sig.get('gear_count')}-speed" if sig.get("gear_count") else None), "measured", None, "gears"),
+            row("Gear ratios (tune)", lad_v, "measured", "tune-side: set final drive + per-gear until the WOT ladder matches these exactly", "gears"),
+            row("Differential", "race differential", "inferred", "required for accel/decel lock tabs — assume race"),
+            row("Clutch / driveline", None, "shop", "no telemetry signature — PI budget usually decides these"),
+        ]},
+        {"menu": "Tires & Rims", "items": [
+            row("Compound", None, "shop", "My Cars pane shows it — one screenshot, or the 20-s HUD clip"),
+            row("Front / rear width", None, "shop", "shop INSTALLED tiles only — the Centenario lesson"),
+            row("Rims / track width", None, "shop", "rim style cosmetic; track width from shop tiles"),
+        ]},
+        {"menu": "Aero & Appearance", "items": [
+            row("Front aero", None, "shop", "fast-sweeper balance hints presence, never the exact part — check shop/visual"),
+            row("Rear wing", None, "shop", "same — speed-binned lat-g hints presence only"),
+        ]},
+    ]
+    counts = {"measured": 0, "inferred": 0, "shop": 0, "pending": 0}
+    for m in menus:
+        for it in m["items"]:
+            counts["pending" if it["pending"] else it["status"]] += 1
+    return {"menus": menus, "counts": counts, "pi": c["pi"], "pi_note": f"cross-check: every proposed parts list must sum to PI {c['pi']} — a mismatch means a missed part (usually widths or aero)"}
+
 def main():
     path = sys.argv[1]
     outdir = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else os.path.join(ROOT, "data", "sessions")
@@ -525,6 +602,8 @@ def main():
     for c in sess["cars"]:
         c["coverage"] = coverage_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull, warm_frac)
         c["advice"] = advice_for(c["id"], cars, corners, launches, braking, bott, c["coverage"], temps_med)
+        c["decode"] = decode_battery_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull)
+        c["clone_sheet"] = clone_sheet_for(c, c["decode"])
         c["temps_med_f"] = {w: round(v) for w, v in temps_med.get(c["id"], {}).items()}
     # ---- course mode: per route family, scope coverage + advice to the event windows, attach per-run lap times ----
     COURSE_PROBES = [("hairpin", "Hairpins", 3), ("medium", "Medium corners", 3), ("fast", "Fast sweepers", 3), ("flick", "Chicane flicks", 2), ("launch", "Standing starts", 2), ("brake", "Hard stops from 80+", 3), ("crest", "Crests", 2)]

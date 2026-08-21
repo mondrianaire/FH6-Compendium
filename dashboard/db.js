@@ -46026,6 +46026,44 @@ window.FH6_DB = {
           "fixes": "Front camber toward -1.5/-2.5 static, pressures down (F -3/-4, R -4/-6) to kill the mid-session balance migration. Slider-only — needs a replica fork (locked)."
         }
       }
+    },
+    "data_out_instrument": {
+      "status": "RESEARCHED 2026-08-19 (docs/research/fh6-data-out.md); capture scaffold written (scripts/telemetry/fh6_dataout_capture.py); first live capture pending",
+      "what": "FH6 Settings > HUD and Gameplay > Data Out: one-way UDP stream, 324-byte fixed packet (FH4/FH5 layout, officially documented 2026-05-15), sent at frame rate while driving only; 127.0.0.1 supported; avoid ports 5200-5300.",
+      "replaces_video_for": [
+        "Friction page (TireSlipRatio/SlipAngle/CombinedSlip per wheel, normalized: |x|>1 = past the limit)",
+        "Suspension page (NormalizedSuspensionTravel + meters)",
+        "Body Acceleration (AccelX/Z, yaw rate)",
+        "General (throttle/brake/steer/gear/rpm/speed/power/torque/boost)",
+        "one bulk tire temp per wheel (F)"
+      ],
+      "still_HUD_only": [
+        "tire PRESSURE",
+        "inner/middle/outer temps (camber verdicts)",
+        "live camber",
+        "wear"
+      ],
+      "unlocks": [
+        "automatic phase segmentation + axle-by-phase understeer index",
+        "breakaway-margin and yaw-damping tests as measured curves (AngVelY decay)",
+        "braking-floor via wheel-speed deficit",
+        "launch slip-ratio traces",
+        "damper-velocity histograms (d/dt travel)",
+        "GEARING TAB RECOVERY from WOT speed/rpm per gear",
+        "dyno reconstruction to verify engine decodes",
+        "session tagging by CarOrdinal/PI/class/drivetrain"
+      ],
+      "protocol": "Hybrid: Data Out for dynamics + a 20 s HUD clip (Tires Misc + Heat) for pressure/camber, aligned by TimestampMS.",
+      "open_empirical": [
+        "WheelInPuddle s32 vs f32",
+        "IsRaceOn in free roam",
+        "silent vs zeroed when paused",
+        "gear encoding (0=R?)",
+        "packet rate on this PC",
+        "Peak% == CombinedSlip*100?",
+        "Store-build loopback exemption needed?"
+      ],
+      "setup_note": "Steam: nothing extra. Store/Game Pass: CheckNetIsolation LoopbackExempt -a -n=\"Microsoft.ForteBaseGame_8wekyb3d8bbwe\" (probable, by analogy). Port default 9876."
     }
   },
   "partsEffects": {

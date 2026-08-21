@@ -2614,7 +2614,7 @@
       const se = host.querySelector("#lvSession");
       if (se) se.innerHTML = live.session ? `<p class="why" style="font-size:12px;margin:8px 0 0">📦 Session analyzed: <strong>${live.session.id}</strong> — ${live.session.summary ? `${live.session.summary.corners} corners · ${live.session.summary.launches} launches · ${live.session.summary.braking} brake events` : ""} ${live.loaded === live.session.id ? `<button class="lab-mode" id="lvOpen">open in Lab Run</button>` : "(loading…)"}</p>` : "";
       const ob = host.querySelector("#lvOpen"); if (ob) ob.addEventListener("click", () => { sIdx = sessions.findIndex((x) => x.id === live.loaded); mode = "run"; carSel = null; render(); });
-      const un = host.querySelector("#lvUnknown"); if (un) { un.innerHTML = live.cars.filter((c) => !carName(c)).map(nameUI).join(""); bindNames(); }
+      const un = host.querySelector("#lvUnknown"); if (un) { const seen = new Set(); un.innerHTML = live.cars.filter((c) => !carName(c) && !seen.has(c.ordinal) && seen.add(c.ordinal)).map(nameUI).join(""); bindNames(); }
     }
     function paintFrame() {
       const f = live.frame; if (!f || !host.querySelector("#lvCircles")) return;

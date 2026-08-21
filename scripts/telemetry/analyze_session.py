@@ -432,7 +432,41 @@ def main():
         c["coverage"] = coverage_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull, warm_frac)
         c["advice"] = advice_for(c["id"], cars, corners, launches, braking, bott, c["coverage"], temps_med)
         c["temps_med_f"] = {w: round(v) for w, v in temps_med.get(c["id"], {}).items()}
-    sess["summary"] = {"cars": len(cars), "configs": len(segments), "stints": len(stints), "events": len(ev_out), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
+    # ---- course mode: per route family, scope coverage + advice to the event windows, attach per-run lap times ----
+    COURSE_PROBES = [("hairpin", "Hairpins", 3), ("medium", "Medium corners", 3), ("fast", "Fast sweepers", 3), ("flick", "Chicane flicks", 2), ("launch", "Standing starts", 2), ("brake", "Hard stops from 80+", 3), ("crest", "Crests", 2)]
+    courses = {}
+    for e in ev_out:
+        co = courses.setdefault(e["route_key"], {"route_key": e["route_key"], "name": e["route"], "events": [], "cars": []})
+        lab = next((st["label"] for st in stints if st["n"] == e.get("stint")), None)
+        co["events"].append({"t0": e["t0"], "t1": e["t1"], "car": e["car"], "stint": e.get("stint"), "label": lab, "laps": e["laps"], "best_lap": e["best_lap"], "last_lap": e["last_lap"], "duration_s": e["duration_s"], "distance_m": e["distance_m"], "mode": e["mode"], "pos_final": e["pos_final"]})
+        if e["car"] not in co["cars"]: co["cars"].append(e["car"])
+    def inwin(t, evs): return any(ev["t0"] <= t <= ev["t1"] for ev in evs)
+    course_out = []
+    for key, co in courses.items():
+        evs = co["events"]; nev = len(evs)
+        cc = [c for c in corners if inwin(c["t0"], evs) and not c["drift"]]; ll = [l for l in launches if inwin(l["t"], evs)]; bb = [b for b in braking if inwin(b["t"], evs)]; cr = [x for x in crests if inwin(x["t"], evs)]
+        counts = {"hairpin": sum(1 for c in cc if c["mph_min"] < 45), "medium": sum(1 for c in cc if 45 <= c["mph_min"] <= 85), "fast": sum(1 for c in cc if c["mph_min"] > 85),
+                  "flick": sum(1 for a, b in zip(cc, cc[1:]) if a["dir"] != b["dir"] and 0 <= b["t0"] - a["t1"] <= 2.5), "launch": len(ll), "brake": sum(1 for b in bb if b["mph_start"] >= 80), "crest": len(cr)}
+        probes = []; num = den = 0.0
+        for k, label, req in COURSE_PROBES:
+            nk = counts[k]; present = (nk / max(nev, 1)) >= 0.5 or nk >= 2
+            if present:
+                conf = strength(nk, req); ready = nk >= req
+                probes.append({"key": k, "label": label, "count": nk, "required": req, "confidence": round(conf, 2), "ready": ready, "present": True, "hint": (f"{max(0, req - nk)} more on this course" if not ready else ("saturated" if conf >= 0.97 else "verdict-ready — more laps sharpen it"))})
+                num += conf; den += 1
+            else:
+                probes.append({"key": k, "label": label, "count": nk, "required": req, "confidence": None, "ready": False, "present": False, "hint": "not on this course"})
+        best = min((e["best_lap"] for e in evs if e["best_lap"]), default=None)
+        for e in evs: e["delta_s"] = round(e["best_lap"] - best, 3) if (best and e["best_lap"]) else None
+        advice_by_car = {}
+        for cid_ in co["cars"]:
+            cov_stub = {"overall": round(num / den, 2) if den else 0.0, "probes": probes}
+            advice_by_car[cid_] = advice_for(cid_, cars, cc, ll, bb, [x for x in bott if inwin(x["t"], evs)], cov_stub, temps_med)
+        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts,
+                           "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
+    course_out.sort(key=lambda c: -c["last_t"])
+    sess["courses"] = course_out
+    sess["summary"] = {"cars": len(cars), "configs": len(segments), "stints": len(stints), "events": len(ev_out), "courses": len(course_out), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
                        "front_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "front" and not c["drift"]),
                        "rear_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "rear" and not c["drift"]),
                        "drift_corners": sum(1 for c in corners if c["drift"])}

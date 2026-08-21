@@ -172,7 +172,8 @@ def run_analysis(until=None, final=True):
         path = os.path.join(outdir, sid + ".json")
         if os.path.exists(path):
             with open(path) as f: js = json.load(f)
-            an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "temps_med_f", "live_s")} for c in js["cars"]]}
+            an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "temps_med_f", "live_s")} for c in js["cars"]],
+                  "courses": js.get("courses", [])[:4], "stints": [{k: st.get(k) for k in ("n", "id", "label", "t0", "t1")} for st in js.get("stints", [])][-20:]}
             with ST.lock: ST.session_json = js; ST.session_path = path; ST.analysis = an
             ST.emit("analysis", an)
             if final: ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})

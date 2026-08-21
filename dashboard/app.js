@@ -2495,7 +2495,8 @@
       const adviceCars = s.cars.filter((c) => c.coverage && (!carSel || c.id === carSel));
       return `
         <div class="lab-tiles">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
-        ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — per car</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : ""}
+        ${(s.courses || []).length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — per route: scoped coverage, lap times per run, scoped suggestions</h3><div class="card-grid">${s.courses.filter((co) => !carSel || co.cars.includes(carSel)).map((co) => courseBlock(co, s)).join("")}</div></div>` : ""}
+        ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session, per car</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : ""}
         ${(s.events || []).length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏆 Events — timed modes detected (races · Rivals · time trials)</h3>
           <div style="overflow-x:auto"><table><thead><tr><th>window</th><th>car</th><th>mode</th><th>laps</th><th>length</th><th>best lap</th><th>final pos</th><th>route</th></tr></thead><tbody>
             ${s.events.map((e) => { const rn = e.route || ((((DB.routes || {}).routes) || {})[e.route_key] || {}).name || (JSON.parse(localStorage.getItem("fh6Routes") || "{}")[e.route_key] || {}).name; return `<tr style="border-left:3px solid ${carCol(s, e.car)}"><td>${e.t0}–${e.t1}s (${e.duration_s}s)</td><td>${carLbl(s, e.car).split(" · ").slice(0, 2).join(" · ")}</td><td>${e.mode}</td><td>${e.laps || "—"}</td><td>${(e.distance_m / 1000).toFixed(2)} km</td><td>${e.best_lap ? e.best_lap.toFixed(3) + " s" : "—"}</td><td>${e.pos_final ?? "—"}</td><td>${rn ? `<b>${esc(rn)}</b>` : `<span class="lab-route" data-key="${e.route_key}" data-mode="${esc(e.mode)}"><input placeholder="name this route (start ${e.start.join(",")})" style="min-width:180px;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"> <button class="lab-mode" data-saveroute style="padding:3px 8px;font-size:11px">save</button></span>`}</td></tr>`; }).join("")}
@@ -2597,13 +2598,34 @@
         ${open.length ? `<div style="margin-top:10px;border-top:1px dashed var(--line);padding-top:8px"><div style="font-size:11px;color:var(--warn,#e3b341);font-weight:700">🔍 Further testing needed — evidence is split</div>${open.map((a) => `<div style="margin:6px 0"><div style="font-size:12px">${a.text}</div><div class="why" style="font-size:10.5px">${a.evidence} · uncertainty ${Math.round(a.confidence * 100)}%</div><div class="chips" style="margin-top:3px">${(a.needs || []).map((k) => `<span class="chip" style="border-color:var(--warn,#e3b341);color:var(--warn,#e3b341)">drive: ${PLBL[k] || k}</span>`).join("")}</div></div>`).join("")}</div>` : ""}
       </div>`;
     };
+    // course mode card: scoped coverage (present probes only), per-run lap times, scoped suggestions per car
+    const courseBlock = (co, s) => {
+      const rn = co.name || ((((DB.routes || {}).routes) || {})[co.route_key] || {}).name || (JSON.parse(localStorage.getItem("fh6Routes") || "{}")[co.route_key] || {}).name || `route @ ${co.route_key.replace("_", ", ")}`;
+      const cov = co.coverage; const present = cov.probes.filter((p) => p.present), absent = cov.probes.filter((p) => !p.present);
+      const carsS = s || { cars: [], stints: [] };
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent2)">
+        <div class="card-row" style="margin-top:0"><strong>🏟 ${esc(rn)}</strong><span class="chip" style="border-color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"};color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}">course confidence ${Math.round(cov.overall * 100)}% · ${co.runs} run${co.runs === 1 ? "" : "s"}${co.best_lap ? " · best " + co.best_lap.toFixed(3) + " s" : ""}</span></div>
+        <div class="lab-bar" style="height:8px;margin:6px 0 8px"><i style="width:${cov.overall * 100}%;background:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}"></i></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:11px">${present.map((p) => `<div title="${esc(p.hint)}"><div style="display:flex;justify-content:space-between"><span>${p.ready ? "✓ " : ""}${p.label}</span><b style="color:${p.ready ? "#00d27a" : "var(--muted)"}">${p.count}/${p.required} <span style="font-weight:400;color:var(--muted)">· ${Math.round(p.confidence * 100)}%</span></b></div><div class="lab-bar"><i style="width:${p.confidence * 100}%;background:${p.ready ? "#00d27a" : "#2f81f7"}"></i></div>${p.confidence < 0.97 ? `<span class="why" style="font-size:10px">${p.hint}</span>` : ""}</div>`).join("")}</div>
+        ${absent.length ? `<p class="why" style="font-size:10.5px;margin:6px 0 0">not on this course: ${absent.map((p) => p.label).join(" · ")} — excluded from the goal</p>` : ""}
+        <div style="overflow-x:auto;margin-top:8px"><table style="font-size:11px"><thead><tr><th>run</th><th>car</th><th>label</th><th>lap</th><th>Δ best</th><th>mode</th></tr></thead><tbody>
+          ${co.events.slice().reverse().map((e) => `<tr><td>${e.stint ?? "—"}</td><td>${carLbl(carsS, e.car).split(" · ")[0]}</td><td>${e.label ? `<b>${esc(e.label)}</b>` : `<span class="why">—</span>`}</td><td>${e.best_lap ? e.best_lap.toFixed(3) + " s" : `${e.duration_s}s · ${(e.distance_m / 1000).toFixed(2)} km`}</td><td>${e.delta_s == null ? "—" : e.delta_s === 0 ? `<b style="color:#00d27a">best</b>` : `<span style="color:${e.delta_s > 0 ? "#e5414e" : "#00d27a"}">${e.delta_s > 0 ? "+" : ""}${e.delta_s.toFixed(3)}</span>`}</td><td>${e.mode.replace("timed solo (Rivals / time trial)", "solo")}</td></tr>`).join("")}
+        </tbody></table></div>
+        ${Object.entries(co.advice_by_car || {}).map(([cidk, adv]) => { const firm = adv.filter((a) => !a.open).slice(0, 4), open = adv.filter((a) => a.open); return `<div style="margin-top:8px"><div style="font-size:11px;color:var(--muted)">${carLbl(carsS, cidk)}</div>
+          ${firm.map((a) => `<div style="display:flex;gap:8px;align-items:flex-start;margin:5px 0"><span class="lab-light" style="background:${SEV[a.severity]};margin-top:4px"></span><div style="flex:1"><div style="font-size:12px"><strong>${a.text}</strong></div><div class="why" style="font-size:10.5px">${a.evidence} · confidence ${Math.round(a.confidence * 100)}%</div></div></div>`).join("") || `<p class="why" style="font-size:11px;margin:4px 0">no firm suggestions on this course yet</p>`}
+          ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top:4px">🔍 ${open.map((a) => a.text).join(" · ")}</div>` : ""}</div>`; }).join("")}
+      </div>`;
+    };
     function paintAdvice() {
       const el = host.querySelector("#lvAdvice"); if (!el) return;
       const an = live.analysis;
       if (!an || !an.cars || !an.cars.length) { el.innerHTML = `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px">first analysis after ~20 s of driving…</p></div>`; return; }
       const cur = live.frame && live.frame.cid; const order = an.cars.slice().sort((a, b) => (b.id === cur) - (a.id === cur));
-      el.innerHTML = `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"} · ${an.summary.corners} corners · ${an.summary.launches} launches · ${an.summary.braking} stops</span></h3>
-        <div class="card-grid">${order.map((c) => adviceBlock(c, { cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, an.cars.find((y) => y.id === x.id) || {})) : an.cars })).join("")}</div></div>`;
+      const sS = { cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, an.cars.find((y) => y.id === x.id) || {})) : an.cars, stints: an.stints || [] };
+      const courses = (an.courses || []).slice(0, 2);
+      el.innerHTML = `${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — scoped to the event you're running <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"}</span></h3><div class="card-grid">${courses.map((co) => courseBlock(co, sS)).join("")}</div></div>` : ""}
+        <div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session <span class="chip">${an.summary.corners} corners · ${an.summary.launches} launches · ${an.summary.braking} stops</span></h3>
+        <div class="card-grid">${order.map((c) => adviceBlock(c, sS)).join("")}</div></div>`;
     }
     function liveView() {
       return `

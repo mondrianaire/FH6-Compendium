@@ -279,7 +279,9 @@ def main():
                 usi = statistics.mean([(abs(r["SlipAngleFL"]) + abs(r["SlipAngleFR"])) / 2 - (abs(r["SlipAngleRL"]) + abs(r["SlipAngleRR"])) / 2 for r in mid]) if mid else 0
                 drift = statistics.mean([max(abs(r["CombinedSlipRL"]), abs(r["CombinedSlipRR"])) for r in seg]) > 2.5
                 v_in = seg[0]["speed_mph"]; v_min = min(r["speed_mph"] for r in seg)
+                ipk = max(range(len(L)), key=lambda kk: abs(L[kk])); apx = seg[ipk]
                 corners.append({"t0": round(seg[0]["t"], 1), "t1": round(seg[-1]["t"], 1), "car": cid(seg[0]), "dir": "R" if sign > 0 else "L",
+                                "apex": [round(apx["PosX"]), round(apx["PosZ"])], "dist": round(apx["DistanceTraveled"]), "mph_apex": round(apx["speed_mph"]),
                                 "mph_in": round(v_in), "mph_min": round(v_min), "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
                                 "drift": drift, "kink": v_min > 85 and peak < 0.9, "brake_max": max([r["Brake"] for r in pre + seg] or [0]), "hb": any(r["HandBrake"] > 0 for r in seg)})
             i = j
@@ -463,7 +465,35 @@ def main():
         for cid_ in co["cars"]:
             cov_stub = {"overall": round(num / den, 2) if den else 0.0, "probes": probes}
             advice_by_car[cid_] = advice_for(cid_, cars, cc, ll, bb, [x for x in bott if inwin(x["t"], evs)], cov_stub, temps_med)
-        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts,
+        # corner identity: cluster this course's corners by apex position (40 m), order along the route, aggregate per physical corner
+        clusters = []
+        for c in sorted(cc, key=lambda c: c["t0"]):
+            ax, az = c.get("apex", [None, None])
+            if ax is None: continue
+            hit = next((cl for cl in clusters if (cl["x"] - ax) ** 2 + (cl["z"] - az) ** 2 <= 40 ** 2), None)
+            if hit: hit["members"].append(c); k_ = len(hit["members"]); hit["x"] += (ax - hit["x"]) / k_; hit["z"] += (az - hit["z"]) / k_
+            else: clusters.append({"x": ax, "z": az, "members": [c]})
+        def med(a): a = sorted(a); return a[len(a) // 2] if a else None
+        clusters.sort(key=lambda cl: med([m["dist"] for m in cl["members"]]) or 0)
+        corner_out = []
+        for i, cl in enumerate(clusters, 1):
+            ms = cl["members"]; nn = len(ms)
+            fr = {"front": 0, "rear": 0, "none": 0}; ph = defaultdict(int)
+            for m in ms:
+                if m["first_red"]: fr[m["first_red"]["axle"]] += 1; ph[m["first_red"]["phase"]] += 1
+                else: fr["none"] += 1
+            dom = max(fr, key=fr.get); cons = fr[dom] / nn
+            dom_ph = max(ph, key=ph.get) if ph else None
+            usis = [m["usi"] for m in ms]
+            per_run = defaultdict(list)
+            for m in ms: per_run[m.get("stint")].append(m)
+            runs = [{"stint": sn, "n": len(v), "mph_min": med([m["mph_min"] for m in v]), "usi": med([m["usi"] for m in v]), "first_red": max(["front", "rear", "none"], key=lambda a: sum(1 for m in v if (m["first_red"]["axle"] if m["first_red"] else "none") == a)), "lat_g": med([m["lat_g_peak"] for m in v])} for sn, v in sorted(per_run.items(), key=lambda kv: (kv[0] is None, kv[0]))]
+            corner_out.append({"id": f"C{i}", "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
+                               "mph_min": med([m["mph_min"] for m in ms]), "mph_in": med([m["mph_in"] for m in ms]), "lat_g": med([m["lat_g_peak"] for m in ms]),
+                               "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis),
+                               "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
+                               "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
+        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out

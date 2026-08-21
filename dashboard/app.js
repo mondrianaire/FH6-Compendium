@@ -2495,7 +2495,7 @@
       const adviceCars = s.cars.filter((c) => c.coverage && (!carSel || c.id === carSel));
       return `
         <div class="lab-tiles">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
-        ${(s.courses || []).length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — per route: scoped coverage, lap times per run, scoped suggestions</h3><div class="card-grid">${s.courses.filter((co) => !carSel || co.cars.includes(carSel)).map((co) => courseBlock(co, s)).join("")}</div></div>` : ""}
+        ${courseMode() && (s.courses || []).length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — per route: scoped coverage, lap times per run, corner identity, scoped suggestions</h3><div class="card-grid">${s.courses.filter((co) => !carSel || co.cars.includes(carSel)).map((co) => courseBlock(co, s)).join("")}</div></div>` : ""}
         ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session, per car</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : ""}
         ${(s.events || []).length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏆 Events — timed modes detected (races · Rivals · time trials)</h3>
           <div style="overflow-x:auto"><table><thead><tr><th>window</th><th>car</th><th>mode</th><th>laps</th><th>length</th><th>best lap</th><th>final pos</th><th>route</th></tr></thead><tbody>
@@ -2611,6 +2611,10 @@
         <div style="overflow-x:auto;margin-top:8px"><table style="font-size:11px"><thead><tr><th>run</th><th>car</th><th>label</th><th>lap</th><th>Δ best</th><th>mode</th></tr></thead><tbody>
           ${co.events.slice().reverse().map((e) => `<tr><td>${e.stint ?? "—"}</td><td>${carLbl(carsS, e.car).split(" · ")[0]}</td><td>${e.label ? `<b>${esc(e.label)}</b>` : `<span class="why">—</span>`}</td><td>${e.best_lap ? e.best_lap.toFixed(3) + " s" : `${e.duration_s}s · ${(e.distance_m / 1000).toFixed(2)} km`}</td><td>${e.delta_s == null ? "—" : e.delta_s === 0 ? `<b style="color:#00d27a">best</b>` : `<span style="color:${e.delta_s > 0 ? "#e5414e" : "#00d27a"}">${e.delta_s > 0 ? "+" : ""}${e.delta_s.toFixed(3)}</span>`}</td><td>${e.mode.replace("timed solo (Rivals / time trial)", "solo")}</td></tr>`).join("")}
         </tbody></table></div>
+        ${(co.corners || []).length ? `<div style="margin-top:10px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Corners on this route — same physical corner across laps and runs (${co.corners.length} identified)</div>
+          <div style="overflow-x:auto"><table style="font-size:11px"><thead><tr><th>#</th><th>type</th><th>min mph</th><th>g</th><th>first red</th><th>consistency</th><th>USI</th><th>samples</th></tr></thead><tbody>
+            ${co.corners.map((k) => { const dcol = k.dominant === "front" ? "#2f81f7" : k.dominant === "rear" ? "#e5414e" : "var(--muted)"; const phc = k.dominant_phase ? CM_PC[(k.dominant_phase) - 1] : "var(--muted)"; return `<tr title="apex ${k.pos.join(", ")} · per run: ${esc(k.runs.map((r) => `run ${r.stint}: ${r.mph_min} mph, USI ${r.usi}, ${r.first_red}`).join(" | "))}"><td><b>${k.id}</b> ${k.dir === "L" ? "⬅" : "➡"}</td><td>${k.type}</td><td>${k.mph_min}</td><td>${k.lat_g}</td><td><span style="color:${dcol};font-weight:700">${k.dominant === "none" ? "clean" : k.dominant}</span>${k.dominant_phase && k.dominant !== "none" ? ` <span style="color:${phc}">ph ${k.dominant_phase}</span>` : ""}</td><td><div class="lab-bar" style="width:70px;display:inline-block;vertical-align:middle"><i style="width:${k.consistency * 100}%;background:${k.consistency >= 0.75 ? "#00d27a" : k.consistency >= 0.5 ? "#e3b341" : "#e5414e"}"></i></div> ${Math.round(k.consistency * 100)}%</td><td>${k.usi > 0 ? "+" : ""}${(k.usi ?? 0).toFixed(2)}${k.usi_spread > 0.2 ? ` <span style="color:var(--warn,#e3b341)" title="spread ${k.usi_spread}">±</span>` : ""}</td><td>${k.n} (${k.runs.length} run${k.runs.length === 1 ? "" : "s"})</td></tr>`; }).join("")}
+          </tbody></table></div></div>` : ""}
         ${Object.entries(co.advice_by_car || {}).map(([cidk, adv]) => { const firm = adv.filter((a) => !a.open).slice(0, 4), open = adv.filter((a) => a.open); return `<div style="margin-top:8px"><div style="font-size:11px;color:var(--muted)">${carLbl(carsS, cidk)}</div>
           ${firm.map((a) => `<div style="display:flex;gap:8px;align-items:flex-start;margin:5px 0"><span class="lab-light" style="background:${SEV[a.severity]};margin-top:4px"></span><div style="flex:1"><div style="font-size:12px"><strong>${a.text}</strong></div><div class="why" style="font-size:10.5px">${a.evidence} · confidence ${Math.round(a.confidence * 100)}%</div></div></div>`).join("") || `<p class="why" style="font-size:11px;margin:4px 0">no firm suggestions on this course yet</p>`}
           ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top:4px">🔍 ${open.map((a) => a.text).join(" · ")}</div>` : ""}</div>`; }).join("")}
@@ -2622,7 +2626,7 @@
       if (!an || !an.cars || !an.cars.length) { el.innerHTML = `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px">first analysis after ~20 s of driving…</p></div>`; return; }
       const cur = live.frame && live.frame.cid; const order = an.cars.slice().sort((a, b) => (b.id === cur) - (a.id === cur));
       const sS = { cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, an.cars.find((y) => y.id === x.id) || {})) : an.cars, stints: an.stints || [] };
-      const courses = (an.courses || []).slice(0, 2);
+      const courses = courseMode() ? (an.courses || []).slice(0, 2) : [];
       el.innerHTML = `${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — scoped to the event you're running <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"}</span></h3><div class="card-grid">${courses.map((co) => courseBlock(co, sS)).join("")}</div></div>` : ""}
         <div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session <span class="chip">${an.summary.corners} corners · ${an.summary.launches} launches · ${an.summary.braking} stops</span></h3>
         <div class="card-grid">${order.map((c) => adviceBlock(c, sS)).join("")}</div></div>`;
@@ -2718,15 +2722,18 @@
       if (b) b.addEventListener("click", () => { liveUrl = u.value.trim().replace(/\/$/, ""); localStorage.setItem("fh6LiveUrl", liveUrl); liveConnect(); });
       if (r) r.addEventListener("click", () => liveReset(false));
     }
+    const courseMode = () => localStorage.getItem("fh6CourseMode") !== "off";
     function render() {
       const s = S();
       host.innerHTML = `
         <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">📡 Telemetry Lab — Data Out sessions</h2>
         <div class="lab-modes"><button class="lab-mode ${mode === "live" ? "active" : ""}" data-mode="live">🔴 Live</button><button class="lab-mode ${mode === "run" ? "active" : ""}" data-mode="run">🧪 Lab Run</button><button class="lab-mode ${mode === "bench" ? "active" : ""}" data-mode="bench">🧬 Decode Bench</button>
+          <button class="lab-mode" id="labCourseToggle" title="Show or hide course-scoped blocks (Live + Lab Run)" style="border-color:var(--accent2);color:${courseMode() ? "#0e1116" : "var(--accent2)"};background:${courseMode() ? "var(--accent2)" : "var(--bg2)"}">🏟 Course mode ${courseMode() ? "ON" : "OFF"}</button>
           ${sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : s ? `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>` : ""}</div>
         ${mode === "live" ? liveView() : !s ? NOSESS : mode === "run" ? runView(s) : benchView(s)}`;
       if (mode === "live") { bindLive(); if (!es) liveConnect(); else paintAll(); }
       host.querySelectorAll(".lab-mode[data-mode]").forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
+      const ct = host.querySelector("#labCourseToggle"); if (ct) ct.addEventListener("click", () => { localStorage.setItem("fh6CourseMode", courseMode() ? "off" : "on"); render(); });
       host.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : b.dataset.car; render(); }));
       host.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; render(); }));
       host.querySelectorAll("[data-replica]").forEach((b) => b.addEventListener("click", () => { replica = b.dataset.replica; render(); }));

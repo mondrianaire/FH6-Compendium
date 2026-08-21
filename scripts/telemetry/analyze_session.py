@@ -54,7 +54,7 @@ PROBES = [  # key, label, required count, weight, hint when incomplete
     ("brake", "Hard stops from > 80 mph", 3, 1.0, "{n} more hard stops from 80+ mph"),
     ("crest", "Crests / bumps (car goes light)", 2, 0.5, "{n} more crests at speed"),
     ("top", "Top-speed pull (WOT in top gear, 5 s)", 1, 0.5, "hold full throttle in top gear for 5 s"),
-    ("wiggle", "Steering pulses > 55 mph", 3, 0.5, "{n} more quick steering pulses at speed (experimental)"),
+    ("wiggle", "Steering pulses > 55 mph", 8, 0.5, "{n} more quick steering pulses at speed (experimental)"),
     ("dyno", "Dyno rpm coverage (WOT)", 1, 1.0, "full-throttle pulls through the rev range"),
     ("gears", "Gear ladder", 1, 1.0, "full-throttle time in every gear"),
     ("warm", "Tires warm (> 150 F) most of the run", 1, 0.5, "keep driving — tires still cold for most frames"),
@@ -69,45 +69,80 @@ def coverage_for(cid_, cars, corners, launches, braking, crests, pulses, top_pul
         "launch": sum(1 for x in launches if x["car"] == cid_), "brake": sum(1 for x in braking if x["car"] == cid_ and x["mph_start"] >= 80),
         "crest": sum(1 for x in crests if x["car"] == cid_), "top": 1 if top_pull.get(cid_, 0) >= 5 else 0, "wiggle": sum(1 for x in pulses if x["car"] == cid_),
     }
-    dyno = c.get("dyno") or []; lo = (c.get("idle_rpm") or 1000) + 1500; hi = c.get("max_rpm") or 0
-    bins = int(max(0, (hi - lo)) // 250) or 1; counts["dyno"] = round(min(1.0, sum(1 for d in dyno if lo <= d["rpm"] <= hi) / bins), 2)
+    # dyno: practical WOT band from idle+1500 to 96% of redline (the top bin is the limiter you never sit on)
+    dyno = c.get("dyno") or []; lo = ((c.get("idle_rpm") or 1000) + 1500) // 250 * 250; hi = 0.96 * (c.get("max_rpm") or 0)
+    bins = [b for b in range(int(lo), int(hi), 250)] or [lo]; have = {d["rpm"] for d in dyno}
+    counts["dyno"] = round(sum(1 for b in bins if b in have) / len(bins), 2)
     g = c.get("gears") or []; mx = max([x["gear"] for x in g], default=0); counts["gears"] = round(len(g) / mx, 2) if mx else 0
     counts["warm"] = round(warm_frac.get(cid_, 0), 2)
     probes = []; num = 0; den = 0
     for key, label, req, wt, hint in PROBES:
-        n = counts[key]; conf = min(1.0, (n / req) if key not in ("dyno", "gears", "warm") else float(n))
-        if key == "warm": conf = 1.0 if n >= 0.6 else n / 0.6
-        need = max(0, req - int(n)) if key not in ("dyno", "gears", "warm") else (0 if conf >= 1 else 1)
-        probes.append({"key": key, "label": label, "count": n, "required": req, "confidence": round(conf, 2), "hint": hint.format(n=need) if conf < 1 else "done"})
+        n = counts[key]; frac = key in ("dyno", "gears", "warm")
+        if frac:
+            conf = min(1.0, float(n) / (0.6 if key == "warm" else 1.0)); ready = conf >= 0.95
+        else:
+            conf = strength(n, req); ready = n >= req
+        need = max(0, req - int(n)) if not frac else (0 if ready else 1)
+        hint_txt = (hint.format(n=need) if not ready else ("saturated" if conf >= 0.97 else "verdict-ready — more sharpens it"))
+        probes.append({"key": key, "label": label, "count": n, "required": req, "confidence": round(conf, 2), "ready": ready, "hint": hint_txt})
         num += conf * wt; den += wt
     return {"overall": round(num / den, 2), "probes": probes}
+
+def strength(n, req):
+    """Asymptotic evidence strength: 0.70 at the required count, ~0.91 at 2x, ~0.97 at 3x, -> 1.0."""
+    return 1.0 - math.exp(-1.2 * float(n) / max(req, 1e-9))
 
 def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med):
     c = cars.get(cid_) or {}; out = []
     grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]; n = len(grip)
     def add(key, text, sev, conf, ev): out.append({"key": key, "text": text, "severity": sev, "confidence": round(max(0, min(1, conf)), 2), "evidence": ev})
+    # confidence = asymptotic evidence strength (more events keep sharpening it) x consistency (share of events that agree)
+    agree = lambda k, tot, req=3: strength(k, req) * (0.5 + 0.5 * (k / tot if tot else 0))
     fr1 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "front" and x["first_red"]["phase"] == 1)
     fr2 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "front" and x["first_red"]["phase"] == 2)
     fr3 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "front" and x["first_red"]["phase"] >= 3)
     rr = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "rear")
     rr4 = sum(1 for x in grip if x["first_red"] and x["first_red"]["axle"] == "rear" and x["first_red"]["phase"] == 4)
     usi = sorted(x["usi"] for x in grip); usim = usi[len(usi) // 2] if usi else None
-    if n >= 2 and fr1 / n >= 0.3: add("brake-lockup", "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.", 3, fr1 / 4, f"{fr1}/{n} corners red on the fronts in phase 1")
-    if n >= 2 and fr2 / n >= 0.25: add("trail-brake", "Trail-brake understeer: finish more braking before steering; caster +0.5 for camber-in-turn.", 2, fr2 / 4, f"{fr2}/{n} corners red on the fronts at turn-in")
-    if (n >= 3 and fr3 / n >= 0.3) or (usim is not None and n >= 4 and usim > 0.15): add("mid-understeer", "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.", 2, max(fr3, 1) / 4 if fr3 else (n / 8), f"USI median {usim:+.3f} over {n} corners; {fr3} mid-corner front reds")
-    if n >= 2 and rr / n >= 0.3: add("rear-limited", "Rear-limited corners: rear ARB/springs softer; on throttle (phase 4) accel diff lock -10%.", 3, rr / 4, f"{rr}/{n} corners red on the rears ({rr4} on exit)")
-    if usim is not None and n >= 4 and usim < -0.05: add("oversteer-balance", "Balance reads oversteer (negative USI): rear relatively softer or rear wing up.", 2, n / 8, f"USI median {usim:+.3f}")
-    L = [x for x in launches if x["car"] == cid_]
+    if n >= 2 and fr1 / n >= 0.3: add("brake-lockup", "Fronts saturate under braking before turn-in: brake pressure DOWN toward the knee, then balance 2-3% rearward.", 3, agree(fr1, n), f"{fr1}/{n} corners red on the fronts in phase 1")
+    if n >= 2 and fr2 / n >= 0.25: add("trail-brake", "Trail-brake understeer: finish more braking before steering; caster +0.5 for camber-in-turn.", 2, agree(fr2, n), f"{fr2}/{n} corners red on the fronts at turn-in")
+    if (n >= 3 and fr3 / n >= 0.3) or (usim is not None and n >= 4 and usim > 0.15):
+        u_over = sum(1 for u in usi if u > 0.15)
+        add("mid-understeer", "Mid-corner understeer: front ARB -2 clicks or front springs softer (mech balance up); if only in fast corners, aero balance forward instead.", 2, max(agree(fr3, n), agree(u_over, n, 4)), f"USI median {usim:+.3f} over {n} corners ({u_over} understeer, {fr3} mid-corner front reds)")
+    if n >= 2 and rr / n >= 0.3: add("rear-limited", "Rear-limited corners: rear ARB/springs softer; on throttle (phase 4) accel diff lock -10%.", 3, agree(rr, n), f"{rr}/{n} corners red on the rears ({rr4} on exit)")
+    if usim is not None and n >= 4 and usim < -0.05:
+        u_os = sum(1 for u in usi if u < -0.05); add("oversteer-balance", "Balance reads oversteer (negative USI): rear relatively softer or rear wing up.", 2, agree(u_os, n, 4), f"USI median {usim:+.3f} ({u_os}/{n} oversteer corners)")
+    L = [x for x in launches if x["car"] == cid_]; k_r = k_f = 0
     if L:
         prs = sorted(x["peak_slip_rear"] for x in L)[len(L) // 2]; pfs = sorted(x["peak_slip_front"] for x in L)[len(L) // 2]
-        if prs > 1.5: add("launch-spin", "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.", 2, len(L) / 2, f"median peak rear slip {prs:.2f} over {len(L)} launches")
-        if pfs > 1.2 and c.get("drivetrain") == "AWD": add("launch-front-spin", "AWD fronts spinning at launch: center split more rearward / front accel diff down.", 2, len(L) / 2, f"median peak front slip {pfs:.2f}")
-    B = [x for x in braking if x["car"] == cid_ and x["mph_start"] >= 60]
+        k_r = sum(1 for x in L if x["peak_slip_rear"] > 1.5); k_f = sum(1 for x in L if x["peak_slip_front"] > 1.2)
+        if prs > 1.5: add("launch-spin", "Launch wheelspin on the rears: accel diff lock down / taller 1st, or squeeze the throttle.", 2, agree(k_r, len(L), 2), f"median peak rear slip {prs:.2f}; {k_r}/{len(L)} launches spun")
+        if pfs > 1.2 and c.get("drivetrain") == "AWD": add("launch-front-spin", "AWD fronts spinning at launch: center split more rearward / front accel diff down.", 2, agree(k_f, len(L), 2), f"median peak front slip {pfs:.2f}; {k_f}/{len(L)} launches")
+    B = [x for x in braking if x["car"] == cid_ and x["mph_start"] >= 60]; both = fr_first = rr_first = 0; fd = rd = 0.0
     if len(B) >= 2:
         fd = sorted(x["front_deficit"] for x in B)[len(B) // 2]; rd = sorted(x["rear_deficit"] for x in B)[len(B) // 2]
-        if fd > 0.35 and rd > 0.35: add("brake-pressure", "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.", 3, len(B) / 3, f"median deficit F {fd:.2f} / R {rd:.2f} over {len(B)} stops")
-        elif fd > rd + 0.1: add("brake-balance-rear", "Fronts lock first: brake balance 2-4% rearward.", 2, len(B) / 3, f"median deficit F {fd:.2f} vs R {rd:.2f}")
-        elif rd > fd + 0.1: add("brake-balance-front", "Rears lock first: brake balance forward, decel diff lock down.", 2, len(B) / 3, f"median deficit R {rd:.2f} vs F {fd:.2f}")
+        both = sum(1 for x in B if x["front_deficit"] > 0.35 and x["rear_deficit"] > 0.35); fr_first = sum(1 for x in B if x["front_deficit"] > x["rear_deficit"] + 0.1); rr_first = sum(1 for x in B if x["rear_deficit"] > x["front_deficit"] + 0.1)
+        if fd > 0.35 and rd > 0.35: add("brake-pressure", "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.", 3, agree(both, len(B)), f"median deficit F {fd:.2f} / R {rd:.2f}; {both}/{len(B)} stops locked both")
+        elif fd > rd + 0.1: add("brake-balance-rear", "Fronts lock first: brake balance 2-4% rearward.", 2, agree(fr_first, len(B)), f"median deficit F {fd:.2f} vs R {rd:.2f}; {fr_first}/{len(B)} stops")
+        elif rd > fd + 0.1: add("brake-balance-front", "Rears lock first: brake balance forward, decel diff lock down.", 2, agree(rr_first, len(B)), f"median deficit R {rd:.2f} vs F {fd:.2f}; {rr_first}/{len(B)} stops")
+    # ---- inconsistency detectors: mixed evidence -> "further testing needed", naming the probe that resolves it ----
+    def open_item(key, text, unc, ev, needs): out.append({"key": key, "text": text, "severity": 1, "confidence": round(max(0, min(1, unc)), 2), "evidence": ev, "needs": needs, "open": True})
+    fr_all = fr1 + fr2 + fr3
+    if n >= 3 and rr > 0 and fr_all > 0 and not (fr_all / n >= 0.65 or rr / n >= 0.65):
+        open_item("inconclusive-axle", f"Mixed axle signal — {fr_all} front-limited vs {rr} rear-limited of {n} corners. Not enough agreement for a balance call: repeat the same corner type several times before changing anything.", 1 - abs(fr_all - rr) / n, f"{fr_all}F / {rr}R / {n - fr_all - rr} clean", ["hairpin", "medium", "fast"])
+    if n >= 4:
+        iqr = usi[int(0.75 * (len(usi) - 1))] - usi[int(0.25 * (len(usi) - 1))]
+        if iqr > 0.2:
+            by = {"hairpin": [x["usi"] for x in grip if x["mph_min"] < 45], "medium": [x["usi"] for x in grip if 45 <= x["mph_min"] <= 85], "fast": [x["usi"] for x in grip if x["mph_min"] > 85]}
+            parts = [f"{k} {sorted(v)[len(v)//2]:+.2f} (n={len(v)})" for k, v in by.items() if v]
+            thin = [k for k, v in by.items() if len(v) < 3]
+            open_item("inconclusive-usi", f"Balance varies corner to corner (USI spread {iqr:.2f}) — likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.", min(1, iqr), "by type: " + ", ".join(parts), thin or ["hairpin", "medium", "fast"])
+    if len(B) >= 2:
+        maj = max(both, fr_first, rr_first)
+        if maj < 0.6 * len(B):
+            open_item("inconclusive-brake", f"Brake-lock pattern inconsistent across {len(B)} stops ({both} both-axle, {fr_first} front-first, {rr_first} rear-first) — more hard stops from 80+ mph before touching balance.", 1 - maj / len(B), f"deficit medians F {fd:.2f} / R {rd:.2f}", ["brake"])
+    if len(L) >= 2 and 0 < k_r < len(L):
+        open_item("inconclusive-launch", f"Launch wheelspin only in {k_r}/{len(L)} launches — inconsistent (surface, temps or throttle?). Two more standing launches on the same surface.", 1 - abs(2 * k_r - len(L)) / len(L), f"rear slip peaks {sorted(round(x['peak_slip_rear'], 1) for x in L)}", ["launch"])
     tm = temps_med.get(cid_)
     if tm:
         fmed = (tm["FL"] + tm["FR"]) / 2; rmed = (tm["RL"] + tm["RR"]) / 2
@@ -116,8 +151,9 @@ def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med):
     nb = sum(1 for x in bott if x["car"] == cid_ and x["mph"] > 40)
     if nb >= 8: add("bottoming", "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).", 1, min(1, nb / 20), f"{nb} bottoming frames above 40 mph (detector still coarse)")
     if cov and cov["overall"] < 0.35: add("more-data", "Low coverage: verdicts are provisional — see the probe bars for what to drive next.", 1, 1.0, f"coverage {cov['overall']:.0%}")
-    out.sort(key=lambda a: -(a["severity"] * a["confidence"]))
-    return out
+    firm = [a for a in out if not a.get("open")]; opn = [a for a in out if a.get("open")]
+    firm.sort(key=lambda a: -(a["severity"] * a["confidence"])); opn.sort(key=lambda a: -a["confidence"])
+    return firm + opn
 
 def main():
     path = sys.argv[1]

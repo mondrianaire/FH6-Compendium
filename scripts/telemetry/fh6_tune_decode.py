@@ -534,12 +534,14 @@ def _part_view(cat, val, ordinal, gear_count=None):
             return out(f"Stock {typ}", "named", stock=True)
         return out(f"{_tier_word(idx)} {typ}", "named" if idx <= 3 else "category")   # capped race-variant index is less certain
     if cat == "differential":
-        # id%1000 is the diff TYPE (family is just namespace). Verified: 0=Stock, 5=Race (dominant, 64 cars).
-        # 6=Rally / 7=Off-Road / 3=Sport are probable (telemetry + FH6 guide); anything else is honestly unverified.
+        # id%1000 is the diff TYPE (family is just namespace). DATA-VERIFIED (tire-compound cross-check + car
+        # types): 0=Stock, 5=Race (64 cars, pairs w/ Race tires), 7=Off-Road (pairs w/ off-road tires; every idx-7
+        # car drives its fronts). 3=Sport / 6=Rally are INFERRED from the FH6 guide only — both run Race tires and
+        # the save can't derive drivetrain to split them, so they stay conf "category" (not asserted exact).
         if idx == 0:
             return out("Stock", "named", stock=True)
-        _DIFF = {5: ("Race Differential", "named"), 6: ("Rally Differential", "category"),
-                 7: ("Off-Road Differential", "category"), 3: ("Sport Differential", "category")}
+        _DIFF = {5: ("Race Differential", "named"), 7: ("Off-Road Differential", "named"),
+                 6: ("Rally Differential", "category"), 3: ("Sport Differential", "category")}
         if idx in _DIFF:
             lbl, cf = _DIFF[idx]
             return out(lbl, cf)

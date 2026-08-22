@@ -556,13 +556,26 @@ def main():
                 drift = statistics.mean([max(abs(r["CombinedSlipRL"]), abs(r["CombinedSlipRR"])) for r in seg]) > 2.5
                 v_in = seg[0]["speed_mph"]; v_min = min(r["speed_mph"] for r in seg)
                 ipk = max(range(len(L)), key=lambda kk: abs(L[kk])); apx = seg[ipk]
+                # how this pass was DRIVEN: braking point (m before apex), throttle-on point (m after apex, negative = before), entry/exit speed & position, radius
+                brk = next((r for r in pre + seg if r["Brake"] > 40 and r["t"] <= apx["t"]), None)
+                imin = min(range(len(seg)), key=lambda kk: seg[kk]["speed_mph"])
+                thr = next((r for r in seg[imin:] if r["Accel"] > 100), None)
+                v_ms = apx["speed_mph"] * 0.44704; radius = round(v_ms * v_ms / max(0.1, peak * 9.81))
                 corners.append({"t0": round(seg[0]["t"], 1), "t1": round(seg[-1]["t"], 1), "car": cid(seg[0]), "dir": "R" if sign > 0 else "L",
                                 "apex": [round(apx["PosX"]), round(apx["PosZ"])], "dist": round(apx["DistanceTraveled"]), "mph_apex": round(apx["speed_mph"]),
-                                "mph_in": round(v_in), "mph_min": round(v_min), "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
+                                "mph_in": round(v_in), "mph_min": round(v_min), "mph_out": round(seg[-1]["speed_mph"]), "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
+                                "entry": [round(seg[0]["PosX"]), round(seg[0]["PosZ"])], "exit": [round(seg[-1]["PosX"]), round(seg[-1]["PosZ"])],
+                                "brake_on_m": (round(apx["DistanceTraveled"] - brk["DistanceTraveled"]) if brk else None), "throttle_on_m": (round(thr["DistanceTraveled"] - apx["DistanceTraveled"]) if thr else None), "radius_m": radius,
                                 "drift": drift, "kink": v_min > 85 and peak < 0.9, "brake_max": max([r["Brake"] for r in pre + seg] or [0]), "hb": any(r["HandBrake"] > 0 for r in seg)})
             i = j
         else: i += 1
     sess["corners"] = corners
+    # each car's measured GRIP (90th-pct peak lateral g over its non-drift corners) — the car-dependent factor that lets course geometry transfer between cars
+    car_grip = {}
+    for k_ in cars:
+        gs = sorted(x["lat_g_peak"] for x in corners if x["car"] == k_ and not x["drift"])
+        if len(gs) >= 5: car_grip[k_] = round(gs[int(0.9 * (len(gs) - 1))], 2)
+    for k_, c_ in cars.items(): c_["grip_g"] = car_grip.get(k_)
 
     # ---- launches ----
     launches = []; i = 0
@@ -822,6 +835,72 @@ def main():
                 if w["t0"] - 0.05 <= t <= w["t1"] + 0.05: return li
             return None
         lapmap = {id(c): lap_of(c["t0"]) for c in cc}
+        # ---- GEOMETRIC course learning from COORDINATES: the path IS the course. Resample the reference lap by arc length, heading -> curvature,
+        #      turns = curvature peaks (radius, length, direction, apex/entry/exit) — independent of how hard you drove them. ----
+        def lap_pts(w): return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+        def resample(pts, step=4.0):
+            if len(pts) < 3: return []
+            S = [0.0]
+            for a, b in zip(pts, pts[1:]): S.append(S[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+            if S[-1] < step * 5: return []
+            out = []; j = 0; s_ = 0.0
+            while s_ <= S[-1]:
+                while j < len(S) - 2 and S[j + 1] < s_: j += 1
+                seg_len = S[j + 1] - S[j]; f = (s_ - S[j]) / seg_len if seg_len > 0 else 0.0
+                out.append((pts[j][0] + (pts[j + 1][0] - pts[j][0]) * f, pts[j][1] + (pts[j + 1][1] - pts[j][1]) * f, s_, pts[j][2] + (pts[j + 1][2] - pts[j][2]) * f))
+                s_ += step
+            return out
+        def curvature(P, step=4.0, win=7):
+            th = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(P, P[1:])]
+            for i_ in range(1, len(th)):
+                while th[i_] - th[i_ - 1] > math.pi: th[i_] -= 2 * math.pi
+                while th[i_] - th[i_ - 1] < -math.pi: th[i_] += 2 * math.pi
+            ths = smooth(th, win) if len(th) >= win else th
+            return [(ths[i_ + 1] - ths[i_ - 1]) / (2 * step) for i_ in range(1, len(ths) - 1)]   # rad/m at P[i_+1]
+        geo = None
+        full_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
+        if full_laps:
+            ref_w = max(full_laps, key=lambda w: sum(1 for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]))
+            P = resample(lap_pts(ref_w))
+            if len(P) >= 20:
+                K = curvature(P); thr = 1.0 / 250.0; gturns = []; i_ = 0
+                while i_ < len(K):
+                    if abs(K[i_]) > thr:
+                        j_ = i_
+                        while j_ < len(K) and abs(K[j_]) > thr * 0.6: j_ += 1
+                        if (j_ - i_) >= 4:
+                            ia = max(range(i_, j_), key=lambda q: abs(K[q])); gturns.append({"i0": i_ + 1, "i1": min(j_, len(P) - 1), "ia": ia + 1, "k": abs(K[ia]), "sgn": 1 if K[ia] > 0 else -1})
+                        i_ = j_
+                    else: i_ += 1
+                merged = []
+                for g in gturns:   # merge near-contiguous same-direction pieces (a wobble inside one turn)
+                    if merged and g["i0"] - merged[-1]["i1"] <= 3 and g["sgn"] == merged[-1]["sgn"]:
+                        m_ = merged[-1]; m_["i1"] = g["i1"]
+                        if g["k"] > m_["k"]: m_["k"] = g["k"]; m_["ia"] = g["ia"]
+                    else: merged.append(dict(g))
+                votes = 0   # calibrate the L/R sign convention against the behavioural corners (lat-g sign) by majority vote
+                for g in merged:
+                    ax, az = P[g["ia"]][0], P[g["ia"]][1]
+                    for c in cc:
+                        if c.get("apex") and math.hypot(c["apex"][0] - ax, c["apex"][1] - az) <= 40: votes += (1 if ((c["dir"] == "R") == (g["sgn"] > 0)) else -1)
+                flip = votes < 0; gt_out = []
+                def heading(i_): a, b = P[max(0, i_ - 1)], P[min(len(P) - 1, i_ + 1)]; return math.atan2(b[1] - a[1], b[0] - a[0])
+                for g in merged:
+                    dth = heading(g["i1"]) - heading(g["i0"])
+                    while dth > math.pi: dth -= 2 * math.pi
+                    while dth < -math.pi: dth += 2 * math.pi
+                    g["deg"] = round(abs(math.degrees(dth)))
+                merged = [g for g in merged if g["deg"] >= 12]   # a gentle bend (< 12° of heading change) is not a turn
+                for n_, g in enumerate(merged, 1):
+                    gt_out.append({"id": f"G{n_}", "apex": [round(P[g["ia"]][0]), round(P[g["ia"]][1])], "s": round(P[g["ia"]][2]), "radius_m": round(1.0 / g["k"]), "dir": ("R" if (g["sgn"] > 0) != flip else "L"), "deg": g["deg"],
+                                   "len_m": round((g["i1"] - g["i0"]) * 4.0), "entry": [round(P[g["i0"]][0]), round(P[g["i0"]][1])], "exit": [round(P[g["i1"]][0]), round(P[g["i1"]][1])], "speed_ref_lap": round(P[g["ia"]][3])})
+                sd_ = max(1, len(P) // 500)
+                geo = {"length_m": round(P[-1][2]), "ref_lap": {"ev": ref_w["ev"], "lap": ref_w["lap"], "t0": ref_w["t0"], "t1": ref_w["t1"]}, "path": [[round(p[0]), round(p[1])] for p in P[::sd_]], "turns": gt_out}
+                lw_last = max(full_laps, key=lambda w: w["t1"]); PL = resample(lap_pts(lw_last))
+                if PL: geo["last_path"] = [[round(p[0]), round(p[1])] for p in PL[::max(1, len(PL) // 500)]]; geo["last_lap"] = {"ev": lw_last["ev"], "lap": lw_last["lap"], "t0": lw_last["t0"], "t1": lw_last["t1"]}
+        def geo_near(x, z):
+            if not geo: return None
+            return next((g["id"] for g in geo["turns"] if math.hypot(g["apex"][0] - x, g["apex"][1] - z) <= max(60, g["len_m"] / 2 + 20)), None)   # anywhere within the turn's span
         # corner identity: cluster this course's corners by apex position (40 m), order along the route, aggregate per physical corner
         clusters = []
         for c in sorted(cc, key=lambda c: c["t0"]):
@@ -861,6 +940,25 @@ def main():
         turns_info = {"count": len(strong), "possible": len(possible), "confidence": turn_conf, "laps": total_laps, "per_lap_detections": per_lap_det, "messy": messy,
                       "note": (f"{total_laps} lap{'s' if total_laps != 1 else ''} — drive {max(0, 3 - total_laps)} more to confirm the turn count" if total_laps < 3 else "turn count confirmed across laps" if not possible else f"{len(possible)} possible turn{'s' if len(possible) != 1 else ''} seen on a minority of laps — keep lapping to confirm or drop them") + (f" · {', '.join(messy)} often split into several detections (taken inconsistently)" if messy else "")}
         laps_info = {"total": total_laps, "windows": lap_windows, "per_event": [sum(1 for w in lap_windows if w["ev"] == ei) for ei in range(len(evs))]}
+        # ---- COURSE MODEL (persistent, data/courses/<route>.json): what each turn IS — geometry + the best clean execution ever seen on it, across sessions ----
+        mdir = os.path.join(ROOT, "data", "courses"); mpath = os.path.join(mdir, re.sub(r"[^A-Za-z0-9_.-]+", "_", key) + ".json")
+        write_models = "_replay_analysis" not in os.path.abspath(outdir)
+        model = {"route_key": key, "name": co["name"], "turns": [], "laps": 0, "sessions": [], "updated": None}
+        try:
+            if os.path.exists(mpath):
+                with open(mpath, encoding="utf-8") as f: model = json.load(f)
+        except Exception: pass
+        def mturn_for(cl):   # model turn within 40 m of this cluster's apex
+            return next((t for t in model["turns"] if (t["pos"][0] - cl["x"]) ** 2 + (t["pos"][1] - cl["z"]) ** 2 <= 40 ** 2), None)
+        def pass_view(m):
+            return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}
+        def best_pass(ms):   # the reference execution: fastest apex among COMMITTED (near this car's grip) CLEAN passes; a cruise through the turn is never a reference
+            if not ms: return None
+            g_car = car_grip.get(ms[0]["car"])
+            committed = [m for m in ms if g_car is None or m["lat_g_peak"] >= 0.6 * g_car] or ms
+            clean = [m for m in committed if not m.get("first_red") and not m.get("drift")]
+            pool = clean or committed
+            return max(pool, key=lambda m: (m["mph_min"], -(m.get("brake_on_m") or 0))) if pool else None
         corner_out = []
         for i, cl in enumerate(clusters, 1):
             ms = cl["members"]; nn = len(ms)
@@ -891,13 +989,81 @@ def main():
                 else:
                     limiter = "mixed"; note = f"{dom_ax}-limited but inconsistent — drive it a few more times cleanly to separate technique from setup"
             worst = limiter in ("tune", "driver", "mixed")
+            # ---- SHOULD vs AM: reference (best clean execution, from the course model if it is better) vs your LATEST pass through this turn ----
+            center = (cl["x"], cl["z"]); core = [m for m in ms if m.get("apex") and math.hypot(m["apex"][0] - center[0], m["apex"][1] - center[1]) <= 60] or ms   # absorbed fragments far from the apex don't define the turn
+            last_m = max(core, key=lambda m: m["t0"]); car_l = last_m["car"]; same = [m for m in core if m["car"] == car_l] or core   # references are CAR-SPECIFIC
+            medv = med([m["mph_min"] for m in same]) or 0; medg = med([m["lat_g_peak"] for m in same]) or 0
+            plaus = [m for m in same if m["mph_min"] <= medv * 1.3 + 3 and m["lat_g_peak"] >= 0.5 * medg] or same   # an implausibly fast 'pass' is a different line / fragment, never a reference
+            sb = best_pass(plaus); mt = mturn_for(cl); ref_src = "this session · same car"
+            ref = pass_view(sb) if sb else None
+            mb = ((mt or {}).get("best_by_car") or {}).get(car_l)
+            if mb and (ref is None or (mb.get("mph_min") or 0) >= (ref.get("mph_min") or 0)) and mb.get("session") != sid: ref = mb; ref_src = f"session {mb.get('session')} · same car"
+            predicted = False
+            if (ref is None or len(same) <= 1) and mb is None and mt and mt.get("radius_m") and car_grip.get(car_l):
+                v = math.sqrt(car_grip[car_l] * 9.81 * mt["radius_m"]) * 2.237   # course LEARNING transfers geometry; the apex speed is predicted from THIS car's measured grip
+                ref = {"mph_in": None, "mph_min": round(v), "mph_out": None, "brake_on_m": None, "throttle_on_m": None, "apex": mt.get("pos"), "predicted": True, "session": None}
+                ref_src = f"predicted — course geometry (r≈{mt['radius_m']} m) × this car's grip ({car_grip[car_l]} g)"; predicted = True
+            last = pass_view(last_m)
+            delta = None; advice = None; on_ref = None
+            if predicted and ref and last:
+                d_min = last["mph_min"] - ref["mph_min"]; delta = {"mph_in": None, "mph_min": d_min, "mph_out": None, "brake_on_m": None, "throttle_on_m": None, "line_m": None}
+                advice = f"no reference for this car here yet — predicted apex ≈ {ref['mph_min']} mph (course geometry × your grip); you did {last['mph_min']} ({'+' if d_min >= 0 else ''}{d_min})" + (" — carry more speed" if d_min <= -4 else " — at / above the prediction; this pass becomes the reference")
+            elif ref and last and not (ref.get("t0") == last.get("t0") and ref.get("session") == sid and len(same) == 1):
+                d_in = last["mph_in"] - ref["mph_in"]; d_min = last["mph_min"] - ref["mph_min"]; d_out = (last["mph_out"] - ref["mph_out"]) if (last.get("mph_out") is not None and ref.get("mph_out") is not None) else None
+                d_brk = (last["brake_on_m"] - ref["brake_on_m"]) if (last.get("brake_on_m") is not None and ref.get("brake_on_m") is not None) else None   # negative = you braked LATER (closer to the apex) than the reference
+                d_thr = (last["throttle_on_m"] - ref["throttle_on_m"]) if (last.get("throttle_on_m") is not None and ref.get("throttle_on_m") is not None) else None   # negative = you got on the power EARLIER
+                line = round(math.hypot(last["apex"][0] - ref["apex"][0], last["apex"][1] - ref["apex"][1])) if (last.get("apex") and ref.get("apex")) else None
+                delta = {"mph_in": d_in, "mph_min": d_min, "mph_out": d_out, "brake_on_m": d_brk, "throttle_on_m": d_thr, "line_m": line}
+                fr_last = last.get("first_red") or ""
+                if fr_last.startswith("front") and d_in >= 3: advice = f"too much entry speed: {last['mph_in']} mph in vs your reference {ref['mph_in']} (+{d_in}) — brake earlier" + (f" (you braked {abs(d_brk)} m later)" if d_brk is not None and d_brk < -8 else "") + "; the front can't take it"
+                elif fr_last.startswith("rear") and d_thr is not None and d_thr <= -10: advice = f"on the power too early: throttle {abs(d_thr)} m before your reference point — the rear lets go; wait for the apex"
+                elif fr_last.startswith("front") and fr_last.endswith("ph1") and d_brk is not None and d_brk < -10: advice = f"braking {abs(d_brk)} m later than your reference and locking the fronts — brake at your reference point"
+                elif not fr_last and d_min <= -4: advice = f"over-slowing: apex {last['mph_min']} mph vs your reference {ref['mph_min']} ({d_min}) — carry more speed" + (f"; you brake {d_brk} m earlier than needed" if d_brk is not None and d_brk > 10 else "")
+                elif not fr_last and d_out is not None and d_out <= -4 and abs(d_min) < 4: advice = f"slow exit: {last['mph_out']} mph out vs {ref['mph_out']} — earlier / more throttle from the apex"
+                elif line is not None and line >= 10 and abs(d_min) >= 2: advice = f"off your reference line by {line} m at the apex ({'slower' if d_min < 0 else 'faster'} by {abs(d_min)} mph) — re-find the apex"
+                elif abs(d_in) < 3 and abs(d_min) < 3 and (d_brk is None or abs(d_brk) < 12): advice = "✓ on your reference — this turn is consistent"; on_ref = True
+                else: advice = f"entry {'+' if d_in >= 0 else ''}{d_in} · apex {'+' if d_min >= 0 else ''}{d_min} mph vs reference" + (f" · braked {abs(d_brk)} m {'later' if d_brk < 0 else 'earlier'}" if d_brk is not None and abs(d_brk) >= 8 else "")
+                if limiter == "tune" and advice and not on_ref: advice += " · (tune-limited here — see the limiter note)"
+            elif ref and len(same) == 1: advice = "first pass of this car here — becomes its reference; drive it again to compare"
+            # update the persistent model with this session's turn
+            if mt is None:
+                mt = {"id": f"T{len(model['turns']) + 1}", "pos": [round(cl["x"]), round(cl["z"])], "dir": None, "type": None, "radius_m": None, "n": 0, "best": None, "sessions": 0}; model["turns"].append(mt)
+            mt["pos"] = [round(cl["x"]), round(cl["z"])]; mt["dir"] = max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)); mt["n"] = mt.get("n", 0) + nn
+            mt["type"] = "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"
+            mt["radius_m"] = med([m.get("radius_m") for m in ms if m.get("radius_m")]) or mt.get("radius_m")
+            if sb and (not mt.get("best") or (pass_view(sb)["mph_min"] or 0) > (mt["best"].get("mph_min") or 0) or mt["best"].get("session") == sid): mt["best"] = pass_view(sb)
+            if sb:   # references are kept PER CAR CONFIG — execution does not transfer between cars, geometry does
+                bbc = mt.setdefault("best_by_car", {}); cur_b = bbc.get(car_l)
+                if not cur_b or (pass_view(sb)["mph_min"] or 0) > (cur_b.get("mph_min") or 0) or cur_b.get("session") == sid: bbc[car_l] = pass_view(sb)
+            mt.setdefault("cars", [])
+            if car_l not in mt["cars"]: mt["cars"].append(car_l)
+            mt["status"] = cl.get("status", "turn")
             corner_out.append({"id": cl.get("cid", f"C{i}"), "status": cl.get("status", "turn"), "presence": cl.get("presence"), "laps_seen": cl.get("laps_seen"), "multi": cl.get("multi"), "per_lap": cl.get("per_lap"), "absorbed": cl.get("absorbed", 0),
                                "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
                                "mph_min": med([m["mph_min"] for m in ms]), "mph_in": med([m["mph_in"] for m in ms]), "lat_g": med([m["lat_g_peak"] for m in ms]),
                                "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
+                               "model_id": mt["id"], "geo_id": geo_near(cl["x"], cl["z"]), "radius_m": mt.get("radius_m"), "ref": ref, "ref_src": ref_src, "last": last, "delta": delta, "advice": advice, "on_ref": on_ref,
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
+        # persist the course model (never from replays); the session carries a compact summary
+        if sid not in model["sessions"]: model["sessions"].append(sid); model["laps"] = model.get("laps", 0) + total_laps
+        model["updated"] = sid; model["name"] = co["name"] or model.get("name")
+        if geo and (not model.get("geometry") or len(geo["path"]) >= len((model.get("geometry") or {}).get("path") or [])): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "turns": geo["turns"], "session": sid}   # the map persists with the course
+        if write_models:
+            try:
+                os.makedirs(mdir, exist_ok=True)
+                with open(mpath, "w", encoding="utf-8") as f: json.dump(model, f, indent=1, ensure_ascii=False)
+            except Exception: pass
+        model_info = {"turns": len([t for t in model["turns"] if t.get("status", "turn") == "turn"]), "laps": model.get("laps", 0), "sessions": len(model.get("sessions", [])), "file": os.path.relpath(mpath, ROOT)}
+        on_ref_n = sum(1 for k in corner_out if k.get("on_ref")); cmp_n = sum(1 for k in corner_out if k.get("delta") is not None)
+        pred_n = sum(1 for k in corner_out if (k.get("ref") or {}).get("predicted")); own_n = sum(1 for k in corner_out if k.get("ref") and not (k.get("ref") or {}).get("predicted"))
+        if geo:   # mapped turns vs driven turns: a mapped turn with no behavioural corner is a turn you took flat / never loaded — it still exists
+            driven_ids = {k.get("geo_id") for k in corner_out if k.get("geo_id")}
+            geo["driven"] = len(driven_ids); geo["not_driven"] = [g["id"] for g in geo["turns"] if g["id"] not in driven_ids]
+            turns_info["mapped"] = len(geo["turns"]); turns_info["mapped_driven"] = len(driven_ids)
+            if not model.get("geometry") or len(geo["path"]) >= len((model.get("geometry") or {}).get("path") or []): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "turns": geo["turns"], "session": sid}
         course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile, "laps": laps_info, "turns": turns_info,
+                           "model": model_info, "driving": {"compared": cmp_n, "on_reference": on_ref_n, "predicted": pred_n, "own_refs": own_n, "car_grip": {k_: car_grip.get(k_) for k_ in co["cars"]}}, "geometry": geo,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out

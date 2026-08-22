@@ -679,7 +679,7 @@ def main():
     except Exception: routes = {}
     events = []; cur_ev = None; last_t = None
     for r in live:
-        inev = r["CurrentLap"] > 0 or r["RacePosition"] > 0
+        inev = r["CurrentLap"] > 0   # the LAP TIMER running is the honest event flag — RacePosition lingers > 0 in free roam after an event ends
         if inev:
             if cur_ev is None or (last_t is not None and r["t"] - last_t > 2.0):
                 if cur_ev: events.append(cur_ev)

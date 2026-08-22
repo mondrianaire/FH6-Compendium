@@ -2,27 +2,27 @@
  "schema_version": "1.1.0",
  "purpose": "Route registry. A route = canonical start [x,z] + heading + length (+ its course model path once learned). New events are ATTRIBUTED to the nearest known route when the start is within ~120 m (250 m with path overlap), the heading agrees (a reversed circuit is a different route) and the length fits — so restarts and grid-slot offsets never split a route. Name a route once from the dashboard.",
  "routes": {
-  "4200_-5500": {
+  "4200_-5450": {
    "start": [
-    4190,
-    -5481
+    4186,
+    -5461
    ],
    "heading": [
-    0.154,
-    0.988
+    0.163,
+    0.987
    ],
    "length_m": 3382,
    "events": 3,
    "first_seen": "fh6_20260821_122523",
    "last_seen": "fh6_20260821_173737"
   },
-  "4250_-5300": {
+  "4250_-5250": {
    "start": [
-    4275,
-    -5293
+    4272,
+    -5274
    ],
    "heading": [
-    -0.15,
+    -0.147,
     0.989
    ],
    "length_m": 10594,
@@ -30,14 +30,14 @@
    "first_seen": "fh6_20260821_162805",
    "last_seen": "fh6_20260821_162805"
   },
-  "1850_6050": {
+  "1900_6100": {
    "start": [
-    1863,
-    6071
+    1882,
+    6078
    ],
    "heading": [
-    0.828,
-    0.561
+    0.821,
+    0.57
    ],
    "length_m": 1722,
    "events": 5,
@@ -58,28 +58,28 @@
    "first_seen": "fh6_20260821_171239",
    "last_seen": "fh6_20260821_171239"
   },
-  "-7350_-2150": {
+  "-7350_-2100": {
    "start": [
-    -7354,
-    -2127
+    -7349,
+    -2108
    ],
    "heading": [
-    0.231,
-    0.973
+    0.226,
+    0.974
    ],
    "length_m": 72737,
    "events": 14,
    "first_seen": "fh6_20260821_173737",
    "last_seen": "fh6_20260821_214057"
   },
-  "-1850_1600": {
+  "-1850_1550": {
    "start": [
-    -1862,
-    1579
+    -1847,
+    1566
    ],
    "heading": [
     0.769,
-    -0.639
+    -0.64
    ],
    "length_m": 23914,
    "events": 2,

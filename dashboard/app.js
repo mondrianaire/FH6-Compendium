@@ -2488,8 +2488,20 @@
           </tbody></table></div><p class="why" style="font-size:11px;margin-top:6px">No track ordinal exists in FH6 Data Out — a route is recognised by its start position + length. Name it once and every later run on it is labelled. Free roam = everything outside these windows.</p></div>`;
     }
     // 🏟 COURSE — the course's identity: profile (incl. what it never uses), every turn quantified & classified, lap deltas, course-weighted suggestions
-    // routes ATLAS: every known route's learned path on one canvas (world coordinates) — the general layout of where you race; the current session's courses highlighted
+    // routes ATLAS: every known route's learned path on one canvas (world coordinates) — the general layout of where you race.
+    // Click a route or its start ● to select it: every route that STARTS at the same hub (≤ 250 m) or FOLLOWS its path (≥ 30 % of points within 30 m) lights up.
+    let atlasPick = null, atlasLastS = null;
+    const atlasRelated = (models, key) => {
+      const sel = models.find((m) => m.route_key === key); if (!sel) return null;
+      const sp = sel.geometry.path, s0 = sp[0]; const cells = new Map();
+      sp.forEach((p) => { const k = `${Math.floor(p[0] / 30)},${Math.floor(p[1] / 30)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(p); });
+      const near = (x, z) => { const cx = Math.floor(x / 30), cz = Math.floor(z / 30); for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { const a = cells.get(`${cx + dx},${cz + dz}`); if (a) for (const p of a) { if ((p[0] - x) ** 2 + (p[1] - z) ** 2 <= 900) return true; } } return false; };
+      const sameStart = new Set(), follows = new Set(), ov = {};
+      models.forEach((m) => { if (m.route_key === key) return; const p = m.geometry.path; if (Math.hypot(p[0][0] - s0[0], p[0][1] - s0[1]) <= 250) sameStart.add(m.route_key); const f = p.filter((q) => near(q[0], q[1])).length / p.length; ov[m.route_key] = f; if (f >= 0.3) follows.add(m.route_key); });
+      return { key, sel, sameStart, follows, ov };
+    };
     const routesAtlas = (s) => {
+      atlasLastS = s;
       const models = (DB.courseModels || []).filter((m) => m && m.geometry && ((m.geometry.path && m.geometry.path.length > 4) || (m.geometry.paths && m.geometry.paths.flat().length > 4)));
       if (!models.length) return "";
       models.forEach((m) => { if (!m.geometry.path) m.geometry.path = m.geometry.paths.flat(); });
@@ -2499,11 +2511,26 @@
       const X = (x) => pad + (x - x0) * sc + ((W - 2 * pad) - (x1 - x0) * sc) / 2, Y = (z) => H - pad - (z - z0) * sc - ((H - 2 * pad) - (z1 - z0) * sc) / 2;
       const poly = (a) => a.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
       const lbl = (m) => (m.name || (names[m.route_key] || {}).name || (loc[m.route_key] || {}).name || m.route_key);
-      return `<div class="block" style="border-color:var(--accent2)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🗺 Routes atlas — every route learned so far (${models.length}), in world coordinates</h3><span class="chip">${models.reduce((a, m) => a + (m.laps || 0), 0)} laps · ${models.reduce((a, m) => a + ((m.sessions || []).length), 0)} session-visits</span></div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><svg viewBox="0 0 ${W} ${H}" class="tz-svg" style="max-width:${W}px;background:var(--bg);border-radius:8px">
-          ${models.map((m) => { const on = cur.has(m.route_key); return `<g>${(m.geometry.paths || [m.geometry.path]).map((pc) => `<polyline fill="none" stroke="${on ? "var(--accent)" : "var(--accent2)"}" stroke-width="${on ? 2.5 : 1.5}" opacity="${on ? 1 : .7}" points="${poly(pc)}"><title>${esc(lbl(m))} · ${m.geometry.length_m} m · ${(m.geometry.turns || []).length} turns · ${m.laps || 0} laps</title></polyline>`).join("")}<circle cx="${X(m.geometry.path[0][0]).toFixed(1)}" cy="${Y(m.geometry.path[0][1]).toFixed(1)}" r="3" fill="${on ? "var(--accent)" : "var(--accent2)"}"/><text x="${(X(m.geometry.path[0][0]) + 5).toFixed(1)}" y="${(Y(m.geometry.path[0][1]) - 4).toFixed(1)}" fill="${on ? "var(--accent)" : "var(--txt)"}" font-size="9" font-weight="${on ? 700 : 400}">${esc(lbl(m)).slice(0, 22)}</text></g>`; }).join("")}
-        </svg><div style="font-size:10.5px;max-width:260px"><div><span style="color:var(--accent)">━</span> courses in this ${arr(s, "courses").length ? "session" : "view"} · <span style="color:var(--accent2)">━</span> other learned routes · ● start</div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">${models.map((m) => `<span class="chip" style="${cur.has(m.route_key) ? "border-color:var(--accent);color:var(--accent)" : ""}" title="${esc(m.route_key)}">${esc(lbl(m)).slice(0, 26)} · ${(m.geometry.turns || []).length}T · ${m.laps || 0}L</span>`).join("")}</div><p class="why" style="font-size:10px;margin:6px 0 0">paths are learned from your own laps (reference lap per route); name a route once in the events table and the label updates here</p></div></div></div>`;
+      const rel = atlasPick ? atlasRelated(models, atlasPick) : null; if (atlasPick && !rel) atlasPick = null;
+      const styleOf = (m) => { const on = cur.has(m.route_key); if (!rel) return { col: on ? "var(--accent)" : "var(--accent2)", w: on ? 2.5 : 1.5, op: on ? 1 : .7 }; const isSel = m.route_key === rel.key, isRel = rel.sameStart.has(m.route_key) || rel.follows.has(m.route_key); return { col: isSel ? "var(--accent)" : isRel ? "var(--warn,#e3b341)" : "var(--accent2)", w: isSel ? 3.5 : isRel ? 2.5 : 1.2, op: isSel || isRel ? 1 : .18 }; };
+      const relList = rel ? models.filter((m) => m.route_key !== rel.key && (rel.sameStart.has(m.route_key) || rel.follows.has(m.route_key))) : [];
+      return `<div class="block" id="atlasBlock" style="border-color:var(--accent2)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🗺 Routes atlas — every route learned so far (${models.length}), in world coordinates</h3><span class="chip">${models.reduce((a, m) => a + (m.laps || 0), 0)} laps · ${models.reduce((a, m) => a + ((m.sessions || []).length), 0)} session-visits</span></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><svg viewBox="0 0 ${W} ${H}" class="tz-svg" data-atlas-bg="1" style="max-width:${W}px;background:var(--bg);border-radius:8px;cursor:${rel ? "pointer" : "default"}">
+          ${models.map((m) => { const st = styleOf(m); const k = esc(m.route_key); return `<g>${(m.geometry.paths || [m.geometry.path]).map((pc) => `<polyline data-atlas-route="${k}" fill="none" stroke="${st.col}" stroke-width="${st.w}" opacity="${st.op}" style="cursor:pointer" points="${poly(pc)}"><title>${esc(lbl(m))} · ${m.geometry.length_m} m · ${(m.geometry.turns || []).length} turns · ${m.laps || 0} laps — click to highlight routes sharing its start / path</title></polyline>`).join("")}<circle data-atlas-route="${k}" cx="${X(m.geometry.path[0][0]).toFixed(1)}" cy="${Y(m.geometry.path[0][1]).toFixed(1)}" r="${rel && m.route_key === rel.key ? 5 : 3.5}" fill="${st.col}" opacity="${Math.max(st.op, .5)}" style="cursor:pointer"><title>start of ${esc(lbl(m))} — click</title></circle><text data-atlas-route="${k}" x="${(X(m.geometry.path[0][0]) + 5).toFixed(1)}" y="${(Y(m.geometry.path[0][1]) - 4).toFixed(1)}" fill="${st.col === "var(--accent2)" ? "var(--txt)" : st.col}" opacity="${Math.max(st.op, .45)}" font-size="9" font-weight="${st.w >= 2.5 ? 700 : 400}" style="cursor:pointer">${esc(lbl(m)).slice(0, 22)}</text></g>`; }).join("")}
+        </svg><div style="font-size:10.5px;max-width:260px" id="atlasInfo">
+          ${rel ? `<div style="padding:6px 8px;border:1px solid var(--accent);border-radius:8px"><div><b style="color:var(--accent)">${esc(lbl(rel.sel))}</b> <span class="why">· ${rel.sel.geometry.length_m} m · ${(rel.sel.geometry.turns || []).length} turns · ${rel.sel.laps || 0} laps</span> <span class="chip" data-atlas-clear="1" style="cursor:pointer;padding:1px 6px">✕ clear</span></div>
+            <div style="margin-top:4px"><b>${rel.sameStart.size}</b> other route${rel.sameStart.size === 1 ? "" : "s"} start${rel.sameStart.size === 1 ? "s" : ""} at this hub · <b>${rel.follows.size}</b> follow${rel.follows.size === 1 ? "s" : ""} its path</div>
+            <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">${relList.map((m) => `<span class="chip" data-atlas-route="${esc(m.route_key)}" style="cursor:pointer;border-color:var(--warn,#e3b341);color:var(--warn,#e3b341)" title="click to select">${esc(lbl(m)).slice(0, 24)} · ${rel.sameStart.has(m.route_key) ? "same start" : ""}${rel.sameStart.has(m.route_key) && rel.follows.has(m.route_key) ? " · " : ""}${rel.follows.has(m.route_key) ? Math.round(rel.ov[m.route_key] * 100) + "% on path" : ""}</span>`).join("") || `<span class="why">no other route starts here or follows it</span>`}</div></div>`
+            : `<div><span style="color:var(--accent)">━</span> courses in this ${arr(s, "courses").length ? "session" : "view"} · <span style="color:var(--accent2)">━</span> other learned routes · ● start · <b>click a route or its start</b> to highlight every route that starts there or follows it</div>`}
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">${models.map((m) => `<span class="chip" data-atlas-route="${esc(m.route_key)}" style="cursor:pointer;${rel && m.route_key === rel.key ? "border-color:var(--accent);color:var(--accent)" : rel && (rel.sameStart.has(m.route_key) || rel.follows.has(m.route_key)) ? "border-color:var(--warn,#e3b341);color:var(--warn,#e3b341)" : cur.has(m.route_key) ? "border-color:var(--accent);color:var(--accent)" : ""}" title="${esc(m.route_key)} — click to select">${esc(lbl(m)).slice(0, 26)} · ${(m.geometry.turns || []).length}T · ${m.laps || 0}L</span>`).join("")}</div><p class="why" style="font-size:10px;margin:6px 0 0">paths are learned from your own laps (reference lap per route); name a route once in the events table and the label updates here</p></div></div></div>`;
     };
+    const bindAtlas = (root) => {
+      const r = root || host;
+      r.querySelectorAll("[data-atlas-route]").forEach((el) => el.addEventListener("click", (ev) => { ev.stopPropagation(); const k = el.dataset.atlasRoute; atlasPick = atlasPick === k ? null : k; repaintAtlas(); }));
+      r.querySelectorAll("[data-atlas-clear]").forEach((el) => el.addEventListener("click", (ev) => { ev.stopPropagation(); atlasPick = null; repaintAtlas(); }));
+      r.querySelectorAll("[data-atlas-bg]").forEach((el) => el.addEventListener("click", () => { if (atlasPick) { atlasPick = null; repaintAtlas(); } }));
+    };
+    const repaintAtlas = () => { const blk = host.querySelector("#atlasBlock"); if (!blk) return; const tmp = document.createElement("div"); tmp.innerHTML = routesAtlas(atlasLastS); const nb = tmp.firstElementChild; if (nb) { blk.replaceWith(nb); bindAtlas(nb); } };
     function courseSection(s, isLive) {
       if (!s) return isLive ? EMPTY_LIVE : NOSESS;
       const courses = arr(s, "courses");   // no car filter here — the car rail belongs to Free Tuning; a course card already names its cars
@@ -2955,6 +2982,7 @@
       const r = root || host;
       r.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : b.dataset.car; if (src === "live") paintSections(); else render(); }));
       r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") { live._donorPick = donor; const ls = liveSess(); const p = PIN(); pinDonor(ls && car(ls, donor) ? ls : (p && p.data && car(p.data, donor) ? p.data : null), donor); paintSections(true); paintBanner(); } else render(); }));
+      bindAtlas(r);
       r.querySelectorAll("[data-unpin]").forEach((b) => b.addEventListener("click", () => {
         // unpin = un-donor: if the pinned donor is a run of the CURRENT live session, clear its 🎯 role too (else the role would re-pin it at once)
         const p = PIN(); const ls = liveSess(); const n = p ? stintOf(p.key) : null;

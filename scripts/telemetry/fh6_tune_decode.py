@@ -186,6 +186,31 @@ def load_masses():
         _MASSES = out
     return _MASSES
 
+
+_BUILDS = None
+def _car_build(ordinal):
+    """The captured build record's My-Cars 'pane' for one ordinal (displacement_l / power_hp / torque_lbft /
+    compound), or None. Populated once from data/builds/*.json — the same shop-capture that feeds springs."""
+    global _BUILDS
+    if _BUILDS is None:
+        _BUILDS = {}
+        try:
+            bdir = os.path.join(os.path.dirname(_masses_path()), "builds")
+            for fp in glob.glob(os.path.join(bdir, "*.json")):
+                if os.path.basename(fp).startswith("_"):
+                    continue
+                try:
+                    with open(fp, encoding="utf-8") as fh:
+                        b = json.load(fh)
+                except Exception:
+                    continue
+                o = b.get("car_ordinal")
+                if o:
+                    _BUILDS[int(o)] = b.get("pane") or {}
+        except Exception:
+            pass
+    return _BUILDS.get(int(ordinal))
+
 def spring_rate_from_mass(ordinal, name, norm):
     """Derive a spring-rate slider's absolute value (lb/in) from car mass + the fixed frequency band.
     k = f^2 * W_axle / 19.56 (W_axle = total_lb * front-or-rear share); the slider is linear in k.
@@ -570,24 +595,27 @@ def _conversion_rows(tune, ordinal):
     def row(item, cat, upgrade, conf, tier, stock, raw):
         return {"item": item, "category": cat, "value": upgrade, "upgrade": upgrade, "conf": conf,
                 "tier": tier, "stock": stock, "raw": raw, "status": "measured", "confidence": 1.0}
-    own = int(ordinal); engine = P.get("engine"); motor = P.get("motor")
+    own = int(ordinal); engine = P.get("engine"); motor = P.get("motor"); build = _car_build(own)
     # ENGINE / POWERTRAIN — 'engine' (combustion) and 'motor' (electric) slots are MUTUALLY EXCLUSIVE. A stock
     # powertrain has slot-family (id//1000) == the car's OWN ordinal; family != own ordinal is a real swap.
-    # (idx = id%1000 is only the engine build/config level, NOT a swap marker.) Cylinders / redline / power are
-    # not in the save — the daemon enriches this row with the active car's live telemetry when it is being driven.
+    # (idx = id%1000 is only the engine build/config level, NOT a swap marker.) DISPLACEMENT (litres) is added
+    # from a captured build (My Cars pane); cylinders / redline / power come from live telemetry (daemon enrich).
     if motor is not None:
         stock_ev = motor // 1000 == own
-        r = row("powertrain", "Engine", "Stock electric powertrain" if stock_ev else "Motor swap (EV)",
-                "named" if stock_ev else "category", motor % 1000, stock_ev, motor)
-        r["electric"] = True
-        conv.append(r)
+        er = row("powertrain", "Engine", "Stock electric powertrain" if stock_ev else "Motor swap (EV)",
+                 "named" if stock_ev else "category", motor % 1000, stock_ev, motor)
+        er["electric"] = True
     elif engine is not None:
         if engine // 1000 == own:
-            conv.append(row("powertrain", "Engine", "Stock engine", "named", engine % 1000, True, engine))
+            er = row("powertrain", "Engine", "Stock engine", "named", engine % 1000, True, engine)
         else:
-            conv.append(row("powertrain", "Engine", f"Engine swap (catalog #{engine // 1000})", "category", engine % 1000, False, engine))
+            er = row("powertrain", "Engine", f"Engine swap (catalog #{engine // 1000})", "category", engine % 1000, False, engine)
     else:
-        conv.append(row("powertrain", "Engine", "Unknown powertrain", "category", 0, False, None))
+        er = row("powertrain", "Engine", "Unknown powertrain", "category", 0, False, None)
+    if not er.get("electric") and build and build.get("displacement_l"):
+        er["value"] = er["upgrade"] = f"{er['value']} · {build['displacement_l']}L"
+        er["displacement_l"] = build["displacement_l"]
+    conv.append(er)
     # ASPIRATION — from the populated forced-induction slot (electric = none)
     if motor is not None:
         conv.append(row("aspiration", "Aspiration", "Electric (no aspiration)", "named", 0, True, None))

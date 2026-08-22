@@ -253,6 +253,45 @@ def run_analysis(until=None, final=True):
         ST.analyzing = False
 
 # ---------------- HTTP / SSE ----------------
+def _enrich_engine_desc(deliverable, ordn):
+    """Append the live engine fingerprint (cylinders / redline / power) to the Conversions 'Engine' row, so a
+    decoded clone describes WHAT engine it has. The save file holds no engine specs; this joins the active car's
+    telemetry (ST.cars, keyed by cid whose prefix is the ordinal). Best-effort: only fills in for a driven car."""
+    try:
+        car = None
+        with ST.lock:
+            for cid, c in ST.cars.items():
+                if str(cid).split("|")[0] == str(ordn):
+                    car = dict(c); break
+        for m in deliverable.get("menus", []):
+            if m.get("menu") != "Conversions":
+                continue
+            for r in m["rows"]:
+                if r.get("item") != "powertrain":
+                    continue
+                electric = bool(r.get("electric"))
+                bits = []
+                if car:
+                    if not electric:
+                        if car.get("cyl"):
+                            bits.append(f"{car['cyl']}-cyl")
+                        if car.get("max_rpm"):
+                            bits.append(f"{int(car['max_rpm'])} rpm redline")
+                    dyno = car.get("dyno") or []
+                    peak = max((d for d in dyno if d.get("hp")), key=lambda d: d["hp"], default=None)
+                    if peak:
+                        bits.append(f"~{int(peak['hp'])} hp")
+                    if bits:
+                        r["value"] = r["upgrade"] = r["value"] + " · " + " · ".join(bits)
+                        r["telemetry"] = True
+                elif not electric:
+                    r["value"] = r["upgrade"] = r["value"] + " — drive it to read cylinders, redline & power"
+                    r["needs_drive"] = True
+                return
+    except Exception:
+        return
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
     def _cors(self):
@@ -336,8 +375,10 @@ class H(BaseHTTPRequestHandler):
                     if metas:
                         names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
                         tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+                        deliverable = TUNE.tune_to_deliverable(tune, nm)
+                        _enrich_engine_desc(deliverable, ordn)
                         payload = {"available": True, "ordinal": ordn, "name": nm, "ts": metas[0]["ts"],
-                                   "tune": tune, "deliverable": TUNE.tune_to_deliverable(tune, nm)}
+                                   "tune": tune, "deliverable": deliverable}
                     else:
                         payload = {"available": False, "ordinal": ordn, "reason": "no on-disk tune for this car"}
                 except Exception as e:

@@ -464,9 +464,14 @@ TIER_NAMES = ["Stock", "Street", "Sport", "Race"]   # FH upgrade ladder by tier 
 DIM_SLOTS = {"front_tire_width", "rear_tire_width", "front_rim_size", "rear_rim_size",
              "front_track_width", "rear_track_width", "front_tire_profile", "rear_tire_profile",
              "rim_style", "rear_rim_style"}
-# FH tire-compound list by index (0 = Stock). Order is best-effort from FH6 web sources; verify per car.
+# FH6 tire-compound list by index. Anchors are certain: 0 = Stock (66 cars, the no-upgrade default),
+# 5 = Race (86 cars, the dominant competitive compound). idx 4 has ZERO cars on disk, corroborating that
+# FH6 dropped FH5's standalone "Slick" — so the specialty compounds sit at 5+. Order below follows the FH6
+# Tires guide (Stock/Street/Sport/Semi-Slick/Race/Rally/Off-Road/Snow/Drift) and is cross-checked against the
+# on-disk distribution (idx 9 Drift x28 fits the heavy drift garage). Non-Stock names stay conf "compound"
+# (best-effort). idx 11/12/15 are FH6 compounds we haven't pinned yet — shown as "Compound #N" until verified.
 COMPOUND_NAMES = {0: "Stock", 1: "Street", 2: "Sport", 3: "Semi-Slick", 4: "Slick", 5: "Race",
-                  6: "Drag", 7: "Rally", 8: "Offroad", 9: "Snow", 10: "Drift"}
+                  6: "Rally", 7: "Off-Road", 8: "Snow", 9: "Drift", 10: "Drag"}
 
 ASPIRATION_TYPE = {"single_turbo": "Single Turbo", "twin_turbo": "Twin Turbo", "quad_turbo": "Quad Turbo",
                    "pos_supercharger": "Positive-Displacement Supercharger", "centrifugal_supercharger": "Centrifugal Supercharger"}
@@ -499,7 +504,7 @@ def _part_view(cat, val, ordinal, gear_count=None):
         if idx == 0:
             return out("Stock", "named", stock=True)
         nm = COMPOUND_NAMES.get(idx)   # conf "compound" — the index→name order is best-effort, not verified per car
-        return out(f"{nm} Compound", "compound") if nm else out(f"Compound #{idx}", "compound")
+        return out(f"{nm} Compound", "compound") if nm else out(f"Compound #{idx} — unmapped, verify in shop", "compound")
     if cat in DIM_SLOTS:
         return out("Stock", "named", stock=True) if idx == 0 else out(f"{disp} · level {idx}", "dim")
     if cat == "transmission" and fam == RACE_TRANS_FAMILY:

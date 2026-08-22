@@ -2578,8 +2578,8 @@
       return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)"}</span></summary>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 8px;margin-top:6px">${SLIDER_ORDER.map((sl) => `<label style="font-size:10.5px;display:flex;justify-content:space-between;align-items:center;gap:4px">${SLIDER[sl].label}<input data-tunecid="${esc(cid)}" data-tunesl="${sl}" value="${cur[sl] != null ? cur[sl] : ""}" inputmode="decimal" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"></label>`).join("")}</div></details>`;
     };
-    const numericTuningPanel = (co, s) => {
-      const cid = (co.cars || [])[0] || (live.frame && live.frame.cid); if (!cid) return "";
+    const numericTuningPanel = (co, s, forceCid) => {
+      const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0]; if (!cid) return "";
       const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
       const cur = getTune(cid); const moves = tuningMoves(adv, co.corners, cur); const haveCur = Object.keys(cur).length > 0;
       const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
@@ -2629,8 +2629,14 @@
     };
     const liveCourseDashboard = (co, s) => {
       const p = courseParts(co, s); const tr = co.track || {}; const tu = co.turns || {}; const dr = co.driving || {}; const lapsN = co.laps ? co.laps.total : co.runs; const f = live.frame || {};
-      const ck = courseKnowledge(co); const training = ck.stage === "training"; const turnsN = tu.count || 0; const refsOwn = dr.own_refs || 0, refsPred = dr.predicted || 0;
-      const needRefs = Math.max(1, Math.ceil(turnsN * 0.5)); const feedbackReady = ck.mapped && refsOwn >= needRefs;
+      // CAR-AWARE: everything car-specific (references, tuning, feedback) follows the EQUIPPED car; course LEARNING (turns/map/profile) is the track and stays.
+      const curCar = (f.on && f.cid) || (co.cars || [])[0]; const curName = curCar ? (carName({ ordinal: String(curCar).split("|")[0], id: curCar }) || "#" + String(curCar).split("|")[0]) : "";
+      const carGrip = dr.car_grip || {}; const analysisReflectsCar = curCar && (carGrip[curCar] != null || (co.cars || []).includes(curCar));
+      const carChanged = !!(live.courseCar && curCar && live.courseCar !== curCar);   // set in paintFrame; means the analysis still reflects the previous car
+      const ck = courseKnowledge(co); const training = ck.stage === "training"; const turnsN = tu.count || 0;
+      const refsOwn = analysisReflectsCar ? (dr.own_refs || 0) : 0, refsPred = dr.predicted || 0;   // a just-swapped car has no references yet — re-gathering
+      const needRefs = Math.max(1, Math.ceil(turnsN * 0.5)); const feedbackReady = ck.mapped && analysisReflectsCar && refsOwn >= needRefs;
+      const carBanner = (carChanged || !analysisReflectsCar) && curCar ? `<div class="lab-corner" style="border-left:4px solid var(--warn,#e3b341);background:rgba(227,179,65,.08);margin-bottom:8px"><strong style="font-size:13px">🔄 Car changed — now ${esc(curName)}</strong> <span class="why" style="font-size:11px">the course (turns · map · layout) is kept; this car's references, tuning targets and feedback are re-gathering — drive ${needRefs} clean turn${needRefs === 1 ? "" : "s"} (predictions from geometry × this car's grip fill in meanwhile). The next analysis (~20 s) confirms.</span></div>` : "";
       const tiles = [[esc(p.rn), "course"], [`${lapsN} / ${tr.laps || lapsN}`, "laps · session / on record"], [co.best_lap ? co.best_lap.toFixed(3) : "—", "best lap · session"], [tr.best ? tr.best.best_lap.toFixed(3) : "—", "best lap · track"], [`${turnsN}${tu.possible ? " +" + tu.possible : ""}`, `turns · ${Math.round((tu.track_confidence || tu.confidence || 0) * 100)}% earned`], [`${ck.pct}%`, "course knowledge"], [`${dr.on_reference || 0}/${dr.compared || 0}`, "turns on reference"], [`${refsOwn}/${turnsN}`, "refs for this car"]];
       const st = (k, ok, t) => `<span class="chip" title="${esc(t)}" style="border-color:${ok ? "#00d27a" : "var(--warn,#e3b341)"};color:${ok ? "#00d27a" : "var(--warn,#e3b341)"}">${ok ? "✓" : "○"} ${k}</span>`;
       const learnPanel = `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📚 Course learning — what we know about this track</strong><span class="chip" style="border-color:var(--accent2);color:var(--accent2);font-weight:700">${ck.pct}%</span></div>
@@ -2638,13 +2644,13 @@
             ${p.track}${p.map}${p.turns}${p.profile}${p.laps}</div>`;
       const feedPanel = `<div class="lab-corner" style="border-left:4px solid ${feedbackReady ? "var(--accent)" : "var(--muted)"}"><div class="card-row" style="margin-top:0"><strong>🏋 Tuning feedback — this car on this track</strong><span class="chip" style="border-color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};font-weight:700">${feedbackReady ? "ACTIVE" : "WARMING UP"}</span></div>
             <p class="why" style="font-size:11px;margin:4px 0 6px">${feedbackReady ? `references exist for ${refsOwn}/${turnsN} turns — the per-turn deltas and slider suggestions below are grounded in this car's own best passes` : `${refsOwn}/${turnsN} turns have a reference for this car — ${Math.max(0, needRefs - refsOwn)} more clean turn${needRefs - refsOwn === 1 ? "" : "s"} needed (geometry × grip predictions fill in meanwhile)`}</p>
-            ${numericTuningPanel(co, s)}
+            ${numericTuningPanel(co, s, curCar)}
             <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
-      if (training) return `${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      if (training) return `${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${learnPanel}
         <div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`;
-      return `${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      return `${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
     };
     const paintCourseLive = () => { const el = host.querySelector("#lvCourseLive"); if (!el) return; const f = live.frame || {}; const lo = live.loop; const txt = f.on && f.ev ? `lap ${f.lapn || 1} in progress${f.lapt ? " · " + f.lapt.toFixed(1) + " s" : ""}` : lo && lo.lap ? `loop lap ${lo.lap}${lo.last_s ? " · last " + lo.last_s + " s" : ""}` : f.on ? "free roam — not on the course" : "not driving"; if (el.textContent !== txt) el.textContent = txt; };
@@ -2759,7 +2765,7 @@
     const usiVerdict = (u) => u > 0.15 ? ["understeer", "#2f81f7"] : u < -0.05 ? ["oversteer", "#e5414e"] : ["neutral", "#00d27a"];
     const phaseBars = (ph) => `<span style="display:inline-flex;gap:2px">${(ph || []).map((p) => { const fr = Math.min(1, p.front / 1.5), rr = Math.min(1, p.rear / 1.5); const col = p.red === "front" ? "#2f81f7" : p.red === "rear" ? "#e5414e" : p.red === "both" ? "#a371f7" : "#3a4250"; return `<span title="phase ${p.phase} (${CM_SHORT ? CM_SHORT[p.phase - 1] : ""}): front ${p.front} · rear ${p.rear}" style="display:inline-block;width:16px;height:16px;border-radius:2px;border:1px solid ${col};position:relative;background:var(--bg)"><i style="position:absolute;left:0;bottom:0;width:50%;height:${Math.round(fr * 100)}%;background:#2f81f7;opacity:${p.front > 1 ? 1 : .4}"></i><i style="position:absolute;right:0;bottom:0;width:50%;height:${Math.round(rr * 100)}%;background:#e5414e;opacity:${p.rear > 1 ? 1 : .4}"></i></span>`; }).join("")}</span>`;
     const cornerAnalysis = () => {
-      const log = (live.cornerLog || []); const cs = canonTurns(); const f = live.frame || {}; const inCorner = f.on && Math.abs(f.lat || 0) > 0.4;
+      const curC = (live.frame && live.frame.on && live.frame.cid) || live.courseCar; const log = (live.cornerLog || []).filter((c) => !curC || c.car === curC); const cs = canonTurns(); const f = live.frame || {}; const inCorner = f.on && Math.abs(f.lat || 0) > 0.4;   // car-aware: only the equipped car's corners
       if (!log.length && !cs.length) return `<div class="lab-corner" style="border-left:4px solid var(--accent2);background:var(--bg2)"><strong>🩺 Corner analysis</strong> <span class="why">— every corner of every lap, live. Start a lap; each corner appears here the moment you complete it.</span>${inCorner ? ` <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">● in a corner now — ${f.lat > 0 ? "right" : "left"}, ${Math.abs(f.lat).toFixed(2)} g</span>` : ""}</div>`;
       // per-turn matrix (this session): for each course turn, the corners taken on it (matched here, so a late-arriving analysis still groups older corners)
       const byTurn = {}; log.forEach((c) => { c._turn = matchTurn(c.apex); const k = c._turn ? c._turn.id : "?"; (byTurn[k] = byTurn[k] || []).push(c); });
@@ -3147,6 +3153,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     function paintFrame() {
       const f = live.frame; if (!f) return;
       updateLiveDec(f); paintDecNext(); paintCourseLive();
+      // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
+      if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was && effMode() === "course") paintSections(true); }
       for (const w of W4) {
         const [ratio, angle, comb] = f.slip[w]; const ring = host.querySelector(`[data-ring="${w}"]`), nd = host.querySelector(`[data-needle="${w}"]`), pk = host.querySelector(`[data-peak="${w}"]`);
         if (!ring) continue;

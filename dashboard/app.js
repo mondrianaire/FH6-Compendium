@@ -2653,6 +2653,20 @@
       return `${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
     };
+    // large ACTIVE-CAR banner — everything car-scoped (course tuning, references, decode) is about THIS car; make it unmissable
+    const paintActiveCar = () => { const el = host.querySelector("#lvActiveCar"); if (!el) return; const f = live.frame; const on = f && f.on;
+      const cid = on ? f.cid : live.courseCar; const changed = live._carJustChanged && (performance.now() - live._carJustChanged < 6000);
+      const key = `${on ? 1 : 0}|${cid || ""}|${changed ? 1 : 0}`; if (el.dataset.k === key) return; el.dataset.k = key;
+      if (!cid) { el.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border:2px solid var(--muted);border-radius:10px;background:var(--bg2)"><span style="font-size:24px">🚗</span><b style="font-size:16px;color:var(--muted)">No active car</b><span class="why">get in a car and drive — every course / decode reading below is scoped to the active car</span></div>`; return; }
+      const nm = (NAMES()[String(f && f.car)] || {}).name || (carName({ ordinal: String(cid).split("|")[0], id: cid })) || "#" + String(cid).split("|")[0];
+      const col = changed ? "var(--warn,#e3b341)" : on ? "var(--accent)" : "var(--muted)";
+      el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:9px 14px;border:2px solid ${col};border-radius:10px;background:${changed ? "rgba(227,179,65,.10)" : on ? "rgba(0,210,122,.06)" : "var(--bg2)"};box-shadow:inset 6px 0 0 ${col}">
+        <span style="font-size:26px">${changed ? "🔄" : "🚗"}</span>
+        <div style="flex:1;min-width:0"><div style="font-size:18px;font-weight:800;color:${col};line-height:1.1">${esc(nm)}</div><div class="why" style="font-size:12px">${on ? `${f.cls} ${f.pi} · ${f.drv} · ${f.cyl || ""}cyl${f.on && f.ev ? " · in an event" : ""}` : "parked — last active car"} · build ${String(cid).split("|").slice(0, 4).join("|")}</div></div>
+        <span class="chip" style="border-color:${col};color:${col};font-weight:700">${changed ? "CAR CHANGED" : on ? "● ACTIVE" : "idle"}</span>
+        <span class="why" style="font-size:11px;max-width:260px">course tuning, references &amp; decode below are for THIS car${changed ? " — re-gathering its data" : ""}</span>
+      </div>`;
+    };
     const paintCourseLive = () => { const el = host.querySelector("#lvCourseLive"); if (!el) return; const f = live.frame || {}; const lo = live.loop; const txt = f.on && f.ev ? `lap ${f.lapn || 1} in progress${f.lapt ? " · " + f.lapt.toFixed(1) + " s" : ""}` : lo && lo.lap ? `loop lap ${lo.lap}${lo.last_s ? " · last " + lo.last_s + " s" : ""}` : f.on ? "free roam — not on the course" : "not driving"; if (el.textContent !== txt) el.textContent = txt; };
     // ---- RECORDING · COURSE: the TRACK INDEX — every course on record with its records and the BEST BUILD that set them ----
     const trackIndex = (s) => {
@@ -2889,7 +2903,16 @@
       const subject = isLive ? (A ? `<div class="block" style="border-color:#a371f7"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🚗 Cloning the car you're in — ${esc(carName(A) || "#" + A.ordinal)} <span class="why">· ${A.class} ${A.pi} ${A.drivetrain} ${A.cyl}cyl · build ${A.build_id}</span></h3><span class="chip" style="border-color:${Adone ? "#00d27a" : "#e3b341"};color:${Adone ? "#00d27a" : "#e3b341"};font-weight:700">${A.decode ? (Adone ? "CAPTURE COMPLETE" : A.decode.ready_n + "/" + A.decode.total + " tests") : "analysing…"}</span></div>
           <p class="why" style="font-size:11px;margin:2px 0 6px">analysed constantly — the daemon re-analyses every ~20 s of driving; the panel below moves with every frame</p>
           <div id="lvDecNext">${nextPanelHtml(A)}</div>
-          ${A.id === D.id ? `<p class="why" style="font-size:11px;margin:4px 0">this is the DONOR — its sheet is the deliverable below; set another car's run as 🔧 REPLICA to converge</p>` : `<p class="why" style="font-size:11px;margin:4px 0">this car is not the donor — <b>set as 🎯 DONOR</b> in the stream bar to make it the capture, or <b>🔧 REPLICA</b> to converge it against the donor below</p>`}
+          ${(() => { const st = live.stint || (live.frame && live.frame.stint) || 0; const tg = (live.tags || {})[String(st)] || {}; const myRole = (typeof tg === "object" && tg.role) || ""; const pin = PIN(); const hasDonor = !!(pin || roleStint("donor"));
+            return `<div style="margin:6px 0;padding:8px 10px;border:1px dashed #a371f7;border-radius:8px;font-size:11.5px">
+              <div style="font-weight:700;margin-bottom:4px">Which run is this? <span class="why" style="font-weight:400">— tag the car you're driving so the Bench knows what to compare</span></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                <button class="lab-mode" data-role="donor" style="padding:5px 12px;font-size:12px;border-color:#e3b341;color:#e3b341;${myRole === "donor" ? "background:#e3b341;color:#0e1116" : ""}">🎯 DONOR — the tune I want to clone</button>
+                <button class="lab-mode" data-role="replica" style="padding:5px 12px;font-size:12px;border-color:#00d27a;color:#00d27a;${myRole === "replica" ? "background:#00d27a;color:#0e1116" : ""}">🔧 REPLICA — my rebuild of it</button>
+                ${myRole ? `<span class="chip" style="border-color:${myRole === "donor" ? "#e3b341" : "#00d27a"};color:${myRole === "donor" ? "#e3b341" : "#00d27a"}">this run = ${myRole === "donor" ? "🎯 DONOR" : "🔧 REPLICA"}</span>` : ""}
+              </div>
+              <div class="why" style="font-size:10.5px;margin-top:5px">${!hasDonor ? "<b>Start here:</b> driving the locked / downloaded tune you want to copy? Press 🎯 DONOR — its Clone Sheet (the parts) builds below and it stays pinned." : A.id === (D && D.id) ? "This IS the donor — the Clone Sheet below is your deliverable. Build a copy, drive it, and press 🔧 REPLICA to see the slider gaps." : "Donor already set. If this is your rebuild, press 🔧 REPLICA to converge it against the donor on the Bench."}</div>
+            </div>`; })()}
           ${A.decode ? (Adone ? `${A.clone_sheet ? cloneSheetHtml(A) : ""}<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>🧬 decode battery</b> <span class="chip" style="border-color:#00d27a;color:#00d27a">all tests captured</span></summary>${decodePanel(A, "🚗 ")}</details>` : `${decodePanel(A, "🚗 ")}${A.clone_sheet ? `<div style="margin-top:8px">${cloneSheetHtml(A)}</div>` : ""}`) : `<p class="why" style="font-size:11px">first analysis after ~20 s of driving…</p>`}
         </div>` : `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><p class="why" style="font-size:12px;margin:0 0 6px">${live.frame && live.frame.on ? "this config has no analysis yet — drive ~20 s" : "not driving — the car you get into becomes the decode subject automatically"}</p><div id="lvDecNext">${nextPanelHtml(null)}</div></div>`) : "";
       const libraryBlock = isLive ? "" : buildLibrary(s);
@@ -3073,9 +3096,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     function streamBar() {
       return `
         <div class="block" style="border-color:#e5414e">
-          <div class="card-row" style="margin-top:0"><h3 style="margin:0">🔴 Live — Data Out stream</h3><span id="lvStatus" class="chip">connecting…</span></div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)"><button class="lab-mode" id="lvConnect">connect</button><button class="lab-mode" id="lvReset" title="Clear the live screen and start a fresh session (new CSV) on the daemon" style="border-color:#e5414e;color:#e5414e">↺ reset live</button>
-            <span class="why" style="font-size:11px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (or <code>--replay captures/&lt;file&gt;.csv</code> to replay a recording live)</span></div>
+          <div class="card-row" style="margin-top:0"><h3 style="margin:0;font-size:15px">🔴 Live stream</h3><span style="display:inline-flex;align-items:center;gap:6px"><span id="lvStatus" class="chip">connecting…</span><button class="lab-mode" id="lvReset" title="Start a fresh recording — clears the live screen and begins a new session/CSV. Your pinned donor and course records are kept." style="padding:3px 10px;font-size:11px;border-color:#e5414e;color:#e5414e">↺ new session</button><span class="chip" id="lvConnGear" title="connection settings" style="cursor:pointer;padding:3px 8px">⚙</span></span></div>
+          <div id="lvConnRow" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"><button class="lab-mode" id="lvConnect" style="font-size:12px">connect</button><span class="why" style="font-size:10.5px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (<code>--replay captures/&lt;file&gt;.csv</code> to replay)</span></div>
           <div id="lvWfLine" style="margin-top:8px;font-size:12px"></div>
           <div id="lvLoop" style="margin-top:8px"></div>
           <div id="lvStint" style="margin-top:8px"></div>
@@ -3089,7 +3111,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const sectionsHtml = (s, isLive) => { const w = effMode(); return w === "course" ? courseSection(s, isLive) : w === "decode" ? decodeSection(s, isLive) : freeSection(s, isLive); };
     function liveBody() {
       const w = effMode();
-      return `<div id="lvBanner"></div>
+      return `<div id="lvActiveCar" style="margin-bottom:8px"></div>
+        <div id="lvBanner"></div>
         <div class="lab-tiles" id="lvTiles"></div>
         <div id="lvSections">${sectionsHtml(liveSess(), true)}</div>
         ${w === "free" ? `<div class="block"><h3 style="margin-top:0">🩺 Friction — live (Peak% = |combined slip| × 100; needle = slip vector; ring red past 1.0)</h3>
@@ -3132,29 +3155,25 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const sv = host.querySelector("#lvStint");
       if (sv && live.connected) {
         const n = live.stint || (st && st.stint) || 0; const tg = (live.tags || {})[String(n)] || {}; const labTxt = typeof tg === "string" ? tg : (tg.label || ""); const role = (typeof tg === "object" && tg.role) || "";
-        if (sv.dataset.n !== String(n) || sv.dataset.lab !== labTxt || sv.dataset.role !== role || sv.dataset.m !== liveEffMode()) {
+        if (sv.dataset.n !== String(n) || sv.dataset.lab !== labTxt || sv.dataset.crole !== role || sv.dataset.m !== liveEffMode()) {
           const sameRun = sv.dataset.n === String(n); const typedTag = (sv.querySelector("#lvTag") || {}).value || "";   // keep a half-typed tag across repaints
-          sv.dataset.n = String(n); sv.dataset.lab = labTxt; sv.dataset.role = role; sv.dataset.m = liveEffMode();
+          sv.dataset.n = String(n); sv.dataset.lab = labTxt; sv.dataset.crole = role; sv.dataset.m = liveEffMode();
           const roleChip = role ? `<span class="chip" style="border-color:${role === "donor" ? "#e3b341" : "#00d27a"};color:${role === "donor" ? "#e3b341" : "#00d27a"}">${role === "donor" ? "🎯 DONOR" : "🔧 REPLICA"}</span>` : "";
           const wf = liveEffMode();   // the run row follows the workflow: Course = attempts (auto-split), Decode = roles + manual splits, Free = tags + manual splits
           sv.innerHTML = n ? `<span class="chip" style="border-color:var(--accent);color:var(--accent)">🏁 ${wf === "course" ? "attempt" : "run"} ${n}${labTxt ? " “" + esc(labTxt) + "”" : ""}</span> ${roleChip}
             <input id="lvTag" placeholder="${wf === "course" ? "tag this attempt — e.g. softer front" : "tag this run — e.g. front ARB −2"}" value="${esc(labTxt)}" style="min-width:200px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"> <button class="lab-mode" id="lvTagBtn" style="padding:4px 10px;font-size:12px">🏷 tag</button>${wf === "course" ? "" : ` <button class="lab-mode" id="lvNewRun" title="force a run split at the next driving frame — use after a slider change" style="padding:4px 10px;font-size:12px">➕ new run</button>`}
-            ${wf === "decode" ? `<span style="margin-left:8px;font-size:11px;color:var(--muted)">roles:</span> <button class="lab-mode" data-role="donor" style="padding:4px 10px;font-size:12px;border-color:#e3b341;color:#e3b341">set as 🎯 DONOR</button> <button class="lab-mode" data-role="replica" style="padding:4px 10px;font-size:12px;border-color:#00d27a;color:#00d27a">set as 🔧 REPLICA</button>` : ""}
-            <div class="why" style="font-size:10.5px;margin-top:3px">${wf === "course" ? "🏟 every menu gap / restart starts a new attempt — tag an attempt when you changed a slider between them" : wf === "decode" ? "🧬 runs split only on a build change, an event edge, or ➕ new run — fast-travel to your next test freely; the donor is pinned once set" : "🛣 runs split only on a build change, an event edge, or ➕ new run — tag each re-tune so the runs table and Bench can A/B them"}</div>` : `<span class="why" style="font-size:11px">run counter starts with the first driving frame</span>`;
+            <div class="why" style="font-size:10.5px;margin-top:3px">${wf === "course" ? "🏟 every menu gap / restart starts a new attempt — tag one when you changed a slider between them" : wf === "decode" ? "🧬 the 🎯 DONOR / 🔧 REPLICA controls are in the Decode section below" : "🛣 runs split on a build change, an event edge, or ➕ new run — tag each re-tune"}</div>` : `<span class="why" style="font-size:11px">run counter starts with the first driving frame</span>`;
           const ti = sv.querySelector("#lvTag"); if (ti && sameRun && typedTag && typedTag !== labTxt) ti.value = typedTag;
           const tb = sv.querySelector("#lvTagBtn"); if (tb) tb.addEventListener("click", () => { const v = sv.querySelector("#lvTag").value.trim(); fetch(liveUrl + "/tag", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: v, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags, { [String(n)]: Object.assign({}, live.tags[String(n)], { label: v }) }); paintStatus(); }).catch(() => {}); });
           const nr = sv.querySelector("#lvNewRun"); if (nr) nr.addEventListener("click", () => { fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(() => { nr.textContent = "➕ splits at next driving frame"; setTimeout(() => { nr.textContent = "➕ new run"; }, 2500); }).catch(() => {}); });
-          sv.querySelectorAll("[data-role]").forEach((b) => b.addEventListener("click", () => { const rl = b.dataset.role; fetch(liveUrl + "/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: rl, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags); Object.keys(live.tags).forEach((k) => { if (live.tags[k] && live.tags[k].role === rl) live.tags[k] = Object.assign({}, live.tags[k], { role: null }); }); live.tags[String(n)] = Object.assign({}, live.tags[String(n)], { role: rl }); sv.dataset.role = "";
-            if (rl === "donor") { const ls = liveSess(); const cidNow = live.frame && live.frame.cid; if (ls && cidNow) { live._donorPick = null; pinDonor(ls, cidNow + "#" + n); } }   // 🎯 DONOR from the stream bar pins itself (stays across resets / restarts / reloads)
-            paintStatus(); paintSections(true); paintBanner(); }).catch(() => {}); }));
         }
       }
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
-      updateLiveDec(f); paintDecNext(); paintCourseLive();
+      updateLiveDec(f); paintDecNext(); paintCourseLive(); paintActiveCar();
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
-      if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was && effMode() === "course") paintSections(true); }
+      if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }
       for (const w of W4) {
         const [ratio, angle, comb] = f.slip[w]; const ring = host.querySelector(`[data-ring="${w}"]`), nd = host.querySelector(`[data-needle="${w}"]`), pk = host.querySelector(`[data-peak="${w}"]`);
         if (!ring) continue;
@@ -3227,7 +3246,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     function bindLive() {
       const b = host.querySelector("#lvConnect"), u = host.querySelector("#lvUrl"), r = host.querySelector("#lvReset");
       if (b) b.addEventListener("click", () => { liveUrl = u.value.trim().replace(/\/$/, ""); localStorage.setItem("fh6LiveUrl", liveUrl); liveConnect(); });
-      if (r) r.addEventListener("click", () => liveReset(false));
+      if (r) r.addEventListener("click", () => { if (confirm("Start a fresh recording? This clears the live screen and begins a new session on the daemon. Your pinned donor and course records are kept.")) liveReset(false); });
+      const g = host.querySelector("#lvConnGear"); if (g) g.addEventListener("click", () => { const row = host.querySelector("#lvConnRow"); if (row) row.style.display = row.style.display === "none" ? "flex" : "none"; });
     }
     // ---- Lab axes: SOURCE (🔴 live stream | 📼 recording) × WORKFLOW (🏟 Course | 🧬 Decode | 🛣 Free Tuning) ----
     // Live: the workflow is auto-detected by the daemon (Rivals / race / loop → Course · donor flagged → Decode · else Free) unless you click a tab (manual, until 🧭 auto).
@@ -3251,6 +3271,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") { live._donorPick = donor; const ls = liveSess(); const p = PIN(); pinDonor(ls && car(ls, donor) ? ls : (p && p.data && car(p.data, donor) ? p.data : null), donor); paintSections(true); paintBanner(); } else render(); }));
       bindAtlas(r);
       r.querySelectorAll("[data-tunecid]").forEach((inp) => inp.addEventListener("change", () => { setTune(inp.dataset.tunecid, inp.dataset.tunesl, inp.value); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-role]").forEach((b) => b.addEventListener("click", () => { const rl = b.dataset.role; const n = live.stint || (live.frame && live.frame.stint) || 0; if (!n) return;
+        fetch(liveUrl + "/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: rl, stint: n }) }).then(() => {
+          live.tags = Object.assign({}, live.tags); Object.keys(live.tags).forEach((k) => { if (live.tags[k] && live.tags[k].role === rl) live.tags[k] = Object.assign({}, live.tags[k], { role: null }); }); live.tags[String(n)] = Object.assign({}, live.tags[String(n)], { role: rl });
+          if (rl === "donor") { const ls = liveSess(); const cidNow = live.frame && live.frame.cid; if (ls && cidNow) { live._donorPick = null; pinDonor(ls, cidNow + "#" + n); } }
+          paintStatus(); if (src === "live") paintSections(true); else render();
+        }).catch(() => {});
+      }));
       r.querySelectorAll("[data-course-stage]").forEach((b) => b.addEventListener("click", () => { localStorage.setItem("fh6CourseStage", b.dataset.courseStage); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-expected]").forEach((b) => b.addEventListener("click", () => { const [rk, n] = b.dataset.expected.split("|"); fetch(liveUrl + "/course-expected", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, n: +n }) }).then(() => { b.textContent = "saved ✓"; }).catch(() => {}); }));
       r.querySelectorAll("[data-lib-pick]").forEach((b) => b.addEventListener("click", () => { const [sid, key] = b.dataset.libPick.split("|"); libPick = { sid, key }; donor = key; render(); }));

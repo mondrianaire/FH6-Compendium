@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "_purpose": "A BUILD RECORD: the individual upgrade components of one build, read from the donor car itself — the upgrade shop's INSTALLED tiles per category, the My Cars stats pane, and the tune menu's tab row (a locked downloaded tune still shows which tabs exist: Brakes tab = race brakes installed, Antiroll Bars tab = race ARBs, Differential tab = sport/race diff, Gearing tab = sport/race transmission, Aero tab = adjustable aero). Telemetry cannot name individual parts (many stacks give the same outputs) — it VERIFIES them: gear count vs transmission, boost vs aspiration, cyl/redline vs engine swap, drivetrain, exact PI, pane hp/tq/weight vs measured. File name: <ordinal>-<short-label>.json. Matched to a session car by 'cid' (ordinal|drivetrain|cyl|PI), optionally 'build_id'.",
+  "car_ordinal": 0,
+  "car": "YYYY Make Model",
+  "cid": "ordinal|drivetrain(0 FWD/1 RWD/2 AWD)|cylinders|PI",
+  "build_id": null,
+  "label": "e.g. downloaded tune — donor",
+  "tune_share_code": null,
+  "captured": "YYYY-MM-DD",
+  "source": "shop INSTALLED tiles + My Cars pane + tune tabs (screenshots transcribed)",
+  "pane": { "pi": null, "class": null, "power_hp": null, "torque_lbft": null, "weight_lb": null, "front_pct": null, "compound": null, "suspension": null, "displacement_l": null },
+  "tune_tabs": [],
+  "parts": {
+    "Conversions": [
+      { "slot": "Engine", "installed": null, "note": "stock or the swap's exact menu name" },
+      { "slot": "Drivetrain", "installed": null },
+      { "slot": "Aspiration", "installed": null, "note": "family + tier exactly as the menu names it" },
+      { "slot": "Body kit", "installed": null }
+    ],
+    "Engine": [
+      { "slot": "Air filter", "installed": null },
+      { "slot": "Intake manifold / throttle body", "installed": null },
+      { "slot": "Fuel system", "installed": null },
+      { "slot": "Ignition", "installed": null },
+      { "slot": "Exhaust", "installed": null },
+      { "slot": "Camshaft", "installed": null },
+      { "slot": "Valves", "installed": null },
+      { "slot": "Displacement", "installed": null },
+      { "slot": "Pistons / compression", "installed": null },
+      { "slot": "Turbo / supercharger tier", "installed": null },
+      { "slot": "Intercooler", "installed": null },
+      { "slot": "Oil & cooling", "installed": null },
+      { "slot": "Flywheel", "installed": null }
+    ],
+    "Platform & Handling": [
+      { "slot": "Brakes", "installed": null },
+      { "slot": "Springs & dampers", "installed": null },
+      { "slot": "Front anti-roll bar", "installed": null },
+      { "slot": "Rear anti-roll bar", "installed": null },
+      { "slot": "Chassis reinforcement / roll cage", "installed": null },
+      { "slot": "Weight reduction", "installed": null }
+    ],
+    "Drivetrain": [
+      { "slot": "Clutch", "installed": null },
+      { "slot": "Transmission", "installed": null, "note": "tier + speeds, e.g. Race 8-speed" },
+      { "slot": "Driveline", "installed": null },
+      { "slot": "Differential", "installed": null }
+    ],
+    "Tires & Rims": [
+      { "slot": "Tire compound", "installed": null },
+      { "slot": "Front tire width", "installed": null },
+      { "slot": "Rear tire width", "installed": null },
+      { "slot": "Rim style", "installed": null },
+      { "slot": "Front rim size", "installed": null },
+      { "slot": "Rear rim size", "installed": null },
+      { "slot": "Front track width", "installed": null },
+      { "slot": "Rear track width", "installed": null }
+    ],
+    "Aero & Appearance": [
+      { "slot": "Front bumper / splitter", "installed": null },
+      { "slot": "Rear wing", "installed": null },
+      { "slot": "Other body parts", "installed": null }
+    ]
+  }
+}

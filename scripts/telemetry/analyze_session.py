@@ -11,6 +11,7 @@ swap or drivetrain conversion mid-session becomes a new entry. Each entry carrie
 (max rpm, boost, dyno peak, gear count + ladder, mass index) and a short build_id hash; names come
 from data/car-ordinals.json (learned map) when known.
 """
+import re
 import csv, hashlib, json, math, os, statistics, sys
 from collections import defaultdict
 
@@ -327,16 +328,58 @@ def clone_sheet_for(c, bat):
             row("Rear wing", None, "shop", "same — speed-binned lat-g hints presence only"),
         ]},
     ]
+    # ---- INDIVIDUAL COMPONENTS from a build record (the donor car's shop INSTALLED tiles + pane + tune tabs), each VERIFIED against the stream where possible ----
+    rec = c.get("build_record"); comp = []
+    if rec:
+        pane = rec.get("pane") or {}; tabs = [str(t).lower() for t in (rec.get("tune_tabs") or [])]
+        def has_tab(*names): return any(any(n in t.replace("-", "").replace(" ", "") for n in names) for t in tabs)
+        CONF = {"verified": 0.97, "consistent": 0.9, "captured": 0.85, "contradicted": 0.2}
+        hp_m = sig.get("hp_peak"); tq_m = sig.get("tq_peak"); tot_ev = []
+        if pane.get("power_hp") and hp_m: tot_ev.append(f"pane {pane['power_hp']} hp vs measured {hp_m} hp → {'match' if abs(pane['power_hp'] - hp_m) / max(1, pane['power_hp']) <= 0.04 else 'MISMATCH'}")
+        if pane.get("torque_lbft") and tq_m: tot_ev.append(f"pane {pane['torque_lbft']} lb-ft vs measured {tq_m} → {'match' if abs(pane['torque_lbft'] - tq_m) / max(1, pane['torque_lbft']) <= 0.06 else 'MISMATCH'}")
+        if pane.get("pi") is not None: tot_ev.append(f"PI {pane['pi']} {'==' if pane['pi'] == c['pi'] else '!='} measured {c['pi']}")
+        totals_ok = (None if not tot_ev else all(("MISMATCH" not in e and "!=" not in e) for e in tot_ev))
+        for menu, items in (rec.get("parts") or {}).items():
+            rows_ = []
+            for it in items or []:
+                slot = str(it.get("slot") or ""); inst = it.get("installed")
+                if inst is None: continue
+                sl = slot.lower(); iv = str(inst).lower(); verdict, evid = "captured", "shop INSTALLED tile"
+                if "transmission" in sl:
+                    m_ = re.search(r"(\d+)\s*-?\s*speed", iv); gc = sig.get("gear_count")
+                    if m_ and gc: verdict, evid = (("verified", f"shop tile · {gc} gears measured at WOT") if int(m_.group(1)) == gc else ("contradicted", f"tile says {m_.group(1)}-speed but the stream measured {gc} gears"))
+                elif "aspiration" in sl or "turbo" in sl or "supercharger" in sl:
+                    boosted = (sig.get("boost_max") or 0) > 0.5; na = any(k in iv for k in ("stock", "natural", "none"))
+                    if na: verdict, evid = (("verified", "no boost in the stream") if not boosted else ("contradicted", f"stream shows {sig.get('boost_max')} psi boost"))
+                    else: verdict, evid = (("consistent", f"stream shows {sig.get('boost_max')} psi — family present; the tier comes from the tile") if boosted else ("contradicted", "stream shows no boost"))
+                elif menu == "Conversions" and sl.startswith("drivetrain"):
+                    dv = c["drivetrain"]; verdict, evid = (("verified", f"stream drivetrain {dv}") if (dv.lower() in iv or "stock" in iv) else ("captured", f"stream drivetrain {dv} — make sure the swap tile matches"))
+                elif menu == "Conversions" and sl.startswith("engine"):
+                    verdict, evid = "consistent", f"stream: {c['cyl']}-cyl · redline {c['max_rpm']} rpm · idle {c['idle_rpm']} — the named engine must match these"
+                elif menu == "Engine":
+                    verdict, evid = (("consistent", "engine stack · " + "; ".join(tot_ev)) if totals_ok is True else ("contradicted", "engine stack totals · " + "; ".join(tot_ev)) if totals_ok is False else ("captured", "engine stack — capture the pane power/torque to cross-check the whole stack"))
+                elif "brake" in sl: verdict, evid = (("verified", "Brakes tab present in the tune menu") if has_tab("brake") and "race" in iv else ("captured", "shop tile" + (" · no Brakes tab in the tune menu" if tabs and not has_tab("brake") else "")))
+                elif "anti-roll" in sl or "antiroll" in sl or "arb" in sl: verdict, evid = (("verified", "Antiroll Bars tab present in the tune menu") if has_tab("antiroll", "arb") and "race" in iv else ("captured", "shop tile"))
+                elif "differential" in sl: verdict, evid = (("verified", "Differential tab present in the tune menu") if has_tab("differential", "diff") and ("race" in iv or "sport" in iv) else ("captured", "shop tile"))
+                elif "spring" in sl: verdict, evid = (("verified", f"pane suspension '{pane.get('suspension')}'") if pane.get("suspension") and str(pane.get("suspension")).lower() in iv else ("captured", "shop tile"))
+                elif "compound" in sl: verdict, evid = (("verified", f"pane compound '{pane.get('compound')}'") if pane.get("compound") and str(pane.get("compound")).lower() in iv else ("captured", "shop tile"))
+                elif "weight" in sl: verdict, evid = (("consistent", f"pane weight {pane.get('weight_lb')} lb") if pane.get("weight_lb") else ("captured", "shop tile"))
+                rows_.append({"item": slot, "value": inst, "status": verdict, "note": it.get("note"), "gate": None, "pending": False, "confidence": CONF[verdict], "evidence": evid,
+                              "needs": ("re-check the shop tile — the stream disagrees" if verdict == "contradicted" else None)})
+            if rows_: comp.append({"menu": menu, "items": rows_})
+        if comp: menus = comp + [{"menu": "Telemetry cross-check", "items": [it for m in menus for it in m["items"] if it["status"] == "measured"]}]
     counts = {"measured": 0, "inferred": 0, "shop": 0, "pending": 0}; num = den = 0.0; weak = []
     for m in menus:
         for it in m["items"]:
-            counts["pending" if it["pending"] else it["status"]] += 1
+            k_ = "pending" if it["pending"] else it["status"]; counts[k_] = counts.get(k_, 0) + 1
             if it["confidence"] is not None:
-                w = 1.0 if it["status"] == "measured" else 0.5
+                w = 1.0 if it["status"] in ("measured", "verified", "consistent", "captured", "contradicted") else 0.5
+                if comp and it["status"] == "measured": w = 0.5   # with components present, telemetry rows are the cross-check, not the deliverable
                 num += it["confidence"] * w; den += w
-                if it["status"] == "measured" and it["confidence"] < 0.7: weak.append({"item": it["item"], "confidence": it["confidence"], "needs": it["needs"] or (f"pending — needs the {it['gate']} test" if it["pending"] else None)})
+                if it["status"] in ("measured", "contradicted") and it["confidence"] < 0.7: weak.append({"item": it["item"], "confidence": it["confidence"], "needs": it["needs"] or (f"pending — needs the {it['gate']} test" if it["pending"] else None)})
     overall = round(num / den, 2) if den else 0.0
-    return {"menus": menus, "counts": counts, "pi": c["pi"], "confidence": overall, "weak": weak, "complete": all(t["ok"] for t in bat["tests"]),
+    return {"menus": menus, "counts": counts, "pi": c["pi"], "confidence": overall, "weak": weak, "complete": all(t["ok"] for t in bat["tests"]), "components": bool(comp),
+            "build_record": ({"label": rec.get("label"), "captured": rec.get("captured"), "source": rec.get("source"), "tune_share_code": rec.get("tune_share_code"), "file": rec.get("_file")} if rec else None),
             "pi_note": f"cross-check: every proposed parts list must sum to PI {c['pi']} — a mismatch means a missed part (usually widths or aero)"}
 
 def main():
@@ -377,6 +420,14 @@ def main():
         elif zero_since is None: zero_since = r["t"]
     sess = {"id": sid, "source": path, "frames": len(rows), "duration_s": round(dur, 1), "rate_pps": round(len(rows) / max(dur, 1e-9), 1), "live_frames": len(live)}
     NAMES = names_map()
+    # BUILD RECORDS (data/builds/*.json): individual components read from the donor car's shop / pane / tune tabs — matched to a session car by cid
+    BUILDS = []; bdir = os.path.join(ROOT, "data", "builds")
+    if os.path.isdir(bdir):
+        for fn in sorted(os.listdir(bdir)):
+            if fn.endswith(".json") and not fn.startswith("_"):
+                try:
+                    with open(os.path.join(bdir, fn), encoding="utf-8") as f: b = json.load(f); b["_file"] = fn; BUILDS.append(b)
+                except Exception: pass
 
     # ---- per-configuration entries + segments ----
     cars = {}; segments = []; cur = None
@@ -444,6 +495,7 @@ def main():
                     "mass_idx": round(statistics.median(c["_mass"])) if len(c["_mass"]) >= 15 else None, "shift_rpm": c["shift_rpm"]}
         key = f'{c["ordinal"]}|{c["drivetrain"]}|{c["cyl"]}|{c["pi"]}|{round(c["max_rpm"], -2)}|{len(lad)}|{",".join(f"{g["rel"]:.1f}" for g in lad)}|{round((c["sig"]["hp_peak"] or 0), -1)}'
         c["build_id"] = hashlib.md5(key.encode()).hexdigest()[:8]
+        c["build_record"] = next((b for b in BUILDS if b.get("cid") == c["id"] and (not b.get("build_id") or b.get("build_id") == c["build_id"])), None)
         for k in ("_gear", "_dyno", "_k", "_boost", "_mass", "_shift", "_prev", "_pull", "_pulls", "_boost_n"): del c[k]
     sess["cars"] = sorted(cars.values(), key=lambda c: -c["live_frames"]); sess["segments"] = segments
 

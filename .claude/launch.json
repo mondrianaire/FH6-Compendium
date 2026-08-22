@@ -14,6 +14,12 @@
       "port": 8642
     },
     {
+      "name": "dashboard (main checkout 8643)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8643", "--directory", "C:/Users/mondr/Documents/Claude/Projects/forza-horizon-6-tuning/dashboard"],
+      "port": 8643
+    },
+    {
       "name": "dashboard (node/serve)",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["-y", "serve", "dashboard", "-l", "3000"],

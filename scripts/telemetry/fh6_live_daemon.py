@@ -18,6 +18,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from fh6_dataout_capture import FH_FMT, FIELDS, W, decode  # noqa: E402
+try:
+    import fh6_tune_decode as TUNE  # on-disk tune reader (stdlib); optional
+except Exception:
+    TUNE = None
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 G = 9.80665
@@ -236,7 +240,7 @@ def run_analysis(until=None, final=True):
         path = os.path.join(outdir, sid + ".json")
         if os.path.exists(path):
             with open(path) as f: js = json.load(f)
-            an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "decode", "clone_sheet", "temps_med_f", "live_s")} for c in js["cars"]],
+            an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "general", "decode", "clone_sheet", "temps_med_f", "live_s")} for c in js["cars"]],
                   "courses": [{k: v for k, v in co.items() if k != "geometry"} for co in js.get("courses", [])[:4]],   # geometry (maps, layouts) is heavy and lives in /session.json, which the dashboard fetches after every analysis
                   "stints": [{k: st.get(k) for k in ("n", "id", "label", "role", "t0", "t1")} for st in js.get("stints", [])][-20:]}
             with ST.lock: ST.session_json = js; ST.session_path = path; ST.analysis = an
@@ -304,6 +308,42 @@ class H(BaseHTTPRequestHandler):
             ct = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "bmp": "image/bmp", "webp": "image/webp"}.get(fn.lower().rsplit(".", 1)[-1], "application/octet-stream")
             data = open(path, "rb").read()
             self.send_response(200); self._cors(); self.send_header("Content-Type", ct); self.send_header("Content-Length", str(len(data))); self.send_header("Cache-Control", "no-cache"); self.end_headers(); self.wfile.write(data)
+        elif self.path.startswith("/disk-tunes"):   # every car with an on-disk tune (Data file) — the decode library index
+            payload = {"available": False, "cars": []}
+            if TUNE is not None:
+                try:
+                    names = names_load().get("cars", {}); by_ord, root = TUNE.scan_tunes(newest_only=False)
+                    cars = []
+                    for ordn, metas in by_ord.items():
+                        nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
+                        t = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+                        cars.append({"ordinal": ordn, "name": nm, "tunes": len(metas), "locked": t["locked"], "gears": t["gear_count"]})
+                    cars.sort(key=lambda c: (c["name"] or "zzz"))
+                    payload = {"available": True, "root": root, "count": len(cars), "cars": cars}
+                except Exception as e:
+                    payload = {"available": False, "error": str(e)}
+            body = json.dumps(payload).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/disk-tune"):   # decoded tune + decode-section deliverable for one car (?ordinal=N, or active car)
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+            ordn = q.get("ordinal", [None])[0]
+            if ordn is None:
+                fr = ST.latest; ordn = fr and fr.get("car")   # fall back to the live/active car
+            payload = {"available": False}
+            if TUNE is not None and ordn is not None:
+                try:
+                    ordn = int(ordn); metas, _ = TUNE.tunes_for_ordinal(ordn)
+                    if metas:
+                        names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
+                        tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+                        payload = {"available": True, "ordinal": ordn, "name": nm, "ts": metas[0]["ts"],
+                                   "tune": tune, "deliverable": TUNE.tune_to_deliverable(tune, nm)}
+                    else:
+                        payload = {"available": False, "ordinal": ordn, "reason": "no on-disk tune for this car"}
+                except Exception as e:
+                    payload = {"available": False, "error": str(e)}
+            body = json.dumps(payload).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         else:
             self.send_response(404); self._cors(); self.end_headers()
     def do_OPTIONS(self):
@@ -338,6 +378,17 @@ class H(BaseHTTPRequestHandler):
             m = body.get("mode"); ST.lab_mode = m if m in ("course", "decode", "free") else None; ok = True   # effective lab mode from the dashboard (auto-detected or manual override)
         elif self.path.startswith("/new-run"):
             ST._force_split = True; ok = True   # split at the next driving frame (after a slider change in Decode / Free mode)
+        elif self.path.startswith("/tune-range") and body.get("field") is not None:   # register a (norm, displayed-value) point to back-solve a per-car slider range
+            resp = {"ok": False}
+            if TUNE is not None:
+                try:
+                    ordn = int(body.get("ordinal"))
+                    solved = TUNE.register_range(ordn, str(body["field"]), float(body["norm"]), float(body["value"]), unit=body.get("unit"))
+                    resp = {"ok": True, "solved": solved, "field": str(body["field"]), "ordinal": ordn}
+                except Exception as ex_:
+                    print("tune-range not saved:", repr(ex_), file=sys.stderr); resp = {"ok": False, "error": str(ex_)}
+            out2 = json.dumps(resp).encode()
+            self.send_response(200 if resp.get("ok") else 400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out2))); self.end_headers(); self.wfile.write(out2); return
         elif self.path.startswith("/build-field") and body.get("cid"):   # save a 'shop check' value (from a screenshot) into the build record data/builds/<cid>.json
             try:
                 import re as _re2
@@ -450,6 +501,44 @@ def replay_loop(path, speed):
             ingest(p, t - tbase)
     print("[replay] done")
 
+def disk_watcher():
+    """Watch the FH save folder for the ACTIVE car and push a fresh decode (+ a diff vs the previous
+    save) over SSE the instant a new tune Data file appears. Saving a tune in-game then updates the
+    dashboard within ~1s, hands-free. Diff only fires on a genuine re-save of the same car, not a car change."""
+    if TUNE is None:
+        return
+    last = None
+    while True:
+        time.sleep(1.5)
+        try:
+            fr = ST.latest; ordn = fr and fr.get("car")
+            if not ordn:
+                continue
+            ordn = int(ordn)
+            metas, _ = TUNE.tunes_for_ordinal(ordn)
+            if not metas:
+                if last != (ordn, None):
+                    last = (ordn, None); ST.emit("disk", {"ordinal": ordn, "available": False})
+                continue
+            key = (ordn, round(metas[0]["mtime"], 2))
+            if key == last:
+                continue
+            new_save = bool(last and last[0] == ordn)   # same car + newer file = a fresh save
+            last = key
+            tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+            nm = names_load().get("cars", {}).get(str(ordn)) or {}
+            nm = nm.get("name") if isinstance(nm, dict) else nm
+            diff = None
+            if new_save and len(metas) >= 2:
+                try:
+                    diff = TUNE.tune_diff(TUNE.parse_tune(metas[1]["path"], ordinal_hint=ordn), tune)
+                except Exception:
+                    diff = None
+            ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": metas[0]["ts"], "available": True,
+                             "deliverable": TUNE.tune_to_deliverable(tune, nm), "diff": diff, "new_save": new_save})
+        except Exception:
+            pass
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=9876); ap.add_argument("--http", type=int, default=8765)
@@ -472,6 +561,8 @@ def main():
         ST.csv_path = os.path.abspath(a.replay); ST.replay = True   # analysis runs on the replayed file, capped at replay time
     srv = ThreadingHTTPServer(("127.0.0.1", a.http), H); srv.daemon_threads = True
     threading.Thread(target=srv.serve_forever, daemon=True).start()
+    if TUNE is not None:
+        threading.Thread(target=disk_watcher, daemon=True).start()   # push on-disk tune decode on save / car change
     print(f"[http] http://localhost:{a.http}/events  (SSE)  /session.json  /health")
     try:
         if a.replay: replay_loop(a.replay, a.speed); time.sleep(8)

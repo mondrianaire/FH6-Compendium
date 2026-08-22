@@ -2478,7 +2478,7 @@
     }
     // ---- WORKFLOW sections — rendered from a session object (a recording, or the live session's latest analysis); isLive adds live hints ----
     const arr = (s, k) => (s && Array.isArray(s[k]) ? s[k] : []);
-    const EMPTY_LIVE = `<div class="block"><p class="why" style="font-size:12px;margin:0">first analysis lands after ~20 s of driving — the stream bar above is already live</p></div>`;
+    const EMPTY_LIVE = `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><div id="lvDiskDecode"></div><p class="why" style="font-size:12px;margin:6px 0 0">the on-disk tune (above) decodes instantly from the save file — no driving needed; the drive-based decode battery begins after ~20 s of driving</p></div>`;
     const routeName = (key, fallback) => (((((DB.routes || {}).routes) || {})[key] || {}).name) || (JSON.parse(localStorage.getItem("fh6Routes") || "{}")[key] || {}).name || fallback;
     function eventsTable(s) {
       const ev = arr(s, "events"); if (!ev.length) return "";
@@ -2554,11 +2554,23 @@
       "bottoming": [["rreb", 1, 0.7], ["fbump", 1, 0.5]],
     };
     const tuneKey = (cid) => "fh6Tune:" + baseId(cid);
-    const getTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
-    const setTune = (cid, k, v) => { const t = getTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; localStorage.setItem(tuneKey(cid), JSON.stringify(t)); };
-    const tuningMoves = (adv, corners, cur) => {
+    // disk-decoded exact slider values → the tuning engine's slider keys (auto-fills "current tune")
+    const DISK2SLIDER = { front_arb: "farb", rear_arb: "rarb", front_bump: "fbump", rear_bump: "rbump", front_rebound: "freb", rear_rebound: "rreb", brake_balance: "bbal", brake_pressure: "bpress", rear_diff_accel: "accel", rear_diff_decel: "decel", center_diff: "center", front_spring: "fspring", rear_spring: "rspring", front_downforce: "faero", rear_downforce: "raero" };
+    const applyDiskTune = (d) => {                       // pull exact slider values off the decode so targets need no typing; returns whether they changed
+      if (!d || !d.deliverable) return false;
+      const vals = {};
+      (d.deliverable.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && DISK2SLIDER[r.field]) vals[DISK2SLIDER[r.field]] = r.value; }));
+      live.diskTune = live.diskTune || {}; const key = String(d.ordinal);
+      const changed = JSON.stringify(live.diskTune[key]) !== JSON.stringify(vals);
+      live.diskTune[key] = vals; return changed;
+    };
+    const userTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
+    const getTune = (cid) => { const ord = String(cid).split("|")[0]; const disk = (live.diskTune && live.diskTune[ord]) || {}; return Object.assign({}, disk, userTune(cid)); };   // user entries override the disk auto-fill
+    const setTune = (cid, k, v) => { const t = userTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; localStorage.setItem(tuneKey(cid), JSON.stringify(t)); };
+    const tuningMoves = (adv, corners, cur, weightKey) => {
+      const wk = weightKey || "course_weight";   // course lane weights by course_weight; general lane by breadth
       const acc = {};
-      (adv || []).filter((a) => !a.open).forEach((a) => { const rx = TUNE_RX[a.key]; if (!rx) return; const cw = a.course_weight != null ? a.course_weight : 1; if (cw < 0.2) return;
+      (adv || []).filter((a) => !a.open).forEach((a) => { const rx = TUNE_RX[a.key]; if (!rx) return; const cw = a[wk] != null ? a[wk] : 1; if (cw < 0.2) return;
         const mag = (a.severity / 3) * (a.confidence || 0.7) * cw;
         rx.forEach(([sl, dir, w]) => { const e = acc[sl] = acc[sl] || { net: 0, wsum: 0, sev: 0, srcs: new Set(), conf: 0 }; e.net += dir * w * mag; e.wsum += w * mag; e.sev = Math.max(e.sev, a.severity); e.conf = Math.max(e.conf, a.confidence || 0.7); e.srcs.add(a.text.split(":")[0].split(" (")[0]); });
       });
@@ -2575,7 +2587,9 @@
       return moves.sort((a, b) => b.sev - a.sev || Math.abs(b.delta || 0) - Math.abs(a.delta || 0));
     };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
-      return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)"}</span></summary>
+      const diskN = Object.keys((live.diskTune && live.diskTune[String(cid).split("|")[0]]) || {}).length;
+      const note = diskN ? `<b style="color:#00d27a">📀 ${diskN} current values auto-filled from disk</b> — targets are exact; edit any to override` : (n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)");
+      return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${note}</span></summary>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 8px;margin-top:6px">${SLIDER_ORDER.map((sl) => `<label style="font-size:10.5px;display:flex;justify-content:space-between;align-items:center;gap:4px">${SLIDER[sl].label}<input data-tunecid="${esc(cid)}" data-tunesl="${sl}" value="${cur[sl] != null ? cur[sl] : ""}" inputmode="decimal" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"></label>`).join("")}</div></details>`;
     };
     const numericTuningPanel = (co, s, forceCid) => {
@@ -2705,6 +2719,33 @@
         ${eventsTable(s)}`;
     }
     // 🛣 FREE TUNING — whole-session advisor, runs, test cards, gear & dyno (recordings also get the strip + corner cards; live paints those as instruments)
+    // ---- GENERAL / ALL-AROUND tuning: the inverse of course tuning. Weights diagnoses by BREADTH
+    // (how consistently a problem shows across every context the build has driven — corner-type x surface),
+    // so it recommends changes that help across the board for public / Horizon Open play, never overfit to one track.
+    const BIAS_COL = { understeer: "#2f81f7", oversteer: "#e5414e", neutral: "#00d27a" };
+    const generalTuningPanel = (c, s) => {
+      if (!c) return "";
+      const g = c.general, adv = c.advice || [], cid = c.id;
+      const sig = (g && g.balance) || [];
+      if (!g || g.corners < 4 || sig.length === 0) return `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🛣 All-around tune — ${esc(carName(c) || "#" + c.ordinal)}</h3><p class="why" style="font-size:12px;margin:0">Gathering — drive varied corners (and surfaces) on public / free-roam; the all-around read needs a spread of contexts, not one track.</p></div>`;
+      const moves = tuningMoves(adv, [], getTune(cid), "breadth");
+      const rob = g.robustness;
+      const robCol = rob == null ? "var(--muted)" : rob >= 0.6 ? "#00d27a" : rob >= 0.35 ? "#e3b341" : "#e5414e";
+      // balance signature matrix — the diagnostic: how the car handles across every context, so surface/speed specificity shows through
+      const matrix = `<div style="overflow-x:auto"><table style="font-size:11.5px"><thead><tr><th>context</th><th>corners</th><th>balance (USI)</th><th>first red</th><th></th></tr></thead><tbody>
+        ${sig.map((r) => `<tr><td><b>${r.type}</b> <span class="why">· ${r.surface}</span></td><td>${r.n}</td><td style="color:${BIAS_COL[r.bias]};font-weight:700">${r.usi > 0 ? "+" : ""}${r.usi.toFixed(3)}</td><td>${r.axle === "none" ? `<span style="color:#00d27a">clean</span>` : `<span style="color:${r.axle === "front" ? "#2f81f7" : "#e5414e"}">${r.axle}</span>`}</td><td><span class="chip" style="border-color:${BIAS_COL[r.bias]};color:${BIAS_COL[r.bias]}">${r.bias}</span></td></tr>`).join("")}
+        </tbody></table></div>`;
+      const splitFlag = g.surface_split ? `<div style="margin:8px 0;padding:6px 10px;border:1px solid #e3b341;border-radius:8px;font-size:11.5px"><b style="color:#e3b341">⚠ Surface-specific:</b> balance swings by surface — USI ${g.surface_split.smooth > 0 ? "+" : ""}${g.surface_split.smooth} on road vs ${g.surface_split.rough > 0 ? "+" : ""}${g.surface_split.rough} on rough. No single tune wins both; this all-around read favours where you drive most — tune a separate setup for the other surface.</div>` : "";
+      const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
+      const movesTbl = moves.length ? `<div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th>slider</th><th>current</th><th></th><th>set to</th><th>Δ</th><th>why (across every context)</th><th>conf</th></tr></thead><tbody>
+        ${moves.map((m) => `<tr><td><b>${m.label}</b></td><td>${m.from != null ? m.from + m.unit : `<span class="why">—</span>`}</td><td style="color:${col(m)};font-weight:700">${arrow(m)}</td><td>${m.to != null ? `<b style="color:${col(m)}">${m.to}${m.unit}</b>` : `<span style="color:${col(m)}">${m.dir > 0 ? "stiffer" : "softer"}${m.delta != null ? " ~" + Math.abs(m.delta) + m.unit : ""}</span>`}</td><td style="color:${col(m)}">${m.delta != null ? (m.delta > 0 ? "+" : "") + m.delta + m.unit : (m.dir > 0 ? "+" : "−")}</td><td class="why" style="font-size:10.5px">${esc(m.why)}</td><td><div class="lab-bar" style="width:44px;height:5px;display:inline-block"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></div></td></tr>`).join("")}
+        </tbody></table></div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`;
+      return `<div class="block" style="border-color:var(--accent)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🛣 All-around tune — ${esc(carName(c) || "#" + c.ordinal)} <span class="why">· for public / Horizon Open · robust across the board</span></h3><span class="chip" style="border-color:${robCol};color:${robCol};font-weight:700" title="how consistent the car's balance is across every context — high = predictable all-rounder">consistency ${rob == null ? "—" : Math.round(rob * 100) + "%"}</span> <span class="chip">${g.corners} corners · ${g.buckets} contexts${g.surfaces.length > 1 ? " · " + g.surfaces.join("+") : ""}</span></div>
+        <p class="why" style="font-size:11px;margin:4px 0 6px">Weighs each fix by how <b>broadly</b> it helps — a problem in every context gets a full move; one that only shows in some contexts is a balance issue, not a blanket change. The opposite of the course lane, which tunes for one track.</p>
+        <div style="font-size:11px;color:var(--muted);margin:2px 0 3px"><b>Balance signature</b> — how it handles across everything you've driven (blue = understeer, red = oversteer, green = neutral)</div>${matrix}${splitFlag}
+        ${tuneInputRow(cid)}
+        <div style="font-size:11px;color:var(--muted);margin:8px 0 3px"><b>🎯 Across-the-board changes</b> — helps everywhere, not one track</div>${movesTbl}</div>`;
+    };
     function freeSection(s, isLive) {
       if (!s) return isLive ? EMPTY_LIVE : NOSESS;
       const cars = arr(s, "cars"), corners = arr(s, "corners"), launches = arr(s, "launches"), braking = arr(s, "braking"), pulses = arr(s, "pulses"), stints = arr(s, "stints");
@@ -2724,7 +2765,8 @@
         <p class="why" style="font-size:10.5px;margin:4px 0 0">tire temp max °F: ${Object.entries(c.temps_max_f || {}).map(([w, v]) => `${w} ${v}`).join(" · ") || "—"}</p></div>`).join("");
       const pulsesByCar = cars.map((c) => { const p = pulses.filter((x) => x.car === c.id && x.decay_s != null).map((x) => x.decay_s).sort((a, b) => a - b); return p.length ? `${carLbl(s, c.id)}: median decay <b>${p[Math.floor(p.length / 2)].toFixed(2)} s</b> (${p.length} pulses)` : null; }).filter(Boolean);
       const adviceCars = cars.filter((c) => c.coverage && (!carSel || c.id === carSel));
-      return `${tiles}
+      const genCar = (isLive && live.frame && live.frame.on && cars.find((c) => c.id === live.frame.cid)) || (carSel && cars.find((c) => c.id === carSel)) || adviceCars[0] || cars[0];
+      return `${genCar ? generalTuningPanel(genCar, s) : ""}${tiles}
         ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session, per car${sm.corners != null ? ` <span class="chip">${sm.corners} corners · ${sm.launches} launches · ${sm.braking} stops</span>` : ""}${isLive ? ` <span class="chip">updates every ~20 s of driving</span>` : ""}</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px;margin:0">${isLive ? "first analysis after ~20 s of driving…" : "no analysed cars in this recording"}</p></div>`}
         ${stints.length ? `<div class="block"><h3 style="margin-top:0">🏁 Runs — the unit of an A/B re-tune (tag them; set 🎯 / 🔧 roles for Decode)</h3>
           <div style="overflow-x:auto"><table><thead><tr><th>run</th><th>car</th><th>window</th><th>label</th><th>role</th><th>corners</th><th>USI med</th><th>front-red</th><th>brake F/R</th><th>launch slip</th><th>ladder</th></tr></thead><tbody>
@@ -2792,6 +2834,118 @@
         <div style="overflow-x:auto"><table style="font-size:11.5px"><thead><tr><th>shop menu</th><th>part</th><th>install / match</th><th>status</th><th style="min-width:150px">confidence · evidence</th><th style="min-width:170px">how / why</th></tr></thead><tbody>
         ${cs.menus.map((m) => m.items.map((it, i) => { const sc = STATCHIP[it.status] || ["?", "var(--muted)"]; const cv = it.confidence; const cc = cv == null ? null : confCol(cv); return `<tr>${i === 0 ? `<td rowspan="${m.items.length}" style="font-weight:700;color:var(--accent2);white-space:nowrap">${m.menu}</td>` : ""}<td style="white-space:nowrap">${it.item}</td><td>${it.pending ? `<span style="color:var(--muted)">⏳ pending — needs <b>${gateLbl[it.gate] || it.gate}</b></span>` : (it.value != null ? `<b>${esc(String(it.value))}</b>` : `<span style="color:var(--muted)">—</span>`)}</td><td style="white-space:nowrap"><span class="chip" style="border-color:${sc[1]};color:${sc[1]}">${sc[0]}</span></td><td>${cv == null ? `<span class="why" style="font-size:10.5px">— verify in shop</span>` : `<div style="display:flex;align-items:center;gap:6px"><div class="lab-bar" style="width:60px;height:6px"><i style="width:${cv * 100}%;background:${cc}"></i></div><b style="color:${cc};font-size:11px">${Math.round(cv * 100)}%</b>${it.status === "inferred" && !it.evidence ? `<span class="why" style="font-size:10px">assumed</span>` : ""}</div>${it.evidence ? `<div class="why" style="font-size:10px;margin-top:2px">${esc(it.evidence)}</div>` : ""}${it.needs && cv < 0.7 ? `<div style="font-size:10px;color:var(--warn,#e3b341);margin-top:2px">↑ ${esc(it.needs)}</div>` : ""}`}</td><td class="why" style="font-size:10.5px">${it.note ? esc(it.note) : ""}</td></tr>`; }).join("")).join("")}
         </tbody></table></div>`;
+    };
+    // ---- ON-DISK DECODE: read the equipped car's tune straight from the save file (exact, no driving) ----
+    // FH6 writes every tune as a plaintext 598-byte Data file; the daemon parses it (/disk-tune) into the
+    // same Clone-Sheet deliverable shape. This is the STRONGEST decode source — exact values, and it sees
+    // the locked/downloaded sliders the in-game screen hides — so it leads the decode subject when present.
+    const diskDiffBanner = (ordinal) => {   // "changed since your last save" — appears ~45s after a fresh save
+      const dd = live.diskDiff; if (!dd || !dd.diff || dd.ordinal !== ordinal || performance.now() - dd.t > 45000) return "";
+      const sl = (dd.diff.sliders || []).map((c) => { const f = esc(c.field.replace(/_/g, " ")); return c.pos ? `<b>${f}</b> ${c.from_pct}%→${c.to_pct}%` : `<b>${f}</b> ${c.from}→${c.to}${c.unit ? " " + esc(c.unit) : ""}`; });
+      const pc = (dd.diff.parts || []).length;
+      if (!sl.length && !pc) return "";
+      return `<div style="margin:0 0 10px;padding:8px 12px;border:1px solid #e3b341;border-radius:8px;background:rgba(227,179,65,.08);font-size:12px"><b style="color:#e3b341">🔧 Changed since your last save:</b> ${sl.slice(0, 8).join(" · ") || ""}${sl.length > 8 ? ` · +${sl.length - 8} more` : ""}${pc ? ` <span class="why">· ${pc} part change${pc > 1 ? "s" : ""}</span>` : ""}</div>`;
+    };
+    const FHM_CLS = { D: "#57c1ff", C: "#57d98a", B: "#f2d94e", A: "#ff9f45", S1: "#ff4f97", S2: "#c46bff", X: "#ff5a5a" };
+    const FHM_CSS = `
+      .fhm{font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
+      .fhm-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+      @media(max-width:860px){.fhm-cols{grid-template-columns:1fr}}
+      .fhm-sub{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px;margin:0 0 10px}
+      .fhm-cat{margin-bottom:9px;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg2)}
+      .fhm-cath{display:flex;align-items:center;gap:8px;padding:6px 11px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--line)}
+      .fhm-cath .bar{width:3px;height:12px;background:#36c1e8;border-radius:2px}
+      .fhm-cath b{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt)}
+      .fhm-cath .k{margin-left:auto;font-size:10px;color:var(--muted)}
+      .fhm-prow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:5px 11px;border-bottom:1px solid rgba(255,255,255,.03);font-size:12.5px;text-transform:capitalize}
+      .fhm-prow:last-child{border-bottom:none}.fhm-prow.stock{opacity:.5}
+      .fhm-pips{display:flex;gap:3px}.fhm-pips i{width:13px;height:6px;border-radius:1px;background:#26313a}.fhm-pips i.on{background:#a8d92a}
+      .fhm-up{min-width:120px;text-align:right;text-transform:none}
+      .fhm-up.named,.fhm-up.category{color:#c3ea4f}.fhm-up.stock{color:var(--muted);font-size:11px;text-transform:uppercase}
+      .fhm-up.dim{color:#36c1e8}.fhm-up.cosmetic{color:var(--muted)}
+      .fhm-tab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 7px;border-left:2px solid var(--accent);padding-left:7px}
+      .fhm-sec{margin-bottom:11px}
+      .fhm-sech{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#0b0f07;background:#a8d92a;padding:2px 8px;border-radius:3px;display:inline-block;margin:0 0 7px}
+      .fhm-sl{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}.fhm-sl:last-child{border-bottom:none}
+      .fhm-slt{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:5px}
+      .fhm-sll{font-size:12px;color:var(--txt)}
+      .fhm-slv{font-weight:700;font-size:16px;color:#c3ea4f;white-space:nowrap;font-variant-numeric:tabular-nums}
+      .fhm-slv.pos{color:#e6a63a;font-size:13px}
+      .fhm-trk{position:relative;height:16px}
+      .fhm-trk .rail{position:absolute;top:7px;left:0;right:0;height:3px;border-radius:2px;background:#0b1013;border:1px solid var(--line)}
+      .fhm-trk .fill{position:absolute;top:7px;left:0;height:3px;border-radius:2px;background:#a8d92a}
+      .fhm-trk .fill.pos{background:repeating-linear-gradient(90deg,#e6a63a,#e6a63a 4px,transparent 4px,transparent 8px)}
+      .fhm-trk .knob{position:absolute;top:1px;width:4px;height:14px;border-radius:2px;background:var(--txt);transform:translateX(-50%)}
+      .fhm-trk .knob.pos{background:#e6a63a}
+      .fhm-pol{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+      .fhm-rin{width:44px;padding:1px 3px;border-radius:3px;border:1px dashed #e6a63a;background:var(--bg2);color:var(--txt);font-size:10px;margin-left:4px}`;
+    const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
+    const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };
+    const diskDeliverableHtml = (r) => {
+      ensureFhmCss();
+      const dl = r && r.deliverable; if (!dl) return "";
+      const oc = confCol(dl.confidence); const sm = dl.summary || {};
+      const f = live.frame; const badge = (f && String(f.car) === String(dl.ordinal) && f.cls) ? `<span class="chip" style="border-color:${FHM_CLS[f.cls] || "var(--accent)"};color:${FHM_CLS[f.cls] || "var(--accent)"};font-weight:700">${f.cls} ${f.pi}</span>` : "";
+      const lockChip = dl.locked ? `<span class="chip" style="border-color:#e3b341;color:#e3b341" title="downloaded / locked in-game — the save file still holds its real values">🔒 downloaded</span>` : `<span class="chip" style="border-color:#00d27a;color:#00d27a">self-made</span>`;
+      const cats = (dl.menus || []).map((m) => {
+        const inst = m.rows.filter((x) => !x.stock).length;
+        const rows = m.rows.map((it) => {
+          const cls = it.stock ? "stock" : (it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named");
+          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${esc(it.item.replace(/_/g, " "))}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}</span></div>`;
+        }).join("");
+        return `<div class="fhm-cat"><div class="fhm-cath"><span class="bar"></span><b>${esc(m.menu)}</b><span class="k">${inst}/${m.rows.length}</span></div>${rows}</div>`;
+      }).join("");
+      const tabsHtml = (dl.tabs || []).map((t) => {
+        const secs = []; const at = {};
+        t.rows.forEach((row) => { if (at[row.section] == null) { at[row.section] = secs.length; secs.push({ h: row.section, rows: [] }); } secs[at[row.section]].rows.push(row); });
+        const secHtml = secs.map((s) => `<div class="fhm-sec"><div class="fhm-sech">${esc(s.h)}</div>${s.rows.map((row) => {
+          const rel = row.value == null; const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
+          const val = rel
+            ? `<span class="fhm-slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%${row.per_car && !String(row.field).startsWith("gear") ? `<input class="fhm-rin" data-rangeord="${dl.ordinal}" data-rangefield="${esc(row.field)}" data-rangenorm="${row.fill}" data-rangeunit="${esc(row.unit || "")}" placeholder="=?" title="Type the in-game number for this slider — two saved tunes at different positions lock this car's range, then every tune prints exact." inputmode="decimal">` : ""}</span>`
+            : `<span class="fhm-slv">${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>`;
+          return `<div class="fhm-sl"><div class="fhm-slt"><span class="fhm-sll">${esc(row.label || row.field)}</span>${val}</div><div class="fhm-trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div><div class="fhm-pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
+        }).join("")}</div>`).join("");
+        return `<div style="margin-bottom:13px"><div class="fhm-tab">${esc(t.tab)}</div>${secHtml}</div>`;
+      }).join("");
+      return `<div class="block fhm" style="border-color:#00d27a"><div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span></div>
+        ${diskDiffBanner(dl.ordinal)}
+        <p class="why" style="font-size:11px;margin:4px 0 11px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_absolute} exact</b> · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
+        <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
+    };
+    const fetchDiskTune = (ordinal) => {
+      if (!ordinal || !live.connected) return;   // 0 / null = no active car — never fetch
+      live.diskCache = live.diskCache || {};
+      if (Object.prototype.hasOwnProperty.call(live.diskCache, ordinal)) return;   // cached (incl. in-flight / negative)
+      live.diskCache[ordinal] = null;   // in-flight marker — avoids refetch storms
+      fetch(liveUrl + "/disk-tune?ordinal=" + ordinal).then((r) => r.json()).then((d) => {
+        live.diskCache[ordinal] = d && d.available ? d : { available: false };
+        if (d && d.available) applyDiskTune(d);
+        paintDiskDecode();
+      }).catch(() => { live.diskCache[ordinal] = { available: false }; });   // record failure (not delete) so it can't storm
+    };
+    const paintDiskDecode = () => {
+      const el = host.querySelector("#lvDiskDecode"); if (!el) return;
+      const ord = live.frame && live.frame.car;
+      if (!ord) { el.innerHTML = ""; return; }   // 0 / null = no active car
+      live.diskCache = live.diskCache || {};
+      const cached = live.diskCache[ord];
+      if (cached === undefined) { fetchDiskTune(ord); el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
+      if (cached === null) { el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
+      if (!cached.available) { el.innerHTML = ""; return; }   // no on-disk tune for this car — stay quiet
+      const dsum = (cached.deliverable && cached.deliverable.summary) || {};
+      const key = ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "");
+      if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
+      el.dataset.fhmKey = key;
+      el.innerHTML = diskDeliverableHtml(cached);
+      el.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
+        const v = parseFloat(inp.value); if (isNaN(v)) return; const ord = +inp.dataset.rangeord;
+        fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ordinal: ord, field: inp.dataset.rangefield, norm: +inp.dataset.rangenorm, value: v, unit: inp.dataset.rangeunit }) })
+          .then((r) => r.json()).then((d) => {
+            if (d && d.ok) { inp.style.borderColor = d.solved ? "#00d27a" : "#e3b341"; inp.title = d.solved ? "range solved — refreshing to exact numbers" : "got it — one more tune at a different position unlocks exact numbers";
+              if (d.solved && live.diskCache) { delete live.diskCache[ord]; paintDiskDecode(); } }
+          }).catch(() => {});
+      }));
     };
     // ---- LIVE CORNER ANALYSIS (course training): every corner of every lap, full stats, in real time ----
     // enriched corner log: each live 'corner' event tagged with its lap and matched to a course turn (canonical apex position)
@@ -2924,6 +3078,7 @@
       const curId = isLive && live.frame ? live.frame.cid : null; const A = curId ? car(s, curId) : null; const Adone = !!(A && A.decode && A.decode.pct >= 1);
       const subject = isLive ? (A ? `<div class="block" style="border-color:#a371f7"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🚗 Cloning the car you're in — ${esc(carName(A) || "#" + A.ordinal)} <span class="why">· ${A.class} ${A.pi} ${A.drivetrain} ${A.cyl}cyl · build ${A.build_id}</span></h3><span class="chip" style="border-color:${Adone ? "#00d27a" : "#e3b341"};color:${Adone ? "#00d27a" : "#e3b341"};font-weight:700">${A.decode ? (Adone ? "CAPTURE COMPLETE" : A.decode.ready_n + "/" + A.decode.total + " tests") : "analysing…"}</span></div>
           <p class="why" style="font-size:11px;margin:2px 0 6px">analysed constantly — the daemon re-analyses every ~20 s of driving; the panel below moves with every frame</p>
+          <div id="lvDiskDecode"></div>
           <div id="lvDecNext">${nextPanelHtml(A)}</div>
           ${(() => { const st = live.stint || (live.frame && live.frame.stint) || 0; const tg = (live.tags || {})[String(st)] || {}; const myRole = (typeof tg === "object" && tg.role) || ""; const pin = PIN(); const hasDonor = !!(pin || roleStint("donor"));
             return `<div style="margin:6px 0;padding:8px 10px;border:1px dashed #a371f7;border-radius:8px;font-size:11.5px">
@@ -2936,7 +3091,7 @@
               <div class="why" style="font-size:10.5px;margin-top:5px">${!hasDonor ? "<b>Start here:</b> driving the locked / downloaded tune you want to copy? Press 🎯 DONOR — its Clone Sheet (the parts) builds below and it stays pinned." : A.id === (D && D.id) ? "This IS the donor — the Clone Sheet below is your deliverable. Build a copy, drive it, and press 🔧 REPLICA to see the slider gaps." : "Donor already set. If this is your rebuild, press 🔧 REPLICA to converge it against the donor on the Bench."}</div>
             </div>`; })()}
           ${A.decode ? (Adone ? `${A.clone_sheet ? cloneSheetHtml(A) : ""}<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>🧬 decode battery</b> <span class="chip" style="border-color:#00d27a;color:#00d27a">all tests captured</span></summary>${decodePanel(A, "🚗 ")}</details>` : `${decodePanel(A, "🚗 ")}${A.clone_sheet ? `<div style="margin-top:8px">${cloneSheetHtml(A)}</div>` : ""}`) : `<p class="why" style="font-size:11px">first analysis after ~20 s of driving…</p>`}
-        </div>` : `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><p class="why" style="font-size:12px;margin:0 0 6px">${live.frame && live.frame.on ? "this config has no analysis yet — drive ~20 s" : "not driving — the car you get into becomes the decode subject automatically"}</p><div id="lvDecNext">${nextPanelHtml(null)}</div></div>`) : "";
+        </div>` : `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><p class="why" style="font-size:12px;margin:0 0 6px">${live.frame && live.frame.on ? "this config has no analysis yet — drive ~20 s" : "not driving — the car you get into becomes the decode subject automatically"}</p><div id="lvDiskDecode"></div><div id="lvDecNext">${nextPanelHtml(null)}</div></div>`) : "";
       const libraryBlock = isLive ? "" : buildLibrary(s);
       const hideDonorDeliverable = isLive && A && A.id === D.id;   // the subject block already shows it
       return `${subject}${libraryBlock}
@@ -2968,7 +3123,7 @@
           <p class="why" style="font-size:11px;margin-top:8px">Static certification still applies above this ledger: pane rows dashed, radar matched, and the two HUD clips (pressure, camber). The ledger covers what the panel cannot see.</p></div>`;
     }
     // ---- LIVE mode: EventSource from the local daemon ----
-    let es = null, liveUrl = localStorage.getItem("fh6LiveUrl") || "http://localhost:8765";
+    let es = null, liveUrl = (localStorage.getItem("fh6LiveUrl") || "http://127.0.0.1:8765").replace("//localhost:", "//127.0.0.1:");   // 127.0.0.1 avoids the Windows localhost→IPv6 resolution stall
     const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null, loop: null, mode: null };
     // the LIVE effective mode (manual override, else daemon suggestion) — pushed to the daemon so its run-split rule matches what you see
     const liveEffMode = () => { const m = labModeSel(); return m !== "auto" ? m : ((live.mode && live.mode.suggest) || "free"); };
@@ -3194,7 +3349,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
-      updateLiveDec(f); paintDecNext(); paintCourseLive(); paintActiveCar();
+      updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintCourseLive(); paintActiveCar();
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
       if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }
       for (const w of W4) {
@@ -3240,10 +3395,19 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       live.loaded = null; carSel = null;   // a (re)connect may be a different daemon / session — never carry a loaded session or a car filter across
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cornerLog = []; (d.corners || []).forEach(pushCornerLog); live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; if (!d.analysis || live.loaded !== d.analysis.id) live.loaded = null; live.connected = true; live.err = false; paintAll(true); onModeChanged(); if (d.analysis) loadFullSession(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cornerLog = []; (d.corners || []).forEach(pushCornerLog); live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; if (!d.analysis || live.loaded !== d.analysis.id) live.loaded = null; live.connected = true; live.err = false; live.diskCache = {}; live.diskTune = {}; live.diskDiff = null; paintAll(true); onModeChanged(); if (d.analysis) loadFullSession(); });
       es.addEventListener("stint", (e) => { const d = JSON.parse(e.data); live.stint = d.n; paintStatus(); });
       es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
+      es.addEventListener("disk", (e) => {   // daemon pushed a fresh on-disk decode (car change or a new tune save)
+        const d = JSON.parse(e.data); live.diskCache = live.diskCache || {};
+        live.diskCache[d.ordinal] = d.available ? d : { available: false };
+        const changed = d.available ? applyDiskTune(d) : false;
+        if (d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
+        paintDiskDecode();
+        const activeOrd = live.frame && String(live.frame.car);
+        if (d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
+      });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label, role: d.role } }); paintStatus(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); live.analysisAt = Date.now(); if (live.dec) decReset(live.dec.cid); paintBanner(); loadFullSession(); });   // the analysis absorbed what the live tracker counted — start the live deltas again
       es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.cornerLog = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; paintAll(true); });

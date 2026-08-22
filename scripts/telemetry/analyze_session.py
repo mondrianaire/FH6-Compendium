@@ -1264,7 +1264,11 @@ def main():
         # canonical turn count: the player's declared count wins; else the merged, established set. This is what the card shows — stable across sessions.
         est_count = model.get("turn_count", detected_here)
         turns_info["established"] = est_count; turns_info["count"] = expected if expected else est_count
-        turns_info["canonical"] = [{"id": t["id"], "pos": t["pos"], "dir": t.get("dir"), "radius_m": t.get("radius_m"), "passes": (t.get("track") or {}).get("passes"), "presence": (t.get("track") or {}).get("presence"), "sessions": (t.get("track") or {}).get("sessions"), "dominant": (t.get("track") or {}).get("dominant")} for t in model["turns"] if t.get("established")]
+        est_turns = [t for t in model["turns"] if t.get("established")]
+        if expected and len(est_turns) > expected:   # trust the declared count: keep the strongest N (by track presence), drop the weakest as fragments
+            est_turns = sorted(est_turns, key=lambda t: -((t.get("track") or {}).get("presence") or 0))[:expected]
+            est_turns.sort(key=lambda t: [tt["id"] for tt in model["turns"]].index(t["id"]))   # restore route order
+        turns_info["canonical"] = [{"id": t["id"], "pos": t["pos"], "dir": t.get("dir"), "radius_m": t.get("radius_m"), "passes": (t.get("track") or {}).get("passes"), "presence": (t.get("track") or {}).get("presence"), "sessions": (t.get("track") or {}).get("sessions"), "dominant": (t.get("track") or {}).get("dominant")} for t in est_turns]
         turns_info["mapped"] = len(((model.get("geometry") or {}).get("turns")) or (geo or {}).get("turns") or [])
         near = [t for t in model["turns"] if not t.get("established") and ((t.get("track") or {}).get("presence") or 0) >= 0.25]
         turns_info["near"] = len(near)

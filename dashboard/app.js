@@ -2795,7 +2795,7 @@
       if (es) { es.close(); es = null; }
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; live.connected = true; live.err = false; paintAll(); onModeChanged(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; live.connected = true; live.err = false; paintAll(); onModeChanged(); if (d.analysis && !live.loaded) loadFullSession(); });
       es.addEventListener("stint", (e) => { const d = JSON.parse(e.data); live.stint = d.n; paintStatus(); });
       es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });

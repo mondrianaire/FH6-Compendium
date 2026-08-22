@@ -2455,13 +2455,22 @@
     };
 
     function strip(s) {
-      const n = s.strip.length, W = 900, cw = W / n;
-      return `<svg viewBox="0 0 ${W} 70" class="tz-svg tz-wide" role="img" aria-label="Session strip">
-        ${s.strip.map((x, i) => `<g><rect x="${(i * cw).toFixed(2)}" y="6" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="40" fill="${ST[x.state]}" opacity="${x.state === "off" ? 1 : x.state === "calm" ? .6 : .95}"><title>${x.t}s — ${STL[x.state]}${x.mph != null ? ` · ${x.mph} mph · F ${x.f} R ${x.r} · ${x.g} g` : ""}${x.car ? ` · ${carLbl(s, x.car)}` : ""}</title></rect>
-          ${x.car ? `<rect x="${(i * cw).toFixed(2)}" y="48" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="5" fill="${carCol(s, x.car)}"/>` : ""}
-          ${x.t % 60 === 0 ? `<text x="${(i * cw).toFixed(1)}" y="66" fill="var(--muted)" font-size="9">${Math.floor(x.t / 60)}:00</text>` : ""}</g>`).join("")}
+      const n = s.strip.length, W = 900, cw = W / n, H = 82;
+      // TURN IDENTIFICATION: overlay every extracted corner on the timeline, coloured by balance — the strip is the
+      // live spine the suggestions come from, so each turn is marked where it happened (▲ understeer / oversteer / neutral).
+      const idxAt = (t) => { let b = 0, bd = Infinity; for (let i = 0; i < n; i++) { const d = Math.abs(s.strip[i].t - t); if (d < bd) { bd = d; b = i; } } return b; };
+      const usiCol = (u) => u > 0.15 ? "#2f81f7" : u < -0.05 ? "#e5414e" : "#00d27a";
+      const t0 = n ? s.strip[0].t : 0, t1 = n ? s.strip[n - 1].t : 0;
+      const turns = (s.corners || []).filter((c) => !c.drift && c.t0 >= t0 && c.t0 <= t1);
+      const marks = turns.map((c, i) => { const x = idxAt(c.t0) * cw + cw / 2; const col = usiCol(c.usi); const v = c.usi > 0.15 ? "understeer" : c.usi < -0.05 ? "oversteer" : "neutral";
+        return `<g><line x1="${x.toFixed(1)}" y1="14" x2="${x.toFixed(1)}" y2="58" stroke="${col}" stroke-width="1" opacity=".45"/><path d="M${(x - 3.2).toFixed(1)} 4 L${(x + 3.2).toFixed(1)} 4 L${x.toFixed(1)} 12 Z" fill="${col}"><title>turn ${i + 1}: ${c.dir === "L" ? "left" : "right"} · ${c.mph_in}→${c.mph_min} mph · ${c.lat_g_peak} g · USI ${c.usi > 0 ? "+" : ""}${c.usi} → ${v}${c.first_red ? " · first red " + c.first_red.axle : ""}</title></path></g>`; }).join("");
+      return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg tz-wide" role="img" aria-label="Session strip with identified turns">
+        ${s.strip.map((x, i) => `<g><rect x="${(i * cw).toFixed(2)}" y="16" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="40" fill="${ST[x.state]}" opacity="${x.state === "off" ? 1 : x.state === "calm" ? .6 : .95}"><title>${x.t}s — ${STL[x.state]}${x.mph != null ? ` · ${x.mph} mph · F ${x.f} R ${x.r} · ${x.g} g` : ""}${x.car ? ` · ${carLbl(s, x.car)}` : ""}</title></rect>
+          ${x.car ? `<rect x="${(i * cw).toFixed(2)}" y="58" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="5" fill="${carCol(s, x.car)}"/>` : ""}
+          ${x.t % 60 === 0 ? `<text x="${(i * cw).toFixed(1)}" y="78" fill="var(--muted)" font-size="9">${Math.floor(x.t / 60)}:00</text>` : ""}</g>`).join("")}
+        ${marks}
       </svg>
-      <div class="chips" style="margin-top:2px">${Object.keys(ST).map((k) => `<span class="chip" style="border-color:${ST[k]};color:${k === "calm" || k === "off" ? "var(--muted)" : ST[k]}">${STL[k]}</span>`).join("")}</div>`;
+      <div class="chips" style="margin-top:2px"><span class="chip" style="border-color:var(--line)">${turns.length} turns ▲ <span style="color:#2f81f7">understeer</span> · <span style="color:#e5414e">oversteer</span> · <span style="color:#00d27a">neutral</span></span>${Object.keys(ST).map((k) => `<span class="chip" style="border-color:${ST[k]};color:${k === "calm" || k === "off" ? "var(--muted)" : ST[k]}">${STL[k]}</span>`).join("")}</div>`;
     }
     function cornerCard(s, c) {
       const cell = cellFor(c);
@@ -2774,11 +2783,15 @@
       const splitFlag = g.surface_split ? `<div style="margin:8px 0;padding:6px 10px;border:1px solid #e3b341;border-radius:8px;font-size:11.5px"><b style="color:#e3b341">⚠ Surface-specific:</b> balance swings by surface — USI ${g.surface_split.smooth > 0 ? "+" : ""}${g.surface_split.smooth} on road vs ${g.surface_split.rough > 0 ? "+" : ""}${g.surface_split.rough} on rough. No single tune wins both; this all-around read favours where you drive most — tune a separate setup for the other surface.</div>` : "";
       const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
       const movesTbl = movesCards(moves);
-      return `<div class="block" style="border-color:var(--accent)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🛣 All-around tune — ${esc(carName(c) || "#" + c.ordinal)} <span class="why">· for public / Horizon Open · robust across the board</span></h3><span class="chip" style="border-color:${robCol};color:${robCol};font-weight:700" title="how consistent the car's balance is across every context — high = predictable all-rounder">consistency ${rob == null ? "—" : Math.round(rob * 100) + "%"}</span> <span class="chip">${g.corners} corners · ${g.buckets} contexts${g.surfaces.length > 1 ? " · " + g.surfaces.join("+") : ""}</span></div>
-        <p class="why" style="font-size:11px;margin:4px 0 6px">Weighs each fix by how <b>broadly</b> it helps — a problem in every context gets a full move; one that only shows in some contexts is a balance issue, not a blanket change. The opposite of the course lane, which tunes for one track.</p>
-        <div style="font-size:11px;color:var(--muted);margin:2px 0 3px"><b>Balance signature</b> — how it handles across everything you've driven (blue = understeer, red = oversteer, green = neutral)</div>${matrix}${splitFlag}
-        ${tuneInputRow(cid)}
-        <div style="font-size:11px;color:var(--muted);margin:8px 0 3px"><b>🎯 Across-the-board changes</b> — helps everywhere, not one track</div>${movesTbl}</div>`;
+      const ovr = sig.filter((r) => r.bias === "oversteer").length, und = sig.filter((r) => r.bias === "understeer").length;
+      const rideMove = moves.some((m) => m.sl === "rheight" || m.sl === "fheight");
+      const verdict = !moves.length ? "Balanced across the board — no systematic change stands out yet" :
+        `${ovr > und ? "Leans oversteer" : und > ovr ? "Leans understeer" : "Mixed balance"} across your contexts — <b>${moves.length} move${moves.length > 1 ? "s" : ""}</b> to make it more neutral & robust${rideMove ? " (incl. ride height — it's bottoming)" : ""}`;
+      return `<div class="block" style="border-color:var(--accent)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🛣 All-around tune — ${esc(carName(c) || "#" + c.ordinal)} <span class="why">· for public / Horizon Open</span></h3><span class="chip" style="border-color:${robCol};color:${robCol};font-weight:700" title="how consistent the car's balance is across every context — high = predictable all-rounder">consistency ${rob == null ? "—" : Math.round(rob * 100) + "%"}</span> <span class="chip">${g.corners} corners · ${g.buckets} contexts${g.surfaces.length > 1 ? " · " + g.surfaces.join("+") : ""}</span></div>
+        <div style="font-size:13px;font-weight:600;margin:7px 0 9px;color:var(--txt)">${verdict}</div>
+        ${movesTbl}
+        <details style="margin-top:10px"><summary style="cursor:pointer;font-size:11.5px;color:var(--muted)"><b>▸ Why these moves</b> — balance across every context (blue = understeer · red = oversteer · green = neutral)</summary><div style="margin-top:6px">${matrix}${splitFlag}<p class="why" style="font-size:10.5px;margin:6px 0 0">Weighs each fix by how <b>broadly</b> it helps — a problem in every context gets a full move; one that only shows in some contexts is a balance issue, not a blanket change (that's the course lane's job).</p></div></details>
+        ${tuneInputRow(cid)}</div>`;
     };
     function freeSection(s, isLive) {
       if (!s) return isLive ? EMPTY_LIVE : NOSESS;
@@ -2801,7 +2814,7 @@
       const adviceCars = cars.filter((c) => c.coverage && (!carSel || c.id === carSel));
       const genCar = (isLive && live.frame && live.frame.on && cars.find((c) => c.id === live.frame.cid)) || (isLive && live.courseCar && cars.find((c) => c.id === live.courseCar)) || (carSel && cars.find((c) => c.id === carSel)) || adviceCars[0] || cars[0];   // in a menu, stay on the car you last drove
       return `${genCar ? generalTuningPanel(genCar, s) : ""}${tiles}
-        ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session, per car${sm.corners != null ? ` <span class="chip">${sm.corners} corners · ${sm.launches} launches · ${sm.braking} stops</span>` : ""}${isLive ? ` <span class="chip">updates every ~20 s of driving</span>` : ""}</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px;margin:0">${isLive ? "first analysis after ~20 s of driving…" : "no analysed cars in this recording"}</p></div>`}
+        ${adviceCars.length ? `<details class="block" style="border-color:var(--accent)"><summary style="cursor:pointer;font-weight:600;font-size:14px">🎯 Confidence &amp; suggestions — whole session, per car${sm.corners != null ? ` <span class="chip">${sm.corners} corners · ${sm.launches} launches · ${sm.braking} stops</span>` : ""}${isLive ? ` <span class="chip">updates every ~20 s of driving</span>` : ""}</summary><div class="card-grid" style="margin-top:8px">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></details>` : `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px;margin:0">${isLive ? "first analysis after ~20 s of driving…" : "no analysed cars in this recording"}</p></div>`}
         ${stints.length ? `<div class="block"><h3 style="margin-top:0">🏁 Runs — the unit of an A/B re-tune (tag them; set 🎯 / 🔧 roles for Decode)</h3>
           <div style="overflow-x:auto"><table><thead><tr><th>run</th><th>car</th><th>window</th><th>label</th><th>role</th><th>corners</th><th>USI med</th><th>front-red</th><th>brake F/R</th><th>launch slip</th><th>ladder</th></tr></thead><tbody>
             ${stints.map((st) => `<tr style="border-left:3px solid ${carCol(s, st.id)}"><td><b>${st.n}</b></td><td>${carLbl(s, st.id).split(" · ").slice(0, 2).join(" · ")}</td><td>${st.t0}–${st.t1}s (${st.live_s}s)</td><td>${st.label ? `<b>${esc(st.label)}</b>` : `<span class="why">—</span>`}</td><td>${st.role === "donor" ? `<span class="chip" style="border-color:#e3b341;color:#e3b341">🎯 DONOR</span>` : st.role === "replica" ? `<span class="chip" style="border-color:#00d27a;color:#00d27a">🔧 REPLICA</span>` : ""}</td><td>${st.corners ?? "—"}</td><td>${st.usi_med == null ? "—" : (st.usi_med > 0 ? "+" : "") + st.usi_med.toFixed(3)}</td><td>${st.first_red_front ?? "—"}/${st.corners ?? "—"}</td><td>${st.brake_fd_med == null ? "—" : `${st.brake_fd_med.toFixed(2)}/${(st.brake_rd_med ?? 0).toFixed(2)}`}</td><td>${st.launch_rear_slip == null ? "—" : st.launch_rear_slip.toFixed(2)}</td><td title="${esc(JSON.stringify(st.ladder || {}))}">${Object.keys(st.ladder || {}).length ? (st.ladder_changed === true ? `<span class="chip" style="border-color:#e3b341;color:#e3b341">gearing changed</span>` : st.ladder_changed === false ? `<span class="chip">same gearing</span>` : `<span class="chip">first / n-a</span>`) : "—"}</td></tr>`).join("")}
@@ -2812,14 +2825,14 @@
         <div class="block" style="border-color:#e5414e"><h3 style="margin-top:0">🩺 Corners — first red ring, by phase</h3>
           <p class="why" style="font-size:12px">${real.length} grip corners (${cs.length - real.length} drifts hidden from diagnosis): front-limited <b>${real.filter((c) => c.first_red && c.first_red.axle === "front").length}</b> · rear-limited <b>${real.filter((c) => c.first_red && c.first_red.axle === "rear").length}</b> · clean <b>${real.filter((c) => !c.first_red).length}</b></p>
           <div class="card-grid">${cs.slice(0, 24).map((c) => cornerCard(s, c)).join("")}</div>${cs.length > 24 ? `<p class="why" style="font-size:11px">+${cs.length - 24} more</p>` : ""}</div>`}
-        <div class="block"><h3 style="margin-top:0">🧪 Test cards detected</h3>${isLive ? rail : ""}
+        <details class="block"><summary style="cursor:pointer;font-weight:600;font-size:14px">🧪 Test cards — launches · braking · gearing · dyno</summary>${isLive ? rail : ""}
           <div class="card-grid" style="margin-top:8px">${launchCharts || `<p class="why" style="font-size:11px">no standing launches yet</p>`}</div>
           <h3 style="font-size:14px">🛑 Braking events — wheel-speed deficit (lock detector)</h3>
           <div style="overflow-x:auto"><table><thead><tr><th>t</th><th>car</th><th>mph</th><th>decel</th><th>front deficit</th><th>rear deficit</th><th>verdict</th></tr></thead><tbody>${brakeRows || `<tr><td colspan="7" class="why">none</td></tr>`}</tbody></table></div>
           <div class="card-grid" style="margin-top:10px">${gearCards}</div>
-          <p class="why" style="font-size:11px;margin-top:8px">🪃 Wiggle (yaw decay after a steering pulse, experimental): ${pulsesByCar.join(" · ") || "no pulses detected"}. 🛏 Bottoming events: <b>${sm.bottoming ?? "—"}</b>.</p></div>
-        <div class="block" style="border-color:var(--warn,#e3b341)"><h3 style="margin-top:0">📎 HUD clips — the two things the stream can't carry</h3>
-          <div class="card-grid"><div class="lab-slot"><img src="assets/telemetry/tires-misc.jpg" alt="">Tires, Misc. — hot pressures → cold = hot − 3.5 psi · live camber</div><div class="lab-slot"><img src="assets/telemetry/heat.jpg" alt="">Heat — inner / middle / outer → camber verdict</div></div></div>`;
+          <p class="why" style="font-size:11px;margin-top:8px">🪃 Wiggle (yaw decay after a steering pulse, experimental): ${pulsesByCar.join(" · ") || "no pulses detected"}. 🛏 Bottoming events: <b>${sm.bottoming ?? "—"}</b>.</p></details>
+        <details class="block" style="border-color:var(--warn,#e3b341)"><summary style="cursor:pointer;font-weight:600;font-size:14px">📎 HUD clips — the two things the stream can't carry</summary>
+          <div class="card-grid"><div class="lab-slot"><img src="assets/telemetry/tires-misc.jpg" alt="">Tires, Misc. — hot pressures → cold = hot − 3.5 psi · live camber</div><div class="lab-slot"><img src="assets/telemetry/heat.jpg" alt="">Heat — inner / middle / outer → camber verdict</div></div></details>`;
     }
     // ---- DECODE mode primitives: progress = test completeness ONLY; deliverable = the shop-standardized clone sheet ----
     const STATCHIP = { measured: ["✅ measured", "#00d27a"], inferred: ["🟡 inferred", "#e3b341"], shop: ["🔍 shop check", "#2f81f7"], verified: ["✅ verified", "#00d27a"], consistent: ["✓ consistent", "#2f81f7"], captured: ["📷 captured", "#a371f7"], contradicted: ["⚠ contradicted", "#e5414e"] };
@@ -3550,11 +3563,12 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         <div id="lvBanner"></div>
         <div class="lab-tiles" id="lvTiles"></div>
         <div id="lvSections">${sectionsHtml(liveSess(), true)}</div>
-        ${w === "free" ? `<div class="block"><h3 style="margin-top:0">🩺 Friction — live (Peak% = |combined slip| × 100; needle = slip vector; ring red past 1.0)</h3>
-          <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,180px));gap:6px;justify-content:center" id="lvCircles">${circleSvg("FL")}${circleSvg("FR")}${circleSvg("RL")}${circleSvg("RR")}</div>
-          <div id="lvInputs" style="max-width:520px;margin:10px auto 0"></div></div>
-        <div class="block"><h3 style="margin-top:0">📼 Session strip — growing</h3><div id="lvStrip"></div></div>` : ""}
-        ${w !== "decode" ? `<div class="block" style="border-color:#e5414e"><h3 style="margin-top:0">🩺 Corner log — newest first</h3><div class="card-grid" id="lvCorners"></div></div>` : ""}`;
+        ${w === "free" ? `<div class="block" style="border-color:var(--accent2)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">📼 Session strip — the live turn-by-turn spine</h3><span class="why" style="font-size:11px">every ▲ is a turn we identified; the suggestions above are read from these</span></div><div id="lvStrip"></div></div>
+        <details class="block"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Live feel — friction rings &amp; pedal inputs</summary>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,180px));gap:6px;justify-content:center;margin-top:8px" id="lvCircles">${circleSvg("FL")}${circleSvg("FR")}${circleSvg("RL")}${circleSvg("RR")}</div>
+          <div id="lvInputs" style="max-width:520px;margin:10px auto 0"></div></details>
+        <details class="block" style="border-color:#e5414e"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Corner log — every turn, newest first</summary><div class="card-grid" id="lvCorners" style="margin-top:8px"></div></details>`
+        : w === "course" ? `<div class="block" style="border-color:#e5414e"><h3 style="margin-top:0">🩺 Corner log — newest first</h3><div class="card-grid" id="lvCorners"></div></div>` : ""}`;
     }
     function paintSections(force) {
       const el = host.querySelector("#lvSections"); if (!el) return;
@@ -3664,7 +3678,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           <span>temp °F</span><span>${f.temp.map((v, i) => `${W4[i]} <b>${v}</b>`).join(" · ")}${f.hb ? " · <b style='color:#e3b341'>HANDBRAKE</b>" : ""}</span></div>`;
     }
     const W4 = ["FL", "FR", "RL", "RR"];
-    function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; }
+    function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars, corners: (live.corners || []).slice(-80) }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; }
     function paintCorners() { const el = host.querySelector("#lvCorners"); if (el) el.innerHTML = live.corners.slice(-12).reverse().map((c) => cornerCard(liveS(), c)).join("") || `<p class="why" style="font-size:11px">no corners yet</p>`; }
     function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); paintCloneLauncher(); }
     function liveConnect() {

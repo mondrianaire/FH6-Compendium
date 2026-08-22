@@ -689,21 +689,123 @@ def main():
         elif cur_ev is not None and last_t is not None and r["t"] - last_t > 2.0:
             events.append(cur_ev); cur_ev = None
     if cur_ev: events.append(cur_ev)
+    # re-join fragments of ONE event split by a pause / menu gap: the lap counter and the odometer CONTINUE across the gap; a restart resets both
+    joined = []
+    for ev in events:
+        if joined:
+            pl = joined[-1]["rows"][-1]; nf = ev["rows"][0]; gap = nf["t"] - pl["t"]; dd = nf["DistanceTraveled"] - pl["DistanceTraveled"]
+            # same attempt iff the odometer CONTINUES across the gap (a pause / menu / checkpoint respawn keeps it; a restart or a new event resets it to ~0) and the lap counter didn't reset
+            if cid(nf) == cid(pl) and nf["LapNumber"] >= pl["LapNumber"] and -50 <= dd <= 150:
+                joined[-1]["rows"].extend(ev["rows"]); continue
+        joined.append(ev)
+    events = joined
+    # ---- ROUTE ATTRIBUTION: a route is identified by where it starts, which way it heads and how long it is — never by a rounded grid cell.
+    #      Restarts a few metres apart, different grid slots and slightly different start triggers are the SAME route (the registry persists in data/routes.json).
+    write_side = "_replay_analysis" not in os.path.abspath(outdir)
+    _mp_cache = {}
+    def model_path_for(k):
+        if k in _mp_cache: return _mp_cache[k]
+        p = os.path.join(ROOT, "data", "courses", re.sub(r"[^A-Za-z0-9_.-]+", "_", k) + ".json"); pts = None
+        try:
+            if os.path.exists(p):
+                with open(p, encoding="utf-8") as f: pts = ((json.load(f).get("geometry") or {}).get("path")) or None
+        except Exception: pts = None
+        if pts:
+            cells = {}
+            for x, z in pts: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+            _mp_cache[k] = (cells, pts)
+        else: _mp_cache[k] = None
+        return _mp_cache[k]
+    def direction_agree(sample, pts):   # do consecutive event samples advance ALONG the route path (same direction) or against it (a reversed route)?
+        if not pts or len(sample) < 6: return True
+        n = len(pts); idx = []
+        for x, z in sample[:: max(1, len(sample) // 60)]:
+            j = min(range(n), key=lambda i_: (pts[i_][0] - x) ** 2 + (pts[i_][1] - z) ** 2)
+            if (pts[j][0] - x) ** 2 + (pts[j][1] - z) ** 2 <= 60 ** 2: idx.append(j)
+        if len(idx) < 4: return True
+        fwd = back = 0
+        for a, b in zip(idx, idx[1:]):
+            d = ((b - a + n // 2) % n) - n // 2
+            if d > 0: fwd += 1
+            elif d < 0: back += 1
+        return fwd >= 1.5 * back
+    def _near(x, z, cells):
+        cx, cz = int(x // 30), int(z // 30)
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                for px, pz in cells.get((cx + dx, cz + dz), ()):
+                    if (px - x) ** 2 + (pz - z) ** 2 <= 30 ** 2: return True
+        return False
+    def overlap(sample, mp):   # (ov, cov): share of this event's samples on the known path · share of the known path covered by this event
+        if not mp or not sample: return None, None
+        cells, pts = mp
+        ov = sum(1 for x, z in sample if _near(x, z, cells)) / len(sample)
+        scells = {}
+        for x, z in sample: scells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+        cov = sum(1 for x, z in pts if _near(x, z, scells)) / max(1, len(pts))
+        return ov, cov
+    def attribute_route(sx, sz, hdg, dist, sample):
+        best = None
+        for k, R in routes.items():
+            if k.startswith("loop:") or not R.get("start"): continue
+            d0 = math.hypot(sx - R["start"][0], sz - R["start"][1])
+            mp = model_path_for(k); ov, cov = overlap(sample, mp)
+            # 1) PATH match: this event runs along the known route's path in the same direction — the start can be ANYWHERE on it (a circuit resumed mid-lap, a fragment)
+            if ov is not None and ov >= 0.7 and direction_agree(sample, mp[1]):
+                cand = (200 + d0 * 0.01, k)
+                if best is None or cand[0] < best[0]: best = cand
+                continue
+            if d0 > 250: continue
+            # 2) START match: close start + same heading; the known path (if any) must agree — either this event lies on it (ov) or it covers it (cov: the known path was a stub from an aborted attempt)
+            hR = R.get("heading")
+            if hR and hdg and (R.get("length_m") or 0) >= 200 and (hR[0] * hdg[0] + hR[1] * hdg[1]) < 0.3: continue   # heads the other way = a different (reversed) route
+            path_ok = (ov is None) or ov >= 0.5 or (cov is not None and cov >= 0.8)
+            if d0 <= 40 and (R.get("length_m") or 0) < 600: cand = (d0, k)   # the SAME start point and the registered route is only a stub (aborted attempts) — it is this route
+            elif d0 <= 120 and path_ok: cand = (d0, k)
+            elif d0 <= 250 and ov is not None and ov >= 0.7: cand = (d0 + 100, k)
+            else: continue
+            if best is None or cand[0] < best[0]: best = cand
+        return best[1] if best else None
     ev_out = []
     for ev in events:
         rs = ev["rows"]
         if rs[-1]["t"] - rs[0]["t"] < 5: continue
         start = next((q for q in rs if q["DistanceTraveled"] >= 0), rs[0])
         sx, sz = start["PosX"], start["PosZ"]; ex, ez = rs[-1]["PosX"], rs[-1]["PosZ"]
-        dist = max(q["DistanceTraveled"] for q in rs); laps = max(q["LapNumber"] for q in rs)
+        dvals = [q["DistanceTraveled"] for q in rs]; dist = max(dvals) - max(0.0, min(dvals)); laps = max(q["LapNumber"] for q in rs)   # odometer may be cumulative — length = what THIS event covered
         pos = [q["RacePosition"] for q in rs if q["RacePosition"] > 0]
         mode = "race" if (pos and (max(pos) > 1 or len(set(pos)) > 1)) else "timed solo (Rivals / time trial)"
         if laps > 0: mode += " · lapped"
-        key = f"{int(round(sx / 50) * 50)}_{int(round(sz / 50) * 50)}"   # route family = where it starts (aborted runs share it)
+        h_row = next((q for q in rs if q["DistanceTraveled"] >= start["DistanceTraveled"] + 100), rs[-1])
+        hv = (h_row["PosX"] - sx, h_row["PosZ"] - sz); hn = math.hypot(*hv); hdg = [round(hv[0] / hn, 3), round(hv[1] / hn, 3)] if hn > 1 else None
+        sample = [(q["PosX"], q["PosZ"]) for q in rs[::max(1, len(rs) // 200)]]
+        key = attribute_route(sx, sz, hdg, dist, sample)
+        if key is None:
+            key = f"{int(round(sx / 50) * 50)}_{int(round(sz / 50) * 50)}"
+            if key in routes and routes[key].get("start"): key = f"{key}_{len(routes)}"   # a genuinely different route that rounds to an occupied cell
+            routes[key] = dict(routes.get(key) or {}, start=[round(sx), round(sz)], heading=hdg, length_m=round(dist), events=0, first_seen=sid)
+        R = routes[key]; R["events"] = R.get("events", 0) + 1; R["length_m"] = max(R.get("length_m") or 0, round(dist)); R["last_seen"] = sid
+        if not R.get("heading") and hdg: R["heading"] = hdg
         ev_out.append({"t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "car": cid(rs[0]), "stint": rs[0].get("stint"), "mode": mode, "laps": laps,
                        "best_lap": round(max((q["BestLap"] for q in rs), default=0), 3) or None, "last_lap": round(max((q["LastLap"] for q in rs), default=0), 3) or None,
                        "distance_m": round(dist), "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": pos[-1] if pos else None,
                        "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "route": (routes.get(key) or {}).get("name")})
+    # persist the route registry (names on disk win — the dashboard / daemon may have named a route while this analysis ran)
+    if write_side:
+        try:
+            rpath = os.path.join(ROOT, "data", "routes.json"); cur = {}
+            if os.path.exists(rpath):
+                with open(rpath, encoding="utf-8") as f: cur = json.load(f)
+            disk = cur.get("routes", {}) if isinstance(cur, dict) else {}
+            for k, v in routes.items():
+                base = dict(disk.get(k) or {})
+                for kk, vv in v.items():
+                    if kk != "name": base[kk] = vv
+                if v.get("name") and not base.get("name"): base["name"] = v["name"]
+                disk[k] = base
+            out_r = {"schema_version": "1.1.0", "purpose": "Route registry. A route = canonical start [x,z] + heading + length (+ its course model path once learned). New events are ATTRIBUTED to the nearest known route when the start is within ~120 m (250 m with path overlap), the heading agrees (a reversed circuit is a different route) and the length fits — so restarts and grid-slot offsets never split a route. Name a route once from the dashboard.", "routes": disk}
+            with open(rpath, "w", encoding="utf-8") as f: json.dump(out_r, f, indent=1, ensure_ascii=False)
+        except Exception as ex_: print("route registry not saved:", repr(ex_), file=sys.stderr)
 
     # ---- reference loops: user-defined free-roam test circuits. Each pass through the start point = one lap (a synthetic event). ----
     loops = {}

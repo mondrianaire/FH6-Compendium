@@ -11,7 +11,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 33,
-   "n": 2,
+   "n": 6,
    "best": {
     "mph_in": 52,
     "mph_min": 28,
@@ -61,7 +61,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 65,
-   "n": 1,
+   "n": 3,
    "best": {
     "mph_in": 65,
     "mph_min": 65,
@@ -111,7 +111,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 74,
-   "n": 1,
+   "n": 3,
    "best": {
     "mph_in": 88,
     "mph_min": 88,

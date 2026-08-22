@@ -2533,15 +2533,36 @@
     const repaintAtlas = () => { if (src === "live") paintSections(true); else render(); };   // the course cards follow the atlas selection, so repaint the whole course section
     // ---- NUMERIC TUNING ADJUSTMENTS: the deliverable of Course TUNING — actual slider numbers from the diagnosis + the current tune ----
     const SLIDER = {
-      farb: { label: "Front ARB", unit: "", step: 3, min: 1, max: 65, dp: 1 }, rarb: { label: "Rear ARB", unit: "", step: 3, min: 1, max: 65, dp: 1 },
-      fspring: { label: "Front spring rate", unit: " lb/in", step: 0, pct: 0.06, dp: 0 }, rspring: { label: "Rear spring rate", unit: " lb/in", step: 0, pct: 0.06, dp: 0 },
-      fbump: { label: "Front bump", unit: "", step: 1.5, min: 1, max: 20, dp: 1 }, rbump: { label: "Rear bump", unit: "", step: 1.5, min: 1, max: 20, dp: 1 },
-      freb: { label: "Front rebound", unit: "", step: 1.5, min: 1, max: 20, dp: 1 }, rreb: { label: "Rear rebound", unit: "", step: 1.5, min: 1, max: 20, dp: 1 },
-      bbal: { label: "Brake balance (% front)", unit: "%", step: 3, min: 0, max: 100, dp: 0 }, bpress: { label: "Brake pressure", unit: "%", step: 8, min: 50, max: 150, dp: 0 },
-      accel: { label: "Accel differential", unit: "%", step: 8, min: 0, max: 100, dp: 0 }, decel: { label: "Decel differential", unit: "%", step: 6, min: 0, max: 100, dp: 0 },
-      center: { label: "Center balance (% rear)", unit: "%", step: 5, min: 0, max: 100, dp: 0 }, faero: { label: "Front downforce", unit: "", step: 0, pct: 0.15, dp: 0 }, raero: { label: "Rear downforce", unit: "", step: 0, pct: 0.15, dp: 0 },
+      farb: { label: "Front ARB", unit: "", step: 3, min: 1, max: 65, dp: 1, verb: ["stiffer", "softer"] }, rarb: { label: "Rear ARB", unit: "", step: 3, min: 1, max: 65, dp: 1, verb: ["stiffer", "softer"] },
+      fspring: { label: "Front spring rate", unit: " lb/in", step: 0, pct: 0.06, dp: 0, verb: ["stiffer", "softer"] }, rspring: { label: "Rear spring rate", unit: " lb/in", step: 0, pct: 0.06, dp: 0, verb: ["stiffer", "softer"] },
+      fheight: { label: "Front ride height", unit: "", step: 1, dp: 0, notch: true, verb: ["higher", "lower"] }, rheight: { label: "Rear ride height", unit: "", step: 1, dp: 0, notch: true, verb: ["higher", "lower"] },
+      fbump: { label: "Front bump", unit: "", step: 1.5, min: 1, max: 20, dp: 1, verb: ["firmer", "softer"] }, rbump: { label: "Rear bump", unit: "", step: 1.5, min: 1, max: 20, dp: 1, verb: ["firmer", "softer"] },
+      freb: { label: "Front rebound", unit: "", step: 1.5, min: 1, max: 20, dp: 1, verb: ["slower", "faster"] }, rreb: { label: "Rear rebound", unit: "", step: 1.5, min: 1, max: 20, dp: 1, verb: ["slower", "faster"] },
+      bbal: { label: "Brake balance (% front)", unit: "%", step: 3, min: 0, max: 100, dp: 0, verb: ["+front", "+rear"] }, bpress: { label: "Brake pressure", unit: "%", step: 8, min: 50, max: 150, dp: 0, verb: ["higher", "lower"] },
+      accel: { label: "Accel differential", unit: "%", step: 8, min: 0, max: 100, dp: 0, verb: ["more lock", "less lock"] }, decel: { label: "Decel differential", unit: "%", step: 6, min: 0, max: 100, dp: 0, verb: ["more lock", "less lock"] },
+      center: { label: "Center balance (% rear)", unit: "%", step: 5, min: 0, max: 100, dp: 0, verb: ["+rear", "+front"] }, faero: { label: "Front downforce", unit: "", step: 0, pct: 0.15, dp: 0, verb: ["more", "less"] }, raero: { label: "Rear downforce", unit: "", step: 0, pct: 0.15, dp: 0, verb: ["more", "less"] },
     };
-    const SLIDER_ORDER = ["farb", "rarb", "fspring", "rspring", "fbump", "rbump", "freb", "rreb", "bbal", "bpress", "accel", "decel", "center", "faero", "raero"];
+    // plain-language EFFECT of moving each slider (dir up / down) — what the change DOES on track
+    const SLIDER_FX = {
+      farb: { up: "sharper front turn-in, but can scrub", down: "front regains grip → less understeer" },
+      rarb: { up: "sharper rear, more rotation → more oversteer", down: "rear regains grip → less oversteer" },
+      fspring: { up: "less nose dive, sharper but firmer", down: "more front grip over bumps" },
+      rspring: { up: "supports the rear, less squat & bottoming", down: "more rear grip over bumps" },
+      fheight: { up: "raises the nose → stops the front bottoming out", down: "lower nose & CG (only if it isn't bottoming)" },
+      rheight: { up: "raises the tail → stops the rear bottoming out", down: "lower tail & CG (only if it isn't bottoming)" },
+      fbump: { up: "firmer over sharp bumps up front", down: "softer front impacts, more compliance" },
+      rbump: { up: "firmer rear over bumps", down: "more rear compliance" },
+      freb: { up: "front settles slower after a bump", down: "front recovers faster" },
+      rreb: { up: "rear settles slower → calmer on throttle", down: "rear recovers faster" },
+      bbal: { up: "more front brake → stops the rears locking", down: "more rear brake → rotates on entry" },
+      bpress: { up: "stronger brakes (can lock up)", down: "stops lock-up → shorter, controllable stops" },
+      accel: { up: "more corner-exit drive, but more wheelspin", down: "less wheelspin off throttle → traction, less power-oversteer" },
+      decel: { up: "more stable off throttle (can push wide)", down: "freer rotation into the corner" },
+      center: { up: "more rear bias → livelier / more oversteer", down: "more front bias → more stable" },
+      faero: { up: "more front grip at speed → less high-speed understeer", down: "less drag, faster top end" },
+      raero: { up: "more rear grip at speed → less high-speed oversteer", down: "less drag, faster top end" },
+    };
+    const SLIDER_ORDER = ["farb", "rarb", "fspring", "rspring", "fheight", "rheight", "fbump", "rbump", "freb", "rreb", "bbal", "bpress", "accel", "decel", "center", "faero", "raero"];
     const TUNE_RX = {
       "mid-understeer": [["farb", -1, 1], ["rarb", 1, 0.6], ["fspring", -1, 0.6]],
       "front-hot": [["farb", -1, 0.5], ["faero", 1, 0.4]],
@@ -2551,7 +2572,7 @@
       "brake-balance-rear": [["bbal", -1, 1]], "brake-balance-front": [["bbal", 1, 1]],
       "brake-pressure": [["bpress", -1, 1]], "trail-brake": [["bbal", -1, 0.4]],
       "launch-spin": [["accel", -1, 1]], "launch-front-spin": [["center", 1, 1], ["accel", -1, 0.5]],
-      "bottoming": [["rreb", 1, 0.7], ["fbump", 1, 0.5]],
+      "bottoming": [["rheight", 1, 1], ["fheight", 1, 0.8]],   // fix bottoming with RIDE HEIGHT (matches the advice), not dampers
     };
     const tuneKey = (cid) => "fh6Tune:" + baseId(cid);
     // disk-decoded exact slider values → the tuning engine's slider keys (auto-fills "current tune")
@@ -2586,6 +2607,18 @@
       });
       return moves.sort((a, b) => b.sev - a.sev || Math.abs(b.delta || 0) - Math.abs(a.delta || 0));
     };
+    // elegant tuning-move cards: priority-striped, current -> target, PLAIN-LANGUAGE effect, diagnosis + confidence
+    const movesCards = (moves) => { ensureFhmCss(); return moves.length ? `<div class="tmoves">${moves.map((m, i) => {
+      const up = m.dir > 0; const col = up ? "#e3b341" : "#2f81f7";
+      const sevCol = m.sev >= 3 ? "#e5414e" : m.sev >= 2 ? "#e3b341" : "#00d27a";
+      const fx = (SLIDER_FX[m.sl] || {})[up ? "up" : "down"] || "";
+      const vb = (SLIDER[m.sl].verb || ["stiffer", "softer"])[up ? 0 : 1];
+      const notchU = SLIDER[m.sl].notch ? (Math.abs(m.delta) === 1 ? " notch" : " notches") : (m.unit || "");
+      const change = (m.to != null && m.from != null)
+        ? `<span class="tm-from">${m.from}${m.unit}</span><span class="tm-arr" style="color:${col}">${up ? "▲" : "▼"}</span><b class="tm-to" style="color:${col}">${m.to}${m.unit}</b>`
+        : `<b class="tm-to" style="color:${col}">${vb}${m.delta != null ? " ~" + Math.abs(m.delta) + notchU : ""}</b>`;
+      return `<div class="tmove" style="border-left-color:${sevCol}"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div></div>`;
+    }).join("")}</div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`; };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
       const diskN = Object.keys((live.diskTune && live.diskTune[String(cid).split("|")[0]]) || {}).length;
       const note = diskN ? `<b style="color:#00d27a">📀 ${diskN} current values auto-filled from disk</b> — targets are exact; edit any to override` : (n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)");
@@ -2737,9 +2770,7 @@
         </tbody></table></div>`;
       const splitFlag = g.surface_split ? `<div style="margin:8px 0;padding:6px 10px;border:1px solid #e3b341;border-radius:8px;font-size:11.5px"><b style="color:#e3b341">⚠ Surface-specific:</b> balance swings by surface — USI ${g.surface_split.smooth > 0 ? "+" : ""}${g.surface_split.smooth} on road vs ${g.surface_split.rough > 0 ? "+" : ""}${g.surface_split.rough} on rough. No single tune wins both; this all-around read favours where you drive most — tune a separate setup for the other surface.</div>` : "";
       const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
-      const movesTbl = moves.length ? `<div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th>slider</th><th>current</th><th></th><th>set to</th><th>Δ</th><th>why (across every context)</th><th>conf</th></tr></thead><tbody>
-        ${moves.map((m) => `<tr><td><b>${m.label}</b></td><td>${m.from != null ? m.from + m.unit : `<span class="why">—</span>`}</td><td style="color:${col(m)};font-weight:700">${arrow(m)}</td><td>${m.to != null ? `<b style="color:${col(m)}">${m.to}${m.unit}</b>` : `<span style="color:${col(m)}">${m.dir > 0 ? "stiffer" : "softer"}${m.delta != null ? " ~" + Math.abs(m.delta) + m.unit : ""}</span>`}</td><td style="color:${col(m)}">${m.delta != null ? (m.delta > 0 ? "+" : "") + m.delta + m.unit : (m.dir > 0 ? "+" : "−")}</td><td class="why" style="font-size:10.5px">${esc(m.why)}</td><td><div class="lab-bar" style="width:44px;height:5px;display:inline-block"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></div></td></tr>`).join("")}
-        </tbody></table></div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`;
+      const movesTbl = movesCards(moves);
       return `<div class="block" style="border-color:var(--accent)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🛣 All-around tune — ${esc(carName(c) || "#" + c.ordinal)} <span class="why">· for public / Horizon Open · robust across the board</span></h3><span class="chip" style="border-color:${robCol};color:${robCol};font-weight:700" title="how consistent the car's balance is across every context — high = predictable all-rounder">consistency ${rob == null ? "—" : Math.round(rob * 100) + "%"}</span> <span class="chip">${g.corners} corners · ${g.buckets} contexts${g.surfaces.length > 1 ? " · " + g.surfaces.join("+") : ""}</span></div>
         <p class="why" style="font-size:11px;margin:4px 0 6px">Weighs each fix by how <b>broadly</b> it helps — a problem in every context gets a full move; one that only shows in some contexts is a balance issue, not a blanket change. The opposite of the course lane, which tunes for one track.</p>
         <div style="font-size:11px;color:var(--muted);margin:2px 0 3px"><b>Balance signature</b> — how it handles across everything you've driven (blue = understeer, red = oversteer, green = neutral)</div>${matrix}${splitFlag}
@@ -2927,7 +2958,18 @@
       .fhm-verify-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12.5px;margin-bottom:6px}
       .fhm-verify-h span{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
       .fhm-verify-todo{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;font-size:11px;text-transform:capitalize}
-      .fhm-verify-todo span{display:inline-flex;align-items:center}`;
+      .fhm-verify-todo span{display:inline-flex;align-items:center}
+      .tmoves{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+      .tmove{border-left:3px solid var(--line);background:var(--bg2);border-radius:0 8px 8px 0;padding:8px 11px}
+      .tmove-top{display:flex;align-items:center;gap:9px}
+      .tmove-n{flex:none;width:19px;height:19px;border-radius:50%;background:var(--bg);border:1px solid var(--line);font-size:10.5px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-variant-numeric:tabular-nums}
+      .tmove-sl{font-weight:600;font-size:13px}
+      .tmove-ch{margin-left:auto;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;display:inline-flex;align-items:baseline;gap:5px}
+      .tm-from{color:var(--muted)}.tm-arr{font-size:11px}.tm-to{font-size:15.5px;font-weight:700}
+      .tmove-fx{font-size:11.5px;color:var(--txt);margin:5px 0 0 28px;line-height:1.35}
+      .tmove-why{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);margin:4px 0 0 28px}
+      .tmove-conf{display:inline-block;width:42px;height:4px;border-radius:2px;background:#0b1013;overflow:hidden;flex:none}
+      .tmove-conf i{display:block;height:100%}`;
     const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
     const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };
     const diskDeliverableHtml = (r, opts) => {

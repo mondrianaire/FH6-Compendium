@@ -695,7 +695,8 @@ def main():
         if joined:
             pl = joined[-1]["rows"][-1]; nf = ev["rows"][0]; gap = nf["t"] - pl["t"]; dd = nf["DistanceTraveled"] - pl["DistanceTraveled"]
             # same attempt iff the odometer CONTINUES across the gap (a pause / menu / checkpoint respawn keeps it; a restart or a new event resets it to ~0) and the lap counter didn't reset
-            if cid(nf) == cid(pl) and nf["LapNumber"] >= pl["LapNumber"] and -50 <= dd <= 150:
+            lapped_cont = nf["LapNumber"] > 0 and nf["LapNumber"] >= pl["LapNumber"]   # a lapped circuit keeps counting laps — the car may have kept lapping while the flag dropped
+            if cid(nf) == cid(pl) and nf["LapNumber"] >= pl["LapNumber"] and (-50 <= dd <= 150 or (lapped_cont and -50 <= dd <= max(150.0, 25.0 * gap))):
                 joined[-1]["rows"].extend(ev["rows"]); continue
         joined.append(ev)
     events = joined

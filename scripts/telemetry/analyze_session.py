@@ -1021,7 +1021,7 @@ def main():
                 if PLs: geo["last_paths"] = down(PLs); geo["last_path"] = [p for pc in geo["last_paths"] for p in pc]; geo["last_lap"] = {"ev": lw_last["ev"], "lap": lw_last["lap"], "t0": lw_last["t0"], "t1": lw_last["t1"]}
                 # the COURSE LAYOUT: every lap / attempt recorded, drawn together — the spread of lines is the road; they accumulate in the course model across sessions
                 lap_paths = []
-                for w in full_laps[-16:]:
+                for w in full_laps[-32:]:
                     PPs = resample(lap_pts(w), step=8.0)
                     if PPs:
                         pc = max(PPs, key=len)   # the longest continuous piece of that lap (no teleport lines)
@@ -1167,11 +1167,22 @@ def main():
             mt.setdefault("cars", [])
             if car_l not in mt["cars"]: mt["cars"].append(car_l)
             mt["status"] = cl.get("status", "turn")
+            # ---- per-turn TRACK statistics: this turn's passes / presence / first-red / limiter accumulate across every session (keyed by session = idempotent) ----
+            ms_ = mt.setdefault("by_session", {})   # ('sessions' on a model turn is the count)
+            ms_[sid] = {"n": nn, "laps_seen": cl.get("laps_seen", 0), "laps": total_laps, "fr": fr, "lim": limiter, "multi": cl.get("multi"), "mph_min": med([m["mph_min"] for m in ms]), "usi": med(usis), "cars": sorted({m["car"] for m in ms})}
+            fr_t = {"front": 0, "rear": 0, "none": 0}; lim_t = {"tune": 0, "driver": 0, "mixed": 0, "clean": 0}
+            for v in ms_.values():
+                for k2 in fr_t: fr_t[k2] += (v.get("fr") or {}).get(k2, 0)
+                lim_t[v.get("lim") or "clean"] = lim_t.get(v.get("lim") or "clean", 0) + 1
+            tot_n = sum(v["n"] for v in ms_.values()); tot_seen = sum(v["laps_seen"] for v in ms_.values())
+            trk = {"passes": tot_n, "laps_seen": tot_seen, "sessions": len(ms_), "fr": fr_t, "lim": lim_t, "dominant": (max(fr_t, key=fr_t.get) if tot_n else None), "consistency": (round(max(fr_t.values()) / tot_n, 2) if tot_n else None),
+                   "cars": sorted({c_ for v in ms_.values() for c_ in (v.get("cars") or [])})}
+            mt["track"] = trk; mt["sessions"] = len(ms_)
             corner_out.append({"id": cl.get("cid", f"C{i}"), "status": cl.get("status", "turn"), "presence": cl.get("presence"), "laps_seen": cl.get("laps_seen"), "multi": cl.get("multi"), "per_lap": cl.get("per_lap"), "absorbed": cl.get("absorbed", 0),
                                "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
                                "mph_min": med([m["mph_min"] for m in ms]), "mph_in": med([m["mph_in"] for m in ms]), "lat_g": med([m["lat_g_peak"] for m in ms]),
                                "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
-                               "model_id": mt["id"], "geo_id": geo_near(cl["x"], cl["z"]), "radius_m": mt.get("radius_m"), "ref": ref, "ref_src": ref_src, "last": last, "delta": delta, "advice": advice, "on_ref": on_ref,
+                               "model_id": mt["id"], "geo_id": geo_near(cl["x"], cl["z"]), "radius_m": mt.get("radius_m"), "ref": ref, "ref_src": ref_src, "last": last, "delta": delta, "advice": advice, "on_ref": on_ref, "track": dict(trk),
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
         # persist the course model (never from replays); the session carries a compact summary
@@ -1187,6 +1198,12 @@ def main():
                 if not cur_ or e["best_lap"] < cur_["best_lap"] or cur_.get("session") == sid and e["best_lap"] <= cur_["best_lap"]: model["best_laps"][e["car"]] = {"best_lap": e["best_lap"], "session": sid, "name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi")}
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
         model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis
+        # track-level presence per turn (over ALL track laps) and a track-level turn-count confidence — the turn identity is corroborated across sessions, not just this one
+        for k_ in corner_out:
+            t_ = k_.get("track") or {}
+            if t_: t_["laps_track"] = model["laps"]; t_["presence"] = (round(t_.get("laps_seen", 0) / model["laps"], 2) if model["laps"] else None)
+        turns_info["track_laps"] = model["laps"]; turns_info["track_sessions"] = len(model["sessions"])
+        turns_info["track_confidence"] = round(strength(model["laps"], 3) * max(0.3, agree), 2)
         if profile and (not model.get("profile") or total_laps >= (model.get("profile_laps") or 0)): model["profile"] = profile; model["profile_laps"] = total_laps; model["profile_session"] = sid
         model["updated"] = sid; model["name"] = co["name"] or model.get("name")
         bl = model.get("best_laps") or {}; overall = (min(bl.values(), key=lambda b_: b_["best_lap"]) if bl else None)
@@ -1197,7 +1214,7 @@ def main():
         if geo:
             mg = model.get("geometry") or {}
             prev_lp = [lp for lp in (mg.get("lap_paths") or []) if lp.get("session") != sid]   # re-analysis of this session replaces its own laps
-            layout = sorted(prev_lp + (geo.get("lap_paths") or []), key=lambda lp: (lp.get("session") or "", lp.get("ev", 0), lp.get("lap", 0)))[-24:]   # chronological (session ids are timestamps) — the 24 most RECENT laps, whatever the analysis order
+            layout = sorted(prev_lp + (geo.get("lap_paths") or []), key=lambda lp: (lp.get("session") or "", lp.get("ev", 0), lp.get("lap", 0)))[-48:]   # chronological (session ids are timestamps) — the 48 most RECENT laps, whatever the analysis order
             if not mg.get("path") or len(geo["path"]) >= len(mg.get("path") or []): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"), "turns": geo["turns"], "session": sid, "lap_paths": layout}   # the map persists with the course
             else: mg["lap_paths"] = layout; model["geometry"] = mg
             geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing

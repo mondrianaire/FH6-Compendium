@@ -28,7 +28,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_193720"
    },
-   "sessions": 0,
+   "sessions": 7,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 82,
@@ -50,7 +50,149 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_173737": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 63,
+     "usi": 0.751,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_182520": {
+     "n": 6,
+     "laps_seen": 6,
+     "laps": 12,
+     "fr": {
+      "front": 6,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 72,
+     "usi": 0.279,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 70,
+     "usi": 0.209,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 8,
+     "laps_seen": 8,
+     "laps": 12,
+     "fr": {
+      "front": 8,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 69,
+     "usi": 0.232,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 9,
+     "laps_seen": 9,
+     "laps": 10,
+     "fr": {
+      "front": 9,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 65,
+     "usi": 0.204,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 78,
+     "usi": 0.059,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 17,
+     "laps_seen": 17,
+     "laps": 25,
+     "fr": {
+      "front": 17,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 69,
+     "usi": 0.355,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 44,
+    "laps_seen": 44,
+    "sessions": 7,
+    "fr": {
+     "front": 44,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 7,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T2",
@@ -78,7 +220,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_214057"
    },
-   "sessions": 0,
+   "sessions": 7,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 95,
@@ -100,7 +242,149 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_173737": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 77,
+     "usi": -0.096,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_182520": {
+     "n": 10,
+     "laps_seen": 10,
+     "laps": 12,
+     "fr": {
+      "front": 9,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 79,
+     "usi": 0.203,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 2,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 1.0,
+     "mph_min": 85,
+     "usi": -0.112,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 9,
+     "laps_seen": 9,
+     "laps": 12,
+     "fr": {
+      "front": 9,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 78,
+     "usi": 0.224,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 9,
+     "laps_seen": 9,
+     "laps": 10,
+     "fr": {
+      "front": 9,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 82,
+     "usi": 0.149,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 80,
+     "usi": 0.085,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 17,
+     "laps_seen": 17,
+     "laps": 25,
+     "fr": {
+      "front": 17,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 84,
+     "usi": 0.15,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 50,
+    "laps_seen": 49,
+    "sessions": 7,
+    "fr": {
+     "front": 49,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 7,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.98,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T3",
@@ -128,7 +412,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_214057"
    },
-   "sessions": 0,
+   "sessions": 7,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 96,
@@ -150,7 +434,149 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_173737": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 83,
+     "usi": 0.699,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_182520": {
+     "n": 11,
+     "laps_seen": 11,
+     "laps": 12,
+     "fr": {
+      "front": 10,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 73,
+     "usi": 0.266,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 81,
+     "usi": 0.252,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 8,
+     "laps_seen": 7,
+     "laps": 12,
+     "fr": {
+      "front": 6,
+      "rear": 2,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.14,
+     "mph_min": 77,
+     "usi": 0.235,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 10,
+     "laps_seen": 10,
+     "laps": 10,
+     "fr": {
+      "front": 10,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 73,
+     "usi": 0.534,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 86,
+     "usi": 0.167,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 14,
+     "laps_seen": 14,
+     "laps": 25,
+     "fr": {
+      "front": 12,
+      "rear": 2,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 81,
+     "usi": 0.368,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 47,
+    "laps_seen": 46,
+    "sessions": 7,
+    "fr": {
+     "front": 42,
+     "rear": 5,
+     "none": 0
+    },
+    "lim": {
+     "tune": 7,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.89,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T4",
@@ -178,7 +604,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_193720"
    },
-   "sessions": 0,
+   "sessions": 7,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 67,
@@ -200,7 +626,149 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_173737": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 38,
+     "usi": 0.747,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_182520": {
+     "n": 11,
+     "laps_seen": 11,
+     "laps": 12,
+     "fr": {
+      "front": 11,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 38,
+     "usi": 0.844,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 36,
+     "usi": 0.986,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 10,
+     "laps_seen": 10,
+     "laps": 12,
+     "fr": {
+      "front": 10,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 35,
+     "usi": 0.819,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 10,
+     "laps_seen": 9,
+     "laps": 10,
+     "fr": {
+      "front": 10,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.11,
+     "mph_min": 35,
+     "usi": 0.835,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 38,
+     "usi": 0.808,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 18,
+     "laps_seen": 17,
+     "laps": 25,
+     "fr": {
+      "front": 17,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.06,
+     "mph_min": 32,
+     "usi": 0.787,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 53,
+    "laps_seen": 51,
+    "sessions": 7,
+    "fr": {
+     "front": 52,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 7,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.98,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T5",
@@ -228,7 +796,7 @@
     "first_red": "front ph2",
     "session": "fh6_20260821_214057"
    },
-   "sessions": 0,
+   "sessions": 7,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 117,
@@ -250,7 +818,149 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_182520": {
+     "n": 6,
+     "laps_seen": 6,
+     "laps": 12,
+     "fr": {
+      "front": 6,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 73,
+     "usi": -0.297,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 88,
+     "usi": 0.071,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 6,
+     "laps_seen": 6,
+     "laps": 12,
+     "fr": {
+      "front": 6,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 71,
+     "usi": 0.041,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 4,
+     "laps_seen": 4,
+     "laps": 10,
+     "fr": {
+      "front": 4,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 88,
+     "usi": -0.098,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 50,
+     "usi": 0.158,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_200059": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 87,
+     "usi": 0.298,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 10,
+     "laps_seen": 10,
+     "laps": 25,
+     "fr": {
+      "front": 9,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 89,
+     "usi": 0.036,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 29,
+    "laps_seen": 29,
+    "sessions": 7,
+    "fr": {
+     "front": 28,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 7,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.97,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T6",
@@ -278,7 +988,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_193720"
    },
-   "sessions": 0,
+   "sessions": 6,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 43,
@@ -300,7 +1010,132 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_182520": {
+     "n": 13,
+     "laps_seen": 11,
+     "laps": 12,
+     "fr": {
+      "front": 12,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.18,
+     "mph_min": 33,
+     "usi": 0.754,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 31,
+     "usi": 0.774,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 11,
+     "laps_seen": 11,
+     "laps": 12,
+     "fr": {
+      "front": 10,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 29,
+     "usi": 0.752,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 11,
+     "laps_seen": 9,
+     "laps": 10,
+     "fr": {
+      "front": 10,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.22,
+     "mph_min": 33,
+     "usi": 0.774,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 3,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 3,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.5,
+     "mph_min": 28,
+     "usi": 0.808,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 23,
+     "laps_seen": 21,
+     "laps": 25,
+     "fr": {
+      "front": 23,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.1,
+     "mph_min": 32,
+     "usi": 0.878,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 62,
+    "laps_seen": 55,
+    "sessions": 6,
+    "fr": {
+     "front": 59,
+     "rear": 3,
+     "none": 0
+    },
+    "lim": {
+     "tune": 6,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.95,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T7",
@@ -328,7 +1163,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_214057"
    },
-   "sessions": 0,
+   "sessions": 4,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 97,
@@ -350,7 +1185,98 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_182520": {
+     "n": 15,
+     "laps_seen": 12,
+     "laps": 12,
+     "fr": {
+      "front": 13,
+      "rear": 2,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.17,
+     "mph_min": 72,
+     "usi": 0.143,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 11,
+     "laps_seen": 10,
+     "laps": 12,
+     "fr": {
+      "front": 11,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.1,
+     "mph_min": 73,
+     "usi": 0.155,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 10,
+     "laps_seen": 10,
+     "laps": 10,
+     "fr": {
+      "front": 10,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 73,
+     "usi": 0.182,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 22,
+     "laps_seen": 20,
+     "laps": 25,
+     "fr": {
+      "front": 21,
+      "rear": 0,
+      "none": 1
+     },
+     "lim": "tune",
+     "multi": 0.05,
+     "mph_min": 82,
+     "usi": 0.1,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 58,
+    "laps_seen": 52,
+    "sessions": 4,
+    "fr": {
+     "front": 55,
+     "rear": 2,
+     "none": 1
+    },
+    "lim": {
+     "tune": 4,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.95,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T8",
@@ -378,7 +1304,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_193720"
    },
-   "sessions": 0,
+   "sessions": 4,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 68,
@@ -400,7 +1326,98 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_182520": {
+     "n": 10,
+     "laps_seen": 9,
+     "laps": 12,
+     "fr": {
+      "front": 8,
+      "rear": 2,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.11,
+     "mph_min": 61,
+     "usi": 0.626,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 4,
+     "laps_seen": 4,
+     "laps": 12,
+     "fr": {
+      "front": 3,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 60,
+     "usi": 0.71,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 7,
+     "laps_seen": 7,
+     "laps": 10,
+     "fr": {
+      "front": 7,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 57,
+     "usi": 0.616,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 7,
+     "laps_seen": 7,
+     "laps": 25,
+     "fr": {
+      "front": 7,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 54,
+     "usi": 0.676,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 28,
+    "laps_seen": 27,
+    "sessions": 4,
+    "fr": {
+     "front": 25,
+     "rear": 3,
+     "none": 0
+    },
+    "lim": {
+     "tune": 4,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.89,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T9",
@@ -428,7 +1445,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_191809"
    },
-   "sessions": 0,
+   "sessions": 5,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 76,
@@ -450,7 +1467,115 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_182520": {
+     "n": 7,
+     "laps_seen": 7,
+     "laps": 12,
+     "fr": {
+      "front": 7,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 48,
+     "usi": 0.592,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 53,
+     "usi": 0.326,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 5,
+     "laps_seen": 4,
+     "laps": 12,
+     "fr": {
+      "front": 5,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.25,
+     "mph_min": 54,
+     "usi": 0.561,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 5,
+     "laps_seen": 5,
+     "laps": 10,
+     "fr": {
+      "front": 5,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 48,
+     "usi": 0.222,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 11,
+     "laps_seen": 10,
+     "laps": 25,
+     "fr": {
+      "front": 11,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.1,
+     "mph_min": 47,
+     "usi": 0.737,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 29,
+    "laps_seen": 27,
+    "sessions": 5,
+    "fr": {
+     "front": 29,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 5,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T10",
@@ -478,7 +1603,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_191726"
    },
-   "sessions": 0,
+   "sessions": 3,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 88,
@@ -500,7 +1625,81 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_182520": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 12,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 67,
+     "usi": 0.307,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 79,
+     "usi": -0.671,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 25,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 58,
+     "usi": -0.271,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 3,
+    "laps_seen": 3,
+    "sessions": 3,
+    "fr": {
+     "front": 3,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 3,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T11",
@@ -528,7 +1727,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_214057"
    },
-   "sessions": 0,
+   "sessions": 5,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 79,
@@ -550,7 +1749,115 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_182520": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 12,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 65,
+     "usi": 0.181,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191726": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 53,
+     "usi": 0.196,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_191809": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 12,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 71,
+     "usi": 0.037,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 64,
+     "usi": 0.127,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 10,
+     "laps_seen": 10,
+     "laps": 25,
+     "fr": {
+      "front": 8,
+      "rear": 2,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 71,
+     "usi": 0.099,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 15,
+    "laps_seen": 15,
+    "sessions": 5,
+    "fr": {
+     "front": 13,
+     "rear": 2,
+     "none": 0
+    },
+    "lim": {
+     "tune": 5,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.87,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T12",
@@ -578,7 +1885,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_191809"
    },
-   "sessions": 0,
+   "sessions": 3,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 107,
@@ -600,7 +1907,81 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_191809": {
+     "n": 2,
+     "laps_seen": 1,
+     "laps": 12,
+     "fr": {
+      "front": 1,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "mixed",
+     "multi": 1.0,
+     "mph_min": 107,
+     "usi": 0.161,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_195011": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 103,
+     "usi": 0.062,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 25,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 103,
+     "usi": -0.018,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 5,
+    "laps_seen": 4,
+    "sessions": 3,
+    "fr": {
+     "front": 4,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 2,
+     "driver": 0,
+     "mixed": 1,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 0.8,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T13",
@@ -628,7 +2009,7 @@
     "first_red": null,
     "session": "fh6_20260821_191809"
    },
-   "sessions": 0,
+   "sessions": 3,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 117,
@@ -650,7 +2031,81 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_191809": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 12,
+     "fr": {
+      "front": 0,
+      "rear": 0,
+      "none": 1
+     },
+     "lim": "clean",
+     "multi": 0.0,
+     "mph_min": 117,
+     "usi": -0.049,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_193720": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 10,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 112,
+     "usi": 0.036,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    },
+    "fh6_20260821_214057": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 25,
+     "fr": {
+      "front": 0,
+      "rear": 0,
+      "none": 1
+     },
+     "lim": "clean",
+     "multi": 0.0,
+     "mph_min": 117,
+     "usi": -0.063,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 4,
+    "laps_seen": 4,
+    "sessions": 3,
+    "fr": {
+     "front": 2,
+     "rear": 0,
+     "none": 2
+    },
+    "lim": {
+     "tune": 1,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 2
+    },
+    "dominant": "front",
+    "consistency": 0.5,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T14",
@@ -678,7 +2133,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_193720"
    },
-   "sessions": 0,
+   "sessions": 1,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 54,
@@ -700,7 +2155,47 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_193720": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 10,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 54,
+     "usi": 0.178,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T15",
@@ -728,7 +2223,7 @@
     "first_red": "front ph2",
     "session": "fh6_20260821_193720"
    },
-   "sessions": 0,
+   "sessions": 1,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 107,
@@ -750,7 +2245,47 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_193720": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 10,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 89,
+     "usi": 0.014,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 2,
+    "laps_seen": 2,
+    "sessions": 1,
+    "fr": {
+     "front": 2,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T16",
@@ -778,7 +2313,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_193720"
    },
-   "sessions": 0,
+   "sessions": 1,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 70,
@@ -800,7 +2335,47 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "possible"
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_193720": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 10,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 68,
+     "usi": -0.114,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T17",
@@ -828,7 +2403,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_195011"
    },
-   "sessions": 0,
+   "sessions": 1,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 79,
@@ -850,7 +2425,47 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_195011": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 79,
+     "usi": 0.166,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 2,
+    "laps_seen": 2,
+    "sessions": 1,
+    "fr": {
+     "front": 2,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   },
   {
    "id": "T18",
@@ -878,7 +2493,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260821_200059"
    },
-   "sessions": 0,
+   "sessions": 1,
    "best_by_car": {
     "2866|2|4|800": {
      "mph_in": 21,
@@ -900,7 +2515,47 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "status": "turn"
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_200059": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 21,
+     "usi": 3.915,
+     "cars": [
+      "2866|2|4|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1,
+     "driver": 0,
+     "mixed": 0,
+     "clean": 0
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|800"
+    ]
+   }
   }
  ],
  "laps": 64,
@@ -3467,6 +5122,7679 @@
   ],
   "session": "fh6_20260821_195011",
   "lap_paths": [
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 4,
+    "pts": [
+     [
+      -7348,
+      -2110
+     ],
+     [
+      -7347,
+      -2102
+     ],
+     [
+      -7345,
+      -2094
+     ],
+     [
+      -7343,
+      -2086
+     ],
+     [
+      -7341,
+      -2078
+     ],
+     [
+      -7339,
+      -2071
+     ],
+     [
+      -7338,
+      -2063
+     ],
+     [
+      -7336,
+      -2055
+     ],
+     [
+      -7334,
+      -2047
+     ],
+     [
+      -7333,
+      -2039
+     ],
+     [
+      -7331,
+      -2031
+     ],
+     [
+      -7330,
+      -2024
+     ],
+     [
+      -7329,
+      -2016
+     ],
+     [
+      -7328,
+      -2008
+     ],
+     [
+      -7327,
+      -2000
+     ],
+     [
+      -7326,
+      -1992
+     ],
+     [
+      -7327,
+      -1984
+     ],
+     [
+      -7328,
+      -1976
+     ],
+     [
+      -7330,
+      -1968
+     ],
+     [
+      -7333,
+      -1961
+     ],
+     [
+      -7337,
+      -1954
+     ],
+     [
+      -7342,
+      -1947
+     ],
+     [
+      -7347,
+      -1941
+     ],
+     [
+      -7353,
+      -1936
+     ],
+     [
+      -7359,
+      -1931
+     ],
+     [
+      -7366,
+      -1926
+     ],
+     [
+      -7372,
+      -1922
+     ],
+     [
+      -7379,
+      -1917
+     ],
+     [
+      -7386,
+      -1913
+     ],
+     [
+      -7393,
+      -1910
+     ],
+     [
+      -7401,
+      -1908
+     ],
+     [
+      -7409,
+      -1908
+     ],
+     [
+      -7417,
+      -1908
+     ],
+     [
+      -7425,
+      -1910
+     ],
+     [
+      -7431,
+      -1915
+     ],
+     [
+      -7435,
+      -1922
+     ],
+     [
+      -7437,
+      -1930
+     ],
+     [
+      -7441,
+      -1937
+     ],
+     [
+      -7445,
+      -1944
+     ],
+     [
+      -7448,
+      -1951
+     ],
+     [
+      -7452,
+      -1958
+     ],
+     [
+      -7456,
+      -1965
+     ],
+     [
+      -7461,
+      -1971
+     ],
+     [
+      -7468,
+      -1976
+     ],
+     [
+      -7474,
+      -1981
+     ],
+     [
+      -7480,
+      -1986
+     ],
+     [
+      -7485,
+      -1992
+     ],
+     [
+      -7489,
+      -1999
+     ],
+     [
+      -7493,
+      -2006
+     ],
+     [
+      -7497,
+      -2013
+     ],
+     [
+      -7499,
+      -2021
+     ],
+     [
+      -7500,
+      -2029
+     ],
+     [
+      -7500,
+      -2037
+     ],
+     [
+      -7500,
+      -2045
+     ],
+     [
+      -7500,
+      -2053
+     ],
+     [
+      -7500,
+      -2061
+     ],
+     [
+      -7500,
+      -2069
+     ],
+     [
+      -7500,
+      -2077
+     ],
+     [
+      -7500,
+      -2084
+     ],
+     [
+      -7502,
+      -2092
+     ],
+     [
+      -7504,
+      -2100
+     ],
+     [
+      -7508,
+      -2107
+     ],
+     [
+      -7512,
+      -2114
+     ],
+     [
+      -7517,
+      -2120
+     ],
+     [
+      -7522,
+      -2126
+     ],
+     [
+      -7528,
+      -2132
+     ],
+     [
+      -7533,
+      -2139
+     ],
+     [
+      -7537,
+      -2145
+     ],
+     [
+      -7542,
+      -2152
+     ],
+     [
+      -7546,
+      -2158
+     ],
+     [
+      -7548,
+      -2166
+     ],
+     [
+      -7546,
+      -2174
+     ],
+     [
+      -7542,
+      -2181
+     ],
+     [
+      -7537,
+      -2187
+     ],
+     [
+      -7531,
+      -2192
+     ],
+     [
+      -7524,
+      -2196
+     ],
+     [
+      -7517,
+      -2199
+     ],
+     [
+      -7509,
+      -2202
+     ],
+     [
+      -7501,
+      -2204
+     ],
+     [
+      -7493,
+      -2205
+     ],
+     [
+      -7485,
+      -2206
+     ],
+     [
+      -7478,
+      -2208
+     ],
+     [
+      -7470,
+      -2211
+     ],
+     [
+      -7463,
+      -2215
+     ],
+     [
+      -7458,
+      -2221
+     ],
+     [
+      -7456,
+      -2229
+     ],
+     [
+      -7459,
+      -2236
+     ],
+     [
+      -7464,
+      -2242
+     ],
+     [
+      -7471,
+      -2246
+     ],
+     [
+      -7479,
+      -2248
+     ],
+     [
+      -7487,
+      -2250
+     ],
+     [
+      -7494,
+      -2253
+     ],
+     [
+      -7501,
+      -2256
+     ],
+     [
+      -7507,
+      -2262
+     ],
+     [
+      -7506,
+      -2270
+     ],
+     [
+      -7501,
+      -2276
+     ],
+     [
+      -7494,
+      -2280
+     ],
+     [
+      -7487,
+      -2282
+     ],
+     [
+      -7479,
+      -2283
+     ],
+     [
+      -7471,
+      -2284
+     ],
+     [
+      -7463,
+      -2285
+     ],
+     [
+      -7455,
+      -2285
+     ],
+     [
+      -7447,
+      -2283
+     ],
+     [
+      -7439,
+      -2281
+     ],
+     [
+      -7432,
+      -2279
+     ],
+     [
+      -7424,
+      -2275
+     ],
+     [
+      -7417,
+      -2272
+     ],
+     [
+      -7410,
+      -2268
+     ],
+     [
+      -7404,
+      -2263
+     ],
+     [
+      -7397,
+      -2258
+     ],
+     [
+      -7391,
+      -2253
+     ],
+     [
+      -7386,
+      -2247
+     ],
+     [
+      -7381,
+      -2241
+     ],
+     [
+      -7377,
+      -2234
+     ],
+     [
+      -7373,
+      -2227
+     ],
+     [
+      -7370,
+      -2219
+     ],
+     [
+      -7368,
+      -2212
+     ],
+     [
+      -7367,
+      -2204
+     ],
+     [
+      -7366,
+      -2196
+     ],
+     [
+      -7365,
+      -2188
+     ],
+     [
+      -7364,
+      -2180
+     ],
+     [
+      -7363,
+      -2172
+     ],
+     [
+      -7361,
+      -2164
+     ],
+     [
+      -7359,
+      -2156
+     ],
+     [
+      -7357,
+      -2149
+     ],
+     [
+      -7354,
+      -2141
+     ],
+     [
+      -7352,
+      -2134
+     ],
+     [
+      -7350,
+      -2126
+     ],
+     [
+      -7348,
+      -2118
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 5,
+    "pts": [
+     [
+      -7346,
+      -2110
+     ],
+     [
+      -7344,
+      -2102
+     ],
+     [
+      -7341,
+      -2094
+     ],
+     [
+      -7340,
+      -2087
+     ],
+     [
+      -7339,
+      -2079
+     ],
+     [
+      -7339,
+      -2071
+     ],
+     [
+      -7339,
+      -2063
+     ],
+     [
+      -7340,
+      -2055
+     ],
+     [
+      -7341,
+      -2047
+     ],
+     [
+      -7341,
+      -2039
+     ],
+     [
+      -7341,
+      -2031
+     ],
+     [
+      -7341,
+      -2023
+     ],
+     [
+      -7340,
+      -2015
+     ],
+     [
+      -7338,
+      -2007
+     ],
+     [
+      -7337,
+      -1999
+     ],
+     [
+      -7336,
+      -1991
+     ],
+     [
+      -7336,
+      -1983
+     ],
+     [
+      -7337,
+      -1975
+     ],
+     [
+      -7339,
+      -1967
+     ],
+     [
+      -7341,
+      -1960
+     ],
+     [
+      -7344,
+      -1952
+     ],
+     [
+      -7348,
+      -1945
+     ],
+     [
+      -7352,
+      -1939
+     ],
+     [
+      -7357,
+      -1932
+     ],
+     [
+      -7363,
+      -1927
+     ],
+     [
+      -7369,
+      -1921
+     ],
+     [
+      -7375,
+      -1917
+     ],
+     [
+      -7383,
+      -1913
+     ],
+     [
+      -7390,
+      -1911
+     ],
+     [
+      -7398,
+      -1910
+     ],
+     [
+      -7406,
+      -1910
+     ],
+     [
+      -7414,
+      -1910
+     ],
+     [
+      -7422,
+      -1912
+     ],
+     [
+      -7429,
+      -1916
+     ],
+     [
+      -7434,
+      -1922
+     ],
+     [
+      -7438,
+      -1929
+     ],
+     [
+      -7441,
+      -1937
+     ],
+     [
+      -7445,
+      -1944
+     ],
+     [
+      -7449,
+      -1951
+     ],
+     [
+      -7454,
+      -1957
+     ],
+     [
+      -7459,
+      -1963
+     ],
+     [
+      -7464,
+      -1969
+     ],
+     [
+      -7470,
+      -1975
+     ],
+     [
+      -7475,
+      -1981
+     ],
+     [
+      -7480,
+      -1987
+     ],
+     [
+      -7485,
+      -1993
+     ],
+     [
+      -7490,
+      -2000
+     ],
+     [
+      -7494,
+      -2007
+     ],
+     [
+      -7497,
+      -2014
+     ],
+     [
+      -7499,
+      -2022
+     ],
+     [
+      -7501,
+      -2029
+     ],
+     [
+      -7501,
+      -2037
+     ],
+     [
+      -7501,
+      -2045
+     ],
+     [
+      -7502,
+      -2053
+     ],
+     [
+      -7502,
+      -2061
+     ],
+     [
+      -7502,
+      -2069
+     ],
+     [
+      -7502,
+      -2077
+     ],
+     [
+      -7503,
+      -2085
+     ],
+     [
+      -7503,
+      -2093
+     ],
+     [
+      -7502,
+      -2101
+     ],
+     [
+      -7502,
+      -2109
+     ],
+     [
+      -7503,
+      -2117
+     ],
+     [
+      -7508,
+      -2123
+     ],
+     [
+      -7515,
+      -2127
+     ],
+     [
+      -7522,
+      -2130
+     ],
+     [
+      -7528,
+      -2135
+     ],
+     [
+      -7534,
+      -2141
+     ],
+     [
+      -7539,
+      -2147
+     ],
+     [
+      -7542,
+      -2154
+     ],
+     [
+      -7544,
+      -2162
+     ],
+     [
+      -7543,
+      -2170
+     ],
+     [
+      -7541,
+      -2178
+     ],
+     [
+      -7537,
+      -2185
+     ],
+     [
+      -7532,
+      -2191
+     ],
+     [
+      -7526,
+      -2196
+     ],
+     [
+      -7519,
+      -2200
+     ],
+     [
+      -7511,
+      -2202
+     ],
+     [
+      -7503,
+      -2203
+     ],
+     [
+      -7495,
+      -2204
+     ],
+     [
+      -7487,
+      -2205
+     ],
+     [
+      -7480,
+      -2207
+     ],
+     [
+      -7472,
+      -2209
+     ],
+     [
+      -7465,
+      -2213
+     ],
+     [
+      -7459,
+      -2218
+     ],
+     [
+      -7455,
+      -2225
+     ],
+     [
+      -7456,
+      -2233
+     ],
+     [
+      -7460,
+      -2240
+     ],
+     [
+      -7466,
+      -2245
+     ],
+     [
+      -7474,
+      -2248
+     ],
+     [
+      -7482,
+      -2249
+     ],
+     [
+      -7490,
+      -2251
+     ],
+     [
+      -7497,
+      -2253
+     ],
+     [
+      -7504,
+      -2258
+     ],
+     [
+      -7508,
+      -2264
+     ],
+     [
+      -7506,
+      -2272
+     ],
+     [
+      -7501,
+      -2278
+     ],
+     [
+      -7494,
+      -2282
+     ],
+     [
+      -7486,
+      -2283
+     ],
+     [
+      -7478,
+      -2283
+     ],
+     [
+      -7470,
+      -2285
+     ],
+     [
+      -7462,
+      -2285
+     ],
+     [
+      -7454,
+      -2286
+     ],
+     [
+      -7446,
+      -2286
+     ],
+     [
+      -7438,
+      -2285
+     ],
+     [
+      -7430,
+      -2283
+     ],
+     [
+      -7423,
+      -2281
+     ],
+     [
+      -7415,
+      -2278
+     ],
+     [
+      -7409,
+      -2273
+     ],
+     [
+      -7402,
+      -2268
+     ],
+     [
+      -7397,
+      -2262
+     ],
+     [
+      -7392,
+      -2256
+     ],
+     [
+      -7387,
+      -2249
+     ],
+     [
+      -7383,
+      -2243
+     ],
+     [
+      -7380,
+      -2236
+     ],
+     [
+      -7377,
+      -2228
+     ],
+     [
+      -7374,
+      -2220
+     ],
+     [
+      -7372,
+      -2213
+     ],
+     [
+      -7370,
+      -2205
+     ],
+     [
+      -7368,
+      -2197
+     ],
+     [
+      -7366,
+      -2190
+     ],
+     [
+      -7364,
+      -2182
+     ],
+     [
+      -7362,
+      -2174
+     ],
+     [
+      -7360,
+      -2166
+     ],
+     [
+      -7358,
+      -2158
+     ],
+     [
+      -7356,
+      -2151
+     ],
+     [
+      -7355,
+      -2143
+     ],
+     [
+      -7353,
+      -2135
+     ],
+     [
+      -7352,
+      -2127
+     ],
+     [
+      -7350,
+      -2119
+     ],
+     [
+      -7349,
+      -2111
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 6,
+    "pts": [
+     [
+      -7348,
+      -2110
+     ],
+     [
+      -7347,
+      -2103
+     ],
+     [
+      -7346,
+      -2095
+     ],
+     [
+      -7344,
+      -2087
+     ],
+     [
+      -7342,
+      -2079
+     ],
+     [
+      -7340,
+      -2071
+     ],
+     [
+      -7339,
+      -2063
+     ],
+     [
+      -7337,
+      -2056
+     ],
+     [
+      -7335,
+      -2048
+     ],
+     [
+      -7333,
+      -2040
+     ],
+     [
+      -7332,
+      -2032
+     ],
+     [
+      -7330,
+      -2024
+     ],
+     [
+      -7330,
+      -2016
+     ],
+     [
+      -7329,
+      -2008
+     ],
+     [
+      -7329,
+      -2000
+     ],
+     [
+      -7329,
+      -1992
+     ],
+     [
+      -7331,
+      -1985
+     ],
+     [
+      -7333,
+      -1977
+     ],
+     [
+      -7336,
+      -1969
+     ],
+     [
+      -7339,
+      -1962
+     ],
+     [
+      -7343,
+      -1955
+     ],
+     [
+      -7347,
+      -1948
+     ],
+     [
+      -7352,
+      -1942
+     ],
+     [
+      -7357,
+      -1936
+     ],
+     [
+      -7363,
+      -1930
+     ],
+     [
+      -7369,
+      -1925
+     ],
+     [
+      -7375,
+      -1920
+     ],
+     [
+      -7382,
+      -1916
+     ],
+     [
+      -7390,
+      -1913
+     ],
+     [
+      -7397,
+      -1910
+     ],
+     [
+      -7405,
+      -1909
+     ],
+     [
+      -7413,
+      -1908
+     ],
+     [
+      -7421,
+      -1910
+     ],
+     [
+      -7428,
+      -1912
+     ],
+     [
+      -7435,
+      -1917
+     ],
+     [
+      -7440,
+      -1923
+     ],
+     [
+      -7444,
+      -1930
+     ],
+     [
+      -7446,
+      -1937
+     ],
+     [
+      -7449,
+      -1945
+     ],
+     [
+      -7451,
+      -1953
+     ],
+     [
+      -7454,
+      -1960
+     ],
+     [
+      -7459,
+      -1967
+     ],
+     [
+      -7464,
+      -1973
+     ],
+     [
+      -7469,
+      -1979
+     ],
+     [
+      -7475,
+      -1984
+     ],
+     [
+      -7480,
+      -1990
+     ],
+     [
+      -7486,
+      -1996
+     ],
+     [
+      -7491,
+      -2002
+     ],
+     [
+      -7495,
+      -2009
+     ],
+     [
+      -7498,
+      -2017
+     ],
+     [
+      -7500,
+      -2024
+     ],
+     [
+      -7501,
+      -2032
+     ],
+     [
+      -7501,
+      -2040
+     ],
+     [
+      -7501,
+      -2048
+     ],
+     [
+      -7500,
+      -2056
+     ],
+     [
+      -7501,
+      -2064
+     ],
+     [
+      -7501,
+      -2072
+     ],
+     [
+      -7501,
+      -2080
+     ],
+     [
+      -7502,
+      -2088
+     ],
+     [
+      -7504,
+      -2096
+     ],
+     [
+      -7507,
+      -2103
+     ],
+     [
+      -7511,
+      -2110
+     ],
+     [
+      -7516,
+      -2117
+     ],
+     [
+      -7521,
+      -2123
+     ],
+     [
+      -7526,
+      -2128
+     ],
+     [
+      -7532,
+      -2134
+     ],
+     [
+      -7536,
+      -2141
+     ],
+     [
+      -7540,
+      -2148
+     ],
+     [
+      -7543,
+      -2155
+     ],
+     [
+      -7544,
+      -2163
+     ],
+     [
+      -7543,
+      -2171
+     ],
+     [
+      -7540,
+      -2179
+     ],
+     [
+      -7536,
+      -2186
+     ],
+     [
+      -7532,
+      -2192
+     ],
+     [
+      -7526,
+      -2198
+     ],
+     [
+      -7520,
+      -2203
+     ],
+     [
+      -7512,
+      -2205
+     ],
+     [
+      -7504,
+      -2207
+     ],
+     [
+      -7496,
+      -2208
+     ],
+     [
+      -7488,
+      -2208
+     ],
+     [
+      -7480,
+      -2209
+     ],
+     [
+      -7472,
+      -2210
+     ],
+     [
+      -7465,
+      -2213
+     ],
+     [
+      -7458,
+      -2218
+     ],
+     [
+      -7453,
+      -2224
+     ],
+     [
+      -7451,
+      -2231
+     ],
+     [
+      -7453,
+      -2238
+     ],
+     [
+      -7460,
+      -2243
+     ],
+     [
+      -7468,
+      -2245
+     ],
+     [
+      -7475,
+      -2248
+     ],
+     [
+      -7482,
+      -2251
+     ],
+     [
+      -7490,
+      -2253
+     ],
+     [
+      -7498,
+      -2254
+     ],
+     [
+      -7505,
+      -2258
+     ],
+     [
+      -7508,
+      -2266
+     ],
+     [
+      -7506,
+      -2273
+     ],
+     [
+      -7500,
+      -2279
+     ],
+     [
+      -7493,
+      -2282
+     ],
+     [
+      -7485,
+      -2284
+     ],
+     [
+      -7477,
+      -2285
+     ],
+     [
+      -7469,
+      -2286
+     ],
+     [
+      -7461,
+      -2287
+     ],
+     [
+      -7453,
+      -2286
+     ],
+     [
+      -7445,
+      -2286
+     ],
+     [
+      -7438,
+      -2284
+     ],
+     [
+      -7430,
+      -2282
+     ],
+     [
+      -7423,
+      -2278
+     ],
+     [
+      -7416,
+      -2274
+     ],
+     [
+      -7409,
+      -2270
+     ],
+     [
+      -7403,
+      -2265
+     ],
+     [
+      -7397,
+      -2259
+     ],
+     [
+      -7392,
+      -2253
+     ],
+     [
+      -7388,
+      -2246
+     ],
+     [
+      -7385,
+      -2239
+     ],
+     [
+      -7382,
+      -2231
+     ],
+     [
+      -7379,
+      -2224
+     ],
+     [
+      -7376,
+      -2217
+     ],
+     [
+      -7373,
+      -2209
+     ],
+     [
+      -7370,
+      -2202
+     ],
+     [
+      -7368,
+      -2194
+     ],
+     [
+      -7366,
+      -2186
+     ],
+     [
+      -7363,
+      -2178
+     ],
+     [
+      -7361,
+      -2171
+     ],
+     [
+      -7359,
+      -2163
+     ],
+     [
+      -7357,
+      -2155
+     ],
+     [
+      -7355,
+      -2148
+     ],
+     [
+      -7353,
+      -2140
+     ],
+     [
+      -7351,
+      -2132
+     ],
+     [
+      -7350,
+      -2124
+     ],
+     [
+      -7348,
+      -2116
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 7,
+    "pts": [
+     [
+      -7347,
+      -2111
+     ],
+     [
+      -7345,
+      -2103
+     ],
+     [
+      -7344,
+      -2095
+     ],
+     [
+      -7342,
+      -2087
+     ],
+     [
+      -7340,
+      -2080
+     ],
+     [
+      -7338,
+      -2072
+     ],
+     [
+      -7336,
+      -2064
+     ],
+     [
+      -7335,
+      -2056
+     ],
+     [
+      -7334,
+      -2048
+     ],
+     [
+      -7333,
+      -2040
+     ],
+     [
+      -7332,
+      -2032
+     ],
+     [
+      -7330,
+      -2024
+     ],
+     [
+      -7329,
+      -2017
+     ],
+     [
+      -7328,
+      -2009
+     ],
+     [
+      -7328,
+      -2001
+     ],
+     [
+      -7329,
+      -1993
+     ],
+     [
+      -7330,
+      -1985
+     ],
+     [
+      -7331,
+      -1977
+     ],
+     [
+      -7334,
+      -1969
+     ],
+     [
+      -7337,
+      -1962
+     ],
+     [
+      -7340,
+      -1955
+     ],
+     [
+      -7344,
+      -1948
+     ],
+     [
+      -7349,
+      -1941
+     ],
+     [
+      -7354,
+      -1935
+     ],
+     [
+      -7359,
+      -1929
+     ],
+     [
+      -7366,
+      -1925
+     ],
+     [
+      -7373,
+      -1920
+     ],
+     [
+      -7380,
+      -1917
+     ],
+     [
+      -7387,
+      -1914
+     ],
+     [
+      -7395,
+      -1911
+     ],
+     [
+      -7403,
+      -1910
+     ],
+     [
+      -7411,
+      -1910
+     ],
+     [
+      -7419,
+      -1911
+     ],
+     [
+      -7426,
+      -1914
+     ],
+     [
+      -7432,
+      -1919
+     ],
+     [
+      -7437,
+      -1925
+     ],
+     [
+      -7441,
+      -1932
+     ],
+     [
+      -7444,
+      -1940
+     ],
+     [
+      -7448,
+      -1947
+     ],
+     [
+      -7452,
+      -1954
+     ],
+     [
+      -7456,
+      -1961
+     ],
+     [
+      -7461,
+      -1967
+     ],
+     [
+      -7466,
+      -1973
+     ],
+     [
+      -7472,
+      -1979
+     ],
+     [
+      -7477,
+      -1985
+     ],
+     [
+      -7482,
+      -1991
+     ],
+     [
+      -7487,
+      -1998
+     ],
+     [
+      -7491,
+      -2004
+     ],
+     [
+      -7494,
+      -2011
+     ],
+     [
+      -7497,
+      -2019
+     ],
+     [
+      -7499,
+      -2027
+     ],
+     [
+      -7500,
+      -2035
+     ],
+     [
+      -7501,
+      -2043
+     ],
+     [
+      -7501,
+      -2051
+     ],
+     [
+      -7501,
+      -2059
+     ],
+     [
+      -7500,
+      -2067
+     ],
+     [
+      -7499,
+      -2075
+     ],
+     [
+      -7499,
+      -2083
+     ],
+     [
+      -7499,
+      -2091
+     ],
+     [
+      -7501,
+      -2098
+     ],
+     [
+      -7503,
+      -2106
+     ],
+     [
+      -7507,
+      -2113
+     ],
+     [
+      -7511,
+      -2120
+     ],
+     [
+      -7516,
+      -2126
+     ],
+     [
+      -7522,
+      -2132
+     ],
+     [
+      -7528,
+      -2137
+     ],
+     [
+      -7534,
+      -2142
+     ],
+     [
+      -7540,
+      -2148
+     ],
+     [
+      -7544,
+      -2155
+     ],
+     [
+      -7546,
+      -2162
+     ],
+     [
+      -7546,
+      -2170
+     ],
+     [
+      -7544,
+      -2178
+     ],
+     [
+      -7540,
+      -2184
+     ],
+     [
+      -7534,
+      -2190
+     ],
+     [
+      -7527,
+      -2194
+     ],
+     [
+      -7520,
+      -2198
+     ],
+     [
+      -7512,
+      -2201
+     ],
+     [
+      -7505,
+      -2203
+     ],
+     [
+      -7497,
+      -2205
+     ],
+     [
+      -7489,
+      -2206
+     ],
+     [
+      -7481,
+      -2208
+     ],
+     [
+      -7474,
+      -2211
+     ],
+     [
+      -7467,
+      -2214
+     ],
+     [
+      -7461,
+      -2220
+     ],
+     [
+      -7457,
+      -2227
+     ],
+     [
+      -7458,
+      -2234
+     ],
+     [
+      -7462,
+      -2241
+     ],
+     [
+      -7469,
+      -2246
+     ],
+     [
+      -7476,
+      -2248
+     ],
+     [
+      -7484,
+      -2251
+     ],
+     [
+      -7491,
+      -2254
+     ],
+     [
+      -7499,
+      -2256
+     ],
+     [
+      -7506,
+      -2259
+     ],
+     [
+      -7509,
+      -2267
+     ],
+     [
+      -7504,
+      -2273
+     ],
+     [
+      -7498,
+      -2279
+     ],
+     [
+      -7491,
+      -2282
+     ],
+     [
+      -7483,
+      -2284
+     ],
+     [
+      -7476,
+      -2285
+     ],
+     [
+      -7468,
+      -2286
+     ],
+     [
+      -7460,
+      -2286
+     ],
+     [
+      -7452,
+      -2285
+     ],
+     [
+      -7444,
+      -2284
+     ],
+     [
+      -7436,
+      -2282
+     ],
+     [
+      -7428,
+      -2280
+     ],
+     [
+      -7421,
+      -2277
+     ],
+     [
+      -7414,
+      -2273
+     ],
+     [
+      -7407,
+      -2268
+     ],
+     [
+      -7401,
+      -2263
+     ],
+     [
+      -7395,
+      -2258
+     ],
+     [
+      -7390,
+      -2252
+     ],
+     [
+      -7386,
+      -2245
+     ],
+     [
+      -7381,
+      -2238
+     ],
+     [
+      -7378,
+      -2231
+     ],
+     [
+      -7375,
+      -2224
+     ],
+     [
+      -7372,
+      -2216
+     ],
+     [
+      -7370,
+      -2208
+     ],
+     [
+      -7368,
+      -2201
+     ],
+     [
+      -7366,
+      -2193
+     ],
+     [
+      -7364,
+      -2185
+     ],
+     [
+      -7362,
+      -2177
+     ],
+     [
+      -7360,
+      -2170
+     ],
+     [
+      -7358,
+      -2162
+     ],
+     [
+      -7357,
+      -2154
+     ],
+     [
+      -7355,
+      -2146
+     ],
+     [
+      -7353,
+      -2138
+     ],
+     [
+      -7351,
+      -2131
+     ],
+     [
+      -7350,
+      -2123
+     ],
+     [
+      -7348,
+      -2115
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 8,
+    "pts": [
+     [
+      -7348,
+      -2111
+     ],
+     [
+      -7346,
+      -2104
+     ],
+     [
+      -7344,
+      -2096
+     ],
+     [
+      -7342,
+      -2088
+     ],
+     [
+      -7341,
+      -2080
+     ],
+     [
+      -7339,
+      -2072
+     ],
+     [
+      -7337,
+      -2065
+     ],
+     [
+      -7336,
+      -2057
+     ],
+     [
+      -7334,
+      -2049
+     ],
+     [
+      -7333,
+      -2041
+     ],
+     [
+      -7331,
+      -2033
+     ],
+     [
+      -7330,
+      -2025
+     ],
+     [
+      -7330,
+      -2017
+     ],
+     [
+      -7330,
+      -2009
+     ],
+     [
+      -7330,
+      -2001
+     ],
+     [
+      -7330,
+      -1993
+     ],
+     [
+      -7331,
+      -1985
+     ],
+     [
+      -7333,
+      -1977
+     ],
+     [
+      -7335,
+      -1970
+     ],
+     [
+      -7338,
+      -1962
+     ],
+     [
+      -7342,
+      -1955
+     ],
+     [
+      -7346,
+      -1949
+     ],
+     [
+      -7351,
+      -1942
+     ],
+     [
+      -7357,
+      -1936
+     ],
+     [
+      -7362,
+      -1931
+     ],
+     [
+      -7368,
+      -1925
+     ],
+     [
+      -7375,
+      -1921
+     ],
+     [
+      -7382,
+      -1917
+     ],
+     [
+      -7389,
+      -1914
+     ],
+     [
+      -7397,
+      -1912
+     ],
+     [
+      -7405,
+      -1911
+     ],
+     [
+      -7413,
+      -1912
+     ],
+     [
+      -7421,
+      -1913
+     ],
+     [
+      -7428,
+      -1916
+     ],
+     [
+      -7434,
+      -1921
+     ],
+     [
+      -7439,
+      -1927
+     ],
+     [
+      -7443,
+      -1934
+     ],
+     [
+      -7446,
+      -1941
+     ],
+     [
+      -7450,
+      -1949
+     ],
+     [
+      -7453,
+      -1956
+     ],
+     [
+      -7457,
+      -1963
+     ],
+     [
+      -7461,
+      -1970
+     ],
+     [
+      -7466,
+      -1976
+     ],
+     [
+      -7472,
+      -1982
+     ],
+     [
+      -7477,
+      -1987
+     ],
+     [
+      -7483,
+      -1993
+     ],
+     [
+      -7488,
+      -1999
+     ],
+     [
+      -7492,
+      -2006
+     ],
+     [
+      -7495,
+      -2013
+     ],
+     [
+      -7497,
+      -2021
+     ],
+     [
+      -7499,
+      -2029
+     ],
+     [
+      -7499,
+      -2037
+     ],
+     [
+      -7499,
+      -2045
+     ],
+     [
+      -7499,
+      -2053
+     ],
+     [
+      -7499,
+      -2061
+     ],
+     [
+      -7500,
+      -2069
+     ],
+     [
+      -7500,
+      -2077
+     ],
+     [
+      -7502,
+      -2085
+     ],
+     [
+      -7504,
+      -2092
+     ],
+     [
+      -7507,
+      -2100
+     ],
+     [
+      -7511,
+      -2107
+     ],
+     [
+      -7516,
+      -2113
+     ],
+     [
+      -7521,
+      -2120
+     ],
+     [
+      -7526,
+      -2126
+     ],
+     [
+      -7530,
+      -2133
+     ],
+     [
+      -7535,
+      -2139
+     ],
+     [
+      -7539,
+      -2146
+     ],
+     [
+      -7543,
+      -2153
+     ],
+     [
+      -7545,
+      -2161
+     ],
+     [
+      -7545,
+      -2169
+     ],
+     [
+      -7543,
+      -2176
+     ],
+     [
+      -7539,
+      -2183
+     ],
+     [
+      -7534,
+      -2189
+     ],
+     [
+      -7527,
+      -2194
+     ],
+     [
+      -7520,
+      -2197
+     ],
+     [
+      -7513,
+      -2200
+     ],
+     [
+      -7505,
+      -2202
+     ],
+     [
+      -7497,
+      -2203
+     ],
+     [
+      -7489,
+      -2205
+     ],
+     [
+      -7481,
+      -2207
+     ],
+     [
+      -7474,
+      -2210
+     ],
+     [
+      -7467,
+      -2213
+     ],
+     [
+      -7460,
+      -2218
+     ],
+     [
+      -7456,
+      -2225
+     ],
+     [
+      -7454,
+      -2233
+     ],
+     [
+      -7457,
+      -2240
+     ],
+     [
+      -7463,
+      -2245
+     ],
+     [
+      -7470,
+      -2249
+     ],
+     [
+      -7478,
+      -2251
+     ],
+     [
+      -7486,
+      -2252
+     ],
+     [
+      -7494,
+      -2253
+     ],
+     [
+      -7501,
+      -2257
+     ],
+     [
+      -7506,
+      -2262
+     ],
+     [
+      -7507,
+      -2270
+     ],
+     [
+      -7503,
+      -2277
+     ],
+     [
+      -7497,
+      -2281
+     ],
+     [
+      -7489,
+      -2284
+     ],
+     [
+      -7482,
+      -2286
+     ],
+     [
+      -7474,
+      -2287
+     ],
+     [
+      -7466,
+      -2287
+     ],
+     [
+      -7458,
+      -2286
+     ],
+     [
+      -7450,
+      -2284
+     ],
+     [
+      -7442,
+      -2282
+     ],
+     [
+      -7434,
+      -2280
+     ],
+     [
+      -7427,
+      -2277
+     ],
+     [
+      -7420,
+      -2274
+     ],
+     [
+      -7413,
+      -2270
+     ],
+     [
+      -7406,
+      -2265
+     ],
+     [
+      -7400,
+      -2260
+     ],
+     [
+      -7394,
+      -2255
+     ],
+     [
+      -7389,
+      -2248
+     ],
+     [
+      -7385,
+      -2242
+     ],
+     [
+      -7381,
+      -2235
+     ],
+     [
+      -7378,
+      -2227
+     ],
+     [
+      -7375,
+      -2220
+     ],
+     [
+      -7374,
+      -2212
+     ],
+     [
+      -7373,
+      -2204
+     ],
+     [
+      -7372,
+      -2196
+     ],
+     [
+      -7371,
+      -2188
+     ],
+     [
+      -7369,
+      -2180
+     ],
+     [
+      -7368,
+      -2172
+     ],
+     [
+      -7366,
+      -2165
+     ],
+     [
+      -7365,
+      -2157
+     ],
+     [
+      -7363,
+      -2149
+     ],
+     [
+      -7362,
+      -2141
+     ],
+     [
+      -7360,
+      -2133
+     ],
+     [
+      -7358,
+      -2126
+     ],
+     [
+      -7355,
+      -2118
+     ],
+     [
+      -7353,
+      -2110
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 9,
+    "pts": [
+     [
+      -7353,
+      -2109
+     ],
+     [
+      -7351,
+      -2101
+     ],
+     [
+      -7349,
+      -2093
+     ],
+     [
+      -7347,
+      -2086
+     ],
+     [
+      -7345,
+      -2078
+     ],
+     [
+      -7343,
+      -2070
+     ],
+     [
+      -7341,
+      -2062
+     ],
+     [
+      -7339,
+      -2055
+     ],
+     [
+      -7337,
+      -2047
+     ],
+     [
+      -7335,
+      -2039
+     ],
+     [
+      -7333,
+      -2032
+     ],
+     [
+      -7331,
+      -2024
+     ],
+     [
+      -7329,
+      -2016
+     ],
+     [
+      -7327,
+      -2008
+     ],
+     [
+      -7326,
+      -2000
+     ],
+     [
+      -7325,
+      -1992
+     ],
+     [
+      -7326,
+      -1984
+     ],
+     [
+      -7328,
+      -1977
+     ],
+     [
+      -7330,
+      -1969
+     ],
+     [
+      -7333,
+      -1962
+     ],
+     [
+      -7337,
+      -1955
+     ],
+     [
+      -7342,
+      -1949
+     ],
+     [
+      -7348,
+      -1943
+     ],
+     [
+      -7354,
+      -1938
+     ],
+     [
+      -7360,
+      -1932
+     ],
+     [
+      -7355,
+      -1937
+     ],
+     [
+      -7350,
+      -1942
+     ],
+     [
+      -7356,
+      -1936
+     ],
+     [
+      -7362,
+      -1931
+     ],
+     [
+      -7368,
+      -1925
+     ],
+     [
+      -7374,
+      -1920
+     ],
+     [
+      -7381,
+      -1916
+     ],
+     [
+      -7388,
+      -1912
+     ],
+     [
+      -7395,
+      -1910
+     ],
+     [
+      -7403,
+      -1908
+     ],
+     [
+      -7411,
+      -1908
+     ],
+     [
+      -7419,
+      -1908
+     ],
+     [
+      -7427,
+      -1909
+     ],
+     [
+      -7435,
+      -1912
+     ],
+     [
+      -7442,
+      -1916
+     ],
+     [
+      -7448,
+      -1921
+     ],
+     [
+      -7449,
+      -1929
+     ],
+     [
+      -7449,
+      -1937
+     ],
+     [
+      -7450,
+      -1945
+     ],
+     [
+      -7453,
+      -1952
+     ],
+     [
+      -7456,
+      -1960
+     ],
+     [
+      -7460,
+      -1966
+     ],
+     [
+      -7466,
+      -1972
+     ],
+     [
+      -7471,
+      -1978
+     ],
+     [
+      -7476,
+      -1984
+     ],
+     [
+      -7482,
+      -1990
+     ],
+     [
+      -7487,
+      -1997
+     ],
+     [
+      -7491,
+      -2003
+     ],
+     [
+      -7494,
+      -2010
+     ],
+     [
+      -7497,
+      -2018
+     ],
+     [
+      -7499,
+      -2026
+     ],
+     [
+      -7501,
+      -2034
+     ],
+     [
+      -7501,
+      -2042
+     ],
+     [
+      -7501,
+      -2050
+     ],
+     [
+      -7501,
+      -2058
+     ],
+     [
+      -7501,
+      -2066
+     ],
+     [
+      -7501,
+      -2074
+     ],
+     [
+      -7501,
+      -2082
+     ],
+     [
+      -7503,
+      -2089
+     ],
+     [
+      -7506,
+      -2097
+     ],
+     [
+      -7510,
+      -2104
+     ],
+     [
+      -7514,
+      -2111
+     ],
+     [
+      -7519,
+      -2117
+     ],
+     [
+      -7525,
+      -2123
+     ],
+     [
+      -7530,
+      -2129
+     ],
+     [
+      -7534,
+      -2135
+     ],
+     [
+      -7538,
+      -2142
+     ],
+     [
+      -7542,
+      -2149
+     ],
+     [
+      -7543,
+      -2157
+     ],
+     [
+      -7544,
+      -2165
+     ],
+     [
+      -7543,
+      -2173
+     ],
+     [
+      -7540,
+      -2181
+     ],
+     [
+      -7536,
+      -2187
+     ],
+     [
+      -7530,
+      -2193
+     ],
+     [
+      -7523,
+      -2197
+     ],
+     [
+      -7515,
+      -2200
+     ],
+     [
+      -7508,
+      -2202
+     ],
+     [
+      -7500,
+      -2204
+     ],
+     [
+      -7492,
+      -2206
+     ],
+     [
+      -7485,
+      -2208
+     ],
+     [
+      -7477,
+      -2211
+     ],
+     [
+      -7470,
+      -2214
+     ],
+     [
+      -7463,
+      -2219
+     ],
+     [
+      -7458,
+      -2225
+     ],
+     [
+      -7455,
+      -2232
+     ],
+     [
+      -7457,
+      -2240
+     ],
+     [
+      -7463,
+      -2245
+     ],
+     [
+      -7470,
+      -2248
+     ],
+     [
+      -7478,
+      -2250
+     ],
+     [
+      -7486,
+      -2251
+     ],
+     [
+      -7494,
+      -2253
+     ],
+     [
+      -7501,
+      -2257
+     ],
+     [
+      -7507,
+      -2262
+     ],
+     [
+      -7510,
+      -2269
+     ],
+     [
+      -7507,
+      -2277
+     ],
+     [
+      -7501,
+      -2282
+     ],
+     [
+      -7493,
+      -2285
+     ],
+     [
+      -7486,
+      -2287
+     ],
+     [
+      -7478,
+      -2288
+     ],
+     [
+      -7470,
+      -2288
+     ],
+     [
+      -7462,
+      -2288
+     ],
+     [
+      -7454,
+      -2287
+     ],
+     [
+      -7446,
+      -2286
+     ],
+     [
+      -7438,
+      -2284
+     ],
+     [
+      -7431,
+      -2281
+     ],
+     [
+      -7423,
+      -2278
+     ],
+     [
+      -7416,
+      -2274
+     ],
+     [
+      -7410,
+      -2269
+     ],
+     [
+      -7404,
+      -2264
+     ],
+     [
+      -7398,
+      -2259
+     ],
+     [
+      -7393,
+      -2253
+     ],
+     [
+      -7388,
+      -2246
+     ],
+     [
+      -7384,
+      -2239
+     ],
+     [
+      -7380,
+      -2232
+     ],
+     [
+      -7377,
+      -2225
+     ],
+     [
+      -7375,
+      -2217
+     ],
+     [
+      -7372,
+      -2209
+     ],
+     [
+      -7370,
+      -2202
+     ],
+     [
+      -7368,
+      -2194
+     ],
+     [
+      -7366,
+      -2187
+     ],
+     [
+      -7364,
+      -2179
+     ],
+     [
+      -7362,
+      -2171
+     ],
+     [
+      -7360,
+      -2163
+     ],
+     [
+      -7358,
+      -2155
+     ],
+     [
+      -7356,
+      -2148
+     ],
+     [
+      -7354,
+      -2140
+     ],
+     [
+      -7352,
+      -2132
+     ],
+     [
+      -7350,
+      -2124
+     ],
+     [
+      -7348,
+      -2117
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 10,
+    "pts": [
+     [
+      -7347,
+      -2110
+     ],
+     [
+      -7345,
+      -2102
+     ],
+     [
+      -7343,
+      -2094
+     ],
+     [
+      -7341,
+      -2087
+     ],
+     [
+      -7339,
+      -2079
+     ],
+     [
+      -7338,
+      -2071
+     ],
+     [
+      -7336,
+      -2063
+     ],
+     [
+      -7335,
+      -2055
+     ],
+     [
+      -7333,
+      -2047
+     ],
+     [
+      -7332,
+      -2039
+     ],
+     [
+      -7331,
+      -2032
+     ],
+     [
+      -7330,
+      -2024
+     ],
+     [
+      -7330,
+      -2016
+     ],
+     [
+      -7329,
+      -2008
+     ],
+     [
+      -7329,
+      -2000
+     ],
+     [
+      -7330,
+      -1992
+     ],
+     [
+      -7331,
+      -1984
+     ],
+     [
+      -7333,
+      -1976
+     ],
+     [
+      -7335,
+      -1968
+     ],
+     [
+      -7338,
+      -1961
+     ],
+     [
+      -7341,
+      -1954
+     ],
+     [
+      -7345,
+      -1946
+     ],
+     [
+      -7349,
+      -1939
+     ],
+     [
+      -7353,
+      -1933
+     ],
+     [
+      -7358,
+      -1926
+     ],
+     [
+      -7364,
+      -1921
+     ],
+     [
+      -7371,
+      -1918
+     ],
+     [
+      -7379,
+      -1915
+     ],
+     [
+      -7386,
+      -1912
+     ],
+     [
+      -7394,
+      -1911
+     ],
+     [
+      -7402,
+      -1910
+     ],
+     [
+      -7410,
+      -1910
+     ],
+     [
+      -7418,
+      -1910
+     ],
+     [
+      -7426,
+      -1912
+     ],
+     [
+      -7433,
+      -1916
+     ],
+     [
+      -7438,
+      -1922
+     ],
+     [
+      -7442,
+      -1929
+     ],
+     [
+      -7445,
+      -1936
+     ],
+     [
+      -7448,
+      -1943
+     ],
+     [
+      -7451,
+      -1951
+     ],
+     [
+      -7455,
+      -1958
+     ],
+     [
+      -7459,
+      -1965
+     ],
+     [
+      -7464,
+      -1971
+     ],
+     [
+      -7470,
+      -1977
+     ],
+     [
+      -7475,
+      -1982
+     ],
+     [
+      -7480,
+      -1989
+     ],
+     [
+      -7485,
+      -1995
+     ],
+     [
+      -7490,
+      -2002
+     ],
+     [
+      -7493,
+      -2009
+     ],
+     [
+      -7496,
+      -2016
+     ],
+     [
+      -7499,
+      -2024
+     ],
+     [
+      -7500,
+      -2032
+     ],
+     [
+      -7502,
+      -2040
+     ],
+     [
+      -7502,
+      -2048
+     ],
+     [
+      -7502,
+      -2056
+     ],
+     [
+      -7502,
+      -2064
+     ],
+     [
+      -7502,
+      -2072
+     ],
+     [
+      -7502,
+      -2080
+     ],
+     [
+      -7503,
+      -2088
+     ],
+     [
+      -7505,
+      -2095
+     ],
+     [
+      -7509,
+      -2103
+     ],
+     [
+      -7513,
+      -2109
+     ],
+     [
+      -7518,
+      -2116
+     ],
+     [
+      -7523,
+      -2122
+     ],
+     [
+      -7528,
+      -2128
+     ],
+     [
+      -7533,
+      -2134
+     ],
+     [
+      -7537,
+      -2141
+     ],
+     [
+      -7541,
+      -2148
+     ],
+     [
+      -7543,
+      -2156
+     ],
+     [
+      -7544,
+      -2164
+     ],
+     [
+      -7544,
+      -2172
+     ],
+     [
+      -7541,
+      -2179
+     ],
+     [
+      -7537,
+      -2186
+     ],
+     [
+      -7532,
+      -2192
+     ],
+     [
+      -7525,
+      -2196
+     ],
+     [
+      -7518,
+      -2199
+     ],
+     [
+      -7510,
+      -2201
+     ],
+     [
+      -7502,
+      -2202
+     ],
+     [
+      -7494,
+      -2204
+     ],
+     [
+      -7486,
+      -2205
+     ],
+     [
+      -7478,
+      -2206
+     ],
+     [
+      -7471,
+      -2209
+     ],
+     [
+      -7464,
+      -2213
+     ],
+     [
+      -7459,
+      -2219
+     ],
+     [
+      -7456,
+      -2227
+     ],
+     [
+      -7458,
+      -2234
+     ],
+     [
+      -7463,
+      -2240
+     ],
+     [
+      -7469,
+      -2245
+     ],
+     [
+      -7477,
+      -2249
+     ],
+     [
+      -7484,
+      -2251
+     ],
+     [
+      -7492,
+      -2252
+     ],
+     [
+      -7500,
+      -2255
+     ],
+     [
+      -7506,
+      -2260
+     ],
+     [
+      -7507,
+      -2268
+     ],
+     [
+      -7503,
+      -2274
+     ],
+     [
+      -7496,
+      -2279
+     ],
+     [
+      -7489,
+      -2281
+     ],
+     [
+      -7481,
+      -2281
+     ],
+     [
+      -7473,
+      -2282
+     ],
+     [
+      -7465,
+      -2282
+     ],
+     [
+      -7457,
+      -2282
+     ],
+     [
+      -7449,
+      -2281
+     ],
+     [
+      -7441,
+      -2280
+     ],
+     [
+      -7433,
+      -2279
+     ],
+     [
+      -7425,
+      -2277
+     ],
+     [
+      -7418,
+      -2273
+     ],
+     [
+      -7411,
+      -2269
+     ],
+     [
+      -7405,
+      -2265
+     ],
+     [
+      -7399,
+      -2259
+     ],
+     [
+      -7394,
+      -2253
+     ],
+     [
+      -7389,
+      -2247
+     ],
+     [
+      -7385,
+      -2240
+     ],
+     [
+      -7381,
+      -2233
+     ],
+     [
+      -7378,
+      -2225
+     ],
+     [
+      -7376,
+      -2218
+     ],
+     [
+      -7373,
+      -2210
+     ],
+     [
+      -7371,
+      -2202
+     ],
+     [
+      -7368,
+      -2195
+     ],
+     [
+      -7366,
+      -2187
+     ],
+     [
+      -7364,
+      -2179
+     ],
+     [
+      -7362,
+      -2172
+     ],
+     [
+      -7360,
+      -2164
+     ],
+     [
+      -7358,
+      -2156
+     ],
+     [
+      -7356,
+      -2148
+     ],
+     [
+      -7354,
+      -2141
+     ],
+     [
+      -7352,
+      -2133
+     ],
+     [
+      -7350,
+      -2125
+     ],
+     [
+      -7348,
+      -2117
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 11,
+    "pts": [
+     [
+      -7347,
+      -2110
+     ],
+     [
+      -7345,
+      -2103
+     ],
+     [
+      -7343,
+      -2095
+     ],
+     [
+      -7342,
+      -2087
+     ],
+     [
+      -7340,
+      -2079
+     ],
+     [
+      -7338,
+      -2071
+     ],
+     [
+      -7337,
+      -2063
+     ],
+     [
+      -7335,
+      -2056
+     ],
+     [
+      -7334,
+      -2048
+     ],
+     [
+      -7333,
+      -2040
+     ],
+     [
+      -7331,
+      -2032
+     ],
+     [
+      -7330,
+      -2024
+     ],
+     [
+      -7330,
+      -2016
+     ],
+     [
+      -7330,
+      -2008
+     ],
+     [
+      -7330,
+      -2000
+     ],
+     [
+      -7330,
+      -1992
+     ],
+     [
+      -7331,
+      -1984
+     ],
+     [
+      -7333,
+      -1976
+     ],
+     [
+      -7335,
+      -1969
+     ],
+     [
+      -7339,
+      -1961
+     ],
+     [
+      -7343,
+      -1954
+     ],
+     [
+      -7347,
+      -1948
+     ],
+     [
+      -7352,
+      -1942
+     ],
+     [
+      -7358,
+      -1936
+     ],
+     [
+      -7364,
+      -1931
+     ],
+     [
+      -7371,
+      -1926
+     ],
+     [
+      -7378,
+      -1922
+     ],
+     [
+      -7385,
+      -1919
+     ],
+     [
+      -7392,
+      -1916
+     ],
+     [
+      -7400,
+      -1914
+     ],
+     [
+      -7408,
+      -1913
+     ],
+     [
+      -7416,
+      -1913
+     ],
+     [
+      -7424,
+      -1914
+     ],
+     [
+      -7431,
+      -1918
+     ],
+     [
+      -7436,
+      -1925
+     ],
+     [
+      -7439,
+      -1932
+     ],
+     [
+      -7443,
+      -1939
+     ],
+     [
+      -7447,
+      -1946
+     ],
+     [
+      -7451,
+      -1953
+     ],
+     [
+      -7455,
+      -1959
+     ],
+     [
+      -7460,
+      -1966
+     ],
+     [
+      -7465,
+      -1972
+     ],
+     [
+      -7471,
+      -1978
+     ],
+     [
+      -7476,
+      -1984
+     ],
+     [
+      -7481,
+      -1990
+     ],
+     [
+      -7486,
+      -1996
+     ],
+     [
+      -7491,
+      -2002
+     ],
+     [
+      -7495,
+      -2009
+     ],
+     [
+      -7497,
+      -2017
+     ],
+     [
+      -7499,
+      -2025
+     ],
+     [
+      -7501,
+      -2033
+     ],
+     [
+      -7502,
+      -2041
+     ],
+     [
+      -7502,
+      -2049
+     ],
+     [
+      -7501,
+      -2056
+     ],
+     [
+      -7501,
+      -2064
+     ],
+     [
+      -7501,
+      -2072
+     ],
+     [
+      -7501,
+      -2080
+     ],
+     [
+      -7503,
+      -2088
+     ],
+     [
+      -7505,
+      -2096
+     ],
+     [
+      -7508,
+      -2103
+     ],
+     [
+      -7512,
+      -2110
+     ],
+     [
+      -7517,
+      -2117
+     ],
+     [
+      -7522,
+      -2123
+     ],
+     [
+      -7527,
+      -2129
+     ],
+     [
+      -7532,
+      -2136
+     ],
+     [
+      -7536,
+      -2142
+     ],
+     [
+      -7541,
+      -2149
+     ],
+     [
+      -7544,
+      -2156
+     ],
+     [
+      -7545,
+      -2164
+     ],
+     [
+      -7545,
+      -2172
+     ],
+     [
+      -7543,
+      -2180
+     ],
+     [
+      -7538,
+      -2186
+     ],
+     [
+      -7533,
+      -2192
+     ],
+     [
+      -7526,
+      -2196
+     ],
+     [
+      -7518,
+      -2198
+     ],
+     [
+      -7510,
+      -2200
+     ],
+     [
+      -7502,
+      -2202
+     ],
+     [
+      -7495,
+      -2203
+     ],
+     [
+      -7487,
+      -2205
+     ],
+     [
+      -7479,
+      -2207
+     ],
+     [
+      -7472,
+      -2210
+     ],
+     [
+      -7465,
+      -2215
+     ],
+     [
+      -7460,
+      -2221
+     ],
+     [
+      -7458,
+      -2229
+     ],
+     [
+      -7461,
+      -2236
+     ],
+     [
+      -7466,
+      -2242
+     ],
+     [
+      -7473,
+      -2246
+     ],
+     [
+      -7480,
+      -2249
+     ],
+     [
+      -7488,
+      -2251
+     ],
+     [
+      -7496,
+      -2253
+     ],
+     [
+      -7503,
+      -2258
+     ],
+     [
+      -7507,
+      -2264
+     ],
+     [
+      -7507,
+      -2271
+     ],
+     [
+      -7502,
+      -2278
+     ],
+     [
+      -7496,
+      -2282
+     ],
+     [
+      -7488,
+      -2284
+     ],
+     [
+      -7480,
+      -2285
+     ],
+     [
+      -7472,
+      -2285
+     ],
+     [
+      -7464,
+      -2285
+     ],
+     [
+      -7456,
+      -2284
+     ],
+     [
+      -7448,
+      -2283
+     ],
+     [
+      -7440,
+      -2282
+     ],
+     [
+      -7433,
+      -2280
+     ],
+     [
+      -7425,
+      -2278
+     ],
+     [
+      -7418,
+      -2275
+     ],
+     [
+      -7411,
+      -2271
+     ],
+     [
+      -7404,
+      -2266
+     ],
+     [
+      -7399,
+      -2260
+     ],
+     [
+      -7393,
+      -2254
+     ],
+     [
+      -7388,
+      -2248
+     ],
+     [
+      -7384,
+      -2241
+     ],
+     [
+      -7381,
+      -2234
+     ],
+     [
+      -7378,
+      -2226
+     ],
+     [
+      -7375,
+      -2219
+     ],
+     [
+      -7373,
+      -2211
+     ],
+     [
+      -7371,
+      -2203
+     ],
+     [
+      -7369,
+      -2196
+     ],
+     [
+      -7368,
+      -2188
+     ],
+     [
+      -7366,
+      -2180
+     ],
+     [
+      -7364,
+      -2172
+     ],
+     [
+      -7362,
+      -2164
+     ],
+     [
+      -7360,
+      -2157
+     ],
+     [
+      -7358,
+      -2149
+     ],
+     [
+      -7356,
+      -2141
+     ],
+     [
+      -7354,
+      -2133
+     ],
+     [
+      -7352,
+      -2126
+     ],
+     [
+      -7350,
+      -2118
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 12,
+    "pts": [
+     [
+      -7349,
+      -2112
+     ],
+     [
+      -7347,
+      -2104
+     ],
+     [
+      -7345,
+      -2097
+     ],
+     [
+      -7344,
+      -2089
+     ],
+     [
+      -7342,
+      -2081
+     ],
+     [
+      -7340,
+      -2073
+     ],
+     [
+      -7339,
+      -2065
+     ],
+     [
+      -7337,
+      -2057
+     ],
+     [
+      -7336,
+      -2050
+     ],
+     [
+      -7334,
+      -2042
+     ],
+     [
+      -7333,
+      -2034
+     ],
+     [
+      -7331,
+      -2026
+     ],
+     [
+      -7330,
+      -2018
+     ],
+     [
+      -7330,
+      -2010
+     ],
+     [
+      -7329,
+      -2002
+     ],
+     [
+      -7329,
+      -1994
+     ],
+     [
+      -7330,
+      -1986
+     ],
+     [
+      -7332,
+      -1978
+     ],
+     [
+      -7334,
+      -1971
+     ],
+     [
+      -7337,
+      -1963
+     ],
+     [
+      -7341,
+      -1956
+     ],
+     [
+      -7345,
+      -1949
+     ],
+     [
+      -7350,
+      -1943
+     ],
+     [
+      -7356,
+      -1938
+     ],
+     [
+      -7362,
+      -1933
+     ],
+     [
+      -7368,
+      -1928
+     ],
+     [
+      -7375,
+      -1923
+     ],
+     [
+      -7381,
+      -1918
+     ],
+     [
+      -7388,
+      -1915
+     ],
+     [
+      -7396,
+      -1912
+     ],
+     [
+      -7404,
+      -1911
+     ],
+     [
+      -7412,
+      -1911
+     ],
+     [
+      -7420,
+      -1912
+     ],
+     [
+      -7428,
+      -1914
+     ],
+     [
+      -7434,
+      -1918
+     ],
+     [
+      -7439,
+      -1924
+     ],
+     [
+      -7443,
+      -1931
+     ],
+     [
+      -7446,
+      -1939
+     ],
+     [
+      -7448,
+      -1947
+     ],
+     [
+      -7451,
+      -1954
+     ],
+     [
+      -7455,
+      -1961
+     ],
+     [
+      -7460,
+      -1968
+     ],
+     [
+      -7465,
+      -1974
+     ],
+     [
+      -7470,
+      -1980
+     ],
+     [
+      -7476,
+      -1985
+     ],
+     [
+      -7481,
+      -1991
+     ],
+     [
+      -7486,
+      -1997
+     ],
+     [
+      -7491,
+      -2004
+     ],
+     [
+      -7495,
+      -2011
+     ],
+     [
+      -7497,
+      -2018
+     ],
+     [
+      -7499,
+      -2026
+     ],
+     [
+      -7499,
+      -2034
+     ],
+     [
+      -7499,
+      -2042
+     ],
+     [
+      -7499,
+      -2050
+     ],
+     [
+      -7499,
+      -2058
+     ],
+     [
+      -7499,
+      -2066
+     ],
+     [
+      -7500,
+      -2074
+     ],
+     [
+      -7502,
+      -2082
+     ],
+     [
+      -7504,
+      -2090
+     ],
+     [
+      -7507,
+      -2097
+     ],
+     [
+      -7509,
+      -2105
+     ],
+     [
+      -7513,
+      -2112
+     ],
+     [
+      -7517,
+      -2118
+     ],
+     [
+      -7522,
+      -2125
+     ],
+     [
+      -7527,
+      -2131
+     ],
+     [
+      -7533,
+      -2137
+     ],
+     [
+      -7537,
+      -2144
+     ],
+     [
+      -7540,
+      -2151
+     ],
+     [
+      -7542,
+      -2159
+     ],
+     [
+      -7543,
+      -2167
+     ],
+     [
+      -7541,
+      -2175
+     ],
+     [
+      -7538,
+      -2182
+     ],
+     [
+      -7533,
+      -2188
+     ],
+     [
+      -7527,
+      -2194
+     ],
+     [
+      -7521,
+      -2198
+     ],
+     [
+      -7513,
+      -2201
+     ],
+     [
+      -7506,
+      -2203
+     ],
+     [
+      -7498,
+      -2205
+     ],
+     [
+      -7490,
+      -2207
+     ],
+     [
+      -7482,
+      -2209
+     ],
+     [
+      -7475,
+      -2211
+     ],
+     [
+      -7468,
+      -2215
+     ],
+     [
+      -7462,
+      -2220
+     ],
+     [
+      -7457,
+      -2227
+     ],
+     [
+      -7456,
+      -2234
+     ],
+     [
+      -7459,
+      -2242
+     ],
+     [
+      -7466,
+      -2246
+     ],
+     [
+      -7473,
+      -2249
+     ],
+     [
+      -7481,
+      -2252
+     ],
+     [
+      -7489,
+      -2254
+     ],
+     [
+      -7496,
+      -2256
+     ],
+     [
+      -7503,
+      -2259
+     ],
+     [
+      -7507,
+      -2266
+     ],
+     [
+      -7505,
+      -2274
+     ],
+     [
+      -7500,
+      -2279
+     ],
+     [
+      -7492,
+      -2282
+     ],
+     [
+      -7484,
+      -2284
+     ],
+     [
+      -7476,
+      -2285
+     ],
+     [
+      -7468,
+      -2285
+     ],
+     [
+      -7460,
+      -2285
+     ],
+     [
+      -7452,
+      -2285
+     ],
+     [
+      -7445,
+      -2284
+     ],
+     [
+      -7437,
+      -2282
+     ],
+     [
+      -7429,
+      -2280
+     ],
+     [
+      -7422,
+      -2276
+     ],
+     [
+      -7415,
+      -2272
+     ],
+     [
+      -7408,
+      -2268
+     ],
+     [
+      -7402,
+      -2263
+     ],
+     [
+      -7396,
+      -2257
+     ],
+     [
+      -7391,
+      -2251
+     ],
+     [
+      -7386,
+      -2245
+     ],
+     [
+      -7382,
+      -2238
+     ],
+     [
+      -7378,
+      -2231
+     ],
+     [
+      -7375,
+      -2224
+     ],
+     [
+      -7373,
+      -2216
+     ],
+     [
+      -7371,
+      -2208
+     ],
+     [
+      -7368,
+      -2201
+     ],
+     [
+      -7366,
+      -2193
+     ],
+     [
+      -7364,
+      -2185
+     ],
+     [
+      -7362,
+      -2178
+     ],
+     [
+      -7360,
+      -2170
+     ],
+     [
+      -7358,
+      -2162
+     ],
+     [
+      -7357,
+      -2154
+     ],
+     [
+      -7355,
+      -2146
+     ],
+     [
+      -7353,
+      -2139
+     ],
+     [
+      -7351,
+      -2131
+     ],
+     [
+      -7349,
+      -2123
+     ],
+     [
+      -7348,
+      -2115
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_191809",
+    "ev": 0,
+    "lap": 13,
+    "pts": [
+     [
+      -7347,
+      -2109
+     ],
+     [
+      -7345,
+      -2101
+     ],
+     [
+      -7344,
+      -2093
+     ],
+     [
+      -7342,
+      -2085
+     ],
+     [
+      -7341,
+      -2077
+     ],
+     [
+      -7339,
+      -2070
+     ],
+     [
+      -7338,
+      -2062
+     ],
+     [
+      -7336,
+      -2054
+     ],
+     [
+      -7335,
+      -2046
+     ],
+     [
+      -7334,
+      -2043
+     ],
+     [
+      -7336,
+      -2051
+     ],
+     [
+      -7338,
+      -2059
+     ],
+     [
+      -7339,
+      -2066
+     ],
+     [
+      -7341,
+      -2074
+     ],
+     [
+      -7343,
+      -2082
+     ],
+     [
+      -7344,
+      -2090
+     ],
+     [
+      -7346,
+      -2098
+     ],
+     [
+      -7348,
+      -2106
+     ],
+     [
+      -7349,
+      -2113
+     ],
+     [
+      -7351,
+      -2121
+     ],
+     [
+      -7353,
+      -2129
+     ],
+     [
+      -7355,
+      -2137
+     ],
+     [
+      -7357,
+      -2144
+     ],
+     [
+      -7359,
+      -2152
+     ],
+     [
+      -7361,
+      -2160
+     ],
+     [
+      -7363,
+      -2168
+     ],
+     [
+      -7365,
+      -2175
+     ],
+     [
+      -7367,
+      -2183
+     ],
+     [
+      -7369,
+      -2191
+     ],
+     [
+      -7371,
+      -2199
+     ],
+     [
+      -7373,
+      -2206
+     ],
+     [
+      -7375,
+      -2214
+     ],
+     [
+      -7377,
+      -2222
+     ],
+     [
+      -7380,
+      -2229
+     ],
+     [
+      -7383,
+      -2237
+     ],
+     [
+      -7386,
+      -2244
+     ],
+     [
+      -7390,
+      -2251
+     ],
+     [
+      -7395,
+      -2257
+     ],
+     [
+      -7401,
+      -2263
+     ],
+     [
+      -7407,
+      -2268
+     ],
+     [
+      -7413,
+      -2273
+     ],
+     [
+      -7420,
+      -2277
+     ],
+     [
+      -7426,
+      -2282
+     ],
+     [
+      -7434,
+      -2284
+     ],
+     [
+      -7442,
+      -2285
+     ],
+     [
+      -7450,
+      -2285
+     ],
+     [
+      -7458,
+      -2284
+     ],
+     [
+      -7464,
+      -2283
+     ],
+     [
+      -7456,
+      -2284
+     ],
+     [
+      -7448,
+      -2284
+     ],
+     [
+      -7440,
+      -2284
+     ],
+     [
+      -7432,
+      -2282
+     ],
+     [
+      -7425,
+      -2279
+     ],
+     [
+      -7418,
+      -2276
+     ],
+     [
+      -7411,
+      -2272
+     ],
+     [
+      -7404,
+      -2267
+     ],
+     [
+      -7399,
+      -2261
+     ],
+     [
+      -7393,
+      -2256
+     ],
+     [
+      -7388,
+      -2249
+     ],
+     [
+      -7384,
+      -2243
+     ],
+     [
+      -7380,
+      -2236
+     ],
+     [
+      -7376,
+      -2229
+     ],
+     [
+      -7373,
+      -2221
+     ],
+     [
+      -7370,
+      -2214
+     ],
+     [
+      -7368,
+      -2206
+     ],
+     [
+      -7366,
+      -2198
+     ],
+     [
+      -7364,
+      -2190
+     ],
+     [
+      -7362,
+      -2183
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_193720",
+    "ev": 0,
+    "lap": 1,
+    "pts": [
+     [
+      -7361,
+      -2175
+     ],
+     [
+      -7359,
+      -2167
+     ],
+     [
+      -7357,
+      -2159
+     ],
+     [
+      -7356,
+      -2152
+     ],
+     [
+      -7354,
+      -2144
+     ],
+     [
+      -7353,
+      -2136
+     ],
+     [
+      -7352,
+      -2128
+     ],
+     [
+      -7350,
+      -2120
+     ],
+     [
+      -7348,
+      -2112
+     ],
+     [
+      -7347,
+      -2104
+     ],
+     [
+      -7345,
+      -2097
+     ],
+     [
+      -7343,
+      -2089
+     ],
+     [
+      -7342,
+      -2081
+     ],
+     [
+      -7340,
+      -2073
+     ],
+     [
+      -7339,
+      -2065
+     ],
+     [
+      -7337,
+      -2057
+     ],
+     [
+      -7336,
+      -2050
+     ],
+     [
+      -7334,
+      -2042
+     ],
+     [
+      -7333,
+      -2034
+     ],
+     [
+      -7331,
+      -2026
+     ],
+     [
+      -7330,
+      -2018
+     ],
+     [
+      -7329,
+      -2010
+     ],
+     [
+      -7329,
+      -2002
+     ],
+     [
+      -7330,
+      -1994
+     ],
+     [
+      -7331,
+      -1986
+     ],
+     [
+      -7332,
+      -1978
+     ],
+     [
+      -7334,
+      -1971
+     ],
+     [
+      -7336,
+      -1963
+     ],
+     [
+      -7340,
+      -1956
+     ],
+     [
+      -7344,
+      -1949
+     ],
+     [
+      -7348,
+      -1942
+     ],
+     [
+      -7354,
+      -1936
+     ],
+     [
+      -7360,
+      -1931
+     ],
+     [
+      -7366,
+      -1926
+     ],
+     [
+      -7372,
+      -1921
+     ],
+     [
+      -7379,
+      -1917
+     ],
+     [
+      -7386,
+      -1913
+     ],
+     [
+      -7394,
+      -1911
+     ],
+     [
+      -7402,
+      -1909
+     ],
+     [
+      -7410,
+      -1908
+     ],
+     [
+      -7418,
+      -1908
+     ],
+     [
+      -7425,
+      -1910
+     ],
+     [
+      -7432,
+      -1914
+     ],
+     [
+      -7438,
+      -1920
+     ],
+     [
+      -7442,
+      -1927
+     ],
+     [
+      -7444,
+      -1935
+     ],
+     [
+      -7446,
+      -1942
+     ],
+     [
+      -7450,
+      -1949
+     ],
+     [
+      -7453,
+      -1957
+     ],
+     [
+      -7457,
+      -1964
+     ],
+     [
+      -7462,
+      -1970
+     ],
+     [
+      -7468,
+      -1976
+     ],
+     [
+      -7473,
+      -1982
+     ],
+     [
+      -7478,
+      -1988
+     ],
+     [
+      -7483,
+      -1994
+     ],
+     [
+      -7488,
+      -2000
+     ],
+     [
+      -7493,
+      -2006
+     ],
+     [
+      -7497,
+      -2013
+     ],
+     [
+      -7500,
+      -2021
+     ],
+     [
+      -7501,
+      -2029
+     ],
+     [
+      -7501,
+      -2037
+     ],
+     [
+      -7500,
+      -2045
+     ],
+     [
+      -7499,
+      -2053
+     ],
+     [
+      -7499,
+      -2061
+     ],
+     [
+      -7499,
+      -2069
+     ],
+     [
+      -7499,
+      -2077
+     ],
+     [
+      -7501,
+      -2084
+     ],
+     [
+      -7503,
+      -2092
+     ],
+     [
+      -7506,
+      -2099
+     ],
+     [
+      -7511,
+      -2106
+     ],
+     [
+      -7516,
+      -2112
+     ],
+     [
+      -7521,
+      -2118
+     ],
+     [
+      -7526,
+      -2125
+     ],
+     [
+      -7531,
+      -2131
+     ],
+     [
+      -7535,
+      -2138
+     ],
+     [
+      -7539,
+      -2145
+     ],
+     [
+      -7542,
+      -2152
+     ],
+     [
+      -7544,
+      -2160
+     ],
+     [
+      -7544,
+      -2168
+     ],
+     [
+      -7542,
+      -2176
+     ],
+     [
+      -7538,
+      -2183
+     ],
+     [
+      -7533,
+      -2189
+     ],
+     [
+      -7527,
+      -2193
+     ],
+     [
+      -7520,
+      -2198
+     ],
+     [
+      -7513,
+      -2202
+     ],
+     [
+      -7505,
+      -2204
+     ],
+     [
+      -7497,
+      -2206
+     ],
+     [
+      -7490,
+      -2207
+     ],
+     [
+      -7482,
+      -2209
+     ],
+     [
+      -7474,
+      -2211
+     ],
+     [
+      -7466,
+      -2213
+     ],
+     [
+      -7460,
+      -2218
+     ],
+     [
+      -7456,
+      -2225
+     ],
+     [
+      -7456,
+      -2232
+     ],
+     [
+      -7461,
+      -2239
+     ],
+     [
+      -7467,
+      -2244
+     ],
+     [
+      -7474,
+      -2247
+     ],
+     [
+      -7482,
+      -2248
+     ],
+     [
+      -7490,
+      -2250
+     ],
+     [
+      -7498,
+      -2253
+     ],
+     [
+      -7504,
+      -2258
+     ],
+     [
+      -7508,
+      -2264
+     ],
+     [
+      -7508,
+      -2272
+     ],
+     [
+      -7504,
+      -2279
+     ],
+     [
+      -7497,
+      -2282
+     ],
+     [
+      -7489,
+      -2285
+     ],
+     [
+      -7481,
+      -2287
+     ],
+     [
+      -7473,
+      -2288
+     ],
+     [
+      -7465,
+      -2288
+     ],
+     [
+      -7457,
+      -2287
+     ],
+     [
+      -7449,
+      -2286
+     ],
+     [
+      -7442,
+      -2284
+     ],
+     [
+      -7434,
+      -2282
+     ],
+     [
+      -7426,
+      -2279
+     ],
+     [
+      -7419,
+      -2276
+     ],
+     [
+      -7412,
+      -2272
+     ],
+     [
+      -7406,
+      -2267
+     ],
+     [
+      -7400,
+      -2262
+     ],
+     [
+      -7394,
+      -2256
+     ],
+     [
+      -7389,
+      -2250
+     ],
+     [
+      -7385,
+      -2243
+     ],
+     [
+      -7381,
+      -2236
+     ],
+     [
+      -7378,
+      -2228
+     ],
+     [
+      -7376,
+      -2221
+     ],
+     [
+      -7373,
+      -2213
+     ],
+     [
+      -7371,
+      -2206
+     ],
+     [
+      -7369,
+      -2198
+     ],
+     [
+      -7367,
+      -2190
+     ],
+     [
+      -7365,
+      -2182
+     ],
+     [
+      -7363,
+      -2175
+     ],
+     [
+      -7361,
+      -2167
+     ],
+     [
+      -7359,
+      -2159
+     ],
+     [
+      -7357,
+      -2151
+     ],
+     [
+      -7355,
+      -2144
+     ],
+     [
+      -7353,
+      -2136
+     ],
+     [
+      -7351,
+      -2128
+     ],
+     [
+      -7350,
+      -2120
+     ],
+     [
+      -7348,
+      -2112
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_193720",
+    "ev": 0,
+    "lap": 2,
+    "pts": [
+     [
+      -7348,
+      -2109
+     ],
+     [
+      -7346,
+      -2101
+     ],
+     [
+      -7344,
+      -2094
+     ],
+     [
+      -7342,
+      -2086
+     ],
+     [
+      -7340,
+      -2078
+     ],
+     [
+      -7338,
+      -2070
+     ],
+     [
+      -7337,
+      -2062
+     ],
+     [
+      -7335,
+      -2055
+     ],
+     [
+      -7334,
+      -2047
+     ],
+     [
+      -7333,
+      -2039
+     ],
+     [
+      -7332,
+      -2031
+     ],
+     [
+      -7331,
+      -2023
+     ],
+     [
+      -7330,
+      -2015
+     ],
+     [
+      -7329,
+      -2007
+     ],
+     [
+      -7329,
+      -1999
+     ],
+     [
+      -7329,
+      -1991
+     ],
+     [
+      -7329,
+      -1983
+     ],
+     [
+      -7331,
+      -1975
+     ],
+     [
+      -7333,
+      -1968
+     ],
+     [
+      -7336,
+      -1960
+     ],
+     [
+      -7340,
+      -1953
+     ],
+     [
+      -7345,
+      -1947
+     ],
+     [
+      -7351,
+      -1941
+     ],
+     [
+      -7356,
+      -1935
+     ],
+     [
+      -7361,
+      -1929
+     ],
+     [
+      -7367,
+      -1924
+     ],
+     [
+      -7373,
+      -1919
+     ],
+     [
+      -7380,
+      -1914
+     ],
+     [
+      -7388,
+      -1911
+     ],
+     [
+      -7395,
+      -1909
+     ],
+     [
+      -7403,
+      -1907
+     ],
+     [
+      -7411,
+      -1906
+     ],
+     [
+      -7419,
+      -1906
+     ],
+     [
+      -7427,
+      -1907
+     ],
+     [
+      -7435,
+      -1909
+     ],
+     [
+      -7442,
+      -1913
+     ],
+     [
+      -7447,
+      -1918
+     ],
+     [
+      -7448,
+      -1926
+     ],
+     [
+      -7447,
+      -1934
+     ],
+     [
+      -7448,
+      -1942
+     ],
+     [
+      -7451,
+      -1950
+     ],
+     [
+      -7454,
+      -1957
+     ],
+     [
+      -7456,
+      -1965
+     ],
+     [
+      -7460,
+      -1972
+     ],
+     [
+      -7464,
+      -1978
+     ],
+     [
+      -7470,
+      -1984
+     ],
+     [
+      -7476,
+      -1989
+     ],
+     [
+      -7483,
+      -1994
+     ],
+     [
+      -7488,
+      -1999
+     ],
+     [
+      -7493,
+      -2006
+     ],
+     [
+      -7497,
+      -2013
+     ],
+     [
+      -7500,
+      -2020
+     ],
+     [
+      -7502,
+      -2028
+     ],
+     [
+      -7502,
+      -2036
+     ],
+     [
+      -7502,
+      -2044
+     ],
+     [
+      -7502,
+      -2052
+     ],
+     [
+      -7501,
+      -2060
+     ],
+     [
+      -7501,
+      -2068
+     ],
+     [
+      -7500,
+      -2076
+     ],
+     [
+      -7500,
+      -2084
+     ],
+     [
+      -7502,
+      -2092
+     ],
+     [
+      -7505,
+      -2099
+     ],
+     [
+      -7510,
+      -2106
+     ],
+     [
+      -7515,
+      -2111
+     ],
+     [
+      -7521,
+      -2117
+     ],
+     [
+      -7527,
+      -2122
+     ],
+     [
+      -7533,
+      -2127
+     ],
+     [
+      -7538,
+      -2134
+     ],
+     [
+      -7542,
+      -2141
+     ],
+     [
+      -7544,
+      -2148
+     ],
+     [
+      -7545,
+      -2156
+     ],
+     [
+      -7545,
+      -2164
+     ],
+     [
+      -7544,
+      -2172
+     ],
+     [
+      -7541,
+      -2179
+     ],
+     [
+      -7536,
+      -2186
+     ],
+     [
+      -7531,
+      -2192
+     ],
+     [
+      -7524,
+      -2196
+     ],
+     [
+      -7517,
+      -2199
+     ],
+     [
+      -7509,
+      -2201
+     ],
+     [
+      -7501,
+      -2202
+     ],
+     [
+      -7493,
+      -2203
+     ],
+     [
+      -7485,
+      -2205
+     ],
+     [
+      -7478,
+      -2208
+     ],
+     [
+      -7471,
+      -2212
+     ],
+     [
+      -7464,
+      -2216
+     ],
+     [
+      -7458,
+      -2222
+     ],
+     [
+      -7455,
+      -2229
+     ],
+     [
+      -7458,
+      -2236
+     ],
+     [
+      -7464,
+      -2242
+     ],
+     [
+      -7471,
+      -2246
+     ],
+     [
+      -7478,
+      -2248
+     ],
+     [
+      -7486,
+      -2250
+     ],
+     [
+      -7494,
+      -2251
+     ],
+     [
+      -7502,
+      -2254
+     ],
+     [
+      -7508,
+      -2259
+     ],
+     [
+      -7511,
+      -2266
+     ],
+     [
+      -7510,
+      -2274
+     ],
+     [
+      -7504,
+      -2280
+     ],
+     [
+      -7496,
+      -2283
+     ],
+     [
+      -7489,
+      -2285
+     ],
+     [
+      -7481,
+      -2286
+     ],
+     [
+      -7473,
+      -2286
+     ],
+     [
+      -7465,
+      -2287
+     ],
+     [
+      -7457,
+      -2287
+     ],
+     [
+      -7449,
+      -2286
+     ],
+     [
+      -7441,
+      -2285
+     ],
+     [
+      -7433,
+      -2282
+     ],
+     [
+      -7426,
+      -2280
+     ],
+     [
+      -7419,
+      -2276
+     ],
+     [
+      -7411,
+      -2273
+     ],
+     [
+      -7405,
+      -2268
+     ],
+     [
+      -7399,
+      -2263
+     ],
+     [
+      -7393,
+      -2257
+     ],
+     [
+      -7388,
+      -2251
+     ],
+     [
+      -7384,
+      -2244
+     ],
+     [
+      -7380,
+      -2237
+     ],
+     [
+      -7376,
+      -2230
+     ],
+     [
+      -7373,
+      -2223
+     ],
+     [
+      -7371,
+      -2215
+     ],
+     [
+      -7368,
+      -2208
+     ],
+     [
+      -7366,
+      -2200
+     ],
+     [
+      -7364,
+      -2192
+     ],
+     [
+      -7362,
+      -2184
+     ],
+     [
+      -7361,
+      -2176
+     ],
+     [
+      -7359,
+      -2169
+     ],
+     [
+      -7357,
+      -2161
+     ],
+     [
+      -7356,
+      -2153
+     ],
+     [
+      -7354,
+      -2145
+     ],
+     [
+      -7352,
+      -2137
+     ],
+     [
+      -7351,
+      -2130
+     ],
+     [
+      -7349,
+      -2122
+     ],
+     [
+      -7347,
+      -2114
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_193720",
+    "ev": 0,
+    "lap": 3,
+    "pts": [
+     [
+      -7346,
+      -2109
+     ],
+     [
+      -7345,
+      -2102
+     ],
+     [
+      -7343,
+      -2094
+     ],
+     [
+      -7341,
+      -2086
+     ],
+     [
+      -7340,
+      -2078
+     ],
+     [
+      -7338,
+      -2070
+     ],
+     [
+      -7336,
+      -2062
+     ],
+     [
+      -7335,
+      -2055
+     ],
+     [
+      -7334,
+      -2047
+     ],
+     [
+      -7332,
+      -2039
+     ],
+     [
+      -7331,
+      -2031
+     ],
+     [
+      -7330,
+      -2023
+     ],
+     [
+      -7329,
+      -2015
+     ],
+     [
+      -7328,
+      -2007
+     ],
+     [
+      -7327,
+      -1999
+     ],
+     [
+      -7327,
+      -1991
+     ],
+     [
+      -7328,
+      -1983
+     ],
+     [
+      -7330,
+      -1975
+     ],
+     [
+      -7332,
+      -1968
+     ],
+     [
+      -7335,
+      -1960
+     ],
+     [
+      -7339,
+      -1953
+     ],
+     [
+      -7343,
+      -1946
+     ],
+     [
+      -7348,
+      -1940
+     ],
+     [
+      -7353,
+      -1934
+     ],
+     [
+      -7359,
+      -1929
+     ],
+     [
+      -7366,
+      -1924
+     ],
+     [
+      -7373,
+      -1921
+     ],
+     [
+      -7380,
+      -1917
+     ],
+     [
+      -7388,
+      -1915
+     ],
+     [
+      -7395,
+      -1912
+     ],
+     [
+      -7403,
+      -1910
+     ],
+     [
+      -7411,
+      -1910
+     ],
+     [
+      -7419,
+      -1910
+     ],
+     [
+      -7427,
+      -1912
+     ],
+     [
+      -7434,
+      -1916
+     ],
+     [
+      -7439,
+      -1922
+     ],
+     [
+      -7442,
+      -1930
+     ],
+     [
+      -7444,
+      -1937
+     ],
+     [
+      -7447,
+      -1945
+     ],
+     [
+      -7451,
+      -1952
+     ],
+     [
+      -7455,
+      -1959
+     ],
+     [
+      -7459,
+      -1965
+     ],
+     [
+      -7465,
+      -1971
+     ],
+     [
+      -7470,
+      -1977
+     ],
+     [
+      -7476,
+      -1983
+     ],
+     [
+      -7481,
+      -1989
+     ],
+     [
+      -7485,
+      -1996
+     ],
+     [
+      -7490,
+      -2002
+     ],
+     [
+      -7494,
+      -2009
+     ],
+     [
+      -7497,
+      -2016
+     ],
+     [
+      -7500,
+      -2024
+     ],
+     [
+      -7501,
+      -2032
+     ],
+     [
+      -7502,
+      -2040
+     ],
+     [
+      -7502,
+      -2048
+     ],
+     [
+      -7502,
+      -2056
+     ],
+     [
+      -7502,
+      -2064
+     ],
+     [
+      -7502,
+      -2072
+     ],
+     [
+      -7502,
+      -2080
+     ],
+     [
+      -7502,
+      -2088
+     ],
+     [
+      -7504,
+      -2096
+     ],
+     [
+      -7506,
+      -2103
+     ],
+     [
+      -7510,
+      -2110
+     ],
+     [
+      -7515,
+      -2116
+     ],
+     [
+      -7521,
+      -2122
+     ],
+     [
+      -7526,
+      -2128
+     ],
+     [
+      -7531,
+      -2134
+     ],
+     [
+      -7536,
+      -2141
+     ],
+     [
+      -7540,
+      -2148
+     ],
+     [
+      -7543,
+      -2155
+     ],
+     [
+      -7545,
+      -2163
+     ],
+     [
+      -7545,
+      -2171
+     ],
+     [
+      -7542,
+      -2178
+     ],
+     [
+      -7538,
+      -2185
+     ],
+     [
+      -7532,
+      -2190
+     ],
+     [
+      -7525,
+      -2195
+     ],
+     [
+      -7518,
+      -2198
+     ],
+     [
+      -7510,
+      -2200
+     ],
+     [
+      -7502,
+      -2201
+     ],
+     [
+      -7494,
+      -2203
+     ],
+     [
+      -7486,
+      -2205
+     ],
+     [
+      -7479,
+      -2207
+     ],
+     [
+      -7471,
+      -2209
+     ],
+     [
+      -7464,
+      -2213
+     ],
+     [
+      -7459,
+      -2219
+     ],
+     [
+      -7456,
+      -2226
+     ],
+     [
+      -7457,
+      -2234
+     ],
+     [
+      -7462,
+      -2241
+     ],
+     [
+      -7469,
+      -2245
+     ],
+     [
+      -7477,
+      -2247
+     ],
+     [
+      -7485,
+      -2248
+     ],
+     [
+      -7492,
+      -2250
+     ],
+     [
+      -7500,
+      -2254
+     ],
+     [
+      -7506,
+      -2259
+     ],
+     [
+      -7509,
+      -2266
+     ],
+     [
+      -7508,
+      -2274
+     ],
+     [
+      -7503,
+      -2280
+     ],
+     [
+      -7496,
+      -2284
+     ],
+     [
+      -7488,
+      -2286
+     ],
+     [
+      -7480,
+      -2286
+     ],
+     [
+      -7472,
+      -2285
+     ],
+     [
+      -7464,
+      -2285
+     ],
+     [
+      -7456,
+      -2285
+     ],
+     [
+      -7448,
+      -2284
+     ],
+     [
+      -7440,
+      -2282
+     ],
+     [
+      -7433,
+      -2279
+     ],
+     [
+      -7425,
+      -2277
+     ],
+     [
+      -7418,
+      -2273
+     ],
+     [
+      -7411,
+      -2269
+     ],
+     [
+      -7405,
+      -2264
+     ],
+     [
+      -7399,
+      -2259
+     ],
+     [
+      -7393,
+      -2253
+     ],
+     [
+      -7388,
+      -2247
+     ],
+     [
+      -7384,
+      -2240
+     ],
+     [
+      -7380,
+      -2233
+     ],
+     [
+      -7377,
+      -2226
+     ],
+     [
+      -7375,
+      -2218
+     ],
+     [
+      -7373,
+      -2210
+     ],
+     [
+      -7371,
+      -2203
+     ],
+     [
+      -7369,
+      -2195
+     ],
+     [
+      -7367,
+      -2187
+     ],
+     [
+      -7366,
+      -2179
+     ],
+     [
+      -7364,
+      -2171
+     ],
+     [
+      -7361,
+      -2164
+     ],
+     [
+      -7359,
+      -2156
+     ],
+     [
+      -7357,
+      -2148
+     ],
+     [
+      -7355,
+      -2141
+     ],
+     [
+      -7353,
+      -2133
+     ],
+     [
+      -7352,
+      -2125
+     ],
+     [
+      -7350,
+      -2117
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_193720",
+    "ev": 0,
+    "lap": 4,
+    "pts": [
+     [
+      -7348,
+      -2111
+     ],
+     [
+      -7346,
+      -2103
+     ],
+     [
+      -7345,
+      -2095
+     ],
+     [
+      -7343,
+      -2087
+     ],
+     [
+      -7341,
+      -2080
+     ],
+     [
+      -7339,
+      -2072
+     ],
+     [
+      -7337,
+      -2064
+     ],
+     [
+      -7335,
+      -2056
+     ],
+     [
+      -7334,
+      -2049
+     ],
+     [
+      -7332,
+      -2041
+     ],
+     [
+      -7331,
+      -2033
+     ],
+     [
+      -7330,
+      -2025
+     ],
+     [
+      -7329,
+      -2017
+     ],
+     [
+      -7329,
+      -2009
+     ],
+     [
+      -7329,
+      -2001
+     ],
+     [
+      -7330,
+      -1993
+     ],
+     [
+      -7331,
+      -1985
+     ],
+     [
+      -7333,
+      -1977
+     ],
+     [
+      -7335,
+      -1970
+     ],
+     [
+      -7338,
+      -1962
+     ],
+     [
+      -7342,
+      -1955
+     ],
+     [
+      -7345,
+      -1948
+     ],
+     [
+      -7350,
+      -1941
+     ],
+     [
+      -7355,
+      -1935
+     ],
+     [
+      -7361,
+      -1930
+     ],
+     [
+      -7368,
+      -1925
+     ],
+     [
+      -7375,
+      -1921
+     ],
+     [
+      -7381,
+      -1917
+     ],
+     [
+      -7388,
+      -1913
+     ],
+     [
+      -7395,
+      -1909
+     ],
+     [
+      -7402,
+      -1905
+     ],
+     [
+      -7410,
+      -1902
+     ],
+     [
+      -7418,
+      -1901
+     ],
+     [
+      -7425,
+      -1901
+     ],
+     [
+      -7433,
+      -1903
+     ],
+     [
+      -7439,
+      -1909
+     ],
+     [
+      -7442,
+      -1916
+     ],
+     [
+      -7444,
+      -1924
+     ],
+     [
+      -7445,
+      -1932
+     ],
+     [
+      -7446,
+      -1940
+     ],
+     [
+      -7449,
+      -1947
+     ],
+     [
+      -7452,
+      -1955
+     ],
+     [
+      -7456,
+      -1961
+     ],
+     [
+      -7461,
+      -1968
+     ],
+     [
+      -7466,
+      -1974
+     ],
+     [
+      -7472,
+      -1979
+     ],
+     [
+      -7478,
+      -1985
+     ],
+     [
+      -7483,
+      -1991
+     ],
+     [
+      -7487,
+      -1998
+     ],
+     [
+      -7491,
+      -2005
+     ],
+     [
+      -7494,
+      -2012
+     ],
+     [
+      -7497,
+      -2020
+     ],
+     [
+      -7499,
+      -2027
+     ],
+     [
+      -7500,
+      -2035
+     ],
+     [
+      -7500,
+      -2043
+     ],
+     [
+      -7500,
+      -2051
+     ],
+     [
+      -7500,
+      -2059
+     ],
+     [
+      -7500,
+      -2067
+     ],
+     [
+      -7500,
+      -2075
+     ],
+     [
+      -7501,
+      -2083
+     ],
+     [
+      -7502,
+      -2091
+     ],
+     [
+      -7505,
+      -2099
+     ],
+     [
+      -7508,
+      -2106
+     ],
+     [
+      -7513,
+      -2112
+     ],
+     [
+      -7518,
+      -2119
+     ],
+     [
+      -7523,
+      -2125
+     ],
+     [
+      -7529,
+      -2130
+     ],
+     [
+      -7534,
+      -2136
+     ],
+     [
+      -7538,
+      -2143
+     ],
+     [
+      -7542,
+      -2150
+     ],
+     [
+      -7544,
+      -2158
+     ],
+     [
+      -7544,
+      -2166
+     ],
+     [
+      -7543,
+      -2174
+     ],
+     [
+      -7540,
+      -2181
+     ],
+     [
+      -7536,
+      -2188
+     ],
+     [
+      -7530,
+      -2193
+     ],
+     [
+      -7523,
+      -2197
+     ],
+     [
+      -7515,
+      -2200
+     ],
+     [
+      -7507,
+      -2201
+     ],
+     [
+      -7499,
+      -2203
+     ],
+     [
+      -7492,
+      -2204
+     ],
+     [
+      -7484,
+      -2206
+     ],
+     [
+      -7476,
+      -2208
+     ],
+     [
+      -7469,
+      -2212
+     ],
+     [
+      -7463,
+      -2216
+     ],
+     [
+      -7458,
+      -2223
+     ],
+     [
+      -7457,
+      -2231
+     ],
+     [
+      -7461,
+      -2238
+     ],
+     [
+      -7467,
+      -2243
+     ],
+     [
+      -7474,
+      -2246
+     ],
+     [
+      -7482,
+      -2250
+     ],
+     [
+      -7489,
+      -2253
+     ],
+     [
+      -7496,
+      -2256
+     ],
+     [
+      -7504,
+      -2259
+     ],
+     [
+      -7509,
+      -2264
+     ],
+     [
+      -7506,
+      -2271
+     ],
+     [
+      -7500,
+      -2275
+     ],
+     [
+      -7494,
+      -2281
+     ],
+     [
+      -7487,
+      -2284
+     ],
+     [
+      -7479,
+      -2286
+     ],
+     [
+      -7471,
+      -2287
+     ],
+     [
+      -7463,
+      -2287
+     ],
+     [
+      -7455,
+      -2287
+     ],
+     [
+      -7447,
+      -2287
+     ],
+     [
+      -7439,
+      -2286
+     ],
+     [
+      -7432,
+      -2284
+     ],
+     [
+      -7424,
+      -2281
+     ],
+     [
+      -7417,
+      -2278
+     ],
+     [
+      -7410,
+      -2274
+     ],
+     [
+      -7403,
+      -2269
+     ],
+     [
+      -7397,
+      -2264
+     ],
+     [
+      -7392,
+      -2258
+     ],
+     [
+      -7387,
+      -2252
+     ],
+     [
+      -7382,
+      -2245
+     ],
+     [
+      -7379,
+      -2238
+     ],
+     [
+      -7376,
+      -2230
+     ],
+     [
+      -7374,
+      -2223
+     ],
+     [
+      -7372,
+      -2215
+     ],
+     [
+      -7370,
+      -2207
+     ],
+     [
+      -7367,
+      -2200
+     ],
+     [
+      -7365,
+      -2192
+     ],
+     [
+      -7363,
+      -2184
+     ],
+     [
+      -7360,
+      -2177
+     ],
+     [
+      -7359,
+      -2169
+     ],
+     [
+      -7357,
+      -2161
+     ],
+     [
+      -7355,
+      -2153
+     ],
+     [
+      -7354,
+      -2145
+     ],
+     [
+      -7352,
+      -2138
+     ],
+     [
+      -7350,
+      -2130
+     ],
+     [
+      -7349,
+      -2122
+     ],
+     [
+      -7347,
+      -2114
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_193720",
+    "ev": 0,
+    "lap": 5,
+    "pts": [
+     [
+      -7347,
+      -2111
+     ],
+     [
+      -7345,
+      -2104
+     ],
+     [
+      -7344,
+      -2096
+     ],
+     [
+      -7342,
+      -2088
+     ],
+     [
+      -7340,
+      -2080
+     ],
+     [
+      -7339,
+      -2072
+     ],
+     [
+      -7337,
+      -2064
+     ],
+     [
+      -7335,
+      -2057
+     ],
+     [
+      -7334,
+      -2049
+     ],
+     [
+      -7332,
+      -2041
+     ],
+     [
+      -7331,
+      -2033
+     ],
+     [
+      -7330,
+      -2025
+     ],
+     [
+      -7329,
+      -2017
+     ],
+     [
+      -7328,
+      -2009
+     ],
+     [
+      -7328,
+      -2001
+     ],
+     [
+      -7328,
+      -1993
+     ],
+     [
+      -7329,
+      -1985
+     ],
+     [
+      -7331,
+      -1977
+     ],
+     [
+      -7333,
+      -1970
+     ],
+     [
+      -7336,
+      -1962
+     ],
+     [
+      -7339,
+      -1955
+     ],
+     [
+      -7343,
+      -1948
+     ],
+     [
+      -7347,
+      -1941
+     ],
+     [
+      -7352,
+      -1934
+     ],
+     [
+      -7357,
+      -1928
+     ],
+     [
+      -7363,
+      -1923
+     ],
+     [
+      -7370,
+      -1919
+     ],
+     [
+      -7377,
+      -1917
+     ],
+     [
+      -7385,
+      -1916
+     ],
+     [
+      -7393,
+      -1915
+     ],
+     [
+      -7401,
+      -1915
+     ],
+     [
+      -7409,
+      -1914
+     ],
+     [
+      -7416,
+      -1911
+     ],
+     [
+      -7422,
+      -1912
+     ],
+     [
+      -7429,
+      -1916
+     ],
+     [
+      -7436,
+      -1920
+     ],
+     [
+      -7441,
+      -1926
+     ],
+     [
+      -7444,
+      -1933
+     ],
+     [
+      -7446,
+      -1941
+     ],
+     [
+      -7449,
+      -1948
+     ],
+     [
+      -7453,
+      -1955
+     ],
+     [
+      -7457,
+      -1962
+     ],
+     [
+      -7462,
+      -1968
+     ],
+     [
+      -7468,
+      -1974
+     ],
+     [
+      -7474,
+      -1980
+     ],
+     [
+      -7479,
+      -1985
+     ],
+     [
+      -7484,
+      -1991
+     ],
+     [
+      -7489,
+      -1998
+     ],
+     [
+      -7493,
+      -2005
+     ],
+     [
+      -7496,
+      -2012
+     ],
+     [
+      -7499,
+      -2020
+     ],
+     [
+      -7500,
+      -2028
+     ],
+     [
+      -7501,
+      -2036
+     ],
+     [
+      -7501,
+      -2044
+     ],
+     [
+      -7501,
+      -2052
+     ],
+     [
+      -7500,
+      -2060
+     ],
+     [
+      -7499,
+      -2068
+     ],
+     [
+      -7499,
+      -2075
+     ],
+     [
+      -7499,
+      -2083
+     ],
+     [
+      -7500,
+      -2091
+     ],
+     [
+      -7502,
+      -2099
+     ],
+     [
+      -7506,
+      -2106
+     ],
+     [
+      -7511,
+      -2113
+     ],
+     [
+      -7516,
+      -2118
+     ],
+     [
+      -7522,
+      -2124
+     ],
+     [
+      -7528,
+      -2129
+     ],
+     [
+      -7533,
+      -2136
+     ],
+     [
+      -7537,
+      -2142
+     ],
+     [
+      -7541,
+      -2150
+     ],
+     [
+      -7543,
+      -2157
+     ],
+     [
+      -7544,
+      -2165
+     ],
+     [
+      -7542,
+      -2173
+     ],
+     [
+      -7539,
+      -2180
+     ],
+     [
+      -7535,
+      -2187
+     ],
+     [
+      -7529,
+      -2192
+     ],
+     [
+      -7522,
+      -2196
+     ],
+     [
+      -7515,
+      -2199
+     ],
+     [
+      -7507,
+      -2201
+     ],
+     [
+      -7499,
+      -2203
+     ],
+     [
+      -7491,
+      -2204
+     ],
+     [
+      -7483,
+      -2206
+     ],
+     [
+      -7476,
+      -2208
+     ],
+     [
+      -7469,
+      -2212
+     ],
+     [
+      -7462,
+      -2217
+     ],
+     [
+      -7458,
+      -2224
+     ],
+     [
+      -7457,
+      -2231
+     ],
+     [
+      -7460,
+      -2239
+     ],
+     [
+      -7467,
+      -2244
+     ],
+     [
+      -7474,
+      -2246
+     ],
+     [
+      -7482,
+      -2247
+     ],
+     [
+      -7490,
+      -2248
+     ],
+     [
+      -7498,
+      -2250
+     ],
+     [
+      -7504,
+      -2255
+     ],
+     [
+      -7508,
+      -2262
+     ],
+     [
+      -7508,
+      -2270
+     ],
+     [
+      -7504,
+      -2277
+     ],
+     [
+      -7498,
+      -2281
+     ],
+     [
+      -7491,
+      -2284
+     ],
+     [
+      -7483,
+      -2286
+     ],
+     [
+      -7475,
+      -2286
+     ],
+     [
+      -7467,
+      -2286
+     ],
+     [
+      -7459,
+      -2285
+     ],
+     [
+      -7451,
+      -2284
+     ],
+     [
+      -7443,
+      -2283
+     ],
+     [
+      -7435,
+      -2281
+     ],
+     [
+      -7428,
+      -2278
+     ],
+     [
+      -7420,
+      -2275
+     ],
+     [
+      -7414,
+      -2271
+     ],
+     [
+      -7407,
+      -2266
+     ],
+     [
+      -7401,
+      -2261
+     ],
+     [
+      -7395,
+      -2256
+     ],
+     [
+      -7389,
+      -2250
+     ],
+     [
+      -7384,
+      -2244
+     ],
+     [
+      -7379,
+      -2237
+     ],
+     [
+      -7376,
+      -2230
+     ],
+     [
+      -7372,
+      -2223
+     ],
+     [
+      -7369,
+      -2216
+     ],
+     [
+      -7367,
+      -2208
+     ],
+     [
+      -7366,
+      -2200
+     ],
+     [
+      -7364,
+      -2192
+     ],
+     [
+      -7363,
+      -2184
+     ],
+     [
+      -7362,
+      -2176
+     ],
+     [
+      -7360,
+      -2169
+     ],
+     [
+      -7359,
+      -2161
+     ],
+     [
+      -7357,
+      -2153
+     ],
+     [
+      -7355,
+      -2145
+     ],
+     [
+      -7354,
+      -2137
+     ],
+     [
+      -7352,
+      -2129
+     ],
+     [
+      -7350,
+      -2122
+     ],
+     [
+      -7348,
+      -2114
+     ]
+    ]
+   },
    {
     "session": "fh6_20260821_193720",
     "ev": 0,
@@ -7348,6 +16676,4705 @@
      [
       -7405,
       -1911
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 1,
+    "pts": [
+     [
+      -7354,
+      -2127
+     ],
+     [
+      -7353,
+      -2120
+     ],
+     [
+      -7351,
+      -2112
+     ],
+     [
+      -7349,
+      -2104
+     ],
+     [
+      -7347,
+      -2096
+     ],
+     [
+      -7345,
+      -2089
+     ],
+     [
+      -7343,
+      -2081
+     ],
+     [
+      -7342,
+      -2073
+     ],
+     [
+      -7340,
+      -2065
+     ],
+     [
+      -7338,
+      -2057
+     ],
+     [
+      -7336,
+      -2050
+     ],
+     [
+      -7334,
+      -2042
+     ],
+     [
+      -7333,
+      -2034
+     ],
+     [
+      -7331,
+      -2026
+     ],
+     [
+      -7331,
+      -2018
+     ],
+     [
+      -7330,
+      -2010
+     ],
+     [
+      -7330,
+      -2002
+     ],
+     [
+      -7330,
+      -1994
+     ],
+     [
+      -7330,
+      -1986
+     ],
+     [
+      -7332,
+      -1978
+     ],
+     [
+      -7334,
+      -1971
+     ],
+     [
+      -7337,
+      -1963
+     ],
+     [
+      -7340,
+      -1956
+     ],
+     [
+      -7345,
+      -1949
+     ],
+     [
+      -7350,
+      -1943
+     ],
+     [
+      -7355,
+      -1937
+     ],
+     [
+      -7361,
+      -1932
+     ],
+     [
+      -7368,
+      -1927
+     ],
+     [
+      -7374,
+      -1923
+     ],
+     [
+      -7381,
+      -1919
+     ],
+     [
+      -7389,
+      -1916
+     ],
+     [
+      -7397,
+      -1914
+     ],
+     [
+      -7404,
+      -1912
+     ],
+     [
+      -7412,
+      -1912
+     ],
+     [
+      -7420,
+      -1914
+     ],
+     [
+      -7428,
+      -1916
+     ],
+     [
+      -7435,
+      -1921
+     ],
+     [
+      -7440,
+      -1926
+     ],
+     [
+      -7444,
+      -1933
+     ],
+     [
+      -7447,
+      -1941
+     ],
+     [
+      -7450,
+      -1948
+     ],
+     [
+      -7453,
+      -1956
+     ],
+     [
+      -7457,
+      -1963
+     ],
+     [
+      -7462,
+      -1969
+     ],
+     [
+      -7467,
+      -1975
+     ],
+     [
+      -7473,
+      -1981
+     ],
+     [
+      -7478,
+      -1987
+     ],
+     [
+      -7483,
+      -1993
+     ],
+     [
+      -7488,
+      -1999
+     ],
+     [
+      -7492,
+      -2006
+     ],
+     [
+      -7496,
+      -2013
+     ],
+     [
+      -7498,
+      -2021
+     ],
+     [
+      -7500,
+      -2028
+     ],
+     [
+      -7501,
+      -2036
+     ],
+     [
+      -7501,
+      -2044
+     ],
+     [
+      -7501,
+      -2052
+     ],
+     [
+      -7500,
+      -2060
+     ],
+     [
+      -7500,
+      -2068
+     ],
+     [
+      -7500,
+      -2076
+     ],
+     [
+      -7502,
+      -2084
+     ],
+     [
+      -7504,
+      -2092
+     ],
+     [
+      -7507,
+      -2099
+     ],
+     [
+      -7511,
+      -2106
+     ],
+     [
+      -7516,
+      -2113
+     ],
+     [
+      -7521,
+      -2119
+     ],
+     [
+      -7526,
+      -2125
+     ],
+     [
+      -7531,
+      -2131
+     ],
+     [
+      -7536,
+      -2138
+     ],
+     [
+      -7540,
+      -2144
+     ],
+     [
+      -7544,
+      -2151
+     ],
+     [
+      -7547,
+      -2159
+     ],
+     [
+      -7548,
+      -2167
+     ],
+     [
+      -7547,
+      -2175
+     ],
+     [
+      -7545,
+      -2182
+     ],
+     [
+      -7541,
+      -2189
+     ],
+     [
+      -7535,
+      -2195
+     ],
+     [
+      -7529,
+      -2199
+     ],
+     [
+      -7521,
+      -2202
+     ],
+     [
+      -7513,
+      -2204
+     ],
+     [
+      -7505,
+      -2204
+     ],
+     [
+      -7497,
+      -2205
+     ],
+     [
+      -7489,
+      -2206
+     ],
+     [
+      -7482,
+      -2208
+     ],
+     [
+      -7474,
+      -2210
+     ],
+     [
+      -7467,
+      -2214
+     ],
+     [
+      -7461,
+      -2219
+     ],
+     [
+      -7457,
+      -2226
+     ],
+     [
+      -7457,
+      -2233
+     ],
+     [
+      -7461,
+      -2240
+     ],
+     [
+      -7468,
+      -2245
+     ],
+     [
+      -7475,
+      -2247
+     ],
+     [
+      -7483,
+      -2250
+     ],
+     [
+      -7490,
+      -2253
+     ],
+     [
+      -7498,
+      -2255
+     ],
+     [
+      -7505,
+      -2259
+     ],
+     [
+      -7509,
+      -2266
+     ],
+     [
+      -7506,
+      -2273
+     ],
+     [
+      -7499,
+      -2277
+     ],
+     [
+      -7492,
+      -2280
+     ],
+     [
+      -7484,
+      -2282
+     ],
+     [
+      -7476,
+      -2283
+     ],
+     [
+      -7468,
+      -2283
+     ],
+     [
+      -7460,
+      -2283
+     ],
+     [
+      -7452,
+      -2282
+     ],
+     [
+      -7444,
+      -2281
+     ],
+     [
+      -7437,
+      -2279
+     ],
+     [
+      -7429,
+      -2277
+     ],
+     [
+      -7421,
+      -2274
+     ],
+     [
+      -7414,
+      -2270
+     ],
+     [
+      -7408,
+      -2266
+     ],
+     [
+      -7401,
+      -2262
+     ],
+     [
+      -7395,
+      -2257
+     ],
+     [
+      -7389,
+      -2251
+     ],
+     [
+      -7384,
+      -2245
+     ],
+     [
+      -7379,
+      -2238
+     ],
+     [
+      -7376,
+      -2231
+     ],
+     [
+      -7373,
+      -2224
+     ],
+     [
+      -7371,
+      -2216
+     ],
+     [
+      -7369,
+      -2208
+     ],
+     [
+      -7367,
+      -2201
+     ],
+     [
+      -7366,
+      -2193
+     ],
+     [
+      -7364,
+      -2185
+     ],
+     [
+      -7362,
+      -2177
+     ],
+     [
+      -7360,
+      -2169
+     ],
+     [
+      -7358,
+      -2162
+     ],
+     [
+      -7357,
+      -2154
+     ],
+     [
+      -7355,
+      -2146
+     ],
+     [
+      -7353,
+      -2138
+     ],
+     [
+      -7351,
+      -2130
+     ],
+     [
+      -7350,
+      -2123
+     ],
+     [
+      -7348,
+      -2115
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 2,
+    "pts": [
+     [
+      -7347,
+      -2109
+     ],
+     [
+      -7345,
+      -2101
+     ],
+     [
+      -7343,
+      -2093
+     ],
+     [
+      -7342,
+      -2085
+     ],
+     [
+      -7340,
+      -2078
+     ],
+     [
+      -7338,
+      -2070
+     ],
+     [
+      -7336,
+      -2062
+     ],
+     [
+      -7335,
+      -2054
+     ],
+     [
+      -7333,
+      -2046
+     ],
+     [
+      -7332,
+      -2038
+     ],
+     [
+      -7331,
+      -2030
+     ],
+     [
+      -7330,
+      -2022
+     ],
+     [
+      -7330,
+      -2014
+     ],
+     [
+      -7329,
+      -2007
+     ],
+     [
+      -7329,
+      -1999
+     ],
+     [
+      -7329,
+      -1991
+     ],
+     [
+      -7330,
+      -1983
+     ],
+     [
+      -7332,
+      -1975
+     ],
+     [
+      -7335,
+      -1967
+     ],
+     [
+      -7338,
+      -1960
+     ],
+     [
+      -7342,
+      -1953
+     ],
+     [
+      -7347,
+      -1947
+     ],
+     [
+      -7353,
+      -1941
+     ],
+     [
+      -7359,
+      -1935
+     ],
+     [
+      -7365,
+      -1930
+     ],
+     [
+      -7371,
+      -1925
+     ],
+     [
+      -7378,
+      -1921
+     ],
+     [
+      -7385,
+      -1917
+     ],
+     [
+      -7392,
+      -1914
+     ],
+     [
+      -7400,
+      -1912
+     ],
+     [
+      -7408,
+      -1911
+     ],
+     [
+      -7416,
+      -1910
+     ],
+     [
+      -7424,
+      -1911
+     ],
+     [
+      -7431,
+      -1913
+     ],
+     [
+      -7438,
+      -1916
+     ],
+     [
+      -7445,
+      -1922
+     ],
+     [
+      -7449,
+      -1928
+     ],
+     [
+      -7450,
+      -1936
+     ],
+     [
+      -7451,
+      -1944
+     ],
+     [
+      -7452,
+      -1952
+     ],
+     [
+      -7455,
+      -1959
+     ],
+     [
+      -7459,
+      -1966
+     ],
+     [
+      -7464,
+      -1972
+     ],
+     [
+      -7470,
+      -1978
+     ],
+     [
+      -7476,
+      -1983
+     ],
+     [
+      -7482,
+      -1989
+     ],
+     [
+      -7487,
+      -1995
+     ],
+     [
+      -7491,
+      -2002
+     ],
+     [
+      -7494,
+      -2009
+     ],
+     [
+      -7497,
+      -2017
+     ],
+     [
+      -7499,
+      -2024
+     ],
+     [
+      -7500,
+      -2032
+     ],
+     [
+      -7500,
+      -2040
+     ],
+     [
+      -7500,
+      -2048
+     ],
+     [
+      -7500,
+      -2056
+     ],
+     [
+      -7501,
+      -2064
+     ],
+     [
+      -7500,
+      -2072
+     ],
+     [
+      -7500,
+      -2080
+     ],
+     [
+      -7501,
+      -2088
+     ],
+     [
+      -7502,
+      -2096
+     ],
+     [
+      -7505,
+      -2104
+     ],
+     [
+      -7508,
+      -2111
+     ],
+     [
+      -7513,
+      -2117
+     ],
+     [
+      -7518,
+      -2123
+     ],
+     [
+      -7523,
+      -2129
+     ],
+     [
+      -7529,
+      -2135
+     ],
+     [
+      -7533,
+      -2142
+     ],
+     [
+      -7538,
+      -2148
+     ],
+     [
+      -7541,
+      -2155
+     ],
+     [
+      -7544,
+      -2163
+     ],
+     [
+      -7545,
+      -2171
+     ],
+     [
+      -7543,
+      -2179
+     ],
+     [
+      -7539,
+      -2186
+     ],
+     [
+      -7533,
+      -2191
+     ],
+     [
+      -7526,
+      -2195
+     ],
+     [
+      -7519,
+      -2198
+     ],
+     [
+      -7511,
+      -2200
+     ],
+     [
+      -7503,
+      -2202
+     ],
+     [
+      -7496,
+      -2204
+     ],
+     [
+      -7488,
+      -2206
+     ],
+     [
+      -7480,
+      -2208
+     ],
+     [
+      -7473,
+      -2212
+     ],
+     [
+      -7466,
+      -2216
+     ],
+     [
+      -7461,
+      -2222
+     ],
+     [
+      -7458,
+      -2229
+     ],
+     [
+      -7462,
+      -2236
+     ],
+     [
+      -7468,
+      -2241
+     ],
+     [
+      -7475,
+      -2244
+     ],
+     [
+      -7483,
+      -2247
+     ],
+     [
+      -7490,
+      -2250
+     ],
+     [
+      -7497,
+      -2253
+     ],
+     [
+      -7503,
+      -2259
+     ],
+     [
+      -7507,
+      -2266
+     ],
+     [
+      -7506,
+      -2274
+     ],
+     [
+      -7501,
+      -2280
+     ],
+     [
+      -7494,
+      -2284
+     ],
+     [
+      -7486,
+      -2286
+     ],
+     [
+      -7478,
+      -2288
+     ],
+     [
+      -7470,
+      -2288
+     ],
+     [
+      -7462,
+      -2287
+     ],
+     [
+      -7454,
+      -2287
+     ],
+     [
+      -7446,
+      -2285
+     ],
+     [
+      -7439,
+      -2284
+     ],
+     [
+      -7431,
+      -2281
+     ],
+     [
+      -7424,
+      -2277
+     ],
+     [
+      -7417,
+      -2273
+     ],
+     [
+      -7410,
+      -2269
+     ],
+     [
+      -7403,
+      -2265
+     ],
+     [
+      -7397,
+      -2260
+     ],
+     [
+      -7391,
+      -2254
+     ],
+     [
+      -7386,
+      -2248
+     ],
+     [
+      -7382,
+      -2241
+     ],
+     [
+      -7378,
+      -2234
+     ],
+     [
+      -7375,
+      -2227
+     ],
+     [
+      -7373,
+      -2219
+     ],
+     [
+      -7371,
+      -2211
+     ],
+     [
+      -7369,
+      -2204
+     ],
+     [
+      -7367,
+      -2196
+     ],
+     [
+      -7365,
+      -2188
+     ],
+     [
+      -7363,
+      -2181
+     ],
+     [
+      -7361,
+      -2173
+     ],
+     [
+      -7359,
+      -2165
+     ],
+     [
+      -7357,
+      -2157
+     ],
+     [
+      -7355,
+      -2150
+     ],
+     [
+      -7354,
+      -2142
+     ],
+     [
+      -7352,
+      -2134
+     ],
+     [
+      -7350,
+      -2126
+     ],
+     [
+      -7348,
+      -2118
+     ],
+     [
+      -7347,
+      -2110
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 3,
+    "pts": [
+     [
+      -7346,
+      -2109
+     ],
+     [
+      -7344,
+      -2101
+     ],
+     [
+      -7343,
+      -2093
+     ],
+     [
+      -7341,
+      -2085
+     ],
+     [
+      -7340,
+      -2077
+     ],
+     [
+      -7338,
+      -2070
+     ],
+     [
+      -7336,
+      -2062
+     ],
+     [
+      -7335,
+      -2054
+     ],
+     [
+      -7333,
+      -2046
+     ],
+     [
+      -7332,
+      -2038
+     ],
+     [
+      -7331,
+      -2030
+     ],
+     [
+      -7331,
+      -2022
+     ],
+     [
+      -7330,
+      -2014
+     ],
+     [
+      -7329,
+      -2006
+     ],
+     [
+      -7329,
+      -1998
+     ],
+     [
+      -7329,
+      -1990
+     ],
+     [
+      -7330,
+      -1982
+     ],
+     [
+      -7331,
+      -1974
+     ],
+     [
+      -7334,
+      -1967
+     ],
+     [
+      -7337,
+      -1959
+     ],
+     [
+      -7341,
+      -1952
+     ],
+     [
+      -7345,
+      -1946
+     ],
+     [
+      -7350,
+      -1939
+     ],
+     [
+      -7355,
+      -1934
+     ],
+     [
+      -7361,
+      -1928
+     ],
+     [
+      -7368,
+      -1924
+     ],
+     [
+      -7375,
+      -1920
+     ],
+     [
+      -7383,
+      -1917
+     ],
+     [
+      -7390,
+      -1915
+     ],
+     [
+      -7398,
+      -1914
+     ],
+     [
+      -7406,
+      -1913
+     ],
+     [
+      -7414,
+      -1913
+     ],
+     [
+      -7422,
+      -1913
+     ],
+     [
+      -7430,
+      -1915
+     ],
+     [
+      -7436,
+      -1919
+     ],
+     [
+      -7441,
+      -1926
+     ],
+     [
+      -7444,
+      -1933
+     ],
+     [
+      -7446,
+      -1941
+     ],
+     [
+      -7449,
+      -1948
+     ],
+     [
+      -7453,
+      -1956
+     ],
+     [
+      -7457,
+      -1962
+     ],
+     [
+      -7462,
+      -1969
+     ],
+     [
+      -7467,
+      -1974
+     ],
+     [
+      -7473,
+      -1980
+     ],
+     [
+      -7479,
+      -1985
+     ],
+     [
+      -7485,
+      -1991
+     ],
+     [
+      -7489,
+      -1997
+     ],
+     [
+      -7494,
+      -2004
+     ],
+     [
+      -7497,
+      -2012
+     ],
+     [
+      -7499,
+      -2019
+     ],
+     [
+      -7501,
+      -2027
+     ],
+     [
+      -7501,
+      -2035
+     ],
+     [
+      -7501,
+      -2043
+     ],
+     [
+      -7501,
+      -2051
+     ],
+     [
+      -7501,
+      -2059
+     ],
+     [
+      -7501,
+      -2067
+     ],
+     [
+      -7501,
+      -2075
+     ],
+     [
+      -7501,
+      -2083
+     ],
+     [
+      -7503,
+      -2091
+     ],
+     [
+      -7505,
+      -2099
+     ],
+     [
+      -7508,
+      -2106
+     ],
+     [
+      -7512,
+      -2113
+     ],
+     [
+      -7517,
+      -2119
+     ],
+     [
+      -7522,
+      -2126
+     ],
+     [
+      -7527,
+      -2131
+     ],
+     [
+      -7533,
+      -2137
+     ],
+     [
+      -7538,
+      -2144
+     ],
+     [
+      -7542,
+      -2150
+     ],
+     [
+      -7544,
+      -2158
+     ],
+     [
+      -7545,
+      -2166
+     ],
+     [
+      -7544,
+      -2174
+     ],
+     [
+      -7541,
+      -2181
+     ],
+     [
+      -7537,
+      -2187
+     ],
+     [
+      -7530,
+      -2192
+     ],
+     [
+      -7523,
+      -2196
+     ],
+     [
+      -7516,
+      -2199
+     ],
+     [
+      -7508,
+      -2201
+     ],
+     [
+      -7500,
+      -2203
+     ],
+     [
+      -7492,
+      -2204
+     ],
+     [
+      -7485,
+      -2206
+     ],
+     [
+      -7477,
+      -2209
+     ],
+     [
+      -7470,
+      -2212
+     ],
+     [
+      -7463,
+      -2216
+     ],
+     [
+      -7457,
+      -2222
+     ],
+     [
+      -7454,
+      -2229
+     ],
+     [
+      -7454,
+      -2237
+     ],
+     [
+      -7459,
+      -2243
+     ],
+     [
+      -7466,
+      -2247
+     ],
+     [
+      -7473,
+      -2250
+     ],
+     [
+      -7481,
+      -2251
+     ],
+     [
+      -7489,
+      -2252
+     ],
+     [
+      -7497,
+      -2255
+     ],
+     [
+      -7503,
+      -2259
+     ],
+     [
+      -7507,
+      -2266
+     ],
+     [
+      -7503,
+      -2272
+     ],
+     [
+      -7496,
+      -2275
+     ],
+     [
+      -7488,
+      -2277
+     ],
+     [
+      -7480,
+      -2277
+     ],
+     [
+      -7472,
+      -2277
+     ],
+     [
+      -7464,
+      -2278
+     ],
+     [
+      -7456,
+      -2278
+     ],
+     [
+      -7448,
+      -2278
+     ],
+     [
+      -7440,
+      -2278
+     ],
+     [
+      -7432,
+      -2276
+     ],
+     [
+      -7424,
+      -2274
+     ],
+     [
+      -7417,
+      -2272
+     ],
+     [
+      -7409,
+      -2268
+     ],
+     [
+      -7402,
+      -2264
+     ],
+     [
+      -7396,
+      -2260
+     ],
+     [
+      -7390,
+      -2254
+     ],
+     [
+      -7385,
+      -2248
+     ],
+     [
+      -7380,
+      -2241
+     ],
+     [
+      -7376,
+      -2234
+     ],
+     [
+      -7373,
+      -2227
+     ],
+     [
+      -7371,
+      -2219
+     ],
+     [
+      -7369,
+      -2212
+     ],
+     [
+      -7367,
+      -2204
+     ],
+     [
+      -7365,
+      -2196
+     ],
+     [
+      -7363,
+      -2189
+     ],
+     [
+      -7361,
+      -2181
+     ],
+     [
+      -7359,
+      -2173
+     ],
+     [
+      -7357,
+      -2165
+     ],
+     [
+      -7356,
+      -2157
+     ],
+     [
+      -7355,
+      -2149
+     ],
+     [
+      -7354,
+      -2141
+     ],
+     [
+      -7352,
+      -2134
+     ],
+     [
+      -7350,
+      -2126
+     ],
+     [
+      -7348,
+      -2118
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 4,
+    "pts": [
+     [
+      -7347,
+      -2112
+     ],
+     [
+      -7346,
+      -2104
+     ],
+     [
+      -7344,
+      -2096
+     ],
+     [
+      -7342,
+      -2088
+     ],
+     [
+      -7341,
+      -2081
+     ],
+     [
+      -7339,
+      -2073
+     ],
+     [
+      -7338,
+      -2065
+     ],
+     [
+      -7336,
+      -2057
+     ],
+     [
+      -7335,
+      -2049
+     ],
+     [
+      -7333,
+      -2041
+     ],
+     [
+      -7332,
+      -2033
+     ],
+     [
+      -7331,
+      -2025
+     ],
+     [
+      -7330,
+      -2017
+     ],
+     [
+      -7330,
+      -2009
+     ],
+     [
+      -7330,
+      -2001
+     ],
+     [
+      -7330,
+      -1993
+     ],
+     [
+      -7331,
+      -1986
+     ],
+     [
+      -7332,
+      -1978
+     ],
+     [
+      -7335,
+      -1970
+     ],
+     [
+      -7338,
+      -1963
+     ],
+     [
+      -7342,
+      -1956
+     ],
+     [
+      -7346,
+      -1949
+     ],
+     [
+      -7351,
+      -1943
+     ],
+     [
+      -7356,
+      -1936
+     ],
+     [
+      -7361,
+      -1931
+     ],
+     [
+      -7367,
+      -1925
+     ],
+     [
+      -7374,
+      -1920
+     ],
+     [
+      -7381,
+      -1916
+     ],
+     [
+      -7388,
+      -1913
+     ],
+     [
+      -7395,
+      -1910
+     ],
+     [
+      -7403,
+      -1908
+     ],
+     [
+      -7411,
+      -1907
+     ],
+     [
+      -7419,
+      -1907
+     ],
+     [
+      -7427,
+      -1909
+     ],
+     [
+      -7434,
+      -1912
+     ],
+     [
+      -7440,
+      -1917
+     ],
+     [
+      -7445,
+      -1924
+     ],
+     [
+      -7448,
+      -1931
+     ],
+     [
+      -7449,
+      -1939
+     ],
+     [
+      -7450,
+      -1947
+     ],
+     [
+      -7453,
+      -1954
+     ],
+     [
+      -7457,
+      -1962
+     ],
+     [
+      -7461,
+      -1968
+     ],
+     [
+      -7466,
+      -1974
+     ],
+     [
+      -7471,
+      -1980
+     ],
+     [
+      -7477,
+      -1986
+     ],
+     [
+      -7483,
+      -1992
+     ],
+     [
+      -7487,
+      -1998
+     ],
+     [
+      -7491,
+      -2005
+     ],
+     [
+      -7495,
+      -2012
+     ],
+     [
+      -7498,
+      -2020
+     ],
+     [
+      -7500,
+      -2027
+     ],
+     [
+      -7502,
+      -2035
+     ],
+     [
+      -7503,
+      -2043
+     ],
+     [
+      -7503,
+      -2051
+     ],
+     [
+      -7502,
+      -2059
+     ],
+     [
+      -7501,
+      -2067
+     ],
+     [
+      -7501,
+      -2075
+     ],
+     [
+      -7502,
+      -2083
+     ],
+     [
+      -7504,
+      -2091
+     ],
+     [
+      -7507,
+      -2098
+     ],
+     [
+      -7511,
+      -2105
+     ],
+     [
+      -7515,
+      -2111
+     ],
+     [
+      -7520,
+      -2118
+     ],
+     [
+      -7525,
+      -2124
+     ],
+     [
+      -7529,
+      -2131
+     ],
+     [
+      -7533,
+      -2138
+     ],
+     [
+      -7537,
+      -2145
+     ],
+     [
+      -7541,
+      -2152
+     ],
+     [
+      -7543,
+      -2160
+     ],
+     [
+      -7543,
+      -2168
+     ],
+     [
+      -7542,
+      -2176
+     ],
+     [
+      -7538,
+      -2183
+     ],
+     [
+      -7534,
+      -2190
+     ],
+     [
+      -7528,
+      -2195
+     ],
+     [
+      -7521,
+      -2199
+     ],
+     [
+      -7513,
+      -2201
+     ],
+     [
+      -7505,
+      -2203
+     ],
+     [
+      -7498,
+      -2204
+     ],
+     [
+      -7490,
+      -2205
+     ],
+     [
+      -7482,
+      -2207
+     ],
+     [
+      -7475,
+      -2210
+     ],
+     [
+      -7468,
+      -2214
+     ],
+     [
+      -7462,
+      -2220
+     ],
+     [
+      -7458,
+      -2227
+     ],
+     [
+      -7458,
+      -2235
+     ],
+     [
+      -7462,
+      -2241
+     ],
+     [
+      -7469,
+      -2246
+     ],
+     [
+      -7476,
+      -2249
+     ],
+     [
+      -7484,
+      -2250
+     ],
+     [
+      -7492,
+      -2252
+     ],
+     [
+      -7499,
+      -2255
+     ],
+     [
+      -7505,
+      -2260
+     ],
+     [
+      -7508,
+      -2268
+     ],
+     [
+      -7506,
+      -2275
+     ],
+     [
+      -7500,
+      -2281
+     ],
+     [
+      -7493,
+      -2285
+     ],
+     [
+      -7486,
+      -2287
+     ],
+     [
+      -7478,
+      -2288
+     ],
+     [
+      -7470,
+      -2288
+     ],
+     [
+      -7462,
+      -2288
+     ],
+     [
+      -7454,
+      -2286
+     ],
+     [
+      -7446,
+      -2284
+     ],
+     [
+      -7438,
+      -2282
+     ],
+     [
+      -7431,
+      -2280
+     ],
+     [
+      -7423,
+      -2277
+     ],
+     [
+      -7416,
+      -2273
+     ],
+     [
+      -7409,
+      -2269
+     ],
+     [
+      -7403,
+      -2264
+     ],
+     [
+      -7397,
+      -2259
+     ],
+     [
+      -7392,
+      -2253
+     ],
+     [
+      -7387,
+      -2246
+     ],
+     [
+      -7383,
+      -2239
+     ],
+     [
+      -7380,
+      -2232
+     ],
+     [
+      -7377,
+      -2224
+     ],
+     [
+      -7375,
+      -2217
+     ],
+     [
+      -7372,
+      -2209
+     ],
+     [
+      -7369,
+      -2202
+     ],
+     [
+      -7367,
+      -2194
+     ],
+     [
+      -7365,
+      -2186
+     ],
+     [
+      -7362,
+      -2179
+     ],
+     [
+      -7360,
+      -2171
+     ],
+     [
+      -7358,
+      -2163
+     ],
+     [
+      -7356,
+      -2156
+     ],
+     [
+      -7354,
+      -2148
+     ],
+     [
+      -7352,
+      -2140
+     ],
+     [
+      -7350,
+      -2132
+     ],
+     [
+      -7349,
+      -2124
+     ],
+     [
+      -7347,
+      -2117
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 5,
+    "pts": [
+     [
+      -7346,
+      -2111
+     ],
+     [
+      -7344,
+      -2103
+     ],
+     [
+      -7343,
+      -2095
+     ],
+     [
+      -7341,
+      -2087
+     ],
+     [
+      -7339,
+      -2079
+     ],
+     [
+      -7337,
+      -2072
+     ],
+     [
+      -7336,
+      -2064
+     ],
+     [
+      -7334,
+      -2056
+     ],
+     [
+      -7333,
+      -2048
+     ],
+     [
+      -7332,
+      -2040
+     ],
+     [
+      -7331,
+      -2032
+     ],
+     [
+      -7330,
+      -2024
+     ],
+     [
+      -7329,
+      -2016
+     ],
+     [
+      -7329,
+      -2008
+     ],
+     [
+      -7329,
+      -2000
+     ],
+     [
+      -7330,
+      -1992
+     ],
+     [
+      -7331,
+      -1984
+     ],
+     [
+      -7334,
+      -1977
+     ],
+     [
+      -7337,
+      -1969
+     ],
+     [
+      -7340,
+      -1962
+     ],
+     [
+      -7344,
+      -1955
+     ],
+     [
+      -7348,
+      -1948
+     ],
+     [
+      -7353,
+      -1942
+     ],
+     [
+      -7359,
+      -1937
+     ],
+     [
+      -7365,
+      -1932
+     ],
+     [
+      -7372,
+      -1927
+     ],
+     [
+      -7379,
+      -1923
+     ],
+     [
+      -7386,
+      -1920
+     ],
+     [
+      -7393,
+      -1916
+     ],
+     [
+      -7401,
+      -1914
+     ],
+     [
+      -7409,
+      -1912
+     ],
+     [
+      -7417,
+      -1912
+     ],
+     [
+      -7425,
+      -1912
+     ],
+     [
+      -7432,
+      -1914
+     ],
+     [
+      -7440,
+      -1917
+     ],
+     [
+      -7444,
+      -1923
+     ],
+     [
+      -7447,
+      -1931
+     ],
+     [
+      -7449,
+      -1939
+     ],
+     [
+      -7451,
+      -1946
+     ],
+     [
+      -7454,
+      -1954
+     ],
+     [
+      -7457,
+      -1961
+     ],
+     [
+      -7461,
+      -1968
+     ],
+     [
+      -7467,
+      -1974
+     ],
+     [
+      -7472,
+      -1980
+     ],
+     [
+      -7478,
+      -1985
+     ],
+     [
+      -7483,
+      -1992
+     ],
+     [
+      -7487,
+      -1998
+     ],
+     [
+      -7491,
+      -2005
+     ],
+     [
+      -7494,
+      -2013
+     ],
+     [
+      -7497,
+      -2020
+     ],
+     [
+      -7499,
+      -2028
+     ],
+     [
+      -7500,
+      -2036
+     ],
+     [
+      -7500,
+      -2044
+     ],
+     [
+      -7500,
+      -2052
+     ],
+     [
+      -7500,
+      -2060
+     ],
+     [
+      -7499,
+      -2068
+     ],
+     [
+      -7500,
+      -2076
+     ],
+     [
+      -7502,
+      -2084
+     ],
+     [
+      -7504,
+      -2091
+     ],
+     [
+      -7507,
+      -2098
+     ],
+     [
+      -7512,
+      -2105
+     ],
+     [
+      -7516,
+      -2112
+     ],
+     [
+      -7521,
+      -2118
+     ],
+     [
+      -7526,
+      -2124
+     ],
+     [
+      -7531,
+      -2131
+     ],
+     [
+      -7535,
+      -2137
+     ],
+     [
+      -7539,
+      -2144
+     ],
+     [
+      -7542,
+      -2152
+     ],
+     [
+      -7544,
+      -2160
+     ],
+     [
+      -7545,
+      -2168
+     ],
+     [
+      -7545,
+      -2176
+     ],
+     [
+      -7543,
+      -2183
+     ],
+     [
+      -7539,
+      -2190
+     ],
+     [
+      -7534,
+      -2197
+     ],
+     [
+      -7528,
+      -2201
+     ],
+     [
+      -7520,
+      -2204
+     ],
+     [
+      -7512,
+      -2206
+     ],
+     [
+      -7504,
+      -2205
+     ],
+     [
+      -7496,
+      -2205
+     ],
+     [
+      -7488,
+      -2206
+     ],
+     [
+      -7481,
+      -2208
+     ],
+     [
+      -7473,
+      -2210
+     ],
+     [
+      -7466,
+      -2214
+     ],
+     [
+      -7461,
+      -2220
+     ],
+     [
+      -7458,
+      -2227
+     ],
+     [
+      -7461,
+      -2235
+     ],
+     [
+      -7466,
+      -2241
+     ],
+     [
+      -7473,
+      -2245
+     ],
+     [
+      -7480,
+      -2248
+     ],
+     [
+      -7488,
+      -2250
+     ],
+     [
+      -7495,
+      -2253
+     ],
+     [
+      -7502,
+      -2257
+     ],
+     [
+      -7506,
+      -2264
+     ],
+     [
+      -7505,
+      -2272
+     ],
+     [
+      -7500,
+      -2277
+     ],
+     [
+      -7492,
+      -2280
+     ],
+     [
+      -7485,
+      -2283
+     ],
+     [
+      -7477,
+      -2284
+     ],
+     [
+      -7469,
+      -2285
+     ],
+     [
+      -7461,
+      -2286
+     ],
+     [
+      -7453,
+      -2285
+     ],
+     [
+      -7445,
+      -2283
+     ],
+     [
+      -7437,
+      -2281
+     ],
+     [
+      -7430,
+      -2279
+     ],
+     [
+      -7422,
+      -2276
+     ],
+     [
+      -7415,
+      -2272
+     ],
+     [
+      -7409,
+      -2267
+     ],
+     [
+      -7403,
+      -2262
+     ],
+     [
+      -7397,
+      -2257
+     ],
+     [
+      -7392,
+      -2251
+     ],
+     [
+      -7388,
+      -2244
+     ],
+     [
+      -7384,
+      -2237
+     ],
+     [
+      -7380,
+      -2230
+     ],
+     [
+      -7377,
+      -2222
+     ],
+     [
+      -7374,
+      -2215
+     ],
+     [
+      -7371,
+      -2208
+     ],
+     [
+      -7368,
+      -2200
+     ],
+     [
+      -7365,
+      -2192
+     ],
+     [
+      -7363,
+      -2185
+     ],
+     [
+      -7361,
+      -2177
+     ],
+     [
+      -7359,
+      -2169
+     ],
+     [
+      -7357,
+      -2162
+     ],
+     [
+      -7355,
+      -2154
+     ],
+     [
+      -7353,
+      -2146
+     ],
+     [
+      -7351,
+      -2138
+     ],
+     [
+      -7350,
+      -2130
+     ],
+     [
+      -7348,
+      -2123
+     ],
+     [
+      -7346,
+      -2115
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 6,
+    "pts": [
+     [
+      -7346,
+      -2110
+     ],
+     [
+      -7344,
+      -2103
+     ],
+     [
+      -7343,
+      -2095
+     ],
+     [
+      -7341,
+      -2087
+     ],
+     [
+      -7339,
+      -2079
+     ],
+     [
+      -7338,
+      -2071
+     ],
+     [
+      -7336,
+      -2063
+     ],
+     [
+      -7335,
+      -2056
+     ],
+     [
+      -7333,
+      -2048
+     ],
+     [
+      -7332,
+      -2040
+     ],
+     [
+      -7331,
+      -2032
+     ],
+     [
+      -7330,
+      -2024
+     ],
+     [
+      -7329,
+      -2016
+     ],
+     [
+      -7328,
+      -2008
+     ],
+     [
+      -7328,
+      -2000
+     ],
+     [
+      -7328,
+      -1992
+     ],
+     [
+      -7330,
+      -1984
+     ],
+     [
+      -7332,
+      -1976
+     ],
+     [
+      -7334,
+      -1969
+     ],
+     [
+      -7338,
+      -1962
+     ],
+     [
+      -7342,
+      -1955
+     ],
+     [
+      -7346,
+      -1948
+     ],
+     [
+      -7351,
+      -1942
+     ],
+     [
+      -7356,
+      -1936
+     ],
+     [
+      -7362,
+      -1930
+     ],
+     [
+      -7368,
+      -1925
+     ],
+     [
+      -7375,
+      -1921
+     ],
+     [
+      -7382,
+      -1918
+     ],
+     [
+      -7390,
+      -1915
+     ],
+     [
+      -7398,
+      -1914
+     ],
+     [
+      -7406,
+      -1913
+     ],
+     [
+      -7414,
+      -1913
+     ],
+     [
+      -7422,
+      -1914
+     ],
+     [
+      -7430,
+      -1915
+     ],
+     [
+      -7437,
+      -1918
+     ],
+     [
+      -7442,
+      -1924
+     ],
+     [
+      -7446,
+      -1931
+     ],
+     [
+      -7448,
+      -1939
+     ],
+     [
+      -7451,
+      -1947
+     ],
+     [
+      -7453,
+      -1954
+     ],
+     [
+      -7456,
+      -1962
+     ],
+     [
+      -7459,
+      -1969
+     ],
+     [
+      -7463,
+      -1976
+     ],
+     [
+      -7468,
+      -1982
+     ],
+     [
+      -7474,
+      -1988
+     ],
+     [
+      -7480,
+      -1992
+     ],
+     [
+      -7486,
+      -1998
+     ],
+     [
+      -7491,
+      -2004
+     ],
+     [
+      -7495,
+      -2010
+     ],
+     [
+      -7498,
+      -2018
+     ],
+     [
+      -7499,
+      -2026
+     ],
+     [
+      -7500,
+      -2034
+     ],
+     [
+      -7499,
+      -2042
+     ],
+     [
+      -7499,
+      -2050
+     ],
+     [
+      -7498,
+      -2058
+     ],
+     [
+      -7498,
+      -2066
+     ],
+     [
+      -7499,
+      -2074
+     ],
+     [
+      -7501,
+      -2082
+     ],
+     [
+      -7503,
+      -2089
+     ],
+     [
+      -7506,
+      -2097
+     ],
+     [
+      -7509,
+      -2104
+     ],
+     [
+      -7514,
+      -2111
+     ],
+     [
+      -7518,
+      -2117
+     ],
+     [
+      -7523,
+      -2123
+     ],
+     [
+      -7528,
+      -2130
+     ],
+     [
+      -7532,
+      -2137
+     ],
+     [
+      -7536,
+      -2144
+     ],
+     [
+      -7540,
+      -2151
+     ],
+     [
+      -7543,
+      -2158
+     ],
+     [
+      -7544,
+      -2166
+     ],
+     [
+      -7543,
+      -2174
+     ],
+     [
+      -7540,
+      -2181
+     ],
+     [
+      -7535,
+      -2187
+     ],
+     [
+      -7528,
+      -2192
+     ],
+     [
+      -7521,
+      -2197
+     ],
+     [
+      -7514,
+      -2200
+     ],
+     [
+      -7506,
+      -2202
+     ],
+     [
+      -7499,
+      -2203
+     ],
+     [
+      -7491,
+      -2205
+     ],
+     [
+      -7483,
+      -2207
+     ],
+     [
+      -7475,
+      -2209
+     ],
+     [
+      -7468,
+      -2213
+     ],
+     [
+      -7462,
+      -2218
+     ],
+     [
+      -7459,
+      -2225
+     ],
+     [
+      -7460,
+      -2233
+     ],
+     [
+      -7465,
+      -2239
+     ],
+     [
+      -7471,
+      -2244
+     ],
+     [
+      -7479,
+      -2247
+     ],
+     [
+      -7486,
+      -2250
+     ],
+     [
+      -7494,
+      -2253
+     ],
+     [
+      -7501,
+      -2256
+     ],
+     [
+      -7506,
+      -2263
+     ],
+     [
+      -7505,
+      -2270
+     ],
+     [
+      -7500,
+      -2277
+     ],
+     [
+      -7494,
+      -2281
+     ],
+     [
+      -7486,
+      -2284
+     ],
+     [
+      -7478,
+      -2285
+     ],
+     [
+      -7470,
+      -2286
+     ],
+     [
+      -7462,
+      -2286
+     ],
+     [
+      -7454,
+      -2286
+     ],
+     [
+      -7446,
+      -2285
+     ],
+     [
+      -7439,
+      -2283
+     ],
+     [
+      -7431,
+      -2281
+     ],
+     [
+      -7423,
+      -2278
+     ],
+     [
+      -7416,
+      -2274
+     ],
+     [
+      -7410,
+      -2270
+     ],
+     [
+      -7404,
+      -2265
+     ],
+     [
+      -7398,
+      -2259
+     ],
+     [
+      -7393,
+      -2253
+     ],
+     [
+      -7389,
+      -2246
+     ],
+     [
+      -7385,
+      -2239
+     ],
+     [
+      -7381,
+      -2232
+     ],
+     [
+      -7377,
+      -2225
+     ],
+     [
+      -7375,
+      -2217
+     ],
+     [
+      -7373,
+      -2210
+     ],
+     [
+      -7370,
+      -2202
+     ],
+     [
+      -7368,
+      -2194
+     ],
+     [
+      -7366,
+      -2186
+     ],
+     [
+      -7364,
+      -2179
+     ],
+     [
+      -7362,
+      -2171
+     ],
+     [
+      -7360,
+      -2163
+     ],
+     [
+      -7357,
+      -2156
+     ],
+     [
+      -7356,
+      -2148
+     ],
+     [
+      -7354,
+      -2140
+     ],
+     [
+      -7352,
+      -2132
+     ],
+     [
+      -7350,
+      -2125
+     ],
+     [
+      -7348,
+      -2117
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 7,
+    "pts": [
+     [
+      -7347,
+      -2111
+     ],
+     [
+      -7345,
+      -2103
+     ],
+     [
+      -7343,
+      -2095
+     ],
+     [
+      -7342,
+      -2087
+     ],
+     [
+      -7340,
+      -2080
+     ],
+     [
+      -7338,
+      -2072
+     ],
+     [
+      -7336,
+      -2064
+     ],
+     [
+      -7335,
+      -2056
+     ],
+     [
+      -7333,
+      -2048
+     ],
+     [
+      -7332,
+      -2040
+     ],
+     [
+      -7332,
+      -2032
+     ],
+     [
+      -7331,
+      -2024
+     ],
+     [
+      -7330,
+      -2017
+     ],
+     [
+      -7330,
+      -2009
+     ],
+     [
+      -7330,
+      -2001
+     ],
+     [
+      -7331,
+      -1993
+     ],
+     [
+      -7332,
+      -1985
+     ],
+     [
+      -7334,
+      -1977
+     ],
+     [
+      -7336,
+      -1969
+     ],
+     [
+      -7340,
+      -1962
+     ],
+     [
+      -7344,
+      -1955
+     ],
+     [
+      -7349,
+      -1949
+     ],
+     [
+      -7354,
+      -1943
+     ],
+     [
+      -7360,
+      -1938
+     ],
+     [
+      -7367,
+      -1933
+     ],
+     [
+      -7373,
+      -1928
+     ],
+     [
+      -7380,
+      -1924
+     ],
+     [
+      -7387,
+      -1920
+     ],
+     [
+      -7394,
+      -1916
+     ],
+     [
+      -7402,
+      -1914
+     ],
+     [
+      -7409,
+      -1912
+     ],
+     [
+      -7417,
+      -1911
+     ],
+     [
+      -7425,
+      -1911
+     ],
+     [
+      -7433,
+      -1913
+     ],
+     [
+      -7440,
+      -1917
+     ],
+     [
+      -7446,
+      -1922
+     ],
+     [
+      -7449,
+      -1930
+     ],
+     [
+      -7449,
+      -1938
+     ],
+     [
+      -7448,
+      -1946
+     ],
+     [
+      -7450,
+      -1954
+     ],
+     [
+      -7453,
+      -1961
+     ],
+     [
+      -7457,
+      -1968
+     ],
+     [
+      -7463,
+      -1973
+     ],
+     [
+      -7469,
+      -1978
+     ],
+     [
+      -7475,
+      -1983
+     ],
+     [
+      -7481,
+      -1989
+     ],
+     [
+      -7486,
+      -1995
+     ],
+     [
+      -7490,
+      -2002
+     ],
+     [
+      -7494,
+      -2009
+     ],
+     [
+      -7497,
+      -2016
+     ],
+     [
+      -7499,
+      -2024
+     ],
+     [
+      -7500,
+      -2032
+     ],
+     [
+      -7500,
+      -2040
+     ],
+     [
+      -7500,
+      -2048
+     ],
+     [
+      -7500,
+      -2056
+     ],
+     [
+      -7500,
+      -2064
+     ],
+     [
+      -7500,
+      -2072
+     ],
+     [
+      -7500,
+      -2080
+     ],
+     [
+      -7502,
+      -2088
+     ],
+     [
+      -7504,
+      -2096
+     ],
+     [
+      -7507,
+      -2103
+     ],
+     [
+      -7511,
+      -2110
+     ],
+     [
+      -7516,
+      -2117
+     ],
+     [
+      -7520,
+      -2123
+     ],
+     [
+      -7526,
+      -2129
+     ],
+     [
+      -7531,
+      -2135
+     ],
+     [
+      -7537,
+      -2141
+     ],
+     [
+      -7541,
+      -2147
+     ],
+     [
+      -7545,
+      -2155
+     ],
+     [
+      -7547,
+      -2162
+     ],
+     [
+      -7548,
+      -2170
+     ],
+     [
+      -7546,
+      -2178
+     ],
+     [
+      -7543,
+      -2185
+     ],
+     [
+      -7538,
+      -2191
+     ],
+     [
+      -7532,
+      -2197
+     ],
+     [
+      -7525,
+      -2201
+     ],
+     [
+      -7517,
+      -2203
+     ],
+     [
+      -7509,
+      -2205
+     ],
+     [
+      -7501,
+      -2206
+     ],
+     [
+      -7493,
+      -2207
+     ],
+     [
+      -7485,
+      -2208
+     ],
+     [
+      -7478,
+      -2209
+     ],
+     [
+      -7470,
+      -2212
+     ],
+     [
+      -7464,
+      -2217
+     ],
+     [
+      -7458,
+      -2223
+     ],
+     [
+      -7455,
+      -2230
+     ],
+     [
+      -7458,
+      -2238
+     ],
+     [
+      -7464,
+      -2243
+     ],
+     [
+      -7471,
+      -2246
+     ],
+     [
+      -7479,
+      -2249
+     ],
+     [
+      -7486,
+      -2251
+     ],
+     [
+      -7494,
+      -2254
+     ],
+     [
+      -7501,
+      -2257
+     ],
+     [
+      -7505,
+      -2264
+     ],
+     [
+      -7506,
+      -2272
+     ],
+     [
+      -7501,
+      -2279
+     ],
+     [
+      -7495,
+      -2283
+     ],
+     [
+      -7487,
+      -2285
+     ],
+     [
+      -7479,
+      -2286
+     ],
+     [
+      -7471,
+      -2286
+     ],
+     [
+      -7463,
+      -2285
+     ],
+     [
+      -7455,
+      -2284
+     ],
+     [
+      -7447,
+      -2283
+     ],
+     [
+      -7439,
+      -2281
+     ],
+     [
+      -7432,
+      -2279
+     ],
+     [
+      -7424,
+      -2276
+     ],
+     [
+      -7417,
+      -2273
+     ],
+     [
+      -7410,
+      -2269
+     ],
+     [
+      -7403,
+      -2264
+     ],
+     [
+      -7397,
+      -2259
+     ],
+     [
+      -7392,
+      -2253
+     ],
+     [
+      -7387,
+      -2247
+     ],
+     [
+      -7383,
+      -2240
+     ],
+     [
+      -7380,
+      -2233
+     ],
+     [
+      -7377,
+      -2225
+     ],
+     [
+      -7374,
+      -2218
+     ],
+     [
+      -7372,
+      -2210
+     ],
+     [
+      -7370,
+      -2202
+     ],
+     [
+      -7368,
+      -2195
+     ],
+     [
+      -7366,
+      -2187
+     ],
+     [
+      -7364,
+      -2179
+     ],
+     [
+      -7362,
+      -2171
+     ],
+     [
+      -7360,
+      -2163
+     ],
+     [
+      -7358,
+      -2156
+     ],
+     [
+      -7357,
+      -2148
+     ],
+     [
+      -7355,
+      -2140
+     ],
+     [
+      -7353,
+      -2132
+     ],
+     [
+      -7351,
+      -2125
+     ],
+     [
+      -7349,
+      -2117
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 8,
+    "pts": [
+     [
+      -7348,
+      -2110
+     ],
+     [
+      -7346,
+      -2102
+     ],
+     [
+      -7344,
+      -2094
+     ],
+     [
+      -7342,
+      -2086
+     ],
+     [
+      -7340,
+      -2078
+     ],
+     [
+      -7339,
+      -2071
+     ],
+     [
+      -7337,
+      -2063
+     ],
+     [
+      -7336,
+      -2055
+     ],
+     [
+      -7334,
+      -2047
+     ],
+     [
+      -7333,
+      -2039
+     ],
+     [
+      -7332,
+      -2031
+     ],
+     [
+      -7330,
+      -2023
+     ],
+     [
+      -7329,
+      -2015
+     ],
+     [
+      -7328,
+      -2007
+     ],
+     [
+      -7328,
+      -1999
+     ],
+     [
+      -7328,
+      -1991
+     ],
+     [
+      -7329,
+      -1984
+     ],
+     [
+      -7330,
+      -1976
+     ],
+     [
+      -7333,
+      -1968
+     ],
+     [
+      -7336,
+      -1961
+     ],
+     [
+      -7340,
+      -1954
+     ],
+     [
+      -7345,
+      -1947
+     ],
+     [
+      -7349,
+      -1941
+     ],
+     [
+      -7354,
+      -1934
+     ],
+     [
+      -7359,
+      -1928
+     ],
+     [
+      -7365,
+      -1923
+     ],
+     [
+      -7372,
+      -1918
+     ],
+     [
+      -7379,
+      -1915
+     ],
+     [
+      -7387,
+      -1912
+     ],
+     [
+      -7395,
+      -1911
+     ],
+     [
+      -7403,
+      -1911
+     ],
+     [
+      -7410,
+      -1912
+     ],
+     [
+      -7418,
+      -1914
+     ],
+     [
+      -7426,
+      -1915
+     ],
+     [
+      -7433,
+      -1918
+     ],
+     [
+      -7438,
+      -1925
+     ],
+     [
+      -7440,
+      -1932
+     ],
+     [
+      -7444,
+      -1940
+     ],
+     [
+      -7449,
+      -1946
+     ],
+     [
+      -7453,
+      -1953
+     ],
+     [
+      -7456,
+      -1960
+     ],
+     [
+      -7461,
+      -1967
+     ],
+     [
+      -7466,
+      -1973
+     ],
+     [
+      -7471,
+      -1979
+     ],
+     [
+      -7477,
+      -1984
+     ],
+     [
+      -7483,
+      -1989
+     ],
+     [
+      -7488,
+      -1996
+     ],
+     [
+      -7493,
+      -2002
+     ],
+     [
+      -7496,
+      -2010
+     ],
+     [
+      -7499,
+      -2017
+     ],
+     [
+      -7500,
+      -2025
+     ],
+     [
+      -7501,
+      -2033
+     ],
+     [
+      -7501,
+      -2041
+     ],
+     [
+      -7501,
+      -2049
+     ],
+     [
+      -7500,
+      -2057
+     ],
+     [
+      -7500,
+      -2065
+     ],
+     [
+      -7500,
+      -2073
+     ],
+     [
+      -7500,
+      -2081
+     ],
+     [
+      -7501,
+      -2089
+     ],
+     [
+      -7503,
+      -2096
+     ],
+     [
+      -7506,
+      -2104
+     ],
+     [
+      -7510,
+      -2111
+     ],
+     [
+      -7515,
+      -2117
+     ],
+     [
+      -7519,
+      -2124
+     ],
+     [
+      -7525,
+      -2130
+     ],
+     [
+      -7530,
+      -2136
+     ],
+     [
+      -7535,
+      -2142
+     ],
+     [
+      -7539,
+      -2149
+     ],
+     [
+      -7544,
+      -2156
+     ],
+     [
+      -7546,
+      -2163
+     ],
+     [
+      -7546,
+      -2171
+     ],
+     [
+      -7543,
+      -2178
+     ],
+     [
+      -7538,
+      -2185
+     ],
+     [
+      -7532,
+      -2190
+     ],
+     [
+      -7526,
+      -2195
+     ],
+     [
+      -7518,
+      -2198
+     ],
+     [
+      -7511,
+      -2201
+     ],
+     [
+      -7503,
+      -2203
+     ],
+     [
+      -7496,
+      -2206
+     ],
+     [
+      -7488,
+      -2209
+     ],
+     [
+      -7480,
+      -2211
+     ],
+     [
+      -7473,
+      -2214
+     ],
+     [
+      -7466,
+      -2217
+     ],
+     [
+      -7460,
+      -2223
+     ],
+     [
+      -7457,
+      -2230
+     ],
+     [
+      -7461,
+      -2236
+     ],
+     [
+      -7468,
+      -2239
+     ],
+     [
+      -7475,
+      -2242
+     ],
+     [
+      -7482,
+      -2247
+     ],
+     [
+      -7489,
+      -2250
+     ],
+     [
+      -7496,
+      -2254
+     ],
+     [
+      -7503,
+      -2258
+     ],
+     [
+      -7507,
+      -2265
+     ],
+     [
+      -7505,
+      -2272
+     ],
+     [
+      -7500,
+      -2278
+     ],
+     [
+      -7493,
+      -2282
+     ],
+     [
+      -7485,
+      -2285
+     ],
+     [
+      -7477,
+      -2286
+     ],
+     [
+      -7469,
+      -2286
+     ],
+     [
+      -7461,
+      -2285
+     ],
+     [
+      -7454,
+      -2285
+     ],
+     [
+      -7446,
+      -2285
+     ],
+     [
+      -7438,
+      -2285
+     ],
+     [
+      -7430,
+      -2284
+     ],
+     [
+      -7422,
+      -2282
+     ],
+     [
+      -7415,
+      -2278
+     ],
+     [
+      -7408,
+      -2273
+     ],
+     [
+      -7402,
+      -2268
+     ],
+     [
+      -7396,
+      -2263
+     ],
+     [
+      -7390,
+      -2258
+     ],
+     [
+      -7385,
+      -2252
+     ],
+     [
+      -7381,
+      -2245
+     ],
+     [
+      -7378,
+      -2237
+     ],
+     [
+      -7375,
+      -2230
+     ],
+     [
+      -7373,
+      -2222
+     ],
+     [
+      -7371,
+      -2214
+     ],
+     [
+      -7370,
+      -2206
+     ],
+     [
+      -7368,
+      -2199
+     ],
+     [
+      -7367,
+      -2191
+     ],
+     [
+      -7365,
+      -2183
+     ],
+     [
+      -7364,
+      -2175
+     ],
+     [
+      -7361,
+      -2167
+     ],
+     [
+      -7360,
+      -2160
+     ],
+     [
+      -7357,
+      -2152
+     ],
+     [
+      -7356,
+      -2144
+     ],
+     [
+      -7354,
+      -2136
+     ],
+     [
+      -7352,
+      -2129
+     ],
+     [
+      -7350,
+      -2121
+     ],
+     [
+      -7348,
+      -2113
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260821_214057",
+    "ev": 0,
+    "lap": 9,
+    "pts": [
+     [
+      -7348,
+      -2111
+     ],
+     [
+      -7346,
+      -2103
+     ],
+     [
+      -7344,
+      -2095
+     ],
+     [
+      -7342,
+      -2087
+     ],
+     [
+      -7340,
+      -2080
+     ],
+     [
+      -7338,
+      -2072
+     ],
+     [
+      -7337,
+      -2064
+     ],
+     [
+      -7335,
+      -2056
+     ],
+     [
+      -7333,
+      -2048
+     ],
+     [
+      -7332,
+      -2041
+     ],
+     [
+      -7331,
+      -2033
+     ],
+     [
+      -7330,
+      -2025
+     ],
+     [
+      -7329,
+      -2017
+     ],
+     [
+      -7328,
+      -2009
+     ],
+     [
+      -7328,
+      -2001
+     ],
+     [
+      -7329,
+      -1993
+     ],
+     [
+      -7330,
+      -1985
+     ],
+     [
+      -7332,
+      -1977
+     ],
+     [
+      -7335,
+      -1970
+     ],
+     [
+      -7339,
+      -1963
+     ],
+     [
+      -7342,
+      -1955
+     ],
+     [
+      -7346,
+      -1948
+     ],
+     [
+      -7351,
+      -1942
+     ],
+     [
+      -7356,
+      -1936
+     ],
+     [
+      -7362,
+      -1931
+     ],
+     [
+      -7368,
+      -1925
+     ],
+     [
+      -7374,
+      -1921
+     ],
+     [
+      -7381,
+      -1917
+     ],
+     [
+      -7389,
+      -1913
+     ],
+     [
+      -7396,
+      -1911
+     ],
+     [
+      -7404,
+      -1910
+     ],
+     [
+      -7412,
+      -1910
+     ],
+     [
+      -7420,
+      -1911
+     ],
+     [
+      -7427,
+      -1914
+     ],
+     [
+      -7434,
+      -1919
+     ],
+     [
+      -7438,
+      -1926
+     ],
+     [
+      -7442,
+      -1933
+     ],
+     [
+      -7445,
+      -1940
+     ],
+     [
+      -7449,
+      -1948
+     ],
+     [
+      -7452,
+      -1955
+     ],
+     [
+      -7457,
+      -1961
+     ],
+     [
+      -7461,
+      -1968
+     ],
+     [
+      -7467,
+      -1973
+     ],
+     [
+      -7473,
+      -1979
+     ],
+     [
+      -7478,
+      -1986
+     ],
+     [
+      -7482,
+      -1992
+     ],
+     [
+      -7487,
+      -1998
+     ],
+     [
+      -7491,
+      -2005
+     ],
+     [
+      -7495,
+      -2012
+     ],
+     [
+      -7498,
+      -2020
+     ],
+     [
+      -7500,
+      -2027
+     ],
+     [
+      -7502,
+      -2035
+     ],
+     [
+      -7503,
+      -2043
+     ],
+     [
+      -7503,
+      -2051
+     ],
+     [
+      -7502,
+      -2059
+     ],
+     [
+      -7501,
+      -2067
+     ],
+     [
+      -7499,
+      -2075
+     ],
+     [
+      -7498,
+      -2083
+     ],
+     [
+      -7498,
+      -2091
+     ],
+     [
+      -7498,
+      -2099
+     ],
+     [
+      -7499,
+      -2107
+     ],
+     [
+      -7501,
+      -2114
+     ],
+     [
+      -7505,
+      -2121
+     ],
+     [
+      -7511,
+      -2127
+     ],
+     [
+      -7517,
+      -2131
+     ],
+     [
+      -7524,
+      -2136
+     ],
+     [
+      -7530,
+      -2141
+     ],
+     [
+      -7536,
+      -2146
+     ],
+     [
+      -7540,
+      -2153
+     ],
+     [
+      -7542,
+      -2161
+     ],
+     [
+      -7542,
+      -2169
+     ],
+     [
+      -7540,
+      -2177
+     ],
+     [
+      -7537,
+      -2184
+     ],
+     [
+      -7533,
+      -2191
+     ],
+     [
+      -7527,
+      -2197
+     ],
+     [
+      -7521,
+      -2201
+     ],
+     [
+      -7513,
+      -2205
+     ],
+     [
+      -7506,
+      -2207
+     ],
+     [
+      -7498,
+      -2209
+     ],
+     [
+      -7490,
+      -2210
+     ],
+     [
+      -7482,
+      -2213
+     ],
+     [
+      -7475,
+      -2215
+     ],
+     [
+      -7468,
+      -2218
+     ],
+     [
+      -7462,
+      -2224
+     ],
+     [
+      -7458,
+      -2231
+     ],
+     [
+      -7459,
+      -2239
+     ],
+     [
+      -7465,
+      -2244
+     ],
+     [
+      -7473,
+      -2247
+     ],
+     [
+      -7481,
+      -2249
+     ],
+     [
+      -7488,
+      -2250
+     ],
+     [
+      -7496,
+      -2253
+     ],
+     [
+      -7503,
+      -2257
+     ],
+     [
+      -7507,
+      -2264
+     ],
+     [
+      -7508,
+      -2272
+     ],
+     [
+      -7504,
+      -2278
+     ],
+     [
+      -7498,
+      -2282
+     ],
+     [
+      -7490,
+      -2285
+     ],
+     [
+      -7482,
+      -2286
+     ],
+     [
+      -7474,
+      -2286
+     ],
+     [
+      -7466,
+      -2286
+     ],
+     [
+      -7458,
+      -2285
+     ],
+     [
+      -7450,
+      -2284
+     ],
+     [
+      -7443,
+      -2282
+     ],
+     [
+      -7435,
+      -2279
+     ],
+     [
+      -7427,
+      -2277
+     ],
+     [
+      -7420,
+      -2273
+     ],
+     [
+      -7413,
+      -2270
+     ],
+     [
+      -7406,
+      -2266
+     ],
+     [
+      -7400,
+      -2261
+     ],
+     [
+      -7394,
+      -2255
+     ],
+     [
+      -7389,
+      -2249
+     ],
+     [
+      -7384,
+      -2243
+     ],
+     [
+      -7380,
+      -2236
+     ],
+     [
+      -7376,
+      -2229
+     ],
+     [
+      -7374,
+      -2221
+     ],
+     [
+      -7371,
+      -2214
+     ],
+     [
+      -7369,
+      -2206
+     ],
+     [
+      -7367,
+      -2198
+     ],
+     [
+      -7365,
+      -2191
+     ],
+     [
+      -7363,
+      -2183
+     ],
+     [
+      -7361,
+      -2175
+     ],
+     [
+      -7359,
+      -2167
+     ],
+     [
+      -7358,
+      -2159
+     ],
+     [
+      -7356,
+      -2152
+     ],
+     [
+      -7355,
+      -2144
+     ],
+     [
+      -7353,
+      -2136
+     ],
+     [
+      -7351,
+      -2128
+     ],
+     [
+      -7350,
+      -2120
+     ],
+     [
+      -7348,
+      -2112
      ]
     ]
    },

@@ -2613,10 +2613,11 @@
       const sevCol = m.sev >= 3 ? "#e5414e" : m.sev >= 2 ? "#e3b341" : "#00d27a";
       const fx = (SLIDER_FX[m.sl] || {})[up ? "up" : "down"] || "";
       const vb = (SLIDER[m.sl].verb || ["stiffer", "softer"])[up ? 0 : 1];
-      const notchU = SLIDER[m.sl].notch ? (Math.abs(m.delta) === 1 ? " notch" : " notches") : (m.unit || "");
+      const notch = SLIDER[m.sl].notch; const dmag = notch ? Math.max(1, Math.round(Math.abs(m.delta || 0))) : Math.abs(m.delta);
+      const notchU = notch ? (dmag === 1 ? " notch" : " notches") : (m.unit || "");
       const change = (m.to != null && m.from != null)
         ? `<span class="tm-from">${m.from}${m.unit}</span><span class="tm-arr" style="color:${col}">${up ? "▲" : "▼"}</span><b class="tm-to" style="color:${col}">${m.to}${m.unit}</b>`
-        : `<b class="tm-to" style="color:${col}">${vb}${m.delta != null ? " ~" + Math.abs(m.delta) + notchU : ""}</b>`;
+        : `<b class="tm-to" style="color:${col}">${vb}${(m.delta != null || notch) ? " ~" + dmag + notchU : ""}</b>`;
       return `<div class="tmove" style="border-left-color:${sevCol}"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div></div>`;
     }).join("")}</div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`; };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
@@ -2627,6 +2628,7 @@
     };
     const numericTuningPanel = (co, s, forceCid) => {
       const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0]; if (!cid) return "";
+      if (live.connected) { const o0 = String(cid).split("|")[0]; if (!(live.diskTune && live.diskTune[o0])) fetchDiskTune(+o0); }
       const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
       const cur = getTune(cid); const moves = tuningMoves(adv, co.corners, cur); const haveCur = Object.keys(cur).length > 0;
       const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
@@ -2759,6 +2761,7 @@
     const generalTuningPanel = (c, s) => {
       if (!c) return "";
       const g = c.general, adv = c.advice || [], cid = c.id;
+      if (live.connected) { const o0 = String(cid).split("|")[0]; if (!(live.diskTune && live.diskTune[o0])) fetchDiskTune(+o0); }   // pull current values for THIS car (not just the active frame)
       const sig = (g && g.balance) || [];
       if (!g || g.corners < 4 || sig.length === 0) return `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🛣 All-around tune — ${esc(carName(c) || "#" + c.ordinal)}</h3><p class="why" style="font-size:12px;margin:0">Gathering — drive varied corners (and surfaces) on public / free-roam; the all-around read needs a spread of contexts, not one track.</p></div>`;
       const moves = tuningMoves(adv, [], getTune(cid), "breadth");

@@ -2490,9 +2490,9 @@
     // 🏟 COURSE — the course's identity: profile (incl. what it never uses), every turn quantified & classified, lap deltas, course-weighted suggestions
     function courseSection(s, isLive) {
       if (!s) return isLive ? EMPTY_LIVE : NOSESS;
-      const courses = arr(s, "courses").filter((co) => !carSel || co.cars.includes(carSel));
+      const courses = arr(s, "courses");   // no car filter here — the car rail belongs to Free Tuning; a course card already names its cars
       return `${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course — per route: what it demands, every turn quantified & classified, lap deltas per run, course-weighted suggestions${isLive ? ` <span class="chip">updates every ~20 s of driving</span>` : ""}</h3><div class="card-grid">${courses.map((co) => courseBlock(co, s)).join("")}</div></div>`
-        : `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course — nothing scoped yet</h3><p class="why" style="font-size:12px;margin:0">A course appears when you run a timed event (Rivals · race · time trial) or lap a marked reference loop${isLive ? " — mark one from the stream bar (📍) and drive back through the start" : ""}. Everything outside those windows is Free Tuning.</p></div>`}
+        : `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course — nothing scoped yet</h3><p class="why" style="font-size:12px;margin:0">A course appears when you run a timed event (Rivals · race · time trial) or lap a marked reference loop${isLive ? " — mark one with 📍 in the stream bar above (the control lives on this Course tab) and drive back through the start" : ""}. Everything outside those windows is Free Tuning.</p></div>`}
         ${eventsTable(s)}`;
     }
     // 🛣 FREE TUNING — whole-session advisor, runs, test cards, gear & dyno (recordings also get the strip + corner cards; live paints those as instruments)
@@ -2558,32 +2558,44 @@
     // 🧬 DECODE — clone a build: donor capture (progress = tests only) → Clone Sheet (the parts) → Bench convergence (the sliders)
     function decodeSection(s, isLive) {
       if (!s || !arr(s, "cars").length) return isLive ? EMPTY_LIVE : NOSESS;
-      const stints = arr(s, "stints"), launches = arr(s, "launches"), braking = arr(s, "braking"), corners = arr(s, "corners"), pulses = arr(s, "pulses");
-      // auto-pick donor/replica from run roles if set (stream-bar buttons in Live), else fall back to the first two cars
-      const roleStint = (rl) => { const st = stints.find((x) => x.role === rl); return st ? st.id + "#" + st.n : null; };
-      if (donor == null) donor = roleStint("donor") || s.cars[0].id;
-      if (replica == null) replica = roleStint("replica") || (s.cars[1] || s.cars[0]).id;
-      if (!car(s, donor)) donor = s.cars[0].id;
+      // DONOR side may come from the pinned donor (its own session, possibly before a reset / restart); REPLICA side is always the current session
+      const pin = isLive ? PIN() : null; let sD = s, pinNote = "";
+      if (pin) {
+        if (pin.sid === s.id && car(s, pin.key)) { sD = s; pinDonor(s, pin.key); }   // same session: keep the pinned copy fresh from the live data
+        else if (pin.data && car(pin.data, pin.key)) { sD = pin.data; pinNote = `📌 donor pinned from session <b>${esc(pin.sid)}</b> — replica side is the current session`; }
+      }
+      const stints = arr(s, "stints"), stintsD = arr(sD, "stints"), launches = arr(s, "launches"), launchesD = arr(sD, "launches"), braking = arr(s, "braking"), brakingD = arr(sD, "braking"), corners = arr(s, "corners"), cornersD = arr(sD, "corners"), pulses = arr(s, "pulses"), pulsesD = arr(sD, "pulses");
+      const roleStint = (rl, list) => { const st = (list || stints).find((x) => x.role === rl); return st ? st.id + "#" + st.n : null; };
+      if (isLive) {   // live: the pin wins, then an explicit chip click, then a run role (roles can be set AFTER this tab first rendered), then the first car
+        const rd = roleStint("donor");
+        if (!pin && rd) pinDonor(s, rd);   // a 🎯 DONOR role set in the stream bar pins itself
+        donor = (pin && car(sD, pin.key) ? pin.key : null) || live._donorPick || rd || s.cars[0].id;
+        replica = live._replicaPick || roleStint("replica") || (s.cars[1] || s.cars[0]).id;
+      } else {
+        if (donor == null) donor = roleStint("donor") || s.cars[0].id;
+        if (replica == null) replica = roleStint("replica") || (s.cars[1] || s.cars[0]).id;
+      }
+      if (!car(sD, donor)) donor = (sD.cars[0] || s.cars[0]).id;
       if (!car(s, replica)) replica = (s.cars[1] || s.cars[0]).id;
-      const D = car(s, donor), R = car(s, replica); const Dg = D.gears || [], Rg = R.gears || [], Dd = D.dyno || [], Rd = R.dyno || [];
+      const D = car(sD, donor), R = car(s, replica); const Dg = D.gears || [], Rg = R.gears || [], Dd = D.dyno || [], Rd = R.dyno || [];
       const dC = "#e3b341", rC = "#00d27a";
       const pick = (a, o) => { const b = baseId(o), n = stintOf(o); return a.filter((x) => x.car === b && (n == null || x.stint === n)); };
-      const stintChips = (sel, attr) => stints.filter((st) => (st.corners || 0) + (st.launches || 0) + (st.braking || 0) > 0).map((st) => `<span class="chip ${sel === st.id + "#" + st.n ? "on" : ""}" data-${attr}="${st.id}#${st.n}" title="${st.t0}s–${st.t1}s">run ${st.n}${st.role === "donor" ? " 🎯" : st.role === "replica" ? " 🔧" : ""}${st.label ? " “" + esc(st.label) + "”" : ""} · ${carLbl(s, st.id).split(" · ")[0]}</span>`).join("");
-      const hasRoles = stints.some((x) => x.role); const sameRun = baseId(donor) === baseId(replica) && stintOf(donor) === stintOf(replica); const diffCar = D.id !== R.id;
-      const kinds = [["Launch", pick(launches, donor).length && pick(launches, replica).length], ["Braking", pick(braking, donor).length && pick(braking, replica).length], ["Corner", pick(corners, donor).length && pick(corners, replica).length], ["Gearing", Dg.length && Rg.length], ["Dyno", Dd.length && Rd.length], ["Crest", 1], ["Top-speed pull", 0], ["Wiggle", pick(pulses, donor).length && pick(pulses, replica).length]];
+      const stintChips = (sel, attr, ss) => arr(ss, "stints").filter((st) => (st.corners || 0) + (st.launches || 0) + (st.braking || 0) > 0).map((st) => `<span class="chip ${sel === st.id + "#" + st.n ? "on" : ""}" data-${attr}="${st.id}#${st.n}" title="${st.t0}s–${st.t1}s">run ${st.n}${st.role === "donor" ? " 🎯" : st.role === "replica" ? " 🔧" : ""}${st.label ? " “" + esc(st.label) + "”" : ""} · ${carLbl(ss, st.id).split(" · ")[0]}</span>`).join("");
+      const hasRoles = stints.some((x) => x.role) || stintsD.some((x) => x.role); const sameRun = sD === s && baseId(donor) === baseId(replica) && stintOf(donor) === stintOf(replica); const diffCar = D.id !== R.id;
+      const kinds = [["Launch", pick(launchesD, donor).length && pick(launches, replica).length], ["Braking", pick(brakingD, donor).length && pick(braking, replica).length], ["Corner", pick(cornersD, donor).length && pick(corners, replica).length], ["Gearing", Dg.length && Rg.length], ["Dyno", Dd.length && Rd.length], ["Crest", 1], ["Top-speed pull", 0], ["Wiggle", pick(pulsesD, donor).length && pick(pulses, replica).length]];
       // match metrics
       const common = Dg.filter((g) => Rg.find((h) => h.gear === g.gear));
       const gearErr = common.length ? Math.sqrt(common.reduce((a, g) => { const h = Rg.find((x) => x.gear === g.gear); return a + Math.pow((h.mps_per_krpm - g.mps_per_krpm) / g.mps_per_krpm, 2); }, 0) / common.length) * 100 : null;
       const rpmC = Dd.filter((d) => Rd.find((e) => e.rpm === d.rpm));
       const dynoErr = rpmC.length ? Math.sqrt(rpmC.reduce((a, d) => { const e = Rd.find((x) => x.rpm === d.rpm); return a + Math.pow((e.hp - d.hp) / Math.max(d.hp, 1), 2); }, 0) / rpmC.length) * 100 : null;
       const med = (a) => { a = a.slice().sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
-      const lD = pick(launches, donor)[0], lR = pick(launches, replica)[0];
+      const lD = pick(launchesD, donor)[0], lR = pick(launches, replica)[0];
       const launchErr = lD && lR ? Math.abs(lR.peak_slip_rear - lD.peak_slip_rear) / Math.max(lD.peak_slip_rear, 0.1) * 100 : null;
-      const bD = med(pick(braking, donor).map((b) => b.front_deficit - b.rear_deficit)), bR = med(pick(braking, replica).map((b) => b.front_deficit - b.rear_deficit));
+      const bD = med(pick(brakingD, donor).map((b) => b.front_deficit - b.rear_deficit)), bR = med(pick(braking, replica).map((b) => b.front_deficit - b.rear_deficit));
       const brakeErr = bD != null && bR != null ? Math.abs(bR - bD) * 100 : null;
-      const uD = med(pick(corners, donor).filter((c) => !c.drift).map((c) => c.usi)), uR = med(pick(corners, replica).filter((c) => !c.drift).map((c) => c.usi));
+      const uD = med(pick(cornersD, donor).filter((c) => !c.drift).map((c) => c.usi)), uR = med(pick(corners, replica).filter((c) => !c.drift).map((c) => c.usi));
       const usiErr = uD != null && uR != null ? Math.abs(uR - uD) * 100 : null;
-      const pD = med(pick(pulses, donor).filter((p) => p.decay_s != null).map((p) => p.decay_s)), pR = med(pick(pulses, replica).filter((p) => p.decay_s != null).map((p) => p.decay_s));
+      const pD = med(pick(pulsesD, donor).filter((p) => p.decay_s != null).map((p) => p.decay_s)), pR = med(pick(pulses, replica).filter((p) => p.decay_s != null).map((p) => p.decay_s));
       const pulseErr = pD != null && pR != null ? Math.abs(pR - pD) / Math.max(pD, 0.05) * 100 : null;
       const ledger = [
         ["⚙️ Gearing", gearErr, 2, 6, `ladder RMS ${fmt(gearErr, 1)}% over ${common.length} gears`, "FD / individual ratios until the WOT ladder overlays gear by gear"],
@@ -2594,24 +2606,25 @@
         ["🪃 Dampers", pulseErr, 15, 40, `yaw-decay ${fmt(pR)} s vs donor ${fmt(pD)} s (experimental)`, "rear rebound / front bump until the decay and crest traces overlay"],
         ["🪁 Aero", null, 0, 0, "needs a top-speed pull + fast-sweeper probe (not in this session)", "rear wing / front aero until speed-binned lat g and braking overlay"],
       ];
-      const lad = (sel, c) => { const n = stintOf(sel); const st = n != null ? stints.find((x) => x.n === n) : null; return st && st.ladder && Object.keys(st.ladder).length ? Object.entries(st.ladder).map(([g, v]) => [+g, v]) : (c.gears || []).map((g) => [g.gear, g.mps_per_krpm]); };
+      const lad = (sel, c, list) => { const n = stintOf(sel); const st = n != null ? (list || stints).find((x) => x.n === n) : null; return st && st.ladder && Object.keys(st.ladder).length ? Object.entries(st.ladder).map(([g, v]) => [+g, v]) : (c.gears || []).map((g) => [g.gear, g.mps_per_krpm]); };
       return `
         <div class="block" style="border-color:#e3b341"><h3 style="margin-top:0">🧬 Decode — clone a build: donor capture → Clone Sheet (the parts) → Bench convergence (the sliders)</h3>
-          <p class="why" style="font-size:12px">${hasRoles ? "Donor / replica picked from the run roles (🎯 / 🔧)." : isLive ? "Set <b>🎯 DONOR</b> on the locked-tune run and <b>🔧 REPLICA</b> on your rebuild from the stream bar — or pick runs below." : "No run roles in this recording — pick the donor run and the replica run below."} ${sameRun ? "Same run on both sides: a self-check until a replica run exists." : diffCar ? "<b>Different cars on the two sides</b> — a demo comparison; the ledger will be honestly red." : ""}</p>
+          <p class="why" style="font-size:12px">${pinNote ? pinNote + " · " : ""}${hasRoles || pin ? "Donor: " + (pin ? "📌 pinned — stays until you pick another donor or unpin it" : "from the run roles (🎯 / 🔧)") + "." : isLive ? "Set <b>🎯 DONOR</b> on the locked-tune run and <b>🔧 REPLICA</b> on your rebuild from the stream bar — or pick runs below." : "No run roles in this recording — pick the donor run and the replica run below."} ${sameRun ? "Same run on both sides: a self-check until a replica run exists." : diffCar ? "<b>Different cars on the two sides</b> — a demo comparison; the ledger will be honestly red." : ""}${isLive && pin ? ` <button class="lab-mode" data-unpin style="padding:2px 8px;font-size:11px;margin-left:6px">✕ unpin donor</button>` : ""}</p>
           <div class="lab-bench">
-            <div><strong style="color:${dC}">🎯 DONOR / RUN A</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${donor === c.id ? "on" : ""}" data-donor="${c.id}">${carLbl(s, c.id)}</span>`).join("")}${stintChips(donor, "donor")}</div></div>
-            <div><strong style="color:${rC}">🔧 REPLICA / RUN B</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${replica === c.id ? "on" : ""}" data-replica="${c.id}">${carLbl(s, c.id)}</span>`).join("")}${stintChips(replica, "replica")}</div></div>
+            <div><strong style="color:${dC}">🎯 DONOR / RUN A</strong> <div class="lab-rail">${sD.cars.map((c) => `<span class="chip ${donor === c.id ? "on" : ""}" data-donor="${c.id}">${carLbl(sD, c.id)}</span>`).join("")}${stintChips(donor, "donor", sD)}</div></div>
+            <div><strong style="color:${rC}">🔧 REPLICA / RUN B</strong> <div class="lab-rail">${s.cars.map((c) => `<span class="chip ${replica === c.id ? "on" : ""}" data-replica="${c.id}">${carLbl(s, c.id)}</span>`).join("")}${stintChips(replica, "replica", s)}</div></div>
           </div>
           <div class="lab-rail" style="margin-top:10px">${kinds.map(([k, ok]) => `<span class="chip ${ok ? "on" : "missing"}">${ok ? "✓" : "○"} ${k}</span>`).join("")}</div>
         </div>
-        ${D.decode ? `<div class="block" style="border-color:#e3b341">${decodePanel(D, "🎯 DONOR · ")}</div>` : ""}
+        ${isLive && live.frame && live.frame.cid && live.frame.cid !== D.id ? (() => { const cc = car(s, live.frame.cid); return cc && cc.decode ? `<div class="block" style="border-color:#e3b341">${decodePanel(cc, "current car · ")}<p class="why" style="font-size:11px;margin:6px 0 0">capturing a locked tune? set this run as 🎯 DONOR in the stream bar — the clone sheet is built from the donor</p></div>` : ""; })() : ""}
+        ${D.decode ? `<div class="block" style="border-color:#e3b341">${decodePanel(D, roleStint("donor") ? "🎯 DONOR · " : "donor (picked) · ")}</div>` : ""}
         ${D.clone_sheet ? `<div class="block">${cloneSheetHtml(D)}</div>` : ""}
         <div class="block"><h3 style="margin-top:0">⚖️ Bench — donor vs replica, maneuver by maneuver</h3>
         <div class="lab-bench">
-          <div><h3 style="margin-top:0;font-size:14px">⚙️ Gear ladder</h3>${chart([{ pts: lad(donor, D), col: dC, label: "A" }, { pts: lad(replica, R), col: rC, label: "B" }], { xl: "gear", yl: "m/s per krpm", w: 380 })}</div>
+          <div><h3 style="margin-top:0;font-size:14px">⚙️ Gear ladder</h3>${chart([{ pts: lad(donor, D, stintsD), col: dC, label: "A" }, { pts: lad(replica, R, stints), col: rC, label: "B" }], { xl: "gear", yl: "m/s per krpm", w: 380 })}</div>
           <div><h3 style="margin-top:0;font-size:14px">🔧 Dyno (WOT frames)</h3>${chart([{ pts: Dd.map((d) => [d.rpm, d.hp]), col: dC, label: "donor hp" }, { pts: Rd.map((d) => [d.rpm, d.hp]), col: rC, label: "replica hp" }], { xl: "rpm", yl: "hp", w: 380 })}</div>
           <div><h3 style="margin-top:0;font-size:14px">🚦 Launch — rear slip ratio</h3>${lD && lR ? chart([{ pts: lD.trace.map((p) => [p[0], Math.max(Math.abs(p[3]), Math.abs(p[4]))]), col: dC, label: "donor" }, { pts: lR.trace.map((p) => [p[0], Math.max(Math.abs(p[3]), Math.abs(p[4]))]), col: rC, label: "replica" }], { xl: "s", yl: "slip", hline: 1, hlabel: "limit", ymax: 6, w: 380 }) : `<p class="why">needs a launch on both</p>`}</div>
-          <div><h3 style="margin-top:0;font-size:14px">🛑 Braking — deficit front vs rear</h3>${chart([{ pts: pick(braking, donor).map((b, i) => [i + 1, b.front_deficit]), col: dC, label: "donor F" }, { pts: pick(braking, donor).map((b, i) => [i + 1, b.rear_deficit]), col: "#f0883e", label: "donor R" }, { pts: pick(braking, replica).map((b, i) => [i + 1, b.front_deficit]), col: rC, label: "replica F" }, { pts: pick(braking, replica).map((b, i) => [i + 1, b.rear_deficit]), col: "#2f81f7", label: "replica R" }], { xl: "event #", yl: "deficit", w: 380, ymax: 1.05 })}</div>
+          <div><h3 style="margin-top:0;font-size:14px">🛑 Braking — deficit front vs rear</h3>${chart([{ pts: pick(brakingD, donor).map((b, i) => [i + 1, b.front_deficit]), col: dC, label: "donor F" }, { pts: pick(brakingD, donor).map((b, i) => [i + 1, b.rear_deficit]), col: "#f0883e", label: "donor R" }, { pts: pick(braking, replica).map((b, i) => [i + 1, b.front_deficit]), col: rC, label: "replica F" }, { pts: pick(braking, replica).map((b, i) => [i + 1, b.rear_deficit]), col: "#2f81f7", label: "replica R" }], { xl: "event #", yl: "deficit", w: 380, ymax: 1.05 })}</div>
         </div></div>
         <div class="block" style="margin-top:14px"><h3 style="margin-top:0">📋 Match ledger — green all the way down = decoded</h3>
           <div style="overflow-x:auto"><table><thead><tr><th></th><th>slider group</th><th>measured</th><th>turn next</th></tr></thead><tbody>
@@ -2625,7 +2638,14 @@
     // the LIVE effective mode (manual override, else daemon suggestion) — pushed to the daemon so its run-split rule matches what you see
     const liveEffMode = () => { const m = labModeSel(); return m !== "auto" ? m : ((live.mode && live.mode.suggest) || "free"); };
     let pushedMode = null;
-    const pushMode = () => { if (!live.connected) return; const m = liveEffMode(); if (m === pushedMode) return; pushedMode = m; fetch(liveUrl + "/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: m }) }).catch(() => { pushedMode = null; }); };
+    // only a MANUAL override is pushed; in auto the daemon uses its own detection (so a second dashboard on the same daemon can't fight it)
+    const pushMode = () => { if (!live.connected) return; const m = labModeSel() === "auto" ? "auto" : liveEffMode(); if (m === pushedMode) return; pushedMode = m; fetch(liveUrl + "/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: m }) }).catch(() => { pushedMode = null; }); };
+    // ---- pinned DONOR: once chosen it STAYS (across resets, daemon restarts, reloads, workflow switches) until a new donor is picked or it's unpinned.
+    // The pin carries a compact copy of the donor's data, so Decode keeps working after the live session has moved on.
+    const PIN = () => { try { return JSON.parse(localStorage.getItem("fh6DecodeDonor") || "null"); } catch (e) { return null; } };
+    const miniSession = (s, key) => { const b = baseId(key), n = stintOf(key); const f = (a) => (a || []).filter((x) => x.car === b && (n == null || x.stint === n)); const c = car(s, key); return { id: s.id, pinned: true, cars: c ? [c] : [], stints: (s.stints || []).filter((st) => st.id === b && (n == null || st.n === n)), launches: f(s.launches), braking: f(s.braking), corners: f(s.corners), pulses: f(s.pulses), events: [], courses: [], strip: [], summary: s.summary || {} }; };
+    const pinDonor = (s, key) => { if (!s || !key || !car(s, key)) return; const base = { sid: s.id, key, name: carName(car(s, key)) || "#" + baseId(key), ts: Date.now() }; try { localStorage.setItem("fh6DecodeDonor", JSON.stringify(Object.assign({ data: miniSession(s, key) }, base))); } catch (e) { try { localStorage.setItem("fh6DecodeDonor", JSON.stringify(base)); } catch (e2) {} } };
+    const unpinDonor = () => { localStorage.removeItem("fh6DecodeDonor"); live._donorPick = null; };
     const liveS = () => ({ cars: live.cars });
     const circleSvg = (w) => `<svg viewBox="0 0 120 130" class="tz-svg" data-wheel="${w}" style="max-width:160px">
         <text x="60" y="12" text-anchor="middle" fill="var(--muted)" font-size="10">${w}</text>
@@ -2687,8 +2707,9 @@
       const el = host.querySelector("#lvBanner"); if (!el) return;
       const em = effMode(), ms = labModeSel(), lm = live.mode || {};
       const MODE_LBL = { course: ["🏟 COURSE", "var(--accent2)"], decode: ["🧬 DECODE", "#e3b341"], free: ["🛣 FREE TUNING", "var(--accent)"] };
-      const an = live.analysis; const donorSt = an && (an.stints || []).find((x) => x.role === "donor"); const donorCar = donorSt && (an.cars || []).find((c) => c.id === donorSt.id);
-      const dchip = donorCar && donorCar.decode ? `<span class="chip" style="border-color:#e3b341;color:#e3b341" title="donor capture progress — tests only">🎯 donor ${donorCar.decode.ready_n}/${donorCar.decode.total} tests</span>` : "";
+      const an = live.analysis; const donorSt = an && (an.stints || []).find((x) => x.role === "donor"); const pin = PIN(); const ls = liveSess();
+      const donorCar = pin ? ((ls && pin.sid === ls.id && car(ls, pin.key)) || (pin.data && car(pin.data, pin.key)) || null) : (donorSt && (an.cars || []).find((c) => c.id === donorSt.id));
+      const dchip = donorCar && donorCar.decode ? `<span class="chip" style="border-color:#e3b341;color:#e3b341" title="${pin ? "pinned donor — stays until you pick another or unpin (Decode tab)" : "donor capture progress — tests only"}">${pin ? "📌 " : ""}🎯 donor ${esc(carName(donorCar) || "")} ${donorCar.decode.ready_n}/${donorCar.decode.total} tests</span>` : "";
       el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL[em][1]};color:${MODE_LBL[em][1]};font-weight:700">${MODE_LBL[em][0]}</span><span class="why" style="font-size:11px">${ms === "auto" ? "🧭 auto-detected" + (lm.reason ? " — " + esc(lm.reason) : " — waiting for the stream") : "manual — click 🧭 auto to hand detection back"}${live.status && live.status.game === "menu" ? " · in menus / paused" : ""}</span>${dchip}</div>`;
     }
     function streamBar() {
@@ -2704,7 +2725,8 @@
     }
     // the session object the live workflows render from: the daemon's latest full analysis (refetched after every analysis), else a thin stand-in built from the SSE analysis payload
     const analysisAsSession = (an) => ({ id: an.id, partial: true, cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, (an.cars || []).find((y) => y.id === x.id) || {})) : (an.cars || []), stints: an.stints || [], courses: an.courses || [], events: [], launches: [], braking: [], corners: [], pulses: [], strip: [], summary: an.summary || {} });
-    const liveSess = () => (live.loaded && sessions.find((x) => x.id === live.loaded)) || (live.analysis ? analysisAsSession(live.analysis) : null);
+    // the loaded full session is only trusted when it IS the session the daemon is currently analysing (reconnects / restarts / replays change the id)
+    const liveSess = () => { const an = live.analysis; if (!an) return null; const full = live.loaded && live.loaded === an.id && sessions.find((x) => x.id === live.loaded); return full || analysisAsSession(an); };
     const sectionsHtml = (s, isLive) => { const w = effMode(); return w === "course" ? courseSection(s, isLive) : w === "decode" ? decodeSection(s, isLive) : freeSection(s, isLive); };
     function liveBody() {
       const w = effMode();
@@ -2717,13 +2739,13 @@
         <div class="block"><h3 style="margin-top:0">📼 Session strip — growing</h3><div id="lvStrip"></div></div>` : ""}
         ${w !== "decode" ? `<div class="block" style="border-color:#e5414e"><h3 style="margin-top:0">🩺 Corner log — newest first</h3><div class="card-grid" id="lvCorners"></div></div>` : ""}`;
     }
-    function paintSections() {
+    function paintSections(force) {
       const el = host.querySelector("#lvSections"); if (!el) return;
-      const a = document.activeElement; if (a && el.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;   // never wipe something being typed — the next analysis repaints
+      const a = document.activeElement; if (!force && a && el.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;   // never wipe something being typed — the next analysis repaints (reset / explicit picks force)
       el.innerHTML = sectionsHtml(liveSess(), true); bindBody(el);
     }
     function loadFullSession() {
-      fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });
+      fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });   // a response that lands after a reset (analysis null / new id) is ignored
     }
     function paintStatus() {
       const el = host.querySelector("#lvStatus"); if (!el) return;
@@ -2737,11 +2759,11 @@
       const un = host.querySelector("#lvUnknown"); if (un) { const seen = new Set(); un.innerHTML = live.cars.filter((c) => !carName(c) && !seen.has(c.ordinal) && seen.add(c.ordinal)).map(nameUI).join(""); bindNames(un); }
       const lv = host.querySelector("#lvLoop");
       if (lv && live.connected) {
-        const lo = live.loop; const lk = `${lo ? lo.name + "|" + lo.lap + "|" + lo.last_s : "none"}`;
+        const lo = live.loop; const onCourse = effMode() === "course"; const lk = `${onCourse}|${lo ? lo.name + "|" + lo.lap + "|" + lo.last_s : "none"}`;   // reference-loop controls belong to the Course workflow only
         if (lv.dataset.k !== lk) {
           lv.dataset.k = lk; const typedLoop = (lv.querySelector("#lvLoopName") || {}).value || "";
           const spec = `<details class="tz-why" style="margin-top:4px"><summary>the decode loop — what to include</summary><p style="font-size:11px">One repeatable circuit that hits every decode test: <b>standing start → long straight</b> (gearing · dyno · top-speed) → <b>threshold brake</b> from 80+ → <b>hairpin</b> → <b>medium corner</b> → <b>fast sweeper</b> → a <b>crest</b> → a quick <b>left-right</b> (wiggle) → back to start. ~90–120 s. The Goliath hits everything but is slow; an EventLab blueprint or a chosen free-roam loop is the quick version. The 🧬 Decode battery below fills in as you cover each element.</p></details>`;
-          lv.innerHTML = lo ? `<span class="chip" style="border-color:var(--accent2);color:var(--accent2)">📍 loop “${esc(lo.name)}” · lap ${lo.lap}${lo.last_s ? " · last " + lo.last_s + "s" : ""}</span> <button class="lab-mode" id="lvClearLoop" style="padding:3px 8px;font-size:11px">clear loop</button> <span class="why" style="font-size:11px">drive back through the start to complete a lap</span>${spec}`
+          lv.innerHTML = !onCourse ? "" : lo ? `<span class="chip" style="border-color:var(--accent2);color:var(--accent2)">📍 loop “${esc(lo.name)}” · lap ${lo.lap}${lo.last_s ? " · last " + lo.last_s + "s" : ""}</span> <button class="lab-mode" id="lvClearLoop" style="padding:3px 8px;font-size:11px">clear loop</button> <span class="why" style="font-size:11px">drive back through the start to complete a lap</span>${spec}`
             : `<div style="font-size:11px;color:var(--accent2);font-weight:700;margin-bottom:3px">🏟 Course mode · reference loop</div><button class="lab-mode" id="lvMarkLoop" style="padding:4px 10px;font-size:12px;border-color:var(--accent2);color:var(--accent2)">📍 mark loop start (here)</button> <input id="lvLoopName" placeholder="loop name — e.g. Decode Loop" style="min-width:220px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"> <span class="why" style="font-size:11px">stand at your start/finish, name it, mark — every lap is timed & position-aligned</span>${spec}`;
           const ln = lv.querySelector("#lvLoopName"); if (ln && typedLoop) ln.value = typedLoop;
           const mb = lv.querySelector("#lvMarkLoop"); if (mb) mb.addEventListener("click", () => { const nm = lv.querySelector("#lvLoopName").value.trim() || "test loop"; fetch(liveUrl + "/mark-start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: nm }) }).then((r) => r.json()).then((r) => { if (r.ok !== false) { live.loop = { name: nm, lap: 0, last_s: null }; lv.dataset.k = ""; paintStatus(); } }).catch(() => {}); });
@@ -2762,7 +2784,9 @@
           const ti = sv.querySelector("#lvTag"); if (ti && sameRun && typedTag && typedTag !== labTxt) ti.value = typedTag;
           const tb = sv.querySelector("#lvTagBtn"); if (tb) tb.addEventListener("click", () => { const v = sv.querySelector("#lvTag").value.trim(); fetch(liveUrl + "/tag", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: v, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags, { [String(n)]: Object.assign({}, live.tags[String(n)], { label: v }) }); paintStatus(); }).catch(() => {}); });
           const nr = sv.querySelector("#lvNewRun"); if (nr) nr.addEventListener("click", () => { fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(() => { nr.textContent = "➕ splits at next driving frame"; setTimeout(() => { nr.textContent = "➕ new run"; }, 2500); }).catch(() => {}); });
-          sv.querySelectorAll("[data-role]").forEach((b) => b.addEventListener("click", () => { const rl = b.dataset.role; fetch(liveUrl + "/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: rl, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags); Object.keys(live.tags).forEach((k) => { if (live.tags[k] && live.tags[k].role === rl) live.tags[k] = Object.assign({}, live.tags[k], { role: null }); }); live.tags[String(n)] = Object.assign({}, live.tags[String(n)], { role: rl }); sv.dataset.role = ""; paintStatus(); }).catch(() => {}); }));
+          sv.querySelectorAll("[data-role]").forEach((b) => b.addEventListener("click", () => { const rl = b.dataset.role; fetch(liveUrl + "/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: rl, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags); Object.keys(live.tags).forEach((k) => { if (live.tags[k] && live.tags[k].role === rl) live.tags[k] = Object.assign({}, live.tags[k], { role: null }); }); live.tags[String(n)] = Object.assign({}, live.tags[String(n)], { role: rl }); sv.dataset.role = "";
+            if (rl === "donor") { const ls = liveSess(); const cidNow = live.frame && live.frame.cid; if (ls && cidNow) { live._donorPick = null; pinDonor(ls, cidNow + "#" + n); } }   // 🎯 DONOR from the stream bar pins itself (stays across resets / restarts / reloads)
+            paintStatus(); paintSections(true); paintBanner(); }).catch(() => {}); }));
         }
       }
     }
@@ -2790,18 +2814,19 @@
     const W4 = ["FL", "FR", "RL", "RR"];
     function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; }
     function paintCorners() { const el = host.querySelector("#lvCorners"); if (el) el.innerHTML = live.corners.slice(-12).reverse().map((c) => cornerCard(liveS(), c)).join("") || `<p class="why" style="font-size:11px">no corners yet</p>`; }
-    function paintAll() { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(); }
+    function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); }
     function liveConnect() {
       if (es) { es.close(); es = null; }
+      live.loaded = null; carSel = null;   // a (re)connect may be a different daemon / session — never carry a loaded session or a car filter across
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; live.connected = true; live.err = false; paintAll(); onModeChanged(); if (d.analysis && !live.loaded) loadFullSession(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; if (!d.analysis || live.loaded !== d.analysis.id) live.loaded = null; live.connected = true; live.err = false; paintAll(true); onModeChanged(); if (d.analysis) loadFullSession(); });
       es.addEventListener("stint", (e) => { const d = JSON.parse(e.data); live.stint = d.n; paintStatus(); });
       es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label, role: d.role } }); paintStatus(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); paintBanner(); loadFullSession(); });
-      es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; paintAll(); });
+      es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; paintAll(true); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
@@ -2817,7 +2842,7 @@
       es.onerror = () => { live.connected = false; live.err = true; paintStatus(); };
     }
     function liveReset(local) {
-      live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.frame = null; live.cars = [];
+      live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.frame = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null;
       if (!local && live.connected) fetch(liveUrl + "/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
       render();
     }
@@ -2845,8 +2870,14 @@
     function bindBody(root) {
       const r = root || host;
       r.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : b.dataset.car; if (src === "live") paintSections(); else render(); }));
-      r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") paintSections(); else render(); }));
-      r.querySelectorAll("[data-replica]").forEach((b) => b.addEventListener("click", () => { replica = b.dataset.replica; if (src === "live") paintSections(); else render(); }));
+      r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") { live._donorPick = donor; const ls = liveSess(); const p = PIN(); pinDonor(ls && car(ls, donor) ? ls : (p && p.data && car(p.data, donor) ? p.data : null), donor); paintSections(true); paintBanner(); } else render(); }));
+      r.querySelectorAll("[data-unpin]").forEach((b) => b.addEventListener("click", () => {
+        // unpin = un-donor: if the pinned donor is a run of the CURRENT live session, clear its 🎯 role too (else the role would re-pin it at once)
+        const p = PIN(); const ls = liveSess(); const n = p ? stintOf(p.key) : null;
+        if (p && ls && p.sid === ls.id && n != null && live.connected) { fetch(liveUrl + "/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: null, stint: n }) }).catch(() => {}); if (live.tags && live.tags[String(n)]) live.tags[String(n)] = Object.assign({}, live.tags[String(n)], { role: null }); const st = (ls.stints || []).find((x) => x.n === n); if (st) st.role = null; }
+        unpinDonor(); paintSections(true); paintBanner(); paintStatus();
+      }));
+      r.querySelectorAll("[data-replica]").forEach((b) => b.addEventListener("click", () => { replica = b.dataset.replica; if (src === "live") { live._replicaPick = replica; paintSections(true); } else render(); }));
       bindNames(r);
       r.querySelectorAll("[data-saveroute]").forEach((b) => b.addEventListener("click", () => {
         const wrap = b.closest(".lab-route"); const v = wrap.querySelector("input").value.trim(); if (!v) return;
@@ -2868,7 +2899,7 @@
         <div class="lab-modes"><span class="why" style="font-size:11px;margin-right:2px">workflow</span><span id="labWf" style="display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center">${tabsHtml()}</span></div>
         ${src === "live" ? `${streamBar()}<div id="lvBody">${liveBody()}</div>` : !s ? NOSESS : sectionsHtml(s, false)}`;
       live._shownWf = effMode();
-      host.querySelectorAll("[data-src]").forEach((b) => b.addEventListener("click", () => { src = b.dataset.src; localStorage.setItem("fh6LabSrc", src); carSel = null; render(); }));
+      host.querySelectorAll("[data-src]").forEach((b) => b.addEventListener("click", () => { src = b.dataset.src; localStorage.setItem("fh6LabSrc", src); carSel = null; donor = replica = null; render(); }));   // run picks ('cid#n') never carry across sources — run numbers restart per session
       bindTabs(); bindBody(host);
       const sel = host.querySelector("#labSess"); if (sel) sel.addEventListener("change", () => { sIdx = +sel.value; carSel = null; donor = replica = null; render(); });
       if (src === "live") { bindLive(); if (!es) liveConnect(); else paintAll(); }

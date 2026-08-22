@@ -136,6 +136,59 @@ def load_global_ranges():
             _GLOBAL_RANGES = {}
     return _GLOBAL_RANGES
 
+
+def _spring_model():
+    """The spring-rate frequency band (game-fixed) from data/global-slider-ranges.json."""
+    try:
+        with open(_global_ranges_path(), encoding="utf-8") as fh:
+            return json.load(fh).get("spring_model")
+    except Exception:
+        return None
+
+
+_MASSES = None
+def _masses_path():
+    here = os.path.dirname(os.path.abspath(__file__))
+    return os.path.abspath(os.path.join(here, "..", "..", "data", "car-mass.json"))
+
+def load_masses():
+    """Per-car {ordinal: {mass_lb, front_pct}} from data/car-mass.json (captured from the My Cars stats pane)."""
+    global _MASSES
+    if _MASSES is None:
+        try:
+            with open(_masses_path(), encoding="utf-8") as fh:
+                doc = json.load(fh)
+            _MASSES = {}
+            for o, v in (doc.get("masses") or {}).items():
+                try:
+                    _MASSES[int(o)] = v
+                except (ValueError, TypeError):
+                    continue
+        except Exception:
+            _MASSES = {}
+    return _MASSES
+
+def spring_rate_from_mass(ordinal, name, norm):
+    """Derive a spring-rate slider's absolute value (lb/in) from car mass + the fixed frequency band.
+    k = f^2 * W_axle / 19.56 (W_axle = total_lb * front-or-rear share); the slider is linear in k.
+    Returns None unless this car has mass captured AND the band is configured."""
+    m = load_masses().get(int(ordinal)); sm = _spring_model()
+    if not (m and sm):
+        return None
+    total = m.get("mass_lb"); fp = m.get("front_pct")
+    if not total or fp is None:
+        return None
+    if fp > 1:
+        fp = fp / 100.0
+    dist = fp if name == "front_spring" else (1.0 - fp)
+    w_axle = total * dist
+    fmin = sm.get("freq_min_hz"); fmax = sm.get("freq_max_hz")
+    if not (fmin and fmax) or w_axle <= 0:
+        return None
+    kmin = fmin * fmin * w_axle / 19.56
+    kmax = fmax * fmax * w_axle / 19.56
+    return round(kmin + norm * (kmax - kmin), 1)
+
 def back_solve(points):
     """Solve [min, max] from >=2 (norm, value) points via least squares (value = min + norm*(max-min))."""
     pts = [(float(n), float(v)) for n, v in points]
@@ -221,6 +274,9 @@ def parse_tune(path, ordinal_hint=None):
             entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
             entry["range"] = gband
             entry["derived"] = True   # global band (game-fixed), not a per-chassis registration
+        elif per_car and name in ("front_spring", "rear_spring") and spring_rate_from_mass(ordinal, name, norm) is not None:
+            entry["value"] = spring_rate_from_mass(ordinal, name, norm)
+            entry["derived"] = True   # from car mass + the spring frequency band
         elif per_car:
             # unknown absolute range: report position toward the pole
             entry["value"] = None

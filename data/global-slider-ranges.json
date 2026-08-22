@@ -4,8 +4,26 @@
   "purpose": "Global tuning-slider ranges that are the SAME for every car (game-fixed), used to de-normalize sliders the save file stores as 0..1 positions. Unlike data/car-tune-ranges.json (per-chassis), these bands apply to every ordinal.",
   "method": "GEAR band shape confirmed on real Data Out telemetry: for the correct band, ladder(mps_per_krpm) x gear-ratio is constant across gears (= tire_radius / final_drive, tire-radius-free). Fitting the 10-speed Honda Beat (ord 3852) gives CV 2.0% at [0.48, 6.00]; Viper ACR / Cayman GT4 / others 4-6% (measurement noise). Absolute scale pinned by physical plausibility (real gear ratios live in ~0.5-5.0; a 2x-scaled band gives absurd 8.8:1 first gears). FINAL DRIVE band from FH tuning calculators, telemetry-consistent. Refine to per-tune EXACT via WheelRotationSpeed: final_drive x gear = CurrentEngineRpm*(2*pi/60) / WheelRotSpeed at a zero-slip frame.",
   "ranges": {
-    "final_drive": {"min": 2.2, "max": 6.1, "confidence": "derived", "source": "FH tuning calculators + telemetry-consistent"},
-    "gear": {"min": 0.48, "max": 6.0, "confidence": "derived", "source": "telemetry shape-confirmed (Honda Beat CV 2.0%) + physical-plausibility scale"}
+    "final_drive": {
+      "min": 2.2,
+      "max": 6.1,
+      "confidence": "derived",
+      "source": "FH tuning calculators + telemetry-consistent"
+    },
+    "gear": {
+      "min": 0.48,
+      "max": 6.0,
+      "confidence": "derived",
+      "source": "telemetry shape-confirmed (Honda Beat CV 2.0%) + physical-plausibility scale"
+    }
   },
-  "confidence_note": "confidence 'derived' = high-quality inference (correct shape, plausible scale), not read-exact off disk. A single WheelRotationSpeed gear-ladder drive on any car upgrades these to verified-exact and can refine the absolute scale."
+  "confidence_note": "confidence 'derived' = high-quality inference (correct shape, plausible scale), not read-exact off disk. A single WheelRotationSpeed gear-ladder drive on any car upgrades these to verified-exact and can refine the absolute scale.",
+  "spring_model": {
+    "formula": "k_lb_per_in = freq_hz^2 * W_axle_lb / 19.56 ; W_axle = total_lb * dist(front or rear) ; the slider is linear in spring RATE between the two frequency endpoints",
+    "freq_min_hz": 1.4,
+    "freq_max_hz": 3.13,
+    "confidence": "provisional",
+    "source": "FH spring formula (k = f^2 * W_axle / 19.56, verified across all Forza titles + calculators); frequency band from one observed car whose rate range ratio was 5.00 (=> f_max/f_min = 2.236, e.g. 1.40->3.13 Hz). REFINE: one registered spring endpoint + that car's mass pins the band exactly for every car.",
+    "needs": "per-car mass+front% in data/car-mass.json (from the My Cars stats capture)"
+  }
 }

@@ -116,6 +116,26 @@ def load_ranges():
                 out.setdefault(oi, {})[f] = [r["min"], r["max"]]
     return out
 
+
+_GLOBAL_RANGES = None
+def _global_ranges_path():
+    here = os.path.dirname(os.path.abspath(__file__))
+    return os.path.abspath(os.path.join(here, "..", "..", "data", "global-slider-ranges.json"))
+
+def load_global_ranges():
+    """Global (same-for-every-car) slider bands — gear + final drive — as {field: [lo, hi]}.
+    These de-normalize sliders whose range is game-fixed (not per-chassis); see data/global-slider-ranges.json."""
+    global _GLOBAL_RANGES
+    if _GLOBAL_RANGES is None:
+        try:
+            with open(_global_ranges_path(), encoding="utf-8") as fh:
+                doc = json.load(fh)
+            _GLOBAL_RANGES = {f: [r["min"], r["max"]] for f, r in (doc.get("ranges") or {}).items()
+                              if isinstance(r, dict) and "min" in r and "max" in r}
+        except Exception:
+            _GLOBAL_RANGES = {}
+    return _GLOBAL_RANGES
+
 def back_solve(points):
     """Solve [min, max] from >=2 (norm, value) points via least squares (value = min + norm*(max-min))."""
     pts = [(float(n), float(v)) for n, v in points]
@@ -191,10 +211,16 @@ def parse_tune(path, ordinal_hint=None):
         norm = _f32(b, off)
         entry = {"norm": round(norm, 4), "unit": unit, "adjustable": adj}
         rng = ranges.get(name)
+        gband = load_global_ranges().get(name)
         if per_car and rng:
             lo2, hi2 = rng
             entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
             entry["range"] = rng
+        elif per_car and gband:
+            lo2, hi2 = gband
+            entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
+            entry["range"] = gband
+            entry["derived"] = True   # global band (game-fixed), not a per-chassis registration
         elif per_car:
             # unknown absolute range: report position toward the pole
             entry["value"] = None
@@ -510,22 +536,35 @@ def tune_to_deliverable(tune, car_name=None):
             sec, poles, label = SLIDER_META.get(k, (tab_name, ("", ""), k.replace("_", " ")))
             base = {"field": k, "label": label, "section": sec, "poles": list(poles), "fill": round(e["norm"], 4)}
             if e["value"] is not None:
-                rows.append({**base, "value": e["value"], "unit": e["unit"],
-                             "display": f"{e['value']} {e['unit']}".strip(), "status": "measured", "confidence": 1.0})
+                vr = {**base, "value": e["value"], "unit": e["unit"], "display": f"{e['value']} {e['unit']}".strip()}
+                if e.get("derived"):
+                    vr.update({"derived": True, "status": "measured-derived", "confidence": 0.85})
+                else:
+                    vr.update({"status": "measured", "confidence": 1.0})
+                rows.append(vr)
             else:
                 rows.append({**base, "value": None, "norm": e["norm"], "unit": e["unit"], "per_car": True,
                              "display": f"{e['pole_pct']}% toward {e.get('pole', '?')}",
                              "status": "measured-relative", "confidence": 0.6})
         if tab_name == "Gearing" and tune["gears_norm"]:
+            gband = load_global_ranges().get("gear")
             ordn_word = {1: "1st", 2: "2nd", 3: "3rd"}
             for i, g in enumerate(tune["gears_norm"], 1):
-                rows.append({"field": f"gear_{i}", "label": f"{ordn_word.get(i, str(i)+'th')} gear", "section": "Forward Gears",
-                             "poles": list(GEAR_POLES), "fill": round(g, 4), "value": None, "norm": g,
-                             "display": f"{round(g*100,1)}% toward accel", "status": "measured-relative", "confidence": 0.6})
+                gr = {"field": f"gear_{i}", "label": f"{ordn_word.get(i, str(i)+'th')} gear",
+                      "section": "Forward Gears", "poles": list(GEAR_POLES), "fill": round(g, 4)}
+                if gband:
+                    val = round(gband[0] + g * (gband[1] - gband[0]), 3)
+                    gr.update({"value": val, "unit": ":1", "display": f"{val}:1", "derived": True,
+                               "status": "measured-derived", "confidence": 0.85})
+                else:
+                    gr.update({"value": None, "norm": g, "display": f"{round(g*100,1)}% toward accel",
+                               "status": "measured-relative", "confidence": 0.6})
+                rows.append(gr)
         if rows:
             tabs.append({"tab": tab_name, "rows": rows})
     installed = sum(len(m["rows"]) for m in menus)
-    abs_sliders = sum(1 for t in tabs for r in t["rows"] if r.get("value") is not None)
+    abs_sliders = sum(1 for t in tabs for r in t["rows"] if r.get("value") is not None and not r.get("derived"))
+    der_sliders = sum(1 for t in tabs for r in t["rows"] if r.get("value") is not None and r.get("derived"))
     rel_sliders = sum(1 for t in tabs for r in t["rows"] if r.get("value") is None)
     return {
         "source": "disk",
@@ -535,11 +574,12 @@ def tune_to_deliverable(tune, car_name=None):
         "gear_count": tune["gear_count"],
         "menus": menus,
         "tabs": tabs,
-        "summary": {"parts_installed": installed, "sliders_absolute": abs_sliders,
+        "summary": {"parts_installed": installed, "sliders_absolute": abs_sliders + der_sliders,
+                    "sliders_exact": abs_sliders, "sliders_derived": der_sliders,
                     "sliders_relative": rel_sliders},
-        # overall confidence: parts + absolute sliders are exact; relative sliders slightly discount
-        "confidence": round((installed + abs_sliders + 0.6 * rel_sliders) /
-                            max(1, installed + abs_sliders + rel_sliders), 3),
+        # overall confidence: parts + disk-exact sliders count full; derived (global-band) ~0.85; relative discount
+        "confidence": round((installed + abs_sliders + 0.85 * der_sliders + 0.6 * rel_sliders) /
+                            max(1, installed + abs_sliders + der_sliders + rel_sliders), 3),
     }
 
 

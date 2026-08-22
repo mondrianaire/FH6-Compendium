@@ -2871,6 +2871,7 @@
       .fhm-sll{font-size:12px;color:var(--txt)}
       .fhm-slv{font-weight:700;font-size:16px;color:#c3ea4f;white-space:nowrap;font-variant-numeric:tabular-nums}
       .fhm-slv.pos{color:#e6a63a;font-size:13px}
+      .fhm-slv.derived{color:#8fd14f;border-bottom:1px dotted rgba(143,209,79,.55)}
       .fhm-trk{position:relative;height:16px}
       .fhm-trk .rail{position:absolute;top:7px;left:0;right:0;height:3px;border-radius:2px;background:#0b1013;border:1px solid var(--line)}
       .fhm-trk .fill{position:absolute;top:7px;left:0;height:3px;border-radius:2px;background:#a8d92a}
@@ -2953,7 +2954,7 @@
           const rel = row.value == null; const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
           const val = rel
             ? `<span class="fhm-slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%${row.per_car && !String(row.field).startsWith("gear") ? `<input class="fhm-rin" data-rangeord="${dl.ordinal}" data-rangefield="${esc(row.field)}" data-rangenorm="${row.fill}" data-rangeunit="${esc(row.unit || "")}" placeholder="=?" title="Type the in-game number for this slider — two saved tunes at different positions lock this car's range, then every tune prints exact." inputmode="decimal">` : ""}</span>`
-            : `<span class="fhm-slv">${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>`;
+            : `<span class="fhm-slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global gear / final-drive band — exact on your next gear-ladder drive"' : ""}>${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>`;
           return `<div class="fhm-sl"><div class="fhm-slt"><span class="fhm-sll">${vdot(vsl[row.field])}${esc(row.label || row.field)}</span>${val}</div><div class="fhm-trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div><div class="fhm-pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
         }).join("")}</div>`).join("");
         return `<div style="margin-bottom:13px"><div class="fhm-tab">${esc(t.tab)}</div>${secHtml}</div>`;
@@ -2964,7 +2965,7 @@
       return `<div class="block fhm" style="border-color:#00d27a">${headRow}
         ${diskDiffBanner(dl.ordinal)}
         ${confMeterHtml(r)}
-        <p class="why" style="font-size:11px;margin:4px 0 11px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_absolute} exact</b> · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
+        <p class="why" style="font-size:11px;margin:4px 0 11px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_exact != null ? sm.sliders_exact : sm.sliders_absolute} exact</b>${sm.sliders_derived ? ` · <b style="color:#8fd14f" title="gears + final drive, de-normalized from the global band">${sm.sliders_derived} derived</b>` : ""} · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
         <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
     const fetchDiskTune = (ordinal) => {
@@ -3031,6 +3032,8 @@
       items.push(c.soft.length
         ? `<div class="fhm-todo"><span class="d">○</span><span><b>${c.soft.length} best-effort part name${c.soft.length > 1 ? "s" : ""}</b> — <span class="why">confirm in the upgrade shop: ${esc(c.soft.slice(0, 4).join(", "))}${c.soft.length > 4 ? " +" + (c.soft.length - 4) + " more" : ""}</span></span></div>`
         : `<div class="fhm-todo ok"><span class="d">✓</span><span>every part named exactly</span></div>`);
+      const nder = (cached.deliverable && cached.deliverable.summary && cached.deliverable.summary.sliders_derived) || 0;
+      if (nder) items.push(`<div class="fhm-todo ok"><span class="d">≈</span><span><b>${nder} gear / final-drive values</b> derived from the global band — <span class="why">exact on your next gear-ladder drive</span></span></div>`);
       if (c.locked) items.push(`<div class="fhm-todo ok"><span class="d">🔒</span><span>downloaded tune — values read straight off disk (the in-game tune screen hides them)</span></div>`);
       return `<div class="fhm-conf">
         <div class="fhm-confhead"><span class="lbl">confidence to a buildable clone</span><b style="color:${oc}">${c.pct}%</b><span class="tag" style="border-color:${oc};color:${oc}">${c.reasonable ? "✓ reasonable — ready to build" : "partial — keep refining"}</span></div>

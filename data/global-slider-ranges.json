@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "created": "2026-08-22",
+  "purpose": "Global tuning-slider ranges that are the SAME for every car (game-fixed), used to de-normalize sliders the save file stores as 0..1 positions. Unlike data/car-tune-ranges.json (per-chassis), these bands apply to every ordinal.",
+  "method": "GEAR band shape confirmed on real Data Out telemetry: for the correct band, ladder(mps_per_krpm) x gear-ratio is constant across gears (= tire_radius / final_drive, tire-radius-free). Fitting the 10-speed Honda Beat (ord 3852) gives CV 2.0% at [0.48, 6.00]; Viper ACR / Cayman GT4 / others 4-6% (measurement noise). Absolute scale pinned by physical plausibility (real gear ratios live in ~0.5-5.0; a 2x-scaled band gives absurd 8.8:1 first gears). FINAL DRIVE band from FH tuning calculators, telemetry-consistent. Refine to per-tune EXACT via WheelRotationSpeed: final_drive x gear = CurrentEngineRpm*(2*pi/60) / WheelRotSpeed at a zero-slip frame.",
+  "ranges": {
+    "final_drive": {"min": 2.2, "max": 6.1, "confidence": "derived", "source": "FH tuning calculators + telemetry-consistent"},
+    "gear": {"min": 0.48, "max": 6.0, "confidence": "derived", "source": "telemetry shape-confirmed (Honda Beat CV 2.0%) + physical-plausibility scale"}
+  },
+  "confidence_note": "confidence 'derived' = high-quality inference (correct shape, plausible scale), not read-exact off disk. A single WheelRotationSpeed gear-ladder drive on any car upgrades these to verified-exact and can refine the absolute scale."
+}

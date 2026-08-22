@@ -1218,12 +1218,59 @@ def main():
                                                     "build_id": cinfo.get("build_id"), "hp": (cinfo.get("sig") or {}).get("hp_peak"), "gears": (cinfo.get("sig") or {}).get("gear_count")}   # the BEST BUILD that set the record
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
         model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis
+        mlaps = model["laps"] or 1
+        # ---- MERGE model-turn fragments: the same physical corner detected at slightly different apex across sessions became separate model turns (bloated to 20+).
+        #      Collapse turns within 35 m into one, recombine per-session detections, then keep a STABLE canonical set (established across the track). ----
+        def _tpass(t): return (t.get("track") or {}).get("passes", 0)
+        merged_turns = []
+        for t in sorted(model.get("turns", []), key=lambda t: -_tpass(t)):
+            hit = next((u for u in merged_turns if (u["pos"][0] - t["pos"][0]) ** 2 + (u["pos"][1] - t["pos"][1]) ** 2 <= 35 ** 2 and u.get("dir") == t.get("dir")), None)
+            if hit:
+                hbs = hit.setdefault("by_session", {})
+                for s_, v in (t.get("by_session") or {}).items():
+                    if s_ not in hbs or (v.get("n", 0) > (hbs[s_] or {}).get("n", 0)): hbs[s_] = v
+                if t.get("radius_m") and (not hit.get("radius_m") or _tpass(t) > _tpass(hit) * 0): hit["radius_m"] = hit.get("radius_m") or t.get("radius_m")
+                if not hit.get("best") and t.get("best"): hit["best"] = t["best"]
+            else: merged_turns.append(t)
+        for t in merged_turns:   # recompute each merged turn's track stats from its combined per-session detections
+            bs = t.get("by_session") or {}; fr_t = {"front": 0, "rear": 0, "none": 0}; lim_t = {}
+            for v in bs.values():
+                for k2 in fr_t: fr_t[k2] += (v.get("fr") or {}).get(k2, 0)
+                lim_t[v.get("lim") or "clean"] = lim_t.get(v.get("lim") or "clean", 0) + 1
+            tn = sum(v.get("n", 0) for v in bs.values()); tseen = sum(v.get("laps_seen", 0) for v in bs.values())
+            t["track"] = {"passes": tn, "laps_seen": tseen, "sessions": len(bs), "fr": fr_t, "lim": lim_t, "dominant": (max(fr_t, key=fr_t.get) if tn else None), "consistency": (round(max(fr_t.values()) / tn, 2) if tn else None),
+                          "cars": sorted({c_ for v in bs.values() for c_ in (v.get("cars") or [])}), "laps_track": model["laps"], "presence": round(tseen / mlaps, 2)}
+            t["sessions"] = len(bs)
+        # order along the route (nearest point on the learned path) and renumber; the canonical set = turns established across the track
+        gpath = ((model.get("geometry") or {}).get("path")) or [t["pos"] for t in merged_turns]
+        def route_s(pos):
+            best_i = min(range(len(gpath)), key=lambda i: (gpath[i][0] - pos[0]) ** 2 + (gpath[i][1] - pos[1]) ** 2) if gpath else 0
+            return best_i
+        merged_turns.sort(key=lambda t: route_s(t["pos"]))
+        for i, t in enumerate(merged_turns, 1): t["id"] = f"T{i}"
+        def _established(t):
+            tr = t.get("track") or {}
+            return (tr.get("sessions", 0) >= 2 and (tr.get("laps_seen", 0) / mlaps) >= 0.35) or (tr.get("passes", 0) >= 0.5 * mlaps)
+        for t in merged_turns: t["established"] = _established(t); t["status"] = "turn" if t["established"] else "possible"
+        model["turns"] = merged_turns
+        canonical = [t for t in merged_turns if t["established"]]
+        model["turn_count"] = len(canonical)
         # track-level presence per turn (over ALL track laps) and a track-level turn-count confidence — the turn identity is corroborated across sessions, not just this one
         for k_ in corner_out:
             t_ = k_.get("track") or {}
             if t_: t_["laps_track"] = model["laps"]; t_["presence"] = (round(t_.get("laps_seen", 0) / model["laps"], 2) if model["laps"] else None)
         turns_info["track_laps"] = model["laps"]; turns_info["track_sessions"] = len(model["sessions"])
         turns_info["track_confidence"] = round(strength(model["laps"], 3) * max(0.3, agree), 2)
+        # canonical turn count: the player's declared count wins; else the merged, established set. This is what the card shows — stable across sessions.
+        est_count = model.get("turn_count", detected_here)
+        turns_info["established"] = est_count; turns_info["count"] = expected if expected else est_count
+        turns_info["canonical"] = [{"id": t["id"], "pos": t["pos"], "dir": t.get("dir"), "radius_m": t.get("radius_m"), "passes": (t.get("track") or {}).get("passes"), "presence": (t.get("track") or {}).get("presence"), "sessions": (t.get("track") or {}).get("sessions"), "dominant": (t.get("track") or {}).get("dominant")} for t in model["turns"] if t.get("established")]
+        turns_info["mapped"] = len(((model.get("geometry") or {}).get("turns")) or (geo or {}).get("turns") or [])
+        near = [t for t in model["turns"] if not t.get("established") and ((t.get("track") or {}).get("presence") or 0) >= 0.25]
+        turns_info["near"] = len(near)
+        if expected:
+            miss = est_count - expected
+            turns_info["note"] = (f"you declared {expected} turns · {est_count} established across {model['laps']} laps/{len(model['sessions'])} sessions" + (" — match ✓" if miss == 0 else f" · {abs(miss)} {'extra detected — likely fragments, keep lapping to settle' if miss > 0 else 'still to confirm'}" + (f"; {len(near)} more nearly established" if miss < 0 and near else "")) + (f" · {', '.join(messy)} split into several detections (drive as one arc)" if messy else ""))
         if profile and (not model.get("profile") or total_laps >= (model.get("profile_laps") or 0)): model["profile"] = profile; model["profile_laps"] = total_laps; model["profile_session"] = sid
         model["updated"] = sid; model["name"] = co["name"] or model.get("name")
         bl = model.get("best_laps") or {}; overall = (min(bl.values(), key=lambda b_: b_["best_lap"]) if bl else None)
@@ -1237,8 +1284,11 @@ def main():
             layout = sorted(prev_lp + (geo.get("lap_paths") or []), key=lambda lp: (lp.get("session") or "", lp.get("ev", 0), lp.get("lap", 0)))[-48:]   # chronological (session ids are timestamps) — the 48 most RECENT laps, whatever the analysis order
             if not mg.get("path") or len(geo["path"]) >= len(mg.get("path") or []): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"), "turns": geo["turns"], "session": sid, "lap_paths": layout}   # the map persists with the course
             else: mg["lap_paths"] = layout; model["geometry"] = mg
+            # the session's map should show the BEST-known map of the track (a thin 3-lap session must not display only 3 turns) — borrow the model's richer geometry
+            bestg = model["geometry"]
+            if len(bestg.get("turns") or []) > len(geo.get("turns") or []): geo["turns"] = bestg["turns"]; geo["paths"] = bestg.get("paths"); geo["path"] = bestg.get("path"); geo["length_m"] = bestg.get("length_m"); geo["from_model"] = True
             geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing
-            for k_ in ("lap_paths", "path", "last_path"): geo.pop(k_, None)   # session entry keeps the drawable pieces + layout only (no duplicated flat copies)
+            for k_ in ("lap_paths", "last_path"): geo.pop(k_, None)   # session entry keeps the drawable pieces + layout only (path kept for the map shape)
         if write_models:
             try:
                 os.makedirs(mdir, exist_ok=True); tmp_ = mpath + ".tmp"

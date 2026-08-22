@@ -5,103 +5,13 @@
   {
    "id": "T1",
    "pos": [
-    -1975,
-    1596
-   ],
-   "dir": "L",
-   "type": "hairpin",
-   "radius_m": 16,
-   "n": 10,
-   "best": {
-    "mph_in": 84,
-    "mph_min": 32,
-    "mph_out": 60,
-    "brake_on_m": 375,
-    "throttle_on_m": 47,
-    "lat_g": 2.5,
-    "apex": [
-     -1975,
-     1610
-    ],
-    "t0": 2468.1,
-    "stint": 5,
-    "first_red": "front ph1",
-    "session": "fh6_20260821_202122"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "2866|2|4|700": {
-     "mph_in": 84,
-     "mph_min": 32,
-     "mph_out": 60,
-     "brake_on_m": 375,
-     "throttle_on_m": 47,
-     "lat_g": 2.5,
-     "apex": [
-      -1975,
-      1610
-     ],
-     "t0": 2468.1,
-     "stint": 5,
-     "first_red": "front ph1",
-     "session": "fh6_20260821_202122"
-    }
-   },
-   "cars": [
-    "2866|2|4|700"
-   ],
-   "status": "turn",
-   "by_session": {
-    "fh6_20260821_202122": {
-     "n": 5,
-     "laps_seen": 4,
-     "laps": 7,
-     "fr": {
-      "front": 5,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.25,
-     "mph_min": 32,
-     "usi": 0.534,
-     "cars": [
-      "2866|2|4|700"
-     ]
-    }
-   },
-   "track": {
-    "passes": 5,
-    "laps_seen": 4,
-    "sessions": 1,
-    "fr": {
-     "front": 5,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {
-     "tune": 1,
-     "driver": 0,
-     "mixed": 0,
-     "clean": 0
-    },
-    "dominant": "front",
-    "consistency": 1.0,
-    "cars": [
-     "2866|2|4|700"
-    ]
-   }
-  },
-  {
-   "id": "T2",
-   "pos": [
     -1835,
     1432
    ],
    "dir": "R",
    "type": "medium",
    "radius_m": 41,
-   "n": 2,
+   "n": 1,
    "best": {
     "mph_in": 68,
     "mph_min": 59,
@@ -170,20 +80,235 @@
      "none": 0
     },
     "lim": {
-     "tune": 1,
-     "driver": 0,
-     "mixed": 0,
-     "clean": 0
+     "tune": 1
     },
     "dominant": "front",
     "consistency": 1.0,
     "cars": [
      "2866|2|4|700"
-    ]
-   }
+    ],
+    "laps_track": 8,
+    "presence": 0.12
+   },
+   "established": false
+  },
+  {
+   "id": "T2",
+   "pos": [
+    -1899,
+    1564
+   ],
+   "dir": "L",
+   "type": "medium",
+   "radius_m": 35,
+   "n": 2,
+   "best": {
+    "mph_in": 88,
+    "mph_min": 75,
+    "mph_out": 75,
+    "brake_on_m": null,
+    "throttle_on_m": null,
+    "lat_g": 2.22,
+    "apex": [
+     -1898,
+     1563
+    ],
+    "t0": 2757.1,
+    "stint": 13,
+    "first_red": "front ph3",
+    "session": "fh6_20260821_202122"
+   },
+   "sessions": 2,
+   "best_by_car": {
+    "2866|2|4|700": {
+     "mph_in": 88,
+     "mph_min": 75,
+     "mph_out": 75,
+     "brake_on_m": null,
+     "throttle_on_m": null,
+     "lat_g": 2.22,
+     "apex": [
+      -1898,
+      1563
+     ],
+     "t0": 2757.1,
+     "stint": 13,
+     "first_red": "front ph3",
+     "session": "fh6_20260821_202122"
+    },
+    "1046|2|10|800": {
+     "mph_in": 90,
+     "mph_min": 58,
+     "mph_out": 61,
+     "brake_on_m": 0,
+     "throttle_on_m": 0,
+     "lat_g": 2.19,
+     "apex": [
+      -1899,
+      1564
+     ],
+     "t0": 82.2,
+     "stint": 4,
+     "first_red": "front ph1",
+     "session": "fh6_20260821_211040"
+    }
+   },
+   "cars": [
+    "2866|2|4|700",
+    "1046|2|10|800"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_202122": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 7,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 75,
+     "usi": 0.204,
+     "cars": [
+      "2866|2|4|700"
+     ]
+    },
+    "fh6_20260821_211040": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 58,
+     "usi": 0.358,
+     "cars": [
+      "1046|2|10|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 2,
+    "laps_seen": 2,
+    "sessions": 2,
+    "fr": {
+     "front": 2,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 2
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "1046|2|10|800",
+     "2866|2|4|700"
+    ],
+    "laps_track": 8,
+    "presence": 0.25
+   },
+   "established": false
   },
   {
    "id": "T3",
+   "pos": [
+    -1975,
+    1596
+   ],
+   "dir": "L",
+   "type": "hairpin",
+   "radius_m": 16,
+   "n": 5,
+   "best": {
+    "mph_in": 84,
+    "mph_min": 32,
+    "mph_out": 60,
+    "brake_on_m": 375,
+    "throttle_on_m": 47,
+    "lat_g": 2.5,
+    "apex": [
+     -1975,
+     1610
+    ],
+    "t0": 2468.1,
+    "stint": 5,
+    "first_red": "front ph1",
+    "session": "fh6_20260821_202122"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "2866|2|4|700": {
+     "mph_in": 84,
+     "mph_min": 32,
+     "mph_out": 60,
+     "brake_on_m": 375,
+     "throttle_on_m": 47,
+     "lat_g": 2.5,
+     "apex": [
+      -1975,
+      1610
+     ],
+     "t0": 2468.1,
+     "stint": 5,
+     "first_red": "front ph1",
+     "session": "fh6_20260821_202122"
+    }
+   },
+   "cars": [
+    "2866|2|4|700"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260821_202122": {
+     "n": 5,
+     "laps_seen": 4,
+     "laps": 7,
+     "fr": {
+      "front": 5,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.25,
+     "mph_min": 32,
+     "usi": 0.534,
+     "cars": [
+      "2866|2|4|700"
+     ]
+    }
+   },
+   "track": {
+    "passes": 5,
+    "laps_seen": 4,
+    "sessions": 1,
+    "fr": {
+     "front": 5,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|700"
+    ],
+    "laps_track": 8,
+    "presence": 0.5
+   },
+   "established": true
+  },
+  {
+   "id": "T4",
    "pos": [
     -1949,
     1564
@@ -191,7 +316,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 60,
-   "n": 2,
+   "n": 1,
    "best": {
     "mph_in": 63,
     "mph_min": 63,
@@ -260,325 +385,20 @@
      "none": 0
     },
     "lim": {
-     "tune": 1,
-     "driver": 0,
-     "mixed": 0,
-     "clean": 0
+     "tune": 1
     },
     "dominant": "front",
     "consistency": 1.0,
     "cars": [
      "2866|2|4|700"
-    ]
-   }
-  },
-  {
-   "id": "T4",
-   "pos": [
-    -2046,
-    1608
-   ],
-   "dir": "R",
-   "type": "medium",
-   "radius_m": 39,
-   "n": 2,
-   "best": {
-    "mph_in": 84,
-    "mph_min": 64,
-    "mph_out": 71,
-    "brake_on_m": 96,
-    "throttle_on_m": 63,
-    "lat_g": 2.45,
-    "apex": [
-     -2046,
-     1608
     ],
-    "t0": 2518.4,
-    "stint": 5,
-    "first_red": "front ph2",
-    "session": "fh6_20260821_202122"
+    "laps_track": 8,
+    "presence": 0.12
    },
-   "sessions": 1,
-   "best_by_car": {
-    "2866|2|4|700": {
-     "mph_in": 84,
-     "mph_min": 64,
-     "mph_out": 71,
-     "brake_on_m": 96,
-     "throttle_on_m": 63,
-     "lat_g": 2.45,
-     "apex": [
-      -2046,
-      1608
-     ],
-     "t0": 2518.4,
-     "stint": 5,
-     "first_red": "front ph2",
-     "session": "fh6_20260821_202122"
-    }
-   },
-   "cars": [
-    "2866|2|4|700"
-   ],
-   "status": "possible",
-   "by_session": {
-    "fh6_20260821_202122": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 7,
-     "fr": {
-      "front": 1,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 64,
-     "usi": 0.443,
-     "cars": [
-      "2866|2|4|700"
-     ]
-    }
-   },
-   "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
-    "fr": {
-     "front": 1,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {
-     "tune": 1,
-     "driver": 0,
-     "mixed": 0,
-     "clean": 0
-    },
-    "dominant": "front",
-    "consistency": 1.0,
-    "cars": [
-     "2866|2|4|700"
-    ]
-   }
+   "established": false
   },
   {
    "id": "T5",
-   "pos": [
-    -1966,
-    1659
-   ],
-   "dir": "R",
-   "type": "medium",
-   "radius_m": 60,
-   "n": 6,
-   "best": {
-    "mph_in": 83,
-    "mph_min": 74,
-    "mph_out": 106,
-    "brake_on_m": 635,
-    "throttle_on_m": -463,
-    "lat_g": 2.89,
-    "apex": [
-     -1970,
-     1660
-    ],
-    "t0": 2484.7,
-    "stint": 5,
-    "first_red": "front ph2",
-    "session": "fh6_20260821_202122"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "2866|2|4|700": {
-     "mph_in": 83,
-     "mph_min": 74,
-     "mph_out": 106,
-     "brake_on_m": 635,
-     "throttle_on_m": -463,
-     "lat_g": 2.89,
-     "apex": [
-      -1970,
-      1660
-     ],
-     "t0": 2484.7,
-     "stint": 5,
-     "first_red": "front ph2",
-     "session": "fh6_20260821_202122"
-    }
-   },
-   "cars": [
-    "2866|2|4|700"
-   ],
-   "status": "turn",
-   "by_session": {
-    "fh6_20260821_202122": {
-     "n": 3,
-     "laps_seen": 3,
-     "laps": 7,
-     "fr": {
-      "front": 3,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 74,
-     "usi": 0.348,
-     "cars": [
-      "2866|2|4|700"
-     ]
-    }
-   },
-   "track": {
-    "passes": 3,
-    "laps_seen": 3,
-    "sessions": 1,
-    "fr": {
-     "front": 3,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {
-     "tune": 1,
-     "driver": 0,
-     "mixed": 0,
-     "clean": 0
-    },
-    "dominant": "front",
-    "consistency": 1.0,
-    "cars": [
-     "2866|2|4|700"
-    ]
-   }
-  },
-  {
-   "id": "T6",
-   "pos": [
-    -1899,
-    1564
-   ],
-   "dir": "L",
-   "type": "medium",
-   "radius_m": 35,
-   "n": 4,
-   "best": {
-    "mph_in": 88,
-    "mph_min": 75,
-    "mph_out": 75,
-    "brake_on_m": null,
-    "throttle_on_m": null,
-    "lat_g": 2.22,
-    "apex": [
-     -1898,
-     1563
-    ],
-    "t0": 2757.1,
-    "stint": 13,
-    "first_red": "front ph3",
-    "session": "fh6_20260821_202122"
-   },
-   "sessions": 2,
-   "best_by_car": {
-    "2866|2|4|700": {
-     "mph_in": 88,
-     "mph_min": 75,
-     "mph_out": 75,
-     "brake_on_m": null,
-     "throttle_on_m": null,
-     "lat_g": 2.22,
-     "apex": [
-      -1898,
-      1563
-     ],
-     "t0": 2757.1,
-     "stint": 13,
-     "first_red": "front ph3",
-     "session": "fh6_20260821_202122"
-    },
-    "1046|2|10|800": {
-     "mph_in": 90,
-     "mph_min": 58,
-     "mph_out": 61,
-     "brake_on_m": 0,
-     "throttle_on_m": 0,
-     "lat_g": 2.19,
-     "apex": [
-      -1899,
-      1564
-     ],
-     "t0": 82.2,
-     "stint": 4,
-     "first_red": "front ph1",
-     "session": "fh6_20260821_211040"
-    }
-   },
-   "cars": [
-    "2866|2|4|700",
-    "1046|2|10|800"
-   ],
-   "status": "turn",
-   "by_session": {
-    "fh6_20260821_202122": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 7,
-     "fr": {
-      "front": 1,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 75,
-     "usi": 0.204,
-     "cars": [
-      "2866|2|4|700"
-     ]
-    },
-    "fh6_20260821_211040": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 1,
-     "fr": {
-      "front": 1,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 58,
-     "usi": 0.358,
-     "cars": [
-      "1046|2|10|800"
-     ]
-    }
-   },
-   "track": {
-    "passes": 2,
-    "laps_seen": 2,
-    "sessions": 2,
-    "fr": {
-     "front": 2,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {
-     "tune": 2,
-     "driver": 0,
-     "mixed": 0,
-     "clean": 0
-    },
-    "dominant": "front",
-    "consistency": 1.0,
-    "cars": [
-     "1046|2|10|800",
-     "2866|2|4|700"
-    ]
-   }
-  },
-  {
-   "id": "T7",
    "pos": [
     -1946,
     1465
@@ -586,7 +406,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 31,
-   "n": 2,
+   "n": 1,
    "best": {
     "mph_in": 64,
     "mph_min": 50,
@@ -655,17 +475,197 @@
      "none": 0
     },
     "lim": {
-     "tune": 1,
-     "driver": 0,
-     "mixed": 0,
-     "clean": 0
+     "tune": 1
     },
     "dominant": "front",
     "consistency": 1.0,
     "cars": [
      "2866|2|4|700"
-    ]
-   }
+    ],
+    "laps_track": 8,
+    "presence": 0.12
+   },
+   "established": false
+  },
+  {
+   "id": "T6",
+   "pos": [
+    -2046,
+    1608
+   ],
+   "dir": "R",
+   "type": "medium",
+   "radius_m": 39,
+   "n": 1,
+   "best": {
+    "mph_in": 84,
+    "mph_min": 64,
+    "mph_out": 71,
+    "brake_on_m": 96,
+    "throttle_on_m": 63,
+    "lat_g": 2.45,
+    "apex": [
+     -2046,
+     1608
+    ],
+    "t0": 2518.4,
+    "stint": 5,
+    "first_red": "front ph2",
+    "session": "fh6_20260821_202122"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "2866|2|4|700": {
+     "mph_in": 84,
+     "mph_min": 64,
+     "mph_out": 71,
+     "brake_on_m": 96,
+     "throttle_on_m": 63,
+     "lat_g": 2.45,
+     "apex": [
+      -2046,
+      1608
+     ],
+     "t0": 2518.4,
+     "stint": 5,
+     "first_red": "front ph2",
+     "session": "fh6_20260821_202122"
+    }
+   },
+   "cars": [
+    "2866|2|4|700"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_202122": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 7,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 64,
+     "usi": 0.443,
+     "cars": [
+      "2866|2|4|700"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|700"
+    ],
+    "laps_track": 8,
+    "presence": 0.12
+   },
+   "established": false
+  },
+  {
+   "id": "T7",
+   "pos": [
+    -1966,
+    1659
+   ],
+   "dir": "R",
+   "type": "medium",
+   "radius_m": 60,
+   "n": 3,
+   "best": {
+    "mph_in": 83,
+    "mph_min": 74,
+    "mph_out": 106,
+    "brake_on_m": 635,
+    "throttle_on_m": -463,
+    "lat_g": 2.89,
+    "apex": [
+     -1970,
+     1660
+    ],
+    "t0": 2484.7,
+    "stint": 5,
+    "first_red": "front ph2",
+    "session": "fh6_20260821_202122"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "2866|2|4|700": {
+     "mph_in": 83,
+     "mph_min": 74,
+     "mph_out": 106,
+     "brake_on_m": 635,
+     "throttle_on_m": -463,
+     "lat_g": 2.89,
+     "apex": [
+      -1970,
+      1660
+     ],
+     "t0": 2484.7,
+     "stint": 5,
+     "first_red": "front ph2",
+     "session": "fh6_20260821_202122"
+    }
+   },
+   "cars": [
+    "2866|2|4|700"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260821_202122": {
+     "n": 3,
+     "laps_seen": 3,
+     "laps": 7,
+     "fr": {
+      "front": 3,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 74,
+     "usi": 0.348,
+     "cars": [
+      "2866|2|4|700"
+     ]
+    }
+   },
+   "track": {
+    "passes": 3,
+    "laps_seen": 3,
+    "sessions": 1,
+    "fr": {
+     "front": 3,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "2866|2|4|700"
+    ],
+    "laps_track": 8,
+    "presence": 0.38
+   },
+   "established": false
   }
  ],
  "laps": 8,
@@ -734,6 +734,7 @@
    "drivetrain": "AWD"
   }
  },
+ "turn_count": 1,
  "profile": {
   "dims": {
    "low_corner": {

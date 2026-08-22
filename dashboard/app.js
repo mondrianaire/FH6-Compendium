@@ -2907,12 +2907,32 @@
       .fhm-fbtn:hover{border-color:var(--accent);color:var(--accent)}
       .fhm-fbtn.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.14)}
       .fhm-fbody{padding:11px}
-      .fhm-fbody .block{margin:0 !important;border:none !important;padding:0 !important;background:none !important}`;
+      .fhm-fbody .block{margin:0 !important;border:none !important;padding:0 !important;background:none !important}
+      .fhm-vdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--muted)}
+      .fhm-vdot.ok{background:#00d27a;box-shadow:0 0 5px rgba(0,210,122,.6)}
+      .fhm-vdot.near{background:#e3b341}
+      .fhm-vdot.off{background:#e5414e;box-shadow:0 0 5px rgba(229,65,78,.5)}
+      .fhm-vdot.over{background:#ff9f45}
+      .fhm-coarse{border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin:0 0 9px;background:rgba(255,255,255,.015)}
+      .fhm-coarse-h{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+      .fhm-coarse-row{display:flex;flex-wrap:wrap;gap:6px}
+      .fhm-vchip{display:inline-flex;align-items:center;font-size:11px;border:1px solid var(--line);border-radius:11px;padding:2px 9px;white-space:nowrap}
+      .fhm-vchip.ok{border-color:rgba(0,210,122,.45)}
+      .fhm-vchip.off{border-color:rgba(229,65,78,.55)}
+      .fhm-vchip.over{border-color:rgba(255,159,69,.55)}
+      .fhm-vchip .w{color:#e5414e;margin-left:4px}
+      .fhm-vchip.over .w{color:#ff9f45}
+      .fhm-verify{border:1px solid;border-radius:8px;padding:8px 11px;margin:0 0 10px;background:rgba(255,255,255,.015)}
+      .fhm-verify-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12.5px;margin-bottom:6px}
+      .fhm-verify-h span{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+      .fhm-verify-todo{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;font-size:11px;text-transform:capitalize}
+      .fhm-verify-todo span{display:inline-flex;align-items:center}`;
     const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
     const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };
     const diskDeliverableHtml = (r, opts) => {
       opts = opts || {};
       ensureFhmCss();
+      const vp = (opts.verify && opts.verify.parts) || {}; const vsl = (opts.verify && opts.verify.sliders) || {};
       const dl = r && r.deliverable; if (!dl) return "";
       const oc = confCol(dl.confidence); const sm = dl.summary || {};
       const f = live.frame; const fMatch = f && String(f.car) === String(dl.ordinal);
@@ -2922,7 +2942,7 @@
         const inst = m.rows.filter((x) => !x.stock).length;
         const rows = m.rows.map((it) => {
           const cls = it.stock ? "stock" : (it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named");
-          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${esc(it.item.replace(/_/g, " "))}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}</span></div>`;
+          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${vdot(vp[it.item])}${esc(it.item.replace(/_/g, " "))}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}</span></div>`;
         }).join("");
         return `<div class="fhm-cat"><div class="fhm-cath"><span class="bar"></span><b>${esc(m.menu)}</b><span class="k">${inst}/${m.rows.length}</span></div>${rows}</div>`;
       }).join("");
@@ -2934,7 +2954,7 @@
           const val = rel
             ? `<span class="fhm-slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%${row.per_car && !String(row.field).startsWith("gear") ? `<input class="fhm-rin" data-rangeord="${dl.ordinal}" data-rangefield="${esc(row.field)}" data-rangenorm="${row.fill}" data-rangeunit="${esc(row.unit || "")}" placeholder="=?" title="Type the in-game number for this slider — two saved tunes at different positions lock this car's range, then every tune prints exact." inputmode="decimal">` : ""}</span>`
             : `<span class="fhm-slv">${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>`;
-          return `<div class="fhm-sl"><div class="fhm-slt"><span class="fhm-sll">${esc(row.label || row.field)}</span>${val}</div><div class="fhm-trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div><div class="fhm-pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
+          return `<div class="fhm-sl"><div class="fhm-slt"><span class="fhm-sll">${vdot(vsl[row.field])}${esc(row.label || row.field)}</span>${val}</div><div class="fhm-trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div><div class="fhm-pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
         }).join("")}</div>`).join("");
         return `<div style="margin-bottom:13px"><div class="fhm-tab">${esc(t.tab)}</div>${secHtml}</div>`;
       }).join("");
@@ -2989,7 +3009,7 @@
     // pinned (or last-decoded) ordinal — completely frame-independent, so a CarOrdinal blip to 0 in the menus can't clear it.
     const FLOAT_KEY = "fh6FloatState";
     const loadFloat = () => { try { return JSON.parse(localStorage.getItem(FLOAT_KEY)) || {}; } catch (e) { return {}; } };
-    const initFloat = () => { if (live.float) return; live.float = Object.assign({ ord: 0, open: false, min: false, pinned: false, x: null, y: null }, loadFloat()); };
+    const initFloat = () => { if (live.float) return; live.float = Object.assign({ ord: 0, open: false, min: false, pinned: false, x: null, y: null }, loadFloat()); if (!live.float.target) live.float.target = loadTarget(); };
     const saveFloat = () => { try { localStorage.setItem(FLOAT_KEY, JSON.stringify({ ord: live.float.ord, open: live.float.open, min: live.float.min, pinned: live.float.pinned, x: live.float.x, y: live.float.y })); } catch (e) {} };
     // which car the float tracks: pinned -> its locked ordinal; else the active car, else the last car driven (survives menu blips)
     const floatOrd = () => { initFloat(); return (live.float.pinned && live.float.ord) ? live.float.ord : ((live.frame && live.frame.car) || lastCarOrd() || live.float.ord || 0); };
@@ -3023,33 +3043,106 @@
         .then((r) => r.json()).then((d) => { if (d && d.ok) { inp.style.borderColor = d.solved ? "#00d27a" : "#e3b341"; inp.title = d.solved ? "range solved — refreshing to exact numbers" : "got it — one more tune at a different position unlocks exact numbers";
           if (d.solved && live.diskCache) { delete live.diskCache[ordi]; fetchDiskTune(ordi); paintDiskDecode(); paintFloat(true); } } }).catch(() => {});
     }));
+    // ---- BUILD VERIFICATION: score the current build against the pinned clone (green / yellow / red per row) ----
+    const TARGET_KEY = "fh6FloatTarget";
+    const saveTarget = () => { try { live.float.target ? localStorage.setItem(TARGET_KEY, JSON.stringify(live.float.target)) : localStorage.removeItem(TARGET_KEY); } catch (e) {} };
+    const loadTarget = () => { try { return JSON.parse(localStorage.getItem(TARGET_KEY)) || null; } catch (e) { return null; } };
+    const partTier = (u) => /^Race/.test(u || "") ? 3 : /^Sport/.test(u || "") ? 2 : /^Street/.test(u || "") ? 1 : 0;
+    const VDOT_TITLE = { ok: "matches the clone", near: "close — double-check", off: "not matching the clone yet", over: "higher tier than the clone (adds PI)" };
+    const vdot = (st) => st ? `<span class="fhm-vdot ${st}" title="${VDOT_TITLE[st] || ""}"></span>` : "";
+    // freeze the pinned clone as the target to build toward, plus a live snapshot (PI/class/drivetrain) for instant checks
+    const freezeTarget = (ord) => {
+      const cached = live.diskCache && live.diskCache[ord];
+      if (!cached || !cached.available) { live.float.target = null; saveTarget(); return; }
+      const f = live.frame; const snap = (f && String(f.car) === String(ord)) ? { pi: f.pi, cls: f.cls, drv: f.drv, cyl: f.cyl } : null;
+      live.float.target = { ordinal: cached.deliverable.ordinal, name: cached.name, ts: cached.ts, deliverable: cached.deliverable, live: snap };
+      saveTarget();
+    };
+    // compare the current build's decode against the frozen target: per installed part + per slider
+    const verifyBuild = (tgtDl, curDl) => {
+      const res = { parts: {}, sliders: {}, nParts: 0, okParts: 0, nSliders: 0, okSliders: 0, bad: [] };
+      const cp = {}; ((curDl && curDl.menus) || []).forEach((m) => m.rows.forEach((r) => { cp[r.item] = r; }));
+      ((tgtDl && tgtDl.menus) || []).forEach((m) => m.rows.forEach((t) => {
+        if (t.stock) return;   // only score the parts the clone actually installs
+        res.nParts++; const c = cp[t.item]; let st;
+        if (!c || c.stock) st = "off";
+        else { const tt = partTier(t.upgrade), ct = partTier(c.upgrade);
+          if (tt && ct) st = ct === tt ? "ok" : (ct < tt ? "off" : "over");
+          else st = String(c.upgrade || c.value) === String(t.upgrade || t.value) ? "ok" : "near"; }
+        res.parts[t.item] = st; if (st === "ok") res.okParts++; else res.bad.push({ item: t.item, st, want: t.upgrade || t.value });
+      }));
+      const cs = {}; ((curDl && curDl.tabs) || []).forEach((tb) => tb.rows.forEach((r) => { cs[r.field] = r; }));
+      ((tgtDl && tgtDl.tabs) || []).forEach((tb) => tb.rows.forEach((t) => {
+        res.nSliders++; const c = cs[t.field]; let st = "off";
+        if (c) { const d = (t.value != null && c.value != null) ? Math.abs(c.value - t.value) / (Math.abs(t.value) || 1) : Math.abs((c.fill || 0) - (t.fill || 0));
+          st = d < 0.02 ? "ok" : d < 0.06 ? "near" : "off"; }
+        res.sliders[t.field] = st; if (st === "ok") res.okSliders++;
+      }));
+      return res;
+    };
+    // instant, pre-save checks from the live frame vs the pinned snapshot (PI / class / drivetrain / cylinders)
+    const liveCoarse = (tgt, f) => {
+      if (!tgt || !tgt.live || !f || String(f.car) !== String(tgt.ordinal)) return null;
+      const s = tgt.live; const out = [];
+      if (s.pi != null && f.pi != null) { const dpi = f.pi - s.pi; out.push({ k: "PI", st: dpi === 0 ? "ok" : "off", now: f.pi, want: s.pi, note: dpi === 0 ? "" : (dpi > 0 ? "+" + dpi + " over" : dpi + " under") }); }
+      if (s.cls && f.cls) out.push({ k: "class", st: f.cls === s.cls ? "ok" : "off", now: f.cls, want: s.cls });
+      if (s.drv && f.drv) out.push({ k: "drivetrain", st: f.drv === s.drv ? "ok" : "off", now: f.drv, want: s.drv });
+      if (s.cyl != null && f.cyl != null) out.push({ k: "cylinders", st: f.cyl === s.cyl ? "ok" : "over", now: f.cyl + "cyl", want: s.cyl + "cyl" });
+      return out.length ? out : null;
+    };
+    const coarseStrip = (coarse) => {
+      if (!coarse) return "";
+      const chip = (c) => `<span class="fhm-vchip ${c.st}">${vdot(c.st)}${c.k} <b>${esc(String(c.now))}</b>${c.st !== "ok" ? ` <span class="w">→ ${esc(String(c.want))}${c.note ? " (" + esc(c.note) + ")" : ""}</span>` : ""}</span>`;
+      return `<div class="fhm-coarse"><div class="fhm-coarse-h">● live — the car you're in vs the clone (no save needed)</div><div class="fhm-coarse-row">${coarse.map(chip).join("")}</div></div>`;
+    };
+    const verifyBanner = (v, pinnedNoBuild) => {
+      if (!v) return pinnedNoBuild ? `<div class="fhm-verify" style="border-color:var(--line)"><div class="fhm-verify-h"><b>🎯 clone pinned as your target</b><span class="why">save your build to check each part</span></div><p class="why" style="font-size:10.5px;margin:4px 0 0">every row below is what to install / set — dots turn green as your saved build matches</p></div>` : "";
+      const tot = v.nParts + v.nSliders, ok = v.okParts + v.okSliders; const pct = tot ? Math.round(ok / tot * 100) : 100;
+      const col = pct >= 100 ? "#00d27a" : pct >= 70 ? "#e3b341" : "#e5414e";
+      return `<div class="fhm-verify" style="border-color:${col}"><div class="fhm-verify-h"><b style="color:${col}">${pct >= 100 ? "✅ build matches the clone" : "🔧 building toward the clone"}</b><span>${v.okParts}/${v.nParts} upgrades · ${v.okSliders}/${v.nSliders} tune</span></div><div class="fhm-confbar"><i style="width:${pct}%;background:${col}"></i></div>${v.bad.length ? `<div class="fhm-verify-todo">${v.bad.slice(0, 6).map((b) => `<span>${vdot(b.st)}<b>${esc(String(b.item).replace(/_/g, " "))}</b> → ${esc(String(b.want))}</span>`).join("")}${v.bad.length > 6 ? `<span class="why">+${v.bad.length - 6} more</span>` : ""}</div>` : ""}</div>`;
+    };
     const ensureFloatHost = () => { let el = document.getElementById("fhmFloat"); if (!el) { el = document.createElement("div"); el.id = "fhmFloat"; el.className = "fhm-float"; el.style.display = "none"; document.body.appendChild(el); ensureFhmCss(); } return el; };
-    const popOutFloat = (ord) => { initFloat(); live.float.ord = ord || floatOrd(); live.float.pinned = true; live.float.open = true; live.float.min = false; saveFloat(); paintFloat(true); };
+    const popOutFloat = (ord) => { initFloat(); live.float.ord = ord || floatOrd(); live.float.pinned = true; live.float.open = true; live.float.min = false; freezeTarget(live.float.ord); saveFloat(); paintFloat(true); };
     function paintFloat(force) {
       initFloat(); const el = ensureFloatHost();
       if (!live.float.open) { el.style.display = "none"; return; }
-      const ord = floatOrd();
-      let cached = (ord && live.diskCache) ? live.diskCache[ord] : null;
-      if ((!cached || !cached.available) && live.float._lastOrd && live.diskCache) cached = live.diskCache[live.float._lastOrd];   // keep showing the last good sheet through menu blips / refetches
+      const pinned = !!(live.float.pinned && live.float.target);
+      let cached, cur = null, verify = null, coarse = null;
+      if (pinned) {
+        const t = live.float.target;
+        cached = { available: true, name: t.name, ts: t.ts, deliverable: t.deliverable };
+        cur = (live.diskCache && live.diskCache[t.ordinal]) || null;
+        if (cur && cur.available && cur.ts !== t.ts) verify = verifyBuild(t.deliverable, cur.deliverable);
+        coarse = liveCoarse(t, live.frame);
+        live.float.ord = t.ordinal; live.float._lastOrd = t.ordinal;
+      } else {
+        const ord = floatOrd();
+        cached = (ord && live.diskCache) ? live.diskCache[ord] : null;
+        if ((!cached || !cached.available) && live.float._lastOrd && live.diskCache) cached = live.diskCache[live.float._lastOrd];
+      }
       if (!cached || !cached.available) { el.style.display = "none"; return; }
-      const dl = cached.deliverable; live.float._lastOrd = dl.ordinal; if (live.float.pinned) live.float.ord = dl.ordinal;
+      const dl = cached.deliverable; if (!live.float.pinned) live.float._lastOrd = dl.ordinal;
       const c = diskConf(cached); const nm = cached.name || ("#" + dl.ordinal); const oc = confCol(c.conf); const dsum = dl.summary || {};
-      const key = "F|" + dl.ordinal + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (dsum.sliders_relative || 0) + "|" + live.float.min + "|" + live.float.pinned + "|" + (live.diskDiff && live.diskDiff.ordinal === dl.ordinal ? live.diskDiff.t : "");
+      const vsig = verify ? (verify.okParts + "/" + verify.nParts + "," + verify.okSliders + "/" + verify.nSliders) : "";
+      const csig = coarse ? coarse.map((x) => x.k + x.st + x.now).join("") : "";
+      const key = "F|" + dl.ordinal + "|" + (cached.ts || "") + "|" + ((cur && cur.ts) || "") + "|" + (dsum.sliders_absolute || 0) + "|" + live.float.min + "|" + live.float.pinned + "|" + vsig + "|" + csig + "|" + (live.diskDiff && live.diskDiff.ordinal === dl.ordinal ? live.diskDiff.t : "");
       el.style.display = "block";
       if (live.float.x != null) { el.style.left = live.float.x + "px"; el.style.top = live.float.y + "px"; el.style.right = "auto"; el.style.bottom = "auto"; }
       if (!force && el.dataset.k === key && el.querySelector(".fhm-fbar")) return;   // unchanged - don't rebuild (keeps the =? inputs stable while typing)
       el.dataset.k = key;
+      const pinTitle = live.float.pinned ? "pinned as your target — the build below is scored against it (click to unpin)" : "following the car you're in — click to pin this as the target to build toward";
       const bar = `<div class="fhm-fbar"><span class="ttl">📀 TAKE TO GAME</span><span class="nm">${esc(nm)}</span><span class="pct" style="color:${oc}">${c.pct}%</span>
-        <button class="fhm-fbtn ${live.float.pinned ? "on" : ""}" data-fpin title="${live.float.pinned ? "pinned to this car - decoding another car won't swap it out" : "following the car you're in - click to pin this build so it stays"}">📌</button>
+        <button class="fhm-fbtn ${live.float.pinned ? "on" : ""}" data-fpin title="${pinTitle}">📌</button>
         <button class="fhm-fbtn" data-fmin title="${live.float.min ? "expand" : "minimize to a pill"}">${live.float.min ? "▢" : "—"}</button>
         <button class="fhm-fbtn" data-fclose title="close (re-open with the Pop out button)">✕</button></div>`;
-      el.innerHTML = live.float.min ? bar : bar + `<div class="fhm-fbody">${diskDeliverableHtml(cached, { inFloat: true })}</div>`;
+      const body = coarseStrip(coarse) + verifyBanner(verify, pinned && !verify) + diskDeliverableHtml(cached, { inFloat: true, verify: verify });
+      el.innerHTML = live.float.min ? bar : bar + `<div class="fhm-fbody">${body}</div>`;
       const fbar = el.querySelector(".fhm-fbar");
       if (fbar) fbar.addEventListener("mousedown", (e) => { if (e.target.closest(".fhm-fbtn")) return; const sx = e.clientX, sy = e.clientY, r = el.getBoundingClientRect(), ox = r.left, oy = r.top;
         const mv = (ev) => { live.float.x = Math.max(0, Math.min(window.innerWidth - 80, ox + ev.clientX - sx)); live.float.y = Math.max(0, Math.min(window.innerHeight - 26, oy + ev.clientY - sy)); el.style.left = live.float.x + "px"; el.style.top = live.float.y + "px"; el.style.right = "auto"; el.style.bottom = "auto"; };
         const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up); saveFloat(); };
         document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up); e.preventDefault(); });
-      const pin = el.querySelector("[data-fpin]"); if (pin) pin.addEventListener("click", () => { live.float.pinned = !live.float.pinned; if (live.float.pinned) live.float.ord = dl.ordinal; saveFloat(); paintFloat(true); });
+      const pin = el.querySelector("[data-fpin]"); if (pin) pin.addEventListener("click", () => { live.float.pinned = !live.float.pinned; if (live.float.pinned) { live.float.ord = dl.ordinal; freezeTarget(dl.ordinal); } else { live.float.target = null; saveTarget(); } saveFloat(); paintFloat(true); });
       const mn = el.querySelector("[data-fmin]"); if (mn) mn.addEventListener("click", () => { live.float.min = !live.float.min; saveFloat(); paintFloat(true); });
       const cl = el.querySelector("[data-fclose]"); if (cl) cl.addEventListener("click", () => { live.float.open = false; saveFloat(); paintFloat(true); });
       if (!live.float.min) bindRangeInputs(el);

@@ -3017,8 +3017,10 @@
       live.diskCache[ordinal] = null;   // in-flight marker — avoids refetch storms
       fetch(liveUrl + "/disk-tune?ordinal=" + ordinal).then((r) => r.json()).then((d) => {
         live.diskCache[ordinal] = d && d.available ? d : { available: false };
-        if (d && d.available) applyDiskTune(d);
+        const filled = d && d.available ? applyDiskTune(d) : false;
         paintDiskDecode(); paintFloat();
+        const activeOrd = live.frame && String(live.frame.car);
+        if (filled && effMode() !== "decode" && activeOrd === String(ordinal)) paintSections(true);   // current values now known -> tuning panels show current -> target
       }).catch(() => { live.diskCache[ordinal] = { available: false }; });   // record failure (not delete) so it can't storm
     };
     const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
@@ -3620,6 +3622,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
+      if (f.car && live.connected) fetchDiskTune(f.car);   // auto-fill the current tune in every workflow, so tuning panels can print current -> target
       updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintCourseLive(); paintActiveCar();
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
       if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }

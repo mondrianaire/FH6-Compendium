@@ -305,17 +305,27 @@ def main():
     live = [r for r in rows if r["IsRaceOn"] == 1]
     sid = os.path.splitext(os.path.basename(path))[0]; dur = rows[-1]["t"]
     # ---- stints (runs): a new stint starts when driving resumes after >= 2 s off, or the configuration changes ----
-    tags = {}
+    tags = {}; starts = {}
     tpath = os.path.join(ROOT, "data", "sessions", sid + ".tags.json")
     if os.path.exists(tpath):
         try:
-            with open(tpath, encoding="utf-8") as f: tags = json.load(f).get("stints", {})
-        except Exception: tags = {}
+            with open(tpath, encoding="utf-8") as f: _tg = json.load(f); tags = _tg.get("stints", {}); starts = _tg.get("stint_starts") or {}
+        except Exception: tags = {}; starts = {}
     stint_n = 0; zero_since = None; prev_cfg = None; stint_rows = defaultdict(list)
+    # run (stint) boundaries. The live daemon's recorded boundaries (tags file "stint_starts", absolute t_mono) are AUTHORITATIVE — they're
+    # mode-aware (menus / fast travel only split a run in Course mode; Decode / Free split on build change, event start/finish, or ➕ new run).
+    # Captures without them keep the original rule (build change, or driving resumes after >= 2 s off) so older tag files stay aligned.
+    bounds = sorted((int(k), float(v) - rows[0]["t_mono"]) for k, v in starts.items()) if starts else None
     for r in rows:
         if r["IsRaceOn"] == 1:
             k = cid(r)
-            if prev_cfg is None or (zero_since is not None and r["t"] - zero_since >= 2.0) or k != prev_cfg: stint_n += 1
+            if bounds:
+                n = 0
+                for bn, bt in bounds:
+                    if r["t"] >= bt - 0.05: n = bn
+                    else: break
+                stint_n = n or 1
+            elif prev_cfg is None or (zero_since is not None and r["t"] - zero_since >= 2.0) or k != prev_cfg: stint_n += 1
             zero_since = None; prev_cfg = k; r["stint"] = stint_n; stint_rows[stint_n].append(r)
         elif zero_since is None: zero_since = r["t"]
     sess = {"id": sid, "source": path, "frames": len(rows), "duration_s": round(dur, 1), "rate_pps": round(len(rows) / max(dur, 1e-9), 1), "live_frames": len(live)}

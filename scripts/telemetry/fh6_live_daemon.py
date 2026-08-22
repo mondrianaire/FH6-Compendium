@@ -40,6 +40,8 @@ class State:
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
         self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None
+        self.last_t = 0.0; self.game = "menu"; self.game_kind = None; self._noev_since = None; self.ev_maxpos = 0; self.mode_suggest = None; self.mode_reason = None   # lab-mode auto-detection
+        self.lab_mode = None; self._force_split = False; self._ev_edge = False; self.stint_starts = {}; self.last_drive_game = None   # effective lab mode (pushed by the dashboard), manual split request, event edge pending, run boundaries (t_mono)
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
         self.seq = 0
     def emit(self, name, payload):
@@ -73,13 +75,56 @@ def compact(p, t_mono):
         "smash": round(p["SmashableVelDiff"], 2),
     }
 
+def _mode_suggest(t_mono):
+    """Lab-mode auto-detection from game state. Timed event (Rivals/race) -> COURSE; free roam -> COURSE if lapping a
+    marked reference loop, DECODE if a donor/replica run is flagged, else FREE (whole-session advisor). Emits on change only."""
+    if ST.game == "event": sug, why = "course", f"timed event detected ({ST.game_kind or 'timed'})"
+    elif ST.game == "freeroam":
+        with ST.lock: roles = {v.get("role") for v in list(ST.stint_tags.values()) if isinstance(v, dict)}; loop = ST.loop; lstate = ST._loop_state   # snapshot under the lock: /tag, /role, /clear-loop mutate these from the HTTP thread
+        if loop and lstate != "start": sug, why = "course", f"lapping reference loop “{loop['name']}”"
+        elif "donor" in roles or "replica" in roles: sug, why = "decode", "donor / replica run flagged this session"
+        else: sug, why = "free", "free roam — whole-session advisor"
+    else: return   # menus / pause: keep the last suggestion sticky (a pause mid-Rivals must not flap Course -> Free -> Course)
+    if sug != ST.mode_suggest or why != ST.mode_reason:
+        ST.mode_suggest, ST.mode_reason = sug, why
+        ST.emit("mode", {"game": ST.game, "kind": ST.game_kind, "suggest": sug, "reason": why, "t": round(t_mono, 1)})
+
+def _save_tags():
+    """Persist run tags/roles AND the authoritative run boundaries (absolute t_mono) so the offline analyzer numbers runs identically."""
+    if not ST.csv_path or ST.replay: return   # replay must NEVER touch the source session's tags file (relative clock + would clobber real tags)
+    sid = os.path.splitext(os.path.basename(ST.csv_path))[0]; tp = os.path.join(ROOT, "data", "sessions", sid + ".tags.json")
+    os.makedirs(os.path.dirname(tp), exist_ok=True)
+    with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags, "stint_starts": ST.stint_starts}, f, indent=2, ensure_ascii=False)
+
 def ingest(p, t_mono):
     """Core pipeline for one decoded packet (live or replay)."""
     c = compact(p, t_mono)
-    # stint (run) boundaries: driving resumes after >= 2 s off, or the configuration changes
+    # game mode FIRST (the run rule depends on it): timed event (Rivals / race) vs free roam vs menus — 1.5 s hysteresis on event exit
+    ST.last_t = t_mono
+    g = "menu" if not c["on"] else ("event" if c["ev"] else "freeroam")
+    if g == "event":
+        ST._noev_since = None; ST.ev_maxpos = max(ST.ev_maxpos, int(c["rpos"] or 0))
+    elif ST.game == "event" and g == "freeroam":
+        ST._noev_since = ST._noev_since or t_mono
+        if t_mono - ST._noev_since < 1.5: g = "event"
+    if g in ("event", "freeroam"):
+        if ST.last_drive_game is not None and g != ST.last_drive_game: ST._ev_edge = True   # event <-> free roam edge = new run (a pause mid-event is NOT an edge)
+        ST.last_drive_game = g
+    if g != ST.game:
+        ST.game = g
+        if g == "freeroam": ST.ev_maxpos = 0; ST.game_kind = None
+        elif g == "event": ST.game_kind = ST.game_kind or ("race" if ST.ev_maxpos > 2 else "rivals / timed")   # kind survives a pause
+    elif g == "event" and ST.game_kind != "race" and ST.ev_maxpos > 2: ST.game_kind = "race"
+    _mode_suggest(t_mono)
+    # run (stint) boundaries — MODE-AWARE. Always: build/config change, event start/finish, or an explicit ➕ new run.
+    # Course mode only: driving resumes after >= 2 s off (each attempt = a run). Decode / Free: menus & fast travel do NOT split a run.
     if c["on"]:
-        if ST.prev_cfg is None or (ST._zero_since is not None and t_mono - ST._zero_since >= 2.0) or c["cid"] != ST.prev_cfg:
-            ST.stint += 1; ST.stint_start = t_mono; ST.emit("stint", {"n": ST.stint, "t0": round(t_mono, 1), "id": c["cid"]})
+        eff = ST.lab_mode or ST.mode_suggest or "free"
+        gap = ST._zero_since is not None and t_mono - ST._zero_since >= 2.0
+        if ST.prev_cfg is None or c["cid"] != ST.prev_cfg or ST._ev_edge or ST._force_split or (gap and eff == "course"):
+            why = "first drive" if ST.prev_cfg is None else "build change" if c["cid"] != ST.prev_cfg else "event start / finish" if ST._ev_edge else "new run (manual)" if ST._force_split else "menu gap (course mode)"
+            ST.stint += 1; ST.stint_start = t_mono; ST._force_split = False; ST._ev_edge = False; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
+            ST.emit("stint", {"n": ST.stint, "t0": round(t_mono, 1), "id": c["cid"], "why": why}); _save_tags()
         ST._zero_since = None; ST.prev_cfg = c["cid"]
     elif ST._zero_since is None: ST._zero_since = t_mono
     c["stint"] = ST.stint
@@ -209,7 +254,7 @@ class H(BaseHTTPRequestHandler):
             last_seq = ST.seq; last_frame_t = 0.0; last_status = 0.0
             try:
                 # initial snapshot: strip + corners + cars
-                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "loop": ST.loop and {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "last_s": ST.loop_last_s}, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
+                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "loop": ST.loop and {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "last_s": ST.loop_last_s}, "game": ST.game, "mode": {"suggest": ST.mode_suggest, "reason": ST.mode_reason, "kind": ST.game_kind, "game": ST.game}, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
                 self.wfile.write(f"event: snapshot\ndata: {json.dumps(snap)}\n\n".encode()); self.wfile.flush()
                 while True:
                     now = time.monotonic()
@@ -220,7 +265,7 @@ class H(BaseHTTPRequestHandler):
                     if fr and now - last_frame_t >= 0.05 and now - lp < 1.0:
                         self.wfile.write(f"event: frame\ndata: {json.dumps(fr)}\n\n".encode()); last_frame_t = now
                     if now - last_status >= 1.0:
-                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'loop': ST.loop and {'name': ST.loop['name'], 'lap': ST.loop_lap, 'last_s': ST.loop_last_s}, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
+                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'loop': ST.loop and {'name': ST.loop['name'], 'lap': ST.loop_lap, 'last_s': ST.loop_last_s}, 'game': ST.game, 'mode': {'suggest': ST.mode_suggest, 'reason': ST.mode_reason, 'kind': ST.game_kind, 'game': ST.game}, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
                     self.wfile.flush(); time.sleep(0.02)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
@@ -264,11 +309,12 @@ class H(BaseHTTPRequestHandler):
                     if role: cur["role"] = role
                     else: cur.pop("role", None)
                 cur.setdefault("t0", ST.stint_start); ST.stint_tags[str(n)] = cur
-            if ST.csv_path:
-                sid = os.path.splitext(os.path.basename(ST.csv_path))[0]; tp = os.path.join(ROOT, "data", "sessions", sid + ".tags.json")
-                os.makedirs(os.path.dirname(tp), exist_ok=True)
-                with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags}, f, indent=2, ensure_ascii=False)
+            _save_tags()
             ST.emit("tag", {"n": n, "label": cur.get("label"), "role": cur.get("role")}); ok = True
+        elif self.path.startswith("/mode"):
+            m = body.get("mode"); ST.lab_mode = m if m in ("course", "decode", "free") else None; ok = True   # effective lab mode from the dashboard (auto-detected or manual override)
+        elif self.path.startswith("/new-run"):
+            ST._force_split = True; ok = True   # split at the next driving frame (after a slider change in Decode / Free mode)
         elif self.path.startswith("/mark-start") and body.get("name"):
             if ST.last_pos is None: ok = False
             else:
@@ -306,6 +352,8 @@ def reset_session():
         ST.last_on_t = None; ST.live_since_analysis = 0.0; ST.drive_since_periodic = 0.0
         ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
         ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None   # keep the loop DEFINITION, reset its lap count
+        ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
+        ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
         ST.events = []; ST.seq += 1
         if ST.csv_file and not ST.replay:
             try: ST.csv_file.close()

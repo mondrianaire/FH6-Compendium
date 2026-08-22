@@ -2599,7 +2599,11 @@
     }
     // ---- LIVE mode: EventSource from the local daemon ----
     let es = null, liveUrl = localStorage.getItem("fh6LiveUrl") || "http://localhost:8765";
-    const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null, loop: null };
+    const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null, loop: null, mode: null };
+    // the LIVE effective mode (manual override, else daemon suggestion) — pushed to the daemon so its run-split rule matches what you see
+    const liveEffMode = () => { const m = labModeSel(); return m !== "auto" ? m : ((live.mode && live.mode.suggest) || "free"); };
+    let pushedMode = null;
+    const pushMode = () => { if (!live.connected) return; const m = liveEffMode(); if (m === pushedMode) return; pushedMode = m; fetch(liveUrl + "/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: m }) }).catch(() => { pushedMode = null; }); };
     const liveS = () => ({ cars: live.cars });
     const circleSvg = (w) => `<svg viewBox="0 0 120 130" class="tz-svg" data-wheel="${w}" style="max-width:160px">
         <text x="60" y="12" text-anchor="middle" fill="var(--muted)" font-size="10">${w}</text>
@@ -2659,13 +2663,21 @@
     function paintAdvice() {
       const el = host.querySelector("#lvAdvice"); if (!el) return;
       const an = live.analysis;
-      if (!an || !an.cars || !an.cars.length) { el.innerHTML = `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px">first analysis after ~20 s of driving…</p></div>`; return; }
+      const em0 = effMode(), ms0 = labModeSel(), lm0 = live.mode || {};
+      const MODE_LBL0 = { course: ["🏟 COURSE", "var(--accent2)"], decode: ["🧬 DECODE", "#e3b341"], free: ["🛣 FREE", "var(--accent)"] };
+      const banner0 = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL0[em0][1]};color:${MODE_LBL0[em0][1]};font-weight:700">${MODE_LBL0[em0][0]}</span><span class="why" style="font-size:11px">${ms0 === "auto" ? "🧭 auto-detected" + (lm0.reason ? " — " + esc(lm0.reason) : " — waiting for the stream") : "manual override — click 🧭 auto (top) to hand detection back"}${live.status && live.status.game === "menu" ? " · in menus / paused" : ""}</span></div>`;
+      if (!an || !an.cars || !an.cars.length) { el.innerHTML = `${banner0}<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px">first analysis after ~20 s of driving…</p></div>`; return; }
       const cur = live.frame && live.frame.cid; const order = an.cars.slice().sort((a, b) => (b.id === cur) - (a.id === cur));
       const sS = { cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, an.cars.find((y) => y.id === x.id) || {})) : an.cars, stints: an.stints || [] };
       const courses = courseMode() ? (an.courses || []).slice(0, 2) : [];
       const donorSt = (an.stints || []).find((x) => x.role === "donor");
       const donorCar = donorSt ? an.cars.find((c) => c.id === donorSt.id) : null;
-      el.innerHTML = `${donorCar && donorCar.decode ? `<div class="block" style="border-color:#e3b341">${decodePanel(donorCar, "🎯 DONOR · ")}${donorCar.decode.pct >= 1 ? `<p class="why" style="font-size:11px;margin:6px 0 0;color:#00d27a">clone sheet ready — open the <b>Decode Bench</b> for the full upgrade sheet</p>` : ""}</div>` : ""}${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — scoped to the event you're running <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"}</span></h3><div class="card-grid">${courses.map((co) => courseBlock(co, sS)).join("")}</div></div>` : ""}
+      const em = effMode(), ms = labModeSel(), lm = live.mode || {};
+      const MODE_LBL = { course: ["🏟 COURSE", "var(--accent2)"], decode: ["🧬 DECODE", "#e3b341"], free: ["🛣 FREE", "var(--accent)"] };
+      const banner = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL[em][1]};color:${MODE_LBL[em][1]};font-weight:700">${MODE_LBL[em][0]}</span><span class="why" style="font-size:11px">${ms === "auto" ? "🧭 auto-detected" + (lm.reason ? " — " + esc(lm.reason) : " — waiting for the stream") : "manual override — click 🧭 auto (top) to hand detection back"}${live.status && live.status.game === "menu" ? " · in menus / paused" : ""}</span></div>`;
+      const curCar = cur ? an.cars.find((c) => c.id === cur) : null;
+      const decodeBlock = decodeMode() && curCar && curCar.decode && (!donorCar || donorCar.id !== curCar.id) ? `<div class="block" style="border-color:#e3b341">${decodePanel(curCar, "current car · ")}<p class="why" style="font-size:11px;margin:6px 0 0">capturing a locked tune? set this run as 🎯 DONOR above — the Decode Bench builds the clone sheet from it</p></div>` : "";
+      el.innerHTML = `${banner}${decodeBlock}${donorCar && donorCar.decode ? `<div class="block" style="border-color:#e3b341">${decodePanel(donorCar, "🎯 DONOR · ")}${donorCar.decode.pct >= 1 ? `<p class="why" style="font-size:11px;margin:6px 0 0;color:#00d27a">clone sheet ready — open the <b>Decode Bench</b> for the full upgrade sheet</p>` : ""}</div>` : ""}${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course mode — ${lm.game === "event" ? "scoped to the event you're running" : "scoped to the loop you're lapping"} <span class="chip">${an.final ? "session closed" : "updates every ~20 s of driving"}</span></h3><div class="card-grid">${courses.map((co) => courseBlock(co, sS)).join("")}</div></div>` : ""}
         <div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session <span class="chip">${an.summary.corners} corners · ${an.summary.launches} launches · ${an.summary.braking} stops</span></h3>
         <div class="card-grid">${order.map((c) => adviceBlock(c, sS)).join("")}</div></div>`;
     }
@@ -2690,7 +2702,7 @@
     function paintStatus() {
       const el = host.querySelector("#lvStatus"); if (!el) return;
       const st = live.status;
-      const outdated = !!(st && st.stint === undefined);
+      const outdated = !!(st && (st.stint === undefined || st.mode === undefined));
       el.textContent = !live.connected ? (live.err ? "daemon not reachable — start it, then connect" : "connecting…") : outdated ? `⚠ daemon is an older build — stop and start it to get live suggestions, runs and reset (still receiving ${st.pps} pkt/s)` : st && st.receiving ? `● receiving ${st.pps} pkt/s · ${st.frames} frames${st.csv ? " · " + st.csv : ""}` : "connected — waiting for packets (drive, or start a replay)";
       el.style.borderColor = el.style.color = !live.connected ? "#e5414e" : outdated ? "var(--warn,#e3b341)" : st && st.receiving ? "#00d27a" : "var(--warn,#e3b341)";
       const se = host.querySelector("#lvSession");
@@ -2699,12 +2711,11 @@
       const un = host.querySelector("#lvUnknown"); if (un) { const seen = new Set(); un.innerHTML = live.cars.filter((c) => !carName(c) && !seen.has(c.ordinal) && seen.add(c.ordinal)).map(nameUI).join(""); bindNames(); }
       const lv = host.querySelector("#lvLoop");
       if (lv && live.connected) {
-        const lo = live.loop; const on = courseMode(); const lk = `${on}|${lo ? lo.name + "|" + lo.lap + "|" + lo.last_s : "none"}`;
+        const lo = live.loop; const lk = `${lo ? lo.name + "|" + lo.lap + "|" + lo.last_s : "none"}`;
         if (lv.dataset.k !== lk) {
           lv.dataset.k = lk;
           const spec = `<details class="tz-why" style="margin-top:4px"><summary>the decode loop — what to include</summary><p style="font-size:11px">One repeatable circuit that hits every decode test: <b>standing start → long straight</b> (gearing · dyno · top-speed) → <b>threshold brake</b> from 80+ → <b>hairpin</b> → <b>medium corner</b> → <b>fast sweeper</b> → a <b>crest</b> → a quick <b>left-right</b> (wiggle) → back to start. ~90–120 s. The Goliath hits everything but is slow; an EventLab blueprint or a chosen free-roam loop is the quick version. The 🧬 Decode battery below fills in as you cover each element.</p></details>`;
-          lv.innerHTML = !on ? `<span class="why" style="font-size:11px">📍 reference loops live in Course mode — turn it ON (top) to define a test circuit</span>`
-            : lo ? `<span class="chip" style="border-color:var(--accent2);color:var(--accent2)">📍 loop “${esc(lo.name)}” · lap ${lo.lap}${lo.last_s ? " · last " + lo.last_s + "s" : ""}</span> <button class="lab-mode" id="lvClearLoop" style="padding:3px 8px;font-size:11px">clear loop</button> <span class="why" style="font-size:11px">drive back through the start to complete a lap</span>${spec}`
+          lv.innerHTML = lo ? `<span class="chip" style="border-color:var(--accent2);color:var(--accent2)">📍 loop “${esc(lo.name)}” · lap ${lo.lap}${lo.last_s ? " · last " + lo.last_s + "s" : ""}</span> <button class="lab-mode" id="lvClearLoop" style="padding:3px 8px;font-size:11px">clear loop</button> <span class="why" style="font-size:11px">drive back through the start to complete a lap</span>${spec}`
             : `<div style="font-size:11px;color:var(--accent2);font-weight:700;margin-bottom:3px">🏟 Course mode · reference loop</div><button class="lab-mode" id="lvMarkLoop" style="padding:4px 10px;font-size:12px;border-color:var(--accent2);color:var(--accent2)">📍 mark loop start (here)</button> <input id="lvLoopName" placeholder="loop name — e.g. Decode Loop" style="min-width:220px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"> <span class="why" style="font-size:11px">stand at your start/finish, name it, mark — every lap is timed & position-aligned</span>${spec}`;
           const mb = lv.querySelector("#lvMarkLoop"); if (mb) mb.addEventListener("click", () => { const nm = lv.querySelector("#lvLoopName").value.trim() || "test loop"; fetch(liveUrl + "/mark-start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: nm }) }).then((r) => r.json()).then((r) => { if (r.ok !== false) { live.loop = { name: nm, lap: 0, last_s: null }; lv.dataset.k = ""; paintStatus(); } }).catch(() => {}); });
           const cb = lv.querySelector("#lvClearLoop"); if (cb) cb.addEventListener("click", () => { fetch(liveUrl + "/clear-loop", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(() => { live.loop = null; lv.dataset.k = ""; paintStatus(); }).catch(() => {}); });
@@ -2713,13 +2724,15 @@
       const sv = host.querySelector("#lvStint");
       if (sv && live.connected) {
         const n = live.stint || (st && st.stint) || 0; const tg = (live.tags || {})[String(n)] || {}; const labTxt = typeof tg === "string" ? tg : (tg.label || ""); const role = (typeof tg === "object" && tg.role) || "";
-        if (sv.dataset.n !== String(n) || sv.dataset.lab !== labTxt || sv.dataset.role !== role) {
-          sv.dataset.n = String(n); sv.dataset.lab = labTxt; sv.dataset.role = role;
+        if (sv.dataset.n !== String(n) || sv.dataset.lab !== labTxt || sv.dataset.role !== role || sv.dataset.m !== liveEffMode()) {
+          sv.dataset.n = String(n); sv.dataset.lab = labTxt; sv.dataset.role = role; sv.dataset.m = liveEffMode();
           const roleChip = role ? `<span class="chip" style="border-color:${role === "donor" ? "#e3b341" : "#00d27a"};color:${role === "donor" ? "#e3b341" : "#00d27a"}">${role === "donor" ? "🎯 DONOR" : "🔧 REPLICA"}</span>` : "";
           sv.innerHTML = n ? `<span class="chip" style="border-color:var(--accent);color:var(--accent)">🏁 run ${n}${labTxt ? " “" + esc(labTxt) + "”" : ""}</span> ${roleChip}
-            <input id="lvTag" placeholder="tag this run — e.g. front ARB −2" value="${esc(labTxt)}" style="min-width:200px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"> <button class="lab-mode" id="lvTagBtn" style="padding:4px 10px;font-size:12px">🏷 tag run</button>
-            <span style="margin-left:8px;font-size:11px;color:var(--muted)">decode:</span> <button class="lab-mode" data-role="donor" style="padding:4px 10px;font-size:12px;border-color:#e3b341;color:#e3b341">set as 🎯 DONOR</button> <button class="lab-mode" data-role="replica" style="padding:4px 10px;font-size:12px;border-color:#00d27a;color:#00d27a">set as 🔧 REPLICA</button>` : `<span class="why" style="font-size:11px">run counter starts with the first driving frame</span>`;
+            <input id="lvTag" placeholder="tag this run — e.g. front ARB −2" value="${esc(labTxt)}" style="min-width:200px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"> <button class="lab-mode" id="lvTagBtn" style="padding:4px 10px;font-size:12px">🏷 tag run</button> <button class="lab-mode" id="lvNewRun" title="force a run split at the next driving frame — use after a slider change in Decode / Free mode" style="padding:4px 10px;font-size:12px">➕ new run</button>
+            <span style="margin-left:8px;font-size:11px;color:var(--muted)">decode:</span> <button class="lab-mode" data-role="donor" style="padding:4px 10px;font-size:12px;border-color:#e3b341;color:#e3b341">set as 🎯 DONOR</button> <button class="lab-mode" data-role="replica" style="padding:4px 10px;font-size:12px;border-color:#00d27a;color:#00d27a">set as 🔧 REPLICA</button>
+            <div class="why" style="font-size:10.5px;margin-top:3px">${liveEffMode() === "course" ? "🏟 Course: every menu gap / restart starts a new run (each attempt = a run)" : "runs split only on a build change, an event start / finish, or ➕ new run — menus & fast travel don't split (teleport to your next test freely)"}</div>` : `<span class="why" style="font-size:11px">run counter starts with the first driving frame</span>`;
           const tb = sv.querySelector("#lvTagBtn"); if (tb) tb.addEventListener("click", () => { const v = sv.querySelector("#lvTag").value.trim(); fetch(liveUrl + "/tag", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: v, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags, { [String(n)]: Object.assign({}, live.tags[String(n)], { label: v }) }); paintStatus(); }).catch(() => {}); });
+          const nr = sv.querySelector("#lvNewRun"); if (nr) nr.addEventListener("click", () => { fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(() => { nr.textContent = "➕ splits at next driving frame"; setTimeout(() => { nr.textContent = "➕ new run"; }, 2500); }).catch(() => {}); });
           sv.querySelectorAll("[data-role]").forEach((b) => b.addEventListener("click", () => { const rl = b.dataset.role; fetch(liveUrl + "/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: rl, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags); Object.keys(live.tags).forEach((k) => { if (live.tags[k] && live.tags[k].role === rl) live.tags[k] = Object.assign({}, live.tags[k], { role: null }); }); live.tags[String(n)] = Object.assign({}, live.tags[String(n)], { role: rl }); sv.dataset.role = ""; paintStatus(); }).catch(() => {}); }));
         }
       }
@@ -2753,7 +2766,7 @@
       if (es) { es.close(); es = null; }
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; live.connected = true; live.err = false; paintAll(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; live.connected = true; live.err = false; paintAll(); paintModeChips(); pushMode(); });
       es.addEventListener("stint", (e) => { const d = JSON.parse(e.data); live.stint = d.n; paintStatus(); });
       es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
@@ -2765,7 +2778,12 @@
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
       es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
       es.addEventListener("corner", (e) => { live.corners.push(JSON.parse(e.data)); paintCorners(); });
-      es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false; paintStatus(); });
+      es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false;
+        const sm = live.status.mode; const changed = sm && (!live.mode || sm.suggest !== live.mode.suggest || sm.reason !== live.mode.reason);   // status carries the current mode every second — authoritative after reconnects / daemon restarts
+        if (changed) live.mode = sm;
+        const gm = live.status.game; const gameChanged = gm !== live._game; live._game = gm;
+        paintStatus(); pushMode(); if (changed) onModeChanged(); else if (gameChanged) paintAdvice(); });
+      es.addEventListener("mode", (e) => { live.mode = JSON.parse(e.data); onModeChanged(); });
       es.addEventListener("session", (e) => { live.session = JSON.parse(e.data); paintStatus();
         fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; paintStatus(); } }).catch(() => {}); });
       es.onerror = () => { live.connected = false; live.err = true; paintStatus(); };
@@ -2780,18 +2798,29 @@
       if (b) b.addEventListener("click", () => { liveUrl = u.value.trim().replace(/\/$/, ""); localStorage.setItem("fh6LiveUrl", liveUrl); liveConnect(); });
       if (r) r.addEventListener("click", () => liveReset(false));
     }
-    const courseMode = () => localStorage.getItem("fh6CourseMode") !== "off";
+    // Lab mode: auto (detected from the stream by the daemon) or a manual override. Course = course profile + per-turn;
+    // Decode = clone-capture progress + sheet; Free = whole-session advisor. Session review (Lab Run / Bench) treats auto as Course.
+    const LAB_MODES = [["auto", "🧭 auto"], ["course", "🏟 Course"], ["decode", "🧬 Decode"], ["free", "🛣 Free"]];
+    const labModeSel = () => localStorage.getItem("fh6LabMode") || "auto";
+    const effMode = () => { const m = labModeSel(); if (m !== "auto") return m; if (mode !== "live") return "course"; return (live.mode && live.mode.suggest) || "free"; };
+    const courseMode = () => effMode() === "course";
+    const decodeMode = () => effMode() === "decode";
+    const modeChipsHtml = () => LAB_MODES.map(([k, l]) => { const sel = labModeSel() === k; const eff = k !== "auto" && effMode() === k; return `<button class="lab-mode" data-labmode="${k}" title="${k === "auto" ? "detected from the stream: timed event (Rivals / race) → Course · lapping a marked loop → Course · donor/replica flagged → Decode · otherwise Free" : "override auto-detection (sticks until you pick auto again)"}" style="border-color:var(--accent2);color:${sel ? "#0e1116" : "var(--accent2)"};background:${sel ? "var(--accent2)" : "var(--bg2)"};${eff && !sel ? "box-shadow:inset 0 0 0 2px var(--accent2)" : ""}">${l}${k === "auto" && sel ? " → " + effMode().toUpperCase() : ""}</button>`; }).join("");
+    const bindModeChips = () => host.querySelectorAll("[data-labmode]").forEach((b) => b.addEventListener("click", () => { localStorage.setItem("fh6LabMode", b.dataset.labmode); pushMode(); render(); }));
+    // targeted refresh on a live mode change — never a full render() (that would wipe typed run tags / loop names / the daemon URL)
+    const paintModeChips = () => { const sp = host.querySelector("#labModeSel"); if (sp) { sp.innerHTML = modeChipsHtml(); bindModeChips(); } };
+    const onModeChanged = () => { pushMode(); paintModeChips(); paintAdvice(); paintStatus(); };
     function render() {
       const s = S();
       host.innerHTML = `
         <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">📡 Telemetry Lab — Data Out sessions</h2>
         <div class="lab-modes"><button class="lab-mode ${mode === "live" ? "active" : ""}" data-mode="live">🔴 Live</button><button class="lab-mode ${mode === "run" ? "active" : ""}" data-mode="run">🧪 Lab Run</button><button class="lab-mode ${mode === "bench" ? "active" : ""}" data-mode="bench">🧬 Decode Bench</button>
-          <button class="lab-mode" id="labCourseToggle" title="Show or hide course-scoped blocks (Live + Lab Run)" style="border-color:var(--accent2);color:${courseMode() ? "#0e1116" : "var(--accent2)"};background:${courseMode() ? "var(--accent2)" : "var(--bg2)"}">🏟 Course mode ${courseMode() ? "ON" : "OFF"}</button>
+          <span id="labModeSel" style="display:inline-flex;gap:4px;align-items:center;margin-left:6px;flex-wrap:wrap">${modeChipsHtml()}</span>
           ${sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : s ? `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>` : ""}</div>
         ${mode === "live" ? liveView() : !s ? NOSESS : mode === "run" ? runView(s) : benchView(s)}`;
       if (mode === "live") { bindLive(); if (!es) liveConnect(); else paintAll(); }
       host.querySelectorAll(".lab-mode[data-mode]").forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
-      const ct = host.querySelector("#labCourseToggle"); if (ct) ct.addEventListener("click", () => { localStorage.setItem("fh6CourseMode", courseMode() ? "off" : "on"); render(); });
+      bindModeChips();
       host.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : b.dataset.car; render(); }));
       host.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; render(); }));
       host.querySelectorAll("[data-replica]").forEach((b) => b.addEventListener("click", () => { replica = b.dataset.replica; render(); }));

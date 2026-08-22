@@ -65,7 +65,7 @@ def compact(p, t_mono):
     return {
         "t": round(t_mono, 2), "on": p["IsRaceOn"], "car": p["CarOrdinal"], "cid": cid(p), "pi": p["CarPI"], "cls": CLASS.get(p["CarClass"], "?"), "drv": DRIVE.get(p["DrivetrainType"], "?"), "cyl": p["NumCylinders"],
         "gear": p["Gear"], "mph": round(p["Speed"] * 2.23694, 1), "rpm": round(p["CurrentEngineRpm"]), "maxrpm": round(p["EngineMaxRpm"]),
-        "ev": 1 if p["CurrentLap"] > 0 else 0, "lapn": p["LapNumber"], "rpos": p["RacePosition"], "lapt": round(p["CurrentLap"], 2), "dist": round(p["DistanceTraveled"]),   # ev = lap timer running (RacePosition lingers after an event ends)
+        "ev": 1 if p["CurrentLap"] > 0 else 0, "lapn": p["LapNumber"], "rpos": p["RacePosition"], "lapt": round(p["CurrentLap"], 2), "dist": round(p["DistanceTraveled"]), "px": round(p["PosX"], 1), "pz": round(p["PosZ"], 1),   # ev = lap timer running (RacePosition lingers after an event ends)
         "lat": round(p["AccelX"] / G, 2), "lon": round(p["AccelZ"] / G, 2), "yaw": round(math.degrees(p["AngVelY"]), 1),
         "steer": p["Steer"], "thr": p["Accel"], "brk": p["Brake"], "hb": p["HandBrake"], "boost": round(p["Boost"], 1),
         "hp": round(p["Power"] / 745.7), "tq": round(p["Torque"] * 0.7376),
@@ -201,9 +201,13 @@ def ingest(p, t_mono):
                 mid = rows[k2:k4 + 1]
                 usi = sum((abs(r["slip"]["FL"][1]) + abs(r["slip"]["FR"][1])) / 2 - (abs(r["slip"]["RL"][1]) + abs(r["slip"]["RR"][1])) / 2 for r in mid) / max(len(mid), 1)
                 drift = sum(max(abs(r["slip"]["RL"][2]), abs(r["slip"]["RR"][2])) for r in rows) / len(rows) > 2.5
-                v_min = min(r["mph"] for r in rows)
-                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint, "dir": "R" if sign > 0 else "L", "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min),
+                v_min = min(r["mph"] for r in rows); ipk = max(range(len(rows)), key=lambda i: abs(rows[i]["lat"])); apx = rows[ipk]
+                # braking point: metres of odometer before the apex where the brakes first came on hard; throttle-on: metres after apex
+                brk_r = next((r for r in co["pre"] + rows[:ipk + 1] if r["brk"] > 40), None); imin = min(range(len(rows)), key=lambda i: rows[i]["mph"]); thr_r = next((r for r in rows[imin:] if r["thr"] > 100), None)
+                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint, "lapn": apx.get("lapn"), "dir": "R" if sign > 0 else "L",
+                      "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min), "mph_out": round(rows[-1]["mph"]), "mph_apex": round(apx["mph"]), "apex": [apx.get("px"), apx.get("pz")], "loop_lap": (ST.loop_lap if ST.loop else None),
                       "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3), "drift": drift, "kink": v_min > 85 and peak < 0.9,
+                      "brake_on_m": (round(apx.get("dist", 0) - brk_r["dist"]) if brk_r else None), "throttle_on_m": (round(thr_r["dist"] - apx.get("dist", 0)) if thr_r else None),
                       "brake_max": max([r["brk"] for r in co["pre"] + rows] or [0]), "hb": any(r["hb"] > 0 for r in rows)}
                 with ST.lock: ST.corners.append(cc)
                 ST.emit("corner", cc)

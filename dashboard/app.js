@@ -2891,8 +2891,14 @@
       .fhm-todo .d{color:#e3b341;flex:none}
       .fhm-todo.ok .d{color:#00d27a}
       .fhm-todo code{background:var(--bg2);border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:10.5px;color:#e6a63a}
-      .fhm-float{position:fixed;right:18px;bottom:18px;z-index:9999;width:min(560px,94vw);max-height:86vh;display:flex;flex-direction:column;border:1px solid #00d27a;border-radius:10px;background:var(--bg);box-shadow:0 18px 46px rgba(0,0,0,.55);overflow:hidden}
-      .fhm-fbar{display:flex;align-items:center;gap:8px;padding:7px 11px;background:linear-gradient(180deg,rgba(0,210,122,.14),rgba(0,210,122,.04));border-bottom:1px solid var(--line);cursor:grab;user-select:none}
+      .fhm-float{position:fixed;right:18px;bottom:18px;z-index:9999;width:min(560px,94vw);max-height:86vh;border:1px solid #00d27a;border-radius:10px;background:var(--bg);box-shadow:0 18px 46px rgba(0,0,0,.55);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(140,150,160,.45) transparent}
+      .fhm-float::-webkit-scrollbar{width:12px;height:12px}
+      .fhm-float::-webkit-scrollbar-track{background:transparent;margin:6px 0}
+      .fhm-float::-webkit-scrollbar-thumb{background:rgba(140,150,160,.35);border-radius:10px;border:3px solid transparent;background-clip:padding-box}
+      .fhm-float::-webkit-scrollbar-thumb:hover{background:rgba(0,210,122,.6);background-clip:padding-box}
+      .fhm-float::-webkit-scrollbar-thumb:active{background:rgba(0,210,122,.85);background-clip:padding-box}
+      .fhm-float::-webkit-scrollbar-corner{background:transparent}
+      .fhm-fbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px;background:linear-gradient(180deg,rgba(0,210,122,.16),rgba(0,210,122,.05)),var(--bg);border-bottom:1px solid var(--line);cursor:grab;user-select:none}
       .fhm-fbar:active{cursor:grabbing}
       .fhm-fbar .ttl{font-size:10px;letter-spacing:.15em;font-weight:700;color:#00d27a;white-space:nowrap}
       .fhm-fbar .nm{font-size:12.5px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2900,7 +2906,7 @@
       .fhm-fbtn{flex:none;width:24px;height:22px;border:1px solid var(--line);border-radius:5px;background:var(--bg2);color:var(--txt);font-size:12px;line-height:1;cursor:pointer;padding:0}
       .fhm-fbtn:hover{border-color:var(--accent);color:var(--accent)}
       .fhm-fbtn.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.14)}
-      .fhm-fbody{overflow-y:auto;padding:11px;flex:1}
+      .fhm-fbody{padding:11px}
       .fhm-fbody .block{margin:0 !important;border:none !important;padding:0 !important;background:none !important}`;
     const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
     const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };

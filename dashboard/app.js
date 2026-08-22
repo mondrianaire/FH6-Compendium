@@ -3486,6 +3486,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           <div class="card-row" style="margin-top:0"><h3 style="margin:0;font-size:15px">🔴 Live stream</h3><span style="display:inline-flex;align-items:center;gap:6px"><span id="lvStatus" class="chip">connecting…</span><button class="lab-mode" id="lvReset" title="Start a fresh recording — clears the live screen and begins a new session/CSV. Your pinned donor and course records are kept." style="padding:3px 10px;font-size:11px;border-color:#e5414e;color:#e5414e">↺ new session</button><span class="chip" id="lvConnGear" title="connection settings" style="cursor:pointer;padding:3px 8px">⚙</span></span></div>
           <div id="lvConnRow" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"><button class="lab-mode" id="lvConnect" style="font-size:12px">connect</button><span class="why" style="font-size:10.5px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (<code>--replay captures/&lt;file&gt;.csv</code> to replay)</span></div>
           <div id="lvWfLine" style="margin-top:8px;font-size:12px"></div>
+          <div id="lvCloneLauncher" style="margin-top:8px"></div>
           <div id="lvLoop" style="margin-top:8px"></div>
           <div id="lvStint" style="margin-top:8px"></div>
           <div id="lvSession"></div><div id="lvUnknown"></div>
@@ -3556,9 +3557,28 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         }
       }
     }
+    // the clone launcher lives in the stream bar (visible in EVERY workflow) so you can pop the last-decoded
+    // build sheet out into the floating window even from Course mode, where the in-section Pop out isn't shown
+    function paintCloneLauncher() {
+      const el = host.querySelector("#lvCloneLauncher"); if (!el) return;
+      initFloat();
+      const ord = (live.float.pinned && live.float.target) ? live.float.target.ordinal : floatOrd();
+      const cached = (ord && live.diskCache) ? live.diskCache[ord] : null;
+      if (!cached || !cached.available) { if (el.dataset.k !== "-") { el.dataset.k = "-"; el.innerHTML = ""; } return; }
+      const c = diskConf(cached); const nm = cached.name || ("#" + ord); const oc = confCol(c.conf);
+      const open = !!live.float.open, pinned = !!live.float.pinned;
+      const k = ord + "|" + open + "|" + pinned + "|" + c.pct;
+      if (el.dataset.k === k) return; el.dataset.k = k;
+      el.innerHTML = `<span class="chip" style="border-color:#00d27a;color:#00d27a">📀 clone ready</span> <b style="font-size:12px">${esc(nm)}</b> <span class="chip" style="border-color:${oc};color:${oc}">${c.pct}%</span> ${open
+        ? `<span class="why" style="font-size:11px">📌 window ${pinned ? "pinned — scoring your build" : "open"} · <a href="#" data-clonefocus style="color:var(--accent)">bring to front</a> · <a href="#" data-cloneclose style="color:var(--muted)">close</a></span>`
+        : `<button class="lab-mode" data-clonepop style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7">📌 keep on screen</button> <span class="why" style="font-size:11px">— pops the build sheet out so it stays while you work the upgrade / tune menus</span>`}`;
+      const pop = el.querySelector("[data-clonepop]"); if (pop) pop.addEventListener("click", () => { popOutFloat(ord); paintCloneLauncher(); });
+      const cl = el.querySelector("[data-cloneclose]"); if (cl) cl.addEventListener("click", (e) => { e.preventDefault(); live.float.open = false; saveFloat(); paintFloat(true); paintCloneLauncher(); });
+      const fc = el.querySelector("[data-clonefocus]"); if (fc) fc.addEventListener("click", (e) => { e.preventDefault(); live.float.min = false; live.float.x = null; live.float.y = null; saveFloat(); paintFloat(true); });
+    }
     function paintFrame() {
       const f = live.frame; if (!f) return;
-      updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCourseLive(); paintActiveCar();
+      updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintCourseLive(); paintActiveCar();
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
       if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }
       for (const w of W4) {
@@ -3598,7 +3618,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const W4 = ["FL", "FR", "RL", "RR"];
     function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; }
     function paintCorners() { const el = host.querySelector("#lvCorners"); if (el) el.innerHTML = live.corners.slice(-12).reverse().map((c) => cornerCard(liveS(), c)).join("") || `<p class="why" style="font-size:11px">no corners yet</p>`; }
-    function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); }
+    function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); paintCloneLauncher(); }
     function liveConnect() {
       if (es) { es.close(); es = null; }
       live.loaded = null; carSel = null;   // a (re)connect may be a different daemon / session — never carry a loaded session or a car filter across
@@ -3613,7 +3633,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         live.diskCache[d.ordinal] = d.available ? d : { available: false };
         const changed = d.available ? applyDiskTune(d) : false;
         if (d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
-        paintDiskDecode(); paintFloat();
+        paintDiskDecode(); paintFloat(); paintCloneLauncher();
         const activeOrd = live.frame && String(live.frame.car);
         if (d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
       });

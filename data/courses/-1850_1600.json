@@ -408,6 +408,94 @@
   "fh6_20260821_202122"
  ],
  "updated": "fh6_20260821_202122",
+ "best_laps": {
+  "2866|2|4|700": {
+   "best_lap": 32.614,
+   "session": "fh6_20260821_202122",
+   "name": "2018 Exomotive Exocet Sport V8 XP-5",
+   "class": "A",
+   "pi": 700
+  }
+ },
+ "visits": [
+  {
+   "session": "fh6_20260821_202122",
+   "laps": 6,
+   "attempts": 2,
+   "cars": [
+    "2866|2|4|700"
+   ],
+   "best_lap": 32.614,
+   "best_car": "2866|2|4|700"
+  }
+ ],
+ "cars": {
+  "2866|2|4|700": {
+   "name": "2018 Exomotive Exocet Sport V8 XP-5",
+   "class": "A",
+   "pi": 700,
+   "drivetrain": "AWD"
+  }
+ },
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.045,
+    "band": "light"
+   },
+   "mid_corner": {
+    "frac": 0.414,
+    "band": "heavy"
+   },
+   "fast_corner": {
+    "frac": 0.171,
+    "band": "moderate"
+   },
+   "braking": {
+    "frac": 0.115,
+    "band": "moderate"
+   },
+   "straight": {
+    "frac": 0.089,
+    "band": "light"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "light",
+    "range_m": 17.8
+   },
+   "launch": {
+    "frac": null,
+    "band": "moderate"
+   }
+  },
+  "heavy": [
+   "medium corners"
+  ],
+  "absent": [],
+  "gears_used": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   11
+  ],
+  "top_gear_used": 11,
+  "max_gear": 6,
+  "top_speed": 116,
+  "elevation_range_m": 17.8,
+  "notes": [
+   "no real straight (top speed only 116 mph, gears used [1, 2, 3, 4, 5, 11]/6) — top-end gearing & drag are irrelevant here; tune the gears you use"
+  ],
+  "priority": [
+   "medium corners",
+   "fast sweepers",
+   "heavy braking"
+  ]
+ },
+ "profile_laps": 6,
+ "profile_session": "fh6_20260821_202122",
  "geometry": {
   "length_m": 1116,
   "path": [

@@ -805,7 +805,8 @@ def main():
                 if v.get("name") and not base.get("name"): base["name"] = v["name"]
                 disk[k] = base
             out_r = {"schema_version": "1.1.0", "purpose": "Route registry. A route = canonical start [x,z] + heading + length (+ its course model path once learned). New events are ATTRIBUTED to the nearest known route when the start is within ~120 m (250 m with path overlap), the heading agrees (a reversed circuit is a different route) and the length fits — so restarts and grid-slot offsets never split a route. Name a route once from the dashboard.", "routes": disk}
-            with open(rpath, "w", encoding="utf-8") as f: json.dump(out_r, f, indent=1, ensure_ascii=False)
+            with open(rpath + ".tmp", "w", encoding="utf-8") as f: json.dump(out_r, f, indent=1, ensure_ascii=False)
+            os.replace(rpath + ".tmp", rpath)
         except Exception as ex_: print("route registry not saved:", repr(ex_), file=sys.stderr)
 
     # ---- reference loops: user-defined free-roam test circuits. Each pass through the start point = one lap (a synthetic event). ----
@@ -969,8 +970,8 @@ def main():
                 while th[i_] - th[i_ - 1] < -math.pi: th[i_] += 2 * math.pi
             ths = smooth(th, win) if len(th) >= win else th
             return [(ths[i_ + 1] - ths[i_ - 1]) / (2 * step) for i_ in range(1, len(ths) - 1)]   # rad/m at P[i_+1]
-        def down(pcs, n=500):   # downsample pieces for drawing (≈ n points in total)
-            tot = sum(len(p) for p in pcs) or 1; k = max(1, tot // n)
+        def down(pcs, n=500):   # downsample pieces for drawing (<= n points in total)
+            tot = sum(len(p) for p in pcs) or 1; k = max(1, -(-tot // n))
             return [[[round(p[0]), round(p[1])] for p in pc[::k]] for pc in pcs if len(pc[::k]) >= 2]
         geo = None
         full_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
@@ -1024,8 +1025,8 @@ def main():
                     PPs = resample(lap_pts(w), step=8.0)
                     if PPs:
                         pc = max(PPs, key=len)   # the longest continuous piece of that lap (no teleport lines)
-                        lap_paths.append({"session": sid, "ev": w["ev"], "lap": w["lap"], "pts": [[round(p[0]), round(p[1])] for p in pc[::max(1, len(pc) // 160)]]})
-                geo["lap_paths"] = lap_paths
+                        lap_paths.append({"session": sid, "ev": w["ev"], "lap": w["lap"], "pts": [[round(p[0]), round(p[1])] for p in pc[::max(1, -(-len(pc) // 160))]]})   # <= 160 pts
+                geo["lap_paths"] = lap_paths   # merged into the course model below; stripped from the session entry afterwards (layout_paths carries them)
         def geo_near(x, z):
             if not geo: return None
             return next((g["id"] for g in geo["turns"] if math.hypot(g["apex"][0] - x, g["apex"][1] - z) <= max(60, g["len_m"] / 2 + 20)), None)   # anywhere within the turn's span
@@ -1174,30 +1175,48 @@ def main():
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
         # persist the course model (never from replays); the session carries a compact summary
-        if sid not in model["sessions"]: model["sessions"].append(sid); model["laps"] = model.get("laps", 0) + total_laps
+        # ---- TRACK RECORD: the track is the entity — cars and sessions are visits. Everything track-specific accumulates here on identification. ----
+        ev_best = [(e["best_lap"], e["car"]) for e in evs if e.get("best_lap")]
+        best_here = min(ev_best, key=lambda x: x[0]) if ev_best else None
+        model.setdefault("best_laps", {}); model.setdefault("visits", []); model.setdefault("cars", {})
+        for e in evs:
+            cinfo = cars.get(e["car"]) or {}
+            model["cars"][e["car"]] = {"name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi"), "drivetrain": cinfo.get("drivetrain")}
+            if e.get("best_lap"):
+                cur_ = model["best_laps"].get(e["car"])
+                if not cur_ or e["best_lap"] < cur_["best_lap"] or cur_.get("session") == sid and e["best_lap"] <= cur_["best_lap"]: model["best_laps"][e["car"]] = {"best_lap": e["best_lap"], "session": sid, "name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi")}
+        model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
+        model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis
+        if profile and (not model.get("profile") or total_laps >= (model.get("profile_laps") or 0)): model["profile"] = profile; model["profile_laps"] = total_laps; model["profile_session"] = sid
         model["updated"] = sid; model["name"] = co["name"] or model.get("name")
+        bl = model.get("best_laps") or {}; overall = (min(bl.values(), key=lambda b_: b_["best_lap"]) if bl else None)
+        track = {"name": model.get("name"), "laps": model["laps"], "sessions": len(model["sessions"]), "attempts": sum(v.get("attempts", 0) for v in model["visits"]),
+                 "cars": [dict(cid=k_, **v) for k_, v in (model.get("cars") or {}).items()], "best_laps": [dict(cid=k_, **v) for k_, v in sorted(bl.items(), key=lambda kv: kv[1]["best_lap"])], "best": overall,
+                 "visits": model["visits"][-8:], "this_session_best": (best_here[0] if best_here else None), "this_session_best_car": (best_here[1] if best_here else None),
+                 "delta_to_track_best": (round(best_here[0] - overall["best_lap"], 3) if (best_here and overall) else None), "profile_laps": model.get("profile_laps"), "profile_session": model.get("profile_session"), "file": os.path.relpath(mpath, ROOT)}
         if geo:
             mg = model.get("geometry") or {}
             prev_lp = [lp for lp in (mg.get("lap_paths") or []) if lp.get("session") != sid]   # re-analysis of this session replaces its own laps
-            layout = (prev_lp + (geo.get("lap_paths") or []))[-24:]
+            layout = sorted(prev_lp + (geo.get("lap_paths") or []), key=lambda lp: (lp.get("session") or "", lp.get("ev", 0), lp.get("lap", 0)))[-24:]   # chronological (session ids are timestamps) — the 24 most RECENT laps, whatever the analysis order
             if not mg.get("path") or len(geo["path"]) >= len(mg.get("path") or []): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"), "turns": geo["turns"], "session": sid, "lap_paths": layout}   # the map persists with the course
             else: mg["lap_paths"] = layout; model["geometry"] = mg
             geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing
+            for k_ in ("lap_paths", "path", "last_path"): geo.pop(k_, None)   # session entry keeps the drawable pieces + layout only (no duplicated flat copies)
         if write_models:
             try:
-                os.makedirs(mdir, exist_ok=True)
-                with open(mpath, "w", encoding="utf-8") as f: json.dump(model, f, indent=1, ensure_ascii=False)
-            except Exception: pass
+                os.makedirs(mdir, exist_ok=True); tmp_ = mpath + ".tmp"
+                with open(tmp_, "w", encoding="utf-8") as f: json.dump(model, f, indent=1, ensure_ascii=False)
+                os.replace(tmp_, mpath)   # atomic: a concurrent reader (build-db, the daemon) never sees a half-written model
+            except Exception as ex_: print("course model not saved:", repr(ex_), file=sys.stderr)
         model_info = {"turns": len([t for t in model["turns"] if t.get("status", "turn") == "turn"]), "laps": model.get("laps", 0), "sessions": len(model.get("sessions", [])), "file": os.path.relpath(mpath, ROOT)}
         on_ref_n = sum(1 for k in corner_out if k.get("on_ref")); cmp_n = sum(1 for k in corner_out if k.get("delta") is not None)
         pred_n = sum(1 for k in corner_out if (k.get("ref") or {}).get("predicted")); own_n = sum(1 for k in corner_out if k.get("ref") and not (k.get("ref") or {}).get("predicted"))
         if geo:   # mapped turns vs driven turns: a mapped turn with no behavioural corner is a turn you took flat / never loaded — it still exists
             driven_ids = {k.get("geo_id") for k in corner_out if k.get("geo_id")}
             geo["driven"] = len(driven_ids); geo["not_driven"] = [g["id"] for g in geo["turns"] if g["id"] not in driven_ids]
-            turns_info["mapped"] = len(geo["turns"]); turns_info["mapped_driven"] = len(driven_ids)
-            if not model.get("geometry") or len(geo["path"]) >= len((model.get("geometry") or {}).get("path") or []): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "turns": geo["turns"], "session": sid}
+            turns_info["mapped"] = len(geo["turns"]); turns_info["mapped_driven"] = len(driven_ids)   # (model geometry is persisted in the block above, before the flat copies are stripped)
         course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile, "laps": laps_info, "turns": turns_info,
-                           "model": model_info, "driving": {"compared": cmp_n, "on_reference": on_ref_n, "predicted": pred_n, "own_refs": own_n, "car_grip": {k_: car_grip.get(k_) for k_ in co["cars"]}}, "geometry": geo,
+                           "model": model_info, "track": track, "driving": {"compared": cmp_n, "on_reference": on_ref_n, "predicted": pred_n, "own_refs": own_n, "car_grip": {k_: car_grip.get(k_) for k_ in co["cars"]}}, "geometry": geo,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out
@@ -1206,7 +1225,8 @@ def main():
                        "rear_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "rear" and not c["drift"]),
                        "drift_corners": sum(1 for c in corners if c["drift"])}
     out = os.path.join(outdir, sid + ".json")
-    json.dump(sess, open(out, "w"), separators=(",", ":"))
+    with open(out + ".tmp", "w") as f: json.dump(sess, f, separators=(",", ":"))
+    os.replace(out + ".tmp", out)   # atomic
     print(f"wrote {out}  ({os.path.getsize(out)//1024} KB)  cars={[(c['id'], c['name'], c['build_id']) for c in sess['cars']]}  summary={sess['summary']}")
 
 if __name__ == "__main__":

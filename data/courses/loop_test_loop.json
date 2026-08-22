@@ -376,6 +376,117 @@
   "fh6_20260821_211040"
  ],
  "updated": "fh6_20260821_211040",
+ "best_laps": {
+  "2866|2|4|700": {
+   "best_lap": 21.85,
+   "session": "fh6_20260821_202122",
+   "name": "2018 Exomotive Exocet Sport V8 XP-5",
+   "class": "A",
+   "pi": 700
+  },
+  "1046|2|10|800": {
+   "best_lap": 22.13,
+   "session": "fh6_20260821_211040",
+   "name": "2008 Dodge Viper SRT-10 ACR",
+   "class": "S1",
+   "pi": 800
+  }
+ },
+ "visits": [
+  {
+   "session": "fh6_20260821_202122",
+   "laps": 7,
+   "attempts": 7,
+   "cars": [
+    "2866|2|4|700"
+   ],
+   "best_lap": 21.85,
+   "best_car": "2866|2|4|700"
+  },
+  {
+   "session": "fh6_20260821_211040",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "1046|2|10|800"
+   ],
+   "best_lap": 22.13,
+   "best_car": "1046|2|10|800"
+  }
+ ],
+ "cars": {
+  "2866|2|4|700": {
+   "name": "2018 Exomotive Exocet Sport V8 XP-5",
+   "class": "A",
+   "pi": 700,
+   "drivetrain": "AWD"
+  },
+  "1046|2|10|800": {
+   "name": "2008 Dodge Viper SRT-10 ACR",
+   "class": "S1",
+   "pi": 800,
+   "drivetrain": "AWD"
+  }
+ },
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.06,
+    "band": "light"
+   },
+   "mid_corner": {
+    "frac": 0.385,
+    "band": "heavy"
+   },
+   "fast_corner": {
+    "frac": 0.214,
+    "band": "moderate"
+   },
+   "braking": {
+    "frac": 0.114,
+    "band": "moderate"
+   },
+   "straight": {
+    "frac": 0.059,
+    "band": "light"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "light",
+    "range_m": 17.8
+   },
+   "launch": {
+    "frac": null,
+    "band": "absent"
+   }
+  },
+  "heavy": [
+   "medium corners"
+  ],
+  "absent": [],
+  "gears_used": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   11
+  ],
+  "top_gear_used": 11,
+  "max_gear": 6,
+  "top_speed": 107,
+  "elevation_range_m": 17.8,
+  "notes": [
+   "no real straight (top speed only 107 mph, gears used [1, 2, 3, 4, 5, 11]/6) — top-end gearing & drag are irrelevant here; tune the gears you use"
+  ],
+  "priority": [
+   "medium corners",
+   "fast sweepers",
+   "heavy braking"
+  ]
+ },
+ "profile_laps": 7,
+ "profile_session": "fh6_20260821_202122",
  "geometry": {
   "length_m": 740,
   "path": [

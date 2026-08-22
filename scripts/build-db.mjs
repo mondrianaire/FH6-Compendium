@@ -33,8 +33,9 @@ const db = {
   carOrdinals: read("car-ordinals.json"),
   routes: read("routes.json"),
   referenceLoops: read("reference-loops.json"),
-  courseModels: (() => { try { return readdirSync(join(root, "data", "courses")).filter((f) => f.endsWith(".json")).sort().map((f) => JSON.parse(readFileSync(join(root, "data", "courses", f), "utf8"))); } catch (e) { return []; } })(),
-  sessions: readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json")).sort()
+  courseModels: (() => { let files = []; try { files = readdirSync(join(root, "data", "courses")).filter((f) => f.endsWith(".json") && !f.endsWith(".tmp")).sort(); } catch (e) { return []; }
+    return files.map((f) => { try { return JSON.parse(readFileSync(join(root, "data", "courses", f), "utf8")); } catch (e) { console.warn(`course model skipped (unreadable): ${f}`); return null; } }).filter(Boolean); })(),
+  sessions: readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json") && !f.endsWith(".tags.json")).sort()   // tags files are run labels, not sessions
     .map((f) => JSON.parse(readFileSync(join(root, "data", "sessions", f), "utf8"))),
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",

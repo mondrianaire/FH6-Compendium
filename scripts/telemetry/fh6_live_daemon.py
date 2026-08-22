@@ -233,7 +233,8 @@ def run_analysis(until=None, final=True):
         if os.path.exists(path):
             with open(path) as f: js = json.load(f)
             an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "decode", "clone_sheet", "temps_med_f", "live_s")} for c in js["cars"]],
-                  "courses": js.get("courses", [])[:4], "stints": [{k: st.get(k) for k in ("n", "id", "label", "role", "t0", "t1")} for st in js.get("stints", [])][-20:]}
+                  "courses": [{k: v for k, v in co.items() if k != "geometry"} for co in js.get("courses", [])[:4]],   # geometry (maps, layouts) is heavy and lives in /session.json, which the dashboard fetches after every analysis
+                  "stints": [{k: st.get(k) for k in ("n", "id", "label", "role", "t0", "t1")} for st in js.get("stints", [])][-20:]}
             with ST.lock: ST.session_json = js; ST.session_path = path; ST.analysis = an
             ST.emit("analysis", an)
             if final: ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Per-car absolute ranges for the 7 tune sliders whose min/max are chassis-specific (springs, ride height, downforce, final drive, gears). FH never prints the slider end-stops on screen, so these are learned by back-solving from >=2 known (normalized-position, displayed-value) points: value = min + norm*(max-min). Once a car+field has a solved range, EVERY on-disk tune for that car prints that field as an exact number instead of a slider position. Keyed by car ordinal. Written by hand and by the daemon (POST /tune-range). See research/savefile-decode-2026-08-22.md and fh6_tune_decode.py.",
+  "fields": [
+    "front_spring",
+    "rear_spring",
+    "front_ride_height",
+    "rear_ride_height",
+    "front_downforce",
+    "rear_downforce",
+    "final_drive"
+  ],
+  "ranges": {
+    "2142": {
+      "_car": "2014 Volkswagen Golf R",
+      "front_ride_height": {
+        "min": 6.9,
+        "max": 8.1,
+        "unit": "in",
+        "source": "footage-verified endpoints (tuning-variables.json)"
+      },
+      "rear_ride_height": {
+        "min": 6.9,
+        "max": 8.1,
+        "unit": "in",
+        "source": "footage-verified endpoints (tuning-variables.json)"
+      }
+    }
+  },
+  "points": {}
+}

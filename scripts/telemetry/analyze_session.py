@@ -224,6 +224,72 @@ def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med, pro
     firm.sort(key=lambda a: -(a["severity"] * a["confidence"] * wt(a))); opn.sort(key=lambda a: -(a["confidence"] * wt(a)))
     return firm + opn
 
+def general_tuning_for(cid_, corners, advice):
+    """The GENERAL / all-around lane — the inverse of course tuning.
+
+    Course tuning weights each diagnosis by how much THIS course uses it (course_weight),
+    deliberately overfitting to one track. General tuning weights by BREADTH: how consistently
+    the problem appears across every context the build has actually driven (corner-type x
+    surface). It acts only on systematic weaknesses and never overfits to one track's quirk.
+    If a car is surface- or speed-specific, that shows up as a split balance signature (and a
+    'context_split' flag on the advisory) rather than a blanket slider change."""
+    grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]
+    def med(a):
+        a = sorted(a)
+        return a[len(a) // 2] if a else None
+    ctype = lambda c: "hairpin" if c["mph_min"] < 45 else "medium" if c["mph_min"] <= 85 else "fast"
+    # context buckets = corner-type x surface
+    buckets = {}
+    for c in grip:
+        buckets.setdefault((ctype(c), c.get("surface", "smooth")), []).append(c)
+    def dom_axle(cs):
+        cnt = {"front": 0, "rear": 0, "none": 0}
+        for c in cs:
+            cnt[(c["first_red"] or {}).get("axle", "none")] += 1
+        return max(cnt, key=cnt.get)
+    sig = []
+    for (typ, surf), cs in buckets.items():
+        if len(cs) < 2:
+            continue
+        u = med([c["usi"] for c in cs])
+        sig.append({"type": typ, "surface": surf, "n": len(cs), "usi": round(u, 3), "axle": dom_axle(cs),
+                    "bias": "understeer" if u > 0.1 else "oversteer" if u < -0.05 else "neutral"})
+    sig.sort(key=lambda s: -s["n"])
+    usis = [s["usi"] for s in sig]
+    spread = (max(usis) - min(usis)) if len(usis) >= 2 else 0.0
+    robustness = round(max(0.0, 1 - spread / 0.5), 2) if sig else None   # 0.5 USI spread across contexts => 0 robustness
+    surfaces = sorted(set(s["surface"] for s in sig))
+    surf_split = None
+    if len(surfaces) >= 2:
+        by_surf = {}
+        for s in sig:
+            by_surf.setdefault(s["surface"], []).append(s["usi"])
+        sm, rg = med(by_surf.get("smooth", [])), med(by_surf.get("rough", []))
+        if sm is not None and rg is not None and abs(sm - rg) > 0.2:
+            surf_split = {"smooth": round(sm, 3), "rough": round(rg, 3)}
+    # breadth per advisory = fraction of contexts exhibiting the problem (blanket -> ~1, one-context -> low)
+    def exhibits(a, s):
+        k = a["key"]
+        if k in ("mid-understeer", "trail-brake", "brake-lockup"):
+            return s["usi"] > 0.1 or s["axle"] == "front"
+        if k == "oversteer-balance":
+            return s["usi"] < -0.05 or s["axle"] == "rear"
+        if k == "rear-limited":
+            return s["axle"] == "rear"
+        return None   # not corner-context dependent (launch / brake / temps / bottoming / meta)
+    for a in advice:
+        rel = [e for e in (exhibits(a, s) for s in sig) if e is not None]
+        if not rel:
+            a["breadth"] = 1.0 if a["key"] == "more-data" else 0.85   # broadly applicable, not tied to corner context
+            continue
+        present = sum(1 for e in rel if e)
+        a["breadth"] = round(present / len(rel), 2)
+        if 0 < present < len(rel):
+            a["context_split"] = True     # some contexts, not others -> a balance issue, not a blanket change
+    return {"balance": sig, "robustness": robustness, "buckets": len(sig),
+            "surfaces": surfaces, "surface_split": surf_split, "corners": len(grip)}
+
+
 def decode_battery_for(cid_, cars, corners, launches, braking, crests, pulses, top_pull):
     """DECODE progress = completeness of the tests needed to clone this build. Per car, session-wide:
     tests count wherever they were driven — the loop is a convenience, not a requirement."""
@@ -561,7 +627,11 @@ def main():
                 imin = min(range(len(seg)), key=lambda kk: seg[kk]["speed_mph"])
                 thr = next((r for r in seg[imin:] if r["Accel"] > 100), None)
                 v_ms = apx["speed_mph"] * 0.44704; radius = round(v_ms * v_ms / max(0.1, peak * 9.81))
-                corners.append({"t0": round(seg[0]["t"], 1), "t1": round(seg[-1]["t"], 1), "car": cid(seg[0]), "dir": "R" if sign > 0 else "L",
+                # surface the corner was taken on (road vs rough): sustained SurfaceRumble across the corner, not a one-frame kerb clip
+                sr = [max(r["SurfaceRumbleFL"], r["SurfaceRumbleFR"], r["SurfaceRumbleRL"], r["SurfaceRumbleRR"]) for r in seg]
+                rough_frac = round(sum(1 for x in sr if x > 0.1) / len(sr), 2) if sr else 0.0
+                surface = "rough" if rough_frac > 0.35 else "smooth"
+                corners.append({"t0": round(seg[0]["t"], 1), "t1": round(seg[-1]["t"], 1), "car": cid(seg[0]), "dir": "R" if sign > 0 else "L", "surface": surface, "rough_frac": rough_frac,
                                 "apex": [round(apx["PosX"]), round(apx["PosZ"])], "dist": round(apx["DistanceTraveled"]), "mph_apex": round(apx["speed_mph"]),
                                 "mph_in": round(v_in), "mph_min": round(v_min), "mph_out": round(seg[-1]["speed_mph"]), "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
                                 "entry": [round(seg[0]["PosX"]), round(seg[0]["PosZ"])], "exit": [round(seg[-1]["PosX"]), round(seg[-1]["PosZ"])],
@@ -858,6 +928,7 @@ def main():
     for c in sess["cars"]:
         c["coverage"] = coverage_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull, warm_frac)
         c["advice"] = advice_for(c["id"], cars, corners, launches, braking, bott, c["coverage"], temps_med)
+        c["general"] = general_tuning_for(c["id"], corners, c["advice"])   # all-around lane: breadth over every context (mutates advice to add breadth)
         c["decode"] = decode_battery_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull)
         c["clone_sheet"] = clone_sheet_for(c, c["decode"])
         c["temps_med_f"] = {w: round(v) for w, v in temps_med.get(c["id"], {}).items()}

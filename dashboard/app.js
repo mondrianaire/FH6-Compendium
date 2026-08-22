@@ -2654,6 +2654,52 @@
         ${cs.menus.map((m) => m.items.map((it, i) => { const sc = STATCHIP[it.status] || ["?", "var(--muted)"]; const cv = it.confidence; const cc = cv == null ? null : confCol(cv); return `<tr>${i === 0 ? `<td rowspan="${m.items.length}" style="font-weight:700;color:var(--accent2);white-space:nowrap">${m.menu}</td>` : ""}<td style="white-space:nowrap">${it.item}</td><td>${it.pending ? `<span style="color:var(--muted)">⏳ pending — needs <b>${gateLbl[it.gate] || it.gate}</b></span>` : (it.value != null ? `<b>${esc(String(it.value))}</b>` : `<span style="color:var(--muted)">—</span>`)}</td><td style="white-space:nowrap"><span class="chip" style="border-color:${sc[1]};color:${sc[1]}">${sc[0]}</span></td><td>${cv == null ? `<span class="why" style="font-size:10.5px">— verify in shop</span>` : `<div style="display:flex;align-items:center;gap:6px"><div class="lab-bar" style="width:60px;height:6px"><i style="width:${cv * 100}%;background:${cc}"></i></div><b style="color:${cc};font-size:11px">${Math.round(cv * 100)}%</b>${it.status === "inferred" && !it.evidence ? `<span class="why" style="font-size:10px">assumed</span>` : ""}</div>${it.evidence ? `<div class="why" style="font-size:10px;margin-top:2px">${esc(it.evidence)}</div>` : ""}${it.needs && cv < 0.7 ? `<div style="font-size:10px;color:var(--warn,#e3b341);margin-top:2px">↑ ${esc(it.needs)}</div>` : ""}`}</td><td class="why" style="font-size:10.5px">${it.note ? esc(it.note) : ""}</td></tr>`; }).join("")).join("")}
         </tbody></table></div>`;
     };
+    // ---- LIVE DECODE coach: the car you're in is analysed constantly; between the daemon's analyses the dashboard tracks, frame by frame, what the battery still needs ----
+    const DEC_HOWTO = { launch: "standing start — stop fully, then full throttle past 60 mph", gears: "full throttle in every gear (15+ frames each)", dyno: "sweep the rev range at full throttle", top: "hold TOP gear at full throttle for 5 s", brake: "threshold-brake from 80+ mph to a near stop", hairpin: "a hairpin (apex under 45 mph)", medium: "a medium corner (apex 45–85 mph)", fast: "a fast sweeper (apex over 85 mph)", crest: "a crest / bump at speed (car goes light)", wiggle: "quick left-right steering pulses at 55+ mph" };
+    const decReset = (cid) => { live.dec = { cid, gearF: {}, bins: new Set(), topS: 0, topCur: 0, launches: 0, brakes: 0, wiggles: 0, crests: 0, corners: { hairpin: 0, medium: 0, fast: 0 }, lastT: 0, stoppedT: null, brkOn: false, steerSign: 0, steerT: 0, wigT: 0, crestT: 0, act: "—", topGear: null, lastPaint: 0 }; };
+    const updateLiveDec = (f) => {
+      if (!f || !f.on) { if (live.dec) live.dec.act = "not driving"; return; }
+      if (!live.dec || live.dec.cid !== f.cid) decReset(f.cid);
+      const d = live.dec, now = performance.now(), dt = d.lastT ? Math.min(0.2, (now - d.lastT) / 1000) : 0; d.lastT = now;
+      const ls = liveSess(); const A = ls ? car(ls, f.cid) : null; if (f.gear > (d.topGear || 0) && f.gear <= 10) d.topGear = f.gear; const topGear = (A && A.sig && A.sig.gear_count) || d.topGear || 0;
+      const wot = f.thr > 230 && f.rpm > 1500 && f.mph > 5 && f.gear >= 1 && f.gear <= 10; let act = "cruising";
+      if (wot) { d.gearF[f.gear] = (d.gearF[f.gear] || 0) + 1; d.bins.add(Math.floor(f.rpm / 250) * 250); act = `WOT pull · gear ${f.gear} · ${Math.round(f.rpm)} rpm`; if (topGear && f.gear >= topGear) { d.topCur += dt; d.topS = Math.max(d.topS, d.topCur); act = `TOP-GEAR pull · ${d.topCur.toFixed(1)} s`; } else d.topCur = 0; } else d.topCur = 0;
+      if (f.mph < 2) { if (d.stoppedT == null) d.stoppedT = now; } else if (d.stoppedT != null && now - d.stoppedT > 800 && f.mph > 30) { d.launches += 1; d.stoppedT = null; act = "LAUNCH"; } else if (d.stoppedT != null && f.mph > 30) d.stoppedT = null;
+      if (d.stoppedT != null && f.mph < 2 && now - d.stoppedT > 800) act = "stopped — ready to launch";
+      if (f.brk > 200 && !d.brkOn) { d.brkOn = true; if (f.mph >= 80) { d.brakes += 1; act = "HARD STOP"; } } else if (f.brk < 60) d.brkOn = false;
+      if (f.brk > 200 && f.mph >= 60) act = "braking hard";
+      const sgn = f.steer > 60 ? 1 : f.steer < -60 ? -1 : 0;
+      if (sgn && f.mph > 55) { if (d.steerSign && sgn !== d.steerSign && now - d.steerT < 1200 && now - d.wigT > 2000) { d.wiggles += 1; d.wigT = now; act = "steering pulse"; } d.steerSign = sgn; d.steerT = now; }
+      if (f.susp && f.susp.length === 4 && f.mph > 50 && f.susp.every((v) => v < 0.25) && now - d.crestT > 3000) { d.crests += 1; d.crestT = now; act = "CREST"; }
+      if (Math.abs(f.lat) > 0.6 && !wot && act === "cruising") act = "cornering";
+      d.act = act;
+    };
+    const decOnCorner = (c) => { const d = live.dec; if (!d || !c || c.car !== d.cid || c.drift) return; const k = c.mph_min < 45 ? "hairpin" : c.mph_min <= 85 ? "medium" : "fast"; d.corners[k] = (d.corners[k] || 0) + 1; };
+    const liveTestProgress = (A) => {   // authoritative counts from the last analysis + what the dashboard has seen since (approximate; reset on each analysis)
+      const d = live.dec || {}; const tests = (A && A.decode && A.decode.tests) || [];
+      return tests.map((t) => { let extra = 0, live_ = null;
+        if (t.key === "launch") extra = d.launches || 0;
+        else if (t.key === "brake") extra = d.brakes || 0;
+        else if (t.key === "wiggle") extra = d.wiggles || 0;
+        else if (t.key === "crest") extra = d.crests || 0;
+        else if (t.key === "hairpin" || t.key === "medium" || t.key === "fast") extra = (d.corners || {})[t.key] || 0;
+        else if (t.key === "top") { if (!t.ok) live_ = `${Math.min(5, d.topS || 0).toFixed(1)} / 5 s held`; if ((d.topS || 0) >= 5) extra = 1; }
+        else if (t.key === "gears") { const miss = ((t.why.match(/missing gear ([\d, ]+)/) || [])[1] || "").split(",").map((x) => +x.trim()).filter(Boolean); extra = miss.filter((g) => (d.gearF || {})[g] >= 15).length; if (miss.length) live_ = miss.map((g) => `g${g} ${Math.min(15, (d.gearF || {})[g] || 0)}/15 frames`).join(" · "); }
+        else if (t.key === "dyno") { const miss = ((t.why.match(/missing rpm: ([\d, ]+)/) || [])[1] || "").split(",").map((x) => +x.trim()).filter(Boolean); const bins = d.bins || new Set(); extra = miss.filter((b) => bins.has(b)).length; if (miss.length) { const left = miss.filter((b) => !bins.has(b)); live_ = left.length ? `rpm still missing: ${left.join(", ")}` : "all missing bins swept — the next analysis confirms"; } }
+        const have = Math.min(t.need, t.have + extra); return Object.assign({}, t, { have_live: have, ok_live: have >= t.need, live: live_, extra });
+      });
+    };
+    const nextPanelHtml = (A) => {
+      const d = live.dec || {};
+      if (!A || !A.decode) return `<div class="lab-corner" style="border-left:4px solid #a371f7;background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:15px">▶ NEXT: drive — the first analysis (~20 s of driving) defines what this car still needs</strong><span class="chip">${esc(d.act || "—")}</span></div></div>`;
+      const prog = liveTestProgress(A); const todo = prog.filter((t) => !t.ok_live).sort((a, b) => (b.need - b.have_live) / b.need - (a.need - a.have_live) / a.need); const weak = (A.clone_sheet && A.clone_sheet.weak) || []; const done = prog.length && !todo.length; const top = todo[0];
+      return `<div class="lab-corner" style="border-left:4px solid ${done ? "#00d27a" : "#a371f7"};background:var(--bg2)">
+        <div class="card-row" style="margin-top:0"><strong style="font-size:15px">${done ? "✅ CAPTURE COMPLETE — sheet ready" : "▶ NEXT: " + esc(DEC_HOWTO[top.key] || top.label)}</strong><span class="chip" title="what the dashboard sees you doing right now">${esc(d.act || "—")}</span></div>
+        ${done ? `<p class="why" style="font-size:12px;margin:4px 0">every battery test is captured${weak.length ? ` — to raise confidence: ${weak.map((w) => `<b>${esc(w.item)}</b> ${Math.round(w.confidence * 100)}% · ${esc(w.needs || "")}`).join(" · ")}` : " — every measured row is backed by repeated, consistent measurements"}</p>` : `<p class="why" style="font-size:12px;margin:4px 0">${todo.length} of ${prog.length} tests still needed — counts move with every frame; the analysis confirms them every ~20 s of driving</p>`}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:11px">${prog.map((t) => `<div style="${t.ok_live ? "opacity:.55" : ""}"><div style="display:flex;justify-content:space-between;gap:6px"><span>${t.ok_live ? "✓ " : "○ "}<b>${t.label}</b>${!t.ok_live ? ` <span class="why">— ${esc(DEC_HOWTO[t.key] || "")}</span>` : ""}</span><b style="white-space:nowrap;color:${t.ok_live ? "#00d27a" : "#e3b341"}">${t.have_live}/${t.need}${t.extra ? ` <span style="font-weight:400;color:var(--muted)">(+${t.extra} live)</span>` : ""}</b></div><div class="lab-bar" style="height:5px"><i style="width:${Math.min(100, t.have_live / t.need * 100)}%;background:${t.ok_live ? "#00d27a" : "#a371f7"}"></i></div>${t.live && !t.ok_live ? `<span class="why" style="font-size:10px">${esc(t.live)}</span>` : ""}</div>`).join("")}</div>
+      </div>`;
+    };
+    const paintDecNext = () => { const el = host.querySelector("#lvDecNext"); if (!el) return; const d = live.dec; const now = performance.now(); if (d && now - (d.lastPaint || 0) < 400) return; if (d) d.lastPaint = now; const ls = liveSess(); const A = live.frame && ls ? car(ls, live.frame.cid) : null; el.innerHTML = nextPanelHtml(A); };
     // 🧬 DECODE — clone a build: donor capture (progress = tests only) → Clone Sheet (the parts) → Bench convergence (the sliders)
     function decodeSection(s, isLive) {
       if (!s || !arr(s, "cars").length) return isLive ? EMPTY_LIVE : NOSESS;
@@ -2710,9 +2756,11 @@
       // LIVE: the SUBJECT of decoding is the car you are in right now — full clone of the currently equipped, active config
       const curId = isLive && live.frame ? live.frame.cid : null; const A = curId ? car(s, curId) : null; const Adone = !!(A && A.decode && A.decode.pct >= 1);
       const subject = isLive ? (A ? `<div class="block" style="border-color:#a371f7"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🚗 Cloning the car you're in — ${esc(carName(A) || "#" + A.ordinal)} <span class="why">· ${A.class} ${A.pi} ${A.drivetrain} ${A.cyl}cyl · build ${A.build_id}</span></h3><span class="chip" style="border-color:${Adone ? "#00d27a" : "#e3b341"};color:${Adone ? "#00d27a" : "#e3b341"};font-weight:700">${A.decode ? (Adone ? "CAPTURE COMPLETE" : A.decode.ready_n + "/" + A.decode.total + " tests") : "analysing…"}</span></div>
+          <p class="why" style="font-size:11px;margin:2px 0 6px">analysed constantly — the daemon re-analyses every ~20 s of driving; the panel below moves with every frame</p>
+          <div id="lvDecNext">${nextPanelHtml(A)}</div>
           ${A.id === D.id ? `<p class="why" style="font-size:11px;margin:4px 0">this is the DONOR — its sheet is the deliverable below; set another car's run as 🔧 REPLICA to converge</p>` : `<p class="why" style="font-size:11px;margin:4px 0">this car is not the donor — <b>set as 🎯 DONOR</b> in the stream bar to make it the capture, or <b>🔧 REPLICA</b> to converge it against the donor below</p>`}
           ${A.decode ? (Adone ? `${A.clone_sheet ? cloneSheetHtml(A) : ""}<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>🧬 decode battery</b> <span class="chip" style="border-color:#00d27a;color:#00d27a">all tests captured</span></summary>${decodePanel(A, "🚗 ")}</details>` : `${decodePanel(A, "🚗 ")}${A.clone_sheet ? `<div style="margin-top:8px">${cloneSheetHtml(A)}</div>` : ""}`) : `<p class="why" style="font-size:11px">first analysis after ~20 s of driving…</p>`}
-        </div>` : `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><p class="why" style="font-size:12px;margin:0">${live.frame && live.frame.on ? "this config has no analysis yet — drive ~20 s" : "not driving — the car you get into becomes the decode subject automatically"}</p></div>`) : "";
+        </div>` : `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><p class="why" style="font-size:12px;margin:0 0 6px">${live.frame && live.frame.on ? "this config has no analysis yet — drive ~20 s" : "not driving — the car you get into becomes the decode subject automatically"}</p><div id="lvDecNext">${nextPanelHtml(null)}</div></div>`) : "";
       const libraryBlock = isLive ? "" : buildLibrary(s);
       const hideDonorDeliverable = isLive && A && A.id === D.id;   // the subject block already shows it
       return `${subject}${libraryBlock}
@@ -2961,6 +3009,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
+      updateLiveDec(f); paintDecNext();
       for (const w of W4) {
         const [ratio, angle, comb] = f.slip[w]; const ring = host.querySelector(`[data-ring="${w}"]`), nd = host.querySelector(`[data-needle="${w}"]`), pk = host.querySelector(`[data-peak="${w}"]`);
         if (!ring) continue;
@@ -3009,13 +3058,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label, role: d.role } }); paintStatus(); });
-      es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); paintBanner(); loadFullSession(); });
+      es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); live.analysisAt = Date.now(); if (live.dec) decReset(live.dec.cid); paintBanner(); loadFullSession(); });   // the analysis absorbed what the live tracker counted — start the live deltas again
       es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; paintAll(true); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
       es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
-      es.addEventListener("corner", (e) => { live.corners.push(JSON.parse(e.data)); paintCorners(); });
+      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); paintCorners(); decOnCorner(c); paintDecNext(); });
       es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false;
         const sm = live.status.mode; const changed = sm && (!live.mode || sm.suggest !== live.mode.suggest || sm.reason !== live.mode.reason);   // status carries the current mode every second — authoritative after reconnects / daemon restarts
         if (changed) live.mode = sm;

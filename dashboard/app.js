@@ -2478,7 +2478,7 @@
     }
     // ---- WORKFLOW sections — rendered from a session object (a recording, or the live session's latest analysis); isLive adds live hints ----
     const arr = (s, k) => (s && Array.isArray(s[k]) ? s[k] : []);
-    const EMPTY_LIVE = `<div class="block"><p class="why" style="font-size:12px;margin:0">first analysis lands after ~20 s of driving — the stream bar above is already live</p></div>`;
+    const EMPTY_LIVE = `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><div id="lvDiskDecode"></div><p class="why" style="font-size:12px;margin:6px 0 0">the on-disk tune (above) decodes instantly from the save file — no driving needed; the drive-based decode battery begins after ~20 s of driving</p></div>`;
     const routeName = (key, fallback) => (((((DB.routes || {}).routes) || {})[key] || {}).name) || (JSON.parse(localStorage.getItem("fh6Routes") || "{}")[key] || {}).name || fallback;
     function eventsTable(s) {
       const ev = arr(s, "events"); if (!ev.length) return "";
@@ -2846,29 +2846,71 @@
       if (!sl.length && !pc) return "";
       return `<div style="margin:0 0 10px;padding:8px 12px;border:1px solid #e3b341;border-radius:8px;background:rgba(227,179,65,.08);font-size:12px"><b style="color:#e3b341">🔧 Changed since your last save:</b> ${sl.slice(0, 8).join(" · ") || ""}${sl.length > 8 ? ` · +${sl.length - 8} more` : ""}${pc ? ` <span class="why">· ${pc} part change${pc > 1 ? "s" : ""}</span>` : ""}</div>`;
     };
+    const FHM_CLS = { D: "#57c1ff", C: "#57d98a", B: "#f2d94e", A: "#ff9f45", S1: "#ff4f97", S2: "#c46bff", X: "#ff5a5a" };
+    const FHM_CSS = `
+      .fhm{font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
+      .fhm-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+      @media(max-width:860px){.fhm-cols{grid-template-columns:1fr}}
+      .fhm-sub{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px;margin:0 0 10px}
+      .fhm-cat{margin-bottom:9px;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg2)}
+      .fhm-cath{display:flex;align-items:center;gap:8px;padding:6px 11px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--line)}
+      .fhm-cath .bar{width:3px;height:12px;background:#36c1e8;border-radius:2px}
+      .fhm-cath b{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt)}
+      .fhm-cath .k{margin-left:auto;font-size:10px;color:var(--muted)}
+      .fhm-prow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:5px 11px;border-bottom:1px solid rgba(255,255,255,.03);font-size:12.5px;text-transform:capitalize}
+      .fhm-prow:last-child{border-bottom:none}.fhm-prow.stock{opacity:.5}
+      .fhm-pips{display:flex;gap:3px}.fhm-pips i{width:13px;height:6px;border-radius:1px;background:#26313a}.fhm-pips i.on{background:#a8d92a}
+      .fhm-up{min-width:120px;text-align:right;text-transform:none}
+      .fhm-up.named,.fhm-up.category{color:#c3ea4f}.fhm-up.stock{color:var(--muted);font-size:11px;text-transform:uppercase}
+      .fhm-up.dim{color:#36c1e8}.fhm-up.cosmetic{color:var(--muted)}
+      .fhm-tab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 7px;border-left:2px solid var(--accent);padding-left:7px}
+      .fhm-sec{margin-bottom:11px}
+      .fhm-sech{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#0b0f07;background:#a8d92a;padding:2px 8px;border-radius:3px;display:inline-block;margin:0 0 7px}
+      .fhm-sl{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}.fhm-sl:last-child{border-bottom:none}
+      .fhm-slt{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:5px}
+      .fhm-sll{font-size:12px;color:var(--txt)}
+      .fhm-slv{font-weight:700;font-size:16px;color:#c3ea4f;white-space:nowrap;font-variant-numeric:tabular-nums}
+      .fhm-slv.pos{color:#e6a63a;font-size:13px}
+      .fhm-trk{position:relative;height:16px}
+      .fhm-trk .rail{position:absolute;top:7px;left:0;right:0;height:3px;border-radius:2px;background:#0b1013;border:1px solid var(--line)}
+      .fhm-trk .fill{position:absolute;top:7px;left:0;height:3px;border-radius:2px;background:#a8d92a}
+      .fhm-trk .fill.pos{background:repeating-linear-gradient(90deg,#e6a63a,#e6a63a 4px,transparent 4px,transparent 8px)}
+      .fhm-trk .knob{position:absolute;top:1px;width:4px;height:14px;border-radius:2px;background:var(--txt);transform:translateX(-50%)}
+      .fhm-trk .knob.pos{background:#e6a63a}
+      .fhm-pol{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+      .fhm-rin{width:44px;padding:1px 3px;border-radius:3px;border:1px dashed #e6a63a;background:var(--bg2);color:var(--txt);font-size:10px;margin-left:4px}`;
+    const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
+    const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };
     const diskDeliverableHtml = (r) => {
+      ensureFhmCss();
       const dl = r && r.deliverable; if (!dl) return "";
       const oc = confCol(dl.confidence); const sm = dl.summary || {};
+      const f = live.frame; const badge = (f && String(f.car) === String(dl.ordinal) && f.cls) ? `<span class="chip" style="border-color:${FHM_CLS[f.cls] || "var(--accent)"};color:${FHM_CLS[f.cls] || "var(--accent)"};font-weight:700">${f.cls} ${f.pi}</span>` : "";
       const lockChip = dl.locked ? `<span class="chip" style="border-color:#e3b341;color:#e3b341" title="downloaded / locked in-game — the save file still holds its real values">🔒 downloaded</span>` : `<span class="chip" style="border-color:#00d27a;color:#00d27a">self-made</span>`;
-      const partRows = (dl.menus || []).map((m) => m.rows.map((it, i) => {
-        const lbl = it.stock === true ? `<span style="color:var(--muted)">Stock</span>` : it.tier != null ? `<b>Upgraded</b> <span class="why">· tier ${it.tier}</span>` : `<b>Installed</b> <span class="why">· #${it.raw}</span>`;
-        return `<tr>${i === 0 ? `<td rowspan="${m.rows.length}" style="font-weight:700;color:var(--accent2);white-space:nowrap">${esc(m.menu)}</td>` : ""}<td style="white-space:nowrap">${esc(it.item.replace(/_/g, " "))}</td><td>${lbl}</td></tr>`;
-      }).join("")).join("");
-      const tuneRows = (dl.tabs || []).map((t) => t.rows.map((it, i) => {
-        const rel = it.value == null;
-        const relCell = rel
-          ? `<span style="color:var(--muted)">${esc(it.display)}</span>${it.per_car && !it.field.startsWith("gear") ? ` <input data-rangeord="${dl.ordinal}" data-rangefield="${esc(it.field)}" data-rangenorm="${it.norm}" data-rangeunit="${esc(it.unit || "")}" placeholder="=?" title="Type the number you see in-game for this slider. Two saved tunes at different positions back-solve this car's range — then every tune prints exact." inputmode="decimal" style="width:50px;padding:1px 4px;border-radius:4px;border:1px dashed var(--accent2);background:var(--bg2);color:var(--txt);font-size:10.5px">` : ""}`
-          : `<b>${esc(it.display)}</b>`;
-        return `<tr>${i === 0 ? `<td rowspan="${t.rows.length}" style="font-weight:700;color:var(--accent2);white-space:nowrap">${esc(t.tab)}</td>` : ""}<td style="white-space:nowrap">${esc(it.field.replace(/_/g, " "))}</td><td>${relCell}</td></tr>`;
-      }).join("")).join("");
-      return `<div class="block" style="border-color:#00d27a"><div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)} <span class="why">· read from the save file · exact</span></h3><span class="chip" style="border-color:${oc};color:${oc};font-weight:700">confidence ${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span></div>
-        <div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${dl.confidence * 100}%;background:${oc}"></i></div>
+      const cats = (dl.menus || []).map((m) => {
+        const inst = m.rows.filter((x) => !x.stock).length;
+        const rows = m.rows.map((it) => {
+          const cls = it.stock ? "stock" : (it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named");
+          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${esc(it.item.replace(/_/g, " "))}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}</span></div>`;
+        }).join("");
+        return `<div class="fhm-cat"><div class="fhm-cath"><span class="bar"></span><b>${esc(m.menu)}</b><span class="k">${inst}/${m.rows.length}</span></div>${rows}</div>`;
+      }).join("");
+      const tabsHtml = (dl.tabs || []).map((t) => {
+        const secs = []; const at = {};
+        t.rows.forEach((row) => { if (at[row.section] == null) { at[row.section] = secs.length; secs.push({ h: row.section, rows: [] }); } secs[at[row.section]].rows.push(row); });
+        const secHtml = secs.map((s) => `<div class="fhm-sec"><div class="fhm-sech">${esc(s.h)}</div>${s.rows.map((row) => {
+          const rel = row.value == null; const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
+          const val = rel
+            ? `<span class="fhm-slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%${row.per_car && !String(row.field).startsWith("gear") ? `<input class="fhm-rin" data-rangeord="${dl.ordinal}" data-rangefield="${esc(row.field)}" data-rangenorm="${row.fill}" data-rangeunit="${esc(row.unit || "")}" placeholder="=?" title="Type the in-game number for this slider — two saved tunes at different positions lock this car's range, then every tune prints exact." inputmode="decimal">` : ""}</span>`
+            : `<span class="fhm-slv">${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>`;
+          return `<div class="fhm-sl"><div class="fhm-slt"><span class="fhm-sll">${esc(row.label || row.field)}</span>${val}</div><div class="fhm-trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div><div class="fhm-pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
+        }).join("")}</div>`).join("");
+        return `<div style="margin-bottom:13px"><div class="fhm-tab">${esc(t.tab)}</div>${secHtml}</div>`;
+      }).join("");
+      return `<div class="block fhm" style="border-color:#00d27a"><div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span></div>
         ${diskDiffBanner(dl.ordinal)}
-        <p class="why" style="font-size:11px;margin:2px 0 8px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_absolute} sliders exact</b> · ${sm.sliders_relative} shown as slider position (per-car range not yet registered). No driving, no screenshots — the values come straight off disk, including the locked/downloaded sliders the tune screen hides.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="disk-cols">
-          <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">🔧 Parts to install</div><div style="overflow-x:auto"><table style="font-size:11.5px"><thead><tr><th>shop menu</th><th>part</th><th>install</th></tr></thead><tbody>${partRows}</tbody></table></div></div>
-          <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">🎛 Tune to set</div><div style="overflow-x:auto"><table style="font-size:11.5px"><thead><tr><th>tab</th><th>slider</th><th>value</th></tr></thead><tbody>${tuneRows}</tbody></table></div></div>
-        </div></div>`;
+        <p class="why" style="font-size:11px;margin:4px 0 11px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_absolute} exact</b> · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
+        <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
     const fetchDiskTune = (ordinal) => {
       if (!ordinal || !live.connected) return;   // 0 / null = no active car — never fetch
@@ -2890,6 +2932,10 @@
       if (cached === undefined) { fetchDiskTune(ord); el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
       if (cached === null) { el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
       if (!cached.available) { el.innerHTML = ""; return; }   // no on-disk tune for this car — stay quiet
+      const dsum = (cached.deliverable && cached.deliverable.summary) || {};
+      const key = ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "");
+      if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
+      el.dataset.fhmKey = key;
       el.innerHTML = diskDeliverableHtml(cached);
       el.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
         const v = parseFloat(inp.value); if (isNaN(v)) return; const ord = +inp.dataset.rangeord;

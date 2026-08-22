@@ -346,6 +346,38 @@ CATEGORY_DISPLAY = {
     "car_body": "Body Kit", "front_bumper": "Front Bumper", "rear_bumper": "Rear Bumper", "hood": "Hood",
     "side_skirts": "Side Skirts", "rear_wing": "Rear Wing",
 }
+# Green-header section + directional pole labels + display label per slider (the FH tune-menu structure).
+SLIDER_META = {
+    "front_tire_pressure": ("Tire Pressure", ("Low", "High"), "Front tire pressure"),
+    "rear_tire_pressure":  ("Tire Pressure", ("Low", "High"), "Rear tire pressure"),
+    "front_spring": ("Springs", ("Soft", "Stiff"), "Front spring rate"),
+    "rear_spring":  ("Springs", ("Soft", "Stiff"), "Rear spring rate"),
+    "front_ride_height": ("Ride Height", ("Low", "High"), "Front ride height"),
+    "rear_ride_height":  ("Ride Height", ("Low", "High"), "Rear ride height"),
+    "front_camber": ("Camber", ("Negative", "Positive"), "Front camber"),
+    "rear_camber":  ("Camber", ("Negative", "Positive"), "Rear camber"),
+    "front_toe": ("Toe", ("In", "Out"), "Front toe"),
+    "rear_toe":  ("Toe", ("In", "Out"), "Rear toe"),
+    "front_caster": ("Front Caster", ("Low", "High"), "Front caster"),
+    "front_arb": ("Antiroll Bars", ("Soft", "Stiff"), "Front ARB"),
+    "rear_arb":  ("Antiroll Bars", ("Soft", "Stiff"), "Rear ARB"),
+    "front_bump": ("Bump Stiffness", ("Soft", "Stiff"), "Front bump"),
+    "rear_bump":  ("Bump Stiffness", ("Soft", "Stiff"), "Rear bump"),
+    "front_rebound": ("Rebound Stiffness", ("Soft", "Stiff"), "Front rebound"),
+    "rear_rebound":  ("Rebound Stiffness", ("Soft", "Stiff"), "Rear rebound"),
+    "front_downforce": ("Downforce", ("Speed", "Cornering"), "Front downforce"),
+    "rear_downforce":  ("Downforce", ("Speed", "Cornering"), "Rear downforce"),
+    "brake_balance":  ("Braking Force (Balance)", ("Rear", "Front"), "Brake balance"),
+    "brake_pressure": ("Braking Force (Pressure)", ("Low", "High"), "Brake pressure"),
+    "front_diff_accel": ("Front Differential", ("Low", "High"), "Front acceleration"),
+    "front_diff_decel": ("Front Differential", ("Low", "High"), "Front deceleration"),
+    "rear_diff_accel":  ("Rear Differential", ("Low", "High"), "Rear acceleration"),
+    "rear_diff_decel":  ("Rear Differential", ("Low", "High"), "Rear deceleration"),
+    "center_diff": ("Center", ("Front", "Rear"), "Center balance"),
+    "final_drive": ("Forward Gears", ("Speed", "Acceleration"), "Final drive"),
+}
+GEAR_POLES = ("Speed", "Acceleration")
+
 TIER_NAMES = ["Stock", "Street", "Sport", "Race"]   # FH upgrade ladder by tier index (parts-effects.json / tuning-variables.json)
 # Slots whose tier index is a DIMENSION step (mm / inch), not the Stock/Street/Sport/Race ladder.
 DIM_SLOTS = {"front_tire_width", "rear_tire_width", "front_rim_size", "rear_rim_size",
@@ -436,19 +468,21 @@ def tune_to_deliverable(tune, car_name=None):
             e = tune["sliders"].get(k)
             if not e:
                 continue
+            sec, poles, label = SLIDER_META.get(k, (tab_name, ("", ""), k.replace("_", " ")))
+            base = {"field": k, "label": label, "section": sec, "poles": list(poles), "fill": round(e["norm"], 4)}
             if e["value"] is not None:
-                disp = f"{e['value']} {e['unit']}".strip()
-                rows.append({"field": k, "value": e["value"], "unit": e["unit"],
-                             "display": disp, "status": "measured", "confidence": 1.0})
+                rows.append({**base, "value": e["value"], "unit": e["unit"],
+                             "display": f"{e['value']} {e['unit']}".strip(), "status": "measured", "confidence": 1.0})
             else:
-                rows.append({"field": k, "value": None, "norm": e["norm"], "unit": e["unit"], "per_car": True,
-                             "display": f"{e['pole_pct']}% toward {e.get('pole','?')}",
+                rows.append({**base, "value": None, "norm": e["norm"], "unit": e["unit"], "per_car": True,
+                             "display": f"{e['pole_pct']}% toward {e.get('pole', '?')}",
                              "status": "measured-relative", "confidence": 0.6})
         if tab_name == "Gearing" and tune["gears_norm"]:
+            ordn_word = {1: "1st", 2: "2nd", 3: "3rd"}
             for i, g in enumerate(tune["gears_norm"], 1):
-                rows.append({"field": f"gear_{i}", "value": None, "norm": g,
-                             "display": f"gear {i}: {round(g*100,1)}% toward accel",
-                             "status": "measured-relative", "confidence": 0.6})
+                rows.append({"field": f"gear_{i}", "label": f"{ordn_word.get(i, str(i)+'th')} gear", "section": "Forward Gears",
+                             "poles": list(GEAR_POLES), "fill": round(g, 4), "value": None, "norm": g,
+                             "display": f"{round(g*100,1)}% toward accel", "status": "measured-relative", "confidence": 0.6})
         if rows:
             tabs.append({"tab": tab_name, "rows": rows})
     installed = sum(len(m["rows"]) for m in menus)

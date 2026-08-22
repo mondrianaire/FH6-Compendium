@@ -152,20 +152,38 @@ def _masses_path():
     return os.path.abspath(os.path.join(here, "..", "..", "data", "car-mass.json"))
 
 def load_masses():
-    """Per-car {ordinal: {mass_lb, front_pct}} from data/car-mass.json (captured from the My Cars stats pane)."""
+    """Per-car {ordinal: {mass_lb, front_pct}} for spring derivation. Sources, in precedence order:
+    (1) data/car-mass.json (explicit); (2) captured build records in data/builds/*.json (pane.weight_lb +
+    pane.front_pct from the My Cars stats pane) — so springs self-complete the moment a build is captured."""
     global _MASSES
     if _MASSES is None:
+        out = {}
         try:
             with open(_masses_path(), encoding="utf-8") as fh:
-                doc = json.load(fh)
-            _MASSES = {}
-            for o, v in (doc.get("masses") or {}).items():
-                try:
-                    _MASSES[int(o)] = v
-                except (ValueError, TypeError):
-                    continue
+                for o, v in (json.load(fh).get("masses") or {}).items():
+                    try:
+                        out[int(o)] = v
+                    except (ValueError, TypeError):
+                        continue
         except Exception:
-            _MASSES = {}
+            pass
+        try:
+            bdir = os.path.join(os.path.dirname(_masses_path()), "builds")
+            for fp in glob.glob(os.path.join(bdir, "*.json")):
+                if os.path.basename(fp).startswith("_"):
+                    continue
+                try:
+                    with open(fp, encoding="utf-8") as fh:
+                        b = json.load(fh)
+                except Exception:
+                    continue
+                o = b.get("car_ordinal"); pane = b.get("pane") or {}
+                w = pane.get("weight_lb"); frac = pane.get("front_pct")
+                if o and w and frac is not None and int(o) not in out:
+                    out[int(o)] = {"mass_lb": w, "front_pct": frac, "source": "build-capture"}
+        except Exception:
+            pass
+        _MASSES = out
     return _MASSES
 
 def spring_rate_from_mass(ordinal, name, norm):

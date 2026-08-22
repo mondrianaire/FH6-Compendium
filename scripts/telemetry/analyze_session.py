@@ -692,6 +692,23 @@ def main():
         for cid_ in co["cars"]:
             cov_stub = {"overall": round(num / den, 2) if den else 0.0, "probes": probes}
             advice_by_car[cid_] = advice_for(cid_, cars, cc, ll, bb, [x for x in bott if inwin(x["t"], evs)], cov_stub, temps_med, profile)
+        # ---- lap bookkeeping: a LAP = one pass of the course. Loop passes / sprints = the event itself; lapped events split on LapNumber changes ----
+        lap_windows = []
+        for ei, ev in enumerate(evs):
+            rows_ev = [r for r in loop_rows if ev["t0"] <= r["t"] <= ev["t1"]]
+            k_ = 0; t_start = ev["t0"]; cur_lap = rows_ev[0]["LapNumber"] if rows_ev else None
+            for r in rows_ev:
+                if r["LapNumber"] != cur_lap:
+                    k_ += 1; lap_windows.append({"ev": ei, "lap": k_, "t0": round(t_start, 1), "t1": round(r["t"], 1)}); t_start = r["t"]; cur_lap = r["LapNumber"]
+            k_ += 1; lap_windows.append({"ev": ei, "lap": k_, "t0": round(t_start, 1), "t1": ev["t1"]})
+        lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15]   # the stub after a finish line is not a lap
+        lap_windows = lw_full or lap_windows
+        total_laps = len(lap_windows)
+        def lap_of(t):
+            for li, w in enumerate(lap_windows):
+                if w["t0"] - 0.05 <= t <= w["t1"] + 0.05: return li
+            return None
+        lapmap = {id(c): lap_of(c["t0"]) for c in cc}
         # corner identity: cluster this course's corners by apex position (40 m), order along the route, aggregate per physical corner
         clusters = []
         for c in sorted(cc, key=lambda c: c["t0"]):
@@ -702,6 +719,35 @@ def main():
             else: clusters.append({"x": ax, "z": az, "members": [c]})
         def med(a): a = sorted(a); return a[len(a) // 2] if a else None
         clusters.sort(key=lambda cl: med([m["dist"] for m in cl["members"]]) or 0)
+        # ---- turn count that EARNS confidence across laps. A badly taken turn often fragments into 2-3 detections; a real turn shows up on most laps.
+        def lap_stats(cl):
+            lh = defaultdict(int)
+            for m in cl["members"]:
+                li = lapmap.get(id(m))
+                if li is not None: lh[li] += 1
+            cl["laps_seen"] = len(lh); cl["presence"] = round(len(lh) / total_laps, 2) if total_laps else 0.0
+            cl["multi"] = round(sum(1 for v in lh.values() if v >= 2) / max(1, len(lh)), 2)   # share of its laps where this turn was detected MORE than once = taken messily
+            cl["per_lap"] = [lh.get(li, 0) for li in range(total_laps)]
+        for cl in clusters: lap_stats(cl)
+        strong = [cl for cl in clusters if cl["presence"] >= 0.5]; weak = [cl for cl in clusters if cl["presence"] < 0.5]; possible = []
+        for cl in weak:   # a low-presence cluster within 80 m (along the route) of a strong turn is a FRAGMENT of it — absorbed; otherwise a 'possible' turn
+            d_cl = med([m["dist"] for m in cl["members"]]) or 0
+            near = min(strong, key=lambda s_: abs((med([m["dist"] for m in s_["members"]]) or 0) - d_cl), default=None)
+            if near is not None and abs((med([m["dist"] for m in near["members"]]) or 0) - d_cl) <= 80: near["members"] = near["members"] + cl["members"]; near["absorbed"] = near.get("absorbed", 0) + len(cl["members"])
+            else: possible.append(cl)
+        for cl in strong: lap_stats(cl)
+        strong.sort(key=lambda cl: med([m["dist"] for m in cl["members"]]) or 0); possible.sort(key=lambda cl: med([m["dist"] for m in cl["members"]]) or 0)
+        for i, cl in enumerate(strong, 1): cl["cid"] = f"C{i}"; cl["status"] = "turn"
+        for i, cl in enumerate(possible, 1): cl["cid"] = f"?{i}"; cl["status"] = "possible"
+        clusters = strong + possible
+        per_lap_det = [sum(1 for c in cc if lapmap.get(id(c)) == li) for li in range(total_laps)]
+        messy = [cl["cid"] for cl in strong if cl["multi"] >= 0.34]
+        conf_laps = strength(total_laps, 3)   # 0.33 at 1 lap · 0.55 at 2 · 0.70 at 3 · 0.91 at 6
+        agree = 1.0 - 0.5 * (len(possible) / max(1, len(strong) + len(possible))) - 0.3 * (sum(cl["multi"] for cl in strong) / max(1, len(strong)))
+        turn_conf = round(conf_laps * max(0.3, agree), 2)
+        turns_info = {"count": len(strong), "possible": len(possible), "confidence": turn_conf, "laps": total_laps, "per_lap_detections": per_lap_det, "messy": messy,
+                      "note": (f"{total_laps} lap{'s' if total_laps != 1 else ''} — drive {max(0, 3 - total_laps)} more to confirm the turn count" if total_laps < 3 else "turn count confirmed across laps" if not possible else f"{len(possible)} possible turn{'s' if len(possible) != 1 else ''} seen on a minority of laps — keep lapping to confirm or drop them") + (f" · {', '.join(messy)} often split into several detections (taken inconsistently)" if messy else "")}
+        laps_info = {"total": total_laps, "windows": lap_windows, "per_event": [sum(1 for w in lap_windows if w["ev"] == ei) for ei in range(len(evs))]}
         corner_out = []
         for i, cl in enumerate(clusters, 1):
             ms = cl["members"]; nn = len(ms)
@@ -732,12 +778,13 @@ def main():
                 else:
                     limiter = "mixed"; note = f"{dom_ax}-limited but inconsistent — drive it a few more times cleanly to separate technique from setup"
             worst = limiter in ("tune", "driver", "mixed")
-            corner_out.append({"id": f"C{i}", "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
+            corner_out.append({"id": cl.get("cid", f"C{i}"), "status": cl.get("status", "turn"), "presence": cl.get("presence"), "laps_seen": cl.get("laps_seen"), "multi": cl.get("multi"), "per_lap": cl.get("per_lap"), "absorbed": cl.get("absorbed", 0),
+                               "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
                                "mph_min": med([m["mph_min"] for m in ms]), "mph_in": med([m["mph_in"] for m in ms]), "lat_g": med([m["lat_g_peak"] for m in ms]),
                                "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
-        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile,
+        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile, "laps": laps_info, "turns": turns_info,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out

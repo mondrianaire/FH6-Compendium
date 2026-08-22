@@ -251,39 +251,70 @@ def decode_battery_for(cid_, cars, corners, launches, braking, crests, pulses, t
     return {"ready_n": ready, "total": len(tests), "pct": round(ready / len(tests), 2), "missing": [t["label"] for t in tests if not t["ok"]], "tests": tests}
 
 def clone_sheet_for(c, bat):
-    """The decode deliverable: a standardized upgrade sheet organized like the actual in-game upgrade shop menus.
-    Each row = what to install/match, with status: measured (stream fact) / inferred (high-confidence) / shop (needs a shop or HUD check)."""
-    ok = {t["key"]: t["ok"] for t in bat["tests"]}
-    sig = c.get("sig") or {}
-    def row(item, value, status, note=None, gate=None):
+    """The decode deliverable: a standardized upgrade sheet organized like the in-game upgrade shop menus. Each row carries what to install /
+    match, a status (measured = stream fact · inferred = assumption · shop = needs a shop / HUD check) AND a confidence EARNED from evidence:
+    how many independent measurements back the figure and how consistent they are — never a single reading."""
+    ok = {t["key"]: t["ok"] for t in bat["tests"]}; gpct = {t["key"]: min(1.0, t["have"] / max(1, t["need"])) for t in bat["tests"]}
+    sig = c.get("sig") or {}; ev = c.get("evidence") or {}
+    def cons(iqr, scale): return 1.0 if iqr is None else max(0.0, 1.0 - min(1.0, iqr / scale))
+    def row(item, value, status, note=None, gate=None, conf=None, evid=None, needs=None):
         pend = bool(gate) and not ok.get(gate, False)
-        return {"item": item, "value": None if pend else value, "status": status, "note": note, "gate": gate, "pending": pend}
+        if status == "inferred" and conf is None: conf = 0.55
+        cv = max(0.0, min(1.0, conf if conf is not None else 0.0))
+        if pend: cv = cv * gpct.get(gate, 0.0)   # a pending row's confidence BUILDS toward its gate test instead of sitting at zero (the value stays hidden until the test passes)
+        return {"item": item, "value": None if pend else value, "status": status, "note": note, "gate": gate, "pending": pend,
+                "confidence": (None if status == "shop" else round(cv, 2)), "evidence": evid, "needs": needs}
+    frames = ev.get("frames", 0); wot = ev.get("wot_frames", 0)
+    const_conf = strength(frames, 300); const_ev = f"{frames:,} frames · constant across the run"   # header constants are confirmed on every frame
     boost = sig.get("boost_max") or 0
-    asp_v = (f"forced induction — peak {boost} psi" if boost > 0.5 else "naturally aspirated (0 psi all session)")
-    asp_n = ("boost ramp shape names the type: laggy = turbo, rpm-linear = centrifugal, flat = positive-displacement" if boost > 0.5 else "any NA power upgrades allowed; no turbo/supercharger installed")
-    lad = c.get("gears") or []
+    if boost > 0.5:
+        b_iqr = ev.get("boost_per_pull_iqr_pct"); asp_conf = strength(ev.get("boost_frames", 0), 150) * cons(b_iqr, 15)
+        asp_v = f"forced induction — peak {boost} psi"; asp_ev = f"{ev.get('boost_frames', 0):,} boost-on frames · peak boost across {ev.get('pulls', 0)} pulls ±{b_iqr if b_iqr is not None else '—'}%"
+        asp_needs = None if asp_conf >= 0.7 else "more full-throttle pulls so peak boost repeats"; asp_n = "boost ramp shape names the type: laggy = turbo, rpm-linear = centrifugal, flat = positive-displacement"
+    else:
+        asp_conf = strength(wot, 300); asp_v = "naturally aspirated (0 psi all session)"; asp_ev = f"{wot:,} WOT frames · boost never above 0.5 psi"
+        asp_needs = None if asp_conf >= 0.7 else "more full-throttle time"; asp_n = "any NA power upgrades allowed; no turbo/supercharger installed"
+    lad = c.get("gears") or []; gstats = ev.get("gears") or {}
     lad_v = " · ".join(f"g{g['gear']} {round(g['mps_per_krpm'] * 2.237, 1)}" for g in lad) + " mph/krpm" if lad else None
+    lad_c = [g for g in lad if g["gear"] >= 2] or lad   # gear 1 is wheelspin-contaminated — it stays in the ladder but not in the confidence
+    gconfs = {g["gear"]: strength((gstats.get(g["gear"]) or {}).get("n", 0), 60) * cons((gstats.get(g["gear"]) or {}).get("iqr_pct"), 5) for g in lad_c}
+    weak_g = sorted((g for g, v in gconfs.items() if v < 0.7), key=lambda g: gconfs[g])
+    ratio_conf = (sum(gconfs.values()) / len(gconfs)) if gconfs else 0.0
+    gmin = min(gconfs, key=gconfs.get) if gconfs else None
+    ratio_ev = (f"{len(lad)} gears · weakest gear {gmin}: {(gstats.get(gmin) or {}).get('n', 0)} WOT frames, spread ±{(gstats.get(gmin) or {}).get('iqr_pct')}%" + (" · gear 1 excluded (launch wheelspin)" if len(lad) > len(lad_c) else "") if gmin else None)
+    ratio_needs = (f"hold full throttle longer in gear{'s' if len(weak_g) > 1 else ''} {', '.join(map(str, weak_g))}" if weak_g else None)
+    tg = ev.get("top_gear"); tgf = ev.get("top_gear_frames", 0)
+    trans_conf = strength(tgf, 40) * (1.0 if ok.get("top") else 0.75)
+    trans_ev = f"{sig.get('gear_count')} gears seen · top gear {tg}: {tgf} WOT frames · top-speed pull {'✓' if ok.get('top') else '○'}"
+    trans_needs = None if trans_conf >= 0.7 else ("hold top gear at full throttle for 5 s" if not ok.get("top") else "more WOT frames in top gear")
+    ptp = ev.get("pulls_through_peak", 0); pk_iqr = ev.get("peak_hp_iqr_pct"); dyno_t = next((t for t in bat["tests"] if t["key"] == "dyno"), None)
+    dyno_pct = (dyno_t["have"] / max(1, dyno_t["need"])) if dyno_t else 0.0
+    eng_conf = strength(ptp, 3) * cons(pk_iqr, 10) * min(1.0, dyno_pct); peaks = ev.get("peak_hp_per_pull") or []
+    eng_ev = f"{ptp} full pull{'s' if ptp != 1 else ''} through the peak · peak {min(peaks) if peaks else '—'}–{max(peaks) if peaks else '—'} hp (±{pk_iqr if pk_iqr is not None else '—'}%) · rpm bins {dyno_t['have'] if dyno_t else 0}/{dyno_t['need'] if dyno_t else 0}"
+    eng_needs = None if eng_conf >= 0.7 else (f"{max(0, 3 - ptp)} more full-throttle pull{'s' if 3 - ptp != 1 else ''} that sweep through {sig.get('rpm_at_peak') or 'the peak'} rpm" if ptp < 3 else "peaks disagree across pulls — repeat clean pulls on flat road" if (pk_iqr or 0) > 5 else "finish the rpm sweep")
+    mn = ev.get("mass_n", 0); m_iqr = ev.get("mass_iqr_pct"); mass_conf = strength(mn, 30) * cons(m_iqr, 25)
+    mass_ev = f"{mn} clean-acceleration samples · spread ±{m_iqr if m_iqr is not None else '—'}%"; mass_needs = None if mass_conf >= 0.7 else "more gentle full-throttle starts (6–20 mph, no wheelspin)"
     menus = [
         {"menu": "Conversions", "items": [
-            row("Engine", f"{c['cyl']}-cyl · redline {c['max_rpm']} rpm · idle {c['idle_rpm']}", "measured", "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which"),
-            row("Drivetrain", c["drivetrain"], "measured", "install the drivetrain swap only if the stock layout differs"),
-            row("Aspiration", asp_v, "measured" if boost > 0.5 or ok.get("dyno") else "inferred", asp_n, "dyno" if boost <= 0.5 else None),
+            row("Engine", f"{c['cyl']}-cyl · redline {c['max_rpm']} rpm · idle {c['idle_rpm']}", "measured", "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which", None, const_conf, const_ev),
+            row("Drivetrain", c["drivetrain"], "measured", "install the drivetrain swap only if the stock layout differs", None, const_conf, const_ev),
+            row("Aspiration", asp_v, "measured", asp_n, "dyno" if boost <= 0.5 else None, asp_conf, asp_ev, asp_needs),
             row("Body kit", None, "shop", "not visible in telemetry — check visually"),
         ]},
         {"menu": "Engine", "items": [
             row("Total output target", (f"{sig.get('hp_peak')} hp @ {sig.get('rpm_at_peak')} rpm · {sig.get('tq_peak')} lb-ft" if sig.get("hp_peak") else None), "measured",
-                f"any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI {c['pi']}", "dyno"),
+                f"any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI {c['pi']}", "dyno", eng_conf, eng_ev, eng_needs),
         ]},
         {"menu": "Platform & Handling", "items": [
-            row("Brakes", "race brakes", "inferred", "required for the brake tabs the donor tune uses — assume race"),
-            row("Springs & dampers", "race springs", "inferred", "required for spring/damper tabs — assume race; behaviour match happens on the Bench"),
-            row("Anti-roll bars", "race ARBs", "inferred", "required for ARB tab — assume race"),
-            row("Weight (mass index)", (f"~{sig.get('mass_idx')} (relative index)" if sig.get("mass_idx") else None), "inferred", "brackets the weight-reduction tier once compared against stock", "launch"),
+            row("Brakes", "race brakes", "inferred", "assumed — required for the brake tabs a tuned donor uses; confirm in the shop"),
+            row("Springs & dampers", "race springs", "inferred", "assumed — required for spring/damper tabs; behaviour match happens on the Bench"),
+            row("Anti-roll bars", "race ARBs", "inferred", "assumed — required for the ARB tab"),
+            row("Weight (mass index)", (f"~{sig.get('mass_idx')} (relative index)" if sig.get("mass_idx") else None), "inferred", "brackets the weight-reduction tier once compared against stock", "launch", mass_conf, mass_ev, mass_needs),
         ]},
         {"menu": "Drivetrain", "items": [
-            row("Transmission", (f"{sig.get('gear_count')}-speed → race {sig.get('gear_count')}-speed" if sig.get("gear_count") else None), "measured", None, "gears"),
-            row("Gear ratios (tune)", lad_v, "measured", "tune-side: set final drive + per-gear until the WOT ladder matches these exactly", "gears"),
-            row("Differential", "race differential", "inferred", "required for accel/decel lock tabs — assume race"),
+            row("Transmission", (f"{sig.get('gear_count')}-speed → race {sig.get('gear_count')}-speed" if sig.get("gear_count") else None), "measured", None, "gears", trans_conf, trans_ev, trans_needs),
+            row("Gear ratios (tune)", lad_v, "measured", "tune-side: set final drive + per-gear until the WOT ladder matches these exactly", "gears", ratio_conf, ratio_ev, ratio_needs),
+            row("Differential", "race differential", "inferred", "assumed — required for accel/decel lock tabs"),
             row("Clutch / driveline", None, "shop", "no telemetry signature — PI budget usually decides these"),
         ]},
         {"menu": "Tires & Rims", "items": [
@@ -296,11 +327,17 @@ def clone_sheet_for(c, bat):
             row("Rear wing", None, "shop", "same — speed-binned lat-g hints presence only"),
         ]},
     ]
-    counts = {"measured": 0, "inferred": 0, "shop": 0, "pending": 0}
+    counts = {"measured": 0, "inferred": 0, "shop": 0, "pending": 0}; num = den = 0.0; weak = []
     for m in menus:
         for it in m["items"]:
             counts["pending" if it["pending"] else it["status"]] += 1
-    return {"menus": menus, "counts": counts, "pi": c["pi"], "pi_note": f"cross-check: every proposed parts list must sum to PI {c['pi']} — a mismatch means a missed part (usually widths or aero)"}
+            if it["confidence"] is not None:
+                w = 1.0 if it["status"] == "measured" else 0.5
+                num += it["confidence"] * w; den += w
+                if it["status"] == "measured" and it["confidence"] < 0.7: weak.append({"item": it["item"], "confidence": it["confidence"], "needs": it["needs"] or (f"pending — needs the {it['gate']} test" if it["pending"] else None)})
+    overall = round(num / den, 2) if den else 0.0
+    return {"menus": menus, "counts": counts, "pi": c["pi"], "confidence": overall, "weak": weak, "complete": all(t["ok"] for t in bat["tests"]),
+            "pi_note": f"cross-check: every proposed parts list must sum to PI {c['pi']} — a mismatch means a missed part (usually widths or aero)"}
 
 def main():
     path = sys.argv[1]
@@ -350,8 +387,9 @@ def main():
         c = cars.setdefault(k, {"id": k, "ordinal": r["CarOrdinal"], "pi": r["CarPI"], "class": CLASS.get(r["CarClass"], str(r["CarClass"])), "drivetrain": DRIVE.get(r["DrivetrainType"], "?"),
                                 "cyl": r["NumCylinders"], "max_rpm": round(r["EngineMaxRpm"]), "idle_rpm": round(r["EngineIdleRpm"]), "car_group": r["CarGroup"],
                                 "name": (NAMES.get(str(r["CarOrdinal"])) or {}).get("name"),
-                                "live_frames": 0, "_gear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "_shift": [], "_prev": None, "temps_max_f": {w: 0 for w in W}})
+                                "live_frames": 0, "_gear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "_shift": [], "_prev": None, "_pull": None, "_pulls": [], "_boost_n": 0, "temps_max_f": {w: 0 for w in W}})
         c["live_frames"] += 1; c["_boost"] = max(c["_boost"], r["Boost"])
+        if r["Boost"] > 0.5: c["_boost_n"] += 1
         for w in W: c["temps_max_f"][w] = max(c["temps_max_f"][w], r["TireTempF" + w])
         # gearbox upshift point (automatic): rpm of the last WOT frame before a gear change (gear 11 = shift transient)
         pv = c["_prev"]
@@ -361,6 +399,13 @@ def main():
         if r["Accel"] > 230 and r["CurrentEngineRpm"] > r["EngineIdleRpm"] + 1200 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10:
             c["_gear"][r["Gear"]].append(r["Speed"] / r["CurrentEngineRpm"])
             c["_dyno"][int(r["CurrentEngineRpm"] // 250) * 250].append((r["Power"] / 745.7, r["Torque"] * 0.7376))
+            # independent WOT PULLS (gap > 0.7 s starts a new one): the engine figure must repeat across pulls, not come from one burst
+            hp_ = r["Power"] / 745.7; rpm_ = r["CurrentEngineRpm"]; pl = c["_pull"]
+            if pl is None or r["t"] - pl["t_last"] > 0.7:
+                if pl is not None and pl["rpm_max"] - pl["rpm_min"] >= 1500: c["_pulls"].append(pl)
+                pl = c["_pull"] = {"t0": r["t"], "t_last": r["t"], "hp_max": hp_, "rpm_at": rpm_, "rpm_min": rpm_, "rpm_max": rpm_, "boost_max": r["Boost"]}
+            pl["t_last"] = r["t"]; pl["rpm_min"] = min(pl["rpm_min"], rpm_); pl["rpm_max"] = max(pl["rpm_max"], rpm_); pl["boost_max"] = max(pl["boost_max"], r["Boost"])
+            if hp_ > pl["hp_max"]: pl["hp_max"] = hp_; pl["rpm_at"] = rpm_
             if 6 < r["Speed"] < 20 and r["AccelZ"] > 1.5 and all(abs(r["SlipRatio" + w]) < 0.3 for w in W) and r["Power"] > 10000:
                 c["_mass"].append(r["Power"] / (r["Speed"] * r["AccelZ"]))   # kg-ish index (ignores drag/driveline loss)
         if r["Accel"] < 10 and r["Brake"] < 10 and r["Speed"] > 8:
@@ -378,12 +423,28 @@ def main():
         for w in W: c["temps_max_f"][w] = round(c["temps_max_f"][w])
         pk = max(c["dyno"], key=lambda d: d["hp"]) if c["dyno"] else None
         c["shift_rpm"] = round(statistics.median(c["_shift"]), -1) if len(c["_shift"]) >= 3 else None   # automatic's upshift point — caps the usable dyno band
+        # ---- EVIDENCE for the clone sheet: how many independent measurements back each figure, and how consistent they are ----
+        if c["_pull"] is not None and c["_pull"]["rpm_max"] - c["_pull"]["rpm_min"] >= 1500: c["_pulls"].append(c["_pull"])
+        def iqr_pct(a, ref=None):
+            a = sorted(x for x in a if x is not None)
+            if len(a) < 2: return None
+            q1 = a[int(0.25 * (len(a) - 1))]; q3 = a[int(0.75 * (len(a) - 1))]; m = ref if ref is not None else a[len(a) // 2]
+            return round(abs(q3 - q1) / abs(m) * 100, 2) if m else None
+        pk_rpm = pk["rpm"] if pk else None
+        thr = [p for p in c["_pulls"] if pk_rpm is not None and p["rpm_min"] <= pk_rpm - 250 and p["rpm_max"] >= pk_rpm + 250]   # pulls that sweep THROUGH the peak
+        peaks = sorted(p["hp_max"] for p in thr)
+        c["evidence"] = {"frames": c["live_frames"], "wot_frames": sum(len(v) for v in c["_gear"].values()), "boost_frames": c["_boost_n"],
+                         "pulls": len(c["_pulls"]), "pulls_through_peak": len(thr), "peak_hp_per_pull": [round(p) for p in peaks][-8:], "peak_hp_iqr_pct": iqr_pct(peaks),
+                         "boost_per_pull_iqr_pct": iqr_pct([p["boost_max"] for p in c["_pulls"] if p["boost_max"] > 0.5]),
+                         "shift_n": len(c["_shift"]), "shift_iqr_pct": iqr_pct(c["_shift"]), "mass_n": len(c["_mass"]), "mass_iqr_pct": iqr_pct(c["_mass"]),
+                         "gears": {int(g): {"n": len(v), "iqr_pct": iqr_pct(v)} for g, v in c["_gear"].items() if len(v) >= 25},
+                         "top_gear": (max(c["_gear"]) if c["_gear"] else None), "top_gear_frames": (len(c["_gear"][max(c["_gear"])]) if c["_gear"] else 0)}
         c["sig"] = {"boost_max": round(c["_boost"], 1), "hp_peak": pk["hp"] if pk else None, "rpm_at_peak": pk["rpm"] if pk else None,
                     "tq_peak": max((d["tq"] for d in c["dyno"]), default=None), "gear_count": len(lad), "ladder": [g["rel"] for g in lad],
                     "mass_idx": round(statistics.median(c["_mass"])) if len(c["_mass"]) >= 15 else None, "shift_rpm": c["shift_rpm"]}
         key = f'{c["ordinal"]}|{c["drivetrain"]}|{c["cyl"]}|{c["pi"]}|{round(c["max_rpm"], -2)}|{len(lad)}|{",".join(f"{g["rel"]:.1f}" for g in lad)}|{round((c["sig"]["hp_peak"] or 0), -1)}'
         c["build_id"] = hashlib.md5(key.encode()).hexdigest()[:8]
-        for k in ("_gear", "_dyno", "_k", "_boost", "_mass", "_shift", "_prev"): del c[k]
+        for k in ("_gear", "_dyno", "_k", "_boost", "_mass", "_shift", "_prev", "_pull", "_pulls", "_boost_n"): del c[k]
     sess["cars"] = sorted(cars.values(), key=lambda c: -c["live_frames"]); sess["segments"] = segments
 
     # ---- impacts / zero windows ----

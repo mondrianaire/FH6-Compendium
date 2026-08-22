@@ -2765,7 +2765,7 @@
         <p class="why" style="font-size:10.5px;margin:4px 0 0">tire temp max °F: ${Object.entries(c.temps_max_f || {}).map(([w, v]) => `${w} ${v}`).join(" · ") || "—"}</p></div>`).join("");
       const pulsesByCar = cars.map((c) => { const p = pulses.filter((x) => x.car === c.id && x.decay_s != null).map((x) => x.decay_s).sort((a, b) => a - b); return p.length ? `${carLbl(s, c.id)}: median decay <b>${p[Math.floor(p.length / 2)].toFixed(2)} s</b> (${p.length} pulses)` : null; }).filter(Boolean);
       const adviceCars = cars.filter((c) => c.coverage && (!carSel || c.id === carSel));
-      const genCar = (isLive && live.frame && live.frame.on && cars.find((c) => c.id === live.frame.cid)) || (carSel && cars.find((c) => c.id === carSel)) || adviceCars[0] || cars[0];
+      const genCar = (isLive && live.frame && live.frame.on && cars.find((c) => c.id === live.frame.cid)) || (isLive && live.courseCar && cars.find((c) => c.id === live.courseCar)) || (carSel && cars.find((c) => c.id === carSel)) || adviceCars[0] || cars[0];   // in a menu, stay on the car you last drove
       return `${genCar ? generalTuningPanel(genCar, s) : ""}${tiles}
         ${adviceCars.length ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions — whole session, per car${sm.corners != null ? ` <span class="chip">${sm.corners} corners · ${sm.launches} launches · ${sm.braking} stops</span>` : ""}${isLive ? ` <span class="chip">updates every ~20 s of driving</span>` : ""}</h3><div class="card-grid">${adviceCars.map((c) => adviceBlock(c, s)).join("")}</div></div>` : `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🎯 Confidence & suggestions</h3><p class="why" style="font-size:12px;margin:0">${isLive ? "first analysis after ~20 s of driving…" : "no analysed cars in this recording"}</p></div>`}
         ${stints.length ? `<div class="block"><h3 style="margin-top:0">🏁 Runs — the unit of an A/B re-tune (tag them; set 🎯 / 🔧 roles for Decode)</h3>
@@ -2878,14 +2878,39 @@
       .fhm-trk .knob{position:absolute;top:1px;width:4px;height:14px;border-radius:2px;background:var(--txt);transform:translateX(-50%)}
       .fhm-trk .knob.pos{background:#e6a63a}
       .fhm-pol{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px}
-      .fhm-rin{width:44px;padding:1px 3px;border-radius:3px;border:1px dashed #e6a63a;background:var(--bg2);color:var(--txt);font-size:10px;margin-left:4px}`;
+      .fhm-rin{width:44px;padding:1px 3px;border-radius:3px;border:1px dashed #e6a63a;background:var(--bg2);color:var(--txt);font-size:10px;margin-left:4px}
+      .fhm-conf{border:1px solid var(--line);border-radius:8px;padding:8px 11px;margin:0 0 11px;background:rgba(255,255,255,.015)}
+      .fhm-confhead{display:flex;align-items:center;gap:9px}
+      .fhm-confhead .lbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+      .fhm-confhead b{font-size:16px;font-variant-numeric:tabular-nums;margin-left:auto}
+      .fhm-confhead .tag{font-size:10px;border:1px solid;border-radius:10px;padding:1px 8px;white-space:nowrap}
+      .fhm-confbar{height:7px;border-radius:4px;background:#0b1013;border:1px solid var(--line);overflow:hidden;margin:6px 0 8px}
+      .fhm-confbar i{display:block;height:100%;border-radius:4px;transition:width .5s ease}
+      .fhm-todos{display:flex;flex-direction:column;gap:4px}
+      .fhm-todo{display:flex;gap:7px;font-size:11.5px;align-items:baseline}
+      .fhm-todo .d{color:#e3b341;flex:none}
+      .fhm-todo.ok .d{color:#00d27a}
+      .fhm-todo code{background:var(--bg2);border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:10.5px;color:#e6a63a}
+      .fhm-float{position:fixed;right:18px;bottom:18px;z-index:9999;width:min(560px,94vw);max-height:86vh;display:flex;flex-direction:column;border:1px solid #00d27a;border-radius:10px;background:var(--bg);box-shadow:0 18px 46px rgba(0,0,0,.55);overflow:hidden}
+      .fhm-fbar{display:flex;align-items:center;gap:8px;padding:7px 11px;background:linear-gradient(180deg,rgba(0,210,122,.14),rgba(0,210,122,.04));border-bottom:1px solid var(--line);cursor:grab;user-select:none}
+      .fhm-fbar:active{cursor:grabbing}
+      .fhm-fbar .ttl{font-size:10px;letter-spacing:.15em;font-weight:700;color:#00d27a;white-space:nowrap}
+      .fhm-fbar .nm{font-size:12.5px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .fhm-fbar .pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap}
+      .fhm-fbtn{flex:none;width:24px;height:22px;border:1px solid var(--line);border-radius:5px;background:var(--bg2);color:var(--txt);font-size:12px;line-height:1;cursor:pointer;padding:0}
+      .fhm-fbtn:hover{border-color:var(--accent);color:var(--accent)}
+      .fhm-fbtn.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.14)}
+      .fhm-fbody{overflow-y:auto;padding:11px;flex:1}
+      .fhm-fbody .block{margin:0 !important;border:none !important;padding:0 !important;background:none !important}`;
     const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
     const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };
-    const diskDeliverableHtml = (r) => {
+    const diskDeliverableHtml = (r, opts) => {
+      opts = opts || {};
       ensureFhmCss();
       const dl = r && r.deliverable; if (!dl) return "";
       const oc = confCol(dl.confidence); const sm = dl.summary || {};
-      const f = live.frame; const badge = (f && String(f.car) === String(dl.ordinal) && f.cls) ? `<span class="chip" style="border-color:${FHM_CLS[f.cls] || "var(--accent)"};color:${FHM_CLS[f.cls] || "var(--accent)"};font-weight:700">${f.cls} ${f.pi}</span>` : "";
+      const f = live.frame; const fMatch = f && String(f.car) === String(dl.ordinal);
+      const badge = (fMatch && f.cls) ? `<span class="chip" style="border-color:${FHM_CLS[f.cls] || "var(--accent)"};color:${FHM_CLS[f.cls] || "var(--accent)"};font-weight:700">${f.cls} ${f.pi}</span>${f.drv ? ` <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${esc(f.drv)}</span>` : ""}` : "";
       const lockChip = dl.locked ? `<span class="chip" style="border-color:#e3b341;color:#e3b341" title="downloaded / locked in-game — the save file still holds its real values">🔒 downloaded</span>` : `<span class="chip" style="border-color:#00d27a;color:#00d27a">self-made</span>`;
       const cats = (dl.menus || []).map((m) => {
         const inst = m.rows.filter((x) => !x.stock).length;
@@ -2907,8 +2932,12 @@
         }).join("")}</div>`).join("");
         return `<div style="margin-bottom:13px"><div class="fhm-tab">${esc(t.tab)}</div>${secHtml}</div>`;
       }).join("");
-      return `<div class="block fhm" style="border-color:#00d27a"><div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span></div>
+      const cf = diskConf(r);
+      const popBtn = opts.popBtn ? (cf && cf.reasonable ? `<button class="lab-mode" data-popout="${dl.ordinal}" title="keep this build on screen while you navigate the upgrade / tune menus" style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7;margin-left:auto">📌 Pop out</button>` : `<button class="lab-mode" disabled title="reach reasonable confidence first — see the checklist below" style="padding:3px 10px;font-size:11px;border-color:var(--line);color:var(--muted);margin-left:auto;opacity:.55;cursor:not-allowed">📌 Pop out</button>`) : "";
+      const headRow = opts.inFloat ? "" : `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span>${popBtn}</div>`;
+      return `<div class="block fhm" style="border-color:#00d27a">${headRow}
         ${diskDiffBanner(dl.ordinal)}
+        ${confMeterHtml(r)}
         <p class="why" style="font-size:11px;margin:4px 0 11px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_absolute} exact</b> · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
         <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
@@ -2920,13 +2949,14 @@
       fetch(liveUrl + "/disk-tune?ordinal=" + ordinal).then((r) => r.json()).then((d) => {
         live.diskCache[ordinal] = d && d.available ? d : { available: false };
         if (d && d.available) applyDiskTune(d);
-        paintDiskDecode();
+        paintDiskDecode(); paintFloat();
       }).catch(() => { live.diskCache[ordinal] = { available: false }; });   // record failure (not delete) so it can't storm
     };
+    const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
     const paintDiskDecode = () => {
       const el = host.querySelector("#lvDiskDecode"); if (!el) return;
-      const ord = live.frame && live.frame.car;
-      if (!ord) { el.innerHTML = ""; return; }   // 0 / null = no active car
+      const ord = (live.frame && live.frame.car) || lastCarOrd();
+      if (!ord) { el.innerHTML = ""; return; }   // 0 / null = no active car (and none driven yet)
       live.diskCache = live.diskCache || {};
       const cached = live.diskCache[ord];
       if (cached === undefined) { fetchDiskTune(ord); el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
@@ -2936,7 +2966,8 @@
       const key = ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "");
       if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
       el.dataset.fhmKey = key;
-      el.innerHTML = diskDeliverableHtml(cached);
+      el.innerHTML = diskDeliverableHtml(cached, { popBtn: true });
+      el.querySelectorAll("[data-popout]").forEach((b) => b.addEventListener("click", () => popOutFloat(+b.dataset.popout)));
       el.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
         const v = parseFloat(inp.value); if (isNaN(v)) return; const ord = +inp.dataset.rangeord;
         fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -2947,6 +2978,76 @@
           }).catch(() => {});
       }));
     };
+    // ---- FLOATING "TAKE TO GAME" WINDOW: the decoded build sheet, kept on screen across menu / workflow / tab / source changes ----
+    // Mounted on document.body (position:fixed) so NOTHING in the render cycle wipes it. It reads live.diskCache for the
+    // pinned (or last-decoded) ordinal — completely frame-independent, so a CarOrdinal blip to 0 in the menus can't clear it.
+    const FLOAT_KEY = "fh6FloatState";
+    const loadFloat = () => { try { return JSON.parse(localStorage.getItem(FLOAT_KEY)) || {}; } catch (e) { return {}; } };
+    const initFloat = () => { if (live.float) return; live.float = Object.assign({ ord: 0, open: false, min: false, pinned: false, x: null, y: null }, loadFloat()); };
+    const saveFloat = () => { try { localStorage.setItem(FLOAT_KEY, JSON.stringify({ ord: live.float.ord, open: live.float.open, min: live.float.min, pinned: live.float.pinned, x: live.float.x, y: live.float.y })); } catch (e) {} };
+    // which car the float tracks: pinned -> its locked ordinal; else the active car, else the last car driven (survives menu blips)
+    const floatOrd = () => { initFloat(); return (live.float.pinned && live.float.ord) ? live.float.ord : ((live.frame && live.frame.car) || lastCarOrd() || live.float.ord || 0); };
+    // confidence model for an on-disk decode: what's exact, what still needs a user action, and whether it's "reasonable" to build from
+    const diskConf = (cached) => {
+      const dl = cached && cached.deliverable; if (!dl) return null;
+      let rangeNeeded = 0; const soft = [];
+      (dl.tabs || []).forEach((t) => (t.rows || []).forEach((row) => { if (row.value == null && row.per_car && !String(row.field).startsWith("gear")) rangeNeeded++; }));
+      (dl.menus || []).forEach((m) => (m.rows || []).forEach((row) => { if (!row.stock && (row.conf === "category" || row.conf === "compound" || row.conf === "dim")) soft.push(String(row.item).replace(/_/g, " ")); }));
+      const conf = dl.confidence || 0;
+      return { pct: Math.round(conf * 100), conf, reasonable: conf >= 0.75, rangeNeeded, soft, locked: !!dl.locked };
+    };
+    const confMeterHtml = (cached) => {
+      const c = diskConf(cached); if (!c) return "";
+      const oc = confCol(c.conf); const items = [];
+      items.push(c.rangeNeeded
+        ? `<div class="fhm-todo"><span class="d">○</span><span><b>${c.rangeNeeded} per-car slider${c.rangeNeeded > 1 ? "s" : ""}</b> shown by position — <span class="why">type the in-game number on a <code>=?</code> box; two positions lock this car's range and every slider prints exact</span></span></div>`
+        : `<div class="fhm-todo ok"><span class="d">✓</span><span>every slider is exact</span></div>`);
+      items.push(c.soft.length
+        ? `<div class="fhm-todo"><span class="d">○</span><span><b>${c.soft.length} best-effort part name${c.soft.length > 1 ? "s" : ""}</b> — <span class="why">confirm in the upgrade shop: ${esc(c.soft.slice(0, 4).join(", "))}${c.soft.length > 4 ? " +" + (c.soft.length - 4) + " more" : ""}</span></span></div>`
+        : `<div class="fhm-todo ok"><span class="d">✓</span><span>every part named exactly</span></div>`);
+      if (c.locked) items.push(`<div class="fhm-todo ok"><span class="d">🔒</span><span>downloaded tune — values read straight off disk (the in-game tune screen hides them)</span></div>`);
+      return `<div class="fhm-conf">
+        <div class="fhm-confhead"><span class="lbl">confidence to a buildable clone</span><b style="color:${oc}">${c.pct}%</b><span class="tag" style="border-color:${oc};color:${oc}">${c.reasonable ? "✓ reasonable — ready to build" : "partial — keep refining"}</span></div>
+        <div class="fhm-confbar"><i style="width:${c.pct}%;background:${oc}"></i></div>
+        <div class="fhm-todos">${items.join("")}</div></div>`;
+    };
+    const bindRangeInputs = (scope) => scope.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
+      const v = parseFloat(inp.value); if (isNaN(v)) return; const ordi = +inp.dataset.rangeord;
+      fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: ordi, field: inp.dataset.rangefield, norm: +inp.dataset.rangenorm, value: v, unit: inp.dataset.rangeunit }) })
+        .then((r) => r.json()).then((d) => { if (d && d.ok) { inp.style.borderColor = d.solved ? "#00d27a" : "#e3b341"; inp.title = d.solved ? "range solved — refreshing to exact numbers" : "got it — one more tune at a different position unlocks exact numbers";
+          if (d.solved && live.diskCache) { delete live.diskCache[ordi]; fetchDiskTune(ordi); paintDiskDecode(); paintFloat(true); } } }).catch(() => {});
+    }));
+    const ensureFloatHost = () => { let el = document.getElementById("fhmFloat"); if (!el) { el = document.createElement("div"); el.id = "fhmFloat"; el.className = "fhm-float"; el.style.display = "none"; document.body.appendChild(el); ensureFhmCss(); } return el; };
+    const popOutFloat = (ord) => { initFloat(); live.float.ord = ord || floatOrd(); live.float.pinned = true; live.float.open = true; live.float.min = false; saveFloat(); paintFloat(true); };
+    function paintFloat(force) {
+      initFloat(); const el = ensureFloatHost();
+      if (!live.float.open) { el.style.display = "none"; return; }
+      const ord = floatOrd();
+      let cached = (ord && live.diskCache) ? live.diskCache[ord] : null;
+      if ((!cached || !cached.available) && live.float._lastOrd && live.diskCache) cached = live.diskCache[live.float._lastOrd];   // keep showing the last good sheet through menu blips / refetches
+      if (!cached || !cached.available) { el.style.display = "none"; return; }
+      const dl = cached.deliverable; live.float._lastOrd = dl.ordinal; if (live.float.pinned) live.float.ord = dl.ordinal;
+      const c = diskConf(cached); const nm = cached.name || ("#" + dl.ordinal); const oc = confCol(c.conf); const dsum = dl.summary || {};
+      const key = "F|" + dl.ordinal + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (dsum.sliders_relative || 0) + "|" + live.float.min + "|" + live.float.pinned + "|" + (live.diskDiff && live.diskDiff.ordinal === dl.ordinal ? live.diskDiff.t : "");
+      el.style.display = "block";
+      if (live.float.x != null) { el.style.left = live.float.x + "px"; el.style.top = live.float.y + "px"; el.style.right = "auto"; el.style.bottom = "auto"; }
+      if (!force && el.dataset.k === key && el.querySelector(".fhm-fbar")) return;   // unchanged - don't rebuild (keeps the =? inputs stable while typing)
+      el.dataset.k = key;
+      const bar = `<div class="fhm-fbar"><span class="ttl">📀 TAKE TO GAME</span><span class="nm">${esc(nm)}</span><span class="pct" style="color:${oc}">${c.pct}%</span>
+        <button class="fhm-fbtn ${live.float.pinned ? "on" : ""}" data-fpin title="${live.float.pinned ? "pinned to this car - decoding another car won't swap it out" : "following the car you're in - click to pin this build so it stays"}">📌</button>
+        <button class="fhm-fbtn" data-fmin title="${live.float.min ? "expand" : "minimize to a pill"}">${live.float.min ? "▢" : "—"}</button>
+        <button class="fhm-fbtn" data-fclose title="close (re-open with the Pop out button)">✕</button></div>`;
+      el.innerHTML = live.float.min ? bar : bar + `<div class="fhm-fbody">${diskDeliverableHtml(cached, { inFloat: true })}</div>`;
+      const fbar = el.querySelector(".fhm-fbar");
+      if (fbar) fbar.addEventListener("mousedown", (e) => { if (e.target.closest(".fhm-fbtn")) return; const sx = e.clientX, sy = e.clientY, r = el.getBoundingClientRect(), ox = r.left, oy = r.top;
+        const mv = (ev) => { live.float.x = Math.max(0, Math.min(window.innerWidth - 80, ox + ev.clientX - sx)); live.float.y = Math.max(0, Math.min(window.innerHeight - 26, oy + ev.clientY - sy)); el.style.left = live.float.x + "px"; el.style.top = live.float.y + "px"; el.style.right = "auto"; el.style.bottom = "auto"; };
+        const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up); saveFloat(); };
+        document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up); e.preventDefault(); });
+      const pin = el.querySelector("[data-fpin]"); if (pin) pin.addEventListener("click", () => { live.float.pinned = !live.float.pinned; if (live.float.pinned) live.float.ord = dl.ordinal; saveFloat(); paintFloat(true); });
+      const mn = el.querySelector("[data-fmin]"); if (mn) mn.addEventListener("click", () => { live.float.min = !live.float.min; saveFloat(); paintFloat(true); });
+      const cl = el.querySelector("[data-fclose]"); if (cl) cl.addEventListener("click", () => { live.float.open = false; saveFloat(); paintFloat(true); });
+      if (!live.float.min) bindRangeInputs(el);
+    }
     // ---- LIVE CORNER ANALYSIS (course training): every corner of every lap, full stats, in real time ----
     // enriched corner log: each live 'corner' event tagged with its lap and matched to a course turn (canonical apex position)
     const canonTurns = () => { const an = live.analysis; const co = an && (an.courses || [])[0]; return (co && co.turns && co.turns.canonical) || []; };
@@ -3075,7 +3176,7 @@
       ];
       const lad = (sel, c, list) => { const n = stintOf(sel); const st = n != null ? (list || stints).find((x) => x.n === n) : null; return st && st.ladder && Object.keys(st.ladder).length ? Object.entries(st.ladder).map(([g, v]) => [+g, v]) : (c.gears || []).map((g) => [g.gear, g.mps_per_krpm]); };
       // LIVE: the SUBJECT of decoding is the car you are in right now — full clone of the currently equipped, active config
-      const curId = isLive && live.frame ? live.frame.cid : null; const A = curId ? car(s, curId) : null; const Adone = !!(A && A.decode && A.decode.pct >= 1);
+      const curId = isLive ? ((live.frame && live.frame.on && live.frame.cid) || live.courseCar) : null; const A = curId ? car(s, curId) : null; const Adone = !!(A && A.decode && A.decode.pct >= 1);   // fall back to the last car you drove so the clone sheet stays while you're in the upgrade screen
       const subject = isLive ? (A ? `<div class="block" style="border-color:#a371f7"><div class="card-row" style="margin-top:0"><h3 style="margin:0">🚗 Cloning the car you're in — ${esc(carName(A) || "#" + A.ordinal)} <span class="why">· ${A.class} ${A.pi} ${A.drivetrain} ${A.cyl}cyl · build ${A.build_id}</span></h3><span class="chip" style="border-color:${Adone ? "#00d27a" : "#e3b341"};color:${Adone ? "#00d27a" : "#e3b341"};font-weight:700">${A.decode ? (Adone ? "CAPTURE COMPLETE" : A.decode.ready_n + "/" + A.decode.total + " tests") : "analysing…"}</span></div>
           <p class="why" style="font-size:11px;margin:2px 0 6px">analysed constantly — the daemon re-analyses every ~20 s of driving; the panel below moves with every frame</p>
           <div id="lvDiskDecode"></div>
@@ -3126,7 +3227,13 @@
     let es = null, liveUrl = (localStorage.getItem("fh6LiveUrl") || "http://127.0.0.1:8765").replace("//localhost:", "//127.0.0.1:");   // 127.0.0.1 avoids the Windows localhost→IPv6 resolution stall
     const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null, loop: null, mode: null };
     // the LIVE effective mode (manual override, else daemon suggestion) — pushed to the daemon so its run-split rule matches what you see
-    const liveEffMode = () => { const m = labModeSel(); return m !== "auto" ? m : ((live.mode && live.mode.suggest) || "free"); };
+    const liveEffMode = () => {   // auto workflow = the daemon's suggestion, but FROZEN while you're in a menu (upgrade / tune screen) so the deliverable stays up while you implement it
+      const m = labModeSel(); if (m !== "auto") return m;
+      const suggest = (live.mode && live.mode.suggest) || "free";
+      const inMenu = !!(live.status && live.status.game === "menu");
+      if (!inMenu) { live._lastDriveWf = suggest; return suggest; }
+      return live._lastDriveWf || suggest;
+    };
     let pushedMode = null;
     // only a MANUAL override is pushed; in auto the daemon uses its own detection (so a second dashboard on the same daemon can't fight it)
     const pushMode = () => { if (!live.connected) return; const m = labModeSel() === "auto" ? "auto" : liveEffMode(); if (m === pushedMode) return; pushedMode = m; fetch(liveUrl + "/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: m }) }).catch(() => { pushedMode = null; }); };
@@ -3269,7 +3376,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const an = live.analysis; const donorSt = an && (an.stints || []).find((x) => x.role === "donor"); const pin = PIN(); const ls = liveSess();
       const donorCar = pin ? ((ls && pin.sid === ls.id && car(ls, pin.key)) || (pin.data && car(pin.data, pin.key)) || null) : (donorSt && (an.cars || []).find((c) => c.id === donorSt.id));
       const dchip = donorCar && donorCar.decode ? `<span class="chip" style="border-color:#e3b341;color:#e3b341" title="${pin ? "pinned donor — stays until you pick another or unpin (Decode tab)" : "donor capture progress — tests only"}">${pin ? "📌 " : ""}🎯 donor ${esc(carName(donorCar) || "")} ${donorCar.decode.ready_n}/${donorCar.decode.total} tests${donorCar.decode.pct >= 1 && donorCar.clone_sheet && donorCar.clone_sheet.confidence != null ? " · 📋 sheet " + Math.round(donorCar.clone_sheet.confidence * 100) + "%" : ""}</span>` : "";
-      el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL[em][1]};color:${MODE_LBL[em][1]};font-weight:700">${MODE_LBL[em][0]}</span><span class="why" style="font-size:11px">${ms === "auto" ? "🧭 auto-detected" + (lm.reason ? " — " + esc(lm.reason) : " — waiting for the stream") : "manual — click 🧭 auto to hand detection back"}${live.status && live.status.game === "menu" ? " · in menus / paused" : ""}</span>${dchip}</div>`;
+      el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL[em][1]};color:${MODE_LBL[em][1]};font-weight:700">${MODE_LBL[em][0]}</span><span class="why" style="font-size:11px">${ms === "auto" ? "🧭 auto-detected" + (lm.reason ? " — " + esc(lm.reason) : " — waiting for the stream") : "manual — click 🧭 auto to hand detection back"}${live.status && live.status.game === "menu" ? ` · in menus — <b style="color:var(--accent)">📌 deliverable held</b> for the upgrade / tune screen` : ""}</span>${dchip}</div>`;
     }
     function streamBar() {
       return `
@@ -3349,7 +3456,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
-      updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintCourseLive(); paintActiveCar();
+      updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCourseLive(); paintActiveCar();
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
       if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }
       for (const w of W4) {
@@ -3404,7 +3511,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         live.diskCache[d.ordinal] = d.available ? d : { available: false };
         const changed = d.available ? applyDiskTune(d) : false;
         if (d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
-        paintDiskDecode();
+        paintDiskDecode(); paintFloat();
         const activeOrd = live.frame && String(live.frame.car);
         if (d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
       });
@@ -3507,8 +3614,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       host.querySelectorAll("[data-src]").forEach((b) => b.addEventListener("click", () => { src = b.dataset.src; localStorage.setItem("fh6LabSrc", src); carSel = null; donor = replica = null; render(); }));   // run picks ('cid#n') never carry across sources — run numbers restart per session
       bindTabs(); bindBody(host);
       const sel = host.querySelector("#labSess"); if (sel) sel.addEventListener("change", () => { sIdx = +sel.value; carSel = null; donor = replica = null; render(); });
-      if (src === "live") { bindLive(); if (!es) liveConnect(); else paintAll(); }
+      if (src === "live") { bindLive(); if (!es) liveConnect(); else paintAll(); ensureFloatHost(); paintFloat(); }
     }
+    ensureFloatHost();
     render();
   }
 

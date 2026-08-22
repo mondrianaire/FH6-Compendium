@@ -301,13 +301,12 @@ def scan_tunes(containers_root=None, newest_only=True):
 # Shop menus, in the order the decode section presents them. Each entry lists
 # the part-slot keys that live under it.
 SHOP_MENUS = [
-    ("Engine & Power", ["engine","motor","motor_parts","camshaft","valves","displacement",
+    ("Engine & Power", ["engine","motor_parts","camshaft","valves","displacement",
         "pistons","fuel_system","ignition","exhaust","intake","flywheel","manifold",
-        "restrictor_plate","oil_cooling","aspiration","single_turbo","twin_turbo","quad_turbo",
-        "pos_supercharger","centrifugal_supercharger","intercooler"]),
+        "restrictor_plate","oil_cooling","intercooler"]),
     ("Platform & Handling", ["brakes","springs_dampers","front_arb","rear_arb",
         "weight_reduction","roll_cage"]),
-    ("Drivetrain", ["drivetrain","clutch","transmission","driveline","differential"]),
+    ("Drivetrain", ["clutch","transmission","driveline","differential"]),
     ("Tires & Rims", ["tire_compound","front_tire_width","rear_tire_width","front_rim_size",
         "rear_rim_size","rim_style","rear_rim_style","front_tire_profile","rear_tire_profile",
         "front_track_width","rear_track_width"]),
@@ -439,6 +438,45 @@ def _part_view(cat, val, ordinal, gear_count=None):
     conf = "named" if idx <= 3 else "category"   # a race-variant index we cap at "Race" is slightly less certain
     return out(f"{_tier_word(idx)} {disp}", conf)
 
+_NAMES_CACHE = None
+def _car_names():
+    global _NAMES_CACHE
+    if _NAMES_CACHE is None:
+        here = os.path.dirname(os.path.abspath(__file__))
+        try:
+            _NAMES_CACHE = load_car_names(os.path.abspath(os.path.join(here, "..", "..")))
+        except Exception:
+            _NAMES_CACHE = {}
+    return _NAMES_CACHE
+
+def _conversion_rows(tune, ordinal):
+    """The Conversions category — the swaps that GATE every other upgrade: engine swap, aspiration, drivetrain.
+    Ordered first because installing/removing these changes what the rest of the menu even offers."""
+    P = tune["parts"]; conv = []
+    def row(item, cat, upgrade, conf, tier, stock, raw):
+        return {"item": item, "category": cat, "value": upgrade, "upgrade": upgrade, "conf": conf,
+                "tier": tier, "stock": stock, "raw": raw, "status": "measured", "confidence": 1.0}
+    # Aspiration — read the induction directly from whichever forced-induction slot is populated
+    asp = next((s for s in ASPIRATION_TYPE if P.get(s) is not None), None)
+    if asp:
+        av = P[asp]; t = av % 1000
+        conv.append(row("aspiration", "Aspiration", (f"{_tier_word(t)} " if t else "") + ASPIRATION_TYPE[asp], "named", t, False, av))
+    else:
+        conv.append(row("aspiration", "Aspiration", "Naturally Aspirated", "named", 0, True, None))
+    # Engine swap — ONLY the explicit swap slot. (The engine-internal family is a global engine-catalog id
+    # that numerically collides with car ordinals — inferring a donor car from it is confidently wrong, so we don't.)
+    motor = P.get("motor")
+    if motor is not None:
+        conv.append(row("motor", "Engine Swap", f"{_tier_word(motor % 1000)} engine swap" if motor % 1000 else "Engine swapped", "named", motor % 1000, False, motor))
+    else:
+        conv.append(row("motor", "Engine Swap", "Stock engine (no swap)", "named", 0, True, None))
+    # Drivetrain — stock vs swapped (the slot isn't a Street/Sport/Race tier); the dashboard prepends the live FWD/RWD/AWD letter
+    dv = P.get("drivetrain")
+    if dv is not None:
+        t = dv % 1000
+        conv.append(row("drivetrain", "Drivetrain", "Stock layout" if t == 0 else "Converted / swapped", "named", t, t == 0, dv))
+    return conv
+
 def tune_to_deliverable(tune, car_name=None):
     """Turn a parsed tune into the decode-section Clone Sheet deliverable.
     Every row is status 'measured' at confidence 1.0 — the on-disk file is exact
@@ -460,6 +498,7 @@ def tune_to_deliverable(tune, car_name=None):
                          "status": "measured", "confidence": 1.0})
         if rows:
             menus.append({"menu": menu_name, "rows": rows})
+    menus.insert(0, {"menu": "Conversions", "rows": _conversion_rows(tune, ordn)})   # gates every other option — engine swap, aspiration, drivetrain
     # tune tabs
     tabs = []
     for tab_name, keys in TUNE_TABS:

@@ -680,14 +680,22 @@
    "session": "fh6_20260821_202122",
    "name": "2018 Exomotive Exocet Sport V8 XP-5",
    "class": "A",
-   "pi": 700
+   "pi": 700,
+   "drivetrain": "AWD",
+   "build_id": "8e0b0e33",
+   "hp": 269,
+   "gears": 6
   },
   "1046|2|10|800": {
    "best_lap": 22.13,
    "session": "fh6_20260821_211040",
    "name": "2008 Dodge Viper SRT-10 ACR",
    "class": "S1",
-   "pi": 800
+   "pi": 800,
+   "drivetrain": "AWD",
+   "build_id": "38572cd3",
+   "hp": 703,
+   "gears": 8
   }
  },
  "visits": [

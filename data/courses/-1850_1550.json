@@ -734,7 +734,11 @@
    "session": "fh6_20260821_202122",
    "name": "2018 Exomotive Exocet Sport V8 XP-5",
    "class": "A",
-   "pi": 700
+   "pi": 700,
+   "drivetrain": "AWD",
+   "build_id": "8e0b0e33",
+   "hp": 269,
+   "gears": 6
   }
  },
  "visits": [

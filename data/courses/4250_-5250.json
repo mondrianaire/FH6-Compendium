@@ -2102,14 +2102,22 @@
    "session": "fh6_20260821_162805",
    "name": "1991 Honda Beat",
    "class": "A",
-   "pi": 700
+   "pi": 700,
+   "drivetrain": "AWD",
+   "build_id": "d5a5039e",
+   "hp": 349,
+   "gears": 10
   },
   "2616|2|10|800": {
    "best_lap": 84.446,
    "session": "fh6_20260821_162805",
    "name": "2016 Lamborghini Centenario LP 770-4",
    "class": "S1",
-   "pi": 800
+   "pi": 800,
+   "drivetrain": "AWD",
+   "build_id": "040933e5",
+   "hp": 698,
+   "gears": 6
   }
  },
  "visits": [

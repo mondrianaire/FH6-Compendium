@@ -1195,7 +1195,9 @@ def main():
             model["cars"][e["car"]] = {"name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi"), "drivetrain": cinfo.get("drivetrain")}
             if e.get("best_lap"):
                 cur_ = model["best_laps"].get(e["car"])
-                if not cur_ or e["best_lap"] < cur_["best_lap"] or cur_.get("session") == sid and e["best_lap"] <= cur_["best_lap"]: model["best_laps"][e["car"]] = {"best_lap": e["best_lap"], "session": sid, "name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi")}
+                if not cur_ or e["best_lap"] < cur_["best_lap"] or cur_.get("session") == sid and e["best_lap"] <= cur_["best_lap"]:
+                    model["best_laps"][e["car"]] = {"best_lap": e["best_lap"], "session": sid, "name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi"), "drivetrain": cinfo.get("drivetrain"),
+                                                    "build_id": cinfo.get("build_id"), "hp": (cinfo.get("sig") or {}).get("hp_peak"), "gears": (cinfo.get("sig") or {}).get("gear_count")}   # the BEST BUILD that set the record
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
         model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis
         # track-level presence per turn (over ALL track laps) and a track-level turn-count confidence — the turn identity is corroborated across sessions, not just this one

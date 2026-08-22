@@ -941,17 +941,26 @@ def main():
         # ---- GEOMETRIC course learning from COORDINATES: the path IS the course. Resample the reference lap by arc length, heading -> curvature,
         #      turns = curvature peaks (radius, length, direction, apex/entry/exit) — independent of how hard you drove them. ----
         def lap_pts(w): return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
-        def resample(pts, step=4.0):
-            if len(pts) < 3: return []
-            S = [0.0]
-            for a, b in zip(pts, pts[1:]): S.append(S[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
-            if S[-1] < step * 5: return []
-            out = []; j = 0; s_ = 0.0
-            while s_ <= S[-1]:
-                while j < len(S) - 2 and S[j + 1] < s_: j += 1
-                seg_len = S[j + 1] - S[j]; f = (s_ - S[j]) / seg_len if seg_len > 0 else 0.0
-                out.append((pts[j][0] + (pts[j + 1][0] - pts[j][0]) * f, pts[j][1] + (pts[j + 1][1] - pts[j][1]) * f, s_, pts[j][2] + (pts[j + 1][2] - pts[j][2]) * f))
-                s_ += step
+        def resample(pts, step=4.0):   # -> list of PIECES; a jump > 150 m between consecutive rows (respawn / rewind / teleport) starts a new piece
+            pieces = []; cur = [pts[0]] if pts else []
+            for a_, b_ in zip(pts, pts[1:]):
+                if math.hypot(b_[0] - a_[0], b_[1] - a_[1]) > 150:
+                    if len(cur) >= 3: pieces.append(cur)
+                    cur = [b_]
+                else: cur.append(b_)
+            if len(cur) >= 3: pieces.append(cur)
+            out = []
+            for pc in pieces:
+                S = [0.0]
+                for a_, b_ in zip(pc, pc[1:]): S.append(S[-1] + math.hypot(b_[0] - a_[0], b_[1] - a_[1]))
+                if S[-1] < step * 5: continue
+                P_ = []; j = 0; s_ = 0.0
+                while s_ <= S[-1]:
+                    while j < len(S) - 2 and S[j + 1] < s_: j += 1
+                    seg_len = S[j + 1] - S[j]; f = (s_ - S[j]) / seg_len if seg_len > 0 else 0.0
+                    P_.append((pc[j][0] + (pc[j + 1][0] - pc[j][0]) * f, pc[j][1] + (pc[j + 1][1] - pc[j][1]) * f, s_, pc[j][2] + (pc[j + 1][2] - pc[j][2]) * f))
+                    s_ += step
+                out.append(P_)
             return out
         def curvature(P, step=4.0, win=7):
             th = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(P, P[1:])]
@@ -960,24 +969,32 @@ def main():
                 while th[i_] - th[i_ - 1] < -math.pi: th[i_] += 2 * math.pi
             ths = smooth(th, win) if len(th) >= win else th
             return [(ths[i_ + 1] - ths[i_ - 1]) / (2 * step) for i_ in range(1, len(ths) - 1)]   # rad/m at P[i_+1]
+        def down(pcs, n=500):   # downsample pieces for drawing (≈ n points in total)
+            tot = sum(len(p) for p in pcs) or 1; k = max(1, tot // n)
+            return [[[round(p[0]), round(p[1])] for p in pc[::k]] for pc in pcs if len(pc[::k]) >= 2]
         geo = None
         full_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
         if full_laps:
             ref_w = max(full_laps, key=lambda w: sum(1 for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]))
-            P = resample(lap_pts(ref_w))
+            pieces = resample(lap_pts(ref_w)); P = [p for pc in pieces for p in pc]
             if len(P) >= 20:
-                K = curvature(P); thr = 1.0 / 250.0; gturns = []; i_ = 0
-                while i_ < len(K):
-                    if abs(K[i_]) > thr:
-                        j_ = i_
-                        while j_ < len(K) and abs(K[j_]) > thr * 0.6: j_ += 1
-                        if (j_ - i_) >= 4:
-                            ia = max(range(i_, j_), key=lambda q: abs(K[q])); gturns.append({"i0": i_ + 1, "i1": min(j_, len(P) - 1), "ia": ia + 1, "k": abs(K[ia]), "sgn": 1 if K[ia] > 0 else -1})
-                        i_ = j_
-                    else: i_ += 1
+                thr = 1.0 / 250.0; gturns = []; off = 0; piece_of = {}
+                for pi_, pc in enumerate(pieces):
+                    for q in range(len(pc)): piece_of[off + q] = pi_
+                    if len(pc) >= 12:
+                        K = curvature(pc); i_ = 0
+                        while i_ < len(K):
+                            if abs(K[i_]) > thr:
+                                j_ = i_
+                                while j_ < len(K) and abs(K[j_]) > thr * 0.6: j_ += 1
+                                if (j_ - i_) >= 4:
+                                    ia = max(range(i_, j_), key=lambda q: abs(K[q])); gturns.append({"i0": off + i_ + 1, "i1": off + min(j_, len(pc) - 1), "ia": off + ia + 1, "k": abs(K[ia]), "sgn": 1 if K[ia] > 0 else -1})
+                                i_ = j_
+                            else: i_ += 1
+                    off += len(pc)
                 merged = []
-                for g in gturns:   # merge near-contiguous same-direction pieces (a wobble inside one turn)
-                    if merged and g["i0"] - merged[-1]["i1"] <= 3 and g["sgn"] == merged[-1]["sgn"]:
+                for g in gturns:   # merge near-contiguous same-direction pieces (a wobble inside one turn) — never across a path break
+                    if merged and g["i0"] - merged[-1]["i1"] <= 3 and g["sgn"] == merged[-1]["sgn"] and piece_of.get(g["i0"]) == piece_of.get(merged[-1]["i1"]):
                         m_ = merged[-1]; m_["i1"] = g["i1"]
                         if g["k"] > m_["k"]: m_["k"] = g["k"]; m_["ia"] = g["ia"]
                     else: merged.append(dict(g))
@@ -997,10 +1014,18 @@ def main():
                 for n_, g in enumerate(merged, 1):
                     gt_out.append({"id": f"G{n_}", "apex": [round(P[g["ia"]][0]), round(P[g["ia"]][1])], "s": round(P[g["ia"]][2]), "radius_m": round(1.0 / g["k"]), "dir": ("R" if (g["sgn"] > 0) != flip else "L"), "deg": g["deg"],
                                    "len_m": round((g["i1"] - g["i0"]) * 4.0), "entry": [round(P[g["i0"]][0]), round(P[g["i0"]][1])], "exit": [round(P[g["i1"]][0]), round(P[g["i1"]][1])], "speed_ref_lap": round(P[g["ia"]][3])})
-                sd_ = max(1, len(P) // 500)
-                geo = {"length_m": round(P[-1][2]), "ref_lap": {"ev": ref_w["ev"], "lap": ref_w["lap"], "t0": ref_w["t0"], "t1": ref_w["t1"]}, "path": [[round(p[0]), round(p[1])] for p in P[::sd_]], "turns": gt_out}
-                lw_last = max(full_laps, key=lambda w: w["t1"]); PL = resample(lap_pts(lw_last))
-                if PL: geo["last_path"] = [[round(p[0]), round(p[1])] for p in PL[::max(1, len(PL) // 500)]]; geo["last_lap"] = {"ev": lw_last["ev"], "lap": lw_last["lap"], "t0": lw_last["t0"], "t1": lw_last["t1"]}
+                geo = {"length_m": round(sum(pc[-1][2] for pc in pieces)), "ref_lap": {"ev": ref_w["ev"], "lap": ref_w["lap"], "t0": ref_w["t0"], "t1": ref_w["t1"]}, "paths": down(pieces), "turns": gt_out, "pieces": len(pieces)}
+                geo["path"] = [p for pc in geo["paths"] for p in pc]   # flat (overlap cells · atlas bounds); 'paths' are the drawable pieces
+                lw_last = max(full_laps, key=lambda w: w["t1"]); PLs = resample(lap_pts(lw_last))
+                if PLs: geo["last_paths"] = down(PLs); geo["last_path"] = [p for pc in geo["last_paths"] for p in pc]; geo["last_lap"] = {"ev": lw_last["ev"], "lap": lw_last["lap"], "t0": lw_last["t0"], "t1": lw_last["t1"]}
+                # the COURSE LAYOUT: every lap / attempt recorded, drawn together — the spread of lines is the road; they accumulate in the course model across sessions
+                lap_paths = []
+                for w in full_laps[-16:]:
+                    PPs = resample(lap_pts(w), step=8.0)
+                    if PPs:
+                        pc = max(PPs, key=len)   # the longest continuous piece of that lap (no teleport lines)
+                        lap_paths.append({"session": sid, "ev": w["ev"], "lap": w["lap"], "pts": [[round(p[0]), round(p[1])] for p in pc[::max(1, len(pc) // 160)]]})
+                geo["lap_paths"] = lap_paths
         def geo_near(x, z):
             if not geo: return None
             return next((g["id"] for g in geo["turns"] if math.hypot(g["apex"][0] - x, g["apex"][1] - z) <= max(60, g["len_m"] / 2 + 20)), None)   # anywhere within the turn's span
@@ -1151,7 +1176,13 @@ def main():
         # persist the course model (never from replays); the session carries a compact summary
         if sid not in model["sessions"]: model["sessions"].append(sid); model["laps"] = model.get("laps", 0) + total_laps
         model["updated"] = sid; model["name"] = co["name"] or model.get("name")
-        if geo and (not model.get("geometry") or len(geo["path"]) >= len((model.get("geometry") or {}).get("path") or [])): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "turns": geo["turns"], "session": sid}   # the map persists with the course
+        if geo:
+            mg = model.get("geometry") or {}
+            prev_lp = [lp for lp in (mg.get("lap_paths") or []) if lp.get("session") != sid]   # re-analysis of this session replaces its own laps
+            layout = (prev_lp + (geo.get("lap_paths") or []))[-24:]
+            if not mg.get("path") or len(geo["path"]) >= len(mg.get("path") or []): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"), "turns": geo["turns"], "session": sid, "lap_paths": layout}   # the map persists with the course
+            else: mg["lap_paths"] = layout; model["geometry"] = mg
+            geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing
         if write_models:
             try:
                 os.makedirs(mdir, exist_ok=True)

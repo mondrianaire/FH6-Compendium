@@ -90,3 +90,38 @@ print EXACT numbers, not just slider position — closing the last gap in "full 
 **Clone status:** for a range-registered car, ALL 27 sliders + the full parts list print exact — complete
 recreation instructions, including for locked/downloaded tunes. Un-registered cars show the 20 fixed sliders
 exact + 7 as slider position (still cloneable by eye) until two known values are entered.
+
+---
+
+## Part-catalog decode — upgrade NAMES resolved (2026-08-22)
+
+Every part slot now resolves to the exact FH upgrade name, closing the "what to install" gap.
+
+- **Tier is `id % 1000` for ALL parts** (ordinal-scoped AND shared global): 0=Stock, 1=Street, 2=Sport, 3=Race (race-variant indices >3 cap at Race). Verified: clutch {0,3}, driveline {0,3}, camshaft/exhaust/intake {0,2,3}.
+- **Transmission** family **2102 = Race transmission**; its tier encodes the SPEED COUNT (tier 0→6-speed, 4→7, 5→8, 6→9, 7→10, 8→4) — verified perfectly against each tune's gear_count. Named "Race Transmission · N-speed" using the decoded gear count directly.
+- **Aspiration** named by slot + tier: single_turbo / twin_turbo / quad_turbo / pos_supercharger / centrifugal_supercharger × Street/Sport/Race.
+- **Engine-swap donors**: some engine-internal families ARE car ordinals (1022=Ferrari F430, 2794=Porsche 911 Turbo S, 2270=Skyline GT-R) — a swapped engine's internals reference the donor car. (Not yet surfaced per-row; internals are tier-named.)
+- **Compound** index → name via COMPOUND_NAMES (best-effort FH order; verify per car). **Dimension** slots (widths/rims/track/profile) → "level N". **Cosmetic** (rim style) → "Custom".
+
+Result on the Exocet clone sheet: 37 named, 1 sizing, 2 cosmetic, **0 unresolved**. Implemented in `fh6_tune_decode.py` `_part_view` (+ CATEGORY_DISPLAY / TIER_NAMES / COMPOUND_NAMES / ASPIRATION_TYPE / RACE_TRANS_FAMILY); flows to `tune_to_deliverable`. Standard deliverable rendered as the FH6 Upgrades & Tuning menu — artifact claude.ai/code/artifact/9baffab2.
+
+---
+
+## Seamless decode→clone→tune loop (2026-08-22)
+
+Measured decode latency: parse 0.17ms, full deliverable 0.25ms, endpoint 17ms (127.0.0.1). The gate is
+FH's write timing — Data files are written per tune-SAVE (newest was 2.8h ago), not live per keystroke.
+
+Shipped to make the loop hands-free:
+- **Daemon folder-watch** (`disk_watcher` thread): watches the active car's tune folder; the instant a new
+  `Data` file lands (you save in-game), it pushes a fresh decode + a save-to-save DIFF over SSE (`disk`
+  event) within ~1.5s. Verified end-to-end via a temp save-root (`FH6_SAVE_ROOT` override): simulated save →
+  banner "front arb 15.7→45.8" appeared with no refresh.
+- **Auto-fill the tuning engine from the decode**: `getTune()` now merges disk-decoded exact slider values
+  under user entries (keyed by ordinal). The Course/Free tuning panels show EXACT target numbers with zero
+  typing — verified 11 values auto-filled (farb 15.7, rarb 49.1, bbal 53, center 72.2…). Per-car position-only
+  sliders stay manual until their range is registered.
+- **Save-to-save diff** (`tune_diff`): "🔧 Changed since your last save: front arb 15.7→45.8 · …" banner,
+  fades after 45s; fires only on a genuine re-save of the same car (not a car switch).
+- **Fast per-ordinal scan** (`tunes_for_ordinal`): globs one car's tunes (~1ms) instead of all 498.
+- **127.0.0.1 default** + localhost→127.0.0.1 migration: kills the ~2s Windows localhost→IPv6 resolution stall.

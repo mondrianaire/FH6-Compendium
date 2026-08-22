@@ -229,11 +229,52 @@ def _ordinal_from_dirname(d):
     return int(m.group(1)), m.group(2)     # ordinal, timestamp string
 
 def find_containers_root(base=r"C:\XboxGames\GameSave\pgs"):
-    """Locate the newest ContainersRoot under the GameSave tree."""
+    """Locate the newest ContainersRoot under the GameSave tree.
+    FH6_SAVE_ROOT overrides it (point straight at a folder holding Tuning_* dirs) — for a Steam/alt
+    install or for testing without touching the real save."""
+    env = os.environ.get("FH6_SAVE_ROOT")
+    if env and os.path.isdir(env):
+        return env
     hits = glob.glob(os.path.join(base, "u_*", "*", "ContainersRoot"))
     if not hits:
         return None
     return max(hits, key=lambda p: os.path.getmtime(p))
+
+def tunes_for_ordinal(ordinal, containers_root=None):
+    """Fast path — glob only ONE car's tune Data files (newest first). ~1ms vs a full scan."""
+    root = containers_root or find_containers_root()
+    if not root:
+        return [], None
+    pats = {f"Tuning_{int(ordinal):04d}_*", f"Tuning_{int(ordinal)}_*"}
+    seen = set(); metas = []
+    for pat in pats:
+        for data in glob.glob(os.path.join(root, pat, "Data")):
+            if data in seen:
+                continue
+            seen.add(data)
+            _, ts = _ordinal_from_dirname(os.path.dirname(data))
+            metas.append({"path": data, "ts": ts, "mtime": os.path.getmtime(data)})
+    metas.sort(key=lambda m: m["mtime"], reverse=True)
+    return metas, root
+
+
+def tune_diff(prev, cur):
+    """What changed between two saves of the same car: slider moves (exact or position) + part changes."""
+    sliders = []
+    for name, e in cur["sliders"].items():
+        if name.startswith("_"):
+            continue
+        pe = prev["sliders"].get(name)
+        if not pe:
+            continue
+        if e.get("value") is not None and pe.get("value") is not None:
+            if abs(e["value"] - pe["value"]) > 1e-6:
+                sliders.append({"field": name, "from": pe["value"], "to": e["value"], "unit": e.get("unit", "")})
+        elif abs(e["norm"] - pe["norm"]) > 0.005:
+            sliders.append({"field": name, "from_pct": round(pe["norm"] * 100, 1), "to_pct": round(e["norm"] * 100, 1), "pos": True})
+    parts = [{"item": k, "from": prev["parts"].get(k), "to": v} for k, v in cur["parts"].items() if v != prev["parts"].get(k)]
+    return {"sliders": sliders, "parts": parts, "gear_delta": cur["gear_count"] - prev["gear_count"]}
+
 
 def scan_tunes(containers_root=None, newest_only=True):
     """Return {ordinal: [tune_meta,...]} newest-first. Each meta has path, ts, mtime."""
@@ -285,16 +326,86 @@ TUNE_TABS = [
     ("Gearing",     ["final_drive"]),   # individual gears appended dynamically
 ]
 
-def _part_view(cat, val, ordinal):
-    """Human-ish view of one part slot value (tier index if ordinal-scoped, else global ID)."""
+# In-game category name for each part slot (what the upgrade shop calls it).
+CATEGORY_DISPLAY = {
+    "engine": "Engine Block", "motor": "Engine Swap", "camshaft": "Camshaft", "valves": "Valves",
+    "displacement": "Displacement", "pistons": "Pistons & Compression", "fuel_system": "Fuel System",
+    "ignition": "Ignition", "exhaust": "Exhaust", "intake": "Intake", "flywheel": "Flywheel",
+    "manifold": "Intake Manifold", "restrictor_plate": "Restrictor Plate", "oil_cooling": "Oil Cooling",
+    "single_turbo": "Single Turbo", "twin_turbo": "Twin Turbo", "quad_turbo": "Quad Turbo",
+    "pos_supercharger": "Supercharger", "centrifugal_supercharger": "Centrifugal Supercharger",
+    "intercooler": "Intercooler", "aspiration": "Aspiration", "motor_parts": "Engine",
+    "brakes": "Brakes", "springs_dampers": "Springs & Dampers", "front_arb": "Front Anti-roll Bar",
+    "rear_arb": "Rear Anti-roll Bar", "weight_reduction": "Weight Reduction", "roll_cage": "Chassis Reinforcement",
+    "drivetrain": "Drivetrain", "clutch": "Clutch", "transmission": "Transmission", "driveline": "Driveline",
+    "differential": "Differential",
+    "tire_compound": "Tire Compound", "front_tire_width": "Front Tire Width", "rear_tire_width": "Rear Tire Width",
+    "front_rim_size": "Front Rim Size", "rear_rim_size": "Rear Rim Size", "rim_style": "Rim Style",
+    "rear_rim_style": "Rear Rim Style", "front_tire_profile": "Front Tire Profile", "rear_tire_profile": "Rear Tire Profile",
+    "front_track_width": "Front Track Width", "rear_track_width": "Rear Track Width",
+    "car_body": "Body Kit", "front_bumper": "Front Bumper", "rear_bumper": "Rear Bumper", "hood": "Hood",
+    "side_skirts": "Side Skirts", "rear_wing": "Rear Wing",
+}
+TIER_NAMES = ["Stock", "Street", "Sport", "Race"]   # FH upgrade ladder by tier index (parts-effects.json / tuning-variables.json)
+# Slots whose tier index is a DIMENSION step (mm / inch), not the Stock/Street/Sport/Race ladder.
+DIM_SLOTS = {"front_tire_width", "rear_tire_width", "front_rim_size", "rear_rim_size",
+             "front_track_width", "rear_track_width", "front_tire_profile", "rear_tire_profile",
+             "rim_style", "rear_rim_style"}
+# FH tire-compound list by index (0 = Stock). Order is best-effort from FH6 web sources; verify per car.
+COMPOUND_NAMES = {0: "Stock", 1: "Street", 2: "Sport", 3: "Semi-Slick", 4: "Slick", 5: "Race",
+                  6: "Drag", 7: "Rally", 8: "Offroad", 9: "Snow", 10: "Drift"}
+
+ASPIRATION_TYPE = {"single_turbo": "Single Turbo", "twin_turbo": "Twin Turbo", "quad_turbo": "Quad Turbo",
+                   "pos_supercharger": "Positive-Displacement Supercharger", "centrifugal_supercharger": "Centrifugal Supercharger"}
+RACE_TRANS_FAMILY = 2102   # verified: family 2102 = Race transmission; its tier encodes the speed count
+COSMETIC_SLOTS = {"rim_style", "rear_rim_style"}
+
+def _tier_word(idx):
+    return TIER_NAMES[idx] if 0 <= idx < len(TIER_NAMES) else "Race"   # cap race-variant indices (>3) at "Race"
+
+def _part_view(cat, val, ordinal, gear_count=None):
+    """Human view of one part slot: the exact upgrade NAME to install.
+
+    Both ordinal-scoped parts (car-specific tiers) and shared global parts encode the tier in the
+    low 3 digits (id % 1000): 0=Stock, 1=Street, 2=Sport, 3=Race (race-variant indices cap at Race).
+    Special cases: tire compound (index=compound type), dimension slots (mm/inch step), transmission
+    (family 2102 = Race, tier = speed count), aspiration (named by slot + tier). `conf`: named (exact) |
+    compound | dim | cosmetic | category (upgraded but tier ambiguous)."""
+    disp = CATEGORY_DISPLAY.get(cat, cat.replace("_", " ").title())
     if val is None:
-        return {"raw": None, "tier": None, "label": "—", "stock": None}
-    if val // 1000 == ordinal:
-        idx = val % 1000
-        return {"raw": val, "tier": idx, "stock": idx == 0,
-                "label": "Stock" if idx == 0 else f"Upgraded · tier {idx}"}
-    # global catalog id (shared swap part): show the id; stock cannot be inferred
-    return {"raw": val, "tier": None, "stock": None, "label": f"catalog #{val}"}
+        return {"raw": None, "tier": None, "stock": None, "label": "—", "upgrade": None, "conf": None, "category": disp}
+    idx = val % 1000
+    fam = val // 1000
+
+    def out(label, conf, stock=False, tier=idx):
+        return {"raw": val, "tier": tier, "stock": stock, "label": label, "upgrade": label, "conf": conf, "category": disp}
+
+    if cat in COSMETIC_SLOTS:
+        return out("Stock", "named", stock=True) if idx == 0 else out(f"Custom · style {idx}", "cosmetic")
+    if cat == "tire_compound":
+        if idx == 0:
+            return out("Stock", "named", stock=True)
+        nm = COMPOUND_NAMES.get(idx)   # conf "compound" — the index→name order is best-effort, not verified per car
+        return out(f"{nm} Compound", "compound") if nm else out(f"Compound #{idx}", "compound")
+    if cat in DIM_SLOTS:
+        return out("Stock", "named", stock=True) if idx == 0 else out(f"{disp} · level {idx}", "dim")
+    if cat == "transmission" and fam == RACE_TRANS_FAMILY:
+        n = gear_count
+        return out(f"Race Transmission · {n}-speed" if n else "Race Transmission", "named")
+    if cat in ASPIRATION_TYPE:
+        typ = ASPIRATION_TYPE[cat]
+        if idx == 0:
+            return out(f"Stock {typ}", "named", stock=True)
+        return out(f"{_tier_word(idx)} {typ}", "named" if idx <= 3 else "category")   # capped race-variant index is less certain
+    if cat == "differential":
+        # the diff slot holds distinct TYPES (Race/Drift/Offroad/rally), not a clean Stock/Street/Sport/Race
+        # ladder — so name the common case but flag it 'category' (inferred), never assert it as exact.
+        return out("Stock", "named", stock=True) if idx == 0 else out("Race Differential", "category")
+    # standard Stock/Street/Sport/Race ladder (brakes, ARB, springs, clutch, driveline, engine internals, weight, aero, …)
+    if idx == 0:
+        return out("Stock", "named", stock=True)
+    conf = "named" if idx <= 3 else "category"   # a race-variant index we cap at "Race" is slightly less certain
+    return out(f"{_tier_word(idx)} {disp}", conf)
 
 def tune_to_deliverable(tune, car_name=None):
     """Turn a parsed tune into the decode-section Clone Sheet deliverable.
@@ -308,10 +419,11 @@ def tune_to_deliverable(tune, car_name=None):
         for k in keys:
             if k not in tune["parts"]:
                 continue
-            pv = _part_view(k, tune["parts"][k], ordn)
+            pv = _part_view(k, tune["parts"][k], ordn, gear_count=tune["gear_count"])
             if pv["raw"] is None:
                 continue   # empty slot — omit from the install list
-            rows.append({"item": k, "value": pv["label"], "tier": pv["tier"],
+            rows.append({"item": k, "category": pv["category"], "value": pv["label"],
+                         "upgrade": pv["upgrade"], "conf": pv["conf"], "tier": pv["tier"],
                          "stock": pv["stock"], "raw": pv["raw"],
                          "status": "measured", "confidence": 1.0})
         if rows:

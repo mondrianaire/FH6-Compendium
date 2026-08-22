@@ -2554,8 +2554,19 @@
       "bottoming": [["rreb", 1, 0.7], ["fbump", 1, 0.5]],
     };
     const tuneKey = (cid) => "fh6Tune:" + baseId(cid);
-    const getTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
-    const setTune = (cid, k, v) => { const t = getTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; localStorage.setItem(tuneKey(cid), JSON.stringify(t)); };
+    // disk-decoded exact slider values → the tuning engine's slider keys (auto-fills "current tune")
+    const DISK2SLIDER = { front_arb: "farb", rear_arb: "rarb", front_bump: "fbump", rear_bump: "rbump", front_rebound: "freb", rear_rebound: "rreb", brake_balance: "bbal", brake_pressure: "bpress", rear_diff_accel: "accel", rear_diff_decel: "decel", center_diff: "center", front_spring: "fspring", rear_spring: "rspring", front_downforce: "faero", rear_downforce: "raero" };
+    const applyDiskTune = (d) => {                       // pull exact slider values off the decode so targets need no typing; returns whether they changed
+      if (!d || !d.deliverable) return false;
+      const vals = {};
+      (d.deliverable.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && DISK2SLIDER[r.field]) vals[DISK2SLIDER[r.field]] = r.value; }));
+      live.diskTune = live.diskTune || {}; const key = String(d.ordinal);
+      const changed = JSON.stringify(live.diskTune[key]) !== JSON.stringify(vals);
+      live.diskTune[key] = vals; return changed;
+    };
+    const userTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
+    const getTune = (cid) => { const ord = String(cid).split("|")[0]; const disk = (live.diskTune && live.diskTune[ord]) || {}; return Object.assign({}, disk, userTune(cid)); };   // user entries override the disk auto-fill
+    const setTune = (cid, k, v) => { const t = userTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; localStorage.setItem(tuneKey(cid), JSON.stringify(t)); };
     const tuningMoves = (adv, corners, cur, weightKey) => {
       const wk = weightKey || "course_weight";   // course lane weights by course_weight; general lane by breadth
       const acc = {};
@@ -2576,7 +2587,9 @@
       return moves.sort((a, b) => b.sev - a.sev || Math.abs(b.delta || 0) - Math.abs(a.delta || 0));
     };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
-      return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)"}</span></summary>
+      const diskN = Object.keys((live.diskTune && live.diskTune[String(cid).split("|")[0]]) || {}).length;
+      const note = diskN ? `<b style="color:#00d27a">📀 ${diskN} current values auto-filled from disk</b> — targets are exact; edit any to override` : (n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)");
+      return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${note}</span></summary>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 8px;margin-top:6px">${SLIDER_ORDER.map((sl) => `<label style="font-size:10.5px;display:flex;justify-content:space-between;align-items:center;gap:4px">${SLIDER[sl].label}<input data-tunecid="${esc(cid)}" data-tunesl="${sl}" value="${cur[sl] != null ? cur[sl] : ""}" inputmode="decimal" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"></label>`).join("")}</div></details>`;
     };
     const numericTuningPanel = (co, s, forceCid) => {
@@ -2826,6 +2839,13 @@
     // FH6 writes every tune as a plaintext 598-byte Data file; the daemon parses it (/disk-tune) into the
     // same Clone-Sheet deliverable shape. This is the STRONGEST decode source — exact values, and it sees
     // the locked/downloaded sliders the in-game screen hides — so it leads the decode subject when present.
+    const diskDiffBanner = (ordinal) => {   // "changed since your last save" — appears ~45s after a fresh save
+      const dd = live.diskDiff; if (!dd || !dd.diff || dd.ordinal !== ordinal || performance.now() - dd.t > 45000) return "";
+      const sl = (dd.diff.sliders || []).map((c) => { const f = esc(c.field.replace(/_/g, " ")); return c.pos ? `<b>${f}</b> ${c.from_pct}%→${c.to_pct}%` : `<b>${f}</b> ${c.from}→${c.to}${c.unit ? " " + esc(c.unit) : ""}`; });
+      const pc = (dd.diff.parts || []).length;
+      if (!sl.length && !pc) return "";
+      return `<div style="margin:0 0 10px;padding:8px 12px;border:1px solid #e3b341;border-radius:8px;background:rgba(227,179,65,.08);font-size:12px"><b style="color:#e3b341">🔧 Changed since your last save:</b> ${sl.slice(0, 8).join(" · ") || ""}${sl.length > 8 ? ` · +${sl.length - 8} more` : ""}${pc ? ` <span class="why">· ${pc} part change${pc > 1 ? "s" : ""}</span>` : ""}</div>`;
+    };
     const diskDeliverableHtml = (r) => {
       const dl = r && r.deliverable; if (!dl) return "";
       const oc = confCol(dl.confidence); const sm = dl.summary || {};
@@ -2843,6 +2863,7 @@
       }).join("")).join("");
       return `<div class="block" style="border-color:#00d27a"><div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)} <span class="why">· read from the save file · exact</span></h3><span class="chip" style="border-color:${oc};color:${oc};font-weight:700">confidence ${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span></div>
         <div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${dl.confidence * 100}%;background:${oc}"></i></div>
+        ${diskDiffBanner(dl.ordinal)}
         <p class="why" style="font-size:11px;margin:2px 0 8px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_absolute} sliders exact</b> · ${sm.sliders_relative} shown as slider position (per-car range not yet registered). No driving, no screenshots — the values come straight off disk, including the locked/downloaded sliders the tune screen hides.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="disk-cols">
           <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">🔧 Parts to install</div><div style="overflow-x:auto"><table style="font-size:11.5px"><thead><tr><th>shop menu</th><th>part</th><th>install</th></tr></thead><tbody>${partRows}</tbody></table></div></div>
@@ -2856,6 +2877,7 @@
       live.diskCache[ordinal] = null;   // in-flight marker — avoids refetch storms
       fetch(liveUrl + "/disk-tune?ordinal=" + ordinal).then((r) => r.json()).then((d) => {
         live.diskCache[ordinal] = d && d.available ? d : { available: false };
+        if (d && d.available) applyDiskTune(d);
         paintDiskDecode();
       }).catch(() => { live.diskCache[ordinal] = { available: false }; });   // record failure (not delete) so it can't storm
     };
@@ -3055,7 +3077,7 @@
           <p class="why" style="font-size:11px;margin-top:8px">Static certification still applies above this ledger: pane rows dashed, radar matched, and the two HUD clips (pressure, camber). The ledger covers what the panel cannot see.</p></div>`;
     }
     // ---- LIVE mode: EventSource from the local daemon ----
-    let es = null, liveUrl = localStorage.getItem("fh6LiveUrl") || "http://localhost:8765";
+    let es = null, liveUrl = (localStorage.getItem("fh6LiveUrl") || "http://127.0.0.1:8765").replace("//localhost:", "//127.0.0.1:");   // 127.0.0.1 avoids the Windows localhost→IPv6 resolution stall
     const live = { status: null, frame: null, strip: [], corners: [], cars: [], session: null, connected: false, err: false, loaded: null, loop: null, mode: null };
     // the LIVE effective mode (manual override, else daemon suggestion) — pushed to the daemon so its run-split rule matches what you see
     const liveEffMode = () => { const m = labModeSel(); return m !== "auto" ? m : ((live.mode && live.mode.suggest) || "free"); };
@@ -3327,10 +3349,19 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       live.loaded = null; carSel = null;   // a (re)connect may be a different daemon / session — never carry a loaded session or a car filter across
       live.connected = false; live.err = false; paintStatus();
       try { es = new EventSource(liveUrl + "/events"); } catch (e) { live.err = true; paintStatus(); return; }
-      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cornerLog = []; (d.corners || []).forEach(pushCornerLog); live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; if (!d.analysis || live.loaded !== d.analysis.id) live.loaded = null; live.connected = true; live.err = false; live.diskCache = {}; paintAll(true); onModeChanged(); if (d.analysis) loadFullSession(); });
+      es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); live.strip = d.strip || []; live.corners = d.corners || []; live.cornerLog = []; (d.corners || []).forEach(pushCornerLog); live.cars = d.cars || []; live.session = d.session || null; live.analysis = d.analysis || null; live.stint = d.stint || 0; live.tags = d.tags || {}; live.loop = d.loop || null; if (d.mode) live.mode = d.mode; if (!d.analysis || live.loaded !== d.analysis.id) live.loaded = null; live.connected = true; live.err = false; live.diskCache = {}; live.diskTune = {}; live.diskDiff = null; paintAll(true); onModeChanged(); if (d.analysis) loadFullSession(); });
       es.addEventListener("stint", (e) => { const d = JSON.parse(e.data); live.stint = d.n; paintStatus(); });
       es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
+      es.addEventListener("disk", (e) => {   // daemon pushed a fresh on-disk decode (car change or a new tune save)
+        const d = JSON.parse(e.data); live.diskCache = live.diskCache || {};
+        live.diskCache[d.ordinal] = d.available ? d : { available: false };
+        const changed = d.available ? applyDiskTune(d) : false;
+        if (d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
+        paintDiskDecode();
+        const activeOrd = live.frame && String(live.frame.car);
+        if (d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
+      });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label, role: d.role } }); paintStatus(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); live.analysisAt = Date.now(); if (live.dec) decReset(live.dec.cid); paintBanner(); loadFullSession(); });   // the analysis absorbed what the live tracker counted — start the live deltas again
       es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.cornerLog = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; paintAll(true); });

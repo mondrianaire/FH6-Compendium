@@ -332,7 +332,7 @@ class H(BaseHTTPRequestHandler):
             payload = {"available": False}
             if TUNE is not None and ordn is not None:
                 try:
-                    ordn = int(ordn); by_ord, _ = TUNE.scan_tunes(newest_only=True); metas = by_ord.get(ordn)
+                    ordn = int(ordn); metas, _ = TUNE.tunes_for_ordinal(ordn)
                     if metas:
                         names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
                         tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
@@ -501,6 +501,44 @@ def replay_loop(path, speed):
             ingest(p, t - tbase)
     print("[replay] done")
 
+def disk_watcher():
+    """Watch the FH save folder for the ACTIVE car and push a fresh decode (+ a diff vs the previous
+    save) over SSE the instant a new tune Data file appears. Saving a tune in-game then updates the
+    dashboard within ~1s, hands-free. Diff only fires on a genuine re-save of the same car, not a car change."""
+    if TUNE is None:
+        return
+    last = None
+    while True:
+        time.sleep(1.5)
+        try:
+            fr = ST.latest; ordn = fr and fr.get("car")
+            if not ordn:
+                continue
+            ordn = int(ordn)
+            metas, _ = TUNE.tunes_for_ordinal(ordn)
+            if not metas:
+                if last != (ordn, None):
+                    last = (ordn, None); ST.emit("disk", {"ordinal": ordn, "available": False})
+                continue
+            key = (ordn, round(metas[0]["mtime"], 2))
+            if key == last:
+                continue
+            new_save = bool(last and last[0] == ordn)   # same car + newer file = a fresh save
+            last = key
+            tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+            nm = names_load().get("cars", {}).get(str(ordn)) or {}
+            nm = nm.get("name") if isinstance(nm, dict) else nm
+            diff = None
+            if new_save and len(metas) >= 2:
+                try:
+                    diff = TUNE.tune_diff(TUNE.parse_tune(metas[1]["path"], ordinal_hint=ordn), tune)
+                except Exception:
+                    diff = None
+            ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": metas[0]["ts"], "available": True,
+                             "deliverable": TUNE.tune_to_deliverable(tune, nm), "diff": diff, "new_save": new_save})
+        except Exception:
+            pass
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=9876); ap.add_argument("--http", type=int, default=8765)
@@ -523,6 +561,8 @@ def main():
         ST.csv_path = os.path.abspath(a.replay); ST.replay = True   # analysis runs on the replayed file, capped at replay time
     srv = ThreadingHTTPServer(("127.0.0.1", a.http), H); srv.daemon_threads = True
     threading.Thread(target=srv.serve_forever, daemon=True).start()
+    if TUNE is not None:
+        threading.Thread(target=disk_watcher, daemon=True).start()   # push on-disk tune decode on save / car change
     print(f"[http] http://localhost:{a.http}/events  (SSE)  /session.json  /health")
     try:
         if a.replay: replay_loop(a.replay, a.speed); time.sleep(8)

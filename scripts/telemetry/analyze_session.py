@@ -60,6 +60,15 @@ PROBES = [  # key, label, required count, weight, hint when incomplete
     ("warm", "Tires warm (> 150 F) most of the run", 1, 0.5, "keep driving — tires still cold for most frames"),
 ]
 
+def dyno_band(c):
+    """The honest WOT dyno band, in 250-rpm bins: from idle+1750 rounded UP (the lugging / boost-lag fringe below adds nothing to the curve
+    match; WOT frames count from idle+1200 so every bin is reachable) up to 96% of redline OR the gearbox's measured upshift point, whichever
+    is lower (an automatic never sits above its shift rpm except at top speed)."""
+    lo = -(-((c.get("idle_rpm") or 1000) + 1750) // 250) * 250; hi = 0.96 * (c.get("max_rpm") or 0)
+    if c.get("shift_rpm"): hi = min(hi, c["shift_rpm"] + 125)
+    bins = [b for b in range(int(lo), int(hi), 250)] or [lo]
+    return bins
+
 def coverage_for(cid_, cars, corners, launches, braking, crests, pulses, top_pull, warm_frac):
     c = cars.get(cid_) or {}
     grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]
@@ -70,8 +79,7 @@ def coverage_for(cid_, cars, corners, launches, braking, crests, pulses, top_pul
         "crest": sum(1 for x in crests if x["car"] == cid_), "top": 1 if top_pull.get(cid_, 0) >= 5 else 0, "wiggle": sum(1 for x in pulses if x["car"] == cid_),
     }
     # dyno: practical WOT band from idle+1500 to 96% of redline (the top bin is the limiter you never sit on)
-    dyno = c.get("dyno") or []; lo = ((c.get("idle_rpm") or 1000) + 1500) // 250 * 250; hi = 0.96 * (c.get("max_rpm") or 0)
-    bins = [b for b in range(int(lo), int(hi), 250)] or [lo]; have = {d["rpm"] for d in dyno}
+    dyno = c.get("dyno") or []; bins = dyno_band(c); have = {d["rpm"] for d in dyno}
     counts["dyno"] = round(sum(1 for b in bins if b in have) / len(bins), 2)
     g = c.get("gears") or []; mx = max([x["gear"] for x in g], default=0); counts["gears"] = round(len(g) / mx, 2) if mx else 0
     counts["warm"] = round(warm_frac.get(cid_, 0), 2)
@@ -222,12 +230,14 @@ def decode_battery_for(cid_, cars, corners, launches, braking, crests, pulses, t
     grip = [x for x in corners if x["car"] == cid_ and not x["drift"]]
     gl = {g["gear"]: g["n"] for g in (c.get("gears") or [])}
     mx = max(gl, default=0)
-    dyno = c.get("dyno") or []; lo = ((c.get("idle_rpm") or 1000) + 1500) // 250 * 250; hi = 0.96 * (c.get("max_rpm") or 0)
-    dbins = [b for b in range(int(lo), int(hi), 250)] or [lo]; have = {d["rpm"] for d in dyno}
+    dyno = c.get("dyno") or []; dbins = dyno_band(c); have = {d["rpm"] for d in dyno}
+    miss_bins = [b for b in dbins if b not in have]; miss_gears = [g for g in range(1, mx + 1) if gl.get(g, 0) < 15]
+    dyno_detail = (f"missing rpm: {', '.join(str(b) for b in miss_bins)} — roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones" if miss_bins else None)
+    if c.get("shift_rpm"): dyno_detail = (dyno_detail or "") + f" · band capped at your gearbox's upshift point (~{int(c['shift_rpm'])} rpm)"
     TESTS = [
         ("launch", "Standing launch", sum(1 for x in launches if x["car"] == cid_), 1, "mass index · diff center split · accel spin", ["Weight (mass index)"]),
-        ("gears", "Full gear ladder", sum(1 for g in gl if gl[g] >= 15), max(mx, 1), "WOT time in every gear", ["Transmission", "Gear ratios (tune)"]),
-        ("dyno", "Dyno rev sweep", sum(1 for b in dbins if b in have), len(dbins), "full-throttle through the whole rev range", ["Total output target", "Aspiration"]),
+        ("gears", "Full gear ladder", sum(1 for g in gl if gl[g] >= 15), max(mx, 1), "WOT time in every gear" + (f" — missing gear {', '.join(map(str, miss_gears))}" if miss_gears and mx else ""), ["Transmission", "Gear ratios (tune)"]),
+        ("dyno", "Dyno rev sweep", sum(1 for b in dbins if b in have), len(dbins), "full-throttle through the usable rev range" + (" — " + dyno_detail if dyno_detail else ""), ["Total output target", "Aspiration"]),
         ("top", "Top-speed pull", 1 if top_pull.get(cid_, 0) >= 5 else 0, 1, "hold top gear WOT 5 s", ["Gear ratios (tune)", "Aero presence hint"]),
         ("brake", "Hard stops from 80+", sum(1 for x in braking if x["car"] == cid_ and x["mph_start"] >= 80), 2, "threshold brake — balance / lock threshold", ["Brakes"]),
         ("hairpin", "Hairpin", sum(1 for x in grip if x["mph_min"] < 45), 1, "low-speed mechanical balance", ["Springs / ARBs (behaviour)"]),
@@ -340,10 +350,15 @@ def main():
         c = cars.setdefault(k, {"id": k, "ordinal": r["CarOrdinal"], "pi": r["CarPI"], "class": CLASS.get(r["CarClass"], str(r["CarClass"])), "drivetrain": DRIVE.get(r["DrivetrainType"], "?"),
                                 "cyl": r["NumCylinders"], "max_rpm": round(r["EngineMaxRpm"]), "idle_rpm": round(r["EngineIdleRpm"]), "car_group": r["CarGroup"],
                                 "name": (NAMES.get(str(r["CarOrdinal"])) or {}).get("name"),
-                                "live_frames": 0, "_gear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "temps_max_f": {w: 0 for w in W}})
+                                "live_frames": 0, "_gear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "_shift": [], "_prev": None, "temps_max_f": {w: 0 for w in W}})
         c["live_frames"] += 1; c["_boost"] = max(c["_boost"], r["Boost"])
         for w in W: c["temps_max_f"][w] = max(c["temps_max_f"][w], r["TireTempF" + w])
-        if r["Accel"] > 230 and r["CurrentEngineRpm"] > 2500 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10:
+        # gearbox upshift point (automatic): rpm of the last WOT frame before a gear change (gear 11 = shift transient)
+        pv = c["_prev"]
+        if pv is not None and pv["Accel"] > 230 and 1 <= pv["Gear"] <= 9 and (r["Gear"] == 11 or r["Gear"] == pv["Gear"] + 1) and pv["CurrentEngineRpm"] > 0.5 * pv["EngineMaxRpm"]: c["_shift"].append(pv["CurrentEngineRpm"])
+        c["_prev"] = r
+        # WOT frames for the dyno / ladder: anything above idle+1200 (the dyno band below starts at idle+1500, so every bin is reachable)
+        if r["Accel"] > 230 and r["CurrentEngineRpm"] > r["EngineIdleRpm"] + 1200 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10:
             c["_gear"][r["Gear"]].append(r["Speed"] / r["CurrentEngineRpm"])
             c["_dyno"][int(r["CurrentEngineRpm"] // 250) * 250].append((r["Power"] / 745.7, r["Torque"] * 0.7376))
             if 6 < r["Speed"] < 20 and r["AccelZ"] > 1.5 and all(abs(r["SlipRatio" + w]) < 0.3 for w in W) and r["Power"] > 10000:
@@ -362,12 +377,13 @@ def main():
         c["live_s"] = round(c["live_frames"] / max(sess["rate_pps"], 1), 1)
         for w in W: c["temps_max_f"][w] = round(c["temps_max_f"][w])
         pk = max(c["dyno"], key=lambda d: d["hp"]) if c["dyno"] else None
+        c["shift_rpm"] = round(statistics.median(c["_shift"]), -1) if len(c["_shift"]) >= 3 else None   # automatic's upshift point — caps the usable dyno band
         c["sig"] = {"boost_max": round(c["_boost"], 1), "hp_peak": pk["hp"] if pk else None, "rpm_at_peak": pk["rpm"] if pk else None,
                     "tq_peak": max((d["tq"] for d in c["dyno"]), default=None), "gear_count": len(lad), "ladder": [g["rel"] for g in lad],
-                    "mass_idx": round(statistics.median(c["_mass"])) if len(c["_mass"]) >= 15 else None}
+                    "mass_idx": round(statistics.median(c["_mass"])) if len(c["_mass"]) >= 15 else None, "shift_rpm": c["shift_rpm"]}
         key = f'{c["ordinal"]}|{c["drivetrain"]}|{c["cyl"]}|{c["pi"]}|{round(c["max_rpm"], -2)}|{len(lad)}|{",".join(f"{g["rel"]:.1f}" for g in lad)}|{round((c["sig"]["hp_peak"] or 0), -1)}'
         c["build_id"] = hashlib.md5(key.encode()).hexdigest()[:8]
-        for k in ("_gear", "_dyno", "_k", "_boost", "_mass"): del c[k]
+        for k in ("_gear", "_dyno", "_k", "_boost", "_mass", "_shift", "_prev"): del c[k]
     sess["cars"] = sorted(cars.values(), key=lambda c: -c["live_frames"]); sess["segments"] = segments
 
     # ---- impacts / zero windows ----
@@ -647,13 +663,13 @@ def main():
         car0 = cars.get(co["cars"][0]) if co["cars"] else {}
         gl = defaultdict(int); rpm_bins = set(); top_s = 0.0; prevt = None; wig = 0
         for r in loop_rows:
-            if r["Accel"] > 230 and r["CurrentEngineRpm"] > 2500 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10:
+            if r["Accel"] > 230 and r["CurrentEngineRpm"] > r["EngineIdleRpm"] + 1200 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10:
                 gl[r["Gear"]] += 1; rpm_bins.add(int(r["CurrentEngineRpm"] // 250) * 250)
                 if car0.get("gears") and r["Gear"] == max((g["gear"] for g in car0["gears"]), default=99) and prevt is not None: top_s += max(0.0, min(0.2, r["t"] - prevt))
             prevt = r["t"]
         pulses_here = [p for p in pulses if inwin(p["t"], evs) and p["car"] in co["cars"]]; wig = len(pulses_here)
         mx = max((g["gear"] for g in (car0.get("gears") or [])), default=0)
-        lo = ((car0.get("idle_rpm") or 1000) + 1500) // 250 * 250; hi = 0.96 * (car0.get("max_rpm") or 0); dbins = [b for b in range(int(lo), int(hi), 250)] or [lo]
+        dbins = dyno_band(car0)
         DB_TESTS = [
             ("launch", "Standing launch", counts["launch"], 1, "launch → mass, diff center split, accel spin"),
             ("gears", "Full gear ladder", sum(1 for g in gl if gl[g] >= 15), max(mx, 1), "WOT time in every gear → gearing tab"),

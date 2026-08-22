@@ -2544,7 +2544,7 @@
       return `<div class="card-row" style="margin-top:0"><strong>🧬 Decode progress — ${roleLbl || ""}${esc(carName(c) || "#" + c.ordinal)}</strong><span class="chip" style="border-color:${col};color:${col}">${d.pct >= 1 ? "ALL TESTS CAPTURED" : d.ready_n + "/" + d.total + " tests"}</span></div>
         <div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${d.pct * 100}%;background:${col}"></i></div>
         <div style="display:flex;flex-wrap:wrap;gap:4px">${d.tests.map((t) => `<span class="chip" title="${esc(t.why)} — unlocks: ${t.unlocks.join(", ")}" style="border-color:${t.ok ? "#00d27a" : "var(--warn,#e3b341)"};color:${t.ok ? "#00d27a" : "var(--warn,#e3b341)"}">${t.ok ? "✓" : "○"} ${t.label} ${t.have}/${t.need}</span>`).join("")}</div>
-        ${d.missing.length ? `<p class="why" style="font-size:10.5px;margin:5px 0 0">to finish the clone capture: <b>${d.missing.join(" · ")}</b> — anywhere, any road; only these tests gate the sheet</p>` : `<p class="why" style="font-size:10.5px;margin:5px 0 0;color:#00d27a">battery complete — the clone sheet is fully unlocked</p>`}`;
+        ${d.missing.length ? `<p class="why" style="font-size:10.5px;margin:5px 0 0">to finish the clone capture: ${d.tests.filter((t) => !t.ok).map((t) => `<b>${t.label}</b> ${t.have}/${t.need}${t.why.includes(" — ") ? ` <span style="color:var(--warn,#e3b341)">(${esc(t.why.split(" — ").slice(1).join(" — "))})</span>` : ""}`).join(" · ")} — anywhere, any road; only these tests gate the sheet</p>` : `<p class="why" style="font-size:10.5px;margin:5px 0 0;color:#00d27a">battery complete — the clone sheet is fully unlocked</p>`}`;
     };
     const cloneSheetHtml = (c) => {
       const cs = c.clone_sheet; if (!cs) return "";

@@ -2757,6 +2757,28 @@
     };
     const confCol = (v) => (v >= 0.8 ? "#00d27a" : v >= 0.6 ? "#e3b341" : "#e5414e");
     // the DELIVERABLE: every row = what to install / match + a confidence EARNED from independent, consistent measurements (+ what to drive to raise it)
+    // ---- SHOP CAPTURE: the daemon serves your in-game screenshots; fill the 'shop check' fields (widths, compound, aero…) while viewing them, saved to the build record ----
+    const SHOP_CAPTURE = [
+      { group: "My Cars pane", pane: true, fields: [["pi", "PI"], ["power_hp", "Power (hp)"], ["torque_lbft", "Torque (lb-ft)"], ["weight_lb", "Weight (lb)"], ["front_pct", "Front %"], ["compound", "Compound"], ["suspension", "Suspension"], ["displacement_l", "Displacement (L)"]] },
+      { group: "Tires & Rims", menu: "Tires & Rims", fields: [["Tire compound"], ["Front tire width"], ["Rear tire width"], ["Rim style"], ["Front track width"], ["Rear track width"]] },
+      { group: "Aero & Appearance", menu: "Aero & Appearance", fields: [["Front bumper / splitter"], ["Rear wing"], ["Other body parts"]] },
+      { group: "Conversions", menu: "Conversions", fields: [["Body kit"]] },
+    ];
+    let shotEnlarged = null;
+    const refreshShots = () => { fetch(liveUrl + "/shots?n=24").then((r) => r.json()).then((d) => { live.shots = d.shots || []; live.shotsDirs = d.dirs || []; const el = host.querySelector("#lvShopCapture"); if (el && el.dataset.cid) el.innerHTML = shopCaptureInner(el.dataset.cid); bindBody(host.querySelector("#lvShopCapture") || host); }).catch(() => {}); };
+    const savedVal = (rec, group, slot, paneKey) => { if (!rec) return null; if (paneKey) return (rec.pane || {})[paneKey]; const items = (rec.parts || {})[group] || []; const row = items.find((it) => it.slot === slot); return row ? row.installed : null; };
+    const buildRecordFor = (cid) => (DB.builds || (window.__builds ||= {}))[cid] || (arr(S(), "cars").find((c) => c.id === cid) || {}).build_record || null;
+    const shopCaptureInner = (cid) => {
+      const rec = (live.session && (arr(S(), "cars").find((c) => c.id === cid) || {}).build_record) || null;
+      const shots = live.shots || []; const now = Date.now() / 1000; const recent = shots.filter((s) => now - s.mtime < 3600).length;
+      const gallery = shots.length ? `<div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0">${shots.slice(0, 16).map((s) => `<img data-shot="${esc(s.url)}" src="${liveUrl}${esc(s.url)}" title="${esc(s.id)}" style="height:70px;border-radius:6px;border:1px solid var(--line);cursor:pointer;flex:0 0 auto">`).join("")}</div>${shotEnlarged ? `<div style="margin:6px 0"><img src="${liveUrl}${esc(shotEnlarged)}" style="max-width:100%;max-height:420px;border-radius:8px;border:1px solid var(--accent2)"> <span class="chip" data-shot-close="1" style="cursor:pointer">✕ close</span></div>` : ""}`
+        : `<p class="why" style="font-size:11px">No screenshots found in ${(live.shotsDirs || []).map((d) => `<code>${esc(d.split(/[\\/]/).slice(-2).join("/"))}</code>`).join(", ") || "the watched folders"}. Take an in-game screenshot (Xbox Game Bar <b>Win+Alt+PrtScn</b>, or your ShareX hotkey) and press ↻.</p>`;
+      const form = SHOP_CAPTURE.map((g) => `<div style="margin-top:8px"><div style="font-size:11px;font-weight:700;color:var(--accent2)">${g.group}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 10px;margin-top:3px">${g.fields.map(([slot, label]) => { const val = savedVal(rec, g.group, slot, g.pane ? slot : null) ?? ""; return `<label style="font-size:11px;display:flex;justify-content:space-between;align-items:center;gap:5px">${label || slot}<input data-shopcid="${esc(cid)}" data-shoppane="${g.pane ? slot : ""}" data-shopmenu="${g.pane ? "" : esc(g.menu)}" data-shopslot="${g.pane ? "" : esc(slot)}" value="${esc(String(val))}" placeholder="from the shot" style="width:88px;padding:2px 5px;border-radius:4px;border:1px solid ${val ? "#00d27a" : "var(--line)"};background:var(--bg2);color:var(--txt);font-size:11px"></label>`; }).join("")}</div></div>`).join("");
+      return `<div class="card-row" style="margin-top:0"><strong style="font-size:13px">📸 Shop capture — fill the 🔍 shop-check data from screenshots</strong><span><span class="chip" title="${recent} shot(s) in the last hour">${shots.length} shots</span> <button class="lab-mode" id="lvShotRefresh" style="padding:2px 8px;font-size:11px">↻ refresh</button></span></div>
+        <p class="why" style="font-size:10.5px;margin:2px 0 6px">Open the in-game <b>upgrade shop</b> / <b>My Cars pane</b> / <b>tune tabs</b>, screenshot each (Win+Alt+PrtScn), press ↻, click a thumbnail to enlarge, then type the values below — saved straight to this car's build record; the Clone Sheet's 🔍 rows turn ✅.</p>
+        ${gallery}${form}`;
+    };
+    const shopCapture = (cid) => cid ? `<div class="block" style="border-color:var(--accent2)"><div id="lvShopCapture" data-cid="${esc(cid)}">${shopCaptureInner(cid)}</div></div>` : "";
     const cloneSheetHtml = (c) => {
       const cs = c.clone_sheet; if (!cs) return "";
       const gateLbl = Object.fromEntries((c.decode ? c.decode.tests : []).map((t) => [t.key, t.label]));
@@ -2931,6 +2953,7 @@
           const sheet = D.clone_sheet ? `<div class="block" style="${done ? "border-color:#00d27a" : ""}">${cloneSheetHtml(D)}</div>` : "";
           // DELIVERABLE MODE: once every test is captured the sheet leads and the battery folds away
           return done ? `${sheet}<div class="block" style="border-color:#e3b341"><details><summary style="cursor:pointer;font-size:12px"><b>🧬 Decode progress — ${esc(carName(D) || "")}</b> <span class="chip" style="border-color:#00d27a;color:#00d27a">ALL TESTS CAPTURED</span> <span class="why">capture complete — the sheet above is the deliverable; expand for the per-test battery</span></summary>${D.decode ? decodePanel(D, lbl) : ""}</details></div>` : `${prog}${sheet}`; })()}
+        ${isLive ? shopCapture(D.id) : ""}
         <div class="block"><h3 style="margin-top:0">⚖️ Bench — donor vs replica, maneuver by maneuver</h3>
         <div class="lab-bench">
           <div><h3 style="margin-top:0;font-size:14px">⚙️ Gear ladder</h3>${chart([{ pts: lad(donor, D, stintsD), col: dC, label: "A" }, { pts: lad(replica, R, stints), col: rC, label: "B" }], { xl: "gear", yl: "m/s per krpm", w: 380 })}</div>
@@ -3271,6 +3294,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") { live._donorPick = donor; const ls = liveSess(); const p = PIN(); pinDonor(ls && car(ls, donor) ? ls : (p && p.data && car(p.data, donor) ? p.data : null), donor); paintSections(true); paintBanner(); } else render(); }));
       bindAtlas(r);
       r.querySelectorAll("[data-tunecid]").forEach((inp) => inp.addEventListener("change", () => { setTune(inp.dataset.tunecid, inp.dataset.tunesl, inp.value); if (src === "live") paintSections(true); else render(); }));
+      const shopEl = r.querySelector("#lvShopCapture") || (r.id === "lvShopCapture" ? r : null);
+      if (shopEl && !live.shots) refreshShots();
+      const sref = r.querySelector("#lvShotRefresh"); if (sref) sref.addEventListener("click", refreshShots);
+      r.querySelectorAll("[data-shot]").forEach((im) => im.addEventListener("click", () => { shotEnlarged = shotEnlarged === im.dataset.shot ? null : im.dataset.shot; const el = host.querySelector("#lvShopCapture"); if (el) { el.innerHTML = shopCaptureInner(el.dataset.cid); bindBody(el); } }));
+      r.querySelectorAll("[data-shot-close]").forEach((b) => b.addEventListener("click", () => { shotEnlarged = null; const el = host.querySelector("#lvShopCapture"); if (el) { el.innerHTML = shopCaptureInner(el.dataset.cid); bindBody(el); } }));
+      r.querySelectorAll("[data-shopcid]").forEach((inp) => inp.addEventListener("change", () => { const body = { cid: inp.dataset.shopcid, value: inp.value.trim() || null }; if (inp.dataset.shoppane) body.pane_key = inp.dataset.shoppane; else { body.menu = inp.dataset.shopmenu; body.slot = inp.dataset.shopslot; } if (shotEnlarged) body.shot = shotEnlarged;
+        fetch(liveUrl + "/build-field", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r2) => r2.json()).then((res) => { if (res.ok !== false) { inp.style.borderColor = "#00d27a"; inp.title = "saved ✓ — re-analyses shortly"; } }).catch(() => {}); }));
       r.querySelectorAll("[data-role]").forEach((b) => b.addEventListener("click", () => { const rl = b.dataset.role; const n = live.stint || (live.frame && live.frame.stint) || 0; if (!n) return;
         fetch(liveUrl + "/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: rl, stint: n }) }).then(() => {
           live.tags = Object.assign({}, live.tags); Object.keys(live.tags).forEach((k) => { if (live.tags[k] && live.tags[k].role === rl) live.tags[k] = Object.assign({}, live.tags[k], { role: null }); }); live.tags[String(n)] = Object.assign({}, live.tags[String(n)], { role: rl });

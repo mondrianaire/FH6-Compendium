@@ -284,8 +284,26 @@ class H(BaseHTTPRequestHandler):
             body = json.dumps(ST.session_json or {}).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/health"):
-            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys())}).encode()
+            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None))}).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/shots"):   # recent in-game screenshots from the watched folder(s), newest first
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query); n = int((q.get("n") or ["24"])[0])
+            imgs = []
+            for d in getattr(ST, "shots_dirs", []) or []:
+                try:
+                    for fn in os.listdir(d):
+                        if fn.lower().rsplit(".", 1)[-1] in ("png", "jpg", "jpeg", "bmp", "webp"):
+                            p = os.path.join(d, fn); st_ = os.stat(p); imgs.append({"id": fn, "dir": d, "mtime": round(st_.st_mtime, 1), "size": st_.st_size, "url": "/shot?f=" + _up.quote(fn)})
+                except Exception: pass
+            imgs.sort(key=lambda x: -x["mtime"]); body = json.dumps({"dirs": getattr(ST, "shots_dirs", []), "shots": imgs[:n]}).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/shot"):   # serve one screenshot by filename (from the watched dirs only — no traversal)
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query); fn = os.path.basename((q.get("f") or [""])[0])
+            path = next((os.path.join(d, fn) for d in getattr(ST, "shots_dirs", []) or [] if os.path.isfile(os.path.join(d, fn))), None)
+            if not path: self.send_response(404); self._cors(); self.end_headers(); return
+            ct = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "bmp": "image/bmp", "webp": "image/webp"}.get(fn.lower().rsplit(".", 1)[-1], "application/octet-stream")
+            data = open(path, "rb").read()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", ct); self.send_header("Content-Length", str(len(data))); self.send_header("Cache-Control", "no-cache"); self.end_headers(); self.wfile.write(data)
         else:
             self.send_response(404); self._cors(); self.end_headers()
     def do_OPTIONS(self):
@@ -320,6 +338,29 @@ class H(BaseHTTPRequestHandler):
             m = body.get("mode"); ST.lab_mode = m if m in ("course", "decode", "free") else None; ok = True   # effective lab mode from the dashboard (auto-detected or manual override)
         elif self.path.startswith("/new-run"):
             ST._force_split = True; ok = True   # split at the next driving frame (after a slider change in Decode / Free mode)
+        elif self.path.startswith("/build-field") and body.get("cid"):   # save a 'shop check' value (from a screenshot) into the build record data/builds/<cid>.json
+            try:
+                import re as _re2
+                bdir = os.path.join(ROOT, "data", "builds"); os.makedirs(bdir, exist_ok=True)
+                fn = _re2.sub(r"[^A-Za-z0-9._-]+", "_", str(body["cid"])) + ".json"; bp = os.path.join(bdir, fn)   # '|' is illegal in Windows filenames — the real cid is kept in the JSON
+                if os.path.exists(bp):
+                    with open(bp, encoding="utf-8") as f: rec = json.load(f)
+                else:
+                    tp = os.path.join(bdir, "_template.json")
+                    rec = json.load(open(tp, encoding="utf-8")) if os.path.exists(tp) else {"parts": {}, "pane": {}}
+                    rec["cid"] = str(body["cid"]); rec["car_ordinal"] = int(str(body["cid"]).split("|")[0]); rec.pop("_purpose", None)
+                rec.setdefault("captured", time.strftime("%Y-%m-%d")); rec["source"] = "dashboard shop-capture (screenshots)"; rec["updated"] = time.strftime("%Y-%m-%d %H:%M")
+                if body.get("pane_key") is not None: rec.setdefault("pane", {})[str(body["pane_key"])] = body.get("value")
+                elif body.get("menu") and body.get("slot"):
+                    items = rec.setdefault("parts", {}).setdefault(str(body["menu"]), [])
+                    row = next((it for it in items if it.get("slot") == body["slot"]), None)
+                    if row is None: row = {"slot": body["slot"]}; items.append(row)
+                    row["installed"] = body.get("value");
+                    if body.get("shot"): row["shot"] = body["shot"]
+                elif body.get("tune_tabs") is not None: rec["tune_tabs"] = body["tune_tabs"]
+                with open(bp + ".tmp", "w", encoding="utf-8") as f: json.dump(rec, f, indent=1, ensure_ascii=False)
+                os.replace(bp + ".tmp", bp); ok = True
+            except Exception as ex_: print("build-field not saved:", repr(ex_), file=sys.stderr); ok = False
         elif self.path.startswith("/mark-start") and body.get("name"):
             if ST.last_pos is None: ok = False
             else:
@@ -414,7 +455,13 @@ def main():
     ap.add_argument("--port", type=int, default=9876); ap.add_argument("--http", type=int, default=8765)
     ap.add_argument("--out", default=os.path.join(ROOT, "captures")); ap.add_argument("--replay"); ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--no-csv", action="store_true")
+    ap.add_argument("--shots-dir", action="append", help="folder(s) of in-game screenshots to serve to the dashboard (repeatable); defaults to Pictures/Screenshots + Videos/Captures")
     a = ap.parse_args()
+    # screenshot folders for the dashboard's shop-capture panel — default to the common Windows capture locations
+    home = os.path.expanduser("~")
+    defaults = [os.path.join(home, "Pictures", "Screenshots"), os.path.join(home, "Videos", "Captures"), os.path.join(home, "Documents", "ShareX", "Screenshots")]
+    ST.shots_dirs = [d for d in (a.shots_dir or defaults) if os.path.isdir(d)]
+    if ST.shots_dirs: print("[shots] serving screenshots from:", " · ".join(ST.shots_dirs))
     if not a.no_csv and not a.replay:
         os.makedirs(a.out, exist_ok=True)
         ST.csv_path = os.path.join(a.out, f"fh6_{time.strftime('%Y%m%d_%H%M%S')}.csv")

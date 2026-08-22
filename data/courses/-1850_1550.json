@@ -11,7 +11,7 @@
    "dir": "L",
    "type": "hairpin",
    "radius_m": 16,
-   "n": 6,
+   "n": 12,
    "best": {
     "mph_in": 83,
     "mph_min": 37,
@@ -101,7 +101,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 60,
-   "n": 3,
+   "n": 6,
    "best": {
     "mph_in": 83,
     "mph_min": 74,
@@ -191,7 +191,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 48,
-   "n": 4,
+   "n": 8,
    "best": {
     "mph_in": 100,
     "mph_min": 62,
@@ -281,7 +281,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 41,
-   "n": 2,
+   "n": 4,
    "best": {
     "mph_in": 77,
     "mph_min": 63,
@@ -371,7 +371,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 60,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 63,
     "mph_min": 63,
@@ -461,7 +461,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 39,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 84,
     "mph_min": 64,
@@ -551,7 +551,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 82,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 88,
     "mph_min": 75,
@@ -641,7 +641,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 31,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 64,
     "mph_min": 50,

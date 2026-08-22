@@ -331,6 +331,21 @@ class H(BaseHTTPRequestHandler):
         elif self.path.startswith("/clear-loop"):
             with ST.lock: ST.loop = None; ST.loop_lap = 0
             ST.emit("loop", {"name": None}); ok = True
+        elif self.path.startswith("/course-expected") and body.get("route_key") is not None:
+            import re as _re
+            mp = os.path.join(ROOT, "data", "courses", _re.sub(r"[^A-Za-z0-9_.-]+", "_", str(body["route_key"])) + ".json")   # ground-truth turn count → persists in the course model; next analysis cross-checks
+            try:
+                m = {}
+                if os.path.exists(mp):
+                    with open(mp, encoding="utf-8") as f: m = json.load(f)
+                n = body.get("n")
+                if n in (None, "", 0): m.pop("expected_turns", None)
+                else: m["expected_turns"] = int(n)
+                if m:
+                    with open(mp + ".tmp", "w", encoding="utf-8") as f: json.dump(m, f, indent=1, ensure_ascii=False)
+                    os.replace(mp + ".tmp", mp)
+                ok = True
+            except Exception as ex_: print("course-expected not saved:", repr(ex_), file=sys.stderr)
         elif self.path.startswith("/route") and body.get("route_key") and body.get("name"):
             rp = os.path.join(ROOT, "data", "routes.json")
             try:

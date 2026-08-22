@@ -11,7 +11,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 173,
-   "n": 3,
+   "n": 6,
    "best": {
     "mph_in": 157,
     "mph_min": 157,
@@ -103,7 +103,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 45,
-   "n": 3,
+   "n": 6,
    "best": {
     "mph_in": 88,
     "mph_min": 53,
@@ -195,7 +195,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 104,
-   "n": 3,
+   "n": 6,
    "best": {
     "mph_in": 94,
     "mph_min": 94,
@@ -287,7 +287,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 198,
-   "n": 2,
+   "n": 4,
    "best": {
     "mph_in": 159,
     "mph_min": 123,
@@ -379,7 +379,7 @@
    "dir": "R",
    "type": "hairpin",
    "radius_m": 45,
-   "n": 3,
+   "n": 6,
    "best": {
     "mph_in": 102,
     "mph_min": 42,
@@ -471,7 +471,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 196,
-   "n": 3,
+   "n": 6,
    "best": {
     "mph_in": 117,
     "mph_min": 117,
@@ -563,7 +563,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 128,
-   "n": 3,
+   "n": 6,
    "best": {
     "mph_in": 126,
     "mph_min": 126,
@@ -655,7 +655,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 111,
-   "n": 2,
+   "n": 4,
    "best": {
     "mph_in": 111,
     "mph_min": 111,
@@ -747,7 +747,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 173,
-   "n": 2,
+   "n": 4,
    "best": {
     "mph_in": 137,
     "mph_min": 137,
@@ -839,7 +839,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 106,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 106,
     "mph_min": 106,
@@ -929,7 +929,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 104,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 86,
     "mph_min": 85,
@@ -1019,7 +1019,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 128,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 104,
     "mph_min": 104,
@@ -1109,7 +1109,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 117,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 143,
     "mph_min": 114,
@@ -1199,7 +1199,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 114,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 87,
     "mph_min": 87,
@@ -1289,7 +1289,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 73,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 53,
     "mph_min": 53,
@@ -1379,7 +1379,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 112,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 139,
     "mph_min": 116,
@@ -1469,7 +1469,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 213,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 133,
     "mph_min": 133,
@@ -1559,7 +1559,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 85,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 127,
     "mph_min": 79,
@@ -1649,7 +1649,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 370,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 137,
     "mph_min": 137,
@@ -1739,7 +1739,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 122,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 56,
     "mph_min": 56,
@@ -1829,7 +1829,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 103,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 126,
     "mph_min": 107,
@@ -1919,7 +1919,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 165,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 117,
     "mph_min": 117,
@@ -2009,7 +2009,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 183,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 116,
     "mph_min": 116,

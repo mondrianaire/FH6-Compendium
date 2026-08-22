@@ -1030,6 +1030,16 @@ def main():
         def geo_near(x, z):
             if not geo: return None
             return next((g["id"] for g in geo["turns"] if math.hypot(g["apex"][0] - x, g["apex"][1] - z) <= max(60, g["len_m"] / 2 + 20)), None)   # anywhere within the turn's span
+        # ---- COURSE MODEL (persistent, data/courses/<route>.json): loaded BEFORE clustering so turn membership can use cross-session (track) presence ----
+        mdir = os.path.join(ROOT, "data", "courses"); mpath = os.path.join(mdir, re.sub(r"[^A-Za-z0-9_.-]+", "_", key) + ".json")
+        write_models = "_replay_analysis" not in os.path.abspath(outdir)
+        model = {"route_key": key, "name": co["name"], "turns": [], "laps": 0, "sessions": [], "updated": None}
+        try:
+            if os.path.exists(mpath):
+                with open(mpath, encoding="utf-8") as f: model = json.load(f)
+        except Exception: pass
+        def mturn_for(cl):   # model turn within 40 m of this cluster's apex
+            return next((t for t in model["turns"] if (t["pos"][0] - cl["x"]) ** 2 + (t["pos"][1] - cl["z"]) ** 2 <= 40 ** 2), None)
         # corner identity: cluster this course's corners by apex position (40 m), order along the route, aggregate per physical corner
         clusters = []
         for c in sorted(cc, key=lambda c: c["t0"]):
@@ -1050,7 +1060,18 @@ def main():
             cl["multi"] = round(sum(1 for v in lh.values() if v >= 2) / max(1, len(lh)), 2)   # share of its laps where this turn was detected MORE than once = taken messily
             cl["per_lap"] = [lh.get(li, 0) for li in range(total_laps)]
         for cl in clusters: lap_stats(cl)
-        strong = [cl for cl in clusters if cl["presence"] >= 0.5]; weak = [cl for cl in clusters if cl["presence"] < 0.5]; possible = []
+        # a cluster is a real TURN if it shows up on most laps THIS session OR it is an established turn ACROSS sessions (track presence).
+        # Deciding on track presence (not just this session) both promotes turns you take inconsistently AND stops the count changing every session.
+        prior_laps = model.get("laps", 0)   # all track laps BEFORE this session (model is updated later)
+        def track_pres(cl):
+            mt_ = mturn_for(cl); t_ = (mt_ or {}).get("track") or {}
+            add_seen = cl.get("laps_seen", 0); tot = prior_laps + total_laps
+            pres = (t_.get("laps_seen", 0) + add_seen) / tot if tot else 0.0
+            return pres, (t_.get("sessions", 0) + 1)
+        def is_turn(cl):
+            if cl["presence"] >= 0.5: return True
+            tp, ts = track_pres(cl); return tp >= 0.4 and ts >= 2   # established across >= 2 sessions on >= 40% of all track laps
+        strong = [cl for cl in clusters if is_turn(cl)]; weak = [cl for cl in clusters if not is_turn(cl)]; possible = []
         for cl in weak:   # a low-presence cluster within 80 m (along the route) of a strong turn is a FRAGMENT of it — absorbed; otherwise a 'possible' turn
             d_cl = med([m["dist"] for m in cl["members"]]) or 0
             near = min(strong, key=lambda s_: abs((med([m["dist"] for m in s_["members"]]) or 0) - d_cl), default=None)
@@ -1066,19 +1087,16 @@ def main():
         conf_laps = strength(total_laps, 3)   # 0.33 at 1 lap · 0.55 at 2 · 0.70 at 3 · 0.91 at 6
         agree = 1.0 - 0.5 * (len(possible) / max(1, len(strong) + len(possible))) - 0.3 * (sum(cl["multi"] for cl in strong) / max(1, len(strong)))
         turn_conf = round(conf_laps * max(0.3, agree), 2)
-        turns_info = {"count": len(strong), "possible": len(possible), "confidence": turn_conf, "laps": total_laps, "per_lap_detections": per_lap_det, "messy": messy,
-                      "note": (f"{total_laps} lap{'s' if total_laps != 1 else ''} — drive {max(0, 3 - total_laps)} more to confirm the turn count" if total_laps < 3 else "turn count confirmed across laps" if not possible else f"{len(possible)} possible turn{'s' if len(possible) != 1 else ''} seen on a minority of laps — keep lapping to confirm or drop them") + (f" · {', '.join(messy)} often split into several detections (taken inconsistently)" if messy else "")}
+        expected = model.get("expected_turns")   # player-declared ground truth (data/courses/<route>.json "expected_turns") — the model converges toward it
+        # headline count = the ESTABLISHED turns of the TRACK (>=40% of all track laps over >=2 sessions), not just what THIS session detected — so it is stable
+        est_prior = sum(1 for t in model.get("turns", []) if ((t.get("track") or {}).get("sessions", 0)) >= 2 and prior_laps and ((t.get("track") or {}).get("laps_seen", 0) / prior_laps) >= 0.4)
+        new_here = sum(1 for cl in strong if mturn_for(cl) is None)
+        track_turns = max(est_prior + new_here, len(strong)) if len(model.get("sessions", [])) >= 2 else len(strong)
+        detected_here = len(strong)
+        turns_info = {"count": track_turns, "detected_here": detected_here, "possible": len(possible), "confidence": turn_conf, "laps": total_laps, "per_lap_detections": per_lap_det, "messy": messy, "expected": expected,
+                      "note": ((f"you count {expected}; the track has {track_turns} established" + (" — match" if expected == track_turns else f", {'+' if track_turns > expected else ''}{track_turns - expected}" + (f" · {len(possible)} possible could close the gap — lap consistently" if track_turns < expected and possible else "")) + " · ") if expected else "") + (f"{track_turns} turns on record" + (f" · {detected_here} caught this session" if detected_here != track_turns else "") + " · " if len(model.get("sessions", [])) >= 2 else "") + (f"{total_laps} lap{'s' if total_laps != 1 else ''} — drive {max(0, 3 - total_laps)} more to confirm the turn count" if total_laps < 3 else "turn count confirmed across laps" if not possible else f"{len(possible)} possible turn{'s' if len(possible) != 1 else ''} seen on a minority of laps — keep lapping to confirm or drop them") + (f" · {', '.join(messy)} often split into several detections (taken inconsistently)" if messy else "")}
         laps_info = {"total": total_laps, "windows": lap_windows, "per_event": [sum(1 for w in lap_windows if w["ev"] == ei) for ei in range(len(evs))]}
-        # ---- COURSE MODEL (persistent, data/courses/<route>.json): what each turn IS — geometry + the best clean execution ever seen on it, across sessions ----
-        mdir = os.path.join(ROOT, "data", "courses"); mpath = os.path.join(mdir, re.sub(r"[^A-Za-z0-9_.-]+", "_", key) + ".json")
-        write_models = "_replay_analysis" not in os.path.abspath(outdir)
-        model = {"route_key": key, "name": co["name"], "turns": [], "laps": 0, "sessions": [], "updated": None}
-        try:
-            if os.path.exists(mpath):
-                with open(mpath, encoding="utf-8") as f: model = json.load(f)
-        except Exception: pass
-        def mturn_for(cl):   # model turn within 40 m of this cluster's apex
-            return next((t for t in model["turns"] if (t["pos"][0] - cl["x"]) ** 2 + (t["pos"][1] - cl["z"]) ** 2 <= 40 ** 2), None)
+        # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}
         def best_pass(ms):   # the reference execution: fastest apex among COMMITTED (near this car's grip) CLEAN passes; a cruise through the turn is never a reference

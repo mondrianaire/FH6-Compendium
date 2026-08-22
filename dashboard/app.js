@@ -2531,6 +2531,66 @@
       r.querySelectorAll("[data-atlas-bg]").forEach((el) => el.addEventListener("click", () => { if (atlasPick) { atlasPick = null; repaintAtlas(); } }));
     };
     const repaintAtlas = () => { if (src === "live") paintSections(true); else render(); };   // the course cards follow the atlas selection, so repaint the whole course section
+    // ---- NUMERIC TUNING ADJUSTMENTS: the deliverable of Course TUNING — actual slider numbers from the diagnosis + the current tune ----
+    const SLIDER = {
+      farb: { label: "Front ARB", unit: "", step: 3, min: 1, max: 65, dp: 1 }, rarb: { label: "Rear ARB", unit: "", step: 3, min: 1, max: 65, dp: 1 },
+      fspring: { label: "Front spring rate", unit: " lb/in", step: 0, pct: 0.06, dp: 0 }, rspring: { label: "Rear spring rate", unit: " lb/in", step: 0, pct: 0.06, dp: 0 },
+      fbump: { label: "Front bump", unit: "", step: 1.5, min: 1, max: 20, dp: 1 }, rbump: { label: "Rear bump", unit: "", step: 1.5, min: 1, max: 20, dp: 1 },
+      freb: { label: "Front rebound", unit: "", step: 1.5, min: 1, max: 20, dp: 1 }, rreb: { label: "Rear rebound", unit: "", step: 1.5, min: 1, max: 20, dp: 1 },
+      bbal: { label: "Brake balance (% front)", unit: "%", step: 3, min: 0, max: 100, dp: 0 }, bpress: { label: "Brake pressure", unit: "%", step: 8, min: 50, max: 150, dp: 0 },
+      accel: { label: "Accel differential", unit: "%", step: 8, min: 0, max: 100, dp: 0 }, decel: { label: "Decel differential", unit: "%", step: 6, min: 0, max: 100, dp: 0 },
+      center: { label: "Center balance (% rear)", unit: "%", step: 5, min: 0, max: 100, dp: 0 }, faero: { label: "Front downforce", unit: "", step: 0, pct: 0.15, dp: 0 }, raero: { label: "Rear downforce", unit: "", step: 0, pct: 0.15, dp: 0 },
+    };
+    const SLIDER_ORDER = ["farb", "rarb", "fspring", "rspring", "fbump", "rbump", "freb", "rreb", "bbal", "bpress", "accel", "decel", "center", "faero", "raero"];
+    const TUNE_RX = {
+      "mid-understeer": [["farb", -1, 1], ["rarb", 1, 0.6], ["fspring", -1, 0.6]],
+      "front-hot": [["farb", -1, 0.5], ["faero", 1, 0.4]],
+      "rear-limited": [["rarb", -1, 1], ["accel", -1, 0.6], ["rspring", -1, 0.5]],
+      "oversteer-balance": [["rarb", -1, 1], ["accel", -1, 0.7], ["raero", 1, 0.5]],
+      "brake-lockup": [["bpress", -1, 1]],
+      "brake-balance-rear": [["bbal", -1, 1]], "brake-balance-front": [["bbal", 1, 1]],
+      "brake-pressure": [["bpress", -1, 1]], "trail-brake": [["bbal", -1, 0.4]],
+      "launch-spin": [["accel", -1, 1]], "launch-front-spin": [["center", 1, 1], ["accel", -1, 0.5]],
+      "bottoming": [["rreb", 1, 0.7], ["fbump", 1, 0.5]],
+    };
+    const tuneKey = (cid) => "fh6Tune:" + baseId(cid);
+    const getTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
+    const setTune = (cid, k, v) => { const t = getTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; localStorage.setItem(tuneKey(cid), JSON.stringify(t)); };
+    const tuningMoves = (adv, corners, cur) => {
+      const acc = {};
+      (adv || []).filter((a) => !a.open).forEach((a) => { const rx = TUNE_RX[a.key]; if (!rx) return; const cw = a.course_weight != null ? a.course_weight : 1; if (cw < 0.2) return;
+        const mag = (a.severity / 3) * (a.confidence || 0.7) * cw;
+        rx.forEach(([sl, dir, w]) => { const e = acc[sl] = acc[sl] || { net: 0, wsum: 0, sev: 0, srcs: new Set(), conf: 0 }; e.net += dir * w * mag; e.wsum += w * mag; e.sev = Math.max(e.sev, a.severity); e.conf = Math.max(e.conf, a.confidence || 0.7); e.srcs.add(a.text.split(":")[0].split(" (")[0]); });
+      });
+      const tuneCorners = (corners || []).filter((k) => k.limiter === "tune");
+      const understeerN = tuneCorners.filter((k) => k.dominant === "front").length, oversteerN = tuneCorners.filter((k) => k.dominant === "rear").length; const nT = Math.max(1, (corners || []).length);
+      if (understeerN) { const e = acc.farb = acc.farb || { net: 0, wsum: 0, sev: 2, srcs: new Set(), conf: 0.7 }; const m = 0.5 * understeerN / nT; e.net -= m; e.wsum += m; e.srcs.add(`${understeerN} turns front-limited`); }
+      if (oversteerN) { const e = acc.rarb = acc.rarb || { net: 0, wsum: 0, sev: 2, srcs: new Set(), conf: 0.7 }; const m = 0.5 * oversteerN / nT; e.net -= m; e.wsum += m; e.srcs.add(`${oversteerN} turns rear-limited`); }
+      const moves = [];
+      SLIDER_ORDER.forEach((sl) => { const e = acc[sl]; if (!e || Math.abs(e.net) < 0.12) return; const S = SLIDER[sl]; const dir = e.net > 0 ? 1 : -1; const cv = cur[sl];
+        let delta; if (S.pct) delta = cv != null ? Math.round(cv * S.pct * Math.min(1.5, Math.abs(e.net)) * dir) : null; else delta = +(S.step * Math.min(1.5, Math.abs(e.net)) * dir).toFixed(S.dp);
+        let to = null; if (cv != null && delta != null) { to = cv + delta; if (S.min != null) to = Math.max(S.min, Math.min(S.max, to)); to = +to.toFixed(S.dp); delta = +(to - cv).toFixed(S.dp); }
+        moves.push({ sl, label: S.label, unit: S.unit, from: cv, to, delta, dir, conf: e.conf, sev: e.sev, why: [...e.srcs].slice(0, 3).join(" · "), pct: !!S.pct });
+      });
+      return moves.sort((a, b) => b.sev - a.sev || Math.abs(b.delta || 0) - Math.abs(a.delta || 0));
+    };
+    const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
+      return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)"}</span></summary>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 8px;margin-top:6px">${SLIDER_ORDER.map((sl) => `<label style="font-size:10.5px;display:flex;justify-content:space-between;align-items:center;gap:4px">${SLIDER[sl].label}<input data-tunecid="${esc(cid)}" data-tunesl="${sl}" value="${cur[sl] != null ? cur[sl] : ""}" inputmode="decimal" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"></label>`).join("")}</div></details>`;
+    };
+    const numericTuningPanel = (co, s) => {
+      const cid = (co.cars || [])[0] || (live.frame && live.frame.cid); if (!cid) return "";
+      const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
+      const cur = getTune(cid); const moves = tuningMoves(adv, co.corners, cur); const haveCur = Object.keys(cur).length > 0;
+      const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🎯 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${co.profile && co.profile.priority && co.profile.priority.length ? " · prioritised for " + co.profile.priority[0] : ""}</span></div>
+        ${tuneInputRow(cid)}
+        ${moves.length ? `<div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th>slider</th><th>current</th><th></th><th>set to</th><th>Δ</th><th>why (from the course)</th><th>conf</th></tr></thead><tbody>
+          ${moves.map((m) => `<tr><td><b>${m.label}</b></td><td>${m.from != null ? m.from + m.unit : `<span class="why">—</span>`}</td><td style="color:${col(m)};font-weight:700">${arrow(m)}</td><td>${m.to != null ? `<b style="color:${col(m)}">${m.to}${m.unit}</b>` : `<span style="color:${col(m)}">${m.dir > 0 ? "stiffer" : "softer"}${m.delta != null ? " ~" + Math.abs(m.delta) + m.unit : ""}</span>`}</td><td style="color:${col(m)}">${m.delta != null ? (m.delta > 0 ? "+" : "") + m.delta + m.unit : (m.dir > 0 ? "+" : "−")}</td><td class="why" style="font-size:10.5px">${esc(m.why)}</td><td><div class="lab-bar" style="width:44px;height:5px;display:inline-block"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></div></td></tr>`).join("")}
+          </tbody></table></div>
+          <p class="why" style="font-size:10.5px;margin:5px 0 0">${haveCur ? "Targets are computed from your entered values. " : "Enter your current values above for exact target numbers — without them these are directions + magnitudes. "}Change ONE group at a time, re-drive the course, and the numbers refine. ▼ softer/less · ▲ stiffer/more. Only sliders the course actually stresses are shown.</p>`
+          : `<p class="why" style="font-size:12px;margin:6px 0">No firm tuning change indicated on this course yet — the car is balanced for what this track demands, or more clean laps are needed to separate driver from tune. Drive a few more consistent laps.</p>`}</div>`;
+    };
     // ---- LIVE · COURSE: two STAGES, car-independent. COURSE TRAINING until the course itself is known well enough (map · turn count earned across laps ·
     //      laps on record · profile → knowledge ≥ 75 %), then COURSE TUNING (this car's feedback on that course). Manual override via chips. ----
     const courseStageSel = () => localStorage.getItem("fh6CourseStage") || "auto";   // auto | training | tuning
@@ -2578,7 +2638,8 @@
             ${p.track}${p.map}${p.turns}${p.profile}${p.laps}</div>`;
       const feedPanel = `<div class="lab-corner" style="border-left:4px solid ${feedbackReady ? "var(--accent)" : "var(--muted)"}"><div class="card-row" style="margin-top:0"><strong>🏋 Tuning feedback — this car on this track</strong><span class="chip" style="border-color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};font-weight:700">${feedbackReady ? "ACTIVE" : "WARMING UP"}</span></div>
             <p class="why" style="font-size:11px;margin:4px 0 6px">${feedbackReady ? `references exist for ${refsOwn}/${turnsN} turns — the per-turn deltas and slider suggestions below are grounded in this car's own best passes` : `${refsOwn}/${turnsN} turns have a reference for this car — ${Math.max(0, needRefs - refsOwn)} more clean turn${needRefs - refsOwn === 1 ? "" : "s"} needed (geometry × grip predictions fill in meanwhile)`}</p>
-            ${p.probes}${p.corners}${p.driving}${p.advice}</div>`;
+            ${numericTuningPanel(co, s)}
+            <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
       if (training) return `${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${learnPanel}
@@ -3181,6 +3242,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : b.dataset.car; if (src === "live") paintSections(); else render(); }));
       r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") { live._donorPick = donor; const ls = liveSess(); const p = PIN(); pinDonor(ls && car(ls, donor) ? ls : (p && p.data && car(p.data, donor) ? p.data : null), donor); paintSections(true); paintBanner(); } else render(); }));
       bindAtlas(r);
+      r.querySelectorAll("[data-tunecid]").forEach((inp) => inp.addEventListener("change", () => { setTune(inp.dataset.tunecid, inp.dataset.tunesl, inp.value); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-course-stage]").forEach((b) => b.addEventListener("click", () => { localStorage.setItem("fh6CourseStage", b.dataset.courseStage); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-expected]").forEach((b) => b.addEventListener("click", () => { const [rk, n] = b.dataset.expected.split("|"); fetch(liveUrl + "/course-expected", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, n: +n }) }).then(() => { b.textContent = "saved ✓"; }).catch(() => {}); }));
       r.querySelectorAll("[data-lib-pick]").forEach((b) => b.addEventListener("click", () => { const [sid, key] = b.dataset.libPick.split("|"); libPick = { sid, key }; donor = key; render(); }));

@@ -504,7 +504,7 @@ def main():
         c = cars.setdefault(k, {"id": k, "ordinal": r["CarOrdinal"], "pi": r["CarPI"], "class": CLASS.get(r["CarClass"], str(r["CarClass"])), "drivetrain": DRIVE.get(r["DrivetrainType"], "?"),
                                 "cyl": r["NumCylinders"], "max_rpm": round(r["EngineMaxRpm"]), "idle_rpm": round(r["EngineIdleRpm"]), "car_group": r["CarGroup"],
                                 "name": (NAMES.get(str(r["CarOrdinal"])) or {}).get("name"),
-                                "live_frames": 0, "_gear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "_shift": [], "_prev": None, "_pull": None, "_pulls": [], "_boost_n": 0, "temps_max_f": {w: 0 for w in W}})
+                                "live_frames": 0, "_gear": defaultdict(list), "_fdgear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "_shift": [], "_prev": None, "_pull": None, "_pulls": [], "_boost_n": 0, "temps_max_f": {w: 0 for w in W}})
         c["live_frames"] += 1; c["_boost"] = max(c["_boost"], r["Boost"])
         if r["Boost"] > 0.5: c["_boost_n"] += 1
         for w in W: c["temps_max_f"][w] = max(c["temps_max_f"][w], r["TireTempF" + w])
@@ -515,6 +515,9 @@ def main():
         # WOT frames for the dyno / ladder: anything above idle+1200 (the dyno band below starts at idle+1500, so every bin is reachable)
         if r["Accel"] > 230 and r["CurrentEngineRpm"] > r["EngineIdleRpm"] + 1200 and r["Speed"] > 5 and 1 <= r["Gear"] <= 10:
             c["_gear"][r["Gear"]].append(r["Speed"] / r["CurrentEngineRpm"])
+            _dw = ("FL", "FR") if r["DrivetrainType"] == 0 else ("RL", "RR") if r["DrivetrainType"] == 1 else W
+            _wr = [r["WheelRotSpeed" + w] for w in _dw if r["WheelRotSpeed" + w] > 1.0]
+            if _wr: c["_fdgear"][r["Gear"]].append(r["CurrentEngineRpm"] * 0.1047197551 / (sum(_wr) / len(_wr)))   # engine_rad_s / driven-wheel_rad_s = FD x gear (exact, tire-radius-free; holds through wheelspin)
             c["_dyno"][int(r["CurrentEngineRpm"] // 250) * 250].append((r["Power"] / 745.7, r["Torque"] * 0.7376))
             # independent WOT PULLS (gap > 0.7 s starts a new one): the engine figure must repeat across pulls, not come from one burst
             hp_ = r["Power"] / 745.7; rpm_ = r["CurrentEngineRpm"]; pl = c["_pull"]
@@ -532,7 +535,10 @@ def main():
         for g in sorted(c["_gear"]):
             if len(c["_gear"][g]) < 25: continue
             m = statistics.median(c["_gear"][g]); base = base or m
-            lad.append({"gear": g, "mps_per_krpm": round(m * 1000, 3), "rel": round(m / base, 3), "n": len(c["_gear"][g])})
+            _e = {"gear": g, "mps_per_krpm": round(m * 1000, 3), "rel": round(m / base, 3), "n": len(c["_gear"][g])}
+            _fg = c["_fdgear"].get(g)
+            if _fg and len(_fg) >= 10: _e["fd_gear"] = round(statistics.median(_fg), 4)   # EXACT final-drive x gear from WheelRotSpeed
+            lad.append(_e)
         c["gears"] = lad
         c["dyno"] = [{"rpm": k, "hp": round(statistics.median([p for p, q in v])), "tq": round(statistics.median([q for p, q in v])), "n": len(v)} for k, v in sorted(c["_dyno"].items()) if len(v) >= 8]
         c["k_wheel"] = {w: (statistics.median(c["_k"][w]) if c["_k"][w] else None) for w in W}

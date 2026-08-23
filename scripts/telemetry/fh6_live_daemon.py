@@ -449,6 +449,38 @@ def _pick_meta(metas, ordn, ts_want=None):
                            "n_saves": len(roster), "saves": saves}
 
 
+def _deliverable_cyl(deliverable):
+    """The decoded tune's cylinder count (from the engine-family catalog) — used to pick the RIGHT build of a
+    multi-build car when enriching from telemetry."""
+    for m in (deliverable or {}).get("menus", []):
+        if m.get("menu") == "Conversions":
+            for r in m["rows"]:
+                if r.get("item") == "powertrain":
+                    return ((r.get("engine_catalog") or {}).get("cyl")) or ((r.get("engine_bits") or {}).get("cat_cyl"))
+    return None
+
+
+def _match_car(ordn, want_cyl=None):
+    """Pick the ST.cars entry for this ordinal that matches the build we mean: the exact car you're driving now, else
+    the one whose cylinders match the decoded tune, else the first seen. ST.cars holds EVERY build of an ordinal
+    (a 4-cyl AWD tune and an 8-cyl RWD tune share the ordinal), so 'first match' showed the wrong drivetrain/engine."""
+    with ST.lock:
+        fr = ST.latest
+        live_cid = fr.get("cid") if (fr and fr.get("on") and int(fr.get("car") or 0) == int(ordn)) else None
+        cand = [(str(cid), dict(c)) for cid, c in ST.cars.items() if str(cid).split("|")[0] == str(ordn)]
+    if not cand:
+        return None
+    if live_cid:                                                   # 1. the exact car you're in
+        for cid, c in cand:
+            if cid == str(live_cid):
+                return c
+    if want_cyl:                                                   # 2. the build whose cylinders match the decoded tune
+        for cid, c in cand:
+            if c.get("cyl") and int(c["cyl"]) == int(want_cyl):
+                return c
+    return cand[0][1]                                              # 3. fallback
+
+
 def _enrich_engine_desc(deliverable, ordn):
     """Feature A: turn the Conversions 'Engine' row into a specific engine TYPE using live telemetry. The save
     holds no engine specs; this joins the active car's cylinders / redline (ST.cars, keyed by cid whose prefix is
@@ -457,11 +489,8 @@ def _enrich_engine_desc(deliverable, ordn):
     value/upgrade so it shows without the dashboard change. Best-effort: a non-driven car keeps its save-only
     descriptor. Never invents a swap donor name."""
     try:
-        car = None
+        car = _match_car(ordn, _deliverable_cyl(deliverable))   # the build that matches THIS tune / the car you're in
         with ST.lock:
-            for cid, c in ST.cars.items():
-                if str(cid).split("|")[0] == str(ordn):
-                    car = dict(c); break
             sj = ST.session_json
         # peak hp: prefer the analyzer's dyno (session_json); fall back to any ST.cars dyno
         peak_hp = None
@@ -526,11 +555,8 @@ def _enrich_drivetrain(deliverable, ordn):
     and folds it into value/upgrade ('Converted / swapped → AWD', or 'Stock layout (RWD)') so it shows without a
     dashboard change. Best-effort: a non-driven car keeps resulting_drivetrain=null (no fabrication)."""
     try:
-        drv = None
-        with ST.lock:
-            for cid, c in ST.cars.items():
-                if str(cid).split("|")[0] == str(ordn):
-                    drv = c.get("drivetrain"); break
+        car = _match_car(ordn, _deliverable_cyl(deliverable))   # match the build we're decoding, not just any 2866 seen
+        drv = car.get("drivetrain") if car else None
         if not drv or drv == "?":
             return
         for m in deliverable.get("menus", []):

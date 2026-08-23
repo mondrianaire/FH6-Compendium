@@ -390,6 +390,46 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .tv.unseen { border-left-color: var(--line); color: var(--muted); }
 .chip.trec { border-color: #e5414e; color: #e5414e; font-weight: 700; }
 
+/* ============ INTERACTIVE AFFORDANCE — anything clickable looks clickable; info pills stay flat ============ */
+/* Every element wired to a click handler (its data-* action attribute or button class) gets a pointer, a clear
+   hover lift, and a focus ring, so actions are never mistaken for static info pills. */
+:is([data-wf],[data-tab],[data-expected],[data-course-stage],[data-courseturn],[data-courseturn-close],
+    [data-diskpick],[data-popout],[data-atlas-route],[data-atlas-clear],[data-atlas-bg],[data-car],[data-donor],
+    [data-replica],[data-role],[data-savename],[data-saveroute],[data-shopcid],[data-shopmenu],[data-shopslot],
+    [data-shoppane],[data-shot],[data-shot-close],[data-src],[data-tunecid],[data-tunesl],[data-unpin],
+    [data-lib-pick],[data-lib-clear],[data-dockpanel],[data-dockmin],[data-dockdetach],[data-fpin],[data-fmin],
+    [data-fclose],[data-clonepop],[data-clonefocus],[data-cloneclose],
+    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn) {
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .13s ease, filter .13s ease, background-color .13s ease;
+}
+:is([data-wf],[data-tab],[data-expected],[data-course-stage],[data-courseturn],[data-courseturn-close],
+    [data-diskpick],[data-popout],[data-atlas-route],[data-atlas-clear],[data-atlas-bg],[data-car],[data-donor],
+    [data-replica],[data-role],[data-savename],[data-saveroute],[data-shopcid],[data-shopmenu],[data-shopslot],
+    [data-shoppane],[data-shot],[data-shot-close],[data-src],[data-tunecid],[data-tunesl],[data-unpin],
+    [data-lib-pick],[data-lib-clear],[data-dockpanel],[data-dockmin],[data-dockdetach],[data-fpin],[data-fmin],
+    [data-fclose],[data-clonepop],[data-clonefocus],[data-cloneclose],
+    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn):hover { transform: translateY(-1px); filter: brightness(1.09); }
+:is([data-wf],[data-expected],[data-course-stage],[data-diskpick],[data-popout],[data-role],[data-src],[data-donor],
+    [data-replica],[data-unpin],[data-shot],[data-clonepop],.lab-mode,.fhm-dchip,.dm-chip,.subnav-btn):active { transform: translateY(0); filter: brightness(.95); }
+:is([data-wf],[data-tab],[data-expected],[data-course-stage],[data-diskpick],[data-popout],[data-atlas-route],
+    [data-car],[data-role],[data-src],[data-donor],[data-replica],[data-unpin],[data-shot],[data-lib-pick],
+    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* The ambiguous case: chips/pills that are really buttons get a persistent faint accent ring + raised edge, so they
+   read as pressable AT REST — a flat info pill has neither. */
+.chip:is([data-expected],[data-course-stage],[data-role],[data-src],[data-donor],[data-replica],[data-unpin],
+         [data-saveroute],[data-savename],[data-shot],[data-atlas-clear],[data-atlas-bg],[data-tunecid],[data-shopcid]),
+.dm-chip, .fhm-dchip {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 2px rgba(0,0,0,.22);
+}
+.chip:is([data-expected],[data-course-stage],[data-role],[data-src],[data-donor],[data-replica],[data-unpin],
+         [data-saveroute],[data-savename],[data-shot],[data-atlas-clear],[data-atlas-bg],[data-tunecid],[data-shopcid]):hover,
+.dm-chip:hover, .fhm-dchip:hover { box-shadow: inset 0 0 0 1px var(--accent), 0 3px 9px rgba(0,0,0,.34); }
+
+/* clickable table rows get a hover wash */
+tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(255,255,255,.05); }
+
 /* ---- Lab sticky top: subtab switcher + necessary live state, anchored to the top of the screen ---- */
 .lab-top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 6px 0 7px; margin: 0 0 9px;
   border-bottom: 1px solid var(--line); }

@@ -3508,7 +3508,8 @@
     const lockCloneTarget = (ordinal) => {
       const c = live.diskCache && live.diskCache[ordinal];
       if (!c || !c.available) return;
-      live.cloneTarget = { ordinal: +ordinal, ts: c.ts, name: c.name, payload: c, at: Date.now() };
+      const f = live.frame; const snap = (f && String(f.car) === String(ordinal)) ? { pi: f.pi, cls: f.cls, drv: f.drv, cyl: f.cyl } : null;   // donor's live signature for the no-save coarse check
+      live.cloneTarget = { ordinal: +ordinal, ts: c.ts, name: c.name, payload: c, live: snap, at: Date.now() };
       fetch(liveUrl + "/clone-lock", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: +ordinal, ts: c.ts }) }).catch(() => {});
       paintDiskDecode(); paintFloat();
     };
@@ -3557,10 +3558,19 @@
       const el = host.querySelector("#lvDiskDecode"); if (!el) return;
       // CLONE TARGET LOCKED: render the FROZEN target, not the live car — building your replica must never repoint it.
       if (live.cloneTarget && live.cloneTarget.payload && live.cloneTarget.payload.available) {
-        const t = live.cloneTarget; const key = "LOCK|" + t.ordinal + "|" + t.ts;
+        const t = live.cloneTarget; const tgtDl = t.payload.deliverable;
+        const f = live.frame; const fMatch = f && String(f.car) === String(t.ordinal);
+        // progress toward the clone: the COARSE live check (PI/class/drivetrain/cyl — updates as you install parts, no
+        // save needed) + the FINE part/slider verify against your latest SAVED build (dots go green as it matches).
+        const cur = (live.diskCache && live.diskCache[t.ordinal]) || null;
+        const verify = (cur && cur.available && cur.deliverable && cur.ts !== t.ts) ? verifyBuild(tgtDl, cur.deliverable) : null;
+        const coarse = liveCoarse(t, f);
+        // DYNAMIC key: re-render when your live signature (PI/cyl) moves OR your saved build changes OR the match count
+        // shifts — so "building toward the clone" actually updates as you upgrade, instead of freezing at lock time.
+        const key = "LOCK|" + t.ordinal + "|" + t.ts + "|" + (cur && cur.ts ? cur.ts : "-") + "|" + (fMatch ? f.pi + "." + f.cyl : "-") + "|" + (verify ? verify.okParts + "." + verify.okSliders : "-");
         if (el.dataset.fhmKey !== key || !el.querySelector(".fhm")) {
           el.dataset.fhmKey = key;
-          el.innerHTML = cloneModeBanner(true) + diskDeliverableHtml(t.payload, { popBtn: true });
+          el.innerHTML = cloneModeBanner(true) + coarseStrip(coarse) + verifyBanner(verify, !verify) + diskDeliverableHtml(t.payload, { popBtn: true, verify: verify });
           bindDiskDecode(el);
         }
         return;

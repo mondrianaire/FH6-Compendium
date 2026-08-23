@@ -3778,8 +3778,35 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     function loadFullSession() {
       fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; cacheCourseGeo(js); } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });   // a response that lands after a reset (analysis null / new id) is ignored
     }
+    // SYSTEM STATUS — one at-a-glance health readout of every subsystem, anchored in the top bar.
+    function checkDecodeHealth() {   // self-throttled to ~15 s; pings /disk-tunes to confirm the save is readable
+      if (!live.connected || Date.now() - (live._dhAt || 0) < 15000) return;
+      live._dhAt = Date.now();
+      fetch(liveUrl + "/disk-tunes").then((r) => r.json()).then((d) => { live.decodeHealth = { ok: !!(d && d.available), n: (d && d.count) || 0, ts: Date.now() }; paintSystemStatus(); }).catch(() => { live.decodeHealth = { ok: false, n: 0, ts: Date.now() }; paintSystemStatus(); });
+    }
+    function paintSystemStatus() {
+      const el = host.querySelector("#lvSysStatus"); if (!el) return;
+      const st = live.status || {}; const dh = live.decodeHealth;
+      const age = live.analysisAt ? Math.round((Date.now() - live.analysisAt) / 1000) : null;
+      const nS = (DB.sessions || []).length, nR = Object.keys(((DB.routes || {}).routes) || {}).length, nC = Object.keys(((DB.carOrdinals || {}).cars) || {}).length;
+      const checks = [
+        live.connected ? { k: "Daemon", lvl: "ok", d: `connected @ ${liveUrl} · ${st.pps || 0} pkt/s` } : { k: "Daemon", lvl: "off", d: live.err ? "not reachable — start it, then connect" : "connecting…" },
+        !live.connected ? { k: "Telemetry", lvl: "off", d: "daemon down" } : st.receiving ? { k: "Telemetry", lvl: "ok", d: `${st.pps} pkt/s · ${st.frames} frames` } : { k: "Telemetry", lvl: "warn", d: "connected — no packets (drive, or replay a CSV)" },
+        !live.connected ? { k: "Game", lvl: "off", d: "—" } : st.game ? { k: "Game", lvl: "ok", d: `FH6 · ${st.game}` } : { k: "Game", lvl: "warn", d: "not detected — is FH6 running with Data Out on?" },
+        !live.connected ? { k: "Decode", lvl: "off", d: "daemon down" } : dh ? (dh.ok ? { k: "Decode", lvl: "ok", d: `${dh.n} tunes readable on disk` } : { k: "Decode", lvl: "warn", d: "save folder not reachable" }) : { k: "Decode", lvl: "warn", d: "checking…" },
+        age == null ? { k: "Analysis", lvl: "warn", d: "none yet — drive to trigger" } : age < 60 ? { k: "Analysis", lvl: "ok", d: `updated ${age}s ago` } : { k: "Analysis", lvl: "warn", d: `stale · ${age}s ago` },
+        (st.frames || live.session) ? { k: "Session", lvl: "ok", d: `${st.frames || 0} frames${st.csv ? " · " + st.csv : ""}` } : { k: "Session", lvl: "warn", d: "idle — no recording yet" },
+        { k: "Data", lvl: "ok", d: `${nS} sessions · ${nR} routes · ${nC} cars` },
+      ];
+      const overall = checks.some((c) => c.lvl === "off") ? "off" : checks.some((c) => c.lvl === "warn") ? "warn" : "ok";
+      const key = overall + "|" + checks.map((c) => c.lvl + c.d).join("|");
+      if (el.dataset.k === key) return; el.dataset.k = key;
+      const OL = { ok: "all systems go", warn: "up · some subsystems idle", off: "daemon offline" };
+      el.innerHTML = `<span class="sys-lead ${overall}" title="overall system health"><span class="sys-dot"></span>${OL[overall]}</span>${checks.map((c) => `<span class="sys-pill ${c.lvl}" title="${esc(c.d)}"><span class="sys-dot"></span>${c.k}</span>`).join("")}`;
+    }
     function paintStatus() {
       const el = host.querySelector("#lvStatus"); if (!el) return;
+      paintSystemStatus(); checkDecodeHealth();
       const st = live.status;
       const outdated = !!(st && (st.stint === undefined || st.mode === undefined));
       el.textContent = !live.connected ? (live.err ? "daemon not reachable — start it, then connect" : "connecting…") : outdated ? `⚠ daemon is an older build — stop and start it to get live suggestions, runs and reset (still receiving ${st.pps} pkt/s)` : st && st.receiving ? `● receiving ${st.pps} pkt/s · ${st.frames} frames${st.csv ? " · " + st.csv : ""}` : "connected — waiting for packets (drive, or start a replay)";
@@ -4058,7 +4085,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           <div class="lab-modes" style="margin-bottom:4px"><span class="why" style="font-size:11px;margin-right:2px">source</span>${SRCS.map(([k, l]) => `<button class="lab-mode ${src === k ? "active" : ""}" data-src="${k}">${l}</button>`).join("")}
             ${src === "session" ? (sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : s ? `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>` : "") : ""}</div>
           <div class="lab-modes"><span class="why" style="font-size:11px;margin-right:2px">workflow</span><span id="labWf" style="display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center">${tabsHtml()}</span></div>
-          ${src === "live" ? `<div class="lab-live-state"><span class="dot"></span><span id="lvStatus" class="chip">connecting…</span><span id="lvWfLine"></span><span class="lab-live-ctrls"><button class="lab-mode" id="lvReset" title="Start a fresh recording — clears the live screen and begins a new session/CSV. Your pinned donor and course records are kept." style="padding:2px 8px;font-size:11px;border-color:#e5414e;color:#e5414e">↺ new</button><span class="chip" id="lvConnGear" title="connection settings" style="cursor:pointer;padding:2px 7px">⚙</span></span></div>` : ""}
+          ${src === "live" ? `<div class="lab-live-state"><span class="dot"></span><span id="lvStatus" class="chip">connecting…</span><span id="lvWfLine"></span><span class="lab-live-ctrls"><button class="lab-mode" id="lvReset" title="Start a fresh recording — clears the live screen and begins a new session/CSV. Your pinned donor and course records are kept." style="padding:2px 8px;font-size:11px;border-color:#e5414e;color:#e5414e">↺ new</button><span class="chip" id="lvConnGear" title="connection settings" style="cursor:pointer;padding:2px 7px">⚙</span></span></div><div class="lab-sys" id="lvSysStatus"></div>` : ""}
         </div>
         ${src === "live" ? `${streamBar()}<div id="lvBody">${liveBody()}</div>` : !s ? NOSESS : sectionsHtml(s, false)}`;
       live._shownWf = effMode();

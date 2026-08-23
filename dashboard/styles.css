@@ -359,3 +359,16 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
   box-shadow: 0 0 6px rgba(229,65,78,.7); flex: none; }
 .lab-live-state #lvWfLine { flex: 1 1 200px; min-width: 160px; font-size: 12px; }
 .lab-live-ctrls { display: inline-flex; gap: 6px; align-items: center; margin-left: auto; }
+
+/* ---- system status strip: green/yellow/red health of every subsystem ---- */
+.lab-sys { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; align-items: center; }
+.sys-pill, .sys-lead { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px;
+  border: 1px solid var(--line); border-radius: 11px; padding: 2px 8px; white-space: nowrap; color: var(--muted); }
+.sys-lead { font-weight: 700; letter-spacing: .02em; }
+.sys-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--muted); }
+.sys-pill.ok, .sys-lead.ok { color: var(--txt); }
+.sys-pill.ok .sys-dot, .sys-lead.ok .sys-dot { background: #00d27a; box-shadow: 0 0 5px rgba(0,210,122,.5); }
+.sys-pill.warn, .sys-lead.warn { border-color: rgba(227,179,65,.4); color: var(--warn); }
+.sys-pill.warn .sys-dot, .sys-lead.warn .sys-dot { background: var(--warn); }
+.sys-pill.off, .sys-lead.off { border-color: rgba(229,65,78,.45); color: #e5414e; }
+.sys-pill.off .sys-dot, .sys-lead.off .sys-dot { background: #e5414e; box-shadow: 0 0 5px rgba(229,65,78,.5); }

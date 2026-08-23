@@ -2949,6 +2949,56 @@
           : `<div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${ck.pct}%;background:${col}"></i><i style="left:75%;width:2px;background:var(--txt);opacity:.6"></i></div><p class="why" style="font-size:11px;margin:4px 0 0">course knowledge ${ck.pct}% · ${ck.needs.length ? "still useful for the course: " + ck.needs.map((n) => esc(n.text)).join(" · ") : "nothing more needed for the course — everything below is feedback for this car on it"}</p>`}
       </div>`;
     };
+    // ---- LAST-CORNER SCORECARD: a quick grade for the corner you just drove, from the same telemetry the analysis uses.
+    // Combines (a) keeping GRIP (no slid axle / drift through the phases), (b) AVERAGE SPEED vs your best line through
+    // that same corner, and (c) avoiding the common MISTAKES we detect (understeer, oversteer, exit wheelspin, lockup,
+    // handbrake). Backbone is grip+mistakes; speed nudges it once we've seen the corner before. ----
+    const GRADE_COL = { S: "#00d27a", A: "#4fd07a", B: "#e3b341", C: "#e8963c", D: "#e5414e" };
+    const cornerKey = (c) => (c && c.apex && c.apex[0] != null && c.apex[1] != null) ? Math.round(c.apex[0] / 18) + "_" + Math.round(c.apex[1] / 18) : null;   // ~18m grid bucket → same corner across laps
+    const cornerAvg = (c) => { const b = (live.spd || []).filter((p) => p.t >= c.t0 && p.t <= c.t1); if (b.length >= 2) return b.reduce((s, p) => s + p.mph, 0) / b.length; return (c.mph_in + c.mph_min + c.mph_out) / 3; };
+    const scoreCorner = (c) => {
+      if (!c) return null;
+      const avg = Math.round(cornerAvg(c));
+      const key = cornerKey(c); const bestRec = key && live.cornerBest && live.cornerBest[key]; const best = bestRec ? bestRec.avg : null;
+      let grip = 100; const issues = [];
+      (c.phases || []).forEach((p) => { if (p.red && p.red !== "none") { const w = p.phase === 4 ? 12 : p.phase === 3 ? 10 : p.phase === 2 ? 8 : 6; grip -= (p.red === "both" ? Math.round(w * 1.3) : w); } });
+      if (c.drift) { grip -= 16; issues.push({ k: "🌀 drift", sev: 3, t: "rear slid well past grip" }); }
+      else if (c.usi > 0.18) { grip -= Math.min(22, Math.round(c.usi * 55)); issues.push({ k: "↔ understeer", sev: c.usi > 0.3 ? 3 : 2, t: "front washed out (turn-in / mid)" }); }
+      else if (c.usi < -0.18) { grip -= Math.min(20, Math.round(-c.usi * 50)); issues.push({ k: "⟳ oversteer", sev: c.usi < -0.3 ? 3 : 2, t: "rear stepped out" }); }
+      const p4 = (c.phases || []).find((p) => p.phase === 4);
+      if (p4 && p4.rear > 1.2 && !c.drift) { grip -= 10; issues.push({ k: "🔥 exit spin", sev: 2, t: "wheelspin on exit — losing drive" }); }
+      if (c.brake_max >= 99 && c.first_red && c.first_red.phase <= 2) { grip -= 8; issues.push({ k: "🛑 lockup", sev: 2, t: "brakes maxed into the corner" }); }
+      if (c.hb) { grip -= 14; issues.push({ k: "✋ handbrake", sev: 2, t: "handbrake pulled" }); }
+      grip = Math.max(0, Math.min(100, grip));
+      let deltaBest = null, speedPct = null;
+      if (best != null && best > 0) { speedPct = Math.round(avg / best * 100); deltaBest = avg - Math.round(best); }
+      // grip is the backbone (60%); speed vs your best line is 40% and STEEP — a clean-but-slow corner is not an S.
+      let score = grip; if (speedPct != null) { const speedComp = Math.max(0, Math.min(100, 100 - (100 - speedPct) * 1.8)); score = Math.round(grip * 0.6 + speedComp * 0.4); }
+      score = Math.max(0, Math.min(100, score));
+      const grade = score >= 90 ? "S" : score >= 80 ? "A" : score >= 68 ? "B" : score >= 55 ? "C" : "D";
+      const gripState = c.drift ? "drift" : (c.first_red ? c.first_red.axle : "held");
+      return { score, grade, grip, gripState, issues: issues.sort((a, b) => b.sev - a.sev), avg, apex: c.mph_apex != null ? c.mph_apex : c.mph_min, best: best != null ? Math.round(best) : null, deltaBest, dir: c.dir, key, kink: !!c.kink, lapn: c.lapn, t: c.t1 };
+    };
+    const pushCornerScore = (c) => {
+      const sc = scoreCorner(c); if (!sc) return;
+      if (sc.key) { live.cornerBest = live.cornerBest || {}; const b = live.cornerBest[sc.key]; if (!b || sc.avg > b.avg) live.cornerBest[sc.key] = { avg: sc.avg, at: Date.now() }; }   // update the personal best AFTER scoring vs the prior best
+      (live.cornerScores = live.cornerScores || []).push(sc); if (live.cornerScores.length > 60) live.cornerScores.shift();
+    };
+    const cornerScoreCard = () => {
+      const scs = live.cornerScores || [];
+      if (!scs.length) return `<div class="cscore"><div class="cscore-hd"><b>🎯 Last corner</b> <span class="why" style="font-size:10.5px">drive a corner — each is graded on grip, speed &amp; clean execution</span></div></div>`;
+      const l = scs[scs.length - 1]; const col = GRADE_COL[l.grade];
+      const dirIcon = l.dir === "R" ? "▶ right" : "◀ left";
+      const gripLbl = l.gripState === "held" ? `<b style="color:#00d27a">🟢 grip held</b>` : l.gripState === "drift" ? `<b style="color:#e5414e">🔴 drifting</b>` : `<b style="color:#e3b341">🟡 ${esc(l.gripState)} slipped</b>`;
+      const speedLbl = l.best != null ? `avg <b>${l.avg}</b> mph <span style="color:${l.deltaBest >= 0 ? "#00d27a" : "#e5414e"}">${l.deltaBest >= 0 ? "▲ +" + l.deltaBest : "▼ " + l.deltaBest}</span> vs your best` : `avg <b>${l.avg}</b> mph · apex ${l.apex} · <span class="why">first pass = baseline</span>`;
+      const issues = l.issues.length ? l.issues.map((i) => `<span class="cscore-iss s${i.sev}" title="${esc(i.t)}">${i.k}</span>`).join("") : `<span class="cscore-clean">✓ clean — nothing flagged</span>`;
+      const strip = scs.slice(-10).map((s) => `<span class="cscore-chip" style="background:${GRADE_COL[s.grade]}" title="grade ${s.grade} · score ${s.score} · avg ${s.avg} mph${s.deltaBest != null ? " (" + (s.deltaBest >= 0 ? "+" : "") + s.deltaBest + " vs best)" : ""}">${s.grade}</span>`).join("");
+      return `<div class="cscore" style="border-color:${col}">
+        <div class="cscore-hd"><b>🎯 Last corner</b> <span class="why" style="font-size:10.5px">${dirIcon}${l.kink ? " · kink" : ""} · lap ${l.lapn || "—"}</span><span class="cscore-strip" title="the last 10 corners, newest on the right">${strip}</span></div>
+        <div class="cscore-body"><div class="cscore-grade" style="color:${col};border-color:${col}">${l.grade}<small>${l.score}</small></div>
+          <div class="cscore-detail"><div class="cscore-line">${gripLbl} · ${speedLbl}</div><div class="cscore-issues">${issues}</div></div></div></div>`;
+    };
+    const paintCornerScore = () => { const el = document.getElementById("lvCornerScore"); if (el) el.innerHTML = cornerScoreCard(); };
     const liveCourseDashboard = (co, s) => {
       const p = courseParts(co, s); const tr = co.track || {}; const tu = co.turns || {}; const dr = co.driving || {}; const lapsN = co.laps ? co.laps.total : co.runs; const f = live.frame || {};
       // CAR-AWARE: everything car-specific (references, tuning, feedback) follows the EQUIPPED car; course LEARNING (turns/map/profile) is the track and stays.
@@ -2969,12 +3019,12 @@
             ${numericTuningPanel(co, s, curCar)}
             <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
       const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null) });
-      if (training) return `${courseHdr}${carBanner}${courseHero(p, co)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      if (training) return `${courseHdr}${carBanner}${courseHero(p, co)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${turnByTurnSection(co)}
         ${learnPanel}
         <div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`;
-      return `${courseHdr}${carBanner}${courseHero(p, co)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      return `${courseHdr}${carBanner}${courseHero(p, co)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         ${turnByTurnSection(co)}
         <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
     };
@@ -3357,6 +3407,23 @@
       .spd-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:2px}
       .spd-hd b{font-size:12.5px;color:var(--accent)}
       .spd-svg{margin-top:2px}
+      /* ---- last-corner scorecard ---- */
+      .cscore{border:1px solid var(--line);border-left-width:4px;border-radius:8px;padding:8px 11px;background:rgba(255,255,255,.015)}
+      .cscore-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .cscore-hd>b{font-size:13px}
+      .cscore-strip{margin-left:auto;display:inline-flex;gap:3px}
+      .cscore-chip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;font-size:9px;font-weight:800;color:#0e1116}
+      .cscore-body{display:flex;align-items:center;gap:12px;margin-top:7px}
+      .cscore-grade{flex:none;width:56px;height:56px;border:2px solid;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:28px;font-weight:800;line-height:1}
+      .cscore-grade small{font-size:10px;font-weight:600;color:var(--muted)}
+      .cscore-detail{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+      .cscore-line{font-size:12px;font-variant-numeric:tabular-nums}
+      .cscore-issues{display:flex;flex-wrap:wrap;gap:5px}
+      .cscore-iss{font-size:10.5px;border-radius:5px;padding:1px 7px;border:1px solid}
+      .cscore-iss.s3{border-color:#e5414e;color:#e5414e;background:rgba(229,65,78,.1)}
+      .cscore-iss.s2{border-color:#e3b341;color:#e3b341;background:rgba(227,179,65,.1)}
+      .cscore-iss.s1{border-color:var(--line);color:var(--muted)}
+      .cscore-clean{font-size:11px;color:#00d27a;font-weight:700}
       /* ---- bottom LIVE DOCK: session-strip spine + bench/clone pop-chips, anchored to every Lab subtab ---- */
       .fhm-dock{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:linear-gradient(180deg,rgba(14,17,22,.86),var(--bg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px);font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
@@ -4680,7 +4747,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
       es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
-      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
+      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); pushCornerScore(c); paintCornerScore(); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
       es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false;
         const sm = live.status.mode; const changed = sm && (!live.mode || sm.suggest !== live.mode.suggest || sm.reason !== live.mode.reason);   // status carries the current mode every second — authoritative after reconnects / daemon restarts
         if (changed) live.mode = sm;

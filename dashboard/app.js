@@ -2659,9 +2659,14 @@
     const applyDiskTune = (d) => {                       // pull exact slider values off the decode so targets need no typing; returns whether they changed
       if (!d || !d.deliverable) return false;
       if (live.cloneTarget && live.cloneTarget.ordinal === +d.ordinal) return false;   // locked: the target's slider targets are frozen; the WIP must not overwrite them
+      live.diskTune = live.diskTune || {}; const key = String(d.ordinal);
+      // GATE: if the decoded save does NOT match the build you're driving (its cylinder count differs from your live
+      // engine), its slider values belong to a DIFFERENT build — never auto-fill them as your "current" tune, or the
+      // recommendations read the wrong car. Clear instead, so targets fall back to vetted baselines until you save THIS
+      // build. This is the fix for "the stored values are not for the current car".
+      if (d.match && d.match.how === "no-match") { const had = live.diskTune[key] != null; delete live.diskTune[key]; return had; }
       const vals = {};
       (d.deliverable.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && DISK2SLIDER[r.field]) vals[DISK2SLIDER[r.field]] = r.value; }));
-      live.diskTune = live.diskTune || {}; const key = String(d.ordinal);
       const changed = JSON.stringify(live.diskTune[key]) !== JSON.stringify(vals);
       live.diskTune[key] = vals; return changed;
     };
@@ -2720,7 +2725,10 @@
     // driven by the save event, so it never waits on the ~20s analysis. Metrics fill in on the next analysis (same tune
     // -> refresh in place, without clobbering good numbers with nulls). Stores the FULL field set for later viewing.
     const abCapture = (cid, c, s) => {
-      if (!cid) return; const full = abFull(cid); if (!full) return;
+      if (!cid) return;
+      const cc = live.diskCache && live.diskCache[String(cid).split("|")[0]];
+      if (cc && cc.match && cc.match.how === "no-match") return;   // decoded save is a DIFFERENT build — don't version/diff its values as this car's tune
+      const full = abFull(cid); if (!full) return;
       const m = abMetrics(c, s); const versions = getAB(cid); const last = versions[versions.length - 1];
       if (last && abFullEq(last.full, full)) {
         if (m && (m.usi != null || m.spin != null || m.rearLim != null || m.frontLim != null)) last.metrics = m;   // refresh only with real numbers
@@ -2730,6 +2738,18 @@
     };
     // gather current car/session context and (re)capture — called on a detected save change AND on each fresh analysis
     const abSync = (cid) => { if (!cid) return; const s = (src === "live" ? live.analysis : S()) || null; const ls = liveSess(); const c = (ls && cid && car(ls, cid)) || (ls && (ls.cars || [])[0]) || null; abCapture(cid, c, s); };
+    // FRESH-READ before the diff: re-query the current on-disk slider values right before comparing, so a change is never
+    // missed by a stale cache. The save-event path is already fresh (the daemon re-decodes and pushes on every save);
+    // this covers the periodic analysis path, where the cache could otherwise lag a change made between events.
+    const refreshDiskThenCapture = (cid, c, s) => {
+      const ord = +String(cid || "").split("|")[0];
+      if (!ord || (src === "live" && !live.connected)) { abCapture(cid, c, s); return; }
+      const ts = live.diskPick && live.diskPick[ord];
+      fetch(liveUrl + "/disk-tune?ordinal=" + ord + (ts ? "&ts=" + encodeURIComponent(ts) : "")).then((r) => r.json()).then((d) => {
+        if (d && d.available) { live.diskCache = live.diskCache || {}; live.diskCache[ord] = d; if (!(live.cloneTarget && live.cloneTarget.ordinal === ord)) applyDiskTune(d); }
+        abCapture(cid, c, s);
+      }).catch(() => abCapture(cid, c, s));
+    };
     // A/B comparison: latest vs previous — every changed field (from->to), metric deltas coloured by improvement, and an
     // expandable list of EVERY stored value for the current version so nothing is hidden.
     const abPanel = (cid) => {
@@ -2862,13 +2882,17 @@
       return `<div class="tmove${applied[m.sl] ? " done" : ""}" style="border-left-color:${sevCol}"><div class="tm-main"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div>${applyBtn}</div><div class="tm-diag" title="acts where the change works · red = where your issue is">${moveCorner(aph, iph)}<div class="tm-diag-cap">acts: ${cap}</div></div></div>`;
     }).join("")}</div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`; };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
-      const diskN = Object.keys((live.diskTune && live.diskTune[String(cid).split("|")[0]]) || {}).length;
-      const note = diskN ? `<b style="color:#00d27a">📀 ${diskN} current values auto-filled from disk</b> — targets are exact; edit any to override` : (n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)");
+      const o0 = String(cid).split("|")[0];
+      const diskN = Object.keys((live.diskTune && live.diskTune[o0]) || {}).length;
+      const noMatch = (() => { const c = live.diskCache && live.diskCache[o0]; return !!(c && c.match && c.match.how === "no-match"); })();
+      const note = diskN ? `<b style="color:#00d27a">📀 ${diskN} current values auto-filled from disk</b> — targets are exact; edit any to override`
+        : noMatch ? `<b style="color:#e3b341">⚠️ this build isn't saved on disk</b> — no saved tune matches your live engine, so targets use vetted baselines. Save your tune in-game (or type your values) to read exact current numbers.`
+        : (n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)");
       return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${note}</span></summary>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 8px;margin-top:6px">${SLIDER_ORDER.map((sl) => `<label style="font-size:10.5px;display:flex;justify-content:space-between;align-items:center;gap:4px">${SLIDER[sl].label}<input data-tunecid="${esc(cid)}" data-tunesl="${sl}" value="${cur[sl] != null ? cur[sl] : ""}" inputmode="decimal" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"></label>`).join("")}</div></details>`;
     };
     const numericTuningPanel = (co, s, forceCid) => {
-      const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0]; if (!cid) return "";
+      const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || live.courseCar || (co.cars || [])[0]; if (!cid) return "";   // when paused, stay on the LAST-DRIVEN car — not co.cars[0], which may be a different car
       if (live.connected) { const o0 = String(cid).split("|")[0]; if (!(live.diskTune && live.diskTune[o0])) fetchDiskTune(+o0); }
       const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
       const liveInc = (live.cornSince || []).filter((c) => !c.drift && c.first_red && (!cid || c.car === cid)).map((c) => ({ limiter: "tune", dominant: c.first_red.axle, phase: c.first_red.phase }));
@@ -3329,6 +3353,10 @@
       .dsan-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px;font-size:11.5px}
       .dsan-hd>span:first-child{flex:1}
       .dsan-new{color:#e3b341}.dsan-res{color:#00d27a}
+      /* ---- F1 speed trace ---- */
+      .spd-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+      .spd-hd b{font-size:12.5px;color:var(--accent)}
+      .spd-svg{margin-top:2px}
       /* ---- bottom LIVE DOCK: session-strip spine + bench/clone pop-chips, anchored to every Lab subtab ---- */
       .fhm-dock{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:linear-gradient(180deg,rgba(14,17,22,.86),var(--bg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px);font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
@@ -4196,6 +4224,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       return `<div id="lvActiveCar" style="margin-bottom:8px"></div>
         <div id="lvBanner"></div>
         <div id="lvTraction"></div>
+        ${w !== "decode" ? `<div class="block lvSpeedTrace" style="border-color:var(--accent);padding:8px 11px 6px"></div>` : ""}
         ${w === "course" ? "" : `<div class="lab-tiles" id="lvTiles"></div>`}
         <div id="lvSections">${sectionsHtml(liveSess(), true)}</div>
         ${w === "free" ? `<details class="block"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Live feel — friction rings &amp; pedal inputs</summary>
@@ -4211,7 +4240,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     }
     function loadFullSession() {
       fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; cacheCourseGeo(js);
-        const cid = (live.frame && live.frame.cid) || live.courseCar; const c = cid && (js.cars || []).find((x) => x.id === cid); if (c) abCapture(cid, c, js);   // A/B: snapshot this tune's sliders + metrics each analysis
+        const cid = (live.frame && live.frame.cid) || live.courseCar; const c = cid && (js.cars || []).find((x) => x.id === cid); if (c) refreshDiskThenCapture(cid, c, js);   // A/B: re-read the on-disk sliders THEN snapshot/diff each analysis, so a change is never missed by a stale cache
       } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });   // a response that lands after a reset (analysis null / new id) is ignored
     }
     // SYSTEM STATUS — one at-a-glance health readout of every subsystem, anchored in the top bar.
@@ -4451,6 +4480,64 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         + `<div class="trac-why">The <b>${s.axle.toLowerCase()}</b> is over the grip limit <b>${s.pct}%</b> of the time you're on the throttle${ratio >= 3 ? ` — ${ratio}× the other axle` : ""}. You're spinning, not accelerating.</div>`
         + `<div class="trac-fix">→ ${fix}</div></div>`;
     }
+    // ---- F1-STYLE SPEED TRACE: a constant tracker of speed over the run. Free mode = the last 2 minutes (vs time);
+    // course mode = the current lap (vs track distance, so corners sit at their real track positions). Corners are marked
+    // at the speed minima (a dip that recovers) — the "dramatic change" a race engineer reads straight off this chart. ----
+    const SPD_WIN_S = 120;   // free-mode rolling window (seconds)
+    const spdWindow = () => {
+      const buf = live.spd || []; if (buf.length < 4) return null;
+      if (effMode() === "course") {
+        const evPts = buf.filter((p) => p.ev && p.dist != null);
+        if (evPts.length >= 8) {
+          const curLap = evPts[evPts.length - 1].lapn;
+          let lap = evPts.filter((p) => p.lapn === curLap);
+          if (lap.length < 8) { const pl = evPts.filter((p) => p.lapn === curLap - 1); if (pl.length >= lap.length) lap = pl; }   // just crossed the line → show the lap just completed
+          if (lap.length >= 8) { const d0 = lap[0].dist;
+            return { pts: lap.map((p) => ({ x: Math.max(0, p.dist - d0), y: p.mph, brk: p.brk, thr: p.thr })), mode: "course", xlabel: "lap distance", lapn: lap[0].lapn }; }
+        }
+      }
+      const lastT = buf[buf.length - 1].t; const w = buf.filter((p) => lastT - p.t <= SPD_WIN_S);
+      if (w.length < 4) return null; const t0 = w[0].t;
+      return { pts: w.map((p) => ({ x: p.t - t0, y: p.mph, brk: p.brk, thr: p.thr })), mode: "free", xlabel: "seconds", lapn: null, span: lastT - t0 };
+    };
+    const spdDips = (pts) => {   // corners = local speed minima that fell and recovered by >=7 mph
+      const n = pts.length; if (n < 6) return [];
+      const win = Math.max(3, Math.round(n * 0.02)); const raw = [];
+      for (let i = win; i < n - win; i++) { const y = pts[i].y; let isMin = true;
+        for (let j = i - win; j <= i + win; j++) { if (pts[j].y < y - 0.01) { isMin = false; break; } }
+        if (!isMin) continue;
+        const before = Math.max(...pts.slice(Math.max(0, i - win * 3), i).map((p) => p.y));
+        const after = Math.max(...pts.slice(i + 1, Math.min(n, i + win * 3)).map((p) => p.y));
+        if (before - y >= 7 && after - y >= 7 && y >= 6) raw.push(i); }   // y>=6: a corner, not a standstill / launch
+      const merged = []; raw.forEach((i) => { const last = merged[merged.length - 1]; if (last != null && i - last < win * 2) { if (pts[i].y < pts[last].y) merged[merged.length - 1] = i; } else merged.push(i); });
+      return merged;
+    };
+    const speedTraceHtml = () => {
+      const win = spdWindow();
+      if (!win) return `<div class="spd-hd"><b>🏁 Speed trace</b></div><p class="why" style="font-size:11px;margin:4px 0">gathering data… drive to build the line.</p>`;
+      const pts = win.pts; const dips = spdDips(pts);
+      const W = 720, H = 190, PL = 32, PR = 10, PT = 14, PB = 24;
+      const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+      const xMax = Math.max(...xs) || 1, yMax = Math.max(40, Math.ceil((Math.max(...ys) + 4) / 10) * 10);
+      const X = (x) => PL + (x / xMax) * (W - PL - PR), Y = (y) => PT + (1 - y / yMax) * (H - PT - PB);
+      const line = pts.map((p, i) => `${i ? "L" : "M"}${X(p.x).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(" ");
+      const area = `${line} L${X(pts[pts.length - 1].x).toFixed(1)} ${Y(0).toFixed(1)} L${X(pts[0].x).toFixed(1)} ${Y(0).toFixed(1)} Z`;
+      const yticks = [0, Math.round(yMax / 2), yMax].map((v) => `<line x1="${PL}" y1="${Y(v).toFixed(1)}" x2="${W - PR}" y2="${Y(v).toFixed(1)}" stroke="rgba(255,255,255,.07)"/><text x="${PL - 4}" y="${(Y(v) + 3).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="9">${v}</text>`).join("");
+      const markers = dips.map((i, k) => { const p = pts[i], x = X(p.x), y = Y(p.y);
+        return `<line x1="${x.toFixed(1)}" y1="${PT}" x2="${x.toFixed(1)}" y2="${H - PB}" stroke="rgba(227,179,65,.35)" stroke-dasharray="3 3"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#e3b341"/><text x="${x.toFixed(1)}" y="${(y - 7).toFixed(1)}" text-anchor="middle" fill="#e3b341" font-size="10" font-weight="700">T${k + 1}</text><text x="${x.toFixed(1)}" y="${(H - PB + 10).toFixed(1)}" text-anchor="middle" fill="var(--muted)" font-size="8">${Math.round(p.y)}</text>`; }).join("");
+      const xlab = win.mode === "free" ? `${Math.round(win.span || xMax)}s ago ← → now` : `${(xMax / 1000).toFixed(2)} km · lap ${win.lapn}`;
+      const hd = win.mode === "course" ? `🏁 Speed trace — lap ${win.lapn} · ${dips.length} corner${dips.length === 1 ? "" : "s"} marked` : `🏁 Speed trace — last ${Math.min(SPD_WIN_S, Math.round(win.span || 0))}s · ${dips.length} corner${dips.length === 1 ? "" : "s"} marked`;
+      return `<div class="spd-hd"><b>${hd}</b><span class="why" style="font-size:10px">corners = speed minima (braking zones)</span></div>
+        <svg viewBox="0 0 ${W} ${H}" class="spd-svg" style="width:100%;height:auto;display:block">
+          ${yticks}<path d="${area}" fill="rgba(47,129,247,.10)"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>${markers}
+          <text x="${W - PR}" y="${H - 3}" text-anchor="end" fill="var(--muted)" font-size="9">${esc(xlab)}</text>
+          <text x="${PL - 26}" y="${PT + 4}" fill="var(--muted)" font-size="9">mph</text>
+        </svg>`;
+    };
+    const paintSpeedTrace = (force) => { const els = document.querySelectorAll(".lvSpeedTrace"); if (!els.length) return;
+      const anyEmpty = [...els].some((e) => !e.innerHTML);   // a freshly-mounted container fills at once, throttle aside
+      const now = performance.now(); if (!force && !anyEmpty && live._spdPaintT && now - live._spdPaintT < 480) return; live._spdPaintT = now;   // ~2 fps is plenty for a trace
+      const html = speedTraceHtml(); els.forEach((el) => { el.innerHTML = html; }); };
     function paintFrame() {
       const f = live.frame; if (!f) return;
       if (f.car && live.connected) { fetchDiskTune(f.car); diskSigCheck(f); }   // auto-fill + re-match the decode to the build now loaded (cyl/PI signature)
@@ -4476,6 +4563,16 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           (live.trac = live.trac || []).push({ mph: f.mph, dc, rc, fc, spin: dc > 1 });
           if (live.trac.length > 300) live.trac.shift();
         }
+      }
+      // ---- SPEED-TRACE buffer: a rolling speed history for the F1-style trace (constant tracker). Sampled ~7Hz so the
+      // line is smooth but light; carries dist + lap + throttle/brake so course mode can plot a whole lap by track
+      // position and colour the phases. Free mode reads the last 2 minutes; course mode the current lap. ----
+      if (f.on && f.mph != null) {
+        const now = performance.now();
+        if (!live._spdT || now - live._spdT >= 140) { live._spdT = now;
+          (live.spd = live.spd || []).push({ t: f.t, mph: f.mph, dist: f.dist, lapn: f.lapn, ev: f.ev, brk: f.brk, thr: f.thr });
+          if (live.spd.length > 3200) live.spd.shift(); }
+        paintSpeedTrace();
       }
       paintTraction(f);
       // the stream bar's live line follows the WORKFLOW: Course = the event you're in (lap, lap time, distance); Decode = donor capture state; Free = the car and the run
@@ -4507,7 +4604,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const W4 = ["FL", "FR", "RL", "RR"];
     function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars, corners: (live.corners || []).slice(-80) }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; paintDockStrip(); paintDock(); }
     function paintCorners() { const el = host.querySelector("#lvCorners"); if (el) el.innerHTML = live.corners.slice(-12).reverse().map((c) => cornerCard(liveS(), c)).join("") || `<p class="why" style="font-size:11px">no corners yet</p>`; }
-    function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); paintCloneLauncher(); paintDock(force); }
+    function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); paintCloneLauncher(); paintDock(force); paintSpeedTrace(); }
     function liveConnect() {
       if (es) { es.close(); es = null; }
       live.loaded = null; carSel = null;   // a (re)connect may be a different daemon / session — never carry a loaded session or a car filter across

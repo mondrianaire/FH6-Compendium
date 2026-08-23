@@ -504,7 +504,7 @@ def main():
         c = cars.setdefault(k, {"id": k, "ordinal": r["CarOrdinal"], "pi": r["CarPI"], "class": CLASS.get(r["CarClass"], str(r["CarClass"])), "drivetrain": DRIVE.get(r["DrivetrainType"], "?"),
                                 "cyl": r["NumCylinders"], "max_rpm": round(r["EngineMaxRpm"]), "idle_rpm": round(r["EngineIdleRpm"]), "car_group": r["CarGroup"],
                                 "name": (NAMES.get(str(r["CarOrdinal"])) or {}).get("name"),
-                                "live_frames": 0, "_gear": defaultdict(list), "_fdgear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "_shift": [], "_prev": None, "_pull": None, "_pulls": [], "_boost_n": 0, "temps_max_f": {w: 0 for w in W}})
+                                "live_frames": 0, "_gear": defaultdict(list), "_fdgear": defaultdict(list), "_dyno": defaultdict(list), "_k": {w: [] for w in W}, "_boost": 0.0, "_mass": [], "_massclean": [], "_shift": [], "_prev": None, "_pull": None, "_pulls": [], "_boost_n": 0, "temps_max_f": {w: 0 for w in W}})
         c["live_frames"] += 1; c["_boost"] = max(c["_boost"], r["Boost"])
         if r["Boost"] > 0.5: c["_boost_n"] += 1
         for w in W: c["temps_max_f"][w] = max(c["temps_max_f"][w], r["TireTempF" + w])
@@ -528,6 +528,9 @@ def main():
             if hp_ > pl["hp_max"]: pl["hp_max"] = hp_; pl["rpm_at"] = rpm_
             if 6 < r["Speed"] < 20 and r["AccelZ"] > 1.5 and all(abs(r["SlipRatio" + w]) < 0.3 for w in W) and r["Power"] > 10000:
                 c["_mass"].append(r["Power"] / (r["Speed"] * r["AccelZ"]))   # kg-ish index (ignores drag/driveline loss)
+        if (r["Gear"] >= 3 and 0.8 < r["AccelZ"] < 4.0 and 8 < r["Speed"] < 35 and abs(r["AccelX"]) < 1.0
+                and r["Power"] > 3000 and max(abs(r["SlipRatio" + w]) for w in W) < 0.03):
+            c["_massclean"].append(0.85 * r["Power"] / (r["Speed"] * r["AccelZ"]))   # wheelspin-free F=ma, driveline-corrected -> kg
         if r["Accel"] < 10 and r["Brake"] < 10 and r["Speed"] > 8:
             for w in W: c["_k"][w].append(r["WheelRotSpeed" + w] / r["Speed"])
     for c in cars.values():
@@ -542,6 +545,9 @@ def main():
         c["gears"] = lad
         c["dyno"] = [{"rpm": k, "hp": round(statistics.median([p for p, q in v])), "tq": round(statistics.median([q for p, q in v])), "n": len(v)} for k, v in sorted(c["_dyno"].items()) if len(v) >= 8]
         c["k_wheel"] = {w: (statistics.median(c["_k"][w]) if c["_k"][w] else None) for w in W}
+        _mc = c["_massclean"]
+        c["mass_measured"] = ({"lb": round(statistics.median(_mc) * 2.205), "kg": round(statistics.median(_mc)), "n": len(_mc)}
+                              if len(_mc) >= 20 else {"n": len(_mc)})   # physics-battery mass probe (needs a clean roll-on maneuver)
         _kv = [v for v in c["k_wheel"].values() if v]   # k_wheel = WheelRotSpeed/Speed = 1/tyre_radius, so radius = 1/k
         c["tire_radius_m"] = round(1.0 / (sum(_kv) / len(_kv)), 3) if _kv else None   # EXACT rolling radius from telemetry (no user input)
         c["live_s"] = round(c["live_frames"] / max(sess["rate_pps"], 1), 1)
@@ -570,7 +576,7 @@ def main():
         key = f'{c["ordinal"]}|{c["drivetrain"]}|{c["cyl"]}|{c["pi"]}|{round(c["max_rpm"], -2)}|{len(lad)}|{",".join(f"{g["rel"]:.1f}" for g in lad)}|{round((c["sig"]["hp_peak"] or 0), -1)}'
         c["build_id"] = hashlib.md5(key.encode()).hexdigest()[:8]
         c["build_record"] = next((b for b in BUILDS if b.get("cid") == c["id"] and (not b.get("build_id") or b.get("build_id") == c["build_id"])), None)
-        for k in ("_gear", "_dyno", "_k", "_boost", "_mass", "_shift", "_prev", "_pull", "_pulls", "_boost_n"): del c[k]
+        for k in ("_gear", "_dyno", "_k", "_boost", "_mass", "_massclean", "_shift", "_prev", "_pull", "_pulls", "_boost_n"): del c[k]
     sess["cars"] = sorted(cars.values(), key=lambda c: -c["live_frames"]); sess["segments"] = segments
 
     # ---- impacts / zero windows ----

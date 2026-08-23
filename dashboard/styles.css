@@ -315,3 +315,17 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .fx-eg { border: 1px dashed var(--accent); border-radius: 8px; padding: 8px 11px; margin: 8px 0; }
 .fx-eg pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.5;
   margin: 5px 0 0; white-space: pre-wrap; color: var(--txt); }
+
+/* ---- COURSE IDENTITY: the auto-computed shape is a course's primary identifier ---- */
+.course-id { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; padding: 8px 11px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); }
+.course-id-glyph { flex: none; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+.course-id-glyph.noshape { width: 60px; height: 42px; font-size: 20px; opacity: .5; }
+.course-glyph { display: block; }
+.course-id-main { flex: 1; min-width: 0; }
+.course-id-title { font-size: 16px; font-weight: 700; line-height: 1.15; }
+.course-id-title b { font-weight: 800; }
+.course-id-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.course-id-hint { font-size: 10px; color: var(--warn); margin-top: 2px; }
+.course-id-right { flex: none; margin-left: auto; }

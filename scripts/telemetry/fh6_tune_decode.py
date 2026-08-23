@@ -17,7 +17,7 @@ research/savefile-decode-2026-08-22.md.
 
 stdlib only. READ-ONLY: never writes to the save; parse copies where possible.
 """
-import struct, os, glob, json, argparse, re
+import struct, os, glob, json, argparse, re, hashlib
 
 TUNE_FILE_SIZE = 598
 
@@ -515,6 +515,29 @@ DIM_SLOTS = {"front_tire_width", "rear_tire_width", "front_rim_size", "rear_rim_
 # (best-effort). idx 11/12/15 are FH6 compounds we haven't pinned yet — shown as "Compound #N" until verified.
 COMPOUND_NAMES = {0: "Stock", 1: "Street", 2: "Sport", 3: "Semi-Slick", 4: "Slick", 5: "Race",
                   6: "Rally", 7: "Off-Road", 8: "Snow", 9: "Drift", 10: "Drag"}
+_COMPOUND_OVERRIDE = None
+_COMPOUND_VERIFIED = set()
+
+def load_compound_names():
+    """Merge data/tire-compounds.json 'names' over the code defaults. The compound index is a GLOBAL enum,
+    so ONE tire-shop capture (read the compound list on any car) pins every car — put the names in that file
+    and 11/12/15 resolve everywhere. Returns (names_dict, verified_set)."""
+    global _COMPOUND_OVERRIDE, _COMPOUND_VERIFIED
+    if _COMPOUND_OVERRIDE is None:
+        merged = dict(COMPOUND_NAMES)
+        try:
+            here = os.path.dirname(os.path.abspath(__file__))
+            path = os.path.abspath(os.path.join(here, "..", "..", "data", "tire-compounds.json"))
+            with open(path, encoding="utf-8") as fh:
+                j = json.load(fh)
+            for k, v in (j.get("names") or {}).items():
+                if v:
+                    merged[int(k)] = v
+            _COMPOUND_VERIFIED = set(int(x) for x in (j.get("verified") or []))
+        except Exception:
+            pass
+        _COMPOUND_OVERRIDE = merged
+    return _COMPOUND_OVERRIDE, _COMPOUND_VERIFIED
 
 ASPIRATION_TYPE = {"single_turbo": "Single Turbo", "twin_turbo": "Twin Turbo", "quad_turbo": "Quad Turbo",
                    "pos_supercharger": "Positive-Displacement Supercharger", "centrifugal_supercharger": "Centrifugal Supercharger"}
@@ -523,6 +546,146 @@ COSMETIC_SLOTS = {"rim_style", "rear_rim_style"}
 
 def _tier_word(idx):
     return TIER_NAMES[idx] if 0 <= idx < len(TIER_NAMES) else "Race"   # cap race-variant indices (>3) at "Race"
+
+
+# ---- engine-type descriptor (Feature A) -------------------------------------
+# The save holds NO engine specs (cylinders / redline / power). This composes a specific engine
+# TYPE from signals we already own: aspiration (decoded), engine-internal build level (decoded),
+# displacement (from a captured build's My-Cars pane), plus — when the daemon enriches a driven car —
+# live cylinders / redline / peak dyno hp. A swapped engine's donor NAME is NEVER invented.
+ENGINE_INTERNAL_SLOTS = ["camshaft", "valves", "displacement", "pistons", "fuel_system", "ignition",
+                         "exhaust", "intake", "flywheel", "manifold", "restrictor_plate", "oil_cooling",
+                         "intercooler", "motor_parts"]
+_ASP_SHORT = {"single_turbo": "Turbo", "twin_turbo": "Twin-Turbo", "quad_turbo": "Quad-Turbo",
+              "pos_supercharger": "Supercharged", "centrifugal_supercharger": "Centrifugal-Supercharged"}
+
+def _aspiration_short(parts):
+    """Short aspiration word from the decoded forced-induction slot, or None for naturally aspirated."""
+    for slot in ASPIRATION_TYPE:
+        if parts.get(slot) is not None:
+            return _ASP_SHORT.get(slot)
+    return None
+
+def _engine_build_level(parts):
+    """Highest bolt-on tier (0..3) across the engine-internal slots — a coarse 'how built' signal from the save."""
+    mx = 0
+    for slot in ENGINE_INTERNAL_SLOTS:
+        v = parts.get(slot)
+        if v is not None:
+            mx = max(mx, min(v % 1000, 3))
+    return mx
+
+def compose_engine_type(asp_short=None, displacement_l=None, cyl=None, peak_hp=None,
+                        redline=None, swapped=False, electric=False, build_level=0,
+                        disp_from_build=False):
+    """Build the engine-type descriptor string from whatever signals exist. The telemetry path passes
+    cyl/peak_hp/redline (measured); the save-only path passes just asp_short/displacement/build_level.
+    Never fabricates a donor name for a swap (only flags that it IS swapped)."""
+    if electric:
+        desc = "Electric powertrain"
+        if peak_hp:
+            desc += f" · {int(peak_hp)} hp"
+    else:
+        head = []
+        if displacement_l:
+            head.append(f"{displacement_l}L")
+        if asp_short:
+            head.append(asp_short)
+        if cyl:
+            head.append(f"{int(cyl)}-cyl")
+        elif not peak_hp and build_level:          # save-only, unknown cylinders: fall back to build level
+            head.append(f"{_tier_word(build_level)}-built engine")
+        heads = " ".join(head) if head else "engine"
+        tail = []
+        if peak_hp and redline:
+            tail.append(f"{int(peak_hp)} hp @ {int(redline)} rpm")
+        elif peak_hp:
+            tail.append(f"{int(peak_hp)} hp")
+        desc = heads + (" · " + " · ".join(tail) if tail else "")
+    if swapped:
+        desc = "Swapped · " + desc
+    if disp_from_build and displacement_l:
+        desc += " (displacement from build capture)"
+    return desc
+
+
+# ---- per-part PI scaffolding (Feature B) ------------------------------------
+# parts_tiers / parts_hash define the canonical config fingerprint shared by the daemon (which records
+# observations) and the solver (which differences them). load_parts_pi / pi_for read the solved estimates;
+# observed_car_pi reads back the exact CarPI for THIS config when it has been driven & recorded.
+def parts_tiers(parts):
+    """{slot: tier} for all 50 slots; tier = id%1000, or None for an empty slot. The canonical config vector."""
+    return {name: (None if parts.get(name) is None else parts.get(name) % 1000) for name in PARTS}
+
+def parts_hash(ordinal, parts):
+    """Stable 16-hex fingerprint of (ordinal + the 50 slot tiers) — the dedup / match key for observations."""
+    tiers = parts_tiers(parts)
+    payload = json.dumps({"o": int(ordinal), "p": {k: tiers[k] for k in sorted(tiers)}}, sort_keys=True)
+    return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
+
+_PARTS_PI = None
+def _parts_pi_path():
+    here = os.path.dirname(os.path.abspath(__file__))
+    return os.path.abspath(os.path.join(here, "..", "..", "data", "parts-pi.json"))
+
+def load_parts_pi():
+    """Solved per-(slot, tier) PI estimates: {slot: {str(tier): {pi_vs_stock, samples, confidence, ...}}}.
+    Empty until fh6_pi_solve.py has enough single-part-diff observations. Cached; missing file -> {}."""
+    global _PARTS_PI
+    if _PARTS_PI is None:
+        try:
+            with open(_parts_pi_path(), encoding="utf-8") as fh:
+                _PARTS_PI = json.load(fh).get("parts_pi") or {}
+        except Exception:
+            _PARTS_PI = {}
+    return _PARTS_PI
+
+def pi_for(slot, tier):
+    """Estimated PI cost of (slot, tier) vs stock, or None if unknown (sparse observations)."""
+    if slot is None or tier is None:
+        return None
+    e = load_parts_pi().get(slot, {}).get(str(tier))
+    if not e:
+        return None
+    v = e.get("pi_vs_stock")
+    return int(v) if isinstance(v, (int, float)) else None
+
+_PI_OBS = None
+def _pi_obs_path():
+    here = os.path.dirname(os.path.abspath(__file__))
+    return os.path.abspath(os.path.join(here, "..", "..", "data", "pi-observations.json"))
+
+def load_pi_observations():
+    """The raw decoded-config <-> CarPI observations (list). Cached; missing file -> []."""
+    global _PI_OBS
+    if _PI_OBS is None:
+        try:
+            with open(_pi_obs_path(), encoding="utf-8") as fh:
+                _PI_OBS = json.load(fh).get("observations") or []
+        except Exception:
+            _PI_OBS = []
+    return _PI_OBS
+
+def observed_car_pi(ordinal, parts):
+    """The exact CarPI recorded for THIS config (matching parts_hash), or None if never driven & recorded."""
+    ph = parts_hash(ordinal, parts)
+    for o in load_pi_observations():
+        if o.get("parts_hash") == ph:
+            return o.get("car_pi")
+    return None
+
+def _pi_slot_for(row, parts):
+    """Map a deliverable row back to the real 50-slot key used in parts-pi/observations (Conversions rows are
+    synthetic: powertrain -> engine/motor, aspiration -> the populated forced-induction slot, drivetrain -> drivetrain)."""
+    item = row.get("item")
+    if item == "powertrain":
+        return "motor" if row.get("electric") else "engine"
+    if item == "aspiration":
+        raw = row.get("raw")
+        return next((s for s in ASPIRATION_TYPE if parts.get(s) == raw), None) if raw is not None else None
+    if item == "drivetrain":
+        return "drivetrain"
+    return item   # regular shop-menu rows already carry the real slot key
 
 def _part_view(cat, val, ordinal, gear_count=None):
     """Human view of one part slot: the exact upgrade NAME to install.
@@ -546,8 +709,11 @@ def _part_view(cat, val, ordinal, gear_count=None):
     if cat == "tire_compound":
         if idx == 0:
             return out("Stock", "named", stock=True)
-        nm = COMPOUND_NAMES.get(idx)   # conf "compound" — the index→name order is best-effort, not verified per car
-        return out(f"{nm} Compound", "compound") if nm else out(f"Compound #{idx} — unmapped, verify in shop", "compound")
+        cnames, cverified = load_compound_names()
+        nm = cnames.get(idx)   # global enum; names from data/tire-compounds.json override the best-effort defaults
+        if not nm:
+            return out(f"Compound #{idx} — capture the tire menu once to name it", "compound")
+        return out(f"{nm} Compound", "named" if idx in cverified else "compound")
     if cat in DIM_SLOTS:
         return out("Stock", "named", stock=True) if idx == 0 else out(f"{disp} · level {idx}", "dim")
     if cat == "transmission" and fam == RACE_TRANS_FAMILY:
@@ -612,9 +778,28 @@ def _conversion_rows(tune, ordinal):
             er = row("powertrain", "Engine", f"Engine swap (catalog #{engine // 1000})", "category", engine % 1000, False, engine)
     else:
         er = row("powertrain", "Engine", "Unknown powertrain", "category", 0, False, None)
-    if not er.get("electric") and build and build.get("displacement_l"):
-        er["value"] = er["upgrade"] = f"{er['value']} · {build['displacement_l']}L"
-        er["displacement_l"] = build["displacement_l"]
+    disp_l = build.get("displacement_l") if (build and not er.get("electric")) else None
+    if disp_l:
+        er["value"] = er["upgrade"] = f"{er['value']} · {disp_l}L"
+        er["displacement_l"] = disp_l
+    # engine-type descriptor (Feature A): a specific TYPE from save-only signals now; the daemon upgrades this
+    # to a telemetry-MEASURED string (cylinders / redline / peak hp) for a driven car. engine_bits carries the
+    # decoded pieces so the daemon can recompose the measured descriptor without re-deriving them.
+    if er.get("electric"):
+        swapped = not er["stock"]
+        er["engine_type"] = compose_engine_type(electric=True, swapped=swapped)
+        er["engine_type_conf"] = "save-only"
+        er["engine_bits"] = {"asp": None, "displacement_l": None, "swapped": swapped,
+                             "electric": True, "build_level": 0, "disp_from_build": False}
+    else:
+        swapped = engine is not None and engine // 1000 != own
+        bl = _engine_build_level(P)
+        er["engine_type"] = compose_engine_type(asp_short=(_aspiration_short(P) or "Naturally aspirated"),
+                                                displacement_l=disp_l, build_level=bl, swapped=swapped,
+                                                disp_from_build=bool(disp_l))
+        er["engine_type_conf"] = "save-only"
+        er["engine_bits"] = {"asp": _aspiration_short(P), "displacement_l": disp_l, "swapped": swapped,
+                             "electric": False, "build_level": bl, "disp_from_build": bool(disp_l)}
     conv.append(er)
     # ASPIRATION — from the populated forced-induction slot (electric = none)
     if motor is not None:
@@ -626,11 +811,14 @@ def _conversion_rows(tune, ordinal):
             conv.append(row("aspiration", "Aspiration", (f"{_tier_word(t)} " if t else "") + ASPIRATION_TYPE[asp], "named", t, False, av))
         else:
             conv.append(row("aspiration", "Aspiration", "Naturally Aspirated", "named", 0, True, None))
-    # Drivetrain — stock vs swapped (the slot isn't a Street/Sport/Race tier); the dashboard prepends the live FWD/RWD/AWD letter
+    # Drivetrain — stock vs swapped (the slot isn't a Street/Sport/Race tier). The save can't know the RESULTING
+    # layout, so resulting_drivetrain starts null; the daemon fills it from live DrivetrainType (FWD/RWD/AWD).
     dv = P.get("drivetrain")
     if dv is not None:
         t = dv % 1000
-        conv.append(row("drivetrain", "Drivetrain", "Stock layout" if t == 0 else "Converted / swapped", "named", t, t == 0, dv))
+        dr = row("drivetrain", "Drivetrain", "Stock layout" if t == 0 else "Converted / swapped", "named", t, t == 0, dv)
+        dr["resulting_drivetrain"] = None
+        conv.append(dr)
     return conv
 
 def tune_to_deliverable(tune, car_name=None):
@@ -696,6 +884,20 @@ def tune_to_deliverable(tune, car_name=None):
     abs_sliders = sum(1 for t in tabs for r in t["rows"] if r.get("value") is not None and not r.get("derived"))
     der_sliders = sum(1 for t in tabs for r in t["rows"] if r.get("value") is not None and r.get("derived"))
     rel_sliders = sum(1 for t in tabs for r in t["rows"] if r.get("value") is None)
+    # PI scaffolding (Feature B): tag each installed non-stock row with its estimated PI cost (or null if
+    # the solver hasn't isolated it yet), and roll up budget totals. Never blocks output — all-null when sparse.
+    pi_total_parts = pi_known_parts = pi_attributed = 0
+    for m in menus:
+        for r in m["rows"]:
+            if r.get("raw") is None or r.get("stock"):
+                continue                       # stock / empty slots are not installed upgrades
+            slot = _pi_slot_for(r, tune["parts"])
+            pv = pi_for(slot, r.get("tier"))
+            r["pi"] = pv                        # int estimate, or None when unknown
+            pi_total_parts += 1
+            if pv is not None:
+                pi_known_parts += 1; pi_attributed += pv
+    pi_total = observed_car_pi(ordn, tune["parts"])   # exact CarPI for THIS config, if driven & recorded
     return {
         "source": "disk",
         "ordinal": ordn,
@@ -706,7 +908,10 @@ def tune_to_deliverable(tune, car_name=None):
         "tabs": tabs,
         "summary": {"parts_installed": installed, "sliders_absolute": abs_sliders + der_sliders,
                     "sliders_exact": abs_sliders, "sliders_derived": der_sliders,
-                    "sliders_relative": rel_sliders},
+                    "sliders_relative": rel_sliders,
+                    "pi_total": pi_total,
+                    "pi_attributed": (pi_attributed if pi_known_parts else None),
+                    "pi_known_parts": pi_known_parts, "pi_total_parts": pi_total_parts},
         # overall confidence: parts + disk-exact sliders count full; derived (global-band) ~0.85; relative discount
         "confidence": round((installed + abs_sliders + 0.85 * der_sliders + 0.6 * rel_sliders) /
                             max(1, installed + abs_sliders + der_sliders + rel_sliders), 3),

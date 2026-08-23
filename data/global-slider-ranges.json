@@ -20,10 +20,15 @@
   "confidence_note": "confidence 'derived' = high-quality inference (correct shape, plausible scale), not read-exact off disk. A single WheelRotationSpeed gear-ladder drive on any car upgrades these to verified-exact and can refine the absolute scale.",
   "spring_model": {
     "formula": "k_lb_per_in = freq_hz^2 * W_axle_lb / 19.56 ; W_axle = total_lb * dist(front or rear) ; the slider is linear in spring RATE between the two frequency endpoints",
+    "formula_confidence": "verified",
+    "formula_source": "CONFIRMED against forza.guide's live spring-rate calculator 2026-08-23: at 50/50 it returns front 618.6 / rear 663.6 lb/in for 3086 lb and front 801.7 / rear 860.0 for 4000 lb — both back-solve to a weight-INVARIANT freq (front 2.80 Hz, rear 2.90 Hz), i.e. k = f^2 * W_axle / 19.56 exactly. Also matches the ForzaTune app methodology.",
+    "recommended_freq_front_hz": 2.80,
+    "recommended_freq_rear_hz": 2.90,
+    "recommended_note": "forza.guide's RECOMMENDED road spring frequency (a stiff, competitive starting point). Rear ~3.6% stiffer than front. This is a single target point, NOT a slider endpoint.",
     "freq_min_hz": 1.4,
     "freq_max_hz": 3.13,
     "confidence": "provisional",
-    "source": "FH spring formula (k = f^2 * W_axle / 19.56, verified across all Forza titles + calculators); frequency band from one observed car whose rate range ratio was 5.00 (=> f_max/f_min = 2.236, e.g. 1.40->3.13 Hz). REFINE: one registered spring endpoint + that car's mass pins the band exactly for every car.",
+    "source": "Frequency BAND from one observed car whose rate range ratio was 5.00 (=> f_max/f_min = 2.236, e.g. 1.40->3.13 Hz). CORROBORATED 2026-08-23: the recommended 2.80/2.90 Hz sits inside this band near the stiff end, consistent but NOT pinning the endpoints. REFINE: the calculator gives a recommended POINT, not the min/max; the exact endpoints still need one in-game two-point read (a registered spring endpoint + that car's mass).",
     "needs": "per-car mass+front% in data/car-mass.json (from the My Cars stats capture)"
   }
 }

@@ -899,7 +899,9 @@ def main():
         with open(os.path.join(ROOT, "data", "reference-loops.json"), encoding="utf-8") as f: loops = json.load(f).get("loops", {})
     except Exception: loops = {}
     for lname, lp in loops.items():
-        lx, lz = lp["start"]; R = lp.get("radius", 60); MIND = lp.get("min_dist", 250)
+        lx, lz = lp["start"]
+        if abs(lx) < 5 and abs(lz) < 5: continue   # invalid origin-marked loop (a pre-race [0,0] capture) — the car never returns to the origin, so it never made a course
+        R = lp.get("radius", 60); MIND = lp.get("min_dist", 250)
         # collect crossings: a lap = leave the radius (travel > MIND from start), then return within radius
         state = "start"; lap_rows = []; away_dist = 0; prev = None; passes = []
         for r in live:
@@ -950,7 +952,7 @@ def main():
     COURSE_PROBES = [("hairpin", "Hairpins", 3), ("medium", "Medium corners", 3), ("fast", "Fast sweepers", 3), ("flick", "Chicane flicks", 2), ("launch", "Standing starts", 2), ("brake", "Hard stops from 80+", 3), ("crest", "Crests", 2)]
     courses = {}
     for e in ev_out:
-        if e["duration_s"] < 15 or e["distance_m"] < 300: continue   # aborted starts / restarts don't make a course
+        if e["duration_s"] < 5 or e["distance_m"] < 100: continue   # only true instant-aborts are dropped; a short PARTIAL run (practising the first few turns, then a crash / restart) still carries cornering data and must contribute to the course
         co = courses.setdefault(e["route_key"], {"route_key": e["route_key"], "name": e["route"], "events": [], "cars": []})
         lab = next((st["label"] for st in stints if st["n"] == e.get("stint")), None)
         co["events"].append({"t0": e["t0"], "t1": e["t1"], "car": e["car"], "stint": e.get("stint"), "label": lab, "laps": e["laps"], "best_lap": e["best_lap"], "last_lap": e["last_lap"], "duration_s": e["duration_s"], "distance_m": e["distance_m"], "mode": e["mode"], "pos_final": e["pos_final"]})

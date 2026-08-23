@@ -1,0 +1,5 @@
+{
+ "schema_version": "1.0.0",
+ "purpose": "decoded-config <-> live CarPI observations; single-part diffs give per-part PI cost — see scripts/telemetry/fh6_pi_solve.py. Written by fh6_live_daemon.py while driving; consumed by fh6_pi_solve.py.",
+ "observations": []
+}

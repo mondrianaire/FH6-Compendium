@@ -658,6 +658,44 @@
     return `<span title="${title}" style="display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px">${[1, 2, 3, 4, 5].map((p) =>
       `<span style="width:9px;height:9px;border-radius:50%;display:inline-block;${phases.includes(p) ? `background:${CM_PC[p - 1]}` : "border:1px solid var(--line)"}"></span>`).join("")}</span>`;
   }
+  const CM_ABBR = ["Brake", "Turn-in", "Mid", "Exit", "Straight"];
+  const CM_CHIP = [[190, 262], [382, 249], [478, 191], [382, 131], [190, 118]];   // per-phase badge anchors on the corner ribbon (from the variables map)
+  // per-move glyph: same canonical corner, PHASE-COLOURED where this slider ACTS, red halo where the driver's ISSUE occurs.
+  // overlap (colour core + red halo) = this change directly targets the problem; a lone red dashed segment = the issue is there but another move handles it.
+  function moveCorner(aph, iph, w) {
+    aph = aph || []; iph = iph || [];
+    const wide = w || 118;
+    const title = `Change acts in: ${aph.map((p) => p + " " + CM_SHORT[p - 1]).join(", ") || "—"}` + (iph.length ? ` · issue occurs in: ${iph.map((p) => p + " " + CM_SHORT[p - 1]).join(", ")}` : "");
+    const segs = CM_SEGS.map((d, i) => {
+      const act = aph.includes(i + 1), iss = iph.includes(i + 1); let s = "";
+      if (iss) s += `<path d="${d}" fill="none" stroke="#e5414e" stroke-width="30" stroke-linecap="round" opacity=".30"/>`;
+      if (act) s += `<path d="${d}" fill="none" stroke="${CM_PC[i]}" stroke-width="17" stroke-linecap="round"/>`;
+      else if (iss) s += `<path d="${d}" fill="none" stroke="#e5414e" stroke-width="9" stroke-linecap="round" stroke-dasharray="1 12" opacity=".85"/>`;
+      return s;
+    }).join("");
+    return `<svg viewBox="0 0 620 320" width="${wide}" height="${Math.round(wide * 0.52)}" style="display:block" role="img" aria-label="${title}"><title>${title}</title>
+      <path d="${CM_RIBBON}" fill="none" stroke="var(--bg3)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+      ${segs}</svg>`;
+  }
+  // master "anatomy of a turn" image above the move cards: every phase in its colour + numbered, the phases where the
+  // driver's ISSUES occur pulsed red and named. One reference image the per-move glyphs read against.
+  function movesAnatomy(moves) {
+    const issue = {};   // phase -> Set(issue words)
+    (moves || []).forEach((m) => (m.iph || []).forEach((p) => { (issue[p] = issue[p] || new Set()); (m.iss || []).forEach((wd) => issue[p].add(wd)); }));
+    const issPhases = Object.keys(issue).map(Number);
+    const segs = CM_SEGS.map((d, i) => {
+      const iss = issPhases.includes(i + 1);
+      return `${iss ? `<path d="${d}" fill="none" stroke="#e5414e" stroke-width="30" stroke-linecap="round" opacity=".9"><animate attributeName="opacity" values=".85;.3;.85" dur="1.9s" repeatCount="indefinite"/></path>` : ""}<path d="${d}" fill="none" stroke="${CM_PC[i]}" stroke-width="16" stroke-linecap="round" opacity="${iss ? 1 : .9}"/>`;
+    }).join("");
+    const badges = CM_CHIP.map((c, i) => `<g><circle cx="${c[0]}" cy="${c[1]}" r="17" fill="var(--bg)" stroke="${CM_PC[i]}" stroke-width="2.5"/><text x="${c[0]}" y="${c[1] + 7}" text-anchor="middle" font-size="21" font-weight="700" fill="${CM_PC[i]}">${i + 1}</text></g>`).join("");
+    const svg = `<svg class="tm-anat-svg" viewBox="0 0 620 320" role="img" aria-label="Anatomy of a turn">
+      <path d="${CM_RIBBON}" fill="none" stroke="var(--bg3)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>${segs}${badges}</svg>`;
+    const legend = [1, 2, 3, 4, 5].map((p) => {
+      const on = issue[p]; const words = on ? [...on].slice(0, 2).join(", ") : "";
+      return `<span class="tm-lg${on ? " iss" : ""}"><i style="background:${CM_PC[p - 1]}"></i>${p} ${CM_SHORT[p - 1]}${on ? ` — <b>${words}</b>` : ""}</span>`;
+    }).join("");
+    return `<div class="tm-anat"><div class="tm-anat-wrap">${svg}</div><div class="tm-anat-lg"><span class="tm-anat-ttl">Anatomy of a turn · <span style="color:#e5414e">red = where your issues occur</span></span>${legend}<span class="tm-tgt" title="FH6's Mechanical Balance stat (front-vs-rear grip, shown live in the tuning screen) is the master target — set it with ARBs first. Confirmed across 4 vetted guides.">🎯 Mech. Balance <b>0.55–0.65</b> <span style="opacity:.7">(~0.60, a mid-corner target)</span> · Aero <b>0.40–0.45</b></span></div></div>`;
+  }
 
   // direction-effect icons: rotate (red, loosens) / push+stability (blue, tightens) / neutral axes
   const FX_ICONS = {
@@ -2582,7 +2620,35 @@
       "brake-pressure": [["bpress", -1, 1]], "trail-brake": [["bbal", -1, 0.4]],
       "launch-spin": [["accel", -1, 1]], "launch-front-spin": [["center", 1, 1], ["accel", -1, 0.5]],
       "bottoming": [["rheight", 1, 1], ["fheight", 1, 0.8]],   // fix bottoming with RIDE HEIGHT (matches the advice), not dampers
+      // net-new symptoms mined from the vetted external guides (forzatune / gamingpromax / forza.guide) — phase-tagged
+      "hi-speed-understeer": [["faero", 1, 1], ["fheight", -1, 0.4]],   // fast sweepers: front lacks aero grip at speed
+      "lift-oversteer": [["bbal", 1, 0.6], ["rreb", 1, 0.5], ["decel", 1, 0.5]],   // rear steps out on lift / trail-brake
+      "hi-speed-wobble": [["raero", 1, 0.7], ["rreb", 1, 0.4]],   // weaves on fast straights (also caster, not a move slider)
     };
+    // WHICH PHASES a slider acts in (1=Braking 2=Turn-in 3=Mid-corner 4=Exit 5=Straight/crest) — grounded in the
+    // situational-model doctrine (data/tuning-variables.json phase_map) and cross-checked against forza.guide's
+    // Four-Corner-Phases lists (front ARB→turn-in, front bump→braking dive, ride height→mid-corner + bottoming).
+    const SLIDER_PHASES = {
+      farb: [2, 3], rarb: [3, 4], fspring: [3], rspring: [3, 4], fheight: [1, 3, 5], rheight: [3, 4, 5],
+      fbump: [1, 2], rbump: [2, 4], freb: [2, 5], rreb: [4, 5], bbal: [1, 2], bpress: [1],
+      accel: [4], decel: [2], center: [4], faero: [3, 5], raero: [3, 5],
+    };
+    // WHERE each symptom (TUNE_RX key) actually shows up on track + a one-word issue label for the anatomy image.
+    const SYMPTOM_PHASES = {
+      "mid-understeer": { ph: [3], issue: "understeer" }, "front-hot": { ph: [2, 3], issue: "front overheating" },
+      "rear-limited": { ph: [3, 4], issue: "oversteer" }, "oversteer-balance": { ph: [3, 4], issue: "oversteer" },
+      "brake-lockup": { ph: [1], issue: "lock-up" }, "brake-pressure": { ph: [1], issue: "lock-up" },
+      "brake-balance-rear": { ph: [1, 2], issue: "brake bias" }, "brake-balance-front": { ph: [1, 2], issue: "brake bias" },
+      "trail-brake": { ph: [1, 2], issue: "entry rotation" }, "launch-spin": { ph: [4], issue: "wheelspin" },
+      "launch-front-spin": { ph: [4], issue: "wheelspin" }, "bottoming": { ph: [1, 5], issue: "bottoming" },
+      "hi-speed-understeer": { ph: [3, 5], issue: "high-speed understeer" }, "lift-oversteer": { ph: [1, 2], issue: "lift/decel oversteer" },
+      "hi-speed-wobble": { ph: [5], issue: "high-speed wobble" },
+    };
+    // ABSOLUTE starting-point values from the vetted external guides (multi-source consensus). Used as the anchor on a
+    // move card when the current value isn't known — sliders whose value is car-specific (springs, ARBs, ride height,
+    // aero) are intentionally omitted (direction-only). rebound 18 / bump 6 is the cross-checked baseline (NOT
+    // grindout's bump≈60%·rebound outlier). See [[fh6-external-tuning-sources]].
+    const SLIDER_BASE = { fbump: 6, rbump: 6, freb: 18, rreb: 18, bbal: 52, bpress: 100, accel: 55, decel: 15, center: 80 };
     const tuneKey = (cid) => "fh6Tune:" + baseId(cid);
     // disk-decoded exact slider values → the tuning engine's slider keys (auto-fills "current tune")
     const DISK2SLIDER = { front_arb: "farb", rear_arb: "rarb", front_bump: "fbump", rear_bump: "rbump", front_rebound: "freb", rear_rebound: "rreb", brake_balance: "bbal", brake_pressure: "bpress", rear_diff_accel: "accel", rear_diff_decel: "decel", center_diff: "center", front_spring: "fspring", rear_spring: "rspring", front_downforce: "faero", rear_downforce: "raero" };
@@ -2602,32 +2668,46 @@
       const acc = {};
       (adv || []).filter((a) => !a.open).forEach((a) => { const rx = TUNE_RX[a.key]; if (!rx) return; const cw = a[wk] != null ? a[wk] : 1; if (cw < 0.2) return;
         const mag = (a.severity / 3) * (a.confidence || 0.7) * cw;
-        rx.forEach(([sl, dir, w]) => { const e = acc[sl] = acc[sl] || { net: 0, wsum: 0, sev: 0, srcs: new Set(), conf: 0 }; e.net += dir * w * mag; e.wsum += w * mag; e.sev = Math.max(e.sev, a.severity); e.conf = Math.max(e.conf, a.confidence || 0.7); e.srcs.add(a.text.split(":")[0].split(" (")[0]); });
+        const sp = SYMPTOM_PHASES[a.key];
+        rx.forEach(([sl, dir, w]) => { const e = acc[sl] = acc[sl] || { net: 0, wsum: 0, sev: 0, srcs: new Set(), conf: 0, iph: new Set(), iss: new Set() }; e.net += dir * w * mag; e.wsum += w * mag; e.sev = Math.max(e.sev, a.severity); e.conf = Math.max(e.conf, a.confidence || 0.7); e.srcs.add(a.text.split(":")[0].split(" (")[0]); if (sp) { sp.ph.forEach((p) => e.iph.add(p)); e.iss.add(sp.issue); } });
       });
       const tuneCorners = (corners || []).filter((k) => k.limiter === "tune");
       const understeerN = tuneCorners.filter((k) => k.dominant === "front").length, oversteerN = tuneCorners.filter((k) => k.dominant === "rear").length; const nT = Math.max(1, (corners || []).length);
-      if (understeerN) { const e = acc.farb = acc.farb || { net: 0, wsum: 0, sev: 2, srcs: new Set(), conf: 0.7 }; const m = 0.5 * understeerN / nT; e.net -= m; e.wsum += m; e.srcs.add(`${understeerN} turns front-limited`); }
-      if (oversteerN) { const e = acc.rarb = acc.rarb || { net: 0, wsum: 0, sev: 2, srcs: new Set(), conf: 0.7 }; const m = 0.5 * oversteerN / nT; e.net -= m; e.wsum += m; e.srcs.add(`${oversteerN} turns rear-limited`); }
+      const cornPh = (k) => (k.phase != null ? k.phase : (k.first_red && k.first_red.phase));   // exact telemetry phase where grip was first lost (settled corners carry first_red; live folds carry .phase)
+      if (understeerN) { const e = acc.farb = acc.farb || { net: 0, wsum: 0, sev: 2, srcs: new Set(), conf: 0.7, iph: new Set(), iss: new Set() }; const m = 0.5 * understeerN / nT; e.net -= m; e.wsum += m; e.srcs.add(`${understeerN} turns front-limited`); e.iss.add("understeer"); e.iph.add(3); tuneCorners.forEach((k) => { if (k.dominant === "front") { const p = cornPh(k); if (p) e.iph.add(p); } }); }
+      if (oversteerN) { const e = acc.rarb = acc.rarb || { net: 0, wsum: 0, sev: 2, srcs: new Set(), conf: 0.7, iph: new Set(), iss: new Set() }; const m = 0.5 * oversteerN / nT; e.net -= m; e.wsum += m; e.srcs.add(`${oversteerN} turns rear-limited`); e.iss.add("oversteer"); e.iph.add(4); tuneCorners.forEach((k) => { if (k.dominant === "rear") { const p = cornPh(k); if (p) e.iph.add(p); } }); }
       const moves = [];
       SLIDER_ORDER.forEach((sl) => { const e = acc[sl]; if (!e || Math.abs(e.net) < 0.12) return; const S = SLIDER[sl]; const dir = e.net > 0 ? 1 : -1; const cv = cur[sl];
         let delta; if (S.pct) delta = cv != null ? Math.round(cv * S.pct * Math.min(1.5, Math.abs(e.net)) * dir) : null; else delta = +(S.step * Math.min(1.5, Math.abs(e.net)) * dir).toFixed(S.dp);
         let to = null; if (cv != null && delta != null) { to = cv + delta; if (S.min != null) to = Math.max(S.min, Math.min(S.max, to)); to = +to.toFixed(S.dp); delta = +(to - cv).toFixed(S.dp); }
-        moves.push({ sl, label: S.label, unit: S.unit, from: cv, to, delta, dir, conf: e.conf, sev: e.sev, why: [...e.srcs].slice(0, 3).join(" · "), pct: !!S.pct });
+        moves.push({ sl, label: S.label, unit: S.unit, from: cv, to, delta, dir, conf: e.conf, sev: e.sev, why: [...e.srcs].slice(0, 3).join(" · "), pct: !!S.pct, iph: [...(e.iph || [])].sort(), iss: [...(e.iss || [])] });
       });
       return moves.sort((a, b) => b.sev - a.sev || Math.abs(b.delta || 0) - Math.abs(a.delta || 0));
     };
     // elegant tuning-move cards: priority-striped, current -> target, PLAIN-LANGUAGE effect, diagnosis + confidence
-    const movesCards = (moves) => { ensureFhmCss(); return moves.length ? `<div class="tmoves">${moves.map((m, i) => {
+    const movesCards = (moves) => { ensureFhmCss(); return moves.length ? `${movesAnatomy(moves)}<div class="tmoves">${moves.map((m, i) => {
       const up = m.dir > 0; const col = up ? "#e3b341" : "#2f81f7";
       const sevCol = m.sev >= 3 ? "#e5414e" : m.sev >= 2 ? "#e3b341" : "#00d27a";
       const fx = (SLIDER_FX[m.sl] || {})[up ? "up" : "down"] || "";
       const vb = (SLIDER[m.sl].verb || ["stiffer", "softer"])[up ? 0 : 1];
       const notch = SLIDER[m.sl].notch; const dmag = notch ? Math.max(1, Math.round(Math.abs(m.delta || 0))) : Math.abs(m.delta);
       const notchU = notch ? (dmag === 1 ? " notch" : " notches") : (m.unit || "");
+      // when the current value isn't known, anchor on the vetted community BASELINE and nudge from it — so the card
+      // still gives an absolute number to dial in, not just a direction. Sliders without a baseline stay direction-only.
+      const base = SLIDER_BASE[m.sl]; let baseTo = null;
+      if (m.to == null && base != null && m.delta != null && !notch) {
+        baseTo = base + m.delta; const S = SLIDER[m.sl];
+        if (S.min != null) baseTo = Math.max(S.min, Math.min(S.max, baseTo));
+        baseTo = +baseTo.toFixed(S.dp);
+      }
       const change = (m.to != null && m.from != null)
         ? `<span class="tm-from">${m.from}${m.unit}</span><span class="tm-arr" style="color:${col}">${up ? "▲" : "▼"}</span><b class="tm-to" style="color:${col}">${m.to}${m.unit}</b>`
-        : `<b class="tm-to" style="color:${col}">${vb}${(m.delta != null || notch) ? " ~" + dmag + notchU : ""}</b>`;
-      return `<div class="tmove" style="border-left-color:${sevCol}"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div></div>`;
+        : baseTo != null
+          ? `<span class="tm-from" title="vetted community baseline — enter your current value for an exact target">≈${base}${m.unit}</span><span class="tm-arr" style="color:${col}">${up ? "▲" : "▼"}</span><b class="tm-to" style="color:${col}">${baseTo}${m.unit}</b><span class="tm-baseline" title="anchored on the multi-source baseline, not your car">base</span>`
+          : `<b class="tm-to" style="color:${col}">${vb}${(m.delta != null || notch) ? " ~" + dmag + notchU : ""}</b>`;
+      const aph = SLIDER_PHASES[m.sl] || []; const iph = m.iph || [];
+      const cap = aph.map((p) => `<span style="color:${CM_PC[p - 1]}">${CM_ABBR[p - 1]}</span>`).join("·") || "—";
+      return `<div class="tmove" style="border-left-color:${sevCol}"><div class="tm-main"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div></div><div class="tm-diag" title="acts where the change works · red = where your issue is">${moveCorner(aph, iph)}<div class="tm-diag-cap">acts: ${cap}</div></div></div>`;
     }).join("")}</div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`; };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
       const diskN = Object.keys((live.diskTune && live.diskTune[String(cid).split("|")[0]]) || {}).length;
@@ -2639,7 +2719,7 @@
       const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0]; if (!cid) return "";
       if (live.connected) { const o0 = String(cid).split("|")[0]; if (!(live.diskTune && live.diskTune[o0])) fetchDiskTune(+o0); }
       const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
-      const liveInc = (live.cornSince || []).filter((c) => !c.drift && c.first_red && (!cid || c.car === cid)).map((c) => ({ limiter: "tune", dominant: c.first_red.axle }));
+      const liveInc = (live.cornSince || []).filter((c) => !c.drift && c.first_red && (!cid || c.car === cid)).map((c) => ({ limiter: "tune", dominant: c.first_red.axle, phase: c.first_red.phase }));
       const cur = getTune(cid); const moves = tuningMoves(adv, [...(co.corners || []), ...liveInc], cur); const haveCur = Object.keys(cur).length > 0;
       const _age = live.analysisAt ? Math.round((Date.now() - live.analysisAt) / 1000) : null;
       const liveNote = liveInc.length ? ` <span class="chip" style="border-color:#00d27a;color:#00d27a" title="the settled read recomputes every ~20 s; corners since then fold into the balance live — the settled read stays the authority for the tune-vs-driver call">📡 settled${_age != null ? " " + _age + "s ago" : ""} · +${liveInc.length} live corner${liveInc.length > 1 ? "s" : ""} folding in</span>` : "";
@@ -2706,11 +2786,12 @@
             <p class="why" style="font-size:11px;margin:4px 0 6px">${feedbackReady ? `references exist for ${refsOwn}/${turnsN} turns — the per-turn deltas and slider suggestions below are grounded in this car's own best passes` : `${refsOwn}/${turnsN} turns have a reference for this car — ${Math.max(0, needRefs - refsOwn)} more clean turn${needRefs - refsOwn === 1 ? "" : "s"} needed (geometry × grip predictions fill in meanwhile)`}</p>
             ${numericTuningPanel(co, s, curCar)}
             <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
-      if (training) return `${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null) });
+      if (training) return `${courseHdr}${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${learnPanel}
         <div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`;
-      return `${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      return `${courseHdr}${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
     };
     // large ACTIVE-CAR banner — everything car-scoped (course tuning, references, decode) is about THIS car; make it unmissable
@@ -2912,6 +2993,13 @@
       .fhm-up{min-width:120px;text-align:right;text-transform:none}
       .fhm-up.named,.fhm-up.category{color:#c3ea4f}.fhm-up.stock{color:var(--muted);font-size:11px;text-transform:uppercase}
       .fhm-up.dim{color:#36c1e8}.fhm-up.cosmetic{color:var(--muted)}
+      .fhm-pi{margin-left:6px;font-size:9.5px;letter-spacing:.04em;font-weight:700;color:#e6a63a;border:1px solid rgba(230,166,58,.4);border-radius:8px;padding:0 5px;vertical-align:middle;font-variant-numeric:tabular-nums}
+      .fhm-prow-sub{font-size:10px;color:var(--muted);line-height:1.25;margin-top:2px;font-style:italic}
+      .fhm-prow-sub.meas{color:#8fd14f;font-style:normal}
+      .fhm-pi-budget{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px;font-size:11px;color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:5px 9px;margin:0 0 11px;background:rgba(230,166,58,.05)}
+      .fhm-pi-budget.ok{border-color:rgba(0,210,122,.4);background:rgba(0,210,122,.05)}
+      .fhm-pi-budget .lbl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+      .fhm-pi-budget b{color:#e6a63a;font-variant-numeric:tabular-nums}
       .fhm-tab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 7px;border-left:2px solid var(--accent);padding-left:7px}
       .fhm-sec{margin-bottom:11px}
       .fhm-sech{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#0b0f07;background:#a8d92a;padding:2px 8px;border-radius:3px;display:inline-block;margin:0 0 7px}
@@ -2978,7 +3066,23 @@
       .fhm-verify-todo{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;font-size:11px;text-transform:capitalize}
       .fhm-verify-todo span{display:inline-flex;align-items:center}
       .tmoves{display:flex;flex-direction:column;gap:7px;margin-top:4px}
-      .tmove{border-left:3px solid var(--line);background:var(--bg2);border-radius:0 8px 8px 0;padding:8px 11px}
+      .tmove{display:flex;gap:10px;align-items:stretch;border-left:3px solid var(--line);background:var(--bg2);border-radius:0 8px 8px 0;padding:8px 11px}
+      .tm-main{flex:1;min-width:0}
+      .tm-diag{flex:none;width:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--line);padding-left:9px}
+      .tm-diag-cap{font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.25}
+      .tm-diag-cap span{font-weight:700}
+      .tm-anat{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:9px 13px;margin:2px 0 9px}
+      .tm-anat-wrap{flex:none;width:220px;max-width:46vw}
+      .tm-anat-svg{width:100%;height:auto;display:block}
+      .tm-anat-lg{display:flex;flex-direction:column;gap:3px;font-size:11px;min-width:160px;flex:1}
+      .tm-anat-ttl{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+      .tm-lg{display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
+      .tm-lg i{width:11px;height:8px;border-radius:2px;flex:none}
+      .tm-lg.iss{color:var(--txt)}.tm-lg.iss b{color:#e5414e;font-weight:700}
+      .tm-tgt{margin-top:5px;padding-top:5px;border-top:1px solid var(--line);font-size:10.5px;color:var(--muted);line-height:1.4}
+      .tm-tgt b{color:var(--accent);font-variant-numeric:tabular-nums}
+      .tm-baseline{margin-left:5px;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 5px;vertical-align:middle}
+      @media(max-width:640px){.tm-diag{width:92px}.tmove{gap:7px}.tm-anat-wrap{width:150px}}
       .tmove-top{display:flex;align-items:center;gap:9px}
       .tmove-n{flex:none;width:19px;height:19px;border-radius:50%;background:var(--bg);border:1px solid var(--line);font-size:10.5px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-variant-numeric:tabular-nums}
       .tmove-sl{font-weight:600;font-size:13px}
@@ -2987,7 +3091,29 @@
       .tmove-fx{font-size:11.5px;color:var(--txt);margin:5px 0 0 28px;line-height:1.35}
       .tmove-why{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);margin:4px 0 0 28px}
       .tmove-conf{display:inline-block;width:42px;height:4px;border-radius:2px;background:#0b1013;overflow:hidden;flex:none}
-      .tmove-conf i{display:block;height:100%}`;
+      .tmove-conf i{display:block;height:100%}
+      /* ---- bottom LIVE DOCK: session-strip spine + bench/clone pop-chips, anchored to every Lab subtab ---- */
+      .fhm-dock{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:linear-gradient(180deg,rgba(14,17,22,.86),var(--bg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px);font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
+      .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
+      .fhm-dock-ttl{font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#e5414e;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+      .fhm-dock-ttl .dot{width:7px;height:7px;border-radius:50%;background:#e5414e;box-shadow:0 0 6px rgba(229,65,78,.7)}
+      .fhm-dock-ro{display:inline-flex;gap:9px;align-items:baseline;font-variant-numeric:tabular-nums}
+      .fhm-dock-ro b{font-size:13px;color:var(--txt)}.fhm-dock-ro b small{font-size:8.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-left:2px;font-weight:400}
+      .fhm-dock-chips{display:inline-flex;gap:6px;margin-left:auto;align-items:center}
+      .fhm-dchip{display:inline-flex;align-items:center;gap:4px;font-size:11px;border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:var(--bg2);color:var(--txt);cursor:pointer;white-space:nowrap}
+      .fhm-dchip:hover{border-color:var(--muted)}
+      .fhm-dchip.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.14)}
+      .fhm-dock-x{flex:none;width:22px;height:20px;border:1px solid var(--line);border-radius:5px;background:var(--bg2);color:var(--muted);font-size:11px;line-height:1;cursor:pointer;padding:0}
+      .fhm-dock-x:hover{border-color:var(--accent);color:var(--accent)}
+      .fhm-dock-panel{max-height:min(46vh,340px);overflow-y:auto;overflow-x:hidden;padding:6px 12px 8px;border-top:1px solid rgba(255,255,255,.04);overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(140,150,160,.45) transparent}
+      .fhm-dock-panel::-webkit-scrollbar{width:11px;height:11px}
+      .fhm-dock-panel::-webkit-scrollbar-track{background:transparent;margin:5px 0}
+      .fhm-dock-panel::-webkit-scrollbar-thumb{background:rgba(140,150,160,.35);border-radius:9px;border:3px solid transparent;background-clip:padding-box}
+      .fhm-dock-panel::-webkit-scrollbar-thumb:hover{background:rgba(163,113,247,.6);background-clip:padding-box}
+      .fhm-dock-strip{padding:0 10px 6px}
+      .fhm-dock-strip svg{width:100%;height:auto;display:block}
+      .fhm-dock.min .fhm-dock-strip,.fhm-dock.min .fhm-dock-panel{display:none}
+      .fhm-dchip.hidden{display:none}`;
     const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
     const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };
     const diskDeliverableHtml = (r, opts) => {
@@ -3003,7 +3129,9 @@
         const inst = m.rows.filter((x) => !x.stock).length;
         const rows = m.rows.map((it) => {
           const cls = it.stock ? "stock" : (it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named");
-          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${vdot(vp[it.item])}${esc(it.item.replace(/_/g, " "))}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}</span></div>`;
+          const pi = it.pi != null ? `<span class="fhm-pi" title="estimated PI cost vs stock — self-building from your driven configs">+${it.pi}</span>` : "";
+          const sub = it.engine_type ? `<div class="fhm-prow-sub${it.engine_type_conf === "measured" ? " meas" : ""}" title="${it.engine_type_conf === "measured" ? "from live telemetry (cyl / redline / hp)" : "from the save + build capture — drive it for measured cyl / hp"}">${it.engine_type_conf === "measured" ? "📡 " : ""}${esc(it.engine_type)}</div>` : "";
+          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${vdot(vp[it.item])}${esc(it.item.replace(/_/g, " "))}${sub}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}${pi}</span></div>`;
         }).join("");
         return `<div class="fhm-cat"><div class="fhm-cath"><span class="bar"></span><b>${esc(m.menu)}</b><span class="k">${inst}/${m.rows.length}</span></div>${rows}</div>`;
       }).join("");
@@ -3025,7 +3153,9 @@
       return `<div class="block fhm" style="border-color:#00d27a">${headRow}
         ${diskDiffBanner(dl.ordinal)}
         ${confMeterHtml(r)}
-        <p class="why" style="font-size:11px;margin:4px 0 11px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_exact != null ? sm.sliders_exact : sm.sliders_absolute} exact</b>${sm.sliders_derived ? ` · <b style="color:#8fd14f" title="gears + final drive, de-normalized from the global band">${sm.sliders_derived} derived</b>` : ""} · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
+        <p class="why" style="font-size:11px;margin:4px 0 8px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_exact != null ? sm.sliders_exact : sm.sliders_absolute} exact</b>${sm.sliders_derived ? ` · <b style="color:#8fd14f" title="gears + final drive, de-normalized from the global band">${sm.sliders_derived} derived</b>` : ""} · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
+        ${(() => { const known = sm.pi_known_parts || 0, tot = sm.pi_total_parts || 0; if (!tot && sm.pi_total == null) return ""; const priced = known >= tot && tot > 0;
+          return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI. Drive varied builds to fill it in — zero menu capture."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${known}/${tot} parts priced${known < tot ? " — fills in as you drive builds that differ by one part" : ""}</span></div>`; })()}
         <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
     const fetchDiskTune = (ordinal) => {
@@ -3453,6 +3583,27 @@
         ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; return `<g><circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="5" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
       </svg>`;
     };
+    // COURSE IDENTITY: the auto-computed SHAPE (from ground-truth position data) is a course's PRIMARY identifier —
+    // there is no track-name string in telemetry, so identity = shape + the user's title. A compact outline glyph,
+    // usable inline atop every course section; an unnamed course still reads by its shape (no ugly "route @ x,z").
+    const courseShapeGlyph = (geo, w) => {
+      const g = geo || {}; const pts = g.path || (g.paths ? g.paths.flat() : null);
+      if (!pts || pts.length < 5) return "";
+      const wide = w || 92, H = Math.round(wide * 0.64), pad = 5;
+      const xs = pts.map((p) => p[0]), zs = pts.map((p) => p[1]);
+      const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
+      const sc = Math.min((wide - 2 * pad) / Math.max(1, x1 - x0), (H - 2 * pad) / Math.max(1, z1 - z0));
+      const X = (x) => pad + (x - x0) * sc + ((wide - 2 * pad) - (x1 - x0) * sc) / 2, Y = (z) => H - pad - (z - z0) * sc - ((H - 2 * pad) - (z1 - z0) * sc) / 2;
+      const poly = pts.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
+      return `<svg viewBox="0 0 ${wide} ${H}" width="${wide}" height="${H}" class="course-glyph" role="img" aria-label="course shape"><polyline fill="none" stroke="var(--accent2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${poly}"/><circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="3" fill="#00d27a"/></svg>`;
+    };
+    const courseIdentity = (rn, geo, opts) => {
+      opts = opts || {}; const glyph = courseShapeGlyph(geo, opts.w || 92);
+      const named = !!rn && !/^route @/i.test(rn) && rn !== "Rivals course"; const g = geo || {};
+      const meta = []; if (g.length_m) meta.push(g.length_m + " m"); if (g.turns && g.turns.length) meta.push(g.turns.length + " turns"); if (opts.topology) meta.push(opts.topology);
+      const title = named ? esc(rn) : "unnamed course";
+      return `<div class="course-id">${glyph ? `<div class="course-id-glyph"${named ? "" : ' title="the shape is this course&#39;s identity — name it in the Atlas"'}>${glyph}</div>` : `<div class="course-id-glyph noshape" title="shape appears once a full lap is mapped">🗺</div>`}<div class="course-id-main"><div class="course-id-title">${opts.icon || "🏟"} <b${named ? "" : ' style="color:var(--muted);font-weight:600"'}>${title}</b></div>${meta.length ? `<div class="course-id-meta">${meta.join(" · ")}</div>` : ""}${named ? "" : `<div class="course-id-hint">its shape is the identity · title it in 🗺 Atlas</div>`}</div>${opts.right ? `<div class="course-id-right">${opts.right}</div>` : ""}</div>`;
+    };
     // ---- course card pieces (also used for atlas-selected tracks that are NOT in the current session: rendered from the track record) ----
     const profileCardHtml = (prof) => { const BB = { heavy: "#e5414e", moderate: "#e3b341", light: "#2f81f7", absent: "#3a4250" }; const DLBL = { low_corner: "low-speed corners", mid_corner: "medium corners", fast_corner: "fast sweepers", braking: "heavy braking", straight: "straights / top-end", elevation: "elevation" }; return prof ? `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
           <strong style="font-size:12px">🗺 Course profile — what this track actually demands</strong>
@@ -3509,7 +3660,8 @@
           <p class="why" style="font-size:10.5px;margin:5px 0 0">${esc(tu.note || "")} · a turn taken badly often shows up as 2–3 detections; it becomes ONE turn as laps accumulate</p>
         </div>` : "";
       const tr = co.track; const trackCard = trackRecordHtml(tr, rn);
-      const header = `<div class="card-row" style="margin-top:0"><strong>${co.is_loop ? "📍" : "🏟"} ${esc(rn)}</strong><span class="chip" style="border-color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"};color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}">course confidence ${Math.round(cov.overall * 100)}% · ${nl} lap${nl === 1 ? "" : "s"}${co.best_lap ? " · best " + co.best_lap.toFixed(3) + " s" : ""}</span></div>`;
+      const confChip = `<span class="chip" style="border-color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"};color:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}">course confidence ${Math.round(cov.overall * 100)}% · ${nl} lap${nl === 1 ? "" : "s"}${co.best_lap ? " · best " + co.best_lap.toFixed(3) + " s" : ""}</span>`;
+      const header = courseIdentity(rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null), right: confChip });
       const probes = `<div class="lab-bar" style="height:8px;margin:6px 0 8px"><i style="width:${cov.overall * 100}%;background:${cov.overall >= 0.8 ? "#00d27a" : cov.overall >= 0.45 ? "#e3b341" : "#e5414e"}"></i></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:11px">${present.map((p) => `<div title="${esc(p.hint)}"><div style="display:flex;justify-content:space-between"><span>${p.ready ? "✓ " : ""}${p.label}</span><b style="color:${p.ready ? "#00d27a" : "var(--muted)"}">${p.count}/${p.required} <span style="font-weight:400;color:var(--muted)">· ${Math.round(p.confidence * 100)}%</span></b></div><div class="lab-bar"><i style="width:${p.confidence * 100}%;background:${p.ready ? "#00d27a" : "#2f81f7"}"></i></div>${p.confidence < 0.97 ? `<span class="why" style="font-size:10px">${p.hint}</span>` : ""}</div>`).join("")}</div>
 ${absent.length ? `<p class="why" style="font-size:10.5px;margin:6px 0 0">not on this course: ${absent.map((p) => p.label).join(" · ")} — excluded from the goal</p>` : ""}`;
@@ -3529,7 +3681,7 @@ ${co.corners.filter((k) => k.ref || k.advice).map((k) => { const r = k.ref || {}
       const advice = `${Object.entries(co.advice_by_car || {}).map(([cidk, adv]) => { const firm = adv.filter((a) => !a.open).slice(0, 4), open = adv.filter((a) => a.open); return `<div style="margin-top:8px"><div style="font-size:11px;color:var(--muted)">${carLbl(carsS, cidk)}</div>
 ${firm.map((a) => `<div style="display:flex;gap:8px;align-items:flex-start;margin:5px 0;${a.minor_here ? "opacity:.5" : ""}"><span class="lab-light" style="background:${SEV[a.severity]};margin-top:4px"></span><div style="flex:1"><div style="font-size:12px"><strong>${a.text}</strong>${a.minor_here ? ` <span class="chip" style="border-color:var(--muted);color:var(--muted)">rarely used on this course</span>` : ""}</div><div class="why" style="font-size:10.5px">${a.evidence} · confidence ${Math.round(a.confidence * 100)}%</div></div></div>`).join("") || `<p class="why" style="font-size:11px;margin:4px 0">no firm suggestions on this course yet</p>`}
 ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top:4px">🔍 ${open.map((a) => a.text).join(" · ")}</div>` : ""}</div>`; }).join("")}`;
-      return { rn, cov, nl, tu, tr, header, track: trackCard, profile: profileCard, map: mapCardHtml(co.geometry, co.corners, co.turns), turns: turnsCard, probes, laps, corners, driving, advice };
+      return { rn, cov, nl, tu, tr, header, track: trackCard, profile: profileCard, map: mapCardHtml(courseGeoFor(co), co.corners, co.turns), turns: turnsCard, probes, laps, corners, driving, advice };
     };
     const courseBlock = (co, s) => { const p = courseParts(co, s); return `<div class="lab-corner" style="border-left:4px solid var(--accent2)">${p.header}${p.track}${p.profile}${p.map}${p.turns}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div>`; };
     // ---- LIVE plumbing: mode banner, stream bar, the live workflow body, and section repaint from the daemon's latest full analysis ----
@@ -3557,7 +3709,14 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     // the session object the live workflows render from: the daemon's latest full analysis (refetched after every analysis), else a thin stand-in built from the SSE analysis payload
     const analysisAsSession = (an) => ({ id: an.id, partial: true, cars: live.cars.length ? live.cars.map((x) => Object.assign({}, x, (an.cars || []).find((y) => y.id === x.id) || {})) : (an.cars || []), stints: an.stints || [], courses: an.courses || [], events: [], launches: [], braking: [], corners: [], pulses: [], strip: [], summary: an.summary || {} });
     // the loaded full session is only trusted when it IS the session the daemon is currently analysing (reconnects / restarts / replays change the id)
-    const liveSess = () => { const an = live.analysis; if (!an) return null; const full = live.loaded && live.loaded === an.id && sessions.find((x) => x.id === live.loaded); return full || analysisAsSession(an); };
+    const liveSess = () => { const an = live.analysis; if (!an) return null; const full = live.loaded && live.loaded === an.id && sessions.find((x) => x.id === live.loaded); if (full) cacheCourseGeo(full); return full || analysisAsSession(an); };
+    // COURSE GEOMETRY CACHE — the live SSE payload STRIPS geometry to stay light, so between the ~20 s re-analyses the
+    // course map/shape would collapse to nothing then flicker back. Cache the last-known geometry per route_key from any
+    // full session and fall back to it, so the visual course route (a course's PRIMARY identity) PERSISTS across analyses.
+    live.courseGeo = live.courseGeo || {};
+    const _hasGeo = (g) => !!(g && ((g.path && g.path.length > 4) || (g.paths && [].concat(...(g.paths || [])).length > 4)));
+    const cacheCourseGeo = (sess) => { if (sess && sess.courses) sess.courses.forEach((co) => { if (co && co.route_key && _hasGeo(co.geometry)) live.courseGeo[co.route_key] = co.geometry; }); };
+    const courseGeoFor = (co) => co ? (_hasGeo(co.geometry) ? co.geometry : (live.courseGeo[co.route_key] || co.geometry || null)) : null;
     const sectionsHtml = (s, isLive) => { const w = effMode(); return w === "course" ? courseSection(s, isLive) : w === "decode" ? decodeSection(s, isLive) : freeSection(s, isLive); };
     function liveBody() {
       const w = effMode();
@@ -3565,8 +3724,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         <div id="lvBanner"></div>
         <div class="lab-tiles" id="lvTiles"></div>
         <div id="lvSections">${sectionsHtml(liveSess(), true)}</div>
-        ${w === "free" ? `<div class="block" style="border-color:var(--accent2)"><div class="card-row" style="margin-top:0"><h3 style="margin:0">📼 Session strip — the live turn-by-turn spine</h3><span class="why" style="font-size:11px">every ▲ is a turn we identified; the suggestions above are read from these</span></div><div id="lvStrip"></div></div>
-        <details class="block"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Live feel — friction rings &amp; pedal inputs</summary>
+        ${w === "free" ? `<details class="block"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Live feel — friction rings &amp; pedal inputs</summary>
           <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,180px));gap:6px;justify-content:center;margin-top:8px" id="lvCircles">${circleSvg("FL")}${circleSvg("FR")}${circleSvg("RL")}${circleSvg("RR")}</div>
           <div id="lvInputs" style="max-width:520px;margin:10px auto 0"></div></details>
         <details class="block" style="border-color:#e5414e"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Corner log — every turn, newest first</summary><div class="card-grid" id="lvCorners" style="margin-top:8px"></div></details>`
@@ -3578,7 +3736,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       el.innerHTML = sectionsHtml(liveSess(), true); bindBody(el);
     }
     function loadFullSession() {
-      fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });   // a response that lands after a reset (analysis null / new id) is ignored
+      fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; cacheCourseGeo(js); } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });   // a response that lands after a reset (analysis null / new id) is ignored
     }
     function paintStatus() {
       const el = host.querySelector("#lvStatus"); if (!el) return;
@@ -3639,6 +3797,66 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const cl = el.querySelector("[data-cloneclose]"); if (cl) cl.addEventListener("click", (e) => { e.preventDefault(); live.float.open = false; saveFloat(); paintFloat(true); paintCloneLauncher(); });
       const fc = el.querySelector("[data-clonefocus]"); if (fc) fc.addEventListener("click", (e) => { e.preventDefault(); live.float.min = false; live.float.x = null; live.float.y = null; saveFloat(); paintFloat(true); });
     }
+    // ---- bottom LIVE DOCK: the session-strip spine + bench/clone pop-chips, anchored to EVERY Lab subtab (mounted on
+    //      document.body so render() cycles never wipe it, like the float). Clone detaches to the floating window. ----
+    const DOCK_KEY = "fh6DockState";
+    const loadDock = () => { try { return JSON.parse(localStorage.getItem(DOCK_KEY)) || {}; } catch (e) { return {}; } };
+    const initDock = () => { if (live.dock) return; live.dock = Object.assign({ min: false, panel: null }, loadDock()); };
+    const saveDock = () => { try { localStorage.setItem(DOCK_KEY, JSON.stringify({ min: live.dock.min, panel: live.dock.panel })); } catch (e) {} };
+    const ensureDockHost = () => { let el = document.getElementById("fhmDock"); if (!el) { el = document.createElement("div"); el.id = "fhmDock"; el.className = "fhm-dock"; el.style.display = "none"; document.body.appendChild(el); ensureFhmCss(); } return el; };
+    const labActive = () => { const l = document.getElementById("lab"); return !!(l && l.classList.contains("active")); };
+    const dockStripData = () => {
+      if (src === "live") return (live.strip && live.strip.length) ? { strip: live.strip.slice(-900), cars: live.cars, corners: (live.corners || []).slice(-80) } : null;
+      const s = S(); return (s && s.strip && s.strip.length) ? { strip: s.strip.slice(-900), cars: s.cars, corners: (s.corners || []).slice(-120) } : null;
+    };
+    const dockShouldShow = () => labActive() && (src === "live" ? (live.connected || !!(live.strip && live.strip.length)) : !!dockStripData());
+    const dockCloneOrd = () => { initFloat(); return (live.float.pinned && live.float.target) ? live.float.target.ordinal : floatOrd(); };
+    // bench panel: the driven car's dyno (hp/tq vs rpm) + gear ladder, from the live / loaded analysis
+    const dockBenchHtml = () => {
+      const ls = liveSess(); const cid = (live.frame && live.frame.on && live.frame.cid) || null;
+      const c = (ls && cid && car(ls, cid)) || (ls && (ls.cars || [])[0]) || null;
+      if (!c) return `<p class="why" style="font-size:11px;margin:2px 0">No car analysed yet — drive to build the dyno &amp; gear bench.</p>`;
+      const dyno = c.dyno || []; const gears = c.gears || []; const nm = carName(c) || ("#" + c.ordinal);
+      const dynoC = dyno.length ? chart([{ pts: dyno.map((d) => [d.rpm, d.hp]), col: "#e3b341", label: "hp" }, { pts: dyno.map((d) => [d.rpm, d.tq]), col: "#e83c9e", label: "ft·lb" }], { w: 320, h: 118, xl: "rpm (WOT frames)", yl: "" }) : `<p class="why" style="font-size:11px">no WOT frames yet — hold full throttle up the rev range</p>`;
+      const ladC = gears.length ? chart([{ pts: gears.map((g, i) => [i + 1, g]), col: "#2f81f7", label: "ratio" }], { w: 240, h: 118, xl: "gear", yl: "ratio" }) : "";
+      return `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">📊 Bench — <b style="color:var(--txt)">${esc(nm)}</b></div><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">${dynoC}${ladC}</div>`;
+    };
+    // clone panel: compact summary of the pinned / last-decoded build + a "detach to floating window" action (the window holds full detail)
+    const dockCloneHtml = () => {
+      const ord = dockCloneOrd(); const cached = (ord && live.diskCache) ? live.diskCache[ord] : null;
+      if (!cached || !cached.available) return `<p class="why" style="font-size:11px;margin:2px 0">No clone decoded yet — drive the car whose build you want to clone.</p>`;
+      const c = diskConf(cached); const nm = cached.name || ("#" + ord); const oc = confCol(c.conf);
+      return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px"><b style="font-size:12.5px">📀 ${esc(nm)}</b><span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${c.pct}%</span><button class="lab-mode" data-dockdetach="${ord}" style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7">⧉ detach to floating window</button></div>${confMeterHtml(cached)}`;
+    };
+    function paintDockReadout() {
+      const el = document.getElementById("dockRo"); if (!el) return; const f = live.frame;
+      if (src === "live" && f) {
+        el.innerHTML = [[f.mph != null ? f.mph.toFixed(0) : "—", "mph"], [f.gear === 0 ? "N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm != null ? f.rpm : "—", "rpm"], [f.lat != null ? f.lat.toFixed(2) : "—", "lat g"]].map(([v, l]) => `<b>${v}<small>${l}</small></b>`).join("");
+      } else if (src !== "live") { const s = S(); el.innerHTML = s ? `<b style="font-size:11px;font-weight:600">📼 ${esc(s.id)}</b>` : ""; }
+      else { el.innerHTML = `<span class="why" style="font-size:11px">waiting for telemetry…</span>`; }
+    }
+    function paintDockStrip() {
+      const el = document.getElementById("dockStrip"); if (!el) return; const d = dockStripData();
+      el.innerHTML = d ? strip(d) : `<p class="why" style="font-size:11px;margin:2px 0">waiting for the first second…</p>`;
+    }
+    function paintDock(force) {
+      initDock(); const el = ensureDockHost();
+      if (!dockShouldShow()) { el.style.display = "none"; const m = document.querySelector("main"); if (m && m.dataset.dockpad) { m.style.paddingBottom = ""; delete m.dataset.dockpad; } return; }
+      el.style.display = "block";
+      const cloneReady = !!(dockCloneOrd() && live.diskCache && live.diskCache[dockCloneOrd()] && live.diskCache[dockCloneOrd()].available);
+      const panel = live.dock.panel; const shellKey = `${live.dock.min}|${panel}|${cloneReady}|${src}`;
+      if (force || el.dataset.k !== shellKey) {
+        el.dataset.k = shellKey; el.className = "fhm-dock" + (live.dock.min ? " min" : "");
+        const chip = (key, label) => `<button class="fhm-dchip ${panel === key ? "on" : ""}${key === "clone" && !cloneReady ? " hidden" : ""}" data-dockpanel="${key}">${label}</button>`;
+        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE DOCK</span><span class="fhm-dock-ro" id="dockRo"></span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("clone", "📀 clone")}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
+        el.querySelectorAll("[data-dockpanel]").forEach((b) => b.addEventListener("click", () => { live.dock.panel = live.dock.panel === b.dataset.dockpanel ? null : b.dataset.dockpanel; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); }));
+        const mn = el.querySelector("[data-dockmin]"); if (mn) mn.addEventListener("click", () => { live.dock.min = !live.dock.min; saveDock(); paintDock(true); });
+        if (!live.dock.min && panel) { const pel = el.querySelector("#dockPanel"); if (pel) { pel.innerHTML = panel === "bench" ? dockBenchHtml() : dockCloneHtml(); const dt = pel.querySelector("[data-dockdetach]"); if (dt) dt.addEventListener("click", () => { popOutFloat(+dt.dataset.dockdetach); paintDock(true); }); } }
+        paintDockStrip();
+        const m = document.querySelector("main"); if (m) { m.style.paddingBottom = (el.offsetHeight + 14) + "px"; m.dataset.dockpad = "1"; }
+      }
+      paintDockReadout();
+    }
     function paintFrame() {
       const f = live.frame; if (!f) return;
       if (f.car && live.connected) fetchDiskTune(f.car);   // auto-fill the current tune in every workflow, so tuning panels can print current -> target
@@ -3678,11 +3896,12 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           <span>steer</span><div class="lab-bar" style="height:8px"><i style="left:${50 + Math.min(50, Math.max(-50, f.steer / 2.54))}%;width:2px;background:#2f81f7"></i><i style="left:50%;width:1px;background:var(--muted)"></i></div>
           <span>susp</span><div style="display:flex;gap:4px">${f.susp.map((v, i) => `<div class="lab-bar" style="flex:1;height:8px" title="${W4[i]} ${v}"><i style="width:${v * 100}%;background:${v > 0.95 ? "#e5414e" : "#a371f7"}"></i></div>`).join("")}</div>
           <span>temp °F</span><span>${f.temp.map((v, i) => `${W4[i]} <b>${v}</b>`).join(" · ")}${f.hb ? " · <b style='color:#e3b341'>HANDBRAKE</b>" : ""}</span></div>`;
+      paintDock();
     }
     const W4 = ["FL", "FR", "RL", "RR"];
-    function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars, corners: (live.corners || []).slice(-80) }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; }
+    function paintStrip() { const el = host.querySelector("#lvStrip"); if (el) el.innerHTML = live.strip.length ? strip({ strip: live.strip.slice(-900), cars: live.cars, corners: (live.corners || []).slice(-80) }) : `<p class="why" style="font-size:11px">waiting for the first second…</p>`; paintDockStrip(); paintDock(); }
     function paintCorners() { const el = host.querySelector("#lvCorners"); if (el) el.innerHTML = live.corners.slice(-12).reverse().map((c) => cornerCard(liveS(), c)).join("") || `<p class="why" style="font-size:11px">no corners yet</p>`; }
-    function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); paintCloneLauncher(); }
+    function paintAll(force) { paintStatus(); paintFrame(); paintStrip(); paintCorners(); paintBanner(); paintSections(force); paintCloneLauncher(); paintDock(force); }
     function liveConnect() {
       if (es) { es.close(); es = null; }
       live.loaded = null; carSel = null;   // a (re)connect may be a different daemon / session — never carry a loaded session or a car filter across
@@ -3697,7 +3916,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         live.diskCache[d.ordinal] = d.available ? d : { available: false };
         const changed = d.available ? applyDiskTune(d) : false;
         if (d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
-        paintDiskDecode(); paintFloat(); paintCloneLauncher();
+        paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintDock(true);
         const activeOrd = live.frame && String(live.frame.car);
         if (d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
       });
@@ -3801,8 +4020,11 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       bindTabs(); bindBody(host);
       const sel = host.querySelector("#labSess"); if (sel) sel.addEventListener("change", () => { sIdx = +sel.value; carSel = null; donor = replica = null; render(); });
       if (src === "live") { bindLive(); if (!es) liveConnect(); else paintAll(); ensureFloatHost(); paintFloat(); }
+      paintDock(true);
     }
-    ensureFloatHost();
+    ensureFloatHost(); ensureDockHost();
+    // the dock only shows on the Lab tab — repaint it whenever #lab gains/loses .active (tab switch or hash nav)
+    (() => { const lab = document.getElementById("lab"); if (lab && !lab._dockObs) { const o = new MutationObserver(() => paintDock(true)); o.observe(lab, { attributes: true, attributeFilter: ["class"] }); lab._dockObs = o; } })();
     render();
   }
 

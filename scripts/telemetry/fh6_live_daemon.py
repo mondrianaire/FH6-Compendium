@@ -28,6 +28,11 @@ G = 9.80665
 CLASS = {0: "D", 1: "C", 2: "B", 3: "A", 4: "S1", 5: "S2", 6: "X", 7: "X"}
 DRIVE = {0: "FWD", 1: "RWD", 2: "AWD"}
 
+# Feature B — per-part PI scaffolding: pair the active car's on-disk decoded config with its live CarPI.
+PI_OBS_PATH = os.path.join(ROOT, "data", "pi-observations.json")
+_PI_LOCK = threading.Lock()
+_PI_LAST = [None]   # (ordinal, parts_hash, car_pi) of the last write — cheap dedup so the file isn't thrashed
+
 class State:
     def __init__(self):
         self.lock = threading.Lock()
@@ -44,7 +49,7 @@ class State:
         self.last_lapnum = None; self._last_lap_analysis = 0.0   # LAP-completion analysis trigger (the granularity the cross-lap limiter changes at)
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
-        self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None
+        self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None; self._auto_loop = False   # _auto_loop: the current loop was auto-started by a timed event (Rivals), not a manual mark
         self.last_t = 0.0; self.game = "menu"; self.game_kind = None; self._noev_since = None; self.ev_maxpos = 0; self.mode_suggest = None; self.mode_reason = None   # lab-mode auto-detection
         self.lab_mode = None; self._force_split = False; self._ev_edge = False; self.stint_starts = {}; self.last_drive_game = None   # effective lab mode (pushed by the dashboard), manual split request, event edge pending, run boundaries (t_mono)
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
@@ -101,6 +106,43 @@ def _save_tags():
     os.makedirs(os.path.dirname(tp), exist_ok=True)
     with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags, "stint_starts": ST.stint_starts}, f, indent=2, ensure_ascii=False)
 
+def _match_route_name(sf):
+    """Best-effort LIVE course name: the nearest known route start within ~120 m. The analyzer does the rigorous
+    attribution (start + heading + length); this is only for the live 'auto-tracking X' label."""
+    try:
+        with open(os.path.join(ROOT, "data", "routes.json"), encoding="utf-8") as f:
+            routes = json.load(f).get("routes", {})
+        best, bd = None, 120.0
+        for key, r in routes.items():
+            rs = r.get("start")
+            if rs and len(rs) >= 2:
+                d = math.hypot(sf[0] - rs[0], sf[1] - rs[1])
+                if d < bd: bd, best = d, (r.get("name") or key)
+        return best
+    except Exception:
+        return None
+
+def _end_auto_course(t_mono, p, c):
+    """A timed event ended (finish, crash, or restart). Complete the OPEN pass so nothing is wasted: this is a
+    point-to-point sprint's only pass, a circuit's final lap, OR a partial/crashed practice run — all of which carry
+    real cornering data (off-line data maps the grip envelope). Classify topology, then clear the auto-course."""
+    lp = ST.loop
+    if not lp or not ST._auto_loop:
+        ST._auto_loop = False
+        return
+    # Topology: only a completed lap (LapNumber increment -> "circuit") is provable LIVE. A single run that ends far
+    # from the start could equally be a genuine A->B finish OR a crashed circuit lap — indistinguishable here — so it
+    # stays "unknown" and the analyzer classifies it authoritatively across runs + the route registry.
+    topo = lp.get("topology", "unknown")
+    # complete the open pass if a meaningful distance was driven since the last start/lap boundary (skips instant aborts)
+    if ST._loop_state == "in" and ST._loop_away > 80:
+        ST.loop_lap += 1; ST.loop_last_s = round(t_mono - (ST._loop_t0 or t_mono), 2)
+        ST.emit("lap", {"loop": lp["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s, "final": True, "topology": topo, "dist_m": round(ST._loop_away)})
+        maybe_lap_analysis(t_mono, "event end (" + topo + ")")
+    with ST.lock:
+        ST.loop = None; ST._auto_loop = False; ST._loop_state = "start"; ST._loop_away = 0.0
+    ST.emit("loop", {"name": None})
+
 def ingest(p, t_mono):
     """Core pipeline for one decoded packet (live or replay)."""
     c = compact(p, t_mono)
@@ -116,6 +158,7 @@ def ingest(p, t_mono):
         if ST.last_drive_game is not None and g != ST.last_drive_game: ST._ev_edge = True   # event <-> free roam edge = new run (a pause mid-event is NOT an edge)
         ST.last_drive_game = g
     if g != ST.game:
+        if ST.game == "event" and ST._auto_loop: _end_auto_course(t_mono, p, c)   # event finish / crash / restart -> complete the open pass (P2P, final lap, or partial), then clear the auto-course
         ST.game = g
         if g == "freeroam": ST.ev_maxpos = 0; ST.game_kind = None
         elif g == "event": ST.game_kind = ST.game_kind or ("race" if ST.ev_maxpos > 2 else "rivals / timed")   # kind survives a pause
@@ -133,7 +176,17 @@ def ingest(p, t_mono):
         ST._zero_since = None; ST.prev_cfg = c["cid"]
     elif ST._zero_since is None: ST._zero_since = t_mono
     c["stint"] = ST.stint
-    ST.last_pos = (p["PosX"], p["PosZ"])
+    if c["on"] and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1): ST.last_pos = (p["PosX"], p["PosZ"])   # only real ON-TRACK positions — a menu / pre-race frame reports [0,0] and must NEVER become a loop start (the bug that put every marked loop at the origin)
+    # AUTO-COURSE: a timed event (Rivals / race) auto-starts course recording at the S/F line — no manual mark needed.
+    # Reuses the loop machinery below for circuit laps; a point-to-point sprint's single pass and any partial/crashed
+    # practice run complete at event end (_end_auto_course). Never overrides a manually-marked loop.
+    if c["on"] and ST.game == "event" and ST.loop is None and ST.last_pos is not None:
+        sf = [round(ST.last_pos[0]), round(ST.last_pos[1])]
+        nm = _match_route_name(sf) or "Rivals course"
+        with ST.lock:
+            ST.loop = {"name": nm, "start": sf, "radius": 60, "min_dist": 250, "auto": True, "topology": "unknown", "sf_fixed": False}
+            ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = t_mono; ST.loop_last_s = None; ST._auto_loop = True
+        ST.emit("loop", {"name": nm, "start": sf, "lap": 0, "auto": True})
     # reference-loop live lap counting: each return through the start (after leaving by min_dist) = one lap
     if ST.loop and c["on"]:
         lx, lz = ST.loop["start"]; R = ST.loop.get("radius", 60); MIND = ST.loop.get("min_dist", 250)
@@ -220,6 +273,11 @@ def ingest(p, t_mono):
     if c["on"] and c["ev"]:
         _ln = c.get("lapn", 0)
         if ST.last_lapnum is not None and _ln > ST.last_lapnum:
+            if ST._auto_loop and ST.loop and not ST.loop.get("sf_fixed"):   # the first LapNumber increment IS the exact S/F crossing (a real on-track position) — pin the loop there, and a lap counter proves it's a circuit
+                with ST.lock:
+                    ST.loop["start"] = [round(p["PosX"]), round(p["PosZ"])]; ST.loop["sf_fixed"] = True; ST.loop["topology"] = "circuit"
+                    ST._loop_state = "in"; ST._loop_away = 0.0; ST._loop_t0 = t_mono
+                ST.emit("loop", {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "topology": "circuit"})
             maybe_lap_analysis(t_mono, "event lap")
         ST.last_lapnum = _ln
     else:
@@ -311,39 +369,95 @@ def _enrich_gears(deliverable, ordn):
 
 
 def _enrich_engine_desc(deliverable, ordn):
-    """Append the live engine fingerprint (cylinders / redline / power) to the Conversions 'Engine' row, so a
-    decoded clone describes WHAT engine it has. The save file holds no engine specs; this joins the active car's
-    telemetry (ST.cars, keyed by cid whose prefix is the ordinal). Best-effort: only fills in for a driven car."""
+    """Feature A: turn the Conversions 'Engine' row into a specific engine TYPE using live telemetry. The save
+    holds no engine specs; this joins the active car's cylinders / redline (ST.cars, keyed by cid whose prefix is
+    the ordinal) and peak dyno hp (ST.session_json, the analyzer's measured curve — ST.cars.dyno stays empty).
+    Sets an authoritative `engine_type` string + `engine_type_conf`='measured', and also folds a short form into
+    value/upgrade so it shows without the dashboard change. Best-effort: a non-driven car keeps its save-only
+    descriptor. Never invents a swap donor name."""
     try:
         car = None
         with ST.lock:
             for cid, c in ST.cars.items():
                 if str(cid).split("|")[0] == str(ordn):
                     car = dict(c); break
+            sj = ST.session_json
+        # peak hp: prefer the analyzer's dyno (session_json); fall back to any ST.cars dyno
+        peak_hp = None
+        if sj:
+            for c in sj.get("cars", []):
+                if str(c.get("ordinal")) == str(ordn):
+                    dl = [d["hp"] for d in (c.get("dyno") or []) if d.get("hp")]
+                    if dl:
+                        peak_hp = max(dl)
+                    break
+        if peak_hp is None and car:
+            dl = [d["hp"] for d in (car.get("dyno") or []) if d.get("hp")]
+            if dl:
+                peak_hp = max(dl)
         for m in deliverable.get("menus", []):
             if m.get("menu") != "Conversions":
                 continue
             for r in m["rows"]:
                 if r.get("item") != "powertrain":
                     continue
-                electric = bool(r.get("electric"))
-                bits = []
-                if car:
-                    if not electric:
-                        if car.get("cyl"):
-                            bits.append(f"{car['cyl']}-cyl")
-                        if car.get("max_rpm"):
-                            bits.append(f"{int(car['max_rpm'])} rpm redline")
-                    dyno = car.get("dyno") or []
-                    peak = max((d for d in dyno if d.get("hp")), key=lambda d: d["hp"], default=None)
-                    if peak:
-                        bits.append(f"~{int(peak['hp'])} hp")
-                    if bits:
-                        r["value"] = r["upgrade"] = r["value"] + " · " + " · ".join(bits)
-                        r["telemetry"] = True
-                elif not electric:
-                    r["value"] = r["upgrade"] = r["value"] + " — drive it to read cylinders, redline & power"
-                    r["needs_drive"] = True
+                bits = r.get("engine_bits") or {}
+                electric = bool(r.get("electric") or bits.get("electric"))
+                if not car and peak_hp is None:
+                    if not electric:      # no telemetry at all: keep the save-only engine_type, hint to drive
+                        r["value"] = r["upgrade"] = r["value"] + " — drive it to read cylinders, redline & power"
+                        r["needs_drive"] = True
+                    return
+                cyl = car.get("cyl") if car else None
+                redline = car.get("max_rpm") if car else None
+                if TUNE is not None:
+                    r["engine_type"] = TUNE.compose_engine_type(
+                        asp_short=bits.get("asp"), displacement_l=bits.get("displacement_l"),
+                        cyl=cyl, peak_hp=peak_hp, redline=redline,
+                        swapped=bool(bits.get("swapped")), electric=electric,
+                        build_level=bits.get("build_level") or 0,
+                        disp_from_build=bool(bits.get("disp_from_build")))
+                    r["engine_type_conf"] = "measured"
+                fold = []
+                if not electric:
+                    if cyl:
+                        fold.append(f"{int(cyl)}-cyl")
+                    if redline:
+                        fold.append(f"{int(redline)} rpm redline")
+                if peak_hp:
+                    fold.append(f"~{int(peak_hp)} hp")
+                if fold:
+                    r["value"] = r["upgrade"] = r["value"] + " · " + " · ".join(fold)
+                r["telemetry"] = True
+                return
+    except Exception:
+        return
+
+
+def _enrich_drivetrain(deliverable, ordn):
+    """Fill the Conversions 'drivetrain' row's RESULTING layout from live telemetry. The save records only
+    stock-vs-swapped (the slot has no FWD/RWD/AWD value); DrivetrainType — read every frame and stored on
+    ST.cars[cid]['drivetrain'] — is the actual resulting layout. Sets `resulting_drivetrain` ('FWD'/'RWD'/'AWD')
+    and folds it into value/upgrade ('Converted / swapped → AWD', or 'Stock layout (RWD)') so it shows without a
+    dashboard change. Best-effort: a non-driven car keeps resulting_drivetrain=null (no fabrication)."""
+    try:
+        drv = None
+        with ST.lock:
+            for cid, c in ST.cars.items():
+                if str(cid).split("|")[0] == str(ordn):
+                    drv = c.get("drivetrain"); break
+        if not drv or drv == "?":
+            return
+        for m in deliverable.get("menus", []):
+            if m.get("menu") != "Conversions":
+                continue
+            for r in m["rows"]:
+                if r.get("item") != "drivetrain":
+                    continue
+                r["resulting_drivetrain"] = drv
+                r["value"] = r["upgrade"] = (f"{r['value']} ({drv})" if r.get("stock")
+                                             else f"{r['value']} → {drv}")
+                r["telemetry"] = True
                 return
     except Exception:
         return
@@ -434,6 +548,7 @@ class H(BaseHTTPRequestHandler):
                         tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
                         deliverable = TUNE.tune_to_deliverable(tune, nm)
                         _enrich_engine_desc(deliverable, ordn)
+                        _enrich_drivetrain(deliverable, ordn)
                         _enrich_gears(deliverable, ordn)
                         payload = {"available": True, "ordinal": ordn, "name": nm, "ts": metas[0]["ts"],
                                    "tune": tune, "deliverable": deliverable}
@@ -512,7 +627,7 @@ class H(BaseHTTPRequestHandler):
                 os.replace(bp + ".tmp", bp); ok = True
             except Exception as ex_: print("build-field not saved:", repr(ex_), file=sys.stderr); ok = False
         elif self.path.startswith("/mark-start") and body.get("name"):
-            if ST.last_pos is None: ok = False
+            if ST.last_pos is None or (abs(ST.last_pos[0]) < 5 and abs(ST.last_pos[1]) < 5): ok = False   # no valid ON-TRACK position yet (menu / pre-race reports [0,0]) — drive onto the track first, then mark
             else:
                 name = str(body["name"]).strip()[:60]; lp = {"name": name, "start": [round(ST.last_pos[0]), round(ST.last_pos[1])], "radius": int(body.get("radius") or 60), "min_dist": int(body.get("min_dist") or 250)}
                 rp = os.path.join(ROOT, "data", "reference-loops.json")
@@ -600,6 +715,62 @@ def replay_loop(path, speed):
             ingest(p, t - tbase)
     print("[replay] done")
 
+def _record_pi_observation(ordn, tune):
+    """Feature B: append/refresh one observation pairing the active car's decoded config (its 50 slot tiers)
+    with the live CarPI, in data/pi-observations.json. Guards: only when THIS car is the active, on-track car
+    with a plausible CarPI (a car in a menu drops CarOrdinal->0 / CarPI absent). Deduped by parts_hash (same
+    exact config recorded once, latest CarPI kept). Safe-write (temp + os.replace). Never touches the save."""
+    if TUNE is None:
+        return
+    fr = ST.latest
+    if not fr or not fr.get("on"):
+        return
+    try:
+        if int(fr.get("car") or 0) != int(ordn):
+            return
+        pi = int(fr.get("pi") or 0)
+    except (TypeError, ValueError):
+        return
+    if pi <= 0 or pi > 999:              # CarPI is 100..999; 0/absent means a menu / no valid read
+        return
+    try:
+        ph = TUNE.parts_hash(ordn, tune["parts"])
+    except Exception:
+        return
+    key = (int(ordn), ph, pi)
+    if key == _PI_LAST[0]:               # same config + same PI already written — nothing to do
+        return
+    with _PI_LOCK:
+        try:
+            with open(PI_OBS_PATH, encoding="utf-8") as f:
+                doc = json.load(f)
+            if not isinstance(doc, dict):
+                doc = {}
+        except Exception:
+            doc = {}
+        doc.setdefault("schema_version", "1.0.0")
+        doc.setdefault("purpose", "decoded-config <-> live CarPI observations; single-part diffs give per-part "
+                                  "PI cost — see scripts/telemetry/fh6_pi_solve.py")
+        obs = doc.setdefault("observations", [])
+        rec = {"ordinal": int(ordn), "ts": round(time.time(), 1), "car_pi": pi, "car_class": fr.get("cls"),
+               "parts": TUNE.parts_tiers(tune["parts"]), "parts_hash": ph}
+        for i, o in enumerate(obs):
+            if o.get("parts_hash") == ph and int(o.get("ordinal", -1)) == int(ordn):
+                obs[i] = rec; break
+        else:
+            obs.append(rec)
+        data = json.dumps(doc, indent=1, ensure_ascii=False)
+        if len(data) < 20:               # sanity: never truncate to garbage
+            return
+        tmp = PI_OBS_PATH + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(data)
+        if os.path.getsize(tmp) < 20:
+            os.remove(tmp); return
+        os.replace(tmp, PI_OBS_PATH)
+    _PI_LAST[0] = key
+
+
 def disk_watcher():
     """Watch the FH save folder for the ACTIVE car and push a fresh decode (+ a diff vs the previous
     save) over SSE the instant a new tune Data file appears. Saving a tune in-game then updates the
@@ -619,6 +790,13 @@ def disk_watcher():
                 if last != (ordn, None):
                     last = (ordn, None); ST.emit("disk", {"ordinal": ordn, "available": False})
                 continue
+            # Feature B: record a PI observation for the current on-disk config whenever this car is being
+            # driven (cheap 598-byte re-decode; deduped by _PI_LAST so the file isn't rewritten needlessly).
+            try:
+                if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0:
+                    _record_pi_observation(ordn, TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn))
+            except Exception:
+                pass
             key = (ordn, round(metas[0]["mtime"], 2))
             if key == last:
                 continue

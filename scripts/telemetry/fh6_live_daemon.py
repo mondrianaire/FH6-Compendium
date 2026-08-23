@@ -407,6 +407,48 @@ def _learn_engine_catalog(family, cyl=None, redline=None, peak_hp=None, drivetra
         return
 
 
+def _pick_meta(metas, ordn, ts_want=None):
+    """A car can have MANY saved tunes on disk (different engines / PIs). Picking the newest file shows the WRONG
+    build when you switch around. Instead match each save's decoded signature (cylinders from the engine-family
+    catalog, exact PI from recorded observations) to the LIVE car you're in. Returns (meta, match_info). ts_want
+    forces a specific save (manual override). Also builds the roster of all saves so the dashboard can offer a picker."""
+    if TUNE is None or not metas:
+        return (metas[0] if metas else None), {"how": "newest", "live": False, "saves": []}
+    cat = TUNE.load_engine_catalog()
+    fr = ST.latest
+    live = bool(fr and fr.get("on") and int(fr.get("car") or 0) == int(ordn))
+    live_cyl = fr.get("cyl") if live else None
+    live_pi = fr.get("pi") if live else None
+    roster = []
+    for m in metas:
+        try:
+            t = TUNE.parse_tune(m["path"], ordinal_hint=ordn)
+        except Exception:
+            continue
+        efam = TUNE.engine_family_of(t["parts"])
+        cyl = (cat.get(str(efam)) or {}).get("cyl")
+        pi = TUNE.observed_car_pi(ordn, t["parts"])   # exact PI if this exact config was ever driven & recorded
+        score = m["mtime"] * 1e-13                     # newest as a faint tiebreak
+        if ts_want and str(m["ts"]) == str(ts_want):
+            score += 1e6                               # explicit user pick wins outright
+        if live and live_cyl and cyl:
+            score += 100 if int(cyl) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal
+        if live and live_pi and pi:
+            score += 60 if int(pi) == int(live_pi) else -min(60, abs(int(pi) - int(live_pi)) * 0.6)
+        roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "locked": t["locked"], "_score": score, "_meta": m})
+    if not roster:
+        return metas[0], {"how": "newest", "live": live, "saves": []}
+    roster.sort(key=lambda r: -r["_score"])
+    best = roster[0]
+    saves = [{k: r[k] for k in ("ts", "cyl", "pi", "locked")} for r in roster]
+    how = "picked" if ts_want else ("signature" if live and (live_cyl or live_pi) else "newest")
+    mism = bool(live and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
+    final_how = how if ts_want else ("no-match" if mism else how)   # an explicit pick is deliberate — never call it a mismatch
+    return best["_meta"], {"how": final_how, "live": live, "live_cyl": live_cyl,
+                           "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
+                           "n_saves": len(roster), "saves": saves}
+
+
 def _enrich_engine_desc(deliverable, ordn):
     """Feature A: turn the Conversions 'Engine' row into a specific engine TYPE using live telemetry. The save
     holds no engine specs; this joins the active car's cylinders / redline (ST.cars, keyed by cid whose prefix is
@@ -588,13 +630,15 @@ class H(BaseHTTPRequestHandler):
                     ordn = int(ordn); metas, _ = TUNE.tunes_for_ordinal(ordn)
                     if metas:
                         names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
-                        tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+                        ts_want = q.get("ts", [None])[0]   # optional manual pick — decode a specific saved tune
+                        meta, match = _pick_meta(metas, ordn, ts_want=ts_want)   # match the save to the car you're in, not just the newest
+                        tune = TUNE.parse_tune(meta["path"], ordinal_hint=ordn)
                         deliverable = TUNE.tune_to_deliverable(tune, nm)
                         _enrich_engine_desc(deliverable, ordn)
                         _enrich_drivetrain(deliverable, ordn)
                         _enrich_gears(deliverable, ordn)
-                        payload = {"available": True, "ordinal": ordn, "name": nm, "ts": metas[0]["ts"],
-                                   "tune": tune, "deliverable": deliverable}
+                        payload = {"available": True, "ordinal": ordn, "name": nm, "ts": meta["ts"],
+                                   "tune": tune, "deliverable": deliverable, "match": match}
                     else:
                         payload = {"available": False, "ordinal": ordn, "reason": "no on-disk tune for this car"}
                 except Exception as e:

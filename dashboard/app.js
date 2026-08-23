@@ -3007,6 +3007,16 @@
       .fhm-pi{margin-left:6px;font-size:9.5px;letter-spacing:.04em;font-weight:700;color:#e6a63a;border:1px solid rgba(230,166,58,.4);border-radius:8px;padding:0 5px;vertical-align:middle;font-variant-numeric:tabular-nums}
       .fhm-prow-sub{font-size:10px;color:var(--muted);line-height:1.25;margin-top:2px;font-style:italic}
       .fhm-prow-sub.meas{color:#8fd14f;font-style:normal}
+      .dm-bar{margin:6px 0 9px;display:flex;flex-direction:column;gap:5px}
+      .dm-warn{font-size:11.5px;border:1px solid rgba(229,65,78,.5);background:rgba(229,65,78,.08);color:var(--txt);border-radius:7px;padding:6px 9px;line-height:1.4}
+      .dm-ok{font-size:11px;color:#00d27a}
+      .dm-why{font-size:11px;color:var(--muted)}
+      .dm-picker{display:flex;flex-wrap:wrap;gap:5px}
+      .dm-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;border:1px solid var(--line);border-radius:12px;padding:3px 10px;background:var(--bg2);color:var(--txt);cursor:pointer;font-variant-numeric:tabular-nums}
+      .dm-chip:hover{border-color:var(--muted)}
+      .dm-chip.on{border-color:#00d27a;color:#00d27a;background:rgba(0,210,122,.12);font-weight:700}
+      .dm-chip.auto{border-color:#a371f7;color:#a371f7}
+      .dm-chip .dm-date{font-size:9px;color:var(--muted)}
       .fhm-pi-budget{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px;font-size:11px;color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:5px 9px;margin:0 0 11px;background:rgba(230,166,58,.05)}
       .fhm-pi-budget.ok{border-color:rgba(0,210,122,.4);background:rgba(0,210,122,.05)}
       .fhm-pi-budget .lbl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
@@ -3131,6 +3141,24 @@
       .fhm-dchip.hidden{display:none}`;
     const ensureFhmCss = () => { if (!document.getElementById("fhmCss")) { const s = document.createElement("style"); s.id = "fhmCss"; s.textContent = FHM_CSS; document.head.appendChild(s); } };
     const fhmPips = (up) => { const lvl = /^Race/.test(up) ? 3 : /^Sport/.test(up) ? 2 : /^Street/.test(up) ? 1 : 0; return lvl ? `<span class="fhm-pips">${[0, 1, 2].map((i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>"; };
+    // WHICH saved tune is this? A car can have many saved tunes on disk; the daemon matches the shown one to the car
+    // you're driving (cyl + PI). This bar shows how it matched, warns when nothing matches the live build, and — when
+    // there are several — lets you pin a specific one (essential when browsing downloaded tunes you haven't applied yet).
+    const _tsFmt = (ts) => { const s = String(ts || ""); return s.length >= 12 ? `${s.slice(4, 6)}/${s.slice(6, 8)} ${s.slice(8, 10)}:${s.slice(10, 12)}` : s; };
+    const diskMatchBar = (r, ordinal) => {
+      const m = r.match; if (!m) return "";
+      const saves = m.saves || []; const cur = String(r.ts); const pick = live.diskPick && live.diskPick[ordinal];
+      let status = "";
+      if (m.how === "no-match") status = `<div class="dm-warn">⚠ You're in a <b>${m.live_cyl}-cyl</b> car${m.live_pi ? ` (PI ${m.live_pi})` : ""} but no saved tune matches it — the closest is <b>${m.chosen_cyl}-cyl</b>. This build isn't saved to disk; <b>save the setup in-game</b> to decode it, or pick a saved tune below.</div>`;
+      else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you're driving — ${m.live_cyl}-cyl${m.live_pi ? `, PI ${m.live_pi}` : ""}</div>`;
+      else if (m.how === "picked") status = `<div class="dm-ok">📌 pinned to this saved tune${saves.length > 1 ? " — auto-match off" : ""}</div>`;
+      else if (saves.length > 1) status = `<div class="dm-why">showing the newest of ${saves.length} saved tunes — drive one to auto-match, or pick it:</div>`;
+      const picker = saves.length > 1 ? `<div class="dm-picker">${saves.map((s) => {
+        const on = String(s.ts) === cur;
+        return `<button class="dm-chip${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded" : "self-made"} · saved ${_tsFmt(s.ts)}">${s.pi != null ? `<b>${s.pi}</b>` : "PI ?"}${s.cyl != null ? ` · ${s.cyl}cyl` : ""} <span class="dm-date">${_tsFmt(s.ts)}</span></button>`;
+      }).join("")}${pick ? `<button class="dm-chip auto" data-diskpick="${ordinal}|">🔄 auto</button>` : ""}</div>` : "";
+      return (status || picker) ? `<div class="dm-bar">${status}${picker}</div>` : "";
+    };
     const diskDeliverableHtml = (r, opts) => {
       opts = opts || {};
       ensureFhmCss();
@@ -3167,6 +3195,7 @@
       const popBtn = opts.popBtn ? (cf && cf.reasonable ? `<button class="lab-mode" data-popout="${dl.ordinal}" title="keep this build on screen while you navigate the upgrade / tune menus" style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7;margin-left:auto">📌 Pop out</button>` : `<button class="lab-mode" disabled title="reach reasonable confidence first — see the checklist below" style="padding:3px 10px;font-size:11px;border-color:var(--line);color:var(--muted);margin-left:auto;opacity:.55;cursor:not-allowed">📌 Pop out</button>`) : "";
       const headRow = opts.inFloat ? "" : `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span>${popBtn}</div>`;
       return `<div class="block fhm" style="border-color:#00d27a">${headRow}
+        ${diskMatchBar(r, dl.ordinal)}
         ${diskDiffBanner(dl.ordinal)}
         ${confMeterHtml(r)}
         <p class="why" style="font-size:11px;margin:4px 0 8px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_exact != null ? sm.sliders_exact : sm.sliders_absolute} exact</b>${sm.sliders_derived ? ` · <b style="color:#8fd14f" title="gears + final drive, de-normalized from the global band">${sm.sliders_derived} derived</b>` : ""} · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
@@ -3175,18 +3204,34 @@
           return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI. During a tuning session (drive, change one part, drive again) these accrue automatically — zero menu capture."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${known}/${tot} parts priced${known < tot ? " — accrues as you drive" : ""}</span> · <span class="why" title="configs the daemon has paired with a live PI — this car / whole garage">📈 ${oc} this car · ${ot} total observed</span></div>`; })()}
         <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
-    const fetchDiskTune = (ordinal) => {
+    const fetchDiskTune = (ordinal, opts) => {
+      opts = opts || {};
       if (!ordinal || !live.connected) return;   // 0 / null = no active car — never fetch
-      live.diskCache = live.diskCache || {};
-      if (Object.prototype.hasOwnProperty.call(live.diskCache, ordinal)) return;   // cached (incl. in-flight / negative)
+      live.diskCache = live.diskCache || {}; live.diskPick = live.diskPick || {};
+      if (!opts.force && Object.prototype.hasOwnProperty.call(live.diskCache, ordinal)) return;   // cached (incl. in-flight / negative)
       live.diskCache[ordinal] = null;   // in-flight marker — avoids refetch storms
-      fetch(liveUrl + "/disk-tune?ordinal=" + ordinal).then((r) => r.json()).then((d) => {
+      const ts = live.diskPick[ordinal];   // a manual pick sticks across refetches until cleared
+      fetch(liveUrl + "/disk-tune?ordinal=" + ordinal + (ts ? "&ts=" + encodeURIComponent(ts) : "")).then((r) => r.json()).then((d) => {
         live.diskCache[ordinal] = d && d.available ? d : { available: false };
         const filled = d && d.available ? applyDiskTune(d) : false;
         paintDiskDecode(); paintFloat();
         const activeOrd = live.frame && String(live.frame.car);
         if (filled && effMode() !== "decode" && activeOrd === String(ordinal)) paintSections(true);   // current values now known -> tuning panels show current -> target
       }).catch(() => { live.diskCache[ordinal] = { available: false }; });   // record failure (not delete) so it can't storm
+    };
+    // the live car's signature (cylinders + PI) identifies WHICH saved tune of a multi-build car is loaded; when it
+    // changes (you switched builds), drop the cached decode so it re-fetches and re-matches — unless you pinned a save.
+    const diskSigCheck = (f) => {
+      if (!f || !f.on || !f.car) return; live.diskSig = live.diskSig || {}; live.diskPick = live.diskPick || {};
+      const sig = `${f.cyl}|${f.pi}`; if (live.diskSig[f.car] === sig) return; live.diskSig[f.car] = sig;
+      if (live.diskCache && Object.prototype.hasOwnProperty.call(live.diskCache, f.car) && !live.diskPick[f.car]) {
+        delete live.diskCache[f.car]; fetchDiskTune(f.car, { force: true });   // re-match to the tune now loaded
+      }
+    };
+    const pickDiskTune = (ordinal, ts) => {   // manual override: pin a specific saved tune (ts) or clear back to auto-match
+      live.diskPick = live.diskPick || {};
+      if (ts) live.diskPick[ordinal] = ts; else delete live.diskPick[ordinal];
+      fetchDiskTune(ordinal, { force: true });
     };
     const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
     const paintDiskDecode = () => {
@@ -3204,6 +3249,7 @@
       el.dataset.fhmKey = key;
       el.innerHTML = diskDeliverableHtml(cached, { popBtn: true });
       el.querySelectorAll("[data-popout]").forEach((b) => b.addEventListener("click", () => popOutFloat(+b.dataset.popout)));
+      el.querySelectorAll("[data-diskpick]").forEach((b) => b.addEventListener("click", () => { const [o, ts] = b.dataset.diskpick.split("|"); pickDiskTune(+o, ts || null); }));
       el.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
         const v = parseFloat(inp.value); if (isNaN(v)) return; const ord = +inp.dataset.rangeord;
         fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -4028,7 +4074,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
-      if (f.car && live.connected) fetchDiskTune(f.car);   // auto-fill the current tune in every workflow, so tuning panels can print current -> target
+      if (f.car && live.connected) { fetchDiskTune(f.car); diskSigCheck(f); }   // auto-fill + re-match the decode to the build now loaded (cyl/PI signature)
       updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintCourseLive(); paintActiveCar();
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
       if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }

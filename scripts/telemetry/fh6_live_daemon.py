@@ -272,6 +272,44 @@ def run_analysis(until=None, final=True):
         ST.analyzing = False
 
 # ---------------- HTTP / SSE ----------------
+def _enrich_gears(deliverable, ordn):
+    """Upgrade decoded gears from band-DERIVED to telemetry-MEASURED: the analyzer's fd_gear is the exact FD*gear
+    product per gear (from WheelRotSpeed, wheelspin-immune), so gear = fd_gear / final_drive is a measured ratio
+    (drops the gear-band assumption; final drive stays band-derived). Best-effort: only when this car was driven
+    through its gears this session."""
+    try:
+        import re as _re
+        with ST.lock:
+            sj = ST.session_json
+        if not sj:
+            return
+        fdg = None
+        for c in sj.get("cars", []):
+            if str(c.get("ordinal")) == str(ordn):
+                gl = {g["gear"]: g["fd_gear"] for g in (c.get("gears") or []) if g.get("fd_gear")}
+                if gl:
+                    fdg = gl; break
+        if not fdg:
+            return
+        fd = None
+        for t in deliverable.get("tabs", []):
+            for r in t.get("rows", []):
+                if r.get("field") == "final_drive" and r.get("value"):
+                    fd = r["value"]
+        if not fd:
+            return
+        for t in deliverable.get("tabs", []):
+            if t.get("tab") != "Gearing":
+                continue
+            for r in t["rows"]:
+                m = _re.match(r"gear_(\d+)$", str(r.get("field", "")))
+                if m and int(m.group(1)) in fdg:
+                    val = round(fdg[int(m.group(1))] / fd, 3)
+                    r["value"] = val; r["display"] = f"{val}:1"; r["telemetry"] = True; r["derived"] = False; r["confidence"] = 0.97
+    except Exception:
+        return
+
+
 def _enrich_engine_desc(deliverable, ordn):
     """Append the live engine fingerprint (cylinders / redline / power) to the Conversions 'Engine' row, so a
     decoded clone describes WHAT engine it has. The save file holds no engine specs; this joins the active car's
@@ -396,6 +434,7 @@ class H(BaseHTTPRequestHandler):
                         tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
                         deliverable = TUNE.tune_to_deliverable(tune, nm)
                         _enrich_engine_desc(deliverable, ordn)
+                        _enrich_gears(deliverable, ordn)
                         payload = {"available": True, "ordinal": ordn, "name": nm, "ts": metas[0]["ts"],
                                    "tune": tune, "deliverable": deliverable}
                     else:

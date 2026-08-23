@@ -2724,6 +2724,40 @@
       return `<div class="ab-panel"><div class="ab-hd"><b>⚗️ A/B testing</b> <span class="why" style="font-size:10.5px">v${versions.length - 1} → v${versions.length}: ${esc(changed)}</span></div>
         <div class="ab-grid">${mrow("spin", "traction spin", "%")}${mrow("usi", "balance |USI|")}${mrow("rearLim", "rear-limited turns")}${mrow("frontLim", "front-limited turns")}</div></div>`;
     };
+    // ---- TUNE SANITY CHECK: runs on the decoded tune (re-evaluates whenever a save change is detected). Flags the
+    // obvious range errors AND the non-obvious "secret" traps most players miss (rebound<bump packing, front-ARB
+    // understeer on RWD, negative rake, locked decel diff, aero that goes light at speed). ----
+    const SAN_LBL = { front_tire_pressure: "Front tyre pressure", rear_tire_pressure: "Rear tyre pressure", front_camber: "Front camber", rear_camber: "Rear camber", front_bump: "Front bump", rear_bump: "Rear bump", front_rebound: "Front rebound", rear_rebound: "Rear rebound", front_arb: "Front ARB", rear_arb: "Rear ARB", brake_balance: "Brake bias", brake_pressure: "Brake pressure", front_ride_height: "Front ride height", rear_ride_height: "Rear ride height", rear_diff_accel: "Rear diff accel", rear_diff_decel: "Rear diff decel", center_diff: "Center diff", front_downforce: "Front downforce", rear_downforce: "Rear downforce" };
+    const sanityCheck = (dl, drv) => {
+      const v = {}; (dl.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && !isNaN(+r.value)) v[r.field] = +r.value; }));
+      const I = []; const add = (lvl, msg, fix) => I.push({ lvl, msg, fix: fix || "" });
+      const fwd = drv === "FWD", awd = drv === "AWD";
+      [["front_bump", "front_rebound", "front"], ["rear_bump", "rear_rebound", "rear"]].forEach(([b, rb, ax]) => {   // SECRET: rebound must be >= bump or the suspension packs down
+        if (v[b] != null && v[rb] != null && v[rb] < v[b] - 0.3) add("error", `${SAN_LBL[rb]} (${v[rb]}) is below ${SAN_LBL[b].toLowerCase()} (${v[b]}) — the ${ax} packs down over bumps and can't recover, losing grip mid-corner.`, `raise ${ax} rebound to at least ${v[b]}`);
+      });
+      ["front_tire_pressure", "rear_tire_pressure"].forEach((k) => { if (v[k] == null) return;
+        if (v[k] < 15) add("error", `${SAN_LBL[k]} ${v[k]} psi is far too low — the tyre rolls onto its sidewall and loses grip.`, "raise toward ~28-32 psi");
+        else if (v[k] > 52) add("warn", `${SAN_LBL[k]} ${v[k]} psi is very high — it shrinks the contact patch and overheats the centre.`, "lower toward ~30 psi"); });
+      if (!fwd && v.rear_diff_accel != null && v.rear_diff_accel >= 95) add("warn", `Rear diff accel ${v.rear_diff_accel}% is near-locked — both rears break loose together on exit (snap oversteer).`, "try 40-60%");
+      if (!fwd && v.rear_diff_decel != null && v.rear_diff_decel >= 55) add("warn", `Rear diff decel ${v.rear_diff_decel}% is high — it locks the rears on entry, causing lift / entry instability.`, "try 0-20%");   // SECRET: high decel diff = entry oversteer
+      if (awd && v.center_diff != null && v.center_diff < 50) add("warn", `Center diff ${v.center_diff}% rear — under 50% makes an AWD car understeer like FWD.`, "60-90% rear for a RWD-like feel");
+      if (v.front_arb != null && v.rear_arb != null) { const d = v.front_arb - v.rear_arb;
+        if (!fwd && d > 10) add("warn", `Front ARB (${v.front_arb}) is much stiffer than the rear (${v.rear_arb}) — on ${drv || "RWD"} this biases the car toward understeer.`, "soften the front ARB (or stiffen the rear) if it pushes");   // SECRET: front-ARB understeer trap
+        if (fwd && d < -10) add("warn", `Rear ARB (${v.rear_arb}) is much stiffer than the front (${v.front_arb}) on FWD — can snap into lift-off oversteer.`, "soften the rear ARB if it snaps"); }
+      if (v.front_ride_height != null && v.rear_ride_height != null && v.front_ride_height > v.rear_ride_height + 0.3) add("warn", `Front ride height (${v.front_ride_height}) is above the rear (${v.rear_ride_height}) — negative rake hurts turn-in and front downforce.`, "run the front slightly lower than the rear");   // SECRET: rake
+      if (!fwd && v.front_downforce != null && v.rear_downforce != null && v.rear_downforce > 0 && v.front_downforce > v.rear_downforce * 1.15) add("warn", `Front downforce exceeds the rear on ${drv || "RWD"} — the rear goes light at speed and can snap into high-speed oversteer.`, "bias downforce toward the rear");
+      if (v.brake_pressure != null && v.brake_pressure < 90) add("info", `Brake pressure ${v.brake_pressure}% — braking force left unused unless you're locking up.`, "raise toward 100%");
+      if (v.brake_balance != null && (v.brake_balance < 40 || v.brake_balance > 68)) add("warn", `Brake bias ${v.brake_balance}% front is extreme — risks locking one axle.`, "move toward 50-55% front");
+      ["front_camber", "rear_camber"].forEach((k) => { if (v[k] != null && v[k] < -4) add("info", `${SAN_LBL[k]} ${v[k]}° is very aggressive — cornering bite up, but less straight-line grip and more wear.`); });
+      return I;
+    };
+    const sanityPanel = (dl, drv) => {
+      if (!dl || !(dl.tabs || []).length) return "";
+      const I = sanityCheck(dl, drv || "?"); const err = I.filter((x) => x.lvl === "error"), warn = I.filter((x) => x.lvl === "warn");
+      if (!I.length) return `<div class="sanity ok"><b>🩺 Sanity check</b> <span class="why">— no red flags in this tune.</span></div>`;
+      const row = (x) => `<div class="sanity-row ${x.lvl}"><span class="s-ic">${x.lvl === "error" ? "⛔" : x.lvl === "warn" ? "⚠" : "ℹ"}</span><span>${x.msg}${x.fix ? ` <b class="s-fix">→ ${x.fix}</b>` : ""}</span></div>`;
+      return `<div class="sanity ${err.length ? "bad" : warn.length ? "warn" : "info"}"><div class="sanity-hd"><b>🩺 Sanity check</b> <span class="why">${err.length ? err.length + " error" + (err.length > 1 ? "s" : "") : ""}${err.length && warn.length ? " · " : ""}${warn.length ? warn.length + " warning" + (warn.length > 1 ? "s" : "") : ""}${!err.length && !warn.length ? "notes only" : ""}</span></div>${[...err, ...warn, ...I.filter((x) => x.lvl === "info")].map(row).join("")}</div>`;
+    };
     const tuningMoves = (adv, corners, cur, weightKey) => {
       const wk = weightKey || "course_weight";   // course lane weights by course_weight; general lane by breadth
       const acc = {};
@@ -3198,6 +3232,17 @@
       .ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 12px;margin-top:6px}
       .ab-m{display:flex;align-items:center;gap:6px;font-size:11.5px;font-variant-numeric:tabular-nums}
       .ab-m>span:first-child{color:var(--muted);flex:1}.ab-m .ab-arr{font-size:10px}
+      .sanity{border-radius:8px;padding:7px 10px;margin:0 0 11px;font-size:11.5px;border:1px solid var(--line)}
+      .sanity.ok{border-color:rgba(0,210,122,.4);background:rgba(0,210,122,.05)}.sanity.ok b{color:#00d27a}
+      .sanity.info{border-color:var(--line)}
+      .sanity.warn{border-color:rgba(227,179,65,.5);background:rgba(227,179,65,.06)}
+      .sanity.bad{border-color:#e5414e;background:rgba(229,65,78,.08)}
+      .sanity-hd{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}.sanity-hd b{font-size:13px}
+      .sanity.bad .sanity-hd b{color:#e5414e}.sanity.warn .sanity-hd b{color:#e3b341}
+      .sanity-row{display:flex;gap:7px;align-items:flex-start;padding:3px 0;line-height:1.4}
+      .sanity-row .s-ic{flex:none}
+      .sanity-row.error{color:var(--txt)}.sanity-row.warn{color:var(--txt)}.sanity-row.info{color:var(--muted)}
+      .sanity-row .s-fix{color:#00d27a;font-weight:600}
       /* ---- bottom LIVE DOCK: session-strip spine + bench/clone pop-chips, anchored to every Lab subtab ---- */
       .fhm-dock{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:linear-gradient(180deg,rgba(14,17,22,.86),var(--bg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px);font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
@@ -3287,6 +3332,7 @@
         ${(() => { const known = sm.pi_known_parts || 0, tot = sm.pi_total_parts || 0; if (!tot && sm.pi_total == null) return ""; const priced = known >= tot && tot > 0;
           const oc = sm.pi_obs_car || 0, ot = sm.pi_obs_total || 0;
           return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI. During a tuning session (drive, change one part, drive again) these accrue automatically — zero menu capture."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${known}/${tot} parts priced${known < tot ? " — accrues as you drive" : ""}</span> · <span class="why" title="configs the daemon has paired with a live PI — this car / whole garage">📈 ${oc} this car · ${ot} total observed</span></div>`; })()}
+        ${(() => { const cm = (dl.menus || []).find((m) => m.menu === "Conversions"); const dr = cm && (cm.rows || []).find((r) => r.item === "drivetrain"); const drv = (dr && dr.resulting_drivetrain) || (live.frame && live.frame.on && live.frame.drv) || null; return sanityPanel(dl, drv); })()}
         <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
     const fetchDiskTune = (ordinal, opts) => {

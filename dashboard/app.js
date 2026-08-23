@@ -2639,10 +2639,13 @@
       const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0]; if (!cid) return "";
       if (live.connected) { const o0 = String(cid).split("|")[0]; if (!(live.diskTune && live.diskTune[o0])) fetchDiskTune(+o0); }
       const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
-      const cur = getTune(cid); const moves = tuningMoves(adv, co.corners, cur); const haveCur = Object.keys(cur).length > 0;
+      const liveInc = (live.cornSince || []).filter((c) => !c.drift && c.first_red && (!cid || c.car === cid)).map((c) => ({ limiter: "tune", dominant: c.first_red.axle }));
+      const cur = getTune(cid); const moves = tuningMoves(adv, [...(co.corners || []), ...liveInc], cur); const haveCur = Object.keys(cur).length > 0;
+      const _age = live.analysisAt ? Math.round((Date.now() - live.analysisAt) / 1000) : null;
+      const liveNote = liveInc.length ? ` <span class="chip" style="border-color:#00d27a;color:#00d27a" title="the settled read recomputes every ~20 s; corners since then fold into the balance live — the settled read stays the authority for the tune-vs-driver call">📡 settled${_age != null ? " " + _age + "s ago" : ""} · +${liveInc.length} live corner${liveInc.length > 1 ? "s" : ""} folding in</span>` : "";
       const prio = (co.profile && co.profile.priority) || []; const rideMove = moves.some((m) => m.sl === "rheight" || m.sl === "fheight"); const rn = co.name || "this course";
       const verdict = !moves.length ? "Balanced for what this track demands — no firm change yet · a few more clean laps will separate driver from tune" : `<b>${moves.length} change${moves.length > 1 ? "s" : ""}</b> to sharpen this car for ${esc(rn)}${prio.length ? ` · this track stresses ${esc(prio.slice(0, 2).join(" + "))}` : ""}${rideMove ? " · incl. ride height (bottoming)" : ""}`;
-      return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🎯 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${prio.length ? " · prioritised for " + esc(prio[0]) : ""}</span></div>
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🎯 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${prio.length ? " · prioritised for " + esc(prio[0]) : ""}</span>${liveNote}</div>
         <div style="font-size:13px;font-weight:600;margin:7px 0 9px;color:var(--txt)">${verdict}</div>
         ${movesCards(moves)}
         <p class="why" style="font-size:10.5px;margin:7px 0 0">${haveCur ? "Targets are computed from your current values (auto-filled from disk). " : "Position-only sliders show a direction until you register their range. "}Change ONE group, re-drive the course, and the numbers refine — course-weighted, so only what THIS track stresses is shown.</p>
@@ -3699,13 +3702,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         if (d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
       });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label, role: d.role } }); paintStatus(); });
-      es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); live.analysisAt = Date.now(); if (live.dec) decReset(live.dec.cid); paintBanner(); loadFullSession(); });   // the analysis absorbed what the live tracker counted — start the live deltas again
+      es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); live.analysisAt = Date.now(); live.cornSince = []; if (live.dec) decReset(live.dec.cid); paintBanner(); loadFullSession(); });   // the analysis absorbed what the live tracker counted — start the live deltas again
       es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.cornerLog = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; paintAll(true); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
       es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
-      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); pushCornerLog(c); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); });
+      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
       es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false;
         const sm = live.status.mode; const changed = sm && (!live.mode || sm.suggest !== live.mode.suggest || sm.reason !== live.mode.reason);   // status carries the current mode every second — authoritative after reconnects / daemon restarts
         if (changed) live.mode = sm;

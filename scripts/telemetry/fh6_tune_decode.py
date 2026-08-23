@@ -575,6 +575,38 @@ def _engine_build_level(parts):
             mx = max(mx, min(v % 1000, 3))
     return mx
 
+# The engine's IDENTITY is NOT the `engine` slot (always the car's own ordinal, tier = build level). It is the family
+# shared uniformly by the engine-INTERNAL parts + aspiration. A family used by >=2 cars, or that is another car's
+# ordinal, is a SWAP; data/engine-swaps.json names it. See scripts/telemetry/build_engine_catalog.py.
+ENGINE_ID_SLOTS = ["camshaft", "valves", "displacement", "pistons", "fuel_system", "ignition",
+                   "exhaust", "intake", "flywheel", "oil_cooling", "manifold", "restrictor_plate", "intercooler"]
+_ASP_SLOTS_ID = ["pos_supercharger", "centrifugal_supercharger", "single_turbo", "twin_turbo", "quad_turbo"]
+
+def engine_family_of(parts):
+    """The engine's identity = the modal family across the engine-internal + aspiration slots (they are ~always
+    uniform). Returns the family int, or None when no engine-internal part is present."""
+    fams = [parts[s] // 1000 for s in (ENGINE_ID_SLOTS + _ASP_SLOTS_ID) if parts.get(s) is not None]
+    if not fams:
+        return None
+    from collections import Counter
+    return Counter(fams).most_common(1)[0][0]
+
+_ENGINE_CATALOG = None
+def _engine_catalog_path():
+    here = os.path.dirname(os.path.abspath(__file__))
+    return os.path.abspath(os.path.join(here, "..", "..", "data", "engine-swaps.json"))
+
+def load_engine_catalog():
+    """{str(family): {label, donor_name, brand_guess, aspiration, shared_swap, cyl, displacement_l, ...}}. Cached; missing -> {}."""
+    global _ENGINE_CATALOG
+    if _ENGINE_CATALOG is None:
+        try:
+            with open(_engine_catalog_path(), encoding="utf-8") as fh:
+                _ENGINE_CATALOG = json.load(fh).get("families") or {}
+        except Exception:
+            _ENGINE_CATALOG = {}
+    return _ENGINE_CATALOG
+
 def compose_engine_type(asp_short=None, displacement_l=None, cyl=None, peak_hp=None,
                         redline=None, swapped=False, electric=False, build_level=0,
                         disp_from_build=False):
@@ -762,24 +794,37 @@ def _conversion_rows(tune, ordinal):
         return {"item": item, "category": cat, "value": upgrade, "upgrade": upgrade, "conf": conf,
                 "tier": tier, "stock": stock, "raw": raw, "status": "measured", "confidence": 1.0}
     own = int(ordinal); engine = P.get("engine"); motor = P.get("motor"); build = _car_build(own)
-    # ENGINE / POWERTRAIN — 'engine' (combustion) and 'motor' (electric) slots are MUTUALLY EXCLUSIVE. A stock
-    # powertrain has slot-family (id//1000) == the car's OWN ordinal; family != own ordinal is a real swap.
-    # (idx = id%1000 is only the engine build/config level, NOT a swap marker.) DISPLACEMENT (litres) is added
-    # from a captured build (My Cars pane); cylinders / redline / power come from live telemetry (daemon enrich).
+    # ENGINE / POWERTRAIN. CRITICAL FIX (2026-08-23): the `engine` slot family (id//1000) is ALWAYS the car's OWN
+    # ordinal — it encodes only the engine BUILD level (tier = id%1000), NEVER the swap. (The old "family != own =
+    # swap" rule therefore fired for nobody and every car decoded as "Stock engine".) The engine's real identity is
+    # the family shared by the engine-INTERNAL parts + aspiration — engine_family_of(). A family used by >=2 cars, or
+    # that is another car's ordinal, is a SWAP; data/engine-swaps.json names it. cyl/redline/power still come live.
+    efam = engine_family_of(P)
+    cat = load_engine_catalog().get(str(efam)) if efam is not None else None
     if motor is not None:
         stock_ev = motor // 1000 == own
         er = row("powertrain", "Engine", "Stock electric powertrain" if stock_ev else "Motor swap (EV)",
                  "named" if stock_ev else "category", motor % 1000, stock_ev, motor)
         er["electric"] = True
-    elif engine is not None:
-        if engine // 1000 == own:
-            er = row("powertrain", "Engine", "Stock engine", "named", engine % 1000, True, engine)
-        else:
-            er = row("powertrain", "Engine", f"Engine swap (catalog #{engine // 1000})", "category", engine % 1000, False, engine)
     else:
-        er = row("powertrain", "Engine", "Unknown powertrain", "category", 0, False, None)
-    disp_l = build.get("displacement_l") if (build and not er.get("electric")) else None
-    if disp_l:
+        build_tier = (engine % 1000) if engine is not None else 0
+        donor = cat.get("donor_name") if cat else None
+        swap = bool(cat and (cat.get("shared_swap") or donor))   # confident swap: shared across cars, or a known donor engine
+        if swap:
+            nm = cat.get("label") or (f"{donor} engine swap" if donor else f"engine swap (family {efam})")
+            er = row("powertrain", "Engine", f"Engine SWAP · {nm}", "named" if donor else "category", build_tier, False, engine)
+        else:
+            # family seen only on this car (or no catalog entry) — the car's own engine; do NOT assert a swap
+            er = row("powertrain", "Engine", "Stock / OEM engine", "named", build_tier, True, engine)
+        er["engine_family"] = efam
+        if cat:
+            er["engine_catalog"] = {k: cat.get(k) for k in ("label", "donor_name", "brand_guess", "aspiration",
+                                                             "shared_swap", "cyl", "displacement_l", "redline",
+                                                             "sample_hp", "resulting_drivetrain", "cars_seen")}
+    # DISPLACEMENT (litres): a captured build's My-Cars pane first, else the engine-family catalog (learned from other
+    # cars that share this engine) — so a swap's displacement shows even for a car never build-captured.
+    disp_l = (build.get("displacement_l") if (build and not er.get("electric")) else None) or (cat.get("displacement_l") if cat else None)
+    if disp_l and not er.get("electric"):
         er["value"] = er["upgrade"] = f"{er['value']} · {disp_l}L"
         er["displacement_l"] = disp_l
     # engine-type descriptor (Feature A): a specific TYPE from save-only signals now; the daemon upgrades this
@@ -792,14 +837,16 @@ def _conversion_rows(tune, ordinal):
         er["engine_bits"] = {"asp": None, "displacement_l": None, "swapped": swapped,
                              "electric": True, "build_level": 0, "disp_from_build": False}
     else:
-        swapped = engine is not None and engine // 1000 != own
+        swapped = not er["stock"]
         bl = _engine_build_level(P)
+        cyl0 = cat.get("cyl") if cat else None
         er["engine_type"] = compose_engine_type(asp_short=(_aspiration_short(P) or "Naturally aspirated"),
-                                                displacement_l=disp_l, build_level=bl, swapped=swapped,
+                                                displacement_l=disp_l, cyl=cyl0, build_level=bl, swapped=swapped,
                                                 disp_from_build=bool(disp_l))
         er["engine_type_conf"] = "save-only"
         er["engine_bits"] = {"asp": _aspiration_short(P), "displacement_l": disp_l, "swapped": swapped,
-                             "electric": False, "build_level": bl, "disp_from_build": bool(disp_l)}
+                             "electric": False, "build_level": bl, "disp_from_build": bool(disp_l),
+                             "engine_family": efam, "cat_label": (cat.get("label") if cat else None), "cat_cyl": cyl0}
     conv.append(er)
     # ASPIRATION — from the populated forced-induction slot (electric = none)
     if motor is not None:

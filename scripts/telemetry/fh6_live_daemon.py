@@ -368,6 +368,45 @@ def _enrich_gears(deliverable, ordn):
         return
 
 
+_ENG_CAT_LOCK = threading.Lock()
+def _learn_engine_catalog(family, cyl=None, redline=None, peak_hp=None, drivetrain=None, pi=None, displacement_l=None):
+    """Accrue a driven engine's MEASURED signature into data/engine-swaps.json, keyed by engine family — the
+    per-part signature the decode then reuses to describe OTHER cars that share this engine but were never driven
+    (cross-car transfer). This is the 'track the signature/PI per part' accrual. Only fills gaps / improves samples;
+    never invents a family. Atomic write, lock-guarded."""
+    if family is None:
+        return
+    try:
+        path = os.path.join(ROOT, "data", "engine-swaps.json")
+        with _ENG_CAT_LOCK:
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    doc = json.load(fh)
+            except Exception:
+                return
+            rec = (doc.get("families") or {}).get(str(family))
+            if rec is None:
+                return
+            changed = False
+            for k, v in (("cyl", int(cyl) if cyl else None), ("redline", int(redline) if redline else None),
+                         ("displacement_l", displacement_l), ("resulting_drivetrain", drivetrain)):
+                if v is not None and rec.get(k) is None:
+                    rec[k] = v; changed = True
+            if peak_hp and peak_hp > (rec.get("sample_hp") or 0):
+                rec["sample_hp"] = int(peak_hp); changed = True
+            if pi and rec.get("sample_pi") is None:
+                rec["sample_pi"] = int(pi); changed = True
+            if changed:
+                if rec.get("source") == "save-mined":
+                    rec["source"] = "save-mined+telemetry"
+                tmp = path + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as fh:
+                    json.dump(doc, fh, indent=1, ensure_ascii=False)
+                os.replace(tmp, path)
+    except Exception:
+        return
+
+
 def _enrich_engine_desc(deliverable, ordn):
     """Feature A: turn the Conversions 'Engine' row into a specific engine TYPE using live telemetry. The save
     holds no engine specs; this joins the active car's cylinders / redline (ST.cars, keyed by cid whose prefix is
@@ -429,6 +468,10 @@ def _enrich_engine_desc(deliverable, ordn):
                 if fold:
                     r["value"] = r["upgrade"] = r["value"] + " · " + " · ".join(fold)
                 r["telemetry"] = True
+                if not electric:   # accrue this engine's measured signature into the family catalog for other cars
+                    _learn_engine_catalog(bits.get("engine_family"), cyl=cyl, redline=redline, peak_hp=peak_hp,
+                                          drivetrain=(car.get("drivetrain") if car else None),
+                                          pi=(car.get("pi") if car else None), displacement_l=bits.get("displacement_l"))
                 return
     except Exception:
         return

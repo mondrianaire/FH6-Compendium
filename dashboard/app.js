@@ -4499,11 +4499,14 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       if (effMode() === "course") {
         const evPts = buf.filter((p) => p.ev && p.dist != null);
         if (evPts.length >= 8) {
-          const curLap = evPts[evPts.length - 1].lapn;
-          let lap = evPts.filter((p) => p.lapn === curLap);
-          if (lap.length < 8) { const pl = evPts.filter((p) => p.lapn === curLap - 1); if (pl.length >= lap.length) lap = pl; }   // just crossed the line → show the lap just completed
-          if (lap.length >= 8) { const d0 = lap[0].dist;
-            return { pts: lap.map((p) => ({ x: Math.max(0, p.dist - d0), y: p.mph, t: p.t, brk: p.brk, thr: p.thr })), mode: "course", xlabel: "lap distance", lapn: lap[0].lapn }; }
+          // group the buffer into laps by lap number → each lap plotted vs LAP distance (dist - its own start) so laps
+          // overlay by track position. We keep every lap in the buffer (not just the current one) and superimpose them.
+          const byLap = new Map();
+          evPts.forEach((p) => { if (!byLap.has(p.lapn)) byLap.set(p.lapn, []); byLap.get(p.lapn).push(p); });
+          const lapNums = [...byLap.keys()].sort((a, b) => a - b).slice(-6);   // last 6 laps (older ones scroll out of the buffer)
+          const laps = lapNums.map((ln) => { const pl = byLap.get(ln); const d0 = pl[0].dist;
+            return { lapn: ln, pts: pl.map((p) => ({ x: Math.max(0, p.dist - d0), y: p.mph, t: p.t })) }; }).filter((L) => L.pts.length >= 6);
+          if (laps.length) return { mode: "course", laps, xlabel: "lap distance", curLap: laps[laps.length - 1].lapn };
         }
       }
       const lastT = buf[buf.length - 1].t; const w = buf.filter((p) => lastT - p.t <= SPD_WIN_S);
@@ -4541,26 +4544,40 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const speedTraceHtml = () => {
       const win = spdWindow();
       if (!win) return `<div class="spd-hd"><b>🏁 Speed trace</b></div><p class="why" style="font-size:11px;margin:4px 0">gathering data… drive to build the line.</p>`;
-      const pts = win.pts;
-      const anMarks = spdCorners(pts);   // analyzer turns when available, else raw speed minima
-      const marksList = anMarks || spdDips(pts).map((i) => ({ i, mph: Math.round(pts[i].y) }));
-      const nC = marksList.length;
       const W = 720, H = 190, PL = 32, PR = 10, PT = 14, PB = 24;
-      const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
-      const xMax = Math.max(...xs) || 1, yMax = Math.max(40, Math.ceil((Math.max(...ys) + 4) / 10) * 10);
+      const lines = win.mode === "course" ? win.laps.map((L) => L.pts) : [win.pts];
+      const allPts = [].concat(...lines);
+      const xMax = Math.max(1, ...allPts.map((p) => p.x)), yMax = Math.max(40, Math.ceil((Math.max(...allPts.map((p) => p.y)) + 4) / 10) * 10);
       const X = (x) => PL + (x / xMax) * (W - PL - PR), Y = (y) => PT + (1 - y / yMax) * (H - PT - PB);
-      const line = pts.map((p, i) => `${i ? "L" : "M"}${X(p.x).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(" ");
-      const area = `${line} L${X(pts[pts.length - 1].x).toFixed(1)} ${Y(0).toFixed(1)} L${X(pts[0].x).toFixed(1)} ${Y(0).toFixed(1)} Z`;
+      const pathOf = (pts) => pts.map((p, i) => `${i ? "L" : "M"}${X(p.x).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(" ");
       const yticks = [0, Math.round(yMax / 2), yMax].map((v) => `<line x1="${PL}" y1="${Y(v).toFixed(1)}" x2="${W - PR}" y2="${Y(v).toFixed(1)}" stroke="rgba(255,255,255,.07)"/><text x="${PL - 4}" y="${(Y(v) + 3).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="9">${v}</text>`).join("");
-      const markers = marksList.map((m, k) => { const p = pts[m.i], x = X(p.x), y = Y(p.y);
-        const dirTag = m.dir === "R" ? "▶" : m.dir === "L" ? "◀" : "";
-        return `<line x1="${x.toFixed(1)}" y1="${PT}" x2="${x.toFixed(1)}" y2="${H - PB}" stroke="rgba(227,179,65,.35)" stroke-dasharray="3 3"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#e3b341"/><text x="${x.toFixed(1)}" y="${(y - 7).toFixed(1)}" text-anchor="middle" fill="#e3b341" font-size="10" font-weight="700">T${k + 1}${dirTag}</text><text x="${x.toFixed(1)}" y="${(H - PB + 10).toFixed(1)}" text-anchor="middle" fill="var(--muted)" font-size="8">${Math.round(m.mph)}</text>`; }).join("");
-      const xlab = win.mode === "free" ? `${Math.round(win.span || xMax)}s ago ← → now` : `${(xMax / 1000).toFixed(2)} km · lap ${win.lapn}`;
-      const src = anMarks ? "analyzer turns · ◀▶ = corner direction" : "speed minima (braking zones)";
-      const hd = win.mode === "course" ? `🏁 Speed trace — lap ${win.lapn} · ${nC} corner${nC === 1 ? "" : "s"}` : `🏁 Speed trace — last ${Math.min(SPD_WIN_S, Math.round(win.span || 0))}s · ${nC} corner${nC === 1 ? "" : "s"}`;
-      return `<div class="spd-hd"><b>${hd}</b><span class="why" style="font-size:10px">corners = ${src}</span></div>
+      // corner markers (analyzer turns when available, else speed minima) — always drawn on the NEWEST line
+      const markOf = (pts) => { const an = spdCorners(pts); const list = an || spdDips(pts).map((i) => ({ i, mph: Math.round(pts[i].y) }));
+        const html = list.map((m, k) => { const p = pts[m.i], x = X(p.x), y = Y(p.y); const d = m.dir === "R" ? "▶" : m.dir === "L" ? "◀" : "";
+          return `<line x1="${x.toFixed(1)}" y1="${PT}" x2="${x.toFixed(1)}" y2="${H - PB}" stroke="rgba(227,179,65,.30)" stroke-dasharray="3 3"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#e3b341"/><text x="${x.toFixed(1)}" y="${(y - 7).toFixed(1)}" text-anchor="middle" fill="#e3b341" font-size="10" font-weight="700">T${k + 1}${d}</text><text x="${x.toFixed(1)}" y="${(H - PB + 10).toFixed(1)}" text-anchor="middle" fill="var(--muted)" font-size="8">${Math.round(m.mph)}</text>`; }).join("");
+        return { html, n: list.length, src: an ? "analyzer turns · ◀▶ dir" : "speed minima" }; };
+      let body = "", markers = "", nC = 0, src = "", hd = "", note = "";
+      if (win.mode === "course") {
+        const n = win.laps.length;
+        // OLDEST → NEWEST: brighter/thicker green = the more recent lap; older laps fade toward dark green
+        body = win.laps.map((L, i) => { const rec = n > 1 ? i / (n - 1) : 1;
+          const col = `hsl(145,${Math.round(45 + 28 * rec)}%,${Math.round(30 + 34 * rec)}%)`, op = (0.32 + 0.68 * rec).toFixed(2), sw = (1 + 0.9 * rec).toFixed(1);
+          return `<path d="${pathOf(L.pts)}" fill="none" stroke="${col}" stroke-width="${sw}" opacity="${op}"/>`; }).join("");
+        const mk = markOf(win.laps[n - 1].pts); markers = mk.html; nC = mk.n; src = mk.src;
+        hd = `🏁 Speed trace — ${n} lap${n === 1 ? "" : "s"} overlaid · lap ${win.curLap} newest`;
+        note = `brighter = newer lap · corners = ${src}`;
+      } else {
+        const pts = win.pts;
+        const area = `<path d="${pathOf(pts)} L${X(pts[pts.length - 1].x).toFixed(1)} ${Y(0).toFixed(1)} L${X(pts[0].x).toFixed(1)} ${Y(0).toFixed(1)} Z" fill="rgba(47,129,247,.10)"/>`;
+        body = area + `<path d="${pathOf(pts)}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>`;
+        const mk = markOf(pts); markers = mk.html; nC = mk.n; src = mk.src;
+        hd = `🏁 Speed trace — last ${Math.min(SPD_WIN_S, Math.round(win.span || 0))}s · ${nC} corner${nC === 1 ? "" : "s"}`;
+        note = `corners = ${src}`;
+      }
+      const xlab = win.mode === "free" ? `${Math.round(win.span || xMax)}s ago ← → now` : `${(xMax / 1000).toFixed(2)} km/lap`;
+      return `<div class="spd-hd"><b>${hd}</b><span class="why" style="font-size:10px">${note}</span></div>
         <svg viewBox="0 0 ${W} ${H}" class="spd-svg" style="width:100%;height:auto;display:block">
-          ${yticks}<path d="${area}" fill="rgba(47,129,247,.10)"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>${markers}
+          ${yticks}${body}${markers}
           <text x="${W - PR}" y="${H - 3}" text-anchor="end" fill="var(--muted)" font-size="9">${esc(xlab)}</text>
           <text x="${PL - 26}" y="${PT + 4}" fill="var(--muted)" font-size="9">mph</text>
         </svg>`;
@@ -4602,7 +4619,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         const now = performance.now();
         if (!live._spdT || now - live._spdT >= 140) { live._spdT = now;
           (live.spd = live.spd || []).push({ t: f.t, mph: f.mph, dist: f.dist, lapn: f.lapn, ev: f.ev, brk: f.brk, thr: f.thr });
-          if (live.spd.length > 3200) live.spd.shift(); }
+          if (live.spd.length > 6000) live.spd.shift(); }   // ~14 min at 7Hz — several laps overlaid in course mode
         paintSpeedTrace();
       }
       paintTraction(f);

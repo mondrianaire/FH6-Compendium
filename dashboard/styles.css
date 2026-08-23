@@ -329,3 +329,24 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .course-id-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .course-id-hint { font-size: 10px; color: var(--warn); margin-top: 2px; }
 .course-id-right { flex: none; margin-left: auto; }
+
+/* ---- per-turn cornering breakdown (opened from the course map) ---- */
+.ct-marker.sel { filter: drop-shadow(0 0 3px rgba(230,237,243,.5)); }
+.ct-break { margin-top: 9px; border: 1px solid var(--accent2); border-radius: 9px; background: var(--bg); overflow: hidden; }
+.ct-break-hd { display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  background: rgba(47,129,247,.10); border-bottom: 1px solid var(--line); font-size: 13px; }
+.ct-break-hd .ct-close { margin-left: auto; cursor: pointer; color: var(--muted); font-size: 13px; padding: 0 4px; }
+.ct-break-hd .ct-close:hover { color: var(--txt); }
+.ct-break-body { display: flex; gap: 12px; align-items: flex-start; padding: 9px 11px; flex-wrap: wrap; }
+.ct-glyph { flex: none; text-align: center; }
+.ct-glyph-cap { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.ct-break-main { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px; }
+.ct-speeds { display: flex; align-items: baseline; gap: 6px; font-size: 15px; font-variant-numeric: tabular-nums; }
+.ct-speeds small { font-size: 9px; color: var(--muted); margin-left: 1px; text-transform: uppercase; }
+.ct-speeds .ct-arr { color: var(--muted); font-size: 12px; }
+.ct-speeds .ct-g { margin-left: auto; font-size: 12px; color: var(--warn); }
+.ct-env { font-size: 11.5px; color: var(--txt); }
+.ct-env b { font-variant-numeric: tabular-nums; }
+.ct-stage { font-size: 12px; padding: 6px 8px; border-radius: 6px; background: var(--bg2); border-left: 3px solid var(--muted); line-height: 1.4; }
+.ct-stage.learn { border-left-color: var(--accent2); }
+.ct-stage.tune { border-left-color: var(--accent); }

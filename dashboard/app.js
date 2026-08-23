@@ -3561,7 +3561,8 @@
       </div>`;
     };
     // course MAP from coordinates: reference-lap path + latest lap overlaid + ALL turns of the course (the canonical/established set — matches the turn count — not only the curvature-mapped ones)
-    const courseMap = (geo, corners, turns) => {
+    const courseMap = (geo, corners, turns, opts) => {
+      opts = opts || {};
       const pieces = geo && (geo.paths || (geo.path ? [geo.path] : [])); if (!pieces || !pieces.length) return "";
       const pts = geo.path || pieces.flat(), lp = geo.last_path || (geo.last_paths || []).flat(), layout = geo.layout_paths || []; if (pts.length < 5) return "";
       const all = pts.concat(lp, ...layout.map((l) => l.pts));
@@ -3580,7 +3581,7 @@
         ${(geo.last_paths || (lp.length ? [lp] : [])).map((pc) => `<polyline fill="none" stroke="var(--warn,#e3b341)" stroke-width="2" stroke-dasharray="4 3" opacity=".9" points="${poly(pc)}"/>`).join("")}
         ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="2.5" points="${poly(pc)}"/>`).join("")}
         <circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="4" fill="#00d27a"/><text x="${(X(pts[0][0]) + 6).toFixed(1)}" y="${(Y(pts[0][1]) - 4).toFixed(1)}" fill="#00d27a" font-size="9">start</text>
-        ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; return `<g><circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="5" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
+        ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; return `<g class="ct-marker${sel ? " sel" : ""}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
       </svg>`;
     };
     // COURSE IDENTITY: the auto-computed SHAPE (from ground-truth position data) is a course's PRIMARY identifier —
@@ -3618,10 +3619,45 @@
           ${(tr.visits || []).length > 1 ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;font-size:10.5px"><span class="why">visits:</span>${tr.visits.map((v) => `<span class="chip" title="${v.session}${v.best_car ? " · " + v.best_car : ""}">${v.session.slice(-6)} · ${v.laps}L${v.best_lap ? " · " + v.best_lap.toFixed(2) : ""}</span>`).join("")}</div>` : ""}
           <p class="why" style="font-size:10px;margin:5px 0 0">one record per track — every car and session that visits it adds laps, references and best times here; the turn references below are per car</p>
         </div>` : ""; };
-    const mapCardHtml = (geo, corners, turns) => { if (!geo) return ""; const canonN = turns && turns.canonical ? turns.canonical.length : (geo.turns || []).length; const shown = (turns && turns.count) || canonN; const mapped = (geo.turns || []).length;
+    // PER-TURN CORNERING BREAKDOWN — clicking a turn on the course map opens THIS: the full corner structure for that
+    // turn (the phase where grip broke, balance, entry/apex/exit speeds, grip-envelope apex), STAGE-AWARE — a learning
+    // status while the layout is still being ratified, then tuning feedback + the fix once confidence crosses 75%.
+    const courseTurnBreakdown = (co, n) => {
+      const tu = co.turns || {}; const canon = tu.canonical || []; const t = canon[n - 1]; if (!t) return "";
+      const near = (a, b, d) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= d * d;
+      const cs = (co.corners || []).filter((k) => k.pos && !k.drift && near(k.pos, t.pos, 45));
+      const c = cs.length ? cs[cs.length - 1] : null;   // the latest measured pass through this turn this session
+      const geo = courseGeoFor(co); const gTurns = ((geo && geo.turns) || []).map((g) => g.apex);
+      const mappedT = gTurns.some((q) => near(q, t.pos, 45));
+      const ck = courseKnowledge(co); const tuning = ck.stage === "tuning";
+      const dr = t.dir === "L" ? "◀ left" : t.dir === "R" ? "right ▶" : "";
+      const r = t.radius_m || (c && c.radius_m) || null;
+      const curCar = (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0];
+      const grip = (co.driving && co.driving.car_grip && curCar && co.driving.car_grip[curCar]) || null;
+      const predMph = (grip && r) ? Math.round(Math.sqrt(grip * 9.81 * r) * 2.237) : null;
+      const ph = c ? (c.dominant_phase || null) : null; const axle = c ? c.dominant : null;   // session corners: phase = dominant_phase, axle = dominant
+      const mphOut = c ? (c.mph_out != null ? c.mph_out : (c.last && c.last.mph_out != null ? c.last.mph_out : (c.ref && c.ref.mph_out))) : null;
+      const usi = c ? c.usi : null; const bal = usi == null ? "" : usi > 0.15 ? "understeer" : usi < -0.05 ? "oversteer" : "neutral";
+      const balCol = usi == null ? "var(--muted)" : usi > 0.15 ? "#2f81f7" : usi < -0.05 ? "#e5414e" : "#00d27a";
+      const glyph = ph ? moveCorner([ph], [ph], 132) : "";
+      const spd = (v, l) => `<span>${v != null ? v : "—"}<small>${l}</small></span>`;
+      const speeds = c ? `<div class="ct-speeds">${c.mph_in != null ? spd(c.mph_in, "in") + `<span class="ct-arr">→</span>` : ""}<span><b style="color:${balCol}">${c.mph_min != null ? c.mph_min : "—"}</b><small>apex</small></span>${mphOut != null ? `<span class="ct-arr">→</span>` + spd(mphOut, "out") : ""}${c.lat_g ? `<span class="ct-g">${c.lat_g} g</span>` : ""}</div>` : `<div class="why" style="font-size:11px">not driven at pace this session — take it once to load the tyres</div>`;
+      const env = predMph != null ? `<div class="ct-env">grip-envelope apex ≈ <b>${predMph}</b> mph <span class="why">(r≈${Math.round(r)} m × this car's grip)</span>${c ? ` · you carried <b style="color:${c.mph_min >= predMph - 2 ? "#00d27a" : "#e3b341"}">${c.mph_min}</b>${c.mph_min >= predMph - 2 ? " — at the limit" : " · " + Math.max(0, predMph - c.mph_min) + " to find"}` : ""}</div>` : "";
+      let stage;
+      if (tuning && c && axle && c.limiter === "tune") { const move = c.note || (axle === "front" ? "soften the FRONT (ARB → spring)" : "soften the REAR (ARB / accel diff)");
+        stage = `<div class="ct-stage tune"><b>🏋 Tuning</b> — ${ph ? `grip broke at <b style="color:${CM_PC[ph - 1]}">${CM_SHORT[ph - 1]}</b>, ` : ""}<b>${bal || axle + "-limited"}</b> → ${esc(move)}${c.delta != null ? ` <span class="why">(you're ${c.delta > 0 ? "+" : ""}${c.delta} mph vs your reference here)</span>` : ""}</div>`;
+      } else if (tuning && c && c.limiter === "driver") { stage = `<div class="ct-stage"><b>🏋 Tuning</b> — the car's fine here; this turn is a <b>driver</b> line/braking gain, not a tune change.</div>`;
+      } else if (tuning) { stage = `<div class="ct-stage"><b>🏋 Tuning</b> — clean through here; no change needed for this turn.</div>`;
+      } else { const passes = t.passes ?? (t.track && t.track.passes) ?? (c && c.laps_seen) ?? 0;
+        stage = `<div class="ct-stage learn"><b>📚 Learning</b> — ${mappedT ? "mapped from coordinates" : "counted from your laps (fast/flat)"}${c ? " · loaded this session" : " · not yet loaded — take it at pace"} · ${passes} pass${passes === 1 ? "" : "es"} on record. <span class="why">at 75% course confidence this flips to tuning feedback</span></div>`; }
+      return `<div class="ct-break"><div class="ct-break-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${bal ? `<span class="chip" style="border-color:${balCol};color:${balCol}">${bal}</span>` : ""}<span class="ct-close" data-courseturn-close="1" title="close">✕</span></div><div class="ct-break-body">${glyph ? `<div class="ct-glyph">${glyph}<div class="ct-glyph-cap">grip: <b style="color:${ph ? CM_PC[ph - 1] : "var(--muted)"}">${ph ? CM_SHORT[ph - 1] : "—"}</b></div></div>` : ""}<div class="ct-break-main">${speeds}${env}${stage}</div></div></div>`;
+    };
+    const mapCardHtml = (geo, corners, turns, co) => { if (!geo) return ""; const canonN = turns && turns.canonical ? turns.canonical.length : (geo.turns || []).length; const shown = (turns && turns.count) || canonN; const mapped = (geo.turns || []).length;
+      const rk = co && co.route_key; const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null; const brk = (co && selN) ? courseTurnBreakdown(co, selN) : "";
       return `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
           <div class="card-row" style="margin-top:0"><strong style="font-size:12px">🗺 Course map — ${shown} turn${shown === 1 ? "" : "s"}${mapped !== shown ? ` (${mapped} curvature-mapped)` : ""} · ${geo.length_m} m</strong><span class="chip">${geo.from_model ? "best map on record" : "ref lap " + ((geo.ref_lap || {}).lap || "—")}${geo.last_lap ? ` · latest lap ${geo.last_lap.lap} overlaid` : ""}</span></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns)}<div style="font-size:10.5px;min-width:150px;max-width:320px"><div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#e5414e">●</span> loaded this session · <span style="color:var(--accent)">○</span> on the map, not loaded · <span style="color:var(--warn,#e3b341)">○</span> counted from your laps, not curvature-mapped (fast/flat)</div>${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns, { rk, selN })}<div style="font-size:10.5px;min-width:150px;max-width:320px">${rk ? `<div style="font-weight:600;color:var(--accent2);margin-bottom:3px">▶ click a turn for its breakdown</div>` : ""}<div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#e5414e">●</span> loaded this session · <span style="color:var(--accent)">○</span> on the map, not loaded · <span style="color:var(--warn,#e3b341)">○</span> counted from your laps, not curvature-mapped (fast/flat)</div>${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
+          ${brk}
         </div>`; };
     // a course card built purely from a TRACK RECORD (course model) — for a route selected in the atlas that this session / recording never visited
     const modelCourseCard = (m) => {
@@ -3681,7 +3717,7 @@ ${co.corners.filter((k) => k.ref || k.advice).map((k) => { const r = k.ref || {}
       const advice = `${Object.entries(co.advice_by_car || {}).map(([cidk, adv]) => { const firm = adv.filter((a) => !a.open).slice(0, 4), open = adv.filter((a) => a.open); return `<div style="margin-top:8px"><div style="font-size:11px;color:var(--muted)">${carLbl(carsS, cidk)}</div>
 ${firm.map((a) => `<div style="display:flex;gap:8px;align-items:flex-start;margin:5px 0;${a.minor_here ? "opacity:.5" : ""}"><span class="lab-light" style="background:${SEV[a.severity]};margin-top:4px"></span><div style="flex:1"><div style="font-size:12px"><strong>${a.text}</strong>${a.minor_here ? ` <span class="chip" style="border-color:var(--muted);color:var(--muted)">rarely used on this course</span>` : ""}</div><div class="why" style="font-size:10.5px">${a.evidence} · confidence ${Math.round(a.confidence * 100)}%</div></div></div>`).join("") || `<p class="why" style="font-size:11px;margin:4px 0">no firm suggestions on this course yet</p>`}
 ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top:4px">🔍 ${open.map((a) => a.text).join(" · ")}</div>` : ""}</div>`; }).join("")}`;
-      return { rn, cov, nl, tu, tr, header, track: trackCard, profile: profileCard, map: mapCardHtml(courseGeoFor(co), co.corners, co.turns), turns: turnsCard, probes, laps, corners, driving, advice };
+      return { rn, cov, nl, tu, tr, header, track: trackCard, profile: profileCard, map: mapCardHtml(courseGeoFor(co), co.corners, co.turns, co), turns: turnsCard, probes, laps, corners, driving, advice };
     };
     const courseBlock = (co, s) => { const p = courseParts(co, s); return `<div class="lab-corner" style="border-left:4px solid var(--accent2)">${p.header}${p.track}${p.profile}${p.map}${p.turns}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div>`; };
     // ---- LIVE plumbing: mode banner, stream bar, the live workflow body, and section repaint from the daemon's latest full analysis ----
@@ -3985,6 +4021,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         }).catch(() => {});
       }));
       r.querySelectorAll("[data-course-stage]").forEach((b) => b.addEventListener("click", () => { localStorage.setItem("fh6CourseStage", b.dataset.courseStage); if (src === "live") paintSections(true); else render(); }));
+      // click a turn on the course map -> open its per-turn breakdown (the ✕ closes it)
+      r.querySelectorAll("[data-courseturn]").forEach((g) => g.addEventListener("click", () => { const parts = String(g.dataset.courseturn).split("|"); live.selTurn = { rk: parts[0], n: +parts[1] }; if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-courseturn-close]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); live.selTurn = null; if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-expected]").forEach((b) => b.addEventListener("click", () => { const [rk, n] = b.dataset.expected.split("|"); fetch(liveUrl + "/course-expected", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, n: +n }) }).then(() => { b.textContent = "saved ✓"; }).catch(() => {}); }));
       r.querySelectorAll("[data-lib-pick]").forEach((b) => b.addEventListener("click", () => { const [sid, key] = b.dataset.libPick.split("|"); libPick = { sid, key }; donor = key; render(); }));
       r.querySelectorAll("[data-lib-clear]").forEach((b) => b.addEventListener("click", () => { libPick = null; donor = null; render(); }));

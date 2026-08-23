@@ -2468,6 +2468,7 @@
     // tiny SVG line chart: series = [{pts:[[x,y]...], col, label}]
     const chart = (series, o = {}) => {
       const w = o.w || 380, h = o.h || 130, L = 36, B = 22, R = 8, T = 8;
+      series = (series || []).map((s) => Object.assign({}, s, { pts: (s.pts || []).filter((p) => p && Number.isFinite(p[0]) && Number.isFinite(p[1])) })).filter((s) => s.pts.length);   // drop non-finite points so a car with partial dyno/gear data can't emit NaN SVG
       const xs = series.flatMap((s) => s.pts.map((p) => p[0])), ys = series.flatMap((s) => s.pts.map((p) => p[1]));
       if (!xs.length) return `<p class="why" style="font-size:11px">no data</p>`;
       const xmin = o.xmin ?? Math.min(...xs), xmax = o.xmax ?? Math.max(...xs), ymin = o.ymin ?? Math.min(0, ...ys), ymax = o.ymax ?? ((Math.max(...ys) * 1.05) || 1);
@@ -3731,14 +3732,14 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL[em][1]};color:${MODE_LBL[em][1]};font-weight:700">${MODE_LBL[em][0]}</span><span class="why" style="font-size:11px">${ms === "auto" ? "🧭 auto-detected" + (lm.reason ? " — " + esc(lm.reason) : " — waiting for the stream") : "manual — click 🧭 auto to hand detection back"}${live.status && live.status.game === "menu" ? ` · in menus — <b style="color:var(--accent)">📌 deliverable held</b> for the upgrade / tune screen` : ""}</span>${dchip}</div>`;
     }
     function streamBar() {
+      // the NECESSARY live state (status + workflow/event line + the ↺/⚙ controls) lives in the sticky .lab-top header
+      // (anchored to the top of the screen). This block holds only the non-glanceable, scrollable bits.
       return `
-        <div class="block" style="border-color:#e5414e">
-          <div class="card-row" style="margin-top:0"><h3 style="margin:0;font-size:15px">🔴 Live stream</h3><span style="display:inline-flex;align-items:center;gap:6px"><span id="lvStatus" class="chip">connecting…</span><button class="lab-mode" id="lvReset" title="Start a fresh recording — clears the live screen and begins a new session/CSV. Your pinned donor and course records are kept." style="padding:3px 10px;font-size:11px;border-color:#e5414e;color:#e5414e">↺ new session</button><span class="chip" id="lvConnGear" title="connection settings" style="cursor:pointer;padding:3px 8px">⚙</span></span></div>
-          <div id="lvConnRow" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"><button class="lab-mode" id="lvConnect" style="font-size:12px">connect</button><span class="why" style="font-size:10.5px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (<code>--replay captures/&lt;file&gt;.csv</code> to replay)</span></div>
-          <div id="lvWfLine" style="margin-top:8px;font-size:12px"></div>
-          <div id="lvCloneLauncher" style="margin-top:8px"></div>
-          <div id="lvLoop" style="margin-top:8px"></div>
-          <div id="lvStint" style="margin-top:8px"></div>
+        <div class="block" style="border-color:#e5414e;margin-top:0">
+          <div id="lvConnRow" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-top:0"><input id="lvUrl" value="${esc(liveUrl)}" style="min-width:240px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:12px"><button class="lab-mode" id="lvConnect" style="font-size:12px">connect</button><span class="why" style="font-size:10.5px">daemon: <code>python scripts/telemetry/fh6_live_daemon.py</code> (<code>--replay captures/&lt;file&gt;.csv</code> to replay)</span></div>
+          <div id="lvCloneLauncher"></div>
+          <div id="lvLoop" style="margin-top:6px"></div>
+          <div id="lvStint" style="margin-top:6px"></div>
           <div id="lvSession"></div><div id="lvUnknown"></div>
         </div>`;
     }
@@ -4050,9 +4051,12 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const s = S(); const SRCS = [["live", "🔴 Live stream"], ["session", "📼 Recording"]];
       host.innerHTML = `
         <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0">📡 Telemetry Lab — Data Out</h2>
-        <div class="lab-modes" style="margin-bottom:4px"><span class="why" style="font-size:11px;margin-right:2px">source</span>${SRCS.map(([k, l]) => `<button class="lab-mode ${src === k ? "active" : ""}" data-src="${k}">${l}</button>`).join("")}
-          ${src === "session" ? (sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : s ? `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>` : "") : ""}</div>
-        <div class="lab-modes"><span class="why" style="font-size:11px;margin-right:2px">workflow</span><span id="labWf" style="display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center">${tabsHtml()}</span></div>
+        <div class="lab-top">
+          <div class="lab-modes" style="margin-bottom:4px"><span class="why" style="font-size:11px;margin-right:2px">source</span>${SRCS.map(([k, l]) => `<button class="lab-mode ${src === k ? "active" : ""}" data-src="${k}">${l}</button>`).join("")}
+            ${src === "session" ? (sessions.length > 1 ? `<select id="labSess">${sessions.map((x, i) => `<option value="${i}" ${i === sIdx ? "selected" : ""}>${x.id}</option>`).join("")}</select>` : s ? `<span class="chip">${s.id} · ${s.frames} frames · ${s.duration_s}s</span>` : "") : ""}</div>
+          <div class="lab-modes"><span class="why" style="font-size:11px;margin-right:2px">workflow</span><span id="labWf" style="display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center">${tabsHtml()}</span></div>
+          ${src === "live" ? `<div class="lab-live-state"><span class="dot"></span><span id="lvStatus" class="chip">connecting…</span><span id="lvWfLine"></span><span class="lab-live-ctrls"><button class="lab-mode" id="lvReset" title="Start a fresh recording — clears the live screen and begins a new session/CSV. Your pinned donor and course records are kept." style="padding:2px 8px;font-size:11px;border-color:#e5414e;color:#e5414e">↺ new</button><span class="chip" id="lvConnGear" title="connection settings" style="cursor:pointer;padding:2px 7px">⚙</span></span></div>` : ""}
+        </div>
         ${src === "live" ? `${streamBar()}<div id="lvBody">${liveBody()}</div>` : !s ? NOSESS : sectionsHtml(s, false)}`;
       live._shownWf = effMode();
       host.querySelectorAll("[data-src]").forEach((b) => b.addEventListener("click", () => { src = b.dataset.src; localStorage.setItem("fh6LabSrc", src); carSel = null; donor = replica = null; render(); }));   // run picks ('cid#n') never carry across sources — run numbers restart per session

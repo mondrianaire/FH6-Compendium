@@ -350,3 +350,12 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .ct-stage { font-size: 12px; padding: 6px 8px; border-radius: 6px; background: var(--bg2); border-left: 3px solid var(--muted); line-height: 1.4; }
 .ct-stage.learn { border-left-color: var(--accent2); }
 .ct-stage.tune { border-left-color: var(--accent); }
+
+/* ---- Lab sticky top: subtab switcher + necessary live state, anchored to the top of the screen ---- */
+.lab-top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 6px 0 7px; margin: 0 0 9px;
+  border-bottom: 1px solid var(--line); }
+.lab-live-state { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 12px; }
+.lab-live-state .dot { width: 8px; height: 8px; border-radius: 50%; background: #e5414e;
+  box-shadow: 0 0 6px rgba(229,65,78,.7); flex: none; }
+.lab-live-state #lvWfLine { flex: 1 1 200px; min-width: 160px; font-size: 12px; }
+.lab-live-ctrls { display: inline-flex; gap: 6px; align-items: center; margin-left: auto; }

@@ -4165,41 +4165,36 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     }
     // shared rolling-window traction stat, used by the full Free-Tuning card AND the anchored dock pill
     const tracSummary = () => {
-      const buf = live.trac || []; const f = live.frame; if (!f || !f.on || buf.length < 25) return null;
+      const buf = live.trac || []; if (buf.length < 25) return null;   // computed from the persistent buffer — survives a pause so the finding stays up while you implement it
       const med = (a) => { a = a.slice().sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : 0; };
       const pct = Math.round(100 * buf.filter((b) => b.spin).length / buf.length);
-      const rmed = med(buf.map((b) => b.rc)), fmed = med(buf.map((b) => b.fc)); const drv = f.drv || "RWD";
+      const rmed = med(buf.map((b) => b.rc)), fmed = med(buf.map((b) => b.fc)); const drv = live.tracDrv || (live.frame && live.frame.drv) || "RWD";
       const axleLimited = drv === "FWD" ? (fmed > rmed * 1.5) : (rmed > fmed * 1.5);
-      return { pct, rmed, fmed, drv, axle: drv === "FWD" ? "FRONT" : "REAR", axleLimited, lvl: pct >= 55 ? "bad" : pct >= 25 ? "warn" : "ok" };
+      return { pct, rmed, fmed, drv, axle: drv === "FWD" ? "FRONT" : "REAR", axleLimited, lvl: pct >= 55 ? "bad" : pct >= 25 ? "warn" : "ok", paused: !(live.frame && live.frame.on) };
     };
     const paintDockTrac = () => {
       const el = document.getElementById("dockTrac"); if (!el) return; const s = tracSummary();
       if (!s) { if (el.innerHTML) el.innerHTML = ""; return; }
-      const lbl = s.lvl === "ok" ? "grip" : `${s.axle[0]}·spin ${s.pct}%`;
-      el.innerHTML = `<span class="dtrac ${s.lvl}" title="traction: driven wheels over the grip limit ${s.pct}% of on-throttle time${s.axleLimited ? " · " + s.axle.toLowerCase() + "-limited" : ""}"><span class="dot"></span>🔥 ${lbl}</span>`;
+      const lbl = s.lvl === "ok" ? "grip" : `${s.axle[0]}·spin ${s.pct}%`; const ic = s.paused ? "⏸" : "🔥";
+      el.innerHTML = `<span class="dtrac ${s.lvl}" title="traction: driven wheels over the grip limit ${s.pct}% of on-throttle time${s.axleLimited ? " · " + s.axle.toLowerCase() + "-limited" : ""}${s.paused ? " · frozen from your last drive" : ""}"><span class="dot"></span>${ic} ${lbl}</span>`;
     };
     // LIVE traction diagnosis from the rolling on-throttle window: how often the driven axle is over the grip limit,
     // which axle, and the immediate tuning fix. Actively scans every frame — no waiting for the ~20 s analysis.
-    function paintTraction(f) {
+    function paintTraction() {
       const el = host.querySelector("#lvTraction"); if (!el) return;
-      const buf = live.trac || [];
-      if (!f || !f.on || buf.length < 25) { if (el.innerHTML) { el.innerHTML = ""; el.dataset.k = ""; } return; }
-      const med = (a) => { a = a.slice().sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : 0; };
-      const n = buf.length; const pct = Math.round(100 * buf.filter((b) => b.spin).length / n);
-      const rmed = med(buf.map((b) => b.rc)), fmed = med(buf.map((b) => b.fc)); const drv = f.drv || "RWD";
-      const lvl = pct >= 55 ? "bad" : pct >= 25 ? "warn" : "ok";
-      const axleLimited = drv === "FWD" ? (fmed > rmed * 1.5) : (rmed > fmed * 1.5);
-      const key = lvl + "|" + pct + "|" + (axleLimited ? "1" : "0") + "|" + drv;
+      const s = tracSummary();
+      if (!s) { if (el.innerHTML) { el.innerHTML = ""; el.dataset.k = ""; } return; }
+      const key = s.lvl + "|" + s.pct + "|" + (s.axleLimited ? "1" : "0") + "|" + s.drv + "|" + (s.paused ? "p" : "d");
       if (el.dataset.k === key) return; el.dataset.k = key;
-      if (lvl === "ok") { el.innerHTML = `<div class="trac ok"><b>✓ TRACTION OK</b> <span class="why">— over the grip limit only ${pct}% of your throttle time; you're putting the power down.</span></div>`; return; }
-      const axle = drv === "FWD" ? "FRONT" : "REAR";
-      const fix = drv === "FWD"
+      const frozen = s.paused ? `<span class="trac-frozen">⏸ from your last drive — implement it, then re-test</span>` : "";
+      if (s.lvl === "ok") { el.innerHTML = `<div class="trac ok"><b>✓ TRACTION OK</b> <span class="why">— over the grip limit only ${s.pct}% of your throttle time; you're putting the power down.</span>${frozen}</div>`; return; }
+      const fix = s.drv === "FWD"
         ? "front diff <b>ACCEL&nbsp;↓</b> · soften the <b>FRONT</b> ARB &amp; spring · front tyre pressure toward its grip peak · shift weight forward"
         : "rear diff <b>ACCEL&nbsp;↓</b> (less snap) · soften the <b>REAR</b> ARB &amp; spring (more mechanical grip) · rear tyre pressure toward its grip peak · add <b>rear downforce</b> / rear weight if available · feed the throttle in more progressively";
-      const ratio = axleLimited ? Math.round((drv === "FWD" ? fmed / Math.max(0.02, rmed) : rmed / Math.max(0.02, fmed))) : 0;
-      const sev = lvl === "bad" ? "MAJOR" : "moderate";
-      el.innerHTML = `<div class="trac ${lvl}"><div class="trac-hd"><b>🔥 TRACTION — ${axle}-LIMITED</b><span class="trac-sev">${sev}</span></div>`
-        + `<div class="trac-why">The <b>${axle.toLowerCase()}</b> is over the grip limit <b>${pct}%</b> of the time you're on the throttle${ratio >= 3 ? ` — ${ratio}× the other axle` : ""}. You're spinning, not accelerating.</div>`
+      const ratio = s.axleLimited ? Math.round((s.drv === "FWD" ? s.fmed / Math.max(0.02, s.rmed) : s.rmed / Math.max(0.02, s.fmed))) : 0;
+      const sev = s.lvl === "bad" ? "MAJOR" : "moderate";
+      el.innerHTML = `<div class="trac ${s.lvl}"><div class="trac-hd"><b>🔥 TRACTION — ${s.axle}-LIMITED</b><span class="trac-sev">${sev}</span>${frozen}</div>`
+        + `<div class="trac-why">The <b>${s.axle.toLowerCase()}</b> is over the grip limit <b>${s.pct}%</b> of the time you're on the throttle${ratio >= 3 ? ` — ${ratio}× the other axle` : ""}. You're spinning, not accelerating.</div>`
         + `<div class="trac-fix">→ ${fix}</div></div>`;
     }
     function paintFrame() {
@@ -4219,6 +4214,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       // ---- LIVE TRACTION SCANNER: driven-wheel slip WHILE ON THROTTLE — the power-down pattern the corner analysis
       // (lateral grip) misses. Accumulates a rolling window; paintTraction turns it into an instant diagnosis + fix. ----
       if (f.on && f.slip) {
+        if (f.drv && f.drv !== "?") live.tracDrv = f.drv;   // remember the drivetrain so the finding still reads correctly once you pause
         const drivenW = f.drv === "FWD" ? ["FL", "FR"] : f.drv === "RWD" ? ["RL", "RR"] : ["FL", "FR", "RL", "RR"];
         if (f.thr > 190 && f.mph > 3) {   // hard on the gas and actually moving (not a standstill burnout)
           const cb = (w) => Math.abs((f.slip[w] || [0, 0, 0])[2]);

@@ -708,6 +708,11 @@ class H(BaseHTTPRequestHandler):
             o = body.get("ordinal"); ST.clone_lock = int(o) if o else None; ok = True   # pin/clear a clone TARGET — pauses PI/catalog accrual for it so building the replica can't poison it
         elif self.path.startswith("/new-run"):
             ST._force_split = True; ok = True   # split at the next driving frame (after a slider change in Decode / Free mode)
+        elif self.path.startswith("/analyze"):   # force a fresh analysis NOW (the 're-test' button after you implement a tune change)
+            if ST.csv_path and not ST.analyzing:
+                ST._last_lap_analysis = 0.0; ST.drive_since_periodic = 0.0
+                threading.Thread(target=run_analysis, args=(None, False), daemon=True).start()
+            ok = True; resp = {"ok": True, "analyzing": bool(ST.analyzing)}
         elif self.path.startswith("/tune-range") and body.get("field") is not None:   # register a (norm, displayed-value) point to back-solve a per-car slider range
             resp = {"ok": False}
             if TUNE is not None:

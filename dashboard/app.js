@@ -2668,6 +2668,23 @@
     const userTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
     const getTune = (cid) => { const ord = String(cid).split("|")[0]; const disk = (live.diskTune && live.diskTune[ord]) || {}; return Object.assign({}, disk, userTune(cid)); };   // user entries override the disk auto-fill
     const setTune = (cid, k, v) => { const t = userTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; localStorage.setItem(tuneKey(cid), JSON.stringify(t)); };
+    // ---- interactive tune iteration: mark a suggested change as IMPLEMENTED (sets it as the new current value +
+    // starts a fresh run), then RE-TEST (force a re-analysis). An applied move that drops off the next analysis's
+    // suggestion list = resolved; one still suggested = needs more / a cleaner re-drive. ----
+    const appliedKey = (cid) => "fh6Applied:" + baseId(cid);
+    const getApplied = (cid) => { try { return JSON.parse(localStorage.getItem(appliedKey(cid)) || "{}"); } catch (e) { return {}; } };
+    const markApplied = (cid, sl, to) => { const a = getApplied(cid); a[sl] = { to: (to === "" || to == null ? null : +to), at: Date.now() }; localStorage.setItem(appliedKey(cid), JSON.stringify(a)); if (to !== "" && to != null) setTune(cid, sl, +to); };
+    const unApply = (cid, sl) => { const a = getApplied(cid); delete a[sl]; localStorage.setItem(appliedKey(cid), JSON.stringify(a)); };
+    const appliedStrip = (cid, moves) => {
+      if (!cid) return ""; const a = getApplied(cid); const keys = Object.keys(a); if (!keys.length) return "";
+      const curSet = new Set((moves || []).map((m) => m.sl));
+      const resolved = keys.filter((sl) => !curSet.has(sl)), pending = keys.filter((sl) => curSet.has(sl));
+      const lbl = (sl) => (SLIDER[sl] || {}).label || sl;
+      return `<div class="applied-strip"><div class="as-hd"><b>🔁 Tune iteration</b><span class="why" style="font-size:10.5px">${keys.length} change${keys.length === 1 ? "" : "s"} marked done · drive, then re-test</span><button class="lab-mode as-retest" data-retest="${esc(cid)}" title="re-run the analysis on your latest driving right now (otherwise it refreshes every ~20 s)">🔁 Re-test now</button></div>
+        ${resolved.length ? `<div class="as-row ok">✓ <b>resolved</b> after your change: ${resolved.map(lbl).join(", ")} — no longer flagged</div>` : ""}
+        ${pending.length ? `<div class="as-row pend">↻ <b>still flagged</b>: ${pending.map(lbl).join(", ")} — drive a clean run &amp; re-test, or it may need another step</div>` : ""}
+        <button class="as-clear" data-clearapplied="${esc(cid)}">clear</button></div>`;
+    };
     const tuningMoves = (adv, corners, cur, weightKey) => {
       const wk = weightKey || "course_weight";   // course lane weights by course_weight; general lane by breadth
       const acc = {};
@@ -2690,7 +2707,7 @@
       return moves.sort((a, b) => b.sev - a.sev || Math.abs(b.delta || 0) - Math.abs(a.delta || 0));
     };
     // elegant tuning-move cards: priority-striped, current -> target, PLAIN-LANGUAGE effect, diagnosis + confidence
-    const movesCards = (moves, drv) => { ensureFhmCss(); return moves.length ? `${movesAnatomy(moves)}<div class="tmoves">${moves.map((m, i) => {
+    const movesCards = (moves, drv, cid) => { ensureFhmCss(); const applied = cid ? getApplied(cid) : {}; return moves.length ? `${movesAnatomy(moves)}<div class="tmoves">${moves.map((m, i) => {
       const up = m.dir > 0; const col = up ? "#e3b341" : "#2f81f7";
       const sevCol = m.sev >= 3 ? "#e5414e" : m.sev >= 2 ? "#e3b341" : "#00d27a";
       const fx = (SLIDER_FX[m.sl] || {})[up ? "up" : "down"] || "";
@@ -2712,7 +2729,11 @@
           : `<b class="tm-to" style="color:${col}">${vb}${(m.delta != null || notch) ? " ~" + dmag + notchU : ""}</b>`;
       const aph = SLIDER_PHASES[m.sl] || []; const iph = m.iph || [];
       const cap = aph.map((p) => `<span style="color:${CM_PC[p - 1]}">${CM_ABBR[p - 1]}</span>`).join("·") || "—";
-      return `<div class="tmove" style="border-left-color:${sevCol}"><div class="tm-main"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div></div><div class="tm-diag" title="acts where the change works · red = where your issue is">${moveCorner(aph, iph)}<div class="tm-diag-cap">acts: ${cap}</div></div></div>`;
+      const tgt = m.to != null ? m.to : (baseTo != null ? baseTo : "");
+      const applyBtn = cid ? (applied[m.sl]
+        ? `<button class="tm-done" data-unapply="${esc(cid)}|${m.sl}" title="marked done — still suggested, so drive a clean run &amp; re-test, or it may need another step. Click to un-mark.">✓ done · still flagged</button>`
+        : `<button class="tm-apply" data-apply="${esc(cid)}|${m.sl}|${tgt}" title="I made this change in-game — set it as my new current value &amp; start a fresh run to A/B test">✓ I made this</button>`) : "";
+      return `<div class="tmove${applied[m.sl] ? " done" : ""}" style="border-left-color:${sevCol}"><div class="tm-main"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div>${applyBtn}</div><div class="tm-diag" title="acts where the change works · red = where your issue is">${moveCorner(aph, iph)}<div class="tm-diag-cap">acts: ${cap}</div></div></div>`;
     }).join("")}</div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`; };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
       const diskN = Object.keys((live.diskTune && live.diskTune[String(cid).split("|")[0]]) || {}).length;
@@ -2732,7 +2753,7 @@
       const verdict = !moves.length ? "Balanced for what this track demands — no firm change yet · a few more clean laps will separate driver from tune" : `<b>${moves.length} change${moves.length > 1 ? "s" : ""}</b> to sharpen this car for ${esc(rn)}${prio.length ? ` · this track stresses ${esc(prio.slice(0, 2).join(" + "))}` : ""}${rideMove ? " · incl. ride height (bottoming)" : ""}`;
       return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🎯 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${prio.length ? " · prioritised for " + esc(prio[0]) : ""}</span>${liveNote}</div>
         <div style="font-size:13px;font-weight:600;margin:7px 0 9px;color:var(--txt)">${verdict}</div>
-        ${movesCards(moves, ["FWD", "RWD", "AWD"][+String(cid).split("|")[1]] || null)}
+        ${appliedStrip(cid, moves)}${movesCards(moves, ["FWD", "RWD", "AWD"][+String(cid).split("|")[1]] || null, cid)}
         <p class="why" style="font-size:10.5px;margin:7px 0 0">${haveCur ? "Targets are computed from your current values (auto-filled from disk). " : "Position-only sliders show a direction until you register their range. "}Change ONE group, re-drive the course, and the numbers refine — course-weighted, so only what THIS track stresses is shown.</p>
         ${tuneInputRow(cid)}</div>`;
     };
@@ -2877,7 +2898,7 @@
         </tbody></table></div>`;
       const splitFlag = g.surface_split ? `<div style="margin:8px 0;padding:6px 10px;border:1px solid #e3b341;border-radius:8px;font-size:11.5px"><b style="color:#e3b341">⚠ Surface-specific:</b> balance swings by surface — USI ${g.surface_split.smooth > 0 ? "+" : ""}${g.surface_split.smooth} on road vs ${g.surface_split.rough > 0 ? "+" : ""}${g.surface_split.rough} on rough. No single tune wins both; this all-around read favours where you drive most — tune a separate setup for the other surface.</div>` : "";
       const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
-      const movesTbl = movesCards(moves, c.drivetrain || (["FWD", "RWD", "AWD"][+String(c.id).split("|")[1]] || null));
+      const movesTbl = appliedStrip(cid, moves) + movesCards(moves, c.drivetrain || (["FWD", "RWD", "AWD"][+String(c.id).split("|")[1]] || null), cid);
       const ovr = sig.filter((r) => r.bias === "oversteer").length, und = sig.filter((r) => r.bias === "understeer").length;
       const rideMove = moves.some((m) => m.sl === "rheight" || m.sl === "fheight");
       const verdict = !moves.length ? "Balanced across the board — no systematic change stands out yet" :
@@ -3119,6 +3140,19 @@
       .tmove-why{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);margin:4px 0 0 28px}
       .tmove-conf{display:inline-block;width:42px;height:4px;border-radius:2px;background:#0b1013;overflow:hidden;flex:none}
       .tmove-conf i{display:block;height:100%}
+      .tmove.done{opacity:.72}
+      .tm-apply,.tm-done{margin:6px 0 0 28px;font-size:10.5px;font-weight:700;border-radius:12px;padding:2px 10px;cursor:pointer;border:1px solid}
+      .tm-apply{border-color:#00d27a;color:#00d27a;background:rgba(0,210,122,.08)}.tm-apply:hover{background:rgba(0,210,122,.16)}
+      .tm-done{border-color:#e3b341;color:#e3b341;background:rgba(227,179,65,.08)}
+      .applied-strip{border:1px solid var(--accent);border-radius:8px;background:rgba(47,129,247,.06);padding:7px 10px;margin:0 0 9px;font-size:11.5px}
+      .applied-strip .as-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .applied-strip .as-hd b{font-size:13px}
+      .applied-strip .as-retest{margin-left:auto;border:1px solid var(--accent);color:var(--accent);background:rgba(47,129,247,.1);border-radius:12px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer}
+      .applied-strip .as-retest:hover{background:rgba(47,129,247,.2)} .applied-strip .as-retest:disabled{opacity:.6;cursor:default}
+      .applied-strip .as-row{margin-top:5px;padding:3px 8px;border-radius:5px}
+      .applied-strip .as-row.ok{background:rgba(0,210,122,.08);border-left:3px solid #00d27a}
+      .applied-strip .as-row.pend{background:rgba(227,179,65,.08);border-left:3px solid #e3b341}
+      .applied-strip .as-clear{margin-top:6px;font-size:9.5px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline}
       /* ---- bottom LIVE DOCK: session-strip spine + bench/clone pop-chips, anchored to every Lab subtab ---- */
       .fhm-dock{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:linear-gradient(180deg,rgba(14,17,22,.86),var(--bg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px);font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
@@ -4293,6 +4327,11 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") { live._donorPick = donor; const ls = liveSess(); const p = PIN(); pinDonor(ls && car(ls, donor) ? ls : (p && p.data && car(p.data, donor) ? p.data : null), donor); paintSections(true); paintBanner(); } else render(); }));
       bindAtlas(r);
       r.querySelectorAll("[data-tunecid]").forEach((inp) => inp.addEventListener("change", () => { setTune(inp.dataset.tunecid, inp.dataset.tunesl, inp.value); if (src === "live") paintSections(true); else render(); }));
+      // interactive tune iteration: mark a move done (sets current=target + starts a fresh run), un-mark, re-test, clear
+      r.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl, to] = b.dataset.apply.split("|"); markApplied(cid, sl, to); fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-unapply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl] = b.dataset.unapply.split("|"); unApply(cid, sl); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
+      r.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { localStorage.removeItem(appliedKey(b.dataset.clearapplied)); if (src === "live") paintSections(true); else render(); }));
       const shopEl = r.querySelector("#lvShopCapture") || (r.id === "lvShopCapture" ? r : null);
       if (shopEl && !live.shots) refreshShots();
       const sref = r.querySelector("#lvShotRefresh"); if (sref) sref.addEventListener("click", refreshShots);

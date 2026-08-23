@@ -2732,6 +2732,23 @@
       const v = {}; (dl.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && !isNaN(+r.value)) v[r.field] = +r.value; }));
       const I = []; const add = (lvl, msg, fix) => I.push({ lvl, msg, fix: fix || "" });
       const fwd = drv === "FWD", awd = drv === "AWD";
+      // MEASURED behaviour first — what the car actually DOES beats what the numbers look like. The live traction
+      // scanner is the headline: a tune that spins its driven axle on power is broken regardless of tidy sliders.
+      const trac = tracForCar(dl && dl.ordinal);
+      if (trac && trac.lvl && trac.lvl !== "ok" && trac.pct != null) {
+        const fixT = trac.drv === "FWD" ? "front diff accel ↓ · soften the front · shift weight forward"
+          : "rear diff accel ↓ · soften the rear (ARB → spring) · rear tyre pressure to its grip peak · add rear downforce / weight · wider rear tyres if you can";
+        add(trac.lvl === "bad" ? "error" : "warn", `Measured — the ${(trac.axle || "driven").toLowerCase()} is over the grip limit <b>${trac.pct}%</b> of your on-throttle time. You're spinning, not accelerating — this tune can't put its power down.`, fixT);
+      }
+      // analysis-based measured signal (persists on the daemon, so it flags right after a reload even before the live
+      // traction buffer refills): the share of analysed corners where an axle is the limit.
+      const sm2 = (live.analysis && live.analysis.summary) || {};
+      const nc = sm2.corners || 0, rl = sm2.rear_limited_corners || 0, fl = sm2.front_limited_corners || 0, drift = sm2.drift_corners || 0;
+      const rearGo = rl + drift;   // the rear giving up = grip-limited OR broken into a slide (drift) — both are lost traction
+      if ((!trac || trac.lvl === "ok") && nc >= 4) {
+        if (!fwd && rearGo / nc >= 0.4) add(rearGo / nc >= 0.6 ? "error" : "warn", `Measured — the rear breaks loose in <b>${rearGo} of ${nc}</b> corners (${drift} into a slide${rl ? `, ${rl} grip-limited` : ""}): it can't hold traction — power-oversteer, unless you're drifting on purpose.`, "rear diff accel ↓ · soften the rear (ARB → spring) · rear tyre pressure to its grip peak · more rear grip / less power / smoother throttle");
+        else if (fl / nc >= 0.45) add(fl / nc >= 0.65 ? "error" : "warn", `Measured — <b>${fl} of ${nc}</b> corners are front-limited: the front washes out (understeer).`, "front softer · mech balance up · front tyre pressure to grip");
+      }
       [["front_bump", "front_rebound", "front"], ["rear_bump", "rear_rebound", "rear"]].forEach(([b, rb, ax]) => {   // SECRET: rebound must be >= bump or the suspension packs down
         if (v[b] != null && v[rb] != null && v[rb] < v[b] - 0.3) add("error", `${SAN_LBL[rb]} (${v[rb]}) is below ${SAN_LBL[b].toLowerCase()} (${v[b]}) — the ${ax} packs down over bumps and can't recover, losing grip mid-corner.`, `raise ${ax} rebound to at least ${v[b]}`);
       });
@@ -4264,6 +4281,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const rmed = med(buf.map((b) => b.rc)), fmed = med(buf.map((b) => b.fc)); const drv = live.tracDrv || (live.frame && live.frame.drv) || "RWD";
       const axleLimited = drv === "FWD" ? (fmed > rmed * 1.5) : (rmed > fmed * 1.5);
       return { pct, rmed, fmed, drv, axle: drv === "FWD" ? "FRONT" : "REAR", axleLimited, lvl: pct >= 55 ? "bad" : pct >= 25 ? "warn" : "ok", paused: !(live.frame && live.frame.on) };
+    };
+    // the traction finding, PER CAR + persisted, so the sanity check can flag it even on a fresh load / a car you're
+    // not currently in. Live buffer for the car you're driving; last-saved reading otherwise.
+    const tracForCar = (ord) => {
+      const liveCar = (live.frame && live.frame.car) || lastCarOrd();
+      if (ord && String(liveCar) === String(ord)) { const s = tracSummary(); if (s && s.pct != null) { try { localStorage.setItem("fh6Trac:" + ord, JSON.stringify({ pct: s.pct, axle: s.axle, lvl: s.lvl, drv: s.drv, at: Date.now() })); } catch (e) {} } return s; }
+      try { return JSON.parse(localStorage.getItem("fh6Trac:" + ord) || "null"); } catch (e) { return null; }
     };
     const paintDockTrac = () => {
       const el = document.getElementById("dockTrac"); if (!el) return; const s = tracSummary();

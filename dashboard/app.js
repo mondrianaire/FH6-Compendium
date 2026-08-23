@@ -4566,19 +4566,20 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       if (effMode() === "course") {
         const evPts = buf.filter((p) => p.ev && p.dist != null);
         if (evPts.length >= 8) {
-          // group the buffer into laps by lap number → each lap plotted vs LAP distance (dist - its own start) so laps
-          // overlay by track position. We keep every lap in the buffer (not just the current one) and superimpose them.
-          const byLap = new Map();
-          evPts.forEach((p) => { if (!byLap.has(p.lapn)) byLap.set(p.lapn, []); byLap.get(p.lapn).push(p); });
-          const lapNums = [...byLap.keys()].sort((a, b) => a - b).slice(-6);   // last 6 laps (older ones scroll out of the buffer)
-          const laps = lapNums.map((ln) => { const pl = byLap.get(ln); const d0 = pl[0].dist;
-            return { lapn: ln, pts: pl.map((p) => ({ x: Math.max(0, p.dist - d0), y: p.mph, t: p.t })) }; }).filter((L) => L.pts.length >= 6);
+          // group by CONTIGUOUS (segment, lap) — a group is one clean pass of a lap with no discontinuity inside it, so
+          // its distance is monotonic and the x-axis can't be corrupted by a menu/rewind mid-lap. Overlay the 6 most
+          // recent groups; a replay or glitch lands in its own segment and simply scrolls out.
+          const groups = new Map();
+          evPts.forEach((p) => { const k = p.seg + "|" + p.lapn; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); });
+          const ordered = [...groups.values()].filter((g) => g.length >= 6).sort((a, b) => a[a.length - 1].t - b[b.length - 1].t).slice(-6);
+          const laps = ordered.map((g) => { const d0 = g[0].dist;
+            return { lapn: g[0].lapn, pts: g.map((p) => ({ x: Math.max(0, p.dist - d0), y: p.mph, t: p.t, seg: p.seg })) }; });
           if (laps.length) return { mode: "course", laps, xlabel: "lap distance", curLap: laps[laps.length - 1].lapn };
         }
       }
       const lastT = buf[buf.length - 1].t; const w = buf.filter((p) => lastT - p.t <= SPD_WIN_S);
       if (w.length < 4) return null; const t0 = w[0].t;
-      return { pts: w.map((p) => ({ x: p.t - t0, y: p.mph, t: p.t, brk: p.brk, thr: p.thr })), mode: "free", xlabel: "seconds", lapn: null, span: lastT - t0 };
+      return { pts: w.map((p) => ({ x: p.t - t0, y: p.mph, t: p.t, seg: p.seg })), mode: "free", xlabel: "seconds", lapn: null, span: lastT - t0 };
     };
     // RECONCILE with the analyzer: place a marker at each detected turn (authoritative — lateral-g + slip, not just
     // speed), aligned to the trace by matching the corner's time window to the buffer. Carries L/R + true min speed.
@@ -4616,7 +4617,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const allPts = [].concat(...lines);
       const xMax = Math.max(1, ...allPts.map((p) => p.x)), yMax = Math.max(40, Math.ceil((Math.max(...allPts.map((p) => p.y)) + 4) / 10) * 10);
       const X = (x) => PL + (x / xMax) * (W - PL - PR), Y = (y) => PT + (1 - y / yMax) * (H - PT - PB);
-      const pathOf = (pts) => pts.map((p, i) => `${i ? "L" : "M"}${X(p.x).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(" ");
+      // break the line at SEGMENT boundaries (a "M" instead of "L") so a pause/menu gap or a rewind never draws a
+      // connecting streak across the discontinuity.
+      const pathOf = (pts) => pts.map((p, i) => `${(i === 0 || (pts[i - 1].seg != null && p.seg !== pts[i - 1].seg)) ? "M" : "L"}${X(p.x).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(" ");
       const yticks = [0, Math.round(yMax / 2), yMax].map((v) => `<line x1="${PL}" y1="${Y(v).toFixed(1)}" x2="${W - PR}" y2="${Y(v).toFixed(1)}" stroke="rgba(255,255,255,.07)"/><text x="${PL - 4}" y="${(Y(v) + 3).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="9">${v}</text>`).join("");
       // corner markers (analyzer turns when available, else speed minima) — always drawn on the NEWEST line
       const markOf = (pts) => { const an = spdCorners(pts); const list = an || spdDips(pts).map((i) => ({ i, mph: Math.round(pts[i].y) }));
@@ -4635,7 +4638,10 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         note = `brighter = newer lap · corners = ${src}`;
       } else {
         const pts = win.pts;
-        const area = `<path d="${pathOf(pts)} L${X(pts[pts.length - 1].x).toFixed(1)} ${Y(0).toFixed(1)} L${X(pts[0].x).toFixed(1)} ${Y(0).toFixed(1)} Z" fill="rgba(47,129,247,.10)"/>`;
+        // area fill only under the LAST continuous segment (the current drive) so a paused gap earlier in the window
+        // doesn't paint a filled block across the break.
+        const lastSeg = pts[pts.length - 1].seg; const tail = pts.filter((p) => p.seg === lastSeg);
+        const area = tail.length >= 2 ? `<path d="${pathOf(tail)} L${X(tail[tail.length - 1].x).toFixed(1)} ${Y(0).toFixed(1)} L${X(tail[0].x).toFixed(1)} ${Y(0).toFixed(1)} Z" fill="rgba(47,129,247,.10)"/>` : "";
         body = area + `<path d="${pathOf(pts)}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>`;
         const mk = markOf(pts); markers = mk.html; nC = mk.n; src = mk.src;
         hd = `🏁 Speed trace — last ${Math.min(SPD_WIN_S, Math.round(win.span || 0))}s · ${nC} corner${nC === 1 ? "" : "s"}`;
@@ -4679,14 +4685,26 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           if (live.trac.length > 300) live.trac.shift();
         }
       }
-      // ---- SPEED-TRACE buffer: a rolling speed history for the F1-style trace (constant tracker). Sampled ~7Hz so the
-      // line is smooth but light; carries dist + lap + throttle/brake so course mode can plot a whole lap by track
-      // position and colour the phases. Free mode reads the last 2 minutes; course mode the current lap. ----
-      if (f.on && f.mph != null) {
+      // ---- SPEED-TRACE buffer (FH6-robust): sample ~7Hz ONLY while actually driving. Reject single-frame telemetry
+      // SPIKES, and start a NEW SEGMENT on any discontinuity — a pause/menu gap, a distance teleport or REWIND, a lap
+      // regression (replay), or a car change. Segments are never joined by a line, so menu-pausing, rewinds and replays
+      // can't draw wild connecting streaks across the chart. ----
+      if (f.on && f.mph != null && f.mph >= 0 && f.mph < 320 && f.car) {
         const now = performance.now();
-        if (!live._spdT || now - live._spdT >= 140) { live._spdT = now;
-          (live.spd = live.spd || []).push({ t: f.t, mph: f.mph, dist: f.dist, lapn: f.lapn, ev: f.ev, brk: f.brk, thr: f.thr });
-          if (live.spd.length > 6000) live.spd.shift(); }   // ~14 min at 7Hz — several laps overlaid in course mode
+        if (!live._spdT || now - live._spdT >= 140) {
+          const buf = (live.spd = live.spd || []); const prev = buf[buf.length - 1];
+          const dt = prev ? f.t - prev.t : 0;
+          const spike = prev && dt >= 0 && dt < 0.6 && Math.abs(f.mph - prev.mph) > 55;   // ~16g in one sample = a glitch frame, not real motion → skip it
+          if (!spike) {
+            live._spdT = now; let seg = live._spdSeg || 0;
+            if (prev) { const dd = (f.dist != null && prev.dist != null) ? f.dist - prev.dist : 0;
+              // gap (pause/menu) · time going backward · distance rewind · distance teleport · lap regression (replay) · car swap
+              if (dt > 1.0 || dt < 0 || dd < -5 || Math.abs(dd) > 120 || (f.lapn != null && prev.lapn != null && f.lapn < prev.lapn) || String(f.car) !== String(prev.car)) seg = (live._spdSeg = seg + 1);
+            }
+            buf.push({ t: f.t, mph: f.mph, dist: f.dist, lapn: f.lapn, ev: f.ev, seg, car: f.car });
+            if (buf.length > 6000) buf.shift();   // ~14 min at 7Hz — several laps overlaid in course mode
+          }
+        }
         paintSpeedTrace();
       }
       paintTraction(f);
@@ -4742,7 +4760,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label, role: d.role } }); paintStatus(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); live.analysisAt = Date.now(); live.cornSince = []; if (live.dec) decReset(live.dec.cid); paintBanner(); loadFullSession(); });   // the analysis absorbed what the live tracker counted — start the live deltas again
-      es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.cornerLog = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; paintAll(true); });
+      es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.cornerLog = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; live.spd = []; live._spdSeg = 0; live.cornerScores = []; live.cornerBest = {}; paintAll(true); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });

@@ -54,6 +54,7 @@ class State:
         self.lab_mode = None; self._force_split = False; self._ev_edge = False; self.stint_starts = {}; self.last_drive_game = None   # effective lab mode (pushed by the dashboard), manual split request, event edge pending, run boundaries (t_mono)
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
         self.seq = 0
+        self.clone_lock = None      # ordinal the user pinned as a CLONE TARGET — while set, PI/catalog accrual for it is paused (building the replica must not poison the target)
     def emit(self, name, payload):
         with self.lock:
             self.seq += 1; self.events.append((self.seq, name, payload))
@@ -539,7 +540,7 @@ def _enrich_engine_desc(deliverable, ordn):
                 if fold:
                     r["value"] = r["upgrade"] = r["value"] + " · " + " · ".join(fold)
                 r["telemetry"] = True
-                if not electric:   # accrue this engine's measured signature into the family catalog for other cars
+                if not electric and ST.clone_lock != ordn:   # accrue this engine's signature into the family catalog — but not while cloning this car (WIP telemetry could write a wrong signature)
                     _learn_engine_catalog(bits.get("engine_family"), cyl=cyl, redline=redline, peak_hp=peak_hp,
                                           drivetrain=(car.get("drivetrain") if car else None),
                                           pi=(car.get("pi") if car else None), displacement_l=bits.get("displacement_l"))
@@ -703,6 +704,8 @@ class H(BaseHTTPRequestHandler):
             ST.emit("tag", {"n": n, "label": cur.get("label"), "role": cur.get("role")}); ok = True
         elif self.path.startswith("/mode"):
             m = body.get("mode"); ST.lab_mode = m if m in ("course", "decode", "free") else None; ok = True   # effective lab mode from the dashboard (auto-detected or manual override)
+        elif self.path.startswith("/clone-lock"):
+            o = body.get("ordinal"); ST.clone_lock = int(o) if o else None; ok = True   # pin/clear a clone TARGET — pauses PI/catalog accrual for it so building the replica can't poison it
         elif self.path.startswith("/new-run"):
             ST._force_split = True; ok = True   # split at the next driving frame (after a slider change in Decode / Free mode)
         elif self.path.startswith("/tune-range") and body.get("field") is not None:   # register a (norm, displayed-value) point to back-solve a per-car slider range
@@ -926,8 +929,12 @@ def disk_watcher():
             # Feature B: record a PI observation for the current on-disk config whenever this car is being
             # driven (cheap 598-byte re-decode; deduped by _PI_LAST so the file isn't rewritten needlessly).
             try:
-                if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0:
-                    _record_pi_observation(ordn, TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn))
+                # PAUSE accrual for a locked clone target: while you build the replica, half-built configs must not be
+                # recorded (a stale on-disk parts snapshot paired with live PI corrupts real configs — see audit).
+                if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0 and ST.clone_lock != ordn:
+                    rec_meta, _rm = _pick_meta(metas, ordn)   # pair the LIVE build's parts (matched by cyl) with the live PI — not the newest file, which may be a different build
+                    if not (_rm and _rm.get("how") == "no-match"):   # skip when NO saved tune matches the live build (a half-built WIP would record wrong parts->PI)
+                        _record_pi_observation(ordn, TUNE.parse_tune(rec_meta["path"], ordinal_hint=ordn))
                     _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)
             except Exception:
                 pass

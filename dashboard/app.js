@@ -2658,6 +2658,7 @@
     const DISK2SLIDER = { front_arb: "farb", rear_arb: "rarb", front_bump: "fbump", rear_bump: "rbump", front_rebound: "freb", rear_rebound: "rreb", brake_balance: "bbal", brake_pressure: "bpress", rear_diff_accel: "accel", rear_diff_decel: "decel", center_diff: "center", front_spring: "fspring", rear_spring: "rspring", front_downforce: "faero", rear_downforce: "raero" };
     const applyDiskTune = (d) => {                       // pull exact slider values off the decode so targets need no typing; returns whether they changed
       if (!d || !d.deliverable) return false;
+      if (live.cloneTarget && live.cloneTarget.ordinal === +d.ordinal) return false;   // locked: the target's slider targets are frozen; the WIP must not overwrite them
       const vals = {};
       (d.deliverable.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && DISK2SLIDER[r.field]) vals[DISK2SLIDER[r.field]] = r.value; }));
       live.diskTune = live.diskTune || {}; const key = String(d.ordinal);
@@ -3017,6 +3018,11 @@
       .dm-chip.on{border-color:#00d27a;color:#00d27a;background:rgba(0,210,122,.12);font-weight:700}
       .dm-chip.auto{border-color:#a371f7;color:#a371f7}
       .dm-chip .dm-date{font-size:9px;color:var(--muted)}
+      .clone-mode{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;margin:0 0 10px;font-size:12.5px}
+      .clone-mode .cm-txt{flex:1;min-width:0}.clone-mode .why{font-size:11px;margin-top:2px}
+      .clone-mode.live{border:1px solid rgba(0,210,122,.45);background:rgba(0,210,122,.06)}.clone-mode.live>.cm-txt b{color:#00d27a}
+      .clone-mode.locked{border:1px solid #a371f7;background:rgba(163,113,247,.13)}.clone-mode.locked>.cm-txt b{color:#a371f7}
+      .clone-mode .lab-mode{flex:none;white-space:nowrap}
       .fhm-pi-budget{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px;font-size:11px;color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:5px 9px;margin:0 0 11px;background:rgba(230,166,58,.05)}
       .fhm-pi-budget.ok{border-color:rgba(0,210,122,.4);background:rgba(0,210,122,.05)}
       .fhm-pi-budget .lbl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
@@ -3207,23 +3213,33 @@
     const fetchDiskTune = (ordinal, opts) => {
       opts = opts || {};
       if (!ordinal || !live.connected) return;   // 0 / null = no active car — never fetch
-      live.diskCache = live.diskCache || {}; live.diskPick = live.diskPick || {};
+      live.diskCache = live.diskCache || {}; live.diskPick = live.diskPick || {}; live._diskGen = live._diskGen || {};
       if (!opts.force && Object.prototype.hasOwnProperty.call(live.diskCache, ordinal)) return;   // cached (incl. in-flight / negative)
+      const gen = (live._diskGen[ordinal] = (live._diskGen[ordinal] || 0) + 1);   // generation token — a newer fetch supersedes stale/out-of-order responses
       live.diskCache[ordinal] = null;   // in-flight marker — avoids refetch storms
       const ts = live.diskPick[ordinal];   // a manual pick sticks across refetches until cleared
       fetch(liveUrl + "/disk-tune?ordinal=" + ordinal + (ts ? "&ts=" + encodeURIComponent(ts) : "")).then((r) => r.json()).then((d) => {
+        if (live._diskGen[ordinal] !== gen) return;   // superseded — drop this stale response so the last-matched build wins
         live.diskCache[ordinal] = d && d.available ? d : { available: false };
         const filled = d && d.available ? applyDiskTune(d) : false;
         paintDiskDecode(); paintFloat();
         const activeOrd = live.frame && String(live.frame.car);
         if (filled && effMode() !== "decode" && activeOrd === String(ordinal)) paintSections(true);   // current values now known -> tuning panels show current -> target
-      }).catch(() => { live.diskCache[ordinal] = { available: false }; });   // record failure (not delete) so it can't storm
+      }).catch(() => { if (live._diskGen[ordinal] === gen) live.diskCache[ordinal] = { available: false }; });   // record failure (not delete) so it can't storm
     };
     // the live car's signature (cylinders + PI) identifies WHICH saved tune of a multi-build car is loaded; when it
-    // changes (you switched builds), drop the cached decode so it re-fetches and re-matches — unless you pinned a save.
+    // changes (you switched builds), re-match — but ONLY after the new signature is stable (menu/half-load frames drop
+    // cyl/PI and would otherwise storm), and NEVER while a clone target is locked (then we deliberately don't follow live).
     const diskSigCheck = (f) => {
-      if (!f || !f.on || !f.car) return; live.diskSig = live.diskSig || {}; live.diskPick = live.diskPick || {};
-      const sig = `${f.cyl}|${f.pi}`; if (live.diskSig[f.car] === sig) return; live.diskSig[f.car] = sig;
+      if (!f || !f.on || !f.car || !f.cyl || !f.pi) return;   // ignore blip frames (menus drop cyl/PI to 0/null)
+      if (live.cloneTarget) return;                            // CLONE mode: the target is frozen — do not follow the live car
+      live.diskSig = live.diskSig || {}; live.diskPick = live.diskPick || {}; live._sigPend = live._sigPend || {};
+      const sig = `${f.cyl}|${f.pi}`;
+      if (live.diskSig[f.car] === sig) { delete live._sigPend[f.car]; return; }
+      const p = live._sigPend[f.car];                          // debounce: the new signature must hold a few frames before we act
+      if (!p || p.sig !== sig) { live._sigPend[f.car] = { sig, n: 1 }; return; }
+      if (++p.n < 3) return;
+      delete live._sigPend[f.car]; live.diskSig[f.car] = sig;
       if (live.diskCache && Object.prototype.hasOwnProperty.call(live.diskCache, f.car) && !live.diskPick[f.car]) {
         delete live.diskCache[f.car]; fetchDiskTune(f.car, { force: true });   // re-match to the tune now loaded
       }
@@ -3233,23 +3249,36 @@
       if (ts) live.diskPick[ordinal] = ts; else delete live.diskPick[ordinal];
       fetchDiskTune(ordinal, { force: true });
     };
-    const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
-    const paintDiskDecode = () => {
-      const el = host.querySelector("#lvDiskDecode"); if (!el) return;
-      const ord = (live.frame && live.frame.car) || lastCarOrd();
-      if (!ord) { el.innerHTML = ""; return; }   // 0 / null = no active car (and none driven yet)
-      live.diskCache = live.diskCache || {};
-      const cached = live.diskCache[ord];
-      if (cached === undefined) { fetchDiskTune(ord); el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
-      if (cached === null) { el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
-      if (!cached.available) { el.innerHTML = ""; return; }   // no on-disk tune for this car — stay quiet
-      const dsum = (cached.deliverable && cached.deliverable.summary) || {};
-      const key = ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "");
-      if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
-      el.dataset.fhmKey = key;
-      el.innerHTML = diskDeliverableHtml(cached, { popBtn: true });
+    // CLONE-TARGET LOCK — the single explicit switch between the two intents. IDENTIFY (default) follows the live car
+    // and re-decodes as you switch builds. LOCKED freezes ONE build as the target: the decode stops following the live
+    // car (so building your replica never poisons it), and the daemon pauses PI/catalog accrual for that car.
+    const lockCloneTarget = (ordinal) => {
+      const c = live.diskCache && live.diskCache[ordinal];
+      if (!c || !c.available) return;
+      live.cloneTarget = { ordinal: +ordinal, ts: c.ts, name: c.name, payload: c, at: Date.now() };
+      fetch(liveUrl + "/clone-lock", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: +ordinal, ts: c.ts }) }).catch(() => {});
+      paintDiskDecode(); paintFloat();
+    };
+    const unlockCloneTarget = () => {
+      live.cloneTarget = null;
+      fetch(liveUrl + "/clone-lock", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: null }) }).catch(() => {});
+      paintDiskDecode(); paintFloat();
+    };
+    // one banner that makes the mode unmistakable + carries the toggle
+    const cloneModeBanner = (locked, payload) => {
+      if (locked) {
+        const t = live.cloneTarget || {}; const sm = ((t.payload || {}).deliverable || {}).summary || {};
+        return `<div class="clone-mode locked"><div class="cm-txt"><b>🎯 CLONE TARGET LOCKED</b> — ${esc(t.name || "#" + t.ordinal)}${sm.pi_total ? ` · PI ${sm.pi_total}` : ""}<div class="why">Frozen — not decoding your live car. Build your replica to match this. Accrual paused for this car so half‑built configs can't poison it.</div></div><button class="lab-mode" data-clone-unlock="1">🔍 Unlock · follow live</button></div>`;
+      }
+      const f = live.frame; const nm = (payload && payload.name) || (f && ((NAMES()[String(f.car)] || {}).name)) || "";
+      const ord = (payload && payload.ordinal) || (f && f.car) || 0;
+      return `<div class="clone-mode live"><div class="cm-txt"><b>🔍 IDENTIFYING</b> — following the car you're in${nm ? ` · ${esc(nm)}` : ""}<div class="why">This re‑reads as you switch builds. Lock it once you've found the build you want to clone.</div></div><button class="lab-mode" data-clone-lock="${ord}">🎯 Lock as clone target</button></div>`;
+    };
+    const bindDiskDecode = (el) => {
       el.querySelectorAll("[data-popout]").forEach((b) => b.addEventListener("click", () => popOutFloat(+b.dataset.popout)));
       el.querySelectorAll("[data-diskpick]").forEach((b) => b.addEventListener("click", () => { const [o, ts] = b.dataset.diskpick.split("|"); pickDiskTune(+o, ts || null); }));
+      el.querySelectorAll("[data-clone-lock]").forEach((b) => b.addEventListener("click", () => lockCloneTarget(+b.dataset.cloneLock)));
+      el.querySelectorAll("[data-clone-unlock]").forEach((b) => b.addEventListener("click", () => unlockCloneTarget()));
       el.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
         const v = parseFloat(inp.value); if (isNaN(v)) return; const ord = +inp.dataset.rangeord;
         fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -3259,6 +3288,33 @@
               if (d.solved && live.diskCache) { delete live.diskCache[ord]; paintDiskDecode(); } }
           }).catch(() => {});
       }));
+    };
+    const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
+    const paintDiskDecode = () => {
+      const el = host.querySelector("#lvDiskDecode"); if (!el) return;
+      // CLONE TARGET LOCKED: render the FROZEN target, not the live car — building your replica must never repoint it.
+      if (live.cloneTarget && live.cloneTarget.payload && live.cloneTarget.payload.available) {
+        const t = live.cloneTarget; const key = "LOCK|" + t.ordinal + "|" + t.ts;
+        if (el.dataset.fhmKey !== key || !el.querySelector(".fhm")) {
+          el.dataset.fhmKey = key;
+          el.innerHTML = cloneModeBanner(true) + diskDeliverableHtml(t.payload, { popBtn: true });
+          bindDiskDecode(el);
+        }
+        return;
+      }
+      const ord = (live.frame && live.frame.car) || lastCarOrd();
+      if (!ord) { el.innerHTML = ""; return; }   // 0 / null = no active car (and none driven yet)
+      live.diskCache = live.diskCache || {};
+      const cached = live.diskCache[ord];
+      if (cached === undefined) { fetchDiskTune(ord); el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
+      if (cached === null) { el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
+      if (!cached.available) { el.innerHTML = ""; return; }   // no on-disk tune for this car — stay quiet
+      const dsum = (cached.deliverable && cached.deliverable.summary) || {};
+      const key = "LIVE|" + ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "");
+      if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
+      el.dataset.fhmKey = key;
+      el.innerHTML = cloneModeBanner(false, cached) + diskDeliverableHtml(cached, { popBtn: true });
+      bindDiskDecode(el);
     };
     // ---- FLOATING "TAKE TO GAME" WINDOW: the decoded build sheet, kept on screen across menu / workflow / tab / source changes ----
     // Mounted on document.body (position:fixed) so NOTHING in the render cycle wipes it. It reads live.diskCache for the
@@ -4127,12 +4183,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
       es.addEventListener("disk", (e) => {   // daemon pushed a fresh on-disk decode (car change or a new tune save)
         const d = JSON.parse(e.data); live.diskCache = live.diskCache || {};
-        live.diskCache[d.ordinal] = d.available ? d : { available: false };
-        const changed = d.available ? applyDiskTune(d) : false;
-        if (d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
+        const locked = live.cloneTarget && live.cloneTarget.ordinal === +d.ordinal;   // a save on the replica you're building must NOT touch the frozen target
+        live.diskCache[d.ordinal] = d.available ? d : { available: false };            // still cached as the current-build probe
+        const changed = (!locked && d.available) ? applyDiskTune(d) : false;
+        if (!locked && d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
         paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintDock(true);
         const activeOrd = live.frame && String(live.frame.car);
-        if (d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
+        if (!locked && d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands
       });
       es.addEventListener("tag", (e) => { const d = JSON.parse(e.data); live.tags = Object.assign({}, live.tags, { [String(d.n)]: { label: d.label, role: d.role } }); paintStatus(); });
       es.addEventListener("analysis", (e) => { live.analysis = JSON.parse(e.data); live.analysisAt = Date.now(); live.cornSince = []; if (live.dec) decReset(live.dec.cid); paintBanner(); loadFullSession(); });   // the analysis absorbed what the live tracker counted — start the live deltas again

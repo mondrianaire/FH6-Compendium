@@ -2785,17 +2785,17 @@
       const st = (k, ok, t) => `<span class="chip" title="${esc(t)}" style="border-color:${ok ? "#00d27a" : "var(--warn,#e3b341)"};color:${ok ? "#00d27a" : "var(--warn,#e3b341)"}">${ok ? "✓" : "○"} ${k}</span>`;
       const learnPanel = `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📚 Course learning — what we know about this track</strong><span class="chip" style="border-color:var(--accent2);color:var(--accent2);font-weight:700">${ck.pct}%</span></div>
             <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:11px;margin:6px 0"><span class="why" style="font-size:10.5px;align-self:center">course progress ↑ in the banner ·</span>${st("references (this car)", turnsN ? refsOwn / turnsN >= 0.5 : false, `${refsOwn}/${turnsN} turns have a reference for THIS car${refsPred ? ` · ${refsPred} predicted from geometry × grip` : ""}`)}</div>
-            ${p.track}${p.map}${p.turns}${p.profile}${p.laps}</div>`;
+            ${p.track}${p.turns}${p.profile}${p.laps}</div>`;
       const feedPanel = `<div class="lab-corner" style="border-left:4px solid ${feedbackReady ? "var(--accent)" : "var(--muted)"}"><div class="card-row" style="margin-top:0"><strong>🏋 Tuning feedback — this car on this track</strong><span class="chip" style="border-color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};font-weight:700">${feedbackReady ? "ACTIVE" : "WARMING UP"}</span></div>
             <p class="why" style="font-size:11px;margin:4px 0 6px">${feedbackReady ? `references exist for ${refsOwn}/${turnsN} turns — the per-turn deltas and slider suggestions below are grounded in this car's own best passes` : `${refsOwn}/${turnsN} turns have a reference for this car — ${Math.max(0, needRefs - refsOwn)} more clean turn${needRefs - refsOwn === 1 ? "" : "s"} needed (geometry × grip predictions fill in meanwhile)`}</p>
             ${numericTuningPanel(co, s, curCar)}
             <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
       const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null) });
-      if (training) return `${courseHdr}${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      if (training) return `${courseHdr}${carBanner}${courseHero(p, co)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${learnPanel}
         <div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`;
-      return `${courseHdr}${carBanner}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      return `${courseHdr}${carBanner}${courseHero(p, co)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
     };
     // large ACTIVE-CAR banner — everything car-scoped (course tuning, references, decode) is about THIS car; make it unmissable
@@ -3101,8 +3101,12 @@
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
       .fhm-dock-ttl{font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#e5414e;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
       .fhm-dock-ttl .dot{width:7px;height:7px;border-radius:50%;background:#e5414e;box-shadow:0 0 6px rgba(229,65,78,.7)}
-      .fhm-dock-ro{display:inline-flex;gap:9px;align-items:baseline;font-variant-numeric:tabular-nums}
-      .fhm-dock-ro b{font-size:13px;color:var(--txt)}.fhm-dock-ro b small{font-size:8.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-left:2px;font-weight:400}
+      .fhm-dock-tiles{display:flex;flex-wrap:wrap;gap:6px;padding:5px 10px 6px;min-height:34px;align-items:stretch;border-top:1px solid rgba(255,255,255,.05)}
+      .fhm-dtile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:48px;padding:2px 7px;border-radius:6px;background:var(--bg2);border:1px solid var(--line)}
+      .fhm-dtile b{font-size:15px;font-weight:800;line-height:1.02;color:var(--txt);font-variant-numeric:tabular-nums}
+      .fhm-dtile span{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;margin-top:1px}
+      .fhm-dtile:nth-last-child(-n+2){min-width:auto;align-items:flex-start}
+      .fhm-dtile:nth-last-child(-n+2) b{font-size:12px;font-weight:700}
       .fhm-dock-chips{display:inline-flex;gap:6px;margin-left:auto;align-items:center}
       .fhm-dchip{display:inline-flex;align-items:center;gap:4px;font-size:11px;border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:var(--bg2);color:var(--txt);cursor:pointer;white-space:nowrap}
       .fhm-dchip:hover{border-color:var(--muted)}
@@ -3571,7 +3575,7 @@
       const pts = geo.path || pieces.flat(), lp = geo.last_path || (geo.last_paths || []).flat(), layout = geo.layout_paths || []; if (pts.length < 5) return "";
       const all = pts.concat(lp, ...layout.map((l) => l.pts));
       const xs = all.map((p) => p[0]), zs = all.map((p) => p[1]); const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
-      const W = 360, H = 240, pad = 18; const sc = Math.min((W - 2 * pad) / Math.max(1, x1 - x0), (H - 2 * pad) / Math.max(1, z1 - z0));
+      const W = 460, H = 300, pad = 20; const sc = Math.min((W - 2 * pad) / Math.max(1, x1 - x0), (H - 2 * pad) / Math.max(1, z1 - z0));
       const X = (x) => pad + (x - x0) * sc + ((W - 2 * pad) - (x1 - x0) * sc) / 2, Y = (z) => H - pad - (z - z0) * sc - ((H - 2 * pad) - (z1 - z0) * sc) / 2;
       const poly = (arr) => arr.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
       // the turn markers = the CANONICAL turns of the course (established across sessions, positions in world coords) — so the map matches the count.
@@ -3583,7 +3587,7 @@
       return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg" style="max-width:${W}px;background:var(--bg);border-radius:8px">
         ${layout.map((l) => `<polyline fill="none" stroke="var(--muted)" stroke-width="1" opacity=".32" points="${poly(l.pts)}"/>`).join("")}
         ${(geo.last_paths || (lp.length ? [lp] : [])).map((pc) => `<polyline fill="none" stroke="var(--warn,#e3b341)" stroke-width="2" stroke-dasharray="4 3" opacity=".9" points="${poly(pc)}"/>`).join("")}
-        ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="2.5" points="${poly(pc)}"/>`).join("")}
+        ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" points="${poly(pc)}"/>`).join("")}
         <circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="4" fill="#00d27a"/><text x="${(X(pts[0][0]) + 6).toFixed(1)}" y="${(Y(pts[0][1]) - 4).toFixed(1)}" fill="#00d27a" font-size="9">start</text>
         ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; return `<g class="ct-marker${sel ? " sel" : ""}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
       </svg>`;
@@ -3603,11 +3607,19 @@
       return `<svg viewBox="0 0 ${wide} ${H}" width="${wide}" height="${H}" class="course-glyph" role="img" aria-label="course shape"><polyline fill="none" stroke="var(--accent2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${poly}"/><circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="3" fill="#00d27a"/></svg>`;
     };
     const courseIdentity = (rn, geo, opts) => {
-      opts = opts || {}; const glyph = courseShapeGlyph(geo, opts.w || 92);
+      opts = opts || {}; const glyph = courseShapeGlyph(geo, opts.w || 112);
       const named = !!rn && !/^route @/i.test(rn) && rn !== "Rivals course"; const g = geo || {};
       const meta = []; if (g.length_m) meta.push(g.length_m + " m"); if (g.turns && g.turns.length) meta.push(g.turns.length + " turns"); if (opts.topology) meta.push(opts.topology);
       const title = named ? esc(rn) : "unnamed course";
       return `<div class="course-id">${glyph ? `<div class="course-id-glyph"${named ? "" : ' title="the shape is this course&#39;s identity — name it in the Atlas"'}>${glyph}</div>` : `<div class="course-id-glyph noshape" title="shape appears once a full lap is mapped">🗺</div>`}<div class="course-id-main"><div class="course-id-title">${opts.icon || "🏟"} <b${named ? "" : ' style="color:var(--muted);font-weight:600"'}>${title}</b></div>${meta.length ? `<div class="course-id-meta">${meta.join(" · ")}</div>` : ""}${named ? "" : `<div class="course-id-hint">its shape is the identity · title it in 🗺 Atlas</div>`}</div>${opts.right ? `<div class="course-id-right">${opts.right}</div>` : ""}</div>`;
+    };
+    // COURSE SHAPE HERO — the interactive map is the course's single most important element; it sits directly under the
+    // identity, front-and-centre, in BOTH stages (was buried in a sub-panel / a collapsed drawer). Empty state below
+    // makes the shape's absence explicit so the user knows a lap is all that's needed to draw it.
+    const courseHero = (p, co) => {
+      if (p && p.map) return `<div class="course-hero"><div class="course-hero-ey">▨ COURSE SHAPE — the identity of this course · click any turn for its breakdown</div>${p.map}</div>`;
+      const co2 = co || {}; const nl = co2.laps ? co2.laps.total : co2.runs;
+      return `<div class="course-hero building"><span style="font-size:32px;line-height:1">🗺</span><div><b style="font-size:13.5px">Mapping this course's shape…</b><div class="why" style="font-size:11px;margin-top:2px">the outline is this course's <b>primary identity</b> — ${co2.is_loop === false ? "reach the event end" : "complete one full lap"} and it draws here from your position trace${nl ? ` · ${nl} pass${nl === 1 ? "" : "es"} so far` : ""}</div></div></div>`;
     };
     // ---- course card pieces (also used for atlas-selected tracks that are NOT in the current session: rendered from the track record) ----
     const profileCardHtml = (prof) => { const BB = { heavy: "#e5414e", moderate: "#e3b341", light: "#2f81f7", absent: "#3a4250" }; const DLBL = { low_corner: "low-speed corners", mid_corner: "medium corners", fast_corner: "fast sweepers", braking: "heavy braking", straight: "straights / top-end", elevation: "elevation" }; return prof ? `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
@@ -3762,7 +3774,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const w = effMode();
       return `<div id="lvActiveCar" style="margin-bottom:8px"></div>
         <div id="lvBanner"></div>
-        <div class="lab-tiles" id="lvTiles"></div>
+        ${w === "course" ? "" : `<div class="lab-tiles" id="lvTiles"></div>`}
         <div id="lvSections">${sectionsHtml(liveSess(), true)}</div>
         ${w === "free" ? `<details class="block"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Live feel — friction rings &amp; pedal inputs</summary>
           <div style="display:grid;grid-template-columns:repeat(2,minmax(140px,180px));gap:6px;justify-content:center;margin-top:8px" id="lvCircles">${circleSvg("FL")}${circleSvg("FR")}${circleSvg("RL")}${circleSvg("RR")}</div>
@@ -3895,12 +3907,17 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const c = diskConf(cached); const nm = cached.name || ("#" + ord); const oc = confCol(c.conf);
       return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px"><b style="font-size:12.5px">📀 ${esc(nm)}</b><span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${c.pct}%</span><button class="lab-mode" data-dockdetach="${ord}" style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7">⧉ detach to floating window</button></div>${confMeterHtml(cached)}`;
     };
-    function paintDockReadout() {
-      const el = document.getElementById("dockRo"); if (!el) return; const f = live.frame;
+    // the mph→mode readout, shared by the in-body #lvTiles card and the anchored dock strip so both stay identical
+    function frameTiles(f) {
+      return [[f.mph.toFixed(0), "mph"], [f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm, "rpm"], [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"], [f.hp, "hp"], [f.boost.toFixed(1), "boost psi"], [f.on ? `${f.cls} ${f.pi}` : "—", f.on ? `${(NAMES()[String(f.car)] || {}).name || "#" + f.car} · ${f.drv} ${f.cyl || ""}cyl` : "not driving"], [f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "—", f.on && f.ev ? `${(f.dist / 1000).toFixed(2)} km · ${f.lapt ? f.lapt.toFixed(1) + " s" : ""}` : "mode"]];
+    }
+    // anchored constant-feedback readout in the dock — the full mph→mode row, visible even when the dock is collapsed
+    function paintDockTiles() {
+      const el = document.getElementById("dockTiles"); if (!el) return; const f = live.frame;
       if (src === "live" && f) {
-        el.innerHTML = [[f.mph != null ? f.mph.toFixed(0) : "—", "mph"], [f.gear === 0 ? "N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm != null ? f.rpm : "—", "rpm"], [f.lat != null ? f.lat.toFixed(2) : "—", "lat g"]].map(([v, l]) => `<b>${v}<small>${l}</small></b>`).join("");
-      } else if (src !== "live") { const s = S(); el.innerHTML = s ? `<b style="font-size:11px;font-weight:600">📼 ${esc(s.id)}</b>` : ""; }
-      else { el.innerHTML = `<span class="why" style="font-size:11px">waiting for telemetry…</span>`; }
+        el.innerHTML = frameTiles(f).map(([v, l]) => `<div class="fhm-dtile"><b>${v}</b><span>${l}</span></div>`).join("");
+      } else if (src !== "live") { const s = S(); el.innerHTML = s ? `<div class="fhm-dtile" style="min-width:auto"><b style="font-size:11.5px">📼 ${esc(s.id)}</b><span>recording</span></div>` : ""; }
+      else { el.innerHTML = `<span class="why" style="font-size:11px;padding:5px 4px">waiting for telemetry…</span>`; }
     }
     function paintDockStrip() {
       const el = document.getElementById("dockStrip"); if (!el) return; const d = dockStripData();
@@ -3915,14 +3932,15 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       if (force || el.dataset.k !== shellKey) {
         el.dataset.k = shellKey; el.className = "fhm-dock" + (live.dock.min ? " min" : "");
         const chip = (key, label) => `<button class="fhm-dchip ${panel === key ? "on" : ""}${key === "clone" && !cloneReady ? " hidden" : ""}" data-dockpanel="${key}">${label}</button>`;
-        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE DOCK</span><span class="fhm-dock-ro" id="dockRo"></span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("clone", "📀 clone")}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
+        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("clone", "📀 clone")}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
         el.querySelectorAll("[data-dockpanel]").forEach((b) => b.addEventListener("click", () => { live.dock.panel = live.dock.panel === b.dataset.dockpanel ? null : b.dataset.dockpanel; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); }));
         const mn = el.querySelector("[data-dockmin]"); if (mn) mn.addEventListener("click", () => { live.dock.min = !live.dock.min; saveDock(); paintDock(true); });
         if (!live.dock.min && panel) { const pel = el.querySelector("#dockPanel"); if (pel) { pel.innerHTML = panel === "bench" ? dockBenchHtml() : dockCloneHtml(); const dt = pel.querySelector("[data-dockdetach]"); if (dt) dt.addEventListener("click", () => { popOutFloat(+dt.dataset.dockdetach); paintDock(true); }); } }
         paintDockStrip();
+        paintDockTiles();
         const m = document.querySelector("main"); if (m) { m.style.paddingBottom = (el.offsetHeight + 14) + "px"; m.dataset.dockpad = "1"; }
       }
-      paintDockReadout();
+      paintDockTiles();
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
@@ -3954,8 +3972,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         if (wl.dataset.h !== html) { wl.dataset.h = html; wl.innerHTML = html; }
       }
       const tiles = host.querySelector("#lvTiles");
-      if (tiles) tiles.innerHTML = [[f.mph.toFixed(0), "mph"], [f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm, "rpm"], [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"], [f.hp, "hp"], [f.boost.toFixed(1), "boost psi"], [f.on ? `${f.cls} ${f.pi}` : "—", f.on ? `${(NAMES()[String(f.car)] || {}).name || "#" + f.car} · ${f.drv} ${f.cyl || ""}cyl` : "not driving"], [f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "—", f.on && f.ev ? `${(f.dist / 1000).toFixed(2)} km · ${f.lapt ? f.lapt.toFixed(1) + " s" : ""}` : "mode"]]
-        .map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("");
+      if (tiles) tiles.innerHTML = frameTiles(f).map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("");
       const inp = host.querySelector("#lvInputs");
       if (inp) inp.innerHTML = `<div style="display:grid;grid-template-columns:60px 1fr;gap:4px 8px;font-size:11px;align-items:center">
           <span>throttle</span><div class="lab-bar" style="height:8px"><i style="width:${f.thr / 2.55}%;background:#00d27a"></i></div>

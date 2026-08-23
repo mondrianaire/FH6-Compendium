@@ -330,6 +330,14 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .course-id-hint { font-size: 10px; color: var(--warn); margin-top: 2px; }
 .course-id-right { flex: none; margin-left: auto; }
 
+/* ---- COURSE SHAPE HERO: the map, front-and-centre under the identity in every stage ---- */
+.course-hero { margin: 0 0 10px; }
+.course-hero-ey { font-size: 10px; letter-spacing: .13em; font-weight: 800; text-transform: uppercase;
+  color: var(--accent2); margin: 2px 2px 3px; }
+.course-hero .tz-svg { width: 100%; max-width: 620px !important; }
+.course-hero.building { display: flex; align-items: center; gap: 13px; padding: 15px 16px;
+  border: 1px dashed var(--muted); border-radius: 10px; background: var(--bg2); }
+
 /* ---- per-turn cornering breakdown (opened from the course map) ---- */
 .ct-marker.sel { filter: drop-shadow(0 0 3px rgba(230,237,243,.5)); }
 .ct-break { margin-top: 9px; border: 1px solid var(--accent2); border-radius: 9px; background: var(--bg); overflow: hidden; }

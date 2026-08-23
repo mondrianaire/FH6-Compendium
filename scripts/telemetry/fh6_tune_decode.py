@@ -32,7 +32,9 @@ PARTS = [
     "front_arb","rear_arb","tire_compound","rear_wing","front_rim_size","rear_rim_size",
     "camshaft","valves","displacement","pistons","fuel_system","ignition","exhaust",
     "intake","flywheel","manifold","restrictor_plate","oil_cooling","single_turbo",
-    "twin_turbo","quad_turbo","pos_supercharger","centrifugal_supercharger","intercooler",
+    # slots 27/28: verified 2026-08-23 against the in-game menu (Exocet 2866 = centrifugal, sits in slot 27;
+    # slot 28 holds the Jeep Trailcat / Hellcat roots blower) — the two supercharger labels were reversed.
+    "twin_turbo","quad_turbo","centrifugal_supercharger","pos_supercharger","intercooler",
     "clutch","transmission","driveline","differential","front_bumper","rear_bumper","hood",
     "side_skirts","front_tire_width","rear_tire_width","weight_reduction","roll_cage",
     "motor_parts","rim_style","aspiration","front_track_width","rear_track_width",

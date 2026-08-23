@@ -50,9 +50,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": null,
-   "label": "Supercharged engine (family 56)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Centrifugal-Supercharged engine (family 56)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": true,
    "cars_seen": {
     "3783": "1989 Volkswagen Golf Rallye",
@@ -72,9 +72,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Volkswagen",
-   "label": "Volkswagen Supercharged engine (family 63)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Volkswagen Centrifugal-Supercharged engine (family 63)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "353": "1992 Volkswagen Golf GTi 16v Mk2"
@@ -92,9 +92,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Chevrolet",
-   "label": "Chevrolet Supercharged engine (family 68)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Chevrolet Centrifugal-Supercharged engine (family 68)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "314": "2002 Chevrolet Corvette Z06"
@@ -232,9 +232,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Acura",
-   "label": "Acura Supercharged engine (family 122)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Acura Centrifugal-Supercharged engine (family 122)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "368": "2001 Acura Integra Type R"
@@ -359,9 +359,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Dodge",
-   "label": "Dodge Supercharged engine (family 237)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Dodge Centrifugal-Supercharged engine (family 237)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "483": "1999 Dodge Viper GTS ACR"
@@ -444,9 +444,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Alfa",
-   "label": "Alfa Supercharged engine (family 474)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Alfa Centrifugal-Supercharged engine (family 474)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": true,
    "cars_seen": {
     "2038": "2014 Alfa Romeo 4C",
@@ -465,9 +465,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Dodge",
-   "label": "Dodge Supercharged engine (family 480)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Dodge Centrifugal-Supercharged engine (family 480)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "1046": "2008 Dodge Viper SRT-10 ACR"
@@ -505,9 +505,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": null,
-   "label": "Supercharged engine (family 574)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Centrifugal-Supercharged engine (family 574)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": true,
    "cars_seen": {
     "383": "2005 BMW M3 E46",
@@ -548,9 +548,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Shelby",
-   "label": "Shelby Centrifugal-Supercharged engine (family 609)",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "label": "Shelby Supercharged engine (family 609)",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "1155": "1965 Shelby Cobra Daytona"
@@ -630,9 +630,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Honda",
-   "label": "Honda Supercharged engine (family 733)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Honda Centrifugal-Supercharged engine (family 733)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": true,
    "cars_seen": {
     "1273": "1997 Honda Civic Type R",
@@ -646,8 +646,8 @@
    "displacement_l": 1.6,
    "redline": 10000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 841,
    "source": "save-mined+telemetry"
   },
   "774": {
@@ -840,8 +840,8 @@
    "donor_name": "2007 Ferrari F430 Scuderia",
    "brand_guess": null,
    "label": "2007 Ferrari F430 Scuderia engine swap",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": true,
    "cars_seen": {
     "312": "1967 Chevrolet Corvette Stingray",
@@ -1039,9 +1039,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": null,
-   "label": "Supercharged engine (family 2292)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Centrifugal-Supercharged engine (family 2292)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": true,
    "cars_seen": {
     "325": "1997 Lamborghini Diablo SV",
@@ -1149,9 +1149,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Jaguar",
-   "label": "Jaguar Centrifugal-Supercharged engine (family 2624)",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "label": "Jaguar Supercharged engine (family 2624)",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3287": "1991 Jaguar XJR-15"
@@ -1212,9 +1212,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Dodge",
-   "label": "Dodge Supercharged engine (family 2674)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Dodge Centrifugal-Supercharged engine (family 2674)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "2544": "2016 Dodge Viper ACR"
@@ -1253,8 +1253,8 @@
    "donor_name": "2016 Toyota Land Cruiser Arctic",
    "brand_guess": "GMC",
    "label": "2016 Toyota Land Cruiser Arctic engine swap",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "2613": "1970 GMC Jimmy"
@@ -1293,8 +1293,8 @@
    "donor_name": "1993 Porsche 911 Turbo S",
    "brand_guess": null,
    "label": "1993 Porsche 911 Turbo S engine swap",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": true,
    "cars_seen": {
     "1108": "1987 Ford RS200 Evolution",
@@ -1429,8 +1429,8 @@
    "donor_name": "2008 Renault Megane R26.R",
    "brand_guess": "Formula",
    "label": "2008 Renault Megane R26.R engine swap",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "2997": "2016 Formula Drift #530 HSV Maloo Gen-F"
@@ -1449,8 +1449,8 @@
    "donor_name": "2018 Mini X-Raid John Cooper Works Buggy",
    "brand_guess": "Formula",
    "label": "2018 Mini X-Raid John Cooper Works Buggy engine swap",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3000": "1997 Formula Drift #777 Nissan 240SX"
@@ -1508,9 +1508,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Chevrolet",
-   "label": "Chevrolet Centrifugal-Supercharged engine (family 3220)",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "label": "Chevrolet Supercharged engine (family 3220)",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3088": "2018 Chevrolet Deberti Drift Truck"
@@ -1548,9 +1548,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Ford",
-   "label": "Ford Supercharged engine (family 3302)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Ford Centrifugal-Supercharged engine (family 3302)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3170": "1994 Ford Supervan 3"
@@ -1588,9 +1588,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Jaguar",
-   "label": "Jaguar Centrifugal-Supercharged engine (family 3419)",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "label": "Jaguar Supercharged engine (family 3419)",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3287": "1991 Jaguar XJR-15"
@@ -1670,8 +1670,8 @@
    "donor_name": "2019 Ford F-250 Deberti",
    "brand_guess": "Nissan",
    "label": "2019 Ford F-250 Deberti engine swap",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3307": "2019 Nissan 370Z Nismo"
@@ -1850,9 +1850,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Ford",
-   "label": "Ford Centrifugal-Supercharged engine (family 3646)",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "label": "Ford Supercharged engine (family 3646)",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "4168": "1968 Ford Mustang GT 2+2 Fastback (Forza Edition)"
@@ -1890,9 +1890,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Formula",
-   "label": "Formula Supercharged engine (family 3683)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Formula Centrifugal-Supercharged engine (family 3683)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3551": "2020 Formula Drift #91 BMW M2"
@@ -2091,9 +2091,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Toyota",
-   "label": "Toyota Supercharged engine (family 3871)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Toyota Centrifugal-Supercharged engine (family 3871)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3848": "2023 Toyota Camry TRD"
@@ -2131,9 +2131,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Lamborghini",
-   "label": "Lamborghini Supercharged engine (family 3897)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Lamborghini Centrifugal-Supercharged engine (family 3897)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3759": "2020 Lamborghini Huracan Evo Spyder"
@@ -2151,9 +2151,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Toyota",
-   "label": "Toyota Supercharged engine (family 3899)",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "label": "Toyota Centrifugal-Supercharged engine (family 3899)",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3761": "2022 Toyota GR86"
@@ -2237,8 +2237,8 @@
    "donor_name": "2024 Nissan Z Nismo",
    "brand_guess": "Volkswagen",
    "label": "2024 Nissan Z Nismo engine swap",
-   "aspiration_slot": "pos_supercharger",
-   "aspiration": "Supercharged",
+   "aspiration_slot": "centrifugal_supercharger",
+   "aspiration": "Centrifugal-Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3783": "1989 Volkswagen Golf Rallye"
@@ -2376,9 +2376,9 @@
    "donor_ordinal": null,
    "donor_name": null,
    "brand_guess": "Subaru",
-   "label": "Subaru Centrifugal-Supercharged engine (family 4104)",
-   "aspiration_slot": "centrifugal_supercharger",
-   "aspiration": "Centrifugal-Supercharged",
+   "label": "Subaru Supercharged engine (family 4104)",
+   "aspiration_slot": "pos_supercharger",
+   "aspiration": "Supercharged",
    "shared_swap": false,
    "cars_seen": {
     "3960": "1994 Subaru Vivio RX-R"

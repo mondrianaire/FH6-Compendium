@@ -2680,10 +2680,49 @@
       const curSet = new Set((moves || []).map((m) => m.sl));
       const resolved = keys.filter((sl) => !curSet.has(sl)), pending = keys.filter((sl) => curSet.has(sl));
       const lbl = (sl) => (SLIDER[sl] || {}).label || sl;
-      return `<div class="applied-strip"><div class="as-hd"><b>🔁 Tune iteration</b><span class="why" style="font-size:10.5px">${keys.length} change${keys.length === 1 ? "" : "s"} marked done · drive, then re-test</span><button class="lab-mode as-retest" data-retest="${esc(cid)}" title="re-run the analysis on your latest driving right now (otherwise it refreshes every ~20 s)">🔁 Re-test now</button></div>
-        ${resolved.length ? `<div class="as-row ok">✓ <b>resolved</b> after your change: ${resolved.map(lbl).join(", ")} — no longer flagged</div>` : ""}
-        ${pending.length ? `<div class="as-row pend">↻ <b>still flagged</b>: ${pending.map(lbl).join(", ")} — drive a clean run &amp; re-test, or it may need another step</div>` : ""}
+      const cur = getTune(cid);   // AUTO-READ the current slider values off the decode — verify the change actually landed on disk
+      const item = (sl) => { const tgt = a[sl].to, now = cur[sl]; let v = "";
+        if (tgt != null && now != null) { const close = Math.abs(now - tgt) <= Math.max(0.5, Math.abs(tgt) * 0.03);
+          v = close ? ` <span class="as-ok" title="read from your saved tune — the change landed">✓${now}</span>` : ` <span class="as-miss" title="the decode reads ${now}, not the ${tgt} you aimed for — did the save land? (per-car sliders read as % until a range is registered)">✎${now}≠${tgt}</span>`; }
+        return lbl(sl) + v; };
+      return `<div class="applied-strip"><div class="as-hd"><b>🔁 Tune iteration</b><span class="why" style="font-size:10.5px">${keys.length} change${keys.length === 1 ? "" : "s"} marked done · ✓ = read back off your saved tune</span><button class="lab-mode as-retest" data-retest="${esc(cid)}" title="re-run the analysis on your latest driving right now (otherwise it refreshes every ~20 s)">🔁 Re-test now</button></div>
+        ${resolved.length ? `<div class="as-row ok">✓ <b>resolved</b> after your change: ${resolved.map(item).join(", ")} — no longer flagged</div>` : ""}
+        ${pending.length ? `<div class="as-row pend">↻ <b>still flagged</b>: ${pending.map(item).join(", ")} — drive a clean run &amp; re-test, or it may need another step</div>` : ""}
         <button class="as-clear" data-clearapplied="${esc(cid)}">clear</button></div>`;
+    };
+    // ---- A/B TUNING SCAFFOLD: each distinct SAVED tune of a car is a "version". We AUTO-READ its slider values from
+    // the decode (exact where the range is known) and snapshot the resulting metrics (balance USI, traction spin%,
+    // front/rear-limited corner counts) every analysis, so a change can be attributed to its slider delta. Foundation
+    // for suggest -> implement -> measure -> compare. ----
+    const SLIDER_BETTER = { usi_abs: "lower", spin: "lower", frontLim: "lower", rearLim: "lower" };   // all "issues": lower = better
+    const abKey = (cid) => "fh6AB:" + baseId(cid);
+    const getAB = (cid) => { try { return JSON.parse(localStorage.getItem(abKey(cid)) || "{}").versions || []; } catch (e) { return []; } };
+    const setAB = (cid, versions) => localStorage.setItem(abKey(cid), JSON.stringify({ versions: versions.slice(-12) }));
+    const sliderSnapshot = (cid) => { const t = getTune(cid); const o = {}; SLIDER_ORDER.forEach((sl) => { if (t[sl] != null) o[sl] = t[sl]; }); return o; };   // auto-read current values off the decode
+    const abMetrics = (c, s) => { const g = c && c.general; const trac = tracSummary(); const sm = (s && s.summary) || {};
+      return { usi: g && g.usi != null ? +(+g.usi).toFixed(3) : null, spin: trac ? trac.pct : null,
+               frontLim: sm.front_limited_corners != null ? sm.front_limited_corners : null,
+               rearLim: sm.rear_limited_corners != null ? sm.rear_limited_corners : null, corners: sm.corners != null ? sm.corners : null }; };
+    const sliderEq = (a, b) => { const ks = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]); for (const k of ks) if ((a || {})[k] !== (b || {})[k]) return false; return true; };
+    const abCapture = (cid, c, s) => {   // called on each fresh analysis for the active car
+      if (!cid) return; const sl = sliderSnapshot(cid); if (!Object.keys(sl).length) return;
+      const m = abMetrics(c, s); const versions = getAB(cid); const last = versions[versions.length - 1];
+      if (last && sliderEq(last.sliders, sl)) { last.metrics = m; last.at = Date.now(); setAB(cid, versions); return; }   // same tune → just refresh its metrics
+      const delta = last ? Object.keys(sl).filter((k) => sl[k] !== last.sliders[k]).map((k) => ({ sl: k, from: last.sliders[k], to: sl[k] })) : [];
+      versions.push({ at: Date.now(), sliders: sl, metrics: m, delta }); setAB(cid, versions);   // a genuinely different tune → new A/B version
+    };
+    // A/B comparison view: latest version vs the one before it, metric deltas coloured by improvement
+    const abPanel = (cid) => {
+      const versions = getAB(cid); if (versions.length < 2) return versions.length === 1 ? `<div class="ab-panel"><div class="ab-hd"><b>⚗️ A/B testing</b> <span class="why" style="font-size:10.5px">baseline captured — implement a change &amp; re-test to compare</span></div></div>` : "";
+      const cur = versions[versions.length - 1], prev = versions[versions.length - 2];
+      const lbl = (sl) => (SLIDER[sl] || {}).label || sl;
+      const changed = (cur.delta || []).map((d) => `${lbl(d.sl)} ${d.from ?? "—"}→${d.to ?? "—"}`).join(" · ") || "same sliders";
+      const mrow = (key, name, unit) => { const a = prev.metrics[key], b = cur.metrics[key]; if (a == null || b == null) return "";
+        const av = key === "usi" ? Math.abs(a) : a, bv = key === "usi" ? Math.abs(b) : b; const better = bv < av - 1e-6, worse = bv > av + 1e-6;
+        const col = better ? "#00d27a" : worse ? "#e5414e" : "var(--muted)"; const arr = better ? "▼" : worse ? "▲" : "=";
+        return `<div class="ab-m"><span>${name}</span><b>${a}${unit || ""}</b><span class="ab-arr" style="color:${col}">${arr}</span><b style="color:${col}">${b}${unit || ""}</b>${better ? " ✓" : worse ? " ✗" : ""}</div>`; };
+      return `<div class="ab-panel"><div class="ab-hd"><b>⚗️ A/B testing</b> <span class="why" style="font-size:10.5px">v${versions.length - 1} → v${versions.length}: ${esc(changed)}</span></div>
+        <div class="ab-grid">${mrow("spin", "traction spin", "%")}${mrow("usi", "balance |USI|")}${mrow("rearLim", "rear-limited turns")}${mrow("frontLim", "front-limited turns")}</div></div>`;
     };
     const tuningMoves = (adv, corners, cur, weightKey) => {
       const wk = weightKey || "course_weight";   // course lane weights by course_weight; general lane by breadth
@@ -2753,7 +2792,7 @@
       const verdict = !moves.length ? "Balanced for what this track demands — no firm change yet · a few more clean laps will separate driver from tune" : `<b>${moves.length} change${moves.length > 1 ? "s" : ""}</b> to sharpen this car for ${esc(rn)}${prio.length ? ` · this track stresses ${esc(prio.slice(0, 2).join(" + "))}` : ""}${rideMove ? " · incl. ride height (bottoming)" : ""}`;
       return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🎯 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${prio.length ? " · prioritised for " + esc(prio[0]) : ""}</span>${liveNote}</div>
         <div style="font-size:13px;font-weight:600;margin:7px 0 9px;color:var(--txt)">${verdict}</div>
-        ${appliedStrip(cid, moves)}${movesCards(moves, ["FWD", "RWD", "AWD"][+String(cid).split("|")[1]] || null, cid)}
+        ${abPanel(cid)}${appliedStrip(cid, moves)}${movesCards(moves, ["FWD", "RWD", "AWD"][+String(cid).split("|")[1]] || null, cid)}
         <p class="why" style="font-size:10.5px;margin:7px 0 0">${haveCur ? "Targets are computed from your current values (auto-filled from disk). " : "Position-only sliders show a direction until you register their range. "}Change ONE group, re-drive the course, and the numbers refine — course-weighted, so only what THIS track stresses is shown.</p>
         ${tuneInputRow(cid)}</div>`;
     };
@@ -2898,7 +2937,7 @@
         </tbody></table></div>`;
       const splitFlag = g.surface_split ? `<div style="margin:8px 0;padding:6px 10px;border:1px solid #e3b341;border-radius:8px;font-size:11.5px"><b style="color:#e3b341">⚠ Surface-specific:</b> balance swings by surface — USI ${g.surface_split.smooth > 0 ? "+" : ""}${g.surface_split.smooth} on road vs ${g.surface_split.rough > 0 ? "+" : ""}${g.surface_split.rough} on rough. No single tune wins both; this all-around read favours where you drive most — tune a separate setup for the other surface.</div>` : "";
       const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
-      const movesTbl = appliedStrip(cid, moves) + movesCards(moves, c.drivetrain || (["FWD", "RWD", "AWD"][+String(c.id).split("|")[1]] || null), cid);
+      const movesTbl = abPanel(cid) + appliedStrip(cid, moves) + movesCards(moves, c.drivetrain || (["FWD", "RWD", "AWD"][+String(c.id).split("|")[1]] || null), cid);
       const ovr = sig.filter((r) => r.bias === "oversteer").length, und = sig.filter((r) => r.bias === "understeer").length;
       const rideMove = moves.some((m) => m.sl === "rheight" || m.sl === "fheight");
       const verdict = !moves.length ? "Balanced across the board — no systematic change stands out yet" :
@@ -3153,6 +3192,12 @@
       .applied-strip .as-row.ok{background:rgba(0,210,122,.08);border-left:3px solid #00d27a}
       .applied-strip .as-row.pend{background:rgba(227,179,65,.08);border-left:3px solid #e3b341}
       .applied-strip .as-clear{margin-top:6px;font-size:9.5px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline}
+      .applied-strip .as-ok{color:#00d27a;font-weight:700}.applied-strip .as-miss{color:#e3b341;font-weight:700}
+      .ab-panel{border:1px solid #a371f7;border-radius:8px;background:rgba(163,113,247,.07);padding:7px 10px;margin:0 0 9px}
+      .ab-panel .ab-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.ab-panel .ab-hd b{font-size:13px;color:#a371f7}
+      .ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 12px;margin-top:6px}
+      .ab-m{display:flex;align-items:center;gap:6px;font-size:11.5px;font-variant-numeric:tabular-nums}
+      .ab-m>span:first-child{color:var(--muted);flex:1}.ab-m .ab-arr{font-size:10px}
       /* ---- bottom LIVE DOCK: session-strip spine + bench/clone pop-chips, anchored to every Lab subtab ---- */
       .fhm-dock{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:linear-gradient(180deg,rgba(14,17,22,.86),var(--bg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px);font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
@@ -4009,7 +4054,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       el.innerHTML = sectionsHtml(liveSess(), true); bindBody(el);
     }
     function loadFullSession() {
-      fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; cacheCourseGeo(js); } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });   // a response that lands after a reset (analysis null / new id) is ignored
+      fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; cacheCourseGeo(js);
+        const cid = (live.frame && live.frame.cid) || live.courseCar; const c = cid && (js.cars || []).find((x) => x.id === cid); if (c) abCapture(cid, c, js);   // A/B: snapshot this tune's sliders + metrics each analysis
+      } }).catch(() => {}).then(() => { paintSections(); paintStatus(); paintBanner(); });   // a response that lands after a reset (analysis null / new id) is ignored
     }
     // SYSTEM STATUS — one at-a-glance health readout of every subsystem, anchored in the top bar.
     function checkDecodeHealth() {   // self-throttled to ~15 s; pings /disk-tunes to confirm the save is readable

@@ -2798,9 +2798,11 @@
       const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null) });
       if (training) return `${courseHdr}${carBanner}${courseHero(p, co)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
+        ${turnByTurnSection(co)}
         ${learnPanel}
         <div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`;
       return `${courseHdr}${carBanner}${courseHero(p, co)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+        ${turnByTurnSection(co)}
         <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
     };
     // large ACTIVE-CAR banner — everything car-scoped (course tuning, references, decode) is about THIS car; make it unmissable
@@ -3683,6 +3685,72 @@
       } else { const passes = t.passes ?? (t.track && t.track.passes) ?? (c && c.laps_seen) ?? 0;
         stage = `<div class="ct-stage learn"><b>📚 Learning</b> — ${mappedT ? "mapped from coordinates" : "counted from your laps (fast/flat)"}${c ? " · loaded this session" : " · not yet loaded — take it at pace"} · ${passes} pass${passes === 1 ? "" : "es"} on record. <span class="why">at 75% course confidence this flips to tuning feedback</span></div>`; }
       return `<div class="ct-break"><div class="ct-break-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${bal ? `<span class="chip" style="border-color:${balCol};color:${balCol}">${bal}</span>` : ""}<span class="ct-close" data-courseturn-close="1" title="close">✕</span></div><div class="ct-break-body">${glyph ? `<div class="ct-glyph">${glyph}<div class="ct-glyph-cap">grip: <b style="color:${ph ? CM_PC[ph - 1] : "var(--muted)"}">${ph ? CM_SHORT[ph - 1] : "—"}</b></div></div>` : ""}<div class="ct-break-main">${speeds}${env}${stage}</div></div></div>`;
+    };
+    // ---- FULL 5-PHASE per-turn analysis: EVERY identified turn, all phases coloured by what the grip did there, with a
+    // tune-vs-driver verdict and a recurring-problem flag. The analyzer measures 4 grip phases (brake · turn-in · mid ·
+    // exit); phase 5 (straight/crest) reads exit-traction. Status: front=understeer · rear=oversteer · both · clean. ----
+    const PH_COL = { clean: "#00d27a", front: "#2f81f7", rear: "#e5414e", both: "#d95926", traction: "#e3b341", unseen: "var(--line)" };
+    const PH_LBL = { clean: "grip OK", front: "understeer", rear: "oversteer", both: "front + rear slip", traction: "traction-limited", unseen: "not driven" };
+    const turnPhaseRibbon = (prof, firstPh, w) => {
+      prof = prof || [];
+      const stOf = (i) => { const p = prof.find((x) => x.phase === i); return p && p.n ? p.status : "unseen"; };
+      const p4 = prof.find((x) => x.phase === 4);
+      const ph5 = (p4 && (p4.status === "rear" || p4.status === "both")) ? "traction" : (p4 && p4.n ? "clean" : "unseen");
+      const stat = [stOf(1), stOf(2), stOf(3), stOf(4), ph5];
+      const segs = CM_SEGS.map((d, i) => {
+        const s = stat[i]; const col = PH_COL[s] || "var(--line)"; const first = firstPh && (i + 1) === firstPh;
+        const halo = first ? `<path d="${d}" fill="none" stroke="var(--txt)" stroke-width="27" stroke-linecap="round" opacity=".26"/>` : "";
+        const stroke = s === "unseen"
+          ? `<path d="${d}" fill="none" stroke="var(--line)" stroke-width="9" stroke-dasharray="1 11" stroke-linecap="round" opacity=".6"/>`
+          : `<path d="${d}" fill="none" stroke="${col}" stroke-width="18" stroke-linecap="round"/>`;
+        return halo + stroke;
+      }).join("");
+      const title = [1, 2, 3, 4, 5].map((p) => `${p} ${CM_SHORT[p - 1]}: ${PH_LBL[stat[p - 1]]}`).join(" · ");
+      return `<svg viewBox="0 0 620 320" width="${w || 160}" height="${Math.round((w || 160) * 0.52)}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title><path d="${CM_RIBBON}" fill="none" stroke="var(--bg3)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>${segs}</svg>`;
+    };
+    const turnVerdict = (c) => {
+      if (!c) return `<div class="tv unseen"><b>— not driven</b> — take this turn at pace once to read its phases</div>`;
+      const note = c.note ? esc(c.note) : ""; const lim = c.limiter;
+      if (lim === "tune") return `<div class="tv tune"><b>🔧 TUNE fix</b> — a setup change helps here.${note ? " " + note : ""}</div>`;
+      if (lim === "driver") return `<div class="tv driver"><b>🧑 DRIVER fix</b> — too fast for the turn regardless of setup.${note ? " " + note : " brake earlier / slower entry."}</div>`;
+      if (lim === "mixed") return `<div class="tv mixed"><b>◐ MIXED</b> — ${note || "inconsistent — drive it clean a few more times to separate technique from setup"}</div>`;
+      return `<div class="tv clean"><b>✓ CLEAN</b> — no grip loss through here.</div>`;
+    };
+    const recurringFlag = (t, c) => {
+      const trk = (c && c.track) || (t && t.track) || null; if (!trk) return "";
+      const lim = trk.lim || {}; const bad = (lim.tune || 0) + (lim.driver || 0) + (lim.mixed || 0);
+      if (bad >= 2 && (lim.tune || lim.driver)) {
+        const kind = (lim.tune || 0) >= (lim.driver || 0) ? "tune" : "driver";
+        return `<span class="chip trec" title="limited on ${bad} of ${trk.sessions || 0} sessions here">⚠ RECURRING · ${kind}-limited · ${trk.passes || 0} passes</span>`;
+      }
+      return "";
+    };
+    const turnCorner = (co, n) => { const t = ((co.turns || {}).canonical || [])[n - 1]; if (!t) return [null, null];
+      const near = (a, b, d) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= d * d;
+      const cs = (co.corners || []).filter((k) => k.pos && !k.drift && near(k.pos, t.pos, 45)); return [t, cs.length ? cs[cs.length - 1] : null]; };
+    const fullTurnCard = (co, n) => {
+      const [t, c] = turnCorner(co, n); if (!t) return "";
+      const dr = t.dir === "L" ? "◀ L" : t.dir === "R" ? "R ▶" : "";
+      const r = t.radius_m || (c && c.radius_m) || null; const type = c ? c.type : null;
+      const curCar = (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0];
+      const grip = (co.driving && co.driving.car_grip && curCar && co.driving.car_grip[curCar]) || null;
+      const predMph = (grip && r) ? Math.round(Math.sqrt(grip * 9.81 * r) * 2.237) : null;
+      const prof = c ? c.phase_profile : null; const firstPh = c ? c.dominant_phase : null;
+      const mphOut = c ? (c.mph_out ?? (c.last && c.last.mph_out) ?? (c.ref && c.ref.mph_out)) : null;
+      const phChips = c && prof ? `<div class="tp-legend">${[1, 2, 3, 4].map((i) => { const p = prof.find((x) => x.phase === i); const s = p && p.n ? p.status : "unseen"; const first = firstPh === i;
+        return `<span class="tp-lg${first ? " first" : ""}"><i style="background:${PH_COL[s]}"></i>${CM_SHORT[i - 1]}: <b style="color:${PH_COL[s]}">${PH_LBL[s]}</b>${first ? " · ⚑ starts here" : ""}</span>`; }).join("")}</div>` : "";
+      const speeds = c ? `<div class="ct-speeds">${c.mph_in != null ? `<span>${c.mph_in}<small>in</small></span><span class="ct-arr">→</span>` : ""}<span><b>${c.mph_min != null ? c.mph_min : "—"}</b><small>apex</small></span>${mphOut != null ? `<span class="ct-arr">→</span><span>${mphOut}<small>out</small></span>` : ""}${c.lat_g ? `<span class="ct-g">${c.lat_g} g</span>` : ""}${predMph != null ? `<span class="ct-env2" title="grip-envelope apex = radius × this car's measured grip">envelope ≈ ${predMph}${c.mph_min != null ? (c.mph_min >= predMph - 2 ? " · at the limit" : " · " + Math.max(0, predMph - c.mph_min) + " to find") : ""}</span>` : ""}</div>` : "";
+      return `<div class="ft-card"><div class="ft-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${type ? `<span class="chip">${type}</span>` : ""}${recurringFlag(t, c)}</div>
+        <div class="ft-body"><div class="ft-glyph">${turnPhaseRibbon(prof, firstPh, 172)}</div><div class="ft-main">${phChips}${speeds}${turnVerdict(c)}</div></div></div>`;
+    };
+    const turnByTurnSection = (co) => {
+      const canon = (co.turns || {}).canonical || []; if (!canon.length) return "";
+      let nTune = 0, nDriver = 0, nRec = 0;
+      canon.forEach((t, i) => { const c = turnCorner(co, i + 1)[1]; if (c && c.limiter === "tune") nTune++; if (c && c.limiter === "driver") nDriver++; if (recurringFlag(t, c)) nRec++; });
+      const cards = canon.map((t, i) => fullTurnCard(co, i + 1)).join("");
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent2);margin-bottom:8px"><div class="card-row" style="margin-top:0"><strong>🔬 Turn-by-turn — all ${canon.length} turns · every phase</strong><span style="display:inline-flex;gap:4px">${nTune ? `<span class="chip" style="border-color:#00d27a;color:#00d27a">🔧 ${nTune} tune</span>` : ""}${nDriver ? `<span class="chip" style="border-color:#e3b341;color:#e3b341">🧑 ${nDriver} driver</span>` : ""}${nRec ? `<span class="chip trec">⚠ ${nRec} recurring</span>` : ""}</span></div>
+        <div class="why" style="font-size:10.5px;margin:2px 0 6px">each turn's 5 phases coloured by grip · <span style="color:#2f81f7">■</span> understeer · <span style="color:#e5414e">■</span> oversteer · <span style="color:#d95926">■</span> both · <span style="color:#00d27a">■</span> ok · ⚑ where the trouble starts · 🔧 setup helps / 🧑 it's speed, not setup</div>
+        <div class="ft-grid">${cards}</div></div>`;
     };
     const mapCardHtml = (geo, corners, turns, co) => { if (!geo) return ""; const canonN = turns && turns.canonical ? turns.canonical.length : (geo.turns || []).length; const shown = (turns && turns.count) || canonN; const mapped = (geo.turns || []).length;
       const rk = co && co.route_key; const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null; const brk = (co && selN) ? courseTurnBreakdown(co, selN) : "";

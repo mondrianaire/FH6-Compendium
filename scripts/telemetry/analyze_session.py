@@ -1235,6 +1235,21 @@ def main():
             dom = max(fr, key=fr.get); cons = fr[dom] / nn
             dom_ph = max(ph, key=ph.get) if ph else None
             usis = [m["usi"] for m in ms]
+            # FULL per-phase profile across this turn's passes (1=brake/approach, 2=turn-in, 3=mid, 4=exit) so the
+            # course dashboard can show every phase of every turn, not just the dominant one. `first_n` = passes whose
+            # FIRST grip loss was here (where the trouble STARTS); status = which axle gives up in this phase.
+            phase_profile = []
+            for pnum in (1, 2, 3, 4):
+                ps = [p for m in ms for p in (m.get("phases") or []) if p.get("phase") == pnum]
+                if not ps:
+                    phase_profile.append({"phase": pnum, "n": 0, "status": "unseen"}); continue
+                rfn = sum(1 for p in ps if p.get("red") in ("front", "both"))
+                rrn = sum(1 for p in ps if p.get("red") in ("rear", "both"))
+                st = "front" if rfn > rrn else "rear" if rrn > rfn else ("both" if rfn and rrn else "clean")
+                phase_profile.append({"phase": pnum, "n": len(ps), "red_front": rfn, "red_rear": rrn,
+                                      "clean": sum(1 for p in ps if p.get("red") == "none"), "first_n": ph.get(pnum, 0),
+                                      "status": st, "front_slip": round(med([p["front"] for p in ps]), 2),
+                                      "rear_slip": round(med([p["rear"] for p in ps]), 2)})
             per_run = defaultdict(list)
             for m in ms: per_run[m.get("stint")].append(m)
             runs = [{"stint": sn, "n": len(v), "mph_min": med([m["mph_min"] for m in v]), "usi": med([m["usi"] for m in v]), "first_red": max(["front", "rear", "none"], key=lambda a: sum(1 for m in v if (m["first_red"]["axle"] if m["first_red"] else "none") == a)), "lat_g": med([m["lat_g_peak"] for m in v])} for sn, v in sorted(per_run.items(), key=lambda kv: (kv[0] is None, kv[0]))]
@@ -1318,7 +1333,7 @@ def main():
             corner_out.append({"id": cl.get("cid", f"C{i}"), "status": cl.get("status", "turn"), "presence": cl.get("presence"), "laps_seen": cl.get("laps_seen"), "multi": cl.get("multi"), "per_lap": cl.get("per_lap"), "absorbed": cl.get("absorbed", 0),
                                "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
                                "mph_min": med([m["mph_min"] for m in ms]), "mph_in": med([m["mph_in"] for m in ms]), "lat_g": med([m["lat_g_peak"] for m in ms]),
-                               "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
+                               "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "phase_profile": phase_profile, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
                                "model_id": mt["id"], "geo_id": geo_near(cl["x"], cl["z"]), "radius_m": mt.get("radius_m"), "ref": ref, "ref_src": ref_src, "last": last, "delta": delta, "advice": advice, "on_ref": on_ref, "track": dict(trk),
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})

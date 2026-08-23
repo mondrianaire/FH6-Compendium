@@ -369,6 +369,27 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .ct-stage.learn { border-left-color: var(--accent2); }
 .ct-stage.tune { border-left-color: var(--accent); }
 
+/* ---- FULL 5-phase per-turn analysis: every identified turn, all phases + tune/driver verdict ---- */
+.ft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; margin-top: 6px; }
+.ft-card { border: 1px solid var(--line); border-radius: 9px; background: var(--bg); overflow: hidden; }
+.ft-hd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 5px 9px;
+  background: var(--bg2); border-bottom: 1px solid var(--line); font-size: 13px; }
+.ft-body { display: flex; gap: 10px; align-items: flex-start; padding: 8px 9px; flex-wrap: wrap; }
+.ft-glyph { flex: none; }
+.ft-main { flex: 1; min-width: 190px; display: flex; flex-direction: column; gap: 5px; }
+.tp-legend { display: flex; flex-direction: column; gap: 1px; font-size: 10.5px; }
+.tp-lg { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+.tp-lg i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.tp-lg.first { color: var(--txt); font-weight: 600; }
+.ct-env2 { margin-left: auto; font-size: 10.5px; color: var(--muted); align-self: center; }
+.tv { font-size: 11.5px; padding: 5px 8px; border-radius: 6px; background: var(--bg2); border-left: 3px solid var(--muted); line-height: 1.35; }
+.tv.tune { border-left-color: #00d27a; background: rgba(0,210,122,.06); }
+.tv.driver { border-left-color: #e3b341; background: rgba(227,179,65,.07); }
+.tv.mixed { border-left-color: #d95926; }
+.tv.clean { border-left-color: #199e70; color: var(--muted); }
+.tv.unseen { border-left-color: var(--line); color: var(--muted); }
+.chip.trec { border-color: #e5414e; color: #e5414e; font-weight: 700; }
+
 /* ---- Lab sticky top: subtab switcher + necessary live state, anchored to the top of the screen ---- */
 .lab-top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 6px 0 7px; margin: 0 0 9px;
   border-bottom: 1px solid var(--line); }

@@ -746,8 +746,10 @@ def _part_view(cat, val, ordinal, gear_count=None):
         cnames, cverified = load_compound_names()
         nm = cnames.get(idx)   # global enum; names from data/tire-compounds.json override the best-effort defaults
         if not nm:
-            return out(f"Compound #{idx} — capture the tire menu once to name it", "compound")
-        return out(f"{nm} Compound", "named" if idx in cverified else "compound")
+            # unmapped index (11/12/15): the compound NAME is unknown until anchored. The index is GLOBAL, so setting
+            # this tyre on ANY one car + saving once maps it for every car that runs it.
+            return out(f"Tyre compound {idx} — unmapped (set once in-game & save to name it for all cars)", "compound")
+        return out((f"{nm} Compound" if idx in cverified else f"{nm} Compound (unverified)"), "named" if idx in cverified else "compound")
     if cat in DIM_SLOTS:
         return out("Stock", "named", stock=True) if idx == 0 else out(f"{disp} · level {idx}", "dim")
     if cat == "transmission" and fam == RACE_TRANS_FAMILY:

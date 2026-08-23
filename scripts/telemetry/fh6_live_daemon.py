@@ -41,6 +41,7 @@ class State:
         self.cars = {}              # ordinal -> info
         self.csv_path = None; self.csv_writer = None; self.csv_file = None
         self.last_on_t = None; self.live_since_analysis = 0.0; self.drive_since_periodic = 0.0; self.analyzing = False; self.replay = False
+        self.last_lapnum = None; self._last_lap_analysis = 0.0   # LAP-completion analysis trigger (the granularity the cross-lap limiter changes at)
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
         self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None
@@ -143,7 +144,7 @@ def ingest(p, t_mono):
             if ST._loop_prev is not None: ST._loop_away += math.hypot(p["PosX"] - ST._loop_prev[0], p["PosZ"] - ST._loop_prev[1])
             if ST._loop_away > MIND and d0 <= R:
                 ST.loop_lap += 1; ST.loop_last_s = round(t_mono - (ST._loop_t0 or t_mono), 2)
-                ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s})
+                ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s}); maybe_lap_analysis(t_mono, "loop lap")
                 ST._loop_away = 0.0; ST._loop_t0 = t_mono
     ST._loop_prev = (p["PosX"], p["PosZ"])
     # CSV row (same layout as capture tool)
@@ -215,6 +216,14 @@ def ingest(p, t_mono):
                       "brake_max": max([r["brk"] for r in co["pre"] + rows] or [0]), "hb": any(r["hb"] > 0 for r in rows)}
                 with ST.lock: ST.corners.append(cc)
                 ST.emit("corner", cc)
+    # LAP-COMPLETION trigger: a finished lap adds a fresh pass of every turn, so the cross-lap read can update NOW
+    if c["on"] and c["ev"]:
+        _ln = c.get("lapn", 0)
+        if ST.last_lapnum is not None and _ln > ST.last_lapnum:
+            maybe_lap_analysis(t_mono, "event lap")
+        ST.last_lapnum = _ln
+    else:
+        ST.last_lapnum = None
     # auto-analysis triggers: (a) every ~20 s of driving (live suggestions), (b) driving stopped > 5 s after >= 15 s of driving (session close)
     if c["on"]:
         ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0; ST.drive_since_periodic += 1 / 100.0
@@ -225,6 +234,16 @@ def ingest(p, t_mono):
             ST.drive_since_periodic = 0; threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
     elif ST.last_on_t is not None and t_mono - ST.last_on_t > 5 and ST.live_since_analysis > 15 and not ST.analyzing and ST.csv_path:
         ST.live_since_analysis = 0; threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
+
+def maybe_lap_analysis(t_mono, why):
+    """Re-run the cross-lap analysis the instant a LAP completes — a finished lap adds one fresh pass of every turn,
+    which is exactly when the tune-vs-driver limiter can change. Debounced (6 s) so short laps can't thrash the
+    analyze_session subprocess; the periodic timer stays as the fallback for long laps / free roam."""
+    if ST.analyzing or not ST.csv_path or (t_mono - ST._last_lap_analysis) < 6:
+        return
+    ST._last_lap_analysis = t_mono; ST.drive_since_periodic = 0.0
+    threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
+
 
 def run_analysis(until=None, final=True):
     ST.analyzing = True

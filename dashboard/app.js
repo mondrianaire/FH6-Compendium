@@ -2744,9 +2744,14 @@
       // so relying on it kept every live course stuck in training. A course is mapped once it has turns established / curvature-mapped.
       const mapped = (tu.mapped || 0) > 0 || (tu.canonical || []).length > 0 || !!(geo && (geo.turns || []).length); const turnConf = tu.track_confidence || tu.confidence || 0; const poss = tu.possible || 0; const notDriven = (geo && geo.not_driven) || []; const prof = !!co.profile;
       const lapStr = 1 - Math.exp(-1.2 * lapsTrack / 3);
-      const pct = Math.round((0.25 * (mapped ? 1 : 0) + 0.35 * turnConf + 0.25 * lapStr + 0.15 * (prof ? 1 : 0)) * 100);
+      // SHAPE confidence: are the recorded laps tracing the same OUTLINE? (analyzer-measured; the shape is the course's identity, so it's the
+      // 25% that used to be a free "a map exists" boolean). Falls back to that boolean for models analysed before shape_confidence existed.
+      const shapeMeasured = tu.shape_confidence != null; const shapeConf = shapeMeasured ? tu.shape_confidence : (mapped ? 1 : 0);
+      const shapeAgree = tu.shape_laps_agree, shapeCompared = tu.shape_laps_compared, shapeSpread = tu.shape_spread_m;
+      const pct = Math.round((0.25 * shapeConf + 0.35 * turnConf + 0.25 * lapStr + 0.15 * (prof ? 1 : 0)) * 100);
       const needs = [];
       if (!mapped) needs.push({ k: "map", p: 0, text: "complete ONE full lap without pausing — the course map is learned from it" });
+      else if (shapeMeasured && shapeConf < 0.75) needs.push({ k: "shape", p: 0, text: `the outline is still settling — ${shapeAgree || 1} lap${(shapeAgree || 1) === 1 ? "" : "s"} trace the same shape${shapeSpread != null ? ` (±${shapeSpread} m)` : ""}; a few more clean laps ratify it (shape ${Math.round(shapeConf * 100)}%)` });
       if (lapsTrack < 3) needs.push({ k: "laps", p: 1, text: `${3 - lapsTrack} more full lap${3 - lapsTrack === 1 ? "" : "s"} — the turn count is earned across laps (now ${Math.round(turnConf * 100)}%)` });
       else if (turnConf < 0.7) needs.push({ k: "laps", p: 1, text: `keep lapping — turn count ${Math.round(turnConf * 100)}% (target 70%): clean laps confirm turns, messy laps split them` });
       if (poss) needs.push({ k: "possible", p: 2, text: `${poss} possible turn${poss === 1 ? "" : "s"} seen on a minority of laps — lap consistently to confirm or drop ${poss === 1 ? "it" : "them"}` });
@@ -2755,7 +2760,7 @@
       if ((tu.messy || []).length) needs.push({ k: "messy", p: 3, text: `${tu.messy.join(", ")} split into several detections most laps — drive ${tu.messy.length === 1 ? "it" : "them"} as one smooth arc` });
       needs.sort((x, y) => x.p - y.p);
       const auto = (pct >= 75 && mapped) ? "tuning" : "training"; const sel = courseStageSel(); const stage = sel === "auto" ? auto : sel;
-      return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof };
+      return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof, shapeConf, shapeMeasured, shapeAgree, shapeCompared, shapeSpread };
     };
     const stageChips = (ck) => `<span style="display:inline-flex;gap:3px;margin-left:8px">${[["auto", "🧭 auto"], ["training", "📚 training"], ["tuning", "🏋 tuning"]].map(([k, l]) => `<span class="chip" data-course-stage="${k}" style="cursor:pointer;padding:1px 7px;${ck.sel === k ? "border-color:var(--txt);color:var(--txt)" : ""}">${l}${k === "auto" && ck.sel === "auto" ? " → " + ck.auto : ""}</span>`).join("")}</span>`;
     const courseStageBanner = (co, ck) => {
@@ -2767,7 +2772,7 @@
           <div class="lab-bar" style="height:14px;margin:4px 0 8px"><i style="width:${ck.pct}%;background:${col}"></i><i style="left:75%;width:2px;background:var(--txt);opacity:.7" title="75% — switches to tuning"></i></div>
           <div style="font-size:14px;margin:6px 0 2px"><b>▶ NEXT to raise confidence:</b> ${top ? esc(top.text) : "keep lapping — the next analysis will confirm"}</div>
           ${ck.needs.slice(1).length ? `<div class="why" style="font-size:11px;margin-top:2px">then:</div><ol style="margin:2px 0 0 18px;padding:0;font-size:11.5px">${ck.needs.slice(1).map((n) => `<li>${esc(n.text)}</li>`).join("")}</ol>` : ""}
-          <p class="why" style="font-size:10px;margin:6px 0 0">counts toward confidence: a full lap (map · profile) · more laps (turn count earned across laps) · loading every mapped turn once · consistent lines (settles possible turns). Tuning feedback is not shown while training — per-car references are still saved in the background.</p>`
+          <p class="why" style="font-size:10px;margin:6px 0 0">counts toward confidence: a <b>stable outline</b> (laps tracing the same shape — 25%${ck.shapeMeasured ? `, now ${Math.round(ck.shapeConf * 100)}%` : ""}) · turn count earned across laps (35%) · more laps (25%) · the course profile (15%). Tuning feedback is not shown while training — per-car references are still saved in the background.</p>`
           : `<div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${ck.pct}%;background:${col}"></i><i style="left:75%;width:2px;background:var(--txt);opacity:.6"></i></div><p class="why" style="font-size:11px;margin:4px 0 0">course knowledge ${ck.pct}% · ${ck.needs.length ? "still useful for the course: " + ck.needs.map((n) => esc(n.text)).join(" · ") : "nothing more needed for the course — everything below is feedback for this car on it"}</p>`}
       </div>`;
     };
@@ -3616,8 +3621,17 @@
     // COURSE SHAPE HERO — the interactive map is the course's single most important element; it sits directly under the
     // identity, front-and-centre, in BOTH stages (was buried in a sub-panel / a collapsed drawer). Empty state below
     // makes the shape's absence explicit so the user knows a lap is all that's needed to draw it.
+    // SHAPE-CONFIDENCE badge — how sure we are the auto-computed outline is right (laps that trace the same shape, ± their spread).
+    // This is the exact quantity the training→tuning gate now leans on, surfaced right on the shape so the user sees it ratify.
+    const shapeBadge = (co) => {
+      const tu = (co && co.turns) || {}; if (tu.shape_confidence == null) return "";
+      const c = tu.shape_confidence, ag = tu.shape_laps_agree || 0, sp = tu.shape_spread_m, lvl = c >= 0.75 ? "ok" : c >= 0.45 ? "warn" : "off";
+      const word = c >= 0.75 ? "ratified" : c >= 0.45 ? "stabilizing" : "unverified";
+      const detail = `${ag} lap${ag === 1 ? "" : "s"} agree${sp != null ? ` · ±${sp} m` : ""} · ${Math.round(c * 100)}%`;
+      return `<span class="shape-badge ${lvl}" title="the recorded laps that trace the same outline, and their spread — this is what the tuning gate uses"><span class="sys-dot"></span>SHAPE · ${word}<small>${detail}</small></span>`;
+    };
     const courseHero = (p, co) => {
-      if (p && p.map) return `<div class="course-hero"><div class="course-hero-ey">▨ COURSE SHAPE — the identity of this course · click any turn for its breakdown</div>${p.map}</div>`;
+      if (p && p.map) return `<div class="course-hero"><div class="course-hero-ey"><span>▨ COURSE SHAPE — the identity of this course · click any turn for its breakdown</span>${shapeBadge(co)}</div>${p.map}</div>`;
       const co2 = co || {}; const nl = co2.laps ? co2.laps.total : co2.runs;
       return `<div class="course-hero building"><span style="font-size:32px;line-height:1">🗺</span><div><b style="font-size:13.5px">Mapping this course's shape…</b><div class="why" style="font-size:11px;margin-top:2px">the outline is this course's <b>primary identity</b> — ${co2.is_loop === false ? "reach the event end" : "complete one full lap"} and it draws here from your position trace${nl ? ` · ${nl} pass${nl === 1 ? "" : "es"} so far` : ""}</div></div></div>`;
     };

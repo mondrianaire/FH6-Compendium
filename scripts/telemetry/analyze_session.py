@@ -101,6 +101,38 @@ def strength(n, req):
     """Asymptotic evidence strength: 0.70 at the required count, ~0.91 at 2x, ~0.97 at 3x, -> 1.0."""
     return 1.0 - math.exp(-1.2 * float(n) / max(req, 1e-9))
 
+def shape_confidence(ref_path, laps):
+    """How CONFIDENT are we in the auto-computed course SHAPE (the outline), as distinct from the turn COUNT.
+    The outline is drawn from one reference lap; this scores whether the OTHER recorded laps trace the same shape.
+    For each lap, the median nearest-point distance to the reference outline (meters) — small = same shape (even on a
+    different racing line, a few m off), large = a genuinely different/broken outline (100s of m). Direction-agnostic
+    (a reversed loop is the same shape) and alignment-free (nearest-neighbour, so start offset / sampling don't matter).
+    Returns (conf 0..1, laps_agree, laps_compared, spread_m, tol_m) or None when there isn't enough to judge."""
+    if not ref_path or len(ref_path) < 8 or not laps:
+        return None
+    xs = [p[0] for p in ref_path]; zs = [p[1] for p in ref_path]
+    span = max(max(xs) - min(xs), max(zs) - min(zs))
+    tol = min(30.0, max(10.0, 0.03 * span))   # "same outline" band: scales with course size, clamped 10-30 m
+    R = ref_path[::max(1, len(ref_path) // 300)]   # thin the reference for the O(lap*ref) nearest-neighbour scan
+    def med_dev(pts):
+        ds = sorted(min((q[0] - r[0]) ** 2 + (q[1] - r[1]) ** 2 for r in R) ** 0.5 for q in pts)
+        return ds[len(ds) // 2] if ds else None
+    devs = []
+    for lp in laps:
+        pts = lp.get("pts") or []
+        if len(pts) < 5:
+            continue
+        d = med_dev(pts)
+        if d is not None:
+            devs.append(d)
+    if not devs:
+        return None
+    n_comp = len(devs)
+    n_agree = sum(1 for d in devs if d <= tol)
+    devs.sort(); spread = devs[len(devs) // 2]   # the typical lap's deviation from the outline
+    conf = strength(n_agree, 3) * (n_agree / n_comp)   # enough agreeing laps AND most laps agree
+    return round(conf, 2), n_agree, n_comp, round(spread, 1), round(tol, 1)
+
 def course_profile(loop_rows, corners_here, braking_here, launches_here, car0):
     """What the course DEMANDS — a usage histogram. Absence is information: no straight => gearing/top-end irrelevant here."""
     if not loop_rows: return None
@@ -1379,6 +1411,9 @@ def main():
             bestg = model["geometry"]
             if len(bestg.get("turns") or []) > len(geo.get("turns") or []): geo["turns"] = bestg["turns"]; geo["paths"] = bestg.get("paths"); geo["path"] = bestg.get("path"); geo["length_m"] = bestg.get("length_m"); geo["from_model"] = True
             geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing
+            _sc = shape_confidence(geo.get("path"), layout)   # SHAPE confidence: do the recorded laps trace the same outline? (rides on turns -> reaches the live push, unlike geometry)
+            if _sc:
+                turns_info["shape_confidence"], turns_info["shape_laps_agree"], turns_info["shape_laps_compared"], turns_info["shape_spread_m"], turns_info["shape_tol_m"] = _sc
             for k_ in ("lap_paths", "last_path"): geo.pop(k_, None)   # session entry keeps the drawable pieces + layout only (path kept for the map shape)
         if write_models:
             try:

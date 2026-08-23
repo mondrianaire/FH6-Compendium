@@ -332,8 +332,18 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 
 /* ---- COURSE SHAPE HERO: the map, front-and-centre under the identity in every stage ---- */
 .course-hero { margin: 0 0 10px; }
-.course-hero-ey { font-size: 10px; letter-spacing: .13em; font-weight: 800; text-transform: uppercase;
-  color: var(--accent2); margin: 2px 2px 3px; }
+.course-hero-ey { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 2px 2px 4px; }
+.course-hero-ey > span { font-size: 10px; letter-spacing: .13em; font-weight: 800; text-transform: uppercase; color: var(--accent2); }
+.shape-badge { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; font-size: 10px;
+  font-weight: 800; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line);
+  border-radius: 11px; padding: 2px 9px; color: var(--muted); white-space: nowrap; }
+.shape-badge small { font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.shape-badge.ok { color: #00d27a; border-color: rgba(0,210,122,.4); }
+.shape-badge.ok .sys-dot { background: #00d27a; box-shadow: 0 0 5px rgba(0,210,122,.5); }
+.shape-badge.warn { color: var(--warn); border-color: rgba(227,179,65,.4); }
+.shape-badge.warn .sys-dot { background: var(--warn); }
+.shape-badge.off { color: #e5414e; border-color: rgba(229,65,78,.45); }
+.shape-badge.off .sys-dot { background: #e5414e; box-shadow: 0 0 5px rgba(229,65,78,.5); }
 .course-hero .tz-svg { width: 100%; max-width: 620px !important; }
 .course-hero.building { display: flex; align-items: center; gap: 13px; padding: 15px 16px;
   border: 1px dashed var(--muted); border-radius: 10px; background: var(--bg2); }

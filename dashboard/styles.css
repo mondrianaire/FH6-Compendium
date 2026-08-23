@@ -430,6 +430,30 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 /* clickable table rows get a hover wash */
 tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(255,255,255,.05); }
 
+/* ============ LIVE TRACTION SCANNER — instant power-down diagnosis ============ */
+.trac { border-radius: 9px; padding: 8px 11px; margin: 0 0 9px; font-size: 12.5px; line-height: 1.4; }
+.trac.ok { border: 1px solid rgba(0,210,122,.4); background: rgba(0,210,122,.05); }
+.trac.ok b { color: #00d27a; }
+.trac.warn { border: 1px solid rgba(227,179,65,.5); background: rgba(227,179,65,.08); }
+.trac.bad { border: 1px solid #e5414e; background: rgba(229,65,78,.11); animation: tracPulse 1.8s ease-in-out infinite; }
+@keyframes tracPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(229,65,78,0); } 50% { box-shadow: 0 0 0 3px rgba(229,65,78,.18); } }
+@media (prefers-reduced-motion: reduce) { .trac.bad { animation: none; } }
+.trac-hd { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.trac.warn .trac-hd b { color: var(--warn); } .trac.bad .trac-hd b { color: #e5414e; }
+.trac-sev { font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 800;
+  border: 1px solid currentColor; border-radius: 9px; padding: 1px 7px; }
+.trac.bad .trac-sev { color: #e5414e; } .trac.warn .trac-sev { color: var(--warn); }
+.trac-why { margin: 4px 0; }
+.trac-fix { font-size: 12px; padding: 5px 8px; border-radius: 6px; background: var(--bg2); margin-top: 5px; }
+.trac.bad .trac-fix { border-left: 3px solid #e5414e; } .trac.warn .trac-fix { border-left: 3px solid var(--warn); }
+/* compact traction pill for the anchored dock */
+.dtrac { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700;
+  border: 1px solid var(--line); border-radius: 11px; padding: 2px 9px; white-space: nowrap; }
+.dtrac .dot { width: 7px; height: 7px; border-radius: 50%; }
+.dtrac.ok { color: #00d27a; } .dtrac.ok .dot { background: #00d27a; }
+.dtrac.warn { color: var(--warn); border-color: rgba(227,179,65,.45); } .dtrac.warn .dot { background: var(--warn); }
+.dtrac.bad { color: #e5414e; border-color: rgba(229,65,78,.55); background: rgba(229,65,78,.08); } .dtrac.bad .dot { background: #e5414e; box-shadow: 0 0 6px rgba(229,65,78,.6); }
+
 /* ---- Lab sticky top: subtab switcher + necessary live state, anchored to the top of the screen ---- */
 .lab-top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 6px 0 7px; margin: 0 0 9px;
   border-bottom: 1px solid var(--line); }

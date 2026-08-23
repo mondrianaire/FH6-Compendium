@@ -3960,6 +3960,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const w = effMode();
       return `<div id="lvActiveCar" style="margin-bottom:8px"></div>
         <div id="lvBanner"></div>
+        <div id="lvTraction"></div>
         ${w === "course" ? "" : `<div class="lab-tiles" id="lvTiles"></div>`}
         <div id="lvSections">${sectionsHtml(liveSess(), true)}</div>
         ${w === "free" ? `<details class="block"><summary style="cursor:pointer;font-weight:600;font-size:14px">🩺 Live feel — friction rings &amp; pedal inputs</summary>
@@ -4118,7 +4119,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       if (force || el.dataset.k !== shellKey) {
         el.dataset.k = shellKey; el.className = "fhm-dock" + (live.dock.min ? " min" : "");
         const chip = (key, label) => `<button class="fhm-dchip ${panel === key ? "on" : ""}${key === "clone" && !cloneReady ? " hidden" : ""}" data-dockpanel="${key}">${label}</button>`;
-        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("clone", "📀 clone")}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
+        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span id="dockTrac"></span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("clone", "📀 clone")}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
         el.querySelectorAll("[data-dockpanel]").forEach((b) => b.addEventListener("click", () => { live.dock.panel = live.dock.panel === b.dataset.dockpanel ? null : b.dataset.dockpanel; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); }));
         const mn = el.querySelector("[data-dockmin]"); if (mn) mn.addEventListener("click", () => { live.dock.min = !live.dock.min; saveDock(); paintDock(true); });
         if (!live.dock.min && panel) { const pel = el.querySelector("#dockPanel"); if (pel) { pel.innerHTML = panel === "bench" ? dockBenchHtml() : dockCloneHtml(); const dt = pel.querySelector("[data-dockdetach]"); if (dt) dt.addEventListener("click", () => { popOutFloat(+dt.dataset.dockdetach); paintDock(true); }); } }
@@ -4126,7 +4127,46 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         paintDockTiles();
         const m = document.querySelector("main"); if (m) { m.style.paddingBottom = (el.offsetHeight + 14) + "px"; m.dataset.dockpad = "1"; }
       }
-      paintDockTiles();
+      paintDockTiles(); paintDockTrac();
+    }
+    // shared rolling-window traction stat, used by the full Free-Tuning card AND the anchored dock pill
+    const tracSummary = () => {
+      const buf = live.trac || []; const f = live.frame; if (!f || !f.on || buf.length < 25) return null;
+      const med = (a) => { a = a.slice().sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : 0; };
+      const pct = Math.round(100 * buf.filter((b) => b.spin).length / buf.length);
+      const rmed = med(buf.map((b) => b.rc)), fmed = med(buf.map((b) => b.fc)); const drv = f.drv || "RWD";
+      const axleLimited = drv === "FWD" ? (fmed > rmed * 1.5) : (rmed > fmed * 1.5);
+      return { pct, rmed, fmed, drv, axle: drv === "FWD" ? "FRONT" : "REAR", axleLimited, lvl: pct >= 55 ? "bad" : pct >= 25 ? "warn" : "ok" };
+    };
+    const paintDockTrac = () => {
+      const el = document.getElementById("dockTrac"); if (!el) return; const s = tracSummary();
+      if (!s) { if (el.innerHTML) el.innerHTML = ""; return; }
+      const lbl = s.lvl === "ok" ? "grip" : `${s.axle[0]}·spin ${s.pct}%`;
+      el.innerHTML = `<span class="dtrac ${s.lvl}" title="traction: driven wheels over the grip limit ${s.pct}% of on-throttle time${s.axleLimited ? " · " + s.axle.toLowerCase() + "-limited" : ""}"><span class="dot"></span>🔥 ${lbl}</span>`;
+    };
+    // LIVE traction diagnosis from the rolling on-throttle window: how often the driven axle is over the grip limit,
+    // which axle, and the immediate tuning fix. Actively scans every frame — no waiting for the ~20 s analysis.
+    function paintTraction(f) {
+      const el = host.querySelector("#lvTraction"); if (!el) return;
+      const buf = live.trac || [];
+      if (!f || !f.on || buf.length < 25) { if (el.innerHTML) { el.innerHTML = ""; el.dataset.k = ""; } return; }
+      const med = (a) => { a = a.slice().sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : 0; };
+      const n = buf.length; const pct = Math.round(100 * buf.filter((b) => b.spin).length / n);
+      const rmed = med(buf.map((b) => b.rc)), fmed = med(buf.map((b) => b.fc)); const drv = f.drv || "RWD";
+      const lvl = pct >= 55 ? "bad" : pct >= 25 ? "warn" : "ok";
+      const axleLimited = drv === "FWD" ? (fmed > rmed * 1.5) : (rmed > fmed * 1.5);
+      const key = lvl + "|" + pct + "|" + (axleLimited ? "1" : "0") + "|" + drv;
+      if (el.dataset.k === key) return; el.dataset.k = key;
+      if (lvl === "ok") { el.innerHTML = `<div class="trac ok"><b>✓ TRACTION OK</b> <span class="why">— over the grip limit only ${pct}% of your throttle time; you're putting the power down.</span></div>`; return; }
+      const axle = drv === "FWD" ? "FRONT" : "REAR";
+      const fix = drv === "FWD"
+        ? "front diff <b>ACCEL&nbsp;↓</b> · soften the <b>FRONT</b> ARB &amp; spring · front tyre pressure toward its grip peak · shift weight forward"
+        : "rear diff <b>ACCEL&nbsp;↓</b> (less snap) · soften the <b>REAR</b> ARB &amp; spring (more mechanical grip) · rear tyre pressure toward its grip peak · add <b>rear downforce</b> / rear weight if available · feed the throttle in more progressively";
+      const ratio = axleLimited ? Math.round((drv === "FWD" ? fmed / Math.max(0.02, rmed) : rmed / Math.max(0.02, fmed))) : 0;
+      const sev = lvl === "bad" ? "MAJOR" : "moderate";
+      el.innerHTML = `<div class="trac ${lvl}"><div class="trac-hd"><b>🔥 TRACTION — ${axle}-LIMITED</b><span class="trac-sev">${sev}</span></div>`
+        + `<div class="trac-why">The <b>${axle.toLowerCase()}</b> is over the grip limit <b>${pct}%</b> of the time you're on the throttle${ratio >= 3 ? ` — ${ratio}× the other axle` : ""}. You're spinning, not accelerating.</div>`
+        + `<div class="trac-fix">→ ${fix}</div></div>`;
     }
     function paintFrame() {
       const f = live.frame; if (!f) return;
@@ -4142,6 +4182,18 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         nd.setAttribute("x2", (60 + cl(angle) * sc / 1.0).toFixed(1)); nd.setAttribute("y2", (68 - cl(ratio) * sc / 1.0).toFixed(1));
         pk.textContent = `${Math.round(Math.abs(comb) * 100)}%`; pk.setAttribute("fill", sat ? "#e5414e" : "var(--txt)");
       }
+      // ---- LIVE TRACTION SCANNER: driven-wheel slip WHILE ON THROTTLE — the power-down pattern the corner analysis
+      // (lateral grip) misses. Accumulates a rolling window; paintTraction turns it into an instant diagnosis + fix. ----
+      if (f.on && f.slip) {
+        const drivenW = f.drv === "FWD" ? ["FL", "FR"] : f.drv === "RWD" ? ["RL", "RR"] : ["FL", "FR", "RL", "RR"];
+        if (f.thr > 190 && f.mph > 3) {   // hard on the gas and actually moving (not a standstill burnout)
+          const cb = (w) => Math.abs((f.slip[w] || [0, 0, 0])[2]);
+          const dc = Math.max(...drivenW.map(cb)); const rc = Math.max(cb("RL"), cb("RR")), fc = Math.max(cb("FL"), cb("FR"));
+          (live.trac = live.trac || []).push({ mph: f.mph, dc, rc, fc, spin: dc > 1 });
+          if (live.trac.length > 300) live.trac.shift();
+        }
+      }
+      paintTraction(f);
       // the stream bar's live line follows the WORKFLOW: Course = the event you're in (lap, lap time, distance); Decode = donor capture state; Free = the car and the run
       const wl = host.querySelector("#lvWfLine");
       if (wl) {

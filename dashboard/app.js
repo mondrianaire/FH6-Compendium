@@ -2650,6 +2650,9 @@
     // aero) are intentionally omitted (direction-only). rebound 18 / bump 6 is the cross-checked baseline (NOT
     // grindout's bump≈60%·rebound outlier). See [[fh6-external-tuning-sources]].
     const SLIDER_BASE = { fbump: 6, rbump: 6, freb: 18, rreb: 18, bbal: 52, bpress: 100, accel: 55, decel: 15, center: 80 };
+    // drivetrain-specific baseline overrides (data/slider-baselines.json): FWD tunes the FRONT diff higher; center split is AWD-only.
+    const SLIDER_BASE_DT = { FWD: { accel: 70 }, RWD: { accel: 55 }, AWD: { accel: 55, center: 80 } };
+    const sliderBaseFor = (sl, drv) => { const dt = SLIDER_BASE_DT[drv] || {}; return dt[sl] != null ? dt[sl] : SLIDER_BASE[sl]; };
     const tuneKey = (cid) => "fh6Tune:" + baseId(cid);
     // disk-decoded exact slider values → the tuning engine's slider keys (auto-fills "current tune")
     const DISK2SLIDER = { front_arb: "farb", rear_arb: "rarb", front_bump: "fbump", rear_bump: "rbump", front_rebound: "freb", rear_rebound: "rreb", brake_balance: "bbal", brake_pressure: "bpress", rear_diff_accel: "accel", rear_diff_decel: "decel", center_diff: "center", front_spring: "fspring", rear_spring: "rspring", front_downforce: "faero", rear_downforce: "raero" };
@@ -2686,7 +2689,7 @@
       return moves.sort((a, b) => b.sev - a.sev || Math.abs(b.delta || 0) - Math.abs(a.delta || 0));
     };
     // elegant tuning-move cards: priority-striped, current -> target, PLAIN-LANGUAGE effect, diagnosis + confidence
-    const movesCards = (moves) => { ensureFhmCss(); return moves.length ? `${movesAnatomy(moves)}<div class="tmoves">${moves.map((m, i) => {
+    const movesCards = (moves, drv) => { ensureFhmCss(); return moves.length ? `${movesAnatomy(moves)}<div class="tmoves">${moves.map((m, i) => {
       const up = m.dir > 0; const col = up ? "#e3b341" : "#2f81f7";
       const sevCol = m.sev >= 3 ? "#e5414e" : m.sev >= 2 ? "#e3b341" : "#00d27a";
       const fx = (SLIDER_FX[m.sl] || {})[up ? "up" : "down"] || "";
@@ -2695,7 +2698,7 @@
       const notchU = notch ? (dmag === 1 ? " notch" : " notches") : (m.unit || "");
       // when the current value isn't known, anchor on the vetted community BASELINE and nudge from it — so the card
       // still gives an absolute number to dial in, not just a direction. Sliders without a baseline stay direction-only.
-      const base = SLIDER_BASE[m.sl]; let baseTo = null;
+      const base = sliderBaseFor(m.sl, drv); let baseTo = null;
       if (m.to == null && base != null && m.delta != null && !notch) {
         baseTo = base + m.delta; const S = SLIDER[m.sl];
         if (S.min != null) baseTo = Math.max(S.min, Math.min(S.max, baseTo));
@@ -2728,7 +2731,7 @@
       const verdict = !moves.length ? "Balanced for what this track demands — no firm change yet · a few more clean laps will separate driver from tune" : `<b>${moves.length} change${moves.length > 1 ? "s" : ""}</b> to sharpen this car for ${esc(rn)}${prio.length ? ` · this track stresses ${esc(prio.slice(0, 2).join(" + "))}` : ""}${rideMove ? " · incl. ride height (bottoming)" : ""}`;
       return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🎯 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${prio.length ? " · prioritised for " + esc(prio[0]) : ""}</span>${liveNote}</div>
         <div style="font-size:13px;font-weight:600;margin:7px 0 9px;color:var(--txt)">${verdict}</div>
-        ${movesCards(moves)}
+        ${movesCards(moves, ["FWD", "RWD", "AWD"][+String(cid).split("|")[1]] || null)}
         <p class="why" style="font-size:10.5px;margin:7px 0 0">${haveCur ? "Targets are computed from your current values (auto-filled from disk). " : "Position-only sliders show a direction until you register their range. "}Change ONE group, re-drive the course, and the numbers refine — course-weighted, so only what THIS track stresses is shown.</p>
         ${tuneInputRow(cid)}</div>`;
     };
@@ -2866,7 +2869,7 @@
         </tbody></table></div>`;
       const splitFlag = g.surface_split ? `<div style="margin:8px 0;padding:6px 10px;border:1px solid #e3b341;border-radius:8px;font-size:11.5px"><b style="color:#e3b341">⚠ Surface-specific:</b> balance swings by surface — USI ${g.surface_split.smooth > 0 ? "+" : ""}${g.surface_split.smooth} on road vs ${g.surface_split.rough > 0 ? "+" : ""}${g.surface_split.rough} on rough. No single tune wins both; this all-around read favours where you drive most — tune a separate setup for the other surface.</div>` : "";
       const arrow = (m) => m.delta > 0 ? "▲" : "▼"; const col = (m) => m.dir > 0 ? "#e3b341" : "#2f81f7";
-      const movesTbl = movesCards(moves);
+      const movesTbl = movesCards(moves, c.drivetrain || (["FWD", "RWD", "AWD"][+String(c.id).split("|")[1]] || null));
       const ovr = sig.filter((r) => r.bias === "oversteer").length, und = sig.filter((r) => r.bias === "understeer").length;
       const rideMove = moves.some((m) => m.sl === "rheight" || m.sl === "fheight");
       const verdict = !moves.length ? "Balanced across the board — no systematic change stands out yet" :

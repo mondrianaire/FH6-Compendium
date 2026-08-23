@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "created": "2026-08-23",
+  "purpose": "Absolute set-to-X tuning baselines, so a move card can show a real number (not just a direction) for ANY car — including undriven ones — selected by live DrivetrainType + CarClass + tire compound. Values are cross-corroborated across independent vetted guides (see [[fh6-external-tuning-sources]]); they are GENERIC starting points, overridden per-car by measured telemetry (e.g. mechanical_balance) once a car is driven. Tag anything sourced here 'baseline-generic'.",
+  "sources": "gamingpromax (MB 0.55-0.65/~0.60, diff baselines, damping 18/6, aero 0.40-0.45, PSI-by-compound), forza.guide (spring freq 2.80/2.90 Hz, 4-phase model), grindout (build/tune order), forzatune (caster/camber). Two web sources had errors that were excluded (grindout bump~=60%*rebound; vpesports diff direction).",
+  "constants": {
+    "damping_bump": 6.0,
+    "damping_rebound": 18.0,
+    "brake_bias_front_pct": 52,
+    "brake_pressure_pct": 100,
+    "caster_deg": 6.8,
+    "camber_front_deg": -2.0,
+    "camber_rear_deg": -1.5,
+    "aero_balance_front": 0.42,
+    "mech_balance_target": 0.60,
+    "spring_freq_front_hz": 2.80,
+    "spring_freq_rear_hz": 2.90
+  },
+  "by_drivetrain": {
+    "FWD": { "diff_accel_pct": 70, "diff_decel_pct": 15, "note": "front diff only; accel higher to reduce exit understeer" },
+    "RWD": { "diff_accel_pct": 55, "diff_decel_pct": 15, "note": "rear diff; higher accel = more traction but exit push" },
+    "AWD": { "diff_accel_pct": 55, "diff_decel_pct": 15, "center_rear_pct": 80, "note": "center 60-90% rear (never <50); RWD-like character with AWD traction" }
+  },
+  "mech_balance_by_class": {
+    "S2": 0.62, "S1": 0.60, "A": 0.60, "B": 0.58, "C": 0.56, "D": 0.55,
+    "_note": "higher classes tolerate a slightly more front-biased (sharper) balance; window is 0.55-0.65"
+  },
+  "psi_by_compound": {
+    "Stock": 27, "Street": 27, "Sport": 28,
+    "Semi-Slick Race": 32, "Slick Race": 32, "Race": 32,
+    "Rally": 26, "Off-Road": 18, "Snow": 24, "Drift": 32,
+    "Drag_front": 33, "Drag_rear": 22,
+    "_note": "grippier/stiffer-sidewall compounds want more air to hold patch shape; off-road/rally want less for compliance"
+  }
+}

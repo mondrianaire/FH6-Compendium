@@ -758,6 +758,26 @@ def replay_loop(path, speed):
             ingest(p, t - tbase)
     print("[replay] done")
 
+_PI_SOLVE_AT = [0.0]
+def _maybe_solve_pi():
+    """Auto-accrue: re-run the per-part PI solver in the background as observations grow (throttled to 120 s),
+    then invalidate the decode's parts-pi cache so the next deliverable reflects freshly-solved estimates.
+    Subprocess = clean module state; all failures are non-fatal (PI stays whatever it last solved)."""
+    now = time.time()
+    if now - _PI_SOLVE_AT[0] < 120:
+        return
+    _PI_SOLVE_AT[0] = now
+    def _run():
+        try:
+            subprocess.run([sys.executable, os.path.join(HERE, "fh6_pi_solve.py")], cwd=ROOT, timeout=60,
+                           capture_output=True)
+            if TUNE is not None:
+                TUNE._PARTS_PI = None      # force reload of data/parts-pi.json on the next pi_for()
+        except Exception:
+            pass
+    threading.Thread(target=_run, daemon=True).start()
+
+
 def _record_pi_observation(ordn, tune):
     """Feature B: append/refresh one observation pairing the active car's decoded config (its 50 slot tiers)
     with the live CarPI, in data/pi-observations.json. Guards: only when THIS car is the active, on-track car
@@ -838,6 +858,7 @@ def disk_watcher():
             try:
                 if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0:
                     _record_pi_observation(ordn, TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn))
+                    _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)
             except Exception:
                 pass
             key = (ordn, round(metas[0]["mtime"], 2))

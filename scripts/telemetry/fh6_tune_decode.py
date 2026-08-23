@@ -947,6 +947,9 @@ def tune_to_deliverable(tune, car_name=None):
             if pv is not None:
                 pi_known_parts += 1; pi_attributed += pv
     pi_total = observed_car_pi(ordn, tune["parts"])   # exact CarPI for THIS config, if driven & recorded
+    _obs = load_pi_observations()   # progress signal for the "measuring PI" state (auto-accrue by driving)
+    pi_obs_car = sum(1 for o in _obs if str(o.get("ordinal")) == str(ordn))
+    pi_obs_total = len(_obs)
     return {
         "source": "disk",
         "ordinal": ordn,
@@ -960,7 +963,8 @@ def tune_to_deliverable(tune, car_name=None):
                     "sliders_relative": rel_sliders,
                     "pi_total": pi_total,
                     "pi_attributed": (pi_attributed if pi_known_parts else None),
-                    "pi_known_parts": pi_known_parts, "pi_total_parts": pi_total_parts},
+                    "pi_known_parts": pi_known_parts, "pi_total_parts": pi_total_parts,
+                    "pi_obs_car": pi_obs_car, "pi_obs_total": pi_obs_total},
         # overall confidence: parts + disk-exact sliders count full; derived (global-band) ~0.85; relative discount
         "confidence": round((installed + abs_sliders + 0.85 * der_sliders + 0.6 * rel_sliders) /
                             max(1, installed + abs_sliders + der_sliders + rel_sliders), 3),

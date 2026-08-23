@@ -4493,12 +4493,28 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           let lap = evPts.filter((p) => p.lapn === curLap);
           if (lap.length < 8) { const pl = evPts.filter((p) => p.lapn === curLap - 1); if (pl.length >= lap.length) lap = pl; }   // just crossed the line → show the lap just completed
           if (lap.length >= 8) { const d0 = lap[0].dist;
-            return { pts: lap.map((p) => ({ x: Math.max(0, p.dist - d0), y: p.mph, brk: p.brk, thr: p.thr })), mode: "course", xlabel: "lap distance", lapn: lap[0].lapn }; }
+            return { pts: lap.map((p) => ({ x: Math.max(0, p.dist - d0), y: p.mph, t: p.t, brk: p.brk, thr: p.thr })), mode: "course", xlabel: "lap distance", lapn: lap[0].lapn }; }
         }
       }
       const lastT = buf[buf.length - 1].t; const w = buf.filter((p) => lastT - p.t <= SPD_WIN_S);
       if (w.length < 4) return null; const t0 = w[0].t;
-      return { pts: w.map((p) => ({ x: p.t - t0, y: p.mph, brk: p.brk, thr: p.thr })), mode: "free", xlabel: "seconds", lapn: null, span: lastT - t0 };
+      return { pts: w.map((p) => ({ x: p.t - t0, y: p.mph, t: p.t, brk: p.brk, thr: p.thr })), mode: "free", xlabel: "seconds", lapn: null, span: lastT - t0 };
+    };
+    // RECONCILE with the analyzer: place a marker at each detected turn (authoritative — lateral-g + slip, not just
+    // speed), aligned to the trace by matching the corner's time window to the buffer. Carries L/R + true min speed.
+    // Returns null when no analyzer corner overlaps the window, so the caller falls back to raw speed-minima.
+    const spdCorners = (pts) => {
+      const cs = live.corners || []; if (!cs.length || pts.length < 4) return null;
+      const tMin = pts[0].t, tMax = pts[pts.length - 1].t;
+      const inWin = cs.filter((c) => c.t0 != null && c.t1 != null && c.t1 >= tMin && c.t0 <= tMax);
+      if (!inWin.length) return null;
+      const marks = [];
+      inWin.forEach((c) => { let best = -1, bestY = Infinity;
+        for (let i = 0; i < pts.length; i++) { if (pts[i].t >= c.t0 && pts[i].t <= c.t1 && pts[i].y < bestY) { bestY = pts[i].y; best = i; } }
+        if (best >= 0) marks.push({ i: best, dir: c.dir, mph: c.mph_min != null ? c.mph_min : Math.round(pts[best].y) }); });
+      marks.sort((a, b) => a.i - b.i);
+      const dedup = []; marks.forEach((m) => { const l = dedup[dedup.length - 1]; if (!l || m.i - l.i > 2) dedup.push(m); else if (m.mph < l.mph) dedup[dedup.length - 1] = m; });
+      return dedup.length ? dedup : null;
     };
     const spdDips = (pts) => {   // corners = local speed minima that fell and recovered by >=7 mph
       const n = pts.length; if (n < 6) return [];
@@ -4515,7 +4531,10 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const speedTraceHtml = () => {
       const win = spdWindow();
       if (!win) return `<div class="spd-hd"><b>🏁 Speed trace</b></div><p class="why" style="font-size:11px;margin:4px 0">gathering data… drive to build the line.</p>`;
-      const pts = win.pts; const dips = spdDips(pts);
+      const pts = win.pts;
+      const anMarks = spdCorners(pts);   // analyzer turns when available, else raw speed minima
+      const marksList = anMarks || spdDips(pts).map((i) => ({ i, mph: Math.round(pts[i].y) }));
+      const nC = marksList.length;
       const W = 720, H = 190, PL = 32, PR = 10, PT = 14, PB = 24;
       const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
       const xMax = Math.max(...xs) || 1, yMax = Math.max(40, Math.ceil((Math.max(...ys) + 4) / 10) * 10);
@@ -4523,11 +4542,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const line = pts.map((p, i) => `${i ? "L" : "M"}${X(p.x).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(" ");
       const area = `${line} L${X(pts[pts.length - 1].x).toFixed(1)} ${Y(0).toFixed(1)} L${X(pts[0].x).toFixed(1)} ${Y(0).toFixed(1)} Z`;
       const yticks = [0, Math.round(yMax / 2), yMax].map((v) => `<line x1="${PL}" y1="${Y(v).toFixed(1)}" x2="${W - PR}" y2="${Y(v).toFixed(1)}" stroke="rgba(255,255,255,.07)"/><text x="${PL - 4}" y="${(Y(v) + 3).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="9">${v}</text>`).join("");
-      const markers = dips.map((i, k) => { const p = pts[i], x = X(p.x), y = Y(p.y);
-        return `<line x1="${x.toFixed(1)}" y1="${PT}" x2="${x.toFixed(1)}" y2="${H - PB}" stroke="rgba(227,179,65,.35)" stroke-dasharray="3 3"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#e3b341"/><text x="${x.toFixed(1)}" y="${(y - 7).toFixed(1)}" text-anchor="middle" fill="#e3b341" font-size="10" font-weight="700">T${k + 1}</text><text x="${x.toFixed(1)}" y="${(H - PB + 10).toFixed(1)}" text-anchor="middle" fill="var(--muted)" font-size="8">${Math.round(p.y)}</text>`; }).join("");
+      const markers = marksList.map((m, k) => { const p = pts[m.i], x = X(p.x), y = Y(p.y);
+        const dirTag = m.dir === "R" ? "▶" : m.dir === "L" ? "◀" : "";
+        return `<line x1="${x.toFixed(1)}" y1="${PT}" x2="${x.toFixed(1)}" y2="${H - PB}" stroke="rgba(227,179,65,.35)" stroke-dasharray="3 3"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#e3b341"/><text x="${x.toFixed(1)}" y="${(y - 7).toFixed(1)}" text-anchor="middle" fill="#e3b341" font-size="10" font-weight="700">T${k + 1}${dirTag}</text><text x="${x.toFixed(1)}" y="${(H - PB + 10).toFixed(1)}" text-anchor="middle" fill="var(--muted)" font-size="8">${Math.round(m.mph)}</text>`; }).join("");
       const xlab = win.mode === "free" ? `${Math.round(win.span || xMax)}s ago ← → now` : `${(xMax / 1000).toFixed(2)} km · lap ${win.lapn}`;
-      const hd = win.mode === "course" ? `🏁 Speed trace — lap ${win.lapn} · ${dips.length} corner${dips.length === 1 ? "" : "s"} marked` : `🏁 Speed trace — last ${Math.min(SPD_WIN_S, Math.round(win.span || 0))}s · ${dips.length} corner${dips.length === 1 ? "" : "s"} marked`;
-      return `<div class="spd-hd"><b>${hd}</b><span class="why" style="font-size:10px">corners = speed minima (braking zones)</span></div>
+      const src = anMarks ? "analyzer turns · ◀▶ = corner direction" : "speed minima (braking zones)";
+      const hd = win.mode === "course" ? `🏁 Speed trace — lap ${win.lapn} · ${nC} corner${nC === 1 ? "" : "s"}` : `🏁 Speed trace — last ${Math.min(SPD_WIN_S, Math.round(win.span || 0))}s · ${nC} corner${nC === 1 ? "" : "s"}`;
+      return `<div class="spd-hd"><b>${hd}</b><span class="why" style="font-size:10px">corners = ${src}</span></div>
         <svg viewBox="0 0 ${W} ${H}" class="spd-svg" style="width:100%;height:auto;display:block">
           ${yticks}<path d="${area}" fill="rgba(47,129,247,.10)"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>${markers}
           <text x="${W - PR}" y="${H - 3}" text-anchor="end" fill="var(--muted)" font-size="9">${esc(xlab)}</text>

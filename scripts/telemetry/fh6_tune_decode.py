@@ -268,6 +268,14 @@ def register_range(ordinal, field, norm, value, unit=None):
     os.replace(tmp, _ranges_path())
     return solved
 
+def range_points(ordinal, field):
+    """(total points, distinct norms) captured so far for ordinal+field. Distinctness matches back_solve's rounding,
+    so `distinct` is exactly how many independent positions we have toward the >=2 needed to lock the range."""
+    doc = _load_ranges_doc()
+    pts = (doc.get("points") or {}).get(f"{int(ordinal)}|{field}", [])
+    distinct = len({round(float(p[0]), 3) for p in pts})
+    return len(pts), distinct
+
 # pole labels for the per-car / normalised fields (what "high" means)
 POLES = {
     "front_downforce":"cornering","rear_downforce":"cornering","final_drive":"acceleration",
@@ -302,6 +310,7 @@ def parse_tune(path, ordinal_hint=None):
 
     # sliders
     ranges = load_ranges().get(ordinal, {})
+    _pts_doc = (_load_ranges_doc().get("points") or {})   # per (ordinal|field) calibration points, for the UI's progress dots
     sliders = {}
     for name, off, lo, hi, unit, per_car, adj in SLIDERS:
         if name.startswith("_"):
@@ -327,6 +336,8 @@ def parse_tune(path, ordinal_hint=None):
             entry["value"] = None
             entry["pole"] = POLES.get(name)
             entry["pole_pct"] = round(norm * 100, 1)
+            entry["cal_points"] = (len({round(float(p[0]), 3) for p in _pts_doc.get(f"{int(ordinal)}|{name}", [])})
+                                   if ordinal is not None else 0)   # distinct positions captured toward the 2 needed to lock this slider
         elif lo is not None:
             entry["value"] = round(lo + norm * (hi - lo), 2)
             entry["range"] = [lo, hi]
@@ -914,6 +925,7 @@ def tune_to_deliverable(tune, car_name=None):
             else:
                 rows.append({**base, "value": None, "norm": e["norm"], "unit": e["unit"], "per_car": True,
                              "display": f"{e['pole_pct']}% toward {e.get('pole', '?')}",
+                             "cal_points": e.get("cal_points", 0),   # distinct calibration points captured (0/1) toward the 2 needed
                              "status": "measured-relative", "confidence": 0.6})
         if tab_name == "Gearing" and tune["gears_norm"]:
             gband = load_global_ranges().get("gear")

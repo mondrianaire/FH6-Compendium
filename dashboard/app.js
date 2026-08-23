@@ -2697,37 +2697,71 @@
     const SLIDER_BETTER = { usi_abs: "lower", spin: "lower", frontLim: "lower", rearLim: "lower" };   // all "issues": lower = better
     const abKey = (cid) => "fh6AB:" + baseId(cid);
     const getAB = (cid) => { try { return JSON.parse(localStorage.getItem(abKey(cid)) || "{}").versions || []; } catch (e) { return []; } };
-    const setAB = (cid, versions) => localStorage.setItem(abKey(cid), JSON.stringify({ versions: versions.slice(-12) }));
-    const sliderSnapshot = (cid) => { const t = getTune(cid); const o = {}; SLIDER_ORDER.forEach((sl) => { if (t[sl] != null) o[sl] = t[sl]; }); return o; };   // auto-read current values off the decode
+    const setAB = (cid, versions) => localStorage.setItem(abKey(cid), JSON.stringify({ versions: versions.slice(-24) }));
+    const sliderSnapshot = (cid) => { const t = getTune(cid); const o = {}; SLIDER_ORDER.forEach((sl) => { if (t[sl] != null) o[sl] = t[sl]; }); return o; };   // numeric fast-path (the exact sliders), kept as metric context
+    // FULL slider snapshot straight off the decoded deliverable — EVERY tuning field, its displayed value + unit, and
+    // whether it's still a position (% slider). An A/B version stores THIS, so a multi-slider change is captured in full
+    // and every value stays viewable later. `key` encodes value-or-position, so ANY change is detected — including
+    // ride-height / downforce that still read as % before calibration.
+    const abFull = (cid) => { const ord = String(cid).split("|")[0]; const dl = (live.diskCache && live.diskCache[ord] && live.diskCache[ord].deliverable) || null;
+      if (!dl || !(dl.tabs || []).length) return null; const o = {};
+      (dl.tabs || []).forEach((t) => (t.rows || []).forEach((r) => {
+        o[r.field] = { label: r.label || r.field, section: r.section || t.tab, unit: r.unit || "", pos: r.value == null,
+          disp: r.display || (r.value != null ? String(r.value) + (r.unit ? " " + r.unit : "") : ((r.fill != null ? Math.round(r.fill * 1000) / 10 : "?") + "%")),
+          key: r.value != null ? "v" + r.value : "n" + (r.fill != null ? Math.round(r.fill * 1e4) : "?") }; }));
+      return o; };
+    const abFullEq = (a, b) => { if (!a || !b) return false; const ks = new Set([...Object.keys(a), ...Object.keys(b)]); for (const k of ks) { if (!a[k] || !b[k] || a[k].key !== b[k].key) return false; } return true; };
+    const abFullDelta = (prev, cur) => { if (!prev) return []; const out = []; Object.keys(cur).forEach((k) => { if (!prev[k] || prev[k].key !== cur[k].key) out.push({ field: k, label: cur[k].label, from: prev[k] ? prev[k].disp : "—", to: cur[k].disp }); }); return out; };
     const abMetrics = (c, s) => { const g = c && c.general; const trac = tracSummary(); const sm = (s && s.summary) || {};
       return { usi: g && g.usi != null ? +(+g.usi).toFixed(3) : null, spin: trac ? trac.pct : null,
                frontLim: sm.front_limited_corners != null ? sm.front_limited_corners : null,
                rearLim: sm.rear_limited_corners != null ? sm.rear_limited_corners : null, corners: sm.corners != null ? sm.corners : null }; };
-    const sliderEq = (a, b) => { const ks = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]); for (const k of ks) if ((a || {})[k] !== (b || {})[k]) return false; return true; };
-    const abCapture = (cid, c, s) => {   // called on each fresh analysis for the active car
-      if (!cid) return; const sl = sliderSnapshot(cid); if (!Object.keys(sl).length) return;
+    // A version is born the moment a CHANGE is detected (any field's value/position differs from the last version) —
+    // driven by the save event, so it never waits on the ~20s analysis. Metrics fill in on the next analysis (same tune
+    // -> refresh in place, without clobbering good numbers with nulls). Stores the FULL field set for later viewing.
+    const abCapture = (cid, c, s) => {
+      if (!cid) return; const full = abFull(cid); if (!full) return;
       const m = abMetrics(c, s); const versions = getAB(cid); const last = versions[versions.length - 1];
-      if (last && sliderEq(last.sliders, sl)) { last.metrics = m; last.at = Date.now(); setAB(cid, versions); return; }   // same tune → just refresh its metrics
-      const delta = last ? Object.keys(sl).filter((k) => sl[k] !== last.sliders[k]).map((k) => ({ sl: k, from: last.sliders[k], to: sl[k] })) : [];
-      versions.push({ at: Date.now(), sliders: sl, metrics: m, delta }); setAB(cid, versions);   // a genuinely different tune → new A/B version
+      if (last && abFullEq(last.full, full)) {
+        if (m && (m.usi != null || m.spin != null || m.rearLim != null || m.frontLim != null)) last.metrics = m;   // refresh only with real numbers
+        last.at = Date.now(); setAB(cid, versions); return; }
+      const delta = abFullDelta(last && last.full, full);
+      versions.push({ at: Date.now(), full, sliders: sliderSnapshot(cid), metrics: m, delta }); setAB(cid, versions);
     };
-    // A/B comparison view: latest version vs the one before it, metric deltas coloured by improvement
+    // gather current car/session context and (re)capture — called on a detected save change AND on each fresh analysis
+    const abSync = (cid) => { if (!cid) return; const s = (src === "live" ? live.analysis : S()) || null; const ls = liveSess(); const c = (ls && cid && car(ls, cid)) || (ls && (ls.cars || [])[0]) || null; abCapture(cid, c, s); };
+    // A/B comparison: latest vs previous — every changed field (from->to), metric deltas coloured by improvement, and an
+    // expandable list of EVERY stored value for the current version so nothing is hidden.
     const abPanel = (cid) => {
-      const versions = getAB(cid); if (versions.length < 2) return versions.length === 1 ? `<div class="ab-panel"><div class="ab-hd"><b>⚗️ A/B testing</b> <span class="why" style="font-size:10.5px">baseline captured — implement a change &amp; re-test to compare</span></div></div>` : "";
-      const cur = versions[versions.length - 1], prev = versions[versions.length - 2];
-      const lbl = (sl) => (SLIDER[sl] || {}).label || sl;
-      const changed = (cur.delta || []).map((d) => `${lbl(d.sl)} ${d.from ?? "—"}→${d.to ?? "—"}`).join(" · ") || "same sliders";
-      const mrow = (key, name, unit) => { const a = prev.metrics[key], b = cur.metrics[key]; if (a == null || b == null) return "";
+      const versions = getAB(cid); if (!versions.length) return "";
+      const cur = versions[versions.length - 1];
+      const tm = (t) => { try { return new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch (e) { return ""; } };
+      const secs = {}; Object.keys(cur.full || {}).forEach((k) => { const f = cur.full[k]; (secs[f.section] = secs[f.section] || []).push(f); });
+      const fullList = Object.keys(secs).length ? Object.keys(secs).map((s) => `<div class="abv-sec">${esc(s)}</div>${secs[s].map((f) => `<div class="abv-row"><span>${esc(f.label)}</span><b class="${f.pos ? "pos" : ""}">${esc(f.disp)}</b></div>`).join("")}`).join("") : `<div class="why" style="font-size:11px">no fields stored yet</div>`;
+      const nfields = Object.keys(cur.full || {}).length;
+      if (versions.length < 2) return `<div class="ab-panel"><div class="ab-hd"><b>⚗️ A/B testing</b> <span class="why" style="font-size:10.5px">baseline v1 captured ${tm(cur.at)} · ${nfields} fields — change a slider &amp; save to spawn v2</span></div><details class="abv"><summary>view all ${nfields} stored values</summary>${fullList}</details></div>`;
+      const prev = versions[versions.length - 2];
+      const changed = (cur.delta || []).length ? (cur.delta).map((d) => `<span class="ab-chg">${esc(d.label)} <span class="why">${esc(String(d.from))}</span> → <b>${esc(String(d.to))}</b></span>`).join("") : `<span class="why">metrics re-measured, no slider change</span>`;
+      const mrow = (key, name, unit) => { const a = prev.metrics && prev.metrics[key], b = cur.metrics && cur.metrics[key]; if (a == null || b == null) return "";
         const av = key === "usi" ? Math.abs(a) : a, bv = key === "usi" ? Math.abs(b) : b; const better = bv < av - 1e-6, worse = bv > av + 1e-6;
         const col = better ? "#00d27a" : worse ? "#e5414e" : "var(--muted)"; const arr = better ? "▼" : worse ? "▲" : "=";
         return `<div class="ab-m"><span>${name}</span><b>${a}${unit || ""}</b><span class="ab-arr" style="color:${col}">${arr}</span><b style="color:${col}">${b}${unit || ""}</b>${better ? " ✓" : worse ? " ✗" : ""}</div>`; };
-      return `<div class="ab-panel"><div class="ab-hd"><b>⚗️ A/B testing</b> <span class="why" style="font-size:10.5px">v${versions.length - 1} → v${versions.length}: ${esc(changed)}</span></div>
-        <div class="ab-grid">${mrow("spin", "traction spin", "%")}${mrow("usi", "balance |USI|")}${mrow("rearLim", "rear-limited turns")}${mrow("frontLim", "front-limited turns")}</div></div>`;
+      const nch = (cur.delta || []).length;
+      return `<div class="ab-panel"><div class="ab-hd"><b>⚗️ A/B testing</b> <span class="why" style="font-size:10.5px">v${versions.length - 1} → v${versions.length} · ${nch} slider${nch === 1 ? "" : "s"} changed · ${tm(cur.at)}</span></div>
+        <div class="ab-changed">${changed}</div>
+        <div class="ab-grid">${mrow("spin", "traction spin", "%")}${mrow("usi", "balance |USI|")}${mrow("rearLim", "rear-limited turns")}${mrow("frontLim", "front-limited turns")}</div>
+        <details class="abv"><summary>view all ${nfields} stored values (v${versions.length})</summary>${fullList}</details></div>`;
     };
     // ---- TUNE SANITY CHECK: runs on the decoded tune (re-evaluates whenever a save change is detected). Flags the
     // obvious range errors AND the non-obvious "secret" traps most players miss (rebound<bump packing, front-ARB
     // understeer on RWD, negative rake, locked decel diff, aero that goes light at speed). ----
     const SAN_LBL = { front_tire_pressure: "Front tyre pressure", rear_tire_pressure: "Rear tyre pressure", front_camber: "Front camber", rear_camber: "Rear camber", front_bump: "Front bump", rear_bump: "Rear bump", front_rebound: "Front rebound", rear_rebound: "Rear rebound", front_arb: "Front ARB", rear_arb: "Rear ARB", brake_balance: "Brake bias", brake_pressure: "Brake pressure", front_ride_height: "Front ride height", rear_ride_height: "Rear ride height", rear_diff_accel: "Rear diff accel", rear_diff_decel: "Rear diff decel", center_diff: "Center diff", front_downforce: "Front downforce", rear_downforce: "Rear downforce" };
+    // a STABLE identity for a finding across value changes — strip HTML + digits so "rear over the limit 96%" and
+    // "…94%" are the same finding. Used to flag which findings are NEW since the user last hit Check.
+    const sanKey = (x) => ((x.lvl || "") + "|" + String(x.msg || "").replace(/<[^>]+>/g, "").replace(/[0-9.]+/g, "#")).slice(0, 70);
+    const sanSeenKey = (cid) => "fh6SanSeen:" + baseId(cid);
+    const loadSanSeen = (cid) => { try { return new Set(JSON.parse(localStorage.getItem(sanSeenKey(cid)) || "[]")); } catch (e) { return new Set(); } };
+    const saveSanSeen = (cid, set) => { try { localStorage.setItem(sanSeenKey(cid), JSON.stringify([...set])); } catch (e) {} };
     const sanityCheck = (dl, drv) => {
       const v = {}; (dl.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && !isNaN(+r.value)) v[r.field] = +r.value; }));
       const I = [];
@@ -2765,7 +2799,7 @@
       ["front_camber", "rear_camber"].forEach((k) => { if (v[k] != null && v[k] < -4) add("info", `${SAN_LBL[k]} ${v[k]}° is very aggressive — cornering bite up, but less straight-line grip and more wear.`, [{ field: k, to: -2 }], [3]); });
       return I;
     };
-    const sanityPanel = (dl, drv) => {
+    const sanityPanel = (dl, drv, hl) => {
       if (!dl || !(dl.tabs || []).length) return "";
       const I = sanityCheck(dl, drv || "?"); const err = I.filter((x) => x.lvl === "error"), warn = I.filter((x) => x.lvl === "warn");
       if (!I.length) return `<div class="sanity ok"><b>🩺 Sanity check</b> <span class="why">— no red flags in this tune.</span></div>`;
@@ -2773,7 +2807,8 @@
         const iph = (x.iph && x.iph.length) ? x.iph : [...aph];
         const glyph = (aph.size || iph.length) ? `<div class="s-glyph">${moveCorner([...aph], iph, 92)}</div>` : "";
         const sets = (x.fixes || []).map((f) => `<span class="s-set">${esc(f.label)} ${f.from != null ? `<b class="s-from">${f.from}</b> → ` : "→ "}<b class="s-to">${f.to}</b></span>`).join("");
-        return `<div class="sanity-row ${x.lvl}"><span class="s-ic">${x.lvl === "error" ? "⛔" : x.lvl === "warn" ? "⚠" : "ℹ"}</span><div class="s-body"><div>${x.msg}</div>${sets ? `<div class="s-fixrow">🔧 ${sets}</div>` : ""}</div>${glyph}</div>`; };
+        const isNew = hl && hl.has(sanKey(x));
+        return `<div class="sanity-row ${x.lvl}${isNew ? " new" : ""}"><span class="s-ic">${x.lvl === "error" ? "⛔" : x.lvl === "warn" ? "⚠" : "ℹ"}</span><div class="s-body"><div>${isNew ? `<span class="s-new">⭐ NEW</span> ` : ""}${x.msg}</div>${sets ? `<div class="s-fixrow">🔧 ${sets}</div>` : ""}</div>${glyph}</div>`; };
       return `<div class="sanity ${err.length ? "bad" : warn.length ? "warn" : "info"}"><div class="sanity-hd"><b>🩺 Sanity check</b> <span class="why">${err.length ? err.length + " error" + (err.length > 1 ? "s" : "") : ""}${err.length && warn.length ? " · " : ""}${warn.length ? warn.length + " warning" + (warn.length > 1 ? "s" : "") : ""}${!err.length && !warn.length ? "notes only" : ""}</span></div>${[...err, ...warn, ...I.filter((x) => x.lvl === "info")].map(row).join("")}</div>`;
     };
     const tuningMoves = (adv, corners, cur, weightKey) => {
@@ -2838,6 +2873,7 @@
       const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
       const liveInc = (live.cornSince || []).filter((c) => !c.drift && c.first_red && (!cid || c.car === cid)).map((c) => ({ limiter: "tune", dominant: c.first_red.axle, phase: c.first_red.phase }));
       const cur = getTune(cid); const moves = tuningMoves(adv, [...(co.corners || []), ...liveInc], cur); const haveCur = Object.keys(cur).length > 0;
+      live.lastMoves = live.lastMoves || {}; if (cid) live.lastMoves[cid] = moves;   // cache for the anchored dock iteration panel
       const _age = live.analysisAt ? Math.round((Date.now() - live.analysisAt) / 1000) : null;
       const liveNote = liveInc.length ? ` <span class="chip" style="border-color:#00d27a;color:#00d27a" title="the settled read recomputes every ~20 s; corners since then fold into the balance live — the settled read stays the authority for the tune-vs-driver call">📡 settled${_age != null ? " " + _age + "s ago" : ""} · +${liveInc.length} live corner${liveInc.length > 1 ? "s" : ""} folding in</span>` : "";
       const prio = (co.profile && co.profile.priority) || []; const rideMove = moves.some((m) => m.sl === "rheight" || m.sl === "fheight"); const rn = co.name || "this course";
@@ -2981,6 +3017,7 @@
       const sig = (g && g.balance) || [];
       if (!g || g.corners < 4 || sig.length === 0) return `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🛣 All-around tune — ${esc(carName(c) || "#" + c.ordinal)}</h3><p class="why" style="font-size:12px;margin:0">Gathering — drive varied corners (and surfaces) on public / free-roam; the all-around read needs a spread of contexts, not one track.</p></div>`;
       const moves = tuningMoves(adv, [], getTune(cid), "breadth");
+      live.lastMoves = live.lastMoves || {}; if (cid) live.lastMoves[cid] = moves;   // cache for the anchored dock iteration panel
       const rob = g.robustness;
       const robCol = rob == null ? "var(--muted)" : rob >= 0.6 ? "#00d27a" : rob >= 0.35 ? "#e3b341" : "#e5414e";
       // balance signature matrix — the diagnostic: how the car handles across every context, so surface/speed specificity shows through
@@ -3264,6 +3301,34 @@
       .s-fixrow{margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11px}
       .s-set{border:1px solid var(--line);border-radius:6px;padding:1px 8px;font-variant-numeric:tabular-nums;background:var(--bg2);white-space:nowrap}
       .s-set .s-from{color:var(--muted);font-weight:600}.s-set .s-to{color:#00d27a;font-weight:800}
+      .sanity-row.new{background:rgba(227,179,65,.10);border-radius:6px}
+      .s-new{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.05em;color:#0b0e13;background:#e3b341;border-radius:4px;padding:0 5px;margin-right:5px;vertical-align:1px}
+      /* ---- one-time per-car calibration card (ride height / downforce ranges) ---- */
+      .cal-card{border:1px solid #e6a63a;border-radius:8px;background:rgba(230,166,58,.07);padding:8px 11px;margin:0 0 11px}
+      .cal-hd{margin-bottom:6px}.cal-hd b{font-size:13px;color:#e6a63a}
+      .cal-row{display:flex;align-items:center;gap:9px;padding:4px 0;border-top:1px solid rgba(255,255,255,.05);flex-wrap:wrap}
+      .cal-row:first-of-type{border-top:none}
+      .cal-lbl{font-weight:700;min-width:120px;font-size:12px}
+      .cal-pos{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+      .cal-dots{letter-spacing:2px;color:#e6a63a;font-size:12px}
+      .cal-row .fhm-rin{width:70px;margin-left:0}
+      .cal-unit{color:var(--muted);font-size:11px}
+      .fhm-rin-msg{font-size:10.5px;flex:1 0 100%;margin-left:1px}
+      .cal-flash{outline:2px solid #e6a63a;outline-offset:2px;border-radius:6px;transition:outline-color .4s}
+      .fhm-caljump{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;border:1px solid #e6a63a;color:#e6a63a;background:rgba(230,166,58,.10);border-radius:10px;padding:0 7px;margin-left:5px;cursor:pointer;white-space:nowrap}
+      .fhm-caljump:hover{background:rgba(230,166,58,.22)}
+      /* ---- A/B full-value view + changed-field chips ---- */
+      .ab-changed{display:flex;flex-wrap:wrap;gap:5px 8px;margin-top:6px;font-size:11.5px}
+      .ab-chg{border:1px solid rgba(163,113,247,.4);border-radius:6px;padding:1px 7px;background:rgba(163,113,247,.08);font-variant-numeric:tabular-nums}
+      .abv{margin-top:7px;font-size:11px}
+      .abv>summary{cursor:pointer;color:#a371f7;font-weight:600;user-select:none}
+      .abv-sec{margin-top:5px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+      .abv-row{display:flex;justify-content:space-between;gap:10px;padding:1px 0;font-variant-numeric:tabular-nums}
+      .abv-row>span{color:var(--muted)}.abv-row>b.pos{color:#e6a63a}
+      /* ---- dock manual sanity-check window ---- */
+      .dsan-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px;font-size:11.5px}
+      .dsan-hd>span:first-child{flex:1}
+      .dsan-new{color:#e3b341}.dsan-res{color:#00d27a}
       /* ---- bottom LIVE DOCK: session-strip spine + bench/clone pop-chips, anchored to every Lab subtab ---- */
       .fhm-dock{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:linear-gradient(180deg,rgba(14,17,22,.86),var(--bg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px);font-family:'Saira Semi Condensed','Barlow Semi Condensed','Segoe UI',system-ui,sans-serif}
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
@@ -3310,6 +3375,19 @@
       }).join("")}${pick ? `<button class="dm-chip auto" data-diskpick="${ordinal}|">🔄 auto</button>` : ""}</div>` : "";
       return (status || picker) ? `<div class="dm-bar">${status}${picker}</div>` : "";
     };
+    // ONE-TIME per-car calibration: ride-height / downforce ranges are per-chassis, so the save's 0..1 position can't be
+    // turned into a real number until we see the displayed value at TWO different positions. This is the single guided
+    // "read this value" surface — enter the in-game number, move the slider & re-save, enter it again → the range locks
+    // and every future decode of this car prints exact. Progress dots come from the daemon's captured-point count.
+    const calibrationCard = (dl) => {
+      const un = []; (dl.tabs || []).forEach((t) => (t.rows || []).forEach((row) => { if (row.value == null && row.per_car && !String(row.field).startsWith("gear")) un.push(row); }));
+      if (!un.length) return "";
+      const ord = dl.ordinal;
+      const crow = (r) => { const cp = r.cal_points || 0; const pct = r.norm != null ? Math.round(r.norm * 1000) / 10 : Math.round((r.fill || 0) * 1000) / 10;
+        const dots = `<span class="cal-dots" title="${cp} of 2 reference points captured">${cp >= 1 ? "●" : "○"}${cp >= 2 ? "●" : "○"}</span>`;
+        return `<div class="cal-row" id="cal-${ord}-${esc(r.field)}"><span class="cal-lbl">${esc(r.label || r.field)}</span><span class="cal-pos">${pct}% toward ${esc((r.poles || [])[0] || r.pole || "")}</span>${dots}<input class="fhm-rin" data-rangeord="${ord}" data-rangefield="${esc(r.field)}" data-rangenorm="${r.fill}" data-rangeunit="${esc(r.unit || "")}" placeholder="in-game #" inputmode="decimal">${r.unit ? `<span class="cal-unit">${esc(r.unit)}</span>` : ""}<span class="fhm-rin-msg"></span></div>`; };
+      return `<div class="cal-card"><div class="cal-hd"><b>🎯 One-time calibration</b> <span class="why" style="font-size:10.5px">${un.length} slider${un.length > 1 ? "s" : ""} still read as % — type the number shown in-game, then move that slider to a different setting, re-save, and type it again. Two points lock this car's range for good.</span></div>${un.map(crow).join("")}</div>`;
+    };
     const diskDeliverableHtml = (r, opts) => {
       opts = opts || {};
       ensureFhmCss();
@@ -3336,7 +3414,7 @@
         const secHtml = secs.map((s) => `<div class="fhm-sec"><div class="fhm-sech">${esc(s.h)}</div>${s.rows.map((row) => {
           const rel = row.value == null; const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
           const val = rel
-            ? `<span class="fhm-slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%${row.per_car && !String(row.field).startsWith("gear") ? `<input class="fhm-rin" data-rangeord="${dl.ordinal}" data-rangefield="${esc(row.field)}" data-rangenorm="${row.fill}" data-rangeunit="${esc(row.unit || "")}" placeholder="=?" title="Type the in-game number for this slider — two saved tunes at different positions lock this car's range, then every tune prints exact." inputmode="decimal">` : ""}</span>`
+            ? `<span class="fhm-slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%${row.per_car && !String(row.field).startsWith("gear") ? ` <button class="fhm-caljump" data-caljump="cal-${dl.ordinal}-${esc(row.field)}" title="set the exact value — jumps to the one-time calibration above">🎯 set${(row.cal_points || 0) >= 1 ? " · 1/2" : ""}</button>` : ""}</span>`
             : `<span class="fhm-slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global gear / final-drive band — exact on your next gear-ladder drive"' : ""}>${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>`;
           return `<div class="fhm-sl"><div class="fhm-slt"><span class="fhm-sll">${vdot(vsl[row.field])}${esc(row.label || row.field)}</span>${val}</div><div class="fhm-trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div><div class="fhm-pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
         }).join("")}</div>`).join("");
@@ -3354,6 +3432,7 @@
           const oc = sm.pi_obs_car || 0, ot = sm.pi_obs_total || 0;
           return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI. During a tuning session (drive, change one part, drive again) these accrue automatically — zero menu capture."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${known}/${tot} parts priced${known < tot ? " — accrues as you drive" : ""}</span> · <span class="why" title="configs the daemon has paired with a live PI — this car / whole garage">📈 ${oc} this car · ${ot} total observed</span></div>`; })()}
         ${(() => { const cm = (dl.menus || []).find((m) => m.menu === "Conversions"); const dr = cm && (cm.rows || []).find((r) => r.item === "drivetrain"); const drv = (dr && dr.resulting_drivetrain) || (live.frame && live.frame.on && live.frame.drv) || null; return sanityPanel(dl, drv); })()}
+        ${calibrationCard(dl)}
         <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
     const fetchDiskTune = (ordinal, opts) => {
@@ -3425,14 +3504,24 @@
       el.querySelectorAll("[data-diskpick]").forEach((b) => b.addEventListener("click", () => { const [o, ts] = b.dataset.diskpick.split("|"); pickDiskTune(+o, ts || null); }));
       el.querySelectorAll("[data-clone-lock]").forEach((b) => b.addEventListener("click", () => lockCloneTarget(+b.dataset.cloneLock)));
       el.querySelectorAll("[data-clone-unlock]").forEach((b) => b.addEventListener("click", () => unlockCloneTarget()));
+      el.querySelectorAll("[data-caljump]").forEach((b) => b.addEventListener("click", () => {
+        const t = el.querySelector("#" + (window.CSS && CSS.escape ? CSS.escape(b.dataset.caljump) : b.dataset.caljump));
+        if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); const i = t.querySelector("input"); if (i) { i.focus(); t.classList.add("cal-flash"); setTimeout(() => t.classList.remove("cal-flash"), 1200); } }
+      }));
       el.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
         const v = parseFloat(inp.value); if (isNaN(v)) return; const ord = +inp.dataset.rangeord;
+        const msg = inp.parentElement && inp.parentElement.querySelector(".fhm-rin-msg");
+        const set = (t, c) => { if (msg) { msg.textContent = t; msg.style.color = c; } };
+        set("saving…", "var(--muted)");
         fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ordinal: ord, field: inp.dataset.rangefield, norm: +inp.dataset.rangenorm, value: v, unit: inp.dataset.rangeunit }) })
           .then((r) => r.json()).then((d) => {
-            if (d && d.ok) { inp.style.borderColor = d.solved ? "#00d27a" : "#e3b341"; inp.title = d.solved ? "range solved — refreshing to exact numbers" : "got it — one more tune at a different position unlocks exact numbers";
-              if (d.solved && live.diskCache) { delete live.diskCache[ord]; paintDiskDecode(); } }
-          }).catch(() => {});
+            if (!d || !d.ok) { inp.style.borderColor = "#e5414e"; set("✕ not saved" + (d && d.error ? " — " + d.error : ""), "#e5414e"); return; }
+            if (d.solved) { inp.style.borderColor = "#00d27a"; set(`✓ locked ${d.solved[0]}–${d.solved[1]} ${inp.dataset.rangeunit || ""} — now exact`, "#00d27a");
+              if (live.diskCache) delete live.diskCache[ord]; fetchDiskTune(ord, { force: true }); }   // fresh decode → exact values flow to the sheet, sanity check & A/B via the normal repaint
+            else { inp.style.borderColor = "#e3b341"; inp.value = "";
+              set(`● point ${d.distinct || 1}/2 saved — change this slider in-game to another setting, re-save the tune, then read it here again`, "#e3b341"); }
+          }).catch(() => { inp.style.borderColor = "#e5414e"; set("✕ daemon offline", "#e5414e"); });
       }));
     };
     const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
@@ -4258,23 +4347,67 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const el = document.getElementById("dockStrip"); if (!el) return; const d = dockStripData();
       el.innerHTML = d ? strip(d) : `<p class="why" style="font-size:11px;margin:2px 0">waiting for the first second…</p>`;
     }
+    // ---- anchored-dock cockpit panels: iteration tracker, A/B results, and the manual sanity check — the result-tracking
+    //      surfaces, always reachable on the dock instead of buried in the scrolling body. ----
+    const dockActiveCid = () => { if (live.frame && live.frame.on && live.frame.cid) return live.frame.cid; const ls = liveSess(); const c = ls && (ls.cars || [])[0]; return c ? c.id : null; };
+    const dockIterHtml = () => { const cid = dockActiveCid();
+      if (!cid) return `<p class="why" style="font-size:11px;margin:2px 0">No car yet — drive to track tune changes.</p>`;
+      const moves = (live.lastMoves && live.lastMoves[cid]) || [];
+      return appliedStrip(cid, moves) || `<div class="why" style="font-size:11px">🔁 Nothing marked done yet. In the tuning panel press <b>“✓ I made this”</b> on a suggested change — it tracks here: did it land on your saved tune, and did it clear the issue.</div>`; };
+    const dockABHtml = () => { const cid = dockActiveCid();
+      if (!cid) return `<p class="why" style="font-size:11px;margin:2px 0">No car yet — drive to capture A/B baselines.</p>`;
+      return abPanel(cid) || `<div class="why" style="font-size:11px">⚗️ No A/B versions yet. Every saved change spawns a version automatically — the full slider set is stored so you can compare balance, spin% and limited-corner counts.</div>`; };
+    // the manual sanity check + a "what's new" window: same check as the auto save-trigger, but on demand and diffed
+    // against the findings you last acknowledged, so genuinely new problems stand out.
+    const activeSanCtx = () => { const ord = (live.frame && live.frame.car) || lastCarOrd(); if (!ord) return null;
+      const cached = live.diskCache && live.diskCache[ord]; if (!cached || !cached.available || !cached.deliverable) return null;
+      const dl = cached.deliverable; const cm = (dl.menus || []).find((m) => m.menu === "Conversions"); const dr = cm && (cm.rows || []).find((r) => r.item === "drivetrain");
+      const drv = (dr && dr.resulting_drivetrain) || (live.frame && live.frame.on && live.frame.drv) || null;
+      const cid = (live.frame && live.frame.on && live.frame.cid) || String(ord);
+      return { ord, dl, drv, cid }; };
+    const runSanityCheck = (opts) => { opts = opts || {}; const ctx = activeSanCtx(); if (!ctx) return;
+      if (opts.acknowledge && ctx.dl) saveSanSeen(ctx.cid, new Set(sanityCheck(ctx.dl, ctx.drv).map(sanKey)));   // baseline what's visible now
+      if (opts.refresh && ctx.ord) { if (live.diskCache) delete live.diskCache[ctx.ord]; fetchDiskTune(ctx.ord, { force: true }); fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); } };
+    const dockSanityHtml = () => { const ctx = activeSanCtx();
+      if (!ctx) return `<p class="why" style="font-size:11px;margin:2px 0">No decoded tune yet — drive the car to read its sliders, then check.</p>`;
+      const findings = sanityCheck(ctx.dl, ctx.drv); const seen = loadSanSeen(ctx.cid);
+      const keys = findings.map(sanKey); const hl = new Set(keys.filter((k) => !seen.has(k)));
+      const resolved = [...seen].filter((k) => !keys.includes(k)).length;
+      const err = findings.filter((x) => x.lvl === "error").length, warn = findings.filter((x) => x.lvl === "warn").length;
+      const head = `<div class="dsan-hd"><span>${hl.size ? `<b class="dsan-new">⭐ ${hl.size} new</b>` : `<span class="why">no new findings</span>`}${resolved ? ` · <span class="dsan-res">✓ ${resolved} resolved</span>` : ""} <span class="why">· ${err} error${err === 1 ? "" : "s"}, ${warn} warning${warn === 1 ? "" : "s"}</span></span><button class="lab-mode" data-sancheck="1" title="re-read the saved tune + re-run the driving analysis, then mark these findings as seen">🩺 Check now</button></div>`;
+      return `<div class="dsan">${head}${sanityPanel(ctx.dl, ctx.drv, hl)}</div>`; };
+    const dockPanelSig = (panel) => { const cid = dockActiveCid();
+      if (panel === "iter") return `i|${cid}|${localStorage.getItem(appliedKey(cid || "")) || ""}|${((live.lastMoves || {})[cid] || []).map((m) => m.sl).join(",")}`;
+      if (panel === "ab") return `a|${cid}|${localStorage.getItem(abKey(cid || "")) || ""}`;
+      if (panel === "san") { const ctx = activeSanCtx(); return `s|${ctx ? ctx.cid : ""}|${ctx ? sanityCheck(ctx.dl, ctx.drv).map(sanKey).join(";") : ""}|${ctx ? localStorage.getItem(sanSeenKey(ctx.cid)) || "" : ""}`; }
+      return panel; };
+    const fillDockPanel = (pel, panel) => {
+      pel.innerHTML = panel === "bench" ? dockBenchHtml() : panel === "clone" ? dockCloneHtml() : panel === "iter" ? dockIterHtml() : panel === "ab" ? dockABHtml() : panel === "san" ? dockSanityHtml() : "";
+      const dt = pel.querySelector("[data-dockdetach]"); if (dt) dt.addEventListener("click", () => { popOutFloat(+dt.dataset.dockdetach); paintDock(true); });
+      pel.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
+      pel.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { localStorage.removeItem(appliedKey(b.dataset.clearapplied)); paintDock(true); }));
+      pel.querySelectorAll("[data-sancheck]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🩺 checking…"; runSanityCheck({ acknowledge: true, refresh: true }); setTimeout(() => paintDock(true), 250); }));
+      pel.dataset.sig = dockPanelSig(panel); };
     function paintDock(force) {
       initDock(); const el = ensureDockHost();
       if (!dockShouldShow()) { el.style.display = "none"; const m = document.querySelector("main"); if (m && m.dataset.dockpad) { m.style.paddingBottom = ""; delete m.dataset.dockpad; } return; }
       el.style.display = "block";
       const cloneReady = !!(dockCloneOrd() && live.diskCache && live.diskCache[dockCloneOrd()] && live.diskCache[dockCloneOrd()].available);
-      const panel = live.dock.panel; const shellKey = `${live.dock.min}|${panel}|${cloneReady}|${src}`;
+      const hasCar = !!dockActiveCid();
+      const panel = live.dock.panel; const shellKey = `${live.dock.min}|${panel}|${cloneReady}|${hasCar}|${src}`;
       if (force || el.dataset.k !== shellKey) {
         el.dataset.k = shellKey; el.className = "fhm-dock" + (live.dock.min ? " min" : "");
-        const chip = (key, label) => `<button class="fhm-dchip ${panel === key ? "on" : ""}${key === "clone" && !cloneReady ? " hidden" : ""}" data-dockpanel="${key}">${label}</button>`;
-        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span id="dockTrac"></span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("clone", "📀 clone")}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
+        const chip = (key, label, hide) => `<button class="fhm-dchip ${panel === key ? "on" : ""}${hide ? " hidden" : ""}" data-dockpanel="${key}">${label}</button>`;
+        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span id="dockTrac"></span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("iter", "🔁 iter", !hasCar)}${chip("ab", "⚗️ A/B", !hasCar)}${chip("san", "🩺 check", !hasCar)}${chip("clone", "📀 clone", !cloneReady)}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
         el.querySelectorAll("[data-dockpanel]").forEach((b) => b.addEventListener("click", () => { live.dock.panel = live.dock.panel === b.dataset.dockpanel ? null : b.dataset.dockpanel; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); }));
         const mn = el.querySelector("[data-dockmin]"); if (mn) mn.addEventListener("click", () => { live.dock.min = !live.dock.min; saveDock(); paintDock(true); });
-        if (!live.dock.min && panel) { const pel = el.querySelector("#dockPanel"); if (pel) { pel.innerHTML = panel === "bench" ? dockBenchHtml() : dockCloneHtml(); const dt = pel.querySelector("[data-dockdetach]"); if (dt) dt.addEventListener("click", () => { popOutFloat(+dt.dataset.dockdetach); paintDock(true); }); } }
+        if (!live.dock.min && panel) { const pel = el.querySelector("#dockPanel"); if (pel) fillDockPanel(pel, panel); }
         paintDockStrip();
         paintDockTiles();
         const m = document.querySelector("main"); if (m) { m.style.paddingBottom = (el.offsetHeight + 14) + "px"; m.dataset.dockpad = "1"; }
       }
+      // keep the live cockpit panels fresh without wiping them every frame — only re-render when their content changed
+      if (!live.dock.min && (panel === "iter" || panel === "ab" || panel === "san")) { const pel = el.querySelector("#dockPanel"); if (pel && pel.dataset.sig !== dockPanelSig(panel)) fillDockPanel(pel, panel); }
       paintDockTiles(); paintDockTrac();
     }
     // shared rolling-window traction stat, used by the full Free-Tuning card AND the anchored dock pill
@@ -4390,6 +4523,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         live.diskCache[d.ordinal] = d.available ? d : { available: false };            // still cached as the current-build probe
         const changed = (!locked && d.available) ? applyDiskTune(d) : false;
         if (!locked && d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
+        if (!locked && d.new_save && d.available && live.frame && String(live.frame.car) === String(d.ordinal) && live.frame.cid) abSync(live.frame.cid);   // a change was saved → spawn/refresh the A/B version NOW (stores the full field set; metrics fill on next analysis)
         paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintDock(true);
         const activeOrd = live.frame && String(live.frame.car);
         if (!locked && d.available && effMode() !== "decode" && activeOrd === String(d.ordinal) && (changed || d.new_save)) paintSections(true);   // refresh tuning targets when the auto-fill newly applies (car change) or a save lands

@@ -719,7 +719,9 @@ class H(BaseHTTPRequestHandler):
                 try:
                     ordn = int(body.get("ordinal"))
                     solved = TUNE.register_range(ordn, str(body["field"]), float(body["norm"]), float(body["value"]), unit=body.get("unit"))
-                    resp = {"ok": True, "solved": solved, "field": str(body["field"]), "ordinal": ordn}
+                    npts, distinct = TUNE.range_points(ordn, str(body["field"]))
+                    resp = {"ok": True, "solved": solved, "points": npts, "distinct": distinct,
+                            "need": max(0, 2 - distinct), "field": str(body["field"]), "ordinal": ordn}
                 except Exception as ex_:
                     print("tune-range not saved:", repr(ex_), file=sys.stderr); resp = {"ok": False, "error": str(ex_)}
             out2 = json.dumps(resp).encode()

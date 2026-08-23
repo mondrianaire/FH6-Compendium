@@ -542,6 +542,8 @@ def main():
         c["gears"] = lad
         c["dyno"] = [{"rpm": k, "hp": round(statistics.median([p for p, q in v])), "tq": round(statistics.median([q for p, q in v])), "n": len(v)} for k, v in sorted(c["_dyno"].items()) if len(v) >= 8]
         c["k_wheel"] = {w: (statistics.median(c["_k"][w]) if c["_k"][w] else None) for w in W}
+        _kv = [v for v in c["k_wheel"].values() if v]   # k_wheel = WheelRotSpeed/Speed = 1/tyre_radius, so radius = 1/k
+        c["tire_radius_m"] = round(1.0 / (sum(_kv) / len(_kv)), 3) if _kv else None   # EXACT rolling radius from telemetry (no user input)
         c["live_s"] = round(c["live_frames"] / max(sess["rate_pps"], 1), 1)
         for w in W: c["temps_max_f"][w] = round(c["temps_max_f"][w])
         pk = max(c["dyno"], key=lambda d: d["hp"]) if c["dyno"] else None

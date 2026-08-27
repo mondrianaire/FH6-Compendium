@@ -436,18 +436,51 @@ def _pick_meta(metas, ordn, ts_want=None):
             score += 100 if int(cyl) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal
         if live and live_pi and pi:
             score += 60 if int(pi) == int(live_pi) else -min(60, abs(int(pi) - int(live_pi)) * 0.6)
-        roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "locked": t["locked"], "_score": score, "_meta": m})
+        roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
     if not roster:
         return metas[0], {"how": "newest", "live": live, "saves": []}
     roster.sort(key=lambda r: -r["_score"])
+    # DISAMBIGUATE same-signature saves. A clone makes several builds share cyl + PI (sliders don't move PI), so the
+    # cyl/PI score alone ties them and we'd fall back to 'newest'. When the leaders tie, use the LIVE-measured gear
+    # ladder (telemetry-exact, wheelspin-immune) to pick the build actually EQUIPPED: gearing is part of the tune, so
+    # two builds that differ in gears/final-drive separate cleanly here, while genuinely identical builds stay tied.
+    n_ties = 1; gear_used = False
+    if live and len(roster) >= 2:
+        ties = [r for r in roster if roster[0]["_score"] - r["_score"] < 40.0]   # < ~1 PI point apart = a cyl/PI tie
+        n_ties = len(ties)
+        if n_ties >= 2:
+            live_gl = None
+            with ST.lock: sj = ST.session_json
+            for c in (sj.get("cars", []) if sj else []):
+                if str(c.get("ordinal")) == str(ordn):
+                    gl = {int(g["gear"]): g["fd_gear"] for g in (c.get("gears") or []) if g.get("fd_gear")}
+                    if len(gl) >= 3: live_gl = gl   # need a gear-ladder pass (several gears measured) to fingerprint
+                    break
+            if live_gl:
+                import re as _re
+                def _gear_err(r):
+                    dl = TUNE.tune_to_deliverable(r["_tune"], "")
+                    fd = None; ratios = {}
+                    for tab in dl.get("tabs", []):
+                        for row in tab.get("rows", []):
+                            if row.get("field") == "final_drive" and row.get("value"): fd = row["value"]
+                            mm = _re.match(r"gear_(\d+)$", str(row.get("field", "")))
+                            if mm and row.get("value"): ratios[int(mm.group(1))] = row["value"]
+                    common = [g for g in ratios if g in live_gl] if fd else []
+                    if not common: return 9.9
+                    return sum(abs(fd * ratios[g] - live_gl[g]) / live_gl[g] for g in common) / len(common)
+                errs = sorted(((_gear_err(r), i, r) for i, r in enumerate(ties)), key=lambda x: (x[0], x[1]))
+                # accept only a CLEAR winner: good absolute match AND clearly ahead of the runner-up (else stay ambiguous)
+                if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
+                    winner = errs[0][2]; roster = [winner] + [r for r in roster if r is not winner]; gear_used = True
     best = roster[0]
     saves = [{k: r[k] for k in ("ts", "cyl", "pi", "locked")} for r in roster]
     how = "picked" if ts_want else ("signature" if live and (live_cyl or live_pi) else "newest")
     mism = bool(live and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
-    final_how = how if ts_want else ("no-match" if mism else how)   # an explicit pick is deliberate — never call it a mismatch
+    final_how = how if ts_want else ("no-match" if mism else ("gear-matched" if gear_used else how))
     return best["_meta"], {"how": final_how, "live": live, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
-                           "n_saves": len(roster), "saves": saves}
+                           "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used, "saves": saves}
 
 
 def _deliverable_cyl(deliverable):

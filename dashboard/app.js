@@ -3460,8 +3460,10 @@
       const m = r.match; if (!m) return "";
       const saves = m.saves || []; const cur = String(r.ts); const pick = live.diskPick && live.diskPick[ordinal];
       let status = "";
+      const ties = m.n_signature_ties || 1;
       if (m.how === "no-match") status = `<div class="dm-warn">⚠ You're in a <b>${m.live_cyl}-cyl</b> car${m.live_pi ? ` (PI ${m.live_pi})` : ""} but no saved tune matches it — the closest is <b>${m.chosen_cyl}-cyl</b>. This build isn't saved to disk; <b>save the setup in-game</b> to decode it, or pick a saved tune below.</div>`;
-      else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you're driving — ${m.live_cyl}-cyl${m.live_pi ? `, PI ${m.live_pi}` : ""}</div>`;
+      else if (m.how === "gear-matched") status = `<div class="dm-ok">✓ <b>${ties} builds</b> share this engine + PI${m.live_pi ? ` (PI ${m.live_pi})` : ""} — identified the <b>equipped</b> one by its live gear ladder ⚙</div>`;
+      else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you're driving — ${m.live_cyl}-cyl${m.live_pi ? `, PI ${m.live_pi}` : ""}${ties >= 2 ? ` <span class="why" style="font-weight:400">· ${ties} builds share this signature — drive up through the gears to pin the exact one, or pick below</span>` : ""}</div>`;
       else if (m.how === "picked") status = `<div class="dm-ok">📌 pinned to this saved tune${saves.length > 1 ? " — auto-match off" : ""}</div>`;
       else if (saves.length > 1) status = `<div class="dm-why">showing the newest of ${saves.length} saved tunes — drive one to auto-match, or pick it:</div>`;
       const picker = saves.length > 1 ? `<div class="dm-picker">${saves.map((s) => {

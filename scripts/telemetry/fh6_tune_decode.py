@@ -257,7 +257,16 @@ def register_range(ordinal, field, norm, value, unit=None):
     doc = _load_ranges_doc()
     key = f"{int(ordinal)}|{field}"
     pts = doc.setdefault("points", {}).setdefault(key, [])
-    pts.append([round(float(norm), 4), float(value)])
+    nr = round(float(norm), 4)
+    # ONE value per position: a slider can't hold two different values at one norm. Collapse the set to last-value-per-
+    # position (self-heals the contradictory duplicates a stale-norm capture left behind, e.g. [[1.0,406],[1.0,190]]),
+    # then apply this capture. Two DISTINCT positions are what back_solve needs.
+    bynorm = {}
+    for p in pts:
+        try: bynorm[round(float(p[0]), 3)] = [round(float(p[0]), 4), float(p[1])]
+        except Exception: continue
+    bynorm[round(nr, 3)] = [nr, float(value)]
+    pts[:] = list(bynorm.values())
     solved = back_solve(pts)
     if solved:
         r = doc.setdefault("ranges", {}).setdefault(str(int(ordinal)), {})

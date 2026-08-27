@@ -474,7 +474,7 @@ def _pick_meta(metas, ordn, ts_want=None):
                 if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
                     winner = errs[0][2]; roster = [winner] + [r for r in roster if r is not winner]; gear_used = True
     best = roster[0]
-    saves = [{k: r[k] for k in ("ts", "cyl", "pi", "locked")} for r in roster]
+    saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count")) for r in roster]   # gear count distinguishes same-(cyl,PI) builds in the library
     how = "picked" if ts_want else ("signature" if live and (live_cyl or live_pi) else "newest")
     mism = bool(live and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
     final_how = how if ts_want else ("no-match" if mism else ("gear-matched" if gear_used else how))
@@ -750,11 +750,23 @@ class H(BaseHTTPRequestHandler):
             resp = {"ok": False}
             if TUNE is not None:
                 try:
-                    ordn = int(body.get("ordinal"))
-                    solved = TUNE.register_range(ordn, str(body["field"]), float(body["norm"]), float(body["value"]), unit=body.get("unit"))
-                    npts, distinct = TUNE.range_points(ordn, str(body["field"]))
+                    ordn = int(body.get("ordinal")); field = str(body["field"])
+                    # Read the CURRENT position straight from the newest save rather than trusting the client's cached
+                    # norm — the calibration card doesn't re-render on every save (the disk-watch only re-decodes while a
+                    # car is in-frame, not in the menu), so a downforce/aero re-save was registering the SAME position
+                    # twice and the range never solved. Pair the newest-save norm with the value the user just read.
+                    norm = None
+                    try:
+                        metas, _ = TUNE.tunes_for_ordinal(ordn)
+                        if metas:
+                            e = (TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn).get("sliders") or {}).get(field)
+                            if e and e.get("norm") is not None: norm = float(e["norm"])
+                    except Exception: pass
+                    if norm is None: norm = float(body.get("norm"))
+                    solved = TUNE.register_range(ordn, field, norm, float(body["value"]), unit=body.get("unit"))
+                    npts, distinct = TUNE.range_points(ordn, field)
                     resp = {"ok": True, "solved": solved, "points": npts, "distinct": distinct,
-                            "need": max(0, 2 - distinct), "field": str(body["field"]), "ordinal": ordn}
+                            "need": max(0, 2 - distinct), "norm": round(norm, 4), "field": field, "ordinal": ordn}
                 except Exception as ex_:
                     print("tune-range not saved:", repr(ex_), file=sys.stderr); resp = {"ok": False, "error": str(ex_)}
             out2 = json.dumps(resp).encode()

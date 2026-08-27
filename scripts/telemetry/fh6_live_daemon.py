@@ -793,6 +793,28 @@ def _build_union(deliverable, ordn, match=None):
         pass
 
 
+def _livery_strings(path, max_strings=3):
+    """Tolerant scan of a Livery container's `header` for its length-prefixed UTF-16LE strings — observed layout:
+    [u32 ver][u32 n]["name" n chars][u32 n]["description"]...["creator"]. Scans forward so unknown binary between
+    strings is skipped. READ-ONLY; returns up to max_strings printable strings (name, description, creator)."""
+    try:
+        b = open(path, "rb").read()
+    except Exception:
+        return []
+    out = []; i = 0
+    while i + 4 <= len(b) and len(out) < max_strings:
+        n = int.from_bytes(b[i:i + 4], "little")
+        if 2 < n <= 96 and i + 4 + 2 * n <= len(b):
+            try:
+                s = b[i + 4:i + 4 + 2 * n].decode("utf-16-le")
+                if s and all(c.isprintable() for c in s):
+                    out.append(s); i += 4 + 2 * n; continue
+            except Exception:
+                pass
+        i += 1
+    return out
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
     def _cors(self):
@@ -891,6 +913,36 @@ class H(BaseHTTPRequestHandler):
                     payload = {"available": False, "error": str(e)}
             body = json.dumps(payload).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/liveries"):   # livery designs saved for one car — THE visual identity players use to tell builds apart. READ-ONLY.
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+            ordn = q.get("ordinal", [None])[0]
+            out = {"liveries": []}
+            if TUNE is not None and ordn is not None:
+                try:
+                    root = TUNE.find_containers_root(); tag = f"{int(ordn):04d}"
+                    for d in sorted(os.listdir(root), reverse=True):
+                        if not (d.startswith(f"Livery_{tag}_") or d.startswith(f"SoulBoundLivery_{tag}_") or d.startswith(f"BaseLivery_{tag}_")):
+                            continue
+                        full = os.path.join(root, d)
+                        names = _livery_strings(os.path.join(full, "header"))
+                        out["liveries"].append({"dir": d, "kind": d.split("_")[0], "ts": d.split("_")[-1],
+                                                "name": (names[0] if names else None), "desc": (names[1] if len(names) > 1 else None),
+                                                "creator": (names[2] if len(names) > 2 else None),
+                                                "thumb": os.path.exists(os.path.join(full, "bigThumb.webp"))})
+                except Exception as e_:
+                    out["error"] = str(e_)
+            body = json.dumps(out).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/livery-thumb"):   # the livery's thumbnail image (bigThumb.webp), streamed READ-ONLY
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+            d = os.path.basename(q.get("d", [""])[0])   # basename() blocks path traversal
+            ok_prefix = d.startswith("Livery_") or d.startswith("SoulBoundLivery_") or d.startswith("BaseLivery_")
+            p = os.path.join(TUNE.find_containers_root(), d, "bigThumb.webp") if (TUNE is not None and ok_prefix) else None
+            if p and os.path.exists(p):
+                data = open(p, "rb").read()
+                self.send_response(200); self._cors(); self.send_header("Content-Type", "image/webp"); self.send_header("Cache-Control", "max-age=3600"); self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+            else:
+                self.send_response(404); self._cors(); self.end_headers()
         else:
             self.send_response(404); self._cors(); self.end_headers()
     def do_OPTIONS(self):

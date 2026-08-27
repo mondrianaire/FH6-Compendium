@@ -3435,6 +3435,13 @@
       .s-set .s-from{color:var(--muted);font-weight:600}.s-set .s-to{color:#00d27a;font-weight:800}
       .sanity-row.new{background:rgba(227,179,65,.10);border-radius:6px}
       .s-new{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.05em;color:#0b0e13;background:#e3b341;border-radius:4px;padding:0 5px;margin-right:5px;vertical-align:1px}
+      /* ---- livery gallery ---- */
+      .lvy-strip{border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin:0 0 10px;background:rgba(255,255,255,.015)}
+      .lvy-h{font-size:12px;font-weight:700;margin-bottom:5px}
+      .lvy-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:3px;scrollbar-width:thin}
+      .lvy{flex:none;width:104px;margin:0;text-align:center}
+      .lvy img{width:104px;height:62px;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block;background:var(--bg2)}
+      .lvy figcaption{font-size:9.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       /* ---- build-confirm gate ---- */
       .bcf{border:2px solid;border-radius:9px;padding:9px 12px;margin:0 0 10px;background:rgba(255,255,255,.015)}
       .bcf-hd{display:flex;align-items:baseline;gap:9px}.bcf-hd b{font-size:13.5px}
@@ -3634,6 +3641,28 @@
       }).join("");
       return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqKnown ? " · 🎮 = equipped" : " · drive to flag the equipped one"}</span></summary>${rows}</details>`;
     };
+    // ---- LIVERY GALLERY: the paintjob thumbnails from the save's Livery containers — the visual identity players
+    // actually use to tell builds apart. No tune↔livery link exists on disk (both key by car only), so this is a
+    // recognition aid, not an identity key: you see YOUR paint, you know YOUR build. READ-ONLY via the daemon. ----
+    const fetchLiveries = (ord) => {
+      if (!ord || !live.connected) return;
+      live.liveryCache = live.liveryCache || {};
+      if (live.liveryCache[ord] !== undefined) return;   // cached or in-flight
+      live.liveryCache[ord] = null;
+      fetch(liveUrl + "/liveries?ordinal=" + ord).then((r) => r.json())
+        .then((d) => { live.liveryCache[ord] = { n: (d.liveries || []).length, list: d.liveries || [] }; paintDiskDecode(); paintFloat(); })
+        .catch(() => { live.liveryCache[ord] = { n: 0, list: [] }; });
+    };
+    const liveryStrip = (ord) => {
+      live.liveryCache = live.liveryCache || {};
+      const c = live.liveryCache[ord];
+      if (c === undefined) { fetchLiveries(ord); return ""; }
+      if (!c || !c.n) return "";
+      const cards = c.list.filter((l) => l.thumb).slice(0, 12).map((l) =>
+        `<figure class="lvy" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}"><img src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" alt="livery"><figcaption>${esc(l.name || (l.kind === "SoulBoundLivery" ? "soul-bound" : l.kind === "BaseLivery" ? "base paint" : "design"))}</figcaption></figure>`).join("");
+      if (!cards) return "";
+      return `<div class="lvy-strip"><div class="lvy-h">🎨 Liveries on this car <span class="why" style="font-size:10px">— the paint is how you know the build at a glance</span></div><div class="lvy-row">${cards}</div></div>`;
+    };
     const diskDeliverableHtml = (r, opts) => {
       opts = opts || {};
       ensureFhmCss();
@@ -3671,6 +3700,7 @@
       const popBtn = opts.popBtn ? (cf && cf.reasonable ? `<button class="lab-mode" data-popout="${dl.ordinal}" title="keep this build on screen while you navigate the upgrade / tune menus" style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7;margin-left:auto">📌 Pop out</button>` : `<button class="lab-mode" disabled title="reach reasonable confidence first — see the checklist below" style="padding:3px 10px;font-size:11px;border-color:var(--line);color:var(--muted);margin-left:auto;opacity:.55;cursor:not-allowed">📌 Pop out</button>`) : "";
       const headRow = opts.inFloat ? "" : `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span>${popBtn}</div>`;
       return `<div class="block fhm" style="border-color:#00d27a">${headRow}
+        ${liveryStrip(dl.ordinal)}
         ${diskMatchBar(r, dl.ordinal)}
         ${tuneLibraryCard(r, dl.ordinal)}
         ${diskDiffBanner(dl.ordinal)}
@@ -3788,7 +3818,7 @@
         const coarse = liveCoarse(t, f);
         // DYNAMIC key: re-render when your live signature (PI/cyl) moves OR your saved build changes OR the match count
         // shifts — so "building toward the clone" actually updates as you upgrade, instead of freezing at lock time.
-        const key = "LOCK|" + t.ordinal + "|" + t.ts + "|" + (cur && cur.ts ? cur.ts : "-") + "|" + (fMatch ? f.pi + "." + f.cyl : "-") + "|" + (verify ? verify.okParts + "." + verify.okSliders : "-");
+        const key = "LOCK|" + t.ordinal + "|" + t.ts + "|" + (cur && cur.ts ? cur.ts : "-") + "|" + (fMatch ? f.pi + "." + f.cyl : "-") + "|" + (verify ? verify.okParts + "." + verify.okSliders : "-") + "|" + (((live.liveryCache || {})[t.ordinal] || {}).n || 0);
         if (el.dataset.fhmKey !== key || !el.querySelector(".fhm")) {
           el.dataset.fhmKey = key;
           el.innerHTML = cloneModeBanner(true) + coarseStrip(coarse) + verifyBanner(verify, !verify) + diskDeliverableHtml(t.payload, { popBtn: true, verify: verify });
@@ -3804,7 +3834,7 @@
       if (cached === null) { el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
       if (!cached.available) { el.innerHTML = ""; return; }   // no on-disk tune for this car — stay quiet
       const dsum = (cached.deliverable && cached.deliverable.summary) || {};
-      const key = "LIVE|" + ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "");
+      const key = "LIVE|" + ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "") + "|" + (((live.liveryCache || {})[ord] || {}).n || 0);
       if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
       el.dataset.fhmKey = key;
       el.innerHTML = cloneModeBanner(false, cached) + diskDeliverableHtml(cached, { popBtn: true });

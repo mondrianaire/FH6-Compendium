@@ -329,6 +329,11 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .course-id-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .course-id-hint { font-size: 10px; color: var(--warn); margin-top: 2px; }
 .course-id-right { flex: none; margin-left: auto; }
+.course-id-name.editable { cursor: text; border-bottom: 1px dashed transparent; transition: border-color .12s; }
+.course-id-name.editable:hover { border-bottom-color: var(--muted); }
+.course-id-nameinput { font-size: 16px; font-weight: 800; font-family: inherit; color: var(--txt); background: var(--bg2);
+  border: 1px solid var(--accent); border-radius: 5px; padding: 1px 6px; min-width: 180px; max-width: 100%; }
+.course-id-nameinput:focus { outline: none; box-shadow: 0 0 0 2px rgba(47,129,247,.3); }
 
 /* ---- COURSE SHAPE HERO: the map, front-and-centre under the identity in every stage ---- */
 .course-hero { margin: 0 0 10px; }

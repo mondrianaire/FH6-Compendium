@@ -3018,7 +3018,7 @@
             <p class="why" style="font-size:11px;margin:4px 0 6px">${feedbackReady ? `references exist for ${refsOwn}/${turnsN} turns — the per-turn deltas and slider suggestions below are grounded in this car's own best passes` : `${refsOwn}/${turnsN} turns have a reference for this car — ${Math.max(0, needRefs - refsOwn)} more clean turn${needRefs - refsOwn === 1 ? "" : "s"} needed (geometry × grip predictions fill in meanwhile)`}</p>
             ${numericTuningPanel(co, s, curCar)}
             <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
-      const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null) });
+      const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null), routeKey: co.route_key, mode: co.is_loop ? "loop" : "event" });
       if (training) return `${courseHdr}${carBanner}${courseHero(p, co)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${turnByTurnSection(co)}
@@ -4062,7 +4062,9 @@
       const named = !!rn && !/^route @/i.test(rn) && rn !== "Rivals course"; const g = geo || {};
       const meta = []; if (g.length_m) meta.push(g.length_m + " m"); if (g.turns && g.turns.length) meta.push(g.turns.length + " turns"); if (opts.topology) meta.push(opts.topology);
       const title = named ? esc(rn) : "unnamed course";
-      return `<div class="course-id">${glyph ? `<div class="course-id-glyph"${named ? "" : ' title="the shape is this course&#39;s identity — name it in the Atlas"'}>${glyph}</div>` : `<div class="course-id-glyph noshape" title="shape appears once a full lap is mapped">🗺</div>`}<div class="course-id-main"><div class="course-id-title">${opts.icon || "🏟"} <b${named ? "" : ' style="color:var(--muted);font-weight:600"'}>${title}</b></div>${meta.length ? `<div class="course-id-meta">${meta.join(" · ")}</div>` : ""}${named ? "" : `<div class="course-id-hint">its shape is the identity · title it in 🗺 Atlas</div>`}</div>${opts.right ? `<div class="course-id-right">${opts.right}</div>` : ""}</div>`;
+      const editable = !!opts.routeKey;   // double-click the title to name the course on the spot (persists to routes.json)
+      const nameB = `<b class="course-id-name${editable ? " editable" : ""}"${named ? "" : ' style="color:var(--muted);font-weight:600"'}${editable ? ` data-nameroute="${esc(opts.routeKey)}" data-curname="${named ? esc(rn) : ""}"${opts.mode ? ` data-namemode="${esc(opts.mode)}"` : ""} title="double-click to name this course"` : ""}>${title}</b>`;
+      return `<div class="course-id">${glyph ? `<div class="course-id-glyph"${named ? "" : ' title="the shape is this course&#39;s identity — name it in the Atlas"'}>${glyph}</div>` : `<div class="course-id-glyph noshape" title="shape appears once a full lap is mapped">🗺</div>`}<div class="course-id-main"><div class="course-id-title">${opts.icon || "🏟"} ${nameB}</div>${meta.length ? `<div class="course-id-meta">${meta.join(" · ")}</div>` : ""}${named ? "" : `<div class="course-id-hint">its shape is the identity · ${editable ? "<b>double-click the title</b> to name it" : "title it in 🗺 Atlas"}</div>`}</div>${opts.right ? `<div class="course-id-right">${opts.right}</div>` : ""}</div>`;
     };
     // COURSE SHAPE HERO — the interactive map is the course's single most important element; it sits directly under the
     // identity, front-and-centre, in BOTH stages (was buried in a sub-panel / a collapsed drawer). Empty state below
@@ -4847,6 +4849,22 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         const key = wrap.dataset.key; const loc = JSON.parse(localStorage.getItem("fh6Routes") || "{}"); loc[key] = { name: v }; localStorage.setItem("fh6Routes", JSON.stringify(loc));
         fetch(liveUrl + "/route", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: key, name: v, mode: wrap.dataset.mode }) }).catch(() => {});
         if (src === "live") paintSections(); else render();
+      }));
+      // DOUBLE-CLICK the course title to name it on the spot (same persistence as the Atlas: localStorage + POST /route)
+      r.querySelectorAll("[data-nameroute]").forEach((el) => el.addEventListener("dblclick", (e) => {
+        e.preventDefault(); if (el.querySelector("input")) return;
+        const key = el.dataset.nameroute, cur = el.dataset.curname || "", mode = el.dataset.namemode || null;
+        const inp = document.createElement("input"); inp.type = "text"; inp.value = cur; inp.className = "course-id-nameinput"; inp.placeholder = "name this course…"; inp.maxLength = 80;
+        el.textContent = ""; el.appendChild(inp); inp.focus(); inp.select();
+        let done = false;
+        const finish = (commit) => { if (done) return; done = true; const v = inp.value.trim();
+          if (commit && v) { const loc = JSON.parse(localStorage.getItem("fh6Routes") || "{}"); loc[key] = { name: v }; localStorage.setItem("fh6Routes", JSON.stringify(loc));
+            fetch(liveUrl + "/route", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: key, name: v, mode }) }).catch(() => {}); }
+          if (src === "live") paintSections(true); else render();   // re-render either way (restores the title on cancel)
+        };
+        inp.addEventListener("keydown", (ev) => { ev.stopPropagation(); if (ev.key === "Enter") { ev.preventDefault(); finish(true); } else if (ev.key === "Escape") { ev.preventDefault(); finish(false); } });
+        inp.addEventListener("blur", () => finish(true));
+        inp.addEventListener("click", (ev) => ev.stopPropagation());
       }));
     }
     function renderBody() {   // live only: rebuild the workflow body beneath the stream bar

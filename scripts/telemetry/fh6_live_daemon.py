@@ -364,7 +364,16 @@ def _enrich_gears(deliverable, ordn):
                 m = _re.match(r"gear_(\d+)$", str(r.get("field", "")))
                 if m and int(m.group(1)) in fdg:
                     val = round(fdg[int(m.group(1))] / fd, 3)
-                    r["value"] = val; r["display"] = f"{val}:1"; r["telemetry"] = True; r["derived"] = False; r["confidence"] = 0.97
+                    # RECONCILE, don't silently overwrite: keep the save's band-derived value alongside the telemetry
+                    # measurement. Agreement (within 4%) CORROBORATES (conf 0.97); disagreement is a CONFLICT — surfaced
+                    # to the union strip with BOTH numbers, confidence dropped, telemetry shown (it's the direct read).
+                    sv = r.get("value")
+                    r["save_value"] = sv
+                    r["value"] = val; r["display"] = f"{val}:1"; r["telemetry"] = True; r["derived"] = False
+                    if sv is not None and sv > 0 and abs(val - sv) / sv > 0.04:
+                        r["conflict"] = {"save": sv, "telemetry": val}; r["confidence"] = 0.5
+                    else:
+                        r["agree"] = sv is not None; r["confidence"] = 0.97
     except Exception:
         return
 
@@ -608,6 +617,112 @@ def _enrich_drivetrain(deliverable, ordn):
         return
 
 
+def _build_union(deliverable, ordn, match=None):
+    """THE UNION: reconcile the save decode against every telemetry measurement available for this build, so the two
+    sources BOLSTER each other instead of living as separate deliverables. Emits deliverable['union']:
+      fields[] — each reconcilable field with save+telemetry values and a status:
+                 agree (both sources, corroborated) · conflict (competing expected values -> low confidence)
+                 tele-fill (telemetry filled a save blind spot) · await (telemetry WOULD raise confidence; not captured)
+      asks[]   — the ranked, deduplicated 'drive X to raise confidence' prompts the dashboard shows prominently.
+    Best-effort: never raises; an undriven car simply yields awaits."""
+    try:
+        u = {"fields": [], "asks": []}
+        def fld(name, save_v, tele_v, status, note=None):
+            u["fields"].append({"name": name, "save": save_v, "telemetry": tele_v, "status": status, "note": note or ""})
+        def ask(key, text, gain, rank):
+            if not any(a["key"] == key for a in u["asks"]):
+                u["asks"].append({"key": key, "text": text, "gain": gain, "rank": rank})
+        car = _match_car(ordn, _deliverable_cyl(deliverable))
+        sig = (car or {}).get("sig") or {}
+        conv = next((m for m in deliverable.get("menus", []) if m.get("menu") == "Conversions"), {"rows": []})
+        rows = {r.get("item"): r for r in conv.get("rows", [])}
+        # -- build identity (from the matcher) is the foundation every other confidence stands on
+        if match and match.get("how") == "no-match":
+            ask("identity", "save THIS build in-game — no saved tune matches your live engine, so every decoded value may be another build's", "unblocks everything", 0)
+        elif match and (match.get("n_signature_ties") or 1) >= 2 and not match.get("gear_disambig"):
+            ask("identity", f"drive up through the gears — {match['n_signature_ties']} builds share this engine + PI; the gear ladder identifies the equipped one", "build identity", 0)
+        # -- engine cylinders: save-side catalog vs live NumCylinders
+        cat_cyl = _deliverable_cyl(deliverable); live_cyl = (car or {}).get("cyl")
+        if cat_cyl and live_cyl:
+            fld("Engine cylinders", f"{cat_cyl}-cyl", f"{live_cyl}-cyl", "agree" if int(cat_cyl) == int(live_cyl) else "conflict",
+                None if int(cat_cyl) == int(live_cyl) else "the save's engine family disagrees with the engine you're driving — likely decoding the wrong build")
+        elif cat_cyl:
+            fld("Engine cylinders", f"{cat_cyl}-cyl", None, "await", "one on-track frame confirms it")
+            ask("drive-once", "drive this car once — one frame confirms cylinders, redline & drivetrain layout", "engine + drivetrain", 3)
+        # -- drivetrain layout: save literally can't know FWD/RWD/AWD
+        drv = (car or {}).get("drivetrain")
+        dr_row = rows.get("drivetrain") or {}
+        if drv and drv != "?":
+            fld("Drivetrain layout", "stock/swapped only (save can't know layout)", drv, "tele-fill")
+        else:
+            fld("Drivetrain layout", "stock/swapped only", None, "await", "the save never records FWD/RWD/AWD")
+            ask("drive-once", "drive this car once — one frame confirms cylinders, redline & drivetrain layout", "engine + drivetrain", 3)
+        # -- aspiration vs measured boost
+        asp_row = rows.get("aspiration") or {}
+        asp_lbl = str(asp_row.get("value") or "")
+        boost = sig.get("boost_max")
+        if asp_lbl:
+            na = "Naturally Aspirated" in asp_lbl or "no aspiration" in asp_lbl
+            if boost is None or car is None:
+                fld("Aspiration", asp_lbl, None, "await", "a full-throttle pull reads boost and verifies it")
+                ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
+            elif na and boost > 0.5:
+                fld("Aspiration", asp_lbl, f"{boost} psi boost seen", "conflict", "the save says NA but the stream shows boost — wrong build or wrong slot read")
+            elif (not na) and boost <= 0.5 and sig.get("hp_peak"):
+                fld("Aspiration", asp_lbl, "no boost in the stream", "conflict", "the save says forced induction but WOT pulls show no boost")
+            else:
+                fld("Aspiration", asp_lbl, (f"{boost} psi" if boost and boost > 0.5 else "NA confirmed"), "agree")
+        # -- gears: aggregate the per-row reconciliation _enrich_gears recorded
+        g_meas = g_agree = g_conf = g_tot = 0
+        for t in deliverable.get("tabs", []):
+            if t.get("tab") != "Gearing":
+                continue
+            for r in t["rows"]:
+                if str(r.get("field", "")).startswith("gear_"):
+                    g_tot += 1
+                    if r.get("telemetry"):
+                        g_meas += 1
+                        if r.get("conflict"): g_conf += 1
+                        elif r.get("agree"): g_agree += 1
+        if g_tot:
+            if g_conf:
+                fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "conflict", f"{g_conf} gear{'s' if g_conf > 1 else ''} disagree with the save — competing values shown on the rows")
+            elif g_meas:
+                fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "agree" if g_meas >= g_tot else "tele-fill",
+                    None if g_meas >= g_tot else f"{g_tot - g_meas} gear{'s' if g_tot - g_meas > 1 else ''} not yet driven at full throttle")
+            else:
+                fld("Gear ratios", f"{g_tot} gears (band-derived ~85%)", None, "await", "a WOT run up through the gears measures every ratio exactly")
+            if g_meas < g_tot:
+                ask("gear-ladder", "full-throttle up through every gear — measures exact ratios (and identifies the build among same-PI clones)", "gearing exact", 1)
+        # -- peak hp (feeds the engine descriptor)
+        if not sig.get("hp_peak"):
+            ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
+        else:
+            fld("Peak power", "save holds no hp", f"~{int(sig['hp_peak'])} hp @ {sig.get('rpm_at_peak') or '?'} rpm", "tele-fill")
+        # -- PI: exact observed CarPI for THIS config vs live
+        sm = deliverable.get("summary", {}) or {}
+        live_pi = (car or {}).get("pi")
+        if sm.get("pi_total") is not None and live_pi:
+            same = abs(int(sm["pi_total"]) - int(live_pi)) <= 1
+            fld("PI", f"{sm['pi_total']} (observed for this config)", str(live_pi), "agree" if same else "conflict",
+                None if same else "live PI differs from the recorded observation — the config on disk may not be what you're driving")
+        elif sm.get("pi_total") is None:
+            fld("PI", None, (str(live_pi) if live_pi else None), "await", "PI is telemetry-exact but only recorded once THIS exact config is driven")
+            ask("drive-build", "drive this exact build once — records its exact PI against the config", "PI exact", 4)
+        # -- per-car sliders still relative -> calibration ask (the guided card does the capture)
+        rel = sm.get("sliders_relative") or 0
+        if rel:
+            ask("calibrate", f"{rel} slider{'s' if rel > 1 else ''} still read as % — use the 🎯 calibration card (two saved positions each locks them exact)", "sliders exact", 5)
+        u["asks"].sort(key=lambda a: a["rank"])
+        u["n_agree"] = sum(1 for f in u["fields"] if f["status"] == "agree")
+        u["n_conflict"] = sum(1 for f in u["fields"] if f["status"] == "conflict")
+        u["n_fill"] = sum(1 for f in u["fields"] if f["status"] == "tele-fill")
+        u["n_await"] = sum(1 for f in u["fields"] if f["status"] == "await")
+        deliverable["union"] = u
+    except Exception:
+        pass
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
     def _cors(self):
@@ -697,6 +812,7 @@ class H(BaseHTTPRequestHandler):
                         _enrich_engine_desc(deliverable, ordn)
                         _enrich_drivetrain(deliverable, ordn)
                         _enrich_gears(deliverable, ordn)
+                        _build_union(deliverable, ordn, match=match)   # reconcile save vs telemetry: agreements, conflicts, ranked drive-asks
                         payload = {"available": True, "ordinal": ordn, "name": nm, "ts": meta["ts"],
                                    "tune": tune, "deliverable": deliverable, "match": match}
                     else:
@@ -1004,8 +1120,13 @@ def disk_watcher():
                     diff = TUNE.tune_diff(TUNE.parse_tune(metas[1]["path"], ordinal_hint=ordn), tune)
                 except Exception:
                     diff = None
+            deliverable = TUNE.tune_to_deliverable(tune, nm)
+            # the SSE-pushed deliverable gets the SAME telemetry enrichment + union as /disk-tune (it used to go out
+            # raw, so a save-event repaint silently lost the measured gears/engine/drivetrain and the union strip)
+            _enrich_engine_desc(deliverable, ordn); _enrich_drivetrain(deliverable, ordn); _enrich_gears(deliverable, ordn)
+            _build_union(deliverable, ordn)
             ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": metas[0]["ts"], "available": True,
-                             "deliverable": TUNE.tune_to_deliverable(tune, nm), "diff": diff, "new_save": new_save})
+                             "deliverable": deliverable, "diff": diff, "new_save": new_save})
         except Exception:
             pass
 

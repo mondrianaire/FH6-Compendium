@@ -2999,6 +2999,45 @@
           <div class="cscore-detail"><div class="cscore-line">${gripLbl} · ${speedLbl}</div><div class="cscore-issues">${issues}</div></div></div></div>`;
     };
     const paintCornerScore = () => { const el = document.getElementById("lvCornerScore"); if (el) el.innerHTML = cornerScoreCard(); };
+    // ---- BUILD-CONFIRM GATE: tuning advice is only as good as the build identification behind its "current values", so
+    // course tuning stays locked until the DECODE confidently identifies the build you're driving. The system decides
+    // when it's confident (clean live match + a solid decode) and prompts YOU to confirm — you don't have to judge it. ----
+    const buildConfirmKey = (cid) => "fh6BuildOK:" + baseId(cid);
+    const isBuildConfirmed = (cid) => { try { return localStorage.getItem(buildConfirmKey(cid)) === "1"; } catch (e) { return false; } };
+    const setBuildConfirmed = (cid, v) => { try { if (v) localStorage.setItem(buildConfirmKey(cid), "1"); else localStorage.removeItem(buildConfirmKey(cid)); } catch (e) {} };
+    const buildConfidence = (cached) => {
+      const R = { ready: false, pct: 0, why: [], need: [], hardBlock: false, matchLbl: "" };
+      if (!cached || !cached.available || !cached.deliverable) { R.need.push("drive the car so its build reads from the save file"); R.hardBlock = true; return R; }
+      const dl = cached.deliverable, m = cached.match || {}, sm = dl.summary || {};
+      const n = m.n_saves || (m.saves || []).length || 1, ties = m.n_signature_ties || 1;
+      if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`save THIS build in-game — you're in a ${m.live_cyl}-cyl car but the nearest save is ${m.chosen_cyl}-cyl, so its parts &amp; sliders aren't the build you're driving`); }
+      else if (m.how === "gear-matched") { R.matchLbl = "gear-matched"; R.why.push(`identified the equipped build by its live gear ladder (${ties} share this engine + PI)`); }
+      else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(`drive up through the gears once — ${ties} builds share this engine + PI, and the gear ladder is how I tell which one you're on`); }
+      else if (m.how === "signature") { R.matchLbl = "signature"; R.why.push("matched to the car you're driving (cylinders + PI)"); }
+      else if (m.how === "picked") { R.matchLbl = "pinned"; R.why.push("pinned to a specific saved tune"); }
+      else if (n > 1) { R.hardBlock = true; R.matchLbl = "unmatched"; R.need.push(`drive so I can match the equipped build (${n} saved tunes exist), or pick it in the decode panel`); }
+      else { R.matchLbl = "single save"; R.why.push("single saved tune for this car — unambiguous"); }
+      R.why.push(`${sm.parts_installed || 0} parts read exact`);
+      const exact = sm.sliders_exact != null ? sm.sliders_exact : (sm.sliders_absolute || 0), rel = sm.sliders_relative || 0;
+      if (exact > 0) R.why.push(`${exact} slider values exact`);
+      if (rel > 0) R.need.push(`${rel} slider${rel === 1 ? "" : "s"} still read as % — calibrate ride-height/downforce for exact current values (advice uses vetted baselines meanwhile)`);
+      const conf = dl.confidence || 0; R.pct = R.hardBlock ? 0 : Math.round(conf * 100);
+      R.ready = !R.hardBlock && conf >= 0.6;   // identified live + a solid decode → the system says "ready to confirm"
+      return R;
+    };
+    const buildConfirmCard = (cid, bc) => {
+      const col = bc.hardBlock ? "#e5414e" : bc.ready ? "#00d27a" : "#e3b341";
+      const head = bc.hardBlock ? "⏳ Identifying your build" : bc.ready ? "✅ Build confidently identified" : "⏳ Gathering build data";
+      const sub = bc.hardBlock ? "Tuning advice stays locked until I can confidently identify the exact build you're driving — otherwise the numbers would sit on the wrong current values."
+        : bc.ready ? "The decode confidently matches the build you're driving. Confirm to unlock tuning advice grounded in your real current values."
+        : "Almost there — I'll light up Confirm the moment the build reads confidently.";
+      const whyList = bc.why.length ? `<div class="bcf-list ok">${bc.why.map((w) => `<div>✓ ${w}</div>`).join("")}</div>` : "";
+      const needList = bc.need.length ? `<div class="bcf-list need"><div class="bcf-need-h">${bc.hardBlock ? "needed to identify the build:" : "to reach exact advice:"}</div>${bc.need.map((w) => `<div>→ ${w}</div>`).join("")}</div>` : "";
+      const btn = bc.hardBlock ? ""
+        : bc.ready ? `<button class="bcf-btn go" data-confirmbuild="${esc(cid)}">✓ Confirm build &amp; unlock tuning</button>`
+        : `<button class="bcf-btn wait" data-confirmbuild="${esc(cid)}" title="not yet confident — you can confirm anyway, but I'd wait">confirm anyway (not yet confident)</button>`;
+      return `<div class="bcf" style="border-color:${col}"><div class="bcf-hd" style="color:${col}"><b>${head}</b>${bc.hardBlock ? "" : `<span class="bcf-pct">${bc.pct}% confident</span>`}</div><p class="why" style="font-size:11.5px;margin:2px 0 7px">${sub}</p>${whyList}${needList}${btn}</div>`;
+    };
     const liveCourseDashboard = (co, s) => {
       const p = courseParts(co, s); const tr = co.track || {}; const tu = co.turns || {}; const dr = co.driving || {}; const lapsN = co.laps ? co.laps.total : co.runs; const f = live.frame || {};
       // CAR-AWARE: everything car-specific (references, tuning, feedback) follows the EQUIPPED car; course LEARNING (turns/map/profile) is the track and stays.
@@ -3377,6 +3416,31 @@
       .s-set .s-from{color:var(--muted);font-weight:600}.s-set .s-to{color:#00d27a;font-weight:800}
       .sanity-row.new{background:rgba(227,179,65,.10);border-radius:6px}
       .s-new{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.05em;color:#0b0e13;background:#e3b341;border-radius:4px;padding:0 5px;margin-right:5px;vertical-align:1px}
+      /* ---- SAVE x TELEMETRY union strip ---- */
+      .us{border:1px solid #2f81f7;border-radius:8px;background:rgba(47,129,247,.06);padding:8px 11px;margin:0 0 11px}
+      .us.has-conflict{border-color:#e5414e;background:rgba(229,65,78,.05)}
+      .us-hd{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+      .us-hd>b{font-size:13px;color:#2f81f7}.us.has-conflict .us-hd>b{color:#e5414e}
+      .us-chip{font-size:10.5px;border:1px solid;border-radius:10px;padding:1px 8px;white-space:nowrap;font-weight:700}
+      .us-chip.ok{border-color:#00d27a;color:#00d27a}.us-chip.bad{border-color:#e5414e;color:#e5414e;background:rgba(229,65,78,.12)}
+      .us-chip.fill{border-color:#2f81f7;color:#2f81f7}.us-chip.wait{border-color:#e3b341;color:#e3b341}
+      .us-row{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;padding:3px 0;font-size:11.5px;border-top:1px solid rgba(255,255,255,.05)}
+      .us-row:first-of-type{border-top:none}
+      .us-row.conflict{background:rgba(229,65,78,.08);border-radius:6px;padding-left:5px;padding-right:5px}
+      .us-ic{flex:none;font-weight:800}.us-name{min-width:118px}
+      .us-vals{font-variant-numeric:tabular-nums}
+      .us-src{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:4px}
+      .us-src.tel{border-color:#2f81f7;color:#2f81f7}
+      .us-x{margin:0 6px;color:var(--muted)}
+      .us-note{flex-basis:100%;font-size:10.5px;color:#e5414e;padding-left:20px}
+      .us-row.await .us-note,.us-row.tele-fill .us-note{color:var(--muted)}
+      .us-asks{margin-top:7px;border:1px dashed #e3b341;border-radius:7px;padding:6px 10px;background:rgba(227,179,65,.06)}
+      .us-asks-h{font-size:9.5px;letter-spacing:.12em;font-weight:800;color:#e3b341;margin-bottom:3px}
+      .us-ask{display:flex;align-items:baseline;gap:6px;font-size:11.5px;padding:1px 0}
+      .us-ask-arrow{color:#e3b341;font-weight:800}
+      .us-gain{margin-left:auto;font-size:9.5px;color:var(--muted);white-space:nowrap;border:1px solid var(--line);border-radius:8px;padding:0 6px}
+      .fhm-cflag{display:inline-block;font-size:9.5px;font-weight:800;color:#e5414e;border:1px solid #e5414e;border-radius:5px;padding:0 5px;margin-left:5px;background:rgba(229,65,78,.1);vertical-align:1px}
+      .fhm-aflag{display:inline-block;font-size:9px;font-weight:800;color:#00d27a;margin-left:5px;vertical-align:1px;opacity:.85}
       /* ---- one-time per-car calibration card (ride height / downforce ranges) ---- */
       .cal-card{border:1px solid #e6a63a;border-radius:8px;background:rgba(230,166,58,.07);padding:8px 11px;margin:0 0 11px}
       .cal-hd{margin-bottom:6px}.cal-hd b{font-size:13px;color:#e6a63a}
@@ -3485,6 +3549,20 @@
         return `<div class="cal-row" id="cal-${ord}-${esc(r.field)}"><span class="cal-lbl">${esc(r.label || r.field)}</span><span class="cal-pos">${pct}% toward ${esc((r.poles || [])[0] || r.pole || "")}</span>${dots}<input class="fhm-rin" data-rangeord="${ord}" data-rangefield="${esc(r.field)}" data-rangenorm="${r.fill}" data-rangeunit="${esc(r.unit || "")}" placeholder="in-game #" inputmode="decimal">${r.unit ? `<span class="cal-unit">${esc(r.unit)}</span>` : ""}<span class="fhm-rin-msg"></span></div>`; };
       return `<div class="cal-card"><div class="cal-hd"><b>🎯 One-time calibration</b> <span class="why" style="font-size:10.5px">${un.length} slider${un.length > 1 ? "s" : ""} still read as % — type the number shown in-game, then move that slider to a different setting, re-save, and type it again. Two points lock this car's range for good.</span></div>${un.map(crow).join("")}</div>`;
     };
+    // ---- SAVE × TELEMETRY UNION STRIP: the reconciled decode. Every field the daemon could cross-check carries both
+    // sources — agreements corroborate, disagreements flag as ⚠ CONFLICTS (competing expected values → low confidence),
+    // and where a telemetry reading WOULD raise confidence, the ranked "drive X" asks say exactly what to drive. ----
+    const unionStrip = (dl) => {
+      const u = dl && dl.union; if (!u || (!(u.fields || []).length && !(u.asks || []).length)) return "";
+      const ICO = { agree: "✓", conflict: "⚠", "tele-fill": "📡", await: "○" };
+      const COL = { agree: "#00d27a", conflict: "#e5414e", "tele-fill": "#2f81f7", await: "#e3b341" };
+      const ORD = { conflict: 0, agree: 1, "tele-fill": 2, await: 3 };
+      const chips = `${u.n_agree ? `<span class="us-chip ok">✓ ${u.n_agree} corroborated</span>` : ""}${u.n_conflict ? `<span class="us-chip bad">⚠ ${u.n_conflict} conflict${u.n_conflict > 1 ? "s" : ""}</span>` : ""}${u.n_fill ? `<span class="us-chip fill">📡 ${u.n_fill} filled by telemetry</span>` : ""}${u.n_await ? `<span class="us-chip wait">○ ${u.n_await} awaiting telemetry</span>` : ""}`;
+      const frow = (f) => `<div class="us-row ${f.status}"><span class="us-ic" style="color:${COL[f.status] || "var(--muted)"}">${ICO[f.status] || "·"}</span><b class="us-name">${esc(f.name)}</b><span class="us-vals">${f.save != null ? `<span class="us-src">save</span>${esc(String(f.save))}` : ""}${f.save != null && f.telemetry != null ? `<span class="us-x">×</span>` : ""}${f.telemetry != null ? `<span class="us-src tel">📡</span>${esc(String(f.telemetry))}` : ""}</span>${f.note ? `<div class="us-note">${esc(f.note)}</div>` : ""}</div>`;
+      const fields = (u.fields || []).slice().sort((a, b) => (ORD[a.status] ?? 9) - (ORD[b.status] ?? 9));
+      const asks = (u.asks || []).length ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
+      return `<div class="us${u.n_conflict ? " has-conflict" : ""}"><div class="us-hd"><b>🔗 Save × telemetry — one reconciled decode</b>${chips}</div>${fields.map(frow).join("")}${asks}</div>`;
+    };
     const diskDeliverableHtml = (r, opts) => {
       opts = opts || {};
       ensureFhmCss();
@@ -3512,7 +3590,7 @@
           const rel = row.value == null; const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
           const val = rel
             ? `<span class="fhm-slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%${row.per_car && !String(row.field).startsWith("gear") ? ` <button class="fhm-caljump" data-caljump="cal-${dl.ordinal}-${esc(row.field)}" title="set the exact value — jumps to the one-time calibration above">🎯 set${(row.cal_points || 0) >= 1 ? " · 1/2" : ""}</button>` : ""}</span>`
-            : `<span class="fhm-slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global gear / final-drive band — exact on your next gear-ladder drive"' : ""}>${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>`;
+            : `<span class="fhm-slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global gear / final-drive band — exact on your next gear-ladder drive"' : ""}>${esc(String(row.value))}<small style="font-size:10px;color:var(--muted);margin-left:2px">${esc(row.unit || "")}</small></span>${row.conflict ? `<span class="fhm-cflag" title="COMPETING VALUES — the save decodes ${row.conflict.save} but telemetry measures ${row.conflict.telemetry}; showing the telemetry read at low confidence">⚠ save ${row.conflict.save}</span>` : row.agree ? `<span class="fhm-aflag" title="corroborated — the save's value and the telemetry measurement agree">✓×2</span>` : ""}`;
           return `<div class="fhm-sl"><div class="fhm-slt"><span class="fhm-sll">${vdot(vsl[row.field])}${esc(row.label || row.field)}</span>${val}</div><div class="fhm-trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div><div class="fhm-pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
         }).join("")}</div>`).join("");
         return `<div style="margin-bottom:13px"><div class="fhm-tab">${esc(t.tab)}</div>${secHtml}</div>`;
@@ -3524,6 +3602,7 @@
         ${diskMatchBar(r, dl.ordinal)}
         ${diskDiffBanner(dl.ordinal)}
         ${confMeterHtml(r)}
+        ${unionStrip(dl)}
         <p class="why" style="font-size:11px;margin:4px 0 8px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_exact != null ? sm.sliders_exact : sm.sliders_absolute} exact</b>${sm.sliders_derived ? ` · <b style="color:#8fd14f" title="gears + final drive, de-normalized from the global band">${sm.sliders_derived} derived</b>` : ""} · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
         ${(() => { const known = sm.pi_known_parts || 0, tot = sm.pi_total_parts || 0; if (!tot && sm.pi_total == null) return ""; const priced = known >= tot && tot > 0;
           const oc = sm.pi_obs_car || 0, ot = sm.pi_obs_total || 0;

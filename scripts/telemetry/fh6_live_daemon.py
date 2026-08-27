@@ -348,6 +348,16 @@ def _enrich_gears(deliverable, ordn):
                 gl = {g["gear"]: g["fd_gear"] for g in (c.get("gears") or []) if g.get("fd_gear")}
                 if gl:
                     fdg = gl; break
+        # STABILITY: cache the measured ladder per ordinal so gears don't pop out of 'measured' when a fresh analysis
+        # briefly lacks them (sparse WOT frames in the last window) — the ladder is a physical property of the build.
+        if not hasattr(ST, "fdg_cache"):
+            ST.fdg_cache = {}
+        if fdg:
+            ST.fdg_cache[str(ordn)] = {"fdg": fdg, "t": time.time()}
+        else:
+            cached = ST.fdg_cache.get(str(ordn))
+            if cached and time.time() - cached["t"] < 1800:
+                fdg = cached["fdg"]
         if not fdg:
             return
         fd = None
@@ -373,10 +383,23 @@ def _enrich_gears(deliverable, ordn):
                     r["value"] = val; r["display"] = f"{val}:1"; r["telemetry"] = True; r["derived"] = False
                     if sv is not None and sv > 0:
                         ratios.append(val / sv)
-                    if sv is not None and sv > 0 and abs(val - sv) / sv > 0.04:
-                        r["conflict"] = {"save": sv, "telemetry": val}; r["confidence"] = 0.5
+                    # HYSTERESIS: verdicts were flapping — each ~20s analysis re-measures the ladder with a little
+                    # jitter, and a single 4% cutoff flipped agree<->conflict constantly. Now: clearly out (>=7%) ->
+                    # conflict; clearly in (<=3.5%) -> agree; the band between KEEPS the previous verdict (per
+                    # ordinal+gear+save-value, so a new save/tune naturally resets it).
+                    if not hasattr(ST, "gear_verdicts"):
+                        ST.gear_verdicts = {}
+                    if sv is not None and sv > 0:
+                        dev = abs(val - sv) / sv
+                        vkey = f"{ordn}|{m.group(1)}|{round(sv, 3)}"
+                        verdict = "conflict" if dev >= 0.07 else ("agree" if dev <= 0.035 else ST.gear_verdicts.get(vkey, "agree"))
+                        ST.gear_verdicts[vkey] = verdict
+                        if verdict == "conflict":
+                            r["conflict"] = {"save": sv, "telemetry": val}; r["confidence"] = 0.5
+                        else:
+                            r["agree"] = True; r["confidence"] = 0.97
                     else:
-                        r["agree"] = sv is not None; r["confidence"] = 0.97
+                        r["confidence"] = 0.97
         # DIAGNOSE a systematic gear conflict. Both sides are derived through bands (save: gear band; telemetry:
         # exact fd_gear / band-derived FD), so when they disagree the question is WHICH band is off. If every gear is
         # off by the SAME factor k, the shared divisor — the final drive — is the culprit (a per-gear problem would
@@ -648,7 +671,17 @@ def _build_union(deliverable, ordn, match=None):
             if not any(a["key"] == key for a in u["asks"]):
                 u["asks"].append({"key": key, "text": text, "gain": gain, "rank": rank})
         car = _match_car(ordn, _deliverable_cyl(deliverable))
-        sig = (car or {}).get("sig") or {}
+        # sig (boost_max / hp_peak / rpm_at_peak) lives on the ANALYZER's session cars — NOT on ST.cars (the live
+        # config registry _match_car returns). Reading it off the wrong record left aspiration stuck on 'await'
+        # forever, even after a full pull to redline.
+        sig = {}
+        with ST.lock:
+            sj = ST.session_json
+        if sj:
+            want = _deliverable_cyl(deliverable)
+            cands = [c for c in sj.get("cars", []) if str(c.get("ordinal")) == str(ordn)]
+            sj_car = next((c for c in cands if want and c.get("cyl") == want), cands[0] if cands else None)
+            sig = (sj_car or {}).get("sig") or {}
         conv = next((m for m in deliverable.get("menus", []) if m.get("menu") == "Conversions"), {"rows": []})
         rows = {r.get("item"): r for r in conv.get("rows", [])}
         # -- build identity (from the matcher) is the foundation every other confidence stands on
@@ -678,7 +711,7 @@ def _build_union(deliverable, ordn, match=None):
         boost = sig.get("boost_max")
         if asp_lbl:
             na = "Naturally Aspirated" in asp_lbl or "no aspiration" in asp_lbl
-            if boost is None or car is None:
+            if boost is None:   # no analyzer sig yet for this build — nothing measured to check against
                 fld("Aspiration", asp_lbl, None, "await", "a full-throttle pull reads boost and verifies it")
                 ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
             elif na and boost > 0.5:

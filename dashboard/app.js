@@ -3587,8 +3587,9 @@
           const cls = it.stock ? "stock" : (it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named");
           const pi = it.pi != null ? `<span class="fhm-pi" title="estimated PI cost vs stock — self-building from your driven configs">+${it.pi}</span>` : "";
           const sub = it.engine_type ? `<div class="fhm-prow-sub${it.engine_type_conf === "measured" ? " meas" : ""}" title="${it.engine_type_conf === "measured" ? "from live telemetry (cyl / redline / hp)" : "from the save + build capture — drive it for measured cyl / hp"}">${it.engine_type_conf === "measured" ? "📡 " : ""}${esc(it.engine_type)}</div>` : "";
+          const noteSub = it.note ? `<div class="fhm-prow-sub" style="font-style:italic">ℹ ${esc(it.note)}</div>` : "";
           const swapHint = (it.item === "powertrain" && !it.stock && it.engine_family != null) ? `<div class="fhm-prow-sub" style="color:var(--accent2);font-style:normal" title="the engine's identity is recovered from the save's engine-internals family (${it.engine_family}) — the old decode read the wrong byte and called every car stock. In-game, open Engine Swap and pick the tile whose signature matches.">🔧 Engine Swap menu → match this tile${it.engine_catalog && it.engine_catalog.shared_swap ? " · shared swap engine" : ""}</div>` : "";
-          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${vdot(vp[it.item])}${esc(it.item.replace(/_/g, " "))}${sub}${swapHint}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}${pi}</span></div>`;
+          return `<div class="fhm-prow ${it.stock ? "stock" : ""}"><span>${vdot(vp[it.item])}${esc(it.item.replace(/_/g, " "))}${sub}${noteSub}${swapHint}</span>${fhmPips(it.upgrade || "")}<span class="fhm-up ${cls}">${esc(it.upgrade || it.value)}${pi}</span></div>`;
         }).join("");
         return `<div class="fhm-cat"><div class="fhm-cath"><span class="bar"></span><b>${esc(m.menu)}</b><span class="k">${inst}/${m.rows.length}</span></div>${rows}</div>`;
       }).join("");

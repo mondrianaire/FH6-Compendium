@@ -806,6 +806,16 @@ def _part_view(cat, val, ordinal, gear_count=None):
             lbl, cf = _DIFF[idx]
             return out(lbl, cf)
         return out(f"Upgraded differential (tier {idx}) — type unverified", "category")
+    if cat == "engine":
+        # NOT a shop tile: the engine slot's family is always the car's own ordinal and its tier is the engine's
+        # aggregate BUILD LEVEL — it moves as a CONSEQUENCE of installing the internals below (camshaft, valves,
+        # pistons, …). Labelling it 'Sport Engine Block' sent people hunting for a part that doesn't exist.
+        if idx == 0:
+            return out("Stock", "named", stock=True)
+        o = out(f"{_tier_word(idx)}-level engine build", "dim")
+        o["note"] = "derived indicator — not a shop part; it reflects the engine internals installed below"
+        o["derived_level"] = True
+        return o
     # standard Stock/Street/Sport/Race ladder (brakes, ARB, springs, clutch, driveline, engine internals, weight, aero, …)
     if idx == 0:
         return out("Stock", "named", stock=True)
@@ -920,10 +930,13 @@ def tune_to_deliverable(tune, car_name=None):
             pv = _part_view(k, tune["parts"][k], ordn, gear_count=tune["gear_count"])
             if pv["raw"] is None:
                 continue   # empty slot — omit from the install list
-            rows.append({"item": k, "category": pv["category"], "value": pv["label"],
-                         "upgrade": pv["upgrade"], "conf": pv["conf"], "tier": pv["tier"],
-                         "stock": pv["stock"], "raw": pv["raw"],
-                         "status": "measured", "confidence": 1.0})
+            row_d = {"item": k, "category": pv["category"], "value": pv["label"],
+                     "upgrade": pv["upgrade"], "conf": pv["conf"], "tier": pv["tier"],
+                     "stock": pv["stock"], "raw": pv["raw"],
+                     "status": "measured", "confidence": 1.0}
+            if pv.get("note"): row_d["note"] = pv["note"]
+            if pv.get("derived_level"): row_d["derived_level"] = True
+            rows.append(row_d)
         if rows:
             menus.append({"menu": menu_name, "rows": rows})
     menus.insert(0, {"menu": "Conversions", "rows": _conversion_rows(tune, ordn)})   # gates every other option — engine swap, aspiration, drivetrain
@@ -978,6 +991,8 @@ def tune_to_deliverable(tune, car_name=None):
         for r in m["rows"]:
             if r.get("raw") is None or r.get("stock"):
                 continue                       # stock / empty slots are not installed upgrades
+            if r.get("derived_level"):
+                continue                       # derived indicators (engine build level) are not installable — no PI of their own
             slot = _pi_slot_for(r, tune["parts"])
             pv = pi_for(slot, r.get("tier"))
             r["pi"] = pv                        # int estimate, or None when unknown

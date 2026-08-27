@@ -355,14 +355,20 @@ def _enrich_gears(deliverable, ordn):
         if not hasattr(ST, "fdg_cache"):
             ST.fdg_cache = {}
         ckey = f"{ordn}|{deliverable.get('gear_count')}|{_deliverable_cyl(deliverable)}"
+        now_t = time.time()
+        for k in [k for k, v in ST.fdg_cache.items() if now_t - v["t"] > 3600]:   # evict, don't just ignore — the dict must not grow for the daemon's lifetime
+            ST.fdg_cache.pop(k, None)
         if fdg:
             if max(fdg) <= (deliverable.get("gear_count") or 99):   # a ladder with more gears than this save's box belongs to another build — don't cache it against this one
-                ST.fdg_cache[ckey] = {"fdg": fdg, "t": time.time()}
+                prev = ST.fdg_cache.get(ckey)
+                if prev and now_t - prev["t"] < 1800:   # MERGE: a sparse fresh sample must not clobber a fuller recent ladder (fresh gears win per-gear)
+                    merged = dict(prev["fdg"]); merged.update(fdg); fdg = merged
+                ST.fdg_cache[ckey] = {"fdg": fdg, "t": now_t}
             else:
                 fdg = {}
         if not fdg:
             cached = ST.fdg_cache.get(ckey)
-            if cached and time.time() - cached["t"] < 1800:
+            if cached and now_t - cached["t"] < 1800:
                 fdg = cached["fdg"]
         if not fdg:
             return
@@ -398,12 +404,17 @@ def _enrich_gears(deliverable, ordn):
                     if sv is not None and sv > 0:
                         dev = abs(val - sv) / sv
                         vkey = f"{ordn}|{m.group(1)}|{round(sv, 3)}"
-                        verdict = "conflict" if dev >= 0.07 else ("agree" if dev <= 0.035 else ST.gear_verdicts.get(vkey, "agree"))
+                        # first-seen inside the dead band is NEAR — measured but neither corroborated nor conflicting.
+                        # It resolves to agree/conflict only when the evidence clearly crosses a line; a persistent
+                        # 4-7% mismatch must not masquerade as 'agree 0.97' forever.
+                        verdict = "conflict" if dev >= 0.07 else ("agree" if dev <= 0.035 else ST.gear_verdicts.get(vkey, "near"))
                         ST.gear_verdicts[vkey] = verdict
                         if verdict == "conflict":
                             r["conflict"] = {"save": sv, "telemetry": val}; r["confidence"] = 0.5
-                        else:
+                        elif verdict == "agree":
                             r["agree"] = True; r["confidence"] = 0.97
+                        else:
+                            r["confidence"] = 0.85   # near: shown as measured, no corroborated/conflict flag
                     else:
                         r["confidence"] = 0.97
         # DIAGNOSE a systematic gear conflict. Both sides are derived through bands (save: gear band; telemetry:
@@ -692,7 +703,12 @@ def _build_union(deliverable, ordn, match=None):
         if sj:
             want = _deliverable_cyl(deliverable)
             cands = [c for c in sj.get("cars", []) if str(c.get("ordinal")) == str(ordn)]
-            sj_car = next((c for c in cands if want and c.get("cyl") == want), cands[0] if cands else None)
+            # STRICT build match — never fall back to "any car with this ordinal": another build's boost/hp signature
+            # would manufacture aspiration/power conflicts for a perfectly consistent save (multi-build ordinals are
+            # exactly the case this machinery exists for). Only take cands[0] when cyl is underivable AND unambiguous.
+            sj_car = next((c for c in cands if want and c.get("cyl") == want), None)
+            if sj_car is None and not want and len(cands) == 1:
+                sj_car = cands[0]
             sig = (sj_car or {}).get("sig") or {}
         conv = next((m for m in deliverable.get("menus", []) if m.get("menu") == "Conversions"), {"rows": []})
         rows = {r.get("item"): r for r in conv.get("rows", [])}
@@ -730,6 +746,10 @@ def _build_union(deliverable, ordn, match=None):
                 fld("Aspiration", asp_lbl, f"{boost} psi boost seen", "conflict", "the save says NA but the stream shows boost — wrong build or wrong slot read")
             elif (not na) and boost <= 0.5 and sig.get("hp_peak"):
                 fld("Aspiration", asp_lbl, "no boost in the stream", "conflict", "the save says forced induction but WOT pulls show no boost")
+            elif (not na) and boost <= 0.5:
+                # forced induction on the save but no boost seen AND no pull evidence — that's absent data, not agreement
+                fld("Aspiration", asp_lbl, None, "await", "no boosted pull measured yet — a full-throttle pull to redline verifies the charger")
+                ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
             else:
                 fld("Aspiration", asp_lbl, (f"{boost} psi" if boost and boost > 0.5 else "NA confirmed"), "agree")
         # -- gears: aggregate the per-row reconciliation _enrich_gears recorded
@@ -804,10 +824,12 @@ def _livery_strings(path, max_strings=3):
     out = []; i = 0
     while i + 4 <= len(b) and len(out) < max_strings:
         n = int.from_bytes(b[i:i + 4], "little")
-        if 2 < n <= 96 and i + 4 + 2 * n <= len(b):
+        # accept 1-char strings too (a 1-2 char name is legal; rejecting it shifted creator into the desc slot);
+        # guard against binary noise by requiring at least one alphanumeric character
+        if 0 < n <= 96 and i + 4 + 2 * n <= len(b):
             try:
                 s = b[i + 4:i + 4 + 2 * n].decode("utf-16-le")
-                if s and all(c.isprintable() for c in s):
+                if s and s.strip() and any(c.isalnum() for c in s) and all(c.isprintable() for c in s):
                     out.append(s); i += 4 + 2 * n; continue
             except Exception:
                 pass
@@ -934,13 +956,24 @@ class H(BaseHTTPRequestHandler):
             body = json.dumps(out).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/livery-thumb"):   # the livery's thumbnail image (bigThumb.webp), streamed READ-ONLY
-            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
-            d = os.path.basename(q.get("d", [""])[0])   # basename() blocks path traversal
-            ok_prefix = d.startswith("Livery_") or d.startswith("SoulBoundLivery_") or d.startswith("BaseLivery_")
-            p = os.path.join(TUNE.find_containers_root(), d, "bigThumb.webp") if (TUNE is not None and ok_prefix) else None
-            if p and os.path.exists(p):
-                data = open(p, "rb").read()
-                self.send_response(200); self._cors(); self.send_header("Content-Type", "image/webp"); self.send_header("Cache-Control", "max-age=3600"); self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+            data = None
+            try:
+                import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+                d = os.path.basename(q.get("d", [""])[0])   # basename() blocks path traversal
+                ok_prefix = d.startswith("Livery_") or d.startswith("SoulBoundLivery_") or d.startswith("BaseLivery_")
+                if TUNE is not None and ok_prefix:
+                    root = TUNE.find_containers_root()
+                    if root:
+                        p = os.path.join(root, d, "bigThumb.webp")
+                        if os.path.exists(p):
+                            data = open(p, "rb").read()
+            except Exception:
+                data = None   # missing root / mid-save file swap must yield a clean 404, not a dead socket
+            if data:
+                # NOTE: no _cors() here — it stamps Cache-Control: no-cache, which would defeat the max-age below
+                self.send_response(200); self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Type", "image/webp"); self.send_header("Cache-Control", "max-age=3600")
+                self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
             else:
                 self.send_response(404); self._cors(); self.end_headers()
         else:
@@ -1081,6 +1114,7 @@ def reset_session():
     with ST.lock:
         ST.strip = []; ST.corners = []; ST._corner = None; ST._sec = None; ST._sec_rows = []; ST.cars = {}
         ST.analysis = None; ST.session_json = None; ST.session_path = None
+        ST.fdg_cache = {}; ST.gear_verdicts = {}   # measured-ladder cache + hysteresis state die with the session — stale telemetry must not outlive it
         ST.last_on_t = None; ST.live_since_analysis = 0.0; ST.drive_since_periodic = 0.0
         ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
         ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None   # keep the loop DEFINITION, reset its lap count
@@ -1233,22 +1267,35 @@ def disk_watcher():
                 continue
             new_save = bool(last and last[0] == ordn)   # same car + newer file = a fresh save
             last = key
-            tune = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+            if new_save:
+                # a fresh save may change gearing/identity — drop this car's measured-ladder cache + gear verdicts so
+                # stale telemetry can't be compared against the new tune (phantom conflicts), and its livery may have
+                # changed too (the client clears its own livery cache off this event)
+                if hasattr(ST, "fdg_cache"):
+                    for k in [k for k in ST.fdg_cache if k.startswith(f"{ordn}|")]:
+                        ST.fdg_cache.pop(k, None)
+                if hasattr(ST, "gear_verdicts"):
+                    for k in [k for k in ST.gear_verdicts if k.startswith(f"{ordn}|")]:
+                        ST.gear_verdicts.pop(k, None)
             nm = names_load().get("cars", {}).get(str(ordn)) or {}
             nm = nm.get("name") if isinstance(nm, dict) else nm
             diff = None
             if new_save and len(metas) >= 2:
                 try:
-                    diff = TUNE.tune_diff(TUNE.parse_tune(metas[1]["path"], ordinal_hint=ordn), tune)
+                    diff = TUNE.tune_diff(TUNE.parse_tune(metas[1]["path"], ordinal_hint=ordn),
+                                          TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn))
                 except Exception:
                     diff = None
+            # decode the MATCHED save (same _pick_meta as /disk-tune) and CARRY the match — the emit used to decode
+            # metas[0] with no match key, which made the client's confirm gate read every save event as
+            # 'single save — unambiguous' and bypassed applyDiskTune's no-match guard.
+            meta_m, match_m = _pick_meta(metas, ordn)
+            tune = TUNE.parse_tune(meta_m["path"], ordinal_hint=ordn)
             deliverable = TUNE.tune_to_deliverable(tune, nm)
-            # the SSE-pushed deliverable gets the SAME telemetry enrichment + union as /disk-tune (it used to go out
-            # raw, so a save-event repaint silently lost the measured gears/engine/drivetrain and the union strip)
             _enrich_engine_desc(deliverable, ordn); _enrich_drivetrain(deliverable, ordn); _enrich_gears(deliverable, ordn)
-            _build_union(deliverable, ordn)
-            ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": metas[0]["ts"], "available": True,
-                             "deliverable": deliverable, "diff": diff, "new_save": new_save})
+            _build_union(deliverable, ordn, match=match_m)
+            ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": meta_m["ts"], "available": True,
+                             "deliverable": deliverable, "match": match_m, "diff": diff, "new_save": new_save})
         except Exception:
             pass
 

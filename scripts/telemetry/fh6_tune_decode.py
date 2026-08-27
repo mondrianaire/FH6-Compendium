@@ -334,7 +334,9 @@ def parse_tune(path, ordinal_hint=None):
         if per_car and not rng and ordinal is not None:
             for p in _pts_doc.get(f"{int(ordinal)}|{name}", []):
                 try:
-                    if abs(float(p[0]) - norm) <= 0.002:
+                    # float-rounding slack ONLY (norm round-trips at 4 decimals): a looser tolerance spans real slider
+                    # notches on fine sliders, so a nudged slider would keep reporting the stale typed value as exact
+                    if abs(float(p[0]) - norm) <= 0.0005:
                         anchor = float(p[1]); break
                 except Exception:
                     continue

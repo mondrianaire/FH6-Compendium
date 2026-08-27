@@ -2464,7 +2464,7 @@
       }));
     }
     const fmt = (v, d = 2) => (v == null ? "—" : (+v).toFixed(d));
-    const esc = (t) => String(t).replace(/"/g, "&quot;");
+    const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");   // FULL escape — livery names/creators are arbitrary user text from downloaded designs; quote-only escaping was an XSS vector into innerHTML
     // tiny SVG line chart: series = [{pts:[[x,y]...], col, label}]
     const chart = (series, o = {}) => {
       const w = o.w || 380, h = o.h || 130, L = 36, B = 22, R = 8, T = 8;
@@ -3006,8 +3006,15 @@
     const isBuildConfirmed = (cid) => { try { return localStorage.getItem(buildConfirmKey(cid)) === "1"; } catch (e) { return false; } };
     const setBuildConfirmed = (cid, v) => { try { if (v) localStorage.setItem(buildConfirmKey(cid), "1"); else localStorage.removeItem(buildConfirmKey(cid)); } catch (e) {} };
     const buildConfidence = (cached) => {
-      const R = { ready: false, pct: 0, why: [], need: [], hardBlock: false, matchLbl: "" };
-      if (!cached || !cached.available || !cached.deliverable) { R.need.push("drive the car so its build reads from the save file"); R.hardBlock = true; return R; }
+      const R = { ready: false, pct: 0, why: [], need: [], hardBlock: false, matchLbl: "", noSave: false };
+      if (cached && cached.available === false) {
+        // definitively NO saved tune on disk — there are no wrong current values to protect against (advice falls back
+        // to vetted baselines), so this is NOT a hard block: 'confirm anyway' proceeds on baselines.
+        R.noSave = true; R.matchLbl = "no saved tune";
+        R.need.push("no saved tune exists for this car — save your tune in-game once to ground advice in exact values (until then, targets use vetted community baselines)");
+        return R;
+      }
+      if (!cached || !cached.deliverable) { R.need.push("reading the build from the save file…"); R.hardBlock = true; return R; }
       const dl = cached.deliverable, m = cached.match || {}, sm = dl.summary || {};
       const n = m.n_saves || (m.saves || []).length || 1, ties = m.n_signature_ties || 1;
       if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`save THIS build in-game — you're in a ${m.live_cyl}-cyl car but the nearest save is ${m.chosen_cyl}-cyl, so its parts &amp; sliders aren't the build you're driving`); }
@@ -3016,7 +3023,8 @@
       else if (m.how === "signature") { R.matchLbl = "signature"; R.why.push("matched to the car you're driving (cylinders + PI)"); }
       else if (m.how === "picked") { R.matchLbl = "pinned"; R.why.push("pinned to a specific saved tune"); }
       else if (n > 1) { R.hardBlock = true; R.matchLbl = "unmatched"; R.need.push(`drive so I can match the equipped build (${n} saved tunes exist), or pick it in the decode panel`); }
-      else { R.matchLbl = "single save"; R.why.push("single saved tune for this car — unambiguous"); }
+      else if (m.live) { R.matchLbl = "single save"; R.why.push("single saved tune for this car — unambiguous, and the live car checks out"); }
+      else { R.matchLbl = "single save"; R.softNoLive = true; R.need.push("drive the car once — a single save is unambiguous on disk, but only a live check catches an unsaved work-in-progress build"); }
       R.why.push(`${sm.parts_installed || 0} parts read exact`);
       const exact = sm.sliders_exact != null ? sm.sliders_exact : (sm.sliders_absolute || 0), rel = sm.sliders_relative || 0;
       if (exact > 0) R.why.push(`${exact} slider values exact`);
@@ -3030,19 +3038,21 @@
       if (topAsk && !u.n_agree) R.need.push(topAsk.text);   // nothing corroborated yet → surface the highest-value drive
       const conf = dl.confidence || 0;
       R.pct = R.hardBlock ? 0 : Math.max(0, Math.round(conf * 100) - 15 * (u.n_conflict || 0));
-      R.ready = !R.hardBlock && conf >= 0.6 && !(u.n_conflict || 0);   // identified live + solid decode + no open conflicts → the SYSTEM says "confirm now"
+      R.ready = !R.hardBlock && !R.softNoLive && conf >= 0.6 && !(u.n_conflict || 0);   // identified LIVE + solid decode + no open conflicts → the SYSTEM says "confirm now"
       return R;
     };
     const buildConfirmCard = (cid, bc) => {
       const col = bc.hardBlock ? "#e5414e" : bc.ready ? "#00d27a" : "#e3b341";
-      const head = bc.hardBlock ? "⏳ Identifying your build" : bc.ready ? "✅ Build confidently identified" : "⏳ Gathering build data";
+      const head = bc.hardBlock ? "⏳ Identifying your build" : bc.noSave ? "📄 No saved tune yet" : bc.ready ? "✅ Build confidently identified" : "⏳ Gathering build data";
       const sub = bc.hardBlock ? "Tuning advice stays locked until I can confidently identify the exact build you're driving — otherwise the numbers would sit on the wrong current values."
+        : bc.noSave ? "This car has no saved tune to identify — there are no wrong values to protect against, so you can proceed now: advice will use vetted baselines until you save a tune."
         : bc.ready ? "The decode confidently matches the build you're driving. Confirm to unlock tuning advice grounded in your real current values."
         : "Almost there — I'll light up Confirm the moment the build reads confidently.";
       const whyList = bc.why.length ? `<div class="bcf-list ok">${bc.why.map((w) => `<div>✓ ${w}</div>`).join("")}</div>` : "";
       const needList = bc.need.length ? `<div class="bcf-list need"><div class="bcf-need-h">${bc.hardBlock ? "needed to identify the build:" : "to reach exact advice:"}</div>${bc.need.map((w) => `<div>→ ${w}</div>`).join("")}</div>` : "";
       const btn = bc.hardBlock ? ""
         : bc.ready ? `<button class="bcf-btn go" data-confirmbuild="${esc(cid)}">✓ Confirm build &amp; unlock tuning</button>`
+        : bc.noSave ? `<button class="bcf-btn go" data-confirmbuild="${esc(cid)}">✓ Proceed on baselines</button>`
         : `<button class="bcf-btn wait" data-confirmbuild="${esc(cid)}" title="not yet confident — you can confirm anyway, but I'd wait">confirm anyway (not yet confident)</button>`;
       return `<div class="bcf" style="border-color:${col}"><div class="bcf-hd" style="color:${col}"><b>${head}</b>${bc.hardBlock ? "" : `<span class="bcf-pct">${bc.pct}% confident</span>`}</div><p class="why" style="font-size:11.5px;margin:2px 0 7px">${sub}</p>${whyList}${needList}${btn}</div>`;
     };
@@ -3630,16 +3640,16 @@
       if (saves.length < 2) return "";
       const buckets = new Map();
       saves.forEach((s) => { const k = `${s.cyl != null ? s.cyl : "?"}|${s.pi != null ? s.pi : "?"}`; if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(s); });
-      const cur = String(r.ts); const eqKnown = m.how === "signature" || m.how === "gear-matched" || m.how === "picked";
+      const cur = String(r.ts); const eqLive = m.how === "signature" || m.how === "gear-matched"; const pinnedPick = m.how === "picked";
       const rows = [...buckets.entries()].map(([k, list]) => {
         const [cyl, pi] = k.split("|");
         const items = list.map((s) => { const on = String(s.ts) === cur;
-          const eq = on && eqKnown;
-          return `<button class="tl-save${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded / locked" : "self-made"} · saved ${_tsFmt(s.ts)} · click to decode this build">${eq ? "🎮 " : ""}${_tsFmt(s.ts)}${s.gears ? ` · ${s.gears}-sp` : ""}${s.locked ? " 🔒" : ""}</button>`; }).join("");
+          const flag = on && eqLive ? "🎮 " : on && pinnedPick ? "📌 " : "";   // 🎮 = live-verified equipped; 📌 = manually pinned (no live verification)
+          return `<button class="tl-save${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded / locked" : "self-made"} · saved ${_tsFmt(s.ts)} · click to decode this build${on && pinnedPick ? " · pinned manually — not live-verified" : ""}">${flag}${_tsFmt(s.ts)}${s.gears ? ` · ${s.gears}-sp` : ""}${s.locked ? " 🔒" : ""}</button>`; }).join("");
         const tie = list.length > 1 ? `<span class="tl-tie" title="same engine + PI (what cloning creates) — the slider fingerprint differs; the live gear ladder identifies which is equipped">${list.length} share this signature</span>` : "";
         return `<div class="tl-bucket"><span class="tl-sig"><b>${pi !== "?" ? "PI " + pi : "PI ?"}</b> · ${cyl !== "?" ? cyl + "-cyl" : "engine ?"}${tie}</span><span class="tl-saves">${items}</span></div>`;
       }).join("");
-      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqKnown ? " · 🎮 = equipped" : " · drive to flag the equipped one"}</span></summary>${rows}</details>`;
+      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}</details>`;
     };
     // ---- LIVERY GALLERY: the paintjob thumbnails from the save's Livery containers — the visual identity players
     // actually use to tell builds apart. No tune↔livery link exists on disk (both key by car only), so this is a
@@ -3651,7 +3661,7 @@
       live.liveryCache[ord] = null;
       fetch(liveUrl + "/liveries?ordinal=" + ord).then((r) => r.json())
         .then((d) => { live.liveryCache[ord] = { n: (d.liveries || []).length, list: d.liveries || [] }; paintDiskDecode(); paintFloat(); })
-        .catch(() => { live.liveryCache[ord] = { n: 0, list: [] }; });
+        .catch(() => { live.liveryCache[ord] = { n: 0, list: [] }; setTimeout(() => { if (live.liveryCache && live.liveryCache[ord] && !live.liveryCache[ord].n) delete live.liveryCache[ord]; }, 30000); });   // a fetch error must not cache 'no liveries' forever — retry on the next paint after 30s
     };
     const liveryStrip = (ord) => {
       live.liveryCache = live.liveryCache || {};
@@ -3875,12 +3885,7 @@
         <div class="fhm-confbar"><i style="width:${c.pct}%;background:${oc}"></i></div>
         <div class="fhm-todos">${items.join("")}</div></div>`;
     };
-    const bindRangeInputs = (scope) => scope.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
-      const v = parseFloat(inp.value); if (isNaN(v)) return; const ordi = +inp.dataset.rangeord;
-      fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: ordi, field: inp.dataset.rangefield, norm: +inp.dataset.rangenorm, value: v, unit: inp.dataset.rangeunit }) })
-        .then((r) => r.json()).then((d) => { if (d && d.ok) { inp.style.borderColor = d.solved ? "#00d27a" : "#e3b341"; inp.title = d.solved ? "range solved — refreshing to exact numbers" : "got it — one more tune at a different position unlocks exact numbers";
-          if (d.solved && live.diskCache) { delete live.diskCache[ordi]; fetchDiskTune(ordi); paintDiskDecode(); paintFloat(true); } } }).catch(() => {});
-    }));
+    // (the float binds calibration inputs via bindDiskDecode — one binder, one behavior, everywhere)
     // ---- BUILD VERIFICATION: score the current build against the pinned clone (green / yellow / red per row) ----
     const TARGET_KEY = "fh6FloatTarget";
     const saveTarget = () => { try { live.float.target ? localStorage.setItem(TARGET_KEY, JSON.stringify(live.float.target)) : localStorage.removeItem(TARGET_KEY); } catch (e) {} };
@@ -3963,7 +3968,7 @@
       const c = diskConf(cached); const nm = cached.name || ("#" + dl.ordinal); const oc = confCol(c.conf); const dsum = dl.summary || {};
       const vsig = verify ? (verify.okParts + "/" + verify.nParts + "," + verify.okSliders + "/" + verify.nSliders) : "";
       const csig = coarse ? coarse.map((x) => x.k + x.st + x.now).join("") : "";
-      const key = "F|" + dl.ordinal + "|" + (cached.ts || "") + "|" + ((cur && cur.ts) || "") + "|" + (dsum.sliders_absolute || 0) + "|" + live.float.min + "|" + live.float.pinned + "|" + vsig + "|" + csig + "|" + (live.diskDiff && live.diskDiff.ordinal === dl.ordinal ? live.diskDiff.t : "");
+      const key = "F|" + dl.ordinal + "|" + (cached.ts || "") + "|" + ((cur && cur.ts) || "") + "|" + (dsum.sliders_absolute || 0) + "|" + live.float.min + "|" + live.float.pinned + "|" + vsig + "|" + csig + "|" + (live.diskDiff && live.diskDiff.ordinal === dl.ordinal ? live.diskDiff.t : "") + "|" + (((live.liveryCache || {})[dl.ordinal] || {}).n || 0);
       el.style.display = "block";
       if (live.float.x != null) { el.style.left = live.float.x + "px"; el.style.top = live.float.y + "px"; el.style.right = "auto"; el.style.bottom = "auto"; }
       if (!force && el.dataset.k === key && el.querySelector(".fhm-fbar")) return;   // unchanged - don't rebuild (keeps the =? inputs stable while typing)
@@ -3983,7 +3988,7 @@
       const pin = el.querySelector("[data-fpin]"); if (pin) pin.addEventListener("click", () => { live.float.pinned = !live.float.pinned; if (live.float.pinned) { live.float.ord = dl.ordinal; freezeTarget(dl.ordinal); } else { live.float.target = null; saveTarget(); } saveFloat(); paintFloat(true); });
       const mn = el.querySelector("[data-fmin]"); if (mn) mn.addEventListener("click", () => { live.float.min = !live.float.min; saveFloat(); paintFloat(true); });
       const cl = el.querySelector("[data-fclose]"); if (cl) cl.addEventListener("click", () => { live.float.open = false; saveFloat(); paintFloat(true); });
-      if (!live.float.min) bindRangeInputs(el);
+      if (!live.float.min) bindDiskDecode(el);   // same binder as the inline panel — anchored calibration feedback, tune-library picks, cal-jumps all work in the float too
     }
     // ---- LIVE CORNER ANALYSIS (course training): every corner of every lap, full stats, in real time ----
     // enriched corner log: each live 'corner' event tagged with its lap and matched to a course turn (canonical apex position)
@@ -4126,7 +4131,7 @@
                 <button class="lab-mode" data-role="replica" style="padding:5px 12px;font-size:12px;border-color:#00d27a;color:#00d27a;${myRole === "replica" ? "background:#00d27a;color:#0e1116" : ""}">🔧 REPLICA — my rebuild of it</button>
                 ${myRole ? `<span class="chip" style="border-color:${myRole === "donor" ? "#e3b341" : "#00d27a"};color:${myRole === "donor" ? "#e3b341" : "#00d27a"}">this run = ${myRole === "donor" ? "🎯 DONOR" : "🔧 REPLICA"}</span>` : ""}
               </div>
-              <div class="why" style="font-size:10.5px;margin-top:5px">${!hasDonor ? "<b>Start here:</b> driving the locked / downloaded tune you want to copy? Press 🎯 DONOR — its Clone Sheet (the parts) builds below and it stays pinned." : A.id === (D && D.id) ? "This IS the donor — the Clone Sheet below is your deliverable. Build a copy, drive it, and press 🔧 REPLICA to see the slider gaps." : "Donor already set. If this is your rebuild, press 🔧 REPLICA to converge it against the donor on the Bench."}</div>
+              <div class="why" style="font-size:10.5px;margin-top:5px">${!hasDonor ? "<b>Start here:</b> driving the locked / downloaded tune you want to copy? Press 🎯 DONOR — its build sheet (📀 above) is the deliverable, and the 📡 measurement detail accrues below." : A.id === (D && D.id) ? "This IS the donor — the 📀 build sheet above is your deliverable (measured facts feed its 🔗 union; the raw detail sits in the 📡 drawer below). Build a copy, drive it, and press 🔧 REPLICA to see the slider gaps." : "Donor already set. If this is your rebuild, press 🔧 REPLICA to converge it against the donor on the Bench."}</div>
             </div>`; })()}
           ${(() => {   // ONE deliverable: the save sheet + union above is canonical. The telemetry clone-sheet is the
             // MEASUREMENT DETAIL feeding that union — collapsed, not a competing second deliverable. The battery
@@ -4947,6 +4952,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         live.diskCache[d.ordinal] = d.available ? d : { available: false };            // still cached as the current-build probe
         const changed = (!locked && d.available) ? applyDiskTune(d) : false;
         if (!locked && d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
+        if (d.new_save && live.liveryCache) delete live.liveryCache[d.ordinal];   // a save may bring a new/changed livery — refetch the gallery
         if (!locked && d.new_save && d.available && live.frame && String(live.frame.car) === String(d.ordinal) && live.frame.cid) abSync(live.frame.cid);   // a change was saved → spawn/refresh the A/B version NOW (stores the full field set; metrics fill on next analysis)
         paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintDock(true);
         const activeOrd = live.frame && String(live.frame.car);

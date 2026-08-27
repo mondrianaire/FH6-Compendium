@@ -3452,6 +3452,8 @@
       .lvy{flex:none;width:104px;margin:0;text-align:center}
       .lvy img{width:104px;height:62px;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block;background:var(--bg2)}
       .lvy figcaption{font-size:9.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .lvy-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+      .lvy-chip{font-size:10.5px;border:1px solid var(--line);border-radius:10px;padding:2px 9px;background:var(--bg2);white-space:nowrap}
       /* ---- build-confirm gate ---- */
       .bcf{border:2px solid;border-radius:9px;padding:9px 12px;margin:0 0 10px;background:rgba(255,255,255,.015)}
       .bcf-hd{display:flex;align-items:baseline;gap:9px}.bcf-hd b{font-size:13.5px}
@@ -3670,8 +3672,16 @@
       if (!c || !c.n) return "";
       const cards = c.list.filter((l) => l.thumb).slice(0, 12).map((l) =>
         `<figure class="lvy" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}"><img src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" alt="livery"><figcaption>${esc(l.name || (l.kind === "SoulBoundLivery" ? "soul-bound" : l.kind === "BaseLivery" ? "base paint" : "design"))}</figcaption></figure>`).join("");
-      if (!cards) return "";
-      return `<div class="lvy-strip"><div class="lvy-h">🎨 Liveries on this car <span class="why" style="font-size:10px">— the paint is how you know the build at a glance</span></div><div class="lvy-row">${cards}</div></div>`;
+      // PAINT-ONLY case: a plain paintjob saves a BaseLivery container with NO thumbnail (the game only renders
+      // bigThumb.webp for full designs), and its name is the generic 'Forza BaseLivery'. Show those as labelled
+      // chips with the save date — still a recognition cue, honestly presented as paint rather than a design.
+      const chips = c.list.filter((l) => !l.thumb).slice(0, 8).map((l) => {
+        const generic = /^Forza (Base|SoulBound)?Livery$/i.test(l.name || "");
+        const label = (l.name && !generic) ? l.name : (l.kind === "BaseLivery" ? "base paint" : l.kind === "SoulBoundLivery" ? "soul-bound livery" : "design");
+        return `<span class="lvy-chip" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}">🎨 ${esc(label)}${l.ts ? ` · ${_tsFmt(l.ts)}` : ""}</span>`; }).join("");
+      if (!cards && !chips) return "";
+      const note = cards ? "— the paint is how you know the build at a glance" : "— paint-only (the game saves no thumbnail for plain paintjobs)";
+      return `<div class="lvy-strip"><div class="lvy-h">🎨 Liveries on this car <span class="why" style="font-size:10px">${note}</span></div><div class="lvy-row">${cards}${chips ? `<div class="lvy-chips">${chips}</div>` : ""}</div></div>`;
     };
     const diskDeliverableHtml = (r, opts) => {
       opts = opts || {};

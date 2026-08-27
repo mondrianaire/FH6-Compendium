@@ -3021,8 +3021,16 @@
       const exact = sm.sliders_exact != null ? sm.sliders_exact : (sm.sliders_absolute || 0), rel = sm.sliders_relative || 0;
       if (exact > 0) R.why.push(`${exact} slider values exact`);
       if (rel > 0) R.need.push(`${rel} slider${rel === 1 ? "" : "s"} still read as % — calibrate ride-height/downforce for exact current values (advice uses vetted baselines meanwhile)`);
-      const conf = dl.confidence || 0; R.pct = R.hardBlock ? 0 : Math.round(conf * 100);
-      R.ready = !R.hardBlock && conf >= 0.6;   // identified live + a solid decode → the system says "ready to confirm"
+      // UNION input: telemetry cross-checks drive the verdict. Corroborations raise confidence; an open save×telemetry
+      // CONFLICT means the decode and the measurements disagree — never confirm on top of that.
+      const u = dl.union || {};
+      if (u.n_agree) R.why.push(`${u.n_agree} field${u.n_agree > 1 ? "s" : ""} corroborated by telemetry (save × measured agree)`);
+      if (u.n_conflict) R.need.push(`resolve ${u.n_conflict} save × telemetry conflict${u.n_conflict > 1 ? "s" : ""} — see the 🔗 union strip (a conflict means the decoded values may not be this build's)`);
+      const topAsk = (u.asks || [])[0];
+      if (topAsk && !u.n_agree) R.need.push(topAsk.text);   // nothing corroborated yet → surface the highest-value drive
+      const conf = dl.confidence || 0;
+      R.pct = R.hardBlock ? 0 : Math.max(0, Math.round(conf * 100) - 15 * (u.n_conflict || 0));
+      R.ready = !R.hardBlock && conf >= 0.6 && !(u.n_conflict || 0);   // identified live + solid decode + no open conflicts → the SYSTEM says "confirm now"
       return R;
     };
     const buildConfirmCard = (cid, bc) => {
@@ -3037,6 +3045,17 @@
         : bc.ready ? `<button class="bcf-btn go" data-confirmbuild="${esc(cid)}">✓ Confirm build &amp; unlock tuning</button>`
         : `<button class="bcf-btn wait" data-confirmbuild="${esc(cid)}" title="not yet confident — you can confirm anyway, but I'd wait">confirm anyway (not yet confident)</button>`;
       return `<div class="bcf" style="border-color:${col}"><div class="bcf-hd" style="color:${col}"><b>${head}</b>${bc.hardBlock ? "" : `<span class="bcf-pct">${bc.pct}% confident</span>`}</div><p class="why" style="font-size:11.5px;margin:2px 0 7px">${sub}</p>${whyList}${needList}${btn}</div>`;
+    };
+    // the GATE around course tuning advice: advice is only as good as the build identification behind its current
+    // values, so until the build is confirmed the panel shows the confirm card (the SYSTEM says when it's confident —
+    // the ✓ button lights green on a clean match + solid decode + zero union conflicts). Recordings skip the gate.
+    const gatedTuning = (co, s, cid) => {
+      if (src !== "live" || !cid) return numericTuningPanel(co, s, cid);
+      if (isBuildConfirmed(cid)) return `<div class="bcf-ok">✓ build confirmed — advice reads this build's real values<button class="bcf-recheck" data-unconfirmbuild="${esc(cid)}" title="drop the confirmation and re-verify the build identification">↺ re-check</button></div>` + numericTuningPanel(co, s, cid);
+      const ord = String(cid).split("|")[0];
+      const cached = live.diskCache ? live.diskCache[ord] : null;
+      if (cached === undefined && live.connected) fetchDiskTune(+ord);
+      return buildConfirmCard(cid, buildConfidence(cached || null));
     };
     const liveCourseDashboard = (co, s) => {
       const p = courseParts(co, s); const tr = co.track || {}; const tu = co.turns || {}; const dr = co.driving || {}; const lapsN = co.laps ? co.laps.total : co.runs; const f = live.frame || {};
@@ -3055,7 +3074,7 @@
             ${p.track}${p.turns}${p.profile}${p.laps}</div>`;
       const feedPanel = `<div class="lab-corner" style="border-left:4px solid ${feedbackReady ? "var(--accent)" : "var(--muted)"}"><div class="card-row" style="margin-top:0"><strong>🏋 Tuning feedback — this car on this track</strong><span class="chip" style="border-color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};color:${feedbackReady ? "#00d27a" : "var(--warn,#e3b341)"};font-weight:700">${feedbackReady ? "ACTIVE" : "WARMING UP"}</span></div>
             <p class="why" style="font-size:11px;margin:4px 0 6px">${feedbackReady ? `references exist for ${refsOwn}/${turnsN} turns — the per-turn deltas and slider suggestions below are grounded in this car's own best passes` : `${refsOwn}/${turnsN} turns have a reference for this car — ${Math.max(0, needRefs - refsOwn)} more clean turn${needRefs - refsOwn === 1 ? "" : "s"} needed (geometry × grip predictions fill in meanwhile)`}</p>
-            ${numericTuningPanel(co, s, curCar)}
+            ${gatedTuning(co, s, curCar)}
             <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
       const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null), routeKey: co.route_key, mode: co.is_loop ? "loop" : "event" });
       if (training) return `${courseHdr}${carBanner}${courseHero(p, co)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
@@ -3416,6 +3435,30 @@
       .s-set .s-from{color:var(--muted);font-weight:600}.s-set .s-to{color:#00d27a;font-weight:800}
       .sanity-row.new{background:rgba(227,179,65,.10);border-radius:6px}
       .s-new{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.05em;color:#0b0e13;background:#e3b341;border-radius:4px;padding:0 5px;margin-right:5px;vertical-align:1px}
+      /* ---- build-confirm gate ---- */
+      .bcf{border:2px solid;border-radius:9px;padding:9px 12px;margin:0 0 10px;background:rgba(255,255,255,.015)}
+      .bcf-hd{display:flex;align-items:baseline;gap:9px}.bcf-hd b{font-size:13.5px}
+      .bcf-pct{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+      .bcf-list{font-size:11.5px;margin:4px 0}.bcf-list.ok{color:#00d27a}
+      .bcf-list.need{color:var(--txt)}.bcf-need-h{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#e3b341;margin-bottom:2px}
+      .bcf-btn{margin-top:6px;border-radius:7px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;border:1px solid}
+      .bcf-btn.go{background:#00d27a;border-color:#00d27a;color:#0e1116}
+      .bcf-btn.go:hover{filter:brightness(1.1)}
+      .bcf-btn.wait{background:transparent;border-color:var(--line);color:var(--muted)}
+      .bcf-ok{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#00d27a;font-weight:700;border:1px solid rgba(0,210,122,.4);border-radius:7px;padding:4px 10px;margin:0 0 8px;background:rgba(0,210,122,.06)}
+      .bcf-recheck{margin-left:auto;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--muted);font-size:10.5px;padding:1px 8px;cursor:pointer}
+      .bcf-recheck:hover{border-color:var(--accent);color:var(--accent)}
+      /* ---- tune library ---- */
+      .tl{border:1px solid #a371f7;border-radius:8px;background:rgba(163,113,247,.05);padding:7px 11px;margin:0 0 10px;font-size:11.5px}
+      .tl>summary{cursor:pointer;user-select:none}.tl>summary b{font-size:12.5px;color:#a371f7}
+      .tl-bucket{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:5px 0;border-top:1px solid rgba(255,255,255,.05)}
+      .tl-bucket:first-of-type{margin-top:5px}
+      .tl-sig{min-width:150px;font-variant-numeric:tabular-nums}
+      .tl-tie{display:inline-block;margin-left:7px;font-size:9.5px;font-weight:700;color:#e3b341;border:1px solid #e3b341;border-radius:8px;padding:0 6px}
+      .tl-saves{display:inline-flex;gap:5px;flex-wrap:wrap}
+      .tl-save{font-size:10.5px;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--txt);padding:1px 8px;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
+      .tl-save:hover{border-color:#a371f7}
+      .tl-save.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.12);font-weight:700}
       /* ---- SAVE x TELEMETRY union strip ---- */
       .us{border:1px solid #2f81f7;border-radius:8px;background:rgba(47,129,247,.06);padding:8px 11px;margin:0 0 11px}
       .us.has-conflict{border-color:#e5414e;background:rgba(229,65,78,.05)}
@@ -3572,6 +3615,25 @@
       const asks = (u.asks || []).length ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
       return `<div class="us${u.n_conflict ? " has-conflict" : ""}"><div class="us-hd"><b>🔗 Save × telemetry — one reconciled decode</b>${chips}</div>${fields.map(frow).join("")}${asks}</div>`;
     };
+    // ---- TUNE LIBRARY: every saved build of this car, bucketed by SIGNATURE (engine cylinders × PI) — the primary
+    // index — with the slider fingerprint separating same-signature members (exactly what clones create) and the
+    // EQUIPPED build flagged from the live match. Click any save to pin/decode it. ----
+    const tuneLibraryCard = (r, ordinal) => {
+      const m = r.match; const saves = (m && m.saves) || [];
+      if (saves.length < 2) return "";
+      const buckets = new Map();
+      saves.forEach((s) => { const k = `${s.cyl != null ? s.cyl : "?"}|${s.pi != null ? s.pi : "?"}`; if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(s); });
+      const cur = String(r.ts); const eqKnown = m.how === "signature" || m.how === "gear-matched" || m.how === "picked";
+      const rows = [...buckets.entries()].map(([k, list]) => {
+        const [cyl, pi] = k.split("|");
+        const items = list.map((s) => { const on = String(s.ts) === cur;
+          const eq = on && eqKnown;
+          return `<button class="tl-save${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded / locked" : "self-made"} · saved ${_tsFmt(s.ts)} · click to decode this build">${eq ? "🎮 " : ""}${_tsFmt(s.ts)}${s.gears ? ` · ${s.gears}-sp` : ""}${s.locked ? " 🔒" : ""}</button>`; }).join("");
+        const tie = list.length > 1 ? `<span class="tl-tie" title="same engine + PI (what cloning creates) — the slider fingerprint differs; the live gear ladder identifies which is equipped">${list.length} share this signature</span>` : "";
+        return `<div class="tl-bucket"><span class="tl-sig"><b>${pi !== "?" ? "PI " + pi : "PI ?"}</b> · ${cyl !== "?" ? cyl + "-cyl" : "engine ?"}${tie}</span><span class="tl-saves">${items}</span></div>`;
+      }).join("");
+      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqKnown ? " · 🎮 = equipped" : " · drive to flag the equipped one"}</span></summary>${rows}</details>`;
+    };
     const diskDeliverableHtml = (r, opts) => {
       opts = opts || {};
       ensureFhmCss();
@@ -3610,6 +3672,7 @@
       const headRow = opts.inFloat ? "" : `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span>${popBtn}</div>`;
       return `<div class="block fhm" style="border-color:#00d27a">${headRow}
         ${diskMatchBar(r, dl.ordinal)}
+        ${tuneLibraryCard(r, dl.ordinal)}
         ${diskDiffBanner(dl.ordinal)}
         ${confMeterHtml(r)}
         ${unionStrip(dl)}
@@ -4035,7 +4098,15 @@
               </div>
               <div class="why" style="font-size:10.5px;margin-top:5px">${!hasDonor ? "<b>Start here:</b> driving the locked / downloaded tune you want to copy? Press 🎯 DONOR — its Clone Sheet (the parts) builds below and it stays pinned." : A.id === (D && D.id) ? "This IS the donor — the Clone Sheet below is your deliverable. Build a copy, drive it, and press 🔧 REPLICA to see the slider gaps." : "Donor already set. If this is your rebuild, press 🔧 REPLICA to converge it against the donor on the Bench."}</div>
             </div>`; })()}
-          ${A.decode ? (Adone ? `${A.clone_sheet ? cloneSheetHtml(A) : ""}<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>🧬 decode battery</b> <span class="chip" style="border-color:#00d27a;color:#00d27a">all tests captured</span></summary>${decodePanel(A, "🚗 ")}</details>` : `${decodePanel(A, "🚗 ")}${A.clone_sheet ? `<div style="margin-top:8px">${cloneSheetHtml(A)}</div>` : ""}`) : `<p class="why" style="font-size:11px">first analysis after ~20 s of driving…</p>`}
+          ${(() => {   // ONE deliverable: the save sheet + union above is canonical. The telemetry clone-sheet is the
+            // MEASUREMENT DETAIL feeding that union — collapsed, not a competing second deliverable. The battery
+            // advisor (what to drive next) stays visible while capture is incomplete, since it drives the data in.
+            if (!A.decode) return `<p class="why" style="font-size:11px">first analysis after ~20 s of driving…</p>`;
+            const sheet = A.clone_sheet ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📡 Telemetry measurement detail</b> <span class="why">— the measured facts feeding the 🔗 union in the build sheet above${Adone ? "" : " (still capturing)"}</span></summary><div style="margin-top:6px">${cloneSheetHtml(A)}</div></details>` : "";
+            return Adone
+              ? `${sheet}<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>🧬 decode battery</b> <span class="chip" style="border-color:#00d27a;color:#00d27a">all tests captured</span></summary>${decodePanel(A, "🚗 ")}</details>`
+              : `${decodePanel(A, "🚗 ")}${sheet}`;
+          })()}
         </div>` : `<div class="block" style="border-color:#a371f7"><h3 style="margin-top:0">🚗 Cloning the car you're in</h3><p class="why" style="font-size:12px;margin:0 0 6px">${live.frame && live.frame.on ? "this config has no analysis yet — drive ~20 s" : "not driving — the car you get into becomes the decode subject automatically"}</p><div id="lvDiskDecode"></div><div id="lvDecNext">${nextPanelHtml(null)}</div></div>`) : "";
       const libraryBlock = isLive ? "" : buildLibrary(s);
       const hideDonorDeliverable = isLive && A && A.id === D.id;   // the subject block already shows it
@@ -4906,6 +4977,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-unapply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl] = b.dataset.unapply.split("|"); unApply(cid, sl); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
       r.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { localStorage.removeItem(appliedKey(b.dataset.clearapplied)); if (src === "live") paintSections(true); else render(); }));
+      // build-confirm gate: confirm (unlocks course tuning advice) / re-check (drops the confirmation)
+      r.querySelectorAll("[data-confirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.confirmbuild, true); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-unconfirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.unconfirmbuild, false); if (src === "live") paintSections(true); else render(); }));
       const shopEl = r.querySelector("#lvShopCapture") || (r.id === "lvShopCapture" ? r : null);
       if (shopEl && !live.shots) refreshShots();
       const sref = r.querySelector("#lvShotRefresh"); if (sref) sref.addEventListener("click", refreshShots);

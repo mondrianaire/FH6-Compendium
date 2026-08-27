@@ -348,14 +348,20 @@ def _enrich_gears(deliverable, ordn):
                 gl = {g["gear"]: g["fd_gear"] for g in (c.get("gears") or []) if g.get("fd_gear")}
                 if gl:
                     fdg = gl; break
-        # STABILITY: cache the measured ladder per ordinal so gears don't pop out of 'measured' when a fresh analysis
-        # briefly lacks them (sparse WOT frames in the last window) — the ladder is a physical property of the build.
+        # STABILITY: cache the measured ladder so gears don't pop out of 'measured' when a fresh analysis briefly
+        # lacks them (sparse WOT frames in the last window) — the ladder is a physical property of the build. Keyed by
+        # BUILD identity (ordinal + gear count + decoded cyl), never bare ordinal: a stale ladder from a DIFFERENT
+        # build of the same car isn't data for this one, and serving it manufactured phantom gear conflicts.
         if not hasattr(ST, "fdg_cache"):
             ST.fdg_cache = {}
+        ckey = f"{ordn}|{deliverable.get('gear_count')}|{_deliverable_cyl(deliverable)}"
         if fdg:
-            ST.fdg_cache[str(ordn)] = {"fdg": fdg, "t": time.time()}
-        else:
-            cached = ST.fdg_cache.get(str(ordn))
+            if max(fdg) <= (deliverable.get("gear_count") or 99):   # a ladder with more gears than this save's box belongs to another build — don't cache it against this one
+                ST.fdg_cache[ckey] = {"fdg": fdg, "t": time.time()}
+            else:
+                fdg = {}
+        if not fdg:
+            cached = ST.fdg_cache.get(ckey)
             if cached and time.time() - cached["t"] < 1800:
                 fdg = cached["fdg"]
         if not fdg:
@@ -666,6 +672,12 @@ def _build_union(deliverable, ordn, match=None):
     try:
         u = {"fields": [], "asks": []}
         def fld(name, save_v, tele_v, status, note=None):
+            # INVARIANT: a conflict needs TWO actual values. When one source has no data, the other is simply the
+            # only source of that field — never a conflict. (Measured absence WITH evidence, e.g. 0 psi during a
+            # redline pull, is data and must be passed as an explicit value string, not None.)
+            if status == "conflict" and (save_v is None or tele_v is None):
+                status = "tele-fill" if save_v is None else "await"
+                note = None
             u["fields"].append({"name": name, "save": save_v, "telemetry": tele_v, "status": status, "note": note or ""})
         def ask(key, text, gain, rank):
             if not any(a["key"] == key for a in u["asks"]):

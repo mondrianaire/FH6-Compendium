@@ -328,10 +328,23 @@ def parse_tune(path, ordinal_hint=None):
         entry = {"norm": round(norm, 4), "unit": unit, "adjustable": adj}
         rng = ranges.get(name)
         gband = load_global_ranges().get(name)
+        # SINGLE-POINT ANCHOR: one user-entered exact value makes this slider exact AT ITS CURRENT POSITION right away
+        # (no waiting for the 2-point range solve). Beats the global band — the user's read arbitrates a band error.
+        anchor = None
+        if per_car and not rng and ordinal is not None:
+            for p in _pts_doc.get(f"{int(ordinal)}|{name}", []):
+                try:
+                    if abs(float(p[0]) - norm) <= 0.002:
+                        anchor = float(p[1]); break
+                except Exception:
+                    continue
         if per_car and rng:
             lo2, hi2 = rng
             entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
             entry["range"] = rng
+        elif per_car and anchor is not None:
+            entry["value"] = round(anchor, 2)
+            entry["anchored"] = True   # exact at this position (user-read); range still wants a 2nd position
         elif per_car and gband:
             lo2, hi2 = gband
             entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
@@ -926,7 +939,9 @@ def tune_to_deliverable(tune, car_name=None):
             base = {"field": k, "label": label, "section": sec, "poles": list(poles), "fill": round(e["norm"], 4)}
             if e["value"] is not None:
                 vr = {**base, "value": e["value"], "unit": e["unit"], "display": f"{e['value']} {e['unit']}".strip()}
-                if e.get("derived"):
+                if e.get("anchored"):
+                    vr.update({"anchored": True, "status": "measured-anchored", "confidence": 0.95})   # user-read exact at this position
+                elif e.get("derived"):
                     vr.update({"derived": True, "status": "measured-derived", "confidence": 0.85})
                 else:
                     vr.update({"status": "measured", "confidence": 1.0})

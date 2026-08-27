@@ -357,6 +357,7 @@ def _enrich_gears(deliverable, ordn):
                     fd = r["value"]
         if not fd:
             return
+        ratios = []   # val/sv per reconciled gear — a CONSTANT factor across gears means the shared DIVISOR (final drive) is off, not the gears
         for t in deliverable.get("tabs", []):
             if t.get("tab") != "Gearing":
                 continue
@@ -370,10 +371,24 @@ def _enrich_gears(deliverable, ordn):
                     sv = r.get("value")
                     r["save_value"] = sv
                     r["value"] = val; r["display"] = f"{val}:1"; r["telemetry"] = True; r["derived"] = False
+                    if sv is not None and sv > 0:
+                        ratios.append(val / sv)
                     if sv is not None and sv > 0 and abs(val - sv) / sv > 0.04:
                         r["conflict"] = {"save": sv, "telemetry": val}; r["confidence"] = 0.5
                     else:
                         r["agree"] = sv is not None; r["confidence"] = 0.97
+        # DIAGNOSE a systematic gear conflict. Both sides are derived through bands (save: gear band; telemetry:
+        # exact fd_gear / band-derived FD), so when they disagree the question is WHICH band is off. If every gear is
+        # off by the SAME factor k, the shared divisor — the final drive — is the culprit (a per-gear problem would
+        # scatter). fd_implied = fd * k is what the FD would have to be for the two sources to agree.
+        if len(ratios) >= 3:
+            mean_k = sum(ratios) / len(ratios)
+            spread = max(ratios) - min(ratios)
+            if abs(mean_k - 1.0) > 0.04 and spread / mean_k < 0.03:
+                deliverable["gear_diag"] = {"kind": "fd", "factor": round(mean_k, 4), "fd_used": fd,
+                                            "fd_implied": round(fd * mean_k, 3), "n": len(ratios)}
+            elif abs(mean_k - 1.0) > 0.04 or spread / mean_k > 0.06:
+                deliverable["gear_diag"] = {"kind": "scattered", "n": len(ratios), "spread": round(spread, 3)}
     except Exception:
         return
 
@@ -686,7 +701,17 @@ def _build_union(deliverable, ordn, match=None):
                         elif r.get("agree"): g_agree += 1
         if g_tot:
             if g_conf:
-                fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "conflict", f"{g_conf} gear{'s' if g_conf > 1 else ''} disagree with the save — competing values shown on the rows")
+                gd = deliverable.get("gear_diag") or {}
+                if gd.get("kind") == "fd":
+                    note = (f"all {gd['n']} gears disagree by the SAME ×{gd['factor']} factor — the shared divisor is the culprit: "
+                            f"the band-derived FINAL DRIVE ({gd['fd_used']}), not the gears. If the sources agreed, FD would be ~{gd['fd_implied']}. "
+                            f"Type your exact in-game final drive in the 🎯 calibration card — that arbitrates & fixes every gear at once")
+                elif gd.get("kind") == "scattered":
+                    note = (f"gear disagreements are SCATTERED (not one factor) — likely decoding a different save than the build you drove, "
+                            f"or the drive predates your last gearing change. Re-save the tune, drive the gears again, or check the build picker")
+                else:
+                    note = f"{g_conf} gear{'s' if g_conf > 1 else ''} disagree with the save — competing values shown on the rows"
+                fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "conflict", note)
             elif g_meas:
                 fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "agree" if g_meas >= g_tot else "tele-fill",
                     None if g_meas >= g_tot else f"{g_tot - g_meas} gear{'s' if g_tot - g_meas > 1 else ''} not yet driven at full throttle")

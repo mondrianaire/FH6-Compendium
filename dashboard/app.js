@@ -3444,6 +3444,7 @@
       /* ---- one-time per-car calibration card (ride height / downforce ranges) ---- */
       .cal-card{border:1px solid #e6a63a;border-radius:8px;background:rgba(230,166,58,.07);padding:8px 11px;margin:0 0 11px}
       .cal-hd{margin-bottom:6px}.cal-hd b{font-size:13px;color:#e6a63a}
+      .cal-sub{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:7px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.12)}
       .cal-row{display:flex;align-items:center;gap:9px;padding:4px 0;border-top:1px solid rgba(255,255,255,.05);flex-wrap:wrap}
       .cal-row:first-of-type{border-top:none}
       .cal-lbl{font-weight:700;min-width:120px;font-size:12px}
@@ -3540,14 +3541,22 @@
     // turned into a real number until we see the displayed value at TWO different positions. This is the single guided
     // "read this value" surface — enter the in-game number, move the slider & re-save, enter it again → the range locks
     // and every future decode of this car prints exact. Progress dots come from the daemon's captured-point count.
+    const CAL_REFINABLE = new Set(["final_drive", "front_spring", "rear_spring", "front_ride_height", "rear_ride_height", "front_downforce", "rear_downforce"]);
     const calibrationCard = (dl) => {
-      const un = []; (dl.tabs || []).forEach((t) => (t.rows || []).forEach((row) => { if (row.value == null && row.per_car && !String(row.field).startsWith("gear")) un.push(row); }));
-      if (!un.length) return "";
+      const un = [], refine = [];
+      (dl.tabs || []).forEach((t) => (t.rows || []).forEach((row) => {
+        if (row.value == null && row.per_car && !String(row.field).startsWith("gear")) un.push(row);
+        else if (row.derived && CAL_REFINABLE.has(row.field)) refine.push(row);   // band-derived (~85%): the in-game number arbitrates the band & anchors it exact
+      }));
+      if (!un.length && !refine.length) return "";
       const ord = dl.ordinal;
-      const crow = (r) => { const cp = r.cal_points || 0; const pct = r.norm != null ? Math.round(r.norm * 1000) / 10 : Math.round((r.fill || 0) * 1000) / 10;
-        const dots = `<span class="cal-dots" title="${cp} of 2 reference points captured">${cp >= 1 ? "●" : "○"}${cp >= 2 ? "●" : "○"}</span>`;
-        return `<div class="cal-row" id="cal-${ord}-${esc(r.field)}"><span class="cal-lbl">${esc(r.label || r.field)}</span><span class="cal-pos">${pct}% toward ${esc((r.poles || [])[0] || r.pole || "")}</span>${dots}<input class="fhm-rin" data-rangeord="${ord}" data-rangefield="${esc(r.field)}" data-rangenorm="${r.fill}" data-rangeunit="${esc(r.unit || "")}" placeholder="in-game #" inputmode="decimal">${r.unit ? `<span class="cal-unit">${esc(r.unit)}</span>` : ""}<span class="fhm-rin-msg"></span></div>`; };
-      return `<div class="cal-card"><div class="cal-hd"><b>🎯 One-time calibration</b> <span class="why" style="font-size:10.5px">${un.length} slider${un.length > 1 ? "s" : ""} still read as % — type the number shown in-game, then move that slider to a different setting, re-save, and type it again. Two points lock this car's range for good.</span></div>${un.map(crow).join("")}</div>`;
+      const crow = (r, isRefine) => { const cp = r.cal_points || 0; const pct = r.norm != null ? Math.round(r.norm * 1000) / 10 : Math.round((r.fill || 0) * 1000) / 10;
+        const dots = isRefine ? "" : `<span class="cal-dots" title="${cp} of 2 reference points captured">${cp >= 1 ? "●" : "○"}${cp >= 2 ? "●" : "○"}</span>`;
+        const pos = isRefine ? `<span class="cal-pos" title="band-derived estimate — enter the real in-game number to anchor it exact">est. ${esc(String(r.value))}${esc(r.unit || "")}</span>` : `<span class="cal-pos">${pct}% toward ${esc((r.poles || [])[0] || r.pole || "")}</span>`;
+        return `<div class="cal-row" id="cal-${ord}-${esc(r.field)}"><span class="cal-lbl">${esc(r.label || r.field)}</span>${pos}${dots}<input class="fhm-rin" data-rangeord="${ord}" data-rangefield="${esc(r.field)}" data-rangenorm="${r.fill}" data-rangeunit="${esc(r.unit || "")}" placeholder="in-game #" inputmode="decimal">${r.unit ? `<span class="cal-unit">${esc(r.unit)}</span>` : ""}<span class="fhm-rin-msg"></span></div>`; };
+      const unHtml = un.length ? `${un.map((r) => crow(r, false)).join("")}` : "";
+      const refHtml = refine.length ? `<div class="cal-sub">refine band-derived (est. shown — your in-game number arbitrates)</div>${refine.map((r) => crow(r, true)).join("")}` : "";
+      return `<div class="cal-card"><div class="cal-hd"><b>🎯 One-time calibration</b> <span class="why" style="font-size:10.5px">type the number shown in-game — ONE entry makes that slider exact at its current position immediately; a second entry at a different setting locks the car's full range for good.</span></div>${unHtml}${refHtml}</div>`;
     };
     // ---- SAVE × TELEMETRY UNION STRIP: the reconciled decode. Every field the daemon could cross-check carries both
     // sources — agreements corroborate, disagreements flag as ⚠ CONFLICTS (competing expected values → low confidence),
@@ -3694,10 +3703,10 @@
           body: JSON.stringify({ ordinal: ord, field: inp.dataset.rangefield, norm: +inp.dataset.rangenorm, value: v, unit: inp.dataset.rangeunit }) })
           .then((r) => r.json()).then((d) => {
             if (!d || !d.ok) { inp.style.borderColor = "#e5414e"; set("✕ not saved" + (d && d.error ? " — " + d.error : ""), "#e5414e"); return; }
-            if (d.solved) { inp.style.borderColor = "#00d27a"; set(`✓ locked ${d.solved[0]}–${d.solved[1]} ${inp.dataset.rangeunit || ""} — now exact`, "#00d27a");
-              if (live.diskCache) delete live.diskCache[ord]; fetchDiskTune(ord, { force: true }); }   // fresh decode → exact values flow to the sheet, sanity check & A/B via the normal repaint
-            else { inp.style.borderColor = "#e3b341"; inp.value = "";
-              set(`● point ${d.distinct || 1}/2 saved — change this slider in-game to another setting, re-save the tune, then read it here again`, "#e3b341"); }
+            if (d.solved) { inp.style.borderColor = "#00d27a"; set(`✓ locked ${d.solved[0]}–${d.solved[1]} ${inp.dataset.rangeunit || ""} — now exact`, "#00d27a"); }
+            else { inp.style.borderColor = "#00d27a";
+              set(`✓ anchored exact at this position (point ${d.distinct || 1}/2) — later, move the slider, re-save & enter again to lock the full range`, "#00d27a"); }
+            if (live.diskCache) delete live.diskCache[ord]; fetchDiskTune(ord, { force: true });   // fresh decode either way → the anchored/exact value flows to the sheet, gears, union, sanity & A/B immediately
           }).catch(() => { inp.style.borderColor = "#e5414e"; set("✕ daemon offline", "#e5414e"); });
       }));
     };

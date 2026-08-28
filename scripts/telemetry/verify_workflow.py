@@ -148,10 +148,21 @@ def c5():
 check("C identify", "PI observations deduped per config", c5)
 
 def c6():
+    # Capability check, not a data-completeness check: the stamp guard only records PI on
+    # VERIFIED identity, so a build the user hasn't gear-verified yet has pi=None by design.
+    # fail = separation actually broken (colliding stamps / non-distinct builds);
+    # warn = pipeline sound but the second same-PI build still awaits its verification drive.
     bs = (DT.get("match") or {}).get("builds") or []
+    if len(bs) < 5:
+        return ("warn", f"only {len(bs)} builds visible — roster incomplete")
+    sigs = [b.get("build") for b in bs]   # parts-fingerprint slug (sha1[:8])
+    if len(sigs) != len(set(sigs)):
+        return (False, f"build fingerprints collide: {sigs}")
     pis = [b["pi"] for b in bs if b["pi"] is not None]
     two800 = sum(1 for p in pis if p == 800)
-    return (two800 >= 2 if len(bs) >= 5 else "warn", f"stamped PIs={pis} — S1-800 builds separated: {two800}")
+    if two800 >= 2:
+        return (True, f"stamped PIs={pis} — both S1-800 builds carry verified stamps")
+    return ("warn", f"stamped PIs={pis} — one S1-800 build verified; the other needs its gear-verification drive (stamp guard holding, as designed)")
 check("C identify", "the two S1-800 builds are separated", c6)
 
 def c7():

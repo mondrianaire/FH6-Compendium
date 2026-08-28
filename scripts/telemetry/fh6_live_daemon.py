@@ -56,6 +56,7 @@ class State:
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
         self.seq = 0
         self.clone_lock = None      # ordinal the user pinned as a CLONE TARGET — while set, PI/catalog accrual for it is paused (building the replica must not poison the target)
+        self.gears_seen = {}        # ordinal -> set of forward gears USED at speed this session — hard identity evidence (you cannot use gear 8 in a 6-speed box)
     def emit(self, name, payload):
         with self.lock:
             self.seq += 1; self.events.append((self.seq, name, payload))
@@ -184,6 +185,8 @@ def ingest(p, t_mono):
         ST._zero_since = None; ST.prev_cfg = c["cid"]
     elif ST._zero_since is None: ST._zero_since = t_mono
     c["stint"] = ST.stint
+    if c["on"] and c["car"] and 1 <= (c["gear"] or 0) <= 10 and c["mph"] > 15:   # gears actually USED at speed — the cheapest exact identity evidence
+        ST.gears_seen.setdefault(str(c["car"]), set()).add(int(c["gear"]))
     if c["on"] and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1): ST.last_pos = (p["PosX"], p["PosZ"])   # only real ON-TRACK positions — a menu / pre-race frame reports [0,0] and must NEVER become a loop start (the bug that put every marked loop at the origin)
     # AUTO-COURSE: a timed event (Rivals / race) auto-starts course recording at the S/F line — no manual mark needed.
     # Reuses the loop machinery below for circuit laps; a point-to-point sprint's single pass and any partial/crashed
@@ -596,6 +599,12 @@ def _pick_meta(metas, ordn, ts_want=None):
         live_red = (fr.get("maxrpm") if live and fr else None)
         if live_red and red:                           # two same-cyl same-PI builds with DIFFERENT ENGINES separate here: redline is telemetry-exact
             score += 50 if abs(int(red) - int(live_red)) <= 400 else -min(50, abs(int(red) - int(live_red)) * 0.02)
+        gseen = getattr(ST, "gears_seen", {}).get(str(ordn)) or set()
+        mxg = max(gseen) if gseen else 0
+        gc0 = t.get("gear_count")
+        if live and mxg and gc0:                       # gears USED are hard evidence: gear 8 in a 6-speed box is impossible; reaching the box's exact top is strong
+            if int(gc0) < mxg: score -= 500
+            elif int(gc0) == mxg and mxg >= 5: score += 45
         roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "red": red, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
     if not roster:
         return metas[0], {"how": "newest", "live": live, "saves": []}
@@ -1081,10 +1090,27 @@ def _build_union(deliverable, ordn, match=None):
         if match and match.get("how") in ("signature", "gear-matched", "newest"):
             ev = [f["name"] for f in u["fields"] if f["status"] == "conflict" and f["name"] in ("Aspiration", "Transmission")]
             if ev:
-                match["prev_how"] = match.get("how"); match["how"] = "unsaved-build"; match["evidence"] = ev
-                ask("identity", "capture this build's file (re-apply its tune from Find Tunes, or save it if your own) — measured " + " + ".join(e.lower() for e in ev)
-                    + " contradicts every save on disk, so you're driving a distinct build that isn't captured yet", "unblocks everything", 0)
-                u["asks"].sort(key=lambda a: a["rank"])
+                # "contradicts every save" must actually mean EVERY save — a Transmission conflict against the
+                # CHOSEN save while ANOTHER roster save matches the gears being used means the tie-pick was wrong,
+                # not that the build is unsaved. (Re-applying an already-applied tune writes NO file, so the old
+                # advice could never resolve this state — the loop the user reported.)
+                _alt = None
+                try:
+                    _ordk = str(int((deliverable or {}).get("ordinal") or 0))
+                    _gs = getattr(ST, "gears_seen", {}).get(_ordk) or set()
+                    _mx = max(_gs) if _gs else 0
+                    if "Transmission" in ev and _mx:
+                        _alt = next((s for s in (match.get("saves") or []) if s.get("gears") and int(s["gears"]) >= _mx and str(s.get("ts")) != str((match.get("saves") or [{}])[0].get("ts"))), None)
+                except Exception:
+                    _alt = None
+                if _alt is not None and ev == ["Transmission"]:
+                    ask("identity", f"{match.get('n_signature_ties') or 'several'} saved builds tie on signature and the measured gearbox contradicts the current pick — keep driving up through the gears (Build {_alt.get('build') or '?'} matches the {_alt.get('gears')}-speed box you're using; the ladder confirms it, no re-apply needed)", "auto-resolves", 0)
+                    u["asks"].sort(key=lambda a: a["rank"])
+                else:
+                    match["prev_how"] = match.get("how"); match["how"] = "unsaved-build"; match["evidence"] = ev
+                    ask("identity", "capture this build's file — measured " + " + ".join(e.lower() for e in ev)
+                        + " contradicts every save on disk: you're driving a distinct build that isn't captured. Change any part (or slider) and SAVE if it's yours, or apply a different tune then re-apply this one — re-applying an already-active tune writes nothing", "unblocks everything", 0)
+                    u["asks"].sort(key=lambda a: a["rank"])
     except Exception:
         pass
 
@@ -1408,6 +1434,7 @@ def reset_session():
         ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
         ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None; ST._auto_suspend = None   # keep the loop DEFINITION, reset its lap count
         ST.live_seen = {}   # J20: the parked-identity hold is session telemetry — it dies with the session
+        ST.gears_seen = {}
         ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
         ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
         ST.events = []; ST.seq += 1

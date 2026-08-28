@@ -3478,6 +3478,8 @@
       .tl-save{font-size:10.5px;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--txt);padding:1px 8px;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
       .tl-save:hover{border-color:#a371f7}
       .tl-save.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.12);font-weight:700}
+      .tl-worn{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.12)}
+      .tl-lvy{width:56px;height:34px;object-fit:cover;border-radius:5px;border:1px solid var(--line)}
       /* ---- SAVE x TELEMETRY union strip ---- */
       .us{border:1px solid #2f81f7;border-radius:8px;background:rgba(47,129,247,.06);padding:8px 11px;margin:0 0 11px}
       .us.has-conflict{border-color:#e5414e;background:rgba(229,65,78,.05)}
@@ -3651,7 +3653,13 @@
         const tie = list.length > 1 ? `<span class="tl-tie" title="same engine + PI (what cloning creates) — the slider fingerprint differs; the live gear ladder identifies which is equipped">${list.length} share this signature</span>` : "";
         return `<div class="tl-bucket"><span class="tl-sig"><b>${pi !== "?" ? "PI " + pi : "PI ?"}</b> · ${cyl !== "?" ? cyl + "-cyl" : "engine ?"}${tie}</span><span class="tl-saves">${items}</span></div>`;
       }).join("");
-      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}</details>`;
+      // GARAGE-INSTANCE reality check: FH6 stores tune containers per MODEL + save event — two garage cars of the
+      // same model do NOT get separate tune files, and no livery↔tune link exists on disk. When the car has liveries,
+      // show them inline here so the picker at least carries the visual identity, and say what the game can't record.
+      const lc = (live.liveryCache || {})[String(ordinal)];
+      const wornThumbs = (lc && lc.n) ? lc.list.filter((l) => l.thumb).slice(0, 6).map((l) => `<img class="tl-lvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" title="${esc(l.name || "design")}" alt="">`).join("") : "";
+      const worn = wornThumbs ? `<div class="tl-worn"><span class="why" style="font-size:10px">🎨 liveries on this car (the game records NO livery↔tune link — two garage cars of the same model even share one tune file; identify by the paint you see in-game, and re-save a build's tune in-game to give it its own entry here):</span>${wornThumbs}</div>` : "";
+      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${worn}</details>`;
     };
     // ---- LIVERY GALLERY: the paintjob thumbnails from the save's Livery containers — the visual identity players
     // actually use to tell builds apart. No tune↔livery link exists on disk (both key by car only), so this is a

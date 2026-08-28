@@ -297,7 +297,7 @@ def ingest(p, t_mono):
         ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0; ST.drive_since_periodic += 1 / 100.0
         try: sz = os.path.getsize(ST.csv_path) if ST.csv_path and not ST.replay else 0
         except Exception: sz = 0
-        period = 20 if sz < 60e6 else 45 if sz < 150e6 else 90   # re-analysis cadence scales with file size (use ↺ reset to start a fresh, fast session)
+        period = 20 if sz < 60e6 else 45 if sz < 150e6 else 90 if sz < 350e6 else 300   # re-analysis cadence scales with file size (use ↺ reset to start a fresh, fast session). Past ~350MB an analysis takes ~as long as the old 90s ceiling — back-to-back analyzer runs saturated a core + disk and lagged the GAME; 300s keeps a huge session usable until the reset
         if ST.drive_since_periodic > period and not ST.analyzing and ST.csv_path:
             ST.drive_since_periodic = 0; threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
     elif ST.last_on_t is not None and t_mono - ST.last_on_t > 5 and ST.live_since_analysis > 15 and not ST.analyzing and ST.csv_path:

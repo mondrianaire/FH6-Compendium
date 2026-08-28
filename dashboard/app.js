@@ -3669,7 +3669,10 @@
       live.liveryCache = live.liveryCache || {};
       const c = live.liveryCache[ord];
       if (c === undefined) { fetchLiveries(ord); return ""; }
-      if (!c || !c.n) return "";
+      if (!c) return "";
+      // ZERO entries is itself information: an untouched factory-paint car writes NO livery container at all (verified
+      // across the garage — 47/160 tuned cars). Say so, instead of an ambiguous blank.
+      if (!c.n) return `<div class="lvy-strip"><div class="lvy-h">🎨 Liveries on this car <span class="why" style="font-size:10px">— none saved</span></div><div class="lvy-chips"><span class="lvy-chip" title="no Livery / BaseLivery container exists for this car — the game only writes one when you save a design or apply a paint">🏭 factory paint — never repainted</span></div></div>`;
       const cards = c.list.filter((l) => l.thumb).slice(0, 12).map((l) =>
         `<figure class="lvy" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}"><img src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" alt="livery"><figcaption>${esc(l.name || (l.kind === "SoulBoundLivery" ? "soul-bound" : l.kind === "BaseLivery" ? "base paint" : "design"))}</figcaption></figure>`).join("");
       // PAINT-ONLY case: a plain paintjob saves a BaseLivery container with NO thumbnail (the game only renders

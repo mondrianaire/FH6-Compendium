@@ -3455,6 +3455,15 @@
       .lvy figcaption{font-size:9.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .lvy-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
       .lvy-chip{font-size:10.5px;border:1px solid var(--line);border-radius:10px;padding:2px 9px;background:var(--bg2);white-space:nowrap}
+      .lvy{position:relative}
+      .lvy.assoc img{border-color:#a371f7}
+      .lvy.assoc-cur img{border:2px solid #00d27a;box-shadow:0 0 9px rgba(0,210,122,.45)}
+      .lvy-badge{position:absolute;top:2px;left:2px;font-size:8.5px;font-weight:800;background:rgba(14,17,22,.85);border:1px solid #a371f7;color:#a371f7;border-radius:5px;padding:0 4px;max-width:98px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .lvy-badge.cur{border-color:#00d27a;color:#00d27a}
+      .lvy-cur-tag{color:#00d27a;font-weight:800}
+      .lvy-chip.assoc{border-color:#a371f7}
+      .lvy-chip.assoc-cur{border-color:#00d27a;box-shadow:0 0 6px rgba(0,210,122,.35)}
+      .lvy-chip b{color:#a371f7;font-weight:700}.lvy-chip.assoc-cur b{color:#00d27a}
       /* ---- build-confirm gate ---- */
       .bcf{border:2px solid;border-radius:9px;padding:9px 12px;margin:0 0 10px;background:rgba(255,255,255,.015)}
       .bcf-hd{display:flex;align-items:baseline;gap:9px}.bcf-hd b{font-size:13.5px}
@@ -3736,7 +3745,7 @@
         .then((d) => { live.liveryCache[ord] = { n: (d.liveries || []).length, list: d.liveries || [] }; paintDiskDecode(); paintFloat(); })
         .catch(() => { live.liveryCache[ord] = { n: 0, list: [] }; setTimeout(() => { if (live.liveryCache && live.liveryCache[ord] && !live.liveryCache[ord].n) delete live.liveryCache[ord]; }, 30000); });   // a fetch error must not cache 'no liveries' forever — retry on the next paint after 30s
     };
-    const liveryStrip = (ord) => {
+    const liveryStrip = (ord, mm, curTs) => {
       live.liveryCache = live.liveryCache || {};
       const c = live.liveryCache[ord];
       if (c === undefined) { fetchLiveries(ord); return ""; }
@@ -3744,17 +3753,25 @@
       // ZERO entries is itself information: an untouched factory-paint car writes NO livery container at all (verified
       // across the garage — 47/160 tuned cars). Say so, instead of an ambiguous blank.
       if (!c.n) return `<div class="lvy-strip"><div class="lvy-h">🎨 Liveries on this car <span class="why" style="font-size:10px">— none saved</span></div><div class="lvy-chips"><span class="lvy-chip" title="no Livery / BaseLivery container exists for this car — the game only writes one when you save a design or apply a paint">🏭 factory paint — never repainted</span></div></div>`;
-      const cards = c.list.filter((l) => l.thumb).slice(0, 12).map((l) =>
-        `<figure class="lvy" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}"><img src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" alt="livery"><figcaption>${esc(l.name || (l.kind === "SoulBoundLivery" ? "soul-bound" : l.kind === "BaseLivery" ? "base paint" : "design"))}</figcaption></figure>`).join("");
+      // ASSOCIATION back-projection: liveries the identification algorithm has tied to a BUILD carry that build's tune
+      // specs as a badge (🪪 E · PI 800 · 8sp); the CURRENTLY DECODED tune's livery gets the strongest highlight.
+      const assoc = {};
+      (((mm || {}).builds) || []).forEach((b) => { if (b.livery && b.livery.dir) {
+        const isCur = (b.saves || []).some((ts) => String(ts) === String(curTs));
+        if (!assoc[b.livery.dir] || isCur) assoc[b.livery.dir] = { label: b.label, pi: b.pi, gears: b.gears, source: b.livery.source, isCur }; } });
+      const specTxt = (a) => `Build ${a.label}${a.pi != null ? ` · PI ${a.pi}` : ""}${a.gears ? ` · ${a.gears}-sp` : ""}${a.source === "guess" ? " ≈" : ""}`;
+      const cards = c.list.filter((l) => l.thumb).slice(0, 12).map((l) => { const a = assoc[l.dir];
+        const badge = a ? `<span class="lvy-badge${a.isCur ? " cur" : ""}" title="${a.source === "pinned" ? "pinned — this livery wears this tune" : "guessed from save-time proximity — confirm in the library"}">🪪 ${esc(specTxt(a))}</span>` : "";
+        return `<figure class="lvy${a ? " assoc" : ""}${a && a.isCur ? " assoc-cur" : ""}" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}${a ? " · " + esc(specTxt(a)) : ""}">${badge}<img src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" alt="livery"><figcaption>${esc(l.name || (l.kind === "SoulBoundLivery" ? "soul-bound" : l.kind === "BaseLivery" ? "base paint" : "design"))}${a && a.isCur ? `<b class="lvy-cur-tag"> ◀ this tune</b>` : ""}</figcaption></figure>`; }).join("");
       // PAINT-ONLY case: a plain paintjob saves a BaseLivery container with NO thumbnail (the game only renders
       // bigThumb.webp for full designs), and its name is the generic 'Forza BaseLivery'. Show those as labelled
       // chips with the save date — still a recognition cue, honestly presented as paint rather than a design.
-      const chips = c.list.filter((l) => !l.thumb).slice(0, 8).map((l) => {
+      const chips = c.list.filter((l) => !l.thumb).slice(0, 8).map((l) => { const a = assoc[l.dir];
         const generic = /^Forza (Base|SoulBound)?Livery$/i.test(l.name || "");
         const label = (l.name && !generic) ? l.name : (l.kind === "BaseLivery" ? "base paint" : l.kind === "SoulBoundLivery" ? "soul-bound livery" : "design");
-        return `<span class="lvy-chip" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}">🎨 ${esc(label)}${l.ts ? ` · ${_tsFmt(l.ts)}` : ""}</span>`; }).join("");
+        return `<span class="lvy-chip${a ? " assoc" : ""}${a && a.isCur ? " assoc-cur" : ""}" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}${a ? " · " + esc(specTxt(a)) : ""}">🎨 ${esc(label)}${l.ts ? ` · ${_tsFmt(l.ts)}` : ""}${a ? ` <b>🪪 ${esc(specTxt(a))}</b>${a.isCur ? " ◀" : ""}` : ""}</span>`; }).join("");
       if (!cards && !chips) return "";
-      const note = cards ? "— the paint is how you know the build at a glance" : "— paint-only (the game saves no thumbnail for plain paintjobs)";
+      const note = cards ? "— the paint is how you know the build at a glance · 🪪 = tune association" : "— paint-only (the game saves no thumbnail for plain paintjobs)";
       return `<div class="lvy-strip"><div class="lvy-h">🎨 Liveries on this car <span class="why" style="font-size:10px">${note}</span></div><div class="lvy-row">${cards}${chips ? `<div class="lvy-chips">${chips}</div>` : ""}</div></div>`;
     };
     const diskDeliverableHtml = (r, opts) => {
@@ -3819,7 +3836,7 @@
         const oc2 = sm.pi_obs_car || 0, ot2 = sm.pi_obs_total || 0;
         return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${piKnown}/${piTot} parts priced${piKnown < piTot ? " — accrues as you drive" : ""}</span> · <span class="why" title="configs the daemon has paired with a live PI — this car / whole garage">📈 ${oc2} this car · ${ot2} total observed</span></div>`; })();
       return `<div class="block fhm" style="border-color:#00d27a">${headRow}
-        ${liveryStrip(dl.ordinal)}
+        ${liveryStrip(dl.ordinal, r.match, r.ts)}
         <div class="idm">
           ${diskMatchBar(r, dl.ordinal)}
           ${diskDiffBanner(dl.ordinal)}

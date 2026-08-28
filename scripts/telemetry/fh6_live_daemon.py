@@ -510,7 +510,11 @@ def _pick_meta(metas, ordn, ts_want=None):
     # two builds that differ in gears/final-drive separate cleanly here, while genuinely identical builds stay tied.
     n_ties = 1; gear_used = False
     if live and len(roster) >= 2:
-        ties = [r for r in roster if roster[0]["_score"] - r["_score"] < 40.0]   # < ~1 PI point apart = a cyl/PI tie
+        # candidates = every same-cylinder save. NOT the score-tie window: the PI-observation bonus is self-
+        # reinforcing (stamped builds outscore unstamped ones, so unstamped builds never got their ladder compared and
+        # never got stamped). An unstamped PI is UNKNOWN — it may equally sit at the class cap — so PI cannot rule a
+        # same-cyl save out. The measured gear ladder OUTRANKS the PI bonus whenever it's available.
+        ties = [r for r in roster if not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl)]
         n_ties = len(ties)
         if n_ties >= 2:
             live_gl = None
@@ -1319,7 +1323,12 @@ def disk_watcher():
                 # recorded (a stale on-disk parts snapshot paired with live PI corrupts real configs — see audit).
                 if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0 and ST.clone_lock != ordn:
                     rec_meta, _rm = _pick_meta(metas, ordn)   # pair the LIVE build's parts (matched by cyl) with the live PI — not the newest file, which may be a different build
-                    if not (_rm and _rm.get("how") == "no-match"):   # skip when NO saved tune matches the live build (a half-built WIP would record wrong parts->PI)
+                    # STAMP ONLY ON A VERIFIED IDENTITY: with several same-cyl builds, a cyl/PI pick can't prove WHICH
+                    # build is equipped (at a class cap they converge; unstamped PIs are unknown) — stamping then would
+                    # pair the live PI with the wrong build's parts and poison the observation store. Require a single
+                    # candidate or a gear-ladder-verified pick.
+                    ok_stamp = _rm and _rm.get("how") != "no-match" and ((_rm.get("n_signature_ties") or 1) <= 1 or _rm.get("gear_disambig"))
+                    if ok_stamp:
                         _record_pi_observation(ordn, TUNE.parse_tune(rec_meta["path"], ordinal_hint=ordn))
                     _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)
             except Exception:

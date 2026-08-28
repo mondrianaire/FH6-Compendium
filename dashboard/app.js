@@ -2664,7 +2664,7 @@
       // engine), its slider values belong to a DIFFERENT build — never auto-fill them as your "current" tune, or the
       // recommendations read the wrong car. Clear instead, so targets fall back to vetted baselines until you save THIS
       // build. This is the fix for "the stored values are not for the current car".
-      if (d.match && d.match.how === "no-match") { const had = live.diskTune[key] != null; delete live.diskTune[key]; return had; }
+      if (d.match && (d.match.how === "no-match" || d.match.how === "unsaved-build")) { const had = live.diskTune[key] != null; delete live.diskTune[key]; return had; }   // a distinct/unsaved build must never auto-fill another build's sliders as "current"
       const vals = {};
       (d.deliverable.tabs || []).forEach((t) => (t.rows || []).forEach((r) => { if (r.value != null && DISK2SLIDER[r.field]) vals[DISK2SLIDER[r.field]] = r.value; }));
       const changed = JSON.stringify(live.diskTune[key]) !== JSON.stringify(vals);
@@ -2727,7 +2727,7 @@
     const abCapture = (cid, c, s) => {
       if (!cid) return;
       const cc = live.diskCache && live.diskCache[String(cid).split("|")[0]];
-      if (cc && cc.match && cc.match.how === "no-match") return;   // decoded save is a DIFFERENT build — don't version/diff its values as this car's tune
+      if (cc && cc.match && (cc.match.how === "no-match" || cc.match.how === "unsaved-build")) return;   // decoded save is a DIFFERENT build — don't version/diff its values as this car's tune
       const full = abFull(cid); if (!full) return;
       const m = abMetrics(c, s); const versions = getAB(cid); const last = versions[versions.length - 1];
       if (last && abFullEq(last.full, full)) {
@@ -3017,7 +3017,8 @@
       if (!cached || !cached.deliverable) { R.need.push("reading the build from the save file…"); R.hardBlock = true; return R; }
       const dl = cached.deliverable, m = cached.match || {}, sm = dl.summary || {};
       const n = m.n_saves || (m.saves || []).length || 1, ties = m.n_signature_ties || 1;
-      if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`save THIS build in-game — you're in a ${m.live_cyl}-cyl car but the nearest save is ${m.chosen_cyl}-cyl, so its parts &amp; sliders aren't the build you're driving`); }
+      if (m.how === "unsaved-build") { R.hardBlock = true; R.matchLbl = "distinct build"; R.need.push(`save THIS build's tune in-game — measured ${(m.evidence || []).join(" + ").toLowerCase() || "telemetry"} contradicts every saved tune, so you're driving a distinct build whose parts aren't on disk (the class cap makes different part combos share one PI)`); }
+      else if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`save THIS build in-game — you're in a ${m.live_cyl}-cyl car but the nearest save is ${m.chosen_cyl}-cyl, so its parts &amp; sliders aren't the build you're driving`); }
       else if (m.how === "gear-matched") { R.matchLbl = "gear-matched"; R.why.push(`identified the equipped build by its live gear ladder (${ties} share this engine + PI)`); }
       else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(`drive up through the gears once — ${ties} builds share this engine + PI, and the gear ladder is how I tell which one you're on`); }
       else if (m.how === "signature") { R.matchLbl = "signature"; R.why.push("matched to the car you're driving (cylinders + PI)"); }
@@ -3590,7 +3591,8 @@
       const saves = m.saves || []; const cur = String(r.ts); const pick = live.diskPick && live.diskPick[ordinal];
       let status = "";
       const ties = m.n_signature_ties || 1;
-      if (m.how === "no-match") status = `<div class="dm-warn">⚠ You're in a <b>${m.live_cyl}-cyl</b> car${m.live_pi ? ` (PI ${m.live_pi})` : ""} but no saved tune matches it — the closest is <b>${m.chosen_cyl}-cyl</b>. This build isn't saved to disk; <b>save the setup in-game</b> to decode it, or pick a saved tune below.</div>`;
+      if (m.how === "unsaved-build") status = `<div class="dm-warn">🚧 <b>DISTINCT BUILD detected</b> — measured <b>${esc((m.evidence || []).join(" + ").toLowerCase() || "telemetry")}</b> contradicts every saved tune (same cylinders${m.live_pi ? `, same PI ${m.live_pi} — the class cap makes different part combos converge` : ""}). You're driving a build whose parts are <b>not on disk</b>. <b>Save its tune in-game</b> to give it its own entry, or pick a saved tune below.</div>`;
+      else if (m.how === "no-match") status = `<div class="dm-warn">⚠ You're in a <b>${m.live_cyl}-cyl</b> car${m.live_pi ? ` (PI ${m.live_pi})` : ""} but no saved tune matches it — the closest is <b>${m.chosen_cyl}-cyl</b>. This build isn't saved to disk; <b>save the setup in-game</b> to decode it, or pick a saved tune below.</div>`;
       else if (m.how === "gear-matched") status = `<div class="dm-ok">✓ <b>${ties} builds</b> share this engine + PI${m.live_pi ? ` (PI ${m.live_pi})` : ""} — identified the <b>equipped</b> one by its live gear ladder ⚙</div>`;
       else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you're driving — ${m.live_cyl}-cyl${m.live_pi ? `, PI ${m.live_pi}` : ""}${ties >= 2 ? ` <span class="why" style="font-weight:400">· ${ties} builds share this signature — drive up through the gears to pin the exact one, or pick below</span>` : ""}</div>`;
       else if (m.how === "picked") status = `<div class="dm-ok">📌 pinned to this saved tune${saves.length > 1 ? " — auto-match off" : ""}</div>`;
@@ -3641,7 +3643,7 @@
     // EQUIPPED build flagged from the live match. Click any save to pin/decode it. ----
     const tuneLibraryCard = (r, ordinal) => {
       const m = r.match; const saves = (m && m.saves) || [];
-      if (saves.length < 2) return "";
+      if (saves.length < 2 && (m && m.how) !== "unsaved-build") return "";   // a detected unsaved build shows the library even with one save — that's the whole point
       const buckets = new Map();
       saves.forEach((s) => { const k = `${s.cyl != null ? s.cyl : "?"}|${s.pi != null ? s.pi : "?"}`; if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(s); });
       const cur = String(r.ts); const eqLive = m.how === "signature" || m.how === "gear-matched"; const pinnedPick = m.how === "picked";
@@ -3656,10 +3658,12 @@
       // GARAGE-INSTANCE reality check: FH6 stores tune containers per MODEL + save event — two garage cars of the
       // same model do NOT get separate tune files, and no livery↔tune link exists on disk. When the car has liveries,
       // show them inline here so the picker at least carries the visual identity, and say what the game can't record.
+      // a live-DETECTED distinct build gets its own synthetic row — it exists in the garage but not on disk
+      const unsavedRow = m.how === "unsaved-build" ? `<div class="tl-bucket"><span class="tl-sig"><b>🚧 unsaved build</b> · detected live<span class="tl-tie" title="measured ${esc((m.evidence || []).join(" + "))} contradicts every saved tune — same cylinders + PI (class-cap convergence), different parts">${esc((m.evidence || []).join(" + ")) || "measured"} differs</span></span><span class="tl-saves"><span class="why" style="font-size:10.5px">save its tune in-game → it becomes a real entry here</span></span></div>` : "";
       const lc = (live.liveryCache || {})[String(ordinal)];
       const wornThumbs = (lc && lc.n) ? lc.list.filter((l) => l.thumb).slice(0, 6).map((l) => `<img class="tl-lvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" title="${esc(l.name || "design")}" alt="">`).join("") : "";
       const worn = wornThumbs ? `<div class="tl-worn"><span class="why" style="font-size:10px">🎨 liveries on this car (the game records NO livery↔tune link — two garage cars of the same model even share one tune file; identify by the paint you see in-game, and re-save a build's tune in-game to give it its own entry here):</span>${wornThumbs}</div>` : "";
-      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${worn}</details>`;
+      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${unsavedRow}${worn}</details>`;
     };
     // ---- LIVERY GALLERY: the paintjob thumbnails from the save's Livery containers — the visual identity players
     // actually use to tell builds apart. No tune↔livery link exists on disk (both key by car only), so this is a

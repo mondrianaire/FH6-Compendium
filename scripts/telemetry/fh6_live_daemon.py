@@ -697,7 +697,7 @@ def _build_union(deliverable, ordn, match=None):
         # sig (boost_max / hp_peak / rpm_at_peak) lives on the ANALYZER's session cars — NOT on ST.cars (the live
         # config registry _match_car returns). Reading it off the wrong record left aspiration stuck on 'await'
         # forever, even after a full pull to redline.
-        sig = {}
+        sig = {}; sj_car = None
         with ST.lock:
             sj = ST.session_json
         if sj:
@@ -752,6 +752,18 @@ def _build_union(deliverable, ordn, match=None):
                 ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
             else:
                 fld("Aspiration", asp_lbl, (f"{boost} psi" if boost and boost > 0.5 else "NA confirmed"), "agree")
+        # -- transmission: the measured gear COUNT is a PART-level cross-check. At a class cap (e.g. S1 800) different
+        # part combos converge to the SAME PI, so cyl×PI can't separate them — but driving gear 8 at WOT while the
+        # save holds a 6-speed box is definitive: a DIFFERENT build is equipped.
+        meas_gears = [g.get("gear") for g in ((sj_car or {}).get("gears") or []) if g.get("gear")]
+        gc_save = deliverable.get("gear_count")
+        if meas_gears and gc_save:
+            mx = max(meas_gears)
+            if mx > gc_save:
+                fld("Transmission", f"{gc_save}-speed (saved tune)", f"gear {mx} measured at WOT", "conflict",
+                    "the live gearbox has MORE gears than the saved tune's transmission — a different build is equipped")
+            elif mx == gc_save and len(set(meas_gears)) >= gc_save:
+                fld("Transmission", f"{gc_save}-speed", f"all {gc_save} gears seen at WOT", "agree")
         # -- gears: aggregate the per-row reconciliation _enrich_gears recorded
         g_meas = g_agree = g_conf = g_tot = 0
         for t in deliverable.get("tabs", []):
@@ -809,6 +821,18 @@ def _build_union(deliverable, ordn, match=None):
         u["n_fill"] = sum(1 for f in u["fields"] if f["status"] == "tele-fill")
         u["n_await"] = sum(1 for f in u["fields"] if f["status"] == "await")
         deliverable["union"] = u
+        # AUTO-IDENTIFY A DISTINCT UNSAVED BUILD: aspiration and transmission are PART-level measurements — they can
+        # only disagree with the save if different PARTS are equipped (sliders can't change them). When the matcher
+        # said "matched by cyl+PI" but a part-level measurement contradicts the save, the truth is: you're driving a
+        # build that exists in the garage but NOT on disk (same cyl, same capped PI, different upgrades). Flip the
+        # match to 'unsaved-build' so the client warns, blocks auto-fill, and offers the save-in-game path.
+        if match and match.get("how") in ("signature", "gear-matched", "newest"):
+            ev = [f["name"] for f in u["fields"] if f["status"] == "conflict" and f["name"] in ("Aspiration", "Transmission")]
+            if ev:
+                match["prev_how"] = match.get("how"); match["how"] = "unsaved-build"; match["evidence"] = ev
+                ask("identity", "save THIS build's tune in-game — measured " + " + ".join(e.lower() for e in ev)
+                    + " contradicts every saved tune, so you're driving a distinct build that isn't on disk yet", "unblocks everything", 0)
+                u["asks"].sort(key=lambda a: a["rank"])
     except Exception:
         pass
 

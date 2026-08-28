@@ -13,6 +13,12 @@ means a later, faster lap re-rates history instead of destroying it: your improv
 
 Idempotent: re-analysis of the same session replaces its own rows (UNIQUE on route_key+session+cid+t0), so the
 20-second cadence cannot duplicate a lap.
+
+VOID laps: in a timed run contact invalidates the time — the lap is not slower, it is VOID. A void lap must
+never define a build's reference best, or one lucky "fast" impacted lap silently mis-rates every other lap on
+the course through the 107% rule. But a void lap's TIME is the only invalid part: its grip, cornering and
+racing-line data are as real as any other lap's. So voidness is filtered out of TIMING and kept for TRACES —
+void rows are still returned, carrying `void` and their `impacts` count, for the UI to strike through.
 """
 import json, os, sqlite3, threading
 
@@ -37,25 +43,48 @@ def connect(root):
         build_id TEXT, class TEXT, pi INTEGER, drivetrain TEXT,
         solo INTEGER DEFAULT 0,                     -- a Rivals/time-trial lap: no traffic, no contact
         pts TEXT NOT NULL,                          -- [[arc_m, mph, grip, x, z], ...]
+        impacts INTEGER DEFAULT 0,                  -- grip-code-4 points in this lap: contact / jolt
+        void INTEGER DEFAULT 0,                     -- 1 = time invalidated by contact (timed run only)
         UNIQUE (route_key, session, cid, t0))""")
     cx.execute("CREATE INDEX IF NOT EXISTS ix_lap_route ON lap_traces(route_key, cid, lap_s)")
+    _migrate(cx)
     return cx
 
 
+def _migrate(cx):
+    """Bring an existing lap_traces up to the current column set. CREATE TABLE IF NOT EXISTS is a no-op on a
+    file that already has the table, so new columns must be ALTERed in. Capability check, not a version
+    counter: we ask the table what it has and add only what is missing, so a half-applied migration self-heals
+    on the next open and running the old code against a migrated file still works (the defaults fill in).
+    ALTER TABLE ADD COLUMN with a constant DEFAULT is metadata-only in SQLite — no row rewrite, no data touched."""
+    have = {r[1] for r in cx.execute("PRAGMA table_info(lap_traces)")}
+    for col, ddl in (("impacts", "impacts INTEGER DEFAULT 0"), ("void", "void INTEGER DEFAULT 0")):
+        if col not in have:
+            cx.execute("ALTER TABLE lap_traces ADD COLUMN " + ddl)
+            cx.commit()
+
+
 def put_laps(root, rows):
-    """rows: dicts with route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts."""
+    """rows: dicts with route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts,
+    and optionally impacts + void (both default to 0 — an older caller that does not know about contact still
+    writes a valid row). The named-parameter bind raises on a missing key, so the defaults are applied here in
+    Python rather than left to the column DEFAULT."""
     if not rows:
         return 0
     with _LOCK:
         cx = connect(root)
         try:
             cx.executemany(
-                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts)
-                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:pts)
+                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts, impacts, void)
+                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:pts,:impacts,:void)
                    ON CONFLICT(route_key, session, cid, t0) DO UPDATE SET
                      lap_s=excluded.lap_s, arc_m=excluded.arc_m, pts=excluded.pts, solo=excluded.solo,
-                     build_id=excluded.build_id, class=excluded.class, pi=excluded.pi, drivetrain=excluded.drivetrain""",
-                [dict(r, pts=json.dumps(r["pts"], separators=(",", ":"))) for r in rows])
+                     build_id=excluded.build_id, class=excluded.class, pi=excluded.pi, drivetrain=excluded.drivetrain,
+                     impacts=excluded.impacts, void=excluded.void""",
+                # re-analysis runs every 20-90 s: a lap re-scored as clean must be able to un-void itself, so
+                # impacts/void are overwritten on conflict like every other re-derived field.
+                [dict(r, pts=json.dumps(r["pts"], separators=(",", ":")),
+                      impacts=int(r.get("impacts") or 0), void=1 if r.get("void") else 0) for r in rows])
             cx.commit()
             return len(rows)
         finally:
@@ -64,7 +93,11 @@ def put_laps(root, rows):
 
 def get_laps(root, route_key, cls=None, competitive_only=True, limit=400):
     """Competitive laps for a course, newest-fastest first. Reference = each build's own best here, so a slower
-    car's good laps still qualify; `competitive` is also returned per row so callers can show the rest greyed."""
+    car's good laps still qualify; `competitive` is also returned per row so callers can show the rest greyed.
+
+    competitive_only=True now means "laps worth comparing times against, PLUS every void lap" — a void lap is
+    never competitive, but dropping it would hide contact from the UI and lose a perfectly good grip trace.
+    Callers distinguish them by the returned `void` flag: strike the time, keep the line on the map."""
     if not os.path.exists(db_path(root)):
         return []
     with _LOCK:
@@ -81,21 +114,27 @@ def get_laps(root, route_key, cls=None, competitive_only=True, limit=400):
             rows = [dict(r) for r in cx.execute(q, args).fetchall()]
         finally:
             cx.close()
+    for r in rows:                                  # legacy rows predate the columns; normalise once, up front
+        r["impacts"] = int(r.get("impacts") or 0)
+        r["void"] = bool(r.get("void"))
     best = {}
     for r in rows:
         t = r.get("lap_s")
-        if t and (r["cid"] not in best or t < best[r["cid"]]):
+        # a void time can never define the reference: it was set with contact, and the 107% rule measured
+        # against it would mis-rate every clean lap the build has ever set here.
+        if t and not r["void"] and (r["cid"] not in best or t < best[r["cid"]]):
             best[r["cid"]] = t
     out = []
     for r in rows:
         ref = best.get(r["cid"])
-        r["competitive"] = bool(r.get("lap_s") and ref and r["lap_s"] <= ref * COMPETITIVE)
+        r["competitive"] = bool(r.get("lap_s") and ref and not r["void"] and r["lap_s"] <= ref * COMPETITIVE)
         r["pct_off"] = round((r["lap_s"] / ref - 1) * 100, 1) if (r.get("lap_s") and ref) else None
         try:
             r["pts"] = json.loads(r["pts"])
         except Exception:
             r["pts"] = []
-        if competitive_only and not r["competitive"]:
+        # void laps survive the filter: their TIME is invalid, their grip/cornering trace is not.
+        if competitive_only and not r["competitive"] and not r["void"]:
             continue
         out.append(r)
     return out[:limit]

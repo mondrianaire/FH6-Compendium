@@ -1238,16 +1238,71 @@ def _lap_class_counts(route_key):
         return {}
 
 
+def _lap_contact_counts(route_key):
+    """How many of this route's laps carried contact, and how many that VOIDED — a header-level count so the
+    course view can say "3 of 11 laps void" without walking every lap's pts. Route-wide like _lap_class_counts
+    (never narrowed by the class filter) and mode=ro for the same reason: the analyzer owns the writes.
+    Tolerates a pre-migration db — the columns are added by lap_store, and a daemon running ahead of that
+    migration must answer zeros, not 500."""
+    p = lap_store.db_path(ROOT)
+    zero = {"laps": 0, "impacted": 0, "void": 0}
+    if not os.path.exists(p):
+        return zero
+    try:
+        import sqlite3 as _sq
+        cx = _sq.connect("file:" + p.replace("\\", "/") + "?mode=ro", uri=True, timeout=5)
+        try:
+            cols = {r[1] for r in cx.execute("PRAGMA table_info(lap_traces)").fetchall()}
+            if not {"impacts", "void"} <= cols:
+                n = cx.execute("SELECT COUNT(*) FROM lap_traces WHERE route_key=?", (route_key,)).fetchone()[0]
+                return dict(zero, laps=n)
+            n, i, v = cx.execute(
+                "SELECT COUNT(*), SUM(impacts > 0), SUM(void <> 0) FROM lap_traces WHERE route_key=?",
+                (route_key,)).fetchone()
+        finally:
+            cx.close()
+        return {"laps": int(n or 0), "impacted": int(i or 0), "void": int(v or 0)}
+    except Exception:
+        return zero
+
+
+def _thin_pts(pts, cap=200):
+    """Downsample one lap's pts to at most `cap` points — WITHOUT ever dropping an impact.
+
+    WHY the extra bookkeeping: an impact is a SINGLE sample (one [arc, mph, 4, x, z] point). A naive strided
+    walk keeps every Nth point, so it deletes the exact samples the map markers and trace ticks are drawn
+    from — the lap would report impacts:3 and render zero markers. So: keep the first point, the last point,
+    and EVERY grip_code==4 point unconditionally, then stride-fill the remainder up to the cap. Indices are
+    emitted in ascending order, so the polyline still draws front-to-back.
+
+    The thinning still matters: at ~26 bytes a point an unthinned 40-lap answer is 600 KB of coordinates no
+    560 px trace can resolve, and shipping it stalls the repaint. Ceil division on the REMAINING budget so
+    the result lands at or under the cap (floor division overshoots: 599 // 200 = 2 keeps 300 points). The
+    one deliberate exception is a lap with more than `cap` impact points: contact is the payload there, so
+    every one of them ships.
+    """
+    n = len(pts)
+    if n <= cap:
+        return pts
+    keep = {0, n - 1}                                                     # the finish line is the sample a stride always misses
+    keep.update(i for i, p in enumerate(pts) if len(p) > 2 and p[2] == 4)  # grip_code 4 = impact: never thinnable
+    room = cap - len(keep)
+    if room > 0:
+        keep.update(range(0, n, max(1, -(-n // room))))
+    return [pts[i] for i in sorted(keep)]
+
+
 def _laps_payload(route_key, cls=None, limit=40, competitive_only=True, cap=200):
     """Historical laps for one course, contract-shaped for the dashboard. READ-ONLY over data/laps.db.
 
-    pts is downsampled to `cap` points per lap: at ~26 bytes a point an unthinned 40-lap answer is 600 KB of
-    coordinates no 560 px trace can resolve, and shipping it stalls the repaint. Ceil division so the result
-    lands AT or under the cap (floor division overshoots: 599 // 200 = 2 keeps 300 points), and the last point
-    is forced back in — the finish line is the one sample a strided walk almost always misses.
+    Each lap carries `impacts` (how many contact samples it holds) and `void` (contact invalidated the time —
+    a Rivals/time-trial lap with contact is not slow, it is VOID). Void laps are still shipped: the time is
+    dead but the grip and cornering data is not, and the UI strikes the time through rather than hiding it.
+    pts is thinned by _thin_pts, which keeps every impact sample so the count and the markers agree.
     """
     out = {"route_key": route_key, "class": cls or None, "n": 0, "laps": [], "best": None,
-           "by_class": _lap_class_counts(route_key) if route_key else {}}
+           "by_class": _lap_class_counts(route_key) if route_key else {},
+           "contact": _lap_contact_counts(route_key) if route_key else {"laps": 0, "impacted": 0, "void": 0}}
     if not route_key:
         return out
     try:
@@ -1256,16 +1311,19 @@ def _laps_payload(route_key, cls=None, limit=40, competitive_only=True, cap=200)
         return out   # a locked/half-written db must answer empty, not 500 — the course view renders around it
     for r in rows:
         pts = r.get("pts") or []
-        if len(pts) > cap:
-            last = pts[-1]
-            pts = pts[::max(1, -(-len(pts) // cap))]
-            pts[-1] = last
+        n4 = sum(1 for p in pts if len(p) > 2 and p[2] == 4)
+        pts = _thin_pts(pts, cap)
+        # Prefer the stored count (taken pre-stride at write time, so it is the truer one), but fall back to
+        # what the pts actually hold: rows written before the column existed read 0 while their trace still
+        # carries impact samples, and a badge that contradicts the visible markers is worse than either alone.
         out["laps"].append({"cid": r.get("cid"), "build_id": r.get("build_id"), "class": r.get("class"),
                             "pi": r.get("pi"), "drivetrain": r.get("drivetrain"), "lap_s": r.get("lap_s"),
                             "pct_off": r.get("pct_off"), "competitive": r.get("competitive"),
-                            "solo": r.get("solo"), "session": r.get("session"), "t0": r.get("t0"), "pts": pts})
+                            "solo": r.get("solo"), "impacts": int(r.get("impacts") or 0) or n4,
+                            "void": bool(r.get("void")),
+                            "session": r.get("session"), "t0": r.get("t0"), "pts": pts})
     out["n"] = len(out["laps"])
-    fastest = next((l for l in out["laps"] if l["lap_s"]), None)   # get_laps sorts fastest-first
+    fastest = next((l for l in out["laps"] if l["lap_s"] and not l["void"]), None)   # get_laps sorts fastest-first; a void time can never be the best
     out["best"] = {"lap_s": fastest["lap_s"], "cid": fastest["cid"]} if fastest else None
     return out
 

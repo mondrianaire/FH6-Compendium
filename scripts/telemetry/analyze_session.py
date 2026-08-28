@@ -981,7 +981,10 @@ def main():
         # driving-line assist runs in Rivals too). RacePosition is the only signal: it varies or exceeds 1 in a
         # race, and is a constant 1 in a solo time trial. The known hole is a race led wire-to-wire in P1, which
         # is why `solo_conf` is published — a course can be DECLARED Rivals (routes.json "rivals") to settle it.
-        solo = not (pos and (max(pos) > 1 or len(set(pos)) > 1))
+        # `pos` EMPTY means RacePosition was 0 all event — no evidence either way. `not (pos and ...)` returned
+        # True there, coercing absence of evidence into "confirmed solo", which then made those laps voidable.
+        # Solo must be a positive finding: a position was reported, and it never varied and never exceeded 1.
+        solo = bool(pos) and not (max(pos) > 1 or len(set(pos)) > 1)
         mode = "timed solo (Rivals / time trial)" if solo else "race"
         solo_conf = "inferred" if solo else "certain"   # upgraded to 'declared' at course level, where the route key is known
         if laps > 0: mode += " · lapped"
@@ -1083,7 +1086,11 @@ def main():
         if e["duration_s"] < 5 or e["distance_m"] < 100: continue   # only true instant-aborts are dropped; a short PARTIAL run (practising the first few turns, then a crash / restart) still carries cornering data and must contribute to the course
         co = courses.setdefault(e["route_key"], {"route_key": e["route_key"], "name": e["route"], "events": [], "cars": []})
         lab = next((st["label"] for st in stints if st["n"] == e.get("stint")), None)
-        co["events"].append({"t0": e["t0"], "t1": e["t1"], "car": e["car"], "stint": e.get("stint"), "label": lab, "laps": e["laps"], "best_lap": e["best_lap"], "last_lap": e["last_lap"], "duration_s": e["duration_s"], "distance_m": e["distance_m"], "mode": e["mode"], "pos_final": e["pos_final"]})
+        # solo/solo_conf must ride along: the course-scoped consumers below (Rivals scoping at ~:1735, and the
+        # VOID verdict on every stored lap) read them off THIS dict, not off ev_out. Dropping them here made both
+        # read None — every lap stored solo=0, and `rivals` could only ever be True by explicit declaration.
+        # .get(): a synthetic reference-loop event (~:1049) has no solo at all, and unknown must stay unknown.
+        co["events"].append({"t0": e["t0"], "t1": e["t1"], "car": e["car"], "stint": e.get("stint"), "label": lab, "laps": e["laps"], "best_lap": e["best_lap"], "last_lap": e["last_lap"], "duration_s": e["duration_s"], "distance_m": e["distance_m"], "mode": e["mode"], "solo": e.get("solo"), "solo_conf": e.get("solo_conf"), "pos_final": e["pos_final"]})
         if e["car"] not in co["cars"]: co["cars"].append(e["car"])
     def inwin(t, evs): return any(ev["t0"] <= t <= ev["t1"] for ev in evs)
     course_out = []
@@ -1426,6 +1433,25 @@ def main():
                 pcs_ = resample(lap_pts(w, grip=True)); pts_all = [p for pc in pcs_ for p in pc]
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
+        def _impacts(pts_):   # grip 4 = the JOLT alphabet (|lat_g| > 3 or SmashableVelDiff > 0). Display only. Count BEFORE thinning.
+            return sum(1 for p in pts_ if len(p) > 4 and p[4] == 4)
+        def _contacts(w_):
+            """TRUE CONTACT ONLY — a hit on a smashable object. grip_code 4 must NEVER decide a lap's validity:
+            measured across five captures it fired 500 times on |lat_g| > 3.0 against 4 times on
+            SmashableVelDiff, and the two arms never co-occur in a single frame. 73% of grip-4 points sit within
+            40 m of a mapped turn, and this course's best CLEAN pass through T8 pulls 2.92 g against a 3.0 g
+            gate — a 2.7% margin. So grip-4 is a hard-cornering detector wearing an impact's name, and voiding on
+            it struck out five of the six fastest laps on record, moving the reference best 29.7 -> 30.4 s and
+            heading for 34.0 s once every session re-analysed. Only a smashable hit is unambiguous."""
+            return sum(1 for r in loop_rows if w_["t0"] <= r["t"] <= w_["t1"] and (r.get("SmashableVelDiff") or 0) > 0)
+        def _thin(pts_, n):
+            # Thin to ~n points but NEVER drop an impact: the map/trace draw their impact markers from these very
+            # points, so a thinned-out hit would vanish from the map while the stored `impacts` count still claimed it.
+            # (Latent today — every stored lap resamples to < 600 points — but a 10 km route strides by 8.)
+            k = max(1, len(pts_) // n)
+            if k == 1: return pts_
+            keep = set(range(0, len(pts_), k)) | {i for i, p in enumerate(pts_) if len(p) > 4 and p[4] == 4}
+            return [pts_[i] for i in sorted(keep)]
         # EVERY lap that covers the course goes to the append-only lap store — competitiveness (the 107% rule) is
         # judged at read time against each build's own best, so a later faster lap RE-RATES history instead of
         # deleting it. The model keeps only the best per tune (a compact summary; the store holds the record).
@@ -1436,23 +1462,28 @@ def main():
             _cr = cars.get(cid_) or {}
             for w in valid:
                 arc_w, pts_w = _win_arc[id(w)]
-                kw = max(1, len(pts_w) // 300)
                 _ev = evs[w["ev"]] if 0 <= w["ev"] < len(evs) else {}
+                # VOID: contact invalidates a TIMED lap, so the time is not a time at all. It must never become the
+                # cid's reference best, because the 107% competitive rule is judged against that best — one void
+                # 'fast' lap would silently mis-rate every other lap on the course. In a RACE contact is normal:
+                # show the impacts, keep the time. Solo unknown => not voided (absence of evidence isn't evidence).
+                _solo = 1 if _ev.get("solo") else 0
+                _imp = _impacts(pts_w)
                 _lap_rows.append({"route_key": key, "session": sid, "cid": cid_, "t0": round(w["t0"], 1),
                                   "lap_s": round(w["t1"] - w["t0"], 2), "arc_m": round(arc_w),
                                   "build_id": _cr.get("build_id"), "class": _cr.get("class"), "pi": _cr.get("pi"),
-                                  "drivetrain": _cr.get("drivetrain"), "solo": 1 if _ev.get("solo") else 0,
-                                  "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in pts_w[::kw]]})
+                                  "drivetrain": _cr.get("drivetrain"), "solo": _solo,
+                                  "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,
+                                  "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in _thin(pts_w, 300)]})
             bw = min(valid, key=lambda w: w["t1"] - w["t0"])
             lt = round(bw["t1"] - bw["t0"], 2)
             pts_all = _win_arc[id(bw)][1]
-            kk = max(1, len(pts_all) // 300)
             carrec = cars.get(cid_) or {}
             # pts = [arc_m, mph, grip_code, x, z] — the state paints the trace, and x/z lets a hover on the trace
             # point at the exact spot on the course map (no arc-to-path alignment guesswork). Older 2-column
             # traces still render: every consumer treats columns 3-5 as optional.
             speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"),
-                                      "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in pts_all[::kk]]}
+                                      "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in _thin(pts_all, 300)]}
         # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}

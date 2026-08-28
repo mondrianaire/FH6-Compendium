@@ -24,7 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.pat
 # Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
 # course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
 # reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
-DET_VER = "geo2-centroid-m60"
+DET_VER = "geo3-straight-veto"
 
 
 def self_retrace(path, tol=20.0):
@@ -1266,9 +1266,19 @@ def main():
             # adjacency, not apex distance — a compound corner's apexes sit ~90 m apart while its halves are
             # metres apart. 60 m is measured, not guessed: real compound halves here sit 36 m apart and genuinely
             # separate same-direction corners sit 148 m apart, so the threshold lands in an empty band.
+            # NEVER MERGE ACROSS A STRAIGHT. Distance alone is the wrong test, and the metric that chose it was
+            # biased: cross-lap agreement REWARDS merging (fewer, larger turns are trivially more consistent, and
+            # merging the whole course into one turn would score 100%), so tuning the gap on agreement drove it
+            # to 60 m and swallowed real corners. Two corners separated by actual straight road are two corners
+            # however close they sit. Measured cost of getting this wrong: G1 became 173 deg over 236 m with a
+            # 965 m-radius straight inside it, G7 244 deg over 260 m around an 849 m straight -- five distinct
+            # curvature peaks each, one marker, and the merged apex landing between the real corners.
+            STRAIGHT_R = 300.0                      # radius above which the road is not turning
             adj = max(1, int(60.0 / step)); mg = []
             for t_ in out:
-                if mg and t_["sgn"] == mg[-1]["sgn"] and (t_["i0"] - mg[-1]["i1"]) <= adj:
+                gap_k = [abs(x) for x in K[max(0, mg[-1]["i1"] - 1):max(0, t_["i0"] - 1)]] if mg else []
+                straight = bool(gap_k) and (1.0 / max(1e-6, min(gap_k)) > STRAIGHT_R)   # touching segments: nothing between them, so merge
+                if mg and t_["sgn"] == mg[-1]["sgn"] and (t_["i0"] - mg[-1]["i1"]) <= adj and not straight:
                     m_ = mg[-1]; m_["i1"] = max(m_["i1"], t_["i1"]); m_["deg"] = m_["deg"] + t_["deg"]
                     if t_["k"] > m_["k"]: m_["k"] = t_["k"]; m_["ia"] = t_["ia"]; m_["radius_m"] = t_["radius_m"]
                 else: mg.append(dict(t_))
@@ -1319,6 +1329,64 @@ def main():
                                            "k": t_["k"], "sgn": t_["sgn"], "deg": t_["deg"], "radius_m": t_["radius_m"]})
                     off += len(pc)
                 merged = gturns   # the detector already bridges wobbles inside a turn; no second merge pass
+                K_all = curvature(P, 4.0, 9)   # curvature over the whole reference lap: K_all[i-1] describes P[i]
+                # ---- CURVATURE FINDS THE CORNER · GRIP RESCUES WHAT IT MISSED · GEOMETRY PLACES THE APEX -----
+                # Grip can only ever ADD a corner, never gate one: corners 2 and 3 here are legitimate corners
+                # taken flat out with no loss of grip, so a grip-gated detector would delete them. The road
+                # bending IS a corner whether or not it costs you anything.
+                # Curvature thresholds do miss gentle sweepers that still cost
+                # grip (this course lost five that way, at s=128/168/904, 58-66% of samples past the limit). But
+                # the racing line does NOT pass through the geometric apex -- grip peaks at turn-in and on exit --
+                # so grip must never place the apex. It says THAT a corner is there and roughly WHERE; curvature
+                # says where its apex is. Grip is an ENHANCEMENT: with no laps yet, curvature alone still stands.
+                gl_prof = {}   # 8 m arc bucket -> share of samples past the limit, pooled over every full lap
+                try:
+                    _lb, _lt = {}, {}
+                    for w_ in full_laps:
+                        for pc_ in resample(lap_pts(w_, grip=True)):
+                            for q_ in pc_:
+                                b_ = int(q_[2] // 8.0)
+                                _lt[b_] = _lt.get(b_, 0) + 1
+                                if len(q_) > 4 and q_[4] in (1, 2, 3): _lb[b_] = _lb.get(b_, 0) + 1   # resample yields (x, z, arc, mph, grip)
+                    gl_prof = {b_: _lb.get(b_, 0) / n_ for b_, n_ in _lt.items() if n_ >= 6}
+                except Exception:
+                    gl_prof = {}
+                def _gl(arc):
+                    return gl_prof.get(int(arc // 8.0), 0.0)
+                if gl_prof:
+                    # 1. RESCUE: a curvature candidate the acceptance rule dropped is a real corner if the car is
+                    #    demonstrably loaded there. (Rescued below via the sub-threshold pass in detect_turns.)
+                    # 2. SPLIT: a turn spanning two separated grip peaks is two corners the merge fused; its
+                    #    centroid apex then lands in the gap between them, marking road where nothing happens.
+                    out2 = []
+                    for t_ in merged:
+                        i0, i1 = t_["i0"], min(t_["i1"], len(P) - 1)
+                        if i1 - i0 < 8: out2.append(t_); continue
+                        pk = []   # local maxima of grip loss inside this turn, >= 30 m apart
+                        for j in range(i0 + 2, i1 - 2):
+                            f = _gl(P[j][2])
+                            if f >= 0.55 and f >= _gl(P[j - 2][2]) and f >= _gl(P[j + 2][2]):
+                                if not pk or (P[j][2] - P[pk[-1]][2]) >= 30: pk.append(j)
+                        if len(pk) < 2: out2.append(t_); continue
+                        bnds = [i0] + [ (a + b) // 2 for a, b in zip(pk, pk[1:]) ] + [i1]
+                        for a, b in zip(bnds, bnds[1:]):
+                            if b - a < 4: continue
+                            sl = [abs(x) for x in K_all[max(0, a - 1):max(0, b - 1)]] or [t_["k"]]
+                            ja = a + max(range(len(sl)), key=lambda q: sl[q])
+                            out2.append(dict(t_, i0=a, i1=b, ia=min(ja, len(P) - 1), k=max(sl),
+                                             radius_m=round(1.0 / max(1e-6, max(sl))),
+                                             deg=round(t_["deg"] * (b - a) / max(1, i1 - i0))))
+                    merged = out2
+                # APEX = the TIGHTEST POINT OF THE ROAD inside the corner's own span -- the geometric apex, which
+                # is what a driver aims at. The span is now anchored (by curvature, and split by grip where two
+                # corners were fused), so this is stable in a way a free-floating argmax never was.
+                for t_ in merged:
+                    a_, b_ = max(0, t_["i0"] - 1), max(1, min(t_["i1"], len(P) - 1) - 1)
+                    sl = [abs(x) for x in K_all[a_:b_]]
+                    if sl:
+                        ja = t_["i0"] + max(range(len(sl)), key=lambda q: sl[q])
+                        t_["ia"] = min(max(ja, 0), len(P) - 1)
+                        t_["k"] = max(sl); t_["radius_m"] = round(1.0 / max(1e-6, max(sl)))
                 votes = 0   # calibrate the L/R sign convention against the behavioural corners (lat-g sign) by majority vote
                 for g in merged:
                     ax, az = P[g["ia"]][0], P[g["ia"]][1]

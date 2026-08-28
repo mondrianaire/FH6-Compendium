@@ -885,7 +885,10 @@ def main():
             path_ok = (ov is None) or ov >= 0.5 or (cov is not None and cov >= 0.8)
             if d0 <= 40 and (R.get("length_m") or 0) < 600: cand = (d0, k)   # the SAME start point and the registered route is only a stub (aborted attempts) — it is this route
             elif d0 <= 120 and path_ok: cand = (d0, k)
-            elif d0 <= 250 and ov is not None and ov >= 0.7: cand = (d0 + 100, k)
+            # 0.55, not 0.7: two runs of ONE course that start ~200 m apart (a Rivals restart placing you
+            # differently) share only ~60% of their sampled path, yet genuinely distinct routes score 0.00-0.05
+            # — the margin is enormous, and 0.7 was re-minting a duplicate course on every re-analysis.
+            elif d0 <= 250 and ov is not None and ov >= 0.55: cand = (d0 + 100, k)
             else: continue
             if best is None or cand[0] < best[0]: best = cand
         return best[1] if best else None

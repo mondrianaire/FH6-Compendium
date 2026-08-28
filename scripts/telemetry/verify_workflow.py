@@ -8,7 +8,7 @@ per attribute. READ-ONLY everywhere (game saves, data stores, HTTP GETs). Run af
 Groups: A services · B save-decode · C identification (builds/matcher/PI/liveries) · D union invariants ·
 E events · F client artifacts · G data stores.
 """
-import sys, os, io, json, glob, hashlib, subprocess, urllib.request
+import sys, os, io, json, glob, hashlib, re, subprocess, urllib.request
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -275,6 +275,22 @@ def f4():
     src = open(os.path.join(ROOT, "dashboard", "app.js"), encoding="utf-8").read()
     return ('replace(/&/g, "&amp;")' in src and 'replace(/</g, "&lt;")' in src, "esc() full-escapes & < > \" [XSS guard]")
 check("F client", "esc() is a full HTML escape", f4)
+
+def f4b():
+    """A SHARED HELPER MUST BE DEFINED BEFORE ITS FIRST USE IN SOURCE ORDER. esc() lived inside buildLab() while
+    gripLegend() — defined 1800 lines earlier, outside it — called esc(). `node --check` passes that happily:
+    it is a scope error, not a syntax error. At runtime it threw inside gripLegend -> mapCardHtml -> courseParts
+    and took the entire COURSE MAP down. Definition-after-first-use is the exact signature of that scope split."""
+    src = open(os.path.join(ROOT, "dashboard", "app.js"), encoding="utf-8").read().split("\n")
+    bad = []
+    for name in ("esc", "gripOf", "gripCol", "gripLegend", "gripChip", "piBadge"):
+        d = next((i for i, l in enumerate(src) if re.search(rf"^\s*(?:const|function)\s+{name}\b", l)), None)
+        u = next((i for i, l in enumerate(src) if re.search(rf"[^\w.]{name}\(", l)
+                  and not re.search(rf"^\s*(?:const|function)\s+{name}\b", l)), None)
+        if d is not None and u is not None and u < d:
+            bad.append(f"{name}: used at line {u+1}, defined at line {d+1}")
+    return (not bad, "shared helpers defined before first use" if not bad else "USED BEFORE DEFINED — " + " · ".join(bad))
+check("F client", "shared helpers are in scope where used", f4b)
 
 def f5():
     src = open(os.path.join(ROOT, "dashboard", "app.js"), encoding="utf-8").read()

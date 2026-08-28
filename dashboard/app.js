@@ -651,6 +651,11 @@
   // overdriven) · amber = an impact to discard · slate = within grip · near-black = not driving.
   // `word` is the handling family a driver thinks in; `axle` is the measurement it came from — both are true,
   // and every surface should show the one that fits its space rather than inventing a third vocabulary.
+  // ONE escape function, at MODULE scope. It used to live inside buildLab(), so every helper defined outside
+  // buildLab — gripLegend among them — referenced an identifier that did not exist in its scope chain. That threw
+  // ReferenceError inside gripLegend -> mapCardHtml -> courseParts, which took the whole COURSE MAP down: the
+  // legend is rendered as part of the map card, so one out-of-scope call removed the map entirely.
+  const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");   // FULL escape — livery names/creators are arbitrary user text from downloaded designs; quote-only escaping was an XSS vector into innerHTML
   const GRIP = {
     calm:   { col: "#2a313c", ink: "#8b97a7", word: "within grip",  axle: "within grip",            short: "grip",   icon: "✓", n: 0 },
     front:  { col: "#2f81f7", ink: "#2f81f7", word: "understeer",   axle: "fronts past the limit",  short: "front",  icon: "↔", n: 1 },
@@ -2514,7 +2519,8 @@
       }));
     }
     const fmt = (v, d = 2) => (v == null ? "—" : (+v).toFixed(d));
-    const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");   // FULL escape — livery names/creators are arbitrary user text from downloaded designs; quote-only escaping was an XSS vector into innerHTML
+    // esc() is now module-scope (defined above GRIP) so helpers OUTSIDE buildLab can escape too — a local copy
+    // here would shadow it and re-open exactly the scope split that killed the course map.
     // tiny SVG line chart: series = [{pts:[[x,y]...], col, label}]
     const chart = (series, o = {}) => {
       const w = o.w || 380, h = o.h || 130, L = 36, B = 22, R = 8, T = 8;

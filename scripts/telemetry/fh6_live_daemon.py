@@ -1626,7 +1626,7 @@ def disk_watcher():
                     # build is equipped (at a class cap they converge; unstamped PIs are unknown) — stamping then would
                     # pair the live PI with the wrong build's parts and poison the observation store. Require a single
                     # candidate or a gear-ladder-verified pick.
-                    ok_stamp = _rm and _rm.get("how") != "no-match" and ((_rm.get("n_signature_ties") or 1) <= 1 or _rm.get("gear_disambig"))
+                    ok_stamp = _rm and _rm.get("how") != "no-match" and not _rm.get("held") and ((_rm.get("n_signature_ties") or 1) <= 1 or _rm.get("gear_disambig"))   # a pure HOLD is a memory, not a verification — a garage swap writes no file, so a held-wrong identity would stamp the live PI onto the wrong build's parts every watcher tick
                     if ok_stamp:
                         _record_pi_observation(ordn, TUNE.parse_tune(rec_meta["path"], ordinal_hint=ordn))
                     _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)

@@ -3106,8 +3106,8 @@
       if (!cached || !cached.deliverable) { R.need.push("reading the build from the save file…"); R.hardBlock = true; return R; }
       const dl = cached.deliverable, m = cached.match || {}, sm = dl.summary || {};
       const n = m.n_saves || (m.saves || []).length || 1, ties = m.n_signature_ties || 1;
-      if (m.how === "unsaved-build") { R.hardBlock = true; R.matchLbl = "distinct build"; R.need.push(`re-apply this build's tune from Find Tunes (or save it if yours) — its file isn't on disk`); }
-      else if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`re-apply or save this build's tune — no save matches your ${m.live_cyl}-cyl engine`); }
+      if (m.how === "unsaved-build") { R.hardBlock = true; R.matchLbl = "distinct build"; R.need.push(`its file isn't on disk — capture it: change any part or slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the already-active tune writes nothing`); }
+      else if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`no save matches your ${m.live_cyl}-cyl engine — capture it: change any part or slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the already-active tune writes nothing`); }
       else if (m.how === "gear-matched") { R.matchLbl = "gear-matched"; R.why.push(`identified the equipped build by its live gear ladder (${ties} share this engine + PI)`); }
       else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(`drive up through the gears — the ladder identifies which of ${ties} builds you're on`); }
       else if (m.how === "signature") { R.matchLbl = "signature"; R.why.push(m.live ? "matched to the car you're driving (cylinders + PI)" : "matched to the car you last drove (cylinders + PI) — held while parked"); }   // J20
@@ -3126,7 +3126,7 @@
       if (u.n_agree) R.why.push(`${u.n_agree} field${u.n_agree > 1 ? "s" : ""} corroborated by telemetry (save × measured agree)`);
       if (u.n_conflict) R.need.push(`resolve ${u.n_conflict} save×telemetry conflict${u.n_conflict > 1 ? "s" : ""} — 🔗 drawer`);
       const topAsk = (u.asks || [])[0];
-      if (topAsk && !u.n_agree) R.need.push(topAsk.text);   // nothing corroborated yet → surface the highest-value drive
+      if (topAsk && (!u.n_agree || R.hardBlock)) R.need.push(topAsk.text);   // surface the top ask when nothing corroborates OR the gate is hard-blocked (the daemon's corrected escape must reach the card)
       const conf = dl.confidence || 0;
       R.pct = R.hardBlock ? 0 : Math.max(0, Math.round(conf * 100) - 15 * (u.n_conflict || 0));
       R.ready = !R.hardBlock && !R.softNoLive && conf >= 0.6 && !(u.n_conflict || 0);   // identified LIVE + solid decode + no open conflicts → the SYSTEM says "confirm now"
@@ -3173,7 +3173,8 @@
       if (cached === undefined && live.connected) fetchDiskTune(+ord);
       if (isBuildConfirmed(cid)) {
         const why = confirmRegressReason(cached);
-        if (why) {
+        let overrode = ""; try { overrode = localStorage.getItem("fh6BuildOKevi:" + baseId(cid)) || ""; } catch (e) {}
+        if (why && why !== overrode) {   // regress on NEW evidence only — 'confirm anyway'/'proceed on baselines' explicitly overrode the standing condition; re-firing on the same one was an infinite ping-pong
           try { localStorage.removeItem(buildConfirmKey(cid)); localStorage.setItem("fh6BuildRegressed:" + baseId(cid), JSON.stringify({ at: Date.now(), why })); } catch (e) {}
           if (live._regrToast !== baseId(cid)) { live._regrToast = baseId(cid); focusToast("⬇ build confirmation regressed — " + why); }
           return `<div class="bcf" style="border-color:#e5414e"><div class="bcf-hd" style="color:#e5414e"><b>⬇ Confirmation regressed</b></div><p class="why" style="font-size:11.5px;margin:2px 0 0">${esc(why)} — tuning advice is locked again until the build re-verifies.</p></div>` + buildConfirmCard(cid, buildConfidence(cached || null));
@@ -3817,8 +3818,8 @@
       const saves = m.saves || []; const cur = String(r.ts); const pick = live.diskPick && live.diskPick[ordinal];
       let status = "";
       const ties = m.n_signature_ties || 1;
-      if (m.how === "unsaved-build") status = `<div class="dm-warn"><b>🚧 Distinct build — its file is not on disk.</b> Re-apply its tune from Find Tunes (or save it if yours). <span class="dm-info" title="Measured ${esc((m.evidence || []).join(" + ").toLowerCase() || "telemetry")} contradicts every saved tune. Same cylinders${m.live_pi ? ` and PI ${m.live_pi}` : ""} — at a class cap different part combos converge to one PI, so only part-level measurements can tell builds apart. A downloaded tune writes its file when applied.">ⓘ why</span></div>`;
-      else if (m.how === "no-match") status = `<div class="dm-warn"><b>⚠ No saved tune matches this car.</b> Re-apply its tune from Find Tunes (or save it if yours). <span class="dm-info" title="You're in a ${m.live_cyl}-cyl car${m.live_pi ? ` at PI ${m.live_pi}` : ""}; the closest save is ${m.chosen_cyl}-cyl — a different engine, so its parts and sliders are not this build's. Downloaded tunes write their file when applied.">ⓘ why</span></div>`;
+      if (m.how === "unsaved-build") status = `<div class="dm-warn"><b>🚧 Distinct build — its file is not on disk.</b> Change any part/slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the active tune writes nothing. <span class="dm-info" title="Measured ${esc((m.evidence || []).join(" + ").toLowerCase() || "telemetry")} contradicts every saved tune. Same cylinders${m.live_pi ? ` and PI ${m.live_pi}` : ""} — at a class cap different part combos converge to one PI, so only part-level measurements can tell builds apart. A downloaded tune writes its file when applied.">ⓘ why</span></div>`;
+      else if (m.how === "no-match") status = `<div class="dm-warn"><b>⚠ No saved tune matches this car.</b> Apply its tune (or a different one first if it's already active — a re-apply of the active tune writes nothing), or save it if yours. <span class="dm-info" title="You're in a ${m.live_cyl}-cyl car${m.live_pi ? ` at PI ${m.live_pi}` : ""}; the closest save is ${m.chosen_cyl}-cyl — a different engine, so its parts and sliders are not this build's. Downloaded tunes write their file when applied.">ⓘ why</span></div>`;
       else if (m.how === "gear-matched") status = `<div class="dm-ok">✓ identified the <b>equipped build</b> by its gear ladder ⚙${m.held ? ` <span class="why" style="font-weight:400">— held from your last verified run (a menu car-swap is invisible to telemetry; WOT the gears again if you switched cars)</span>` : ties > 1 ? ` <span class="why" style="font-weight:400">(${ties} builds share this engine + PI)</span>` : ""}</div>`;
       else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you${m.live ? "'re driving" : " last drove (held while parked)"} — ${m.live_cyl}-cyl${m.live_pi ? ` ${piBadge(null, m.live_pi, true)}` : ""}${ties >= 2 ? ` <span class="why" style="font-weight:400">· ${ties} builds share this signature — drive up through the gears to pin the exact one, or pick below</span>` : ""}</div>`;
       else if (m.how === "picked") status = `<div class="dm-ok">📌 pinned to this saved tune${saves.length > 1 ? " — auto-match off" : ""}</div>`;
@@ -3910,7 +3911,7 @@
       // same model do NOT get separate tune files, and no livery↔tune link exists on disk. When the car has liveries,
       // show them inline here so the picker at least carries the visual identity, and say what the game can't record.
       // a live-DETECTED distinct build gets its own synthetic row — it exists in the garage but not on disk
-      const unsavedRow = m.how === "unsaved-build" ? `<div class="tl-bucket"><span class="tl-sig"><b>🚧 unsaved build</b> · detected live<span class="tl-tie" title="measured ${esc((m.evidence || []).join(" + "))} contradicts every saved tune — same cylinders + PI (class-cap convergence), different parts">${esc((m.evidence || []).join(" + ")) || "measured"} differs</span></span><span class="tl-saves"><span class="why" style="font-size:10.5px">re-apply (downloaded) or save (own) its tune in-game → it becomes a real entry here</span></span></div>` : "";
+      const unsavedRow = m.how === "unsaved-build" ? `<div class="tl-bucket"><span class="tl-sig"><b>🚧 unsaved build</b> · detected live<span class="tl-tie" title="measured ${esc((m.evidence || []).join(" + "))} contradicts every saved tune — same cylinders + PI (class-cap convergence), different parts">${esc((m.evidence || []).join(" + ")) || "measured"} differs</span></span><span class="tl-saves"><span class="why" style="font-size:10.5px">change a part/slider + SAVE (own), or apply a DIFFERENT tune then re-apply (downloaded) → it becomes a real entry here</span></span></div>` : "";
       // (the duplicate 'tl-worn' gallery was removed — audit F2: it repeated the livery strip with less information;
       // the per-build cells above remain the association editor, the strip remains the one gallery)
       return `<details class="tl"${nCats > 1 ? " open" : ""} data-dk="tl"><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved tune${saves.length > 1 ? "s" : ""} · <b>${nCats} distinct build${nCats > 1 ? "s" : ""}</b> (by upgrade parts)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${unsavedRow}</details>`;
@@ -4085,7 +4086,7 @@
       try { localStorage.setItem(ledKey, JSON.stringify(led)); } catch (e) {}
       const REQS = [
         { k: "identity", ok: idOk, lbl: "build identity verified", act: (bcR.need || [])[0] || "drive up through the gears — the ladder identifies the equipped build", note: idOk && !idNowOk ? "held from your last verified run" : idOk ? (led.identity.note || "") : "" },
-        { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-apply this tune from Find Tunes (or re-save if yours), then drive once · 🔗 drawer` },
+        { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-save (own) or apply a different tune then re-apply (downloaded), then drive once · 🔗 drawer` },
         { k: "sanity", ok: !sanE, soft: true, lbl: "tuning sanity clean", act: `${sanE} finding${sanE > 1 ? "s" : ""} — 🩺 drawer (advisory: does not block ratification)` },
         { k: "calib", ok: !relN, lbl: "every slider value exact", act: `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — 🎯 drawer, two-point read` },
         { k: "pi", ok: piOk, lbl: "PI stamped", act: "drive this build once while identified — stamps its PI", note: piOk ? `PI ${led.pi.v}` : "" },
@@ -4099,7 +4100,7 @@
       const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `${piBadge(null, curB0.pi, true)}${curB0.gears ? `<span class="why"> · ${curB0.gears}-sp</span>` : ""}` : ""}${verdictChip}<span style="margin-left:auto;display:inline-flex;gap:7px;align-items:center">${ratChip}<span style="color:${oc};font-weight:800">${Math.round(dl.confidence * 100)}%</span></span>${flags}</div>`;
       // short warn line inline (action-first); the full match bar + picker live in the identity drawer
       const warnLine = (mm0.how === "no-match" || mm0.how === "unsaved-build")
-        ? `<div class="dm-warn" style="margin:0 0 8px"><b>🚧 This build's file is not on disk.</b> Re-apply its tune from Find Tunes (or save it if yours) — full detail in the 🪪 drawer.</div>` : "";
+        ? `<div class="dm-warn" style="margin:0 0 8px"><b>🚧 This build's file is not on disk.</b> Change a part/slider + SAVE (own) or apply a DIFFERENT tune then re-apply (re-applying the active tune writes nothing) — full detail in the 🪪 drawer.</div>` : "";
       const idDrawer = drawer("🪪 Identity, confidence, liveries &amp; library", idmBlock + liveryStrip(dl.ordinal, r.match, r.ts) + tuneLibraryCard(r, dl.ordinal), false);
       if (opts.inFloat) {
         return `<div class="block fhm" style="border-color:${frameCol}">${ribbon}${ratifBlock}${colsBlock}${idDrawer}${drawers}</div>`;
@@ -5639,8 +5640,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
       r.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { if (!b.dataset.arm) { b.dataset.arm = "1"; const t0 = b.textContent; b.textContent = "really clear the history?"; setTimeout(() => { delete b.dataset.arm; b.textContent = t0; }, 4000); return; } localStorage.removeItem(appliedKey(b.dataset.clearapplied)); if (src === "live") paintSections(true); else render(); }));   // audit F9: two-step
       // build-confirm gate: confirm (unlocks course tuning advice) / re-check (drops the confirmation)
-      r.querySelectorAll("[data-confirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.confirmbuild, true); try { localStorage.removeItem("fh6BuildRegressed:" + baseId(b.dataset.confirmbuild)); } catch (e) {} live._regrToast = null; if (src === "live") paintSections(true); else render(); }));
-      r.querySelectorAll("[data-unconfirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.unconfirmbuild, false); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-confirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.confirmbuild, true); try { const c0 = (live.diskCache || {})[String(b.dataset.confirmbuild).split("|")[0]]; localStorage.setItem("fh6BuildOKevi:" + baseId(b.dataset.confirmbuild), confirmRegressReason(c0 || null) || ""); localStorage.removeItem("fh6BuildRegressed:" + baseId(b.dataset.confirmbuild)); } catch (e) {} live._regrToast = null; if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-unconfirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.unconfirmbuild, false); try { localStorage.removeItem("fh6BuildOKevi:" + baseId(b.dataset.unconfirmbuild)); } catch (e) {} if (src === "live") paintSections(true); else render(); }));
       const shopEl = r.querySelector("#lvShopCapture") || (r.id === "lvShopCapture" ? r : null);
       if (shopEl && !live.shots) refreshShots();
       const sref = r.querySelector("#lvShotRefresh"); if (sref) sref.addEventListener("click", refreshShots);

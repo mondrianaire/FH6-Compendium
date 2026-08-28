@@ -3493,6 +3493,10 @@
       /* ---- consolidated identification master panel + drawers ---- */
       .idm{margin:0 0 10px}
       .idm-chips{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
+      .idm-id{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;margin:7px 0;padding:6px 10px;border:1px dashed var(--line);border-radius:7px}
+      .idm-id.ok{border-color:rgba(0,210,122,.5);border-style:solid}
+      .idm-id.guess{border-color:rgba(227,179,65,.55)}
+      .idm-id.unknown{border-color:rgba(229,65,78,.45)}
       .idm-drawer{border:1px solid var(--line);border-radius:8px;margin:0 0 8px;padding:6px 11px;font-size:11.5px;background:rgba(255,255,255,.012)}
       .idm-drawer>summary{cursor:pointer;font-weight:600;font-size:12px;user-select:none}
       .idm-drawer>summary:hover{color:var(--accent)}
@@ -3820,6 +3824,17 @@
           ${diskMatchBar(r, dl.ordinal)}
           ${diskDiffBanner(dl.ordinal)}
           ${confMeterHtml(r)}
+          ${(() => {   // RECOGNITION IDENTITY line — decode % measures how completely the tune FILE reads; WHICH of
+            // your cars wears it is a separate axis the player recognises by PAINT. Say its state explicitly.
+            const mm = r.match || {}; const curB = (mm.builds || []).find((b) => (b.saves || []).some((ts) => String(ts) === String(r.ts)));
+            if (!curB) return "";
+            const lv = curB.livery;
+            const cyc = `data-cyclelivery="${dl.ordinal}|${esc(curB.build)}|${esc((lv && lv.dir) || "")}"`;
+            const img = lv && lv.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(lv.dir)}" ${cyc} title="click to change">` : "";
+            if (lv && lv.source === "pinned") return `<div class="idm-id ok">${img}🪪 this tune is <b>Build ${esc(curB.label)}</b> · worn livery: <b>${esc(lv.name || "pinned design")}</b> <span class="why">pinned by you — recognition certain</span></div>`;
+            if (lv) return `<div class="idm-id guess">${img}🪪 <b>Build ${esc(curB.label)}</b> · worn livery: <b>≈ ${esc(lv.name || "design")}</b> <span class="why">a GUESS from save-time proximity (~${lv.dt_h}h) — click the thumbnail to confirm or change</span></div>`;
+            return `<div class="idm-id unknown"><span class="tl-blvy-none" ${cyc} title="assign the paint this build wears — cycle through this car's liveries">🎨+</span>🪪 <b>Build ${esc(curB.label)}</b> · <b>worn livery unknown</b> <span class="why">the ${Math.round(dl.confidence * 100)}% measures how completely the tune FILE decodes — WHICH of your cars wears it, the game never records; you recognise it by paint. Click 🎨+ to assign.</span></div>`;
+          })()}
           <div class="idm-chips">${contrib}</div>
           ${asksHtml}
         </div>

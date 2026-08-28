@@ -1409,6 +1409,15 @@ def main():
             est_turns.sort(key=lambda t: [tt["id"] for tt in model["turns"]].index(t["id"]))   # restore route order
         turns_info["canonical"] = [{"id": t["id"], "pos": t["pos"], "dir": t.get("dir"), "radius_m": t.get("radius_m"), "passes": (t.get("track") or {}).get("passes"), "presence": (t.get("track") or {}).get("presence"), "sessions": (t.get("track") or {}).get("sessions"), "dominant": (t.get("track") or {}).get("dominant")} for t in est_turns]
         turns_info["mapped"] = len(((model.get("geometry") or {}).get("turns")) or (geo or {}).get("turns") or [])
+        # COMPLETENESS: consistency of the detections that exist is NOT completeness against the road shape. A turn
+        # never detected leaves no cluster and costs `agree` nothing — so confidence converged happily at N-minus-the-
+        # missed-turns while the curvature map knew better. Cap both confidences by enumerated/mapped (1 turn of slack
+        # for extractor generosity) so no consumer can ratify a course whose own map says the inventory is short.
+        if turns_info["mapped"]:
+            _cover = min(1.0, (est_count + 1) / turns_info["mapped"])
+            turns_info["confidence"] = round(turns_info.get("confidence", 0) * _cover, 2)
+            turns_info["track_confidence"] = round(turns_info.get("track_confidence", 0) * _cover, 2)
+            turns_info["shape_coverage"] = round(_cover, 2)
         near = [t for t in model["turns"] if not t.get("established") and ((t.get("track") or {}).get("presence") or 0) >= 0.25]
         turns_info["near"] = len(near)
         if expected:

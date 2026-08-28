@@ -2947,14 +2947,20 @@
       // 'mapped' must come from the analysis's turn data (tu.mapped / canonical), NOT co.geometry — geometry is stripped from the live SSE payload,
       // so relying on it kept every live course stuck in training. A course is mapped once it has turns established / curvature-mapped.
       const mapped = (tu.mapped || 0) > 0 || (tu.canonical || []).length > 0 || !!(geo && (geo.turns || []).length); const turnConf = tu.track_confidence || tu.confidence || 0; const poss = tu.possible || 0; const notDriven = (geo && geo.not_driven) || []; const prof = !!co.profile;
+      // SHAPE COVERAGE: the curvature map's turn count is the shape's own testimony — ratification must not outrun
+      // enumeration. established/mapped (+1 slack for extractor generosity); no geometry data → no penalty.
+      const estN = tu.established != null ? tu.established : ((tu.canonical || []).length || tu.count || 0);
+      const geoCov = tu.shape_coverage != null ? tu.shape_coverage : ((tu.mapped || 0) > 0 ? Math.min(1, (estN + 1) / tu.mapped) : 1);
+      const missingN = (tu.mapped || 0) > estN ? tu.mapped - estN : 0;
       const lapStr = 1 - Math.exp(-1.2 * lapsTrack / 3);
       // SHAPE confidence: are the recorded laps tracing the same OUTLINE? (analyzer-measured; the shape is the course's identity, so it's the
       // 25% that used to be a free "a map exists" boolean). Falls back to that boolean for models analysed before shape_confidence existed.
-      const shapeMeasured = tu.shape_confidence != null; const shapeConf = shapeMeasured ? tu.shape_confidence : (mapped ? 1 : 0);
+      const shapeMeasured = tu.shape_confidence != null; const shapeConf = shapeMeasured ? tu.shape_confidence : (mapped ? 0.5 : 0);   // unmeasured ≠ perfect: a map with no cross-lap shape agreement earns half, not a free 1.0
       const shapeAgree = tu.shape_laps_agree, shapeCompared = tu.shape_laps_compared, shapeSpread = tu.shape_spread_m;
       const pct = Math.round((0.25 * shapeConf + 0.35 * turnConf + 0.25 * lapStr + 0.15 * (prof ? 1 : 0)) * 100);
       const needs = [];
       if (!mapped) needs.push({ k: "map", p: 0, text: "complete ONE full lap without pausing — the course map is learned from it" });
+      if (missingN > 1) needs.push({ k: "enumerate", p: 0, text: `the shape shows ${tu.mapped} turns — only ${estN} enumerated: ${missingN} still to establish (take the map's hollow turns at pace so they register)` });   // the shape's own testimony blocks ratification
       else if (shapeMeasured && shapeConf < 0.75) needs.push({ k: "shape", p: 0, text: `the outline is still settling — ${shapeAgree || 1} lap${(shapeAgree || 1) === 1 ? "" : "s"} trace the same shape${shapeSpread != null ? ` (±${shapeSpread} m)` : ""}; a few more clean laps ratify it (shape ${Math.round(shapeConf * 100)}%)` });
       if (lapsTrack < 3) needs.push({ k: "laps", p: 1, text: `${3 - lapsTrack} more full lap${3 - lapsTrack === 1 ? "" : "s"} — the turn count is earned across laps (now ${Math.round(turnConf * 100)}%)` });
       else if (turnConf < 0.7) needs.push({ k: "laps", p: 1, text: `keep lapping — turn count ${Math.round(turnConf * 100)}% (target 70%): clean laps confirm turns, messy laps split them` });
@@ -2963,8 +2969,8 @@
       if (!prof) needs.push({ k: "profile", p: 3, text: "one full lap so the course's demands (profile) are known" });
       if ((tu.messy || []).length) needs.push({ k: "messy", p: 3, text: `${tu.messy.map(turnLabel).join(", ")} split into several detections most laps — drive ${tu.messy.length === 1 ? "it" : "them"} as one smooth arc` });   // J13
       needs.sort((x, y) => x.p - y.p);
-      const auto = (pct >= 75 && mapped) ? "tuning" : "training"; const sel = courseStageSel(); const stage = sel === "auto" ? auto : sel;
-      return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof, shapeConf, shapeMeasured, shapeAgree, shapeCompared, shapeSpread };
+      const auto = (pct >= 75 && mapped && geoCov >= 0.9) ? "tuning" : "training"; const sel = courseStageSel(); const stage = sel === "auto" ? auto : sel;   // HARD gate: the tuning stage requires the enumerated turns to cover the shape's mapped turns — per-turn advice on a known-incomplete inventory is wrong advice
+      return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof, shapeConf, shapeMeasured, shapeAgree, shapeCompared, shapeSpread, geoCov, missingN };
     };
     const stageChips = (ck) => `<span style="display:inline-flex;gap:3px;margin-left:8px">${[["auto", "🧭 auto"], ["training", "📚 training"], ["tuning", "🏋 tuning"]].map(([k, l]) => `<span class="chip" data-course-stage="${k}" style="cursor:pointer;padding:1px 7px;${ck.sel === k ? "border-color:var(--txt);color:var(--txt)" : ""}">${l}${k === "auto" && ck.sel === "auto" ? " → " + ck.auto : ""}</span>`).join("")}</span>`;
     const courseStageBanner = (co, ck) => {
@@ -2976,7 +2982,7 @@
           <div class="lab-bar" style="height:14px;margin:4px 0 8px"><i style="width:${ck.pct}%;background:${col}"></i><i style="left:75%;width:2px;background:var(--txt);opacity:.7" title="75% — switches to tuning"></i></div>
           <div style="font-size:14px;margin:6px 0 2px"><b>▶ NEXT to raise confidence:</b> ${top ? esc(top.text) : "keep lapping — the next analysis will confirm"}</div>
           ${ck.needs.slice(1).length ? `<div class="why" style="font-size:11px;margin-top:2px">then:</div><ol style="margin:2px 0 0 18px;padding:0;font-size:11.5px">${ck.needs.slice(1).map((n) => `<li>${esc(n.text)}</li>`).join("")}</ol>` : ""}
-          <p class="why" style="font-size:10px;margin:6px 0 0">counts toward confidence: a <b>stable outline</b> (laps tracing the same shape — 25%${ck.shapeMeasured ? `, now ${Math.round(ck.shapeConf * 100)}%` : ""}) · turn count earned across laps (35%) · more laps (25%) · the course profile (15%). Tuning feedback is not shown while training — per-car references are still saved in the background.</p>`
+          <p class="why" style="font-size:10px;margin:6px 0 0">counts toward confidence: a <b>stable outline</b> (laps tracing the same shape — 25%${ck.shapeMeasured ? `, now ${Math.round(ck.shapeConf * 100)}%` : ""}) · turn count earned across laps (35%) · more laps (25%) · the course profile (15%). The tuning stage ALSO requires the enumerated turns to cover the shape's mapped turns${ck.geoCov != null ? ` (now ${Math.round(ck.geoCov * 100)}%, needs 90%)` : ""} — per-turn advice on an incomplete inventory would be wrong advice. Tuning feedback is not shown while training — per-car references are still saved in the background.</p>`
           : `<div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${ck.pct}%;background:${col}"></i><i style="left:75%;width:2px;background:var(--txt);opacity:.6"></i></div><p class="why" style="font-size:11px;margin:4px 0 0">course knowledge ${ck.pct}% · ${ck.needs.length ? "still useful for the course: " + ck.needs.map((n) => esc(n.text)).join(" · ") : "nothing more needed for the course — everything below is feedback for this car on it"}</p>`}
       </div>`;
     };

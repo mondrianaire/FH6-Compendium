@@ -5185,7 +5185,12 @@
     };
     const turnLines = (co, tpos) => { try {
       if (!tpos) return null; const geo = courseGeoFor(co);
-      const gt = ((geo && geo.turns) || []).find((g2) => g2.apex && ((g2.apex[0] - tpos[0]) ** 2 + (g2.apex[1] - tpos[1]) ** 2) <= TURN_R * TURN_R);
+      // WHICHEVER geometry carries the block. courseGeoFor may hand back this session's own turns (which the
+      // analyzer has not stamped) while the course MODEL bundled in db.js holds the ranked lines, or the reverse
+      // on a course only just driven — so ask both rather than tying the feature to one source winning.
+      const near = (ts) => (ts || []).find((g2) => g2.apex && ((g2.apex[0] - tpos[0]) ** 2 + (g2.apex[1] - tpos[1]) ** 2) <= TURN_R * TURN_R);
+      const mg = co && co.route_key ? modelGeoFor(co.route_key) : null;
+      const gt = [near(geo && geo.turns), near(mg && mg.turns)].find((t) => t && (t.lines || t.line)) || near(geo && geo.turns);
       const raw = gt && (gt.lines || gt.line); if (!raw) return null;
       const b = raw.by_class ? (raw.by_class[""] || raw.by_class[Object.keys(raw.by_class)[0]]) : raw;
       if (!b) return null;

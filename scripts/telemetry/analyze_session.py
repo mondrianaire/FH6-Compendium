@@ -1833,6 +1833,10 @@ def main():
                                    {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             if sid not in rec["sessions"]: rec["sessions"].append(sid)
             rec["sessions"] = rec["sessions"][-40:]
+            # POSITION MUST TRACK THE MAP. pos was written once at creation and never again, while s refreshed --
+            # so an entry whose apex the detector had since MOVED kept being drawn at the old place. That is the
+            # phantom at 0.64 g sitting 40 m from any real corner: not a spurious turn, a real turn drawn stale.
+            rec["pos"] = [round(ap[0]), round(ap[1])]
             for f_ in ("dir", "radius_m", "deg", "s"):
                 if g_.get(f_) is not None: rec[f_] = g_[f_]
         # the model's PERSISTED geometry is the best map on record — a full mapped lap, already vetted. Every
@@ -1856,11 +1860,13 @@ def main():
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
                                    {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             rec["model_map"] = True
-        # RETIRE PHANTOMS: an entry detected only by a superseded detector stops being re-detected, but its old
-        # session list keeps it above the >=2-sessions bar forever. A turn survives only if the current map holds
-        # it, or a RECENT mapping session still finds it. (Session ids are timestamps, so max() is 'most recent'.)
-        for k_ in [k for k, v in gseen.items() if not v.get("model_map") and sid not in (v.get("sessions") or [])]:
-            gseen.pop(k_, None)   # not in the course's map and not seen driving it just now = not part of the road
+        # THE CURRENT MAP IS THE GEOMETRIC TRUTH. An entry not in it is a superseded apex, full stop. The old
+        # rule also spared anything "seen this session", which meant every time the detector moved an apex the
+        # PREVIOUS position survived beside the new one and they accumulated: one corner ended up drawn twice
+        # (markers 1 and 2 both resolving to G1, 60 m and 4 m away), and a phantom sat at 0.64 g -- the lowest
+        # of any drawn turn, 40 m from the nearest real corner -- on road where the car is not cornering at all.
+        for k_ in [k for k, v in gseen.items() if not v.get("model_map")]:
+            gseen.pop(k_, None)   # not in the course's own map = not part of the road
         # every geometric turn becomes a model turn (created if the behavioural pass never saw it)
         for t in merged_turns: t.pop("geo_mapped", None); t.pop("geo_sessions", None)   # re-derived from gseen below, never inherited from the file
         for k, v in gseen.items():

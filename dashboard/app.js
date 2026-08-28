@@ -3106,8 +3106,9 @@
     const updCarDot = (f) => { try {
       host.querySelectorAll("svg[data-live-map]").forEach((sv) => {
         const g = sv.querySelector(".lv-car"); if (!g) return;
-        if (!f || !f.on || f.px == null) { g.style.display = "none"; return; }
+        if (!f || !f.on || f.px == null || f.pz == null) { g.style.display = "none"; return; }   // BOTH axes: pz was unchecked, so cy went NaN and the dot painted at the origin
         const ds = sv.dataset; const cx = +ds.ox + (f.px - +ds.x0) * +ds.sc, cy = +ds.oy - (f.pz - +ds.z0) * +ds.sc;
+        if (!isFinite(cx) || !isFinite(cy)) { g.style.display = "none"; return; }   // belt-and-braces: NaN passes every bounds test below and SVG paints an invalid transform at the origin
         if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) { g.style.display = "none"; return; }   // off the mapped area — hide rather than pin to an edge
         g.style.display = ""; g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
       });
@@ -3125,9 +3126,10 @@
     const paintLastOnMap = (sc) => { try {
       if (!sc) return;
       flashTurnOnMap(sc);   // the turn's persistent grade ring
-      if (!sc.pos || sc.pos[0] == null) return;
+      if (!sc.pos || sc.pos[0] == null || sc.pos[1] == null) return;   // BOTH axes: pos[1] was unchecked, so cy went NaN and the marker painted at the origin
       host.querySelectorAll("svg[data-live-map]").forEach((sv) => {
         const ds = sv.dataset; const cx = +ds.ox + (sc.pos[0] - +ds.x0) * +ds.sc, cy = +ds.oy - (sc.pos[1] - +ds.z0) * +ds.sc;
+        if (!isFinite(cx) || !isFinite(cy)) { const gp = sv.querySelector(".lv-last"); if (gp) gp.style.display = "none"; return; }   // NaN passes every bounds test below and paints at the origin
         if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) return;   // this map is a different course
         let g = sv.querySelector(".lv-last");
         if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.setAttribute("class", "lv-last"); sv.insertBefore(g, sv.querySelector(".lv-car")); }

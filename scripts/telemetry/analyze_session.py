@@ -678,6 +678,7 @@ def main():
                 rough_frac = round(sum(1 for x in sr if x > 0.1) / len(sr), 2) if sr else 0.0
                 surface = "rough" if rough_frac > 0.35 else "smooth"
                 corners.append({"t0": round(seg[0]["t"], 1), "t1": round(seg[-1]["t"], 1), "car": cid(seg[0]), "dir": "R" if sign > 0 else "L", "surface": surface, "rough_frac": rough_frac,
+                                "ev": 1 if apx["CurrentLap"] > 0 else 0,   # J14: honest event flag (lap timer running) — free-roam corners must not steer course baselines
                                 "apex": [round(apx["PosX"]), round(apx["PosZ"])], "dist": round(apx["DistanceTraveled"]), "mph_apex": round(apx["speed_mph"]),
                                 "mph_in": round(v_in), "mph_min": round(v_min), "mph_out": round(seg[-1]["speed_mph"]), "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
                                 "entry": [round(seg[0]["PosX"]), round(seg[0]["PosZ"])], "exit": [round(seg[-1]["PosX"]), round(seg[-1]["PosZ"])],
@@ -689,7 +690,8 @@ def main():
     # each car's measured GRIP (90th-pct peak lateral g over its non-drift corners) — the car-dependent factor that lets course geometry transfer between cars
     car_grip = {}
     for k_ in cars:
-        gs = sorted(x["lat_g_peak"] for x in corners if x["car"] == k_ and not x["drift"])
+        gs = sorted(x["lat_g_peak"] for x in corners if x["car"] == k_ and not x["drift"] and x.get("ev"))   # J14: grip from committed on-course corners — free-roam cruising drags the 90th percentile down
+        if len(gs) < 5: gs = sorted(x["lat_g_peak"] for x in corners if x["car"] == k_ and not x["drift"])   # too few on-course samples yet — fall back to everything rather than report nothing
         if len(gs) >= 5: car_grip[k_] = round(gs[int(0.9 * (len(gs) - 1))], 2)
     for k_, c_ in cars.items(): c_["grip_g"] = car_grip.get(k_)
 
@@ -1334,7 +1336,7 @@ def main():
                                "n": nn, "dir": max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)), "pos": [round(cl["x"]), round(cl["z"])], "dist": med([m["dist"] for m in ms]),
                                "mph_min": med([m["mph_min"] for m in ms]), "mph_in": med([m["mph_in"] for m in ms]), "lat_g": med([m["lat_g_peak"] for m in ms]),
                                "first_red": fr, "dominant": dom, "dominant_phase": dom_ph, "phase_profile": phase_profile, "consistency": round(cons, 2), "usi": med(usis), "limiter": limiter, "note": note,
-                               "model_id": mt["id"], "geo_id": geo_near(cl["x"], cl["z"]), "radius_m": mt.get("radius_m"), "ref": ref, "ref_src": ref_src, "last": last, "delta": delta, "advice": advice, "on_ref": on_ref, "track": dict(trk),
+                               "model_id": mt["id"], "geo_id": geo_near(cl["x"], cl["z"]), "radius_m": mt.get("radius_m"), "ref": ref, "ref_src": ref_src, "ref_car": car_l, "last": last, "delta": delta, "advice": advice, "on_ref": on_ref, "track": dict(trk),
                                "usi_spread": round((sorted(usis)[int(0.75 * (nn - 1))] - sorted(usis)[int(0.25 * (nn - 1))]) if nn >= 2 else 0, 3), "runs": runs,
                                "type": "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"})
         # persist the course model (never from replays); the session carries a compact summary
@@ -1439,12 +1441,16 @@ def main():
         model_info = {"turns": len([t for t in model["turns"] if t.get("status", "turn") == "turn"]), "laps": model.get("laps", 0), "sessions": len(model.get("sessions", [])), "file": os.path.relpath(mpath, ROOT)}
         on_ref_n = sum(1 for k in corner_out if k.get("on_ref")); cmp_n = sum(1 for k in corner_out if k.get("delta") is not None)
         pred_n = sum(1 for k in corner_out if (k.get("ref") or {}).get("predicted")); own_n = sum(1 for k in corner_out if k.get("ref") and not (k.get("ref") or {}).get("predicted"))
+        own_by_car = {}   # J17: "refs for this car" must count THIS build's refs — each corner's ref belongs to whichever build last drove it
+        for k in corner_out:
+            if k.get("ref") and not (k.get("ref") or {}).get("predicted") and k.get("ref_car"):
+                own_by_car[k["ref_car"]] = own_by_car.get(k["ref_car"], 0) + 1
         if geo:   # mapped turns vs driven turns: a mapped turn with no behavioural corner is a turn you took flat / never loaded — it still exists
             driven_ids = {k.get("geo_id") for k in corner_out if k.get("geo_id")}
             geo["driven"] = len(driven_ids); geo["not_driven"] = [g["id"] for g in geo["turns"] if g["id"] not in driven_ids]
             turns_info["mapped"] = len(geo["turns"]); turns_info["mapped_driven"] = len(driven_ids)   # (model geometry is persisted in the block above, before the flat copies are stripped)
         course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile, "laps": laps_info, "turns": turns_info,
-                           "model": model_info, "track": track, "driving": {"compared": cmp_n, "on_reference": on_ref_n, "predicted": pred_n, "own_refs": own_n, "car_grip": {k_: car_grip.get(k_) for k_ in co["cars"]}}, "geometry": geo,
+                           "model": model_info, "track": track, "driving": {"compared": cmp_n, "on_reference": on_ref_n, "predicted": pred_n, "own_refs": own_n, "own_refs_by_car": own_by_car, "car_grip": {k_: car_grip.get(k_) for k_ in co["cars"]}}, "geometry": geo,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out

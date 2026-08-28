@@ -49,7 +49,7 @@ class State:
         self.last_lapnum = None; self._last_lap_analysis = 0.0   # LAP-completion analysis trigger (the granularity the cross-lap limiter changes at)
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
-        self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None; self._auto_loop = False   # _auto_loop: the current loop was auto-started by a timed event (Rivals), not a manual mark
+        self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None; self._auto_loop = False; self._auto_suspend = None   # _auto_loop: the current loop was auto-started by a timed event (Rivals), not a manual mark; _auto_suspend: odometer/lap-timer snapshot taken at a mid-event pause (J7)
         self.last_t = 0.0; self.game = "menu"; self.game_kind = None; self._noev_since = None; self.ev_maxpos = 0; self.mode_suggest = None; self.mode_reason = None   # lab-mode auto-detection
         self.lab_mode = None; self._force_split = False; self._ev_edge = False; self.stint_starts = {}; self.last_drive_game = None   # effective lab mode (pushed by the dashboard), manual split request, event edge pending, run boundaries (t_mono)
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
@@ -141,7 +141,7 @@ def _end_auto_course(t_mono, p, c):
         ST.emit("lap", {"loop": lp["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s, "final": True, "topology": topo, "dist_m": round(ST._loop_away)})
         maybe_lap_analysis(t_mono, "event end (" + topo + ")")
     with ST.lock:
-        ST.loop = None; ST._auto_loop = False; ST._loop_state = "start"; ST._loop_away = 0.0
+        ST.loop = None; ST._auto_loop = False; ST._loop_state = "start"; ST._loop_away = 0.0; ST._auto_suspend = None
     ST.emit("loop", {"name": None})
 
 def ingest(p, t_mono):
@@ -159,7 +159,13 @@ def ingest(p, t_mono):
         if ST.last_drive_game is not None and g != ST.last_drive_game: ST._ev_edge = True   # event <-> free roam edge = new run (a pause mid-event is NOT an edge)
         ST.last_drive_game = g
     if g != ST.game:
-        if ST.game == "event" and ST._auto_loop: _end_auto_course(t_mono, p, c)   # event finish / crash / restart -> complete the open pass (P2P, final lap, or partial), then clear the auto-course
+        if ST.game == "event" and ST._auto_loop:
+            if g == "menu": ST._auto_suspend = {"dist": c["dist"], "lapt": c["lapt"]}   # J7: a pause is NOT an event exit — suspend, decide on the way back out (ending here fabricated a final pass + re-anchored the course at the pause position)
+            else: _end_auto_course(t_mono, p, c)   # event finish / crash -> complete the open pass (P2P, final lap, or partial), then clear the auto-course
+        elif ST.game == "menu" and ST._auto_suspend is not None:
+            sus = ST._auto_suspend; ST._auto_suspend = None
+            resumed = g == "event" and c["dist"] >= sus["dist"] - 50 and c["lapt"] >= sus["lapt"] - 1   # odometer + lap timer CONTINUE across a resume, RESET on a pause-menu restart (analyzer precedent) — a resume keeps the loop untouched
+            if not resumed: _end_auto_course(t_mono, p, c)   # quit to free roam, or restart: the suspended run is over (its partial pass still counts); a restart re-anchors at the real grid via last_pos below
         ST.game = g
         if g == "freeroam": ST.ev_maxpos = 0; ST.game_kind = None
         elif g == "event": ST.game_kind = ST.game_kind or ("race" if ST.ev_maxpos > 2 else "rivals / timed")   # kind survives a pause
@@ -200,7 +206,7 @@ def ingest(p, t_mono):
                 ST.loop_lap += 1; ST.loop_last_s = round(t_mono - (ST._loop_t0 or t_mono), 2)
                 ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s}); maybe_lap_analysis(t_mono, "loop lap")
                 ST._loop_away = 0.0; ST._loop_t0 = t_mono
-    ST._loop_prev = (p["PosX"], p["PosZ"])
+    if c["on"]: ST._loop_prev = (p["PosX"], p["PosZ"])   # menu frames report (0,0) — tracking them would add phantom kilometres to _loop_away across a pause (J7)
     # CSV row (same layout as capture tool)
     if ST.csv_writer:
         row = [time.time(), t_mono, p["Speed"] * 2.23694, p["AccelX"] / G, p["AccelZ"] / G, math.degrees(p["AngVelY"])]
@@ -265,6 +271,7 @@ def ingest(p, t_mono):
                 brk_r = next((r for r in co["pre"] + rows[:ipk + 1] if r["brk"] > 40), None); imin = min(range(len(rows)), key=lambda i: rows[i]["mph"]); thr_r = next((r for r in rows[imin:] if r["thr"] > 100), None)
                 cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint,
                       "lapn": (((apx.get("lapn") or 0) + 1) if apx.get("ev") else None),   # J11: 1-based in events, None outside — telemetry's 0-based lap read as falsy everywhere downstream
+                      "ev": 1 if apx.get("ev") else 0,   # J14: on-course truth stamped at the source — free-roam corners must never share a canonical-turn key with course corners
                       "dir": "R" if sign > 0 else "L",
                       "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min), "mph_out": round(rows[-1]["mph"]), "mph_apex": round(apx["mph"]), "apex": [apx.get("px"), apx.get("pz")], "loop_lap": (ST.loop_lap if ST.loop else None),
                       "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3), "drift": drift, "kink": v_min > 85 and peak < 0.9,
@@ -558,8 +565,16 @@ def _pick_meta(metas, ordn, ts_want=None):
     cat = TUNE.load_engine_catalog()
     fr = ST.latest
     live = bool(fr and fr.get("on") and int(fr.get("car") or 0) == int(ordn))
-    live_cyl = fr.get("cyl") if live else None
-    live_pi = fr.get("pi") if live else None
+    # J20: parking must not evaporate the laps just driven — remember the last live signature per ordinal and hold
+    # it for 2h (same window + idiom as the sticky gear identity), so the confirm gate doesn't demand "drive once"
+    # for a car verified minutes ago. A fresh live frame always overrides; reset_session clears the memory.
+    if live:
+        if not hasattr(ST, "live_seen"): ST.live_seen = {}
+        ST.live_seen[str(ordn)] = {"t": time.time(), "cyl": fr.get("cyl"), "pi": fr.get("pi")}
+    seen = getattr(ST, "live_seen", {}).get(str(ordn))
+    live_recent = bool(not live and seen and time.time() - seen["t"] < 7200)
+    live_cyl = fr.get("cyl") if live else (seen.get("cyl") if live_recent else None)
+    live_pi = fr.get("pi") if live else (seen.get("pi") if live_recent else None)
     roster = []
     for m in metas:
         try:
@@ -726,10 +741,10 @@ def _pick_meta(metas, ordn, ts_want=None):
         builds = []
     saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count"),
                   build=next((b["label"] for b in builds if r.get("_bsig") == b["build"]), None)) for r in roster]
-    how = "picked" if ts_want else ("signature" if live and (live_cyl or live_pi) else "newest")
-    mism = bool(live and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
+    how = "picked" if ts_want else ("signature" if (live or live_recent) and (live_cyl or live_pi) else "newest")   # J20: a 2h-recent signature still identifies
+    mism = bool((live or live_recent) and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
     final_how = how if ts_want else ("no-match" if mism else ("gear-matched" if gear_used else how))
-    return best["_meta"], {"how": final_how, "live": live, "live_cyl": live_cyl,
+    return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
                            "held": held_id, "builds": builds, "saves": saves}
@@ -1342,7 +1357,8 @@ def reset_session():
         ST.fdg_cache = {}; ST.gear_verdicts = {}   # measured-ladder cache + hysteresis state die with the session — stale telemetry must not outlive it
         ST.last_on_t = None; ST.live_since_analysis = 0.0; ST.drive_since_periodic = 0.0
         ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
-        ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None   # keep the loop DEFINITION, reset its lap count
+        ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None; ST._auto_suspend = None   # keep the loop DEFINITION, reset its lap count
+        ST.live_seen = {}   # J20: the parked-identity hold is session telemetry — it dies with the session
         ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
         ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
         ST.events = []; ST.seq += 1

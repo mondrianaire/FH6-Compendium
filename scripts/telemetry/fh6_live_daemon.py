@@ -541,6 +541,21 @@ def _pick_meta(metas, ordn, ts_want=None):
                 # accept only a CLEAR winner: good absolute match AND clearly ahead of the runner-up (else stay ambiguous)
                 if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
                     winner = errs[0][2]; roster = [winner] + [r for r in roster if r is not winner]; gear_used = True
+                    if not hasattr(ST, "gear_id"):
+                        ST.gear_id = {}
+                    ST.gear_id[str(ordn)] = {"ts": str(winner["ts"]), "t": time.time()}   # PERSIST the verified identity — it must survive a pause
+    # STICKY IDENTITY: when the ladder can't run RIGHT NOW (menus drop the live frame; a short window lacks gears),
+    # reuse the last gear-VERIFIED identity instead of reverting to 'newest' — the user's WOT run must not evaporate
+    # the moment they pause to read the dashboard. Held for 2h; a new in-game save re-anchors it (below); an explicit
+    # pick still overrides.
+    held_id = False
+    if not gear_used and not ts_want:
+        gid = getattr(ST, "gear_id", {}).get(str(ordn))
+        if gid and time.time() - gid["t"] < 7200:
+            held = next((r for r in roster if str(r["ts"]) == str(gid["ts"])), None)
+            if held is not None:
+                roster = [held] + [r for r in roster if r is not held]
+                gear_used = True; held_id = True
     best = roster[0]
     # BUILD CATEGORIZATION: group saves by their exact PARTS fingerprint (byte-exact in every save file). Saves
     # sharing a fingerprint are slider iterations of ONE build; different fingerprints are DIFFERENT builds — and at a
@@ -627,7 +642,7 @@ def _pick_meta(metas, ordn, ts_want=None):
     return best["_meta"], {"how": final_how, "live": live, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
-                           "builds": builds, "saves": saves}
+                           "held": held_id, "builds": builds, "saves": saves}
 
 
 def _deliverable_cyl(deliverable):
@@ -1402,6 +1417,11 @@ def disk_watcher():
                 if hasattr(ST, "gear_verdicts"):
                     for k in [k for k in ST.gear_verdicts if k.startswith(f"{ordn}|")]:
                         ST.gear_verdicts.pop(k, None)
+                # an in-game save is a POSITIVE identity signal — it comes from the car you're sitting in, so the
+                # just-written file IS the equipped build. Re-anchor the sticky identity to it.
+                if not hasattr(ST, "gear_id"):
+                    ST.gear_id = {}
+                ST.gear_id[str(ordn)] = {"ts": str(metas[0]["ts"]), "t": time.time()}
             nm = names_load().get("cars", {}).get(str(ordn)) or {}
             nm = nm.get("name") if isinstance(nm, dict) else nm
             diff = None

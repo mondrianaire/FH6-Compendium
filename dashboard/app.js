@@ -3479,6 +3479,9 @@
       .tl-save{font-size:10.5px;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--txt);padding:1px 8px;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
       .tl-save:hover{border-color:#a371f7}
       .tl-save.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.12);font-weight:700}
+      .tl-bucket.cur{background:rgba(163,113,247,.06);border-radius:7px;padding-left:6px;padding-right:6px}
+      .tl-diffs{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px;align-items:baseline;padding:3px 0 1px 12px}
+      .tl-diff{font-size:9.5px;border:1px solid rgba(227,179,65,.45);color:#e3b341;border-radius:6px;padding:0 6px;white-space:nowrap}
       .tl-worn{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.12)}
       .tl-lvy{width:56px;height:34px;object-fit:cover;border-radius:5px;border:1px solid var(--line)}
       /* ---- SAVE x TELEMETRY union strip ---- */
@@ -3638,23 +3641,37 @@
       const asks = (u.asks || []).length ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
       return `<div class="us${u.n_conflict ? " has-conflict" : ""}"><div class="us-hd"><b>🔗 Save × telemetry — one reconciled decode</b>${chips}</div>${fields.map(frow).join("")}${asks}</div>`;
     };
-    // ---- TUNE LIBRARY: every saved build of this car, bucketed by SIGNATURE (engine cylinders × PI) — the primary
-    // index — with the slider fingerprint separating same-signature members (exactly what clones create) and the
-    // EQUIPPED build flagged from the live match. Click any save to pin/decode it. ----
+    // ---- TUNE LIBRARY: categorized by BUILD — the exact PARTS fingerprint of each save (byte-exact from disk).
+    // PI can't be the category (at a class cap, different part combos share one PI), so builds are: A, B, C… newest
+    // first, each with its observed PI (stamped once driven), its saves (slider iterations of that build), and the
+    // exact UPGRADE-PART diffs vs Build A. The equipped build carries 🎮 from the live match. ----
     const tuneLibraryCard = (r, ordinal) => {
       const m = r.match; const saves = (m && m.saves) || [];
       if (saves.length < 2 && (m && m.how) !== "unsaved-build") return "";   // a detected unsaved build shows the library even with one save — that's the whole point
-      const buckets = new Map();
-      saves.forEach((s) => { const k = `${s.cyl != null ? s.cyl : "?"}|${s.pi != null ? s.pi : "?"}`; if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(s); });
       const cur = String(r.ts); const eqLive = m.how === "signature" || m.how === "gear-matched"; const pinnedPick = m.how === "picked";
-      const rows = [...buckets.entries()].map(([k, list]) => {
-        const [cyl, pi] = k.split("|");
-        const items = list.map((s) => { const on = String(s.ts) === cur;
-          const flag = on && eqLive ? "🎮 " : on && pinnedPick ? "📌 " : "";   // 🎮 = live-verified equipped; 📌 = manually pinned (no live verification)
-          return `<button class="tl-save${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded / locked" : "self-made"} · saved ${_tsFmt(s.ts)} · click to decode this build${on && pinnedPick ? " · pinned manually — not live-verified" : ""}">${flag}${_tsFmt(s.ts)}${s.gears ? ` · ${s.gears}-sp` : ""}${s.locked ? " 🔒" : ""}</button>`; }).join("");
-        const tie = list.length > 1 ? `<span class="tl-tie" title="same engine + PI (what cloning creates) — the slider fingerprint differs; the live gear ladder identifies which is equipped">${list.length} share this signature</span>` : "";
-        return `<div class="tl-bucket"><span class="tl-sig"><b>${pi !== "?" ? "PI " + pi : "PI ?"}</b> · ${cyl !== "?" ? cyl + "-cyl" : "engine ?"}${tie}</span><span class="tl-saves">${items}</span></div>`;
-      }).join("");
+      const saveBtn = (s) => { const on = String(s.ts) === cur;
+        const flag = on && eqLive ? "🎮 " : on && pinnedPick ? "📌 " : "";   // 🎮 = live-verified equipped; 📌 = manually pinned (no live verification)
+        return `<button class="tl-save${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded / locked" : "self-made"} · saved ${_tsFmt(s.ts)} · click to decode this build${on && pinnedPick ? " · pinned manually — not live-verified" : ""}">${flag}${_tsFmt(s.ts)}${s.gears ? ` · ${s.gears}-sp` : ""}${s.locked ? " 🔒" : ""}</button>`; };
+      const byTs = new Map(saves.map((s) => [String(s.ts), s]));
+      let rows, nCats;
+      if ((m.builds || []).length) {
+        nCats = m.builds.length;
+        rows = m.builds.map((b) => {
+          const items = (b.saves || []).map((ts) => byTs.get(String(ts))).filter(Boolean).map(saveBtn).join("");
+          const holdsCur = (b.saves || []).some((ts) => String(ts) === cur);
+          const dchips = (b.diff_vs_A || []).map((d) => `<span class="tl-diff">${esc(d)}</span>`).join("");
+          const more = b.n_diffs > (b.diff_vs_A || []).length ? `<span class="tl-diff">+${b.n_diffs - b.diff_vs_A.length} more</span>` : "";
+          return `<div class="tl-bucket${holdsCur ? " cur" : ""}"><span class="tl-sig"><b>Build ${esc(b.label)}</b> · ${b.pi != null ? "PI " + b.pi : `<span class="why" title="PI is stamped the first time this exact build is driven">PI ? — drive to stamp</span>`}${b.cyl != null ? ` · ${b.cyl}-cyl` : ""}${b.gears ? ` · ${b.gears}-sp` : ""}</span><span class="tl-saves">${items}</span>${b.label !== "A" && (dchips || more) ? `<div class="tl-diffs"><span class="why" style="font-size:9.5px">vs A:</span> ${dchips}${more}</div>` : ""}</div>`;
+        }).join("");
+      } else {   // old daemon payload — fall back to signature buckets
+        const buckets = new Map();
+        saves.forEach((s) => { const k = `${s.cyl != null ? s.cyl : "?"}|${s.pi != null ? s.pi : "?"}`; if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(s); });
+        nCats = buckets.size;
+        rows = [...buckets.entries()].map(([k, list]) => {
+          const [cyl, pi] = k.split("|");
+          return `<div class="tl-bucket"><span class="tl-sig"><b>${pi !== "?" ? "PI " + pi : "PI ?"}</b> · ${cyl !== "?" ? cyl + "-cyl" : "engine ?"}</span><span class="tl-saves">${list.map(saveBtn).join("")}</span></div>`;
+        }).join("");
+      }
       // GARAGE-INSTANCE reality check: FH6 stores tune containers per MODEL + save event — two garage cars of the
       // same model do NOT get separate tune files, and no livery↔tune link exists on disk. When the car has liveries,
       // show them inline here so the picker at least carries the visual identity, and say what the game can't record.
@@ -3663,7 +3680,7 @@
       const lc = (live.liveryCache || {})[String(ordinal)];
       const wornThumbs = (lc && lc.n) ? lc.list.filter((l) => l.thumb).slice(0, 6).map((l) => `<img class="tl-lvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" title="${esc(l.name || "design")}" alt="">`).join("") : "";
       const worn = wornThumbs ? `<div class="tl-worn"><span class="why" style="font-size:10px">🎨 liveries on this car (the game records NO livery↔tune link — two garage cars of the same model even share one tune file; identify by the paint you see in-game, and re-save a build's tune in-game to give it its own entry here):</span>${wornThumbs}</div>` : "";
-      return `<details class="tl"${buckets.size > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved builds · ${buckets.size} signature${buckets.size > 1 ? "s" : ""} (engine × PI)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${unsavedRow}${worn}</details>`;
+      return `<details class="tl"${nCats > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved tune${saves.length > 1 ? "s" : ""} · <b>${nCats} distinct build${nCats > 1 ? "s" : ""}</b> (by upgrade parts)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${unsavedRow}${worn}</details>`;
     };
     // ---- LIVERY GALLERY: the paintjob thumbnails from the save's Livery containers — the visual identity players
     // actually use to tell builds apart. No tune↔livery link exists on disk (both key by car only), so this is a

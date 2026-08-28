@@ -538,13 +538,51 @@ def _pick_meta(metas, ordn, ts_want=None):
                 if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
                     winner = errs[0][2]; roster = [winner] + [r for r in roster if r is not winner]; gear_used = True
     best = roster[0]
-    saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count")) for r in roster]   # gear count distinguishes same-(cyl,PI) builds in the library
+    # BUILD CATEGORIZATION: group saves by their exact PARTS fingerprint (byte-exact in every save file). Saves
+    # sharing a fingerprint are slider iterations of ONE build; different fingerprints are DIFFERENT builds — and at a
+    # class cap several builds share cyl+PI, so PARTS (not PI) are the true category. Each non-base build carries the
+    # exact part diffs vs Build A (the newest), so the dashboard can say WHAT differs, not just that something does.
+    builds = []
+    try:
+        import hashlib as _hl
+        sig_groups = {}
+        for r in roster:
+            items = tuple(sorted((k, v) for k, v in ((r["_tune"] or {}).get("parts") or {}).items() if v is not None))
+            h = _hl.sha1(repr(items).encode()).hexdigest()[:8]
+            r["_bsig"] = h; sig_groups.setdefault(h, []).append(r)
+        order = sorted(sig_groups, key=lambda h: -max(float(x["_meta"]["mtime"]) for x in sig_groups[h]))
+        labels = {h: chr(65 + i) for i, h in enumerate(order[:26])}
+        def _tw(v):
+            if v is None: return "—"
+            ix = v % 1000
+            return "Stock" if ix == 0 else (TUNE._tier_word(ix) if ix <= 3 else f"t{ix}")
+        base = order[0] if order else None
+        for h in order:
+            mem = sig_groups[h]
+            diffs = []
+            if base and h != base:
+                pa = (sig_groups[base][0]["_tune"] or {}).get("parts") or {}
+                pb = (mem[0]["_tune"] or {}).get("parts") or {}
+                for slot in sorted(set(pa) | set(pb)):
+                    va, vb = pa.get(slot), pb.get(slot)
+                    if va != vb:
+                        disp = TUNE.CATEGORY_DISPLAY.get(slot, slot.replace("_", " ").title())
+                        diffs.append(f"{disp}: {_tw(va)} → {_tw(vb)}")
+            builds.append({"build": h, "label": labels.get(h, "?"), "saves": [x["ts"] for x in mem], "n": len(mem),
+                           "cyl": mem[0].get("cyl"), "pi": next((x["pi"] for x in mem if x.get("pi")), None),
+                           "gears": (mem[0]["_tune"] or {}).get("gear_count"),
+                           "diff_vs_A": diffs[:12], "n_diffs": len(diffs)})
+    except Exception:
+        builds = []
+    saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count"),
+                  build=next((b["label"] for b in builds if r.get("_bsig") == b["build"]), None)) for r in roster]
     how = "picked" if ts_want else ("signature" if live and (live_cyl or live_pi) else "newest")
     mism = bool(live and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
     final_how = how if ts_want else ("no-match" if mism else ("gear-matched" if gear_used else how))
     return best["_meta"], {"how": final_how, "live": live, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
-                           "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used, "saves": saves}
+                           "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
+                           "builds": builds, "saves": saves}
 
 
 def _deliverable_cyl(deliverable):

@@ -225,6 +225,19 @@ def f4():
     return ('replace(/&/g, "&amp;")' in src and 'replace(/</g, "&lt;")' in src, "esc() full-escapes & < > \" [XSS guard]")
 check("F client", "esc() is a full HTML escape", f4)
 
+def f5():
+    src = open(os.path.join(ROOT, "dashboard", "app.js"), encoding="utf-8").read()
+    bad = []
+    if 'class="block fhm" style="border-color:#00d27a"' in src: bad.append("hardcoded green decode frame")
+    if "tl-worn" in src and "removed" not in src.split("tl-worn")[0][-200:]: pass   # tolerated only in the removal comment
+    if '<div class="tl-worn">' in src: bad.append("tl-worn gallery back")
+    if ".dm-chip.on{border-color:#00d27a" in src: bad.append("green selection state back")
+    if "really clear the history?" not in src: bad.append("two-step clear missing")
+    if "curCar = (f.on && f.cid) || live.courseCar" not in src: bad.append("paused wrong-car fallback back")
+    if "OFFLINE — last data" not in src: bad.append("dock offline state missing")
+    return (not bad, "UX invariants hold" if not bad else "REGRESSED: " + "; ".join(bad))
+check("F client", "UX audit invariants (frame/selection/clear/pause/offline)", f5)
+
 # ---------------- G. DATA STORES ----------------
 def g1():
     for fn, req in [("engine-swaps.json", 100), ("parts-pi.json", 0), ("tire-compounds.json", 0)]:

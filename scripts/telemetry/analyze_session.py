@@ -1483,19 +1483,58 @@ def main():
         def route_s(pos):
             best_i = min(range(len(gpath)), key=lambda i: (gpath[i][0] - pos[0]) ** 2 + (gpath[i][1] - pos[1]) ** 2) if gpath else 0
             return best_i
-        merged_turns.sort(key=lambda t: route_s(t["pos"]))
+        # ═══ A TURN IS A PROPERTY OF THE ROAD, NOT OF HOW HARD YOU DROVE IT ═══
+        # Turn EXISTENCE comes from geometry + geography: the curvature of the path you drove, which is
+        # pace-independent. Tyre load (the 0.35 g behavioural detector) only describes HOW a turn was taken —
+        # it can never decide whether the turn is there. Basing existence on load was the root cause of turns
+        # that vanish when driven smoothly, and of every ratio/persistence patch built to compensate.
+        # Geometry turns are merged across sessions positionally, the same way behavioural ones are.
+        gseen = model.setdefault("geo_turns", {})       # stable key -> {pos, dir, radius_m, deg, sessions[]}
+        for g_ in ((geo or {}).get("turns") or []):
+            ap = g_.get("apex")
+            if not ap: continue
+            hit_k = next((k for k, v in gseen.items() if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 40 ** 2), None)
+            rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
+                                   {"pos": [round(ap[0]), round(ap[1])], "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
+            if sid not in rec["sessions"]: rec["sessions"].append(sid)
+            rec["sessions"] = rec["sessions"][-40:]
+            for f_ in ("dir", "radius_m", "deg"):
+                if g_.get(f_) is not None: rec[f_] = g_[f_]
+        # the model's PERSISTED geometry is the best map on record — a full mapped lap, already vetted. Every
+        # turn in it is part of the road by definition, so it seeds the inventory at full standing.
+        for g_ in (((model.get("geometry") or {}).get("turns")) or []):
+            ap = g_.get("apex")
+            if not ap: continue
+            hit_k = next((k for k, v in gseen.items() if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 40 ** 2), None)
+            rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
+                                   {"pos": [round(ap[0]), round(ap[1])], "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
+            rec["model_map"] = True
+        # every geometric turn becomes a model turn (created if the behavioural pass never saw it)
+        for k, v in gseen.items():
+            hit = next((t for t in merged_turns if (t["pos"][0] - v["pos"][0]) ** 2 + (t["pos"][1] - v["pos"][1]) ** 2 <= 40 ** 2), None)
+            if hit is None:
+                hit = {"id": "T?", "pos": list(v["pos"]), "dir": v.get("dir"), "type": None, "radius_m": v.get("radius_m"),
+                       "n": 0, "best": None, "sessions": 0, "by_session": {}, "track": {}}
+                merged_turns.append(hit)
+            hit["geo_sessions"] = len(v.get("sessions") or [])
+            hit["geo_mapped"] = bool(v.get("model_map"))
+            hit["deg"] = v.get("deg")
+            if hit.get("radius_m") is None: hit["radius_m"] = v.get("radius_m")
+            if hit.get("dir") is None: hit["dir"] = v.get("dir")
+        merged_turns.sort(key=lambda t: route_s(t["pos"]))            # re-order: geometry may have inserted turns
         for i, t in enumerate(merged_turns, 1): t["id"] = f"T{i}"
         def _established(t):
+            # GEOMETRY first: a curve confirmed by the road on 2+ visits IS a turn, however gently you take it.
+            # (One visit can carry a rejoin/crawl artefact, so two is the noise filter.)
+            if t.get("geo_mapped"): return "geometry"           # in the course's own persisted map = part of the road
+            if (t.get("geo_sessions") or 0) >= 2: return "geometry"
             tr = t.get("track") or {}
-            return (tr.get("sessions", 0) >= 2 and (tr.get("laps_seen", 0) / mlaps) >= 0.35) or (tr.get("passes", 0) >= 0.5 * mlaps)
-        for t in merged_turns: t["established"] = _established(t); t["status"] = "turn" if t["established"] else "possible"
-        # PERSISTENCE across sessions is evidence too: a turn seen in many different sessions is real even when
-        # its per-lap detection RATE is low — that is the signature of a turn taken without loading the tyres,
-        # which the 0.35 g behavioural detector structurally cannot see every lap (never a ratio problem).
+            # behaviour is a FALLBACK for turns the reference lap's curvature missed (a section it never covered)
+            if (tr.get("sessions", 0) >= 2 and (tr.get("laps_seen", 0) / mlaps) >= 0.35) or (tr.get("passes", 0) >= 0.5 * mlaps): return "behaviour"
+            if (t.get("geo_sessions") or 0) >= 1 and (tr.get("passes") or 0) >= 1: return "geometry+driven"   # mapped once AND actually driven
+            return None
         for t in merged_turns:
-            tr = t.get("track") or {}
-            if not t["established"] and tr.get("sessions", 0) >= 5 and tr.get("passes", 0) >= 20:
-                t["established"] = True; t["status"] = "turn"; t["est_by"] = "persistence"
+            _by = _established(t); t["established"] = bool(_by); t["est_by"] = _by; t["status"] = "turn" if _by else "possible"
         # THE PLAYER'S DECLARED COUNT IS GROUND TRUTH — the model already TRIMS when it over-detects; it must
         # also PROMOTE when it under-detects, or a course you have declared 9 turns on shows 7 forever.
         _exp = model.get("expected_turns")

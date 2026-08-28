@@ -3480,6 +3480,12 @@
       .tl-save:hover{border-color:#a371f7}
       .tl-save.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.12);font-weight:700}
       .tl-bucket.cur{background:rgba(163,113,247,.06);border-radius:7px;padding-left:6px;padding-right:6px}
+      .tl-blvy{width:44px;height:26px;object-fit:cover;border-radius:5px;border:1px solid var(--line);cursor:pointer;flex:none;align-self:center}
+      .tl-blvy:hover{border-color:#a371f7}
+      .tl-blvy-chip{font-size:9.5px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;cursor:pointer;white-space:nowrap;flex:none}
+      .tl-blvy-chip:hover{border-color:#a371f7}
+      .tl-blvy-none{font-size:11px;border:1px dashed var(--line);border-radius:6px;padding:1px 7px;color:var(--muted);cursor:pointer;flex:none}
+      .tl-blvy-none:hover{border-color:#a371f7;color:#a371f7}
       .tl-diffs{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px;align-items:baseline;padding:3px 0 1px 12px}
       .tl-diff{font-size:9.5px;border:1px solid rgba(227,179,65,.45);color:#e3b341;border-radius:6px;padding:0 6px;white-space:nowrap}
       .tl-worn{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.12)}
@@ -3661,7 +3667,16 @@
           const holdsCur = (b.saves || []).some((ts) => String(ts) === cur);
           const dchips = (b.diff_vs_A || []).map((d) => `<span class="tl-diff">${esc(d)}</span>`).join("");
           const more = b.n_diffs > (b.diff_vs_A || []).length ? `<span class="tl-diff">+${b.n_diffs - b.diff_vs_A.length} more</span>` : "";
-          return `<div class="tl-bucket${holdsCur ? " cur" : ""}"><span class="tl-sig"><b>Build ${esc(b.label)}</b> · ${b.pi != null ? "PI " + b.pi : `<span class="why" title="PI is stamped the first time this exact build is driven">PI ? — drive to stamp</span>`}${b.cyl != null ? ` · ${b.cyl}-cyl` : ""}${b.gears ? ` · ${b.gears}-sp` : ""}</span><span class="tl-saves">${items}</span>${b.label !== "A" && (dchips || more) ? `<div class="tl-diffs"><span class="why" style="font-size:9.5px">vs A:</span> ${dchips}${more}</div>` : ""}</div>`;
+          // build↔livery: pinned association or a save-time-proximity guess (labelled). Click to cycle through this
+          // car's liveries (…last → none → first); any click PINS your choice — user truth beats the guess.
+          const lv = b.livery;
+          const cyc = `data-cyclelivery="${ordinal}|${esc(b.build)}|${esc((lv && lv.dir) || "")}"`;
+          const lvTitle = lv ? `${esc(lv.name || "livery")}${lv.source === "guess" ? ` · GUESS (saved ~${lv.dt_h}h apart) — click to change/confirm` : " · pinned — click to change"}` : "no livery associated — click to assign from this car's liveries";
+          const lvCell = lv
+            ? (lv.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(lv.dir)}" loading="lazy" alt="" ${cyc} title="${lvTitle}">`
+                        : `<span class="tl-blvy-chip" ${cyc} title="${lvTitle}">🎨 ${esc(lv.name || "livery")}${lv.source === "guess" ? " ≈" : ""}</span>`)
+            : `<span class="tl-blvy-none" ${cyc} title="${lvTitle}">🎨+</span>`;
+          return `<div class="tl-bucket${holdsCur ? " cur" : ""}">${lvCell}<span class="tl-sig"><b>Build ${esc(b.label)}</b> · ${b.pi != null ? "PI " + b.pi : `<span class="why" title="PI is stamped the first time this exact build is driven">PI ? — drive to stamp</span>`}${b.cyl != null ? ` · ${b.cyl}-cyl` : ""}${b.gears ? ` · ${b.gears}-sp` : ""}${lv && lv.source === "guess" ? `<span class="tl-tie" title="associated by save-time proximity, not recorded by the game — click the thumbnail to confirm or change">livery ≈ guess</span>` : ""}</span><span class="tl-saves">${items}</span>${b.label !== "A" && (dchips || more) ? `<div class="tl-diffs"><span class="why" style="font-size:9.5px">vs A:</span> ${dchips}${more}</div>` : ""}</div>`;
         }).join("");
       } else {   // old daemon payload — fall back to signature buckets
         const buckets = new Map();
@@ -3836,6 +3851,16 @@
       el.querySelectorAll("[data-diskpick]").forEach((b) => b.addEventListener("click", () => { const [o, ts] = b.dataset.diskpick.split("|"); pickDiskTune(+o, ts || null); }));
       el.querySelectorAll("[data-clone-lock]").forEach((b) => b.addEventListener("click", () => lockCloneTarget(+b.dataset.cloneLock)));
       el.querySelectorAll("[data-clone-unlock]").forEach((b) => b.addEventListener("click", () => unlockCloneTarget()));
+      el.querySelectorAll("[data-cyclelivery]").forEach((b2) => b2.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation();
+        const [ordL, buildL, curDir] = b2.dataset.cyclelivery.split("|");
+        const lc = (live.liveryCache || {})[String(ordL)];
+        const opts = (lc && lc.list) ? lc.list.map((l) => l.dir) : [];
+        if (!opts.length) { fetchLiveries(ordL); return; }
+        const i = curDir ? opts.indexOf(curDir) : -1;
+        const next = (i + 1 >= opts.length) ? null : opts[i + 1];   // cycles: none → first → … → last → none
+        fetch(liveUrl + "/build-livery", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: +ordL, build: buildL, dir: next }) })
+          .then(() => { if (live.diskCache) delete live.diskCache[ordL]; fetchDiskTune(+ordL, { force: true }); }).catch(() => {});
+      }));
       el.querySelectorAll("[data-caljump]").forEach((b) => b.addEventListener("click", () => {
         const t = el.querySelector("#" + (window.CSS && CSS.escape ? CSS.escape(b.dataset.caljump) : b.dataset.caljump));
         if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); const i = t.querySelector("input"); if (i) { i.focus(); t.classList.add("cal-flash"); setTimeout(() => t.classList.remove("cal-flash"), 1200); } }

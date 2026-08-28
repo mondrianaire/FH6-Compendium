@@ -576,6 +576,47 @@ def _pick_meta(metas, ordn, ts_want=None):
                            "cyl": mem[0].get("cyl"), "pi": next((x["pi"] for x in mem if x.get("pi")), None),
                            "gears": (mem[0]["_tune"] or {}).get("gear_count"),
                            "diff_vs_A": diffs[:12], "n_diffs": len(diffs)})
+        # LIVERY ASSOCIATION per build: no tune↔livery link exists on disk, so a manual PIN
+        # (data/build-liveries.json) wins; otherwise GUESS by save-time proximity — a build's tune save and its
+        # livery save usually come from the same garage session. Guesses are labelled as guesses.
+        try:
+            root_ = TUNE.find_containers_root(); tag_ = f"{int(ordn):04d}"
+            livs = []
+            for d_ in os.listdir(root_):
+                if d_.startswith((f"Livery_{tag_}_", f"SoulBoundLivery_{tag_}_", f"BaseLivery_{tag_}_")):
+                    nm_ = _livery_strings(os.path.join(root_, d_, "header"))
+                    livs.append({"dir": d_, "name": (nm_[0] if nm_ else None),
+                                 "thumb": os.path.exists(os.path.join(root_, d_, "bigThumb.webp")),
+                                 "ts": d_.split("_")[-1]})
+            pins = {}
+            try:
+                with open(os.path.join(ROOT, "data", "build-liveries.json"), encoding="utf-8") as f_:
+                    pins = (json.load(f_).get("assoc") or {}).get(str(ordn), {})
+            except Exception:
+                pins = {}
+            def _ep(ts):
+                try: return time.mktime(time.strptime(str(ts)[:14], "%Y%m%d%H%M%S"))
+                except Exception: return None
+            for b in builds:
+                pin_dir = pins.get(b["build"])
+                pl = next((l for l in livs if l["dir"] == pin_dir), None) if pin_dir else None
+                if pl is not None:
+                    b["livery"] = {"dir": pl["dir"], "name": pl["name"], "thumb": pl["thumb"], "source": "pinned"}
+                    continue
+                best_l = None; best_dt = None
+                for l in livs:
+                    le = _ep(l["ts"])
+                    if le is None: continue
+                    for ts_ in b["saves"]:
+                        te = _ep(ts_)
+                        if te is None: continue
+                        dt_ = abs(le - te)
+                        if best_dt is None or dt_ < best_dt: best_dt, best_l = dt_, l
+                if best_l is not None and best_dt is not None and best_dt <= 6 * 3600:
+                    b["livery"] = {"dir": best_l["dir"], "name": best_l["name"], "thumb": best_l["thumb"],
+                                   "source": "guess", "dt_h": round(best_dt / 3600, 1)}
+        except Exception:
+            pass
     except Exception:
         builds = []
     saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count"),
@@ -1161,6 +1202,19 @@ class H(BaseHTTPRequestHandler):
                     os.replace(mp + ".tmp", mp)
                 ok = True
             except Exception as ex_: print("course-expected not saved:", repr(ex_), file=sys.stderr)
+        elif self.path.startswith("/build-livery") and body.get("ordinal") and body.get("build") is not None:   # pin (or clear) a build↔livery association — user-confirmed truth over the save-time guess
+            bp = os.path.join(ROOT, "data", "build-liveries.json")
+            try:
+                with open(bp, encoding="utf-8") as f: bobj = json.load(f)
+            except Exception:
+                bobj = {"schema_version": "1.0.0", "assoc": {}}
+            a_ = bobj.setdefault("assoc", {}).setdefault(str(int(body["ordinal"])), {})
+            d_ = body.get("dir")
+            if d_: a_[str(body["build"])] = os.path.basename(str(d_))
+            else: a_.pop(str(body["build"]), None)
+            tmp_ = bp + ".tmp"
+            with open(tmp_, "w", encoding="utf-8") as f: json.dump(bobj, f, indent=1)
+            os.replace(tmp_, bp); ok = True
         elif self.path.startswith("/route") and body.get("route_key") and body.get("name"):
             rp = os.path.join(ROOT, "data", "routes.json")
             try:

@@ -128,7 +128,20 @@ def get_laps(root, route_key, cls=None, competitive_only=True, limit=400):
     # session happened to drive: a 492 m window on a 1030 m circuit is correctly timed at 15.09 s and 72.9 mph,
     # but as a reference best it makes every real 30 s lap 200% off, and one route dropped to a single
     # "competitive" lap out of 84. The route's own median arc IS the course length -- no caller has to say so.
-    _arcs = sorted(r["arc_m"] for r in rows if r.get("arc_m"))
+    #
+    # MEASURED OVER THE WHOLE ROUTE, NOT THE PAGE. `rows` is capped at limit*3 and ordered by lap_s ASCENDING,
+    # so at a small limit the fetched set is almost entirely short fast fragments and the median collapses --
+    # limit=3 saw a 660 m "course" and flagged nothing, while limit=400 saw 1028 m and flagged 11. Coverage that
+    # depends on how many rows you asked for is not coverage. One extra single-column scan settles it.
+    with _LOCK:
+        cx2 = connect(root)
+        try:
+            _all = [a for (a,) in cx2.execute(
+                "SELECT arc_m FROM lap_traces WHERE route_key=?" + (" AND class=?" if cls else ""),
+                ([route_key, cls] if cls else [route_key])).fetchall() if a]
+        finally:
+            cx2.close()
+    _arcs = sorted(_all) or sorted(r["arc_m"] for r in rows if r.get("arc_m"))
     full = (_arcs[len(_arcs) // 2] * 0.9) if _arcs else 0
     best = {}
     for r in rows:

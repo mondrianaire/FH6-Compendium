@@ -268,9 +268,11 @@ def register_range(ordinal, field, norm, value, unit=None):
     bynorm[round(nr, 3)] = [nr, float(value)]
     pts[:] = list(bynorm.values())
     solved = back_solve(pts)
-    if solved:
+    if solved and solved[0] is not None and solved[1] is not None and solved[0] < solved[1]:   # PLAUSIBILITY GATE: a solve with min >= max is a contradiction from bad points (e.g. rear_ride_height min 22.98 > max 3.8 was published as 'exact') — never publish it; keep the raw points for a future consistent solve
         r = doc.setdefault("ranges", {}).setdefault(str(int(ordinal)), {})
         r[field] = {"min": solved[0], "max": solved[1], "unit": unit or "", "source": f"back-solved from {len(pts)} points"}
+    else:
+        solved = None
     tmp = _ranges_path() + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(doc, fh, indent=2)

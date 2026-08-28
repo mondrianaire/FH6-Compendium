@@ -25,7 +25,95 @@
         "unit": "in",
         "source": "footage-verified endpoints (tuning-variables.json)"
       }
-    }
+    },
+    "2866": {}
   },
-  "points": {}
+  "points": {
+    "4160|front_spring": [
+      [
+        0.2325,
+        469.0
+      ]
+    ],
+    "4160|rear_spring": [
+      [
+        0.0775,
+        339.0
+      ]
+    ],
+    "4160|front_ride_height": [
+      [
+        0.0,
+        5.5
+      ]
+    ],
+    "4160|rear_ride_height": [
+      [
+        0.0,
+        5.4
+      ]
+    ],
+    "4160|front_downforce": [
+      [
+        0.5,
+        517.0
+      ]
+    ],
+    "4160|rear_downforce": [
+      [
+        0.5,
+        423.0
+      ]
+    ],
+    "2866|front_ride_height": [
+      [
+        1.0,
+        4.1
+      ],
+      [
+        0.0,
+        4.1
+      ]
+    ],
+    "2866|rear_ride_height": [
+      [
+        1.0,
+        3.8
+      ],
+      [
+        0.927,
+        5.2
+      ]
+    ],
+    "2866|front_downforce": [
+      [
+        1.0,
+        190.0
+      ]
+    ],
+    "2866|rear_downforce": [
+      [
+        1.0,
+        201.0
+      ]
+    ],
+    "2866|final_drive": [
+      [
+        0.0923,
+        2.56
+      ]
+    ],
+    "2866|front_spring": [
+      [
+        0.312,
+        406.0
+      ]
+    ],
+    "2866|rear_spring": [
+      [
+        0.3013,
+        434.0
+      ]
+    ]
+  }
 }

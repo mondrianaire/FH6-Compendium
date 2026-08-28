@@ -2680,7 +2680,7 @@
     // across slider iterations) instead; skey() self-migrates the legacy cid-keyed value on first touch.
     const buildSigFor = (ord) => { try { if (typeof live === "undefined") return null; const c = live.diskCache && live.diskCache[ord]; if (!c || !c.available) return null; const m = c.match || {}; const b = (m.builds || []).find((b2) => (b2.saves || []).some((ts) => String(ts) === String(c.ts))); return b ? b.build : null; } catch (e) { return null; } };
     const stateId = (cid) => { const b = baseId(cid); const ord = String(b).split("|")[0]; const sig = buildSigFor(ord); return sig ? ord + "|" + sig : b; };
-    const skey = (prefix, cid) => { const nk = prefix + stateId(cid); try { if (localStorage.getItem(nk) == null) { const lv = localStorage.getItem(prefix + baseId(cid)); if (lv != null) localStorage.setItem(nk, lv); } } catch (e) {} return nk; };
+    const skey = (prefix, cid) => { const nk = prefix + stateId(cid); try { const lk = prefix + baseId(cid); if (nk !== lk) { const lv = localStorage.getItem(lk); if (lv != null) { if (localStorage.getItem(nk) == null) localStorage.setItem(nk, lv); localStorage.removeItem(lk); } } } catch (e) {} return nk; };   // migrate once, then DELETE the legacy key — offline writes under baseId were orphaned forever once the sig key existed (split-brain)
     const tuneKey = (cid) => skey("fh6Tune:", cid);
     // disk-decoded exact slider values → the tuning engine's slider keys (auto-fills "current tune")
     const DISK2SLIDER = { front_arb: "farb", rear_arb: "rarb", front_bump: "fbump", rear_bump: "rbump", front_rebound: "freb", rear_rebound: "rreb", brake_balance: "bbal", brake_pressure: "bpress", rear_diff_accel: "accel", rear_diff_decel: "decel", center_diff: "center", front_spring: "fspring", rear_spring: "rspring", front_downforce: "faero", rear_downforce: "raero" };
@@ -2700,14 +2700,14 @@
     };
     const userTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
     const getTune = (cid) => { const ord = String(cid).split("|")[0]; const disk = (live.diskTune && live.diskTune[ord]) || {}; return Object.assign({}, disk, userTune(cid)); };   // user entries override the disk auto-fill
-    const setTune = (cid, k, v) => { const t = userTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; localStorage.setItem(tuneKey(cid), JSON.stringify(t)); };
+    const setTune = (cid, k, v) => { const t = userTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; try { localStorage.setItem(tuneKey(cid), JSON.stringify(t)); } catch (e) {} };   // a quota throw here silently killed the whole repaint chain
     // ---- interactive tune iteration: mark a suggested change as IMPLEMENTED (sets it as the new current value +
     // starts a fresh run), then RE-TEST (force a re-analysis). An applied move that drops off the next analysis's
     // suggestion list = resolved; one still suggested = needs more / a cleaner re-drive. ----
     const appliedKey = (cid) => skey("fh6Applied:", cid);   // J19: per-build — a slider change never moves PI
     const getApplied = (cid) => { try { return JSON.parse(localStorage.getItem(appliedKey(cid)) || "{}"); } catch (e) { return {}; } };
-    const markApplied = (cid, sl, to) => { const a = getApplied(cid); a[sl] = { to: (to === "" || to == null ? null : +to), at: Date.now() }; localStorage.setItem(appliedKey(cid), JSON.stringify(a)); if (to !== "" && to != null) setTune(cid, sl, +to); };
-    const unApply = (cid, sl) => { const a = getApplied(cid); delete a[sl]; localStorage.setItem(appliedKey(cid), JSON.stringify(a)); };
+    const markApplied = (cid, sl, to) => { const a = getApplied(cid); a[sl] = { to: (to === "" || to == null ? null : +to), at: Date.now() }; try { localStorage.setItem(appliedKey(cid), JSON.stringify(a)); } catch (e) {} if (to !== "" && to != null) setTune(cid, sl, +to); };
+    const unApply = (cid, sl) => { const a = getApplied(cid); delete a[sl]; try { localStorage.setItem(appliedKey(cid), JSON.stringify(a)); } catch (e) {} };
     const appliedStrip = (cid, moves) => {
       if (!cid) return ""; const a = getApplied(cid); const keys = Object.keys(a); if (!keys.length) return "";
       const curSet = new Set((moves || []).map((m) => m.sl));
@@ -2730,7 +2730,7 @@
     const SLIDER_BETTER = { usi_abs: "lower", spin: "lower", frontLim: "lower", rearLim: "lower" };   // all "issues": lower = better
     const abKey = (cid) => skey("fh6AB:", cid);   // J19: the A/B chain must survive a part install
     const getAB = (cid) => { try { return JSON.parse(localStorage.getItem(abKey(cid)) || "{}").versions || []; } catch (e) { return []; } };
-    const setAB = (cid, versions) => localStorage.setItem(abKey(cid), JSON.stringify({ versions: versions.slice(-24) }));
+    const setAB = (cid, versions) => { try { localStorage.setItem(abKey(cid), JSON.stringify({ versions: versions.slice(-24) })); } catch (e) {} };
     const sliderSnapshot = (cid) => { const t = getTune(cid); const o = {}; SLIDER_ORDER.forEach((sl) => { if (t[sl] != null) o[sl] = t[sl]; }); return o; };   // numeric fast-path (the exact sliders), kept as metric context
     // FULL slider snapshot straight off the decoded deliverable — EVERY tuning field, its displayed value + unit, and
     // whether it's still a position (% slider). An A/B version stores THIS, so a multi-slider change is captured in full
@@ -2970,9 +2970,9 @@
       if ((tu.messy || []).length) needs.push({ k: "messy", p: 3, text: `${tu.messy.map(turnLabel).join(", ")} split into several detections most laps — drive ${tu.messy.length === 1 ? "it" : "them"} as one smooth arc` });   // J13
       needs.sort((x, y) => x.p - y.p);
       let auto = (pct >= 75 && mapped && geoCov >= 0.9) ? "tuning" : "training"; const sel = courseStageSel();   // HARD gate: the tuning stage requires the enumerated turns to cover the shape's mapped turns — per-turn advice on a known-incomplete inventory is wrong advice
-      try { const hk = "fh6StageAuto:" + (co.route_key || "");   // HYSTERESIS: a reached tuning stage regresses only when CLEARLY below the gate — one newly-mapped turn at the boundary must not flap the stage (and its toast) every analysis
+      if (src === "live") { try { const hk = "fh6StageAuto:" + (co.route_key || "");   // HYSTERESIS: a reached tuning stage regresses only when CLEARLY below the gate — one newly-mapped turn at the boundary must not flap the stage (and its toast) every analysis. LIVE-only: a recording render of stale data must not clobber the live latch
         if (localStorage.getItem(hk) === "tuning" && auto === "training" && pct >= 68 && geoCov >= 0.85 && mapped) auto = "tuning";
-        localStorage.setItem(hk, auto); } catch (e) {}
+        localStorage.setItem(hk, auto); } catch (e) {} }
       let stage = sel === "auto" ? auto : sel; let pinSuspended = false;
       if (sel === "tuning" && auto === "training") { stage = "training"; pinSuspended = true; }   // STATUS REGRESSION beats the pin: prerequisites no longer fulfilled → the pinned tuning stage is suspended, not honored
       return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof, shapeConf, shapeMeasured, shapeAgree, shapeCompared, shapeSpread, geoCov, missingN, pinSuspended };
@@ -3177,7 +3177,8 @@
       if (isBuildConfirmed(cid)) {
         const why = confirmRegressReason(cached);
         let overrode = ""; try { overrode = localStorage.getItem("fh6BuildOKevi:" + baseId(cid)) || ""; } catch (e) {}
-        if (why && why !== overrode) {   // regress on NEW evidence only — 'confirm anyway'/'proceed on baselines' explicitly overrode the standing condition; re-firing on the same one was an infinite ping-pong
+        const normWhy = (s) => String(s).replace(/\d+/g, "#");   // '2 conflicts opened' vs '3 conflicts opened' is the SAME standing condition — exact-string compare revived the ping-pong on every count change
+        if (why && normWhy(why) !== normWhy(overrode)) {   // regress on NEW evidence only — 'confirm anyway'/'proceed on baselines' explicitly overrode the standing condition
           try { localStorage.removeItem(buildConfirmKey(cid)); localStorage.setItem("fh6BuildRegressed:" + baseId(cid), JSON.stringify({ at: Date.now(), why })); } catch (e) {}
           if (live._regrToast !== baseId(cid)) { live._regrToast = baseId(cid); focusToast("⬇ build confirmation regressed — " + why); }
           return `<div class="bcf" style="border-color:#e5414e"><div class="bcf-hd" style="color:#e5414e"><b>⬇ Confirmation regressed</b></div><p class="why" style="font-size:11.5px;margin:2px 0 0">${esc(why)} — tuning advice is locked again until the build re-verifies.</p></div>` + buildConfirmCard(cid, buildConfidence(cached || null));
@@ -4075,18 +4076,21 @@
       // contradiction. Absence of signal (parked, menus, a fresh daemon, a cache miss) never un-checks anything —
       // that was the volatility: the list was a snapshot of flickering inputs, not a ledger of requirements.
       const bcR = buildConfidence(r);
-      const ordL = String(dl.ordinal); const sigL = (typeof buildSigFor === "function" && buildSigFor(ordL)) || (curB0 && curB0.build) || "nosig";
+      const ordL = String(dl.ordinal); const sigL = (curB0 && curB0.build) || "nosig";   // sig from the RENDERED payload, never a live lookup — mixing them latched the clone TARGET's ledger with the WIP build's evidence (split-brain)
+      const ledFrozen = !!(live.cloneTarget && live.cloneTarget.ordinal === +dl.ordinal);   // a frozen target's ledger is read-only: the live car's driving must not earn or destroy ITS latches
       const ledKey = "fh6Ratif:" + ordL + "|" + sigL;
       let led = {}; try { led = JSON.parse(localStorage.getItem(ledKey) || "{}") || {}; } catch (e) {}
       const regrWhy = confirmRegressReason(r);
       const idNowOk = !bcR.hardBlock && !bcR.softNoLive;
-      if (idNowOk) led.identity = { ok: true, at: Date.now(), note: bcR.matchLbl };
-      else if (regrWhy) delete led.identity;   // positive contradiction — everything else keeps the latch
+      if (!ledFrozen) {
+        if (idNowOk) led.identity = { ok: true, at: Date.now(), note: bcR.matchLbl };
+        else if (regrWhy) delete led.identity;   // positive contradiction — everything else keeps the latch
+      }
       const idOk = !!(led.identity && led.identity.ok);
       const piNow = curB0 && curB0.pi != null ? curB0.pi : null;
-      if (piNow != null) led.pi = { v: piNow, at: Date.now() };   // the physical fact "this config's PI is known" does not become false on a cache/hash migration
+      if (!ledFrozen && piNow != null) led.pi = { v: piNow, at: Date.now() };   // the physical fact "this config's PI is known" does not become false on a cache/hash migration
       const piOk = !!(led.pi && led.pi.v != null);
-      try { localStorage.setItem(ledKey, JSON.stringify(led)); } catch (e) {}
+      if (!ledFrozen) { try { localStorage.setItem(ledKey, JSON.stringify(led)); } catch (e) {} }
       const REQS = [
         { k: "identity", ok: idOk, lbl: "build identity verified", act: (bcR.need || [])[0] || "drive up through the gears — the ladder identifies the equipped build", note: idOk && !idNowOk ? "held from your last verified run" : idOk ? (led.identity.note || "") : "" },
         { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: (dl.gear_diag || {}).kind === "fd" ? `gear conflict is a SYSTEMATIC offset (final-drive band) — re-saving cannot change a band-derived value: calibrate the final drive in the 🎯 drawer instead` : `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-save (own) or apply a different tune then re-apply (downloaded), then drive once · 🔗 drawer` },
@@ -5283,11 +5287,12 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const paintDockData = () => {
       const el = document.getElementById("dockData"); if (!el) return;
       const s = dockDataState();
-      if (!s || s.loading) { if (el.innerHTML) el.innerHTML = ""; return; }
+      if (!s || s.loading) { if (el.innerHTML) { el.innerHTML = ""; el.dataset.k = ""; } return; }
       const n = s.none ? 1 : (s.asks || []).length + (s.courseNeeds || []).length;
       // an OPEN CONFLICT outranks "complete": zero asks with disagreeing data is red, not green (found by verify_workflow attr D1)
       const lvl = s.conflict ? "bad" : (s.none || n ? "warn" : "ok");
       const label = s.conflict && !n ? `⚠ ${s.conflict} conflict${s.conflict > 1 ? "s" : ""} open` : s.none ? "apply/save a tune" : n ? `${n} drive${n > 1 ? "s" : ""} needed` : "data complete";   // J1: a menu save is not a "drive"
+      const pk = lvl + "|" + label; if (el.dataset.k === pk) return; el.dataset.k = pk;   // paintDock runs per FRAME — an unconditional rebuild replaced the pill mid-press and ate the click
       el.innerHTML = `<button class="ddata-pill ${lvl}" title="${s.conflict ? "save × telemetry disagree — open the panel / 🔗 drawer" : n ? "live techniques still needed for correct analysis — click for the list" : "all measurable data captured for this car"}"><span class="dot"></span>📡 ${label}</button>`;
       const b = el.querySelector(".ddata-pill"); if (b) b.addEventListener("click", () => { live.dock.panel = live.dock.panel === "data" ? null : "data"; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); });
     };
@@ -5575,9 +5580,10 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       es.addEventListener("loop", (e) => { const d = JSON.parse(e.data); live.loop = d.name ? { name: d.name, lap: d.lap || 0, last_s: null } : null; paintStatus(); });
       es.addEventListener("lap", (e) => { const d = JSON.parse(e.data); if (live.loop) { live.loop = { name: d.loop, lap: d.lap, last_s: d.time_s }; } paintStatus(); });
       es.addEventListener("disk", (e) => {   // daemon pushed a fresh on-disk decode (car change or a new tune save)
-        const d = JSON.parse(e.data); live.diskCache = live.diskCache || {};
+        const d = JSON.parse(e.data); live.diskCache = live.diskCache || {}; live._diskGen = live._diskGen || {};
         const locked = live.cloneTarget && live.cloneTarget.ordinal === +d.ordinal;   // a save on the replica you're building must NOT touch the frozen target
-        live.diskCache[d.ordinal] = d.available ? d : { available: false };            // still cached as the current-build probe
+        const pinned = live.diskPick && live.diskPick[d.ordinal] && String(d.ts) !== String(live.diskPick[d.ordinal]);   // the daemon emits the AUTO match — a manual save-pick must not be clobbered by it
+        if (!pinned) { live.diskCache[d.ordinal] = d.available ? d : { available: false }; live._diskGen[d.ordinal] = (live._diskGen[d.ordinal] || 0) + 1; }   // gen bump: a stale in-flight fetch must not overwrite this fresher decode
         const changed = (!locked && d.available) ? applyDiskTune(d) : false;
         if (!locked && d.available) maybeFocusCourse(d.match, d.ordinal);
         if (!locked && d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save

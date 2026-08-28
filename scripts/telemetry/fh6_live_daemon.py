@@ -12,7 +12,7 @@ Endpoints:  GET /events  (SSE: status / frame ~20 Hz / strip per second / corner
             GET /session.json  (latest auto-analysis)   GET /health
 Dashboard: Telemetry Lab -> Live (EventSource on http://localhost:8765/events)
 """
-import argparse, csv, json, math, os, socket, struct, subprocess, sys, threading, time
+import argparse, csv, glob, json, math, os, socket, struct, subprocess, sys, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -182,6 +182,8 @@ def ingest(p, t_mono):
         if ST.prev_cfg is None or c["cid"] != ST.prev_cfg or ST._ev_edge or ST._force_split or (gap and eff == "course"):
             why = "first drive" if ST.prev_cfg is None else "build change" if c["cid"] != ST.prev_cfg else "event start / finish" if ST._ev_edge else "new run (manual)" if ST._force_split else "menu gap (course mode)"
             ST.stint += 1; ST.stint_start = t_mono; ST._force_split = False; ST._ev_edge = False; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
+            if why == "build change":   # a different cid = a different gearbox may be equipped — the old build's gears must not veto or fingerprint the new one
+                ST.gears_seen.pop(str(c["car"]), None); ST.live_fdg.pop(str(c["car"]), None)
             ST.emit("stint", {"n": ST.stint, "t0": round(t_mono, 1), "id": c["cid"], "why": why}); _save_tags()
         ST._zero_since = None; ST.prev_cfg = c["cid"]
     elif ST._zero_since is None: ST._zero_since = t_mono
@@ -373,7 +375,7 @@ def _session_car_for(sj, ordn, want_cyl=None):
     if want_cyl:
         cyls = [c for c in cands if c.get("cyl") == want_cyl]
         if len(cyls) == 1: return cyls[0]
-        if len(cyls) > 1: return None
+        return None   # >1 same-cyl = ambiguous; 0 = POSITIVE contradiction (every record's cyl differs) — the lone-candidate fallback served the contradicted record anyway
     return cands[0] if len(cands) == 1 else None
 
 
@@ -500,7 +502,12 @@ def _learn_engine_catalog(family, cyl=None, redline=None, peak_hp=None, drivetra
             changed = False
             for k, v in (("cyl", int(cyl) if cyl else None), ("redline", int(redline) if redline else None),
                          ("displacement_l", displacement_l), ("resulting_drivetrain", drivetrain)):
-                if v is not None and rec.get(k) is None:
+                # cyl/redline: verified-OVERWRITE (every caller now passes the identity guard, so a fresh verified
+                # measurement CORRECTS a pre-guard wrong value — fill-only meant a bad cyl blocked its own repair,
+                # since the guard compared live cyl against the catalog's own wrong entry). Others stay fill-only
+                # (resulting_drivetrain conflates conversion state; don't churn it).
+                over = k in ("cyl", "redline")
+                if v is not None and (rec.get(k) is None or (over and rec.get(k) != v)):
                     rec[k] = v; changed = True
             if peak_hp and peak_hp > (rec.get("sample_hp") or 0):
                 rec["sample_hp"] = int(peak_hp); changed = True
@@ -1231,7 +1238,7 @@ class H(BaseHTTPRequestHandler):
                     if fr and now - last_frame_t >= 0.05 and now - lp < 1.0:
                         self.wfile.write(f"event: frame\ndata: {json.dumps(fr)}\n\n".encode()); last_frame_t = now
                     if now - last_status >= 1.0:
-                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'loop': ST.loop and {'name': ST.loop['name'], 'lap': ST.loop_lap, 'last_s': ST.loop_last_s}, 'game': ST.game, 'mode': {'suggest': ST.mode_suggest, 'reason': ST.mode_reason, 'kind': ST.game_kind, 'game': ST.game}, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
+                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'loop': ST.loop and {'name': ST.loop['name'], 'lap': ST.loop_lap, 'last_s': ST.loop_last_s}, 'game': ST.game, 'mode': {'suggest': ST.mode_suggest, 'reason': ST.mode_reason, 'kind': ST.game_kind, 'game': ST.game}, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT), 'clone_lock': ST.clone_lock})}\n\n".encode()); last_status = now   # the PERIODIC event is what live.status actually reads — omitting the lock made the orphan-lock chip unreachable
                     self.wfile.flush(); time.sleep(0.02)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
@@ -1723,6 +1730,28 @@ def disk_watcher():
         except Exception:
             pass
 
+def _compress_old_captures(out_dir):
+    """LOSSLESS retention: gzip capture CSVs older than 3 days (never the live one), oldest first, in the background.
+    Raw captures were growing unbounded (16+ GB found across checkouts) with no policy at all. Reversible: gunzip
+    restores the original byte-for-byte; the analyzer only ever reads the CURRENT session's CSV."""
+    import gzip, shutil
+    try:
+        now = time.time()
+        olds = sorted((p for p in glob.glob(os.path.join(out_dir, "*.csv"))
+                       if now - os.path.getmtime(p) > 3 * 86400 and not os.path.exists(p + ".gz")), key=os.path.getmtime)
+        for p in olds:
+            try:
+                with open(p, "rb") as fi, gzip.open(p + ".gz", "wb", compresslevel=6) as fo:
+                    shutil.copyfileobj(fi, fo, 1 << 20)
+                if os.path.getsize(p + ".gz") > 0:
+                    os.remove(p)
+                    print(f"[retention] compressed {os.path.basename(p)} ({os.path.getsize(p + '.gz') // 1048576} MB gz)")
+            except Exception as e:
+                print(f"[retention] skip {os.path.basename(p)}: {e!r}")
+    except Exception:
+        pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=9876); ap.add_argument("--http", type=int, default=8765)
@@ -1737,6 +1766,7 @@ def main():
     if ST.shots_dirs: print("[shots] serving screenshots from:", " · ".join(ST.shots_dirs))
     if not a.no_csv and not a.replay:
         os.makedirs(a.out, exist_ok=True)
+        threading.Thread(target=_compress_old_captures, args=(a.out,), daemon=True).start()
         ST.csv_path = os.path.join(a.out, f"fh6_{time.strftime('%Y%m%d_%H%M%S')}.csv")
         ST.csv_file = open(ST.csv_path, "w", newline=""); ST.csv_writer = csv.writer(ST.csv_file)
         ST.csv_writer.writerow(["t_wall", "t_mono", "speed_mph", "lat_g", "long_g", "yaw_rate_dps"] + [f"TireTempC{w}" for w in W] + FIELDS)

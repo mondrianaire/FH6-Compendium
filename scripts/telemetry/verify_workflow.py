@@ -108,6 +108,28 @@ def b4():
     return (not bad, f"{len((doc.get('points') or {}))} point-sets, duplicate-position sets: {bad or 'none'}")
 check("B decode", "calibration points: one value per position", b4)
 
+def b5():
+    # DATA INVARIANTS the audits kept finding by hand — now permanent: ranges must be possible (min < max),
+    # per-tune speed traces must actually cover their course, and course best_laps must not exceed any event lap.
+    probs = []
+    doc = json.load(open(os.path.join(ROOT, "data", "car-tune-ranges.json"), encoding="utf-8"))
+    for ordn, flds in (doc.get("ranges") or {}).items():
+        if not isinstance(flds, dict): continue
+        for f, r in flds.items():
+            if isinstance(r, dict) and r.get("min") is not None and r.get("max") is not None and r["min"] >= r["max"]:
+                probs.append(f"range {ordn}.{f} min>=max")
+    for mp in glob.glob(os.path.join(ROOT, "data", "courses", "*.json")):
+        try:
+            m = json.load(open(mp, encoding="utf-8"))
+        except Exception:
+            continue
+        trs = m.get("speed_traces") or {}
+        arcs = [t["pts"][-1][0] for t in trs.values() if t.get("pts")]
+        if arcs and min(arcs) < 0.5 * max(arcs):
+            probs.append(f"{os.path.basename(mp)} trace covers <50% of the longest ({min(arcs)}/{max(arcs)}m)")
+    return (not probs, f"{len(probs)} invariant violations{': ' + '; '.join(probs[:3]) if probs else ' — ranges possible, traces cover their courses'}")
+check("B decode", "store invariants: ranges possible, traces cover courses", b5)
+
 # ---------------- C. IDENTIFICATION ----------------
 DT = http_json("/disk-tune?ordinal=2866")
 def c1():

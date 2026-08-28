@@ -688,11 +688,12 @@ def main():
         else: i += 1
     sess["corners"] = corners
     # each car's measured GRIP (90th-pct peak lateral g over its non-drift corners) — the car-dependent factor that lets course geometry transfer between cars
-    car_grip = {}
+    car_grip = {}; car_grip_src = {}
     for k_ in cars:
         gs = sorted(x["lat_g_peak"] for x in corners if x["car"] == k_ and not x["drift"] and x.get("ev"))   # J14: grip from committed on-course corners — free-roam cruising drags the 90th percentile down
-        if len(gs) < 5: gs = sorted(x["lat_g_peak"] for x in corners if x["car"] == k_ and not x["drift"])   # too few on-course samples yet — fall back to everything rather than report nothing
-        if len(gs) >= 5: car_grip[k_] = round(gs[int(0.9 * (len(gs) - 1))], 2)
+        _src = "ev"
+        if len(gs) < 5: gs = sorted(x["lat_g_peak"] for x in corners if x["car"] == k_ and not x["drift"]); _src = "fallback"   # too few on-course samples yet — fall back to everything rather than report nothing
+        if len(gs) >= 5: car_grip[k_] = round(gs[int(0.9 * (len(gs) - 1))], 2); car_grip_src[k_] = _src
     for k_, c_ in cars.items(): c_["grip_g"] = car_grip.get(k_)
 
     # ---- launches ----
@@ -1104,7 +1105,16 @@ def main():
         geo = None
         full_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
         if full_laps:
-            ref_w = max(full_laps, key=lambda w: sum(1 for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]))
+            # ref lap = the FASTEST lap of TYPICAL length (median arc consensus). 'Most rows' picked the SLOWEST lap
+            # — and a rejoin/crawl lap: its loop showed up as phantom mapped turns and crawl speed_ref values.
+            def _rows_in(w): return sum(1 for r in loop_rows if w["t0"] <= r["t"] <= w["t1"])
+            _cand = sorted(full_laps, key=lambda w: -_rows_in(w))[:8]
+            _arcs = {}
+            for w in _cand:
+                pcs0 = resample(lap_pts(w)); _arcs[id(w)] = sum(pc[-1][2] for pc in pcs0) if pcs0 else 0
+            _amed = sorted(_arcs.values())[len(_arcs) // 2] if _arcs else 0
+            _typ = [w for w in _cand if _amed and abs(_arcs[id(w)] - _amed) <= 0.1 * _amed] or _cand
+            ref_w = min(_typ, key=_rows_in)
             pieces = resample(lap_pts(ref_w)); P = [p for pc in pieces for p in pc]
             if len(P) >= 20:
                 thr = 1.0 / 250.0; gturns = []; off = 0; piece_of = {}
@@ -1200,13 +1210,20 @@ def main():
             if cl["presence"] >= 0.5: return True
             tp, ts = track_pres(cl); return tp >= 0.4 and ts >= 2   # established across >= 2 sessions on >= 40% of all track laps
         strong = [cl for cl in clusters if is_turn(cl)]; weak = [cl for cl in clusters if not is_turn(cl)]; possible = []
-        for cl in weak:   # a low-presence cluster within 80 m (along the route) of a strong turn is a FRAGMENT of it — absorbed; otherwise a 'possible' turn
-            d_cl = med([m["dist"] for m in cl["members"]]) or 0
-            near = min(strong, key=lambda s_: abs((med([m["dist"] for m in s_["members"]]) or 0) - d_cl), default=None)
-            if near is not None and abs((med([m["dist"] for m in near["members"]]) or 0) - d_cl) <= 80: near["members"] = near["members"] + cl["members"]; near["absorbed"] = near.get("absorbed", 0) + len(cl["members"])
+        for cl in weak:   # a low-presence cluster within 80 m (POSITION) of a strong turn is a FRAGMENT of it — absorbed; otherwise a 'possible' turn.
+            # POSITIONAL, not odometer: dist is cumulative ACROSS laps (and resets on restart), so median-dist deltas
+            # encoded 'which lap', not 'where on the route' — same-corner fragments missed the 80 m gate on multi-lap
+            # circuits and cross-lap coincidences absorbed fragments into distant corners.
+            near = min(strong, key=lambda s_: (s_["x"] - cl["x"]) ** 2 + (s_["z"] - cl["z"]) ** 2, default=None)
+            if near is not None and (near["x"] - cl["x"]) ** 2 + (near["z"] - cl["z"]) ** 2 <= 80 ** 2: near["members"] = near["members"] + cl["members"]; near["absorbed"] = near.get("absorbed", 0) + len(cl["members"])
             else: possible.append(cl)
         for cl in strong: lap_stats(cl)
-        strong.sort(key=lambda cl: med([m["dist"] for m in cl["members"]]) or 0); possible.sort(key=lambda cl: med([m["dist"] for m in cl["members"]]) or 0)
+        def _route_pos(cl):   # route order from the cluster's EARLIEST lap's odometer — cross-lap medians interleave wrongly
+            lm = [(lapmap.get(id(m)), m["dist"]) for m in cl["members"] if lapmap.get(id(m)) is not None]
+            if not lm: return med([m["dist"] for m in cl["members"]]) or 0
+            l0 = min(x[0] for x in lm)
+            return med([d for l, d in lm if l == l0]) or 0
+        strong.sort(key=_route_pos); possible.sort(key=_route_pos)
         for i, cl in enumerate(strong, 1): cl["cid"] = f"C{i}"; cl["status"] = "turn"
         for i, cl in enumerate(possible, 1): cl["cid"] = f"?{i}"; cl["status"] = "possible"
         clusters = strong + possible
@@ -1314,7 +1331,7 @@ def main():
             mb = ((mt or {}).get("best_by_car") or {}).get(car_l)
             if mb and (ref is None or (mb.get("mph_min") or 0) >= (ref.get("mph_min") or 0)) and mb.get("session") != sid: ref = mb; ref_src = f"session {mb.get('session')} · same car"
             predicted = False
-            if (ref is None or len(same) <= 1) and mb is None and mt and mt.get("radius_m") and car_grip.get(car_l):
+            if (ref is None or len(same) <= 1) and mb is None and mt and mt.get("radius_m") and car_grip.get(car_l) and car_grip_src.get(car_l) == "ev":   # cruise-fallback grip mints implausibly slow predicted refs a mediocre pass then 'beats' — predict only from committed on-course grip
                 v = math.sqrt(car_grip[car_l] * 9.81 * mt["radius_m"]) * 2.237   # course LEARNING transfers geometry; the apex speed is predicted from THIS car's measured grip
                 ref = {"mph_in": None, "mph_min": round(v), "mph_out": None, "brake_on_m": None, "throttle_on_m": None, "apex": mt.get("pos"), "predicted": True, "session": None}
                 ref_src = f"predicted — course geometry (r≈{mt['radius_m']} m) × this car's grip ({car_grip[car_l]} g)"; predicted = True
@@ -1342,7 +1359,8 @@ def main():
             elif ref and len(same) == 1: advice = "first pass of this car here — becomes its reference; drive it again to compare"
             # update the persistent model with this session's turn
             if mt is None:
-                mt = {"id": f"T{len(model['turns']) + 1}", "pos": [round(cl["x"]), round(cl["z"])], "dir": None, "type": None, "radius_m": None, "n": 0, "best": None, "sessions": 0}; model["turns"].append(mt)
+                mt = {"id": f"T{len(model['turns']) + 1}", "pos": [round(cl["x"]), round(cl["z"])], "dir": None, "type": None, "radius_m": None, "n": 0, "best": None, "sessions": 0}
+                if cl.get("status") == "turn": model["turns"].append(mt)   # 'possible' clusters no longer mint PERSISTENT model turns — noise accumulated forever and shifted later T-numbers; they persist only once they establish
             mt["pos"] = [round(cl["x"]), round(cl["z"])]; mt["dir"] = max(("L", "R"), key=lambda d: sum(1 for m in ms if m["dir"] == d)); mt["n"] = mt.get("n", 0) + nn
             mt["type"] = "hairpin" if (med([m["mph_min"] for m in ms]) or 0) < 45 else "fast" if (med([m["mph_min"] for m in ms]) or 0) > 85 else "medium"
             mt["radius_m"] = med([m.get("radius_m") for m in ms if m.get("radius_m")]) or mt.get("radius_m")
@@ -1448,7 +1466,10 @@ def main():
         if expected:
             miss = est_count - expected
             turns_info["note"] = (f"you declared {expected} turns · {est_count} established across {model['laps']} laps/{len(model['sessions'])} sessions" + (" — match ✓" if miss == 0 else f" · {abs(miss)} {'extra detected — likely fragments, keep lapping to settle' if miss > 0 else 'still to confirm'}" + (f"; {len(near)} more nearly established" if miss < 0 and near else "")) + (f" · {', '.join(messy)} split into several detections (drive as one arc)" if messy else ""))
-        if profile and (not model.get("profile") or total_laps >= (model.get("profile_laps") or 0)): model["profile"] = profile; model["profile_laps"] = total_laps; model["profile_session"] = sid
+        _max_ev_d = max((e.get("distance_m") or 0) for e in evs) if evs else 0
+        _geo_len = ((model.get("geometry") or {}).get("length_m") or 0)
+        if profile and (not model.get("profile") or (total_laps >= (model.get("profile_laps") or 0) and (not _geo_len or _max_ev_d >= 0.6 * _geo_len))):
+            model["profile"] = profile; model["profile_laps"] = total_laps; model["profile_session"] = sid   # sector-restart partials count as 'laps' — a session of stubs must not overwrite a full-run profile (distance guard)
         model["updated"] = sid; model["name"] = co["name"] or model.get("name")
         bl = model.get("best_laps") or {}; overall = (min(bl.values(), key=lambda b_: b_["best_lap"]) if bl else None)
         track = {"name": model.get("name"), "laps": model["laps"], "sessions": len(model["sessions"]), "attempts": sum(v.get("attempts", 0) for v in model["visits"]),

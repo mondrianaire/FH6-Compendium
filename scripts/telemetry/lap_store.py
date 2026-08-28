@@ -117,17 +117,24 @@ def get_laps(root, route_key, cls=None, competitive_only=True, limit=400):
     for r in rows:                                  # legacy rows predate the columns; normalise once, up front
         r["impacts"] = int(r.get("impacts") or 0)
         r["void"] = bool(r.get("void"))
+    # A PARTIAL LAP IS NOT A FAST LAP. Coverage must be judged against the COURSE, not against whatever this
+    # session happened to drive: a 492 m window on a 1030 m circuit is correctly timed at 15.09 s and 72.9 mph,
+    # but as a reference best it makes every real 30 s lap 200% off, and one route dropped to a single
+    # "competitive" lap out of 84. The route's own median arc IS the course length -- no caller has to say so.
+    _arcs = sorted(r["arc_m"] for r in rows if r.get("arc_m"))
+    full = (_arcs[len(_arcs) // 2] * 0.9) if _arcs else 0
     best = {}
     for r in rows:
         t = r.get("lap_s")
+        r["partial"] = bool(full and (r.get("arc_m") or 0) < full)
         # a void time can never define the reference: it was set with contact, and the 107% rule measured
-        # against it would mis-rate every clean lap the build has ever set here.
-        if t and not r["void"] and (r["cid"] not in best or t < best[r["cid"]]):
+        # against it would mis-rate every clean lap the build has ever set here. Nor can a partial lap.
+        if t and not r["void"] and not r["partial"] and (r["cid"] not in best or t < best[r["cid"]]):
             best[r["cid"]] = t
     out = []
     for r in rows:
         ref = best.get(r["cid"])
-        r["competitive"] = bool(r.get("lap_s") and ref and not r["void"] and r["lap_s"] <= ref * COMPETITIVE)
+        r["competitive"] = bool(r.get("lap_s") and ref and not r["void"] and not r["partial"] and r["lap_s"] <= ref * COMPETITIVE)
         r["pct_off"] = round((r["lap_s"] / ref - 1) * 100, 1) if (r.get("lap_s") and ref) else None
         try:
             r["pts"] = json.loads(r["pts"])

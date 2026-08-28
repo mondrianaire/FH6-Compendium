@@ -1753,9 +1753,14 @@ def main():
             # only the road it saw) — borrow the model's geometry when it covers MORE ROAD. This used to borrow
             # whichever had MORE TURNS, which is not a measure of coverage: turns are a function of the path, so a
             # superseded over-detecting map always won and re-infected every new session with its extra corners.
+            # Coverage and detector output are NOT the same thing, and gating both on det stranded every thin session
+            # on the 24 models still stamped det=None: they borrowed nothing and drew only the road they saw. A
+            # superseded detector does not make the ROAD wrong, so the path/length is borrowed on coverage alone;
+            # TURNS are the detector's output, so they stay behind the det gate — that was the real intent.
             bestg = model["geometry"]
-            if bestg.get("det") == DET_VER and len(bestg.get("path") or []) > len(geo.get("path") or []):
-                geo["turns"] = bestg["turns"]; geo["paths"] = bestg.get("paths"); geo["path"] = bestg.get("path"); geo["length_m"] = bestg.get("length_m"); geo["from_model"] = True
+            if len(bestg.get("path") or []) > len(geo.get("path") or []):
+                geo["paths"] = bestg.get("paths"); geo["path"] = bestg.get("path"); geo["length_m"] = bestg.get("length_m"); geo["from_model"] = True
+                if bestg.get("det") == DET_VER: geo["turns"] = bestg["turns"]
             geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing
             _sc = shape_confidence(geo.get("path"), layout)   # SHAPE confidence: do the recorded laps trace the same outline? (rides on turns -> reaches the live push, unlike geometry)
             if _sc:

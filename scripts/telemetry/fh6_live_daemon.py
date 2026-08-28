@@ -18,6 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from fh6_dataout_capture import FH_FMT, FIELDS, W, decode  # noqa: E402
+import lap_store  # noqa: E402  — the per-lap history store (data/laps.db); the daemon only ever READS it
 try:
     import fh6_tune_decode as TUNE  # on-disk tune reader (stdlib); optional
 except Exception:
@@ -1217,6 +1218,58 @@ def _livery_strings(path, max_strings=3):
     return out
 
 
+def _lap_class_counts(route_key):
+    """How many laps this route holds per class — ALWAYS every class, even when the caller filtered to one,
+    because the UI can only offer a class switch if it knows which other classes exist. A separate GROUP BY
+    rather than a count over get_laps(): a class-filtered read sees one class, and the competitive filter
+    truncates. Opened mode=ro — the analyzer owns the writes, this process must never create or touch the db."""
+    p = lap_store.db_path(ROOT)
+    if not os.path.exists(p):
+        return {}
+    try:
+        import sqlite3 as _sq
+        cx = _sq.connect("file:" + p.replace("\\", "/") + "?mode=ro", uri=True, timeout=5)
+        try:
+            rows = cx.execute("SELECT class, COUNT(*) FROM lap_traces WHERE route_key=? GROUP BY class", (route_key,)).fetchall()
+        finally:
+            cx.close()
+        return {str(c): n for c, n in rows if c}
+    except Exception:
+        return {}
+
+
+def _laps_payload(route_key, cls=None, limit=40, competitive_only=True, cap=200):
+    """Historical laps for one course, contract-shaped for the dashboard. READ-ONLY over data/laps.db.
+
+    pts is downsampled to `cap` points per lap: at ~26 bytes a point an unthinned 40-lap answer is 600 KB of
+    coordinates no 560 px trace can resolve, and shipping it stalls the repaint. Ceil division so the result
+    lands AT or under the cap (floor division overshoots: 599 // 200 = 2 keeps 300 points), and the last point
+    is forced back in — the finish line is the one sample a strided walk almost always misses.
+    """
+    out = {"route_key": route_key, "class": cls or None, "n": 0, "laps": [], "best": None,
+           "by_class": _lap_class_counts(route_key) if route_key else {}}
+    if not route_key:
+        return out
+    try:
+        rows = lap_store.get_laps(ROOT, route_key, cls=cls or None, competitive_only=competitive_only, limit=limit)
+    except Exception:
+        return out   # a locked/half-written db must answer empty, not 500 — the course view renders around it
+    for r in rows:
+        pts = r.get("pts") or []
+        if len(pts) > cap:
+            last = pts[-1]
+            pts = pts[::max(1, -(-len(pts) // cap))]
+            pts[-1] = last
+        out["laps"].append({"cid": r.get("cid"), "build_id": r.get("build_id"), "class": r.get("class"),
+                            "pi": r.get("pi"), "drivetrain": r.get("drivetrain"), "lap_s": r.get("lap_s"),
+                            "pct_off": r.get("pct_off"), "competitive": r.get("competitive"),
+                            "solo": r.get("solo"), "session": r.get("session"), "t0": r.get("t0"), "pts": pts})
+    out["n"] = len(out["laps"])
+    fastest = next((l for l in out["laps"] if l["lap_s"]), None)   # get_laps sorts fastest-first
+    out["best"] = {"lap_s": fastest["lap_s"], "cid": fastest["cid"]} if fastest else None
+    return out
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
     def _cors(self):
@@ -1250,6 +1303,14 @@ class H(BaseHTTPRequestHandler):
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/session.json"):
             body = json.dumps(ST.session_json or {}).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/laps"):   # every lap ever driven on one course — the historical traces the course view overlays
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+            rk = (q.get("route_key") or [""])[0]   # parse_qs already unquotes, so "loop:<name>" keys arrive intact
+            cls = (q.get("class") or [""])[0]      # optional: omit for every class
+            try: lim = max(1, min(200, int((q.get("limit") or ["40"])[0])))
+            except Exception: lim = 40
+            body = json.dumps(_laps_payload(rk, cls, lim, competitive_only=(q.get("all") or ["0"])[0] not in ("1", "true"))).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/health"):
             with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None)), "clone_lock": ST.clone_lock}).encode()   # the lock GATES stamping/accrual — an invisible lock silently blocked both after a reload

@@ -3298,11 +3298,13 @@
       if (training) return `${courseHdr}${courseIdRow(curCar)}${carBanner}${courseHero(p, co)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${turnByTurnSection(co, tuneUnlocked)}
+        ${p.history}
         ${speedTracesCard(co, curCar)}
         ${learnPanel}
         <div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`;
       return `${courseHdr}${courseIdRow(curCar)}${carBanner}${courseHero(p, co)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
         ${turnByTurnSection(co, tuneUnlocked)}
+        ${p.history}
         ${speedTracesCard(co, curCar)}
         <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
     };
@@ -4580,7 +4582,11 @@
           est = est.slice().sort((a, b) => ((b.track || {}).presence || 0) - ((a.track || {}).presence || 0)).slice(0, m.expected_turns)
                    .sort((a, b) => m.turns.indexOf(a) - m.turns.indexOf(b));
         }
-        rows = est.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m, type: t.type, track: t.track || null, best_by_car: t.best_by_car || null }));
+        // est_by / geo_sessions / model_sessions ride along so the turn HISTORY panel reads the same rows the map and
+        // the turn cards do — one turn table, not a parallel one. model_sessions, not sessions: the canonical merge
+        // below overwrites `sessions` with the session's own (possibly undefined) count.
+        rows = est.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m, type: t.type, track: t.track || null, best_by_car: t.best_by_car || null,
+          est_by: t.est_by || null, geo_sessions: t.geo_sessions != null ? t.geo_sessions : null, geo_mapped: !!t.geo_mapped, model_sessions: t.sessions != null ? t.sessions : null }));
       }
       const canon = tu.canonical || [];
       if (canon.length) {   // the session sees the SAME model, fresher than db.js — it wins, keeping the model's extra fields where they line up
@@ -4949,11 +4955,49 @@
     // (livery thumb + PI badge); turn ticks speak the map's T-number language. YOUR tune is the blue emphasized line.
     const _traceCls = (curCar) => { const fp = (live.frame && live.frame.on && live.frame.cls) || null; if (fp) return fp; const pi = curCar ? +String(curCar).split("|")[3] : NaN; return isFinite(pi) ? CLS_OF_PI(pi) : null; };
     const _traceEntries = (co, curCls) => Object.entries(co.speed_traces || {}).map(([c2, t]) => Object.assign({ cid: c2, cls: t.class || CLS_OF_PI(t.pi) }, t)).filter((t) => t.pts && t.pts.length > 2 && (!curCls || t.cls === curCls));
+    // ---- HISTORICAL LAPS — every lap of this course ever recorded (the daemon's /laps over data/laps.db), class-scoped.
+    // The model's speed_traces hold at most one lap per tune; this is the whole record behind them. The endpoint is
+    // NEW: an older daemon 404s it. Every failure caches an EMPTY result, so the overlay simply never appears — a
+    // course view that loses its map because a fetch threw is a far worse outcome than one without history.
+    live.laps = live.laps || {}; live.lapsCls = live.lapsCls || {};
+    const lapsKey = (rk, cls) => String(rk) + "|" + (cls || "");
+    const fetchLaps = (rk, cls) => { try {
+      if (!rk || !live.connected) return null;
+      const k = lapsKey(rk, cls), have = live.laps[k];
+      if (have && Date.now() - have.at < 120000) return have;   // self-throttled: paintSections runs on every analysis
+      live._lapsIn = live._lapsIn || {}; if (live._lapsIn[k]) return have || null;
+      live._lapsIn[k] = 1;
+      fetch(liveUrl + "/laps?route_key=" + encodeURIComponent(rk) + (cls ? "&class=" + encodeURIComponent(cls) : "") + "&limit=40")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((js) => { live.laps[k] = { at: Date.now(), laps: (js && js.laps) || [], by_class: (js && js.by_class) || {}, best: (js && js.best) || null }; delete live._lapsIn[k];
+          if (live.laps[k].laps.length) paintSections(); })   // repaint only when there is something new to draw
+        .catch(() => { live.laps[k] = { at: Date.now(), laps: [], by_class: {}, best: null }; delete live._lapsIn[k]; });
+      return have || null;
+    } catch (e) { return null; } };
+    // the class the traces are scoped to: the user's switch wins, else the live car's class, else every class
+    const traceClsFor = (co, curCar) => { const rk = co && co.route_key; const ov = rk ? live.lapsCls[rk] : undefined; return ov !== undefined ? (ov || null) : (_traceCls(curCar) || null); };
     const speedTracesCard = (co, curCar) => { try {
-      const st = co.speed_traces; if (!st || !Object.keys(st).length) return "";
-      const curCls = _traceCls(curCar);
-      const match = _traceEntries(co, curCls);
-      if (!match.length) { const have = [...new Set(Object.values(st).map((t) => t.class || CLS_OF_PI(t.pi)).filter(Boolean))]; return `<div class="lab-corner" style="border-left:4px solid var(--muted);font-size:11.5px"><b>📈 Speed traces</b> <span class="why">no saved trace for ${curCls ? "class " + esc(curCls) : "this class"} on this circuit yet — a clean best lap saves one per tune automatically${have.length ? " · traces exist for class " + have.map(esc).join(", ") : ""}</span></div>`; }
+      const st = co.speed_traces || {}; const rk = co.route_key || null;
+      const curCls = traceClsFor(co, curCar);
+      const hist = fetchLaps(rk, curCls);   // lazily kicked from the render, exactly like the disk-tune read on the identity row
+      const byCls = (hist && hist.by_class) || {};
+      // the class switch is driven by what the DATABASE actually holds — never a fixed list of classes
+      const clsRow = (() => { const ks = Object.keys(byCls).filter((c2) => byCls[c2]); if (!rk || !ks.length) return "";
+        const chip = (v, lab, n) => `<span class="chip" data-lapscls="${esc(rk)}|${esc(v)}" style="cursor:pointer;${(curCls || "") === v ? "border-color:var(--accent);color:var(--accent)" : "color:var(--muted)"}">${esc(lab)}${n != null ? " · " + n : ""}</span>`;
+        return `<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:5px 0 2px"><span class="why" style="font-size:10px">laps on record:</span>${ks.sort().map((c2) => chip(c2, c2, byCls[c2])).join("")}${chip("", "every class", ks.reduce((a, c2) => a + byCls[c2], 0))}</div>`;
+      })();
+      const saved = _traceEntries(co, curCls);
+      // a recorded lap and a saved trace can be the SAME lap — the saved one wins, it carries the tune identity
+      const seen = new Set(saved.map((t) => t.cid + "|" + (t.lap_s != null ? t.lap_s.toFixed(2) : "")));
+      const recs = ((hist && hist.laps) || []).filter((l) => l && l.pts && l.pts.length > 2)
+        .map((l) => ({ cid: l.cid, cls: l.class || CLS_OF_PI(l.pi), pts: l.pts, lap_s: l.lap_s, pi: l.pi, build_id: l.build_id, session: l.session, pct_off: l.pct_off, hist: true }))
+        .filter((l) => (!curCls || l.cls === curCls) && !seen.has(l.cid + "|" + (l.lap_s != null ? l.lap_s.toFixed(2) : "")));
+      const match = saved.concat(recs);
+      if (!match.length) {
+        if (!Object.keys(st).length && !Object.keys(byCls).length) return "";   // nothing on record for this course at all — stay silent
+        const have = [...new Set(Object.values(st).map((t) => t.class || CLS_OF_PI(t.pi)).filter(Boolean))];
+        return `<div class="lab-corner" style="border-left:4px solid var(--muted);font-size:11.5px"><b>📈 Speed traces</b> <span class="why">no lap for ${curCls ? "class " + esc(curCls) : "this class"} on this circuit yet — a clean best lap saves one per tune automatically${have.length ? " · traces exist for class " + have.map(esc).join(", ") : ""}</span>${clsRow}</div>`;
+      }
       match.sort((a, b) => (a.lap_s || 9e9) - (b.lap_s || 9e9));
       const smax = Math.max(...match.map((t) => t.pts[t.pts.length - 1][0])); if (!smax) return "";
       const vmax = Math.max(...match.flatMap((t) => t.pts.map((p) => p[1]))) * 1.06 || 1;
@@ -4968,7 +5012,9 @@
         segs.push([st, run]);
         return segs.map(([s2, pts2]) => `<polyline fill="none" stroke="${gripCol(s2)}" stroke-width="${s2 ? w2 + 0.8 : w2}" stroke-linecap="round" opacity="${s2 ? 1 : 0.85}" points="${pts2.map((p) => `${px2(p[0]).toFixed(1)},${py2(p[1]).toFixed(1)}`).join(" ")}"><title>${esc(gripOf(s2).axle)}</title></polyline>`).join("");
       };
-      const isCur = (t) => !!curCar && t.cid === curCar; const best = match[0]; const cur = match.find(isCur);
+      // ONE line is yours: your FASTEST lap here. The rest of your own laps stay faint context — grip-painting every
+      // one of them would repaint the whole chart in state colours and drown the comparison.
+      const best = match[0]; const cur = curCar ? match.find((t) => t.cid === curCar) : null; const isCur = (t) => t === cur;
       const geo = courseGeoFor(co); const canon2 = ((co.turns || {}).canonical) || [];
       const tkLbl = (g2) => { let bi = -1, bd = 60 * 60; canon2.forEach((t2, i2) => { const d2 = (t2.pos[0] - g2.apex[0]) ** 2 + (t2.pos[1] - g2.apex[1]) ** 2; if (d2 < bd) { bd = d2; bi = i2; } }); return bi >= 0 ? "T" + (bi + 1) : "·"; };   // THIS course's T-numbers, not courses[0]'s
       const ticks = ((geo && geo.turns) || []).filter((g2) => g2.s != null && g2.apex).map((g2) => `<line x1="${px2(g2.s).toFixed(1)}" y1="${H2 - padB}" x2="${px2(g2.s).toFixed(1)}" y2="8" stroke="var(--line)" opacity=".55"/><text x="${px2(g2.s).toFixed(1)}" y="${H2 - 4}" text-anchor="middle" font-size="8" fill="var(--muted)">${tkLbl(g2)}</text>`).join("");
@@ -4976,8 +5022,10 @@
       // rivals: plain lines (comparison). YOUR tune: grip-painted, because that is the one you can act on.
       const lines = match.map((t) => (isCur(t) ? "" : line(t, t === best ? "#00d27a" : "var(--muted)", t === best ? 1.8 : 1.1, t === best ? 0.9 : 0.45))).join("") + (cur ? gripLine(cur, 2.4) : "");
       const hasGrip = !!(cur && cur.pts && cur.pts[0] && cur.pts[0].length > 2);
-      const leg = match.slice(0, 6).map((t) => `<span class="chip" title="${esc((t.session || "") + (t.build_id ? " · build " + t.build_id : ""))}" style="border-color:${isCur(t) ? "var(--accent2)" : t === best ? "#00d27a" : "var(--line)"};${isCur(t) || t === best ? "" : "color:var(--muted)"}">${buildThumb(String(t.cid).split("|")[0], t.build_id, true)} ${piBadge(t.cls, t.pi, true)}${t.lap_s ? ` · ${t.lap_s.toFixed(1)} s` : ""}${isCur(t) ? " · you" : t === best ? " · fastest" : ""}</span>`).join("");
-      return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces — class ${esc(curCls || "all")} on this circuit</strong><span class="why" style="font-size:10.5px">${match.length} saved tune${match.length === 1 ? "" : "s"} · each tune's best lap · mph vs distance</span></div>
+      // pct_off is the ONE number that makes a faint context line legible: how far off ITS OWN tune's best it was.
+      const leg = match.slice(0, 8).map((t) => `<span class="chip" title="${esc((t.session || "") + (t.build_id ? " · build " + t.build_id : "") + (t.hist ? " · recorded lap" : " · saved trace"))}" style="border-color:${isCur(t) ? "var(--accent2)" : t === best ? "#00d27a" : "var(--line)"};${isCur(t) || t === best ? "" : "color:var(--muted)"}">${buildThumb(String(t.cid).split("|")[0], t.build_id, true)} ${piBadge(t.cls, t.pi, true)}${t.lap_s ? ` · ${t.lap_s.toFixed(1)} s` : ""}${t.pct_off ? ` <span style="opacity:.75">+${t.pct_off.toFixed(1)}%</span>` : ""}${isCur(t) ? " · you" : t === best ? " · fastest" : ""}</span>`).join("") + (match.length > 8 ? `<span class="chip" style="color:var(--muted)">+${match.length - 8} more</span>` : "");
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces — class ${esc(curCls || "all")} on this circuit</strong><span class="why" style="font-size:10.5px">${match.length} lap${match.length === 1 ? "" : "s"}${recs.length ? ` (${saved.length} saved tune${saved.length === 1 ? "" : "s"} + ${recs.length} from the lap record)` : " · each tune's best lap"} · mph vs distance</span></div>
+        ${clsRow}
         <div style="overflow-x:auto"><svg class="spd-trace" viewBox="0 0 ${W2} ${H2}" style="min-width:420px;max-width:100%;background:var(--bg);border-radius:8px"
              data-smax="${smax}" data-padl="${padL}" data-w="${W2}" data-h="${H2}"
              data-pts="${hasGrip ? esc(JSON.stringify(cur.pts.map((p) => [p[0], p[1], p[2], p[3], p[4]]))) : ""}">${axis}${ticks}${lines}
@@ -4989,7 +5037,7 @@
     const turnTraceStrip = (co, tpos, curCar) => { try {
       if (!co.speed_traces || !tpos) return ""; const geo = courseGeoFor(co);
       const gt = ((geo && geo.turns) || []).find((g2) => g2.apex && g2.s != null && ((g2.apex[0] - tpos[0]) ** 2 + (g2.apex[1] - tpos[1]) ** 2) <= 45 * 45); if (!gt) return "";
-      const curCls = _traceCls(curCar); const entries = _traceEntries(co, curCls); if (!entries.length) return "";
+      const curCls = traceClsFor(co, curCar); const entries = _traceEntries(co, curCls); if (!entries.length) return "";
       const s0 = Math.max(0, gt.s - 120), s1 = gt.s + 180;
       const segs = entries.map((t) => ({ t, pts: t.pts.filter((p) => p[0] >= s0 && p[0] <= s1) })).filter((x) => x.pts.length > 2); if (!segs.length) return "";
       const vmax = Math.max(...segs.flatMap((x) => x.pts.map((p) => p[1]))) * 1.08 || 1; const W3 = 240, H3 = 74;
@@ -5154,6 +5202,30 @@
         <div class="why" style="font-size:10.5px;margin:2px 0 6px">each turn's 5 phases coloured by grip · <span style="color:#2f81f7">■</span> understeer · <span style="color:#e5414e">■</span> oversteer · <span style="color:#d95926">■</span> both · <span style="color:#00d27a">■</span> ok · ⚑ where the trouble starts · 🔧 setup helps / 🧑 it's speed, not setup</div>
         <div class="ft-grid">${cards}</div></div>`;
     };
+    // ---- HISTORICAL TURN RECORD — what the DATABASE knows about this course's turns, independent of this session.
+    // A turn earns its place either from the curvature of the recorded path (geometry) or from how the car behaved
+    // through it lap after lap (behaviour); that provenance, the sessions behind it and its running pass/presence
+    // tally are all already in the course model, so this panel fills in the moment a course is identified — before
+    // a single turn has been driven in the current session.
+    const EST_BY = { geometry: ["📐 geometry", "var(--accent2)", "read from the curvature of the recorded path"], behaviour: ["🖐 behaviour", "#e3b341", "established from how the car behaved through it, lap after lap"], "geometry+driven": ["📐+🖐 both", "#00d27a", "curvature and driving behaviour agree on this turn"] };
+    const LIM_W = { tune: "🔧 tune", driver: "🧑 driver", mixed: "◐ mixed", clean: "✓ clean" };
+    const turnHistoryCard = (co) => { try {
+      const T = turnTable(co); const rows = T.turns.filter((t) => (t.track && t.track.passes) || t.est_by || t.geo_sessions != null);
+      if (!rows.length) return "";   // a course with no cross-session record yet says nothing rather than showing an empty table
+      const nSess = Math.max(0, ...rows.map((t) => (t.track || {}).sessions || 0)), lapsTrack = Math.max(0, ...rows.map((t) => (t.track || {}).laps_track || 0));
+      const estOf = (t) => t.est_by || (t.geo_mapped ? "geometry" : ((t.track || {}).passes ? "behaviour" : null));
+      const nGeo = rows.filter((t) => String(estOf(t) || "").indexOf("geometry") === 0).length;
+      // models written before est_by existed carry no provenance — infer it and mark the inference with ≈, never silently
+      const estCell = (t) => { const k = estOf(t); if (!k) return `<span class="why">—</span>`; const e = EST_BY[k] || [esc(k), "var(--muted)", ""];
+        return `<span class="chip" style="border-color:${e[1]};color:${e[1]}" title="${esc(e[2])}${t.est_by ? "" : " — inferred: this course model predates the provenance record"}">${e[0]}${t.est_by ? "" : " ≈"}</span>`; };
+      const body = rows.map((t) => { const k = t.track || {}; const ax = gripFromAxle(k.dominant); const pr = k.presence;
+        return `<tr><td style="white-space:nowrap"><b>T${t.n}</b> ${t.dir === "L" ? "⬅" : "➡"}${t.radius_m ? ` <span class="why">r≈${Math.round(t.radius_m)} m</span>` : ""}</td><td>${estCell(t)}</td><td>${t.geo_sessions != null ? t.geo_sessions : "—"}</td><td>${k.sessions || t.model_sessions || "—"}</td><td style="white-space:nowrap">${pr != null ? `<div class="lab-bar" style="width:54px;display:inline-block;vertical-align:middle"><i style="width:${Math.round(pr * 100)}%;background:${pr >= 0.7 ? "#00d27a" : pr >= 0.4 ? "#e3b341" : "var(--muted)"}"></i></div> <span title="seen on ${k.laps_seen} of ${k.laps_track} laps on record">${k.laps_seen || 0}/${k.laps_track || 0}</span>` : "—"}</td><td>${k.passes != null ? `<b>${k.passes}</b>` : "—"}</td><td style="white-space:nowrap">${k.dominant && k.dominant !== "none" ? `<span style="color:${gripCol(ax)};font-weight:700">${gripOf(ax).word}</span> <span class="why">${Math.round((k.consistency || 0) * 100)}%</span>` : `<span class="why">clean</span>`}</td><td class="why" style="white-space:nowrap">${Object.entries(k.lim || {}).map(([kk, v]) => `${LIM_W[kk] || kk} ${v}`).join(" · ") || "—"}</td></tr>`;
+      }).join("");
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent2);margin-bottom:8px"><div class="card-row" style="margin-top:0"><strong>🕰 Turn history — every session on record, not just this one</strong><span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${rows.length} turn${rows.length === 1 ? "" : "s"}${nSess ? ` · ${nSess} session${nSess === 1 ? "" : "s"}` : ""}${lapsTrack ? ` · ${lapsTrack} lap${lapsTrack === 1 ? "" : "s"}` : ""}</span></div>
+        <div class="why" style="font-size:10.5px;margin:2px 0 6px">${nGeo} of ${rows.length} established from the map's curvature, the rest from how the car behaved there · presence = the share of every lap on record where this turn showed up · the axle column is this turn's habit across every car that has driven it</div>
+        <div style="overflow-x:auto"><table style="font-size:11px"><thead><tr><th>#</th><th>established by</th><th title="how many sessions placed this turn geometrically">geo sessions</th><th>sessions</th><th>presence</th><th>passes</th><th>axle · all sessions</th><th>limiter</th></tr></thead><tbody>${body}</tbody></table></div>
+        <div style="margin-top:5px">${gripLegend(["front", "rear", "both"])}</div></div>`;
+    } catch (e) { return ""; } };
     const mapCardHtml = (geo, corners, turns, co) => { if (!geo) return ""; const canonN = turns && turns.canonical ? turns.canonical.length : (geo.turns || []).length; const shown = (turns && turns.count) || canonN; const mapped = (geo.turns || []).length;
       const rk = co && co.route_key; const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null; const brk = (co && selN) ? courseTurnBreakdown(co, selN) : "";
       return `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
@@ -5173,7 +5245,7 @@
       const mTurns = { count: m.expected_turns || m.turn_count || estTurns.length, canonical: estTurns };
       return `<div class="lab-corner" style="border-left:4px solid var(--accent)">
         ${courseIdentity(rn, geo, { icon: "🏟", routeKey: m.route_key, tags: courseTagsRow(m), right: `<span class="chip" style="border-color:var(--accent);color:var(--accent)">from the track record — not visited in this ${src === "live" ? "session" : "recording"}</span>` })}
-        ${trackRecordHtml(tr, rn, geo, m.route_key)}${m.speed_traces ? speedTracesCard({ speed_traces: m.speed_traces, geometry: m.geometry, route_key: m.route_key }, live.courseCar || null) : ""}${m.profile ? profileCardHtml(m.profile) : ""}${geo ? mapCardHtml(geo, [], mTurns) : ""}
+        ${trackRecordHtml(tr, rn, geo, m.route_key)}${speedTracesCard({ speed_traces: m.speed_traces || {}, geometry: m.geometry, route_key: m.route_key }, live.courseCar || null)}${m.profile ? profileCardHtml(m.profile) : ""}${geo ? mapCardHtml(geo, [], mTurns) : ""}${turnHistoryCard({ route_key: m.route_key })}
         ${(g.turns || []).length ? `<div style="margin-top:8px;font-size:11px"><div style="color:var(--muted);margin-bottom:4px">Turns on this route (from its map)</div><div style="display:flex;flex-wrap:wrap;gap:3px">${g.turns.map((t) => `<span class="chip" title="${t.len_m} m long · ${t.deg != null ? t.deg + "°" : ""}">${t.id} ${t.dir === "L" ? "⬅" : "➡"} r${t.radius_m}${t.deg != null ? " · " + t.deg + "°" : ""}</span>`).join("")}</div><p class="why" style="font-size:10.5px;margin:4px 0 0">drive it in this session for per-turn references, limiter and advice</p></div>` : ""}
       </div>`;
     };
@@ -5219,9 +5291,9 @@ ${co.corners.filter((k) => k.ref || k.advice).map((k) => { const tn = (() => { t
       const advice = `${Object.entries(co.advice_by_car || {}).map(([cidk, adv]) => { const firm = adv.filter((a) => !a.open).slice(0, 4), open = adv.filter((a) => a.open); return `<div style="margin-top:8px"><div style="font-size:11px;color:var(--muted)">${carLblHtml(carsS, cidk)}</div>
 ${firm.map((a) => `<div style="display:flex;gap:8px;align-items:flex-start;margin:5px 0;${a.minor_here ? "opacity:.5" : ""}"><span class="lab-light" style="background:${SEV[a.severity]};margin-top:4px"></span><div style="flex:1"><div style="font-size:12px"><strong>${a.text}</strong>${a.minor_here ? ` <span class="chip" style="border-color:var(--muted);color:var(--muted)">rarely used on this course</span>` : ""}</div><div class="why" style="font-size:10.5px">${a.evidence} · confidence ${Math.round(a.confidence * 100)}%</div></div></div>`).join("") || `<p class="why" style="font-size:11px;margin:4px 0">no firm suggestions on this course yet</p>`}
 ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top:4px">🔍 ${open.map((a) => a.text).join(" · ")}</div>` : ""}</div>`; }).join("")}`;
-      return { rn, cov, nl, tu, tr, header, track: trackCard, profile: profileCard, map: mapCardHtml(courseGeoFor(co), co.corners, co.turns, co), turns: turnsCard, probes, laps, corners, driving, advice };
+      return { rn, cov, nl, tu, tr, header, track: trackCard, profile: profileCard, map: mapCardHtml(courseGeoFor(co), co.corners, co.turns, co), turns: turnsCard, history: turnHistoryCard(co), probes, laps, corners, driving, advice };
     };
-    const courseBlock = (co, s) => { const p = courseParts(co, s); return `<div class="lab-corner" style="border-left:4px solid var(--accent2)">${p.header}${p.track}${p.profile}${p.map}${p.turns}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div>`; };
+    const courseBlock = (co, s) => { const p = courseParts(co, s); return `<div class="lab-corner" style="border-left:4px solid var(--accent2)">${p.header}${p.track}${p.profile}${p.map}${p.turns}${p.history}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div>`; };
     // ---- LIVE plumbing: mode banner, stream bar, the live workflow body, and section repaint from the daemon's latest full analysis ----
     function paintBanner() {
       const el = host.querySelector("#lvBanner"); if (!el) return;
@@ -5255,7 +5327,27 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     live.courseGeo = live.courseGeo || {};
     const _hasGeo = (g) => !!(g && ((g.path && g.path.length > 4) || (g.paths && [].concat(...(g.paths || [])).length > 4)));
     const cacheCourseGeo = (sess) => { if (sess && sess.courses) sess.courses.forEach((co) => { if (co && co.route_key && _hasGeo(co.geometry)) live.courseGeo[co.route_key] = co.geometry; }); };
-    const courseGeoFor = (co) => co ? (_hasGeo(co.geometry) ? co.geometry : (live.courseGeo[co.route_key] || co.geometry || null)) : null;
+    // THE MAP MUST DRAW THE MOMENT THE COURSE IS IDENTIFIED. A session whose lap window did not survive the analyzer's
+    // full-lap filter carries geometry = null, and a thin session carries a truncated path — but the course MODEL on
+    // disk already holds the best map ever recorded here, and db.js embeds it whole. So: take the richest path on
+    // record, and keep this session's own extras (latest lap, layout traces, ref lap) laid over it. This is the same
+    // borrow the analyzer performs server-side; doing it here means a stale model can never blank the course view.
+    const _geoLen = (g) => (g ? (g.path ? g.path.length : (g.paths ? [].concat(...g.paths).length : 0)) : 0);
+    const _mgCache = {};   // DB.courseModels is fixed for the life of the page; courseGeoFor runs a dozen times per repaint
+    const modelGeoFor = (rk) => { try {
+      if (!rk) return null; if (rk in _mgCache) return _mgCache[rk];
+      const m = (DB.courseModels || []).find((x) => x && x.route_key === rk); const g = m && m.geometry;
+      _mgCache[rk] = !_hasGeo(g) ? null
+        : { paths: g.paths || [g.path], path: g.path || (g.paths || []).flat(), layout_paths: (g.lap_paths || []).map((lp) => ({ session: lp.session, pts: lp.pts })), turns: g.turns || [], length_m: g.length_m, from_model: true, not_driven: [] };
+      return _mgCache[rk];
+    } catch (e) { return null; } };
+    const courseGeoFor = (co) => { if (!co) return null;
+      const own = _hasGeo(co.geometry) ? co.geometry : (live.courseGeo[co.route_key] || null);
+      const mg = modelGeoFor(co.route_key);
+      if (!own) return mg || co.geometry || null;
+      if (mg && _geoLen(mg) > _geoLen(own)) return Object.assign({}, own, { paths: mg.paths, path: mg.path, turns: (mg.turns || []).length ? mg.turns : own.turns, length_m: mg.length_m || own.length_m, layout_paths: (own.layout_paths || []).length ? own.layout_paths : mg.layout_paths, from_model: true });
+      return own;
+    };
     const sectionsHtml = (s, isLive) => { const w = effMode(); return w === "course" ? courseSection(s, isLive) : w === "decode" ? decodeSection(s, isLive) : freeSection(s, isLive); };
     function liveBody() {
       const w = effMode();
@@ -5857,6 +5949,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       // click a turn on the course map -> open its per-turn breakdown (the ✕ closes it)
       r.querySelectorAll("[data-courseturn]").forEach((g) => g.addEventListener("click", () => { const parts = String(g.dataset.courseturn).split("|"); live.selTurn = { rk: parts[0], n: +parts[1] }; if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-courseturn-close]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); live.selTurn = null; if (src === "live") paintSections(true); else render(); }));
+      // switch which class the speed traces are scoped to — "" means every class. The choice sticks per route; the
+      // next repaint refetches /laps for it (empty value ⇒ the class param is simply omitted).
+      r.querySelectorAll("[data-lapscls]").forEach((b) => b.addEventListener("click", () => { const p2 = String(b.dataset.lapscls).split("|"); live.lapsCls[p2[0]] = p2.slice(1).join("|"); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-expected]").forEach((b) => b.addEventListener("click", () => { const [rk, n] = b.dataset.expected.split("|"); fetch(liveUrl + "/course-expected", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, n: +n }) }).then(() => { b.textContent = "saved ✓"; }).catch(() => {}); }));
       r.querySelectorAll("[data-lib-pick]").forEach((b) => b.addEventListener("click", () => { const [sid, key] = b.dataset.libPick.split("|"); libPick = { sid, key }; donor = key; render(); }));
       r.querySelectorAll("[data-lib-clear]").forEach((b) => b.addEventListener("click", () => { libPick = null; donor = null; render(); }));

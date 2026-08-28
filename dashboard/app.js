@@ -3490,6 +3490,16 @@
       .tl-diff{font-size:9.5px;border:1px solid rgba(227,179,65,.45);color:#e3b341;border-radius:6px;padding:0 6px;white-space:nowrap}
       .tl-worn{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.12)}
       .tl-lvy{width:56px;height:34px;object-fit:cover;border-radius:5px;border:1px solid var(--line)}
+      /* ---- consolidated identification master panel + drawers ---- */
+      .idm{margin:0 0 10px}
+      .idm-chips{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
+      .idm-drawer{border:1px solid var(--line);border-radius:8px;margin:0 0 8px;padding:6px 11px;font-size:11.5px;background:rgba(255,255,255,.012)}
+      .idm-drawer>summary{cursor:pointer;font-weight:600;font-size:12px;user-select:none}
+      .idm-drawer>summary:hover{color:var(--accent)}
+      .idm-dbody{margin-top:7px}
+      .idm-dbody>.us,.idm-dbody>.sanity,.idm-dbody>.cal-card,.idm-dbody>.fhm-pi-budget{border:none;background:none;padding:0;margin:0}
+      .idm-flag{font-size:10px;font-weight:800;color:#e5414e;border:1px solid #e5414e;border-radius:8px;padding:0 6px;margin-left:6px;vertical-align:1px}
+      .idm-flag.warn{color:#e3b341;border-color:#e3b341}
       /* ---- SAVE x TELEMETRY union strip ---- */
       .us{border:1px solid #2f81f7;border-radius:8px;background:rgba(47,129,247,.06);padding:8px 11px;margin:0 0 11px}
       .us.has-conflict{border-color:#e5414e;background:rgba(229,65,78,.05)}
@@ -3648,15 +3658,16 @@
     // ---- SAVE × TELEMETRY UNION STRIP: the reconciled decode. Every field the daemon could cross-check carries both
     // sources — agreements corroborate, disagreements flag as ⚠ CONFLICTS (competing expected values → low confidence),
     // and where a telemetry reading WOULD raise confidence, the ranked "drive X" asks say exactly what to drive. ----
-    const unionStrip = (dl) => {
-      const u = dl && dl.union; if (!u || (!(u.fields || []).length && !(u.asks || []).length)) return "";
+    const unionStrip = (dl, uopts) => {
+      uopts = uopts || {};
+      const u = dl && dl.union; if (!u || !(u.fields || []).length && (uopts.noAsks || !(u.asks || []).length)) return "";
       const ICO = { agree: "✓", conflict: "⚠", "tele-fill": "📡", await: "○" };
       const COL = { agree: "#00d27a", conflict: "#e5414e", "tele-fill": "#2f81f7", await: "#e3b341" };
       const ORD = { conflict: 0, agree: 1, "tele-fill": 2, await: 3 };
       const chips = `${u.n_agree ? `<span class="us-chip ok">✓ ${u.n_agree} corroborated</span>` : ""}${u.n_conflict ? `<span class="us-chip bad">⚠ ${u.n_conflict} conflict${u.n_conflict > 1 ? "s" : ""}</span>` : ""}${u.n_fill ? `<span class="us-chip fill">📡 ${u.n_fill} filled by telemetry</span>` : ""}${u.n_await ? `<span class="us-chip wait">○ ${u.n_await} awaiting telemetry</span>` : ""}`;
       const frow = (f) => `<div class="us-row ${f.status}"><span class="us-ic" style="color:${COL[f.status] || "var(--muted)"}">${ICO[f.status] || "·"}</span><b class="us-name">${esc(f.name)}</b><span class="us-vals">${f.save != null ? `<span class="us-src">save</span>${esc(String(f.save))}` : ""}${f.save != null && f.telemetry != null ? `<span class="us-x">×</span>` : ""}${f.telemetry != null ? `<span class="us-src tel">📡</span>${esc(String(f.telemetry))}` : ""}</span>${f.note ? `<div class="us-note">${esc(f.note)}</div>` : ""}</div>`;
       const fields = (u.fields || []).slice().sort((a, b) => (ORD[a.status] ?? 9) - (ORD[b.status] ?? 9));
-      const asks = (u.asks || []).length ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
+      const asks = (!uopts.noAsks && (u.asks || []).length) ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
       return `<div class="us${u.n_conflict ? " has-conflict" : ""}"><div class="us-hd"><b>🔗 Save × telemetry — one reconciled decode</b>${chips}</div>${fields.map(frow).join("")}${asks}</div>`;
     };
     // ---- TUNE LIBRARY: categorized by BUILD — the exact PARTS fingerprint of each save (byte-exact from disk).
@@ -3778,19 +3789,45 @@
       const cf = diskConf(r);
       const popBtn = opts.popBtn ? (cf && cf.reasonable ? `<button class="lab-mode" data-popout="${dl.ordinal}" title="keep this build on screen while you navigate the upgrade / tune menus" style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7;margin-left:auto">📌 Pop out</button>` : `<button class="lab-mode" disabled title="reach reasonable confidence first — see the checklist below" style="padding:3px 10px;font-size:11px;border-color:var(--line);color:var(--muted);margin-left:auto;opacity:.55;cursor:not-allowed">📌 Pop out</button>`) : "";
       const headRow = opts.inFloat ? "" : `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span>${popBtn}</div>`;
+      // ---- CONSOLIDATED assembly: CONFIDENCE is the primary section. Identity (match), the confidence meter, one
+      // contributor-chip row and the single ranked ask list form the master panel; everything that used to stack as
+      // parallel cards (union detail, sanity, PI budget, calibration) becomes a DRAWER feeding it — same information,
+      // one hierarchy, no duplicate prompts. Drawers auto-open only when they carry something red. ----
+      const u2 = dl.union || {};
+      const drvX = (() => { const cm = (dl.menus || []).find((m) => m.menu === "Conversions"); const dr2 = cm && (cm.rows || []).find((x) => x.item === "drivetrain"); return (dr2 && dr2.resulting_drivetrain) || (live.frame && live.frame.on && live.frame.drv) || null; })();
+      const sanI = (dl.tabs || []).length ? sanityCheck(dl, drvX || "?") : [];
+      const sanE = sanI.filter((x) => x.lvl === "error").length, sanW = sanI.filter((x) => x.lvl === "warn").length;
+      const exactN = sm.sliders_exact != null ? sm.sliders_exact : (sm.sliders_absolute || 0); const relN = sm.sliders_relative || 0;
+      const piKnown = sm.pi_known_parts || 0, piTot = sm.pi_total_parts || 0;
+      const c2 = (txt, cls, title) => `<span class="us-chip ${cls}"${title ? ` title="${esc(title)}"` : ""}>${txt}</span>`;
+      const contrib = [
+        c2(`${sm.parts_installed} parts exact`, "ok", "every installed part decodes byte-exact from the save"),
+        c2(`${exactN} sliders exact${sm.sliders_derived ? ` · ${sm.sliders_derived} derived` : ""}${relN ? ` · ${relN} by %` : ""}`, relN ? "wait" : "ok", relN ? "%-sliders lock exact via the 🎯 calibration drawer" : "all slider values absolute"),
+        u2.n_agree ? c2(`✓ ${u2.n_agree} corroborated`, "ok", "save × telemetry agree — see the 🔗 drawer") : "",
+        u2.n_conflict ? c2(`⚠ ${u2.n_conflict} conflict${u2.n_conflict > 1 ? "s" : ""}`, "bad", "save and telemetry disagree — the 🔗 drawer has both values") : "",
+        u2.n_await ? c2(`○ ${u2.n_await} awaiting telemetry`, "wait", "the ask list below says which drive provides each") : "",
+        (sanE || sanW) ? c2(`🩺 ${sanE ? sanE + " error" + (sanE > 1 ? "s" : "") : ""}${sanE && sanW ? " · " : ""}${sanW ? sanW + " warning" + (sanW > 1 ? "s" : "") : ""}`, sanE ? "bad" : "wait", "tuning sanity findings — the 🩺 drawer has the fixes") : ((dl.tabs || []).length ? c2("🩺 clean", "ok", "no sanity findings on this tune") : ""),
+        (piTot || sm.pi_total != null) ? c2(`🧮 PI ${sm.pi_total != null ? sm.pi_total + " · " : ""}${piKnown}/${piTot} priced`, (piKnown >= piTot && piTot) ? "ok" : "wait", "per-part PI accrues as configs are driven — details in the 🧮 drawer") : "",
+      ].filter(Boolean).join("");
+      const asksHtml = (u2.asks || []).length ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u2.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
+      const drawer = (title, body, open) => body ? `<details class="idm-drawer"${open ? " open" : ""}><summary>${title}</summary><div class="idm-dbody">${body}</div></details>` : "";
+      const piHtml = (() => { if (!piTot && sm.pi_total == null) return ""; const priced = piKnown >= piTot && piTot > 0;
+        const oc2 = sm.pi_obs_car || 0, ot2 = sm.pi_obs_total || 0;
+        return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${piKnown}/${piTot} parts priced${piKnown < piTot ? " — accrues as you drive" : ""}</span> · <span class="why" title="configs the daemon has paired with a live PI — this car / whole garage">📈 ${oc2} this car · ${ot2} total observed</span></div>`; })();
       return `<div class="block fhm" style="border-color:#00d27a">${headRow}
         ${liveryStrip(dl.ordinal)}
-        ${diskMatchBar(r, dl.ordinal)}
+        <div class="idm">
+          ${diskMatchBar(r, dl.ordinal)}
+          ${diskDiffBanner(dl.ordinal)}
+          ${confMeterHtml(r)}
+          <div class="idm-chips">${contrib}</div>
+          ${asksHtml}
+        </div>
         ${tuneLibraryCard(r, dl.ordinal)}
-        ${diskDiffBanner(dl.ordinal)}
-        ${confMeterHtml(r)}
-        ${unionStrip(dl)}
-        <p class="why" style="font-size:11px;margin:4px 0 8px">${sm.parts_installed} parts · <b style="color:#00d27a">${sm.sliders_exact != null ? sm.sliders_exact : sm.sliders_absolute} exact</b>${sm.sliders_derived ? ` · <b style="color:#8fd14f" title="gears + final drive, de-normalized from the global band">${sm.sliders_derived} derived</b>` : ""} · ${sm.sliders_relative} by position — straight off disk, no driving, including the locked sliders the tune screen hides.</p>
-        ${(() => { const known = sm.pi_known_parts || 0, tot = sm.pi_total_parts || 0; if (!tot && sm.pi_total == null) return ""; const priced = known >= tot && tot > 0;
-          const oc = sm.pi_obs_car || 0, ot = sm.pi_obs_total || 0;
-          return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI. During a tuning session (drive, change one part, drive again) these accrue automatically — zero menu capture."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${known}/${tot} parts priced${known < tot ? " — accrues as you drive" : ""}</span> · <span class="why" title="configs the daemon has paired with a live PI — this car / whole garage">📈 ${oc} this car · ${ot} total observed</span></div>`; })()}
-        ${(() => { const cm = (dl.menus || []).find((m) => m.menu === "Conversions"); const dr = cm && (cm.rows || []).find((r) => r.item === "drivetrain"); const drv = (dr && dr.resulting_drivetrain) || (live.frame && live.frame.on && live.frame.drv) || null; return sanityPanel(dl, drv); })()}
-        ${calibrationCard(dl)}
+        ${drawer(`🔗 Save × telemetry — field detail${u2.n_conflict ? ` <span class="idm-flag">⚠ ${u2.n_conflict}</span>` : ""}`, unionStrip(dl, { noAsks: true }), !!u2.n_conflict)}
+        ${drawer(`🩺 Sanity check${sanE || sanW ? ` <span class="idm-flag${sanE ? "" : " warn"}">${sanE ? "⛔ " + sanE : ""}${sanE && sanW ? " · " : ""}${sanW ? "⚠ " + sanW : ""}</span>` : " — clean"}`, sanI.length ? sanityPanel(dl, drvX) : "", sanE > 0)}
+        ${drawer(`🧮 PI budget — per-part pricing`, piHtml, false)}
+        ${drawer(`🎯 Calibration${relN ? ` <span class="idm-flag warn">${relN} pending</span>` : ""}`, calibrationCard(dl), false)}
         <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
     };
     const fetchDiskTune = (ordinal, opts) => {
@@ -3875,7 +3912,8 @@
       }));
       el.querySelectorAll("[data-caljump]").forEach((b) => b.addEventListener("click", () => {
         const t = el.querySelector("#" + (window.CSS && CSS.escape ? CSS.escape(b.dataset.caljump) : b.dataset.caljump));
-        if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); const i = t.querySelector("input"); if (i) { i.focus(); t.classList.add("cal-flash"); setTimeout(() => t.classList.remove("cal-flash"), 1200); } }
+        if (t) { let dd = t.closest("details"); while (dd) { dd.open = true; dd = dd.parentElement ? dd.parentElement.closest("details") : null; }   // the calibration card lives in a drawer now — open it before jumping
+          t.scrollIntoView({ behavior: "smooth", block: "center" }); const i = t.querySelector("input"); if (i) { i.focus(); t.classList.add("cal-flash"); setTimeout(() => t.classList.remove("cal-flash"), 1200); } }
       }));
       el.querySelectorAll("[data-rangefield]").forEach((inp) => inp.addEventListener("change", () => {
         const v = parseFloat(inp.value); if (isNaN(v)) return; const ord = +inp.dataset.rangeord;

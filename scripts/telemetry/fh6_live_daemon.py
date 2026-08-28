@@ -584,6 +584,7 @@ def _pick_meta(metas, ordn, ts_want=None):
         efam = TUNE.engine_family_of(t["parts"])
         cyl = (cat.get(str(efam)) or {}).get("cyl")
         pi = TUNE.observed_car_pi(ordn, t["parts"])   # exact PI if this exact config was ever driven & recorded
+        red = (cat.get(str(efam)) or {}).get("redline")   # the family's MEASURED redline — the engine's live fingerprint
         score = m["mtime"] * 1e-13                     # newest as a faint tiebreak
         if ts_want and str(m["ts"]) == str(ts_want):
             score += 1e6                               # explicit user pick wins outright
@@ -591,7 +592,10 @@ def _pick_meta(metas, ordn, ts_want=None):
             score += 100 if int(cyl) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal
         if live and live_pi and pi:
             score += 60 if int(pi) == int(live_pi) else -min(60, abs(int(pi) - int(live_pi)) * 0.6)
-        roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
+        live_red = (fr.get("maxrpm") if live and fr else None)
+        if live_red and red:                           # two same-cyl same-PI builds with DIFFERENT ENGINES separate here: redline is telemetry-exact
+            score += 50 if abs(int(red) - int(live_red)) <= 400 else -min(50, abs(int(red) - int(live_red)) * 0.02)
+        roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "red": red, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
     if not roster:
         return metas[0], {"how": "newest", "live": live, "saves": []}
     roster.sort(key=lambda r: -r["_score"])
@@ -656,6 +660,15 @@ def _pick_meta(metas, ordn, ts_want=None):
         gid = getattr(ST, "gear_id", {}).get(str(ordn))
         if gid and time.time() - gid["t"] < 7200:
             held = next((r for r in roster if str(r["ts"]) == str(gid["ts"])), None)
+            # the hold must YIELD to contradicting live evidence: switching garage instances writes NO save file,
+            # so a stale hold was the only voice — but the live engine (cyl, redline) is telemetry-exact. When it
+            # contradicts the held build, drop the hold and let the scoring/ladder re-disambiguate NOW.
+            if held is not None and live:
+                _lr = fr.get("maxrpm") if fr else None
+                if (held.get("cyl") and live_cyl and int(held["cyl"]) != int(live_cyl)) or (held.get("red") and _lr and abs(int(held["red"]) - int(_lr)) > 700):
+                    held = None
+                    try: del ST.gear_id[str(ordn)]   # the verified identity belonged to the OTHER build — it no longer describes what's equipped
+                    except Exception: pass
             if held is not None:
                 roster = [held] + [r for r in roster if r is not held]
                 gear_used = True; held_id = True
@@ -744,6 +757,18 @@ def _pick_meta(metas, ordn, ts_want=None):
     how = "picked" if ts_want else ("signature" if (live or live_recent) and (live_cyl or live_pi) else "newest")   # J20: a 2h-recent signature still identifies
     mism = bool((live or live_recent) and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
     final_how = how if ts_want else ("no-match" if mism else ("gear-matched" if gear_used else how))
+    # LIVE TRUTH OVERRIDE: while the equipped build is strongly identified and on track, the frame's CarPI IS this
+    # build's PI — a stored stamp that disagrees is stale or misattributed and must never outrank the live read
+    # (the "identifies as A700 while driving it at S1 800" bug).
+    if live_pi and (live or live_recent) and final_how in ("gear-matched", "picked"):
+        try:
+            eq = next((b for b in builds if any(str(t2) == str(best["ts"]) for t2 in (b.get("saves") or []))), None)
+            if eq is not None and eq.get("pi") != int(live_pi):
+                eq["pi"] = int(live_pi); eq["pi_src"] = "live"
+            for s2 in saves:
+                if str(s2.get("ts")) == str(best["ts"]) and s2.get("pi") != int(live_pi): s2["pi"] = int(live_pi)
+        except Exception:
+            pass
     return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
@@ -1457,6 +1482,8 @@ def _record_pi_observation(ordn, tune):
                "parts": TUNE.parts_tiers(tune["parts"]), "parts_hash": ph}
         for i, o in enumerate(obs):
             if o.get("parts_hash") == ph and int(o.get("ordinal", -1)) == int(ordn):
+                if int(o.get("car_pi") or 0) != pi:   # same config cannot have two PIs — the earlier stamp was misattributed (pre-guard era) or pre-family-hash; the fresh VERIFIED read wins
+                    print(f"[pi-obs] CONFLICTING re-stamp ord {ordn} {ph}: {o.get('car_pi')} -> {pi} (earlier stamp replaced)")
                 obs[i] = rec; break
         else:
             obs.append(rec)
@@ -1470,6 +1497,13 @@ def _record_pi_observation(ordn, tune):
             os.remove(tmp); return
         os.replace(tmp, PI_OBS_PATH)
     _PI_LAST[0] = key
+    # the decode module CACHES observations — without this, /disk-tune serves pre-stamp PIs for the daemon's
+    # whole lifetime (the "identifies as A700 while the live frame says S1 800" bug). Refresh + force a re-emit.
+    try:
+        TUNE._PI_OBS = None
+    except Exception:
+        pass
+    ST._disk_dirty = True
 
 
 def disk_watcher():

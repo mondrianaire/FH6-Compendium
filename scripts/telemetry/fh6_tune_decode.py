@@ -687,9 +687,16 @@ def parts_tiers(parts):
     return {name: (None if parts.get(name) is None else parts.get(name) % 1000) for name in PARTS}
 
 def parts_hash(ordinal, parts):
-    """Stable 16-hex fingerprint of (ordinal + the 50 slot tiers) — the dedup / match key for observations."""
+    """Stable 16-hex fingerprint of (ordinal + engine FAMILY + the 50 slot tiers) — the dedup / match key for
+    observations. The family must be in the hash: tiers are id%1000, which ERASES the engine-swap identity
+    (id//1000) — two configs differing only by swap hashed identically and their PI stamps collided."""
     tiers = parts_tiers(parts)
-    payload = json.dumps({"o": int(ordinal), "p": {k: tiers[k] for k in sorted(tiers)}}, sort_keys=True)
+    fam = None
+    try:
+        fam = engine_family_of(parts)
+    except Exception:
+        pass
+    payload = json.dumps({"o": int(ordinal), "f": fam, "p": {k: tiers[k] for k in sorted(tiers)}}, sort_keys=True)
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
 
 _PARTS_PI = None

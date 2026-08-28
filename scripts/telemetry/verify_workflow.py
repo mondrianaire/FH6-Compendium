@@ -230,7 +230,7 @@ def f3():
              "function clsBadge", "function piBadge", "carLblHtml", "pib-img",   # the in-game class-badge design language must exist and stay wired
              "buildThumb", "courseIdentMini", "startOfKey",   # tune identity (livery thumbnail) + course identity (name + start + shape)
              "courseTags", "courseMeasuredChip",   # course tags: type + car-fit from the measured makeup
-             "data-live-map", "flashTurnOnMap", "lastCornerSvg", "geoCov", "speedTracesCard", "turnTraceStrip"]   # live position on the course map + turn-grade rings
+             "data-live-map", "flashTurnOnMap", "lastCornerSvg", "geoCov", "speedTracesCard", "turnTraceStrip", "confirmRegressReason", "pinSuspended"]   # live position on the course map + turn-grade rings
     missing = [m for m in marks if m not in src]
     return (not missing, f"feature markers present ({len(marks) - len(missing)}/{len(marks)}){'; missing: ' + str(missing) if missing else ''}")
 check("F client", "feature surface complete", f3)

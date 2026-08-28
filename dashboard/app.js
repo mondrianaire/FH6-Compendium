@@ -2969,14 +2969,17 @@
       if (!prof) needs.push({ k: "profile", p: 3, text: "one full lap so the course's demands (profile) are known" });
       if ((tu.messy || []).length) needs.push({ k: "messy", p: 3, text: `${tu.messy.map(turnLabel).join(", ")} split into several detections most laps — drive ${tu.messy.length === 1 ? "it" : "them"} as one smooth arc` });   // J13
       needs.sort((x, y) => x.p - y.p);
-      const auto = (pct >= 75 && mapped && geoCov >= 0.9) ? "tuning" : "training"; const sel = courseStageSel(); const stage = sel === "auto" ? auto : sel;   // HARD gate: the tuning stage requires the enumerated turns to cover the shape's mapped turns — per-turn advice on a known-incomplete inventory is wrong advice
-      return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof, shapeConf, shapeMeasured, shapeAgree, shapeCompared, shapeSpread, geoCov, missingN };
+      const auto = (pct >= 75 && mapped && geoCov >= 0.9) ? "tuning" : "training"; const sel = courseStageSel();   // HARD gate: the tuning stage requires the enumerated turns to cover the shape's mapped turns — per-turn advice on a known-incomplete inventory is wrong advice
+      let stage = sel === "auto" ? auto : sel; let pinSuspended = false;
+      if (sel === "tuning" && auto === "training") { stage = "training"; pinSuspended = true; }   // STATUS REGRESSION beats the pin: prerequisites no longer fulfilled → the pinned tuning stage is suspended, not honored
+      return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof, shapeConf, shapeMeasured, shapeAgree, shapeCompared, shapeSpread, geoCov, missingN, pinSuspended };
     };
     const stageChips = (ck) => `<span style="display:inline-flex;gap:3px;margin-left:8px">${[["auto", "🧭 auto"], ["training", "📚 training"], ["tuning", "🏋 tuning"]].map(([k, l]) => `<span class="chip" data-course-stage="${k}" style="cursor:pointer;padding:1px 7px;${ck.sel === k ? "border-color:var(--txt);color:var(--txt)" : ""}">${l}${k === "auto" && ck.sel === "auto" ? " → " + ck.auto : ""}</span>`).join("")}</span>`;
     const courseStageBanner = (co, ck) => {
       const training = ck.stage === "training"; const top = ck.needs[0]; const col = training ? "var(--accent2)" : "var(--accent)";
       const remain = Math.max(0, 75 - ck.pct);
-      return `<div class="lab-corner" style="border-left:4px solid ${col};background:var(--bg2);margin-bottom:8px">
+      const regrNote = ck.pinSuspended ? `<div style="border-left:3px solid #e5414e;background:rgba(229,65,78,.08);padding:5px 8px;border-radius:6px;margin-bottom:6px;font-size:11.5px"><b style="color:#e5414e">⬇ Your 🏋 tuning pin is suspended</b> <span class="why">— prerequisites regressed${ck.missingN > 1 ? ` (the shape shows ${ck.missingN} more turns than are enumerated)` : ""}; it resumes on its own when the gate passes.</span></div>` : "";
+      return `<div class="lab-corner" style="border-left:4px solid ${col};background:var(--bg2);margin-bottom:8px">${regrNote}
         <div class="card-row" style="margin-top:0"><strong style="font-size:15px">${training ? "📚 COURSE TRAINING" : "🏋 COURSE TUNING"} <span class="why" style="font-weight:400">· ${training ? "learning THIS COURSE (car-independent)" : "the course is known — feedback is about this car on it"}</span></strong><span style="display:inline-flex;align-items:center;gap:4px"><span id="lvCourseLive" class="chip"></span>${stageChips(ck)}</span></div>
         ${training ? `<div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 2px"><b style="font-size:34px;line-height:1;color:${col}">${ck.pct}%</b><span class="why" style="font-size:12px">course-learning confidence${remain ? ` · ${remain}% to reach the tuning stage (75%)` : " · ready to switch to tuning"}</span></div>
           <div class="lab-bar" style="height:14px;margin:4px 0 8px"><i style="width:${ck.pct}%;background:${col}"></i><i style="left:75%;width:2px;background:var(--txt);opacity:.7" title="75% — switches to tuning"></i></div>
@@ -3142,18 +3145,41 @@
         : bc.ready ? `<button class="bcf-btn go" data-confirmbuild="${esc(cid)}">✓ Confirm build &amp; unlock tuning</button>`
         : bc.noSave ? `<button class="bcf-btn go" data-confirmbuild="${esc(cid)}">✓ Proceed on baselines</button>`
         : `<button class="bcf-btn wait" data-confirmbuild="${esc(cid)}" title="not yet confident — you can confirm anyway, but I'd wait">confirm anyway (not yet confident)</button>`;
-      return `<div class="bcf" style="border-color:${col}"><div class="bcf-hd" style="color:${col}">${buildThumb(String(cid).split("|")[0])}<b>${head}</b>${bc.hardBlock ? "" : `<span class="bcf-pct">${bc.pct}% confident</span>`}</div><p class="why" style="font-size:11.5px;margin:2px 0 7px">${sub}</p>${whyList}${needList}${btn}</div>`;
+      const regr = (() => { try { const rj = JSON.parse(localStorage.getItem("fh6BuildRegressed:" + baseId(cid)) || "null"); return rj && rj.why ? `<p class="why" style="font-size:11px;margin:0 0 7px;color:#e5414e">⬇ previously confirmed — regressed: ${esc(rj.why)}</p>` : ""; } catch (e) { return ""; } })();
+      return `<div class="bcf" style="border-color:${col}"><div class="bcf-hd" style="color:${col}">${buildThumb(String(cid).split("|")[0])}<b>${head}</b>${bc.hardBlock ? "" : `<span class="bcf-pct">${bc.pct}% confident</span>`}</div><p class="why" style="font-size:11.5px;margin:2px 0 7px">${sub}</p>${regr}${whyList}${needList}${btn}</div>`;
     };
     // the GATE around course tuning advice: advice is only as good as the build identification behind its current
     // values, so until the build is confirmed the panel shows the confirm card (the SYSTEM says when it's confident —
     // the ✓ button lights green on a clean match + solid decode + zero union conflicts). Recordings skip the gate.
+    // STATUS REGRESSION: a confirmation is a claim about prerequisites — when they stop holding, the status must
+    // FALL BACK on its own, not linger until a manual re-check. Positive evidence only (identity lost, save gone,
+    // ambiguity returned, conflicts opened); offline / loading / parked are NOT evidence and never regress anything.
+    const confirmRegressReason = (cached) => {
+      if (!cached) return null;
+      if (cached.available === false) return "the saved tune file is gone from disk";
+      const m = cached.match || {};
+      if (m.how === "no-match") return "no saved tune matches the live engine any more";
+      if (m.how === "unsaved-build") return "you're in a distinct build whose file is not on disk";
+      if (m.how === "signature" && (m.n_signature_ties || 1) >= 2) return `${m.n_signature_ties} builds share this signature — identity is ambiguous again`;
+      const nc = ((cached.deliverable || {}).union || {}).n_conflict || 0;
+      if (nc) return `${nc} save×telemetry conflict${nc > 1 ? "s" : ""} opened`;
+      return null;
+    };
     const gatedTuning = (co, s, cid) => {
       if (src !== "live" || !cid) return numericTuningPanel(co, s, cid);
       if (!live.connected) return `<div class="bcf" style="border-color:var(--muted)"><div class="bcf-hd" style="color:var(--muted)"><b>📡 Daemon offline</b></div><p class="why" style="font-size:11.5px;margin:2px 0 0">reconnect to identify the build — tuning advice needs the live decode (a red 'identifying…' here would be wrong: nothing is being identified while offline)</p></div>`;   // audit F23: offline is not an identification failure
-      if (isBuildConfirmed(cid)) return `<div class="bcf-ok">${buildThumb(String(cid).split("|")[0], null, true)} ✓ build confirmed — advice reads this build's real values<button class="bcf-recheck" data-unconfirmbuild="${esc(cid)}" title="drop the confirmation and re-verify the build identification">↺ re-check</button></div>` + numericTuningPanel(co, s, cid);
       const ord = String(cid).split("|")[0];
       const cached = live.diskCache ? live.diskCache[ord] : null;
       if (cached === undefined && live.connected) fetchDiskTune(+ord);
+      if (isBuildConfirmed(cid)) {
+        const why = confirmRegressReason(cached);
+        if (why) {
+          try { localStorage.removeItem(buildConfirmKey(cid)); localStorage.setItem("fh6BuildRegressed:" + baseId(cid), JSON.stringify({ at: Date.now(), why })); } catch (e) {}
+          if (live._regrToast !== baseId(cid)) { live._regrToast = baseId(cid); focusToast("⬇ build confirmation regressed — " + why); }
+          return `<div class="bcf" style="border-color:#e5414e"><div class="bcf-hd" style="color:#e5414e"><b>⬇ Confirmation regressed</b></div><p class="why" style="font-size:11.5px;margin:2px 0 0">${esc(why)} — tuning advice is locked again until the build re-verifies.</p></div>` + buildConfirmCard(cid, buildConfidence(cached || null));
+        }
+        return `<div class="bcf-ok">${buildThumb(String(cid).split("|")[0], null, true)} ✓ build confirmed — advice reads this build's real values<button class="bcf-recheck" data-unconfirmbuild="${esc(cid)}" title="drop the confirmation and re-verify the build identification">↺ re-check</button></div>` + numericTuningPanel(co, s, cid);
+      }
       return buildConfirmCard(cid, buildConfidence(cached || null));
     };
     // slim persistent identity row for the COURSE view (audit F22) — the user lives here, but identity lived only in
@@ -3180,6 +3206,9 @@
       const carGrip = dr.car_grip || {}; const analysisReflectsCar = curCar && (carGrip[curCar] != null || (co.cars || []).includes(curCar));
       const carChanged = !!(live.courseCar && curCar && live.courseCar !== curCar);   // set in paintFrame; means the analysis still reflects the previous car
       const ck = courseKnowledge(co); const training = ck.stage === "training"; const turnsN = tu.count || 0;
+      try { const pk = "fh6StageSeen:" + co.route_key; const prevSt = localStorage.getItem(pk);   // STATUS REGRESSION is announced, not silent: one toast per downgrade edge
+        if (prevSt === "tuning" && ck.stage === "training") focusToast(`⬇ ${p.rn || "course"} regressed to TRAINING — prerequisites no longer fulfilled`);
+        if (prevSt !== ck.stage) localStorage.setItem(pk, ck.stage); } catch (e) {}
       const tuneUnlocked = !training && (src !== "live" || !curCar || isBuildConfirmed(curCar));   // J12: the per-turn 🔧 verdicts must agree with the gate — no prescriptions while tuning advice is locked
       const refsOwn = (dr.own_refs_by_car && curCar != null) ? (dr.own_refs_by_car[curCar] || 0) : (analysisReflectsCar ? (dr.own_refs || 0) : 0), refsPred = dr.predicted || 0;   // J17: "refs for this car" counts THIS build's refs — the flat own_refs counted every build's (fallback for pre-J17 analyses)
       const needRefs = Math.max(1, Math.ceil(turnsN * 0.5)); const feedbackReady = ck.mapped && analysisReflectsCar && refsOwn >= needRefs;
@@ -5553,7 +5582,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
       r.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { if (!b.dataset.arm) { b.dataset.arm = "1"; const t0 = b.textContent; b.textContent = "really clear the history?"; setTimeout(() => { delete b.dataset.arm; b.textContent = t0; }, 4000); return; } localStorage.removeItem(appliedKey(b.dataset.clearapplied)); if (src === "live") paintSections(true); else render(); }));   // audit F9: two-step
       // build-confirm gate: confirm (unlocks course tuning advice) / re-check (drops the confirmation)
-      r.querySelectorAll("[data-confirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.confirmbuild, true); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-confirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.confirmbuild, true); try { localStorage.removeItem("fh6BuildRegressed:" + baseId(b.dataset.confirmbuild)); } catch (e) {} live._regrToast = null; if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-unconfirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.unconfirmbuild, false); if (src === "live") paintSections(true); else render(); }));
       const shopEl = r.querySelector("#lvShopCapture") || (r.id === "lvShopCapture" ? r : null);
       if (shopEl && !live.shots) refreshShots();

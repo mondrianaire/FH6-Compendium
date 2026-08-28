@@ -3506,6 +3506,10 @@
       .idm-id.ok{border-color:rgba(0,210,122,.5);border-style:solid}
       .idm-id.guess{border-color:rgba(227,179,65,.55)}
       .idm-id.unknown{border-color:rgba(229,65,78,.45)}
+      .idm-picks{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center;vertical-align:middle}
+      .idm-pick{width:66px;height:40px;object-fit:cover;border-radius:6px;border:2px solid var(--line);cursor:pointer;transition:border-color .12s,transform .12s}
+      .idm-pick:hover{border-color:#00d27a;transform:scale(1.06)}
+      .idm-pick.chip{width:auto;height:auto;font-size:10.5px;padding:2px 8px;border-radius:8px;background:var(--bg2);border-width:1px}
       .idm-drawer{border:1px solid var(--line);border-radius:8px;margin:0 0 8px;padding:6px 11px;font-size:11.5px;background:rgba(255,255,255,.012)}
       .idm-drawer>summary{cursor:pointer;font-weight:600;font-size:12px;user-select:none}
       .idm-drawer>summary:hover{color:var(--accent)}
@@ -3851,7 +3855,14 @@
             if (lv && lv.source === "pinned") return `<div class="idm-id ok">${img}🪪 this tune is <b>Build ${esc(curB.label)}</b> · worn livery: <b>${esc(lv.name || "pinned design")}</b> <span class="why">pinned by you — recognition certain</span></div>`;
             if (lv && lv.source === "auto") return `<div class="idm-id ok">${img}🪪 this tune is <b>Build ${esc(curB.label)}</b> · worn livery: <b>${esc(lv.name || "design")}</b> <span class="why">auto-associated — this livery was saved while the build was verified equipped (click to change)</span></div>`;
             if (lv) return `<div class="idm-id guess">${img}🪪 <b>Build ${esc(curB.label)}</b> · worn livery: <b>≈ ${esc(lv.name || "design")}</b> <span class="why">a GUESS from save-time proximity (~${lv.dt_h}h) — click the thumbnail to confirm or change</span></div>`;
-            return `<div class="idm-id unknown"><span class="tl-blvy-none" ${cyc} title="assign the paint this build wears — cycle through this car's liveries">🎨+</span>🪪 <b>Build ${esc(curB.label)}</b> · <b>worn livery unknown</b> <span class="why">the ${Math.round(dl.confidence * 100)}% measures how completely the tune FILE decodes — WHICH of your cars wears it, the game never records; you recognise it by paint. Click 🎨+ to assign.</span></div>`;
+            // ONE-TAP PICKER: the game never records which car wears which paint (GarageLayout blobs are encrypted —
+            // probed), so at the moment the build is VERIFIED we show the car's liveries as direct choices: one glance,
+            // one tap, pinned to the right build while the identity is certain.
+            const lc2 = (live.liveryCache || {})[String(dl.ordinal)];
+            const opts2 = ((lc2 && lc2.list) || []).slice(0, 6).map((l) => l.thumb
+              ? `<img class="idm-pick" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" alt="" title="tap: Build ${esc(curB.label)} wears ${esc(l.name || "this design")}" data-picklivery="${dl.ordinal}|${esc(curB.build)}|${esc(l.dir)}">`
+              : `<span class="idm-pick chip" data-picklivery="${dl.ordinal}|${esc(curB.build)}|${esc(l.dir)}" title="tap: Build ${esc(curB.label)} wears this">🎨 ${esc(l.name && !/^Forza/.test(l.name) ? l.name : (l.kind === "BaseLivery" ? "base paint" : "soul-bound"))}</span>`).join("");
+            return `<div class="idm-id unknown">🪪 <b>Build ${esc(curB.label)}</b> · <b>worn livery unknown</b>${opts2 ? ` — <b>tap the paint this car is wearing:</b> <span class="idm-picks">${opts2}</span>` : ` <span class="tl-blvy-none" ${cyc}>🎨+</span>`} <span class="why">the game never records this — one tap pins it for good</span></div>`;
           })()}
           <div class="idm-chips">${contrib}</div>
           ${asksHtml}
@@ -3933,6 +3944,11 @@
       el.querySelectorAll("[data-diskpick]").forEach((b) => b.addEventListener("click", () => { const [o, ts] = b.dataset.diskpick.split("|"); pickDiskTune(+o, ts || null); }));
       el.querySelectorAll("[data-clone-lock]").forEach((b) => b.addEventListener("click", () => lockCloneTarget(+b.dataset.cloneLock)));
       el.querySelectorAll("[data-clone-unlock]").forEach((b) => b.addEventListener("click", () => unlockCloneTarget()));
+      el.querySelectorAll("[data-picklivery]").forEach((b3) => b3.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation();
+        const [ordP, buildP, dirP] = b3.dataset.picklivery.split("|");
+        fetch(liveUrl + "/build-livery", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: +ordP, build: buildP, dir: dirP }) })
+          .then(() => { if (live.diskCache) delete live.diskCache[ordP]; fetchDiskTune(+ordP, { force: true }); }).catch(() => {});
+      }));
       el.querySelectorAll("[data-cyclelivery]").forEach((b2) => b2.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation();
         const [ordL, buildL, curDir] = b2.dataset.cyclelivery.split("|");
         const lc = (live.liveryCache || {})[String(ordL)];

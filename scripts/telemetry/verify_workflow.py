@@ -226,7 +226,8 @@ check("F client", "served JS is current", f2)
 
 def f3():
     src = open(os.path.join(ROOT, "dashboard", "app.js"), encoding="utf-8").read()
-    marks = ["const unionStrip", "tuneLibraryCard", "dockDataHtml", "cornerScoreCard", "spdCorners", "buildConfidence", "gatedTuning", "liveryStrip", "idm-chips", "data-cyclelivery"]
+    marks = ["const unionStrip", "tuneLibraryCard", "dockDataHtml", "cornerScoreCard", "spdCorners", "buildConfidence", "gatedTuning", "liveryStrip", "idm-chips", "data-cyclelivery",
+             "function clsBadge", "function piBadge", "carLblHtml", "pib-img"]   # the in-game class-badge design language must exist and stay wired
     missing = [m for m in marks if m not in src]
     return (not missing, f"feature markers present ({len(marks) - len(missing)}/{len(marks)}){'; missing: ' + str(missing) if missing else ''}")
 check("F client", "feature surface complete", f3)

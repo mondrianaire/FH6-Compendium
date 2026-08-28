@@ -155,6 +155,10 @@ td.price { font-variant-numeric: tabular-nums; }
 .pib b { padding: 3px 5px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55); font-style: normal; }
 .pib i { padding: 3px 5px; background: #0b0d10; color: #fff; font-style: normal; font-weight: 700; }
 .pib-img { height: 19px; width: auto; display: block; image-rendering: -webkit-optimize-contrast; }
+/* compact badge for dense one-line rows (tiles, ribbons, saves/build rows, chips) */
+.pib--sm { font-size: 10px; }
+.pib--sm .pib-img { height: 14px; }
+.pib--sm b, .pib--sm i { padding: 2px 4px; }
 
 /* visual-first primitives: rule card + why-drawer (prose budget doctrine) */
 .tz-rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }

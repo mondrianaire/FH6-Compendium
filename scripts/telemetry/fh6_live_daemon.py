@@ -472,6 +472,80 @@ def _learn_engine_catalog(family, cyl=None, redline=None, peak_hp=None, drivetra
         return
 
 
+def _gear_log(ordn, ts):
+    """Identity TIMELINE: intervals of which save was verified-equipped, so a livery can be attributed to the build
+    equipped AT ITS SAVE MOMENT — a plain 'recent livery -> current build' rule mis-pins across a car swap."""
+    if not hasattr(ST, "gear_id_log"):
+        ST.gear_id_log = {}
+    lg = ST.gear_id_log.setdefault(str(ordn), [])
+    now = time.time()
+    if lg and lg[-1]["ts"] == str(ts) and lg[-1]["t1"] is None:
+        return
+    if lg and lg[-1]["t1"] is None:
+        lg[-1]["t1"] = now
+    lg.append({"ts": str(ts), "t0": now, "t1": None})
+
+
+def _auto_assoc_livery(ordn, window_s=14400):
+    """TRUE AUTO-ASSOCIATION: a livery saved while build X was verified-equipped belongs to build X — you paint the
+    car you're sitting in. Each unassociated recent livery is matched to the identity-timeline interval covering its
+    save mtime (±2 min slack). A livery saved when NO identity was verified is left alone (manual pin / guess).
+    Never overwrites an existing pin; never re-assigns an associated livery. Throttled; source='auto'."""
+    try:
+        if not hasattr(ST, "_aa_last"):
+            ST._aa_last = {}
+        if time.time() - ST._aa_last.get(str(ordn), 0) < 30:
+            return
+        ST._aa_last[str(ordn)] = time.time()
+        log = getattr(ST, "gear_id_log", {}).get(str(ordn)) or []
+        if not log:
+            return
+        root_lv = TUNE.find_containers_root(); tag_lv = f"{int(ordn):04d}"
+        now = time.time()
+        bp2 = os.path.join(ROOT, "data", "build-liveries.json")
+        try:
+            with open(bp2, encoding="utf-8") as f2:
+                bobj2 = json.load(f2)
+        except Exception:
+            bobj2 = {"schema_version": "1.0.0", "assoc": {}}
+        a2 = bobj2.setdefault("assoc", {}).setdefault(str(ordn), {})
+        assigned = {(v.get("dir") if isinstance(v, dict) else v) for v in a2.values()}
+        metas2, _ = TUNE.tunes_for_ordinal(int(ordn))
+        import hashlib as _h2
+        changed = False
+        for d_ in os.listdir(root_lv):
+            if not d_.startswith((f"Livery_{tag_lv}_", f"SoulBoundLivery_{tag_lv}_", f"BaseLivery_{tag_lv}_")) or d_ in assigned:
+                continue
+            try:
+                mt = os.path.getmtime(os.path.join(root_lv, d_, "C_livery"))
+            except Exception:
+                continue
+            if now - mt > window_s:
+                continue
+            iv = next((e for e in log if e["t0"] - 120 <= mt <= (e["t1"] or now) + 120), None)
+            if iv is None:
+                continue   # saved while no identity was verified — not ours to claim
+            idm = next((mm2 for mm2 in metas2 if str(mm2["ts"]) == str(iv["ts"])), None)
+            if idm is None:
+                continue
+            t_id = TUNE.parse_tune(idm["path"], ordinal_hint=int(ordn))
+            items2 = tuple(sorted((k, v) for k, v in (t_id["parts"] or {}).items() if v is not None))
+            sig2 = _h2.sha1(repr(items2).encode()).hexdigest()[:8]
+            if sig2 in a2:
+                continue   # that build already has a pin — keep it
+            a2[sig2] = {"dir": d_, "source": "auto"}
+            assigned.add(d_); changed = True
+            print(f"auto-associated livery {d_} -> build {sig2} of {ordn} (saved while that build was verified equipped)", file=sys.stderr)
+        if changed:
+            tmpb = bp2 + ".tmp"
+            with open(tmpb, "w", encoding="utf-8") as f2:
+                json.dump(bobj2, f2, indent=1)
+            os.replace(tmpb, bp2)
+            ST._disk_dirty = True   # force the next disk emit so the dashboard shows it immediately
+    except Exception:
+        pass
+
+
 def _pick_meta(metas, ordn, ts_want=None):
     """A car can have MANY saved tunes on disk (different engines / PIs). Picking the newest file shows the WRONG
     build when you switch around. Instead match each save's decoded signature (cylinders from the engine-family
@@ -544,6 +618,7 @@ def _pick_meta(metas, ordn, ts_want=None):
                     if not hasattr(ST, "gear_id"):
                         ST.gear_id = {}
                     ST.gear_id[str(ordn)] = {"ts": str(winner["ts"]), "t": time.time()}   # PERSIST the verified identity — it must survive a pause
+                    _gear_log(ordn, winner["ts"]); _auto_assoc_livery(ordn)   # timeline entry + attribute any livery saved during a verified interval
     # STICKY IDENTITY: when the ladder can't run RIGHT NOW (menus drop the live frame; a short window lacks gears),
     # reuse the last gear-VERIFIED identity instead of reverting to 'newest' — the user's WOT run must not evaporate
     # the moment they pause to read the dashboard. Held for 2h; a new in-game save re-anchors it (below); an explicit
@@ -613,10 +688,12 @@ def _pick_meta(metas, ordn, ts_want=None):
                 try: return time.mktime(time.strptime(str(ts)[:14], "%Y%m%d%H%M%S"))
                 except Exception: return None
             for b in builds:
-                pin_dir = pins.get(b["build"])
+                pv_ = pins.get(b["build"])
+                pin_dir = (pv_.get("dir") if isinstance(pv_, dict) else pv_)
+                pin_src = (pv_.get("source") if isinstance(pv_, dict) else None) or "pinned"   # str = user pin; dict may be an auto-association
                 pl = next((l for l in livs if l["dir"] == pin_dir), None) if pin_dir else None
                 if pl is not None:
-                    b["livery"] = {"dir": pl["dir"], "name": pl["name"], "thumb": pl["thumb"], "source": "pinned"}
+                    b["livery"] = {"dir": pl["dir"], "name": pl["name"], "thumb": pl["thumb"], "source": pin_src}
                     continue
                 best_l = None; best_dt = None
                 for l in livs:
@@ -1402,6 +1479,8 @@ def disk_watcher():
                     _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)
             except Exception:
                 pass
+            if getattr(ST, "_disk_dirty", False):
+                ST._disk_dirty = False; last = (None, None)   # an auto-association changed the deliverable — re-emit even without a file change
             key = (ordn, round(metas[0]["mtime"], 2))
             if key == last:
                 continue
@@ -1422,6 +1501,7 @@ def disk_watcher():
                 if not hasattr(ST, "gear_id"):
                     ST.gear_id = {}
                 ST.gear_id[str(ordn)] = {"ts": str(metas[0]["ts"]), "t": time.time()}
+                _gear_log(ordn, metas[0]["ts"]); _auto_assoc_livery(ordn)
             nm = names_load().get("cars", {}).get(str(ordn)) or {}
             nm = nm.get("name") if isinstance(nm, dict) else nm
             diff = None

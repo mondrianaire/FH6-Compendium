@@ -3707,7 +3707,7 @@
           // car's liveries (…last → none → first); any click PINS your choice — user truth beats the guess.
           const lv = b.livery;
           const cyc = `data-cyclelivery="${ordinal}|${esc(b.build)}|${esc((lv && lv.dir) || "")}"`;
-          const lvTitle = lv ? `${esc(lv.name || "livery")}${lv.source === "guess" ? ` · GUESS (saved ~${lv.dt_h}h apart) — click to change/confirm` : " · pinned — click to change"}` : "no livery associated — click to assign from this car's liveries";
+          const lvTitle = lv ? `${esc(lv.name || "livery")}${lv.source === "guess" ? ` · GUESS (saved ~${lv.dt_h}h apart) — click to change/confirm` : lv.source === "auto" ? " · auto-associated (saved while this build was verified equipped) — click to change" : " · pinned — click to change"}` : "no livery associated — click to assign from this car's liveries";
           const lvCell = lv
             ? (lv.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(lv.dir)}" loading="lazy" alt="" ${cyc} title="${lvTitle}">`
                         : `<span class="tl-blvy-chip" ${cyc} title="${lvTitle}">🎨 ${esc(lv.name || "livery")}${lv.source === "guess" ? " ≈" : ""}</span>`)
@@ -3761,7 +3761,7 @@
         if (!assoc[b.livery.dir] || isCur) assoc[b.livery.dir] = { label: b.label, pi: b.pi, gears: b.gears, source: b.livery.source, isCur }; } });
       const specTxt = (a) => `Build ${a.label}${a.pi != null ? ` · PI ${a.pi}` : ""}${a.gears ? ` · ${a.gears}-sp` : ""}${a.source === "guess" ? " ≈" : ""}`;
       const cards = c.list.filter((l) => l.thumb).slice(0, 12).map((l) => { const a = assoc[l.dir];
-        const badge = a ? `<span class="lvy-badge${a.isCur ? " cur" : ""}" title="${a.source === "pinned" ? "pinned — this livery wears this tune" : "guessed from save-time proximity — confirm in the library"}">🪪 ${esc(specTxt(a))}</span>` : "";
+        const badge = a ? `<span class="lvy-badge${a.isCur ? " cur" : ""}" title="${a.source === "pinned" ? "pinned — this livery wears this tune" : a.source === "auto" ? "auto-associated — saved while this build was verified equipped" : "guessed from save-time proximity — confirm in the library"}">🪪 ${esc(specTxt(a))}</span>` : "";
         return `<figure class="lvy${a ? " assoc" : ""}${a && a.isCur ? " assoc-cur" : ""}" title="${esc([l.name, l.desc, l.creator && ("by " + l.creator)].filter(Boolean).join(" · ") || l.kind)}${a ? " · " + esc(specTxt(a)) : ""}">${badge}<img src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" alt="livery"><figcaption>${esc(l.name || (l.kind === "SoulBoundLivery" ? "soul-bound" : l.kind === "BaseLivery" ? "base paint" : "design"))}${a && a.isCur ? `<b class="lvy-cur-tag"> ◀ this tune</b>` : ""}</figcaption></figure>`; }).join("");
       // PAINT-ONLY case: a plain paintjob saves a BaseLivery container with NO thumbnail (the game only renders
       // bigThumb.webp for full designs), and its name is the generic 'Forza BaseLivery'. Show those as labelled
@@ -3849,6 +3849,7 @@
             const cyc = `data-cyclelivery="${dl.ordinal}|${esc(curB.build)}|${esc((lv && lv.dir) || "")}"`;
             const img = lv && lv.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(lv.dir)}" ${cyc} title="click to change">` : "";
             if (lv && lv.source === "pinned") return `<div class="idm-id ok">${img}🪪 this tune is <b>Build ${esc(curB.label)}</b> · worn livery: <b>${esc(lv.name || "pinned design")}</b> <span class="why">pinned by you — recognition certain</span></div>`;
+            if (lv && lv.source === "auto") return `<div class="idm-id ok">${img}🪪 this tune is <b>Build ${esc(curB.label)}</b> · worn livery: <b>${esc(lv.name || "design")}</b> <span class="why">auto-associated — this livery was saved while the build was verified equipped (click to change)</span></div>`;
             if (lv) return `<div class="idm-id guess">${img}🪪 <b>Build ${esc(curB.label)}</b> · worn livery: <b>≈ ${esc(lv.name || "design")}</b> <span class="why">a GUESS from save-time proximity (~${lv.dt_h}h) — click the thumbnail to confirm or change</span></div>`;
             return `<div class="idm-id unknown"><span class="tl-blvy-none" ${cyc} title="assign the paint this build wears — cycle through this car's liveries">🎨+</span>🪪 <b>Build ${esc(curB.label)}</b> · <b>worn livery unknown</b> <span class="why">the ${Math.round(dl.confidence * 100)}% measures how completely the tune FILE decodes — WHICH of your cars wears it, the game never records; you recognise it by paint. Click 🎨+ to assign.</span></div>`;
           })()}

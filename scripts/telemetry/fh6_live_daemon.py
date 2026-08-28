@@ -877,13 +877,27 @@ def _pick_meta(metas, ordn, ts_want=None):
     # LIVE TRUTH OVERRIDE: while the equipped build is strongly identified and on track, the frame's CarPI IS this
     # build's PI — a stored stamp that disagrees is stale or misattributed and must never outrank the live read
     # (the "identifies as A700 while driving it at S1 800" bug).
+    # ...but RECORD that it fired. The override adopts the live PI so the display is not wrong, and in doing so
+    # it consumes the only evidence that the car has been MODIFIED SINCE ITS LAST SAVE. The game writes a
+    # Tuning_*/Data file only when a tune is SAVED — browsing the upgrade shop, swapping rims or dragging
+    # sliders writes nothing — so no amount of polling can see an in-menu change. But a live CarPI that matches
+    # NO save on file is proof one happened, and swallowing it is how the decode came to show a month-old
+    # snapshot of ordinal 4167 while the user was changing its wheels (PI 850 -> 851 in the shop; no save has 851).
+    stale = None
     if live_pi and (live or live_recent) and final_how in ("gear-matched", "picked"):
         try:
+            _lp = int(live_pi)
+            _known = {int(s2["pi"]) for s2 in saves if s2.get("pi") is not None}
             eq = next((b for b in builds if any(str(t2) == str(best["ts"]) for t2 in (b.get("saves") or []))), None)
-            if eq is not None and eq.get("pi") != int(live_pi):
-                eq["pi"] = int(live_pi); eq["pi_src"] = "live"
+            if _known and _lp not in _known:
+                stale = {"live_pi": _lp, "save_pi": (eq or {}).get("pi"), "save_ts": best.get("ts"),
+                         "why": "the car reads PI %d live, and no save on file records that PI — it has been "
+                                "modified since its last save, so the values below describe the save, not the car. "
+                                "Save the tune in-game and it will be read exactly." % _lp}
+            if eq is not None and eq.get("pi") != _lp:
+                eq["pi"] = _lp; eq["pi_src"] = "live"
             for s2 in saves:
-                if str(s2.get("ts")) == str(best["ts"]) and s2.get("pi") != int(live_pi): s2["pi"] = int(live_pi)
+                if str(s2.get("ts")) == str(best["ts"]) and s2.get("pi") != _lp: s2["pi"] = _lp
         except Exception:
             pass
     # A PICK THE LIVE CAR CORROBORATES. The pick itself is just a declaration, so it is not evidence on its own —
@@ -895,7 +909,7 @@ def _pick_meta(metas, ordn, ts_want=None):
     return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
-                           "held": held_id, "ladder_tied": ladder_tied, "picked_ok": picked_ok,
+                           "held": held_id and not stale, "ladder_tied": ladder_tied, "picked_ok": picked_ok, "stale": stale,
                            "builds": builds, "saves": saves}
 
 

@@ -4272,7 +4272,13 @@
           : "";
         return `<div class="idm-cand"><span class="why" style="font-size:9.5px">${bs.length} candidate builds — what separates them:</span> ${chips}<div class="idm-cand-act">${act}${twinNote}</div></div>`;
       })();
-      const verdictChip = mm0.how === "gear-matched" ? `<span style="color:#00d27a;font-weight:700">⚙ verified${mm0.held ? " · held" : ""}</span>`
+      // MODIFIED SINCE ITS LAST SAVE outranks every other verdict. The game writes a tune file only when you
+      // SAVE, so shop changes and slider drags are invisible on disk — but a live CarPI matching no save proves
+      // one happened, and the sliders below then describe the SAVE, not the car. Saying "verified" there is the
+      // wrong answer confidently delivered; this says what is actually known and what would settle it.
+      const verdictChip = mm0.stale
+        ? `<span class="idm-flag warn" title="${esc(mm0.stale.why || "")}">⚠ modified since its last save — showing the save${mm0.stale.save_ts ? " of " + esc(String(mm0.stale.save_ts).slice(0, 8)) : ""}</span>`
+        : mm0.how === "gear-matched" ? `<span style="color:#00d27a;font-weight:700">⚙ verified${mm0.held ? " · held" : ""}</span>`
         : mm0.how === "picked" ? `<span style="color:#a371f7;font-weight:700">📌 pinned</span>`
         : (mm0.how === "no-match" || mm0.how === "unsaved-build") ? `<span class="idm-flag">build file missing</span>`
         : (mm0.n_signature_ties || 1) >= 2 ? `<span class="idm-flag warn">${mm0.n_signature_ties} candidates — drive the gears</span>`

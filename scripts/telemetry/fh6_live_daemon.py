@@ -889,6 +889,9 @@ def _pick_meta(metas, ordn, ts_want=None):
             _lp = int(live_pi)
             _known = {int(s2["pi"]) for s2 in saves if s2.get("pi") is not None}
             eq = next((b for b in builds if any(str(t2) == str(best["ts"]) for t2 in (b.get("saves") or []))), None)
+            # `_known` empty means no save has EVER been stamped, so "PI matches nothing" is not evidence of a
+            # modification — it is evidence this build is simply new. Both cases mean the sliders on screen may
+            # not describe the car, but only the first is a change since the last save.
             if _known and _lp not in _known:
                 stale = {"live_pi": _lp, "save_pi": (eq or {}).get("pi"), "save_ts": best.get("ts"),
                          "why": "the car reads PI %d live, and no save on file records that PI — it has been "
@@ -991,7 +994,22 @@ def _stamp_state(match, ordn=None):
         return False, "the live car contradicts the save you pinned (engine or gearbox disagree), or it isn't on track right now — the PI stamp needs the pin to match what you're driving"
     if match.get("held"):
         return False, "identity is HELD from your earlier verified run, not verified right now — a remembered identity is not evidence that this PI belongs to this build. Drive up through the gears again, or pick the equipped save in the 🪪 drawer"
-    return False, f"{match.get('n_signature_ties') or 2} saved builds share this engine + PI — drive up through the gears, or pick the equipped save in the 🪪 drawer"
+    # SAY WHAT IS ACTUALLY AMBIGUOUS. The tie filter (see `ties`) is CYLINDERS plus "gearbox not yet ruled out
+    # by a gear you have used" — PI is not in it. Claiming the builds "share this engine + PI" sent the user
+    # hunting for a matching build that does not exist: the live car read PI 805, a number no save has ever
+    # carried, while all six saves had pi=None. A PI nothing shares cannot be what makes them ambiguous.
+    _n = match.get('n_signature_ties') or 2
+    _pis = [s2.get("pi") for s2 in (match.get("saves") or []) if s2.get("pi") is not None]
+    _lp = match.get("live_pi")
+    if not _pis:
+        _why = (f"{_n} saved builds share this engine, and none of them has a recorded PI yet — so PI cannot tell "
+                f"them apart" + (f" (the car reads {_lp} live, which no save carries)" if _lp else "") + ". ")
+    elif _lp and int(_lp) not in {int(x) for x in _pis}:
+        _why = (f"{_n} saved builds share this engine. The car reads PI {int(_lp)} live and no save records it "
+                f"(saves have {sorted({int(x) for x in _pis})}) — this build has not been stamped before. ")
+    else:
+        _why = f"{_n} saved builds share this engine and PI. "
+    return False, _why + "Drive up through the gears, or pick the equipped save in the 🪪 drawer — a pick the live car does not contradict is accepted."
 
 
 def _enrich_engine_desc(deliverable, ordn, verified=False):

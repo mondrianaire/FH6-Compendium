@@ -58,7 +58,7 @@ class State:
         self.seq = 0
         self.clone_lock = None      # ordinal the user pinned as a CLONE TARGET — while set, PI/catalog accrual for it is paused (building the replica must not poison the target)
         self.gears_seen = {}        # ordinal -> set of forward gears USED at speed this session — hard identity evidence (you cannot use gear 8 in a 6-speed box)
-        self.picked_id = {}         # ordinal -> {ts, t}: the save the user PICKED in the 🪪 drawer while in this car — an explicit declaration of the equipped build (2h, like the gear hold)
+        self.picked_id = {}         # ordinal -> {ts, t}: the save the user PICKED in the 🪪 drawer — seeded from data/identity-evidence.json at startup so a restart does not re-ask
         self.live_fdg = {}          # ordinal -> {gear: [rpm/mph samples]} measured DAEMON-LOCAL at clean WOT — the ladder must not wait for (or die with) the analyzer
     def emit(self, name, payload):
         with self.lock:
@@ -66,6 +66,63 @@ class State:
             if len(self.events) > 2000: self.events = self.events[-2000:]
 
 ST = State()
+
+def _ident_restore():
+    """Resume, do not re-ask. Without this the persisted evidence would be written and never read, which is
+    exactly the orphan pattern the ask audit spent its time removing."""
+    try:
+        d = _ident_load()
+        for o, v in (d.get("picked") or {}).items():
+            if v.get("ts"): ST.picked_id[str(o)] = {"ts": str(v["ts"]), "t": time.time()}
+        for o, gs in (d.get("gears") or {}).items():
+            if gs: ST.gears_seen[str(o)] = set(int(x) for x in gs)
+        if d.get("picked") or d.get("gears"):
+            print("[identity] restored %d pick(s) and gear evidence for %d car(s)"
+                  % (len(d.get("picked") or {}), len(d.get("gears") or {})), flush=True)
+    except Exception:
+        pass
+_ident_restore()
+
+_IDENT_LOCK = threading.Lock()
+def _ident_path(): return os.path.join(ROOT, "data", "identity-evidence.json")
+
+def _ident_load():
+    """Identity evidence that SURVIVES. Both signals that resolve a multi-build car were in-memory only and
+    expired after 2 h: the user's explicit drawer pick, and the gears actually used (you cannot reach 8th in a
+    6-speed box). A restart, a crash, a reboot or two quiet hours discarded every one, and the car went back to
+    "6 saved builds share this engine" — so the same question got asked again and again while nothing accumulated.
+
+    A gear you have driven is a permanent fact about a build; a pick is a standing declaration until the user
+    moves off that build or a fresh save supersedes it. Neither should evaporate on a process bounce."""
+    try:
+        with open(_ident_path(), encoding="utf-8") as f: return json.load(f)
+    except Exception:
+        return {"schema_version": "1.0.0", "picked": {}, "gears": {}}
+
+def _ident_save(doc):
+    try:
+        p2 = _ident_path(); os.makedirs(os.path.dirname(p2), exist_ok=True)
+        tmp = p2 + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f: json.dump(doc, f, indent=1)
+        os.replace(tmp, p2)
+    except Exception:
+        pass
+
+def _ident_remember(kind, ordn, value):
+    with _IDENT_LOCK:
+        d = _ident_load()
+        if kind == "picked":
+            d.setdefault("picked", {})[str(ordn)] = {"ts": str(value), "at": time.time()}
+        else:
+            g = set(d.setdefault("gears", {}).get(str(ordn)) or [])
+            g |= set(int(x) for x in value)
+            d["gears"][str(ordn)] = sorted(g)          # gears only ever ACCUMULATE: driving 3rd never unproves 8th
+        _ident_save(d)
+
+def _ident_forget_pick(ordn):
+    with _IDENT_LOCK:
+        d = _ident_load()
+        if d.get("picked", {}).pop(str(ordn), None) is not None: _ident_save(d)
 
 def cid(p): return f'{p["CarOrdinal"]}|{p["DrivetrainType"]}|{p["NumCylinders"]}|{p["CarPI"]}'
 NAMES_PATH = os.path.join(ROOT, "data", "car-ordinals.json")
@@ -191,7 +248,9 @@ def ingest(p, t_mono):
     elif ST._zero_since is None: ST._zero_since = t_mono
     c["stint"] = ST.stint
     if c["on"] and c["car"] and 1 <= (c["gear"] or 0) <= 10 and c["mph"] > 15:   # gears actually USED at speed — the cheapest exact identity evidence
-        ST.gears_seen.setdefault(str(c["car"]), set()).add(int(c["gear"]))
+        _g = ST.gears_seen.setdefault(str(c["car"]), set())
+        if int(c["gear"]) not in _g:
+            _g.add(int(c["gear"])); _ident_remember("gears", c["car"], [int(c["gear"])])   # only on a NEW gear: one write per box, not per frame
         # LIVE gear-ratio accrual (rpm/mph per gear at clean WOT, wheelspin-gated via slip ratios): the ladder's
         # identity fingerprint, measured HERE — the analyzer's session output lags the cadence and dies on restart,
         # which left WOT pulls undetected ("drive up through the gears" that could never satisfy itself).
@@ -1537,6 +1596,7 @@ class H(BaseHTTPRequestHandler):
                         # must not become a licence to write that build's parts into the PI store.
                         if ts_want and match.get("picked_ok"):
                             ST.picked_id[str(ordn)] = {"ts": str(ts_want), "t": time.time()}
+                            _ident_remember("picked", ordn, ts_want)   # a declaration outlives the process that heard it
                         tune = TUNE.parse_tune(meta["path"], ordinal_hint=ordn)
                         deliverable = TUNE.tune_to_deliverable(tune, nm)
                         _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match))
@@ -1790,7 +1850,10 @@ def reset_session():
         ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None; ST._auto_suspend = None   # keep the loop DEFINITION, reset its lap count
         ST.live_seen = {}   # J20: the parked-identity hold is session telemetry — it dies with the session
         ST.gears_seen = {}; ST.live_fdg = {}
-        ST.picked_id = {}   # a pick declares what is equipped RIGHT NOW — a new session may be a different car entirely
+        # A new session does NOT clear the picks. A declaration is about a BUILD, not about a session, and
+        # wiping it here is half of why the same question kept coming back; a fresh save or a contradicting
+        # live read still supersedes it, which is the evidence that should.
+        ST.picked_id = dict(ST.picked_id)
         ST.clone_lock = None   # an orphaned lock silently blocked PI stamping + catalog accrual with no surface — a session reset is a clean slate
         ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
         ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
@@ -1987,7 +2050,7 @@ def disk_watcher():
                 if not hasattr(ST, "gear_id"):
                     ST.gear_id = {}
                 ST.gear_id[str(ordn)] = {"ts": str(metas[0]["ts"]), "t": time.time()}
-                ST.picked_id.pop(str(ordn), None)   # the fresh save IS the equipped build — it supersedes an older declaration, which may now name a build the user has moved off
+                ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)   # the fresh save IS the equipped build — it supersedes an older declaration, which may now name a build the user has moved off
                 _gear_log(ordn, metas[0]["ts"]); _auto_assoc_livery(ordn)
             nm = names_load().get("cars", {}).get(str(ordn)) or {}
             nm = nm.get("name") if isinstance(nm, dict) else nm

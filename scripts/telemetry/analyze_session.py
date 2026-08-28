@@ -1039,6 +1039,9 @@ def main():
             db.append({"key": k, "label": label, "have": have, "need": need, "ok": ok_, "why": why})
         decode = {"ready_n": ready, "total": len(DB_TESTS), "pct": round(ready / len(DB_TESTS), 2), "missing": [t["label"] for t in db if not t["ok"]], "tests": db}
         profile = course_profile(loop_rows, cc, bb, ll, car0)
+        if profile and cc:   # course-level SURFACE: mean rough fraction over this course's corners — persists with the profile (dirt/offroad course tag)
+            rfs = [c.get("rough_frac", 0.0) for c in cc if c.get("rough_frac") is not None]
+            if rfs: profile["rough_frac"] = round(sum(rfs) / len(rfs), 2); profile["rough_n"] = len(rfs)
         advice_by_car = {}
         for cid_ in co["cars"]:
             cov_stub = {"overall": round(num / den, 2) if den else 0.0, "probes": probes}

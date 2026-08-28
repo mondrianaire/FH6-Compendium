@@ -3635,6 +3635,17 @@
       .course-mini-glyph{flex:none;display:flex;align-items:center}
       .course-mini b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .start-pt{white-space:nowrap}.start-pt i{color:#00d27a;font-style:normal}
+      .ratif{border-radius:8px;padding:7px 10px;margin:0 0 8px;font-size:12px}
+      .ratif.ok{border:1px solid #00d27a;background:rgba(0,210,122,.08)}
+      .ratif.no{border:1px solid #e3b341;background:rgba(227,179,65,.07)}
+      .ratif.bad{border:1px solid #e5414e;background:rgba(229,65,78,.07)}
+      .ratif ol{margin:4px 0 0 20px;padding:0}
+      .ratif li{margin:2px 0;font-size:11.5px}
+      .ratif li span{margin-right:3px}
+      .rat-chip{font-size:10.5px;font-weight:800;border-radius:5px;padding:2px 7px;border:1px solid;white-space:nowrap}
+      .rat-chip.ok{color:#00d27a;border-color:#00d27a}
+      .rat-chip.no{color:#e3b341;border-color:#e3b341}
+      .rat-chip.bad{color:#e5414e;border-color:#e5414e}
       .lv-car{transition:transform .18s linear}
       .lv-last .lvl-ring{opacity:.95}
       .lv-last.fresh .lvl-ring{animation:tnpulse 1.1s ease-out 2}
@@ -4040,18 +4051,36 @@
         : (mm0.n_signature_ties || 1) >= 2 ? `<span class="idm-flag warn">${mm0.n_signature_ties} candidates — drive the gears</span>`
         : `<span class="why">${esc(mm0.how || "")}</span>`;
       const flags = `${u2.n_conflict ? `<span class="idm-flag" title="save × telemetry disagree — 🔗 drawer">⚠ ${u2.n_conflict}</span>` : ""}${sanE ? `<span class="idm-flag" title="sanity errors — 🩺 drawer">⛔ ${sanE}</span>` : sanW ? `<span class="idm-flag warn" title="sanity warnings — 🩺 drawer">🩺 ${sanW}</span>` : ""}${relN ? `<span class="idm-flag warn" title="%-sliders to calibrate — 🎯 drawer">🎯 ${relN}</span>` : ""}`;
-      const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `${piBadge(null, curB0.pi, true)}${curB0.gears ? `<span class="why"> · ${curB0.gears}-sp</span>` : ""}` : ""}${verdictChip}<span style="color:${oc};font-weight:800;margin-left:auto">${Math.round(dl.confidence * 100)}%</span>${flags}</div>`;
+      // ---- RATIFICATION VERDICT: the ONE answer this card must give — is the tune FINISHED, and if not, exactly
+      // what finishes it. Every ingredient already exists in the flags/drawers; this states them as one numbered
+      // checklist that never hides. Ratified = identity verified · no conflicts · no sanity errors · every value
+      // exact · PI stamped. Awaiting-telemetry corroboration does NOT block (it is enrichment, not doubt). ----
+      const bcR = buildConfidence(r);
+      const finSteps = [];
+      if (u2.n_conflict) finSteps.push({ i: "⚠", t: `resolve ${u2.n_conflict} save×telemetry conflict${u2.n_conflict > 1 ? "s" : ""} — re-apply this tune from Find Tunes (or re-save if yours), then drive once · both values in the 🔗 drawer` });
+      if (bcR.hardBlock || bcR.softNoLive) (bcR.need || []).slice(0, 2).forEach((t) => finSteps.push({ i: "🔎", t }));
+      if (sanE) finSteps.push({ i: "⛔", t: `fix ${sanE} tuning sanity error${sanE > 1 ? "s" : ""} — the 🩺 drawer names the exact slider${sanE > 1 ? "s" : ""} and the fix` });
+      if (relN) finSteps.push({ i: "🎯", t: `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} to exact values — 🎯 drawer, two-point read` });
+      if (curB0 && curB0.pi == null) finSteps.push({ i: "🪪", t: "drive this build once while identified — stamps its PI (the badge reads ? until then)" });
+      const ratified = !finSteps.length;
+      const ratCls = ratified ? "ok" : (u2.n_conflict || bcR.hardBlock) ? "bad" : "no";
+      const ratChip = ratified ? `<span class="rat-chip ok">✓ RATIFIED</span>` : `<span class="rat-chip ${ratCls}">◐ ${finSteps.length} to finish</span>`;
+      const ratifBlock = ratified
+        ? `<div class="ratif ok"><b>✅ TUNE RATIFIED</b> <span class="why">identity verified · no conflicts · no sanity errors · every value exact · PI stamped${u2.n_await ? ` · ${u2.n_await} field${u2.n_await > 1 ? "s" : ""} still corroborating in the background` : ""}</span></div>`
+        : `<div class="ratif ${ratCls}"><b>◐ NOT RATIFIED — ${finSteps.length === 1 ? "one step finishes" : finSteps.length + " steps finish"} this tune:</b><ol>${finSteps.map((s2) => `<li><span>${s2.i}</span> ${esc(s2.t)}</li>`).join("")}</ol></div>`;
+      const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `${piBadge(null, curB0.pi, true)}${curB0.gears ? `<span class="why"> · ${curB0.gears}-sp</span>` : ""}` : ""}${verdictChip}<span style="margin-left:auto;display:inline-flex;gap:7px;align-items:center">${ratChip}<span style="color:${oc};font-weight:800">${Math.round(dl.confidence * 100)}%</span></span>${flags}</div>`;
       // short warn line inline (action-first); the full match bar + picker live in the identity drawer
       const warnLine = (mm0.how === "no-match" || mm0.how === "unsaved-build")
         ? `<div class="dm-warn" style="margin:0 0 8px"><b>🚧 This build's file is not on disk.</b> Re-apply its tune from Find Tunes (or save it if yours) — full detail in the 🪪 drawer.</div>` : "";
       const idDrawer = drawer("🪪 Identity, confidence, liveries &amp; library", idmBlock + liveryStrip(dl.ordinal, r.match, r.ts) + tuneLibraryCard(r, dl.ordinal), false);
       if (opts.inFloat) {
-        return `<div class="block fhm" style="border-color:${frameCol}">${ribbon}${colsBlock}${idDrawer}${drawers}</div>`;
+        return `<div class="block fhm" style="border-color:${frameCol}">${ribbon}${ratifBlock}${colsBlock}${idDrawer}${drawers}</div>`;
       }
       return `<div class="block fhm" style="border-color:${frameCol}">${headRow}
         ${warnLine}
         ${diskDiffBanner(dl.ordinal)}
         ${ribbon}
+        ${ratifBlock}
         ${colsBlock}
         ${idDrawer}
         ${drawers}</div>`;

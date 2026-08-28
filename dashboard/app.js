@@ -3837,7 +3837,7 @@
       }).join("");
       const cf = diskConf(r);
       const popBtn = opts.popBtn ? (cf && cf.reasonable ? `<button class="lab-mode" data-popout="${dl.ordinal}" title="keep this build on screen while you navigate the upgrade / tune menus" style="padding:3px 10px;font-size:11px;border-color:#a371f7;color:#a371f7;margin-left:auto">📌 Pop out</button>` : `<button class="lab-mode" disabled title="reach reasonable confidence first — see the checklist below" style="padding:3px 10px;font-size:11px;border-color:var(--line);color:var(--muted);margin-left:auto;opacity:.55;cursor:not-allowed">📌 Pop out</button>`) : "";
-      const headRow = opts.inFloat ? "" : `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}<span class="chip" style="border-color:${oc};color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span> ${lockChip} <span class="chip">${dl.gear_count}-speed</span>${popBtn}</div>`;
+      const headRow = opts.inFloat ? "" : `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📀 On-disk tune — ${esc(r.name || "#" + dl.ordinal)}</h3>${badge}${lockChip} <span class="chip">${dl.gear_count}-speed</span>${popBtn}</div>`;
       // ---- CONSOLIDATED assembly: CONFIDENCE is the primary section. Identity (match), the confidence meter, one
       // contributor-chip row and the single ranked ask list form the master panel; everything that used to stack as
       // parallel cards (union detail, sanity, PI budget, calibration) becomes a DRAWER feeding it — same information,
@@ -3869,7 +3869,6 @@
       const frameCol = (mm0.how === "no-match" || mm0.how === "unsaved-build") ? "#e5414e" : (u2.n_conflict ? "#e3b341" : oc);
       const idmBlock = `<div class="idm">
           ${diskMatchBar(r, dl.ordinal)}
-          ${diskDiffBanner(dl.ordinal)}
           ${confMeterHtml(r)}
           ${(() => {   // RECOGNITION IDENTITY line — decode % measures how completely the tune FILE reads; WHICH of
             // your cars wears it is a separate axis the player recognises by PAINT. Say its state explicitly.
@@ -3898,19 +3897,30 @@
         ${drawer(`🩺 Sanity check${sanE || sanW ? ` <span class="idm-flag${sanE ? "" : " warn"}">${sanE ? "⛔ " + sanE : ""}${sanE && sanW ? " · " : ""}${sanW ? "⚠ " + sanW : ""}</span>` : " — clean"}`, sanI.length ? sanityPanel(dl, drvX) : "", sanE > 0)}
         ${drawer(`🧮 PI budget — per-part pricing`, piHtml, false)}
         ${drawer(`🎯 Calibration${relN ? ` <span class="idm-flag warn">${relN} pending</span>` : ""}`, calibrationCard(dl), false)}`;
+      // ---- STREAMLINED assembly (UX audit, second pass): ONE glanceable identity ribbon, payload immediately,
+      // EVERYTHING else in drawers. The dock's 📡 pill carries the persistent ask signal, so the sheet stays quiet.
+      const curB0 = (mm0.builds || []).find((b) => (b.saves || []).some((ts) => String(ts) === String(r.ts)));
+      const ribThumb = curB0 && curB0.livery && curB0.livery.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(curB0.livery.dir)}" alt="" title="${esc((curB0.livery.name || "livery") + (curB0.livery.source === "guess" ? " (guess)" : ""))}">` : "";
+      const verdictChip = mm0.how === "gear-matched" ? `<span style="color:#00d27a;font-weight:700">⚙ verified${mm0.held ? " · held" : ""}</span>`
+        : mm0.how === "picked" ? `<span style="color:#a371f7;font-weight:700">📌 pinned</span>`
+        : (mm0.how === "no-match" || mm0.how === "unsaved-build") ? `<span class="idm-flag">build file missing</span>`
+        : (mm0.n_signature_ties || 1) >= 2 ? `<span class="idm-flag warn">${mm0.n_signature_ties} candidates — drive the gears</span>`
+        : `<span class="why">${esc(mm0.how || "")}</span>`;
+      const flags = `${u2.n_conflict ? `<span class="idm-flag" title="save × telemetry disagree — 🔗 drawer">⚠ ${u2.n_conflict}</span>` : ""}${sanE ? `<span class="idm-flag" title="sanity errors — 🩺 drawer">⛔ ${sanE}</span>` : sanW ? `<span class="idm-flag warn" title="sanity warnings — 🩺 drawer">🩺 ${sanW}</span>` : ""}${relN ? `<span class="idm-flag warn" title="%-sliders to calibrate — 🎯 drawer">🎯 ${relN}</span>` : ""}`;
+      const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `<span class="why">PI ${curB0.pi}${curB0.gears ? ` · ${curB0.gears}-sp` : ""}</span>` : ""}${verdictChip}<span style="color:${oc};font-weight:800;margin-left:auto">${Math.round(dl.confidence * 100)}%</span>${flags}</div>`;
+      // short warn line inline (action-first); the full match bar + picker live in the identity drawer
+      const warnLine = (mm0.how === "no-match" || mm0.how === "unsaved-build")
+        ? `<div class="dm-warn" style="margin:0 0 8px"><b>🚧 This build's file is not on disk.</b> Re-apply its tune from Find Tunes (or save it if yours) — full detail in the 🪪 drawer.</div>` : "";
+      const idDrawer = drawer("🪪 Identity, confidence, liveries &amp; library", idmBlock + liveryStrip(dl.ordinal, r.match, r.ts) + tuneLibraryCard(r, dl.ordinal), false);
       if (opts.inFloat) {
-        // FLOAT = the take-to-game window: its purpose IS the parts/sliders payload (audit F1). One compact identity
-        // ribbon, then the columns FIRST; the full identity stack + gallery + library fold into one drawer.
-        const curB0 = (mm0.builds || []).find((b) => (b.saves || []).some((ts) => String(ts) === String(r.ts)));
-        const ribThumb = curB0 && curB0.livery && curB0.livery.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(curB0.livery.dir)}" alt="">` : "";
-        const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b><span style="color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span>${mm0.how === "no-match" || mm0.how === "unsaved-build" ? `<span class="idm-flag">not this build's file</span>` : mm0.how === "gear-matched" ? `<span class="why">⚙ verified</span>` : ""}</div>`;
-        return `<div class="block fhm" style="border-color:${frameCol}">${ribbon}${colsBlock}${drawer("🪪 Identity, liveries &amp; library — detail", idmBlock + liveryStrip(dl.ordinal, r.match, r.ts) + tuneLibraryCard(r, dl.ordinal), false)}${drawers}</div>`;
+        return `<div class="block fhm" style="border-color:${frameCol}">${ribbon}${colsBlock}${idDrawer}${drawers}</div>`;
       }
       return `<div class="block fhm" style="border-color:${frameCol}">${headRow}
-        ${idmBlock}
-        ${liveryStrip(dl.ordinal, r.match, r.ts)}
-        ${tuneLibraryCard(r, dl.ordinal)}
+        ${warnLine}
+        ${diskDiffBanner(dl.ordinal)}
+        ${ribbon}
         ${colsBlock}
+        ${idDrawer}
         ${drawers}</div>`;
     };
     const fetchDiskTune = (ordinal, opts) => {

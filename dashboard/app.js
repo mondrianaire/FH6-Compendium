@@ -644,6 +644,33 @@
   // ---- variables ----
   // corner-map constants shared by the big phase map and the per-category glyphs
   // 5-slot categorical palette validated (dataviz six-checks) against surface #161b22
+  // ═══ GRIP STATE — THE universal identity for what the tyres are doing. ONE alphabet (the daemon's and the
+  // analyzer's: off|calm|front|rear|both|impact), ONE palette, ONE set of words, used by the strip, the course
+  // map, the turn cards, the speed trace, the diagnosis panels and every chip that names an axle. Blue = the
+  // FRONTS gave up (understeer family) · red = the REARS gave up (oversteer) · purple = all four (drift /
+  // overdriven) · amber = an impact to discard · slate = within grip · near-black = not driving.
+  // `word` is the handling family a driver thinks in; `axle` is the measurement it came from — both are true,
+  // and every surface should show the one that fits its space rather than inventing a third vocabulary.
+  const GRIP = {
+    calm:   { col: "#2a313c", ink: "#8b97a7", word: "within grip",  axle: "within grip",            short: "grip",   icon: "✓", n: 0 },
+    front:  { col: "#2f81f7", ink: "#2f81f7", word: "understeer",   axle: "fronts past the limit",  short: "front",  icon: "↔", n: 1 },
+    rear:   { col: "#e5414e", ink: "#e5414e", word: "oversteer",    axle: "rears past the limit",   short: "rear",   icon: "⟳", n: 2 },
+    both:   { col: "#a371f7", ink: "#a371f7", word: "drift / overdriven", axle: "all four — drift / overdriven", short: "all four", icon: "🌀", n: 3 },
+    impact: { col: "#e3b341", ink: "#e3b341", word: "impact / jolt", axle: "impact / jolt",         short: "impact", icon: "⚡", n: 4 },
+    off:    { col: "#0b0e12", ink: "#8b97a7", word: "not driving",   axle: "not driving",           short: "off",    icon: "·", n: 5 },
+  };
+  const GRIP_BY_N = ["calm", "front", "rear", "both", "impact", "off"];      // the analyzer's numeric trace codes
+  const gripOf = (k) => GRIP[k] || (typeof k === "number" ? GRIP[GRIP_BY_N[k]] : null) || GRIP.calm;
+  const gripCol = (k) => gripOf(k).col;
+  // axle + handling word in one chip — the Rosetta the diagnostic matrix already teaches (front≡understeer)
+  const gripChip = (k, opts) => { const g = gripOf(k); const o = opts || {};
+    return `<span class="gchip" style="border-color:${g.ink};color:${g.ink}"${o.title ? ` title="${o.title}"` : ""}>${o.noIcon ? "" : g.icon + " "}${o.axle ? g.axle : g.word}</span>`; };
+  // the ONE legend — every strip/trace/map that paints states explains them the same way
+  const gripLegend = (keys) => `<span class="glegend">${(keys || ["calm", "front", "rear", "both", "impact"]).map((k) => { const g = gripOf(k);
+    return `<span title="${esc(g.axle)}"><i style="background:${g.col}"></i>${g.word}</span>`; }).join("")}</span>`;
+  // USI (understeer index) and first-red axle both resolve INTO the same alphabet — never a parallel one
+  const gripFromUsi = (u) => (u > 0.15 ? "front" : u < -0.05 ? "rear" : "calm");
+  const gripFromAxle = (a, drift) => (drift ? "both" : a === "front" ? "front" : a === "rear" ? "rear" : a === "both" ? "both" : "calm");
   const CM_PC = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
   const CM_SHORT = ["Braking", "Turn-in", "Mid-corner", "Exit", "Straight/crest"];
   const CM_SEGS = [
@@ -1945,9 +1972,9 @@
     };
     const tireCol = (which) => {
       const L = v.loose;
-      if (L === "all") return TZ_C.bad;
-      if (L === "limit") return TZ_C.warn;
-      if (L === which) return TZ_C.bad;
+      if (L === "all") return gripCol("both");      // the axle that let go must READ as that axle: front blue,
+      if (L === "limit") return gripCol("impact");   // rear red, all four purple — they were all one red before
+      if (L === which) return gripCol(which === "front" ? "front" : "rear");
       return TZ_C.dark;
     };
     const tire = (x, y, col, rot) => `<rect x="${x}" y="${y}" width="10" height="22" rx="2.5" fill="${col}"${rot ? ` transform="rotate(${rot} ${x + 5} ${y + 11})"` : ""}/>`;
@@ -2026,7 +2053,7 @@
       }
       return pts.map((p, i) => `${i ? "L" : "M"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
     };
-    const zoneCol = { muted: "#2a313c", good: "#00d27a", mixed: "#e3b341", drift: "#e5414e" };
+    const zoneCol = { muted: gripCol("calm"), good: "#00d27a", mixed: gripCol("impact"), drift: gripCol("both") };   // drift is PURPLE everywhere now (it read red here, purple in the lab)
     const slipSvg = `<svg viewBox="0 0 640 300" class="tz-svg tz-wide" role="img" aria-label="Grip versus slip angle">
       ${gs.slip_curve.zones.map((z) => `<rect x="${sx(z.from)}" y="${SC.y1}" width="${sx(z.to) - sx(z.from)}" height="${SC.y0 - SC.y1}" fill="${zoneCol[z.tone]}" opacity="0.09"/>`).join("")}
       <line x1="${SC.x0}" y1="${SC.y0}" x2="${SC.x1}" y2="${SC.y0}" stroke="var(--line)" stroke-width="1.5"/>
@@ -2155,8 +2182,9 @@
                 <ul class="why" style="font-size:11px;margin:4px 0 0;padding-left:16px">${m.rear.fix.map((f) => `<li>${f}</li>`).join("")}</ul></td>`).join("")}</tr>
           </tbody>
         </table></div>`;
-      const stCol = { calm: "#2a313c", front: "#2f81f7", rear: "#e5414e", both: "#a371f7", spike: "#e3b341" };
-      const stLbl = { calm: "within grip", front: "fronts saturated — understeer", rear: "rears saturated — oversteer", both: "all four — drift/overdriven", spike: "impact / physics jolt (discard)" };
+      // both maps are now VIEWS onto the one GRIP identity (the hand-authored timeline says "spike" where telemetry says "impact")
+      const stCol = { calm: gripCol("calm"), front: gripCol("front"), rear: gripCol("rear"), both: gripCol("both"), spike: gripCol("impact") };
+      const stLbl = { calm: GRIP.calm.axle, front: `${GRIP.front.axle} — ${GRIP.front.word}`, rear: `${GRIP.rear.axle} — ${GRIP.rear.word}`, both: GRIP.both.axle, spike: `${GRIP.impact.axle} (discard)` };
       const run = fd.your_run;
       const CW = 740 / run.timeline.length;
       const runStrip = `<svg viewBox="0 0 740 84" class="tz-svg tz-wide" role="img" aria-label="Your run, second by second">
@@ -2447,8 +2475,8 @@
     const sessions = DB.sessions || [];
     const tzfd = (DB.trainingZone || {}).friction_diagnosis;
     const NOSESS = `<p class="hint">No recorded sessions yet. Live: <code>python scripts/telemetry/fh6_live_daemon.py</code> then the 🔴 Live mode. Post-hoc: <code>fh6_dataout_capture.py</code> → <code>analyze_session.py</code> → rebuild.</p>`;
-    const ST = { calm: "#2a313c", front: "#2f81f7", rear: "#e5414e", both: "#a371f7", impact: "#e3b341", off: "#0b0e12" };
-    const STL = { calm: "within grip", front: "fronts past the limit", rear: "rears past the limit", both: "all four — drift / overdriven", impact: "impact / jolt", off: "not driving" };
+    const ST = Object.fromEntries(Object.entries(GRIP).map(([k, g]) => [k, g.col]));      // strip colors — the ONE palette
+    const STL = Object.fromEntries(Object.entries(GRIP).map(([k, g]) => [k, g.axle]));     // strip labels — the ONE wording
     const CARC = ["#00d27a", "#2f81f7", "#e3b341", "#e83c9e", "#a371f7", "#f0883e"];
     let sIdx = 0, carSel = null, donor = null, replica = null;
     const S = () => sessions[sIdx];
@@ -2520,10 +2548,10 @@
       // TURN IDENTIFICATION: overlay every extracted corner on the timeline, coloured by balance — the strip is the
       // live spine the suggestions come from, so each turn is marked where it happened (▲ understeer / oversteer / neutral).
       const idxAt = (t) => { let b = 0, bd = Infinity; for (let i = 0; i < n; i++) { const d = Math.abs(s.strip[i].t - t); if (d < bd) { bd = d; b = i; } } return b; };
-      const usiCol = (u) => u > 0.15 ? "#2f81f7" : u < -0.05 ? "#e5414e" : "#00d27a";
+      const usiCol = (u) => gripCol(gripFromUsi(u));   // USI resolves INTO the grip alphabet, never a parallel one
       const t0 = n ? s.strip[0].t : 0, t1 = n ? s.strip[n - 1].t : 0;
       const turns = (s.corners || []).filter((c) => !c.drift && c.t0 >= t0 && c.t0 <= t1);
-      const marks = turns.map((c, i) => { const x = idxAt(c.t0) * cw + cw / 2; const col = usiCol(c.usi); const v = c.usi > 0.15 ? "understeer" : c.usi < -0.05 ? "oversteer" : "neutral";
+      const marks = turns.map((c, i) => { const x = idxAt(c.t0) * cw + cw / 2; const col = usiCol(c.usi); const v = gripOf(gripFromUsi(c.usi)).word;
         return `<g><line x1="${x.toFixed(1)}" y1="14" x2="${x.toFixed(1)}" y2="58" stroke="${col}" stroke-width="1" opacity=".45"/><path d="M${(x - 3.2).toFixed(1)} 4 L${(x + 3.2).toFixed(1)} 4 L${x.toFixed(1)} 12 Z" fill="${col}"><title>turn ${i + 1}: ${c.dir === "L" ? "left" : "right"} · ${c.mph_in}→${c.mph_min} mph · ${c.lat_g_peak} g · USI ${c.usi > 0 ? "+" : ""}${c.usi} → ${v}${c.first_red ? " · first red " + c.first_red.axle : ""}</title></path></g>`; }).join("");
       return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg tz-wide" role="img" aria-label="Session strip with identified turns">
         ${s.strip.map((x, i) => `<g><rect x="${(i * cw).toFixed(2)}" y="16" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="40" fill="${ST[x.state]}" opacity="${x.state === "off" ? 1 : x.state === "calm" ? .6 : .95}"><title>${x.t}s — ${STL[x.state]}${x.mph != null ? ` · ${x.mph} mph · F ${x.f} R ${x.r} · ${x.g} g` : ""}${x.car ? ` · ${carLbl(s, x.car)}` : ""}</title></rect>
@@ -2538,11 +2566,11 @@
       const fr = c.first_red;
       return `<div class="lab-corner" style="border-left:4px solid ${carCol(s, c.car)}">
         <div class="card-row" style="margin-top:0"><strong>${c.dir === "L" ? "⬅" : "➡"} ${c.t0}s · ${c.mph_in}→${c.mph_min} mph · ${c.lat_g_peak} g</strong>
-          <span>${c.stint ? `<span class="chip" title="run">run ${c.stint}</span> ` : ""}${c.drift ? `<span class="chip" style="border-color:#a371f7;color:#a371f7">drift</span>` : fr ? `<span class="chip" style="border-color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]};color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]}">first red: ${fr.axle} · ph ${c.kink ? 5 : fr.phase}</span>` : `<span class="chip">no saturation</span>`}</span></div>
+          <span>${c.stint ? `<span class="chip" title="run">run ${c.stint}</span> ` : ""}${c.drift ? `<span class="chip" style="border-color:${gripCol("both")};color:${gripCol("both")}">${GRIP.both.word}</span>` : fr ? `<span class="chip" style="border-color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]};color:${CM_PC[(c.kink ? 5 : fr.phase) - 1]}">first red: ${fr.axle} · ph ${c.kink ? 5 : fr.phase}</span>` : `<span class="chip">no saturation</span>`}</span></div>
         <div class="lab-ph">${c.phases.map((p) => `<div style="border-color:${CM_PC[p.phase - 1]}" title="${esc(CM_SHORT[p.phase - 1])} · ${p.dur}s">
-            <span style="color:${CM_PC[p.phase - 1]};font-weight:700">${p.phase}</span> F <b style="color:${p.front > 1 ? "#e5414e" : "inherit"}">${p.front}</b><div class="lab-bar"><i style="width:${Math.min(100, p.front * 50)}%;background:${p.front > 1 ? "#2f81f7" : "#566173"}"></i></div>
-            R <b style="color:${p.rear > 1 ? "#e5414e" : "inherit"}">${p.rear}</b><div class="lab-bar"><i style="width:${Math.min(100, p.rear * 50)}%;background:${p.rear > 1 ? "#e5414e" : "#566173"}"></i></div></div>`).join("")}</div>
-        <p class="why" style="font-size:11px;margin:6px 0 0">USI <b>${c.usi > 0 ? "+" : ""}${c.usi}</b> ${c.usi > 0.15 ? "→ understeer" : c.usi < -0.05 ? "→ oversteer" : "→ balanced"}${c.hb ? " · handbrake" : ""}${c.brake_max > 200 ? " · hard brake" : ""}</p>
+            <span style="color:${CM_PC[p.phase - 1]};font-weight:700">${p.phase}</span> F <b style="color:${p.front > 1 ? gripCol("front") : "inherit"}">${p.front}</b><div class="lab-bar"><i style="width:${Math.min(100, p.front * 50)}%;background:${p.front > 1 ? gripCol("front") : "#566173"}"></i></div>
+            R <b style="color:${p.rear > 1 ? gripCol("rear") : "inherit"}">${p.rear}</b><div class="lab-bar"><i style="width:${Math.min(100, p.rear * 50)}%;background:${p.rear > 1 ? gripCol("rear") : "#566173"}"></i></div></div>`).join("")}</div>
+        <p class="why" style="font-size:11px;margin:6px 0 0">USI <b>${c.usi > 0 ? "+" : ""}${c.usi}</b> → ${gripOf(gripFromUsi(c.usi)).word}${c.hb ? " · handbrake" : ""}${c.brake_max > 200 ? " · hard brake" : ""}</p>
         ${cell && !c.drift ? `<p class="why" style="font-size:11px;margin:4px 0 0"><strong>${cell.name}</strong> — ${cell.fix}</p>` : ""}
       </div>`;
     }
@@ -3082,6 +3110,39 @@
         g.classList.remove("fresh"); void g.getBoundingClientRect(); g.classList.add("fresh");
       });
     } catch (e) {} };
+    // TRACE ↔ MAP: hovering the speed trace marks the exact spot on the course map. The trace's points carry
+    // their own world position (analyzer writes [s, mph, grip, x, z]), so this needs no arc-to-path alignment.
+    const bindTraceHover = (root) => { (root || host).querySelectorAll("svg.spd-trace[data-pts]").forEach((sv) => {
+      if (sv._bound) return; sv._bound = true;
+      let P = null; try { P = JSON.parse(sv.dataset.pts || "[]"); } catch (e) { P = null; }
+      if (!P || !P.length) return;
+      const ds = sv.dataset, smax = +ds.smax, padL = +ds.padl, W2 = +ds.w;
+      const readEl = sv.closest(".lab-corner") && sv.closest(".lab-corner").querySelector(".spd-read");
+      const cur = sv.querySelector(".spd-cursor");
+      const move = (ev) => {
+        const r = sv.getBoundingClientRect(); const vx = ((ev.clientX - r.left) / r.width) * W2;
+        const s = ((vx - padL) / (W2 - padL - 6)) * smax;
+        let bi = 0, bd = Infinity;
+        for (let i = 0; i < P.length; i++) { const d = Math.abs(P[i][0] - s); if (d < bd) { bd = d; bi = i; } }
+        const p = P[bi]; const g = gripOf(p[2]);
+        const px = padL + (p[0] / smax) * (W2 - padL - 6);
+        if (cur) { cur.style.display = ""; cur.querySelector("line").setAttribute("x1", px); cur.querySelector("line").setAttribute("x2", px);
+          const cc = cur.querySelector("circle"); cc.setAttribute("cx", px); cc.setAttribute("cy", sv.querySelector("polyline") ? +(sv.dataset.h) - 15 - (p[1] / (Math.max(...P.map((q) => q[1])) * 1.06 || 1)) * (+sv.dataset.h - 15 - 8) : 0); cc.setAttribute("fill", g.col); }
+        if (readEl) readEl.innerHTML = `<b>${Math.round(p[1])} mph</b> at ${Math.round(p[0])} m · ${gripChip(GRIP_BY_N[p[2]] || "calm", { axle: true })}`;
+        if (p.length > 4) markMapAt(p[3], p[4], g.col);
+      };
+      sv.addEventListener("mousemove", move);
+      sv.addEventListener("mouseleave", () => { if (cur) cur.style.display = "none"; if (readEl) readEl.textContent = "hover the trace — it marks that exact spot on the course map"; clearMapMark(); });
+    }); };
+    const markMapAt = (x, z, col) => { try { host.querySelectorAll("svg[data-live-map]").forEach((sv) => {
+      const ds = sv.dataset; const cx = +ds.ox + (x - +ds.x0) * +ds.sc, cy = +ds.oy - (z - +ds.z0) * +ds.sc;
+      if (cx < -20 || cy < -20 || cx > +ds.w + 20 || cy > +ds.h + 20) return;
+      let g = sv.querySelector(".spd-mark");
+      if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.setAttribute("class", "spd-mark"); sv.appendChild(g); }
+      g.style.display = ""; g.innerHTML = `<circle r="11" fill="none" stroke="${col}" stroke-width="1.4" opacity=".55"/><circle r="5" fill="${col}" stroke="var(--bg)" stroke-width="1.5"/>`;
+      g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
+    }); } catch (e) {} };
+    const clearMapMark = () => { try { host.querySelectorAll("svg[data-live-map] .spd-mark").forEach((g) => { g.style.display = "none"; }); } catch (e) {} };
     const flashTurnOnMap = (sc) => { try {
       if (!sc || !sc.key || String(sc.key).indexOf("ct") !== 0) return; const n = +String(sc.key).slice(2); const col = GRADE_COL[sc.grade];
       host.querySelectorAll(`svg[data-live-map] [data-tn="${n}"]`).forEach((mk) => {
@@ -3640,6 +3701,12 @@
       .course-mini-glyph{flex:none;display:flex;align-items:center}
       .course-mini b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .start-pt{white-space:nowrap}.start-pt i{color:#00d27a;font-style:normal}
+      .gchip{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;border:1px solid;border-radius:5px;padding:1px 6px;white-space:nowrap}
+      .glegend{display:inline-flex;flex-wrap:wrap;gap:9px;font-size:10px;color:var(--muted)}
+      .glegend span{display:inline-flex;align-items:center;gap:4px}
+      .glegend i{width:10px;height:3px;border-radius:2px;display:inline-block}
+      svg.spd-trace{cursor:crosshair}
+      .spd-mark{pointer-events:none}
       .ratif{border-radius:8px;padding:7px 10px;margin:0 0 8px;font-size:12px}
       .ratif.ok{border:1px solid #00d27a;background:rgba(0,210,122,.08)}
       .ratif.no{border:1px solid #e3b341;background:rgba(227,179,65,.07)}
@@ -4453,8 +4520,48 @@
     }
     // ---- LIVE CORNER ANALYSIS (course training): every corner of every lap, full stats, in real time ----
     // enriched corner log: each live 'corner' event tagged with its lap and matched to a course turn (canonical apex position)
-    const canonTurns = () => { const an = live.analysis; const co = an && (an.courses || [])[0]; return (co && co.turns && co.turns.canonical) || []; };
-    const matchTurn = (apex) => { if (!apex || apex[0] == null) return null; const cs = canonTurns(); let best = null, bd = 60 * 60; cs.forEach((t, i) => { const d = (t.pos[0] - apex[0]) ** 2 + (t.pos[1] - apex[1]) ** 2; if (d < bd) { bd = d; best = { id: t.id, n: i + 1, dir: t.dir }; } }); return best; };
+    // ═══ TURN TABLE — turns come from COURSE DATA, not from re-deriving them per session. Order of truth:
+    // (1) the persisted course model's established turns (full fidelity: type, radius, track record, per-car
+    // bests), (2) the session's canonical projection of that same model when it is fresher, (3) — only when a
+    // course has never established a turn — the curvature map, flagged PROVISIONAL. `source` is rendered, never
+    // hidden, so "no turns yet" reads as a stage of learning rather than a blank panel.
+    const _ttCache = {};
+    const turnTable = (co) => {
+      if (!co) return { turns: [], source: "none", count: 0 };
+      const rk = co.route_key || ""; const ck = rk + "|" + ((live.analysis && live.analysis.id) || "") + "|" + ((co.turns || {}).canonical || []).length;
+      if (_ttCache[ck]) return _ttCache[ck];
+      const tu = co.turns || {};
+      const m = ((DB.courseModels || []).find((x) => x && x.route_key === rk)) || null;
+      let rows = [];
+      if (m && (m.turns || []).length) {
+        let est = m.turns.filter((t) => t.established);
+        if (m.expected_turns && est.length > m.expected_turns) {
+          est = est.slice().sort((a, b) => ((b.track || {}).presence || 0) - ((a.track || {}).presence || 0)).slice(0, m.expected_turns)
+                   .sort((a, b) => m.turns.indexOf(a) - m.turns.indexOf(b));
+        }
+        rows = est.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m, type: t.type, track: t.track || null, best_by_car: t.best_by_car || null }));
+      }
+      const canon = tu.canonical || [];
+      if (canon.length) {   // the session sees the SAME model, fresher than db.js — it wins, keeping the model's extra fields where they line up
+        const near = (a, b) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= 20 * 20;
+        rows = canon.map((c) => Object.assign({}, rows.find((r2) => r2.id === c.id) || rows.find((r2) => near(r2.pos, c.pos)) || {},
+          { id: c.id, pos: c.pos, dir: c.dir, radius_m: c.radius_m, passes: c.passes, presence: c.presence, sessions: c.sessions, dominant: c.dominant }));
+      }
+      let out;
+      if (rows.length) out = { turns: rows.map((r2, i) => Object.assign(r2, { n: i + 1 })), source: "model", count: tu.count || (m && (m.expected_turns || m.turn_count)) || rows.length, expected: tu.expected != null ? tu.expected : (m && m.expected_turns) || null };
+      else {
+        const geo = courseGeoFor(co) || (m && m.geometry) || null; const g = (geo && geo.turns) || [];
+        out = g.length ? { turns: g.map((x, i) => ({ n: i + 1, id: x.id, pos: x.apex, dir: x.dir, radius_m: x.radius_m, provisional: true })), source: "geometry", count: g.length, expected: tu.expected || null }
+                       : { turns: [], source: "none", count: 0, expected: tu.expected || null };
+      }
+      _ttCache[ck] = out; return out;
+    };
+    const TURN_R = 45;   // ONE join radius everywhere (the analyzer's own corner↔turn radius) — was 60/45/40/18 in five places
+    const turnAt = (co, pos) => { if (!pos || pos[0] == null) return null; let best = null, bd = TURN_R * TURN_R;
+      turnTable(co).turns.forEach((t) => { const d = (t.pos[0] - pos[0]) ** 2 + (t.pos[1] - pos[1]) ** 2; if (d < bd) { bd = d; best = t; } }); return best; };
+    const turnKey = (t) => (t ? (t.id || "g" + t.n) : null);   // join on the MODEL's id, never a positional index
+    const canonTurns = () => { const an = live.analysis; const co = an && (an.courses || [])[0]; return (co ? turnTable(co).turns : []); };   // legacy shim: live course, model-first
+    const matchTurn = (apex) => { if (!apex || apex[0] == null) return null; const an = live.analysis; const co = an && (an.courses || [])[0]; const t = co && turnAt(co, apex); return t ? { id: t.id, n: t.n, dir: t.dir } : null; };
     // J13: ONE turn language for the user — canonical T<n>. Analyzer ids (C3 clusters, G4 geometry, model T-ids)
     // stay in the data but resolve to T<n> for display; unresolvable ids pass through untouched.
     const matchTurnById = (id) => {
@@ -4467,7 +4574,7 @@
     const turnLabel = (id) => { try { const mt = matchTurnById(id); return mt ? "T" + mt.n : String(id); } catch (e) { return String(id); } };
     const resolveTurnIds = (text) => { try { return String(text).replace(/\b[GC]\d+\b/g, (id) => turnLabel(id)); } catch (e) { return text; } };
     const pushCornerLog = (c) => { if (!live.cornerLog) live.cornerLog = []; const lap = c.lapn != null ? c.lapn : (c.loop_lap != null ? c.loop_lap : null); live.cornerLog.push(Object.assign({}, c, { lap, seq: (live.cornerLog.length + 1) })); if (live.cornerLog.length > 400) live.cornerLog = live.cornerLog.slice(-400); };   // turn match happens at RENDER (canonical turns may load after the corner)
-    const usiVerdict = (u) => u > 0.15 ? ["understeer", "#2f81f7"] : u < -0.05 ? ["oversteer", "#e5414e"] : ["neutral", "#00d27a"];
+    const usiVerdict = (u) => { const g = gripOf(gripFromUsi(u)); return [g.word, u > 0.15 || u < -0.05 ? g.ink : "#00d27a"]; };
     const phaseBars = (ph) => `<span style="display:inline-flex;gap:2px">${(ph || []).map((p) => { const fr = Math.min(1, p.front / 1.5), rr = Math.min(1, p.rear / 1.5); const col = p.red === "front" ? "#2f81f7" : p.red === "rear" ? "#e5414e" : p.red === "both" ? "#a371f7" : "#3a4250"; return `<span title="phase ${p.phase} (${CM_SHORT ? CM_SHORT[p.phase - 1] : ""}): front ${p.front} · rear ${p.rear}" style="display:inline-block;width:16px;height:16px;border-radius:2px;border:1px solid ${col};position:relative;background:var(--bg)"><i style="position:absolute;left:0;bottom:0;width:50%;height:${Math.round(fr * 100)}%;background:#2f81f7;opacity:${p.front > 1 ? 1 : .4}"></i><i style="position:absolute;right:0;bottom:0;width:50%;height:${Math.round(rr * 100)}%;background:#e5414e;opacity:${p.rear > 1 ? 1 : .4}"></i></span>`; }).join("")}</span>`;
     const cornerAnalysis = () => {
       const curC = (live.frame && live.frame.on && live.frame.cid) || live.courseCar; const log = (live.cornerLog || []).filter((c) => !curC || c.car === curC); const cs = canonTurns(); const f = live.frame || {}; const inCorner = f.on && Math.abs(f.lat || 0) > 0.4;   // car-aware: only the equipped car's corners
@@ -4700,10 +4807,15 @@
       const poly = (arr) => arr.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
       // the turn markers = the CANONICAL turns of the course (established across sessions, positions in world coords) — so the map matches the count.
       // A canonical turn is "geometry-confirmed" if a curvature turn sits near it, and "loaded" if a behavioural corner was measured near it this session.
-      const canon = (turns && turns.canonical && turns.canonical.length) ? turns.canonical.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, r: t.radius_m })) : (geo.turns || []).map((g) => ({ id: g.id, pos: g.apex, dir: g.dir, r: g.radius_m }));
+      // ONE table for markers, clicks and the breakdown panel — the old canonical/geometry ternary made the
+      // geometry fallback clickable while the panel only indexed canonical, so those clicks did nothing.
+      const _tt = opts.co ? turnTable(opts.co) : { turns: (turns && turns.canonical && turns.canonical.length ? turns.canonical.map((t, i) => ({ n: i + 1, id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m })) : (geo.turns || []).map((g, i) => ({ n: i + 1, id: g.id, pos: g.apex, dir: g.dir, radius_m: g.radius_m, provisional: true }))), source: "model" };
+      const canon = _tt.turns.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, r: t.radius_m, provisional: t.provisional }));
       const gTurns = (geo.turns || []).map((g) => g.apex); const nearAny = (pos, list, d) => list.some((q) => (q[0] - pos[0]) ** 2 + (q[1] - pos[1]) ** 2 <= d * d);
       const cornerPos = (corners || []).map((k) => k.pos).filter(Boolean);
-      const markers = canon.map((t, i) => ({ n: i + 1, id: t.id, pos: t.pos, dir: t.dir, r: t.r, mapped: nearAny(t.pos, gTurns, 45), loaded: nearAny(t.pos, cornerPos, 45) }));
+      const markers = canon.map((t, i) => ({ n: i + 1, id: t.id, pos: t.pos, dir: t.dir, r: t.r, provisional: t.provisional, mapped: nearAny(t.pos, gTurns, 45), loaded: nearAny(t.pos, cornerPos, 45),
+        grip: (() => { const k = (corners || []).filter((c) => c.pos && (c.pos[0] - t.pos[0]) ** 2 + (c.pos[1] - t.pos[1]) ** 2 <= TURN_R * TURN_R).slice(-1)[0];
+          return k ? gripFromAxle(k.dominant, k.drift) : null; })() }));   // a turn wears the state it took: blue when the fronts went, purple when all four did
       // LIVE INSTRUMENT: on the live source the map carries (a) the transform constants so paintFrame can move the
       // car marker every frame without re-rendering, (b) a per-turn GRADE ring from the Last-corner scoring — the
       // map and the scorecard speak about the same turn in the same color.
@@ -4714,7 +4826,7 @@
         ${(geo.last_paths || (lp.length ? [lp] : [])).map((pc) => `<polyline fill="none" stroke="var(--warn,#e3b341)" stroke-width="2" stroke-dasharray="4 3" opacity=".9" points="${poly(pc)}"/>`).join("")}
         ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" points="${poly(pc)}"/>`).join("")}
         <circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="4" fill="#00d27a"/><text x="${(X(pts[0][0]) + 6).toFixed(1)}" y="${(Y(pts[0][1]) - 4).toFixed(1)}" fill="#00d27a" font-size="9">start</text>
-        ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; const gr = gradeByTurn[g.n]; const fresh = gr && gr.at && (Date.now() - gr.at < 8000); return `<g class="ct-marker${sel ? " sel" : ""}" data-tn="${g.n}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${gr ? `<circle class="tn-grade${fresh ? " fresh" : ""}" cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="8.5" fill="none" stroke="${GRADE_COL[gr.grade]}" stroke-width="2.2"><title>latest pass: grade ${gr.grade} · score ${gr.score}${gr.deltaBest != null ? ` · ${gr.deltaBest >= 0 ? "+" : ""}${gr.deltaBest} vs best` : ""}</title></circle>` : ""}${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
+        ${markers.map((g) => { const col = g.grip && g.grip !== "calm" ? gripCol(g.grip) : g.loaded ? "#00d27a" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; const gr = gradeByTurn[g.n]; const fresh = gr && gr.at && (Date.now() - gr.at < 8000); return `<g class="ct-marker${sel ? " sel" : ""}" data-tn="${g.n}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${gr ? `<circle class="tn-grade${fresh ? " fresh" : ""}" cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="8.5" fill="none" stroke="${GRADE_COL[gr.grade]}" stroke-width="2.2"><title>latest pass: grade ${gr.grade} · score ${gr.score}${gr.deltaBest != null ? ` · ${gr.deltaBest >= 0 ? "+" : ""}${gr.deltaBest} vs best` : ""}</title></circle>` : ""}${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.grip && g.grip !== "calm" ? gripCol(g.grip) : g.loaded ? "#00d27a" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
         ${(() => { if (!opts.live || typeof live === "undefined") return ""; const ls = (live.cornerScores || []).slice(-1)[0]; if (!ls || !ls.pos || ls.pos[0] == null) return ""; const lx = X(ls.pos[0]), ly = Y(ls.pos[1]); if (lx < -25 || ly < -25 || lx > W + 25 || ly > H + 25) return ""; return `<g class="lv-last" transform="translate(${lx.toFixed(1)},${ly.toFixed(1)})">${lastCornerSvg(ls)}</g>`; })()}
         ${opts.live ? `<g class="lv-car" style="display:none"><circle r="9" fill="none" stroke="#00d27a" stroke-width="1.4" opacity=".45"/><circle r="4.6" fill="#00d27a" stroke="#0e1116" stroke-width="1.4"><title>you — live position</title></circle></g>` : ""}
       </svg>`;
@@ -4797,16 +4909,31 @@
       const W2 = 560, H2 = 150, padL = 26, padB = 15;
       const px2 = (s) => padL + (s / smax) * (W2 - padL - 6), py2 = (v) => (H2 - padB) - (v / vmax) * (H2 - padB - 8);
       const line = (t, col, w2, op) => `<polyline fill="none" stroke="${col}" stroke-width="${w2}" opacity="${op}" points="${t.pts.map((p) => `${px2(p[0]).toFixed(1)},${py2(p[1]).toFixed(1)}`).join(" ")}"/>`;
+      // GRIP-PAINTED trace: the same line, cut into runs of one state, so a turn reads blue the instant the
+      // fronts give up and purple when all four go — the state change IS the shape of the line, seamlessly.
+      const gripLine = (t, w2) => { const P = t.pts; if (!P.length || P[0].length < 3) return line(t, "var(--accent2)", w2, 1);
+        const segs = []; let run = [P[0]], st = P[0][2];
+        for (let i = 1; i < P.length; i++) { if (P[i][2] !== st) { run.push(P[i]); segs.push([st, run]); run = [P[i]]; st = P[i][2]; } else run.push(P[i]); }
+        segs.push([st, run]);
+        return segs.map(([s2, pts2]) => `<polyline fill="none" stroke="${gripCol(s2)}" stroke-width="${s2 ? w2 + 0.8 : w2}" stroke-linecap="round" opacity="${s2 ? 1 : 0.85}" points="${pts2.map((p) => `${px2(p[0]).toFixed(1)},${py2(p[1]).toFixed(1)}`).join(" ")}"><title>${esc(gripOf(s2).axle)}</title></polyline>`).join("");
+      };
       const isCur = (t) => !!curCar && t.cid === curCar; const best = match[0]; const cur = match.find(isCur);
       const geo = courseGeoFor(co); const canon2 = ((co.turns || {}).canonical) || [];
       const tkLbl = (g2) => { let bi = -1, bd = 60 * 60; canon2.forEach((t2, i2) => { const d2 = (t2.pos[0] - g2.apex[0]) ** 2 + (t2.pos[1] - g2.apex[1]) ** 2; if (d2 < bd) { bd = d2; bi = i2; } }); return bi >= 0 ? "T" + (bi + 1) : "·"; };   // THIS course's T-numbers, not courses[0]'s
       const ticks = ((geo && geo.turns) || []).filter((g2) => g2.s != null && g2.apex).map((g2) => `<line x1="${px2(g2.s).toFixed(1)}" y1="${H2 - padB}" x2="${px2(g2.s).toFixed(1)}" y2="8" stroke="var(--line)" opacity=".55"/><text x="${px2(g2.s).toFixed(1)}" y="${H2 - 4}" text-anchor="middle" font-size="8" fill="var(--muted)">${tkLbl(g2)}</text>`).join("");
       const axis = [0.5, 1].map((f2) => { const v = Math.round(vmax * f2 / 10) * 10; return `<text x="2" y="${(py2(v) + 3).toFixed(1)}" font-size="8" fill="var(--muted)">${v}</text>`; }).join("");
-      const lines = match.map((t) => (isCur(t) ? "" : line(t, t === best ? "#00d27a" : "var(--muted)", t === best ? 1.8 : 1.1, t === best ? 0.9 : 0.45))).join("") + (cur ? line(cur, "var(--accent2)", 2.4, 1) : "");
+      // rivals: plain lines (comparison). YOUR tune: grip-painted, because that is the one you can act on.
+      const lines = match.map((t) => (isCur(t) ? "" : line(t, t === best ? "#00d27a" : "var(--muted)", t === best ? 1.8 : 1.1, t === best ? 0.9 : 0.45))).join("") + (cur ? gripLine(cur, 2.4) : "");
+      const hasGrip = !!(cur && cur.pts && cur.pts[0] && cur.pts[0].length > 2);
       const leg = match.slice(0, 6).map((t) => `<span class="chip" title="${esc((t.session || "") + (t.build_id ? " · build " + t.build_id : ""))}" style="border-color:${isCur(t) ? "var(--accent2)" : t === best ? "#00d27a" : "var(--line)"};${isCur(t) || t === best ? "" : "color:var(--muted)"}">${buildThumb(String(t.cid).split("|")[0], t.build_id, true)} ${piBadge(t.cls, t.pi, true)}${t.lap_s ? ` · ${t.lap_s.toFixed(1)} s` : ""}${isCur(t) ? " · you" : t === best ? " · fastest" : ""}</span>`).join("");
       return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces — class ${esc(curCls || "all")} on this circuit</strong><span class="why" style="font-size:10.5px">${match.length} saved tune${match.length === 1 ? "" : "s"} · each tune's best lap · mph vs distance</span></div>
-        <div style="overflow-x:auto"><svg viewBox="0 0 ${W2} ${H2}" style="min-width:420px;max-width:100%;background:var(--bg);border-radius:8px">${axis}${ticks}${lines}</svg></div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${leg}</div></div>`;
+        <div style="overflow-x:auto"><svg class="spd-trace" viewBox="0 0 ${W2} ${H2}" style="min-width:420px;max-width:100%;background:var(--bg);border-radius:8px"
+             data-smax="${smax}" data-padl="${padL}" data-w="${W2}" data-h="${H2}"
+             data-pts="${hasGrip ? esc(JSON.stringify(cur.pts.map((p) => [p[0], p[1], p[2], p[3], p[4]]))) : ""}">${axis}${ticks}${lines}
+             <g class="spd-cursor" style="display:none"><line y1="6" y2="${H2 - padB}" stroke="var(--txt)" stroke-width="1" opacity=".6"/><circle r="3.5" fill="var(--txt)"/></g></svg></div>
+        <div class="spd-read why" style="font-size:10.5px;min-height:14px">${hasGrip ? "hover the trace — it marks that exact spot on the course map" : ""}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${leg}</div>
+        ${hasGrip ? `<div style="margin-top:4px">${gripLegend(["calm", "front", "rear", "both", "impact"])}</div>` : ""}</div>`;
     } catch (e) { return ""; } };
     const turnTraceStrip = (co, tpos, curCar) => { try {
       if (!co.speed_traces || !tpos) return ""; const geo = courseGeoFor(co);
@@ -4824,7 +4951,11 @@
       const ct = courseTags(x); if (!ct) return "";
       const chip2 = (g) => `<span class="chip" style="border-color:${g.col};color:${g.col}" title="${esc(g.why)}">${g.t}</span>`;
       const kindChip = ct.kind ? `<span class="chip" style="border-color:var(--accent2);color:var(--accent2)" title="topology from recorded laps">${ct.kind === "reference loop" ? "📍" : ct.kind === "circuit" ? "🔁" : "➡"} ${ct.kind}</span>` : "";
-      return `<div class="course-tags" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px">${kindChip}${ct.tags.map(chip2).join("")}${ct.fits.length ? `<span class="why" style="font-size:10px">fits:</span>${ct.fits.map(chip2).join("")}` : ""}${courseMeasuredChip(x)}</div>`;
+      // RIVALS: the packet has no mode field, so this is inferred from RacePosition — and CLICKABLE, because the
+      // player's own word beats a heuristic that cannot tell a wire-to-wire race win from a time trial.
+      const _tuR = x.turns || {}; const _riv = _tuR.rivals, _rsrc = _tuR.rivals_src;
+      const rivChip = x.route_key ? `<span class="chip" data-rivals="${esc(x.route_key)}|${_riv ? 0 : 1}" style="cursor:pointer;border-color:${_riv ? "var(--accent)" : "var(--line)"};color:${_riv ? "var(--accent)" : "var(--muted)"}" title="${_rsrc === "declared" ? "you declared this a Rivals course — its laps are the clean comparable ones" : _riv ? "inferred from race position (no opponents seen) — click to confirm" : "races recorded here — click if this is actually a Rivals course"}">🏁 ${_riv ? "Rivals" : "not Rivals"}${_rsrc === "declared" ? "" : " ≈"}</span>` : "";
+      return `<div class="course-tags" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px">${kindChip}${rivChip}${ct.tags.map(chip2).join("")}${ct.fits.length ? `<span class="why" style="font-size:10px">fits:</span>${ct.fits.map(chip2).join("")}` : ""}${courseMeasuredChip(x)}</div>`;
     };
     const courseIdentity = (rn, geo, opts) => {
       opts = opts || {}; const glyph = courseShapeGlyph(geo, opts.w || 112);
@@ -4944,7 +5075,7 @@
       }
       return "";
     };
-    const turnCorner = (co, n) => { const t = ((co.turns || {}).canonical || [])[n - 1]; if (!t) return [null, null];
+    const turnCorner = (co, n) => { const t = turnTable(co).turns[n - 1]; if (!t) return [null, null];
       const near = (a, b, d) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= d * d;
       const cs = (co.corners || []).filter((k) => k.pos && !k.drift && near(k.pos, t.pos, 45)); return [t, cs.length ? cs[cs.length - 1] : null]; };
     const fullTurnCard = (co, n, unlocked) => {
@@ -4963,7 +5094,8 @@
         <div class="ft-body"><div class="ft-glyph">${turnPhaseRibbon(prof, firstPh, 172)}</div><div class="ft-main">${phChips}${speeds}${turnVerdict(c, unlocked)}</div></div></div>`;
     };
     const turnByTurnSection = (co, unlocked) => {
-      const canon = (co.turns || {}).canonical || []; if (!canon.length) return "";
+      const _T = turnTable(co); const canon = _T.turns;
+      if (!canon.length) return `<div class="lab-corner" style="border-left:4px solid var(--accent2);margin-bottom:8px;font-size:11.5px"><b>🔬 Turn-by-turn</b> <span class="why">— no turns learned yet. Complete one full lap: the course's turns are read from it, and they become permanent once they show up on most laps across two sessions.</span></div>`;
       let nTune = 0, nDriver = 0, nRec = 0;
       canon.forEach((t, i) => { const c = turnCorner(co, i + 1)[1]; if (c && c.limiter === "tune") nTune++; if (c && c.limiter === "driver") nDriver++; if (recurringFlag(t, c)) nRec++; });
       const cards = canon.map((t, i) => fullTurnCard(co, i + 1, unlocked)).join("");
@@ -4975,7 +5107,7 @@
       const rk = co && co.route_key; const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null; const brk = (co && selN) ? courseTurnBreakdown(co, selN) : "";
       return `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
           <div class="card-row" style="margin-top:0"><strong style="font-size:12px">🗺 Course map — ${shown} turn${shown === 1 ? "" : "s"}${mapped !== shown ? ` (${mapped} curvature-mapped)` : ""} · ${geo.length_m} m</strong><span class="chip">${geo.from_model ? "best map on record" : "ref lap " + ((geo.ref_lap || {}).lap || "—")}${geo.last_lap ? ` · latest lap ${geo.last_lap.lap} overlaid` : ""}</span></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns, { rk, selN, live: src === "live" })}<div style="font-size:10.5px;min-width:150px;max-width:320px">${rk ? `<div style="font-weight:600;color:var(--accent2);margin-bottom:3px">▶ click a turn for its breakdown</div>` : ""}<div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#e5414e">●</span> loaded this session · <span style="color:var(--accent)">○</span> on the map, not loaded · <span style="color:var(--warn,#e3b341)">○</span> counted from your laps, not curvature-mapped (fast/flat)</div>${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.map(turnLabel).join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns, { rk, selN, live: src === "live", co })}<div style="font-size:10.5px;min-width:150px;max-width:320px">${rk ? `<div style="font-weight:600;color:var(--accent2);margin-bottom:3px">▶ click a turn for its breakdown</div>` : ""}<div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#00d27a">●</span> clean this session · <span style="color:var(--accent)">○</span> on the map, not loaded</div><div style="margin-top:3px">a turn wears the state it took: ${gripLegend(["front", "rear", "both"])}</div>${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.map(turnLabel).join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
           ${brk}
         </div>`; };
     // a course card built purely from a TRACK RECORD (course model) — for a route selected in the atlas that this session / recording never visited
@@ -5639,6 +5771,10 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const onModeChanged = () => { pushMode(); if (src === "live" && effMode() !== live._shownWf) renderBody(); else { paintTabs(); paintBanner(); paintStatus(); } };
     function bindBody(root) {
       const r = root || host;
+      bindTraceHover(r);   // trace → map scrubbing survives every innerHTML rebuild
+      r.querySelectorAll("[data-rivals]").forEach((b) => b.addEventListener("click", () => { const [rk, v] = b.dataset.rivals.split("|");
+        fetch(liveUrl + "/route", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, rivals: v === "1" }) })
+          .then(() => { if (src === "live") paintSections(true); else render(); }).catch(() => {}); }));
       r.querySelectorAll("[data-car]").forEach((b) => b.addEventListener("click", () => { carSel = b.dataset.car === "all" ? null : b.dataset.car; if (src === "live") paintSections(); else render(); }));
       r.querySelectorAll("[data-donor]").forEach((b) => b.addEventListener("click", () => { donor = b.dataset.donor; if (src === "live") { live._donorPick = donor; const ls = liveSess(); const p = PIN(); pinDonor(ls && car(ls, donor) ? ls : (p && p.data && car(p.data, donor) ? p.data : null), donor); paintSections(true); paintBanner(); } else render(); }));
       bindAtlas(r);

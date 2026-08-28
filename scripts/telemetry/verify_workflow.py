@@ -253,7 +253,7 @@ def f3():
     marks = ["const unionStrip", "tuneLibraryCard", "dockDataHtml", "cornerScoreCard", "spdCorners", "buildConfidence", "gatedTuning", "liveryStrip", "idm-chips", "data-cyclelivery",
              "function clsBadge", "function piBadge", "carLblHtml", "pib-img",   # the in-game class-badge design language must exist and stay wired
              "buildThumb", "courseIdentMini", "startOfKey",   # tune identity (livery thumbnail) + course identity (name + start + shape)
-             "courseTags", "courseMeasuredChip",   # course tags: type + car-fit from the measured makeup
+             "courseTags", "courseMeasuredChip", "const GRIP", "gripLegend", "turnTable", "bindTraceHover", "data-rivals",   # course tags: type + car-fit from the measured makeup
              "data-live-map", "flashTurnOnMap", "lastCornerSvg", "geoCov", "speedTracesCard", "turnTraceStrip", "confirmRegressReason", "pinSuspended", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
     missing = [m for m in marks if m not in src]
     return (not missing, f"feature markers present ({len(marks) - len(missing)}/{len(marks)}){'; missing: ' + str(missing) if missing else ''}")

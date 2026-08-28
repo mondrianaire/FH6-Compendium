@@ -896,7 +896,14 @@ def main():
         sx, sz = start["PosX"], start["PosZ"]; ex, ez = rs[-1]["PosX"], rs[-1]["PosZ"]
         dvals = [q["DistanceTraveled"] for q in rs]; dist = max(dvals) - max(0.0, min(dvals)); laps = max(q["LapNumber"] for q in rs)   # odometer may be cumulative — length = what THIS event covered
         pos = [q["RacePosition"] for q in rs if q["RacePosition"] > 0]
-        mode = "race" if (pos and (max(pos) > 1 or len(set(pos)) > 1)) else "timed solo (Rivals / time trial)"
+        # MODE is INFERRED, never read: the 324-byte Data Out packet carries no game-mode field (verified —
+        # Trailing323 is always 0, and NormAIBrakeDiff/NormDrivingLine are identical in both modes because the
+        # driving-line assist runs in Rivals too). RacePosition is the only signal: it varies or exceeds 1 in a
+        # race, and is a constant 1 in a solo time trial. The known hole is a race led wire-to-wire in P1, which
+        # is why `solo_conf` is published — a course can be DECLARED Rivals (routes.json "rivals") to settle it.
+        solo = not (pos and (max(pos) > 1 or len(set(pos)) > 1))
+        mode = "timed solo (Rivals / time trial)" if solo else "race"
+        solo_conf = "inferred" if solo else "certain"   # upgraded to 'declared' at course level, where the route key is known
         if laps > 0: mode += " · lapped"
         h_row = next((q for q in rs if q["DistanceTraveled"] >= start["DistanceTraveled"] + 100), rs[-1])
         hv = (h_row["PosX"] - sx, h_row["PosZ"] - sz); hn = math.hypot(*hv); hdg = [round(hv[0] / hn, 3), round(hv[1] / hn, 3)] if hn > 1 else None
@@ -908,7 +915,7 @@ def main():
             routes[key] = dict(routes.get(key) or {}, start=[round(sx), round(sz)], heading=hdg, length_m=round(dist), events=0, first_seen=sid)
         R = routes[key]; R["events"] = R.get("events", 0) + 1; R["length_m"] = max(R.get("length_m") or 0, round(dist)); R["last_seen"] = sid
         if not R.get("heading") and hdg: R["heading"] = hdg
-        ev_out.append({"t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "car": cid(rs[0]), "stint": rs[0].get("stint"), "mode": mode, "laps": laps,
+        ev_out.append({"t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "car": cid(rs[0]), "stint": rs[0].get("stint"), "mode": mode, "solo": solo, "solo_conf": solo_conf, "laps": laps,
                        # BestLap is BEST-SO-FAR (0, then non-increasing): max() returned the FIRST lap's time and the
                        # improve-only track record latched it forever, misranking builds. min of positives = the real best.
                        # LastLap changes every lap, so max() was the SLOWEST lap labeled 'last' — take the final value.
@@ -1072,7 +1079,21 @@ def main():
         lapmap = {id(c): lap_of(c["t0"]) for c in cc}
         # ---- GEOMETRIC course learning from COORDINATES: the path IS the course. Resample the reference lap by arc length, heading -> curvature,
         #      turns = curvature peaks (radius, length, direction, apex/entry/exit) — independent of how hard you drove them. ----
-        def lap_pts(w): return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+        # GRIP STATE — the same alphabet the live strip uses (fh6_live_daemon ~line 254), so one vocabulary
+        # describes a moment whether it is read live, in the strip, on the map or along a saved trace.
+        # 0 calm · 1 front (understeer) · 2 rear (oversteer) · 3 both (drift/overdriven) · 4 impact
+        def grip_code(r):
+            try:
+                if abs(r.get("lat_g") or 0) > 3.0 or (r.get("SmashableVelDiff") or 0) > 0: return 4
+                fr = max(abs(r["CombinedSlipFL"]), abs(r["CombinedSlipFR"]))
+                rr = max(abs(r["CombinedSlipRL"]), abs(r["CombinedSlipRR"]))
+                return 3 if (fr > 1 and rr > 1) else 1 if fr > 1 else 2 if rr > 1 else 0
+            except Exception:
+                return 0
+        def lap_pts(w, grip=False):
+            rows_ = [r for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+            if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r)) for r in rows_]   # 4th column rides through resample un-interpolated (a state is categorical)
+            return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in rows_]
         def resample(pts, step=4.0):   # -> list of PIECES; a jump > 150 m between consecutive rows (respawn / rewind / teleport) starts a new piece
             pieces = []; cur = [pts[0]] if pts else []
             for a_, b_ in zip(pts, pts[1:]):
@@ -1090,7 +1111,8 @@ def main():
                 while s_ <= S[-1]:
                     while j < len(S) - 2 and S[j + 1] < s_: j += 1
                     seg_len = S[j + 1] - S[j]; f = (s_ - S[j]) / seg_len if seg_len > 0 else 0.0
-                    P_.append((pc[j][0] + (pc[j + 1][0] - pc[j][0]) * f, pc[j][1] + (pc[j + 1][1] - pc[j][1]) * f, s_, pc[j][2] + (pc[j + 1][2] - pc[j][2]) * f))
+                    _base = (pc[j][0] + (pc[j + 1][0] - pc[j][0]) * f, pc[j][1] + (pc[j + 1][1] - pc[j][1]) * f, s_, pc[j][2] + (pc[j + 1][2] - pc[j][2]) * f)
+                    P_.append(_base + ((max(pc[j][3], pc[j + 1][3]),) if len(pc[j]) > 3 and len(pc[j + 1]) > 3 else ()))   # categorical: carry the WORSE of the bracketing states, never a blend
                     s_ += step
                 out.append(P_)
             return out
@@ -1256,7 +1278,7 @@ def main():
         _win_arc = {}
         for cid_, wins in _trace_wins.items():
             for w in wins:
-                pcs_ = resample(lap_pts(w)); pts_all = [p for pc in pcs_ for p in pc]
+                pcs_ = resample(lap_pts(w, grip=True)); pts_all = [p for pc in pcs_ for p in pc]
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
         for cid_, wins in _trace_wins.items():
@@ -1267,7 +1289,11 @@ def main():
             pts_all = _win_arc[id(bw)][1]
             kk = max(1, len(pts_all) // 300)
             carrec = cars.get(cid_) or {}
-            speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"), "pts": [[round(p[2]), round(p[3], 1)] for p in pts_all[::kk]]}
+            # pts = [arc_m, mph, grip_code, x, z] — the state paints the trace, and x/z lets a hover on the trace
+            # point at the exact spot on the course map (no arc-to-path alignment guesswork). Older 2-column
+            # traces still render: every consumer treats columns 3-5 as optional.
+            speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"),
+                                      "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in pts_all[::kk]]}
         # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}
@@ -1468,6 +1494,12 @@ def main():
         if expected:
             miss = est_count - expected
             turns_info["note"] = (f"you declared {expected} turns · {est_count} established across {model['laps']} laps/{len(model['sessions'])} sessions" + (" — match ✓" if miss == 0 else f" · {abs(miss)} {'extra detected — likely fragments, keep lapping to settle' if miss > 0 else 'still to confirm'}" + (f"; {len(near)} more nearly established" if miss < 0 and near else "")) + (f" · {', '.join(messy)} split into several detections (drive as one arc)" if messy else ""))
+        # RIVALS scoping: a course is Rivals when the player DECLARED it (routes.json "rivals") or every timed
+        # event on it ran solo. Rivals laps are the clean comparable ones — no traffic, no contact, a ghost only —
+        # so tune-vs-tune comparison should lean on them; races stay in the record but are marked.
+        _decl = bool((routes.get(key) or {}).get("rivals"))
+        turns_info["rivals"] = _decl or (bool(evs) and all(e.get("solo") for e in evs))
+        turns_info["rivals_src"] = "declared" if _decl else ("inferred" if turns_info["rivals"] else "race")
         _max_ev_d = max((e.get("distance_m") or 0) for e in evs) if evs else 0
         _geo_len = ((model.get("geometry") or {}).get("length_m") or 0)
         if profile and (not model.get("profile") or (total_laps >= (model.get("profile_laps") or 0) and (not _geo_len or _max_ev_d >= 0.6 * _geo_len))):

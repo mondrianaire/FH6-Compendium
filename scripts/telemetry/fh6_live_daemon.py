@@ -1488,6 +1488,17 @@ class H(BaseHTTPRequestHandler):
             tmp_ = bp + ".tmp"
             with open(tmp_, "w", encoding="utf-8") as f: json.dump(bobj, f, indent=1)
             os.replace(tmp_, bp); ok = True
+        elif self.path.startswith("/route") and body.get("route_key") and "rivals" in body:
+            # DECLARED Rivals — the packet has no game-mode field, so the player's own word settles what the
+            # RacePosition heuristic can only guess (a race led wire-to-wire looks identical to a time trial).
+            rp = os.path.join(ROOT, "data", "routes.json")
+            try:
+                with open(rp, encoding="utf-8") as f: robj = json.load(f)
+            except Exception: robj = {"schema_version": "1.0.0", "routes": {}}
+            _rk = str(body["route_key"]); _prev = (robj.setdefault("routes", {}).get(_rk) or {})
+            robj["routes"][_rk] = dict(_prev, rivals=bool(body["rivals"]))
+            with open(rp, "w", encoding="utf-8") as f: json.dump(robj, f, indent=2, ensure_ascii=False)
+            ok = True
         elif self.path.startswith("/route") and body.get("route_key") and body.get("name"):
             rp = os.path.join(ROOT, "data", "routes.json")
             try:

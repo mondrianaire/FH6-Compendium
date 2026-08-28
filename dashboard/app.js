@@ -3745,6 +3745,10 @@
       /* ---- consolidated identification master panel + drawers ---- */
       .idm{margin:0 0 10px}
       .idm-ribbon{display:flex;align-items:center;gap:9px;border:1px solid;border-radius:8px;padding:5px 10px;margin:0 0 9px;font-size:12.5px}
+      /* candidate-split panel: reads as attached UNDER the identity ribbon (pulled up over the ribbon's margin) */
+      .idm-cand{margin:-7px 0 9px;padding:6px 10px 5px;border:1px dashed rgba(227,179,65,.4);border-top:none;border-radius:0 0 8px 8px;display:flex;flex-wrap:wrap;gap:5px;align-items:baseline}
+      .idm-cand-act{flex-basis:100%;font-size:10.5px;color:var(--muted);padding-top:3px;line-height:1.45}
+      .idm-cand-act b{color:#e3b341}
       .dm-info{cursor:help;color:var(--muted);font-size:10.5px;border-bottom:1px dotted var(--muted);white-space:nowrap}
       #fhmToast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9500;background:var(--bg2);border:1px solid #00d27a;color:#00d27a;font-weight:700;font-size:13px;border-radius:9px;padding:8px 18px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 6px 22px rgba(0,0,0,.45)}
       #fhmToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -4128,6 +4132,37 @@
       // EVERYTHING else in drawers. The dock's 📡 pill carries the persistent ask signal, so the sheet stays quiet.
       const curB0 = (mm0.builds || []).find((b) => (b.saves || []).some((ts) => String(ts) === String(r.ts)));
       const ribThumb = curB0 && curB0.livery && curB0.livery.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(curB0.livery.dir)}" alt="" title="${esc((curB0.livery.name || "livery") + (curB0.livery.source === "guess" ? " (guess)" : ""))}">` : curB0 && curB0.livery ? `<span class="tl-blvy-chip" title="paint-only — no thumbnail exists on disk">🎨 ${esc(curB0.livery.name || "base paint")}${curB0.livery.source === "guess" ? " ≈" : ""}</span>` : "";
+      // IDENTITY AMBIGUOUS: say WHAT separates the candidates, not merely how many there are. Builds sharing one
+      // signature are NOT one build — these six differ by real parts (gear count, engine internals, diffs, tyres).
+      // The live packet never carries a parts list, only its CONSEQUENCES, and top gear is the sharpest of them:
+      // a box cannot use a gear it does not have. So group the candidates by box size and name the exact drive
+      // that eliminates a group — an ambiguity you can act on, instead of an unqualified "drive the gears".
+      const ordSuf = (n) => (n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th");
+      const candPanel = (() => {
+        const bs = (mm0.builds || []).filter((b) => b && b.label);
+        if ((mm0.n_signature_ties || 1) < 2 || bs.length < 2) return "";
+        const byG = new Map();
+        bs.forEach((b) => { const g = +b.gears || 0; if (!byG.has(g)) byG.set(g, []); byG.get(g).push(b); });
+        const gs = [...byG.keys()].sort((a, b) => a - b);
+        const chips = gs.map((g) => {
+          const grp = byG.get(g);
+          const labs = grp.map((b) => b.label).join("·");
+          const tip = grp.map((b) => `Build ${b.label}${b.n_diffs ? ` — ${b.n_diffs} parts differ from ${b.diff_base || "A"}` : " — base build"}`).join("\n");
+          return `<span class="tl-diff" title="${esc(tip)}">${g ? g + "-sp" : "gears ?"} <b>${esc(labs)}</b></span>`;
+        }).join("");
+        // The smallest box is eliminated the moment you use a gear it does not have.
+        const small = gs.find((g) => g > 0);
+        const bigger = gs.some((g) => g > small);
+        const doomed = small && bigger ? byG.get(small).map((b) => b.label).join("·") : null;
+        const act = doomed
+          ? `Reach <b>${small + 1}${ordSuf(small + 1)}</b> and <b>${esc(doomed)}</b> ${byG.get(small).length > 1 ? "are" : "is"} ruled out — a ${small}-speed box cannot reach it.`
+          : `Every candidate has the same box, so gear count cannot separate them — the ratio ladder or redline must (a full WOT pull through the gears).`;
+        const twins = gs.filter((g) => byG.get(g).length > 1).map((g) => byG.get(g).map((b) => b.label).join("·"));
+        const twinNote = twins.length
+          ? ` <span class="why">${twins.join(" and ")} share a box — separating those needs the ratio ladder.</span>`
+          : "";
+        return `<div class="idm-cand"><span class="why" style="font-size:9.5px">${bs.length} candidate builds — what separates them:</span> ${chips}<div class="idm-cand-act">${act}${twinNote}</div></div>`;
+      })();
       const verdictChip = mm0.how === "gear-matched" ? `<span style="color:#00d27a;font-weight:700">⚙ verified${mm0.held ? " · held" : ""}</span>`
         : mm0.how === "picked" ? `<span style="color:#a371f7;font-weight:700">📌 pinned</span>`
         : (mm0.how === "no-match" || mm0.how === "unsaved-build") ? `<span class="idm-flag">build file missing</span>`
@@ -4171,7 +4206,7 @@
       const ratChip = ratified ? `<span class="rat-chip ok">✓ RATIFIED</span>` : `<span class="rat-chip ${ratCls}">◐ ${doneN}/${hard.length}</span>`;
       const ratifBlock = `<div class="ratif ${ratCls}"><b>${ratified ? "✅ TUNE RATIFIED" : `◐ RATIFICATION — ${doneN} of ${hard.length}`}</b>${ratified && u2.n_await ? ` <span class="why">${u2.n_await} field${u2.n_await > 1 ? "s" : ""} still corroborating in the background</span>` : ""}
         <div class="ratif-reqs">${REQS.map((q) => `<div class="ratif-req ${q.ok ? "done" : q.soft ? "adv" : "todo"}"><span class="rr-st">${q.ok ? "✓" : q.soft ? "⚠" : "○"}</span><span class="rr-lbl">${q.lbl}</span>${q.ok ? (q.note ? `<span class="why">${esc(q.note)}</span>` : "") : `<span class="rr-act">${esc(q.act)}</span>`}</div>`).join("")}</div></div>`;
-      const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `${piBadge(null, curB0.pi, true)}${curB0.gears ? `<span class="why"> · ${curB0.gears}-sp</span>` : ""}` : ""}${verdictChip}<span style="margin-left:auto;display:inline-flex;gap:7px;align-items:center">${ratChip}<span style="color:${oc};font-weight:800">${Math.round(dl.confidence * 100)}%</span></span>${flags}</div>`;
+      const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `${piBadge(null, curB0.pi, true)}${curB0.gears ? `<span class="why"> · ${curB0.gears}-sp</span>` : ""}` : ""}${verdictChip}<span style="margin-left:auto;display:inline-flex;gap:7px;align-items:center">${ratChip}<span style="color:${oc};font-weight:800">${Math.round(dl.confidence * 100)}%</span></span>${flags}</div>${candPanel}`;
       // short warn line inline (action-first); the full match bar + picker live in the identity drawer
       const warnLine = (mm0.how === "no-match" || mm0.how === "unsaved-build")
         ? `<div class="dm-warn" style="margin:0 0 8px"><b>🚧 This build's file is not on disk.</b> Change a part/slider + SAVE (own) or apply a DIFFERENT tune then re-apply (re-applying the active tune writes nothing) — full detail in the 🪪 drawer.</div>` : "";

@@ -1,362 +1,368 @@
 {
-  "schema_version": "1.1.0",
-  "purpose": "Route registry. A route = canonical start [x,z] + heading + length (+ its course model path once learned). New events are ATTRIBUTED to the nearest known route when the start is within ~120 m (250 m with path overlap), the heading agrees (a reversed circuit is a different route) and the length fits — so restarts and grid-slot offsets never split a route. Name a route once from the dashboard.",
-  "routes": {
-    "4200_-5450": {
-      "start": [
-        4186,
-        -5461
-      ],
-      "heading": [
-        0.163,
-        0.987
-      ],
-      "length_m": 3382,
-      "events": 3,
-      "first_seen": "fh6_20260821_122523",
-      "last_seen": "fh6_20260821_173737"
-    },
-    "4250_-5250": {
-      "start": [
-        4272,
-        -5274
-      ],
-      "heading": [
-        -0.147,
-        0.989
-      ],
-      "length_m": 10594,
-      "events": 29,
-      "first_seen": "fh6_20260821_162805",
-      "last_seen": "fh6_20260828_122408"
-    },
-    "1900_6100": {
-      "start": [
-        1882,
-        6078
-      ],
-      "heading": [
-        0.821,
-        0.57
-      ],
-      "length_m": 4134,
-      "events": 54,
-      "first_seen": "fh6_20260821_162805",
-      "last_seen": "fh6_20260823_025408"
-    },
-    "2550_7900": {
-      "start": [
-        2542,
-        7922
-      ],
-      "heading": [
-        -0.506,
-        -0.862
-      ],
-      "length_m": 1464,
-      "events": 1,
-      "first_seen": "fh6_20260821_171239",
-      "last_seen": "fh6_20260821_171239"
-    },
-    "-7350_-2100": {
-      "name": "Edamame Circuit",
-      "source": "dashboard 2026-08-28",
-      "mode": "event",
-      "start": [
-        -7439,
-        -1931
-      ],
-      "length_m": 1920
-    },
-    "-1850_1550": {
-      "start": [
-        -1847,
-        1566
-      ],
-      "heading": [
-        0.769,
-        -0.64
-      ],
-      "length_m": 30766,
-      "events": 90,
-      "first_seen": "fh6_20260821_202122",
-      "last_seen": "fh6_20260828_120421"
-    },
-    "2850_-200": {
-      "start": [
-        2860,
-        -218
-      ],
-      "heading": [
-        -0.939,
-        0.344
-      ],
-      "length_m": 5952,
-      "events": 34,
-      "first_seen": "fh6_20260823_023501",
-      "last_seen": "fh6_20260823_023501"
-    },
-    "5900_1800": {
-      "start": [
-        5909,
-        1825
-      ],
-      "heading": [
-        0.806,
-        0.592
-      ],
-      "length_m": 5952,
-      "events": 117,
-      "first_seen": "fh6_20260823_025408",
-      "last_seen": "fh6_20260823_025408"
-    },
-    "-4550_-6050": {
-      "start": [
-        -4536,
-        -6051
-      ],
-      "heading": [
-        -0.985,
-        0.175
-      ],
-      "length_m": 805,
-      "events": 98,
-      "first_seen": "fh6_20260823_032213",
-      "last_seen": "fh6_20260823_032213"
-    },
-    "-3250_-7850": {
-      "start": [
-        -3263,
-        -7846
-      ],
-      "heading": [
-        0.119,
-        -0.993
-      ],
-      "length_m": 4366,
-      "events": 139,
-      "first_seen": "fh6_20260823_032213",
-      "last_seen": "fh6_20260823_032213"
-    },
-    "-3750_300": {
-      "start": [
-        -3774,
-        308
-      ],
-      "heading": [
-        -0.931,
-        -0.365
-      ],
-      "length_m": 231,
-      "events": 82,
-      "first_seen": "fh6_20260823_083740",
-      "last_seen": "fh6_20260823_101233"
-    },
-    "-5100_-100": {
-      "start": [
-        -5079,
-        -80
-      ],
-      "heading": [
-        0.974,
-        0.228
-      ],
-      "length_m": 517,
-      "events": 17,
-      "first_seen": "fh6_20260823_083740",
-      "last_seen": "fh6_20260823_083740"
-    },
-    "-3250_500": {
-      "start": [
-        -3259,
-        492
-      ],
-      "heading": [
-        0.805,
-        0.594
-      ],
-      "length_m": 0,
-      "events": 5,
-      "first_seen": "fh6_20260823_083740",
-      "last_seen": "fh6_20260823_083740"
-    },
-    "-3050_1050": {
-      "start": [
-        -3054,
-        1049
-      ],
-      "heading": [
-        -0.252,
-        0.968
-      ],
-      "length_m": -21,
-      "events": 25,
-      "first_seen": "fh6_20260823_090915",
-      "last_seen": "fh6_20260823_090915"
-    },
-    "-3400_450": {
-      "start": [
-        -3412,
-        450
-      ],
-      "heading": [
-        0.858,
-        0.514
-      ],
-      "length_m": 202,
-      "events": 24,
-      "first_seen": "fh6_20260823_090915",
-      "last_seen": "fh6_20260823_090915"
-    },
-    "-50_7150": {
-      "start": [
-        -49,
-        7144
-      ],
-      "heading": [
-        -0.776,
-        -0.631
-      ],
-      "length_m": 5947,
-      "events": 205,
-      "first_seen": "fh6_20260827_213049",
-      "last_seen": "fh6_20260828_081447"
-    },
-    "-400_-1150": {
-      "start": [
-        -378,
-        -1150
-      ],
-      "heading": [
-        -0.122,
-        0.993
-      ],
-      "length_m": 5953,
-      "events": 111,
-      "first_seen": "fh6_20260827_213049",
-      "last_seen": "fh6_20260828_001105"
-    },
-    "3550_6100": {
-      "start": [
-        3554,
-        6075
-      ],
-      "heading": [
-        0.37,
-        -0.929
-      ],
-      "length_m": 5952,
-      "events": 228,
-      "first_seen": "fh6_20260827_213049",
-      "last_seen": "fh6_20260828_001105"
-    },
-    "-4750_-1550": {
-      "start": [
-        -4756,
-        -1531
-      ],
-      "heading": [
-        0.776,
-        -0.63
-      ],
-      "length_m": 5954,
-      "events": 114,
-      "first_seen": "fh6_20260827_213049",
-      "last_seen": "fh6_20260828_001105"
-    },
-    "-2350_-7550": {
-      "name": "Hakone Nanamagari",
-      "source": "dashboard 2026-08-28",
-      "mode": "event",
-      "start": [
-        -2360,
-        -7552
-      ],
-      "heading": [
-        0.022,
-        -1.0
-      ],
-      "length_m": 5950,
-      "events": 60,
-      "first_seen": "fh6_20260828_081447",
-      "last_seen": "fh6_20260828_110556"
-    },
-    "-1850_0": {
-      "start": [
-        -1868,
-        20
-      ],
-      "heading": [
-        -0.822,
-        -0.57
-      ],
-      "length_m": 5952,
-      "events": 20,
-      "first_seen": "fh6_20260827_224507",
-      "last_seen": "fh6_20260827_224507"
-    },
-    "150_-850": {
-      "start": [
-        170,
-        -842
-      ],
-      "heading": [
-        -1.0,
-        -0.021
-      ],
-      "length_m": 5952,
-      "events": 181,
-      "first_seen": "fh6_20260827_224507",
-      "last_seen": "fh6_20260828_120421"
-    },
-    "-2800_-7850": {
-      "start": [
-        -2818,
-        -7831
-      ],
-      "heading": [
-        -0.521,
-        -0.853
-      ],
-      "length_m": 1176,
-      "events": 19,
-      "first_seen": "fh6_20260828_081447",
-      "last_seen": "fh6_20260828_081447"
-    },
-    "-100_-6050": {
-      "start": [
-        -112,
-        -6059
-      ],
-      "heading": [
-        -0.973,
-        -0.23
-      ],
-      "length_m": 5948,
-      "events": 45,
-      "first_seen": "fh6_20260828_122408",
-      "last_seen": "fh6_20260828_122408"
-    },
-    "200_-6000": {
-      "start": [
-        208,
-        -6011
-      ],
-      "heading": [
-        -0.82,
-        0.572
-      ],
-      "length_m": 745,
-      "events": 26,
-      "first_seen": "fh6_20260828_122408",
-      "last_seen": "fh6_20260828_122408"
-    },
-    "loop:test loop": {
-      "start": [
-        -1885,
-        1525
-      ],
-      "length_m": 740
-    }
+ "schema_version": "1.1.0",
+ "purpose": "Route registry. A route = canonical start [x,z] + heading + length (+ its course model path once learned). New events are ATTRIBUTED to the nearest known route when the start is within ~120 m (250 m with path overlap), the heading agrees (a reversed circuit is a different route) and the length fits — so restarts and grid-slot offsets never split a route. Name a route once from the dashboard.",
+ "routes": {
+  "4200_-5450": {
+   "start": [
+    4186,
+    -5461
+   ],
+   "heading": [
+    0.163,
+    0.987
+   ],
+   "length_m": 3382,
+   "events": 3,
+   "first_seen": "fh6_20260821_122523",
+   "last_seen": "fh6_20260821_173737"
+  },
+  "4250_-5250": {
+   "start": [
+    4272,
+    -5274
+   ],
+   "heading": [
+    -0.147,
+    0.989
+   ],
+   "length_m": 10594,
+   "events": 29,
+   "first_seen": "fh6_20260821_162805",
+   "last_seen": "fh6_20260828_122408"
+  },
+  "1900_6100": {
+   "start": [
+    1882,
+    6078
+   ],
+   "heading": [
+    0.821,
+    0.57
+   ],
+   "length_m": 4134,
+   "events": 54,
+   "first_seen": "fh6_20260821_162805",
+   "last_seen": "fh6_20260823_025408"
+  },
+  "2550_7900": {
+   "start": [
+    2542,
+    7922
+   ],
+   "heading": [
+    -0.506,
+    -0.862
+   ],
+   "length_m": 1464,
+   "events": 1,
+   "first_seen": "fh6_20260821_171239",
+   "last_seen": "fh6_20260821_171239"
+  },
+  "-7350_-2100": {
+   "name": "Edamame Circuit",
+   "source": "dashboard 2026-08-28",
+   "mode": "event",
+   "start": [
+    -7439,
+    -1931
+   ],
+   "length_m": 53725,
+   "events": 34,
+   "last_seen": "fh6_20260828_133421",
+   "heading": [
+    0.196,
+    0.981
+   ]
+  },
+  "-1850_1550": {
+   "start": [
+    -1847,
+    1566
+   ],
+   "heading": [
+    0.769,
+    -0.64
+   ],
+   "length_m": 30766,
+   "events": 90,
+   "first_seen": "fh6_20260821_202122",
+   "last_seen": "fh6_20260828_120421"
+  },
+  "2850_-200": {
+   "start": [
+    2860,
+    -218
+   ],
+   "heading": [
+    -0.939,
+    0.344
+   ],
+   "length_m": 5952,
+   "events": 34,
+   "first_seen": "fh6_20260823_023501",
+   "last_seen": "fh6_20260823_023501"
+  },
+  "5900_1800": {
+   "start": [
+    5909,
+    1825
+   ],
+   "heading": [
+    0.806,
+    0.592
+   ],
+   "length_m": 5952,
+   "events": 117,
+   "first_seen": "fh6_20260823_025408",
+   "last_seen": "fh6_20260823_025408"
+  },
+  "-4550_-6050": {
+   "start": [
+    -4536,
+    -6051
+   ],
+   "heading": [
+    -0.985,
+    0.175
+   ],
+   "length_m": 805,
+   "events": 98,
+   "first_seen": "fh6_20260823_032213",
+   "last_seen": "fh6_20260823_032213"
+  },
+  "-3250_-7850": {
+   "start": [
+    -3263,
+    -7846
+   ],
+   "heading": [
+    0.119,
+    -0.993
+   ],
+   "length_m": 4366,
+   "events": 139,
+   "first_seen": "fh6_20260823_032213",
+   "last_seen": "fh6_20260823_032213"
+  },
+  "-3750_300": {
+   "start": [
+    -3774,
+    308
+   ],
+   "heading": [
+    -0.931,
+    -0.365
+   ],
+   "length_m": 231,
+   "events": 82,
+   "first_seen": "fh6_20260823_083740",
+   "last_seen": "fh6_20260823_101233"
+  },
+  "-5100_-100": {
+   "start": [
+    -5079,
+    -80
+   ],
+   "heading": [
+    0.974,
+    0.228
+   ],
+   "length_m": 517,
+   "events": 17,
+   "first_seen": "fh6_20260823_083740",
+   "last_seen": "fh6_20260823_083740"
+  },
+  "-3250_500": {
+   "start": [
+    -3259,
+    492
+   ],
+   "heading": [
+    0.805,
+    0.594
+   ],
+   "length_m": 0,
+   "events": 5,
+   "first_seen": "fh6_20260823_083740",
+   "last_seen": "fh6_20260823_083740"
+  },
+  "-3050_1050": {
+   "start": [
+    -3054,
+    1049
+   ],
+   "heading": [
+    -0.252,
+    0.968
+   ],
+   "length_m": -21,
+   "events": 25,
+   "first_seen": "fh6_20260823_090915",
+   "last_seen": "fh6_20260823_090915"
+  },
+  "-3400_450": {
+   "start": [
+    -3412,
+    450
+   ],
+   "heading": [
+    0.858,
+    0.514
+   ],
+   "length_m": 202,
+   "events": 24,
+   "first_seen": "fh6_20260823_090915",
+   "last_seen": "fh6_20260823_090915"
+  },
+  "-50_7150": {
+   "start": [
+    -49,
+    7144
+   ],
+   "heading": [
+    -0.776,
+    -0.631
+   ],
+   "length_m": 5947,
+   "events": 205,
+   "first_seen": "fh6_20260827_213049",
+   "last_seen": "fh6_20260828_081447"
+  },
+  "-400_-1150": {
+   "start": [
+    -378,
+    -1150
+   ],
+   "heading": [
+    -0.122,
+    0.993
+   ],
+   "length_m": 5953,
+   "events": 111,
+   "first_seen": "fh6_20260827_213049",
+   "last_seen": "fh6_20260828_001105"
+  },
+  "3550_6100": {
+   "start": [
+    3554,
+    6075
+   ],
+   "heading": [
+    0.37,
+    -0.929
+   ],
+   "length_m": 5952,
+   "events": 228,
+   "first_seen": "fh6_20260827_213049",
+   "last_seen": "fh6_20260828_001105"
+  },
+  "-4750_-1550": {
+   "start": [
+    -4756,
+    -1531
+   ],
+   "heading": [
+    0.776,
+    -0.63
+   ],
+   "length_m": 5954,
+   "events": 114,
+   "first_seen": "fh6_20260827_213049",
+   "last_seen": "fh6_20260828_001105"
+  },
+  "-2350_-7550": {
+   "name": "Hakone Nanamagari",
+   "source": "dashboard 2026-08-28",
+   "mode": "event",
+   "start": [
+    -2360,
+    -7552
+   ],
+   "heading": [
+    0.022,
+    -1.0
+   ],
+   "length_m": 5950,
+   "events": 60,
+   "first_seen": "fh6_20260828_081447",
+   "last_seen": "fh6_20260828_110556"
+  },
+  "-1850_0": {
+   "start": [
+    -1868,
+    20
+   ],
+   "heading": [
+    -0.822,
+    -0.57
+   ],
+   "length_m": 5952,
+   "events": 20,
+   "first_seen": "fh6_20260827_224507",
+   "last_seen": "fh6_20260827_224507"
+  },
+  "150_-850": {
+   "start": [
+    170,
+    -842
+   ],
+   "heading": [
+    -1.0,
+    -0.021
+   ],
+   "length_m": 5952,
+   "events": 181,
+   "first_seen": "fh6_20260827_224507",
+   "last_seen": "fh6_20260828_120421"
+  },
+  "-2800_-7850": {
+   "start": [
+    -2818,
+    -7831
+   ],
+   "heading": [
+    -0.521,
+    -0.853
+   ],
+   "length_m": 1176,
+   "events": 19,
+   "first_seen": "fh6_20260828_081447",
+   "last_seen": "fh6_20260828_081447"
+  },
+  "-100_-6050": {
+   "start": [
+    -112,
+    -6059
+   ],
+   "heading": [
+    -0.973,
+    -0.23
+   ],
+   "length_m": 5948,
+   "events": 45,
+   "first_seen": "fh6_20260828_122408",
+   "last_seen": "fh6_20260828_122408"
+  },
+  "200_-6000": {
+   "start": [
+    208,
+    -6011
+   ],
+   "heading": [
+    -0.82,
+    0.572
+   ],
+   "length_m": 745,
+   "events": 26,
+   "first_seen": "fh6_20260828_122408",
+   "last_seen": "fh6_20260828_122408"
+  },
+  "loop:test loop": {
+   "start": [
+    -1885,
+    1525
+   ],
+   "length_m": 740
   }
+ }
 }

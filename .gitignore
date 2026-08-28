@@ -5,3 +5,4 @@ captures/
 __pycache__/
 *.pyc
 data/_backup_courses_*/
+data/laps.db*

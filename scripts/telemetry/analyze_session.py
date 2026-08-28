@@ -13,6 +13,7 @@ from data/car-ordinals.json (learned map) when known.
 """
 import re
 import csv, hashlib, json, math, os, statistics, sys
+import lap_store
 from collections import defaultdict
 
 G = 9.80665
@@ -1281,9 +1282,23 @@ def main():
                 pcs_ = resample(lap_pts(w, grip=True)); pts_all = [p for pc in pcs_ for p in pc]
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
+        # EVERY lap that covers the course goes to the append-only lap store — competitiveness (the 107% rule) is
+        # judged at read time against each build's own best, so a later faster lap RE-RATES history instead of
+        # deleting it. The model keeps only the best per tune (a compact summary; the store holds the record).
+        _lap_rows = []
         for cid_, wins in _trace_wins.items():
             valid = [w for w in wins if id(w) in _win_arc and _win_arc[id(w)][0] >= 0.7 * _ref_arc]
             if not valid: continue
+            _cr = cars.get(cid_) or {}
+            for w in valid:
+                arc_w, pts_w = _win_arc[id(w)]
+                kw = max(1, len(pts_w) // 300)
+                _ev = evs[w["ev"]] if 0 <= w["ev"] < len(evs) else {}
+                _lap_rows.append({"route_key": key, "session": sid, "cid": cid_, "t0": round(w["t0"], 1),
+                                  "lap_s": round(w["t1"] - w["t0"], 2), "arc_m": round(arc_w),
+                                  "build_id": _cr.get("build_id"), "class": _cr.get("class"), "pi": _cr.get("pi"),
+                                  "drivetrain": _cr.get("drivetrain"), "solo": 1 if _ev.get("solo") else 0,
+                                  "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in pts_w[::kw]]})
             bw = min(valid, key=lambda w: w["t1"] - w["t0"])
             lt = round(bw["t1"] - bw["t0"], 2)
             pts_all = _win_arc[id(bw)][1]
@@ -1430,6 +1445,9 @@ def main():
                 if not cur_ or e["best_lap"] < cur_["best_lap"] or cur_.get("session") == sid and e["best_lap"] <= cur_["best_lap"]:
                     model["best_laps"][e["car"]] = {"best_lap": e["best_lap"], "session": sid, "name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi"), "drivetrain": cinfo.get("drivetrain"),
                                                     "build_id": cinfo.get("build_id"), "hp": (cinfo.get("sig") or {}).get("hp_peak"), "gears": (cinfo.get("sig") or {}).get("gear_count")}   # the BEST BUILD that set the record
+        if _lap_rows:
+            try: lap_store.put_laps(ROOT, _lap_rows)     # EVERY covering lap — append-only, idempotent per (course, session, cid, t0)
+            except Exception as _e: print(f"[laps] store write failed: {_e!r}")
         trm = model.setdefault("speed_traces", {})   # per-tune traces: a cid's saved trace only improves (faster lap replaces slower); the 10 fastest tunes kept
         for cid_, tr_ in speed_traces_new.items():
             prev_ = trm.get(cid_)
@@ -1471,6 +1489,23 @@ def main():
             tr = t.get("track") or {}
             return (tr.get("sessions", 0) >= 2 and (tr.get("laps_seen", 0) / mlaps) >= 0.35) or (tr.get("passes", 0) >= 0.5 * mlaps)
         for t in merged_turns: t["established"] = _established(t); t["status"] = "turn" if t["established"] else "possible"
+        # PERSISTENCE across sessions is evidence too: a turn seen in many different sessions is real even when
+        # its per-lap detection RATE is low — that is the signature of a turn taken without loading the tyres,
+        # which the 0.35 g behavioural detector structurally cannot see every lap (never a ratio problem).
+        for t in merged_turns:
+            tr = t.get("track") or {}
+            if not t["established"] and tr.get("sessions", 0) >= 5 and tr.get("passes", 0) >= 20:
+                t["established"] = True; t["status"] = "turn"; t["est_by"] = "persistence"
+        # THE PLAYER'S DECLARED COUNT IS GROUND TRUTH — the model already TRIMS when it over-detects; it must
+        # also PROMOTE when it under-detects, or a course you have declared 9 turns on shows 7 forever.
+        _exp = model.get("expected_turns")
+        if _exp:
+            _est = [t for t in merged_turns if t["established"]]
+            if len(_est) < _exp:
+                _cand = sorted((t for t in merged_turns if not t["established"]),
+                               key=lambda t: -((t.get("track") or {}).get("presence") or 0))
+                for t in _cand[:_exp - len(_est)]:
+                    t["established"] = True; t["status"] = "turn"; t["est_by"] = "declared"   # counted toward YOUR declared total
         model["turns"] = merged_turns
         canonical = [t for t in merged_turns if t["established"]]
         model["turn_count"] = len(canonical)
@@ -1487,7 +1522,11 @@ def main():
         if expected and len(est_turns) > expected:   # trust the declared count: keep the strongest N (by track presence), drop the weakest as fragments
             est_turns = sorted(est_turns, key=lambda t: -((t.get("track") or {}).get("presence") or 0))[:expected]
             est_turns.sort(key=lambda t: [tt["id"] for tt in model["turns"]].index(t["id"]))   # restore route order
-        turns_info["canonical"] = [{"id": t["id"], "pos": t["pos"], "dir": t.get("dir"), "radius_m": t.get("radius_m"), "passes": (t.get("track") or {}).get("passes"), "presence": (t.get("track") or {}).get("presence"), "sessions": (t.get("track") or {}).get("sessions"), "dominant": (t.get("track") or {}).get("dominant")} for t in est_turns]
+        # the projection carries the model's OWN description (type, how it established, the track record's
+        # dominant axle + limiter) so the client never has to re-derive a turn's identity from a session corner
+        turns_info["canonical"] = [{"id": t["id"], "pos": t["pos"], "dir": t.get("dir"), "radius_m": t.get("radius_m"), "type": t.get("type"), "est_by": t.get("est_by"),
+                                    "passes": (t.get("track") or {}).get("passes"), "presence": (t.get("track") or {}).get("presence"), "sessions": (t.get("track") or {}).get("sessions"),
+                                    "dominant": (t.get("track") or {}).get("dominant"), "lim": (t.get("track") or {}).get("lim"), "consistency": (t.get("track") or {}).get("consistency")} for t in est_turns]
         turns_info["mapped"] = len(((model.get("geometry") or {}).get("turns")) or (geo or {}).get("turns") or [])
         near = [t for t in model["turns"] if not t.get("established") and ((t.get("track") or {}).get("presence") or 0) >= 0.25]
         turns_info["near"] = len(near)

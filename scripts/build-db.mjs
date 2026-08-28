@@ -7,6 +7,7 @@ import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (f) => JSON.parse(readFileSync(join(root, "data", f), "utf8"));
+const SESSION_KEEP = +(process.env.SESSION_KEEP || 15);   // how many recent sessions ride in the bundle
 
 const db = {
   tuningVariables: read("tuning-variables.json"),
@@ -35,8 +36,12 @@ const db = {
   referenceLoops: read("reference-loops.json"),
   courseModels: (() => { let files = []; try { files = readdirSync(join(root, "data", "courses")).filter((f) => f.endsWith(".json") && !f.endsWith(".tmp")).sort(); } catch (e) { return []; }
     return files.map((f) => { try { return JSON.parse(readFileSync(join(root, "data", "courses", f), "utf8")); } catch (e) { console.warn(`course model skipped (unreadable): ${f}`); return null; } }).filter(Boolean); })(),
-  sessions: readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json") && !f.endsWith(".tags.json")).sort()   // tags files are run labels, not sessions
-    .map((f) => JSON.parse(readFileSync(join(root, "data", "sessions", f), "utf8"))),
+  // RECENT sessions only. Embedding every session made db.js 44 MB — a bundle the browser re-parses on every
+  // page load, growing without bound (119 files / 39 MB and counting). The full history lives on disk and in
+  // the course models + lap store; the Recording view needs the recent ones. sessionsTotal keeps that honest.
+  sessions: (() => { const all = readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json") && !f.endsWith(".tags.json")).sort();   // tags files are run labels, not sessions
+    return all.slice(-SESSION_KEEP).map((f) => JSON.parse(readFileSync(join(root, "data", "sessions", f), "utf8"))); })(),
+  sessionsTotal: readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json") && !f.endsWith(".tags.json")).length,
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",
 };

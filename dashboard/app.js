@@ -3642,6 +3642,14 @@
       .ratif ol{margin:4px 0 0 20px;padding:0}
       .ratif li{margin:2px 0;font-size:11.5px}
       .ratif li span{margin-right:3px}
+      .ratif-reqs{display:flex;flex-direction:column;gap:2px;margin-top:5px}
+      .ratif-req{display:flex;align-items:baseline;gap:7px;font-size:11.5px}
+      .ratif-req .rr-st{flex:none;font-weight:800;width:12px;text-align:center}
+      .ratif-req.done .rr-st{color:#00d27a}
+      .ratif-req.todo .rr-st{color:var(--warn,#e3b341)}
+      .ratif-req.done .rr-lbl{color:var(--muted)}
+      .ratif-req.todo .rr-lbl{font-weight:700}
+      .ratif-req .rr-act{color:var(--txt);font-size:11px}
       .rat-chip{font-size:10.5px;font-weight:800;border-radius:5px;padding:2px 7px;border:1px solid;white-space:nowrap}
       .rat-chip.ok{color:#00d27a;border-color:#00d27a}
       .rat-chip.no{color:#e3b341;border-color:#e3b341}
@@ -4055,19 +4063,35 @@
       // what finishes it. Every ingredient already exists in the flags/drawers; this states them as one numbered
       // checklist that never hides. Ratified = identity verified · no conflicts · no sanity errors · every value
       // exact · PI stamped. Awaiting-telemetry corroboration does NOT block (it is enrichment, not doubt). ----
+      // ---- RATIFICATION LEDGER: FIVE fixed requirements. The section NEVER changes shape — only checkmarks move.
+      // Each requirement LATCHES per build (ordinal + fingerprint): once fulfilled it stays fulfilled until POSITIVE
+      // contradiction. Absence of signal (parked, menus, a fresh daemon, a cache miss) never un-checks anything —
+      // that was the volatility: the list was a snapshot of flickering inputs, not a ledger of requirements.
       const bcR = buildConfidence(r);
-      const finSteps = [];
-      if (u2.n_conflict) finSteps.push({ i: "⚠", t: `resolve ${u2.n_conflict} save×telemetry conflict${u2.n_conflict > 1 ? "s" : ""} — re-apply this tune from Find Tunes (or re-save if yours), then drive once · both values in the 🔗 drawer` });
-      if (bcR.hardBlock || bcR.softNoLive) (bcR.need || []).slice(0, 2).forEach((t) => finSteps.push({ i: "🔎", t }));
-      if (sanE) finSteps.push({ i: "⛔", t: `fix ${sanE} tuning sanity error${sanE > 1 ? "s" : ""} — the 🩺 drawer names the exact slider${sanE > 1 ? "s" : ""} and the fix` });
-      if (relN) finSteps.push({ i: "🎯", t: `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} to exact values — 🎯 drawer, two-point read` });
-      if (curB0 && curB0.pi == null) finSteps.push({ i: "🪪", t: "drive this build once while identified — stamps its PI (the badge reads ? until then)" });
-      const ratified = !finSteps.length;
-      const ratCls = ratified ? "ok" : (u2.n_conflict || bcR.hardBlock) ? "bad" : "no";
-      const ratChip = ratified ? `<span class="rat-chip ok">✓ RATIFIED</span>` : `<span class="rat-chip ${ratCls}">◐ ${finSteps.length} to finish</span>`;
-      const ratifBlock = ratified
-        ? `<div class="ratif ok"><b>✅ TUNE RATIFIED</b> <span class="why">identity verified · no conflicts · no sanity errors · every value exact · PI stamped${u2.n_await ? ` · ${u2.n_await} field${u2.n_await > 1 ? "s" : ""} still corroborating in the background` : ""}</span></div>`
-        : `<div class="ratif ${ratCls}"><b>◐ NOT RATIFIED — ${finSteps.length === 1 ? "one step finishes" : finSteps.length + " steps finish"} this tune:</b><ol>${finSteps.map((s2) => `<li><span>${s2.i}</span> ${esc(s2.t)}</li>`).join("")}</ol></div>`;
+      const ordL = String(dl.ordinal); const sigL = (typeof buildSigFor === "function" && buildSigFor(ordL)) || (curB0 && curB0.build) || "nosig";
+      const ledKey = "fh6Ratif:" + ordL + "|" + sigL;
+      let led = {}; try { led = JSON.parse(localStorage.getItem(ledKey) || "{}") || {}; } catch (e) {}
+      const regrWhy = confirmRegressReason(r);
+      const idNowOk = !bcR.hardBlock && !bcR.softNoLive;
+      if (idNowOk) led.identity = { ok: true, at: Date.now(), note: bcR.matchLbl };
+      else if (regrWhy) delete led.identity;   // positive contradiction — everything else keeps the latch
+      const idOk = !!(led.identity && led.identity.ok);
+      const piNow = curB0 && curB0.pi != null ? curB0.pi : null;
+      if (piNow != null) led.pi = { v: piNow, at: Date.now() };   // the physical fact "this config's PI is known" does not become false on a cache/hash migration
+      const piOk = !!(led.pi && led.pi.v != null);
+      try { localStorage.setItem(ledKey, JSON.stringify(led)); } catch (e) {}
+      const REQS = [
+        { k: "identity", ok: idOk, lbl: "build identity verified", act: (bcR.need || [])[0] || "drive up through the gears — the ladder identifies the equipped build", note: idOk && !idNowOk ? "held from your last verified run" : idOk ? (led.identity.note || "") : "" },
+        { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-apply this tune from Find Tunes (or re-save if yours), then drive once · 🔗 drawer` },
+        { k: "sanity", ok: !sanE, lbl: "tuning sanity clean", act: `fix ${sanE} error${sanE > 1 ? "s" : ""} — the 🩺 drawer names the slider and the fix` },
+        { k: "calib", ok: !relN, lbl: "every slider value exact", act: `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — 🎯 drawer, two-point read` },
+        { k: "pi", ok: piOk, lbl: "PI stamped", act: "drive this build once while identified — stamps its PI", note: piOk ? `PI ${led.pi.v}` : "" },
+      ];
+      const doneN = REQS.filter((q) => q.ok).length; const ratified = doneN === REQS.length;
+      const ratCls = ratified ? "ok" : (u2.n_conflict || (!idOk && bcR.hardBlock)) ? "bad" : "no";
+      const ratChip = ratified ? `<span class="rat-chip ok">✓ RATIFIED</span>` : `<span class="rat-chip ${ratCls}">◐ ${doneN}/${REQS.length}</span>`;
+      const ratifBlock = `<div class="ratif ${ratCls}"><b>${ratified ? "✅ TUNE RATIFIED" : `◐ RATIFICATION — ${doneN} of ${REQS.length}`}</b>${ratified && u2.n_await ? ` <span class="why">${u2.n_await} field${u2.n_await > 1 ? "s" : ""} still corroborating in the background</span>` : ""}
+        <div class="ratif-reqs">${REQS.map((q) => `<div class="ratif-req ${q.ok ? "done" : "todo"}"><span class="rr-st">${q.ok ? "✓" : "○"}</span><span class="rr-lbl">${q.lbl}</span>${q.ok ? (q.note ? `<span class="why">${esc(q.note)}</span>` : "") : `<span class="rr-act">${esc(q.act)}</span>`}</div>`).join("")}</div></div>`;
       const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `${piBadge(null, curB0.pi, true)}${curB0.gears ? `<span class="why"> · ${curB0.gears}-sp</span>` : ""}` : ""}${verdictChip}<span style="margin-left:auto;display:inline-flex;gap:7px;align-items:center">${ratChip}<span style="color:${oc};font-weight:800">${Math.round(dl.confidence * 100)}%</span></span>${flags}</div>`;
       // short warn line inline (action-first); the full match bar + picker live in the identity drawer
       const warnLine = (mm0.how === "no-match" || mm0.how === "unsaved-build")

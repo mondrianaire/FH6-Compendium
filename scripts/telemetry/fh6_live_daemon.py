@@ -31,6 +31,7 @@ DRIVE = {0: "FWD", 1: "RWD", 2: "AWD"}
 # Feature B — per-part PI scaffolding: pair the active car's on-disk decoded config with its live CarPI.
 PI_OBS_PATH = os.path.join(ROOT, "data", "pi-observations.json")
 _PI_LOCK = threading.Lock()
+_BL_LOCK = threading.Lock()   # data/build-letters.json — the permanent build-letter registry
 _PI_LAST = [None]   # (ordinal, parts_hash, car_pi) of the last write — cheap dedup so the file isn't thrashed
 
 class State:
@@ -680,13 +681,35 @@ def _pick_meta(metas, ordn, ts_want=None):
     builds = []
     try:
         import hashlib as _hl
+        def _build_letters(ordn2, sigs_in_order):
+            """Permanent per-ordinal build letters (data/build-letters.json): first sight of a fingerprint assigns
+            the next free letter, FOREVER. Newest-first re-lettering renamed every build whenever a save landed —
+            an identity must not drift. First migration freezes the letters currently on screen."""
+            path2 = os.path.join(ROOT, "data", "build-letters.json")
+            with _BL_LOCK:
+                try:
+                    with open(path2, encoding="utf-8") as f2: doc2 = json.load(f2)
+                except Exception:
+                    doc2 = {"schema_version": "1.0.0", "letters": {}}
+                mm = doc2.setdefault("letters", {}).setdefault(str(ordn2), {})
+                changed2 = False
+                for h2 in sigs_in_order:
+                    if h2 not in mm:
+                        used2 = set(mm.values())
+                        mm[h2] = next((chr(65 + i2) for i2 in range(26) if chr(65 + i2) not in used2), "Z" + str(len(mm)))
+                        changed2 = True
+                if changed2:
+                    tmp2 = path2 + ".tmp"
+                    with open(tmp2, "w", encoding="utf-8") as f2: json.dump(doc2, f2, indent=1)
+                    os.replace(tmp2, path2)
+                return {h2: mm[h2] for h2 in sigs_in_order}
         sig_groups = {}
         for r in roster:
             items = tuple(sorted((k, v) for k, v in ((r["_tune"] or {}).get("parts") or {}).items() if v is not None))
             h = _hl.sha1(repr(items).encode()).hexdigest()[:8]
             r["_bsig"] = h; sig_groups.setdefault(h, []).append(r)
         order = sorted(sig_groups, key=lambda h: -max(float(x["_meta"]["mtime"]) for x in sig_groups[h]))
-        labels = {h: chr(65 + i) for i, h in enumerate(order[:26])}
+        labels = _build_letters(ordn, order)   # PERMANENT letters: a build keeps its letter for life — a new save must never re-letter the garage (identity volatility)
         def _tw(v):
             if v is None: return "—"
             ix = v % 1000

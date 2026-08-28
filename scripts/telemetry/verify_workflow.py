@@ -120,9 +120,10 @@ def c2():
     bs = (DT.get("match") or {}).get("builds") or []
     labels = [b["label"] for b in bs]
     sigs = {b["build"] for b in bs}
-    seq = labels == [chr(65 + i) for i in range(len(labels))]
-    return (len(bs) >= 1 and len(sigs) == len(bs) and seq, f"{len(bs)} builds, labels={labels}, fingerprints distinct={len(sigs) == len(bs)}")
-check("C identify", "builds: distinct fingerprints + sequential labels", c2)
+    # letters are PERMANENT per fingerprint (data/build-letters.json) — unique, stable, NOT positional:
+    # a new save must never re-letter the garage.
+    return (len(bs) >= 1 and len(sigs) == len(bs) and len(set(labels)) == len(labels), f"{len(bs)} builds, labels={labels}, fingerprints distinct={len(sigs) == len(bs)}, labels unique={len(set(labels)) == len(labels)}")
+check("C identify", "builds: distinct fingerprints + permanent unique labels", c2)
 
 def c3():
     bs = (DT.get("match") or {}).get("builds") or []
@@ -230,7 +231,7 @@ def f3():
              "function clsBadge", "function piBadge", "carLblHtml", "pib-img",   # the in-game class-badge design language must exist and stay wired
              "buildThumb", "courseIdentMini", "startOfKey",   # tune identity (livery thumbnail) + course identity (name + start + shape)
              "courseTags", "courseMeasuredChip",   # course tags: type + car-fit from the measured makeup
-             "data-live-map", "flashTurnOnMap", "lastCornerSvg", "geoCov", "speedTracesCard", "turnTraceStrip", "confirmRegressReason", "pinSuspended", "TUNE RATIFIED", "finSteps"]   # live position on the course map + turn-grade rings
+             "data-live-map", "flashTurnOnMap", "lastCornerSvg", "geoCov", "speedTracesCard", "turnTraceStrip", "confirmRegressReason", "pinSuspended", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
     missing = [m for m in marks if m not in src]
     return (not missing, f"feature markers present ({len(marks) - len(missing)}/{len(marks)}){'; missing: ' + str(missing) if missing else ''}")
 check("F client", "feature surface complete", f3)

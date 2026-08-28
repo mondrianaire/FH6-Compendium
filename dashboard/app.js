@@ -2854,7 +2854,7 @@
     };
     // elegant tuning-move cards: priority-striped, current -> target, PLAIN-LANGUAGE effect, diagnosis + confidence
     const movesCards = (moves, drv, cid) => { ensureFhmCss(); const applied = cid ? getApplied(cid) : {}; return moves.length ? `${movesAnatomy(moves)}<div class="tmoves">${moves.map((m, i) => {
-      const up = m.dir > 0; const col = up ? "#e3b341" : "#2f81f7";
+      const up = m.dir > 0; const col = up ? "#f2994a" : "#2f81f7";   // direction orange/blue — #e3b341 is reserved for pending/warning (audit F12)
       const sevCol = m.sev >= 3 ? "#e5414e" : m.sev >= 2 ? "#e3b341" : "#00d27a";
       const fx = (SLIDER_FX[m.sl] || {})[up ? "up" : "down"] || "";
       const vb = (SLIDER[m.sl].verb || ["stiffer", "softer"])[up ? 0 : 1];
@@ -2902,7 +2902,7 @@
       const liveNote = liveInc.length ? ` <span class="chip" style="border-color:#00d27a;color:#00d27a" title="the settled read recomputes every ~20 s; corners since then fold into the balance live — the settled read stays the authority for the tune-vs-driver call">📡 settled${_age != null ? " " + _age + "s ago" : ""} · +${liveInc.length} live corner${liveInc.length > 1 ? "s" : ""} folding in</span>` : "";
       const prio = (co.profile && co.profile.priority) || []; const rideMove = moves.some((m) => m.sl === "rheight" || m.sl === "fheight"); const rn = co.name || "this course";
       const verdict = !moves.length ? "Balanced for what this track demands — no firm change yet · a few more clean laps will separate driver from tune" : `<b>${moves.length} change${moves.length > 1 ? "s" : ""}</b> to sharpen this car for ${esc(rn)}${prio.length ? ` · this track stresses ${esc(prio.slice(0, 2).join(" + "))}` : ""}${rideMove ? " · incl. ride height (bottoming)" : ""}`;
-      return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🎯 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${prio.length ? " · prioritised for " + esc(prio[0]) : ""}</span>${liveNote}</div>
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:14px">🔧 Tuning adjustments — the numbers to change</strong><span class="chip" style="border-color:var(--accent);color:var(--accent)">${moves.length} change${moves.length === 1 ? "" : "s"}${prio.length ? " · prioritised for " + esc(prio[0]) : ""}</span>${liveNote}</div>
         <div style="font-size:13px;font-weight:600;margin:7px 0 9px;color:var(--txt)">${verdict}</div>
         ${abPanel(cid)}${appliedStrip(cid, moves)}${movesCards(moves, ["FWD", "RWD", "AWD"][+String(cid).split("|")[1]] || null, cid)}
         <p class="why" style="font-size:10.5px;margin:7px 0 0">${haveCur ? "Targets are computed from your current values (auto-filled from disk). " : "Position-only sliders show a direction until you register their range. "}Change ONE group, re-drive the course, and the numbers refine — course-weighted, so only what THIS track stresses is shown.</p>
@@ -2986,7 +2986,7 @@
     };
     const cornerScoreCard = () => {
       const scs = live.cornerScores || [];
-      if (!scs.length) return `<div class="cscore"><div class="cscore-hd"><b>🎯 Last corner</b> <span class="why" style="font-size:10.5px">drive a corner — each is graded on grip, speed &amp; clean execution</span></div></div>`;
+      if (!scs.length) return `<div class="cscore"><div class="cscore-hd"><b>Last corner</b> <span class="why" style="font-size:10.5px">drive a corner — each is graded on grip, speed &amp; clean execution</span></div></div>`;
       const l = scs[scs.length - 1]; const col = GRADE_COL[l.grade];
       const dirIcon = l.dir === "R" ? "▶ right" : "◀ left";
       const gripLbl = l.gripState === "held" ? `<b style="color:#00d27a">🟢 grip held</b>` : l.gripState === "drift" ? `<b style="color:#e5414e">🔴 drifting</b>` : `<b style="color:#e3b341">🟡 ${esc(l.gripState)} slipped</b>`;
@@ -2994,7 +2994,7 @@
       const issues = l.issues.length ? l.issues.map((i) => `<span class="cscore-iss s${i.sev}" title="${esc(i.t)}">${i.k}</span>`).join("") : `<span class="cscore-clean">✓ clean — nothing flagged</span>`;
       const strip = scs.slice(-10).map((s) => `<span class="cscore-chip" style="background:${GRADE_COL[s.grade]}" title="grade ${s.grade} · score ${s.score} · avg ${s.avg} mph${s.deltaBest != null ? " (" + (s.deltaBest >= 0 ? "+" : "") + s.deltaBest + " vs best)" : ""}">${s.grade}</span>`).join("");
       return `<div class="cscore" style="border-color:${col}">
-        <div class="cscore-hd"><b>🎯 Last corner</b> <span class="why" style="font-size:10.5px">${dirIcon}${l.kink ? " · kink" : ""} · lap ${l.lapn || "—"}</span><span class="cscore-strip" title="the last 10 corners, newest on the right">${strip}</span></div>
+        <div class="cscore-hd"><b>Last corner</b> <span class="why" style="font-size:10.5px">${dirIcon}${l.kink ? " · kink" : ""} · lap ${l.lapn || "—"}</span><span class="cscore-strip" title="the last 10 corners, newest on the right">${strip}</span></div>
         <div class="cscore-body"><div class="cscore-grade" style="color:${col};border-color:${col}">${l.grade}<small>${l.score}</small></div>
           <div class="cscore-detail"><div class="cscore-line">${gripLbl} · ${speedLbl}</div><div class="cscore-issues">${issues}</div></div></div></div>`;
     };
@@ -3011,30 +3011,30 @@
         // definitively NO saved tune on disk — there are no wrong current values to protect against (advice falls back
         // to vetted baselines), so this is NOT a hard block: 'confirm anyway' proceeds on baselines.
         R.noSave = true; R.matchLbl = "no saved tune";
-        R.need.push("no tune file exists for this car — apply a downloaded tune or save your own once to ground advice in exact values (until then, targets use vetted community baselines)");
+        R.need.push("apply or save a tune once — advice uses baselines until a file exists");
         return R;
       }
       if (!cached || !cached.deliverable) { R.need.push("reading the build from the save file…"); R.hardBlock = true; return R; }
       const dl = cached.deliverable, m = cached.match || {}, sm = dl.summary || {};
       const n = m.n_saves || (m.saves || []).length || 1, ties = m.n_signature_ties || 1;
-      if (m.how === "unsaved-build") { R.hardBlock = true; R.matchLbl = "distinct build"; R.need.push(`capture its file: re-apply the tune from Find Tunes if it's a downloaded tune (applying writes its save), or save it if it's your own — measured ${(m.evidence || []).join(" + ").toLowerCase() || "telemetry"} contradicts every save on disk, so you're driving a distinct build whose parts aren't captured (the class cap makes different part combos share one PI)`); }
-      else if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`capture its file: re-apply the tune from Find Tunes if it's a downloaded tune (applying writes its save), or save it if it's your own — you're in a ${m.live_cyl}-cyl car but the nearest save is ${m.chosen_cyl}-cyl, so its parts &amp; sliders aren't the build you're driving`); }
+      if (m.how === "unsaved-build") { R.hardBlock = true; R.matchLbl = "distinct build"; R.need.push(`re-apply this build's tune from Find Tunes (or save it if yours) — its file isn't on disk`); }
+      else if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`re-apply or save this build's tune — no save matches your ${m.live_cyl}-cyl engine`); }
       else if (m.how === "gear-matched") { R.matchLbl = "gear-matched"; R.why.push(`identified the equipped build by its live gear ladder (${ties} share this engine + PI)`); }
-      else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(`drive up through the gears once — ${ties} builds share this engine + PI, and the gear ladder is how I tell which one you're on`); }
+      else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(`drive up through the gears — the ladder identifies which of ${ties} builds you're on`); }
       else if (m.how === "signature") { R.matchLbl = "signature"; R.why.push("matched to the car you're driving (cylinders + PI)"); }
       else if (m.how === "picked") { R.matchLbl = "pinned"; R.why.push("pinned to a specific saved tune"); }
       else if (n > 1) { R.hardBlock = true; R.matchLbl = "unmatched"; R.need.push(`drive so I can match the equipped build (${n} saved tunes exist), or pick it in the decode panel`); }
       else if (m.live) { R.matchLbl = "single save"; R.why.push("single saved tune for this car — unambiguous, and the live car checks out"); }
-      else { R.matchLbl = "single save"; R.softNoLive = true; R.need.push("drive the car once — a single save is unambiguous on disk, but only a live check catches an unsaved work-in-progress build"); }
+      else { R.matchLbl = "single save"; R.softNoLive = true; R.need.push("drive once — verifies the save matches the car you're in"); }
       R.why.push(`${sm.parts_installed || 0} parts read exact`);
       const exact = sm.sliders_exact != null ? sm.sliders_exact : (sm.sliders_absolute || 0), rel = sm.sliders_relative || 0;
       if (exact > 0) R.why.push(`${exact} slider values exact`);
-      if (rel > 0) R.need.push(`${rel} slider${rel === 1 ? "" : "s"} still read as % — calibrate ride-height/downforce for exact current values (advice uses vetted baselines meanwhile)`);
+      if (rel > 0) R.need.push(`calibrate ${rel} %-slider${rel === 1 ? "" : "s"} — 🎯 drawer (baselines used meanwhile)`);
       // UNION input: telemetry cross-checks drive the verdict. Corroborations raise confidence; an open save×telemetry
       // CONFLICT means the decode and the measurements disagree — never confirm on top of that.
       const u = dl.union || {};
       if (u.n_agree) R.why.push(`${u.n_agree} field${u.n_agree > 1 ? "s" : ""} corroborated by telemetry (save × measured agree)`);
-      if (u.n_conflict) R.need.push(`resolve ${u.n_conflict} save × telemetry conflict${u.n_conflict > 1 ? "s" : ""} — see the 🔗 union strip (a conflict means the decoded values may not be this build's)`);
+      if (u.n_conflict) R.need.push(`resolve ${u.n_conflict} save×telemetry conflict${u.n_conflict > 1 ? "s" : ""} — 🔗 drawer`);
       const topAsk = (u.asks || [])[0];
       if (topAsk && !u.n_agree) R.need.push(topAsk.text);   // nothing corroborated yet → surface the highest-value drive
       const conf = dl.confidence || 0;
@@ -3062,6 +3062,7 @@
     // the ✓ button lights green on a clean match + solid decode + zero union conflicts). Recordings skip the gate.
     const gatedTuning = (co, s, cid) => {
       if (src !== "live" || !cid) return numericTuningPanel(co, s, cid);
+      if (!live.connected) return `<div class="bcf" style="border-color:var(--muted)"><div class="bcf-hd" style="color:var(--muted)"><b>📡 Daemon offline</b></div><p class="why" style="font-size:11.5px;margin:2px 0 0">reconnect to identify the build — tuning advice needs the live decode (a red 'identifying…' here would be wrong: nothing is being identified while offline)</p></div>`;   // audit F23: offline is not an identification failure
       if (isBuildConfirmed(cid)) return `<div class="bcf-ok">✓ build confirmed — advice reads this build's real values<button class="bcf-recheck" data-unconfirmbuild="${esc(cid)}" title="drop the confirmation and re-verify the build identification">↺ re-check</button></div>` + numericTuningPanel(co, s, cid);
       const ord = String(cid).split("|")[0];
       const cached = live.diskCache ? live.diskCache[ord] : null;
@@ -3071,13 +3072,13 @@
     const liveCourseDashboard = (co, s) => {
       const p = courseParts(co, s); const tr = co.track || {}; const tu = co.turns || {}; const dr = co.driving || {}; const lapsN = co.laps ? co.laps.total : co.runs; const f = live.frame || {};
       // CAR-AWARE: everything car-specific (references, tuning, feedback) follows the EQUIPPED car; course LEARNING (turns/map/profile) is the track and stays.
-      const curCar = (f.on && f.cid) || (co.cars || [])[0]; const curName = curCar ? (carName({ ordinal: String(curCar).split("|")[0], id: curCar }) || "#" + String(curCar).split("|")[0]) : "";
+      const curCar = (f.on && f.cid) || live.courseCar || (co.cars || [])[0]; const curName = curCar ? (carName({ ordinal: String(curCar).split("|")[0], id: curCar }) || "#" + String(curCar).split("|")[0]) : "";   // paused → stay on the LAST-DRIVEN car, never rescope the gate/advice to co.cars[0] (audit F20)
       const carGrip = dr.car_grip || {}; const analysisReflectsCar = curCar && (carGrip[curCar] != null || (co.cars || []).includes(curCar));
       const carChanged = !!(live.courseCar && curCar && live.courseCar !== curCar);   // set in paintFrame; means the analysis still reflects the previous car
       const ck = courseKnowledge(co); const training = ck.stage === "training"; const turnsN = tu.count || 0;
       const refsOwn = analysisReflectsCar ? (dr.own_refs || 0) : 0, refsPred = dr.predicted || 0;   // a just-swapped car has no references yet — re-gathering
       const needRefs = Math.max(1, Math.ceil(turnsN * 0.5)); const feedbackReady = ck.mapped && analysisReflectsCar && refsOwn >= needRefs;
-      const carBanner = (carChanged || !analysisReflectsCar) && curCar ? `<div class="lab-corner" style="border-left:4px solid var(--warn,#e3b341);background:rgba(227,179,65,.08);margin-bottom:8px"><strong style="font-size:13px">🔄 Car changed — now ${esc(curName)}</strong> <span class="why" style="font-size:11px">the course (turns · map · layout) is kept; this car's references, tuning targets and feedback are re-gathering — drive ${needRefs} clean turn${needRefs === 1 ? "" : "s"} (predictions from geometry × this car's grip fill in meanwhile). The next analysis (~20 s) confirms.</span></div>` : "";
+      const carBanner = (carChanged || !analysisReflectsCar) && curCar ? `<div class="lab-corner" style="border-left:4px solid var(--warn,#e3b341);background:rgba(227,179,65,.08);margin-bottom:8px" title="The course (turns · map · layout) is kept. This car's references and tuning targets re-gather; geometry × grip predictions fill in meanwhile; the next analysis (~20 s) confirms."><strong style="font-size:13px">🔄 Now ${esc(curName)}</strong> <span class="why" style="font-size:11px">course kept · drive ${needRefs} clean turn${needRefs === 1 ? "" : "s"} to re-learn this car</span></div>` : "";
       const tiles = [[esc(p.rn), "course"], [`${lapsN} / ${tr.laps || lapsN}`, "laps · session / on record"], [co.best_lap ? co.best_lap.toFixed(3) : "—", "best lap · session"], [tr.best ? tr.best.best_lap.toFixed(3) : "—", "best lap · track"], [`${turnsN}${tu.possible ? " +" + tu.possible : ""}`, `turns · ${Math.round((tu.track_confidence || tu.confidence || 0) * 100)}% earned`], [`${dr.on_reference || 0}/${dr.compared || 0}`, "turns on reference"], [`${refsOwn}/${turnsN}`, "refs for this car"]];
       const st = (k, ok, t) => `<span class="chip" title="${esc(t)}" style="border-color:${ok ? "#00d27a" : "var(--warn,#e3b341)"};color:${ok ? "#00d27a" : "var(--warn,#e3b341)"}">${ok ? "✓" : "○"} ${k}</span>`;
       const learnPanel = `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📚 Course learning — what we know about this track</strong><span class="chip" style="border-color:var(--accent2);color:var(--accent2);font-weight:700">${ck.pct}%</span></div>
@@ -3307,7 +3308,7 @@
       .dm-picker{display:flex;flex-wrap:wrap;gap:5px}
       .dm-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;border:1px solid var(--line);border-radius:12px;padding:3px 10px;background:var(--bg2);color:var(--txt);cursor:pointer;font-variant-numeric:tabular-nums}
       .dm-chip:hover{border-color:var(--muted)}
-      .dm-chip.on{border-color:#00d27a;color:#00d27a;background:rgba(0,210,122,.12);font-weight:700}
+      .dm-chip.on{border-color:#a371f7;color:#a371f7;background:rgba(163,113,247,.12);font-weight:700}   /* selection is purple everywhere (tl-save.on matches); green = live-verified only (audit F13) */
       .dm-chip.auto{border-color:#a371f7;color:#a371f7}
       .dm-chip .dm-date{font-size:9px;color:var(--muted)}
       .clone-mode{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;margin:0 0 10px;font-size:12.5px}
@@ -3501,6 +3502,8 @@
       .tl-lvy{width:56px;height:34px;object-fit:cover;border-radius:5px;border:1px solid var(--line)}
       /* ---- consolidated identification master panel + drawers ---- */
       .idm{margin:0 0 10px}
+      .idm-ribbon{display:flex;align-items:center;gap:9px;border:1px solid;border-radius:8px;padding:5px 10px;margin:0 0 9px;font-size:12.5px}
+      .dm-info{cursor:help;color:var(--muted);font-size:10.5px;border-bottom:1px dotted var(--muted);white-space:nowrap}
       .idm-chips{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
       .idm-id{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;margin:7px 0;padding:6px 10px;border:1px dashed var(--line);border-radius:7px}
       .idm-id.ok{border-color:rgba(0,210,122,.5);border-style:solid}
@@ -3607,6 +3610,9 @@
       .fhm-dock-hd{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:30px;flex-wrap:wrap}
       .fhm-dock-ttl{font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#e5414e;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
       .fhm-dock-ttl .dot{width:7px;height:7px;border-radius:50%;background:#e5414e;box-shadow:0 0 6px rgba(229,65,78,.7)}
+      .fhm-dock-ttl.off{color:var(--muted)}
+      .fhm-dock-ttl.off .dot{background:var(--muted);box-shadow:none}
+      .fhm-dock.offline .fhm-dock-tiles{opacity:.45}
       .fhm-dock-tiles{display:flex;flex-wrap:wrap;gap:6px;padding:5px 10px 6px;min-height:34px;align-items:stretch;border-top:1px solid rgba(255,255,255,.05)}
       .fhm-dtile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:48px;padding:2px 7px;border-radius:6px;background:var(--bg2);border:1px solid var(--line)}
       .fhm-dtile b{font-size:15px;font-weight:800;line-height:1.02;color:var(--txt);font-variant-numeric:tabular-nums}
@@ -3639,13 +3645,13 @@
       const saves = m.saves || []; const cur = String(r.ts); const pick = live.diskPick && live.diskPick[ordinal];
       let status = "";
       const ties = m.n_signature_ties || 1;
-      if (m.how === "unsaved-build") status = `<div class="dm-warn">🚧 <b>DISTINCT BUILD detected</b> — measured <b>${esc((m.evidence || []).join(" + ").toLowerCase() || "telemetry")}</b> contradicts every saved tune (same cylinders${m.live_pi ? `, same PI ${m.live_pi} — the class cap makes different part combos converge` : ""}). You're driving a build whose parts are <b>not on disk</b>. <b>Re-apply its tune from Find Tunes</b> (a downloaded tune writes its file when applied) or <b>save it</b> if it's your own — or pick a saved tune below.</div>`;
-      else if (m.how === "no-match") status = `<div class="dm-warn">⚠ You're in a <b>${m.live_cyl}-cyl</b> car${m.live_pi ? ` (PI ${m.live_pi})` : ""} but no saved tune matches it — the closest is <b>${m.chosen_cyl}-cyl</b>. This build's file isn't on disk; <b>re-apply the tune from Find Tunes</b> (downloaded tunes write their file when applied) or <b>save it</b> if it's yours — or pick a saved tune below.</div>`;
+      if (m.how === "unsaved-build") status = `<div class="dm-warn"><b>🚧 Distinct build — its file is not on disk.</b> Re-apply its tune from Find Tunes (or save it if yours). <span class="dm-info" title="Measured ${esc((m.evidence || []).join(" + ").toLowerCase() || "telemetry")} contradicts every saved tune. Same cylinders${m.live_pi ? ` and PI ${m.live_pi}` : ""} — at a class cap different part combos converge to one PI, so only part-level measurements can tell builds apart. A downloaded tune writes its file when applied.">ⓘ why</span></div>`;
+      else if (m.how === "no-match") status = `<div class="dm-warn"><b>⚠ No saved tune matches this car.</b> Re-apply its tune from Find Tunes (or save it if yours). <span class="dm-info" title="You're in a ${m.live_cyl}-cyl car${m.live_pi ? ` at PI ${m.live_pi}` : ""}; the closest save is ${m.chosen_cyl}-cyl — a different engine, so its parts and sliders are not this build's. Downloaded tunes write their file when applied.">ⓘ why</span></div>`;
       else if (m.how === "gear-matched") status = `<div class="dm-ok">✓ identified the <b>equipped build</b> by its gear ladder ⚙${m.held ? ` <span class="why" style="font-weight:400">— held from your last verified run (a menu car-swap is invisible to telemetry; WOT the gears again if you switched cars)</span>` : ties > 1 ? ` <span class="why" style="font-weight:400">(${ties} builds share this engine + PI)</span>` : ""}</div>`;
       else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you're driving — ${m.live_cyl}-cyl${m.live_pi ? `, PI ${m.live_pi}` : ""}${ties >= 2 ? ` <span class="why" style="font-weight:400">· ${ties} builds share this signature — drive up through the gears to pin the exact one, or pick below</span>` : ""}</div>`;
       else if (m.how === "picked") status = `<div class="dm-ok">📌 pinned to this saved tune${saves.length > 1 ? " — auto-match off" : ""}</div>`;
       else if (saves.length > 1) status = `<div class="dm-why">showing the newest of ${saves.length} saved tunes — drive one to auto-match, or pick it:</div>`;
-      const picker = saves.length > 1 ? `<div class="dm-picker">${saves.map((s) => {
+      const picker = (saves.length > 1 || pick) ? `<div class="dm-picker">${saves.map((s) => {
         const on = String(s.ts) === cur;
         return `<button class="dm-chip${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded" : "self-made"} · saved ${_tsFmt(s.ts)}">${s.pi != null ? `<b>${s.pi}</b>` : "PI ?"}${s.cyl != null ? ` · ${s.cyl}cyl` : ""} <span class="dm-date">${_tsFmt(s.ts)}</span></button>`;
       }).join("")}${pick ? `<button class="dm-chip auto" data-diskpick="${ordinal}|">🔄 auto</button>` : ""}</div>` : "";
@@ -3681,7 +3687,7 @@
       const ICO = { agree: "✓", conflict: "⚠", "tele-fill": "📡", await: "○" };
       const COL = { agree: "#00d27a", conflict: "#e5414e", "tele-fill": "#2f81f7", await: "#e3b341" };
       const ORD = { conflict: 0, agree: 1, "tele-fill": 2, await: 3 };
-      const chips = `${u.n_agree ? `<span class="us-chip ok">✓ ${u.n_agree} corroborated</span>` : ""}${u.n_conflict ? `<span class="us-chip bad">⚠ ${u.n_conflict} conflict${u.n_conflict > 1 ? "s" : ""}</span>` : ""}${u.n_fill ? `<span class="us-chip fill">📡 ${u.n_fill} filled by telemetry</span>` : ""}${u.n_await ? `<span class="us-chip wait">○ ${u.n_await} awaiting telemetry</span>` : ""}`;
+      const chips = `${u.n_agree ? `<span class="us-chip ok" title="save and telemetry agree on these — confidence raised">✓ ${u.n_agree} corroborated</span>` : ""}${u.n_conflict ? `<span class="us-chip bad">⚠ ${u.n_conflict} conflict${u.n_conflict > 1 ? "s" : ""}</span>` : ""}${u.n_fill ? `<span class="us-chip fill" title="values the save cannot know, measured live (drivetrain layout, peak hp)">📡 ${u.n_fill} from telemetry</span>` : ""}${u.n_await ? `<span class="us-chip wait">○ ${u.n_await} awaiting telemetry</span>` : ""}`;
       const frow = (f) => `<div class="us-row ${f.status}"><span class="us-ic" style="color:${COL[f.status] || "var(--muted)"}">${ICO[f.status] || "·"}</span><b class="us-name">${esc(f.name)}</b><span class="us-vals">${f.save != null ? `<span class="us-src">save</span>${esc(String(f.save))}` : ""}${f.save != null && f.telemetry != null ? `<span class="us-x">×</span>` : ""}${f.telemetry != null ? `<span class="us-src tel">📡</span>${esc(String(f.telemetry))}` : ""}</span>${f.note ? `<div class="us-note">${esc(f.note)}</div>` : ""}</div>`;
       const fields = (u.fields || []).slice().sort((a, b) => (ORD[a.status] ?? 9) - (ORD[b.status] ?? 9));
       const asks = (!uopts.noAsks && (u.asks || []).length) ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
@@ -3732,10 +3738,9 @@
       // show them inline here so the picker at least carries the visual identity, and say what the game can't record.
       // a live-DETECTED distinct build gets its own synthetic row — it exists in the garage but not on disk
       const unsavedRow = m.how === "unsaved-build" ? `<div class="tl-bucket"><span class="tl-sig"><b>🚧 unsaved build</b> · detected live<span class="tl-tie" title="measured ${esc((m.evidence || []).join(" + "))} contradicts every saved tune — same cylinders + PI (class-cap convergence), different parts">${esc((m.evidence || []).join(" + ")) || "measured"} differs</span></span><span class="tl-saves"><span class="why" style="font-size:10.5px">re-apply (downloaded) or save (own) its tune in-game → it becomes a real entry here</span></span></div>` : "";
-      const lc = (live.liveryCache || {})[String(ordinal)];
-      const wornThumbs = (lc && lc.n) ? lc.list.filter((l) => l.thumb).slice(0, 6).map((l) => `<img class="tl-lvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(l.dir)}" loading="lazy" title="${esc(l.name || "design")}" alt="">`).join("") : "";
-      const worn = wornThumbs ? `<div class="tl-worn"><span class="why" style="font-size:10px">🎨 liveries on this car (the game records NO livery↔tune link — two garage cars of the same model even share one tune file; identify by the paint you see in-game, and re-save a build's tune in-game to give it its own entry here):</span>${wornThumbs}</div>` : "";
-      return `<details class="tl"${nCats > 1 ? " open" : ""}><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved tune${saves.length > 1 ? "s" : ""} · <b>${nCats} distinct build${nCats > 1 ? "s" : ""}</b> (by upgrade parts)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${unsavedRow}${worn}</details>`;
+      // (the duplicate 'tl-worn' gallery was removed — audit F2: it repeated the livery strip with less information;
+      // the per-build cells above remain the association editor, the strip remains the one gallery)
+      return `<details class="tl"${nCats > 1 ? " open" : ""} data-dk="tl"><summary><b>📚 Tune library</b> <span class="why" style="font-size:10.5px">${saves.length} saved tune${saves.length > 1 ? "s" : ""} · <b>${nCats} distinct build${nCats > 1 ? "s" : ""}</b> (by upgrade parts)${eqLive ? " · 🎮 = equipped" : pinnedPick ? " · 📌 = pinned (not live-verified)" : " · drive to flag the equipped one"}</span></summary>${rows}${unsavedRow}</details>`;
     };
     // ---- LIVERY GALLERY: the paintjob thumbnails from the save's Livery containers — the visual identity players
     // actually use to tell builds apart. No tune↔livery link exists on disk (both key by car only), so this is a
@@ -3835,13 +3840,15 @@
         (piTot || sm.pi_total != null) ? c2(`🧮 PI ${sm.pi_total != null ? sm.pi_total + " · " : ""}${piKnown}/${piTot} priced`, (piKnown >= piTot && piTot) ? "ok" : "wait", "per-part PI accrues as configs are driven — details in the 🧮 drawer") : "",
       ].filter(Boolean).join("");
       const asksHtml = (u2.asks || []).length ? `<div class="us-asks"><div class="us-asks-h">📡 DRIVE TO RAISE CONFIDENCE</div>${u2.asks.map((a) => `<div class="us-ask"><span class="us-ask-arrow">▸</span><span>${esc(a.text)}</span><span class="us-gain">${esc(a.gain)}</span></div>`).join("")}</div>` : "";
-      const drawer = (title, body, open) => body ? `<details class="idm-drawer"${open ? " open" : ""}><summary>${title}</summary><div class="idm-dbody">${body}</div></details>` : "";
+      const drawer = (title, body, open) => body ? `<details class="idm-drawer" data-dk="${esc(title.slice(0, 2))}"${open ? " open" : ""}><summary>${title}</summary><div class="idm-dbody">${body}</div></details>` : "";
       const piHtml = (() => { if (!piTot && sm.pi_total == null) return ""; const priced = piKnown >= piTot && piTot > 0;
         const oc2 = sm.pi_obs_car || 0, ot2 = sm.pi_obs_total || 0;
         return `<div class="fhm-pi-budget${priced ? " ok" : ""}" title="Per-part PI self-builds from your driven configs: two decoded builds of the same car differing by one part reveal that part's PI."><span class="lbl">🧮 PI budget</span>${sm.pi_total != null ? `<b>${sm.pi_total}</b> total` : `<span class="why">total unknown — drive this exact build once</span>`}${sm.pi_attributed != null ? ` · <b>${sm.pi_attributed}</b> attributed` : ""} · <span class="why">${piKnown}/${piTot} parts priced${piKnown < piTot ? " — accrues as you drive" : ""}</span> · <span class="why" title="configs the daemon has paired with a live PI — this car / whole garage">📈 ${oc2} this car · ${ot2} total observed</span></div>`; })();
-      return `<div class="block fhm" style="border-color:#00d27a">${headRow}
-        ${liveryStrip(dl.ordinal, r.match, r.ts)}
-        <div class="idm">
+      // frame color follows the MATCH state, never a hardcoded green — green claimed "trustable" even over a
+      // distinct-build warning (audit F3/F11); the confidence color oc carries the verified case.
+      const mm0 = r.match || {};
+      const frameCol = (mm0.how === "no-match" || mm0.how === "unsaved-build") ? "#e5414e" : (u2.n_conflict ? "#e3b341" : oc);
+      const idmBlock = `<div class="idm">
           ${diskMatchBar(r, dl.ordinal)}
           ${diskDiffBanner(dl.ordinal)}
           ${confMeterHtml(r)}
@@ -3866,13 +3873,26 @@
           })()}
           <div class="idm-chips">${contrib}</div>
           ${asksHtml}
-        </div>
-        ${tuneLibraryCard(r, dl.ordinal)}
-        ${drawer(`🔗 Save × telemetry — field detail${u2.n_conflict ? ` <span class="idm-flag">⚠ ${u2.n_conflict}</span>` : ""}`, unionStrip(dl, { noAsks: true }), !!u2.n_conflict)}
+        </div>`;
+      const colsBlock = `<div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div>`;
+      const drawers = `${drawer(`🔗 Save × telemetry — field detail${u2.n_conflict ? ` <span class="idm-flag">⚠ ${u2.n_conflict}</span>` : ""}`, unionStrip(dl, { noAsks: true }), !!u2.n_conflict)}
         ${drawer(`🩺 Sanity check${sanE || sanW ? ` <span class="idm-flag${sanE ? "" : " warn"}">${sanE ? "⛔ " + sanE : ""}${sanE && sanW ? " · " : ""}${sanW ? "⚠ " + sanW : ""}</span>` : " — clean"}`, sanI.length ? sanityPanel(dl, drvX) : "", sanE > 0)}
         ${drawer(`🧮 PI budget — per-part pricing`, piHtml, false)}
-        ${drawer(`🎯 Calibration${relN ? ` <span class="idm-flag warn">${relN} pending</span>` : ""}`, calibrationCard(dl), false)}
-        <div class="fhm-cols"><div><div class="fhm-sub">🔧 Upgrades — the parts to install</div>${cats}</div><div><div class="fhm-sub">🎛 Tuning — the sliders to set</div>${tabsHtml}</div></div></div>`;
+        ${drawer(`🎯 Calibration${relN ? ` <span class="idm-flag warn">${relN} pending</span>` : ""}`, calibrationCard(dl), false)}`;
+      if (opts.inFloat) {
+        // FLOAT = the take-to-game window: its purpose IS the parts/sliders payload (audit F1). One compact identity
+        // ribbon, then the columns FIRST; the full identity stack + gallery + library fold into one drawer.
+        const curB0 = (mm0.builds || []).find((b) => (b.saves || []).some((ts) => String(ts) === String(r.ts)));
+        const ribThumb = curB0 && curB0.livery && curB0.livery.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(curB0.livery.dir)}" alt="">` : "";
+        const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b><span style="color:${oc};font-weight:700">${Math.round(dl.confidence * 100)}%</span>${mm0.how === "no-match" || mm0.how === "unsaved-build" ? `<span class="idm-flag">not this build's file</span>` : mm0.how === "gear-matched" ? `<span class="why">⚙ verified</span>` : ""}</div>`;
+        return `<div class="block fhm" style="border-color:${frameCol}">${ribbon}${colsBlock}${drawer("🪪 Identity, liveries &amp; library — detail", idmBlock + liveryStrip(dl.ordinal, r.match, r.ts) + tuneLibraryCard(r, dl.ordinal), false)}${drawers}</div>`;
+      }
+      return `<div class="block fhm" style="border-color:${frameCol}">${headRow}
+        ${idmBlock}
+        ${liveryStrip(dl.ordinal, r.match, r.ts)}
+        ${tuneLibraryCard(r, dl.ordinal)}
+        ${colsBlock}
+        ${drawers}</div>`;
     };
     const fetchDiskTune = (ordinal, opts) => {
       opts = opts || {};
@@ -3939,6 +3959,10 @@
       const ord = (payload && payload.ordinal) || (f && f.car) || 0;
       return `<div class="clone-mode live"><div class="cm-txt"><b>🔍 IDENTIFYING</b> — following the car you're in${nm ? ` · ${esc(nm)}` : ""}<div class="why">This re‑reads as you switch builds. Lock it once you've found the build you want to clone.</div></div><button class="lab-mode" data-clone-lock="${ord}">🎯 Lock as clone target</button></div>`;
     };
+    // keep the user's drawer toggles + scroll across key-based innerHTML rebuilds (audit F4): capture before, restore
+    // after. A drawer the user explicitly set wins over the template's auto-open; a NEW drawer keeps its default.
+    const captureUi = (el) => { const map = {}; el.querySelectorAll("details[data-dk]").forEach((d) => { map[d.dataset.dk] = d.open; }); const fb = el.querySelector(".fhm-fbody"); return { map, scroll: fb ? fb.scrollTop : null }; };
+    const restoreUi = (el, st) => { if (!st) return; el.querySelectorAll("details[data-dk]").forEach((d) => { if (Object.prototype.hasOwnProperty.call(st.map, d.dataset.dk)) d.open = st.map[d.dataset.dk]; }); const fb = el.querySelector(".fhm-fbody"); if (fb && st.scroll != null) fb.scrollTop = st.scroll; };
     const bindDiskDecode = (el) => {
       el.querySelectorAll("[data-popout]").forEach((b) => b.addEventListener("click", () => popOutFloat(+b.dataset.popout)));
       el.querySelectorAll("[data-diskpick]").forEach((b) => b.addEventListener("click", () => { const [o, ts] = b.dataset.diskpick.split("|"); pickDiskTune(+o, ts || null); }));
@@ -3949,15 +3973,25 @@
         fetch(liveUrl + "/build-livery", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: +ordP, build: buildP, dir: dirP }) })
           .then(() => { if (live.diskCache) delete live.diskCache[ordP]; fetchDiskTune(+ordP, { force: true }); }).catch(() => {});
       }));
+      // audit F6: no more blind cycling — clicking the livery cell opens an INLINE tap-picker (thumbs + none + cancel);
+      // one explicit choice pins, cancel restores, nothing is rewritten silently.
       el.querySelectorAll("[data-cyclelivery]").forEach((b2) => b2.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation();
-        const [ordL, buildL, curDir] = b2.dataset.cyclelivery.split("|");
+        const [ordL, buildL] = b2.dataset.cyclelivery.split("|");
         const lc = (live.liveryCache || {})[String(ordL)];
-        const opts = (lc && lc.list) ? lc.list.map((l) => l.dir) : [];
+        const opts = (lc && lc.list) || [];
         if (!opts.length) { fetchLiveries(ordL); return; }
-        const i = curDir ? opts.indexOf(curDir) : -1;
-        const next = (i + 1 >= opts.length) ? null : opts[i + 1];   // cycles: none → first → … → last → none
-        fetch(liveUrl + "/build-livery", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: +ordL, build: buildL, dir: next }) })
-          .then(() => { if (live.diskCache) delete live.diskCache[ordL]; fetchDiskTune(+ordL, { force: true }); }).catch(() => {});
+        const pop = document.createElement("span"); pop.className = "idm-picks";
+        const choose = (dir) => { fetch(liveUrl + "/build-livery", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ordinal: +ordL, build: buildL, dir: dir }) })
+          .then(() => { if (live.diskCache) delete live.diskCache[ordL]; fetchDiskTune(+ordL, { force: true }); paintFloat(true); }).catch(() => {}); };
+        opts.slice(0, 6).forEach((l) => { let o;
+          if (l.thumb) { o = document.createElement("img"); o.className = "idm-pick"; o.src = liveUrl + "/livery-thumb?d=" + encodeURIComponent(l.dir); o.alt = ""; }
+          else { o = document.createElement("span"); o.className = "idm-pick chip"; o.textContent = "🎨 " + (l.name && !/^Forza/.test(l.name) ? l.name : (l.kind === "BaseLivery" ? "base paint" : "soul-bound")); }
+          o.title = "pin: " + (l.name || l.kind); o.addEventListener("click", (e) => { e.stopPropagation(); choose(l.dir); }); pop.appendChild(o); });
+        const none = document.createElement("span"); none.className = "idm-pick chip"; none.textContent = "∅ none"; none.title = "clear the association";
+        none.addEventListener("click", (e) => { e.stopPropagation(); choose(null); }); pop.appendChild(none);
+        const cancel = document.createElement("span"); cancel.className = "idm-pick chip"; cancel.textContent = "✕"; cancel.title = "cancel — keep as is";
+        cancel.addEventListener("click", (e) => { e.stopPropagation(); pop.replaceWith(b2); }); pop.appendChild(cancel);
+        b2.replaceWith(pop);
       }));
       el.querySelectorAll("[data-caljump]").forEach((b) => b.addEventListener("click", () => {
         const t = el.querySelector("#" + (window.CSS && CSS.escape ? CSS.escape(b.dataset.caljump) : b.dataset.caljump));
@@ -3997,8 +4031,9 @@
         const key = "LOCK|" + t.ordinal + "|" + t.ts + "|" + (cur && cur.ts ? cur.ts : "-") + "|" + (fMatch ? f.pi + "." + f.cyl : "-") + "|" + (verify ? verify.okParts + "." + verify.okSliders : "-") + "|" + (((live.liveryCache || {})[t.ordinal] || {}).n || 0);
         if (el.dataset.fhmKey !== key || !el.querySelector(".fhm")) {
           el.dataset.fhmKey = key;
+          const st = captureUi(el);
           el.innerHTML = cloneModeBanner(true) + coarseStrip(coarse) + verifyBanner(verify, !verify) + diskDeliverableHtml(t.payload, { popBtn: true, verify: verify });
-          bindDiskDecode(el);
+          bindDiskDecode(el); restoreUi(el, st);
         }
         return;
       }
@@ -4013,8 +4048,9 @@
       const key = "LIVE|" + ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "") + "|" + (((live.liveryCache || {})[ord] || {}).n || 0);
       if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
       el.dataset.fhmKey = key;
+      const st = captureUi(el);
       el.innerHTML = cloneModeBanner(false, cached) + diskDeliverableHtml(cached, { popBtn: true });
-      bindDiskDecode(el);
+      bindDiskDecode(el); restoreUi(el, st);
     };
     // ---- FLOATING "TAKE TO GAME" WINDOW: the decoded build sheet, kept on screen across menu / workflow / tab / source changes ----
     // Mounted on document.body (position:fixed) so NOTHING in the render cycle wipes it. It reads live.diskCache for the
@@ -4111,7 +4147,12 @@
       return `<div class="fhm-verify" style="border-color:${col}"><div class="fhm-verify-h"><b style="color:${col}">${pct >= 100 ? "✅ build matches the clone" : "🔧 building toward the clone"}</b><span>${v.okParts}/${v.nParts} upgrades · ${v.okSliders}/${v.nSliders} tune</span></div><div class="fhm-confbar"><i style="width:${pct}%;background:${col}"></i></div>${v.bad.length ? `<div class="fhm-verify-todo">${v.bad.slice(0, 6).map((b) => `<span>${vdot(b.st)}<b>${esc(String(b.item).replace(/_/g, " "))}</b> → ${esc(String(b.want))}</span>`).join("")}${v.bad.length > 6 ? `<span class="why">+${v.bad.length - 6} more</span>` : ""}</div>` : ""}</div>`;
     };
     const ensureFloatHost = () => { let el = document.getElementById("fhmFloat"); if (!el) { el = document.createElement("div"); el.id = "fhmFloat"; el.className = "fhm-float"; el.style.display = "none"; document.body.appendChild(el); ensureFhmCss(); } return el; };
-    const popOutFloat = (ord) => { initFloat(); live.float.ord = ord || floatOrd(); live.float.pinned = true; live.float.open = true; live.float.min = false; freezeTarget(live.float.ord); saveFloat(); paintFloat(true); };
+    const popOutFloat = (ord) => { initFloat(); const next = ord || floatOrd();
+      if (live.float.pinned && live.float.target && String(live.float.target.ordinal) !== String(next)) {   // audit F7: never silently overwrite a frozen target
+        const nm = live.float.target.name || ("#" + live.float.target.ordinal);
+        if (!window.confirm(`Replace the pinned clone target (${nm}) with this build?`)) return;
+      }
+      live.float.ord = next; live.float.pinned = true; live.float.open = true; live.float.min = false; freezeTarget(live.float.ord); saveFloat(); paintFloat(true); };
     function paintFloat(force) {
       initFloat(); const el = ensureFloatHost();
       if (!live.float.open) { el.style.display = "none"; return; }
@@ -4145,13 +4186,17 @@
         <button class="fhm-fbtn" data-fmin title="${live.float.min ? "expand" : "minimize to a pill"}">${live.float.min ? "▢" : "—"}</button>
         <button class="fhm-fbtn" data-fclose title="close (re-open with the Pop out button)">✕</button></div>`;
       const body = coarseStrip(coarse) + verifyBanner(verify, pinned && !verify) + diskDeliverableHtml(cached, { inFloat: true, verify: verify });
+      const stF = captureUi(el);
       el.innerHTML = live.float.min ? bar : bar + `<div class="fhm-fbody">${body}</div>`;
+      restoreUi(el, stF);   // scroll + drawer toggles survive the per-key rebuild (audit F1/F4 — the float resets scroll on exactly the mid-menu glances it exists for)
       const fbar = el.querySelector(".fhm-fbar");
       if (fbar) fbar.addEventListener("mousedown", (e) => { if (e.target.closest(".fhm-fbtn")) return; const sx = e.clientX, sy = e.clientY, r = el.getBoundingClientRect(), ox = r.left, oy = r.top;
         const mv = (ev) => { live.float.x = Math.max(0, Math.min(window.innerWidth - 80, ox + ev.clientX - sx)); live.float.y = Math.max(0, Math.min(window.innerHeight - 26, oy + ev.clientY - sy)); el.style.left = live.float.x + "px"; el.style.top = live.float.y + "px"; el.style.right = "auto"; el.style.bottom = "auto"; };
         const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up); saveFloat(); };
         document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up); e.preventDefault(); });
-      const pin = el.querySelector("[data-fpin]"); if (pin) pin.addEventListener("click", () => { live.float.pinned = !live.float.pinned; if (live.float.pinned) { live.float.ord = dl.ordinal; freezeTarget(dl.ordinal); } else { live.float.target = null; saveTarget(); } saveFloat(); paintFloat(true); });
+      const pin = el.querySelector("[data-fpin]"); if (pin) pin.addEventListener("click", () => {
+        if (live.float.pinned) { if (!window.confirm("Unpin the clone target? Its frozen snapshot is discarded (re-pin from the decode panel any time).")) return; }   // audit F7
+        live.float.pinned = !live.float.pinned; if (live.float.pinned) { live.float.ord = dl.ordinal; freezeTarget(dl.ordinal); } else { live.float.target = null; saveTarget(); } saveFloat(); paintFloat(true); });
       const mn = el.querySelector("[data-fmin]"); if (mn) mn.addEventListener("click", () => { live.float.min = !live.float.min; saveFloat(); paintFloat(true); });
       const cl = el.querySelector("[data-fclose]"); if (cl) cl.addEventListener("click", () => { live.float.open = false; saveFloat(); paintFloat(true); });
       if (!live.float.min) bindDiskDecode(el);   // same binder as the inline panel — anchored calibration feedback, tune-library picks, cal-jumps all work in the float too
@@ -4867,7 +4912,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       if (s.loading) return `<p class="why" style="font-size:11px;margin:2px 0">reading the build…</p>`;
       if (s.none) return `<div class="ddata-row"><span class="ddata-arrow">▸</span><span><b>apply or save a tune in-game</b> — no tune file exists for this car (downloaded tunes write theirs when applied; your own when saved); the decode has nothing to analyse until one exists</span><span class="ddata-gain">unblocks decode</span></div>`;
       const rows = [...s.asks, ...s.courseNeeds];
-      const cap = `<div class="ddata-cap">${s.agree ? `<span class="us-chip ok">✓ ${s.agree} corroborated</span>` : ""}${s.fill ? `<span class="us-chip fill">📡 ${s.fill} measured</span>` : ""}${s.conflict ? `<span class="us-chip bad">⚠ ${s.conflict} conflict${s.conflict > 1 ? "s" : ""}</span>` : ""}</div>`;
+      const cap = `<div class="ddata-cap">${s.agree ? `<span class="us-chip ok" title="save and telemetry agree on these">✓ ${s.agree} corroborated</span>` : ""}${s.fill ? `<span class="us-chip fill" title="values the save cannot know, measured live">📡 ${s.fill} from telemetry</span>` : ""}${s.conflict ? `<span class="us-chip bad">⚠ ${s.conflict} conflict${s.conflict > 1 ? "s" : ""}</span>` : ""}</div>`;
       if (!rows.length) return `${cap}<div class="ddata-done">✓ every measurable is captured — the analysis is running on complete data for this car</div>`;
       return `${cap}<div class="why" style="font-size:10.5px;margin:2px 0 5px">these techniques provide the data the analysis still needs — in payoff order:</div>${rows.map((a) => `<div class="ddata-row"><span class="ddata-arrow">▸</span><span>${esc(a.text)}</span><span class="ddata-gain">${esc(a.gain)}</span></div>`).join("")}`;
     };
@@ -4892,7 +4937,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       pel.innerHTML = panel === "bench" ? dockBenchHtml() : panel === "clone" ? dockCloneHtml() : panel === "iter" ? dockIterHtml() : panel === "ab" ? dockABHtml() : panel === "san" ? dockSanityHtml() : panel === "data" ? dockDataHtml() : "";
       const dt = pel.querySelector("[data-dockdetach]"); if (dt) dt.addEventListener("click", () => { popOutFloat(+dt.dataset.dockdetach); paintDock(true); });
       pel.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
-      pel.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { localStorage.removeItem(appliedKey(b.dataset.clearapplied)); paintDock(true); }));
+      pel.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { if (!b.dataset.arm) { b.dataset.arm = "1"; const t0 = b.textContent; b.textContent = "really clear the history?"; setTimeout(() => { delete b.dataset.arm; b.textContent = t0; }, 4000); return; } localStorage.removeItem(appliedKey(b.dataset.clearapplied)); paintDock(true); }));   // audit F9: two-step
       pel.querySelectorAll("[data-sancheck]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🩺 checking…"; runSanityCheck({ acknowledge: true, refresh: true }); setTimeout(() => paintDock(true), 250); }));
       pel.dataset.sig = dockPanelSig(panel); };
     function paintDock(force) {
@@ -4901,11 +4946,21 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       el.style.display = "block";
       const cloneReady = !!(dockCloneOrd() && live.diskCache && live.diskCache[dockCloneOrd()] && live.diskCache[dockCloneOrd()].available);
       const hasCar = !!dockActiveCid();
-      const panel = live.dock.panel; const shellKey = `${live.dock.min}|${panel}|${cloneReady}|${hasCar}|${src}`;
+      const offline = src === "live" && !live.connected;
+      const idle = src === "live" && !hasCar && !(live.strip || []).length;   // no car, no data yet — one line, not seven placeholders (audit F21)
+      let panel = live.dock.panel;
+      if (!hasCar && ["iter", "ab", "san", "data"].includes(panel)) panel = null;   // never render a panel whose chip is hidden
+      const shellKey = `${live.dock.min}|${panel}|${cloneReady}|${hasCar}|${src}|${offline}|${idle}`;
+      if (idle) {
+        if (el.dataset.k !== shellKey) { el.dataset.k = shellKey; el.className = "fhm-dock" + (offline ? " offline" : "");
+          el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl${offline ? " off" : ""}"><span class="dot"></span>${offline ? "OFFLINE" : "LIVE"}</span><span class="why" style="font-size:11px">waiting for telemetry — get in a car and drive</span></div>`;
+          const m0 = document.querySelector("main"); if (m0) { m0.style.paddingBottom = (el.offsetHeight + 14) + "px"; m0.dataset.dockpad = "1"; } }
+        return;
+      }
       if (force || el.dataset.k !== shellKey) {
-        el.dataset.k = shellKey; el.className = "fhm-dock" + (live.dock.min ? " min" : "");
+        el.dataset.k = shellKey; el.className = "fhm-dock" + (live.dock.min ? " min" : "") + (offline ? " offline" : "");
         const chip = (key, label, hide) => `<button class="fhm-dchip ${panel === key ? "on" : ""}${hide ? " hidden" : ""}" data-dockpanel="${key}">${label}</button>`;
-        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span id="dockTrac"></span><span id="dockData"></span><span class="fhm-dock-chips">${chip("data", "📡 data", !hasCar)}${chip("bench", "📊 bench")}${chip("iter", "🔁 iter", !hasCar)}${chip("ab", "⚗️ A/B", !hasCar)}${chip("san", "🩺 check", !hasCar)}${chip("clone", "📀 clone", !cloneReady)}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
+        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl${offline ? " off" : ""}"><span class="dot"></span>${offline ? "OFFLINE — last data" : "LIVE"}</span><span id="dockTrac"></span><span id="dockData"></span><span class="fhm-dock-chips">${chip("data", "📡 data", !hasCar)}${chip("bench", "📊 bench")}${chip("iter", "🔁 iter", !hasCar)}${chip("ab", "⚗️ A/B", !hasCar)}${chip("san", "🩺 check", !hasCar)}${chip("clone", "📀 clone", !cloneReady)}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
         el.querySelectorAll("[data-dockpanel]").forEach((b) => b.addEventListener("click", () => { live.dock.panel = live.dock.panel === b.dataset.dockpanel ? null : b.dataset.dockpanel; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); }));
         const mn = el.querySelector("[data-dockmin]"); if (mn) mn.addEventListener("click", () => { live.dock.min = !live.dock.min; saveDock(); paintDock(true); });
         if (!live.dock.min && panel) { const pel = el.querySelector("#dockPanel"); if (pel) fillDockPanel(pel, panel); }
@@ -5125,7 +5180,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         if (wl.dataset.h !== html) { wl.dataset.h = html; wl.innerHTML = html; }
       }
       const tiles = host.querySelector("#lvTiles");
-      if (tiles) tiles.innerHTML = frameTiles(f).map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("");
+      if (tiles) { const dup = dockShouldShow();   // the anchored dock already shows this exact row — don't render it twice in one viewport (audit F5)
+        tiles.style.display = dup ? "none" : ""; if (!dup) tiles.innerHTML = frameTiles(f).map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join(""); }
       const inp = host.querySelector("#lvInputs");
       if (inp) inp.innerHTML = `<div style="display:grid;grid-template-columns:60px 1fr;gap:4px 8px;font-size:11px;align-items:center">
           <span>throttle</span><div class="lab-bar" style="height:8px"><i style="width:${f.thr / 2.55}%;background:#00d27a"></i></div>
@@ -5175,7 +5231,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         paintStatus(); pushMode(); if (changed) onModeChanged(); else if (gameChanged) paintBanner(); });
       es.addEventListener("mode", (e) => { live.mode = JSON.parse(e.data); onModeChanged(); });
       es.addEventListener("session", (e) => { live.session = JSON.parse(e.data); paintStatus(); loadFullSession(); });
-      es.onerror = () => { live.connected = false; live.err = true; paintStatus(); };
+      es.onerror = () => { live.connected = false; live.err = true; paintStatus(); paintDock(true); };   // the dock must not keep claiming LIVE over frozen numbers (audit F19)
     }
     function liveReset(local) {
       live.strip = []; live.corners = []; live.analysis = null; live.session = null; live.loaded = null; live.frame = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null;
@@ -5214,7 +5270,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl, to] = b.dataset.apply.split("|"); markApplied(cid, sl, to); fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-unapply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl] = b.dataset.unapply.split("|"); unApply(cid, sl); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
-      r.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { localStorage.removeItem(appliedKey(b.dataset.clearapplied)); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { if (!b.dataset.arm) { b.dataset.arm = "1"; const t0 = b.textContent; b.textContent = "really clear the history?"; setTimeout(() => { delete b.dataset.arm; b.textContent = t0; }, 4000); return; } localStorage.removeItem(appliedKey(b.dataset.clearapplied)); if (src === "live") paintSections(true); else render(); }));   // audit F9: two-step
       // build-confirm gate: confirm (unlocks course tuning advice) / re-check (drops the confirmation)
       r.querySelectorAll("[data-confirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.confirmbuild, true); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-unconfirmbuild]").forEach((b) => b.addEventListener("click", () => { setBuildConfirmed(b.dataset.unconfirmbuild, false); if (src === "live") paintSections(true); else render(); }));

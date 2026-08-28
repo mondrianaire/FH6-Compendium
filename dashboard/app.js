@@ -3521,6 +3521,8 @@
       .idm{margin:0 0 10px}
       .idm-ribbon{display:flex;align-items:center;gap:9px;border:1px solid;border-radius:8px;padding:5px 10px;margin:0 0 9px;font-size:12.5px}
       .dm-info{cursor:help;color:var(--muted);font-size:10.5px;border-bottom:1px dotted var(--muted);white-space:nowrap}
+      #fhmToast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9500;background:var(--bg2);border:1px solid #00d27a;color:#00d27a;font-weight:700;font-size:13px;border-radius:9px;padding:8px 18px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 6px 22px rgba(0,0,0,.45)}
+      #fhmToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
       .idm-chips{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
       .idm-id{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;margin:7px 0;padding:6px 10px;border:1px dashed var(--line);border-radius:7px}
       .idm-id.ok{border-color:rgba(0,210,122,.5);border-style:solid}
@@ -3922,6 +3924,7 @@
       fetch(liveUrl + "/disk-tune?ordinal=" + ordinal + (ts ? "&ts=" + encodeURIComponent(ts) : "")).then((r) => r.json()).then((d) => {
         if (live._diskGen[ordinal] !== gen) return;   // superseded — drop this stale response so the last-matched build wins
         live.diskCache[ordinal] = d && d.available ? d : { available: false };
+        if (d && d.available) maybeFocusCourse(d.match, ordinal);   // a positive identification pulls focus to Course
         const filled = d && d.available ? applyDiskTune(d) : false;
         paintDiskDecode(); paintFloat();
         const activeOrd = live.frame && String(live.frame.car);
@@ -4030,6 +4033,25 @@
             if (live.diskCache) delete live.diskCache[ord]; fetchDiskTune(ord, { force: true });   // fresh decode either way → the anchored/exact value flows to the sheet, gears, union, sanity & A/B immediately
           }).catch(() => { inp.style.borderColor = "#e5414e"; set("✕ daemon offline", "#e5414e"); });
       }));
+    };
+    // FOCUS THE COURSE once identification goes POSITIVE: the moment the matcher verifies the equipped build while
+    // you're on a course (timed event or marked loop), the identification job is done — foreground the Course
+    // workflow instead of leaving the user parked in Decode (especially with manual mode pinned). Fires once per car
+    // per verification; never while a clone workflow is active (that's a deliberate Decode stay).
+    const focusToast = (txt) => { let t = document.getElementById("fhmToast"); if (!t) { t = document.createElement("div"); t.id = "fhmToast"; document.body.appendChild(t); ensureFhmCss(); } t.textContent = txt; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 4200); };
+    const maybeFocusCourse = (m, ordinal) => {
+      if (src !== "live" || !m) return;
+      live._idFocused = live._idFocused || {};
+      if (m.how !== "gear-matched") { delete live._idFocused[ordinal]; return; }
+      if (live._idFocused[ordinal]) return;
+      if (live.cloneTarget) return;                                              // cloning = a deliberate Decode stay
+      if (live.mode && live.mode.suggest === "decode") return;                   // donor/replica run flagged
+      const f = live.frame; const onCourse = !!((f && f.ev) || live.loop);
+      if (!onCourse) return;
+      live._idFocused[ordinal] = true;
+      if (effMode() === "course") { focusToast("⚙ build identified — course feedback is live"); return; }
+      localStorage.setItem("fh6LabMode", "course"); pushMode(); renderBody();
+      focusToast("⚙ build identified — focusing Course");
     };
     const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
     const paintDiskDecode = () => {
@@ -5226,6 +5248,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         const locked = live.cloneTarget && live.cloneTarget.ordinal === +d.ordinal;   // a save on the replica you're building must NOT touch the frozen target
         live.diskCache[d.ordinal] = d.available ? d : { available: false };            // still cached as the current-build probe
         const changed = (!locked && d.available) ? applyDiskTune(d) : false;
+        if (!locked && d.available) maybeFocusCourse(d.match, d.ordinal);
         if (!locked && d.new_save) live.diskDiff = d.diff ? { ordinal: d.ordinal, diff: d.diff, t: performance.now() } : null;   // set (or clear) the banner on every save
         if (d.new_save && live.liveryCache) delete live.liveryCache[d.ordinal];   // a save may bring a new/changed livery — refetch the gallery
         if (!locked && d.new_save && d.available && live.frame && String(live.frame.car) === String(d.ordinal) && live.frame.cid) abSync(live.frame.cid);   // a change was saved → spawn/refresh the A/B version NOW (stores the full field set; metrics fill on next analysis)

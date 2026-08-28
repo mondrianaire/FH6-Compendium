@@ -1719,8 +1719,16 @@ def main():
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,
                                   "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,
                                   "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in _thin(pts_w, 300)]})
-            bw = min(valid, key=lambda w: w["t1"] - w["t0"])
-            lt = round(bw["t1"] - bw["t0"], 2)
+            # A PARTIAL LAP IS NOT THIS BUILD'S BEST LAP. `valid` only requires 70% of the session's own
+            # reference arc, so on a course driven in fragments the shortest window wins on wall-clock and
+            # becomes the stored trace -- the backfill surfaced five courses whose trace covered under half the
+            # longest. Require near-full coverage, and rank on the GAME clock, not the pause-inflated wall span.
+            _full = [w for w in valid if _win_arc[id(w)][0] >= 0.9 * _ref_arc] or valid
+            def _bw_key(w):
+                g_ = _game_lap_s(w)
+                return g_ if g_ is not None else (w["t1"] - w["t0"])
+            bw = min(_full, key=_bw_key)
+            lt = round(_bw_key(bw), 2)
             pts_all = _win_arc[id(bw)][1]
             carrec = cars.get(cid_) or {}
             # pts = [arc_m, mph, grip_code, x, z] — the state paints the trace, and x/z lets a hover on the trace
@@ -1871,6 +1879,15 @@ def main():
         for cid_, tr_ in speed_traces_new.items():
             prev_ = trm.get(cid_)
             if prev_ is None or (tr_.get("lap_s") or 9e9) < (prev_.get("lap_s") or 9e9) or prev_.get("session") == sid: trm[cid_] = tr_   # same-session re-analysis may REPAIR a bad trace (the escape best_laps already has)
+        # RETIRE SHORT TRACES. A stored trace only improves on lap TIME, so a partial lap that once won the slot
+        # keeps it forever — it is short, therefore quick, therefore never beaten. The backfill surfaced five
+        # courses whose trace covered under half the longest. Coverage is judged against the course's own mapped
+        # length (falling back to the longest trace on record), so no caller has to declare it.
+        _clen = ((model.get("geometry") or {}).get("length_m") or 0) or max(
+            [(t.get("pts") or [[0]])[-1][0] for t in trm.values() if t.get("pts")] or [0])
+        if _clen:
+            for _k in [k for k, t in trm.items() if t.get("pts") and t["pts"][-1][0] < 0.7 * _clen]:
+                trm.pop(_k, None)
         if len(trm) > 10: model["speed_traces"] = trm = dict(sorted(trm.items(), key=lambda kv: kv[1].get("lap_s") or 9e9)[:10])
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
         model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis

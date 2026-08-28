@@ -3647,6 +3647,9 @@
       .ratif-req .rr-st{flex:none;font-weight:800;width:12px;text-align:center}
       .ratif-req.done .rr-st{color:#00d27a}
       .ratif-req.todo .rr-st{color:var(--warn,#e3b341)}
+      .ratif-req.adv .rr-st{color:var(--muted)}
+      .ratif-req.adv .rr-lbl{color:var(--muted)}
+      .ratif-req.adv .rr-act{color:var(--muted);font-size:10.5px}
       .ratif-req.done .rr-lbl{color:var(--muted)}
       .ratif-req.todo .rr-lbl{font-weight:700}
       .ratif-req .rr-act{color:var(--txt);font-size:11px}
@@ -4083,15 +4086,16 @@
       const REQS = [
         { k: "identity", ok: idOk, lbl: "build identity verified", act: (bcR.need || [])[0] || "drive up through the gears — the ladder identifies the equipped build", note: idOk && !idNowOk ? "held from your last verified run" : idOk ? (led.identity.note || "") : "" },
         { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-apply this tune from Find Tunes (or re-save if yours), then drive once · 🔗 drawer` },
-        { k: "sanity", ok: !sanE, lbl: "tuning sanity clean", act: `fix ${sanE} error${sanE > 1 ? "s" : ""} — the 🩺 drawer names the slider and the fix` },
+        { k: "sanity", ok: !sanE, soft: true, lbl: "tuning sanity clean", act: `${sanE} finding${sanE > 1 ? "s" : ""} — 🩺 drawer (advisory: does not block ratification)` },
         { k: "calib", ok: !relN, lbl: "every slider value exact", act: `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — 🎯 drawer, two-point read` },
         { k: "pi", ok: piOk, lbl: "PI stamped", act: "drive this build once while identified — stamps its PI", note: piOk ? `PI ${led.pi.v}` : "" },
       ];
-      const doneN = REQS.filter((q) => q.ok).length; const ratified = doneN === REQS.length;
+      const hard = REQS.filter((q) => !q.soft);   // sanity findings are ADVISORY — warnings, never ratification blockers
+      const doneN = hard.filter((q) => q.ok).length; const ratified = doneN === hard.length;
       const ratCls = ratified ? "ok" : (u2.n_conflict || (!idOk && bcR.hardBlock)) ? "bad" : "no";
-      const ratChip = ratified ? `<span class="rat-chip ok">✓ RATIFIED</span>` : `<span class="rat-chip ${ratCls}">◐ ${doneN}/${REQS.length}</span>`;
-      const ratifBlock = `<div class="ratif ${ratCls}"><b>${ratified ? "✅ TUNE RATIFIED" : `◐ RATIFICATION — ${doneN} of ${REQS.length}`}</b>${ratified && u2.n_await ? ` <span class="why">${u2.n_await} field${u2.n_await > 1 ? "s" : ""} still corroborating in the background</span>` : ""}
-        <div class="ratif-reqs">${REQS.map((q) => `<div class="ratif-req ${q.ok ? "done" : "todo"}"><span class="rr-st">${q.ok ? "✓" : "○"}</span><span class="rr-lbl">${q.lbl}</span>${q.ok ? (q.note ? `<span class="why">${esc(q.note)}</span>` : "") : `<span class="rr-act">${esc(q.act)}</span>`}</div>`).join("")}</div></div>`;
+      const ratChip = ratified ? `<span class="rat-chip ok">✓ RATIFIED</span>` : `<span class="rat-chip ${ratCls}">◐ ${doneN}/${hard.length}</span>`;
+      const ratifBlock = `<div class="ratif ${ratCls}"><b>${ratified ? "✅ TUNE RATIFIED" : `◐ RATIFICATION — ${doneN} of ${hard.length}`}</b>${ratified && u2.n_await ? ` <span class="why">${u2.n_await} field${u2.n_await > 1 ? "s" : ""} still corroborating in the background</span>` : ""}
+        <div class="ratif-reqs">${REQS.map((q) => `<div class="ratif-req ${q.ok ? "done" : q.soft ? "adv" : "todo"}"><span class="rr-st">${q.ok ? "✓" : q.soft ? "⚠" : "○"}</span><span class="rr-lbl">${q.lbl}</span>${q.ok ? (q.note ? `<span class="why">${esc(q.note)}</span>` : "") : `<span class="rr-act">${esc(q.act)}</span>`}</div>`).join("")}</div></div>`;
       const ribbon = `<div class="idm-ribbon" style="border-color:${frameCol}">${ribThumb}<b>${curB0 ? "Build " + esc(curB0.label) : esc(r.name || "#" + dl.ordinal)}</b>${curB0 && curB0.pi != null ? `${piBadge(null, curB0.pi, true)}${curB0.gears ? `<span class="why"> · ${curB0.gears}-sp</span>` : ""}` : ""}${verdictChip}<span style="margin-left:auto;display:inline-flex;gap:7px;align-items:center">${ratChip}<span style="color:${oc};font-weight:800">${Math.round(dl.confidence * 100)}%</span></span>${flags}</div>`;
       // short warn line inline (action-first); the full match bar + picker live in the identity drawer
       const warnLine = (mm0.how === "no-match" || mm0.how === "unsaved-build")

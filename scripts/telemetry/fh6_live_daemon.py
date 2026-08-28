@@ -57,6 +57,7 @@ class State:
         self.seq = 0
         self.clone_lock = None      # ordinal the user pinned as a CLONE TARGET — while set, PI/catalog accrual for it is paused (building the replica must not poison the target)
         self.gears_seen = {}        # ordinal -> set of forward gears USED at speed this session — hard identity evidence (you cannot use gear 8 in a 6-speed box)
+        self.live_fdg = {}          # ordinal -> {gear: [rpm/mph samples]} measured DAEMON-LOCAL at clean WOT — the ladder must not wait for (or die with) the analyzer
     def emit(self, name, payload):
         with self.lock:
             self.seq += 1; self.events.append((self.seq, name, payload))
@@ -187,6 +188,17 @@ def ingest(p, t_mono):
     c["stint"] = ST.stint
     if c["on"] and c["car"] and 1 <= (c["gear"] or 0) <= 10 and c["mph"] > 15:   # gears actually USED at speed — the cheapest exact identity evidence
         ST.gears_seen.setdefault(str(c["car"]), set()).add(int(c["gear"]))
+        # LIVE gear-ratio accrual (rpm/mph per gear at clean WOT, wheelspin-gated via slip ratios): the ladder's
+        # identity fingerprint, measured HERE — the analyzer's session output lags the cadence and dies on restart,
+        # which left WOT pulls undetected ("drive up through the gears" that could never satisfy itself).
+        if c["mph"] > 25 and (c["thr"] or 0) >= 90 and (c["rpm"] or 0) > 0:
+            try:
+                if max(abs(v[0]) for v in c["slip"].values()) < 0.12:
+                    sl = ST.live_fdg.setdefault(str(c["car"]), {}).setdefault(int(c["gear"]), [])
+                    sl.append(c["rpm"] / c["mph"])
+                    if len(sl) > 30: del sl[0]
+            except Exception:
+                pass
     if c["on"] and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1): ST.last_pos = (p["PosX"], p["PosZ"])   # only real ON-TRACK positions — a menu / pre-race frame reports [0,0] and must NEVER become a loop start (the bug that put every marked loop at the origin)
     # AUTO-COURSE: a timed event (Rivals / race) auto-starts course recording at the S/F line — no manual mark needed.
     # Reuses the loop machinery below for circuit laps; a point-to-point sprint's single pass and any partial/crashed
@@ -624,15 +636,20 @@ def _pick_meta(metas, ordn, ts_want=None):
             r["_bsig"] = _hl0.sha1(repr(items0).encode()).hexdigest()[:8]
     except Exception:
         pass
-    n_ties = 1; gear_used = False
+    gear_used = False
+    # candidates = every same-cylinder save NOT eliminated by hard evidence (gears actually used). NOT the score-tie
+    # window: the PI-observation bonus is self-reinforcing. Counted UNCONDITIONALLY (live_cyl holds across parking via
+    # live_recent) so the displayed tie count no longer flaps 6<->1 with driving/parked — and the STAMP GUARD, which
+    # reads this count, no longer refuses to stamp while driving because parked-vs-live changed the arithmetic.
+    _gsT = getattr(ST, "gears_seen", {}).get(str(ordn)) or set(); _mxT = max(_gsT) if _gsT else 0
+    ties = [r for r in roster if (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))
+            and (not _mxT or not (r["_tune"] or {}).get("gear_count") or int((r["_tune"] or {}).get("gear_count")) >= _mxT)]
+    n_ties = len({r.get("_bsig") for r in ties}) if ties and all(r.get("_bsig") for r in ties) else max(1, len(ties))
     if live and len(roster) >= 2:
-        # candidates = every same-cylinder save. NOT the score-tie window: the PI-observation bonus is self-
-        # reinforcing (stamped builds outscore unstamped ones, so unstamped builds never got their ladder compared and
-        # never got stamped). An unstamped PI is UNKNOWN — it may equally sit at the class cap — so PI cannot rule a
-        # same-cyl save out. The measured gear ladder OUTRANKS the PI bonus whenever it's available.
-        ties = [r for r in roster if not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl)]
-        n_ties = len({r.get("_bsig") for r in ties}) if all(r.get("_bsig") for r in ties) else len(ties)   # distinct BUILDS, not saves
         if n_ties >= 2:
+            # measured ladder: the analyzer's fd_gear when available (exact), else the DAEMON-LOCAL rpm/mph ladder —
+            # comparison is UNIT-FREE (each ladder normalized by its first common gear), so either source works and
+            # a WOT pull verifies within seconds instead of waiting for the next analysis.
             live_gl = None
             with ST.lock: sj = ST.session_json
             for c in (sj.get("cars", []) if sj else []):
@@ -640,6 +657,11 @@ def _pick_meta(metas, ordn, ts_want=None):
                     gl = {int(g["gear"]): g["fd_gear"] for g in (c.get("gears") or []) if g.get("fd_gear")}
                     if len(gl) >= 3: live_gl = gl   # need a gear-ladder pass (several gears measured) to fingerprint
                     break
+            gl_abs = True   # analyzer fd_gear is in save units — absolute compare keeps FINAL-DRIVE discrimination
+            if not live_gl:
+                lf = getattr(ST, "live_fdg", {}).get(str(ordn)) or {}
+                gl2 = {g: sorted(v)[len(v) // 2] for g, v in lf.items() if len(v) >= 8}
+                if len(gl2) >= 3: live_gl = gl2; gl_abs = False   # rpm/mph carries an unknown constant — compare gear STEPS (unit-free)
             if live_gl:
                 import re as _re
                 def _gear_err(r):
@@ -650,9 +672,14 @@ def _pick_meta(metas, ordn, ts_want=None):
                             if row.get("field") == "final_drive" and row.get("value"): fd = row["value"]
                             mm = _re.match(r"gear_(\d+)$", str(row.get("field", "")))
                             if mm and row.get("value"): ratios[int(mm.group(1))] = row["value"]
-                    common = [g for g in ratios if g in live_gl] if fd else []
-                    if not common: return 9.9
-                    return sum(abs(fd * ratios[g] - live_gl[g]) / live_gl[g] for g in common) / len(common)
+                    common = sorted(g for g in ratios if g in live_gl) if fd else []
+                    if gl_abs:
+                        if not common: return 9.9
+                        return sum(abs(fd * ratios[g] - live_gl[g]) / live_gl[g] for g in common) / len(common)
+                    if len(common) < 2: return 9.9
+                    g0 = common[0]
+                    if not ratios[g0] or not live_gl[g0]: return 9.9
+                    return sum(abs((ratios[g] / ratios[g0]) - (live_gl[g] / live_gl[g0])) / max(1e-6, live_gl[g] / live_gl[g0]) for g in common[1:]) / (len(common) - 1)   # unit-free: gear STEPS (rpm/mph source)
                 errs = sorted(((_gear_err(r), i, r) for i, r in enumerate(ties)), key=lambda x: (x[0], x[1]))
                 # accept only a CLEAR winner: good absolute match AND clearly ahead of the runner-up (else stay ambiguous)
                 if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
@@ -1434,7 +1461,7 @@ def reset_session():
         ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
         ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None; ST._auto_suspend = None   # keep the loop DEFINITION, reset its lap count
         ST.live_seen = {}   # J20: the parked-identity hold is session telemetry — it dies with the session
-        ST.gears_seen = {}
+        ST.gears_seen = {}; ST.live_fdg = {}
         ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
         ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
         ST.events = []; ST.seq += 1

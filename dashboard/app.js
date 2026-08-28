@@ -3538,6 +3538,18 @@
       .abv-sec{margin-top:5px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
       .abv-row{display:flex;justify-content:space-between;gap:10px;padding:1px 0;font-variant-numeric:tabular-nums}
       .abv-row>span{color:var(--muted)}.abv-row>b.pos{color:#e6a63a}
+      /* ---- 📡 data-needs status (pill + panel) ---- */
+      .ddata-pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;border:1px solid;border-radius:11px;padding:1px 9px;background:var(--bg2);cursor:pointer;white-space:nowrap}
+      .ddata-pill .dot{width:6px;height:6px;border-radius:50%}
+      .ddata-pill.warn{border-color:#e3b341;color:#e3b341}.ddata-pill.warn .dot{background:#e3b341}
+      .ddata-pill.bad{border-color:#e5414e;color:#e5414e}.ddata-pill.bad .dot{background:#e5414e}
+      .ddata-pill.ok{border-color:#00d27a;color:#00d27a}.ddata-pill.ok .dot{background:#00d27a}
+      .ddata-pill:hover{filter:brightness(1.2)}
+      .ddata-cap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+      .ddata-row{display:flex;align-items:baseline;gap:7px;font-size:11.5px;padding:2px 0}
+      .ddata-arrow{color:#e3b341;font-weight:800;flex:none}
+      .ddata-gain{margin-left:auto;font-size:9.5px;color:var(--muted);white-space:nowrap;border:1px solid var(--line);border-radius:8px;padding:0 6px;flex:none}
+      .ddata-done{font-size:11.5px;color:#00d27a;font-weight:700}
       /* ---- dock manual sanity-check window ---- */
       .dsan-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px;font-size:11.5px}
       .dsan-hd>span:first-child{flex:1}
@@ -4748,13 +4760,47 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const err = findings.filter((x) => x.lvl === "error").length, warn = findings.filter((x) => x.lvl === "warn").length;
       const head = `<div class="dsan-hd"><span>${hl.size ? `<b class="dsan-new">⭐ ${hl.size} new</b>` : `<span class="why">no new findings</span>`}${resolved ? ` · <span class="dsan-res">✓ ${resolved} resolved</span>` : ""} <span class="why">· ${err} error${err === 1 ? "" : "s"}, ${warn} warning${warn === 1 ? "" : "s"}</span></span><button class="lab-mode" data-sancheck="1" title="re-read the saved tune + re-run the driving analysis, then mark these findings as seen">🩺 Check now</button></div>`;
       return `<div class="dsan">${head}${sanityPanel(ctx.dl, ctx.drv, hl)}</div>`; };
+    // ---- 📡 DATA-NEEDS STATUS: the single surface that says which LIVE TECHNIQUES are still required before the
+    // analysis can be trusted — the union's ranked asks (gear ladder, redline pull, drive-once, calibration…) plus
+    // course-knowledge needs in course mode. Pill = always-visible count; panel = the technique list with payoffs. ----
+    const dockDataState = () => {
+      const ord = (live.frame && live.frame.car) || lastCarOrd(); if (!ord) return null;
+      const cached = live.diskCache ? live.diskCache[ord] : undefined;
+      if (cached === undefined) { if (live.connected) fetchDiskTune(ord); return { loading: true }; }
+      if (!cached || !cached.available) return { none: true, ord };
+      const u = (cached.deliverable || {}).union || {};
+      let courseNeeds = [];
+      if (effMode() === "course") { const ls = liveSess(); const co = ls && (ls.courses || [])[0];
+        if (co) { const ck = courseKnowledge(co); courseNeeds = (ck.needs || []).map((n) => ({ text: n.text, gain: "course knowledge", key: "course-" + n.k })); } }
+      return { ord, asks: (u.asks || []), courseNeeds, agree: u.n_agree || 0, fill: u.n_fill || 0, conflict: u.n_conflict || 0 };
+    };
+    const dockDataHtml = () => {
+      const s = dockDataState();
+      if (!s) return `<p class="why" style="font-size:11px;margin:2px 0">No car yet — get in a car; the data checklist scopes to it.</p>`;
+      if (s.loading) return `<p class="why" style="font-size:11px;margin:2px 0">reading the build…</p>`;
+      if (s.none) return `<div class="ddata-row"><span class="ddata-arrow">▸</span><span><b>save a tune in-game</b> — no saved tune exists for this car, so the decode has nothing to analyse; advice runs on baselines until then</span><span class="ddata-gain">unblocks decode</span></div>`;
+      const rows = [...s.asks, ...s.courseNeeds];
+      const cap = `<div class="ddata-cap">${s.agree ? `<span class="us-chip ok">✓ ${s.agree} corroborated</span>` : ""}${s.fill ? `<span class="us-chip fill">📡 ${s.fill} measured</span>` : ""}${s.conflict ? `<span class="us-chip bad">⚠ ${s.conflict} conflict${s.conflict > 1 ? "s" : ""}</span>` : ""}</div>`;
+      if (!rows.length) return `${cap}<div class="ddata-done">✓ every measurable is captured — the analysis is running on complete data for this car</div>`;
+      return `${cap}<div class="why" style="font-size:10.5px;margin:2px 0 5px">these techniques provide the data the analysis still needs — in payoff order:</div>${rows.map((a) => `<div class="ddata-row"><span class="ddata-arrow">▸</span><span>${esc(a.text)}</span><span class="ddata-gain">${esc(a.gain)}</span></div>`).join("")}`;
+    };
+    const paintDockData = () => {
+      const el = document.getElementById("dockData"); if (!el) return;
+      const s = dockDataState();
+      if (!s || s.loading) { if (el.innerHTML) el.innerHTML = ""; return; }
+      const n = s.none ? 1 : (s.asks || []).length + (s.courseNeeds || []).length;
+      const lvl = s.none || n ? (s.conflict ? "bad" : "warn") : "ok";
+      el.innerHTML = `<button class="ddata-pill ${lvl}" title="${n ? "live techniques still needed for correct analysis — click for the list" : "all measurable data captured for this car"}"><span class="dot"></span>📡 ${n ? `${n} drive${n > 1 ? "s" : ""} needed` : "data complete"}</button>`;
+      const b = el.querySelector(".ddata-pill"); if (b) b.addEventListener("click", () => { live.dock.panel = live.dock.panel === "data" ? null : "data"; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); });
+    };
     const dockPanelSig = (panel) => { const cid = dockActiveCid();
       if (panel === "iter") return `i|${cid}|${localStorage.getItem(appliedKey(cid || "")) || ""}|${((live.lastMoves || {})[cid] || []).map((m) => m.sl).join(",")}`;
       if (panel === "ab") return `a|${cid}|${localStorage.getItem(abKey(cid || "")) || ""}`;
       if (panel === "san") { const ctx = activeSanCtx(); return `s|${ctx ? ctx.cid : ""}|${ctx ? sanityCheck(ctx.dl, ctx.drv).map(sanKey).join(";") : ""}|${ctx ? localStorage.getItem(sanSeenKey(ctx.cid)) || "" : ""}`; }
+      if (panel === "data") { const s = dockDataState(); return `d|${s ? (s.ord || "") : ""}|${s && s.asks ? s.asks.map((a) => a.key).join(",") : ""}|${s && s.courseNeeds ? s.courseNeeds.map((a) => a.key).join(",") : ""}|${s ? `${s.agree}.${s.fill}.${s.conflict}` : ""}|${s && s.none ? "none" : ""}`; }
       return panel; };
     const fillDockPanel = (pel, panel) => {
-      pel.innerHTML = panel === "bench" ? dockBenchHtml() : panel === "clone" ? dockCloneHtml() : panel === "iter" ? dockIterHtml() : panel === "ab" ? dockABHtml() : panel === "san" ? dockSanityHtml() : "";
+      pel.innerHTML = panel === "bench" ? dockBenchHtml() : panel === "clone" ? dockCloneHtml() : panel === "iter" ? dockIterHtml() : panel === "ab" ? dockABHtml() : panel === "san" ? dockSanityHtml() : panel === "data" ? dockDataHtml() : "";
       const dt = pel.querySelector("[data-dockdetach]"); if (dt) dt.addEventListener("click", () => { popOutFloat(+dt.dataset.dockdetach); paintDock(true); });
       pel.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
       pel.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { localStorage.removeItem(appliedKey(b.dataset.clearapplied)); paintDock(true); }));
@@ -4770,7 +4816,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       if (force || el.dataset.k !== shellKey) {
         el.dataset.k = shellKey; el.className = "fhm-dock" + (live.dock.min ? " min" : "");
         const chip = (key, label, hide) => `<button class="fhm-dchip ${panel === key ? "on" : ""}${hide ? " hidden" : ""}" data-dockpanel="${key}">${label}</button>`;
-        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span id="dockTrac"></span><span class="fhm-dock-chips">${chip("bench", "📊 bench")}${chip("iter", "🔁 iter", !hasCar)}${chip("ab", "⚗️ A/B", !hasCar)}${chip("san", "🩺 check", !hasCar)}${chip("clone", "📀 clone", !cloneReady)}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
+        el.innerHTML = `<div class="fhm-dock-hd"><span class="fhm-dock-ttl"><span class="dot"></span>LIVE</span><span id="dockTrac"></span><span id="dockData"></span><span class="fhm-dock-chips">${chip("data", "📡 data", !hasCar)}${chip("bench", "📊 bench")}${chip("iter", "🔁 iter", !hasCar)}${chip("ab", "⚗️ A/B", !hasCar)}${chip("san", "🩺 check", !hasCar)}${chip("clone", "📀 clone", !cloneReady)}<button class="fhm-dock-x" data-dockmin title="${live.dock.min ? "expand" : "collapse"}">${live.dock.min ? "▲" : "▼"}</button></span></div><div class="fhm-dock-tiles" id="dockTiles"></div>${live.dock.min ? "" : `${panel ? `<div class="fhm-dock-panel" id="dockPanel"></div>` : ""}<div class="fhm-dock-strip" id="dockStrip"></div>`}`;
         el.querySelectorAll("[data-dockpanel]").forEach((b) => b.addEventListener("click", () => { live.dock.panel = live.dock.panel === b.dataset.dockpanel ? null : b.dataset.dockpanel; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); }));
         const mn = el.querySelector("[data-dockmin]"); if (mn) mn.addEventListener("click", () => { live.dock.min = !live.dock.min; saveDock(); paintDock(true); });
         if (!live.dock.min && panel) { const pel = el.querySelector("#dockPanel"); if (pel) fillDockPanel(pel, panel); }
@@ -4779,8 +4825,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
         const m = document.querySelector("main"); if (m) { m.style.paddingBottom = (el.offsetHeight + 14) + "px"; m.dataset.dockpad = "1"; }
       }
       // keep the live cockpit panels fresh without wiping them every frame — only re-render when their content changed
-      if (!live.dock.min && (panel === "iter" || panel === "ab" || panel === "san")) { const pel = el.querySelector("#dockPanel"); if (pel && pel.dataset.sig !== dockPanelSig(panel)) fillDockPanel(pel, panel); }
-      paintDockTiles(); paintDockTrac();
+      if (!live.dock.min && (panel === "iter" || panel === "ab" || panel === "san" || panel === "data")) { const pel = el.querySelector("#dockPanel"); if (pel && pel.dataset.sig !== dockPanelSig(panel)) fillDockPanel(pel, panel); }
+      paintDockTiles(); paintDockTrac(); paintDockData();
     }
     // shared rolling-window traction stat, used by the full Free-Tuning card AND the anchored dock pill
     const tracSummary = () => {

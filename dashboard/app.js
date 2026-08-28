@@ -3012,7 +3012,7 @@
       score = Math.max(0, Math.min(100, score));
       const grade = score >= 90 ? "S" : score >= 80 ? "A" : score >= 68 ? "B" : score >= 55 ? "C" : "D";
       const gripState = c.drift ? "drift" : (c.first_red ? c.first_red.axle : "held");
-      return { score, grade, grip, gripState, issues: issues.sort((a, b) => b.sev - a.sev), avg, apex: c.mph_apex != null ? c.mph_apex : c.mph_min, best: best != null ? Math.round(best) : null, deltaBest, dir: c.dir, key, kink: !!c.kink, lapn: c.lapn, t: c.t1 };
+      return { score, grade, grip, gripState, issues: issues.sort((a, b) => b.sev - a.sev), avg, apex: c.mph_apex != null ? c.mph_apex : c.mph_min, pos: c.apex, best: best != null ? Math.round(best) : null, deltaBest, dir: c.dir, key, kink: !!c.kink, lapn: c.lapn, t: c.t1 };   // pos = world coords — the map's last-corner callout anchors here
     };
     const pushCornerScore = (c) => {
       const sc = scoreCorner(c); if (!sc) return;
@@ -3030,7 +3030,7 @@
       const issues = l.issues.length ? l.issues.map((i) => `<span class="cscore-iss s${i.sev}" title="${esc(i.t)}">${i.k}</span>`).join("") : `<span class="cscore-clean">✓ clean — nothing flagged</span>`;
       const strip = scs.slice(-10).map((s) => `<span class="cscore-chip" style="background:${GRADE_COL[s.grade]}" title="grade ${s.grade} · score ${s.score} · avg ${s.avg} mph${s.deltaBest != null ? " (" + (s.deltaBest >= 0 ? "+" : "") + s.deltaBest + " vs best)" : ""}">${s.grade}</span>`).join("");
       return `<div class="cscore" style="border-color:${col}">
-        <div class="cscore-hd"><b>Last corner${l.key && String(l.key).indexOf("ct") === 0 ? " — T" + String(l.key).slice(2) : ""}</b> <span class="why" style="font-size:10.5px">${dirIcon}${l.kink ? " · kink" : ""} · lap ${l.lapn || "—"}</span><span class="cscore-strip" title="the last 10 corners, newest on the right">${strip}</span></div>
+        <div class="cscore-hd"><b>Last corner${l.key && String(l.key).indexOf("ct") === 0 ? " — T" + String(l.key).slice(2) : ""}</b> <span class="why" style="font-size:10.5px">${dirIcon}${l.kink ? " · kink" : ""} · lap ${l.lapn || "—"}${l.pos && l.pos[0] != null ? ` · <span style="color:${GRADE_COL[l.grade]}">◉ on the map</span>` : ""}</span><span class="cscore-strip" title="the last 10 corners, newest on the right">${strip}</span></div>
         <div class="cscore-body"><div class="cscore-grade" style="color:${col};border-color:${col}">${l.grade}<small>${l.score}</small></div>
           <div class="cscore-detail"><div class="cscore-line">${gripLbl} · ${speedLbl}</div><div class="cscore-issues">${issues}</div></div></div></div>`;
     };
@@ -3045,6 +3045,29 @@
         const ds = sv.dataset; const cx = +ds.ox + (f.px - +ds.x0) * +ds.sc, cy = +ds.oy - (f.pz - +ds.z0) * +ds.sc;
         if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) { g.style.display = "none"; return; }   // off the mapped area — hide rather than pin to an edge
         g.style.display = ""; g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
+      });
+    } catch (e) {} };
+    // LAST-CORNER CALLOUT: the scorecard's verdict, ON the map, at the corner's real apex — grade color + the
+    // established driving-error icons (🌀 drift · ↔ understeer · ⟳ oversteer · 🔥 exit spin · 🛑 lockup · ✋ handbrake).
+    // One visual language: what the Last-corner card says, the map shows, where it happened.
+    const lastCornerSvg = (sc) => {
+      const col = GRADE_COL[sc.grade];
+      const icons = sc.issues && sc.issues.length ? sc.issues.slice(0, 3).map((i) => (i.k || "").split(" ")[0]).join("") : "✓";
+      const tn = sc.key && String(sc.key).indexOf("ct") === 0 ? " — T" + String(sc.key).slice(2) : "";
+      const tt = `LAST CORNER${tn} · grade ${sc.grade} (${sc.score})${sc.deltaBest != null ? ` · ${sc.deltaBest >= 0 ? "+" : ""}${sc.deltaBest} mph vs best` : ""}${sc.issues && sc.issues.length ? " · " + sc.issues.map((i) => `${i.k} — ${i.t}`).join(" · ") : " · clean — nothing flagged"}`;
+      return `<circle r="16.5" fill="none" stroke="${col}" stroke-width="1" opacity=".35"/><circle class="lvl-ring" r="12.5" fill="var(--bg)" fill-opacity=".55" stroke="${col}" stroke-width="2.6"/><text y="4" text-anchor="middle" fill="${col}" font-size="11" font-weight="800" style="paint-order:stroke;stroke:var(--bg);stroke-width:2px">${sc.grade}</text><text y="28" text-anchor="middle" font-size="10" style="paint-order:stroke;stroke:var(--bg);stroke-width:2.5px"${sc.issues && sc.issues.length ? "" : ` fill="#00d27a"`}>${icons}</text><title>${esc(tt)}</title>`;
+    };
+    const paintLastOnMap = (sc) => { try {
+      if (!sc) return;
+      flashTurnOnMap(sc);   // the turn's persistent grade ring
+      if (!sc.pos || sc.pos[0] == null) return;
+      host.querySelectorAll("svg[data-live-map]").forEach((sv) => {
+        const ds = sv.dataset; const cx = +ds.ox + (sc.pos[0] - +ds.x0) * +ds.sc, cy = +ds.oy - (sc.pos[1] - +ds.z0) * +ds.sc;
+        if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) return;   // this map is a different course
+        let g = sv.querySelector(".lv-last");
+        if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.setAttribute("class", "lv-last"); sv.insertBefore(g, sv.querySelector(".lv-car")); }
+        g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`); g.innerHTML = lastCornerSvg(sc);
+        g.classList.remove("fresh"); void g.getBoundingClientRect(); g.classList.add("fresh");
       });
     } catch (e) {} };
     const flashTurnOnMap = (sc) => { try {
@@ -3576,6 +3599,8 @@
       .course-mini b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .start-pt{white-space:nowrap}.start-pt i{color:#00d27a;font-style:normal}
       .lv-car{transition:transform .18s linear}
+      .lv-last .lvl-ring{opacity:.95}
+      .lv-last.fresh .lvl-ring{animation:tnpulse 1.1s ease-out 2}
       .tn-grade{opacity:.85}
       .tn-grade.fresh{animation:tnpulse 1.1s ease-out 3}
       @keyframes tnpulse{0%{stroke-opacity:1;stroke-width:4}60%{stroke-opacity:.35;stroke-width:2.2}100%{stroke-opacity:.85;stroke-width:2.2}}
@@ -4588,6 +4613,7 @@
         ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" points="${poly(pc)}"/>`).join("")}
         <circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="4" fill="#00d27a"/><text x="${(X(pts[0][0]) + 6).toFixed(1)}" y="${(Y(pts[0][1]) - 4).toFixed(1)}" fill="#00d27a" font-size="9">start</text>
         ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; const gr = gradeByTurn[g.n]; const fresh = gr && gr.at && (Date.now() - gr.at < 8000); return `<g class="ct-marker${sel ? " sel" : ""}" data-tn="${g.n}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${gr ? `<circle class="tn-grade${fresh ? " fresh" : ""}" cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="8.5" fill="none" stroke="${GRADE_COL[gr.grade]}" stroke-width="2.2"><title>latest pass: grade ${gr.grade} · score ${gr.score}${gr.deltaBest != null ? ` · ${gr.deltaBest >= 0 ? "+" : ""}${gr.deltaBest} vs best` : ""}</title></circle>` : ""}${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
+        ${(() => { if (!opts.live || typeof live === "undefined") return ""; const ls = (live.cornerScores || []).slice(-1)[0]; if (!ls || !ls.pos || ls.pos[0] == null) return ""; const lx = X(ls.pos[0]), ly = Y(ls.pos[1]); if (lx < -25 || ly < -25 || lx > W + 25 || ly > H + 25) return ""; return `<g class="lv-last" transform="translate(${lx.toFixed(1)},${ly.toFixed(1)})">${lastCornerSvg(ls)}</g>`; })()}
         ${opts.live ? `<g class="lv-car" style="display:none"><circle r="9" fill="none" stroke="#00d27a" stroke-width="1.4" opacity=".45"/><circle r="4.6" fill="#00d27a" stroke="#0e1116" stroke-width="1.4"><title>you — live position</title></circle></g>` : ""}
       </svg>`;
     };
@@ -5430,7 +5456,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
       es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
-      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); pushCornerScore(c); paintCornerScore(); flashTurnOnMap((live.cornerScores || []).slice(-1)[0]); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
+      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); pushCornerScore(c); paintCornerScore(); paintLastOnMap((live.cornerScores || []).slice(-1)[0]); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
       es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false;
         const sm = live.status.mode; const changed = sm && (!live.mode || sm.suggest !== live.mode.suggest || sm.reason !== live.mode.reason);   // status carries the current mode every second — authoritative after reconnects / daemon restarts
         if (changed) live.mode = sm;

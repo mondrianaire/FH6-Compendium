@@ -557,6 +557,7 @@ def clone_sheet_for(c, bat):
             "build_record": ({"label": rec.get("label"), "captured": rec.get("captured"), "source": rec.get("source"), "tune_share_code": rec.get("tune_share_code"), "file": rec.get("_file")} if rec else None),
             "pi_note": f"cross-check: every proposed parts list must sum to PI {c['pi']} — a mismatch means a missed part (usually widths or aero)"}
 
+FAST_MAX_TURNS = 24   # stamped turns per course — a hard bound on turns x K x points
 FAST_K = 3            # lines kept per turn
 FAST_PTS = 12         # points drawn per line — on the 4 m lap grid that covers a 48 m corner at full resolution
 FAST_MIN = 3          # fewer clean traversals than this and a median means nothing — emit no block at all
@@ -590,6 +591,10 @@ def fast_lines(laps, turns):
     There is deliberately NO fast-side ratio test. A line taken flat where the median lap brakes to half
     speed is exactly what this feature exists to find; only geometry may reject a fast reading.
     """
+    # BOUND THE PAYLOAD. Cost is ~1.4 KB per stamped turn and the course model is read-modify-WRITTEN every
+    # analysis cycle (20-90 s), so an over-detected model is the failure case: 4200_-5450 currently carries 172
+    # turns and would add ~238 KB per rewrite. Stamp only the turns with the most time ACTUALLY available -- the
+    # ones the feature exists for -- and never more than FAST_MAX_TURNS. Turns are scored first, then trimmed.
     made = 0
     for t in turns:
         t.pop("lines", None)   # a turn that no longer qualifies must lose its stale block, not keep it
@@ -643,6 +648,12 @@ def fast_lines(laps, turns):
                       "s_in": round(s0), "s_out": round(s1), "best_s": round(best, 2), "median_s": round(mid, 2),
                       "available_s": round(mid - best, 2), "fast": fast}
         made += 1
+    if made > FAST_MAX_TURNS:
+        ranked = sorted((t for t in turns if t.get("lines")),
+                        key=lambda t: -(t["lines"].get("available_s") or 0))
+        for t in ranked[FAST_MAX_TURNS:]:
+            t.pop("lines", None)
+        made = FAST_MAX_TURNS
     return made
 
 

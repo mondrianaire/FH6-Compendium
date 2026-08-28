@@ -61,6 +61,13 @@ def solve_isolation(observations):
 
     # slot groups the game changes together, so a "single part" edge may legitimately touch two slots
     LINKED = (frozenset(("rim_style", "rear_rim_style")), frozenset(("front_tire_width", "rear_tire_width")))
+    # MUTUALLY EXCLUSIVE FAMILIES. A car has ONE aspiration: fitting a centrifugal supercharger clears the
+    # positive-displacement slot and fills the centrifugal one, so a single part change shows up as TWO slot
+    # diffs — one going to None, one coming from it. Observed on the Exocet: pos_supercharger 3 -> None and
+    # centrifugal_supercharger None -> 3, PI 841 -> 800. That is one -41 PI edge, and the strict one-slot test
+    # threw it away. Attributed to the slot being FILLED, which is the part actually on the car afterwards.
+    EXCL = (frozenset(("single_turbo", "twin_turbo", "quad_turbo",
+                       "centrifugal_supercharger", "pos_supercharger", "aspiration")),)
     edges = {}          # slot -> {(from_tier, to_tier): [delta, ...]}  (both directions)
     pair_count = 0
     for obs in by_ord.values():
@@ -77,6 +84,12 @@ def solve_isolation(observations):
                 # since the two always carry the same tier.
                 if len(diff) == 2 and frozenset(diff) in LINKED:
                     diff = [d for d in diff if not d.startswith("rear_")] or diff[:1]
+                elif 2 <= len(diff) <= 3 and any(set(diff) <= g for g in EXCL):
+                    # one family, so one part: keep the slot that ends up OCCUPIED on the b side
+                    filled = [d for d in diff if pb.get(d) is not None]
+                    if len(filled) == 1: diff = filled
+                    elif len([d for d in diff if pa.get(d) is not None]) == 1:
+                        diff = [d for d in diff if pa.get(d) is not None]
                 if len(diff) != 1:
                     continue
                 s = diff[0]

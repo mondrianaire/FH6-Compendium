@@ -4,3 +4,4 @@ package-lock.json
 captures/
 __pycache__/
 *.pyc
+data/_backup_courses_*/

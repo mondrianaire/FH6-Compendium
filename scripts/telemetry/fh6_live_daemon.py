@@ -1493,7 +1493,11 @@ class H(BaseHTTPRequestHandler):
             try:
                 with open(rp, encoding="utf-8") as f: robj = json.load(f)
             except Exception: robj = {"schema_version": "1.0.0", "routes": {}}
-            robj.setdefault("routes", {})[str(body["route_key"])] = {"name": str(body["name"]).strip()[:80], "source": f"dashboard {time.strftime('%Y-%m-%d')}", "mode": body.get("mode")}
+            # MERGE, never replace: this used to overwrite the whole entry, wiping start/heading/length_m — and
+            # attribute_route skips start-less routes, so NAMING a course made it unmatchable and every later run of
+            # it minted a duplicate. The courses you care enough to name were the ones that fragmented worst.
+            _rk = str(body["route_key"]); _prev = (robj.setdefault("routes", {}).get(_rk) or {})
+            robj["routes"][_rk] = dict(_prev, name=str(body["name"]).strip()[:80], source=f"dashboard {time.strftime('%Y-%m-%d')}", mode=body.get("mode") or _prev.get("mode"))
             with open(rp, "w", encoding="utf-8") as f: json.dump(robj, f, indent=2, ensure_ascii=False)
             ok = True
         elif self.path.startswith("/build") and body.get("build_id") and body.get("label"):

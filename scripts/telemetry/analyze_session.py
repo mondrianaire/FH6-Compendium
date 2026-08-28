@@ -867,15 +867,17 @@ def main():
     def attribute_route(sx, sz, hdg, dist, sample):
         best = None
         for k, R in routes.items():
-            if k.startswith("loop:") or not R.get("start"): continue
-            d0 = math.hypot(sx - R["start"][0], sz - R["start"][1])
+            if k.startswith("loop:"): continue
+            st = R.get("start")
+            d0 = math.hypot(sx - st[0], sz - st[1]) if st else None
             mp = model_path_for(k); ov, cov = overlap(sample, mp)
-            # 1) PATH match: this event runs along the known route's path in the same direction — the start can be ANYWHERE on it (a circuit resumed mid-lap, a fragment)
+            # 1) PATH match: this event runs along the known route's path in the same direction — the start can be ANYWHERE on it (a circuit resumed mid-lap, a fragment).
+            # Needs only the MODEL path, so a route whose registry start was lost (older naming writes wiped it) stays matchable — skipping those minted duplicates.
             if ov is not None and ov >= 0.7 and direction_agree(sample, mp[1]):
-                cand = (200 + d0 * 0.01, k)
+                cand = (200 + (d0 or 0) * 0.01, k)
                 if best is None or cand[0] < best[0]: best = cand
                 continue
-            if d0 > 250: continue
+            if d0 is None or d0 > 250: continue
             # 2) START match: close start + same heading; the known path (if any) must agree — either this event lies on it (ov) or it covers it (cov: the known path was a stub from an aborted attempt)
             hR = R.get("heading")
             if hR and hdg and (R.get("length_m") or 0) >= 200 and (hR[0] * hdg[0] + hR[1] * hdg[1]) < 0.3: continue   # heads the other way = a different (reversed) route

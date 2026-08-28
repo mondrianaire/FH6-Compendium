@@ -302,6 +302,45 @@ def g2():
     return (len(img) > 1000 and trav == 404, f"{len(liv)} liveries · thumb streams {len(img)}B · traversal -> {trav}")
 check("G data", "livery endpoints (stream + traversal guard)", g2)
 
+def g3():
+    # COURSE FRAGMENTATION: one physical road must be ONE model. (Naming a course used to wipe its registry
+    # geometry, making it unmatchable, so every later run minted a duplicate — both faults are fixed, and
+    # scripts/telemetry/merge_courses.py repairs any that slip through. This keeps it from recurring silently.)
+    paths, names = {}, {}
+    for mp in glob.glob(os.path.join(ROOT, "data", "courses", "*.json")):
+        try:
+            m = json.load(open(mp, encoding="utf-8"))
+        except Exception:
+            continue
+        k = m.get("route_key") or os.path.basename(mp)[:-5]
+        if str(k).startswith("loop:"): continue
+        g = m.get("geometry") or {}
+        p = g.get("path") or (g.get("paths") or [[]])[0] or []
+        if p: paths[k] = p
+        nm = (m.get("name") or "").strip().lower()
+        if nm: names.setdefault(nm, []).append(k)
+    def cov(a, b):
+        cb = {(int(x // 30), int(z // 30)) for x, z in b}
+        hit = sum(1 for x, z in a if any((int(x // 30) + dx, int(z // 30) + dz) in cb for dx in (-1, 0, 1) for dz in (-1, 0, 1)))
+        return hit / max(1, len(a))
+    dups = []
+    ks = sorted(paths)
+    for i, a in enumerate(ks):
+        for b in ks[i + 1:]:
+            ab, ba = cov(paths[a], paths[b]), cov(paths[b], paths[a])
+            if min(ab, ba) >= 0.70: dups.append(f"{a}~{b} ({ab:.2f}/{ba:.2f})")
+    for nm, ks2 in names.items():
+        if len(ks2) > 1: dups.append(f"'{nm}' split across {len(ks2)} models")
+    # registry entries must keep their geometry — a start-less route is invisible to the route matcher
+    try:
+        R = json.load(open(os.path.join(ROOT, "data", "routes.json"), encoding="utf-8")).get("routes") or {}
+    except Exception:
+        R = {}
+    blind = [k for k, v in R.items() if not str(k).startswith("loop:") and isinstance(v, dict) and not v.get("start")]
+    if blind: dups.append(f"{len(blind)} route(s) with no start (unmatchable): {', '.join(blind[:3])}")
+    return (not dups, f"{len(paths)} course models{' — ' + '; '.join(dups[:3]) if dups else ', no duplicates, every route matchable'}")
+check("G data", "courses: one road = one model (no fragmentation)", g3)
+
 # ---------------- report ----------------
 if "--json" in sys.argv:
     print(json.dumps(RESULTS, indent=1)); sys.exit(0)

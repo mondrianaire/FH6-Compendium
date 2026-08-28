@@ -2877,8 +2877,8 @@
       const cap = aph.map((p) => `<span style="color:${CM_PC[p - 1]}">${CM_ABBR[p - 1]}</span>`).join("·") || "—";
       const tgt = m.to != null ? m.to : (baseTo != null ? baseTo : "");
       const applyBtn = cid ? (applied[m.sl]
-        ? `<button class="tm-done" data-unapply="${esc(cid)}|${m.sl}" title="marked done — still suggested, so drive a clean run &amp; re-test, or it may need another step. Click to un-mark.">✓ done · still flagged</button>`
-        : `<button class="tm-apply" data-apply="${esc(cid)}|${m.sl}|${tgt}" title="I made this change in-game — set it as my new current value &amp; start a fresh run to A/B test">✓ I made this</button>`) : "";
+        ? `<button class="tm-done" data-unapply="${esc(cid)}@@${m.sl}" title="marked done — still suggested, so drive a clean run &amp; re-test, or it may need another step. Click to un-mark.">✓ done · still flagged</button>`
+        : `<button class="tm-apply" data-apply="${esc(cid)}@@${m.sl}@@${tgt}" title="I made this change in-game — set it as my new current value &amp; start a fresh run to A/B test">✓ I made this</button>`) : "";
       return `<div class="tmove${applied[m.sl] ? " done" : ""}" style="border-left-color:${sevCol}"><div class="tm-main"><div class="tmove-top"><span class="tmove-n">${i + 1}</span><span class="tmove-sl">${m.label}</span><span class="tmove-ch">${change}</span></div>${fx ? `<div class="tmove-fx">${fx}</div>` : ""}<div class="tmove-why"><span>${esc(m.why)}</span><span class="tmove-conf" title="confidence ${Math.round((m.conf || 0) * 100)}%"><i style="width:${Math.round((m.conf || 0) * 100)}%;background:${(m.conf || 0) >= 0.7 ? "#00d27a" : "#e3b341"}"></i></span></div>${applyBtn}</div><div class="tm-diag" title="acts where the change works · red = where your issue is">${moveCorner(aph, iph)}<div class="tm-diag-cap">acts: ${cap}</div></div></div>`;
     }).join("")}</div>` : `<p class="why" style="font-size:11px;margin:6px 0 0">No across-the-board change stands out yet — the car's weaknesses so far are context-specific (see the balance signature), not systematic.</p>`; };
     const tuneInputRow = (cid) => { const cur = getTune(cid); const n = Object.keys(cur).length;
@@ -2894,7 +2894,7 @@
     const numericTuningPanel = (co, s, forceCid) => {
       const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || live.courseCar || (co.cars || [])[0]; if (!cid) return "";   // when paused, stay on the LAST-DRIVEN car — not co.cars[0], which may be a different car
       if (live.connected) { const o0 = String(cid).split("|")[0]; if (!(live.diskTune && live.diskTune[o0])) fetchDiskTune(+o0); }
-      const adv = (co.advice_by_car || {})[cid] || (co.advice_by_car && Object.values(co.advice_by_car)[0]) || [];
+      const adv = (co.advice_by_car || {})[cid] || [];   // J18: no advice for THIS build yet ≠ borrow another build's advice
       const liveInc = (live.cornSince || []).filter((c) => !c.drift && c.first_red && (!cid || c.car === cid)).map((c) => ({ limiter: "tune", dominant: c.first_red.axle, phase: c.first_red.phase }));
       const cur = getTune(cid); const moves = tuningMoves(adv, [...(co.corners || []), ...liveInc], cur); const haveCur = Object.keys(cur).length > 0;
       live.lastMoves = live.lastMoves || {}; if (cid) live.lastMoves[cid] = moves;   // cache for the anchored dock iteration panel
@@ -2954,7 +2954,11 @@
     // that same corner, and (c) avoiding the common MISTAKES we detect (understeer, oversteer, exit wheelspin, lockup,
     // handbrake). Backbone is grip+mistakes; speed nudges it once we've seen the corner before. ----
     const GRADE_COL = { S: "#00d27a", A: "#4fd07a", B: "#e3b341", C: "#e8963c", D: "#e5414e" };
-    const cornerKey = (c) => (c && c.apex && c.apex[0] != null && c.apex[1] != null) ? Math.round(c.apex[0] / 18) + "_" + Math.round(c.apex[1] / 18) : null;   // ~18m grid bucket → same corner across laps
+    const cornerKey = (c) => {
+      if (!c || !c.apex || c.apex[0] == null || c.apex[1] == null) return null;
+      try { const mt = matchTurn(c.apex); if (mt) return "ct" + mt.n; } catch (e) {}   // J10: canonical turn id when the course knows its turns — stable, unlike raw grid buckets
+      return Math.round(c.apex[0] / 18) + "_" + Math.round(c.apex[1] / 18);            // fallback before the course is mapped
+    };
     const cornerAvg = (c) => { const b = (live.spd || []).filter((p) => p.t >= c.t0 && p.t <= c.t1); if (b.length >= 2) return b.reduce((s, p) => s + p.mph, 0) / b.length; return (c.mph_in + c.mph_min + c.mph_out) / 3; };
     const scoreCorner = (c) => {
       if (!c) return null;
@@ -4060,7 +4064,8 @@
       if (!onCourse) return;
       live._idFocused[ordinal] = true;
       if (effMode() === "course") { focusToast("⚙ build identified — course feedback is live"); return; }
-      localStorage.setItem("fh6LabMode", "course"); pushMode(); renderBody();
+      if (labModeSel() !== "auto") localStorage.setItem("fh6LabMode", "course");   // J9: manual users get re-pinned; auto users stay auto (game-state detection lands on course itself)
+      pushMode(); renderBody();
       focusToast("⚙ build identified — focusing Course");
     };
     const lastCarOrd = () => (live.courseCar ? +String(live.courseCar).split("|")[0] : 0);   // last car you drove (survives menu / upgrade-screen frames where CarOrdinal drops to 0)
@@ -4092,7 +4097,8 @@
       const cached = live.diskCache[ord];
       if (cached === undefined) { fetchDiskTune(ord); el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
       if (cached === null) { el.innerHTML = `<div class="block" style="border-color:#00d27a"><p class="why" style="font-size:11px;margin:0">📀 reading the on-disk tune…</p></div>`; return; }
-      if (!cached.available) { el.innerHTML = ""; return; }   // no on-disk tune for this car — stay quiet
+      if (!cached.available) {   // J1: the bootstrap action must be VISIBLE — silence read as "nothing to do" while the journey was stalled on a menu save
+        el.innerHTML = `<div class="block" style="border-color:#e3b341"><b style="font-size:13px">📄 No tune file for this car yet</b><p class="why" style="font-size:11.5px;margin:4px 0 0">The decode reads the on-disk tune file, and this car has none. <b>Apply a downloaded tune from Find Tunes</b> (applying writes its file) <b>or save your own tune once</b> — the full build sheet appears the moment the file exists. Driving alone cannot create it.</p></div>`; return; }
       const dsum = (cached.deliverable && cached.deliverable.summary) || {};
       const key = "LIVE|" + ord + "|" + (cached.ts || "") + "|" + (dsum.sliders_absolute || 0) + "|" + (live.diskDiff && live.diskDiff.ordinal === ord ? live.diskDiff.t : "") + "|" + (((live.liveryCache || {})[ord] || {}).n || 0);
       if (el.dataset.fhmKey === key && el.querySelector(".fhm")) return;   // unchanged — don't rebuild every frame (keeps the =? inputs stable)
@@ -4947,8 +4953,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     const dockDataState = () => {
       const ord = (live.frame && live.frame.car) || lastCarOrd(); if (!ord) return null;
       const cached = live.diskCache ? live.diskCache[ord] : undefined;
-      if (cached === undefined) { if (live.connected) fetchDiskTune(ord); return { loading: true }; }
-      if (!cached || !cached.available) return { none: true, ord };
+      if (cached === undefined || cached === null) { if (cached === undefined && live.connected) fetchDiskTune(ord); return { loading: true }; }   // null = in flight (J4)
+      if (!cached.available) return { none: true, ord };
       const u = (cached.deliverable || {}).union || {};
       let courseNeeds = [];
       if (effMode() === "course") { const ls = liveSess(); const co = ls && (ls.courses || [])[0];
@@ -4972,7 +4978,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const n = s.none ? 1 : (s.asks || []).length + (s.courseNeeds || []).length;
       // an OPEN CONFLICT outranks "complete": zero asks with disagreeing data is red, not green (found by verify_workflow attr D1)
       const lvl = s.conflict ? "bad" : (s.none || n ? "warn" : "ok");
-      const label = s.conflict && !n ? `⚠ ${s.conflict} conflict${s.conflict > 1 ? "s" : ""} open` : n ? `${n} drive${n > 1 ? "s" : ""} needed` : "data complete";
+      const label = s.conflict && !n ? `⚠ ${s.conflict} conflict${s.conflict > 1 ? "s" : ""} open` : s.none ? "apply/save a tune" : n ? `${n} drive${n > 1 ? "s" : ""} needed` : "data complete";   // J1: a menu save is not a "drive"
       el.innerHTML = `<button class="ddata-pill ${lvl}" title="${s.conflict ? "save × telemetry disagree — open the panel / 🔗 drawer" : n ? "live techniques still needed for correct analysis — click for the list" : "all measurable data captured for this car"}"><span class="dot"></span>📡 ${label}</button>`;
       const b = el.querySelector(".ddata-pill"); if (b) b.addEventListener("click", () => { live.dock.panel = live.dock.panel === "data" ? null : "data"; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); });
     };
@@ -5167,6 +5173,11 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     function paintFrame() {
       const f = live.frame; if (!f) return;
       if (f.car && live.connected) { fetchDiskTune(f.car); diskSigCheck(f); }   // auto-fill + re-match the decode to the build now loaded (cyl/PI signature)
+      // J5: the focus pull must also fire on the COURSE-ARRIVAL edge (entering an event / starting a loop) — a car
+      // identified back in free roam produces no new match event when f.ev flips, so match-arrival alone missed it.
+      const onC = !!(f.ev || live.loop);
+      if (onC && !live._prevOnCourse && f.car) { const c0 = live.diskCache && live.diskCache[f.car]; if (c0 && c0.available) maybeFocusCourse(c0.match, f.car); }
+      live._prevOnCourse = onC;
       updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintCourseLive(); paintActiveCar();
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
       if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }
@@ -5181,6 +5192,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       // ---- LIVE TRACTION SCANNER: driven-wheel slip WHILE ON THROTTLE — the power-down pattern the corner analysis
       // (lateral grip) misses. Accumulates a rolling window; paintTraction turns it into an instant diagnosis + fix. ----
       if (f.on && f.slip) {
+        if (live._tracCar !== f.car) { live._tracCar = f.car; live.trac = []; }   // J8: a different car's wheelspin is not this car's diagnosis
         if (f.drv && f.drv !== "?") live.tracDrv = f.drv;   // remember the drivetrain so the finding still reads correctly once you pause
         const drivenW = f.drv === "FWD" ? ["FL", "FR"] : f.drv === "RWD" ? ["RL", "RR"] : ["FL", "FR", "RL", "RR"];
         if (f.thr > 190 && f.mph > 3) {   // hard on the gas and actually moving (not a standstill burnout)
@@ -5317,8 +5329,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       bindAtlas(r);
       r.querySelectorAll("[data-tunecid]").forEach((inp) => inp.addEventListener("change", () => { setTune(inp.dataset.tunecid, inp.dataset.tunesl, inp.value); if (src === "live") paintSections(true); else render(); }));
       // interactive tune iteration: mark a move done (sets current=target + starts a fresh run), un-mark, re-test, clear
-      r.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl, to] = b.dataset.apply.split("|"); markApplied(cid, sl, to); fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); if (src === "live") paintSections(true); else render(); }));
-      r.querySelectorAll("[data-unapply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl] = b.dataset.unapply.split("|"); unApply(cid, sl); if (src === "live") paintSections(true); else render(); }));
+      /* J16: cid itself contains "|" — split on a safe delimiter; this button was dead since birth */
+      r.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl, to] = b.dataset.apply.split("@@"); markApplied(cid, sl, to); fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-unapply]").forEach((b) => b.addEventListener("click", () => { const [cid, sl] = b.dataset.unapply.split("@@"); unApply(cid, sl); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-retest]").forEach((b) => b.addEventListener("click", () => { b.textContent = "🔁 re-analysing…"; b.disabled = true; fetch(liveUrl + "/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); }));
       r.querySelectorAll("[data-clearapplied]").forEach((b) => b.addEventListener("click", () => { if (!b.dataset.arm) { b.dataset.arm = "1"; const t0 = b.textContent; b.textContent = "really clear the history?"; setTimeout(() => { delete b.dataset.arm; b.textContent = t0; }, 4000); return; } localStorage.removeItem(appliedKey(b.dataset.clearapplied)); if (src === "live") paintSections(true); else render(); }));   // audit F9: two-step
       // build-confirm gate: confirm (unlocks course tuning advice) / re-check (drops the confirmation)

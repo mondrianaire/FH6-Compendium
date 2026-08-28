@@ -263,7 +263,9 @@ def ingest(p, t_mono):
                 v_min = min(r["mph"] for r in rows); ipk = max(range(len(rows)), key=lambda i: abs(rows[i]["lat"])); apx = rows[ipk]
                 # braking point: metres of odometer before the apex where the brakes first came on hard; throttle-on: metres after apex
                 brk_r = next((r for r in co["pre"] + rows[:ipk + 1] if r["brk"] > 40), None); imin = min(range(len(rows)), key=lambda i: rows[i]["mph"]); thr_r = next((r for r in rows[imin:] if r["thr"] > 100), None)
-                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint, "lapn": apx.get("lapn"), "dir": "R" if sign > 0 else "L",
+                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint,
+                      "lapn": (((apx.get("lapn") or 0) + 1) if apx.get("ev") else None),   # J11: 1-based in events, None outside — telemetry's 0-based lap read as falsy everywhere downstream
+                      "dir": "R" if sign > 0 else "L",
                       "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min), "mph_out": round(rows[-1]["mph"]), "mph_apex": round(apx["mph"]), "apex": [apx.get("px"), apx.get("pz")], "loop_lap": (ST.loop_lap if ST.loop else None),
                       "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3), "drift": drift, "kink": v_min > 85 and peak < 0.9,
                       "brake_on_m": (round(apx.get("dist", 0) - brk_r["dist"]) if brk_r else None), "throttle_on_m": (round(thr_r["dist"] - apx.get("dist", 0)) if thr_r else None),
@@ -582,6 +584,17 @@ def _pick_meta(metas, ordn, ts_want=None):
     # cyl/PI score alone ties them and we'd fall back to 'newest'. When the leaders tie, use the LIVE-measured gear
     # ladder (telemetry-exact, wheelspin-immune) to pick the build actually EQUIPPED: gearing is part of the tune, so
     # two builds that differ in gears/final-drive separate cleanly here, while genuinely identical builds stay tied.
+    # J2: fingerprint the PARTS of every save FIRST — identity ambiguity exists between distinct BUILDS, not between
+    # slider iterations of one build. Two same-fingerprint saves (save → tweak sliders → save again, the natural first
+    # hour with a car) are ONE build: no gear-ladder separation is possible or needed, newest wins, and treating them
+    # as 'ties' hard-blocked the gate with a physically unsatisfiable 'drive the gears' instruction.
+    try:
+        import hashlib as _hl0
+        for r in roster:
+            items0 = tuple(sorted((k, v) for k, v in ((r["_tune"] or {}).get("parts") or {}).items() if v is not None))
+            r["_bsig"] = _hl0.sha1(repr(items0).encode()).hexdigest()[:8]
+    except Exception:
+        pass
     n_ties = 1; gear_used = False
     if live and len(roster) >= 2:
         # candidates = every same-cylinder save. NOT the score-tie window: the PI-observation bonus is self-
@@ -589,7 +602,7 @@ def _pick_meta(metas, ordn, ts_want=None):
         # never got stamped). An unstamped PI is UNKNOWN — it may equally sit at the class cap — so PI cannot rule a
         # same-cyl save out. The measured gear ladder OUTRANKS the PI bonus whenever it's available.
         ties = [r for r in roster if not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl)]
-        n_ties = len(ties)
+        n_ties = len({r.get("_bsig") for r in ties}) if all(r.get("_bsig") for r in ties) else len(ties)   # distinct BUILDS, not saves
         if n_ties >= 2:
             live_gl = None
             with ST.lock: sj = ST.session_json
@@ -1454,6 +1467,10 @@ def disk_watcher():
         time.sleep(1.5)
         try:
             fr = ST.latest; ordn = fr and fr.get("car")
+            if ordn:
+                ST.last_car = int(ordn)
+            else:
+                ordn = getattr(ST, "last_car", None)   # J3: the FIRST save happens IN the tune menu, where CarOrdinal drops to 0 — watch the last driven car so the save is detected without requiring another drive
             if not ordn:
                 continue
             ordn = int(ordn)
@@ -1469,6 +1486,14 @@ def disk_watcher():
                 # recorded (a stale on-disk parts snapshot paired with live PI corrupts real configs — see audit).
                 if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0 and ST.clone_lock != ordn:
                     rec_meta, _rm = _pick_meta(metas, ordn)   # pair the LIVE build's parts (matched by cyl) with the live PI — not the newest file, which may be a different build
+                    # J6: a verdict CHANGE (e.g. the gear ladder just verified the build mid-event) must reach the
+                    # client — no file changed, so the mtime watcher alone would never re-emit and the confirm gate
+                    # stayed blocked on 'drive the gears' the user had already driven.
+                    if not hasattr(ST, "_last_verdict"):
+                        ST._last_verdict = {}
+                    _v = f"{_rm.get('how')}|{rec_meta.get('ts')}" if _rm else ""
+                    if ST._last_verdict.get(str(ordn)) != _v:
+                        ST._last_verdict[str(ordn)] = _v; ST._disk_dirty = True
                     # STAMP ONLY ON A VERIFIED IDENTITY: with several same-cyl builds, a cyl/PI pick can't prove WHICH
                     # build is equipped (at a class cap they converge; unstamped PIs are unknown) — stamping then would
                     # pair the live PI with the wrong build's parts and poison the observation store. Require a single

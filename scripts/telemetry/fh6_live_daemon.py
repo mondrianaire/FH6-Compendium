@@ -729,6 +729,7 @@ def _pick_meta(metas, ordn, ts_want=None):
             builds.append({"build": h, "label": labels.get(h, "?"), "saves": [x["ts"] for x in mem], "n": len(mem),
                            "cyl": mem[0].get("cyl"), "pi": next((x["pi"] for x in mem if x.get("pi")), None),
                            "gears": (mem[0]["_tune"] or {}).get("gear_count"),
+                           "diff_base": labels.get(base, "?"),   # letters are permanent, so the diff base is NOT always 'A' — name it
                            "diff_vs_A": diffs[:12], "n_diffs": len(diffs)})
         # LIVERY ASSOCIATION per build: no tune↔livery link exists on disk, so a manual PIN
         # (data/build-liveries.json) wins; otherwise GUESS by save-time proximity — a build's tune save and its

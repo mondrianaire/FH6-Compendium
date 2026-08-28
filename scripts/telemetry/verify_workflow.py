@@ -127,9 +127,10 @@ check("C identify", "builds: distinct fingerprints + permanent unique labels", c
 
 def c3():
     bs = (DT.get("match") or {}).get("builds") or []
-    bad = [b["label"] for b in bs if b["label"] != "A" and not b.get("n_diffs")]
-    return (not bad, f"non-A builds all carry part diffs (empty: {bad or 'none'})")
-check("C identify", "non-A builds carry diffs vs A", c3)
+    base = (bs[0].get("diff_base") if bs else None) or "A"   # permanent letters: the diff base is named, not positional
+    bad = [b["label"] for b in bs if b["label"] != base and not b.get("n_diffs")]
+    return (not bad, f"non-{base} builds all carry part diffs (empty: {bad or 'none'})")
+check("C identify", "non-base builds carry diffs vs the named base", c3)
 
 def c4():
     saves = (DT.get("match") or {}).get("saves") or []

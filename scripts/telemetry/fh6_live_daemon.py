@@ -58,6 +58,7 @@ class State:
         self.seq = 0
         self.clone_lock = None      # ordinal the user pinned as a CLONE TARGET — while set, PI/catalog accrual for it is paused (building the replica must not poison the target)
         self.gears_seen = {}        # ordinal -> set of forward gears USED at speed this session — hard identity evidence (you cannot use gear 8 in a 6-speed box)
+        self.picked_id = {}         # ordinal -> {ts, t}: the save the user PICKED in the 🪪 drawer while in this car — an explicit declaration of the equipped build (2h, like the gear hold)
         self.live_fdg = {}          # ordinal -> {gear: [rpm/mph samples]} measured DAEMON-LOCAL at clean WOT — the ladder must not wait for (or die with) the analyzer
     def emit(self, name, payload):
         with self.lock:
@@ -695,8 +696,28 @@ def _pick_meta(metas, ordn, ts_want=None):
                 if len(gl2) >= 3: live_gl = gl2; gl_abs = False   # rpm/mph carries an unknown constant — compare gear STEPS (unit-free)
             if live_gl:
                 import re as _re
+                _dls = {}
+                def _dl_of(r):
+                    k = id(r)
+                    if k not in _dls: _dls[k] = TUNE.tune_to_deliverable(r["_tune"], "")   # one decode per candidate, shared by the derived-fd probe and the error metric
+                    return _dls[k]
+                # THE ABSOLUTE COMPARE NEEDS REAL FINAL DRIVES. fd is band-DERIVED in 511/513 saves (a linear guess
+                # from the slider %), so `fd x ratio` compares a measured ladder against a guess: no candidate can
+                # clear the 6% gate however well the user drives, and producing a ladder REMOVED the working
+                # discriminator (audit T4 — "more driving makes disambiguation worse"). When any candidate's fd is
+                # derived, fall back to the unit-free STEP compare: the fd cancels on both sides, so what remains is
+                # ladder SHAPE — the part telemetry can actually measure. Cost: two builds differing ONLY in final
+                # drive stay tied, which is honest — that difference was never measured, only guessed.
+                def _fd_derived(r):
+                    for tab in _dl_of(r).get("tabs", []):
+                        for row in tab.get("rows", []):
+                            if row.get("field") == "final_drive":
+                                return bool(row.get("derived"))
+                    return False
+                if gl_abs and any(_fd_derived(r) for r in ties):
+                    gl_abs = False
                 def _gear_err(r):
-                    dl = TUNE.tune_to_deliverable(r["_tune"], "")
+                    dl = _dl_of(r)
                     fd = None; ratios = {}
                     for tab in dl.get("tabs", []):
                         for row in tab.get("rows", []):
@@ -865,10 +886,17 @@ def _pick_meta(metas, ordn, ts_want=None):
                 if str(s2.get("ts")) == str(best["ts"]) and s2.get("pi") != int(live_pi): s2["pi"] = int(live_pi)
         except Exception:
             pass
+    # A PICK THE LIVE CAR CORROBORATES. The pick itself is just a declaration, so it is not evidence on its own —
+    # but a picked save that survives the hard-evidence filters (same cylinders as the live engine, gearbox big
+    # enough for the gears actually used) is a declaration the car does not contradict. That, and only that, is what
+    # the PI stamp accepts as a substitute for the ladder (audit T1); identity scoring is untouched.
+    picked_ok = bool(ts_want and str(best["ts"]) == str(ts_want) and any(r is best for r in ties)
+                     and (live or live_recent) and live_cyl and best.get("cyl") and int(best["cyl"]) == int(live_cyl))
     return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
-                           "held": held_id, "ladder_tied": ladder_tied, "builds": builds, "saves": saves}
+                           "held": held_id, "ladder_tied": ladder_tied, "picked_ok": picked_ok,
+                           "builds": builds, "saves": saves}
 
 
 def _deliverable_cyl(deliverable):
@@ -908,6 +936,48 @@ def _verified_identity(match):
     if not match or match.get("how") in ("no-match", "unsaved-build"): return False
     if match.get("held"): return False
     return (match.get("n_signature_ties") or 1) <= 1 or bool(match.get("gear_disambig"))
+
+
+def _stamp_identity(match):
+    """The PI-STAMP write standard ONLY — deliberately NOT _verified_identity itself.
+
+    _verified_identity also guards the CROSS-CAR engine-family catalog bootstrap (:_enrich_engine_desc), where one
+    wrong write teaches a whole family the wrong engine permanently and then self-confirms it. That predicate must
+    stay strict. The PI store is per-(ordinal, parts_hash): a wrong write there mis-prices ONE config and is
+    correctable by a later verified read, so it can accept one more kind of evidence — the user's explicit save pick,
+    but only when the live car does not contradict it (`picked_ok`). Without this, the manual pick the dashboard
+    itself offers as THE escape from a signature tie unblocked tuning advice and nothing else, and parts-pi.json
+    stayed starved of the one datum that exists nowhere on disk (audit T1)."""
+    if match and match.get("how") == "picked" and not match.get("gear_disambig"):
+        # A PICK IS ONLY AS GOOD AS THE LIVE CAR SAYS. Never fall through to _verified_identity here: a pick forces
+        # final_how='picked', which BYPASSES the no-match test, and when the live engine matches no save at all the
+        # candidate set is empty and n_signature_ties reports 1 — so a flatly contradicted pick would read as
+        # "unambiguous". picked_ok is the corroboration (same cylinders as the live engine, gearbox consistent with
+        # the gears actually used); the ladder, when it ran, still outranks the declaration.
+        return bool(match.get("picked_ok"))
+    return _verified_identity(match)
+
+
+def _stamp_state(match, ordn=None):
+    """Why the PI stamp is (not) allowed, in words the user can act on. The guard is otherwise SILENT: the ribbon can
+    read '⚙ verified · held' while stamping stays refused, and the ledger then asks for a drive that cannot help
+    (audit T13). Returns (ok, reason) — the reason is empty when ok."""
+    try:
+        if ordn is not None and ST.clone_lock is not None and int(ST.clone_lock) == int(ordn):
+            return False, "PI accrual is PAUSED for this car — it is pinned as a clone TARGET, so half-built configs can't be recorded. Clear the clone lock to resume stamping"
+    except Exception:
+        pass
+    if not match:
+        return False, "no build match yet"
+    if match.get("how") in ("no-match", "unsaved-build"):
+        return False, "this build has no file on disk — its live PI would be stamped onto another build's parts. Change any part or slider and SAVE first"
+    if _stamp_identity(match):
+        return True, ""
+    if match.get("how") == "picked":
+        return False, "the live car contradicts the save you pinned (engine or gearbox disagree), or it isn't on track right now — the PI stamp needs the pin to match what you're driving"
+    if match.get("held"):
+        return False, "identity is HELD from your earlier verified run, not verified right now — a remembered identity is not evidence that this PI belongs to this build. Drive up through the gears again, or pick the equipped save in the 🪪 drawer"
+    return False, f"{match.get('n_signature_ties') or 2} saved builds share this engine + PI — drive up through the gears, or pick the equipped save in the 🪪 drawer"
 
 
 def _enrich_engine_desc(deliverable, ordn, verified=False):
@@ -1143,8 +1213,14 @@ def _build_union(deliverable, ordn, match=None):
             fld("PI", f"{sm['pi_total']} (observed for this config)", str(live_pi), "agree" if same else "conflict",
                 None if same else "live PI differs from the recorded observation — the config on disk may not be what you're driving")
         elif sm.get("pi_total") is None:
-            fld("PI", None, (str(live_pi) if live_pi else None), "await", "PI is telemetry-exact but only recorded once THIS exact config is driven")
-            ask("drive-build", "drive this exact build once — records its exact PI against the config", "PI exact", 4)
+            # THE STAMP GUARD MUST SPEAK. Driving is only half the requirement — the write also needs a verified
+            # identity, and when that half fails the old ask sent the user to do a lap that could never satisfy it
+            # (audit T13). Say which half is missing. u["stamp"] carries the same verdict structurally.
+            _stok, _swhy = _stamp_state(match, ordn)
+            fld("PI", None, (str(live_pi) if live_pi else None), "await",
+                "PI is telemetry-exact but only recorded once THIS exact config is driven" if _stok else f"PI cannot stamp: {_swhy}")
+            ask("drive-build", "drive this exact build once — records its exact PI against the config" if _stok
+                else f"PI cannot stamp yet — {_swhy}", "PI exact", 4)
         # -- per-car sliders still relative -> calibration ask (the guided card does the capture)
         rel = sm.get("sliders_relative") or 0
         if rel:
@@ -1154,6 +1230,8 @@ def _build_union(deliverable, ordn, match=None):
         u["n_conflict"] = sum(1 for f in u["fields"] if f["status"] == "conflict")
         u["n_fill"] = sum(1 for f in u["fields"] if f["status"] == "tele-fill")
         u["n_await"] = sum(1 for f in u["fields"] if f["status"] == "await")
+        _s_ok, _s_why = _stamp_state(match, ordn)
+        u["stamp"] = {"ok": _s_ok, "why": _s_why}   # the PI-stamp guard's verdict, structurally — the ledger's 'PI stamped' row can say WHY instead of an unexplained red (T13)
         deliverable["union"] = u
         # AUTO-IDENTIFY A DISTINCT UNSAVED BUILD: aspiration and transmission are PART-level measurements — they can
         # only disagree with the save if different PARTS are equipped (sliders can't change them). When the matcher
@@ -1420,6 +1498,13 @@ class H(BaseHTTPRequestHandler):
                         names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
                         ts_want = q.get("ts", [None])[0]   # optional manual pick — decode a specific saved tune
                         meta, match = _pick_meta(metas, ordn, ts_want=ts_want)   # match the save to the car you're in, not just the newest
+                        # REMEMBER A CORROBORATED PICK. The disk watcher re-picks on its own clock and never sees the
+                        # query string, so the pick the dashboard calls "THE escape" from a signature tie reached the
+                        # decode panel and nothing else. Held for 2h like the gear-verified identity, and only when
+                        # the live car agrees with the pinned save (picked_ok) — browsing another build while parked
+                        # must not become a licence to write that build's parts into the PI store.
+                        if ts_want and match.get("picked_ok"):
+                            ST.picked_id[str(ordn)] = {"ts": str(ts_want), "t": time.time()}
                         tune = TUNE.parse_tune(meta["path"], ordinal_hint=ordn)
                         deliverable = TUNE.tune_to_deliverable(tune, nm)
                         _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match))
@@ -1525,18 +1610,44 @@ class H(BaseHTTPRequestHandler):
                     # norm — the calibration card doesn't re-render on every save (the disk-watch only re-decodes while a
                     # car is in-frame, not in the menu), so a downforce/aero re-save was registering the SAME position
                     # twice and the range never solved. Pair the newest-save norm with the value the user just read.
-                    norm = None
-                    try:
-                        metas, _ = TUNE.tunes_for_ordinal(ordn)
-                        if metas:
-                            e = (TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn).get("sliders") or {}).get(field)
-                            if e and e.get("norm") is not None: norm = float(e["norm"])
-                    except Exception: pass
-                    if norm is None: norm = float(body.get("norm"))
+                    #
+                    # BUT NEVER GUESS WHICH POSITION WAS READ. data/car-tune-ranges.json is shared and persisted, and
+                    # back_solve republishes what lands here as "exact": one mis-paired (norm, value) silently poisons
+                    # every later decode of that field, for every save of that car. "Newest" is an ASSUMPTION — the
+                    # card renders whatever save the 🪪 picker (or the matcher) chose, which is often not metas[0]
+                    # (audit T2). So pick the source save on evidence, and refuse when the evidence is missing:
+                    #   ts sent by the client  -> that save (it says which one it rendered; today's client sends none)
+                    #   newest save is FRESH   -> metas[0]: a save written minutes ago IS what the tune screen shows
+                    #   otherwise              -> the MATCHED save, i.e. the build the car is identified as = the card
+                    # Then cross-check against the position the client rendered; a disagreement we cannot explain is a
+                    # refusal, not a coin flip. A retry costs one refresh; a bad range costs every later reading.
+                    metas, _ = TUNE.tunes_for_ordinal(ordn)
+                    if not metas: raise ValueError("no saved tune on disk for this car")
+                    fresh = (time.time() - float(metas[0]["mtime"])) < 600
+                    ts_seen = body.get("ts")   # the save the card was rendered from, when the client tells us
+                    if ts_seen is not None:
+                        src = next((m for m in metas if str(m["ts"]) == str(ts_seen)), None)
+                        if src is None: raise ValueError("the save this calibration card was rendered from is no longer on disk — refresh the decode and enter the number again")
+                    elif fresh:
+                        src = metas[0]
+                    else:
+                        src, _mr = _pick_meta(metas, ordn)
+                    e = (TUNE.parse_tune(src["path"], ordinal_hint=ordn).get("sliders") or {}).get(field)
+                    norm = float(e["norm"]) if (e and e.get("norm") is not None) else None
+                    if norm is None: raise ValueError(f"that save carries no position for {field}")
+                    cli = body.get("norm")
+                    # A card whose position disagrees with the source has two opposite causes with the SAME symptom:
+                    # the benign one (you just re-saved and the card hasn't re-rendered — what the newest-save re-read
+                    # was written for, covered by `fresh`) and the corrupting one (the card is showing another build).
+                    # Outside the fresh window nothing here can tell them apart, so say so instead of writing a guess.
+                    if cli is not None and len(metas) > 1 and not (fresh and src is metas[0]) and abs(float(cli) - norm) > 1e-3:
+                        ST._disk_dirty = True   # push a fresh decode so the card can re-render, then the retry lands
+                        raise ValueError(f"the position this card is showing ({round(float(cli)*100,1)}%) isn't the one I'd pair it with ({round(norm*100,1)}%), and this car has {len(metas)} saves — I won't guess which tune you read that number off. Re-save the tune you're reading (or refresh the decode), then enter it again")
                     solved = TUNE.register_range(ordn, field, norm, float(body["value"]), unit=body.get("unit"))
                     npts, distinct = TUNE.range_points(ordn, field)
                     resp = {"ok": True, "solved": solved, "points": npts, "distinct": distinct,
-                            "need": max(0, 2 - distinct), "norm": round(norm, 4), "field": field, "ordinal": ordn}
+                            "need": max(0, 2 - distinct), "norm": round(norm, 4), "field": field, "ordinal": ordn,
+                            "ts": src["ts"]}   # WHICH save the point was paired with — the pairing is the whole risk, so name it
                 except Exception as ex_:
                     print("tune-range not saved:", repr(ex_), file=sys.stderr); resp = {"ok": False, "error": str(ex_)}
             out2 = json.dumps(resp).encode()
@@ -1647,6 +1758,7 @@ def reset_session():
         ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None; ST._auto_suspend = None   # keep the loop DEFINITION, reset its lap count
         ST.live_seen = {}   # J20: the parked-identity hold is session telemetry — it dies with the session
         ST.gears_seen = {}; ST.live_fdg = {}
+        ST.picked_id = {}   # a pick declares what is equipped RIGHT NOW — a new session may be a different car entirely
         ST.clone_lock = None   # an orphaned lock silently blocked PI stamping + catalog accrual with no surface — a session reset is a clean slate
         ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
         ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
@@ -1799,7 +1911,9 @@ def disk_watcher():
                 # PAUSE accrual for a locked clone target: while you build the replica, half-built configs must not be
                 # recorded (a stale on-disk parts snapshot paired with live PI corrupts real configs — see audit).
                 if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0 and ST.clone_lock != ordn:
-                    rec_meta, _rm = _pick_meta(metas, ordn)   # pair the LIVE build's parts (matched by cyl) with the live PI — not the newest file, which may be a different build
+                    _pk = (getattr(ST, "picked_id", {}) or {}).get(str(ordn))
+                    _pts = _pk["ts"] if _pk and time.time() - _pk["t"] < 7200 else None   # the user's own pick, if they made one for this car recently
+                    rec_meta, _rm = _pick_meta(metas, ordn, ts_want=_pts)   # pair the LIVE build's parts (matched by cyl, or the build the user pinned) with the live PI — not the newest file, which may be a different build
                     # J6: a verdict CHANGE (e.g. the gear ladder just verified the build mid-event) must reach the
                     # client — no file changed, so the mtime watcher alone would never re-emit and the confirm gate
                     # stayed blocked on 'drive the gears' the user had already driven.
@@ -1812,7 +1926,7 @@ def disk_watcher():
                     # build is equipped (at a class cap they converge; unstamped PIs are unknown) — stamping then would
                     # pair the live PI with the wrong build's parts and poison the observation store. Require a single
                     # candidate or a gear-ladder-verified pick.
-                    ok_stamp = _verified_identity(_rm)   # ONE write standard everywhere: no-match/UNSAVED-BUILD never stamp (an unsaved build's live PI must not overwrite the disk config's), a pure HOLD is a memory not a verification, and ambiguity needs the ladder
+                    ok_stamp = _stamp_identity(_rm)   # the ladder standard (no-match/UNSAVED-BUILD never stamp, a pure HOLD is a memory not a verification), PLUS an explicit pick the live car corroborates. The catalog bootstrap keeps the STRICTER _verified_identity — see _stamp_identity
                     if ok_stamp:
                         _record_pi_observation(ordn, TUNE.parse_tune(rec_meta["path"], ordinal_hint=ordn))
                     _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)
@@ -1841,6 +1955,7 @@ def disk_watcher():
                 if not hasattr(ST, "gear_id"):
                     ST.gear_id = {}
                 ST.gear_id[str(ordn)] = {"ts": str(metas[0]["ts"]), "t": time.time()}
+                ST.picked_id.pop(str(ordn), None)   # the fresh save IS the equipped build — it supersedes an older declaration, which may now name a build the user has moved off
                 _gear_log(ordn, metas[0]["ts"]); _auto_assoc_livery(ordn)
             nm = names_load().get("cars", {}).get(str(ordn)) or {}
             nm = nm.get("name") if isinstance(nm, dict) else nm

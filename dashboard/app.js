@@ -1841,7 +1841,14 @@
       </div>
       <div class="block">
         <h3>Instruments</h3>
-        ${L.instrumentation.map((i) => `<p class="why" style="margin:4px 0"><span class="conf ${i.status.startsWith("verified") ? "conf-verified" : "conf-contested"}">${i.status.startsWith("verified") ? "✅" : "❌ verify in-game"}</span> <strong>${i.id}:</strong> ${i.what} — ${i.use}</p>`).join("")}
+        ${L.instrumentation.map((i) => {
+          // the status is free text a human writes; a startsWith("verified") test called the 60 Hz Data Out stream
+          // unverified for weeks because its status reads "PLAYER-VERIFIED 2026-08-10 …". Match the word wherever it
+          // sits (start or after a space/hyphen, any case) while still refusing an explicit negation — "unverified"
+          // fails the word test on its own, "not verified" is rejected outright.
+          const st = String(i.status || ""); const ok = /(^|[\s-])verified/i.test(st) && !/\bnot[\s-]+verified/i.test(st);
+          return `<p class="why" style="margin:4px 0"><span class="conf ${ok ? "conf-verified" : "conf-contested"}" title="${esc(st)}">${ok ? "✅" : "❌ verify in-game"}</span> <strong>${i.id}:</strong> ${i.what} — ${i.use}</p>`;
+        }).join("")}
       </div>
       ${L.cornering_envelope ? `
       <div class="block" style="border-color:var(--accent2)">
@@ -2752,7 +2759,14 @@
       live.diskTune[key] = vals; return changed;
     };
     const userTune = (cid) => { try { return JSON.parse(localStorage.getItem(tuneKey(cid)) || "{}"); } catch (e) { return {}; } };
-    const getTune = (cid) => { const ord = String(cid).split("|")[0]; const disk = (live.diskTune && live.diskTune[ord]) || {}; return Object.assign({}, disk, userTune(cid)); };   // user entries override the disk auto-fill
+    // PRECEDENCE: the DISK wins wherever it has a value. A typed number is a one-time transcription; the save is
+    // byte-exact and re-read after every save you make, so the old order (typed over disk) let one stale entry
+    // outrank every later save for good — and those values feed the tuningMoves targets. Typed entries still fill
+    // every slider the save cannot supply (position-only fields, and builds with no matching save), and clearing an
+    // input still deletes it (setTune), so nothing the user can enter is lost — it is only outranked when the save
+    // actually holds that field.
+    const getTune = (cid) => { const ord = String(cid).split("|")[0]; const disk = (live.diskTune && live.diskTune[ord]) || {}; return Object.assign({}, userTune(cid), disk); };
+    const diskHas = (cid, sl) => { const ord = String(cid).split("|")[0]; const d = (live.diskTune && live.diskTune[ord]) || {}; return d[sl] != null; };   // is this slider's number coming off the save?
     const setTune = (cid, k, v) => { const t = userTune(cid); if (v === "" || v == null || isNaN(+v)) delete t[k]; else t[k] = +v; try { localStorage.setItem(tuneKey(cid), JSON.stringify(t)); } catch (e) {} };   // a quota throw here silently killed the whole repaint chain
     // ---- interactive tune iteration: mark a suggested change as IMPLEMENTED (sets it as the new current value +
     // starts a fresh run), then RE-TEST (force a re-analysis). An applied move that drops off the next analysis's
@@ -2966,11 +2980,14 @@
       const o0 = String(cid).split("|")[0];
       const diskN = Object.keys((live.diskTune && live.diskTune[o0]) || {}).length;
       const noMatch = (() => { const c = live.diskCache && live.diskCache[o0]; return !!(c && c.match && c.match.how === "no-match"); })();
-      const note = diskN ? `<b style="color:#00d27a">📀 ${diskN} current values auto-filled from disk</b> ${buildThumb(o0, null, true)} — targets are exact; edit any to override`
+      const note = diskN ? `<b style="color:#00d27a">📀 ${diskN} current values read from your saved tune</b> ${buildThumb(o0, null, true)} — exact, and they refresh every time you save; the rest are yours to type`
         : noMatch ? `<b style="color:#e3b341">⚠️ this build isn't saved on disk</b> — no saved tune matches your live engine, so targets use vetted baselines. Save your tune in-game (or type your values) to read exact current numbers.`
         : (n ? n + " values entered — targets below are exact; edit anytime" : "enter your current slider values for EXACT target numbers (from the in-game tune pane)");
       return `<details ${n ? "" : "open"} style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px"><b>⚙️ Current tune</b> <span class="why">${note}</span></summary>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 8px;margin-top:6px">${SLIDER_ORDER.map((sl) => `<label style="font-size:10.5px;display:flex;justify-content:space-between;align-items:center;gap:4px">${SLIDER[sl].label}<input data-tunecid="${esc(cid)}" data-tunesl="${sl}" value="${cur[sl] != null ? cur[sl] : ""}" inputmode="decimal" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:11px"></label>`).join("")}</div></details>`;
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 8px;margin-top:6px">${SLIDER_ORDER.map((sl) => { const onDisk = diskHas(cid, sl);
+          // a disk-backed field is READONLY on purpose: typing into it would have looked like an override and then
+          // silently lost to the next save read. Change it in-game and save — the number follows.
+          return `<label style="font-size:10.5px;display:flex;justify-content:space-between;align-items:center;gap:4px"${onDisk ? ` title="📀 read from your saved tune. If this does not match the car, the wrong save is attributed — type over it and it wins until the next save."` : ""}>${onDisk ? "📀 " : ""}${SLIDER[sl].label}<input data-tunecid="${esc(cid)}" data-tunesl="${sl}" value="${cur[sl] != null ? cur[sl] : ""}" inputmode="decimal" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid ${onDisk ? "#00d27a" : "var(--line)"};background:var(--bg2);color:${onDisk ? "#00d27a" : "var(--txt)"};font-size:11px"></label>`; }).join("")}</div></details>`;
     };
     const numericTuningPanel = (co, s, forceCid) => {
       const cid = forceCid || (live.frame && live.frame.on && live.frame.cid) || live.courseCar || (co.cars || [])[0]; if (!cid) return "";   // when paused, stay on the LAST-DRIVEN car — not co.cars[0], which may be a different car
@@ -3522,12 +3539,15 @@
     };
     const confCol = (v) => (v >= 0.8 ? "#00d27a" : v >= 0.6 ? "#e3b341" : "#e5414e");
     // the DELIVERABLE: every row = what to install / match + a confidence EARNED from independent, consistent measurements (+ what to drive to raise it)
-    // ---- SHOP CAPTURE: the daemon serves your in-game screenshots; fill the 'shop check' fields (widths, compound, aero…) while viewing them, saved to the build record ----
+    // ---- STATS-PANE CAPTURE: the daemon serves your in-game screenshots; type the few numbers the save file does NOT hold ----
+    // Every parts field that used to live here (tire compound + widths, rim style, track widths, front bumper, rear
+    // wing, body kit) decodes straight out of the 598-byte save at confidence 1.0 — 513/513 saves, 0 unresolved — so
+    // asking for per-car upgrade-menu screenshots was both redundant and a standing-rule violation. What survives is
+    // the ONE screen the save cannot supply: weight_lb + front_pct feed the spring-rate formula (fh6_tune_decode
+    // load_masses → spring_rate_from_mass) and displacement_l is the first source for the engine descriptor
+    // (fh6_tune_decode:906, by ordinal) — no decoded slot carries any of the three.
     const SHOP_CAPTURE = [
-      { group: "My Cars pane", pane: true, fields: [["pi", "PI"], ["power_hp", "Power (hp)"], ["torque_lbft", "Torque (lb-ft)"], ["weight_lb", "Weight (lb)"], ["front_pct", "Front %"], ["compound", "Compound"], ["suspension", "Suspension"], ["displacement_l", "Displacement (L)"]] },
-      { group: "Tires & Rims", menu: "Tires & Rims", fields: [["Tire compound"], ["Front tire width"], ["Rear tire width"], ["Rim style"], ["Front track width"], ["Rear track width"]] },
-      { group: "Aero & Appearance", menu: "Aero & Appearance", fields: [["Front bumper / splitter"], ["Rear wing"], ["Other body parts"]] },
-      { group: "Conversions", menu: "Conversions", fields: [["Body kit"]] },
+      { group: "My Cars pane", pane: true, fields: [["weight_lb", "Weight (lb)"], ["front_pct", "Front %"], ["displacement_l", "Displacement (L)"]] },
     ];
     let shotEnlarged = null;
     const refreshShots = () => { fetch(liveUrl + "/shots?n=24").then((r) => r.json()).then((d) => { live.shots = d.shots || []; live.shotsDirs = d.dirs || []; const el = host.querySelector("#lvShopCapture"); if (el && el.dataset.cid) el.innerHTML = shopCaptureInner(el.dataset.cid); bindBody(host.querySelector("#lvShopCapture") || host); }).catch(() => {}); };
@@ -3539,8 +3559,8 @@
       const gallery = shots.length ? `<div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0">${shots.slice(0, 16).map((s) => `<img data-shot="${esc(s.url)}" src="${liveUrl}${esc(s.url)}" title="${esc(s.id)}" style="height:70px;border-radius:6px;border:1px solid var(--line);cursor:pointer;flex:0 0 auto">`).join("")}</div>${shotEnlarged ? `<div style="margin:6px 0"><img src="${liveUrl}${esc(shotEnlarged)}" style="max-width:100%;max-height:420px;border-radius:8px;border:1px solid var(--accent2)"> <span class="chip" data-shot-close="1" style="cursor:pointer">✕ close</span></div>` : ""}`
         : `<p class="why" style="font-size:11px">No screenshots found in ${(live.shotsDirs || []).map((d) => `<code>${esc(d.split(/[\\/]/).slice(-2).join("/"))}</code>`).join(", ") || "the watched folders"}. Take an in-game screenshot (Xbox Game Bar <b>Win+Alt+PrtScn</b>, or your ShareX hotkey) and press ↻.</p>`;
       const form = SHOP_CAPTURE.map((g) => `<div style="margin-top:8px"><div style="font-size:11px;font-weight:700;color:var(--accent2)">${g.group}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 10px;margin-top:3px">${g.fields.map(([slot, label]) => { const val = savedVal(rec, g.group, slot, g.pane ? slot : null) ?? ""; return `<label style="font-size:11px;display:flex;justify-content:space-between;align-items:center;gap:5px">${label || slot}<input data-shopcid="${esc(cid)}" data-shoppane="${g.pane ? slot : ""}" data-shopmenu="${g.pane ? "" : esc(g.menu)}" data-shopslot="${g.pane ? "" : esc(slot)}" value="${esc(String(val))}" placeholder="from the shot" style="width:88px;padding:2px 5px;border-radius:4px;border:1px solid ${val ? "#00d27a" : "var(--line)"};background:var(--bg2);color:var(--txt);font-size:11px"></label>`; }).join("")}</div></div>`).join("");
-      return `<div class="card-row" style="margin-top:0"><strong style="font-size:13px">📸 Shop capture — fill the 🔍 shop-check data from screenshots</strong><span><span class="chip" title="${recent} shot(s) in the last hour">${shots.length} shots</span> <button class="lab-mode" id="lvShotRefresh" style="padding:2px 8px;font-size:11px">↻ refresh</button></span></div>
-        <p class="why" style="font-size:10.5px;margin:2px 0 6px">Open the in-game <b>upgrade shop</b> / <b>My Cars pane</b> / <b>tune tabs</b>, screenshot each (Win+Alt+PrtScn), press ↻, click a thumbnail to enlarge, then type the values below — saved straight to this car's build record; the Clone Sheet's 🔍 rows turn ✅.</p>
+      return `<div class="card-row" style="margin-top:0"><strong style="font-size:13px">📸 Stats pane — the three numbers the save file doesn't hold</strong><span><span class="chip" title="${recent} shot(s) in the last hour">${shots.length} shots</span> <button class="lab-mode" id="lvShotRefresh" style="padding:2px 8px;font-size:11px">↻ refresh</button></span></div>
+        <p class="why" style="font-size:10.5px;margin:2px 0 6px">One screenshot of the <b>My Cars stats pane</b> (Win+Alt+PrtScn), press ↻, click a thumbnail to enlarge, then type these three. <b>Parts and sliders need nothing typed</b> — they decode exactly from your saved tune. Mass and front % unlock the spring-rate formula; displacement names the engine.</p>
         ${gallery}${form}`;
     };
     const shopCapture = (cid) => cid ? `<div class="block" style="border-color:var(--accent2)"><div id="lvShopCapture" data-cid="${esc(cid)}">${shopCaptureInner(cid)}</div></div>` : "";
@@ -3548,10 +3568,13 @@
       const cs = c.clone_sheet; if (!cs) return "";
       const gateLbl = Object.fromEntries((c.decode ? c.decode.tests : []).map((t) => [t.key, t.label]));
       const oc = cs.confidence != null ? confCol(cs.confidence) : "var(--muted)"; const weak = cs.weak || [];
+      // the cs.components ELSE branch used to carry the "capture all six upgrade menus from the donor's own shop"
+      // banner. Dropped: the 598-byte save names every one of those parts exactly (513/513 saves, 0 unresolved), so
+      // the screenshots bought nothing and the ask told the user to break the standing per-car capture rule.
       return `<div class="card-row" style="margin-top:0"><h3 style="margin:0">📋 Clone sheet — ${esc(carName(c) || "#" + c.ordinal)}${cs.complete ? ` <span class="chip" style="border-color:#00d27a;color:#00d27a">capture complete — this is the deliverable</span>` : ""}</h3>${cs.confidence != null ? `<span class="chip" style="border-color:${oc};color:${oc};font-weight:700;font-size:13px">clone confidence ${Math.round(cs.confidence * 100)}%</span>` : ""}</div>
         <div class="lab-bar" style="height:8px;margin:6px 0"><i style="width:${(cs.confidence || 0) * 100}%;background:${oc}"></i></div>
         ${cs.components ? `<p class="why" style="font-size:11px;margin:2px 0 6px">📷 <b>Individual components from the donor car's own shop</b> (${esc((cs.build_record || {}).label || "build record")} · captured ${esc((cs.build_record || {}).captured || "")}) — each verified against the stream where it can be: ✅ verified · ✓ consistent · 📷 captured (stream can't see it) · ⚠ contradicted. ${Object.entries(cs.counts).map(([k, v]) => `${v} ${k}`).join(" · ")}.</p>`
-          : `<div style="margin:0 0 8px;padding:8px 10px;border:1px dashed var(--accent2);border-radius:8px;font-size:11px"><b>📷 Individual components need the donor car's own shop — the stream can't name parts (many stacks give the same outputs).</b> Capture once: <b>Upgrade shop</b> → each category with its INSTALLED tiles (Conversions · Engine · Platform & Handling · Drivetrain · Tires & Rims · Aero & Appearance) · the <b>My Cars stats pane</b> (PI · power · torque · weight · compound · suspension · front %) · the <b>tune menu tab row</b> (which tabs exist). Drop the screenshots in chat → transcribed into <code>data/builds/</code> → every part appears here, verified against the stream (gear count · boost · drivetrain · engine · exact PI · hp/tq).</div>`}
+          : ""}
         <p class="why" style="font-size:11px;margin:2px 0 6px">${cs.components ? "" : `✅ ${cs.counts.measured} measured · 🟡 ${cs.counts.inferred} inferred (assumptions) · 🔍 ${cs.counts.shop} shop checks · ⏳ ${cs.counts.pending} pending — `}each row's confidence comes from how many independent measurements back it and how consistent they are, never from one reading. ${esc(cs.pi_note)}</p>
         ${weak.length ? `<div style="margin:0 0 8px;padding:6px 10px;border:1px solid var(--warn,#e3b341);border-radius:8px;font-size:11px"><b style="color:var(--warn,#e3b341)">⚠ ${weak.length} measured row${weak.length === 1 ? "" : "s"} under 70 % — don't trust yet:</b> ${weak.map((w) => `<span class="chip" style="border-color:var(--warn,#e3b341);color:var(--warn,#e3b341)">${esc(w.item)} ${Math.round(w.confidence * 100)}%</span> <span class="why">↑ ${esc(w.needs || "")}</span>`).join(" · ")}</div>` : (cs.complete ? `<p class="why" style="font-size:11px;margin:0 0 8px;color:#00d27a">every measured row is backed by repeated, consistent measurements</p>` : "")}
         <div style="overflow-x:auto"><table style="font-size:11.5px"><thead><tr><th style="max-width:72px">shop menu</th><th>part</th><th>install / match</th><th>status</th><th style="min-width:110px">confidence · evidence</th><th style="min-width:110px">how / why</th></tr></thead><tbody>
@@ -4007,7 +4030,7 @@
       const crow = (r, isRefine) => { const cp = r.cal_points || 0; const pct = r.norm != null ? Math.round(r.norm * 1000) / 10 : Math.round((r.fill || 0) * 1000) / 10;
         const dots = isRefine ? "" : `<span class="cal-dots" title="${cp} of 2 reference points captured">${cp >= 1 ? "●" : "○"}${cp >= 2 ? "●" : "○"}</span>`;
         const pos = isRefine ? `<span class="cal-pos" title="band-derived estimate — enter the real in-game number to anchor it exact">est. ${esc(String(r.value))}${esc(r.unit || "")}</span>` : `<span class="cal-pos">${pct}% toward ${esc((r.poles || [])[0] || r.pole || "")}</span>`;
-        return `<div class="cal-row" id="cal-${ord}-${esc(r.field)}"><span class="cal-lbl">${esc(r.label || r.field)}</span>${pos}${dots}<input class="fhm-rin" data-rangeord="${ord}" data-rangefield="${esc(r.field)}" data-rangenorm="${r.fill}" data-rangeunit="${esc(r.unit || "")}" placeholder="in-game #" inputmode="decimal">${r.unit ? `<span class="cal-unit">${esc(r.unit)}</span>` : ""}<span class="fhm-rin-msg"></span></div>`; };
+        return `<div class="cal-row" id="cal-${ord}-${esc(r.field)}"><span class="cal-lbl">${esc(r.label || r.field)}</span>${pos}${dots}<input class="fhm-rin" data-rangeord="${ord}" data-rangefield="${esc(r.field)}" data-rangenorm="${r.fill}" data-rangeunit="${esc(r.unit || "")}" data-rangets="${esc(dl.ts || "")}" placeholder="in-game #" inputmode="decimal">${r.unit ? `<span class="cal-unit">${esc(r.unit)}</span>` : ""}<span class="fhm-rin-msg"></span></div>`; };
       const unHtml = un.length ? `${un.map((r) => crow(r, false)).join("")}` : "";
       const refHtml = refine.length ? `<div class="cal-sub">refine band-derived (est. shown — your in-game number arbitrates)</div>${refine.map((r) => crow(r, true)).join("")}` : "";
       return `<div class="cal-card"><div class="cal-hd"><b>🎯 One-time calibration</b> <span class="why" style="font-size:10.5px">type the number shown in-game — ONE entry makes that slider exact at its current position immediately; a second entry at a different setting locks the car's full range for good.</span></div>${unHtml}${refHtml}</div>`;
@@ -4420,7 +4443,10 @@
         const set = (t, c) => { if (msg) { msg.textContent = t; msg.style.color = c; } };
         set("saving…", "var(--muted)");
         fetch(liveUrl + "/tune-range", { method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ordinal: ord, field: inp.dataset.rangefield, norm: +inp.dataset.rangenorm, value: v, unit: inp.dataset.rangeunit }) })
+          // ts identifies WHICH SAVE this reading calibrates. Without it the daemon's evidence-based source
+          // selection cannot see the pin, so a calibration on any multi-save car whose newest save is older than
+          // 600 s is refused forever — 2866 has 6 saves and a newest 27,153 s old.
+          body: JSON.stringify({ ordinal: ord, field: inp.dataset.rangefield, norm: +inp.dataset.rangenorm, value: v, unit: inp.dataset.rangeunit, ts: (inp.dataset.rangets || undefined) }) })
           .then((r) => r.json()).then((d) => {
             if (!d || !d.ok) { inp.style.borderColor = "#e5414e"; set("✕ not saved" + (d && d.error ? " — " + d.error : ""), "#e5414e"); return; }
             if (d.solved) { inp.style.borderColor = "#00d27a"; set(`✓ locked ${d.solved[0]}–${d.solved[1]} ${inp.dataset.rangeunit || ""} — now exact`, "#00d27a"); }
@@ -5486,7 +5512,11 @@
       const turnsCard = tu ? `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
           <div class="card-row" style="margin-top:0"><strong style="font-size:12px">🔁 Turns — established across every session</strong><span class="chip" style="border-color:${tu.expected != null ? (tu.expected === tu.count ? "#00d27a" : "var(--warn,#e3b341)") : TC};color:${tu.expected != null ? (tu.expected === tu.count ? "#00d27a" : "var(--warn,#e3b341)") : TC};font-weight:700">${tu.count} turn${tu.count === 1 ? "" : "s"}${tu.expected != null ? (tu.expected === (tu.established ?? tu.count) ? " ✓ your count" : " · you count " + tu.expected) : ""}</span></div>
           <div class="why" style="font-size:10.5px;margin-top:2px">${tu.expected != null ? `<b>${tu.expected}</b> declared` : `<b>${tu.established ?? tu.count}</b> established`}${tu.established != null && tu.expected != null && tu.established !== tu.expected ? ` · ${tu.established} established across the track` : ""}${tu.mapped != null ? ` · ${tu.mapped} mapped from coordinates` : ""}${tu.detected_here != null ? ` · ${tu.detected_here} detected this session` : ""}${tu.near ? ` · ${tu.near} nearly established` : ""}</div>
-          <div class="card-row" style="margin-top:2px"><span class="why" style="font-size:10.5px">your count for this course:</span> <span style="display:inline-flex;gap:3px">${[6, 7, 8, 9, 10, 11, 12].map((n) => `<span class="chip" data-expected="${co.route_key}|${n}" style="cursor:pointer;padding:1px 6px;${tu.expected === n ? "border-color:var(--accent);color:var(--accent)" : ""}">${n}</span>`).join("")}${tu.expected != null ? `<span class="chip" data-expected="${co.route_key}|0" style="cursor:pointer;padding:1px 6px">clear</span>` : ""}</span></div>
+          <div class="card-row" style="margin-top:2px"><span class="why" style="font-size:10.5px">your count for this course:</span> <span style="display:inline-flex;gap:4px;align-items:center">
+            <input data-expected-n="${co.route_key}" type="number" min="1" max="30" step="1" value="${tu.expected != null ? tu.expected : ""}" placeholder="turns" style="width:62px;padding:2px 5px;border-radius:6px;border:1px solid ${tu.expected != null ? "var(--accent)" : "var(--line)"};background:var(--bg2);color:var(--txt);font-size:11px"><span class="chip" data-expected-set="${co.route_key}" style="cursor:pointer;padding:1px 8px">declare</span>${tu.expected != null ? `<span class="chip" data-expected="${co.route_key}|0" style="cursor:pointer;padding:1px 6px">clear</span>` : ""}</span></div>
+          <!-- a fixed 6..12 chip row made the documented geoCov escape untypeable: four of the six blocked courses
+               need 2 or 4 declared turns, both below the old floor. Any 1-30 count is declarable now. -->
+          <div class="why" style="font-size:10px;margin-top:2px">short loops count too — a 2-turn or 4-turn circuit is a legitimate declaration</div>
           <div class="lab-bar" style="height:6px;margin:5px 0"><i style="width:${tu.confidence * 100}%;background:${TC}"></i></div>
           <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-size:11px"><span class="why">detections per lap:</span>${(tu.per_lap_detections || []).map((n, i) => `<span class="chip" title="lap ${i + 1}: ${n} corner detections" style="${n === tu.count ? "border-color:#00d27a;color:#00d27a" : "border-color:var(--warn,#e3b341);color:var(--warn,#e3b341)"}">L${i + 1} · ${n}</span>`).join(`<span class="why">→</span>`)}${(tu.per_lap_detections || []).length ? `<span class="why">→ converges on <b>${tu.count}</b></span>` : ""}</div>
           ${tu.track_laps != null && tu.track_laps > tu.laps ? `<div style="margin-top:5px;font-size:11px"><span class="chip" style="border-color:${(tu.track_confidence || 0) >= 0.8 ? "#00d27a" : "#e3b341"};color:${(tu.track_confidence || 0) >= 0.8 ? "#00d27a" : "#e3b341"}">track: ${tu.track_laps} laps over ${tu.track_sessions} session${tu.track_sessions === 1 ? "" : "s"} · turn count ${Math.round((tu.track_confidence || 0) * 100)}%</span> <span class="why">this session adds ${tu.laps} lap${tu.laps === 1 ? "" : "s"}; the turn column on the right counts every pass ever recorded here</span></div>` : ""}
@@ -5646,6 +5676,17 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           const cb = lv.querySelector("#lvClearLoop"); if (cb) cb.addEventListener("click", () => { fetch(liveUrl + "/clear-loop", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(() => { live.loop = null; lv.dataset.k = ""; paintStatus(); }).catch(() => {}); });
         }
       }
+      // The run tag asks "what did you change" — the disk diff already knows: it names every slider that moved
+      // between your last two saves. Offer it as the tag's opening text (the user still presses 🏷 to commit).
+      // Same 45 s TTL + ordinal check as diskDiffBanner, so a stale diff can never resurface as a suggestion.
+      const tagSuggest = () => { try {
+        const dd = live.diskDiff; if (!dd || !dd.diff || performance.now() - dd.t > 45000) return "";
+        const ord = live.frame && live.frame.cid ? +String(live.frame.cid).split("|")[0] : null;
+        if (ord != null && dd.ordinal !== ord) return "";
+        const sl = (dd.diff.sliders || []).map((c) => `${String(c.field).replace(/_/g, " ")} ${c.pos ? c.from_pct + "%→" + c.to_pct + "%" : c.from + "→" + c.to}`);
+        if (!sl.length) return "";
+        return sl.slice(0, 3).join(", ") + (sl.length > 3 ? ` +${sl.length - 3} more` : "");
+      } catch (e) { return ""; } };
       const sv = host.querySelector("#lvStint");
       if (sv && live.connected) {
         const n = live.stint || (st && st.stint) || 0; const tg = (live.tags || {})[String(n)] || {}; const labTxt = typeof tg === "string" ? tg : (tg.label || ""); const role = (typeof tg === "object" && tg.role) || "";
@@ -5661,6 +5702,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
           const tb = sv.querySelector("#lvTagBtn"); if (tb) tb.addEventListener("click", () => { const v = sv.querySelector("#lvTag").value.trim(); fetch(liveUrl + "/tag", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: v, stint: n }) }).then(() => { live.tags = Object.assign({}, live.tags, { [String(n)]: Object.assign({}, live.tags[String(n)], { label: v }) }); paintStatus(); }).catch(() => {}); });
           const nr = sv.querySelector("#lvNewRun"); if (nr) nr.addEventListener("click", () => { fetch(liveUrl + "/new-run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(() => { nr.textContent = "➕ splits at next driving frame"; setTimeout(() => { nr.textContent = "➕ new run"; }, 2500); }).catch(() => {}); });
         }
+        // pre-fill runs OUTSIDE the repaint guard (a fresh save doesn't change the run number, so the guard would
+        // skip it) but only ONCE per diff and only into an empty box — never over a saved label or a half-typed tag.
+        try {
+          const ti2 = sv.querySelector("#lvTag");
+          if (ti2) { const sg = tagSuggest(); const dk = sg ? String(live.diskDiff.t) : "";
+            if (sg && ti2.dataset.pf !== dk && !ti2.value) { ti2.value = sg; ti2.dataset.pf = dk; ti2.title = "pre-filled from the disk diff — the sliders that moved since your last save. Edit it, then press 🏷 tag to keep it."; } }
+        } catch (e) {}
       }
     }
     // the clone launcher lives in the stream bar (visible in EVERY workflow) so you can pop the last-decoded
@@ -6177,6 +6225,15 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       // next repaint refetches /laps for it (empty value ⇒ the class param is simply omitted).
       r.querySelectorAll("[data-lapscls]").forEach((b) => b.addEventListener("click", () => { const p2 = String(b.dataset.lapscls).split("|"); live.lapsCls[p2[0]] = p2.slice(1).join("|"); if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-expected]").forEach((b) => b.addEventListener("click", () => { const [rk, n] = b.dataset.expected.split("|"); fetch(liveUrl + "/course-expected", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, n: +n }) }).then(() => { b.textContent = "saved ✓"; }).catch(() => {}); }));
+      // free turn-count declaration (1-30). n=0 is the existing "clear" post, so an empty box is simply ignored here.
+      r.querySelectorAll("[data-expected-set]").forEach((b) => b.addEventListener("click", () => {
+        try {
+          const rk = b.dataset.expectedSet; const inp = (b.parentElement || r).querySelector(`[data-expected-n="${rk}"]`);
+          const n = Math.round(+((inp && inp.value) || "")); if (!n || !isFinite(n) || n < 1 || n > 30) { b.textContent = "1–30"; setTimeout(() => { b.textContent = "declare"; }, 1800); return; }
+          fetch(liveUrl + "/course-expected", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, n }) }).then(() => { b.textContent = "saved ✓"; }).catch(() => {});
+        } catch (e) {}
+      }));
+      r.querySelectorAll("[data-expected-n]").forEach((inp) => inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { const b = (inp.parentElement || r).querySelector(`[data-expected-set="${inp.dataset.expectedN}"]`); if (b) b.click(); } }));
       r.querySelectorAll("[data-lib-pick]").forEach((b) => b.addEventListener("click", () => { const [sid, key] = b.dataset.libPick.split("|"); libPick = { sid, key }; donor = key; render(); }));
       r.querySelectorAll("[data-lib-clear]").forEach((b) => b.addEventListener("click", () => { libPick = null; donor = null; render(); }));
       r.querySelectorAll("[data-unpin]").forEach((b) => b.addEventListener("click", () => {

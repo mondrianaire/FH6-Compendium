@@ -26,7 +26,20 @@
         "source": "footage-verified endpoints (tuning-variables.json)"
       }
     },
-    "2866": {}
+    "2866": {
+      "front_spring": {
+        "min": 148.862,
+        "max": 973.022,
+        "unit": "lb/in",
+        "source": "back-solved from 2 points"
+      },
+      "rear_spring": {
+        "min": 153.785,
+        "max": 1083.805,
+        "unit": "lb/in",
+        "source": "back-solved from 2 points"
+      }
+    }
   },
   "points": {
     "4160|front_spring": [
@@ -73,6 +86,10 @@
       [
         0.0,
         4.1
+      ],
+      [
+        0.0511,
+        4.1
       ]
     ],
     "2866|rear_ride_height": [
@@ -107,12 +124,20 @@
       [
         0.312,
         406.0
+      ],
+      [
+        0.0322,
+        175.4
       ]
     ],
     "2866|rear_spring": [
       [
         0.3013,
         434.0
+      ],
+      [
+        0.0055,
+        158.9
       ]
     ]
   }

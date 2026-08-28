@@ -1,6 +1,6 @@
 {
  "schema_version": "1.0.0",
- "generated": "2026-08-28 18:13:52",
+ "generated": "2026-08-28 18:46:05",
  "method": "single-part isolation from decoded-config<->CarPI observations (median per edge, anchored to stock); pure-Python least-squares regression fallback (tagged 'regression') for the rest",
  "parts_pi": {},
  "coverage": {
@@ -8,9 +8,9 @@
   "part_tiers_seen": 0,
   "part_tiers_resolved": 0,
   "by_confidence": {},
-  "regression": "underdetermined (30 obs, 189 params)",
-  "observations": 30,
-  "ordinals": 18,
+  "regression": "underdetermined (31 obs, 190 params)",
+  "observations": 31,
+  "ordinals": 19,
   "single_part_pairs": 0
  }
 }

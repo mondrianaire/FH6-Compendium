@@ -427,10 +427,78 @@ def decode_battery_for(cid_, cars, corners, launches, braking, crests, pulses, t
     ready = sum(1 for t in tests if t["ok"])
     return {"ready_n": ready, "total": len(tests), "pct": round(ready / len(tests), 2), "missing": [t["label"] for t in tests if not t["ok"]], "tests": tests}
 
-def clone_sheet_for(c, bat):
+# Confidence per decode `conf` grade (fh6_tune_decode._part_view). The BYTE is always exact; what varies is how
+# well we can NAME what that byte means. named = the shop's own part name · dim/cosmetic = exact index, the shop's
+# label for that level is not mapped · category = upgraded but the tier is ambiguous · compound = the tyre index is
+# a global enum whose name is still best-effort (416/513 saves read "(unverified)"). Never assert a name we don't have.
+DEC_CONF = {"named": 1.0, "dim": 0.9, "cosmetic": 0.9, "category": 0.8, "compound": 0.65}
+
+
+def saved_build_for(cid_, sid_, gears_seen, boost_max, wot_frames):
+    """The on-disk tune save that was EQUIPPED for this capture, as {slot: decoded row}. None when it cannot be proven.
+
+    The 598-byte save carries every part slot byte-exact, which retires eleven clone-sheet rows that used to say
+    "🔍 shop check" or assert an unmeasured "🟡 inferred" race part. But only if the RIGHT save is used: ordinal 2866
+    alone holds six saves whose parts genuinely differ (Race vs Sport differential, three rim styles, two tyre
+    widths), so a naive `metas[0]` would stamp ANOTHER build's parts into the deliverable at confidence 1.0 —
+    strictly worse than an honest "needs a shop check".
+
+    Same discipline as _tune_hash_for: TIMESTAMP PROPOSES, TELEMETRY DISPOSES.
+      propose — the newest save for this ordinal written before the capture started (a save written after the
+                drive cannot have been on the car during it)
+      dispose — its gearbox must hold at least the gears the car actually used, and its aspiration must not
+                contradict the measured boost
+    Any doubt returns None and the caller keeps the old shop / inferred row. READ-ONLY: never writes to the save."""
+    try:
+        ordn = int(str(cid_).split("|")[0])
+    except Exception:
+        return None
+    try:
+        t_start = time.mktime(time.strptime(str(sid_)[4:19], "%Y%m%d_%H%M%S"))   # session ids are fh6_YYYYMMDD_HHMMSS
+    except Exception:
+        return None                      # no capture clock means no sound attribution — say nothing
+    try:
+        metas, _ = TUNE.tunes_for_ordinal(ordn)
+    except Exception:
+        return None
+    best = None
+    for m_ in sorted(metas or [], key=lambda q: str(q.get("ts") or ""), reverse=True):
+        try:
+            ep_ = time.mktime(time.strptime(str(m_.get("ts"))[:14], "%Y%m%d%H%M%S"))
+        except Exception:
+            continue
+        if ep_ > t_start:
+            continue                     # saved after the capture began: cannot have been equipped for it
+        best = m_; break
+    if best is None:
+        return None
+    try:
+        tn = TUNE.parse_tune(best["path"], ordinal_hint=ordn)
+    except Exception:
+        return None
+    if gears_seen and tn.get("gear_count") and int(tn["gear_count"]) < gears_seen:
+        return None                      # the car used a gear this save's box does not have — not what was fitted
+    forced = any(tn["parts"].get(s) is not None for s in TUNE.ASPIRATION_TYPE)
+    if (boost_max or 0) > 0.5 and not forced:
+        return None                      # the stream measured boost and this save is naturally aspirated
+    if forced and (boost_max or 0) <= 0.5 and (wot_frames or 0) >= 300:
+        return None                      # plenty of full throttle and never a psi: not this save's charger
+    try:
+        dl = TUNE.tune_to_deliverable(tn)
+    except Exception:
+        return None
+    by_slot = {r["item"]: r for m_ in dl.get("menus", []) for r in m_.get("rows", []) if r.get("value")}
+    if not by_slot:
+        return None
+    ts_ = str(best.get("ts") or "")
+    return {"parts": by_slot, "ts": ts_, "ordinal": ordn, "locked": bool(tn.get("locked")), "gear_count": tn.get("gear_count"),
+            "when": (f"{ts_[0:4]}-{ts_[4:6]}-{ts_[6:8]} {ts_[8:10]}:{ts_[10:12]}" if len(ts_) >= 12 else ts_)}
+
+
+def clone_sheet_for(c, bat, sid=None, ord_rebuilt=False):
     """The decode deliverable: a standardized upgrade sheet organized like the in-game upgrade shop menus. Each row carries what to install /
-    match, a status (measured = stream fact · inferred = assumption · shop = needs a shop / HUD check) AND a confidence EARNED from evidence:
-    how many independent measurements back the figure and how consistent they are — never a single reading."""
+    match, a status (measured = stream fact OR byte-exact save decode · inferred = assumption · shop = needs a shop / HUD check) AND a
+    confidence EARNED from evidence: how many independent measurements back the figure and how consistent they are — never a single reading."""
     ok = {t["key"]: t["ok"] for t in bat["tests"]}; gpct = {t["key"]: min(1.0, t["have"] / max(1, t["need"])) for t in bat["tests"]}
     sig = c.get("sig") or {}; ev = c.get("evidence") or {}
     def cons(iqr, scale): return 1.0 if iqr is None else max(0.0, 1.0 - min(1.0, iqr / scale))
@@ -471,11 +539,43 @@ def clone_sheet_for(c, bat):
     eng_needs = None if eng_conf >= 0.7 else (f"{max(0, 3 - ptp)} more full-throttle pull{'s' if 3 - ptp != 1 else ''} that sweep through {sig.get('rpm_at_peak') or 'the peak'} rpm" if ptp < 3 else "peaks disagree across pulls — repeat clean pulls on flat road" if (pk_iqr or 0) > 5 else "finish the rpm sweep")
     mn = ev.get("mass_n", 0); m_iqr = ev.get("mass_iqr_pct"); mass_conf = strength(mn, 30) * cons(m_iqr, 25)
     mass_ev = f"{mn} clean-acceleration samples · spread ±{m_iqr if m_iqr is not None else '—'}%"; mass_needs = None if mass_conf >= 0.7 else "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+    # ---- PARTS OFF THE SAVE. Eleven rows below used to be un-earnable: seven "🔍 shop check" rows carry confidence
+    # None by construction (see row(), above), so no amount of driving could ever satisfy them, and four "🟡 inferred"
+    # rows ASSERTED race brakes / springs / ARBs / differential at 0.55 — on this very build the save reads Stock,
+    # Stock, Stock, Race Differential, so three of the four assumptions were simply false. Every one of those slots is
+    # byte-exact in the 598-byte save. Attribution is the whole risk (saved_build_for), so a failure there silently
+    # keeps the old honest row rather than printing another build's parts as fact.
+    # ord_rebuilt: this capture holds MORE THAN ONE configuration of the same car, so parts were changed mid-drive
+    # (one AZ-1 capture ran configs at PI 342/600/700/800/899). The single pre-capture save can be right for at most
+    # one of them and nothing here can say which, so none of them get it.
+    dec = None
+    try:
+        dec = saved_build_for(c["id"], sid, len(lad), boost, wot) if (sid and not ord_rebuilt) else None
+    except Exception:
+        dec = None       # the deliverable must never fail because a save could not be read
+    dec_ev = (f"tune save {dec['when']}" + (" (downloaded / locked)" if dec["locked"] else "") +
+              f" · byte-exact · its {dec['gear_count']}-speed box matches the ladder measured at WOT") if dec else None
+    def _pv_text(v):
+        """One decoded slot's display text, minus the category name a dimension slot repeats ("Rear Tire Width · level 4" -> "level 4")."""
+        s = str(v.get("value") or ""); cat = str(v.get("category") or "")
+        return s[len(cat) + 3:] if (cat and s.startswith(cat + " · ")) else s
+    def drow(item, slots, note=None):
+        """A clone-sheet row read straight off the attributed save, or None when it cannot supply one (caller falls back)."""
+        vs = [v for v in ((dec["parts"].get(s) if dec else None) for s in slots) if v]
+        if not vs: return None
+        confs = [v.get("conf") for v in vs]
+        cv = min(DEC_CONF.get(x, 0.8) for x in confs)   # a combined row is only as good as its weakest slot
+        val = " · ".join((_pv_text(v) if len(vs) == 1 else f"{v['category']}: {_pv_text(v)}") for v in vs)
+        # the tyre INDEX is exact; its NAME is a global enum. One in-game set + save on any car names it for every car.
+        nds = "name this tyre index once in-game on any car and save — scripts/telemetry/anchor_compound.py maps it for all cars" if "compound" in confs else None
+        return {"item": item, "value": val, "status": "measured", "note": note, "gate": None, "pending": False,
+                "confidence": round(cv, 2), "evidence": dec_ev + f" · {len(vs)} part slot{'s' if len(vs) != 1 else ''}", "needs": nds}
     menus = [
         {"menu": "Conversions", "items": [
             row("Engine", f"{c['cyl']}-cyl · redline {c['max_rpm']} rpm · idle {c['idle_rpm']}", "measured", "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which", None, const_conf, const_ev),
             row("Drivetrain", c["drivetrain"], "measured", "install the drivetrain swap only if the stock layout differs", None, const_conf, const_ev),
             row("Aspiration", asp_v, "measured", asp_n, "dyno" if boost <= 0.5 else None, asp_conf, asp_ev, asp_needs),
+            drow("Body kit", ["car_body"], "invisible to telemetry — the save's body slot names it outright") or
             row("Body kit", None, "shop", "not visible in telemetry — check visually"),
         ]},
         {"menu": "Engine", "items": [
@@ -483,24 +583,35 @@ def clone_sheet_for(c, bat):
                 f"any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI {c['pi']}", "dyno", eng_conf, eng_ev, eng_needs),
         ]},
         {"menu": "Platform & Handling", "items": [
+            drow("Brakes", ["brakes"], "gates the brake tabs a tuned donor uses — this is the tier actually fitted, not the one we used to assume") or
             row("Brakes", "race brakes", "inferred", "assumed — required for the brake tabs a tuned donor uses; confirm in the shop"),
+            drow("Springs & dampers", ["springs_dampers"], "gates the spring/damper tabs; the behaviour match still happens on the Bench") or
             row("Springs & dampers", "race springs", "inferred", "assumed — required for spring/damper tabs; behaviour match happens on the Bench"),
+            drow("Anti-roll bars", ["front_arb", "rear_arb"], "gates the ARB tab — both bars are separate slots in the save") or
             row("Anti-roll bars", "race ARBs", "inferred", "assumed — required for the ARB tab"),
             row("Weight (mass index)", (f"~{sig.get('mass_idx')} (relative index)" if sig.get("mass_idx") else None), "inferred", "brackets the weight-reduction tier once compared against stock", "launch", mass_conf, mass_ev, mass_needs),
         ]},
         {"menu": "Drivetrain", "items": [
             row("Transmission", (f"{sig.get('gear_count')}-speed → race {sig.get('gear_count')}-speed" if sig.get("gear_count") else None), "measured", None, "gears", trans_conf, trans_ev, trans_needs),
             row("Gear ratios (tune)", lad_v, "measured", "tune-side: set final drive + per-gear until the WOT ladder matches these exactly", "gears", ratio_conf, ratio_ev, ratio_needs),
+            drow("Differential", ["differential"], "gates the accel/decel lock tabs — the diff TYPE, not an assumed race unit") or
             row("Differential", "race differential", "inferred", "assumed — required for accel/decel lock tabs"),
+            drow("Clutch / driveline", ["clutch", "driveline"], "no telemetry signature at all — both slots come straight off the save") or
             row("Clutch / driveline", None, "shop", "no telemetry signature — PI budget usually decides these"),
         ]},
         {"menu": "Tires & Rims", "items": [
+            drow("Compound", ["tire_compound"], "the compound INDEX is byte-exact; its NAME is a global enum that has to be anchored once in-game") or
             row("Compound", None, "shop", "My Cars pane shows it — one screenshot, or the 20-s HUD clip"),
+            drow("Front / rear width", ["front_tire_width", "rear_tire_width"], "per-axle width level — the Centenario lesson, without the screenshot") or
             row("Front / rear width", None, "shop", "shop INSTALLED tiles only — the Centenario lesson"),
+            drow("Rims / track width", ["front_rim_size", "rear_rim_size", "rim_style", "rear_rim_style", "front_track_width", "rear_track_width"],
+                 "rim style is cosmetic; track width moves the actual geometry") or
             row("Rims / track width", None, "shop", "rim style cosmetic; track width from shop tiles"),
         ]},
         {"menu": "Aero & Appearance", "items": [
+            drow("Front aero", ["front_bumper"], "fast-sweeper balance only ever hinted at presence — the save names the part") or
             row("Front aero", None, "shop", "fast-sweeper balance hints presence, never the exact part — check shop/visual"),
+            drow("Rear wing", ["rear_wing"], "speed-binned lat-g only ever hinted at presence — the save names the part") or
             row("Rear wing", None, "shop", "same — speed-binned lat-g hints presence only"),
         ]},
     ]
@@ -555,6 +666,8 @@ def clone_sheet_for(c, bat):
                 if it["status"] in ("measured", "contradicted") and it["confidence"] < 0.7: weak.append({"item": it["item"], "confidence": it["confidence"], "needs": it["needs"] or (f"pending — needs the {it['gate']} test" if it["pending"] else None)})
     overall = round(num / den, 2) if den else 0.0
     return {"menus": menus, "counts": counts, "pi": c["pi"], "confidence": overall, "weak": weak, "complete": all(t["ok"] for t in bat["tests"]), "components": bool(comp),
+            # which save the parts rows were read from — null means attribution failed and those rows are still shop/inferred
+            "save_attribution": ({"ts": dec["ts"], "when": dec["when"], "ordinal": dec["ordinal"], "locked": dec["locked"], "gear_count": dec["gear_count"]} if dec else None),
             "build_record": ({"label": rec.get("label"), "captured": rec.get("captured"), "source": rec.get("source"), "tune_share_code": rec.get("tune_share_code"), "file": rec.get("_file")} if rec else None),
             "pi_note": f"cross-check: every proposed parts list must sum to PI {c['pi']} — a mismatch means a missed part (usually widths or aero)"}
 
@@ -1173,12 +1286,16 @@ def main():
     sess["crests"] = crests[:100]
     warm_frac = {k: warm_n[k] / max(1, c["live_frames"]) for k, c in cars.items()}
     temps_med = {k: {w: statistics.median(v[w]) for w in W} for k, v in temps_acc.items() if v["FL"]}
+    # ordinals that appear under MORE THAN ONE configuration in this capture: parts changed mid-drive, so the one
+    # pre-capture tune save cannot be attributed to any single config (see clone_sheet_for)
+    _ord_seen = defaultdict(int)
+    for _c in sess["cars"]: _ord_seen[str(_c["id"]).split("|")[0]] += 1
     for c in sess["cars"]:
         c["coverage"] = coverage_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull, warm_frac)
         c["advice"] = advice_for(c["id"], cars, corners, launches, braking, bott, c["coverage"], temps_med)
         c["general"] = general_tuning_for(c["id"], corners, c["advice"])   # all-around lane: breadth over every context (mutates advice to add breadth)
         c["decode"] = decode_battery_for(c["id"], cars, corners, launches, braking, crests, pulses, top_pull)
-        c["clone_sheet"] = clone_sheet_for(c, c["decode"])
+        c["clone_sheet"] = clone_sheet_for(c, c["decode"], sid, _ord_seen[str(c["id"]).split("|")[0]] > 1)   # sid carries the capture clock the save attribution is bound to
         c["temps_med_f"] = {w: round(v) for w, v in temps_med.get(c["id"], {}).items()}
     # ---- course mode: per route family, scope coverage + advice to the event windows, attach per-run lap times ----
     COURSE_PROBES = [("hairpin", "Hairpins", 3), ("medium", "Medium corners", 3), ("fast", "Fast sweepers", 3), ("flick", "Chicane flicks", 2), ("launch", "Standing starts", 2), ("brake", "Hard stops from 80+", 3), ("crest", "Crests", 2)]

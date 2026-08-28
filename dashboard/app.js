@@ -4827,8 +4827,10 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const s = dockDataState();
       if (!s || s.loading) { if (el.innerHTML) el.innerHTML = ""; return; }
       const n = s.none ? 1 : (s.asks || []).length + (s.courseNeeds || []).length;
-      const lvl = s.none || n ? (s.conflict ? "bad" : "warn") : "ok";
-      el.innerHTML = `<button class="ddata-pill ${lvl}" title="${n ? "live techniques still needed for correct analysis — click for the list" : "all measurable data captured for this car"}"><span class="dot"></span>📡 ${n ? `${n} drive${n > 1 ? "s" : ""} needed` : "data complete"}</button>`;
+      // an OPEN CONFLICT outranks "complete": zero asks with disagreeing data is red, not green (found by verify_workflow attr D1)
+      const lvl = s.conflict ? "bad" : (s.none || n ? "warn" : "ok");
+      const label = s.conflict && !n ? `⚠ ${s.conflict} conflict${s.conflict > 1 ? "s" : ""} open` : n ? `${n} drive${n > 1 ? "s" : ""} needed` : "data complete";
+      el.innerHTML = `<button class="ddata-pill ${lvl}" title="${s.conflict ? "save × telemetry disagree — open the panel / 🔗 drawer" : n ? "live techniques still needed for correct analysis — click for the list" : "all measurable data captured for this car"}"><span class="dot"></span>📡 ${label}</button>`;
       const b = el.querySelector(".ddata-pill"); if (b) b.addEventListener("click", () => { live.dock.panel = live.dock.panel === "data" ? null : "data"; if (live.dock.min) live.dock.min = false; saveDock(); paintDock(true); });
     };
     const dockPanelSig = (panel) => { const cid = dockActiveCid();

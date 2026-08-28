@@ -1601,6 +1601,32 @@ def main():
                 pcs_ = resample(lap_pts(w, grip=True)); pts_all = [p for pc in pcs_ for p in pc]
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
+        def _game_lap_s(w_):
+            """The lap's time on the GAME clock, which stops when you pause. None when it cannot be trusted.
+
+            `t1 - t0` is WALL time. Pause rows are dropped by the IsRaceOn filter, so two surviving rows straddle
+            the pause and the span swallows it whole -- which is why "pause after the finish line voids the next
+            lap". Measured on one 9-lap capture: 2015 s of wall time, 290 s of game time, 1724 s (86%) frozen,
+            and the frozen time is IsRaceOn=0 in 179,642 rows out of 179,642. So CurrentRaceTime is pause-immune
+            by construction, and its span matched the game's own LastLap to 0.001-0.002 s on every lap checked.
+            The store held a 79.40 s median on a ~30 s circuit, with implied average speeds down to 1.0 mph.
+
+            LastLap is preferred (it IS the official time) but is NOT unconditionally reliable -- it has been seen
+            latching 43840.992 s and 231307.938 s -- so it is only accepted when it agrees with the race-clock
+            span. Returning None rather than a wrong number matters: lap_s gates the 107% competitive rule, and a
+            bogus fast lap silently mis-rates every other lap on the course. A lap with no trustworthy time still
+            keeps its trace: cornering and grip data never needed a lap time.
+            """
+            rs_ = [r for r in loop_rows if w_["t0"] <= r["t"] <= w_["t1"] and r.get("CurrentRaceTime") is not None]
+            if len(rs_) < 20:
+                return None
+            span = rs_[-1]["CurrentRaceTime"] - rs_[0]["CurrentRaceTime"]
+            if not (3.0 <= span <= 1800.0):
+                return None
+            ll = rs_[-1].get("LastLap") or 0.0
+            if 3.0 <= ll <= 1800.0 and abs(ll - span) <= max(0.5, 0.05 * span):
+                return round(ll, 3)          # the game's own official time, corroborated by its race clock
+            return round(span, 3)
         def _impacts(pts_):   # grip 4 = the JOLT alphabet (|lat_g| > 3 or SmashableVelDiff > 0). Display only. Count BEFORE thinning.
             return sum(1 for p in pts_ if len(p) > 4 and p[4] == 4)
         def _contacts(w_):
@@ -1637,8 +1663,9 @@ def main():
                 # show the impacts, keep the time. Solo unknown => not voided (absence of evidence isn't evidence).
                 _solo = 1 if _ev.get("solo") else 0
                 _imp = _impacts(pts_w)
+                _lap_s = _game_lap_s(w)
                 _lap_rows.append({"route_key": key, "session": sid, "cid": cid_, "t0": round(w["t0"], 1),
-                                  "lap_s": round(w["t1"] - w["t0"], 2), "arc_m": round(arc_w),
+                                  "lap_s": _lap_s, "arc_m": round(arc_w),
                                   "build_id": _cr.get("build_id"), "class": _cr.get("class"), "pi": _cr.get("pi"),
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,
                                   "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,

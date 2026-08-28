@@ -3017,6 +3017,7 @@
     const pushCornerScore = (c) => {
       const sc = scoreCorner(c); if (!sc) return;
       if (sc.key) { live.cornerBest = live.cornerBest || {}; const b = live.cornerBest[sc.key]; if (!b || sc.avg > b.avg) live.cornerBest[sc.key] = { avg: sc.avg, at: Date.now() }; }   // update the personal best AFTER scoring vs the prior best
+      sc.at = Date.now();   // wall-clock stamp — the map's grade ring pulses while the score is fresh
       (live.cornerScores = live.cornerScores || []).push(sc); if (live.cornerScores.length > 60) live.cornerScores.shift();
     };
     const cornerScoreCard = () => {
@@ -3034,6 +3035,27 @@
           <div class="cscore-detail"><div class="cscore-line">${gripLbl} · ${speedLbl}</div><div class="cscore-issues">${issues}</div></div></div></div>`;
     };
     const paintCornerScore = () => { const el = document.getElementById("lvCornerScore"); if (el) el.innerHTML = cornerScoreCard(); };
+    // LIVE MAP: the car's position, moved every frame on any rendered live course map (no re-render — the SVG
+    // carries its own transform constants), and the just-scored turn ringed in its Last-corner grade color so the
+    // map and the scorecard narrate the same moment.
+    const updCarDot = (f) => { try {
+      host.querySelectorAll("svg[data-live-map]").forEach((sv) => {
+        const g = sv.querySelector(".lv-car"); if (!g) return;
+        if (!f || !f.on || f.px == null) { g.style.display = "none"; return; }
+        const ds = sv.dataset; const cx = +ds.ox + (f.px - +ds.x0) * +ds.sc, cy = +ds.oy - (f.pz - +ds.z0) * +ds.sc;
+        if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) { g.style.display = "none"; return; }   // off the mapped area — hide rather than pin to an edge
+        g.style.display = ""; g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
+      });
+    } catch (e) {} };
+    const flashTurnOnMap = (sc) => { try {
+      if (!sc || !sc.key || String(sc.key).indexOf("ct") !== 0) return; const n = +String(sc.key).slice(2); const col = GRADE_COL[sc.grade];
+      host.querySelectorAll(`svg[data-live-map] [data-tn="${n}"]`).forEach((mk) => {
+        const anchor = mk.querySelector("circle[cx]"); if (!anchor) return;
+        let ring = mk.querySelector(".tn-grade");
+        if (!ring) { ring = document.createElementNS("http://www.w3.org/2000/svg", "circle"); ring.setAttribute("class", "tn-grade"); ring.setAttribute("cx", anchor.getAttribute("cx")); ring.setAttribute("cy", anchor.getAttribute("cy")); ring.setAttribute("r", "8.5"); ring.setAttribute("fill", "none"); ring.setAttribute("stroke-width", "2.2"); mk.insertBefore(ring, mk.firstChild); }
+        ring.setAttribute("stroke", col); ring.classList.remove("fresh"); void ring.getBoundingClientRect(); ring.classList.add("fresh");   // restart the pulse
+      });
+    } catch (e) {} };
     // ---- BUILD-CONFIRM GATE: tuning advice is only as good as the build identification behind its "current values", so
     // course tuning stays locked until the DECODE confidently identifies the build you're driving. The system decides
     // when it's confident (clean live match + a solid decode) and prompts YOU to confirm — you don't have to judge it. ----
@@ -3553,6 +3575,10 @@
       .course-mini-glyph{flex:none;display:flex;align-items:center}
       .course-mini b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .start-pt{white-space:nowrap}.start-pt i{color:#00d27a;font-style:normal}
+      .lv-car{transition:transform .18s linear}
+      .tn-grade{opacity:.85}
+      .tn-grade.fresh{animation:tnpulse 1.1s ease-out 3}
+      @keyframes tnpulse{0%{stroke-opacity:1;stroke-width:4}60%{stroke-opacity:.35;stroke-width:2.2}100%{stroke-opacity:.85;stroke-width:2.2}}
       .tl-blvy-chip:hover{border-color:#a371f7}
       .tl-blvy-none{font-size:11px;border:1px dashed var(--line);border-radius:6px;padding:1px 7px;color:var(--muted);cursor:pointer;flex:none}
       .tl-blvy-none:hover{border-color:#a371f7;color:#a371f7}
@@ -4551,12 +4577,18 @@
       const gTurns = (geo.turns || []).map((g) => g.apex); const nearAny = (pos, list, d) => list.some((q) => (q[0] - pos[0]) ** 2 + (q[1] - pos[1]) ** 2 <= d * d);
       const cornerPos = (corners || []).map((k) => k.pos).filter(Boolean);
       const markers = canon.map((t, i) => ({ n: i + 1, id: t.id, pos: t.pos, dir: t.dir, r: t.r, mapped: nearAny(t.pos, gTurns, 45), loaded: nearAny(t.pos, cornerPos, 45) }));
-      return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg" style="max-width:${W}px;background:var(--bg);border-radius:8px">
+      // LIVE INSTRUMENT: on the live source the map carries (a) the transform constants so paintFrame can move the
+      // car marker every frame without re-rendering, (b) a per-turn GRADE ring from the Last-corner scoring — the
+      // map and the scorecard speak about the same turn in the same color.
+      const OX = pad + ((W - 2 * pad) - (x1 - x0) * sc) / 2, OY = H - pad - ((H - 2 * pad) - (z1 - z0) * sc) / 2;
+      const gradeByTurn = {}; if (opts.live && typeof live !== "undefined") (live.cornerScores || []).forEach((s2) => { if (s2.key && String(s2.key).indexOf("ct") === 0) gradeByTurn[+String(s2.key).slice(2)] = s2; });
+      return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg"${opts.live ? ` data-live-map="1" data-x0="${x0}" data-z0="${z0}" data-sc="${sc}" data-ox="${OX.toFixed(2)}" data-oy="${OY.toFixed(2)}" data-w="${W}" data-h="${H}"` : ""} style="max-width:${W}px;background:var(--bg);border-radius:8px">
         ${layout.map((l) => `<polyline fill="none" stroke="var(--muted)" stroke-width="1" opacity=".32" points="${poly(l.pts)}"/>`).join("")}
         ${(geo.last_paths || (lp.length ? [lp] : [])).map((pc) => `<polyline fill="none" stroke="var(--warn,#e3b341)" stroke-width="2" stroke-dasharray="4 3" opacity=".9" points="${poly(pc)}"/>`).join("")}
         ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" points="${poly(pc)}"/>`).join("")}
         <circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="4" fill="#00d27a"/><text x="${(X(pts[0][0]) + 6).toFixed(1)}" y="${(Y(pts[0][1]) - 4).toFixed(1)}" fill="#00d27a" font-size="9">start</text>
-        ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; return `<g class="ct-marker${sel ? " sel" : ""}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
+        ${markers.map((g) => { const col = g.loaded ? "#e5414e" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; const gr = gradeByTurn[g.n]; const fresh = gr && gr.at && (Date.now() - gr.at < 8000); return `<g class="ct-marker${sel ? " sel" : ""}" data-tn="${g.n}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${gr ? `<circle class="tn-grade${fresh ? " fresh" : ""}" cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="8.5" fill="none" stroke="${GRADE_COL[gr.grade]}" stroke-width="2.2"><title>latest pass: grade ${gr.grade} · score ${gr.score}${gr.deltaBest != null ? ` · ${gr.deltaBest >= 0 ? "+" : ""}${gr.deltaBest} vs best` : ""}</title></circle>` : ""}${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.loaded ? "#e5414e" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
+        ${opts.live ? `<g class="lv-car" style="display:none"><circle r="9" fill="none" stroke="#00d27a" stroke-width="1.4" opacity=".45"/><circle r="4.6" fill="#00d27a" stroke="#0e1116" stroke-width="1.4"><title>you — live position</title></circle></g>` : ""}
       </svg>`;
     };
     // COURSE IDENTITY: the auto-computed SHAPE (from ground-truth position data) is a course's PRIMARY identifier —
@@ -4776,7 +4808,7 @@
       const rk = co && co.route_key; const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null; const brk = (co && selN) ? courseTurnBreakdown(co, selN) : "";
       return `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
           <div class="card-row" style="margin-top:0"><strong style="font-size:12px">🗺 Course map — ${shown} turn${shown === 1 ? "" : "s"}${mapped !== shown ? ` (${mapped} curvature-mapped)` : ""} · ${geo.length_m} m</strong><span class="chip">${geo.from_model ? "best map on record" : "ref lap " + ((geo.ref_lap || {}).lap || "—")}${geo.last_lap ? ` · latest lap ${geo.last_lap.lap} overlaid` : ""}</span></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns, { rk, selN })}<div style="font-size:10.5px;min-width:150px;max-width:320px">${rk ? `<div style="font-weight:600;color:var(--accent2);margin-bottom:3px">▶ click a turn for its breakdown</div>` : ""}<div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#e5414e">●</span> loaded this session · <span style="color:var(--accent)">○</span> on the map, not loaded · <span style="color:var(--warn,#e3b341)">○</span> counted from your laps, not curvature-mapped (fast/flat)</div>${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.map(turnLabel).join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns, { rk, selN, live: src === "live" })}<div style="font-size:10.5px;min-width:150px;max-width:320px">${rk ? `<div style="font-weight:600;color:var(--accent2);margin-bottom:3px">▶ click a turn for its breakdown</div>` : ""}<div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#e5414e">●</span> loaded this session · <span style="color:var(--accent)">○</span> on the map, not loaded · <span style="color:var(--warn,#e3b341)">○</span> counted from your laps, not curvature-mapped (fast/flat)</div>${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.map(turnLabel).join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
           ${brk}
         </div>`; };
     // a course card built purely from a TRACK RECORD (course model) — for a route selected in the atlas that this session / recording never visited
@@ -5291,7 +5323,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const onC = !!(f.ev || live.loop);
       if (onC && !live._prevOnCourse && f.car) { const c0 = live.diskCache && live.diskCache[f.car]; if (c0 && c0.available) maybeFocusCourse(c0.match, f.car); }
       live._prevOnCourse = onC;
-      updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintCourseLive(); paintActiveCar();
+      updateLiveDec(f); paintDecNext(); paintDiskDecode(); paintFloat(); paintCloneLauncher(); paintCourseLive(); paintActiveCar(); updCarDot(f);
       // course training is CAR-AWARE: when the equipped car changes, re-scope the car-specific parts (references, tuning, feedback) — repaint the course sections
       if (f.on && f.cid && f.cid !== live.courseCar) { const was = live.courseCar; live.courseCar = f.cid; if (was) { live._carJustChanged = performance.now(); if (effMode() !== "free") paintSections(true); } }
       for (const w of W4) {
@@ -5398,7 +5430,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
       es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
       es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
-      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); pushCornerScore(c); paintCornerScore(); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
+      es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); pushCornerScore(c); paintCornerScore(); flashTurnOnMap((live.cornerScores || []).slice(-1)[0]); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
       es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false;
         const sm = live.status.mode; const changed = sm && (!live.mode || sm.suggest !== live.mode.suggest || sm.reason !== live.mode.reason);   // status carries the current mode every second — authoritative after reconnects / daemon restarts
         if (changed) live.mode = sm;

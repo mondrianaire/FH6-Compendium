@@ -3182,6 +3182,60 @@
         ring.setAttribute("stroke", col); ring.classList.remove("fresh"); void ring.getBoundingClientRect(); ring.classList.add("fresh");   // restart the pulse
       });
     } catch (e) {} };
+    // ---- MAP ZOOM / PAN. The map is RE-PARAMETERIZED, never merely transformed: screen = k·base(x) + t, so the
+    // composed projection is again an ox/oy/sc triple — ox' = k·ox0 + tx, oy' = k·oy0 + ty, sc' = k·sc0. applyMapView
+    // writes the group transform and those three dataset attrs in ONE call, so markMapAt, updCarDot and
+    // paintLastOnMap — which read the dataset and attach their overlays to the svg ROOT, outside the moved group —
+    // stay pixel-exact with no edit of their own. Moving the DOM instead of rebuilding it is what keeps the turn-marker
+    // click listeners (bound by bindBody, one per marker) alive across a zoom.
+    // Glyphs must NOT grow with the zoom, so every fixed-size element rides `.mv-fix` and gets a 1/k counter-scale. ----
+    const MAP_ZMIN = 1, MAP_ZMAX = 14;
+    const mapViewOf = (key) => { live.mapView = live.mapView || {}; return live.mapView[key] || { k: 1, tx: 0, ty: 0 }; };
+    const clampPan = (v, W, H) => { v.tx = Math.max(W * (1 - v.k), Math.min(0, v.tx)); v.ty = Math.max(H * (1 - v.k), Math.min(0, v.ty)); return v; };   // the course can never be dragged off its own frame
+    const applyMapView = (sv) => { try {
+      const ds = sv.dataset; const v = mapViewOf(ds.mapkey); const k = v.k, tx = v.tx, ty = v.ty;
+      const g = sv.querySelector(".mv"); if (g) g.setAttribute("transform", `translate(${tx.toFixed(2)},${ty.toFixed(2)}) scale(${k.toFixed(4)})`);
+      const inv = k === 1 ? "" : ` scale(${(1 / k).toFixed(4)})`;
+      sv.querySelectorAll(".mv-fix").forEach((el) => el.setAttribute("transform", `translate(${el.dataset.fx},${el.dataset.fy})${inv}`));
+      ds.sc = +ds.sc0 * k; ds.ox = (+ds.ox0 * k + tx).toFixed(2); ds.oy = (+ds.oy0 * k + ty).toFixed(2);
+      const rs = sv.querySelector(".mv-reset"); if (rs) { const on = k > 1.001 || tx || ty; rs.style.display = on ? "" : "none"; const lb = rs.querySelector(".mv-zlbl"); if (lb) lb.textContent = k.toFixed(1) + "×"; }
+      sv.style.cursor = k > 1.001 ? "grab" : "";
+    } catch (e) {} };
+    const bindMapZoom = (root) => { try { (root || host).querySelectorAll("svg[data-zoomable]").forEach((sv) => {
+      if (sv._zbound) return; sv._zbound = true;
+      const ds = sv.dataset, W = +ds.w, H = +ds.h, key = ds.mapkey;
+      // pointer px → viewBox units: the map is displayed at anything from 460 to 620 CSS px, so its rendered size
+      // must never enter the maths (the same rect conversion bindTraceHover uses).
+      // a map in a hidden tab measures 0×0, and dividing by that poisons the view with NaN — which SVG reads as
+      // "no transform", i.e. the whole course silently jumping to the origin. Refuse the gesture instead.
+      const vpt = (ev) => { const r = sv.getBoundingClientRect(); if (!r.width || !r.height) return null; return [((ev.clientX - r.left) / r.width) * W, ((ev.clientY - r.top) / r.height) * H]; };
+      const put = (v) => { if (!isFinite(v.k) || !isFinite(v.tx) || !isFinite(v.ty)) return; live.mapView = live.mapView || {}; live.mapView[key] = clampPan(v, W, H); applyMapView(sv); };
+      sv.addEventListener("wheel", (ev) => {
+        const p = vpt(ev); if (!p) return;
+        ev.preventDefault();   // the map owns the wheel while the cursor is on it — otherwise the page scrolls away mid-zoom
+        const v = Object.assign({}, mapViewOf(key)), k0 = v.k;
+        v.k = Math.max(MAP_ZMIN, Math.min(MAP_ZMAX, k0 * (ev.deltaY < 0 ? 1.22 : 1 / 1.22)));
+        // zoom ABOUT THE CURSOR: the world point under the pointer keeps its screen position.
+        v.tx = p[0] - (p[0] - v.tx) * (v.k / k0); v.ty = p[1] - (p[1] - v.ty) * (v.k / k0);
+        put(v);
+      }, { passive: false });
+      sv.addEventListener("pointerdown", (ev) => {
+        if (ev.button !== 0 || mapViewOf(key).k <= 1.001) return;   // at 1× there is nothing to pan, so a click stays a click
+        const p0 = vpt(ev); if (!p0) return;
+        const st = { p: p0, tx: mapViewOf(key).tx, ty: mapViewOf(key).ty, moved: 0 }; sv.style.cursor = "grabbing";
+        // NO setPointerCapture: capturing retargets the follow-up click away from the turn marker under the cursor.
+        const mv = (e2) => { const p = vpt(e2); if (!p) return; st.moved = Math.max(st.moved, Math.abs(p[0] - st.p[0]) + Math.abs(p[1] - st.p[1]));
+          const v = Object.assign({}, mapViewOf(key)); v.tx = st.tx + (p[0] - st.p[0]); v.ty = st.ty + (p[1] - st.p[1]); put(v); };
+        const up = () => { window.removeEventListener("pointermove", mv); window.removeEventListener("pointerup", up); sv._drag = st.moved > 3; sv.style.cursor = "grab"; };
+        window.addEventListener("pointermove", mv); window.addEventListener("pointerup", up);
+      });
+      // a pan that ENDS on a turn dot must not open that turn — kill the click in the CAPTURE phase, before it
+      // reaches the per-marker listener bindBody attached.
+      sv.addEventListener("click", (ev) => { if (sv._drag) { sv._drag = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
+      const rb = sv.querySelector("[data-mapreset]"); if (rb) rb.addEventListener("click", (ev) => { ev.stopPropagation(); put({ k: 1, tx: 0, ty: 0 }); });
+      sv.addEventListener("dblclick", (ev) => { ev.preventDefault(); put({ k: 1, tx: 0, ty: 0 }); });
+      applyMapView(sv);
+    }); } catch (e) {} };
     // ---- BUILD-CONFIRM GATE: tuning advice is only as good as the build identification behind its "current values", so
     // course tuning stays locked until the DECODE confidently identifies the build you're driving. The system decides
     // when it's confident (clean live match + a solid decode) and prompts YOU to confirm — you don't have to judge it. ----
@@ -4889,6 +4943,14 @@
       // car marker every frame without re-rendering, (b) a per-turn GRADE ring from the Last-corner scoring — the
       // map and the scorecard speak about the same turn in the same color.
       const OX = pad + ((W - 2 * pad) - (x1 - x0) * sc) / 2, OY = H - pad - ((H - 2 * pad) - (z1 - z0) * sc) / 2;
+      // ZOOM/PAN: the view survives the wholesale repaint every analysis cycle does, so it lives on `live` beside
+      // live.selTurn — and the FIRST paint already carries it, so a repaint mid-zoom never snaps back to 1×.
+      // The drawn course rides `.mv`; the dataset publishes the COMPOSED projection (see applyMapView).
+      const _mvKey = opts.rk || `g${Math.round(x0)}_${Math.round(z0)}`;
+      const _mv = (typeof live !== "undefined" && live.mapView && live.mapView[_mvKey]) || { k: 1, tx: 0, ty: 0 };
+      const _inv = _mv.k === 1 ? "" : ` scale(${(1 / _mv.k).toFixed(4)})`;
+      const fixG = (x, z) => { const fx = X(x).toFixed(1), fy = Y(z).toFixed(1); return ` data-fx="${fx}" data-fy="${fy}" transform="translate(${fx},${fy})${_inv}"`; };   // a glyph that must keep its size at any zoom
+      const XE = (x) => _mv.k * X(x) + _mv.tx, YE = (z) => _mv.k * Y(z) + _mv.ty;   // root space — for the overlays that live OUTSIDE .mv
       // THE LINE YOU DROVE, painted by grip state: the lap trace carries [s, mph, grip, x, z], so the map shows
       // exactly WHERE the fronts washed (blue), the rears stepped out (red) or all four went (purple).
       const gripPath = (() => { try {
@@ -4896,7 +4958,7 @@
         const P = tr.pts; const segs = []; let run = [P[0]], st = P[0][2];
         for (let i = 1; i < P.length; i++) { if (P[i][2] !== st) { run.push(P[i]); segs.push([st, run]); run = [P[i]]; st = P[i][2]; } else run.push(P[i]); }
         segs.push([st, run]);
-        return segs.map(([s2, pp]) => `<polyline fill="none" stroke="${gripCol(s2)}" stroke-width="${s2 ? 4 : 2.6}" stroke-linecap="round" stroke-linejoin="round" opacity="${s2 ? 1 : 0.75}" points="${pp.map((q) => `${X(q[3]).toFixed(1)},${Y(q[4]).toFixed(1)}`).join(" ")}"><title>${esc(gripOf(s2).axle)}</title></polyline>`).join("");
+        return segs.map(([s2, pp]) => `<polyline fill="none" stroke="${gripCol(s2)}" stroke-width="${s2 ? 4 : 2.6}" stroke-linecap="round" stroke-linejoin="round" opacity="${s2 ? 1 : 0.75}" vector-effect="non-scaling-stroke" points="${pp.map((q) => `${X(q[3]).toFixed(1)},${Y(q[4]).toFixed(1)}`).join(" ")}"><title>${esc(gripOf(s2).axle)}</title></polyline>`).join("");
       } catch (e) { return ""; } })();
       // WHERE THE CONTACT HAPPENED. Same lap, same [s, mph, grip, x, z] points — a burst glyph at every impact.
       // Deliberately NOT a circle: amber is already worn by the latest-lap dash and by unmapped turn dots, so the
@@ -4905,19 +4967,24 @@
         const tr = opts.gripLap; if (!tr || !tr.pts) return "";
         const hits = impactMarks(tr.pts); if (!hits.length) return "";
         const vd = isVoid(tr);
-        return `<g class="imp-marks" pointer-events="none" fill="${gripCol("impact")}">${hits.map((p, i) => `<g transform="translate(${X(p[3]).toFixed(1)},${Y(p[4]).toFixed(1)})"><path d="M 0 -7.5 L 2 -2 L 7.5 0 L 2 2 L 0 7.5 L -2 2 L -7.5 0 L -2 -2 Z" stroke="var(--bg)" stroke-width="1.1"/><circle r="2.1" fill="var(--bg)"/><title>impact ${i + 1} of ${hits.length} — ${esc(gripOf("impact").word)}${vd ? " · " + esc(VOID_WHY) : ""}</title></g>`).join("")}</g>`;
+        return `<g class="imp-marks" pointer-events="none" fill="${gripCol("impact")}">${hits.map((p, i) => `<g class="mv-fix"${fixG(p[3], p[4])}><path d="M 0 -7.5 L 2 -2 L 7.5 0 L 2 2 L 0 7.5 L -2 2 L -7.5 0 L -2 -2 Z" stroke="var(--bg)" stroke-width="1.1"/><circle r="2.1" fill="var(--bg)"/><title>impact ${i + 1} of ${hits.length} — ${esc(gripOf("impact").word)}${vd ? " · " + esc(VOID_WHY) : ""}</title></g>`).join("")}</g>`;
       } catch (e) { return ""; } })();
       const gradeByTurn = {}; if (typeof live !== "undefined") (live.cornerScores || []).forEach((s2) => { if (s2.key && String(s2.key).indexOf("ct") === 0) gradeByTurn[+String(s2.key).slice(2)] = s2; });
-      return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg"${opts.live ? ` data-live-map="1" data-x0="${x0}" data-z0="${z0}" data-sc="${sc}" data-ox="${OX.toFixed(2)}" data-oy="${OY.toFixed(2)}" data-w="${W}" data-h="${H}"` : ""} style="max-width:${W}px;background:var(--bg);border-radius:8px">
-        ${layout.map((l) => `<polyline fill="none" stroke="var(--muted)" stroke-width="1" opacity=".32" points="${poly(l.pts)}"/>`).join("")}
-        ${(geo.last_paths || (lp.length ? [lp] : [])).map((pc) => `<polyline fill="none" stroke="var(--warn,#e3b341)" stroke-width="2" stroke-dasharray="4 3" opacity=".9" points="${poly(pc)}"/>`).join("")}
-        ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="${gripPath ? 1.6 : 3.2}" stroke-linecap="round" stroke-linejoin="round" opacity="${gripPath ? 0.35 : 1}" points="${poly(pc)}"/>`).join("")}
+      const _zoomed = _mv.k > 1.001 || _mv.tx || _mv.ty;
+      return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg" data-zoomable="1" data-mapkey="${esc(_mvKey)}" data-x0="${x0}" data-z0="${z0}" data-sc0="${sc}" data-ox0="${OX.toFixed(2)}" data-oy0="${OY.toFixed(2)}" data-sc="${sc * _mv.k}" data-ox="${(OX * _mv.k + _mv.tx).toFixed(2)}" data-oy="${(OY * _mv.k + _mv.ty).toFixed(2)}" data-w="${W}" data-h="${H}"${opts.live ? ` data-live-map="1"` : ""} style="max-width:${W}px;background:var(--bg);border-radius:8px;overflow:hidden;user-select:none;touch-action:pan-y">
+        <g class="mv" transform="translate(${_mv.tx.toFixed(2)},${_mv.ty.toFixed(2)}) scale(${_mv.k.toFixed(4)})">
+        ${layout.map((l) => `<polyline fill="none" stroke="var(--muted)" stroke-width="1" opacity=".32" vector-effect="non-scaling-stroke" points="${poly(l.pts)}"/>`).join("")}
+        ${(geo.last_paths || (lp.length ? [lp] : [])).map((pc) => `<polyline fill="none" stroke="var(--warn,#e3b341)" stroke-width="2" stroke-dasharray="4 3" opacity=".9" vector-effect="non-scaling-stroke" points="${poly(pc)}"/>`).join("")}
+        ${pieces.map((pc) => `<polyline fill="none" stroke="var(--accent2)" stroke-width="${gripPath ? 1.6 : 3.2}" stroke-linecap="round" stroke-linejoin="round" opacity="${gripPath ? 0.35 : 1}" vector-effect="non-scaling-stroke" points="${poly(pc)}"/>`).join("")}
         ${gripPath}
         ${impactPath}
-        <circle cx="${X(pts[0][0]).toFixed(1)}" cy="${Y(pts[0][1]).toFixed(1)}" r="4" fill="#00d27a"/><text x="${(X(pts[0][0]) + 6).toFixed(1)}" y="${(Y(pts[0][1]) - 4).toFixed(1)}" fill="#00d27a" font-size="9">start</text>
-        ${markers.map((g) => { const col = g.grip && g.grip !== "calm" ? gripCol(g.grip) : g.loaded ? "#00d27a" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; const gr = gradeByTurn[g.n]; const fresh = gr && gr.at && (Date.now() - gr.at < 8000); return `<g class="ct-marker${sel ? " sel" : ""}" data-tn="${g.n}"${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${gr ? `<circle class="tn-grade${fresh ? " fresh" : ""}" cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="8.5" fill="none" stroke="${GRADE_COL[gr.grade]}" stroke-width="2.2"><title>latest pass: grade ${gr.grade} · score ${gr.score}${gr.deltaBest != null ? ` · ${gr.deltaBest >= 0 ? "+" : ""}${gr.deltaBest} vs best` : ""}</title></circle>` : ""}${sel ? `<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="${X(g.pos[0]).toFixed(1)}" cy="${Y(g.pos[1]).toFixed(1)}" r="${sel ? 6 : 5}" fill="${g.grip && g.grip !== "calm" ? gripCol(g.grip) : g.loaded ? "#00d27a" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""}${g.grip && g.grip !== "calm" ? " — " + gripOf(g.grip).axle : ""}${gradeByTurn[g.n] ? " · grade " + gradeByTurn[g.n].grade + " (" + gradeByTurn[g.n].score + ")" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.provisional ? "PROVISIONAL — read from curvature, not yet established across laps" : g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="${(X(g.pos[0]) + 6).toFixed(1)}" y="${(Y(g.pos[1]) + 3).toFixed(1)}" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
-        ${(() => { if (!opts.live || typeof live === "undefined") return ""; const ls = (live.cornerScores || []).slice(-1)[0]; if (!ls || !ls.pos || ls.pos[0] == null) return ""; const lx = X(ls.pos[0]), ly = Y(ls.pos[1]); if (lx < -25 || ly < -25 || lx > W + 25 || ly > H + 25) return ""; return `<g class="lv-last" transform="translate(${lx.toFixed(1)},${ly.toFixed(1)})">${lastCornerSvg(ls)}</g>`; })()}
+        <g class="mv-fix"${fixG(pts[0][0], pts[0][1])}><circle r="4" fill="#00d27a"/><text x="6" y="-4" fill="#00d27a" font-size="9">start</text></g>
+        ${markers.map((g) => { const col = g.grip && g.grip !== "calm" ? gripCol(g.grip) : g.loaded ? "#00d27a" : g.mapped ? "var(--accent)" : "var(--warn,#e3b341)"; const sel = opts.selN === g.n; const rk = opts.rk || ""; const gr = gradeByTurn[g.n]; const fresh = gr && gr.at && (Date.now() - gr.at < 8000); return `<g class="ct-marker mv-fix${sel ? " sel" : ""}" data-tn="${g.n}"${fixG(g.pos[0], g.pos[1])}${rk ? ` data-courseturn="${esc(rk)}|${g.n}" style="cursor:pointer"` : ""}>${gr ? `<circle class="tn-grade${fresh ? " fresh" : ""}" cx="0" cy="0" r="8.5" fill="none" stroke="${GRADE_COL[gr.grade]}" stroke-width="2.2"><title>latest pass: grade ${gr.grade} · score ${gr.score}${gr.deltaBest != null ? ` · ${gr.deltaBest >= 0 ? "+" : ""}${gr.deltaBest} vs best` : ""}</title></circle>` : ""}${sel ? `<circle cx="0" cy="0" r="9.5" fill="none" stroke="var(--txt)" stroke-width="1.6"/>` : ""}<circle cx="0" cy="0" r="${sel ? 6 : 5}" fill="${g.grip && g.grip !== "calm" ? gripCol(g.grip) : g.loaded ? "#00d27a" : "var(--bg)"}" stroke="${col}" stroke-width="1.5"><title>Turn ${g.n}${g.dir ? " · " + g.dir : ""}${g.r ? " · r≈" + g.r + " m" : ""}${g.grip && g.grip !== "calm" ? " — " + gripOf(g.grip).axle : ""}${gradeByTurn[g.n] ? " · grade " + gradeByTurn[g.n].grade + " (" + gradeByTurn[g.n].score + ")" : ""} — ${rk ? "click for the full breakdown · " : ""}${g.provisional ? "PROVISIONAL — read from curvature, not yet established across laps" : g.loaded ? "loaded in telemetry this session" : g.mapped ? "on the map, not loaded this session (take it at pace)" : "counted from your laps, not yet curvature-mapped (a fast/flat turn)"}</title></circle><text x="6" y="3" fill="${col}" font-size="9" font-weight="700">${g.n}</text></g>`; }).join("")}
+        </g>
+        ${(() => { if (!opts.live || typeof live === "undefined") return ""; const ls = (live.cornerScores || []).slice(-1)[0]; if (!ls || !ls.pos || ls.pos[0] == null) return ""; const lx = XE(ls.pos[0]), ly = YE(ls.pos[1]); if (lx < -25 || ly < -25 || lx > W + 25 || ly > H + 25) return ""; return `<g class="lv-last" transform="translate(${lx.toFixed(1)},${ly.toFixed(1)})">${lastCornerSvg(ls)}</g>`; })()}
         ${opts.live ? `<g class="lv-car" style="display:none"><circle r="9" fill="none" stroke="#00d27a" stroke-width="1.4" opacity=".45"/><circle r="4.6" fill="#00d27a" stroke="#0e1116" stroke-width="1.4"><title>you — live position</title></circle></g>` : ""}
+        <text x="6" y="${H - 6}" font-size="8.5" fill="var(--muted)" opacity=".75" pointer-events="none">scroll to zoom · drag to pan · double-click resets</text>
+        <g class="mv-reset" data-mapreset="1" style="cursor:pointer${_zoomed ? "" : ";display:none"}" transform="translate(${W - 74},8)"><title>back to the whole course</title><rect width="66" height="18" rx="5" fill="var(--bg2)" stroke="var(--line)"/><text x="6" y="13" font-size="10" fill="var(--txt)">⟲ reset</text><text class="mv-zlbl" x="60" y="13" font-size="9" fill="var(--muted)" text-anchor="end">${_mv.k.toFixed(1)}×</text></g>
       </svg>`;
     };
     // COURSE IDENTITY: the auto-computed SHAPE (from ground-truth position data) is a course's PRIMARY identifier —
@@ -4991,7 +5058,7 @@
     // The model's speed_traces hold at most one lap per tune; this is the whole record behind them. The endpoint is
     // NEW: an older daemon 404s it. Every failure caches an EMPTY result, so the overlay simply never appears — a
     // course view that loses its map because a fetch threw is a far worse outcome than one without history.
-    live.laps = live.laps || {}; live.lapsCls = live.lapsCls || {};
+    live.laps = live.laps || {}; live.lapsCls = live.lapsCls || {}; live.mapView = live.mapView || {};
     const lapsKey = (rk, cls) => String(rk) + "|" + (cls || "");
     const fetchLaps = (rk, cls) => { try {
       if (!rk || !live.connected) return null;
@@ -5098,6 +5165,91 @@
       const lines = segs.map((x) => `<polyline fill="none" stroke="${curCar && x.t.cid === curCar ? "var(--accent2)" : x === best ? "#00d27a" : "var(--muted)"}" stroke-width="${curCar && x.t.cid === curCar ? 2.2 : x === best ? 1.6 : 1}" opacity="${curCar && x.t.cid === curCar ? 1 : x === best ? 0.9 : 0.4}" points="${x.pts.map((p) => `${px3(p[0]).toFixed(1)},${py3(p[1]).toFixed(1)}`).join(" ")}"/>`).join("");
       return `<div class="ct-trace" style="margin-top:5px"><svg viewBox="0 0 ${W3} ${H3}" width="${W3}" height="${H3}" style="background:var(--bg);border-radius:6px"><line x1="${px3(gt.s).toFixed(1)}" y1="4" x2="${px3(gt.s).toFixed(1)}" y2="${H3 - 4}" stroke="var(--warn,#e3b341)" opacity=".7"/>${lines}</svg><div class="why" style="font-size:9.5px">speed through this turn — <span style="color:var(--accent2)">you</span> vs <span style="color:#00d27a">fastest</span> · class ${esc(curCls || "all")}${segs.length > 1 ? ` · ${segs.length} tunes` : ""} · ${"｜"} = apex</div></div>`;
     } catch (e) { return ""; } };
+    // ---- THE FASTEST DOCUMENTED LINE THROUGH THIS CORNER. The ANALYZER ranks it — corner traversal time is
+    // sum(Δarc / speed) over the turn's arc span, which is independent of lap_s (pause-corrupted) and of whole-lap
+    // ranking — and writes the winning lines INTO the course model, which reaches the client both bundled in db.js
+    // and live in /session.json. Nothing here refetches: GET /laps 404s on a daemon older than the endpoint.
+    // The block is OPTIONAL at every level (new course, too few clean traversals, an older model): absent ⇒ null ⇒
+    // the panel renders exactly as it did before this existed. The point encodings the analyzer may use are read
+    // interchangeably, because the drawing does not care which one arrived — a packed "x,z,grip,…" STRING (what it
+    // writes today: indent=1 costs ~2.5 B of whitespace per array scalar, so one string is a third the size),
+    // a flat number array of apex-relative offsets, or explicit [x,z,grip,mph] tuples. ----
+    const _linePts = (L, rel) => {   // → [[x, z, grip|null, mph|null], …] whatever shape the analyzer wrote
+      const pp = L.pts; const P = [];
+      if (typeof pp === "string") { const v = pp.split(",").map(Number); const st = v.length % 3 === 0 ? 3 : 2;
+        for (let j = 0; j + 1 < v.length; j += st) P.push([v[j] + (rel ? rel[0] : 0), v[j + 1] + (rel ? rel[1] : 0), st === 3 ? v[j + 2] : null, null]); return P; }
+      if (!pp || !pp.length) return P;
+      if (typeof pp[0] === "number") { for (let j = 0; j + 1 < pp.length; j += 2) P.push([pp[j] + (rel ? rel[0] : 0), pp[j + 1] + (rel ? rel[1] : 0), L.grip ? L.grip[j / 2] : null, L.mphs ? L.mphs[j / 2] : null]); return P; }
+      pp.forEach((q, j) => P.push([q[0], q[1], q.length > 2 ? q[2] : (L.grip ? L.grip[j] : null), q.length > 3 ? q[3] : null]));
+      return P;
+    };
+    const turnLines = (co, tpos) => { try {
+      if (!tpos) return null; const geo = courseGeoFor(co);
+      const gt = ((geo && geo.turns) || []).find((g2) => g2.apex && ((g2.apex[0] - tpos[0]) ** 2 + (g2.apex[1] - tpos[1]) ** 2) <= TURN_R * TURN_R);
+      const raw = gt && (gt.lines || gt.line); if (!raw) return null;
+      const b = raw.by_class ? (raw.by_class[""] || raw.by_class[Object.keys(raw.by_class)[0]]) : raw;
+      if (!b) return null;
+      const rel = b.rel || raw.rel || null;   // only an apex-relative encoding declares an origin; absent ⇒ world coords
+      const arr = b.fast || b.lines || []; if (!arr.length) return null;
+      const lines = arr.map((L, i) => ({ rank: i, t: L.t != null ? L.t : L.t_s, mph: L.mph != null ? L.mph : (L.mph_apex != null ? L.mph_apex : L.mph_min),
+        cid: L.cid, build_id: L.build_id, sess: L.sess || L.session, lap_s: L.lap_s, void: !!L.void, pts: _linePts(L, rel) })).filter((L) => L.pts.length > 1);
+      if (!lines.length) return null;
+      const num = (...v) => v.find((x) => x != null);
+      const best = num(b.best_s, b.best, lines[0].t);
+      const med = num(b.med, b.med_s, b.median_s);
+      const gain = num(b.gain, b.gain_s, b.available_s, (med != null && best != null ? med - best : null));
+      return { apex: gt.apex, geo, n: num(b.n, b.n_laps), rej: num(b.n_rejected, b.reject && b.reject.n),
+        why: (b.reject && b.reject.rule) || (b.cut_s != null ? "slower than " + b.cut_s + " s" : null), best, med, gain, lines };
+    } catch (e) { return null; } };
+    // The close-up is the WHERE (x/z through the corner); the trace strip beside it is the WHEN (speed vs distance).
+    // COLOR: two vocabularies, both already in use, kept apart. STATE = the grip palette, painted on the fastest line
+    // only. RANK = a green CASING under it — stroking the fastest line green would overwrite the very state colours
+    // that say where the grip went, which is the one thing this drawing exists to show.
+    const turnCloseup = (co, tpos, curCar) => { try {
+      const D = turnLines(co, tpos); if (!D) return "";
+      const W4 = 216, H4 = 168, pad4 = 15;
+      const all = D.lines.reduce((a, L) => a.concat(L.pts), []).concat([D.apex]);
+      const xs = all.map((p) => p[0]), zs = all.map((p) => p[1]);
+      const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
+      const sc4 = Math.min((W4 - 2 * pad4) / Math.max(8, x1 - x0), (H4 - 2 * pad4) / Math.max(8, z1 - z0));
+      const X4 = (x) => pad4 + (x - x0) * sc4 + ((W4 - 2 * pad4) - (x1 - x0) * sc4) / 2, Y4 = (z) => H4 - pad4 - (z - z0) * sc4 - ((H4 - 2 * pad4) - (z1 - z0) * sc4) / 2;
+      const pstr = (P) => P.map((q) => `${X4(q[0]).toFixed(1)},${Y4(q[1]).toFixed(1)}`).join(" ");
+      // the road itself, for orientation — the course path near this apex, cut into CONSECUTIVE runs so a lap that
+      // passes nearby twice never draws a phantom shortcut between the two passes.
+      const road = (() => { try {
+        const gp = (D.geo && (D.geo.path || (D.geo.paths || []).flat())) || []; if (gp.length < 3) return "";
+        const R = Math.max(x1 - x0, z1 - z0) * 0.6 + 12; const runs = []; let cur = null, prev = -9;
+        gp.forEach((p, i) => { if ((p[0] - D.apex[0]) ** 2 + (p[1] - D.apex[1]) ** 2 <= R * R) { if (i !== prev + 1) { cur = []; runs.push(cur); } cur.push(p); prev = i; } });
+        return runs.filter((r2) => r2.length > 1).map((r2) => `<polyline fill="none" stroke="var(--muted)" stroke-width="7" opacity=".16" stroke-linecap="round" stroke-linejoin="round" points="${pstr(r2)}"/>`).join("");
+      } catch (e) { return ""; } })();
+      const F = D.lines[0];
+      const rest = D.lines.slice(1).map((L) => `<polyline fill="none" stroke="var(--muted)" stroke-width="1.2" opacity=".45" stroke-linecap="round" stroke-linejoin="round"${L.void ? ` stroke-dasharray="3 3"` : ""} points="${pstr(L.pts)}"><title>#${L.rank + 1} fastest — ${L.t != null ? L.t.toFixed(2) + " s" : "—"}${L.void ? " · " + VOID_WHY : ""}</title></polyline>`).join("");
+      const hasGrip = F.pts.some((q) => q[2] != null);
+      const fastLine = hasGrip ? (() => { const P = F.pts; const segs = []; let run = [P[0]], st = P[0][2];
+          for (let i = 1; i < P.length; i++) { if (P[i][2] !== st) { run.push(P[i]); segs.push([st, run]); run = [P[i]]; st = P[i][2]; } else run.push(P[i]); }
+          segs.push([st, run]);
+          return segs.map(([s2, pp]) => `<polyline fill="none" stroke="${gripCol(s2)}" stroke-width="${s2 ? 3 : 2.4}" stroke-linecap="round" stroke-linejoin="round" points="${pstr(pp)}"><title>${esc(gripOf(s2).axle)}</title></polyline>`).join(""); })()
+        : `<polyline fill="none" stroke="var(--accent2)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="${pstr(F.pts)}"><title>the fastest documented line — ${F.t != null ? F.t.toFixed(2) + " s" : "—"}</title></polyline>`;
+      const p0 = F.pts[0], pN = F.pts[F.pts.length - 1];
+      const f2 = (v) => (v == null ? "—" : (+v).toFixed(2));
+      const chips = D.lines.map((L) => `<span class="chip" title="${esc((L.sess || "") + (L.lap_s != null ? " · lap " + L.lap_s.toFixed(1) + " s" : "") + (L.void ? " · " + VOID_WHY : ""))}" style="border-color:${L.void ? gripCol("impact") : L.rank === 0 ? "#00d27a" : curCar && L.cid === curCar ? "var(--accent2)" : "var(--line)"};${L.rank === 0 ? "" : "color:var(--muted)"}">${L.cid ? buildThumb(String(L.cid).split("|")[0], L.build_id, true) + " " : ""}<span${L.void ? ` style="text-decoration:line-through"` : ""}>${f2(L.t)} s</span>${L.mph != null ? ` · ${Math.round(L.mph)} mph` : ""}${L.rank === 0 ? " · fastest" : ""}${curCar && L.cid === curCar ? " · you" : ""}</span>`).join("");
+      return `<div class="ct-closeup" style="flex:none;width:${W4}px">
+        <div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);font-weight:800;margin-bottom:2px">◎ fastest line through here</div>
+        <div style="font-size:11.5px;line-height:1.45;margin-bottom:4px"><b style="color:#00d27a">best ${f2(D.best)} s</b> · median ${f2(D.med)} s · <b style="color:var(--warn,#e3b341)">${f2(D.gain)} s available</b></div>
+        <svg viewBox="0 0 ${W4} ${H4}" width="${W4}" height="${H4}" style="background:var(--bg);border-radius:7px;display:block;overflow:hidden" role="img" aria-label="fastest documented line through this corner">
+          ${road}
+          <circle cx="${X4(D.apex[0]).toFixed(1)}" cy="${Y4(D.apex[1]).toFixed(1)}" r="4.5" fill="none" stroke="var(--warn,#e3b341)" stroke-width="1.3" opacity=".85"><title>apex</title></circle>
+          ${rest}
+          <polyline fill="none" stroke="#00d27a" stroke-width="7" opacity=".3" stroke-linecap="round" stroke-linejoin="round" points="${pstr(F.pts)}"/>
+          ${fastLine}
+          <circle cx="${X4(p0[0]).toFixed(1)}" cy="${Y4(p0[1]).toFixed(1)}" r="3.2" fill="#00d27a" stroke="var(--bg)" stroke-width="1.2"><title>entry</title></circle>
+          <circle cx="${X4(pN[0]).toFixed(1)}" cy="${Y4(pN[1]).toFixed(1)}" r="2.6" fill="none" stroke="#00d27a" stroke-width="1.6"><title>exit</title></circle>
+        </svg>
+        <div class="why" style="font-size:9.5px;margin-top:3px">${D.n ? D.n + " clean traversal" + (D.n === 1 ? "" : "s") + " ranked" : "ranked from your laps"}${D.rej ? ` · ${D.rej} rejected${D.why ? " (" + esc(D.why) + ")" : ""}` : ""} · <span style="color:#00d27a">●</span> entry → <span style="color:var(--warn,#e3b341)">○</span> apex${D.lines.length > 1 ? ` · <span style="color:var(--muted)">─</span> next ${D.lines.length - 1} fastest` : ""}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${chips}</div>
+        ${hasGrip ? `<div style="margin-top:3px">${gripLegend(["calm", "front", "rear", "both"])}</div>` : `<div class="why" style="font-size:9.5px;margin-top:2px">grip state not recorded on these lines — drawn in your path colour</div>`}
+      </div>`;
+    } catch (e) { return ""; } };
     const courseTagsRow = (x) => {
       const ct = courseTags(x); if (!ct) return "";
       const chip2 = (g) => `<span class="chip" style="border-color:${g.col};color:${g.col}" title="${esc(g.why)}">${g.t}</span>`;
@@ -5184,7 +5336,8 @@
       } else if (tuning) { stage = `<div class="ct-stage"><b>🏋 Tuning</b> — clean through here; no change needed for this turn.</div>`;
       } else { const passes = t.passes ?? (t.track && t.track.passes) ?? (c && c.laps_seen) ?? 0;
         stage = `<div class="ct-stage learn"><b>📚 Learning</b> — ${mappedT ? "mapped from coordinates" : "counted from your laps (fast/flat)"}${c ? " · loaded this session" : " · not yet loaded — take it at pace"} · ${passes} pass${passes === 1 ? "" : "es"} on record. <span class="why">at 75% course confidence this flips to tuning feedback</span></div>`; }
-      return `<div class="ct-break"><div class="ct-break-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${bal ? `<span class="chip" style="border-color:${balCol};color:${balCol}">${bal}</span>` : ""}<span class="ct-close" data-courseturn-close="1" title="close">✕</span></div><div class="ct-break-body">${glyph ? `<div class="ct-glyph">${glyph}<div class="ct-glyph-cap">grip: <b style="color:${ph ? CM_PC[ph - 1] : "var(--muted)"}">${ph ? CM_SHORT[ph - 1] : "—"}</b></div></div>` : ""}<div class="ct-break-main">${speeds}${env}${turnTraceStrip(co, t.pos, curCar)}${stage}</div></div></div>`;
+      const closeup = turnCloseup(co, t.pos, curCar);   // "" until the analyzer has ranked lines here — the panel then reads exactly as it always did
+      return `<div class="ct-break"><div class="ct-break-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${bal ? `<span class="chip" style="border-color:${balCol};color:${balCol}">${bal}</span>` : ""}<span class="ct-close" data-courseturn-close="1" title="close">✕</span></div><div class="ct-break-body">${closeup}${glyph ? `<div class="ct-glyph">${glyph}<div class="ct-glyph-cap">grip: <b style="color:${ph ? CM_PC[ph - 1] : "var(--muted)"}">${ph ? CM_SHORT[ph - 1] : "—"}</b></div></div>` : ""}<div class="ct-break-main">${speeds}${env}${turnTraceStrip(co, t.pos, curCar)}${stage}</div></div></div>`;
     };
     // ---- FULL 5-PHASE per-turn analysis: EVERY identified turn, all phases coloured by what the grip did there, with a
     // tune-vs-driver verdict and a recurring-problem flag. The analyzer measures 4 grip phases (brake · turn-in · mid ·
@@ -5978,6 +6131,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     function bindBody(root) {
       const r = root || host;
       bindTraceHover(r);   // trace → map scrubbing survives every innerHTML rebuild
+      bindMapZoom(r);      // …and so does wheel-zoom / drag-pan, because the view itself lives on `live`
       r.querySelectorAll("[data-rivals]").forEach((b) => b.addEventListener("click", () => { const [rk, v] = b.dataset.rivals.split("|");
         fetch(liveUrl + "/route", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, rivals: v === "1" }) })
           .then(() => { if (src === "live") paintSections(true); else render(); }).catch(() => {}); }));

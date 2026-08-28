@@ -24,7 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.pat
 # Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
 # course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
 # reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
-DET_VER = "geo3-straight-veto"
+DET_VER = "geo4-arcreg"
 
 
 def self_retrace(path, tol=20.0):
@@ -556,6 +556,95 @@ def clone_sheet_for(c, bat):
     return {"menus": menus, "counts": counts, "pi": c["pi"], "confidence": overall, "weak": weak, "complete": all(t["ok"] for t in bat["tests"]), "components": bool(comp),
             "build_record": ({"label": rec.get("label"), "captured": rec.get("captured"), "source": rec.get("source"), "tune_share_code": rec.get("tune_share_code"), "file": rec.get("_file")} if rec else None),
             "pi_note": f"cross-check: every proposed parts list must sum to PI {c['pi']} — a mismatch means a missed part (usually widths or aero)"}
+
+FAST_K = 3            # lines kept per turn
+FAST_PTS = 12         # points drawn per line — on the 4 m lap grid that covers a 48 m corner at full resolution
+FAST_MIN = 3          # fewer clean traversals than this and a median means nothing — emit no block at all
+FAST_APEX_M = 25.0    # a clipped window whose nearest sample misses the apex by more is the WRONG piece of road
+FAST_COVER = 0.9      # the window must span this much of the turn (0.95 fails on the 4 m grid: the edges fall between samples)
+FAST_RATIO = 2.5      # a traversal this many times the median is a stopped car, not a lap
+
+
+def _fast_pick(seg, n):
+    """Evenly thin a window to n samples, endpoints kept — the line must still reach the turn's edges."""
+    if len(seg) <= n:
+        return seg
+    last = len(seg) - 1
+    return [seg[int(round(i * last / (n - 1)))] for i in range(n)]
+
+
+def fast_lines(laps, turns):
+    """Per turn, the fastest documented lines through it — precomputed so the dashboard only has to draw.
+
+    Ranking is by TRAVERSAL TIME through the turn's own arc span, sum(delta_arc / speed). Whole-lap `lap_s`
+    is corrupted by pause time, so a lap that is slow overall can still hold the fastest line through one
+    corner — which is also why the caller must pass EVERY stored lap: the 107% competitive rule rides on
+    that same broken lap_s and would delete the corner-fastest line in 7 of this course's 13 corners.
+
+    Three rejections, in this order, because the one 91 s reading has two different causes:
+      1. GEOMETRY — a partial lap carries a shifted arc origin, so clipping by arc alone measures the wrong
+         piece of road. Such a window scores FALSELY FAST (it lands on a straight), so it cannot be left to
+         a slow-side ratio test to catch.
+      2. COVERAGE — a window that does not span the turn is not a traversal of it.
+      3. RATIO — what remains is the car that stopped.
+    There is deliberately NO fast-side ratio test. A line taken flat where the median lap brakes to half
+    speed is exactly what this feature exists to find; only geometry may reject a fast reading.
+    """
+    made = 0
+    for t in turns:
+        t.pop("lines", None)   # a turn that no longer qualifies must lose its stale block, not keep it
+        ax, s = t.get("apex"), t.get("s")
+        if not ax or s is None:
+            continue
+        half = max(20.0, (t.get("len_m") or 40) / 2.0)
+        s0, s1 = s - half, s + half
+        cand, n_rej = [], 0
+        for lp in laps:
+            seg = [p for p in (lp.get("pts") or []) if len(p) >= 5 and s0 <= p[0] <= s1]
+            if len(seg) < 4:
+                continue   # this lap simply does not cover the turn — not a rejection
+            if (seg[-1][0] - seg[0][0]) < FAST_COVER * (s1 - s0) or min(math.hypot(p[3] - ax[0], p[4] - ax[1]) for p in seg) > FAST_APEX_M:
+                n_rej += 1
+                continue
+            tt = 0.0
+            for a, b in zip(seg, seg[1:]):
+                v = (a[1] + b[1]) * 0.5 * 0.44704   # mph -> m/s, trapezoid across the step
+                if v <= 0.1:
+                    tt = None
+                    break
+                tt += (b[0] - a[0]) / v
+            if not tt:
+                n_rej += 1
+                continue
+            cand.append((tt, lp, seg))
+        if len(cand) < FAST_MIN:
+            continue
+        _ts = sorted(c[0] for c in cand)
+        cut = FAST_RATIO * _ts[len(_ts) // 2]
+        keep = sorted((c for c in cand if c[0] <= cut), key=lambda c: c[0])
+        n_rej += len(cand) - len(keep)
+        if len(keep) < FAST_MIN:
+            continue
+        _ts = [c[0] for c in keep]
+        best, mid = _ts[0], _ts[len(_ts) // 2]
+        fast = []
+        for tt, lp, seg in keep[:FAST_K]:
+            # "x,z,grip,x,z,grip,..." — one STRING, not an array. json.dump(indent=1) puts every array scalar on
+            # its own line, so an honest [[x,z,grip],...] spends ~250 of its ~430 bytes per line on whitespace;
+            # the string is the same integers, losslessly, at a third of the cost (+8.7% -> +4.6% on the model).
+            pts = ",".join(str(v) for p in _fast_pick(seg, FAST_PTS)
+                           for v in (int(round(p[3])), int(round(p[4])), int(p[2] or 0)))
+            # lap_s is deliberately NOT carried: it is pause-corrupted, and a whole-lap time sitting next to a
+            # corner time is an invitation to rank on the wrong one.
+            fast.append({"t_s": round(tt, 2), "mph_min": round(min(p[1] for p in seg)), "cid": lp.get("cid"),
+                         "build_id": lp.get("build_id"), "class": lp.get("class"), "session": lp.get("session"),
+                         "void": bool(lp.get("void")), "pts": pts})
+        t["lines"] = {"v": 1, "n_laps": len(keep), "n_rejected": n_rej, "cut_s": round(cut, 2),
+                      "s_in": round(s0), "s_out": round(s1), "best_s": round(best, 2), "median_s": round(mid, 2),
+                      "available_s": round(mid - best, 2), "fast": fast}
+        made += 1
+    return made
+
 
 def main():
     path = sys.argv[1]
@@ -1736,12 +1825,15 @@ def main():
         for g_ in ((geo or {}).get("turns") or []):
             ap = g_.get("apex")
             if not ap: continue
-            hit_k = next((k for k, v in gseen.items() if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 40 ** 2), None)
+            _as = g_.get("s")
+            hit_k = next((k for k, v in gseen.items()
+                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 18 ** 2
+                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= 22)), None)
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
-                                   {"pos": [round(ap[0]), round(ap[1])], "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
+                                   {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             if sid not in rec["sessions"]: rec["sessions"].append(sid)
             rec["sessions"] = rec["sessions"][-40:]
-            for f_ in ("dir", "radius_m", "deg"):
+            for f_ in ("dir", "radius_m", "deg", "s"):
                 if g_.get(f_) is not None: rec[f_] = g_[f_]
         # the model's PERSISTED geometry is the best map on record — a full mapped lap, already vetted. Every
         # turn in it is part of the road by definition, so it seeds the inventory at full standing.
@@ -1757,9 +1849,12 @@ def main():
         for g_ in _authoritative:
             ap = g_.get("apex")
             if not ap: continue
-            hit_k = next((k for k, v in gseen.items() if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 40 ** 2), None)
+            _as = g_.get("s")
+            hit_k = next((k for k, v in gseen.items()
+                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 18 ** 2
+                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= 22)), None)
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
-                                   {"pos": [round(ap[0]), round(ap[1])], "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
+                                   {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             rec["model_map"] = True
         # RETIRE PHANTOMS: an entry detected only by a superseded detector stops being re-detected, but its old
         # session list keeps it above the >=2-sessions bar forever. A turn survives only if the current map holds
@@ -1860,6 +1955,18 @@ def main():
             if len(bestg.get("path") or []) > len(geo.get("path") or []):
                 geo["paths"] = bestg.get("paths"); geo["path"] = bestg.get("path"); geo["length_m"] = bestg.get("length_m"); geo["from_model"] = True
                 if bestg.get("det") == DET_VER: geo["turns"] = bestg["turns"]
+            # The turn list is only NOW final (the borrow above may have replaced it), so this is where the
+            # fastest documented line through each corner gets stamped on. Wrapped whole: this is an extra,
+            # and a lap store that is locked, empty or malformed must cost the analysis nothing.
+            try:
+                _flaps = lap_store.get_laps(ROOT, key, cls=None, competitive_only=False, limit=400)   # READ ONLY
+                _mturns = ((model.get("geometry") or {}).get("turns")) or []
+                fast_lines(_flaps, _mturns)
+                _gturns = geo.get("turns") or []
+                # usually the same list object; they diverge when the det-gated borrow did not fire, and each
+                # then carries its OWN turn enumeration — so recompute rather than copy across by id.
+                if _gturns is not _mturns: fast_lines(_flaps, _gturns)
+            except Exception as ex_: print("fastest lines skipped:", repr(ex_), file=sys.stderr)
             geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing
             _sc = shape_confidence(geo.get("path"), layout)   # SHAPE confidence: do the recorded laps trace the same outline? (rides on turns -> reaches the live push, unlike geometry)
             if _sc:

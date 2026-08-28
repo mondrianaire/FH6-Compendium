@@ -5500,7 +5500,17 @@
       const mTurns = { count: m.expected_turns || m.turn_count || estTurns.length, canonical: estTurns };
       return `<div class="lab-corner" style="border-left:4px solid var(--accent)">
         ${courseIdentity(rn, geo, { icon: "🏟", routeKey: m.route_key, tags: courseTagsRow(m), right: `<span class="chip" style="border-color:var(--accent);color:var(--accent)">from the track record — not visited in this ${src === "live" ? "session" : "recording"}</span>` })}
-        ${trackRecordHtml(tr, rn, geo, m.route_key)}${speedTracesCard({ speed_traces: m.speed_traces || {}, geometry: m.geometry, route_key: m.route_key }, live.courseCar || null)}${m.profile ? profileCardHtml(m.profile) : ""}${geo ? mapCardHtml(geo, [], mTurns) : ""}${turnHistoryCard({ route_key: m.route_key })}
+        ${trackRecordHtml(tr, rn, geo, m.route_key)}${(() => {
+          // ONE TRACE PER ROUTE ON THE PAGE. The course view above already renders this route's trace, sitting
+          // right under its map where hovering it marks the map. Drawing it again down here is the same chart
+          // twice with the second copy too far from any map to be usable — and it is what made the trace look
+          // duplicated. The atlas keeps its trace only for routes the live view is NOT already showing.
+          try {
+            const shown = new Set((((live.analysis || {}).courses) || []).map((c) => c.route_key));
+            if (shown.has(m.route_key)) return "";
+          } catch (e) {}
+          return speedTracesCard({ speed_traces: m.speed_traces || {}, geometry: m.geometry, route_key: m.route_key }, live.courseCar || null);
+        })()}${m.profile ? profileCardHtml(m.profile) : ""}${geo ? mapCardHtml(geo, [], mTurns) : ""}${turnHistoryCard({ route_key: m.route_key })}
         ${(g.turns || []).length ? `<div style="margin-top:8px;font-size:11px"><div style="color:var(--muted);margin-bottom:4px">Turns on this route (from its map)</div><div style="display:flex;flex-wrap:wrap;gap:3px">${g.turns.map((t) => `<span class="chip" title="${t.len_m} m long · ${t.deg != null ? t.deg + "°" : ""}">${t.id} ${t.dir === "L" ? "⬅" : "➡"} r${t.radius_m}${t.deg != null ? " · " + t.deg + "°" : ""}</span>`).join("")}</div><p class="why" style="font-size:10.5px;margin:4px 0 0">drive it in this session for per-turn references, limiter and advice</p></div>` : ""}
       </div>`;
     };

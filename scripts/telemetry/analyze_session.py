@@ -1471,15 +1471,29 @@ def main():
             if k.get("ref") and not (k.get("ref") or {}).get("predicted") and k.get("ref_car"):
                 own_by_car[k["ref_car"]] = own_by_car.get(k["ref_car"], 0) + 1
         if geo:   # mapped turns vs driven turns: a mapped turn with no behavioural corner is a turn you took flat / never loaded — it still exists
-            driven_ids = {k.get("geo_id") for k in corner_out if k.get("geo_id")}
-            geo["driven"] = len(driven_ids); geo["not_driven"] = [g["id"] for g in geo["turns"] if g["id"] not in driven_ids]
-            turns_info["mapped"] = len(geo["turns"]); turns_info["mapped_driven"] = len(driven_ids)   # (model geometry is persisted in the block above, before the flat copies are stripped)
+            # POSITIONAL, not id-string: geo_id strings are minted per session, and the geometry may be model-borrowed
+            # from ANOTHER session's enumeration — comparing ids across the two spaces produced phantom not_driven turns.
+            def _near_geo(gt):
+                ax = gt.get("apex")
+                return bool(ax and any(k.get("pos") and (k["pos"][0] - ax[0]) ** 2 + (k["pos"][1] - ax[1]) ** 2 <= 45 * 45 for k in corner_out))
+            driven_g = [g["id"] for g in geo["turns"] if _near_geo(g)]
+            geo["driven"] = len(driven_g); geo["not_driven"] = [g["id"] for g in geo["turns"] if g["id"] not in driven_g]
+            turns_info["mapped"] = len(geo["turns"]); turns_info["mapped_driven"] = len(driven_g)   # (model geometry is persisted in the block above, before the flat copies are stripped)
         # COMPLETENESS (after the FINAL mapped count — the session geometry can be richer than the model's): consistency
         # of the detections that exist is NOT completeness against the road shape. A turn never detected leaves no
         # cluster and costs `agree` nothing — so confidence converged happily at N-minus-the-missed-turns while the
         # curvature map knew better. Cap both confidences by enumerated/mapped (+1 slack for extractor generosity).
         if turns_info.get("mapped"):
-            _cover = min(1.0, (est_count + 1) / turns_info["mapped"])
+            # Denominator honesty (two escape hatches for a deadlocked gate):
+            # 1. the player's DECLARED count is ground truth — when set, coverage measures against IT, not the extractor
+            # 2. short shallow KINKS are mapped pace-free but the behavioral detector (0.8s over 0.25g) structurally
+            #    cannot register them — 'take it at pace' shortens time-in-corner, a dead-end ask. Exempt them.
+            if expected:
+                _den = expected
+            else:
+                _subst = [g for g in ((geo or {}).get("turns") or (model.get("geometry") or {}).get("turns") or []) if (g.get("deg") or 99) >= 30 or (g.get("len_m") or 99) >= 40]
+                _den = len(_subst) if _subst else turns_info["mapped"]
+            _cover = min(1.0, (est_count + 1) / max(1, _den))
             turns_info["confidence"] = round(turns_info.get("confidence", 0) * _cover, 2)
             turns_info["track_confidence"] = round(turns_info.get("track_confidence", 0) * _cover, 2)
             turns_info["shape_coverage"] = round(_cover, 2)

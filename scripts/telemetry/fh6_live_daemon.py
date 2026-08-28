@@ -356,6 +356,27 @@ def run_analysis(until=None, final=True):
         ST.analyzing = False
 
 # ---------------- HTTP / SSE ----------------
+def _session_car_for(sj, ordn, want_cyl=None):
+    """The analyzer session-car record for THIS build — never 'any car with this ordinal'. Preference: the LIVE
+    frame's exact cid, then a PI match to the live frame, then an UNAMBIGUOUS cyl match. Session cars are keyed by
+    full cid (ordinal|drv|cyl|pi), so a multi-build ordinal has several records — first-match took the WRONG one,
+    and its boost/hp/gears then manufactured conflicts and poisoned the caches. No record beats the wrong record."""
+    cands = [c for c in ((sj or {}).get("cars") or []) if str(c.get("ordinal")) == str(ordn)]
+    if not cands: return None
+    fr = ST.latest
+    if fr and fr.get("on") and str(fr.get("car")) == str(ordn):
+        hit = next((c for c in cands if str(c.get("id")) == str(fr.get("cid"))), None)
+        if hit is not None: return hit
+        if fr.get("pi"):
+            hit = next((c for c in cands if c.get("pi") == fr.get("pi")), None)
+            if hit is not None: return hit
+    if want_cyl:
+        cyls = [c for c in cands if c.get("cyl") == want_cyl]
+        if len(cyls) == 1: return cyls[0]
+        if len(cyls) > 1: return None
+    return cands[0] if len(cands) == 1 else None
+
+
 def _enrich_gears(deliverable, ordn):
     """Upgrade decoded gears from band-DERIVED to telemetry-MEASURED: the analyzer's fd_gear is the exact FD*gear
     product per gear (from WheelRotSpeed, wheelspin-immune), so gear = fd_gear / final_drive is a measured ratio
@@ -368,11 +389,10 @@ def _enrich_gears(deliverable, ordn):
         if not sj:
             return
         fdg = None
-        for c in sj.get("cars", []):
-            if str(c.get("ordinal")) == str(ordn):
-                gl = {g["gear"]: g["fd_gear"] for g in (c.get("gears") or []) if g.get("fd_gear")}
-                if gl:
-                    fdg = gl; break
+        _sc = _session_car_for(sj, ordn, _deliverable_cyl(deliverable))   # THIS build's record only — a sibling build's ladder faked gear conflicts and poisoned the cache
+        if _sc is not None:
+            gl = {g["gear"]: g["fd_gear"] for g in (_sc.get("gears") or []) if g.get("fd_gear")}
+            if gl: fdg = gl
         # STABILITY: cache the measured ladder so gears don't pop out of 'measured' when a fresh analysis briefly
         # lacks them (sparse WOT frames in the last window) — the ladder is a physical property of the build. Keyed by
         # BUILD identity (ordinal + gear count + decoded cyl), never bare ordinal: a stale ladder from a DIFFERENT
@@ -493,6 +513,10 @@ def _learn_engine_catalog(family, cyl=None, redline=None, peak_hp=None, drivetra
                 with open(tmp, "w", encoding="utf-8") as fh:
                     json.dump(doc, fh, indent=1, ensure_ascii=False)
                 os.replace(tmp, path)
+                try:
+                    TUNE._ENGINE_CATALOG = None   # the decode module caches the catalog — without this, freshly-learned cyl/redline never reach the matcher until a restart (the stale-obs-cache bug, catalog edition)
+                except Exception:
+                    pass
     except Exception:
         return
 
@@ -604,9 +628,9 @@ def _pick_meta(metas, ordn, ts_want=None):
         score = m["mtime"] * 1e-13                     # newest as a faint tiebreak
         if ts_want and str(m["ts"]) == str(ts_want):
             score += 1e6                               # explicit user pick wins outright
-        if live and live_cyl and cyl:
-            score += 100 if int(cyl) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal
-        if live and live_pi and pi:
+        if (live or live_recent) and live_cyl and cyl:
+            score += 100 if int(cyl) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal — held signature keeps scoring while parked (a parked pick must not fall to file-date and then CLAIM signature)
+        if (live or live_recent) and live_pi and pi:
             score += 60 if int(pi) == int(live_pi) else -min(60, abs(int(pi) - int(live_pi)) * 0.6)
         live_red = (fr.get("maxrpm") if live and fr else None)
         if live_red and red:                           # two same-cyl same-PI builds with DIFFERENT ENGINES separate here: redline is telemetry-exact
@@ -636,7 +660,7 @@ def _pick_meta(metas, ordn, ts_want=None):
             r["_bsig"] = _hl0.sha1(repr(items0).encode()).hexdigest()[:8]
     except Exception:
         pass
-    gear_used = False
+    gear_used = False; ladder_tied = False
     # candidates = every same-cylinder save NOT eliminated by hard evidence (gears actually used). NOT the score-tie
     # window: the PI-observation bonus is self-reinforcing. Counted UNCONDITIONALLY (live_cyl holds across parking via
     # live_recent) so the displayed tie count no longer flaps 6<->1 with driving/parked — and the STAMP GUARD, which
@@ -652,11 +676,10 @@ def _pick_meta(metas, ordn, ts_want=None):
             # a WOT pull verifies within seconds instead of waiting for the next analysis.
             live_gl = None
             with ST.lock: sj = ST.session_json
-            for c in (sj.get("cars", []) if sj else []):
-                if str(c.get("ordinal")) == str(ordn):
-                    gl = {int(g["gear"]): g["fd_gear"] for g in (c.get("gears") or []) if g.get("fd_gear")}
-                    if len(gl) >= 3: live_gl = gl   # need a gear-ladder pass (several gears measured) to fingerprint
-                    break
+            _sc2 = _session_car_for(sj, ordn)   # the EQUIPPED car's ladder (live cid first) — a stale sibling build's ladder used to win disambiguation and pin the wrong 2h hold
+            if _sc2 is not None:
+                gl = {int(g["gear"]): g["fd_gear"] for g in (_sc2.get("gears") or []) if g.get("fd_gear")}
+                if len(gl) >= 3: live_gl = gl   # need a gear-ladder pass (several gears measured) to fingerprint
             gl_abs = True   # analyzer fd_gear is in save units — absolute compare keeps FINAL-DRIVE discrimination
             if not live_gl:
                 lf = getattr(ST, "live_fdg", {}).get(str(ordn)) or {}
@@ -684,6 +707,8 @@ def _pick_meta(metas, ordn, ts_want=None):
                 # accept only a CLEAR winner: good absolute match AND clearly ahead of the runner-up (else stay ambiguous)
                 if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
                     winner = errs[0][2]; roster = [winner] + [r for r in roster if r is not winner]; gear_used = True
+                elif errs and errs[0][0] < 9.0:
+                    ladder_tied = True   # the ladder RAN and could not separate (identical gearing) — 'drive the gears' is then a dead-end ask; the client must offer the manual pick as THE escape
                     if not hasattr(ST, "gear_id"):
                         ST.gear_id = {}
                     ST.gear_id[str(ordn)] = {"ts": str(winner["ts"]), "t": time.time()}   # PERSIST the verified identity — it must survive a pause
@@ -815,7 +840,10 @@ def _pick_meta(metas, ordn, ts_want=None):
     saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count"),
                   build=next((b["label"] for b in builds if r.get("_bsig") == b["build"]), None)) for r in roster]
     how = "picked" if ts_want else ("signature" if (live or live_recent) and (live_cyl or live_pi) else "newest")   # J20: a 2h-recent signature still identifies
-    mism = bool((live or live_recent) and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl))
+    # 'no save matches your engine' must mean NO save: when ANY roster save matches the live cylinders, a chosen-save
+    # mismatch is a wrong tie-pick (scoring interplay), not a missing file — universality checked against the whole set.
+    mism = bool((live or live_recent) and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl)
+                and not any(r.get("cyl") and int(r["cyl"]) == int(live_cyl) for r in roster if r is not best))
     final_how = how if ts_want else ("no-match" if mism else ("gear-matched" if gear_used else how))
     # LIVE TRUTH OVERRIDE: while the equipped build is strongly identified and on track, the frame's CarPI IS this
     # build's PI — a stored stamp that disagrees is stale or misattributed and must never outrank the live read
@@ -832,7 +860,7 @@ def _pick_meta(metas, ordn, ts_want=None):
     return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
-                           "held": held_id, "builds": builds, "saves": saves}
+                           "held": held_id, "ladder_tied": ladder_tied, "builds": builds, "saves": saves}
 
 
 def _deliverable_cyl(deliverable):
@@ -867,7 +895,14 @@ def _match_car(ordn, want_cyl=None):
     return cand[0][1]                                              # 3. fallback
 
 
-def _enrich_engine_desc(deliverable, ordn):
+def _verified_identity(match):
+    """The ok_stamp standard, reusable: identity strong enough to WRITE with (stores are shared/cross-car)."""
+    if not match or match.get("how") in ("no-match", "unsaved-build"): return False
+    if match.get("held"): return False
+    return (match.get("n_signature_ties") or 1) <= 1 or bool(match.get("gear_disambig"))
+
+
+def _enrich_engine_desc(deliverable, ordn, verified=False):
     """Feature A: turn the Conversions 'Engine' row into a specific engine TYPE using live telemetry. The save
     holds no engine specs; this joins the active car's cylinders / redline (ST.cars, keyed by cid whose prefix is
     the ordinal) and peak dyno hp (ST.session_json, the analyzer's measured curve — ST.cars.dyno stays empty).
@@ -925,7 +960,13 @@ def _enrich_engine_desc(deliverable, ordn):
                 if fold:
                     r["value"] = r["upgrade"] = r["value"] + " · " + " · ".join(fold)
                 r["telemetry"] = True
-                if not electric and ST.clone_lock != ordn:   # accrue this engine's signature into the family catalog — but not while cloning this car (WIP telemetry could write a wrong signature)
+                # IDENTITY GUARD (mirrors the PI stamp guard): the catalog is CROSS-CAR — one wrong write teaches a
+                # family the WRONG engine's cyl/redline permanently and self-confirms the mismatch (+100 cyl score)
+                # for every car sharing it. Learn only when the save's decoded cyl is KNOWN and matches the live car;
+                # an unknown-cyl family learns nothing from an unverifiable pairing.
+                _want_c = _deliverable_cyl(deliverable)
+                _ok_learn = bool(_want_c and cyl and int(_want_c) == int(cyl)) or bool(verified and cyl and not _want_c)   # unknown-cyl families BOOTSTRAP only on a verified identity (ok_stamp standard)
+                if not electric and ST.clone_lock != ordn and _ok_learn:
                     _learn_engine_catalog(bits.get("engine_family"), cyl=cyl, redline=redline, peak_hp=peak_hp,
                                           drivetrain=(car.get("drivetrain") if car else None),
                                           pi=(car.get("pi") if car else None), displacement_l=bits.get("displacement_l"))
@@ -990,19 +1031,16 @@ def _build_union(deliverable, ordn, match=None):
             sj = ST.session_json
         if sj:
             want = _deliverable_cyl(deliverable)
-            cands = [c for c in sj.get("cars", []) if str(c.get("ordinal")) == str(ordn)]
             # STRICT build match — never fall back to "any car with this ordinal": another build's boost/hp signature
-            # would manufacture aspiration/power conflicts for a perfectly consistent save (multi-build ordinals are
-            # exactly the case this machinery exists for). Only take cands[0] when cyl is underivable AND unambiguous.
-            sj_car = next((c for c in cands if want and c.get("cyl") == want), None)
-            if sj_car is None and not want and len(cands) == 1:
-                sj_car = cands[0]
+            # would manufacture aspiration/power conflicts for a perfectly consistent save. Live-cid first, then PI,
+            # then unambiguous cyl (a cyl-only first-match let a stale turbo record flip every fresh NA save forever).
+            sj_car = _session_car_for(sj, ordn, want)
             sig = (sj_car or {}).get("sig") or {}
         conv = next((m for m in deliverable.get("menus", []) if m.get("menu") == "Conversions"), {"rows": []})
         rows = {r.get("item"): r for r in conv.get("rows", [])}
         # -- build identity (from the matcher) is the foundation every other confidence stands on
         if match and match.get("how") == "no-match":
-            ask("identity", "capture this build's file — re-apply its tune from Find Tunes (downloaded tunes write their save when applied) or save it if your own; no save matches your live engine, so every decoded value may be another build's", "unblocks everything", 0)
+            ask("identity", "capture this build's file — no save matches your live engine, so every decoded value may be another build's: change any part/slider and SAVE (if yours), or apply this build's tune from Find Tunes (if it's already active, apply a different tune first — re-applying the active tune writes nothing)", "unblocks everything", 0)
         elif match and (match.get("n_signature_ties") or 1) >= 2 and not match.get("gear_disambig"):
             ask("identity", f"drive up through the gears — {match['n_signature_ties']} builds share this engine + PI; the gear ladder identifies the equipped one", "build identity", 0)
         # -- engine cylinders: save-side catalog vs live NumCylinders
@@ -1133,6 +1171,12 @@ def _build_union(deliverable, ordn, match=None):
                 if _alt is not None and ev == ["Transmission"]:
                     ask("identity", f"{match.get('n_signature_ties') or 'several'} saved builds tie on signature and the measured gearbox contradicts the current pick — keep driving up through the gears (Build {_alt.get('build') or '?'} matches the {_alt.get('gears')}-speed box you're using; the ladder confirms it, no re-apply needed)", "auto-resolves", 0)
                     u["asks"].sort(key=lambda a: a["rank"])
+                elif ev == ["Aspiration"] and (match.get("n_signature_ties") or 1) >= 2:
+                    # same roster-first doctrine as the Transmission guard: with tied builds, a measured-aspiration
+                    # contradiction against the CHOSEN save more likely means the tie-pick is wrong than that the
+                    # build is unsaved — 'contradicts every save' may only be claimed after checking every save.
+                    ask("identity", f"{match.get('n_signature_ties')} saved builds tie and the measured aspiration contradicts the current pick — likely a wrong tie-pick, not an unsaved build: keep driving (the gear ladder separates them) or pick the equipped save in the 🪪 drawer", "auto-resolves", 0)
+                    u["asks"].sort(key=lambda a: a["rank"])
                 else:
                     match["prev_how"] = match.get("how"); match["how"] = "unsaved-build"; match["evidence"] = ev
                     ask("identity", "capture this build's file — measured " + " + ".join(e.lower() for e in ev)
@@ -1176,7 +1220,7 @@ class H(BaseHTTPRequestHandler):
             last_seq = ST.seq; last_frame_t = 0.0; last_status = 0.0
             try:
                 # initial snapshot: strip + corners + cars
-                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "loop": ST.loop and {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "last_s": ST.loop_last_s}, "game": ST.game, "mode": {"suggest": ST.mode_suggest, "reason": ST.mode_reason, "kind": ST.game_kind, "game": ST.game}, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
+                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "loop": ST.loop and {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "last_s": ST.loop_last_s}, "game": ST.game, "mode": {"suggest": ST.mode_suggest, "reason": ST.mode_reason, "kind": ST.game_kind, "game": ST.game}, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}, "clone_lock": ST.clone_lock}
                 self.wfile.write(f"event: snapshot\ndata: {json.dumps(snap)}\n\n".encode()); self.wfile.flush()
                 while True:
                     now = time.monotonic()
@@ -1201,7 +1245,7 @@ class H(BaseHTTPRequestHandler):
             body = json.dumps(ST.session_json or {}).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/health"):
-            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None))}).encode()
+            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None)), "clone_lock": ST.clone_lock}).encode()   # the lock GATES stamping/accrual — an invisible lock silently blocked both after a reload
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/shots"):   # recent in-game screenshots from the watched folder(s), newest first
             import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query); n = int((q.get("n") or ["24"])[0])
@@ -1252,7 +1296,7 @@ class H(BaseHTTPRequestHandler):
                         meta, match = _pick_meta(metas, ordn, ts_want=ts_want)   # match the save to the car you're in, not just the newest
                         tune = TUNE.parse_tune(meta["path"], ordinal_hint=ordn)
                         deliverable = TUNE.tune_to_deliverable(tune, nm)
-                        _enrich_engine_desc(deliverable, ordn)
+                        _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match))
                         _enrich_drivetrain(deliverable, ordn)
                         _enrich_gears(deliverable, ordn)
                         _build_union(deliverable, ordn, match=match)   # reconcile save vs telemetry: agreements, conflicts, ranked drive-asks
@@ -1462,6 +1506,7 @@ def reset_session():
         ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None; ST._auto_suspend = None   # keep the loop DEFINITION, reset its lap count
         ST.live_seen = {}   # J20: the parked-identity hold is session telemetry — it dies with the session
         ST.gears_seen = {}; ST.live_fdg = {}
+        ST.clone_lock = None   # an orphaned lock silently blocked PI stamping + catalog accrual with no surface — a session reset is a clean slate
         ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
         ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
         ST.events = []; ST.seq += 1
@@ -1626,7 +1671,7 @@ def disk_watcher():
                     # build is equipped (at a class cap they converge; unstamped PIs are unknown) — stamping then would
                     # pair the live PI with the wrong build's parts and poison the observation store. Require a single
                     # candidate or a gear-ladder-verified pick.
-                    ok_stamp = _rm and _rm.get("how") != "no-match" and not _rm.get("held") and ((_rm.get("n_signature_ties") or 1) <= 1 or _rm.get("gear_disambig"))   # a pure HOLD is a memory, not a verification — a garage swap writes no file, so a held-wrong identity would stamp the live PI onto the wrong build's parts every watcher tick
+                    ok_stamp = _verified_identity(_rm)   # ONE write standard everywhere: no-match/UNSAVED-BUILD never stamp (an unsaved build's live PI must not overwrite the disk config's), a pure HOLD is a memory not a verification, and ambiguity needs the ladder
                     if ok_stamp:
                         _record_pi_observation(ordn, TUNE.parse_tune(rec_meta["path"], ordinal_hint=ordn))
                     _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)
@@ -1649,6 +1694,7 @@ def disk_watcher():
                 if hasattr(ST, "gear_verdicts"):
                     for k in [k for k in ST.gear_verdicts if k.startswith(f"{ordn}|")]:
                         ST.gear_verdicts.pop(k, None)
+                ST.gears_seen.pop(str(ordn), None); ST.live_fdg.pop(str(ordn), None)   # the new tune may have a SMALLER box — the old top gear must not veto the fresh save (permanent false Transmission conflict)
                 # an in-game save is a POSITIVE identity signal — it comes from the car you're sitting in, so the
                 # just-written file IS the equipped build. Re-anchor the sticky identity to it.
                 if not hasattr(ST, "gear_id"):
@@ -1670,7 +1716,7 @@ def disk_watcher():
             meta_m, match_m = _pick_meta(metas, ordn)
             tune = TUNE.parse_tune(meta_m["path"], ordinal_hint=ordn)
             deliverable = TUNE.tune_to_deliverable(tune, nm)
-            _enrich_engine_desc(deliverable, ordn); _enrich_drivetrain(deliverable, ordn); _enrich_gears(deliverable, ordn)
+            _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match_m)); _enrich_drivetrain(deliverable, ordn); _enrich_gears(deliverable, ordn)
             _build_union(deliverable, ordn, match=match_m)
             ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": meta_m["ts"], "available": True,
                              "deliverable": deliverable, "match": match_m, "diff": diff, "new_save": new_save})

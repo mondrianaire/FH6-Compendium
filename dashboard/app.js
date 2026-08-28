@@ -2950,7 +2950,7 @@
       // SHAPE COVERAGE: the curvature map's turn count is the shape's own testimony — ratification must not outrun
       // enumeration. established/mapped (+1 slack for extractor generosity); no geometry data → no penalty.
       const estN = tu.established != null ? tu.established : ((tu.canonical || []).length || tu.count || 0);
-      const geoCov = tu.shape_coverage != null ? tu.shape_coverage : ((tu.mapped || 0) > 0 ? Math.min(1, (estN + 1) / tu.mapped) : 1);
+      const geoCov = tu.shape_coverage != null ? tu.shape_coverage : ((tu.mapped || 0) > 0 ? Math.min(1, (estN + 1) / (tu.expected || tu.mapped)) : 1);   // the player's DECLARED count is ground truth — an over-mapping extractor must not deadlock the gate
       const missingN = (tu.mapped || 0) > estN ? tu.mapped - estN : 0;
       const lapStr = 1 - Math.exp(-1.2 * lapsTrack / 3);
       // SHAPE confidence: are the recorded laps tracing the same OUTLINE? (analyzer-measured; the shape is the course's identity, so it's the
@@ -2969,7 +2969,10 @@
       if (!prof) needs.push({ k: "profile", p: 3, text: "one full lap so the course's demands (profile) are known" });
       if ((tu.messy || []).length) needs.push({ k: "messy", p: 3, text: `${tu.messy.map(turnLabel).join(", ")} split into several detections most laps — drive ${tu.messy.length === 1 ? "it" : "them"} as one smooth arc` });   // J13
       needs.sort((x, y) => x.p - y.p);
-      const auto = (pct >= 75 && mapped && geoCov >= 0.9) ? "tuning" : "training"; const sel = courseStageSel();   // HARD gate: the tuning stage requires the enumerated turns to cover the shape's mapped turns — per-turn advice on a known-incomplete inventory is wrong advice
+      let auto = (pct >= 75 && mapped && geoCov >= 0.9) ? "tuning" : "training"; const sel = courseStageSel();   // HARD gate: the tuning stage requires the enumerated turns to cover the shape's mapped turns — per-turn advice on a known-incomplete inventory is wrong advice
+      try { const hk = "fh6StageAuto:" + (co.route_key || "");   // HYSTERESIS: a reached tuning stage regresses only when CLEARLY below the gate — one newly-mapped turn at the boundary must not flap the stage (and its toast) every analysis
+        if (localStorage.getItem(hk) === "tuning" && auto === "training" && pct >= 68 && geoCov >= 0.85 && mapped) auto = "tuning";
+        localStorage.setItem(hk, auto); } catch (e) {}
       let stage = sel === "auto" ? auto : sel; let pinSuspended = false;
       if (sel === "tuning" && auto === "training") { stage = "training"; pinSuspended = true; }   // STATUS REGRESSION beats the pin: prerequisites no longer fulfilled → the pinned tuning stage is suspended, not honored
       return { pct, stage, auto, sel, needs, mapped, turnConf, lapsTrack, lapsN, poss, notDriven, prof, shapeConf, shapeMeasured, shapeAgree, shapeCompared, shapeSpread, geoCov, missingN, pinSuspended };
@@ -3109,7 +3112,7 @@
       if (m.how === "unsaved-build") { R.hardBlock = true; R.matchLbl = "distinct build"; R.need.push(`its file isn't on disk — capture it: change any part or slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the already-active tune writes nothing`); }
       else if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`no save matches your ${m.live_cyl}-cyl engine — capture it: change any part or slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the already-active tune writes nothing`); }
       else if (m.how === "gear-matched") { R.matchLbl = "gear-matched"; R.why.push(`identified the equipped build by its live gear ladder (${ties} share this engine + PI)`); }
-      else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(`drive up through the gears — the ladder identifies which of ${ties} builds you're on`); }
+      else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(m.ladder_tied ? `these ${ties} builds share IDENTICAL gearing — the ladder cannot separate them: pick the equipped save in the 🪪 drawer (one click resolves it)` : `drive up through the gears — the ladder identifies which of ${ties} builds you're on`); }   // when the ladder RAN and tied, 'drive the gears' is a dead-end ask — the manual pick is THE escape
       else if (m.how === "signature") { R.matchLbl = "signature"; R.why.push(m.live ? "matched to the car you're driving (cylinders + PI)" : "matched to the car you last drove (cylinders + PI) — held while parked"); }   // J20
       else if (m.how === "picked") { R.matchLbl = "pinned"; R.why.push("pinned to a specific saved tune"); }
       else if (n > 1) { R.hardBlock = true; R.matchLbl = "unmatched"; R.need.push(`drive so I can match the equipped build (${n} saved tunes exist), or pick it in the decode panel`); }
@@ -4086,9 +4089,9 @@
       try { localStorage.setItem(ledKey, JSON.stringify(led)); } catch (e) {}
       const REQS = [
         { k: "identity", ok: idOk, lbl: "build identity verified", act: (bcR.need || [])[0] || "drive up through the gears — the ladder identifies the equipped build", note: idOk && !idNowOk ? "held from your last verified run" : idOk ? (led.identity.note || "") : "" },
-        { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-save (own) or apply a different tune then re-apply (downloaded), then drive once · 🔗 drawer` },
+        { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: (dl.gear_diag || {}).kind === "fd" ? `gear conflict is a SYSTEMATIC offset (final-drive band) — re-saving cannot change a band-derived value: calibrate the final drive in the 🎯 drawer instead` : `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-save (own) or apply a different tune then re-apply (downloaded), then drive once · 🔗 drawer` },
         { k: "sanity", ok: !sanE, soft: true, lbl: "tuning sanity clean", act: `${sanE} finding${sanE > 1 ? "s" : ""} — 🩺 drawer (advisory: does not block ratification)` },
-        { k: "calib", ok: !relN, lbl: "every slider value exact", act: `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — 🎯 drawer, two-point read` },
+        { k: "calib", ok: !relN, lbl: "every slider value exact", act: dl.locked ? `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — a locked tune hides its sliders, so calibrate via ANY editable tune on this car (calibration is per-car and transfers): save your own tune once, do the 🎯 two-point read there, then re-apply this one` : `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — 🎯 drawer, two-point read` },
         { k: "pi", ok: piOk, lbl: "PI stamped", act: "drive this build once while identified — stamps its PI", note: piOk ? `PI ${led.pi.v}` : "" },
       ];
       const hard = REQS.filter((q) => !q.soft);   // sanity findings are ADVISORY — warnings, never ratification blockers
@@ -5040,7 +5043,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const an = live.analysis; const donorSt = an && (an.stints || []).find((x) => x.role === "donor"); const pin = PIN(); const ls = liveSess();
       const donorCar = pin ? ((ls && pin.sid === ls.id && car(ls, pin.key)) || (pin.data && car(pin.data, pin.key)) || null) : (donorSt && (an.cars || []).find((c) => c.id === donorSt.id));
       const dchip = donorCar && donorCar.decode ? `<span class="chip" style="border-color:#e3b341;color:#e3b341" title="${pin ? "pinned donor — stays until you pick another or unpin (Decode tab)" : "donor capture progress — tests only"}">${pin ? "📌 " : ""}🎯 donor ${buildThumb(donorCar.ordinal, donorCar.build_id, true)} ${esc(carName(donorCar) || "")} ${donorCar.decode.ready_n}/${donorCar.decode.total} tests${donorCar.decode.pct >= 1 && donorCar.clone_sheet && donorCar.clone_sheet.confidence != null ? " · 📋 sheet " + Math.round(donorCar.clone_sheet.confidence * 100) + "%" : ""}</span>` : "";
-      el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL[em][1]};color:${MODE_LBL[em][1]};font-weight:700">${MODE_LBL[em][0]}</span><span class="why" style="font-size:11px">${ms === "auto" ? "🧭 auto-detected" + (lm.reason ? " — " + esc(lm.reason) : " — waiting for the stream") : "manual — click 🧭 auto to hand detection back"}${live.status && live.status.game === "menu" ? ` · in menus — <b style="color:var(--accent)">📌 deliverable held</b> for the upgrade / tune screen` : ""}</span>${dchip}</div>`;
+      el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="chip" style="border-color:${MODE_LBL[em][1]};color:${MODE_LBL[em][1]};font-weight:700">${MODE_LBL[em][0]}</span><span class="why" style="font-size:11px">${ms === "auto" ? "🧭 auto-detected" + (lm.reason ? " — " + esc(lm.reason) : " — waiting for the stream") : "manual — click 🧭 auto to hand detection back"}${live.status && live.status.game === "menu" ? ` · in menus — <b style="color:var(--accent)">📌 deliverable held</b> for the upgrade / tune screen` : ""}</span>${dchip}${(() => { const lk = live.status && live.status.clone_lock; if (lk == null || (live.cloneTarget && live.cloneTarget.ordinal === lk)) return ""; const nm2 = (NAMES()[String(lk)] || {}).name || "#" + lk; return `<span class="chip" style="border-color:#e5414e;color:#e5414e" title="a clone lock from a previous session is still active on the daemon — it silently pauses PI stamping and catalog accrual for this car">🎯 orphaned clone lock: ${esc(nm2)} <button class="lab-mode" data-clone-unlock="1" style="padding:1px 7px;font-size:10px;margin-left:4px">unlock</button></span>`; })()}</div>`;
+      el.querySelectorAll("[data-clone-unlock]").forEach((b) => b.addEventListener("click", () => { unlockCloneTarget(); if (live.status) live.status.clone_lock = null; paintBanner(); }));
     }
     function streamBar() {
       // the NECESSARY live state (status + workflow/event line + the ↺/⚙ controls) lives in the sticky .lab-top header

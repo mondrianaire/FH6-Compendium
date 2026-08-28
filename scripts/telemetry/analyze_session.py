@@ -21,6 +21,82 @@ CLASS = {0: "D", 1: "C", 2: "B", 3: "A", 4: "S1", 5: "S2", 6: "X", 7: "X"}
 DRIVE = {0: "FWD", 1: "RWD", 2: "AWD"}
 W = ["FL", "FR", "RL", "RR"]
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+# Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
+# course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
+# reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
+DET_VER = "geo2-centroid-m60"
+
+
+def self_retrace(path, tol=20.0):
+    """Fraction of a path's second half that lies within tol metres of its first half.
+
+    A lap drives each piece of road ONCE, so a real lap — closed circuit or not — scores near zero. A MERGED
+    lap (the game missed a finish-line crossing, so two laps became one window) retraces itself and scores
+    high. This is the only way to tell a genuinely long course from two laps of a short one: length alone
+    cannot, and length alone is what crowned a 1923 m double lap as the reference for a 1024 m circuit."""
+    if len(path) < 40:
+        return 0.0
+    h = len(path) // 2
+    A = path[:h:2] or path[:h]
+    B = path[h::2] or path[h:]
+    t2 = tol * tol
+    n = sum(1 for b in B if any((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 <= t2 for a in A))
+    return n / max(1, len(B))
+
+
+def better_map(fresh, stored):
+    """Should this session's geometry become the course's map? ONE definition, used by both the turn registry
+    and the model write — they used to decide separately, so the registry was seeded from the old map while the
+    write adopted the new one, and every superseded corner stayed 'part of the road' forever."""
+    if not (fresh and fresh.get("path")):
+        return False
+    if self_retrace(fresh["path"]) >= 0.4:
+        return False                                              # never adopt a merged lap as the map
+    sp = (stored or {}).get("path")
+    if not sp:
+        return True
+    if self_retrace(sp) >= 0.4:
+        return True                                               # the stored map IS a merged lap: replace it
+    if len(fresh["path"]) >= len(sp):
+        return True
+    # an older detector's map is not trustworthy, but only a session that really drove the course may re-map it
+    return (stored or {}).get("det") != DET_VER and len(fresh["path"]) >= 0.8 * len(sp)
+
+
+def split_multilap(pts, close_m=35.0, min_lap_m=250.0):
+    """Where did each lap actually end? Returns the indices that close a lap, or [] if this is a single lap.
+
+    Laps are cut on the game's LapNumber, but it does not increment in free roam or on unregistered routes, so
+    a whole multi-lap run arrives as ONE window. Geometry then reads two laps of a circuit as one road of twice
+    the length with every corner counted twice — the fault behind three corrupted course maps, one of which had
+    a single 'lap' holding five. The finish line is not in the telemetry, but the road says the same thing: the
+    lap closed when the car came back to where it started.
+
+    pts: [(t, x, z), ...]. A cut needs min_lap_m of travel first, so crawling around the grid cannot trigger one.
+    """
+    if len(pts) < 40:
+        return []
+    cum = [0.0]
+    for i in range(1, len(pts)):
+        cum.append(cum[-1] + math.hypot(pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]))
+    cuts = []
+    i0 = 0
+    for i in range(1, len(pts)):
+        if cum[i] - cum[i0] < min_lap_m:
+            continue
+        if math.hypot(pts[i][1] - pts[i0][1], pts[i][2] - pts[i0][2]) <= close_m:
+            cuts.append(i)
+            i0 = i
+    # A SHORT TAIL IS NOT A LAP. A LapNumber window already ends AT the start line, so its final return is the
+    # lap closing, not a new one beginning — accepting it turned every ordinary lap into a lap plus a stub and
+    # doubled the lap count. Every interior piece is >= min_lap_m by construction; only the tail can be short.
+    while cuts:
+        pieces = [cum[b] - cum[a] for a, b in zip([0] + cuts, cuts)]
+        typical = sorted(pieces)[len(pieces) // 2]
+        if cum[-1] - cum[cuts[-1]] >= 0.5 * typical:
+            break
+        cuts.pop()
+    return cuts
 INTS = ("IsRaceOn","Gear","Accel","Brake","Clutch","HandBrake","Steer","CarOrdinal","CarPI","CarClass","DrivetrainType","NumCylinders","CarGroup","LapNumber","RacePosition","Trailing323","NormDrivingLine","NormAIBrakeDiff")
 
 def cid(r): return f'{r["CarOrdinal"]}|{r["DrivetrainType"]}|{r["NumCylinders"]}|{r["CarPI"]}'
@@ -1075,6 +1151,20 @@ def main():
             k_ += 1; lap_windows.append({"ev": ei, "lap": k_, "t0": round(t_start, 1), "t1": ev["t1"]})
         lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15]   # the stub after a finish line is not a lap
         lap_windows = lw_full or lap_windows
+        # LapNumber does not increment in free roam or on unregistered routes, so a multi-lap run arrives as ONE
+        # window. Cut it where the car returned to where the window started — the road's own finish line.
+        _split = []
+        for w in lap_windows:
+            _p = [(r["t"], r["PosX"], r["PosZ"]) for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+            _cuts = split_multilap(_p)
+            if not _cuts:
+                _split.append(w); continue
+            _b = [0] + _cuts + [len(_p) - 1]
+            for _a, _z in zip(_b, _b[1:]):
+                if _z - _a >= 20: _split.append(dict(w, t0=round(_p[_a][0], 1), t1=round(_p[_z][0], 1), split=True))
+        _split.sort(key=lambda x: x["t0"])
+        for _i, _w in enumerate(_split, 1): _w["lap"] = _i
+        lap_windows = _split or lap_windows
         total_laps = len(lap_windows)
         def lap_of(t):
             for li, w in enumerate(lap_windows):
@@ -1130,8 +1220,76 @@ def main():
         def down(pcs, n=500):   # downsample pieces for drawing (<= n points in total)
             tot = sum(len(p) for p in pcs) or 1; k = max(1, -(-tot // n))
             return [[[round(p[0]), round(p[1])] for p in pc[::k]] for pc in pcs if len(pc[::k]) >= 2]
+        # ═══ TURN DETECTION (validated in scripts/telemetry/turn_lab.py against cross-lap agreement) ═══
+        # A turn is a SUSTAINED CHANGE OF DIRECTION, not a radius crossing a threshold. Segment the path by
+        # curvature SIGN while |k| is above a permissive floor (r < 600 m, so long sweepers survive), bridging
+        # short sub-floor gaps inside one turn, and accept a segment on the heading change it actually produces
+        # (>= 30 deg) or on being genuinely tight (r <= 90 m and >= 14 deg). Radius never gates EXISTENCE — that
+        # is what made a 200 m sweeper invisible while a twitch inside a hairpin counted as its own turn.
+        # Measured vs the shipped detector: cross-lap agreement 70% vs 59%, count spread +/-0.6 vs +/-2.8 turns
+        # per lap, orphan (one-lap-only) turns 4 vs 11.
+        def detect_turns(P, step=4.0, win=9, floor_r=600.0, min_deg=30.0, tight_r=90.0, tight_deg=14.0, bridge_m=25.0):
+            K = curvature(P, step, win)
+            if not K: return []
+            floor = 1.0 / floor_r; bridge = max(1, int(bridge_m / step))
+            segs = []; cur = None; gap = 0
+            for i_, k_ in enumerate(K):
+                sg = 1 if k_ > 0 else -1
+                if abs(k_) >= floor:
+                    if cur and cur["sgn"] == sg and gap <= bridge: cur["i1"] = i_ + 1; gap = 0
+                    else:
+                        if cur: segs.append(cur)
+                        cur = {"i0": i_, "i1": i_ + 1, "sgn": sg}; gap = 0
+                elif cur:
+                    gap += 1
+                    if gap > bridge: segs.append(cur); cur = None
+            if cur: segs.append(cur)
+            out = []
+            for t_ in segs:
+                sl = K[t_["i0"]:t_["i1"]]
+                if not sl: continue
+                deg = abs(sum(sl) * step) * 180 / math.pi
+                ia = t_["i0"] + max(range(len(sl)), key=lambda q: abs(sl[q]))
+                rmin = 1 / max(1e-6, abs(K[ia]))
+                if not (deg >= min_deg or (rmin <= tight_r and deg >= tight_deg)): continue
+                out.append({"ia": ia + 1, "i0": t_["i0"] + 1, "i1": min(t_["i1"] + 1, len(P) - 1),
+                            "sgn": t_["sgn"], "k": abs(K[ia]), "deg": round(deg), "radius_m": round(rmin)})
+            # ONE CONTINUOUS CHANGE OF DIRECTION IS ONE TURN: same-direction segments whose spans nearly touch are
+            # a double-apex / compound corner that a momentary curvature dip split in two. Merge on SPAN
+            # adjacency, not apex distance — a compound corner's apexes sit ~90 m apart while its halves are
+            # metres apart. 60 m is measured, not guessed: real compound halves here sit 36 m apart and genuinely
+            # separate same-direction corners sit 148 m apart, so the threshold lands in an empty band.
+            adj = max(1, int(60.0 / step)); mg = []
+            for t_ in out:
+                if mg and t_["sgn"] == mg[-1]["sgn"] and (t_["i0"] - mg[-1]["i1"]) <= adj:
+                    m_ = mg[-1]; m_["i1"] = max(m_["i1"], t_["i1"]); m_["deg"] = m_["deg"] + t_["deg"]
+                    if t_["k"] > m_["k"]: m_["k"] = t_["k"]; m_["ia"] = t_["ia"]; m_["radius_m"] = t_["radius_m"]
+                else: mg.append(dict(t_))
+            # WHERE a turn IS = where its direction change is CONCENTRATED, not the single tightest sample. The
+            # argmax of a smoothed derivative wanders with the racing line, so the same corner reported apexes
+            # tens of metres apart from lap to lap; the curvature-weighted centroid is a property of the road.
+            for t_ in mg:
+                sl = [abs(x) for x in K[max(0, t_["i0"] - 1):max(0, t_["i1"] - 1)]]
+                tot = sum(sl)
+                if tot:
+                    t_["ia"] = min(len(P) - 1, max(0, int(round(t_["i0"] + sum(q * w for q, w in enumerate(sl)) / tot))))
+            return mg
         geo = None
-        full_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
+        # a "lap" for GEOMETRY must be a lap: the 15 s rule admits aborted stubs (Edamame stored 48 lap paths,
+        # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns.
+        _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
+        def _arc_of_win(w):
+            _p = resample(lap_pts(w)); return sum(pc[-1][2] for pc in _p) if _p else 0
+        _cand_arcs = {id(w): _arc_of_win(w) for w in _cand_laps}
+        # A FULL LAP IS THE CONSENSUS LENGTH, NOT THE LONGEST. Measuring against the session maximum inverts the
+        # filter the moment one lap window merges two laps (a missed finish-line crossing): the bar doubles, every
+        # genuine lap is discarded as a "fragment", and the merged lap is crowned reference — which is how a
+        # 1024 m circuit came to be mapped as a 1923 m road with its corners counted twice.
+        # LOWER median: robust against the high outlier that causes the fault, and biased toward the short side,
+        # where the coverage guard at the model write already prevents any damage.
+        _vals = sorted(v for v in _cand_arcs.values() if v > 0)
+        _med = _vals[(len(_vals) - 1) // 2] if _vals else 0
+        full_laps = [w for w in _cand_laps if _med and 0.7 * _med <= _cand_arcs[id(w)] <= 1.45 * _med] or _cand_laps
         if full_laps:
             # ref lap = the FASTEST lap of TYPICAL length (median arc consensus). 'Most rows' picked the SLOWEST lap
             # — and a rejoin/crawl lap: its loop showed up as phantom mapped turns and crawl speed_ref values.
@@ -1145,39 +1303,22 @@ def main():
             ref_w = min(_typ, key=_rows_in)
             pieces = resample(lap_pts(ref_w)); P = [p for pc in pieces for p in pc]
             if len(P) >= 20:
-                thr = 1.0 / 250.0; gturns = []; off = 0; piece_of = {}
+                gturns = []; off = 0; piece_of = {}
                 for pi_, pc in enumerate(pieces):
                     for q in range(len(pc)): piece_of[off + q] = pi_
                     if len(pc) >= 12:
-                        K = curvature(pc); i_ = 0
-                        while i_ < len(K):
-                            if abs(K[i_]) > thr:
-                                j_ = i_
-                                while j_ < len(K) and abs(K[j_]) > thr * 0.6: j_ += 1
-                                if (j_ - i_) >= 4:
-                                    ia = max(range(i_, j_), key=lambda q: abs(K[q])); gturns.append({"i0": off + i_ + 1, "i1": off + min(j_, len(pc) - 1), "ia": off + ia + 1, "k": abs(K[ia]), "sgn": 1 if K[ia] > 0 else -1})
-                                i_ = j_
-                            else: i_ += 1
+                        for t_ in detect_turns(pc):
+                            gturns.append({"i0": off + t_["i0"], "i1": off + t_["i1"], "ia": off + t_["ia"],
+                                           "k": t_["k"], "sgn": t_["sgn"], "deg": t_["deg"], "radius_m": t_["radius_m"]})
                     off += len(pc)
-                merged = []
-                for g in gturns:   # merge near-contiguous same-direction pieces (a wobble inside one turn) — never across a path break
-                    if merged and g["i0"] - merged[-1]["i1"] <= 3 and g["sgn"] == merged[-1]["sgn"] and piece_of.get(g["i0"]) == piece_of.get(merged[-1]["i1"]):
-                        m_ = merged[-1]; m_["i1"] = g["i1"]
-                        if g["k"] > m_["k"]: m_["k"] = g["k"]; m_["ia"] = g["ia"]
-                    else: merged.append(dict(g))
+                merged = gturns   # the detector already bridges wobbles inside a turn; no second merge pass
                 votes = 0   # calibrate the L/R sign convention against the behavioural corners (lat-g sign) by majority vote
                 for g in merged:
                     ax, az = P[g["ia"]][0], P[g["ia"]][1]
                     for c in cc:
                         if c.get("apex") and math.hypot(c["apex"][0] - ax, c["apex"][1] - az) <= 40: votes += (1 if ((c["dir"] == "R") == (g["sgn"] > 0)) else -1)
                 flip = votes < 0; gt_out = []
-                def heading(i_): a, b = P[max(0, i_ - 1)], P[min(len(P) - 1, i_ + 1)]; return math.atan2(b[1] - a[1], b[0] - a[0])
-                for g in merged:
-                    dth = heading(g["i1"]) - heading(g["i0"])
-                    while dth > math.pi: dth -= 2 * math.pi
-                    while dth < -math.pi: dth += 2 * math.pi
-                    g["deg"] = round(abs(math.degrees(dth)))
-                merged = [g for g in merged if g["deg"] >= 12]   # a gentle bend (< 12° of heading change) is not a turn
+                # deg/radius come from the detector (integrated over the whole turn, not an endpoint difference)
                 for n_, g in enumerate(merged, 1):
                     gt_out.append({"id": f"G{n_}", "apex": [round(P[g["ia"]][0]), round(P[g["ia"]][1])], "s": round(P[g["ia"]][2]), "radius_m": round(1.0 / g["k"]), "dir": ("R" if (g["sgn"] > 0) != flip else "L"), "deg": g["deg"],
                                    "len_m": round((g["i1"] - g["i0"]) * 4.0), "entry": [round(P[g["i0"]][0]), round(P[g["i0"]][1])], "exit": [round(P[g["i1"]][0]), round(P[g["i1"]][1])], "speed_ref_lap": round(P[g["ia"]][3])})
@@ -1505,14 +1646,29 @@ def main():
                 if g_.get(f_) is not None: rec[f_] = g_[f_]
         # the model's PERSISTED geometry is the best map on record — a full mapped lap, already vetted. Every
         # turn in it is part of the road by definition, so it seeds the inventory at full standing.
-        for g_ in (((model.get("geometry") or {}).get("turns")) or []):
+        # REBUILT, never accumulated: this flag used to be set and never cleared, so a turn that appeared in any
+        # map ever stayed established forever — a corrected map could remove a corner from the road and the
+        # inventory would still carry it. It describes the CURRENT map or it describes nothing.
+        for _v in gseen.values(): _v.pop("model_map", None)
+        # ...and seed from the map that will actually BE the course's map after this session, not the one it was
+        # replacing. Reading the stored map here while the write below adopted the fresh one is what kept a
+        # superseded double lap's phantom corners standing at full geometric authority.
+        _authoritative = ((geo.get("turns") if better_map(geo, model.get("geometry"))
+                           else (model.get("geometry") or {}).get("turns")) or [])
+        for g_ in _authoritative:
             ap = g_.get("apex")
             if not ap: continue
             hit_k = next((k for k, v in gseen.items() if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 40 ** 2), None)
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
                                    {"pos": [round(ap[0]), round(ap[1])], "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             rec["model_map"] = True
+        # RETIRE PHANTOMS: an entry detected only by a superseded detector stops being re-detected, but its old
+        # session list keeps it above the >=2-sessions bar forever. A turn survives only if the current map holds
+        # it, or a RECENT mapping session still finds it. (Session ids are timestamps, so max() is 'most recent'.)
+        for k_ in [k for k, v in gseen.items() if not v.get("model_map") and sid not in (v.get("sessions") or [])]:
+            gseen.pop(k_, None)   # not in the course's map and not seen driving it just now = not part of the road
         # every geometric turn becomes a model turn (created if the behavioural pass never saw it)
+        for t in merged_turns: t.pop("geo_mapped", None); t.pop("geo_sessions", None)   # re-derived from gseen below, never inherited from the file
         for k, v in gseen.items():
             hit = next((t for t in merged_turns if (t["pos"][0] - v["pos"][0]) ** 2 + (t["pos"][1] - v["pos"][1]) ** 2 <= 40 ** 2), None)
             if hit is None:
@@ -1538,16 +1694,11 @@ def main():
             return None
         for t in merged_turns:
             _by = _established(t); t["established"] = bool(_by); t["est_by"] = _by; t["status"] = "turn" if _by else "possible"
-        # THE PLAYER'S DECLARED COUNT IS GROUND TRUTH — the model already TRIMS when it over-detects; it must
-        # also PROMOTE when it under-detects, or a course you have declared 9 turns on shows 7 forever.
+        # THE DECLARED COUNT IS A TEST, NEVER AN INPUT. Promoting unestablished clusters just to reach a declared
+        # total made the count self-fulfilling: it could no longer disagree, so it could no longer reveal a
+        # detector fault. Record the discrepancy so the dashboard can flag it, and let the geometry stand.
         _exp = model.get("expected_turns")
-        if _exp:
-            _est = [t for t in merged_turns if t["established"]]
-            if len(_est) < _exp:
-                _cand = sorted((t for t in merged_turns if not t["established"]),
-                               key=lambda t: -((t.get("track") or {}).get("presence") or 0))
-                for t in _cand[:_exp - len(_est)]:
-                    t["established"] = True; t["status"] = "turn"; t["est_by"] = "declared"   # counted toward YOUR declared total
+        model["turn_count_delta"] = (len([t for t in merged_turns if t["established"]]) - _exp) if _exp else None
         model["turns"] = merged_turns
         canonical = [t for t in merged_turns if t["established"]]
         model["turn_count"] = len(canonical)
@@ -1595,11 +1746,16 @@ def main():
             mg = model.get("geometry") or {}
             prev_lp = [lp for lp in (mg.get("lap_paths") or []) if lp.get("session") != sid]   # re-analysis of this session replaces its own laps
             layout = sorted(prev_lp + (geo.get("lap_paths") or []), key=lambda lp: (lp.get("session") or "", lp.get("ev", 0), lp.get("lap", 0)))[-48:]   # chronological (session ids are timestamps) — the 48 most RECENT laps, whatever the analysis order
-            if not mg.get("path") or len(geo["path"]) >= len(mg.get("path") or []): model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"), "turns": geo["turns"], "session": sid, "lap_paths": layout}   # the map persists with the course
+            if better_map(geo, mg):
+                model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"), "turns": geo["turns"], "session": sid, "lap_paths": layout, "det": DET_VER}   # the map persists with the course
             else: mg["lap_paths"] = layout; model["geometry"] = mg
-            # the session's map should show the BEST-known map of the track (a thin 3-lap session must not display only 3 turns) — borrow the model's richer geometry
+            # The session's map should show the BEST-KNOWN map of the track (a thin 3-lap session must not display
+            # only the road it saw) — borrow the model's geometry when it covers MORE ROAD. This used to borrow
+            # whichever had MORE TURNS, which is not a measure of coverage: turns are a function of the path, so a
+            # superseded over-detecting map always won and re-infected every new session with its extra corners.
             bestg = model["geometry"]
-            if len(bestg.get("turns") or []) > len(geo.get("turns") or []): geo["turns"] = bestg["turns"]; geo["paths"] = bestg.get("paths"); geo["path"] = bestg.get("path"); geo["length_m"] = bestg.get("length_m"); geo["from_model"] = True
+            if bestg.get("det") == DET_VER and len(bestg.get("path") or []) > len(geo.get("path") or []):
+                geo["turns"] = bestg["turns"]; geo["paths"] = bestg.get("paths"); geo["path"] = bestg.get("path"); geo["length_m"] = bestg.get("length_m"); geo["from_model"] = True
             geo["layout_paths"] = [{"session": lp.get("session"), "pts": lp["pts"]} for lp in layout]   # every recorded lap of this course (all sessions) for the layout drawing
             _sc = shape_confidence(geo.get("path"), layout)   # SHAPE confidence: do the recorded laps trace the same outline? (rides on turns -> reaches the live push, unlike geometry)
             if _sc:

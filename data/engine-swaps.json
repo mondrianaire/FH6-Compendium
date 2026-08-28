@@ -645,7 +645,7 @@
    "cyl": 4,
    "displacement_l": 1.6,
    "redline": 10000,
-   "sample_hp": null,
+   "sample_hp": 340,
    "resulting_drivetrain": "AWD",
    "sample_pi": 841,
    "source": "save-mined+telemetry"
@@ -922,13 +922,13 @@
    "cars_seen": {
     "1661": "1986 Lancia Delta S4"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
+   "redline": 9000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 600,
+   "source": "save-mined+telemetry"
   },
   "2135": {
    "engine_family": 2135,
@@ -966,13 +966,13 @@
     "3865": "1994 Honda Acty",
     "3928": "2022 Hyundai i20 N"
    },
-   "cyl": null,
+   "cyl": 3,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 11000,
+   "sample_hp": 634,
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "2233": {
    "engine_family": 2233,
@@ -1116,13 +1116,13 @@
    "cars_seen": {
     "2430": "2016 Ariel Nomad"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9000,
+   "sample_hp": 328,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "2619": {
    "engine_family": 2619,
@@ -1179,13 +1179,13 @@
     "3184": "1977 Ford Escort Mk2",
     "4165": "1973 Mazda RX-3 (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
+   "redline": 8000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "2672": {
    "engine_family": 2672,
@@ -1395,13 +1395,13 @@
     "3662": "2021 RJ Anderson #37 Polaris RZR Pro 4 Truck",
     "4164": "2022 Subaru BRZ (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 1750,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "3123": {
    "engine_family": 3123,
@@ -1435,13 +1435,13 @@
    "cars_seen": {
     "2997": "2016 Formula Drift #530 HSV Maloo Gen-F"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 1119,
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "3132": {
    "engine_family": 3132,
@@ -1877,13 +1877,13 @@
    "cars_seen": {
     "3523": "2020 Formula Drift #151 Toyota GR Supra"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9000,
+   "sample_hp": 1032,
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 779,
+   "source": "save-mined+telemetry"
   },
   "3683": {
    "engine_family": 3683,
@@ -2058,13 +2058,13 @@
    "cars_seen": {
     "3665": "2021 Sierra Cars 700R"
    },
-   "cyl": null,
+   "cyl": 1,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 127,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 600,
+   "source": "save-mined+telemetry"
   },
   "3802": {
    "engine_family": 3802,
@@ -2223,13 +2223,13 @@
     "3214": "2019 Porsche #70 Porsche Motorsport 935",
     "3781": "2023 Porsche 911 GT3 RS"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9000,
+   "sample_hp": 276,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 600,
+   "source": "save-mined+telemetry"
   },
   "3921": {
    "engine_family": 3921,
@@ -2444,13 +2444,13 @@
    "cars_seen": {
     "4114": "1992 Nissan Skyline GT-R"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 390,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 600,
+   "source": "save-mined+telemetry"
   },
   "4305": {
    "engine_family": 4305,
@@ -2464,13 +2464,13 @@
    "cars_seen": {
     "4160": "1989 Nissan S-Cargo (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 896,
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 800,
+   "source": "save-mined+telemetry"
   },
   "4307": {
    "engine_family": 4307,
@@ -2544,13 +2544,13 @@
    "cars_seen": {
     "4167": "2012 Nisan GT-R Black Edition R35 (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 2787,
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 850,
+   "source": "save-mined+telemetry"
   },
   "4313": {
    "engine_family": 4313,
@@ -2667,13 +2667,13 @@
     "2987": "1962 Peel P50",
     "3865": "1994 Honda Acty"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 16500,
+   "sample_hp": 748,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 930,
+   "source": "save-mined+telemetry"
   },
   "4365": {
    "engine_family": 4365,
@@ -2729,13 +2729,13 @@
    "cars_seen": {
     "4223": "2000 Nissan Skyline GT-R V-Spec II"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
+   "redline": 10000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 598,
+   "source": "save-mined+telemetry"
   },
   "4377": {
    "engine_family": 4377,

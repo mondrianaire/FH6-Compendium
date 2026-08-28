@@ -3,8 +3,8 @@
   "loops": {
     "test loop": {
       "start": [
-        -1837,
-        1559
+        984,
+        2341
       ],
       "radius": 60,
       "min_dist": 250

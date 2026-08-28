@@ -102,7 +102,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 76,
-   "n": 179,
+   "n": 181,
    "best": {
     "mph_in": 90,
     "mph_min": 90,
@@ -286,7 +286,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 161,
-   "n": 156,
+   "n": 160,
    "best": {
     "mph_in": 126,
     "mph_min": 126,
@@ -451,7 +451,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 161,
-   "n": 156,
+   "n": 160,
    "best": {
     "mph_in": 139,
     "mph_min": 139,
@@ -623,10 +623,25 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 5,
+    "presence": 0.0
+   },
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 176,
+   "deg": 181,
    "established": true,
    "est_by": "geometry",
    "status": "turn"
@@ -640,7 +655,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 33,
-   "n": 136,
+   "n": 140,
    "best": {
     "mph_in": 79,
     "mph_min": 56,
@@ -785,7 +800,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 173,
-   "n": 108,
+   "n": 110,
    "best": {
     "mph_in": 91,
     "mph_min": 91,
@@ -911,7 +926,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 160,
-   "n": 67,
+   "n": 71,
    "best": {
     "mph_in": 106,
     "mph_min": 106,
@@ -1024,7 +1039,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 213,
-   "n": 28,
+   "n": 30,
    "best": {
     "mph_in": 118,
     "mph_min": 118,
@@ -1115,7 +1130,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 152,
-   "n": 108,
+   "n": 110,
    "best": {
     "mph_in": 114,
     "mph_min": 114,
@@ -1337,10 +1352,25 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 5,
+    "presence": 0.0
+   },
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 179,
+   "deg": 183,
    "established": true,
    "est_by": "geometry",
    "status": "turn"
@@ -1354,7 +1384,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 115,
-   "n": 135,
+   "n": 139,
    "best": {
     "mph_in": 95,
     "mph_min": 95,
@@ -1502,7 +1532,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 95,
-   "n": 127,
+   "n": 129,
    "best": {
     "mph_in": 99,
     "mph_min": 99,
@@ -1638,7 +1668,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": false,
-   "deg": 38,
+   "deg": 41,
    "est_by": "behaviour"
   },
   {
@@ -1650,7 +1680,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 47,
-   "n": 107,
+   "n": 109,
    "best": {
     "mph_in": 108,
     "mph_min": 79,
@@ -1767,7 +1797,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 65,
+   "deg": 70,
    "est_by": "geometry"
   },
   {
@@ -1779,7 +1809,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 77,
-   "n": 39,
+   "n": 41,
    "best": {
     "mph_in": 77,
     "mph_min": 77,
@@ -1870,7 +1900,7 @@
    "dir": "R",
    "type": "hairpin",
    "radius_m": 18,
-   "n": 154,
+   "n": 158,
    "best": {
     "mph_in": 58,
     "mph_min": 40,
@@ -2025,7 +2055,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 171,
+   "deg": 190,
    "est_by": "geometry"
   },
   {
@@ -2037,7 +2067,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 111,
-   "n": 27,
+   "n": 29,
    "best": {
     "mph_in": 69,
     "mph_min": 69,
@@ -2128,7 +2158,7 @@
    "dir": "L",
    "type": "hairpin",
    "radius_m": 18,
-   "n": 275,
+   "n": 279,
    "best": {
     "mph_in": 79,
     "mph_min": 40,
@@ -2265,7 +2295,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 176,
+   "deg": 179,
    "est_by": "geometry"
   },
   {
@@ -2277,7 +2307,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 194,
-   "n": 132,
+   "n": 136,
    "best": {
     "mph_in": 114,
     "mph_min": 114,
@@ -2430,10 +2460,25 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 5,
+    "presence": 0.0
+   },
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 84,
+   "deg": 130,
    "established": true,
    "est_by": "geometry",
    "status": "turn"
@@ -2538,7 +2583,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 71,
-   "n": 171,
+   "n": 173,
    "best": {
     "mph_in": 95,
     "mph_min": 90,
@@ -2656,7 +2701,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 38,
+   "deg": 42,
    "est_by": "geometry"
   },
   {
@@ -2668,7 +2713,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 79,
-   "n": 131,
+   "n": 135,
    "best": {
     "mph_in": 115,
     "mph_min": 98,
@@ -2804,7 +2849,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 38,
+   "deg": 45,
    "est_by": "geometry"
   },
   {
@@ -2816,7 +2861,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 46,
-   "n": 38,
+   "n": 40,
    "best": {
     "mph_in": 89,
     "mph_min": 78,
@@ -2898,7 +2943,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 54,
+   "deg": 151,
    "est_by": "geometry"
   },
   {
@@ -2914,7 +2959,22 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 5,
+    "presence": 0.0
+   },
    "geo_sessions": 0,
    "geo_mapped": true,
    "deg": 25,
@@ -3022,7 +3082,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 57,
-   "n": 38,
+   "n": 40,
    "best": {
     "mph_in": 92,
     "mph_min": 81,
@@ -3116,7 +3176,7 @@
    "dir": "L",
    "type": "hairpin",
    "radius_m": 63,
-   "n": 103,
+   "n": 105,
    "best": {
     "mph_in": 84,
     "mph_min": 84,
@@ -3249,10 +3309,25 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 5,
+    "presence": 0.0
+   },
    "geo_sessions": 1,
    "geo_mapped": false,
-   "deg": 87,
+   "deg": 90,
    "established": false,
    "est_by": null,
    "status": "possible"
@@ -3270,10 +3345,25 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 5,
+    "presence": 0.0
+   },
    "geo_sessions": 1,
    "geo_mapped": false,
-   "deg": 17,
+   "deg": 20,
    "established": false,
    "est_by": null,
    "status": "possible"
@@ -3382,10 +3472,25 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 5,
+    "presence": 0.0
+   },
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 63,
+   "deg": 93,
    "established": true,
    "est_by": "geometry",
    "status": "turn"
@@ -3399,7 +3504,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 43,
-   "n": 103,
+   "n": 105,
    "best": {
     "mph_in": 90,
     "mph_min": 81,
@@ -3516,7 +3621,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 55,
+   "deg": 91,
    "est_by": "geometry"
   },
   {
@@ -3528,7 +3633,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 52,
-   "n": 103,
+   "n": 105,
    "best": {
     "mph_in": 86,
     "mph_min": 86,
@@ -3657,7 +3762,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 80,
-   "n": 38,
+   "n": 40,
    "best": {
     "mph_in": 75,
     "mph_min": 75,
@@ -3751,7 +3856,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 57,
-   "n": 103,
+   "n": 105,
    "best": {
     "mph_in": 111,
     "mph_min": 72,
@@ -3868,7 +3973,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 111,
+   "deg": 177,
    "est_by": "geometry"
   },
   {
@@ -3880,7 +3985,7 @@
    "dir": "L",
    "type": "medium",
    "radius_m": 121,
-   "n": 76,
+   "n": 80,
    "best": {
     "mph_in": 83,
     "mph_min": 83,
@@ -4159,7 +4264,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 135,
-   "n": 102,
+   "n": 104,
    "best": {
     "mph_in": 107,
     "mph_min": 107,
@@ -4276,7 +4381,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 47,
+   "deg": 58,
    "est_by": "geometry"
   },
   {
@@ -4288,7 +4393,7 @@
    "dir": "R",
    "type": "fast",
    "radius_m": 76,
-   "n": 121,
+   "n": 123,
    "best": {
     "mph_in": 133,
     "mph_min": 131,
@@ -4425,7 +4530,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": false,
-   "deg": 38,
+   "deg": 41,
    "est_by": "behaviour"
   },
   {
@@ -4531,7 +4636,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 124,
-   "n": 121,
+   "n": 123,
    "best": {
     "mph_in": 136,
     "mph_min": 136,
@@ -4762,7 +4867,7 @@
    "established": true,
    "geo_sessions": 1,
    "geo_mapped": true,
-   "deg": 173,
+   "deg": 178,
    "est_by": "geometry"
   }
  ],
@@ -11061,645 +11166,6 @@
       4945
      ]
     ]
-   },
-   {
-    "session": "fh6_20260828_001105",
-    "ev": 1,
-    "lap": 1,
-    "pts": [
-     [
-      -46,
-      7146
-     ],
-     [
-      -65,
-      7131
-     ],
-     [
-      -84,
-      7117
-     ],
-     [
-      -103,
-      7102
-     ],
-     [
-      -120,
-      7085
-     ],
-     [
-      -132,
-      7065
-     ],
-     [
-      -139,
-      7042
-     ],
-     [
-      -138,
-      7018
-     ],
-     [
-      -133,
-      6994
-     ],
-     [
-      -123,
-      6973
-     ],
-     [
-      -113,
-      6951
-     ],
-     [
-      -102,
-      6930
-     ],
-     [
-      -92,
-      6908
-     ],
-     [
-      -83,
-      6886
-     ],
-     [
-      -73,
-      6863
-     ],
-     [
-      -65,
-      6841
-     ],
-     [
-      -58,
-      6818
-     ],
-     [
-      -53,
-      6795
-     ],
-     [
-      -51,
-      6771
-     ],
-     [
-      -50,
-      6747
-     ],
-     [
-      -49,
-      6723
-     ],
-     [
-      -48,
-      6699
-     ],
-     [
-      -47,
-      6675
-     ],
-     [
-      -45,
-      6651
-     ],
-     [
-      -42,
-      6627
-     ],
-     [
-      -35,
-      6604
-     ],
-     [
-      -28,
-      6581
-     ],
-     [
-      -18,
-      6559
-     ],
-     [
-      -9,
-      6537
-     ],
-     [
-      1,
-      6515
-     ],
-     [
-      10,
-      6493
-     ],
-     [
-      16,
-      6470
-     ],
-     [
-      5,
-      6449
-     ],
-     [
-      -17,
-      6442
-     ],
-     [
-      -39,
-      6451
-     ],
-     [
-      -53,
-      6470
-     ],
-     [
-      -65,
-      6491
-     ],
-     [
-      -77,
-      6512
-     ],
-     [
-      -89,
-      6533
-     ],
-     [
-      -100,
-      6554
-     ],
-     [
-      -110,
-      6576
-     ],
-     [
-      -118,
-      6599
-     ],
-     [
-      -125,
-      6621
-     ],
-     [
-      -130,
-      6645
-     ],
-     [
-      -132,
-      6669
-     ],
-     [
-      -133,
-      6693
-     ],
-     [
-      -133,
-      6717
-     ],
-     [
-      -135,
-      6741
-     ],
-     [
-      -138,
-      6765
-     ],
-     [
-      -142,
-      6788
-     ],
-     [
-      -149,
-      6811
-     ],
-     [
-      -156,
-      6834
-     ],
-     [
-      -164,
-      6857
-     ],
-     [
-      -173,
-      6879
-     ],
-     [
-      -187,
-      6898
-     ],
-     [
-      -208,
-      6909
-     ],
-     [
-      -231,
-      6904
-     ],
-     [
-      -245,
-      6885
-     ],
-     [
-      -245,
-      6861
-     ],
-     [
-      -237,
-      6839
-     ],
-     [
-      -226,
-      6818
-     ],
-     [
-      -215,
-      6796
-     ],
-     [
-      -205,
-      6774
-     ],
-     [
-      -198,
-      6751
-     ],
-     [
-      -191,
-      6728
-     ],
-     [
-      -188,
-      6705
-     ],
-     [
-      -189,
-      6681
-     ],
-     [
-      -192,
-      6657
-     ],
-     [
-      -198,
-      6634
-     ],
-     [
-      -205,
-      6611
-     ],
-     [
-      -213,
-      6588
-     ],
-     [
-      -221,
-      6566
-     ],
-     [
-      -230,
-      6543
-     ],
-     [
-      -239,
-      6521
-     ],
-     [
-      -247,
-      6498
-     ],
-     [
-      -255,
-      6476
-     ],
-     [
-      -263,
-      6453
-     ],
-     [
-      -271,
-      6430
-     ],
-     [
-      -278,
-      6408
-     ],
-     [
-      -286,
-      6385
-     ],
-     [
-      -292,
-      6362
-     ],
-     [
-      -299,
-      6339
-     ],
-     [
-      -306,
-      6316
-     ],
-     [
-      -313,
-      6293
-     ],
-     [
-      -319,
-      6270
-     ],
-     [
-      -323,
-      6246
-     ],
-     [
-      -322,
-      6222
-     ],
-     [
-      -315,
-      6199
-     ],
-     [
-      -301,
-      6180
-     ],
-     [
-      -284,
-      6163
-     ],
-     [
-      -266,
-      6146
-     ],
-     [
-      -246,
-      6133
-     ],
-     [
-      -226,
-      6120
-     ],
-     [
-      -206,
-      6107
-     ],
-     [
-      -186,
-      6094
-     ],
-     [
-      -166,
-      6080
-     ],
-     [
-      -164,
-      6058
-     ],
-     [
-      -186,
-      6052
-     ],
-     [
-      -208,
-      6061
-     ],
-     [
-      -228,
-      6074
-     ],
-     [
-      -247,
-      6089
-     ],
-     [
-      -264,
-      6106
-     ],
-     [
-      -282,
-      6122
-     ],
-     [
-      -300,
-      6137
-     ],
-     [
-      -320,
-      6150
-     ],
-     [
-      -341,
-      6163
-     ],
-     [
-      -361,
-      6155
-     ],
-     [
-      -359,
-      6132
-     ],
-     [
-      -342,
-      6116
-     ],
-     [
-      -324,
-      6100
-     ],
-     [
-      -305,
-      6085
-     ],
-     [
-      -286,
-      6070
-     ],
-     [
-      -268,
-      6055
-     ],
-     [
-      -249,
-      6039
-     ],
-     [
-      -231,
-      6023
-     ],
-     [
-      -213,
-      6008
-     ],
-     [
-      -194,
-      5993
-     ],
-     [
-      -174,
-      5979
-     ],
-     [
-      -154,
-      5967
-     ],
-     [
-      -132,
-      5957
-     ],
-     [
-      -109,
-      5949
-     ],
-     [
-      -86,
-      5943
-     ],
-     [
-      -63,
-      5938
-     ],
-     [
-      -39,
-      5935
-     ],
-     [
-      -15,
-      5932
-     ],
-     [
-      9,
-      5929
-     ],
-     [
-      33,
-      5927
-     ],
-     [
-      57,
-      5926
-     ],
-     [
-      80,
-      5923
-     ],
-     [
-      102,
-      5913
-     ],
-     [
-      120,
-      5897
-     ],
-     [
-      131,
-      5876
-     ],
-     [
-      136,
-      5852
-     ],
-     [
-      137,
-      5828
-     ],
-     [
-      136,
-      5804
-     ],
-     [
-      133,
-      5780
-     ],
-     [
-      128,
-      5757
-     ],
-     [
-      117,
-      5736
-     ],
-     [
-      101,
-      5718
-     ],
-     [
-      84,
-      5701
-     ],
-     [
-      68,
-      5683
-     ],
-     [
-      51,
-      5666
-     ],
-     [
-      36,
-      5648
-     ],
-     [
-      23,
-      5627
-     ],
-     [
-      16,
-      5604
-     ],
-     [
-      12,
-      5581
-     ],
-     [
-      11,
-      5557
-     ],
-     [
-      8,
-      5533
-     ],
-     [
-      1,
-      5510
-     ],
-     [
-      -13,
-      5491
-     ],
-     [
-      -33,
-      5478
-     ],
-     [
-      -54,
-      5467
-     ],
-     [
-      -77,
-      5458
-     ],
-     [
-      -100,
-      5454
-     ],
-     [
-      -124,
-      5454
-     ],
-     [
-      -147,
-      5460
-     ],
-     [
-      -169,
-      5472
-     ],
-     [
-      -187,
-      5487
-     ]
-    ]
    }
   ]
  },
@@ -14249,7 +13715,7 @@
     7024
    ],
    "dir": "L",
-   "radius_m": 82,
+   "radius_m": 86,
    "deg": 82,
    "sessions": [
     "fh6_20260828_001105"
@@ -14275,8 +13741,8 @@
     6447
    ],
    "dir": "R",
-   "radius_m": 31,
-   "deg": 176,
+   "radius_m": 32,
+   "deg": 181,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14288,8 +13754,8 @@
     6898
    ],
    "dir": "L",
-   "radius_m": 29,
-   "deg": 179,
+   "radius_m": 30,
+   "deg": 183,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14301,8 +13767,8 @@
     6643
    ],
    "dir": "R",
-   "radius_m": 112,
-   "deg": 38,
+   "radius_m": 122,
+   "deg": 41,
    "sessions": [
     "fh6_20260828_001105"
    ]
@@ -14313,8 +13779,8 @@
     6197
    ],
    "dir": "L",
-   "radius_m": 61,
-   "deg": 65,
+   "radius_m": 63,
+   "deg": 70,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14327,7 +13793,7 @@
    ],
    "dir": "R",
    "radius_m": 20,
-   "deg": 171,
+   "deg": 190,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14339,8 +13805,8 @@
     6154
    ],
    "dir": "L",
-   "radius_m": 15,
-   "deg": 176,
+   "radius_m": 16,
+   "deg": 179,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14365,8 +13831,8 @@
     5912
    ],
    "dir": "R",
-   "radius_m": 62,
-   "deg": 84,
+   "radius_m": 64,
+   "deg": 130,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14378,8 +13844,8 @@
     5730
    ],
    "dir": "R",
-   "radius_m": 90,
-   "deg": 38,
+   "radius_m": 98,
+   "deg": 42,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14391,8 +13857,8 @@
     5618
    ],
    "dir": "L",
-   "radius_m": 86,
-   "deg": 38,
+   "radius_m": 87,
+   "deg": 45,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14404,8 +13870,8 @@
     5498
    ],
    "dir": "R",
-   "radius_m": 52,
-   "deg": 54,
+   "radius_m": 56,
+   "deg": 151,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14431,7 +13897,7 @@
    ],
    "dir": "L",
    "radius_m": 66,
-   "deg": 87,
+   "deg": 90,
    "sessions": [
     "fh6_20260828_001105"
    ]
@@ -14442,8 +13908,8 @@
     5567
    ],
    "dir": "L",
-   "radius_m": 69,
-   "deg": 17,
+   "radius_m": 80,
+   "deg": 20,
    "sessions": [
     "fh6_20260828_001105"
    ]
@@ -14454,8 +13920,8 @@
     5505
    ],
    "dir": "L",
-   "radius_m": 25,
-   "deg": 63,
+   "radius_m": 27,
+   "deg": 93,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14467,8 +13933,8 @@
     5334
    ],
    "dir": "R",
-   "radius_m": 53,
-   "deg": 55,
+   "radius_m": 54,
+   "deg": 91,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14504,8 +13970,8 @@
     5092
    ],
    "dir": "L",
-   "radius_m": 54,
-   "deg": 111,
+   "radius_m": 57,
+   "deg": 177,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14517,8 +13983,8 @@
     4938
    ],
    "dir": "L",
-   "radius_m": 141,
-   "deg": 47,
+   "radius_m": 144,
+   "deg": 58,
    "sessions": [
     "fh6_20260828_001105"
    ],
@@ -14530,8 +13996,8 @@
     5006
    ],
    "dir": "R",
-   "radius_m": 101,
-   "deg": 38,
+   "radius_m": 104,
+   "deg": 41,
    "sessions": [
     "fh6_20260828_001105"
    ]
@@ -14555,7 +14021,7 @@
    ],
    "dir": "R",
    "radius_m": 18,
-   "deg": 173,
+   "deg": 178,
    "sessions": [
     "fh6_20260828_001105"
    ],

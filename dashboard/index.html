@@ -140,7 +140,10 @@
     <span id="footStamp"></span>
   </footer>
 
-  <script src="db.js"></script>
+  <!-- db.js MUST carry the cache-buster too. It did not, so while app.js updated on every deploy the DATA it
+       renders came from browser cache indefinitely: the map showed a stale bundle (11 courses instead of 25,
+       superseded turn geometry) no matter how many times the course was re-analysed. -->
+  <script src="db.js?v=geoturns100"></script>
   <script src="app.js?v=geoturns100"></script>
 </body>
 </html>

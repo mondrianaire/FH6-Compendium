@@ -47,6 +47,18 @@ def a2():
     return (f"?v={v}" in served, f"worktree v={v}; 8000 serves it: {f'?v={v}' in served}")
 check("A services", "dashboard 8000 = worktree version", a2)
 
+def a2b():
+    """EVERY local asset must carry the cache-buster, not just app.js. db.js shipped without one, so the
+    dashboard rendered a cached DATA bundle indefinitely — new code drawing superseded course geometry, which
+    reads exactly like a broken detector. A stale-data bug is invisible unless something asserts this."""
+    import re
+    wt = open(os.path.join(ROOT, "dashboard", "index.html"), encoding="utf-8").read()
+    srcs = re.findall(r'<script[^>]+src="([^"]+)"', wt) + re.findall(r'<link[^>]+href="([^"]+\.css[^"]*)"', wt)
+    local = [s for s in srcs if not s.startswith(("http://", "https://", "//"))]
+    bare = [s for s in local if "?v=" not in s]
+    return (not bare, f"{len(local)} local assets versioned" if not bare else f"NO cache-buster on: {bare}")
+check("A services", "every local asset is cache-busted", a2b)
+
 def a3():
     import re
     wt = re.search(r"app\.js\?v=([a-z0-9]+)", open(os.path.join(ROOT, "dashboard", "index.html"), encoding="utf-8").read()).group(1)

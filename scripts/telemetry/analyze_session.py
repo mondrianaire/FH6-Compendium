@@ -12,8 +12,9 @@ swap or drivetrain conversion mid-session becomes a new entry. Each entry carrie
 from data/car-ordinals.json (learned map) when known.
 """
 import re
-import csv, hashlib, json, math, os, statistics, sys
+import csv, hashlib, json, math, os, statistics, sys, time
 import lap_store
+import fh6_tune_decode as TUNE   # tune_hash: which slider revision a lap was driven on
 from collections import defaultdict
 
 G = 9.80665
@@ -1650,6 +1651,52 @@ def main():
                 pcs_ = resample(lap_pts(w, grip=True)); pts_all = [p for pc in pcs_ for p in pc]
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
+        def _tune_hash_for(cid_, w_):
+            """Which TUNE REVISION was on the car for this lap. None unless it can be VERIFIED.
+
+            parts_hash says which build; it excludes sliders by design, so a slider-only change is invisible to
+            every existing key and a spring A/B cannot be recorded at all. tune_hash closes that.
+
+            Attribution is timestamp PROPOSES, telemetry DISPOSES: take the newest save for this ordinal written
+            before the lap started, then require its gear count to match what the car actually did. Timestamp
+            alone is not sound -- session fh6_20260828_001105 measured an 8-gear box while the newest save on
+            ordinal 2866 was a 6-gear save from six days earlier, because an older tune had been re-applied.
+            When they disagree, return None: an unattributed lap is honest, a wrongly attributed one poisons
+            every comparison built on it."""
+            try:
+                ordn_ = int(str(cid_).split("|")[0])
+            except Exception:
+                return None
+            try:
+                metas, _ = TUNE.tunes_for_ordinal(ordn_)
+            except Exception:
+                return None
+            if not metas: return None
+            try:   # session ids are fh6_YYYYMMDD_HHMMSS, so the capture start is in the name
+                _se = time.mktime(time.strptime(sid[4:19], "%Y%m%d_%H%M%S"))
+            except Exception:
+                _se = None
+            t_abs = (_se + w_["t0"]) if _se else None
+            gears_seen = len((cars.get(cid_) or {}).get("gears") or [])   # `gears` is the per-gear ladder, so its LENGTH is the box size
+            best_ = None
+            for m_ in sorted(metas, key=lambda q: str(q.get("ts") or ""), reverse=True):
+                try:
+                    ep_ = time.mktime(time.strptime(str(m_.get("ts"))[:14], "%Y%m%d%H%M%S"))
+                except Exception:
+                    continue
+                if t_abs is not None and ep_ > t_abs: continue     # saved after this lap: cannot have been equipped
+                best_ = m_; break
+            if best_ is None: return None
+            try:
+                tn_ = TUNE.parse_tune(best_["path"], ordinal_hint=ordn_)
+            except Exception:
+                return None
+            if gears_seen and tn_.get("gear_count") and int(tn_["gear_count"]) < gears_seen:
+                return None   # the car used a gear this save's box does not have — it is not what was equipped
+            try:
+                return TUNE.tune_hash(best_["path"])
+            except Exception:
+                return None
         def _game_lap_s(w_):
             """The lap's time on the GAME clock, which stops when you pause. None when it cannot be trusted.
 
@@ -1713,11 +1760,13 @@ def main():
                 _solo = 1 if _ev.get("solo") else 0
                 _imp = _impacts(pts_w)
                 _lap_s = _game_lap_s(w)
+                _th = _tune_hash_for(cid_, w)
                 _lap_rows.append({"route_key": key, "session": sid, "cid": cid_, "t0": round(w["t0"], 1),
                                   "lap_s": _lap_s, "arc_m": round(arc_w),
                                   "build_id": _cr.get("build_id"), "class": _cr.get("class"), "pi": _cr.get("pi"),
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,
                                   "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,
+                                  "tune_hash": _th,
                                   "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in _thin(pts_w, 300)]})
             # A PARTIAL LAP IS NOT THIS BUILD'S BEST LAP. `valid` only requires 70% of the session's own
             # reference arc, so on a course driven in fragments the shortest window wins on wall-clock and

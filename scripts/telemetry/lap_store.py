@@ -42,6 +42,7 @@ def connect(root):
         t0 REAL NOT NULL, lap_s REAL, arc_m REAL,
         build_id TEXT, class TEXT, pi INTEGER, drivetrain TEXT,
         solo INTEGER DEFAULT 0,                     -- a Rivals/time-trial lap: no traffic, no contact
+        tune_hash TEXT,                             -- which TUNE REVISION was equipped; NULL when unverifiable
         pts TEXT NOT NULL,                          -- [[arc_m, mph, grip, x, z], ...]
         impacts INTEGER DEFAULT 0,                  -- grip-code-4 points in this lap: contact / jolt
         void INTEGER DEFAULT 0,                     -- 1 = time invalidated by contact (timed run only)
@@ -58,7 +59,8 @@ def _migrate(cx):
     on the next open and running the old code against a migrated file still works (the defaults fill in).
     ALTER TABLE ADD COLUMN with a constant DEFAULT is metadata-only in SQLite — no row rewrite, no data touched."""
     have = {r[1] for r in cx.execute("PRAGMA table_info(lap_traces)")}
-    for col, ddl in (("impacts", "impacts INTEGER DEFAULT 0"), ("void", "void INTEGER DEFAULT 0")):
+    for col, ddl in (("impacts", "impacts INTEGER DEFAULT 0"), ("void", "void INTEGER DEFAULT 0"),
+                     ("tune_hash", "tune_hash TEXT")):
         if col not in have:
             cx.execute("ALTER TABLE lap_traces ADD COLUMN " + ddl)
             cx.commit()
@@ -66,25 +68,30 @@ def _migrate(cx):
 
 def put_laps(root, rows):
     """rows: dicts with route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts,
-    and optionally impacts + void (both default to 0 — an older caller that does not know about contact still
-    writes a valid row). The named-parameter bind raises on a missing key, so the defaults are applied here in
-    Python rather than left to the column DEFAULT."""
+    and optionally impacts, void (default 0) and tune_hash (default None) — an older caller that knows about
+    none of them still writes a valid row. The named-parameter bind raises on a missing key, so the defaults are
+    applied here in Python rather than left to the column DEFAULT.
+
+    NOTE for anyone adding a column: it must go in FOUR places — the CREATE TABLE, _migrate, the INSERT column
+    list AND its VALUES, and the DO UPDATE SET. Miss the INSERT and every row still writes, silently, with the
+    field NULL; because the rows already exist the upsert path runs and `excluded.<col>` is simply never set."""
     if not rows:
         return 0
     with _LOCK:
         cx = connect(root)
         try:
             cx.executemany(
-                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts, impacts, void)
-                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:pts,:impacts,:void)
+                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts, impacts, void, tune_hash)
+                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:pts,:impacts,:void,:tune_hash)
                    ON CONFLICT(route_key, session, cid, t0) DO UPDATE SET
                      lap_s=excluded.lap_s, arc_m=excluded.arc_m, pts=excluded.pts, solo=excluded.solo,
                      build_id=excluded.build_id, class=excluded.class, pi=excluded.pi, drivetrain=excluded.drivetrain,
-                     impacts=excluded.impacts, void=excluded.void""",
+                     impacts=excluded.impacts, void=excluded.void, tune_hash=excluded.tune_hash""",
                 # re-analysis runs every 20-90 s: a lap re-scored as clean must be able to un-void itself, so
                 # impacts/void are overwritten on conflict like every other re-derived field.
                 [dict(r, pts=json.dumps(r["pts"], separators=(",", ":")),
-                      impacts=int(r.get("impacts") or 0), void=1 if r.get("void") else 0) for r in rows])
+                      impacts=int(r.get("impacts") or 0), void=1 if r.get("void") else 0,
+                      tune_hash=r.get("tune_hash")) for r in rows])
             cx.commit()
             return len(rows)
         finally:

@@ -701,6 +701,28 @@ def parts_hash(ordinal, parts):
     payload = json.dumps({"o": int(ordinal), "f": fam, "p": {k: tiers[k] for k in sorted(tiers)}}, sort_keys=True)
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
 
+# The slider region runs from the first slider offset to the end of file, covering every slider AND the ten
+# gear ratios — one contiguous block, so it hashes without decoding anything.
+OFF_TUNE = 0x019E
+
+def tune_hash(path_or_bytes):
+    """Stable 16-hex fingerprint of the TUNE — every slider and gear value, nothing else.
+
+    parts_hash answers "which build is this"; it deliberately excludes sliders, so two saves that differ only
+    in tyre pressure hash identically. That is correct for build identity and useless for A/B: a slider-only
+    change is currently invisible to every key the system has, and ordinal 3852 already carries four saves
+    alternating A/B/A/B between two slider states with zero parts changed.
+
+    Hashing RAW BYTES rather than decoded values is deliberate: it needs no decoder, so it covers slider fields
+    that have never been mapped, and it works on LOCKED downloaded tunes that cannot be opened in-game.
+    Verified: 6 saves on ordinal 2866 -> 6 distinct hashes.
+    """
+    b = path_or_bytes if isinstance(path_or_bytes, (bytes, bytearray)) else open(path_or_bytes, "rb").read()
+    if len(b) != TUNE_FILE_SIZE:
+        return None
+    return hashlib.sha1(bytes(b[OFF_TUNE:])).hexdigest()[:16]
+
+
 _PARTS_PI = None
 def _parts_pi_path():
     here = os.path.dirname(os.path.abspath(__file__))

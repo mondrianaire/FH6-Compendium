@@ -24,7 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.pat
 # Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
 # course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
 # reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
-DET_VER = "geo4-arcreg"
+DET_VER = "geo5-latg-split"
 
 
 def self_retrace(path, tol=20.0):
@@ -1420,6 +1420,33 @@ def main():
             ref_w = min(_typ, key=_rows_in)
             pieces = resample(lap_pts(ref_w)); P = [p for pc in pieces for p in pc]
             if len(P) >= 20:
+                # Median |lat_g| per 8 m, pooled over every full lap. Straights here read 0.03-0.07 g against
+                # 0.67-2.4 g in corners -- a 10x separation, so the threshold is not a judgement call.
+                LG_ON = 0.25
+                lg_prof = {}
+                try:
+                    _cell = {}
+                    for _i, _p in enumerate(P): _cell.setdefault((int(_p[0] // 25), int(_p[1] // 25)), []).append(_i)
+                    _spans = [(w_["t0"], w_["t1"]) for w_ in full_laps]
+                    _acc = {}
+                    for r_ in loop_rows:
+                        _t = r_.get("t")
+                        if not any(a <= _t <= b for a, b in _spans): continue
+                        x_, z_ = r_.get("PosX"), r_.get("PosZ")
+                        if x_ is None or z_ is None: continue
+                        best_ = None; bd_ = 1e9
+                        for dx in (-1, 0, 1):
+                            for dz in (-1, 0, 1):
+                                for _i in _cell.get((int(x_ // 25) + dx, int(z_ // 25) + dz), ()):
+                                    d_ = (P[_i][0] - x_) ** 2 + (P[_i][1] - z_) ** 2
+                                    if d_ < bd_: bd_ = d_; best_ = _i
+                        if best_ is None or bd_ >= 400: continue
+                        _acc.setdefault(int(P[best_][2] // 8.0), []).append(abs(r_.get("lat_g") or 0.0))
+                    lg_prof = {b_: sorted(v)[len(v) // 2] for b_, v in _acc.items() if len(v) >= 10}
+                except Exception:
+                    lg_prof = {}
+                def _lgv(arc):
+                    return lg_prof.get(int(arc // 8.0))
                 gturns = []; off = 0; piece_of = {}
                 for pi_, pc in enumerate(pieces):
                     for q in range(len(pc)): piece_of[off + q] = pi_
@@ -1467,6 +1494,28 @@ def main():
                             f = _gl(P[j][2])
                             if f >= 0.55 and f >= _gl(P[j - 2][2]) and f >= _gl(P[j + 2][2]):
                                 if not pk or (P[j][2] - P[pk[-1]][2]) >= 30: pk.append(j)
+                        # UNION with lateral g. Curvature can run continuously through what are really two
+                        # corners -- from s=64 to s=300 here the road never straightens, so nothing in the
+                        # geometry can separate them -- but the car does: 0.67 g, dipping to 0.34 g, then 2.20 g.
+                        # Two humps with a real trough are two corners. Added to the grip peaks, never replacing
+                        # them: replacing lost more splits than it gained (13 turns -> 10) because through a
+                        # continuous corner sequence lateral g stays high with only shallow dips.
+                        lpk = []
+                        for j in range(i0 + 2, i1 - 2):
+                            v = _lgv(P[j][2])
+                            if v is None or v < LG_ON: continue
+                            a2, b2 = _lgv(P[j - 2][2]), _lgv(P[j + 2][2])
+                            if a2 is None or b2 is None or not (v >= a2 and v >= b2): continue
+                            if not lpk or (P[j][2] - P[lpk[-1]][2]) >= 30: lpk.append(j)
+                            elif v > (_lgv(P[lpk[-1]][2]) or 0): lpk[-1] = j
+                        if len(lpk) >= 2:
+                            for a2, b2 in zip(lpk, lpk[1:]):
+                                lo = min([(_lgv(P[q][2]) or 9) for q in range(a2, b2)] or [9])
+                                hi = min(_lgv(P[a2][2]) or 0, _lgv(P[b2][2]) or 0)
+                                if hi and lo <= 0.6 * hi:
+                                    for j in (a2, b2):
+                                        if all(abs(P[j][2] - P[q][2]) >= 25 for q in pk): pk.append(j)
+                            pk.sort()
                         if len(pk) < 2: out2.append(t_); continue
                         bnds = [i0] + [ (a + b) // 2 for a, b in zip(pk, pk[1:]) ] + [i1]
                         for a, b in zip(bnds, bnds[1:]):

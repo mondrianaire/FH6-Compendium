@@ -59,6 +59,8 @@ def solve_isolation(observations):
         except (TypeError, ValueError):
             continue
 
+    # slot groups the game changes together, so a "single part" edge may legitimately touch two slots
+    LINKED = (frozenset(("rim_style", "rear_rim_style")), frozenset(("front_tire_width", "rear_tire_width")))
     edges = {}          # slot -> {(from_tier, to_tier): [delta, ...]}  (both directions)
     pair_count = 0
     for obs in by_ord.values():
@@ -67,6 +69,14 @@ def solve_isolation(observations):
                 a, b = obs[i], obs[j]
                 pa, pb = (a.get("parts") or {}), (b.get("parts") or {})
                 diff = [s for s in slots if pa.get(s) != pb.get(s)]
+                # LINKED SLOTS MOVE AS ONE PART. Wheels are fitted as a set, so changing them writes BOTH
+                # rim_style and rear_rim_style; tyre width likewise. A strict one-slot test therefore discards
+                # every genuine rim change as "two parts changed" -- which is why the solver reported
+                # single_part_pairs=0 while 9 isolated edges (7 rim pairs, 1 differential, 1 tire_compound)
+                # were sitting in the 513 saves on disk. The pair IS the edge: attribute it to the front slot,
+                # since the two always carry the same tier.
+                if len(diff) == 2 and frozenset(diff) in LINKED:
+                    diff = [d for d in diff if not d.startswith("rear_")] or diff[:1]
                 if len(diff) != 1:
                     continue
                 s = diff[0]

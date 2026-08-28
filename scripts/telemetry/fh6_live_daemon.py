@@ -889,7 +889,7 @@ def _build_union(deliverable, ordn, match=None):
         rows = {r.get("item"): r for r in conv.get("rows", [])}
         # -- build identity (from the matcher) is the foundation every other confidence stands on
         if match and match.get("how") == "no-match":
-            ask("identity", "save THIS build in-game — no saved tune matches your live engine, so every decoded value may be another build's", "unblocks everything", 0)
+            ask("identity", "capture this build's file — re-apply its tune from Find Tunes (downloaded tunes write their save when applied) or save it if your own; no save matches your live engine, so every decoded value may be another build's", "unblocks everything", 0)
         elif match and (match.get("n_signature_ties") or 1) >= 2 and not match.get("gear_disambig"):
             ask("identity", f"drive up through the gears — {match['n_signature_ties']} builds share this engine + PI; the gear ladder identifies the equipped one", "build identity", 0)
         # -- engine cylinders: save-side catalog vs live NumCylinders
@@ -1005,8 +1005,8 @@ def _build_union(deliverable, ordn, match=None):
             ev = [f["name"] for f in u["fields"] if f["status"] == "conflict" and f["name"] in ("Aspiration", "Transmission")]
             if ev:
                 match["prev_how"] = match.get("how"); match["how"] = "unsaved-build"; match["evidence"] = ev
-                ask("identity", "save THIS build's tune in-game — measured " + " + ".join(e.lower() for e in ev)
-                    + " contradicts every saved tune, so you're driving a distinct build that isn't on disk yet", "unblocks everything", 0)
+                ask("identity", "capture this build's file (re-apply its tune from Find Tunes, or save it if your own) — measured " + " + ".join(e.lower() for e in ev)
+                    + " contradicts every save on disk, so you're driving a distinct build that isn't captured yet", "unblocks everything", 0)
                 u["asks"].sort(key=lambda a: a["rank"])
     except Exception:
         pass

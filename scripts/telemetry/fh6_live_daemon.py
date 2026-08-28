@@ -707,12 +707,12 @@ def _pick_meta(metas, ordn, ts_want=None):
                 # accept only a CLEAR winner: good absolute match AND clearly ahead of the runner-up (else stay ambiguous)
                 if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
                     winner = errs[0][2]; roster = [winner] + [r for r in roster if r is not winner]; gear_used = True
-                elif errs and errs[0][0] < 9.0:
-                    ladder_tied = True   # the ladder RAN and could not separate (identical gearing) — 'drive the gears' is then a dead-end ask; the client must offer the manual pick as THE escape
                     if not hasattr(ST, "gear_id"):
                         ST.gear_id = {}
                     ST.gear_id[str(ordn)] = {"ts": str(winner["ts"]), "t": time.time()}   # PERSIST the verified identity — it must survive a pause
                     _gear_log(ordn, winner["ts"]); _auto_assoc_livery(ordn)   # timeline entry + attribute any livery saved during a verified interval
+                elif errs and errs[0][0] < 9.0:
+                    ladder_tied = True   # the ladder RAN and could not separate (identical gearing) — 'drive the gears' is then a dead-end ask; the client must offer the manual pick as THE escape
     # STICKY IDENTITY: when the ladder can't run RIGHT NOW (menus drop the live frame; a short window lacks gears),
     # reuse the last gear-VERIFIED identity instead of reverting to 'newest' — the user's WOT run must not evaporate
     # the moment they pause to read the dashboard. Held for 2h; a new in-game save re-anchors it (below); an explicit

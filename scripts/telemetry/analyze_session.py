@@ -906,7 +906,11 @@ def main():
         R = routes[key]; R["events"] = R.get("events", 0) + 1; R["length_m"] = max(R.get("length_m") or 0, round(dist)); R["last_seen"] = sid
         if not R.get("heading") and hdg: R["heading"] = hdg
         ev_out.append({"t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "car": cid(rs[0]), "stint": rs[0].get("stint"), "mode": mode, "laps": laps,
-                       "best_lap": round(max((q["BestLap"] for q in rs), default=0), 3) or None, "last_lap": round(max((q["LastLap"] for q in rs), default=0), 3) or None,
+                       # BestLap is BEST-SO-FAR (0, then non-increasing): max() returned the FIRST lap's time and the
+                       # improve-only track record latched it forever, misranking builds. min of positives = the real best.
+                       # LastLap changes every lap, so max() was the SLOWEST lap labeled 'last' — take the final value.
+                       "best_lap": round(min((q["BestLap"] for q in rs if q["BestLap"] > 0), default=0), 3) or None,
+                       "last_lap": round(next((q["LastLap"] for q in reversed(rs) if q["LastLap"] > 0), 0), 3) or None,
                        "distance_m": round(dist), "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": pos[-1] if pos else None,
                        "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "route": (routes.get(key) or {}).get("name")})
     # persist the route registry (names on disk win — the dashboard / daemon may have named a route while this analysis ran)
@@ -1228,12 +1232,20 @@ def main():
             _car_w = evs[w["ev"]]["car"] if 0 <= w["ev"] < len(evs) else None
             if _car_w: _trace_wins.setdefault(_car_w, []).append(w)
         speed_traces_new = {}
+        # a candidate window must actually COVER the course: min-by-duration otherwise crowns an aborted partial
+        # (shortest window!) as the tune's permanent trace. Reference = the longest arc any window covers this session.
+        _win_arc = {}
         for cid_, wins in _trace_wins.items():
-            bw = min(wins, key=lambda w: w["t1"] - w["t0"])
+            for w in wins:
+                pcs_ = resample(lap_pts(w)); pts_all = [p for pc in pcs_ for p in pc]
+                if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
+        _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
+        for cid_, wins in _trace_wins.items():
+            valid = [w for w in wins if id(w) in _win_arc and _win_arc[id(w)][0] >= 0.7 * _ref_arc]
+            if not valid: continue
+            bw = min(valid, key=lambda w: w["t1"] - w["t0"])
             lt = round(bw["t1"] - bw["t0"], 2)
-            pcs_ = resample(lap_pts(bw))
-            pts_all = [p for pc in pcs_ for p in pc]
-            if len(pts_all) < 30: continue
+            pts_all = _win_arc[id(bw)][1]
             kk = max(1, len(pts_all) // 300)
             carrec = cars.get(cid_) or {}
             speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"), "pts": [[round(p[2]), round(p[3], 1)] for p in pts_all[::kk]]}
@@ -1375,7 +1387,7 @@ def main():
         trm = model.setdefault("speed_traces", {})   # per-tune traces: a cid's saved trace only improves (faster lap replaces slower); the 10 fastest tunes kept
         for cid_, tr_ in speed_traces_new.items():
             prev_ = trm.get(cid_)
-            if prev_ is None or (tr_.get("lap_s") or 9e9) < (prev_.get("lap_s") or 9e9): trm[cid_] = tr_
+            if prev_ is None or (tr_.get("lap_s") or 9e9) < (prev_.get("lap_s") or 9e9) or prev_.get("session") == sid: trm[cid_] = tr_   # same-session re-analysis may REPAIR a bad trace (the escape best_laps already has)
         if len(trm) > 10: model["speed_traces"] = trm = dict(sorted(trm.items(), key=lambda kv: kv[1].get("lap_s") or 9e9)[:10])
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
         model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis

@@ -1220,6 +1220,23 @@ def main():
         turns_info = {"count": track_turns, "detected_here": detected_here, "possible": len(possible), "confidence": turn_conf, "laps": total_laps, "per_lap_detections": per_lap_det, "messy": messy, "expected": expected,
                       "note": ((f"you count {expected}; the track has {track_turns} established" + (" — match" if expected == track_turns else f", {'+' if track_turns > expected else ''}{track_turns - expected}" + (f" · {len(possible)} possible could close the gap — lap consistently" if track_turns < expected and possible else "")) + " · ") if expected else "") + (f"{track_turns} turns on record" + (f" · {detected_here} caught this session" if detected_here != track_turns else "") + " · " if len(model.get("sessions", [])) >= 2 else "") + (f"{total_laps} lap{'s' if total_laps != 1 else ''} — drive {max(0, 3 - total_laps)} more to confirm the turn count" if total_laps < 3 else "turn count confirmed across laps" if not possible else f"{len(possible)} possible turn{'s' if len(possible) != 1 else ''} seen on a minority of laps — keep lapping to confirm or drop them") + (f" · {', '.join(messy)} often split into several detections (taken inconsistently)" if messy else "")}
         laps_info = {"total": total_laps, "windows": lap_windows, "per_event": [sum(1 for w in lap_windows if w["ev"] == ei) for ei in range(len(evs))]}
+        # ---- per-TUNE SPEED TRACES: each build's BEST full lap as a speed-vs-arclength curve, persisted with the
+        #      course. Keyed by cid (the config identity — a PI change IS a different trace); build_id/class/pi ride
+        #      along so the dashboard can badge the trace and gate the overlay to the viewer's class. Keep the 10 fastest.
+        _trace_wins = {}
+        for w in full_laps:
+            _car_w = evs[w["ev"]]["car"] if 0 <= w["ev"] < len(evs) else None
+            if _car_w: _trace_wins.setdefault(_car_w, []).append(w)
+        speed_traces_new = {}
+        for cid_, wins in _trace_wins.items():
+            bw = min(wins, key=lambda w: w["t1"] - w["t0"])
+            lt = round(bw["t1"] - bw["t0"], 2)
+            pcs_ = resample(lap_pts(bw))
+            pts_all = [p for pc in pcs_ for p in pc]
+            if len(pts_all) < 30: continue
+            kk = max(1, len(pts_all) // 300)
+            carrec = cars.get(cid_) or {}
+            speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"), "pts": [[round(p[2]), round(p[3], 1)] for p in pts_all[::kk]]}
         # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}
@@ -1355,6 +1372,11 @@ def main():
                 if not cur_ or e["best_lap"] < cur_["best_lap"] or cur_.get("session") == sid and e["best_lap"] <= cur_["best_lap"]:
                     model["best_laps"][e["car"]] = {"best_lap": e["best_lap"], "session": sid, "name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi"), "drivetrain": cinfo.get("drivetrain"),
                                                     "build_id": cinfo.get("build_id"), "hp": (cinfo.get("sig") or {}).get("hp_peak"), "gears": (cinfo.get("sig") or {}).get("gear_count")}   # the BEST BUILD that set the record
+        trm = model.setdefault("speed_traces", {})   # per-tune traces: a cid's saved trace only improves (faster lap replaces slower); the 10 fastest tunes kept
+        for cid_, tr_ in speed_traces_new.items():
+            prev_ = trm.get(cid_)
+            if prev_ is None or (tr_.get("lap_s") or 9e9) < (prev_.get("lap_s") or 9e9): trm[cid_] = tr_
+        if len(trm) > 10: model["speed_traces"] = trm = dict(sorted(trm.items(), key=lambda kv: kv[1].get("lap_s") or 9e9)[:10])
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
         model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis
         mlaps = model["laps"] or 1
@@ -1461,7 +1483,7 @@ def main():
             driven_ids = {k.get("geo_id") for k in corner_out if k.get("geo_id")}
             geo["driven"] = len(driven_ids); geo["not_driven"] = [g["id"] for g in geo["turns"] if g["id"] not in driven_ids]
             turns_info["mapped"] = len(geo["turns"]); turns_info["mapped_driven"] = len(driven_ids)   # (model geometry is persisted in the block above, before the flat copies are stripped)
-        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile, "laps": laps_info, "turns": turns_info,
+        course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile, "laps": laps_info, "turns": turns_info, "speed_traces": model.get("speed_traces"),
                            "model": model_info, "track": track, "driving": {"compared": cmp_n, "on_reference": on_ref_n, "predicted": pred_n, "own_refs": own_n, "own_refs_by_car": own_by_car, "car_grip": {k_: car_grip.get(k_) for k_ in co["cars"]}}, "geometry": geo,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])

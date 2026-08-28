@@ -25,7 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.pat
 # Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
 # course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
 # reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
-DET_VER = "geo5-latg-split"
+DET_VER = "geo6-banked-latg"
 
 
 def self_retrace(path, tol=20.0):
@@ -43,6 +43,20 @@ def self_retrace(path, tol=20.0):
     t2 = tol * tol
     n = sum(1 for b in B if any((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 <= t2 for a in A))
     return n / max(1, len(B))
+
+
+def _lat_bank_on_disk(route_key):
+    """The course's banked lateral-g profile, read straight off its model file.
+
+    The geometry block runs BEFORE `model` is loaded, so it cannot reach the bank through it — the same
+    ordering that once had the turn registry seeded from a superseded map. Reading the file directly keeps the
+    accumulation honest without moving the model load."""
+    try:
+        mp = os.path.join(ROOT, "data", "courses", re.sub(r"[^A-Za-z0-9_.-]+", "_", str(route_key)) + ".json")
+        with open(mp, encoding="utf-8") as f:
+            return dict(((json.load(f).get("geometry") or {}).get("lat_acc") or {}))
+    except Exception:
+        return {}
 
 
 def better_map(fresh, stored):
@@ -1509,7 +1523,7 @@ def main():
                 if tot:
                     t_["ia"] = min(len(P) - 1, max(0, int(round(t_["i0"] + sum(q * w for q, w in enumerate(sl)) / tot))))
             return mg
-        geo = None
+        geo = None; lat_acc = None
         # a "lap" for GEOMETRY must be a lap: the 15 s rule admits aborted stubs (Edamame stored 48 lap paths,
         # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns.
         _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
@@ -1541,7 +1555,7 @@ def main():
                 # Median |lat_g| per 8 m, pooled over every full lap. Straights here read 0.03-0.07 g against
                 # 0.67-2.4 g in corners -- a 10x separation, so the threshold is not a judgement call.
                 LG_ON = 0.25
-                lg_prof = {}
+                lg_prof = {}; lat_acc = None
                 try:
                     _cell = {}
                     for _i, _p in enumerate(P): _cell.setdefault((int(_p[0] // 25), int(_p[1] // 25)), []).append(_i)
@@ -1560,9 +1574,20 @@ def main():
                                     if d_ < bd_: bd_ = d_; best_ = _i
                         if best_ is None or bd_ >= 400: continue
                         _acc.setdefault(int(P[best_][2] // 8.0), []).append(abs(r_.get("lat_g") or 0.0))
-                    lg_prof = {b_: sorted(v)[len(v) // 2] for b_, v in _acc.items() if len(v) >= 10}
+                    # ACCUMULATE ACROSS EVERY SESSION, not just this one. A course's corners are a property of the
+                    # ROAD; deriving them from whichever laps you happened to drive today is what made the turn
+                    # count move (Edamame 15 -> 7 on a thin session). laps.db stores [arc, mph, grip, x, z] with
+                    # no lat_g, so the profile is banked in the course model as running (sum, n) per 8 m bucket
+                    # and merged here — every session makes the map better and none makes it worse.
+                    _sess = {b_: (sum(v), len(v)) for b_, v in _acc.items()}
+                    _bank = _lat_bank_on_disk(key)
+                    for b_, (sm, n_) in _sess.items():
+                        pb = _bank.get(str(b_)) or [0.0, 0]
+                        _bank[str(b_)] = [round(pb[0] + sm, 3), pb[1] + n_]
+                    lat_acc = _bank
+                    lg_prof = {int(b_): (v[0] / v[1]) for b_, v in _bank.items() if v[1] >= 10}
                 except Exception:
-                    lg_prof = {}
+                    lg_prof = {}; lat_acc = _lat_bank_on_disk(key)
                 def _lgv(arc):
                     return lg_prof.get(int(arc // 8.0))
                 gturns = []; off = 0; piece_of = {}
@@ -2216,9 +2241,32 @@ def main():
             mg = model.get("geometry") or {}
             prev_lp = [lp for lp in (mg.get("lap_paths") or []) if lp.get("session") != sid]   # re-analysis of this session replaces its own laps
             layout = sorted(prev_lp + (geo.get("lap_paths") or []), key=lambda lp: (lp.get("session") or "", lp.get("ev", 0), lp.get("lap", 0)))[-48:]   # chronological (session ids are timestamps) — the 48 most RECENT laps, whatever the analysis order
+            # THE TURNS OF A CIRCUIT ARE A FIXED PROPERTY OF THE ROAD. They must not move because of what you
+            # happened to drive today. The lateral-g split needs many laps to build its profile, so a thin
+            # session produces no profile, no split, and fewer turns — Edamame went 15 -> 7 exactly that way,
+            # then the registry drew 8. A map derived from 32 laps is strictly better evidence than one derived
+            # from 3, so turns are kept unless the new derivation saw AT LEAST AS MANY laps. Improve-only.
+            _n_new = len(full_laps)
+            _n_old = int(mg.get("turns_n_laps") or 0)
             if better_map(geo, mg):
-                model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"), "turns": geo["turns"], "session": sid, "lap_paths": layout, "det": DET_VER}   # the map persists with the course
-            else: mg["lap_paths"] = layout; model["geometry"] = mg
+                _keep_turns = (mg.get("turns") and _n_old > _n_new and
+                               len(mg.get("path") or []) == len(geo.get("path") or []))   # same road, better evidence
+                model["geometry"] = {"length_m": geo["length_m"], "path": geo["path"], "paths": geo.get("paths"),
+                                     "turns": (mg["turns"] if _keep_turns else geo["turns"]),
+                                     "turns_n_laps": (_n_old if _keep_turns else _n_new),
+                                     "session": sid, "lap_paths": layout, "det": DET_VER,
+                                     "lat_acc": (lat_acc if lat_acc is not None else mg.get("lat_acc"))}   # the map persists with the course
+                if _keep_turns: geo["turns"] = mg["turns"]                                  # and the session shows the same map
+            elif mg.get("turns") and _n_new > _n_old and geo.get("turns"):
+                # keeping the stored PATH, but this session saw more laps than the one that derived its turns —
+                # so re-derive the turns on the better evidence without disturbing the road.
+                mg["turns"] = geo["turns"]; mg["turns_n_laps"] = _n_new; mg["det"] = DET_VER
+                if lat_acc is not None: mg["lat_acc"] = lat_acc
+                mg["lap_paths"] = layout; model["geometry"] = mg
+            else:
+                mg["lap_paths"] = layout
+                if lat_acc is not None: mg["lat_acc"] = lat_acc   # the bank grows even when the map does not change
+                model["geometry"] = mg
             # The session's map should show the BEST-KNOWN map of the track (a thin 3-lap session must not display
             # only the road it saw) — borrow the model's geometry when it covers MORE ROAD. This used to borrow
             # whichever had MORE TURNS, which is not a measure of coverage: turns are a function of the path, so a

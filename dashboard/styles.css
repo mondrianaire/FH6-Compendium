@@ -521,3 +521,11 @@ tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(25
    structurally cannot see); `traced` is measured-but-no-grip-event. */
 .tv.flat { border-left: 3px solid #00d27a; background: rgba(0, 210, 122, .07); }
 .tv.traced { border-left: 3px solid var(--accent2); background: rgba(47, 129, 247, .06); }
+
+/* The colour-mode strip, shared by the course map and the speed trace so a colour cannot mean two things on one
+   screen. The selected pill is filled rather than outlined: which channel you are looking at has to be readable
+   at a glance, because every line on both surfaces changes meaning with it. */
+.seg-ctl { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; font-size: 10.5px; }
+.seg-ctl .chip.seg-mode.on { background: var(--accent2); border-color: var(--accent2); color: var(--bg); font-weight: 700; }
+.seg-ctl .chip.seg-grad { line-height: 0; border-color: var(--line); }
+.seg-ctl .chip.seg-grad.on { outline: 2px solid var(--accent2); outline-offset: 1px; }

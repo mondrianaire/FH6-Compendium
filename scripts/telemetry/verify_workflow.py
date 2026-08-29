@@ -314,7 +314,9 @@ def f3():
              "updCarDot(live.frame)",
              # a mapped turn must never render as "not driven" again: the trace fallback, the nearest-corner join
              # that replaced last-match, and the verdict that speaks for a corner no grip event can see
-             "tracedCorner", "cornerNear", "no lift measured", "traced: t.traced", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
+             "tracedCorner", "cornerNear", "no lift measured", "traced: t.traced",
+             # the colour engine both the map and the trace draw through — one meaning per colour, per screen
+             "SEG_MODES", "segScale", "segControls", "showing grip instead", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
     missing = [m for m in marks if m not in src]
     return (not missing, f"feature markers present ({len(marks) - len(missing)}/{len(marks)}){'; missing: ' + str(missing) if missing else ''}")
 check("F client", "feature surface complete", f3)

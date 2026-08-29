@@ -681,6 +681,72 @@
   // exactly WHERE the car was hit with no new capture. These live at MODULE scope beside the rest of the grip
   // alphabet, defined before every renderer that calls them, for the same reason `esc` does.
   const IMPACT_N = GRIP.impact.n;
+  // ================= TRACE / MAP COLOUR MODES =================
+  // The driven line is drawn twice — once on the course map, once on the speed trace — and both used to be
+  // hard-wired to the grip alphabet. Grip is one question about a lap; speed and elevation are others, and the
+  // road answers all three. One engine so the two surfaces can never disagree about what a colour means.
+  //
+  // GRIP is categorical (an axle either let go or it did not) and keeps its established colours. SPEED and
+  // ELEVATION are continuous and are quantised into buckets, because the renderer draws runs of one colour —
+  // a per-point gradient would emit one polyline per sample.
+  // Elevation is only present on traces written since PosY was carried through, so the mode reports how much of
+  // the lap it can actually colour rather than silently drawing a flat line.
+  const GRAD = {
+    heat:    ["#2f81f7", "#3fb6c8", "#6fd08c", "#d7d264", "#e8a13c", "#e5414e"],
+    viridis: ["#440154", "#3b528b", "#21918c", "#5ec962", "#c2df23", "#fde725"],
+    ice:     ["#0d1a3a", "#1b4b8f", "#2f81f7", "#69b7ff", "#a9d8ff", "#e8f4ff"],
+    mono:    ["#2a2f37", "#454c58", "#657084", "#8e9aad", "#b9c3d3", "#e6ecf5"],
+  };
+  const GRAD_KEYS = Object.keys(GRAD);
+  const gradOf = () => GRAD[(() => { try { return localStorage.getItem("fh6Grad") || "heat"; } catch (e) { return "heat"; } })()] || GRAD.heat;
+  const SEG_MODES = [
+    { k: "grip",  lbl: "grip",      tip: "what the tyres did — the axle that let go, and where" },
+    { k: "speed", lbl: "speed",     tip: "how fast you were going, coloured across this lap's own range" },
+    { k: "elev",  lbl: "elevation", tip: "height along the road — climbs, crests and compressions" },
+  ];
+  const segMode = () => { try { return localStorage.getItem("fh6SegMode") || "grip"; } catch (e) { return "grip"; } };
+  // the scale is per-LAP, not global: a lap is coloured against its own range, so a slow car's trace still uses
+  // the whole palette instead of collapsing into one band next to a faster one
+  const segScale = (pts, mode) => {
+    const i = mode === "elev" ? 5 : 1;
+    const v = (pts || []).map((q) => (q.length > i ? q[i] : null)).filter((x) => x != null && isFinite(x));
+    if (!v.length) return null;
+    const lo = Math.min(...v), hi = Math.max(...v);
+    return hi - lo < 1e-6 ? null : { lo, hi, i, n: v.length, of: (pts || []).length };
+  };
+  const segBucket = (q, mode, sc) => {
+    if (mode === "grip" || !sc) return null;
+    const v = q.length > sc.i ? q[sc.i] : null;
+    if (v == null || !isFinite(v)) return null;
+    const g = gradOf();
+    return Math.max(0, Math.min(g.length - 1, Math.floor(((v - sc.lo) / (sc.hi - sc.lo)) * g.length)));
+  };
+  // the key a run is split on: grip state, or the colour bucket. Same shape either way, so one splitter serves both.
+  const segKey = (q, mode, sc) => (mode === "grip" || !sc) ? q[2] : segBucket(q, mode, sc);
+  const segCol = (key, mode, sc) => (mode === "grip" || !sc) ? gripCol(key) : (gradOf()[key] || "var(--muted)");
+  const segLegend = (mode, sc) => {
+    // SAY WHEN THE MODE HAS NO DATA. Falling back to grip is the right RENDER — a grip-coloured line beats a
+    // blank one — but doing it silently means picking "elevation" hands you a grip map with a grip legend and
+    // nothing saying so. Elevation only exists on traces written since PosY was carried through (33 of 181), so
+    // this is the common case, not the edge one.
+    if (mode !== "grip" && !sc)
+      return `<span class="why" style="color:var(--warn,#e3b341)">no ${mode === "elev" ? "elevation" : "speed"} recorded on this lap — showing grip instead</span> ` +
+             gripLegend(["calm", "front", "rear", "both", "impact"]);
+    if (mode === "grip" || !sc) return gripLegend(["calm", "front", "rear", "both", "impact"]);
+    const g = gradOf(), unit = mode === "elev" ? " m" : " mph";
+    const cov = sc.of ? Math.round((sc.n / sc.of) * 100) : 100;
+    return `<span class="glegend">${g.map((c, i) => `<i style="background:${c};width:14px;height:9px;display:inline-block;border-radius:2px"></i>`).join("")}` +
+      ` <span class="why">${Math.round(sc.lo)}${unit} → ${Math.round(sc.hi)}${unit}${cov < 100 ? ` · ${cov}% of the lap has this channel` : ""}</span></span>`;
+  };
+  // the control strip both surfaces share: what the colour MEANS, and which palette says it
+  const segControls = (sc, mode) => {
+    const md = mode || segMode(), grad = (() => { try { return localStorage.getItem("fh6Grad") || "heat"; } catch (e) { return "heat"; } })();
+    const pills = SEG_MODES.map((m) => `<span class="chip seg-mode${m.k === md ? " on" : ""}" data-segmode="${m.k}" title="${esc(m.tip)}" style="cursor:pointer">${m.lbl}</span>`).join("");
+    const grads = md === "grip" ? "" : `<span class="why" style="font-size:10px;margin-left:6px">palette</span>` +
+      GRAD_KEYS.map((k) => `<span class="chip seg-grad${k === grad ? " on" : ""}" data-seggrad="${k}" title="${k}" style="cursor:pointer;padding:1px 4px">${GRAD[k].map((c) => `<i style="background:${c};width:6px;height:9px;display:inline-block"></i>`).join("")}</span>`).join("");
+    return `<div class="seg-ctl">${pills}${grads}<span style="margin-left:auto">${segLegend(md, sc)}</span></div>`;
+  };
+
   // resample() carries the WORSE of two bracketing states, so one real hit can flag several adjacent 4 m buckets —
   // cluster by world distance so a single collision draws ONE marker instead of a smear of them.
   const impactMarks = (pts, minD) => { try {
@@ -5112,10 +5178,16 @@
       // exactly WHERE the fronts washed (blue), the rears stepped out (red) or all four went (purple).
       const gripPath = (() => { try {
         const tr = opts.gripLap; if (!tr || !tr.pts || !tr.pts.length || tr.pts[0].length < 5) return "";
-        const P = tr.pts; const segs = []; let run = [P[0]], st = P[0][2];
-        for (let i = 1; i < P.length; i++) { if (P[i][2] !== st) { run.push(P[i]); segs.push([st, run]); run = [P[i]]; st = P[i][2]; } else run.push(P[i]); }
+        // COLOURED BY THE SELECTED MODE, not always by grip. Splitting on segKey means the same run-splitting
+        // serves a categorical channel (grip) and a quantised continuous one (speed, elevation) identically.
+        const P = tr.pts, _md = segMode(), _sc = segScale(P, _md);
+        const segs = []; let run = [P[0]], st = segKey(P[0], _md, _sc);
+        for (let i = 1; i < P.length; i++) { const k = segKey(P[i], _md, _sc);
+          if (k !== st) { run.push(P[i]); segs.push([st, run]); run = [P[i]]; st = k; } else run.push(P[i]); }
         segs.push([st, run]);
-        return segs.map(([s2, pp]) => `<polyline fill="none" stroke="${gripCol(s2)}" stroke-width="${s2 ? 4 : 2.6}" stroke-linecap="round" stroke-linejoin="round" opacity="${s2 ? 1 : 0.75}" vector-effect="non-scaling-stroke" points="${pp.map((q) => `${X(q[3]).toFixed(1)},${Y(q[4]).toFixed(1)}`).join(" ")}"><title>${esc(gripOf(s2).axle)}</title></polyline>`).join("");
+        return segs.map(([s2, pp]) => { const hot = _md === "grip" ? !!s2 : true;
+          const ttl = _md === "grip" ? gripOf(s2).axle : (_md === "elev" ? "elevation" : "speed");
+          return `<polyline fill="none" stroke="${segCol(s2, _md, _sc)}" stroke-width="${hot ? 4 : 2.6}" stroke-linecap="round" stroke-linejoin="round" opacity="${hot ? 1 : 0.75}" vector-effect="non-scaling-stroke" points="${pp.map((q) => `${X(q[3]).toFixed(1)},${Y(q[4]).toFixed(1)}`).join(" ")}"><title>${esc(ttl)}</title></polyline>`; }).join("");
       } catch (e) { return ""; } })();
       // WHERE THE CONTACT HAPPENED. Same lap, same [s, mph, grip, x, z] points — a burst glyph at every impact.
       // Deliberately NOT a circle: amber is already worn by the latest-lap dash and by unmapped turn dots, so the
@@ -5267,10 +5339,15 @@
       // GRIP-PAINTED trace: the same line, cut into runs of one state, so a turn reads blue the instant the
       // fronts give up and purple when all four go — the state change IS the shape of the line, seamlessly.
       const gripLine = (t, w2) => { const P = t.pts; if (!P.length || P[0].length < 3) return line(t, "var(--accent2)", w2, 1);
-        const segs = []; let run = [P[0]], st = P[0][2];
-        for (let i = 1; i < P.length; i++) { if (P[i][2] !== st) { run.push(P[i]); segs.push([st, run]); run = [P[i]]; st = P[i][2]; } else run.push(P[i]); }
+        // the same mode engine the map uses, so a colour never means two things on one screen
+        const _md = segMode(), _sc = segScale(P, _md);
+        const segs = []; let run = [P[0]], st = segKey(P[0], _md, _sc);
+        for (let i = 1; i < P.length; i++) { const k = segKey(P[i], _md, _sc);
+          if (k !== st) { run.push(P[i]); segs.push([st, run]); run = [P[i]]; st = k; } else run.push(P[i]); }
         segs.push([st, run]);
-        return segs.map(([s2, pts2]) => `<polyline fill="none" stroke="${gripCol(s2)}" stroke-width="${s2 ? w2 + 0.8 : w2}" stroke-linecap="round" opacity="${s2 ? 1 : 0.85}" points="${pts2.map((p) => `${px2(p[0]).toFixed(1)},${py2(p[1]).toFixed(1)}`).join(" ")}"><title>${esc(gripOf(s2).axle)}</title></polyline>`).join("");
+        return segs.map(([s2, pts2]) => { const hot = _md === "grip" ? !!s2 : true;
+          const ttl = _md === "grip" ? gripOf(s2).axle : (_md === "elev" ? "elevation" : "speed");
+          return `<polyline fill="none" stroke="${segCol(s2, _md, _sc)}" stroke-width="${hot ? w2 + 0.8 : w2}" stroke-linecap="round" opacity="${hot ? 1 : 0.85}" points="${pts2.map((p) => `${px2(p[0]).toFixed(1)},${py2(p[1]).toFixed(1)}`).join(" ")}"><title>${esc(ttl)}</title></polyline>`; }).join("");
       };
       // ONE line is yours: your FASTEST lap here. The rest of your own laps stay faint context — grip-painting every
       // one of them would repaint the whole chart in state colours and drown the comparison.
@@ -5311,6 +5388,7 @@
              data-smax="${smax}" data-padl="${padL}" data-w="${W2}" data-h="${H2}"
              data-pts="${hasGrip ? esc(JSON.stringify(cur.pts.map((p) => [p[0], p[1], p[2], p[3], p[4]]))) : ""}">${axis}${ticks}${lines}${impTicks}
              <g class="spd-cursor" style="display:none"><line y1="6" y2="${H2 - padB}" stroke="var(--txt)" stroke-width="1" opacity=".6"/><circle r="3.5" fill="var(--txt)"/></g></svg></div>
+        ${(() => { try { return segControls(segScale((cur || best || match[0] || {}).pts, segMode())); } catch (e) { return ""; } })()}
         <div class="spd-read why" style="font-size:10.5px;min-height:14px">${hasGrip ? "hover the trace — it marks that exact spot on the course map" : ""}</div>
         ${nVoid ? `<div class="why" style="font-size:10.5px;color:${gripCol("impact")};margin-top:3px">${gripOf("impact").icon} ${nVoid} lap${nVoid === 1 ? "" : "s"} void — ${esc(VOID_WHY)}. Struck-through times are barred from being a best.</div>` : ""}
         ${nPart ? `<div class="why" style="font-size:10.5px;color:var(--warn,#e3b341);margin-top:3px">◔ ${nPart} partial lap${nPart === 1 ? "" : "s"} — ${esc(PARTIAL_WHY)}. Kept because the corners they cover are real: on a long course you have never finished, these are most of what is known about its opening.</div>` : ""}
@@ -5624,6 +5702,7 @@
       const nImpMap = impactCount(gripLap && gripLap.pts);
       return `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
           <div class="card-row" style="margin-top:0"><strong style="font-size:12px">🗺 Course map — ${shown} turn${shown === 1 ? "" : "s"}${mapped !== shown ? ` (${mapped} curvature-mapped)` : ""} · ${geo.length_m} m</strong><span class="chip">${geo.from_model ? "best map on record" : "ref lap " + ((geo.ref_lap || {}).lap || "—")}${geo.last_lap ? ` · latest lap ${geo.last_lap.lap} overlaid` : ""}</span></div>
+          ${(() => { try { return segControls(segScale((gripLap || {}).pts, segMode())); } catch (e) { return ""; } })()}
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns, { rk, selN, live: src === "live", co, gripLap })}<div style="font-size:10.5px;min-width:150px;max-width:320px">${rk ? `<div style="font-weight:600;color:var(--accent2);margin-bottom:3px">▶ click a turn for its breakdown</div>` : ""}<div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#00d27a">●</span> clean this session · <span style="color:var(--accent)">○</span> on the map, not loaded</div><div style="margin-top:3px">a turn wears the state it took: ${gripLegend(["front", "rear", "both", "impact"])}</div>${nImpMap ? `<div style="margin-top:3px;color:${gripCol("impact")}">${gripOf("impact").icon} ${nImpMap} impact${nImpMap === 1 ? "" : "s"} on the painted lap — the burst marks where the car was hit${isVoid(gripLap) ? `<br><b>this lap's TIME is void</b> — ${esc(VOID_WHY)}` : ""}</div>` : ""}${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.map(turnLabel).join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
           ${brk}
         </div>`; };
@@ -5658,6 +5737,7 @@
       return `<div class="dash-map-pane">
         <div class="dash-pane-hd"><span class="dash-ey">▨ COURSE MAP</span><b>${shown} turn${shown === 1 ? "" : "s"}</b><span class="why">${geo.length_m} m</span>${shapeBadge(co)}${turnTally(co)}<span class="why" style="margin-left:auto;font-size:10px">scroll to zoom · drag to pan · click a turn →</span></div>
         <div class="dash-map-wrap">${courseMap(geo, co.corners, co.turns, { rk, selN, live: src === "live", co, gripLap, W: 600, H: 560, fill: true })}</div>
+        ${(() => { try { return segControls(segScale((gripLap || {}).pts, segMode())); } catch (e) { return ""; } })()}
         <div class="dash-map-key">
           <span><span style="color:var(--accent2)">━</span> course</span><span><span style="color:var(--warn,#e3b341)">╌</span> latest lap</span><span><span style="color:var(--muted)">─</span> every lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</span>
           <span><span style="color:#00d27a">●</span> clean</span><span><span style="color:var(--accent)">○</span> not loaded</span>
@@ -6444,6 +6524,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       r.querySelectorAll("[data-course-stage]").forEach((b) => b.addEventListener("click", () => { localStorage.setItem("fh6CourseStage", b.dataset.courseStage); if (src === "live") paintSections(true); else render(); }));
       // click a turn on the course map -> open its per-turn breakdown (the ✕ closes it)
       r.querySelectorAll("[data-courseturn]").forEach((g) => g.addEventListener("click", () => { const parts = String(g.dataset.courseturn).split("|"); live.selTurn = { rk: parts[0], n: +parts[1] }; if (src === "live") paintSections(true); else render(); }));
+      // the colour mode and palette are a VIEW choice, so they persist and repaint without touching any data
+      r.querySelectorAll("[data-segmode]").forEach((b) => b.addEventListener("click", () => {
+        try { localStorage.setItem("fh6SegMode", b.dataset.segmode); } catch (e) {}
+        if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-seggrad]").forEach((b) => b.addEventListener("click", () => {
+        try { localStorage.setItem("fh6Grad", b.dataset.seggrad); } catch (e) {}
+        if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-courseturn-close]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); live.selTurn = null; if (src === "live") paintSections(true); else render(); }));
       // switch which class the speed traces are scoped to — "" means every class. The choice sticks per route; the
       // next repaint refetches /laps for it (empty value ⇒ the class param is simply omitted).

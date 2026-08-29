@@ -1606,6 +1606,21 @@ def main():
                      and (r.get("CurrentLap") is None or r["CurrentLap"] > 0)]
             if len(rows_) < 30:      # nothing timed in this window: fall back rather than map an empty road
                 rows_ = [r for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+            # ...and START TO FINISH, one lap only. Dropping the pre-lap rows is not enough: a window can still
+            # hold a whole lap plus the partial that followed it, and this feeds BOTH the course geometry and the
+            # stored speed trace. A trace that runs past the line is not a lap of the course — it plots two
+            # different stretches of road on one distance axis, so every comparison against it is against a
+            # different thing. The lap boundary is the CurrentLap reset (race time keeps climbing across it), so
+            # split there and keep the longest complete lap.
+            _ls, _c2, _pc = [], [], None
+            for r in rows_:
+                _v = r.get("CurrentLap")
+                if _pc is not None and _v is not None and _pc > 30.0 and _v < 1.0:
+                    if len(_c2) > 30: _ls.append(_c2)
+                    _c2 = []
+                _c2.append(r); _pc = _v
+            if len(_c2) > 30: _ls.append(_c2)
+            if _ls: rows_ = max(_ls, key=lambda L: len(L))
             # 4th column rides through resample un-interpolated (a state is categorical); the 5th is ELEVATION,
             # which is continuous and interpolates like speed. PosY was in every capture and reached nothing —
             # a whole channel of the road (climbs, crests, compressions) that the lab could not draw.
@@ -2026,7 +2041,19 @@ def main():
                 _imp = _impacts(pts_w)
                 _lap_s = _game_lap_s(w)
                 _th = _tune_hash_for(cid_, w)
-                _lap_rows.append({"route_key": key, "session": sid, "cid": cid_, "t0": round(w["t0"], 1),
+                # A LAP BELONGS TO THE COURSE WHOSE LINE IT CROSSED — not to whichever course this loop is on.
+                # This wrote the outer `key`, so every window a car drove was filed under EVERY course that car
+                # visited in the session: one 5,696 m lap appeared under both -6800_-1100 and -3750_300, and so
+                # did four others. Duplicated laps inflate a course's history and, through the 107% rule, let a
+                # lap set on one road define the reference best on another.
+                # The event already carries the route its start/finish line identified; that is the answer.
+                # File it under the line it crossed. Do NOT skip a lap whose route differs from this loop's
+                # course: the first cut did, and the 23.41 mi Colossus lap vanished outright, because that route
+                # has no course entry in this session for the loop to reach. Losing a lap is far worse than
+                # filing one twice — and it cannot be filed twice anyway, since the store is UNIQUE on
+                # (route_key, session, cid, t0), so a second write of the same lap is an idempotent upsert.
+                _rk = _ev.get("route_key") or key
+                _lap_rows.append({"route_key": _rk, "session": sid, "cid": cid_, "t0": round(w["t0"], 1),
                                   "lap_s": _lap_s, "arc_m": round(arc_w),
                                   "build_id": _cr.get("build_id"), "class": _cr.get("class"), "pi": _cr.get("pi"),
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,

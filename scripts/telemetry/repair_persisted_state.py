@@ -34,7 +34,8 @@ LARGE time is beaten by the next honest lap, an absurdly SMALL one can never be 
    so this changes no behaviour — it only stops the file asserting something impossible. The next event through
    that route sets it correctly via the same max().
 """
-import argparse, glob, io, json, os, sys
+import argparse
+import math, glob, io, json, os, sys
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
@@ -74,10 +75,25 @@ def repair(m):
             v.pop("lap_s", None)
     # a trace that covers more road than the map is not a lap of it
     L = (m.get("geometry") or {}).get("length_m") or 0
-    if L:
+    # ...and neither is one that covers far too little. A stored trace used to improve on lap TIME alone, in the
+    # analyzer AND in the merger, so a fragment was quick because it was short, therefore never beaten, therefore
+    # permanent: a 364 m trace claiming a 15.3 s lap held the slot on the 1840 m -2350_-7550 against a real 71.7 s
+    # lap. That is 269 mph. The analyzer retires these at 0.7 of the course and the merger now does too; this
+    # clears the ones already written, using the same fraction so all three agree on what a trace is.
+    # A map made of disconnected scraps cannot judge coverage, so it does not get a vote here.
+    _ps = (m.get("geometry") or {}).get("paths") or []
+    _gaps = [math.hypot(_ps[i][-1][0] - _ps[i + 1][0][0], _ps[i][-1][1] - _ps[i + 1][0][1])
+             for i in range(len(_ps) - 1) if _ps[i] and _ps[i + 1]]
+    _fragmented = bool(_gaps) and max(_gaps) > (L or 0)
+    if L and not _fragmented:
         for cid in [c for c, v in st.items() if _span((v or {}).get("pts")) / L >= 1.45]:
             hits.append("speed_traces[%s] spans %.0f m on a %.0f m map (%.2fx)"
                         % (cid, _span(st[cid]["pts"]), L, _span(st[cid]["pts"]) / L))
+            del st[cid]
+    if L and not _fragmented:
+        for cid in [c for c, v in st.items() if 0 < _span((v or {}).get("pts")) < 0.7 * L]:
+            hits.append("speed_traces[%s] covers only %.0f m of the %.0f m course (%.0f%%) — a fragment holding "
+                        "the slot on time" % (cid, _span(st[cid]["pts"]), L, 100 * _span(st[cid]["pts"]) / L))
             del st[cid]
     return hits
 

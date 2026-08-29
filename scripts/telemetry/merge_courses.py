@@ -59,6 +59,34 @@ def cover(a, b_cells, s=30):
     return hit / len(a)
 
 
+def _tspan(t):
+    """Road covered by a trace, piece-aware — the arc resets when a trace is stitched from pieces."""
+    tot = 0.0; prev = None; st = None
+    for q in (t or {}).get("pts") or []:
+        a = q[0]
+        if prev is None: st = a
+        elif a < prev: tot += prev - st; st = a
+        prev = a
+    return tot + (prev - st) if prev is not None else 0.0
+
+
+def _trace_beats(rec, cur):
+    """Is `rec` the better trace for this cid than `cur`?
+
+    NOT SIMPLY THE FASTER ONE. This compared lap_s alone, so a 364 m fragment claiming a 15.3 s lap displaced a
+    real 1840 m lap at 71.7 s on -2350_-7550 — 1840 m in 15.3 s is 269 mph, and no car in the store does that.
+    A short run is quick BECAUSE it is short, so on time alone a fragment wins a race it never ran and then holds
+    the slot forever, because nothing honest can beat it. The analyzer already knew this and retires traces under
+    70% of the course; merging did not, and quietly put back what the analyzer had thrown out.
+    Coverage first, then time — the same order the analyzer uses, so the two agree about what a trace is.
+    """
+    sr, sc = _tspan(rec), _tspan(cur)
+    if sc and sr and (sr < 0.85 * sc or sr > 1.18 * sc):
+        return sr > sc                      # materially different road: the one covering MORE of it wins
+    return (rec.get("lap_s") or 9e9) < (cur.get("lap_s") or 9e9)   # same road: the faster lap wins
+
+
+
 def merge_into(dst, src):
     """Fold src's learning into dst. Conservative: additive counters, improve-only records, positional turns."""
     dst["laps"] = (dst.get("laps") or 0) + (src.get("laps") or 0)
@@ -78,7 +106,7 @@ def merge_into(dst, src):
                 d[cid] = rec
             elif k == "best_laps" and (rec.get("best_lap") or 9e9) < (cur.get("best_lap") or 9e9):
                 d[cid] = rec
-            elif k == "speed_traces" and (rec.get("lap_s") or 9e9) < (cur.get("lap_s") or 9e9):
+            elif k == "speed_traces" and _trace_beats(rec, cur):
                 d[cid] = rec
     # turns: merge positionally (40 m — the analyzer's own clustering radius); new positions append
     dts = dst.setdefault("turns", [])
@@ -107,6 +135,13 @@ def merge_into(dst, src):
     if (src.get("profile_laps") or 0) > (dst.get("profile_laps") or 0):
         dst["profile"] = src.get("profile"); dst["profile_laps"] = src.get("profile_laps"); dst["profile_session"] = src.get("profile_session")
     dst["merged_from"] = sorted(set((dst.get("merged_from") or []) + [src.get("route_key")] + (src.get("merged_from") or [])))
+    # and retire what no longer covers the merged course, exactly as analyze_session does after its own writes:
+    # the map may have GROWN in this merge, which can leave a trace that covered the old road short of the new one.
+    _cl = ((dst.get("geometry") or {}).get("length_m") or 0)
+    if _cl:
+        _st = dst.get("speed_traces") or {}
+        for _k in [k for k, t in _st.items() if _tspan(t) and _tspan(t) < 0.7 * _cl]:
+            _st.pop(_k, None)
     return dst
 
 

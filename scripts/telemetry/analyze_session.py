@@ -2253,6 +2253,36 @@ def main():
         model["turns"] = merged_turns
         canonical = [t for t in merged_turns if t["established"]]
         model["turn_count"] = len(canonical)
+        # ---- TRACE-DERIVED PER-TURN STATISTICS, additive ----
+        # A corner is only DETECTED at lat_g > 0.35 sustained 0.8 s, so a sweeper taken without lifting produces
+        # no corner record and its turn reads "not driven" though the car went through it every lap. laps.db has
+        # held the answer all along, keyed by position. This measures every MAP turn from every stored lap and
+        # hangs the result in its own `traced` namespace — never overwriting `track`, which is the accumulated
+        # BEHAVIOURAL record with a different denominator (this course counts 194 laps where the store holds 94,
+        # and 53% of mapped turns lab-wide sit on routes with no usable traces at all).
+        # It is also the retroactive method: move or insert a turn and the next run re-derives it from laps
+        # already driven. Measured at ~0.1 s for a 13-turn course with 94 laps, so it runs every cycle.
+        try:
+            import turn_stats as _TS
+            _tr = _TS.measure(ROOT, key, model)
+            _gt = [g for g in ((model.get("geometry") or {}).get("turns") or []) if g.get("apex")]
+            _byid = {g.get("id"): g.get("apex") for g in _gt}
+            for t_ in merged_turns:
+                t_.pop("traced", None)                     # re-derived every run, never inherited
+                p_ = t_.get("pos")
+                if not p_:
+                    continue
+                best, bd = None, 45.0 ** 2
+                for gid, ap_ in _byid.items():
+                    if not ap_:
+                        continue
+                    d_ = (ap_[0] - p_[0]) ** 2 + (ap_[1] - p_[1]) ** 2
+                    if d_ < bd:
+                        best, bd = gid, d_
+                if best and _tr.get(best):
+                    t_["traced"] = _tr[best]
+        except Exception as _e:
+            print("  [traced] skipped: %r" % (_e,))
         # track-level presence per turn (over ALL track laps) and a track-level turn-count confidence — the turn identity is corroborated across sessions, not just this one
         for k_ in corner_out:
             t_ = k_.get("track") or {}

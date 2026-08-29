@@ -4775,7 +4775,9 @@
         // the turn cards do — one turn table, not a parallel one. model_sessions, not sessions: the canonical merge
         // below overwrites `sessions` with the session's own (possibly undefined) count.
         rows = est.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m, type: t.type, track: t.track || null, best_by_car: t.best_by_car || null,
-          est_by: t.est_by || null, geo_sessions: t.geo_sessions != null ? t.geo_sessions : null, geo_mapped: !!t.geo_mapped, model_sessions: t.sessions != null ? t.sessions : null }));
+          est_by: t.est_by || null, geo_sessions: t.geo_sessions != null ? t.geo_sessions : null, geo_mapped: !!t.geo_mapped, model_sessions: t.sessions != null ? t.sessions : null,
+          // trace-measured statistics: what every stored lap did here, by position
+          traced: t.traced || null }));
       }
       // WHICH TURN SET WINS. The old rule was "the session always wins — it sees the model live, db.js is a
       // snapshot". True only while the analysis is CURRENT. An analysis produced by a superseded detector is the
@@ -4813,6 +4815,26 @@
       _ttCache[ck] = out; return out;
     };
     const TURN_R = 45;   // ONE join radius everywhere (the analyzer's own corner↔turn radius) — was 60/45/40/18 in five places
+    // A CORNER-SHAPED RECORD FROM THE TRACE MEASUREMENT. Four renderers ask "is there a behavioural corner near
+    // this turn?" and print "not driven" when there is not — which is exactly wrong for a corner taken without
+    // lifting, since the detector needs lat_g > 0.35 for 0.8 s to fire at all. Rather than teach four renderers a
+    // new shape, the measurement is handed to them in the shape they already consume, flagged `traced` so nothing
+    // mistakes it for a measured cornering event. It carries no limiter and no phase profile: a trace knows where
+    // the car was and how fast, not which axle gave up, and inventing either would be worse than saying nothing.
+    const tracedCorner = (t) => { const d = t && t.traced; if (!d || !d.n_passes) return null;
+      return { traced: d, mph_min: d.min_mph, mph_in: null, mph_out: null, lat_g: null,
+               limiter: null, note: null, dominant: null, dominant_phase: null, phase_profile: null,
+               usi: null, type: null, radius_m: t.radius_m || null, laps_seen: d.n_passes, pos: t.pos };
+    };
+    // NEAREST, not last. `cs[cs.length-1]` took whichever matching corner came last in the array, so a turn could
+    // render a corner 44 m away in preference to one at 0 m — measured on T10 today — and with the map's full
+    // turn set two adjacent turns could both claim the same corner while a third rendered none.
+    const cornerNear = (co, t) => { if (!t || !t.pos) return null;
+      let best = null, bd = TURN_R * TURN_R;
+      (co.corners || []).forEach((k) => { if (!k.pos || k.drift) return;
+        const d = (k.pos[0] - t.pos[0]) ** 2 + (k.pos[1] - t.pos[1]) ** 2; if (d <= bd) { bd = d; best = k; } });
+      return best || tracedCorner(t);
+    };
     const turnAt = (co, pos) => { if (!pos || pos[0] == null) return null; let best = null, bd = TURN_R * TURN_R;
       turnTable(co).turns.forEach((t) => { const d = (t.pos[0] - pos[0]) ** 2 + (t.pos[1] - pos[1]) ** 2; if (d < bd) { bd = d; best = t; } }); return best; };
     const turnKey = (t) => (t ? (t.id || "g" + t.n) : null);   // join on the MODEL's id, never a positional index
@@ -5068,10 +5090,10 @@
       // ONE table for markers, clicks and the breakdown panel — the old canonical/geometry ternary made the
       // geometry fallback clickable while the panel only indexed canonical, so those clicks did nothing.
       const _tt = opts.co ? turnTable(opts.co) : { turns: (turns && turns.canonical && turns.canonical.length ? turns.canonical.map((t, i) => ({ n: i + 1, id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m })) : (geo.turns || []).map((g, i) => ({ n: i + 1, id: g.id, pos: g.apex, dir: g.dir, radius_m: g.radius_m, provisional: true }))), source: "model" };
-      const canon = _tt.turns.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, r: t.radius_m, provisional: t.provisional }));
+      const canon = _tt.turns.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, r: t.radius_m, provisional: t.provisional, traced: t.traced || null }));
       const gTurns = (geo.turns || []).map((g) => g.apex); const nearAny = (pos, list, d) => list.some((q) => (q[0] - pos[0]) ** 2 + (q[1] - pos[1]) ** 2 <= d * d);
       const cornerPos = (corners || []).map((k) => k.pos).filter(Boolean);
-      const markers = canon.map((t, i) => ({ n: i + 1, id: t.id, pos: t.pos, dir: t.dir, r: t.r, provisional: t.provisional, mapped: nearAny(t.pos, gTurns, 45), loaded: nearAny(t.pos, cornerPos, 45),
+      const markers = canon.map((t, i) => ({ n: i + 1, id: t.id, pos: t.pos, dir: t.dir, r: t.r, provisional: t.provisional, mapped: nearAny(t.pos, gTurns, 45), loaded: nearAny(t.pos, cornerPos, 45) || !!(t.traced && t.traced.n_passes),   // measured by trace counts as loaded: a corner taken flat fires no grip event, and a hollow marker on a corner driven 90 times is the map saying "not driven" about the road you know best
         grip: (() => { const k = (corners || []).filter((c) => c.pos && (c.pos[0] - t.pos[0]) ** 2 + (c.pos[1] - t.pos[1]) ** 2 <= TURN_R * TURN_R).slice(-1)[0];
           return k ? gripFromAxle(k.dominant, k.drift) : null; })() }));   // a turn wears the state it took: blue when the fronts went, purple when all four did
       // LIVE INSTRUMENT: on the live source the map carries (a) the transform constants so paintFrame can move the
@@ -5460,7 +5482,7 @@
       const t = turnTable(co).turns[n - 1]; if (!t) return "";
       const near = (a, b, d) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= d * d;
       const cs = (co.corners || []).filter((k) => k.pos && !k.drift && near(k.pos, t.pos, 45));
-      const c = cs.length ? cs[cs.length - 1] : null;   // the latest measured pass through this turn this session
+      const c = cornerNear(co, t);   // nearest measured pass, or the trace measurement when nothing cornered here
       const geo = courseGeoFor(co); const gTurns = ((geo && geo.turns) || []).map((g) => g.apex);
       const mappedT = gTurns.some((q) => near(q, t.pos, 45));
       const ck = courseKnowledge(co); const tuning = ck.stage === "tuning";
@@ -5503,7 +5525,10 @@
     // tune-vs-driver verdict and a recurring-problem flag. The analyzer measures 4 grip phases (brake · turn-in · mid ·
     // exit); phase 5 (straight/crest) reads exit-traction. Status: front=understeer · rear=oversteer · both · clean. ----
     const PH_COL = { clean: "#00d27a", front: "#2f81f7", rear: "#e5414e", both: "#d95926", traction: "#e3b341", unseen: "var(--line)" };
-    const PH_LBL = { clean: "grip OK", front: "understeer", rear: "oversteer", both: "front + rear slip", traction: "traction-limited", unseen: "not driven" };
+    // "unseen" means THIS PHASE was not resolved, which is a statement about grip sampling — not about whether
+    // the car went through the corner. Calling it "not driven" on a turn the traces show 90 passes through was
+    // the most confidently wrong thing on the page.
+    const PH_LBL = { clean: "grip OK", front: "understeer", rear: "oversteer", both: "front + rear slip", traction: "traction-limited", unseen: "no grip reading" };
     const turnPhaseRibbon = (prof, firstPh, w) => {
       prof = prof || [];
       const stOf = (i) => { const p = prof.find((x) => x.phase === i); return p && p.n ? p.status : "unseen"; };
@@ -5522,7 +5547,17 @@
       return `<svg viewBox="0 0 620 320" width="${w || 160}" height="${Math.round((w || 160) * 0.52)}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title><path d="${CM_RIBBON}" fill="none" stroke="var(--bg3)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>${segs}</svg>`;
     };
     const turnVerdict = (c, unlocked) => {
-      if (!c) return `<div class="tv unseen"><b>— not driven</b> — take this turn at pace once to read its phases</div>`;
+      // A TRACE-MEASURED TURN IS A FINDING, NOT AN ABSENCE. This is the corner the grip detector cannot see —
+      // it needs lat_g > 0.35 held for 0.8 s, which a corner taken without lifting never produces. What the
+      // traces know is where the car was and how fast, so that is exactly what this claims: speed carried, as a
+      // fraction of the lap's own straight-line pace, over N stored laps. It never says "flat out" — there is no
+      // throttle channel in the trace, so a lift is not observable and must not be asserted.
+      if (c && c.traced) { const d = c.traced;
+        const strong = d.verdict === "no lift measured", soft = d.verdict === "probably no lift";
+        if (strong || soft) return `<div class="tv flat"><b>${strong ? "🏁 NO LIFT MEASURED" : "🏁 probably no lift"}</b> — carried <b>${d.min_mph}</b> mph here, ${Math.round(d.ratio * 100)}% of this lap's own straight-line pace, on ${d.n_flat} of ${d.n_passes} stored laps${d.n_builds > 1 ? ` across ${d.n_builds} builds` : ""}. <span class="why">measured from the racing line, not from a grip event — the trace carries no throttle channel, so a lift cannot be seen either way</span></div>`;
+        return `<div class="tv traced"><b>◔ measured from ${d.n_passes} stored lap${d.n_passes === 1 ? "" : "s"}</b> — slowest through here <b>${d.min_mph}</b> mph (${Math.round(d.ratio * 100)}% of straight-line pace). <span class="why">no grip event fired here, so there is no axle verdict — drive it at pace to read the phases</span></div>`;
+      }
+      if (!c) return `<div class="tv unseen"><b>— no data here yet</b> — no stored lap has been measured through this turn</div>`;
       const note = c.note ? esc(resolveTurnIds(c.note)) : ""; const lim = c.limiter;
       if (lim === "tune" && unlocked === false) return `<div class="tv tune"><b>🔧 setup-limited</b> — the car, not your line, gives up here.${note ? " " + note : ""} <span class="why">the fix arrives with tuning feedback once it unlocks</span></div>`;   // J12: diagnosis without a prescription while tuning advice is locked
       if (lim === "tune") return `<div class="tv tune"><b>🔧 TUNE fix</b> — a setup change helps here.${note ? " " + note : ""}</div>`;
@@ -5541,7 +5576,7 @@
     };
     const turnCorner = (co, n) => { const t = turnTable(co).turns[n - 1]; if (!t) return [null, null];
       const near = (a, b, d) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= d * d;
-      const cs = (co.corners || []).filter((k) => k.pos && !k.drift && near(k.pos, t.pos, 45)); return [t, cs.length ? cs[cs.length - 1] : null]; };
+      return [t, cornerNear(co, t)]; };
     // fullTurnCard / turnByTurnSection lived here. They rendered EVERY turn's phases as a grid below the body;
     // that content now answers the question the map asks, inside courseTurnBreakdown, for the turn you clicked.
     // The aggregate counts they carried live on in turnTally, on the map pane header.
@@ -5654,6 +5689,10 @@
       // drew every turn UNCLICKABLE — the atlas showed you a course's 13 corners and let you open none of them.
       // A minimal course stub is all the panel needs: turnTable falls back to the model, and the breakdown
       // correctly reports "not driven at pace this session" because this card is the record, not a session.
+      // `corners: []` is deliberate — this card is the cross-session RECORD, not a session, so it has no
+      // behavioural corners of its own. That used to mean every turn on it rendered "not driven", on the one
+      // card whose entire purpose is what the course knows. turnTable reads the model directly, so the traced
+      // measurements ride along and the fallback fills the cards in.
       const mCo = { route_key: m.route_key, name: rn, turns: mTurns, corners: [], geometry: m.geometry,
                     laps: { total: m.laps || 0 }, runs: m.laps || 0, driving: {}, cars: Object.keys(m.cars || {}) };
       return `<div class="lab-corner" style="border-left:4px solid var(--accent)">

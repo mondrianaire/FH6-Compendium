@@ -310,7 +310,10 @@ def f3():
              # paintSections is a wholesale innerHTML rebuild: it destroys the map SVG and recreates the car dot
              # hidden. Unless the live overlays are re-placed in the SAME task, the dot blinks out on every
              # repaint — and paintAll calls paintFrame BEFORE paintSections, which made that a certainty.
-             "updCarDot(live.frame)", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
+             "updCarDot(live.frame)",
+             # a mapped turn must never render as "not driven" again: the trace fallback, the nearest-corner join
+             # that replaced last-match, and the verdict that speaks for a corner no grip event can see
+             "tracedCorner", "cornerNear", "no lift measured", "traced: t.traced", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
     missing = [m for m in marks if m not in src]
     return (not missing, f"feature markers present ({len(marks) - len(missing)}/{len(marks)}){'; missing: ' + str(missing) if missing else ''}")
 check("F client", "feature surface complete", f3)

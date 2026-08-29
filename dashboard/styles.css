@@ -515,3 +515,9 @@ tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(25
 .dash-info-pane .dash-pane-body { max-height: min(74vh, 660px); overflow-y: auto; overflow-x: hidden; }
 /* one column when there is no second half to give away */
 @media (max-width: 900px) { .dash-body { grid-template-columns: minmax(0, 1fr); } .dash-map-pane { position: static; } }
+
+/* A trace-measured turn is a finding, not an absence — it must not wear the greyed-out "unseen" treatment that
+   used to mean "not driven". `flat` is the corner taken without a measurable lift (the thing the grip detector
+   structurally cannot see); `traced` is measured-but-no-grip-event. */
+.tv.flat { border-left: 3px solid #00d27a; background: rgba(0, 210, 122, .07); }
+.tv.traced { border-left: 3px solid var(--accent2); background: rgba(47, 129, 247, .06); }

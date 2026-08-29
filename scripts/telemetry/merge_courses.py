@@ -110,6 +110,31 @@ def merge_into(dst, src):
     return dst
 
 
+def _rekey_sessions(old_key, new_key):
+    """Point every session record at the surviving course. Returns how many session files changed.
+
+    A session is a historical record and its COURSE list is not history about the world, it is a pointer into the
+    course catalog — so when the catalog retires a key, the pointer has to follow or it dangles. Only the key is
+    rewritten; every measurement in the record is left exactly as it was."""
+    n = 0
+    for p in glob.glob(os.path.join(ROOT, "data", "sessions", "*.json")):
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        hit = False
+        for coll in ("courses", "events"):
+            for rec in (d.get(coll) or []):
+                if rec.get("route_key") == old_key:
+                    rec["route_key"] = new_key; hit = True
+        if hit:
+            tmp = p + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(d, f, indent=1)
+            os.replace(tmp, p); n += 1
+    return n
+
+
 def _move_traces(old_key, new_key):
     """Re-key a retired course's lap traces onto the canonical course. Returns how many rows moved.
 
@@ -265,6 +290,13 @@ def main():
             moved = _move_traces(d, canon)
             if moved:
                 print(f"  moved {moved} lap trace(s) {d} -> {canon}")
+            # AND THE SESSION RECORDS. The model is deleted and the route key retired, but every session that
+            # ever saw that road still names it — and the dashboard bundles sessions, so the retired course keeps
+            # appearing on screen after the merge that was supposed to remove it. Jett: "the old courses fake are
+            # still showing up to me." Same fault as the lap traces, one artefact over.
+            rn = _rekey_sessions(d, canon)
+            if rn:
+                print(f"  re-keyed {rn} session record(s) {d} -> {canon}")
             os.remove(dp)
             routes.pop(d, None)   # the duplicate key is retired; path matching now attracts its events to the canonical model
         if name:

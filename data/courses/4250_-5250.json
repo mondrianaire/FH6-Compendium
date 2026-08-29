@@ -293,12 +293,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 0,
-      "geo_mapped": true,
       "deg": 58,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 0,
+      "geo_mapped": true
     },
     {
       "id": "T5",
@@ -531,12 +531,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 21,
+      "deg": 19,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true
     },
     {
       "id": "T8",
@@ -738,12 +738,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 39,
+      "deg": 38,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true
     },
     {
       "id": "T11",
@@ -793,7 +793,7 @@
       "cars": [
         "3852|2|4|700"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_162805": {
           "n": 1,
@@ -833,11 +833,9 @@
         "laps_track": 4,
         "presence": 0.25
       },
-      "established": true,
-      "geo_sessions": 1,
-      "geo_mapped": true,
+      "established": false,
       "deg": 66,
-      "est_by": "geometry"
+      "est_by": null
     },
     {
       "id": "T12",
@@ -853,12 +851,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 0,
-      "geo_mapped": true,
       "deg": 12,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 0,
+      "geo_mapped": true
     },
     {
       "id": "T13",
@@ -1135,10 +1133,10 @@
         "presence": 0.25
       },
       "established": true,
+      "deg": 25,
+      "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 54,
-      "est_by": "geometry"
+      "geo_mapped": true
     },
     {
       "id": "T16",
@@ -1229,10 +1227,10 @@
         "presence": 0.25
       },
       "established": true,
+      "deg": 22,
+      "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 24,
-      "est_by": "geometry"
+      "geo_mapped": true
     },
     {
       "id": "T17",
@@ -1416,10 +1414,10 @@
         "presence": 0.25
       },
       "established": true,
+      "deg": 36,
+      "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 45,
-      "est_by": "geometry"
+      "geo_mapped": true
     },
     {
       "id": "T19",
@@ -1526,12 +1524,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 0,
-      "geo_mapped": true,
       "deg": 13,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 0,
+      "geo_mapped": true
     },
     {
       "id": "T21",
@@ -1547,12 +1545,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 0,
-      "geo_mapped": true,
       "deg": 12,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 0,
+      "geo_mapped": true
     },
     {
       "id": "T22",
@@ -1568,12 +1566,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 45,
+      "deg": 42,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true
     },
     {
       "id": "T23",
@@ -1682,12 +1680,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 23,
+      "deg": 19,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true
     },
     {
       "id": "T25",
@@ -1703,12 +1701,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 0,
-      "geo_mapped": true,
       "deg": 12,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 0,
+      "geo_mapped": true
     },
     {
       "id": "T26",
@@ -1815,12 +1813,12 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 79,
+      "deg": 67,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true
     },
     {
       "id": "T28",
@@ -2369,6 +2367,27 @@
       },
       "established": false,
       "est_by": null
+    },
+    {
+      "id": "T14",
+      "pos": [
+        3831,
+        -5091
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 59,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "deg": 64,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
     }
   ],
   "laps": 4,
@@ -12615,13 +12634,13 @@
   "geo_turns": {
     "4086_-5011": {
       "pos": [
-        4086,
-        -5011
+        4090,
+        -5012
       ],
-      "s": 260,
-      "dir": "L",
-      "radius_m": 88,
-      "deg": 21,
+      "s": 256,
+      "dir": "R",
+      "radius_m": 75,
+      "deg": 19,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12633,9 +12652,9 @@
         -5012
       ],
       "s": 400,
-      "dir": "L",
-      "radius_m": 77,
-      "deg": 39,
+      "dir": "R",
+      "radius_m": 70,
+      "deg": 38,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12643,13 +12662,13 @@
     },
     "3830_-5095": {
       "pos": [
-        3830,
-        -5095
+        3831,
+        -5091
       ],
-      "s": 552,
-      "dir": "L",
+      "s": 548,
+      "dir": "R",
       "radius_m": 59,
-      "deg": 66,
+      "deg": 64,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12661,9 +12680,9 @@
         -5415
       ],
       "s": 904,
-      "dir": "R",
-      "radius_m": 21,
-      "deg": 54,
+      "dir": "L",
+      "radius_m": 14,
+      "deg": 25,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12671,13 +12690,13 @@
     },
     "3787_-5491": {
       "pos": [
-        3787,
-        -5491
+        3781,
+        -5485
       ],
-      "s": 996,
-      "dir": "L",
-      "radius_m": 63,
-      "deg": 24,
+      "s": 988,
+      "dir": "R",
+      "radius_m": 50,
+      "deg": 22,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12685,13 +12704,13 @@
     },
     "3871_-5625": {
       "pos": [
-        3871,
-        -5625
+        3869,
+        -5613
       ],
-      "s": 1156,
-      "dir": "R",
-      "radius_m": 102,
-      "deg": 45,
+      "s": 1144,
+      "dir": "L",
+      "radius_m": 96,
+      "deg": 36,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12703,9 +12722,9 @@
         -5882
       ],
       "s": 1416,
-      "dir": "L",
-      "radius_m": 53,
-      "deg": 45,
+      "dir": "R",
+      "radius_m": 47,
+      "deg": 42,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12717,9 +12736,9 @@
         -6013
       ],
       "s": 1604,
-      "dir": "L",
-      "radius_m": 89,
-      "deg": 23,
+      "dir": "R",
+      "radius_m": 85,
+      "deg": 19,
       "sessions": [
         "fh6_20260828_122408"
       ],
@@ -12731,9 +12750,9 @@
         -6071
       ],
       "s": 1804,
-      "dir": "L",
-      "radius_m": 64,
-      "deg": 79,
+      "dir": "R",
+      "radius_m": 62,
+      "deg": 67,
       "sessions": [
         "fh6_20260828_122408"
       ],

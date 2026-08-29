@@ -2121,18 +2121,43 @@ def main():
         # collapsed each pair and 13 mapped turns became 11 registry entries and 10 drawn markers. The map is the
         # authority on what a turn is, so the map sets the tolerance — half the closest gap it contains, capped
         # at the old value. Distinct turns then cannot collide however tightly a circuit is packed.
-        _ms = sorted(t.get("s") for t in ((geo or {}).get("turns") or []) if t.get("s") is not None)
+        # DERIVE THE TOLERANCE FROM THE MAP THAT WILL BE THE COURSE'S MAP, not from this session's fresh
+        # detections. _ms read (geo or {}).get("turns") -- the session's own turns -- and fell back to a 44 m
+        # default whenever a short capture produced fewer than two. That yields _TOL_S=22 / _TOL_XZ=18, exactly
+        # the pre-fix constants this block exists to replace, on precisely the runs least able to afford them.
+        _authoritative = ((geo.get("turns") if better_map(geo, model.get("geometry"))
+                           else (model.get("geometry") or {}).get("turns")) or [])
+        _ms = sorted(t.get("s") for t in _authoritative if t.get("s") is not None)
         _gapmin = min((b - a for a, b in zip(_ms, _ms[1:])), default=44)
         _TOL_S = max(6.0, min(22.0, _gapmin / 2.0))
         _TOL_XZ = max(6.0, min(18.0, _gapmin / 2.0))
         gseen = model.setdefault("geo_turns", {})       # stable key -> {pos, dir, radius_m, deg, sessions[]}
+
+        def _bind(ap, _as, taken):
+            """NEAREST registry entry inside the positional gate, one-to-one. Three faults lived in the `next(...)`
+            this replaces: it returned the first DICT-ORDER hit rather than the closest; the `or` across the two
+            tolerances let an 8 m arc match forgive a 49 m positional error, which is how two keys ended up
+            holding physically opposite ends of the same course (~312 m adrift); and nothing stopped two map
+            turns binding the same entry, so a pair 20 m apart collapsed into one. Arc is a TIEBREAK among
+            candidates already inside the XZ gate, never an alternative to it."""
+            best, bd = None, _TOL_XZ ** 2
+            for k, v in gseen.items():
+                if k in taken or not v.get("pos"):
+                    continue
+                d = (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2
+                if d > bd:
+                    continue
+                if d < bd or (best is not None and _as is not None and v.get("s") is not None
+                              and abs(v["s"] - _as) < abs(gseen[best].get("s", 1e9) - _as)):
+                    best, bd = k, d
+            return best
+        _taken = set()
         for g_ in ((geo or {}).get("turns") or []):
             ap = g_.get("apex")
             if not ap: continue
             _as = g_.get("s")
-            hit_k = next((k for k, v in gseen.items()
-                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= _TOL_XZ ** 2
-                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= _TOL_S)), None)
+            hit_k = _bind(ap, _as, _taken)
+            if hit_k: _taken.add(hit_k)
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
                                    {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             if sid not in rec["sessions"]: rec["sessions"].append(sid)
@@ -2152,18 +2177,22 @@ def main():
         # ...and seed from the map that will actually BE the course's map after this session, not the one it was
         # replacing. Reading the stored map here while the write below adopted the fresh one is what kept a
         # superseded double lap's phantom corners standing at full geometric authority.
-        _authoritative = ((geo.get("turns") if better_map(geo, model.get("geometry"))
-                           else (model.get("geometry") or {}).get("turns")) or [])
+        _taken2 = set()
         for g_ in _authoritative:
             ap = g_.get("apex")
             if not ap: continue
             _as = g_.get("s")
-            hit_k = next((k for k, v in gseen.items()
-                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= _TOL_XZ ** 2
-                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= _TOL_S)), None)
+            hit_k = _bind(ap, _as, _taken2)
+            if hit_k: _taken2.add(hit_k)
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
                                    {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             rec["model_map"] = True
+            # refresh from the MAP it just bound to — an entry whose apex the detector moved must not keep
+            # describing where the corner used to be (that is the ~312 m drift, and it is what a stale `pos`
+            # then feeds to every downstream matcher).
+            rec["pos"] = [round(ap[0]), round(ap[1])]
+            for f_ in ("dir", "radius_m", "deg", "s"):
+                if g_.get(f_) is not None: rec[f_] = g_[f_]
         # THE CURRENT MAP IS THE GEOMETRIC TRUTH. An entry not in it is a superseded apex, full stop. The old
         # rule also spared anything "seen this session", which meant every time the detector moved an apex the
         # PREVIOUS position survived beside the new one and they accumulated: one corner ended up drawn twice
@@ -2173,12 +2202,19 @@ def main():
             gseen.pop(k_, None)   # not in the course's own map = not part of the road
         # every geometric turn becomes a model turn (created if the behavioural pass never saw it)
         for t in merged_turns: t.pop("geo_mapped", None); t.pop("geo_sessions", None)   # re-derived from gseen below, never inherited from the file
+        _bound = set()
         for k, v in gseen.items():
             # ...and the same map-derived tolerance here. A 40 m radius silently re-merged what the two matchers
             # above had just kept apart: 13 registry entries collapsed back to 10 model turns because Edamame
             # has pairs 20 m apart. Every stage that matches turns to turns must use the map's own spacing.
-            hit = next((t for t in merged_turns
-                        if (t["pos"][0] - v["pos"][0]) ** 2 + (t["pos"][1] - v["pos"][1]) ** 2 <= _TOL_XZ ** 2), None)
+            # NEAREST AND ONE-TO-ONE, like the two above it. First-hit matching let two registry entries 20 m
+            # apart both bind the same merged turn, so the pair the tolerance had just protected collapsed here
+            # instead — one stage later, with the same result and no trace of which stage lost them.
+            _cand = [(t, (t["pos"][0] - v["pos"][0]) ** 2 + (t["pos"][1] - v["pos"][1]) ** 2)
+                     for t in merged_turns if id(t) not in _bound]
+            _cand = [c for c in _cand if c[1] <= _TOL_XZ ** 2]
+            hit = min(_cand, key=lambda c: c[1])[0] if _cand else None
+            if hit is not None: _bound.add(id(hit))
             if hit is None:
                 hit = {"id": "T?", "pos": list(v["pos"]), "dir": v.get("dir"), "type": None, "radius_m": v.get("radius_m"),
                        "n": 0, "best": None, "sessions": 0, "by_session": {}, "track": {}}

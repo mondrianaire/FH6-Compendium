@@ -67,7 +67,7 @@
         "4232|2|6|800",
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_122523": {
           "n": 1,
@@ -125,8 +125,8 @@
         "laps_track": 2,
         "presence": 1.0
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T2",
@@ -217,7 +217,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 173
     },
     {
       "id": "T3",
@@ -435,7 +438,10 @@
         "presence": 1.0
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 22
     },
     {
       "id": "T5",
@@ -667,7 +673,7 @@
       "cars": [
         "4232|2|6|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_122523": {
           "n": 1,
@@ -707,8 +713,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T8",
@@ -799,7 +805,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 41
     },
     {
       "id": "T9",
@@ -940,7 +949,7 @@
       "cars": [
         "4232|2|6|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_122523": {
           "n": 1,
@@ -980,8 +989,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T11",
@@ -1031,7 +1040,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -1071,8 +1080,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T12",
@@ -1198,7 +1207,10 @@
         "presence": 1.0
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 76
     },
     {
       "id": "T13",
@@ -1265,7 +1277,7 @@
         "4232|2|6|800",
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_122523": {
           "n": 1,
@@ -1323,8 +1335,8 @@
         "laps_track": 2,
         "presence": 1.0
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T14",
@@ -1592,7 +1604,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -1632,8 +1644,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T17",
@@ -1791,7 +1803,7 @@
         "4232|2|6|800",
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_122523": {
           "n": 1,
@@ -1849,8 +1861,8 @@
         "laps_track": 2,
         "presence": 1.0
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T19",
@@ -1941,7 +1953,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 25
     },
     {
       "id": "T20",
@@ -1991,7 +2006,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -2031,8 +2046,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T21",
@@ -2123,7 +2138,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 58
     },
     {
       "id": "T22",
@@ -2264,7 +2282,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -2304,8 +2322,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T24",
@@ -2487,7 +2505,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 42
     },
     {
       "id": "T26",
@@ -2578,7 +2599,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 18
     },
     {
       "id": "T27",
@@ -2760,7 +2784,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 37
     },
     {
       "id": "T29",
@@ -3027,7 +3054,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -3067,8 +3094,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T32",
@@ -3523,7 +3550,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 63
     },
     {
       "id": "T37",
@@ -3614,7 +3644,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 61
     },
     {
       "id": "T38",
@@ -3705,7 +3738,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 52
     },
     {
       "id": "T39",
@@ -3755,7 +3791,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -3795,8 +3831,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T40",
@@ -3887,7 +3923,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 73
     },
     {
       "id": "T41",
@@ -3937,7 +3976,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -3977,8 +4016,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T42",
@@ -4069,7 +4108,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 28
     },
     {
       "id": "T43",
@@ -4160,7 +4202,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 82
     },
     {
       "id": "T44",
@@ -4342,7 +4387,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 72
     },
     {
       "id": "T46",
@@ -4433,7 +4481,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 57
     },
     {
       "id": "T47",
@@ -4615,7 +4666,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 74
     },
     {
       "id": "T49",
@@ -4706,7 +4760,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 31
     },
     {
       "id": "T50",
@@ -4756,7 +4813,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -4796,8 +4853,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T51",
@@ -4888,7 +4945,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 41
     },
     {
       "id": "T52",
@@ -4979,7 +5039,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 44
     },
     {
       "id": "T53",
@@ -5070,7 +5133,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 74
     },
     {
       "id": "T54",
@@ -5161,7 +5227,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 176
     },
     {
       "id": "T55",
@@ -5252,7 +5321,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 177
     },
     {
       "id": "T56",
@@ -5434,7 +5506,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 33
     },
     {
       "id": "T58",
@@ -5798,7 +5873,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 19
     },
     {
       "id": "T62",
@@ -5889,7 +5967,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 68
     },
     {
       "id": "T63",
@@ -5980,7 +6061,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 62
     },
     {
       "id": "T64",
@@ -6303,7 +6387,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -6343,8 +6427,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T68",
@@ -6435,7 +6519,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 124
     },
     {
       "id": "T69",
@@ -6485,7 +6572,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -6525,8 +6612,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T70",
@@ -6708,7 +6795,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 39
     },
     {
       "id": "T72",
@@ -7345,7 +7435,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 21
     },
     {
       "id": "T79",
@@ -7618,7 +7711,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 62
     },
     {
       "id": "T82",
@@ -7668,7 +7764,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -7708,8 +7804,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T83",
@@ -7800,7 +7896,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 32
     },
     {
       "id": "T84",
@@ -7982,7 +8081,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 99
     },
     {
       "id": "T86",
@@ -8032,7 +8134,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -8072,8 +8174,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T87",
@@ -8164,7 +8266,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 179
     },
     {
       "id": "T88",
@@ -8214,7 +8319,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -8254,8 +8359,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T89",
@@ -8437,7 +8542,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 168
     },
     {
       "id": "T91",
@@ -8528,7 +8636,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 162
     },
     {
       "id": "T92",
@@ -8619,7 +8730,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 12
     },
     {
       "id": "T93",
@@ -8710,7 +8824,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 179
     },
     {
       "id": "T94",
@@ -8801,7 +8918,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 178
     },
     {
       "id": "T95",
@@ -8892,7 +9012,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 179
     },
     {
       "id": "T96",
@@ -9033,7 +9156,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -9073,8 +9196,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T98",
@@ -9165,7 +9288,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 78
     },
     {
       "id": "T99",
@@ -9529,7 +9655,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 16
     },
     {
       "id": "T103",
@@ -9620,7 +9749,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 40
     },
     {
       "id": "T104",
@@ -9893,7 +10025,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 59
     },
     {
       "id": "T107",
@@ -9984,7 +10119,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 123
     },
     {
       "id": "T108",
@@ -10075,7 +10213,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 62
     },
     {
       "id": "T109",
@@ -10166,7 +10307,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 22
     },
     {
       "id": "T110",
@@ -10257,7 +10401,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 12
     },
     {
       "id": "T111",
@@ -10348,7 +10495,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 41
     },
     {
       "id": "T112",
@@ -10489,7 +10639,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -10529,8 +10679,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T114",
@@ -10671,7 +10821,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -10711,8 +10861,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T116",
@@ -10944,7 +11094,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -10984,8 +11134,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T119",
@@ -11167,7 +11317,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 12
     },
     {
       "id": "T121",
@@ -11217,7 +11370,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -11257,8 +11410,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T122",
@@ -11349,7 +11502,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 69
     },
     {
       "id": "T123",
@@ -11622,7 +11778,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 180
     },
     {
       "id": "T126",
@@ -11713,7 +11872,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 63
     },
     {
       "id": "T127",
@@ -11986,7 +12148,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 63
     },
     {
       "id": "T130",
@@ -12036,7 +12201,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -12076,8 +12241,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T131",
@@ -12218,7 +12383,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -12258,8 +12423,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T133",
@@ -12441,7 +12606,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 87
     },
     {
       "id": "T135",
@@ -12623,7 +12791,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 68
     },
     {
       "id": "T137",
@@ -12805,7 +12976,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 71
     },
     {
       "id": "T139",
@@ -12896,7 +13070,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 41
     },
     {
       "id": "T140",
@@ -12987,7 +13164,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 49
     },
     {
       "id": "T141",
@@ -13169,7 +13349,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 21
     },
     {
       "id": "T143",
@@ -13351,7 +13534,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 32
     },
     {
       "id": "T145",
@@ -13442,7 +13628,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 61
     },
     {
       "id": "T146",
@@ -13533,7 +13722,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 29
     },
     {
       "id": "T147",
@@ -13624,7 +13816,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 16
     },
     {
       "id": "T148",
@@ -13806,7 +14001,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 16
     },
     {
       "id": "T150",
@@ -13897,7 +14095,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 31
     },
     {
       "id": "T151",
@@ -14079,7 +14280,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 68
     },
     {
       "id": "T153",
@@ -14170,7 +14374,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 72
     },
     {
       "id": "T154",
@@ -14261,7 +14468,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 89
     },
     {
       "id": "T155",
@@ -14352,7 +14562,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 29
     },
     {
       "id": "T156",
@@ -14402,7 +14615,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -14442,8 +14655,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T157",
@@ -14534,7 +14747,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 41
     },
     {
       "id": "T158",
@@ -14989,7 +15205,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 47
     },
     {
       "id": "T163",
@@ -15080,7 +15299,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 163
     },
     {
       "id": "T164",
@@ -15171,7 +15393,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 82
     },
     {
       "id": "T165",
@@ -15353,7 +15578,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 50
     },
     {
       "id": "T167",
@@ -15444,7 +15672,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 37
     },
     {
       "id": "T168",
@@ -15626,7 +15857,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 62
     },
     {
       "id": "T170",
@@ -15767,7 +16001,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -15807,8 +16041,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T172",
@@ -15990,7 +16224,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 179
     },
     {
       "id": "T174",
@@ -16081,7 +16318,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 19
     },
     {
       "id": "T175",
@@ -16172,7 +16412,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 74
     },
     {
       "id": "T176",
@@ -16222,7 +16465,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -16262,8 +16505,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T177",
@@ -16354,7 +16597,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 91
     },
     {
       "id": "T178",
@@ -16627,7 +16873,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 95
     },
     {
       "id": "T181",
@@ -16718,7 +16967,10 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 82
     },
     {
       "id": "T182",
@@ -16859,7 +17111,7 @@
       "cars": [
         "2544|2|10|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260821_173737": {
           "n": 1,
@@ -16899,8 +17151,8 @@
         "laps_track": 2,
         "presence": 0.5
       },
-      "established": true,
-      "est_by": "geometry"
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T184",
@@ -16991,7 +17243,1837 @@
         "presence": 0.5
       },
       "established": true,
-      "est_by": "geometry"
+      "est_by": "geometry",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 54
+    },
+    {
+      "id": "T86",
+      "pos": [
+        4408,
+        -5897
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 129,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 44,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T87",
+      "pos": [
+        4392,
+        -5860
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 120,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 30,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T88",
+      "pos": [
+        4249,
+        -5727
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 160,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 33,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T89",
+      "pos": [
+        4121,
+        -4851
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 140,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 25,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T90",
+      "pos": [
+        4319,
+        -4676
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 102,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 67,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T91",
+      "pos": [
+        4578,
+        -4746
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 159,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 70,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T92",
+      "pos": [
+        4529,
+        -3626
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 179,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 33,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T93",
+      "pos": [
+        4429,
+        -3437
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 57,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 110,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T94",
+      "pos": [
+        4513,
+        -3349
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 30,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 179,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T95",
+      "pos": [
+        4175,
+        -3096
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 89,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 42,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T96",
+      "pos": [
+        4186,
+        -3042
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 81,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 60,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T97",
+      "pos": [
+        3927,
+        -2633
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 43,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 119,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T98",
+      "pos": [
+        4372,
+        -2558
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 39,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 119,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T99",
+      "pos": [
+        4328,
+        -2430
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 139,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 52,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T100",
+      "pos": [
+        4519,
+        -1927
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 170,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 45,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T101",
+      "pos": [
+        4446,
+        -1437
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 221,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 33,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T102",
+      "pos": [
+        6156,
+        821
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 216,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 35,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T103",
+      "pos": [
+        6306,
+        1069
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 177,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 59,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T104",
+      "pos": [
+        5960,
+        1321
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 87,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 98,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T105",
+      "pos": [
+        5751,
+        1711
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 37,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 68,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T106",
+      "pos": [
+        6100,
+        2080
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 127,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 33,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T107",
+      "pos": [
+        6256,
+        2174
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 85,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 56,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T108",
+      "pos": [
+        6354,
+        2329
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 42,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 124,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T109",
+      "pos": [
+        4965,
+        1189
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 179,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 44,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T110",
+      "pos": [
+        4935,
+        1054
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 72,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 129,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T111",
+      "pos": [
+        4141,
+        1338
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 94,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 64,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T112",
+      "pos": [
+        3914,
+        1225
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 154,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 69,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T113",
+      "pos": [
+        3514,
+        1611
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 193,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 16,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T114",
+      "pos": [
+        3473,
+        2193
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 190,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 23,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T115",
+      "pos": [
+        3372,
+        2298
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 164,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 32,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T116",
+      "pos": [
+        2946,
+        2436
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 35,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 152,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T117",
+      "pos": [
+        3578,
+        3140
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 245,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 15,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T118",
+      "pos": [
+        3941,
+        3609
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 59,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 82,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T119",
+      "pos": [
+        3843,
+        3569
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 103,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 95,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T120",
+      "pos": [
+        3376,
+        3997
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 167,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 36,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T121",
+      "pos": [
+        3848,
+        4140
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 115,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 43,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T122",
+      "pos": [
+        4052,
+        3933
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 78,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 78,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T123",
+      "pos": [
+        4246,
+        4120
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 29,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 116,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T124",
+      "pos": [
+        4142,
+        4665
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 82,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 85,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T125",
+      "pos": [
+        4000,
+        4600
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 40,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 97,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T126",
+      "pos": [
+        3712,
+        4642
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 16,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 169,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T127",
+      "pos": [
+        4027,
+        4840
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 101,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 30,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T128",
+      "pos": [
+        3742,
+        4889
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 32,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 132,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T129",
+      "pos": [
+        3888,
+        5108
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 134,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 30,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T130",
+      "pos": [
+        3942,
+        5504
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 22,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 177,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T131",
+      "pos": [
+        4018,
+        5376
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 19,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 177,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T132",
+      "pos": [
+        4014,
+        5616
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 56,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 59,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T133",
+      "pos": [
+        3723,
+        5820
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 15,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 167,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T134",
+      "pos": [
+        4058,
+        5751
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 73,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 83,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T135",
+      "pos": [
+        3562,
+        6234
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 24,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 101,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T136",
+      "pos": [
+        3799,
+        6250
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 84,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 89,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T137",
+      "pos": [
+        3800,
+        6502
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 102,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 81,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T138",
+      "pos": [
+        3349,
+        6702
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 52,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 134,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T139",
+      "pos": [
+        3394,
+        7163
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 104,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 62,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T140",
+      "pos": [
+        2687,
+        7327
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 65,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 48,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T141",
+      "pos": [
+        2310,
+        7403
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 94,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 34,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T142",
+      "pos": [
+        1893,
+        7844
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 68,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 82,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T143",
+      "pos": [
+        1473,
+        7566
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 78,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 67,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T144",
+      "pos": [
+        163,
+        7801
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 52,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 131,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T145",
+      "pos": [
+        -389,
+        7378
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 108,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 73,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T146",
+      "pos": [
+        -742,
+        7672
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 60,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 95,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T147",
+      "pos": [
+        -990,
+        7361
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 123,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 36,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T148",
+      "pos": [
+        -171,
+        6050
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 20,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 167,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T149",
+      "pos": [
+        121,
+        5740
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 78,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 50,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T150",
+      "pos": [
+        14,
+        5613
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 109,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 49,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T151",
+      "pos": [
+        -11,
+        5487
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 50,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 67,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T152",
+      "pos": [
+        -250,
+        5596
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 80,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 99,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T153",
+      "pos": [
+        -689,
+        5094
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 64,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 71,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T154",
+      "pos": [
+        -269,
+        5014
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 122,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 30,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T155",
+      "pos": [
+        -199,
+        4999
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 177,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 26,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T156",
+      "pos": [
+        25,
+        4990
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 17,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 180,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T157",
+      "pos": [
+        -678,
+        4515
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 30,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 94,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T158",
+      "pos": [
+        -1050,
+        4774
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 41,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 92,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T159",
+      "pos": [
+        -971,
+        4421
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 41,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 88,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T160",
+      "pos": [
+        -933,
+        3679
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 212,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 19,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T161",
+      "pos": [
+        -978,
+        3361
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 223,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 25,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T162",
+      "pos": [
+        -1112,
+        2759
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 109,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 81,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T163",
+      "pos": [
+        -1375,
+        2710
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 87,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 73,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T164",
+      "pos": [
+        -1519,
+        2338
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 82,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 93,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T165",
+      "pos": [
+        -1754,
+        2320
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 88,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 88,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T166",
+      "pos": [
+        -1650,
+        1676
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 146,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 46,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T167",
+      "pos": [
+        -1696,
+        1484
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 181,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 38,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T168",
+      "pos": [
+        -1916,
+        1367
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 175,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 32,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T169",
+      "pos": [
+        -2239,
+        1458
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 179,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 13,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T170",
+      "pos": [
+        -2381,
+        1517
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 185,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 24,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T171",
+      "pos": [
+        -2924,
+        1346
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 116,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 55,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T172",
+      "pos": [
+        -3264,
+        1367
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 48,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 133,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
     }
   ],
   "laps": 2,
@@ -17037,7 +19119,7 @@
       "drivetrain": "AWD"
     }
   },
-  "turn_count": 114,
+  "turn_count": 172,
   "profile": {
     "dims": {
       "low_corner": {
@@ -25905,5 +27987,2071 @@
       }
     ]
   },
-  "turn_count_delta": null
+  "turn_count_delta": null,
+  "geo_turns": {
+    "4242_-5712": {
+      "pos": [
+        4242,
+        -5712
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 125,
+      "deg": 22,
+      "s": 240
+    },
+    "4408_-5897": {
+      "pos": [
+        4408,
+        -5897
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 129,
+      "deg": 44,
+      "s": 492
+    },
+    "4422_-5955": {
+      "pos": [
+        4422,
+        -5955
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 8,
+      "deg": 173,
+      "s": 568
+    },
+    "4392_-5860": {
+      "pos": [
+        4392,
+        -5860
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 120,
+      "deg": 30,
+      "s": 668
+    },
+    "4249_-5727": {
+      "pos": [
+        4249,
+        -5727
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 160,
+      "deg": 33,
+      "s": 864
+    },
+    "4121_-4851": {
+      "pos": [
+        4121,
+        -4851
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 140,
+      "deg": 25,
+      "s": 1760
+    },
+    "4319_-4676": {
+      "pos": [
+        4319,
+        -4676
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 102,
+      "deg": 67,
+      "s": 2036
+    },
+    "4578_-4746": {
+      "pos": [
+        4578,
+        -4746
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 159,
+      "deg": 70,
+      "s": 2308
+    },
+    "4763_-4585": {
+      "pos": [
+        4763,
+        -4585
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 182,
+      "deg": 41,
+      "s": 2564
+    },
+    "4529_-3626": {
+      "pos": [
+        4529,
+        -3626
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 179,
+      "deg": 33,
+      "s": 3568
+    },
+    "4429_-3437": {
+      "pos": [
+        4429,
+        -3437
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 57,
+      "deg": 110,
+      "s": 3804
+    },
+    "4513_-3349": {
+      "pos": [
+        4513,
+        -3349
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 30,
+      "deg": 179,
+      "s": 3932
+    },
+    "4339_-3360": {
+      "pos": [
+        4339,
+        -3360
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 68,
+      "deg": 76,
+      "s": 4132
+    },
+    "4175_-3096": {
+      "pos": [
+        4175,
+        -3096
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 89,
+      "deg": 42,
+      "s": 4456
+    },
+    "4186_-3042": {
+      "pos": [
+        4186,
+        -3042
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 81,
+      "deg": 60,
+      "s": 4512
+    },
+    "3927_-2633": {
+      "pos": [
+        3927,
+        -2633
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 43,
+      "deg": 119,
+      "s": 5008
+    },
+    "4372_-2558": {
+      "pos": [
+        4372,
+        -2558
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 39,
+      "deg": 119,
+      "s": 5496
+    },
+    "4328_-2430": {
+      "pos": [
+        4328,
+        -2430
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 139,
+      "deg": 52,
+      "s": 5632
+    },
+    "4519_-1927": {
+      "pos": [
+        4519,
+        -1927
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 170,
+      "deg": 45,
+      "s": 6176
+    },
+    "4424_-1607": {
+      "pos": [
+        4424,
+        -1607
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 186,
+      "deg": 25,
+      "s": 6516
+    },
+    "4446_-1437": {
+      "pos": [
+        4446,
+        -1437
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 221,
+      "deg": 33,
+      "s": 6688
+    },
+    "4326_-1151": {
+      "pos": [
+        4326,
+        -1151
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 131,
+      "deg": 58,
+      "s": 7004
+    },
+    "5416_677": {
+      "pos": [
+        5416,
+        677
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 182,
+      "deg": 33,
+      "s": 9216
+    },
+    "6156_821": {
+      "pos": [
+        6156,
+        821
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 216,
+      "deg": 35,
+      "s": 9980
+    },
+    "6306_1069": {
+      "pos": [
+        6306,
+        1069
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 177,
+      "deg": 59,
+      "s": 10276
+    },
+    "5960_1321": {
+      "pos": [
+        5960,
+        1321
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 87,
+      "deg": 98,
+      "s": 10816
+    },
+    "5931_1279": {
+      "pos": [
+        5931,
+        1279
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 84,
+      "deg": 19,
+      "s": 10868
+    },
+    "5865_1248": {
+      "pos": [
+        5865,
+        1248
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 38,
+      "deg": 68,
+      "s": 10944
+    },
+    "5757_1348": {
+      "pos": [
+        5757,
+        1348
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 72,
+      "deg": 62,
+      "s": 11096
+    },
+    "5751_1711": {
+      "pos": [
+        5751,
+        1711
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 37,
+      "deg": 68,
+      "s": 11468
+    },
+    "6100_2080": {
+      "pos": [
+        6100,
+        2080
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 127,
+      "deg": 33,
+      "s": 11996
+    },
+    "6129_2194": {
+      "pos": [
+        6129,
+        2194
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 37,
+      "deg": 124,
+      "s": 12128
+    },
+    "6256_2174": {
+      "pos": [
+        6256,
+        2174
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 85,
+      "deg": 56,
+      "s": 12260
+    },
+    "6354_2329": {
+      "pos": [
+        6354,
+        2329
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 42,
+      "deg": 124,
+      "s": 12480
+    },
+    "6232_2339": {
+      "pos": [
+        6232,
+        2339
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 139,
+      "deg": 39,
+      "s": 12604
+    },
+    "4965_1189": {
+      "pos": [
+        4965,
+        1189
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 179,
+      "deg": 44,
+      "s": 14344
+    },
+    "4935_1054": {
+      "pos": [
+        4935,
+        1054
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 72,
+      "deg": 129,
+      "s": 14484
+    },
+    "4141_1338": {
+      "pos": [
+        4141,
+        1338
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 94,
+      "deg": 64,
+      "s": 15388
+    },
+    "3914_1225": {
+      "pos": [
+        3914,
+        1225
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 154,
+      "deg": 69,
+      "s": 15644
+    },
+    "3514_1611": {
+      "pos": [
+        3514,
+        1611
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 193,
+      "deg": 16,
+      "s": 16220
+    },
+    "3473_2193": {
+      "pos": [
+        3473,
+        2193
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 190,
+      "deg": 23,
+      "s": 16808
+    },
+    "3372_2298": {
+      "pos": [
+        3372,
+        2298
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 164,
+      "deg": 32,
+      "s": 16956
+    },
+    "2946_2436": {
+      "pos": [
+        2946,
+        2436
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 35,
+      "deg": 152,
+      "s": 17412
+    },
+    "3123_2525": {
+      "pos": [
+        3123,
+        2525
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 164,
+      "deg": 21,
+      "s": 17628
+    },
+    "3578_3140": {
+      "pos": [
+        3578,
+        3140
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 245,
+      "deg": 15,
+      "s": 18416
+    },
+    "4055_3483": {
+      "pos": [
+        4055,
+        3483
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 103,
+      "deg": 62,
+      "s": 19064
+    },
+    "3941_3609": {
+      "pos": [
+        3941,
+        3609
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 59,
+      "deg": 82,
+      "s": 19240
+    },
+    "3843_3569": {
+      "pos": [
+        3843,
+        3569
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 103,
+      "deg": 95,
+      "s": 19348
+    },
+    "3578_3765": {
+      "pos": [
+        3578,
+        3765
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 179,
+      "deg": 32,
+      "s": 19708
+    },
+    "3376_3997": {
+      "pos": [
+        3376,
+        3997
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 167,
+      "deg": 36,
+      "s": 20028
+    },
+    "3538_4218": {
+      "pos": [
+        3538,
+        4218
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 120,
+      "deg": 99,
+      "s": 20348
+    },
+    "3848_4140": {
+      "pos": [
+        3848,
+        4140
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 115,
+      "deg": 43,
+      "s": 20668
+    },
+    "4052_3933": {
+      "pos": [
+        4052,
+        3933
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 78,
+      "deg": 78,
+      "s": 20968
+    },
+    "4469_4184": {
+      "pos": [
+        4469,
+        4184
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 27,
+      "deg": 179,
+      "s": 21476
+    },
+    "4246_4120": {
+      "pos": [
+        4246,
+        4120
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 29,
+      "deg": 116,
+      "s": 21736
+    },
+    "4209_4329": {
+      "pos": [
+        4209,
+        4329
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 20,
+      "deg": 168,
+      "s": 21960
+    },
+    "4297_4289": {
+      "pos": [
+        4297,
+        4289
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 18,
+      "deg": 162,
+      "s": 22076
+    },
+    "4259_4396": {
+      "pos": [
+        4259,
+        4396
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 170,
+      "deg": 12,
+      "s": 22192
+    },
+    "4209_4496": {
+      "pos": [
+        4209,
+        4496
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 18,
+      "deg": 179,
+      "s": 22324
+    },
+    "4283_4464": {
+      "pos": [
+        4283,
+        4464
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 14,
+      "deg": 178,
+      "s": 22420
+    },
+    "4240_4546": {
+      "pos": [
+        4240,
+        4546
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 13,
+      "deg": 179,
+      "s": 22528
+    },
+    "4313_4518": {
+      "pos": [
+        4313,
+        4518
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 17,
+      "deg": 176,
+      "s": 22624
+    },
+    "4142_4665": {
+      "pos": [
+        4142,
+        4665
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 82,
+      "deg": 85,
+      "s": 22864
+    },
+    "4000_4600": {
+      "pos": [
+        4000,
+        4600
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 40,
+      "deg": 97,
+      "s": 23028
+    },
+    "3927_4664": {
+      "pos": [
+        3927,
+        4664
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 75,
+      "deg": 78,
+      "s": 23128
+    },
+    "3712_4642": {
+      "pos": [
+        3712,
+        4642
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 16,
+      "deg": 169,
+      "s": 23368
+    },
+    "3837_4711": {
+      "pos": [
+        3837,
+        4711
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 139,
+      "deg": 16,
+      "s": 23512
+    },
+    "3959_4757": {
+      "pos": [
+        3959,
+        4757
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 126,
+      "deg": 40,
+      "s": 23644
+    },
+    "4027_4840": {
+      "pos": [
+        4027,
+        4840
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 101,
+      "deg": 30,
+      "s": 23752
+    },
+    "4275_5129": {
+      "pos": [
+        4275,
+        5129
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 85,
+      "deg": 59,
+      "s": 24144
+    },
+    "4182_5260": {
+      "pos": [
+        4182,
+        5260
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 14,
+      "deg": 177,
+      "s": 24328
+    },
+    "4211_5114": {
+      "pos": [
+        4211,
+        5114
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 44,
+      "deg": 123,
+      "s": 24488
+    },
+    "4104_5095": {
+      "pos": [
+        4104,
+        5095
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 62,
+      "deg": 62,
+      "s": 24600
+    },
+    "4018_4977": {
+      "pos": [
+        4018,
+        4977
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 125,
+      "deg": 22,
+      "s": 24748
+    },
+    "3955_4922": {
+      "pos": [
+        3955,
+        4922
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 162,
+      "deg": 12,
+      "s": 24832
+    },
+    "3906_4876": {
+      "pos": [
+        3906,
+        4876
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 78,
+      "deg": 41,
+      "s": 24900
+    },
+    "3742_4889": {
+      "pos": [
+        3742,
+        4889
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 32,
+      "deg": 132,
+      "s": 25092
+    },
+    "3888_5108": {
+      "pos": [
+        3888,
+        5108
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 134,
+      "deg": 30,
+      "s": 25356
+    },
+    "3942_5504": {
+      "pos": [
+        3942,
+        5504
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 22,
+      "deg": 177,
+      "s": 25772
+    },
+    "4018_5376": {
+      "pos": [
+        4018,
+        5376
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 19,
+      "deg": 177,
+      "s": 25956
+    },
+    "4014_5616": {
+      "pos": [
+        4014,
+        5616
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 56,
+      "deg": 59,
+      "s": 26200
+    },
+    "3785_5728": {
+      "pos": [
+        3785,
+        5728
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 197,
+      "deg": 12,
+      "s": 26456
+    },
+    "3723_5820": {
+      "pos": [
+        3723,
+        5820
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 15,
+      "deg": 167,
+      "s": 26596
+    },
+    "3777_5776": {
+      "pos": [
+        3777,
+        5776
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 40,
+      "deg": 69,
+      "s": 26668
+    },
+    "4058_5751": {
+      "pos": [
+        4058,
+        5751
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 73,
+      "deg": 83,
+      "s": 26980
+    },
+    "4109_5688": {
+      "pos": [
+        4109,
+        5688
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 17,
+      "deg": 180,
+      "s": 27084
+    },
+    "4030_5855": {
+      "pos": [
+        4030,
+        5855
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 114,
+      "deg": 63,
+      "s": 27276
+    },
+    "3607_5956": {
+      "pos": [
+        3607,
+        5956
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 110,
+      "deg": 63,
+      "s": 27716
+    },
+    "3562_6234": {
+      "pos": [
+        3562,
+        6234
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 24,
+      "deg": 101,
+      "s": 28020
+    },
+    "3799_6250": {
+      "pos": [
+        3799,
+        6250
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 84,
+      "deg": 89,
+      "s": 28276
+    },
+    "3800_6502": {
+      "pos": [
+        3800,
+        6502
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 102,
+      "deg": 81,
+      "s": 28540
+    },
+    "3349_6702": {
+      "pos": [
+        3349,
+        6702
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 52,
+      "deg": 134,
+      "s": 29068
+    },
+    "3735_6978": {
+      "pos": [
+        3735,
+        6978
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 76,
+      "deg": 87,
+      "s": 29548
+    },
+    "3597_7203": {
+      "pos": [
+        3597,
+        7203
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 72,
+      "deg": 68,
+      "s": 29844
+    },
+    "3394_7163": {
+      "pos": [
+        3394,
+        7163
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 104,
+      "deg": 62,
+      "s": 30056
+    },
+    "3036_7430": {
+      "pos": [
+        3036,
+        7430
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 85,
+      "deg": 71,
+      "s": 30512
+    },
+    "2853_7304": {
+      "pos": [
+        2853,
+        7304
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 81,
+      "deg": 41,
+      "s": 30740
+    },
+    "2687_7327": {
+      "pos": [
+        2687,
+        7327
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 65,
+      "deg": 48,
+      "s": 30912
+    },
+    "2653_7366": {
+      "pos": [
+        2653,
+        7366
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 62,
+      "deg": 49,
+      "s": 30964
+    },
+    "2310_7403": {
+      "pos": [
+        2310,
+        7403
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 94,
+      "deg": 34,
+      "s": 31312
+    },
+    "2253_7447": {
+      "pos": [
+        2253,
+        7447
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 202,
+      "deg": 21,
+      "s": 31384
+    },
+    "1952_7667": {
+      "pos": [
+        1952,
+        7667
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 139,
+      "deg": 32,
+      "s": 31768
+    },
+    "1893_7844": {
+      "pos": [
+        1893,
+        7844
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 68,
+      "deg": 82,
+      "s": 31960
+    },
+    "1676_7792": {
+      "pos": [
+        1676,
+        7792
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 73,
+      "deg": 61,
+      "s": 32204
+    },
+    "1655_7740": {
+      "pos": [
+        1655,
+        7740
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 87,
+      "deg": 29,
+      "s": 32260
+    },
+    "1605_7689": {
+      "pos": [
+        1605,
+        7689
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 124,
+      "deg": 16,
+      "s": 32332
+    },
+    "1473_7566": {
+      "pos": [
+        1473,
+        7566
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 78,
+      "deg": 67,
+      "s": 32520
+    },
+    "1362_7582": {
+      "pos": [
+        1362,
+        7582
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 139,
+      "deg": 16,
+      "s": 32632
+    },
+    "1149_7533": {
+      "pos": [
+        1149,
+        7533
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 189,
+      "deg": 31,
+      "s": 32852
+    },
+    "812_7191": {
+      "pos": [
+        812,
+        7191
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 73,
+      "deg": 68,
+      "s": 33344
+    },
+    "605_7247": {
+      "pos": [
+        605,
+        7247
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 52,
+      "deg": 72,
+      "s": 33564
+    },
+    "486_7143": {
+      "pos": [
+        486,
+        7143
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 50,
+      "deg": 89,
+      "s": 33728
+    },
+    "351_7272": {
+      "pos": [
+        351,
+        7272
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 100,
+      "deg": 29,
+      "s": 33920
+    },
+    "163_7801": {
+      "pos": [
+        163,
+        7801
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 52,
+      "deg": 131,
+      "s": 34492
+    },
+    "-115_7408": {
+      "pos": [
+        -115,
+        7408
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 94,
+      "deg": 41,
+      "s": 35000
+    },
+    "-389_7378": {
+      "pos": [
+        -389,
+        7378
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 108,
+      "deg": 73,
+      "s": 35284
+    },
+    "-742_7672": {
+      "pos": [
+        -742,
+        7672
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 60,
+      "deg": 95,
+      "s": 35776
+    },
+    "-990_7361": {
+      "pos": [
+        -990,
+        7361
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 123,
+      "deg": 36,
+      "s": 36176
+    },
+    "-773_6796": {
+      "pos": [
+        -773,
+        6796
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 77,
+      "deg": 47,
+      "s": 36804
+    },
+    "-766_6701": {
+      "pos": [
+        -766,
+        6701
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 27,
+      "deg": 163,
+      "s": 36908
+    },
+    "-647_6793": {
+      "pos": [
+        -647,
+        6793
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 76,
+      "deg": 82,
+      "s": 37068
+    },
+    "-332_6703": {
+      "pos": [
+        -332,
+        6703
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 80,
+      "deg": 50,
+      "s": 37400
+    },
+    "-251_6523": {
+      "pos": [
+        -251,
+        6523
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 147,
+      "deg": 37,
+      "s": 37600
+    },
+    "-314_6198": {
+      "pos": [
+        -314,
+        6198
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 56,
+      "deg": 62,
+      "s": 37936
+    },
+    "-171_6050": {
+      "pos": [
+        -171,
+        6050
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 20,
+      "deg": 167,
+      "s": 38164
+    },
+    "-360_6152": {
+      "pos": [
+        -360,
+        6152
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 17,
+      "deg": 179,
+      "s": 38404
+    },
+    "-110_5949": {
+      "pos": [
+        -110,
+        5949
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 162,
+      "deg": 19,
+      "s": 38732
+    },
+    "108_5907": {
+      "pos": [
+        108,
+        5907
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 65,
+      "deg": 74,
+      "s": 38956
+    },
+    "121_5740": {
+      "pos": [
+        121,
+        5740
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 78,
+      "deg": 50,
+      "s": 39132
+    },
+    "14_5613": {
+      "pos": [
+        14,
+        5613
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 109,
+      "deg": 49,
+      "s": 39300
+    },
+    "-11_5487": {
+      "pos": [
+        -11,
+        5487
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 50,
+      "deg": 67,
+      "s": 39432
+    },
+    "-178_5486": {
+      "pos": [
+        -178,
+        5486
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 67,
+      "deg": 91,
+      "s": 39620
+    },
+    "-250_5596": {
+      "pos": [
+        -250,
+        5596
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 80,
+      "deg": 99,
+      "s": 39756
+    },
+    "-431_5520": {
+      "pos": [
+        -431,
+        5520
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 63,
+      "deg": 95,
+      "s": 39964
+    },
+    "-405_5331": {
+      "pos": [
+        -405,
+        5331
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 68,
+      "deg": 82,
+      "s": 40164
+    },
+    "-689_5094": {
+      "pos": [
+        -689,
+        5094
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 64,
+      "deg": 71,
+      "s": 40544
+    },
+    "-629_4980": {
+      "pos": [
+        -629,
+        4980
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 88,
+      "deg": 41,
+      "s": 40676
+    },
+    "-469_4939": {
+      "pos": [
+        -469,
+        4939
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 113,
+      "deg": 44,
+      "s": 40844
+    },
+    "-269_5014": {
+      "pos": [
+        -269,
+        5014
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 122,
+      "deg": 30,
+      "s": 41060
+    },
+    "-199_4999": {
+      "pos": [
+        -199,
+        4999
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 177,
+      "deg": 26,
+      "s": 41132
+    },
+    "25_4990": {
+      "pos": [
+        25,
+        4990
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 17,
+      "deg": 180,
+      "s": 41396
+    },
+    "-283_4903": {
+      "pos": [
+        -283,
+        4903
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 59,
+      "deg": 54,
+      "s": 41720
+    },
+    "-364_4770": {
+      "pos": [
+        -364,
+        4770
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 54,
+      "deg": 74,
+      "s": 41884
+    },
+    "-557_4742": {
+      "pos": [
+        -557,
+        4742
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 34,
+      "deg": 74,
+      "s": 42088
+    },
+    "-576_4620": {
+      "pos": [
+        -576,
+        4620
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 100,
+      "deg": 31,
+      "s": 42212
+    },
+    "-678_4515": {
+      "pos": [
+        -678,
+        4515
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 30,
+      "deg": 94,
+      "s": 42368
+    },
+    "-781_4614": {
+      "pos": [
+        -781,
+        4614
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 28,
+      "deg": 73,
+      "s": 42516
+    },
+    "-755_4723": {
+      "pos": [
+        -755,
+        4723
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 47,
+      "deg": 72,
+      "s": 42632
+    },
+    "-936_4853": {
+      "pos": [
+        -936,
+        4853
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 58,
+      "deg": 57,
+      "s": 42860
+    },
+    "-1050_4774": {
+      "pos": [
+        -1050,
+        4774
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 41,
+      "deg": 92,
+      "s": 43008
+    },
+    "-966_4582": {
+      "pos": [
+        -966,
+        4582
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 184,
+      "deg": 28,
+      "s": 43220
+    },
+    "-971_4421": {
+      "pos": [
+        -971,
+        4421
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 41,
+      "deg": 88,
+      "s": 43384
+    },
+    "-686_4340": {
+      "pos": [
+        -686,
+        4340
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 75,
+      "deg": 82,
+      "s": 43688
+    },
+    "-707_4113": {
+      "pos": [
+        -707,
+        4113
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 74,
+      "deg": 61,
+      "s": 43928
+    },
+    "-873_4022": {
+      "pos": [
+        -873,
+        4022
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 127,
+      "deg": 52,
+      "s": 44120
+    },
+    "-933_3679": {
+      "pos": [
+        -933,
+        3679
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 212,
+      "deg": 19,
+      "s": 44472
+    },
+    "-883_3492": {
+      "pos": [
+        -883,
+        3492
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 90,
+      "deg": 63,
+      "s": 44668
+    },
+    "-978_3361": {
+      "pos": [
+        -978,
+        3361
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 223,
+      "deg": 25,
+      "s": 44832
+    },
+    "-1112_2759": {
+      "pos": [
+        -1112,
+        2759
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 109,
+      "deg": 81,
+      "s": 45464
+    },
+    "-1375_2710": {
+      "pos": [
+        -1375,
+        2710
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 87,
+      "deg": 73,
+      "s": 45736
+    },
+    "-1519_2338": {
+      "pos": [
+        -1519,
+        2338
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 82,
+      "deg": 93,
+      "s": 46152
+    },
+    "-1754_2320": {
+      "pos": [
+        -1754,
+        2320
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 88,
+      "deg": 88,
+      "s": 46400
+    },
+    "-1813_2001": {
+      "pos": [
+        -1813,
+        2001
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 202,
+      "deg": 37,
+      "s": 46728
+    },
+    "-1650_1676": {
+      "pos": [
+        -1650,
+        1676
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 146,
+      "deg": 46,
+      "s": 47096
+    },
+    "-1696_1484": {
+      "pos": [
+        -1696,
+        1484
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 181,
+      "deg": 38,
+      "s": 47296
+    },
+    "-1916_1367": {
+      "pos": [
+        -1916,
+        1367
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 175,
+      "deg": 32,
+      "s": 47556
+    },
+    "-2239_1458": {
+      "pos": [
+        -2239,
+        1458
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 179,
+      "deg": 13,
+      "s": 47892
+    },
+    "-2381_1517": {
+      "pos": [
+        -2381,
+        1517
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 185,
+      "deg": 24,
+      "s": 48048
+    },
+    "-2718_1478": {
+      "pos": [
+        -2718,
+        1478
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 166,
+      "deg": 42,
+      "s": 48392
+    },
+    "-2812_1387": {
+      "pos": [
+        -2812,
+        1387
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 182,
+      "deg": 18,
+      "s": 48524
+    },
+    "-2924_1346": {
+      "pos": [
+        -2924,
+        1346
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 116,
+      "deg": 55,
+      "s": 48644
+    },
+    "-3264_1367": {
+      "pos": [
+        -3264,
+        1367
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 48,
+      "deg": 133,
+      "s": 49060
+    }
+  }
 }

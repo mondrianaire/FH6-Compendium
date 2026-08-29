@@ -442,10 +442,11 @@ def g4():
     # on Hakone from a superseded map, and one route whose reference "lap" is 6.7x the median recorded lap.
     # They are allowed so the harness can go green on everything else — but only BY CODE AND COURSE, so a NEW
     # instance of either, on any other course, still fails. Delete an entry here when its fault is fixed.
-    # ONE entry left. 1900_6100's map-too-long was retired rather than allowlisted: that map self-retraces 0.0%,
-    # its ends sit 3105 m apart and every stored lap lies 100% on it — a POINT-TO-POINT judged by a circuit's
-    # rule. An allowlist should shrink by fixing the fault or by disproving the check, never by habit.
-    KNOWN = {("-2350_-7550", "phantom-turn")}
+    # EMPTY, and it should stay that way. Both entries left by fixing the fault, not by being tolerated:
+    # 1900_6100's map-too-long was a point-to-point judged by a circuit's rule (check retired), and
+    # -2350_-7550's phantom-turn was a superseded registry apex that rebind_map_turns.py cleared when it rebuilt
+    # the registry from the map. An allowlist should only ever shrink; a new entry needs a reason in writing.
+    KNOWN = set()
     fresh = [(k, f) for k, f in fails if (k, f["code"]) not in KNOWN]
     msg = f"{len(rows)} models audited · {len(fails)} FAIL ({len(fails) - len(fresh)} known) · {warns} WARN"
     if fresh:

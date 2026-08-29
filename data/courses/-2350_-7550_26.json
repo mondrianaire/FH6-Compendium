@@ -227,7 +227,7 @@
         "3854|2|4|899",
         "2866|2|4|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260828_001105": {
           "n": 2,
@@ -287,11 +287,9 @@
         "laps_track": 4,
         "presence": 1.0
       },
-      "established": true,
-      "est_by": "geometry",
-      "deg": 38,
-      "geo_sessions": 2,
-      "geo_mapped": true
+      "established": false,
+      "est_by": null,
+      "deg": 38
     },
     {
       "id": "T4",
@@ -358,7 +356,7 @@
         "3854|2|4|899",
         "2866|2|4|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260828_001105": {
           "n": 3,
@@ -419,10 +417,8 @@
         "presence": 0.75
       },
       "deg": 175,
-      "established": true,
-      "est_by": "geometry",
-      "geo_sessions": 2,
-      "geo_mapped": true
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T5",
@@ -472,7 +468,7 @@
       "cars": [
         "3854|2|4|899"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260828_001105": {
           "n": 1,
@@ -513,10 +509,8 @@
         "presence": 0.25
       },
       "deg": 205,
-      "established": true,
-      "est_by": "geometry",
-      "geo_sessions": 2,
-      "geo_mapped": true
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T6",
@@ -583,7 +577,7 @@
         "3854|2|4|899",
         "2866|2|4|800"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260828_001105": {
           "n": 1,
@@ -642,10 +636,8 @@
         "presence": 0.75
       },
       "deg": 199,
-      "established": true,
-      "est_by": "geometry",
-      "geo_sessions": 2,
-      "geo_mapped": true
+      "established": false,
+      "est_by": null
     },
     {
       "id": "T7",
@@ -1319,6 +1311,90 @@
       },
       "established": false,
       "est_by": null
+    },
+    {
+      "id": "T2",
+      "pos": [
+        -2317,
+        -7766
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 107,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "deg": 38,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T3",
+      "pos": [
+        -2373,
+        -7913
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 17,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "deg": 175,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T4",
+      "pos": [
+        -2389,
+        -7773
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 18,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "deg": 205,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T5",
+      "pos": [
+        -2432,
+        -7876
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 15,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "deg": 199,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
     }
   ],
   "laps": 4,
@@ -4539,17 +4615,17 @@
   "geo_turns": {
     "-2316_-7783": {
       "pos": [
-        -2319,
-        -7749
+        -2317,
+        -7766
       ],
       "dir": "R",
-      "radius_m": 90,
+      "radius_m": 107,
       "deg": 38,
       "sessions": [
         "fh6_20260828_001105",
         "fh6_20260828_081447"
       ],
-      "s": 212,
+      "s": 228,
       "model_map": true
     },
     "-2372_-7908": {

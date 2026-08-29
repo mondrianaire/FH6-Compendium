@@ -1291,8 +1291,27 @@ def main():
         # why a complete 23.41 mi lap still minted a brand-new key (_29, then _30) anchored 5 km from the line,
         # and why the event measured 27.45 mi — approach plus lap — instead of the lap.
         # The 0 -> running transition IS the start line, and it is the same place on every attempt.
-        # the first TIMED row is the line: the timer starts as you cross it, so this is the same place on every
-        # attempt, where the window's own first row is wherever the capture caught you rolling up to it
+        # AN EVENT IS NOT A LAP — split it into laps FIRST, because both the anchor and the length need them.
+        # Event rows are already gated on CurrentLap > 0 (:1177), so the approach's zero rows are gone; what is
+        # still inside one event is MULTIPLE laps. Measured on the Colossus event: 66,721 rows / 27.44 mi that
+        # split cleanly at the two timer resets into 1.40 mi (the roll-up), 23.41 mi (THE LAP), and 2.62 mi (a
+        # partial after). Taking the whole event is what made a 23.41 mi road register as 27.45 mi.
+        #
+        # CurrentRaceTime distinguishes the two resets and is why this is unambiguous: it runs across a lap
+        # completion (measured 421.6 s of race time when the 370.6 s lap finished — 51 s of roll-up before it)
+        # and returns to 0 only on a RESTART. So a CurrentLap reset with race time still climbing is a lap
+        # boundary, full stop.
+        _laps_in, _cur, _pcl = [], [], None
+        for q in rs:
+            _c = q.get("CurrentLap")
+            if _pcl is not None and _c is not None and _pcl > 30.0 and _c < 1.0:
+                if len(_cur) > 30: _laps_in.append(_cur)
+                _cur = []
+            _cur.append(q); _pcl = _c
+        if len(_cur) > 30: _laps_in.append(_cur)
+        _lap_rows = max(_laps_in, key=lambda L: len(L)) if _laps_in else rs   # the longest lap describes the road best
+        # the lap's first row IS the line — the timer starts as you cross it, the same place on every attempt,
+        # where the event's own first row is wherever the roll-up happened to begin
         if _lap_rows and _lap_rows is not rs:
             start = _lap_rows[0]; sx, sz = start["PosX"], start["PosZ"]
         _prev_cl = None
@@ -1329,20 +1348,13 @@ def main():
         # This matters because an event routinely spans more than one: the 23.41 mi Colossus lap sat in a 27.45 mi
         # event with the tail of the previous attempt in front of it, and that surplus was what set the route's
         # length and anchored its key 5 km from the line.
-        _laps_in = []; _cur = []; _pcl = None
-        for q in rs:
-            _c = q.get("CurrentLap")
-            if _pcl is not None and _c is not None and _pcl > 30.0 and _c < 1.0:
-                if len(_cur) > 30: _laps_in.append(_cur)
-                _cur = []
-            _cur.append(q); _pcl = _c
-        if len(_cur) > 30: _laps_in.append(_cur)
-        # the LONGEST complete lap describes the road best; a lone partial falls back to the whole event
-        _lap_rows = max(_laps_in, key=len) if _laps_in else rs
         _dp = [(q["PosX"], q["PosZ"]) for q in _lap_rows]
         _darc = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(_dp, _dp[1:])
                     if math.hypot(b[0] - a[0], b[1] - a[1]) < 150)   # skip teleports/respawns
-        dvals = [q["DistanceTraveled"] for q in rs]; dist = max(_darc, max(dvals) - max(0.0, min(dvals)))
+        # NOT max() with the odometer. DistanceTraveled increments by a near-constant ~5,954 per lap regardless of
+        # lap length — measured identical on a 1,036 m Edamame lap and a 37,671 m Colossus lap — so it is not a
+        # distance in any usable sense, and max() would let it inflate a correctly-measured road.
+        dist = _darc
         laps = max(q["LapNumber"] for q in rs)
         pos = [q["RacePosition"] for q in rs if q["RacePosition"] > 0]
         # MODE is INFERRED, never read: the 324-byte Data Out packet carries no game-mode field (verified —

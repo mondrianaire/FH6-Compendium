@@ -79,9 +79,12 @@ def _ident_restore():
         if d.get("picked") or d.get("gears"):
             print("[identity] restored %d pick(s) and gear evidence for %d car(s)"
                   % (len(d.get("picked") or {}), len(d.get("gears") or {})), flush=True)
-    except Exception:
-        pass
-_ident_restore()
+    except Exception as e:
+        # NEVER SILENTLY. This except used to be a bare `pass`, and it was swallowing a NameError: the call sat
+        # ABOVE _ident_load's definition, so the restore raised on every single startup and the daemon discarded
+        # every pick and every gear observation it had faithfully written to disk. The docstring above calls that
+        # "exactly the orphan pattern the ask audit spent its time removing" — the function was an instance of it.
+        print("[identity] RESTORE FAILED — evidence on disk was not loaded: %r" % (e,), flush=True)
 
 _IDENT_LOCK = threading.Lock()
 def _ident_path(): return os.path.join(ROOT, "data", "identity-evidence.json")
@@ -107,6 +110,40 @@ def _ident_save(doc):
         os.replace(tmp, p2)
     except Exception:
         pass
+
+def _box_exercised(ordn, mxg):
+    """Has this car's gearbox been driven to its top, so that "no gear above N" is EVIDENCE and not just silence?
+
+    The gear filter was one-sided: a save whose box is SMALLER than a gear you have used is impossible and gets
+    eliminated, but a save whose box is BIGGER was never eliminated, because not having reached 8th does not prove
+    8th does not exist. That is right for one session and wrong after many. It is why six Exocet builds
+    (6·6·8·9·10·10 speeds) stayed permanently tied while the driver had done full WOT pulls across 16 sessions:
+    every candidate had gear_count >= 6, so nothing could ever be ruled out, and the UI kept asking for a 7th gear
+    that build does not have.
+
+    The evidence used is the ACCUMULATED gear set in data/identity-evidence.json, which only ever grows across
+    sessions and restarts. A contiguous 1..N with N >= 5 means every gear up to N has actually been engaged — you
+    have shifted up through the whole box. Contiguity matters: {1,2,6} is a car that was somewhere in its range,
+    {1,2,3,4,5,6} is a car that was walked to the top.
+
+    SELF-CORRECTING BY CONSTRUCTION, which is what makes it safe to act on. If the inference is wrong — a 10-speed
+    that has genuinely never been taken past 6th — then the first time 7th is engaged the set gains 7, mxg becomes
+    7, and the verdict inverts on its own: the 6-speeds take the -500 impossible-box penalty and the taller boxes
+    return. A wrong reading here costs one upshift to undo, and cannot latch.
+    """
+    try:
+        if not mxg or int(mxg) < 5:
+            return False
+        g = sorted(int(x) for x in ((_ident_load().get("gears") or {}).get(str(ordn)) or []))
+        return bool(g) and g == list(range(1, int(mxg) + 1))
+    except Exception:
+        return False
+
+
+# CALLED HERE, not beside its definition: _ident_restore needs _ident_load, and being defined earlier in the file
+# than the thing it calls is the whole reason the evidence never came back.
+_ident_restore()
+
 
 def _ident_remember(kind, ordn, value):
     with _IDENT_LOCK:
@@ -709,6 +746,7 @@ def _pick_meta(metas, ordn, ts_want=None):
         if live and mxg and gc0:                       # gears USED are hard evidence: gear 8 in a 6-speed box is impossible; reaching the box's exact top is strong
             if int(gc0) < mxg: score -= 500
             elif int(gc0) == mxg and mxg >= 5: score += 45
+            elif int(gc0) > mxg and _box_exercised(ordn, mxg): score -= 300   # see _box_exercised: a bigger box you have never once shifted into
         roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "red": red, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
     if not roster:
         return metas[0], {"how": "newest", "live": live, "saves": []}
@@ -734,8 +772,15 @@ def _pick_meta(metas, ordn, ts_want=None):
     # live_recent) so the displayed tie count no longer flaps 6<->1 with driving/parked — and the STAMP GUARD, which
     # reads this count, no longer refuses to stamp while driving because parked-vs-live changed the arithmetic.
     _gsT = getattr(ST, "gears_seen", {}).get(str(ordn)) or set(); _mxT = max(_gsT) if _gsT else 0
+    _boxT = _box_exercised(ordn, _mxT)
     ties = [r for r in roster if (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))
-            and (not _mxT or not (r["_tune"] or {}).get("gear_count") or int((r["_tune"] or {}).get("gear_count")) >= _mxT)]
+            and (not _mxT or not (r["_tune"] or {}).get("gear_count") or int((r["_tune"] or {}).get("gear_count")) >= _mxT)
+            # ...and, once the box has demonstrably been exercised to its top, drop the boxes that are TOO BIG too.
+            # The filter used to be one-sided: it eliminated a box you had out-shifted, but never one you had never
+            # shifted into, on the reasoning "you might not have reached 7th yet". True for one session; after a
+            # contiguous 1..N ladder accumulated across many sessions of full pulls it is the wrong reading, and it
+            # is why six Exocet builds stayed tied while the driver had done the pull repeatedly.
+            and not (_boxT and (r["_tune"] or {}).get("gear_count") and int((r["_tune"] or {}).get("gear_count")) > _mxT)]
     n_ties = len({r.get("_bsig") for r in ties}) if ties and all(r.get("_bsig") for r in ties) else max(1, len(ties))
     if live and len(roster) >= 2:
         if n_ties >= 2:
@@ -971,6 +1016,9 @@ def _pick_meta(metas, ordn, ts_want=None):
     return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
+                           # the box the car has actually demonstrated, so the UI can name a drive you CAN do
+                           # instead of a gear you do not have
+                           "max_gear_seen": _mxT or None, "box_exercised": _boxT,
                            "held": held_id and not stale, "ladder_tied": ladder_tied, "picked_ok": picked_ok, "stale": stale,
                            "builds": builds, "saves": saves}
 
@@ -1593,6 +1641,16 @@ class H(BaseHTTPRequestHandler):
                     if metas:
                         names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
                         ts_want = q.get("ts", [None])[0]   # optional manual pick — decode a specific saved tune
+                        # A STORED PICK IS STILL A PICK. This read the query string ONLY, so a declaration the user
+                        # made in the drawer — persisted to identity-evidence.json and faithfully restored into
+                        # ST.picked_id at startup — was never consulted when answering. The PI-recording path below
+                        # already falls back to it (same 2 h window); this one did not, which is why a car with a
+                        # valid stored pick still reported "signature" against six candidates. Same bug shape as the
+                        # comment right below: one side of the pair could not see what the other side knew.
+                        if not ts_want:
+                            _spk = (getattr(ST, "picked_id", {}) or {}).get(str(ordn))
+                            if _spk and time.time() - _spk.get("t", 0) < 7200:
+                                ts_want = _spk["ts"]
                         meta, match = _pick_meta(metas, ordn, ts_want=ts_want)   # match the save to the car you're in, not just the newest
                         # REMEMBER A CORROBORATED PICK. The disk watcher re-picks on its own clock and never sees the
                         # query string, so the pick the dashboard calls "THE escape" from a signature tie reached the

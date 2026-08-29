@@ -4307,13 +4307,22 @@
           const tip = grp.map((b) => `Build ${b.label}${b.n_diffs ? ` — ${b.n_diffs} parts differ from ${b.diff_base || "A"}` : " — base build"}`).join("\n");
           return `<span class="tl-diff" title="${esc(tip)}">${g ? g + "-sp" : "gears ?"} <b>${esc(labs)}</b></span>`;
         }).join("");
-        // The smallest box is eliminated the moment you use a gear it does not have.
+        // NAME A DRIVE THE DRIVER CAN ACTUALLY DO. This used to pick the SMALLEST box and say "reach N+1 and it is
+        // ruled out". On a roster of 6·6·8·9·10·10 that renders as "reach 7th" — which is impossible in the very
+        // build you are most likely sitting in, and whose whole purpose is to eliminate it. It named the one drive
+        // the driver cannot perform, and it is where "reach 7th in the Exocet" came from as standing advice.
+        //
+        // The ladder is the real instrument and it is ALWAYS available: one WOT pull through your own box yields a
+        // unit-free ratio ladder that separates every candidate, including same-box twins, and reaching your box's
+        // exact top is itself scored as strong evidence. So that is the instruction. Exceeding a box only ever
+        // appears as a CONDITIONAL bonus — "if it reaches 7th, these are out" — never as the thing to go and do.
+        const topSeen = +(mm0.max_gear_seen || 0);
         const small = gs.find((g) => g > 0);
         const bigger = gs.some((g) => g > small);
+        const ownTop = topSeen || small;   // best guess at the equipped box until a pull proves otherwise
         const doomed = small && bigger ? byG.get(small).map((b) => b.label).join("·") : null;
-        const act = doomed
-          ? `Reach <b>${small + 1}${ordSuf(small + 1)}</b> and <b>${esc(doomed)}</b> ${byG.get(small).length > 1 ? "are" : "is"} ruled out — a ${small}-speed box cannot reach it.`
-          : `Every candidate has the same box, so gear count cannot separate them — the ratio ladder or redline must (a full WOT pull through the gears).`;
+        const act = `<b>One full WOT pull through the gears</b> identifies it — the ratio ladder is unit-free, so it separates every candidate here${ownTop ? `, and reaching <b>${ownTop}${ordSuf(ownTop)}</b> confirms the box size` : ""}.`
+          + (doomed ? ` <span class="why">If it pulls past <b>${small}${ordSuf(small)}</b> into ${small + 1}${ordSuf(small + 1)}, ${esc(doomed)} ${byG.get(small).length > 1 ? "are" : "is"} ruled out too — but a ${small}-speed cannot, so do not chase it.</span>` : "");
         const twins = gs.filter((g) => byG.get(g).length > 1).map((g) => byG.get(g).map((b) => b.label).join("·"));
         const twinNote = twins.length
           ? ` <span class="why">${twins.join(" and ")} share a box — separating those needs the ratio ladder.</span>`
@@ -4329,7 +4338,7 @@
         : mm0.how === "gear-matched" ? `<span style="color:#00d27a;font-weight:700">⚙ verified${mm0.held ? " · held" : ""}</span>`
         : mm0.how === "picked" ? `<span style="color:#a371f7;font-weight:700">📌 pinned</span>`
         : (mm0.how === "no-match" || mm0.how === "unsaved-build") ? `<span class="idm-flag">build file missing</span>`
-        : (mm0.n_signature_ties || 1) >= 2 ? `<span class="idm-flag warn">${mm0.n_signature_ties} candidates — drive the gears</span>`
+        : (mm0.n_signature_ties || 1) >= 2 ? `<span class="idm-flag warn" title="one wide-open-throttle pull through your own box: the ratio ladder separates every candidate">${mm0.n_signature_ties} candidates — one WOT pull settles it</span>`
         : `<span class="why">${esc(mm0.how || "")}</span>`;
       const flags = `${u2.n_conflict ? `<span class="idm-flag" title="save × telemetry disagree — 🔗 drawer">⚠ ${u2.n_conflict}</span>` : ""}${sanE ? `<span class="idm-flag" title="sanity errors — 🩺 drawer">⛔ ${sanE}</span>` : sanW ? `<span class="idm-flag warn" title="sanity warnings — 🩺 drawer">🩺 ${sanW}</span>` : ""}${relN ? `<span class="idm-flag warn" title="%-sliders to calibrate — 🎯 drawer">🎯 ${relN}</span>` : ""}`;
       // ---- RATIFICATION VERDICT: the ONE answer this card must give — is the tune FINISHED, and if not, exactly

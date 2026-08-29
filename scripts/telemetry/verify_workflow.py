@@ -201,6 +201,42 @@ def c6():
     return ("warn", f"stamped PIs={pis} — one S1-800 build verified; the other needs its gear-verification drive (stamp guard holding, as designed)")
 check("C identify", "the two S1-800 builds are separated", c6)
 
+
+def c7():
+    """PERSISTED IDENTITY EVIDENCE MUST COME BACK. data/identity-evidence.json was being written faithfully and
+    read never: _ident_restore() was called ABOVE the definition of the _ident_load() it calls, so it raised
+    NameError on every startup into a bare `except: pass`. Six Exocet builds stayed tied for weeks while the
+    driver did full WOT pulls, because each restart threw away the gears they proved and the pick they made.
+    Writing evidence you never read is worse than not collecting it — it looks like the system is learning.
+    This asserts the round trip: what is on disk has to be visible in what the daemon answers."""
+    ev = os.path.join(ROOT, "data", "identity-evidence.json")
+    if not os.path.exists(ev):
+        return ("warn", "no identity evidence on disk yet — nothing to restore")
+    d = json.load(open(ev, encoding="utf-8"))
+    gears, picks = (d.get("gears") or {}), (d.get("picked") or {})
+    if not gears and not picks:
+        return ("warn", "identity evidence file is empty — nothing to restore")
+    bad = []
+    for o_, gs in list(gears.items())[:6]:
+        if not gs:
+            continue
+        try:
+            m = http_json(f"/disk-tune?ordinal={o_}").get("match") or {}
+        except Exception as e:
+            return (False, f"/disk-tune failed for {o_}: {e}")
+        if m.get("max_gear_seen") != max(int(x) for x in gs):
+            bad.append(f"{o_}: disk says max gear {max(int(x) for x in gs)}, daemon reports {m.get('max_gear_seen')}")
+    for o_ in list(picks)[:6]:
+        try:
+            m = http_json(f"/disk-tune?ordinal={o_}").get("match") or {}
+        except Exception:
+            continue
+        if m.get("how") not in ("picked", "gear-matched"):
+            bad.append(f"{o_}: a pick is stored but the daemon answers how={m.get('how')!r}")
+    return (not bad, f"{len(gears)} gear record(s) + {len(picks)} pick(s) restored"
+                     if not bad else "EVIDENCE NOT RESTORED — " + "; ".join(bad[:2]))
+check("C identify", "persisted identity evidence round-trips", c7)
+
 def c7():
     bs = (DT.get("match") or {}).get("builds") or []
     guesses = [(b["label"], b["livery"].get("dt_h")) for b in bs if b.get("livery") and b["livery"].get("source") == "guess"]

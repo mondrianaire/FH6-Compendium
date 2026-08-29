@@ -3117,6 +3117,29 @@
           <div class="cscore-detail"><div class="cscore-line">${gripLbl} · ${speedLbl}</div><div class="cscore-issues">${issues}</div></div></div></div>`;
     };
     const paintCornerScore = () => { const el = document.getElementById("lvCornerScore"); if (el) el.innerHTML = cornerScoreCard(); };
+    // LOSING GRIP SHOULD BE SOMETHING YOU SEE, NOT SOMETHING YOU READ. The Last-corner card glows in the grip
+    // alphabet's own colour the moment an axle goes past the limit — blue when the fronts let go, red when the
+    // rears do, purple when all four are gone, amber on contact. The card's BORDER keeps showing the grade,
+    // because that is a different fact: the grade is a verdict on a finished corner, the glow is what the car
+    // is doing right now. Two facts, two channels, no competition between them.
+    //
+    // Intensity is the real slip, not a binary: 1.0 is the limit and the strip carries the actual figure, so a
+    // slight push glows faintly and a full slide floods. Written as a direct style set on ONE element — never an
+    // innerHTML repaint, which at this cadence would destroy hover, selection and the map's zoom every second.
+    const hexA = (h, a) => { const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h || ""); return m
+      ? `rgba(${parseInt(m[1], 16)},${parseInt(m[2], 16)},${parseInt(m[3], 16)},${a})` : `rgba(140,150,165,${a})`; };
+    const paintGripGlow = () => { try {
+      const card = document.querySelector("#lvCornerScore .cscore"); if (!card) return;
+      const s = (live.strip && live.strip.length) ? live.strip[live.strip.length - 1] : null;
+      const st = s && s.state;
+      const stale = !s || !live.frame || !live.frame.on;   // parked or disconnected: the last state is not "now"
+      if (stale || !st || st === "calm" || st === "off") { card.style.boxShadow = ""; card.style.borderWidth = ""; return; }
+      const col = gripCol(st);
+      const over = Math.max(+s.f || 0, +s.r || 0);          // 1.0 = at the limit
+      const k = Math.max(0.15, Math.min(1, (over - 1) / 1.2));
+      card.style.boxShadow = `0 0 ${(9 + 30 * k).toFixed(0)}px ${(1 + 4 * k).toFixed(0)}px ${hexA(col, (0.18 + 0.5 * k).toFixed(2))}, inset 0 0 ${(10 + 22 * k).toFixed(0)}px ${hexA(col, (0.05 + 0.16 * k).toFixed(2))}`;
+      card.style.borderWidth = st === "impact" ? "2px" : "";
+    } catch (e) {} };
     // LIVE MAP: the car's position, moved every frame on any rendered live course map (no re-render — the SVG
     // carries its own transform constants), and the just-scored turn ringed in its Last-corner grade color so the
     // map and the scorecard narrate the same moment.
@@ -3866,6 +3889,7 @@
       .idm-cand{margin:-7px 0 9px;padding:6px 10px 5px;border:1px dashed rgba(227,179,65,.4);border-top:none;border-radius:0 0 8px 8px;display:flex;flex-wrap:wrap;gap:5px;align-items:baseline}
       .idm-cand-act{flex-basis:100%;font-size:10.5px;color:var(--muted);padding-top:3px;line-height:1.45}
       .idm-cand-act b{color:#e3b341}
+      @media (prefers-reduced-motion:reduce){.cscore{transition:none}}
       .dm-info{cursor:help;color:var(--muted);font-size:10.5px;border-bottom:1px dotted var(--muted);white-space:nowrap}
       #fhmToast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9500;background:var(--bg2);border:1px solid #00d27a;color:#00d27a;font-weight:700;font-size:13px;border-radius:9px;padding:8px 18px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 6px 22px rgba(0,0,0,.45)}
       #fhmToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -3954,7 +3978,7 @@
       .spd-hd b{font-size:12.5px;color:var(--accent)}
       .spd-svg{margin-top:2px}
       /* ---- last-corner scorecard ---- */
-      .cscore{border:1px solid var(--line);border-left-width:4px;border-radius:8px;padding:8px 11px;background:rgba(255,255,255,.015)}
+      .cscore{transition:box-shadow .22s ease-out;border:1px solid var(--line);border-left-width:4px;border-radius:8px;padding:8px 11px;background:rgba(255,255,255,.015)}
       .cscore-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
       .cscore-hd>b{font-size:13px}
       .cscore-strip{margin-left:auto;display:inline-flex;gap:3px}
@@ -6168,8 +6192,8 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       es.addEventListener("reset", () => { live.strip = []; live.corners = []; live.cornerLog = []; live.analysis = null; live.session = null; live.loaded = null; live.cars = []; carSel = null; donor = replica = null; live._donorPick = live._replicaPick = null; live.spd = []; live._spdSeg = 0; live.cornerScores = []; live.cornerBest = {}; paintAll(true); });
       es.addEventListener("config", (e) => { const c = JSON.parse(e.data); if (!live.cars.find((x) => x.id === c.id)) live.cars.push(c); paintStatus(); });
       fetch(liveUrl + "/cars-map").then((r) => r.json()).then((m) => { live.names = (m && m.cars) || {}; paintStatus(); }).catch(() => {});
-      es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); });
-      es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); });
+      es.addEventListener("frame", (e) => { live.frame = JSON.parse(e.data); paintFrame(); paintGripGlow(); });
+      es.addEventListener("strip", (e) => { live.strip.push(JSON.parse(e.data)); paintStrip(); paintGripGlow(); });
       es.addEventListener("corner", (e) => { const c = JSON.parse(e.data); live.corners.push(c); (live.cornSince = live.cornSince || []).push(c); pushCornerLog(c); pushCornerScore(c); paintCornerScore(); paintLastOnMap((live.cornerScores || []).slice(-1)[0]); paintCorners(); decOnCorner(c); paintDecNext(); paintCornerAnalysis(); const now = Date.now(); if ((effMode() === "course" || effMode() === "free") && now - (live._lastCornPaint || 0) > 4000) { live._lastCornPaint = now; paintSections(); } });
       es.addEventListener("status", (e) => { live.status = JSON.parse(e.data); if (live.status.cars) live.cars = live.status.cars; live.connected = true; live.err = false;
         const sm = live.status.mode; const changed = sm && (!live.mode || sm.suggest !== live.mode.suggest || sm.reason !== live.mode.reason);   // status carries the current mode every second — authoritative after reconnects / daemon restarts

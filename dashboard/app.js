@@ -3151,13 +3151,22 @@
     // LIVE MAP: the car's position, moved every frame on any rendered live course map (no re-render — the SVG
     // carries its own transform constants), and the just-scored turn ringed in its Last-corner grade color so the
     // map and the scorecard narrate the same moment.
+    // ONE BAD PACKET IS NOT A REASON TO BLANK AN INSTRUMENT. `on` is the raw per-packet IsRaceOn, and the game
+    // drops it for a frame across transitions, so a single packet used to hide the car dot and the next one
+    // brought it back — a blink with no meaning behind it. The repaint fix removed most of the flicker; this is
+    // the rest of it. The dot now HOLDS its last position through a short dropout and only goes away when the
+    // signal is really gone, which is also the honest reading: for 400 ms we still know where the car was.
+    const DOT_GRACE = 400;
+    const dotHide = (g) => { const t = live._dotOkAt || 0;
+      if (performance.now() - t < DOT_GRACE) return;   // transient — keep showing the last known position
+      g.style.display = "none"; };
     const updCarDot = (f) => { try {
       host.querySelectorAll("svg[data-live-map]").forEach((sv) => {
         const g = sv.querySelector(".lv-car"); if (!g) return;
-        if (!f || !f.on || f.px == null || f.pz == null) { g.style.display = "none"; return; }   // BOTH axes: pz was unchecked, so cy went NaN and the dot painted at the origin
+        if (!f || !f.on || f.px == null || f.pz == null) { dotHide(g); return; }   // BOTH axes: pz was unchecked, so cy went NaN and the dot painted at the origin
         const ds = sv.dataset; const cx = +ds.ox + (f.px - +ds.x0) * +ds.sc, cy = +ds.oy - (f.pz - +ds.z0) * +ds.sc;
-        if (!isFinite(cx) || !isFinite(cy)) { g.style.display = "none"; return; }   // belt-and-braces: NaN passes every bounds test below and SVG paints an invalid transform at the origin
-        if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) { g.style.display = "none"; return; }   // off the mapped area — hide rather than pin to an edge
+        if (!isFinite(cx) || !isFinite(cy)) { dotHide(g); return; }   // belt-and-braces: NaN passes every bounds test below and SVG paints an invalid transform at the origin
+        if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) { dotHide(g); return; }   // off the mapped area — hide rather than pin to an edge
         // POSITION BEFORE UNHIDING. .lv-car carries `transition:transform .18s`, and the map re-renders the
         // element with NO transform — which is the ORIGIN. Unhiding and moving in one statement makes the
         // transition run FROM the top-left corner, so the dot visibly flies in from the corner on every repaint.
@@ -3166,7 +3175,7 @@
         const _firstPlace = !g.hasAttribute("transform");
         g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
         if (_firstPlace) void g.getBoundingClientRect();   // commit the position before it can be seen
-        g.style.display = "";
+        g.style.display = ""; live._dotOkAt = performance.now();
       });
     } catch (e) {} };
     // LAST-CORNER CALLOUT: the scorecard's verdict, ON the map, at the corner's real apex — grade color + the
@@ -3258,6 +3267,17 @@
       ds.sc = +ds.sc0 * k; ds.ox = (+ds.ox0 * k + tx).toFixed(2); ds.oy = (+ds.oy0 * k + ty).toFixed(2);
       const rs = sv.querySelector(".mv-reset"); if (rs) { const on = k > 1.001 || tx || ty; rs.style.display = on ? "" : "none"; const lb = rs.querySelector(".mv-zlbl"); if (lb) lb.textContent = k.toFixed(1) + "×"; }
       sv.style.cursor = k > 1.001 ? "grab" : "";
+      // The projection just moved under the overlays. They live OUTSIDE .mv in root space and are placed from
+      // this dataset, so until the next frame arrives the car dot is drawn against the OLD projection — and
+      // because .lv-car carries `transition:transform .18s`, it does not sit still and wait, it SLIDES across the
+      // map to catch up. Re-place them here, in the same task as the view change, so a zoom moves the map and the
+      // dot together. The transition is suppressed for this one placement: the car did not move, the view did.
+      try {
+        const g2 = sv.querySelector(".lv-car"), was = g2 && g2.style.transition;
+        if (g2) g2.style.transition = "none";
+        updCarDot(live.frame); paintLastOnMap((live.cornerScores || []).slice(-1)[0]);
+        if (g2) { void g2.getBoundingClientRect(); g2.style.transition = was || ""; }
+      } catch (e) {}
     } catch (e) {} };
     const bindMapZoom = (root) => { try { (root || host).querySelectorAll("svg[data-zoomable]").forEach((sv) => {
       if (sv._zbound) return; sv._zbound = true;

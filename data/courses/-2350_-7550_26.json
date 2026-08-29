@@ -3013,12 +3013,8 @@
       ]
     },
     "2866|2|4|800": {
-      "lap_s": 137.9,
+      "lap_s": 32.083,
       "session": "fh6_20260828_081447",
-      "build_id": "c6bd2083",
-      "class": "S1",
-      "pi": 800,
-      "drivetrain": "AWD",
       "pts": [
         [
           0,
@@ -4609,7 +4605,14 @@
           -2489,
           -7792
         ]
-      ]
+      ],
+      "build_id": "c6bd2083",
+      "class": "S1",
+      "pi": 800,
+      "drivetrain": "AWD",
+      "solo": 1,
+      "impacts": 5,
+      "void": 1
     }
   },
   "geo_turns": {

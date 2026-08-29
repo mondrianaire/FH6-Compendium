@@ -13904,12 +13904,8 @@
       ]
     },
     "3665|2|1|600": {
-      "lap_s": 185.5,
+      "lap_s": 185.496,
       "session": "fh6_20260827_213049",
-      "build_id": "c73dc734",
-      "class": "B",
-      "pi": 600,
-      "drivetrain": "AWD",
       "pts": [
         [
           0,
@@ -16473,15 +16469,18 @@
           -183,
           4942
         ]
-      ]
+      ],
+      "build_id": "c73dc734",
+      "class": "B",
+      "pi": 600,
+      "drivetrain": "AWD",
+      "solo": 0,
+      "impacts": 4,
+      "void": 0
     },
     "2866|2|4|800": {
-      "lap_s": 129.2,
+      "lap_s": 129.166,
       "session": "fh6_20260827_213049",
-      "build_id": "9a94cfd8",
-      "class": "S1",
-      "pi": 800,
-      "drivetrain": "AWD",
       "pts": [
         [
           0,
@@ -19402,7 +19401,14 @@
           -177,
           4944
         ]
-      ]
+      ],
+      "build_id": "9a94cfd8",
+      "class": "S1",
+      "pi": 800,
+      "drivetrain": "AWD",
+      "solo": 0,
+      "impacts": 76,
+      "void": 0
     }
   },
   "geo_turns": {

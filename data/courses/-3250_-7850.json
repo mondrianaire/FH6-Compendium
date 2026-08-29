@@ -6557,12 +6557,8 @@
   },
   "speed_traces": {
     "3761|1|6|700": {
-      "lap_s": 63.8,
+      "lap_s": 63.795,
       "session": "fh6_20260823_032213",
-      "build_id": "cfc80c87",
-      "class": "A",
-      "pi": 700,
-      "drivetrain": "RWD",
       "pts": [
         [
           0,
@@ -9476,7 +9472,14 @@
           -1779,
           -8717
         ]
-      ]
+      ],
+      "build_id": "cfc80c87",
+      "class": "A",
+      "pi": 700,
+      "drivetrain": "RWD",
+      "solo": 0,
+      "impacts": 29,
+      "void": 0
     }
   },
   "geo_turns": {

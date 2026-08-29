@@ -138,6 +138,13 @@ def smooth(vals, n=5):
 # measured by hand (the 23.4 mi Colossus, closed to 7 m, that the windowing never offered as a course) could
 # not be turned into a course map at all. Nothing about their behaviour changes; the nested calls resolve here.
 
+def _arc_of(path):
+    """Road length of a path, in metres. Point count is a sampling artefact; this is the thing being compared."""
+    p = path or []
+    return sum(math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]) for i in range(len(p) - 1)) if len(p) > 1 else 0.0
+
+
+
 def curvature(P, step=4.0, win=7):
     th = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(P, P[1:])]
     for i_ in range(1, len(th)):
@@ -2502,9 +2509,16 @@ def main():
                                      "session": sid, "lap_paths": layout, "det": DET_VER,
                                      "lat_acc": (lat_acc if lat_acc is not None else mg.get("lat_acc"))}   # the map persists with the course
                 if _keep_turns: geo["turns"] = mg["turns"]                                  # and the session shows the same map
-            elif mg.get("turns") and _n_new > _n_old and geo.get("turns"):
+            elif (mg.get("turns") and _n_new > _n_old and geo.get("turns")
+                  and _arc_of(geo.get("path")) >= 0.90 * _arc_of(mg.get("path"))):
                 # keeping the stored PATH, but this session saw more laps than the one that derived its turns —
                 # so re-derive the turns on the better evidence without disturbing the road.
+                # MORE LAPS OF LESS ROAD IS NOT BETTER EVIDENCE. This gate counted laps only, so a session holding
+                # six FRAGMENTS of the Colossus outranked the derivation that had walked the whole 37849 m circuit,
+                # and the course went from 24 turns to 2 while its map sat there untouched — 117 turn records
+                # stranded, 2 established. Turns detected on a fragment describe the fragment; they cannot replace
+                # turns detected on the full road no matter how many times the fragment was driven. Coverage is the
+                # precondition, lap count only breaks the tie after it — the same order the map itself is judged by.
                 mg["turns"] = geo["turns"]; mg["turns_n_laps"] = _n_new; mg["det"] = DET_VER
                 if lat_acc is not None: mg["lat_acc"] = lat_acc
                 mg["lap_paths"] = layout; model["geometry"] = mg

@@ -163,12 +163,8 @@
   },
   "speed_traces": {
     "2997|1|8|700": {
-      "lap_s": 16.6,
+      "lap_s": 16.567,
       "session": "fh6_20260828_122408",
-      "build_id": "cb1d0e90",
-      "class": "A",
-      "pi": 700,
-      "drivetrain": "RWD",
       "pts": [
         [
           0,
@@ -772,7 +768,14 @@
           -75,
           -6044
         ]
-      ]
+      ],
+      "build_id": "cb1d0e90",
+      "class": "A",
+      "pi": 700,
+      "drivetrain": "RWD",
+      "solo": 0,
+      "impacts": 2,
+      "void": 0
     }
   },
   "turn_count": 2,

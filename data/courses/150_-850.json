@@ -10649,12 +10649,8 @@
   },
   "speed_traces": {
     "3250|2|8|700": {
-      "lap_s": 140.68,
+      "lap_s": 140.678,
       "session": "fh6_20260827_224507",
-      "build_id": "33850a36",
-      "class": "A",
-      "pi": 700,
-      "drivetrain": "AWD",
       "pts": [
         [
           0,
@@ -13169,7 +13165,14 @@
           1233,
           -5879
         ]
-      ]
+      ],
+      "build_id": "33850a36",
+      "class": "A",
+      "pi": 700,
+      "drivetrain": "AWD",
+      "solo": 0,
+      "impacts": 5,
+      "void": 0
     }
   },
   "geo_turns": {

@@ -8946,12 +8946,8 @@
   },
   "speed_traces": {
     "3523|1|6|779": {
-      "lap_s": 80.1,
+      "lap_s": 80.059,
       "session": "fh6_20260828_122408",
-      "build_id": "2c6ebeda",
-      "class": "S1",
-      "pi": 779,
-      "drivetrain": "RWD",
       "pts": [
         [
           0,
@@ -12628,7 +12624,14 @@
           4354,
           -5859
         ]
-      ]
+      ],
+      "build_id": "2c6ebeda",
+      "class": "S1",
+      "pi": 779,
+      "drivetrain": "RWD",
+      "solo": 0,
+      "impacts": 3,
+      "void": 0
     }
   },
   "geo_turns": {

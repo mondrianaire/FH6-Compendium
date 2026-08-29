@@ -293,6 +293,14 @@ def ingest(p, t_mono):
             sus = ST._auto_suspend; ST._auto_suspend = None
             resumed = g == "event" and c["dist"] >= sus["dist"] - 50 and c["lapt"] >= sus["lapt"] - 1   # odometer + lap timer CONTINUE across a resume, RESET on a pause-menu restart (analyzer precedent) — a resume keeps the loop untouched
             if not resumed: _end_auto_course(t_mono, p, c)   # quit to free roam, or restart: the suspended run is over (its partial pass still counts); a restart re-anchors at the real grid via last_pos below
+        # RE-READ THE TUNE EVERY TIME YOU COME OUT OF A MENU. The menu is where sliders get changed, and the only
+        # other trigger is the file watcher's mtime poll — which fires on a SAVE, and only on a save. Coming out
+        # of the menu is the moment the change (saved or not) becomes true of the car you are about to drive, so
+        # it is the moment to look: a fresh decode catches a saved tweak immediately instead of on the next poll,
+        # and the live-PI-vs-save comparison catches an UNSAVED one, which no file watcher can ever see.
+        # _disk_dirty is the existing force-re-emit path, so this costs one 598-byte decode per menu exit.
+        if ST.game == "menu" and g != "menu":
+            ST._disk_dirty = True
         ST.game = g
         if g == "freeroam": ST.ev_maxpos = 0; ST.game_kind = None
         elif g == "event": ST.game_kind = ST.game_kind or ("race" if ST.ev_maxpos > 2 else "rivals / timed")   # kind survives a pause
@@ -1757,7 +1765,7 @@ class H(BaseHTTPRequestHandler):
                     if str(c["ordinal"]) == str(body["ordinal"]): c["name"] = obj["cars"][str(body["ordinal"])]["name"]
         elif self.path.startswith("/reset"):
             reset_session(); ok = True
-        elif (self.path.startswith("/tag") or self.path.startswith("/role")) and (body.get("label") is not None or body.get("role") is not None):
+        elif (self.path.startswith("/tag") or self.path.startswith("/role")) and ("label" in body or "role" in body):
             n = int(body.get("stint") or ST.stint)
             with ST.lock:
                 cur = dict(ST.stint_tags.get(str(n)) or {})

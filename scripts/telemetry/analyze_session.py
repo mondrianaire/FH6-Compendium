@@ -1291,6 +1291,10 @@ def main():
         # why a complete 23.41 mi lap still minted a brand-new key (_29, then _30) anchored 5 km from the line,
         # and why the event measured 27.45 mi — approach plus lap — instead of the lap.
         # The 0 -> running transition IS the start line, and it is the same place on every attempt.
+        # the first TIMED row is the line: the timer starts as you cross it, so this is the same place on every
+        # attempt, where the window's own first row is wherever the capture caught you rolling up to it
+        if _lap_rows and _lap_rows is not rs:
+            start = _lap_rows[0]; sx, sz = start["PosX"], start["PosZ"]
         _prev_cl = None
         for q in rs:
             _cl = q.get("CurrentLap")
@@ -1315,7 +1319,27 @@ def main():
         # The path is corroborated independently: mean Speed x wall-clock gives 23.36 mi against the path's 23.41,
         # and CurrentLap, CurrentRaceTime and TimestampMS all agree on 370 s. Three sources against one outlier.
         # The odometer is still used as a floor, so a route whose path is fragmentary is not under-reported either.
-        _dp = [(q["PosX"], q["PosZ"]) for q in rs]
+        # ...and the same rule for the event's own LENGTH and ANCHOR. Geometry alone was not enough: `dist` still
+        # summed every row, so a 23.41 mi lap reported 27.45 mi — lap plus approach plus U-turn — and that number
+        # is what sets routes[key]["length_m"] and feeds attribute_route. Measure the LAP.
+        # AN EVENT IS NOT A LAP. Event rows are already gated on CurrentLap > 0 (see :1177), so filtering them
+        # again is a no-op — and it also means the 0 -> running transition is never visible inside one, because
+        # the zero rows were dropped before the event was cut. What IS visible is the RESET: the timer running to
+        # a peak and dropping to ~0 as you cross. Split there and an event resolves into its laps.
+        # This matters because an event routinely spans more than one: the 23.41 mi Colossus lap sat in a 27.45 mi
+        # event with the tail of the previous attempt in front of it, and that surplus was what set the route's
+        # length and anchored its key 5 km from the line.
+        _laps_in = []; _cur = []; _pcl = None
+        for q in rs:
+            _c = q.get("CurrentLap")
+            if _pcl is not None and _c is not None and _pcl > 30.0 and _c < 1.0:
+                if len(_cur) > 30: _laps_in.append(_cur)
+                _cur = []
+            _cur.append(q); _pcl = _c
+        if len(_cur) > 30: _laps_in.append(_cur)
+        # the LONGEST complete lap describes the road best; a lone partial falls back to the whole event
+        _lap_rows = max(_laps_in, key=len) if _laps_in else rs
+        _dp = [(q["PosX"], q["PosZ"]) for q in _lap_rows]
         _darc = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(_dp, _dp[1:])
                     if math.hypot(b[0] - a[0], b[1] - a[1]) < 150)   # skip teleports/respawns
         dvals = [q["DistanceTraveled"] for q in rs]; dist = max(_darc, max(dvals) - max(0.0, min(dvals)))
@@ -1564,7 +1588,20 @@ def main():
             except Exception:
                 return 0
         def lap_pts(w, grip=False):
-            rows_ = [r for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+            # THE COURSE IS THE LAP, NOT THE WINDOW AROUND IT. Every row between t0 and t1 used to become course
+            # geometry — including everything before the lap started. On a Rivals circuit there is no standing
+            # start: you roll back past the line, turn around, and cross it already at speed, so that pre-lap
+            # manoeuvre was being mapped as part of the road. It is why U-turns kept becoming "courses", why an
+            # approach keyed a route 5 km from its own start line, and why one 23.4 mi lap measured 27.45 mi.
+            #
+            # CurrentLap > 0 is exactly and only "the lap timer is running", which this file already calls the
+            # honest event flag elsewhere. Before the first crossing it is 0 and LastLap is 0 too — the game has
+            # no completed lap to report — so pre-race driving is not merely excludable, it is self-identifying.
+            # Rows without the field at all (older captures) are kept, so nothing regresses on historic data.
+            rows_ = [r for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]
+                     and (r.get("CurrentLap") is None or r["CurrentLap"] > 0)]
+            if len(rows_) < 30:      # nothing timed in this window: fall back rather than map an empty road
+                rows_ = [r for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
             # 4th column rides through resample un-interpolated (a state is categorical); the 5th is ELEVATION,
             # which is continuous and interpolates like speed. PosY was in every capture and reached nothing —
             # a whole channel of the road (climbs, crests, compressions) that the lab could not draw.

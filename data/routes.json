@@ -1,6 +1,6 @@
 {
  "schema_version": "1.1.0",
- "purpose": "Route registry. A route = canonical start [x,z] + heading + length (+ its course model path once learned). New events are ATTRIBUTED to the nearest known route when the start is within ~120 m (250 m with path overlap), the heading agrees (a reversed circuit is a different route) and the length fits \u2014 so restarts and grid-slot offsets never split a route. Name a route once from the dashboard.",
+ "purpose": "Route registry. A route = canonical start [x,z] + heading + length (+ its course model path once learned). New events are ATTRIBUTED to the nearest known route when the start is within ~120 m (250 m with path overlap), the heading agrees (a reversed circuit is a different route) and the length fits — so restarts and grid-slot offsets never split a route. Name a route once from the dashboard.",
  "routes": {
   "4200_-5450": {
    "start": [
@@ -276,7 +276,21 @@
     0.44
    ],
    "length_m": 44182,
-   "events": 3,
+   "events": 11,
+   "first_seen": "fh6_20260829_023235",
+   "last_seen": "fh6_20260829_023235"
+  },
+  "-3750_300": {
+   "start": [
+    -3761,
+    314
+   ],
+   "heading": [
+    -0.93,
+    -0.368
+   ],
+   "length_m": 24057,
+   "events": 11,
    "first_seen": "fh6_20260829_023235",
    "last_seen": "fh6_20260829_023235"
   }

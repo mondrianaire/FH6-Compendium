@@ -486,3 +486,22 @@ tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(25
 .sys-pill.warn .sys-dot, .sys-lead.warn .sys-dot { background: var(--warn); }
 .sys-pill.off, .sys-lead.off { border-color: rgba(229,65,78,.45); color: #e5414e; }
 .sys-pill.off .sys-dot, .sys-lead.off .sys-dot { background: #e5414e; box-shadow: 0 0 5px rgba(229,65,78,.5); }
+
+/* ================= DASHBOARD MODE — the two-column body =================
+   The map is the instrument you watch while driving, so it takes the left half outright, at the full size of that
+   half, and shares it with nothing. It is STICKY: on a portrait screen the analytical material below the body can
+   scroll past while the map stays where your eye already is — that is what live following means in a page that is
+   still taller than the screen. The right half is one pane with two states (tuning overview / selected turn), so it
+   never competes with itself; its body scrolls internally, bounding the row to roughly the map's own height. */
+.dash-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; margin: 0 0 10px; }
+.dash-map-pane, .dash-info-pane { border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); padding: 8px 10px; min-width: 0; }
+.dash-map-pane { position: sticky; top: 8px; }
+.dash-info-pane.turn { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.dash-pane-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 6px; font-size: 12px; }
+.dash-ey { font-size: 10px; letter-spacing: .13em; font-weight: 800; text-transform: uppercase; color: var(--accent2); }
+.dash-map-wrap { width: 100%; }
+.dash-map-wrap .tz-svg { width: 100%; height: auto; max-width: none; }
+.dash-map-key { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 10.5px; color: var(--muted); margin-top: 6px; }
+.dash-info-pane .dash-pane-body { max-height: min(74vh, 660px); overflow-y: auto; overflow-x: hidden; }
+/* one column when there is no second half to give away */
+@media (max-width: 900px) { .dash-body { grid-template-columns: minmax(0, 1fr); } .dash-map-pane { position: static; } }

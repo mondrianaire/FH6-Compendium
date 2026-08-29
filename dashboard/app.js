@@ -3423,16 +3423,22 @@
             ${gatedTuning(co, s, curCar)}
             <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px"><b>📊 Diagnosis behind the numbers</b> <span class="why">— per-turn deltas, limiters, phase breakdown</span></summary><div style="margin-top:6px">${p.probes}${p.corners}${p.driving}${p.advice}</div></details></div>`;
       const courseHdr = courseIdentity(p.rn, courseGeoFor(co), { icon: co.is_loop ? "📍" : "🏟", topology: co.is_loop ? "loop" : (co.topology || null), routeKey: co.route_key, mode: co.is_loop ? "loop" : "event", tags: courseTagsRow(co) });
-      if (training) return `${courseHdr}${courseIdRow(curCar)}${carBanner}${courseHero(p, co)}${speedTracesCard(co, curCar)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      // DASHBOARD LAYOUT — full-width rows, then a two-column body. The map owns the left half outright (it is the
+      // live instrument); the right half is the one contextual pane, tuning overview until the map selects a turn.
+      // Everything analytical keeps its place BELOW the body — it is reference material, not something you watch.
+      const dashBody = `<div class="dash-body">${dashMapPane(co)}${dashInfoPane(co, s, curCar, tuneUnlocked,
+        training
+          ? `${learnPanel}<div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px;margin-top:8px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`
+          : feedPanel)}</div>`;
+      const head = `${courseHdr}${courseIdRow(curCar)}${carBanner}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${speedTracesCard(co, curCar)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>${dashBody}`;
+      if (training) return `${head}
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
         ${turnByTurnSection(co, tuneUnlocked)}
-        ${p.history}
-        ${learnPanel}
-        <div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`;
-      return `${courseHdr}${courseIdRow(curCar)}${carBanner}${courseHero(p, co)}${speedTracesCard(co, curCar)}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+        ${p.history}`;
+      return `${head}
         ${turnByTurnSection(co, tuneUnlocked)}
         ${p.history}
-        <div class="card-grid">${feedPanel}<details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details></div>`;
+        <details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details>`;
     };
     // large ACTIVE-CAR banner — everything car-scoped (course tuning, references, decode) is about THIS car; make it unmissable
     const paintActiveCar = () => { const el = host.querySelector("#lvActiveCar"); if (!el) return; const f = live.frame; const on = f && f.on;
@@ -4991,7 +4997,9 @@
       const pts = geo.path || pieces.flat(), lp = geo.last_path || (geo.last_paths || []).flat(), layout = geo.layout_paths || []; if (pts.length < 5) return "";
       const all = pts.concat(lp, ...layout.map((l) => l.pts));
       const xs = all.map((p) => p[0]), zs = all.map((p) => p[1]); const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
-      const W = 460, H = 300, pad = 20; const sc = Math.min((W - 2 * pad) / Math.max(1, x1 - x0), (H - 2 * pad) / Math.max(1, z1 - z0));
+      // The drawing surface is the CALLER's decision. 460x300 is the inline card's size; dashboard mode hands the
+      // map a whole column and a portrait aspect, because there it is the instrument you watch, not an illustration.
+      const W = opts.W || 460, H = opts.H || 300, pad = 20; const sc = Math.min((W - 2 * pad) / Math.max(1, x1 - x0), (H - 2 * pad) / Math.max(1, z1 - z0));
       const X = (x) => pad + (x - x0) * sc + ((W - 2 * pad) - (x1 - x0) * sc) / 2, Y = (z) => H - pad - (z - z0) * sc - ((H - 2 * pad) - (z1 - z0) * sc) / 2;
       const poly = (arr) => arr.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
       // the turn markers = the CANONICAL turns of the course (established across sessions, positions in world coords) — so the map matches the count.
@@ -5037,7 +5045,7 @@
       } catch (e) { return ""; } })();
       const gradeByTurn = {}; if (typeof live !== "undefined") (live.cornerScores || []).forEach((s2) => { if (s2.key && String(s2.key).indexOf("ct") === 0) gradeByTurn[+String(s2.key).slice(2)] = s2; });
       const _zoomed = _mv.k > 1.001 || _mv.tx || _mv.ty;
-      return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg" data-zoomable="1" data-mapkey="${esc(_mvKey)}" data-x0="${x0}" data-z0="${z0}" data-sc0="${sc}" data-ox0="${OX.toFixed(2)}" data-oy0="${OY.toFixed(2)}" data-sc="${sc * _mv.k}" data-ox="${(OX * _mv.k + _mv.tx).toFixed(2)}" data-oy="${(OY * _mv.k + _mv.ty).toFixed(2)}" data-w="${W}" data-h="${H}"${opts.live ? ` data-live-map="1"` : ""} style="max-width:${W}px;background:var(--bg);border-radius:8px;overflow:hidden;user-select:none;touch-action:pan-y">
+      return `<svg viewBox="0 0 ${W} ${H}" class="tz-svg" data-zoomable="1" data-mapkey="${esc(_mvKey)}" data-x0="${x0}" data-z0="${z0}" data-sc0="${sc}" data-ox0="${OX.toFixed(2)}" data-oy0="${OY.toFixed(2)}" data-sc="${sc * _mv.k}" data-ox="${(OX * _mv.k + _mv.tx).toFixed(2)}" data-oy="${(OY * _mv.k + _mv.ty).toFixed(2)}" data-w="${W}" data-h="${H}"${opts.live ? ` data-live-map="1"` : ""} style="${opts.fill ? "width:100%;max-width:none;display:block" : "max-width:" + W + "px"};background:var(--bg);border-radius:8px;overflow:hidden;user-select:none;touch-action:pan-y">
         <g class="mv" transform="translate(${_mv.tx.toFixed(2)},${_mv.ty.toFixed(2)}) scale(${_mv.k.toFixed(4)})">
         ${layout.map((l) => `<polyline fill="none" stroke="var(--muted)" stroke-width="1" opacity=".32" vector-effect="non-scaling-stroke" points="${poly(l.pts)}"/>`).join("")}
         ${(geo.last_paths || (lp.length ? [lp] : [])).map((pc) => `<polyline fill="none" stroke="var(--warn,#e3b341)" stroke-width="2" stroke-dasharray="4 3" opacity=".9" vector-effect="non-scaling-stroke" points="${poly(pc)}"/>`).join("")}
@@ -5502,24 +5510,63 @@
         <div style="overflow-x:auto"><table style="font-size:11px"><thead><tr><th>#</th><th>established by</th><th title="how many sessions placed this turn geometrically">geo sessions</th><th>sessions</th><th>presence</th><th>passes</th><th>axle · all sessions</th><th>limiter</th></tr></thead><tbody>${body}</tbody></table></div>
         <div style="margin-top:5px">${gripLegend(["front", "rear", "both"])}</div></div>`;
     } catch (e) { return ""; } };
+    // The lap the map paints, resolved ONCE and shared: the map draws it, the impact bursts come from it, and the
+    // caption has to be able to say its time is void. A saved trace carries no void flag, so OR it in from the lap
+    // record. Dashboard mode needs the same lap the inline card uses, so this stopped being an inline IIFE.
+    const gripLapFor = (co, rk) => { try {
+      const st = (co && co.speed_traces) || {}; const cc = live.courseCar || (live.frame && live.frame.cid);
+      const key = cc && st[cc] ? cc : Object.keys(st)[0]; const t = key ? st[key] : null; if (!t || !rk) return t;
+      // the lap record is cached PER CLASS (route|S1, route|…, route| for all), and which one is warm depends on the
+      // class switch — so ask every cache entry for this route, not just one guessed key.
+      const pre = String(rk) + "|", cache = live.laps || {};
+      const rec = Object.keys(cache).filter((k2) => k2.indexOf(pre) === 0).flatMap((k2) => (cache[k2] || {}).laps || []);
+      if (t.lap_s != null && rec.some((l) => l && l.void && l.cid === key && l.lap_s != null && l.lap_s.toFixed(2) === t.lap_s.toFixed(2))) return Object.assign({}, t, { void: true });
+      return t; } catch (e) { return null; } };
     const mapCardHtml = (geo, corners, turns, co) => { if (!geo) return ""; const canonN = turns && turns.canonical ? turns.canonical.length : (geo.turns || []).length; const shown = (turns && turns.count) || canonN; const mapped = (geo.turns || []).length;
       const rk = co && co.route_key; const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null; const brk = (co && selN) ? courseTurnBreakdown(co, selN) : "";
       // the lap the map paints, resolved ONCE: the map draws it, the impact bursts come from it, and the caption has
       // to be able to say its time is void. A saved trace carries no void flag, so OR it in from the lap record.
-      const gripLap = (() => { try { const st = (co && co.speed_traces) || {}; const cc = live.courseCar || (live.frame && live.frame.cid);
-        const key = cc && st[cc] ? cc : Object.keys(st)[0]; const t = key ? st[key] : null; if (!t || !rk) return t;
-        // the lap record is cached PER CLASS (route|S1, route|…, route| for all), and which one is warm depends on the
-        // class switch — so ask every cache entry for this route, not just one guessed key.
-        const pre = String(rk) + "|", cache = live.laps || {};
-        const rec = Object.keys(cache).filter((k2) => k2.indexOf(pre) === 0).flatMap((k2) => (cache[k2] || {}).laps || []);
-        if (t.lap_s != null && rec.some((l) => l && l.void && l.cid === key && l.lap_s != null && l.lap_s.toFixed(2) === t.lap_s.toFixed(2))) return Object.assign({}, t, { void: true });
-        return t; } catch (e) { return null; } })();
+      const gripLap = gripLapFor(co, rk);
       const nImpMap = impactCount(gripLap && gripLap.pts);
       return `<div style="margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)">
           <div class="card-row" style="margin-top:0"><strong style="font-size:12px">🗺 Course map — ${shown} turn${shown === 1 ? "" : "s"}${mapped !== shown ? ` (${mapped} curvature-mapped)` : ""} · ${geo.length_m} m</strong><span class="chip">${geo.from_model ? "best map on record" : "ref lap " + ((geo.ref_lap || {}).lap || "—")}${geo.last_lap ? ` · latest lap ${geo.last_lap.lap} overlaid` : ""}</span></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${courseMap(geo, corners, turns, { rk, selN, live: src === "live", co, gripLap })}<div style="font-size:10.5px;min-width:150px;max-width:320px">${rk ? `<div style="font-weight:600;color:var(--accent2);margin-bottom:3px">▶ click a turn for its breakdown</div>` : ""}<div><span style="color:var(--accent2)">━</span> course path · <span style="color:var(--warn,#e3b341)">╌</span> latest lap · <span style="color:var(--muted)">─</span> every recorded lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</div><div style="margin-top:3px">turns: <span style="color:#00d27a">●</span> clean this session · <span style="color:var(--accent)">○</span> on the map, not loaded</div><div style="margin-top:3px">a turn wears the state it took: ${gripLegend(["front", "rear", "both", "impact"])}</div>${nImpMap ? `<div style="margin-top:3px;color:${gripCol("impact")}">${gripOf("impact").icon} ${nImpMap} impact${nImpMap === 1 ? "" : "s"} on the painted lap — the burst marks where the car was hit${isVoid(gripLap) ? `<br><b>this lap's TIME is void</b> — ${esc(VOID_WHY)}` : ""}</div>` : ""}${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:5px 0 0">${geo.not_driven.map(turnLabel).join(", ")}: mapped turns not loaded this session — take them at pace to register them</p>` : ""}</div></div>
           ${brk}
         </div>`; };
+    // ================= DASHBOARD MODE: a two-column body =================
+    // The map is not an illustration of the course, it is the INSTRUMENT you watch while driving it — so in dashboard
+    // mode it takes the entire left half, at the full size of that half, and shares it with nothing. Everything that
+    // used to crowd it (legend column, turn breakdown, tuning) moved right.
+    //
+    // The right half is one pane with two states, never two panes competing: the course's TUNING OVERVIEW by default,
+    // and the SELECTED TURN's detail when you click a turn on the map. Clicking a turn is the only thing that swaps it,
+    // and closing the turn returns the overview — so the pane always answers the question the map just asked.
+    const dashMapPane = (co) => {
+      const geo = courseGeoFor(co); const rk = co.route_key;
+      if (!geo) return `<div class="dash-map-pane"><div class="course-hero building" style="height:100%">${courseShapeGlyph(geo, 60) || `<span style="font-size:32px">🗺</span>`}<div><b style="font-size:13.5px">Mapping this course's shape…</b><div class="why" style="font-size:11px;margin-top:2px">complete one full lap and the outline draws here from your position trace</div></div></div>`;
+      const tu = co.turns || {}; const shown = (tu.count || (tu.canonical || []).length || (geo.turns || []).length);
+      const gripLap = gripLapFor(co, rk); const nImp = impactCount(gripLap && gripLap.pts);
+      const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null;
+      return `<div class="dash-map-pane">
+        <div class="dash-pane-hd"><span class="dash-ey">▨ COURSE MAP</span><b>${shown} turn${shown === 1 ? "" : "s"}</b><span class="why">${geo.length_m} m</span>${shapeBadge(co)}<span class="why" style="margin-left:auto;font-size:10px">scroll to zoom · drag to pan · click a turn →</span></div>
+        <div class="dash-map-wrap">${courseMap(geo, co.corners, co.turns, { rk, selN, live: src === "live", co, gripLap, W: 600, H: 560, fill: true })}</div>
+        <div class="dash-map-key">
+          <span><span style="color:var(--accent2)">━</span> course</span><span><span style="color:var(--warn,#e3b341)">╌</span> latest lap</span><span><span style="color:var(--muted)">─</span> every lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</span>
+          <span><span style="color:#00d27a">●</span> clean</span><span><span style="color:var(--accent)">○</span> not loaded</span>
+          <span>${gripLegend(["front", "rear", "both", "impact"])}</span>
+          ${nImp ? `<span style="color:${gripCol("impact")}">${gripOf("impact").icon} ${nImp} impact${nImp === 1 ? "" : "s"} on the painted lap${isVoid(gripLap) ? " · its TIME is void" : ""}</span>` : ""}
+        </div>
+        ${(geo.not_driven || []).length ? `<p class="why" style="font-size:10px;margin:4px 2px 0">${geo.not_driven.map(turnLabel).join(", ")}: mapped but not loaded this session — take them at pace</p>` : ""}
+      </div>`;
+    };
+    const dashInfoPane = (co, s2, curCar, tuneUnlocked, feedPanel) => {
+      const rk = co.route_key; const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null;
+      if (selN) {
+        const brk = courseTurnBreakdown(co, selN);
+        if (brk) return `<div class="dash-info-pane turn"><div class="dash-pane-hd"><span class="dash-ey" style="color:var(--accent)">◎ TURN ${selN}</span><span class="why">the map's selection</span><span class="chip" data-courseturn-close="1" style="margin-left:auto;cursor:pointer">✕ back to tuning overview</span></div><div class="dash-pane-body">${brk}</div></div>`;
+      }
+      return `<div class="dash-info-pane"><div class="dash-pane-hd"><span class="dash-ey">🏋 TUNING OVERVIEW</span><span class="why">this car on this course</span><span class="why" style="margin-left:auto;font-size:10px">click a turn on the map for its detail</span></div><div class="dash-pane-body">${feedPanel}</div></div>`;
+    };
     // a course card built purely from a TRACK RECORD (course model) — for a route selected in the atlas that this session / recording never visited
     const modelCourseCard = (m) => {
       const names = ((DB.routes || {}).routes) || {}; const loc = JSON.parse(localStorage.getItem("fh6Routes") || "{}"); const rn = m.name || (names[m.route_key] || {}).name || (loc[m.route_key] || {}).name || `route @ ${m.route_key.replace("_", ", ")}`;

@@ -25,7 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.pat
 # Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
 # course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
 # reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
-DET_VER = "geo6-banked-latg"
+DET_VER = "geo7-tol-from-map"
 
 
 def self_retrace(path, tol=20.0):
@@ -2116,14 +2116,23 @@ def main():
         # it can never decide whether the turn is there. Basing existence on load was the root cause of turns
         # that vanish when driven smoothly, and of every ratio/persistence patch built to compensate.
         # Geometry turns are merged across sessions positionally, the same way behavioural ones are.
+        # THE MATCHER MUST NEVER MERGE TWO TURNS THE MAP CALLS DISTINCT. A fixed tolerance cannot know how close
+        # a course's corners are: Edamame has two pairs only 20 m apart (G2/G3 and G8/G9), so a 22 m arc match
+        # collapsed each pair and 13 mapped turns became 11 registry entries and 10 drawn markers. The map is the
+        # authority on what a turn is, so the map sets the tolerance — half the closest gap it contains, capped
+        # at the old value. Distinct turns then cannot collide however tightly a circuit is packed.
+        _ms = sorted(t.get("s") for t in ((geo or {}).get("turns") or []) if t.get("s") is not None)
+        _gapmin = min((b - a for a, b in zip(_ms, _ms[1:])), default=44)
+        _TOL_S = max(6.0, min(22.0, _gapmin / 2.0))
+        _TOL_XZ = max(6.0, min(18.0, _gapmin / 2.0))
         gseen = model.setdefault("geo_turns", {})       # stable key -> {pos, dir, radius_m, deg, sessions[]}
         for g_ in ((geo or {}).get("turns") or []):
             ap = g_.get("apex")
             if not ap: continue
             _as = g_.get("s")
             hit_k = next((k for k, v in gseen.items()
-                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 18 ** 2
-                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= 22)), None)
+                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= _TOL_XZ ** 2
+                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= _TOL_S)), None)
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
                                    {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             if sid not in rec["sessions"]: rec["sessions"].append(sid)
@@ -2150,8 +2159,8 @@ def main():
             if not ap: continue
             _as = g_.get("s")
             hit_k = next((k for k, v in gseen.items()
-                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= 18 ** 2
-                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= 22)), None)
+                          if (v["pos"][0] - ap[0]) ** 2 + (v["pos"][1] - ap[1]) ** 2 <= _TOL_XZ ** 2
+                          or (_as is not None and v.get("s") is not None and abs(v["s"] - _as) <= _TOL_S)), None)
             rec = gseen.setdefault(hit_k or f"{round(ap[0])}_{round(ap[1])}",
                                    {"pos": [round(ap[0]), round(ap[1])], "s": g_.get("s"), "dir": g_.get("dir"), "radius_m": g_.get("radius_m"), "deg": g_.get("deg"), "sessions": []})
             rec["model_map"] = True
@@ -2165,7 +2174,11 @@ def main():
         # every geometric turn becomes a model turn (created if the behavioural pass never saw it)
         for t in merged_turns: t.pop("geo_mapped", None); t.pop("geo_sessions", None)   # re-derived from gseen below, never inherited from the file
         for k, v in gseen.items():
-            hit = next((t for t in merged_turns if (t["pos"][0] - v["pos"][0]) ** 2 + (t["pos"][1] - v["pos"][1]) ** 2 <= 40 ** 2), None)
+            # ...and the same map-derived tolerance here. A 40 m radius silently re-merged what the two matchers
+            # above had just kept apart: 13 registry entries collapsed back to 10 model turns because Edamame
+            # has pairs 20 m apart. Every stage that matches turns to turns must use the map's own spacing.
+            hit = next((t for t in merged_turns
+                        if (t["pos"][0] - v["pos"][0]) ** 2 + (t["pos"][1] - v["pos"][1]) ** 2 <= _TOL_XZ ** 2), None)
             if hit is None:
                 hit = {"id": "T?", "pos": list(v["pos"]), "dir": v.get("dir"), "type": None, "radius_m": v.get("radius_m"),
                        "n": 0, "best": None, "sessions": 0, "by_session": {}, "track": {}}
@@ -2177,14 +2190,21 @@ def main():
             if hit.get("dir") is None: hit["dir"] = v.get("dir")
         merged_turns.sort(key=lambda t: route_s(t["pos"]))            # re-order: geometry may have inserted turns
         for i, t in enumerate(merged_turns, 1): t["id"] = f"T{i}"
+        _has_map = bool(((model.get("geometry") or {}).get("turns")) or ((geo or {}).get("turns")))
         def _established(t):
             # GEOMETRY first: a curve confirmed by the road on 2+ visits IS a turn, however gently you take it.
             # (One visit can carry a rejoin/crawl artefact, so two is the noise filter.)
             if t.get("geo_mapped"): return "geometry"           # in the course's own persisted map = part of the road
             if (t.get("geo_sessions") or 0) >= 2: return "geometry"
             tr = t.get("track") or {}
-            # behaviour is a FALLBACK for turns the reference lap's curvature missed (a section it never covered)
-            if (tr.get("sessions", 0) >= 2 and (tr.get("laps_seen", 0) / mlaps) >= 0.35) or (tr.get("passes", 0) >= 0.5 * mlaps): return "behaviour"
+            # BEHAVIOUR IS A FALLBACK ONLY WHILE THERE IS NO MAP. It was a reasonable source when curvature
+            # thresholds missed gentle corners, but the lateral-g split now folds those into the geometry — and
+            # a behaviour-only turn depends on HOW YOU DROVE, so it reintroduces exactly the drift this course
+            # kept showing: 13 mapped turns became 16 established because three grip clusters sat outside the
+            # map. Where a map exists it is the authority on what a turn is; where none exists yet, behaviour
+            # is still the only thing there is.
+            if not _has_map and ((tr.get("sessions", 0) >= 2 and (tr.get("laps_seen", 0) / mlaps) >= 0.35)
+                                 or (tr.get("passes", 0) >= 0.5 * mlaps)): return "behaviour"
             if (t.get("geo_sessions") or 0) >= 1 and (tr.get("passes") or 0) >= 1: return "geometry+driven"   # mapped once AND actually driven
             return None
         for t in merged_turns:

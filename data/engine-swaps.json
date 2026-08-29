@@ -2670,7 +2670,7 @@
    "cyl": 4,
    "displacement_l": null,
    "redline": 16500,
-   "sample_hp": 748,
+   "sample_hp": 773,
    "resulting_drivetrain": "AWD",
    "sample_pi": 930,
    "source": "save-mined+telemetry"

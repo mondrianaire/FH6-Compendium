@@ -102,6 +102,29 @@ def merge_into(dst, src):
     return dst
 
 
+def _move_traces(old_key, new_key):
+    """Re-key a retired course's lap traces onto the canonical course. Returns how many rows moved.
+
+    Read-only-safe: if the store does not exist there is nothing to move. The UNIQUE constraint is
+    (route_key, session, cid, t0), so a row that would collide with one already under the canonical key is the
+    SAME lap reached by two names — dropped rather than duplicated."""
+    db = os.path.join(ROOT, "data", "laps.db")
+    if not os.path.exists(db):
+        return 0
+    import sqlite3
+    cx = sqlite3.connect(db, timeout=10)
+    try:
+        n = cx.execute("SELECT COUNT(*) FROM lap_traces WHERE route_key=?", (old_key,)).fetchone()[0]
+        if not n:
+            return 0
+        cx.execute("UPDATE OR IGNORE lap_traces SET route_key=? WHERE route_key=?", (new_key, old_key))
+        cx.execute("DELETE FROM lap_traces WHERE route_key=?", (old_key,))   # any left are exact duplicates
+        cx.commit()
+        return n
+    finally:
+        cx.close()
+
+
 def main():
     apply = "--apply" in sys.argv
     models = {}
@@ -189,6 +212,14 @@ def main():
             dp, dm, _ = models[d]
             merge_into(cm, dm)
             name = name or dm.get("name") or (routes.get(d) or {}).get("name")
+            # THE LAP TRACES MUST FOLLOW THE MODEL. Merging retires the duplicate route_key, but every row in
+            # data/laps.db is keyed by it — so without this the traces of the retired course are orphaned: still
+            # on disk, attached to a key nothing resolves, invisible to /laps and to the per-turn measurement
+            # that now reads them. Zero rows are stranded today, which is exactly why this is cheap to add and
+            # would be expensive to discover: the first real merge would silently lose that course's history.
+            moved = _move_traces(d, canon)
+            if moved:
+                print(f"  moved {moved} lap trace(s) {d} -> {canon}")
             os.remove(dp)
             routes.pop(d, None)   # the duplicate key is retired; path matching now attracts its events to the canonical model
         if name:

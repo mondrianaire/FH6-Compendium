@@ -132,6 +132,77 @@ def smooth(vals, n=5):
         out.append(s / len(q))
     return out
 
+
+# PROMOTED TO MODULE SCOPE. Both are pure functions of a path — they need only math, smooth() and each other —
+# but living nested inside the analysis meant the ONLY way to map a road was to re-run a whole session. A lap
+# measured by hand (the 23.4 mi Colossus, closed to 7 m, that the windowing never offered as a course) could
+# not be turned into a course map at all. Nothing about their behaviour changes; the nested calls resolve here.
+
+def curvature(P, step=4.0, win=7):
+    th = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(P, P[1:])]
+    for i_ in range(1, len(th)):
+        while th[i_] - th[i_ - 1] > math.pi: th[i_] -= 2 * math.pi
+        while th[i_] - th[i_ - 1] < -math.pi: th[i_] += 2 * math.pi
+    ths = smooth(th, win) if len(th) >= win else th
+    return [(ths[i_ + 1] - ths[i_ - 1]) / (2 * step) for i_ in range(1, len(ths) - 1)]   # rad/m at P[i_+1]
+
+def detect_turns(P, step=4.0, win=9, floor_r=600.0, min_deg=30.0, tight_r=90.0, tight_deg=14.0, bridge_m=25.0):
+    K = curvature(P, step, win)
+    if not K: return []
+    floor = 1.0 / floor_r; bridge = max(1, int(bridge_m / step))
+    segs = []; cur = None; gap = 0
+    for i_, k_ in enumerate(K):
+        sg = 1 if k_ > 0 else -1
+        if abs(k_) >= floor:
+            if cur and cur["sgn"] == sg and gap <= bridge: cur["i1"] = i_ + 1; gap = 0
+            else:
+                if cur: segs.append(cur)
+                cur = {"i0": i_, "i1": i_ + 1, "sgn": sg}; gap = 0
+        elif cur:
+            gap += 1
+            if gap > bridge: segs.append(cur); cur = None
+    if cur: segs.append(cur)
+    out = []
+    for t_ in segs:
+        sl = K[t_["i0"]:t_["i1"]]
+        if not sl: continue
+        deg = abs(sum(sl) * step) * 180 / math.pi
+        ia = t_["i0"] + max(range(len(sl)), key=lambda q: abs(sl[q]))
+        rmin = 1 / max(1e-6, abs(K[ia]))
+        if not (deg >= min_deg or (rmin <= tight_r and deg >= tight_deg)): continue
+        out.append({"ia": ia + 1, "i0": t_["i0"] + 1, "i1": min(t_["i1"] + 1, len(P) - 1),
+                    "sgn": t_["sgn"], "k": abs(K[ia]), "deg": round(deg), "radius_m": round(rmin)})
+    # ONE CONTINUOUS CHANGE OF DIRECTION IS ONE TURN: same-direction segments whose spans nearly touch are
+    # a double-apex / compound corner that a momentary curvature dip split in two. Merge on SPAN
+    # adjacency, not apex distance — a compound corner's apexes sit ~90 m apart while its halves are
+    # metres apart. 60 m is measured, not guessed: real compound halves here sit 36 m apart and genuinely
+    # separate same-direction corners sit 148 m apart, so the threshold lands in an empty band.
+    # NEVER MERGE ACROSS A STRAIGHT. Distance alone is the wrong test, and the metric that chose it was
+    # biased: cross-lap agreement REWARDS merging (fewer, larger turns are trivially more consistent, and
+    # merging the whole course into one turn would score 100%), so tuning the gap on agreement drove it
+    # to 60 m and swallowed real corners. Two corners separated by actual straight road are two corners
+    # however close they sit. Measured cost of getting this wrong: G1 became 173 deg over 236 m with a
+    # 965 m-radius straight inside it, G7 244 deg over 260 m around an 849 m straight -- five distinct
+    # curvature peaks each, one marker, and the merged apex landing between the real corners.
+    STRAIGHT_R = 300.0                      # radius above which the road is not turning
+    adj = max(1, int(60.0 / step)); mg = []
+    for t_ in out:
+        gap_k = [abs(x) for x in K[max(0, mg[-1]["i1"] - 1):max(0, t_["i0"] - 1)]] if mg else []
+        straight = bool(gap_k) and (1.0 / max(1e-6, min(gap_k)) > STRAIGHT_R)   # touching segments: nothing between them, so merge
+        if mg and t_["sgn"] == mg[-1]["sgn"] and (t_["i0"] - mg[-1]["i1"]) <= adj and not straight:
+            m_ = mg[-1]; m_["i1"] = max(m_["i1"], t_["i1"]); m_["deg"] = m_["deg"] + t_["deg"]
+            if t_["k"] > m_["k"]: m_["k"] = t_["k"]; m_["ia"] = t_["ia"]; m_["radius_m"] = t_["radius_m"]
+        else: mg.append(dict(t_))
+    # WHERE a turn IS = where its direction change is CONCENTRATED, not the single tightest sample. The
+    # argmax of a smoothed derivative wanders with the racing line, so the same corner reported apexes
+    # tens of metres apart from lap to lap; the curvature-weighted centroid is a property of the road.
+    for t_ in mg:
+        sl = [abs(x) for x in K[max(0, t_["i0"] - 1):max(0, t_["i1"] - 1)]]
+        tot = sum(sl)
+        if tot:
+            t_["ia"] = min(len(P) - 1, max(0, int(round(t_["i0"] + sum(q * w for q, w in enumerate(sl)) / tot))))
+    return mg
+
 def names_map():
     try:
         with open(os.path.join(ROOT, "data", "car-ordinals.json"), encoding="utf-8") as f: return json.load(f).get("cars", {})
@@ -1214,10 +1285,19 @@ def main():
         # the same place on every attempt. Measured on that session: crossings at [-3773,304] and [-3775,307],
         # 3 m apart, both of which round to the one key. Where no lap completed there is no line to find and the
         # window start stands, as before.
+        # THE LAP STARTS WHERE THE TIMER STARTS. On a single-lap Rivals run the timer does not RESET mid-window —
+        # it simply begins at the line and stops at it, so a reset-detector never fires and the anchor stayed at
+        # whatever the window opened on: the approach, the turnaround, wherever the capture caught you. That is
+        # why a complete 23.41 mi lap still minted a brand-new key (_29, then _30) anchored 5 km from the line,
+        # and why the event measured 27.45 mi — approach plus lap — instead of the lap.
+        # The 0 -> running transition IS the start line, and it is the same place on every attempt.
         _prev_cl = None
         for q in rs:
             _cl = q.get("CurrentLap")
             if _cl is None: break
+            if _prev_cl is not None and _prev_cl <= 0.01 and _cl > 0.0:
+                start = q; sx, sz = q["PosX"], q["PosZ"]
+                break
             if _prev_cl is not None and _prev_cl > 30.0 and _cl < 1.0:
                 # move the WHOLE anchor, not just the coordinates: the heading below is measured 100 m along from
                 # `start`, so leaving `start` at the window opening while sx/sz jumped to the line made the heading
@@ -1227,7 +1307,19 @@ def main():
                 start = q; sx, sz = q["PosX"], q["PosZ"]   # the finish line: a property of the course, not the capture
                 break
             _prev_cl = _cl
-        dvals = [q["DistanceTraveled"] for q in rs]; dist = max(dvals) - max(0.0, min(dvals)); laps = max(q["LapNumber"] for q in rs)   # odometer may be cumulative — length = what THIS event covered
+        # LENGTH FROM THE PATH, NOT FROM THE ODOMETER. DistanceTraveled under-reports badly on long routes —
+        # measured on a complete 23.41 mi Colossus lap it read 6,621 m against a 37,671 m path, 5.7x short. That
+        # value sets routes[key]["length_m"] and feeds attribute_route, so every attempt registered a 6.6 km route
+        # where the road is 37.7 km and nothing could ever match anything: the lap WAS captured (last_lap 370.646)
+        # and filed under yet another new key.
+        # The path is corroborated independently: mean Speed x wall-clock gives 23.36 mi against the path's 23.41,
+        # and CurrentLap, CurrentRaceTime and TimestampMS all agree on 370 s. Three sources against one outlier.
+        # The odometer is still used as a floor, so a route whose path is fragmentary is not under-reported either.
+        _dp = [(q["PosX"], q["PosZ"]) for q in rs]
+        _darc = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(_dp, _dp[1:])
+                    if math.hypot(b[0] - a[0], b[1] - a[1]) < 150)   # skip teleports/respawns
+        dvals = [q["DistanceTraveled"] for q in rs]; dist = max(_darc, max(dvals) - max(0.0, min(dvals)))
+        laps = max(q["LapNumber"] for q in rs)
         pos = [q["RacePosition"] for q in rs if q["RacePosition"] > 0]
         # MODE is INFERRED, never read: the 324-byte Data Out packet carries no game-mode field (verified —
         # Trailing323 is always 0, and NormAIBrakeDiff/NormDrivingLine are identical in both modes because the
@@ -1489,13 +1581,6 @@ def main():
                     s_ += step
                 out.append(P_)
             return out
-        def curvature(P, step=4.0, win=7):
-            th = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(P, P[1:])]
-            for i_ in range(1, len(th)):
-                while th[i_] - th[i_ - 1] > math.pi: th[i_] -= 2 * math.pi
-                while th[i_] - th[i_ - 1] < -math.pi: th[i_] += 2 * math.pi
-            ths = smooth(th, win) if len(th) >= win else th
-            return [(ths[i_ + 1] - ths[i_ - 1]) / (2 * step) for i_ in range(1, len(ths) - 1)]   # rad/m at P[i_+1]
         def down(pcs, n=500):   # downsample pieces for drawing (<= n points in total)
             tot = sum(len(p) for p in pcs) or 1; k = max(1, -(-tot // n))
             return [[[round(p[0]), round(p[1])] for p in pc[::k]] for pc in pcs if len(pc[::k]) >= 2]
@@ -1507,62 +1592,6 @@ def main():
         # is what made a 200 m sweeper invisible while a twitch inside a hairpin counted as its own turn.
         # Measured vs the shipped detector: cross-lap agreement 70% vs 59%, count spread +/-0.6 vs +/-2.8 turns
         # per lap, orphan (one-lap-only) turns 4 vs 11.
-        def detect_turns(P, step=4.0, win=9, floor_r=600.0, min_deg=30.0, tight_r=90.0, tight_deg=14.0, bridge_m=25.0):
-            K = curvature(P, step, win)
-            if not K: return []
-            floor = 1.0 / floor_r; bridge = max(1, int(bridge_m / step))
-            segs = []; cur = None; gap = 0
-            for i_, k_ in enumerate(K):
-                sg = 1 if k_ > 0 else -1
-                if abs(k_) >= floor:
-                    if cur and cur["sgn"] == sg and gap <= bridge: cur["i1"] = i_ + 1; gap = 0
-                    else:
-                        if cur: segs.append(cur)
-                        cur = {"i0": i_, "i1": i_ + 1, "sgn": sg}; gap = 0
-                elif cur:
-                    gap += 1
-                    if gap > bridge: segs.append(cur); cur = None
-            if cur: segs.append(cur)
-            out = []
-            for t_ in segs:
-                sl = K[t_["i0"]:t_["i1"]]
-                if not sl: continue
-                deg = abs(sum(sl) * step) * 180 / math.pi
-                ia = t_["i0"] + max(range(len(sl)), key=lambda q: abs(sl[q]))
-                rmin = 1 / max(1e-6, abs(K[ia]))
-                if not (deg >= min_deg or (rmin <= tight_r and deg >= tight_deg)): continue
-                out.append({"ia": ia + 1, "i0": t_["i0"] + 1, "i1": min(t_["i1"] + 1, len(P) - 1),
-                            "sgn": t_["sgn"], "k": abs(K[ia]), "deg": round(deg), "radius_m": round(rmin)})
-            # ONE CONTINUOUS CHANGE OF DIRECTION IS ONE TURN: same-direction segments whose spans nearly touch are
-            # a double-apex / compound corner that a momentary curvature dip split in two. Merge on SPAN
-            # adjacency, not apex distance — a compound corner's apexes sit ~90 m apart while its halves are
-            # metres apart. 60 m is measured, not guessed: real compound halves here sit 36 m apart and genuinely
-            # separate same-direction corners sit 148 m apart, so the threshold lands in an empty band.
-            # NEVER MERGE ACROSS A STRAIGHT. Distance alone is the wrong test, and the metric that chose it was
-            # biased: cross-lap agreement REWARDS merging (fewer, larger turns are trivially more consistent, and
-            # merging the whole course into one turn would score 100%), so tuning the gap on agreement drove it
-            # to 60 m and swallowed real corners. Two corners separated by actual straight road are two corners
-            # however close they sit. Measured cost of getting this wrong: G1 became 173 deg over 236 m with a
-            # 965 m-radius straight inside it, G7 244 deg over 260 m around an 849 m straight -- five distinct
-            # curvature peaks each, one marker, and the merged apex landing between the real corners.
-            STRAIGHT_R = 300.0                      # radius above which the road is not turning
-            adj = max(1, int(60.0 / step)); mg = []
-            for t_ in out:
-                gap_k = [abs(x) for x in K[max(0, mg[-1]["i1"] - 1):max(0, t_["i0"] - 1)]] if mg else []
-                straight = bool(gap_k) and (1.0 / max(1e-6, min(gap_k)) > STRAIGHT_R)   # touching segments: nothing between them, so merge
-                if mg and t_["sgn"] == mg[-1]["sgn"] and (t_["i0"] - mg[-1]["i1"]) <= adj and not straight:
-                    m_ = mg[-1]; m_["i1"] = max(m_["i1"], t_["i1"]); m_["deg"] = m_["deg"] + t_["deg"]
-                    if t_["k"] > m_["k"]: m_["k"] = t_["k"]; m_["ia"] = t_["ia"]; m_["radius_m"] = t_["radius_m"]
-                else: mg.append(dict(t_))
-            # WHERE a turn IS = where its direction change is CONCENTRATED, not the single tightest sample. The
-            # argmax of a smoothed derivative wanders with the racing line, so the same corner reported apexes
-            # tens of metres apart from lap to lap; the curvature-weighted centroid is a property of the road.
-            for t_ in mg:
-                sl = [abs(x) for x in K[max(0, t_["i0"] - 1):max(0, t_["i1"] - 1)]]
-                tot = sum(sl)
-                if tot:
-                    t_["ia"] = min(len(P) - 1, max(0, int(round(t_["i0"] + sum(q * w for q, w in enumerate(sl)) / tot))))
-            return mg
         geo = None; lat_acc = None
         # a "lap" for GEOMETRY must be a lap: the 15 s rule admits aborted stubs (Edamame stored 48 lap paths,
         # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns.

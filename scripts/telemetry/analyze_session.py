@@ -1202,6 +1202,31 @@ def main():
         if rs[-1]["t"] - rs[0]["t"] < 5: continue
         start = next((q for q in rs if q["DistanceTraveled"] >= 0), rs[0])
         sx, sz = start["PosX"], start["PosZ"]; ex, ez = rs[-1]["PosX"], rs[-1]["PosZ"]
+        # KEY THE ROUTE BY ITS START/FINISH LINE, NOT BY WHERE THE CAPTURE WINDOW OPENED.
+        # rs[0] is wherever telemetry happened to start this event — after a reset, mid-drive to the grid, or
+        # part-way round. On a short circuit that is close enough to the line to round into the same 50 m cell;
+        # on a long one it is not, and every attempt keys somewhere different and mints its OWN course. That is
+        # how three completed Colossus laps (372.00 / 374.39 / 382.09 s) became five loose A-to-B fragments —
+        # -2650_-5300, -6350_-750, -6800_-1250, -1300_1600 and a -3750_300_32 — instead of one route.
+        #
+        # The line itself is observable: CurrentLap counts up and drops to ~0 for one packet as you cross it. So
+        # when this event contains a completed lap, the crossing point IS the course's start/finish, and it is
+        # the same place on every attempt. Measured on that session: crossings at [-3773,304] and [-3775,307],
+        # 3 m apart, both of which round to the one key. Where no lap completed there is no line to find and the
+        # window start stands, as before.
+        _prev_cl = None
+        for q in rs:
+            _cl = q.get("CurrentLap")
+            if _cl is None: break
+            if _prev_cl is not None and _prev_cl > 30.0 and _cl < 1.0:
+                # move the WHOLE anchor, not just the coordinates: the heading below is measured 100 m along from
+                # `start`, so leaving `start` at the window opening while sx/sz jumped to the line made the heading
+                # vector span two unrelated points. A garbage heading fails attribute_route's direction gate, and
+                # the route it should have matched gets minted again under a _NN suffix — the exact duplication
+                # this change exists to stop.
+                start = q; sx, sz = q["PosX"], q["PosZ"]   # the finish line: a property of the course, not the capture
+                break
+            _prev_cl = _cl
         dvals = [q["DistanceTraveled"] for q in rs]; dist = max(dvals) - max(0.0, min(dvals)); laps = max(q["LapNumber"] for q in rs)   # odometer may be cumulative — length = what THIS event covered
         pos = [q["RacePosition"] for q in rs if q["RacePosition"] > 0]
         # MODE is INFERRED, never read: the 324-byte Data Out packet carries no game-mode field (verified —

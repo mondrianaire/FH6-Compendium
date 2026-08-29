@@ -1345,7 +1345,20 @@ def main():
         hx, hz = h0["PosX"], h0["PosZ"]
         h_row = next((q for q in rs if q["DistanceTraveled"] >= h0["DistanceTraveled"] + 100), rs[-1])
         hv = (h_row["PosX"] - hx, h_row["PosZ"] - hz); hn = math.hypot(*hv); hdg = [round(hv[0] / hn, 3), round(hv[1] / hn, 3)] if hn > 1 else None
-        sample = [(q["PosX"], q["PosZ"]) for q in rs[::max(1, len(rs) // 200)]]
+        # SAMPLE BY DISTANCE, NOT BY COUNT. This took 200 points however long the event was — 5 m apart on a 1 km
+        # circuit, but 220 m apart on a 44 km one. The overlap test that decides route identity buckets points on
+        # a 40 m grid, so at 220 m spacing a long event registers on almost none of a known route's cells: it can
+        # never match, and mints a fresh key EVERY analysis. That is the six identical -6800_-1100* routes —
+        # same start to the metre, same heading to three decimals, differing only in the length they recorded.
+        # Short courses were unaffected, which is why this survived: the bug needed a road long enough to expose it.
+        _sstep = 25.0
+        sample = []
+        for q in rs:
+            _pt = (q["PosX"], q["PosZ"])
+            if not sample or math.hypot(_pt[0] - sample[-1][0], _pt[1] - sample[-1][1]) >= _sstep:
+                sample.append(_pt)
+            if len(sample) >= 4000:      # a hard ceiling so a pathological event cannot make matching quadratic
+                break
         key = attribute_route(sx, sz, hdg, dist, sample)
         if key is None:
             key = f"{int(round(sx / 50) * 50)}_{int(round(sz / 50) * 50)}"

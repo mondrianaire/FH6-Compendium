@@ -5,597 +5,13 @@
   {
    "id": "T1",
    "pos": [
-    -3096,
-    1048
-   ],
-   "dir": "R",
-   "type": "hairpin",
-   "radius_m": 7,
-   "n": 1,
-   "best": {
-    "mph_in": 44,
-    "mph_min": 13,
-    "mph_out": 14,
-    "brake_on_m": -8,
-    "throttle_on_m": null,
-    "lat_g": 1.37,
-    "apex": [
-     -3096,
-     1048
-    ],
-    "t0": 2917.9,
-    "stint": 30,
-    "first_red": "front ph1",
-    "session": "fh6_20260829_023235"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "4160|1|6|800": {
-     "mph_in": 44,
-     "mph_min": 13,
-     "mph_out": 14,
-     "brake_on_m": -8,
-     "throttle_on_m": null,
-     "lat_g": 1.37,
-     "apex": [
-      -3096,
-      1048
-     ],
-     "t0": 2917.9,
-     "stint": 30,
-     "first_red": "front ph1",
-     "session": "fh6_20260829_023235"
-    }
-   },
-   "cars": [
-    "4160|1|6|800"
-   ],
-   "status": "turn",
-   "by_session": {
-    "fh6_20260829_023235": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 2,
-     "fr": {
-      "front": 1,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 13,
-     "usi": 0.77,
-     "cars": [
-      "4160|1|6|800"
-     ]
-    }
-   },
-   "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
-    "fr": {
-     "front": 1,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {
-     "tune": 1
-    },
-    "dominant": "front",
-    "consistency": 1.0,
-    "cars": [
-     "4160|1|6|800"
-    ],
-    "laps_track": 2,
-    "presence": 0.5
-   },
-   "geo_sessions": 1,
-   "geo_mapped": true,
-   "deg": 194,
-   "established": true,
-   "est_by": "geometry"
-  },
-  {
-   "id": "T2",
-   "pos": [
-    -3130,
-    968
-   ],
-   "dir": "R",
-   "type": "fast",
-   "radius_m": 136,
-   "n": 1,
-   "best": {
-    "mph_in": 143,
-    "mph_min": 102,
-    "mph_out": 102,
-    "brake_on_m": -17,
-    "throttle_on_m": null,
-    "lat_g": 2.44,
-    "apex": [
-     -3130,
-     968
-    ],
-    "t0": 2915.6,
-    "stint": 30,
-    "first_red": "front ph1",
-    "session": "fh6_20260829_023235"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "4160|1|6|800": {
-     "mph_in": 143,
-     "mph_min": 102,
-     "mph_out": 102,
-     "brake_on_m": -17,
-     "throttle_on_m": null,
-     "lat_g": 2.44,
-     "apex": [
-      -3130,
-      968
-     ],
-     "t0": 2915.6,
-     "stint": 30,
-     "first_red": "front ph1",
-     "session": "fh6_20260829_023235"
-    }
-   },
-   "cars": [
-    "4160|1|6|800"
-   ],
-   "status": "possible",
-   "by_session": {
-    "fh6_20260829_023235": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 2,
-     "fr": {
-      "front": 1,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 102,
-     "usi": 0.392,
-     "cars": [
-      "4160|1|6|800"
-     ]
-    }
-   },
-   "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
-    "fr": {
-     "front": 1,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {
-     "tune": 1
-    },
-    "dominant": "front",
-    "consistency": 1.0,
-    "cars": [
-     "4160|1|6|800"
-    ],
-    "laps_track": 2,
-    "presence": 0.5
-   },
-   "established": false,
-   "est_by": null
-  },
-  {
-   "id": "T3",
-   "pos": [
-    -3163,
-    772
-   ],
-   "dir": "R",
-   "type": "fast",
-   "radius_m": 772,
-   "n": 1,
-   "best": {
-    "mph_in": 185,
-    "mph_min": 185,
-    "mph_out": 197,
-    "brake_on_m": null,
-    "throttle_on_m": 1,
-    "lat_g": 0.91,
-    "apex": [
-     -3163,
-     772
-    ],
-    "t0": 2913.3,
-    "stint": 30,
-    "first_red": "rear ph1",
-    "session": "fh6_20260829_023235"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "4160|1|6|800": {
-     "mph_in": 185,
-     "mph_min": 185,
-     "mph_out": 197,
-     "brake_on_m": null,
-     "throttle_on_m": 1,
-     "lat_g": 0.91,
-     "apex": [
-      -3163,
-      772
-     ],
-     "t0": 2913.3,
-     "stint": 30,
-     "first_red": "rear ph1",
-     "session": "fh6_20260829_023235"
-    }
-   },
-   "cars": [
-    "4160|1|6|800"
-   ],
-   "status": "possible",
-   "by_session": {
-    "fh6_20260829_023235": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 2,
-     "fr": {
-      "front": 0,
-      "rear": 1,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 185,
-     "usi": 0.034,
-     "cars": [
-      "4160|1|6|800"
-     ]
-    }
-   },
-   "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
-    "fr": {
-     "front": 0,
-     "rear": 1,
-     "none": 0
-    },
-    "lim": {
-     "tune": 1
-    },
-    "dominant": "rear",
-    "consistency": 1.0,
-    "cars": [
-     "4160|1|6|800"
-    ],
-    "laps_track": 2,
-    "presence": 0.5
-   },
-   "established": false,
-   "est_by": null
-  },
-  {
-   "id": "T4",
-   "pos": [
-    -3283,
-    496
-   ],
-   "dir": "L",
-   "type": null,
-   "radius_m": 209,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
-   "track": {},
-   "geo_sessions": 1,
-   "geo_mapped": true,
-   "deg": 19,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn"
-  },
-  {
-   "id": "T5",
-   "pos": [
-    -3209,
-    562
-   ],
-   "dir": "L",
-   "type": null,
-   "radius_m": 158,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
-   "track": {},
-   "geo_sessions": 1,
-   "geo_mapped": true,
-   "deg": 15,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn"
-  },
-  {
-   "id": "T6",
-   "pos": [
-    -3197,
-    583
-   ],
-   "dir": "L",
-   "type": null,
-   "radius_m": 161,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
-   "track": {},
-   "geo_sessions": 0,
-   "geo_mapped": true,
-   "deg": 42,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn"
-  },
-  {
-   "id": "T7",
-   "pos": [
-    -3173,
-    667
-   ],
-   "dir": "L",
-   "type": null,
-   "radius_m": 232,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
-   "track": {},
-   "geo_sessions": 1,
-   "geo_mapped": true,
-   "deg": 19,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn"
-  },
-  {
-   "id": "T8",
-   "pos": [
-    -3262,
-    507
-   ],
-   "dir": "R",
-   "type": null,
-   "radius_m": 219,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
-   "track": {},
-   "geo_sessions": 1,
-   "geo_mapped": true,
-   "deg": 18,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn"
-  },
-  {
-   "id": "T9",
-   "pos": [
-    -3608,
-    375
-   ],
-   "dir": "R",
-   "type": "medium",
-   "radius_m": 49,
-   "n": 1,
-   "best": {
-    "mph_in": 48,
-    "mph_min": 48,
-    "mph_out": 59,
-    "brake_on_m": null,
-    "throttle_on_m": 1,
-    "lat_g": 1.07,
-    "apex": [
-     -3608,
-     375
-    ],
-    "t0": 2901.4,
-    "stint": 30,
-    "first_red": "front ph1",
-    "session": "fh6_20260829_023235"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "4160|1|6|800": {
-     "mph_in": 48,
-     "mph_min": 48,
-     "mph_out": 59,
-     "brake_on_m": null,
-     "throttle_on_m": 1,
-     "lat_g": 1.07,
-     "apex": [
-      -3608,
-      375
-     ],
-     "t0": 2901.4,
-     "stint": 30,
-     "first_red": "front ph1",
-     "session": "fh6_20260829_023235"
-    }
-   },
-   "cars": [
-    "4160|1|6|800"
-   ],
-   "status": "possible",
-   "by_session": {
-    "fh6_20260829_023235": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 2,
-     "fr": {
-      "front": 1,
-      "rear": 0,
-      "none": 0
-     },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 48,
-     "usi": -0.292,
-     "cars": [
-      "4160|1|6|800"
-     ]
-    }
-   },
-   "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
-    "fr": {
-     "front": 1,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {
-     "tune": 1
-    },
-    "dominant": "front",
-    "consistency": 1.0,
-    "cars": [
-     "4160|1|6|800"
-    ],
-    "laps_track": 2,
-    "presence": 0.5
-   },
-   "established": false,
-   "est_by": null
-  },
-  {
-   "id": "T10",
-   "pos": [
-    -4383,
-    85
-   ],
-   "dir": "R",
-   "type": "fast",
-   "radius_m": 547,
-   "n": 1,
-   "best": {
-    "mph_in": 251,
-    "mph_min": 251,
-    "mph_out": 255,
-    "brake_on_m": null,
-    "throttle_on_m": -16,
-    "lat_g": 2.4,
-    "apex": [
-     -4383,
-     85
-    ],
-    "t0": 2947.7,
-    "stint": 30,
-    "first_red": null,
-    "session": "fh6_20260829_023235"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "4160|1|6|800": {
-     "mph_in": 251,
-     "mph_min": 251,
-     "mph_out": 255,
-     "brake_on_m": null,
-     "throttle_on_m": -16,
-     "lat_g": 2.4,
-     "apex": [
-      -4383,
-      85
-     ],
-     "t0": 2947.7,
-     "stint": 30,
-     "first_red": null,
-     "session": "fh6_20260829_023235"
-    }
-   },
-   "cars": [
-    "4160|1|6|800"
-   ],
-   "status": "possible",
-   "by_session": {
-    "fh6_20260829_023235": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 2,
-     "fr": {
-      "front": 0,
-      "rear": 0,
-      "none": 1
-     },
-     "lim": "clean",
-     "multi": 0.0,
-     "mph_min": 251,
-     "usi": 0.084,
-     "cars": [
-      "4160|1|6|800"
-     ]
-    }
-   },
-   "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
-    "fr": {
-     "front": 0,
-     "rear": 0,
-     "none": 1
-    },
-    "lim": {
-     "clean": 1
-    },
-    "dominant": "none",
-    "consistency": 1.0,
-    "cars": [
-     "4160|1|6|800"
-    ],
-    "laps_track": 2,
-    "presence": 0.5
-   },
-   "established": false,
-   "est_by": null
-  },
-  {
-   "id": "T11",
-   "pos": [
-    -6792,
-    -1054
-   ],
-   "dir": "L",
-   "type": null,
-   "radius_m": 375,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
-   "track": {},
-   "geo_sessions": 1,
-   "geo_mapped": true,
-   "deg": 57,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn"
-  },
-  {
-   "id": "T12",
-   "pos": [
     -5713,
     -4507
    ],
    "dir": "L",
    "type": "fast",
    "radius_m": 560,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 270,
     "mph_min": 270,
@@ -639,7 +55,7 @@
     "fh6_20260829_023235": {
      "n": 1,
      "laps_seen": 1,
-     "laps": 2,
+     "laps": 4,
      "fr": {
       "front": 1,
       "rear": 0,
@@ -671,14 +87,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 2,
-    "presence": 0.5
+    "laps_track": 4,
+    "presence": 0.25
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T13",
+   "id": "T2",
    "pos": [
     -5644,
     -4708
@@ -686,7 +102,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 631,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 270,
     "mph_min": 270,
@@ -730,7 +146,7 @@
     "fh6_20260829_023235": {
      "n": 1,
      "laps_seen": 1,
-     "laps": 2,
+     "laps": 4,
      "fr": {
       "front": 0,
       "rear": 0,
@@ -762,14 +178,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 2,
-    "presence": 0.5
+    "laps_track": 4,
+    "presence": 0.25
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T14",
+   "id": "T3",
    "pos": [
     -5581,
     -4833
@@ -777,7 +193,7 @@
    "dir": "L",
    "type": "fast",
    "radius_m": 596,
-   "n": 1,
+   "n": 2,
    "best": {
     "mph_in": 270,
     "mph_min": 269,
@@ -821,7 +237,7 @@
     "fh6_20260829_023235": {
      "n": 1,
      "laps_seen": 1,
-     "laps": 2,
+     "laps": 4,
      "fr": {
       "front": 0,
       "rear": 0,
@@ -853,29 +269,996 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 2,
-    "presence": 0.5
+    "laps_track": 4,
+    "presence": 0.25
    },
    "established": false,
    "est_by": null
+  },
+  {
+   "id": "T4",
+   "pos": [
+    -3608,
+    375
+   ],
+   "dir": "R",
+   "type": "medium",
+   "radius_m": 49,
+   "n": 2,
+   "best": {
+    "mph_in": 48,
+    "mph_min": 48,
+    "mph_out": 59,
+    "brake_on_m": null,
+    "throttle_on_m": 1,
+    "lat_g": 1.07,
+    "apex": [
+     -3608,
+     375
+    ],
+    "t0": 2901.4,
+    "stint": 30,
+    "first_red": "front ph1",
+    "session": "fh6_20260829_023235"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 48,
+     "mph_min": 48,
+     "mph_out": 59,
+     "brake_on_m": null,
+     "throttle_on_m": 1,
+     "lat_g": 1.07,
+     "apex": [
+      -3608,
+      375
+     ],
+     "t0": 2901.4,
+     "stint": 30,
+     "first_red": "front ph1",
+     "session": "fh6_20260829_023235"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260829_023235": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 4,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 48,
+     "usi": -0.292,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 4,
+    "presence": 0.25
+   },
+   "established": false,
+   "est_by": null
+  },
+  {
+   "id": "T5",
+   "pos": [
+    -3304,
+    484
+   ],
+   "dir": "L",
+   "type": null,
+   "radius_m": 244,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "deg": 16,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 40.0,
+    "med_samples": 5,
+    "med_step_m": 16.0,
+    "min_mph": 145,
+    "ratio": 0.53,
+    "a_long_min": 0.24,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T6",
+   "pos": [
+    -3283,
+    496
+   ],
+   "dir": "R",
+   "type": null,
+   "radius_m": 209,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "deg": 20,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 40.0,
+    "med_samples": 5,
+    "med_step_m": 16.0,
+    "min_mph": 145,
+    "ratio": 0.53,
+    "a_long_min": 0.24,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T7",
+   "pos": [
+    -3209,
+    562
+   ],
+   "dir": "R",
+   "type": null,
+   "radius_m": 158,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "deg": 13,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 12.0,
+    "med_samples": 5,
+    "med_step_m": 4.2,
+    "min_mph": 162,
+    "ratio": 0.6,
+    "a_long_min": -0.18,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T8",
+   "pos": [
+    -3197,
+    583
+   ],
+   "dir": "R",
+   "type": null,
+   "radius_m": 161,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "deg": 44,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 12.0,
+    "med_samples": 6,
+    "med_step_m": 4.2,
+    "min_mph": 162,
+    "ratio": 0.6,
+    "a_long_min": -0.18,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T9",
+   "pos": [
+    -3173,
+    667
+   ],
+   "dir": "L",
+   "type": null,
+   "radius_m": 232,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 4,
+    "presence": 0.0
+   },
+   "deg": 10,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 40.0,
+    "med_samples": 5,
+    "med_step_m": 16.2,
+    "min_mph": 168,
+    "ratio": 0.62,
+    "a_long_min": 0.09,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T10",
+   "pos": [
+    -3163,
+    772
+   ],
+   "dir": "R",
+   "type": "fast",
+   "radius_m": 772,
+   "n": 2,
+   "best": {
+    "mph_in": 185,
+    "mph_min": 185,
+    "mph_out": 197,
+    "brake_on_m": null,
+    "throttle_on_m": 1,
+    "lat_g": 0.91,
+    "apex": [
+     -3163,
+     772
+    ],
+    "t0": 2913.3,
+    "stint": 30,
+    "first_red": "rear ph1",
+    "session": "fh6_20260829_023235"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 185,
+     "mph_min": 185,
+     "mph_out": 197,
+     "brake_on_m": null,
+     "throttle_on_m": 1,
+     "lat_g": 0.91,
+     "apex": [
+      -3163,
+      772
+     ],
+     "t0": 2913.3,
+     "stint": 30,
+     "first_red": "rear ph1",
+     "session": "fh6_20260829_023235"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260829_023235": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 4,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 185,
+     "usi": 0.034,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 0,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "rear",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 4,
+    "presence": 0.25
+   },
+   "established": false,
+   "est_by": null
+  },
+  {
+   "id": "T11",
+   "pos": [
+    -3096,
+    1048
+   ],
+   "dir": "R",
+   "type": "hairpin",
+   "radius_m": 7,
+   "n": 2,
+   "best": {
+    "mph_in": 44,
+    "mph_min": 13,
+    "mph_out": 14,
+    "brake_on_m": -8,
+    "throttle_on_m": null,
+    "lat_g": 1.37,
+    "apex": [
+     -3096,
+     1048
+    ],
+    "t0": 2917.9,
+    "stint": 30,
+    "first_red": "front ph1",
+    "session": "fh6_20260829_023235"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 44,
+     "mph_min": 13,
+     "mph_out": 14,
+     "brake_on_m": -8,
+     "throttle_on_m": null,
+     "lat_g": 1.37,
+     "apex": [
+      -3096,
+      1048
+     ],
+     "t0": 2917.9,
+     "stint": 30,
+     "first_red": "front ph1",
+     "session": "fh6_20260829_023235"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260829_023235": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 4,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 13,
+     "usi": 0.77,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 4,
+    "presence": 0.25
+   },
+   "deg": 194,
+   "established": true,
+   "est_by": "geometry",
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "traced": {
+    "n_passes": 0,
+    "n_laps_traced": 4,
+    "half_m": 30.0,
+    "med_samples": 0,
+    "reached": true,
+    "verdict": "driven past, but no window resolves it"
+   }
+  },
+  {
+   "id": "T12",
+   "pos": [
+    -3130,
+    968
+   ],
+   "dir": "R",
+   "type": "fast",
+   "radius_m": 136,
+   "n": 2,
+   "best": {
+    "mph_in": 143,
+    "mph_min": 102,
+    "mph_out": 102,
+    "brake_on_m": -17,
+    "throttle_on_m": null,
+    "lat_g": 2.44,
+    "apex": [
+     -3130,
+     968
+    ],
+    "t0": 2915.6,
+    "stint": 30,
+    "first_red": "front ph1",
+    "session": "fh6_20260829_023235"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 143,
+     "mph_min": 102,
+     "mph_out": 102,
+     "brake_on_m": -17,
+     "throttle_on_m": null,
+     "lat_g": 2.44,
+     "apex": [
+      -3130,
+      968
+     ],
+     "t0": 2915.6,
+     "stint": 30,
+     "first_red": "front ph1",
+     "session": "fh6_20260829_023235"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260829_023235": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 4,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 102,
+     "usi": 0.392,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 4,
+    "presence": 0.25
+   },
+   "established": false,
+   "est_by": null
+  },
+  {
+   "id": "T13",
+   "pos": [
+    -3176,
+    647
+   ],
+   "dir": "R",
+   "type": null,
+   "radius_m": 251,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "deg": 10,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 40.0,
+    "med_samples": 5,
+    "med_step_m": 16.2,
+    "min_mph": 168,
+    "ratio": 0.62,
+    "a_long_min": 0.09,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T14",
+   "pos": [
+    -3194,
+    556
+   ],
+   "dir": "L",
+   "type": "fast",
+   "radius_m": 119,
+   "n": 2,
+   "best": {
+    "mph_in": 123,
+    "mph_min": 123,
+    "mph_out": 134,
+    "brake_on_m": null,
+    "throttle_on_m": -8,
+    "lat_g": 2.9,
+    "apex": [
+     -3197,
+     571
+    ],
+    "t0": 2835.0,
+    "stint": 27,
+    "first_red": "front ph3",
+    "session": "fh6_20260829_023235"
+   },
+   "sessions": 1,
+   "by_session": {
+    "fh6_20260829_023235": {
+     "n": 2,
+     "laps_seen": 1,
+     "laps": 4,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 1.0,
+     "mph_min": 123,
+     "usi": 0.23,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 2,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 2,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 4,
+    "presence": 0.25
+   },
+   "deg": 15,
+   "established": false,
+   "est_by": null,
+   "status": "possible",
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 123,
+     "mph_min": 123,
+     "mph_out": 134,
+     "brake_on_m": null,
+     "throttle_on_m": -8,
+     "lat_g": 2.9,
+     "apex": [
+      -3197,
+      571
+     ],
+     "t0": 2835.0,
+     "stint": 27,
+     "first_red": "front ph3",
+     "session": "fh6_20260829_023235"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 12.0,
+    "med_samples": 5,
+    "med_step_m": 4.2,
+    "min_mph": 162,
+    "ratio": 0.6,
+    "a_long_min": -0.18,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T15",
+   "pos": [
+    -3258,
+    512
+   ],
+   "dir": "R",
+   "type": "fast",
+   "radius_m": 161,
+   "n": 1,
+   "best": {
+    "mph_in": 136,
+    "mph_min": 136,
+    "mph_out": 144,
+    "brake_on_m": null,
+    "throttle_on_m": -4,
+    "lat_g": 2.43,
+    "apex": [
+     -3258,
+     512
+    ],
+    "t0": 2836.9,
+    "stint": 27,
+    "first_red": "rear ph1",
+    "session": "fh6_20260829_023235"
+   },
+   "sessions": 1,
+   "by_session": {
+    "fh6_20260829_023235": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 4,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 136,
+     "usi": -0.469,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 0,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "rear",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 4,
+    "presence": 0.25
+   },
+   "deg": 19,
+   "established": false,
+   "est_by": null,
+   "status": "possible",
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 136,
+     "mph_min": 136,
+     "mph_out": 144,
+     "brake_on_m": null,
+     "throttle_on_m": -4,
+     "lat_g": 2.43,
+     "apex": [
+      -3258,
+      512
+     ],
+     "t0": 2836.9,
+     "stint": 27,
+     "first_red": "rear ph1",
+     "session": "fh6_20260829_023235"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "traced": {
+    "n_passes": 0,
+    "n_laps_traced": 4,
+    "half_m": 38.0,
+    "med_samples": 0,
+    "reached": true,
+    "verdict": "driven past, but no window resolves it"
+   }
+  },
+  {
+   "id": "T16",
+   "pos": [
+    -4370,
+    86
+   ],
+   "dir": "R",
+   "type": "fast",
+   "radius_m": 547,
+   "n": 4,
+   "best": {
+    "mph_in": 251,
+    "mph_min": 251,
+    "mph_out": 255,
+    "brake_on_m": null,
+    "throttle_on_m": -16,
+    "lat_g": 2.4,
+    "apex": [
+     -4383,
+     85
+    ],
+    "t0": 2947.7,
+    "stint": 30,
+    "first_red": null,
+    "session": "fh6_20260829_023235"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 251,
+     "mph_min": 251,
+     "mph_out": 255,
+     "brake_on_m": null,
+     "throttle_on_m": -16,
+     "lat_g": 2.4,
+     "apex": [
+      -4383,
+      85
+     ],
+     "t0": 2947.7,
+     "stint": 30,
+     "first_red": null,
+     "session": "fh6_20260829_023235"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260829_023235": {
+     "n": 3,
+     "laps_seen": 3,
+     "laps": 4,
+     "fr": {
+      "front": 0,
+      "rear": 0,
+      "none": 3
+     },
+     "lim": "clean",
+     "multi": 0.0,
+     "mph_min": 245,
+     "usi": 0.084,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 3,
+    "laps_seen": 3,
+    "sessions": 1,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 3
+    },
+    "lim": {
+     "clean": 1
+    },
+    "dominant": "none",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 4,
+    "presence": 0.75
+   },
+   "established": false,
+   "est_by": null
+  },
+  {
+   "id": "T17",
+   "pos": [
+    -6792,
+    -1054
+   ],
+   "dir": "L",
+   "type": null,
+   "radius_m": 375,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {
+    "passes": 0,
+    "laps_seen": 0,
+    "sessions": 0,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {},
+    "dominant": null,
+    "consistency": null,
+    "cars": [],
+    "laps_track": 4,
+    "presence": 0.0
+   },
+   "deg": 57,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "traced": {
+    "n_passes": 3,
+    "n_laps_traced": 4,
+    "n_builds": 1,
+    "half_m": 216.0,
+    "med_samples": 55,
+    "med_step_m": 4.5,
+    "min_mph": 24,
+    "ratio": 0.09,
+    "a_long_min": -16.47,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
   }
  ],
- "laps": 2,
+ "laps": 4,
  "sessions": [
   "fh6_20260829_023235"
  ],
  "updated": "fh6_20260829_023235",
- "best_laps": {},
+ "best_laps": {
+  "4160|1|6|800": {
+   "best_lap": 370.646,
+   "session": "fh6_20260829_023235",
+   "name": "1989 Nissan S-Cargo (Forza Edition)",
+   "class": "S1",
+   "pi": 800,
+   "drivetrain": "RWD",
+   "build_id": "437e8a31",
+   "hp": 920,
+   "gears": 6
+  }
+ },
  "visits": [
   {
    "session": "fh6_20260829_023235",
-   "laps": 2,
-   "attempts": 1,
+   "laps": 4,
+   "attempts": 2,
    "cars": [
     "4160|1|6|800"
    ],
-   "best_lap": null,
-   "best_car": null
+   "best_lap": 370.646,
+   "best_car": "4160|1|6|800"
   }
  ],
  "cars": {
@@ -4681,9 +5064,9 @@
     496
    ],
    "s": 512,
-   "dir": "L",
+   "dir": "R",
    "radius_m": 209,
-   "deg": 19,
+   "deg": 20,
    "sessions": [
     "fh6_20260829_023235"
    ],
@@ -4695,9 +5078,9 @@
     562
    ],
    "s": 612,
-   "dir": "L",
+   "dir": "R",
    "radius_m": 158,
-   "deg": 15,
+   "deg": 13,
    "sessions": [
     "fh6_20260829_023235"
    ],
@@ -4709,9 +5092,9 @@
     583
    ],
    "s": 636,
-   "dir": "L",
+   "dir": "R",
    "radius_m": 161,
-   "deg": 11,
+   "deg": 9,
    "sessions": [
     "fh6_20260829_023235"
    ],
@@ -4723,9 +5106,9 @@
     667
    ],
    "s": 724,
-   "dir": "L",
+   "dir": "R",
    "radius_m": 232,
-   "deg": 19,
+   "deg": 10,
    "sessions": [
     "fh6_20260829_023235"
    ],
@@ -4737,23 +5120,9 @@
     1042
    ],
    "s": 1128,
-   "dir": "R",
+   "dir": "L",
    "radius_m": 10,
    "deg": 194,
-   "sessions": [
-    "fh6_20260829_023235"
-   ],
-   "model_map": true
-  },
-  "-3262_507": {
-   "pos": [
-    -3262,
-    507
-   ],
-   "s": 1708,
-   "dir": "R",
-   "radius_m": 219,
-   "deg": 18,
    "sessions": [
     "fh6_20260829_023235"
    ],
@@ -4765,7 +5134,7 @@
     -1054
    ],
    "s": 5680,
-   "dir": "L",
+   "dir": "R",
    "radius_m": 375,
    "deg": 57,
    "sessions": [
@@ -4779,41 +5148,71 @@
     582
    ],
    "s": 1604,
-   "dir": "R",
+   "dir": "L",
    "radius_m": 151,
-   "deg": 42,
-   "sessions": [],
+   "deg": 44,
+   "sessions": [
+    "fh6_20260829_023235"
+   ],
+   "model_map": true
+  },
+  "-3176_647": {
+   "pos": [
+    -3176,
+    647
+   ],
+   "s": 704,
+   "dir": "R",
+   "radius_m": 251,
+   "deg": 10,
+   "sessions": [
+    "fh6_20260829_023235"
+   ],
+   "model_map": true
+  },
+  "-3304_484": {
+   "pos": [
+    -3304,
+    484
+   ],
+   "s": 1756,
+   "dir": "L",
+   "radius_m": 244,
+   "deg": 16,
+   "sessions": [
+    "fh6_20260829_023235"
+   ],
    "model_map": true
   }
  },
  "turn_count_delta": null,
- "turn_count": 7,
+ "turn_count": 8,
  "profile": {
   "dims": {
    "low_corner": {
-    "frac": 0.025,
-    "band": "light"
+    "frac": 0.013,
+    "band": "absent"
    },
    "mid_corner": {
-    "frac": 0.021,
-    "band": "light"
+    "frac": 0.015,
+    "band": "absent"
    },
    "fast_corner": {
-    "frac": 0.391,
+    "frac": 0.322,
     "band": "heavy"
    },
    "braking": {
-    "frac": 0.063,
+    "frac": 0.064,
     "band": "light"
    },
    "straight": {
-    "frac": 0.384,
+    "frac": 0.285,
     "band": "heavy"
    },
    "elevation": {
     "frac": null,
     "band": "moderate",
-    "range_m": 63.5
+    "range_m": 368.5
    },
    "launch": {
     "frac": null,
@@ -4824,7 +5223,10 @@
    "fast sweepers",
    "straights / top-end"
   ],
-  "absent": [],
+  "absent": [
+   "low-speed corners",
+   "medium corners"
+  ],
   "gears_used": [
    1,
    2,
@@ -4836,17 +5238,17 @@
   "top_gear_used": 6,
   "max_gear": 6,
   "top_speed": 274,
-  "elevation_range_m": 63.5,
+  "elevation_range_m": 368.5,
   "notes": [],
   "priority": [
    "fast sweepers",
    "straights / top-end",
    "elevation (crests)"
   ],
-  "rough_frac": 0.0,
-  "rough_n": 8
+  "rough_frac": 0.01,
+  "rough_n": 37
  },
- "profile_laps": 2,
+ "profile_laps": 4,
  "profile_session": "fh6_20260829_023235",
  "geometry": {
   "length_m": 5724,
@@ -8691,16 +9093,16 @@
     ],
     "s": 512,
     "radius_m": 209,
-    "dir": "L",
-    "deg": 19,
-    "len_m": 80,
+    "dir": "R",
+    "deg": 20,
+    "len_m": 88,
     "entry": [
      -3311,
      480
     ],
     "exit": [
-     -3245,
-     524
+     -3239,
+     529
     ],
     "speed_ref_lap": 152
    },
@@ -8712,12 +9114,12 @@
     ],
     "s": 612,
     "radius_m": 158,
-    "dir": "L",
-    "deg": 15,
-    "len_m": 64,
+    "dir": "R",
+    "deg": 13,
+    "len_m": 56,
     "entry": [
-     -3245,
-     524
+     -3239,
+     529
     ],
     "exit": [
      -3203,
@@ -8733,33 +9135,54 @@
     ],
     "s": 636,
     "radius_m": 161,
-    "dir": "L",
-    "deg": 11,
-    "len_m": 48,
+    "dir": "R",
+    "deg": 9,
+    "len_m": 40,
     "entry": [
      -3203,
      572
     ],
     "exit": [
-     -3184,
-     616
+     -3187,
+     609
     ],
     "speed_ref_lap": 162
    },
    {
     "id": "G4",
     "apex": [
+     -3176,
+     647
+    ],
+    "s": 704,
+    "radius_m": 251,
+    "dir": "R",
+    "deg": 10,
+    "len_m": 44,
+    "entry": [
+     -3187,
+     609
+    ],
+    "exit": [
+     -3175,
+     651
+    ],
+    "speed_ref_lap": 170
+   },
+   {
+    "id": "G5",
+    "apex": [
      -3173,
      667
     ],
     "s": 724,
     "radius_m": 232,
-    "dir": "L",
-    "deg": 19,
-    "len_m": 80,
+    "dir": "R",
+    "deg": 10,
+    "len_m": 44,
     "entry": [
-     -3184,
-     616
+     -3175,
+     651
     ],
     "exit": [
      -3170,
@@ -8768,14 +9191,14 @@
     "speed_ref_lap": 171
    },
    {
-    "id": "G5",
+    "id": "G6",
     "apex": [
      -3091,
      1042
     ],
     "s": 1128,
     "radius_m": 10,
-    "dir": "R",
+    "dir": "L",
     "deg": 194,
     "len_m": 60,
     "entry": [
@@ -8789,56 +9212,56 @@
     "speed_ref_lap": 13
    },
    {
-    "id": "G6",
+    "id": "G7",
     "apex": [
      -3192,
      582
     ],
     "s": 1604,
     "radius_m": 151,
-    "dir": "R",
-    "deg": 42,
-    "len_m": 180,
+    "dir": "L",
+    "deg": 44,
+    "len_m": 188,
     "entry": [
      -3170,
      655
     ],
     "exit": [
-     -3262,
-     507
+     -3269,
+     503
     ],
     "speed_ref_lap": 153
    },
    {
-    "id": "G7",
+    "id": "G8",
     "apex": [
-     -3262,
-     507
+     -3304,
+     484
     ],
-    "s": 1708,
-    "radius_m": 219,
-    "dir": "R",
-    "deg": 18,
-    "len_m": 76,
+    "s": 1756,
+    "radius_m": 244,
+    "dir": "L",
+    "deg": 16,
+    "len_m": 68,
     "entry": [
-     -3262,
-     507
+     -3269,
+     503
     ],
     "exit": [
      -3331,
      474
     ],
-    "speed_ref_lap": 159
+    "speed_ref_lap": 162
    },
    {
-    "id": "G8",
+    "id": "G9",
     "apex": [
      -6792,
      -1054
     ],
     "s": 5680,
     "radius_m": 375,
-    "dir": "L",
+    "dir": "R",
     "deg": 57,
     "len_m": 432,
     "entry": [
@@ -8852,13 +9275,568 @@
     "speed_ref_lap": 247
    }
   ],
-  "turns_n_laps": 2,
+  "turns_n_laps": 3,
   "session": "fh6_20260829_023235",
   "lap_paths": [
    {
     "session": "fh6_20260829_023235",
     "ev": 0,
     "lap": 1,
+    "pts": [
+     [
+      -3761,
+      314
+     ],
+     [
+      -3724,
+      328
+     ],
+     [
+      -3686,
+      343
+     ],
+     [
+      -3649,
+      357
+     ],
+     [
+      -3611,
+      370
+     ],
+     [
+      -3574,
+      385
+     ],
+     [
+      -3537,
+      399
+     ],
+     [
+      -3499,
+      412
+     ],
+     [
+      -3461,
+      425
+     ],
+     [
+      -3424,
+      439
+     ],
+     [
+      -3386,
+      453
+     ],
+     [
+      -3349,
+      467
+     ],
+     [
+      -3312,
+      483
+     ],
+     [
+      -3276,
+      500
+     ],
+     [
+      -3239,
+      517
+     ],
+     [
+      -3203,
+      534
+     ],
+     [
+      -3175,
+      562
+     ],
+     [
+      -3162,
+      599
+     ],
+     [
+      -3157,
+      639
+     ],
+     [
+      -3150,
+      678
+     ],
+     [
+      -3146,
+      718
+     ],
+     [
+      -3139,
+      757
+     ],
+     [
+      -3132,
+      797
+     ],
+     [
+      -3125,
+      836
+     ],
+     [
+      -3118,
+      876
+     ],
+     [
+      -3128,
+      911
+     ],
+     [
+      -3140,
+      877
+     ],
+     [
+      -3148,
+      838
+     ],
+     [
+      -3153,
+      799
+     ],
+     [
+      -3158,
+      759
+     ],
+     [
+      -3163,
+      719
+     ],
+     [
+      -3168,
+      679
+     ],
+     [
+      -3175,
+      640
+     ],
+     [
+      -3183,
+      601
+     ],
+     [
+      -3200,
+      565
+     ],
+     [
+      -3227,
+      536
+     ],
+     [
+      -3259,
+      511
+     ],
+     [
+      -3293,
+      491
+     ],
+     [
+      -3329,
+      474
+     ],
+     [
+      -3366,
+      457
+     ],
+     [
+      -3403,
+      442
+     ],
+     [
+      -3440,
+      426
+     ],
+     [
+      -3477,
+      413
+     ],
+     [
+      -3515,
+      400
+     ],
+     [
+      -3553,
+      386
+     ],
+     [
+      -3590,
+      372
+     ],
+     [
+      -3628,
+      358
+     ],
+     [
+      -3665,
+      343
+     ],
+     [
+      -3702,
+      329
+     ],
+     [
+      -3740,
+      315
+     ],
+     [
+      -3777,
+      301
+     ],
+     [
+      -3814,
+      286
+     ],
+     [
+      -3851,
+      271
+     ],
+     [
+      -3888,
+      256
+     ],
+     [
+      -3926,
+      241
+     ],
+     [
+      -3963,
+      228
+     ],
+     [
+      -4001,
+      214
+     ],
+     [
+      -4038,
+      200
+     ],
+     [
+      -4076,
+      186
+     ],
+     [
+      -4113,
+      173
+     ],
+     [
+      -4151,
+      159
+     ],
+     [
+      -4188,
+      145
+     ],
+     [
+      -4226,
+      130
+     ],
+     [
+      -4263,
+      116
+     ],
+     [
+      -4301,
+      103
+     ],
+     [
+      -4339,
+      91
+     ],
+     [
+      -4378,
+      82
+     ],
+     [
+      -4417,
+      74
+     ],
+     [
+      -4457,
+      66
+     ],
+     [
+      -4496,
+      60
+     ],
+     [
+      -4536,
+      55
+     ],
+     [
+      -4576,
+      51
+     ],
+     [
+      -4615,
+      49
+     ],
+     [
+      -4655,
+      46
+     ],
+     [
+      -4695,
+      44
+     ],
+     [
+      -4735,
+      42
+     ],
+     [
+      -4775,
+      40
+     ],
+     [
+      -4815,
+      37
+     ],
+     [
+      -4855,
+      35
+     ],
+     [
+      -4895,
+      31
+     ],
+     [
+      -4934,
+      24
+     ],
+     [
+      -4973,
+      12
+     ],
+     [
+      -5010,
+      -2
+     ],
+     [
+      -5045,
+      -21
+     ],
+     [
+      -5079,
+      -42
+     ],
+     [
+      -5110,
+      -67
+     ],
+     [
+      -5140,
+      -94
+     ],
+     [
+      -5170,
+      -120
+     ],
+     [
+      -5201,
+      -146
+     ],
+     [
+      -5232,
+      -171
+     ],
+     [
+      -5262,
+      -197
+     ],
+     [
+      -5293,
+      -223
+     ],
+     [
+      -5324,
+      -248
+     ],
+     [
+      -5355,
+      -274
+     ],
+     [
+      -5385,
+      -299
+     ],
+     [
+      -5416,
+      -325
+     ],
+     [
+      -5447,
+      -351
+     ],
+     [
+      -5477,
+      -377
+     ],
+     [
+      -5507,
+      -403
+     ],
+     [
+      -5537,
+      -429
+     ],
+     [
+      -5568,
+      -455
+     ],
+     [
+      -5598,
+      -481
+     ],
+     [
+      -5628,
+      -507
+     ],
+     [
+      -5659,
+      -533
+     ],
+     [
+      -5691,
+      -557
+     ],
+     [
+      -5725,
+      -578
+     ],
+     [
+      -5760,
+      -597
+     ],
+     [
+      -5798,
+      -612
+     ],
+     [
+      -5836,
+      -624
+     ],
+     [
+      -5874,
+      -634
+     ],
+     [
+      -5913,
+      -642
+     ],
+     [
+      -5953,
+      -649
+     ],
+     [
+      -5992,
+      -658
+     ],
+     [
+      -6031,
+      -666
+     ],
+     [
+      -6070,
+      -676
+     ],
+     [
+      -6109,
+      -685
+     ],
+     [
+      -6148,
+      -694
+     ],
+     [
+      -6187,
+      -703
+     ],
+     [
+      -6226,
+      -712
+     ],
+     [
+      -6265,
+      -721
+     ],
+     [
+      -6304,
+      -729
+     ],
+     [
+      -6343,
+      -738
+     ],
+     [
+      -6382,
+      -747
+     ],
+     [
+      -6421,
+      -756
+     ],
+     [
+      -6460,
+      -766
+     ],
+     [
+      -6498,
+      -776
+     ],
+     [
+      -6536,
+      -789
+     ],
+     [
+      -6572,
+      -807
+     ],
+     [
+      -6606,
+      -827
+     ],
+     [
+      -6638,
+      -851
+     ],
+     [
+      -6668,
+      -878
+     ],
+     [
+      -6696,
+      -907
+     ],
+     [
+      -6721,
+      -938
+     ],
+     [
+      -6744,
+      -970
+     ],
+     [
+      -6765,
+      -1005
+     ],
+     [
+      -6784,
+      -1040
+     ],
+     [
+      -6800,
+      -1076
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260829_023235",
+    "ev": 1,
+    "lap": 2,
     "pts": [
      [
       -3761,
@@ -9436,640 +10414,536 @@
    },
    {
     "session": "fh6_20260829_023235",
-    "ev": 0,
-    "lap": 2,
+    "ev": 1,
+    "lap": 4,
     "pts": [
      [
-      -6797,
-      -1070
+      -3776,
+      307
      ],
      [
-      -6805,
-      -1101
+      -3806,
+      295
      ],
      [
-      -6809,
-      -1133
+      -3836,
+      284
      ],
      [
-      -6811,
-      -1165
+      -3866,
+      272
      ],
      [
-      -6811,
-      -1197
+      -3896,
+      260
      ],
      [
-      -6809,
-      -1229
+      -3925,
+      248
      ],
      [
-      -6807,
-      -1261
+      -3955,
+      235
      ],
      [
-      -6805,
-      -1293
+      -3985,
+      224
      ],
      [
-      -6805,
-      -1325
+      -4015,
+      213
      ],
      [
-      -6805,
-      -1357
+      -4045,
+      202
      ],
      [
-      -6805,
-      -1389
+      -4075,
+      191
      ],
      [
-      -6805,
-      -1421
+      -4105,
+      180
      ],
      [
-      -6805,
-      -1453
+      -4135,
+      168
      ],
      [
-      -6805,
-      -1485
+      -4165,
+      157
      ],
      [
-      -6805,
-      -1517
+      -4195,
+      146
      ],
      [
-      -6805,
-      -1549
+      -4225,
+      135
      ],
      [
-      -6805,
-      -1581
+      -4255,
+      124
      ],
      [
-      -6805,
-      -1613
+      -4285,
+      113
      ],
      [
-      -6805,
-      -1645
+      -4316,
+      104
      ],
      [
-      -6805,
-      -1677
+      -4346,
+      95
      ],
      [
-      -6805,
-      -1709
+      -4377,
+      87
      ],
      [
-      -6804,
-      -1741
+      -4408,
+      80
      ],
      [
-      -6805,
-      -1773
+      -4440,
+      74
      ],
      [
-      -6805,
-      -1805
+      -4471,
+      68
      ],
      [
-      -6805,
-      -1837
+      -4503,
+      63
      ],
      [
-      -6806,
-      -1869
+      -4535,
+      58
      ],
      [
-      -6806,
-      -1901
+      -4566,
+      54
      ],
      [
-      -6807,
-      -1933
+      -4598,
+      51
      ],
      [
-      -6807,
-      -1965
+      -4630,
+      48
      ],
      [
-      -6807,
-      -1997
+      -4662,
+      45
      ],
      [
-      -6806,
-      -2029
+      -4694,
+      44
      ],
      [
-      -6807,
-      -2061
+      -4726,
+      43
      ],
      [
-      -6807,
-      -2093
+      -4758,
+      42
      ],
      [
-      -6807,
-      -2125
+      -4790,
+      41
      ],
      [
-      -6807,
-      -2157
+      -4822,
+      38
      ],
      [
-      -6807,
-      -2189
+      -4853,
+      35
      ],
      [
-      -6807,
-      -2221
+      -4885,
+      31
      ],
      [
-      -6808,
-      -2253
+      -4917,
+      25
      ],
      [
-      -6808,
-      -2285
+      -4948,
+      17
      ],
      [
-      -6808,
-      -2317
+      -4978,
+      7
      ],
      [
-      -6808,
-      -2349
+      -5007,
+      -6
      ],
      [
-      -6808,
-      -2381
+      -5036,
+      -21
      ],
      [
-      -6807,
-      -2413
+      -5063,
+      -38
      ],
      [
-      -6805,
-      -2445
+      -5089,
+      -56
      ],
      [
-      -6800,
-      -2476
+      -5115,
+      -75
      ],
      [
-      -6793,
-      -2507
+      -5139,
+      -95
      ],
      [
-      -6783,
-      -2538
+      -5164,
+      -117
      ],
      [
-      -6773,
-      -2568
+      -5188,
+      -137
      ],
      [
-      -6760,
-      -2598
+      -5212,
+      -158
      ],
      [
-      -6745,
-      -2626
+      -5237,
+      -178
      ],
      [
-      -6729,
-      -2653
+      -5262,
+      -198
      ],
      [
-      -6710,
-      -2679
+      -5287,
+      -218
      ],
      [
-      -6690,
-      -2704
+      -5312,
+      -238
      ],
      [
-      -6668,
-      -2727
+      -5337,
+      -258
      ],
      [
-      -6645,
-      -2749
+      -5362,
+      -278
      ],
      [
-      -6620,
-      -2769
+      -5387,
+      -298
      ],
      [
-      -6595,
-      -2790
+      -5412,
+      -319
      ],
      [
-      -6569,
-      -2809
+      -5436,
+      -339
      ],
      [
-      -6543,
-      -2827
+      -5461,
+      -360
      ],
      [
-      -6517,
-      -2846
+      -5485,
+      -381
      ],
      [
-      -6491,
-      -2864
+      -5509,
+      -402
      ],
      [
-      -6464,
-      -2882
+      -5533,
+      -423
      ],
      [
-      -6438,
-      -2900
+      -5557,
+      -444
      ],
      [
-      -6411,
-      -2917
+      -5581,
+      -465
      ],
      [
-      -6384,
-      -2935
+      -5605,
+      -486
      ],
      [
-      -6358,
-      -2953
+      -5630,
+      -506
      ],
      [
-      -6331,
-      -2970
+      -5655,
+      -527
      ],
      [
-      -6304,
-      -2988
+      -5680,
+      -547
      ],
      [
-      -6277,
-      -3005
-     ],
-     [
-      -6251,
-      -3023
-     ],
-     [
-      -6224,
-      -3041
-     ],
-     [
-      -6197,
-      -3058
-     ],
-     [
-      -6171,
-      -3076
-     ],
-     [
-      -6144,
-      -3094
-     ],
-     [
-      -6117,
-      -3112
-     ],
-     [
-      -6091,
-      -3129
-     ],
-     [
-      -6065,
-      -3148
-     ],
-     [
-      -6039,
-      -3167
-     ],
-     [
-      -6014,
-      -3187
-     ],
-     [
-      -5989,
-      -3207
-     ],
-     [
-      -5965,
-      -3228
-     ],
-     [
-      -5941,
-      -3249
-     ],
-     [
-      -5918,
-      -3272
-     ],
-     [
-      -5897,
-      -3295
-     ],
-     [
-      -5877,
-      -3320
-     ],
-     [
-      -5859,
-      -3347
-     ],
-     [
-      -5843,
-      -3374
-     ],
-     [
-      -5828,
-      -3403
-     ],
-     [
-      -5814,
-      -3432
-     ],
-     [
-      -5803,
-      -3462
-     ],
-     [
-      -5794,
-      -3492
-     ],
-     [
-      -5786,
-      -3523
-     ],
-     [
-      -5780,
-      -3555
-     ],
-     [
-      -5775,
-      -3587
-     ],
-     [
-      -5772,
-      -3618
-     ],
-     [
-      -5770,
-      -3650
-     ],
-     [
-      -5768,
-      -3682
-     ],
-     [
-      -5767,
-      -3714
-     ],
-     [
-      -5767,
-      -3746
-     ],
-     [
-      -5767,
-      -3778
-     ],
-     [
-      -5766,
-      -3810
-     ],
-     [
-      -5766,
-      -3842
-     ],
-     [
-      -5765,
-      -3874
-     ],
-     [
-      -5764,
-      -3906
-     ],
-     [
-      -5764,
-      -3938
-     ],
-     [
-      -5763,
-      -3970
-     ],
-     [
-      -5762,
-      -4002
-     ],
-     [
-      -5761,
-      -4034
-     ],
-     [
-      -5761,
-      -4066
-     ],
-     [
-      -5760,
-      -4098
-     ],
-     [
-      -5759,
-      -4130
-     ],
-     [
-      -5758,
-      -4162
-     ],
-     [
-      -5758,
-      -4194
-     ],
-     [
-      -5756,
-      -4226
-     ],
-     [
-      -5755,
-      -4258
-     ],
-     [
-      -5753,
-      -4290
-     ],
-     [
-      -5748,
-      -4322
-     ],
-     [
-      -5743,
-      -4353
-     ],
-     [
-      -5738,
-      -4385
+      -5706,
+      -565
      ],
      [
       -5733,
-      -4416
+      -582
      ],
      [
-      -5727,
-      -4448
+      -5762,
+      -597
      ],
      [
-      -5720,
-      -4479
+      -5791,
+      -609
      ],
      [
-      -5712,
-      -4510
+      -5821,
+      -619
      ],
      [
-      -5703,
-      -4541
+      -5852,
+      -628
      ],
      [
-      -5693,
-      -4571
+      -5883,
+      -636
      ],
      [
-      -5683,
-      -4602
+      -5914,
+      -643
      ],
      [
-      -5673,
-      -4632
+      -5946,
+      -649
      ],
      [
-      -5662,
-      -4662
+      -5977,
+      -655
      ],
      [
-      -5651,
-      -4692
+      -6008,
+      -662
      ],
      [
-      -5638,
-      -4721
+      -6040,
+      -669
      ],
      [
-      -5624,
-      -4750
+      -6071,
+      -676
      ],
      [
-      -5610,
-      -4779
+      -6102,
+      -684
      ],
      [
-      -5595,
-      -4807
+      -6133,
+      -691
      ],
      [
-      -5579,
-      -4835
+      -6164,
+      -699
      ],
      [
-      -5562,
-      -4862
+      -6195,
+      -706
      ],
      [
-      -5545,
-      -4889
+      -6227,
+      -713
      ],
      [
-      -5526,
-      -4915
+      -6258,
+      -720
      ],
      [
-      -5507,
-      -4941
+      -6289,
+      -726
      ],
      [
-      -5487,
-      -4966
+      -6320,
+      -733
      ],
      [
-      -5467,
-      -4991
+      -6352,
+      -740
      ],
      [
-      -5448,
-      -5016
+      -6383,
+      -747
      ],
      [
-      -5428,
-      -5041
+      -6414,
+      -754
      ],
      [
-      -5408,
-      -5066
+      -6445,
+      -762
      ],
      [
-      -5388,
-      -5091
+      -6476,
+      -770
      ],
      [
-      -5368,
-      -5116
+      -6506,
+      -780
      ],
      [
-      -5348,
-      -5141
+      -6536,
+      -791
      ],
      [
-      -5327,
-      -5165
+      -6566,
+      -804
      ],
      [
-      -5304,
-      -5188
+      -6594,
+      -818
      ],
      [
-      -5281,
-      -5210
+      -6622,
+      -835
      ],
      [
-      -5256,
-      -5230
+      -6647,
+      -854
      ],
      [
-      -5231,
-      -5249
+      -6672,
+      -875
      ],
      [
-      -5204,
-      -5267
+      -6695,
+      -896
      ],
      [
-      -5176,
-      -5282
+      -6717,
+      -920
      ],
      [
-      -5147,
-      -5295
+      -6737,
+      -945
      ],
      [
-      -5117,
-      -5307
+      -6755,
+      -971
      ],
      [
-      -5086,
-      -5316
+      -6771,
+      -999
      ],
      [
-      -5055,
-      -5323
+      -6785,
+      -1028
      ],
      [
-      -5023,
-      -5328
+      -6797,
+      -1057
+     ],
+     [
+      -6806,
+      -1088
+     ],
+     [
+      -6812,
+      -1120
+     ],
+     [
+      -6812,
+      -1152
+     ],
+     [
+      -6809,
+      -1183
+     ],
+     [
+      -6806,
+      -1215
+     ],
+     [
+      -6803,
+      -1247
+     ],
+     [
+      -6802,
+      -1279
+     ],
+     [
+      -6801,
+      -1311
+     ],
+     [
+      -6800,
+      -1343
+     ],
+     [
+      -6801,
+      -1375
+     ],
+     [
+      -6803,
+      -1407
+     ],
+     [
+      -6803,
+      -1439
+     ],
+     [
+      -6804,
+      -1471
+     ],
+     [
+      -6805,
+      -1503
+     ],
+     [
+      -6806,
+      -1535
+     ],
+     [
+      -6806,
+      -1567
+     ],
+     [
+      -6807,
+      -1599
+     ],
+     [
+      -6808,
+      -1631
+     ],
+     [
+      -6808,
+      -1663
+     ],
+     [
+      -6809,
+      -1695
+     ],
+     [
+      -6810,
+      -1727
+     ],
+     [
+      -6811,
+      -1759
+     ],
+     [
+      -6811,
+      -1791
+     ],
+     [
+      -6811,
+      -1823
      ]
     ]
    }
@@ -10077,2856 +10951,2856 @@
   "det": "geo7-tol-from-map",
   "lat_acc": {
    "0": [
-    339.794,
-    339
+    898.586,
+    16185
    ],
    "1": [
-    97.037,
-    168
+    188.835,
+    595
    ],
    "2": [
-    83.042,
-    133
+    273.563,
+    462
    ],
    "3": [
-    129.151,
-    139
+    353.532,
+    442
    ],
    "4": [
-    0.605,
-    71
+    2.444,
+    284
    ],
    "5": [
-    0.491,
-    64
+    1.982,
+    256
    ],
    "6": [
-    0.502,
-    57
+    1.755,
+    224
    ],
    "7": [
-    0.392,
-    52
+    1.745,
+    212
    ],
    "8": [
-    0.753,
-    51
+    2.971,
+    202
    ],
    "9": [
-    0.624,
-    47
+    2.501,
+    189
    ],
    "10": [
-    0.369,
-    45
+    1.53,
+    179
    ],
    "11": [
-    0.273,
-    42
+    1.214,
+    169
    ],
    "12": [
-    0.33,
-    42
+    1.295,
+    167
    ],
    "13": [
-    8.802,
-    41
+    18.304,
+    163
    ],
    "14": [
-    6.892,
-    42
+    14.449,
+    166
    ],
    "15": [
-    23.992,
-    41
+    53.694,
+    162
    ],
    "16": [
-    49.315,
-    46
+    109.265,
+    175
    ],
    "17": [
-    51.814,
-    52
+    123.959,
+    189
    ],
    "18": [
-    73.489,
-    59
+    194.256,
+    199
    ],
    "19": [
-    53.169,
-    58
+    163.438,
+    210
    ],
    "20": [
-    39.28,
-    54
+    79.272,
+    150
    ],
    "21": [
-    43.103,
-    51
+    90.03,
+    147
    ],
    "22": [
-    21.06,
-    47
+    76.985,
+    190
    ],
    "23": [
-    5.234,
-    43
+    23.768,
+    181
    ],
    "24": [
-    0.915,
-    41
+    7.059,
+    172
    ],
    "25": [
-    0.302,
-    39
+    2.317,
+    164
    ],
    "26": [
-    0.265,
-    38
+    2.072,
+    160
    ],
    "27": [
-    0.263,
-    36
+    3.039,
+    152
    ],
    "28": [
-    0.4,
-    33
+    3.548,
+    145
    ],
    "29": [
-    0.465,
-    34
+    2.917,
+    145
    ],
    "30": [
-    0.571,
-    31
+    4.829,
+    139
    ],
    "31": [
-    0.939,
-    31
+    5.735,
+    136
    ],
    "32": [
-    0.311,
-    29
+    5.616,
+    131
    ],
    "33": [
-    0.273,
-    29
+    11.907,
+    130
    ],
    "34": [
-    0.236,
-    27
+    15.665,
+    127
    ],
    "35": [
-    0.201,
-    27
+    52.694,
+    128
    ],
    "36": [
-    0.186,
-    26
+    64.76,
+    132
    ],
    "37": [
-    0.167,
-    25
+    98.884,
+    139
    ],
    "38": [
-    0.152,
-    25
+    71.833,
+    140
    ],
    "39": [
-    0.169,
-    25
+    14.715,
+    81
    ],
    "40": [
-    0.131,
-    24
+    14.805,
+    74
    ],
    "239": [
-    0.112,
-    16
+    62.571,
+    113
    ],
    "41": [
-    0.164,
-    21
+    6.703,
+    66
    ],
    "238": [
-    0.154,
-    19
+    21.629,
+    100
    ],
    "42": [
-    0.18,
-    20
+    37.387,
+    83
    ],
    "237": [
-    0.123,
-    15
+    25.768,
+    111
    ],
    "43": [
-    2.228,
-    21
+    15.453,
+    57
    ],
    "44": [
-    12.734,
-    22
+    26.441,
+    60
    ],
    "45": [
-    13.632,
-    22
+    27.494,
+    60
    ],
    "46": [
-    9.383,
-    21
+    19.01,
+    58
    ],
    "47": [
-    4.36,
-    21
+    9.02,
+    58
    ],
    "48": [
-    0.542,
-    21
+    1.284,
+    59
    ],
    "49": [
-    0.147,
-    19
+    0.797,
+    54
    ],
    "50": [
-    0.184,
-    21
+    0.922,
+    59
    ],
    "51": [
-    0.162,
-    19
+    4.652,
+    55
    ],
    "52": [
-    0.287,
-    20
+    12.054,
+    57
    ],
    "53": [
-    0.248,
-    20
+    15.229,
+    57
    ],
    "54": [
-    0.221,
-    18
-   ],
-   "55": [
-    0.159,
-    19
-   ],
-   "56": [
-    0.243,
-    19
-   ],
-   "57": [
-    0.271,
-    18
-   ],
-   "58": [
-    5.744,
-    18
-   ],
-   "59": [
-    17.64,
-    18
-   ],
-   "60": [
-    32.557,
-    17
-   ],
-   "61": [
-    31.105,
-    16
-   ],
-   "219": [
-    40.286,
-    19
-   ],
-   "62": [
-    36.489,
-    17
-   ],
-   "218": [
-    36.765,
-    17
-   ],
-   "63": [
-    40.231,
-    18
-   ],
-   "64": [
-    40.636,
-    18
-   ],
-   "65": [
-    35.209,
-    17
-   ],
-   "66": [
-    24.203,
-    17
-   ],
-   "67": [
-    16.953,
-    17
-   ],
-   "68": [
-    11.164,
-    17
-   ],
-   "69": [
-    8.95,
-    16
-   ],
-   "70": [
-    18.21,
-    16
-   ],
-   "71": [
-    38.997,
-    17
-   ],
-   "72": [
-    41.457,
-    17
-   ],
-   "73": [
-    50.907,
-    16
-   ],
-   "74": [
-    54.829,
-    17
-   ],
-   "75": [
-    49.81,
-    16
-   ],
-   "76": [
-    54.813,
-    16
-   ],
-   "77": [
-    56.799,
-    17
-   ],
-   "78": [
-    45.926,
-    16
-   ],
-   "79": [
-    53.879,
-    17
-   ],
-   "80": [
-    52.029,
-    16
-   ],
-   "81": [
-    47.45,
-    17
-   ],
-   "82": [
-    24.713,
-    16
-   ],
-   "83": [
-    11.33,
-    16
-   ],
-   "84": [
-    21.0,
-    16
-   ],
-   "85": [
-    32.237,
-    16
-   ],
-   "86": [
-    31.303,
-    15
-   ],
-   "87": [
-    40.554,
-    16
-   ],
-   "88": [
-    38.643,
-    15
-   ],
-   "89": [
-    38.234,
-    16
-   ],
-   "90": [
-    40.04,
-    16
-   ],
-   "91": [
-    40.782,
-    16
-   ],
-   "92": [
-    18.042,
-    15
-   ],
-   "93": [
-    10.154,
-    15
-   ],
-   "94": [
-    7.343,
-    16
-   ],
-   "95": [
-    17.245,
-    15
-   ],
-   "96": [
-    12.973,
-    15
-   ],
-   "97": [
-    2.678,
-    15
-   ],
-   "98": [
-    2.914,
-    15
-   ],
-   "99": [
-    2.647,
-    14
-   ],
-   "100": [
-    1.321,
-    15
-   ],
-   "101": [
-    0.417,
-    14
-   ],
-   "102": [
-    0.926,
-    15
-   ],
-   "103": [
-    9.443,
-    14
-   ],
-   "104": [
-    10.483,
-    15
-   ],
-   "105": [
-    10.884,
-    14
-   ],
-   "106": [
-    6.881,
-    14
-   ],
-   "107": [
-    5.992,
-    14
-   ],
-   "108": [
-    4.323,
-    14
-   ],
-   "109": [
-    4.427,
-    13
-   ],
-   "110": [
-    5.288,
-    13
-   ],
-   "111": [
-    10.278,
-    14
-   ],
-   "112": [
-    9.533,
-    14
-   ],
-   "113": [
-    8.703,
-    14
-   ],
-   "114": [
-    5.3,
-    13
-   ],
-   "115": [
-    1.941,
-    14
-   ],
-   "116": [
-    0.343,
-    14
-   ],
-   "117": [
-    0.412,
-    14
-   ],
-   "118": [
-    0.707,
-    14
-   ],
-   "119": [
-    0.872,
-    15
-   ],
-   "120": [
-    1.341,
-    17
-   ],
-   "160": [
-    8.806,
-    32
-   ],
-   "159": [
-    4.808,
-    30
-   ],
-   "121": [
-    2.267,
-    20
-   ],
-   "158": [
-    1.715,
-    26
-   ],
-   "122": [
-    1.708,
-    24
-   ],
-   "157": [
-    4.404,
-    26
-   ],
-   "123": [
-    5.69,
-    25
-   ],
-   "156": [
-    12.772,
-    28
-   ],
-   "124": [
-    8.834,
-    26
-   ],
-   "155": [
-    15.75,
-    31
-   ],
-   "125": [
-    8.659,
-    25
-   ],
-   "154": [
-    10.62,
-    30
-   ],
-   "126": [
-    14.973,
-    29
-   ],
-   "153": [
-    21.67,
-    31
-   ],
-   "127": [
-    25.422,
-    28
-   ],
-   "152": [
-    34.116,
-    32
-   ],
-   "128": [
-    38.373,
-    32
-   ],
-   "151": [
-    31.153,
-    33
-   ],
-   "129": [
-    24.643,
-    32
-   ],
-   "150": [
-    16.633,
-    35
-   ],
-   "130": [
-    16.022,
-    35
-   ],
-   "149": [
-    20.518,
-    39
-   ],
-   "131": [
-    19.899,
-    35
-   ],
-   "148": [
-    17.373,
-    45
-   ],
-   "132": [
-    15.448,
-    37
-   ],
-   "147": [
-    12.874,
-    46
-   ],
-   "133": [
-    5.716,
-    44
-   ],
-   "146": [
-    1.827,
-    52
-   ],
-   "134": [
-    1.565,
-    41
-   ],
-   "135": [
-    22.881,
-    37
-   ],
-   "136": [
-    35.845,
-    42
-   ],
-   "137": [
-    13.237,
+    15.412,
     53
    ],
-   "138": [
-    50.543,
-    72
+   "55": [
+    5.894,
+    56
    ],
-   "139": [
-    136.006,
-    114
+   "56": [
+    0.768,
+    55
    ],
-   "140": [
-    205.326,
-    170
+   "57": [
+    0.898,
+    52
    ],
-   "141": [
-    59.601,
-    213
+   "58": [
+    11.623,
+    41
    ],
-   "142": [
-    27.956,
-    149
+   "59": [
+    35.28,
+    36
    ],
-   "143": [
-    19.707,
-    108
+   "60": [
+    65.114,
+    34
    ],
-   "144": [
-    24.643,
+   "61": [
+    62.21,
+    32
+   ],
+   "219": [
+    88.862,
+    99
+   ],
+   "62": [
+    80.599,
+    64
+   ],
+   "218": [
+    81.407,
+    65
+   ],
+   "63": [
+    110.698,
+    96
+   ],
+   "64": [
+    105.481,
+    99
+   ],
+   "65": [
+    87.801,
+    73
+   ],
+   "66": [
+    65.482,
+    53
+   ],
+   "67": [
+    33.906,
+    34
+   ],
+   "68": [
+    22.328,
+    34
+   ],
+   "69": [
+    17.9,
+    32
+   ],
+   "70": [
+    36.42,
+    32
+   ],
+   "71": [
+    77.994,
+    34
+   ],
+   "72": [
+    82.914,
+    34
+   ],
+   "73": [
+    101.814,
+    32
+   ],
+   "74": [
+    109.658,
+    34
+   ],
+   "75": [
+    99.62,
+    32
+   ],
+   "76": [
+    109.626,
+    32
+   ],
+   "77": [
+    113.598,
+    34
+   ],
+   "78": [
+    91.852,
+    32
+   ],
+   "79": [
+    107.758,
+    34
+   ],
+   "80": [
+    104.058,
+    32
+   ],
+   "81": [
+    94.9,
+    34
+   ],
+   "82": [
+    49.426,
+    32
+   ],
+   "83": [
+    22.66,
+    32
+   ],
+   "84": [
+    42.0,
+    32
+   ],
+   "85": [
+    64.474,
+    32
+   ],
+   "86": [
+    62.606,
+    30
+   ],
+   "87": [
+    81.108,
+    32
+   ],
+   "88": [
+    77.414,
+    32
+   ],
+   "89": [
+    76.491,
+    33
+   ],
+   "90": [
+    80.08,
+    32
+   ],
+   "91": [
+    81.564,
+    32
+   ],
+   "92": [
+    36.084,
+    30
+   ],
+   "93": [
+    20.308,
+    30
+   ],
+   "94": [
+    14.686,
+    32
+   ],
+   "95": [
+    34.49,
+    30
+   ],
+   "96": [
+    25.946,
+    30
+   ],
+   "97": [
+    5.356,
+    30
+   ],
+   "98": [
+    5.828,
+    30
+   ],
+   "99": [
+    5.294,
+    28
+   ],
+   "100": [
+    2.642,
+    30
+   ],
+   "101": [
+    0.834,
+    28
+   ],
+   "102": [
+    1.852,
+    30
+   ],
+   "103": [
+    18.886,
+    28
+   ],
+   "104": [
+    20.966,
+    30
+   ],
+   "105": [
+    21.768,
+    28
+   ],
+   "106": [
+    13.762,
+    28
+   ],
+   "107": [
+    11.984,
+    28
+   ],
+   "108": [
+    8.646,
+    28
+   ],
+   "109": [
+    8.854,
+    26
+   ],
+   "110": [
+    10.576,
+    26
+   ],
+   "111": [
+    20.556,
+    28
+   ],
+   "112": [
+    19.066,
+    28
+   ],
+   "113": [
+    17.406,
+    28
+   ],
+   "114": [
+    10.6,
+    26
+   ],
+   "115": [
+    3.882,
+    28
+   ],
+   "116": [
+    0.686,
+    28
+   ],
+   "117": [
+    0.824,
+    28
+   ],
+   "118": [
+    1.414,
+    28
+   ],
+   "119": [
+    1.744,
+    30
+   ],
+   "120": [
+    2.682,
+    34
+   ],
+   "160": [
+    85.679,
+    198
+   ],
+   "159": [
+    181.86,
+    314
+   ],
+   "121": [
+    4.534,
+    40
+   ],
+   "158": [
+    179.647,
+    223
+   ],
+   "122": [
+    3.416,
+    48
+   ],
+   "157": [
+    8.808,
+    52
+   ],
+   "123": [
+    11.38,
+    50
+   ],
+   "156": [
+    25.544,
+    56
+   ],
+   "124": [
+    17.668,
+    52
+   ],
+   "155": [
+    31.5,
+    62
+   ],
+   "125": [
+    17.318,
+    50
+   ],
+   "154": [
+    21.24,
+    60
+   ],
+   "126": [
+    29.946,
+    58
+   ],
+   "153": [
+    43.34,
+    62
+   ],
+   "127": [
+    50.844,
+    56
+   ],
+   "152": [
+    68.232,
+    64
+   ],
+   "128": [
+    76.746,
+    64
+   ],
+   "151": [
+    62.306,
+    66
+   ],
+   "129": [
+    49.286,
+    64
+   ],
+   "150": [
+    33.266,
+    70
+   ],
+   "130": [
+    32.044,
+    70
+   ],
+   "149": [
+    41.036,
+    78
+   ],
+   "131": [
+    39.798,
+    70
+   ],
+   "148": [
+    34.746,
+    90
+   ],
+   "132": [
+    30.896,
+    74
+   ],
+   "147": [
+    25.748,
+    92
+   ],
+   "133": [
+    11.432,
     88
    ],
+   "146": [
+    3.654,
+    104
+   ],
+   "134": [
+    3.13,
+    82
+   ],
+   "135": [
+    45.762,
+    74
+   ],
+   "136": [
+    71.69,
+    84
+   ],
+   "137": [
+    26.474,
+    106
+   ],
+   "138": [
+    101.086,
+    144
+   ],
+   "139": [
+    272.012,
+    228
+   ],
+   "140": [
+    410.652,
+    340
+   ],
+   "141": [
+    119.202,
+    426
+   ],
+   "142": [
+    55.912,
+    298
+   ],
+   "143": [
+    39.414,
+    216
+   ],
+   "144": [
+    49.286,
+    176
+   ],
    "145": [
-    9.111,
-    72
+    18.222,
+    144
    ],
    "161": [
-    10.693,
-    30
+    76.378,
+    171
    ],
    "162": [
-    9.657,
-    29
+    59.471,
+    153
    ],
    "163": [
-    5.789,
-    30
+    56.881,
+    146
    ],
    "164": [
-    7.33,
-    28
+    55.322,
+    137
    ],
    "165": [
-    6.078,
-    28
+    27.49,
+    126
    ],
    "166": [
-    1.636,
-    27
+    17.242,
+    116
    ],
    "167": [
-    2.74,
-    27
+    12.898,
+    111
    ],
    "168": [
-    3.869,
-    26
+    9.5,
+    104
    ],
    "169": [
-    2.786,
-    25
+    14.869,
+    98
    ],
    "170": [
-    1.334,
-    26
+    13.91,
+    98
    ],
    "171": [
-    0.627,
-    24
+    26.109,
+    91
    ],
    "172": [
-    0.424,
-    25
+    13.869,
+    90
    ],
    "173": [
-    3.841,
-    23
+    11.037,
+    86
    ],
    "174": [
-    4.524,
-    24
+    17.978,
+    92
    ],
    "175": [
-    5.204,
-    23
+    30.7,
+    104
    ],
    "176": [
-    2.212,
-    22
+    12.417,
+    99
    ],
    "177": [
-    0.639,
-    23
+    4.75,
+    100
    ],
    "178": [
-    0.488,
-    22
+    11.344,
+    97
    ],
    "179": [
-    0.445,
-    21
+    20.305,
+    96
    ],
    "180": [
-    0.52,
-    21
+    24.647,
+    94
    ],
    "181": [
-    0.676,
-    21
+    25.752,
+    93
    ],
    "182": [
-    0.667,
-    20
+    24.653,
+    92
    ],
    "183": [
-    0.73,
-    20
+    12.396,
+    89
    ],
    "184": [
-    0.673,
-    20
+    10.634,
+    89
    ],
    "185": [
-    0.434,
-    20
+    10.527,
+    90
    ],
    "186": [
-    0.475,
-    20
+    24.572,
+    91
    ],
    "187": [
-    0.49,
-    19
+    55.364,
+    88
    ],
    "188": [
-    1.615,
-    19
+    48.908,
+    89
    ],
    "189": [
-    13.565,
-    18
+    47.242,
+    87
    ],
    "190": [
-    19.486,
-    19
+    63.414,
+    90
    ],
    "191": [
-    19.366,
-    18
+    73.313,
+    85
    ],
    "192": [
-    8.327,
-    19
+    47.011,
+    88
    ],
    "193": [
-    4.24,
-    18
+    26.748,
+    88
    ],
    "194": [
-    18.252,
-    17
+    68.185,
+    88
    ],
    "195": [
-    24.692,
-    18
+    99.485,
+    91
    ],
    "196": [
-    37.451,
-    18
+    133.972,
+    91
    ],
    "197": [
-    51.636,
-    17
+    156.128,
+    72
    ],
    "198": [
-    50.636,
-    17
+    145.026,
+    55
    ],
    "199": [
-    53.363,
-    18
+    154.19,
+    57
    ],
    "200": [
-    57.301,
-    18
+    170.397,
+    57
    ],
    "201": [
-    48.266,
-    16
+    149.511,
+    53
    ],
    "202": [
-    53.073,
-    18
+    156.66,
+    56
    ],
    "203": [
-    50.918,
-    17
+    158.642,
+    55
    ],
    "204": [
-    50.26,
-    17
+    154.967,
+    55
    ],
    "205": [
-    24.201,
-    17
+    105.571,
+    58
    ],
    "206": [
-    30.06,
-    17
+    127.331,
+    242
    ],
    "207": [
-    29.809,
-    17
+    116.24,
+    219
    ],
    "208": [
-    35.601,
-    17
+    102.298,
+    164
    ],
    "209": [
-    34.736,
-    16
+    76.13,
+    136
    ],
    "210": [
-    46.712,
-    17
+    124.444,
+    131
    ],
    "211": [
-    39.455,
-    17
+    129.983,
+    122
    ],
    "212": [
-    38.826,
-    16
+    121.948,
+    111
    ],
    "213": [
-    40.154,
-    17
+    115.151,
+    105
    ],
    "214": [
-    30.983,
-    17
+    63.081,
+    84
    ],
    "215": [
-    14.967,
-    16
+    30.962,
+    58
    ],
    "216": [
-    31.632,
-    17
+    63.264,
+    34
    ],
    "217": [
-    37.838,
-    16
+    75.676,
+    32
    ],
    "220": [
-    31.007,
-    16
+    80.26,
+    95
    ],
    "221": [
-    32.326,
-    16
+    87.722,
+    94
    ],
    "222": [
-    11.871,
-    15
+    41.1,
+    90
    ],
    "223": [
-    10.121,
-    14
+    34.432,
+    74
    ],
    "224": [
-    19.884,
-    15
+    49.122,
+    80
    ],
    "225": [
-    16.413,
-    16
+    33.659,
+    81
    ],
    "226": [
-    5.277,
-    16
+    13.252,
+    82
    ],
    "227": [
-    10.956,
-    15
+    31.868,
+    82
    ],
    "228": [
-    15.213,
-    15
+    48.656,
+    84
    ],
    "229": [
-    11.769,
-    16
+    41.384,
+    86
    ],
    "230": [
-    2.631,
-    15
+    16.778,
+    87
    ],
    "231": [
-    0.966,
-    15
+    20.086,
+    89
    ],
    "232": [
-    0.907,
-    15
+    10.262,
+    90
    ],
    "233": [
-    0.182,
-    14
+    4.64,
+    92
    ],
    "234": [
-    0.232,
-    15
+    13.118,
+    99
    ],
    "235": [
-    0.295,
-    15
+    20.711,
+    101
    ],
    "236": [
-    0.184,
-    14
+    32.899,
+    105
    ],
    "240": [
-    0.14,
-    14
+    60.451,
+    108
    ],
    "241": [
-    0.136,
-    14
+    16.956,
+    105
    ],
    "242": [
-    0.163,
-    14
+    1.226,
+    42
    ],
    "243": [
-    0.11,
-    13
+    1.33,
+    40
    ],
    "244": [
-    0.125,
-    14
+    1.001,
+    42
    ],
    "245": [
-    0.113,
-    14
+    0.425,
+    42
    ],
    "246": [
-    0.104,
-    13
+    0.355,
+    40
    ],
    "247": [
-    0.11,
-    14
+    0.362,
+    42
    ],
    "248": [
-    0.133,
-    14
+    0.397,
+    42
    ],
    "249": [
-    0.104,
-    14
+    0.318,
+    43
    ],
    "250": [
-    0.075,
-    13
+    3.257,
+    40
    ],
    "251": [
-    0.091,
-    14
+    14.177,
+    43
    ],
    "252": [
-    0.071,
-    13
+    15.041,
+    40
    ],
    "253": [
-    0.132,
-    13
+    11.549,
+    40
    ],
    "254": [
-    0.152,
-    14
+    6.552,
+    42
    ],
    "255": [
-    0.142,
-    13
+    1.699,
+    40
    ],
    "256": [
-    0.105,
-    13
+    9.735,
+    40
    ],
    "257": [
-    0.124,
-    13
+    11.172,
+    40
    ],
    "258": [
-    0.124,
-    13
+    11.535,
+    45
    ],
    "259": [
-    0.222,
-    13
+    42.179,
+    95
    ],
    "260": [
-    0.35,
-    13
+    88.402,
+    94
    ],
    "261": [
-    0.193,
-    13
+    10.575,
+    40
    ],
    "262": [
-    0.261,
-    12
+    9.664,
+    37
    ],
    "263": [
-    0.148,
-    13
+    6.796,
+    40
    ],
    "264": [
-    0.09,
-    12
+    1.676,
+    36
    ],
    "265": [
-    0.094,
-    13
+    0.993,
+    39
    ],
    "266": [
-    0.091,
-    12
+    3.84,
+    36
    ],
    "267": [
-    0.079,
-    13
+    7.347,
+    39
    ],
    "268": [
-    0.07,
-    12
+    5.62,
+    36
    ],
    "269": [
-    0.108,
-    12
+    4.24,
+    37
    ],
    "270": [
-    0.09,
-    13
+    2.009,
+    39
    ],
    "271": [
-    0.096,
-    12
+    2.145,
+    37
    ],
    "272": [
-    0.164,
-    13
+    3.248,
+    39
    ],
    "273": [
-    0.136,
-    12
+    3.739,
+    37
    ],
    "274": [
-    0.07,
-    12
+    1.704,
+    37
    ],
    "275": [
-    0.098,
-    12
+    0.456,
+    37
    ],
    "276": [
-    0.066,
-    13
+    0.515,
+    38
    ],
    "277": [
-    0.084,
-    12
+    0.456,
+    37
    ],
    "278": [
-    0.098,
-    12
+    0.284,
+    37
    ],
    "279": [
-    0.076,
-    12
+    0.271,
+    36
    ],
    "280": [
-    0.087,
-    12
+    0.295,
+    37
    ],
    "281": [
-    0.088,
-    12
+    0.256,
+    36
    ],
    "282": [
-    0.063,
-    11
+    0.526,
+    37
    ],
    "283": [
-    0.116,
-    11
+    1.413,
+    47
    ],
    "284": [
-    0.096,
-    11
+    1.045,
+    46
    ],
    "285": [
-    0.385,
-    13
+    8.212,
+    51
    ],
    "286": [
-    0.598,
-    12
+    13.012,
+    49
    ],
    "287": [
-    1.135,
-    12
+    14.876,
+    48
    ],
    "288": [
-    4.081,
-    11
+    19.444,
+    47
    ],
    "289": [
-    4.521,
-    12
+    18.054,
+    48
    ],
    "290": [
-    5.112,
-    12
+    16.626,
+    48
    ],
    "291": [
-    1.909,
-    12
+    9.27,
+    48
    ],
    "292": [
-    0.353,
-    11
+    4.479,
+    46
    ],
    "293": [
-    0.871,
-    12
+    7.271,
+    48
    ],
    "294": [
-    1.045,
-    11
+    10.161,
+    45
    ],
    "295": [
-    0.474,
-    10
+    9.014,
+    44
    ],
    "296": [
-    0.136,
-    11
+    8.403,
+    46
    ],
    "297": [
-    0.135,
-    12
+    4.335,
+    49
    ],
    "298": [
-    0.352,
-    12
+    2.437,
+    48
    ],
    "299": [
-    0.595,
-    11
+    13.073,
+    46
    ],
    "300": [
-    0.352,
-    11
+    19.063,
+    46
    ],
    "301": [
-    0.349,
-    12
+    18.012,
+    47
    ],
    "302": [
-    0.43,
-    11
+    20.55,
+    46
    ],
    "303": [
-    0.558,
-    12
+    11.042,
+    49
    ],
    "304": [
-    0.462,
-    11
+    6.008,
+    46
    ],
    "305": [
-    0.121,
-    12
+    9.43,
+    48
    ],
    "306": [
-    0.294,
-    11
+    13.729,
+    46
    ],
    "307": [
-    0.562,
-    12
+    11.856,
+    47
    ],
    "308": [
-    0.444,
-    11
+    7.121,
+    46
    ],
    "309": [
-    0.313,
-    11
+    8.734,
+    46
    ],
    "310": [
-    0.313,
-    12
+    11.891,
+    47
    ],
    "311": [
-    0.242,
-    11
+    11.807,
+    46
    ],
    "312": [
-    0.19,
-    11
+    12.181,
+    45
    ],
    "313": [
-    0.239,
-    11
+    6.089,
+    45
    ],
    "314": [
-    0.225,
-    12
+    6.706,
+    48
    ],
    "315": [
-    0.269,
-    11
+    9.282,
+    44
    ],
    "316": [
-    0.232,
-    11
+    10.996,
+    46
    ],
    "317": [
-    0.329,
-    11
+    8.089,
+    45
    ],
    "318": [
-    0.33,
-    11
+    3.09,
+    44
    ],
    "319": [
-    0.504,
-    11
+    6.335,
+    44
    ],
    "320": [
-    0.535,
-    11
+    10.013,
+    44
    ],
    "321": [
-    0.447,
-    12
+    10.116,
+    47
    ],
    "322": [
-    0.114,
-    11
+    6.868,
+    46
    ],
    "323": [
-    0.286,
-    11
+    4.878,
+    45
    ],
    "324": [
-    0.642,
-    11
+    4.693,
+    45
    ],
    "325": [
-    0.426,
-    11
+    6.782,
+    45
    ],
    "326": [
-    0.518,
-    11
+    4.632,
+    45
    ],
    "327": [
-    0.506,
-    11
+    2.191,
+    44
    ],
    "328": [
-    0.476,
-    11
+    2.153,
+    45
    ],
    "329": [
-    0.419,
-    11
+    2.202,
+    44
    ],
    "330": [
-    0.356,
-    11
+    1.644,
+    45
    ],
    "331": [
-    0.287,
-    11
+    1.183,
+    45
    ],
    "332": [
-    0.51,
-    11
+    6.301,
+    45
    ],
    "333": [
-    0.726,
-    11
+    9.301,
+    44
    ],
    "334": [
-    0.326,
-    10
+    8.043,
+    42
    ],
    "335": [
-    0.222,
-    11
+    7.979,
+    45
    ],
    "336": [
-    0.245,
-    11
+    3.673,
+    44
    ],
    "337": [
-    0.52,
-    11
+    2.204,
+    44
    ],
    "338": [
-    0.444,
-    11
+    2.979,
+    45
    ],
    "339": [
-    0.189,
-    10
+    1.568,
+    42
    ],
    "340": [
-    0.374,
-    10
+    1.094,
+    40
    ],
    "341": [
-    0.52,
-    10
+    1.655,
+    40
    ],
    "342": [
-    0.2,
-    10
+    0.952,
+    41
    ],
    "343": [
-    0.337,
-    10
+    1.184,
+    42
    ],
    "344": [
-    0.209,
-    11
+    0.993,
+    45
    ],
    "345": [
-    0.318,
-    11
+    4.343,
+    44
    ],
    "346": [
-    0.299,
-    11
+    12.874,
+    44
    ],
    "347": [
-    0.285,
-    10
+    21.085,
+    42
    ],
    "348": [
-    0.34,
-    11
+    25.399,
+    44
    ],
    "349": [
-    0.501,
-    11
+    20.981,
+    44
    ],
    "350": [
-    5.047,
-    10
+    33.825,
+    43
    ],
    "351": [
-    11.49,
-    11
+    45.054,
+    44
    ],
    "352": [
-    16.823,
-    10
+    58.323,
+    41
    ],
    "353": [
-    18.952,
-    11
+    59.088,
+    44
    ],
    "354": [
-    23.042,
-    11
+    71.435,
+    44
    ],
    "355": [
-    18.668,
-    10
+    63.53,
+    42
    ],
    "356": [
-    16.024,
-    11
+    55.755,
+    44
    ],
    "357": [
-    8.322,
-    10
+    45.964,
+    42
    ],
    "358": [
-    7.525,
-    11
+    40.626,
+    42
    ],
    "359": [
-    10.047,
-    10
+    53.487,
+    42
    ],
    "360": [
-    13.947,
-    11
+    61.32,
+    44
    ],
    "361": [
-    15.99,
-    10
+    54.601,
+    41
    ],
    "362": [
-    16.699,
-    9
+    51.751,
+    38
    ],
    "363": [
-    22.961,
-    10
+    64.621,
+    39
    ],
    "364": [
-    14.736,
-    9
+    48.278,
+    36
    ],
    "365": [
-    13.368,
-    10
+    47.614,
+    40
    ],
    "366": [
-    7.161,
-    11
+    34.628,
+    44
    ],
    "367": [
-    1.349,
-    10
+    15.092,
+    41
    ],
    "368": [
-    2.61,
-    11
+    25.637,
+    45
    ],
    "369": [
-    4.375,
-    10
+    28.709,
+    41
    ],
    "370": [
-    17.006,
-    11
+    57.4,
+    43
    ],
    "371": [
-    19.329,
-    10
+    59.707,
+    42
    ],
    "372": [
-    20.045,
-    11
+    49.273,
+    42
    ],
    "373": [
-    19.952,
-    10
+    43.578,
+    42
    ],
    "374": [
-    11.443,
-    10
+    36.978,
+    41
    ],
    "375": [
-    4.169,
-    11
+    29.834,
+    43
    ],
    "376": [
-    1.608,
-    10
+    29.535,
+    40
    ],
    "377": [
-    1.557,
-    10
+    26.354,
+    41
    ],
    "378": [
-    7.641,
-    10
+    42.213,
+    41
    ],
    "379": [
-    8.998,
-    9
+    38.908,
+    37
    ],
    "380": [
-    12.689,
-    9
+    44.587,
+    38
    ],
    "381": [
-    10.74,
-    10
+    33.188,
+    40
    ],
    "382": [
-    5.749,
-    10
+    16.539,
+    41
    ],
    "383": [
-    4.652,
-    10
+    15.797,
+    42
    ],
    "384": [
-    2.718,
-    11
+    12.574,
+    43
    ],
    "385": [
-    3.023,
-    10
+    21.987,
+    40
    ],
    "386": [
-    3.607,
-    11
+    34.634,
+    44
    ],
    "387": [
-    2.002,
-    10
+    37.103,
+    41
    ],
    "388": [
-    1.464,
-    10
+    41.476,
+    41
    ],
    "389": [
-    7.592,
-    10
+    46.133,
+    40
    ],
    "390": [
-    14.479,
-    10
+    48.235,
+    41
    ],
    "391": [
-    16.835,
-    11
+    42.897,
+    42
    ],
    "392": [
-    16.445,
-    10
+    43.698,
+    41
    ],
    "393": [
-    15.034,
-    10
+    36.975,
+    41
    ],
    "394": [
-    9.071,
-    10
+    24.014,
+    41
    ],
    "395": [
-    5.224,
-    11
+    16.138,
+    42
    ],
    "396": [
-    1.265,
-    9
+    6.87,
+    39
    ],
    "397": [
-    0.175,
-    10
+    5.011,
+    39
    ],
    "398": [
-    0.136,
-    9
+    4.982,
+    38
    ],
    "399": [
-    0.743,
-    9
+    11.278,
+    38
    ],
    "400": [
-    1.249,
-    11
+    22.097,
+    43
    ],
    "401": [
-    2.808,
-    10
+    27.117,
+    41
    ],
    "402": [
-    7.513,
-    10
+    41.824,
+    41
    ],
    "403": [
-    8.555,
-    10
+    37.974,
+    40
    ],
    "404": [
-    10.256,
-    10
+    39.919,
+    41
    ],
    "405": [
-    6.211,
-    10
+    23.314,
+    41
    ],
    "406": [
-    2.503,
-    10
+    10.746,
+    40
    ],
    "407": [
-    0.376,
-    10
+    2.975,
+    41
    ],
    "408": [
-    0.637,
-    11
+    4.968,
+    42
    ],
    "409": [
-    0.27,
-    10
+    6.865,
+    40
    ],
    "410": [
-    0.247,
-    10
+    8.109,
+    40
    ],
    "411": [
-    0.467,
-    10
+    6.21,
+    40
    ],
    "412": [
-    1.506,
-    10
+    6.312,
+    42
    ],
    "413": [
-    8.021,
-    10
+    23.93,
+    40
    ],
    "414": [
-    8.818,
-    10
+    32.526,
+    40
    ],
    "415": [
-    9.336,
-    10
+    39.076,
+    40
    ],
    "416": [
-    5.885,
-    9
+    33.221,
+    36
    ],
    "417": [
-    2.648,
-    8
+    25.986,
+    34
    ],
    "418": [
-    3.593,
-    9
+    20.336,
+    36
    ],
    "419": [
-    8.939,
-    9
+    26.528,
+    37
    ],
    "420": [
-    8.757,
-    10
+    29.079,
+    40
    ],
    "421": [
-    9.218,
-    10
+    33.937,
+    39
    ],
    "422": [
-    7.744,
-    10
+    35.255,
+    39
    ],
    "423": [
-    7.52,
-    10
+    33.509,
+    40
    ],
    "424": [
-    15.136,
-    10
+    60.182,
+    41
    ],
    "425": [
-    21.205,
-    10
+    74.193,
+    40
    ],
    "426": [
-    35.512,
-    10
+    121.194,
+    40
    ],
    "427": [
-    35.451,
-    10
+    122.189,
+    40
    ],
    "428": [
-    40.449,
-    10
+    142.724,
+    40
    ],
    "429": [
-    38.343,
-    10
+    141.069,
+    40
    ],
    "430": [
-    36.681,
-    10
+    134.693,
+    40
    ],
    "431": [
-    34.032,
-    10
+    125.546,
+    38
    ],
    "432": [
-    32.501,
-    9
+    131.579,
+    37
    ],
    "433": [
-    31.036,
-    10
+    120.677,
+    38
    ],
    "434": [
-    26.766,
-    9
+    107.724,
+    36
    ],
    "435": [
-    29.872,
-    10
+    118.601,
+    39
    ],
    "436": [
-    31.745,
-    10
+    117.647,
+    39
    ],
    "437": [
-    33.739,
-    10
+    125.215,
+    39
    ],
    "438": [
-    35.591,
-    10
+    131.889,
+    39
    ],
    "439": [
-    32.459,
-    10
+    130.738,
+    39
    ],
    "440": [
-    33.793,
-    10
+    136.795,
+    40
    ],
    "441": [
-    32.986,
-    11
+    139.323,
+    42
    ],
    "442": [
-    18.654,
-    10
+    101.085,
+    40
    ],
    "443": [
-    16.673,
-    11
+    109.343,
+    43
    ],
    "444": [
-    14.743,
-    10
+    92.549,
+    41
    ],
    "445": [
-    25.054,
-    10
+    116.93,
+    40
    ],
    "446": [
-    29.375,
-    11
+    123.133,
+    43
    ],
    "447": [
-    27.867,
-    10
+    127.645,
+    42
    ],
    "448": [
-    30.09,
-    9
+    127.79,
+    38
    ],
    "449": [
-    33.156,
-    11
+    129.765,
+    41
    ],
    "450": [
-    32.362,
-    10
+    138.111,
+    41
    ],
    "451": [
-    28.231,
-    10
+    118.651,
+    41
    ],
    "452": [
-    32.478,
-    10
+    128.937,
+    40
    ],
    "453": [
-    32.313,
-    9
+    117.206,
+    38
    ],
    "454": [
-    33.398,
-    10
+    103.686,
+    38
    ],
    "455": [
-    26.633,
-    9
+    89.692,
+    38
    ],
    "456": [
-    21.029,
-    10
+    73.8,
+    39
    ],
    "457": [
-    14.041,
-    9
+    63.67,
+    37
    ],
    "458": [
-    7.39,
-    10
+    51.593,
+    40
    ],
    "459": [
-    5.227,
-    10
+    49.309,
+    38
    ],
    "460": [
-    3.569,
-    10
+    43.937,
+    41
    ],
    "461": [
-    1.392,
-    10
+    39.993,
+    40
    ],
    "462": [
-    0.599,
-    10
+    42.522,
+    39
    ],
    "463": [
-    5.331,
-    10
+    49.95,
+    40
    ],
    "464": [
-    11.708,
-    10
+    53.504,
+    41
    ],
    "465": [
-    13.595,
-    10
+    47.406,
+    39
    ],
    "466": [
-    14.859,
-    10
+    46.68,
+    41
    ],
    "467": [
-    11.663,
-    11
+    31.772,
+    42
    ],
    "468": [
-    2.855,
-    10
+    13.447,
+    40
    ],
    "469": [
-    1.121,
-    9
+    7.969,
+    37
    ],
    "470": [
-    1.962,
-    9
+    6.89,
+    37
    ],
    "471": [
-    1.151,
-    9
+    3.186,
+    38
    ],
    "472": [
-    0.263,
-    10
+    1.689,
+    39
    ],
    "473": [
-    0.354,
-    10
+    5.861,
+    40
    ],
    "474": [
-    0.283,
-    10
+    12.198,
+    40
    ],
    "475": [
-    0.401,
-    10
+    13.669,
+    40
    ],
    "476": [
-    3.537,
-    10
+    21.5,
+    41
    ],
    "477": [
-    7.99,
-    10
+    23.481,
+    40
    ],
    "478": [
-    10.913,
-    11
+    24.488,
+    44
    ],
    "479": [
-    9.183,
-    10
+    19.52,
+    40
    ],
    "480": [
-    5.139,
-    10
+    14.764,
+    41
    ],
    "481": [
-    1.752,
-    10
+    9.231,
+    40
    ],
    "482": [
-    0.863,
-    10
+    8.733,
+    42
    ],
    "483": [
-    1.266,
-    11
+    6.756,
+    42
    ],
    "484": [
-    0.916,
-    10
+    3.646,
+    39
    ],
    "485": [
-    0.309,
-    9
+    1.308,
+    36
    ],
    "486": [
-    0.827,
-    9
+    2.547,
+    37
    ],
    "487": [
-    4.457,
-    8
+    9.524,
+    36
    ],
    "488": [
-    5.667,
-    9
+    13.658,
+    35
    ],
    "489": [
-    6.61,
-    10
+    20.153,
+    39
    ],
    "490": [
-    4.445,
-    10
+    14.548,
+    38
    ],
    "491": [
-    1.197,
-    10
+    9.274,
+    41
    ],
    "492": [
-    0.941,
-    10
+    6.792,
+    39
    ],
    "493": [
-    0.941,
-    9
+    3.675,
+    37
    ],
    "494": [
-    0.458,
-    9
+    2.195,
+    38
    ],
    "495": [
-    0.209,
-    9
+    2.826,
+    38
    ],
    "496": [
-    0.265,
-    9
+    2.403,
+    39
    ],
    "497": [
-    0.331,
-    10
+    1.875,
+    41
    ],
    "498": [
-    0.543,
-    10
+    2.182,
+    40
    ],
    "499": [
-    0.658,
-    10
+    2.567,
+    41
    ],
    "500": [
-    0.353,
-    9
+    6.864,
+    38
    ],
    "501": [
-    0.447,
-    10
+    8.372,
+    41
    ],
    "502": [
-    0.647,
-    11
+    10.774,
+    42
    ],
    "503": [
-    0.392,
-    10
+    8.995,
+    40
    ],
    "504": [
-    0.26,
-    10
+    4.961,
+    40
    ],
    "505": [
-    0.268,
-    10
+    1.85,
+    40
    ],
    "506": [
-    0.216,
-    10
+    3.12,
+    40
    ],
    "507": [
-    0.308,
-    10
+    6.447,
+    40
    ],
    "508": [
-    0.341,
-    9
+    11.635,
+    37
    ],
    "509": [
-    2.748,
-    9
+    16.236,
+    35
    ],
    "510": [
-    4.278,
-    9
+    20.367,
+    37
    ],
    "511": [
-    5.405,
-    9
+    22.553,
+    37
    ],
    "512": [
-    3.855,
-    8
+    17.68,
+    36
    ],
    "513": [
-    2.067,
-    9
+    18.12,
+    39
    ],
    "514": [
-    0.434,
-    9
+    12.086,
+    39
    ],
    "515": [
-    1.298,
-    10
+    10.409,
+    40
    ],
    "516": [
-    1.316,
-    10
+    5.014,
+    40
    ],
    "517": [
-    0.64,
-    10
+    2.866,
+    40
    ],
    "518": [
-    0.27,
-    10
+    2.826,
+    40
    ],
    "519": [
-    0.789,
-    10
+    3.498,
+    40
    ],
    "520": [
-    6.687,
-    10
+    14.183,
+    40
    ],
    "521": [
-    11.131,
-    10
+    23.056,
+    40
    ],
    "522": [
-    13.844,
-    10
+    28.288,
+    40
    ],
    "523": [
-    12.739,
-    10
+    26.297,
+    41
    ],
    "524": [
-    8.961,
-    10
+    18.906,
+    39
    ],
    "525": [
-    2.299,
-    10
+    9.636,
+    41
    ],
    "526": [
-    2.334,
-    10
+    10.313,
+    40
    ],
    "527": [
-    2.489,
-    10
+    9.56,
+    40
    ],
    "528": [
-    1.47,
-    10
+    6.466,
+    40
    ],
    "529": [
-    0.432,
-    9
+    2.302,
+    37
    ],
    "530": [
-    0.287,
-    9
+    1.498,
+    37
    ],
    "531": [
-    0.246,
-    10
+    2.424,
+    40
    ],
    "532": [
-    2.224,
-    9
+    5.794,
+    36
    ],
    "533": [
-    10.312,
-    10
+    21.662,
+    40
    ],
    "534": [
-    14.589,
-    11
+    30.101,
+    43
    ],
    "535": [
-    13.657,
-    10
+    28.223,
+    40
    ],
    "536": [
-    12.26,
-    10
+    26.238,
+    40
    ],
    "537": [
-    6.3,
-    10
+    20.822,
+    41
    ],
    "538": [
-    4.42,
-    10
+    20.103,
+    40
    ],
    "539": [
-    8.36,
-    10
+    31.632,
+    39
    ],
    "540": [
-    7.376,
-    10
+    26.563,
+    39
    ],
    "541": [
-    9.718,
-    10
+    28.575,
+    40
    ],
    "542": [
-    10.644,
-    9
+    24.856,
+    38
    ],
    "543": [
-    15.987,
-    10
+    33.551,
+    40
    ],
    "544": [
-    18.623,
-    10
+    39.285,
+    40
    ],
    "545": [
-    23.869,
-    10
+    50.068,
+    40
    ],
    "546": [
-    21.213,
-    10
+    52.18,
+    40
    ],
    "547": [
-    19.408,
-    10
+    69.196,
+    40
    ],
    "548": [
-    18.039,
-    10
+    80.204,
+    40
    ],
    "549": [
-    19.45,
-    10
+    94.367,
+    40
    ],
    "550": [
-    14.646,
-    10
+    78.193,
+    40
    ],
    "551": [
-    14.377,
-    10
+    81.434,
+    39
    ],
    "552": [
-    15.462,
-    10
+    92.528,
+    39
    ],
    "553": [
-    19.94,
-    10
+    98.86,
+    39
    ],
    "554": [
-    17.984,
-    10
+    89.087,
+    39
    ],
    "555": [
-    19.204,
-    10
+    91.926,
+    41
    ],
    "556": [
-    16.848,
-    10
+    71.044,
+    40
    ],
    "557": [
-    19.295,
-    10
+    78.396,
+    40
    ],
    "558": [
-    27.047,
-    10
+    101.417,
+    40
    ],
    "559": [
-    36.019,
-    10
+    133.66,
+    40
    ],
    "560": [
-    36.813,
-    10
+    140.266,
+    40
    ],
    "561": [
-    41.72,
-    10
+    163.011,
+    40
    ],
    "562": [
-    42.382,
-    10
+    170.384,
+    40
    ],
    "563": [
-    37.029,
-    10
+    151.827,
+    40
    ],
    "564": [
-    27.639,
-    9
+    129.136,
+    39
    ],
    "565": [
-    32.383,
-    10
+    138.578,
+    40
    ],
    "566": [
-    26.955,
-    10
+    120.912,
+    40
    ],
    "567": [
-    30.294,
-    11
+    137.153,
+    42
    ],
    "568": [
-    22.789,
-    10
+    110.565,
+    40
    ],
    "569": [
-    25.045,
-    10
+    104.009,
+    40
    ],
    "570": [
-    18.614,
-    10
+    64.817,
+    41
    ],
    "571": [
-    18.433,
-    10
+    50.764,
+    40
    ],
    "572": [
-    16.804,
-    10
+    46.693,
+    40
    ],
    "573": [
-    14.607,
-    10
+    45.584,
+    41
    ],
    "574": [
-    11.437,
-    9
+    46.054,
+    37
    ],
    "575": [
-    11.526,
-    9
+    64.995,
+    38
    ],
    "576": [
-    8.498,
-    10
+    57.075,
+    40
    ],
    "577": [
-    7.057,
-    10
+    70.003,
+    40
    ],
    "578": [
-    8.52,
-    11
+    66.861,
+    41
    ],
    "579": [
-    11.5,
-    10
+    77.35,
+    42
    ],
    "580": [
-    12.338,
-    10
+    71.25,
+    40
    ],
    "581": [
-    12.077,
-    10
+    56.035,
+    41
    ],
    "582": [
-    7.763,
-    10
+    34.672,
+    40
    ],
    "583": [
-    6.114,
-    10
+    35.051,
+    41
    ],
    "584": [
-    8.411,
-    10
+    38.633,
+    41
    ],
    "585": [
-    8.702,
-    10
+    31.367,
+    40
    ],
    "586": [
-    9.694,
-    10
+    29.465,
+    40
    ],
    "587": [
-    8.989,
-    10
+    24.231,
+    39
    ],
    "588": [
-    3.606,
-    10
+    18.834,
+    42
    ],
    "589": [
-    0.451,
-    10
+    19.403,
+    40
    ],
    "590": [
-    1.222,
-    10
+    18.544,
+    40
    ],
    "591": [
-    1.222,
-    9
+    19.027,
+    39
    ],
    "592": [
-    0.359,
-    10
+    11.184,
+    40
    ],
    "593": [
-    0.815,
-    10
+    5.071,
+    40
    ],
    "594": [
-    1.033,
-    10
+    6.804,
+    40
    ],
    "595": [
-    0.727,
-    10
+    14.605,
+    40
    ],
    "596": [
-    0.308,
-    9
+    18.812,
+    37
    ],
    "597": [
-    0.135,
-    9
+    18.71,
+    35
    ],
    "598": [
-    0.111,
-    10
+    18.844,
+    38
    ],
    "599": [
-    0.298,
-    10
+    17.1,
+    39
    ],
    "600": [
-    0.403,
-    10
+    18.77,
+    41
    ],
    "601": [
-    0.359,
-    10
+    22.914,
+    40
    ],
    "602": [
-    0.254,
-    10
+    22.262,
+    39
    ],
    "603": [
-    0.207,
-    10
+    18.347,
+    40
    ],
    "604": [
-    0.148,
-    10
+    10.164,
+    40
    ],
    "605": [
-    1.724,
-    10
+    6.765,
+    41
    ],
    "606": [
-    10.333,
-    10
+    25.721,
+    41
    ],
    "607": [
-    9.209,
-    10
+    22.835,
+    40
    ],
    "608": [
-    11.563,
-    10
+    26.021,
+    40
    ],
    "609": [
-    10.884,
-    9
+    27.639,
+    37
    ],
    "610": [
-    6.245,
-    10
+    19.923,
+    40
    ],
    "611": [
-    1.146,
-    10
+    10.48,
+    40
    ],
    "612": [
-    1.902,
-    10
+    10.855,
+    39
    ],
    "613": [
-    2.018,
-    10
+    8.787,
+    40
    ],
    "614": [
-    1.15,
-    10
+    4.882,
+    40
    ],
    "615": [
-    0.202,
-    10
+    3.316,
+    40
    ],
    "616": [
-    0.548,
-    10
+    3.223,
+    40
    ],
    "617": [
-    0.614,
-    10
+    2.038,
+    40
    ],
    "618": [
-    0.171,
-    9
+    0.686,
+    38
    ],
    "619": [
-    0.235,
-    10
+    1.098,
+    40
    ],
    "620": [
-    0.283,
-    10
+    1.983,
+    40
    ],
    "621": [
-    0.215,
-    10
+    7.635,
+    40
    ],
    "622": [
-    0.38,
-    10
+    11.51,
+    41
    ],
    "623": [
-    4.926,
-    10
+    21.956,
+    39
    ],
    "624": [
-    5.582,
-    9
+    25.042,
+    39
    ],
    "625": [
-    7.71,
-    10
+    25.162,
+    39
    ],
    "626": [
-    6.778,
-    10
+    18.195,
+    41
    ],
    "627": [
-    3.769,
-    10
+    8.775,
+    38
    ],
    "628": [
-    0.823,
-    10
+    4.607,
+    40
    ],
    "629": [
-    1.16,
-    10
+    8.711,
+    40
    ],
    "630": [
-    2.163,
-    9
+    11.814,
+    39
    ],
    "631": [
-    4.264,
-    10
+    15.28,
+    38
    ],
    "632": [
-    3.279,
-    9
+    12.606,
+    37
    ],
    "633": [
-    3.283,
-    10
+    10.448,
+    39
    ],
    "634": [
-    1.744,
-    10
+    4.703,
+    40
    ],
    "635": [
-    0.561,
-    10
+    2.157,
+    40
    ],
    "636": [
-    0.481,
-    10
+    2.641,
+    40
    ],
    "637": [
-    0.613,
-    10
+    2.245,
+    39
    ],
    "638": [
-    0.765,
-    9
+    2.436,
+    38
    ],
    "639": [
-    5.819,
-    10
+    12.155,
+    39
    ],
    "640": [
-    8.966,
-    10
+    19.393,
+    40
    ],
    "641": [
-    10.256,
-    10
+    26.217,
+    38
    ],
    "642": [
-    11.006,
-    10
+    34.364,
+    41
    ],
    "643": [
-    6.04,
-    10
+    22.754,
+    40
    ],
    "644": [
-    1.082,
-    10
+    12.551,
+    39
    ],
    "645": [
-    1.088,
-    9
+    11.654,
+    38
    ],
    "646": [
-    1.086,
-    10
+    5.133,
+    39
    ],
    "647": [
-    2.218,
-    10
+    6.342,
+    40
    ],
    "648": [
-    2.421,
-    10
+    7.899,
+    40
    ],
    "649": [
-    1.371,
-    10
+    6.22,
+    40
    ],
    "650": [
-    0.603,
-    9
+    10.582,
+    37
    ],
    "651": [
-    5.277,
-    10
+    27.983,
+    39
    ],
    "652": [
-    6.334,
-    10
+    37.28,
+    39
    ],
    "653": [
-    7.221,
-    9
+    40.255,
+    35
    ],
    "654": [
-    10.378,
-    9
+    49.392,
+    35
    ],
    "655": [
-    15.368,
-    9
+    69.622,
+    35
    ],
    "656": [
-    24.709,
-    9
+    104.372,
+    37
    ],
    "657": [
-    28.57,
-    10
+    107.232,
+    39
    ],
    "658": [
-    36.624,
-    10
+    123.465,
+    40
    ],
    "659": [
-    40.043,
-    10
+    130.467,
+    40
    ],
    "660": [
-    38.319,
-    10
+    122.957,
+    40
    ],
    "661": [
-    31.793,
-    9
+    108.194,
+    38
    ],
    "662": [
-    31.2,
-    10
+    111.354,
+    40
    ],
    "663": [
-    39.08,
-    10
+    141.519,
+    39
    ],
    "664": [
-    31.414,
-    10
+    120.821,
+    40
    ],
    "665": [
-    32.948,
-    10
+    132.131,
+    40
    ],
    "666": [
-    33.394,
-    10
+    128.452,
+    40
    ],
    "667": [
-    37.158,
-    10
+    145.158,
+    39
    ],
    "668": [
-    36.785,
-    10
+    143.998,
+    40
    ],
    "669": [
-    32.017,
-    10
+    133.853,
+    40
    ],
    "670": [
-    36.051,
-    10
+    143.587,
+    40
    ],
    "671": [
-    30.62,
-    9
+    132.103,
+    38
    ],
    "672": [
-    37.005,
-    11
+    142.892,
+    42
    ],
    "673": [
-    36.021,
-    10
+    141.116,
+    40
    ],
    "674": [
-    39.068,
-    10
+    152.819,
+    39
    ],
    "675": [
-    31.879,
-    9
+    132.823,
+    37
    ],
    "676": [
-    36.78,
-    10
+    141.697,
+    39
    ],
    "677": [
-    31.092,
-    10
+    121.174,
+    38
    ],
    "678": [
-    32.351,
-    11
+    125.968,
+    42
    ],
    "679": [
-    32.668,
-    10
+    130.783,
+    40
    ],
    "680": [
-    29.352,
-    10
+    122.478,
+    40
    ],
    "681": [
-    24.146,
-    10
+    101.484,
+    42
    ],
    "682": [
-    32.9,
-    11
+    126.695,
+    42
    ],
    "683": [
-    23.712,
-    10
+    98.85,
+    40
    ],
    "684": [
-    25.658,
-    10
+    101.033,
+    40
    ],
    "685": [
-    29.773,
-    10
+    112.762,
+    40
    ],
    "686": [
-    28.507,
-    10
+    102.532,
+    41
    ],
    "687": [
-    27.359,
-    10
+    92.986,
+    40
    ],
    "688": [
-    32.714,
-    10
+    115.883,
+    40
    ],
    "689": [
-    33.831,
-    10
+    121.025,
+    39
    ],
    "690": [
-    29.907,
-    10
+    118.088,
+    40
    ],
    "691": [
-    34.06,
-    10
+    136.403,
+    41
    ],
    "692": [
-    33.956,
-    11
+    131.589,
+    42
    ],
    "693": [
-    29.952,
-    10
+    126.644,
+    41
    ],
    "694": [
-    36.335,
-    11
+    135.873,
+    42
    ],
    "695": [
-    28.534,
-    10
+    128.466,
+    42
    ],
    "696": [
-    31.597,
-    11
+    121.033,
+    43
    ],
    "697": [
-    25.217,
-    10
+    106.999,
+    40
    ],
    "698": [
-    29.602,
-    11
+    115.91,
+    43
    ],
    "699": [
-    30.025,
-    10
+    107.451,
+    40
    ],
    "700": [
-    28.216,
-    10
+    99.013,
+    40
    ],
    "701": [
-    29.693,
-    10
+    101.344,
+    40
    ],
    "702": [
-    32.735,
-    11
+    137.257,
+    45
    ],
    "703": [
-    31.569,
-    11
+    139.562,
+    43
    ],
    "704": [
-    36.664,
-    10
+    143.798,
+    45
    ],
    "705": [
-    32.674,
-    11
+    111.378,
+    46
    ],
    "706": [
-    37.448,
-    11
+    132.091,
+    47
    ],
    "707": [
-    37.206,
-    11
+    142.143,
+    46
    ],
    "708": [
-    29.964,
-    10
+    128.244,
+    45
    ],
    "709": [
-    38.899,
-    11
+    142.174,
+    47
    ],
    "710": [
-    35.731,
-    11
+    138.888,
+    49
    ],
    "711": [
-    36.877,
-    11
+    135.633,
+    48
    ],
    "712": [
-    101.698,
-    29
+    283.956,
+    105
    ]
   }
  }

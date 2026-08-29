@@ -3405,7 +3405,9 @@
       const curCar = (f.on && f.cid) || live.courseCar || (co.cars || [])[0]; const curName = curCar ? (carName({ ordinal: String(curCar).split("|")[0], id: curCar }) || "#" + String(curCar).split("|")[0]) : "";   // paused → stay on the LAST-DRIVEN car, never rescope the gate/advice to co.cars[0] (audit F20)
       const carGrip = dr.car_grip || {}; const analysisReflectsCar = curCar && (carGrip[curCar] != null || (co.cars || []).includes(curCar));
       const carChanged = !!(live.courseCar && curCar && live.courseCar !== curCar);   // set in paintFrame; means the analysis still reflects the previous car
-      const ck = courseKnowledge(co); const training = ck.stage === "training"; const turnsN = tu.count || 0;
+      // ONE TURN TABLE, INCLUDING FOR THE HEADLINE. tu.count is the SESSION's count; the map, the turn cards and
+      // the tiles were reading two different numbers, so a stale analysis showed "8 turns" over a 13-marker map.
+      const ck = courseKnowledge(co); const training = ck.stage === "training"; const turnsN = turnTable(co).turns.length || tu.count || 0;
       try { const pk = "fh6StageSeen:" + co.route_key; const prevSt = localStorage.getItem(pk);   // STATUS REGRESSION is announced, not silent: one toast per downgrade edge
         if (prevSt === "tuning" && ck.stage === "training") focusToast(`⬇ ${p.rn || "course"} regressed to TRAINING — prerequisites no longer fulfilled`);
         if (prevSt !== ck.stage) localStorage.setItem(pk, ck.stage); } catch (e) {}
@@ -4736,11 +4738,31 @@
         rows = est.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m, type: t.type, track: t.track || null, best_by_car: t.best_by_car || null,
           est_by: t.est_by || null, geo_sessions: t.geo_sessions != null ? t.geo_sessions : null, geo_mapped: !!t.geo_mapped, model_sessions: t.sessions != null ? t.sessions : null }));
       }
+      // WHICH TURN SET WINS. The old rule was "the session always wins — it sees the model live, db.js is a
+      // snapshot". True only while the analysis is CURRENT. An analysis produced by a superseded detector is the
+      // STALER of the two, and Edamame rendered 8 turns from exactly that over a 13-turn model, on a course whose
+      // map, registry and established set all agreed on 13. The session is ONE SAMPLE; the model is the course's
+      // accumulated truth. So the model supplies the SET, the session supplies MEASUREMENTS onto it, and a turn
+      // the session found that the model has not got is added only when the session is on the current detector
+      // (otherwise a stale run can resurrect turns the rule already retired). This mirrors courseGeoFor, which has
+      // always had a rule for which GEOMETRY wins; turns simply never got one.
       const canon = tu.canonical || [];
-      if (canon.length) {   // the session sees the SAME model, fresher than db.js — it wins, keeping the model's extra fields where they line up
-        const near = (a, b) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= 20 * 20;
-        rows = canon.map((c) => Object.assign({}, rows.find((r2) => r2.id === c.id) || rows.find((r2) => near(r2.pos, c.pos)) || {},
-          { id: c.id, pos: c.pos, dir: c.dir, radius_m: c.radius_m, passes: c.passes, presence: c.presence, sessions: c.sessions, dominant: c.dominant }));
+      const near = (a, b) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= 20 * 20;
+      // "current" = the session and the model were written by the SAME detector generation. Both are stamped by
+      // the same analyzer, so this needs no global: agreement means the two are comparable, disagreement (or a
+      // session with no stamp at all, which is every analysis produced before the stamp existed) means they are
+      // not, and the accumulated model is the one to trust.
+      const mdet = (m && (m.geometry || {}).det) || null;
+      const sessCurrent = !!tu.det && (!mdet || tu.det === mdet);
+      if (canon.length && !rows.length) {                 // no model yet (a course's first laps): the session is all there is
+        rows = canon.map((c) => ({ id: c.id, pos: c.pos, dir: c.dir, radius_m: c.radius_m, passes: c.passes, presence: c.presence, sessions: c.sessions, dominant: c.dominant }));
+      } else if (canon.length) {
+        rows = rows.map((r2) => { const c = canon.find((x) => x.id === r2.id) || canon.find((x) => near(x.pos, r2.pos));
+          return c ? Object.assign({}, r2, { passes: c.passes, presence: c.presence, sessions: c.sessions, dominant: c.dominant }) : r2; });
+        if (sessCurrent) {                                // only a current-generation run may ADD to the course's turns
+          const extra = canon.filter((c) => !rows.some((r2) => r2.id === c.id || near(r2.pos, c.pos)));
+          rows = rows.concat(extra.map((c) => ({ id: c.id, pos: c.pos, dir: c.dir, radius_m: c.radius_m, passes: c.passes, presence: c.presence, sessions: c.sessions, dominant: c.dominant, session_only: true })));
+        }
       }
       let out;
       if (rows.length) out = { turns: rows.map((r2, i) => Object.assign(r2, { n: i + 1 })), source: "model", count: tu.count || (m && (m.expected_turns || m.turn_count)) || rows.length, expected: tu.expected != null ? tu.expected : (m && m.expected_turns) || null };
@@ -5385,7 +5407,11 @@
     // turn (the phase where grip broke, balance, entry/apex/exit speeds, grip-envelope apex), STAGE-AWARE — a learning
     // status while the layout is still being ratified, then tuning feedback + the fix once confidence crosses 75%.
     const courseTurnBreakdown = (co, n) => {
-      const tu = co.turns || {}; const canon = tu.canonical || []; const t = canon[n - 1]; if (!t) return "";
+      // ONE TURN TABLE. This indexed the SESSION's canonical array while the map numbered its markers from
+      // turnTable — two lists, indexed independently, so on Edamame clicking T1/T10/T13 silently opened nothing
+      // (the session had 8 entries, the map 13, and index n-1 meant something different in each). courseMap's own
+      // comment records this exact fault being fixed for the MARKERS; the panel they open was left behind.
+      const t = turnTable(co).turns[n - 1]; if (!t) return "";
       const near = (a, b, d) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= d * d;
       const cs = (co.corners || []).filter((k) => k.pos && !k.drift && near(k.pos, t.pos, 45));
       const c = cs.length ? cs[cs.length - 1] : null;   // the latest measured pass through this turn this session
@@ -5544,7 +5570,7 @@
     const dashMapPane = (co) => {
       const geo = courseGeoFor(co); const rk = co.route_key;
       if (!geo) return `<div class="dash-map-pane"><div class="course-hero building" style="height:100%">${courseShapeGlyph(geo, 60) || `<span style="font-size:32px">🗺</span>`}<div><b style="font-size:13.5px">Mapping this course's shape…</b><div class="why" style="font-size:11px;margin-top:2px">complete one full lap and the outline draws here from your position trace</div></div></div>`;
-      const tu = co.turns || {}; const shown = (tu.count || (tu.canonical || []).length || (geo.turns || []).length);
+      const shown = turnTable(co).turns.length || (geo.turns || []).length;   // the count the map states must be the count the map draws
       const gripLap = gripLapFor(co, rk); const nImp = impactCount(gripLap && gripLap.pts);
       const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null;
       return `<div class="dash-map-pane">
@@ -5577,6 +5603,12 @@
       if (m.expected_turns && estTurns.length > m.expected_turns) estTurns = estTurns.slice().sort((a, b) => ((b.track || {}).presence || 0) - ((a.track || {}).presence || 0)).slice(0, m.expected_turns);
       estTurns = estTurns.map((t) => ({ id: t.id, pos: t.pos, dir: t.dir, radius_m: t.radius_m }));
       const mTurns = { count: m.expected_turns || m.turn_count || estTurns.length, canonical: estTurns };
+      // A TRACK-RECORD MAP IS STILL A MAP. This card passed no course object, so mapCardHtml had no route_key and
+      // drew every turn UNCLICKABLE — the atlas showed you a course's 13 corners and let you open none of them.
+      // A minimal course stub is all the panel needs: turnTable falls back to the model, and the breakdown
+      // correctly reports "not driven at pace this session" because this card is the record, not a session.
+      const mCo = { route_key: m.route_key, name: rn, turns: mTurns, corners: [], geometry: m.geometry,
+                    laps: { total: m.laps || 0 }, runs: m.laps || 0, driving: {}, cars: Object.keys(m.cars || {}) };
       return `<div class="lab-corner" style="border-left:4px solid var(--accent)">
         ${courseIdentity(rn, geo, { icon: "🏟", routeKey: m.route_key, tags: courseTagsRow(m), right: `<span class="chip" style="border-color:var(--accent);color:var(--accent)">from the track record — not visited in this ${src === "live" ? "session" : "recording"}</span>` })}
         ${trackRecordHtml(tr, rn, geo, m.route_key)}${(() => {
@@ -5589,7 +5621,7 @@
             if (shown.has(m.route_key)) return "";
           } catch (e) {}
           return speedTracesCard({ speed_traces: m.speed_traces || {}, geometry: m.geometry, route_key: m.route_key }, live.courseCar || null);
-        })()}${m.profile ? profileCardHtml(m.profile) : ""}${geo ? mapCardHtml(geo, [], mTurns) : ""}${turnHistoryCard({ route_key: m.route_key })}
+        })()}${m.profile ? profileCardHtml(m.profile) : ""}${geo ? mapCardHtml(geo, [], mTurns, mCo) : ""}${turnHistoryCard({ route_key: m.route_key })}
         ${(g.turns || []).length ? `<div style="margin-top:8px;font-size:11px"><div style="color:var(--muted);margin-bottom:4px">Turns on this route (from its map)</div><div style="display:flex;flex-wrap:wrap;gap:3px">${g.turns.map((t) => `<span class="chip" title="${t.len_m} m long · ${t.deg != null ? t.deg + "°" : ""}">${t.id} ${t.dir === "L" ? "⬅" : "➡"} r${t.radius_m}${t.deg != null ? " · " + t.deg + "°" : ""}</span>`).join("")}</div><p class="why" style="font-size:10.5px;margin:4px 0 0">drive it in this session for per-turn references, limiter and advice</p></div>` : ""}
       </div>`;
     };

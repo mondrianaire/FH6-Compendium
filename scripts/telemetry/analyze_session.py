@@ -2356,6 +2356,12 @@ def main():
             turns_info["confidence"] = round(turns_info.get("confidence", 0) * _cover, 2)
             turns_info["track_confidence"] = round(turns_info.get("track_confidence", 0) * _cover, 2)
             turns_info["shape_coverage"] = round(_cover, 2)
+        # STAMP THE GENERATION ON THE SESSION'S TURN SET. The dashboard used to let the session's canonical turns
+        # replace the model's outright, on the reasoning that the session sees the model live and db.js is a
+        # snapshot. That holds only while the analysis is CURRENT: an analysis produced by a superseded detector is
+        # the STALER of the two, and Edamame duly rendered 8 turns from a stale session over a 13-turn model. The
+        # client cannot judge which is fresher without knowing which detector each came from, so say so.
+        turns_info["det"] = DET_VER
         course_out.append({"route_key": key, "name": co["name"], "cars": co["cars"], "runs": nev, "best_lap": best, "composition": counts, "corners": corner_out, "is_loop": key.startswith("loop:"), "decode": decode, "profile": profile, "laps": laps_info, "turns": turns_info, "speed_traces": model.get("speed_traces"),
                            "model": model_info, "track": track, "driving": {"compared": cmp_n, "on_reference": on_ref_n, "predicted": pred_n, "own_refs": own_n, "own_refs_by_car": own_by_car, "car_grip": {k_: car_grip.get(k_) for k_ in co["cars"]}}, "geometry": geo,
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})

@@ -26,6 +26,11 @@ RPATH = os.path.join(ROOT, "data", "routes.json")
 THRESH = 0.70
 
 
+def _arc(p):
+    import math
+    return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(p, p[1:])) if p and len(p) > 1 else 0.0
+
+
 def load(p):
     with open(p, encoding="utf-8") as f:
         return json.load(f)
@@ -161,16 +166,37 @@ def main():
             d0 = ((pa[0][0] - pb[0][0]) ** 2 + (pa[0][1] - pb[0][1]) ** 2) ** 0.5
             mutual = min(ab, ba) >= THRESH
             frag = max(ab, ba) >= THRESH and min(ab, ba) >= 0.40 and d0 <= 300
+            # CONTAINMENT: a stub cut from a long road can never satisfy min(ab, ba) >= 0.40, because it IS only a
+            # few percent of that road — 1494 m inside 21288 m scores 0.07 by construction, and the guard that was
+            # meant to reject two roads merely crossing was rejecting every genuine fragment instead.
+            # What separates the two cases is whether the small number is EXPLAINED. If a lies almost wholly on b,
+            # and a is much shorter than b, then ba should come out near len(a)/len(b) — and it does: measured
+            # 0.07 against an expected 0.07, and 0.40 against 0.41. Two roads that merely cross share a short
+            # stretch and score low BOTH ways, so ab >= 0.90 excludes them on its own.
+            # Starts are deliberately not consulted: a fragment begins wherever the capture opened, which is the
+            # very artefact that created these, so requiring the starts to agree would defeat the rule.
+            La, Lb = _arc(pa), _arc(pb)
+            contained = False
+            if La and Lb:
+                lo, hi, cvr = (La, Lb, ab) if La <= Lb else (Lb, La, ba)
+                back = ba if La <= Lb else ab
+                exp = lo / hi
+                contained = cvr >= 0.90 and lo < 0.6 * hi and back <= max(0.25, exp * 2.5)
             # the USER'S OWN NAME is ground truth and outranks any geometric heuristic: naming two keys the same
             # thing is a person saying "this is one course" (and naming is what split them in the first place).
             na = (models[a][1].get("name") or (routes.get(a) or {}).get("name") or "").strip().lower()
             nb = (models[b][1].get("name") or (routes.get(b) or {}).get("name") or "").strip().lower()
             named = bool(na) and na == nb and min(ab, ba) >= 0.40
-            if mutual or frag or named:
+            if mutual or frag or named or contained:
                 grp.append(b); taken.add(b)
-                why[b] = (f"same name '{na}', paths {ab:.2f}/{ba:.2f}" if named and not (mutual or frag)
+                why[a] = why.get(a) or f"seed of this group"
+            why[b] = (f"CONTAINED {ab:.2f}/{ba:.2f} — {min(La, Lb):.0f} m lies on {max(La, Lb):.0f} m" if contained and not (mutual or frag or named)
+                          else f"same name '{na}', paths {ab:.2f}/{ba:.2f}" if named and not (mutual or frag)
                           else f"{'mutual' if mutual else 'fragment'} {ab:.2f}/{ba:.2f}, starts {round(d0)} m apart")
         if len(grp) > 1:
+            # Sorted HERE, not at either consumer: the dry run and the apply path each did `grp[0]` separately,
+            # so sorting one of them would have shown a preview that the merge then contradicted.
+            grp = sorted(grp, key=lambda k: -_arc(models[k][2] or []))
             groups.append((grp, why))
 
     if not groups:
@@ -206,6 +232,10 @@ def main():
     print(f"\nbackup -> {bak}")
 
     for grp, _why in groups:
+        # THE CANONICAL MUST BE THE MODEL WITH THE MOST ROAD IN IT. Groups are seeded by iteration order, so a
+        # containment group could nominate the FRAGMENT as canonical and absorb the road that contains it — the
+        # dry run proposed merging a 47,648 m map into a 5,977 m one, which would have thrown away 87% of the
+        # course to keep the piece. Longest path wins; laps and sessions merge either way.
         canon = grp[0]; cp, cm, _ = models[canon]
         name = cm.get("name") or (routes.get(canon) or {}).get("name")
         for d in grp[1:]:

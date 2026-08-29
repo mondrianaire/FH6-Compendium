@@ -1241,8 +1241,18 @@ def main():
         mode = "timed solo (Rivals / time trial)" if solo else "race"
         solo_conf = "inferred" if solo else "certain"   # upgraded to 'declared' at course level, where the route key is known
         if laps > 0: mode += " · lapped"
-        h_row = next((q for q in rs if q["DistanceTraveled"] >= start["DistanceTraveled"] + 100), rs[-1])
-        hv = (h_row["PosX"] - sx, h_row["PosZ"] - sz); hn = math.hypot(*hv); hdg = [round(hv[0] / hn, 3), round(hv[1] / hn, 3)] if hn > 1 else None
+        # MEASURE THE HEADING OVER FORWARD MOTION ONLY. On a Rivals circuit there is no standing start: you
+        # REVERSE back from the line and cross it already at speed. The window therefore opens with the car
+        # travelling BACKWARDS along the route, and a heading measured from the first 100 m points the wrong way
+        # down the road. attribute_route rejects a reversed heading as "a different (reversed) route" — by design,
+        # since a course driven backwards genuinely is one — so the run fails to match and mints a duplicate.
+        # Anchoring on the first sustained FORWARD motion costs nothing where the start is standing (the first
+        # rows already qualify) and fixes the rolling case, which is every Rivals circuit attempt.
+        _fwd = next((q for q in rs if (q.get("Gear") or 0) > 0 and q.get("speed_mph", 0) > 10), start)
+        h0 = _fwd if _fwd.get("DistanceTraveled") is not None else start
+        hx, hz = h0["PosX"], h0["PosZ"]
+        h_row = next((q for q in rs if q["DistanceTraveled"] >= h0["DistanceTraveled"] + 100), rs[-1])
+        hv = (h_row["PosX"] - hx, h_row["PosZ"] - hz); hn = math.hypot(*hv); hdg = [round(hv[0] / hn, 3), round(hv[1] / hn, 3)] if hn > 1 else None
         sample = [(q["PosX"], q["PosZ"]) for q in rs[::max(1, len(rs) // 200)]]
         key = attribute_route(sx, sz, hdg, dist, sample)
         if key is None:

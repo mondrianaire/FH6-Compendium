@@ -185,6 +185,18 @@ def main():
                 back = ba if La <= Lb else ab
                 exp = lo / hi
                 contained = cvr >= 0.90 and lo < 0.6 * hi and back <= max(0.25, exp * 2.5)
+                # A CLOSED COURSE IS ITS OWN CIRCUIT, however much road it shares with a longer one. Jett's point,
+                # and the guard the original min(ab, ba) >= 0.40 was quietly providing before I removed it to let
+                # genuine fragments through: a 2 km loop that runs along part of a 21 km route is a DIFFERENT
+                # course, not a piece of that one. A fragment is an open stub — it starts and ends in the middle
+                # of the road it was cut from. Absorbing a circuit into a road that merely contains it destroys
+                # a real course and silently reattributes its laps.
+                _sp = pa if La <= Lb else pb
+                if contained and _sp and len(_sp) > 2:
+                    _sl = _arc(_sp)
+                    _gap = ((_sp[0][0] - _sp[-1][0]) ** 2 + (_sp[0][1] - _sp[-1][1]) ** 2) ** 0.5
+                    if _sl and _gap <= max(60.0, 0.12 * _sl):
+                        contained = False
             # the USER'S OWN NAME is ground truth and outranks any geometric heuristic: naming two keys the same
             # thing is a person saying "this is one course" (and naming is what split them in the first place).
             na = (models[a][1].get("name") or (routes.get(a) or {}).get("name") or "").strip().lower()

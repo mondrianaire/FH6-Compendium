@@ -418,12 +418,22 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
     [data-shoppane],[data-shot],[data-shot-close],[data-src],[data-tunecid],[data-tunesl],[data-unpin],
     [data-lib-pick],[data-lib-clear],[data-dockpanel],[data-dockmin],[data-dockdetach],[data-fpin],[data-fmin],
     [data-fclose],[data-clonepop],[data-clonefocus],[data-cloneclose],
-    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn):hover { transform: translateY(-1px); filter: brightness(1.09); }
+    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn):not(svg *):hover { transform: translateY(-1px); filter: brightness(1.09); }
 :is([data-wf],[data-expected],[data-course-stage],[data-diskpick],[data-popout],[data-role],[data-src],[data-donor],
-    [data-replica],[data-unpin],[data-shot],[data-clonepop],.lab-mode,.fhm-dchip,.dm-chip,.subnav-btn):active { transform: translateY(0); filter: brightness(.95); }
+    [data-replica],[data-unpin],[data-shot],[data-clonepop],.lab-mode,.fhm-dchip,.dm-chip,.subnav-btn):not(svg *):active { transform: translateY(0); filter: brightness(.95); }
 :is([data-wf],[data-tab],[data-expected],[data-course-stage],[data-diskpick],[data-popout],[data-atlas-route],
     [data-car],[data-role],[data-src],[data-donor],[data-replica],[data-unpin],[data-shot],[data-lib-pick],
     .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* WHY :not(svg *) ON THE HOVER/ACTIVE RULES ABOVE.
+   These were written for HTML chips and buttons, where `transform: translateY(-1px)` is a harmless nudge. But
+   [data-courseturn] is an SVG <g> POSITIONED BY A transform ATTRIBUTE — translate(x,y) — and a CSS transform
+   PROPERTY does not compose with that attribute, it replaces it outright. So hovering a turn marker threw away
+   its translate and moved it to (0,-1): the top-left corner of the map. Mouse-out removed the CSS transform, the
+   attribute applied again, and it snapped back — the "turn icons flicker to the top left" report, which survived
+   two earlier fixes because the cause was never in the map's own code at all.
+   Anything laid out by an SVG transform attribute must be excluded from CSS transform rules, not just these
+   markers — hence the structural :not(svg *) rather than deleting one selector from the list. */
 
 /* The ambiguous case: chips/pills that are really buttons get a persistent faint accent ring + raised edge, so they
    read as pressable AT REST — a flat info pill has neither. */

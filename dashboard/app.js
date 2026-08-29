@@ -3441,12 +3441,14 @@
           ? `${learnPanel}<div class="lab-corner" style="border-left:4px solid var(--muted);opacity:.75;font-size:11.5px;margin-top:8px" title="Tuning feedback is a tuning-stage concern"><b>🏋 Tuning feedback — locked while training.</b> <span class="why">This car's per-turn references (${refsOwn}/${turnsN}) are still being gathered and saved in the background; they become live feedback the moment course knowledge reaches 75%.</span></div>`
           : feedPanel)}</div>`;
       const head = `${courseHdr}${courseIdRow(curCar)}${carBanner}<div id="lvCornerScore" style="margin-bottom:8px">${cornerScoreCard()}</div>${speedTracesCard(co, curCar)}${courseStageBanner(co, ck)}<div class="lab-tiles" style="margin-bottom:8px">${tiles.map(([v, l]) => `<div class="lab-tile"><b>${v}</b><span>${l}</span></div>`).join("")}</div>${dashBody}`;
+      // turnByTurnSection is GONE from the stack. It rendered every turn's phases as a wall of cards below the
+      // body, which is the same information the turn pane now shows for the turn you actually asked about — and
+      // asking is what clicking a marker means. The aggregate counts it carried survive in the map pane header,
+      // so you can still see AT A GLANCE that three turns are setup-limited without opening thirteen of them.
       if (training) return `${head}
         <div id="lvCornerAnalysis" style="margin-bottom:8px">${cornerAnalysis()}</div>
-        ${turnByTurnSection(co, tuneUnlocked)}
         ${p.history}`;
       return `${head}
-        ${turnByTurnSection(co, tuneUnlocked)}
         ${p.history}
         <details class="lab-corner" style="border-left:4px solid var(--accent2)"><summary style="cursor:pointer;font-size:12px"><b>📚 Course learning</b> <span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${ck.pct}%</span> <span class="why">— known course; open for the record, map and turns</span></summary><div style="margin-top:8px">${learnPanel}</div></details>`;
     };
@@ -5466,7 +5468,16 @@
       } else { const passes = t.passes ?? (t.track && t.track.passes) ?? (c && c.laps_seen) ?? 0;
         stage = `<div class="ct-stage learn"><b>📚 Learning</b> — ${mappedT ? "mapped from coordinates" : "counted from your laps (fast/flat)"}${c ? " · loaded this session" : " · not yet loaded — take it at pace"} · ${passes} pass${passes === 1 ? "" : "es"} on record. <span class="why">at 75% course confidence this flips to tuning feedback</span></div>`; }
       const closeup = turnCloseup(co, t.pos, curCar);   // "" until the analyzer has ranked lines here — the panel then reads exactly as it always did
-      return `<div class="ct-break"><div class="ct-break-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${bal ? `<span class="chip" style="border-color:${balCol};color:${balCol}">${bal}</span>` : ""}<span class="ct-close" data-courseturn-close="1" title="close">✕</span></div><div class="ct-break-body">${closeup}${glyph ? `<div class="ct-glyph">${glyph}<div class="ct-glyph-cap">grip: <b style="color:${ph ? CM_PC[ph - 1] : "var(--muted)"}">${ph ? CM_SHORT[ph - 1] : "—"}</b></div></div>` : ""}<div class="ct-break-main">${speeds}${env}${turnTraceStrip(co, t.pos, curCar)}${stage}</div></div></div>`;
+      // THE PHASES BELONG HERE. They used to live in a separate grid of every turn's card below the body, so the
+      // pane you opened by clicking a turn showed less about that turn than the wall of cards underneath it did.
+      // Clicking a turn on the map is the selection gesture; this pane is where the answer goes. The 5-phase
+      // ribbon replaces the old single-phase glyph outright — it says everything the glyph did and four phases more.
+      const [, cFull] = turnCorner(co, n);
+      const prof = cFull ? cFull.phase_profile : null; const firstPh = cFull ? cFull.dominant_phase : null;
+      const phRibbon = `<div class="ct-glyph">${turnPhaseRibbon(prof, firstPh, 176)}<div class="ct-glyph-cap">${firstPh ? `trouble starts at <b style="color:${CM_PC[firstPh - 1]}">${CM_SHORT[firstPh - 1]}</b>` : "no phase gave up here"}</div></div>`;
+      const phChips = (cFull && prof) ? `<div class="tp-legend">${[1, 2, 3, 4].map((i) => { const q = prof.find((x) => x.phase === i); const st2 = q && q.n ? q.status : "unseen";
+        return `<span class="tp-lg${firstPh === i ? " first" : ""}"><i style="background:${PH_COL[st2]}"></i>${CM_SHORT[i - 1]}: <b style="color:${PH_COL[st2]}">${PH_LBL[st2]}</b>${firstPh === i ? " · ⚑" : ""}</span>`; }).join("")}</div>` : "";
+      return `<div class="ct-break"><div class="ct-break-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${bal ? `<span class="chip" style="border-color:${balCol};color:${balCol}">${bal}</span>` : ""}${recurringFlag(t, cFull)}<span class="ct-close" data-courseturn-close="1" title="close">✕</span></div><div class="ct-break-body">${closeup}${phRibbon}<div class="ct-break-main">${phChips}${speeds}${env}${turnVerdict(cFull, tuning && bcOK)}${turnTraceStrip(co, t.pos, curCar)}${stage}</div></div></div>`;
     };
     // ---- FULL 5-PHASE per-turn analysis: EVERY identified turn, all phases coloured by what the grip did there, with a
     // tune-vs-driver verdict and a recurring-problem flag. The analyzer measures 4 grip phases (brake · turn-in · mid ·
@@ -5511,31 +5522,9 @@
     const turnCorner = (co, n) => { const t = turnTable(co).turns[n - 1]; if (!t) return [null, null];
       const near = (a, b, d) => a && b && ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) <= d * d;
       const cs = (co.corners || []).filter((k) => k.pos && !k.drift && near(k.pos, t.pos, 45)); return [t, cs.length ? cs[cs.length - 1] : null]; };
-    const fullTurnCard = (co, n, unlocked) => {
-      const [t, c] = turnCorner(co, n); if (!t) return "";
-      const dr = t.dir === "L" ? "◀ L" : t.dir === "R" ? "R ▶" : "";
-      const r = t.radius_m || (c && c.radius_m) || null; const type = c ? c.type : null;
-      const curCar = (live.frame && live.frame.on && live.frame.cid) || (co.cars || [])[0];
-      const grip = (co.driving && co.driving.car_grip && curCar && co.driving.car_grip[curCar]) || null;
-      const predMph = (grip && r) ? Math.round(Math.sqrt(grip * 9.81 * r) * 2.237) : null;
-      const prof = c ? c.phase_profile : null; const firstPh = c ? c.dominant_phase : null;
-      const mphOut = c ? (c.mph_out ?? (c.last && c.last.mph_out) ?? (c.ref && c.ref.mph_out)) : null;
-      const phChips = c && prof ? `<div class="tp-legend">${[1, 2, 3, 4].map((i) => { const p = prof.find((x) => x.phase === i); const s = p && p.n ? p.status : "unseen"; const first = firstPh === i;
-        return `<span class="tp-lg${first ? " first" : ""}"><i style="background:${PH_COL[s]}"></i>${CM_SHORT[i - 1]}: <b style="color:${PH_COL[s]}">${PH_LBL[s]}</b>${first ? " · ⚑ starts here" : ""}</span>`; }).join("")}</div>` : "";
-      const speeds = c ? `<div class="ct-speeds">${c.mph_in != null ? `<span>${c.mph_in}<small>in</small></span><span class="ct-arr">→</span>` : ""}<span><b>${c.mph_min != null ? c.mph_min : "—"}</b><small>apex</small></span>${mphOut != null ? `<span class="ct-arr">→</span><span>${mphOut}<small>out</small></span>` : ""}${c.lat_g ? `<span class="ct-g">${c.lat_g} g</span>` : ""}${predMph != null ? `<span class="ct-env2" title="grip-envelope apex = radius × this car's measured grip">envelope ≈ ${predMph}${c.mph_min != null ? (c.mph_min >= predMph - 2 ? " · at the limit" : " · " + Math.max(0, predMph - c.mph_min) + " to find") : ""}</span>` : ""}</div>` : "";
-      return `<div class="ft-card"><div class="ft-hd"><b>Turn ${n}${dr ? " · " + dr : ""}</b>${r ? `<span class="chip">r≈${Math.round(r)} m</span>` : ""}${type ? `<span class="chip">${type}</span>` : ""}${recurringFlag(t, c)}</div>
-        <div class="ft-body"><div class="ft-glyph">${turnPhaseRibbon(prof, firstPh, 172)}</div><div class="ft-main">${phChips}${speeds}${turnVerdict(c, unlocked)}</div></div></div>`;
-    };
-    const turnByTurnSection = (co, unlocked) => {
-      const _T = turnTable(co); const canon = _T.turns;
-      if (!canon.length) return `<div class="lab-corner" style="border-left:4px solid var(--accent2);margin-bottom:8px;font-size:11.5px"><b>🔬 Turn-by-turn</b> <span class="why">— no turns learned yet. Complete one full lap: the course's turns are read from it, and they become permanent once they show up on most laps across two sessions.</span></div>`;
-      let nTune = 0, nDriver = 0, nRec = 0;
-      canon.forEach((t, i) => { const c = turnCorner(co, i + 1)[1]; if (c && c.limiter === "tune") nTune++; if (c && c.limiter === "driver") nDriver++; if (recurringFlag(t, c)) nRec++; });
-      const cards = canon.map((t, i) => fullTurnCard(co, i + 1, unlocked)).join("");
-      return `<div class="lab-corner" style="border-left:4px solid var(--accent2);margin-bottom:8px"><div class="card-row" style="margin-top:0"><strong>🔬 Turn-by-turn — all ${canon.length} turns · every phase</strong><span style="display:inline-flex;gap:4px">${nTune ? `<span class="chip" style="border-color:#00d27a;color:#00d27a">🔧 ${nTune} ${unlocked === false ? "setup-limited" : "tune"}</span>` : ""}${nDriver ? `<span class="chip" style="border-color:#e3b341;color:#e3b341">🧑 ${nDriver} driver</span>` : ""}${nRec ? `<span class="chip trec">⚠ ${nRec} recurring</span>` : ""}</span></div>
-        <div class="why" style="font-size:10.5px;margin:2px 0 6px">each turn's 5 phases coloured by grip · <span style="color:#2f81f7">■</span> understeer · <span style="color:#e5414e">■</span> oversteer · <span style="color:#d95926">■</span> both · <span style="color:#00d27a">■</span> ok · ⚑ where the trouble starts · 🔧 setup helps / 🧑 it's speed, not setup</div>
-        <div class="ft-grid">${cards}</div></div>`;
-    };
+    // fullTurnCard / turnByTurnSection lived here. They rendered EVERY turn's phases as a grid below the body;
+    // that content now answers the question the map asks, inside courseTurnBreakdown, for the turn you clicked.
+    // The aggregate counts they carried live on in turnTally, on the map pane header.
     // ---- HISTORICAL TURN RECORD — what the DATABASE knows about this course's turns, independent of this session.
     // A turn earns its place either from the curvature of the recorded path (geometry) or from how the car behaved
     // through it lap after lap (behaviour); that provenance, the sessions behind it and its running pass/presence
@@ -5591,6 +5580,20 @@
     // The right half is one pane with two states, never two panes competing: the course's TUNING OVERVIEW by default,
     // and the SELECTED TURN's detail when you click a turn on the map. Clicking a turn is the only thing that swaps it,
     // and closing the turn returns the overview — so the pane always answers the question the map just asked.
+    // The at-a-glance half of the retired turn-by-turn grid: HOW MANY turns need a setup change, how many are a
+    // driver gain, how many keep going wrong. Losing this with the grid would have meant opening every turn to
+    // discover whether any of them wanted opening. The counts sit on the map because the map is where you act on
+    // them — the coloured markers already tell you WHICH turn, this tells you how many to look for.
+    const turnTally = (co) => { try {
+      const rows = turnTable(co).turns; if (!rows.length) return "";
+      let nT = 0, nD = 0, nR = 0;
+      rows.forEach((t, i) => { const c = turnCorner(co, i + 1)[1];
+        if (c && c.limiter === "tune") nT++; if (c && c.limiter === "driver") nD++; if (recurringFlag(t, c)) nR++; });
+      const chip = (n2, col, lbl, tip) => n2 ? `<span class="chip" title="${esc(tip)}" style="border-color:${col};color:${col};font-size:9.5px;padding:1px 5px">${lbl} ${n2}</span>` : "";
+      return chip(nT, "#00d27a", "🔧", `${nT} turn(s) where a setup change helps — click them for the phase breakdown`)
+           + chip(nD, "#e3b341", "🧑", `${nD} turn(s) limited by line/braking, not by the car`)
+           + chip(nR, "#e5414e", "⚠", `${nR} turn(s) that go wrong repeatedly across sessions`);
+    } catch (e) { return ""; } };
     const dashMapPane = (co) => {
       const geo = courseGeoFor(co); const rk = co.route_key;
       if (!geo) return `<div class="dash-map-pane"><div class="course-hero building" style="height:100%">${courseShapeGlyph(geo, 60) || `<span style="font-size:32px">🗺</span>`}<div><b style="font-size:13.5px">Mapping this course's shape…</b><div class="why" style="font-size:11px;margin-top:2px">complete one full lap and the outline draws here from your position trace</div></div></div>`;
@@ -5598,7 +5601,7 @@
       const gripLap = gripLapFor(co, rk); const nImp = impactCount(gripLap && gripLap.pts);
       const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null;
       return `<div class="dash-map-pane">
-        <div class="dash-pane-hd"><span class="dash-ey">▨ COURSE MAP</span><b>${shown} turn${shown === 1 ? "" : "s"}</b><span class="why">${geo.length_m} m</span>${shapeBadge(co)}<span class="why" style="margin-left:auto;font-size:10px">scroll to zoom · drag to pan · click a turn →</span></div>
+        <div class="dash-pane-hd"><span class="dash-ey">▨ COURSE MAP</span><b>${shown} turn${shown === 1 ? "" : "s"}</b><span class="why">${geo.length_m} m</span>${shapeBadge(co)}${turnTally(co)}<span class="why" style="margin-left:auto;font-size:10px">scroll to zoom · drag to pan · click a turn →</span></div>
         <div class="dash-map-wrap">${courseMap(geo, co.corners, co.turns, { rk, selN, live: src === "live", co, gripLap, W: 600, H: 560, fill: true })}</div>
         <div class="dash-map-key">
           <span><span style="color:var(--accent2)">━</span> course</span><span><span style="color:var(--warn,#e3b341)">╌</span> latest lap</span><span><span style="color:var(--muted)">─</span> every lap${(geo.layout_paths || []).length ? ` (${geo.layout_paths.length})` : ""}</span>

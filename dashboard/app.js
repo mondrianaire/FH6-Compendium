@@ -5774,6 +5774,17 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const el = host.querySelector("#lvSections"); if (!el) return;
       const a = document.activeElement; if (!force && a && el.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;   // never wipe something being typed — the next analysis repaints (reset / explicit picks force)
       el.innerHTML = sectionsHtml(liveSess(), true); bindBody(el);
+      // RE-PLACE THE LIVE OVERLAYS IN THE SAME TASK AS THE REBUILD. This is a wholesale innerHTML repaint: it
+      // destroys the map SVG and recreates .lv-car with display:none, so the car dot went invisible on EVERY
+      // repaint and stayed invisible until the next frame event happened to arrive. paintAll made it certain
+      // rather than likely — it ran paintFrame() (which places the dot) and THEN paintSections() (which throws
+      // that SVG away), so the dot was guaranteed to blink out every single time. That is the "player tracker
+      // flickering on the course map".
+      //
+      // Re-placing here, synchronously, closes the gap to zero: the browser never gets a chance to paint a frame
+      // in which the map exists and the dot does not. The real cure is not repainting live surfaces with
+      // innerHTML at all (see the redesign note), but that is a larger change and this is correct meanwhile.
+      if (src === "live") { try { updCarDot(live.frame); paintLastOnMap((live.cornerScores || []).slice(-1)[0]); paintGripGlow(); } catch (e) {} }
     }
     function loadFullSession() {
       fetch(liveUrl + "/session.json").then((r) => r.json()).then((js) => { if (js && js.id && live.analysis && js.id === live.analysis.id) { const i = sessions.findIndex((x) => x.id === js.id); if (i >= 0) sessions[i] = js; else sessions.push(js); live.loaded = js.id; cacheCourseGeo(js);

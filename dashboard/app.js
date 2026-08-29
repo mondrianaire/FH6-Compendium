@@ -3127,7 +3127,15 @@
         const ds = sv.dataset; const cx = +ds.ox + (f.px - +ds.x0) * +ds.sc, cy = +ds.oy - (f.pz - +ds.z0) * +ds.sc;
         if (!isFinite(cx) || !isFinite(cy)) { g.style.display = "none"; return; }   // belt-and-braces: NaN passes every bounds test below and SVG paints an invalid transform at the origin
         if (cx < -25 || cy < -25 || cx > +ds.w + 25 || cy > +ds.h + 25) { g.style.display = "none"; return; }   // off the mapped area — hide rather than pin to an edge
-        g.style.display = ""; g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
+        // POSITION BEFORE UNHIDING. .lv-car carries `transition:transform .18s`, and the map re-renders the
+        // element with NO transform — which is the ORIGIN. Unhiding and moving in one statement makes the
+        // transition run FROM the top-left corner, so the dot visibly flies in from the corner on every repaint.
+        // Setting the transform while it is still hidden, then flushing layout, gives the transition a correct
+        // starting point; the first placement after a repaint is then instant rather than an animation.
+        const _firstPlace = !g.hasAttribute("transform");
+        g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
+        if (_firstPlace) void g.getBoundingClientRect();   // commit the position before it can be seen
+        g.style.display = "";
       });
     } catch (e) {} };
     // LAST-CORNER CALLOUT: the scorecard's verdict, ON the map, at the corner's real apex — grade color + the

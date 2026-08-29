@@ -43,6 +43,18 @@ MIN_LAP_S = 20.0      # below this it is a stub, not a lap
 STEP = 4.0            # resample spacing, matching the analyzer's own
 
 
+def _grip(fl, fr, rl, rr, ax):
+    """The analyzer's grip alphabet, restated: 4 impact · 3 both · 1 front · 2 rear · 0 calm.
+
+    Kept in step with analyze_session's grip_code (which is nested and cannot be imported). Code 4 is documented
+    there as a hard-cornering detector wearing an impact's name, so it is recorded descriptively and never used
+    to veto anything."""
+    if abs(ax / 9.80665) > 3.0:
+        return 4
+    f, r = max(abs(fl), abs(fr)), max(abs(rl), abs(rr))
+    return 3 if (f > 1 and r > 1) else 1 if f > 1 else 2 if r > 1 else 0
+
+
 def read_laps(path):
     """Every timed lap in a capture, with the metadata that proves it is one."""
     f = open(path, encoding="utf-8", errors="replace", newline="")
@@ -50,7 +62,11 @@ def read_laps(path):
     hdr = next(rd)
     ix = {n: i for i, n in enumerate(hdr)}
     need = ("IsRaceOn", "CurrentLap", "LastLap", "PosX", "PosZ", "Speed", "RacePosition", "CarOrdinal", "CarPI",
-            "DrivetrainType", "NumCylinders", "PosY")
+            "DrivetrainType", "NumCylinders", "PosY",
+            # the grip alphabet is MEASURED, never assumed. A stored trace whose grip column is all zeroes claims
+            # the car was calm through every corner, which is a lie the whole per-turn analysis would then read
+            # as fact — so the slip channels are required, not optional.
+            "CombinedSlipFL", "CombinedSlipFR", "CombinedSlipRL", "CombinedSlipRR", "AccelX")
     miss = [n for n in need if n not in ix]
     if miss:
         raise SystemExit("capture is missing columns: %s" % miss)
@@ -72,7 +88,11 @@ def read_laps(path):
                         "mph": G(row, "Speed") * 2.23694, "last": G(row, "LastLap"),
                         "rpos": int(G(row, "RacePosition")),
                         "cid": "%d|%d|%d|%d" % (int(G(row, "CarOrdinal")), int(G(row, "DrivetrainType")),
-                                                int(G(row, "NumCylinders")), int(G(row, "CarPI")))})
+                                                int(G(row, "NumCylinders")), int(G(row, "CarPI"))),
+                        "grip": _grip(G(row, "CombinedSlipFL"), G(row, "CombinedSlipFR"),
+                                      G(row, "CombinedSlipRL"), G(row, "CombinedSlipRR"), G(row, "AccelX")),
+                        "cls": int(G(row, "CarClass")) if "CarClass" in ix else None,
+                        "pi": int(G(row, "CarPI")), "drv": int(G(row, "DrivetrainType"))})
         except Exception:
             pass
         prev = cl
@@ -174,6 +194,38 @@ def main():
     m["laps"] = max(m.get("laps") or 0, len(good))
     json.dump(m, open(mp, "w", encoding="utf-8"), indent=2)
     print("\nwrote %s" % mp)
+
+    # A LAP GOOD ENOUGH TO DEFINE THE COURSE IS A LAP WORTH KEEPING. The Colossus ended up with a correct 23.4 mi
+    # map and 21 established turns and ZERO lap traces — every corner mapped, not one of them measured, because
+    # the per-turn statistics read from laps.db and the real laps had never been written there. Storing them here
+    # closes the loop: the drive that defined the course also supplies its corner data.
+    # Only laps belonging to THIS course are stored; the others in the capture belong to their own courses and are
+    # not this run's business to file.
+    import lap_store
+    sess = os.path.splitext(os.path.basename(a.capture))[0]
+    rows = []
+    for GL, GP, Gln, Gt, Gf in good:
+        if abs(Gln - ln) > 0.25 * ln:      # a different course in the same capture
+            continue
+        pts, acc, prev, last_s = [], 0.0, None, -1e9
+        for q in GL:
+            if prev is not None:
+                d = math.hypot(q["x"] - prev[0], q["z"] - prev[1])
+                if d > 150:
+                    prev = (q["x"], q["z"]); continue
+                acc += d
+            if acc - last_s >= STEP or prev is None:
+                pts.append([round(acc), round(q["mph"], 1), q["grip"], round(q["x"]), round(q["z"]), round(q["y"], 1)])
+                last_s = acc
+            prev = (q["x"], q["z"])
+        if len(pts) < 20:
+            continue
+        rows.append({"route_key": key, "session": sess, "cid": Gf["cid"], "t0": round(GL[0]["cl"], 3),
+                     "lap_s": Gf["timer_s"], "arc_m": round(Gln), "build_id": None, "class": None,
+                     "pi": GL[-1].get("pi"), "drivetrain": None, "solo": 1 if Gf["solo"] else 0,
+                     "pts": pts, "impacts": sum(1 for q in pts if q[2] == 4), "void": 0, "tune_hash": None})
+    if rows:
+        print("stored %d lap trace(s) for %s" % (lap_store.put_laps(ROOT, rows), key))
     print("run rebind_map_turns.py next so the turn inventory binds to this map")
 
 

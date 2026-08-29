@@ -1314,22 +1314,14 @@ def main():
         # where the event's own first row is wherever the roll-up happened to begin
         if _lap_rows and _lap_rows is not rs:
             start = _lap_rows[0]; sx, sz = start["PosX"], start["PosZ"]
-        _prev_cl = None
-        for q in rs:
-            _cl = q.get("CurrentLap")
-            if _cl is None: break
-            if _prev_cl is not None and _prev_cl <= 0.01 and _cl > 0.0:
-                start = q; sx, sz = q["PosX"], q["PosZ"]
-                break
-            if _prev_cl is not None and _prev_cl > 30.0 and _cl < 1.0:
-                # move the WHOLE anchor, not just the coordinates: the heading below is measured 100 m along from
-                # `start`, so leaving `start` at the window opening while sx/sz jumped to the line made the heading
-                # vector span two unrelated points. A garbage heading fails attribute_route's direction gate, and
-                # the route it should have matched gets minted again under a _NN suffix — the exact duplication
-                # this change exists to stop.
-                start = q; sx, sz = q["PosX"], q["PosZ"]   # the finish line: a property of the course, not the capture
-                break
-            _prev_cl = _cl
+        # The legacy crossing-detector lived here and OVERWROTE the anchor above. Its first test —
+        # `_prev_cl <= 0.01 and _cl > 0` — was meant to catch the 0 -> running transition, but event rows are
+        # already gated on CurrentLap > 0 and therefore BEGIN at ~0.01, so it matched the event's second row
+        # every time, anchored on the roll-up, and broke out. That is why a 23.41 mi lap kept registering its
+        # start 5 km from its own line.
+        # Nothing replaces it: _lap_rows[0] is the first row of the timed lap, which IS the start/finish line,
+        # and it is the same place on every attempt. The line is the firm anchor; length, turns and per-turn
+        # statistics all extrapolate from it, so it is the one thing that must not be inferred loosely.
         # LENGTH FROM THE PATH, NOT FROM THE ODOMETER. DistanceTraveled under-reports badly on long routes —
         # measured on a complete 23.41 mi Colossus lap it read 6,621 m against a 37,671 m path, 5.7x short. That
         # value sets routes[key]["length_m"] and feeds attribute_route, so every attempt registered a 6.6 km route

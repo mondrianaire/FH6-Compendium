@@ -369,6 +369,33 @@ def g3():
     return (not dups, f"{len(paths)} course models{' — ' + '; '.join(dups[:3]) if dups else ', no duplicates, every route matchable'}")
 check("G data", "courses: one road = one model (no fragmentation)", g3)
 
+
+def g4():
+    # THE MODEL AUDIT MUST ACTUALLY RUN. audit_models.py was written precisely to catch faults in persisted
+    # course state, it exits non-zero on FAIL, and nothing ever invoked it — not this harness, not a hook. So
+    # when 221 turns across 18 courses were established under a superseded rule, the checker that existed to
+    # notice sat on disk unrun. A check nobody runs is not a check; wiring it here is most of its value.
+    import subprocess
+    try:
+        r = subprocess.run([sys.executable, os.path.join(HERE, "audit_models.py"), "--json"],
+                           capture_output=True, text=True, timeout=120)
+        rows = json.loads(r.stdout or "[]")
+    except Exception as e:
+        return (False, f"audit_models.py did not run: {e}")
+    fails = [(c["course"], f) for c in rows for f in c["findings"] if f["severity"] == "FAIL"]
+    warns = sum(1 for c in rows for f in c["findings"] if f["severity"] == "WARN")
+    # KNOWN, TRACKED FAULTS. Two predate this wiring and are real but separate work: a ratcheted registry entry
+    # on Hakone from a superseded map, and one route whose reference "lap" is 6.7x the median recorded lap.
+    # They are allowed so the harness can go green on everything else — but only BY CODE AND COURSE, so a NEW
+    # instance of either, on any other course, still fails. Delete an entry here when its fault is fixed.
+    KNOWN = {("-2350_-7550", "phantom-turn"), ("1900_6100", "map-too-long")}
+    fresh = [(k, f) for k, f in fails if (k, f["code"]) not in KNOWN]
+    msg = f"{len(rows)} models audited · {len(fails)} FAIL ({len(fails) - len(fresh)} known) · {warns} WARN"
+    if fresh:
+        msg += " — NEW: " + "; ".join(f"{k}: {f['code']}" for k, f in fresh[:3])
+    return (not fresh, msg)
+check("G data", "course-model audit (persisted-state invariants)", g4)
+
 # ---------------- report ----------------
 if "--json" in sys.argv:
     print(json.dumps(RESULTS, indent=1)); sys.exit(0)

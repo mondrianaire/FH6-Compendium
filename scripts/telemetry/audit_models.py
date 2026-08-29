@@ -77,9 +77,59 @@ def audit(m, path):
                                                 f"turn in the current map — a ratchet from a superseded map"))
 
     # --- 5. DERIVABLE: the headline count must equal what the flags actually say. ---
+    # NOTE THIS CHECK'S CEILING. It compares the count to the flags, so it can only ever catch a WRITER bug —
+    # the count field drifting from the array. It is structurally incapable of catching a RULE bug, where the
+    # flags themselves are wrong *in agreement* with the count. That is exactly how 221 turns were established
+    # under a superseded rule with every check passing: turn_count=184 and len(established)=184 agreed perfectly
+    # while both described a 172-turn map. Check 5b is the one that can disagree.
     est = [t for t in turns if t.get("established")]
     if m.get("turn_count") is not None and m["turn_count"] != len(est):
         out.append(("FAIL", "count-mismatch", f"turn_count={m['turn_count']} but {len(est)} turns are established"))
+
+    # --- 5b. DERIVABLE, FOR REAL: re-run the establishment rule and compare the SET. ---
+    # The audit's checks were pairwise between ADJACENT artefacts: registry -> map (check 4) and
+    # turn_count -> established (check 5). The pair that mattered, established turns -> THE MAP, was never
+    # wired, so a course could carry 184 established turns over a 172-turn map and report clean. Cross-checking
+    # neighbours can always be satisfied by self-consistent nonsense; the only check that cannot is one that
+    # RE-DERIVES the value from the evidence and compares. So this does not ask whether the flags agree with
+    # each other — it asks what the flags SHOULD be, and says so when they differ.
+    if mapped:                       # a course with no map still establishes from behaviour; nothing to re-derive
+        apex = [t["apex"] for t in mapped]
+        # PROXIMITY IS A FALLBACK, NOT A DEFINITION. geo_mapped is set by the analyzer's own matcher, whose
+        # tolerance is derived from the map's closest turn gap (6-18 m). Using a fixed 45 m radius as a stand-in
+        # calls turns "mapped" that the analyzer correctly did not, and the first cut of this check duly reported
+        # 15 courses of underclaimed turns that were nothing of the kind. So proximity is used ONLY to reconstruct
+        # the flag on the two legacy models that predate provenance entirely; where the field exists, it is truth.
+        has_prov = any("geo_mapped" in t for t in turns)
+
+        def _near(t):
+            p = t.get("pos")
+            return bool(p) and any((q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2 <= 45 ** 2 for q in apex)
+
+        def _should(t):
+            if t.get("geo_mapped") or (t.get("geo_sessions") or 0) >= 2:
+                return True
+            if not has_prov and _near(t):
+                return True
+            return (t.get("geo_sessions") or 0) >= 1 and ((t.get("track") or {}).get("passes") or 0) >= 1
+
+        over = [t for t in est if not _should(t)]          # established with no geometric evidence behind it
+        # the mirror case is stated WITHOUT the proximity fallback: only an outright contradiction counts —
+        # the model itself says this turn is in the map, and the model itself says it is not a turn.
+        under = [t for t in turns if not t.get("established") and t.get("geo_mapped")]
+        if over:
+            ids = ", ".join(str(t.get("id") or t.get("n")) for t in over[:6])
+            out.append(("FAIL", "unearned-turns", f"{len(over)} of {len(est)} established turns have NO geometric "
+                                                  f"evidence on a course whose map has {len(mapped)} turns — the "
+                                                  f"establishment rule and the stored flags disagree ({ids}"
+                                                  f"{', …' if len(over) > 6 else ''})"))
+        if under:
+            out.append(("WARN", "underclaimed-turns", f"{len(under)} mapped-and-driven turns are NOT established — "
+                                                      f"the ratchet may be holding a superseded rule's result"))
+        if len(est) > len(mapped):
+            out.append(("FAIL", "more-turns-than-road", f"{len(est)} turns established but the map has only "
+                                                        f"{len(mapped)} — a course cannot have more corners than "
+                                                        f"its own road"))
     if any(t.get("est_by") == "declared" for t in turns):
         out.append(("FAIL", "declared-promotion", "a turn is established by the DECLARED count — the count is an "
                                                   "input again, so it can no longer test the detector"))

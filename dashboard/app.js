@@ -695,6 +695,14 @@
   // void is whatever the store decided (impacts on a SOLO run); absent -> not void, so an old daemon renders as today
   const isVoid = (t) => !!(t && (t.void === true || t.void === 1));
   const VOID_WHY = "time invalidated by contact — the grip data is still good, only the TIME is void";
+  // A PARTIAL LAP IS THE SAME CASE AS A VOID ONE. It did not cover the whole course, so its TIME is not
+  // comparable — but the corners it did cover are as real as any. The store now returns partials instead of
+  // discarding them (they were 24 of 151 laps, and they fall hardest on long courses never completed, where the
+  // road you have practised most is the road that had no data). The UI's job is to keep them legible WITHOUT
+  // letting a 400 m fragment sit next to a full lap looking like a 12-second record.
+  const isPartial = (t) => !!(t && t.partial);
+  const PARTIAL_WHY = "part of the course only — the corners it covers are real, but the TIME is not comparable to a full lap";
+  const notTimed = (t) => isVoid(t) || isPartial(t);
   const CM_PC = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
   const CM_SHORT = ["Braking", "Turn-in", "Mid-corner", "Exit", "Straight/crest"];
   const CM_SEGS = [
@@ -5202,7 +5210,7 @@
       const vmax = Math.max(...match.flatMap((t) => t.pts.map((p) => p[1]))) * 1.06 || 1;
       const W2 = 560, H2 = 150, padL = 26, padB = 15;
       const px2 = (s) => padL + (s / smax) * (W2 - padL - 6), py2 = (v) => (H2 - padB) - (v / vmax) * (H2 - padB - 8);
-      const line = (t, col, w2, op) => `<polyline fill="none" stroke="${col}" stroke-width="${w2}" opacity="${op}"${isVoid(t) ? ` stroke-dasharray="3 3"` : ""} points="${t.pts.map((p) => `${px2(p[0]).toFixed(1)},${py2(p[1]).toFixed(1)}`).join(" ")}"${isVoid(t) ? `><title>${esc(VOID_WHY)}</title></polyline>` : "/>"}`;
+      const line = (t, col, w2, op) => `<polyline fill="none" stroke="${col}" stroke-width="${w2}" opacity="${op}"${notTimed(t) ? ` stroke-dasharray="3 3"` : ""} points="${t.pts.map((p) => `${px2(p[0]).toFixed(1)},${py2(p[1]).toFixed(1)}`).join(" ")}"${notTimed(t) ? `><title>${esc(isVoid(t) ? VOID_WHY : PARTIAL_WHY)}</title></polyline>` : "/>"}`;
       // GRIP-PAINTED trace: the same line, cut into runs of one state, so a turn reads blue the instant the
       // fronts give up and purple when all four go — the state change IS the shape of the line, seamlessly.
       const gripLine = (t, w2) => { const P = t.pts; if (!P.length || P[0].length < 3) return line(t, "var(--accent2)", w2, 1);
@@ -5215,7 +5223,7 @@
       // one of them would repaint the whole chart in state colours and drown the comparison.
       // match is fastest-first, but a VOID time can never be the fastest anything — the store bars it from being a
       // reference best and the UI must agree, or the green "fastest" line is a lap that never legally happened.
-      const best = match.find((t) => !isVoid(t)) || null; const cur = curCar ? match.find((t) => t.cid === curCar) : null; const isCur = (t) => t === cur;
+      const best = match.find((t) => !notTimed(t)) || null;   // nor may a PARTIAL be the fastest: it is not a lap of this course const cur = curCar ? match.find((t) => t.cid === curCar) : null; const isCur = (t) => t === cur;
       const geo = courseGeoFor(co); const canon2 = ((co.turns || {}).canonical) || [];
       const tkLbl = (g2) => { let bi = -1, bd = 60 * 60; canon2.forEach((t2, i2) => { const d2 = (t2.pos[0] - g2.apex[0]) ** 2 + (t2.pos[1] - g2.apex[1]) ** 2; if (d2 < bd) { bd = d2; bi = i2; } }); return bi >= 0 ? "T" + (bi + 1) : "·"; };   // THIS course's T-numbers, not courses[0]'s
       const ticks = ((geo && geo.turns) || []).filter((g2) => g2.s != null && g2.apex).map((g2) => `<line x1="${px2(g2.s).toFixed(1)}" y1="${H2 - padB}" x2="${px2(g2.s).toFixed(1)}" y2="8" stroke="var(--line)" opacity=".55"/><text x="${px2(g2.s).toFixed(1)}" y="${H2 - 4}" text-anchor="middle" font-size="8" fill="var(--muted)">${tkLbl(g2)}</text>`).join("");
@@ -5235,9 +5243,15 @@
       // pct_off is the ONE number that makes a faint context line legible: how far off ITS OWN tune's best it was.
       // A void lap keeps its chip — its grip data is still worth comparing — but the TIME is struck through and
       // pct_off is suppressed, because "5.3% off" on a lap that never counted reads as an achievement it is not.
-      const leg = match.slice(0, 8).map((t) => { const vd = isVoid(t), nImp = impactCount(t.pts);
-        return `<span class="chip" title="${esc((t.session || "") + (t.build_id ? " · build " + t.build_id : "") + (t.hist ? " · recorded lap" : " · saved trace") + (vd ? " · " + VOID_WHY : ""))}" style="border-color:${vd ? gripCol("impact") : isCur(t) ? "var(--accent2)" : t === best ? "#00d27a" : "var(--line)"};${vd ? `color:${gripCol("impact")};opacity:.8` : isCur(t) || t === best ? "" : "color:var(--muted)"}">${buildThumb(String(t.cid).split("|")[0], t.build_id, true)} ${piBadge(t.cls, t.pi, true)}${t.lap_s ? ` · <span${vd ? ` style="text-decoration:line-through"` : ""}>${t.lap_s.toFixed(1)} s</span>` : ""}${!vd && t.pct_off ? ` <span style="opacity:.75">+${t.pct_off.toFixed(1)}%</span>` : ""}${vd ? ` · ${gripOf("impact").icon} VOID` : nImp ? ` · ${gripOf("impact").icon}${nImp}` : ""}${isCur(t) ? " · you" : t === best ? " · fastest" : ""}</span>`; }).join("") + (match.length > 8 ? `<span class="chip" style="color:var(--muted)">+${match.length - 8} more</span>` : "");
-      const nVoid = match.filter(isVoid).length;
+      // A PARTIAL's time is struck through exactly like a void one, and labelled with HOW MUCH of the course it
+      // covered — "58% of the course" is the fact that makes the shorter time make sense at a glance, and pct_off
+      // is suppressed for the same reason it is on a void lap: a percentage off a best it was never racing reads
+      // as an achievement it is not.
+      const leg = match.slice(0, 8).map((t) => { const vd = isVoid(t), pt = isPartial(t) && !vd, nt = vd || pt, nImp = impactCount(t.pts);
+        const frac = pt && t.arc_m && smax ? Math.round((t.arc_m / smax) * 100) : null;
+        const col = vd ? gripCol("impact") : pt ? "var(--warn,#e3b341)" : isCur(t) ? "var(--accent2)" : t === best ? "#00d27a" : "var(--line)";
+        return `<span class="chip" title="${esc((t.session || "") + (t.build_id ? " · build " + t.build_id : "") + (t.hist ? " · recorded lap" : " · saved trace") + (vd ? " · " + VOID_WHY : pt ? " · " + PARTIAL_WHY : ""))}" style="border-color:${col};${nt ? `color:${col};opacity:.85` : isCur(t) || t === best ? "" : "color:var(--muted)"}">${buildThumb(String(t.cid).split("|")[0], t.build_id, true)} ${piBadge(t.cls, t.pi, true)}${t.lap_s ? ` · <span${nt ? ` style="text-decoration:line-through"` : ""}>${t.lap_s.toFixed(1)} s</span>` : ""}${!nt && t.pct_off ? ` <span style="opacity:.75">+${t.pct_off.toFixed(1)}%</span>` : ""}${vd ? ` · ${gripOf("impact").icon} VOID` : pt ? ` · ◔ ${frac != null ? frac + "% of the course" : "partial"}` : nImp ? ` · ${gripOf("impact").icon}${nImp}` : ""}${isCur(t) ? " · you" : t === best ? " · fastest" : ""}</span>`; }).join("") + (match.length > 8 ? `<span class="chip" style="color:var(--muted)">+${match.length - 8} more</span>` : "");
+      const nVoid = match.filter(isVoid).length; const nPart = match.filter((t) => isPartial(t) && !isVoid(t)).length;
       return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces — class ${esc(curCls || "all")} on this circuit</strong><span class="why" style="font-size:10.5px">${match.length} lap${match.length === 1 ? "" : "s"}${recs.length ? ` (${saved.length} saved tune${saved.length === 1 ? "" : "s"} + ${recs.length} from the lap record)` : " · each tune's best lap"} · mph vs distance</span></div>
         ${clsRow}
         <div style="overflow-x:auto"><svg class="spd-trace" viewBox="0 0 ${W2} ${H2}" style="min-width:420px;max-width:100%;background:var(--bg);border-radius:8px"
@@ -5246,6 +5260,7 @@
              <g class="spd-cursor" style="display:none"><line y1="6" y2="${H2 - padB}" stroke="var(--txt)" stroke-width="1" opacity=".6"/><circle r="3.5" fill="var(--txt)"/></g></svg></div>
         <div class="spd-read why" style="font-size:10.5px;min-height:14px">${hasGrip ? "hover the trace — it marks that exact spot on the course map" : ""}</div>
         ${nVoid ? `<div class="why" style="font-size:10.5px;color:${gripCol("impact")};margin-top:3px">${gripOf("impact").icon} ${nVoid} lap${nVoid === 1 ? "" : "s"} void — ${esc(VOID_WHY)}. Struck-through times are barred from being a best.</div>` : ""}
+        ${nPart ? `<div class="why" style="font-size:10.5px;color:var(--warn,#e3b341);margin-top:3px">◔ ${nPart} partial lap${nPart === 1 ? "" : "s"} — ${esc(PARTIAL_WHY)}. Kept because the corners they cover are real: on a long course you have never finished, these are most of what is known about its opening.</div>` : ""}
         <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${leg}</div>
         ${hasGrip ? `<div style="margin-top:4px">${gripLegend(["calm", "front", "rear", "both", "impact"])}</div>` : ""}</div>`;
     } catch (e) { return ""; } };

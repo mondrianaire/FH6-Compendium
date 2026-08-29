@@ -266,7 +266,11 @@ def f3():
              "function clsBadge", "function piBadge", "carLblHtml", "pib-img",   # the in-game class-badge design language must exist and stay wired
              "buildThumb", "courseIdentMini", "startOfKey",   # tune identity (livery thumbnail) + course identity (name + start + shape)
              "courseTags", "courseMeasuredChip", "const GRIP", "gripLegend", "turnTable", "bindTraceHover", "data-rivals",   # course tags: type + car-fit from the measured makeup
-             "data-live-map", "flashTurnOnMap", "lastCornerSvg", "geoCov", "speedTracesCard", "turnTraceStrip", "confirmRegressReason", "pinSuspended", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
+             "data-live-map", "flashTurnOnMap", "lastCornerSvg", "geoCov", "speedTracesCard", "turnTraceStrip", "confirmRegressReason", "pinSuspended",
+             # a PARTIAL lap is kept for its corners and barred from being a time — both halves must stay wired,
+             # or the store's partials either vanish again or start looking like records
+             "isPartial", "PARTIAL_WHY", "notTimed", "% of the course",
+             "dashMapPane", "dashInfoPane", "TUNE RATIFIED", "ratif-req", "fh6Ratif:"]   # live position on the course map + turn-grade rings
     missing = [m for m in marks if m not in src]
     return (not missing, f"feature markers present ({len(marks) - len(missing)}/{len(marks)}){'; missing: ' + str(missing) if missing else ''}")
 check("F client", "feature surface complete", f3)
@@ -376,19 +380,32 @@ def g4():
     # when 221 turns across 18 courses were established under a superseded rule, the checker that existed to
     # notice sat on disk unrun. A check nobody runs is not a check; wiring it here is most of its value.
     import subprocess
+    # PROOF OF EXECUTION, not proof of silence. `r.stdout or "[]"` meant a crashed audit parsed to zero rows, zero
+    # FAILs, and a green tick — the same result as a clean run. That is the very shape of fault this check exists
+    # to catch, reproduced in the check itself. So: count the models FIRST, then require the audit to have
+    # actually looked at all of them. >= not ==, because the analyzer can mint a model mid-run.
+    n_before = len(glob.glob(os.path.join(ROOT, "data", "courses", "*.json")))
     try:
         r = subprocess.run([sys.executable, os.path.join(HERE, "audit_models.py"), "--json"],
                            capture_output=True, text=True, timeout=120)
-        rows = json.loads(r.stdout or "[]")
+        rows = json.loads(r.stdout)                      # no "[]" fallback: empty stdout is a failure, not a pass
     except Exception as e:
         return (False, f"audit_models.py did not run: {e}")
+    if r.returncode not in (0, 1):
+        return (False, f"audit_models.py crashed (rc={r.returncode}): {(r.stderr or '').strip()[:160]}")
+    n_courses = sum(1 for c in rows if not str(c["course"]).startswith("data/"))
+    if n_courses < n_before:
+        return (False, f"audit only examined {n_courses} of {n_before} course models — it did not run to completion")
     fails = [(c["course"], f) for c in rows for f in c["findings"] if f["severity"] == "FAIL"]
     warns = sum(1 for c in rows for f in c["findings"] if f["severity"] == "WARN")
     # KNOWN, TRACKED FAULTS. Two predate this wiring and are real but separate work: a ratcheted registry entry
     # on Hakone from a superseded map, and one route whose reference "lap" is 6.7x the median recorded lap.
     # They are allowed so the harness can go green on everything else — but only BY CODE AND COURSE, so a NEW
     # instance of either, on any other course, still fails. Delete an entry here when its fault is fixed.
-    KNOWN = {("-2350_-7550", "phantom-turn"), ("1900_6100", "map-too-long")}
+    # ONE entry left. 1900_6100's map-too-long was retired rather than allowlisted: that map self-retraces 0.0%,
+    # its ends sit 3105 m apart and every stored lap lies 100% on it — a POINT-TO-POINT judged by a circuit's
+    # rule. An allowlist should shrink by fixing the fault or by disproving the check, never by habit.
+    KNOWN = {("-2350_-7550", "phantom-turn")}
     fresh = [(k, f) for k, f in fails if (k, f["code"]) not in KNOWN]
     msg = f"{len(rows)} models audited · {len(fails)} FAIL ({len(fails) - len(fresh)} known) · {warns} WARN"
     if fresh:

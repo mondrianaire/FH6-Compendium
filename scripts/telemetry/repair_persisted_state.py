@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""ONE-SHOT: bring persisted state back inside the invariants the audit now enforces.
+
+    python scripts/telemetry/repair_persisted_state.py --dry
+    python scripts/telemetry/repair_persisted_state.py
+
+Three repairs, all the same shape: a field that says something impossible, and that says it permanently because
+the write path only ever moves it one way. Each repair DELETES the impossible value rather than inventing a
+replacement — the next honest measurement fills it in correctly, and a missing field is a state every reader
+already handles, while a wrong one is not.
+
+WHY. `best_laps` and `visits[].best_lap` are improve-only, guarded only by "> 0". A single absurd value therefore
+latches as the course's headline record and stays there until the SAME car happens to drive the SAME course again
+and beat it. Two are live on disk right now: 200_-6000 is showing a track record of 231307.938 s (64.3 HOURS) and
+-1850_1550 43840.992 s (12.2 h), both from config 2997|1|8|700. The largest genuine lap anywhere in the data is
+208.6 s, so there is no judgement call here -- a 17x margin separates the healthy population from the corruption.
+
+WHAT IT DOES. Removes any best_laps entry, visits[].best_lap or speed_traces[].lap_s outside 5 s .. 1 h. It does
+not invent a replacement: the field goes away, and the next real lap that car sets there fills it correctly. A
+visit keeps its lap COUNT and its session -- only the impossible time is dropped -- so no history is lost.
+
+The 5 s floor is clean today and is enforced anyway, because the two directions do not heal alike: an absurdly
+LARGE time is beaten by the next honest lap, an absurdly SMALL one can never be beaten and so is permanent.
+
+2. MULTI-LAP SPEED TRACES. A speed_traces[cid] is meant to be ONE lap plotted against the course. Four span
+   1.56x-2.45x their map (-4750_-1550 has 4800 m of trace on a 1956 m road, and all three of its traces are like
+   this). These are actively destructive rather than merely wrong: _clen falls back to max(trace span) when the
+   geometry carries no length_m, so one merged trace makes every honest trace measure short and the retirement
+   loop deletes the good ones. Dropped whole — a course with no valid single-lap trace should show none.
+
+3. NON-POSITIVE ROUTE LENGTHS. routes.json length_m is minted unclamped, so -3050_1050 carries -21 m and
+   -3250_500 carries 0. Both are removed rather than zeroed: the gates that read it (`>= 200` enables the
+   reversed-heading rejection, `< 600` marks a stub) already treat a missing value exactly as they treat these,
+   so this changes no behaviour — it only stops the file asserting something impossible. The next event through
+   that route sets it correctly via the same max().
+"""
+import argparse, glob, io, json, os, sys
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+LO, HI = 5.0, 3600.0
+
+
+def bad(t):
+    return t is not None and (t >= HI or 0 < t < LO)
+
+
+def _span(pts):
+    """Arc span of a trace, PIECE-AWARE: pts[-1][0] under-reads by ~1950 m where the arc resets mid-trace."""
+    tot = 0.0; prev = None; st = None
+    for q in pts or []:
+        a = q[0]
+        if prev is None: st = a
+        elif a < prev: tot += prev - st; st = a
+        prev = a
+    return tot + (prev - st) if prev is not None else 0.0
+
+
+def repair(m):
+    """Mutates `m`; returns a list of human-readable descriptions of what was dropped."""
+    hits = []
+    bl = m.get("best_laps") or {}
+    for cid in [c for c, v in bl.items() if bad((v or {}).get("best_lap"))]:
+        hits.append("best_laps[%s] = %.3f s" % (cid, bl[cid]["best_lap"]))
+        del bl[cid]
+    for i, v in enumerate(m.get("visits") or []):
+        if bad((v or {}).get("best_lap")):
+            hits.append("visits[%d].best_lap = %.3f s" % (i, v["best_lap"]))
+            v.pop("best_lap", None)
+    st = m.get("speed_traces") or {}
+    for cid, v in st.items():
+        if bad((v or {}).get("lap_s")):
+            hits.append("speed_traces[%s].lap_s = %.3f s" % (cid, v["lap_s"]))
+            v.pop("lap_s", None)
+    # a trace that covers more road than the map is not a lap of it
+    L = (m.get("geometry") or {}).get("length_m") or 0
+    if L:
+        for cid in [c for c, v in st.items() if _span((v or {}).get("pts")) / L >= 1.45]:
+            hits.append("speed_traces[%s] spans %.0f m on a %.0f m map (%.2fx)"
+                        % (cid, _span(st[cid]["pts"]), L, _span(st[cid]["pts"]) / L))
+            del st[cid]
+    return hits
+
+
+def repair_routes():
+    """Remove non-positive length_m from data/routes.json. Returns descriptions of what was dropped."""
+    p = os.path.join(ROOT, "data", "routes.json")
+    try:
+        d = json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        return [], "routes.json unreadable: %s" % e
+    R = d.get("routes") or {}
+    hits = []
+    for k, v in R.items():
+        if isinstance(v, dict) and "length_m" in v and not ((v.get("length_m") or 0) > 0):
+            hits.append("routes[%s].length_m = %s" % (k, v["length_m"]))
+            v.pop("length_m", None)
+    return hits, (d, p)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry", action="store_true")
+    a = ap.parse_args()
+    n_f = n_v = 0
+    for p in sorted(glob.glob(os.path.join(ROOT, "data", "courses", "*.json"))):
+        try:
+            m = json.load(open(p, encoding="utf-8"))
+        except Exception as e:
+            print("  !! %s: %s" % (os.path.basename(p), e)); continue
+        hits = repair(m)
+        if not hits:
+            continue
+        n_f += 1; n_v += len(hits)
+        print("  %-24s %s" % (os.path.basename(p), "; ".join(hits)))
+        if not a.dry:
+            json.dump(m, open(p, "w", encoding="utf-8"), indent=2)
+    rh, rd = repair_routes()
+    for h in rh:
+        print("  %-24s %s" % ("routes.json", h))
+    if rh and not a.dry and isinstance(rd, tuple):
+        json.dump(rd[0], open(rd[1], "w", encoding="utf-8"), indent=2)
+    print("\n%s: %d impossible value(s) across %d course file(s)%s"
+          % ("WOULD DROP" if a.dry else "DROPPED", n_v, n_f,
+             " + %d route length(s)" % len(rh) if rh else ""))
+    if not n_v and not rh:
+        print("nothing to do — every persisted value is inside the audit's invariants")
+
+
+if __name__ == "__main__":
+    main()

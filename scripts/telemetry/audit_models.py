@@ -50,16 +50,58 @@ def audit(m, path):
         elif sr >= 0.25:
             out.append(("WARN", "map-overlap", f"map retraces itself {100*sr:.0f}% — check for a partial second lap"))
 
-    # --- 2. MAP LENGTH vs the laps actually driven: the map should BE a typical lap. ---
-    if gp and len(lap_arcs) >= 5:
+    # --- 2. MAP LENGTH vs the laps actually driven. ---
+    # ONLY A CIRCUIT'S MAP SHOULD BE ONE LAP. This compared map length to the median lap unconditionally and
+    # failed 1900_6100 as "the reference lap is not a lap" — but that route's map self-retraces 0.0%, its start
+    # and end sit 3105 m apart, and every stored lap lies 100% ON the map while covering 11-62% of it. It is a
+    # POINT-TO-POINT, and partial traversals of one are the normal shape, not a fault. Judging an open road by a
+    # circuit's rule is the same mistake as judging a lap against the wrong reference set.
+    ml = arc(gp) if gp else 0
+    # CLOSED means "comes back to where it started", and how close is close depends on the size of the loop. At 5%
+    # a declared reference loop whose ends sit 81 m apart on a 744 m circuit was classed a point-to-point and run
+    # through the open-road branch. A declared loop is a loop whatever its endpoints say; otherwise 12% of length.
+    closed = str(key).startswith("loop:") or (
+        bool(gp) and math.hypot(gp[0][0] - gp[-1][0], gp[0][1] - gp[-1][1]) <= max(60.0, 0.12 * ml))
+    if gp and len(lap_arcs) >= 5 and closed:
         med = statistics.median(lap_arcs)
-        ml = arc(gp)
         if med and ml > 1.45 * med:
-            out.append(("FAIL", "map-too-long", f"map is {ml:.0f} m but the median recorded lap is {med:.0f} m "
-                                                f"({ml/med:.2f}x) — the reference lap is not a lap"))
+            out.append(("FAIL", "map-too-long", f"circuit map is {ml:.0f} m but the median recorded lap is "
+                                                f"{med:.0f} m ({ml/med:.2f}x) — the reference lap is not a lap"))
         elif med and ml < 0.7 * med:
             out.append(("WARN", "map-too-short", f"map is {ml:.0f} m vs median lap {med:.0f} m ({ml/med:.2f}x) — "
                                                  f"the map covers less road than you routinely drive"))
+    # The open-road equivalent, which the length test cannot express. A partial traversal of a point-to-point is
+    # ordinary, so the question is not "how much of the map did this lap cover" but WHETHER THE TWO ARE THE SAME
+    # ROAD — which needs coverage measured BOTH WAYS. The first cut of this check reported one-way coverage and
+    # called five courses "two roads in one model"; every one of them had map-on-lap = 1.00, i.e. the map sits
+    # wholly INSIDE a longer drive. That is a short map, not a spliced one, and it is the open-road form of the
+    # map-too-short WARN above. Only mutual divergence is a fault, and nothing on disk exhibits it.
+    elif gp and not closed and laps:
+        def _cov(a, cb):
+            return sum(1 for x, z in a if any((int(x // 30) + dx, int(z // 30) + dz) in cb
+                                              for dx in (-1, 0, 1) for dz in (-1, 0, 1))) / max(1, len(a))
+        mc = {(int(x // 30), int(z // 30)) for x, z in gp}
+        # A FRAGMENT CANNOT TESTIFY. An aborted 313 m stub of a 740 m road covers little of the map and is covered
+        # by little of it, which looks exactly like divergence while meaning only "this attempt stopped early".
+        # Judge only laps long enough to be a traversal; the store already treats short laps as partial elsewhere.
+        _med = statistics.median(lap_arcs) if lap_arcs else 0
+        split, short = [], []
+        for lp in laps:
+            if _med and arc(lp) < 0.5 * _med:
+                continue
+            on = _cov(lp, mc)
+            if on >= 0.80:
+                continue
+            back = _cov(gp, {(int(x // 30), int(z // 30)) for x, z in lp})
+            (short if back >= 0.80 else split).append(on)
+        if split:
+            out.append(("FAIL", "lap-off-map", f"{len(split)} of {len(laps)} stored laps diverge from this "
+                                               f"point-to-point's map in BOTH directions (best {max(split):.0%} on "
+                                               f"it) — two different roads in one model"))
+        elif short:
+            out.append(("WARN", "map-too-short", f"{len(short)} of {len(laps)} stored laps run past the mapped road "
+                                                 f"(map lies wholly inside them) — the map covers less than you "
+                                                 f"routinely drive here"))
 
     # --- 3. DETECTOR GENERATION: turns computed by a superseded detector are not comparable. ---
     if gp and g.get("det") != DET_VER:
@@ -147,7 +189,110 @@ def audit(m, path):
             out.append(("WARN", "merged-laps", f"{len(bad)} of {len(lap_arcs)} stored laps exceed 1.45x the median "
                                                f"({med:.0f} m) — likely un-split multi-lap windows: "
                                                f"{', '.join(f'{a:.0f}' for a in bad[:5])} m"))
+    # --- 8. A PERSISTED LAP TIME MUST BE A LAP. ---
+    # best_laps is improve-only (analyze_session.py), guarded only by "> 0", so one absurd value latches forever
+    # and becomes the course's headline record. 200_-6000 is showing 231307.938 s -- a 64-HOUR track record -- and
+    # -1850_1550 12.2 hours. The largest healthy lap anywhere on disk is 208.6 s, a 17x margin, so the ceiling is
+    # not a judgement call. The floor is clean today and goes in anyway: an absurdly LARGE time self-heals the next
+    # time that car drives here, an absurdly SMALL one can never be beaten and so can never heal.
+    def _times():
+        for cid, v in (m.get("best_laps") or {}).items():
+            yield f"best_laps[{cid}]", (v or {}).get("best_lap")
+        for i, v in enumerate(m.get("visits") or []):
+            yield f"visits[{i}]", (v or {}).get("best_lap")
+        for cid, v in (m.get("speed_traces") or {}).items():
+            yield f"speed_traces[{cid}]", (v or {}).get("lap_s")
+    bad_t = [(w, t) for w, t in _times() if t and (t >= 3600 or t < 5)]
+    if bad_t:
+        w, t = bad_t[0]
+        out.append(("FAIL", "impossible-lap", f"{len(bad_t)} stored lap time(s) outside 5 s..1 h — {w} = {t:.3f} s "
+                                              f"({t/3600:.1f} h); improve-only, so it can never be beaten off"))
+
+    # --- 9. A TRACE MUST NOT SPAN MORE ROAD THAN THE MAP IT IS DRAWN AGAINST. ---
+    # 1.45 is not a new constant: it is the reciprocal of check 2's own 0.7, so both state one threshold. The span
+    # must be PIECE-AWARE -- pts[-1][0] under-reads by ~1950 m on -4750_-1550 where the arc resets mid-trace.
+    L = (g.get("length_m") or 0) or ml
+    if L:
+        def _span(pts):
+            tot = 0.0; prev = None; st = None
+            for q in pts or []:
+                a = q[0]
+                if prev is None: st = a
+                elif a < prev: tot += prev - st; st = a
+                prev = a
+            return tot + (prev - st) if prev is not None else 0.0
+        wide = []
+        for cid, v in (m.get("speed_traces") or {}).items():
+            sp = _span((v or {}).get("pts"))
+            if sp and sp / L >= 1.45: wide.append((cid, sp))
+        if wide:
+            cid, sp = max(wide, key=lambda x: x[1])
+            out.append(("FAIL", "trace-too-wide", f"{len(wide)} speed trace(s) span more road than the {L:.0f} m map "
+                                                  f"— worst {cid} at {sp:.0f} m ({sp/L:.2f}x); a merged trace here "
+                                                  f"drags the retirement baseline and evicts the honest ones"))
     return key, out
+
+
+def audit_routes(routes, models, ev_counts):
+    """Invariants on data/routes.json -- THE FILE THE AUDIT NEVER OPENED.
+
+    The audit's scope was drawn around the artefact whose bug was being diagnosed (course models) rather than
+    around the write path that produces persisted state. routes.json is written by the same analyzer, carries two
+    textbook max()-ratchets, and gates ROUTE ATTRIBUTION -- which decides which model a session's turns and
+    geometry are written into. It sits upstream of the entire turns/geometry/registry triangle.
+    """
+    out = []
+    # (a) DOMAIN. length_m is minted unclamped and only ever grown, so an impossible value at birth is permanent.
+    #     It is load-bearing: >= 200 enables the reversed-heading rejection, < 600 marks a route a stub.
+    # ABSENT IS NOT A FAULT. A route that has not measured its length yet simply has no length_m, and every reader
+    # already handles that (`R.get("length_m") or 0`). Only a value that IS there and is impossible is a fault —
+    # the first cut failed on `is None` and so re-failed the two routes immediately after repairing them.
+    bad = [(k, v.get("length_m")) for k, v in routes.items()
+           if isinstance(v, dict) and v.get("length_m") is not None and v["length_m"] <= 0]
+    if bad:
+        out.append(("FAIL", "route-length-domain", f"{len(bad)} route(s) with a non-positive length_m: "
+                                                   f"{', '.join(f'{k}={v}' for k, v in bad[:4])} — minted unclamped "
+                                                   f"and only ever grown, so this never self-heals"))
+    # (b) DISTINCT ROADS DO NOT HAVE IDENTICAL LENGTHS. A shared value across routes whose starts are far apart is
+    #     one event's odometer saturating into every route it touched.
+    by_len = {}
+    for k, v in routes.items():
+        L = (v or {}).get("length_m")
+        if L and L > 0: by_len.setdefault(round(L / 5) * 5, []).append(k)
+    for L, ks in sorted(by_len.items()):
+        if len(ks) < 3: continue
+        st = [(routes[k] or {}).get("start") for k in ks]
+        far = any(a and b and ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) > 200 ** 2
+                  for i, a in enumerate(st) for b in st[i + 1:])
+        if far:
+            out.append(("WARN", "route-length-cluster", f"{len(ks)} routes on different roads share length_m ~{L} m "
+                                                        f"({', '.join(ks[:5])}…) — one event's odometer saturating "
+                                                        f"into every route it touched"))
+    # (c) EVENTS RECOUNT. R["events"] += 1 on EVERY re-analysis, so the counter measures how often the analyzer ran,
+    #     not how often you drove. Equality is what one honest pass produces, so healthy data sits ON the boundary.
+    over = [(k, (v or {}).get("events") or 0, ev_counts.get(k, 0)) for k, v in routes.items()
+            if ((v or {}).get("events") or 0) > ev_counts.get(k, 0) + 2]
+    if over:
+        w = max(over, key=lambda x: x[1] - x[2])
+        out.append(("WARN", "route-events-ratchet", f"{len(over)} of {len(routes)} routes declare more events than "
+                                                    f"the sessions on disk can justify — worst {w[0]}: {w[1]} "
+                                                    f"declared vs {w[2]} recounted (re-analysis re-increments)"))
+    return "data/routes.json", out
+
+
+def _route_events():
+    """Recount, from the sessions on disk, how many events each route actually saw."""
+    n = {}
+    for p in glob.glob(os.path.join(ROOT, "data", "sessions", "*.json")):
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        for e in (d.get("events") or []):
+            k = e.get("route_key")
+            if k:
+                n[k] = n.get(k, 0) + 1
+    return n
 
 
 def main():
@@ -159,10 +304,22 @@ def main():
             rows.append((os.path.basename(p), [("FAIL", "unreadable", str(e))]))
             continue
         rows.append(audit(m, p))
+    # THE OTHER FILE THE SAME PIPELINE WRITES. Scoping the audit to data/courses/ was scoping it to the artefact
+    # whose bug was being diagnosed rather than to the write path; routes.json carries two max()-ratchets and gates
+    # route attribution, which decides which model a session is written into at all.
+    try:
+        R = json.load(open(os.path.join(ROOT, "data", "routes.json"), encoding="utf-8")).get("routes") or {}
+        rows.append(audit_routes(R, rows, _route_events()))
+    except Exception as e:
+        rows.append(("data/routes.json", [("FAIL", "routes-unreadable", str(e))]))
+    nf = sum(1 for _, f in rows for s, _, _ in f if s == "FAIL")
     if "--json" in sys.argv:
         print(json.dumps([{"course": k, "findings": [{"severity": s, "code": c, "message": msg} for s, c, msg in f]}
                           for k, f in rows], indent=2))
-        return
+        # AN UNEXERCISED CHECKER MUST NOT LOOK LIKE A PASSING ONE. This branch used a bare `return`, so --json
+        # exited 0 on the exact data where plain mode exited 1 — and the harness that consumes it reads only
+        # stdout. A crashed audit and a clean audit were the same green tick.
+        return 1 if nf else 0
     nf = sum(1 for _, f in rows for s, _, _ in f if s == "FAIL")
     nw = sum(1 for _, f in rows for s, _, _ in f if s == "WARN")
     print(f"COURSE-MODEL AUDIT — {len(rows)} courses · {nf} FAIL · {nw} WARN\n")

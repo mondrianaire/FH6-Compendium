@@ -14,6 +14,12 @@ means a later, faster lap re-rates history instead of destroying it: your improv
 Idempotent: re-analysis of the same session replaces its own rows (UNIQUE on route_key+session+cid+t0), so the
 20-second cadence cannot duplicate a lap.
 
+PARTIAL laps: a lap that does not cover the whole course cannot be TIMED against one that does, but it is not
+worthless — it is a full record of the corners it did cover. This matters most on long courses that have never
+been completed: running the first third of a 6 km route twenty times yields twenty incomparable times and twenty
+good corner records, and dropping them means the corners practised most are the ones least known. Partial rows are
+returned like void ones, flagged `partial`, never competitive, and never able to define a reference best.
+
 VOID laps: in a timed run contact invalidates the time — the lap is not slower, it is VOID. A void lap must
 never define a build's reference best, or one lucky "fast" impacted lap silently mis-rates every other lap on
 the course through the 107% rule. But a void lap's TIME is the only invalid part: its grip, cornering and
@@ -102,9 +108,10 @@ def get_laps(root, route_key, cls=None, competitive_only=True, limit=400):
     """Competitive laps for a course, newest-fastest first. Reference = each build's own best here, so a slower
     car's good laps still qualify; `competitive` is also returned per row so callers can show the rest greyed.
 
-    competitive_only=True now means "laps worth comparing times against, PLUS every void lap" — a void lap is
-    never competitive, but dropping it would hide contact from the UI and lose a perfectly good grip trace.
-    Callers distinguish them by the returned `void` flag: strike the time, keep the line on the map."""
+    competitive_only=True means "laps worth comparing times against, PLUS every void and every partial lap" —
+    neither is ever competitive, but dropping them would hide contact from the UI and throw away perfectly good
+    grip traces. Callers distinguish them by the returned `void` / `partial` flags: strike the time, keep the
+    line on the map."""
     if not os.path.exists(db_path(root)):
         return []
     with _LOCK:
@@ -160,8 +167,14 @@ def get_laps(root, route_key, cls=None, competitive_only=True, limit=400):
             r["pts"] = json.loads(r["pts"])
         except Exception:
             r["pts"] = []
-        # void laps survive the filter: their TIME is invalid, their grip/cornering trace is not.
-        if competitive_only and not r["competitive"] and not r["void"]:
+        # VOID AND PARTIAL LAPS BOTH SURVIVE THE FILTER, for the same reason: their TIME is invalid, their
+        # grip/cornering trace is not. Partial was dropping 24 of 151 stored laps outright — and it fell hardest
+        # exactly where it hurt most, on long courses that have never been completed. Running the first third of a
+        # 6 km route twenty times produces twenty laps with no comparable time and twenty perfectly good records
+        # of those corners; discarding them means the corners you have practised most are the ones the lab knows
+        # least about. Callers already distinguish them: `partial` and `void` ride on every row, `competitive` is
+        # false for both, and no partial can define a reference best (see the `best` loop above).
+        if competitive_only and not r["competitive"] and not r["void"] and not r["partial"]:
             continue
         out.append(r)
     return out[:limit]

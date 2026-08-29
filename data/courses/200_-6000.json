@@ -141,19 +141,7 @@
     "fh6_20260828_122408"
   ],
   "updated": "fh6_20260828_122408",
-  "best_laps": {
-    "2997|1|8|700": {
-      "best_lap": 231307.938,
-      "session": "fh6_20260828_122408",
-      "name": "2016 Formula Drift #530 HSV Maloo Gen-F",
-      "class": "A",
-      "pi": 700,
-      "drivetrain": "RWD",
-      "build_id": "cb1d0e90",
-      "hp": 1098,
-      "gears": 4
-    }
-  },
+  "best_laps": {},
   "visits": [
     {
       "session": "fh6_20260828_122408",
@@ -162,7 +150,6 @@
       "cars": [
         "2997|1|8|700"
       ],
-      "best_lap": 231307.938,
       "best_car": "2997|1|8|700"
     }
   ],

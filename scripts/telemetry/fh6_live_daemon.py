@@ -1490,9 +1490,14 @@ def _laps_payload(route_key, cls=None, limit=40, competitive_only=True, cap=200)
                             "pct_off": r.get("pct_off"), "competitive": r.get("competitive"),
                             "solo": r.get("solo"), "impacts": int(r.get("impacts") or 0) or n4,
                             "void": bool(r.get("void")),
+                            # PARTIAL travels with the row, like VOID. The store now returns partial laps instead
+                            # of discarding them, and arc_m is what lets the UI say "58% of the course" rather
+                            # than presenting a fragment's short time as a record.
+                            "partial": bool(r.get("partial")), "arc_m": r.get("arc_m"),
                             "session": r.get("session"), "t0": r.get("t0"), "pts": pts})
     out["n"] = len(out["laps"])
-    fastest = next((l for l in out["laps"] if l["lap_s"] and not l["void"]), None)   # get_laps sorts fastest-first; a void time can never be the best
+    # nor may a PARTIAL be the best: it is not a lap of this course, only of part of it
+    fastest = next((l for l in out["laps"] if l["lap_s"] and not l["void"] and not l["partial"]), None)
     out["best"] = {"lap_s": fastest["lap_s"], "cid": fastest["cid"]} if fastest else None
     return out
 

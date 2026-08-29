@@ -1551,6 +1551,15 @@ def main():
         lap_windows = []
         for ei, ev in enumerate(evs):
             rows_ev = [r for r in loop_rows if ev["t0"] <= r["t"] <= ev["t1"]]
+            # A LAP BOUNDARY IS NOT ALWAYS A LapNumber EDGE, BUT CUTTING ON THE LAP TIMER IS WORSE. LapNumber does
+            # not increment on a single-lap Rivals run (every Colossus crossing reads 0->0), so cutting the window
+            # at the CurrentLap reset looked like the missing boundary. Measured, it is a regression: session
+            # 051952 went from 5 stored traces to 0. The reset is where the lap TIME is cleared, and the game
+            # reports the completed LastLap on the far side of it — cut there and the window that drove the lap no
+            # longer contains the lap's own time, so nothing downstream will accept it as a lap. The multi-lap case
+            # is already handled below by split_multilap, which cuts on the road returning to itself and keeps the
+            # time with the driving. (What sent me looking was a Colossus trace I believed was missing; it was in
+            # the store the whole time, under -3750_300 from session 213928, 23.42 mi. Nothing needed fixing here.)
             k_ = 0; t_start = ev["t0"]; cur_lap = rows_ev[0]["LapNumber"] if rows_ev else None
             for r in rows_ev:
                 if r["LapNumber"] != cur_lap:

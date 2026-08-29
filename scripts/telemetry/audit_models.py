@@ -63,9 +63,24 @@ def audit(m, path):
     closed = str(key).startswith("loop:") or (
         bool(gp) and math.hypot(gp[0][0] - gp[-1][0], gp[0][1] - gp[-1][1]) <= max(60.0, 0.12 * ml))
     if gp and len(lap_arcs) >= 5 and closed:
-        med = statistics.median(lap_arcs)
+        # MEASURE THE MAP AGAINST LAPS THAT FINISHED, NOT AGAINST EVERY RUN FILED HERE. This took the median over
+        # all stored arcs and failed the Colossus: a 37849 m circuit whose median stored run is 3792 m, reported as
+        # "the reference lap is not a lap". But the map is the verified part — 23.4 mi, confirmed against the game
+        # — and it is the RUNS that are partial, because a 23 mi lap is usually abandoned partway. Judging a course
+        # by the sample of attempts is this project's oldest bug, and here it accused the one thing we had checked.
+        # A map built from a bad reference (several laps stitched into one) still fails, because that map is long
+        # relative to the laps that DID complete. When nothing completed, we cannot tell, and say exactly that.
+        _done = [a for a in lap_arcs if a >= 0.60 * ml]
+        if len(_done) < 3:
+            out.append(("WARN", "circuit-never-completed",
+                        f"circuit map is {ml:.0f} m and no more than {len(_done)} recorded run covers 60% of it "
+                        f"(median run {statistics.median(lap_arcs):.0f} m) — the map cannot be checked against a "
+                        f"full lap until one is driven"))
+            med = None
+        else:
+            med = statistics.median(_done)
         if med and ml > 1.45 * med:
-            out.append(("FAIL", "map-too-long", f"circuit map is {ml:.0f} m but the median recorded lap is "
+            out.append(("FAIL", "map-too-long", f"circuit map is {ml:.0f} m but the median COMPLETED lap is "
                                                 f"{med:.0f} m ({ml/med:.2f}x) — the reference lap is not a lap"))
         elif med and ml < 0.7 * med:
             out.append(("WARN", "map-too-short", f"map is {ml:.0f} m vs median lap {med:.0f} m ({ml/med:.2f}x) — "
@@ -212,7 +227,24 @@ def audit(m, path):
     # 1.45 is not a new constant: it is the reciprocal of check 2's own 0.7, so both state one threshold. The span
     # must be PIECE-AWARE -- pts[-1][0] under-reads by ~1950 m on -4750_-1550 where the arc resets mid-trace.
     L = (g.get("length_m") or 0) or ml
-    if L:
+    # A MAP MADE OF SCRAPS IS NOT A SHORT MAP, AND A TRACE IS NOT WRONG FOR BEING WIDER THAN ONE. Two models here
+    # are stored as two path pieces sitting 5781 m and 6037 m apart — further than the entire road they have
+    # mapped (51+241 m, and 40+1199 m). They are not courses: they are unrelated scraps that landed on one route
+    # key, one of them with no turns at all and two laps to its name. Measured against those, an ordinary 2.3 km
+    # trace reads as 9.07x and got reported as trace-too-wide — blaming the driving for a defect in the map, which
+    # is this project's oldest mistake wearing a new label. Name the actual fault, and let the trace check stand
+    # down: it has nothing to say until there is a coherent map to say it against.
+    _ps = g.get("paths") or []
+    _gaps = [math.hypot(_ps[i][-1][0] - _ps[i + 1][0][0], _ps[i][-1][1] - _ps[i + 1][0][1])
+             for i in range(len(_ps) - 1) if _ps[i] and _ps[i + 1]]
+    _fragmented = bool(_gaps) and max(_gaps) > (L or 0)
+    if _fragmented:
+        out.append(("WARN", "map-fragments",
+                    f"map is {len(_ps)} disconnected pieces totalling {L:.0f} m with a {max(_gaps):.0f} m gap "
+                    f"between them — further apart than the whole map is long, so this key is holding scraps of "
+                    f"two different roads, not one course; a retirement candidate, and no trace can be judged "
+                    f"against it"))
+    if L and not _fragmented:
         def _span(pts):
             tot = 0.0; prev = None; st = None
             for q in pts or []:

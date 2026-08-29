@@ -98,8 +98,11 @@ def merge_into(dst, src):
                 if cid not in bbc or (pv.get("mph_min") or 0) > (bbc[cid].get("mph_min") or 0):
                     bbc[cid] = pv
     dst["turn_count"] = sum(1 for t in dts if t.get("established"))
-    # geometry + profile: keep the richer description
-    if len(path_of(src)) > len(path_of(dst)):
+    # geometry + profile: keep the richer description — measured in ROAD, not in samples.
+    # This compared len(path) — the POINT COUNT — so a short, densely-sampled map outranked a long, sparsely
+    # sampled one and a 5,977 m geometry replaced a 47,648 m geometry, deleting 87% of the course and stranding
+    # 142 of its turns as phantoms. Point count is a sampling artefact; arc length is the thing being compared.
+    if _arc(path_of(src)) > _arc(path_of(dst)):
         dst["geometry"] = src.get("geometry")
     if (src.get("profile_laps") or 0) > (dst.get("profile_laps") or 0):
         dst["profile"] = src.get("profile"); dst["profile_laps"] = src.get("profile_laps"); dst["profile_session"] = src.get("profile_session")
@@ -258,7 +261,19 @@ def main():
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(cm, f, indent=1)
         os.replace(tmp, cp)
-        print(f"merged -> {canon}: {cm.get('laps')} laps, {len(cm.get('sessions') or [])} sessions, "
+        # A MERGE INVALIDATES THE TURN->MAP BINDING, BY DESIGN. The surviving model keeps its own turn inventory but
+    # may adopt the OTHER model's geometry, so turns that were bound to the discarded map are now bound to
+    # nothing: this merge left 145 registry entries claiming a map they were nowhere near and 3 courses declaring
+    # more turns than their road had. The audit went 4 FAIL -> 151. Rebinding is not an optional follow-up step
+    # someone has to remember; it is part of what merging MEANS, so it happens here.
+    try:
+        import rebind_map_turns as _RB
+        _ar, _at, _ae = _RB.rebind(cm)
+        if _ar or _at or _ae:
+            print(f"  rebound turns to the surviving map: +{_ar} registry, +{_at} turns, {_ae:+d} established")
+    except Exception as _e:
+        print(f"  !! turn rebind failed ({_e!r}) — run rebind_map_turns.py before trusting the turn counts")
+    print(f"merged -> {canon}: {cm.get('laps')} laps, {len(cm.get('sessions') or [])} sessions, "
               f"{len(cm.get('turns') or [])} turns (from {len(grp)} models)")
 
     tmp = RPATH + ".tmp"

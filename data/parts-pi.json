@@ -1,6 +1,6 @@
 {
  "schema_version": "1.0.0",
- "generated": "2026-08-29 03:02:22",
+ "generated": "2026-08-29 03:04:56",
  "method": "single-part isolation from decoded-config<->CarPI observations (median per edge, anchored to stock); pure-Python least-squares regression fallback (tagged 'regression') for the rest",
  "parts_pi": {
   "centrifugal_supercharger": {

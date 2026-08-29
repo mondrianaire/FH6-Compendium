@@ -1425,7 +1425,10 @@ def main():
                 return 0
         def lap_pts(w, grip=False):
             rows_ = [r for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
-            if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r)) for r in rows_]   # 4th column rides through resample un-interpolated (a state is categorical)
+            # 4th column rides through resample un-interpolated (a state is categorical); the 5th is ELEVATION,
+            # which is continuous and interpolates like speed. PosY was in every capture and reached nothing —
+            # a whole channel of the road (climbs, crests, compressions) that the lab could not draw.
+            if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r), r.get("PosY", 0.0)) for r in rows_]
             return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in rows_]
         def resample(pts, step=4.0):   # -> list of PIECES; a jump > 150 m between consecutive rows (respawn / rewind / teleport) starts a new piece
             pieces = []; cur = [pts[0]] if pts else []
@@ -1445,7 +1448,9 @@ def main():
                     while j < len(S) - 2 and S[j + 1] < s_: j += 1
                     seg_len = S[j + 1] - S[j]; f = (s_ - S[j]) / seg_len if seg_len > 0 else 0.0
                     _base = (pc[j][0] + (pc[j + 1][0] - pc[j][0]) * f, pc[j][1] + (pc[j + 1][1] - pc[j][1]) * f, s_, pc[j][2] + (pc[j + 1][2] - pc[j][2]) * f)
-                    P_.append(_base + ((max(pc[j][3], pc[j + 1][3]),) if len(pc[j]) > 3 and len(pc[j + 1]) > 3 else ()))   # categorical: carry the WORSE of the bracketing states, never a blend
+                    _cat = (max(pc[j][3], pc[j + 1][3]),) if len(pc[j]) > 3 and len(pc[j + 1]) > 3 else ()   # categorical: carry the WORSE of the bracketing states, never a blend
+                    _ele = ((pc[j][4] + (pc[j + 1][4] - pc[j][4]) * f,) if len(pc[j]) > 4 and len(pc[j + 1]) > 4 else ())   # continuous: interpolate like speed
+                    P_.append(_base + _cat + _ele)
                     s_ += step
                 out.append(P_)
             return out
@@ -1909,7 +1914,7 @@ def main():
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,
                                   "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,
                                   "tune_hash": _th,
-                                  "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in _thin(pts_w, 300)]})
+                                  "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]), round(p[5], 1) if len(p) > 5 else None] for p in _thin(pts_w, 300)]})
             # A PARTIAL LAP IS NOT THIS BUILD'S BEST LAP. `valid` only requires 70% of the session's own
             # reference arc, so on a course driven in fragments the shortest window wins on wall-clock and
             # becomes the stored trace -- the backfill surfaced five courses whose trace covered under half the
@@ -1926,7 +1931,7 @@ def main():
             # point at the exact spot on the course map (no arc-to-path alignment guesswork). Older 2-column
             # traces still render: every consumer treats columns 3-5 as optional.
             speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"),
-                                      "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1])] for p in _thin(pts_all, 300)]}
+                                      "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]), round(p[5], 1) if len(p) > 5 else None] for p in _thin(pts_all, 300)]}
         # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}

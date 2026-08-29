@@ -1,6 +1,6 @@
 {
  "schema_version": "1.0.0",
- "generated": "2026-08-29 01:40:09",
+ "generated": "2026-08-29 02:32:37",
  "method": "single-part isolation from decoded-config<->CarPI observations (median per edge, anchored to stock); pure-Python least-squares regression fallback (tagged 'regression') for the rest",
  "parts_pi": {
   "centrifugal_supercharger": {
@@ -25,8 +25,8 @@
   "by_confidence": {
    "measured-direct": 1
   },
-  "regression": "underdetermined (35 obs, 195 params)",
-  "observations": 35,
+  "regression": "underdetermined (36 obs, 195 params)",
+  "observations": 36,
   "ordinals": 20,
   "single_part_pairs": 2
  }

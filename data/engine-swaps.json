@@ -2467,7 +2467,7 @@
    "cyl": 6,
    "displacement_l": null,
    "redline": 8000,
-   "sample_hp": 896,
+   "sample_hp": 921,
    "resulting_drivetrain": "RWD",
    "sample_pi": 800,
    "source": "save-mined+telemetry"

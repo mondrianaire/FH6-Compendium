@@ -218,6 +218,7 @@ def c7():
         return ("warn", "identity evidence file is empty — nothing to restore")
     bad = []
     for o_, gs in list(gears.items())[:6]:
+        gs = gs.get("g") if isinstance(gs, dict) else gs   # evidence is scoped per build: {cid, g:[...]}
         if not gs:
             continue
         try:

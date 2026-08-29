@@ -75,7 +75,8 @@ def _ident_restore():
         for o, v in (d.get("picked") or {}).items():
             if v.get("ts"): ST.picked_id[str(o)] = {"ts": str(v["ts"]), "t": time.time()}
         for o, gs in (d.get("gears") or {}).items():
-            if gs: ST.gears_seen[str(o)] = set(int(x) for x in gs)
+            g = gs.get("g") if isinstance(gs, dict) else gs
+            if g: ST.gears_seen[str(o)] = set(int(x) for x in g)
         if d.get("picked") or d.get("gears"):
             print("[identity] restored %d pick(s) and gear evidence for %d car(s)"
                   % (len(d.get("picked") or {}), len(d.get("gears") or {})), flush=True)
@@ -134,7 +135,8 @@ def _box_exercised(ordn, mxg):
     try:
         if not mxg or int(mxg) < 5:
             return False
-        g = sorted(int(x) for x in ((_ident_load().get("gears") or {}).get(str(ordn)) or []))
+        _rec = (_ident_load().get("gears") or {}).get(str(ordn))
+        g = sorted(int(x) for x in ((_rec.get("g") if isinstance(_rec, dict) else _rec) or []))
         return bool(g) and g == list(range(1, int(mxg) + 1))
     except Exception:
         return False
@@ -145,16 +147,42 @@ def _box_exercised(ordn, mxg):
 _ident_restore()
 
 
-def _ident_remember(kind, ordn, value):
+def _ident_remember(kind, ordn, value, kwargs_cid=None):
     with _IDENT_LOCK:
         d = _ident_load()
         if kind == "picked":
             d.setdefault("picked", {})[str(ordn)] = {"ts": str(value), "at": time.time()}
         else:
-            g = set(d.setdefault("gears", {}).get(str(ordn)) or [])
+            # SCOPED TO THE BUILD, not to the car. Gears are a property of the GEARBOX, and the gearbox belongs to
+            # the build — so ST.gears_seen is (correctly) cleared on a build change and on a new save, because the
+            # old build's top gear must not veto or fingerprint the new one. The disk copy did NOT mirror that, so
+            # it accumulated across builds forever and the two diverged the moment you changed anything: a car
+            # that ran a 10-speed and then a 6-speed keeps [1..10] on disk, never matches the 6-speed's [1..6],
+            # and _box_exercised — which reads DISK — silently stops working for that car.
+            # Within one build gears still only ACCUMULATE (driving 3rd never unproves 8th); a different build
+            # starts its own set. Old list-shaped entries are read once and then replaced.
+            rec = (d.setdefault("gears", {}) or {}).get(str(ordn))
+            cid = str(kwargs_cid) if kwargs_cid else None
+            if isinstance(rec, dict):
+                g = set(rec.get("g") or []) if (not cid or rec.get("cid") in (None, cid)) else set()
+            else:
+                g = set(rec or [])                      # legacy: a bare list, no build recorded — adopt it once
             g |= set(int(x) for x in value)
-            d["gears"][str(ordn)] = sorted(g)          # gears only ever ACCUMULATE: driving 3rd never unproves 8th
+            d["gears"][str(ordn)] = {"cid": cid, "g": sorted(g)}
         _ident_save(d)
+
+def _ident_forget_gears(ordn):
+    """Drop a car's PERSISTED gear evidence, to mirror ST.gears_seen being cleared.
+
+    Called from the two places that reset the in-memory set — a build change and a fresh save — because both mean
+    the gearbox may not be the one those gears were measured on. Without this the disk copy kept accumulating
+    across builds while memory reset per build, the two diverged permanently, and _box_exercised (which reads
+    disk) stopped being able to confirm any box on a car whose build had ever changed."""
+    with _IDENT_LOCK:
+        d = _ident_load()
+        if (d.get("gears") or {}).pop(str(ordn), None) is not None:
+            _ident_save(d)
+
 
 def _ident_forget_pick(ordn):
     with _IDENT_LOCK:
@@ -279,7 +307,7 @@ def ingest(p, t_mono):
             why = "first drive" if ST.prev_cfg is None else "build change" if c["cid"] != ST.prev_cfg else "event start / finish" if ST._ev_edge else "new run (manual)" if ST._force_split else "menu gap (course mode)"
             ST.stint += 1; ST.stint_start = t_mono; ST._force_split = False; ST._ev_edge = False; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
             if why == "build change":   # a different cid = a different gearbox may be equipped — the old build's gears must not veto or fingerprint the new one
-                ST.gears_seen.pop(str(c["car"]), None); ST.live_fdg.pop(str(c["car"]), None)
+                ST.gears_seen.pop(str(c["car"]), None); ST.live_fdg.pop(str(c["car"]), None); _ident_forget_gears(c["car"])
             ST.emit("stint", {"n": ST.stint, "t0": round(t_mono, 1), "id": c["cid"], "why": why}); _save_tags()
         ST._zero_since = None; ST.prev_cfg = c["cid"]
     elif ST._zero_since is None: ST._zero_since = t_mono
@@ -287,7 +315,7 @@ def ingest(p, t_mono):
     if c["on"] and c["car"] and 1 <= (c["gear"] or 0) <= 10 and c["mph"] > 15:   # gears actually USED at speed — the cheapest exact identity evidence
         _g = ST.gears_seen.setdefault(str(c["car"]), set())
         if int(c["gear"]) not in _g:
-            _g.add(int(c["gear"])); _ident_remember("gears", c["car"], [int(c["gear"])])   # only on a NEW gear: one write per box, not per frame
+            _g.add(int(c["gear"])); _ident_remember("gears", c["car"], [int(c["gear"])], kwargs_cid=c.get("cid"))   # only on a NEW gear: one write per box, not per frame
         # LIVE gear-ratio accrual (rpm/mph per gear at clean WOT, wheelspin-gated via slip ratios): the ladder's
         # identity fingerprint, measured HERE — the analyzer's session output lags the cadence and dies on restart,
         # which left WOT pulls undetected ("drive up through the gears" that could never satisfy itself).
@@ -2107,7 +2135,7 @@ def disk_watcher():
                 if hasattr(ST, "gear_verdicts"):
                     for k in [k for k in ST.gear_verdicts if k.startswith(f"{ordn}|")]:
                         ST.gear_verdicts.pop(k, None)
-                ST.gears_seen.pop(str(ordn), None); ST.live_fdg.pop(str(ordn), None)   # the new tune may have a SMALLER box — the old top gear must not veto the fresh save (permanent false Transmission conflict)
+                ST.gears_seen.pop(str(ordn), None); ST.live_fdg.pop(str(ordn), None); _ident_forget_gears(ordn)   # the new tune may have a SMALLER box — the old top gear must not veto the fresh save (permanent false Transmission conflict)
                 # an in-game save is a POSITIVE identity signal — it comes from the car you're sitting in, so the
                 # just-written file IS the equipped build. Re-anchor the sticky identity to it.
                 if not hasattr(ST, "gear_id"):

@@ -63,6 +63,18 @@ def main():
         print(f"no on-disk tune found for ordinal {ordinal} (or it has no tyre-compound slot).", file=sys.stderr); sys.exit(1)
     d = load(); names = d.setdefault("names", {}); ver = d.setdefault("verified", [])
     prev = names.get(str(idx))
+    # A NAME BELONGS TO AT MOST ONE INDEX, AND A VERIFIED ANCHOR BEATS A GUESS. Anchoring 15 = "Drift" left the
+    # unverified guess at 9 still claiming "Drift" too, so the catalog asserted one compound at two indices and
+    # the older, wrong one was the first a lookup would hit. Every non-stock name in this file started as
+    # best-effort, so each anchor is expected to displace one — the tool has to say so rather than leave the
+    # contradiction for someone to notice. Verified entries are never touched: two of those disagreeing is a
+    # real conflict and must be raised, not silently resolved.
+    freed = []
+    for k in [k for k, v in names.items() if k != str(idx) and v == name]:
+        if k in ver:
+            print("CONFLICT: idx %s is VERIFIED as %r too — not touching it. Resolve by hand." % (k, name), file=sys.stderr)
+            continue
+        del names[k]; freed.append(k)
     names[str(idx)] = name
     if str(idx) not in ver:
         ver.append(str(idx)); ver.sort(key=lambda s: int(s))
@@ -73,6 +85,9 @@ def main():
     os.replace(tmp, CJSON)
     print(f"ANCHORED: idx {idx} = {name!r} (VERIFIED){' — was ' + repr(prev) if prev and prev != name else ''}. "
           f"From ordinal {ordinal} save {ts}. This maps it for every car that runs idx {idx}.")
+    for k in freed:
+        print(f"  freed idx {k}: its {name!r} was an unverified guess, now disproven — that index is UNMAPPED again "
+              f"and needs its own anchor.")
 
 
 if __name__ == "__main__":

@@ -56,6 +56,42 @@ def fragmented(g):
     return bool(gaps) and max(gaps) > (g.get("length_m") or 0)
 
 
+def promote_into(m, key, cx):
+    """Install the best covering laps for `key` into model `m`. Returns a list of one-line descriptions.
+
+    THE ONE PLACE THIS RULE LIVES. The analyzer calls it on the model in memory before its atomic write, and the
+    CLI below calls it on each model on disk, so there is no second copy to drift. Coverage first, then time,
+    bounded at both ends; a scrap map is skipped because it cannot say what coverage means.
+    """
+    g = m.get("geometry") or {}
+    L = g.get("length_m") or 0
+    if not L or fragmented(g):
+        return []
+    cols = {r[1] for r in cx.execute("PRAGMA table_info(lap_traces)")}
+    st = m.setdefault("speed_traces", {})
+    done = []
+    for r in cx.execute("SELECT * FROM lap_traces WHERE route_key=?", (key,)):
+        try:
+            pts = json.loads(r["pts"]) if r["pts"] else []
+        except Exception:
+            continue
+        sp = span(pts)
+        if sp < COVER * L or sp >= WIDE * L:
+            continue
+        # A LAP TIME OF ZERO IS NOT A FAST LAP. The store keeps lap_s as reported, and an unfinished or untimed
+        # run arrives as 0.0 -- which on a plain `or 9e9` guard is falsy and ranks last by luck rather than by
+        # rule. Say it once, here, so the record carries "no time" instead of "0.000 s".
+        rec = {"lap_s": (r["lap_s"] if (r["lap_s"] or 0) > 0 else None), "session": r["session"], "pts": pts}
+        for f in ("build_id", "class", "pi", "drivetrain", "tune_hash", "solo", "impacts", "void"):
+            if f in cols and r[f] is not None:
+                rec[f] = r[f]
+        if beats(rec, st.get(r["cid"])):
+            st[r["cid"]] = rec
+            done.append("%s %.1f s (%.2f mi)" % (r["cid"], r["lap_s"] or 0, sp / 1609.344))
+    return done
+
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry", action="store_true")
@@ -71,32 +107,7 @@ def main():
         key = os.path.basename(p)[:-5]
         if not L or fragmented(g):
             continue
-        st = m.setdefault("speed_traces", {})
-        changed = []
-        for r in cx.execute("SELECT * FROM lap_traces WHERE route_key=?", (key,)):
-            try:
-                pts = json.loads(r["pts"]) if r["pts"] else []
-            except Exception:
-                continue
-            # BOUNDED AT BOTH ENDS. Coverage alone is a floor, and a floor let two courses take traces spanning
-            # 1.45x their map -- a run that carried on past the line, which is not a lap of anything. WIDE is the
-            # reciprocal of COVER's neighbour in check 2, the same single threshold the audit and the repair tool
-            # already state, so a trace this promotes can never be one either of them would throw straight out.
-            _sp = span(pts)
-            if _sp < COVER * L or _sp >= WIDE * L:
-                continue
-            # A LAP TIME OF ZERO IS NOT A FAST LAP. The store keeps lap_s as reported, and an unfinished or
-            # untimed run arrives as 0.0 -- which on a plain `or 9e9` guard is falsy and ranks last by luck
-            # rather than by rule. Say it once, here, so the record carries "no time" instead of "0.000 s".
-            _ls = r["lap_s"] if (r["lap_s"] or 0) > 0 else None
-            rec = {"lap_s": _ls, "session": r["session"], "pts": pts}
-            for f in ("build_id", "class", "pi", "drivetrain", "tune_hash", "solo", "impacts", "void"):
-                if f in cols and r[f] is not None:
-                    rec[f] = r[f]
-            cid = r["cid"]
-            if beats(rec, st.get(cid)):
-                st[cid] = rec
-                changed.append("%s %.1f s (%.2f mi)" % (cid, r["lap_s"] or 0, span(pts) / 1609.344))
+        changed = promote_into(m, key, cx)
         if changed:
             n_c += 1; n_t += len(changed)
             print("  %-22s +%d trace(s): %s" % (key, len(changed), "; ".join(changed[:3])))

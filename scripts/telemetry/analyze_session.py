@@ -12,7 +12,7 @@ swap or drivetrain conversion mid-session becomes a new entry. Each entry carrie
 from data/car-ordinals.json (learned map) when known.
 """
 import re
-import csv, hashlib, json, math, os, statistics, sys, time
+import csv, hashlib, json, math, os, sqlite3, statistics, sys, time
 import lap_store
 import fh6_tune_decode as TUNE   # tune_hash: which slider revision a lap was driven on
 from collections import defaultdict
@@ -2556,6 +2556,19 @@ def main():
                 turns_info["shape_confidence"], turns_info["shape_laps_agree"], turns_info["shape_laps_compared"], turns_info["shape_spread_m"], turns_info["shape_tol_m"] = _sc
             for k_ in ("lap_paths", "last_path"): geo.pop(k_, None)   # session entry keeps the drawable pieces + layout only (path kept for the map shape)
         if write_models:
+            # THE BEST COVERING LAP THE STORE HOLDS BECOMES THE COURSE'S TRACE, HERE, EVERY TIME. Every lap is
+            # written to data/laps.db, but the dashboard draws model["speed_traces"], and only this function ever
+            # moved one across -- so a lap could be in the store, verified, and still invisible. The Colossus was:
+            # a confirmed 369.2 s lap over 23.38 mi, and the course showed no trace at all. Promotion runs on the
+            # model in memory, before the atomic write, so the file lands complete rather than needing a second
+            # pass afterwards; the rule is coverage first then time, bounded at both ends, identical to the audit's
+            # and the repair tool's. Wrapped whole: a locked or malformed store must cost the analysis nothing.
+            try:
+                import promote_traces as _pt
+                _cxp = sqlite3.connect(os.path.join(ROOT, "data", "laps.db")); _cxp.row_factory = sqlite3.Row
+                _pt.promote_into(model, key, _cxp)
+                _cxp.close()
+            except Exception as ex_: print("[traces] promotion skipped:", repr(ex_), file=sys.stderr)
             try:
                 os.makedirs(mdir, exist_ok=True); tmp_ = mpath + ".tmp"
                 with open(tmp_, "w", encoding="utf-8") as f: json.dump(model, f, indent=1, ensure_ascii=False)

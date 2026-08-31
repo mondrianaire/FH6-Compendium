@@ -22,7 +22,8 @@ coverage means, so those courses are skipped rather than guessed at. Idempotent:
 """
 import argparse, glob, io, json, math, os, sqlite3, sys
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # in place: see merge_courses.py
+except Exception: pass
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 COVER = 0.70
 WIDE = 1.45

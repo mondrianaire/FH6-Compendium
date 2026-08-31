@@ -18,7 +18,16 @@ The model with the most laps wins as canonical; the others merge into it. Nothin
 """
 import json, glob, io, os, shutil, sys, time
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+# Re-encode stdout as UTF-8 IN PLACE. This was `sys.stdout = io.TextIOWrapper(sys.stdout.buffer, ...)`
+# in thirteen scripts, and any two of them in one process was a live grenade: the second wrapper adopts the
+# same BufferedWriter, the first loses its only reference, and its finalizer CLOSES the buffer out from
+# under the new wrapper -- the next print raises "I/O operation on closed file". merge_courses.py imports
+# rebind_map_turns at line 399, so `--apply` died AFTER deleting the merged model files and BEFORE writing
+# routes.json, leaving retired keys pointing at models that no longer exist -- which re-mints them on the
+# next capture and re-fragments the very data the merge exists to repair. reconfigure() mutates the
+# existing wrapper, so it is idempotent and no buffer ever changes hands.
+try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception: pass
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 CDIR = os.path.join(ROOT, "data", "courses")

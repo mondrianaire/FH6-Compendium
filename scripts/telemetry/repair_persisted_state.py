@@ -37,7 +37,8 @@ LARGE time is beaten by the next honest lap, an absurdly SMALL one can never be 
 import argparse
 import math, glob, io, json, os, sys
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # in place: see merge_courses.py
+except Exception: pass
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 LO, HI = 5.0, 3600.0
 

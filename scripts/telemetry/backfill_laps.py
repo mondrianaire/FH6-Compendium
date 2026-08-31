@@ -20,7 +20,8 @@ Cost is real and worth stating up front: analysis is parse-bound at ~17.5 MB/s, 
 """
 import argparse, glob, gzip, io, os, shutil, sqlite3, struct, subprocess, sys, tempfile, time
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # in place: see merge_courses.py
+except Exception: pass
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)

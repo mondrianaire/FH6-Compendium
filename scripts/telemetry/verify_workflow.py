@@ -10,7 +10,8 @@ E events · F client artifacts · G data stores.
 """
 import sys, os, io, json, glob, hashlib, re, subprocess, urllib.request
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # in place: see merge_courses.py
+except Exception: pass
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 MAIN = os.path.abspath(os.path.join(ROOT, "..", "..", ".."))  # worktree -> repo root of main checkout (…/forza-horizon-6-tuning)

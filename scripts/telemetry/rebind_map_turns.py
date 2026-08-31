@@ -28,7 +28,8 @@ Idempotent: a second run finds nothing to change.
 """
 import argparse, glob, io, json, math, os, sys
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # in place: see merge_courses.py
+except Exception: pass
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 

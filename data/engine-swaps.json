@@ -2098,13 +2098,13 @@
    "cars_seen": {
     "3848": "2023 Toyota Camry TRD"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9000,
+   "sample_hp": 454,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 538,
+   "source": "save-mined+telemetry"
   },
   "3880": {
    "engine_family": 3880,

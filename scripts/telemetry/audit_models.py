@@ -28,7 +28,26 @@ from analyze_session import DET_VER, self_retrace   # noqa: E402
 
 
 def arc(p):
-    return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(p, p[1:]))
+    """Road length of a point list, in metres, IGNORING the teleports between disconnected map pieces.
+
+    A model's geometry can hold several pieces of road, and `path` is their concatenation -- so the straight line
+    from the end of one piece to the start of the next was being counted as road. Measured: 600_-3800 has 1239 m
+    of road in 2 pieces and scored 7276 m, of which 6037 m was one jump; -5200_-5250 has 292 m and scored 6074 m,
+    20.8x. That number is not cosmetic. audit_models check 2 divides by it, so honest full laps of -6800_-1100
+    were failing as "map-too-long" against a 9085 m map that is really 5711 m of road; and merge_courses prints
+    it to the operator as the reason for a merge ("7276 m lies on 37789 m"). I made the same mistake by hand
+    earlier and blamed the trace rather than the ruler.
+
+    The break is found from the data, not a constant: road is sampled at a near-constant step, so a segment far
+    longer than the median IS a discontinuity. 20x the median, floored at 150 m so a sparsely sampled straight on
+    a short path is never mistaken for one.
+    """
+    if not p or len(p) < 2:
+        return 0.0
+    segs = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(p, p[1:])]
+    med = sorted(segs)[len(segs) // 2]
+    cut = max(150.0, med * 20.0) if med > 0 else float("inf")
+    return sum(d for d in segs if d <= cut)
 
 
 def audit(m, path):

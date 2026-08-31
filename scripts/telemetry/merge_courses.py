@@ -37,7 +37,26 @@ THRESH = 0.70
 
 def _arc(p):
     import math
-    return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(p, p[1:])) if p and len(p) > 1 else 0.0
+    """Road length of a point list, in metres, IGNORING the teleports between disconnected map pieces.
+
+    A model's geometry can hold several pieces of road, and `path` is their concatenation -- so the straight line
+    from the end of one piece to the start of the next was being counted as road. Measured: 600_-3800 has 1239 m
+    of road in 2 pieces and scored 7276 m, of which 6037 m was one jump; -5200_-5250 has 292 m and scored 6074 m,
+    20.8x. That number is not cosmetic. audit_models check 2 divides by it, so honest full laps of -6800_-1100
+    were failing as "map-too-long" against a 9085 m map that is really 5711 m of road; and merge_courses prints
+    it to the operator as the reason for a merge ("7276 m lies on 37789 m"). I made the same mistake by hand
+    earlier and blamed the trace rather than the ruler.
+
+    The break is found from the data, not a constant: road is sampled at a near-constant step, so a segment far
+    longer than the median IS a discontinuity. 20x the median, floored at 150 m so a sparsely sampled straight on
+    a short path is never mistaken for one.
+    """
+    if not p or len(p) < 2:
+        return 0.0
+    segs = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(p, p[1:])]
+    med = sorted(segs)[len(segs) // 2]
+    cut = max(150.0, med * 20.0) if med > 0 else float("inf")
+    return sum(d for d in segs if d <= cut)
 
 
 def load(p):
@@ -132,6 +151,31 @@ def _line_recurs(key, path, min_sessions=2):
         return len(seen)
     except Exception:
         return 0
+
+
+
+def _raced(m, road_m):
+    """Has this course ever been driven at racing speed on its OWN road? Returns implied mph, or 0.
+
+    THE GUARD THAT RECONCILES MERGING WITH ATTRIBUTION. attribute_route now gives a drive its own key when it
+    has a start/finish line of its own, because a course sharing the Colossus's tarmac is still its own course.
+    Containment then wanted to absorb it straight back, and the two rules have to agree or the catalog oscillates.
+
+    Neither shape nor a lap TIME separates the cases: 19 of 23 courses carry a lap time, including a 292 m scrap
+    claiming 177.8 s. But a time means nothing without the road it covers, and together they are decisive.
+    Measured across the catalog, implied average speed splits it with nothing in between: every real course lands
+    at 34-228 mph, and the scraps at 1.6, 3.7 and 12.1 mph -- walking to crawling pace. A "lap time" on a scrap is
+    just how long the capture window happened to be open, which is unrelated to its length; a real lap is the game
+    timing you racing. 20 mph sits in the empty gap between 12.1 and 34.5.
+
+    A course nobody has raced is not protected from absorption. A course somebody has is never absorbed.
+    """
+    if not road_m:
+        return 0.0
+    ls = [v.get("lap_s") for v in (m.get("speed_traces") or {}).values() if (v or {}).get("lap_s")]
+    ls += [v.get("best_lap") for v in (m.get("best_laps") or {}).values() if (v or {}).get("best_lap")]
+    ls = [x for x in ls if x and x > 0]
+    return (road_m / min(ls) * 2.23694) if ls else 0.0
 
 
 
@@ -316,6 +360,12 @@ def main():
                         contained = False
                         print(f"  keeping {_sk}: its start recurs in {_n} sessions — a start/finish line, "
                               f"not a capture artefact, so it is a course in its own right")
+                    else:
+                        _mph = _raced(models[_sk][1], _arc(_sp))
+                        if _mph >= 20.0:
+                            contained = False
+                            print(f"  keeping {_sk}: raced at {_mph:.0f} mph average on its own road — a course "
+                                  f"somebody drove, not a scrap of the road that contains it")
             # the USER'S OWN NAME is ground truth and outranks any geometric heuristic: naming two keys the same
             # thing is a person saying "this is one course" (and naming is what split them in the first place).
             na = (models[a][1].get("name") or (routes.get(a) or {}).get("name") or "").strip().lower()

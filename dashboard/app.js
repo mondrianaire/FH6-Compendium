@@ -5004,7 +5004,7 @@
       const logHtml = `<div style="overflow-x:auto;margin-top:8px"><table style="font-size:11px"><thead><tr><th>#</th><th>lap</th><th>turn</th><th>type</th><th>in→apex→out</th><th>lat g</th><th>brake·thr (m)</th><th>phases F/R</th><th>first red</th><th>USI</th><th>flags</th></tr></thead><tbody>
         ${recent.map((c) => { const type = c.mph_min < 45 ? "hairpin" : c.mph_min <= 85 ? "medium" : "fast"; const fr = c.first_red; const uv = usiVerdict(c.usi); const frcol = fr ? (fr.axle === "front" ? "#2f81f7" : "#e5414e") : "var(--muted)"; const tm = c._turn || (c.ev === 0 ? null : matchTurn(c.apex)); return `<tr><td class="why">${c.seq}</td><td>${c.lap ?? "—"}</td><td><b>${tm ? "T" + tm.n : "·"}</b> ${c.dir === "L" ? "⬅" : "➡"}</td><td>${type}</td><td>${c.mph_in}→<b>${c.mph_min}</b>→${c.mph_out ?? "—"}</td><td>${c.lat_g_peak}</td><td>${c.brake_on_m ?? "—"}${c.throttle_on_m != null ? " · +" + c.throttle_on_m : ""}</td><td>${phaseBars(c.phases)}</td><td>${fr ? `<span style="color:${frcol};font-weight:700">${fr.axle} ph${fr.phase}</span>` : `<span style="color:#00d27a">clean</span>`}</td><td><span style="color:${uv[1]}">${uv[0]}</span> ${c.usi > 0 ? "+" : ""}${c.usi}</td><td class="why">${c.hb ? "🖐 " : ""}${c.drift ? "drift " : ""}${c.kink ? "kink " : ""}${c.brake_max > 200 ? "🛑" : ""}</td></tr>`; }).join("")}
         </tbody></table></div>`;
-      return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>🩺 Corner analysis — every corner, every lap (live)</strong>${(() => { try { const co0 = (live.analysis && (live.analysis.courses || [])[0]) || null; return co0 ? ` ${courseIdentMini(co0.name, courseGeoFor(co0), co0.route_key, 20)}` : ""; } catch (e) { return ""; } })()}<span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${log.length} corner${log.length === 1 ? "" : "s"} this session${inCorner ? " · ● in a corner now" : ""}</span></div>
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>🩺 Corner analysis — every corner, every lap (live)</strong>${(() => { try { const co0 = liveCourse() || null; return co0 ? ` ${courseIdentMini(co0.name, courseGeoFor(co0), co0.route_key, 20)}` : ""; } catch (e) { return ""; } })()}<span class="chip" style="border-color:var(--accent2);color:var(--accent2)">${log.length} corner${log.length === 1 ? "" : "s"} this session${inCorner ? " · ● in a corner now" : ""}</span></div>
         <div style="font-size:11px;color:var(--muted);margin:4px 0 2px">Per-turn this session — apex speed, lat g, braking point, understeer/oversteer, which axle gives up first. Phase squares: ▮ = phase 1-4 (entry → turn-in → apex → exit), blue=front slip, red=rear; filled past the grip limit.</div>${matrix}
         <div style="font-size:11px;color:var(--muted);margin:8px 0 2px">Every corner as you take it (newest first)</div>${logHtml}</div>`;
     };
@@ -5487,8 +5487,12 @@
         const frac = pt && t.arc_m && smax ? Math.round((t.arc_m / smax) * 100) : null;
         const col = vd ? gripCol("impact") : pt ? "var(--warn,#e3b341)" : isCur(t) ? "var(--accent2)" : t === best ? "#00d27a" : "var(--line)";
         return `<span class="chip" title="${esc((t.session || "") + (t.build_id ? " · build " + t.build_id : "") + (t.hist ? " · recorded lap" : " · saved trace") + (vd ? " · " + VOID_WHY : pt ? " · " + PARTIAL_WHY : ""))}" style="border-color:${col};${nt ? `color:${col};opacity:.85` : isCur(t) || t === best ? "" : "color:var(--muted)"}">${buildThumb(String(t.cid).split("|")[0], t.build_id, true)} ${piBadge(t.cls, t.pi, true)}${t.lap_s ? ` · <span${nt ? ` style="text-decoration:line-through"` : ""}>${t.lap_s.toFixed(1)} s</span>` : ""}${!nt && t.pct_off ? ` <span style="opacity:.75">+${t.pct_off.toFixed(1)}%</span>` : ""}${vd ? ` · ${gripOf("impact").icon} VOID` : pt ? ` · ◔ ${frac != null ? frac + "% of the course" : "partial"}` : nImp ? ` · ${gripOf("impact").icon}${nImp}` : ""}${isCur(t) ? " · you" : t === best ? " · fastest" : ""}</span>`; }).join("") + (match.length > 8 ? `<span class="chip" style="color:var(--muted)">+${match.length - 8} more</span>` : "");
+      // THE BREAKDOWN MUST DESCRIBE THE NUMBER IT SITS BESIDE. The header printed the leading count from the
+      // FILTERED set and the parenthetical from the unfiltered one, so filtering 19 traces down to 2 rendered
+      // "2 laps (1 saved tune + 18 from the lap record)" -- a breakdown of 19 offered as the composition of 2.
+      const _nSaved = match.filter((t) => !t.hist).length, _nRecs = match.filter((t) => t.hist).length;
       const nVoid = match.filter(isVoid).length; const nPart = match.filter((t) => isPartial(t) && !isVoid(t)).length;
-      return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces — class ${esc(curCls || "all")} on this circuit</strong><span class="why" style="font-size:10.5px">${match.length} lap${match.length === 1 ? "" : "s"}${recs.length ? ` (${saved.length} saved tune${saved.length === 1 ? "" : "s"} + ${recs.length} from the lap record)` : " · each tune's best lap"} · mph vs distance</span></div>
+      return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces — class ${esc(curCls || "all")} on this circuit</strong><span class="why" style="font-size:10.5px">${match.length} lap${match.length === 1 ? "" : "s"}${recs.length ? ` (${_nSaved} saved tune${_nSaved === 1 ? "" : "s"} + ${_nRecs} from the lap record)` : " · each tune's best lap"} · mph vs distance</span></div>
         ${clsRow}${filtRow}
         <div style="overflow-x:auto"><svg class="spd-trace" viewBox="0 0 ${W2} ${H2}" style="min-width:420px;max-width:100%;background:var(--bg);border-radius:8px"
              data-smax="${smax}" data-padl="${padL}" data-w="${W2}" data-h="${H2}"
@@ -5967,8 +5971,16 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const m = (!own && rk) ? ((DB.courseModels || []).find((x) => x && x.route_key === rk) || null) : null;
       const st2 = own || (m && m.speed_traces) || null;
       if (!st2) return "";
-      return speedTracesCard({ speed_traces: st2, geometry: co.geometry || (m && m.geometry), route_key: rk },
-                             (live.frame && live.frame.cid) || null);
+      // TURNS COME TOO. speedTracesCard labels the ticks under the trace from (co.turns || {}).canonical and
+      // falls back to "·" when that is missing -- and this synthetic object was dropping it, so every tick in
+      // the course view read "·" instead of T1..Tn while the real course object beside it carried them.
+      // AND THE CAR IS THE ONE IN THIS VIEW, NOT THE ONE BEING DRIVEN. Passing live.frame.cid scoped a
+      // RECORDING's traces to whatever class is in the game right now: with an A-class car loaded, four of five
+      // course blocks showed "no lap for class A on this circuit yet" and hid the recording's own traces. Only
+      // the live view has a current car; elsewhere there is none, which shows every class.
+      return speedTracesCard({ speed_traces: st2, geometry: co.geometry || (m && m.geometry), route_key: rk,
+                               turns: co.turns || (m && m.turns) },
+                             src === "live" ? ((live.frame && live.frame.cid) || null) : null);
     } catch (e) { console.error("[traceCardFor]", e); return ""; } };
     const courseBlock = (co, s) => {
       const p = courseParts(co, s);
@@ -6207,7 +6219,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     };
     // the mph→mode readout, shared by the in-body #lvTiles card and the anchored dock strip so both stay identical
     function frameTiles(f) {
-      return [[f.mph.toFixed(0), "mph"], [f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm, "rpm"], [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"], [f.hp, "hp"], [f.boost.toFixed(1), "boost psi"], [f.on ? `${buildThumb(String(f.car), null, true)} ${piBadge(f.cls, f.pi, true)}` : "—", f.on ? `${(NAMES()[String(f.car)] || {}).name || "#" + f.car} · ${f.drv} ${f.cyl || ""}cyl` : "not driving"], [f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "—", f.on && f.ev ? `${(() => { try { const c5 = (live.analysis && (live.analysis.courses || [])[0]) || null; const n5 = c5 && (c5.name || null); return n5 ? esc(String(n5).slice(0, 16)) + " · " : ""; } catch (e) { return ""; } })()}${(f.dist / 1000).toFixed(2)} km · ${f.lapt ? f.lapt.toFixed(1) + " s" : ""}` : "mode"]];
+      return [[f.mph.toFixed(0), "mph"], [f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear, "gear"], [f.rpm, "rpm"], [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"], [f.hp, "hp"], [f.boost.toFixed(1), "boost psi"], [f.on ? `${buildThumb(String(f.car), null, true)} ${piBadge(f.cls, f.pi, true)}` : "—", f.on ? `${(NAMES()[String(f.car)] || {}).name || "#" + f.car} · ${f.drv} ${f.cyl || ""}cyl` : "not driving"], [f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "—", f.on && f.ev ? `${(() => { try { const c5 = liveCourse() || null; const n5 = c5 && (c5.name || null); return n5 ? esc(String(n5).slice(0, 16)) + " · " : ""; } catch (e) { return ""; } })()}${(f.dist / 1000).toFixed(2)} km · ${f.lapt ? f.lapt.toFixed(1) + " s" : ""}` : "mode"]];
     }
     // anchored constant-feedback readout in the dock — the full mph→mode row, visible even when the dock is collapsed
     function paintDockTiles() {

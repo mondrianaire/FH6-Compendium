@@ -580,6 +580,11 @@ tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(25
    the map stayed small, which is the opposite of "the ENTIRE interactive course map".
    Stacked on a tall screen the map gets the full 1077 px width and the detail takes the space below it. Same
    rule, same halves, turned to match the screen. */
-@media (max-aspect-ratio: 1/1) {
+/* Scoped ABOVE the 900 px breakpoint on purpose. Below it .dash-course is already reset to height: auto and
+   one column, and `fr` rows on an auto-height grid size from CONTENT, not from the viewport -- so at 860x1000,
+   an ordinary half-screen window that is both narrow AND tall, both queries matched and the block computed to
+   10,663 px with rows of 5574 px and 4847 px. The stacking exists to use a tall FIXED-height block well; where
+   there is no fixed height there is nothing to divide. */
+@media (max-aspect-ratio: 1/1) and (min-width: 901px) {
   .dash-course > .dash-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr); }
 }

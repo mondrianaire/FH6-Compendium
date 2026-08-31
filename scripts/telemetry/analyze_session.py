@@ -1303,6 +1303,41 @@ def main():
             else: continue
             if best is None or cand[0] < best[0]: best = cand
         return best[1] if best else None
+    def _is_rollup(sx, sz, sample):
+        """The reverse run up to a Rivals start line is not a course. Returns True to DISCARD this event.
+
+        Jett: "on circuits for rivals you dont do a standing start so when the match starts I automatically
+        reverse and gain speed before the start/finish line", and "the u turns for rolling start at the
+        beginning of a rivals track is not useful data (for this) and is distracting from the actual data".
+        Measured, that is exactly what -3750_300_29 is: 836 m of road lying 100% on the Colossus, starting 15 m
+        from the Colossus's own start/finish line, covering 2% of it, driven the other way. attribute_route
+        rejects it on direction -- correctly, since a reversed route IS a different course in this game -- and it
+        then mints its own key, which is how the Colossus keeps sprouting _29 / _30 / _32 siblings.
+
+        COVERAGE IS WHAT SEPARATES A REVERSE VARIANT FROM A ROLL-UP. A real reverse route runs the whole road;
+        a roll-up backs a few hundred metres off the line and turns around. So: lying almost wholly on a known
+        route, beginning at THAT route's line, covering almost none of it, and heading the wrong way. All four,
+        or it is a course and keeps its key.
+        """
+        for k, R in routes.items():
+            if k.startswith("loop:"):
+                continue
+            st = R.get("start")
+            if not st or math.hypot(sx - st[0], sz - st[1]) > 120:
+                continue                                  # not this route's start line
+            mp = model_path_for(k)
+            if not mp:
+                continue
+            ov, cov = overlap(sample, mp)
+            if ov is None or cov is None:
+                continue
+            if ov >= 0.90 and cov <= 0.15 and not direction_agree(sample, mp[1]):
+                _rl = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(sample, sample[1:]))
+                print("  [rollup] discarded %.0f m at %s's start line — lies %d%% on it, covers %d%% of it, "
+                      "and runs the other way" % (_rl, k, round(100 * ov), round(100 * cov)))
+                return True
+        return False
+
     ev_out = []
     for ev in events:
         rs = ev["rows"]
@@ -1424,6 +1459,8 @@ def main():
             if len(sample) >= 4000:      # a hard ceiling so a pathological event cannot make matching quadratic
                 break
         key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_lap_rows is not rs))
+        if key is None and _is_rollup(sx, sz, sample):
+            continue
         if key is None:
             key = f"{int(round(sx / 50) * 50)}_{int(round(sz / 50) * 50)}"
             if key in routes and routes[key].get("start"): key = f"{key}_{len(routes)}"   # a genuinely different route that rounds to an occupied cell
@@ -1461,13 +1498,25 @@ def main():
     try:
         with open(os.path.join(ROOT, "data", "reference-loops.json"), encoding="utf-8") as f: loops = json.load(f).get("loops", {})
     except Exception: loops = {}
+    # THE SAME DRIVING MUST NOT BE FILED AS TWO COURSES. This scan walked every row in the capture, including
+    # rows already inside an attributed route event, so whenever a reference-loop marker sits ON a course's road
+    # -- which is exactly where it lands when it is dropped at a Rivals start -- each pass emitted a synthetic
+    # "loop:<name>" event over driving that already belonged to the route. Measured on fh6_20260821_202122: two
+    # Rivals events on -1850_1550 (t0 2440.4-2531.0 and 2682.2-2812.3, 6 laps, best 32.614 s) alongside FOURTEEN
+    # loop events covering the identical span. One drive, two courses, and both carry laps and lap times.
+    # Jett's premise again: courses share tarmac, and a marker on shared tarmac is not a second course.
+    # A reference loop is for FREE ROAM -- "user-defined free-roam test circuits", per the heading above -- so
+    # rows the game already accounted for as an event are not its business. Rows outside every attributed event
+    # are still scanned, which is the case reference loops exist for.
+    _claimed = [(e["t0"], e["t1"]) for e in ev_out if e.get("route_key")]
+    _free = [r for r in live if not any(a <= r["t"] <= b for a, b in _claimed)] if _claimed else live
     for lname, lp in loops.items():
         lx, lz = lp["start"]
         if abs(lx) < 5 and abs(lz) < 5: continue   # invalid origin-marked loop (a pre-race [0,0] capture) — the car never returns to the origin, so it never made a course
         R = lp.get("radius", 60); MIND = lp.get("min_dist", 250)
         # collect crossings: a lap = leave the radius (travel > MIND from start), then return within radius
         state = "start"; lap_rows = []; away_dist = 0; prev = None; passes = []
-        for r in live:
+        for r in _free:
             d0 = math.hypot(r["PosX"] - lx, r["PosZ"] - lz)
             if state == "start":
                 if d0 <= R: lap_rows = [r]; state = "in"; away_dist = 0
@@ -2449,9 +2498,18 @@ def main():
             hit["geo_sessions"] = len(v.get("sessions") or [])
             hit["geo_mapped"] = bool(v.get("model_map"))
             hit["deg"] = v.get("deg")
+            hit["s"] = v.get("s")                                     # the ARC the map measured for this corner
             if hit.get("radius_m") is None: hit["radius_m"] = v.get("radius_m")
             if hit.get("dir") is None: hit["dir"] = v.get("dir")
-        merged_turns.sort(key=lambda t: route_s(t["pos"]))            # re-order: geometry may have inserted turns
+        # ORDER BY THE ARC THE MAP MEASURED, NOT BY THE NEAREST VERTEX IN SPACE. route_s is an unconstrained
+        # global nearest-vertex search over the flat path, so where a course runs the same tarmac twice the two
+        # passes are metres apart in XZ and the argmin picks a vertex on the WRONG pass -- on -6800_-1100 the
+        # apexes of the corners at arc 508 m and 1756 m are 19.2 m apart. This sort decides the T1..Tn numbering
+        # on the next line, so a corner on the return pass was numbered as if it were on the way out, and every
+        # id downstream inherited that. The registry entry already carries the arc the map measured; it was
+        # simply never copied onto the turn (the same omission rebind_map_turns had). Where a turn knows its own
+        # arc that decides; route_s remains the fallback for a turn the map has no record of.
+        merged_turns.sort(key=lambda t: (t["s"] if t.get("s") is not None else route_s(t["pos"])))
         for i, t in enumerate(merged_turns, 1): t["id"] = f"T{i}"
         _has_map = bool(((model.get("geometry") or {}).get("turns")) or ((geo or {}).get("turns")))
         def _established(t):

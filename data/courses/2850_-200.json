@@ -1369,7 +1369,8 @@
       "deg": 93,
       "est_by": "geometry",
       "geo_sessions": 0,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 520
     },
     {
       "id": "T16",
@@ -1663,7 +1664,8 @@
       "est_by": "geometry",
       "status": "turn",
       "geo_sessions": 0,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 1084
     },
     {
       "id": "T20",
@@ -1684,7 +1686,8 @@
       "est_by": "geometry",
       "status": "turn",
       "geo_sessions": 0,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 1196
     },
     {
       "id": "T21",
@@ -2246,12 +2249,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 83,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 316
     },
     {
       "id": "T5",
@@ -2267,12 +2271,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 0,
-      "geo_mapped": true,
       "deg": 56,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "s": 312
     },
     {
       "id": "T6",
@@ -2288,12 +2293,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 0,
-      "geo_mapped": true,
       "deg": 93,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "s": 308
     }
   ],
   "laps": 3,
@@ -6743,11 +6749,11 @@
         -128
       ],
       "sessions": [],
-      "model_map": true,
       "dir": "R",
       "radius_m": 24,
       "deg": 56,
-      "s": 312
+      "s": 312,
+      "model_map": true
     },
     "2596_-126": {
       "pos": [
@@ -6755,11 +6761,11 @@
         -126
       ],
       "sessions": [],
-      "model_map": true,
       "dir": "R",
       "radius_m": 29,
       "deg": 93,
-      "s": 308
+      "s": 308,
+      "model_map": true
     }
   },
   "turn_count_delta": null

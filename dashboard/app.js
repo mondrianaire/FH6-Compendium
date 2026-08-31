@@ -2701,7 +2701,24 @@
       sp.forEach((p) => { const k = `${Math.floor(p[0] / 30)},${Math.floor(p[1] / 30)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(p); });
       const near = (x, z) => { const cx = Math.floor(x / 30), cz = Math.floor(z / 30); for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { const a = cells.get(`${cx + dx},${cz + dz}`); if (a) for (const p of a) { if ((p[0] - x) ** 2 + (p[1] - z) ** 2 <= 900) return true; } } return false; };
       const sameStart = new Set(), follows = new Set(), ov = {};
-      models.forEach((m) => { if (m.route_key === key) return; const p = m.geometry.path; if (Math.hypot(p[0][0] - s0[0], p[0][1] - s0[1]) <= 250) sameStart.add(m.route_key); const f = p.filter((q) => near(q[0], q[1])).length / p.length; ov[m.route_key] = f; if (f >= 0.3) follows.add(m.route_key); });
+      // SHARING ROAD IS SYMMETRIC; THIS MEASURE WAS NOT. f is the share of the OTHER route's points lying on
+      // the selected one, so a short course wholly inside a long one scores 1.00 when the long one is selected
+      // and ~0.03 when the short one is -- and the atlas, the one screen whose job is showing which routes share
+      // road, denied the relationship outright from the shorter side. Jett: "not all courses are independent.
+      // the colossus is a giant course that involves segments that may be in other courses as well." Measure
+      // both ways and relate on the stronger: either "this lies on that" or "that lies on this" is sharing.
+      // ov keeps the max so the printed number matches the decision that was made from it.
+      const cellsOf = (pp) => { const c = new Map(); pp.forEach((q) => { const k = `${Math.floor(q[0] / 30)},${Math.floor(q[1] / 30)}`; if (!c.has(k)) c.set(k, []); c.get(k).push(q); }); return c; };
+      const nearIn = (c, x, z) => { const cx = Math.floor(x / 30), cz = Math.floor(z / 30);
+        for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { const a = c.get(`${cx + dx},${cz + dz}`); if (a) for (const q of a) if ((q[0] - x) ** 2 + (q[1] - z) ** 2 <= 900) return true; }
+        return false; };
+      models.forEach((m) => { if (m.route_key === key) return; const p = m.geometry.path;
+        if (Math.hypot(p[0][0] - s0[0], p[0][1] - s0[1]) <= 250) sameStart.add(m.route_key);
+        const fwd = p.filter((q) => near(q[0], q[1])).length / p.length;          // how much of THEM lies on us
+        const mc = cellsOf(p);
+        const rev = sp.filter((q) => nearIn(mc, q[0], q[1])).length / sp.length;  // how much of US lies on them
+        const f = Math.max(fwd, rev);
+        ov[m.route_key] = f; if (f >= 0.3) follows.add(m.route_key); });
       return { key, sel, sameStart, follows, ov };
     };
     const routesAtlas = (s) => {

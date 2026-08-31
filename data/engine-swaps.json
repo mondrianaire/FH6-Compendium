@@ -1941,7 +1941,7 @@
    "cyl": 12,
    "displacement_l": null,
    "redline": 10000,
-   "sample_hp": null,
+   "sample_hp": 1288,
    "resulting_drivetrain": "AWD",
    "sample_pi": 829,
    "source": "save-mined+telemetry"

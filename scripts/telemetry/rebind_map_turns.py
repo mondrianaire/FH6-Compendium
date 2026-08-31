@@ -106,6 +106,7 @@ def rebind(m):
         hit["geo_sessions"] = len(v.get("sessions") or [])
         hit["geo_mapped"] = True
         hit["deg"] = v.get("deg")
+        hit["s"] = v.get("s")            # the record needs its ARC, or the ordering below sorts on nothing
         if hit.get("radius_m") is None:
             hit["radius_m"] = v.get("radius_m")
         if hit.get("dir") is None:
@@ -122,10 +123,30 @@ def rebind(m):
         t["established"] = bool(by); t["est_by"] = by
         t["status"] = "turn" if by else "possible"
     est = [t for t in turns if t["established"]]
-    for i, t in enumerate(sorted(est, key=lambda x: (x.get("s") if x.get("s") is not None else 0)), 1):
-        if t.get("id") in (None, "T?"):
-            t["id"] = "T%d" % i
+    # A SORT KEY THE RECORDS ACTUALLY CARRY, AND AN ID NOBODY ELSE IS USING. This sorted on x.get("s") when no
+    # turn record held `s` -- step 2 copied dir/radius_m/deg from the registry entry but not the arc -- so every
+    # key was 0, the sort was a no-op, and `i` was a list position rather than a route position. Worse, the id
+    # came straight from that index and was assigned without checking: a turn created here could be handed "T7"
+    # while an existing turn already answered to "T7", and the dashboard joins on the model's id.
+    # `s` is now copied above, so the order is the route's order; ids are drawn from the first numbers not
+    # already taken, so a new turn can never collide with one that exists.
+    # AND REPAIR THE COLLISIONS ALREADY ON DISK. 65 duplicate ids across 10 courses, up to five on one course:
+    # two established turns both answering to "T21" while the dashboard joins live corners on that id, so one
+    # corner's evidence is read for the other. Ordered by arc, the FIRST holder of an id keeps it -- churn stays
+    # minimal and stable across runs -- and every later claimant is moved to the first free number.
+    _ordered = sorted(est, key=lambda x: (x.get("s") if x.get("s") is not None else 0))
+    _used, _next, _fixed = set(), 1, 0
+    for t in _ordered:
+        i = t.get("id")
+        if i in (None, "T?") or i in _used:
+            while ("T%d" % _next) in _used or any(o.get("id") == ("T%d" % _next) and o is not t for o in _ordered[_ordered.index(t) + 1:]):
+                _next += 1
+            if i not in (None, "T?"):
+                _fixed += 1
+            t["id"] = "T%d" % _next
+        _used.add(t["id"])
     m["turn_count"] = len(est)
+    globals()["_LAST_FIXED_IDS"] = _fixed
     exp = m.get("expected_turns")
     m["turn_count_delta"] = (len(est) - exp) if exp else None
     return added_r, added_t, len(est) - before
@@ -141,12 +162,16 @@ def main():
             m = json.load(open(p, encoding="utf-8"))
         except Exception as e:
             print("  !! %s: %s" % (os.path.basename(p), e)); continue
+        _before = json.dumps(m, sort_keys=True)
         gt = len((m.get("geometry") or {}).get("turns") or [])
         est0 = sum(1 for t in (m.get("turns") or []) if t.get("established"))
         ar, at, ae = rebind(m)
         est1 = sum(1 for t in (m.get("turns") or []) if t.get("established"))
-        if not (ar or at or ae):
-            continue
+        if not (ar or at or ae or globals().get("_LAST_FIXED_IDS")):
+            # a run that only carried arcs onto records or repaired a duplicate id still has to be SAVED,
+            # or the repair happens in memory every time and never reaches disk
+            if json.dumps(m, sort_keys=True) == _before:
+                continue
         n += 1; tot = [tot[0] + ar, tot[1] + at, tot[2] + ae]
         print("  %-24s map %-4d established %s -> %-4d  (+%d registry, +%d turns)"
               % (os.path.basename(p), gt, est0, est1, ar, at))

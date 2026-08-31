@@ -16,12 +16,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 29,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 56
     },
     {
       "id": "T2",
@@ -37,12 +38,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 97,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 116
     },
     {
       "id": "T3",

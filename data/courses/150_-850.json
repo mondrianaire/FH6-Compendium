@@ -734,7 +734,7 @@
       "est_by": null
     },
     {
-      "id": "T9",
+      "id": "T1",
       "pos": [
         -287,
         -1916
@@ -825,10 +825,11 @@
       "deg": 74,
       "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 1696
     },
     {
-      "id": "T10",
+      "id": "T2",
       "pos": [
         70,
         -2155
@@ -861,10 +862,11 @@
       "est_by": "geometry",
       "status": "turn",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 2124
     },
     {
-      "id": "T11",
+      "id": "T3",
       "pos": [
         8,
         -2131
@@ -897,7 +899,8 @@
       "est_by": "geometry",
       "status": "turn",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 2200
     },
     {
       "id": "T12",
@@ -1024,7 +1027,8 @@
       "est_by": "geometry",
       "status": "turn",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 2704
     },
     {
       "id": "T14",
@@ -1210,7 +1214,8 @@
       "deg": 42,
       "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 3032
     },
     {
       "id": "T16",
@@ -1577,7 +1582,8 @@
       "deg": 47,
       "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 3916
     },
     {
       "id": "T20",
@@ -1947,7 +1953,8 @@
       "deg": 97,
       "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 5372
     },
     {
       "id": "T24",
@@ -2406,7 +2413,8 @@
       "deg": 95,
       "est_by": "geometry",
       "geo_sessions": 1,
-      "geo_mapped": true
+      "geo_mapped": true,
+      "s": 6620
     },
     {
       "id": "T9",
@@ -2422,12 +2430,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 108,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 448
     },
     {
       "id": "T10",
@@ -2443,12 +2452,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 96,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 604
     },
     {
       "id": "T11",
@@ -2464,12 +2474,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 101,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 920
     },
     {
       "id": "T12",
@@ -2485,15 +2496,16 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 32,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 2924
     },
     {
-      "id": "T13",
+      "id": "T4",
       "pos": [
         806,
         -3809
@@ -2506,12 +2518,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 37,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 4376
     },
     {
       "id": "T14",
@@ -2527,15 +2540,16 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 36,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 4548
     },
     {
-      "id": "T15",
+      "id": "T5",
       "pos": [
         804,
         -4341
@@ -2548,12 +2562,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 72,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 4944
     },
     {
       "id": "T16",
@@ -2569,12 +2584,13 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 68,
       "established": true,
       "est_by": "geometry",
-      "status": "turn"
+      "status": "turn",
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 6128
     }
   ],
   "laps": 1,

@@ -181,14 +181,25 @@ def _raced(m, road_m):
 
 def merge_into(dst, src):
     """Fold src's learning into dst. Conservative: additive counters, improve-only records, positional turns."""
-    dst["laps"] = (dst.get("laps") or 0) + (src.get("laps") or 0)
     dst["sessions"] = sorted(set((dst.get("sessions") or []) + (src.get("sessions") or [])))
     # visits: keep one row per session (they carry laps/attempts/best)
     seen = {v.get("session"): v for v in (dst.get("visits") or [])}
     for v in (src.get("visits") or []):
-        if v.get("session") not in seen:
+        cur = seen.get(v.get("session"))
+        if cur is None:
             seen[v["session"]] = v
+        elif (v.get("laps") or 0) > (cur.get("laps") or 0):
+            seen[v["session"]] = v      # same session on both models: keep the fuller row, never add the two
     dst["visits"] = sorted(seen.values(), key=lambda v: str(v.get("session") or ""))[-40:]
+    # LAPS IS DEFINED BY THE VISITS, SO DERIVE IT FROM THEM. This added src's total to dst's while the visit
+    # rows above keep only ONE row per session -- and overlapping courses are driven in the same session by
+    # construction, so that is the normal case, not an edge one. analyze_session states the definition:
+    # model["laps"] = sum(v.get("laps", 0) for v in model["visits"]). Measured on the real models, merging the
+    # Colossus with the two scraps produced laps = 32 against sum(visits.laps) = 29, a count contradicting its
+    # own definition and inflating a course with laps no visit row admits to.
+    # Same-session rows are reconciled by keeping the fuller one rather than summing: one drive down shared road
+    # puts a row on both models, and adding them would count that driving twice.
+    dst["laps"] = sum((v.get("laps") or 0) for v in dst["visits"])
     # best_laps / cars / speed_traces: improve-only per cid
     for k in ("best_laps", "cars", "speed_traces"):
         d = dst.setdefault(k, {})

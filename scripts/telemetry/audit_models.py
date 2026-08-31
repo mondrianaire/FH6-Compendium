@@ -218,12 +218,25 @@ def audit(m, path):
 
     # --- 7. LAP HYGIENE: merged laps in the stored layout distort every length statistic downstream. ---
     if len(lap_arcs) >= 5:
+        # LENGTH ALONE DOES NOT MAKE A LAP MERGED, AND ON AN OPEN ROAD IT MEANS NOTHING AT ALL. This flagged any
+        # lap over 1.45x the median with no closed/open gate -- the same mistake check 2 was rewritten to stop
+        # making (see its comment). 1900_6100 is a point-to-point whose map ends 3106 m from its start, with
+        # stored runs of 1408, 1599, 2061, 5465 and 8439 m covering 10% to 61% of the road: partial traversals of
+        # an open road are the normal shape, not evidence of anything.
+        # This file already owns the signal that CAN tell the two apart, and check 1 uses it on the map:
+        # self_retrace, "the only way to tell a genuinely long course from two laps of a short one". A merged
+        # window drives the same road twice and retraces itself; a long single traversal does not. Ask the lap
+        # itself rather than inferring from its length, at check 1's own 0.25 threshold.
         med = statistics.median(lap_arcs)
-        bad = [a for a in lap_arcs if med and a > 1.45 * med]
+        bad = []
+        for p_ in laps:
+            a_ = arc(p_)
+            if med and a_ > 1.45 * med and self_retrace(p_) >= 0.25:
+                bad.append(a_)
         if bad:
             out.append(("WARN", "merged-laps", f"{len(bad)} of {len(lap_arcs)} stored laps exceed 1.45x the median "
-                                               f"({med:.0f} m) — likely un-split multi-lap windows: "
-                                               f"{', '.join(f'{a:.0f}' for a in bad[:5])} m"))
+                                               f"({med:.0f} m) AND retrace themselves — un-split multi-lap "
+                                               f"windows: {', '.join(f'{a:.0f}' for a in sorted(bad)[:5])} m"))
     # --- 8. A PERSISTED LAP TIME MUST BE A LAP. ---
     # best_laps is improve-only (analyze_session.py), guarded only by "> 0", so one absurd value latches forever
     # and becomes the course's headline record. 200_-6000 is showing 231307.938 s -- a 64-HOUR track record -- and

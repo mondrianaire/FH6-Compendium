@@ -193,8 +193,6 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 2,
-      "geo_mapped": true,
       "deg": 57,
       "established": true,
       "est_by": "geometry",
@@ -213,7 +211,10 @@
         "agreement": 0.151,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "s": 136
     },
     {
       "id": "T3",
@@ -678,8 +679,6 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 2,
-      "geo_mapped": true,
       "deg": 37,
       "established": true,
       "est_by": "geometry",
@@ -698,7 +697,10 @@
         "agreement": 0.227,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "s": 176
     },
     {
       "id": "T5",
@@ -808,8 +810,6 @@
       "cars": [
         "2866|2|4|800"
       ],
-      "geo_sessions": 2,
-      "geo_mapped": true,
       "traced": {
         "n_passes": 88,
         "n_laps_traced": 99,
@@ -824,7 +824,10 @@
         "agreement": 0.148,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "s": 196
     },
     {
       "id": "T6",
@@ -1476,8 +1479,6 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 2,
-      "geo_mapped": true,
       "deg": 57,
       "established": true,
       "est_by": "geometry",
@@ -1496,7 +1497,10 @@
         "agreement": 0.0,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "s": 292
     },
     {
       "id": "T8",
@@ -2083,8 +2087,6 @@
       "established": true,
       "deg": 33,
       "est_by": "geometry",
-      "geo_sessions": 3,
-      "geo_mapped": true,
       "traced": {
         "n_passes": 95,
         "n_laps_traced": 99,
@@ -2099,7 +2101,10 @@
         "agreement": 0.042,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 3,
+      "geo_mapped": true,
+      "s": 344
     },
     {
       "id": "T9",
@@ -2581,8 +2586,6 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 5,
-      "geo_mapped": true,
       "deg": 42,
       "established": true,
       "est_by": "geometry",
@@ -2601,7 +2604,10 @@
         "agreement": 0.168,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 5,
+      "geo_mapped": true,
+      "s": 412
     },
     {
       "id": "T11",
@@ -3206,8 +3212,6 @@
       "established": true,
       "deg": 34,
       "est_by": "geometry",
-      "geo_sessions": 3,
-      "geo_mapped": true,
       "traced": {
         "n_passes": 94,
         "n_laps_traced": 99,
@@ -3222,7 +3226,10 @@
         "agreement": 0.032,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 3,
+      "geo_mapped": true,
+      "s": 492
     },
     {
       "id": "T12",
@@ -3238,8 +3245,6 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "deg": 33,
       "established": true,
       "est_by": "geometry",
@@ -3258,7 +3263,10 @@
         "agreement": 0.0,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 560
     },
     {
       "id": "T13",
@@ -3676,8 +3684,6 @@
         "2866|2|4|800",
         "2866|2|4|700"
       ],
-      "geo_sessions": 2,
-      "geo_mapped": true,
       "traced": {
         "n_passes": 91,
         "n_laps_traced": 99,
@@ -3692,7 +3698,10 @@
         "agreement": 0.011,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "s": 580
     },
     {
       "id": "T14",
@@ -4394,8 +4403,6 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 2,
-      "geo_mapped": true,
       "deg": 136,
       "established": true,
       "est_by": "geometry",
@@ -4414,7 +4421,10 @@
         "agreement": 0.0,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 2,
+      "geo_mapped": true,
+      "s": 692
     },
     {
       "id": "T16",
@@ -5083,8 +5093,6 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "geo_sessions": 8,
-      "geo_mapped": true,
       "deg": 76,
       "established": true,
       "est_by": "geometry",
@@ -5103,7 +5111,10 @@
         "agreement": 0.0,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 8,
+      "geo_mapped": true,
+      "s": 764
     },
     {
       "id": "T18",
@@ -5138,8 +5149,6 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "traced": {
         "n_passes": 92,
         "n_laps_traced": 99,
@@ -5154,7 +5163,10 @@
         "agreement": 0.0,
         "reading": null,
         "verdict": "measured"
-      }
+      },
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 800
     },
     {
       "id": "T19",
@@ -5405,8 +5417,6 @@
       "cars": [
         "2866|2|4|800"
       ],
-      "geo_sessions": 1,
-      "geo_mapped": true,
       "traced": {
         "n_passes": 92,
         "n_laps_traced": 99,
@@ -5421,7 +5431,10 @@
         "agreement": 0.783,
         "reading": "no lift measured on 72 of 92 stored laps \u2014 carried 88 mph, 76% of this lap's own straight-line pace",
         "verdict": "probably no lift"
-      }
+      },
+      "geo_sessions": 1,
+      "geo_mapped": true,
+      "s": 904
     },
     {
       "id": "T21",

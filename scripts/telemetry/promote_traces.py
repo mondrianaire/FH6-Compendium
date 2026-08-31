@@ -105,7 +105,12 @@ def main():
         m = json.load(open(p, encoding="utf-8"))
         g = m.get("geometry") or {}
         L = g.get("length_m") or 0
-        key = os.path.basename(p)[:-5]
+        # THE FILENAME IS A SANITISED KEY, NOT THE KEY. analyze_session writes the model to
+        # re.sub(r"[^A-Za-z0-9_.-]+", "_", key) + ".json", so a route_key holding ':' or a space -- like
+        # "loop:test loop", which has 8 recorded laps -- becomes "loop_test_loop" on disk and never matches
+        # anything in lap_traces, which stores the real key. That course reported "nothing to do" forever.
+        # The model carries its own key; read it, and fall back to the filename only when it does not.
+        key = m.get("route_key") or os.path.basename(p)[:-5]
         if not L or fragmented(g):
             continue
         changed = promote_into(m, key, cx)

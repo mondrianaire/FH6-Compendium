@@ -94,16 +94,28 @@ def _pieces(geo):
 def windows(turns, total_len):
     """Half-width per turn: its own length, clipped to the midpoint of each neighbour. Disjoint by construction."""
     n = len(turns)
+    # NEIGHBOURS ARE THE NEIGHBOURS IN ARC ORDER, WHICH IS NOT THE ORDER THE LIST ARRIVES IN. This walked the
+    # list as given and took turns[i-1] / turns[i+1] as the adjacent corners. Where a model describes the same
+    # road more than once -- 2850_-200 holds G1/G2/G3 at s = 316, 312, 308, three records of one physical corner
+    # in DESCENDING arc -- gp and gn come out negative, the negative wins the min(), and every window collapses
+    # to the 1.0 m floor. A 1 m window catches nothing, so real corners reported as unmeasurable: measured
+    # half-widths [1.0, 1.0, 1.0, 106.0, 56.0, 54.0] on that course.
+    # Sorting by arc makes both gaps non-negative by construction, which is what the disjointness claim in the
+    # docstring assumed all along. Half-widths are returned in the CALLER'S order; only the neighbour lookup is
+    # reordered. A zero gap (two records at the same arc) still constrains nothing, so base stands.
+    idx = sorted((i for i in range(n) if turns[i].get("s") is not None), key=lambda i: turns[i]["s"])
+    pos = {i: r for r, i in enumerate(idx)}          # list index -> rank in arc order
     s = [t.get("s") for t in turns]
-    half = []
+    half = [None] * n
     for i, t in enumerate(turns):
         base = max(HALF_MIN, (t.get("len_m") or 0) / 2.0)
-        if n == 1 or s[i] is None:
-            half.append(base); continue
-        sp, sn = s[i - 1], s[(i + 1) % n]
-        gp = (s[i] - sp) if i > 0 else (s[i] + total_len - s[-1])
-        gn = (sn - s[i]) if i + 1 < n else (s[0] + total_len - s[i])
-        half.append(max(1.0, min(base, (gp or base * 2) / 2.0, (gn or base * 2) / 2.0)))
+        if n == 1 or s[i] is None or len(idx) < 2:
+            half[i] = base; continue
+        r = pos[i]; m = len(idx)
+        ip, inx = idx[r - 1], idx[(r + 1) % m]
+        gp = (s[i] - s[ip]) if r > 0 else (s[i] + total_len - s[idx[-1]])
+        gn = (s[inx] - s[i]) if r + 1 < m else (s[idx[0]] + total_len - s[i])
+        half[i] = max(1.0, min(base, (gp or base * 2) / 2.0, (gn or base * 2) / 2.0))
     return half
 
 

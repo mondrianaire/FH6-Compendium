@@ -5386,14 +5386,45 @@
       // a recorded lap and a saved trace can be the SAME lap — the saved one wins, it carries the tune identity
       const seen = new Set(saved.map((t) => t.cid + "|" + (t.lap_s != null ? t.lap_s.toFixed(2) : "")));
       const recs = ((hist && hist.laps) || []).filter((l) => l && l.pts && l.pts.length > 2)
-        .map((l) => ({ cid: l.cid, cls: l.class || CLS_OF_PI(l.pi), pts: l.pts, lap_s: l.lap_s, pi: l.pi, build_id: l.build_id, session: l.session, pct_off: l.pct_off, impacts: l.impacts, void: !!l.void, hist: true }))
+        .map((l) => ({ cid: l.cid, cls: l.class || CLS_OF_PI(l.pi), pts: l.pts, lap_s: l.lap_s, pi: l.pi, build_id: l.build_id, drivetrain: l.drivetrain, tune_hash: l.tune_hash, solo: l.solo, session: l.session, pct_off: l.pct_off, impacts: l.impacts, void: !!l.void, hist: true }))
         .filter((l) => (!curCls || l.cls === curCls) && !seen.has(l.cid + "|" + (l.lap_s != null ? l.lap_s.toFixed(2) : "")));
-      const match = saved.concat(recs);
+      const match0 = saved.concat(recs);
+      // FILTER BY WHAT SEPARATES ONE TRACE FROM ANOTHER. Jett: "the speed trace filters will allow the user to
+      // specific which additional speed traces they want to display based on class, car type, tune hash etc."
+      // Class already had a switch; drivetrain, tune revision and clean/contact did not, so a course with four
+      // tune hashes on record overlaid all of them with no way to ask which line was which setup.
+      // Every dimension here is built from the traces ON SCREEN, never a fixed list -- the same rule the class
+      // row follows -- so a filter can never offer a value that would empty the chart, and dimensions with only
+      // one value present do not appear at all, because a filter that cannot exclude anything is just noise.
+      live.traceFilt = live.traceFilt || {};
+      const tf = (rk && live.traceFilt[rk]) || {};
+      const DIMS = [["drivetrain", "drive"], ["tune_hash", "tune"], ["solo", "traffic"]];
+      const dimVal = (t, d) => (d === "solo" ? (t.solo == null ? null : (t.solo ? "clean" : "contact")) : (t[d] == null ? null : String(t[d])));
+      const dimLab = (d, v) => (d === "tune_hash" ? String(v).slice(0, 6) : String(v));
+      const filtRow = (() => {
+        if (!rk) return "";
+        const parts = DIMS.map(([d, lab]) => {
+          const vals = [...new Set(match0.map((t) => dimVal(t, d)).filter((v) => v != null))].sort();
+          if (vals.length < 2) return "";   // nothing to choose between
+          const chip = (v, text) => `<span class="chip" data-tracefilt="${esc(rk)}|${esc(d)}|${esc(v == null ? "" : v)}" style="cursor:pointer;${(tf[d] || "") === (v == null ? "" : v) ? "border-color:var(--accent);color:var(--accent)" : ""}">${esc(text)}</span>`;
+          return `<span class="why" style="font-size:10px">${esc(lab)}:</span>${chip(null, "all")}${vals.map((v) => chip(v, dimLab(d, v))).join("")}`;
+        }).filter(Boolean);
+        if (!parts.length) return "";
+        return `<div class="seg-ctl" style="gap:4px 10px">${parts.join("")}</div>`;
+      })();
+      const match = match0.filter((t) => DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
       // A saved trace and a recorded lap can be the SAME lap, and the saved one wins the dedupe above — but only the
       // lap RECORD knows about voidness. OR it back in by key, or a void lap survives as a clean-looking saved trace.
       try { const vk = new Set(((hist && hist.laps) || []).filter((l) => l && l.void).map((l) => l.cid + "|" + (l.lap_s != null ? l.lap_s.toFixed(2) : "")));
         if (vk.size) match.forEach((t) => { if (vk.has(t.cid + "|" + (t.lap_s != null ? t.lap_s.toFixed(2) : ""))) t.void = true; }); } catch (e) { /* no lap record — nothing is void */ }
       if (!match.length) {
+        // A FILTER THAT EMPTIES THE CHART MUST NOT TAKE ITS OWN CONTROLS WITH IT. The early return below drops
+        // the whole card, and the filter chips live in it -- so narrowing to a combination nothing matches
+        // would leave no way back except a reload. Keep the chips, say what happened, offer the way out.
+        if (match0.length && DIMS.some(([d]) => tf[d])) {
+          const on = DIMS.filter(([d]) => tf[d]).map(([d, lab]) => `${lab} ${dimLab(d, tf[d])}`).join(" · ");
+          return `<div class="lab-corner" style="border-left:4px solid var(--warn,#e3b341)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces</strong><span class="why">${match0.length} lap${match0.length === 1 ? "" : "s"} here, none matching ${esc(on)}</span><span class="chip" data-tracefilt="${esc(rk)}|*|" style="cursor:pointer;margin-left:auto">✕ clear filters</span></div>${filtRow}</div>`;
+        }
         if (!Object.keys(st).length && !Object.keys(byCls).length) return "";   // nothing on record for this course at all — stay silent
         const have = [...new Set(Object.values(st).map((t) => t.class || CLS_OF_PI(t.pi)).filter(Boolean))];
         return `<div class="lab-corner" style="border-left:4px solid var(--muted);font-size:11.5px"><b>📈 Speed traces</b> <span class="why">no lap for ${curCls ? "class " + esc(curCls) : "this class"} on this circuit yet — a clean best lap saves one per tune automatically${have.length ? " · traces exist for class " + have.map(esc).join(", ") : ""}</span>${clsRow}</div>`;
@@ -5421,7 +5452,14 @@
       // one of them would repaint the whole chart in state colours and drown the comparison.
       // match is fastest-first, but a VOID time can never be the fastest anything — the store bars it from being a
       // reference best and the UI must agree, or the green "fastest" line is a lap that never legally happened.
-      const best = match.find((t) => !notTimed(t)) || null;   // nor may a PARTIAL be the fastest: it is not a lap of this course const cur = curCar ? match.find((t) => t.cid === curCar) : null; const isCur = (t) => t === cur;
+      const best = match.find((t) => !notTimed(t)) || null;   // nor may a PARTIAL be the fastest: it is not a lap of this course
+      // A LOST NEWLINE ATE TWO DECLARATIONS. `const cur` and `const isCur` were pulled onto the end of the
+      // comment above, so both were undefined and every call to this card threw ReferenceError: isCur is not
+      // defined -- straight into the outer `catch (e) { return ""; }`, which returned the empty string. The
+      // speed trace did not render wrong, it did not render AT ALL, and nothing said so: a silent catch turned
+      // a hard crash into a missing feature. That is why the card was absent from every course view.
+      const cur = curCar ? match.find((t) => t.cid === curCar) : null;
+      const isCur = (t) => t === cur;
       const geo = courseGeoFor(co); const canon2 = ((co.turns || {}).canonical) || [];
       const tkLbl = (g2) => { let bi = -1, bd = 60 * 60; canon2.forEach((t2, i2) => { const d2 = (t2.pos[0] - g2.apex[0]) ** 2 + (t2.pos[1] - g2.apex[1]) ** 2; if (d2 < bd) { bd = d2; bi = i2; } }); return bi >= 0 ? "T" + (bi + 1) : "·"; };   // THIS course's T-numbers, not courses[0]'s
       const ticks = ((geo && geo.turns) || []).filter((g2) => g2.s != null && g2.apex).map((g2) => `<line x1="${px2(g2.s).toFixed(1)}" y1="${H2 - padB}" x2="${px2(g2.s).toFixed(1)}" y2="8" stroke="var(--line)" opacity=".55"/><text x="${px2(g2.s).toFixed(1)}" y="${H2 - 4}" text-anchor="middle" font-size="8" fill="var(--muted)">${tkLbl(g2)}</text>`).join("");
@@ -5451,7 +5489,7 @@
         return `<span class="chip" title="${esc((t.session || "") + (t.build_id ? " · build " + t.build_id : "") + (t.hist ? " · recorded lap" : " · saved trace") + (vd ? " · " + VOID_WHY : pt ? " · " + PARTIAL_WHY : ""))}" style="border-color:${col};${nt ? `color:${col};opacity:.85` : isCur(t) || t === best ? "" : "color:var(--muted)"}">${buildThumb(String(t.cid).split("|")[0], t.build_id, true)} ${piBadge(t.cls, t.pi, true)}${t.lap_s ? ` · <span${nt ? ` style="text-decoration:line-through"` : ""}>${t.lap_s.toFixed(1)} s</span>` : ""}${!nt && t.pct_off ? ` <span style="opacity:.75">+${t.pct_off.toFixed(1)}%</span>` : ""}${vd ? ` · ${gripOf("impact").icon} VOID` : pt ? ` · ◔ ${frac != null ? frac + "% of the course" : "partial"}` : nImp ? ` · ${gripOf("impact").icon}${nImp}` : ""}${isCur(t) ? " · you" : t === best ? " · fastest" : ""}</span>`; }).join("") + (match.length > 8 ? `<span class="chip" style="color:var(--muted)">+${match.length - 8} more</span>` : "");
       const nVoid = match.filter(isVoid).length; const nPart = match.filter((t) => isPartial(t) && !isVoid(t)).length;
       return `<div class="lab-corner" style="border-left:4px solid var(--accent2)"><div class="card-row" style="margin-top:0"><strong>📈 Speed traces — class ${esc(curCls || "all")} on this circuit</strong><span class="why" style="font-size:10.5px">${match.length} lap${match.length === 1 ? "" : "s"}${recs.length ? ` (${saved.length} saved tune${saved.length === 1 ? "" : "s"} + ${recs.length} from the lap record)` : " · each tune's best lap"} · mph vs distance</span></div>
-        ${clsRow}
+        ${clsRow}${filtRow}
         <div style="overflow-x:auto"><svg class="spd-trace" viewBox="0 0 ${W2} ${H2}" style="min-width:420px;max-width:100%;background:var(--bg);border-radius:8px"
              data-smax="${smax}" data-padl="${padL}" data-w="${W2}" data-h="${H2}"
              data-pts="${hasGrip ? esc(JSON.stringify(cur.pts.map((p) => [p[0], p[1], p[2], p[3], p[4]]))) : ""}">${axis}${ticks}${lines}${impTicks}
@@ -5462,7 +5500,7 @@
         ${nPart ? `<div class="why" style="font-size:10.5px;color:var(--warn,#e3b341);margin-top:3px">◔ ${nPart} partial lap${nPart === 1 ? "" : "s"} — ${esc(PARTIAL_WHY)}. Kept because the corners they cover are real: on a long course you have never finished, these are most of what is known about its opening.</div>` : ""}
         <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${leg}</div>
         ${hasGrip ? `<div style="margin-top:4px">${gripLegend(["calm", "front", "rear", "both", "impact"])}</div>` : ""}</div>`;
-    } catch (e) { return ""; } };
+    } catch (e) { console.error("[speedTracesCard]", e); return ""; } };
     const turnTraceStrip = (co, tpos, curCar) => { try {
       if (!co.speed_traces || !tpos) return ""; const geo = courseGeoFor(co);
       const gt = ((geo && geo.turns) || []).find((g2) => g2.apex && g2.s != null && ((g2.apex[0] - tpos[0]) ** 2 + (g2.apex[1] - tpos[1]) ** 2) <= 45 * 45); if (!gt) return "";
@@ -5916,6 +5954,22 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
     // The map owns the left half outright and fills it; everything analytical moves into the right pane's own
     // scroll, so the page does not grow with the content. A course is now exactly one screen tall, and the only
     // page scrolling left is BETWEEN courses, which is honest -- they are different courses.
+    // THE TRACES LIVE ON THE MODEL, NOT ON THE SESSION'S COURSE ENTRY. speedTracesCard reads co.speed_traces,
+    // and a session course object does not carry them -- the accumulated per-tune traces belong to the course
+    // model, which is why the atlas card at the bottom of this file hands it the model's fields explicitly.
+    // Without this the card returned "" and the course view showed no trace at all, which it never had.
+    const traceCardFor = (co) => { try {
+      const rk = co && co.route_key;
+      // The session's own course entry DOES carry speed_traces -- I assumed it did not and went to the model,
+      // which returned nothing and left the view with no trace at all. Prefer what the course in front of you
+      // holds; fall back to the model only when this course entry has none of its own.
+      const own = co && co.speed_traces && Object.keys(co.speed_traces).length ? co.speed_traces : null;
+      const m = (!own && rk) ? ((DB.courseModels || []).find((x) => x && x.route_key === rk) || null) : null;
+      const st2 = own || (m && m.speed_traces) || null;
+      if (!st2) return "";
+      return speedTracesCard({ speed_traces: st2, geometry: co.geometry || (m && m.geometry), route_key: rk },
+                             (live.frame && live.frame.cid) || null);
+    } catch (e) { console.error("[traceCardFor]", e); return ""; } };
     const courseBlock = (co, s) => {
       const p = courseParts(co, s);
       const rk = co.route_key;
@@ -5923,7 +5977,7 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       const brk = selN ? courseTurnBreakdown(co, selN) : null;
       const right = brk
         ? `<div class="dash-info-pane turn"><div class="dash-pane-hd"><span class="dash-ey" style="color:var(--accent)">◎ TURN ${selN}</span><span class="why">the map's selection</span><span class="chip" data-courseturn-close="1" style="margin-left:auto;cursor:pointer">✕ back to the course</span></div><div class="dash-pane-body">${brk}</div></div>`
-        : `<div class="dash-info-pane"><div class="dash-pane-hd"><span class="dash-ey">📋 COURSE DETAIL</span><span class="why">click a turn on the map for its own breakdown</span></div><div class="dash-pane-body">${p.track}${p.profile}${p.turns}${p.history}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div></div>`;
+        : `<div class="dash-info-pane"><div class="dash-pane-hd"><span class="dash-ey">📋 COURSE DETAIL</span><span class="why">click a turn on the map for its own breakdown</span></div><div class="dash-pane-body">${traceCardFor(co)}${p.track}${p.profile}${p.turns}${p.history}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div></div>`;
       return `<div class="lab-corner dash-course" style="border-left:4px solid var(--accent2)">${p.header}<div class="dash-body">${dashMapPane(co)}${right}</div></div>`;
     };
     // ---- LIVE plumbing: mode banner, stream bar, the live workflow body, and section repaint from the daemon's latest full analysis ----
@@ -6624,6 +6678,13 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       // switch which class the speed traces are scoped to — "" means every class. The choice sticks per route; the
       // next repaint refetches /laps for it (empty value ⇒ the class param is simply omitted).
       r.querySelectorAll("[data-lapscls]").forEach((b) => b.addEventListener("click", () => { const p2 = String(b.dataset.lapscls).split("|"); live.lapsCls[p2[0]] = p2.slice(1).join("|"); if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-tracefilt]").forEach((b) => b.addEventListener("click", () => {
+        const [rk3, dim, val] = String(b.dataset.tracefilt).split("|");
+        live.traceFilt = live.traceFilt || {};
+        if (dim === "*") live.traceFilt[rk3] = {};                         // the clear-all escape hatch
+        else { const cur = live.traceFilt[rk3] = live.traceFilt[rk3] || {}; if (val) cur[dim] = val; else delete cur[dim]; }
+        if (src === "live") paintSections(true); else render();
+      }));
       r.querySelectorAll("[data-expected]").forEach((b) => b.addEventListener("click", () => { const [rk, n] = b.dataset.expected.split("|"); fetch(liveUrl + "/course-expected", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route_key: rk, n: +n }) }).then(() => { b.textContent = "saved ✓"; }).catch(() => {}); }));
       // free turn-count declaration (1-30). n=0 is the existing "clear" post, so an empty box is simply ignored here.
       r.querySelectorAll("[data-expected-set]").forEach((b) => b.addEventListener("click", () => {

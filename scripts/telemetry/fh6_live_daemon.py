@@ -1571,6 +1571,11 @@ def _laps_payload(route_key, cls=None, limit=40, competitive_only=True, cap=200)
         # carries impact samples, and a badge that contradicts the visible markers is worse than either alone.
         out["laps"].append({"cid": r.get("cid"), "build_id": r.get("build_id"), "class": r.get("class"),
                             "pi": r.get("pi"), "drivetrain": r.get("drivetrain"), "lap_s": r.get("lap_s"),
+                            # tune_hash travels with the lap so the client can filter traces by WHICH SLIDER
+                            # REVISION drove them. The store has held it all along; it simply was not sent, so
+                            # the one dimension that separates two laps of the same car on the same build was
+                            # invisible to the only surface that overlays them.
+                            "tune_hash": r.get("tune_hash"),
                             "pct_off": r.get("pct_off"), "competitive": r.get("competitive"),
                             "solo": r.get("solo"), "impacts": int(r.get("impacts") or 0) or n4,
                             "void": bool(r.get("void")),

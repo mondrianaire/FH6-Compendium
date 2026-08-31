@@ -1247,7 +1247,7 @@ def main():
         for x, z in sample: scells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
         cov = sum(1 for x, z in pts if _near(x, z, scells)) / max(1, len(pts))
         return ov, cov
-    def attribute_route(sx, sz, hdg, dist, sample):
+    def attribute_route(sx, sz, hdg, dist, sample, has_line=False):
         best = None
         for k, R in routes.items():
             if k.startswith("loop:"): continue
@@ -1256,7 +1256,36 @@ def main():
             mp = model_path_for(k); ov, cov = overlap(sample, mp)
             # 1) PATH match: this event runs along the known route's path in the same direction — the start can be ANYWHERE on it (a circuit resumed mid-lap, a fragment).
             # Needs only the MODEL path, so a route whose registry start was lost (older naming writes wiped it) stays matchable — skipping those minted duplicates.
-            if ov is not None and ov >= 0.7 and direction_agree(sample, mp[1]):
+            # LYING ON A ROUTE IS NOT BEING THAT ROUTE. Jett: "not all courses are independent. the colossus is
+            # a giant course that involves segments that may be in other courses as well." FH6 has 25 road events
+            # and this registry holds 23 keys, so drive an unregistered sprint whose tarmac is part of the
+            # Colossus and ov = 1.00 against the Colossus: the sprint is filed under -3750_300 and can never mint
+            # its own key. Its laps join the Colossus's history, its corners are measured as Colossus corners.
+            # d0 was in this branch already, as a 0.01-per-metre TIEBREAK -- a line 3 km away cost 30 points
+            # against a base of 200, which decides nothing. It is not a tiebreak, it is the whole question.
+            # The anchor above makes it answerable: when this event completed a lap, sx/sz is the row where the
+            # timer started, which IS the start/finish line, and it lands within a few metres on every attempt
+            # (measured 3 m apart on the Colossus). Two drives that begin at DIFFERENT lines are different
+            # courses however much tarmac they share, so a drive with a line of its own may only path-match a
+            # route whose line is the same line.
+            # Without a completed lap there is no line to compare -- sx/sz is wherever the window opened, the
+            # very artefact this guard would be reading -- so a fragment keeps the old permissive behaviour and
+            # is still absorbed by the road that contains it, which is what should happen to a fragment.
+            # COVERING A ROUTE MEANS YOU ARE THAT ROUTE, wherever you joined it. cov is the share of the known
+            # route this drive covered, and it was already computed here and used only by rule 2. Without it a
+            # line gate alone blocked a drive with ov=0.95 and cov=1.00 -- one that traversed all of
+            # -6800_-1100 -- purely because it entered 3366 m from the registered start, and minted a
+            # geometry-less duplicate. A drive that covered the whole road is the same course entered
+            # elsewhere; only a drive covering a SLIVER can be a different course sharing tarmac, and that is
+            # exactly where the line has to decide. Measured on the same session: the two genuinely separate
+            # drives scored cov=0.12 and cov=0.13 against the Colossus with their own line 3.4 km from its
+            # line, so they mint their own keys, which is the whole point of the guard.
+            # 600 m rather than 150: the anchor lands within metres when a real lap completes, but a partial
+            # with a spurious timer reset anchors wherever it split, and two real start/finish lines are
+            # kilometres apart -- so the threshold sits above that jitter and far below the real separation.
+            _covers = cov is not None and cov >= 0.70
+            _line_ok = _covers or (not has_line) or d0 is None or d0 <= 600
+            if ov is not None and ov >= 0.7 and _line_ok and direction_agree(sample, mp[1]):
                 cand = (200 + (d0 or 0) * 0.01, k)
                 if best is None or cand[0] < best[0]: best = cand
                 continue
@@ -1394,7 +1423,7 @@ def main():
                 sample.append(_pt)
             if len(sample) >= 4000:      # a hard ceiling so a pathological event cannot make matching quadratic
                 break
-        key = attribute_route(sx, sz, hdg, dist, sample)
+        key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_lap_rows is not rs))
         if key is None:
             key = f"{int(round(sx / 50) * 50)}_{int(round(sz / 50) * 50)}"
             if key in routes and routes[key].get("start"): key = f"{key}_{len(routes)}"   # a genuinely different route that rounds to an occupied cell

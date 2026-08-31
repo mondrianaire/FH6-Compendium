@@ -87,6 +87,45 @@ def _trace_beats(rec, cur):
 
 
 
+def _line_recurs(key, path, min_sessions=2):
+    """Has this course's start/finish line been crossed at the START of laps in >= min_sessions sessions?
+
+    JETT'S POINT, GENERALISED. Courses are not independent: the Colossus is a 23.38 mi circuit and other
+    events run on road that is also part of it. The containment rule absorbs a shorter course into a longer one
+    that contains it, which is right for a capture FRAGMENT and catastrophic for a real course -- it destroys the
+    course and silently reattributes its laps. Closed loops were already spared, but 10 of FH6's 25 road events
+    are SPRINTS, and an open sprint lying inside the Colossus was not.
+
+    Shape cannot separate the two, and neither can a lap time (19 of 23 courses have one, including a 292 m scrap
+    claiming 177.8 s). What separates them is WHERE THEY BEGIN. A fragment begins wherever the capture opened --
+    an arbitrary point that will not recur. A real course begins at a start/finish line the game put there, and
+    every attempt begins at the same place, so the start REPEATS across independent sessions. Measured: Edamame's
+    line recurs in 22 sessions and the Colossus's in 6, while every scrap course has 0 laps starting at its line.
+
+    The comment above is right that starts cannot be compared BETWEEN two courses -- a fragment's start is an
+    artefact. This asks a different question of one course alone: does its own start recur? Read-only, and a
+    missing or unreadable store simply means no evidence, which spares nothing.
+    """
+    if not path:
+        return 0
+    try:
+        import math as _m, sqlite3 as _sq
+        cx = _sq.connect("file:" + os.path.join(ROOT, "data", "laps.db") + "?mode=ro", uri=True)
+        cx.row_factory = _sq.Row
+        st = path[0][:2]
+        seen = set()
+        for r in cx.execute("SELECT session, pts FROM lap_traces WHERE route_key=?", (key,)):
+            try: pts = json.loads(r["pts"]) if r["pts"] else []
+            except Exception: continue
+            if pts and _m.hypot(pts[0][3] - st[0], pts[0][4] - st[1]) <= 60.0:
+                seen.add(r["session"])
+        cx.close()
+        return len(seen)
+    except Exception:
+        return 0
+
+
+
 def merge_into(dst, src):
     """Fold src's learning into dst. Conservative: additive counters, improve-only records, positional turns."""
     dst["laps"] = (dst.get("laps") or 0) + (src.get("laps") or 0)
@@ -252,11 +291,22 @@ def main():
                 # of the road it was cut from. Absorbing a circuit into a road that merely contains it destroys
                 # a real course and silently reattributes its laps.
                 _sp = pa if La <= Lb else pb
+                _sk = a if La <= Lb else b
                 if contained and _sp and len(_sp) > 2:
                     _sl = _arc(_sp)
                     _gap = ((_sp[0][0] - _sp[-1][0]) ** 2 + (_sp[0][1] - _sp[-1][1]) ** 2) ** 0.5
                     if _sl and _gap <= max(60.0, 0.12 * _sl):
                         contained = False
+                # ...and an OPEN course is its own course too, if the game put a line at its start. The closed
+                # guard above covers circuits; it left sprints unprotected, and 10 of the 25 FH6 road events are
+                # sprints that can run on Colossus tarmac. A start that recurs across independent sessions is a
+                # start/finish LINE, not the arbitrary point where a capture happened to open. See _line_recurs.
+                if contained:
+                    _n = _line_recurs(_sk, _sp)
+                    if _n >= 2:
+                        contained = False
+                        print(f"  keeping {_sk}: its start recurs in {_n} sessions — a start/finish line, "
+                              f"not a capture artefact, so it is a course in its own right")
             # the USER'S OWN NAME is ground truth and outranks any geometric heuristic: naming two keys the same
             # thing is a person saying "this is one course" (and naming is what split them in the first place).
             na = (models[a][1].get("name") or (routes.get(a) or {}).get("name") or "").strip().lower()

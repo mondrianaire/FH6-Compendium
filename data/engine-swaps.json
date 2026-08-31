@@ -1938,13 +1938,13 @@
     "3595": "2020 Ferrari SF90 Stradale",
     "3891": "2024 Lamborghini Revuelto"
    },
-   "cyl": null,
+   "cyl": 12,
    "displacement_l": null,
-   "redline": null,
+   "redline": 10000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 829,
+   "source": "save-mined+telemetry"
   },
   "3732": {
    "engine_family": 3732,

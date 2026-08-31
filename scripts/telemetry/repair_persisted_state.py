@@ -115,6 +115,39 @@ def repair_routes():
     return hits, (d, p)
 
 
+def repair_sessions(dry):
+    """A LAP TIME MUST BE A NUMBER. Returns descriptions of what was cleared.
+
+    `best` in analyze_session's course body held the course's best lap time, and a nearest-geometry-turn loop
+    added later reused the same name in the same scope -- so course_out["best_lap"] was written out holding a
+    turn id. Six of 91 session-courses carry strings like "G3", "G44", "G22", and the dashboard called .toFixed
+    on them, which is how it surfaced. The analyzer no longer does it; these are the records already written.
+
+    Cleared to null rather than guessed at: the real time is recoverable only by re-analysing the capture, and
+    null honestly means "not known", while any invented number would be indistinguishable from a measured one.
+    """
+    hits = []
+    for p_ in sorted(glob.glob(os.path.join(ROOT, "data", "sessions", "*.json"))):
+        try:
+            d = json.load(open(p_, encoding="utf-8"))
+        except Exception:
+            continue
+        touched = False
+        for c in (d.get("courses") or []):
+            if not isinstance(c, dict):
+                continue
+            bl = c.get("best_lap")
+            if bl is not None and not isinstance(bl, (int, float)):
+                hits.append("%s[%s].best_lap = %r (a turn id, not a lap time)"
+                            % (os.path.basename(p_), c.get("route_key"), bl))
+                c["best_lap"] = None
+                touched = True
+        if touched and not dry:
+            json.dump(d, open(p_, "w", encoding="utf-8"), indent=1)
+    return hits
+
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry", action="store_true")
@@ -132,6 +165,9 @@ def main():
         print("  %-24s %s" % (os.path.basename(p), "; ".join(hits)))
         if not a.dry:
             json.dump(m, open(p, "w", encoding="utf-8"), indent=2)
+    sh = repair_sessions(a.dry)
+    for h in sh:
+        print("  %-24s %s" % ("sessions", h))
     rh, rd = repair_routes()
     for h in rh:
         print("  %-24s %s" % ("routes.json", h))
@@ -139,8 +175,9 @@ def main():
         json.dump(rd[0], open(rd[1], "w", encoding="utf-8"), indent=2)
     print("\n%s: %d impossible value(s) across %d course file(s)%s"
           % ("WOULD DROP" if a.dry else "DROPPED", n_v, n_f,
-             " + %d route length(s)" % len(rh) if rh else ""))
-    if not n_v and not rh:
+             " + %d route length(s)" % len(rh) if rh else "")
+          + (" + %d session lap time(s)" % len(sh) if sh else ""))
+    if not n_v and not rh and not sh:
         print("nothing to do — every persisted value is inside the audit's invariants")
 
 

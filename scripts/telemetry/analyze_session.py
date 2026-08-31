@@ -2499,15 +2499,20 @@ def main():
                 p_ = t_.get("pos")
                 if not p_:
                     continue
-                best, bd = None, 45.0 ** 2
+                # NOT `best`. This loop sits in the course body, not in a function, and `best` there already
+                # holds the course's best LAP TIME from the events pass -- which is written out 170 lines later
+                # as course_out["best_lap"]. Clobbering it with a geometry turn id put strings like "G3", "G44"
+                # and "G22" in that field on 6 of 22 session-courses, and the dashboard called .toFixed on them.
+                # Mine, from the commit that wired traced turns in. A distinct name is the whole fix.
+                _bg, _bgd = None, 45.0 ** 2
                 for gid, ap_ in _byid.items():
                     if not ap_:
                         continue
                     d_ = (ap_[0] - p_[0]) ** 2 + (ap_[1] - p_[1]) ** 2
-                    if d_ < bd:
-                        best, bd = gid, d_
-                if best and _tr.get(best):
-                    t_["traced"] = _tr[best]
+                    if d_ < _bgd:
+                        _bg, _bgd = gid, d_
+                if _bg and _tr.get(_bg):
+                    t_["traced"] = _tr[_bg]
         except Exception as _e:
             print("  [traced] skipped: %r" % (_e,))
         # track-level presence per turn (over ALL track laps) and a track-level turn-count confidence — the turn identity is corroborated across sessions, not just this one

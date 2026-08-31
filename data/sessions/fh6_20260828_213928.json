@@ -336992,7 +336992,7 @@
     "4160|1|6|800"
    ],
    "runs": 1,
-   "best_lap": "G3",
+   "best_lap": null,
    "composition": {
     "hairpin": 0,
     "medium": 0,
@@ -348781,7 +348781,7 @@
     "4160|1|6|800"
    ],
    "runs": 1,
-   "best_lap": "G5",
+   "best_lap": null,
    "composition": {
     "hairpin": 1,
     "medium": 1,

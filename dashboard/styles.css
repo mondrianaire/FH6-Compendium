@@ -567,3 +567,14 @@ tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(25
     margin-left: calc(-50vw + 50% + 24px);
   }
 }
+
+/* SPLIT ALONG THE LONG AXIS, NOT ALWAYS LEFT/RIGHT. The brief says the map owns half the screen and the other
+   half is context, and on a landscape display that half is the left one. Jett's actual display is PORTRAIT
+   (1125x1800): side by side there gives two 494 px columns 1239 px tall, and the map -- which keeps the course's
+   own aspect -- drew 472x440 inside a 1239 px pane. About 800 px of the instrument's own half sat empty while
+   the map stayed small, which is the opposite of "the ENTIRE interactive course map".
+   Stacked on a tall screen the map gets the full 1077 px width and the detail takes the space below it. Same
+   rule, same halves, turned to match the screen. */
+@media (max-aspect-ratio: 1/1) {
+  .dash-course > .dash-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr); }
+}

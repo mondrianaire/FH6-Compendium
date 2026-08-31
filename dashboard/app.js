@@ -3652,9 +3652,9 @@
       const selBar = atlasPick ? `<div class="card-row" style="margin:0 0 8px"><span class="chip" style="border-color:var(--accent);color:var(--accent)">showing ${courseIdentMini((selModel && selModel.name) || null, selModel && selModel.geometry, atlasPick, 18)} from the atlas${courses.length ? "" : " — its track record"}</span><span class="chip" data-atlas-clear="1" style="cursor:pointer">✕ show all ${allCourses.length} course${allCourses.length === 1 ? "" : "s"}</span></div>` : "";
       const lead = isLive ? "" : `${routesAtlas(s)}${trackIndex(s)}`;
       if (isLive) return `${courses.length ? courses.map((co) => { const _ck = courseKnowledge(co); const _tr = _ck.stage === "training"; const _col = _tr ? "var(--accent2)" : "var(--accent)"; const _bg = _tr ? "rgba(47,129,247,.07)" : "rgba(0,210,122,.07)"; return `<div class="block" style="border:2px solid ${_col};box-shadow:inset 6px 0 0 ${_col};background:${_bg}"><h3 style="margin-top:0;display:flex;align-items:center;gap:8px;font-size:17px"><span style="font-size:22px">${_tr ? "📚" : "🏋"}</span><span style="color:${_col}">${_tr ? "COURSE LEARNING" : "COURSE TUNING"}</span><span class="why" style="font-weight:400;font-size:12px">${_tr ? `— learning the course · switches to tuning at 75%` : `— the course is known · feedback for this car`}</span><span style="margin-left:auto">${analysisAgeChip()}</span></h3>${selBar}${liveCourseDashboard(co, s)}</div>`; }).join("") : atlasPick && selModel ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🏟 Course — from the track record</h3>${selBar}<div class="card-grid">${modelCourseCard(selModel)}</div></div>` : `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course dashboard</h3><div class="lab-corner" style="border-left:4px solid var(--accent2);background:var(--bg2)"><div class="card-row" style="margin-top:0"><strong style="font-size:15px">📚 COURSE TRAINING <span class="why" style="font-weight:400">· no course identified yet</span></strong><span id="lvCourseLive" class="chip"></span></div><div style="font-size:13px;margin:4px 0 2px"><b>▶ NEXT for the course:</b> complete the first attempt / loop lap — the course appears (and is matched against the database) when it finishes</div><p class="why" style="font-size:10.5px;margin:5px 0 0">timed event (Rivals · race · time trial) or a marked reference loop (📍 in the stream bar). Everything outside those windows is Free Tuning.</p></div><div id="lvCornerAnalysis" style="margin-top:8px">${cornerAnalysis()}</div></div>`}${eventsTable(s)}${routesAtlas(s)}`;
-      return `${lead}${courses.length ? `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course — per route: what it demands, every turn quantified & classified, lap deltas per run, course-weighted suggestions</h3>${selBar}<div class="card-grid">${courses.map((co) => courseBlock(co, s)).join("")}</div></div>` : atlasPick && selModel ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🏟 Course — from the track record</h3>${selBar}<div class="card-grid">${modelCourseCard(selModel)}</div></div>`
+      return `${courses.length ? `<div class="block course-wide" style="border-color:var(--accent2)"><h3 style="margin:0 0 6px;font-size:14px">🏟 Course</h3>${selBar}<div class="card-grid course-grid">${courses.map((co) => courseBlock(co, s)).join("")}</div></div>` : atlasPick && selModel ? `<div class="block" style="border-color:var(--accent)"><h3 style="margin-top:0">🏟 Course — from the track record</h3>${selBar}<div class="card-grid">${modelCourseCard(selModel)}</div></div>`
         : `<div class="block" style="border-color:var(--accent2)"><h3 style="margin-top:0">🏟 Course — nothing scoped yet</h3><p class="why" style="font-size:12px;margin:0">A course appears when you run a timed event (Rivals · race · time trial) or lap a marked reference loop${isLive ? " — mark one with 📍 in the stream bar above (the control lives on this Course tab) and drive back through the start" : ""}. Everything outside those windows is Free Tuning.</p></div>`}
-        ${eventsTable(s)}`;
+        ${eventsTable(s)}${lead}`;
     }
     // 🛣 FREE TUNING — whole-session advisor, runs, test cards, gear & dyno (recordings also get the strip + corner cards; live paints those as instruments)
     // ---- GENERAL / ALL-AROUND tuning: the inverse of course tuning. Weights diagnoses by BREADTH
@@ -5907,7 +5907,25 @@ ${firm.map((a) => `<div style="display:flex;gap:8px;align-items:flex-start;margi
 ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top:4px">🔍 ${open.map((a) => a.text).join(" · ")}</div>` : ""}</div>`; }).join("")}`;
       return { rn, cov, nl, tu, tr, header, track: trackCard, profile: profileCard, map: mapCardHtml(courseGeoFor(co), co.corners, co.turns, co), turns: turnsCard, history: turnHistoryCard(co), probes, laps, corners, driving, advice };
     };
-    const courseBlock = (co, s) => { const p = courseParts(co, s); return `<div class="lab-corner" style="border-left:4px solid var(--accent2)">${p.header}${p.track}${p.profile}${p.map}${p.turns}${p.history}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div>`; };
+    // ONE COURSE, ONE SCREEN. This stacked eleven sections vertically -- identity, track record, profile, map,
+    // turns, history, probes, laps, corners, driving, advice -- and a single course measured 9050 px against a
+    // 900 px viewport. Jett's spec: "the course map section needs to be only on the left half and needs to be
+    // the ENTIRE interactive course map that is zoomable. the right section is the tuning overview unless a turn
+    // is selected in which this pane is to be used for turn detail information". That layout was built for the
+    // LIVE view and never reached this one, which is the view you actually read a course in.
+    // The map owns the left half outright and fills it; everything analytical moves into the right pane's own
+    // scroll, so the page does not grow with the content. A course is now exactly one screen tall, and the only
+    // page scrolling left is BETWEEN courses, which is honest -- they are different courses.
+    const courseBlock = (co, s) => {
+      const p = courseParts(co, s);
+      const rk = co.route_key;
+      const selN = (rk && live.selTurn && live.selTurn.rk === rk) ? live.selTurn.n : null;
+      const brk = selN ? courseTurnBreakdown(co, selN) : null;
+      const right = brk
+        ? `<div class="dash-info-pane turn"><div class="dash-pane-hd"><span class="dash-ey" style="color:var(--accent)">◎ TURN ${selN}</span><span class="why">the map's selection</span><span class="chip" data-courseturn-close="1" style="margin-left:auto;cursor:pointer">✕ back to the course</span></div><div class="dash-pane-body">${brk}</div></div>`
+        : `<div class="dash-info-pane"><div class="dash-pane-hd"><span class="dash-ey">📋 COURSE DETAIL</span><span class="why">click a turn on the map for its own breakdown</span></div><div class="dash-pane-body">${p.track}${p.profile}${p.turns}${p.history}${p.probes}${p.laps}${p.corners}${p.driving}${p.advice}</div></div>`;
+      return `<div class="lab-corner dash-course" style="border-left:4px solid var(--accent2)">${p.header}<div class="dash-body">${dashMapPane(co)}${right}</div></div>`;
+    };
     // ---- LIVE plumbing: mode banner, stream bar, the live workflow body, and section repaint from the daemon's latest full analysis ----
     function paintBanner() {
       const el = host.querySelector("#lvBanner"); if (!el) return;

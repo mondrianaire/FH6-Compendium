@@ -529,3 +529,41 @@ tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(25
 .seg-ctl .chip.seg-mode.on { background: var(--accent2); border-color: var(--accent2); color: var(--bg); font-weight: 700; }
 .seg-ctl .chip.seg-grad { line-height: 0; border-color: var(--line); }
 .seg-ctl .chip.seg-grad.on { outline: 2px solid var(--accent2); outline-offset: 1px; }
+
+/* ONE COURSE, ONE SCREEN. The stored-session course view stacked every section vertically and a single course
+   measured 9050 px against a 900 px viewport. The map owns the left half and FILLS it; everything analytical
+   scrolls inside the right pane, so the page height no longer grows with the content. min-height:0 on every
+   flex/grid child is what actually lets an inner pane scroll instead of pushing its parent taller. */
+/* Sized to the space the app chrome actually leaves. Measured at 1600x900: topbar 82 + tabs 46 + section title
+   30 + source picker 111 + the section heading, and the course block began 376 px down -- so a 100vh - 168px
+   block ended 208 px below the fold and the "no scroll" layout still scrolled. The chrome is a constant, not a
+   fraction, so subtracting it scales correctly: 900 -> 504 px of course, 1080 -> 684 px, both fitting. */
+.dash-course { display: flex; flex-direction: column; height: calc(100vh - 396px); min-height: 420px; overflow: hidden; }
+/* Below ~1400 the tab nav wraps to a second line and the chrome grows to 409 px, so the block has to give the
+   same amount back or it lands below the fold again -- measured 829 against an 800 px viewport, 29 px over. */
+@media (max-width: 1400px) { .dash-course { height: calc(100vh - 424px); min-height: 340px; } }
+.dash-course > .dash-body { flex: 1 1 auto; min-height: 0; align-items: stretch; margin-bottom: 0; }
+.dash-course .dash-map-pane, .dash-course .dash-info-pane { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.dash-course .dash-map-pane { position: static; }
+.dash-course .dash-map-wrap { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.dash-course .dash-map-wrap .tz-svg { max-height: 100%; width: auto; max-width: 100%; }
+.dash-course .dash-pane-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
+/* the identity block is a header, not a section: it must not eat the screen it introduces */
+.dash-course .course-id { max-height: 132px; overflow: hidden; }
+.dash-course .course-tags { max-height: 46px; overflow: hidden; }
+@media (max-width: 900px) { .dash-course { height: auto; overflow: visible; } .dash-course .course-id, .dash-course .course-tags { max-height: none; } }
+/* A COURSE IS NOT A CARD. .card-grid is repeat(auto-fill, minmax(300px, 1fr)), which lays out as many 300 px
+   columns as the width allows -- so a single course block took ONE of them and the two panes inside it came out
+   161 px wide each. The course layout is full-width by design; it gets one column and keeps the whole row. */
+.card-grid.course-grid { grid-template-columns: minmax(0, 1fr); }
+/* THE MAP GETS THE ROOM IT NEEDS. main is capped at 1200 px, which is right for prose and wrong for a course:
+   at 1920 the two panes came out 539 px each, so "the ENTIRE interactive course map" had a third of the screen.
+   The course section alone breaks out of the cap on wide viewports -- the rest of the app keeps its measure.
+   max-width is pinned to the same calc as width so the breakout can never introduce a horizontal scrollbar. */
+@media (min-width: 1400px) {
+  .block.course-wide {
+    width: calc(100vw - 48px);
+    max-width: calc(100vw - 48px);
+    margin-left: calc(-50vw + 50% + 24px);
+  }
+}

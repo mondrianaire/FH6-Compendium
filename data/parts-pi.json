@@ -1,6 +1,6 @@
 {
  "schema_version": "1.0.0",
- "generated": "2026-08-31 16:46:56",
+ "generated": "2026-08-31 17:10:07",
  "method": "single-part isolation from decoded-config<->CarPI observations (median per edge, anchored to stock); pure-Python least-squares regression fallback (tagged 'regression') for the rest",
  "parts_pi": {
   "centrifugal_supercharger": {
@@ -16,18 +16,32 @@
      }
     }
    }
+  },
+  "rim_style": {
+   "657": {
+    "pi_vs_stock": 0,
+    "ref_tier": "651",
+    "samples": 1,
+    "confidence": "measured-direct",
+    "edges": {
+     "651->657": {
+      "median_delta": 0,
+      "samples": 1
+     }
+    }
+   }
   }
  },
  "coverage": {
-  "slots_with_estimates": 1,
-  "part_tiers_seen": 1,
-  "part_tiers_resolved": 1,
+  "slots_with_estimates": 2,
+  "part_tiers_seen": 2,
+  "part_tiers_resolved": 2,
   "by_confidence": {
-   "measured-direct": 1
+   "measured-direct": 2
   },
-  "regression": "underdetermined (40 obs, 205 params)",
-  "observations": 40,
+  "regression": "underdetermined (41 obs, 207 params)",
+  "observations": 41,
   "ordinals": 22,
-  "single_part_pairs": 2
+  "single_part_pairs": 3
  }
 }

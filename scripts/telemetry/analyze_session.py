@@ -1885,8 +1885,35 @@ def main():
                         lap_paths.append({"session": sid, "ev": w["ev"], "lap": w["lap"], "pts": [[round(p[0]), round(p[1])] for p in pc[::max(1, -(-len(pc) // 160))]]})   # <= 160 pts
                 geo["lap_paths"] = lap_paths   # merged into the course model below; stripped from the session entry afterwards (layout_paths carries them)
         def geo_near(x, z):
+            """The NEAREST map turn to this corner, not the first one in list order.
+
+            A course can cross its own road: -6800_-1100 is an out-and-back whose G1 (arc 508 m) and G9 (arc
+            1756 m) sit 19.2 m apart in XZ because the road doubles back past itself. Taking the first match in
+            geometry.turns order meant every corner detected on the RETURN pass was labelled with the id of the
+            corner on the way out -- G9's driving published as G1's. That id is stamped on the session corner
+            record and is what the dashboard matches a live corner against, so the wrong corner's evidence was
+            being read back for the rest of the course's life. Same first-hit shape as the three matchers already
+            replaced by _bind; these two were missed because they read as harmless lookups.
+            """
             if not geo: return None
-            return next((g["id"] for g in geo["turns"] if math.hypot(g["apex"][0] - x, g["apex"][1] - z) <= max(60, g["len_m"] / 2 + 20)), None)   # anywhere within the turn's span
+            cands = [(g, math.hypot(g["apex"][0] - x, g["apex"][1] - z)) for g in geo["turns"]]
+            cands = [(g, d) for g, d in cands if d <= max(60, g["len_m"] / 2 + 20)]
+            if not cands: return None
+            # NEAREST, not first-in-list. Taking geometry.turns order meant a corner detected on the RETURN
+            # pass of an out-and-back was labelled with the id of the corner on the way out -- on -6800_-1100,
+            # G9 (arc 1756 m) published as G1 (arc 508 m), because their apexes are 19.2 m apart where the road
+            # doubles back past itself. That id is stamped on the session corner record and is what the dashboard
+            # matches a live corner against, so the wrong corner's evidence was read back for the rest of the
+            # course's life. Same first-hit shape as the three matchers already replaced by _bind.
+            #
+            # STILL AMBIGUOUS WHERE A ROAD CROSSES ITSELF, and this does not pretend otherwise. Nearest-in-XZ
+            # picks whichever apex is marginally closer, which on those three pairs is close to a coin flip.
+            # The fix is to disambiguate by position ALONG THE LAP, and the corner record's `dist` field is not
+            # it: measured, this course's corners span dist -175..6088 while its map spans s 3303..37037, so the
+            # two are not the same quantity and comparing them just re-picks the lowest s -- the original bug in
+            # a new costume. Naming the corner on a self-crossing road needs a monotonic sequence alignment of
+            # detected corners against map turns, which is a real piece of work and is not attempted here.
+            return min(cands, key=lambda gd: gd[1])[0]["id"]
         # ---- COURSE MODEL (persistent, data/courses/<route>.json): loaded BEFORE clustering so turn membership can use cross-session (track) presence ----
         mdir = os.path.join(ROOT, "data", "courses"); mpath = os.path.join(mdir, re.sub(r"[^A-Za-z0-9_.-]+", "_", key) + ".json")
         write_models = "_replay_analysis" not in os.path.abspath(outdir)
@@ -1895,8 +1922,13 @@ def main():
             if os.path.exists(mpath):
                 with open(mpath, encoding="utf-8") as f: model = json.load(f)
         except Exception: pass
-        def mturn_for(cl):   # model turn within 40 m of this cluster's apex
-            return next((t for t in model["turns"] if (t["pos"][0] - cl["x"]) ** 2 + (t["pos"][1] - cl["z"]) ** 2 <= 40 ** 2), None)
+        def mturn_for(cl):   # NEAREST model turn within 40 m of this cluster's apex -- see geo_near: on a course
+            best, bd = None, None                                    # that doubles back, first-in-list is the
+            for t in model["turns"]:                                 # corner on the OTHER pass
+                d2 = (t["pos"][0] - cl["x"]) ** 2 + (t["pos"][1] - cl["z"]) ** 2
+                if d2 <= 40 ** 2 and (bd is None or d2 < bd):
+                    best, bd = t, d2
+            return best
         # corner identity: cluster this course's corners by apex position (40 m), order along the route, aggregate per physical corner
         clusters = []
         for c in sorted(cc, key=lambda c: c["t0"]):

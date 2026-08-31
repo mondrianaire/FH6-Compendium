@@ -2352,8 +2352,19 @@ def main():
         # length (falling back to the longest trace on record), so no caller has to declare it.
         _clen = ((model.get("geometry") or {}).get("length_m") or 0) or max(
             [(t.get("pts") or [[0]])[-1][0] for t in trm.values() if t.get("pts")] or [0])
+        # ...AND WIDE ONES, WHICH THIS DID NOT. Coverage was bounded below and not above, so a trace running far
+        # PAST the line survived here even though promote_into -- in this same file, a few lines down -- rejects
+        # anything at 1.45x or more, and the audit FAILs it as trace-too-wide. Two paths writing the same field
+        # under different rules is how -1700_-4450 ended up holding a 6920 m trace on a 1920 m map, 3.60x.
+        # One rule, both ends, stated once by promote_traces so the three places cannot drift apart again.
         if _clen:
-            for _k in [k for k, t in trm.items() if t.get("pts") and t["pts"][-1][0] < 0.7 * _clen]:
+            try:
+                import promote_traces as _ptb
+                _lo, _hi = _ptb.COVER, _ptb.WIDE
+            except Exception:
+                _lo, _hi = 0.7, 1.45
+            for _k in [k for k, t in trm.items() if t.get("pts")
+                       and not (_lo * _clen <= t["pts"][-1][0] < _hi * _clen)]:
                 trm.pop(_k, None)
         if len(trm) > 10: model["speed_traces"] = trm = dict(sorted(trm.items(), key=lambda kv: kv[1].get("lap_s") or 9e9)[:10])
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]

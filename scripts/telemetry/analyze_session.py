@@ -1518,14 +1518,23 @@ def main():
     # rows the game already accounted for as an event are not its business. Rows outside every attributed event
     # are still scanned, which is the case reference loops exist for.
     _claimed = [(e["t0"], e["t1"]) for e in ev_out if e.get("route_key")]
-    _free = [r for r in live if not any(a <= r["t"] <= b for a, b in _claimed)] if _claimed else live
+    _claimed_t = _claimed or []
     for lname, lp in loops.items():
         lx, lz = lp["start"]
         if abs(lx) < 5 and abs(lz) < 5: continue   # invalid origin-marked loop (a pre-race [0,0] capture) — the car never returns to the origin, so it never made a course
         R = lp.get("radius", 60); MIND = lp.get("min_dist", 250)
         # collect crossings: a lap = leave the radius (travel > MIND from start), then return within radius
         state = "start"; lap_rows = []; away_dist = 0; prev = None; passes = []
-        for r in _free:
+        for r in live:
+            # RESET AT THE BOUNDARY, DO NOT SPLICE ACROSS IT. Filtering the claimed rows out of one flat list
+            # left this integrator working across the hole: away_dist sums hypot() between CONSECUTIVE RETAINED
+            # rows and the lap's distance and time come from its first and last, so a pass that began before an
+            # attributed event and closed after it was not suppressed, it was STITCHED -- reporting a distance
+            # and a duration covering driving the scanner never saw. Clearing the state machine at the boundary
+            # means a lap can never span a claimed window, which is what "not its business" has to mean here.
+            if _claimed_t and any(a <= r["t"] <= b for a, b in _claimed_t):
+                state = "start"; lap_rows = []; away_dist = 0; prev = None
+                continue
             d0 = math.hypot(r["PosX"] - lx, r["PosZ"] - lz)
             if state == "start":
                 if d0 <= R: lap_rows = [r]; state = "in"; away_dist = 0

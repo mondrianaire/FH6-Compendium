@@ -172,10 +172,21 @@ def _raced(m, road_m):
     """
     if not road_m:
         return 0.0
-    ls = [v.get("lap_s") for v in (m.get("speed_traces") or {}).values() if (v or {}).get("lap_s")]
-    ls += [v.get("best_lap") for v in (m.get("best_laps") or {}).values() if (v or {}).get("best_lap")]
-    ls = [x for x in ls if x and x > 0]
-    return (road_m / min(ls) * 2.23694) if ls else 0.0
+    # THE GAME'S CLOCK FIRST, AND NEVER A VOID LAP. This pulled lap_s out of speed_traces and weighted it
+    # equally with best_laps -- but a speed_trace's lap_s is the analyzer's own capture window, which this
+    # docstring calls meaningless, and nothing filtered void. -6350_-750 had NO game-timed lap at all
+    # (best_laps empty, its visit row best_lap null) and was spared on a single trace carrying void: 1 and 327
+    # impacts. min() makes that worse: the shortest window decides, and the shortest window is the one most
+    # likely to be junk. Game-timed values are the evidence; a trace time is a fallback and only when the lap
+    # was clean.
+    _timed = [v.get("best_lap") for v in (m.get("best_laps") or {}).values() if (v or {}).get("best_lap")]
+    _timed += [v.get("best_lap") for v in (m.get("visits") or []) if (v or {}).get("best_lap")]
+    _timed = [x for x in _timed if x and x > 0]
+    if not _timed:
+        _timed = [v.get("lap_s") for v in (m.get("speed_traces") or {}).values()
+                  if (v or {}).get("lap_s") and not (v or {}).get("void")]
+        _timed = [x for x in _timed if x and x > 0]
+    return (road_m / min(_timed) * 2.23694) if _timed else 0.0
 
 
 

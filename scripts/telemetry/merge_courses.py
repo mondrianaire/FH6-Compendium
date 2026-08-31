@@ -456,23 +456,30 @@ def main():
             routes.pop(d, None)   # the duplicate key is retired; path matching now attracts its events to the canonical model
         if name:
             cm["name"] = name; routes.setdefault(canon, {})["name"] = name
+        # A MERGE INVALIDATES THE TURN->MAP BINDING, BY DESIGN. The surviving model keeps its own turn inventory
+        # but may adopt the OTHER model's geometry, so turns bound to the discarded map are now bound to nothing:
+        # one merge left 145 registry entries claiming a map they were nowhere near and 3 courses declaring more
+        # turns than their road had, and the audit went 4 FAIL -> 151. Rebinding is not an optional follow-up
+        # someone has to remember; it is part of what merging MEANS, so it happens here.
+        #
+        # BEFORE THE WRITE, AND INSIDE THE LOOP. It used to run after os.replace had already put the model on
+        # disk -- and rebind() only mutates its argument, main() is what persists it -- so every merge threw its
+        # rebind away and --apply left exactly the unbound turns the block exists to prevent. It also sat at
+        # 4-space indent, outside `for grp`, so it saw only the LAST group; with no duplicate groups at all,
+        # `cm` and `canon` were unbound and the summary print raised UnboundLocalError, after the backup and
+        # after the deletions, killing the routes.json write below.
+        try:
+            import rebind_map_turns as _RB
+            _ar, _at, _ae = _RB.rebind(cm)
+            if _ar or _at or _ae:
+                print(f"  rebound turns to the surviving map: +{_ar} registry, +{_at} turns, {_ae:+d} established")
+        except Exception as _e:
+            print(f"  !! turn rebind failed ({_e!r}) — run rebind_map_turns.py before trusting the turn counts")
         tmp = cp + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(cm, f, indent=1)
         os.replace(tmp, cp)
-        # A MERGE INVALIDATES THE TURN->MAP BINDING, BY DESIGN. The surviving model keeps its own turn inventory but
-    # may adopt the OTHER model's geometry, so turns that were bound to the discarded map are now bound to
-    # nothing: this merge left 145 registry entries claiming a map they were nowhere near and 3 courses declaring
-    # more turns than their road had. The audit went 4 FAIL -> 151. Rebinding is not an optional follow-up step
-    # someone has to remember; it is part of what merging MEANS, so it happens here.
-    try:
-        import rebind_map_turns as _RB
-        _ar, _at, _ae = _RB.rebind(cm)
-        if _ar or _at or _ae:
-            print(f"  rebound turns to the surviving map: +{_ar} registry, +{_at} turns, {_ae:+d} established")
-    except Exception as _e:
-        print(f"  !! turn rebind failed ({_e!r}) — run rebind_map_turns.py before trusting the turn counts")
-    print(f"merged -> {canon}: {cm.get('laps')} laps, {len(cm.get('sessions') or [])} sessions, "
+        print(f"merged -> {canon}: {cm.get('laps')} laps, {len(cm.get('sessions') or [])} sessions, "
               f"{len(cm.get('turns') or [])} turns (from {len(grp)} models)")
 
     tmp = RPATH + ".tmp"

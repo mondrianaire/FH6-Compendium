@@ -1792,6 +1792,18 @@ def main():
             _typ = [w for w in _cand if _amed and abs(_arcs[id(w)] - _amed) <= 0.1 * _amed] or _cand
             ref_w = min(_typ, key=_rows_in)
             pieces = resample(lap_pts(ref_w)); P = [p for pc in pieces for p in pc]
+            # A TURN'S ARC MUST BE ARC ALONG THE COURSE, NOT ALONG ITS PIECE. resample restarts each piece's
+            # running distance at 0, and P is their flat concatenation, so P[i][2] is arc WITHIN the piece i
+            # belongs to. Writing that as the turn's `s` makes two turns on different pieces incomparable:
+            # measured on 2850_-200, pieces [326, 322, 1251] with a maximum turn s of 1196 -- under the largest
+            # piece and nowhere near the 1899 m total. Everything that reads `s` as a position along the course
+            # is then wrong on a multi-piece map: turn_stats.windows picks the wrong neighbours, and the
+            # merged_turns ordering that decides T1..Tn numbers them across pieces as if the arcs were
+            # comparable. _soff[i] is the road before i's piece, so P[i][2] + _soff[i] is arc along the course.
+            _soff, _acc = [], 0.0
+            for pc in pieces:
+                _soff.extend([_acc] * len(pc))
+                _acc += (pc[-1][2] if pc else 0.0)
             if len(P) >= 20:
                 # Median |lat_g| per 8 m, pooled over every full lap. Straights here read 0.03-0.07 g against
                 # 0.67-2.4 g in corners -- a 10x separation, so the threshold is not a judgement call.
@@ -1928,7 +1940,7 @@ def main():
                 flip = votes < 0; gt_out = []
                 # deg/radius come from the detector (integrated over the whole turn, not an endpoint difference)
                 for n_, g in enumerate(merged, 1):
-                    gt_out.append({"id": f"G{n_}", "apex": [round(P[g["ia"]][0]), round(P[g["ia"]][1])], "s": round(P[g["ia"]][2]), "radius_m": round(1.0 / g["k"]), "dir": ("R" if (g["sgn"] > 0) != flip else "L"), "deg": g["deg"],
+                    gt_out.append({"id": f"G{n_}", "apex": [round(P[g["ia"]][0]), round(P[g["ia"]][1])], "s": round(P[g["ia"]][2] + (_soff[g["ia"]] if g["ia"] < len(_soff) else 0.0)), "radius_m": round(1.0 / g["k"]), "dir": ("R" if (g["sgn"] > 0) != flip else "L"), "deg": g["deg"],
                                    "len_m": round((g["i1"] - g["i0"]) * 4.0), "entry": [round(P[g["i0"]][0]), round(P[g["i0"]][1])], "exit": [round(P[g["i1"]][0]), round(P[g["i1"]][1])], "speed_ref_lap": round(P[g["ia"]][3])})
                 geo = {"length_m": round(sum(pc[-1][2] for pc in pieces)), "ref_lap": {"ev": ref_w["ev"], "lap": ref_w["lap"], "t0": ref_w["t0"], "t1": ref_w["t1"]}, "paths": down(pieces), "turns": gt_out, "pieces": len(pieces)}
                 geo["path"] = [p for pc in geo["paths"] for p in pc]   # flat (overlap cells · atlas bounds); 'paths' are the drawable pieces
@@ -2366,15 +2378,30 @@ def main():
         # anything at 1.45x or more, and the audit FAILs it as trace-too-wide. Two paths writing the same field
         # under different rules is how -1700_-4450 ended up holding a 6920 m trace on a 1920 m map, 3.60x.
         # One rule, both ends, stated once by promote_traces so the three places cannot drift apart again.
+        # ONE RULE MEANS THE SAME MEASUREMENT AND THE SAME EXEMPTIONS. Two things were still this pass's own:
+        # it measured a trace's span as pts[-1][0], where the other four places sum the increasing runs because
+        # a trace stitched from pieces RESETS its arc mid-way -- so a real lap read short here and was deleted;
+        # and it had no fragmented-map gate, while promote_into, the promoter's CLI, the repair tool and the
+        # audit all stand down on a map of disconnected scraps. On such a map coverage means nothing, so this
+        # pass was deleting the only trace those courses had on a measurement nobody else trusts.
         if _clen:
             try:
                 import promote_traces as _ptb
-                _lo, _hi = _ptb.COVER, _ptb.WIDE
+                _lo, _hi, _span, _frag = _ptb.COVER, _ptb.WIDE, _ptb.span, _ptb.fragmented
             except Exception:
-                _lo, _hi = 0.7, 1.45
-            for _k in [k for k, t in trm.items() if t.get("pts")
-                       and not (_lo * _clen <= t["pts"][-1][0] < _hi * _clen)]:
-                trm.pop(_k, None)
+                _lo, _hi, _frag = 0.7, 1.45, (lambda _g: False)
+                def _span(_p):
+                    _t = 0.0; _pv = None; _st = None
+                    for _q in _p or []:
+                        _a = _q[0]
+                        if _pv is None: _st = _a
+                        elif _a < _pv: _t += _pv - _st; _st = _a
+                        _pv = _a
+                    return _t + (_pv - _st) if _pv is not None else 0.0
+            if not _frag(model.get("geometry") or {}):
+                for _k in [k for k, t in trm.items() if t.get("pts")
+                           and not (_lo * _clen <= _span(t["pts"]) < _hi * _clen)]:
+                    trm.pop(_k, None)
         if len(trm) > 10: model["speed_traces"] = trm = dict(sorted(trm.items(), key=lambda kv: kv[1].get("lap_s") or 9e9)[:10])
         model["visits"] = sorted([v for v in model["visits"] if v.get("session") != sid] + [{"session": sid, "laps": total_laps, "attempts": nev, "cars": co["cars"], "best_lap": best_here[0] if best_here else None, "best_car": best_here[1] if best_here else None}], key=lambda v: v["session"])[-40:]
         model["laps"] = sum(v.get("laps", 0) for v in model["visits"]); model["sessions"] = sorted({v["session"] for v in model["visits"]})   # idempotent under re-analysis
@@ -2403,9 +2430,19 @@ def main():
             t["sessions"] = len(bs)
         # order along the route (nearest point on the learned path) and renumber; the canonical set = turns established across the track
         gpath = ((model.get("geometry") or {}).get("path")) or [t["pos"] for t in merged_turns]
+        # ARC, NOT A VERTEX INDEX. This returned the INDEX of the nearest path point, and the ordering below
+        # mixes its result with turns that carry a real `s` in METRES -- 0..37037 on the Colossus against an
+        # index 0..len(path). A turn with no arc of its own was therefore sorted as though its index were a
+        # distance, landing it among turns hundreds of metres from where it is. Cumulative arc over the same
+        # vertices puts both operands in the same unit; the sum is gap-aware so the jump between disconnected
+        # map pieces is not counted as road, matching how length_m and audit_models measure the same path.
+        _gcum = [0.0]
+        for _i in range(1, len(gpath)):
+            _d = math.hypot(gpath[_i][0] - gpath[_i - 1][0], gpath[_i][1] - gpath[_i - 1][1])
+            _gcum.append(_gcum[-1] + (_d if _d <= 150.0 else 0.0))
         def route_s(pos):
             best_i = min(range(len(gpath)), key=lambda i: (gpath[i][0] - pos[0]) ** 2 + (gpath[i][1] - pos[1]) ** 2) if gpath else 0
-            return best_i
+            return _gcum[best_i] if best_i < len(_gcum) else 0.0
         # ═══ A TURN IS A PROPERTY OF THE ROAD, NOT OF HOW HARD YOU DROVE IT ═══
         # Turn EXISTENCE comes from geometry + geography: the curvature of the path you drove, which is
         # pace-independent. Tyre load (the 0.35 g behavioural detector) only describes HOW a turn was taken —

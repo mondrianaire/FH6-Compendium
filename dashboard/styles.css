@@ -548,9 +548,14 @@ tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(25
 .dash-course .dash-map-wrap { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .dash-course .dash-map-wrap .tz-svg { max-height: 100%; width: auto; max-width: 100%; }
 .dash-course .dash-pane-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
-/* the identity block is a header, not a section: it must not eat the screen it introduces */
-.dash-course .course-id { max-height: 132px; overflow: hidden; }
-.dash-course .course-tags { max-height: 46px; overflow: hidden; }
+/* the identity block is a header, not a section: it must not eat the screen it introduces -- but it must not
+   be CRUSHED either. .dash-course is a fixed-height column flex container, so its first child inherits
+   flex-shrink: 1 and gives up height to the body below it before the max-height ever applies; combined with
+   overflow: hidden that clips the course NAME, which is the one thing the header exists to say. flex: none
+   pins it to its natural height and makes .dash-body the only thing that shrinks -- which is what should
+   shrink, since it scrolls internally. */
+.dash-course .course-id { flex: none; max-height: 132px; overflow: hidden; }
+.dash-course .course-tags { flex: none; max-height: 46px; overflow: hidden; }
 @media (max-width: 900px) { .dash-course { height: auto; overflow: visible; } .dash-course .course-id, .dash-course .course-tags { max-height: none; } }
 /* A COURSE IS NOT A CARD. .card-grid is repeat(auto-fill, minmax(300px, 1fr)), which lays out as many 300 px
    columns as the width allows -- so a single course block took ONE of them and the two panes inside it came out

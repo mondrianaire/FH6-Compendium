@@ -1372,10 +1372,19 @@ def main():
         # completion (measured 421.6 s of race time when the 370.6 s lap finished — 51 s of roll-up before it)
         # and returns to 0 only on a RESTART. So a CurrentLap reset with race time still climbing is a lap
         # boundary, full stop.
-        _laps_in, _cur, _pcl = [], [], None
+        # COUNT THE CROSSINGS. `_lap_rows is not rs` was used below to mean "this event completed a lap", and it
+        # cannot: _cur is a FRESH list appended unconditionally at the end, so with no reset at all _lap_rows is
+        # a different object holding exactly the same rows, and the test is True for every event over 30 rows --
+        # which the 5 s floor guarantees. Measured across three captures: every event reported has_line=True,
+        # including dozens with zero resets. The line gate in attribute_route was therefore applied to
+        # FRAGMENTS, which its own comment says must stay permissive, and two pieces of the Colossus -- 8812 m
+        # and 24088 m, both lying 100% on it -- were blocked from their own road and minted as separate courses.
+        # A count of actual crossings is the thing being asked about, so count them.
+        _laps_in, _cur, _pcl, _resets = [], [], None, 0
         for q in rs:
             _c = q.get("CurrentLap")
             if _pcl is not None and _c is not None and _pcl > 30.0 and _c < 1.0:
+                _resets += 1
                 if len(_cur) > 30: _laps_in.append(_cur)
                 _cur = []
             _cur.append(q); _pcl = _c
@@ -1383,7 +1392,7 @@ def main():
         _lap_rows = max(_laps_in, key=lambda L: len(L)) if _laps_in else rs   # the longest lap describes the road best
         # the lap's first row IS the line — the timer starts as you cross it, the same place on every attempt,
         # where the event's own first row is wherever the roll-up happened to begin
-        if _lap_rows and _lap_rows is not rs:
+        if _resets and _lap_rows:
             start = _lap_rows[0]; sx, sz = start["PosX"], start["PosZ"]
         # The legacy crossing-detector lived here and OVERWROTE the anchor above. Its first test —
         # `_prev_cl <= 0.01 and _cl > 0` — was meant to catch the 0 -> running transition, but event rows are
@@ -1458,7 +1467,7 @@ def main():
                 sample.append(_pt)
             if len(sample) >= 4000:      # a hard ceiling so a pathological event cannot make matching quadratic
                 break
-        key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_lap_rows is not rs))
+        key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_resets > 0))
         if key is None and _is_rollup(sx, sz, sample):
             continue
         if key is None:

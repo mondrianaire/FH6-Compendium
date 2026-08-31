@@ -346,13 +346,13 @@
     "3761": "2022 Toyota GR86",
     "4162": "1985 Toyota Sprinter (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9000,
+   "sample_hp": 327,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "237": {
    "engine_family": 237,
@@ -431,13 +431,13 @@
     "3062": "1970 Ferrari 512 S",
     "3141": "2018 Apollo Intensa Emozione"
    },
-   "cyl": null,
+   "cyl": 10,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 833,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "474": {
    "engine_family": 474,
@@ -860,13 +860,13 @@
     "3847": "2024 Ford Mustang Dark Horse",
     "4175": "2020 Ford F-450 DRW (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 10,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 833,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "1087": {
    "engine_family": 1087,

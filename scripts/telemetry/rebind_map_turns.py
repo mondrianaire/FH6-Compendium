@@ -134,16 +134,28 @@ def rebind(m):
     # two established turns both answering to "T21" while the dashboard joins live corners on that id, so one
     # corner's evidence is read for the other. Ordered by arc, the FIRST holder of an id keeps it -- churn stays
     # minimal and stable across runs -- and every later claimant is moved to the first free number.
+    # TWO PASSES, NO SEARCHING. The first cut of this walked the list and, for each turn needing an id,
+    # scanned AHEAD for ids later turns already held -- using _ordered.index(t) to find where it was. That is
+    # wrong as well as slow: list.index compares with ==, and two turn records with identical content compare
+    # equal, so index() can return a DIFFERENT turn's position and the look-ahead then scans the wrong slice.
+    # It was also O(n^3) on a course with 172 turns. Reserving every id up front removes the search entirely:
+    # pass one lets the first holder in arc order keep its id, pass two hands the rest numbers nobody holds.
     _ordered = sorted(est, key=lambda x: (x.get("s") if x.get("s") is not None else 0))
-    _used, _next, _fixed = set(), 1, 0
+    _reserved = {t.get("id") for t in _ordered if t.get("id") not in (None, "T?")}
+    _used, _need, _fixed = set(), [], 0
     for t in _ordered:
         i = t.get("id")
         if i in (None, "T?") or i in _used:
-            while ("T%d" % _next) in _used or any(o.get("id") == ("T%d" % _next) and o is not t for o in _ordered[_ordered.index(t) + 1:]):
-                _next += 1
             if i not in (None, "T?"):
-                _fixed += 1
-            t["id"] = "T%d" % _next
+                _fixed += 1          # a duplicate: the first holder in arc order kept it, this one moves
+            _need.append(t)
+        else:
+            _used.add(i)
+    _next = 1
+    for t in _need:
+        while ("T%d" % _next) in _used or ("T%d" % _next) in _reserved:
+            _next += 1
+        t["id"] = "T%d" % _next
         _used.add(t["id"])
     m["turn_count"] = len(est)
     globals()["_LAST_FIXED_IDS"] = _fixed

@@ -1041,7 +1041,12 @@ def main():
         key = f'{c["ordinal"]}|{c["drivetrain"]}|{c["cyl"]}|{c["pi"]}|{round(c["max_rpm"], -2)}|{len(lad)}|{",".join(f"{g["rel"]:.1f}" for g in lad)}|{round((c["sig"]["hp_peak"] or 0), -1)}'
         c["build_id"] = hashlib.md5(key.encode()).hexdigest()[:8]
         c["build_record"] = next((b for b in BUILDS if b.get("cid") == c["id"] and (not b.get("build_id") or b.get("build_id") == c["build_id"])), None)
-        for k in ("_gear", "_dyno", "_k", "_boost", "_mass", "_massclean", "_shift", "_prev", "_pull", "_pulls", "_boost_n"): del c[k]
+        # _fdgear was missing from this list and nothing else was: it is 42.9 MB of the 86.3 MB of session
+        # files on disk -- HALF of everything analyze_session has ever written -- and it rides into
+        # dashboard/db.js, which the browser parses on every load. A per-car scratch accumulator, published
+        # forever because one name was left out of a delete.
+        for k in ("_gear", "_fdgear", "_dyno", "_k", "_boost", "_mass", "_massclean", "_shift", "_prev",
+                  "_pull", "_pulls", "_boost_n"): c.pop(k, None)
     sess["cars"] = sorted(cars.values(), key=lambda c: -c["live_frames"]); sess["segments"] = segments
 
     # ---- impacts / zero windows ----

@@ -644,7 +644,7 @@
    },
    "cyl": 4,
    "displacement_l": 1.6,
-   "redline": 10000,
+   "redline": 8000,
    "sample_hp": 340,
    "resulting_drivetrain": "AWD",
    "sample_pi": 841,

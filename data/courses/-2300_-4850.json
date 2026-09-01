@@ -1,0 +1,203 @@
+{
+ "route_key": "-2300_-4850",
+ "name": null,
+ "turns": [
+  {
+   "id": "T1",
+   "pos": [
+    -2394,
+    -4738
+   ],
+   "dir": "R",
+   "type": "fast",
+   "radius_m": 161,
+   "n": 3,
+   "best": {
+    "mph_in": 149,
+    "mph_min": 130,
+    "mph_out": 132,
+    "brake_on_m": 99,
+    "throttle_on_m": -1,
+    "lat_g": 2.13,
+    "apex": [
+     -2394,
+     -4738
+    ],
+    "t0": 21926.1,
+    "stint": 70,
+    "first_red": "front ph1",
+    "session": "fh6_20260831_172011"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "348|2|10|700": {
+     "mph_in": 149,
+     "mph_min": 130,
+     "mph_out": 132,
+     "brake_on_m": 99,
+     "throttle_on_m": -1,
+     "lat_g": 2.13,
+     "apex": [
+      -2394,
+      -4738
+     ],
+     "t0": 21926.1,
+     "stint": 70,
+     "first_red": "front ph1",
+     "session": "fh6_20260831_172011"
+    }
+   },
+   "cars": [
+    "348|2|10|700"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260831_172011": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 130,
+     "usi": -0.248,
+     "cars": [
+      "348|2|10|700"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "348|2|10|700"
+    ],
+    "laps_track": 1,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  }
+ ],
+ "laps": 1,
+ "sessions": [
+  "fh6_20260831_172011"
+ ],
+ "updated": "fh6_20260831_172011",
+ "best_laps": {
+  "348|2|10|700": {
+   "best_lap": 112.588,
+   "session": "fh6_20260831_172011",
+   "name": "2005 Ford GT",
+   "class": "A",
+   "pi": 700,
+   "drivetrain": "AWD",
+   "build_id": "1b59f090",
+   "hp": 833,
+   "gears": 7
+  }
+ },
+ "visits": [
+  {
+   "session": "fh6_20260831_172011",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "348|2|10|700"
+   ],
+   "best_lap": 112.588,
+   "best_car": "348|2|10|700"
+  }
+ ],
+ "cars": {
+  "348|2|10|700": {
+   "name": "2005 Ford GT",
+   "class": "A",
+   "pi": 700,
+   "drivetrain": "AWD"
+  }
+ },
+ "speed_traces": {},
+ "geo_turns": {},
+ "turn_count_delta": null,
+ "turn_count": 1,
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "mid_corner": {
+    "frac": 0.044,
+    "band": "light"
+   },
+   "fast_corner": {
+    "frac": 0.525,
+    "band": "heavy"
+   },
+   "braking": {
+    "frac": 0.299,
+    "band": "heavy"
+   },
+   "straight": {
+    "frac": 0.085,
+    "band": "light"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "absent",
+    "range_m": 4.8
+   },
+   "launch": {
+    "frac": null,
+    "band": "absent"
+   }
+  },
+  "heavy": [
+   "fast sweepers",
+   "heavy braking"
+  ],
+  "absent": [
+   "low-speed corners",
+   "elevation (crests)"
+  ],
+  "gears_used": [
+   4,
+   5,
+   6,
+   7,
+   11
+  ],
+  "top_gear_used": 11,
+  "max_gear": 7,
+  "top_speed": 175,
+  "elevation_range_m": 4.8,
+  "notes": [
+   "no real straight (top speed only 175 mph, gears used [4, 5, 6, 7, 11]/7) — top-end gearing & drag are irrelevant here; tune the gears you use",
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course"
+  ],
+  "priority": [
+   "fast sweepers",
+   "heavy braking"
+  ],
+  "rough_frac": 0.0,
+  "rough_n": 1
+ },
+ "profile_laps": 1,
+ "profile_session": "fh6_20260831_172011"
+}

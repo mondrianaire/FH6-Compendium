@@ -41,6 +41,21 @@ const db = {
   // the course models + lap store; the Recording view needs the recent ones. sessionsTotal keeps that honest.
   sessions: (() => { const all = readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json") && !f.endsWith(".tags.json")).sort();   // tags files are run labels, not sessions
     return all.slice(-SESSION_KEEP).map((f) => JSON.parse(readFileSync(join(root, "data", "sessions", f), "utf8"))); })(),
+  // THE BUILD LIBRARY MUST NOT BE A WINDOW ON THE LAST 15 SESSIONS. The cap above exists to keep db.js small,
+  // and the Recording view genuinely only needs recent sessions -- but the build library reads DB.sessions too,
+  // and through that cap it showed 39 of 123 cars and 58 of 210 configs. A library that silently forgets 152
+  // builds is worse than no library. The fields it actually uses are tiny: every car of every session, with
+  // just those fields, is 2.1 MB against the 58 MB the sessions themselves weigh.
+  builds: (() => {
+    const F = ["id", "name", "class", "pi", "drivetrain", "cyl", "build_id", "live_s", "decode", "clone_sheet"];
+    const all = readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json") && !f.endsWith(".tags.json")).sort();
+    const rows = [];
+    for (const f of all) {
+      let d; try { d = JSON.parse(readFileSync(join(root, "data", "sessions", f), "utf8")); } catch (e) { continue; }
+      for (const c of (d.cars || [])) { const r = { sid: d.id }; for (const k of F) if (c[k] !== undefined) r[k] = c[k]; rows.push(r); }
+    }
+    return rows;
+  })(),
   sessionsTotal: readdirSync(join(root, "data", "sessions")).filter((f) => f.endsWith(".json") && !f.endsWith(".tags.json")).length,
   sources: read("sources.json"),
   builtAt: process.env.BUILD_STAMP || "unstamped",

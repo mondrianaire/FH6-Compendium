@@ -3634,7 +3634,13 @@
     let libPick = null;
     const buildLibrary = (s) => {
       const lib = new Map();
-      (DB.sessions || []).forEach((ss) => (ss.cars || []).forEach((c) => { const k = c.id; const e = lib.get(k) || { id: k, name: carName(c) || c.name, class: c.class, pi: c.pi, drivetrain: c.drivetrain, cyl: c.cyl, build_ids: new Set(), sessions: [], best: null, roles: new Set() }; e.build_ids.add(c.build_id); e.sessions.push(ss.id); const d = c.decode || {}, cs = c.clone_sheet || {}; const score = (d.pct || 0) + (cs.confidence || 0) / 10; if (!e.best || score > e.best.score) e.best = { score, sid: ss.id, decode: d, sheet: cs, live_s: c.live_s }; (ss.stints || []).forEach((st) => { if (st.id === k && st.role) e.roles.add(st.role); }); lib.set(k, e); }));
+      // Every car of EVERY session when the bundle carries them (DB.builds), not just the 15 sessions the
+      // Recording view needs -- that cap was hiding 152 of 210 configs from the library. Falls back to the
+      // embedded sessions so an older bundle still renders.
+      const _libSrc = (DB.builds && DB.builds.length)
+        ? DB.builds.map((b) => ({ ss: { id: b.sid }, c: b }))
+        : (DB.sessions || []).flatMap((ss) => (ss.cars || []).map((c) => ({ ss, c })));
+      _libSrc.forEach(({ ss, c }) => { const k = c.id; const e = lib.get(k) || { id: k, name: carName(c) || c.name, class: c.class, pi: c.pi, drivetrain: c.drivetrain, cyl: c.cyl, build_ids: new Set(), sessions: [], best: null, roles: new Set() }; e.build_ids.add(c.build_id); e.sessions.push(ss.id); const d = c.decode || {}, cs = c.clone_sheet || {}; const score = (d.pct || 0) + (cs.confidence || 0) / 10; if (!e.best || score > e.best.score) e.best = { score, sid: ss.id, decode: d, sheet: cs, live_s: c.live_s }; (ss.stints || []).forEach((st) => { if (st.id === k && st.role) e.roles.add(st.role); }); lib.set(k, e); });
       const entries = [...lib.values()].sort((a, b) => (b.best ? b.best.score : 0) - (a.best ? a.best.score : 0));
       if (!entries.length) return "";
       const curIds = new Set((s.cars || []).map((c) => c.id));

@@ -262,6 +262,40 @@ def audit(m, path):
                         f"speed_traces[{cid}] claims {ls:.2f} s but its own speed over its own arc gives "
                         f"{t:.1f} s ({100 * abs(ls - t) / t:.0f}% out) — one of the two is not this lap"))
 
+    # --- 7c. A MAP TURN MUST LIE ON ITS OWN MAP. ---
+    # Nothing tested this, and better_map's point-count comparison made it happen: down() caps every path at
+    # 500 points, so a longer road could score FEWER points than a shorter stored one and lose, after which
+    # the branch that keeps the stored path adopted the longer drive's turns anyway -- apexes and arcs measured
+    # along a road the stored path does not contain. -1700_-4450 carries 15 of 29 map turns 358-789 m off its
+    # own path with s running to 6,584 m on a 3,852 m map. A turn that far from the road can never bind to a
+    # driven corner, because geo_near only matches within ~60 m of an apex, so it is invisible AND it inflates
+    # every count derived from the map.
+    _gp2 = [(q[0], q[1]) for q in (g.get("path") or [])]
+    _mts = [t for t in (g.get("turns") or []) if t.get("apex")]
+    if _gp2 and _mts:
+        _cel = {}
+        for _x, _z in _gp2:
+            _cel.setdefault((int(_x // 60), int(_z // 60)), []).append((_x, _z))
+        def _off(_ax, _az):
+            _b = None; _cx, _cz = int(_ax // 60), int(_az // 60)
+            for _dx in (-1, 0, 1):
+                for _dz in (-1, 0, 1):
+                    for _q in _cel.get((_cx + _dx, _cz + _dz), []):
+                        _v = (_q[0] - _ax) ** 2 + (_q[1] - _az) ** 2
+                        if _b is None or _v < _b: _b = _v
+            if _b is not None:
+                return _b ** 0.5
+            # nothing in the neighbouring cells: the apex is far from every vertex, so measure it properly
+            # rather than reporting a sentinel -- "1000000000 m off" tells the reader nothing about the road.
+            return min(((_q[0] - _ax) ** 2 + (_q[1] - _az) ** 2) for _q in _gp2) ** 0.5
+        _far = [(t, _off(t["apex"][0], t["apex"][1])) for t in _mts]
+        _far = [(t, d) for t, d in _far if d > 100.0]
+        if _far:
+            out.append(("FAIL", "turn-off-map",
+                        f"{len(_far)} of {len(_mts)} map turns sit more than 100 m from this course's own path "
+                        f"(worst {max(d for _, d in _far):.0f} m) — they were measured along a different road, "
+                        f"and geo_near can never bind them to a corner"))
+
     # --- 8. A PERSISTED LAP TIME MUST BE A LAP. ---
     # best_laps is improve-only (analyze_session.py), guarded only by "> 0", so one absurd value latches forever
     # and becomes the course's headline record. 200_-6000 is showing 231307.938 s -- a 64-HOUR track record -- and

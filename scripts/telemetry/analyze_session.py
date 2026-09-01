@@ -72,10 +72,23 @@ def better_map(fresh, stored):
         return True
     if self_retrace(sp) >= 0.4:
         return True                                               # the stored map IS a merged lap: replace it
-    if len(fresh["path"]) >= len(sp):
+    # ROAD, NOT POINT COUNT. This compared len(path) -- and down() caps every path at 500 points by striding,
+    # so point count SATURATES and then oscillates: 3996 m of road resamples to 500 points and 4000 m to 334.
+    # Across the live catalog 4200_-5450 holds 47,648 m in 491 points while -4750_-1550 holds 1,966 m in 490:
+    # a 24x difference in road, one point apart. So a genuinely longer map loses, permanently -- every future
+    # full lap of that course resamples to the same count and loses again.
+    # Worse than losing: control then falls to the branch that keeps the STORED path but adopts the new turns,
+    # whose coverage guard only bounds the new path from BELOW, so turns measured along the longer road get
+    # written onto the shorter one. That is already on disk -- -1700_-4450 has 15 of 29 map turns sitting
+    # 358-789 m off its own path, with s running to 6,584 m on a 3,852 m map -- and turns that far off the road
+    # can never bind to a driven corner, because geo_near only matches within ~60 m of an apex.
+    # merge_courses.merge_into was fixed for exactly this ("point count is a sampling artefact; arc length is
+    # the thing being compared"); better_map was not.
+    _fa, _sa = _arc_of(fresh["path"]), _arc_of(sp)
+    if _fa >= _sa:
         return True
     # an older detector's map is not trustworthy, but only a session that really drove the course may re-map it
-    return (stored or {}).get("det") != DET_VER and len(fresh["path"]) >= 0.8 * len(sp)
+    return (stored or {}).get("det") != DET_VER and _fa >= 0.8 * _sa
 
 
 def split_multilap(pts, close_m=35.0, min_lap_m=250.0):
@@ -139,9 +152,19 @@ def smooth(vals, n=5):
 # not be turned into a course map at all. Nothing about their behaviour changes; the nested calls resolve here.
 
 def _arc_of(path):
-    """Road length of a path, in metres. Point count is a sampling artefact; this is the thing being compared."""
+    """Road length of a path, in metres, skipping the joins between disconnected pieces.
+
+    Point count is a sampling artefact; this is the thing being compared. The break is found from the data --
+    road is sampled at a near-constant step, so a segment far longer than the median is a discontinuity, not
+    road -- which is the same rule audit_models.arc uses on the same paths.
+    """
     p = path or []
-    return sum(math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]) for i in range(len(p) - 1)) if len(p) > 1 else 0.0
+    if len(p) < 2:
+        return 0.0
+    segs = [math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]) for i in range(len(p) - 1)]
+    med = sorted(segs)[len(segs) // 2]
+    cut = max(150.0, med * 20.0) if med > 0 else float("inf")
+    return sum(d for d in segs if d <= cut)
 
 
 

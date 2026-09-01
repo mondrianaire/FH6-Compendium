@@ -11,7 +11,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 238,
-      "n": 976,
+      "n": 991,
       "best": {
         "mph_in": 175,
         "mph_min": 175,
@@ -140,7 +140,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 143,
-      "n": 880,
+      "n": 893,
       "best": {
         "mph_in": 106,
         "mph_min": 106,
@@ -269,7 +269,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 202,
-      "n": 481,
+      "n": 487,
       "best": {
         "mph_in": 175,
         "mph_min": 122,
@@ -406,7 +406,7 @@
       "dir": "R",
       "type": "medium",
       "radius_m": 64,
-      "n": 39,
+      "n": 40,
       "best": {
         "mph_in": 70,
         "mph_min": 70,
@@ -550,7 +550,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 145,
-      "n": 140,
+      "n": 143,
       "best": {
         "mph_in": 128,
         "mph_min": 128,
@@ -672,7 +672,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 151,
-      "n": 79,
+      "n": 80,
       "best": {
         "mph_in": 108,
         "mph_min": 108,
@@ -834,7 +834,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 165,
-      "n": 624,
+      "n": 635,
       "best": {
         "mph_in": 150,
         "mph_min": 142,
@@ -1056,7 +1056,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 167,
-      "n": 1096,
+      "n": 1114,
       "best": {
         "mph_in": 177,
         "mph_min": 158,
@@ -1221,7 +1221,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 186,
-      "n": 383,
+      "n": 392,
       "best": {
         "mph_in": 151,
         "mph_min": 151,
@@ -1346,74 +1346,72 @@
     {
       "id": "T14",
       "pos": [
-        -1119,
-        -4224
+        -1097,
+        -4210
       ],
       "dir": "R",
       "type": "fast",
-      "radius_m": 186,
-      "n": 66,
+      "radius_m": 195,
+      "n": 11,
       "best": {
-        "mph_in": 156,
-        "mph_min": 156,
-        "mph_out": 161,
+        "mph_in": 148,
+        "mph_min": 148,
+        "mph_out": 155,
         "brake_on_m": null,
-        "throttle_on_m": -58,
-        "lat_g": 2.56,
+        "throttle_on_m": -113,
+        "lat_g": 2.49,
         "apex": [
-          -1144,
-          -4257
+          -1075,
+          -4193
         ],
-        "t0": 3013.3,
-        "stint": 45,
+        "t0": 311.2,
+        "stint": 4,
         "first_red": "front ph1",
         "session": "fh6_20260831_172011"
       },
       "sessions": 1,
       "by_session": {
         "fh6_20260831_172011": {
-          "n": 13,
-          "laps_seen": 12,
+          "n": 11,
+          "laps_seen": 11,
           "laps": 27,
           "fr": {
-            "front": 12,
-            "rear": 1,
+            "front": 11,
+            "rear": 0,
             "none": 0
           },
           "lim": "tune",
           "multi": 0.0,
-          "mph_min": 146,
-          "usi": 0.232,
+          "mph_min": 147,
+          "usi": 0.364,
           "cars": [
             "348|2|10|700",
             "4162|1|4|700",
-            "4162|1|6|700",
             "4162|2|4|700"
           ]
         }
       },
       "track": {
-        "passes": 13,
-        "laps_seen": 12,
+        "passes": 11,
+        "laps_seen": 11,
         "sessions": 1,
         "fr": {
-          "front": 12,
-          "rear": 1,
+          "front": 11,
+          "rear": 0,
           "none": 0
         },
         "lim": {
           "tune": 1
         },
         "dominant": "front",
-        "consistency": 0.92,
+        "consistency": 1.0,
         "cars": [
           "348|2|10|700",
           "4162|1|4|700",
-          "4162|1|6|700",
           "4162|2|4|700"
         ],
         "laps_track": 27,
-        "presence": 0.44
+        "presence": 0.41
       },
       "deg": 58,
       "s": 724,
@@ -1436,27 +1434,10 @@
           "stint": 4,
           "first_red": "front ph1",
           "session": "fh6_20260831_172011"
-        },
-        "348|2|10|700": {
-          "mph_in": 156,
-          "mph_min": 156,
-          "mph_out": 161,
-          "brake_on_m": null,
-          "throttle_on_m": -58,
-          "lat_g": 2.56,
-          "apex": [
-            -1144,
-            -4257
-          ],
-          "t0": 3013.3,
-          "stint": 45,
-          "first_red": "front ph1",
-          "session": "fh6_20260831_172011"
         }
       },
       "cars": [
-        "4162|1|4|700",
-        "348|2|10|700"
+        "4162|1|4|700"
       ],
       "traced": {
         "n_passes": 18,
@@ -1487,22 +1468,7 @@
       "best": null,
       "sessions": 0,
       "by_session": {},
-      "track": {
-        "passes": 0,
-        "laps_seen": 0,
-        "sessions": 0,
-        "fr": {
-          "front": 0,
-          "rear": 0,
-          "none": 0
-        },
-        "lim": {},
-        "dominant": null,
-        "consistency": null,
-        "cars": [],
-        "laps_track": 27,
-        "presence": 0.0
-      },
+      "track": {},
       "deg": 58,
       "s": 724,
       "established": true,
@@ -1535,7 +1501,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 188,
-      "n": 511,
+      "n": 518,
       "best": {
         "mph_in": 140,
         "mph_min": 140,
@@ -1664,7 +1630,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 424,
-      "n": 130,
+      "n": 133,
       "best": {
         "mph_in": 154,
         "mph_min": 154,
@@ -1793,7 +1759,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 195,
-      "n": 1183,
+      "n": 1202,
       "best": {
         "mph_in": 157,
         "mph_min": 152,
@@ -2136,7 +2102,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 165,
-      "n": 92,
+      "n": 94,
       "best": {
         "mph_in": 147,
         "mph_min": 142,
@@ -2229,7 +2195,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 254,
-      "n": 455,
+      "n": 463,
       "best": {
         "mph_in": 150,
         "mph_min": 149,
@@ -2358,7 +2324,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 331,
-      "n": 199,
+      "n": 201,
       "best": {
         "mph_in": 147,
         "mph_min": 147,
@@ -2468,7 +2434,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 264,
-      "n": 233,
+      "n": 236,
       "best": {
         "mph_in": 151,
         "mph_min": 151,
@@ -2580,7 +2546,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 893,
-      "n": 116,
+      "n": 117,
       "best": {
         "mph_in": 155,
         "mph_min": 155,
@@ -2671,7 +2637,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 1046,
-      "n": 107,
+      "n": 108,
       "best": {
         "mph_in": 161,
         "mph_min": 161,
@@ -2762,7 +2728,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 207,
-      "n": 1438,
+      "n": 1461,
       "best": {
         "mph_in": 149,
         "mph_min": 110,
@@ -2910,7 +2876,7 @@
       "dir": "R",
       "type": "medium",
       "radius_m": 64,
-      "n": 747,
+      "n": 760,
       "best": {
         "mph_in": 100,
         "mph_min": 85,
@@ -3211,7 +3177,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 128,
-      "n": 145,
+      "n": 147,
       "best": {
         "mph_in": 98,
         "mph_min": 98,
@@ -3321,7 +3287,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 314,
-      "n": 196,
+      "n": 198,
       "best": {
         "mph_in": 93,
         "mph_min": 93,
@@ -3431,7 +3397,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 254,
-      "n": 164,
+      "n": 166,
       "best": {
         "mph_in": 160,
         "mph_min": 160,
@@ -3541,7 +3507,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 241,
-      "n": 970,
+      "n": 986,
       "best": {
         "mph_in": 146,
         "mph_min": 146,
@@ -3670,7 +3636,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 238,
-      "n": 169,
+      "n": 173,
       "best": {
         "mph_in": 163,
         "mph_min": 163,
@@ -3797,7 +3763,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 216,
-      "n": 301,
+      "n": 307,
       "best": {
         "mph_in": 148,
         "mph_min": 148,
@@ -3928,7 +3894,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 246,
-      "n": 480,
+      "n": 487,
       "best": {
         "mph_in": 152,
         "mph_min": 152,
@@ -4040,7 +4006,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 297,
-      "n": 38,
+      "n": 39,
       "best": {
         "mph_in": 166,
         "mph_min": 166,
@@ -4150,7 +4116,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 279,
-      "n": 494,
+      "n": 502,
       "best": {
         "mph_in": 145,
         "mph_min": 145,
@@ -4281,7 +4247,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 247,
-      "n": 916,
+      "n": 929,
       "best": {
         "mph_in": 168,
         "mph_min": 167,
@@ -4410,7 +4376,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 153,
-      "n": 253,
+      "n": 257,
       "best": {
         "mph_in": 138,
         "mph_min": 101,
@@ -4616,7 +4582,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 300,
-      "n": 821,
+      "n": 835,
       "best": {
         "mph_in": 160,
         "mph_min": 160,
@@ -4745,7 +4711,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 262,
-      "n": 925,
+      "n": 939,
       "best": {
         "mph_in": 140,
         "mph_min": 140,
@@ -4874,7 +4840,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 455,
-      "n": 759,
+      "n": 772,
       "best": {
         "mph_in": 188,
         "mph_min": 188,
@@ -5003,7 +4969,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 218,
-      "n": 264,
+      "n": 268,
       "best": {
         "mph_in": 112,
         "mph_min": 112,
@@ -5113,7 +5079,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 355,
-      "n": 255,
+      "n": 258,
       "best": {
         "mph_in": 144,
         "mph_min": 144,
@@ -5333,7 +5299,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 163,
-      "n": 103,
+      "n": 104,
       "best": {
         "mph_in": 112,
         "mph_min": 112,
@@ -5431,9 +5397,9 @@
       "track": {},
       "deg": 12,
       "s": 4508,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -5441,9 +5407,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T57",
@@ -5454,7 +5418,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 115,
-      "n": 410,
+      "n": 416,
       "best": {
         "mph_in": 138,
         "mph_min": 104,
@@ -5527,7 +5491,7 @@
         "4162|2|4|700",
         "348|2|10|700"
       ],
-      "status": "turn",
+      "status": "possible",
       "by_session": {
         "fh6_20260831_172011": {
           "n": 6,
@@ -5571,8 +5535,8 @@
         "laps_track": 27,
         "presence": 0.22
       },
-      "established": true,
-      "est_by": "geometry",
+      "established": false,
+      "est_by": null,
       "deg": 12,
       "s": 4544,
       "traced": {
@@ -5582,9 +5546,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T58",
@@ -5602,9 +5564,9 @@
       "track": {},
       "deg": 14,
       "s": 4580,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -5612,9 +5574,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T59",
@@ -5632,9 +5592,9 @@
       "track": {},
       "deg": 56,
       "s": 4648,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -5642,9 +5602,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T60",
@@ -5690,7 +5648,7 @@
       "dir": "L",
       "type": "fast",
       "radius_m": 228,
-      "n": 1006,
+      "n": 1021,
       "best": {
         "mph_in": 178,
         "mph_min": 177,
@@ -5836,9 +5794,9 @@
       "track": {},
       "deg": 12,
       "s": 5768,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -5846,9 +5804,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T63",
@@ -5866,9 +5822,9 @@
       "track": {},
       "deg": 7,
       "s": 5796,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -5876,9 +5832,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T64",
@@ -5896,9 +5850,9 @@
       "track": {},
       "deg": 14,
       "s": 5812,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -5906,9 +5860,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T65",
@@ -5924,11 +5876,11 @@
       "sessions": 0,
       "by_session": {},
       "track": {},
-      "deg": 19,
-      "s": 6060,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "deg": 18,
+      "s": 6064,
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -5936,9 +5888,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T66",
@@ -5949,7 +5899,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 145,
-      "n": 54,
+      "n": 55,
       "best": {
         "mph_in": 151,
         "mph_min": 116,
@@ -6072,9 +6022,9 @@
       },
       "deg": 15,
       "s": 6120,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -6082,9 +6032,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T68",
@@ -6095,7 +6043,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 75,
-      "n": 424,
+      "n": 431,
       "best": {
         "mph_in": 156,
         "mph_min": 95,
@@ -6222,9 +6170,9 @@
       "track": {},
       "deg": 13,
       "s": 6172,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -6232,9 +6180,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T70",
@@ -6252,9 +6198,9 @@
       "track": {},
       "deg": 37,
       "s": 6220,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -6262,9 +6208,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T71",
@@ -6275,7 +6219,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 141,
-      "n": 86,
+      "n": 87,
       "best": {
         "mph_in": 119,
         "mph_min": 118,
@@ -6383,9 +6327,9 @@
       "track": {},
       "deg": 17,
       "s": 6540,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -6393,9 +6337,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T73",
@@ -6413,9 +6355,9 @@
       "track": {},
       "deg": 9,
       "s": 6572,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "traced": {
         "n_passes": 0,
         "n_laps_traced": 18,
@@ -6423,9 +6365,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T74",
@@ -6436,7 +6376,7 @@
       "dir": "R",
       "type": "fast",
       "radius_m": 151,
-      "n": 683,
+      "n": 694,
       "best": {
         "mph_in": 134,
         "mph_min": 134,
@@ -6497,9 +6437,9 @@
       },
       "deg": 21,
       "s": 6584,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn",
+      "established": false,
+      "est_by": null,
+      "status": "possible",
       "best_by_car": {
         "4162|2|4|700": {
           "mph_in": 121,
@@ -6545,9 +6485,7 @@
         "med_samples": 0,
         "reached": false,
         "verdict": "beyond the stretch driven so far \u2014 no lap has reached here yet"
-      },
-      "geo_sessions": 1,
-      "geo_mapped": true
+      }
     },
     {
       "id": "T1",
@@ -6567,28 +6505,6 @@
       "geo_mapped": true,
       "deg": 17,
       "s": 1360,
-      "established": true,
-      "est_by": "geometry",
-      "status": "turn"
-    },
-    {
-      "id": "T2",
-      "pos": [
-        -2402,
-        -4706
-      ],
-      "dir": "R",
-      "type": null,
-      "radius_m": 214,
-      "n": 0,
-      "best": null,
-      "sessions": 0,
-      "by_session": {},
-      "track": {},
-      "geo_sessions": 1,
-      "geo_mapped": true,
-      "deg": 18,
-      "s": 6064,
       "established": true,
       "est_by": "geometry",
       "status": "turn"
@@ -6700,34 +6616,6 @@
       "dir": "R",
       "radius_m": 92,
       "deg": 26,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-1692_-5966": {
-      "pos": [
-        -1687,
-        -5966
-      ],
-      "s": 4544,
-      "dir": "R",
-      "radius_m": 135,
-      "deg": 12,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2273_-4965": {
-      "pos": [
-        -2273,
-        -4970
-      ],
-      "s": 5768,
-      "dir": "L",
-      "radius_m": 294,
-      "deg": 12,
       "sessions": [
         "fh6_20260831_172011"
       ],
@@ -6859,132 +6747,6 @@
       ],
       "model_map": true
     },
-    "-1652_-5958": {
-      "pos": [
-        -1652,
-        -5958
-      ],
-      "s": 4508,
-      "dir": "R",
-      "radius_m": 170,
-      "deg": 12,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-1723_-5963": {
-      "pos": [
-        -1723,
-        -5963
-      ],
-      "s": 4580,
-      "dir": "R",
-      "radius_m": 125,
-      "deg": 14,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2281_-4943": {
-      "pos": [
-        -2281,
-        -4943
-      ],
-      "s": 5796,
-      "dir": "L",
-      "radius_m": 274,
-      "deg": 7,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2286_-4929": {
-      "pos": [
-        -2286,
-        -4929
-      ],
-      "s": 5812,
-      "dir": "L",
-      "radius_m": 287,
-      "deg": 14,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2401_-4710": {
-      "pos": [
-        -2401,
-        -4710
-      ],
-      "s": 6060,
-      "dir": "R",
-      "radius_m": 218,
-      "deg": 19,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2377_-4561": {
-      "pos": [
-        -2377,
-        -4561
-      ],
-      "s": 6220,
-      "dir": "R",
-      "radius_m": 61,
-      "deg": 37,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2101_-4408": {
-      "pos": [
-        -2101,
-        -4408
-      ],
-      "s": 6540,
-      "dir": "R",
-      "radius_m": 188,
-      "deg": 17,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2071_-4397": {
-      "pos": [
-        -2071,
-        -4397
-      ],
-      "s": 6572,
-      "dir": "R",
-      "radius_m": 163,
-      "deg": 9,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2059_-4395": {
-      "pos": [
-        -2059,
-        -4395
-      ],
-      "s": 6584,
-      "dir": "R",
-      "radius_m": 159,
-      "deg": 21,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
     "-466_-4186": {
       "pos": [
         -466,
@@ -7013,48 +6775,6 @@
       ],
       "model_map": true
     },
-    "-2402_-4706": {
-      "pos": [
-        -2402,
-        -4706
-      ],
-      "s": 6064,
-      "dir": "R",
-      "radius_m": 214,
-      "deg": 18,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2409_-4650": {
-      "pos": [
-        -2409,
-        -4650
-      ],
-      "s": 6120,
-      "dir": "R",
-      "radius_m": 260,
-      "deg": 15,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
-    "-2404_-4599": {
-      "pos": [
-        -2404,
-        -4599
-      ],
-      "s": 6172,
-      "dir": "R",
-      "radius_m": 107,
-      "deg": 13,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
-    },
     "-553_-4156": {
       "pos": [
         -553,
@@ -7068,24 +6788,10 @@
         "fh6_20260831_172011"
       ],
       "model_map": true
-    },
-    "-1784_-5934": {
-      "pos": [
-        -1784,
-        -5934
-      ],
-      "s": 4648,
-      "dir": "R",
-      "radius_m": 129,
-      "deg": 56,
-      "sessions": [
-        "fh6_20260831_172011"
-      ],
-      "model_map": true
     }
   },
   "turn_count_delta": null,
-  "turn_count": 29,
+  "turn_count": 14,
   "profile": {
     "dims": {
       "low_corner": {
@@ -11823,321 +11529,6 @@
             }
           ]
         }
-      },
-      {
-        "id": "G15",
-        "apex": [
-          -1652,
-          -5958
-        ],
-        "s": 4508,
-        "radius_m": 170,
-        "dir": "R",
-        "deg": 12,
-        "len_m": 36,
-        "entry": [
-          -1623,
-          -5945
-        ],
-        "exit": [
-          -1656,
-          -5960
-        ],
-        "speed_ref_lap": 115
-      },
-      {
-        "id": "G16",
-        "apex": [
-          -1687,
-          -5966
-        ],
-        "s": 4544,
-        "radius_m": 135,
-        "dir": "R",
-        "deg": 12,
-        "len_m": 36,
-        "entry": [
-          -1656,
-          -5960
-        ],
-        "exit": [
-          -1691,
-          -5966
-        ],
-        "speed_ref_lap": 106
-      },
-      {
-        "id": "G17",
-        "apex": [
-          -1723,
-          -5963
-        ],
-        "s": 4580,
-        "radius_m": 125,
-        "dir": "R",
-        "deg": 14,
-        "len_m": 40,
-        "entry": [
-          -1691,
-          -5966
-        ],
-        "exit": [
-          -1731,
-          -5961
-        ],
-        "speed_ref_lap": 107
-      },
-      {
-        "id": "G18",
-        "apex": [
-          -1784,
-          -5934
-        ],
-        "s": 4648,
-        "radius_m": 129,
-        "dir": "R",
-        "deg": 56,
-        "len_m": 164,
-        "entry": [
-          -1731,
-          -5961
-        ],
-        "exit": [
-          -1842,
-          -5848
-        ],
-        "speed_ref_lap": 105
-      },
-      {
-        "id": "G19",
-        "apex": [
-          -2273,
-          -4970
-        ],
-        "s": 5768,
-        "radius_m": 294,
-        "dir": "L",
-        "deg": 12,
-        "len_m": 72,
-        "entry": [
-          -2265,
-          -5038
-        ],
-        "exit": [
-          -2274,
-          -4966
-        ],
-        "speed_ref_lap": 179
-      },
-      {
-        "id": "G20",
-        "apex": [
-          -2281,
-          -4943
-        ],
-        "s": 5796,
-        "radius_m": 274,
-        "dir": "L",
-        "deg": 7,
-        "len_m": 40,
-        "entry": [
-          -2274,
-          -4966
-        ],
-        "exit": [
-          -2286,
-          -4929
-        ],
-        "speed_ref_lap": 178
-      },
-      {
-        "id": "G21",
-        "apex": [
-          -2286,
-          -4929
-        ],
-        "s": 5812,
-        "radius_m": 287,
-        "dir": "L",
-        "deg": 14,
-        "len_m": 84,
-        "entry": [
-          -2286,
-          -4929
-        ],
-        "exit": [
-          -2327,
-          -4855
-        ],
-        "speed_ref_lap": 177
-      },
-      {
-        "id": "G22",
-        "apex": [
-          -2401,
-          -4710
-        ],
-        "s": 6060,
-        "radius_m": 218,
-        "dir": "R",
-        "deg": 19,
-        "len_m": 48,
-        "entry": [
-          -2387,
-          -4751
-        ],
-        "exit": [
-          -2402,
-          -4706
-        ],
-        "speed_ref_lap": 137
-      },
-      {
-        "id": "G23",
-        "apex": [
-          -2402,
-          -4706
-        ],
-        "s": 6064,
-        "radius_m": 214,
-        "dir": "R",
-        "deg": 18,
-        "len_m": 44,
-        "entry": [
-          -2402,
-          -4706
-        ],
-        "exit": [
-          -2408,
-          -4662
-        ],
-        "speed_ref_lap": 136
-      },
-      {
-        "id": "G24",
-        "apex": [
-          -2409,
-          -4650
-        ],
-        "s": 6120,
-        "radius_m": 260,
-        "dir": "R",
-        "deg": 15,
-        "len_m": 36,
-        "entry": [
-          -2408,
-          -4662
-        ],
-        "exit": [
-          -2409,
-          -4626
-        ],
-        "speed_ref_lap": 127
-      },
-      {
-        "id": "G25",
-        "apex": [
-          -2404,
-          -4599
-        ],
-        "s": 6172,
-        "radius_m": 107,
-        "dir": "R",
-        "deg": 13,
-        "len_m": 32,
-        "entry": [
-          -2409,
-          -4626
-        ],
-        "exit": [
-          -2403,
-          -4595
-        ],
-        "speed_ref_lap": 93
-      },
-      {
-        "id": "G26",
-        "apex": [
-          -2377,
-          -4561
-        ],
-        "s": 6220,
-        "radius_m": 61,
-        "dir": "R",
-        "deg": 37,
-        "len_m": 92,
-        "entry": [
-          -2403,
-          -4595
-        ],
-        "exit": [
-          -2331,
-          -4547
-        ],
-        "speed_ref_lap": 78
-      },
-      {
-        "id": "G27",
-        "apex": [
-          -2101,
-          -4408
-        ],
-        "s": 6540,
-        "radius_m": 188,
-        "dir": "R",
-        "deg": 17,
-        "len_m": 60,
-        "entry": [
-          -2147,
-          -4439
-        ],
-        "exit": [
-          -2097,
-          -4407
-        ],
-        "speed_ref_lap": 132
-      },
-      {
-        "id": "G28",
-        "apex": [
-          -2071,
-          -4397
-        ],
-        "s": 6572,
-        "radius_m": 163,
-        "dir": "R",
-        "deg": 9,
-        "len_m": 32,
-        "entry": [
-          -2097,
-          -4407
-        ],
-        "exit": [
-          -2067,
-          -4396
-        ],
-        "speed_ref_lap": 132
-      },
-      {
-        "id": "G29",
-        "apex": [
-          -2059,
-          -4395
-        ],
-        "s": 6584,
-        "radius_m": 159,
-        "dir": "R",
-        "deg": 21,
-        "len_m": 76,
-        "entry": [
-          -2067,
-          -4396
-        ],
-        "exit": [
-          -1991,
-          -4395
-        ],
-        "speed_ref_lap": 133
       }
     ],
     "turns_n_laps": 16,
@@ -21627,3488 +21018,3488 @@
     "det": "geo7-tol-from-map",
     "lat_acc": {
       "0": [
-        3040.946,
-        37743
+        3078.936,
+        38266
       ],
       "1": [
-        2868.745,
-        30626
+        2913.495,
+        31122
       ],
       "2": [
-        2218.59,
-        28399
+        2247.666,
+        28865
       ],
       "3": [
-        2375.251,
-        27672
+        2407.556,
+        28124
       ],
       "4": [
-        3181.072,
-        26430
+        3228.382,
+        26861
       ],
       "5": [
-        2669.243,
-        25696
+        2707.483,
+        26115
       ],
       "6": [
-        2433.685,
-        25098
+        2466.781,
+        25508
       ],
       "7": [
-        2931.184,
-        24963
+        2965.224,
+        25371
       ],
       "8": [
-        2523.559,
-        23811
+        2558.904,
+        24198
       ],
       "9": [
-        3493.593,
-        22202
+        3549.675,
+        22564
       ],
       "10": [
-        4130.137,
-        21343
+        4187.367,
+        21694
       ],
       "11": [
-        3525.565,
-        20920
+        3569.352,
+        21265
       ],
       "12": [
-        3270.847,
-        19904
+        3314.129,
+        20231
       ],
       "13": [
-        4988.649,
-        21541
+        5071.309,
+        21897
       ],
       "14": [
-        6900.952,
-        22073
+        7009.403,
+        22437
       ],
       "15": [
-        5728.544,
-        21204
+        5816.68,
+        21554
       ],
       "16": [
-        4508.998,
-        20665
+        4569.375,
+        21004
       ],
       "17": [
-        3567.676,
-        20672
+        3620.742,
+        21014
       ],
       "18": [
-        3206.117,
-        20204
+        3251.06,
+        20537
       ],
       "19": [
-        3127.434,
-        20023
+        3176.683,
+        20353
       ],
       "20": [
-        4162.034,
-        19876
+        4224.418,
+        20204
       ],
       "21": [
-        2903.506,
-        19582
+        2947.403,
+        19907
       ],
       "22": [
-        2519.022,
-        19306
+        2554.758,
+        19626
       ],
       "23": [
-        3587.697,
-        19112
+        3635.009,
+        19428
       ],
       "24": [
-        2583.821,
-        18587
+        2620.602,
+        18894
       ],
       "25": [
-        2488.615,
-        18178
+        2525.998,
+        18477
       ],
       "26": [
-        2307.499,
-        18013
+        2339.221,
+        18311
       ],
       "27": [
-        2440.995,
-        17371
+        2480.769,
+        17656
       ],
       "28": [
-        3412.462,
-        16894
+        3474.604,
+        17173
       ],
       "29": [
-        4282.817,
-        16146
+        4367.478,
+        16411
       ],
       "30": [
-        5956.286,
-        15974
+        6065.155,
+        16236
       ],
       "31": [
-        9454.228,
-        17798
+        9613.151,
+        18094
       ],
       "32": [
-        14022.6,
-        18337
+        14253.217,
+        18643
       ],
       "33": [
-        18277.287,
-        18385
+        18574.088,
+        18691
       ],
       "34": [
-        21640.589,
-        18268
+        22002.43,
+        18571
       ],
       "35": [
-        23106.157,
-        18103
+        23492.359,
+        18404
       ],
       "36": [
-        27342.33,
-        18274
+        27804.556,
+        18578
       ],
       "37": [
-        26188.697,
-        18322
+        26638.242,
+        18627
       ],
       "38": [
-        27423.395,
-        18208
+        27887.296,
+        18510
       ],
       "39": [
-        27950.215,
-        18115
+        28430.546,
+        18416
       ],
       "40": [
-        30337.481,
-        18112
+        30861.719,
+        18412
       ],
       "41": [
-        29747.553,
-        18062
+        30244.14,
+        18362
       ],
       "42": [
-        27761.164,
-        18158
+        28209.878,
+        18461
       ],
       "43": [
-        29399.222,
-        18203
+        29873.219,
+        18504
       ],
       "44": [
-        31176.406,
-        18062
+        31687.706,
+        18361
       ],
       "45": [
-        33262.446,
-        17955
+        33816.954,
+        18251
       ],
       "46": [
-        32225.977,
-        17664
+        32764.847,
+        17955
       ],
       "47": [
-        31135.758,
-        17710
-      ],
-      "48": [
-        30998.889,
-        17504
-      ],
-      "49": [
-        30541.787,
-        16938
-      ],
-      "50": [
-        33691.524,
-        16201
-      ],
-      "51": [
-        31556.337,
-        16560
-      ],
-      "52": [
-        32164.005,
-        16262
-      ],
-      "53": [
-        27622.444,
-        15106
-      ],
-      "54": [
-        31775.196,
-        16028
-      ],
-      "55": [
-        34968.07,
-        17574
-      ],
-      "56": [
-        36354.112,
-        17513
-      ],
-      "57": [
-        35657.73,
-        17293
-      ],
-      "58": [
-        35544.305,
-        17198
-      ],
-      "59": [
-        36805.912,
-        17468
-      ],
-      "60": [
-        35793.745,
-        17522
-      ],
-      "61": [
-        34031.748,
-        17618
-      ],
-      "62": [
-        34970.199,
-        17696
-      ],
-      "63": [
-        32840.819,
-        17530
-      ],
-      "64": [
-        26989.167,
-        17801
-      ],
-      "65": [
-        20712.501,
-        17888
-      ],
-      "66": [
-        16083.426,
-        18176
-      ],
-      "67": [
-        15556.722,
-        18134
-      ],
-      "68": [
-        13631.299,
-        18051
-      ],
-      "69": [
-        9038.567,
-        17980
-      ],
-      "70": [
-        5450.896,
-        18023
-      ],
-      "71": [
-        4810.664,
-        17586
-      ],
-      "72": [
-        6215.389,
-        17914
-      ],
-      "73": [
-        8622.033,
-        17858
-      ],
-      "74": [
-        9681.289,
-        17766
-      ],
-      "75": [
-        12421.809,
-        17119
-      ],
-      "76": [
-        14005.453,
-        15196
-      ],
-      "77": [
-        15880.735,
-        13816
-      ],
-      "78": [
-        18294.531,
-        13734
-      ],
-      "79": [
-        23364.762,
-        14783
-      ],
-      "80": [
-        26894.1,
-        16095
-      ],
-      "81": [
-        29204.643,
-        17018
-      ],
-      "82": [
-        30064.744,
-        16521
-      ],
-      "83": [
-        29299.742,
-        16169
-      ],
-      "84": [
-        30244.775,
-        16485
-      ],
-      "85": [
-        30183.187,
-        16375
-      ],
-      "86": [
-        30086.005,
-        16139
-      ],
-      "87": [
-        32758.025,
-        16176
-      ],
-      "88": [
-        30452.75,
-        16272
-      ],
-      "89": [
-        32822.789,
-        16375
-      ],
-      "90": [
-        32750.452,
-        16821
-      ],
-      "91": [
-        30438.842,
-        16911
-      ],
-      "92": [
-        29507.779,
-        17049
-      ],
-      "93": [
-        27113.794,
-        17070
-      ],
-      "94": [
-        27267.915,
-        17048
-      ],
-      "95": [
-        27744.862,
-        17234
-      ],
-      "96": [
-        29121.309,
-        17282
-      ],
-      "97": [
-        29329.844,
-        16671
-      ],
-      "98": [
-        29550.864,
-        15559
-      ],
-      "99": [
-        29227.987,
-        15785
-      ],
-      "100": [
-        30097.736,
-        16120
-      ],
-      "101": [
-        29933.024,
-        16381
-      ],
-      "102": [
-        29490.034,
-        16634
-      ],
-      "103": [
-        27162.944,
-        16867
-      ],
-      "104": [
-        22736.62,
-        16654
-      ],
-      "105": [
-        19112.719,
-        15799
-      ],
-      "106": [
-        16349.633,
-        15670
-      ],
-      "107": [
-        14689.13,
-        15908
-      ],
-      "108": [
-        12237.676,
-        15910
-      ],
-      "109": [
-        11472.47,
-        15538
-      ],
-      "110": [
-        11652.201,
-        15419
-      ],
-      "111": [
-        10627.384,
-        15298
-      ],
-      "112": [
-        8973.101,
-        15184
-      ],
-      "113": [
-        7361.893,
-        15134
-      ],
-      "114": [
-        5885.92,
-        15234
-      ],
-      "115": [
-        4189.492,
-        15251
-      ],
-      "116": [
-        3826.853,
-        15309
-      ],
-      "117": [
-        4254.708,
-        15357
-      ],
-      "118": [
-        4637.159,
-        15288
-      ],
-      "119": [
-        4583.126,
-        15015
-      ],
-      "120": [
-        3610.46,
-        15174
-      ],
-      "121": [
-        2294.394,
-        14609
-      ],
-      "122": [
-        1580.147,
-        13387
-      ],
-      "123": [
-        1734.622,
-        12926
-      ],
-      "124": [
-        1880.934,
-        12954
-      ],
-      "125": [
-        2044.754,
-        13290
-      ],
-      "126": [
-        2216.565,
-        13209
-      ],
-      "127": [
-        1927.042,
-        13416
-      ],
-      "128": [
-        2363.196,
-        13218
-      ],
-      "129": [
-        2170.908,
-        12494
-      ],
-      "130": [
-        1766.902,
-        12223
-      ],
-      "131": [
-        1743.065,
-        12636
-      ],
-      "132": [
-        1192.17,
-        13086
-      ],
-      "133": [
-        1131.101,
-        13270
-      ],
-      "134": [
-        1705.266,
-        13002
-      ],
-      "135": [
-        2084.717,
-        12331
-      ],
-      "136": [
-        1776.535,
-        12721
-      ],
-      "137": [
-        1336.141,
-        13090
-      ],
-      "138": [
-        1238.887,
-        14095
-      ],
-      "139": [
-        1365.957,
-        14334
-      ],
-      "140": [
-        1046.566,
-        14954
-      ],
-      "141": [
-        1101.251,
-        15371
-      ],
-      "142": [
-        1152.599,
-        15032
-      ],
-      "143": [
-        921.794,
-        15227
-      ],
-      "144": [
-        1265.61,
-        15872
-      ],
-      "145": [
-        3340.78,
-        16198
-      ],
-      "146": [
-        5707.185,
-        16069
-      ],
-      "147": [
-        6682.009,
-        16099
-      ],
-      "148": [
-        7317.383,
-        18822
-      ],
-      "149": [
-        6756.69,
-        17252
-      ],
-      "150": [
-        4578.096,
-        16896
-      ],
-      "151": [
-        6012.13,
-        17306
-      ],
-      "152": [
-        12824.971,
-        17983
-      ],
-      "153": [
-        19687.821,
-        18011
-      ],
-      "154": [
-        24875.57,
-        17091
-      ],
-      "155": [
-        30958.795,
-        16986
-      ],
-      "156": [
-        32900.054,
-        17038
-      ],
-      "157": [
-        30104.026,
-        16817
-      ],
-      "158": [
-        33814.069,
-        16686
-      ],
-      "159": [
-        30898.343,
-        16150
-      ],
-      "160": [
-        30824.725,
-        15424
-      ],
-      "161": [
-        28282.189,
-        16063
-      ],
-      "162": [
-        28388.56,
-        16635
-      ],
-      "163": [
-        31715.389,
-        17022
-      ],
-      "164": [
-        30136.202,
-        17084
-      ],
-      "165": [
-        33247.643,
-        17340
-      ],
-      "166": [
-        32746.777,
-        16839
-      ],
-      "167": [
-        35021.331,
-        17006
-      ],
-      "168": [
-        34483.94,
-        17285
-      ],
-      "169": [
-        32582.408,
-        17470
-      ],
-      "170": [
-        34134.038,
-        17698
-      ],
-      "171": [
-        30873.128,
-        17799
-      ],
-      "172": [
-        34948.523,
-        17673
-      ],
-      "173": [
-        33721.868,
-        17946
-      ],
-      "174": [
-        28893.959,
-        17566
-      ],
-      "175": [
-        28749.731,
-        17954
-      ],
-      "176": [
-        26655.527,
-        17971
-      ],
-      "177": [
-        25013.51,
-        17997
-      ],
-      "178": [
-        23489.505,
-        17962
-      ],
-      "179": [
-        19030.652,
-        17985
-      ],
-      "180": [
-        13910.124,
-        17743
-      ],
-      "181": [
-        8651.732,
-        16700
-      ],
-      "182": [
-        8415.824,
-        15141
-      ],
-      "183": [
-        11033.299,
-        15371
-      ],
-      "184": [
-        12331.872,
-        16642
-      ],
-      "185": [
-        12202.158,
-        17222
-      ],
-      "186": [
-        10798.81,
-        17238
-      ],
-      "187": [
-        7941.737,
-        17734
-      ],
-      "188": [
-        8873.537,
-        17204
-      ],
-      "189": [
-        10322.86,
-        17386
-      ],
-      "190": [
-        12552.734,
-        17310
-      ],
-      "191": [
-        12552.376,
-        17352
-      ],
-      "192": [
-        11263.185,
-        17421
-      ],
-      "193": [
-        8891.023,
-        17273
-      ],
-      "194": [
-        7925.03,
-        17139
-      ],
-      "195": [
-        7216.212,
-        17209
-      ],
-      "196": [
-        6519.824,
-        17085
-      ],
-      "197": [
-        5101.054,
-        17165
-      ],
-      "198": [
-        4025.527,
-        17025
-      ],
-      "199": [
-        3360.404,
-        16944
-      ],
-      "200": [
-        2983.572,
-        16915
-      ],
-      "201": [
-        2538.489,
-        16999
-      ],
-      "202": [
-        2631.963,
-        16550
-      ],
-      "203": [
-        2497.004,
-        15485
-      ],
-      "204": [
-        3003.812,
-        14465
-      ],
-      "205": [
-        3354.458,
-        15383
-      ],
-      "206": [
-        3977.609,
-        15980
-      ],
-      "207": [
-        4298.501,
-        16090
-      ],
-      "208": [
-        3927.407,
-        16206
-      ],
-      "209": [
-        3630.308,
-        15701
-      ],
-      "210": [
-        2950.827,
-        15421
-      ],
-      "211": [
-        2192.164,
-        15350
-      ],
-      "212": [
-        2320.907,
-        16143
-      ],
-      "213": [
-        2542.991,
-        16135
-      ],
-      "214": [
-        2379.346,
-        15939
-      ],
-      "215": [
-        2023.78,
-        15736
-      ],
-      "216": [
-        2309.95,
-        15728
-      ],
-      "217": [
-        2210.815,
-        15555
-      ],
-      "218": [
-        2217.003,
-        15541
-      ],
-      "219": [
-        1823.781,
-        15521
-      ],
-      "220": [
-        1502.308,
-        15445
-      ],
-      "221": [
-        1963.467,
-        15429
-      ],
-      "222": [
-        2838.383,
-        15236
-      ],
-      "223": [
-        3909.738,
-        15111
-      ],
-      "224": [
-        3735.795,
-        14511
-      ],
-      "225": [
-        4220.853,
-        12852
-      ],
-      "226": [
-        3789.929,
-        13238
-      ],
-      "227": [
-        4488.813,
-        14547
-      ],
-      "228": [
-        4015.84,
-        15252
-      ],
-      "229": [
-        2933.328,
-        15777
-      ],
-      "230": [
-        3245.641,
-        16178
-      ],
-      "231": [
-        3438.345,
-        15831
-      ],
-      "232": [
-        3214.985,
-        15491
-      ],
-      "233": [
-        3383.348,
-        15579
-      ],
-      "234": [
-        3158.251,
-        15780
-      ],
-      "235": [
-        2814.93,
-        15630
-      ],
-      "236": [
-        2932.357,
-        15653
-      ],
-      "237": [
-        3604.483,
-        15662
-      ],
-      "238": [
-        4004.371,
-        15863
-      ],
-      "239": [
-        3792.008,
-        15721
-      ],
-      "240": [
-        4911.748,
-        15606
-      ],
-      "241": [
-        5089.574,
-        15472
-      ],
-      "242": [
-        6364.642,
-        15598
-      ],
-      "243": [
-        7475.342,
-        15784
-      ],
-      "244": [
-        7465.376,
-        15660
-      ],
-      "245": [
-        6715.257,
-        14901
-      ],
-      "246": [
-        6512.595,
-        14004
-      ],
-      "247": [
-        6612.03,
-        14240
-      ],
-      "248": [
-        8321.351,
-        14723
-      ],
-      "249": [
-        7968.917,
-        15140
-      ],
-      "250": [
-        8952.381,
-        15604
-      ],
-      "251": [
-        10990.957,
-        16760
-      ],
-      "252": [
-        13107.255,
-        17470
-      ],
-      "253": [
-        18027.154,
-        18255
-      ],
-      "254": [
-        24160.146,
-        18047
-      ],
-      "255": [
-        24724.881,
-        19042
-      ],
-      "256": [
-        26282.505,
-        19982
-      ],
-      "257": [
-        23756.456,
-        21008
-      ],
-      "258": [
-        17011.031,
-        22105
-      ],
-      "259": [
-        12325.577,
-        23525
-      ],
-      "260": [
-        15314.723,
-        24627
-      ],
-      "261": [
-        20091.986,
-        26080
-      ],
-      "262": [
-        32713.172,
-        27174
-      ],
-      "263": [
-        51845.35,
-        28555
-      ],
-      "264": [
-        60909.012,
-        30640
-      ],
-      "265": [
-        56097.833,
-        31749
-      ],
-      "266": [
-        56767.077,
-        33117
-      ],
-      "267": [
-        59631.343,
-        34152
-      ],
-      "268": [
-        55748.382,
-        33643
-      ],
-      "269": [
-        57098.238,
-        33701
-      ],
-      "270": [
-        58171.029,
-        36386
-      ],
-      "271": [
-        55953.751,
-        36232
-      ],
-      "272": [
-        56347.525,
-        35880
-      ],
-      "273": [
-        57435.926,
-        36819
-      ],
-      "274": [
-        57713.705,
-        37814
-      ],
-      "275": [
-        49600.22,
-        38554
-      ],
-      "276": [
-        39993.383,
-        39835
-      ],
-      "277": [
-        36682.478,
-        53075
-      ],
-      "278": [
-        30575.512,
-        64743
-      ],
-      "279": [
-        21631.32,
-        43114
-      ],
-      "280": [
-        17672.944,
-        37007
-      ],
-      "281": [
-        14539.415,
-        36449
-      ],
-      "282": [
-        10256.476,
-        32732
-      ],
-      "283": [
-        5997.004,
-        30064
-      ],
-      "284": [
-        6259.224,
-        28148
-      ],
-      "285": [
-        5803.348,
-        27264
-      ],
-      "286": [
-        7113.82,
-        25731
-      ],
-      "287": [
-        7366.801,
-        23940
-      ],
-      "288": [
-        5318.569,
-        21449
-      ],
-      "289": [
-        3959.307,
-        21321
-      ],
-      "290": [
-        5372.789,
-        21768
-      ],
-      "291": [
-        5404.152,
-        22061
-      ],
-      "292": [
-        4766.929,
-        21277
-      ],
-      "293": [
-        4309.787,
-        19829
-      ],
-      "294": [
-        4750.868,
-        19693
-      ],
-      "295": [
-        4560.008,
-        19615
-      ],
-      "296": [
-        4533.823,
-        19327
-      ],
-      "297": [
-        4153.931,
-        19660
-      ],
-      "298": [
-        5586.631,
-        19138
-      ],
-      "299": [
-        5086.505,
-        18396
-      ],
-      "300": [
-        4627.232,
-        18370
-      ],
-      "301": [
-        4910.851,
-        18111
-      ],
-      "302": [
-        3707.673,
-        17861
-      ],
-      "303": [
-        2289.391,
-        18073
-      ],
-      "304": [
-        1232.238,
-        17583
-      ],
-      "305": [
-        1186.821,
-        17207
-      ],
-      "306": [
-        1071.169,
-        16800
-      ],
-      "307": [
-        1435.987,
-        15537
-      ],
-      "308": [
-        1348.085,
-        14421
-      ],
-      "309": [
-        1462.597,
-        14939
-      ],
-      "310": [
-        1744.786,
-        15911
-      ],
-      "311": [
-        2190.936,
-        16178
-      ],
-      "312": [
-        2864.579,
-        16591
-      ],
-      "313": [
-        2745.532,
-        16306
-      ],
-      "314": [
-        1981.742,
-        15843
-      ],
-      "315": [
-        1046.14,
-        15886
-      ],
-      "316": [
-        960.931,
-        15350
-      ],
-      "317": [
-        1052.059,
-        14083
-      ],
-      "318": [
-        957.627,
-        13685
-      ],
-      "319": [
-        1091.093,
-        13959
-      ],
-      "320": [
-        1663.593,
-        14156
-      ],
-      "321": [
-        2144.549,
-        13570
-      ],
-      "322": [
-        2058.24,
-        12757
-      ],
-      "323": [
-        2047.657,
-        12796
-      ],
-      "324": [
-        2691.623,
-        13537
-      ],
-      "325": [
-        3436.57,
-        13839
-      ],
-      "326": [
-        4359.916,
-        14039
-      ],
-      "327": [
-        5134.938,
-        14377
-      ],
-      "328": [
-        5505.352,
-        14768
-      ],
-      "329": [
-        5748.373,
-        15094
-      ],
-      "330": [
-        6368.167,
-        14946
-      ],
-      "331": [
-        6935.038,
-        15544
-      ],
-      "332": [
-        7836.937,
-        15374
-      ],
-      "333": [
-        7089.218,
-        15241
-      ],
-      "334": [
-        4444.088,
-        15253
-      ],
-      "335": [
-        4512.463,
-        15506
-      ],
-      "336": [
-        5035.72,
-        15682
-      ],
-      "337": [
-        4312.81,
-        15641
-      ],
-      "338": [
-        2926.442,
-        15692
-      ],
-      "339": [
-        4882.017,
-        15144
-      ],
-      "340": [
-        7306.039,
-        14827
-      ],
-      "341": [
-        9936.021,
-        14437
-      ],
-      "342": [
-        10600.127,
-        13250
-      ],
-      "343": [
-        12896.168,
-        12388
-      ],
-      "344": [
-        13998.566,
-        12751
-      ],
-      "345": [
-        17345.993,
-        13462
-      ],
-      "346": [
-        17402.69,
-        13564
-      ],
-      "347": [
-        18551.522,
-        13502
-      ],
-      "348": [
-        18388.753,
-        13362
-      ],
-      "349": [
-        18613.366,
-        13180
-      ],
-      "350": [
-        20254.926,
-        13154
-      ],
-      "351": [
-        22359.481,
-        13751
-      ],
-      "352": [
-        26415.874,
-        14649
-      ],
-      "353": [
-        27058.961,
-        14778
-      ],
-      "354": [
-        28027.083,
-        14558
-      ],
-      "355": [
-        25878.287,
-        13994
-      ],
-      "356": [
-        26306.85,
-        14009
-      ],
-      "357": [
-        24559.825,
-        14242
-      ],
-      "358": [
-        21012.788,
-        14830
-      ],
-      "359": [
-        18256.692,
-        15210
-      ],
-      "360": [
-        13635.124,
-        14526
-      ],
-      "361": [
-        11839.751,
-        13358
-      ],
-      "362": [
-        10417.126,
-        13545
-      ],
-      "363": [
-        8178.683,
-        14485
-      ],
-      "364": [
-        7565.017,
-        15008
-      ],
-      "365": [
-        9288.307,
-        15051
-      ],
-      "366": [
-        13432.596,
-        15739
-      ],
-      "367": [
-        15059.816,
-        15919
-      ],
-      "368": [
-        14389.123,
-        15304
-      ],
-      "369": [
-        17511.249,
-        14898
-      ],
-      "370": [
-        19138.038,
-        15241
-      ],
-      "371": [
-        18588.438,
-        15188
-      ],
-      "372": [
-        19715.411,
-        14739
-      ],
-      "373": [
-        20108.584,
-        14452
-      ],
-      "374": [
-        21364.593,
-        14243
-      ],
-      "375": [
-        21947.057,
-        13977
-      ],
-      "376": [
-        19883.929,
-        13528
-      ],
-      "377": [
-        20581.764,
-        13626
-      ],
-      "378": [
-        20942.886,
-        14224
-      ],
-      "379": [
-        20969.532,
-        14054
-      ],
-      "380": [
-        22087.625,
-        13670
-      ],
-      "381": [
-        21128.77,
-        12975
-      ],
-      "382": [
-        18828.863,
-        12019
-      ],
-      "383": [
-        19642.043,
-        12168
-      ],
-      "384": [
-        21420.313,
-        12703
-      ],
-      "385": [
-        22770.218,
-        12910
-      ],
-      "386": [
-        21182.296,
-        13043
-      ],
-      "387": [
-        21469.775,
-        13189
-      ],
-      "388": [
-        19228.961,
-        12918
-      ],
-      "389": [
-        17090.311,
-        12761
-      ],
-      "390": [
-        17411.389,
-        12909
-      ],
-      "391": [
-        17689.246,
-        13375
-      ],
-      "392": [
-        19334.709,
-        13939
-      ],
-      "393": [
-        20821.66,
-        14057
-      ],
-      "394": [
-        20747.783,
-        14135
-      ],
-      "395": [
-        23334.02,
-        15745
-      ],
-      "396": [
-        17984.139,
-        16158
-      ],
-      "397": [
-        14095.58,
-        15201
-      ],
-      "398": [
-        13335.68,
-        15066
-      ],
-      "399": [
-        12457.946,
-        15359
-      ],
-      "400": [
-        10028.341,
-        15151
-      ],
-      "401": [
-        7851.119,
-        15019
-      ],
-      "402": [
-        4663.543,
-        14482
-      ],
-      "403": [
-        3432.842,
-        13116
-      ],
-      "404": [
-        3674.894,
-        12565
-      ],
-      "405": [
-        4137.299,
-        13448
-      ],
-      "406": [
-        5161.132,
-        14030
-      ],
-      "407": [
-        5296.835,
-        14403
-      ],
-      "408": [
-        4673.298,
-        14800
-      ],
-      "409": [
-        4507.074,
-        15064
-      ],
-      "410": [
-        5101.088,
-        14349
-      ],
-      "411": [
-        4937.506,
-        13813
-      ],
-      "412": [
-        4208.766,
-        14351
-      ],
-      "413": [
-        3143.135,
-        14687
-      ],
-      "414": [
-        3597.161,
-        14495
-      ],
-      "415": [
-        5614.146,
-        14448
-      ],
-      "416": [
-        8583.39,
-        13966
-      ],
-      "417": [
-        10653.791,
-        13790
-      ],
-      "418": [
-        13787.722,
-        14087
-      ],
-      "419": [
-        13876.409,
-        13936
-      ],
-      "420": [
-        15367.337,
-        13880
-      ],
-      "421": [
-        14943.647,
-        13698
-      ],
-      "422": [
-        14946.135,
-        13420
-      ],
-      "423": [
-        14578.622,
-        13455
-      ],
-      "424": [
-        15697.647,
-        12848
-      ],
-      "425": [
-        15281.315,
-        12032
-      ],
-      "426": [
-        17069.994,
-        11852
-      ],
-      "427": [
-        18690.323,
-        12426
-      ],
-      "428": [
-        19957.945,
-        12862
-      ],
-      "429": [
-        20054.507,
-        12808
-      ],
-      "430": [
-        19594.495,
-        12955
-      ],
-      "431": [
-        20475.414,
-        13234
-      ],
-      "432": [
-        17998.467,
-        12935
-      ],
-      "433": [
-        18234.995,
-        12923
-      ],
-      "434": [
-        19761.835,
-        13650
-      ],
-      "435": [
-        19857.679,
-        14005
-      ],
-      "436": [
-        19839.226,
-        14265
-      ],
-      "437": [
-        19035.948,
-        14326
-      ],
-      "438": [
-        17764.076,
-        14321
-      ],
-      "439": [
-        15948.311,
-        14374
-      ],
-      "440": [
-        13140.67,
-        14218
-      ],
-      "441": [
-        13061.265,
-        14071
-      ],
-      "442": [
-        10069.46,
-        13955
-      ],
-      "443": [
-        7828.86,
-        13755
-      ],
-      "444": [
-        4940.819,
-        12483
-      ],
-      "445": [
-        3226.746,
-        11917
-      ],
-      "446": [
-        2781.321,
-        11966
-      ],
-      "447": [
-        2761.929,
-        12285
-      ],
-      "448": [
-        2709.371,
-        12829
-      ],
-      "449": [
-        3002.161,
-        13016
-      ],
-      "450": [
-        3887.336,
-        13234
-      ],
-      "451": [
-        6620.36,
-        13150
-      ],
-      "452": [
-        8668.529,
-        12473
-      ],
-      "453": [
-        12347.65,
-        12961
-      ],
-      "454": [
-        14267.639,
-        13378
-      ],
-      "455": [
-        16569.796,
-        13409
-      ],
-      "456": [
-        17590.304,
-        12859
-      ],
-      "457": [
-        18803.707,
-        12786
-      ],
-      "458": [
-        20462.736,
-        12610
-      ],
-      "459": [
-        22342.456,
-        12835
-      ],
-      "460": [
-        24388.402,
-        12521
-      ],
-      "461": [
-        19449.971,
-        11455
-      ],
-      "462": [
-        17950.005,
-        11064
-      ],
-      "463": [
-        18729.159,
-        11521
-      ],
-      "464": [
-        18973.195,
-        12011
-      ],
-      "465": [
-        20452.587,
-        12522
-      ],
-      "466": [
-        21100.907,
-        13026
-      ],
-      "467": [
-        23231.872,
-        13652
-      ],
-      "468": [
-        21991.009,
-        13314
-      ],
-      "469": [
-        16751.984,
-        12425
-      ],
-      "470": [
-        14749.8,
-        12858
-      ],
-      "471": [
-        12091.591,
-        13626
-      ],
-      "472": [
-        10233.153,
-        13736
-      ],
-      "473": [
-        7556.495,
-        13654
-      ],
-      "474": [
-        4999.475,
-        13830
-      ],
-      "475": [
-        3482.368,
-        13763
-      ],
-      "476": [
-        4326.102,
-        13739
-      ],
-      "477": [
-        4232.919,
-        13521
-      ],
-      "478": [
-        3598.666,
-        13563
-      ],
-      "479": [
-        2662.423,
-        13500
-      ],
-      "480": [
-        2361.884,
-        13988
-      ],
-      "481": [
-        2605.367,
-        13863
-      ],
-      "482": [
-        2026.797,
-        12612
-      ],
-      "483": [
-        1415.986,
-        11443
-      ],
-      "484": [
-        1095.651,
-        11711
-      ],
-      "485": [
-        1007.45,
-        12263
-      ],
-      "486": [
-        1200.295,
-        12827
-      ],
-      "487": [
-        1360.026,
-        12994
-      ],
-      "488": [
-        1861.208,
-        13191
-      ],
-      "489": [
-        1958.039,
-        13617
-      ],
-      "490": [
-        1831.708,
-        13106
-      ],
-      "491": [
-        1807.383,
-        12941
-      ],
-      "492": [
-        1718.011,
-        13346
-      ],
-      "493": [
-        1641.428,
-        13469
-      ],
-      "494": [
-        1782.051,
-        12916
-      ],
-      "495": [
-        1794.148,
-        12897
-      ],
-      "496": [
-        1864.146,
-        13014
-      ],
-      "497": [
-        1850.644,
-        13098
-      ],
-      "498": [
-        1697.142,
-        13015
-      ],
-      "499": [
-        1603.791,
-        12983
-      ],
-      "500": [
-        1909.573,
-        13007
-      ],
-      "501": [
-        3145.491,
-        12815
-      ],
-      "502": [
-        3641.405,
-        12789
-      ],
-      "503": [
-        4095.807,
-        12575
-      ],
-      "504": [
-        3397.005,
-        11615
-      ],
-      "505": [
-        2532.005,
-        11019
-      ],
-      "506": [
-        2425.5,
-        11368
-      ],
-      "507": [
-        2335.565,
-        12194
-      ],
-      "508": [
-        2051.238,
-        12178
-      ],
-      "509": [
-        1833.689,
-        12270
-      ],
-      "510": [
-        1448.626,
-        12300
-      ],
-      "511": [
-        1145.386,
-        12677
-      ],
-      "512": [
-        1169.23,
-        12252
-      ],
-      "513": [
-        950.892,
-        12228
-      ],
-      "514": [
-        663.307,
-        12502
-      ],
-      "515": [
-        503.692,
-        12551
-      ],
-      "516": [
-        480.03,
-        12795
-      ],
-      "517": [
-        472.685,
-        12661
-      ],
-      "518": [
-        545.57,
-        12547
-      ],
-      "519": [
-        947.323,
-        12251
-      ],
-      "520": [
-        861.091,
-        12440
-      ],
-      "521": [
-        800.05,
-        12374
-      ],
-      "522": [
-        1247.452,
-        12435
-      ],
-      "523": [
-        2308.136,
-        12429
-      ],
-      "524": [
-        4039.244,
-        12558
-      ],
-      "525": [
-        6147.079,
-        12197
-      ],
-      "526": [
-        6359.011,
-        11161
-      ],
-      "527": [
-        7524.628,
-        10862
-      ],
-      "528": [
-        9055.842,
-        11382
-      ],
-      "529": [
-        9894.093,
-        12204
-      ],
-      "530": [
-        9938.265,
-        12790
-      ],
-      "531": [
-        11960.711,
-        13119
-      ],
-      "532": [
-        14048.053,
-        14008
-      ],
-      "533": [
-        12930.565,
-        13736
-      ],
-      "534": [
-        11910.555,
-        13520
-      ],
-      "535": [
-        10858.475,
-        13827
-      ],
-      "536": [
-        10192.742,
-        14288
-      ],
-      "537": [
-        9454.736,
-        14260
-      ],
-      "538": [
-        7343.511,
-        14231
-      ],
-      "539": [
-        5965.627,
-        14036
-      ],
-      "540": [
-        6668.377,
-        14286
-      ],
-      "541": [
-        6975.962,
-        14346
-      ],
-      "542": [
-        5433.488,
-        14311
-      ],
-      "543": [
-        4521.525,
-        14279
-      ],
-      "544": [
-        4218.784,
-        14466
-      ],
-      "545": [
-        3526.181,
-        14560
-      ],
-      "546": [
-        3338.885,
-        14675
-      ],
-      "547": [
-        2420.563,
-        13322
-      ],
-      "548": [
-        1189.568,
-        12174
-      ],
-      "549": [
-        744.693,
-        12824
-      ],
-      "550": [
-        686.542,
-        13804
-      ],
-      "551": [
-        585.315,
-        14507
-      ],
-      "552": [
-        749.05,
-        14991
-      ],
-      "553": [
-        970.675,
-        15412
-      ],
-      "554": [
-        1429.714,
-        15642
-      ],
-      "555": [
-        2667.275,
-        15759
-      ],
-      "556": [
-        6046.785,
-        16210
-      ],
-      "557": [
-        13758.562,
-        17439
-      ],
-      "558": [
-        19295.481,
-        18015
-      ],
-      "559": [
-        25318.944,
-        18424
-      ],
-      "560": [
-        32461.542,
-        19029
-      ],
-      "561": [
-        36547.267,
-        19504
-      ],
-      "562": [
-        35676.473,
-        19846
-      ],
-      "563": [
-        35631.246,
-        20111
-      ],
-      "564": [
-        38199.123,
-        20181
-      ],
-      "565": [
-        37512.469,
-        20891
-      ],
-      "566": [
-        43336.584,
-        21502
-      ],
-      "567": [
-        41276.104,
-        21942
-      ],
-      "568": [
-        45919.269,
-        22562
-      ],
-      "569": [
-        42665.07,
-        23122
-      ],
-      "570": [
-        42253.848,
-        23044
-      ],
-      "571": [
-        41124.135,
-        22077
-      ],
-      "572": [
-        37568.496,
-        20898
-      ],
-      "573": [
-        40928.68,
-        22746
-      ],
-      "574": [
-        43355.915,
-        23882
-      ],
-      "575": [
-        44318.801,
-        24582
-      ],
-      "576": [
-        40182.215,
-        23577
-      ],
-      "577": [
-        41082.483,
-        24064
-      ],
-      "578": [
-        40517.433,
-        24611
-      ],
-      "579": [
-        41326.065,
-        24381
-      ],
-      "580": [
-        35166.406,
-        23877
-      ],
-      "581": [
-        32060.429,
-        23139
-      ],
-      "582": [
-        28606.104,
-        22802
-      ],
-      "583": [
-        29873.549,
-        22729
-      ],
-      "584": [
-        26749.516,
-        22428
-      ],
-      "585": [
-        21696.561,
-        22263
-      ],
-      "586": [
-        20190.832,
-        21902
-      ],
-      "587": [
-        17118.404,
-        21709
-      ],
-      "588": [
-        10852.795,
-        21192
-      ],
-      "589": [
-        7960.867,
-        20855
-      ],
-      "590": [
-        8146.445,
-        20153
-      ],
-      "591": [
-        6360.447,
-        20528
-      ],
-      "592": [
-        4987.047,
-        20149
-      ],
-      "593": [
-        4709.182,
-        19829
-      ],
-      "594": [
-        4647.937,
-        18698
-      ],
-      "595": [
-        4166.951,
-        16409
-      ],
-      "596": [
-        5207.249,
-        16492
-      ],
-      "597": [
-        6187.757,
-        17921
-      ],
-      "598": [
-        3715.748,
-        18983
-      ],
-      "599": [
-        2759.927,
-        18776
-      ],
-      "600": [
-        2918.827,
-        18474
-      ],
-      "601": [
-        2509.624,
-        18201
-      ],
-      "602": [
-        1739.701,
-        18426
-      ],
-      "603": [
-        1931.548,
-        18197
-      ],
-      "604": [
-        2057.809,
+        31655.347,
         18003
       ],
-      "605": [
-        1713.284,
-        17969
+      "48": [
+        31502.188,
+        17791
       ],
-      "606": [
-        2617.736,
-        17872
+      "49": [
+        31040.002,
+        17218
       ],
-      "607": [
-        3605.097,
-        17291
+      "50": [
+        34235.143,
+        16467
       ],
-      "608": [
-        4931.663,
-        15703
+      "51": [
+        32070.004,
+        16832
       ],
-      "609": [
-        6369.096,
-        14963
+      "52": [
+        32692.697,
+        16529
       ],
-      "610": [
-        6924.018,
-        15242
+      "53": [
+        28076.697,
+        15355
       ],
-      "611": [
-        7449.565,
-        16199
+      "54": [
+        32302.513,
+        16290
       ],
-      "612": [
-        8256.057,
-        16497
+      "55": [
+        35545.321,
+        17863
       ],
-      "613": [
-        10448.848,
-        16628
+      "56": [
+        36954.401,
+        17802
       ],
-      "614": [
-        11450.908,
-        16262
+      "57": [
+        36235.608,
+        17575
       ],
-      "615": [
-        11047.158,
-        16446
+      "58": [
+        36129.423,
+        17480
       ],
-      "616": [
-        9999.266,
+      "59": [
+        37397.012,
+        17752
+      ],
+      "60": [
+        36375.724,
+        17808
+      ],
+      "61": [
+        34587.195,
+        17906
+      ],
+      "62": [
+        35532.674,
+        17986
+      ],
+      "63": [
+        33389.68,
+        17816
+      ],
+      "64": [
+        27426.202,
+        18093
+      ],
+      "65": [
+        21065.351,
+        18181
+      ],
+      "66": [
+        16360.111,
+        18475
+      ],
+      "67": [
+        15815.482,
+        18435
+      ],
+      "68": [
+        13868.967,
+        18349
+      ],
+      "69": [
+        9202.027,
+        18278
+      ],
+      "70": [
+        5538.425,
+        18322
+      ],
+      "71": [
+        4889.913,
+        17877
+      ],
+      "72": [
+        6309.444,
+        18210
+      ],
+      "73": [
+        8752.616,
+        18154
+      ],
+      "74": [
+        9828.34,
+        18062
+      ],
+      "75": [
+        12632.73,
+        17406
+      ],
+      "76": [
+        14247.937,
+        15451
+      ],
+      "77": [
+        16166.288,
+        14045
+      ],
+      "78": [
+        18599.876,
+        13957
+      ],
+      "79": [
+        23744.311,
+        15024
+      ],
+      "80": [
+        27324.533,
+        16359
+      ],
+      "81": [
+        29673.565,
+        17301
+      ],
+      "82": [
+        30549.182,
         16794
       ],
-      "617": [
-        10327.205,
-        16996
-      ],
-      "618": [
-        11324.128,
-        16627
-      ],
-      "619": [
-        11897.8,
-        16681
-      ],
-      "620": [
-        12194.402,
-        16609
-      ],
-      "621": [
-        12638.742,
-        16524
-      ],
-      "622": [
-        14652.56,
-        16481
-      ],
-      "623": [
-        15693.736,
-        16163
-      ],
-      "624": [
-        16500.715,
-        16121
-      ],
-      "625": [
-        19079.897,
-        16114
-      ],
-      "626": [
-        19785.448,
-        15955
-      ],
-      "627": [
-        17977.863,
-        15775
-      ],
-      "628": [
-        14578.053,
-        15505
-      ],
-      "629": [
-        13870.447,
-        14604
-      ],
-      "630": [
-        11210.37,
-        13560
-      ],
-      "631": [
-        9615.962,
-        13342
-      ],
-      "632": [
-        8058.897,
-        13959
-      ],
-      "633": [
-        7694.047,
-        14806
-      ],
-      "634": [
-        6667.779,
-        15030
-      ],
-      "635": [
-        5637.464,
-        15165
-      ],
-      "636": [
-        3156.659,
-        14799
-      ],
-      "637": [
-        1776.867,
-        14733
-      ],
-      "638": [
-        1092.154,
-        15007
-      ],
-      "639": [
-        1336.456,
-        15343
-      ],
-      "640": [
-        2168.898,
-        15446
-      ],
-      "641": [
-        3241.66,
-        15248
-      ],
-      "642": [
-        3159.266,
-        15127
-      ],
-      "643": [
-        3951.538,
-        15289
-      ],
-      "644": [
-        5696.625,
-        15177
-      ],
-      "645": [
-        7113.245,
-        14881
-      ],
-      "646": [
-        8080.304,
-        14674
-      ],
-      "647": [
-        9721.363,
-        14656
-      ],
-      "648": [
-        11450.34,
-        15105
-      ],
-      "649": [
-        13338.838,
-        15030
-      ],
-      "650": [
-        15569.752,
-        15074
-      ],
-      "651": [
-        15729.289,
-        13550
-      ],
-      "652": [
-        15307.768,
-        12424
-      ],
-      "653": [
-        16869.359,
-        12888
-      ],
-      "654": [
-        16380.806,
-        13185
-      ],
-      "655": [
-        16760.774,
-        13722
-      ],
-      "656": [
-        17415.446,
-        14022
-      ],
-      "657": [
-        17829.306,
-        14074
-      ],
-      "658": [
-        19108.204,
-        14141
-      ],
-      "659": [
-        18527.71,
-        14260
-      ],
-      "660": [
-        16774.508,
-        14473
-      ],
-      "661": [
-        14779.719,
-        14531
-      ],
-      "662": [
-        13399.702,
-        14601
-      ],
-      "663": [
-        12165.131,
-        14338
-      ],
-      "664": [
-        11497.496,
-        13413
-      ],
-      "665": [
-        10346.121,
-        12483
-      ],
-      "666": [
-        9610.074,
-        12884
-      ],
-      "667": [
-        8452.116,
-        13424
-      ],
-      "668": [
-        8631.378,
-        14218
-      ],
-      "669": [
-        7581.882,
-        14485
-      ],
-      "670": [
-        6676.13,
-        14739
-      ],
-      "671": [
-        5124.875,
-        14500
-      ],
-      "672": [
-        4743.883,
-        14285
-      ],
-      "673": [
-        4827.576,
-        14391
-      ],
-      "674": [
-        5273.603,
-        14653
-      ],
-      "675": [
-        6133.042,
-        14519
-      ],
-      "676": [
-        7107.898,
-        14631
-      ],
-      "677": [
-        8245.199,
-        14568
-      ],
-      "678": [
-        9490.622,
-        14672
-      ],
-      "679": [
-        11142.842,
-        14657
-      ],
-      "680": [
-        10372.478,
-        14333
-      ],
-      "681": [
-        11539.601,
-        14303
-      ],
-      "682": [
-        12984.739,
-        14524
-      ],
-      "683": [
-        13405.191,
-        14314
-      ],
-      "684": [
-        14361.344,
-        14329
-      ],
-      "685": [
-        14630.56,
-        14288
-      ],
-      "686": [
-        15014.141,
-        13981
-      ],
-      "687": [
-        14827.159,
-        12742
-      ],
-      "688": [
-        13438.7,
-        12352
-      ],
-      "689": [
-        14888.678,
-        12630
-      ],
-      "690": [
-        16010.086,
-        13580
-      ],
-      "691": [
-        16306.947,
-        14095
-      ],
-      "692": [
-        18665.462,
-        14113
-      ],
-      "693": [
-        23057.359,
-        14152
-      ],
-      "694": [
-        25512.939,
-        13966
-      ],
-      "695": [
-        27284.812,
-        13988
-      ],
-      "696": [
-        26929.453,
-        14091
-      ],
-      "697": [
-        25602.34,
-        14398
-      ],
-      "698": [
-        25097.527,
-        14123
-      ],
-      "699": [
-        25138.4,
-        14099
-      ],
-      "700": [
-        23445.162,
-        14468
-      ],
-      "701": [
-        19110.684,
-        14297
-      ],
-      "702": [
-        14633.304,
-        14521
-      ],
-      "703": [
-        9290.76,
-        14346
-      ],
-      "704": [
-        6221.789,
-        14301
-      ],
-      "705": [
-        6248.274,
-        13967
-      ],
-      "706": [
-        6562.888,
-        13972
-      ],
-      "707": [
-        8753.256,
-        14019
-      ],
-      "708": [
-        8825.182,
-        12978
-      ],
-      "709": [
-        10619.94,
-        12183
-      ],
-      "710": [
-        12244.246,
-        12078
-      ],
-      "711": [
-        14751.039,
-        12074
-      ],
-      "712": [
-        14985.552,
-        12288
-      ],
-      "713": [
-        16579.985,
-        12929
-      ],
-      "714": [
-        17391.566,
-        13311
-      ],
-      "715": [
-        19060.89,
-        13808
-      ],
-      "716": [
-        22556.512,
-        13514
-      ],
-      "717": [
-        24819.088,
-        13107
-      ],
-      "718": [
-        29891.914,
-        13595
-      ],
-      "719": [
-        31807.847,
-        13875
-      ],
-      "720": [
-        31407.008,
-        13958
-      ],
-      "721": [
-        32157.539,
-        14184
-      ],
-      "722": [
-        29492.327,
-        14079
-      ],
-      "723": [
-        27561.983,
-        14012
-      ],
-      "724": [
-        25372.421,
-        13931
-      ],
-      "725": [
-        26488.387,
-        13928
-      ],
-      "726": [
-        25454.001,
-        13990
-      ],
-      "727": [
-        25631.074,
-        13901
-      ],
-      "728": [
-        22475.29,
-        13320
-      ],
-      "729": [
-        20244.003,
-        11785
-      ],
-      "730": [
-        20365.8,
-        11562
-      ],
-      "731": [
-        18175.859,
-        12369
-      ],
-      "732": [
-        17658.263,
-        12774
-      ],
-      "733": [
-        15962.286,
-        13320
-      ],
-      "734": [
-        14601.778,
-        13850
-      ],
-      "735": [
-        11840.428,
-        13765
-      ],
-      "736": [
-        9353.571,
-        13654
-      ],
-      "737": [
-        8756.733,
-        13934
-      ],
-      "738": [
-        9314.459,
-        14325
-      ],
-      "739": [
-        9921.042,
-        14345
-      ],
-      "740": [
-        12017.25,
-        14583
-      ],
-      "741": [
-        11895.422,
-        14615
-      ],
-      "742": [
-        13824.062,
-        14758
-      ],
-      "743": [
-        15543.446,
-        14482
-      ],
-      "744": [
-        13513.142,
-        14021
-      ],
-      "745": [
-        14594.025,
-        13789
-      ],
-      "746": [
-        12806.622,
-        13246
-      ],
-      "747": [
-        13069.809,
-        13651
-      ],
-      "748": [
-        14786.956,
-        14800
-      ],
-      "749": [
-        15854.514,
-        15770
-      ],
-      "750": [
-        16144.913,
-        16178
-      ],
-      "751": [
-        18517.214,
-        16695
-      ],
-      "752": [
-        19949.442,
-        16413
-      ],
-      "753": [
-        22834.494,
-        16619
-      ],
-      "754": [
-        23675.785,
-        17063
-      ],
-      "755": [
-        25742.606,
-        17167
-      ],
-      "756": [
-        26214.883,
-        17558
-      ],
-      "757": [
-        24581.903,
-        17913
-      ],
-      "758": [
-        22955.948,
-        18259
-      ],
-      "759": [
-        18966.741,
-        18490
-      ],
-      "760": [
-        13395.826,
-        18541
-      ],
-      "761": [
-        11829.393,
-        18681
-      ],
-      "762": [
-        17457.829,
-        18772
-      ],
-      "763": [
-        21435.147,
-        19269
-      ],
-      "764": [
-        22164.339,
-        19889
-      ],
-      "765": [
-        23664.077,
-        20633
-      ],
-      "766": [
-        28979.128,
-        20985
-      ],
-      "767": [
-        33680.612,
-        21590
-      ],
-      "768": [
-        41097.823,
-        21241
-      ],
-      "769": [
-        45101.269,
-        20050
-      ],
-      "770": [
-        45118.009,
-        21109
-      ],
-      "771": [
-        48154.315,
-        22499
-      ],
-      "772": [
-        48165.663,
-        22918
-      ],
-      "773": [
-        45509.018,
-        22447
-      ],
-      "774": [
-        45252.276,
-        22574
-      ],
-      "775": [
-        44955.845,
-        23266
-      ],
-      "776": [
-        43966.396,
-        23559
-      ],
-      "777": [
-        45386.821,
-        24016
-      ],
-      "778": [
-        45380.147,
-        25060
-      ],
-      "779": [
-        45876.423,
-        25567
-      ],
-      "780": [
-        44120.649,
-        25777
-      ],
-      "781": [
-        37804.576,
-        24649
-      ],
-      "782": [
-        21839.22,
-        22026
-      ],
-      "783": [
-        15408.028,
-        21138
-      ],
-      "784": [
-        13158.83,
-        22508
-      ],
-      "785": [
-        11633.484,
-        23079
-      ],
-      "786": [
-        9732.363,
-        22154
-      ],
-      "787": [
-        7791.224,
-        21821
-      ],
-      "788": [
-        6914.52,
-        21629
-      ],
-      "789": [
-        8401.437,
-        21411
-      ],
-      "790": [
-        11161.509,
-        21283
-      ],
-      "791": [
-        15089.128,
-        21094
-      ],
-      "792": [
-        17930.623,
-        20729
-      ],
-      "793": [
-        18359.206,
-        20177
-      ],
-      "794": [
-        19656.679,
-        18615
-      ],
-      "795": [
-        21596.359,
-        17396
-      ],
-      "796": [
-        23325.792,
-        17178
-      ],
-      "797": [
-        22523.467,
-        18019
-      ],
-      "798": [
-        23881.121,
-        18391
-      ],
-      "799": [
-        19788.555,
-        17032
-      ],
-      "800": [
-        17254.826,
-        15788
-      ],
-      "801": [
-        17917.987,
-        15902
-      ],
-      "802": [
-        17120.007,
+      "83": [
+        29779.012,
+        16435
+      ],
+      "84": [
+        30747.546,
+        16756
+      ],
+      "85": [
+        30687.177,
+        16647
+      ],
+      "86": [
+        30572.01,
+        16403
+      ],
+      "87": [
+        33297.248,
+        16443
+      ],
+      "88": [
+        30952.449,
         16539
       ],
-      "803": [
-        15475.831,
-        17212
+      "89": [
+        33371.734,
+        16645
       ],
-      "804": [
-        12276.764,
-        17536
+      "90": [
+        33288.17,
+        17097
       ],
-      "805": [
-        10152.788,
-        17535
+      "91": [
+        30950.524,
+        17189
       ],
-      "806": [
-        9531.814,
-        17211
+      "92": [
+        30010.29,
+        17330
       ],
-      "807": [
-        9546.042,
-        17093
+      "93": [
+        27557.651,
+        17352
       ],
-      "808": [
-        10721.584,
-        17577
+      "94": [
+        27723.452,
+        17329
       ],
-      "809": [
-        13731.265,
-        17101
+      "95": [
+        28204.304,
+        17518
       ],
-      "810": [
-        16169.125,
-        15745
+      "96": [
+        29612.082,
+        17569
       ],
-      "811": [
-        16954.723,
-        14644
+      "97": [
+        29816.121,
+        16949
       ],
-      "812": [
-        21382.546,
-        15061
+      "98": [
+        30050.38,
+        15814
       ],
-      "813": [
-        24018.081,
-        15660
+      "99": [
+        29700.494,
+        16044
       ],
-      "814": [
-        23910.044,
-        16168
+      "100": [
+        30584.768,
+        16381
       ],
-      "815": [
-        26386.297,
-        16781
+      "101": [
+        30423.749,
+        16648
       ],
-      "816": [
-        28392.955,
-        16901
+      "102": [
+        29973.585,
+        16907
       ],
-      "817": [
-        29044.076,
-        16327
+      "103": [
+        27627.637,
+        17143
       ],
-      "818": [
-        28587.465,
-        16172
+      "104": [
+        23122.916,
+        16931
       ],
-      "819": [
-        27471.068,
+      "105": [
+        19441.519,
+        16060
+      ],
+      "106": [
+        16615.792,
+        15925
+      ],
+      "107": [
+        14928.616,
+        16167
+      ],
+      "108": [
+        12437.729,
+        16173
+      ],
+      "109": [
+        11661.751,
+        15793
+      ],
+      "110": [
+        11850.56,
+        15673
+      ],
+      "111": [
+        10815.616,
+        15550
+      ],
+      "112": [
+        9127.833,
+        15433
+      ],
+      "113": [
+        7482.15,
+        15384
+      ],
+      "114": [
+        5975.913,
+        15485
+      ],
+      "115": [
+        4247.818,
+        15501
+      ],
+      "116": [
+        3880.947,
+        15562
+      ],
+      "117": [
+        4319.623,
+        15610
+      ],
+      "118": [
+        4707.361,
+        15541
+      ],
+      "119": [
+        4658.953,
+        15264
+      ],
+      "120": [
+        3671.926,
+        15424
+      ],
+      "121": [
+        2332.551,
+        14853
+      ],
+      "122": [
+        1603.061,
+        13610
+      ],
+      "123": [
+        1760.263,
+        13137
+      ],
+      "124": [
+        1910.258,
+        13164
+      ],
+      "125": [
+        2080.448,
+        13508
+      ],
+      "126": [
+        2259.019,
+        13426
+      ],
+      "127": [
+        1966.816,
+        13638
+      ],
+      "128": [
+        2411.137,
+        13438
+      ],
+      "129": [
+        2208.158,
+        12699
+      ],
+      "130": [
+        1795.961,
+        12424
+      ],
+      "131": [
+        1771.523,
+        12841
+      ],
+      "132": [
+        1210.723,
+        13297
+      ],
+      "133": [
+        1147.823,
+        13488
+      ],
+      "134": [
+        1735.625,
+        13218
+      ],
+      "135": [
+        2123.622,
+        12533
+      ],
+      "136": [
+        1809.138,
+        12929
+      ],
+      "137": [
+        1357.974,
+        13303
+      ],
+      "138": [
+        1259.767,
+        14327
+      ],
+      "139": [
+        1385.618,
+        14568
+      ],
+      "140": [
+        1065.588,
+        15199
+      ],
+      "141": [
+        1117.1,
+        15623
+      ],
+      "142": [
+        1171.664,
+        15282
+      ],
+      "143": [
+        932.654,
+        15475
+      ],
+      "144": [
+        1276.702,
+        16131
+      ],
+      "145": [
+        3373.008,
+        16465
+      ],
+      "146": [
+        5789.296,
         16332
       ],
-      "820": [
-        26552.167,
-        15914
+      "147": [
+        6776.161,
+        16361
       ],
-      "821": [
-        28006.905,
-        15454
+      "148": [
+        7402.232,
+        19083
       ],
-      "822": [
-        27393.8,
-        14525
+      "149": [
+        6849.236,
+        17516
       ],
-      "823": [
-        26899.938,
-        14069
+      "150": [
+        4643.825,
+        17160
       ],
-      "824": [
-        25599.658,
-        14208
+      "151": [
+        6070.507,
+        17572
       ],
-      "825": [
-        26950.741,
-        15053
+      "152": [
+        12990.735,
+        18242
       ],
-      "826": [
-        26878.057,
-        15566
+      "153": [
+        19967.466,
+        18276
       ],
-      "827": [
-        28112.437,
-        15382
+      "154": [
+        25266.968,
+        17358
       ],
-      "828": [
-        24293.422,
-        15238
+      "155": [
+        31444.576,
+        17253
       ],
-      "829": [
-        17181.354,
-        15483
+      "156": [
+        33471.597,
+        17311
       ],
-      "830": [
-        13104.606,
-        16148
+      "157": [
+        30584.149,
+        17088
       ],
-      "831": [
-        7441.893,
-        16345
+      "158": [
+        34384.572,
+        16955
       ],
-      "832": [
-        4791.37,
-        16124
+      "159": [
+        31416.266,
+        16415
       ],
-      "833": [
-        5083.985,
-        15624
+      "160": [
+        31344.008,
+        15674
       ],
-      "834": [
-        5843.287,
-        15465
+      "161": [
+        28763.877,
+        16321
       ],
-      "835": [
-        4495.398,
-        15175
+      "162": [
+        28847.092,
+        16904
       ],
-      "836": [
-        3344.511,
-        15388
+      "163": [
+        32261.51,
+        17299
       ],
-      "837": [
-        3420.185,
+      "164": [
+        30658.104,
+        17362
+      ],
+      "165": [
+        33805.242,
+        17625
+      ],
+      "166": [
+        33288.476,
+        17113
+      ],
+      "167": [
+        35598.756,
+        17282
+      ],
+      "168": [
+        35066.374,
+        17569
+      ],
+      "169": [
+        33115.465,
+        17755
+      ],
+      "170": [
+        34712.118,
+        17989
+      ],
+      "171": [
+        31370.052,
+        18089
+      ],
+      "172": [
+        35521.561,
+        17961
+      ],
+      "173": [
+        34295.986,
+        18242
+      ],
+      "174": [
+        29386.503,
+        17855
+      ],
+      "175": [
+        29257.174,
+        18248
+      ],
+      "176": [
+        27128.781,
+        18267
+      ],
+      "177": [
+        25418.683,
+        18293
+      ],
+      "178": [
+        23876.004,
+        18255
+      ],
+      "179": [
+        19340.99,
+        18280
+      ],
+      "180": [
+        14158.708,
+        18034
+      ],
+      "181": [
+        8811.713,
+        16977
+      ],
+      "182": [
+        8552.617,
+        15391
+      ],
+      "183": [
+        11210.75,
+        15620
+      ],
+      "184": [
+        12521.525,
+        16916
+      ],
+      "185": [
+        12405.632,
+        17505
+      ],
+      "186": [
+        10984.202,
+        17520
+      ],
+      "187": [
+        8081.641,
+        18025
+      ],
+      "188": [
+        9019.137,
+        17486
+      ],
+      "189": [
+        10488.58,
+        17672
+      ],
+      "190": [
+        12752.402,
+        17596
+      ],
+      "191": [
+        12760.754,
+        17637
+      ],
+      "192": [
+        11446.476,
+        17708
+      ],
+      "193": [
+        9025.296,
+        17558
+      ],
+      "194": [
+        8043.363,
+        17421
+      ],
+      "195": [
+        7323.785,
+        17492
+      ],
+      "196": [
+        6616.788,
+        17366
+      ],
+      "197": [
+        5175.7,
+        17448
+      ],
+      "198": [
+        4084.573,
+        17305
+      ],
+      "199": [
+        3404.493,
+        17223
+      ],
+      "200": [
+        3026.4,
+        17194
+      ],
+      "201": [
+        2573.937,
+        17278
+      ],
+      "202": [
+        2666.676,
+        16823
+      ],
+      "203": [
+        2528.908,
+        15741
+      ],
+      "204": [
+        3044.838,
+        14698
+      ],
+      "205": [
+        3400.224,
+        15631
+      ],
+      "206": [
+        4029.015,
+        16241
+      ],
+      "207": [
+        4353.797,
+        16355
+      ],
+      "208": [
+        3981.423,
+        16471
+      ],
+      "209": [
+        3684.001,
+        15960
+      ],
+      "210": [
+        2995.593,
+        15673
+      ],
+      "211": [
+        2222.976,
+        15600
+      ],
+      "212": [
+        2348.402,
+        16405
+      ],
+      "213": [
+        2575.564,
+        16400
+      ],
+      "214": [
+        2412.446,
+        16200
+      ],
+      "215": [
+        2052.86,
+        15994
+      ],
+      "216": [
+        2344.12,
+        15985
+      ],
+      "217": [
+        2242.37,
+        15808
+      ],
+      "218": [
+        2248.3,
+        15797
+      ],
+      "219": [
+        1848.04,
+        15773
+      ],
+      "220": [
+        1528.039,
+        15698
+      ],
+      "221": [
+        1998.625,
+        15680
+      ],
+      "222": [
+        2888.494,
+        15486
+      ],
+      "223": [
+        3975.483,
         15358
       ],
-      "838": [
-        4027.074,
-        15114
+      "224": [
+        3795.959,
+        14750
       ],
-      "839": [
-        4330.165,
-        14932
+      "225": [
+        4292.185,
+        13061
       ],
-      "840": [
-        3133.25,
-        14640
+      "226": [
+        3852.236,
+        13451
       ],
-      "841": [
-        2543.73,
+      "227": [
+        4563.299,
+        14785
+      ],
+      "228": [
+        4085.014,
+        15500
+      ],
+      "229": [
+        2980.297,
+        16036
+      ],
+      "230": [
+        3293.11,
+        16445
+      ],
+      "231": [
+        3494.968,
+        16094
+      ],
+      "232": [
+        3260.342,
+        15745
+      ],
+      "233": [
+        3438.225,
+        15834
+      ],
+      "234": [
+        3208.957,
+        16038
+      ],
+      "235": [
+        2854.871,
+        15887
+      ],
+      "236": [
+        2973.048,
+        15911
+      ],
+      "237": [
+        3656.952,
+        15917
+      ],
+      "238": [
+        4067.867,
+        16125
+      ],
+      "239": [
+        3852.851,
+        15979
+      ],
+      "240": [
+        4994.405,
+        15863
+      ],
+      "241": [
+        5178.235,
+        15727
+      ],
+      "242": [
+        6463.439,
+        15853
+      ],
+      "243": [
+        7594.704,
+        16044
+      ],
+      "244": [
+        7573.513,
+        15917
+      ],
+      "245": [
+        6808.222,
+        15148
+      ],
+      "246": [
+        6602.955,
+        14231
+      ],
+      "247": [
+        6706.966,
+        14471
+      ],
+      "248": [
+        8453.96,
+        14967
+      ],
+      "249": [
+        8101.267,
+        15392
+      ],
+      "250": [
+        9101.54,
+        15862
+      ],
+      "251": [
+        11186.203,
+        17038
+      ],
+      "252": [
+        13329.334,
+        17760
+      ],
+      "253": [
+        18311.143,
+        18549
+      ],
+      "254": [
+        24578.037,
+        18353
+      ],
+      "255": [
+        25168.481,
+        19364
+      ],
+      "256": [
+        26743.279,
+        20319
+      ],
+      "257": [
+        24166.157,
+        21364
+      ],
+      "258": [
+        17303.212,
+        22480
+      ],
+      "259": [
+        12511.093,
+        23925
+      ],
+      "260": [
+        15553.323,
+        25044
+      ],
+      "261": [
+        20403.878,
+        26523
+      ],
+      "262": [
+        33241.681,
+        27636
+      ],
+      "263": [
+        52689.519,
+        29040
+      ],
+      "264": [
+        61927.07,
+        31159
+      ],
+      "265": [
+        57076.672,
+        32287
+      ],
+      "266": [
+        57726.849,
+        33677
+      ],
+      "267": [
+        60634.371,
+        34728
+      ],
+      "268": [
+        56696.443,
+        34213
+      ],
+      "269": [
+        58050.093,
+        34251
+      ],
+      "270": [
+        59137.717,
+        36982
+      ],
+      "271": [
+        56901.051,
+        36840
+      ],
+      "272": [
+        57304.345,
+        36478
+      ],
+      "273": [
+        58392.07,
+        37429
+      ],
+      "274": [
+        58662.902,
+        38442
+      ],
+      "275": [
+        50442.471,
+        39186
+      ],
+      "276": [
+        40655.987,
+        40467
+      ],
+      "277": [
+        37288.603,
+        53749
+      ],
+      "278": [
+        31041.245,
+        65742
+      ],
+      "279": [
+        21965.741,
+        43785
+      ],
+      "280": [
+        17954.13,
+        37587
+      ],
+      "281": [
+        14753.076,
+        36973
+      ],
+      "282": [
+        10408.576,
+        33231
+      ],
+      "283": [
+        6081.988,
+        30538
+      ],
+      "284": [
+        6359.199,
+        28595
+      ],
+      "285": [
+        5890.244,
+        27705
+      ],
+      "286": [
+        7211.575,
+        26152
+      ],
+      "287": [
+        7474.399,
+        24340
+      ],
+      "288": [
+        5399.295,
+        21797
+      ],
+      "289": [
+        4017.218,
+        21668
+      ],
+      "290": [
+        5453.405,
+        22127
+      ],
+      "291": [
+        5489.955,
+        22425
+      ],
+      "292": [
+        4849.458,
+        21638
+      ],
+      "293": [
+        4378.907,
+        20162
+      ],
+      "294": [
+        4818.697,
+        20020
+      ],
+      "295": [
+        4622.871,
+        19944
+      ],
+      "296": [
+        4612.035,
+        19650
+      ],
+      "297": [
+        4218.494,
+        19989
+      ],
+      "298": [
+        5688.597,
+        19463
+      ],
+      "299": [
+        5181.341,
+        18706
+      ],
+      "300": [
+        4707.256,
+        18679
+      ],
+      "301": [
+        4996.215,
+        18415
+      ],
+      "302": [
+        3780.089,
+        18164
+      ],
+      "303": [
+        2338.441,
+        18379
+      ],
+      "304": [
+        1254.781,
+        17881
+      ],
+      "305": [
+        1205.275,
+        17496
+      ],
+      "306": [
+        1086.409,
+        17087
+      ],
+      "307": [
+        1458.194,
+        15801
+      ],
+      "308": [
+        1368.335,
+        14662
+      ],
+      "309": [
+        1486.084,
+        15186
+      ],
+      "310": [
+        1773.504,
+        16175
+      ],
+      "311": [
+        2227.185,
+        16449
+      ],
+      "312": [
+        2905.978,
+        16870
+      ],
+      "313": [
+        2786.055,
+        16581
+      ],
+      "314": [
+        2012.89,
+        16109
+      ],
+      "315": [
+        1064.209,
+        16151
+      ],
+      "316": [
+        976.66,
+        15609
+      ],
+      "317": [
+        1071.023,
+        14320
+      ],
+      "318": [
+        973.18,
+        13918
+      ],
+      "319": [
+        1105.892,
+        14192
+      ],
+      "320": [
+        1687.78,
+        14395
+      ],
+      "321": [
+        2180.895,
+        13805
+      ],
+      "322": [
+        2094.51,
+        12973
+      ],
+      "323": [
+        2080.866,
+        13010
+      ],
+      "324": [
+        2734.653,
+        13765
+      ],
+      "325": [
+        3487.183,
+        14073
+      ],
+      "326": [
+        4426.702,
+        14277
+      ],
+      "327": [
+        5217.642,
+        14620
+      ],
+      "328": [
+        5592.763,
+        15015
+      ],
+      "329": [
+        5836.955,
+        15349
+      ],
+      "330": [
+        6477.26,
+        15201
+      ],
+      "331": [
+        7054.675,
+        15810
+      ],
+      "332": [
+        7978.755,
+        15638
+      ],
+      "333": [
+        7226.704,
+        15503
+      ],
+      "334": [
+        4526.803,
+        15514
+      ],
+      "335": [
+        4585.343,
+        15768
+      ],
+      "336": [
+        5109.761,
+        15951
+      ],
+      "337": [
+        4384.71,
+        15907
+      ],
+      "338": [
+        2963.967,
+        15963
+      ],
+      "339": [
+        4946.241,
+        15404
+      ],
+      "340": [
+        7408.295,
+        15081
+      ],
+      "341": [
+        10103.234,
+        14688
+      ],
+      "342": [
+        10765.293,
+        13480
+      ],
+      "343": [
+        13119.942,
+        12600
+      ],
+      "344": [
+        14222.928,
+        12965
+      ],
+      "345": [
+        17649.709,
+        13690
+      ],
+      "346": [
+        17696.954,
+        13797
+      ],
+      "347": [
+        18879.292,
+        13734
+      ],
+      "348": [
+        18712.645,
+        13593
+      ],
+      "349": [
+        18927.343,
+        13406
+      ],
+      "350": [
+        20596.768,
+        13377
+      ],
+      "351": [
+        22724.276,
+        13980
+      ],
+      "352": [
+        26855.633,
+        14898
+      ],
+      "353": [
+        27522.371,
+        15032
+      ],
+      "354": [
+        28503.927,
+        14809
+      ],
+      "355": [
+        26325.777,
+        14234
+      ],
+      "356": [
+        26748.295,
+        14247
+      ],
+      "357": [
+        24994.646,
+        14483
+      ],
+      "358": [
+        21375.219,
+        15080
+      ],
+      "359": [
+        18600.377,
+        15468
+      ],
+      "360": [
+        13899.732,
+        14779
+      ],
+      "361": [
+        12062.116,
+        13587
+      ],
+      "362": [
+        10606.576,
+        13772
+      ],
+      "363": [
+        8323.294,
+        14730
+      ],
+      "364": [
+        7686.136,
+        15266
+      ],
+      "365": [
+        9430.151,
+        15308
+      ],
+      "366": [
+        13638.512,
+        16006
+      ],
+      "367": [
+        15346.787,
+        16194
+      ],
+      "368": [
+        14634.692,
+        15566
+      ],
+      "369": [
+        17815.925,
+        15151
+      ],
+      "370": [
+        19489.272,
+        15501
+      ],
+      "371": [
+        18927.099,
+        15447
+      ],
+      "372": [
+        20072.588,
+        14994
+      ],
+      "373": [
+        20470.443,
+        14699
+      ],
+      "374": [
+        21753.757,
+        14489
+      ],
+      "375": [
+        22340.211,
+        14217
+      ],
+      "376": [
+        20228.48,
+        13759
+      ],
+      "377": [
+        20933.813,
+        13856
+      ],
+      "378": [
+        21292.86,
+        14468
+      ],
+      "379": [
+        21329.572,
+        14295
+      ],
+      "380": [
+        22463.752,
+        13906
+      ],
+      "381": [
+        21497.195,
+        13199
+      ],
+      "382": [
+        19144.214,
+        12224
+      ],
+      "383": [
+        19983.077,
+        12375
+      ],
+      "384": [
+        21768.47,
+        12917
+      ],
+      "385": [
+        23146.068,
+        13130
+      ],
+      "386": [
+        21524.689,
+        13265
+      ],
+      "387": [
+        21823.864,
+        13415
+      ],
+      "388": [
+        19574.702,
+        13141
+      ],
+      "389": [
+        17393.701,
+        12978
+      ],
+      "390": [
+        17719.795,
+        13126
+      ],
+      "391": [
+        18012.384,
+        13601
+      ],
+      "392": [
+        19668.606,
+        14176
+      ],
+      "393": [
+        21188.16,
+        14295
+      ],
+      "394": [
+        21102.531,
+        14375
+      ],
+      "395": [
+        23750.762,
+        16022
+      ],
+      "396": [
+        18297.949,
+        16449
+      ],
+      "397": [
+        14327.514,
+        15469
+      ],
+      "398": [
+        13567.091,
+        15331
+      ],
+      "399": [
+        12683.516,
+        15629
+      ],
+      "400": [
+        10214.013,
+        15415
+      ],
+      "401": [
+        7999.561,
+        15281
+      ],
+      "402": [
+        4749.279,
+        14737
+      ],
+      "403": [
+        3491.688,
+        13349
+      ],
+      "404": [
+        3734.403,
+        12781
+      ],
+      "405": [
+        4201.334,
+        13680
+      ],
+      "406": [
+        5241.118,
+        14271
+      ],
+      "407": [
+        5384.093,
+        14653
+      ],
+      "408": [
+        4755.3,
+        15056
+      ],
+      "409": [
+        4582.96,
+        15324
+      ],
+      "410": [
+        5178.324,
+        14600
+      ],
+      "411": [
+        5011.172,
+        14049
+      ],
+      "412": [
+        4276.399,
+        14597
+      ],
+      "413": [
+        3199.788,
+        14940
+      ],
+      "414": [
+        3657.97,
+        14745
+      ],
+      "415": [
+        5688.467,
+        14699
+      ],
+      "416": [
+        8719.134,
+        14209
+      ],
+      "417": [
+        10812.097,
+        14026
+      ],
+      "418": [
+        14016.47,
+        14327
+      ],
+      "419": [
+        14114.309,
+        14175
+      ],
+      "420": [
+        15633.574,
+        14119
+      ],
+      "421": [
+        15200.11,
+        13934
+      ],
+      "422": [
+        15202.22,
+        13650
+      ],
+      "423": [
+        14815.236,
+        13688
+      ],
+      "424": [
+        15956.847,
+        13071
+      ],
+      "425": [
+        15534.145,
+        12241
+      ],
+      "426": [
+        17362.472,
+        12054
+      ],
+      "427": [
+        19006.318,
+        12636
+      ],
+      "428": [
+        20315.814,
+        13083
+      ],
+      "429": [
+        20417.449,
+        13028
+      ],
+      "430": [
+        19931.905,
+        13176
+      ],
+      "431": [
+        20823.832,
+        13461
+      ],
+      "432": [
+        18293.522,
+        13159
+      ],
+      "433": [
+        18535.016,
+        13145
+      ],
+      "434": [
+        20071.832,
+        13881
+      ],
+      "435": [
+        20196.965,
         14245
       ],
-      "842": [
-        2483.815,
-        14426
+      "436": [
+        20170.643,
+        14511
       ],
-      "843": [
-        1642.647,
-        14242
+      "437": [
+        19376.707,
+        14572
       ],
-      "844": [
-        1497.921,
-        12896
+      "438": [
+        18077.256,
+        14567
       ],
-      "845": [
-        1314.285,
-        12063
+      "439": [
+        16241.9,
+        14620
       ],
-      "846": [
-        1216.293,
-        12184
+      "440": [
+        13359.501,
+        14460
       ],
-      "847": [
-        1703.33,
-        12864
+      "441": [
+        13281.303,
+        14312
       ],
-      "848": [
-        2810.394,
-        13272
+      "442": [
+        10245.996,
+        14195
       ],
-      "849": [
-        2987.281,
-        13003
+      "443": [
+        7972.596,
+        13994
       ],
-      "850": [
-        3639.88,
-        12619
+      "444": [
+        5037.282,
+        12701
       ],
-      "851": [
-        3670.091,
-        12515
+      "445": [
+        3288.203,
+        12122
       ],
-      "852": [
-        4318.163,
-        12707
+      "446": [
+        2824.85,
+        12169
       ],
-      "853": [
-        4283.774,
-        12911
+      "447": [
+        2804.935,
+        12493
       ],
-      "854": [
-        3037.677,
-        12815
+      "448": [
+        2753.964,
+        13046
       ],
-      "855": [
-        2197.331,
-        12766
+      "449": [
+        3054.822,
+        13238
       ],
-      "856": [
-        3038.084,
-        12647
+      "450": [
+        3947.178,
+        13461
       ],
-      "857": [
-        4888.622,
-        12642
+      "451": [
+        6721.022,
+        13377
       ],
-      "858": [
-        4949.703,
-        11588
+      "452": [
+        8795.263,
+        12686
       ],
-      "859": [
-        4840.85,
-        11454
+      "453": [
+        12545.344,
+        13181
       ],
-      "860": [
-        4069.079,
-        11888
+      "454": [
+        14506.306,
+        13607
       ],
-      "861": [
-        4065.695,
+      "455": [
+        16855.026,
+        13641
+      ],
+      "456": [
+        17901.917,
+        13079
+      ],
+      "457": [
+        19119.998,
+        13005
+      ],
+      "458": [
+        20812.283,
+        12823
+      ],
+      "459": [
+        22704.145,
+        13057
+      ],
+      "460": [
+        24818.261,
+        12738
+      ],
+      "461": [
+        19786.118,
+        11654
+      ],
+      "462": [
+        18252.744,
+        11253
+      ],
+      "463": [
+        19041.911,
+        11715
+      ],
+      "464": [
+        19299.616,
+        12217
+      ],
+      "465": [
+        20801.468,
+        12735
+      ],
+      "466": [
+        21458.506,
+        13247
+      ],
+      "467": [
+        23618.824,
+        13886
+      ],
+      "468": [
+        22391.91,
+        13546
+      ],
+      "469": [
+        17046.491,
+        12638
+      ],
+      "470": [
+        15015.491,
+        13075
+      ],
+      "471": [
+        12312.334,
+        13860
+      ],
+      "472": [
+        10436.323,
+        13972
+      ],
+      "473": [
+        7713.804,
+        13888
+      ],
+      "474": [
+        5116.643,
+        14068
+      ],
+      "475": [
+        3556.765,
+        14000
+      ],
+      "476": [
+        4405.347,
+        13975
+      ],
+      "477": [
+        4304.837,
+        13752
+      ],
+      "478": [
+        3666.208,
+        13797
+      ],
+      "479": [
+        2719.12,
+        13730
+      ],
+      "480": [
+        2412.423,
+        14226
+      ],
+      "481": [
+        2657.28,
+        14102
+      ],
+      "482": [
+        2064.815,
+        12834
+      ],
+      "483": [
+        1441.583,
+        11640
+      ],
+      "484": [
+        1115.542,
+        11910
+      ],
+      "485": [
+        1025.743,
         12471
       ],
+      "486": [
+        1220.425,
+        13045
+      ],
+      "487": [
+        1381.596,
+        13216
+      ],
+      "488": [
+        1892.088,
+        13416
+      ],
+      "489": [
+        1993.325,
+        13851
+      ],
+      "490": [
+        1865.633,
+        13332
+      ],
+      "491": [
+        1838.135,
+        13160
+      ],
+      "492": [
+        1747.304,
+        13571
+      ],
+      "493": [
+        1670.024,
+        13702
+      ],
+      "494": [
+        1815.12,
+        13137
+      ],
+      "495": [
+        1828.183,
+        13118
+      ],
+      "496": [
+        1900.022,
+        13235
+      ],
+      "497": [
+        1883.661,
+        13322
+      ],
+      "498": [
+        1727.545,
+        13237
+      ],
+      "499": [
+        1636.766,
+        13205
+      ],
+      "500": [
+        1942.747,
+        13231
+      ],
+      "501": [
+        3202.968,
+        13034
+      ],
+      "502": [
+        3704.432,
+        13008
+      ],
+      "503": [
+        4173.927,
+        12793
+      ],
+      "504": [
+        3469.127,
+        11816
+      ],
+      "505": [
+        2587.367,
+        11206
+      ],
+      "506": [
+        2480.373,
+        11560
+      ],
+      "507": [
+        2382.07,
+        12401
+      ],
+      "508": [
+        2087.632,
+        12385
+      ],
+      "509": [
+        1873.632,
+        12480
+      ],
+      "510": [
+        1489.791,
+        12509
+      ],
+      "511": [
+        1179.719,
+        12896
+      ],
+      "512": [
+        1201.808,
+        12464
+      ],
+      "513": [
+        973.803,
+        12437
+      ],
+      "514": [
+        676.43,
+        12715
+      ],
+      "515": [
+        512.654,
+        12766
+      ],
+      "516": [
+        488.512,
+        13013
+      ],
+      "517": [
+        481.234,
+        12878
+      ],
+      "518": [
+        554.26,
+        12763
+      ],
+      "519": [
+        963.348,
+        12460
+      ],
+      "520": [
+        879.962,
+        12653
+      ],
+      "521": [
+        814.884,
+        12588
+      ],
+      "522": [
+        1267.296,
+        12648
+      ],
+      "523": [
+        2337.199,
+        12642
+      ],
+      "524": [
+        4095.843,
+        12774
+      ],
+      "525": [
+        6248.183,
+        12408
+      ],
+      "526": [
+        6461.668,
+        11353
+      ],
+      "527": [
+        7647.283,
+        11046
+      ],
+      "528": [
+        9197.522,
+        11573
+      ],
+      "529": [
+        10050.331,
+        12413
+      ],
+      "530": [
+        10106.873,
+        13009
+      ],
+      "531": [
+        12161.156,
+        13342
+      ],
+      "532": [
+        14292.317,
+        14248
+      ],
+      "533": [
+        13156.076,
+        13973
+      ],
+      "534": [
+        12115.359,
+        13751
+      ],
+      "535": [
+        11040.868,
+        14060
+      ],
+      "536": [
+        10363.271,
+        14532
+      ],
+      "537": [
+        9616.305,
+        14505
+      ],
+      "538": [
+        7461.387,
+        14476
+      ],
+      "539": [
+        6053.816,
+        14278
+      ],
+      "540": [
+        6759.094,
+        14531
+      ],
+      "541": [
+        7092.518,
+        14591
+      ],
+      "542": [
+        5535.768,
+        14557
+      ],
+      "543": [
+        4608.08,
+        14524
+      ],
+      "544": [
+        4292.292,
+        14713
+      ],
+      "545": [
+        3585.596,
+        14810
+      ],
+      "546": [
+        3403.525,
+        14929
+      ],
+      "547": [
+        2470.668,
+        13555
+      ],
+      "548": [
+        1212.578,
+        12384
+      ],
+      "549": [
+        758.625,
+        13041
+      ],
+      "550": [
+        699.797,
+        14039
+      ],
+      "551": [
+        595.53,
+        14756
+      ],
+      "552": [
+        760.598,
+        15249
+      ],
+      "553": [
+        987.81,
+        15675
+      ],
+      "554": [
+        1453.186,
+        15909
+      ],
+      "555": [
+        2706.663,
+        16029
+      ],
+      "556": [
+        6127.072,
+        16487
+      ],
+      "557": [
+        13976.428,
+        17737
+      ],
+      "558": [
+        19611.596,
+        18326
+      ],
+      "559": [
+        25740.552,
+        18742
+      ],
+      "560": [
+        33008.798,
+        19357
+      ],
+      "561": [
+        37192.665,
+        19840
+      ],
+      "562": [
+        36305.155,
+        20189
+      ],
+      "563": [
+        36251.095,
+        20460
+      ],
+      "564": [
+        38864.694,
+        20530
+      ],
+      "565": [
+        38155.852,
+        21252
+      ],
+      "566": [
+        44109.532,
+        21876
+      ],
+      "567": [
+        41989.08,
+        22323
+      ],
+      "568": [
+        46706.04,
+        22953
+      ],
+      "569": [
+        43421.372,
+        23526
+      ],
+      "570": [
+        42977.95,
+        23447
+      ],
+      "571": [
+        41864.928,
+        22468
+      ],
+      "572": [
+        38234.284,
+        21260
+      ],
+      "573": [
+        41640.672,
+        23136
+      ],
+      "574": [
+        44075.87,
+        24291
+      ],
+      "575": [
+        45070.544,
+        25006
+      ],
+      "576": [
+        40843.021,
+        23967
+      ],
+      "577": [
+        41778.398,
+        24458
+      ],
+      "578": [
+        41173.969,
+        25016
+      ],
+      "579": [
+        42016.001,
+        24781
+      ],
+      "580": [
+        35725.092,
+        24261
+      ],
+      "581": [
+        32579.364,
+        23503
+      ],
+      "582": [
+        29056.624,
+        23158
+      ],
+      "583": [
+        30353.061,
+        23084
+      ],
+      "584": [
+        27195.05,
+        22779
+      ],
+      "585": [
+        22052.609,
+        22612
+      ],
+      "586": [
+        20508.118,
+        22246
+      ],
+      "587": [
+        17388.148,
+        22051
+      ],
+      "588": [
+        11021.552,
+        21525
+      ],
+      "589": [
+        8080.939,
+        21184
+      ],
+      "590": [
+        8275.992,
+        20469
+      ],
+      "591": [
+        6463.999,
+        20851
+      ],
+      "592": [
+        5060.83,
+        20466
+      ],
+      "593": [
+        4782.933,
+        20144
+      ],
+      "594": [
+        4717.788,
+        18999
+      ],
+      "595": [
+        4229.434,
+        16668
+      ],
+      "596": [
+        5276.581,
+        16748
+      ],
+      "597": [
+        6277.563,
+        18199
+      ],
+      "598": [
+        3767.435,
+        19281
+      ],
+      "599": [
+        2799.472,
+        19073
+      ],
+      "600": [
+        2962.735,
+        18766
+      ],
+      "601": [
+        2550.222,
+        18485
+      ],
+      "602": [
+        1769.324,
+        18716
+      ],
+      "603": [
+        1960.116,
+        18483
+      ],
+      "604": [
+        2088.733,
+        18286
+      ],
+      "605": [
+        1735.61,
+        18251
+      ],
+      "606": [
+        2649.43,
+        18154
+      ],
+      "607": [
+        3649.301,
+        17568
+      ],
+      "608": [
+        4984.782,
+        15951
+      ],
+      "609": [
+        6450.943,
+        15198
+      ],
+      "610": [
+        7019.182,
+        15478
+      ],
+      "611": [
+        7564.193,
+        16452
+      ],
+      "612": [
+        8377.379,
+        16757
+      ],
+      "613": [
+        10602.302,
+        16889
+      ],
+      "614": [
+        11624.691,
+        16517
+      ],
+      "615": [
+        11223.598,
+        16702
+      ],
+      "616": [
+        10159.562,
+        17058
+      ],
+      "617": [
+        10487.201,
+        17264
+      ],
+      "618": [
+        11497.537,
+        16888
+      ],
+      "619": [
+        12085.883,
+        16945
+      ],
+      "620": [
+        12387.802,
+        16868
+      ],
+      "621": [
+        12838.23,
+        16784
+      ],
+      "622": [
+        14877.746,
+        16740
+      ],
+      "623": [
+        15938.301,
+        16419
+      ],
+      "624": [
+        16747.505,
+        16374
+      ],
+      "625": [
+        19361.004,
+        16367
+      ],
+      "626": [
+        20094.284,
+        16205
+      ],
+      "627": [
+        18280.902,
+        16023
+      ],
+      "628": [
+        14815.255,
+        15749
+      ],
+      "629": [
+        14106.174,
+        14836
+      ],
+      "630": [
+        11399.993,
+        13774
+      ],
+      "631": [
+        9777.122,
+        13548
+      ],
+      "632": [
+        8192.69,
+        14175
+      ],
+      "633": [
+        7828.888,
+        15038
+      ],
+      "634": [
+        6779.517,
+        15265
+      ],
+      "635": [
+        5739.584,
+        15405
+      ],
+      "636": [
+        3210.794,
+        15032
+      ],
+      "637": [
+        1807.535,
+        14962
+      ],
+      "638": [
+        1109.261,
+        15241
+      ],
+      "639": [
+        1357.32,
+        15584
+      ],
+      "640": [
+        2202.346,
+        15690
+      ],
+      "641": [
+        3297.166,
+        15488
+      ],
+      "642": [
+        3210.743,
+        15364
+      ],
+      "643": [
+        4009.695,
+        15531
+      ],
+      "644": [
+        5786.47,
+        15417
+      ],
+      "645": [
+        7234.836,
+        15116
+      ],
+      "646": [
+        8215.126,
+        14906
+      ],
+      "647": [
+        9885.482,
+        14887
+      ],
+      "648": [
+        11633.203,
+        15343
+      ],
+      "649": [
+        13543.375,
+        15266
+      ],
+      "650": [
+        15816.682,
+        15317
+      ],
+      "651": [
+        15972.376,
+        13766
+      ],
+      "652": [
+        15540.103,
+        12619
+      ],
+      "653": [
+        17136.121,
+        13089
+      ],
+      "654": [
+        16640.022,
+        13392
+      ],
+      "655": [
+        17032.426,
+        13939
+      ],
+      "656": [
+        17702.471,
+        14242
+      ],
+      "657": [
+        18115.904,
+        14296
+      ],
+      "658": [
+        19414.289,
+        14363
+      ],
+      "659": [
+        18835.363,
+        14484
+      ],
+      "660": [
+        17046.542,
+        14700
+      ],
+      "661": [
+        15023.688,
+        14759
+      ],
+      "662": [
+        13620.275,
+        14832
+      ],
+      "663": [
+        12361.462,
+        14567
+      ],
+      "664": [
+        11682.212,
+        13626
+      ],
+      "665": [
+        10511.075,
+        12679
+      ],
+      "666": [
+        9772.283,
+        13085
+      ],
+      "667": [
+        8590.867,
+        13631
+      ],
+      "668": [
+        8782.496,
+        14440
+      ],
+      "669": [
+        7712.007,
+        14711
+      ],
+      "670": [
+        6791.221,
+        14971
+      ],
+      "671": [
+        5210.72,
+        14729
+      ],
+      "672": [
+        4820.812,
+        14508
+      ],
+      "673": [
+        4902.093,
+        14615
+      ],
+      "674": [
+        5351.886,
+        14883
+      ],
+      "675": [
+        6227.344,
+        14746
+      ],
+      "676": [
+        7222.737,
+        14861
+      ],
+      "677": [
+        8379.917,
+        14796
+      ],
+      "678": [
+        9644.165,
+        14903
+      ],
+      "679": [
+        11336.287,
+        14888
+      ],
+      "680": [
+        10548.215,
+        14558
+      ],
+      "681": [
+        11734.33,
+        14527
+      ],
+      "682": [
+        13208.588,
+        14753
+      ],
+      "683": [
+        13624.873,
+        14538
+      ],
+      "684": [
+        14595.565,
+        14553
+      ],
+      "685": [
+        14862.775,
+        14513
+      ],
+      "686": [
+        15242.84,
+        14203
+      ],
+      "687": [
+        15073.565,
+        12944
+      ],
+      "688": [
+        13649.566,
+        12547
+      ],
+      "689": [
+        15121.338,
+        12826
+      ],
+      "690": [
+        16263.002,
+        13791
+      ],
+      "691": [
+        16560.506,
+        14317
+      ],
+      "692": [
+        18931.721,
+        14334
+      ],
+      "693": [
+        23401.343,
+        14374
+      ],
+      "694": [
+        25898.065,
+        14186
+      ],
+      "695": [
+        27705.321,
+        14207
+      ],
+      "696": [
+        27351.893,
+        14311
+      ],
+      "697": [
+        26006.053,
+        14626
+      ],
+      "698": [
+        25500.354,
+        14345
+      ],
+      "699": [
+        25541.804,
+        14320
+      ],
+      "700": [
+        23842.984,
+        14696
+      ],
+      "701": [
+        19424.687,
+        14520
+      ],
+      "702": [
+        14873.716,
+        14750
+      ],
+      "703": [
+        9447.551,
+        14572
+      ],
+      "704": [
+        6326.205,
+        14526
+      ],
+      "705": [
+        6344.303,
+        14185
+      ],
+      "706": [
+        6662.23,
+        14192
+      ],
+      "707": [
+        8887.683,
+        14241
+      ],
+      "708": [
+        8962.695,
+        13184
+      ],
+      "709": [
+        10778.596,
+        12374
+      ],
+      "710": [
+        12433.851,
+        12268
+      ],
+      "711": [
+        14976.725,
+        12264
+      ],
+      "712": [
+        15221.665,
+        12480
+      ],
+      "713": [
+        16831.498,
+        13130
+      ],
+      "714": [
+        17667.673,
+        13518
+      ],
+      "715": [
+        19342.007,
+        14026
+      ],
+      "716": [
+        22899.87,
+        13728
+      ],
+      "717": [
+        25199.56,
+        13313
+      ],
+      "718": [
+        30346.639,
+        13807
+      ],
+      "719": [
+        32313.56,
+        14092
+      ],
+      "720": [
+        31890.423,
+        14177
+      ],
+      "721": [
+        32679.178,
+        14408
+      ],
+      "722": [
+        29965.822,
+        14300
+      ],
+      "723": [
+        28019.184,
+        14232
+      ],
+      "724": [
+        25776.84,
+        14149
+      ],
+      "725": [
+        26920.705,
+        14147
+      ],
+      "726": [
+        25858.097,
+        14210
+      ],
+      "727": [
+        26049.674,
+        14120
+      ],
+      "728": [
+        22842.763,
+        13533
+      ],
+      "729": [
+        20558.173,
+        11970
+      ],
+      "730": [
+        20690.875,
+        11741
+      ],
+      "731": [
+        18472.204,
+        12560
+      ],
+      "732": [
+        17945.755,
+        12971
+      ],
+      "733": [
+        16237.236,
+        13527
+      ],
+      "734": [
+        14860.941,
+        14068
+      ],
+      "735": [
+        12061.459,
+        13984
+      ],
+      "736": [
+        9524.719,
+        13868
+      ],
+      "737": [
+        8904.558,
+        14150
+      ],
+      "738": [
+        9464.273,
+        14549
+      ],
+      "739": [
+        10073.213,
+        14568
+      ],
+      "740": [
+        12211.088,
+        14810
+      ],
+      "741": [
+        12088.542,
+        14841
+      ],
+      "742": [
+        14039.181,
+        14987
+      ],
+      "743": [
+        15799.273,
+        14708
+      ],
+      "744": [
+        13718.158,
+        14237
+      ],
+      "745": [
+        14817.092,
+        14001
+      ],
+      "746": [
+        13003.52,
+        13450
+      ],
+      "747": [
+        13260.794,
+        13862
+      ],
+      "748": [
+        14997.274,
+        15029
+      ],
+      "749": [
+        16087.626,
+        16016
+      ],
+      "750": [
+        16394.005,
+        16432
+      ],
+      "751": [
+        18821.332,
+        16957
+      ],
+      "752": [
+        20278.052,
+        16670
+      ],
+      "753": [
+        23207.367,
+        16880
+      ],
+      "754": [
+        24063.267,
+        17332
+      ],
+      "755": [
+        26180.354,
+        17440
+      ],
+      "756": [
+        26642.56,
+        17837
+      ],
+      "757": [
+        24983.172,
+        18199
+      ],
+      "758": [
+        23348.696,
+        18549
+      ],
+      "759": [
+        19299.702,
+        18785
+      ],
+      "760": [
+        13632.058,
+        18835
+      ],
+      "761": [
+        12016.955,
+        18978
+      ],
+      "762": [
+        17733.701,
+        19070
+      ],
+      "763": [
+        21775.246,
+        19576
+      ],
+      "764": [
+        22516.194,
+        20202
+      ],
+      "765": [
+        24027.949,
+        20961
+      ],
+      "766": [
+        29416.319,
+        21319
+      ],
+      "767": [
+        34202.03,
+        21937
+      ],
+      "768": [
+        41743.903,
+        21586
+      ],
+      "769": [
+        45843.082,
+        20372
+      ],
+      "770": [
+        45847.897,
+        21447
+      ],
+      "771": [
+        48942.521,
+        22860
+      ],
+      "772": [
+        48944.416,
+        23284
+      ],
+      "773": [
+        46234.4,
+        22807
+      ],
+      "774": [
+        45974.402,
+        22936
+      ],
+      "775": [
+        45660.103,
+        23634
+      ],
+      "776": [
+        44628.818,
+        23927
+      ],
+      "777": [
+        46096.528,
+        24390
+      ],
+      "778": [
+        46067.558,
+        25454
+      ],
+      "779": [
+        46618.002,
+        25976
+      ],
+      "780": [
+        44808.53,
+        26194
+      ],
+      "781": [
+        38460.0,
+        25056
+      ],
+      "782": [
+        22195.953,
+        22381
+      ],
+      "783": [
+        15634.276,
+        21467
+      ],
+      "784": [
+        13356.367,
+        22861
+      ],
+      "785": [
+        11812.971,
+        23448
+      ],
+      "786": [
+        9888.984,
+        22507
+      ],
+      "787": [
+        7914.956,
+        22169
+      ],
+      "788": [
+        7017.912,
+        21976
+      ],
+      "789": [
+        8523.596,
+        21751
+      ],
+      "790": [
+        11321.721,
+        21622
+      ],
+      "791": [
+        15299.305,
+        21430
+      ],
+      "792": [
+        18193.869,
+        21061
+      ],
+      "793": [
+        18615.17,
+        20500
+      ],
+      "794": [
+        19943.158,
+        18908
+      ],
+      "795": [
+        21912.418,
+        17665
+      ],
+      "796": [
+        23706.448,
+        17438
+      ],
+      "797": [
+        22870.101,
+        18296
+      ],
+      "798": [
+        24275.586,
+        18680
+      ],
+      "799": [
+        20109.989,
+        17304
+      ],
+      "800": [
+        17515.014,
+        16031
+      ],
+      "801": [
+        18205.375,
+        16143
+      ],
+      "802": [
+        17391.435,
+        16790
+      ],
+      "803": [
+        15734.028,
+        17475
+      ],
+      "804": [
+        12482.231,
+        17806
+      ],
+      "805": [
+        10314.684,
+        17806
+      ],
+      "806": [
+        9683.055,
+        17478
+      ],
+      "807": [
+        9682.743,
+        17351
+      ],
+      "808": [
+        10871.679,
+        17849
+      ],
+      "809": [
+        13915.395,
+        17370
+      ],
+      "810": [
+        16405.7,
+        15993
+      ],
+      "811": [
+        17188.026,
+        14867
+      ],
+      "812": [
+        21696.656,
+        15290
+      ],
+      "813": [
+        24398.169,
+        15897
+      ],
+      "814": [
+        24274.596,
+        16412
+      ],
+      "815": [
+        26791.061,
+        17038
+      ],
+      "816": [
+        28836.24,
+        17162
+      ],
+      "817": [
+        29501.327,
+        16578
+      ],
+      "818": [
+        29047.04,
+        16420
+      ],
+      "819": [
+        27920.958,
+        16583
+      ],
+      "820": [
+        26973.639,
+        16163
+      ],
+      "821": [
+        28463.425,
+        15695
+      ],
+      "822": [
+        27825.148,
+        14750
+      ],
+      "823": [
+        27334.868,
+        14285
+      ],
+      "824": [
+        25997.985,
+        14422
+      ],
+      "825": [
+        27391.173,
+        15281
+      ],
+      "826": [
+        27318.602,
+        15805
+      ],
+      "827": [
+        28575.197,
+        15621
+      ],
+      "828": [
+        24712.842,
+        15472
+      ],
+      "829": [
+        17481.585,
+        15719
+      ],
+      "830": [
+        13330.455,
+        16394
+      ],
+      "831": [
+        7566.086,
+        16596
+      ],
+      "832": [
+        4862.415,
+        16372
+      ],
+      "833": [
+        5159.393,
+        15865
+      ],
+      "834": [
+        5938.074,
+        15704
+      ],
+      "835": [
+        4563.784,
+        15408
+      ],
+      "836": [
+        3400.386,
+        15625
+      ],
+      "837": [
+        3476.086,
+        15594
+      ],
+      "838": [
+        4091.48,
+        15348
+      ],
+      "839": [
+        4397.886,
+        15162
+      ],
+      "840": [
+        3183.385,
+        14865
+      ],
+      "841": [
+        2582.043,
+        14464
+      ],
+      "842": [
+        2522.451,
+        14650
+      ],
+      "843": [
+        1667.373,
+        14463
+      ],
+      "844": [
+        1519.51,
+        13095
+      ],
+      "845": [
+        1333.531,
+        12248
+      ],
+      "846": [
+        1235.975,
+        12370
+      ],
+      "847": [
+        1725.446,
+        13059
+      ],
+      "848": [
+        2855.433,
+        13476
+      ],
+      "849": [
+        3032.32,
+        13203
+      ],
+      "850": [
+        3698.415,
+        12813
+      ],
+      "851": [
+        3731.246,
+        12706
+      ],
+      "852": [
+        4391.243,
+        12901
+      ],
+      "853": [
+        4359.493,
+        13109
+      ],
+      "854": [
+        3090.142,
+        13011
+      ],
+      "855": [
+        2229.422,
+        12966
+      ],
+      "856": [
+        3080.684,
+        12840
+      ],
+      "857": [
+        4968.943,
+        12838
+      ],
+      "858": [
+        5033.45,
+        11766
+      ],
+      "859": [
+        4926.556,
+        11630
+      ],
+      "860": [
+        4136.78,
+        12068
+      ],
+      "861": [
+        4130.767,
+        12663
+      ],
       "862": [
-        3727.921,
-        12356
+        3786.932,
+        12546
       ],
       "863": [
-        3023.219,
-        12318
+        3069.356,
+        12508
       ],
       "864": [
-        3030.664,
-        14928
+        3074.746,
+        15117
       ],
       "865": [
-        2889.971,
-        13992
+        2931.684,
+        14180
       ],
       "866": [
-        2829.889,
-        12631
+        2868.485,
+        12817
       ],
       "867": [
-        2925.574,
-        27522
+        2962.582,
+        27712
       ],
       "868": [
-        4344.518,
-        76719
+        4419.99,
+        78310
       ],
       "869": [
-        3784.255,
-        38645
+        3848.518,
+        39402
       ],
       "870": [
-        1025.746,
-        12152
+        1049.084,
+        12461
       ],
       "872": [
         23.253,

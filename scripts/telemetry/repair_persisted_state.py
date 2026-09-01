@@ -162,6 +162,31 @@ def repair(m):
             if len(_keep) != len(_lps):
                 _g["lap_paths"] = _keep
 
+    # A MAP TURN THAT IS NOT ON THIS ROAD WAS MEASURED ALONG A DIFFERENT ONE. better_map compared point
+    # counts, and down() caps every path at 500 points, so a longer road could lose to a shorter stored one --
+    # after which the branch that keeps the stored path adopted the longer drive's turns anyway. The result is
+    # apexes and arcs from a road the path does not contain: -1700_-4450 carries 15 of 29 such turns, up to
+    # 789 m off, with s running to 6,584 m on a 3,852 m map. geo_near only binds a corner within ~60 m of an
+    # apex, so these can never match anything driven -- they are invisible AND they inflate every count taken
+    # from the map. Dropped, not relocated: where the turn really belongs is not recoverable from this file.
+    _g3 = m.get("geometry") or {}
+    _gp3 = [(q[0], q[1]) for q in (_g3.get("path") or [])]
+    _mt3 = _g3.get("turns") or []
+    if _gp3 and _mt3:
+        _keep3, _drop3 = [], []
+        for _t in _mt3:
+            _ap = _t.get("apex")
+            if not _ap:
+                _keep3.append(_t); continue
+            _d = min(((_q[0] - _ap[0]) ** 2 + (_q[1] - _ap[1]) ** 2) for _q in _gp3) ** 0.5
+            (_keep3 if _d <= 100.0 else _drop3).append(_t)
+        if _drop3:
+            hits.append("geometry.turns: %d of %d map turns sit up to %.0f m off this course's own path"
+                        % (len(_drop3), len(_mt3), max(
+                            min(((_q[0] - _t["apex"][0]) ** 2 + (_q[1] - _t["apex"][1]) ** 2) for _q in _gp3) ** 0.5
+                            for _t in _drop3)))
+            _g3["turns"] = _keep3
+
     return hits
 
 

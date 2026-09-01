@@ -27,24 +27,24 @@
     "front_arb": {
       "0": "Stock",
       "1": "Street*",
-      "2": "Sport*",
+      "2": "Sport",
       "3": "Race"
     },
     "rear_arb": {
       "0": "Stock",
       "1": "Street*",
-      "2": "Sport*",
+      "2": "Sport",
       "3": "Race"
     },
     "springs_dampers": {
       "0": "Stock",
       "1": "Street*",
-      "2": "Sport*",
+      "2": "Sport",
       "3": "Race",
       "4": "Rally",
       "5": "Drift"
     },
-    "_star": "A trailing * marks an inferred name: the index exists in the fleet-wide vocabulary but no captured frame names it. Stock/Race/Rally/Drift are read verbatim from docs/fh6-ui-spec.md 2.2.",
+    "_star": "A trailing * marks an inferred name. Tier 2 = Sport and tier 3 = Race are now READ VERBATIM from the in-game basket (2026-09-01): 'Sport Cams and Valves', 'Sport Weight Reduction', 'Race Exhaust', 'Race Front Anti-roll Bars'. Only tier 1 remains unnamed.",
     "_index0_warning": "A decoded index of 0 is NOT yet trustworthy -- see validation.open_anomaly. name_part() still returns 'Stock' for it; callers that need certainty should check the index is >= 1."
   },
   "catalogue_slots": {
@@ -110,5 +110,31 @@
     "save_encoding": "The save stores only the tier, in the slot NAMED for the type -- so the TYPE is encoded by WHICH of single_turbo / twin_turbo / quad_turbo / centrifugal_supercharger / pos_supercharger is populated. That is why the slot literally called 'aspiration' is empty in all 532 tunes; it is not a phantom label, it is a menu with no separate stored value.",
     "verified": "2026-09-01, forzahorizon6_XtE0aSrdbE.mp4 frame 090: on the stock block with no aspiration conversion fitted, the Engine menu shows EIGHT tiles and no supercharger sub-menu. The spec's post-swap capture of the same menu had ELEVEN. The tier cannot be bought until the conversion is installed.",
     "cost_of_getting_it_wrong": "A clone route that lists the supercharger under Engine sends you to a menu where it does not exist."
+  },
+  "names_read_from_basket_2026_09_01": {
+    "source": "Basket Items screen, 1992 Honda NSX-R, 19 items, total CR 35,600. Names are verbatim.",
+    "tier_names": {
+      "2": "Sport",
+      "3": "Race"
+    },
+    "confirmed_rows": {
+      "exhaust idx 3": "Race Exhaust  CR 2,050",
+      "camshaft idx 2": "Sport Cams and Valves  (Free) -- NOTE: ONE part covers cams AND valves",
+      "displacement idx 3": "Race Engine Block  CR 3,300",
+      "pistons idx 3": "Race Pistons / Compression  CR 3,300",
+      "centrifugal_supercharger idx 3": "Race Centrifugal Supercharger  (Free)",
+      "transmission idx 7": "Race Transmission: 7 Speed  CR 3,000",
+      "front_arb idx 3": "Race Front Anti-roll Bars  (Free)",
+      "rear_arb idx 3": "Race Rear Anti-roll Bars  (Free)",
+      "weight_reduction idx 102": "Sport Weight Reduction  CR 1,550",
+      "tire_compound idx 5": "'Horizon' Semi-Slick Race Tire Compound  CR 10,000",
+      "rear_tire_width idx 106": "345 mm Rear Tires  (Free)",
+      "rim_style 701": "Asanti AF 134  CR 1,700 each end",
+      "front_rim_size idx 3": "17 in Front Rims  CR 1,800  -- ASSUMED, basket does not state the index",
+      "rear_rim_size idx 4": "19 in Rear Rims  CR 2,200  -- ASSUMED, basket does not state the index"
+    },
+    "transmission_index_is_gear_count": "Index 7 renders as 'Race Transmission: 7 Speed'. The transmission index is the SPEED COUNT, not a tier position -- so it must never be read against the Stock/Sport/Race ladder.",
+    "cams_and_valves_are_one_part": "The shop sells 'Sport Cams and Valves' as a SINGLE item, yet the save carries separate camshaft and valves slots, and in this target they differ (camshaft idx 2, valves idx 0). Either the slot we call 'valves' is mislabelled, or one part writes two slots unequally. UNRESOLVED -- do not name the 'valves' slot until this is settled.",
+    "rear_wing_is_dense": "The NSX-R Rear Wing menu has 3 tiles (Honda stock / Rocket Bunny - Race / Forza Horizon 6 - Race) and this car's four tunes use indexes 0, 1 and 2 -- all three present, so the index IS the 0-based tile position. idx 2 = the Forza wing, NOT the Rocket Bunny one."
   }
 }

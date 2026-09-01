@@ -59,13 +59,13 @@
     "3860": "1989 Nissan S-Cargo",
     "4162": "1985 Toyota Sprinter (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9000,
+   "sample_hp": 306,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "63": {
    "engine_family": 63,
@@ -219,13 +219,13 @@
    "cars_seen": {
     "364": "2004 Subaru Impreza WRX STi"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 628,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "122": {
    "engine_family": 122,
@@ -348,7 +348,7 @@
    },
    "cyl": 4,
    "displacement_l": null,
-   "redline": 9000,
+   "redline": 9500,
    "sample_hp": 327,
    "resulting_drivetrain": "AWD",
    "sample_pi": 700,
@@ -644,7 +644,7 @@
    },
    "cyl": 4,
    "displacement_l": 1.6,
-   "redline": 8000,
+   "redline": 10000,
    "sample_hp": 340,
    "resulting_drivetrain": "AWD",
    "sample_pi": 841,
@@ -1259,13 +1259,13 @@
    "cars_seen": {
     "2613": "1970 GMC Jimmy"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 391,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 500,
+   "source": "save-mined+telemetry"
   },
   "2746": {
    "engine_family": 2746,
@@ -1332,7 +1332,7 @@
    },
    "cyl": 4,
    "displacement_l": null,
-   "redline": 8000,
+   "redline": 10000,
    "sample_hp": null,
    "resulting_drivetrain": "RWD",
    "sample_pi": 505,

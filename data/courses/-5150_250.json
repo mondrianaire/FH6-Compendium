@@ -1,0 +1,188 @@
+{
+ "route_key": "-5150_250",
+ "name": null,
+ "turns": [
+  {
+   "id": "T1",
+   "pos": [
+    -4994,
+    277
+   ],
+   "dir": "R",
+   "type": "fast",
+   "radius_m": 368,
+   "n": 12,
+   "best": {
+    "mph_in": 112,
+    "mph_min": 112,
+    "mph_out": 137,
+    "brake_on_m": null,
+    "throttle_on_m": -225,
+    "lat_g": 0.98,
+    "apex": [
+     -4994,
+     277
+    ],
+    "t0": 1594.5,
+    "stint": 14,
+    "first_red": "front ph1",
+    "session": "fh6_20260901_042403"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "3650|2|6|892": {
+     "mph_in": 112,
+     "mph_min": 112,
+     "mph_out": 137,
+     "brake_on_m": null,
+     "throttle_on_m": -225,
+     "lat_g": 0.98,
+     "apex": [
+      -4994,
+      277
+     ],
+     "t0": 1594.5,
+     "stint": 14,
+     "first_red": "front ph1",
+     "session": "fh6_20260901_042403"
+    }
+   },
+   "cars": [
+    "3650|2|6|892"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260901_042403": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 112,
+     "usi": 0.375,
+     "cars": [
+      "3650|2|6|892"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "3650|2|6|892"
+    ],
+    "laps_track": 1,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  }
+ ],
+ "laps": 1,
+ "sessions": [
+  "fh6_20260901_042403"
+ ],
+ "updated": "fh6_20260901_042403",
+ "best_laps": {},
+ "visits": [
+  {
+   "session": "fh6_20260901_042403",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "3650|2|6|892"
+   ],
+   "best_lap": null,
+   "best_car": null
+  }
+ ],
+ "cars": {
+  "3650|2|6|892": {
+   "name": "2021 Merceds-AMG One",
+   "class": "S2",
+   "pi": 892,
+   "drivetrain": "AWD"
+  }
+ },
+ "speed_traces": {},
+ "geo_turns": {},
+ "turn_count_delta": null,
+ "turn_count": 1,
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "mid_corner": {
+    "frac": 0.162,
+    "band": "moderate"
+   },
+   "fast_corner": {
+    "frac": 0.301,
+    "band": "heavy"
+   },
+   "braking": {
+    "frac": 0.059,
+    "band": "light"
+   },
+   "straight": {
+    "frac": 0.226,
+    "band": "heavy"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "absent",
+    "range_m": 4.1
+   },
+   "launch": {
+    "frac": null,
+    "band": "moderate"
+   }
+  },
+  "heavy": [
+   "fast sweepers",
+   "straights / top-end"
+  ],
+  "absent": [
+   "low-speed corners",
+   "elevation (crests)"
+  ],
+  "gears_used": [
+   1,
+   2
+  ],
+  "top_gear_used": 2,
+  "max_gear": 2,
+  "top_speed": 139,
+  "elevation_range_m": 4.1,
+  "notes": [
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course"
+  ],
+  "priority": [
+   "fast sweepers",
+   "straights / top-end",
+   "medium corners"
+  ],
+  "rough_frac": 0.0,
+  "rough_n": 1
+ },
+ "profile_laps": 1,
+ "profile_session": "fh6_20260901_042403"
+}

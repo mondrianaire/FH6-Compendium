@@ -2284,7 +2284,20 @@ def main():
                 # cid's reference best, because the 107% competitive rule is judged against that best — one void
                 # 'fast' lap would silently mis-rate every other lap on the course. In a RACE contact is normal:
                 # show the impacts, keep the time. Solo unknown => not voided (absence of evidence isn't evidence).
-                _solo = 1 if _ev.get("solo") else 0
+                # SOLO IS INFERRED FROM ABSENCE, SO CORROBORATE IT BEFORE VOIDING ON IT. A lap is called solo
+                # when RacePosition was reported, never varied and never exceeded 1 -- which is exactly what a
+                # race led from lights to flag looks like. Measured on fh6_20260901_042403: five events, four
+                # of them plainly races (positions up to 5), and the fifth held position 1 for all 22,548
+                # frames because it was won from the front. It was filed as a time trial, marked solo, and then
+                # VOIDED for its 6 impacts -- while a sibling race lap in the same session kept its time with
+                # 23. A 5.74 mi race the player won was discarded on absence of evidence, which the comment
+                # above already says must not happen.
+                # The session settles it: if any other event here saw an opponent, this player was racing, and
+                # an event that merely never fell behind is not established as solo. A genuinely solo session
+                # -- every event position-1 throughout, which is what Rivals looks like -- still voids on
+                # contact, so the protection that matters is untouched.
+                _sess_saw_rivals = any((e.get("solo") is False) for e in ev_out)
+                _solo = 1 if (_ev.get("solo") and not _sess_saw_rivals) else 0
                 _imp = _impacts(pts_w)
                 _lap_s = _game_lap_s(w)
                 _th = _tune_hash_for(cid_, w)

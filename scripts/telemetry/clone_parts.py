@@ -16,7 +16,7 @@ The INDEX is byte-exact either way. See data/part-index-vocabulary.json.
 
 READ-ONLY: never writes to the game save.
 """
-import argparse, glob, io, json, os, sys
+import argparse, glob, io, json, os, struct, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fh6_tune_decode as T
@@ -228,6 +228,56 @@ def family_label(fam):
     return f.get("label") if f else None
 
 
+def tune_name(container_dir):
+    """The tune's display name, from the sibling `header` file: U32 count at 0x04 (in UTF-16 CHARACTERS,
+    not bytes), string from 0x08. 534/534 Tuning headers decode. Reading this would have settled every
+    'which container is on the car' question instantly -- the target read 'Top Meta Rival' all along."""
+    try:
+        h = open(os.path.join(container_dir, "header"), "rb").read()
+        n = struct.unpack_from("<I", h, 4)[0]
+        return h[8:8 + 2 * n].decode("utf-16-le").rstrip("\x00") if 0 < n < 512 else None
+    except Exception:
+        return None
+
+
+# THE PROTOCOL, from the hardware-fingerprint study (90/90 same-hardware pairs verified):
+#   identical hardware  <=>  A[0x02:0x04] == B[0x02:0x04]  and  A[0x0E:0x19E] == B[0x0E:0x19E]
+# i.e. the car ordinal plus the FULL 100-slot part array -- the 50 named slots AND the 50 reserved ones.
+# Comparing only the named 50 is a free false-positive hole. Everything else is excluded on purpose:
+#   0x01 locked flag  -- differs between a downloaded target and your own save BY DEFINITION
+#   0x019E..          -- sliders and gear ratios, which you set yourself
+# NEVER normalise 0xFFFFFFFF (empty) to index 0 before comparing: that would call a naturally-aspirated
+# car identical to a factory-turbo one. Empty is a hardware state on 15 conditional slots.
+HW_ORD = (0x02, 0x04)
+HW_PARTS = (0x0E, 0x19E)
+
+
+def verify_hardware(path_a, path_b):
+    """(verdict, diffs). verdict is MATCH, DIFFER, DIFFER (different car), or CHECK-BY-EYE.
+
+    CHECK-BY-EYE is the one residual the study could not close: intercooler is the only slot whose
+    empty-vs-index-0 state is not determined by the rest of the build, so two hardware-identical cars
+    could in principle differ only there. It fires only when intercooler is the sole difference and one
+    side is empty."""
+    A = open(path_a, "rb").read()
+    B = open(path_b, "rb").read()
+    if len(A) != 598 or len(B) != 598:
+        return "INVALID (not 598 bytes)", []
+    ord_eq = A[HW_ORD[0]:HW_ORD[1]] == B[HW_ORD[0]:HW_ORD[1]]
+    if A[HW_PARTS[0]:HW_PARTS[1]] == B[HW_PARTS[0]:HW_PARTS[1]] and ord_eq:
+        return "MATCH", []
+    diffs = []
+    for i in range(100):
+        off = HW_PARTS[0] + 4 * i
+        if A[off:off + 4] != B[off:off + 4]:
+            name = T.PARTS[i] if i < len(T.PARTS) else "reserved_%d" % i
+            diffs.append((name, struct.unpack_from("<I", A, off)[0], struct.unpack_from("<I", B, off)[0]))
+    if not ord_eq:
+        return "DIFFER (different car)", diffs
+    only_ic = bool(diffs) and all(n == "intercooler" and 0xFFFFFFFF in (x, y) for n, x, y in diffs)
+    return ("CHECK-BY-EYE" if only_ic else "DIFFER"), diffs
+
+
 def containers(ordinal):
     root = T.find_containers_root()
     return sorted(glob.glob(os.path.join(root, "Tuning_%04d_*" % int(ordinal), "Data")),
@@ -355,6 +405,8 @@ def main():
     ap.add_argument("--source", help="source/stock container (default: assume fully stock)")
     ap.add_argument("--list", action="store_true", help="list this car's containers and exit")
     ap.add_argument("--json", action="store_true", help="emit JSON for the dashboard")
+    ap.add_argument("--verify", nargs=2, metavar=("A", "B"),
+                    help="apply the hardware protocol to two containers (index or name substring) and exit")
     ap.add_argument("--walkthrough", action="store_true",
                     help="menu-by-menu install route, in dependency order")
     a = ap.parse_args()
@@ -374,16 +426,33 @@ def main():
         m = [f for f in fs if sel in f]
         return m[0] if m else None
 
+    if a.verify:
+        pa, pb = pick(a.verify[0]), pick(a.verify[1])
+        if not pa or not pb:
+            print("  container not found; run with --list", file=out); out.flush(); return 1
+        v, diffs = verify_hardware(pa, pb)
+        na, nb = tune_name(os.path.dirname(pa)), tune_name(os.path.dirname(pb))
+        print("", file=out)
+        print("  HARDWARE VERIFY  %r  vs  %r" % (na, nb), file=out)
+        print("  compared: ordinal 0x02-0x03 + full 100-slot part array 0x0E-0x19D; excluded: locked flag, sliders, gears", file=out)
+        print("  VERDICT: %s" % v, file=out)
+        for n, x, y in diffs:
+            fx = "empty" if x == 0xFFFFFFFF else str(x); fy = "empty" if y == 0xFFFFFFFF else str(y)
+            print("     %-26s %-10s vs %s" % (n, fx, fy), file=out)
+        if v == "CHECK-BY-EYE":
+            print("  intercooler is the one slot whose empty-vs-0 state is not implied by the build; confirm it in the shop", file=out)
+        out.flush(); return 0 if v == "MATCH" else 2
+
     if a.list:
         print("  %d containers for ordinal %d (oldest first):" % (len(fs), a.ordinal), file=out)
         for i, f in enumerate(fs):
             d = T.parse_tune(f)
             n = len([v for v in (d.get("parts") or {}).values() if v is not None])
             fam = engine_family(d.get("parts") or {})
-            print("    [%d] %-32s %-11s %2d parts  engine family %-6s %s"
+            print("    [%d] %-32s %-11s %2d parts  fam %-5s  %r"
                   % (i, os.path.basename(os.path.dirname(f)),
                      "downloaded" if d.get("locked") else "self-made", n,
-                     fam or "-", family_label(fam) or ""), file=out)
+                     fam or "-", tune_name(os.path.dirname(f)) or "?"), file=out)
         out.flush()
         return 0
 

@@ -14,63 +14,148 @@
     "derived": "index->name follows a rule confirmed across the corpus, but this specific row was not diffed",
     "unknown": "the id exists in the data and has never been seen on screen"
   },
-
   "tier_ladder": {
     "_note": "Global vocabulary used by the SPARSE slots. Confirmed end to end: 1 from 'Street Centrifugal Supercharger', 2 and 3 from the basket ('Sport Cams and Valves', 'Race Exhaust'), 4/5/6 from the Spring and Dampers and Differential menus.",
-    "0": "Stock", "1": "Street", "2": "Sport", "3": "Race", "4": "Rally", "5": "Drift", "6": "Offroad",
-    "applies_to": ["brakes", "front_arb", "rear_arb", "springs_dampers", "differential", "clutch", "driveline"],
+    "0": "Stock",
+    "1": "Street",
+    "2": "Sport",
+    "3": "Race",
+    "4": "Rally",
+    "5": "Drift",
+    "6": "Offroad",
+    "applies_to": [
+      "brakes",
+      "front_arb",
+      "rear_arb",
+      "springs_dampers",
+      "differential",
+      "clutch",
+      "driveline"
+    ],
     "confidence": "verified"
   },
-
   "dense_slots": {
     "_note": "Index IS the 0-based tile position. Do NOT read these against the ladder -- doing so put Race Weight Reduction one tile too low.",
-    "slots": ["drivetrain", "car_body", "engine", "rear_wing", "weight_reduction"],
+    "slots": [
+      "drivetrain",
+      "car_body",
+      "engine",
+      "rear_wing",
+      "weight_reduction"
+    ],
     "confidence": "verified"
   },
-
   "named": {
     "transmission": {
-      "_scheme": "shared donor set 2102, its own catalogue. Race family: gears = index + 3.",
-      "0": {"name": "Stock Transmission", "confidence": "verified"},
-      "4": {"name": "Race Transmission: 7 Speed", "confidence": "verified", "gears": 7},
-      "5": {"name": "Race Transmission: 8 Speed", "confidence": "derived", "gears": 8},
-      "6": {"name": "Race Transmission: 9 Speed", "confidence": "derived", "gears": 9},
-      "7": {"name": "Race Transmission: 10 Speed", "confidence": "verified", "gears": 10},
-      "8": {"name": "Drift Transmission: 4 Speed", "confidence": "derived", "gears": 4}
+      "_scheme": "shared donor set 2102, its own catalogue. Gear count is an exact function of the FULL part id (e.g. 2102007 -> 10 gears), NOT of the index alone -- 'gears = index + 3' was a coincidence over indices 4-7 and must not be used as a rule.",
+      "0": {
+        "name": "UNKNOWN - a genuine shared 6-speed part, NOT stock",
+        "confidence": "unknown",
+        "gears": 6,
+        "note": "Corrected 2026-09-01. Previously recorded as 'Stock Transmission'. 2102000 is a real 6-speed carried by 97 tunes; it is absent from the NSX-R's 6-tile menu, and that menu was never opened on camera, so its name is unobserved."
+      },
+      "4": {
+        "name": "Race Transmission: 7 Speed",
+        "confidence": "verified",
+        "gears": 7
+      },
+      "5": {
+        "name": "Race Transmission: 8 Speed",
+        "confidence": "derived",
+        "gears": 8
+      },
+      "6": {
+        "name": "Race Transmission: 9 Speed",
+        "confidence": "derived",
+        "gears": 9
+      },
+      "7": {
+        "name": "Race Transmission: 10 Speed",
+        "confidence": "verified",
+        "gears": 10
+      },
+      "8": {
+        "name": "Drift Transmission: 4 Speed",
+        "confidence": "derived",
+        "gears": 4
+      }
     },
     "differential": {
       "_scheme": "shared donor set 2102, on the tier ladder",
-      "0": {"name": "Stock Diff", "confidence": "verified"},
-      "3": {"name": "Race Diff", "confidence": "verified"},
-      "5": {"name": "Drift Diff", "confidence": "verified"},
-      "6": {"name": "Offroad Diff", "confidence": "verified"},
-      "7": {"name": "UNKNOWN - 26 tunes carry it, absent from the NSX-R 4-tile menu", "confidence": "unknown"}
+      "0": {
+        "name": "Stock Diff",
+        "confidence": "verified"
+      },
+      "3": {
+        "name": "Race Diff",
+        "confidence": "verified"
+      },
+      "5": {
+        "name": "Drift Diff",
+        "confidence": "verified"
+      },
+      "6": {
+        "name": "Offroad Diff",
+        "confidence": "verified"
+      },
+      "7": {
+        "name": "UNKNOWN - 26 tunes carry it, absent from the NSX-R 4-tile menu",
+        "confidence": "unknown"
+      }
     },
     "weight_reduction": {
       "_scheme": "DENSE - index is the tile position",
-      "0": {"name": "Stock Weight Reduction", "confidence": "verified"},
-      "1": {"name": "Sport Weight Reduction", "confidence": "verified", "effect": "Weight -139 lb"},
-      "2": {"name": "Race Weight Reduction", "confidence": "verified", "effect": "Weight -362 lb"}
+      "0": {
+        "name": "Stock Weight Reduction",
+        "confidence": "verified"
+      },
+      "1": {
+        "name": "Sport Weight Reduction",
+        "confidence": "verified",
+        "effect": "Weight -139 lb"
+      },
+      "2": {
+        "name": "Race Weight Reduction",
+        "confidence": "verified",
+        "effect": "Weight -362 lb"
+      }
     },
     "tire_compound": {
       "_scheme": "GLOBAL enum, same index on every car. ONE capture of the compound menu pins all 163 cars.",
       "_warning": "The map in fh6_tune_decode.py (COMPOUND_NAMES) is WRONG and off by one around here. It calls 5 'Slick Race' and 6 'Rally'. Evidence that 5 is Rally: the cloned build matches container Tuning_0412_20260901181414 on tire_compound, and the game reported that tune's compound as Rally.",
-      "5": {"name": "Rally", "confidence": "derived"},
+      "5": {
+        "name": "Rally",
+        "confidence": "derived"
+      },
       "_needs": "One capture naming every tile in the Tire Compound menu, paired to indexes by diff. Highest-value single capture available."
     },
     "rim_style": {
       "_scheme": "FLAT global catalogue. No partset, nothing derivable from the number. 148 distinct ids observed, 326..14670, block-allocated.",
-      "638": {"name": "Asanti AF 134", "confidence": "verified", "note": "read off the car with the id taken from a diffed container"},
-      "701": {"name": "UNKNOWN", "confidence": "unknown", "note": "carried by Tuning_0412_20260901181414; never seen on screen. Previously and WRONGLY recorded as Asanti AF 134."},
-      "13636": {"name": "UNKNOWN", "confidence": "unknown"},
-      "4294967295": {"name": "(empty slot - stock wheels)", "confidence": "verified"}
+      "638": {
+        "name": "Asanti AF 134",
+        "confidence": "verified",
+        "note": "read off the car with the id taken from a diffed container"
+      },
+      "701": {
+        "name": "UNKNOWN",
+        "confidence": "unknown",
+        "note": "carried by Tuning_0412_20260901181414; never seen on screen. Previously and WRONGLY recorded as Asanti AF 134."
+      },
+      "13636": {
+        "name": "UNKNOWN",
+        "confidence": "unknown"
+      },
+      "4294967295": {
+        "name": "(empty slot - stock wheels)",
+        "confidence": "verified"
+      }
     }
   },
-
   "gaps": {
     "rim_style": "147 of 148 ids unnamed. Each needs fit + save + diff, so this is the most expensive catalogue and the least performance-relevant (cosmetic, though wheels do carry a weight delta).",
     "engine_families": "134 families in data/engine-swaps.json, 25 carry a donor_name and 18 of those are known WRONG -- the engine head is a parallel enumeration offset from the car table, not a donor ordinal, so names cannot be derived from the number.",
     "tier_1_and_2_on_some_slots": "Street and Sport are named in the ladder but were only observed on a few slots; a slot could in principle skip them.",
-    "engine_internal_slots": "Group membership is proven (they carry the ENGINE's partset, 519/519) but which slot is camshaft vs valves vs displacement is not. The Engine menu lists Camshaft and Valves as SEPARATE tiles while the part sold under Camshaft is named 'Sport Cams and Valves'."
+    "engine_internal_slots": "Group membership is proven (they carry the ENGINE's partset, 519/519) but which slot is camshaft vs valves vs displacement is not. The Engine menu lists Camshaft and Valves as SEPARATE tiles while the part sold under Camshaft is named 'Sport Cams and Valves'.",
+    "transmission_2102000": "The shared 6-speed (2102000, 97 tunes) has no observed name."
   }
 }

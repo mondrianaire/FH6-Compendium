@@ -79,6 +79,25 @@ MENUS = [
 ENGINE_INTERNALS = {"camshaft", "valves", "displacement", "pistons", "fuel_system", "ignition",
                     "exhaust", "intake", "flywheel", "oil_cooling", "manifold", "restrictor_plate"}
 
+# Forced induction is TWO steps, and conflating them sent a real clone attempt to the wrong menu:
+#   1. Body Kits and Conversions > Aspiration  picks the TYPE (turbo / centrifugal / roots ...)
+#   2. Upgrade Shop > Engine > <that type>     sells the TIER of it
+# The save stores only the tier, in the slot named for the type -- so the TYPE is encoded by WHICH of
+# these slots is populated, which is why the "aspiration" slot itself is empty in all 532 tunes.
+# Until the conversion is installed the Engine menu has no such sub-menu at all, so this must be
+# ordered before the Engine section.
+ASPIRATION_SLOTS = {
+    "single_turbo": "Single Turbo", "twin_turbo": "Twin Turbo", "quad_turbo": "Quad Turbo",
+    "centrifugal_supercharger": "Centrifugal Supercharger",
+    "pos_supercharger": "Positive-Displacement Supercharger",
+}
+
+
+def aspiration_type(parts):
+    """Which forced-induction conversion is fitted, from which slot is populated. None = NA."""
+    got = [ASPIRATION_SLOTS[k] for k in ASPIRATION_SLOTS if parts.get(k) is not None]
+    return got[0] if len(got) == 1 else (" + ".join(got) if got else None)
+
 # INSTALL ORDER. Not the same as the shop's own tile order, and the difference matters:
 # docs/fh6-ui-spec.md 2.9 -- "Conversions affect the upgrades that are available in other categories",
 # and 5.9 records two observed cases (the Rocket Bunny kit REMOVES the Front Bumper tile; the Front
@@ -225,6 +244,23 @@ def build(target, source, ordinal):
                         "auto": auto, "engine_part": slot in ENGINE_INTERNALS})
         if got:
             rows.append((menu, got))
+
+    # Inject the Aspiration CONVERSION step. Verified on camera 2026-09-01: on the stock block with no
+    # aspiration conversion fitted, the Engine menu shows 8 tiles and NO supercharger sub-menu at all
+    # (the spec's post-swap capture had 11). So buying the tier is impossible until this is installed,
+    # and it belongs with the conversions, not the engine.
+    want = aspiration_type(tp)
+    have = aspiration_type(sp) if source is not None else None
+    if want and want != have:
+        r = {"slot": "_aspiration_conv", "item": "Aspiration  ->  %s" % want, "confirmed": PROVEN,
+             "from": have or "naturally aspirated", "to": "install the %s conversion" % want,
+             "from_idx": None, "to_idx": None, "auto": False, "engine_part": False}
+        for i, (menu, got) in enumerate(rows):
+            if menu == "Body Kits and Conversions":
+                rows[i] = (menu, got + [r])
+                break
+        else:
+            rows.insert(0, ("Body Kits and Conversions", [r]))
     return rows
 
 

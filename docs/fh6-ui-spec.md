@@ -196,3 +196,31 @@ Extracted 2026-09-01 from `forzahorizon6_KUSQ0FOtXb.mp4` (12.6 min, 1992 Honda N
 workflow over 758 frames at 1 fps; 125 distinct screens; two scanners per region, disagreements
 reconciled against named frames (section 6). Everything unreadable is left UNKNOWN in section 7 —
 do not fill those from other Forza titles.
+
+---
+
+## 9. Contextual dependency, confirmed on camera (2026-09-01)
+
+Recording `forzahorizon6_XtE0aSrdbE.mp4`, the stock 1992 Honda NSX-R (B 572), 1 fps.
+
+**9.1 The Engine menu's length depends on the fitted aspiration.** Frame 090: stock block, no
+aspiration conversion — `Engine` shows **8 tiles** (3/3/2) with `Displacement` at row 2 col 2, and
+**no forced-induction sub-menu at all**. Section 2.1's capture of the same menu, taken with the 6.2L
+V8 fitted, shows **11**. So forced induction is bought in two places: the TYPE from
+`Body Kits and Conversions > Aspiration` (tile 3), then the TIER from `Upgrade Shop > Engine`. Until
+the conversion is installed the tier is unreachable.
+
+**9.2 `Drivetrain Swap` is a 2-tile menu.** Frame 020: tile 1 `INSTALLED` (Stock Drivetrain), tile 2
+`OWNED` (AWD Drivetrain). Header B 572 / RWD. Confirms 2.6.
+
+**9.3 `Weight Reduction` is a 3-tile menu.** Frame 040: tile 1 `INSTALLED` (Stock Weight Reduction),
+tile 2 unnamed, tile 3 `OWNED`. Preview panel reads Speed 4.9 · Handling 6.0 · Acceleration 5.2 ·
+Launch 4.2 · Braking 5.4 · Offroad 5.5, badge B 588, drivetrain chip AWD.
+
+**9.4 `Platform and Handling` confirmed 6 tiles** with `Spring and Dampers` on tile 2 (frame 060),
+matching 2.2 exactly.
+
+**9.5 Two index schemes coexist.** Conversion slots (`drivetrain`, `car_body`, `engine`) are per-car
+lists whose index IS the 0-based tile position — 9.2 shows a 2-tile menu and the target's drivetrain
+index is 1. Tier slots (`brakes`, ARBs, `springs_dampers`, `tire_compound`) use the sparse global
+ladder, where the index can exceed the tile count. Match conversions by POSITION and tiers by NAME.

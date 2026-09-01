@@ -1,0 +1,7865 @@
+{
+  "route_key": "2850_2700",
+  "name": null,
+  "turns": [
+    {
+      "id": "T1",
+      "pos": [
+        2803,
+        2732
+      ],
+      "dir": "L",
+      "type": "fast",
+      "radius_m": 178,
+      "n": 30,
+      "best": {
+        "mph_in": 119,
+        "mph_min": 119,
+        "mph_out": 124,
+        "brake_on_m": null,
+        "throttle_on_m": -80,
+        "lat_g": 1.72,
+        "apex": [
+          2803,
+          2732
+        ],
+        "t0": 508.3,
+        "stint": 7,
+        "first_red": null,
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 119,
+          "mph_min": 119,
+          "mph_out": 124,
+          "brake_on_m": null,
+          "throttle_on_m": -80,
+          "lat_g": 1.72,
+          "apex": [
+            2803,
+            2732
+          ],
+          "t0": 508.3,
+          "stint": 7,
+          "first_red": null,
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 0,
+          "laps": 6,
+          "fr": {
+            "front": 0,
+            "rear": 0,
+            "none": 1
+          },
+          "lim": "clean",
+          "multi": 0.0,
+          "mph_min": 119,
+          "usi": -0.112,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 0,
+        "sessions": 1,
+        "fr": {
+          "front": 0,
+          "rear": 0,
+          "none": 1
+        },
+        "lim": {
+          "clean": 1
+        },
+        "dominant": "none",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.0
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T2",
+      "pos": [
+        2687,
+        2839
+      ],
+      "dir": "L",
+      "type": "fast",
+      "radius_m": 96,
+      "n": 43,
+      "best": {
+        "mph_in": 104,
+        "mph_min": 104,
+        "mph_out": 116,
+        "brake_on_m": null,
+        "throttle_on_m": -176,
+        "lat_g": 2.77,
+        "apex": [
+          2687,
+          2839
+        ],
+        "t0": 268.9,
+        "stint": 4,
+        "first_red": null,
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 104,
+          "mph_min": 104,
+          "mph_out": 116,
+          "brake_on_m": null,
+          "throttle_on_m": -176,
+          "lat_g": 2.77,
+          "apex": [
+            2687,
+            2839
+          ],
+          "t0": 268.9,
+          "stint": 4,
+          "first_red": null,
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 0,
+            "rear": 0,
+            "none": 1
+          },
+          "lim": "clean",
+          "multi": 0.0,
+          "mph_min": 104,
+          "usi": -0.001,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 0,
+          "rear": 0,
+          "none": 1
+        },
+        "lim": {
+          "clean": 1
+        },
+        "dominant": "none",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T3",
+      "pos": [
+        2522,
+        2807
+      ],
+      "dir": "L",
+      "type": "fast",
+      "radius_m": 113,
+      "n": 38,
+      "best": {
+        "mph_in": 107,
+        "mph_min": 107,
+        "mph_out": 114,
+        "brake_on_m": null,
+        "throttle_on_m": -31,
+        "lat_g": 2.11,
+        "apex": [
+          2522,
+          2807
+        ],
+        "t0": 343.0,
+        "stint": 5,
+        "first_red": null,
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 107,
+          "mph_min": 107,
+          "mph_out": 114,
+          "brake_on_m": null,
+          "throttle_on_m": -31,
+          "lat_g": 2.11,
+          "apex": [
+            2522,
+            2807
+          ],
+          "t0": 343.0,
+          "stint": 5,
+          "first_red": null,
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 0,
+            "rear": 0,
+            "none": 1
+          },
+          "lim": "clean",
+          "multi": 0.0,
+          "mph_min": 107,
+          "usi": 0.053,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 0,
+          "rear": 0,
+          "none": 1
+        },
+        "lim": {
+          "clean": 1
+        },
+        "dominant": "none",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T4",
+      "pos": [
+        2490,
+        2742
+      ],
+      "dir": "R",
+      "type": "fast",
+      "radius_m": 119,
+      "n": 43,
+      "best": {
+        "mph_in": 120,
+        "mph_min": 120,
+        "mph_out": 122,
+        "brake_on_m": null,
+        "throttle_on_m": -88,
+        "lat_g": 2.48,
+        "apex": [
+          2490,
+          2742
+        ],
+        "t0": 274.4,
+        "stint": 4,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 120,
+          "mph_min": 120,
+          "mph_out": 122,
+          "brake_on_m": null,
+          "throttle_on_m": -88,
+          "lat_g": 2.48,
+          "apex": [
+            2490,
+            2742
+          ],
+          "t0": 274.4,
+          "stint": 4,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "turn",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 1,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 120,
+          "usi": -0.267,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 1,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": true,
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 15,
+      "s": 488,
+      "est_by": "geometry"
+    },
+    {
+      "id": "T5",
+      "pos": [
+        2324,
+        2702
+      ],
+      "dir": "R",
+      "type": "medium",
+      "radius_m": 67,
+      "n": 42,
+      "best": {
+        "mph_in": 82,
+        "mph_min": 82,
+        "mph_out": 100,
+        "brake_on_m": null,
+        "throttle_on_m": -139,
+        "lat_g": 2.81,
+        "apex": [
+          2324,
+          2702
+        ],
+        "t0": 286.8,
+        "stint": 5,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 82,
+          "mph_min": 82,
+          "mph_out": 100,
+          "brake_on_m": null,
+          "throttle_on_m": -139,
+          "lat_g": 2.81,
+          "apex": [
+            2324,
+            2702
+          ],
+          "t0": 286.8,
+          "stint": 5,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "turn",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 1,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 82,
+          "usi": 0.174,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 1,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": true,
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 75,
+      "s": 928,
+      "est_by": "geometry"
+    },
+    {
+      "id": "T6",
+      "pos": [
+        2291,
+        2739
+      ],
+      "dir": "R",
+      "type": "fast",
+      "radius_m": 97,
+      "n": 42,
+      "best": {
+        "mph_in": 102,
+        "mph_min": 102,
+        "mph_out": 110,
+        "brake_on_m": null,
+        "throttle_on_m": -40,
+        "lat_g": 2.26,
+        "apex": [
+          2291,
+          2739
+        ],
+        "t0": 289.0,
+        "stint": 5,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 102,
+          "mph_min": 102,
+          "mph_out": 110,
+          "brake_on_m": null,
+          "throttle_on_m": -40,
+          "lat_g": 2.26,
+          "apex": [
+            2291,
+            2739
+          ],
+          "t0": 289.0,
+          "stint": 5,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 1,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 102,
+          "usi": 0.027,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 1,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T7",
+      "pos": [
+        2261,
+        2817
+      ],
+      "dir": "L",
+      "type": "fast",
+      "radius_m": 168,
+      "n": 96,
+      "best": {
+        "mph_in": 118,
+        "mph_min": 117,
+        "mph_out": 120,
+        "brake_on_m": null,
+        "throttle_on_m": 18,
+        "lat_g": 1.98,
+        "apex": [
+          2263,
+          2794
+        ],
+        "t0": 584.9,
+        "stint": 8,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 118,
+          "mph_min": 117,
+          "mph_out": 120,
+          "brake_on_m": null,
+          "throttle_on_m": 18,
+          "lat_g": 1.98,
+          "apex": [
+            2263,
+            2794
+          ],
+          "t0": 584.9,
+          "stint": 8,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 3,
+          "laps_seen": 3,
+          "laps": 6,
+          "fr": {
+            "front": 3,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 112,
+          "usi": 0.03,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 3,
+        "laps_seen": 3,
+        "sessions": 1,
+        "fr": {
+          "front": 3,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.5
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T8",
+      "pos": [
+        2212,
+        2925
+      ],
+      "dir": "R",
+      "type": "fast",
+      "radius_m": 145,
+      "n": 33,
+      "best": {
+        "mph_in": 121,
+        "mph_min": 121,
+        "mph_out": 124,
+        "brake_on_m": null,
+        "throttle_on_m": -61,
+        "lat_g": 2.09,
+        "apex": [
+          2212,
+          2925
+        ],
+        "t0": 412.4,
+        "stint": 6,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 121,
+          "mph_min": 121,
+          "mph_out": 124,
+          "brake_on_m": null,
+          "throttle_on_m": -61,
+          "lat_g": 2.09,
+          "apex": [
+            2212,
+            2925
+          ],
+          "t0": 412.4,
+          "stint": 6,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 1,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 121,
+          "usi": -0.226,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 1,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T9",
+      "pos": [
+        2194,
+        3049
+      ],
+      "dir": "R",
+      "type": "hairpin",
+      "radius_m": 18,
+      "n": 106,
+      "best": {
+        "mph_in": 87,
+        "mph_min": 38,
+        "mph_out": 43,
+        "brake_on_m": 204,
+        "throttle_on_m": 6,
+        "lat_g": 2.65,
+        "apex": [
+          2186,
+          3053
+        ],
+        "t0": 355.0,
+        "stint": 5,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 87,
+          "mph_min": 38,
+          "mph_out": 43,
+          "brake_on_m": 204,
+          "throttle_on_m": 6,
+          "lat_g": 2.65,
+          "apex": [
+            2186,
+            3053
+          ],
+          "t0": 355.0,
+          "stint": 5,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "turn",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 3,
+          "laps_seen": 2,
+          "laps": 6,
+          "fr": {
+            "front": 3,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.5,
+          "mph_min": 38,
+          "usi": 0.803,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 3,
+        "laps_seen": 2,
+        "sessions": 1,
+        "fr": {
+          "front": 3,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.33
+      },
+      "established": true,
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 179,
+      "s": 1332,
+      "est_by": "geometry"
+    },
+    {
+      "id": "T10",
+      "pos": [
+        2225,
+        3013
+      ],
+      "dir": "R",
+      "type": "medium",
+      "radius_m": 71,
+      "n": 30,
+      "best": {
+        "mph_in": 57,
+        "mph_min": 57,
+        "mph_out": 80,
+        "brake_on_m": null,
+        "throttle_on_m": -75,
+        "lat_g": 1.61,
+        "apex": [
+          2225,
+          3013
+        ],
+        "t0": 539.2,
+        "stint": 8,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 57,
+          "mph_min": 57,
+          "mph_out": 80,
+          "brake_on_m": null,
+          "throttle_on_m": -75,
+          "lat_g": 1.61,
+          "apex": [
+            2225,
+            3013
+          ],
+          "t0": 539.2,
+          "stint": 8,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 1,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 57,
+          "usi": 0.418,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 1,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T11",
+      "pos": [
+        2261,
+        2946
+      ],
+      "dir": "L",
+      "type": "medium",
+      "radius_m": 60,
+      "n": 100,
+      "best": {
+        "mph_in": 88,
+        "mph_min": 87,
+        "mph_out": 97,
+        "brake_on_m": null,
+        "throttle_on_m": 44,
+        "lat_g": 2.79,
+        "apex": [
+          2252,
+          2952
+        ],
+        "t0": 360.6,
+        "stint": 5,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 88,
+          "mph_min": 87,
+          "mph_out": 97,
+          "brake_on_m": null,
+          "throttle_on_m": 44,
+          "lat_g": 2.79,
+          "apex": [
+            2252,
+            2952
+          ],
+          "t0": 360.6,
+          "stint": 5,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "turn",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 3,
+          "laps_seen": 3,
+          "laps": 6,
+          "fr": {
+            "front": 3,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 81,
+          "usi": 0.206,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 3,
+        "laps_seen": 3,
+        "sessions": 1,
+        "fr": {
+          "front": 3,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.5
+      },
+      "established": true,
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 63,
+      "s": 1472,
+      "est_by": "geometry"
+    },
+    {
+      "id": "T12",
+      "pos": [
+        2692,
+        2894
+      ],
+      "dir": "R",
+      "type": "fast",
+      "radius_m": 147,
+      "n": 27,
+      "best": {
+        "mph_in": 138,
+        "mph_min": 138,
+        "mph_out": 139,
+        "brake_on_m": null,
+        "throttle_on_m": 7,
+        "lat_g": 2.65,
+        "apex": [
+          2692,
+          2894
+        ],
+        "t0": 603.5,
+        "stint": 8,
+        "first_red": null,
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 138,
+          "mph_min": 138,
+          "mph_out": 139,
+          "brake_on_m": null,
+          "throttle_on_m": 7,
+          "lat_g": 2.65,
+          "apex": [
+            2692,
+            2894
+          ],
+          "t0": 603.5,
+          "stint": 8,
+          "first_red": null,
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 0,
+            "rear": 0,
+            "none": 1
+          },
+          "lim": "clean",
+          "multi": 0.0,
+          "mph_min": 138,
+          "usi": 0.018,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 0,
+          "rear": 0,
+          "none": 1
+        },
+        "lim": {
+          "clean": 1
+        },
+        "dominant": "none",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T13",
+      "pos": [
+        3024,
+        2771
+      ],
+      "dir": "R",
+      "type": "medium",
+      "radius_m": 45,
+      "n": 114,
+      "best": {
+        "mph_in": 57,
+        "mph_min": 57,
+        "mph_out": 71,
+        "brake_on_m": 109,
+        "throttle_on_m": -29,
+        "lat_g": 1.88,
+        "apex": [
+          3029,
+          2761
+        ],
+        "t0": 495.9,
+        "stint": 7,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 57,
+          "mph_min": 57,
+          "mph_out": 71,
+          "brake_on_m": 109,
+          "throttle_on_m": -29,
+          "lat_g": 1.88,
+          "apex": [
+            3029,
+            2761
+          ],
+          "t0": 495.9,
+          "stint": 7,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "turn",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 4,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 3,
+            "rear": 1,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 1.0,
+          "mph_min": 56,
+          "usi": 0.78,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 4,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 3,
+          "rear": 1,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 0.75,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": true,
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 83,
+      "s": 2268,
+      "est_by": "geometry"
+    },
+    {
+      "id": "T14",
+      "pos": [
+        3035,
+        2570
+      ],
+      "dir": "R",
+      "type": "medium",
+      "radius_m": 48,
+      "n": 1,
+      "best": {
+        "mph_in": 112,
+        "mph_min": 81,
+        "mph_out": 81,
+        "brake_on_m": 81,
+        "throttle_on_m": null,
+        "lat_g": 2.86,
+        "apex": [
+          3035,
+          2570
+        ],
+        "t0": 381.2,
+        "stint": 5,
+        "first_red": "front ph2",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 112,
+          "mph_min": 81,
+          "mph_out": 81,
+          "brake_on_m": 81,
+          "throttle_on_m": null,
+          "lat_g": 2.86,
+          "apex": [
+            3035,
+            2570
+          ],
+          "t0": 381.2,
+          "stint": 5,
+          "first_red": "front ph2",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 1,
+          "laps_seen": 1,
+          "laps": 2,
+          "fr": {
+            "front": 1,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 81,
+          "usi": 0.445,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 1,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 1,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T15",
+      "pos": [
+        2959,
+        2554
+      ],
+      "dir": "R",
+      "type": "medium",
+      "radius_m": 50,
+      "n": 57,
+      "best": {
+        "mph_in": 66,
+        "mph_min": 66,
+        "mph_out": 91,
+        "brake_on_m": 183,
+        "throttle_on_m": -83,
+        "lat_g": 2.55,
+        "apex": [
+          2974,
+          2543
+        ],
+        "t0": 502.4,
+        "stint": 7,
+        "first_red": "front ph1",
+        "session": "fh6_20260822_131217"
+      },
+      "sessions": 1,
+      "best_by_car": {
+        "2866|2|4|800": {
+          "mph_in": 66,
+          "mph_min": 66,
+          "mph_out": 91,
+          "brake_on_m": 183,
+          "throttle_on_m": -83,
+          "lat_g": 2.55,
+          "apex": [
+            2974,
+            2543
+          ],
+          "t0": 502.4,
+          "stint": 7,
+          "first_red": "front ph1",
+          "session": "fh6_20260822_131217"
+        }
+      },
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "status": "possible",
+      "by_session": {
+        "fh6_20260822_131217": {
+          "n": 2,
+          "laps_seen": 1,
+          "laps": 6,
+          "fr": {
+            "front": 2,
+            "rear": 0,
+            "none": 0
+          },
+          "lim": "tune",
+          "multi": 0.0,
+          "mph_min": 66,
+          "usi": 0.67,
+          "cars": [
+            "2866|2|4|800"
+          ]
+        }
+      },
+      "track": {
+        "passes": 2,
+        "laps_seen": 1,
+        "sessions": 1,
+        "fr": {
+          "front": 2,
+          "rear": 0,
+          "none": 0
+        },
+        "lim": {
+          "tune": 1
+        },
+        "dominant": "front",
+        "consistency": 1.0,
+        "cars": [
+          "2866|2|4|800"
+        ],
+        "laps_track": 6,
+        "presence": 0.17
+      },
+      "established": false,
+      "est_by": null
+    },
+    {
+      "id": "T1",
+      "pos": [
+        2549,
+        2837
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 77,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 112,
+      "s": 376,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T2",
+      "pos": [
+        2339,
+        2687
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 10,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 145,
+      "s": 664,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T3",
+      "pos": [
+        2445,
+        2691
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 9,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 177,
+      "s": 804,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T6",
+      "pos": [
+        2738,
+        2876
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 119,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 35,
+      "s": 1948,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T7",
+      "pos": [
+        2820,
+        2806
+      ],
+      "dir": "L",
+      "type": null,
+      "radius_m": 71,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 43,
+      "s": 2056,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    },
+    {
+      "id": "T8",
+      "pos": [
+        3018,
+        2550
+      ],
+      "dir": "R",
+      "type": null,
+      "radius_m": 42,
+      "n": 0,
+      "best": null,
+      "sessions": 0,
+      "by_session": {},
+      "track": {},
+      "geo_sessions": 0,
+      "geo_mapped": true,
+      "deg": 131,
+      "s": 2500,
+      "established": true,
+      "est_by": "geometry",
+      "status": "turn"
+    }
+  ],
+  "laps": 6,
+  "sessions": [
+    "fh6_20260822_131217"
+  ],
+  "updated": "fh6_20260822_131217",
+  "best_laps": {
+    "2866|2|4|800": {
+      "best_lap": 58.844,
+      "session": "fh6_20260822_131217",
+      "name": "2018 Exomotive Exocet Sport V8 XP-5",
+      "class": "S1",
+      "pi": 800,
+      "drivetrain": "AWD",
+      "build_id": "95758951",
+      "hp": 332,
+      "gears": 8
+    }
+  },
+  "visits": [
+    {
+      "session": "fh6_20260822_131217",
+      "laps": 6,
+      "attempts": 4,
+      "cars": [
+        "2866|2|4|800"
+      ],
+      "best_lap": 58.844,
+      "best_car": "2866|2|4|800"
+    }
+  ],
+  "cars": {
+    "2866|2|4|800": {
+      "name": "2018 Exomotive Exocet Sport V8 XP-5",
+      "class": "S1",
+      "pi": 800,
+      "drivetrain": "AWD"
+    }
+  },
+  "turn_count": 11,
+  "profile": {
+    "dims": {
+      "low_corner": {
+        "frac": 0.023,
+        "band": "light"
+      },
+      "mid_corner": {
+        "frac": 0.138,
+        "band": "moderate"
+      },
+      "fast_corner": {
+        "frac": 0.414,
+        "band": "heavy"
+      },
+      "braking": {
+        "frac": 0.075,
+        "band": "light"
+      },
+      "straight": {
+        "frac": 0.264,
+        "band": "heavy"
+      },
+      "elevation": {
+        "frac": null,
+        "band": "moderate",
+        "range_m": 39.9
+      },
+      "launch": {
+        "frac": null,
+        "band": "moderate"
+      }
+    },
+    "heavy": [
+      "fast sweepers",
+      "straights / top-end"
+    ],
+    "absent": [],
+    "gears_used": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "top_gear_used": 8,
+    "max_gear": 8,
+    "top_speed": 139,
+    "elevation_range_m": 39.9,
+    "notes": [],
+    "priority": [
+      "fast sweepers",
+      "straights / top-end",
+      "medium corners",
+      "elevation (crests)"
+    ]
+  },
+  "profile_laps": 6,
+  "profile_session": "fh6_20260822_131217",
+  "geometry": {
+    "length_m": 2756,
+    "path": [
+      [
+        2845,
+        2671
+      ],
+      [
+        2840,
+        2677
+      ],
+      [
+        2835,
+        2683
+      ],
+      [
+        2829,
+        2690
+      ],
+      [
+        2824,
+        2696
+      ],
+      [
+        2819,
+        2702
+      ],
+      [
+        2814,
+        2708
+      ],
+      [
+        2809,
+        2714
+      ],
+      [
+        2805,
+        2721
+      ],
+      [
+        2801,
+        2728
+      ],
+      [
+        2797,
+        2735
+      ],
+      [
+        2792,
+        2741
+      ],
+      [
+        2787,
+        2748
+      ],
+      [
+        2783,
+        2754
+      ],
+      [
+        2778,
+        2761
+      ],
+      [
+        2773,
+        2767
+      ],
+      [
+        2768,
+        2773
+      ],
+      [
+        2763,
+        2779
+      ],
+      [
+        2758,
+        2785
+      ],
+      [
+        2752,
+        2791
+      ],
+      [
+        2747,
+        2797
+      ],
+      [
+        2741,
+        2803
+      ],
+      [
+        2735,
+        2808
+      ],
+      [
+        2729,
+        2814
+      ],
+      [
+        2723,
+        2819
+      ],
+      [
+        2717,
+        2823
+      ],
+      [
+        2710,
+        2828
+      ],
+      [
+        2703,
+        2832
+      ],
+      [
+        2696,
+        2835
+      ],
+      [
+        2688,
+        2838
+      ],
+      [
+        2681,
+        2840
+      ],
+      [
+        2673,
+        2842
+      ],
+      [
+        2665,
+        2845
+      ],
+      [
+        2657,
+        2846
+      ],
+      [
+        2650,
+        2848
+      ],
+      [
+        2642,
+        2849
+      ],
+      [
+        2634,
+        2851
+      ],
+      [
+        2626,
+        2852
+      ],
+      [
+        2618,
+        2852
+      ],
+      [
+        2610,
+        2852
+      ],
+      [
+        2602,
+        2852
+      ],
+      [
+        2594,
+        2852
+      ],
+      [
+        2586,
+        2851
+      ],
+      [
+        2578,
+        2850
+      ],
+      [
+        2570,
+        2848
+      ],
+      [
+        2563,
+        2845
+      ],
+      [
+        2556,
+        2841
+      ],
+      [
+        2549,
+        2837
+      ],
+      [
+        2543,
+        2832
+      ],
+      [
+        2537,
+        2826
+      ],
+      [
+        2532,
+        2820
+      ],
+      [
+        2527,
+        2814
+      ],
+      [
+        2522,
+        2807
+      ],
+      [
+        2519,
+        2800
+      ],
+      [
+        2515,
+        2793
+      ],
+      [
+        2512,
+        2786
+      ],
+      [
+        2509,
+        2778
+      ],
+      [
+        2506,
+        2771
+      ],
+      [
+        2503,
+        2763
+      ],
+      [
+        2499,
+        2756
+      ],
+      [
+        2495,
+        2749
+      ],
+      [
+        2491,
+        2743
+      ],
+      [
+        2486,
+        2736
+      ],
+      [
+        2481,
+        2730
+      ],
+      [
+        2475,
+        2724
+      ],
+      [
+        2470,
+        2719
+      ],
+      [
+        2464,
+        2713
+      ],
+      [
+        2459,
+        2707
+      ],
+      [
+        2452,
+        2702
+      ],
+      [
+        2446,
+        2698
+      ],
+      [
+        2439,
+        2694
+      ],
+      [
+        2432,
+        2690
+      ],
+      [
+        2424,
+        2687
+      ],
+      [
+        2417,
+        2685
+      ],
+      [
+        2409,
+        2682
+      ],
+      [
+        2401,
+        2681
+      ],
+      [
+        2393,
+        2680
+      ],
+      [
+        2385,
+        2680
+      ],
+      [
+        2377,
+        2680
+      ],
+      [
+        2369,
+        2681
+      ],
+      [
+        2361,
+        2682
+      ],
+      [
+        2353,
+        2683
+      ],
+      [
+        2346,
+        2685
+      ],
+      [
+        2339,
+        2687
+      ],
+      [
+        2347,
+        2688
+      ],
+      [
+        2355,
+        2689
+      ],
+      [
+        2363,
+        2690
+      ],
+      [
+        2371,
+        2691
+      ],
+      [
+        2379,
+        2692
+      ],
+      [
+        2387,
+        2693
+      ],
+      [
+        2395,
+        2694
+      ],
+      [
+        2403,
+        2695
+      ],
+      [
+        2411,
+        2696
+      ],
+      [
+        2418,
+        2697
+      ],
+      [
+        2426,
+        2698
+      ],
+      [
+        2434,
+        2699
+      ],
+      [
+        2442,
+        2700
+      ],
+      [
+        2450,
+        2700
+      ],
+      [
+        2458,
+        2701
+      ],
+      [
+        2455,
+        2697
+      ],
+      [
+        2448,
+        2693
+      ],
+      [
+        2441,
+        2690
+      ],
+      [
+        2433,
+        2689
+      ],
+      [
+        2425,
+        2687
+      ],
+      [
+        2417,
+        2686
+      ],
+      [
+        2409,
+        2685
+      ],
+      [
+        2401,
+        2683
+      ],
+      [
+        2393,
+        2683
+      ],
+      [
+        2385,
+        2683
+      ],
+      [
+        2377,
+        2683
+      ],
+      [
+        2369,
+        2684
+      ],
+      [
+        2362,
+        2686
+      ],
+      [
+        2354,
+        2688
+      ],
+      [
+        2346,
+        2690
+      ],
+      [
+        2339,
+        2693
+      ],
+      [
+        2332,
+        2697
+      ],
+      [
+        2325,
+        2701
+      ],
+      [
+        2319,
+        2706
+      ],
+      [
+        2313,
+        2712
+      ],
+      [
+        2308,
+        2718
+      ],
+      [
+        2303,
+        2724
+      ],
+      [
+        2297,
+        2730
+      ],
+      [
+        2293,
+        2737
+      ],
+      [
+        2289,
+        2743
+      ],
+      [
+        2285,
+        2750
+      ],
+      [
+        2281,
+        2758
+      ],
+      [
+        2278,
+        2765
+      ],
+      [
+        2275,
+        2772
+      ],
+      [
+        2272,
+        2780
+      ],
+      [
+        2270,
+        2787
+      ],
+      [
+        2267,
+        2795
+      ],
+      [
+        2264,
+        2802
+      ],
+      [
+        2261,
+        2810
+      ],
+      [
+        2259,
+        2817
+      ],
+      [
+        2256,
+        2825
+      ],
+      [
+        2253,
+        2832
+      ],
+      [
+        2250,
+        2840
+      ],
+      [
+        2247,
+        2847
+      ],
+      [
+        2244,
+        2855
+      ],
+      [
+        2241,
+        2862
+      ],
+      [
+        2239,
+        2870
+      ],
+      [
+        2236,
+        2877
+      ],
+      [
+        2233,
+        2885
+      ],
+      [
+        2230,
+        2892
+      ],
+      [
+        2227,
+        2900
+      ],
+      [
+        2224,
+        2907
+      ],
+      [
+        2221,
+        2915
+      ],
+      [
+        2218,
+        2922
+      ],
+      [
+        2215,
+        2929
+      ],
+      [
+        2212,
+        2937
+      ],
+      [
+        2209,
+        2944
+      ],
+      [
+        2206,
+        2952
+      ],
+      [
+        2203,
+        2959
+      ],
+      [
+        2200,
+        2966
+      ],
+      [
+        2197,
+        2974
+      ],
+      [
+        2194,
+        2981
+      ],
+      [
+        2191,
+        2989
+      ],
+      [
+        2188,
+        2996
+      ],
+      [
+        2185,
+        3003
+      ],
+      [
+        2182,
+        3011
+      ],
+      [
+        2179,
+        3018
+      ],
+      [
+        2178,
+        3026
+      ],
+      [
+        2178,
+        3034
+      ],
+      [
+        2180,
+        3042
+      ],
+      [
+        2183,
+        3049
+      ],
+      [
+        2188,
+        3055
+      ],
+      [
+        2196,
+        3058
+      ],
+      [
+        2203,
+        3056
+      ],
+      [
+        2209,
+        3050
+      ],
+      [
+        2214,
+        3044
+      ],
+      [
+        2217,
+        3036
+      ],
+      [
+        2220,
+        3029
+      ],
+      [
+        2223,
+        3022
+      ],
+      [
+        2226,
+        3014
+      ],
+      [
+        2228,
+        3006
+      ],
+      [
+        2230,
+        2999
+      ],
+      [
+        2233,
+        2991
+      ],
+      [
+        2235,
+        2983
+      ],
+      [
+        2238,
+        2976
+      ],
+      [
+        2242,
+        2969
+      ],
+      [
+        2246,
+        2962
+      ],
+      [
+        2252,
+        2956
+      ],
+      [
+        2257,
+        2951
+      ],
+      [
+        2264,
+        2946
+      ],
+      [
+        2270,
+        2942
+      ],
+      [
+        2278,
+        2938
+      ],
+      [
+        2285,
+        2936
+      ],
+      [
+        2293,
+        2933
+      ],
+      [
+        2300,
+        2931
+      ],
+      [
+        2308,
+        2929
+      ],
+      [
+        2316,
+        2927
+      ],
+      [
+        2324,
+        2926
+      ],
+      [
+        2332,
+        2925
+      ],
+      [
+        2340,
+        2924
+      ],
+      [
+        2348,
+        2924
+      ],
+      [
+        2356,
+        2923
+      ],
+      [
+        2364,
+        2922
+      ],
+      [
+        2372,
+        2922
+      ],
+      [
+        2380,
+        2921
+      ],
+      [
+        2388,
+        2921
+      ],
+      [
+        2396,
+        2920
+      ],
+      [
+        2404,
+        2919
+      ],
+      [
+        2412,
+        2919
+      ],
+      [
+        2420,
+        2918
+      ],
+      [
+        2428,
+        2917
+      ],
+      [
+        2436,
+        2917
+      ],
+      [
+        2444,
+        2916
+      ],
+      [
+        2452,
+        2916
+      ],
+      [
+        2460,
+        2915
+      ],
+      [
+        2468,
+        2914
+      ],
+      [
+        2475,
+        2914
+      ],
+      [
+        2483,
+        2913
+      ],
+      [
+        2491,
+        2913
+      ],
+      [
+        2499,
+        2913
+      ],
+      [
+        2507,
+        2912
+      ],
+      [
+        2515,
+        2912
+      ],
+      [
+        2523,
+        2911
+      ],
+      [
+        2531,
+        2911
+      ],
+      [
+        2539,
+        2910
+      ],
+      [
+        2547,
+        2910
+      ],
+      [
+        2555,
+        2909
+      ],
+      [
+        2563,
+        2909
+      ],
+      [
+        2571,
+        2908
+      ],
+      [
+        2579,
+        2908
+      ],
+      [
+        2587,
+        2907
+      ],
+      [
+        2595,
+        2907
+      ],
+      [
+        2603,
+        2906
+      ],
+      [
+        2611,
+        2905
+      ],
+      [
+        2619,
+        2904
+      ],
+      [
+        2627,
+        2904
+      ],
+      [
+        2635,
+        2903
+      ],
+      [
+        2643,
+        2902
+      ],
+      [
+        2651,
+        2901
+      ],
+      [
+        2659,
+        2901
+      ],
+      [
+        2667,
+        2900
+      ],
+      [
+        2675,
+        2899
+      ],
+      [
+        2683,
+        2898
+      ],
+      [
+        2691,
+        2896
+      ],
+      [
+        2698,
+        2894
+      ],
+      [
+        2706,
+        2892
+      ],
+      [
+        2714,
+        2889
+      ],
+      [
+        2721,
+        2886
+      ],
+      [
+        2728,
+        2882
+      ],
+      [
+        2735,
+        2878
+      ],
+      [
+        2741,
+        2873
+      ],
+      [
+        2747,
+        2868
+      ],
+      [
+        2754,
+        2863
+      ],
+      [
+        2760,
+        2858
+      ],
+      [
+        2766,
+        2852
+      ],
+      [
+        2771,
+        2847
+      ],
+      [
+        2777,
+        2841
+      ],
+      [
+        2783,
+        2835
+      ],
+      [
+        2788,
+        2830
+      ],
+      [
+        2794,
+        2824
+      ],
+      [
+        2800,
+        2819
+      ],
+      [
+        2806,
+        2814
+      ],
+      [
+        2812,
+        2809
+      ],
+      [
+        2820,
+        2806
+      ],
+      [
+        2827,
+        2803
+      ],
+      [
+        2835,
+        2801
+      ],
+      [
+        2843,
+        2800
+      ],
+      [
+        2851,
+        2799
+      ],
+      [
+        2859,
+        2799
+      ],
+      [
+        2867,
+        2798
+      ],
+      [
+        2875,
+        2798
+      ],
+      [
+        2883,
+        2798
+      ],
+      [
+        2891,
+        2798
+      ],
+      [
+        2899,
+        2799
+      ],
+      [
+        2907,
+        2799
+      ],
+      [
+        2915,
+        2800
+      ],
+      [
+        2923,
+        2800
+      ],
+      [
+        2931,
+        2801
+      ],
+      [
+        2939,
+        2801
+      ],
+      [
+        2947,
+        2801
+      ],
+      [
+        2955,
+        2801
+      ],
+      [
+        2963,
+        2801
+      ],
+      [
+        2971,
+        2801
+      ],
+      [
+        2979,
+        2800
+      ],
+      [
+        2987,
+        2798
+      ],
+      [
+        2994,
+        2796
+      ],
+      [
+        3001,
+        2792
+      ],
+      [
+        3008,
+        2788
+      ],
+      [
+        3015,
+        2784
+      ],
+      [
+        3020,
+        2778
+      ],
+      [
+        3024,
+        2771
+      ],
+      [
+        3026,
+        2763
+      ],
+      [
+        3028,
+        2755
+      ],
+      [
+        3030,
+        2747
+      ],
+      [
+        3030,
+        2739
+      ],
+      [
+        3031,
+        2731
+      ],
+      [
+        3031,
+        2723
+      ],
+      [
+        3031,
+        2715
+      ],
+      [
+        3032,
+        2708
+      ],
+      [
+        3032,
+        2700
+      ],
+      [
+        3032,
+        2692
+      ],
+      [
+        3033,
+        2684
+      ],
+      [
+        3033,
+        2676
+      ],
+      [
+        3033,
+        2668
+      ],
+      [
+        3034,
+        2660
+      ],
+      [
+        3034,
+        2652
+      ],
+      [
+        3034,
+        2644
+      ],
+      [
+        3035,
+        2636
+      ],
+      [
+        3036,
+        2628
+      ],
+      [
+        3036,
+        2620
+      ],
+      [
+        3036,
+        2612
+      ],
+      [
+        3036,
+        2604
+      ],
+      [
+        3036,
+        2596
+      ],
+      [
+        3036,
+        2588
+      ],
+      [
+        3036,
+        2580
+      ],
+      [
+        3034,
+        2572
+      ],
+      [
+        3031,
+        2564
+      ],
+      [
+        3027,
+        2558
+      ],
+      [
+        3021,
+        2552
+      ],
+      [
+        3015,
+        2547
+      ],
+      [
+        3007,
+        2544
+      ],
+      [
+        3000,
+        2541
+      ],
+      [
+        2992,
+        2540
+      ],
+      [
+        2984,
+        2540
+      ],
+      [
+        2976,
+        2541
+      ],
+      [
+        2968,
+        2544
+      ],
+      [
+        2961,
+        2547
+      ],
+      [
+        2954,
+        2552
+      ],
+      [
+        2948,
+        2556
+      ],
+      [
+        2941,
+        2561
+      ],
+      [
+        2936,
+        2566
+      ],
+      [
+        2930,
+        2572
+      ],
+      [
+        2925,
+        2578
+      ],
+      [
+        2919,
+        2584
+      ],
+      [
+        2913,
+        2589
+      ],
+      [
+        2908,
+        2595
+      ],
+      [
+        2903,
+        2601
+      ],
+      [
+        2897,
+        2607
+      ],
+      [
+        2892,
+        2613
+      ],
+      [
+        2887,
+        2619
+      ],
+      [
+        2882,
+        2625
+      ],
+      [
+        2877,
+        2632
+      ],
+      [
+        2871,
+        2638
+      ],
+      [
+        2866,
+        2644
+      ],
+      [
+        2861,
+        2650
+      ],
+      [
+        2856,
+        2656
+      ],
+      [
+        2851,
+        2662
+      ],
+      [
+        2846,
+        2668
+      ],
+      [
+        2841,
+        2674
+      ],
+      [
+        2835,
+        2681
+      ],
+      [
+        2830,
+        2687
+      ]
+    ],
+    "paths": [
+      [
+        [
+          2845,
+          2671
+        ],
+        [
+          2840,
+          2677
+        ],
+        [
+          2835,
+          2683
+        ],
+        [
+          2829,
+          2690
+        ],
+        [
+          2824,
+          2696
+        ],
+        [
+          2819,
+          2702
+        ],
+        [
+          2814,
+          2708
+        ],
+        [
+          2809,
+          2714
+        ],
+        [
+          2805,
+          2721
+        ],
+        [
+          2801,
+          2728
+        ],
+        [
+          2797,
+          2735
+        ],
+        [
+          2792,
+          2741
+        ],
+        [
+          2787,
+          2748
+        ],
+        [
+          2783,
+          2754
+        ],
+        [
+          2778,
+          2761
+        ],
+        [
+          2773,
+          2767
+        ],
+        [
+          2768,
+          2773
+        ],
+        [
+          2763,
+          2779
+        ],
+        [
+          2758,
+          2785
+        ],
+        [
+          2752,
+          2791
+        ],
+        [
+          2747,
+          2797
+        ],
+        [
+          2741,
+          2803
+        ],
+        [
+          2735,
+          2808
+        ],
+        [
+          2729,
+          2814
+        ],
+        [
+          2723,
+          2819
+        ],
+        [
+          2717,
+          2823
+        ],
+        [
+          2710,
+          2828
+        ],
+        [
+          2703,
+          2832
+        ],
+        [
+          2696,
+          2835
+        ],
+        [
+          2688,
+          2838
+        ],
+        [
+          2681,
+          2840
+        ],
+        [
+          2673,
+          2842
+        ],
+        [
+          2665,
+          2845
+        ],
+        [
+          2657,
+          2846
+        ],
+        [
+          2650,
+          2848
+        ],
+        [
+          2642,
+          2849
+        ],
+        [
+          2634,
+          2851
+        ],
+        [
+          2626,
+          2852
+        ],
+        [
+          2618,
+          2852
+        ],
+        [
+          2610,
+          2852
+        ],
+        [
+          2602,
+          2852
+        ],
+        [
+          2594,
+          2852
+        ],
+        [
+          2586,
+          2851
+        ],
+        [
+          2578,
+          2850
+        ],
+        [
+          2570,
+          2848
+        ],
+        [
+          2563,
+          2845
+        ],
+        [
+          2556,
+          2841
+        ],
+        [
+          2549,
+          2837
+        ],
+        [
+          2543,
+          2832
+        ],
+        [
+          2537,
+          2826
+        ],
+        [
+          2532,
+          2820
+        ],
+        [
+          2527,
+          2814
+        ],
+        [
+          2522,
+          2807
+        ],
+        [
+          2519,
+          2800
+        ],
+        [
+          2515,
+          2793
+        ],
+        [
+          2512,
+          2786
+        ],
+        [
+          2509,
+          2778
+        ],
+        [
+          2506,
+          2771
+        ],
+        [
+          2503,
+          2763
+        ],
+        [
+          2499,
+          2756
+        ],
+        [
+          2495,
+          2749
+        ],
+        [
+          2491,
+          2743
+        ],
+        [
+          2486,
+          2736
+        ],
+        [
+          2481,
+          2730
+        ],
+        [
+          2475,
+          2724
+        ],
+        [
+          2470,
+          2719
+        ],
+        [
+          2464,
+          2713
+        ],
+        [
+          2459,
+          2707
+        ],
+        [
+          2452,
+          2702
+        ],
+        [
+          2446,
+          2698
+        ],
+        [
+          2439,
+          2694
+        ],
+        [
+          2432,
+          2690
+        ],
+        [
+          2424,
+          2687
+        ],
+        [
+          2417,
+          2685
+        ],
+        [
+          2409,
+          2682
+        ],
+        [
+          2401,
+          2681
+        ],
+        [
+          2393,
+          2680
+        ],
+        [
+          2385,
+          2680
+        ],
+        [
+          2377,
+          2680
+        ],
+        [
+          2369,
+          2681
+        ],
+        [
+          2361,
+          2682
+        ],
+        [
+          2353,
+          2683
+        ],
+        [
+          2346,
+          2685
+        ],
+        [
+          2339,
+          2687
+        ],
+        [
+          2347,
+          2688
+        ],
+        [
+          2355,
+          2689
+        ],
+        [
+          2363,
+          2690
+        ],
+        [
+          2371,
+          2691
+        ],
+        [
+          2379,
+          2692
+        ],
+        [
+          2387,
+          2693
+        ],
+        [
+          2395,
+          2694
+        ],
+        [
+          2403,
+          2695
+        ],
+        [
+          2411,
+          2696
+        ],
+        [
+          2418,
+          2697
+        ],
+        [
+          2426,
+          2698
+        ],
+        [
+          2434,
+          2699
+        ],
+        [
+          2442,
+          2700
+        ],
+        [
+          2450,
+          2700
+        ],
+        [
+          2458,
+          2701
+        ],
+        [
+          2455,
+          2697
+        ],
+        [
+          2448,
+          2693
+        ],
+        [
+          2441,
+          2690
+        ],
+        [
+          2433,
+          2689
+        ],
+        [
+          2425,
+          2687
+        ],
+        [
+          2417,
+          2686
+        ],
+        [
+          2409,
+          2685
+        ],
+        [
+          2401,
+          2683
+        ],
+        [
+          2393,
+          2683
+        ],
+        [
+          2385,
+          2683
+        ],
+        [
+          2377,
+          2683
+        ],
+        [
+          2369,
+          2684
+        ],
+        [
+          2362,
+          2686
+        ],
+        [
+          2354,
+          2688
+        ],
+        [
+          2346,
+          2690
+        ],
+        [
+          2339,
+          2693
+        ],
+        [
+          2332,
+          2697
+        ],
+        [
+          2325,
+          2701
+        ],
+        [
+          2319,
+          2706
+        ],
+        [
+          2313,
+          2712
+        ],
+        [
+          2308,
+          2718
+        ],
+        [
+          2303,
+          2724
+        ],
+        [
+          2297,
+          2730
+        ],
+        [
+          2293,
+          2737
+        ],
+        [
+          2289,
+          2743
+        ],
+        [
+          2285,
+          2750
+        ],
+        [
+          2281,
+          2758
+        ],
+        [
+          2278,
+          2765
+        ],
+        [
+          2275,
+          2772
+        ],
+        [
+          2272,
+          2780
+        ],
+        [
+          2270,
+          2787
+        ],
+        [
+          2267,
+          2795
+        ],
+        [
+          2264,
+          2802
+        ],
+        [
+          2261,
+          2810
+        ],
+        [
+          2259,
+          2817
+        ],
+        [
+          2256,
+          2825
+        ],
+        [
+          2253,
+          2832
+        ],
+        [
+          2250,
+          2840
+        ],
+        [
+          2247,
+          2847
+        ],
+        [
+          2244,
+          2855
+        ],
+        [
+          2241,
+          2862
+        ],
+        [
+          2239,
+          2870
+        ],
+        [
+          2236,
+          2877
+        ],
+        [
+          2233,
+          2885
+        ],
+        [
+          2230,
+          2892
+        ],
+        [
+          2227,
+          2900
+        ],
+        [
+          2224,
+          2907
+        ],
+        [
+          2221,
+          2915
+        ],
+        [
+          2218,
+          2922
+        ],
+        [
+          2215,
+          2929
+        ],
+        [
+          2212,
+          2937
+        ],
+        [
+          2209,
+          2944
+        ],
+        [
+          2206,
+          2952
+        ],
+        [
+          2203,
+          2959
+        ],
+        [
+          2200,
+          2966
+        ],
+        [
+          2197,
+          2974
+        ],
+        [
+          2194,
+          2981
+        ],
+        [
+          2191,
+          2989
+        ],
+        [
+          2188,
+          2996
+        ],
+        [
+          2185,
+          3003
+        ],
+        [
+          2182,
+          3011
+        ],
+        [
+          2179,
+          3018
+        ],
+        [
+          2178,
+          3026
+        ],
+        [
+          2178,
+          3034
+        ],
+        [
+          2180,
+          3042
+        ],
+        [
+          2183,
+          3049
+        ],
+        [
+          2188,
+          3055
+        ],
+        [
+          2196,
+          3058
+        ],
+        [
+          2203,
+          3056
+        ],
+        [
+          2209,
+          3050
+        ],
+        [
+          2214,
+          3044
+        ],
+        [
+          2217,
+          3036
+        ],
+        [
+          2220,
+          3029
+        ],
+        [
+          2223,
+          3022
+        ],
+        [
+          2226,
+          3014
+        ],
+        [
+          2228,
+          3006
+        ],
+        [
+          2230,
+          2999
+        ],
+        [
+          2233,
+          2991
+        ],
+        [
+          2235,
+          2983
+        ],
+        [
+          2238,
+          2976
+        ],
+        [
+          2242,
+          2969
+        ],
+        [
+          2246,
+          2962
+        ],
+        [
+          2252,
+          2956
+        ],
+        [
+          2257,
+          2951
+        ],
+        [
+          2264,
+          2946
+        ],
+        [
+          2270,
+          2942
+        ],
+        [
+          2278,
+          2938
+        ],
+        [
+          2285,
+          2936
+        ],
+        [
+          2293,
+          2933
+        ],
+        [
+          2300,
+          2931
+        ],
+        [
+          2308,
+          2929
+        ],
+        [
+          2316,
+          2927
+        ],
+        [
+          2324,
+          2926
+        ],
+        [
+          2332,
+          2925
+        ],
+        [
+          2340,
+          2924
+        ],
+        [
+          2348,
+          2924
+        ],
+        [
+          2356,
+          2923
+        ],
+        [
+          2364,
+          2922
+        ],
+        [
+          2372,
+          2922
+        ],
+        [
+          2380,
+          2921
+        ],
+        [
+          2388,
+          2921
+        ],
+        [
+          2396,
+          2920
+        ],
+        [
+          2404,
+          2919
+        ],
+        [
+          2412,
+          2919
+        ],
+        [
+          2420,
+          2918
+        ],
+        [
+          2428,
+          2917
+        ],
+        [
+          2436,
+          2917
+        ],
+        [
+          2444,
+          2916
+        ],
+        [
+          2452,
+          2916
+        ],
+        [
+          2460,
+          2915
+        ],
+        [
+          2468,
+          2914
+        ],
+        [
+          2475,
+          2914
+        ],
+        [
+          2483,
+          2913
+        ],
+        [
+          2491,
+          2913
+        ],
+        [
+          2499,
+          2913
+        ],
+        [
+          2507,
+          2912
+        ],
+        [
+          2515,
+          2912
+        ],
+        [
+          2523,
+          2911
+        ],
+        [
+          2531,
+          2911
+        ],
+        [
+          2539,
+          2910
+        ],
+        [
+          2547,
+          2910
+        ],
+        [
+          2555,
+          2909
+        ],
+        [
+          2563,
+          2909
+        ],
+        [
+          2571,
+          2908
+        ],
+        [
+          2579,
+          2908
+        ],
+        [
+          2587,
+          2907
+        ],
+        [
+          2595,
+          2907
+        ],
+        [
+          2603,
+          2906
+        ],
+        [
+          2611,
+          2905
+        ],
+        [
+          2619,
+          2904
+        ],
+        [
+          2627,
+          2904
+        ],
+        [
+          2635,
+          2903
+        ],
+        [
+          2643,
+          2902
+        ],
+        [
+          2651,
+          2901
+        ],
+        [
+          2659,
+          2901
+        ],
+        [
+          2667,
+          2900
+        ],
+        [
+          2675,
+          2899
+        ],
+        [
+          2683,
+          2898
+        ],
+        [
+          2691,
+          2896
+        ],
+        [
+          2698,
+          2894
+        ],
+        [
+          2706,
+          2892
+        ],
+        [
+          2714,
+          2889
+        ],
+        [
+          2721,
+          2886
+        ],
+        [
+          2728,
+          2882
+        ],
+        [
+          2735,
+          2878
+        ],
+        [
+          2741,
+          2873
+        ],
+        [
+          2747,
+          2868
+        ],
+        [
+          2754,
+          2863
+        ],
+        [
+          2760,
+          2858
+        ],
+        [
+          2766,
+          2852
+        ],
+        [
+          2771,
+          2847
+        ],
+        [
+          2777,
+          2841
+        ],
+        [
+          2783,
+          2835
+        ],
+        [
+          2788,
+          2830
+        ],
+        [
+          2794,
+          2824
+        ],
+        [
+          2800,
+          2819
+        ],
+        [
+          2806,
+          2814
+        ],
+        [
+          2812,
+          2809
+        ],
+        [
+          2820,
+          2806
+        ],
+        [
+          2827,
+          2803
+        ],
+        [
+          2835,
+          2801
+        ],
+        [
+          2843,
+          2800
+        ],
+        [
+          2851,
+          2799
+        ],
+        [
+          2859,
+          2799
+        ],
+        [
+          2867,
+          2798
+        ],
+        [
+          2875,
+          2798
+        ],
+        [
+          2883,
+          2798
+        ],
+        [
+          2891,
+          2798
+        ],
+        [
+          2899,
+          2799
+        ],
+        [
+          2907,
+          2799
+        ],
+        [
+          2915,
+          2800
+        ],
+        [
+          2923,
+          2800
+        ],
+        [
+          2931,
+          2801
+        ],
+        [
+          2939,
+          2801
+        ],
+        [
+          2947,
+          2801
+        ],
+        [
+          2955,
+          2801
+        ],
+        [
+          2963,
+          2801
+        ],
+        [
+          2971,
+          2801
+        ],
+        [
+          2979,
+          2800
+        ],
+        [
+          2987,
+          2798
+        ],
+        [
+          2994,
+          2796
+        ],
+        [
+          3001,
+          2792
+        ],
+        [
+          3008,
+          2788
+        ],
+        [
+          3015,
+          2784
+        ],
+        [
+          3020,
+          2778
+        ],
+        [
+          3024,
+          2771
+        ],
+        [
+          3026,
+          2763
+        ],
+        [
+          3028,
+          2755
+        ],
+        [
+          3030,
+          2747
+        ],
+        [
+          3030,
+          2739
+        ],
+        [
+          3031,
+          2731
+        ],
+        [
+          3031,
+          2723
+        ],
+        [
+          3031,
+          2715
+        ],
+        [
+          3032,
+          2708
+        ],
+        [
+          3032,
+          2700
+        ],
+        [
+          3032,
+          2692
+        ],
+        [
+          3033,
+          2684
+        ],
+        [
+          3033,
+          2676
+        ],
+        [
+          3033,
+          2668
+        ],
+        [
+          3034,
+          2660
+        ],
+        [
+          3034,
+          2652
+        ],
+        [
+          3034,
+          2644
+        ],
+        [
+          3035,
+          2636
+        ],
+        [
+          3036,
+          2628
+        ],
+        [
+          3036,
+          2620
+        ],
+        [
+          3036,
+          2612
+        ],
+        [
+          3036,
+          2604
+        ],
+        [
+          3036,
+          2596
+        ],
+        [
+          3036,
+          2588
+        ],
+        [
+          3036,
+          2580
+        ],
+        [
+          3034,
+          2572
+        ],
+        [
+          3031,
+          2564
+        ],
+        [
+          3027,
+          2558
+        ],
+        [
+          3021,
+          2552
+        ],
+        [
+          3015,
+          2547
+        ],
+        [
+          3007,
+          2544
+        ],
+        [
+          3000,
+          2541
+        ],
+        [
+          2992,
+          2540
+        ],
+        [
+          2984,
+          2540
+        ],
+        [
+          2976,
+          2541
+        ],
+        [
+          2968,
+          2544
+        ],
+        [
+          2961,
+          2547
+        ],
+        [
+          2954,
+          2552
+        ],
+        [
+          2948,
+          2556
+        ],
+        [
+          2941,
+          2561
+        ],
+        [
+          2936,
+          2566
+        ],
+        [
+          2930,
+          2572
+        ],
+        [
+          2925,
+          2578
+        ],
+        [
+          2919,
+          2584
+        ],
+        [
+          2913,
+          2589
+        ],
+        [
+          2908,
+          2595
+        ],
+        [
+          2903,
+          2601
+        ],
+        [
+          2897,
+          2607
+        ],
+        [
+          2892,
+          2613
+        ],
+        [
+          2887,
+          2619
+        ],
+        [
+          2882,
+          2625
+        ],
+        [
+          2877,
+          2632
+        ],
+        [
+          2871,
+          2638
+        ],
+        [
+          2866,
+          2644
+        ],
+        [
+          2861,
+          2650
+        ],
+        [
+          2856,
+          2656
+        ],
+        [
+          2851,
+          2662
+        ],
+        [
+          2846,
+          2668
+        ],
+        [
+          2841,
+          2674
+        ],
+        [
+          2835,
+          2681
+        ],
+        [
+          2830,
+          2687
+        ]
+      ]
+    ],
+    "turns": [
+      {
+        "id": "G1",
+        "apex": [
+          2549,
+          2837
+        ],
+        "s": 376,
+        "radius_m": 77,
+        "dir": "L",
+        "deg": 112,
+        "len_m": 276,
+        "entry": [
+          2738,
+          2806
+        ],
+        "exit": [
+          2509,
+          2778
+        ],
+        "speed_ref_lap": 122
+      },
+      {
+        "id": "G2",
+        "apex": [
+          2491,
+          2743
+        ],
+        "s": 488,
+        "radius_m": 139,
+        "dir": "R",
+        "deg": 15,
+        "len_m": 48,
+        "entry": [
+          2501,
+          2760
+        ],
+        "exit": [
+          2473,
+          2721
+        ],
+        "speed_ref_lap": 120
+      },
+      {
+        "id": "G3",
+        "apex": [
+          2339,
+          2687
+        ],
+        "s": 664,
+        "radius_m": 10,
+        "dir": "R",
+        "deg": 145,
+        "len_m": 152,
+        "entry": [
+          2459,
+          2707
+        ],
+        "exit": [
+          2363,
+          2690
+        ],
+        "speed_ref_lap": 120
+      },
+      {
+        "id": "G4",
+        "apex": [
+          2445,
+          2691
+        ],
+        "s": 804,
+        "radius_m": 9,
+        "dir": "R",
+        "deg": 177,
+        "len_m": 48,
+        "entry": [
+          2454,
+          2701
+        ],
+        "exit": [
+          2421,
+          2687
+        ],
+        "speed_ref_lap": 46
+      },
+      {
+        "id": "G5",
+        "apex": [
+          2325,
+          2701
+        ],
+        "s": 928,
+        "radius_m": 77,
+        "dir": "R",
+        "deg": 75,
+        "len_m": 176,
+        "entry": [
+          2401,
+          2683
+        ],
+        "exit": [
+          2272,
+          2780
+        ],
+        "speed_ref_lap": 96
+      },
+      {
+        "id": "G6",
+        "apex": [
+          2200,
+          3057
+        ],
+        "s": 1332,
+        "radius_m": 16,
+        "dir": "R",
+        "deg": 179,
+        "len_m": 120,
+        "entry": [
+          2180,
+          3015
+        ],
+        "exit": [
+          2229,
+          3003
+        ],
+        "speed_ref_lap": 31
+      },
+      {
+        "id": "G7",
+        "apex": [
+          2270,
+          2942
+        ],
+        "s": 1472,
+        "radius_m": 69,
+        "dir": "L",
+        "deg": 63,
+        "len_m": 132,
+        "entry": [
+          2237,
+          2980
+        ],
+        "exit": [
+          2348,
+          2924
+        ],
+        "speed_ref_lap": 98
+      },
+      {
+        "id": "G8",
+        "apex": [
+          2738,
+          2876
+        ],
+        "s": 1948,
+        "radius_m": 119,
+        "dir": "R",
+        "deg": 35,
+        "len_m": 108,
+        "entry": [
+          2687,
+          2897
+        ],
+        "exit": [
+          2777,
+          2841
+        ],
+        "speed_ref_lap": 134
+      },
+      {
+        "id": "G9",
+        "apex": [
+          2820,
+          2806
+        ],
+        "s": 2056,
+        "radius_m": 71,
+        "dir": "L",
+        "deg": 43,
+        "len_m": 96,
+        "entry": [
+          2800,
+          2819
+        ],
+        "exit": [
+          2891,
+          2798
+        ],
+        "speed_ref_lap": 92
+      },
+      {
+        "id": "G10",
+        "apex": [
+          3022,
+          2774
+        ],
+        "s": 2268,
+        "radius_m": 43,
+        "dir": "R",
+        "deg": 83,
+        "len_m": 108,
+        "entry": [
+          2975,
+          2800
+        ],
+        "exit": [
+          3031,
+          2723
+        ],
+        "speed_ref_lap": 79
+      },
+      {
+        "id": "G11",
+        "apex": [
+          3018,
+          2550
+        ],
+        "s": 2500,
+        "radius_m": 42,
+        "dir": "R",
+        "deg": 131,
+        "len_m": 148,
+        "entry": [
+          3036,
+          2584
+        ],
+        "exit": [
+          2925,
+          2578
+        ],
+        "speed_ref_lap": 78
+      }
+    ],
+    "session": "fh6_20260822_131217",
+    "lap_paths": [
+      {
+        "session": "fh6_20260822_131217",
+        "ev": 0,
+        "lap": 1,
+        "pts": [
+          [
+            2845,
+            2671
+          ],
+          [
+            2829,
+            2690
+          ],
+          [
+            2814,
+            2708
+          ],
+          [
+            2801,
+            2728
+          ],
+          [
+            2787,
+            2748
+          ],
+          [
+            2773,
+            2767
+          ],
+          [
+            2758,
+            2785
+          ],
+          [
+            2741,
+            2803
+          ],
+          [
+            2723,
+            2819
+          ],
+          [
+            2703,
+            2832
+          ],
+          [
+            2681,
+            2840
+          ],
+          [
+            2657,
+            2846
+          ],
+          [
+            2634,
+            2851
+          ],
+          [
+            2610,
+            2852
+          ],
+          [
+            2586,
+            2851
+          ],
+          [
+            2563,
+            2845
+          ],
+          [
+            2543,
+            2832
+          ],
+          [
+            2527,
+            2814
+          ],
+          [
+            2515,
+            2793
+          ],
+          [
+            2506,
+            2771
+          ],
+          [
+            2495,
+            2749
+          ],
+          [
+            2481,
+            2730
+          ],
+          [
+            2464,
+            2713
+          ],
+          [
+            2446,
+            2698
+          ],
+          [
+            2424,
+            2687
+          ],
+          [
+            2401,
+            2681
+          ],
+          [
+            2377,
+            2680
+          ],
+          [
+            2353,
+            2683
+          ],
+          [
+            2347,
+            2688
+          ],
+          [
+            2371,
+            2691
+          ],
+          [
+            2395,
+            2694
+          ],
+          [
+            2418,
+            2697
+          ],
+          [
+            2442,
+            2700
+          ],
+          [
+            2455,
+            2697
+          ],
+          [
+            2433,
+            2689
+          ],
+          [
+            2409,
+            2685
+          ],
+          [
+            2385,
+            2683
+          ],
+          [
+            2362,
+            2686
+          ],
+          [
+            2339,
+            2693
+          ],
+          [
+            2319,
+            2706
+          ],
+          [
+            2303,
+            2724
+          ],
+          [
+            2289,
+            2743
+          ],
+          [
+            2278,
+            2765
+          ],
+          [
+            2270,
+            2787
+          ],
+          [
+            2261,
+            2810
+          ],
+          [
+            2253,
+            2832
+          ],
+          [
+            2244,
+            2855
+          ],
+          [
+            2236,
+            2877
+          ],
+          [
+            2227,
+            2900
+          ],
+          [
+            2218,
+            2922
+          ],
+          [
+            2209,
+            2944
+          ],
+          [
+            2200,
+            2966
+          ],
+          [
+            2191,
+            2989
+          ],
+          [
+            2182,
+            3011
+          ],
+          [
+            2178,
+            3034
+          ],
+          [
+            2188,
+            3055
+          ],
+          [
+            2209,
+            3050
+          ],
+          [
+            2220,
+            3029
+          ],
+          [
+            2228,
+            3006
+          ],
+          [
+            2235,
+            2983
+          ],
+          [
+            2246,
+            2962
+          ],
+          [
+            2264,
+            2946
+          ],
+          [
+            2285,
+            2936
+          ],
+          [
+            2308,
+            2929
+          ],
+          [
+            2332,
+            2925
+          ],
+          [
+            2356,
+            2923
+          ],
+          [
+            2380,
+            2921
+          ],
+          [
+            2404,
+            2919
+          ],
+          [
+            2428,
+            2917
+          ],
+          [
+            2452,
+            2916
+          ],
+          [
+            2475,
+            2914
+          ],
+          [
+            2499,
+            2913
+          ],
+          [
+            2523,
+            2911
+          ],
+          [
+            2547,
+            2910
+          ],
+          [
+            2571,
+            2908
+          ],
+          [
+            2595,
+            2907
+          ],
+          [
+            2619,
+            2904
+          ],
+          [
+            2643,
+            2902
+          ],
+          [
+            2667,
+            2900
+          ],
+          [
+            2691,
+            2896
+          ],
+          [
+            2714,
+            2889
+          ],
+          [
+            2735,
+            2878
+          ],
+          [
+            2754,
+            2863
+          ],
+          [
+            2771,
+            2847
+          ],
+          [
+            2788,
+            2830
+          ],
+          [
+            2806,
+            2814
+          ],
+          [
+            2827,
+            2803
+          ],
+          [
+            2851,
+            2799
+          ],
+          [
+            2875,
+            2798
+          ],
+          [
+            2899,
+            2799
+          ],
+          [
+            2923,
+            2800
+          ],
+          [
+            2947,
+            2801
+          ],
+          [
+            2971,
+            2801
+          ],
+          [
+            2994,
+            2796
+          ],
+          [
+            3015,
+            2784
+          ],
+          [
+            3026,
+            2763
+          ],
+          [
+            3030,
+            2739
+          ],
+          [
+            3031,
+            2715
+          ],
+          [
+            3032,
+            2692
+          ],
+          [
+            3033,
+            2668
+          ],
+          [
+            3034,
+            2644
+          ],
+          [
+            3036,
+            2620
+          ],
+          [
+            3036,
+            2596
+          ],
+          [
+            3034,
+            2572
+          ],
+          [
+            3021,
+            2552
+          ],
+          [
+            3000,
+            2541
+          ],
+          [
+            2976,
+            2541
+          ],
+          [
+            2954,
+            2552
+          ],
+          [
+            2936,
+            2566
+          ],
+          [
+            2919,
+            2584
+          ],
+          [
+            2903,
+            2601
+          ],
+          [
+            2887,
+            2619
+          ],
+          [
+            2871,
+            2638
+          ],
+          [
+            2856,
+            2656
+          ],
+          [
+            2841,
+            2674
+          ]
+        ]
+      },
+      {
+        "session": "fh6_20260822_131217",
+        "ev": 0,
+        "lap": 2,
+        "pts": [
+          [
+            2826,
+            2692
+          ],
+          [
+            2811,
+            2711
+          ],
+          [
+            2796,
+            2730
+          ],
+          [
+            2783,
+            2750
+          ],
+          [
+            2769,
+            2770
+          ],
+          [
+            2754,
+            2788
+          ],
+          [
+            2739,
+            2807
+          ],
+          [
+            2719,
+            2821
+          ],
+          [
+            2698,
+            2832
+          ],
+          [
+            2677,
+            2843
+          ],
+          [
+            2655,
+            2853
+          ],
+          [
+            2632,
+            2858
+          ],
+          [
+            2608,
+            2853
+          ],
+          [
+            2585,
+            2846
+          ],
+          [
+            2602,
+            2843
+          ],
+          [
+            2625,
+            2840
+          ],
+          [
+            2649,
+            2838
+          ],
+          [
+            2673,
+            2835
+          ],
+          [
+            2697,
+            2832
+          ],
+          [
+            2705,
+            2835
+          ],
+          [
+            2683,
+            2844
+          ],
+          [
+            2660,
+            2850
+          ],
+          [
+            2636,
+            2854
+          ],
+          [
+            2612,
+            2857
+          ],
+          [
+            2589,
+            2856
+          ],
+          [
+            2566,
+            2849
+          ],
+          [
+            2546,
+            2835
+          ],
+          [
+            2530,
+            2817
+          ],
+          [
+            2515,
+            2798
+          ],
+          [
+            2504,
+            2777
+          ],
+          [
+            2495,
+            2755
+          ],
+          [
+            2484,
+            2733
+          ],
+          [
+            2470,
+            2714
+          ],
+          [
+            2453,
+            2697
+          ],
+          [
+            2431,
+            2687
+          ],
+          [
+            2408,
+            2682
+          ],
+          [
+            2384,
+            2681
+          ],
+          [
+            2360,
+            2684
+          ],
+          [
+            2338,
+            2692
+          ],
+          [
+            2317,
+            2704
+          ],
+          [
+            2300,
+            2721
+          ],
+          [
+            2287,
+            2741
+          ],
+          [
+            2277,
+            2763
+          ],
+          [
+            2270,
+            2786
+          ],
+          [
+            2265,
+            2809
+          ],
+          [
+            2258,
+            2832
+          ],
+          [
+            2248,
+            2854
+          ],
+          [
+            2239,
+            2876
+          ],
+          [
+            2229,
+            2898
+          ],
+          [
+            2219,
+            2920
+          ],
+          [
+            2210,
+            2942
+          ],
+          [
+            2201,
+            2964
+          ],
+          [
+            2192,
+            2987
+          ],
+          [
+            2184,
+            3009
+          ],
+          [
+            2178,
+            3032
+          ],
+          [
+            2187,
+            3053
+          ],
+          [
+            2209,
+            3048
+          ],
+          [
+            2222,
+            3028
+          ],
+          [
+            2230,
+            3005
+          ],
+          [
+            2237,
+            2982
+          ],
+          [
+            2246,
+            2960
+          ],
+          [
+            2262,
+            2943
+          ],
+          [
+            2283,
+            2932
+          ],
+          [
+            2306,
+            2927
+          ],
+          [
+            2330,
+            2923
+          ],
+          [
+            2354,
+            2919
+          ],
+          [
+            2378,
+            2917
+          ],
+          [
+            2402,
+            2916
+          ],
+          [
+            2426,
+            2914
+          ],
+          [
+            2450,
+            2913
+          ],
+          [
+            2474,
+            2912
+          ],
+          [
+            2498,
+            2911
+          ],
+          [
+            2521,
+            2910
+          ],
+          [
+            2545,
+            2909
+          ],
+          [
+            2569,
+            2907
+          ],
+          [
+            2593,
+            2906
+          ],
+          [
+            2617,
+            2903
+          ],
+          [
+            2641,
+            2902
+          ],
+          [
+            2665,
+            2899
+          ],
+          [
+            2689,
+            2894
+          ],
+          [
+            2711,
+            2887
+          ],
+          [
+            2732,
+            2875
+          ],
+          [
+            2750,
+            2859
+          ],
+          [
+            2766,
+            2841
+          ],
+          [
+            2783,
+            2825
+          ],
+          [
+            2803,
+            2811
+          ],
+          [
+            2825,
+            2802
+          ],
+          [
+            2849,
+            2798
+          ],
+          [
+            2873,
+            2797
+          ],
+          [
+            2897,
+            2796
+          ],
+          [
+            2921,
+            2797
+          ],
+          [
+            2944,
+            2799
+          ],
+          [
+            2968,
+            2800
+          ],
+          [
+            2992,
+            2795
+          ],
+          [
+            3013,
+            2784
+          ],
+          [
+            3024,
+            2763
+          ],
+          [
+            3028,
+            2739
+          ],
+          [
+            3032,
+            2715
+          ],
+          [
+            3033,
+            2692
+          ],
+          [
+            3033,
+            2668
+          ],
+          [
+            3034,
+            2644
+          ],
+          [
+            3036,
+            2620
+          ],
+          [
+            3037,
+            2596
+          ],
+          [
+            3036,
+            2572
+          ],
+          [
+            3024,
+            2551
+          ],
+          [
+            3003,
+            2541
+          ],
+          [
+            2979,
+            2541
+          ],
+          [
+            2958,
+            2552
+          ],
+          [
+            2939,
+            2567
+          ],
+          [
+            2923,
+            2585
+          ],
+          [
+            2908,
+            2603
+          ],
+          [
+            2892,
+            2621
+          ],
+          [
+            2876,
+            2639
+          ],
+          [
+            2861,
+            2658
+          ],
+          [
+            2846,
+            2677
+          ]
+        ]
+      },
+      {
+        "session": "fh6_20260822_131217",
+        "ev": 1,
+        "lap": 1,
+        "pts": [
+          [
+            2500,
+            2775
+          ],
+          [
+            2494,
+            2760
+          ],
+          [
+            2488,
+            2746
+          ],
+          [
+            2481,
+            2731
+          ],
+          [
+            2473,
+            2717
+          ],
+          [
+            2463,
+            2705
+          ],
+          [
+            2451,
+            2695
+          ],
+          [
+            2437,
+            2687
+          ],
+          [
+            2421,
+            2682
+          ],
+          [
+            2405,
+            2680
+          ],
+          [
+            2389,
+            2680
+          ],
+          [
+            2374,
+            2681
+          ],
+          [
+            2358,
+            2685
+          ],
+          [
+            2343,
+            2691
+          ],
+          [
+            2329,
+            2699
+          ],
+          [
+            2316,
+            2708
+          ],
+          [
+            2304,
+            2718
+          ],
+          [
+            2294,
+            2731
+          ],
+          [
+            2286,
+            2745
+          ],
+          [
+            2280,
+            2759
+          ],
+          [
+            2275,
+            2775
+          ],
+          [
+            2273,
+            2790
+          ],
+          [
+            2270,
+            2806
+          ],
+          [
+            2265,
+            2822
+          ],
+          [
+            2260,
+            2837
+          ],
+          [
+            2254,
+            2851
+          ],
+          [
+            2246,
+            2865
+          ],
+          [
+            2238,
+            2879
+          ],
+          [
+            2230,
+            2893
+          ],
+          [
+            2221,
+            2907
+          ],
+          [
+            2214,
+            2921
+          ],
+          [
+            2208,
+            2936
+          ],
+          [
+            2203,
+            2951
+          ],
+          [
+            2198,
+            2966
+          ],
+          [
+            2192,
+            2981
+          ],
+          [
+            2186,
+            2996
+          ],
+          [
+            2181,
+            3011
+          ],
+          [
+            2177,
+            3026
+          ],
+          [
+            2179,
+            3042
+          ],
+          [
+            2189,
+            3054
+          ],
+          [
+            2204,
+            3051
+          ],
+          [
+            2213,
+            3038
+          ],
+          [
+            2220,
+            3024
+          ],
+          [
+            2226,
+            3009
+          ],
+          [
+            2230,
+            2994
+          ],
+          [
+            2235,
+            2978
+          ],
+          [
+            2243,
+            2964
+          ],
+          [
+            2253,
+            2952
+          ],
+          [
+            2266,
+            2943
+          ],
+          [
+            2281,
+            2937
+          ],
+          [
+            2296,
+            2933
+          ],
+          [
+            2312,
+            2931
+          ],
+          [
+            2328,
+            2929
+          ],
+          [
+            2344,
+            2927
+          ],
+          [
+            2360,
+            2925
+          ],
+          [
+            2376,
+            2923
+          ],
+          [
+            2392,
+            2922
+          ],
+          [
+            2408,
+            2921
+          ],
+          [
+            2424,
+            2920
+          ],
+          [
+            2440,
+            2918
+          ],
+          [
+            2456,
+            2917
+          ],
+          [
+            2472,
+            2916
+          ],
+          [
+            2487,
+            2914
+          ],
+          [
+            2503,
+            2913
+          ],
+          [
+            2519,
+            2911
+          ],
+          [
+            2535,
+            2911
+          ],
+          [
+            2551,
+            2910
+          ],
+          [
+            2567,
+            2909
+          ],
+          [
+            2583,
+            2908
+          ],
+          [
+            2599,
+            2906
+          ],
+          [
+            2615,
+            2905
+          ],
+          [
+            2631,
+            2903
+          ],
+          [
+            2647,
+            2902
+          ],
+          [
+            2663,
+            2900
+          ],
+          [
+            2679,
+            2898
+          ],
+          [
+            2694,
+            2895
+          ],
+          [
+            2710,
+            2890
+          ],
+          [
+            2724,
+            2883
+          ],
+          [
+            2737,
+            2874
+          ],
+          [
+            2749,
+            2864
+          ],
+          [
+            2760,
+            2851
+          ],
+          [
+            2771,
+            2840
+          ],
+          [
+            2783,
+            2829
+          ],
+          [
+            2795,
+            2819
+          ],
+          [
+            2809,
+            2811
+          ],
+          [
+            2823,
+            2804
+          ],
+          [
+            2839,
+            2801
+          ],
+          [
+            2855,
+            2799
+          ],
+          [
+            2871,
+            2799
+          ],
+          [
+            2887,
+            2799
+          ],
+          [
+            2903,
+            2799
+          ],
+          [
+            2919,
+            2800
+          ],
+          [
+            2935,
+            2801
+          ],
+          [
+            2951,
+            2801
+          ],
+          [
+            2967,
+            2800
+          ],
+          [
+            2983,
+            2799
+          ],
+          [
+            2998,
+            2795
+          ],
+          [
+            3012,
+            2787
+          ],
+          [
+            3021,
+            2774
+          ],
+          [
+            3025,
+            2758
+          ],
+          [
+            3027,
+            2743
+          ],
+          [
+            3029,
+            2727
+          ],
+          [
+            3031,
+            2711
+          ],
+          [
+            3033,
+            2695
+          ],
+          [
+            3034,
+            2679
+          ],
+          [
+            3034,
+            2663
+          ],
+          [
+            3034,
+            2647
+          ],
+          [
+            3035,
+            2631
+          ],
+          [
+            3036,
+            2615
+          ],
+          [
+            3037,
+            2599
+          ],
+          [
+            3037,
+            2583
+          ],
+          [
+            3035,
+            2567
+          ],
+          [
+            3027,
+            2554
+          ],
+          [
+            3013,
+            2545
+          ],
+          [
+            2998,
+            2540
+          ],
+          [
+            2982,
+            2540
+          ],
+          [
+            2967,
+            2545
+          ],
+          [
+            2953,
+            2552
+          ],
+          [
+            2941,
+            2563
+          ],
+          [
+            2929,
+            2574
+          ],
+          [
+            2919,
+            2586
+          ],
+          [
+            2908,
+            2598
+          ],
+          [
+            2898,
+            2610
+          ],
+          [
+            2887,
+            2622
+          ],
+          [
+            2877,
+            2635
+          ],
+          [
+            2867,
+            2647
+          ],
+          [
+            2857,
+            2660
+          ],
+          [
+            2847,
+            2672
+          ],
+          [
+            2837,
+            2685
+          ]
+        ]
+      },
+      {
+        "session": "fh6_20260822_131217",
+        "ev": 1,
+        "lap": 2,
+        "pts": [
+          [
+            2828,
+            2696
+          ],
+          [
+            2818,
+            2708
+          ],
+          [
+            2808,
+            2721
+          ],
+          [
+            2798,
+            2733
+          ],
+          [
+            2788,
+            2746
+          ],
+          [
+            2779,
+            2759
+          ],
+          [
+            2769,
+            2771
+          ],
+          [
+            2759,
+            2784
+          ],
+          [
+            2748,
+            2796
+          ],
+          [
+            2737,
+            2807
+          ],
+          [
+            2725,
+            2818
+          ],
+          [
+            2712,
+            2827
+          ],
+          [
+            2698,
+            2835
+          ],
+          [
+            2683,
+            2841
+          ],
+          [
+            2668,
+            2846
+          ],
+          [
+            2652,
+            2849
+          ],
+          [
+            2637,
+            2852
+          ],
+          [
+            2621,
+            2855
+          ],
+          [
+            2605,
+            2856
+          ],
+          [
+            2589,
+            2854
+          ],
+          [
+            2574,
+            2851
+          ],
+          [
+            2559,
+            2844
+          ],
+          [
+            2546,
+            2834
+          ],
+          [
+            2534,
+            2823
+          ],
+          [
+            2524,
+            2812
+          ],
+          [
+            2515,
+            2798
+          ],
+          [
+            2507,
+            2784
+          ],
+          [
+            2499,
+            2770
+          ],
+          [
+            2492,
+            2756
+          ],
+          [
+            2485,
+            2742
+          ],
+          [
+            2478,
+            2728
+          ],
+          [
+            2468,
+            2714
+          ],
+          [
+            2458,
+            2703
+          ],
+          [
+            2444,
+            2694
+          ],
+          [
+            2430,
+            2687
+          ],
+          [
+            2414,
+            2684
+          ],
+          [
+            2398,
+            2683
+          ],
+          [
+            2382,
+            2683
+          ],
+          [
+            2366,
+            2685
+          ],
+          [
+            2351,
+            2690
+          ],
+          [
+            2336,
+            2696
+          ],
+          [
+            2322,
+            2704
+          ],
+          [
+            2310,
+            2714
+          ],
+          [
+            2299,
+            2726
+          ],
+          [
+            2289,
+            2738
+          ],
+          [
+            2282,
+            2752
+          ],
+          [
+            2276,
+            2767
+          ],
+          [
+            2269,
+            2782
+          ],
+          [
+            2264,
+            2797
+          ],
+          [
+            2258,
+            2812
+          ],
+          [
+            2253,
+            2827
+          ],
+          [
+            2248,
+            2842
+          ],
+          [
+            2242,
+            2857
+          ],
+          [
+            2236,
+            2872
+          ],
+          [
+            2231,
+            2887
+          ],
+          [
+            2225,
+            2902
+          ],
+          [
+            2219,
+            2917
+          ],
+          [
+            2214,
+            2932
+          ],
+          [
+            2208,
+            2947
+          ],
+          [
+            2202,
+            2962
+          ],
+          [
+            2196,
+            2977
+          ],
+          [
+            2190,
+            2992
+          ],
+          [
+            2185,
+            3006
+          ],
+          [
+            2179,
+            3022
+          ],
+          [
+            2178,
+            3037
+          ],
+          [
+            2184,
+            3052
+          ],
+          [
+            2198,
+            3055
+          ],
+          [
+            2209,
+            3044
+          ],
+          [
+            2216,
+            3030
+          ],
+          [
+            2223,
+            3015
+          ],
+          [
+            2229,
+            3000
+          ],
+          [
+            2234,
+            2985
+          ],
+          [
+            2242,
+            2971
+          ],
+          [
+            2250,
+            2958
+          ],
+          [
+            2261,
+            2946
+          ],
+          [
+            2274,
+            2936
+          ],
+          [
+            2288,
+            2930
+          ],
+          [
+            2304,
+            2925
+          ],
+          [
+            2319,
+            2923
+          ],
+          [
+            2335,
+            2922
+          ],
+          [
+            2351,
+            2921
+          ],
+          [
+            2367,
+            2920
+          ],
+          [
+            2383,
+            2919
+          ],
+          [
+            2399,
+            2918
+          ],
+          [
+            2415,
+            2917
+          ],
+          [
+            2431,
+            2916
+          ],
+          [
+            2447,
+            2915
+          ],
+          [
+            2463,
+            2914
+          ],
+          [
+            2479,
+            2913
+          ],
+          [
+            2495,
+            2913
+          ],
+          [
+            2511,
+            2912
+          ],
+          [
+            2527,
+            2911
+          ],
+          [
+            2543,
+            2910
+          ],
+          [
+            2559,
+            2909
+          ],
+          [
+            2575,
+            2907
+          ],
+          [
+            2591,
+            2906
+          ],
+          [
+            2607,
+            2904
+          ],
+          [
+            2623,
+            2902
+          ],
+          [
+            2639,
+            2901
+          ],
+          [
+            2655,
+            2899
+          ],
+          [
+            2670,
+            2898
+          ],
+          [
+            2686,
+            2895
+          ],
+          [
+            2702,
+            2891
+          ],
+          [
+            2717,
+            2886
+          ],
+          [
+            2731,
+            2878
+          ],
+          [
+            2744,
+            2868
+          ],
+          [
+            2755,
+            2857
+          ],
+          [
+            2766,
+            2846
+          ],
+          [
+            2778,
+            2835
+          ],
+          [
+            2790,
+            2824
+          ],
+          [
+            2803,
+            2815
+          ],
+          [
+            2817,
+            2807
+          ],
+          [
+            2831,
+            2800
+          ],
+          [
+            2846,
+            2794
+          ],
+          [
+            2862,
+            2791
+          ],
+          [
+            2878,
+            2789
+          ],
+          [
+            2894,
+            2788
+          ],
+          [
+            2910,
+            2789
+          ],
+          [
+            2925,
+            2791
+          ],
+          [
+            2941,
+            2793
+          ],
+          [
+            2957,
+            2796
+          ],
+          [
+            2973,
+            2797
+          ],
+          [
+            2989,
+            2795
+          ],
+          [
+            3004,
+            2789
+          ],
+          [
+            3016,
+            2778
+          ],
+          [
+            3022,
+            2764
+          ],
+          [
+            3026,
+            2748
+          ],
+          [
+            3029,
+            2733
+          ],
+          [
+            3031,
+            2717
+          ]
+        ]
+      },
+      {
+        "session": "fh6_20260822_131217",
+        "ev": 3,
+        "lap": 1,
+        "pts": [
+          [
+            2671,
+            2843
+          ],
+          [
+            2655,
+            2845
+          ],
+          [
+            2639,
+            2848
+          ],
+          [
+            2623,
+            2851
+          ],
+          [
+            2607,
+            2853
+          ],
+          [
+            2591,
+            2852
+          ],
+          [
+            2576,
+            2850
+          ],
+          [
+            2560,
+            2845
+          ],
+          [
+            2547,
+            2837
+          ],
+          [
+            2534,
+            2827
+          ],
+          [
+            2523,
+            2815
+          ],
+          [
+            2515,
+            2802
+          ],
+          [
+            2508,
+            2787
+          ],
+          [
+            2501,
+            2773
+          ],
+          [
+            2494,
+            2759
+          ],
+          [
+            2487,
+            2744
+          ],
+          [
+            2479,
+            2730
+          ],
+          [
+            2470,
+            2717
+          ],
+          [
+            2460,
+            2705
+          ],
+          [
+            2447,
+            2695
+          ],
+          [
+            2433,
+            2688
+          ],
+          [
+            2417,
+            2684
+          ],
+          [
+            2401,
+            2683
+          ],
+          [
+            2385,
+            2684
+          ],
+          [
+            2370,
+            2685
+          ],
+          [
+            2354,
+            2689
+          ],
+          [
+            2339,
+            2695
+          ],
+          [
+            2325,
+            2702
+          ],
+          [
+            2312,
+            2712
+          ],
+          [
+            2301,
+            2723
+          ],
+          [
+            2291,
+            2736
+          ],
+          [
+            2284,
+            2750
+          ],
+          [
+            2278,
+            2765
+          ],
+          [
+            2275,
+            2781
+          ],
+          [
+            2271,
+            2796
+          ],
+          [
+            2267,
+            2812
+          ],
+          [
+            2262,
+            2827
+          ],
+          [
+            2257,
+            2842
+          ],
+          [
+            2251,
+            2857
+          ],
+          [
+            2245,
+            2872
+          ],
+          [
+            2240,
+            2887
+          ],
+          [
+            2233,
+            2902
+          ],
+          [
+            2226,
+            2916
+          ],
+          [
+            2219,
+            2930
+          ],
+          [
+            2212,
+            2944
+          ],
+          [
+            2205,
+            2959
+          ],
+          [
+            2198,
+            2973
+          ],
+          [
+            2192,
+            2988
+          ],
+          [
+            2186,
+            3003
+          ],
+          [
+            2180,
+            3018
+          ],
+          [
+            2176,
+            3033
+          ],
+          [
+            2180,
+            3048
+          ],
+          [
+            2193,
+            3056
+          ],
+          [
+            2207,
+            3049
+          ],
+          [
+            2217,
+            3036
+          ],
+          [
+            2223,
+            3021
+          ],
+          [
+            2226,
+            3006
+          ],
+          [
+            2229,
+            2990
+          ],
+          [
+            2235,
+            2975
+          ],
+          [
+            2244,
+            2962
+          ],
+          [
+            2255,
+            2951
+          ],
+          [
+            2268,
+            2942
+          ],
+          [
+            2283,
+            2935
+          ],
+          [
+            2298,
+            2930
+          ],
+          [
+            2313,
+            2926
+          ],
+          [
+            2329,
+            2924
+          ],
+          [
+            2345,
+            2922
+          ],
+          [
+            2361,
+            2921
+          ],
+          [
+            2377,
+            2920
+          ],
+          [
+            2393,
+            2918
+          ],
+          [
+            2409,
+            2917
+          ],
+          [
+            2425,
+            2916
+          ],
+          [
+            2441,
+            2915
+          ],
+          [
+            2457,
+            2914
+          ],
+          [
+            2473,
+            2914
+          ],
+          [
+            2489,
+            2913
+          ],
+          [
+            2505,
+            2913
+          ],
+          [
+            2521,
+            2912
+          ],
+          [
+            2537,
+            2911
+          ],
+          [
+            2553,
+            2910
+          ],
+          [
+            2569,
+            2909
+          ],
+          [
+            2585,
+            2908
+          ],
+          [
+            2601,
+            2906
+          ],
+          [
+            2617,
+            2904
+          ],
+          [
+            2632,
+            2903
+          ],
+          [
+            2648,
+            2901
+          ],
+          [
+            2664,
+            2899
+          ],
+          [
+            2680,
+            2897
+          ],
+          [
+            2696,
+            2894
+          ],
+          [
+            2711,
+            2889
+          ],
+          [
+            2725,
+            2881
+          ],
+          [
+            2739,
+            2873
+          ],
+          [
+            2751,
+            2863
+          ],
+          [
+            2763,
+            2852
+          ],
+          [
+            2774,
+            2840
+          ],
+          [
+            2785,
+            2829
+          ],
+          [
+            2797,
+            2819
+          ],
+          [
+            2811,
+            2810
+          ],
+          [
+            2826,
+            2804
+          ],
+          [
+            2841,
+            2800
+          ],
+          [
+            2857,
+            2798
+          ],
+          [
+            2873,
+            2799
+          ],
+          [
+            2889,
+            2800
+          ],
+          [
+            2905,
+            2800
+          ],
+          [
+            2921,
+            2800
+          ],
+          [
+            2937,
+            2800
+          ],
+          [
+            2953,
+            2801
+          ],
+          [
+            2969,
+            2801
+          ],
+          [
+            2985,
+            2799
+          ],
+          [
+            3000,
+            2794
+          ],
+          [
+            3013,
+            2785
+          ],
+          [
+            3021,
+            2771
+          ],
+          [
+            3024,
+            2756
+          ],
+          [
+            3026,
+            2740
+          ],
+          [
+            3026,
+            2724
+          ],
+          [
+            3027,
+            2708
+          ],
+          [
+            3028,
+            2692
+          ],
+          [
+            3028,
+            2676
+          ],
+          [
+            3030,
+            2660
+          ],
+          [
+            3031,
+            2644
+          ],
+          [
+            3033,
+            2628
+          ],
+          [
+            3035,
+            2612
+          ],
+          [
+            3036,
+            2596
+          ],
+          [
+            3036,
+            2580
+          ],
+          [
+            3031,
+            2565
+          ],
+          [
+            3022,
+            2552
+          ],
+          [
+            3008,
+            2544
+          ],
+          [
+            2993,
+            2540
+          ],
+          [
+            2977,
+            2541
+          ],
+          [
+            2962,
+            2547
+          ],
+          [
+            2949,
+            2556
+          ],
+          [
+            2937,
+            2566
+          ],
+          [
+            2926,
+            2578
+          ],
+          [
+            2916,
+            2591
+          ],
+          [
+            2906,
+            2603
+          ],
+          [
+            2896,
+            2615
+          ],
+          [
+            2886,
+            2628
+          ],
+          [
+            2876,
+            2640
+          ],
+          [
+            2866,
+            2653
+          ],
+          [
+            2856,
+            2665
+          ],
+          [
+            2846,
+            2678
+          ],
+          [
+            2836,
+            2691
+          ]
+        ]
+      },
+      {
+        "session": "fh6_20260822_131217",
+        "ev": 3,
+        "lap": 2,
+        "pts": [
+          [
+            2830,
+            2698
+          ],
+          [
+            2820,
+            2710
+          ],
+          [
+            2810,
+            2723
+          ],
+          [
+            2800,
+            2735
+          ],
+          [
+            2789,
+            2747
+          ],
+          [
+            2779,
+            2759
+          ],
+          [
+            2769,
+            2772
+          ],
+          [
+            2759,
+            2784
+          ],
+          [
+            2748,
+            2796
+          ],
+          [
+            2738,
+            2808
+          ],
+          [
+            2726,
+            2818
+          ],
+          [
+            2712,
+            2827
+          ],
+          [
+            2698,
+            2834
+          ],
+          [
+            2683,
+            2840
+          ],
+          [
+            2668,
+            2845
+          ],
+          [
+            2652,
+            2850
+          ],
+          [
+            2637,
+            2853
+          ],
+          [
+            2621,
+            2854
+          ],
+          [
+            2605,
+            2853
+          ],
+          [
+            2589,
+            2853
+          ],
+          [
+            2573,
+            2849
+          ],
+          [
+            2559,
+            2842
+          ],
+          [
+            2546,
+            2833
+          ],
+          [
+            2534,
+            2823
+          ],
+          [
+            2523,
+            2810
+          ],
+          [
+            2515,
+            2797
+          ],
+          [
+            2508,
+            2783
+          ],
+          [
+            2502,
+            2768
+          ],
+          [
+            2496,
+            2753
+          ],
+          [
+            2489,
+            2739
+          ],
+          [
+            2480,
+            2725
+          ],
+          [
+            2471,
+            2712
+          ],
+          [
+            2459,
+            2701
+          ],
+          [
+            2446,
+            2693
+          ],
+          [
+            2431,
+            2687
+          ],
+          [
+            2415,
+            2683
+          ],
+          [
+            2399,
+            2681
+          ],
+          [
+            2383,
+            2682
+          ],
+          [
+            2368,
+            2685
+          ],
+          [
+            2352,
+            2689
+          ],
+          [
+            2338,
+            2695
+          ],
+          [
+            2323,
+            2703
+          ],
+          [
+            2311,
+            2713
+          ],
+          [
+            2300,
+            2724
+          ],
+          [
+            2290,
+            2737
+          ],
+          [
+            2282,
+            2751
+          ],
+          [
+            2275,
+            2765
+          ],
+          [
+            2269,
+            2780
+          ],
+          [
+            2263,
+            2795
+          ],
+          [
+            2257,
+            2810
+          ],
+          [
+            2252,
+            2825
+          ],
+          [
+            2248,
+            2840
+          ],
+          [
+            2243,
+            2855
+          ],
+          [
+            2237,
+            2870
+          ],
+          [
+            2232,
+            2885
+          ],
+          [
+            2226,
+            2900
+          ],
+          [
+            2221,
+            2915
+          ],
+          [
+            2215,
+            2930
+          ],
+          [
+            2208,
+            2945
+          ],
+          [
+            2202,
+            2960
+          ],
+          [
+            2196,
+            2975
+          ],
+          [
+            2190,
+            2989
+          ],
+          [
+            2184,
+            3004
+          ],
+          [
+            2179,
+            3019
+          ],
+          [
+            2177,
+            3035
+          ],
+          [
+            2182,
+            3050
+          ],
+          [
+            2195,
+            3058
+          ],
+          [
+            2209,
+            3051
+          ],
+          [
+            2217,
+            3037
+          ],
+          [
+            2223,
+            3022
+          ],
+          [
+            2226,
+            3007
+          ],
+          [
+            2230,
+            2991
+          ],
+          [
+            2237,
+            2976
+          ],
+          [
+            2245,
+            2963
+          ],
+          [
+            2255,
+            2951
+          ],
+          [
+            2268,
+            2941
+          ],
+          [
+            2282,
+            2934
+          ],
+          [
+            2298,
+            2929
+          ],
+          [
+            2314,
+            2927
+          ],
+          [
+            2329,
+            2925
+          ],
+          [
+            2345,
+            2923
+          ],
+          [
+            2361,
+            2922
+          ],
+          [
+            2377,
+            2920
+          ],
+          [
+            2393,
+            2919
+          ],
+          [
+            2409,
+            2917
+          ],
+          [
+            2425,
+            2916
+          ],
+          [
+            2441,
+            2915
+          ],
+          [
+            2457,
+            2914
+          ],
+          [
+            2473,
+            2913
+          ],
+          [
+            2489,
+            2913
+          ],
+          [
+            2505,
+            2912
+          ],
+          [
+            2521,
+            2912
+          ],
+          [
+            2537,
+            2911
+          ],
+          [
+            2553,
+            2909
+          ],
+          [
+            2569,
+            2908
+          ],
+          [
+            2585,
+            2906
+          ],
+          [
+            2601,
+            2905
+          ],
+          [
+            2617,
+            2904
+          ],
+          [
+            2633,
+            2903
+          ],
+          [
+            2648,
+            2902
+          ],
+          [
+            2664,
+            2900
+          ],
+          [
+            2680,
+            2897
+          ],
+          [
+            2695,
+            2893
+          ],
+          [
+            2710,
+            2887
+          ],
+          [
+            2725,
+            2881
+          ],
+          [
+            2739,
+            2874
+          ],
+          [
+            2753,
+            2864
+          ],
+          [
+            2765,
+            2854
+          ],
+          [
+            2776,
+            2842
+          ],
+          [
+            2787,
+            2831
+          ],
+          [
+            2799,
+            2820
+          ],
+          [
+            2811,
+            2810
+          ],
+          [
+            2826,
+            2804
+          ],
+          [
+            2841,
+            2800
+          ],
+          [
+            2857,
+            2797
+          ],
+          [
+            2873,
+            2797
+          ],
+          [
+            2889,
+            2799
+          ],
+          [
+            2905,
+            2801
+          ],
+          [
+            2921,
+            2801
+          ],
+          [
+            2937,
+            2802
+          ],
+          [
+            2953,
+            2802
+          ],
+          [
+            2969,
+            2800
+          ],
+          [
+            2985,
+            2798
+          ],
+          [
+            3000,
+            2792
+          ],
+          [
+            3012,
+            2782
+          ],
+          [
+            3020,
+            2768
+          ],
+          [
+            3023,
+            2753
+          ],
+          [
+            3024,
+            2737
+          ],
+          [
+            3025,
+            2721
+          ],
+          [
+            3026,
+            2705
+          ],
+          [
+            3027,
+            2689
+          ],
+          [
+            3028,
+            2673
+          ],
+          [
+            3029,
+            2657
+          ],
+          [
+            3030,
+            2641
+          ],
+          [
+            3031,
+            2625
+          ]
+        ]
+      }
+    ]
+  },
+  "geo_turns": {
+    "2549_2837": {
+      "pos": [
+        2549,
+        2837
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 77,
+      "deg": 112,
+      "s": 376
+    },
+    "2491_2743": {
+      "pos": [
+        2491,
+        2743
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 139,
+      "deg": 15,
+      "s": 488
+    },
+    "2339_2687": {
+      "pos": [
+        2339,
+        2687
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 10,
+      "deg": 145,
+      "s": 664
+    },
+    "2445_2691": {
+      "pos": [
+        2445,
+        2691
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 9,
+      "deg": 177,
+      "s": 804
+    },
+    "2325_2701": {
+      "pos": [
+        2325,
+        2701
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 77,
+      "deg": 75,
+      "s": 928
+    },
+    "2200_3057": {
+      "pos": [
+        2200,
+        3057
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 16,
+      "deg": 179,
+      "s": 1332
+    },
+    "2270_2942": {
+      "pos": [
+        2270,
+        2942
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 69,
+      "deg": 63,
+      "s": 1472
+    },
+    "2738_2876": {
+      "pos": [
+        2738,
+        2876
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 119,
+      "deg": 35,
+      "s": 1948
+    },
+    "2820_2806": {
+      "pos": [
+        2820,
+        2806
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "L",
+      "radius_m": 71,
+      "deg": 43,
+      "s": 2056
+    },
+    "3022_2774": {
+      "pos": [
+        3022,
+        2774
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 43,
+      "deg": 83,
+      "s": 2268
+    },
+    "3018_2550": {
+      "pos": [
+        3018,
+        2550
+      ],
+      "sessions": [],
+      "model_map": true,
+      "dir": "R",
+      "radius_m": 42,
+      "deg": 131,
+      "s": 2500
+    }
+  },
+  "turn_count_delta": null
+}

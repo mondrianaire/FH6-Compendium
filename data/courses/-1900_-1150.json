@@ -11,7 +11,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 63,
-   "n": 6,
+   "n": 36,
    "best": {
     "mph_in": 69,
     "mph_min": 69,

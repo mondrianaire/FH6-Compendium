@@ -118,6 +118,50 @@ def repair(m):
             hits.append("speed_traces[%s].lap_s = %.2f s but its own speed gives %.1f s (%.0f%% out)"
                         % (cid, ls, t, 100 * abs(ls - t) / t))
             v["lap_s"] = None
+    # A LAP THAT IS NOT ON THIS ROAD IS NOT THIS COURSE'S LAP. geometry.lap_paths is what the audit's
+    # lap-off-map check reads, and an imported pre-worktree model carried two paths whose start points sit
+    # 2.5 km apart -- one on the model's own road, one on a different one entirely. The audit can only say
+    # "two different roads in one model"; this removes the path that is not on the map, which is the half of
+    # the model that is actually wrong. Judged against the map, never against the other lap: a course is the
+    # accumulated road, not whichever lap happens to be listed first.
+    _g = m.get("geometry") or {}
+    _gp = [(q[0], q[1]) for q in (_g.get("path") or [])]
+    _lps = _g.get("lap_paths") or []
+    if _gp and len(_lps) > 1:
+        _cel = {}
+        for _x, _z in _gp:
+            _cel.setdefault((int(_x // 30), int(_z // 30)), []).append((_x, _z))
+        def _on(_x, _z):
+            _cx, _cz = int(_x // 30), int(_z // 30)
+            for _dx in (-1, 0, 1):
+                for _dz in (-1, 0, 1):
+                    for _q in _cel.get((_cx + _dx, _cz + _dz), []):
+                        if (_q[0] - _x) ** 2 + (_q[1] - _z) ** 2 <= 900:
+                            return True
+            return False
+        _scored = []
+        for _lp in _lps:
+            _pts = [(q[0], q[1]) for q in (_lp.get("pts") or [])]
+            _f = (sum(1 for _x, _z in _pts[::3] if _on(_x, _z)) / max(1, len(_pts[::3]))) if _pts else 1.0
+            _scored.append((_lp, _f))
+        # IF EVERY LAP DISAGREES WITH THE MAP, THE MAP IS THE ODD ONE OUT. Dropping the laps then would delete
+        # the evidence and keep the thing the evidence contradicts -- this project's oldest mistake, pointing
+        # the other way. Measured: 4250_-5250 scores 40% and 41% on its own map, so BOTH of its laps disagree
+        # and neither is the intruder; loop_test_loop scores 7% on its single path. A lap is only an intruder
+        # when some other lap on the same model is squarely on the road, which is what makes it the outlier
+        # rather than the majority.
+        if any(_f >= 0.8 for _, _f in _scored):
+            _keep = []
+            for _lp, _f in _scored:
+                if _f < 0.5:
+                    hits.append("geometry.lap_paths[ev=%s lap=%s] lies %.0f%% on this course's own map, while "
+                                "another lap here lies %.0f%% on it"
+                                % (_lp.get("ev"), _lp.get("lap"), 100 * _f, 100 * max(x for _, x in _scored)))
+                else:
+                    _keep.append(_lp)
+            if len(_keep) != len(_lps):
+                _g["lap_paths"] = _keep
+
     return hits
 
 

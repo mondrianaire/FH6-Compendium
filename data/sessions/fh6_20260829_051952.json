@@ -301,7 +301,7 @@
       "required": 3,
       "confidence": 0.94,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "medium",
@@ -364,7 +364,7 @@
       "required": 1,
       "confidence": 0.7,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "wiggle",
@@ -431,7 +431,7 @@
     },
     {
      "key": "inconclusive-axle",
-     "text": "Mixed axle signal — 42 front-limited vs 10 rear-limited of 74 corners. Not enough agreement for a balance call: repeat the same corner type several times before changing anything.",
+     "text": "Mixed axle signal \u2014 42 front-limited vs 10 rear-limited of 74 corners. Not enough agreement for a balance call: repeat the same corner type several times before changing anything.",
      "severity": 1,
      "confidence": 0.57,
      "evidence": "42F / 10R / 22 clean",
@@ -493,7 +493,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -516,7 +516,7 @@
       "have": 19,
       "need": 19,
       "ok": true,
-      "why": "full-throttle through the usable rev range —  · band capped at your gearbox's upshift point (~7330 rpm)",
+      "why": "full-throttle through the usable rev range \u2014  \u00b7 band capped at your gearbox's upshift point (~7330 rpm)",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -540,7 +540,7 @@
       "have": 22,
       "need": 2,
       "ok": true,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -609,13 +609,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "6-cyl · redline 8000 rpm · idle 800",
+        "value": "6-cyl \u00b7 redline 8000 rpm \u00b7 idle 800",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "196,452 frames · constant across the run",
+        "evidence": "196,452 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -626,29 +626,29 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "196,452 frames · constant across the run",
+        "evidence": "196,452 frames \u00b7 constant across the run",
         "needs": null
        },
        {
         "item": "Aspiration",
-        "value": "forced induction — peak 73.5 psi",
+        "value": "forced induction \u2014 peak 73.5 psi",
         "status": "measured",
         "note": "boost ramp shape names the type: laggy = turbo, rpm-linear = centrifugal, flat = positive-displacement",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "193,786 boost-on frames · peak boost across 39 pulls ±0.0%",
+        "evidence": "193,786 boost-on frames \u00b7 peak boost across 39 pulls \u00b10.0%",
         "needs": null
        },
        {
         "item": "Body kit",
         "value": "Stock",
         "status": "measured",
-        "note": "invisible to telemetry — the save's body slot names it outright",
+        "note": "invisible to telemetry \u2014 the save's body slot names it outright",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 1 part slot",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 1 part slot",
         "needs": null
        }
       ]
@@ -658,13 +658,13 @@
       "items": [
        {
         "item": "Total output target",
-        "value": "919 hp @ 7000 rpm · 700 lb-ft",
+        "value": "919 hp @ 7000 rpm \u00b7 700 lb-ft",
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 800",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 800",
         "gate": "dyno",
         "pending": false,
         "confidence": 0.9,
-        "evidence": "38 full pulls through the peak · peak 922–922 hp (±0.95%) · rpm bins 19/19",
+        "evidence": "38 full pulls through the peak \u00b7 peak 922\u2013922 hp (\u00b10.95%) \u00b7 rpm bins 19/19",
         "needs": null
        }
       ]
@@ -676,11 +676,11 @@
         "item": "Brakes",
         "value": "Stock",
         "status": "measured",
-        "note": "gates the brake tabs a tuned donor uses — this is the tier actually fitted, not the one we used to assume",
+        "note": "gates the brake tabs a tuned donor uses \u2014 this is the tier actually fitted, not the one we used to assume",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 1 part slot",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 1 part slot",
         "needs": null
        },
        {
@@ -691,18 +691,18 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 1 part slot",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 1 part slot",
         "needs": null
        },
        {
         "item": "Anti-roll bars",
-        "value": "Front Anti-roll Bar: Stock · Rear Anti-roll Bar: Stock",
+        "value": "Front Anti-roll Bar: Stock \u00b7 Rear Anti-roll Bar: Stock",
         "status": "measured",
-        "note": "gates the ARB tab — both bars are separate slots in the save",
+        "note": "gates the ARB tab \u2014 both bars are separate slots in the save",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 2 part slots",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 2 part slots",
         "needs": null
        },
        {
@@ -713,8 +713,8 @@
         "gate": "launch",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "0 clean-acceleration samples · spread ±—%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "0 clean-acceleration samples \u00b7 spread \u00b1\u2014%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -723,46 +723,46 @@
       "items": [
        {
         "item": "Transmission",
-        "value": "6-speed → race 6-speed",
+        "value": "6-speed \u2192 race 6-speed",
         "status": "measured",
         "note": null,
         "gate": "gears",
         "pending": false,
         "confidence": 1.0,
-        "evidence": "6 gears seen · top gear 6: 92453 WOT frames · top-speed pull ✓",
+        "evidence": "6 gears seen \u00b7 top gear 6: 92453 WOT frames \u00b7 top-speed pull \u2713",
         "needs": null
        },
        {
         "item": "Gear ratios (tune)",
-        "value": "g1 9.6 · g2 14.9 · g3 20.5 · g4 25.8 · g5 29.7 · g6 35.2 mph/krpm",
+        "value": "g1 9.6 \u00b7 g2 14.9 \u00b7 g3 20.5 \u00b7 g4 25.8 \u00b7 g5 29.7 \u00b7 g6 35.2 mph/krpm",
         "status": "measured",
         "note": "tune-side: set final drive + per-gear until the WOT ladder matches these exactly",
         "gate": "gears",
         "pending": false,
         "confidence": 0.0,
-        "evidence": "6 gears · weakest gear 2: 9191 WOT frames, spread ±7.6% · gear 1 excluded (launch wheelspin)",
+        "evidence": "6 gears \u00b7 weakest gear 2: 9191 WOT frames, spread \u00b17.6% \u00b7 gear 1 excluded (launch wheelspin)",
         "needs": "hold full throttle longer in gears 2, 3, 4, 5, 6"
        },
        {
         "item": "Differential",
         "value": "Race Differential",
         "status": "measured",
-        "note": "gates the accel/decel lock tabs — the diff TYPE, not an assumed race unit",
+        "note": "gates the accel/decel lock tabs \u2014 the diff TYPE, not an assumed race unit",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 1 part slot",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 1 part slot",
         "needs": null
        },
        {
         "item": "Clutch / driveline",
-        "value": "Clutch: Stock · Driveline: Stock",
+        "value": "Clutch: Stock \u00b7 Driveline: Stock",
         "status": "measured",
-        "note": "no telemetry signature at all — both slots come straight off the save",
+        "note": "no telemetry signature at all \u2014 both slots come straight off the save",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 2 part slots",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 2 part slots",
         "needs": null
        }
       ]
@@ -778,29 +778,29 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 1 part slot",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 1 part slot",
         "needs": null
        },
        {
         "item": "Front / rear width",
-        "value": "Front Tire Width: Stock · Rear Tire Width: Stock",
+        "value": "Front Tire Width: Stock \u00b7 Rear Tire Width: Stock",
         "status": "measured",
-        "note": "per-axle width level — the Centenario lesson, without the screenshot",
+        "note": "per-axle width level \u2014 the Centenario lesson, without the screenshot",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 2 part slots",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 2 part slots",
         "needs": null
        },
        {
         "item": "Rims / track width",
-        "value": "Front Rim Size: Stock · Rear Rim Size: level 1 · Rim Style: Custom · style 701 · Rear Rim Style: Custom · style 701 · Front Track Width: Stock · Rear Track Width: Stock",
+        "value": "Front Rim Size: Stock \u00b7 Rear Rim Size: level 1 \u00b7 Rim Style: Custom \u00b7 style 701 \u00b7 Rear Rim Style: Custom \u00b7 style 701 \u00b7 Front Track Width: Stock \u00b7 Rear Track Width: Stock",
         "status": "measured",
         "note": "rim style is cosmetic; track width moves the actual geometry",
         "gate": null,
         "pending": false,
         "confidence": 0.9,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 6 part slots",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 6 part slots",
         "needs": null
        }
       ]
@@ -812,22 +812,22 @@
         "item": "Front aero",
         "value": "Stock",
         "status": "measured",
-        "note": "fast-sweeper balance only ever hinted at presence — the save names the part",
+        "note": "fast-sweeper balance only ever hinted at presence \u2014 the save names the part",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 1 part slot",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 1 part slot",
         "needs": null
        },
        {
         "item": "Rear wing",
         "value": "Stock",
         "status": "measured",
-        "note": "speed-binned lat-g only ever hinted at presence — the save names the part",
+        "note": "speed-binned lat-g only ever hinted at presence \u2014 the save names the part",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) · byte-exact · its 6-speed box matches the ladder measured at WOT · 1 part slot",
+        "evidence": "tune save 2026-08-17 02:34 (downloaded / locked) \u00b7 byte-exact \u00b7 its 6-speed box matches the ladder measured at WOT \u00b7 1 part slot",
         "needs": null
        }
       ]
@@ -858,7 +858,7 @@
      "gear_count": 6
     },
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 800 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 800 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 162,
@@ -33239,7 +33239,7 @@
     -6791,
     -1050
    ],
-   "route_key": "-6800_-1100",
+   "route_key": "-6800_-1400",
    "route": null
   },
   {
@@ -33264,7 +33264,7 @@
     -6812,
     -1123
    ],
-   "route_key": "-6800_-1100",
+   "route_key": "-6800_-1400",
    "route": null
   },
   {
@@ -33289,7 +33289,7 @@
     -6793,
     -1020
    ],
-   "route_key": "-6800_-1100",
+   "route_key": "-6800_-1400",
    "route": null
   },
   {
@@ -33397,7 +33397,7 @@
    "t1": 1922.8,
    "car": "4160|1|6|800",
    "stint": 23,
-   "mode": "timed solo (Rivals / time trial) · lapped",
+   "mode": "timed solo (Rivals / time trial) \u00b7 lapped",
    "solo": true,
    "solo_conf": "inferred",
    "laps": 1,
@@ -34124,7 +34124,7 @@
      "consistency": 1.0,
      "usi": 0.805,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T101",
      "geo_id": null,
      "radius_m": 11,
@@ -34144,7 +34144,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 52,
@@ -34163,7 +34163,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -34286,7 +34286,7 @@
      "consistency": 1.0,
      "usi": 0.801,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T102",
      "geo_id": null,
      "radius_m": 5,
@@ -34306,7 +34306,7 @@
       "first_red": "front ph3",
       "session": "fh6_20260828_213928"
      },
-     "ref_src": "session fh6_20260828_213928 · same car",
+     "ref_src": "session fh6_20260828_213928 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 34,
@@ -34332,7 +34332,7 @@
       "throttle_on_m": null,
       "line_m": 59
      },
-     "advice": "off your reference line by 59 m at the apex (slower by 177 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 59 m at the apex (slower by 177 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 7,
@@ -34479,7 +34479,7 @@
      "consistency": 0.6,
      "usi": 0.075,
      "limiter": "driver",
-     "note": "washes out on the laps you carry ~50 mph more into it — brake earlier / slower entry, it's speed not setup",
+     "note": "washes out on the laps you carry ~50 mph more into it \u2014 brake earlier / slower entry, it's speed not setup",
      "model_id": "T103",
      "geo_id": null,
      "radius_m": 123,
@@ -34499,7 +34499,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 77,
@@ -34525,7 +34525,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 8,
@@ -34672,7 +34672,7 @@
      "consistency": 1.0,
      "usi": 0.344,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T104",
      "geo_id": null,
      "radius_m": 178,
@@ -34692,7 +34692,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 114,
@@ -34711,7 +34711,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -34834,7 +34834,7 @@
      "consistency": 1.0,
      "usi": -0.562,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T107",
      "geo_id": null,
      "radius_m": 196,
@@ -34854,7 +34854,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 161,
@@ -34873,7 +34873,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -34996,7 +34996,7 @@
      "consistency": 0.5,
      "usi": 0.412,
      "limiter": "driver",
-     "note": "front locks when you overlap brake + steering — release the brakes as you turn in (trail off)",
+     "note": "front locks when you overlap brake + steering \u2014 release the brakes as you turn in (trail off)",
      "model_id": "T108",
      "geo_id": null,
      "radius_m": 37,
@@ -35016,7 +35016,7 @@
       "first_red": "rear ph2",
       "session": "fh6_20260829_023235"
      },
-     "ref_src": "session fh6_20260829_023235 · same car",
+     "ref_src": "session fh6_20260829_023235 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 31,
@@ -35042,7 +35042,7 @@
       "throttle_on_m": 4,
       "line_m": 26
      },
-     "advice": "off your reference line by 26 m at the apex (slower by 103 mph) — re-find the apex",
+     "advice": "off your reference line by 26 m at the apex (slower by 103 mph) \u2014 re-find the apex",
      "on_ref": null,
      "track": {
       "passes": 5,
@@ -35165,7 +35165,7 @@
      "consistency": 0.5,
      "usi": 0.229,
      "limiter": "driver",
-     "note": "front locks when you overlap brake + steering — release the brakes as you turn in (trail off)",
+     "note": "front locks when you overlap brake + steering \u2014 release the brakes as you turn in (trail off)",
      "model_id": "T111",
      "geo_id": null,
      "radius_m": 129,
@@ -35185,7 +35185,7 @@
       "first_red": "front ph3",
       "session": "fh6_20260829_023235"
      },
-     "ref_src": "session fh6_20260829_023235 · same car",
+     "ref_src": "session fh6_20260829_023235 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 118,
@@ -35211,7 +35211,7 @@
       "throttle_on_m": null,
       "line_m": 27
      },
-     "advice": "off your reference line by 27 m at the apex (slower by 34 mph) — re-find the apex",
+     "advice": "off your reference line by 27 m at the apex (slower by 34 mph) \u2014 re-find the apex",
      "on_ref": null,
      "track": {
       "passes": 5,
@@ -35342,7 +35342,7 @@
      "consistency": 1.0,
      "usi": -0.017,
      "limiter": "tune",
-     "note": "rear gives up on essentially every lap at the same entry speed — rear softer / accel diff down",
+     "note": "rear gives up on essentially every lap at the same entry speed \u2014 rear softer / accel diff down",
      "model_id": "T112",
      "geo_id": null,
      "radius_m": 133,
@@ -35362,7 +35362,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260829_023235"
      },
-     "ref_src": "session fh6_20260829_023235 · same car",
+     "ref_src": "session fh6_20260829_023235 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 61,
@@ -35388,7 +35388,7 @@
       "throttle_on_m": null,
       "line_m": 13
      },
-     "advice": "off your reference line by 13 m at the apex (slower by 92 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 13 m at the apex (slower by 92 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 8,
@@ -35511,7 +35511,7 @@
      "consistency": 1.0,
      "usi": -0.805,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T116",
      "geo_id": null,
      "radius_m": 33,
@@ -35531,7 +35531,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_023235"
      },
-     "ref_src": "session fh6_20260829_023235 · same car",
+     "ref_src": "session fh6_20260829_023235 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 45,
@@ -35557,7 +35557,7 @@
       "throttle_on_m": 0,
       "line_m": 23
      },
-     "advice": "off your reference line by 23 m at the apex (slower by 3 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 23 m at the apex (slower by 3 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -35680,7 +35680,7 @@
      "consistency": 1.0,
      "usi": -0.045,
      "limiter": "tune",
-     "note": "rear gives up on essentially every lap at the same entry speed — rear softer / accel diff down",
+     "note": "rear gives up on essentially every lap at the same entry speed \u2014 rear softer / accel diff down",
      "model_id": "T64",
      "geo_id": null,
      "radius_m": 682,
@@ -35700,7 +35700,7 @@
       "first_red": "rear ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 185,
@@ -35719,7 +35719,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 3,
@@ -35862,7 +35862,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 250,
@@ -35881,7 +35881,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 4,
@@ -36024,7 +36024,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 255,
@@ -36043,7 +36043,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 3,
@@ -36186,7 +36186,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 244,
@@ -36212,7 +36212,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 3,
@@ -36371,7 +36371,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 259,
@@ -36390,7 +36390,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -36513,7 +36513,7 @@
      "consistency": 1.0,
      "usi": 0.024,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 980,
@@ -36533,7 +36533,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 258,
@@ -36552,7 +36552,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -36695,7 +36695,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 261,
@@ -36714,7 +36714,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -36857,7 +36857,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 257,
@@ -36876,7 +36876,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -37019,7 +37019,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 270,
@@ -37038,7 +37038,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -37161,7 +37161,7 @@
      "consistency": 1.0,
      "usi": 0.073,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": "G1",
      "radius_m": 664,
@@ -37181,7 +37181,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 248,
@@ -37200,7 +37200,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -37323,7 +37323,7 @@
      "consistency": 1.0,
      "usi": -0.127,
      "limiter": "tune",
-     "note": "rear gives up on essentially every lap at the same entry speed — rear softer / accel diff down",
+     "note": "rear gives up on essentially every lap at the same entry speed \u2014 rear softer / accel diff down",
      "model_id": "T31",
      "geo_id": null,
      "radius_m": 139,
@@ -37343,7 +37343,7 @@
       "first_red": "rear ph3",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 83,
@@ -37362,7 +37362,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -37505,7 +37505,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 100,
@@ -37524,7 +37524,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -37667,7 +37667,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 124,
@@ -37686,7 +37686,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -37809,7 +37809,7 @@
      "consistency": 1.0,
      "usi": 0.01,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 127,
@@ -37829,7 +37829,7 @@
       "first_red": "front ph3",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 113,
@@ -37848,7 +37848,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -37971,7 +37971,7 @@
      "consistency": 0.67,
      "usi": 0.091,
      "limiter": "mixed",
-     "note": "front-limited but inconsistent — drive it a few more times cleanly to separate technique from setup",
+     "note": "front-limited but inconsistent \u2014 drive it a few more times cleanly to separate technique from setup",
      "model_id": "T33",
      "geo_id": null,
      "radius_m": 142,
@@ -37991,7 +37991,7 @@
       "first_red": null,
       "session": "fh6_20260828_213928"
      },
-     "ref_src": "session fh6_20260828_213928 · same car",
+     "ref_src": "session fh6_20260828_213928 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 272,
@@ -38017,7 +38017,7 @@
       "throttle_on_m": 8,
       "line_m": 34
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 4,
@@ -38148,7 +38148,7 @@
      "consistency": 1.0,
      "usi": 0.421,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 111,
@@ -38168,7 +38168,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 117,
@@ -38187,7 +38187,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -38330,7 +38330,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 272,
@@ -38349,7 +38349,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -38472,7 +38472,7 @@
      "consistency": 0.5,
      "usi": 0.065,
      "limiter": "mixed",
-     "note": "front-limited but inconsistent — drive it a few more times cleanly to separate technique from setup",
+     "note": "front-limited but inconsistent \u2014 drive it a few more times cleanly to separate technique from setup",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 973,
@@ -38492,7 +38492,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 268,
@@ -38518,7 +38518,7 @@
       "throttle_on_m": 8,
       "line_m": 33
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 2,
@@ -38649,7 +38649,7 @@
      "consistency": 1.0,
      "usi": 0.671,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T40",
      "geo_id": null,
      "radius_m": 86,
@@ -38669,7 +38669,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_213928"
      },
-     "ref_src": "session fh6_20260828_213928 · same car",
+     "ref_src": "session fh6_20260828_213928 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 124,
@@ -38695,7 +38695,7 @@
       "throttle_on_m": 8,
       "line_m": 51
      },
-     "advice": "too much entry speed: 124 mph in vs your reference 101 (+23) — brake earlier; the front can't take it · (tune-limited here — see the limiter note)",
+     "advice": "too much entry speed: 124 mph in vs your reference 101 (+23) \u2014 brake earlier; the front can't take it \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 4,
@@ -38826,7 +38826,7 @@
      "consistency": 0.5,
      "usi": -0.103,
      "limiter": "mixed",
-     "note": "front-limited but inconsistent — drive it a few more times cleanly to separate technique from setup",
+     "note": "front-limited but inconsistent \u2014 drive it a few more times cleanly to separate technique from setup",
      "model_id": "T42",
      "geo_id": null,
      "radius_m": 157,
@@ -38846,7 +38846,7 @@
       "first_red": "rear ph3",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 123,
@@ -38872,7 +38872,7 @@
       "throttle_on_m": -2,
       "line_m": 1
      },
-     "advice": "entry -7 · apex -7 mph vs reference",
+     "advice": "entry -7 \u00b7 apex -7 mph vs reference",
      "on_ref": null,
      "track": {
       "passes": 6,
@@ -39023,7 +39023,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 170,
@@ -39042,7 +39042,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 3,
@@ -39165,7 +39165,7 @@
      "consistency": 1.0,
      "usi": -0.274,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T44",
      "geo_id": null,
      "radius_m": 241,
@@ -39185,7 +39185,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260828_213928"
      },
-     "ref_src": "session fh6_20260828_213928 · same car",
+     "ref_src": "session fh6_20260828_213928 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 163,
@@ -39211,7 +39211,7 @@
       "throttle_on_m": -26,
       "line_m": 4
      },
-     "advice": "entry -13 · apex -13 mph vs reference · (tune-limited here — see the limiter note)",
+     "advice": "entry -13 \u00b7 apex -13 mph vs reference \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -39334,7 +39334,7 @@
      "consistency": 1.0,
      "usi": 0.017,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 719,
@@ -39354,7 +39354,7 @@
       "first_red": "front ph4",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 202,
@@ -39373,7 +39373,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -39496,7 +39496,7 @@
      "consistency": 1.0,
      "usi": -0.321,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 147,
@@ -39516,7 +39516,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 128,
@@ -39535,7 +39535,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -39678,7 +39678,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 223,
@@ -39697,7 +39697,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -39840,7 +39840,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 234,
@@ -39859,7 +39859,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -39982,7 +39982,7 @@
      "consistency": 1.0,
      "usi": -0.061,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 587,
@@ -40002,7 +40002,7 @@
       "first_red": "front ph3",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 244,
@@ -40021,7 +40021,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -40144,7 +40144,7 @@
      "consistency": 1.0,
      "usi": 0.523,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T56",
      "geo_id": null,
      "radius_m": 112,
@@ -40164,7 +40164,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 144,
@@ -40183,7 +40183,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -40306,7 +40306,7 @@
      "consistency": 1.0,
      "usi": 0.049,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 145,
@@ -40326,7 +40326,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 134,
@@ -40352,7 +40352,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 2,
@@ -40483,7 +40483,7 @@
      "consistency": 1.0,
      "usi": -0.443,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T58",
      "geo_id": null,
      "radius_m": 200,
@@ -40503,7 +40503,7 @@
       "first_red": "front ph3",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 162,
@@ -40522,7 +40522,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -40645,7 +40645,7 @@
      "consistency": 1.0,
      "usi": -0.556,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 251,
@@ -40665,7 +40665,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 161,
@@ -40684,7 +40684,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -40807,7 +40807,7 @@
      "consistency": 1.0,
      "usi": 0.656,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T14",
      "geo_id": null,
      "radius_m": 45,
@@ -40827,7 +40827,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 107,
@@ -40853,7 +40853,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 2,
@@ -40984,7 +40984,7 @@
      "consistency": 1.0,
      "usi": -0.02,
      "limiter": "tune",
-     "note": "rear gives up on essentially every lap at the same entry speed — rear softer / accel diff down",
+     "note": "rear gives up on essentially every lap at the same entry speed \u2014 rear softer / accel diff down",
      "model_id": "T60",
      "geo_id": null,
      "radius_m": 257,
@@ -41004,7 +41004,7 @@
       "first_red": null,
       "session": "fh6_20260828_213928"
      },
-     "ref_src": "session fh6_20260828_213928 · same car",
+     "ref_src": "session fh6_20260828_213928 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 116,
@@ -41030,7 +41030,7 @@
       "throttle_on_m": -3,
       "line_m": 11
      },
-     "advice": "off your reference line by 11 m at the apex (slower by 5 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 11 m at the apex (slower by 5 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 4,
@@ -41153,7 +41153,7 @@
      "consistency": 1.0,
      "usi": -0.212,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 154,
@@ -41173,7 +41173,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 120,
@@ -41192,7 +41192,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -41315,7 +41315,7 @@
      "consistency": 0.5,
      "usi": -0.0,
      "limiter": "mixed",
-     "note": "front-limited but inconsistent — drive it a few more times cleanly to separate technique from setup",
+     "note": "front-limited but inconsistent \u2014 drive it a few more times cleanly to separate technique from setup",
      "model_id": "T61",
      "geo_id": null,
      "radius_m": 224,
@@ -41335,7 +41335,7 @@
       "first_red": "rear ph1",
       "session": "fh6_20260829_023235"
      },
-     "ref_src": "session fh6_20260829_023235 · same car",
+     "ref_src": "session fh6_20260829_023235 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 137,
@@ -41361,7 +41361,7 @@
       "throttle_on_m": 5,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 4,
@@ -41492,7 +41492,7 @@
      "consistency": 1.0,
      "usi": 0.025,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T128",
      "geo_id": null,
      "radius_m": 418,
@@ -41512,7 +41512,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 152,
@@ -41538,7 +41538,7 @@
       "throttle_on_m": -8,
       "line_m": 30
      },
-     "advice": "off your reference line by 30 m at the apex (slower by 14 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 30 m at the apex (slower by 14 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -41689,7 +41689,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 237,
@@ -41708,7 +41708,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -41831,7 +41831,7 @@
      "consistency": 1.0,
      "usi": -0.073,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T81",
      "geo_id": null,
      "radius_m": 516,
@@ -41851,7 +41851,7 @@
       "first_red": null,
       "session": "fh6_20260828_213928"
      },
-     "ref_src": "session fh6_20260828_213928 · same car",
+     "ref_src": "session fh6_20260828_213928 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 256,
@@ -41877,7 +41877,7 @@
       "throttle_on_m": 2,
       "line_m": 12
      },
-     "advice": "off your reference line by 12 m at the apex (slower by 2 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 12 m at the apex (slower by 2 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 3,
@@ -42020,7 +42020,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 242,
@@ -42039,7 +42039,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -42182,7 +42182,7 @@
       "first_red": null,
       "session": "fh6_20260828_213928"
      },
-     "ref_src": "session fh6_20260828_213928 · same car",
+     "ref_src": "session fh6_20260828_213928 \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 220,
@@ -42208,7 +42208,7 @@
       "throttle_on_m": -7,
       "line_m": 30
      },
-     "advice": "over-slowing: apex 220 mph vs your reference 260 (-40) — carry more speed",
+     "advice": "over-slowing: apex 220 mph vs your reference 260 (-40) \u2014 carry more speed",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -42351,7 +42351,7 @@
       "first_red": null,
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 236,
@@ -42370,7 +42370,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -42493,7 +42493,7 @@
      "consistency": 1.0,
      "usi": 0.091,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T96",
      "geo_id": null,
      "radius_m": 567,
@@ -42513,7 +42513,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 242,
@@ -42532,7 +42532,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -42655,7 +42655,7 @@
      "consistency": 1.0,
      "usi": -0.056,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T113",
      "geo_id": null,
      "radius_m": 171,
@@ -42675,7 +42675,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260829_051952"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "4160|1|6|800",
      "last": {
       "mph_in": 145,
@@ -42694,7 +42694,7 @@
       "session": "fh6_20260829_051952"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 4,
@@ -42748,7 +42748,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "launch → mass, diff center split, accel spin"
+      "why": "launch \u2192 mass, diff center split, accel spin"
      },
      {
       "key": "gears",
@@ -42756,7 +42756,7 @@
       "have": 6,
       "need": 6,
       "ok": true,
-      "why": "WOT time in every gear → gearing tab"
+      "why": "WOT time in every gear \u2192 gearing tab"
      },
      {
       "key": "dyno",
@@ -42764,7 +42764,7 @@
       "have": 19,
       "need": 19,
       "ok": true,
-      "why": "full-throttle through the rev range → engine/aspiration curve"
+      "why": "full-throttle through the rev range \u2192 engine/aspiration curve"
      },
      {
       "key": "top",
@@ -42772,7 +42772,7 @@
       "have": 1,
       "need": 1,
       "ok": true,
-      "why": "hold top gear WOT 5 s → drag / final drive"
+      "why": "hold top gear WOT 5 s \u2192 drag / final drive"
      },
      {
       "key": "brake",
@@ -42780,7 +42780,7 @@
       "have": 22,
       "need": 2,
       "ok": true,
-      "why": "threshold brake → balance, lock, decel diff"
+      "why": "threshold brake \u2192 balance, lock, decel diff"
      },
      {
       "key": "hairpin",
@@ -42985,7 +42985,7 @@
     ],
     "messy": [],
     "expected": null,
-    "note": "0 turns on record · 52 possible turns seen on a minority of laps — keep lapping to confirm or drop them",
+    "note": "0 turns on record \u00b7 52 possible turns seen on a minority of laps \u2014 keep lapping to confirm or drop them",
     "track_laps": 27,
     "track_sessions": 6,
     "track_confidence": 0.5,
@@ -118485,7 +118485,7 @@
       "confidence": 0.94,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "medium",
@@ -118646,7 +118646,7 @@
      "last_lap": 369.215,
      "duration_s": 719.5,
      "distance_m": 37625,
-     "mode": "timed solo (Rivals / time trial) · lapped",
+     "mode": "timed solo (Rivals / time trial) \u00b7 lapped",
      "solo": true,
      "solo_conf": "inferred",
      "pos_final": 1,
@@ -118681,7 +118681,7 @@
      },
      {
       "key": "inconclusive-axle",
-      "text": "Mixed axle signal — 42 front-limited vs 10 rear-limited of 74 corners. Not enough agreement for a balance call: repeat the same corner type several times before changing anything.",
+      "text": "Mixed axle signal \u2014 42 front-limited vs 10 rear-limited of 74 corners. Not enough agreement for a balance call: repeat the same corner type several times before changing anything.",
       "severity": 1,
       "confidence": 0.57,
       "evidence": "42F / 10R / 22 clean",
@@ -118698,7 +118698,7 @@
    "last_t": 1922.8
   },
   {
-   "route_key": "-6800_-1100",
+   "route_key": "-6800_-1400",
    "name": null,
    "cars": [
     "4160|1|6|800"
@@ -118736,7 +118736,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "launch → mass, diff center split, accel spin"
+      "why": "launch \u2192 mass, diff center split, accel spin"
      },
      {
       "key": "gears",
@@ -118744,7 +118744,7 @@
       "have": 1,
       "need": 6,
       "ok": false,
-      "why": "WOT time in every gear → gearing tab"
+      "why": "WOT time in every gear \u2192 gearing tab"
      },
      {
       "key": "dyno",
@@ -118752,7 +118752,7 @@
       "have": 10,
       "need": 19,
       "ok": false,
-      "why": "full-throttle through the rev range → engine/aspiration curve"
+      "why": "full-throttle through the rev range \u2192 engine/aspiration curve"
      },
      {
       "key": "top",
@@ -118760,7 +118760,7 @@
       "have": 1,
       "need": 1,
       "ok": true,
-      "why": "hold top gear WOT 5 s → drag / final drive"
+      "why": "hold top gear WOT 5 s \u2192 drag / final drive"
      },
      {
       "key": "brake",
@@ -118768,7 +118768,7 @@
       "have": 0,
       "need": 2,
       "ok": false,
-      "why": "threshold brake → balance, lock, decel diff"
+      "why": "threshold brake \u2192 balance, lock, decel diff"
      },
      {
       "key": "hairpin",
@@ -118895,7 +118895,7 @@
     ],
     "messy": [],
     "expected": null,
-    "note": "0 turns on record · 1 lap — drive 2 more to confirm the turn count",
+    "note": "0 turns on record \u00b7 1 lap \u2014 drive 2 more to confirm the turn count",
     "track_laps": 9,
     "track_sessions": 3,
     "track_confidence": 0.97,

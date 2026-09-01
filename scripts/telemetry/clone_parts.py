@@ -79,6 +79,33 @@ MENUS = [
 ENGINE_INTERNALS = {"camshaft", "valves", "displacement", "pistons", "fuel_system", "ignition",
                     "exhaust", "intake", "flywheel", "oil_cooling", "manifold", "restrictor_plate"}
 
+# INSTALL ORDER. Not the same as the shop's own tile order, and the difference matters:
+# docs/fh6-ui-spec.md 2.9 -- "Conversions affect the upgrades that are available in other categories",
+# and 5.9 records two observed cases (the Rocket Bunny kit REMOVES the Front Bumper tile; the Front
+# Tire Width grid grew 4 -> 7 tiles after the widebody/rim change). Our own decode shows the same
+# thing numerically: body-dependent parts carry a variant in the hundreds digit that tracks car_body
+# exactly, 532/532. So conversions must go in FIRST or the tiles you are shopping for do not exist yet.
+# Engine internals go second because they belong to the engine block, not the car (519/519 carry the
+# ENGINE's partset), so swapping the engine afterwards would discard them.
+INSTALL_ORDER = ["Body Kits and Conversions", "Engine", "Drivetrain",
+                 "Platform and Handling", "Tires and Rims", "Aero and Appearance"]
+
+# Upgrade Shop tile number for each category (docs/fh6-ui-spec.md 2, the 3x2 grid), and the sub-menu
+# tile number inside it where the spec names one. None = the spec never showed that tile highlighted.
+SHOP_TILE = {"Engine": 1, "Platform and Handling": 2, "Drivetrain": 3,
+             "Tires and Rims": 4, "Aero and Appearance": 5, "Body Kits and Conversions": 6}
+SUB_TILE = {
+    "engine": 1, "drivetrain": 2, "car_body": 4,                      # Body Kits and Conversions
+    "brakes": 1, "springs_dampers": 2, "front_arb": 3, "rear_arb": 4,  # Platform and Handling
+    "roll_cage": 5, "weight_reduction": 6,
+    "transmission": 1, "driveline": 2, "differential": 3,              # Drivetrain
+    "tire_compound": 1, "front_tire_width": 2, "rear_tire_width": 3,   # Tires and Rims
+    "rim_style": 5, "front_rim_size": 7,
+    "front_bumper": 1, "rear_wing": 2,                                 # Aero and Appearance
+    "intake": 1, "ignition": 4, "valves": 7, "displacement": 8,        # Engine (spec 2.1)
+    "oil_cooling": 10, "flywheel": 11,
+}
+
 _CACHE = {}
 
 
@@ -132,17 +159,37 @@ def containers(ordinal):
                   key=os.path.getmtime)
 
 
+def split_any(pid, ordinal):
+    """(partset, index) for ANY part ID, not just this car's own set.
+
+    Engine internals carry the ENGINE's partset and drivetrain parts carry a shared donor set, so
+    keying only off the car's ordinal threw away a readable tier on 17 of the 50 slots. The index is
+    the last three digits; the partset is what precedes them. Falls back to the ordinal-prefix split
+    first so a car whose ordinal happens to end in a digit run is still read the established way."""
+    if pid is None:
+        return (None, None)
+    ps, idx = T.split_part_id(ordinal, pid)
+    if idx is not None:
+        return (ps, idx)
+    s = str(pid)
+    if len(s) > 3:
+        return (int(s[:-3]), int(s[-3:]))
+    return (None, None)
+
+
 def describe(slot, pid, ordinal):
-    """(index, human) for a part ID. index is None when the ID is not this car's own partset --
-    engine internals legitimately carry the ENGINE's partset, not the car's."""
-    _set, idx = T.split_part_id(ordinal, pid)
+    """(index, human) for a part ID."""
+    ps, idx = split_any(pid, ordinal)
     if idx is None:
         return None, (str(pid) if pid is not None else "-")
     nm = tier_name(slot, idx)
     var, tier = divmod(idx, 100)
+    own = str(ps) == str(ordinal)
     txt = "idx %d" % idx
     if var:
         txt += " (body variant %d, tier %d)" % (var, tier)
+    if not own:
+        txt += " [set %s]" % ps
     return idx, ("%s = %s" % (txt, nm) if nm else txt)
 
 
@@ -174,6 +221,8 @@ def main():
     ap.add_argument("--source", help="source/stock container (default: assume fully stock)")
     ap.add_argument("--list", action="store_true", help="list this car's containers and exit")
     ap.add_argument("--json", action="store_true", help="emit JSON for the dashboard")
+    ap.add_argument("--walkthrough", action="store_true",
+                    help="menu-by-menu install route, in dependency order")
     a = ap.parse_args()
 
     out = io.TextIOWrapper(open(1, "wb", closefd=False), encoding="utf-8", errors="replace")
@@ -240,6 +289,44 @@ def main():
     print("", file=out)
     if total == 0:
         print("  CLONE EXACT - every one of the 50 part slots matches. Nothing left to install.", file=out)
+        out.flush()
+        return 0
+
+    if a.walkthrough:
+        order = {m: i for i, m in enumerate(INSTALL_ORDER)}
+        step = 0
+        for menu, got in sorted(rows, key=lambda kv: order.get(kv[0], 99)):
+            print("  == %s  (Upgrade Shop tile %s) ==" % (menu.upper(), SHOP_TILE.get(menu, "?")), file=out)
+            if menu == "Body Kits and Conversions":
+                print("     do this menu FIRST - conversions change which tiles exist everywhere else", file=out)
+            elif menu == "Engine":
+                print("     engine internals belong to the BLOCK; swapping the engine later discards them", file=out)
+            print("", file=out)
+            for r in got:
+                step += 1
+                st = SUB_TILE.get(r["slot"])
+                path = "Upgrade Shop > %s > %s" % (menu, r["item"])
+                print("   %2d. %s" % (step, path), file=out)
+                print("       sub-menu tile %s%s" % (st if st else "?  (spec never showed it highlighted)",
+                                                     "" if st else ""), file=out)
+                tier = r["to_idx"] % 100 if r["to_idx"] is not None else None
+                nm = tier_name(r["slot"], r["to_idx"]) if r["to_idx"] is not None else None
+                if nm:
+                    print("       PICK: the tile named '%s %s'" % (nm, r["item"]), file=out)
+                elif tier == 0:
+                    print("       PICK: the STOCK tile (tier 0) - leave it alone if the car is stock", file=out)
+                elif tier is not None:
+                    print("       PICK: tier %d in the global ladder (0 Stock / 3 Race / 4 Rally / 5 Drift)" % tier, file=out)
+                    print("             tier names above 5 and the 1/2 slots are NOT yet confirmed", file=out)
+                else:
+                    print("       PICK: part id %s - shared catalogue, not this car's own set" % r["to"], file=out)
+                if r["to_idx"] is not None and r["to_idx"] >= 100:
+                    print("       needs body variant %d - the Body Kit above must be on first"
+                          % (r["to_idx"] // 100), file=out)
+                print("       label confidence: %s" % r["confirmed"], file=out)
+                print("", file=out)
+        print("  %d step%s. After installing, save a setup on the replica and re-run with" % (step, "" if step == 1 else "s"), file=out)
+        print("  --source <that container> - it prints CLONE EXACT when the builds match.", file=out)
         out.flush()
         return 0
     MARK = {PROVEN: "  ", GROUP: " ~", GUESS: " ?"}

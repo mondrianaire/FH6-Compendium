@@ -48,7 +48,7 @@ class State:
         self.cars = {}              # ordinal -> info
         self.csv_path = None; self.csv_writer = None; self.csv_file = None
         self.last_on_t = None; self.live_since_analysis = 0.0; self.drive_since_periodic = 0.0; self.analyzing = False; self.replay = False
-        self.last_lapnum = None; self._last_lap_analysis = 0.0   # LAP-completion analysis trigger (the granularity the cross-lap limiter changes at)
+        self.last_lapnum = None; self._last_lap_analysis = 0.0; self._last_analysis_secs = 0.0   # LAP-completion analysis trigger (the granularity the cross-lap limiter changes at)
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
         self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None; self._auto_loop = False; self._auto_suspend = None   # _auto_loop: the current loop was auto-started by a timed event (Rivals), not a manual mark; _auto_suspend: odometer/lap-timer snapshot taken at a mid-event pause (J7)
@@ -385,6 +385,7 @@ def ingest(p, t_mono):
         row = [time.time(), t_mono, p["Speed"] * 2.23694, p["AccelX"] / G, p["AccelZ"] / G, math.degrees(p["AngVelY"])]
         row += [(p["TireTempF" + w] - 32.0) * 5.0 / 9.0 for w in W] + [p[k] for k in FIELDS]
         ST.csv_writer.writerow(row)
+        _roll_capture_if_big()
     with ST.lock:
         ST.latest = c; ST.frames += 1; ST.last_pkt = time.monotonic()
         ST.pps_win.append(ST.last_pkt); ST.pps_win = [x for x in ST.pps_win if ST.last_pkt - x < 2.0]
@@ -480,7 +481,19 @@ def maybe_lap_analysis(t_mono, why):
     """Re-run the cross-lap analysis the instant a LAP completes — a finished lap adds one fresh pass of every turn,
     which is exactly when the tune-vs-driver limiter can change. Debounced (6 s) so short laps can't thrash the
     analyze_session subprocess; the periodic timer stays as the fallback for long laps / free roam."""
-    if ST.analyzing or not ST.csv_path or (t_mono - ST._last_lap_analysis) < 6:
+    # THE DEBOUNCE MUST SCALE WITH WHAT IT IS DEBOUNCING. 6 s was chosen when a pass was cheap, but a pass
+    # re-reads the WHOLE capture, so its cost grows all session: measured on a 628 MB capture, one
+    # analyze_session pass takes 46.9 s. Re-firing 6 s later means the subprocess is running 89% of the time
+    # the player is on track -- 628 MB read and dozens of course models written, continuously, on the machine
+    # running the game. That is what Jett felt: frame pacing on the telemetry itself shows individual frames of
+    # 353-391 ms and 1% lows of 26-35 FPS during the window the daemon was analysing, against 135-141 FPS
+    # median once it stopped. Nothing was starved -- CPU 25%, GPU 32%, disk queue 0 -- because the cost is
+    # bursty, and the bursts land inside frames.
+    # So the interval is now bounded by the last pass's own cost, holding the analyser to roughly a fifth of
+    # the player's time. A cheap pass still re-fires in 6 s; an expensive one earns a proportional rest.
+    _cost = getattr(ST, "_last_analysis_secs", 0.0) or 0.0
+    _need = max(6.0, _cost * 4.0)
+    if ST.analyzing or not ST.csv_path or (t_mono - ST._last_lap_analysis) < _need:
         return
     ST._last_lap_analysis = t_mono; ST.drive_since_periodic = 0.0
     threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
@@ -488,6 +501,7 @@ def maybe_lap_analysis(t_mono, why):
 
 def run_analysis(until=None, final=True):
     ST.analyzing = True
+    _t_start = time.monotonic()
     try:
         if ST.csv_file: ST.csv_file.flush()
         # replay analyses go to a scratch dir so they never overwrite the canonical session JSON
@@ -510,6 +524,7 @@ def run_analysis(until=None, final=True):
         else:
             print("[analysis] failed:", r.stdout[-300:], r.stderr[-300:])
     finally:
+        ST._last_analysis_secs = time.monotonic() - _t_start   # what the next debounce is measured against
         ST.analyzing = False
 
 # ---------------- HTTP / SSE ----------------
@@ -1963,6 +1978,49 @@ class H(BaseHTTPRequestHandler):
         if save_names: names_save(obj)
         out = json.dumps({"ok": ok, "cars": obj.get("cars", {}), "builds": obj.get("builds", {})}).encode()
         self.send_response(200 if ok else 400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out)
+
+CAPTURE_ROLL_MB = 192          # one analyze_session pass over this much capture costs ~15 s
+
+
+def _roll_capture_if_big():
+    """Start a fresh capture file once this one is large. Jett's call, and it is the better fix.
+
+    THE COST OF ANALYSIS IS THE SIZE OF THE CAPTURE. Every pass re-reads the whole file, so on a session that
+    runs for hours the pass grows without bound: measured, 628 MB takes 46.9 s, and the lap trigger re-fires
+    every 6 s, so the subprocess was running 89% of the time the player was on track -- reading 628 MB and
+    rewriting dozens of course models, continuously, on the machine running the game. The frame pacing in the
+    telemetry shows what that cost: individual frames of 353-391 ms and 1% lows of 26-35 FPS while it ran,
+    against 135-141 FPS median once it stopped. Nothing looked starved -- CPU 25%, GPU 32%, disk queue 0 --
+    because the cost is bursty and the bursts land inside frames.
+    Backing the debounce off caps the SHARE of time spent analysing but not the LATENCY: a 47 s pass is 47 s
+    stale, and gets staler all session. Rolling the file bounds the work itself, so analysis stays quick
+    however long the session runs. Nothing is lost by rolling: course models accumulate across sessions and
+    every lap is already in data/laps.db, so a roll is just a session boundary.
+    """
+    try:
+        if ST.replay or not ST.csv_file or not ST.csv_path:
+            return
+        if ST.frames % 512:                       # stat() is not free at 60 Hz; check every ~8 s of driving
+            return
+        if ST.csv_file.tell() < CAPTURE_ROLL_MB * 1024 * 1024:
+            return
+        old = ST.csv_path
+        try: ST.csv_file.close()
+        except Exception: pass
+        ST.csv_path = os.path.join(os.path.dirname(old), f"fh6_{time.strftime('%Y%m%d_%H%M%S')}.csv")
+        ST.csv_file = open(ST.csv_path, "w", newline="")
+        ST.csv_writer = csv.writer(ST.csv_file)
+        ST.csv_writer.writerow(["t_wall", "t_mono", "speed_mph", "lat_g", "long_g", "yaw_rate_dps"]
+                               + [f"TireTempC{w}" for w in W] + FIELDS)
+        ST.frames = 0; ST.t0 = time.monotonic()
+        ST._last_lap_analysis = 0.0; ST._last_analysis_secs = 0.0   # the new file is cheap again
+        ST.stint_starts = {}
+        print(f"[roll] capture reached {CAPTURE_ROLL_MB} MB -> {os.path.basename(ST.csv_path)}")
+        ST.emit("reset", {"csv": os.path.relpath(ST.csv_path, ROOT)})
+    except Exception as e:
+        print(f"[roll] capture roll failed: {e!r}", file=sys.stderr)
+
+
 
 def reset_session():
     """Start a fresh session on request: clear live accumulators and rotate the CSV (live mode)."""

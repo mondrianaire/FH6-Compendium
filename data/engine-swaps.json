@@ -264,13 +264,13 @@
     "2738": "1995 Nissan GT-R LM",
     "3184": "1977 Ford Escort Mk2"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
+   "redline": 9000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "145": {
    "engine_family": 145,

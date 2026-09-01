@@ -169,6 +169,32 @@ def _load(path, key=None):
     return j.get(key) if key else j
 
 
+def resolve_name(slot, idx, pid=None):
+    """Common name for a part, from data/part-names.json -- the ID -> name layer.
+
+    Order: an explicit per-slot row first (these are diffed and trustworthy), then the flat catalogue
+    keyed by the raw id (rim styles have no index), then the global tier ladder for slots that use it.
+    Returns (name, confidence) or (None, None). A name is NEVER invented from the number."""
+    j = _load(os.path.join(DATA, "part-names.json")) or {}
+    named = (j.get("named") or {}).get(slot) or {}
+    for key in (str(idx), str(pid)):
+        row = named.get(key)
+        if isinstance(row, dict) and row.get("name"):
+            nm = row["name"]
+            return (None, None) if nm.startswith("UNKNOWN") else (nm, row.get("confidence"))
+    lad = j.get("tier_ladder") or {}
+    if slot in (lad.get("applies_to") or []) and idx is not None:
+        nm = lad.get(str(idx % 100))
+        if nm:
+            return ("%s %s" % (nm, _ITEM.get(slot, slot)), lad.get("confidence"))
+    return (None, None)
+
+
+_ITEM = {"brakes": "Brakes", "front_arb": "Front Anti-roll Bars", "rear_arb": "Rear Anti-roll Bars",
+         "springs_dampers": "Spring and Dampers", "differential": "Diff", "clutch": "Clutch",
+         "driveline": "Driveline"}
+
+
 def tier_name(slot, idx):
     """Name for a tier-slot index, or None.
 
@@ -231,7 +257,10 @@ def describe(slot, pid, ordinal):
     ps, idx = split_any(pid, ordinal)
     if idx is None:
         return None, (str(pid) if pid is not None else "-")
-    nm = tier_name(slot, idx)
+    nm, conf = resolve_name(slot, idx, pid)
+    if nm is None:
+        nm = tier_name(slot, idx)
+        conf = None
     var, tier = divmod(idx, 100)
     own = str(ps) == str(ordinal)
     txt = "idx %d" % idx
@@ -239,7 +268,9 @@ def describe(slot, pid, ordinal):
         txt += " (body variant %d, tier %d)" % (var, tier)
     if not own:
         txt += " [set %s]" % ps
-    return idx, ("%s = %s" % (txt, nm) if nm else txt)
+    if nm:
+        return idx, "%s = %s%s" % (txt, nm, "" if conf in (None, "verified") else " (%s)" % conf)
+    return idx, txt
 
 
 def build(target, source, ordinal):

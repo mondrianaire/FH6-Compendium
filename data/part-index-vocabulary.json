@@ -129,7 +129,7 @@
       "weight_reduction idx 102": "Sport Weight Reduction  CR 1,550",
       "tire_compound idx 5": "'Horizon' Semi-Slick Race Tire Compound  CR 10,000",
       "rear_tire_width idx 106": "345 mm Rear Tires  (Free)",
-      "rim_style 701": "Asanti AF 134  CR 1,700 each end",
+      "rim_style 701": "WRONG -- see rim_catalogue_correction. 701 is NOT Asanti AF 134.",
       "front_rim_size idx 3": "17 in Front Rims  CR 1,800  -- ASSUMED, basket does not state the index",
       "rear_rim_size idx 4": "19 in Rear Rims  CR 2,200  -- ASSUMED, basket does not state the index"
     },
@@ -163,5 +163,17 @@
     "corroboration": "The game's own numbers agree. The menu chips give Sport = -139 lb and Race = -362 lb, a 223 lb gap; the Tunes panel showed the user's car 211 lb heavier than the target (2,772 vs 2,561). I had named that gap as the prime suspect and then dismissed it because the container said 'tier 2', trusting the decode over the measurement.",
     "why_this_is_dangerous": "brakes and weight_reduction have IDENTICAL 3-tile menus (Stock/Sport/Race) and use DIFFERENT schemes. Brakes is sparse -- the NSX-R's Race Brakes decode as index 3, impossible in a dense 3-tile menu. Weight reduction is dense -- Race decodes as index 2. Menu shape does NOT predict the scheme."
   },
-  "scheme_must_be_established_per_slot": "THE STANDING LESSON. There is no global rule for whether a slot's index is a dense tile position or a position in the sparse global ladder. It must be established empirically PER SLOT and recorded. Assuming the ladder by default sent a real clone to the wrong part twice: the supercharger (menu it was not in) and Race Weight Reduction (tier read as Sport). Known DENSE: drivetrain, car_body, engine, rear_wing, weight_reduction. Known SPARSE LADDER: brakes, front_arb, rear_arb, springs_dampers, differential, clutch, driveline. Known OTHER: transmission (global catalogue, gears = index+3 for the Race family), tire_compound (global enum), rim_style (flat catalogue with no partset). Anything not on these lists is UNKNOWN and must not be presented as either."
+  "scheme_must_be_established_per_slot": "THE STANDING LESSON. There is no global rule for whether a slot's index is a dense tile position or a position in the sparse global ladder. It must be established empirically PER SLOT and recorded. Assuming the ladder by default sent a real clone to the wrong part twice: the supercharger (menu it was not in) and Race Weight Reduction (tier read as Sport). Known DENSE: drivetrain, car_body, engine, rear_wing, weight_reduction. Known SPARSE LADDER: brakes, front_arb, rear_arb, springs_dampers, differential, clutch, driveline. Known OTHER: transmission (global catalogue, gears = index+3 for the Race family), tire_compound (global enum), rim_style (flat catalogue with no partset). Anything not on these lists is UNKNOWN and must not be presented as either.",
+  "rim_catalogue_correction": {
+    "corrected": "638 = Asanti AF 134. Read directly: the user's saved clone carries rim_style 638 / rear_rim_style 638 at bytes 0x00BA / 0x00D2, and their car shows 'Asanti AF 134' as INSTALLED. That is an observation, not an inference.",
+    "what_was_wrong": "I had recorded 701 = Asanti AF 134. That came from a basket screenshot listing 'Asanti AF 134 (front)/(rear)' while the user was following a route built from container [3], which carries 701 -- so I matched the two by assuming the route had been followed exactly. Circular: the basket showed what I had told them to buy, not what 701 is. I had flagged this exact trap earlier in the same session and then walked into it.",
+    "701_is": "UNKNOWN. It is the rim style in container Tuning_0412_20260901181414 and has never been observed on screen.",
+    "known_rim_ids": {
+      "638": "Asanti AF 134 (VERIFIED, read off the car)",
+      "701": "UNKNOWN",
+      "13636": "UNKNOWN (container Tuning_0412_20260727130757)",
+      "4294967295": "empty slot = stock wheels"
+    },
+    "how_to_name_one": "Fit a wheel, save a setup, diff the container. Each attempt names exactly one id. There is no way to read the id in game, and the catalogue is flat (no partset), so nothing can be derived from the number itself."
+  }
 }

@@ -1330,13 +1330,13 @@
     "3400": "2009 Formula Drift #99 Mazda RX-8",
     "3852": "1991 Honda Beat"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
+   "redline": 8000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 505,
+   "source": "save-mined+telemetry"
   },
   "2846": {
    "engine_family": 2846,

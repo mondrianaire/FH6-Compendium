@@ -35,7 +35,7 @@
         "reading": null,
         "verdict": "measured"
       },
-      "s": 236,
+      "s": 324,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -194,7 +194,7 @@
         "reading": null,
         "verdict": "measured"
       },
-      "s": 316,
+      "s": 408,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -288,7 +288,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 452,
+      "s": 540,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -318,7 +318,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 508,
+      "s": 600,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -448,7 +448,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 544,
+      "s": 637,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -493,7 +493,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 980,
+      "s": 661,
       "geo_sessions": 0,
       "geo_mapped": true
     },
@@ -523,7 +523,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 580,
+      "s": 661,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -553,7 +553,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 988,
+      "s": 673,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -598,7 +598,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1060,
+      "s": 744,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -628,7 +628,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1056,
+      "s": 1103,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -673,7 +673,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1124,
+      "s": 804,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -703,7 +703,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 764,
+      "s": 840,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -748,7 +748,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 840,
+      "s": 912,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -778,7 +778,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1236,
+      "s": 923,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -808,7 +808,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 864,
+      "s": 935,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -911,7 +911,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 644,
+      "s": 1091,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -941,7 +941,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 672,
+      "s": 1115,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -971,7 +971,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 712,
+      "s": 1151,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1001,7 +1001,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1140,
+      "s": 1187,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1046,7 +1046,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1164,
+      "s": 1211,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1076,7 +1076,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1288,
+      "s": 1343,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1106,7 +1106,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 924,
+      "s": 1355,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1235,7 +1235,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1696,
+      "s": 1751,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1280,7 +1280,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1732,
+      "s": 1776,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1310,7 +1310,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 1748,
+      "s": 1799,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1462,7 +1462,7 @@
         "reading": null,
         "verdict": "measured"
       },
-      "s": 1936,
+      "s": 1979,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1572,7 +1572,7 @@
         "reading": null,
         "verdict": "measured"
       },
-      "s": 1996,
+      "s": 2039,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1624,7 +1624,7 @@
         "reading": null,
         "verdict": "measured"
       },
-      "s": 2196,
+      "s": 2243,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1754,7 +1754,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 828,
+      "s": 2327,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -1981,7 +1981,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 2960,
+      "s": 3012,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2011,7 +2011,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 2996,
+      "s": 3048,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2141,7 +2141,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3028,
+      "s": 3072,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2271,7 +2271,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3060,
+      "s": 3108,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2316,7 +2316,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3104,
+      "s": 3143,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2346,7 +2346,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3152,
+      "s": 3191,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2476,7 +2476,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3528,
+      "s": 3564,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2606,7 +2606,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3552,
+      "s": 3600,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2868,7 +2868,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3924,
+      "s": 3972,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2913,7 +2913,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3956,
+      "s": 4008,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -2943,7 +2943,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 3960,
+      "s": 4008,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -3015,7 +3015,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 4020,
+      "s": 4068,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -3087,7 +3087,7 @@
         "reached": true,
         "verdict": "map could not be followed \u2014 the projector lost the road on 2 of 3 laps"
       },
-      "s": 4064,
+      "s": 4116,
       "geo_sessions": 1,
       "geo_mapped": true
     },
@@ -3106,7 +3106,7 @@
       "by_session": {},
       "track": {},
       "deg": 26,
-      "s": 584,
+      "s": 673,
       "established": true,
       "est_by": "geometry",
       "status": "turn",
@@ -3128,7 +3128,7 @@
       "by_session": {},
       "track": {},
       "deg": 48,
-      "s": 1308,
+      "s": 612,
       "established": true,
       "est_by": "geometry",
       "status": "turn",
@@ -6000,7 +6000,7 @@
         -5417,
         -5371
       ],
-      "s": 3552,
+      "s": 3600,
       "dir": "R",
       "radius_m": 55,
       "deg": 51,
@@ -6014,7 +6014,7 @@
         -4390,
         -6245
       ],
-      "s": 1748,
+      "s": 1799,
       "dir": "R",
       "radius_m": 30,
       "deg": 78,
@@ -6028,7 +6028,7 @@
         -4922,
         -5796
       ],
-      "s": 236,
+      "s": 324,
       "dir": "L",
       "radius_m": 145,
       "deg": 40,
@@ -6042,7 +6042,7 @@
         -4867,
         -5854
       ],
-      "s": 316,
+      "s": 408,
       "dir": "L",
       "radius_m": 201,
       "deg": 15,
@@ -6056,7 +6056,7 @@
         -4746,
         -5916
       ],
-      "s": 452,
+      "s": 540,
       "dir": "R",
       "radius_m": 498,
       "deg": 29,
@@ -6070,7 +6070,7 @@
         -4699,
         -5945
       ],
-      "s": 508,
+      "s": 600,
       "dir": "R",
       "radius_m": 142,
       "deg": 29,
@@ -6084,7 +6084,7 @@
         -4677,
         -5974
       ],
-      "s": 544,
+      "s": 637,
       "dir": "R",
       "radius_m": 93,
       "deg": 29,
@@ -6098,7 +6098,7 @@
         -4668,
         -6012
       ],
-      "s": 584,
+      "s": 673,
       "dir": "R",
       "radius_m": 83,
       "deg": 26,
@@ -6112,7 +6112,7 @@
         -4690,
         -6067
       ],
-      "s": 644,
+      "s": 1091,
       "dir": "R",
       "radius_m": 67,
       "deg": 26,
@@ -6126,7 +6126,7 @@
         -4713,
         -6081
       ],
-      "s": 672,
+      "s": 1115,
       "dir": "R",
       "radius_m": 59,
       "deg": 35,
@@ -6140,7 +6140,7 @@
         -4752,
         -6080
       ],
-      "s": 712,
+      "s": 1151,
       "dir": "R",
       "radius_m": 54,
       "deg": 35,
@@ -6154,7 +6154,7 @@
         -4789,
         -6045
       ],
-      "s": 764,
+      "s": 840,
       "dir": "R",
       "radius_m": 57,
       "deg": 38,
@@ -6168,7 +6168,7 @@
         -4785,
         -5983
       ],
-      "s": 828,
+      "s": 2327,
       "dir": "R",
       "radius_m": 59,
       "deg": 38,
@@ -6182,7 +6182,7 @@
         -4778,
         -5974
       ],
-      "s": 840,
+      "s": 912,
       "dir": "R",
       "radius_m": 51,
       "deg": 26,
@@ -6196,7 +6196,7 @@
         -4757,
         -5961
       ],
-      "s": 864,
+      "s": 935,
       "dir": "R",
       "radius_m": 65,
       "deg": 32,
@@ -6210,7 +6210,7 @@
         -4700,
         -5962
       ],
-      "s": 924,
+      "s": 1355,
       "dir": "R",
       "radius_m": 61,
       "deg": 32,
@@ -6224,7 +6224,7 @@
         -4668,
         -6008
       ],
-      "s": 580,
+      "s": 661,
       "dir": "R",
       "radius_m": 83,
       "deg": 29,
@@ -6238,7 +6238,7 @@
         -4670,
         -6015
       ],
-      "s": 988,
+      "s": 673,
       "dir": "R",
       "radius_m": 47,
       "deg": 32,
@@ -6252,7 +6252,7 @@
         -4706,
         -6070
       ],
-      "s": 1056,
+      "s": 1103,
       "dir": "R",
       "radius_m": 56,
       "deg": 29,
@@ -6266,7 +6266,7 @@
         -4770,
         -6069
       ],
-      "s": 1124,
+      "s": 804,
       "dir": "R",
       "radius_m": 53,
       "deg": 26,
@@ -6280,7 +6280,7 @@
         -4781,
         -6057
       ],
-      "s": 1140,
+      "s": 1187,
       "dir": "R",
       "radius_m": 49,
       "deg": 29,
@@ -6294,7 +6294,7 @@
         -4791,
         -6035
       ],
-      "s": 1164,
+      "s": 1211,
       "dir": "R",
       "radius_m": 54,
       "deg": 32,
@@ -6308,7 +6308,7 @@
         -4765,
         -5971
       ],
-      "s": 1236,
+      "s": 923,
       "dir": "R",
       "radius_m": 64,
       "deg": 38,
@@ -6322,7 +6322,7 @@
         -4716,
         -5956
       ],
-      "s": 1288,
+      "s": 1343,
       "dir": "R",
       "radius_m": 61,
       "deg": 35,
@@ -6336,7 +6336,7 @@
         -4391,
         -6199
       ],
-      "s": 1696,
+      "s": 1751,
       "dir": "R",
       "radius_m": 172,
       "deg": 25,
@@ -6350,7 +6350,7 @@
         -4381,
         -6232
       ],
-      "s": 1732,
+      "s": 1776,
       "dir": "R",
       "radius_m": 35,
       "deg": 37,
@@ -6364,7 +6364,7 @@
         -4573,
         -6238
       ],
-      "s": 1936,
+      "s": 1979,
       "dir": "R",
       "radius_m": 105,
       "deg": 40,
@@ -6378,7 +6378,7 @@
         -4616,
         -6198
       ],
-      "s": 1996,
+      "s": 2039,
       "dir": "R",
       "radius_m": 119,
       "deg": 26,
@@ -6392,7 +6392,7 @@
         -4715,
         -6028
       ],
-      "s": 2196,
+      "s": 2243,
       "dir": "L",
       "radius_m": 140,
       "deg": 42,
@@ -6406,7 +6406,7 @@
         -5451,
         -5885
       ],
-      "s": 2960,
+      "s": 3012,
       "dir": "R",
       "radius_m": 246,
       "deg": 12,
@@ -6420,7 +6420,7 @@
         -5485,
         -5874
       ],
-      "s": 2996,
+      "s": 3048,
       "dir": "R",
       "radius_m": 167,
       "deg": 15,
@@ -6434,7 +6434,7 @@
         -5512,
         -5857
       ],
-      "s": 3028,
+      "s": 3072,
       "dir": "R",
       "radius_m": 125,
       "deg": 14,
@@ -6448,7 +6448,7 @@
         -5534,
         -5834
       ],
-      "s": 3060,
+      "s": 3108,
       "dir": "R",
       "radius_m": 116,
       "deg": 15,
@@ -6462,7 +6462,7 @@
         -5551,
         -5794
       ],
-      "s": 3104,
+      "s": 3143,
       "dir": "R",
       "radius_m": 95,
       "deg": 17,
@@ -6476,7 +6476,7 @@
         -5548,
         -5746
       ],
-      "s": 3152,
+      "s": 3191,
       "dir": "R",
       "radius_m": 98,
       "deg": 32,
@@ -6490,7 +6490,7 @@
         -5434,
         -5388
       ],
-      "s": 3528,
+      "s": 3564,
       "dir": "R",
       "radius_m": 121,
       "deg": 15,
@@ -6504,7 +6504,7 @@
         -5050,
         -5350
       ],
-      "s": 3924,
+      "s": 3972,
       "dir": "R",
       "radius_m": 162,
       "deg": 31,
@@ -6518,7 +6518,7 @@
         -5022,
         -5365
       ],
-      "s": 3956,
+      "s": 4008,
       "dir": "R",
       "radius_m": 157,
       "deg": 12,
@@ -6532,7 +6532,7 @@
         -4979,
         -5412
       ],
-      "s": 4020,
+      "s": 4068,
       "dir": "R",
       "radius_m": 147,
       "deg": 12,
@@ -6546,7 +6546,7 @@
         -4963,
         -5453
       ],
-      "s": 4064,
+      "s": 4116,
       "dir": "R",
       "radius_m": 81,
       "deg": 30,
@@ -6560,7 +6560,7 @@
         -4709,
         -6072
       ],
-      "s": 1060,
+      "s": 744,
       "dir": "R",
       "radius_m": 56,
       "deg": 29,
@@ -6574,7 +6574,7 @@
         -4697,
         -5962
       ],
-      "s": 1308,
+      "s": 612,
       "dir": "R",
       "radius_m": 62,
       "deg": 48,
@@ -6588,7 +6588,7 @@
         -5019,
         -5368
       ],
-      "s": 3960,
+      "s": 4008,
       "dir": "R",
       "radius_m": 158,
       "deg": 12,
@@ -6606,7 +6606,7 @@
       "dir": "R",
       "radius_m": 48,
       "deg": 32,
-      "s": 980,
+      "s": 661,
       "model_map": true
     }
   },
@@ -9515,7 +9515,7 @@
           -4922,
           -5796
         ],
-        "s": 236,
+        "s": 324,
         "radius_m": 145,
         "dir": "L",
         "deg": 40,
@@ -9579,7 +9579,7 @@
           -4867,
           -5854
         ],
-        "s": 316,
+        "s": 408,
         "radius_m": 201,
         "dir": "L",
         "deg": 15,
@@ -9600,7 +9600,7 @@
           -4746,
           -5916
         ],
-        "s": 452,
+        "s": 540,
         "radius_m": 498,
         "dir": "R",
         "deg": 29,
@@ -9621,7 +9621,7 @@
           -4699,
           -5945
         ],
-        "s": 508,
+        "s": 600,
         "radius_m": 142,
         "dir": "R",
         "deg": 29,
@@ -9642,7 +9642,7 @@
           -4677,
           -5974
         ],
-        "s": 544,
+        "s": 637,
         "radius_m": 93,
         "dir": "R",
         "deg": 29,
@@ -9663,7 +9663,7 @@
           -4668,
           -6008
         ],
-        "s": 580,
+        "s": 661,
         "radius_m": 83,
         "dir": "R",
         "deg": 29,
@@ -9684,7 +9684,7 @@
           -4668,
           -6012
         ],
-        "s": 584,
+        "s": 673,
         "radius_m": 83,
         "dir": "R",
         "deg": 26,
@@ -9705,7 +9705,7 @@
           -4690,
           -6067
         ],
-        "s": 644,
+        "s": 1091,
         "radius_m": 67,
         "dir": "R",
         "deg": 26,
@@ -9726,7 +9726,7 @@
           -4713,
           -6081
         ],
-        "s": 672,
+        "s": 1115,
         "radius_m": 59,
         "dir": "R",
         "deg": 35,
@@ -9747,7 +9747,7 @@
           -4752,
           -6080
         ],
-        "s": 712,
+        "s": 1151,
         "radius_m": 54,
         "dir": "R",
         "deg": 35,
@@ -9768,7 +9768,7 @@
           -4789,
           -6045
         ],
-        "s": 764,
+        "s": 840,
         "radius_m": 57,
         "dir": "R",
         "deg": 38,
@@ -9789,7 +9789,7 @@
           -4785,
           -5983
         ],
-        "s": 828,
+        "s": 2327,
         "radius_m": 59,
         "dir": "R",
         "deg": 38,
@@ -9810,7 +9810,7 @@
           -4778,
           -5974
         ],
-        "s": 840,
+        "s": 912,
         "radius_m": 51,
         "dir": "R",
         "deg": 26,
@@ -9831,7 +9831,7 @@
           -4757,
           -5961
         ],
-        "s": 864,
+        "s": 935,
         "radius_m": 65,
         "dir": "R",
         "deg": 32,
@@ -9852,7 +9852,7 @@
           -4700,
           -5962
         ],
-        "s": 924,
+        "s": 1355,
         "radius_m": 61,
         "dir": "R",
         "deg": 32,
@@ -9873,7 +9873,7 @@
           -4670,
           -6007
         ],
-        "s": 980,
+        "s": 661,
         "radius_m": 48,
         "dir": "R",
         "deg": 32,
@@ -9894,7 +9894,7 @@
           -4670,
           -6015
         ],
-        "s": 988,
+        "s": 673,
         "radius_m": 47,
         "dir": "R",
         "deg": 32,
@@ -9915,7 +9915,7 @@
           -4706,
           -6070
         ],
-        "s": 1056,
+        "s": 1103,
         "radius_m": 56,
         "dir": "R",
         "deg": 29,
@@ -9936,7 +9936,7 @@
           -4709,
           -6072
         ],
-        "s": 1060,
+        "s": 744,
         "radius_m": 56,
         "dir": "R",
         "deg": 29,
@@ -9957,7 +9957,7 @@
           -4770,
           -6069
         ],
-        "s": 1124,
+        "s": 804,
         "radius_m": 53,
         "dir": "R",
         "deg": 26,
@@ -9978,7 +9978,7 @@
           -4781,
           -6057
         ],
-        "s": 1140,
+        "s": 1187,
         "radius_m": 49,
         "dir": "R",
         "deg": 29,
@@ -9999,7 +9999,7 @@
           -4791,
           -6035
         ],
-        "s": 1164,
+        "s": 1211,
         "radius_m": 54,
         "dir": "R",
         "deg": 32,
@@ -10020,7 +10020,7 @@
           -4765,
           -5971
         ],
-        "s": 1236,
+        "s": 923,
         "radius_m": 64,
         "dir": "R",
         "deg": 38,
@@ -10041,7 +10041,7 @@
           -4716,
           -5956
         ],
-        "s": 1288,
+        "s": 1343,
         "radius_m": 61,
         "dir": "R",
         "deg": 35,
@@ -10062,7 +10062,7 @@
           -4697,
           -5962
         ],
-        "s": 1308,
+        "s": 612,
         "radius_m": 62,
         "dir": "R",
         "deg": 48,
@@ -10083,7 +10083,7 @@
           -4391,
           -6199
         ],
-        "s": 1696,
+        "s": 1751,
         "radius_m": 172,
         "dir": "R",
         "deg": 25,
@@ -10104,7 +10104,7 @@
           -4381,
           -6232
         ],
-        "s": 1732,
+        "s": 1776,
         "radius_m": 35,
         "dir": "R",
         "deg": 37,
@@ -10125,7 +10125,7 @@
           -4390,
           -6245
         ],
-        "s": 1748,
+        "s": 1799,
         "radius_m": 30,
         "dir": "R",
         "deg": 78,
@@ -10146,7 +10146,7 @@
           -4573,
           -6238
         ],
-        "s": 1936,
+        "s": 1979,
         "radius_m": 105,
         "dir": "R",
         "deg": 40,
@@ -10167,7 +10167,7 @@
           -4616,
           -6198
         ],
-        "s": 1996,
+        "s": 2039,
         "radius_m": 119,
         "dir": "R",
         "deg": 26,
@@ -10188,7 +10188,7 @@
           -4715,
           -6028
         ],
-        "s": 2196,
+        "s": 2243,
         "radius_m": 140,
         "dir": "L",
         "deg": 42,
@@ -10209,7 +10209,7 @@
           -5451,
           -5885
         ],
-        "s": 2960,
+        "s": 3012,
         "radius_m": 246,
         "dir": "R",
         "deg": 12,
@@ -10230,7 +10230,7 @@
           -5485,
           -5874
         ],
-        "s": 2996,
+        "s": 3048,
         "radius_m": 167,
         "dir": "R",
         "deg": 15,
@@ -10251,7 +10251,7 @@
           -5512,
           -5857
         ],
-        "s": 3028,
+        "s": 3072,
         "radius_m": 125,
         "dir": "R",
         "deg": 14,
@@ -10272,7 +10272,7 @@
           -5534,
           -5834
         ],
-        "s": 3060,
+        "s": 3108,
         "radius_m": 116,
         "dir": "R",
         "deg": 15,
@@ -10293,7 +10293,7 @@
           -5551,
           -5794
         ],
-        "s": 3104,
+        "s": 3143,
         "radius_m": 95,
         "dir": "R",
         "deg": 17,
@@ -10314,7 +10314,7 @@
           -5548,
           -5746
         ],
-        "s": 3152,
+        "s": 3191,
         "radius_m": 98,
         "dir": "R",
         "deg": 32,
@@ -10335,7 +10335,7 @@
           -5434,
           -5388
         ],
-        "s": 3528,
+        "s": 3564,
         "radius_m": 121,
         "dir": "R",
         "deg": 15,
@@ -10356,7 +10356,7 @@
           -5417,
           -5371
         ],
-        "s": 3552,
+        "s": 3600,
         "radius_m": 55,
         "dir": "R",
         "deg": 51,
@@ -10420,7 +10420,7 @@
           -5050,
           -5350
         ],
-        "s": 3924,
+        "s": 3972,
         "radius_m": 162,
         "dir": "R",
         "deg": 31,
@@ -10441,7 +10441,7 @@
           -5022,
           -5365
         ],
-        "s": 3956,
+        "s": 4008,
         "radius_m": 157,
         "dir": "R",
         "deg": 12,
@@ -10462,7 +10462,7 @@
           -5019,
           -5368
         ],
-        "s": 3960,
+        "s": 4008,
         "radius_m": 158,
         "dir": "R",
         "deg": 12,
@@ -10483,7 +10483,7 @@
           -4979,
           -5412
         ],
-        "s": 4020,
+        "s": 4068,
         "radius_m": 147,
         "dir": "R",
         "deg": 12,
@@ -10504,7 +10504,7 @@
           -4963,
           -5453
         ],
-        "s": 4064,
+        "s": 4116,
         "radius_m": 81,
         "dir": "R",
         "deg": 30,

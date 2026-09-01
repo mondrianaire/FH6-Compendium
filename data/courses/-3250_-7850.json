@@ -294,9 +294,9 @@
       "established": true,
       "deg": 47,
       "est_by": "geometry",
+      "s": 312,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 316
+      "geo_mapped": true
     },
     {
       "id": "T4",
@@ -589,9 +589,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 841,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 844
+      "geo_mapped": true
     },
     {
       "id": "T8",
@@ -1503,9 +1503,9 @@
       "established": true,
       "deg": 34,
       "est_by": "geometry",
+      "s": 1994,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1996
+      "geo_mapped": true
     },
     {
       "id": "T18",
@@ -1525,9 +1525,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 2243,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 2240
+      "geo_mapped": true
     },
     {
       "id": "T19",
@@ -1911,9 +1911,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 2980,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 2980
+      "geo_mapped": true
     },
     {
       "id": "T24",
@@ -5908,7 +5908,7 @@
           -3219,
           -8042
         ],
-        "s": 316,
+        "s": 312,
         "radius_m": 137,
         "dir": "L",
         "deg": 47,
@@ -5929,7 +5929,7 @@
           -2841,
           -8389
         ],
-        "s": 844,
+        "s": 841,
         "radius_m": 73,
         "dir": "R",
         "deg": 67,
@@ -5950,7 +5950,7 @@
           -2305,
           -9370
         ],
-        "s": 1996,
+        "s": 1994,
         "radius_m": 175,
         "dir": "L",
         "deg": 34,
@@ -5971,7 +5971,7 @@
           -2106,
           -9496
         ],
-        "s": 2240,
+        "s": 2243,
         "radius_m": 61,
         "dir": "L",
         "deg": 91,
@@ -9493,7 +9493,7 @@
         -3219,
         -8042
       ],
-      "s": 316,
+      "s": 312,
       "dir": "L",
       "radius_m": 137,
       "deg": 47,
@@ -9507,7 +9507,7 @@
         -2841,
         -8389
       ],
-      "s": 844,
+      "s": 841,
       "dir": "R",
       "radius_m": 73,
       "deg": 67,
@@ -9521,7 +9521,7 @@
         -2305,
         -9370
       ],
-      "s": 1996,
+      "s": 1994,
       "dir": "L",
       "radius_m": 175,
       "deg": 34,
@@ -9535,7 +9535,7 @@
         -2106,
         -9496
       ],
-      "s": 2240,
+      "s": 2243,
       "dir": "L",
       "radius_m": 61,
       "deg": 91,

@@ -177,6 +177,24 @@ def _is_lap_boundary(prev_row, row):
     return bool(lb and lb > 0 and (la is None or abs(lb - la) > 0.01))   # single-lap run: it published a time
 
 
+def _globalise_arc(pcs):
+    """Flatten resample() pieces with their running distance carried ACROSS the joins.
+
+    resample restarts each piece's third element at 0, so the flat concatenation everything downstream uses
+    has an arc that resets mid-trace. Turn `s` was fixed to run along the whole course; the trace arc it is
+    compared against was not, and the two are read against each other constantly -- a turn tick is placed on
+    the trace by arc, and a window's total length was taken as pts[-1][2], which on a multi-piece window is
+    the LAST PIECE ONLY. One of the two had to move; this is the other half of that fix.
+    """
+    out, acc = [], 0.0
+    for pc in pcs:
+        for q in pc:
+            r = list(q); r[2] = q[2] + acc; out.append(r)
+        acc += (pc[-1][2] if pc else 0.0)
+    return out
+
+
+
 def curvature(P, step=4.0, win=7):
     th = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(P, P[1:])]
     for i_ in range(1, len(th)):
@@ -2129,7 +2147,7 @@ def main():
         _win_arc = {}
         for cid_, wins in _trace_wins.items():
             for w in wins:
-                pcs_ = resample(lap_pts(w, grip=True)); pts_all = [p for pc in pcs_ for p in pc]
+                pcs_ = resample(lap_pts(w, grip=True)); pts_all = _globalise_arc(pcs_)
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
         def _tune_hash_for(cid_, w_):

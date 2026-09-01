@@ -141,9 +141,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 144,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 144
+      "geo_mapped": true
     },
     {
       "id": "T3",
@@ -299,9 +299,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 288,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 288
+      "geo_mapped": true
     },
     {
       "id": "T5",
@@ -533,9 +533,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 617,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 612
+      "geo_mapped": true
     },
     {
       "id": "T8",
@@ -676,9 +676,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 1120,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1120
+      "geo_mapped": true
     },
     {
       "id": "T10",
@@ -835,9 +835,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 1424,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1420
+      "geo_mapped": true
     },
     {
       "id": "T12",
@@ -1036,9 +1036,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 1648,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1644
+      "geo_mapped": true
     },
     {
       "id": "T14",
@@ -1146,9 +1146,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 1784,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1784
+      "geo_mapped": true
     },
     {
       "id": "T15",
@@ -1380,9 +1380,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 2186,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 2184
+      "geo_mapped": true
     },
     {
       "id": "T18",
@@ -1523,9 +1523,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 2321,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 2320
+      "geo_mapped": true
     },
     {
       "id": "T20",
@@ -1560,9 +1560,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 2465,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 2464
+      "geo_mapped": true
     },
     {
       "id": "T21",
@@ -1868,9 +1868,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 2681,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 2680
+      "geo_mapped": true
     },
     {
       "id": "T24",
@@ -2011,9 +2011,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 2858,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 2856
+      "geo_mapped": true
     },
     {
       "id": "T26",
@@ -4814,7 +4814,7 @@
         -2867,
         -2253
       ],
-      "s": 612,
+      "s": 617,
       "dir": "L",
       "radius_m": 37,
       "deg": 142,
@@ -4842,7 +4842,7 @@
         -2681,
         -2123
       ],
-      "s": 1420,
+      "s": 1424,
       "dir": "L",
       "radius_m": 58,
       "deg": 84,
@@ -4856,7 +4856,7 @@
         -2480,
         -2204
       ],
-      "s": 1644,
+      "s": 1648,
       "dir": "R",
       "radius_m": 74,
       "deg": 73,
@@ -4884,7 +4884,7 @@
         -2155,
         -2609
       ],
-      "s": 2184,
+      "s": 2186,
       "dir": "R",
       "radius_m": 70,
       "deg": 72,
@@ -4898,7 +4898,7 @@
         -2159,
         -2732
       ],
-      "s": 2320,
+      "s": 2321,
       "dir": "L",
       "radius_m": 19,
       "deg": 121,
@@ -4912,7 +4912,7 @@
         -2020,
         -2736
       ],
-      "s": 2464,
+      "s": 2465,
       "dir": "R",
       "radius_m": 86,
       "deg": 69,
@@ -4926,7 +4926,7 @@
         -1941,
         -2921
       ],
-      "s": 2680,
+      "s": 2681,
       "dir": "R",
       "radius_m": 33,
       "deg": 97,
@@ -4940,7 +4940,7 @@
         -2069,
         -3021
       ],
-      "s": 2856,
+      "s": 2858,
       "dir": "L",
       "radius_m": 37,
       "deg": 110,
@@ -8864,7 +8864,7 @@
           -2867,
           -2253
         ],
-        "s": 612,
+        "s": 617,
         "radius_m": 37,
         "dir": "L",
         "deg": 142,
@@ -8906,7 +8906,7 @@
           -2681,
           -2123
         ],
-        "s": 1420,
+        "s": 1424,
         "radius_m": 58,
         "dir": "L",
         "deg": 84,
@@ -8927,7 +8927,7 @@
           -2480,
           -2204
         ],
-        "s": 1644,
+        "s": 1648,
         "radius_m": 74,
         "dir": "R",
         "deg": 73,
@@ -8969,7 +8969,7 @@
           -2155,
           -2609
         ],
-        "s": 2184,
+        "s": 2186,
         "radius_m": 70,
         "dir": "R",
         "deg": 72,
@@ -8990,7 +8990,7 @@
           -2159,
           -2732
         ],
-        "s": 2320,
+        "s": 2321,
         "radius_m": 19,
         "dir": "L",
         "deg": 121,
@@ -9011,7 +9011,7 @@
           -2020,
           -2736
         ],
-        "s": 2464,
+        "s": 2465,
         "radius_m": 86,
         "dir": "R",
         "deg": 69,
@@ -9032,7 +9032,7 @@
           -1941,
           -2921
         ],
-        "s": 2680,
+        "s": 2681,
         "radius_m": 33,
         "dir": "R",
         "deg": 97,
@@ -9053,7 +9053,7 @@
           -2069,
           -3021
         ],
-        "s": 2856,
+        "s": 2858,
         "radius_m": 37,
         "dir": "L",
         "deg": 110,

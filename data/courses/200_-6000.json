@@ -20,9 +20,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 56,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 56
+      "geo_mapped": true
     },
     {
       "id": "T2",
@@ -42,9 +42,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 117,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 116
+      "geo_mapped": true
     },
     {
       "id": "T3",
@@ -1564,7 +1564,7 @@
           123,
           -5942
         ],
-        "s": 116,
+        "s": 117,
         "radius_m": 20,
         "dir": "R",
         "deg": 97,
@@ -1784,7 +1784,7 @@
         123,
         -5942
       ],
-      "s": 116,
+      "s": 117,
       "dir": "R",
       "radius_m": 20,
       "deg": 97,

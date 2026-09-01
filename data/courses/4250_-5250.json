@@ -297,9 +297,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 112,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 112
+      "geo_mapped": true
     },
     {
       "id": "T5",
@@ -536,9 +536,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 257,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 256
+      "geo_mapped": true
     },
     {
       "id": "T8",
@@ -744,9 +744,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 402,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 400
+      "geo_mapped": true
     },
     {
       "id": "T11",
@@ -858,9 +858,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 658,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 656
+      "geo_mapped": true
     },
     {
       "id": "T13",
@@ -1139,9 +1139,9 @@
       "established": true,
       "deg": 25,
       "est_by": "geometry",
+      "s": 907,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 904
+      "geo_mapped": true
     },
     {
       "id": "T16",
@@ -1234,9 +1234,9 @@
       "established": true,
       "deg": 22,
       "est_by": "geometry",
+      "s": 990,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 988
+      "geo_mapped": true
     },
     {
       "id": "T17",
@@ -1422,9 +1422,9 @@
       "established": true,
       "deg": 36,
       "est_by": "geometry",
+      "s": 1147,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1144
+      "geo_mapped": true
     },
     {
       "id": "T19",
@@ -1535,9 +1535,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 1247,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 1244
+      "geo_mapped": true
     },
     {
       "id": "T21",
@@ -1557,9 +1557,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 1332,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 1328
+      "geo_mapped": true
     },
     {
       "id": "T22",
@@ -1579,9 +1579,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 1420,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1416
+      "geo_mapped": true
     },
     {
       "id": "T23",
@@ -1694,9 +1694,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 1609,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1604
+      "geo_mapped": true
     },
     {
       "id": "T25",
@@ -1716,9 +1716,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 1654,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 1648
+      "geo_mapped": true
     },
     {
       "id": "T26",
@@ -1829,9 +1829,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 1811,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1804
+      "geo_mapped": true
     },
     {
       "id": "T28",
@@ -2399,9 +2399,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 550,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 548
+      "geo_mapped": true
     }
   ],
   "laps": 4,
@@ -6338,7 +6338,7 @@
           4090,
           -5012
         ],
-        "s": 256,
+        "s": 257,
         "radius_m": 75,
         "dir": "R",
         "deg": 19,
@@ -6359,7 +6359,7 @@
           3948,
           -5012
         ],
-        "s": 400,
+        "s": 402,
         "radius_m": 70,
         "dir": "R",
         "deg": 38,
@@ -6380,7 +6380,7 @@
           3831,
           -5091
         ],
-        "s": 548,
+        "s": 550,
         "radius_m": 59,
         "dir": "R",
         "deg": 64,
@@ -6401,7 +6401,7 @@
           3809,
           -5196
         ],
-        "s": 656,
+        "s": 658,
         "radius_m": 149,
         "dir": "R",
         "deg": 12,
@@ -6422,7 +6422,7 @@
           3770,
           -5415
         ],
-        "s": 904,
+        "s": 907,
         "radius_m": 14,
         "dir": "L",
         "deg": 25,
@@ -6443,7 +6443,7 @@
           3781,
           -5485
         ],
-        "s": 988,
+        "s": 990,
         "radius_m": 50,
         "dir": "R",
         "deg": 22,
@@ -6464,7 +6464,7 @@
           3869,
           -5613
         ],
-        "s": 1144,
+        "s": 1147,
         "radius_m": 96,
         "dir": "L",
         "deg": 36,
@@ -6485,7 +6485,7 @@
           3866,
           -5712
         ],
-        "s": 1244,
+        "s": 1247,
         "radius_m": 127,
         "dir": "R",
         "deg": 13,
@@ -6506,7 +6506,7 @@
           3873,
           -5796
         ],
-        "s": 1328,
+        "s": 1332,
         "radius_m": 108,
         "dir": "L",
         "deg": 12,
@@ -6527,7 +6527,7 @@
           3875,
           -5882
         ],
-        "s": 1416,
+        "s": 1420,
         "radius_m": 47,
         "dir": "R",
         "deg": 42,
@@ -6548,7 +6548,7 @@
           4007,
           -6013
         ],
-        "s": 1604,
+        "s": 1609,
         "radius_m": 85,
         "dir": "R",
         "deg": 19,
@@ -6569,7 +6569,7 @@
           4048,
           -6030
         ],
-        "s": 1648,
+        "s": 1654,
         "radius_m": 125,
         "dir": "L",
         "deg": 12,
@@ -6590,7 +6590,7 @@
           4189,
           -6071
         ],
-        "s": 1804,
+        "s": 1811,
         "radius_m": 62,
         "dir": "R",
         "deg": 67,
@@ -12654,7 +12654,7 @@
         4090,
         -5012
       ],
-      "s": 256,
+      "s": 257,
       "dir": "R",
       "radius_m": 75,
       "deg": 19,
@@ -12668,7 +12668,7 @@
         3948,
         -5012
       ],
-      "s": 400,
+      "s": 402,
       "dir": "R",
       "radius_m": 70,
       "deg": 38,
@@ -12682,7 +12682,7 @@
         3831,
         -5091
       ],
-      "s": 548,
+      "s": 550,
       "dir": "R",
       "radius_m": 59,
       "deg": 64,
@@ -12696,7 +12696,7 @@
         3770,
         -5415
       ],
-      "s": 904,
+      "s": 907,
       "dir": "L",
       "radius_m": 14,
       "deg": 25,
@@ -12710,7 +12710,7 @@
         3781,
         -5485
       ],
-      "s": 988,
+      "s": 990,
       "dir": "R",
       "radius_m": 50,
       "deg": 22,
@@ -12724,7 +12724,7 @@
         3869,
         -5613
       ],
-      "s": 1144,
+      "s": 1147,
       "dir": "L",
       "radius_m": 96,
       "deg": 36,
@@ -12738,7 +12738,7 @@
         3875,
         -5882
       ],
-      "s": 1416,
+      "s": 1420,
       "dir": "R",
       "radius_m": 47,
       "deg": 42,
@@ -12752,7 +12752,7 @@
         4007,
         -6013
       ],
-      "s": 1604,
+      "s": 1609,
       "dir": "R",
       "radius_m": 85,
       "deg": 19,
@@ -12766,7 +12766,7 @@
         4189,
         -6071
       ],
-      "s": 1804,
+      "s": 1811,
       "dir": "R",
       "radius_m": 62,
       "deg": 67,
@@ -12792,7 +12792,7 @@
         3809,
         -5196
       ],
-      "s": 656,
+      "s": 658,
       "dir": "R",
       "radius_m": 149,
       "deg": 12,
@@ -12804,7 +12804,7 @@
         3866,
         -5712
       ],
-      "s": 1244,
+      "s": 1247,
       "dir": "R",
       "radius_m": 127,
       "deg": 13,
@@ -12816,7 +12816,7 @@
         3873,
         -5796
       ],
-      "s": 1328,
+      "s": 1332,
       "dir": "L",
       "radius_m": 108,
       "deg": 12,
@@ -12828,7 +12828,7 @@
         4048,
         -6030
       ],
-      "s": 1648,
+      "s": 1654,
       "dir": "L",
       "radius_m": 125,
       "deg": 12,

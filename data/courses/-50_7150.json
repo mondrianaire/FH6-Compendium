@@ -274,9 +274,9 @@
       "established": true,
       "deg": 79,
       "est_by": "geometry",
+      "s": 169,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 164
+      "geo_mapped": true
     },
     {
       "id": "T3",
@@ -1316,9 +1316,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 1343,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 1348
+      "geo_mapped": true
     },
     {
       "id": "T12",
@@ -1611,9 +1611,9 @@
       "established": true,
       "deg": 52,
       "est_by": "geometry",
+      "s": 1607,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 1608
+      "geo_mapped": true
     },
     {
       "id": "T14",
@@ -1741,9 +1741,9 @@
       "established": true,
       "deg": 68,
       "est_by": "geometry",
+      "s": 2076,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 2080
+      "geo_mapped": true
     },
     {
       "id": "T15",
@@ -2000,9 +2000,9 @@
       "established": true,
       "deg": 193,
       "est_by": "geometry",
+      "s": 2302,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 2308
+      "geo_mapped": true
     },
     {
       "id": "T17",
@@ -2241,9 +2241,9 @@
       "established": true,
       "deg": 182,
       "est_by": "geometry",
+      "s": 2542,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 2548
+      "geo_mapped": true
     },
     {
       "id": "T19",
@@ -2425,9 +2425,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 3094,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 3100
+      "geo_mapped": true
     },
     {
       "id": "T21",
@@ -2793,9 +2793,9 @@
       "established": true,
       "deg": 55,
       "est_by": "geometry",
+      "s": 3429,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 3432
+      "geo_mapped": true
     },
     {
       "id": "T24",
@@ -2888,9 +2888,9 @@
       "established": true,
       "deg": 156,
       "est_by": "geometry",
+      "s": 3573,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 3572
+      "geo_mapped": true
     },
     {
       "id": "T25",
@@ -3429,9 +3429,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 4089,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 4092
+      "geo_mapped": true
     },
     {
       "id": "T33",
@@ -3559,9 +3559,9 @@
       "established": true,
       "deg": 84,
       "est_by": "geometry",
+      "s": 4293,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 4292
+      "geo_mapped": true
     },
     {
       "id": "T34",
@@ -4310,9 +4310,9 @@
       "established": true,
       "deg": 57,
       "est_by": "geometry",
+      "s": 4977,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 4980
+      "geo_mapped": true
     },
     {
       "id": "T41",
@@ -4810,9 +4810,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 780,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 780
+      "geo_mapped": true
     },
     {
       "id": "T3",
@@ -4832,9 +4832,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 4641,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 4648
+      "geo_mapped": true
     },
     {
       "id": "T15",
@@ -4854,9 +4854,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 5133,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 5140
+      "geo_mapped": true
     },
     {
       "id": "T4",
@@ -4876,9 +4876,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 5505,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 5504
+      "geo_mapped": true
     },
     {
       "id": "T17",
@@ -4898,9 +4898,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 3897,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 3904
+      "geo_mapped": true
     }
   ],
   "laps": 5,
@@ -8872,7 +8872,7 @@
           -139,
           7023
         ],
-        "s": 164,
+        "s": 169,
         "radius_m": 73,
         "dir": "L",
         "deg": 79,
@@ -9000,7 +9000,7 @@
           -233,
           6897
         ],
-        "s": 1348,
+        "s": 1343,
         "radius_m": 28,
         "dir": "L",
         "deg": 191,
@@ -9064,7 +9064,7 @@
           -193,
           6651
         ],
-        "s": 1608,
+        "s": 1607,
         "radius_m": 152,
         "dir": "R",
         "deg": 52,
@@ -9085,7 +9085,7 @@
           -314,
           6200
         ],
-        "s": 2080,
+        "s": 2076,
         "radius_m": 88,
         "dir": "L",
         "deg": 68,
@@ -9106,7 +9106,7 @@
           -173,
           6053
         ],
-        "s": 2308,
+        "s": 2302,
         "radius_m": 18,
         "dir": "R",
         "deg": 193,
@@ -9127,7 +9127,7 @@
           -359,
           6146
         ],
-        "s": 2548,
+        "s": 2542,
         "radius_m": 17,
         "dir": "L",
         "deg": 182,
@@ -9191,7 +9191,7 @@
           112,
           5905
         ],
-        "s": 3100,
+        "s": 3094,
         "radius_m": 62,
         "dir": "R",
         "deg": 138,
@@ -9255,7 +9255,7 @@
           14,
           5624
         ],
-        "s": 3432,
+        "s": 3429,
         "radius_m": 68,
         "dir": "L",
         "deg": 55,
@@ -9276,7 +9276,7 @@
           -19,
           5493
         ],
-        "s": 3572,
+        "s": 3573,
         "radius_m": 57,
         "dir": "R",
         "deg": 156,
@@ -9340,7 +9340,7 @@
           -271,
           5597
         ],
-        "s": 3904,
+        "s": 3897,
         "radius_m": 68,
         "dir": "L",
         "deg": 85,
@@ -9361,7 +9361,7 @@
           -432,
           5513
         ],
-        "s": 4092,
+        "s": 4089,
         "radius_m": 61,
         "dir": "L",
         "deg": 96,
@@ -9382,7 +9382,7 @@
           -411,
           5326
         ],
-        "s": 4292,
+        "s": 4293,
         "radius_m": 61,
         "dir": "R",
         "deg": 84,
@@ -9403,7 +9403,7 @@
           -687,
           5108
         ],
-        "s": 4648,
+        "s": 4641,
         "radius_m": 66,
         "dir": "L",
         "deg": 116,
@@ -9467,7 +9467,7 @@
           -450,
           4946
         ],
-        "s": 4980,
+        "s": 4977,
         "radius_m": 90,
         "dir": "L",
         "deg": 57,
@@ -9531,7 +9531,7 @@
           -305,
           5009
         ],
-        "s": 5140,
+        "s": 5133,
         "radius_m": 152,
         "dir": "R",
         "deg": 42,
@@ -9552,7 +9552,7 @@
           24,
           4992
         ],
-        "s": 5504,
+        "s": 5505,
         "radius_m": 22,
         "dir": "R",
         "deg": 182,
@@ -19441,7 +19441,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 164,
+      "s": 169,
       "model_map": true
     },
     "1_6447": {
@@ -19471,7 +19471,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 1348,
+      "s": 1343,
       "model_map": true
     },
     "-194_6643": {
@@ -19486,7 +19486,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 1608,
+      "s": 1607,
       "model_map": true
     },
     "-315_6197": {
@@ -19501,7 +19501,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 2080,
+      "s": 2076,
       "model_map": true
     },
     "-162_6059": {
@@ -19516,7 +19516,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 2308,
+      "s": 2302,
       "model_map": true
     },
     "-361_6154": {
@@ -19531,7 +19531,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 2548,
+      "s": 2542,
       "model_map": true
     },
     "105_5912": {
@@ -19546,7 +19546,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 3100,
+      "s": 3094,
       "model_map": true
     },
     "15_5618": {
@@ -19561,7 +19561,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 3432,
+      "s": 3429,
       "model_map": true
     },
     "-9_5498": {
@@ -19576,7 +19576,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 3572,
+      "s": 3573,
       "model_map": true
     },
     "-441_5505": {
@@ -19591,7 +19591,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 4092,
+      "s": 4089,
       "model_map": true
     },
     "-399_5334": {
@@ -19606,7 +19606,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 4292,
+      "s": 4293,
       "model_map": true
     },
     "-691_5092": {
@@ -19621,7 +19621,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 4648,
+      "s": 4641,
       "model_map": true
     },
     "-322_5006": {
@@ -19636,7 +19636,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 5140,
+      "s": 5133,
       "model_map": true
     },
     "25_4996": {
@@ -19651,7 +19651,7 @@
         "fh6_20260828_001105",
         "fh6_20260827_213049"
       ],
-      "s": 5504,
+      "s": 5505,
       "model_map": true
     },
     "-271_5597": {
@@ -19659,7 +19659,7 @@
         -271,
         5597
       ],
-      "s": 3904,
+      "s": 3897,
       "dir": "L",
       "radius_m": 68,
       "deg": 85,
@@ -19673,7 +19673,7 @@
         -450,
         4946
       ],
-      "s": 4980,
+      "s": 4977,
       "dir": "L",
       "radius_m": 90,
       "deg": 57,

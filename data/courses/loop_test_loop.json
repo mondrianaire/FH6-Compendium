@@ -310,9 +310,9 @@
       "established": true,
       "deg": 151,
       "est_by": "geometry",
+      "s": 157,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 156
+      "geo_mapped": true
     },
     {
       "id": "T4",
@@ -496,9 +496,9 @@
       "established": true,
       "deg": 160,
       "est_by": "geometry",
+      "s": 326,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 324
+      "geo_mapped": true
     },
     {
       "id": "T6",
@@ -591,9 +591,9 @@
       "established": true,
       "deg": 144,
       "est_by": "geometry",
+      "s": 539,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 536
+      "geo_mapped": true
     },
     {
       "id": "T7",
@@ -2316,7 +2316,7 @@
           -1982,
           1599
         ],
-        "s": 156,
+        "s": 157,
         "radius_m": 17,
         "dir": "L",
         "deg": 151,
@@ -2337,7 +2337,7 @@
           -1953,
           1462
         ],
-        "s": 324,
+        "s": 326,
         "radius_m": 34,
         "dir": "R",
         "deg": 160,
@@ -2358,7 +2358,7 @@
           -2040,
           1620
         ],
-        "s": 536,
+        "s": 539,
         "radius_m": 65,
         "dir": "R",
         "deg": 144,
@@ -5232,7 +5232,7 @@
       "dir": "L",
       "radius_m": 17,
       "deg": 151,
-      "s": 156,
+      "s": 157,
       "model_map": true
     },
     "-1953_1462": {
@@ -5244,7 +5244,7 @@
       "dir": "R",
       "radius_m": 34,
       "deg": 160,
-      "s": 324,
+      "s": 326,
       "model_map": true
     },
     "-2040_1620": {
@@ -5256,7 +5256,7 @@
       "dir": "R",
       "radius_m": 65,
       "deg": 144,
-      "s": 536,
+      "s": 539,
       "model_map": true
     }
   },

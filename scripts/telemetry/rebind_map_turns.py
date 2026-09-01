@@ -56,6 +56,30 @@ def nearest(pos, items, key, taken, tol):
     return best
 
 
+def arc_along(path, pos):
+    """Arc from the start of `path` to the vertex nearest `pos`, in metres, skipping piece joins.
+
+    THE STORED ARC CANNOT BE TRUSTED, SO DERIVE IT. resample restarts each piece's running distance at 0,
+    and until this session the analyzer wrote that straight out as a turn's `s` -- so every multi-piece
+    model on disk carries arc-within-its-piece, and the writer being fixed does not fix them: this function
+    and the analyzer's improve-only path both copied the stored value forward verbatim. Deriving it from the
+    geometry the turn actually sits on makes it self-healing, and correct for models written either way.
+    The 150 m skip matches route_s: a jump between disconnected pieces is not road.
+    """
+    if not path or len(path) < 2 or not pos:
+        return None
+    best_i, best_d = 0, None
+    cum = [0.0]
+    for i in range(1, len(path)):
+        d = math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1])
+        cum.append(cum[-1] + (d if d <= 150.0 else 0.0))
+    for i, q in enumerate(path):
+        d2 = (q[0] - pos[0]) ** 2 + (q[1] - pos[1]) ** 2
+        if best_d is None or d2 < best_d:
+            best_i, best_d = i, d2
+    return round(cum[best_i])
+
+
 def rebind(m):
     """Mutates `m`. Returns (n_registry_added, n_turns_added, n_established_added)."""
     g = (m.get("geometry") or {}).get("turns") or []
@@ -63,6 +87,18 @@ def rebind(m):
     if not mturns:
         return 0, 0, 0
     tol = tol_of(mturns)
+    _gpath = (m.get("geometry") or {}).get("path") or []
+    # AND CORRECT THE MAP'S OWN ARCS. turn_stats.windows reads geometry.turns[].s, not the registry, so fixing
+    # only the registry leaves the windows wrong. On 2850_-200 the stored arcs are 316, 312, 308 -- descending,
+    # because they are arc within three different pieces -- while the path puts those same apexes at 318, 641
+    # and 958. Read as one sequence they look like three records of one corner 8 m apart and every window
+    # collapsed to the 1 m floor; read correctly they are three corners spread over the course. This is
+    # re-derivation from the geometry the turns already sit on, not new information, and it makes a model
+    # written before the arc fix correct itself instead of waiting to be driven again.
+    for _t in mturns:
+        _sa = arc_along(_gpath, _t.get("apex"))
+        if _sa is not None:
+            _t["s"] = _sa
     reg = m.setdefault("geo_turns", {})
     turns = m.setdefault("turns", [])
 
@@ -86,6 +122,9 @@ def rebind(m):
         for f in ("dir", "radius_m", "deg", "s"):
             if t.get(f) is not None:
                 r[f] = t[f]
+        _sa = arc_along(_gpath, ap)
+        if _sa is not None:
+            r["s"] = _sa                              # derived, never the stored per-piece value
     # an entry the current map does not contain is a superseded apex — the analyzer's own rule
     for k in [k for k, v in reg.items() if not v.get("model_map")]:
         del reg[k]

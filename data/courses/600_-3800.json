@@ -141,9 +141,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 116,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 76
+      "geo_mapped": true
     },
     {
       "id": "T3",
@@ -193,9 +193,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 152,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 112
+      "geo_mapped": true
     },
     {
       "id": "T4",
@@ -245,9 +245,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 777,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 732
+      "geo_mapped": true
     },
     {
       "id": "T5",
@@ -552,9 +552,9 @@
         "reading": null,
         "verdict": "measured"
       },
+      "s": 1232,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 1184
+      "geo_mapped": true
     }
   ],
   "laps": 1,
@@ -5313,7 +5313,7 @@
         -3738,
         320
       ],
-      "s": 76,
+      "s": 116,
       "dir": "L",
       "radius_m": 9,
       "deg": 184,
@@ -5327,7 +5327,7 @@
         -3195,
         577
       ],
-      "s": 732,
+      "s": 777,
       "dir": "L",
       "radius_m": 180,
       "deg": 44,
@@ -5341,7 +5341,7 @@
         -3086,
         1013
       ],
-      "s": 1184,
+      "s": 1232,
       "dir": "L",
       "radius_m": 32,
       "deg": 15,
@@ -5355,7 +5355,7 @@
         -3749,
         318
       ],
-      "s": 112,
+      "s": 152,
       "dir": "R",
       "radius_m": 12,
       "deg": 175,
@@ -7924,7 +7924,7 @@
           -3738,
           320
         ],
-        "s": 76,
+        "s": 116,
         "radius_m": 9,
         "dir": "L",
         "deg": 184,
@@ -7945,7 +7945,7 @@
           -3749,
           318
         ],
-        "s": 112,
+        "s": 152,
         "radius_m": 12,
         "dir": "R",
         "deg": 175,
@@ -7966,7 +7966,7 @@
           -3195,
           577
         ],
-        "s": 732,
+        "s": 777,
         "radius_m": 180,
         "dir": "L",
         "deg": 44,
@@ -7987,7 +7987,7 @@
           -3086,
           1013
         ],
-        "s": 1184,
+        "s": 1232,
         "radius_m": 32,
         "dir": "L",
         "deg": 15,

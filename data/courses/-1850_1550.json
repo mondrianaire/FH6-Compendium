@@ -271,9 +271,9 @@
       "established": true,
       "deg": 137,
       "est_by": "geometry",
+      "s": 503,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 504
+      "geo_mapped": true
     },
     {
       "id": "T3",
@@ -688,9 +688,9 @@
       "established": true,
       "deg": 138,
       "est_by": "geometry",
+      "s": 367,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 368
+      "geo_mapped": true
     },
     {
       "id": "T6",
@@ -1088,9 +1088,9 @@
       "established": true,
       "est_by": "geometry",
       "deg": 147,
+      "s": 970,
       "geo_sessions": 1,
-      "geo_mapped": true,
-      "s": 968
+      "geo_mapped": true
     },
     {
       "id": "T9",
@@ -1488,9 +1488,9 @@
       "established": true,
       "deg": 139,
       "est_by": "geometry",
+      "s": 1211,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 1208
+      "geo_mapped": true
     },
     {
       "id": "T12",
@@ -1817,9 +1817,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 829,
       "geo_sessions": 2,
-      "geo_mapped": true,
-      "s": 828
+      "geo_mapped": true
     },
     {
       "id": "T6",
@@ -1839,9 +1839,9 @@
       "established": true,
       "est_by": "geometry",
       "status": "turn",
+      "s": 225,
       "geo_sessions": 0,
-      "geo_mapped": true,
-      "s": 224
+      "geo_mapped": true
     }
   ],
   "laps": 23,
@@ -4925,7 +4925,7 @@
           -1858,
           1447
         ],
-        "s": 224,
+        "s": 225,
         "radius_m": 39,
         "dir": "R",
         "deg": 147,
@@ -4989,7 +4989,7 @@
           -1882,
           1553
         ],
-        "s": 368,
+        "s": 367,
         "radius_m": 11,
         "dir": "R",
         "deg": 138,
@@ -5053,7 +5053,7 @@
           -1787,
           1472
         ],
-        "s": 504,
+        "s": 503,
         "radius_m": 19,
         "dir": "R",
         "deg": 137,
@@ -5074,7 +5074,7 @@
           -1978,
           1595
         ],
-        "s": 828,
+        "s": 829,
         "radius_m": 14,
         "dir": "L",
         "deg": 153,
@@ -5095,7 +5095,7 @@
           -1932,
           1476
         ],
-        "s": 968,
+        "s": 970,
         "radius_m": 38,
         "dir": "R",
         "deg": 147,
@@ -5116,7 +5116,7 @@
           -2042,
           1619
         ],
-        "s": 1208,
+        "s": 1211,
         "radius_m": 46,
         "dir": "R",
         "deg": 139,
@@ -20174,7 +20174,7 @@
         -1978,
         1595
       ],
-      "s": 828,
+      "s": 829,
       "dir": "L",
       "radius_m": 14,
       "deg": 153,
@@ -20189,7 +20189,7 @@
         -2042,
         1619
       ],
-      "s": 1208,
+      "s": 1211,
       "dir": "R",
       "radius_m": 46,
       "deg": 139,
@@ -20204,7 +20204,7 @@
         -1787,
         1472
       ],
-      "s": 504,
+      "s": 503,
       "dir": "R",
       "radius_m": 19,
       "deg": 137,
@@ -20218,7 +20218,7 @@
         -1932,
         1476
       ],
-      "s": 968,
+      "s": 970,
       "dir": "R",
       "radius_m": 38,
       "deg": 147,
@@ -20236,7 +20236,7 @@
       "dir": "R",
       "radius_m": 39,
       "deg": 147,
-      "s": 224,
+      "s": 225,
       "model_map": true
     },
     "-1882_1553b": {
@@ -20248,7 +20248,7 @@
       "dir": "R",
       "radius_m": 11,
       "deg": 138,
-      "s": 368,
+      "s": 367,
       "model_map": true
     }
   },

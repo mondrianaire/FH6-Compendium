@@ -585,7 +585,7 @@
   },
   "speed_traces": {
     "4160|1|6|800": {
-      "lap_s": 228.1,
+      "lap_s": null,
       "session": "fh6_20260829_051952",
       "build_id": "437e8a31",
       "class": "S1",

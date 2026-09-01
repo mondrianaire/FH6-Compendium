@@ -5349,7 +5349,13 @@
     // PER-TUNE SPEED TRACES: every saved best-lap speed-vs-distance curve for this circuit, overlaid — gated to the
     // viewer's CLASS (an S1 trace against a D trace is noise, not signal). Legend chips wear the tune identity
     // (livery thumb + PI badge); turn ticks speak the map's T-number language. YOUR tune is the blue emphasized line.
-    const _traceCls = (curCar) => { const fp = (live.frame && live.frame.on && live.frame.cls) || null; if (fp) return fp; const pi = curCar ? +String(curCar).split("|")[3] : NaN; return isFinite(pi) ? CLS_OF_PI(pi) : null; };
+    // THE LIVE CAR'S CLASS IS ONLY THE ANSWER WHEN THE CALLER IS ASKING ABOUT THE LIVE CAR. This read
+    // live.frame.cls FIRST and ignored the curCar it was handed, so the Recording view -- which now
+    // deliberately passes null, meaning "no current car here" -- still got class-filtered by whatever is
+    // loaded in the game right now, and a recording's own traces stayed hidden behind "no lap for class A
+    // on this circuit yet". Passing null could not express the intent because the parameter was not
+    // consulted. useLive says it outright.
+    const _traceCls = (curCar, useLive) => { const fp = (useLive && live.frame && live.frame.on && live.frame.cls) || null; if (fp) return fp; const pi = curCar ? +String(curCar).split("|")[3] : NaN; return isFinite(pi) ? CLS_OF_PI(pi) : null; };
     const _traceEntries = (co, curCls) => Object.entries(co.speed_traces || {}).map(([c2, t]) => Object.assign({ cid: c2, cls: t.class || CLS_OF_PI(t.pi) }, t)).filter((t) => t.pts && t.pts.length > 2 && (!curCls || t.cls === curCls));
     // ---- HISTORICAL LAPS — every lap of this course ever recorded (the daemon's /laps over data/laps.db), class-scoped.
     // The model's speed_traces hold at most one lap per tune; this is the whole record behind them. The endpoint is
@@ -5371,10 +5377,10 @@
       return have || null;
     } catch (e) { return null; } };
     // the class the traces are scoped to: the user's switch wins, else the live car's class, else every class
-    const traceClsFor = (co, curCar) => { const rk = co && co.route_key; const ov = rk ? live.lapsCls[rk] : undefined; return ov !== undefined ? (ov || null) : (_traceCls(curCar) || null); };
+    const traceClsFor = (co, curCar, useLive) => { const rk = co && co.route_key; const ov = rk ? live.lapsCls[rk] : undefined; return ov !== undefined ? (ov || null) : (_traceCls(curCar, useLive) || null); };
     const speedTracesCard = (co, curCar) => { try {
       const st = co.speed_traces || {}; const rk = co.route_key || null;
-      const curCls = traceClsFor(co, curCar);
+      const curCls = traceClsFor(co, curCar, src === "live");
       const hist = fetchLaps(rk, curCls);   // lazily kicked from the render, exactly like the disk-tune read on the identity row
       const byCls = (hist && hist.by_class) || {};
       // the class switch is driven by what the DATABASE actually holds — never a fixed list of classes
@@ -5460,8 +5466,13 @@
       // a hard crash into a missing feature. That is why the card was absent from every course view.
       const cur = curCar ? match.find((t) => t.cid === curCar) : null;
       const isCur = (t) => t === cur;
+      // A TICK WEARS THE TURN'S OWN ID, NOT ITS POSITION IN THE LIST. This returned "T" + (index + 1), and
+      // canonical ids are not contiguous -- Edamame's are T2, T4, T5, T7, T8 -- so the ticks read T1, T2, T3,
+      // T4, T5 and every one of them named a different corner from the marker the map draws at the same place.
+      // The ids became arc-ordered and unique when rebind stopped handing out numbers already in use, so the
+      // id is now the thing to show; the positional count remains only as a fallback for a turn without one.
       const geo = courseGeoFor(co); const canon2 = ((co.turns || {}).canonical) || [];
-      const tkLbl = (g2) => { let bi = -1, bd = 60 * 60; canon2.forEach((t2, i2) => { const d2 = (t2.pos[0] - g2.apex[0]) ** 2 + (t2.pos[1] - g2.apex[1]) ** 2; if (d2 < bd) { bd = d2; bi = i2; } }); return bi >= 0 ? "T" + (bi + 1) : "·"; };   // THIS course's T-numbers, not courses[0]'s
+      const tkLbl = (g2) => { let bi = -1, bd = 60 * 60; canon2.forEach((t2, i2) => { const d2 = (t2.pos[0] - g2.apex[0]) ** 2 + (t2.pos[1] - g2.apex[1]) ** 2; if (d2 < bd) { bd = d2; bi = i2; } }); return bi >= 0 ? (canon2[bi].id || "T" + (bi + 1)) : "·"; };   // the turn's OWN id, not its position
       const ticks = ((geo && geo.turns) || []).filter((g2) => g2.s != null && g2.apex).map((g2) => `<line x1="${px2(g2.s).toFixed(1)}" y1="${H2 - padB}" x2="${px2(g2.s).toFixed(1)}" y2="8" stroke="var(--line)" opacity=".55"/><text x="${px2(g2.s).toFixed(1)}" y="${H2 - 4}" text-anchor="middle" font-size="8" fill="var(--muted)">${tkLbl(g2)}</text>`).join("");
       const axis = [0.5, 1].map((f2) => { const v = Math.round(vmax * f2 / 10) * 10; return `<text x="2" y="${(py2(v) + 3).toFixed(1)}" font-size="8" fill="var(--muted)">${v}</text>`; }).join("");
       // rivals: plain lines (comparison). YOUR tune: grip-painted, because that is the one you can act on.
@@ -5508,7 +5519,7 @@
     const turnTraceStrip = (co, tpos, curCar) => { try {
       if (!co.speed_traces || !tpos) return ""; const geo = courseGeoFor(co);
       const gt = ((geo && geo.turns) || []).find((g2) => g2.apex && g2.s != null && ((g2.apex[0] - tpos[0]) ** 2 + (g2.apex[1] - tpos[1]) ** 2) <= 45 * 45); if (!gt) return "";
-      const curCls = traceClsFor(co, curCar); const entries = _traceEntries(co, curCls); if (!entries.length) return "";
+      const curCls = traceClsFor(co, curCar, src === "live"); const entries = _traceEntries(co, curCls); if (!entries.length) return "";
       const s0 = Math.max(0, gt.s - 120), s1 = gt.s + 180;
       const segs = entries.map((t) => ({ t, pts: t.pts.filter((p) => p[0] >= s0 && p[0] <= s1) })).filter((x) => x.pts.length > 2); if (!segs.length) return "";
       const vmax = Math.max(...segs.flatMap((x) => x.pts.map((p) => p[1]))) * 1.08 || 1; const W3 = 240, H3 = 74;

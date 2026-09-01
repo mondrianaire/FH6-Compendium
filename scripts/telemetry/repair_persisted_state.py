@@ -35,6 +35,7 @@ LARGE time is beaten by the next honest lap, an absurdly SMALL one can never be 
    that route sets it correctly via the same max().
 """
 import argparse
+import sqlite3
 import math, glob, io, json, os, sys
 
 try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # in place: see merge_courses.py
@@ -96,6 +97,27 @@ def repair(m):
             hits.append("speed_traces[%s] covers only %.0f m of the %.0f m course (%.0f%%) — a fragment holding "
                         "the slot on time" % (cid, _span(st[cid]["pts"]), L, 100 * _span(st[cid]["pts"]) / L))
             del st[cid]
+    # A TRACE THAT CONTRADICTS ITS OWN SPEED IS NOT DESCRIBING THIS LAP. A trace holds both the road it
+    # covered and the speed it covered it at, so its own mph integrated over its own arc reproduces its own
+    # lap time -- 29 of 33 agree to a fraction of a second. The four that do not include Edamame's 21.088 s,
+    # which is FASTER than that course's 29.376 s track record and was being shown as the lap to beat.
+    # Cleared to null, not to the integrated estimate: null honestly says "not known", where a computed
+    # number would be indistinguishable from one the game reported.
+    for cid, v in list(st.items()):
+        pts = (v or {}).get("pts") or []
+        ls = (v or {}).get("lap_s")
+        if len(pts) < 30 or not ls or ls <= 0:
+            continue
+        t = 0.0
+        for i in range(1, len(pts)):
+            d = pts[i][0] - pts[i - 1][0]
+            mph = (pts[i][1] + pts[i - 1][1]) / 2.0
+            if d > 0 and mph > 1:
+                t += d / (mph * 0.44704)
+        if t > 1 and abs(ls - t) / t > 0.25:
+            hits.append("speed_traces[%s].lap_s = %.2f s but its own speed gives %.1f s (%.0f%% out)"
+                        % (cid, ls, t, 100 * abs(ls - t) / t))
+            v["lap_s"] = None
     return hits
 
 
@@ -113,6 +135,37 @@ def repair_routes():
             hits.append("routes[%s].length_m = %s" % (k, v["length_m"]))
             v.pop("length_m", None)
     return hits, (d, p)
+
+
+def repair_lap_store(dry):
+    """Remove lap_traces rows whose session does not exist. Returns descriptions of what was dropped.
+
+    Four rows carry session fh6_99990101_000000 -- a year-9999 sentinel, not a capture. No session file by
+    that name exists and no course model claims it, so nothing can ever explain where those laps came from
+    or check them against a capture; two of their route_keys have no model at all. A lap whose provenance
+    cannot be established is not evidence, and these sit in the same table the 107% rule reads.
+    """
+    hits = []
+    dbp = os.path.join(ROOT, "data", "laps.db")
+    if not os.path.exists(dbp):
+        return hits
+    try:
+        cx = sqlite3.connect(dbp)
+        cx.row_factory = sqlite3.Row
+        known = {os.path.basename(x)[:-5] for x in glob.glob(os.path.join(ROOT, "data", "sessions", "*.json"))
+                 if not x.endswith(".tags.json")}
+        rows = [dict(r) for r in cx.execute("SELECT id, route_key, session FROM lap_traces")]
+        orphan = [r for r in rows if r["session"] and r["session"] not in known]
+        for r in orphan:
+            hits.append("id=%s route=%s session=%s (no such session file)" % (r["id"], r["route_key"], r["session"]))
+        if orphan and not dry:
+            cx.executemany("DELETE FROM lap_traces WHERE id=?", [(r["id"],) for r in orphan])
+            cx.commit()
+        cx.close()
+    except Exception as e:
+        hits.append("laps.db unreadable: %r" % (e,))
+    return hits
+
 
 
 def repair_sessions(dry):
@@ -165,6 +218,9 @@ def main():
         print("  %-24s %s" % (os.path.basename(p), "; ".join(hits)))
         if not a.dry:
             json.dump(m, open(p, "w", encoding="utf-8"), indent=2)
+    lh = repair_lap_store(a.dry)
+    for h in lh:
+        print("  %-24s %s" % ("laps.db", h))
     sh = repair_sessions(a.dry)
     for h in sh:
         print("  %-24s %s" % ("sessions", h))
@@ -176,8 +232,9 @@ def main():
     print("\n%s: %d impossible value(s) across %d course file(s)%s"
           % ("WOULD DROP" if a.dry else "DROPPED", n_v, n_f,
              " + %d route length(s)" % len(rh) if rh else "")
-          + (" + %d session lap time(s)" % len(sh) if sh else ""))
-    if not n_v and not rh and not sh:
+          + (" + %d session lap time(s)" % len(sh) if sh else "")
+          + (" + %d orphan lap row(s)" % len(lh) if lh else ""))
+    if not n_v and not rh and not sh and not lh:
         print("nothing to do — every persisted value is inside the audit's invariants")
 
 

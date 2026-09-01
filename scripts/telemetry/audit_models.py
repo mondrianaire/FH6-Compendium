@@ -237,6 +237,31 @@ def audit(m, path):
             out.append(("WARN", "merged-laps", f"{len(bad)} of {len(lap_arcs)} stored laps exceed 1.45x the median "
                                                f"({med:.0f} m) AND retrace themselves — un-split multi-lap "
                                                f"windows: {', '.join(f'{a:.0f}' for a in sorted(bad)[:5])} m"))
+    # --- 7b. A TRACE'S LAP TIME MUST AGREE WITH THE TRACE'S OWN SPEED. ---
+    # The one check here that needs no external reference: a trace carries both the road it covered and the
+    # speed it covered it at, so integrating its own mph over its own arc reproduces its own lap time. Where
+    # the two disagree, one of the numbers is not describing this lap. Measured across the catalog, 29 of 33
+    # traces agree to within a fraction of a second -- 32.116 stored against 32.0 integrated -- and 4 do not:
+    # three are scraps whose lap_s is really a capture window (177.8 s over 68 s of driving, 958.7 over 34.6),
+    # and the fourth is Edamame's 21.088 s, which is not just wrong but FASTER than that course's own track
+    # record of 29.376 s, so it was being shown as the lap to beat. Nothing else could catch that: the value
+    # is inside every plausible range and only its own trace contradicts it.
+    for cid, v in (m.get("speed_traces") or {}).items():
+        pts = (v or {}).get("pts") or []
+        ls = (v or {}).get("lap_s")
+        if len(pts) < 30 or not ls or ls <= 0:
+            continue
+        t = 0.0
+        for i in range(1, len(pts)):
+            d = pts[i][0] - pts[i - 1][0]
+            mph = (pts[i][1] + pts[i - 1][1]) / 2.0
+            if d > 0 and mph > 1:
+                t += d / (mph * 0.44704)
+        if t > 1 and abs(ls - t) / t > 0.25:
+            out.append(("FAIL", "trace-time-disagrees",
+                        f"speed_traces[{cid}] claims {ls:.2f} s but its own speed over its own arc gives "
+                        f"{t:.1f} s ({100 * abs(ls - t) / t:.0f}% out) — one of the two is not this lap"))
+
     # --- 8. A PERSISTED LAP TIME MUST BE A LAP. ---
     # best_laps is improve-only (analyze_session.py), guarded only by "> 0", so one absurd value latches forever
     # and becomes the course's headline record. 200_-6000 is showing 231307.938 s -- a 64-HOUR track record -- and

@@ -194,20 +194,35 @@ def describe(slot, pid, ordinal):
 
 
 def build(target, source, ordinal):
+    """Rows are the ACTIONS needed on the replica. With no source container we model the stock car as
+    tier 0 / variant 0 in every slot -- otherwise every populated slot looks like a change and a list
+    of 'required upgrades' fills up with parts the stock car already has."""
     tp = target.get("parts") or {}
     sp = (source or {}).get("parts") or {}
+    assume_stock = source is None
     rows = []
     for menu, items in MENUS:
         got = []
         for slot, item, confirmed in items:
             tv, sv = tp.get(slot), sp.get(slot)
-            if tv == sv or (tv is None and sv is None):
+            if tv is None and sv is None:
                 continue
             ti, ttxt = describe(slot, tv, ordinal)
-            si, stxt = describe(slot, sv, ordinal)
+            if assume_stock:
+                # a stock car sits at index 0 of whatever partset that slot uses
+                if ti == 0:
+                    continue
+                si, stxt = 0, "stock (idx 0)"
+            else:
+                if tv == sv:
+                    continue
+                si, stxt = describe(slot, sv, ordinal)
+            # tier 0 in a NON-zero variant is the stock part *for that conversion* -- fitting the body
+            # kit sets it. It is a consequence, not something you buy, so it must not read as an action.
+            auto = bool(ti is not None and ti >= 100 and ti % 100 == 0)
             got.append({"slot": slot, "item": item, "confirmed": confirmed,
                         "from": stxt, "to": ttxt, "from_idx": si, "to_idx": ti,
-                        "engine_part": slot in ENGINE_INTERNALS})
+                        "auto": auto, "engine_part": slot in ENGINE_INTERNALS})
         if got:
             rows.append((menu, got))
     return rows
@@ -330,18 +345,32 @@ def main():
         out.flush()
         return 0
     MARK = {PROVEN: "  ", GROUP: " ~", GUESS: " ?"}
+    auto_rows = []
     for menu, got in rows:
+        act = [r for r in got if not r["auto"]]
+        auto_rows += [(menu, r) for r in got if r["auto"]]
+        if not act:
+            continue
         print("  %s" % menu.upper(), file=out)
-        for r in got:
+        for r in act:
             line = "  %s %-36s %s" % (MARK[r["confirmed"]], r["item"], r["to"])
             if r["from"] != "-" and sd is not None:
                 line += "   (was %s)" % r["from"]
             print(line, file=out)
         print("", file=out)
-    ng = sum(1 for _, g in rows for r in g if r["confirmed"] == GROUP)
-    nq = sum(1 for _, g in rows for r in g if r["confirmed"] == GUESS)
+    if auto_rows:
+        print("  SET AUTOMATICALLY BY THE CONVERSION - do not shop for these", file=out)
+        for menu, r in auto_rows:
+            print("     %-36s %s" % (r["item"], r["to"]), file=out)
+        print("     (tier 0 in body variant %s = the stock part FOR that conversion)"
+              % (auto_rows[0][1]["to_idx"] // 100), file=out)
+        print("", file=out)
+    acts = total - len(auto_rows)
+    ng = sum(1 for _, g in rows for r in g if r["confirmed"] == GROUP and not r["auto"])
+    nq = sum(1 for _, g in rows for r in g if r["confirmed"] == GUESS and not r["auto"])
+    print("  %d PART%s TO INSTALL (+%d set automatically)" % (acts, "" if acts == 1 else "S", len(auto_rows)), file=out)
     print("  LABEL CONFIDENCE   (blank)=proven   ~=right menu, exact item unproven   ?=hand-assigned", file=out)
-    print("  %d proven · %d group · %d guess" % (total - ng - nq, ng, nq), file=out)
+    print("  %d proven · %d group · %d guess" % (acts - ng - nq, ng, nq), file=out)
     print("", file=out)
     print("  The INDEX on every row is byte-exact; only the item NAME can be off. You do not have to", file=out)
     print("  trust the names: install, save a setup on the replica, then re-run with --source <that", file=out)

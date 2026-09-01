@@ -95,10 +95,17 @@ def rebind(m):
     # collapsed to the 1 m floor; read correctly they are three corners spread over the course. This is
     # re-derivation from the geometry the turns already sit on, not new information, and it makes a model
     # written before the arc fix correct itself instead of waiting to be driven again.
-    for _t in mturns:
-        _sa = arc_along(_gpath, _t.get("apex"))
-        if _sa is not None:
-            _t["s"] = _sa
+    # ONLY WHERE THE STORED VALUE IS ACTUALLY WRONG. On a SINGLE-piece map the analyzer's arc is already
+    # course-global and it is exact: it knows the vertex index the apex was detected at, where this function
+    # can only snap to the nearest vertex by position. Overriding those traded precision for nothing and moved
+    # two of Edamame's thirteen half-widths by 0.5 m, which the selftest -- a calibration guard on exactly
+    # those numbers -- caught. Per-piece arc only exists on a multi-piece map, so that is where the derivation
+    # applies; elsewhere the stored value is better than anything re-derived here.
+    if len((m.get("geometry") or {}).get("paths") or []) > 1:
+        for _t in mturns:
+            _sa = arc_along(_gpath, _t.get("apex"))
+            if _sa is not None:
+                _t["s"] = _sa
     reg = m.setdefault("geo_turns", {})
     turns = m.setdefault("turns", [])
 
@@ -122,9 +129,10 @@ def rebind(m):
         for f in ("dir", "radius_m", "deg", "s"):
             if t.get(f) is not None:
                 r[f] = t[f]
-        _sa = arc_along(_gpath, ap)
-        if _sa is not None:
-            r["s"] = _sa                              # derived, never the stored per-piece value
+        if len((m.get("geometry") or {}).get("paths") or []) > 1:
+            _sa = arc_along(_gpath, ap)               # multi-piece: the stored arc is arc-within-its-piece
+            if _sa is not None:
+                r["s"] = _sa
     # an entry the current map does not contain is a superseded apex — the analyzer's own rule
     for k in [k for k, v in reg.items() if not v.get("model_map")]:
         del reg[k]

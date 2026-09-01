@@ -321,8 +321,17 @@ def selftest():
     st = measure(ROOT, "-7350_-2100")
     chk("every mapped turn is measured", all(v.get("n_passes") for v in st.values()),
         "%d of %d have zero passes" % (sum(1 for v in st.values() if not v.get("n_passes")), len(st)))
+    # 20.5 and 34.5 were 20.0 and 34.0 until the arc fix, and the reason is recorded here because updating a
+    # snapshot assertion to match new output is otherwise indistinguishable from hiding a regression.
+    # resample restarts each piece's running distance at 0, and a turn's `s` used to be written straight from
+    # that, dropping the joins. Edamame's reference lap resamples into several pieces even though its model
+    # path is one, so its arcs were under-measured by a growing 1-2 m: the last turn sat at 904 of 1036 m of
+    # road (87.2%) and now sits at 907 (87.5%). Neither exceeds the road; the new one drops nothing. Two of
+    # thirteen half-widths follow that by half a metre. The other three checks in this selftest -- every turn
+    # measured, the hairpins never unlifted at any setting, no thin route claiming an unlifted turn -- are
+    # unchanged, which is what says the CALIBRATION still holds and only its input got more accurate.
     chk("half-widths are the brief's",
-        [st[k]["half_m"] for k in st] == [20.0, 10.0, 10.0, 26.0, 24.0, 34.0, 32.0, 10.0, 10.0, 30.0, 18.0, 18.0, 42.0],
+        [st[k]["half_m"] for k in st] == [20.5, 10.0, 10.0, 26.0, 24.0, 34.5, 32.0, 10.0, 10.0, 30.0, 18.0, 18.0, 42.0],
         str([st[k]["half_m"] for k in st]))
     # the hairpins must NEVER read as unlifted, at any setting of the two constants
     global RATIO_FLAT, ALONG_FLOOR

@@ -39,6 +39,10 @@ DATA = os.path.abspath(os.path.join(HERE, "..", "..", "data"))
 # (real aspiration lives in the mutually-exclusive single_turbo/twin_turbo/centrifugal/pos slots), and
 # "motor"/"motor_parts" appear only in the 13 EV tunes -- the exact 13 that carry no engine family.
 PROVEN, GROUP, GUESS = "proven", "group", "guess"
+# GATED: a real Upgrade Shop item whose tile a conversion REMOVES. Front Bumper is the known case
+# -- present on the stock car, gone once the widebody is fitted (spec 2.5, confirmed frame t_226).
+# The value still lands in the save because the kit supplies the part, so it must not be shopped for.
+GATED = "gated"
 MENUS = [
     ("Body Kits and Conversions", [
         ("engine", "Engine Swap", PROVEN), ("drivetrain", "Drivetrain Swap", PROVEN),
@@ -71,11 +75,20 @@ MENUS = [
         ("front_track_width", "Front Track Width", GUESS), ("rear_track_width", "Rear Track Width", GUESS),
         ("front_rim_size", "Front Rim Size", GUESS), ("rear_rim_size", "Rear Rim Size", GUESS),
         ("rim_style", "Rim Style", GUESS), ("rear_rim_style", "Rear Rim Style", GUESS)]),
+    # VERIFIED 2026-09-01 (forzahorizon6_JgVzgSq0Rx.mp4 frame t_226): with the widebody fitted, this
+    # menu holds exactly ONE tile -- Rear Wing. The spec (2.5) says the kit REMOVES the Front Bumper
+    # tile, and that is what the frame shows. Hood / Side Skirts / Rear Bumper were never in it.
     ("Aero and Appearance", [
-        ("front_bumper", "Front Bumper", GUESS), ("rear_bumper", "Rear Bumper", GUESS),
-        ("rear_wing", "Rear Wing", GUESS), ("hood", "Hood", GUESS),
-        ("side_skirts", "Side Skirts", GUESS)]),
+        ("rear_wing", "Rear Wing", PROVEN),
+        ("front_bumper", "Front Bumper", GATED)]),
 ]
+
+# Slots that are NOT purchasable in the Upgrade Shop at all. Listing them as shop steps sent a real
+# clone to a menu with one tile looking for five. They still differ between the two cars, so they are
+# reported -- just not as things to go and buy.
+NOT_IN_SHOP = {
+    "hood": "Hood", "side_skirts": "Side Skirts", "rear_bumper": "Rear Bumper",
+}
 ENGINE_INTERNALS = {"camshaft", "valves", "displacement", "pistons", "fuel_system", "ignition",
                     "exhaust", "intake", "flywheel", "oil_cooling", "manifold", "restrictor_plate"}
 
@@ -109,12 +122,18 @@ def aspiration_type(parts):
 INSTALL_ORDER = ["Body Kits and Conversions", "Engine", "Drivetrain",
                  "Platform and Handling", "Tires and Rims", "Aero and Appearance"]
 
+# Two index schemes share one field (docs/fh6-ui-spec.md 9.5). Conversions are per-car lists whose
+# index IS the 0-based tile position -- the NSX-R Drivetrain Swap menu has 2 tiles and the target
+# index is 1, the 2nd tile. Tier slots use the sparse GLOBAL ladder, where the index can exceed the
+# tile count (index 3 in a 2-tile anti-roll-bar menu). Match conversions by POSITION, tiers by NAME.
+DENSE_SLOTS = {"drivetrain", "car_body", "engine"}
+
 # Upgrade Shop tile number for each category (docs/fh6-ui-spec.md 2, the 3x2 grid), and the sub-menu
 # tile number inside it where the spec names one. None = the spec never showed that tile highlighted.
 SHOP_TILE = {"Engine": 1, "Platform and Handling": 2, "Drivetrain": 3,
              "Tires and Rims": 4, "Aero and Appearance": 5, "Body Kits and Conversions": 6}
 SUB_TILE = {
-    "engine": 1, "drivetrain": 2, "car_body": 4,                      # Body Kits and Conversions
+    "engine": 1, "drivetrain": 2, "_aspiration_conv": 3, "car_body": 4,  # Body Kits and Conversions
     "brakes": 1, "springs_dampers": 2, "front_arb": 3, "rear_arb": 4,  # Platform and Handling
     "roll_cage": 5, "weight_reduction": 6,
     "transmission": 1, "driveline": 2, "differential": 3,              # Drivetrain
@@ -314,6 +333,8 @@ def main():
     sd = T.parse_tune(sf) if sf else None
 
     rows = build(td, sd, a.ordinal)
+    tp_all = td.get("parts") or {}
+    sp_all = (sd or {}).get("parts") or {}
     if a.json:
         print(json.dumps({"ordinal": a.ordinal,
                           "target": os.path.basename(os.path.dirname(tf)),
@@ -362,13 +383,17 @@ def main():
                                                      "" if st else ""), file=out)
                 tier = r["to_idx"] % 100 if r["to_idx"] is not None else None
                 nm = tier_name(r["slot"], r["to_idx"]) if r["to_idx"] is not None else None
-                if nm:
+                if r["slot"] == "_aspiration_conv":
+                    print("       PICK: %s" % r["to"], file=out)
+                    print("             without this the Engine menu has NO such sub-menu (spec 9.1)", file=out)
+                elif r["slot"] in DENSE_SLOTS:
+                    print("       PICK: tile %d  (position, 1-based) - conversions index by position" % (tier + 1), file=out)
+                elif nm:
                     print("       PICK: the tile named '%s %s'" % (nm, r["item"]), file=out)
-                elif tier == 0:
-                    print("       PICK: the STOCK tile (tier 0) - leave it alone if the car is stock", file=out)
                 elif tier is not None:
-                    print("       PICK: tier %d in the global ladder (0 Stock / 3 Race / 4 Rally / 5 Drift)" % tier, file=out)
-                    print("             tier names above 5 and the 1/2 slots are NOT yet confirmed", file=out)
+                    print("       PICK: ladder tier %d - 0 Stock / 3 Race / 4 Rally / 5 Drift" % tier, file=out)
+                    print("             NOT a tile number: this car shows only the tiers it offers,", file=out)
+                    print("             in ascending order, so count up the non-stock tiles to find it", file=out)
                 else:
                     print("       PICK: part id %s - shared catalogue, not this car's own set" % r["to"], file=out)
                 if r["to_idx"] is not None and r["to_idx"] >= 100:
@@ -380,7 +405,7 @@ def main():
         print("  --source <that container> - it prints CLONE EXACT when the builds match.", file=out)
         out.flush()
         return 0
-    MARK = {PROVEN: "  ", GROUP: " ~", GUESS: " ?"}
+    MARK = {PROVEN: "  ", GROUP: " ~", GUESS: " ?", GATED: " !"}
     auto_rows = []
     for menu, got in rows:
         act = [r for r in got if not r["auto"]]
@@ -402,6 +427,31 @@ def main():
               % (auto_rows[0][1]["to_idx"] // 100), file=out)
         print("", file=out)
     acts = total - len(auto_rows)
+    # Slots that are not Upgrade Shop items at all. Reported, never shopped -- dropping them silently
+    # would read as "covered everything" when three real differences went unmentioned.
+    outside = []
+    for slot, name in NOT_IN_SHOP.items():
+        tv, sv = tp_all.get(slot), sp_all.get(slot)
+        ti, ttxt = describe(slot, tv, a.ordinal)
+        if sd is None:
+            if ti not in (None, 0):
+                outside.append((name, ttxt))
+        elif tv != sv:
+            outside.append((name, ttxt))
+    if outside:
+        print("  NOT IN THE UPGRADE SHOP - these differ but are not purchasable there", file=out)
+        for name, ttxt in outside:
+            print("     %-36s %s" % (name, ttxt), file=out)
+        print("     (never seen as a tile in any captured Upgrade Shop menu; most likely supplied by", file=out)
+        print("      the body kit or set in visual customisation. Verify before hunting for them.)", file=out)
+        print("", file=out)
+
+    gated = [(m, r) for m, g in rows for r in g if r["confirmed"] == GATED and not r["auto"]]
+    if gated:
+        print("  TILE REMOVED BY A CONVERSION - cannot be bought, the kit supplies it", file=out)
+        for _m, r in gated:
+            print("     %-36s %s" % (r["item"], r["to"]), file=out)
+        print("", file=out)
     ng = sum(1 for _, g in rows for r in g if r["confirmed"] == GROUP and not r["auto"])
     nq = sum(1 for _, g in rows for r in g if r["confirmed"] == GUESS and not r["auto"])
     print("  %d PART%s TO INSTALL (+%d set automatically)" % (acts, "" if acts == 1 else "S", len(auto_rows)), file=out)

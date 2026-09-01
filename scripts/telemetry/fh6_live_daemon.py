@@ -313,7 +313,28 @@ def ingest(p, t_mono):
         gap = ST._zero_since is not None and t_mono - ST._zero_since >= 2.0
         if ST.prev_cfg is None or c["cid"] != ST.prev_cfg or ST._ev_edge or ST._force_split or (gap and eff == "course"):
             why = "first drive" if ST.prev_cfg is None else "build change" if c["cid"] != ST.prev_cfg else "event start / finish" if ST._ev_edge else "new run (manual)" if ST._force_split else "menu gap (course mode)"
-            ST.stint += 1; ST.stint_start = t_mono; ST._force_split = False; ST._ev_edge = False; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
+            # AN EVENT ENTRY IS ONE BOUNDARY, NOT TWO. The car is on-track for exactly one frame with the lap
+            # timer still at 0 before it starts ticking -- measured across three captures, EVERY entry is
+            # preceded by exactly one such frame. That frame opens a run (the course-mode gap rule) and sets
+            # last_drive_game = "freeroam", which guarantees _ev_edge on the very next frame ~5 ms later and
+            # opens a second. The analyzer assigns rows to the LAST boundary at or before them, so the first
+            # run gets a window narrower than a frame, collects nothing, and vanishes: 148 runs numbered to
+            # 165 on one session, 55 to 65 on another, with holes wherever an event loaded. 123 such pairs
+            # across 28 sessions. A boundary landing on top of one a moment old is the same boundary moving,
+            # not a new run -- unless the CAR changed, which is a real new run however fast it happened.
+            #
+            # 0.05 s comes from the data, not from taste. Across all 1387 recorded boundary gaps the histogram
+            # is: 129 under 0.02 s, then NOTHING AT ALL between 0.02 and 0.10 s, then 32 in 0.10-0.25, 44 in
+            # 0.25-0.50, and on up. The adjacent-frame pairs are separated from every real boundary by an empty
+            # band, and 0.05 sits inside it. My first cut used 1.0 s, which would have swallowed 126 boundaries
+            # that are nothing to do with this.
+            _fresh = ST.stint > 0 and ST.stint_start is not None and (t_mono - ST.stint_start) < 0.05
+            if _fresh and c["cid"] == ST.prev_cfg:
+                ST.stint_start = t_mono; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
+                ST._force_split = False; ST._ev_edge = False
+                why = "event start (boundary moved)"         # the run number does NOT advance: same run, later t0
+            else:
+                ST.stint += 1; ST.stint_start = t_mono; ST._force_split = False; ST._ev_edge = False; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
             if why == "build change":   # a different cid = a different gearbox may be equipped — the old build's gears must not veto or fingerprint the new one
                 ST.gears_seen.pop(str(c["car"]), None); ST.live_fdg.pop(str(c["car"]), None); _ident_forget_gears(c["car"])
             ST.emit("stint", {"n": ST.stint, "t0": round(t_mono, 1), "id": c["cid"], "why": why}); _save_tags()

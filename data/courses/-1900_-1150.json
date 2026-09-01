@@ -1,49 +1,49 @@
 {
- "route_key": "-2300_-4850",
+ "route_key": "-1900_-1150",
  "name": null,
  "turns": [
   {
    "id": "T1",
    "pos": [
-    -2394,
-    -4738
+    -2148,
+    -1026
    ],
    "dir": "R",
-   "type": "fast",
-   "radius_m": 161,
-   "n": 24,
+   "type": "medium",
+   "radius_m": 63,
+   "n": 6,
    "best": {
-    "mph_in": 149,
-    "mph_min": 130,
-    "mph_out": 132,
-    "brake_on_m": 99,
-    "throttle_on_m": -1,
-    "lat_g": 2.13,
+    "mph_in": 69,
+    "mph_min": 69,
+    "mph_out": 71,
+    "brake_on_m": 56,
+    "throttle_on_m": -14,
+    "lat_g": 1.65,
     "apex": [
-     -2394,
-     -4738
+     -2154,
+     -1016
     ],
-    "t0": 21926.1,
-    "stint": 70,
-    "first_red": "front ph1",
+    "t0": 25672.7,
+    "stint": 128,
+    "first_red": "rear ph1",
     "session": "fh6_20260831_172011"
    },
    "sessions": 1,
    "best_by_car": {
     "348|2|10|700": {
-     "mph_in": 149,
-     "mph_min": 130,
-     "mph_out": 132,
-     "brake_on_m": 99,
-     "throttle_on_m": -1,
-     "lat_g": 2.13,
+     "mph_in": 69,
+     "mph_min": 69,
+     "mph_out": 71,
+     "brake_on_m": 56,
+     "throttle_on_m": -14,
+     "lat_g": 1.65,
      "apex": [
-      -2394,
-      -4738
+      -2154,
+      -1016
      ],
-     "t0": 21926.1,
-     "stint": 70,
-     "first_red": "front ph1",
+     "t0": 25672.7,
+     "stint": 128,
+     "first_red": "rear ph1",
      "session": "fh6_20260831_172011"
     }
    },
@@ -53,37 +53,37 @@
    "status": "turn",
    "by_session": {
     "fh6_20260831_172011": {
-     "n": 1,
+     "n": 2,
      "laps_seen": 1,
      "laps": 1,
      "fr": {
       "front": 1,
-      "rear": 0,
+      "rear": 1,
       "none": 0
      },
-     "lim": "tune",
-     "multi": 0.0,
-     "mph_min": 130,
-     "usi": -0.248,
+     "lim": "driver",
+     "multi": 1.0,
+     "mph_min": 69,
+     "usi": 0.546,
      "cars": [
       "348|2|10|700"
      ]
     }
    },
    "track": {
-    "passes": 1,
+    "passes": 2,
     "laps_seen": 1,
     "sessions": 1,
     "fr": {
      "front": 1,
-     "rear": 0,
+     "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 1
+     "driver": 1
     },
     "dominant": "front",
-    "consistency": 1.0,
+    "consistency": 0.5,
     "cars": [
      "348|2|10|700"
     ],
@@ -99,19 +99,7 @@
   "fh6_20260831_172011"
  ],
  "updated": "fh6_20260831_172011",
- "best_laps": {
-  "348|2|10|700": {
-   "best_lap": 112.588,
-   "session": "fh6_20260831_172011",
-   "name": "2005 Ford GT",
-   "class": "A",
-   "pi": 700,
-   "drivetrain": "AWD",
-   "build_id": "4b751a8b",
-   "hp": 833,
-   "gears": 7
-  }
- },
+ "best_laps": {},
  "visits": [
   {
    "session": "fh6_20260831_172011",
@@ -120,8 +108,8 @@
    "cars": [
     "348|2|10|700"
    ],
-   "best_lap": 112.588,
-   "best_car": "348|2|10|700"
+   "best_lap": null,
+   "best_car": null
   }
  ],
  "cars": {
@@ -143,25 +131,25 @@
     "band": "absent"
    },
    "mid_corner": {
-    "frac": 0.044,
-    "band": "light"
-   },
-   "fast_corner": {
-    "frac": 0.525,
+    "frac": 0.32,
     "band": "heavy"
    },
+   "fast_corner": {
+    "frac": 0.009,
+    "band": "absent"
+   },
    "braking": {
-    "frac": 0.299,
+    "frac": 0.317,
     "band": "heavy"
    },
    "straight": {
-    "frac": 0.085,
-    "band": "light"
+    "frac": 0.154,
+    "band": "moderate"
    },
    "elevation": {
     "frac": null,
     "band": "absent",
-    "range_m": 4.8
+    "range_m": 1.0
    },
    "launch": {
     "frac": null,
@@ -169,34 +157,36 @@
    }
   },
   "heavy": [
-   "fast sweepers",
+   "medium corners",
    "heavy braking"
   ],
   "absent": [
    "low-speed corners",
+   "fast sweepers",
    "elevation (crests)"
   ],
   "gears_used": [
+   3,
    4,
    5,
    6,
-   7,
    11
   ],
   "top_gear_used": 11,
   "max_gear": 7,
   "top_speed": 175,
-  "elevation_range_m": 4.8,
+  "elevation_range_m": 1.0,
   "notes": [
-   "no real straight (top speed only 175 mph, gears used [4, 5, 6, 7, 11]/7) — top-end gearing & drag are irrelevant here; tune the gears you use",
-   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course"
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course",
+   "no fast corners — understeer here is mechanical, not aero"
   ],
   "priority": [
-   "fast sweepers",
-   "heavy braking"
+   "medium corners",
+   "heavy braking",
+   "straights / top-end"
   ],
-  "rough_frac": 0.0,
-  "rough_n": 1
+  "rough_frac": 0.03,
+  "rough_n": 2
  },
  "profile_laps": 1,
  "profile_session": "fh6_20260831_172011"

@@ -554,6 +554,55 @@ DIM_SLOTS = {"front_tire_width", "rear_tire_width", "front_rim_size", "rear_rim_
 # (best-effort). idx 11/12/15 are FH6 compounds we haven't pinned yet — shown as "Compound #N" until verified.
 COMPOUND_NAMES = {0: "Stock", 1: "Street", 2: "Sport", 3: "Semi-Slick", 4: "Slick", 5: "Race",
                   6: "Rally", 7: "Off-Road", 8: "Snow", 9: "Drift", 10: "Drag"}
+_TIER_VOCAB = None
+
+def load_tier_vocab():
+    """Names for the per-slot part INDEX, from data/part-index-vocabulary.json.
+
+    A part ID is <partset><index>. The index is NOT the tile position in that car's menu -- the
+    NSX-R's 2-tile Front Anti-roll Bars menu decodes to index 3 -- it is a position in a GLOBAL
+    per-slot vocabulary that each car exposes a subset of, ascending. So ONE map names the tier
+    slots on every car, exactly as data/tire-compounds.json already does for compounds.
+    Returns {slot: {int index: name}}; a trailing '*' on a name marks an inferred position."""
+    global _TIER_VOCAB
+    if _TIER_VOCAB is None:
+        _TIER_VOCAB = {}
+        try:
+            here = os.path.dirname(os.path.abspath(__file__))
+            path = os.path.abspath(os.path.join(here, "..", "..", "data", "part-index-vocabulary.json"))
+            with open(path, encoding="utf-8") as fh:
+                j = json.load(fh)
+            for slot, m in (j.get("tier_slots") or {}).items():
+                if slot.startswith("_") or not isinstance(m, dict):
+                    continue
+                _TIER_VOCAB[slot] = {int(k): v for k, v in m.items() if k.isdigit()}
+        except Exception:
+            _TIER_VOCAB = {}
+    return _TIER_VOCAB
+
+
+def split_part_id(ordinal, pid):
+    """(partset, index) for a part ID, or (None, None) if it is not this car's own set.
+
+    Shared components carry a donor set's ordinal (transmission 2102000 on both ord 2866 and 3852),
+    so only split when the ID actually starts with this car's ordinal."""
+    if pid is None:
+        return (None, None)
+    s, o = str(pid), str(ordinal or "")
+    if o and s.startswith(o) and len(s) > len(o):
+        return (int(o), int(s[len(o):]))
+    return (None, None)
+
+
+def name_part(ordinal, slot, pid):
+    """Best-effort name for an installed part, or None. Tier slots resolve globally; catalogue
+    slots (engine, wings, rims, body) are car-specific and are left to their own stores."""
+    _set, idx = split_part_id(ordinal, pid)
+    if idx is None:
+        return None
+    return (load_tier_vocab().get(slot) or {}).get(idx)
+
+
 _COMPOUND_OVERRIDE = None
 _COMPOUND_VERIFIED = set()
 
@@ -1135,7 +1184,12 @@ def _print_tune(tune, names):
     if tune["gears_norm"]:
         print("  GEARS (normalised):", tune["gears_norm"])
     installed = {k: v for k, v in tune["parts"].items() if v is not None}
-    print(f"  PARTS: {len(installed)} slots populated (U32 catalog IDs)")
+    named = [(k, v, name_part(tune.get("ordinal"), k, v)) for k, v in installed.items()]
+    n_named = sum(1 for _, _, nm in named if nm)
+    print(f"  PARTS: {len(installed)} slots populated ({n_named} named)")
+    for k, v, nm in named:
+        if nm:
+            print(f"    {k:22s} {v}  = {nm}")
 
 if __name__ == "__main__":
     main()

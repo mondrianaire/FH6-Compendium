@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "created": "2026-09-01",
+  "purpose": "Names for the per-slot part INDEX in a save-file part ID. Part IDs decode as <partset><index>, where <partset> is normally the car's own ordinal (shared components use a donor set, e.g. transmission 2102000 on both ord 2866 and 3852). The index is NOT the tile position in that car's menu -- it is a position in a GLOBAL per-slot vocabulary, and each car's menu shows only the subset it offers, in ascending index order. One map therefore names parts for every car; no per-car upgrade-menu capture is needed for the tier slots.",
+  "evidence": {
+    "refutes_menu_position": "1992 Honda NSX-R (ord 412): docs/fh6-ui-spec.md 2.2 records the 'Front Anti-roll Bars' menu with exactly TWO tiles (Stock, Race), yet the decoded front_arb index is 3. A tile position cannot be 3 in a 2-tile menu.",
+    "supports_global_vocabulary": [
+      "brakes / front_arb / rear_arb take exactly {0,1,2,3} across all 163 cars -- a 4-value vocabulary, not a per-car list length.",
+      "springs_dampers takes exactly {0..5}. The NSX-R menu lists 4 tiles in the order Stock, Race, Rally, Drift = indexes {0,3,4,5}; the decoded set for ord 412 is {0,3,5}, a subset, and ascending.",
+      "brakes on the NSX-R lists 3 tiles Stock, Sport, Race = {0,2,3}; decoded set for ord 412 is {0,3}, a subset.",
+      "The spec's own naming pattern (section 5.7) is a global vocabulary: Stock / Sport / Race / Rally / Drift / Offroad."
+    ],
+    "spec": "docs/fh6-ui-spec.md"
+  },
+  "confidence_key": {
+    "verified": "name read verbatim off a named frame AND its index position confirmed by the ascending-subset test",
+    "inferred": "position follows from the confirmed neighbours and the standard vocabulary, but no frame names it"
+  },
+  "tier_slots": {
+    "_note": "Global vocabulary. Index means the same thing on every car.",
+    "brakes": {
+      "0": "Stock",
+      "1": "Street*",
+      "2": "Sport",
+      "3": "Race"
+    },
+    "front_arb": {
+      "0": "Stock",
+      "1": "Street*",
+      "2": "Sport*",
+      "3": "Race"
+    },
+    "rear_arb": {
+      "0": "Stock",
+      "1": "Street*",
+      "2": "Sport*",
+      "3": "Race"
+    },
+    "springs_dampers": {
+      "0": "Stock",
+      "1": "Street*",
+      "2": "Sport*",
+      "3": "Race",
+      "4": "Rally",
+      "5": "Drift"
+    },
+    "_star": "A trailing * marks an inferred name: the index exists in the fleet-wide vocabulary but no captured frame names it. Stock/Race/Rally/Drift are read verbatim from docs/fh6-ui-spec.md 2.2.",
+    "_index0_warning": "A decoded index of 0 is NOT yet trustworthy -- see validation.open_anomaly. name_part() still returns 'Stock' for it; callers that need certainty should check the index is >= 1."
+  },
+  "catalogue_slots": {
+    "_note": "The index is still global-positional, but the ITEM at each position is car-specific (donor engines, brand wings, rim styles, body kits). These need the car's own list -- data/engine-swaps.json already covers engines.",
+    "slots": [
+      "engine",
+      "rear_wing",
+      "rim_style",
+      "front_bumper",
+      "car_body",
+      "aspiration"
+    ],
+    "engine_example_ord_412": {
+      "0": "Stock Powertrain Swap",
+      "1": "1.6L I4 - Turbo Rally",
+      "2": "2.0L I4-T",
+      "3": "3.2L I6",
+      "4": "6.2L V8",
+      "source": "docs/fh6-ui-spec.md 2.6, read verbatim; 5 tiles, ascending"
+    }
+  },
+  "unresolved": {
+    "hundreds_grouped_slots": [
+      "weight_reduction",
+      "roll_cage",
+      "front_tire_width",
+      "rear_tire_width"
+    ],
+    "observation": "These take {0..N} union {100..10N} union {200..} union {300..} -- a second dimension in the hundreds digit, not a flat tier. The spec notes the Front Tire Width grid grew from 4 to 7 tiles after the widebody/rim change, so the hundreds digit most likely selects the body/conversion variant the part belongs to. NOT yet confirmed; do not name these from the tier table."
+  },
+  "validation": {
+    "unlock_gating_test": "docs/fh6-ui-spec.md 5.8: Race/Rally/Drift springs unlock SPRING, DAMPER AND ALIGNMENT tuning; Stock/Street/Sport leave it locked. Damping default is 10.5 (the ONLY front_bump value at indexes 1 and 2, n=12). Across 531 tunes: index 3/4/5 = 100.0% moved off default (n=275, zero exceptions); index 1/2 = 0.0% (n=12). Both ends match the gating exactly, which is what confirms 3=Race, 4=Rally, 5=Drift and that 1,2 sit below the unlock.",
+    "open_anomaly": "index 0 splits 103 at default / 142 tuned, where the gating predicts ~0% tuned. The two sets are DISJOINT BY CAR (49 cars vs 54 cars, zero overlap), so this is a property of the car, not of the tune -- i.e. the <partset><index> split is not yet reliable for every ordinal, most likely a prefix ambiguity where another partset's ID starts with this car's ordinal digits. Until that is resolved, treat a decoded index of 0 as UNRELIABLE and do not name it; indexes 1-5 are sound.",
+    "counter_evidence_noted": "Within index 0, the default-damping group is mostly Race ARB (87) while the tuned group is mostly Stock ARB (124) -- backwards from what a genuinely-upgraded car would show, which is further reason to distrust the index-0 bucket rather than to reinterpret index 0 as a non-stock part."
+  }
+}

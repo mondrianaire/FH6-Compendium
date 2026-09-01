@@ -225,6 +225,24 @@ def repair_lap_store(dry):
                  if not x.endswith(".tags.json")}
         rows = [dict(r) for r in cx.execute("SELECT id, route_key, session FROM lap_traces")]
         orphan = [r for r in rows if r["session"] and r["session"] not in known]
+        # AND CLEAR A STORED LAP TIME ITS OWN TRACE CONTRADICTS. Repairing only the model is cosmetic: the
+        # store keeps the value and the next promotion writes it straight back, which is how Edamame's
+        # 21.088 s -- faster than that course's own 29.376 s record -- survived two repairs.
+        try:
+            import promote_traces as _pt
+            _bad = []
+            for r in cx.execute("SELECT id, route_key, cid, lap_s, pts FROM lap_traces WHERE lap_s IS NOT NULL"):
+                try: _p = json.loads(r["pts"]) if r["pts"] else []
+                except Exception: continue
+                if _pt.time_disagrees(r["lap_s"], _p):
+                    _bad.append((r["id"], r["route_key"], r["cid"], r["lap_s"], _pt.implied_s(_p)))
+            for _i, _rk, _cid, _ls, _t in _bad:
+                hits.append("id=%s %s [%s] lap_s=%.2f s but its own speed gives %.1f s" % (_i, _rk, _cid, _ls, _t))
+            if _bad and not dry:
+                cx.executemany("UPDATE lap_traces SET lap_s=NULL WHERE id=?", [(b[0],) for b in _bad])
+                cx.commit()
+        except Exception as _e:
+            hits.append("lap-time consistency pass skipped: %r" % (_e,))
         for r in orphan:
             hits.append("id=%s route=%s session=%s (no such session file)" % (r["id"], r["route_key"], r["session"]))
         if orphan and not dry:
@@ -302,7 +320,7 @@ def main():
           % ("WOULD DROP" if a.dry else "DROPPED", n_v, n_f,
              " + %d route length(s)" % len(rh) if rh else "")
           + (" + %d session lap time(s)" % len(sh) if sh else "")
-          + (" + %d orphan lap row(s)" % len(lh) if lh else ""))
+          + (" + %d lap-store row(s)" % len(lh) if lh else ""))   # orphans AND contradicted lap times
     if not n_v and not rh and not sh and not lh:
         print("nothing to do — every persisted value is inside the audit's invariants")
 

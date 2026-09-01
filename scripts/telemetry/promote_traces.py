@@ -57,6 +57,30 @@ def fragmented(g):
     return bool(gaps) and max(gaps) > (g.get("length_m") or 0)
 
 
+def implied_s(pts):
+    """The lap time this trace's OWN speed column implies over its OWN arc, in seconds (0 if unknowable).
+
+    A trace carries both the road it covered and the speed it covered it at, so it can be checked against
+    itself with no external reference. Measured across the catalog, 29 of 33 agree to a fraction of a second.
+    """
+    t = 0.0
+    for i in range(1, len(pts or [])):
+        d = pts[i][0] - pts[i - 1][0]
+        mph = (pts[i][1] + pts[i - 1][1]) / 2.0
+        if d > 0 and mph > 1:
+            t += d / (mph * 0.44704)
+    return t
+
+
+def time_disagrees(lap_s, pts, tol=0.25):
+    """Does this trace's stated lap time contradict its own speed data?"""
+    if not lap_s or lap_s <= 0 or len(pts or []) < 30:
+        return False
+    t = implied_s(pts)
+    return t > 1 and abs(lap_s - t) / t > tol
+
+
+
 def promote_into(m, key, cx):
     """Install the best covering laps for `key` into model `m`. Returns a list of one-line descriptions.
 
@@ -82,7 +106,15 @@ def promote_into(m, key, cx):
         # A LAP TIME OF ZERO IS NOT A FAST LAP. The store keeps lap_s as reported, and an unfinished or untimed
         # run arrives as 0.0 -- which on a plain `or 9e9` guard is falsy and ranks last by luck rather than by
         # rule. Say it once, here, so the record carries "no time" instead of "0.000 s".
-        rec = {"lap_s": (r["lap_s"] if (r["lap_s"] or 0) > 0 else None), "session": r["session"], "pts": pts}
+        # AND THE TIME MUST NOT CONTRADICT THE TRACE. repair_persisted_state clears a model's lap_s when its
+        # own speed says otherwise, but the STORE row keeps it -- so the next promotion put it straight back
+        # and the audit failed again on a value that had just been repaired. Edamame's 21.088 s, faster than
+        # that course's own 29.376 s record, survived two repairs that way. Carry the trace, drop the time it
+        # cannot support.
+        _ls = r["lap_s"] if (r["lap_s"] or 0) > 0 else None
+        if time_disagrees(_ls, pts):
+            _ls = None
+        rec = {"lap_s": _ls, "session": r["session"], "pts": pts}
         for f in ("build_id", "class", "pi", "drivetrain", "tune_hash", "solo", "impacts", "void"):
             if f in cols and r[f] is not None:
                 rec[f] = r[f]

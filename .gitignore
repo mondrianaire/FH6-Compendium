@@ -9,3 +9,6 @@ data/laps.db*
 
 # atomic-write scratch files: analyze_session and the daemon write X.tmp then os.replace it
 *.tmp
+
+# Windows reserved device name: a stray >NUL redirect creates a file git cannot index
+NUL

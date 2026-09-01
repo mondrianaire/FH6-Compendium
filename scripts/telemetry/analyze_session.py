@@ -146,29 +146,35 @@ def _arc_of(path):
 
 
 def _is_lap_boundary(prev_row, row):
-    """Did the car just cross the start/finish LINE, as opposed to restarting?
+    """Did the car just complete a LAP, as opposed to restarting? Ask the game, not the clock.
 
-    Both clear CurrentLap, so the timer alone cannot tell them apart, and the > 30 s floor this used to
-    carry got it wrong in both directions. Too high: Edamame's best lap is 29.4 s and loop_test_loop's is
-    21.9 s, so on those courses no crossing could EVER register -- 22 of the 208 timed laps in the store are
-    under 30 s. Too permissive in the other direction: measured on capture 134742, 129 drops with the timer
-    over 5 s, of which only 22 are laps and 107 are RESTARTS. The old test counted 126 of them as crossings.
+    Three tests have been tried here and the first two were both wrong, in opposite directions.
+      * `previous CurrentLap > 30.0` -- too high, so Edamame's 29.4 s lap and loop_test_loop's 21.9 s lap
+        could never register (22 of 208 stored laps are under 30 s); and too permissive, accepting 126 of
+        135 drops on capture 134742 when only ~21 are laps, because a RESTART clears CurrentLap too.
+      * `CurrentRaceTime kept climbing` -- better, but not sound: measured on 213928 it accepts 19 drops
+        including two where LapNumber and LastLap are both unchanged, so the premise that the race clock
+        always clears on a restart is simply false.
 
-    CurrentRaceTime is what separates the two, and this file's own comments have said so since the anchor
-    work: it runs ACROSS a lap completion and returns to 0 only on a restart. So a lap boundary is the lap
-    timer clearing while the race timer keeps climbing. The small floor is only noise rejection; the race
-    timer does the actual work.
+    The game states the answer directly. Completing a lap increments LapNumber on a lapped circuit, and on
+    a single-lap Rivals run -- where LapNumber stays 0 throughout -- it publishes the time in LastLap.
+    Either is the game saying "that was a lap"; a restart says neither, and zeroes LastLap.
+
+    Corroborated rather than assumed: on 213928 this accepts exactly 11 boundaries, and every one of them
+    is AT a start/finish line -- eight Edamame laps of 29.6-34.0 s clustered within 8 m of (-7348,-2110),
+    and three Colossus laps of 372.0, 374.4 and 382.1 s within 3 m of (-3773,307). Nothing else is
+    accepted, and no threshold on lap length is involved.
     """
     if not prev_row or not row:
         return False
     a, b = prev_row.get("CurrentLap"), row.get("CurrentLap")
     if a is None or b is None or not (a > 3.0 and b < 1.0):
-        return False
-    ra, rb = prev_row.get("CurrentRaceTime"), row.get("CurrentRaceTime")
-    if ra is None or rb is None:
-        return a > 30.0          # no race clock in this capture: fall back to the old floor
-    return rb >= ra - 1.0        # race time carried on -> a lap; it cleared -> a restart
-
+        return False                                   # the lap timer did not clear: nothing happened
+    na, nb = prev_row.get("LapNumber"), row.get("LapNumber")
+    if na is not None and nb is not None and nb - na == 1:
+        return True                                    # lapped circuit: the game counted another lap
+    la, lb = prev_row.get("LastLap"), row.get("LastLap")
+    return bool(lb and lb > 0 and (la is None or abs(lb - la) > 0.01))   # single-lap run: it published a time
 
 
 def curvature(P, step=4.0, win=7):
@@ -1349,8 +1355,23 @@ def main():
             if k.startswith("loop:"):
                 continue
             st = R.get("start")
-            if not st or math.hypot(sx - st[0], sz - st[1]) > 120:
-                continue                                  # not this route's start line
+            if not st:
+                continue
+            # ASK THE WHOLE DRIVE, NOT ITS ANCHOR. This compared only sx/sz, the event's anchor -- and when no
+            # lap completes the anchor falls back to the first row with DistanceTraveled >= 0, which on a
+            # reverse roll-up is hundreds of metres down the road: measured 212 m past the Colossus line, so a
+            # 4432 m roll-up sailed through this 120 m gate and minted -3550_400, a 31st course made entirely
+            # of Colossus tarmac driven backwards. A roll-up BEGINS at the line and reverses away from it, so
+            # the drive passes right by it whatever the anchor says; the closest approach is the honest test
+            # and it does not depend on an anchor that only a completed lap makes trustworthy.
+            _near_line = math.hypot(sx - st[0], sz - st[1])
+            for _px, _pz in sample:
+                _d = math.hypot(_px - st[0], _pz - st[1])
+                if _d < _near_line:
+                    _near_line = _d
+                    if _near_line <= 120: break
+            if _near_line > 120:
+                continue                                  # the drive never comes near this route's line
             mp = model_path_for(k)
             if not mp:
                 continue

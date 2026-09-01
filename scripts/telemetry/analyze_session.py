@@ -145,6 +145,32 @@ def _arc_of(path):
 
 
 
+def _is_lap_boundary(prev_row, row):
+    """Did the car just cross the start/finish LINE, as opposed to restarting?
+
+    Both clear CurrentLap, so the timer alone cannot tell them apart, and the > 30 s floor this used to
+    carry got it wrong in both directions. Too high: Edamame's best lap is 29.4 s and loop_test_loop's is
+    21.9 s, so on those courses no crossing could EVER register -- 22 of the 208 timed laps in the store are
+    under 30 s. Too permissive in the other direction: measured on capture 134742, 129 drops with the timer
+    over 5 s, of which only 22 are laps and 107 are RESTARTS. The old test counted 126 of them as crossings.
+
+    CurrentRaceTime is what separates the two, and this file's own comments have said so since the anchor
+    work: it runs ACROSS a lap completion and returns to 0 only on a restart. So a lap boundary is the lap
+    timer clearing while the race timer keeps climbing. The small floor is only noise rejection; the race
+    timer does the actual work.
+    """
+    if not prev_row or not row:
+        return False
+    a, b = prev_row.get("CurrentLap"), row.get("CurrentLap")
+    if a is None or b is None or not (a > 3.0 and b < 1.0):
+        return False
+    ra, rb = prev_row.get("CurrentRaceTime"), row.get("CurrentRaceTime")
+    if ra is None or rb is None:
+        return a > 30.0          # no race clock in this capture: fall back to the old floor
+    return rb >= ra - 1.0        # race time carried on -> a lap; it cleared -> a restart
+
+
+
 def curvature(P, step=4.0, win=7):
     th = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(P, P[1:])]
     for i_ in range(1, len(th)):
@@ -1380,14 +1406,13 @@ def main():
         # FRAGMENTS, which its own comment says must stay permissive, and two pieces of the Colossus -- 8812 m
         # and 24088 m, both lying 100% on it -- were blocked from their own road and minted as separate courses.
         # A count of actual crossings is the thing being asked about, so count them.
-        _laps_in, _cur, _pcl, _resets = [], [], None, 0
+        _laps_in, _cur, _prow, _resets = [], [], None, 0
         for q in rs:
-            _c = q.get("CurrentLap")
-            if _pcl is not None and _c is not None and _pcl > 30.0 and _c < 1.0:
+            if _prow is not None and _is_lap_boundary(_prow, q):
                 _resets += 1
                 if len(_cur) > 30: _laps_in.append(_cur)
                 _cur = []
-            _cur.append(q); _pcl = _c
+            _cur.append(q); _prow = q
         if len(_cur) > 30: _laps_in.append(_cur)
         _lap_rows = max(_laps_in, key=lambda L: len(L)) if _laps_in else rs   # the longest lap describes the road best
         # the lap's first row IS the line — the timer starts as you cross it, the same place on every attempt,
@@ -1724,13 +1749,12 @@ def main():
             # different stretches of road on one distance axis, so every comparison against it is against a
             # different thing. The lap boundary is the CurrentLap reset (race time keeps climbing across it), so
             # split there and keep the longest complete lap.
-            _ls, _c2, _pc = [], [], None
+            _ls, _c2, _prow2 = [], [], None
             for r in rows_:
-                _v = r.get("CurrentLap")
-                if _pc is not None and _v is not None and _pc > 30.0 and _v < 1.0:
+                if _prow2 is not None and _is_lap_boundary(_prow2, r):
                     if len(_c2) > 30: _ls.append(_c2)
                     _c2 = []
-                _c2.append(r); _pc = _v
+                _c2.append(r); _prow2 = r
             if len(_c2) > 30: _ls.append(_c2)
             if _ls: rows_ = max(_ls, key=lambda L: len(L))
             # 4th column rides through resample un-interpolated (a state is categorical); the 5th is ELEVATION,

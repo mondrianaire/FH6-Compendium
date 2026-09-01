@@ -133,7 +133,11 @@ PRUNED_BY_BODY_KIT = {"front_bumper"}
 # index IS the 0-based tile position -- the NSX-R Drivetrain Swap menu has 2 tiles and the target
 # index is 1, the 2nd tile. Tier slots use the sparse GLOBAL ladder, where the index can exceed the
 # tile count (index 3 in a 2-tile anti-roll-bar menu). Match conversions by POSITION, tiers by NAME.
-DENSE_SLOTS = {"drivetrain", "car_body", "engine"}
+# weight_reduction and rear_wing are dense too -- established by a completed clone and by this car
+# using all three rear-wing indexes against a 3-tile menu. NOTE that brakes has an IDENTICAL 3-tile
+# menu (Stock/Sport/Race) and is SPARSE: its Race decodes as index 3, impossible if dense. Menu
+# shape does not predict the scheme -- it has to be established per slot and recorded.
+DENSE_SLOTS = {"drivetrain", "car_body", "engine", "weight_reduction", "rear_wing"}
 
 # Upgrade Shop tile number for each category (docs/fh6-ui-spec.md 2, the 3x2 grid), and the sub-menu
 # tile number inside it where the spec names one. None = the spec never showed that tile highlighted.
@@ -422,7 +426,8 @@ def main():
                     print("       PICK: %s" % r["to"], file=out)
                     print("             without this the Engine menu has NO such sub-menu (spec 9.1)", file=out)
                 elif r["slot"] in DENSE_SLOTS:
-                    print("       PICK: tile %d  (position, 1-based) - conversions index by position" % (tier + 1), file=out)
+                    print("       PICK: tile %d  (position, 1-based)" % (tier + 1), file=out)
+                    print("             this slot indexes by POSITION, not by the Stock/Sport/Race ladder", file=out)
                 elif nm:
                     print("       PICK: the tile named '%s %s'" % (nm, r["item"]), file=out)
                 elif tier is not None:

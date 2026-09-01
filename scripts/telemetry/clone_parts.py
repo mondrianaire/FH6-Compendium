@@ -119,8 +119,15 @@ def aspiration_type(parts):
 # exactly, 532/532. So conversions must go in FIRST or the tiles you are shopping for do not exist yet.
 # Engine internals go second because they belong to the engine block, not the car (519/519 carry the
 # ENGINE's partset), so swapping the engine afterwards would discard them.
-INSTALL_ORDER = ["Body Kits and Conversions", "Engine", "Drivetrain",
+INSTALL_ORDER = ["Pre-conversion", "Body Kits and Conversions", "Engine", "Drivetrain",
                  "Platform and Handling", "Tires and Rims", "Aero and Appearance"]
+
+# Conversions do not only ADD tiles -- the widebody REMOVES the Front Bumper tile (spec 2.5/5.9), and
+# the reasoning above only covered the adding case, so the route scheduled the bumper straight into a
+# menu that no longer had it. A shop row whose target sits in variant 0, in a menu a fitted conversion
+# prunes, must be bought FIRST. The kit's own re-stamp looks different (variant N, tier 0) and is
+# already handled as "auto", so this only fires on a genuine pre-kit purchase.
+PRUNED_BY_BODY_KIT = {"front_bumper"}
 
 # Two index schemes share one field (docs/fh6-ui-spec.md 9.5). Conversions are per-car lists whose
 # index IS the 0-based tile position -- the NSX-R Drivetrain Swap menu has 2 tiles and the target
@@ -268,6 +275,28 @@ def build(target, source, ordinal):
     # aspiration conversion fitted, the Engine menu shows 8 tiles and NO supercharger sub-menu at all
     # (the spec's post-swap capture had 11). So buying the tier is impossible until this is installed,
     # and it belongs with the conversions, not the engine.
+    kit = None
+    for _s in ("front_tire_width", "rear_tire_width", "front_track_width", "roll_cage"):
+        _p, _i = split_any(tp.get(_s), ordinal)
+        if _i is not None:
+            kit = _i // 100
+            break
+    if kit:
+        pre = []
+        for i, (menu, got) in enumerate(rows):
+            keep = []
+            for r in got:
+                if (r["slot"] in PRUNED_BY_BODY_KIT and not r["auto"]
+                        and r["to_idx"] is not None and r["to_idx"] < 100):
+                    r = dict(r, confirmed=PROVEN)
+                    pre.append(r)
+                else:
+                    keep.append(r)
+            rows[i] = (menu, keep)
+        rows = [(m, g) for m, g in rows if g]
+        if pre:
+            rows.insert(0, ("Pre-conversion", pre))
+
     want = aspiration_type(tp)
     have = aspiration_type(sp) if source is not None else None
     if want and want != have:
@@ -368,6 +397,12 @@ def main():
         order = {m: i for i, m in enumerate(INSTALL_ORDER)}
         step = 0
         for menu, got in sorted(rows, key=lambda kv: order.get(kv[0], 99)):
+            # Honour the same flags the summary honours. These two modes read the SAME rows, and the
+            # walkthrough used to number 6 of them as purchases while the summary printed them under
+            # "do not shop for these" -- one run of one tool contradicting itself.
+            got = [r for r in got if not r["auto"] and r["confirmed"] != GATED]
+            if not got:
+                continue
             print("  == %s  (Upgrade Shop tile %s) ==" % (menu.upper(), SHOP_TILE.get(menu, "?")), file=out)
             if menu == "Body Kits and Conversions":
                 print("     do this menu FIRST - conversions change which tiles exist everywhere else", file=out)

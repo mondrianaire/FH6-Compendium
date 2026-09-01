@@ -585,12 +585,21 @@ def split_part_id(ordinal, pid):
     """(partset, index) for a part ID, or (None, None) if it is not this car's own set.
 
     Shared components carry a donor set's ordinal (transmission 2102000 on both ord 2866 and 3852),
-    so only split when the ID actually starts with this car's ordinal."""
+    so only split when the ID really belongs to this car's set.
+
+    The index is a FIXED 3-digit field, so the test is arithmetic, not textual. A startswith() test
+    mis-split one ID in 21,027: ord 3921's rear_track_width 392100 matched the prefix "3921" and
+    decoded as index 0 -- a phantom Stock -- when the fixed-width rule reads (partset 392, index 100),
+    which is exactly what that tune's fifteen sibling geometry slots carry."""
     if pid is None:
         return (None, None)
-    s, o = str(pid), str(ordinal or "")
-    if o and s.startswith(o) and len(s) > len(o):
-        return (int(o), int(s[len(o):]))
+    try:
+        o = int(ordinal)
+    except (TypeError, ValueError):
+        return (None, None)
+    idx = int(pid) - o * 1000
+    if 0 <= idx < 1000:
+        return (o, idx)
     return (None, None)
 
 

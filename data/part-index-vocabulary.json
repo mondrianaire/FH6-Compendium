@@ -20,31 +20,31 @@
     "_note": "Global vocabulary. Index means the same thing on every car.",
     "brakes": {
       "0": "Stock",
-      "1": "Street*",
+      "1": "Street",
       "2": "Sport",
       "3": "Race"
     },
     "front_arb": {
       "0": "Stock",
-      "1": "Street*",
+      "1": "Street",
       "2": "Sport",
       "3": "Race"
     },
     "rear_arb": {
       "0": "Stock",
-      "1": "Street*",
+      "1": "Street",
       "2": "Sport",
       "3": "Race"
     },
     "springs_dampers": {
       "0": "Stock",
-      "1": "Street*",
+      "1": "Street",
       "2": "Sport",
       "3": "Race",
       "4": "Rally",
       "5": "Drift"
     },
-    "_star": "A trailing * marks an inferred name. Tier 2 = Sport and tier 3 = Race are now READ VERBATIM from the in-game basket (2026-09-01): 'Sport Cams and Valves', 'Sport Weight Reduction', 'Race Exhaust', 'Race Front Anti-roll Bars'. Only tier 1 remains unnamed.",
+    "_star": "The ladder is now fully named from captured frames: 0 Stock, 1 Street, 2 Sport, 3 Race, 4 Rally, 5 Drift. Tier 1 comes from the Centrifugal Supercharger sub-menu, whose tile 1 reads 'Street Centrifugal Supercharger' (INSTALLED); tiers 2 and 3 from the basket screen.",
     "_index0_warning": "A decoded index of 0 is NOT yet trustworthy -- see validation.open_anomaly. name_part() still returns 'Stock' for it; callers that need certainty should check the index is >= 1."
   },
   "catalogue_slots": {
@@ -136,5 +136,24 @@
     "transmission_index_is_gear_count": "Index 7 renders as 'Race Transmission: 7 Speed'. The transmission index is the SPEED COUNT, not a tier position -- so it must never be read against the Stock/Sport/Race ladder.",
     "cams_and_valves_are_one_part": "The shop sells 'Sport Cams and Valves' as a SINGLE item, yet the save carries separate camshaft and valves slots, and in this target they differ (camshaft idx 2, valves idx 0). Either the slot we call 'valves' is mislabelled, or one part writes two slots unequally. UNRESOLVED -- do not name the 'valves' slot until this is settled.",
     "rear_wing_is_dense": "The NSX-R Rear Wing menu has 3 tiles (Honda stock / Rocket Bunny - Race / Forza Horizon 6 - Race) and this car's four tunes use indexes 0, 1 and 2 -- all three present, so the index IS the 0-based tile position. idx 2 = the Forza wing, NOT the Rocket Bunny one."
-  }
+  },
+  "transmission_index_is_NOT_the_gear_count": {
+    "correction": "An earlier reading claimed the transmission index IS the gear count, from the single coincidence that index 7 appeared alongside a basket line reading 'Race Transmission: 7 Speed'. That was over-read: the basket line came from a DIFFERENT part than the one the target specifies.",
+    "menu": "The NSX-R Transmission menu has 6 tiles: 1 Stock, 2 Race 7 Speed, 3 Race 8 Speed, 4 Race 9 Speed, 5 Race 10 Speed, 6 Drift 4 Speed. There is no 6-Speed, which is what first broke the gear-count reading.",
+    "actual_rule": "transmission is a SHARED donor set (2102), so the index is a position in a global transmission catalogue. For the Race family, gears = index + 3.",
+    "evidence_across_532_tunes": {
+      "idx 4": "7 gears in 99 of 106 -> Race Transmission: 7 Speed",
+      "idx 5": "8 gears in 47 of 51  -> Race Transmission: 8 Speed",
+      "idx 6": "9 gears in 33 of 37  -> Race Transmission: 9 Speed",
+      "idx 7": "10 gears in 90 of 92 -> Race Transmission: 10 Speed",
+      "idx 8": "4 gears in 41 of 41  -> Drift Transmission: 4 Speed (breaks the +3 rule, hence 'Race family only')",
+      "idx 0": "stock, gear count varies by chassis (5 or 6 mostly)"
+    },
+    "cost_of_the_error": "A route saying 'index 7' without naming it let a real clone attempt buy the 7-Speed (index 4) when the target wanted the 10-Speed (index 7)."
+  },
+  "cams_and_valves_resolved": {
+    "was": "Flagged unresolved: the shop sells 'Sport Cams and Valves' as ONE item, yet the save carries separate camshaft and valves slots that differ in the target (2 vs 0).",
+    "now": "RESOLVED. The Engine menu has BOTH as separate tiles -- tile 5 Camshaft, tile 6 Valves (frames t_047/t_048). The part sold under Camshaft is merely NAMED 'Cams and Valves'; it writes only the camshaft slot. So camshaft 2 / valves 0 is a normal build: buy the Camshaft item, leave the Valves tile stock."
+  },
+  "sub_label_chips_are_deltas": "Tile sub-label chips are deltas against the CURRENT BASKET, not absolute part properties. The same wheel reads 'Weight -18 lb' at one basket state and 'Weight -27 lb' at another. Never treat a chip as a fixed attribute of a part."
 }

@@ -424,7 +424,7 @@
       "required": 2,
       "confidence": 0.95,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "launch",
@@ -442,7 +442,7 @@
       "required": 3,
       "confidence": 0.91,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "crest",
@@ -451,7 +451,7 @@
       "required": 2,
       "confidence": 0.83,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "top",
@@ -496,14 +496,14 @@
       "required": 1,
       "confidence": 0.25,
       "ready": false,
-      "hint": "keep driving — tires still cold for most frames"
+      "hint": "keep driving \u2014 tires still cold for most frames"
      }
     ]
    },
    "advice": [
     {
      "key": "brake-pressure",
-     "text": "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.",
+     "text": "Both axles lock under hard braking: brake pressure too high overall \u2014 bring it down to the knee.",
      "severity": 3,
      "confidence": 0.85,
      "evidence": "median deficit F 0.41 / R 0.37; 14/20 stops locked both",
@@ -543,7 +543,7 @@
     },
     {
      "key": "inconclusive-usi",
-     "text": "Balance varies corner to corner (USI spread 0.53) — likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
+     "text": "Balance varies corner to corner (USI spread 0.53) \u2014 likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
      "severity": 1,
      "confidence": 0.53,
      "evidence": "by type: hairpin +0.47 (n=13), medium -0.00 (n=13)",
@@ -596,7 +596,7 @@
       "have": 1,
       "need": 1,
       "ok": true,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -619,7 +619,7 @@
       "have": 38,
       "need": 38,
       "ok": true,
-      "why": "full-throttle through the usable rev range —  · band capped at your gearbox's upshift point (~11970 rpm)",
+      "why": "full-throttle through the usable rev range \u2014  \u00b7 band capped at your gearbox's upshift point (~11970 rpm)",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -643,7 +643,7 @@
       "have": 6,
       "need": 2,
       "ok": true,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -712,13 +712,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "3-cyl · redline 14000 rpm · idle 800",
+        "value": "3-cyl \u00b7 redline 14000 rpm \u00b7 idle 800",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "172,067 frames · constant across the run",
+        "evidence": "172,067 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -729,7 +729,7 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "172,067 frames · constant across the run",
+        "evidence": "172,067 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -740,14 +740,14 @@
         "gate": "dyno",
         "pending": false,
         "confidence": 1.0,
-        "evidence": "19,367 WOT frames · boost never above 0.5 psi",
+        "evidence": "19,367 WOT frames \u00b7 boost never above 0.5 psi",
         "needs": null
        },
        {
         "item": "Body kit",
         "value": null,
         "status": "shop",
-        "note": "not visible in telemetry — check visually",
+        "note": "not visible in telemetry \u2014 check visually",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -761,13 +761,13 @@
       "items": [
        {
         "item": "Total output target",
-        "value": "180 hp @ 10750 rpm · 94 lb-ft",
+        "value": "180 hp @ 10750 rpm \u00b7 94 lb-ft",
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 600",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 600",
         "gate": "dyno",
         "pending": false,
         "confidence": 1.0,
-        "evidence": "18 full pulls through the peak · peak 180–180 hp (±0.0%) · rpm bins 38/38",
+        "evidence": "18 full pulls through the peak \u00b7 peak 180\u2013180 hp (\u00b10.0%) \u00b7 rpm bins 38/38",
         "needs": null
        }
       ]
@@ -779,7 +779,7 @@
         "item": "Brakes",
         "value": "race brakes",
         "status": "inferred",
-        "note": "assumed — required for the brake tabs a tuned donor uses; confirm in the shop",
+        "note": "assumed \u2014 required for the brake tabs a tuned donor uses; confirm in the shop",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -790,7 +790,7 @@
         "item": "Springs & dampers",
         "value": "race springs",
         "status": "inferred",
-        "note": "assumed — required for spring/damper tabs; behaviour match happens on the Bench",
+        "note": "assumed \u2014 required for spring/damper tabs; behaviour match happens on the Bench",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -801,7 +801,7 @@
         "item": "Anti-roll bars",
         "value": "race ARBs",
         "status": "inferred",
-        "note": "assumed — required for the ARB tab",
+        "note": "assumed \u2014 required for the ARB tab",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -816,8 +816,8 @@
         "gate": "launch",
         "pending": false,
         "confidence": 0.0,
-        "evidence": "215 clean-acceleration samples · spread ±26.67%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "215 clean-acceleration samples \u00b7 spread \u00b126.67%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -826,31 +826,31 @@
       "items": [
        {
         "item": "Transmission",
-        "value": "4-speed → race 4-speed",
+        "value": "4-speed \u2192 race 4-speed",
         "status": "measured",
         "note": null,
         "gate": "gears",
         "pending": false,
         "confidence": 0.74,
-        "evidence": "4 gears seen · top gear 4: 131 WOT frames · top-speed pull ○",
+        "evidence": "4 gears seen \u00b7 top gear 4: 131 WOT frames \u00b7 top-speed pull \u25cb",
         "needs": null
        },
        {
         "item": "Gear ratios (tune)",
-        "value": "g1 4.3 · g2 6.4 · g3 8.6 · g4 10.9 mph/krpm",
+        "value": "g1 4.3 \u00b7 g2 6.4 \u00b7 g3 8.6 \u00b7 g4 10.9 mph/krpm",
         "status": "measured",
         "note": "tune-side: set final drive + per-gear until the WOT ladder matches these exactly",
         "gate": "gears",
         "pending": false,
         "confidence": 0.01,
-        "evidence": "4 gears · weakest gear 3: 3887 WOT frames, spread ±6.03% · gear 1 excluded (launch wheelspin)",
+        "evidence": "4 gears \u00b7 weakest gear 3: 3887 WOT frames, spread \u00b16.03% \u00b7 gear 1 excluded (launch wheelspin)",
         "needs": "hold full throttle longer in gears 3, 4, 2"
        },
        {
         "item": "Differential",
         "value": "race differential",
         "status": "inferred",
-        "note": "assumed — required for accel/decel lock tabs",
+        "note": "assumed \u2014 required for accel/decel lock tabs",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -861,7 +861,7 @@
         "item": "Clutch / driveline",
         "value": null,
         "status": "shop",
-        "note": "no telemetry signature — PI budget usually decides these",
+        "note": "no telemetry signature \u2014 PI budget usually decides these",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -877,7 +877,7 @@
         "item": "Compound",
         "value": null,
         "status": "shop",
-        "note": "My Cars pane shows it — one screenshot, or the 20-s HUD clip",
+        "note": "My Cars pane shows it \u2014 one screenshot, or the 20-s HUD clip",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -888,7 +888,7 @@
         "item": "Front / rear width",
         "value": null,
         "status": "shop",
-        "note": "shop INSTALLED tiles only — the Centenario lesson",
+        "note": "shop INSTALLED tiles only \u2014 the Centenario lesson",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -915,7 +915,7 @@
         "item": "Front aero",
         "value": null,
         "status": "shop",
-        "note": "fast-sweeper balance hints presence, never the exact part — check shop/visual",
+        "note": "fast-sweeper balance hints presence, never the exact part \u2014 check shop/visual",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -926,7 +926,7 @@
         "item": "Rear wing",
         "value": null,
         "status": "shop",
-        "note": "same — speed-binned lat-g hints presence only",
+        "note": "same \u2014 speed-binned lat-g hints presence only",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -954,7 +954,7 @@
     "complete": false,
     "components": false,
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 600 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 600 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 26,
@@ -1317,7 +1317,7 @@
       "required": 1,
       "confidence": 0.0,
       "ready": false,
-      "hint": "keep driving — tires still cold for most frames"
+      "hint": "keep driving \u2014 tires still cold for most frames"
      }
     ]
    },
@@ -1332,7 +1332,7 @@
     },
     {
      "key": "more-data",
-     "text": "Low coverage: verdicts are provisional — see the probe bars for what to drive next.",
+     "text": "Low coverage: verdicts are provisional \u2014 see the probe bars for what to drive next.",
      "severity": 1,
      "confidence": 1,
      "evidence": "coverage 31%",
@@ -1378,7 +1378,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -1401,7 +1401,7 @@
       "have": 16,
       "need": 22,
       "ok": false,
-      "why": "full-throttle through the usable rev range — missing rpm: 2750, 3000, 3500, 4250, 4500, 5000 — roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones · band capped at your gearbox's upshift point (~8020 rpm)",
+      "why": "full-throttle through the usable rev range \u2014 missing rpm: 2750, 3000, 3500, 4250, 4500, 5000 \u2014 roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones \u00b7 band capped at your gearbox's upshift point (~8020 rpm)",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -1425,7 +1425,7 @@
       "have": 1,
       "need": 2,
       "ok": false,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -1494,13 +1494,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "4-cyl · redline 8500 rpm · idle 800",
+        "value": "4-cyl \u00b7 redline 8500 rpm \u00b7 idle 800",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "110,965 frames · constant across the run",
+        "evidence": "110,965 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -1511,25 +1511,25 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "110,965 frames · constant across the run",
+        "evidence": "110,965 frames \u00b7 constant across the run",
         "needs": null
        },
        {
         "item": "Aspiration",
-        "value": "forced induction — peak 73.5 psi",
+        "value": "forced induction \u2014 peak 73.5 psi",
         "status": "measured",
         "note": "boost ramp shape names the type: laggy = turbo, rpm-linear = centrifugal, flat = positive-displacement",
         "gate": null,
         "pending": false,
         "confidence": 0.91,
-        "evidence": "4,176 boost-on frames · peak boost across 6 pulls ±1.42%",
+        "evidence": "4,176 boost-on frames \u00b7 peak boost across 6 pulls \u00b11.42%",
         "needs": null
        },
        {
         "item": "Body kit",
         "value": null,
         "status": "shop",
-        "note": "not visible in telemetry — check visually",
+        "note": "not visible in telemetry \u2014 check visually",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -1545,12 +1545,12 @@
         "item": "Total output target",
         "value": null,
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 899",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 899",
         "gate": "dyno",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "4 full pulls through the peak · peak 295–634 hp (±51.73%) · rpm bins 16/22",
-        "needs": "peaks disagree across pulls — repeat clean pulls on flat road"
+        "evidence": "4 full pulls through the peak \u00b7 peak 295\u2013634 hp (\u00b151.73%) \u00b7 rpm bins 16/22",
+        "needs": "peaks disagree across pulls \u2014 repeat clean pulls on flat road"
        }
       ]
      },
@@ -1561,7 +1561,7 @@
         "item": "Brakes",
         "value": "race brakes",
         "status": "inferred",
-        "note": "assumed — required for the brake tabs a tuned donor uses; confirm in the shop",
+        "note": "assumed \u2014 required for the brake tabs a tuned donor uses; confirm in the shop",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -1572,7 +1572,7 @@
         "item": "Springs & dampers",
         "value": "race springs",
         "status": "inferred",
-        "note": "assumed — required for spring/damper tabs; behaviour match happens on the Bench",
+        "note": "assumed \u2014 required for spring/damper tabs; behaviour match happens on the Bench",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -1583,7 +1583,7 @@
         "item": "Anti-roll bars",
         "value": "race ARBs",
         "status": "inferred",
-        "note": "assumed — required for the ARB tab",
+        "note": "assumed \u2014 required for the ARB tab",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -1598,8 +1598,8 @@
         "gate": "launch",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "0 clean-acceleration samples · spread ±—%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "0 clean-acceleration samples \u00b7 spread \u00b1\u2014%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -1608,31 +1608,31 @@
       "items": [
        {
         "item": "Transmission",
-        "value": "6-speed → race 6-speed",
+        "value": "6-speed \u2192 race 6-speed",
         "status": "measured",
         "note": null,
         "gate": "gears",
         "pending": false,
         "confidence": 0.72,
-        "evidence": "6 gears seen · top gear 6: 107 WOT frames · top-speed pull ○",
+        "evidence": "6 gears seen \u00b7 top gear 6: 107 WOT frames \u00b7 top-speed pull \u25cb",
         "needs": null
        },
        {
         "item": "Gear ratios (tune)",
-        "value": "g1 3.4 · g2 4.9 · g3 6.8 · g4 8.6 · g5 11.7 · g6 15.0 mph/krpm",
+        "value": "g1 3.4 \u00b7 g2 4.9 \u00b7 g3 6.8 \u00b7 g4 8.6 \u00b7 g5 11.7 \u00b7 g6 15.0 mph/krpm",
         "status": "measured",
         "note": "tune-side: set final drive + per-gear until the WOT ladder matches these exactly",
         "gate": "gears",
         "pending": false,
         "confidence": 0.12,
-        "evidence": "6 gears · weakest gear 2: 80 WOT frames, spread ±17.54% · gear 1 excluded (launch wheelspin)",
+        "evidence": "6 gears \u00b7 weakest gear 2: 80 WOT frames, spread \u00b117.54% \u00b7 gear 1 excluded (launch wheelspin)",
         "needs": "hold full throttle longer in gears 2, 3, 4, 5, 6"
        },
        {
         "item": "Differential",
         "value": "race differential",
         "status": "inferred",
-        "note": "assumed — required for accel/decel lock tabs",
+        "note": "assumed \u2014 required for accel/decel lock tabs",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -1643,7 +1643,7 @@
         "item": "Clutch / driveline",
         "value": null,
         "status": "shop",
-        "note": "no telemetry signature — PI budget usually decides these",
+        "note": "no telemetry signature \u2014 PI budget usually decides these",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -1659,7 +1659,7 @@
         "item": "Compound",
         "value": null,
         "status": "shop",
-        "note": "My Cars pane shows it — one screenshot, or the 20-s HUD clip",
+        "note": "My Cars pane shows it \u2014 one screenshot, or the 20-s HUD clip",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -1670,7 +1670,7 @@
         "item": "Front / rear width",
         "value": null,
         "status": "shop",
-        "note": "shop INSTALLED tiles only — the Centenario lesson",
+        "note": "shop INSTALLED tiles only \u2014 the Centenario lesson",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -1697,7 +1697,7 @@
         "item": "Front aero",
         "value": null,
         "status": "shop",
-        "note": "fast-sweeper balance hints presence, never the exact part — check shop/visual",
+        "note": "fast-sweeper balance hints presence, never the exact part \u2014 check shop/visual",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -1708,7 +1708,7 @@
         "item": "Rear wing",
         "value": null,
         "status": "shop",
-        "note": "same — speed-binned lat-g hints presence only",
+        "note": "same \u2014 speed-binned lat-g hints presence only",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -1730,7 +1730,7 @@
      {
       "item": "Total output target",
       "confidence": 0.0,
-      "needs": "peaks disagree across pulls — repeat clean pulls on flat road"
+      "needs": "peaks disagree across pulls \u2014 repeat clean pulls on flat road"
      },
      {
       "item": "Gear ratios (tune)",
@@ -1741,7 +1741,7 @@
     "complete": false,
     "components": false,
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 899 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 899 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 38,
@@ -2111,7 +2111,7 @@
       "required": 2,
       "confidence": 0.91,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "top",
@@ -2120,7 +2120,7 @@
       "required": 1,
       "confidence": 0.7,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "wiggle",
@@ -2203,7 +2203,7 @@
     },
     {
      "key": "front-hot",
-     "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature — check pressures/camber on the HUD (Tires Misc + Heat).",
+     "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature \u2014 check pressures/camber on the HUD (Tires Misc + Heat).",
      "severity": 1,
      "confidence": 0.7,
      "evidence": "median F 232 F vs R 208 F",
@@ -2211,7 +2211,7 @@
     },
     {
      "key": "inconclusive-brake",
-     "text": "Brake-lock pattern inconsistent across 70 stops (0 both-axle, 13 front-first, 1 rear-first) — more hard stops from 80+ mph before touching balance.",
+     "text": "Brake-lock pattern inconsistent across 70 stops (0 both-axle, 13 front-first, 1 rear-first) \u2014 more hard stops from 80+ mph before touching balance.",
      "severity": 1,
      "confidence": 0.81,
      "evidence": "deficit medians F 0.16 / R 0.10",
@@ -2223,7 +2223,7 @@
     },
     {
      "key": "inconclusive-usi",
-     "text": "Balance varies corner to corner (USI spread 0.69) — likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
+     "text": "Balance varies corner to corner (USI spread 0.69) \u2014 likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
      "severity": 1,
      "confidence": 0.69,
      "evidence": "by type: hairpin +0.79 (n=47), medium +0.50 (n=24), fast -0.14 (n=9)",
@@ -2297,7 +2297,7 @@
       "have": 7,
       "need": 1,
       "ok": true,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -2320,7 +2320,7 @@
       "have": 22,
       "need": 24,
       "ok": false,
-      "why": "full-throttle through the usable rev range — missing rpm: 2750, 3000 — roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones · band capped at your gearbox's upshift point (~8460 rpm)",
+      "why": "full-throttle through the usable rev range \u2014 missing rpm: 2750, 3000 \u2014 roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones \u00b7 band capped at your gearbox's upshift point (~8460 rpm)",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -2344,7 +2344,7 @@
       "have": 62,
       "need": 2,
       "ok": true,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -2413,13 +2413,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "4-cyl · redline 10000 rpm · idle 800",
+        "value": "4-cyl \u00b7 redline 10000 rpm \u00b7 idle 800",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "73,255 frames · constant across the run",
+        "evidence": "73,255 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -2430,25 +2430,25 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "73,255 frames · constant across the run",
+        "evidence": "73,255 frames \u00b7 constant across the run",
         "needs": null
        },
        {
         "item": "Aspiration",
-        "value": "forced induction — peak 11.0 psi",
+        "value": "forced induction \u2014 peak 11.0 psi",
         "status": "measured",
         "note": "boost ramp shape names the type: laggy = turbo, rpm-linear = centrifugal, flat = positive-displacement",
         "gate": null,
         "pending": false,
         "confidence": 0.93,
-        "evidence": "40,196 boost-on frames · peak boost across 98 pulls ±1.03%",
+        "evidence": "40,196 boost-on frames \u00b7 peak boost across 98 pulls \u00b11.03%",
         "needs": null
        },
        {
         "item": "Body kit",
         "value": null,
         "status": "shop",
-        "note": "not visible in telemetry — check visually",
+        "note": "not visible in telemetry \u2014 check visually",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -2464,11 +2464,11 @@
         "item": "Total output target",
         "value": null,
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 800",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 800",
         "gate": "dyno",
         "pending": true,
         "confidence": 0.83,
-        "evidence": "79 full pulls through the peak · peak 340–340 hp (±0.12%) · rpm bins 22/24",
+        "evidence": "79 full pulls through the peak \u00b7 peak 340\u2013340 hp (\u00b10.12%) \u00b7 rpm bins 22/24",
         "needs": null
        }
       ]
@@ -2480,7 +2480,7 @@
         "item": "Brakes",
         "value": "race brakes",
         "status": "inferred",
-        "note": "assumed — required for the brake tabs a tuned donor uses; confirm in the shop",
+        "note": "assumed \u2014 required for the brake tabs a tuned donor uses; confirm in the shop",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -2491,7 +2491,7 @@
         "item": "Springs & dampers",
         "value": "race springs",
         "status": "inferred",
-        "note": "assumed — required for spring/damper tabs; behaviour match happens on the Bench",
+        "note": "assumed \u2014 required for spring/damper tabs; behaviour match happens on the Bench",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -2502,7 +2502,7 @@
         "item": "Anti-roll bars",
         "value": "race ARBs",
         "status": "inferred",
-        "note": "assumed — required for the ARB tab",
+        "note": "assumed \u2014 required for the ARB tab",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -2517,8 +2517,8 @@
         "gate": "launch",
         "pending": false,
         "confidence": 0.0,
-        "evidence": "114 clean-acceleration samples · spread ±56.33%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "114 clean-acceleration samples \u00b7 spread \u00b156.33%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -2527,31 +2527,31 @@
       "items": [
        {
         "item": "Transmission",
-        "value": "6-speed → race 6-speed",
+        "value": "6-speed \u2192 race 6-speed",
         "status": "measured",
         "note": null,
         "gate": "gears",
         "pending": false,
         "confidence": 1.0,
-        "evidence": "6 gears seen · top gear 6: 6821 WOT frames · top-speed pull ✓",
+        "evidence": "6 gears seen \u00b7 top gear 6: 6821 WOT frames \u00b7 top-speed pull \u2713",
         "needs": null
        },
        {
         "item": "Gear ratios (tune)",
-        "value": "g1 5.2 · g2 6.5 · g3 8.2 · g4 9.9 · g5 11.4 · g6 13.1 mph/krpm",
+        "value": "g1 5.2 \u00b7 g2 6.5 \u00b7 g3 8.2 \u00b7 g4 9.9 \u00b7 g5 11.4 \u00b7 g6 13.1 mph/krpm",
         "status": "measured",
         "note": "tune-side: set final drive + per-gear until the WOT ladder matches these exactly",
         "gate": "gears",
         "pending": false,
         "confidence": 0.68,
-        "evidence": "6 gears · weakest gear 2: 7861 WOT frames, spread ±6.08% · gear 1 excluded (launch wheelspin)",
+        "evidence": "6 gears \u00b7 weakest gear 2: 7861 WOT frames, spread \u00b16.08% \u00b7 gear 1 excluded (launch wheelspin)",
         "needs": "hold full throttle longer in gears 2, 3"
        },
        {
         "item": "Differential",
         "value": "race differential",
         "status": "inferred",
-        "note": "assumed — required for accel/decel lock tabs",
+        "note": "assumed \u2014 required for accel/decel lock tabs",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -2562,7 +2562,7 @@
         "item": "Clutch / driveline",
         "value": null,
         "status": "shop",
-        "note": "no telemetry signature — PI budget usually decides these",
+        "note": "no telemetry signature \u2014 PI budget usually decides these",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -2578,7 +2578,7 @@
         "item": "Compound",
         "value": null,
         "status": "shop",
-        "note": "My Cars pane shows it — one screenshot, or the 20-s HUD clip",
+        "note": "My Cars pane shows it \u2014 one screenshot, or the 20-s HUD clip",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -2589,7 +2589,7 @@
         "item": "Front / rear width",
         "value": null,
         "status": "shop",
-        "note": "shop INSTALLED tiles only — the Centenario lesson",
+        "note": "shop INSTALLED tiles only \u2014 the Centenario lesson",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -2616,7 +2616,7 @@
         "item": "Front aero",
         "value": null,
         "status": "shop",
-        "note": "fast-sweeper balance hints presence, never the exact part — check shop/visual",
+        "note": "fast-sweeper balance hints presence, never the exact part \u2014 check shop/visual",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -2627,7 +2627,7 @@
         "item": "Rear wing",
         "value": null,
         "status": "shop",
-        "note": "same — speed-binned lat-g hints presence only",
+        "note": "same \u2014 speed-binned lat-g hints presence only",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -2655,7 +2655,7 @@
     "complete": false,
     "components": false,
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 800 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 800 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 232,
@@ -3016,7 +3016,7 @@
       "required": 1,
       "confidence": 0.7,
       "ready": true,
-      "hint": "verdict-ready — more sharpens it"
+      "hint": "verdict-ready \u2014 more sharpens it"
      },
      {
       "key": "wiggle",
@@ -3067,7 +3067,7 @@
     },
     {
      "key": "brake-pressure",
-     "text": "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.",
+     "text": "Both axles lock under hard braking: brake pressure too high overall \u2014 bring it down to the knee.",
      "severity": 3,
      "confidence": 0.25,
      "evidence": "median deficit F 1.00 / R 1.00; 1/2 stops locked both",
@@ -3075,7 +3075,7 @@
     },
     {
      "key": "front-hot",
-     "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature — check pressures/camber on the HUD (Tires Misc + Heat).",
+     "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature \u2014 check pressures/camber on the HUD (Tires Misc + Heat).",
      "severity": 1,
      "confidence": 0.7,
      "evidence": "median F 8230 F vs R 416 F",
@@ -3083,7 +3083,7 @@
     },
     {
      "key": "tires-cooking",
-     "text": "Tire temps past 300 F: pressures likely high and/or sustained wheelspin — HUD pressure check.",
+     "text": "Tire temps past 300 F: pressures likely high and/or sustained wheelspin \u2014 HUD pressure check.",
      "severity": 1,
      "confidence": 0.6,
      "evidence": "max median 16219 F",
@@ -3091,7 +3091,7 @@
     },
     {
      "key": "inconclusive-brake",
-     "text": "Brake-lock pattern inconsistent across 2 stops (1 both-axle, 0 front-first, 0 rear-first) — more hard stops from 80+ mph before touching balance.",
+     "text": "Brake-lock pattern inconsistent across 2 stops (1 both-axle, 0 front-first, 0 rear-first) \u2014 more hard stops from 80+ mph before touching balance.",
      "severity": 1,
      "confidence": 0.5,
      "evidence": "deficit medians F 1.00 / R 1.00",
@@ -3128,7 +3128,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -3151,7 +3151,7 @@
       "have": 32,
       "need": 55,
       "ok": false,
-      "why": "full-throttle through the usable rev range — missing rpm: 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 8750, 11750, 12000, 12250 — roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
+      "why": "full-throttle through the usable rev range \u2014 missing rpm: 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 8750, 11750, 12000, 12250 \u2014 roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -3175,7 +3175,7 @@
       "have": 2,
       "need": 2,
       "ok": true,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -3244,13 +3244,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "0-cyl · redline 17000 rpm · idle 0",
+        "value": "0-cyl \u00b7 redline 17000 rpm \u00b7 idle 0",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "44,595 frames · constant across the run",
+        "evidence": "44,595 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -3261,7 +3261,7 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "44,595 frames · constant across the run",
+        "evidence": "44,595 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -3272,14 +3272,14 @@
         "gate": "dyno",
         "pending": true,
         "confidence": 0.56,
-        "evidence": "830 WOT frames · boost never above 0.5 psi",
+        "evidence": "830 WOT frames \u00b7 boost never above 0.5 psi",
         "needs": null
        },
        {
         "item": "Body kit",
         "value": null,
         "status": "shop",
-        "note": "not visible in telemetry — check visually",
+        "note": "not visible in telemetry \u2014 check visually",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -3295,11 +3295,11 @@
         "item": "Total output target",
         "value": null,
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 781",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 781",
         "gate": "dyno",
         "pending": true,
         "confidence": 0.19,
-        "evidence": "2 full pulls through the peak · peak 1892–1893 hp (±0.0%) · rpm bins 32/55",
+        "evidence": "2 full pulls through the peak \u00b7 peak 1892\u20131893 hp (\u00b10.0%) \u00b7 rpm bins 32/55",
         "needs": "1 more full-throttle pull that sweep through 16000 rpm"
        }
       ]
@@ -3311,7 +3311,7 @@
         "item": "Brakes",
         "value": "race brakes",
         "status": "inferred",
-        "note": "assumed — required for the brake tabs a tuned donor uses; confirm in the shop",
+        "note": "assumed \u2014 required for the brake tabs a tuned donor uses; confirm in the shop",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3322,7 +3322,7 @@
         "item": "Springs & dampers",
         "value": "race springs",
         "status": "inferred",
-        "note": "assumed — required for spring/damper tabs; behaviour match happens on the Bench",
+        "note": "assumed \u2014 required for spring/damper tabs; behaviour match happens on the Bench",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3333,7 +3333,7 @@
         "item": "Anti-roll bars",
         "value": "race ARBs",
         "status": "inferred",
-        "note": "assumed — required for the ARB tab",
+        "note": "assumed \u2014 required for the ARB tab",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3348,8 +3348,8 @@
         "gate": "launch",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "8 clean-acceleration samples · spread ±70.43%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "8 clean-acceleration samples \u00b7 spread \u00b170.43%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -3358,13 +3358,13 @@
       "items": [
        {
         "item": "Transmission",
-        "value": "1-speed → race 1-speed",
+        "value": "1-speed \u2192 race 1-speed",
         "status": "measured",
         "note": null,
         "gate": "gears",
         "pending": false,
         "confidence": 1.0,
-        "evidence": "1 gears seen · top gear 1: 830 WOT frames · top-speed pull ✓",
+        "evidence": "1 gears seen \u00b7 top gear 1: 830 WOT frames \u00b7 top-speed pull \u2713",
         "needs": null
        },
        {
@@ -3375,14 +3375,14 @@
         "gate": "gears",
         "pending": false,
         "confidence": 0.0,
-        "evidence": "1 gears · weakest gear 1: 830 WOT frames, spread ±51.47%",
+        "evidence": "1 gears \u00b7 weakest gear 1: 830 WOT frames, spread \u00b151.47%",
         "needs": "hold full throttle longer in gear 1"
        },
        {
         "item": "Differential",
         "value": "race differential",
         "status": "inferred",
-        "note": "assumed — required for accel/decel lock tabs",
+        "note": "assumed \u2014 required for accel/decel lock tabs",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3393,7 +3393,7 @@
         "item": "Clutch / driveline",
         "value": null,
         "status": "shop",
-        "note": "no telemetry signature — PI budget usually decides these",
+        "note": "no telemetry signature \u2014 PI budget usually decides these",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -3409,7 +3409,7 @@
         "item": "Compound",
         "value": null,
         "status": "shop",
-        "note": "My Cars pane shows it — one screenshot, or the 20-s HUD clip",
+        "note": "My Cars pane shows it \u2014 one screenshot, or the 20-s HUD clip",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -3420,7 +3420,7 @@
         "item": "Front / rear width",
         "value": null,
         "status": "shop",
-        "note": "shop INSTALLED tiles only — the Centenario lesson",
+        "note": "shop INSTALLED tiles only \u2014 the Centenario lesson",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -3447,7 +3447,7 @@
         "item": "Front aero",
         "value": null,
         "status": "shop",
-        "note": "fast-sweeper balance hints presence, never the exact part — check shop/visual",
+        "note": "fast-sweeper balance hints presence, never the exact part \u2014 check shop/visual",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -3458,7 +3458,7 @@
         "item": "Rear wing",
         "value": null,
         "status": "shop",
-        "note": "same — speed-binned lat-g hints presence only",
+        "note": "same \u2014 speed-binned lat-g hints presence only",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -3480,7 +3480,7 @@
      {
       "item": "Aspiration",
       "confidence": 0.56,
-      "needs": "pending — needs the dyno test"
+      "needs": "pending \u2014 needs the dyno test"
      },
      {
       "item": "Total output target",
@@ -3496,7 +3496,7 @@
     "complete": false,
     "components": false,
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 781 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 781 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 16219,
@@ -3676,14 +3676,14 @@
       "required": 1,
       "confidence": 0.02,
       "ready": false,
-      "hint": "keep driving — tires still cold for most frames"
+      "hint": "keep driving \u2014 tires still cold for most frames"
      }
     ]
    },
    "advice": [
     {
      "key": "more-data",
-     "text": "Low coverage: verdicts are provisional — see the probe bars for what to drive next.",
+     "text": "Low coverage: verdicts are provisional \u2014 see the probe bars for what to drive next.",
      "severity": 1,
      "confidence": 1,
      "evidence": "coverage 0%",
@@ -3721,7 +3721,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -3744,7 +3744,7 @@
       "have": 0,
       "need": 55,
       "ok": false,
-      "why": "full-throttle through the usable rev range — missing rpm: 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 10250, 10500, 10750, 11000, 11250, 11500, 11750, 12000, 12250, 12500, 12750, 13000, 13250, 13500, 13750, 14000, 14250, 14500, 14750, 15000, 15250, 15500, 15750, 16000, 16250 — roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
+      "why": "full-throttle through the usable rev range \u2014 missing rpm: 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 10250, 10500, 10750, 11000, 11250, 11500, 11750, 12000, 12250, 12500, 12750, 13000, 13250, 13500, 13750, 14000, 14250, 14500, 14750, 15000, 15250, 15500, 15750, 16000, 16250 \u2014 roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -3768,7 +3768,7 @@
       "have": 0,
       "need": 2,
       "ok": false,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -3837,13 +3837,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "0-cyl · redline 17000 rpm · idle 0",
+        "value": "0-cyl \u00b7 redline 17000 rpm \u00b7 idle 0",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "11,303 frames · constant across the run",
+        "evidence": "11,303 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -3854,7 +3854,7 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "11,303 frames · constant across the run",
+        "evidence": "11,303 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -3865,14 +3865,14 @@
         "gate": "dyno",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "5 WOT frames · boost never above 0.5 psi",
+        "evidence": "5 WOT frames \u00b7 boost never above 0.5 psi",
         "needs": "more full-throttle time"
        },
        {
         "item": "Body kit",
         "value": null,
         "status": "shop",
-        "note": "not visible in telemetry — check visually",
+        "note": "not visible in telemetry \u2014 check visually",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -3888,11 +3888,11 @@
         "item": "Total output target",
         "value": null,
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 712",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 712",
         "gate": "dyno",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "0 full pulls through the peak · peak —–— hp (±—%) · rpm bins 0/55",
+        "evidence": "0 full pulls through the peak \u00b7 peak \u2014\u2013\u2014 hp (\u00b1\u2014%) \u00b7 rpm bins 0/55",
         "needs": "3 more full-throttle pulls that sweep through the peak rpm"
        }
       ]
@@ -3904,7 +3904,7 @@
         "item": "Brakes",
         "value": "race brakes",
         "status": "inferred",
-        "note": "assumed — required for the brake tabs a tuned donor uses; confirm in the shop",
+        "note": "assumed \u2014 required for the brake tabs a tuned donor uses; confirm in the shop",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3915,7 +3915,7 @@
         "item": "Springs & dampers",
         "value": "race springs",
         "status": "inferred",
-        "note": "assumed — required for spring/damper tabs; behaviour match happens on the Bench",
+        "note": "assumed \u2014 required for spring/damper tabs; behaviour match happens on the Bench",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3926,7 +3926,7 @@
         "item": "Anti-roll bars",
         "value": "race ARBs",
         "status": "inferred",
-        "note": "assumed — required for the ARB tab",
+        "note": "assumed \u2014 required for the ARB tab",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3941,8 +3941,8 @@
         "gate": "launch",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "0 clean-acceleration samples · spread ±—%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "0 clean-acceleration samples \u00b7 spread \u00b1\u2014%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -3957,7 +3957,7 @@
         "gate": "gears",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "0 gears seen · top gear 1: 5 WOT frames · top-speed pull ○",
+        "evidence": "0 gears seen \u00b7 top gear 1: 5 WOT frames \u00b7 top-speed pull \u25cb",
         "needs": "hold top gear at full throttle for 5 s"
        },
        {
@@ -3975,7 +3975,7 @@
         "item": "Differential",
         "value": "race differential",
         "status": "inferred",
-        "note": "assumed — required for accel/decel lock tabs",
+        "note": "assumed \u2014 required for accel/decel lock tabs",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -3986,7 +3986,7 @@
         "item": "Clutch / driveline",
         "value": null,
         "status": "shop",
-        "note": "no telemetry signature — PI budget usually decides these",
+        "note": "no telemetry signature \u2014 PI budget usually decides these",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4002,7 +4002,7 @@
         "item": "Compound",
         "value": null,
         "status": "shop",
-        "note": "My Cars pane shows it — one screenshot, or the 20-s HUD clip",
+        "note": "My Cars pane shows it \u2014 one screenshot, or the 20-s HUD clip",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4013,7 +4013,7 @@
         "item": "Front / rear width",
         "value": null,
         "status": "shop",
-        "note": "shop INSTALLED tiles only — the Centenario lesson",
+        "note": "shop INSTALLED tiles only \u2014 the Centenario lesson",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4040,7 +4040,7 @@
         "item": "Front aero",
         "value": null,
         "status": "shop",
-        "note": "fast-sweeper balance hints presence, never the exact part — check shop/visual",
+        "note": "fast-sweeper balance hints presence, never the exact part \u2014 check shop/visual",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4051,7 +4051,7 @@
         "item": "Rear wing",
         "value": null,
         "status": "shop",
-        "note": "same — speed-binned lat-g hints presence only",
+        "note": "same \u2014 speed-binned lat-g hints presence only",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4088,13 +4088,13 @@
      {
       "item": "Gear ratios (tune)",
       "confidence": 0.0,
-      "needs": "pending — needs the gears test"
+      "needs": "pending \u2014 needs the gears test"
      }
     ],
     "complete": false,
     "components": false,
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 712 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 712 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 135,
@@ -4412,14 +4412,14 @@
       "required": 1,
       "confidence": 0.0,
       "ready": false,
-      "hint": "keep driving — tires still cold for most frames"
+      "hint": "keep driving \u2014 tires still cold for most frames"
      }
     ]
    },
    "advice": [
     {
      "key": "more-data",
-     "text": "Low coverage: verdicts are provisional — see the probe bars for what to drive next.",
+     "text": "Low coverage: verdicts are provisional \u2014 see the probe bars for what to drive next.",
      "severity": 1,
      "confidence": 1,
      "evidence": "coverage 21%",
@@ -4455,7 +4455,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -4478,7 +4478,7 @@
       "have": 15,
       "need": 28,
       "ok": false,
-      "why": "full-throttle through the usable rev range — missing rpm: 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750 — roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
+      "why": "full-throttle through the usable rev range \u2014 missing rpm: 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750 \u2014 roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -4502,7 +4502,7 @@
       "have": 0,
       "need": 2,
       "ok": false,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -4571,13 +4571,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "2-cyl · redline 10000 rpm · idle 800",
+        "value": "2-cyl \u00b7 redline 10000 rpm \u00b7 idle 800",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "5,450 frames · constant across the run",
+        "evidence": "5,450 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -4588,7 +4588,7 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "5,450 frames · constant across the run",
+        "evidence": "5,450 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -4599,14 +4599,14 @@
         "gate": "dyno",
         "pending": true,
         "confidence": 0.52,
-        "evidence": "968 WOT frames · boost never above 0.5 psi",
+        "evidence": "968 WOT frames \u00b7 boost never above 0.5 psi",
         "needs": null
        },
        {
         "item": "Body kit",
         "value": null,
         "status": "shop",
-        "note": "not visible in telemetry — check visually",
+        "note": "not visible in telemetry \u2014 check visually",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4622,11 +4622,11 @@
         "item": "Total output target",
         "value": null,
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 800",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 800",
         "gate": "dyno",
         "pending": true,
         "confidence": 0.09,
-        "evidence": "1 full pull through the peak · peak 352–352 hp (±—%) · rpm bins 15/28",
+        "evidence": "1 full pull through the peak \u00b7 peak 352\u2013352 hp (\u00b1\u2014%) \u00b7 rpm bins 15/28",
         "needs": "2 more full-throttle pulls that sweep through 9000 rpm"
        }
       ]
@@ -4638,7 +4638,7 @@
         "item": "Brakes",
         "value": "race brakes",
         "status": "inferred",
-        "note": "assumed — required for the brake tabs a tuned donor uses; confirm in the shop",
+        "note": "assumed \u2014 required for the brake tabs a tuned donor uses; confirm in the shop",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -4649,7 +4649,7 @@
         "item": "Springs & dampers",
         "value": "race springs",
         "status": "inferred",
-        "note": "assumed — required for spring/damper tabs; behaviour match happens on the Bench",
+        "note": "assumed \u2014 required for spring/damper tabs; behaviour match happens on the Bench",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -4660,7 +4660,7 @@
         "item": "Anti-roll bars",
         "value": "race ARBs",
         "status": "inferred",
-        "note": "assumed — required for the ARB tab",
+        "note": "assumed \u2014 required for the ARB tab",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -4675,8 +4675,8 @@
         "gate": "launch",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "6 clean-acceleration samples · spread ±57.66%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "6 clean-acceleration samples \u00b7 spread \u00b157.66%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -4685,31 +4685,31 @@
       "items": [
        {
         "item": "Transmission",
-        "value": "3-speed → race 3-speed",
+        "value": "3-speed \u2192 race 3-speed",
         "status": "measured",
         "note": null,
         "gate": "gears",
         "pending": false,
         "confidence": 0.7,
-        "evidence": "3 gears seen · top gear 3: 90 WOT frames · top-speed pull ○",
+        "evidence": "3 gears seen \u00b7 top gear 3: 90 WOT frames \u00b7 top-speed pull \u25cb",
         "needs": "hold top gear at full throttle for 5 s"
        },
        {
         "item": "Gear ratios (tune)",
-        "value": "g1 4.0 · g2 6.0 · g3 8.8 mph/krpm",
+        "value": "g1 4.0 \u00b7 g2 6.0 \u00b7 g3 8.8 mph/krpm",
         "status": "measured",
         "note": "tune-side: set final drive + per-gear until the WOT ladder matches these exactly",
         "gate": "gears",
         "pending": false,
         "confidence": 0.83,
-        "evidence": "3 gears · weakest gear 3: 90 WOT frames, spread ±0.4% · gear 1 excluded (launch wheelspin)",
+        "evidence": "3 gears \u00b7 weakest gear 3: 90 WOT frames, spread \u00b10.4% \u00b7 gear 1 excluded (launch wheelspin)",
         "needs": null
        },
        {
         "item": "Differential",
         "value": "race differential",
         "status": "inferred",
-        "note": "assumed — required for accel/decel lock tabs",
+        "note": "assumed \u2014 required for accel/decel lock tabs",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -4720,7 +4720,7 @@
         "item": "Clutch / driveline",
         "value": null,
         "status": "shop",
-        "note": "no telemetry signature — PI budget usually decides these",
+        "note": "no telemetry signature \u2014 PI budget usually decides these",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4736,7 +4736,7 @@
         "item": "Compound",
         "value": null,
         "status": "shop",
-        "note": "My Cars pane shows it — one screenshot, or the 20-s HUD clip",
+        "note": "My Cars pane shows it \u2014 one screenshot, or the 20-s HUD clip",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4747,7 +4747,7 @@
         "item": "Front / rear width",
         "value": null,
         "status": "shop",
-        "note": "shop INSTALLED tiles only — the Centenario lesson",
+        "note": "shop INSTALLED tiles only \u2014 the Centenario lesson",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4774,7 +4774,7 @@
         "item": "Front aero",
         "value": null,
         "status": "shop",
-        "note": "fast-sweeper balance hints presence, never the exact part — check shop/visual",
+        "note": "fast-sweeper balance hints presence, never the exact part \u2014 check shop/visual",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4785,7 +4785,7 @@
         "item": "Rear wing",
         "value": null,
         "status": "shop",
-        "note": "same — speed-binned lat-g hints presence only",
+        "note": "same \u2014 speed-binned lat-g hints presence only",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -4807,7 +4807,7 @@
      {
       "item": "Aspiration",
       "confidence": 0.52,
-      "needs": "pending — needs the dyno test"
+      "needs": "pending \u2014 needs the dyno test"
      },
      {
       "item": "Total output target",
@@ -4818,7 +4818,7 @@
     "complete": false,
     "components": false,
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 800 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 800 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 83,
@@ -5082,14 +5082,14 @@
       "required": 1,
       "confidence": 0.0,
       "ready": false,
-      "hint": "keep driving — tires still cold for most frames"
+      "hint": "keep driving \u2014 tires still cold for most frames"
      }
     ]
    },
    "advice": [
     {
      "key": "more-data",
-     "text": "Low coverage: verdicts are provisional — see the probe bars for what to drive next.",
+     "text": "Low coverage: verdicts are provisional \u2014 see the probe bars for what to drive next.",
      "severity": 1,
      "confidence": 1,
      "evidence": "coverage 14%",
@@ -5126,7 +5126,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "mass index · diff center split · accel spin",
+      "why": "mass index \u00b7 diff center split \u00b7 accel spin",
       "unlocks": [
        "Weight (mass index)"
       ]
@@ -5149,7 +5149,7 @@
       "have": 11,
       "need": 32,
       "ok": false,
-      "why": "full-throttle through the usable rev range — missing rpm: 2750, 3000, 3250, 3500, 3750, 4750, 5000, 5250, 5500, 5750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 10250, 10500 — roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
+      "why": "full-throttle through the usable rev range \u2014 missing rpm: 2750, 3000, 3250, 3500, 3750, 4750, 5000, 5250, 5500, 5750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 10250, 10500 \u2014 roll onto full throttle from low rpm in a tall gear for the low bins; hold WOT to the shift point for the high ones",
       "unlocks": [
        "Total output target",
        "Aspiration"
@@ -5173,7 +5173,7 @@
       "have": 0,
       "need": 2,
       "ok": false,
-      "why": "threshold brake — balance / lock threshold",
+      "why": "threshold brake \u2014 balance / lock threshold",
       "unlocks": [
        "Brakes"
       ]
@@ -5242,13 +5242,13 @@
       "items": [
        {
         "item": "Engine",
-        "value": "3-cyl · redline 11000 rpm · idle 950",
+        "value": "3-cyl \u00b7 redline 11000 rpm \u00b7 idle 950",
         "status": "measured",
-        "note": "if this differs from the stock engine, an engine swap is installed — the shop's swap list + these specs identify which",
+        "note": "if this differs from the stock engine, an engine swap is installed \u2014 the shop's swap list + these specs identify which",
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "3,048 frames · constant across the run",
+        "evidence": "3,048 frames \u00b7 constant across the run",
         "needs": null
        },
        {
@@ -5259,25 +5259,25 @@
         "gate": null,
         "pending": false,
         "confidence": 1.0,
-        "evidence": "3,048 frames · constant across the run",
+        "evidence": "3,048 frames \u00b7 constant across the run",
         "needs": null
        },
        {
         "item": "Aspiration",
-        "value": "forced induction — peak 26.8 psi",
+        "value": "forced induction \u2014 peak 26.8 psi",
         "status": "measured",
         "note": "boost ramp shape names the type: laggy = turbo, rpm-linear = centrifugal, flat = positive-displacement",
         "gate": null,
         "pending": false,
         "confidence": 0.96,
-        "evidence": "414 boost-on frames · peak boost across 2 pulls ±0.0%",
+        "evidence": "414 boost-on frames \u00b7 peak boost across 2 pulls \u00b10.0%",
         "needs": null
        },
        {
         "item": "Body kit",
         "value": null,
         "status": "shop",
-        "note": "not visible in telemetry — check visually",
+        "note": "not visible in telemetry \u2014 check visually",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -5293,11 +5293,11 @@
         "item": "Total output target",
         "value": null,
         "status": "measured",
-        "note": "any bolt-on stack that reproduces this curve is functionally identical — and the parts list must sum to PI 700",
+        "note": "any bolt-on stack that reproduces this curve is functionally identical \u2014 and the parts list must sum to PI 700",
         "gate": "dyno",
         "pending": true,
         "confidence": 0.04,
-        "evidence": "1 full pull through the peak · peak 168–168 hp (±—%) · rpm bins 11/32",
+        "evidence": "1 full pull through the peak \u00b7 peak 168\u2013168 hp (\u00b1\u2014%) \u00b7 rpm bins 11/32",
         "needs": "2 more full-throttle pulls that sweep through 7750 rpm"
        }
       ]
@@ -5309,7 +5309,7 @@
         "item": "Brakes",
         "value": "race brakes",
         "status": "inferred",
-        "note": "assumed — required for the brake tabs a tuned donor uses; confirm in the shop",
+        "note": "assumed \u2014 required for the brake tabs a tuned donor uses; confirm in the shop",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -5320,7 +5320,7 @@
         "item": "Springs & dampers",
         "value": "race springs",
         "status": "inferred",
-        "note": "assumed — required for spring/damper tabs; behaviour match happens on the Bench",
+        "note": "assumed \u2014 required for spring/damper tabs; behaviour match happens on the Bench",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -5331,7 +5331,7 @@
         "item": "Anti-roll bars",
         "value": "race ARBs",
         "status": "inferred",
-        "note": "assumed — required for the ARB tab",
+        "note": "assumed \u2014 required for the ARB tab",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -5346,8 +5346,8 @@
         "gate": "launch",
         "pending": true,
         "confidence": 0.0,
-        "evidence": "4 clean-acceleration samples · spread ±8.94%",
-        "needs": "more gentle full-throttle starts (6–20 mph, no wheelspin)"
+        "evidence": "4 clean-acceleration samples \u00b7 spread \u00b18.94%",
+        "needs": "more gentle full-throttle starts (6\u201320 mph, no wheelspin)"
        }
       ]
      },
@@ -5356,13 +5356,13 @@
       "items": [
        {
         "item": "Transmission",
-        "value": "1-speed → race 1-speed",
+        "value": "1-speed \u2192 race 1-speed",
         "status": "measured",
         "note": null,
         "gate": "gears",
         "pending": false,
         "confidence": 0.75,
-        "evidence": "1 gears seen · top gear 1: 187 WOT frames · top-speed pull ○",
+        "evidence": "1 gears seen \u00b7 top gear 1: 187 WOT frames \u00b7 top-speed pull \u25cb",
         "needs": null
        },
        {
@@ -5373,14 +5373,14 @@
         "gate": "gears",
         "pending": false,
         "confidence": 0.0,
-        "evidence": "1 gears · weakest gear 1: 187 WOT frames, spread ±8.19%",
+        "evidence": "1 gears \u00b7 weakest gear 1: 187 WOT frames, spread \u00b18.19%",
         "needs": "hold full throttle longer in gear 1"
        },
        {
         "item": "Differential",
         "value": "race differential",
         "status": "inferred",
-        "note": "assumed — required for accel/decel lock tabs",
+        "note": "assumed \u2014 required for accel/decel lock tabs",
         "gate": null,
         "pending": false,
         "confidence": 0.55,
@@ -5391,7 +5391,7 @@
         "item": "Clutch / driveline",
         "value": null,
         "status": "shop",
-        "note": "no telemetry signature — PI budget usually decides these",
+        "note": "no telemetry signature \u2014 PI budget usually decides these",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -5407,7 +5407,7 @@
         "item": "Compound",
         "value": null,
         "status": "shop",
-        "note": "My Cars pane shows it — one screenshot, or the 20-s HUD clip",
+        "note": "My Cars pane shows it \u2014 one screenshot, or the 20-s HUD clip",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -5418,7 +5418,7 @@
         "item": "Front / rear width",
         "value": null,
         "status": "shop",
-        "note": "shop INSTALLED tiles only — the Centenario lesson",
+        "note": "shop INSTALLED tiles only \u2014 the Centenario lesson",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -5445,7 +5445,7 @@
         "item": "Front aero",
         "value": null,
         "status": "shop",
-        "note": "fast-sweeper balance hints presence, never the exact part — check shop/visual",
+        "note": "fast-sweeper balance hints presence, never the exact part \u2014 check shop/visual",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -5456,7 +5456,7 @@
         "item": "Rear wing",
         "value": null,
         "status": "shop",
-        "note": "same — speed-binned lat-g hints presence only",
+        "note": "same \u2014 speed-binned lat-g hints presence only",
         "gate": null,
         "pending": false,
         "confidence": null,
@@ -5489,7 +5489,7 @@
     "complete": false,
     "components": false,
     "build_record": null,
-    "pi_note": "cross-check: every proposed parts list must sum to PI 700 — a mismatch means a missed part (usually widths or aero)"
+    "pi_note": "cross-check: every proposed parts list must sum to PI 700 \u2014 a mismatch means a missed part (usually widths or aero)"
    },
    "temps_med_f": {
     "FL": 91,
@@ -93226,7 +93226,7 @@
     -3082,
     -8125
    ],
-   "route_key": "-2350_-7550_26",
+   "route_key": "-2350_-7550",
    "route": null
   },
   {
@@ -93301,7 +93301,7 @@
     -2489,
     -7794
    ],
-   "route_key": "-2350_-7550_26",
+   "route_key": "-2350_-7550",
    "route": null
   }
  ],
@@ -93363,7 +93363,7 @@
  ],
  "courses": [
   {
-   "route_key": "-2350_-7550_26",
+   "route_key": "-2350_-7550",
    "name": null,
    "cars": [
     "2866|2|4|800"
@@ -93457,7 +93457,7 @@
      "consistency": 1.0,
      "usi": 0.168,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T1",
      "geo_id": null,
      "radius_m": 105,
@@ -93477,7 +93477,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 79,
@@ -93503,7 +93503,7 @@
       "throttle_on_m": 44,
       "line_m": 34
      },
-     "advice": "off your reference line by 34 m at the apex (slower by 6 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 34 m at the apex (slower by 6 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 3,
@@ -93627,7 +93627,7 @@
      "consistency": 1.0,
      "usi": -0.515,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T3",
      "geo_id": "G1",
      "radius_m": 100,
@@ -93647,7 +93647,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 107,
@@ -93673,7 +93673,7 @@
       "throttle_on_m": -53,
       "line_m": 22
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 4,
@@ -93798,7 +93798,7 @@
      "consistency": 1.0,
      "usi": 0.908,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T5",
      "geo_id": "G2",
      "radius_m": 16,
@@ -93815,7 +93815,7 @@
       "predicted": true,
       "session": null
      },
-     "ref_src": "predicted — course geometry (r≈6 m) × this car's grip (2.79 g)",
+     "ref_src": "predicted \u2014 course geometry (r\u22486 m) \u00d7 this car's grip (2.79 g)",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 81,
@@ -93841,7 +93841,7 @@
       "throttle_on_m": null,
       "line_m": null
      },
-     "advice": "no reference for this car here yet — predicted apex ≈ 29 mph (course geometry × your grip); you did 30 (+1) — at / above the prediction; this pass becomes the reference",
+     "advice": "no reference for this car here yet \u2014 predicted apex \u2248 29 mph (course geometry \u00d7 your grip); you did 30 (+1) \u2014 at / above the prediction; this pass becomes the reference",
      "on_ref": null,
      "track": {
       "passes": 4,
@@ -93958,7 +93958,7 @@
      "consistency": 1.0,
      "usi": 0.844,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T7",
      "geo_id": "G2",
      "radius_m": 17,
@@ -93978,7 +93978,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 60,
@@ -94004,7 +94004,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 3,
@@ -94128,7 +94128,7 @@
      "consistency": 1.0,
      "usi": -0.835,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T9",
      "geo_id": "G5",
      "radius_m": 36,
@@ -94148,7 +94148,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 55,
@@ -94167,7 +94167,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -94282,7 +94282,7 @@
      "consistency": 1.0,
      "usi": 0.606,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T10",
      "geo_id": null,
      "radius_m": 17,
@@ -94302,7 +94302,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 58,
@@ -94321,7 +94321,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -94436,7 +94436,7 @@
      "consistency": 0.5,
      "usi": 0.821,
      "limiter": "driver",
-     "note": "front locks when you overlap brake + steering — release the brakes as you turn in (trail off)",
+     "note": "front locks when you overlap brake + steering \u2014 release the brakes as you turn in (trail off)",
      "model_id": "T11",
      "geo_id": null,
      "radius_m": 88,
@@ -94456,7 +94456,7 @@
       "first_red": "rear ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 73,
@@ -94482,7 +94482,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 2,
@@ -94597,7 +94597,7 @@
      "consistency": 1.0,
      "usi": 0.471,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T12",
      "geo_id": null,
      "radius_m": 31,
@@ -94617,7 +94617,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 47,
@@ -94636,7 +94636,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -94751,7 +94751,7 @@
      "consistency": 1.0,
      "usi": 0.884,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T13",
      "geo_id": null,
      "radius_m": 24,
@@ -94771,7 +94771,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 80,
@@ -94790,7 +94790,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -94905,7 +94905,7 @@
      "consistency": 1.0,
      "usi": 1.239,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T14",
      "geo_id": null,
      "radius_m": 16,
@@ -94925,7 +94925,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 80,
@@ -94944,7 +94944,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -95059,7 +95059,7 @@
      "consistency": 1.0,
      "usi": 0.928,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T15",
      "geo_id": null,
      "radius_m": 12,
@@ -95079,7 +95079,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 61,
@@ -95098,7 +95098,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -95152,7 +95152,7 @@
       "have": 2,
       "need": 1,
       "ok": true,
-      "why": "launch → mass, diff center split, accel spin"
+      "why": "launch \u2192 mass, diff center split, accel spin"
      },
      {
       "key": "gears",
@@ -95160,7 +95160,7 @@
       "have": 6,
       "need": 6,
       "ok": true,
-      "why": "WOT time in every gear → gearing tab"
+      "why": "WOT time in every gear \u2192 gearing tab"
      },
      {
       "key": "dyno",
@@ -95168,7 +95168,7 @@
       "have": 22,
       "need": 24,
       "ok": false,
-      "why": "full-throttle through the rev range → engine/aspiration curve"
+      "why": "full-throttle through the rev range \u2192 engine/aspiration curve"
      },
      {
       "key": "top",
@@ -95176,7 +95176,7 @@
       "have": 1,
       "need": 1,
       "ok": true,
-      "why": "hold top gear WOT 5 s → drag / final drive"
+      "why": "hold top gear WOT 5 s \u2192 drag / final drive"
      },
      {
       "key": "brake",
@@ -95184,7 +95184,7 @@
       "have": 14,
       "need": 2,
       "ok": true,
-      "why": "threshold brake → balance, lock, decel diff"
+      "why": "threshold brake \u2192 balance, lock, decel diff"
      },
      {
       "key": "hairpin",
@@ -95324,7 +95324,7 @@
      "C7"
     ],
     "expected": null,
-    "note": "2 laps — drive 1 more to confirm the turn count · C7 often split into several detections (taken inconsistently)",
+    "note": "2 laps \u2014 drive 1 more to confirm the turn count \u00b7 C7 often split into several detections (taken inconsistently)",
     "track_laps": 4,
     "track_sessions": 2,
     "track_confidence": 0.78,
@@ -102501,7 +102501,7 @@
       "confidence": 0.94,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "medium",
@@ -102511,7 +102511,7 @@
       "confidence": 0.91,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "fast",
@@ -102531,7 +102531,7 @@
       "confidence": 0.95,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "launch",
@@ -102541,7 +102541,7 @@
       "confidence": 0.7,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "brake",
@@ -102637,7 +102637,7 @@
      },
      {
       "key": "front-hot",
-      "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature — check pressures/camber on the HUD (Tires Misc + Heat).",
+      "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature \u2014 check pressures/camber on the HUD (Tires Misc + Heat).",
       "severity": 1,
       "confidence": 0.7,
       "evidence": "median F 232 F vs R 208 F",
@@ -102653,7 +102653,7 @@
      },
      {
       "key": "inconclusive-usi",
-      "text": "Balance varies corner to corner (USI spread 1.06) — likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
+      "text": "Balance varies corner to corner (USI spread 1.06) \u2014 likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
       "severity": 1,
       "confidence": 1,
       "evidence": "by type: hairpin +0.84 (n=7), medium +0.17 (n=6), fast -0.52 (n=2)",
@@ -102665,7 +102665,7 @@
      },
      {
       "key": "inconclusive-brake",
-      "text": "Brake-lock pattern inconsistent across 16 stops (0 both-axle, 5 front-first, 0 rear-first) — more hard stops from 80+ mph before touching balance.",
+      "text": "Brake-lock pattern inconsistent across 16 stops (0 both-axle, 5 front-first, 0 rear-first) \u2014 more hard stops from 80+ mph before touching balance.",
       "severity": 1,
       "confidence": 0.69,
       "evidence": "deficit medians F 0.17 / R 0.11",
@@ -102779,7 +102779,7 @@
      "consistency": 0.67,
      "usi": 0.111,
      "limiter": "mixed",
-     "note": "front-limited but inconsistent — drive it a few more times cleanly to separate technique from setup",
+     "note": "front-limited but inconsistent \u2014 drive it a few more times cleanly to separate technique from setup",
      "model_id": "T4",
      "geo_id": null,
      "radius_m": 107,
@@ -102799,7 +102799,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 89,
@@ -102825,7 +102825,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 7,
@@ -102986,7 +102986,7 @@
      "consistency": 1.0,
      "usi": 0.075,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T1",
      "geo_id": "G1",
      "radius_m": 88,
@@ -103006,7 +103006,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 109,
@@ -103032,7 +103032,7 @@
       "throttle_on_m": 148,
       "line_m": 6
      },
-     "advice": "entry +2 · apex -11 mph vs reference · (tune-limited here — see the limiter note)",
+     "advice": "entry +2 \u00b7 apex -11 mph vs reference \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 8,
@@ -103186,7 +103186,7 @@
      "consistency": 1.0,
      "usi": 0.791,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T8",
      "geo_id": "G2",
      "radius_m": 16,
@@ -103206,7 +103206,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 69,
@@ -103232,7 +103232,7 @@
       "throttle_on_m": -102,
       "line_m": 25
      },
-     "advice": "off your reference line by 25 m at the apex (slower by 2 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 25 m at the apex (slower by 2 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 9,
@@ -103378,7 +103378,7 @@
      "consistency": 1.0,
      "usi": 0.575,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T3",
      "geo_id": "G1",
      "radius_m": 22,
@@ -103398,7 +103398,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 77,
@@ -103424,7 +103424,7 @@
       "throttle_on_m": 11,
       "line_m": 1
      },
-     "advice": "too much entry speed: 77 mph in vs your reference 69 (+8) — brake earlier; the front can't take it · (tune-limited here — see the limiter note)",
+     "advice": "too much entry speed: 77 mph in vs your reference 69 (+8) \u2014 brake earlier; the front can't take it \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 8,
@@ -103570,7 +103570,7 @@
      "consistency": 1.0,
      "usi": 0.81,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T25",
      "geo_id": "G4",
      "radius_m": 58,
@@ -103590,7 +103590,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 56,
@@ -103609,7 +103609,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -103737,7 +103737,7 @@
      "consistency": 0.86,
      "usi": 0.908,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T7",
      "geo_id": "G2",
      "radius_m": 15,
@@ -103757,7 +103757,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 31,
@@ -103783,7 +103783,7 @@
       "throttle_on_m": -42,
       "line_m": 23
      },
-     "advice": "off your reference line by 23 m at the apex (slower by 9 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 23 m at the apex (slower by 9 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 10,
@@ -103944,7 +103944,7 @@
      "consistency": 1.0,
      "usi": 0.66,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T2",
      "geo_id": "G5",
      "radius_m": 19,
@@ -103964,7 +103964,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 59,
@@ -103990,7 +103990,7 @@
       "throttle_on_m": -48,
       "line_m": 1
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 9,
@@ -104135,7 +104135,7 @@
      "consistency": 1.0,
      "usi": 0.837,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T9",
      "geo_id": "G10",
      "radius_m": 19,
@@ -104155,7 +104155,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 51,
@@ -104181,7 +104181,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 8,
@@ -104320,7 +104320,7 @@
      "consistency": 1.0,
      "usi": 0.504,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T10",
      "geo_id": "G12",
      "radius_m": 27,
@@ -104340,7 +104340,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 58,
@@ -104366,7 +104366,7 @@
       "throttle_on_m": null,
       "line_m": 9
      },
-     "advice": "entry -9 · apex -15 mph vs reference · braked 17 m earlier · (tune-limited here — see the limiter note)",
+     "advice": "entry -9 \u00b7 apex -15 mph vs reference \u00b7 braked 17 m earlier \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 6,
@@ -104504,7 +104504,7 @@
      "consistency": 1.0,
      "usi": 1.196,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T11",
      "geo_id": "G15",
      "radius_m": 15,
@@ -104524,7 +104524,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 41,
@@ -104550,7 +104550,7 @@
       "throttle_on_m": -106,
       "line_m": 4
      },
-     "advice": "entry -10 · apex -5 mph vs reference · braked 15 m earlier · (tune-limited here — see the limiter note)",
+     "advice": "entry -10 \u00b7 apex -5 mph vs reference \u00b7 braked 15 m earlier \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 8,
@@ -104695,7 +104695,7 @@
      "consistency": 0.86,
      "usi": 0.723,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T12",
      "geo_id": "G16",
      "radius_m": 19,
@@ -104715,7 +104715,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_110556"
      },
-     "ref_src": "session fh6_20260828_110556 · same car",
+     "ref_src": "session fh6_20260828_110556 \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 56,
@@ -104741,7 +104741,7 @@
       "throttle_on_m": 60,
       "line_m": 34
      },
-     "advice": "off your reference line by 34 m at the apex (slower by 9 mph) — re-find the apex · (tune-limited here — see the limiter note)",
+     "advice": "off your reference line by 34 m at the apex (slower by 9 mph) \u2014 re-find the apex \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 11,
@@ -104896,7 +104896,7 @@
      "consistency": 1.0,
      "usi": 0.88,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T14",
      "geo_id": "G17",
      "radius_m": 20,
@@ -104916,7 +104916,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 54,
@@ -104942,7 +104942,7 @@
       "throttle_on_m": 0,
       "line_m": 0
      },
-     "advice": "✓ on your reference — this turn is consistent",
+     "advice": "\u2713 on your reference \u2014 this turn is consistent",
      "on_ref": true,
      "track": {
       "passes": 6,
@@ -105079,7 +105079,7 @@
      "consistency": 1.0,
      "usi": 0.699,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T16",
      "geo_id": "G18",
      "radius_m": 33,
@@ -105099,7 +105099,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 67,
@@ -105125,7 +105125,7 @@
       "throttle_on_m": -26,
       "line_m": 7
      },
-     "advice": "entry -20 · apex -7 mph vs reference · braked 26 m earlier · (tune-limited here — see the limiter note)",
+     "advice": "entry -20 \u00b7 apex -7 mph vs reference \u00b7 braked 26 m earlier \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 7,
@@ -105263,7 +105263,7 @@
      "consistency": 1.0,
      "usi": 0.666,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T21",
      "geo_id": "G25",
      "radius_m": 14,
@@ -105283,7 +105283,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 54,
@@ -105309,7 +105309,7 @@
       "throttle_on_m": -4,
       "line_m": 6
      },
-     "advice": "braking 25 m later than your reference and locking the fronts — brake at your reference point · (tune-limited here — see the limiter note)",
+     "advice": "braking 25 m later than your reference and locking the fronts \u2014 brake at your reference point \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 9,
@@ -105471,7 +105471,7 @@
      "consistency": 1.0,
      "usi": 1.105,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T19",
      "geo_id": "G22",
      "radius_m": 20,
@@ -105491,7 +105491,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 77,
@@ -105517,7 +105517,7 @@
       "throttle_on_m": 28,
       "line_m": 12
      },
-     "advice": "braking 47 m later than your reference and locking the fronts — brake at your reference point · (tune-limited here — see the limiter note)",
+     "advice": "braking 47 m later than your reference and locking the fronts \u2014 brake at your reference point \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 4,
@@ -105646,7 +105646,7 @@
      "consistency": 1.0,
      "usi": -0.001,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T22",
      "geo_id": "G23",
      "radius_m": 98,
@@ -105666,7 +105666,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "3854|1|3|600",
      "last": {
       "mph_in": 74,
@@ -105685,7 +105685,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -105804,7 +105804,7 @@
      "consistency": 1.0,
      "usi": 0.536,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T23",
      "geo_id": "G23",
      "radius_m": 44,
@@ -105824,7 +105824,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 85,
@@ -105843,7 +105843,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 3,
@@ -105972,7 +105972,7 @@
      "consistency": 1.0,
      "usi": 0.094,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T26",
      "geo_id": "G28",
      "radius_m": 48,
@@ -105992,7 +105992,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 93,
@@ -106011,7 +106011,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -106130,7 +106130,7 @@
      "consistency": 1.0,
      "usi": -0.138,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T24",
      "geo_id": "G29",
      "radius_m": 141,
@@ -106150,7 +106150,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "2866|2|4|800",
      "last": {
       "mph_in": 100,
@@ -106169,7 +106169,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -106222,7 +106222,7 @@
       "have": 6,
       "need": 1,
       "ok": true,
-      "why": "launch → mass, diff center split, accel spin"
+      "why": "launch \u2192 mass, diff center split, accel spin"
      },
      {
       "key": "gears",
@@ -106230,7 +106230,7 @@
       "have": 6,
       "need": 4,
       "ok": true,
-      "why": "WOT time in every gear → gearing tab"
+      "why": "WOT time in every gear \u2192 gearing tab"
      },
      {
       "key": "dyno",
@@ -106238,7 +106238,7 @@
       "have": 38,
       "need": 38,
       "ok": true,
-      "why": "full-throttle through the rev range → engine/aspiration curve"
+      "why": "full-throttle through the rev range \u2192 engine/aspiration curve"
      },
      {
       "key": "top",
@@ -106246,7 +106246,7 @@
       "have": 1,
       "need": 1,
       "ok": true,
-      "why": "hold top gear WOT 5 s → drag / final drive"
+      "why": "hold top gear WOT 5 s \u2192 drag / final drive"
      },
      {
       "key": "brake",
@@ -106254,7 +106254,7 @@
       "have": 51,
       "need": 2,
       "ok": true,
-      "why": "threshold brake → balance, lock, decel diff"
+      "why": "threshold brake \u2192 balance, lock, decel diff"
      },
      {
       "key": "hairpin",
@@ -106428,7 +106428,7 @@
      "C11"
     ],
     "expected": null,
-    "note": "14 turns on record · 5 possible turns seen on a minority of laps — keep lapping to confirm or drop them · C4, C6, C11 often split into several detections (taken inconsistently)",
+    "note": "14 turns on record \u00b7 5 possible turns seen on a minority of laps \u2014 keep lapping to confirm or drop them \u00b7 C4, C6, C11 often split into several detections (taken inconsistently)",
     "track_laps": 10,
     "track_sessions": 4,
     "track_confidence": 0.57,
@@ -134037,7 +134037,7 @@
       "confidence": 0.94,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "flick",
@@ -134077,7 +134077,7 @@
       "confidence": 0.83,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      }
     ]
    },
@@ -134214,7 +134214,7 @@
      },
      {
       "key": "brake-pressure",
-      "text": "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.",
+      "text": "Both axles lock under hard braking: brake pressure too high overall \u2014 bring it down to the knee.",
       "severity": 3,
       "confidence": 0.8,
       "evidence": "median deficit F 0.41 / R 0.36; 8/12 stops locked both",
@@ -134238,7 +134238,7 @@
      },
      {
       "key": "inconclusive-usi",
-      "text": "Balance varies corner to corner (USI spread 0.47) — likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
+      "text": "Balance varies corner to corner (USI spread 0.47) \u2014 likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
       "severity": 1,
       "confidence": 0.47,
       "evidence": "by type: hairpin +0.49 (n=6), medium -0.00 (n=8)",
@@ -134292,7 +134292,7 @@
      },
      {
       "key": "front-hot",
-      "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature — check pressures/camber on the HUD (Tires Misc + Heat).",
+      "text": "Fronts run 15 F+ hotter than rears: the understeer thermal signature \u2014 check pressures/camber on the HUD (Tires Misc + Heat).",
       "severity": 1,
       "confidence": 0.7,
       "evidence": "median F 232 F vs R 208 F",
@@ -134300,7 +134300,7 @@
      },
      {
       "key": "inconclusive-brake",
-      "text": "Brake-lock pattern inconsistent across 54 stops (0 both-axle, 8 front-first, 1 rear-first) — more hard stops from 80+ mph before touching balance.",
+      "text": "Brake-lock pattern inconsistent across 54 stops (0 both-axle, 8 front-first, 1 rear-first) \u2014 more hard stops from 80+ mph before touching balance.",
       "severity": 1,
       "confidence": 0.85,
       "evidence": "deficit medians F 0.16 / R 0.10",
@@ -134312,7 +134312,7 @@
      },
      {
       "key": "inconclusive-usi",
-      "text": "Balance varies corner to corner (USI spread 0.44) — likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
+      "text": "Balance varies corner to corner (USI spread 0.44) \u2014 likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
       "severity": 1,
       "confidence": 0.44,
       "evidence": "by type: hairpin +0.79 (n=38), medium +0.70 (n=18), fast -0.09 (n=7)",
@@ -134424,7 +134424,7 @@
      "consistency": 1.0,
      "usi": 0.473,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T2",
      "geo_id": "G1",
      "radius_m": 16,
@@ -134444,7 +134444,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "3854|1|3|600",
      "last": {
       "mph_in": 49,
@@ -134470,7 +134470,7 @@
       "throttle_on_m": -34,
       "line_m": 3
      },
-     "advice": "entry -3 · apex -4 mph vs reference · braked 17 m earlier · (tune-limited here — see the limiter note)",
+     "advice": "entry -3 \u00b7 apex -4 mph vs reference \u00b7 braked 17 m earlier \u00b7 (tune-limited here \u2014 see the limiter note)",
      "on_ref": null,
      "track": {
       "passes": 5,
@@ -134610,7 +134610,7 @@
      "consistency": 1.0,
      "usi": 0.183,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T1",
      "geo_id": null,
      "radius_m": 41,
@@ -134630,7 +134630,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "3854|1|3|600",
      "last": {
       "mph_in": 53,
@@ -134649,7 +134649,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -134785,7 +134785,7 @@
       "first_red": null,
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "3854|1|3|600",
      "last": {
       "mph_in": 35,
@@ -134811,7 +134811,7 @@
       "throttle_on_m": 5,
       "line_m": 36
      },
-     "advice": "over-slowing: apex 35 mph vs your reference 73 (-38) — carry more speed",
+     "advice": "over-slowing: apex 35 mph vs your reference 73 (-38) \u2014 carry more speed",
      "on_ref": null,
      "track": {
       "passes": 2,
@@ -134935,7 +134935,7 @@
      "consistency": 1.0,
      "usi": -0.139,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T3",
      "geo_id": "G2",
      "radius_m": 46,
@@ -134955,7 +134955,7 @@
       "first_red": "front ph2",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "3854|1|3|600",
      "last": {
       "mph_in": 75,
@@ -134974,7 +134974,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -135090,7 +135090,7 @@
      "consistency": 1.0,
      "usi": -0.509,
      "limiter": "tune",
-     "note": "front gives up on essentially every lap at the same entry speed — front softer / mech balance up",
+     "note": "front gives up on essentially every lap at the same entry speed \u2014 front softer / mech balance up",
      "model_id": "T5",
      "geo_id": "G6",
      "radius_m": 64,
@@ -135110,7 +135110,7 @@
       "first_red": "front ph1",
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "3854|1|3|600",
      "last": {
       "mph_in": 63,
@@ -135129,7 +135129,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 1,
@@ -135185,7 +135185,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "launch → mass, diff center split, accel spin"
+      "why": "launch \u2192 mass, diff center split, accel spin"
      },
      {
       "key": "gears",
@@ -135193,7 +135193,7 @@
       "have": 4,
       "need": 4,
       "ok": true,
-      "why": "WOT time in every gear → gearing tab"
+      "why": "WOT time in every gear \u2192 gearing tab"
      },
      {
       "key": "dyno",
@@ -135201,7 +135201,7 @@
       "have": 38,
       "need": 38,
       "ok": true,
-      "why": "full-throttle through the rev range → engine/aspiration curve"
+      "why": "full-throttle through the rev range \u2192 engine/aspiration curve"
      },
      {
       "key": "top",
@@ -135209,7 +135209,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "hold top gear WOT 5 s → drag / final drive"
+      "why": "hold top gear WOT 5 s \u2192 drag / final drive"
      },
      {
       "key": "brake",
@@ -135217,7 +135217,7 @@
       "have": 3,
       "need": 2,
       "ok": true,
-      "why": "threshold brake → balance, lock, decel diff"
+      "why": "threshold brake \u2192 balance, lock, decel diff"
      },
      {
       "key": "hairpin",
@@ -135310,7 +135310,7 @@
     "top_speed": 90,
     "elevation_range_m": 51.9,
     "notes": [
-     "no fast corners — understeer here is mechanical, not aero"
+     "no fast corners \u2014 understeer here is mechanical, not aero"
     ],
     "priority": [
      "low-speed corners",
@@ -135366,7 +135366,7 @@
     ],
     "messy": [],
     "expected": null,
-    "note": "4 possible turns seen on a minority of laps — keep lapping to confirm or drop them",
+    "note": "4 possible turns seen on a minority of laps \u2014 keep lapping to confirm or drop them",
     "track_laps": 3,
     "track_sessions": 1,
     "track_confidence": 0.35,
@@ -138378,7 +138378,7 @@
       "confidence": 0.91,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "medium",
@@ -138388,7 +138388,7 @@
       "confidence": 0.8,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "fast",
@@ -138428,7 +138428,7 @@
       "confidence": 0.7,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      },
      {
       "key": "crest",
@@ -138438,7 +138438,7 @@
       "confidence": 0.83,
       "ready": true,
       "present": true,
-      "hint": "verdict-ready — more laps sharpen it"
+      "hint": "verdict-ready \u2014 more laps sharpen it"
      }
     ]
    },
@@ -138550,7 +138550,7 @@
     "3854|1|3|600": [
      {
       "key": "brake-pressure",
-      "text": "Both axles lock under hard braking: brake pressure too high overall — bring it down to the knee.",
+      "text": "Both axles lock under hard braking: brake pressure too high overall \u2014 bring it down to the knee.",
       "severity": 3,
       "confidence": 0.8,
       "evidence": "median deficit F 0.42 / R 0.44; 6/8 stops locked both",
@@ -138582,7 +138582,7 @@
      },
      {
       "key": "inconclusive-usi",
-      "text": "Balance varies corner to corner (USI spread 0.34) — likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
+      "text": "Balance varies corner to corner (USI spread 0.34) \u2014 likely speed-dependent (mechanical vs aero). Split the verdict by corner speed before tuning.",
       "severity": 1,
       "confidence": 0.34,
       "evidence": "by type: hairpin +0.47 (n=6), medium -0.08 (n=4)",
@@ -138710,7 +138710,7 @@
       "first_red": null,
       "session": "fh6_20260828_081447"
      },
-     "ref_src": "this session · same car",
+     "ref_src": "this session \u00b7 same car",
      "ref_car": "3854|1|2|800",
      "last": {
       "mph_in": 49,
@@ -138729,7 +138729,7 @@
       "session": "fh6_20260828_081447"
      },
      "delta": null,
-     "advice": "first pass of this car here — becomes its reference; drive it again to compare",
+     "advice": "first pass of this car here \u2014 becomes its reference; drive it again to compare",
      "on_ref": null,
      "track": {
       "passes": 4,
@@ -138793,7 +138793,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "launch → mass, diff center split, accel spin"
+      "why": "launch \u2192 mass, diff center split, accel spin"
      },
      {
       "key": "gears",
@@ -138801,7 +138801,7 @@
       "have": 3,
       "need": 3,
       "ok": true,
-      "why": "WOT time in every gear → gearing tab"
+      "why": "WOT time in every gear \u2192 gearing tab"
      },
      {
       "key": "dyno",
@@ -138809,7 +138809,7 @@
       "have": 16,
       "need": 28,
       "ok": false,
-      "why": "full-throttle through the rev range → engine/aspiration curve"
+      "why": "full-throttle through the rev range \u2192 engine/aspiration curve"
      },
      {
       "key": "top",
@@ -138817,7 +138817,7 @@
       "have": 0,
       "need": 1,
       "ok": false,
-      "why": "hold top gear WOT 5 s → drag / final drive"
+      "why": "hold top gear WOT 5 s \u2192 drag / final drive"
      },
      {
       "key": "brake",
@@ -138825,7 +138825,7 @@
       "have": 0,
       "need": 2,
       "ok": false,
-      "why": "threshold brake → balance, lock, decel diff"
+      "why": "threshold brake \u2192 balance, lock, decel diff"
      },
      {
       "key": "hairpin",
@@ -138918,9 +138918,9 @@
     "top_speed": 64,
     "elevation_range_m": 0.9,
     "notes": [
-     "no real straight (top speed only 64 mph, gears used [1, 2, 3]/3) — top-end gearing & drag are irrelevant here; tune the gears you use",
-     "flat (no crests) — spring/damper vertical behaviour isn't tested on this course",
-     "no fast corners — understeer here is mechanical, not aero"
+     "no real straight (top speed only 64 mph, gears used [1, 2, 3]/3) \u2014 top-end gearing & drag are irrelevant here; tune the gears you use",
+     "flat (no crests) \u2014 spring/damper vertical behaviour isn't tested on this course",
+     "no fast corners \u2014 understeer here is mechanical, not aero"
     ],
     "priority": [
      "medium corners"
@@ -138953,7 +138953,7 @@
     ],
     "messy": [],
     "expected": null,
-    "note": "21 turns on record · 1 caught this session · 1 lap — drive 2 more to confirm the turn count",
+    "note": "21 turns on record \u00b7 1 caught this session \u00b7 1 lap \u2014 drive 2 more to confirm the turn count",
     "track_laps": 5,
     "track_sessions": 3,
     "track_confidence": 0.86,
@@ -147708,7 +147708,7 @@
     "3854|1|2|800": [
      {
       "key": "more-data",
-      "text": "Low coverage: verdicts are provisional — see the probe bars for what to drive next.",
+      "text": "Low coverage: verdicts are provisional \u2014 see the probe bars for what to drive next.",
       "severity": 1,
       "confidence": 1,
       "evidence": "coverage 33%",

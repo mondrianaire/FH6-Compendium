@@ -62,7 +62,7 @@
    "cyl": 4,
    "displacement_l": null,
    "redline": 9000,
-   "sample_hp": 306,
+   "sample_hp": 340,
    "resulting_drivetrain": "AWD",
    "sample_pi": 700,
    "source": "save-mined+telemetry"
@@ -1056,13 +1056,13 @@
     "3767": "2022 Acura NSX Type S",
     "4197": "1994 Mazda MX-5 Miata (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 10,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 866,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 800,
+   "source": "save-mined+telemetry"
   },
   "2427": {
    "engine_family": 2427,

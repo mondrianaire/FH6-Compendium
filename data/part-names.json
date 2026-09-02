@@ -172,7 +172,19 @@
    },
    "_price_hint": "price tracks class loosely (3,200 = no change, 3,300 = 1 unit, 3,400 = 2 units, 3,700 = 3 units) with exceptions at 3,500 and 4,000.",
    "_id_to_name_sources": "No readable install file carries the rim id->name table (it lives in the encrypted gamedbRC.slt); icon zip order and archive dates are alphabetical/installer artefacts. Two usable sources: (1) 167 containers have per-build WebP Thumb.png renders (670x376) showing the installed wheels: match the wheel crop against the 528 decoded icons; (2) ids appear to ascend alphabetically within allocation batches (636 American Racing Outlaw II, 637 Asanti AF 118, 638 Asanti AF 134 verified, 639 Asanti AF 140, 649 Compomotive M05: visual reads, unproven). 99100 on ordinal 1562 is a non-rim anomaly.",
-   "_smoke_test_2026_09_02": "Top Meta Rival clone on a second NSX-R via one basket: with stock rims the preview read A 702 (all other parts matched); fitting a heavier rim brought it to A 700, the target's PI. So rim 701 (target) is a heavier-than-stock class, and 638 Asanti AF 134 is in that same class (the first clone also reached 700 with it). Weight chips on tiles are deltas versus the installed rim, so classes are relative; the stock rim is not the heaviest option on this car."
+   "_smoke_test_2026_09_02": "Top Meta Rival clone on a second NSX-R via one basket: with stock rims the preview read A 702 (all other parts matched); fitting a heavier rim brought it to A 700, the target's PI. So rim 701 (target) is a heavier-than-stock class, and 638 Asanti AF 134 is in that same class (the first clone also reached 700 with it). Weight chips on tiles are deltas versus the installed rim, so classes are relative; the stock rim is not the heaviest option on this car.",
+   "_weight_class_observations": {
+    "nsxr_top_meta_rival_class": {
+     "ids": [
+      701,
+      638,
+      13675
+     ],
+     "evidence": "each yields A 700 on the Top Meta Rival hardware (701 = target; 638 Asanti AF 134 = first clone; 13675 = smoke-test clone 'cloned rsx' 2026-09-02); stock rim yields 702, so this class is heavier than the NSX-R stock rim",
+     "name_13675": "pending (read from the name bar)"
+    }
+   },
+   "_smoke_test_verdict": "cloned rsx (Tuning_0412_20260902044227) vs Top Meta Rival: all 100 part slots identical except rim_style/rear_rim_style (13675 vs 701); gears identical; 12 sliders at install defaults awaiting the tune screen."
   },
   "driveline": {
    "_scheme": "Global ladder",

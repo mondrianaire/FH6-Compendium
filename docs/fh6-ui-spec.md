@@ -336,3 +336,5 @@ A rim changes weight only, and with it PWR and PI; nothing else in the stats pag
 ### 10.7 Body Kits and Conversions on the NSX-R (2026-09-02)
 
 Engine Swap: five tiles, dense. Stock Powertrain Swap (0), 1.6L I4 - Turbo Rally (1, -140 hp, 25,000 CR), 2.0L I4-T (2, -125 hp), 3.2L I6 (3, -119 hp), 6.2L V8 (4, +179 hp, owned). Names are composed from displacement and layout plus an optional suffix; index 3 matches engine set 136 in two stored tunes. Aspiration: four tiles, Stock - Naturally Aspirated, Twin Turbo (+55 hp, 1,800 CR), Positive-Displacement Supercharger (+33 hp, 1,500 CR), Centrifugal Supercharger (+29 hp); no Single Turbo on this car. Both menus show the Performance dyno panel.
+
+Front aero gating, both directions (2026-09-02): fitting the body kit removes the Front Bumper tile; removing the kit restores it. The front_bumper slot keeps its pre-kit value while the kit is on (NSX-R clone: front_bumper index 2 in variant 0 with car_body variant 1), so a build that carries both was bought in the order front aero first, kit second. Cloning onto a car that already wears the kit means: remove kit, buy front aero, refit kit.

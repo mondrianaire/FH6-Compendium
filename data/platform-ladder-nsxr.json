@@ -175,6 +175,32 @@
   ]
  },
  "rear_arb": {
-  "partial": "rar1 = Stock Rear Anti-roll Bars = index 0; install moved rear_arb slider 0.378 -> 0.500 (Race rear bar default 0.378 inferred from the clone; rar2 pending)"
+  "menu": "2 tiles: Stock, Race. Banner UNLOCKS REAR ANTIROLL BAR STIFFNESS TUNING (game spelling) on the Race tile.",
+  "side_effect": "install rewrites the rear_arb slider to the bar's default (Stock 0.500, Race 0.378)",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Rear Anti-roll Bars",
+    "index": 0,
+    "brake_60_ft": 85.5,
+    "brake_100_ft": 197.6,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "rar1",
+    "default_rear_arb": 0.5
+   },
+   {
+    "tile": 2,
+    "name": "Race Rear Anti-roll Bars",
+    "index": 3,
+    "installed": true,
+    "brake_60_ft": 85.7,
+    "brake_100_ft": 197.9,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "rar2",
+    "default_rear_arb": 0.378
+   }
+  ]
  }
 }

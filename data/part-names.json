@@ -203,9 +203,11 @@
   },
   "rear_arb": {
    "_scheme": "Global ladder",
-   "_proof": "rar1 2026-09-02",
+   "_proof": "rar1/rar2 2026-09-02; rar2 = installed Race = self-check",
    "0": "Stock Rear Anti-roll Bars",
-   "_side_effect": "rewrites rear_arb slider (Stock 0.500)"
+   "3": "Race Rear Anti-roll Bars",
+   "_banner": "UNLOCKS REAR ANTIROLL BAR STIFFNESS TUNING on Race",
+   "_side_effect": "rewrites rear_arb slider (Stock 0.500, Race 0.378)"
   }
  },
  "gaps": {

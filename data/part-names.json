@@ -195,9 +195,17 @@
   },
   "front_arb": {
    "_scheme": "Global ladder",
-   "_proof": "far1 2026-09-02",
-   "0": "Stock Front Anti-roll Bar (name bar not yet captured)",
-   "_side_effect": "install rewrites the front_arb slider"
+   "_proof": "far1/far2 2026-09-02; far2 = installed Race = self-check",
+   "0": "Stock Front Anti-roll Bars",
+   "3": "Race Front Anti-roll Bars",
+   "_banner": "UNLOCKS FRONT ANTI-ROLL BAR STIFFNESS TUNING on Race",
+   "_side_effect": "rewrites front_arb slider (Stock 0.500, Race 0.480)"
+  },
+  "rear_arb": {
+   "_scheme": "Global ladder",
+   "_proof": "rar1 2026-09-02",
+   "0": "Stock Rear Anti-roll Bars",
+   "_side_effect": "rewrites rear_arb slider (Stock 0.500)"
   }
  },
  "gaps": {

@@ -1,0 +1,43 @@
+{
+ "car": "1992 Honda NSX-R (ordinal 412)",
+ "captured": "2026-09-02",
+ "source": "Upgrade Shop > Platform and Handling; Y page 3; setups brkN/sprN/farN/rarN/chsN/wgtN",
+ "brakes": {
+  "menu": "3 tiles, no Street tier; banner UNLOCKS BRAKE TUNING on the Race tile only",
+  "side_effect": "no slider rewritten",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Brakes",
+    "index": 0,
+    "installed": true,
+    "brake_60_ft": 85.5,
+    "brake_100_ft": 197.6,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "brk1"
+   },
+   {
+    "tile": 2,
+    "name": "Sport Brakes",
+    "index": 2,
+    "brake_60_ft": 73.6,
+    "brake_100_ft": 170.0,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "brk2"
+   },
+   {
+    "tile": 3,
+    "name": "Race Brakes",
+    "index": 3,
+    "brake_60_ft": 66.9,
+    "brake_100_ft": 151.9,
+    "latg_60": 1.22,
+    "latg_120": 1.51,
+    "banner": "UNLOCKS BRAKE TUNING",
+    "setup": "brk3"
+   }
+  ]
+ }
+}

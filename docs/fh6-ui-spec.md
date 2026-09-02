@@ -294,3 +294,11 @@ Differential: four tiles, banner "UNLOCKS FULL DIFFERENTIAL TUNING" on every non
 Differential installs rewrite the five differential sliders to the part's defaults (the Race diff kept the Stock values). Index 7 is not offered here; across 544 stored tunes index 4 never occurs and 7 occurs only on AWD rally-type cars, so 7 is probably Rally Diff (prove on the 2014 Golf R). Stored-tune coverage: transmission 1/2/3 and differential 7 and clutch 2 all on the Golf R; differential 2 and driveline 2 on the 2004 WRX STi; clutch 1 and driveline 1 on the 1989 Golf Rallye; differential 1 on the Autozam AZ-1; transmission 9 on the 2024 Revuelto.
 
 Drivetrain category on the NSX-R has three tiles only: Transmission, Driveline, Differential. There is no Clutch tile on this car even though the save carries a stock clutch id; the Clutch menu exists on other cars (Race clutch on 55 stored tunes).
+
+### 10.4 Platform and Handling grids, NSX-R, proven (2026-09-02)
+
+| Menu | Tile | Name bar | Index | 60-0 / 100-0 ft | Lat G 60/120 | Banner | Sliders rewritten |
+|---|---|---|---|---|---|---|---|
+| Brakes | 1 | Stock Brakes | 0 | 85.5 / 197.6 | 1.22 / 1.50 |  | none |
+| Brakes | 2 | Sport Brakes | 2 | 73.6 / 170.0 | 1.22 / 1.50 |  | none |
+| Brakes | 3 | Race Brakes | 3 | 66.9 / 151.9 | 1.22 / 1.51 | UNLOCKS BRAKE TUNING | none |

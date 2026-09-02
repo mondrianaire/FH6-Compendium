@@ -397,6 +397,7 @@
         "car_body",
         "engine"
       ]
-    }
+    },
+    "per_car_option_lists": "Each car archive Content/media/cars/<CAR>.zip carries Manifest.xml with <UpgradeablePart PartEnum=... PartId=...> rows listing that car's VISUAL upgrade options by the exact save part id -- CarBody, RearWing, FrontBumper, RearBumper, Hood, SideSkirts, ChassisStiffness (including the variant-100 ids) -- 660 archives. So the option LISTS for the brand-composed slots are file-derivable for every car; the model basenames are generic (bumperfcustom_b, trunk_b), so the brand LABEL per option is still menu-only."
   }
 }

@@ -302,3 +302,9 @@ Drivetrain category on the NSX-R has three tiles only: Transmission, Driveline, 
 | Brakes | 1 | Stock Brakes | 0 | 85.5 / 197.6 | 1.22 / 1.50 |  | none |
 | Brakes | 2 | Sport Brakes | 2 | 73.6 / 170.0 | 1.22 / 1.50 |  | none |
 | Brakes | 3 | Race Brakes | 3 | 66.9 / 151.9 | 1.22 / 1.51 | UNLOCKS BRAKE TUNING | none |
+| Spring and Dampers | 1 | Stock Spring and Dampers | 0 | 85.8 / 198.0 | 1.22 / 1.50 |  | 12 suspension sliders |
+| Spring and Dampers | 2 | Race Spring and Dampers | 3 | 84.7 / 196.8 | 1.22 / 1.50 | UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING | 12 suspension sliders |
+| Spring and Dampers | 3 | Rally Spring and Dampers | 4 | 85.6 / 197.6 | 1.22 / 1.49 | UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING | 12 suspension sliders |
+| Spring and Dampers | 4 | Drift Spring and Dampers | 5 | 86.8 / 203.1 | 1.22 / 1.50 | UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING | 12 suspension sliders |
+
+Spring kits rewrite camber, caster (both fields, including rear_caster: 0.667 stock, 0.000 on the kits), springs, ride height, bump and rebound to per-kit defaults. Rally sets ride height 1.000 and Drift 0.000 (band anchors); Race sets 0.327. Stock resets everything to 0.500. Anti-roll bar installs rewrite their own slider (front_arb 0.480 -> 0.500 on the stock bar).

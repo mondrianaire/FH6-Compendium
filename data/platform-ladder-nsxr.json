@@ -39,5 +39,113 @@
     "setup": "brk3"
    }
   ]
+ },
+ "springs_dampers": {
+  "menu": "4 tiles: Stock, Race, Rally, Drift (no Street/Sport tier). Banner UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING on every non-stock tile.",
+  "side_effect": "Installing a spring kit rewrites camber, caster (incl. the rear_caster field), springs, ride height, bump and rebound to the kit's defaults (normalised). Rally pins ride height to 1.000, Drift to 0.000: two free anchors for the per-car ride-height band. Stock restores 0.500 everywhere with camber 0.350/0.450 and caster 0.667.",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Spring and Dampers",
+    "index": 0,
+    "installed": true,
+    "brake_60_ft": 85.8,
+    "brake_100_ft": 198.0,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "spr1",
+    "defaults": {
+     "front_camber": 0.35,
+     "rear_camber": 0.45,
+     "front_caster": 0.667,
+     "rear_caster": 0.667,
+     "front_spring": 0.5,
+     "rear_spring": 0.5,
+     "front_ride_height": 0.5,
+     "rear_ride_height": 0.5,
+     "front_bump": 0.5,
+     "rear_bump": 0.5,
+     "front_rebound": 0.5,
+     "rear_rebound": 0.5
+    }
+   },
+   {
+    "tile": 2,
+    "name": "Race Spring and Dampers",
+    "index": 3,
+    "brake_60_ft": 84.7,
+    "brake_100_ft": 196.8,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "spr2",
+    "defaults": {
+     "front_camber": 0.3,
+     "rear_camber": 0.35,
+     "front_caster": 0.667,
+     "rear_caster": 0.0,
+     "front_spring": 0.229,
+     "rear_spring": 0.482,
+     "front_ride_height": 0.327,
+     "rear_ride_height": 0.327,
+     "front_bump": 0.264,
+     "rear_bump": 0.407,
+     "front_rebound": 0.454,
+     "rear_rebound": 0.684
+    }
+   },
+   {
+    "tile": 3,
+    "name": "Rally Spring and Dampers",
+    "index": 4,
+    "price_cr": 2050,
+    "brake_60_ft": 85.6,
+    "brake_100_ft": 197.6,
+    "latg_60": 1.22,
+    "latg_120": 1.49,
+    "setup": "spr3",
+    "defaults": {
+     "front_camber": 0.45,
+     "rear_camber": 0.45,
+     "front_caster": 0.917,
+     "rear_caster": 0.0,
+     "front_spring": 0.141,
+     "rear_spring": 0.0,
+     "front_ride_height": 1.0,
+     "rear_ride_height": 1.0,
+     "front_bump": 0.028,
+     "rear_bump": 0.061,
+     "front_rebound": 0.352,
+     "rear_rebound": 0.512
+    }
+   },
+   {
+    "tile": 4,
+    "name": "Drift Spring and Dampers",
+    "index": 5,
+    "price_cr": 2050,
+    "brake_60_ft": 86.8,
+    "brake_100_ft": 203.1,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "spr4",
+    "defaults": {
+     "front_camber": 0.0,
+     "rear_camber": 0.35,
+     "front_caster": 1.0,
+     "rear_caster": 0.0,
+     "front_spring": 0.229,
+     "rear_spring": 0.482,
+     "front_ride_height": 0.0,
+     "rear_ride_height": 0.0,
+     "front_bump": 0.264,
+     "rear_bump": 0.407,
+     "front_rebound": 0.454,
+     "rear_rebound": 0.684
+    }
+   }
+  ]
+ },
+ "front_arb": {
+  "partial": "far1 = Stock Front Anti-roll Bar = index 0; installing it moved front_arb slider 0.480 -> 0.500 (bars rewrite their own slider)."
  }
 }

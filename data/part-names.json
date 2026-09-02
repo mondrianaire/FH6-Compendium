@@ -178,6 +178,26 @@
    },
    "_banner": "UNLOCKS BRAKE TUNING on Race only",
    "_side_effect": "none"
+  },
+  "springs_dampers": {
+   "_scheme": "Global ladder, car set (412xxx)",
+   "_proof": "NSX-R saves spr1..spr4 2026-09-02; spr1 = installed Stock unchanged = self-check",
+   "0": "Stock Spring and Dampers",
+   "3": "Race Spring and Dampers",
+   "4": "Rally Spring and Dampers",
+   "5": "Drift Spring and Dampers",
+   "_unverified": {
+    "1": "Street?",
+    "2": "Sport? (neither offered on this car)"
+   },
+   "_banner": "UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING on every non-stock tile",
+   "_side_effect": "rewrites 12 suspension sliders incl. rear_caster (0.667 stock, 0.000 on Race/Rally/Drift)"
+  },
+  "front_arb": {
+   "_scheme": "Global ladder",
+   "_proof": "far1 2026-09-02",
+   "0": "Stock Front Anti-roll Bar (name bar not yet captured)",
+   "_side_effect": "install rewrites the front_arb slider"
   }
  },
  "gaps": {

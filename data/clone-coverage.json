@@ -1,137 +1,139 @@
 {
- "containers": 574,
- "clone_ready": 425,
+ "containers": 575,
+ "clone_ready": 426,
  "by_blocker_kind": {
-  "ready": 425,
+  "ready": 426,
   "derived": 74,
   "unknown": 53,
   "derived + unknown": 22
  },
  "per_slot": {
   "engine": {
-   "brand": 561
+   "brand": 562
   },
   "drivetrain": {
-   "derived": 574
+   "unknown": 575
   },
   "car_body": {
-   "brand": 574
+   "brand": 575
   },
   "brakes": {
-   "proven": 565,
+   "proven": 566,
    "verified": 9
   },
   "springs_dampers": {
-   "proven": 562,
+   "proven": 563,
    "verified": 12
   },
   "front_arb": {
-   "proven": 570,
+   "proven": 571,
    "verified": 4
   },
   "rear_arb": {
-   "proven": 569,
+   "proven": 570,
    "verified": 5
   },
   "tire_compound": {
-   "proven": 536,
+   "proven": 537,
    "unknown": 38
   },
   "rear_wing": {
-   "brand": 574
+   "brand": 575
   },
   "front_rim_size": {
-   "derived": 574
+   "derived": 575
   },
   "rear_rim_size": {
-   "derived": 574
+   "derived": 575
   },
   "camshaft": {
-   "verified": 561
+   "verified": 562
   },
   "valves": {
-   "verified": 561
+   "verified": 562
   },
   "displacement": {
-   "verified": 561
+   "verified": 562
   },
   "pistons": {
-   "verified": 561
+   "verified": 562
   },
   "fuel_system": {
-   "verified": 561
+   "verified": 562
   },
   "ignition": {
-   "verified": 561
+   "verified": 562
   },
   "exhaust": {
-   "verified": 561
+   "verified": 562
   },
   "intake": {
-   "verified": 561
+   "verified": 562
   },
   "flywheel": {
-   "verified": 561
+   "verified": 562
   },
   "manifold": {
    "derived": 118
   },
   "oil_cooling": {
-   "verified": 561
+   "verified": 562
   },
   "clutch": {
-   "derived": 574
+   "derived": 575
   },
   "transmission": {
-   "proven": 466,
-   "verified": 108
+   "proven": 467,
+   "derived": 108
   },
   "driveline": {
-   "proven": 546,
+   "proven": 547,
    "verified": 28
   },
   "differential": {
-   "proven": 546,
+   "proven": 547,
    "unknown": 26,
    "verified": 2
   },
   "front_bumper": {
-   "brand": 574
+   "brand": 575
   },
   "rear_bumper": {
-   "brand": 574
+   "brand": 575
   },
   "hood": {
-   "brand": 574
+   "brand": 575
   },
   "side_skirts": {
-   "brand": 574
+   "brand": 575
   },
   "front_tire_width": {
-   "derived": 574
+   "derived": 575
   },
   "rear_tire_width": {
-   "derived": 574
+   "derived": 575
   },
   "weight_reduction": {
-   "proven": 268,
-   "verified": 306
+   "unknown": 161,
+   "derived": 368,
+   "proven": 46
   },
   "roll_cage": {
-   "proven": 381,
-   "derived": 193
+   "derived": 343,
+   "unknown": 186,
+   "proven": 46
   },
   "front_track_width": {
-   "derived": 574
+   "derived": 575
   },
   "rear_track_width": {
-   "derived": 574
+   "derived": 575
   },
   "front_tire_profile": {
-   "derived": 574
+   "derived": 575
   },
   "rear_tire_profile": {
-   "derived": 574
+   "derived": 575
   },
   "twin_turbo": {
    "derived": 109
@@ -140,14 +142,14 @@
    "verified": 315
   },
   "rim_style": {
-   "rim": 103,
-   "rim-proven": 202
+   "rim": 300,
+   "rim-proven": 6
   },
   "rear_rim_style": {
-   "rim": 303
+   "rim": 304
   },
   "centrifugal_supercharger": {
-   "verified": 174
+   "verified": 175
   },
   "single_turbo": {
    "derived": 142
@@ -160,7 +162,7 @@
    "derived": 18
   },
   "motor": {
-   "derived": 13
+   "unknown": 13
   },
   "motor_parts": {
    "derived": 13
@@ -208,6 +210,13 @@
    "builds": 2,
    "cars": 2,
    "top": "1962 Peel P50 x1, 1970 Ferrari 512 S x1"
+  },
+  {
+   "slot": "transmission",
+   "key": 9,
+   "builds": 1,
+   "cars": 1,
+   "top": "2024 Lamborghini Revuelto x1"
   }
  ],
  "ready_examples": [

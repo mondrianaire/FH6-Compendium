@@ -241,5 +241,44 @@
     "setup": "chs3"
    }
   ]
- }
+ },
+ "weight_reduction": {
+  "menu": "3 tiles Stock, Sport, Race. No banner.",
+  "scheme": "DENSE inside the body variant: 412100 / 412101 / 412102 (variant 1 = widebody kit, tier = tile position).",
+  "side_effect": "none",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Weight Reduction",
+    "index": 100,
+    "brake_60_ft": 86.7,
+    "brake_100_ft": 202.6,
+    "latg_60": 1.19,
+    "latg_120": 1.43,
+    "setup": "wgt1"
+   },
+   {
+    "tile": 2,
+    "name": "Sport Weight Reduction",
+    "index": 101,
+    "brake_60_ft": 86.6,
+    "brake_100_ft": 200.8,
+    "latg_60": 1.2,
+    "latg_120": 1.45,
+    "setup": "wgt2"
+   },
+   {
+    "tile": 3,
+    "name": "Race Weight Reduction",
+    "index": 102,
+    "installed": true,
+    "brake_60_ft": 85.7,
+    "brake_100_ft": 197.9,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "wgt3"
+   }
+  ]
+ },
+ "_complete": "Platform and Handling fully proven on the NSX-R 2026-09-02: brakes/springs/bars on the global ladder, roll cage and weight reduction dense within the body variant."
 }

@@ -80,21 +80,13 @@
    "_side_effect": "install rewrites center/front/rear accel+decel sliders to the part's defaults"
   },
   "weight_reduction": {
-   "_scheme": "DENSE - index is the tile position",
-   "0": {
-    "name": "Stock Weight Reduction",
-    "confidence": "verified"
-   },
-   "1": {
-    "name": "Sport Weight Reduction",
-    "confidence": "verified",
-    "effect": "Weight -139 lb"
-   },
-   "2": {
-    "name": "Race Weight Reduction",
-    "confidence": "verified",
-    "effect": "Weight -362 lb"
-   }
+   "_scheme": "DENSE within the body variant: index = variant*100 + tile position (412100/412101/412102 on the widebody NSX-R)",
+   "_proof": "wgt1..wgt3 2026-09-02; wgt3 = installed Race = self-check",
+   "0": "Stock Weight Reduction",
+   "1": "Sport Weight Reduction",
+   "2": "Race Weight Reduction",
+   "_note": "tier digit only; hundreds digit is the body variant. A 4-tile car (Street present) would shift Sport/Race to 2/3 under the dense rule; unverified.",
+   "_side_effect": "none"
   },
   "tire_compound": {
    "_scheme": "GLOBAL enum, same index on every car. Part id = ordinal*1000 + index (412001 on the NSX-R).",

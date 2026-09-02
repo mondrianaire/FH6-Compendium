@@ -313,5 +313,8 @@ Drivetrain category on the NSX-R has three tiles only: Transmission, Driveline, 
 | Chassis Reinforcement / Roll Cage | 1 | Stock Chassis Reinforcement / Roll Cage | 100 (dense, variant 1) | 85.8 / 197.9 | 1.22 / 1.50 |  | none |
 | Chassis Reinforcement / Roll Cage | 2 | Sport Chassis Reinforcement / Roll Cage | 101 | 86.0 / 198.2 | 1.22 / 1.50 |  | none |
 | Chassis Reinforcement / Roll Cage | 3 | Race Chassis Reinforcement / Roll Cage | 102 | 84.8 / 198.5 | 1.22 / 1.49 |  | none |
+| Weight Reduction | 1 | Stock Weight Reduction | 100 (dense, variant 1) | 86.7 / 202.6 | 1.19 / 1.43 |  | none |
+| Weight Reduction | 2 | Sport Weight Reduction | 101 | 86.6 / 200.8 | 1.20 / 1.45 |  | none |
+| Weight Reduction | 3 | Race Weight Reduction | 102 | 85.7 / 197.9 | 1.22 / 1.50 |  | none |
 
 Spring kits rewrite camber, caster (both fields, including rear_caster: 0.667 stock, 0.000 on the kits), springs, ride height, bump and rebound to per-kit defaults. Rally sets ride height 1.000 and Drift 0.000 (band anchors); Race sets 0.327. Stock resets everything to 0.500. Anti-roll bar installs rewrite their own slider (front_arb 0.480 -> 0.500 on the stock bar).

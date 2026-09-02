@@ -171,7 +171,8 @@
     }
    },
    "_price_hint": "price tracks class loosely (3,200 = no change, 3,300 = 1 unit, 3,400 = 2 units, 3,700 = 3 units) with exceptions at 3,500 and 4,000.",
-   "_id_to_name_sources": "No readable install file carries the rim id->name table (it lives in the encrypted gamedbRC.slt); icon zip order and archive dates are alphabetical/installer artefacts. Two usable sources: (1) 167 containers have per-build WebP Thumb.png renders (670x376) showing the installed wheels: match the wheel crop against the 528 decoded icons; (2) ids appear to ascend alphabetically within allocation batches (636 American Racing Outlaw II, 637 Asanti AF 118, 638 Asanti AF 134 verified, 639 Asanti AF 140, 649 Compomotive M05: visual reads, unproven). 99100 on ordinal 1562 is a non-rim anomaly."
+   "_id_to_name_sources": "No readable install file carries the rim id->name table (it lives in the encrypted gamedbRC.slt); icon zip order and archive dates are alphabetical/installer artefacts. Two usable sources: (1) 167 containers have per-build WebP Thumb.png renders (670x376) showing the installed wheels: match the wheel crop against the 528 decoded icons; (2) ids appear to ascend alphabetically within allocation batches (636 American Racing Outlaw II, 637 Asanti AF 118, 638 Asanti AF 134 verified, 639 Asanti AF 140, 649 Compomotive M05: visual reads, unproven). 99100 on ordinal 1562 is a non-rim anomaly.",
+   "_smoke_test_2026_09_02": "Top Meta Rival clone on a second NSX-R via one basket: with stock rims the preview read A 702 (all other parts matched); fitting a heavier rim brought it to A 700, the target's PI. So rim 701 (target) is a heavier-than-stock class, and 638 Asanti AF 134 is in that same class (the first clone also reached 700 with it). Weight chips on tiles are deltas versus the installed rim, so classes are relative; the stock rim is not the heaviest option on this car."
   },
   "driveline": {
    "_scheme": "Global ladder",

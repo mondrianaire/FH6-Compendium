@@ -1,403 +1,424 @@
 {
-  "schema_version": "1.0.0",
-  "created": "2026-09-01",
-  "purpose": "The missing layer: internal part ID -> common name. Everything else in the clone pipeline is downstream of this. A part ID decodes to (slot, index); this file turns that into the string the game prints in the Upgrade Shop and the basket.",
-  "why_it_must_be_observed": "The game ships no readable table. Content/media/nerddata/NerdData.json and Content/media/physics/PI.xml are ENCRYPTED despite their extensions (verified 2026-09-01), and the bulk of the game sits in a 1.09 GB packed container. Names can only come from the screen.",
-  "how_to_add_a_row": [
-    "1. Fit the part in game and note the name from the BASKET screen (it prints names as plain text; tiles do not).",
-    "2. Save a setup, then diff the new container against the previous one.",
-    "3. The diff names exactly which (slot, index) changed. Pair THAT index with the basket name.",
-    "NEVER pair a basket name with an index you merely expected to be installed -- that is how 701 was wrongly recorded as Asanti AF 134. The index must come from a diff."
+ "schema_version": "1.0.0",
+ "created": "2026-09-01",
+ "purpose": "The missing layer: internal part ID -> common name. Everything else in the clone pipeline is downstream of this. A part ID decodes to (slot, index); this file turns that into the string the game prints in the Upgrade Shop and the basket.",
+ "why_it_must_be_observed": "The game ships no readable table. Content/media/nerddata/NerdData.json and Content/media/physics/PI.xml are ENCRYPTED despite their extensions (verified 2026-09-01), and the bulk of the game sits in a 1.09 GB packed container. Names can only come from the screen.",
+ "how_to_add_a_row": [
+  "1. Fit the part in game and note the name from the BASKET screen (it prints names as plain text; tiles do not).",
+  "2. Save a setup, then diff the new container against the previous one.",
+  "3. The diff names exactly which (slot, index) changed. Pair THAT index with the basket name.",
+  "NEVER pair a basket name with an index you merely expected to be installed -- that is how 701 was wrongly recorded as Asanti AF 134. The index must come from a diff."
+ ],
+ "confidence": {
+  "verified": "read off a named frame AND pinned to an index by a container diff",
+  "derived": "index->name follows a rule confirmed across the corpus, but this specific row was not diffed",
+  "unknown": "the id exists in the data and has never been seen on screen"
+ },
+ "tier_ladder": {
+  "_note": "Global vocabulary used by the SPARSE slots. Confirmed end to end: 1 from 'Street Centrifugal Supercharger', 2 and 3 from the basket ('Sport Cams and Valves', 'Race Exhaust'), 4/5/6 from the Spring and Dampers and Differential menus.",
+  "0": "Stock",
+  "1": "Street",
+  "2": "Sport",
+  "3": "Race",
+  "4": "Rally",
+  "5": "Drift",
+  "6": "Offroad",
+  "applies_to": [
+   "brakes",
+   "front_arb",
+   "rear_arb",
+   "springs_dampers",
+   "differential",
+   "clutch",
+   "driveline"
   ],
-  "confidence": {
-    "verified": "read off a named frame AND pinned to an index by a container diff",
-    "derived": "index->name follows a rule confirmed across the corpus, but this specific row was not diffed",
-    "unknown": "the id exists in the data and has never been seen on screen"
+  "confidence": "verified"
+ },
+ "dense_slots": {
+  "_note": "Index IS the 0-based tile position. Do NOT read these against the ladder -- doing so put Race Weight Reduction one tile too low.",
+  "slots": [
+   "drivetrain",
+   "car_body",
+   "engine",
+   "rear_wing",
+   "weight_reduction"
+  ],
+  "confidence": "verified"
+ },
+ "named": {
+  "transmission": {
+   "_scheme": "shared donor set 2102, its own catalogue. Gear count is an exact function of the FULL part id (e.g. 2102007 -> 10 gears), NOT of the index alone -- 'gears = index + 3' was a coincidence over indices 4-7 and must not be used as a rule.",
+   "0": {
+    "name": "Stock Transmission",
+    "confidence": "derived",
+    "gears": 6,
+    "note": "Catalogue row 55. The fingerprint study called 2102000 'a genuine shared 6-speed, not stock'; the catalogue says the index-0 row IS 'Stock Transmission' -- a stock box that happens to be a 6-speed on most cars. Both statements are consistent."
+   },
+   "4": {
+    "name": "Race Transmission: 7 Speed",
+    "confidence": "verified",
+    "gears": 7
+   },
+   "5": {
+    "name": "Race Transmission: 8 Speed",
+    "confidence": "derived",
+    "gears": 8
+   },
+   "6": {
+    "name": "Race Transmission: 9 Speed",
+    "confidence": "derived",
+    "gears": 9
+   },
+   "7": {
+    "name": "Race Transmission: 10 Speed",
+    "confidence": "verified",
+    "gears": 10
+   },
+   "8": {
+    "name": "Drift Transmission: 4 Speed",
+    "confidence": "derived",
+    "gears": 4
+   }
   },
-  "tier_ladder": {
-    "_note": "Global vocabulary used by the SPARSE slots. Confirmed end to end: 1 from 'Street Centrifugal Supercharger', 2 and 3 from the basket ('Sport Cams and Valves', 'Race Exhaust'), 4/5/6 from the Spring and Dampers and Differential menus.",
-    "0": "Stock",
-    "1": "Street",
-    "2": "Sport",
-    "3": "Race",
-    "4": "Rally",
-    "5": "Drift",
-    "6": "Offroad",
-    "applies_to": [
-      "brakes",
-      "front_arb",
-      "rear_arb",
-      "springs_dampers",
-      "differential",
-      "clutch",
-      "driveline"
-    ],
+  "differential": {
+   "_scheme": "shared donor set 2102, on the tier ladder",
+   "0": {
+    "name": "Stock Diff",
     "confidence": "verified"
-  },
-  "dense_slots": {
-    "_note": "Index IS the 0-based tile position. Do NOT read these against the ladder -- doing so put Race Weight Reduction one tile too low.",
-    "slots": [
-      "drivetrain",
-      "car_body",
-      "engine",
-      "rear_wing",
-      "weight_reduction"
-    ],
+   },
+   "3": {
+    "name": "Race Diff",
     "confidence": "verified"
+   },
+   "5": {
+    "name": "Drift Diff",
+    "confidence": "verified"
+   },
+   "6": {
+    "name": "Offroad Diff",
+    "confidence": "verified"
+   },
+   "7": {
+    "name": "UNKNOWN - 26 tunes carry it, absent from the NSX-R 4-tile menu",
+    "confidence": "unknown"
+   }
   },
-  "named": {
-    "transmission": {
-      "_scheme": "shared donor set 2102, its own catalogue. Gear count is an exact function of the FULL part id (e.g. 2102007 -> 10 gears), NOT of the index alone -- 'gears = index + 3' was a coincidence over indices 4-7 and must not be used as a rule.",
-      "0": {
-        "name": "Stock Transmission",
-        "confidence": "derived",
-        "gears": 6,
-        "note": "Catalogue row 55. The fingerprint study called 2102000 'a genuine shared 6-speed, not stock'; the catalogue says the index-0 row IS 'Stock Transmission' -- a stock box that happens to be a 6-speed on most cars. Both statements are consistent."
-      },
-      "4": {
-        "name": "Race Transmission: 7 Speed",
-        "confidence": "verified",
-        "gears": 7
-      },
-      "5": {
-        "name": "Race Transmission: 8 Speed",
-        "confidence": "derived",
-        "gears": 8
-      },
-      "6": {
-        "name": "Race Transmission: 9 Speed",
-        "confidence": "derived",
-        "gears": 9
-      },
-      "7": {
-        "name": "Race Transmission: 10 Speed",
-        "confidence": "verified",
-        "gears": 10
-      },
-      "8": {
-        "name": "Drift Transmission: 4 Speed",
-        "confidence": "derived",
-        "gears": 4
-      }
-    },
-    "differential": {
-      "_scheme": "shared donor set 2102, on the tier ladder",
-      "0": {
-        "name": "Stock Diff",
-        "confidence": "verified"
-      },
-      "3": {
-        "name": "Race Diff",
-        "confidence": "verified"
-      },
-      "5": {
-        "name": "Drift Diff",
-        "confidence": "verified"
-      },
-      "6": {
-        "name": "Offroad Diff",
-        "confidence": "verified"
-      },
-      "7": {
-        "name": "UNKNOWN - 26 tunes carry it, absent from the NSX-R 4-tile menu",
-        "confidence": "unknown"
-      }
-    },
-    "weight_reduction": {
-      "_scheme": "DENSE - index is the tile position",
-      "0": {
-        "name": "Stock Weight Reduction",
-        "confidence": "verified"
-      },
-      "1": {
-        "name": "Sport Weight Reduction",
-        "confidence": "verified",
-        "effect": "Weight -139 lb"
-      },
-      "2": {
-        "name": "Race Weight Reduction",
-        "confidence": "verified",
-        "effect": "Weight -362 lb"
-      }
-    },
-    "tire_compound": {
-      "_scheme": "GLOBAL enum, same index on every car. ONE capture of the compound menu pins all 163 cars.",
-      "_warning": "The map in fh6_tune_decode.py (COMPOUND_NAMES) is WRONG and off by one around here. It calls 5 'Slick Race' and 6 'Rally'. Evidence that 5 is Rally: the cloned build matches container Tuning_0412_20260901181414 on tire_compound, and the game reported that tune's compound as Rally.",
-      "_needs": "One capture naming every tile in the Tire Compound menu, paired to indexes by diff. Highest-value single capture available."
-    },
-    "rim_style": {
-      "_scheme": "FLAT global catalogue. No partset, nothing derivable from the number. 148 distinct ids observed, 326..14670, block-allocated.",
-      "638": {
-        "name": "Asanti AF 134",
-        "confidence": "verified",
-        "note": "read off the car with the id taken from a diffed container"
-      },
-      "701": {
-        "name": "UNKNOWN",
-        "confidence": "unknown",
-        "note": "carried by Tuning_0412_20260901181414; never seen on screen. Previously and WRONGLY recorded as Asanti AF 134."
-      },
-      "13636": {
-        "name": "UNKNOWN",
-        "confidence": "unknown"
-      },
-      "4294967295": {
-        "name": "(empty slot - stock wheels)",
-        "confidence": "verified"
-      }
-    }
+  "weight_reduction": {
+   "_scheme": "DENSE - index is the tile position",
+   "0": {
+    "name": "Stock Weight Reduction",
+    "confidence": "verified"
+   },
+   "1": {
+    "name": "Sport Weight Reduction",
+    "confidence": "verified",
+    "effect": "Weight -139 lb"
+   },
+   "2": {
+    "name": "Race Weight Reduction",
+    "confidence": "verified",
+    "effect": "Weight -362 lb"
+   }
   },
-  "gaps": {
-    "rim_style": "147 of 148 ids unnamed. Each needs fit + save + diff, so this is the most expensive catalogue and the least performance-relevant (cosmetic, though wheels do carry a weight delta).",
-    "engine_families": "134 families in data/engine-swaps.json, 25 carry a donor_name and 18 of those are known WRONG -- the engine head is a parallel enumeration offset from the car table, not a donor ordinal, so names cannot be derived from the number.",
-    "tier_1_and_2_on_some_slots": "Street and Sport are named in the ladder but were only observed on a few slots; a slot could in principle skip them.",
-    "engine_internal_slots": "Group membership is proven (they carry the ENGINE's partset, 519/519) but which slot is camshaft vs valves vs displacement is not. The Engine menu lists Camshaft and Valves as SEPARATE tiles while the part sold under Camshaft is named 'Sport Cams and Valves'.",
-    "transmission_2102000": "The shared 6-speed (2102000, 97 tunes) has no observed name."
+  "tire_compound": {
+   "_scheme": "GLOBAL enum, same index on every car. Part id = ordinal*1000 + index (412001 on the NSX-R).",
+   "_proof": "2026-09-02 NSX-R capture session: each compound put in the basket, setup saved as cmpN, container tire_compound read directly (Tuning_0412_20260902021611..021900). Names verbatim from the lime name bar.",
+   "0": "Stock Tire Compound",
+   "1": "Street Tire Compound",
+   "2": "Sport Tire Compound",
+   "3": "Semi-Slick Race Tire Compound",
+   "10": "'Horizon' Semi-Slick Race Tire Compound",
+   "5": "Rally Tire Compound (game-reported on Tuning_0412_20260901181414; tile 8 name capture pending)",
+   "_menu_order_nsxr": {
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 10,
+    "8": 5,
+    "6": "?",
+    "7": "?",
+    "9": "?"
+   },
+   "_menu_is_not_index_order": "tile 5 = index 10. Never read an index off tile position.",
+   "_side_effect": "Installing a compound resets front_tire_pressure to 0.400 and rear_tire_pressure to 0.450 (normalised); gears untouched (4/4 saves)."
   },
-  "catalogue": {
-    "source": "Content/media/stripped/stringtables/EN.zip -> Upgrades.str, IDS_Name_<n>; parsed by scripts/telemetry/fh6_strings.py; exported to data/game-strings/Upgrades.json",
-    "rule": "For a 4-tier family the display name is Upgrades[base(slot) + tier], tier = index % 100 in 0..3 (Stock/Street/Sport/Race). Validated on all 12 screen-verified (slot, tier, name) pairs with zero misses.",
-    "why_the_ladder_looked_sparse": "Rally/Drift/Offroad were added to the catalogue later at high IDS numbers (272, 278, 291, 292, 301) while the save encodes them as tiers 4/5/6 of the same slot. extended_tiers maps those.",
-    "brand_rule": "Brand parts compose as '<List_PartManufacturer name> - <Upgrades name>' (e.g. 'Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'); they are not rows of Upgrades.str.",
-    "bases": {
-      "camshaft": 3,
-      "displacement": 7,
-      "fuel_system": 11,
-      "ignition": 15,
-      "exhaust": 19,
-      "intake": 23,
-      "single_turbo": 27,
-      "pos_supercharger": 31,
-      "centrifugal_supercharger": 35,
-      "intercooler": 39,
-      "brakes": 43,
-      "springs_dampers": 47,
-      "front_arb": 51,
-      "transmission": 55,
-      "clutch": 59,
-      "flywheel": 63,
-      "driveline": 67,
-      "differential": 71,
-      "weight_reduction": 75,
-      "tire_compound": 78,
-      "front_rim_size": 82,
-      "front_tire_width": 84,
-      "front_bumper": 86,
-      "rear_wing": 90,
-      "rear_bumper": 94,
-      "side_skirts": 98,
-      "hood": 100,
-      "rim_style": 114,
-      "drivetrain": 141,
-      "car_body": 143,
-      "rear_tire_width": 149,
-      "restrictor_plate": 161,
-      "manifold": 208,
-      "valves": 220,
-      "pistons": 224,
-      "oil_cooling": 232,
-      "twin_turbo": 236,
-      "rear_arb": 244,
-      "roll_cage": 248,
-      "rear_rim_size": 257,
-      "motor_parts": 259,
-      "front_track_width": 282,
-      "rear_track_width": 284,
-      "front_tire_profile": 304,
-      "rear_tire_profile": 308,
-      "motor": 314,
-      "engine": 1
-    },
-    "extended_tiers": {
-      "springs_dampers": {
-        "4": 272,
-        "5": 278
-      },
-      "differential": {
-        "4": 291,
-        "5": 292,
-        "6": 301
-      },
-      "transmission": {
-        "0": 55,
-        "1": 56,
-        "2": 57,
-        "3": 293,
-        "4": 294,
-        "5": 295,
-        "6": 296,
-        "7": 297,
-        "8": 302,
-        "9": 271
-      },
-      "tire_compound": {
-        "0": 78,
-        "1": 79,
-        "2": 80,
-        "3": 81,
-        "5": 273,
-        "6": 274,
-        "7": 275,
-        "8": 277,
-        "9": 280,
-        "10": 281,
-        "11": 298,
-        "12": 299,
-        "13": 300,
-        "15": 303
-      },
-      "weight_reduction": {
-        "0": 75,
-        "1": 77,
-        "2": 113
-      },
-      "single_turbo": {
-        "4": 312
-      },
-      "twin_turbo": {
-        "4": 313
-      },
-      "restrictor_plate": {
-        "0": 161,
-        "1": 162
-      }
-    },
-    "extended_confidence": {
-      "transmission": "derived: 4..8 pinned by gear counts (7/8/9/10-speed, Drift 4); 0..3 and 9 by catalogue order",
-      "tire_compound": "derived: 5=Rally confirmed on the completed clone; the rest follow catalogue order and are UNVERIFIED",
-      "weight_reduction": "verified by the completed clone (dense: Stock/Sport/Race)",
-      "springs_dampers": "verified (Rally/Drift read from the NSX-R menu)",
-      "differential": "verified (Stock/Race/Drift/Offroad read from the NSX-R menu)",
-      "single_turbo": "tier 4 = 'Race Turbo With Anti-Lag' (312), derived from catalogue order"
-    },
-    "verified_slots": [
-      "exhaust",
-      "camshaft",
-      "displacement",
-      "pistons",
-      "brakes",
-      "front_arb",
-      "rear_arb",
-      "weight_reduction",
-      "centrifugal_supercharger",
-      "springs_dampers",
-      "differential",
-      "transmission"
-    ],
-    "verified_pairs": [
-      [
-        "exhaust",
-        3,
-        "Race Exhaust"
-      ],
-      [
-        "camshaft",
-        2,
-        "Sport Cams and Valves"
-      ],
-      [
-        "displacement",
-        3,
-        "Race Engine Block"
-      ],
-      [
-        "pistons",
-        3,
-        "Race Pistons / Compression"
-      ],
-      [
-        "brakes",
-        3,
-        "Race Brakes"
-      ],
-      [
-        "front_arb",
-        3,
-        "Race Front Anti-roll Bars"
-      ],
-      [
-        "rear_arb",
-        3,
-        "Race Rear Anti-roll Bars"
-      ],
-      [
-        "weight_reduction",
-        2,
-        "Race Weight Reduction"
-      ],
-      [
-        "centrifugal_supercharger",
-        3,
-        "Race Centrifugal Supercharger"
-      ],
-      [
-        "centrifugal_supercharger",
-        1,
-        "Street Centrifugal Supercharger"
-      ],
-      [
-        "springs_dampers",
-        3,
-        "Race Spring and Dampers"
-      ],
-      [
-        "springs_dampers",
-        5,
-        "Drift Spring and Dampers"
-      ]
-    ],
-    "rims": "Model names are NOT in EN.zip. The rim catalogue is the directory Content/media/cars/_library/scene/wheels/<MFR>_<MODEL>.zip (e.g. ASA_AF134, WOR_MeisterCR01, AME_VF300, 5ZI_5ZRCopse) with matching icons in ui/textures/data_bound/Upgrade_Parts.zip/Tire_Rims/Licensed_Rims/. The numeric rim_style id -> stem mapping is in no readable text entry; it still needs fit -> save -> diff per wheel.",
-    "pair_families": {
-      "_rule": "Stock/Upgraded pairs, not 4-tier runs: tier 0 -> Stock row, tier >= 1 -> the 'Upgraded ...' row. The game itself labels every non-stock option just 'Upgraded'; the size is only on the tile.",
-      "front_rim_size": [
-        82,
-        83
-      ],
-      "rear_rim_size": [
-        257,
-        258
-      ],
-      "front_tire_width": [
-        84,
-        85
-      ],
-      "rear_tire_width": [
-        149,
-        145
-      ],
-      "front_track_width": [
-        282,
-        283
-      ],
-      "rear_track_width": [
-        284,
-        285
-      ],
-      "front_tire_profile": [
-        304,
-        305
-      ],
-      "rear_tire_profile": [
-        308,
-        309
-      ],
-      "rim_style": [
-        114,
-        115
-      ]
-    },
-    "brand_slots": {
-      "_rule": "Per-car lists of brand parts ('Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'). The 4-tier family rows exist in the catalogue but the tile the player sees is <Manufacturer> - <row>, and the save index is a dense per-car position, so the row alone is NOT the name. Resolver returns no name rather than a plausible wrong one.",
-      "slots": [
-        "rear_wing",
-        "front_bumper",
-        "rear_bumper",
-        "hood",
-        "side_skirts",
-        "car_body",
-        "engine"
-      ]
-    },
-    "per_car_option_lists": "Each car archive Content/media/cars/<CAR>.zip carries Manifest.xml with <UpgradeablePart PartEnum=... PartId=...> rows listing that car's VISUAL upgrade options by the exact save part id -- CarBody, RearWing, FrontBumper, RearBumper, Hood, SideSkirts, ChassisStiffness (including the variant-100 ids) -- 660 archives. So the option LISTS for the brand-composed slots are file-derivable for every car; the model basenames are generic (bumperfcustom_b, trunk_b), so the brand LABEL per option is still menu-only."
+  "rim_style": {
+   "_scheme": "FLAT global catalogue. No partset, nothing derivable from the number. 148 distinct ids observed, 326..14670, block-allocated.",
+   "638": {
+    "name": "Asanti AF 134",
+    "confidence": "verified",
+    "note": "read off the car with the id taken from a diffed container"
+   },
+   "701": {
+    "name": "UNKNOWN",
+    "confidence": "unknown",
+    "note": "carried by Tuning_0412_20260901181414; never seen on screen. Previously and WRONGLY recorded as Asanti AF 134."
+   },
+   "13636": {
+    "name": "UNKNOWN",
+    "confidence": "unknown"
+   },
+   "4294967295": {
+    "name": "(empty slot - stock wheels)",
+    "confidence": "verified"
+   }
   }
+ },
+ "gaps": {
+  "rim_style": "147 of 148 ids unnamed. Each needs fit + save + diff, so this is the most expensive catalogue and the least performance-relevant (cosmetic, though wheels do carry a weight delta).",
+  "engine_families": "134 families in data/engine-swaps.json, 25 carry a donor_name and 18 of those are known WRONG -- the engine head is a parallel enumeration offset from the car table, not a donor ordinal, so names cannot be derived from the number.",
+  "tier_1_and_2_on_some_slots": "Street and Sport are named in the ladder but were only observed on a few slots; a slot could in principle skip them.",
+  "engine_internal_slots": "Group membership is proven (they carry the ENGINE's partset, 519/519) but which slot is camshaft vs valves vs displacement is not. The Engine menu lists Camshaft and Valves as SEPARATE tiles while the part sold under Camshaft is named 'Sport Cams and Valves'.",
+  "transmission_2102000": "The shared 6-speed (2102000, 97 tunes) has no observed name."
+ },
+ "catalogue": {
+  "source": "Content/media/stripped/stringtables/EN.zip -> Upgrades.str, IDS_Name_<n>; parsed by scripts/telemetry/fh6_strings.py; exported to data/game-strings/Upgrades.json",
+  "rule": "For a 4-tier family the display name is Upgrades[base(slot) + tier], tier = index % 100 in 0..3 (Stock/Street/Sport/Race). Validated on all 12 screen-verified (slot, tier, name) pairs with zero misses.",
+  "why_the_ladder_looked_sparse": "Rally/Drift/Offroad were added to the catalogue later at high IDS numbers (272, 278, 291, 292, 301) while the save encodes them as tiers 4/5/6 of the same slot. extended_tiers maps those.",
+  "brand_rule": "Brand parts compose as '<List_PartManufacturer name> - <Upgrades name>' (e.g. 'Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'); they are not rows of Upgrades.str.",
+  "bases": {
+   "camshaft": 3,
+   "displacement": 7,
+   "fuel_system": 11,
+   "ignition": 15,
+   "exhaust": 19,
+   "intake": 23,
+   "single_turbo": 27,
+   "pos_supercharger": 31,
+   "centrifugal_supercharger": 35,
+   "intercooler": 39,
+   "brakes": 43,
+   "springs_dampers": 47,
+   "front_arb": 51,
+   "transmission": 55,
+   "clutch": 59,
+   "flywheel": 63,
+   "driveline": 67,
+   "differential": 71,
+   "weight_reduction": 75,
+   "tire_compound": 78,
+   "front_rim_size": 82,
+   "front_tire_width": 84,
+   "front_bumper": 86,
+   "rear_wing": 90,
+   "rear_bumper": 94,
+   "side_skirts": 98,
+   "hood": 100,
+   "rim_style": 114,
+   "drivetrain": 141,
+   "car_body": 143,
+   "rear_tire_width": 149,
+   "restrictor_plate": 161,
+   "manifold": 208,
+   "valves": 220,
+   "pistons": 224,
+   "oil_cooling": 232,
+   "twin_turbo": 236,
+   "rear_arb": 244,
+   "roll_cage": 248,
+   "rear_rim_size": 257,
+   "motor_parts": 259,
+   "front_track_width": 282,
+   "rear_track_width": 284,
+   "front_tire_profile": 304,
+   "rear_tire_profile": 308,
+   "motor": 314,
+   "engine": 1
+  },
+  "extended_tiers": {
+   "springs_dampers": {
+    "4": 272,
+    "5": 278
+   },
+   "differential": {
+    "4": 291,
+    "5": 292,
+    "6": 301
+   },
+   "transmission": {
+    "0": 55,
+    "1": 56,
+    "2": 57,
+    "3": 293,
+    "4": 294,
+    "5": 295,
+    "6": 296,
+    "7": 297,
+    "8": 302,
+    "9": 271
+   },
+   "tire_compound": {
+    "0": 78,
+    "1": 79,
+    "2": 80,
+    "3": 81,
+    "10": 275,
+    "5": 273
+   },
+   "weight_reduction": {
+    "0": 75,
+    "1": 77,
+    "2": 113
+   },
+   "single_turbo": {
+    "4": 312
+   },
+   "twin_turbo": {
+    "4": 313
+   },
+   "restrictor_plate": {
+    "0": 161,
+    "1": 162
+   },
+   "tire_compound_unproven_catalogue_order": {
+    "6": 274,
+    "7": 275,
+    "8": 277,
+    "9": 280,
+    "11": 298,
+    "12": 299,
+    "13": 300,
+    "15": 303
+   },
+   "_note_tire_compound": "Proven rows only in tire_compound (cmpN saves 2026-09-02). The catalogue-order guess was wrong at index 10 (guessed 281 Vintage, actual 275 'Horizon' Semi-Slick); remaining guesses parked in tire_compound_unproven_catalogue_order."
+  },
+  "extended_confidence": {
+   "transmission": "derived: 4..8 pinned by gear counts (7/8/9/10-speed, Drift 4); 0..3 and 9 by catalogue order",
+   "tire_compound": "derived: 5=Rally confirmed on the completed clone; the rest follow catalogue order and are UNVERIFIED",
+   "weight_reduction": "verified by the completed clone (dense: Stock/Sport/Race)",
+   "springs_dampers": "verified (Rally/Drift read from the NSX-R menu)",
+   "differential": "verified (Stock/Race/Drift/Offroad read from the NSX-R menu)",
+   "single_turbo": "tier 4 = 'Race Turbo With Anti-Lag' (312), derived from catalogue order"
+  },
+  "verified_slots": [
+   "exhaust",
+   "camshaft",
+   "displacement",
+   "pistons",
+   "brakes",
+   "front_arb",
+   "rear_arb",
+   "weight_reduction",
+   "centrifugal_supercharger",
+   "springs_dampers",
+   "differential",
+   "transmission"
+  ],
+  "verified_pairs": [
+   [
+    "exhaust",
+    3,
+    "Race Exhaust"
+   ],
+   [
+    "camshaft",
+    2,
+    "Sport Cams and Valves"
+   ],
+   [
+    "displacement",
+    3,
+    "Race Engine Block"
+   ],
+   [
+    "pistons",
+    3,
+    "Race Pistons / Compression"
+   ],
+   [
+    "brakes",
+    3,
+    "Race Brakes"
+   ],
+   [
+    "front_arb",
+    3,
+    "Race Front Anti-roll Bars"
+   ],
+   [
+    "rear_arb",
+    3,
+    "Race Rear Anti-roll Bars"
+   ],
+   [
+    "weight_reduction",
+    2,
+    "Race Weight Reduction"
+   ],
+   [
+    "centrifugal_supercharger",
+    3,
+    "Race Centrifugal Supercharger"
+   ],
+   [
+    "centrifugal_supercharger",
+    1,
+    "Street Centrifugal Supercharger"
+   ],
+   [
+    "springs_dampers",
+    3,
+    "Race Spring and Dampers"
+   ],
+   [
+    "springs_dampers",
+    5,
+    "Drift Spring and Dampers"
+   ]
+  ],
+  "rims": "Model names are NOT in EN.zip. The rim catalogue is the directory Content/media/cars/_library/scene/wheels/<MFR>_<MODEL>.zip (e.g. ASA_AF134, WOR_MeisterCR01, AME_VF300, 5ZI_5ZRCopse) with matching icons in ui/textures/data_bound/Upgrade_Parts.zip/Tire_Rims/Licensed_Rims/. The numeric rim_style id -> stem mapping is in no readable text entry; it still needs fit -> save -> diff per wheel.",
+  "pair_families": {
+   "_rule": "Stock/Upgraded pairs, not 4-tier runs: tier 0 -> Stock row, tier >= 1 -> the 'Upgraded ...' row. The game itself labels every non-stock option just 'Upgraded'; the size is only on the tile.",
+   "front_rim_size": [
+    82,
+    83
+   ],
+   "rear_rim_size": [
+    257,
+    258
+   ],
+   "front_tire_width": [
+    84,
+    85
+   ],
+   "rear_tire_width": [
+    149,
+    145
+   ],
+   "front_track_width": [
+    282,
+    283
+   ],
+   "rear_track_width": [
+    284,
+    285
+   ],
+   "front_tire_profile": [
+    304,
+    305
+   ],
+   "rear_tire_profile": [
+    308,
+    309
+   ],
+   "rim_style": [
+    114,
+    115
+   ]
+  },
+  "brand_slots": {
+   "_rule": "Per-car lists of brand parts ('Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'). The 4-tier family rows exist in the catalogue but the tile the player sees is <Manufacturer> - <row>, and the save index is a dense per-car position, so the row alone is NOT the name. Resolver returns no name rather than a plausible wrong one.",
+   "slots": [
+    "rear_wing",
+    "front_bumper",
+    "rear_bumper",
+    "hood",
+    "side_skirts",
+    "car_body",
+    "engine"
+   ]
+  },
+  "per_car_option_lists": "Each car archive Content/media/cars/<CAR>.zip carries Manifest.xml with <UpgradeablePart PartEnum=... PartId=...> rows listing that car's VISUAL upgrade options by the exact save part id -- CarBody, RearWing, FrontBumper, RearBumper, Hood, SideSkirts, ChassisStiffness (including the variant-100 ids) -- 660 archives. So the option LISTS for the brand-composed slots are file-derivable for every car; the model basenames are generic (bumperfcustom_b, trunk_b), so the brand LABEL per option is still menu-only."
+ }
 }

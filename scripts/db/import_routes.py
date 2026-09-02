@@ -27,10 +27,13 @@ sys.path.insert(0, os.path.join(ROOT, "scripts", "telemetry"))
 
 import fh6db                                            # noqa: E402
 import fh6_owt                                          # noqa: E402
+import fh6_turns                                        # noqa: E402
 
 
 def run(cx, aitracks, verbose=False):
-    routes = fh6_owt.load_all(aitracks)
+    # full=True keeps all 14 floats per point: the turn detector needs the lateral width vector
+    # and the surface normal, not just the position the matcher uses.
+    routes = fh6_owt.load_all(aitracks, full=True)
     if not routes:
         raise RuntimeError("no .owt centre-lines under %r" % aitracks)
 
@@ -44,6 +47,15 @@ def run(cx, aitracks, verbose=False):
             if i % 2:
                 continue
             prows.append((r["route_id"], i, p[0], p[1], p[2]))
+
+    # turns from the road itself: stable, ordered, and the same every run
+    trows = []
+    for r in routes:
+        for t in fh6_turns.turns_for(r):
+            trows.append((r["route_id"], t["turn_id"], t["seq"], t["arc_m"], t["apex_arc_m"],
+                          t["apex_x"], t["apex_y"], t["apex_z"], t["radius_m"],
+                          t["peak_radius_m"], t["angle_deg"], t["dir"], t["kind"],
+                          t["length_m"], t["width_m"], t["bank_deg"]))
 
     matches = fh6_owt.match_courses(routes)
     known = {r[0] for r in cx.execute("SELECT route_key FROM course")}
@@ -59,13 +71,17 @@ def run(cx, aitracks, verbose=False):
 
     with cx:
         cx.execute("PRAGMA defer_foreign_keys=ON")
-        for t in ("course_route", "ref_route_point", "ref_route"):
+        for t in ("course_route", "ref_route_turn", "ref_route_point", "ref_route"):
             cx.execute("DELETE FROM %s" % t)
         n_r = fh6db.upsert_many(cx, "ref_route", [
             "route_id", "name", "length_m", "n_points", "is_loop",
             "bbox_x0", "bbox_x1", "bbox_z0", "bbox_z1", "source"], rrows)
         n_p = fh6db.upsert_many(cx, "ref_route_point", ["route_id", "i", "x", "y", "z"],
                                 prows, chunk=10000)
+        n_t = fh6db.upsert_many(cx, "ref_route_turn", [
+            "route_id", "turn_id", "seq", "arc_m", "apex_arc_m", "apex_x", "apex_y", "apex_z",
+            "radius_m", "peak_radius_m", "angle_deg", "dir", "kind", "length_m", "width_m",
+            "bank_deg"], trows, chunk=2000)
         n_m = fh6db.upsert_many(cx, "course_route", [
             "route_key", "route_id", "match_kind", "mean_dev_m", "p95_dev_m", "covered",
             "len_ratio", "runner_up", "computed_utc"], mrows)
@@ -78,7 +94,8 @@ def run(cx, aitracks, verbose=False):
     kinds = {}
     for m in mrows:
         kinds[m[2]] = kinds.get(m[2], 0) + 1
-    return {"ref_route": n_r, "ref_route_point": n_p, "course_route": n_m}, kinds
+    return {"ref_route": n_r, "ref_route_point": n_p, "ref_route_turn": n_t,
+            "course_route": n_m}, kinds
 
 
 def main(argv=None):

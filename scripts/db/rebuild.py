@@ -28,6 +28,7 @@ STAGES = [
     ("containers", "import_containers.py", "save containers -> parts, sliders, gears, packages"),
     ("telemetry", "import_telemetry.py", "sessions, courses, laps and per-sample trace rows"),
     ("routes", "import_routes.py", "the game's route centre-lines and how our courses map on"),
+    ("corners", "import_corners.py", "what every lap did at every road-derived turn"),
     ("observations", "import_observations.py", "human evidence, name grading, clone readiness"),
 ]
 

@@ -683,3 +683,33 @@ CREATE TABLE IF NOT EXISTS course_route (
   runner_up    TEXT,
   computed_utc TEXT
 );
+
+-- Turns derived from the game's centre-line curvature, not from driven laps (added 2026-09-02).
+--
+-- course_turn holds what the ANALYZER established from telemetry: real, but a property of the
+-- driving, so the list grows and shifts as laps accumulate and a corner nobody took is not a
+-- corner. This table holds what the ROAD is: the same turns, in the same order, for the same
+-- route, whoever drives it and whether they drive it at all.
+--
+-- radius_m is the sweep radius (arc length / swept angle), not the peak-curvature radius, which
+-- a single noisy sample can drive to absurd values. peak_radius_m keeps the tighter reading.
+-- width_m and bank_deg come from the centre-line's own lateral vector and surface normal, and
+-- are measurements telemetry cannot make at all.
+CREATE TABLE IF NOT EXISTS ref_route_turn (
+  route_id      TEXT NOT NULL REFERENCES ref_route(route_id) ON DELETE CASCADE,
+  turn_id       TEXT NOT NULL,           -- T1.. in arc order along the route
+  seq           INTEGER NOT NULL,
+  arc_m         REAL,                    -- where the turn starts
+  apex_arc_m    REAL,                    -- where curvature peaks
+  apex_x        REAL, apex_y REAL, apex_z REAL,
+  radius_m      REAL,
+  peak_radius_m REAL,
+  angle_deg     REAL,
+  dir           TEXT,                    -- L or R
+  kind          TEXT,                    -- hairpin | tight | medium | fast | sweeper
+  length_m      REAL,
+  width_m       REAL,                    -- road width at the apex
+  bank_deg      REAL,                    -- surface tilt off horizontal at the apex
+  PRIMARY KEY (route_id, turn_id)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS ix_route_turn ON ref_route_turn(route_id, seq);

@@ -40,7 +40,7 @@ STRIDE = 56
 COUNT_OFF = 0x24
 
 
-def parse(path):
+def parse(path, full=False):
     """-> {'route_id', 'n', 'points': [(x, y, z)], 'length_m', 'is_loop', 'bbox'}"""
     with open(path, "rb") as fh:
         b = fh.read()
@@ -50,10 +50,14 @@ def parse(path):
     need = HDR + n * STRIDE
     if need > len(b):
         raise ValueError("%s: %d points need %d bytes, file is %d" % (path, n, need, len(b)))
-    raw = [struct.unpack_from("<3f", b, HDR + i * STRIDE) for i in range(n)]
+    # 14 floats per record: 0-2 position, 3-5 the lateral half-width vector (perpendicular to
+    # travel on 98% of steps), 6-8 the unit surface normal (banking), 9-13 sparse link data.
+    # full=True keeps all of them; the matcher only needs position and 3 floats is far cheaper.
+    fmt = "<14f" if full else "<3f"
+    raw = [struct.unpack_from(fmt, b, HDR + i * STRIDE) for i in range(n)]
     # A few routes carry non-finite points (unfinished or stitched geometry). Drop them rather
     # than the whole file: the surviving polyline is still the route's real centre-line.
-    pts = [p for p in raw if all(math.isfinite(v) for v in p)]
+    pts = [p for p in raw if all(math.isfinite(v) for v in p[:3])]
     n_bad = len(raw) - len(pts)
     if len(pts) < 2:
         raise ValueError("%s: only %d finite points of %d" % (path, len(pts), n))
@@ -69,11 +73,11 @@ def parse(path):
             "bbox": [round(min(xs)), round(max(xs)), round(min(zs)), round(max(zs))]}
 
 
-def load_all(d=AITRACKS):
+def load_all(d=AITRACKS, full=False):
     out = []
     for p in sorted(glob.glob(os.path.join(d, "*.owt"))):
         try:
-            out.append(parse(p))
+            out.append(parse(p, full=full))
         except Exception as e:                           # noqa: BLE001
             print("  !! %s: %s" % (os.path.basename(p), e), file=sys.stderr)
     return out

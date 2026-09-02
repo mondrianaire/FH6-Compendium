@@ -47,38 +47,21 @@
  },
  "named": {
   "transmission": {
-   "_scheme": "shared donor set 2102, its own catalogue. Gear count is an exact function of the FULL part id (e.g. 2102007 -> 10 gears), NOT of the index alone -- 'gears = index + 3' was a coincidence over indices 4-7 and must not be used as a rule.",
-   "0": {
-    "name": "Stock Transmission",
-    "confidence": "derived",
-    "gears": 6,
-    "note": "Catalogue row 55. The fingerprint study called 2102000 'a genuine shared 6-speed, not stock'; the catalogue says the index-0 row IS 'Stock Transmission' -- a stock box that happens to be a 6-speed on most cars. Both statements are consistent."
+   "_scheme": "Own catalogue, shared donor set 2102: id = 2102000 + index. Gear count = number of non-sentinel gear slots in the container.",
+   "0": "Stock Transmission",
+   "4": "Race Transmission: 7 Speed",
+   "5": "Race Transmission: 8 Speed",
+   "6": "Race Transmission: 9 Speed",
+   "7": "Race Transmission: 10 Speed",
+   "8": "Drift Transmission: 4 Speed",
+   "_proof": "2026-09-02 NSX-R saves trm1..trm6 read directly; trm5 (10 Speed, installed) unchanged = self-check.",
+   "_unverified": {
+    "1": "Street Transmission (catalogue order)",
+    "2": "Sport Transmission (catalogue order)",
+    "3": "Race Transmission: 6 Speed (catalogue order)",
+    "9": "Rally Transmission (catalogue order)"
    },
-   "4": {
-    "name": "Race Transmission: 7 Speed",
-    "confidence": "verified",
-    "gears": 7
-   },
-   "5": {
-    "name": "Race Transmission: 8 Speed",
-    "confidence": "derived",
-    "gears": 8
-   },
-   "6": {
-    "name": "Race Transmission: 9 Speed",
-    "confidence": "derived",
-    "gears": 9
-   },
-   "7": {
-    "name": "Race Transmission: 10 Speed",
-    "confidence": "verified",
-    "gears": 10
-   },
-   "8": {
-    "name": "Drift Transmission: 4 Speed",
-    "confidence": "derived",
-    "gears": 4
-   }
+   "_side_effect": "install rewrites gear sliders + final drive to the transmission's defaults; unused slots = -1.0"
   },
   "differential": {
    "_scheme": "shared donor set 2102, on the tier ladder",
@@ -122,7 +105,7 @@
   },
   "tire_compound": {
    "_scheme": "GLOBAL enum, same index on every car. Part id = ordinal*1000 + index (412001 on the NSX-R).",
-   "_proof": "2026-09-02 NSX-R capture session: every tile queued in the basket, setup saved as cmpN (N = tile), container tire_compound read directly (Tuning_0412_20260902021611..022740). Names verbatim from the lime name bar. cmp8 = index 5 with 'Rally Tire Compound' on screen is the self-check.",
+   "_proof": "2026-09-02 NSX-R capture session: every tile queued in the basket, setup saved as cmpN (N = tile, cmp1..cmp11; cmp1 = Stock = index 0 saved last), container tire_compound read directly (Tuning_0412_20260902021611..022740). Names verbatim from the lime name bar. cmp8 = index 5 with 'Rally Tire Compound' on screen is the self-check.",
    "_menu_order_nsxr": {
     "1": 0,
     "2": 1,

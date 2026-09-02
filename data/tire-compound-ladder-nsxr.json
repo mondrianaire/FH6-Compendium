@@ -2,7 +2,7 @@
  "car": "1992 Honda NSX-R (ordinal 412)",
  "build": "jett nsx clone, 440 hp, 2,547 lb, front 45%, AWD; basket held 2 unrelated pending items (+2 PI in every preview)",
  "captured": "2026-09-02",
- "source": "Upgrade Shop > Tires and Rims > Tire Compound; Y pages 2 and 3; setups cmp2..cmp11",
+ "source": "Upgrade Shop > Tires and Rims > Tire Compound; Y pages 2 and 3; setups cmp1..cmp11",
  "note": "Lateral G and braking pages are the game's own previews for the highlighted tile. Stock previews higher lateral G than Street/Sport while its GRIP chip is lower; the page-3 model is not a pure compound ladder.",
  "compounds": [
   {
@@ -16,10 +16,12 @@
    "latg_60": 1.22,
    "latg_120": 1.49,
    "pi_preview": 681,
-   "setup": null,
+   "setup": "cmp1",
    "pi_class": "A",
    "weight_lb": 2547,
-   "front_pct": 45
+   "front_pct": 45,
+   "brake_60_ft_reread": 81.2,
+   "brake_100_ft_reread": 189.3
   },
   {
    "tile": 2,

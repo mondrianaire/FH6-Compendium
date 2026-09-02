@@ -1,0 +1,222 @@
+{
+ "car": "1992 Honda NSX-R (ordinal 412)",
+ "captured": "2026-09-02",
+ "source": "Upgrade Shop > Drivetrain > Transmission; Y page 4; setups trm1..trm6",
+ "menu": "6 tiles: Stock, Race 7/8/9/10 Speed, Drift 4 Speed. No Street, Sport, Race 6 Speed or Rally on this car.",
+ "banner": "UNLOCKS FULL GEAR RATIO TUNING shown on every non-stock tile.",
+ "side_effect": "Installing a transmission rewrites all gear sliders and final drive to that transmission's defaults; unused gear slots become -1.0. Selecting the already-installed part changes nothing.",
+ "ratio_bands": {
+  "gear": [
+   0.48,
+   6.0
+  ],
+  "final_drive": [
+   2.2,
+   6.1
+  ]
+ },
+ "transmissions": [
+  {
+   "tile": 1,
+   "name": "Stock Transmission",
+   "index": 0,
+   "part_id": 2102000,
+   "price_cr": 0,
+   "t0_60_s": 3.0,
+   "t0_100_s": 6.9,
+   "top_mph": 150.8,
+   "gear_count": 6,
+   "gear_positions": [
+    0.6649,
+    0.4583,
+    0.3315,
+    0.2428,
+    0.1793,
+    0.1377
+   ],
+   "gear_ratios_default": [
+    4.15,
+    3.01,
+    2.31,
+    1.82,
+    1.47,
+    1.24
+   ],
+   "final_drive_position": 0.3077,
+   "final_drive_default": 3.4,
+   "setup": "trm1",
+   "note": "install rewrote gears + final drive to defaults"
+  },
+  {
+   "tile": 2,
+   "name": "Race Transmission: 7 Speed",
+   "index": 4,
+   "part_id": 2102004,
+   "price_cr": 3000,
+   "t0_60_s": 2.967,
+   "t0_100_s": 6.9,
+   "top_mph": 169.4,
+   "gear_count": 7,
+   "gear_positions": [
+    0.6685,
+    0.4366,
+    0.3062,
+    0.2138,
+    0.1522,
+    0.1069,
+    0.067
+   ],
+   "gear_ratios_default": [
+    4.17,
+    2.89,
+    2.17,
+    1.66,
+    1.32,
+    1.07,
+    0.85
+   ],
+   "final_drive_position": 0.3667,
+   "final_drive_default": 3.63,
+   "setup": "trm2",
+   "note": "install rewrote gears + final drive to defaults"
+  },
+  {
+   "tile": 3,
+   "name": "Race Transmission: 8 Speed",
+   "index": 5,
+   "part_id": 2102005,
+   "price_cr": 3000,
+   "t0_60_s": 2.933,
+   "t0_100_s": 6.883,
+   "top_mph": 169.3,
+   "gear_count": 8,
+   "gear_positions": [
+    0.6685,
+    0.4475,
+    0.3388,
+    0.2572,
+    0.1993,
+    0.1467,
+    0.096,
+    0.058
+   ],
+   "gear_ratios_default": [
+    4.17,
+    2.95,
+    2.35,
+    1.9,
+    1.58,
+    1.29,
+    1.01,
+    0.8
+   ],
+   "final_drive_position": 0.4249,
+   "final_drive_default": 3.86,
+   "setup": "trm3",
+   "note": "install rewrote gears + final drive to defaults"
+  },
+  {
+   "tile": 4,
+   "name": "Race Transmission: 9 Speed",
+   "index": 6,
+   "part_id": 2102006,
+   "price_cr": 0,
+   "t0_60_s": 2.9,
+   "t0_100_s": 6.833,
+   "top_mph": 169.3,
+   "gear_count": 9,
+   "gear_positions": [
+    0.6685,
+    0.4475,
+    0.3315,
+    0.2536,
+    0.1993,
+    0.154,
+    0.1178,
+    0.0761,
+    0.0489
+   ],
+   "gear_ratios_default": [
+    4.17,
+    2.95,
+    2.31,
+    1.88,
+    1.58,
+    1.33,
+    1.13,
+    0.9,
+    0.75
+   ],
+   "final_drive_position": 0.4908,
+   "final_drive_default": 4.11,
+   "setup": "trm4",
+   "note": "install rewrote gears + final drive to defaults"
+  },
+  {
+   "tile": 5,
+   "name": "Race Transmission: 10 Speed",
+   "index": 7,
+   "part_id": 2102007,
+   "price_cr": 0,
+   "t0_60_s": 2.95,
+   "t0_100_s": 6.8,
+   "top_mph": 170.0,
+   "gear_count": 10,
+   "gear_positions": [
+    0.6685,
+    0.4438,
+    0.3279,
+    0.25,
+    0.1957,
+    0.1504,
+    0.1178,
+    0.0851,
+    0.0616,
+    0.0399
+   ],
+   "gear_ratios_default": [
+    4.17,
+    2.93,
+    2.29,
+    1.86,
+    1.56,
+    1.31,
+    1.13,
+    0.95,
+    0.82,
+    0.7
+   ],
+   "final_drive_position": 0.5662,
+   "final_drive_default": 4.41,
+   "setup": "trm5",
+   "note": "installed; save unchanged (defaults not rewritten)"
+  },
+  {
+   "tile": 6,
+   "name": "Drift Transmission: 4 Speed",
+   "index": 8,
+   "part_id": 2102008,
+   "price_cr": 3000,
+   "t0_60_s": 3.617,
+   "t0_100_s": 7.5,
+   "top_mph": 167.9,
+   "gear_count": 4,
+   "gear_positions": [
+    0.4366,
+    0.2736,
+    0.1558,
+    0.0942
+   ],
+   "gear_ratios_default": [
+    2.89,
+    1.99,
+    1.34,
+    1.0
+   ],
+   "final_drive_position": 0.2051,
+   "final_drive_default": 3.0,
+   "setup": "trm6",
+   "note": "install rewrote gears + final drive to defaults"
+  }
+ ]
+}

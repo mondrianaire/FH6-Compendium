@@ -262,3 +262,18 @@ Eleven tiles (three rows of three plus a fourth row of two; the scrollbar thumb 
 Menu order is not index order (tile 5 = 10, tile 7 = 15). A queued tile shows a small basket glyph in its corner and the INSTALLED badge leaves the current part while anything is queued; the footer CR shows the queued price. Installing a compound resets both tire-pressure sliders (0.400 F / 0.450 R normalised). Indices 4 and 11-14 are not offered on this car; catalogue rows 281, 300 and 303 remain unplaced.
 
 Container folder timestamps (`Tuning_<ordinal>_<yyyymmddhhmmss>`) are UTC: the cmp6 save folder reads 20260902022442 while the matching screenshot is stamped 2026-09-01 22:24:37 local (UTC-4).
+
+### 10.2 Transmission grid, NSX-R, proven (2026-09-02)
+
+Six tiles. Every non-stock tile shows the yellow banner "UNLOCKS FULL GEAR RATIO TUNING". Index = save value minus 2102000, one saved setup per tile (trm1..trm6).
+
+| Tile | Name bar | Index | 0-60 / 0-100 s | Top mph | Gear slots written | Default final drive |
+|---|---|---|---|---|---|---|
+| 1 | Stock Transmission | 0 | 3.000 / 6.900 | 150.8 | 6 | 3.40 |
+| 2 | Race Transmission: 7 Speed | 4 | 2.967 / 6.900 | 169.4 | 7 | 3.63 |
+| 3 | Race Transmission: 8 Speed | 5 | 2.933 / 6.883 | 169.3 | 8 | 3.86 |
+| 4 | Race Transmission: 9 Speed | 6 | 2.900 / 6.833 | 169.3 | 9 | 4.11 |
+| 5 | Race Transmission: 10 Speed | 7 | 2.950 / 6.800 | 170.0 | 10 | 4.41 |
+| 6 | Drift Transmission: 4 Speed | 8 | 3.617 / 7.500 | 167.9 | 4 | 3.00 |
+
+Installing a transmission rewrites all ten gear sliders and the final drive to that transmission's defaults; slots beyond its gear count become the -1.0 sentinel. Re-selecting the installed part writes nothing. Street, Sport, Race 6 Speed and Rally are not offered on this car (indices 1, 2, 3, 9 still unverified).

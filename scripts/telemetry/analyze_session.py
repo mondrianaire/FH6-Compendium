@@ -2269,6 +2269,13 @@ def main():
                 pcs_ = resample(lap_pts(w, grip=True)); pts_all = _globalise_arc(pcs_)
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
+        # THE COURSE IS THE REFERENCE, NOT THE SESSION. A session that only ever drove a fragment of a long course had
+        # _ref_arc = that fragment, so the fragment passed the 70% / 90% gates below, was saved as the build's best
+        # trace, and the course model kept it forever because 18.7 s beats 108 s. Highway Circuit, 2026-09-02: the
+        # speed-trace panel crowned a quarter-lap 'fastest' and voided every real 108 s lap against it.
+        _model_len = float(((model.get("geometry") or {}).get("length_m") or 0) or 0)
+        if _model_len > 0:
+            _ref_arc = max(_ref_arc, _model_len)
         def _tune_hash_for(cid_, w_):
             # The rule lives in module-level tune_hash_for (backfill_laps.py --tune-hash re-runs it on stored
             # rows); this closure only supplies what it knows -- the session id and the measured gear ladder.
@@ -2374,7 +2381,9 @@ def main():
             # reference arc, so on a course driven in fragments the shortest window wins on wall-clock and
             # becomes the stored trace -- the backfill surfaced five courses whose trace covered under half the
             # longest. Require near-full coverage, and rank on the GAME clock, not the pause-inflated wall span.
-            _full = [w for w in valid if _win_arc[id(w)][0] >= 0.9 * _ref_arc] or valid
+            _full = [w for w in valid if _win_arc[id(w)][0] >= 0.9 * _ref_arc]
+            if not _full:
+                continue   # no window covered the course: the lap store keeps the partials, the model saves no best trace
             def _bw_key(w):
                 g_ = _game_lap_s(w)
                 return g_ if g_ is not None else (w["t1"] - w["t0"])

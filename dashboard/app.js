@@ -744,7 +744,9 @@
     const pills = SEG_MODES.map((m) => `<span class="chip seg-mode${m.k === md ? " on" : ""}" data-segmode="${m.k}" title="${esc(m.tip)}" style="cursor:pointer">${m.lbl}</span>`).join("");
     const grads = md === "grip" ? "" : `<span class="why" style="font-size:10px;margin-left:6px">palette</span>` +
       GRAD_KEYS.map((k) => `<span class="chip seg-grad${k === grad ? " on" : ""}" data-seggrad="${k}" title="${k}" style="cursor:pointer;padding:1px 4px">${GRAD[k].map((c) => `<i style="background:${c};width:6px;height:9px;display:inline-block"></i>`).join("")}</span>`).join("");
-    return `<div class="seg-ctl">${pills}${grads}<span style="margin-left:auto">${segLegend(md, sc)}</span></div>`;
+    const pAll = (() => { try { return localStorage.getItem("fh6PaintAll") === "1"; } catch (e) { return false; } })();
+    const allPill = `<span class="chip seg-paintall${pAll ? " on" : ""}" data-paintall="1" title="paint every run in this palette, not only the foregrounded lap" style="cursor:pointer;margin-left:6px">every run</span>`;
+    return `<div class="seg-ctl">${pills}${grads}${allPill}<span style="margin-left:auto">${segLegend(md, sc)}</span></div>`;
   };
 
   // resample() carries the WORSE of two bracketing states, so one real hit can flag several adjacent 4 m buckets —
@@ -766,7 +768,7 @@
   // discarding them (they were 24 of 151 laps, and they fall hardest on long courses never completed, where the
   // road you have practised most is the road that had no data). The UI's job is to keep them legible WITHOUT
   // letting a 400 m fragment sit next to a full lap looking like a 12-second record.
-  const isPartial = (t) => !!(t && t.partial);
+  const isPartial = (t) => !!(t && (t.partial || (t._cov != null && t._cov < 0.9)));   // _cov: coverage judged from the trace's own points
   const PARTIAL_WHY = "part of the course only — the corners it covers are real, but the TIME is not comparable to a full lap";
   const notTimed = (t) => isVoid(t) || isPartial(t);
   const CM_PC = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
@@ -5401,6 +5403,12 @@
         .map((l) => ({ cid: l.cid, cls: l.class || CLS_OF_PI(l.pi), pts: l.pts, lap_s: l.lap_s, pi: l.pi, build_id: l.build_id, drivetrain: l.drivetrain, tune_hash: l.tune_hash, solo: l.solo, session: l.session, pct_off: l.pct_off, impacts: l.impacts, void: !!l.void, hist: true }))
         .filter((l) => (!curCls || l.cls === curCls) && !seen.has(l.cid + "|" + (l.lap_s != null ? l.lap_s.toFixed(2) : "")));
       const match0 = saved.concat(recs);
+      // A SAVED TRACE CARRIES NO PARTIAL FLAG. The course model kept whichever window a session called its best,
+      // and a session that only drove a fragment saved the fragment; judged here from the trace's own last arc
+      // against the course length, so a quarter-lap can never be crowned fastest or foregrounded as 'you'.
+      { const _La = match0.map((t) => (t.pts && t.pts.length ? (t.pts[t.pts.length - 1][0] || 0) : 0));
+        const _L = Math.max(((courseGeoFor(co) || {}).length_m) || 0, ..._La, 0);
+        if (_L > 0) match0.forEach((t, i2) => { t._cov = _La[i2] / _L; }); }
       // FILTER BY WHAT SEPARATES ONE TRACE FROM ANOTHER. Jett: "the speed trace filters will allow the user to
       // specific which additional speed traces they want to display based on class, car type, tune hash etc."
       // Class already had a switch; drivetrain, tune revision and clean/contact did not, so a course with four
@@ -5482,7 +5490,10 @@
       const ticks = ((geo && geo.turns) || []).filter((g2) => g2.s != null && g2.apex).map((g2) => `<line x1="${px2(g2.s).toFixed(1)}" y1="${H2 - padB}" x2="${px2(g2.s).toFixed(1)}" y2="8" stroke="var(--line)" opacity=".55"/><text x="${px2(g2.s).toFixed(1)}" y="${H2 - 4}" text-anchor="middle" font-size="8" fill="var(--muted)">${tkLbl(g2)}</text>`).join("");
       const axis = [0.5, 1].map((f2) => { const v = Math.round(vmax * f2 / 10) * 10; return `<text x="2" y="${(py2(v) + 3).toFixed(1)}" font-size="8" fill="var(--muted)">${v}</text>`; }).join("");
       // rivals: plain lines (comparison). YOUR tune: grip-painted, because that is the one you can act on.
-      const lines = match.map((t) => (isCur(t) ? "" : line(t, t === best ? "#00d27a" : "var(--muted)", t === best ? 1.8 : 1.1, t === best ? 0.9 : 0.45))).join("") + (cur ? gripLine(cur, 2.4) : "");
+      // "every run": Jett asked why grip/speed/elevation are not painted on the ENTIRE trace of EVERY run. They are
+      // recorded for every run; painting one lap is a view choice. This switch paints them all (the others thinner).
+      const paintAll = (() => { try { return localStorage.getItem("fh6PaintAll") === "1"; } catch (e) { return false; } })();
+      const lines = match.map((t) => (isCur(t) ? "" : (paintAll && t.pts && t.pts[0] && t.pts[0].length > 2 ? gripLine(t, t === best ? 1.6 : 1.0) : line(t, t === best ? "#00d27a" : "var(--muted)", t === best ? 1.8 : 1.1, t === best ? 0.9 : 0.45)))).join("") + (cur ? gripLine(cur, 2.4) : "");
       const hasGrip = !!(cur && cur.pts && cur.pts[0] && cur.pts[0].length > 2);
       // THE SAME CONTACT, on the distance axis: a lap point's arc (p[0]) is where the hit happened along the lap, so
       // the trace tick and the map burst are the SAME event read two ways. Ticked for the lap the chart foregrounds.
@@ -6699,6 +6710,9 @@ ${open.length ? `<div style="font-size:11px;color:var(--warn,#e3b341);margin-top
       // the colour mode and palette are a VIEW choice, so they persist and repaint without touching any data
       r.querySelectorAll("[data-segmode]").forEach((b) => b.addEventListener("click", () => {
         try { localStorage.setItem("fh6SegMode", b.dataset.segmode); } catch (e) {}
+        if (src === "live") paintSections(true); else render(); }));
+      r.querySelectorAll("[data-paintall]").forEach((b) => b.addEventListener("click", () => {
+        try { localStorage.setItem("fh6PaintAll", localStorage.getItem("fh6PaintAll") === "1" ? "0" : "1"); } catch (e) {}
         if (src === "live") paintSections(true); else render(); }));
       r.querySelectorAll("[data-seggrad]").forEach((b) => b.addEventListener("click", () => {
         try { localStorage.setItem("fh6Grad", b.dataset.seggrad); } catch (e) {}

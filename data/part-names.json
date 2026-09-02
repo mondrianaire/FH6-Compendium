@@ -43,7 +43,16 @@
    "rear_wing",
    "weight_reduction"
   ],
-  "confidence": "verified"
+  "confidence": "verified",
+  "front_tire_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_tire_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "front_rim_size": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_rim_size": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "front_track_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_track_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "front_tire_profile": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_tire_profile": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "motor": "Motor and Battery Swap conversion slot; per-car names"
  },
  "named": {
   "transmission": {
@@ -161,7 +170,8 @@
      "pi_preview": 638
     }
    },
-   "_price_hint": "price tracks class loosely (3,200 = no change, 3,300 = 1 unit, 3,400 = 2 units, 3,700 = 3 units) with exceptions at 3,500 and 4,000."
+   "_price_hint": "price tracks class loosely (3,200 = no change, 3,300 = 1 unit, 3,400 = 2 units, 3,700 = 3 units) with exceptions at 3,500 and 4,000.",
+   "_id_to_name_sources": "No readable install file carries the rim id->name table (it lives in the encrypted gamedbRC.slt); icon zip order and archive dates are alphabetical/installer artefacts. Two usable sources: (1) 167 containers have per-build WebP Thumb.png renders (670x376) showing the installed wheels: match the wheel crop against the 528 decoded icons; (2) ids appear to ascend alphabetically within allocation batches (636 American Racing Outlaw II, 637 Asanti AF 118, 638 Asanti AF 134 verified, 639 Asanti AF 140, 649 Compomotive M05: visual reads, unproven). 99100 on ordinal 1562 is a non-rim anomaly."
   },
   "driveline": {
    "_scheme": "Global ladder",
@@ -320,6 +330,12 @@
      "installed_in_clone": "2 (matches rear_wing 412002)"
     }
    }
+  },
+  "manifold": {
+   "_exclusive": "manifold (NA marker) and any populated aspiration slot are mutually exclusive; never schedule a manifold purchase after an Aspiration conversion."
+  },
+  "motor": {
+   "_scheme": "DENSE conversion slot (Motor and Battery Swap), per-car names; do not name by catalogue row. motor_parts rows 259-262 are a normal Stock/Street/Sport/Race run keyed by the motor family."
   }
  },
  "gaps": {
@@ -476,7 +492,8 @@
    "valves",
    "oil_cooling",
    "flywheel",
-   "intercooler"
+   "intercooler",
+   "driveline"
   ],
   "verified_pairs": [
    [
@@ -578,6 +595,16 @@
     "camshaft",
     3,
     "Race Cams and Valves"
+   ],
+   [
+    "driveline",
+    0,
+    "Stock Driveline"
+   ],
+   [
+    "driveline",
+    3,
+    "Race Driveline"
    ]
   ],
   "rims": "Model names are NOT in EN.zip. The rim catalogue is the directory Content/media/cars/_library/scene/wheels/<MFR>_<MODEL>.zip (e.g. ASA_AF134, WOR_MeisterCR01, AME_VF300, 5ZI_5ZRCopse) with matching icons in ui/textures/data_bound/Upgrade_Parts.zip/Tire_Rims/Licensed_Rims/. The numeric rim_style id -> stem mapping is in no readable text entry; it still needs fit -> save -> diff per wheel.",
@@ -665,5 +692,56 @@
     "class3": -33
    }
   }
+ },
+ "size_slots": {
+  "_scheme": "DENSE per car: index = step k from stock in the car's own list (variant digit = body kit). Proven on the NSX-R clone frames: rear_tire_width 106 = tile 7 of 7 (345 mm), rear_rim_size 4 = tile 5 (20 in), front_rim_size 3 = tile 4 (18 in). Front tire width, track width and tire profile dense by construction (fleet uses exactly tiers 0..N with N = catalogue 'Upgraded' row count).",
+  "row_counts": {
+   "front_tire_width": 6,
+   "rear_tire_width": 6,
+   "front_rim_size": 8,
+   "rear_rim_size": 8,
+   "front_track_width": 3,
+   "rear_track_width": 3,
+   "front_tire_profile": 3,
+   "rear_tire_profile": 3
+  },
+  "nsxr_412": {
+   "front_tire_width_stock_body": [
+    "205 (205/50R15)",
+    "225 (225/45R15)",
+    "245",
+    "255 (255/40R15)"
+   ],
+   "front_tire_width_widebody": [
+    "205",
+    "225",
+    "?",
+    "?",
+    "275 (275/35R15)",
+    "?",
+    "295 (295/35R15)"
+   ],
+   "rear_tire_width_stock_body": [
+    "225 (225/50R16)",
+    "245 (245/45R16)",
+    "265",
+    "285 (285/40R16)",
+    "305 (305/35R16)"
+   ],
+   "rear_tire_width_widebody": [
+    "285 (stock for kit)",
+    "295",
+    "305",
+    "315",
+    "325",
+    "335",
+    "345"
+   ],
+   "front_rim_size": "index 3 = 18 in Front Rims (tile 4)",
+   "rear_rim_size": "index 4 = 20 in Rear Rims (tile 5)",
+   "note": "rim menus do not change with the kit; the NSX-R sells no track width or tire profile menu"
+  },
+  "track_width_and_profile": "Separate car-dependent shop menus, not consequences of width or rim size (47 containers have non-stock front track width with stock front tire width). Only cars whose category shows the tile carry them; at a widebody variant tier 0 is the kit's own stock.",
+  "corrections": "part-index-vocabulary.json basket rows were wrong: front_rim_size 3 is 18 in (not 17), rear_rim_size 4 is 20 in (not 19)."
  }
 }

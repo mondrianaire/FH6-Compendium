@@ -1,24 +1,46 @@
 {
  "schema_version": "1.1.0",
  "created": "2026-08-22",
- "updated": "2026-08-29",
+ "updated": "2026-09-02",
  "purpose": "Tire-compound index -> name. The save stores tire_compound as ordinal*1000+idx; idx (0..15) is a GLOBAL compound-catalog position. idx 0 = Stock is data-certain. The in-game Tire Compound MENU (video-captured 2026-08-23) gives the REAL FH6 compound NAMES, but the menu grid is NOT in save-index order and only shows a car's AVAILABLE compounds, so it does NOT by itself map name->index.",
  "names": {
   "0": "Stock",
   "1": "Street",
   "2": "Sport",
   "3": "Semi-Slick Race",
-  "5": "Slick Race",
-  "6": "Rally",
+  "5": "Rally",
+  "6": "Slick Race",
   "7": "Offroad Race",
   "8": "Snow",
-  "10": "Drag",
+  "9": "Drag",
+  "10": "'Horizon' Semi-Slick Race",
   "15": "Drift"
  },
- "names_confidence": "idx 0 = Stock and idx 15 = Drift are VERIFIED from saves. Every other index->name assignment is UNVERIFIED best-effort and may be displaced the same way idx 9's 'Drift' was: anchor_compound.py now frees any unverified index claiming a name that a verified anchor has just taken, so the catalog cannot assert one compound at two indices.",
+ "names_confidence": {
+  "0": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "1": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "2": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "3": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "5": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "6": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "7": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "8": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "9": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "10": "proven (saved setup cmpN read back from the container, 2026-09-02)",
+  "15": "proven (saved setup cmpN read back from the container, 2026-09-02)"
+ },
  "verified": [
-  "0",
-  "15"
+  0,
+  1,
+  2,
+  3,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  15
  ],
  "observed_fh6_menu_compounds": {
   "source": "In-game Tire Compound menu, 2018 Exomotive Exocet Sport V8 XP-5 (ord 2866), video knE0jOvP9z.mp4 2026-08-23. Names are exact; grid POSITION is NOT the save index.",
@@ -40,36 +62,21 @@
    "and whatever idx 11/12/15 are — the Exocet only offers its subset"
   ]
  },
- "index_map_status": "STILL NEEDED. The menu gives names but not indices. To map name->index GLOBALLY (the index is global, so one car suffices): install + save a distinctive compound on ONE car, decode the saved tune, read tire_compound%1000 = that compound's index. A handful of installs (e.g. Drag, Snow, Offroad Race, Slick Race) on the Exocet anchors those indices for the whole garage. This also resolves 11/12/15.",
+ "index_map_status": "PROVEN for 0,1,2,3,5,6,7,8,9,10,15 (all 11 NSX-R tiles, one saved setup each). 11 and 12 observed in stored tunes but unnamed (MX-5 Miata FE / Peel P50 sell them); 4, 13, 14 unseen in 574 containers.",
  "unmapped_pending_anchor": {
-  "9": {
-   "files": 46,
-   "cars_sample": [
-    "1995 Ferrari F50",
-    "2004 Maserati MC12",
-    "2008 Dodge Viper SRT-10 ACR",
-    "2010 Noble M600",
-    "2012 Lamborghini Aventador LP700-4",
-    "2013 Ariel Atom"
-   ],
-   "note": "was an unverified 'Drift' guess until idx 15 was VERIFIED as Drift from ordinal 1110. The cars running it are supercars and track specials, and \"'Horizon' Semi-Slick Race\" is the one name in the observed in-game menu roster with no index assigned — so that is the leading hypothesis, NOT a claim. Anchor it to find out."
-  },
-  "11": {
-   "files": 36,
-   "cars_sample": [
-    "1969 Ferrari Dino 246",
-    "1994 Ford Supervan 3",
-    "1991 Jaguar XJR-15",
-    "2021 Mercedes-AMG One",
-    "1989 Nissan S-Cargo (Forza Edition)"
-   ]
-  },
-  "12": {
-   "files": 2,
-   "cars_sample": [
-    "1962 Peel P50",
-    "1970 Ferrari 512 S"
-   ]
-  }
+  "11": "36 builds, e.g. 1994 Mazda MX-5 Miata (Forza Edition)",
+  "12": "2 builds: 1962 Peel P50, 1970 Ferrari 512 S"
+ },
+ "_superseded_names_2026_08_29": {
+  "0": "Stock",
+  "1": "Street",
+  "2": "Sport",
+  "3": "Semi-Slick Race",
+  "5": "Slick Race",
+  "6": "Rally",
+  "7": "Offroad Race",
+  "8": "Snow",
+  "10": "Drag",
+  "15": "Drift"
  }
 }

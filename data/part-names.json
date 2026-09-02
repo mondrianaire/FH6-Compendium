@@ -743,5 +743,6 @@
   },
   "track_width_and_profile": "Separate car-dependent shop menus, not consequences of width or rim size (47 containers have non-stock front track width with stock front tire width). Only cars whose category shows the tile carry them; at a widebody variant tier 0 is the kit's own stock.",
   "corrections": "part-index-vocabulary.json basket rows were wrong: front_rim_size 3 is 18 in (not 17), rear_rim_size 4 is 20 in (not 19)."
- }
+ },
+ "drivetrain_partset_caveat": "Transmission, differential, driveline and clutch share ONE partset per container that is never the car's ordinal. Set 2102 is used by swapped drivetrains (313 of 574 containers); stock drivetrains use a per-car set (94 sets, 238 containers). Every proven Drivetrain ladder (trm/dif/drv saves 2026-09-02) was made on the AWD-swapped NSX-R, i.e. set 2102. The index digits look identical across sets in the corpus histograms, but treat differential/transmission/driveline names on non-2102 sets as 'verified on 2102 only' until one stock-set capture. The transmission speed count is set-independent: count the non-sentinel gear slots."
 }

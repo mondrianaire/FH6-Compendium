@@ -8,8 +8,11 @@ Classifies each populated (non-EMPTY) slot of each container by how its name res
   brand     a brand-labelled slot (engine swap, body kit, wing, bumpers, hood, skirts): per-car, no table
   rim       rim_style ids: only the verified anchors resolve
   unknown   nothing resolves
-A build is "clone-ready" when every populated slot that is not stock (index 0 / variant-stock) is
-proven or verified. Writes data/clone-coverage.json and prints a summary.
+A build is "clone-ready" when every populated non-stock slot is proven/verified by name, or is a dense
+tile-position slot (drivetrain, engine swap, body kit, wing, front bumper, weight, cage, motor, the 8 size
+ladders), or is set by the kit (hood, skirts, rear bumper), or is a rim (weight class read from the source
+car), or is a catalogue-derived name on a base tier 0-3 (19/19 record). Late-added catalogue rows and
+unknown indices are the only blockers. Writes data/clone-coverage.json and prints a summary.
 """
 import io, os, sys, glob, json, struct, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -32,6 +35,9 @@ harvest(cars)
 pn = json.load(open(os.path.join(C.DATA, 'part-names.json'), encoding='utf-8'))
 brand_slots = set((pn.get('catalogue', {}).get('brand_slots') or {}).get('slots') or [])
 RIM = {'rim_style', 'rear_rim_style'}
+DENSE_TILE = {'drivetrain', 'car_body', 'engine', 'rear_wing', 'front_bumper', 'weight_reduction', 'roll_cage', 'motor'}
+AUTO_BY_KIT = {'hood', 'side_skirts', 'rear_bumper'}
+SIZE_SLOTS = {'front_tire_width', 'rear_tire_width', 'front_rim_size', 'rear_rim_size', 'front_track_width', 'rear_track_width', 'front_tire_profile', 'rear_tire_profile'}
 
 def classify(slot, pid, ordinal):
     ps, idx = C.split_any(pid, ordinal)
@@ -66,6 +72,13 @@ for p in files:
         cls, idx, nm = classify(slot, pid, o)
         per_slot[slot][cls] += 1
         stock = idx is not None and idx % 100 == 0 and slot not in RIM
+        # 2026-09-02 audit: size slots are dense (tile = tier + 1); catalogue-derived names are clone-safe on the
+        # base tiers 0-3 (19/19 record); only late-added catalogue rows (tier >= 4, or slots with no base run)
+        # remain real gaps. Rims are a weight class read from the source car, so they never block.
+        if slot in SIZE_SLOTS or slot in DENSE_TILE or slot in AUTO_BY_KIT or slot in RIM:
+            continue
+        if cls == 'derived' and idx is not None and idx % 100 <= 3:
+            continue
         if cls in ('proven', 'verified', 'rim-proven') or stock:
             continue
         key = pid if slot in RIM else idx

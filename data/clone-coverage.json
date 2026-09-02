@@ -1,541 +1,235 @@
 {
  "containers": 574,
+ "clone_ready": 425,
+ "by_blocker_kind": {
+  "ready": 425,
+  "derived": 74,
+  "unknown": 53,
+  "derived + unknown": 22
+ },
  "per_slot": {
   "engine": {
-   "stock": 274,
-   "tile-proven": 287
+   "brand": 561
   },
   "drivetrain": {
-   "tile-proven": 336,
-   "stock": 238
+   "derived": 574
   },
   "car_body": {
-   "stock": 527,
-   "tile-proven": 47
+   "brand": 574
   },
   "brakes": {
-   "stock": 400,
-   "name-proven": 174
+   "proven": 565,
+   "verified": 9
   },
   "springs_dampers": {
-   "name-proven": 290,
-   "stock": 284
+   "proven": 562,
+   "verified": 12
   },
   "front_arb": {
-   "name-proven": 326,
-   "stock": 248
+   "proven": 570,
+   "verified": 4
   },
   "rear_arb": {
-   "name-proven": 317,
-   "stock": 257
+   "proven": 569,
+   "verified": 5
   },
   "tire_compound": {
-   "stock": 133,
-   "name-proven": 403,
+   "proven": 536,
    "unknown": 38
   },
   "rear_wing": {
-   "tile-proven": 330,
-   "stock": 244
+   "brand": 574
   },
   "front_rim_size": {
-   "stock": 468,
-   "size-unproven": 106
+   "derived": 574
   },
   "rear_rim_size": {
-   "size-unproven": 234,
-   "stock": 340
+   "derived": 574
   },
   "camshaft": {
-   "stock": 395,
-   "name-proven": 166
+   "verified": 561
   },
   "valves": {
-   "stock": 374,
-   "name-proven": 187
+   "verified": 561
   },
   "displacement": {
-   "stock": 342,
-   "name-proven": 219
+   "verified": 561
   },
   "pistons": {
-   "stock": 366,
-   "name-proven": 195
+   "verified": 561
   },
   "fuel_system": {
-   "stock": 389,
-   "name-proven": 172
+   "verified": 561
   },
   "ignition": {
-   "stock": 385,
-   "name-proven": 176
+   "verified": 561
   },
   "exhaust": {
-   "stock": 309,
-   "name-proven": 252
+   "verified": 561
   },
   "intake": {
-   "stock": 349,
-   "name-proven": 212
+   "verified": 561
   },
   "flywheel": {
-   "stock": 427,
-   "name-proven": 134
+   "verified": 561
   },
   "manifold": {
-   "stock": 81,
-   "name-derived": 37
+   "derived": 118
   },
   "oil_cooling": {
-   "stock": 443,
-   "name-proven": 118
+   "verified": 561
   },
   "clutch": {
-   "stock": 510,
-   "name-derived": 64
+   "derived": 574
   },
   "transmission": {
-   "name-proven": 453,
-   "stock": 121
+   "proven": 466,
+   "verified": 108
   },
   "driveline": {
-   "stock": 242,
-   "name-proven": 304,
-   "name-derived": 28
+   "proven": 546,
+   "verified": 28
   },
   "differential": {
-   "name-proven": 450,
-   "stock": 98,
-   "unknown": 26
+   "proven": 546,
+   "unknown": 26,
+   "verified": 2
   },
   "front_bumper": {
-   "stock": 304,
-   "tile-proven": 270
+   "brand": 574
   },
   "rear_bumper": {
-   "stock": 474,
-   "auto-by-kit": 100
+   "brand": 574
   },
   "hood": {
-   "stock": 461,
-   "auto-by-kit": 113
+   "brand": 574
   },
   "side_skirts": {
-   "stock": 474,
-   "auto-by-kit": 100
+   "brand": 574
   },
   "front_tire_width": {
-   "stock": 371,
-   "size-unproven": 203
+   "derived": 574
   },
   "rear_tire_width": {
-   "size-unproven": 476,
-   "stock": 98
+   "derived": 574
   },
   "weight_reduction": {
-   "stock": 133,
-   "tile-proven": 441
+   "proven": 268,
+   "verified": 306
   },
   "roll_cage": {
-   "stock": 338,
-   "tile-proven": 236
+   "proven": 381,
+   "derived": 193
   },
   "front_track_width": {
-   "stock": 459,
-   "size-unproven": 115
+   "derived": 574
   },
   "rear_track_width": {
-   "stock": 370,
-   "size-unproven": 204
+   "derived": 574
   },
   "front_tire_profile": {
-   "stock": 566,
-   "size-unproven": 8
+   "derived": 574
   },
   "rear_tire_profile": {
-   "stock": 553,
-   "size-unproven": 21
+   "derived": 574
   },
   "twin_turbo": {
-   "name-derived": 88,
-   "stock": 21
+   "derived": 109
   },
   "intercooler": {
-   "stock": 171,
-   "name-proven": 144
+   "verified": 315
   },
   "rim_style": {
-   "rim-unknown": 103,
-   "rim-ok": 202
+   "rim": 103,
+   "rim-proven": 202
   },
   "rear_rim_style": {
-   "rim-unknown": 303
+   "rim": 303
   },
   "centrifugal_supercharger": {
-   "name-proven": 174
+   "verified": 174
   },
   "single_turbo": {
-   "name-derived": 106,
-   "stock": 36
+   "derived": 142
   },
   "restrictor_plate": {
    "unknown": 11,
-   "name-derived": 4,
-   "stock": 6
+   "derived": 10
   },
   "pos_supercharger": {
-   "name-derived": 11,
-   "stock": 7
+   "derived": 18
   },
   "motor": {
-   "stock": 10,
-   "ev-unproven": 3
+   "derived": 13
   },
   "motor_parts": {
-   "stock": 6,
-   "ev-unproven": 7
+   "derived": 13
   }
  },
- "blocker_combos": {
-  "size-unproven": 110,
-  "ready": 9,
-  "name-derived + rim-unknown + size-unproven": 112,
-  "rim-unknown + size-unproven": 128,
-  "name-derived + size-unproven": 86,
-  "name-derived + size-unproven + unknown": 22,
-  "name-derived + rim-unknown + size-unproven + unknown": 18,
-  "rim-unknown": 6,
-  "size-unproven + unknown": 13,
-  "name-derived + rim-unknown": 21,
-  "rim-unknown + size-unproven + unknown": 12,
-  "name-derived": 18,
-  "name-derived + unknown": 4,
-  "ev-unproven + rim-unknown + size-unproven + unknown": 1,
-  "ev-unproven + size-unproven": 5,
-  "ev-unproven + rim-unknown + size-unproven": 3,
-  "name-derived + rim-unknown + unknown": 5,
-  "ev-unproven": 1
- },
- "ready": {
-  "strict": 9,
-  "sizes_dense": 119,
-  "sizes_dense_rims_resolved": 253,
-  "plus_derived": 490
- },
- "residual": [
+ "gaps": [
   {
-   "class": "name-derived",
    "slot": "single_turbo",
    "key": 4,
    "builds": 55,
    "cars": 23,
-   "top": [
-    "1989 Nissan S-Cargo (Forza Edition)",
-    "2020 Wuling Sunshine S (Forza Edition)",
-    "1962 Peel P50"
-   ]
+   "top": "1989 Nissan S-Cargo (Forza Edition) x9, 2020 Wuling Sunshine S (Forza Edition) x7, 1962 Peel P50 x4"
   },
   {
-   "class": "name-derived",
-   "slot": "clutch",
-   "key": 3,
-   "builds": 55,
-   "cars": 29,
-   "top": [
-    "1998 Subaru Impreza 22B",
-    "2014 Volkswagen Golf R",
-    "1994 Honda Acty"
-   ]
-  },
-  {
-   "class": "name-derived",
    "slot": "twin_turbo",
    "key": 4,
    "builds": 41,
    "cars": 22,
-   "top": [
-    "1994 Mazda MX-5 Miata (Forza Edition)",
-    "1998 Subaru Impreza 22B",
-    "2012 Nissan GT-R"
-   ]
+   "top": "1994 Mazda MX-5 Miata (Forza Edition) x11, 1998 Subaru Impreza 22B x3, 2012 Nissan GT-R x3"
   },
   {
-   "class": "name-derived",
-   "slot": "manifold",
-   "key": 3,
-   "builds": 34,
-   "cars": 21,
-   "top": [
-    "1986 MG Metro 6R4",
-    "1994 Mazda MX-5 Miata (Forza Edition)",
-    "2004 Subaru Impreza WRX STi"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "twin_turbo",
-   "key": 1,
-   "builds": 24,
-   "cars": 13,
-   "top": [
-    "2012 Nisan GT-R Black Edition R35 (Forza Edition)",
-    "1964 Ferrari 250 GTO",
-    "2013 Cadillac XTS Limo"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "single_turbo",
-   "key": 3,
-   "builds": 22,
-   "cars": 15,
-   "top": [
-    "2014 Volkswagen Golf R",
-    "2006 Formula Drift #43 Dodge Viper SRT10",
-    "2018 Ferrari FXX-K Evo"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "single_turbo",
-   "key": 1,
-   "builds": 20,
-   "cars": 10,
-   "top": [
-    "2018 Lotus Scura Motorsports Exige WTAC",
-    "1965 Alfa Romeo Giulia TZ2",
-    "2021 Merceds-AMG One"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "driveline",
-   "key": 1,
-   "builds": 17,
-   "cars": 11,
-   "top": [
-    "1989 Volkswagen Golf Rallye",
-    "2008 Mitsubishi Lancer Evolution X GSR",
-    "1999 Dodge Viper GTS ACR"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "twin_turbo",
-   "key": 3,
-   "builds": 17,
-   "cars": 12,
-   "top": [
-    "1998 Subaru Impreza 22B",
-    "2013 Viper GTS",
-    "1994 Mazda MX-5 Miata (Forza Edition)"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "driveline",
-   "key": 2,
-   "builds": 11,
-   "cars": 10,
-   "top": [
-    "1984 Honda City",
-    "2004 Subaru Impreza WRX STi",
-    "1992 GMC Syclone"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "single_turbo",
-   "key": 2,
-   "builds": 9,
-   "cars": 8,
-   "top": [
-    "2020 Wuling Sunshine S (Forza Edition)",
-    "2004 Subaru Impreza WRX STi",
-    "2008 Subaru Impreza WRX STi"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "twin_turbo",
-   "key": 2,
-   "builds": 6,
-   "cars": 5,
-   "top": [
-    "1995 Ferrari F50",
-    "2013 Ariel Atom",
-    "2021 McLaren Sabre"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "clutch",
-   "key": 2,
-   "builds": 6,
-   "cars": 5,
-   "top": [
-    "2014 Volkswagen Golf R",
-    "2004 Subaru Impreza WRX STi",
-    "2008 Dodge Viper SRT-10 ACR"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "pos_supercharger",
-   "key": 2,
-   "builds": 5,
-   "cars": 3,
-   "top": [
-    "2019 Casey Currie Motorsports #4402 Ultra 4 Trophy Jeep",
-    "1994 Subaru Vivio RX-R",
-    "2018 Chevrolet Camaro 1LE"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "restrictor_plate",
-   "key": 1,
-   "builds": 4,
-   "cars": 3,
-   "top": [
-    "2018 Lotus Scura Motorsports Exige WTAC",
-    "1991 Mazda #55 Mazda 787B",
-    "1990 Mercedes-Benz 190E 2.5-16 Evolution II (Forza Edition)"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "pos_supercharger",
-   "key": 3,
-   "builds": 3,
-   "cars": 3,
-   "top": [
-    "1965 Shelby Cobra Daytona",
-    "2016 Formula Drift #530 HSV Maloo Gen-F",
-    "1991 Honda Beat"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "pos_supercharger",
-   "key": 1,
-   "builds": 3,
-   "cars": 3,
-   "top": [
-    "1970 GMC Jimmy",
-    "2017 Jeep Trailcat",
-    "1991 Jaguar XJR-15"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "clutch",
-   "key": 1,
-   "builds": 3,
-   "cars": 3,
-   "top": [
-    "1989 Volkswagen Golf Rallye",
-    "1994 Subaru Vivio RX-R",
-    "1985 Toyota Sprinter (Forza Edition)"
-   ]
-  },
-  {
-   "class": "name-derived",
-   "slot": "manifold",
-   "key": 2,
-   "builds": 3,
-   "cars": 2,
-   "top": [
-    "1984 Honda City",
-    "1985 Toyota Sprinter (Forza Edition)"
-   ]
-  },
-  {
-   "class": "unknown",
    "slot": "tire_compound",
    "key": 11,
    "builds": 36,
    "cars": 11,
-   "top": [
-    "1994 Mazda MX-5 Miata (Forza Edition)",
-    "2020 Wuling Sunshine S (Forza Edition)",
-    "1989 Nissan S-Cargo (Forza Edition)"
-   ]
+   "top": "1994 Mazda MX-5 Miata (Forza Edition) x10, 2020 Wuling Sunshine S (Forza Edition) x7, 1989 Nissan S-Cargo (Forza Edition) x4"
   },
   {
-   "class": "unknown",
    "slot": "differential",
    "key": 7,
    "builds": 26,
    "cars": 17,
-   "top": [
-    "1986 MG Metro 6R4",
-    "2004 Subaru Impreza WRX STi",
-    "2014 Volkswagen Golf R"
-   ]
+   "top": "1986 MG Metro 6R4 x4, 2004 Subaru Impreza WRX STi x3, 2014 Volkswagen Golf R x3"
   },
   {
-   "class": "unknown",
    "slot": "restrictor_plate",
    "key": 2,
    "builds": 11,
    "cars": 9,
-   "top": [
-    "2014 Alfa Romeo 4C",
-    "2018 Lotus Scura Motorsports Exige WTAC",
-    "2008 Mitsubishi Lancer Evolution X GSR"
-   ]
+   "top": "2014 Alfa Romeo 4C x2, 2018 Lotus Scura Motorsports Exige WTAC x2, 2008 Mitsubishi Lancer Evolution X GSR x1"
   },
   {
-   "class": "unknown",
    "slot": "tire_compound",
    "key": 12,
    "builds": 2,
    "cars": 2,
-   "top": [
-    "1962 Peel P50",
-    "1970 Ferrari 512 S"
-   ]
-  },
-  {
-   "class": "ev-unproven",
-   "slot": "motor_parts",
-   "key": 3,
-   "builds": 6,
-   "cars": 2,
-   "top": [
-    "1986 Ford F-150 XLT Lariat (Forza Edition)",
-    "2022 GMC Hummer EV"
-   ]
-  },
-  {
-   "class": "ev-unproven",
-   "slot": "motor",
-   "key": 1,
-   "builds": 3,
-   "cars": 1,
-   "top": [
-    "2022 GMC Hummer EV"
-   ]
-  },
-  {
-   "class": "ev-unproven",
-   "slot": "motor_parts",
-   "key": 2,
-   "builds": 1,
-   "cars": 1,
-   "top": [
-    "2022 Rivian R1T"
-   ]
+   "top": "1962 Peel P50 x1, 1970 Ferrari 512 S x1"
   }
  ],
- "rim": {
-  "builds_blocked": 306,
-  "distinct_ids": 168
- },
- "size": {
-  "builds_with_nonstock": 510
- },
- "rim_reframe": "Rims are a weight class, readable from the source car's INSTALLED tile; not a table gap. Effective readiness: 119 if size ladders are dense, 253 with rims by protocol, 490 with derived names accepted.",
- "fallback": "Every residual gap has a second identification path: effect-match (source Power/Weight + Braking/Lateral G pages vs the candidate tile's preview), with PI verifiable live through the daemon's menu preview configs."
+ "ready_examples": [
+  "1964 Ferrari 250 GTO",
+  "1964 Ferrari 250 GTO",
+  "1964 Ferrari 250 GTO",
+  "1964 Ferrari 250 GTO",
+  "1967 Chevrolet Corvette Stingray",
+  "2002 Chevrolet Corvette Z06",
+  "1997 Lamborghini Diablo SV",
+  "1969 Ferrari Dino 246",
+  "1997 McLaren F1 GT",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT"
+ ]
 }

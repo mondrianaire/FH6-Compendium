@@ -208,6 +208,15 @@
    "3": "Race Rear Anti-roll Bars",
    "_banner": "UNLOCKS REAR ANTIROLL BAR STIFFNESS TUNING on Race",
    "_side_effect": "rewrites rear_arb slider (Stock 0.500, Race 0.378)"
+  },
+  "roll_cage": {
+   "_scheme": "DENSE within the body variant: index = variant*100 + tile position (412100/412101/412102 on the widebody NSX-R)",
+   "_proof": "chs1..chs3 2026-09-02; chs1 = installed Stock unchanged",
+   "0": "Stock Chassis Reinforcement / Roll Cage",
+   "1": "Sport Chassis Reinforcement / Roll Cage",
+   "2": "Race Chassis Reinforcement / Roll Cage",
+   "_note": "tier digit only; the hundreds digit is the body variant",
+   "_side_effect": "none"
   }
  },
  "gaps": {

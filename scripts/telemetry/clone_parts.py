@@ -137,7 +137,7 @@ PRUNED_BY_BODY_KIT = {"front_bumper"}
 # using all three rear-wing indexes against a 3-tile menu. NOTE that brakes has an IDENTICAL 3-tile
 # menu (Stock/Sport/Race) and is SPARSE: its Race decodes as index 3, impossible if dense. Menu
 # shape does not predict the scheme -- it has to be established per slot and recorded.
-DENSE_SLOTS = {"drivetrain", "car_body", "engine", "weight_reduction", "rear_wing"}
+DENSE_SLOTS = {"drivetrain", "car_body", "engine", "weight_reduction", "rear_wing", "roll_cage"}
 
 # Upgrade Shop tile number for each category (docs/fh6-ui-spec.md 2, the 3x2 grid), and the sub-menu
 # tile number inside it where the spec names one. None = the spec never showed that tile highlighted.

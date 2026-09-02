@@ -202,5 +202,44 @@
     "default_rear_arb": 0.378
    }
   ]
+ },
+ "roll_cage": {
+  "menu": "Chassis Reinforcement / Roll Cage: 3 tiles Stock, Sport, Race. No banner.",
+  "scheme": "DENSE inside the body variant: ids 412100 / 412101 / 412102 (variant 1 = widebody kit, tier = tile position). Not the global ladder.",
+  "side_effect": "none",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Chassis Reinforcement / Roll Cage",
+    "index": 100,
+    "installed": true,
+    "brake_60_ft": 85.8,
+    "brake_100_ft": 197.9,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "chs1"
+   },
+   {
+    "tile": 2,
+    "name": "Sport Chassis Reinforcement / Roll Cage",
+    "index": 101,
+    "price_cr": 1400,
+    "brake_60_ft": 86.0,
+    "brake_100_ft": 198.2,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "chs2"
+   },
+   {
+    "tile": 3,
+    "name": "Race Chassis Reinforcement / Roll Cage",
+    "index": 102,
+    "brake_60_ft": 84.8,
+    "brake_100_ft": 198.5,
+    "latg_60": 1.22,
+    "latg_120": 1.49,
+    "setup": "chs3"
+   }
+  ]
  }
 }

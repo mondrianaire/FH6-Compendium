@@ -318,3 +318,5 @@ Drivetrain category on the NSX-R has three tiles only: Transmission, Driveline, 
 | Weight Reduction | 3 | Race Weight Reduction | 102 | 85.7 / 197.9 | 1.22 / 1.50 |  | none |
 
 Spring kits rewrite camber, caster (both fields, including rear_caster: 0.667 stock, 0.000 on the kits), springs, ride height, bump and rebound to per-kit defaults. Rally sets ride height 1.000 and Drift 0.000 (band anchors); Race sets 0.327. Stock resets everything to 0.500. Anti-roll bar installs rewrite their own slider (front_arb 0.480 -> 0.500 on the stock bar).
+
+Platform and Handling category grid on the NSX-R: six tiles in this order: Brakes, Spring and Dampers, Front Anti-roll Bars, Rear Anti-roll Bars, Chassis Reinforcement / Roll Cage, Weight Reduction (brake-disc, coilover, front bar, rear bar, X-brace, tyre-plus-battery icons).

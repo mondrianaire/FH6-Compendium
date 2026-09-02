@@ -224,3 +224,19 @@ matching 2.2 exactly.
 lists whose index IS the 0-based tile position — 9.2 shows a 2-tile menu and the target's drivetrain
 index is 1. Tier slots (`brakes`, ARBs, `springs_dampers`, `tire_compound`) use the sparse global
 ladder, where the index can exceed the tile count. Match conversions by POSITION and tiers by NAME.
+
+## 10. Upgrade Shop stats panel: five Y-toggle pages (observed 2026-09-01, NSX-R, Tire Compound menu)
+
+The panel under the lime name bar cycles with **Y / Toggle** through five pages. Every page previews the **highlighted** tile applied to the current build; on the INSTALLED tile the pages describe the current build itself. Red/green triangles mark the delta versus the installed part.
+
+| # | Page | Rows (verbatim) | Example on the Stock tile (clone build, installed compound = index 5) |
+|---|---|---|---|
+| 1 | Ratings | Speed, Handling, Acceleration, Launch, Braking, Offroad; PI preview box; drivetrain chip | 6.2 · 6.7▼ · 8.9▼ · 8.3▼ · 6.2▲ · 5.5▼ · A 681 · AWD |
+| 2 | Power / Weight | Power, Torque, Weight, Front, PWR, Displacement | 440 hp · 307 ft·lb · 2,547 lb · 45% · 0.17 hp/lb · 3,400 |
+| 3 | Braking Distance / Lateral Gs | 60 mph – 0, 100 mph – 0; 60 mph, 120 mph | 81.1 ft · 189.1 ft · 1.22 · 1.49 |
+| 4 | Acceleration & Speed | 0 – 60 mph, 0 – 100 mph, Top Speed | 2.950 s · 6.783 s · 170.0 mph |
+| 5 | Aerodynamics / Chassis | Efficiency, Balance; Mech. Balance | 0.809 · 0.42 · 0.59 |
+
+Consequences: page 2 supplies mass and front weight fraction for the spring-rate bands (the My Cars stats screen is no longer needed); page 3 gives a per-compound grip ladder from the game's own model; page 5 gives the aero and mechanical balance of any build. Tile chips (e.g. GRIP -0.16) appear on the highlighted tile only and are deltas versus the installed part.
+
+Tire Compound grid on the NSX-R: 9 tiles, scrollbar present. Tile 1 = "Stock Tire Compound (Street)" (catalogue row 78 is "Stock Tire Compound"; the class suffix is appended by the UI). INSTALLED badge on tile 8, whose save value is index 5.

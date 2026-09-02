@@ -299,6 +299,27 @@
     },
     "note": "no Single Turbo tile on this car; the type chosen here decides which Engine sub-menu (and slot) exists"
    }
+  },
+  "rear_wing": {
+   "_scheme": "DENSE per car; name = <PartManufacturer> - <Upgrades row> (brand rule verified on screen 2026-09-02)",
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "0": "Honda - Stock Rear Wing",
+     "1": "Rocket Bunny - Race Rear Wing",
+     "2": "Forza Horizon 6 - Race Rear Wing",
+     "price_cr": {
+      "1": 5000
+     },
+     "pi_preview": {
+      "0": 591,
+      "1": 578,
+      "2": 578
+     },
+     "chips": "ADJUSTABLE on all three tiles; banner UNLOCKS REAR WING DOWNFORCE TUNING on the two Race wings",
+     "installed_in_clone": "2 (matches rear_wing 412002)"
+    }
+   }
   }
  },
  "gaps": {

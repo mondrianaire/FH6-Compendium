@@ -1,0 +1,3493 @@
+{
+ "_summary": {
+  "generated": "2026-09-02",
+  "source": "WebP build renders in Thumb.png of Tuning_* containers (zero saves made); wheel icons from the BC7 icon dump",
+  "n_containers": 574,
+  "n_webp_renders": 167,
+  "n_renders_with_rim_id": 82,
+  "n_distinct_ids_in_renders": 62,
+  "n_ids_scored": 62,
+  "n_matched_by_eye": 41,
+  "n_ambiguous_by_eye": 17,
+  "n_no_verdict": 4,
+  "method": "front wheel located from the opaque-alpha bottom contour (chord-fit radius, manual override on 7 lowered cars); matcher = per-radius z-normalised polar image (circular high-pass), rotation-max NCC + spoke-count harmonic gating + spectral cosine, scale scan 0.50-0.92 of tyre radius, centre/aspect refinement; aggregate = mean over an id's wheels. Every matched/ambiguous verdict was made by eye on crop-vs-icon comparison sheets; the matcher only supplied candidates.",
+  "caveats": [
+   "names are derived from icon stems (brand code + model), NOT from the EN string table; e.g. the in-game Torq Thrust name may be 'VN215 Torq Thrust D', which changes its sort position",
+   "rim colour is a paint option and was ignored; matches rest on spoke geometry",
+   "rear-wheel-only ids (rear_rim_style != rim_style) are oblique and low-confidence",
+   "'HOL' brand code unresolved (Hole Star / Sun Star / Solid); it sorts between Halibrand and HRE either way",
+   "matcher aggregate top-1 agreed with the eye verdict on only ~10 ids; spoke-count detection is unreliable on wheels under ~45 px radius",
+   "candidate lists for the second-pass zooms were seeded from the alphabetical prior (brand predicted by id position) and then judged by eye; ids whose verdict came from such a sheet: 13153,13154,13619,13620,13673,13675,13701,13970,13973,14027,665,13808,13867,13874,13894,13981,14028,14037"
+  ],
+  "alphabetical_batch_test": {
+   "hypothesis": "within each id batch, in-game names ascend alphabetically (brand, then model) with id",
+   "strict_matched_only": [
+    {
+     "batch": "326..395",
+     "n": 4,
+     "holds": true,
+     "sequence": [
+      "326=5Zigen Sports Engine SC 3000",
+      "338=American Racing VF 302",
+      "371=OZ Racing Superturismo GT",
+      "395=Volk Racing TE 37"
+     ],
+     "breaks": []
+    },
+    {
+     "batch": "632..711",
+     "n": 12,
+     "holds": true,
+     "sequence": [
+      "636=American Racing Outlaw II",
+      "637=Asanti AF 118",
+      "638=Asanti AF 134",
+      "639=Asanti AF 140",
+      "649=Compomotive M 05",
+      "655=DUB Big Chips",
+      "663=Halibrand Sprint II",
+      "665=HOL Hole Star",
+      "666=HOL Solid",
+      "670=Konig Rewind",
+      "675=Lexani LTC 704",
+      "701=TSW Hockenheim R"
+     ],
+     "breaks": []
+    },
+    {
+     "batch": "10917..10959",
+     "n": 0,
+     "holds": null,
+     "detail": "no resolved ids in batch"
+    },
+    {
+     "batch": "12431..12444",
+     "n": 3,
+     "holds": true,
+     "sequence": [
+      "12431=BBS RSTurbofan",
+      "12432=HRE 505",
+      "12433=Rotiform VCET"
+     ],
+     "breaks": []
+    },
+    {
+     "batch": "12905..12928",
+     "n": 2,
+     "holds": false,
+     "sequence": [
+      "12918=Rotiform BLQ",
+      "12928=ADV.1 Forza"
+     ],
+     "breaks": [
+      "12918=Rotiform BLQ > 12928=ADV.1 Forza"
+     ]
+    },
+    {
+     "batch": "13146..13158",
+     "n": 5,
+     "holds": true,
+     "sequence": [
+      "13146=Speedline 859",
+      "13147=Speedline F 1",
+      "13153=Volk Racing GTF",
+      "13154=Volk Racing Turbo Fan",
+      "13158=Weld Racing Alumastar BL"
+     ],
+     "breaks": []
+    },
+    {
+     "batch": "13616..14050",
+     "n": 15,
+     "holds": false,
+     "sequence": [
+      "13618=5Zigen Becketts MK 6",
+      "13619=5Zigen DForce RSX 6",
+      "13620=5Zigen Fireball RR",
+      "13625=5Zigen Pro Racer Z 1",
+      "13673=Advan GT",
+      "13675=American Racing VF 309",
+      "13682=American Racing Torq Thrust",
+      "13698=Asanti AF 116",
+      "13701=Asanti CX 173",
+      "13946=TSW Mugello",
+      "13970=Volk Racing GTS",
+      "13973=Volk Racing TE 37 Ultra",
+      "14027=Weld Racing M 77",
+      "14031=Work Meister L 13 P",
+      "14050=Vorsteiner vfn 507"
+     ],
+     "breaks": [
+      "13675=American Racing VF 309 > 13682=American Racing Torq Thrust",
+      "14031=Work Meister L 13 P > 14050=Vorsteiner vfn 507"
+     ]
+    },
+    {
+     "batch": "14669..14670",
+     "n": 0,
+     "holds": null,
+     "detail": "no resolved ids in batch"
+    }
+   ],
+   "with_ambiguous_leans": [
+    {
+     "batch": "326..395",
+     "n": 5,
+     "holds": true,
+     "sequence": [
+      "326=5Zigen Sports Engine SC 3000",
+      "338=American Racing VF 302",
+      "363=Momo Stealth",
+      "371=OZ Racing Superturismo GT",
+      "395=Volk Racing TE 37"
+     ],
+     "breaks": []
+    },
+    {
+     "batch": "632..711",
+     "n": 13,
+     "holds": false,
+     "sequence": [
+      "636=American Racing Outlaw II",
+      "637=Asanti AF 118",
+      "638=Asanti AF 134",
+      "639=Asanti AF 140",
+      "649=Compomotive M 05",
+      "655=DUB Big Chips",
+      "663=Halibrand Sprint II",
+      "665=HOL Hole Star",
+      "666=HOL Solid",
+      "670=Konig Rewind",
+      "674=Momo GTR",
+      "675=Lexani LTC 704",
+      "701=TSW Hockenheim R"
+     ],
+     "breaks": [
+      "674=Momo GTR > 675=Lexani LTC 704"
+     ]
+    },
+    {
+     "batch": "10917..10959",
+     "n": 0,
+     "holds": null,
+     "detail": "no resolved ids in batch"
+    },
+    {
+     "batch": "12431..12444",
+     "n": 4,
+     "holds": true,
+     "sequence": [
+      "12431=BBS RSTurbofan",
+      "12432=HRE 505",
+      "12433=Rotiform VCET",
+      "12442=Titan 7 TS 7"
+     ],
+     "breaks": []
+    },
+    {
+     "batch": "12905..12928",
+     "n": 2,
+     "holds": false,
+     "sequence": [
+      "12918=Rotiform BLQ",
+      "12928=ADV.1 Forza"
+     ],
+     "breaks": [
+      "12918=Rotiform BLQ > 12928=ADV.1 Forza"
+     ]
+    },
+    {
+     "batch": "13146..13158",
+     "n": 5,
+     "holds": true,
+     "sequence": [
+      "13146=Speedline 859",
+      "13147=Speedline F 1",
+      "13153=Volk Racing GTF",
+      "13154=Volk Racing Turbo Fan",
+      "13158=Weld Racing Alumastar BL"
+     ],
+     "breaks": []
+    },
+    {
+     "batch": "13616..14050",
+     "n": 29,
+     "holds": false,
+     "sequence": [
+      "13618=5Zigen Becketts MK 6",
+      "13619=5Zigen DForce RSX 6",
+      "13620=5Zigen Fireball RR",
+      "13625=5Zigen Pro Racer Z 1",
+      "13647=ADV.1 5 Track Spec CS",
+      "13663=ADV.1 52 MV 1 CS",
+      "13666=ADV.1 8 MV 1 SL",
+      "13673=Advan GT",
+      "13675=American Racing VF 309",
+      "13682=American Racing Torq Thrust",
+      "13698=Asanti AF 116",
+      "13701=Asanti CX 173",
+      "13732=Enkei NT 03",
+      "13808=Konig Air",
+      "13867=Modulare M 7",
+      "13874=Oettinger Type RXX",
+      "13894=Rotiform BUC",
+      "13946=TSW Mugello",
+      "13970=Volk Racing GTS",
+      "13973=Volk Racing TE 37 Ultra",
+      "13981=Vorsteiner vfn 504",
+      "14016=Weld Racing Cheyenne 6",
+      "14027=Weld Racing M 77",
+      "14028=Work Gnosis FMB 03",
+      "14030=Work Meister CR 01",
+      "14031=Work Meister L 13 P",
+      "14037=Work WORK Emotion T 7 R 2 P",
+      "14045=TSW Hockenheim R",
+      "14050=Vorsteiner vfn 507"
+     ],
+     "breaks": [
+      "13675=American Racing VF 309 > 13682=American Racing Torq Thrust",
+      "14037=Work WORK Emotion T 7 R 2 P > 14045=TSW Hockenheim R"
+     ]
+    },
+    {
+     "batch": "14669..14670",
+     "n": 0,
+     "holds": null,
+     "detail": "no resolved ids in batch"
+    }
+   ]
+  },
+  "scratch": {
+   "crops": "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rimmatch/<id>_<container>[_rear].png",
+   "full_renders": "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rimmatch/full/",
+   "compare_sheets": "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rimmatch/compare2/ and zoom2/",
+   "matcher_output": "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rimmatch/match_results.json",
+   "scripts": [
+    "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rim_enum.py",
+    "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rim_locate.py",
+    "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rim_match.py",
+    "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rim_run.py",
+    "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rim_compare.py",
+    "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rim_zoom.py",
+    "C:/Users/mondr/AppData/Local/Temp/claude/C--Users-mondr-Documents-Claude-Projects-forza-horizon-6-tuning--claude-worktrees-forza-eliminator-tips-db-c512c3/6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4/scratchpad/rim_final.py"
+   ]
+  }
+ },
+ "326": {
+  "renders": [
+   "Tuning_4164_20260811013936"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4164_20260811013936",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.66
+   },
+   {
+    "stem": "CRA_Series61",
+    "score": 0.638
+   },
+   {
+    "stem": "KON_Air",
+    "score": 0.635
+   }
+  ],
+  "top10": [
+   "BRA_MonoblockIV",
+   "CRA_Series61",
+   "KON_Air",
+   "OET_E",
+   "AME_VN327",
+   "WOR_Design_DH",
+   "OZ_AspenHLT",
+   "SPE_F1",
+   "WOR_RSZR",
+   "ROT_NUE"
+  ],
+  "verdict": "matched",
+  "stem": "5ZI_SportsEngineSC3000",
+  "name": "5Zigen Sports Engine SC 3000",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "5ZI_Hyper5ZR"
+  ],
+  "note": "7 Y-spoke, silver"
+ },
+ "338": {
+  "renders": [
+   "Tuning_1549_20260810174947"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_1549_20260810174947",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "RAC_RGS",
+    "score": 0.768
+   },
+   {
+    "stem": "HRE_rs205m",
+    "score": 0.764
+   },
+   {
+    "stem": "KON_Air",
+    "score": 0.764
+   }
+  ],
+  "top10": [
+   "RAC_RGS",
+   "HRE_rs205m",
+   "KON_Air",
+   "KON_Americana",
+   "KMC_KM685",
+   "vor_vcs003",
+   "AME_TorqThrust",
+   "ROT_CUF",
+   "MOM_GTR",
+   "HRE_305m"
+  ],
+  "verdict": "matched",
+  "stem": "AME_VF302",
+  "name": "American Racing VF 302",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "AME_VN205",
+   "AME_VF310"
+  ],
+  "note": "5 flat straight spokes, chrome"
+ },
+ "363": {
+  "renders": [
+   "Tuning_3369_20260807011822"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3369_20260807011822",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_Design_DH",
+    "score": 0.637
+   },
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.631
+   },
+   {
+    "stem": "CRA_Series61",
+    "score": 0.628
+   }
+  ],
+  "top10": [
+   "WOR_Design_DH",
+   "BRA_MonoblockIV",
+   "CRA_Series61",
+   "AME_VN327",
+   "WEL_Alumastar_20_Drag",
+   "OET_E",
+   "ADV_5STrackSpecCS",
+   "OET_M",
+   "CRA_Series391",
+   "F52_Tarmac348"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "MOM_Stealth",
+   "vor_vcs003",
+   "ADV_5STrackSpecCS"
+  ],
+  "candidate_names": [
+   "Momo Stealth",
+   "Vorsteiner vcs 003",
+   "ADV.1 5 STrack Spec CS"
+  ],
+  "note": "silver 5 wide flat spokes, no lip"
+ },
+ "371": {
+  "renders": [
+   "Tuning_1667_20260810004951",
+   "Tuning_2472_20260807022849",
+   "Tuning_3120_20260810165647",
+   "Tuning_3282_20260818142431",
+   "Tuning_3369_20260807011640",
+   "Tuning_3852_20260806044539",
+   "Tuning_3852_20260823051219"
+  ],
+  "n_wheels": 7,
+  "wheels": [
+   {
+    "container": "Tuning_1667_20260810004951",
+    "wheel": "front",
+    "k": 16
+   },
+   {
+    "container": "Tuning_2472_20260807022849",
+    "wheel": "front",
+    "k": 16
+   },
+   {
+    "container": "Tuning_3120_20260810165647",
+    "wheel": "front",
+    "k": 16
+   },
+   {
+    "container": "Tuning_3282_20260818142431",
+    "wheel": "front",
+    "k": 4
+   },
+   {
+    "container": "Tuning_3369_20260807011640",
+    "wheel": "rear",
+    "k": 4
+   },
+   {
+    "container": "Tuning_3852_20260806044539",
+    "wheel": "front",
+    "k": 16
+   },
+   {
+    "container": "Tuning_3852_20260823051219",
+    "wheel": "rear",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "TSW_Holeshot",
+    "score": 0.515
+   },
+   {
+    "stem": "TSW_Imola",
+    "score": 0.515
+   },
+   {
+    "stem": "OZ_SuperturismoGT",
+    "score": 0.508
+   }
+  ],
+  "top10": [
+   "TSW_Holeshot",
+   "TSW_Imola",
+   "OZ_SuperturismoGT",
+   "MOT_MR141",
+   "ROT_TrackR",
+   "ROT_CCV",
+   "TSW_Hockenheim_R",
+   "TSW_HockenheimT",
+   "ROT_VCET",
+   "MOT_MR404"
+  ],
+  "verdict": "matched",
+  "stem": "OZ_SuperturismoGT",
+  "name": "OZ Racing Superturismo GT",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "TSW_Imola",
+   "MOT_MR141"
+  ],
+  "note": "15 flat blade spokes; 5 renders agree"
+ },
+ "395": {
+  "renders": [
+   "Tuning_3665_20260818092846"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3665_20260818092846",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "VOL_TE37Ultra",
+    "score": 0.793
+   },
+   {
+    "stem": "ADV_6MV2Standard",
+    "score": 0.777
+   },
+   {
+    "stem": "VOL_VRG2Forged",
+    "score": 0.775
+   }
+  ],
+  "top10": [
+   "VOL_TE37Ultra",
+   "ADV_6MV2Standard",
+   "VOL_VRG2Forged",
+   "VOL_TE37",
+   "TSW_Revo",
+   "KMC_KM711",
+   "ADV_AVS6",
+   "VOL_TE037Dura",
+   "VOL_ProgressiveTE",
+   "ENK_RS6"
+  ],
+  "verdict": "matched",
+  "stem": "VOL_TE37",
+  "name": "Volk Racing TE 37",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [],
+  "note": "6-spoke with the VOLK RACING spoke decals"
+ },
+ "636": {
+  "renders": [
+   "Tuning_3852_20260730095449"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3852_20260730095449",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_USF",
+    "score": 0.559
+   },
+   {
+    "stem": "ASA_AF140",
+    "score": 0.549
+   },
+   {
+    "stem": "WOR_MeisterL13P",
+    "score": 0.538
+   }
+  ],
+  "top10": [
+   "ROT_USF",
+   "ASA_AF140",
+   "WOR_MeisterL13P",
+   "ROT_AeroDiscTheVoid",
+   "F52_Forza",
+   "MOT_MR124",
+   "WEL_Cheyenne6",
+   "ADV_6MV2Standard",
+   "MOM_Heritage6",
+   "WED_SA67R"
+  ],
+  "verdict": "matched",
+  "stem": "AME_Outlaw_II",
+  "name": "American Racing Outlaw II",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "HOL_Hole_Star"
+  ],
+  "note": "dished face, ring of holes, 5 flat spokes"
+ },
+ "637": {
+  "renders": [
+   "Tuning_2177_20260806103607",
+   "Tuning_3214_20260806124002",
+   "Tuning_3287_20260813202811"
+  ],
+  "n_wheels": 3,
+  "wheels": [
+   {
+    "container": "Tuning_2177_20260806103607",
+    "wheel": "front",
+    "k": 4
+   },
+   {
+    "container": "Tuning_3214_20260806124002",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_3287_20260813202811",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "CRA_Series313",
+    "score": 0.497
+   },
+   {
+    "stem": "AME_Outlaw_II",
+    "score": 0.496
+   },
+   {
+    "stem": "ROT_VCET",
+    "score": 0.494
+   }
+  ],
+  "top10": [
+   "CRA_Series313",
+   "AME_Outlaw_II",
+   "ROT_VCET",
+   "ROT_AeroDisc",
+   "HOL_Solid",
+   "WEL_Alumastar_20_Drag",
+   "WOR_Equip40",
+   "CRA_Series61",
+   "5ZI_Hyper5ZR",
+   "ROT_WGRM"
+  ],
+  "verdict": "matched",
+  "stem": "ASA_AF118",
+  "name": "Asanti AF 118",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "HRE_S101",
+   "ADV_05RMMV2CS"
+  ],
+  "note": "5 split spokes with slot, polished lip; 3 renders agree"
+ },
+ "638": {
+  "renders": [
+   "Tuning_0412_20260901200805",
+   "Tuning_2866_20260828151050",
+   "Tuning_3773_20260806110303"
+  ],
+  "n_wheels": 3,
+  "wheels": [
+   {
+    "container": "Tuning_0412_20260901200805",
+    "wheel": "front",
+    "k": 10
+   },
+   {
+    "container": "Tuning_2866_20260828151050",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_3773_20260806110303",
+    "wheel": "front",
+    "k": 10
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ASA_AF134",
+    "score": 0.576
+   },
+   {
+    "stem": "5ZI_FireballRR",
+    "score": 0.567
+   },
+   {
+    "stem": "AME_VF482",
+    "score": 0.566
+   }
+  ],
+  "top10": [
+   "ASA_AF134",
+   "5ZI_FireballRR",
+   "AME_VF482",
+   "ROT_DABM",
+   "TSW_Clypse",
+   "HRE_943RL",
+   "WOR_GnosisCV201",
+   "MOM_Quantum",
+   "WOR_GnosisCV203",
+   "MOD_M15"
+  ],
+  "verdict": "matched",
+  "stem": "ASA_AF134",
+  "name": "Asanti AF 134",
+  "confidence": "looked",
+  "strength": "anchor-confirmed",
+  "alternates": [],
+  "note": "10 straight spokes; matcher #1 on 2 of 3 renders and on the aggregate"
+ },
+ "639": {
+  "renders": [
+   "Tuning_1627_20260806152739"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_1627_20260806152739",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "CRA_Series61",
+    "score": 0.634
+   },
+   {
+    "stem": "WOR_Design_DH",
+    "score": 0.632
+   },
+   {
+    "stem": "OET_E",
+    "score": 0.622
+   }
+  ],
+  "top10": [
+   "CRA_Series61",
+   "WOR_Design_DH",
+   "OET_E",
+   "CRA_Series391",
+   "F52_Tarmac348",
+   "BRA_MonoblockIV",
+   "OZ_AspenHLT",
+   "OET_M",
+   "KON_Americana",
+   "AME_VN205"
+  ],
+  "verdict": "matched",
+  "stem": "ASA_AF140",
+  "name": "Asanti AF 140",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "ADV_SuperAdvanSA3R"
+  ],
+  "note": "3 wide split spokes"
+ },
+ "649": {
+  "renders": [
+   "Tuning_4162_20260814214313"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4162_20260814214313",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "COM_M05",
+    "score": 0.818
+   },
+   {
+    "stem": "ENK_TarmacEvo",
+    "score": 0.802
+   },
+   {
+    "stem": "F52_MonoblockTarmac",
+    "score": 0.798
+   }
+  ],
+  "top10": [
+   "COM_M05",
+   "ENK_TarmacEvo",
+   "F52_MonoblockTarmac",
+   "WOR_EwingRSZNegative",
+   "HRE_rs205m",
+   "ROT_NUE",
+   "WOR_EquipRSZNegative",
+   "OET_M",
+   "ROT_P45R",
+   "SPE_859"
+  ],
+  "verdict": "matched",
+  "stem": "COM_M05",
+  "name": "Compomotive M 05",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [
+   "F52_MonoblockTarmac"
+  ],
+  "note": "5 flat spokes, 4-bolt hub; matcher #1"
+ },
+ "655": {
+  "renders": [
+   "Tuning_2128_20260810082618"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_2128_20260810082618",
+    "wheel": "front",
+    "k": 11
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MOT_MR139",
+    "score": 0.59
+   },
+   {
+    "stem": "HRE_P43SC",
+    "score": 0.557
+   },
+   {
+    "stem": "HRE_rc103",
+    "score": 0.546
+   }
+  ],
+  "top10": [
+   "MOT_MR139",
+   "HRE_P43SC",
+   "HRE_rc103",
+   "WOR_Emotion11R",
+   "DUB_BigChips",
+   "ADV_RSDF",
+   "WOR_MCORacingCS",
+   "VOL_ZE40TimeAttack",
+   "ADV_RZF2",
+   "OZ_HyperGTHLT"
+  ],
+  "verdict": "matched",
+  "stem": "DUB_BigChips",
+  "name": "DUB Big Chips",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "DUB_Presidential"
+  ],
+  "note": "faceted chrome starburst"
+ },
+ "657": {
+  "renders": [
+   "Tuning_2987_20260810002439"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_2987_20260810002439",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "OZ_AspenHLT",
+    "score": 0.699
+   },
+   {
+    "stem": "ADV_5STrackSpecCS",
+    "score": 0.695
+   },
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.693
+   }
+  ],
+  "top10": [
+   "OZ_AspenHLT",
+   "ADV_5STrackSpecCS",
+   "BRA_MonoblockIV",
+   "ROT_WLD",
+   "COM_M05",
+   "AME_VF526",
+   "OET_M",
+   "WOR_EwingRSZNegative",
+   "ENK_TarmacEvo",
+   "WOR_Design_DH"
+  ],
+  "verdict": "no-match",
+  "stem": null,
+  "name": null,
+  "confidence": "ranked-only",
+  "note": "Peel P50 wheel is ~18 px across; unreadable"
+ },
+ "663": {
+  "renders": [
+   "Tuning_0249_20260727091803"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_0249_20260727091803",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.759
+   },
+   {
+    "stem": "OZ_AspenHLT",
+    "score": 0.755
+   },
+   {
+    "stem": "COM_M05",
+    "score": 0.752
+   }
+  ],
+  "top10": [
+   "BRA_MonoblockIV",
+   "OZ_AspenHLT",
+   "COM_M05",
+   "AME_TorqThrust",
+   "AME_VN205",
+   "ENK_TarmacEvo",
+   "F52_MonoblockTarmac",
+   "KON_Americana",
+   "OET_E",
+   "ROT_CUF"
+  ],
+  "verdict": "matched",
+  "stem": "HAL_SprintII",
+  "name": "Halibrand Sprint II",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "HAL_Indy"
+  ],
+  "note": "5 wide spokes with slots, polished lip"
+ },
+ "665": {
+  "renders": [
+   "Tuning_0249_20260727094207"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_0249_20260727094207",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_Equip40",
+    "score": 0.588
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.574
+   },
+   {
+    "stem": "WOR_Equip_01",
+    "score": 0.544
+   }
+  ],
+  "top10": [
+   "WOR_Equip40",
+   "CRA_Series313",
+   "WOR_Equip_01",
+   "AME_Outlaw_II",
+   "HOL_Solid",
+   "ROT_VCET",
+   "ROT_AeroDisc",
+   "ROT_CBU",
+   "BBS_RSTurbofan",
+   "MIC_Classic_Look"
+  ],
+  "verdict": "matched",
+  "stem": "HOL_Hole_Star",
+  "name": "HOL Hole Star",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "HOL_SunStar",
+   "WOR_Equip_01"
+  ],
+  "note": "black 5-star centre in a polished dish"
+ },
+ "666": {
+  "renders": [
+   "Tuning_4175_20260813185858"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4175_20260813185858",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "HOL_Solid",
+    "score": 0.561
+   },
+   {
+    "stem": "AME_Outlaw_II",
+    "score": 0.54
+   },
+   {
+    "stem": "ROT_VCET",
+    "score": 0.535
+   }
+  ],
+  "top10": [
+   "HOL_Solid",
+   "AME_Outlaw_II",
+   "ROT_VCET",
+   "CRA_Series313",
+   "ROT_AeroDisc",
+   "WOR_Equip40",
+   "BBS_RSTurbofan",
+   "WOR_Equip_01",
+   "ROT_CBU",
+   "MIC_Classic_Look"
+  ],
+  "verdict": "matched",
+  "stem": "HOL_Solid",
+  "name": "HOL Solid",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "CRA_Series313"
+  ],
+  "note": "solid disc, small hub"
+ },
+ "670": {
+  "renders": [
+   "Tuning_2866_20260819000050"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_2866_20260819000050",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ADV_5STrackSpecCS",
+    "score": 0.712
+   },
+   {
+    "stem": "OZ_AspenHLT",
+    "score": 0.709
+   },
+   {
+    "stem": "AME_TorqThrust",
+    "score": 0.701
+   }
+  ],
+  "top10": [
+   "ADV_5STrackSpecCS",
+   "OZ_AspenHLT",
+   "AME_TorqThrust",
+   "AME_VN205",
+   "KON_Air",
+   "WOR_EquipRSZNegative",
+   "WOR_LanvecLS1",
+   "OET_TypeRE",
+   "vor_vcs003",
+   "MOT_MR221"
+  ],
+  "verdict": "matched",
+  "stem": "KON_Rewind",
+  "name": "Konig Rewind",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "KON_Britelite"
+  ],
+  "note": "8 flat spokes, polished lip"
+ },
+ "674": {
+  "renders": [
+   "Tuning_3852_20260817001940"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3852_20260817001940",
+    "wheel": "rear",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_EmotionT5R2P",
+    "score": 0.646
+   },
+   {
+    "stem": "KON_Air",
+    "score": 0.642
+   },
+   {
+    "stem": "OET_E",
+    "score": 0.638
+   }
+  ],
+  "top10": [
+   "WOR_EmotionT5R2P",
+   "KON_Air",
+   "OET_E",
+   "AME_TorqThrust",
+   "ASA_AF118",
+   "ROT_DIA",
+   "OET_RZ",
+   "OET_M",
+   "5ZI_Hyper5ZR",
+   "IFO_Astra"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "MOM_GTR",
+   "OET_M",
+   "MOD_M7"
+  ],
+  "candidate_names": [
+   "Momo GTR",
+   "Oettinger M",
+   "Modulare M 7"
+  ],
+  "note": "rear oblique: 5 wide spokes, polished lip"
+ },
+ "675": {
+  "renders": [
+   "Tuning_3852_20260817001940"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3852_20260817001940",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MOT_MR124",
+    "score": 0.655
+   },
+   {
+    "stem": "ADV_6MV2Standard",
+    "score": 0.647
+   },
+   {
+    "stem": "VOL_ProgressiveTE",
+    "score": 0.647
+   }
+  ],
+  "top10": [
+   "MOT_MR124",
+   "ADV_6MV2Standard",
+   "VOL_ProgressiveTE",
+   "WOR_MeisterL13P",
+   "VOL_GTP",
+   "VOL_TE37Ultra",
+   "MOM_Heritage6",
+   "HRE_C106",
+   "VOL_TE37",
+   "LEX_LTC_704"
+  ],
+  "verdict": "matched",
+  "stem": "LEX_LTC_704",
+  "name": "Lexani LTC 704",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "LEX_LTC_701"
+  ],
+  "note": "black spokes with silver cross marks at the tips"
+ },
+ "701": {
+  "renders": [
+   "Tuning_0348_20260817052518",
+   "Tuning_3852_20260713141738",
+   "Tuning_3852_20260716044616",
+   "Tuning_3852_20260716044711",
+   "Tuning_3852_20260810160629",
+   "Tuning_4160_20260817021525",
+   "Tuning_4197_20260810152353"
+  ],
+  "n_wheels": 7,
+  "wheels": [
+   {
+    "container": "Tuning_0348_20260817052518",
+    "wheel": "front",
+    "k": 16
+   },
+   {
+    "container": "Tuning_3852_20260713141738",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_3852_20260716044616",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_3852_20260716044711",
+    "wheel": "rear",
+    "k": 5
+   },
+   {
+    "container": "Tuning_3852_20260810160629",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_4160_20260817021525",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_4197_20260810152353",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MIC_ET_Drag",
+    "score": 0.538
+   },
+   {
+    "stem": "WOR_MeisterCR01",
+    "score": 0.536
+   },
+   {
+    "stem": "CRA_Series61",
+    "score": 0.536
+   }
+  ],
+  "top10": [
+   "MIC_ET_Drag",
+   "WOR_MeisterCR01",
+   "CRA_Series61",
+   "VOL_GTS",
+   "WEL_Alumastar_20_Drag",
+   "ROT_DIA",
+   "AME_VN511",
+   "ROT_WLD",
+   "ROT_WGRM",
+   "WOR_MeisterS13P"
+  ],
+  "verdict": "matched",
+  "stem": "TSW_Hockenheim_R",
+  "name": "TSW Hockenheim R",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "TSW_Imola",
+   "TSW_HockenheimT"
+  ],
+  "note": "15 thin straight spokes, small plain cap, no visible hub bolts; 7 wheels on 5 cars"
+ },
+ "12431": {
+  "renders": [
+   "Tuning_4197_20260823050827"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4197_20260823050827",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "HOL_Solid",
+    "score": 0.54
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.529
+   },
+   {
+    "stem": "AME_Outlaw_II",
+    "score": 0.523
+   }
+  ],
+  "top10": [
+   "HOL_Solid",
+   "CRA_Series313",
+   "AME_Outlaw_II",
+   "ROT_VCET",
+   "WOR_Equip40",
+   "ROT_AeroDisc",
+   "BBS_RSTurbofan",
+   "WOR_Equip_01",
+   "ROT_CBU",
+   "ROT_AeroDiscBranded"
+  ],
+  "verdict": "matched",
+  "stem": "BBS_RSTurbofan",
+  "name": "BBS RSTurbofan",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "BBS_RS_GT"
+  ],
+  "note": "gold cross-lace mesh, polished lip, outer flat ring"
+ },
+ "12432": {
+  "renders": [
+   "Tuning_3767_20260711200038",
+   "Tuning_3854_20260828064838"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_3767_20260711200038",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_3854_20260828064838",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "HRE_p111sc",
+    "score": 0.755
+   },
+   {
+    "stem": "AME_VN205",
+    "score": 0.745
+   },
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.743
+   }
+  ],
+  "top10": [
+   "HRE_p111sc",
+   "AME_VN205",
+   "BRA_MonoblockIV",
+   "AME_TorqThrust",
+   "ASA_Monoblock101",
+   "SPE_859",
+   "OET_M",
+   "OZ_AspenHLT",
+   "HRE_505",
+   "ROT_DIA"
+  ],
+  "verdict": "matched",
+  "stem": "HRE_505",
+  "name": "HRE 505",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "ASA_Monoblock101",
+   "BRA_MonoblockIV"
+  ],
+  "note": "5 wide spokes, riveted polished lip"
+ },
+ "12433": {
+  "renders": [
+   "Tuning_3999_20260817050321"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3999_20260817050321",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "HOL_Solid",
+    "score": 0.561
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.548
+   },
+   {
+    "stem": "ROT_VCET",
+    "score": 0.532
+   }
+  ],
+  "top10": [
+   "HOL_Solid",
+   "CRA_Series313",
+   "ROT_VCET",
+   "WOR_Equip40",
+   "WOR_Equip_01",
+   "ROT_AeroDisc",
+   "AME_Outlaw_II",
+   "ROT_CBU",
+   "BBS_RSTurbofan",
+   "WEL_Alumastar_20_Drag"
+  ],
+  "verdict": "matched",
+  "stem": "ROT_VCET",
+  "name": "Rotiform VCET",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [],
+  "note": "flat disc with perimeter vent slots"
+ },
+ "12442": {
+  "renders": [
+   "Tuning_2262_20260806205945"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_2262_20260806205945",
+    "wheel": "front",
+    "k": 7
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MOM_Raptor",
+    "score": 0.842
+   },
+   {
+    "stem": "HRE_FF01",
+    "score": 0.821
+   },
+   {
+    "stem": "MOT_MR130",
+    "score": 0.82
+   }
+  ],
+  "top10": [
+   "MOM_Raptor",
+   "HRE_FF01",
+   "MOT_MR130",
+   "WEL_M77",
+   "HRE_P40sc",
+   "ADV_7MV1Standard",
+   "GRA_57BNA",
+   "TIT_TS7",
+   "ADV_72CF2",
+   "MOD_D37"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "TIT_TS7",
+   "MOM_Raptor",
+   "HRE_FF01"
+  ],
+  "candidate_names": [
+   "Titan 7 TS 7",
+   "Momo Raptor",
+   "HRE FF 01"
+  ],
+  "note": "silver 7 Y-spoke"
+ },
+ "12443": {
+  "renders": [
+   "Tuning_1130_20260806093420"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_1130_20260806093420",
+    "wheel": "rear",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WEL_Alumastar_20_Drag",
+    "score": 0.583
+   },
+   {
+    "stem": "MIC_ET_Drag",
+    "score": 0.57
+   },
+   {
+    "stem": "CRA_Series61",
+    "score": 0.568
+   }
+  ],
+  "top10": [
+   "WEL_Alumastar_20_Drag",
+   "MIC_ET_Drag",
+   "CRA_Series61",
+   "AME_VN327",
+   "BRA_MonoblockIV",
+   "CRA_Series391",
+   "WEL_AlumastarBL",
+   "WOR_MeisterS13P",
+   "ROT_WGRM",
+   "ROT_WLD"
+  ],
+  "verdict": "no-match",
+  "stem": null,
+  "name": null,
+  "confidence": "ranked-only",
+  "note": "rear oblique only, black 5-spoke; not resolvable"
+ },
+ "12444": {
+  "renders": [
+   "Tuning_3783_20260822081501"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3783_20260822081501",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "CRA_Series313",
+    "score": 0.564
+   },
+   {
+    "stem": "ROT_VCET",
+    "score": 0.549
+   },
+   {
+    "stem": "WOR_Equip40",
+    "score": 0.547
+   }
+  ],
+  "top10": [
+   "CRA_Series313",
+   "ROT_VCET",
+   "WOR_Equip40",
+   "AME_Outlaw_II",
+   "HOL_Solid",
+   "WOR_Equip_01",
+   "ROT_AeroDisc",
+   "ROT_CBU",
+   "BBS_RSTurbofan",
+   "MIC_Classic_Look"
+  ],
+  "verdict": "no-match",
+  "stem": null,
+  "name": null,
+  "confidence": "ranked-only",
+  "note": "black ~10 thin spokes; matcher top-10 did not contain a convincing candidate"
+ },
+ "12913": {
+  "renders": [
+   "Tuning_3999_20260817050321"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3999_20260817050321",
+    "wheel": "rear",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "AME_Outlaw_II",
+    "score": 0.598
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.589
+   },
+   {
+    "stem": "HOL_Solid",
+    "score": 0.588
+   }
+  ],
+  "top10": [
+   "AME_Outlaw_II",
+   "CRA_Series313",
+   "HOL_Solid",
+   "WOR_Equip40",
+   "ROT_VCET",
+   "WOR_Equip_01",
+   "ROT_CBU",
+   "ROT_AeroDisc",
+   "BBS_RSTurbofan",
+   "MIC_Classic_Look"
+  ],
+  "verdict": "no-match",
+  "stem": null,
+  "name": null,
+  "confidence": "ranked-only",
+  "note": "rear oblique only, white 5-spoke; not resolvable"
+ },
+ "12918": {
+  "renders": [
+   "Tuning_0364_20260810161942",
+   "Tuning_2544_20260810153924"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_0364_20260810161942",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_2544_20260810153924",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_WLD",
+    "score": 0.595
+   },
+   {
+    "stem": "CRA_Series391",
+    "score": 0.594
+   },
+   {
+    "stem": "CRA_Series61",
+    "score": 0.592
+   }
+  ],
+  "top10": [
+   "ROT_WLD",
+   "CRA_Series391",
+   "CRA_Series61",
+   "AME_VN327",
+   "ROT_DIA",
+   "WOR_Design_DH",
+   "BOR_A",
+   "BRA_MonoblockIV",
+   "HAL_SprintII",
+   "ROT_WRO"
+  ],
+  "verdict": "matched",
+  "stem": "ROT_BLQ",
+  "name": "Rotiform BLQ",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "MOM_Revenge",
+   "MOD_B14"
+  ],
+  "note": "black interlocking mesh; 2 renders"
+ },
+ "12928": {
+  "renders": [
+   "Tuning_2142_20260608105103",
+   "Tuning_2142_20260608105734"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_2142_20260608105103",
+    "wheel": "rear",
+    "k": 5
+   },
+   {
+    "container": "Tuning_2142_20260608105734",
+    "wheel": "rear",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_DIA",
+    "score": 0.662
+   },
+   {
+    "stem": "CRA_Series61",
+    "score": 0.656
+   },
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.65
+   }
+  ],
+  "top10": [
+   "ROT_DIA",
+   "CRA_Series61",
+   "BRA_MonoblockIV",
+   "ROT_WGRM",
+   "OET_E",
+   "HAL_SprintII",
+   "WOR_Design_DH",
+   "ROT_WRO",
+   "5ZI_Hyper5ZR",
+   "ASA_CX860"
+  ],
+  "verdict": "matched",
+  "stem": "ADV_Forza",
+  "name": "ADV.1 Forza",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [],
+  "note": "black 5-spoke with the red stripe on one spoke (2 rear renders)"
+ },
+ "13146": {
+  "renders": [
+   "Tuning_1108_20260628025123"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_1108_20260628025123",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "SPE_859",
+    "score": 0.914
+   },
+   {
+    "stem": "HRE_rs205m",
+    "score": 0.904
+   },
+   {
+    "stem": "ROT_J_SPL",
+    "score": 0.894
+   }
+  ],
+  "top10": [
+   "SPE_859",
+   "HRE_rs205m",
+   "ROT_J_SPL",
+   "WOR_RyverS005",
+   "ROT_P45R",
+   "OET_Type_RXX",
+   "WOR_EquipRSZNegative",
+   "ROT_CUF",
+   "COM_M05",
+   "MOM_GTR"
+  ],
+  "verdict": "matched",
+  "stem": "SPE_859",
+  "name": "Speedline 859",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "COM_M05"
+  ],
+  "note": "white narrow 5-spoke, 5 bolts, rounded windows"
+ },
+ "13147": {
+  "renders": [
+   "Tuning_1549_20260811052352",
+   "Tuning_2614_20260806060951",
+   "Tuning_3003_20260810175207"
+  ],
+  "n_wheels": 3,
+  "wheels": [
+   {
+    "container": "Tuning_1549_20260811052352",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_2614_20260806060951",
+    "wheel": "front",
+    "k": 4
+   },
+   {
+    "container": "Tuning_3003_20260810175207",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "BOR_A",
+    "score": 0.563
+   },
+   {
+    "stem": "F52_Tarmac348",
+    "score": 0.559
+   },
+   {
+    "stem": "ROT_DIA",
+    "score": 0.55
+   }
+  ],
+  "top10": [
+   "BOR_A",
+   "F52_Tarmac348",
+   "ROT_DIA",
+   "CRA_Series61",
+   "ROT_WLD",
+   "AME_VN327",
+   "HAL_SprintII",
+   "ADV_5STrackSpecCS",
+   "CRA_Series391",
+   "WOR_Design_DH"
+  ],
+  "verdict": "matched",
+  "stem": "SPE_F1",
+  "name": "Speedline F 1",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [],
+  "note": "black 5 flat spokes, narrow windows, SPEEDLINE tyre lettering; 3 renders agree"
+ },
+ "13153": {
+  "renders": [
+   "Tuning_4171_20260811010447"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4171_20260811010447",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_WLD",
+    "score": 0.59
+   },
+   {
+    "stem": "AME_VN511",
+    "score": 0.578
+   },
+   {
+    "stem": "AME_VN327",
+    "score": 0.577
+   }
+  ],
+  "top10": [
+   "ROT_WLD",
+   "AME_VN511",
+   "AME_VN327",
+   "WEL_Alumastar_20_Drag",
+   "MIC_ET_Drag",
+   "BOR_A",
+   "OET_E",
+   "CRA_Series391",
+   "F52_Tarmac348",
+   "WOR_Design_DH"
+  ],
+  "verdict": "matched",
+  "stem": "VOL_GTF",
+  "name": "Volk Racing GTF",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "WOR_EmotionD9R"
+  ],
+  "note": "gold ~10 thin spokes with wide polished lip"
+ },
+ "13154": {
+  "renders": [
+   "Tuning_4162_20260811142356"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4162_20260811142356",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_Equip40",
+    "score": 0.613
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.6
+   },
+   {
+    "stem": "ROT_VCET",
+    "score": 0.574
+   }
+  ],
+  "top10": [
+   "WOR_Equip40",
+   "CRA_Series313",
+   "ROT_VCET",
+   "HOL_Solid",
+   "AME_Outlaw_II",
+   "WOR_Equip_01",
+   "ROT_CBU",
+   "ROT_AeroDisc",
+   "BBS_RSTurbofan",
+   "MIC_Classic_Look"
+  ],
+  "verdict": "matched",
+  "stem": "VOL_TurboFan",
+  "name": "Volk Racing Turbo Fan",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "HOL_Solid"
+  ],
+  "note": "flat moon disc with the small notch"
+ },
+ "13158": {
+  "renders": [
+   "Tuning_3128_20260813155400"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3128_20260813155400",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_WLD",
+    "score": 0.636
+   },
+   {
+    "stem": "HRE_505",
+    "score": 0.618
+   },
+   {
+    "stem": "BOR_A",
+    "score": 0.615
+   }
+  ],
+  "top10": [
+   "ROT_WLD",
+   "HRE_505",
+   "BOR_A",
+   "CRA_Series391",
+   "F52_Tarmac348",
+   "MIC_ET_Drag",
+   "ROT_DIA",
+   "HAL_SprintII",
+   "BRA_MonoblockIV",
+   "WOR_MeisterS13P"
+  ],
+  "verdict": "matched",
+  "stem": "WEL_AlumastarBL",
+  "name": "Weld Racing Alumastar BL",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [],
+  "note": "gold beadlock ring with lettering over a black 5-spoke"
+ },
+ "13618": {
+  "renders": [
+   "Tuning_0314_20260727113151"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_0314_20260727113151",
+    "wheel": "front",
+    "k": 12
+   }
+  ],
+  "top3": [
+   {
+    "stem": "KMC_KM696",
+    "score": 0.764
+   },
+   {
+    "stem": "5ZI_BeckettsMK6",
+    "score": 0.749
+   },
+   {
+    "stem": "ROT_OZR",
+    "score": 0.709
+   }
+  ],
+  "top10": [
+   "KMC_KM696",
+   "5ZI_BeckettsMK6",
+   "ROT_OZR",
+   "5ZI_ProRacerZ1",
+   "KMC_XD228",
+   "OZ_UltraleggeraHLTCL",
+   "5ZI_ZR_520",
+   "WOR_GnosisHS201",
+   "OZ_SuperleggeraIII",
+   "KON_Daylite"
+  ],
+  "verdict": "matched",
+  "stem": "5ZI_BeckettsMK6",
+  "name": "5Zigen Becketts MK 6",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "KMC_KM696",
+   "5ZI_ProRacerZ1"
+  ],
+  "note": "12 thin straight silver spokes"
+ },
+ "13619": {
+  "renders": [
+   "Tuning_0364_20260711055746",
+   "Tuning_1478_20260810175550"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_0364_20260711055746",
+    "wheel": "front",
+    "k": 6
+   },
+   {
+    "container": "Tuning_1478_20260810175550",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "VOL_VRG2Forged",
+    "score": 0.77
+   },
+   {
+    "stem": "VOL_ProgressiveTE",
+    "score": 0.763
+   },
+   {
+    "stem": "VOL_TE37Ultra",
+    "score": 0.759
+   }
+  ],
+  "top10": [
+   "VOL_VRG2Forged",
+   "VOL_ProgressiveTE",
+   "VOL_TE37Ultra",
+   "VOL_TE37",
+   "KMC_KM711",
+   "ADV_6MV2Standard",
+   "vor_vfn506",
+   "VOL_TE037Dura",
+   "TSW_Revo",
+   "MOM_Heritage6"
+  ],
+  "verdict": "matched",
+  "stem": "5ZI_DForceRSX6",
+  "name": "5Zigen DForce RSX 6",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [],
+  "note": "6-spoke with the RSX-6 / D-FORCE spoke decals; 2 renders"
+ },
+ "13620": {
+  "renders": [
+   "Tuning_2544_20260810135407"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_2544_20260810135407",
+    "wheel": "front",
+    "k": 10
+   }
+  ],
+  "top3": [
+   {
+    "stem": "TSW_Rifle",
+    "score": 0.797
+   },
+   {
+    "stem": "MOD_B15Evo",
+    "score": 0.784
+   },
+   {
+    "stem": "ASA_ABL20",
+    "score": 0.776
+   }
+  ],
+  "top10": [
+   "TSW_Rifle",
+   "MOD_B15Evo",
+   "ASA_ABL20",
+   "LEX_M108",
+   "MOM_Rush",
+   "ROT_Tarmac_3",
+   "TSW_Clypse",
+   "HRE_943RL",
+   "5ZI_FireballRR",
+   "ADV_RCIII"
+  ],
+  "verdict": "matched",
+  "stem": "5ZI_FireballRR",
+  "name": "5Zigen Fireball RR",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "TSW_Rifle"
+  ],
+  "note": "10 thin spokes, polished lip"
+ },
+ "13625": {
+  "renders": [
+   "Tuning_3852_20260727210347"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3852_20260727210347",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_Equip40",
+    "score": 0.557
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.555
+   },
+   {
+    "stem": "AME_Outlaw_II",
+    "score": 0.554
+   }
+  ],
+  "top10": [
+   "WOR_Equip40",
+   "CRA_Series313",
+   "AME_Outlaw_II",
+   "HOL_Solid",
+   "ROT_VCET",
+   "ROT_AeroDisc",
+   "WOR_Equip_01",
+   "BBS_RSTurbofan",
+   "ROT_CBU",
+   "ROT_AeroDiscDinoNugs"
+  ],
+  "verdict": "matched",
+  "stem": "5ZI_ProRacerZ1",
+  "name": "5Zigen Pro Racer Z 1",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "KMC_KM696"
+  ],
+  "note": "12 thin straight dark spokes"
+ },
+ "13647": {
+  "renders": [
+   "Tuning_3600_20260810131308",
+   "Tuning_3650_20260810172345"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_3600_20260810131308",
+    "wheel": "front",
+    "k": 6
+   },
+   {
+    "container": "Tuning_3650_20260810172345",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_MeisterL13P",
+    "score": 0.501
+   },
+   {
+    "stem": "ASA_AF140",
+    "score": 0.497
+   },
+   {
+    "stem": "ADV_6MV2Standard",
+    "score": 0.489
+   }
+  ],
+  "top10": [
+   "WOR_MeisterL13P",
+   "ASA_AF140",
+   "ADV_6MV2Standard",
+   "ROT_WLD",
+   "MOT_MR124",
+   "MIC_ET_Drag",
+   "AME_VN511",
+   "MOM_Heritage6",
+   "VOL_ProgressiveTE",
+   "HRE_C106"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "ADV_5TrackSpecCS",
+   "vor_vff103",
+   "TIT_TS5",
+   "KMC_KM694"
+  ],
+  "candidate_names": [
+   "ADV.1 5 Track Spec CS",
+   "Vorsteiner vff 103",
+   "Titan 7 TS 5",
+   "KMC Wheels KM 694"
+  ],
+  "note": "black 5 Y-spoke, thin arms; 2 renders"
+ },
+ "13663": {
+  "renders": [
+   "Tuning_2472_20260806092932",
+   "Tuning_3854_20260828065109"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_2472_20260806092932",
+    "wheel": "front",
+    "k": 14
+   },
+   {
+    "container": "Tuning_3854_20260828065109",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "CRA_Series391",
+    "score": 0.447
+   },
+   {
+    "stem": "ROT_WLD",
+    "score": 0.446
+   },
+   {
+    "stem": "WEL_Alumastar_20_Drag",
+    "score": 0.443
+   }
+  ],
+  "top10": [
+   "CRA_Series391",
+   "ROT_WLD",
+   "WEL_Alumastar_20_Drag",
+   "AME_VN511",
+   "AME_VN327",
+   "MIC_ET_Drag",
+   "HOL_Hole_Star",
+   "WOR_SeekerFX",
+   "ROT_WGRM",
+   "WEL_AlumastarBL"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "ADV_52MV1CS",
+   "ADV_52MV1SL",
+   "TSW_Chapelle"
+  ],
+  "candidate_names": [
+   "ADV.1 52 MV 1 CS",
+   "ADV.1 52 MV 1 SL",
+   "TSW Chapelle"
+  ],
+  "note": "black twin 5-spoke (parallel pairs); 2 renders"
+ },
+ "13666": {
+  "renders": [
+   "Tuning_3759_20260814063040"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3759_20260814063040",
+    "wheel": "rear",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "CRA_Series313",
+    "score": 0.69
+   },
+   {
+    "stem": "WOR_Equip40",
+    "score": 0.634
+   },
+   {
+    "stem": "ROT_VCET",
+    "score": 0.617
+   }
+  ],
+  "top10": [
+   "CRA_Series313",
+   "WOR_Equip40",
+   "ROT_VCET",
+   "WOR_Equip_01",
+   "AME_Outlaw_II",
+   "HOL_Solid",
+   "ROT_CBU",
+   "ROT_AeroDisc",
+   "BBS_RSTurbofan",
+   "MIC_Classic_Look"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "ADV_8MV1SL",
+   "ADV_08MV2CS",
+   "ADV_8RTrackSpecCS"
+  ],
+  "candidate_names": [
+   "ADV.1 8 MV 1 SL",
+   "ADV.1 08 MV 2 CS",
+   "ADV.1 8 RTrack Spec CS"
+  ],
+  "note": "rear oblique: black 8 Y mesh"
+ },
+ "13673": {
+  "renders": [
+   "Tuning_4171_20260730031127"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4171_20260730031127",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MOT_MR124",
+    "score": 0.686
+   },
+   {
+    "stem": "ADV_6MV2Standard",
+    "score": 0.676
+   },
+   {
+    "stem": "VOL_ProgressiveTE",
+    "score": 0.669
+   }
+  ],
+  "top10": [
+   "MOT_MR124",
+   "ADV_6MV2Standard",
+   "VOL_ProgressiveTE",
+   "VOL_GTP",
+   "WOR_MeisterL13P",
+   "VOL_TE37Ultra",
+   "VOL_VRG2Forged",
+   "HRE_C106",
+   "VOL_TE37",
+   "KMC_KM711"
+  ],
+  "verdict": "matched",
+  "stem": "ADV_GT",
+  "name": "Advan GT",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "WOR_MeisterL13P"
+  ],
+  "note": "5 flat black spokes, riveted polished lip"
+ },
+ "13675": {
+  "renders": [
+   "Tuning_2297_20260806103113"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_2297_20260806103113",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_MeisterCR01",
+    "score": 0.646
+   },
+   {
+    "stem": "ROT_WGRM",
+    "score": 0.642
+   },
+   {
+    "stem": "WOR_EmotionT5R2P",
+    "score": 0.638
+   }
+  ],
+  "top10": [
+   "WOR_MeisterCR01",
+   "ROT_WGRM",
+   "WOR_EmotionT5R2P",
+   "ROT_FUC",
+   "WOR_LanvecLS1",
+   "AME_VF310",
+   "CRA_Series61",
+   "KON_Air",
+   "WOR_MeisterS13P",
+   "ROT_DIA"
+  ],
+  "verdict": "matched",
+  "stem": "AME_VF309",
+  "name": "American Racing VF 309",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [],
+  "note": "ring of 10 round holes, red centre ring"
+ },
+ "13682": {
+  "renders": [
+   "Tuning_0325_20260810131650",
+   "Tuning_0383_20260807045150"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_0325_20260810131650",
+    "wheel": "front",
+    "k": 5
+   },
+   {
+    "container": "Tuning_0383_20260807045150",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_CUF",
+    "score": 0.88
+   },
+   {
+    "stem": "KON_Americana",
+    "score": 0.855
+   },
+   {
+    "stem": "OET_Type_RXX",
+    "score": 0.852
+   }
+  ],
+  "top10": [
+   "ROT_CUF",
+   "KON_Americana",
+   "OET_Type_RXX",
+   "vor_vcs003",
+   "OZ_AspenHLT",
+   "AME_VN205",
+   "MOM_GTR",
+   "HRE_rs205m",
+   "WOR_EquipRSZNegative",
+   "HRE_945RL"
+  ],
+  "verdict": "matched",
+  "stem": "AME_TorqThrust",
+  "name": "American Racing Torq Thrust",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "KON_Americana"
+  ],
+  "note": "Torq-Thrust spoke shape, polished lip; 2 renders"
+ },
+ "13698": {
+  "renders": [
+   "Tuning_1562_20260713105224"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_1562_20260713105224",
+    "wheel": "front",
+    "k": 12
+   }
+  ],
+  "top3": [
+   {
+    "stem": "KMC_XD228",
+    "score": 0.727
+   },
+   {
+    "stem": "BRA_MonoblockVIMulti",
+    "score": 0.695
+   },
+   {
+    "stem": "KMC_KM696",
+    "score": 0.694
+   }
+  ],
+  "top10": [
+   "KMC_XD228",
+   "BRA_MonoblockVIMulti",
+   "KMC_KM696",
+   "5ZI_ZR_520",
+   "5ZI_BeckettsMK6",
+   "ASA_AF116",
+   "5ZI_ProRacerZ1",
+   "ROT_OZR",
+   "KON_Daylite",
+   "HAL_Indy"
+  ],
+  "verdict": "matched",
+  "stem": "ASA_AF116",
+  "name": "Asanti AF 116",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "BRA_MonoblockVIMulti"
+  ],
+  "note": "6 split spokes, chrome, polished lip"
+ },
+ "13701": {
+  "renders": [
+   "Tuning_0483_20260810230931"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_0483_20260810230931",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_CUF",
+    "score": 0.76
+   },
+   {
+    "stem": "OZ_AspenHLT",
+    "score": 0.738
+   },
+   {
+    "stem": "vor_vcs003",
+    "score": 0.735
+   }
+  ],
+  "top10": [
+   "ROT_CUF",
+   "OZ_AspenHLT",
+   "vor_vcs003",
+   "KON_Americana",
+   "AME_VN205",
+   "MOM_GTR",
+   "OET_Type_RXX",
+   "AME_TorqThrust",
+   "WOR_EquipRSZNegative",
+   "HRE_rs205m"
+  ],
+  "verdict": "matched",
+  "stem": "ASA_CX173",
+  "name": "Asanti CX 173",
+  "confidence": "looked",
+  "strength": "high",
+  "alternates": [],
+  "note": "white 5 split spokes with pink accents"
+ },
+ "13732": {
+  "renders": [
+   "Tuning_3655_20260806113058"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3655_20260806113058",
+    "wheel": "rear",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_Equip40",
+    "score": 0.601
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.596
+   },
+   {
+    "stem": "HOL_Solid",
+    "score": 0.578
+   }
+  ],
+  "top10": [
+   "WOR_Equip40",
+   "CRA_Series313",
+   "HOL_Solid",
+   "WOR_Equip_01",
+   "AME_Outlaw_II",
+   "ROT_VCET",
+   "ROT_AeroDisc",
+   "ROT_CBU",
+   "BBS_RSTurbofan",
+   "MIC_Classic_Look"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "ENK_NT03",
+   "ENK_RPF1",
+   "ENK_TS10"
+  ],
+  "candidate_names": [
+   "Enkei NT 03",
+   "Enkei RPF 1",
+   "Enkei TS 10"
+  ],
+  "note": "rear oblique: silver ~12 thin spokes, paired look"
+ },
+ "13808": {
+  "renders": [
+   "Tuning_4210_20260810165312"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4210_20260810165312",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "OZ_AspenHLT",
+    "score": 0.69
+   },
+   {
+    "stem": "CRA_Series61",
+    "score": 0.688
+   },
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.681
+   }
+  ],
+  "top10": [
+   "OZ_AspenHLT",
+   "CRA_Series61",
+   "BRA_MonoblockIV",
+   "vor_vcs003",
+   "AME_VN205",
+   "KON_Americana",
+   "HRE_rs205m",
+   "OET_M",
+   "WOR_EquipRSZNegative",
+   "ADV_5STrackSpecCS"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "KON_Air",
+   "MOM_GTR",
+   "MOT_MR131"
+  ],
+  "candidate_names": [
+   "Konig Air",
+   "Momo GTR",
+   "Motegi Racing MR 131"
+  ],
+  "note": "chrome 5 wide spokes, deep dish"
+ },
+ "13867": {
+  "renders": [
+   "Tuning_3852_20260823051219"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3852_20260823051219",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MIC_ET_Drag",
+    "score": 0.594
+   },
+   {
+    "stem": "VOL_GTS",
+    "score": 0.588
+   },
+   {
+    "stem": "ROT_WLD",
+    "score": 0.583
+   }
+  ],
+  "top10": [
+   "MIC_ET_Drag",
+   "VOL_GTS",
+   "ROT_WLD",
+   "WEL_Alumastar_20_Drag",
+   "ROT_WGRM",
+   "HOL_Hole_Star",
+   "ROT_WRO",
+   "CRA_Series391",
+   "HRE_505",
+   "AME_VN511"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "MOD_M7",
+   "OZ_Zeus",
+   "MOM_RF5C"
+  ],
+  "candidate_names": [
+   "Modulare M 7",
+   "OZ Racing Zeus",
+   "Momo RF 5 C"
+  ],
+  "note": "small dark 5 split-spoke"
+ },
+ "13874": {
+  "renders": [
+   "Tuning_3369_20260807011640"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3369_20260807011640",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "CRA_Series391",
+    "score": 0.584
+   },
+   {
+    "stem": "MIC_ET_Drag",
+    "score": 0.578
+   },
+   {
+    "stem": "ROT_WLD",
+    "score": 0.574
+   }
+  ],
+  "top10": [
+   "CRA_Series391",
+   "MIC_ET_Drag",
+   "ROT_WLD",
+   "AME_VN511",
+   "AME_VN327",
+   "WEL_Alumastar_20_Drag",
+   "BOR_A",
+   "HAL_SprintII",
+   "ROT_DIA",
+   "ROT_ZRHT"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "OET_Type_RXX",
+   "RAC_RGS",
+   "OET_RZ"
+  ],
+  "candidate_names": [
+   "Oettinger Type RXX",
+   "Racing Dynamics RGS",
+   "Oettinger RZ"
+  ],
+  "note": "silver 5 wide spokes, thin lip"
+ },
+ "13894": {
+  "renders": [
+   "Tuning_3848_20260807012400"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3848_20260807012400",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_USF",
+    "score": 0.507
+   },
+   {
+    "stem": "ASA_AF140",
+    "score": 0.501
+   },
+   {
+    "stem": "WOR_MeisterL13P",
+    "score": 0.499
+   }
+  ],
+  "top10": [
+   "ROT_USF",
+   "ASA_AF140",
+   "WOR_MeisterL13P",
+   "ROT_AeroDiscTheVoid",
+   "ADV_06RMV2CS",
+   "ASA_AF116",
+   "F52_Forza",
+   "ROT_BlitzSports",
+   "ADV_6MV2Standard",
+   "WEL_Cheyenne6"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "ROT_BUC",
+   "ROT_INDT",
+   "ROT_LASR"
+  ],
+  "candidate_names": [
+   "Rotiform BUC",
+   "Rotiform INDT",
+   "Rotiform LASR"
+  ],
+  "note": "black ~20 straight thin spokes"
+ },
+ "13946": {
+  "renders": [
+   "Tuning_1130_20260806093420",
+   "Tuning_2542_20260806170113"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_1130_20260806093420",
+    "wheel": "front",
+    "k": 8
+   },
+   {
+    "container": "Tuning_2542_20260806170113",
+    "wheel": "front",
+    "k": 8
+   }
+  ],
+  "top3": [
+   {
+    "stem": "TSW_Mugello",
+    "score": 0.809
+   },
+   {
+    "stem": "VOL_G16",
+    "score": 0.731
+   },
+   {
+    "stem": "VOL_FZeroWinning",
+    "score": 0.729
+   }
+  ],
+  "top10": [
+   "TSW_Mugello",
+   "VOL_G16",
+   "VOL_FZeroWinning",
+   "ADV_8MV1SL",
+   "WOR_GnosisCV202",
+   "WOR_MeisterM1R",
+   "MOD_M23",
+   "COM_ML",
+   "RSW_F8",
+   "RSW_RType"
+  ],
+  "verdict": "matched",
+  "stem": "TSW_Mugello",
+  "name": "TSW Mugello",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "VOL_G16"
+  ],
+  "note": "8 fork-ended spokes; 2 renders; matcher #1"
+ },
+ "13970": {
+  "renders": [
+   "Tuning_4162_20260811142356"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_4162_20260811142356",
+    "wheel": "rear",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.669
+   },
+   {
+    "stem": "OET_E",
+    "score": 0.646
+   },
+   {
+    "stem": "HAL_SprintII",
+    "score": 0.641
+   }
+  ],
+  "top10": [
+   "BRA_MonoblockIV",
+   "OET_E",
+   "HAL_SprintII",
+   "CRA_Series61",
+   "OZ_AspenHLT",
+   "ROT_WRO",
+   "OET_M",
+   "ADV_5STrackSpecCS",
+   "WOR_Design_DH",
+   "KON_Americana"
+  ],
+  "verdict": "matched",
+  "stem": "VOL_GTS",
+  "name": "Volk Racing GTS",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [],
+  "note": "gold 5-spoke with white lip (rear render)"
+ },
+ "13973": {
+  "renders": [
+   "Tuning_3852_20260716044711"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3852_20260716044711",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MOT_MR124",
+    "score": 0.633
+   },
+   {
+    "stem": "WOR_MeisterL13P",
+    "score": 0.631
+   },
+   {
+    "stem": "ROT_USF",
+    "score": 0.617
+   }
+  ],
+  "top10": [
+   "MOT_MR124",
+   "WOR_MeisterL13P",
+   "ROT_USF",
+   "VOL_ProgressiveTE",
+   "ADV_6MV2Standard",
+   "HRE_C106",
+   "VOL_GTP",
+   "WEL_Cheyenne6",
+   "ASA_AF140",
+   "VOL_VRG2Forged"
+  ],
+  "verdict": "matched",
+  "stem": "VOL_TE37Ultra",
+  "name": "Volk Racing TE 37 Ultra",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "VOL_ProgressiveTE",
+   "VOL_TE037Dura"
+  ],
+  "note": "6 wide flat spokes"
+ },
+ "13981": {
+  "renders": [
+   "Tuning_0364_20260810162008"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_0364_20260810162008",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "BRA_MonoblockIV",
+    "score": 0.645
+   },
+   {
+    "stem": "BOR_A",
+    "score": 0.625
+   },
+   {
+    "stem": "OZ_AspenHLT",
+    "score": 0.623
+   }
+  ],
+  "top10": [
+   "BRA_MonoblockIV",
+   "BOR_A",
+   "OZ_AspenHLT",
+   "ROT_WLD",
+   "ROT_WRO",
+   "OET_E",
+   "HAL_SprintII",
+   "BOY_Slayer",
+   "F52_Tarmac348",
+   "ROT_WGRM"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "vor_vfn504",
+   "vor_vfn508",
+   "vor_vff102"
+  ],
+  "candidate_names": [
+   "Vorsteiner vfn 504",
+   "Vorsteiner vfn 508",
+   "Vorsteiner vff 102"
+  ],
+  "note": "dark 5 split-spoke, narrow slot"
+ },
+ "14016": {
+  "renders": [
+   "Tuning_1046_20260807022103"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_1046_20260807022103",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ADV_6MV2Standard",
+    "score": 0.674
+   },
+   {
+    "stem": "MOT_MR124",
+    "score": 0.65
+   },
+   {
+    "stem": "WOR_MeisterL13P",
+    "score": 0.638
+   }
+  ],
+  "top10": [
+   "ADV_6MV2Standard",
+   "MOT_MR124",
+   "WOR_MeisterL13P",
+   "VOL_GTP",
+   "VOL_TE37Ultra",
+   "VOL_VRG2Forged",
+   "KMC_KM711",
+   "VOL_ProgressiveTE",
+   "MOM_Heritage6",
+   "TSW_Revo"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "WEL_Cheyenne6",
+   "WOR_MeisterL13P"
+  ],
+  "candidate_names": [
+   "Weld Racing Cheyenne 6",
+   "Work Meister L 13 P"
+  ],
+  "note": "black 6 wide flat spokes, deep lip with dark inner band"
+ },
+ "14027": {
+  "renders": [
+   "Tuning_2738_20260813175142"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_2738_20260813175142",
+    "wheel": "front",
+    "k": 7
+   }
+  ],
+  "top3": [
+   {
+    "stem": "TSW_Evo",
+    "score": 0.64
+   },
+   {
+    "stem": "KON_After_Burner",
+    "score": 0.62
+   },
+   {
+    "stem": "ROT_SDR",
+    "score": 0.611
+   }
+  ],
+  "top10": [
+   "TSW_Evo",
+   "KON_After_Burner",
+   "ROT_SDR",
+   "MOM_Raptor",
+   "WOR_EmotionT7R2P",
+   "HRE_rs208m",
+   "ADV_7MV1Standard",
+   "WED_SA90",
+   "HRE_FF01",
+   "ADV_72CF2"
+  ],
+  "verdict": "matched",
+  "stem": "WEL_M77",
+  "name": "Weld Racing M 77",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "ENK_TM7",
+   "ADV_7MV2CS"
+  ],
+  "note": "black 7 Y-spoke"
+ },
+ "14028": {
+  "renders": [
+   "Tuning_3767_20260711105708"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3767_20260711105708",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_WLD",
+    "score": 0.588
+   },
+   {
+    "stem": "WEL_Alumastar_20_Drag",
+    "score": 0.565
+   },
+   {
+    "stem": "MIC_ET_Drag",
+    "score": 0.56
+   }
+  ],
+  "top10": [
+   "ROT_WLD",
+   "WEL_Alumastar_20_Drag",
+   "MIC_ET_Drag",
+   "AME_VN511",
+   "CRA_Series391",
+   "WOR_MeisterCR01",
+   "ROT_DIA",
+   "AME_VN327",
+   "WEL_AlumastarBL",
+   "HOL_Hole_Star"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "WOR_GnosisFMB03",
+   "WEL_Vektor",
+   "WOR_VSXX"
+  ],
+  "candidate_names": [
+   "Work Gnosis FMB 03",
+   "Weld Racing Vektor",
+   "Work VSXX"
+  ],
+  "note": "black dense mesh, thin bronze lip"
+ },
+ "14030": {
+  "renders": [
+   "Tuning_3767_20260711105627"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3767_20260711105627",
+    "wheel": "front",
+    "k": 4
+   }
+  ],
+  "top3": [
+   {
+    "stem": "WOR_Equip40",
+    "score": 0.63
+   },
+   {
+    "stem": "WOR_Equip_01",
+    "score": 0.607
+   },
+   {
+    "stem": "CRA_Series313",
+    "score": 0.596
+   }
+  ],
+  "top10": [
+   "WOR_Equip40",
+   "WOR_Equip_01",
+   "CRA_Series313",
+   "ROT_VCET",
+   "AME_Outlaw_II",
+   "ROT_AeroDisc",
+   "HOL_Solid",
+   "ROT_CBU",
+   "MIC_Classic_Look",
+   "BBS_RSTurbofan"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "WOR_MeisterCR01",
+   "WOR_MeisterS13P"
+  ],
+  "candidate_names": [
+   "Work Meister CR 01",
+   "Work Meister S 13 P"
+  ],
+  "note": "black 5-spoke, riveted lip with dark inner band"
+ },
+ "14031": {
+  "renders": [
+   "Tuning_3402_20260711045400"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3402_20260711045400",
+    "wheel": "front",
+    "k": 6
+   }
+  ],
+  "top3": [
+   {
+    "stem": "MOT_MR124",
+    "score": 0.666
+   },
+   {
+    "stem": "ADV_6MV2Standard",
+    "score": 0.654
+   },
+   {
+    "stem": "VOL_ProgressiveTE",
+    "score": 0.647
+   }
+  ],
+  "top10": [
+   "MOT_MR124",
+   "ADV_6MV2Standard",
+   "VOL_ProgressiveTE",
+   "VOL_VRG2Forged",
+   "VOL_GTP",
+   "WOR_MeisterL13P",
+   "KMC_KM711",
+   "VOL_TE37Ultra",
+   "TSW_Revo",
+   "VOL_TE37"
+  ],
+  "verdict": "matched",
+  "stem": "WOR_MeisterL13P",
+  "name": "Work Meister L 13 P",
+  "confidence": "looked",
+  "strength": "moderate-high",
+  "alternates": [
+   "WEL_Cheyenne6"
+  ],
+  "note": "slim 6-spoke, riveted polished lip"
+ },
+ "14037": {
+  "renders": [
+   "Tuning_3655_20260806113058"
+  ],
+  "n_wheels": 1,
+  "wheels": [
+   {
+    "container": "Tuning_3655_20260806113058",
+    "wheel": "front",
+    "k": 7
+   }
+  ],
+  "top3": [
+   {
+    "stem": "KON_After_Burner",
+    "score": 0.626
+   },
+   {
+    "stem": "ROT_SDR",
+    "score": 0.617
+   },
+   {
+    "stem": "WOR_EmotionT7R2P",
+    "score": 0.617
+   }
+  ],
+  "top10": [
+   "KON_After_Burner",
+   "ROT_SDR",
+   "WOR_EmotionT7R2P",
+   "TSW_Evo",
+   "HRE_948RL",
+   "HRE_rs208m",
+   "WED_SA90",
+   "RO_R27",
+   "FIK_FC307",
+   "HRE_tr107"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "WOR_EmotionT7R2P",
+   "WED_SA70"
+  ],
+  "candidate_names": [
+   "Work WORK Emotion T 7 R 2 P",
+   "WedsSport SA 70"
+  ],
+  "note": "black 7 straight slim spokes"
+ },
+ "14045": {
+  "renders": [
+   "Tuning_2987_20260810002513",
+   "Tuning_3722_20260813162604"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_2987_20260810002513",
+    "wheel": "front",
+    "k": 4
+   },
+   {
+    "container": "Tuning_3722_20260813162604",
+    "wheel": "front",
+    "k": 5
+   }
+  ],
+  "top3": [
+   {
+    "stem": "ROT_WLD",
+    "score": 0.536
+   },
+   {
+    "stem": "AME_VN327",
+    "score": 0.53
+   },
+   {
+    "stem": "MIC_ET_Drag",
+    "score": 0.522
+   }
+  ],
+  "top10": [
+   "ROT_WLD",
+   "AME_VN327",
+   "MIC_ET_Drag",
+   "WEL_Alumastar_20_Drag",
+   "BOR_A",
+   "CRA_Series391",
+   "CRA_Series61",
+   "HRE_505",
+   "HAL_SprintII",
+   "ROT_WGRM"
+  ],
+  "verdict": "ambiguous",
+  "stem": null,
+  "name": null,
+  "confidence": "looked",
+  "candidates": [
+   "TSW_Hockenheim_R",
+   "OZ_SuperturismoGT",
+   "WOR_SeekerFX"
+  ],
+  "candidate_names": [
+   "TSW Hockenheim R",
+   "OZ Racing Superturismo GT",
+   "Work Seeker FX"
+  ],
+  "note": "silver ~15 thin spokes (Peel render unreadable)"
+ },
+ "14050": {
+  "renders": [
+   "Tuning_2472_20260801202601",
+   "Tuning_2472_20260806104516"
+  ],
+  "n_wheels": 2,
+  "wheels": [
+   {
+    "container": "Tuning_2472_20260801202601",
+    "wheel": "front",
+    "k": 10
+   },
+   {
+    "container": "Tuning_2472_20260806104516",
+    "wheel": "front",
+    "k": 10
+   }
+  ],
+  "top3": [
+   {
+    "stem": "vor_vfn507",
+    "score": 0.814
+   },
+   {
+    "stem": "vor_vff111",
+    "score": 0.753
+   },
+   {
+    "stem": "F52_Outlaw001",
+    "score": 0.662
+   }
+  ],
+  "top10": [
+   "vor_vfn507",
+   "vor_vff111",
+   "F52_Outlaw001",
+   "TSW_Geneva",
+   "TSW_Chrono",
+   "HRE_r101lightweight",
+   "vor_vcs002",
+   "vor_vff101",
+   "BBS_CIR",
+   "ROT_FLG"
+  ],
+  "verdict": "matched",
+  "stem": "vor_vfn507",
+  "name": "Vorsteiner vfn 507",
+  "confidence": "looked",
+  "strength": "moderate",
+  "alternates": [
+   "vor_vff111",
+   "WOR_VSXX"
+  ],
+  "note": "Y-mesh with thin dark lip; 2 renders; matcher #1 (0.81)"
+ }
+}

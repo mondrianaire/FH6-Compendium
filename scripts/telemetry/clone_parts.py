@@ -735,10 +735,26 @@ def pick_for(slot, idx, pid, ordinal, fam=None, kit=0):
     if slot in RIM_SLOTS:
         nm, conf = resolve_name(slot, None, pid)
         p.update(pick_kind="rim", confirmed=READ, name=nm if conf == "verified" else None)
-        p["instruction"] = ("rim id %s: read the installed rim on the source car and fit any rim of the "
-                            "same weight class" % pid)
+        # data/rim-id-matches.json: the wheel in each build's WebP render matched BY EYE against the decoded
+        # wheel icons. A hint for finding the tile faster, never proof -- it lives beside the name, not in it.
+        rm = (_load(os.path.join(DATA, "rim-id-matches.json")) or {}).get(str(pid)) or {}
+        hint = ""
+        if not p["name"] and rm.get("verdict") == "matched" and rm.get("name"):
+            p["render_name"] = rm["name"]
+            p["render_strength"] = rm.get("strength") or "unrated"
+            hint = " (the build render reads as '%s')" % rm["name"]
+        p["instruction"] = ("rim id %s%s: read the installed rim on the source car and fit any rim of the "
+                            "same weight class" % (pid, hint))
         if p["name"]:
             p["notes"].append("this id was read off a car as '%s'" % nm)
+        elif p.get("render_name"):
+            alts = rm.get("alternates") or []
+            p["notes"].append("render match is by eye against the wheel icons (%s%s) - a hint for finding "
+                              "the tile, not proof; the weight chip is what must agree"
+                              % (p["render_strength"], ("; alternates " + ", ".join(alts)) if alts else ""))
+        elif rm.get("verdict") == "ambiguous" and rm.get("candidates"):
+            p["notes"].append("the build render narrows the design to %s (ambiguous by eye)"
+                              % ", ".join(rm["candidates"]))
         p["notes"].append("rims differ only by weight class (spec 10.6); the lock hides sliders, "
                           "not the INSTALLED badge, and the Rim Style menu opens on the installed tile")
         return p

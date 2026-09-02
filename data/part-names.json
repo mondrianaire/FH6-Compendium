@@ -184,7 +184,8 @@
      "name_13675": "pending (read from the name bar)"
     }
    },
-   "_smoke_test_verdict": "cloned rsx (Tuning_0412_20260902044227) vs Top Meta Rival: all 100 part slots identical except rim_style/rear_rim_style (13675 vs 701); gears identical; 12 sliders at install defaults awaiting the tune screen."
+   "_smoke_test_verdict": "cloned rsx (Tuning_0412_20260902044227) vs Top Meta Rival: all 100 part slots identical except rim_style/rear_rim_style (13675 vs 701); gears identical; 12 sliders at install defaults awaiting the tune screen.",
+   "_render_matches": "data/rim-id-matches.json (2026-09-02): the wheel in each of the 167 WebP build renders matched against the 528 decoded wheel icons, 62 distinct ids scored, 41 matched BY EYE (701 TSW Hockenheim R moderate, 13675 American Racing VF 309 high, 638 Asanti AF 134 anchor-confirmed, 13147 Speedline F1 high, 371 OZ Superturismo GT moderate), 17 ambiguous with candidate lists, 4 no verdict; 711 has no render. The automatic matcher alone got only ~10 of 62 right (spoke counting fails under ~45 px), so every verdict is a human read of the compare sheets. Alphabetical ascent within an allocation batch holds in 4 of 6 batches (632..711 strongest); it breaks at 12928 (ADV.1 Forza) and twice in 13616..14050. Hints for finding the tile, never proof: the weight chip must agree."
   },
   "driveline": {
    "_scheme": "Global ladder",

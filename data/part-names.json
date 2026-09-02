@@ -634,5 +634,36 @@
   },
   "per_car_option_lists": "Each car archive Content/media/cars/<CAR>.zip carries Manifest.xml with <UpgradeablePart PartEnum=... PartId=...> rows listing that car's VISUAL upgrade options by the exact save part id -- CarBody, RearWing, FrontBumper, RearBumper, Hood, SideSkirts, ChassisStiffness (including the variant-100 ids) -- 660 archives. So the option LISTS for the brand-composed slots are file-derivable for every car; the model basenames are generic (bumperfcustom_b, trunk_b), so the brand LABEL per option is still menu-only.",
   "_engine_note_2026_09_02": "NSX-R Engine menus (name bar, no saves needed): every engine family except Intercooler sells 3 tiles Stock/Sport/Race; installed tiles match save ids on the global ladder (cams tile 2 = index 2, pistons/block/exhaust/supercharger tile 3 = index 3), so the Street tier is absent, not renumbered. Intercooler sells 4 tiles. PI previews with the top tile: fuel 691, ignition 690, valves 689, oil 686, flywheel 685, intercooler 685, cams 695 (from Sport); baseline 683. Power chips: fuel +20, ignition +16, valves +15, oil +9, intercooler +26, cams +34; flywheel -4 lb."
+ },
+ "fallback_identification": {
+  "rule": "When a slot's tile cannot be named or positioned, identify it by EFFECT: read the source car's Power/Weight page (power, torque, weight, front %, displacement, PI) and Braking/Lateral G page once; on the clone, leave ambiguous slots for last, then pick the tile whose preview reproduces the source numbers. Tile chips (POWER +N hp, Weight -N lb) are deltas against the current state and must close the remaining difference. PI is verifiable live: the daemon receives menu preview configs while tiles are highlighted.",
+  "why": "Jett 2026-09-02: 'if we know that the correct upgrade would result in XXX HP or X torque, that is almost as good and will suffice for right now'. Rims (weight class) were the first application.",
+  "known_effects_nsxr": {
+   "engine_top_tiles_hp": {
+    "fuel_system": 20,
+    "ignition": 16,
+    "valves": 15,
+    "oil_cooling": 9,
+    "intercooler": 26,
+    "camshaft_from_sport": 34,
+    "flywheel_lb": -4
+   },
+   "engine_swaps_hp": {
+    "1.6L I4 - Turbo Rally": -140,
+    "2.0L I4-T": -125,
+    "3.2L I6": -119,
+    "6.2L V8": 179
+   },
+   "aspiration_hp": {
+    "Twin Turbo": 55,
+    "Positive-Displacement Supercharger": 33,
+    "Centrifugal Supercharger": 29
+   },
+   "rims_lb": {
+    "class1": -11,
+    "class2": -22,
+    "class3": -33
+   }
+  }
  }
 }

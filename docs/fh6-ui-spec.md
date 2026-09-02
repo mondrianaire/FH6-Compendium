@@ -342,3 +342,7 @@ Front aero gating, both directions (2026-09-02): fitting the body kit removes th
 ### 10.8 Aero and Appearance on the NSX-R (2026-09-02)
 
 With the body kit removed the category shows two tiles, Front Bumper and Rear Wing (one tile, Rear Wing, with the kit on). Rear Wing: three tiles, dense, names by the brand rule: Honda - Stock Rear Wing (0), Rocket Bunny - Race Rear Wing (1, 5,000 CR), Forza Horizon 6 - Race Rear Wing (2, installed on the clone). All three show the ADJUSTABLE chip; the two Race wings show UNLOCKS REAR WING DOWNFORCE TUNING. Front Bumper description: "Note that Race upgrades make downforce adjustable."
+
+### 10.9 Fallback identification by effect (2026-09-02)
+
+When a tile cannot be named or positioned, the correct part is the one whose preview reproduces the source car's numbers. Read the source once (Power/Weight page: power, torque, weight, front %, displacement, PI; Braking/Lateral G page), leave ambiguous slots for last on the clone, then pick the tile whose preview lands on the source values. Chips (POWER +N hp, Weight -N lb) are deltas against the current state. PI can be verified live: the telemetry daemon receives preview configs while a tile is highlighted. Rims (weight class) are the first application of this rule.

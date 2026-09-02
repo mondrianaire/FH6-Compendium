@@ -781,6 +781,40 @@ def tune_hash(path_or_bytes):
     return hashlib.sha1(bytes(b[OFF_TUNE:])).hexdigest()[:16]
 
 
+# ---- identity tiers, all on RAW BYTES (fingerprint study, 2026-09-01; 534 containers, 90/90 pairs) ----
+# GUID (header)  == setup_hash  : this exact saved setup. 476 distinct of 534 files; the rest are re-downloads.
+# setup_hash                    : hardware AND sliders AND gears. ordinal + parts[0..99] + 0x19E..0x255.
+# hw_hash                       : hardware only -- THE clone-verification protocol. ordinal + parts[0..99].
+# tune_hash                     : sliders + gears only (0x19E..). Orthogonal: 2 keys are shared across
+#                                 DIFFERENT hardware in the fleet, so it can never be a setup identity.
+# parts_hash (legacy, above)    : decoded-dict key. id%1000 erases the partset; 0 collisions observed in
+#                                 534 files but structurally weaker than hw_hash. Kept for the PI store.
+# Excluded from every tier on purpose: 0x00 version, 0x01 locked flag (differs between a download and
+# your own save BY DEFINITION), 0x04..0x0D constants. Never normalise 0xFFFFFFFF to 0 before hashing.
+HW_BYTES = ((0x02, 0x04), (0x0E, 0x19E))
+SETUP_BYTES = ((0x02, 0x04), (0x0E, 0x256))
+
+
+def _slice_hash(path_or_bytes, ranges):
+    b = path_or_bytes if isinstance(path_or_bytes, (bytes, bytearray)) else open(path_or_bytes, "rb").read()
+    if len(b) != TUNE_FILE_SIZE:
+        return None
+    h = hashlib.sha1()
+    for a, z in ranges:
+        h.update(bytes(b[a:z]))
+    return h.hexdigest()[:16]
+
+
+def hw_hash(path_or_bytes):
+    """Identical hardware <=> equal hw_hash. Ordinal + all 100 part slots (named and reserved)."""
+    return _slice_hash(path_or_bytes, HW_BYTES)
+
+
+def setup_hash(path_or_bytes):
+    """Identical hardware AND sliders AND gears. Equal to the header GUID's distinctness in the corpus."""
+    return _slice_hash(path_or_bytes, SETUP_BYTES)
+
+
 _PARTS_PI = None
 def _parts_pi_path():
     here = os.path.dirname(os.path.abspath(__file__))

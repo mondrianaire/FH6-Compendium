@@ -1,0 +1,18 @@
+{
+ "IDS_Description_0": "Standard production class. This class consists of affordable passenger cars. Car class designates a car's performance level by taking into account grip, weight, and power.",
+ "IDS_Description_1": "Sport production class. This includes sports oriented saloons.  Car class designates a car's performance level by taking into account grip, weight, and power.",
+ "IDS_Description_2": "Sport-performance production class. This includes sports oriented coups.  Car class designates a car's performance level by taking into account grip, weight, and power.",
+ "IDS_Description_3": "Performance production class. Here is where you will find the high end sports cars.  Car class designates a car's performance level by taking into account grip, weight, and power.",
+ "IDS_Description_4": "High performance production class. Supercars and exotics. Car class designates a car's performance level by taking into account grip, weight, and power.",
+ "IDS_Description_5": "Ultra high performance production class. This has the rarest cars in the world.  Car class designates a car's performance level by taking into account grip, weight, and power.",
+ "IDS_Description_6": "Ultra high end, purpose-built race cars. Car class designates a car's performance level by taking into account grip, weight, and power.",
+ "IDS_Description_7": "This is the unlimited class.",
+ "IDS_DisplayName_0": "D",
+ "IDS_DisplayName_1": "C",
+ "IDS_DisplayName_2": "B",
+ "IDS_DisplayName_3": "A",
+ "IDS_DisplayName_4": "S1",
+ "IDS_DisplayName_5": "S2",
+ "IDS_DisplayName_6": "R",
+ "IDS_DisplayName_7": "X"
+}

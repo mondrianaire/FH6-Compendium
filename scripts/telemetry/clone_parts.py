@@ -156,6 +156,7 @@ SUB_TILE = {
 }
 
 _CACHE = {}
+_CAT_CACHE = {}
 
 
 def _load(path, key=None):
@@ -181,7 +182,36 @@ def resolve_name(slot, idx, pid=None):
         row = named.get(key)
         if isinstance(row, dict) and row.get("name"):
             nm = row["name"]
-            return (None, None) if nm.startswith("UNKNOWN") else (nm, row.get("confidence"))
+            if not nm.startswith("UNKNOWN"):
+                return (nm, row.get("confidence"))
+    # The game's own catalogue (EN.zip Upgrades.str) -- name = Upgrades[base + tier], with an explicit map
+    # for slots whose later-added tiers sit at high IDS numbers. Falls through if the install is absent.
+    cat = j.get("catalogue") or {}
+    if idx is not None and cat:
+        tier = idx % 100
+        U = _CAT_CACHE.get("U")
+        if U is None:
+            try:
+                import fh6_strings as _S
+                U = _S.numbered(_S.load("Upgrades"), "IDS_Name")
+            except Exception:
+                U = {}
+            _CAT_CACHE["U"] = U
+        if U:
+            if slot in ((cat.get("brand_slots") or {}).get("slots") or []):
+                return (None, None)
+            pair = (cat.get("pair_families") or {}).get(slot)
+            if isinstance(pair, list):
+                ids = pair[0] if tier == 0 else pair[1]
+                if ids in U:
+                    return (U[ids], "derived")
+            ids = ((cat.get("extended_tiers") or {}).get(slot) or {}).get(str(tier))
+            if ids is None:
+                base = (cat.get("bases") or {}).get(slot)
+                if base is not None and tier < 4:
+                    ids = base + tier
+            if ids is not None and ids in U:
+                return (U[ids], "verified" if slot in (cat.get("verified_slots") or []) else "derived")
     lad = j.get("tier_ladder") or {}
     if slot in (lad.get("applies_to") or []) and idx is not None:
         nm = lad.get(str(idx % 100))
@@ -449,10 +479,10 @@ def main():
             d = T.parse_tune(f)
             n = len([v for v in (d.get("parts") or {}).values() if v is not None])
             fam = engine_family(d.get("parts") or {})
-            print("    [%d] %-32s %-11s %2d parts  fam %-5s  %r"
+            print("    [%d] %-32s %-11s %2d parts  fam %-5s  hw:%s setup:%s  %r"
                   % (i, os.path.basename(os.path.dirname(f)),
                      "downloaded" if d.get("locked") else "self-made", n,
-                     fam or "-", tune_name(os.path.dirname(f)) or "?"), file=out)
+                     fam or "-", T.hw_hash(f)[:8], T.setup_hash(f)[:8], tune_name(os.path.dirname(f)) or "?"), file=out)
         out.flush()
         return 0
 

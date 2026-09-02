@@ -49,10 +49,10 @@
     "transmission": {
       "_scheme": "shared donor set 2102, its own catalogue. Gear count is an exact function of the FULL part id (e.g. 2102007 -> 10 gears), NOT of the index alone -- 'gears = index + 3' was a coincidence over indices 4-7 and must not be used as a rule.",
       "0": {
-        "name": "UNKNOWN - a genuine shared 6-speed part, NOT stock",
-        "confidence": "unknown",
+        "name": "Stock Transmission",
+        "confidence": "derived",
         "gears": 6,
-        "note": "Corrected 2026-09-01. Previously recorded as 'Stock Transmission'. 2102000 is a real 6-speed carried by 97 tunes; it is absent from the NSX-R's 6-tile menu, and that menu was never opened on camera, so its name is unobserved."
+        "note": "Catalogue row 55. The fingerprint study called 2102000 'a genuine shared 6-speed, not stock'; the catalogue says the index-0 row IS 'Stock Transmission' -- a stock box that happens to be a 6-speed on most cars. Both statements are consistent."
       },
       "4": {
         "name": "Race Transmission: 7 Speed",
@@ -123,10 +123,6 @@
     "tire_compound": {
       "_scheme": "GLOBAL enum, same index on every car. ONE capture of the compound menu pins all 163 cars.",
       "_warning": "The map in fh6_tune_decode.py (COMPOUND_NAMES) is WRONG and off by one around here. It calls 5 'Slick Race' and 6 'Rally'. Evidence that 5 is Rally: the cloned build matches container Tuning_0412_20260901181414 on tire_compound, and the game reported that tune's compound as Rally.",
-      "5": {
-        "name": "Rally",
-        "confidence": "derived"
-      },
       "_needs": "One capture naming every tile in the Tire Compound menu, paired to indexes by diff. Highest-value single capture available."
     },
     "rim_style": {
@@ -157,5 +153,250 @@
     "tier_1_and_2_on_some_slots": "Street and Sport are named in the ladder but were only observed on a few slots; a slot could in principle skip them.",
     "engine_internal_slots": "Group membership is proven (they carry the ENGINE's partset, 519/519) but which slot is camshaft vs valves vs displacement is not. The Engine menu lists Camshaft and Valves as SEPARATE tiles while the part sold under Camshaft is named 'Sport Cams and Valves'.",
     "transmission_2102000": "The shared 6-speed (2102000, 97 tunes) has no observed name."
+  },
+  "catalogue": {
+    "source": "Content/media/stripped/stringtables/EN.zip -> Upgrades.str, IDS_Name_<n>; parsed by scripts/telemetry/fh6_strings.py; exported to data/game-strings/Upgrades.json",
+    "rule": "For a 4-tier family the display name is Upgrades[base(slot) + tier], tier = index % 100 in 0..3 (Stock/Street/Sport/Race). Validated on all 12 screen-verified (slot, tier, name) pairs with zero misses.",
+    "why_the_ladder_looked_sparse": "Rally/Drift/Offroad were added to the catalogue later at high IDS numbers (272, 278, 291, 292, 301) while the save encodes them as tiers 4/5/6 of the same slot. extended_tiers maps those.",
+    "brand_rule": "Brand parts compose as '<List_PartManufacturer name> - <Upgrades name>' (e.g. 'Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'); they are not rows of Upgrades.str.",
+    "bases": {
+      "camshaft": 3,
+      "displacement": 7,
+      "fuel_system": 11,
+      "ignition": 15,
+      "exhaust": 19,
+      "intake": 23,
+      "single_turbo": 27,
+      "pos_supercharger": 31,
+      "centrifugal_supercharger": 35,
+      "intercooler": 39,
+      "brakes": 43,
+      "springs_dampers": 47,
+      "front_arb": 51,
+      "transmission": 55,
+      "clutch": 59,
+      "flywheel": 63,
+      "driveline": 67,
+      "differential": 71,
+      "weight_reduction": 75,
+      "tire_compound": 78,
+      "front_rim_size": 82,
+      "front_tire_width": 84,
+      "front_bumper": 86,
+      "rear_wing": 90,
+      "rear_bumper": 94,
+      "side_skirts": 98,
+      "hood": 100,
+      "rim_style": 114,
+      "drivetrain": 141,
+      "car_body": 143,
+      "rear_tire_width": 149,
+      "restrictor_plate": 161,
+      "manifold": 208,
+      "valves": 220,
+      "pistons": 224,
+      "oil_cooling": 232,
+      "twin_turbo": 236,
+      "rear_arb": 244,
+      "roll_cage": 248,
+      "rear_rim_size": 257,
+      "motor_parts": 259,
+      "front_track_width": 282,
+      "rear_track_width": 284,
+      "front_tire_profile": 304,
+      "rear_tire_profile": 308,
+      "motor": 314,
+      "engine": 1
+    },
+    "extended_tiers": {
+      "springs_dampers": {
+        "4": 272,
+        "5": 278
+      },
+      "differential": {
+        "4": 291,
+        "5": 292,
+        "6": 301
+      },
+      "transmission": {
+        "0": 55,
+        "1": 56,
+        "2": 57,
+        "3": 293,
+        "4": 294,
+        "5": 295,
+        "6": 296,
+        "7": 297,
+        "8": 302,
+        "9": 271
+      },
+      "tire_compound": {
+        "0": 78,
+        "1": 79,
+        "2": 80,
+        "3": 81,
+        "5": 273,
+        "6": 274,
+        "7": 275,
+        "8": 277,
+        "9": 280,
+        "10": 281,
+        "11": 298,
+        "12": 299,
+        "13": 300,
+        "15": 303
+      },
+      "weight_reduction": {
+        "0": 75,
+        "1": 77,
+        "2": 113
+      },
+      "single_turbo": {
+        "4": 312
+      },
+      "twin_turbo": {
+        "4": 313
+      },
+      "restrictor_plate": {
+        "0": 161,
+        "1": 162
+      }
+    },
+    "extended_confidence": {
+      "transmission": "derived: 4..8 pinned by gear counts (7/8/9/10-speed, Drift 4); 0..3 and 9 by catalogue order",
+      "tire_compound": "derived: 5=Rally confirmed on the completed clone; the rest follow catalogue order and are UNVERIFIED",
+      "weight_reduction": "verified by the completed clone (dense: Stock/Sport/Race)",
+      "springs_dampers": "verified (Rally/Drift read from the NSX-R menu)",
+      "differential": "verified (Stock/Race/Drift/Offroad read from the NSX-R menu)",
+      "single_turbo": "tier 4 = 'Race Turbo With Anti-Lag' (312), derived from catalogue order"
+    },
+    "verified_slots": [
+      "exhaust",
+      "camshaft",
+      "displacement",
+      "pistons",
+      "brakes",
+      "front_arb",
+      "rear_arb",
+      "weight_reduction",
+      "centrifugal_supercharger",
+      "springs_dampers",
+      "differential",
+      "transmission"
+    ],
+    "verified_pairs": [
+      [
+        "exhaust",
+        3,
+        "Race Exhaust"
+      ],
+      [
+        "camshaft",
+        2,
+        "Sport Cams and Valves"
+      ],
+      [
+        "displacement",
+        3,
+        "Race Engine Block"
+      ],
+      [
+        "pistons",
+        3,
+        "Race Pistons / Compression"
+      ],
+      [
+        "brakes",
+        3,
+        "Race Brakes"
+      ],
+      [
+        "front_arb",
+        3,
+        "Race Front Anti-roll Bars"
+      ],
+      [
+        "rear_arb",
+        3,
+        "Race Rear Anti-roll Bars"
+      ],
+      [
+        "weight_reduction",
+        2,
+        "Race Weight Reduction"
+      ],
+      [
+        "centrifugal_supercharger",
+        3,
+        "Race Centrifugal Supercharger"
+      ],
+      [
+        "centrifugal_supercharger",
+        1,
+        "Street Centrifugal Supercharger"
+      ],
+      [
+        "springs_dampers",
+        3,
+        "Race Spring and Dampers"
+      ],
+      [
+        "springs_dampers",
+        5,
+        "Drift Spring and Dampers"
+      ]
+    ],
+    "rims": "Model names are NOT in EN.zip. The rim catalogue is the directory Content/media/cars/_library/scene/wheels/<MFR>_<MODEL>.zip (e.g. ASA_AF134, WOR_MeisterCR01, AME_VF300, 5ZI_5ZRCopse) with matching icons in ui/textures/data_bound/Upgrade_Parts.zip/Tire_Rims/Licensed_Rims/. The numeric rim_style id -> stem mapping is in no readable text entry; it still needs fit -> save -> diff per wheel.",
+    "pair_families": {
+      "_rule": "Stock/Upgraded pairs, not 4-tier runs: tier 0 -> Stock row, tier >= 1 -> the 'Upgraded ...' row. The game itself labels every non-stock option just 'Upgraded'; the size is only on the tile.",
+      "front_rim_size": [
+        82,
+        83
+      ],
+      "rear_rim_size": [
+        257,
+        258
+      ],
+      "front_tire_width": [
+        84,
+        85
+      ],
+      "rear_tire_width": [
+        149,
+        145
+      ],
+      "front_track_width": [
+        282,
+        283
+      ],
+      "rear_track_width": [
+        284,
+        285
+      ],
+      "front_tire_profile": [
+        304,
+        305
+      ],
+      "rear_tire_profile": [
+        308,
+        309
+      ],
+      "rim_style": [
+        114,
+        115
+      ]
+    },
+    "brand_slots": {
+      "_rule": "Per-car lists of brand parts ('Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'). The 4-tier family rows exist in the catalogue but the tile the player sees is <Manufacturer> - <row>, and the save index is a dense per-car position, so the row alone is NOT the name. Resolver returns no name rather than a plausible wrong one.",
+      "slots": [
+        "rear_wing",
+        "front_bumper",
+        "rear_bumper",
+        "hood",
+        "side_skirts",
+        "car_body",
+        "engine"
+      ]
+    }
   }
 }

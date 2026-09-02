@@ -178,8 +178,12 @@ def resolve_name(slot, idx, pid=None):
     Returns (name, confidence) or (None, None). A name is NEVER invented from the number."""
     j = _load(os.path.join(DATA, "part-names.json")) or {}
     named = (j.get("named") or {}).get(slot) or {}
+    # Rows are either {"name":..., "confidence":...} (older) or a bare string (2026-09-02 capture
+    # session: every string row was proven by a saved setup read back from the container).
     for key in (str(idx), str(pid)):
         row = named.get(key)
+        if isinstance(row, str) and row and not row.startswith("UNKNOWN"):
+            return (row.split(" (")[0] if row.startswith("Rally Tire Compound (") else row, "proven")
         if isinstance(row, dict) and row.get("name"):
             nm = row["name"]
             if not nm.startswith("UNKNOWN"):

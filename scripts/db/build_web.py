@@ -193,6 +193,34 @@ def main(argv=None):
                        FROM obs_menu ORDER BY slot, tile""")
     total += write(os.path.join(out, "evidence.json"), {"evidence": ev, "menu": menu})
 
+
+    # ---- identity: how a LIVE car on screen is matched to a build we already hold ------
+    # The daemon reports the car's 50 decoded part ids. Joining them in slot order gives a
+    # hardware fingerprint the browser can compare directly, with no hashing and no guessing:
+    # if the string matches, this is that build. The slider fingerprint does the same for a tune.
+    slots = [r["slot"] for r in cx.execute("SELECT slot FROM ref_slot ORDER BY slot_index")]
+    sliders_order = [r["slider"] for r in cx.execute(
+        "SELECT slider FROM ref_slider ORDER BY slot_index")]
+    ident = []
+    for t in cx.execute("""SELECT container, ordinal, hw_hash, setup_hash, tune_name, locked,
+                                  source, pi, class, mass_kg, front_pct, gear_count, saved_utc
+                           FROM tune_container ORDER BY ordinal, saved_utc"""):
+        pk = {r["slot"]: r["part_id"] for r in cx.execute(
+            "SELECT slot, part_id FROM tune_part WHERE container=?", (t["container"],))}
+        sk = {r["slider"]: r["norm"] for r in cx.execute(
+            "SELECT slider, norm FROM tune_slider WHERE container=?", (t["container"],))}
+        ident.append({
+            "c": t["container"], "o": t["ordinal"], "hw": t["hw_hash"], "su": t["setup_hash"],
+            "name": t["tune_name"], "locked": t["locked"], "src": t["source"], "pi": t["pi"],
+            "cls": t["class"], "kg": t["mass_kg"], "front": t["front_pct"],
+            "gears": t["gear_count"], "saved": t["saved_utc"],
+            "pkey": ",".join("-" if pk.get(s) is None else str(pk[s]) for s in slots),
+            "skey": ",".join(("%.4f" % sk[s]) if sk.get(s) is not None else "-"
+                             for s in sliders_order),
+        })
+    total += write(os.path.join(out, "identity.json"),
+                   {"slots": slots, "sliders": sliders_order, "builds": ident})
+
     # ---- index --------------------------------------------------------------
     counts = fh6db.table_counts(cx)
     runs = rows(cx, "SELECT kind, n_rows, finished_utc, ok FROM import_run "

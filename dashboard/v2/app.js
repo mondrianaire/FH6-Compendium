@@ -30,6 +30,7 @@ const KG_LB = 2.2046226;
 
 /* ---------------------------------------------------------------- views */
 const VIEWS = [
+  { k: "live", lbl: "Dashboard", f: (h) => viewLive(h) },
   { k: "overview", lbl: "Overview", f: viewOverview },
   { k: "cars", lbl: "Cars", f: viewCars },
   { k: "builds", lbl: "Builds", f: viewBuilds },
@@ -346,10 +347,13 @@ async function viewEvidence(host) {
 
 /* ================================================================ boot */
 async function route() {
-  const k = (location.hash || "#overview").slice(1).split("/")[0];
+  const k = (location.hash || "#live").slice(1).split("/")[0];
   const v = VIEWS.find((x) => x.k === k) || VIEWS[0];
   document.querySelectorAll("#nav button").forEach((b) => b.classList.toggle("on", b.dataset.k === v.k));
   const host = $("#view"); host.innerHTML = "";
+  // the Dashboard is a fixed-height instrument panel, every other view is a document
+  document.body.classList.toggle("fixed", v.k === "live");
+  host.classList.toggle("live", v.k === "live");
   try { await v.f(host); }
   catch (e) { host.innerHTML = `<div class="panel"><b>could not render ${esc(v.k)}</b>
     <div class="why">${esc(e.message)}</div>

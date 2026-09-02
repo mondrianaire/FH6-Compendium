@@ -103,3 +103,59 @@ svg{display:block;max-width:100%}
 .mono{font-family:var(--mono)}
 .dim{color:var(--dim)}
 .right{text-align:right}
+
+/* ============================================================ Dashboard
+   A fixed instrument panel, not a document: the page itself never scrolls, each pane
+   fills its cell and scrolls inside. What is on screen IS the current stage. */
+body.fixed{overflow:hidden;height:100vh}
+body.fixed main{height:calc(100vh - 46px);padding:10px;display:flex;flex-direction:column;gap:9px;
+  max-width:none;overflow:hidden}
+.live{min-height:0;display:flex;flex-direction:column;gap:9px}
+
+.idbar{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:9px 13px;flex:0 0 auto}
+.idcar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;min-width:0}
+.idcar b{font-size:15px}
+.idnums{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;flex:0 0 auto}
+.stage{display:flex;gap:9px;align-items:center;background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--line2);border-radius:8px;padding:8px 11px}
+.stage .dot{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;
+  font:700 11px var(--mono);background:var(--panel2);color:var(--mut);flex:0 0 auto}
+.stage .t{font-weight:600;font-size:12.5px}
+.stage .s{color:var(--mut);font-size:11px}
+.stage.ok{border-left-color:var(--acc)} .stage.ok .dot{background:var(--acc);color:#04140c}
+.stage.no{border-left-color:var(--bad)} .stage.no .dot{background:var(--bad);color:#fff}
+.stage.go{border-left-color:var(--acc);background:#0f2a1e} .stage.go .dot{background:var(--acc);color:#04140c}
+.stage.wait{opacity:.72}
+
+.panes{display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1 1 auto;min-height:0}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.pane>header{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid var(--line);
+  font-weight:600;font-size:12.5px;flex:0 0 auto}
+.pane>header .why{font-weight:400}
+.popbtn{margin-left:auto;background:var(--panel2);border:1px solid var(--line2);color:var(--mut);
+  border-radius:5px;padding:3px 9px;font:11px var(--sans);cursor:pointer}
+.popbtn:hover{color:var(--acc);border-color:var(--acc)}
+.pane>.body{overflow:auto;padding:6px 4px 10px;min-height:0}
+
+.grp{margin:2px 0 9px}
+.grp h4{margin:7px 10px 4px;font:600 10.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--mut)}
+.row{display:grid;grid-template-columns:132px 1fr 62px 62px;gap:8px;align-items:center;
+  padding:3px 10px;border-bottom:1px solid #1a222c}
+.row:hover{background:var(--panel2)}
+.row .slot{color:var(--mut);font-size:11px}
+.row .nm{font-size:12.5px}
+.row .tile{font:11px var(--mono);color:var(--acc2);text-align:right}
+.row .pid{font-size:10.5px;text-align:right}
+.row.stock{opacity:.45}
+.row.stock .nm{color:var(--mut)}
+
+body.pop{padding:10px;background:var(--bg)}
+.popwrap h3{margin:0 0 8px}
+body.pop .live{height:auto}
+body.pop .pane{border:0;background:none}
+body.pop .pane>.body{overflow:visible}

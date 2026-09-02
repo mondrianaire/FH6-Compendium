@@ -232,6 +232,73 @@
    "2": "Race Chassis Reinforcement / Roll Cage",
    "_note": "tier digit only; the hundreds digit is the body variant",
    "_side_effect": "none"
+  },
+  "engine": {
+   "_scheme": "DENSE per car: tile position = index in the car's own set. Names are composed (displacement + layout + optional suffix), not a string-table row; record per car.",
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "captured": "2026-09-02 name bar, no saves",
+     "0": "Stock Powertrain Swap",
+     "1": "1.6L I4 - Turbo Rally",
+     "2": "2.0L I4-T",
+     "3": "3.2L I6",
+     "4": "6.2L V8",
+     "power_chip_hp": {
+      "1": -140,
+      "2": -125,
+      "3": -119,
+      "4": 179
+     },
+     "price_cr": {
+      "1": 25000,
+      "2": 25000,
+      "3": 25000,
+      "4": 3700
+     },
+     "pi_preview": {
+      "0": 638,
+      "1": 616,
+      "2": 601,
+      "3": 582,
+      "4": 651
+     },
+     "cross_check": "engine 412003 in stored tunes 'Road Grip (Rocket Bunny)' and '(A) Cornering Speed RWD' carries internals in set 136 -> set 136 = the 3.2L I6"
+    }
+   }
+  },
+  "_aspiration_menu": {
+   "412": {
+    "car": "1992 Honda NSX-R",
+    "tiles": [
+     "Stock - Naturally Aspirated",
+     "Twin Turbo",
+     "Positive-Displacement Supercharger",
+     "Centrifugal Supercharger"
+    ],
+    "slots": [
+     "manifold (NA marker)",
+     "twin_turbo",
+     "pos_supercharger",
+     "centrifugal_supercharger"
+    ],
+    "power_chip_hp": {
+     "Twin Turbo": 55,
+     "Positive-Displacement Supercharger": 33,
+     "Centrifugal Supercharger": 29
+    },
+    "price_cr": {
+     "Twin Turbo": 1800,
+     "Positive-Displacement Supercharger": 1500
+    },
+    "pi_preview": {
+     "Stock": 566,
+     "Twin Turbo": 596,
+     "Positive-Displacement Supercharger": 583,
+     "Centrifugal Supercharger": 572
+    },
+    "note": "no Single Turbo tile on this car; the type chosen here decides which Engine sub-menu (and slot) exists"
+   }
   }
  },
  "gaps": {

@@ -332,3 +332,7 @@ Contextual dependency, restated with the 2026-09-02 counts: the Engine category 
 ### 10.6 Rims are functionally a weight class (2026-09-02)
 
 A rim changes weight only, and with it PWR and PI; nothing else in the stats pages moves. Weight deltas are multiples of a per-car unit (NSX-R: Advan TC-4 -11 lb, RZ-F2 -22, RGII -33, PI 636/637/638; another car: -14/-28/-42). For cloning, any rim in the same class is identical. Protocol: open Rim Style on the source car (the cursor lands on the INSTALLED tile even on a locked tune), read name and weight chip, fit any same-class rim; record the container id against the name and class so the table fills on use. Rim size is separate: it is a size-ladder slot and changes tire geometry.
+
+### 10.7 Body Kits and Conversions on the NSX-R (2026-09-02)
+
+Engine Swap: five tiles, dense. Stock Powertrain Swap (0), 1.6L I4 - Turbo Rally (1, -140 hp, 25,000 CR), 2.0L I4-T (2, -125 hp), 3.2L I6 (3, -119 hp), 6.2L V8 (4, +179 hp, owned). Names are composed from displacement and layout plus an optional suffix; index 3 matches engine set 136 in two stored tunes. Aspiration: four tiles, Stock - Naturally Aspirated, Twin Turbo (+55 hp, 1,800 CR), Positive-Displacement Supercharger (+33 hp, 1,500 CR), Centrifugal Supercharger (+29 hp); no Single Turbo on this car. Both menus show the Performance dyno panel.

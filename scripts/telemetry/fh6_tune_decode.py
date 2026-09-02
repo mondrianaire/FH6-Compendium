@@ -552,7 +552,7 @@ DIM_SLOTS = {"front_tire_width", "rear_tire_width", "front_rim_size", "rear_rim_
 # Tires guide (Stock/Street/Sport/Semi-Slick/Race/Rally/Off-Road/Snow/Drift) and is cross-checked against the
 # on-disk distribution (idx 9 Drift x28 fits the heavy drift garage). Non-Stock names stay conf "compound"
 # (best-effort). idx 11/12/15 are FH6 compounds we haven't pinned yet — shown as "Compound #N" until verified.
-COMPOUND_NAMES = {0: "Stock", 1: "Street", 2: "Sport", 3: "Semi-Slick Race", 5: "Rally", 10: "'Horizon' Semi-Slick Race"}  # proven by cmpN saves 2026-09-02; other indices unknown (menu order != index order)
+COMPOUND_NAMES = {0: "Stock", 1: "Street", 2: "Sport", 3: "Semi-Slick Race", 5: "Rally", 6: "Slick Race", 7: "Offroad Race", 8: "Snow", 9: "Drag", 10: "Horizon Semi-Slick Race", 15: "Drift"}  # proven by cmpN saves 2026-09-02 (11 NSX-R tiles); 4, 11-14 unseen
 _TIER_VOCAB = None
 
 def load_tier_vocab():

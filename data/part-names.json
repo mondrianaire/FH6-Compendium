@@ -122,26 +122,34 @@
   },
   "tire_compound": {
    "_scheme": "GLOBAL enum, same index on every car. Part id = ordinal*1000 + index (412001 on the NSX-R).",
-   "_proof": "2026-09-02 NSX-R capture session: each compound put in the basket, setup saved as cmpN, container tire_compound read directly (Tuning_0412_20260902021611..021900). Names verbatim from the lime name bar.",
-   "0": "Stock Tire Compound",
-   "1": "Street Tire Compound",
-   "2": "Sport Tire Compound",
-   "3": "Semi-Slick Race Tire Compound",
-   "10": "'Horizon' Semi-Slick Race Tire Compound",
-   "5": "Rally Tire Compound (game-reported on Tuning_0412_20260901181414; tile 8 name capture pending)",
+   "_proof": "2026-09-02 NSX-R capture session: every tile queued in the basket, setup saved as cmpN (N = tile), container tire_compound read directly (Tuning_0412_20260902021611..022740). Names verbatim from the lime name bar. cmp8 = index 5 with 'Rally Tire Compound' on screen is the self-check.",
    "_menu_order_nsxr": {
     "1": 0,
     "2": 1,
     "3": 2,
     "4": 3,
     "5": 10,
+    "6": 6,
+    "7": 15,
     "8": 5,
-    "6": "?",
-    "7": "?",
-    "9": "?"
+    "9": 7,
+    "10": 8,
+    "11": 9
    },
-   "_menu_is_not_index_order": "tile 5 = index 10. Never read an index off tile position.",
-   "_side_effect": "Installing a compound resets front_tire_pressure to 0.400 and rear_tire_pressure to 0.450 (normalised); gears untouched (4/4 saves)."
+   "_menu_is_not_index_order": "tile 5 = index 10, tile 7 = index 15. Never read an index off tile position.",
+   "_not_offered_on_nsxr": "indices 4, 11, 12, 13, 14 unseen; catalogue rows still unplaced: 281 Vintage Race, 300 Vintage White Wall, 303 'Hot Wheels' Semi-Slick Race. Need a car that sells them.",
+   "_side_effect": "Installing a compound resets front_tire_pressure to 0.400 and rear_tire_pressure to 0.450 (normalised); gears untouched (10/10 saves).",
+   "0": "Stock Tire Compound",
+   "1": "Street Tire Compound",
+   "2": "Sport Tire Compound",
+   "3": "Semi-Slick Race Tire Compound",
+   "5": "Rally Tire Compound",
+   "6": "Slick Race Tire Compound",
+   "7": "Offroad Race Tire Compound",
+   "8": "Snow Tire Compound",
+   "9": "Drag Tire Compound",
+   "10": "'Horizon' Semi-Slick Race Tire Compound",
+   "15": "Drift Tire Compound"
   },
   "rim_style": {
    "_scheme": "FLAT global catalogue. No partset, nothing derivable from the number. 148 distinct ids observed, 326..14670, block-allocated.",
@@ -253,8 +261,13 @@
     "1": 79,
     "2": 80,
     "3": 81,
+    "5": 273,
+    "6": 299,
+    "7": 274,
+    "8": 277,
+    "9": 280,
     "10": 275,
-    "5": 273
+    "15": 298
    },
    "weight_reduction": {
     "0": 75,
@@ -272,16 +285,20 @@
     "1": 162
    },
    "tire_compound_unproven_catalogue_order": {
-    "6": 274,
-    "7": 275,
-    "8": 277,
-    "9": 280,
-    "11": 298,
-    "12": 299,
-    "13": 300,
-    "15": 303
+    "unplaced_rows": [
+     281,
+     300,
+     303
+    ],
+    "unseen_indices": [
+     4,
+     11,
+     12,
+     13,
+     14
+    ]
    },
-   "_note_tire_compound": "Proven rows only in tire_compound (cmpN saves 2026-09-02). The catalogue-order guess was wrong at index 10 (guessed 281 Vintage, actual 275 'Horizon' Semi-Slick); remaining guesses parked in tire_compound_unproven_catalogue_order."
+   "_note_tire_compound": "All 11 NSX-R compounds proven by cmpN saves 2026-09-02. Catalogue order was right for 8 Snow and 9 Drag only; wrong at 6, 7, 10, 15."
   },
   "extended_confidence": {
    "transmission": "derived: 4..8 pinned by gear counts (7/8/9/10-speed, Drift 4); 0..3 and 9 by catalogue order",

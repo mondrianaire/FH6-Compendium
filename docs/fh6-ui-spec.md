@@ -240,3 +240,25 @@ The panel under the lime name bar cycles with **Y / Toggle** through five pages.
 Consequences: page 2 supplies mass and front weight fraction for the spring-rate bands (the My Cars stats screen is no longer needed); page 3 gives a per-compound grip ladder from the game's own model; page 5 gives the aero and mechanical balance of any build. Tile chips (e.g. GRIP -0.16) appear on the highlighted tile only and are deltas versus the installed part.
 
 Tire Compound grid on the NSX-R: 9 tiles, scrollbar present. Tile 1 = "Stock Tire Compound (Street)" (catalogue row 78 is "Stock Tire Compound"; the class suffix is appended by the UI). INSTALLED badge on tile 8, whose save value is index 5.
+
+### 10.1 Tire Compound grid, NSX-R, fully proven (2026-09-02)
+
+Eleven tiles (three rows of three plus a fourth row of two; the scrollbar thumb is the only hint from the first screen). Index = save-file value, proven by one saved setup per tile.
+
+| Tile | Name bar | Index | Lat G 60/120 | 60-0 / 100-0 ft | PI preview |
+|---|---|---|---|---|---|
+| 1 | Stock Tire Compound (Street) | 0 | 1.22 / 1.49 | 81.1 / 189.1 | A 681 |
+| 2 | Street Tire Compound | 1 | 1.10 / 1.34 | 80.4 / 190.5 | A 684 |
+| 3 | Sport Tire Compound | 2 | 1.12 / 1.37 | 79.5 / 185.8 | S1 701 |
+| 4 | Semi-Slick Race Tire Compound | 3 | 1.32 / 1.62 | 76.4 / 181.0 | S1 727 |
+| 5 | 'Horizon' Semi-Slick Race Tire Compound | 10 | 1.32 / 1.62 | 76.4 / 181.0 | S1 727 |
+| 6 | Slick Race Tire Compound | 6 | 1.32 / 1.62 | 74.9 / 171.2 | S1 738 |
+| 7 | Drift Tire Compound | 15 | 1.17 / 1.43 | 78.7 / 188.5 | S1 701 |
+| 8 | Rally Tire Compound | 5 | 1.27 / 1.56 | 83.9 / 199.9 | S1 702 |
+| 9 | Offroad Race Tire Compound | 7 | 1.05 / 1.29 | 80.1 / 192.5 | A 687 |
+| 10 | Snow Tire Compound | 8 | 1.10 / 1.34 | 81.0 / 191.1 | A 684 |
+| 11 | Drag Tire Compound | 9 | 1.10 / 1.35 | 83.9 / 205.4 | A 656 |
+
+Menu order is not index order (tile 5 = 10, tile 7 = 15). A queued tile shows a small basket glyph in its corner and the INSTALLED badge leaves the current part while anything is queued; the footer CR shows the queued price. Installing a compound resets both tire-pressure sliders (0.400 F / 0.450 R normalised). Indices 4 and 11-14 are not offered on this car; catalogue rows 281, 300 and 303 remain unplaced.
+
+Container folder timestamps (`Tuning_<ordinal>_<yyyymmddhhmmss>`) are UTC: the cmp6 save folder reads 20260902022442 while the matching screenshot is stamped 2026-09-01 22:24:37 local (UTC-4).

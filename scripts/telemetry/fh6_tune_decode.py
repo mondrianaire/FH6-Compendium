@@ -878,6 +878,44 @@ def _pi_slot_for(row, parts):
         return "drivetrain"
     return item   # regular shop-menu rows already carry the real slot key
 
+_PN_CACHE = {}
+
+
+def _proven_name(slot, val, idx, ordinal):
+    """ONE name layer (2026-09-02). A name from data/part-names.json -- proven by a saved setup, a verified
+    catalogue pair, or a per-car row read off the name bar -- via clone_parts.resolve_name. Returns None when
+    nothing proven exists so the older heuristics below still apply. The audit critic found this deliverable
+    naming the Offroad diff 'Rally', the kit's stock cage 'Race' and dense per-car parts by ladder words; the
+    proven rows now win. Lazy import: clone_parts imports this module at load time."""
+    try:
+        import clone_parts as _C
+    except Exception:
+        return None
+    dense_in_variant = slot in ("roll_cage", "weight_reduction")
+    look = idx % 100 if dense_in_variant else idx
+    if slot in ("rim_style", "rear_rim_style"):
+        nm, _conf = _C.resolve_name(slot, None, val)
+        return nm
+    if "pn" not in _PN_CACHE:
+        try:
+            here = os.path.dirname(os.path.abspath(__file__))
+            with open(os.path.join(here, "..", "..", "data", "part-names.json"), encoding="utf-8") as fh:
+                _PN_CACHE["pn"] = json.load(fh)
+        except Exception:
+            _PN_CACHE["pn"] = {}
+    per = (((_PN_CACHE["pn"].get("named") or {}).get(slot) or {}).get("_per_car") or {}).get(str(ordinal)) or {}
+    row = per.get(str(look))
+    if isinstance(row, str) and row:
+        return row
+    try:
+        nm, conf = _C.resolve_name(slot, look, val)
+    except Exception:
+        return None
+    if nm and conf in ("proven", "verified"):
+        return nm
+    return None
+
+
 def _part_view(cat, val, ordinal, gear_count=None):
     """Human view of one part slot: the exact upgrade NAME to install.
 
@@ -894,6 +932,10 @@ def _part_view(cat, val, ordinal, gear_count=None):
 
     def out(label, conf, stock=False, tier=idx):
         return {"raw": val, "tier": tier, "stock": stock, "label": label, "upgrade": label, "conf": conf, "category": disp}
+
+    proven = _proven_name(cat, val, idx, ordinal)
+    if proven is not None:
+        return out(proven, "named", stock=(idx % 100 == 0))
 
     if cat in COSMETIC_SLOTS:
         return out("Stock", "named", stock=True) if idx == 0 else out(f"Custom · style {idx}", "cosmetic")

@@ -349,6 +349,27 @@
   },
   "motor": {
    "_scheme": "DENSE conversion slot (Motor and Battery Swap), per-car names; do not name by catalogue row. motor_parts rows 259-262 are a normal Stock/Street/Sport/Race run keyed by the motor family."
+  },
+  "car_body": {
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "0": "Stock Body",
+     "1": "Rocket Bunny - Widebody Kit",
+     "_source": "basket line 2026-09-02 smoke test"
+    }
+   },
+   "_scheme": "DENSE per car (Body Kit tiles); names per car, brand-prefixed"
+  },
+  "drivetrain": {
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "0": "Stock Drivetrain",
+     "1": "AWD Drivetrain",
+     "_source": "basket line 2026-09-02 smoke test; spec 9.2 Drivetrain Swap tile 2"
+    }
+   }
   }
  },
  "gaps": {

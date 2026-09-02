@@ -148,9 +148,12 @@ def run(cx, verbose=False):
                "are 2102 and 2170, and 2102 is the NSX-R's own AWD swap set. Use ref_part.",
                "verified", "FH6_Database.sqlite List_UpgradeDrivetrainDifferential", NOW, None))
     ev.append((None, "transmission",
-               "A transmission row's NumGears counts REVERSE: level 9 has NumGears 10 and is a "
-               "9-speed. Counting the container's stored ratios called it a 10-speed.",
-               "verified", "FH6_Database.sqlite List_UpgradeDrivetrainTransmission", NOW, None))
+               "A transmission row's NumGears counts REVERSE, so it is one more than the speed "
+               "count in the part's name: level 9 has NumGears 10 and is the 9-speed, level 10 "
+               "has NumGears 11 and is the 10-speed. Use Level, or the container's own gear "
+               "count (forward gears only) -- never NumGears -- to say how many speeds a "
+               "gearbox has.",
+               "verified", "List_UpgradeDrivetrainTransmission vs container gear rows", NOW, None))
     ev.append((None, "slider:tire_pressure",
                "The tire-pressure band is 15..55 psi, not 14..55: the stock compound row is "
                "31.0/33.0 psi and a fresh install writes 0.400/0.450, which 15 + 40s reproduces "

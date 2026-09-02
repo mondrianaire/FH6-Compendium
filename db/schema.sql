@@ -638,3 +638,48 @@ SELECT l.route_key, co.name AS course, l.class, l.cid, l.build_id, l.lap_id, l.l
        ROW_NUMBER() OVER (PARTITION BY l.route_key, l.class ORDER BY l.lap_s) AS rank
 FROM lap l JOIN course co ON co.route_key = l.route_key
 WHERE l.void = 0 AND l.is_partial = 0 AND l.lap_s IS NOT NULL;
+
+-- ============================================================================
+-- GAME ROUTES  (added 2026-09-02)
+--
+-- The game defines its routes as centre-lines under media/openworld/brio/aitracks, and those
+-- coordinates are the SAME metre frame the telemetry reports -- verified by matching our learned
+-- paths onto them at 2-4 m mean deviation, which is road width plus GPS noise. So the game can
+-- say exactly where a track is, and our laps say exactly how fast it was driven. A course row
+-- carries both: route_id is the game's identity, the lap_ tables are ours.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS ref_route (
+  route_id    TEXT PRIMARY KEY,        -- '281' from Route281.owt
+  name        TEXT,                    -- filled once the event datasets are decoded
+  length_m    REAL,
+  n_points    INTEGER,
+  is_loop     INTEGER,
+  bbox_x0     REAL, bbox_x1 REAL, bbox_z0 REAL, bbox_z1 REAL,
+  source      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ref_route_point (
+  route_id    TEXT NOT NULL REFERENCES ref_route(route_id) ON DELETE CASCADE,
+  i           INTEGER NOT NULL,
+  x           REAL NOT NULL,
+  y           REAL,                    -- elevation
+  z           REAL NOT NULL,
+  PRIMARY KEY (route_id, i)
+) WITHOUT ROWID;
+
+-- How a learned course maps onto a game route, WITH the evidence for the claim.
+-- match_kind: verified (whole route, clearly best) | probable | partial (on it, drove some of
+-- it) | none. 'partial' is a real answer: it says the lap records belong to a stretch of that
+-- route, not to the route.
+CREATE TABLE IF NOT EXISTS course_route (
+  route_key    TEXT PRIMARY KEY REFERENCES course(route_key) ON DELETE CASCADE,
+  route_id     TEXT REFERENCES ref_route(route_id),
+  match_kind   TEXT NOT NULL,
+  mean_dev_m   REAL,
+  p95_dev_m    REAL,
+  covered      REAL,                   -- fraction of the game route we have driven
+  len_ratio    REAL,
+  runner_up    TEXT,
+  computed_utc TEXT
+);

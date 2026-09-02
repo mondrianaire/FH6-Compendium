@@ -1,0 +1,105 @@
+/* FH6 Lab v2 — built on data/fh6.db. Dark, dense, chart-first. */
+:root{
+  --bg:#0d1117; --panel:#141a22; --panel2:#1a222c; --line:#232d39; --line2:#2e3a48;
+  --ink:#dfe7ef; --mut:#7d8b9c; --dim:#576372;
+  --acc:#00d27a; --acc2:#4ea3ff; --warn:#e3b341; --bad:#f0616d; --mag:#c678dd;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --sans:"Inter","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--sans)}
+a{color:var(--acc2);text-decoration:none}
+
+header{display:flex;align-items:center;gap:18px;padding:0 16px;height:46px;
+  background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:7px;font-weight:700}
+.mark{background:var(--acc);color:#04140c;border-radius:4px;padding:2px 6px;font:700 12px var(--mono)}
+.who{color:var(--mut);font-weight:500;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+nav{display:flex;gap:2px;margin-left:8px}
+nav button{background:none;border:0;color:var(--mut);font:500 12.5px var(--sans);
+  padding:6px 11px;border-radius:5px;cursor:pointer}
+nav button:hover{background:var(--panel2);color:var(--ink)}
+nav button.on{background:var(--panel2);color:var(--acc);box-shadow:inset 0 -2px 0 var(--acc)}
+.stamp{margin-left:auto;font:11px var(--mono);color:var(--dim)}
+
+main{padding:16px;max-width:1500px;margin:0 auto}
+.loading{color:var(--mut);padding:40px;text-align:center}
+h2{font-size:15px;margin:0 0 10px;font-weight:600}
+h3{font-size:12px;margin:16px 0 7px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.why{color:var(--mut);font-size:11.5px}
+
+/* layout */
+.grid{display:grid;gap:12px}
+.cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.split{grid-template-columns:340px 1fr;align-items:start}
+@media(max-width:1000px){.split{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+.panel.tight{padding:0;overflow:hidden}
+
+/* stat cards */
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px 13px}
+.stat .n{font:700 25px/1 var(--mono);color:var(--acc)}
+.stat .n.b{color:var(--acc2)} .stat .n.w{color:var(--warn)}
+.stat .l{color:var(--mut);font-size:11.5px;margin-top:5px}
+
+/* tables */
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{text-align:left;color:var(--mut);font-weight:500;font-size:11px;text-transform:uppercase;
+  letter-spacing:.06em;padding:7px 9px;border-bottom:1px solid var(--line2);background:var(--panel)}
+/* Sticky only where the table itself scrolls. Sticking to the page header instead made the
+   row headings float over the rows of any short table that does not scroll. */
+.scroll th{position:sticky;top:0;z-index:2}
+td{padding:6px 9px;border-bottom:1px solid var(--line)}
+tbody tr:hover{background:var(--panel2)}
+tbody tr.sel{background:#16233020;box-shadow:inset 2px 0 0 var(--acc)}
+tbody tr.click{cursor:pointer}
+.num{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.scroll{max-height:70vh;overflow:auto}
+
+/* chips */
+.chip{display:inline-block;border:1px solid var(--line2);border-radius:11px;padding:1px 8px;
+  font-size:11px;color:var(--mut);white-space:nowrap}
+.chip.on{border-color:var(--acc);color:var(--acc)}
+.chip.b{border-color:var(--acc2);color:var(--acc2)}
+.chip.w{border-color:var(--warn);color:var(--warn)}
+.chip.r{border-color:var(--bad);color:var(--bad)}
+.chip.m{border-color:var(--mag);color:var(--mag)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.cls{font:700 10.5px var(--mono);padding:1px 5px;border-radius:3px;color:#000}
+.cls.D{background:#6ea8fe}.cls.C{background:#ffd35c}.cls.B{background:#ff9d5c}
+.cls.A{background:#f0616d;color:#fff}.cls.S1{background:#c678dd;color:#fff}
+.cls.S2{background:#4ea3ff;color:#fff}.cls.R{background:#00d27a}.cls.X{background:#dfe7ef}
+
+/* filter bar */
+.bar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+input[type=search],select{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
+  border-radius:5px;padding:5px 8px;font:12.5px var(--sans);outline:none}
+input[type=search]:focus,select:focus{border-color:var(--acc2)}
+
+/* slider bars */
+.sl{display:grid;grid-template-columns:150px 1fr 96px;gap:9px;align-items:center;padding:3px 0}
+.sl .lb{color:var(--mut);font-size:11.5px;text-align:right}
+.sl .track{position:relative;height:15px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:3px;overflow:hidden}
+.sl .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#0b3a2a,var(--acc));opacity:.65}
+.sl .tick{position:absolute;top:-1px;bottom:-1px;width:2px;background:var(--warn)}
+.sl .val{font:12px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.sl.locked .fill{background:var(--line2)}
+.sl.locked .val{color:var(--dim)}
+
+/* charts */
+svg{display:block;max-width:100%}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--mut);margin-top:6px}
+.legend i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+
+/* rule card: one claim + its evidence */
+.rule{background:var(--panel2);border-left:3px solid var(--acc2);border-radius:0 6px 6px 0;
+  padding:8px 11px;margin:7px 0;font-size:12.5px}
+.rule .src{color:var(--dim);font:11px var(--mono);margin-top:4px}
+.rule.verified{border-left-color:var(--acc)}
+.rule.read{border-left-color:var(--warn)}
+.rule.unknown{border-left-color:var(--bad)}
+.mono{font-family:var(--mono)}
+.dim{color:var(--dim)}
+.right{text-align:right}

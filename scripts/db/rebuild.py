@@ -27,6 +27,7 @@ STAGES = [
     ("gamedb", "import_gamedb.py", "the game's own catalogue, strings, physics and cars"),
     ("containers", "import_containers.py", "save containers -> parts, sliders, gears, packages"),
     ("telemetry", "import_telemetry.py", "sessions, courses, laps and per-sample trace rows"),
+    ("routes", "import_routes.py", "the game's route centre-lines and how our courses map on"),
     ("observations", "import_observations.py", "human evidence, name grading, clone readiness"),
 ]
 

@@ -549,7 +549,12 @@ def run(cx, gamedb, strdir, swatchdir=None, verbose=False):
         if "Id" not in cs:
             continue
         has_level, has_stock = "Level" in cs, "IsStock" in cs
-        keyc = keycol if keycol in cs else ("Ordinal" if "Ordinal" in cs else None)
+        # COLUMN NAMES ARE NOT CONSISTENTLY CASED IN THE GAME'S SCHEMA: the body-keyed tables
+        # spell it CarBodyId, CarbodyId and CarBodyID in different places. A case-sensitive
+        # lookup silently found none of them, so tile ranking fell into a single global bucket
+        # and printed things like "tile 391 of 2227" instead of "tile 3 of 3".
+        low = {c.lower(): c for c in cs}
+        keyc = low.get((keycol or "").lower()) or low.get("ordinal")
         # bucket by key so tiles can be ranked within one car's menu
         buckets = {}
         for r in gx.execute("SELECT * FROM %s" % tbl):

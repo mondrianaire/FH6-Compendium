@@ -7,23 +7,23 @@
     "final_drive": {
       "min": 2.2,
       "max": 6.1,
-      "confidence": "derived",
-      "source": "FH tuning calculators + telemetry-consistent"
+      "confidence": "verified",
+      "source": "VERIFIED 2026-09-01 without driving: container Tuning_0412_20260901163403 final_drive position 0.6062 converts through [2.2, 6.1] to 4.56, one of the three final-drive states (4.11 / 4.25 / 4.56) recorded verbatim on the GEARING tab in docs/fh6-ui-spec.md section 3. One point against a band pinned by nine gear points."
     },
     "gear": {
       "min": 0.48,
       "max": 6.0,
-      "confidence": "derived",
-      "source": "telemetry shape-confirmed (Honda Beat CV 2.0%) + physical-plausibility scale"
+      "confidence": "verified",
+      "source": "VERIFIED 2026-09-01 without driving: container Tuning_0412_20260901163403 (9-speed) converted through [0.48, 6.00] reproduces the GEARING tab ratios recorded verbatim in docs/fh6-ui-spec.md section 3 on all 9 gears to 0.01 (4.15 2.75 2.13 1.73 1.47 1.27 1.10 0.93 0.78). Two points pin a linear band; nine agree."
     }
   },
-  "confidence_note": "confidence 'derived' = high-quality inference (correct shape, plausible scale), not read-exact off disk. A single WheelRotationSpeed gear-ladder drive on any car upgrades these to verified-exact and can refine the absolute scale.",
+  "confidence_note": "confidence 'derived' = high-quality inference (correct shape, plausible scale), not read-exact off disk. A single WheelRotationSpeed gear-ladder drive on any car upgrades these to verified-exact and can refine the absolute scale. GEAR band upgraded to verified from a screen read paired with its container; a gear-ladder drive is NOT required for gear ratios.",
   "spring_model": {
     "formula": "k_lb_per_in = freq_hz^2 * W_axle_lb / 19.56 ; W_axle = total_lb * dist(front or rear) ; the slider is linear in spring RATE between the two frequency endpoints",
     "formula_confidence": "verified",
     "formula_source": "CONFIRMED against forza.guide's live spring-rate calculator 2026-08-23: at 50/50 it returns front 618.6 / rear 663.6 lb/in for 3086 lb and front 801.7 / rear 860.0 for 4000 lb — both back-solve to a weight-INVARIANT freq (front 2.80 Hz, rear 2.90 Hz), i.e. k = f^2 * W_axle / 19.56 exactly. Also matches the ForzaTune app methodology.",
-    "recommended_freq_front_hz": 2.80,
-    "recommended_freq_rear_hz": 2.90,
+    "recommended_freq_front_hz": 2.8,
+    "recommended_freq_rear_hz": 2.9,
     "recommended_note": "forza.guide's RECOMMENDED road spring frequency (a stiff, competitive starting point). Rear ~3.6% stiffer than front. This is a single target point, NOT a slider endpoint.",
     "freq_min_hz": 1.4,
     "freq_max_hz": 3.13,

@@ -277,3 +277,20 @@ Six tiles. Every non-stock tile shows the yellow banner "UNLOCKS FULL GEAR RATIO
 | 6 | Drift Transmission: 4 Speed | 8 | 3.617 / 7.500 | 167.9 | 4 | 3.00 |
 
 Installing a transmission rewrites all ten gear sliders and the final drive to that transmission's defaults; slots beyond its gear count become the -1.0 sentinel. Re-selecting the installed part writes nothing. Street, Sport, Race 6 Speed and Rally are not offered on this car (indices 1, 2, 3, 9 still unverified).
+
+### 10.3 Differential and Driveline grids, NSX-R, proven (2026-09-02)
+
+Differential: four tiles, banner "UNLOCKS FULL DIFFERENTIAL TUNING" on every non-stock tile. Driveline: two tiles.
+
+| Menu | Tile | Name bar | Index | 0-60 / 0-100 s | Top mph | Slider defaults written on install |
+|---|---|---|---|---|---|---|
+| Differential | 1 | Stock Diff | 0 | 2.850 / 6.733 | 152.0 | center_diff 0.602, front_diff_accel 0.300, front_diff_decel 0.100, rear_diff_accel 0.550, rear_diff_decel 0.125 |
+| Differential | 2 | Race Diff | 3 | 2.900 / 6.800 | 152.0 | unchanged from Stock values (no rewrite observed) |
+| Differential | 3 | Drift Diff | 5 | 2.817 / 6.700 | 152.0 | front_diff_accel 0.100, front_diff_decel 0.000, rear_diff_accel 0.825, rear_diff_decel 0.025 |
+| Differential | 4 | Offroad Diff | 6 | 3.000 / 6.883 | 150.8 | center_diff 0.500, front_diff_accel 1.000, front_diff_decel 1.000, rear_diff_accel 1.000, rear_diff_decel 1.000 |
+| Driveline | 1 | Stock Driveline | 0 | 2.850 / 6.717 | 152.0 | none |
+| Driveline | 2 | Race Driveline | 3 | 2.833 / 6.700 | 152.0 | none |
+
+Differential installs rewrite the five differential sliders to the part's defaults (the Race diff kept the Stock values). Index 7 is not offered here; across 544 stored tunes index 4 never occurs and 7 occurs only on AWD rally-type cars, so 7 is probably Rally Diff (prove on the 2014 Golf R). Stored-tune coverage: transmission 1/2/3 and differential 7 and clutch 2 all on the Golf R; differential 2 and driveline 2 on the 2004 WRX STi; clutch 1 and driveline 1 on the 1989 Golf Rallye; differential 1 on the Autozam AZ-1; transmission 9 on the 2024 Revuelto.
+
+Drivetrain category on the NSX-R has three tiles only: Transmission, Driveline, Differential. There is no Clutch tile on this car even though the save carries a stock clutch id; the Clutch menu exists on other cars (Race clutch on 55 stored tunes).

@@ -64,27 +64,20 @@
    "_side_effect": "install rewrites gear sliders + final drive to the transmission's defaults; unused slots = -1.0"
   },
   "differential": {
-   "_scheme": "shared donor set 2102, on the tier ladder",
-   "0": {
-    "name": "Stock Diff",
-    "confidence": "verified"
+   "_scheme": "Global ladder positions, donor set varies (2102 on the NSX-R)",
+   "_proof": "NSX-R saves dif1..dif4 2026-09-02; dif4 = installed Offroad = index 6 self-check",
+   "0": "Stock Diff",
+   "3": "Race Diff",
+   "5": "Drift Diff",
+   "6": "Offroad Diff",
+   "_hypothesis": {
+    "7": "Rally Diff (AWD cars only; index 4 unused in 544 tunes)"
    },
-   "3": {
-    "name": "Race Diff",
-    "confidence": "verified"
+   "_unverified": {
+    "1": "Street?",
+    "2": "Sport?"
    },
-   "5": {
-    "name": "Drift Diff",
-    "confidence": "verified"
-   },
-   "6": {
-    "name": "Offroad Diff",
-    "confidence": "verified"
-   },
-   "7": {
-    "name": "UNKNOWN - 26 tunes carry it, absent from the NSX-R 4-tile menu",
-    "confidence": "unknown"
-   }
+   "_side_effect": "install rewrites center/front/rear accel+decel sliders to the part's defaults"
   },
   "weight_reduction": {
    "_scheme": "DENSE - index is the tile position",
@@ -153,6 +146,25 @@
    "4294967295": {
     "name": "(empty slot - stock wheels)",
     "confidence": "verified"
+   }
+  },
+  "driveline": {
+   "_scheme": "Global ladder",
+   "_proof": "NSX-R saves drv1..drv2 2026-09-02",
+   "0": "Stock Driveline",
+   "3": "Race Driveline",
+   "_unverified": {
+    "1": "Street Driveline?",
+    "2": "Sport Driveline?"
+   }
+  },
+  "clutch": {
+   "_scheme": "Global ladder (0 Stock, 3 Race seen in stored tunes; 1, 2 rare)",
+   "_menu": "NO Clutch tile on the 1992 NSX-R: its Drivetrain menu is Transmission, Driveline, Differential only, while the save still holds clutch = 2102000. Cars with a Race clutch in stored tunes: 1998 Impreza 22B, 2014 Golf R, 1985 Sprinter FE.",
+   "_unverified": {
+    "1": "Street Clutch?",
+    "2": "Sport Clutch?",
+    "3": "Race Clutch (catalogue order)"
    }
   }
  },

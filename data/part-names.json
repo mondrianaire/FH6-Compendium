@@ -138,7 +138,30 @@
    "4294967295": {
     "name": "(empty slot - stock wheels)",
     "confidence": "verified"
-   }
+   },
+   "_functional_equivalence": "Rims differ ONLY in weight delta (hence PWR and PI). Weight deltas come in classes that are multiples of a per-car unit: NSX-R unit 11 lb (Advan TC-4 -11, RZ-F2 -22, RGII -33; PI 636/637/638 on the same build), another car unit 14 lb (-14/-28/-42). Any rim of the same class is functionally identical for cloning. Observed 2026-09-02.",
+   "_clone_protocol": "No id->name table is required: the lock hides sliders, not INSTALLED badges, and the Rim Style menu opens with the cursor on the installed tile. Read the source car's installed rim (name + weight chip) and fit any rim of the same weight class. Each such read pairs the container id with a name and class: record it here.",
+   "_observed_names_no_id": {
+    "Advan TC-4": {
+     "weight_lb": -11,
+     "price_cr": 3300,
+     "car": "NSX-R",
+     "pi_preview": 636
+    },
+    "Advan RZ-F2": {
+     "weight_lb": -22,
+     "price_cr": 3400,
+     "car": "NSX-R",
+     "pi_preview": 637
+    },
+    "Advan RGII": {
+     "weight_lb": -33,
+     "price_cr": 3700,
+     "car": "NSX-R",
+     "pi_preview": 638
+    }
+   },
+   "_price_hint": "price tracks class loosely (3,200 = no change, 3,300 = 1 unit, 3,400 = 2 units, 3,700 = 3 units) with exceptions at 3,500 and 4,000."
   },
   "driveline": {
    "_scheme": "Global ladder",

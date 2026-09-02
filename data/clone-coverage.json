@@ -535,5 +535,6 @@
  },
  "size": {
   "builds_with_nonstock": 510
- }
+ },
+ "rim_reframe": "Rims are a weight class, readable from the source car's INSTALLED tile; not a table gap. Effective readiness: 119 if size ladders are dense, 253 with rims by protocol, 490 with derived names accepted."
 }

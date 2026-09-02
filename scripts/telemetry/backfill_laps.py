@@ -17,8 +17,18 @@ a capture that was already analysed costs time but changes nothing.
 
 Cost is real and worth stating up front: analysis is parse-bound at ~17.5 MB/s, so the 1.5 GB capture alone is
 ~86 s and the whole captures/ directory is minutes, not seconds. --dry-run prints the projection before you commit.
+
+TUNE-HASH RE-ATTRIBUTION (--tune-hash) is the cheap second mode: it re-derives ONLY the tune_hash column for the
+rows already in the store, from (session, cid, t0) plus the gear ladder in the session JSON, through the same
+analyze_session.tune_hash_for the analyzer uses. No capture is replayed, nothing else in the row is touched. It
+exists because the attribution used to compare a UTC container stamp against a local session id (~4 h apart),
+which left 174 of 306 laps with tune_hash NULL — a rule fix that a full replay would take minutes to apply and
+this applies in a second.
+
+    python scripts/telemetry/backfill_laps.py --tune-hash --dry-run   # per-session table of what would change
+    python scripts/telemetry/backfill_laps.py --tune-hash             # write the column (only rows that change)
 """
-import argparse, glob, gzip, io, os, shutil, sqlite3, struct, subprocess, sys, tempfile, time
+import argparse, glob, gzip, io, json, os, shutil, sqlite3, struct, subprocess, sys, tempfile, time
 
 try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # in place: see merge_courses.py
 except Exception: pass
@@ -133,11 +143,99 @@ def analyse(c, tmpdir):
             os.remove(tmp)
 
 
+def _session_gears(sid, cache):
+    """{cid: measured gear count} for a session, from its JSON. sig.gear_count is len(gears) by construction
+    (checked equal on all 344 cars in data/sessions on 2026-09-02); the ladder length is the fallback. None when
+    the session has no JSON — then its rows are left alone, because the gear check cannot be run without it."""
+    if sid in cache:
+        return cache[sid]
+    p = os.path.join(ROOT, "data", "sessions", sid + ".json")
+    out = None
+    if os.path.exists(p):
+        try:
+            with open(p, encoding="utf-8") as f:
+                cars = json.load(f).get("cars") or []
+            out = {}
+            for c in cars:
+                sig = c.get("sig") or {}
+                g = sig.get("gear_count")
+                out[str(c.get("id"))] = int(g) if g else len(c.get("gears") or [])
+        except Exception:
+            out = None
+    cache[sid] = out
+    return out
+
+
+def retune(dry_run):
+    """Re-derive tune_hash for every stored lap and report / write the differences. Reads through a read-only
+    connection first; the write phase touches only tune_hash on the rows that changed."""
+    import analyze_session as A
+    p = lap_store.db_path(ROOT)
+    if not os.path.exists(p):
+        print("no lap store"); return
+    cx = sqlite3.connect(f"file:{p}?mode=ro", uri=True, timeout=10)
+    try:
+        rows = cx.execute("SELECT id, session, cid, t0, tune_hash FROM lap_traces ORDER BY session, cid, t0").fetchall()
+    finally:
+        cx.close()
+    cache = {}; changes = []; per = {}
+    skipped = 0
+    for rid, sid, cid, t0, old in rows:
+        st = per.setdefault(sid, {"rows": 0, "null_before": 0, "null_after": 0, "resolved": 0, "corrected": 0, "dropped": 0, "skipped": 0})
+        st["rows"] += 1
+        if old is None: st["null_before"] += 1
+        gears = _session_gears(sid, cache)
+        if gears is None:
+            st["skipped"] += 1; skipped += 1
+            if old is None: st["null_after"] += 1
+            continue
+        new = A.tune_hash_for(cid, sid, t0, gears.get(str(cid), 0))
+        if new is None: st["null_after"] += 1
+        if new != old:
+            changes.append((rid, sid, cid, t0, old, new))
+            if old is None and new is not None: st["resolved"] += 1
+            elif old is not None and new is None: st["dropped"] += 1
+            else: st["corrected"] += 1
+    tot = {k: sum(v[k] for v in per.values()) for k in ("rows", "null_before", "null_after", "resolved", "corrected", "dropped", "skipped")}
+    print(f"\nTUNE-HASH RE-ATTRIBUTION — {tot['rows']} stored laps · {len(per)} sessions · "
+          f"{'DRY RUN' if dry_run else 'WRITING'}")
+    print(f"\n  {'session':<22}{'rows':>5}{'NULL→':>7}{'→NULL':>7}{'resolved':>10}{'corrected':>11}{'dropped':>9}")
+    for sid in sorted(per):
+        st = per[sid]
+        if not (st["resolved"] or st["corrected"] or st["dropped"] or st["null_before"] or st["skipped"]):
+            continue
+        flag = f"  (no session JSON: {st['skipped']} left alone)" if st["skipped"] else ""
+        print(f"  {sid:<22}{st['rows']:>5}{st['null_before']:>7}{st['null_after']:>7}{st['resolved']:>10}{st['corrected']:>11}{st['dropped']:>9}{flag}")
+    print(f"  {'TOTAL':<22}{tot['rows']:>5}{tot['null_before']:>7}{tot['null_after']:>7}{tot['resolved']:>10}{tot['corrected']:>11}{tot['dropped']:>9}")
+    print(f"\n  tune_hash NULL: {tot['null_before']} -> {tot['null_after']} of {tot['rows']} · "
+          f"{tot['resolved']} resolved · {tot['corrected']} re-attributed to a different save · {tot['dropped']} now rejected"
+          + (f" · {skipped} skipped (no session JSON)" if skipped else ""))
+    if dry_run:
+        print("  DRY RUN — nothing written. Re-run without --dry-run to write the column.\n")
+        return
+    if not changes:
+        print("  nothing to write.\n"); return
+    with lap_store._LOCK:
+        cx = lap_store.connect(ROOT)
+        try:
+            cx.executemany("UPDATE lap_traces SET tune_hash=? WHERE id=?", [(new, rid) for rid, *_r, new in changes])
+            cx.commit()
+        finally:
+            cx.close()
+    print(f"  wrote tune_hash on {len(changes)} rows.\n")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Replay captures into the lap store.")
     ap.add_argument("--dry-run", action="store_true", help="list what would run, with sizes and an ETA; write nothing")
     ap.add_argument("--limit", type=int, default=0, metavar="N", help="only the N smallest captures")
+    ap.add_argument("--tune-hash", action="store_true",
+                    help="re-attribute ONLY tune_hash on stored rows (no replay); honours --dry-run")
     a = ap.parse_args()
+
+    if a.tune_hash:
+        retune(a.dry_run)
+        return
 
     caps = captures()
     if a.limit > 0:

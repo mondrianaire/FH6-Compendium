@@ -10,9 +10,14 @@ Identity is keyed by CONFIGURATION, not just car: id = "ordinal|drivetrain|cylin
 swap or drivetrain conversion mid-session becomes a new entry. Each entry carries a build signature
 (max rpm, boost, dyno peak, gear count + ladder, mass index) and a short build_id hash; names come
 from data/car-ordinals.json (learned map) when known.
+
+Clocks: session ids (fh6_YYYYMMDD_HHMMSS) are LOCAL time; tune container stamps (Tuning_<ordinal>_<stamp>)
+are UTC. Anything that matches a lap or a capture to a save goes through session_epoch / container_epoch so
+both sit on one base -- parsing both as local put every save ~4 h late and NULLed 174 of 306 stored laps
+(fixed 2026-09-02; scripts/telemetry/check_tune_clock.py asserts it against the containers on disk).
 """
 import re
-import csv, hashlib, json, math, os, sqlite3, statistics, sys, time
+import calendar, csv, hashlib, json, math, os, sqlite3, statistics, sys, time
 import lap_store
 import fh6_tune_decode as TUNE   # tune_hash: which slider revision a lap was driven on
 from collections import defaultdict
@@ -599,6 +604,100 @@ def decode_battery_for(cid_, cars, corners, launches, braking, crests, pulses, t
 DEC_CONF = {"named": 1.0, "dim": 0.9, "cosmetic": 0.9, "category": 0.8, "compound": 0.65}
 
 
+# ---- one clock for save attribution ---------------------------------------------------------------------
+# Two timestamps meet whenever a lap or a capture is matched to the tune save that was on the car, and they are
+# written in DIFFERENT time bases:
+#   * session ids (fh6_YYYYMMDD_HHMMSS) come from the daemon's time.strftime            -> LOCAL time
+#   * tune container folders (Tuning_<ordinal>_<yyyymmddhhmmss>) are stamped by the game -> UTC
+# Proven 2026-09-02: a save whose screenshot reads 2026-09-01 22:24:37 local sits in ...20260902022442 on a
+# UTC-4 machine, and across all 574 containers the Data file's mtime trails the folder stamp by 2-178 s (median
+# 13 s) when the stamp is read as UTC, versus ~4 h when it is read as local.
+# Until this was fixed both were parsed with time.mktime (local), so every save appeared ~4 h LATER than it
+# was; "newest save written before the lap" then rejected the save that was actually equipped, and 174 of 306
+# lap rows in data/laps.db carried tune_hash NULL. Every comparison of the two goes through these helpers, so
+# the conversion lives in exactly one place. scripts/telemetry/check_tune_clock.py asserts it against the disk.
+
+def container_epoch(meta_or_ts):
+    """Epoch seconds at which a tune container was saved. Accepts a tunes_for_ordinal meta or a bare stamp.
+    The folder stamp is the primary source (UTC, written by the game at the save); the Data file's mtime is
+    the fallback when the stamp is unparseable. None when neither is available."""
+    ts = meta_or_ts.get("ts") if isinstance(meta_or_ts, dict) else meta_or_ts
+    try:
+        return float(calendar.timegm(time.strptime(str(ts)[:14], "%Y%m%d%H%M%S")))
+    except Exception:
+        pass
+    if isinstance(meta_or_ts, dict) and meta_or_ts.get("mtime") is not None:
+        try:
+            return float(meta_or_ts["mtime"])
+        except Exception:
+            return None
+    return None
+
+
+def session_epoch(sid):
+    """Epoch seconds at which a capture started. Session ids are fh6_YYYYMMDD_HHMMSS in LOCAL time (the daemon
+    names the CSV with time.strftime), so mktime is the right conversion HERE and timegm would be the same bug
+    in the other direction. None when the id carries no clock."""
+    try:
+        return float(time.mktime(time.strptime(str(sid)[4:19], "%Y%m%d_%H%M%S")))
+    except Exception:
+        return None
+
+
+def newest_save_before(metas, t_epoch):
+    """The newest tune save in `metas` written at or before t_epoch (None = no clock: simply the newest save).
+    A save written after the moment in question cannot have been on the car at it."""
+    for m_ in sorted(metas or [], key=lambda q: str(q.get("ts") or ""), reverse=True):
+        ep_ = container_epoch(m_)
+        if ep_ is None:
+            continue
+        if t_epoch is not None and ep_ > t_epoch:
+            continue
+        return m_
+    return None
+
+
+def tune_hash_for(cid, sid, t0, gears_seen):
+    """Which TUNE REVISION was on the car for the lap starting t0 s into session sid. None unless VERIFIED.
+
+    parts_hash says which build; it excludes sliders by design, so a slider-only change is invisible to every
+    existing key and a spring A/B cannot be recorded at all. tune_hash closes that.
+
+    Attribution is timestamp PROPOSES, telemetry DISPOSES: take the newest save for this ordinal written
+    before the lap started, then require its gear count to match what the car actually did (`gears_seen` is
+    the length of the measured ladder). Timestamp alone is not sound -- session fh6_20260828_001105 measured
+    an 8-gear box while the newest save on ordinal 2866 was a 6-gear save from six days earlier, because an
+    older tune had been re-applied. When they disagree, return None: an unattributed lap is honest, a wrongly
+    attributed one poisons every comparison built on it.
+
+    Module-level rather than a closure so backfill_laps.py --tune-hash re-runs the SAME rule on stored rows."""
+    try:
+        ordn = int(str(cid).split("|")[0])
+    except Exception:
+        return None
+    try:
+        metas, _ = TUNE.tunes_for_ordinal(ordn)
+    except Exception:
+        return None
+    if not metas:
+        return None
+    se = session_epoch(sid)
+    t_abs = (se + float(t0)) if se is not None else None   # no clock in the id: the newest save is the proposal
+    best = newest_save_before(metas, t_abs)                # saved after this lap: cannot have been equipped
+    if best is None:
+        return None
+    try:
+        tn = TUNE.parse_tune(best["path"], ordinal_hint=ordn)
+    except Exception:
+        return None
+    if gears_seen and tn.get("gear_count") and int(tn["gear_count"]) < gears_seen:
+        return None   # the car used a gear this save's box does not have -- it is not what was equipped
+    try:
+        return TUNE.tune_hash(best["path"])
+    except Exception:
+        return None
+
+
 def saved_build_for(cid_, sid_, gears_seen, boost_max, wot_frames):
     """The on-disk tune save that was EQUIPPED for this capture, as {slot: decoded row}. None when it cannot be proven.
 
@@ -618,23 +717,15 @@ def saved_build_for(cid_, sid_, gears_seen, boost_max, wot_frames):
         ordn = int(str(cid_).split("|")[0])
     except Exception:
         return None
-    try:
-        t_start = time.mktime(time.strptime(str(sid_)[4:19], "%Y%m%d_%H%M%S"))   # session ids are fh6_YYYYMMDD_HHMMSS
-    except Exception:
+    t_start = session_epoch(sid_)        # session ids are fh6_YYYYMMDD_HHMMSS in LOCAL time
+    if t_start is None:
         return None                      # no capture clock means no sound attribution — say nothing
     try:
         metas, _ = TUNE.tunes_for_ordinal(ordn)
     except Exception:
         return None
-    best = None
-    for m_ in sorted(metas or [], key=lambda q: str(q.get("ts") or ""), reverse=True):
-        try:
-            ep_ = time.mktime(time.strptime(str(m_.get("ts"))[:14], "%Y%m%d%H%M%S"))
-        except Exception:
-            continue
-        if ep_ > t_start:
-            continue                     # saved after the capture began: cannot have been equipped for it
-        best = m_; break
+    # container stamps are UTC; newest_save_before reads them through container_epoch, on the capture's clock
+    best = newest_save_before(metas, t_start)   # saved after the capture began: cannot have been equipped for it
     if best is None:
         return None
     try:
@@ -2179,51 +2270,10 @@ def main():
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
         def _tune_hash_for(cid_, w_):
-            """Which TUNE REVISION was on the car for this lap. None unless it can be VERIFIED.
-
-            parts_hash says which build; it excludes sliders by design, so a slider-only change is invisible to
-            every existing key and a spring A/B cannot be recorded at all. tune_hash closes that.
-
-            Attribution is timestamp PROPOSES, telemetry DISPOSES: take the newest save for this ordinal written
-            before the lap started, then require its gear count to match what the car actually did. Timestamp
-            alone is not sound -- session fh6_20260828_001105 measured an 8-gear box while the newest save on
-            ordinal 2866 was a 6-gear save from six days earlier, because an older tune had been re-applied.
-            When they disagree, return None: an unattributed lap is honest, a wrongly attributed one poisons
-            every comparison built on it."""
-            try:
-                ordn_ = int(str(cid_).split("|")[0])
-            except Exception:
-                return None
-            try:
-                metas, _ = TUNE.tunes_for_ordinal(ordn_)
-            except Exception:
-                return None
-            if not metas: return None
-            try:   # session ids are fh6_YYYYMMDD_HHMMSS, so the capture start is in the name
-                _se = time.mktime(time.strptime(sid[4:19], "%Y%m%d_%H%M%S"))
-            except Exception:
-                _se = None
-            t_abs = (_se + w_["t0"]) if _se else None
+            # The rule lives in module-level tune_hash_for (backfill_laps.py --tune-hash re-runs it on stored
+            # rows); this closure only supplies what it knows -- the session id and the measured gear ladder.
             gears_seen = len((cars.get(cid_) or {}).get("gears") or [])   # `gears` is the per-gear ladder, so its LENGTH is the box size
-            best_ = None
-            for m_ in sorted(metas, key=lambda q: str(q.get("ts") or ""), reverse=True):
-                try:
-                    ep_ = time.mktime(time.strptime(str(m_.get("ts"))[:14], "%Y%m%d%H%M%S"))
-                except Exception:
-                    continue
-                if t_abs is not None and ep_ > t_abs: continue     # saved after this lap: cannot have been equipped
-                best_ = m_; break
-            if best_ is None: return None
-            try:
-                tn_ = TUNE.parse_tune(best_["path"], ordinal_hint=ordn_)
-            except Exception:
-                return None
-            if gears_seen and tn_.get("gear_count") and int(tn_["gear_count"]) < gears_seen:
-                return None   # the car used a gear this save's box does not have — it is not what was equipped
-            try:
-                return TUNE.tune_hash(best_["path"])
-            except Exception:
-                return None
+            return tune_hash_for(cid_, sid, w_["t0"], gears_seen)
         def _game_lap_s(w_):
             """The lap's time on the GAME clock, which stops when you pause. None when it cannot be trusted.
 

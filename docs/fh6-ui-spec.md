@@ -263,6 +263,8 @@ Menu order is not index order (tile 5 = 10, tile 7 = 15). A queued tile shows a 
 
 Container folder timestamps (`Tuning_<ordinal>_<yyyymmddhhmmss>`) are UTC: the cmp6 save folder reads 20260902022442 while the matching screenshot is stamped 2026-09-01 22:24:37 local (UTC-4).
 
+The analyzer's save attribution (`tune_hash_for` for laps, `saved_build_for` for a capture's parts, both in `scripts/telemetry/analyze_session.py`) used to parse that stamp with `time.mktime` (local) and compare it against the local-time session id (`fh6_YYYYMMDD_HHMMSS`, the daemon's `time.strftime`), so every save appeared ~4 h later than it was and "newest save written before the lap" rejected the save that was actually equipped: 174 of 306 rows in `data/laps.db` carried `tune_hash` NULL. Fixed 2026-09-02: `container_epoch` reads the folder stamp as UTC (`calendar.timegm`, Data-file mtime as the fallback), `session_epoch` reads the id as local, and both attributions go through `newest_save_before`. Across all 574 containers the Data file's mtime trails the UTC-read stamp by 2-178 s (median 13 s); `scripts/telemetry/check_tune_clock.py` asserts that on every container and exits 1 if the bases ever drift apart. `scripts/telemetry/backfill_laps.py --tune-hash --dry-run` re-runs the attribution on stored rows and reports what would change; without `--dry-run` it writes only the `tune_hash` column.
+
 ### 10.2 Transmission grid, NSX-R, proven (2026-09-02)
 
 Six tiles. Every non-stock tile shows the yellow banner "UNLOCKS FULL GEAR RATIO TUNING". Index = save value minus 2102000, one saved setup per tile (trm1..trm6).

@@ -159,3 +159,36 @@ body.pop{padding:10px;background:var(--bg)}
 body.pop .live{height:auto}
 body.pop .pane{border:0;background:none}
 body.pop .pane>.body{overflow:visible}
+
+/* the clone stage is a real button, and must look like one */
+button.stage.act{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
+button.stage.act:disabled{cursor:not-allowed}
+button.stage.act.go:hover{background:#14361f;box-shadow:0 0 0 1px var(--acc)}
+button.stage.act.go:active{transform:translateY(1px)}
+
+/* clone sheet shown inline when the browser blocks the pop-out */
+.cloneov{position:fixed;inset:0;z-index:60;background:#000b;display:grid;place-items:center}
+.cloneov .ovbox{position:relative;width:min(1080px,96vw);height:min(920px,94vh);
+  background:#0b0f14;border:1px solid #243040;border-radius:10px;overflow:hidden;
+  display:flex;flex-direction:column}
+.cloneov .screen{height:auto;flex:1 1 auto;min-height:0}
+.cloneov .ovx{position:absolute;top:8px;right:10px;z-index:9;background:#18212c;color:#8a97a8;
+  border:1px solid #243040;border-radius:5px;width:26px;height:26px;cursor:pointer;font:14px inherit}
+.cloneov .ovx:hover{color:#f0616d;border-color:#f0616d}
+
+/* contextual alerts: what just moved, and what it means you must do */
+.alert{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--acc2);
+  border-radius:8px;padding:9px 13px;font-size:12.5px;display:flex;align-items:center;gap:10px;
+  flex-wrap:wrap}
+.alert.warn{border-left-color:var(--warn)} .alert.bad{border-left-color:var(--bad)}
+.mini{background:var(--panel2);border:1px solid var(--line2);color:var(--mut);border-radius:5px;
+  padding:3px 10px;font:11.5px inherit;cursor:pointer;margin-left:auto}
+.mini+.mini{margin-left:0}
+.mini:hover{color:var(--ink);border-color:var(--acc2)}
+.mini.go{color:var(--acc);border-color:var(--acc)}
+.ovbox.ab{height:auto;max-height:80vh;padding:16px 18px}
+.abhd{display:flex;gap:10px;align-items:baseline;margin-bottom:10px}
+.abtab{display:grid;gap:2px}
+.abr{display:grid;grid-template-columns:1fr 180px 140px;gap:10px;padding:7px 9px;
+  background:var(--panel);border-radius:6px;font-size:12.5px}
+.abr.hd{background:none;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.07em}

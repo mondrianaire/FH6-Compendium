@@ -93,6 +93,23 @@ code change is announced) and `data` the moment a rebuild finishes or `api/ident
 rewritten by anyone. The page reloads on `code` and re-reads identity, world, diagnosis and the
 car on `data`. Nothing in the browser polls; nothing on ports 8000 or 8765 is involved.
 
+### The ratification ladder is bounded, and the order is the game's
+At most three manual steps, plus one the lab does itself: (1) clone onto a second copy of the
+car — locked/downloaded tunes only; (2) save the clone with a name; (3) import + regenerate,
+automatic on any save the database does not hold; (4) say which save is fitted — only when
+saves tie on cylinders, drivetrain and PI, and only when the gear ladder cannot separate them
+(`tune_gear` holds every save's ladder, the daemon matches it unit-free from its own WOT
+accrual, and `_box_exercised` makes "no gear above N" evidence from the accumulated gear set).
+Every other status is a subset: new build on disk = step 3 alone, hardware or slider change =
+steps 2-3, downloaded = 1-3.
+
+**Order matters, because the menus gate each other** (spec §9.1, §10.7): the aspiration
+conversion must be installed before its forced-induction tier exists in the Engine list; an
+engine or drivetrain swap changes which part sets exist at all; a body kit removes the Front
+Bumper tile, so front aero comes first; a transmission, differential or spring kit REWRITES
+its sliders on install, so every hardware step precedes every slider step. A clone route that
+ignores this order sends the user to a menu that does not exist yet.
+
 ## 2. Modes
 
 Mode comes from the daemon's `mode` event (`suggest`: free | course | decode, with `reason`),

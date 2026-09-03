@@ -118,7 +118,7 @@ body.fixed main{height:calc(100vh - 46px);padding:10px;display:flex;flex-directi
 .idcar b{font-size:15px}
 .idnums{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
 
-.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;flex:0 0 auto}
+.stages{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;flex:0 0 auto}
 .stage{display:flex;gap:9px;align-items:center;background:var(--panel);border:1px solid var(--line);
   border-left:3px solid var(--line2);border-radius:8px;padding:8px 11px}
 .stage .dot{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;
@@ -192,3 +192,101 @@ button.stage.act.go:active{transform:translateY(1px)}
 .abr{display:grid;grid-template-columns:1fr 180px 140px;gap:10px;padding:7px 9px;
   background:var(--panel);border-radius:6px;font-size:12.5px}
 .abr.hd{background:none;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.07em}
+
+/* which of several saved builds is actually on the car */
+.picker{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);
+  border-radius:8px;padding:9px 12px;margin-top:8px}
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px;margin-top:7px}
+.pick{display:grid;grid-template-columns:auto 1fr;gap:2px 9px;text-align:left;cursor:pointer;
+  background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:6px 9px;
+  color:var(--ink);font:inherit}
+.pick:hover{border-color:var(--acc2)}
+.pick.on{border-color:var(--acc2)}
+.pick.pin{border-color:var(--acc);background:#0f2a1e}
+.pick b{grid-row:span 2;align-self:center;font:700 15px var(--mono);color:var(--acc2)}
+.pick .pm{font:11px var(--mono);color:var(--mut)}
+.pick .pd{font-size:11px;color:var(--dim);grid-column:2}
+.pick .chip{grid-column:2;justify-self:start;margin-top:3px}
+
+/* ===================================================== the instrument panel */
+.hdr{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:8px 12px;flex:0 0 auto}
+.hcar{display:flex;align-items:center;gap:12px;min-width:0}
+.thumb{width:92px;height:52px;border-radius:6px;object-fit:cover;background:var(--panel2);border:1px solid var(--line2);flex:0 0 auto}
+.thumb.none{display:grid;place-items:center;color:var(--dim);font:11px var(--mono)}
+.hname{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.hname b{font-size:15px}
+.htune{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:4px}
+.htune .tn{color:var(--mut);font-size:12px}
+.pill{font:700 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:10px;
+  border:1px solid var(--line2);color:var(--mut)}
+.pill.ok{background:#0f2a1e;border-color:var(--acc);color:var(--acc)}
+.pill.warn{background:#2a220f;border-color:var(--warn);color:var(--warn)}
+.pill.bad{background:#2a1416;border-color:var(--bad);color:var(--bad)}
+.pill.blue{background:#0f1f2e;border-color:var(--acc2);color:var(--acc2)}
+.pill.dim{opacity:.6}
+.hact{display:flex;gap:8px;margin-left:auto;flex:0 0 auto}
+.big{background:var(--panel2);border:1px solid var(--acc2);color:var(--acc2);border-radius:6px;
+  padding:9px 14px;font:700 12px var(--sans);letter-spacing:.06em;cursor:pointer}
+.big:hover{background:#0f1f2e}
+.big:disabled{opacity:.35;cursor:not-allowed}
+.big.go{border-color:var(--acc);color:var(--acc)}
+.big.go.on{background:var(--acc);color:#04140c}
+.hchips{display:flex;gap:5px;flex-wrap:wrap;flex:0 0 auto}
+
+.pane>.body.map{padding:6px;display:flex;flex-direction:column}
+.pane>.body.map svg{flex:1 1 auto;min-height:0}
+.tabs2{display:flex;gap:4px}
+.tabs2 button{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:5px;padding:3px 10px;font:600 11.5px var(--sans);cursor:pointer}
+.tabs2 button.on{border-color:var(--acc);color:var(--acc)}
+
+.frow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line)}
+.frow .fl{display:flex;flex-direction:column;gap:2px;min-width:0}
+.frow.normal{opacity:.55}
+.frow.weak .fl b{color:var(--mut)}
+
+.steps{display:flex;gap:8px;flex-wrap:wrap}
+.step{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.step i{display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--panel2);
+  border:1px solid var(--line2);font:700 10px var(--mono);color:var(--mut);font-style:normal}
+
+.ftr{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:6px 12px;flex:0 0 auto;font-size:12px}
+.cov{display:inline-flex;align-items:center;gap:8px}
+.cov .bar{width:140px;height:8px;background:var(--panel2);border:1px solid var(--line2);border-radius:4px;overflow:hidden;position:relative}
+.cov .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
+
+/* the floating build sheet — the v1 decode float pattern, in-page and draggable */
+.fsheet{position:fixed;right:24px;top:70px;width:min(980px,90vw);height:min(860px,88vh);z-index:70;
+  background:#0b0f14;border:1px solid var(--line2);border-radius:10px;box-shadow:0 18px 50px #000c;
+  display:flex;flex-direction:column;overflow:hidden}
+.fsheet .fbar{display:flex;align-items:center;gap:10px;padding:7px 11px;background:var(--panel);
+  border-bottom:1px solid var(--line2);cursor:grab;user-select:none;flex:0 0 auto}
+.fsheet .fbar .ttl{font:700 11px var(--mono);letter-spacing:.1em;color:var(--acc)}
+.fsheet .fbar .nm{color:var(--mut);font-size:12px;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsheet .fbar button{background:var(--panel2);border:1px solid var(--line2);color:var(--mut);border-radius:4px;
+  width:24px;height:22px;cursor:pointer;font:12px inherit}
+.fsheet .fbar button:hover{color:var(--ink);border-color:var(--acc2)}
+.fsheet .fbody{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.fsheet .fbody .screen{height:auto;flex:1 1 auto;min-height:0}
+.fsheet.min{height:auto}
+.fsheet.min .fbody{display:none}
+
+/* the alerts region may not starve the panes: cap it and let it scroll, and keep the picker compact */
+#alerts{flex:0 0 auto;max-height:26vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+#alerts:empty{display:none}
+.picker{margin-top:0;padding:7px 10px}
+.picks{grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:5px;margin-top:5px}
+.pick{padding:4px 8px;gap:1px 7px}
+.pick b{font-size:13px}
+.pick .pd{display:none}
+.pick:hover .pd{display:block}
+.alert{padding:7px 11px}
+
+/* The dashboard's home is a 4K portrait monitor at 200% — a 1080×1920 CSS-px viewport. There the
+   two panes stack (a 530-px-wide map is no map) and the build sheet takes the width. */
+@media (orientation: portrait){
+  .panes{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+  .fsheet{right:auto;left:3vw;top:56px;width:94vw;height:min(1500px,74vh)}
+  #alerts{max-height:18vh}
+}

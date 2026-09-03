@@ -194,6 +194,33 @@ def main(argv=None):
     total += write(os.path.join(out, "evidence.json"), {"evidence": ev, "menu": menu})
 
 
+
+    # ---- world map: every game route, decimated, for the FREE-mode left pane ------------
+    # ~8 m spacing keeps 169 routes under a megabyte and is still finer than the map can draw.
+    world = {"routes": {}, "bbox": None}
+    xs, zs = [], []
+    for r in cx.execute("SELECT route_id, length_m, is_loop FROM ref_route"):
+        pts = [[round(p["x"]), round(p["z"])] for p in cx.execute(
+            "SELECT x, z FROM ref_route_point WHERE route_id=? AND (i % 4)=0 ORDER BY i", (r["route_id"],))]
+        if len(pts) < 3:
+            continue
+        world["routes"][r["route_id"]] = {"len": r["length_m"], "loop": r["is_loop"], "pts": pts}
+        xs += [p[0] for p in pts]; zs += [p[1] for p in pts]
+    if xs:
+        world["bbox"] = [min(xs), max(xs), min(zs), max(zs)]
+    # our own learned courses on the same map, so driven roads light up
+    world["courses"] = {c["route_key"]: {"name": c["name"], "path": (json.loads(c["geometry"] or "{}").get("path") or [])[::3]}
+                        for c in cx.execute("SELECT route_key, name, geometry FROM course")}
+    total += write(os.path.join(out, "world.json"), world)
+
+    # ---- diagnosis rollups: what goes wrong, where, for whom ----------------------------
+    diag = {
+        "by_setup": rows(cx, "SELECT * FROM v_diag_by_setup"),
+        "by_turn": rows(cx, "SELECT * FROM v_diag_by_turn"),
+        "symptoms": rows(cx, "SELECT symptom, phase, primary_fix, secondary_fix, tertiary_fix, detector, source FROM ref_symptom"),
+    }
+    total += write(os.path.join(out, "diag.json"), diag)
+
     # ---- identity: how a LIVE car on screen is matched to a build we already hold ------
     # The daemon reports the car's 50 decoded part ids. Joining them in slot order gives a
     # hardware fingerprint the browser can compare directly, with no hashing and no guessing:
@@ -209,8 +236,13 @@ def main(argv=None):
             "SELECT slot, part_id FROM tune_part WHERE container=?", (t["container"],))}
         sk = {r["slider"]: r["norm"] for r in cx.execute(
             "SELECT slider, norm FROM tune_slider WHERE container=?", (t["container"],))}
+        rims = {r["slot"]: r["ml"] for r in cx.execute("""
+            SELECT tp.slot, json_extract(rp.data, '$.mass_level') AS ml
+            FROM tune_part tp JOIN ref_part rp ON rp.slot = tp.slot AND rp.part_id = tp.part_id
+            WHERE tp.container = ? AND tp.slot IN ('rim_style','rear_rim_style')""", (t["container"],))}
         ident.append({
             "c": t["container"], "o": t["ordinal"], "hw": t["hw_hash"], "su": t["setup_hash"],
+            "rim_ml": [rims.get("rim_style"), rims.get("rear_rim_style")],
             "name": t["tune_name"], "locked": t["locked"], "src": t["source"], "pi": t["pi"],
             "cls": t["class"], "kg": t["mass_kg"], "front": t["front_pct"],
             "gears": t["gear_count"], "saved": t["saved_utc"],

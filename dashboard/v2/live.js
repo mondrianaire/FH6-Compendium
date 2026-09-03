@@ -38,23 +38,10 @@ function skeyOf(sliders, order) {
 async function viewLive(host) {
   document.body.classList.add("fixed");
   host.classList.add("live");
-  host.innerHTML = `
-    <div class="idbar" id="idbar"></div>
-    <div id="alerts"></div>
-    <div class="stages" id="stages"></div>
-    <div class="panes">
-      <section class="pane" id="pHw"><header>Hardware<span class="why" id="hwn"></span>
-        <button class="popbtn" id="popHw" title="pop out beside the game">pop out</button></header>
-        <div class="body" id="hwBody"></div></section>
-      <section class="pane" id="pTune"><header>Tuning<span class="why" id="tunen"></span>
-        <button class="popbtn" id="popTune" title="pop out beside the game">pop out</button></header>
-        <div class="body" id="tuneBody"></div></section>
-    </div>`;
-  $("#popHw").onclick = () => popOut("hw");
-  $("#popTune").onclick = () => popOut("tune");
-
+  panelSkeleton(host);
   if (!IDENT) IDENT = await get("identity.json");
-  paintBar(); paintStages();
+  await panelBoot();
+  paintPanel();
   connect();
 }
 
@@ -67,22 +54,25 @@ function connect() {
     // drive time identifies whatever you drove longest and never changes when you switch cars.
     // The frame carries the live cid, so that is what drives identification.
     ES.addEventListener("frame", (e) => onFrame(JSON.parse(e.data)));
+    ES.addEventListener("mode", (e) => { const d = JSON.parse(e.data); MODE = d; paintLeft(); paintRight(); paintFooter(); });
     ES.addEventListener("snapshot", (e) => onLive(JSON.parse(e.data)));
     ES.addEventListener("status", (e) => onLive(JSON.parse(e.data)));
-    ES.onerror = () => { LIVE.receiving = false; paintBar(); };
-  } catch (err) { LIVE.err = String(err); paintBar(); }
+    ES.onerror = () => { LIVE.receiving = false; paintHeader(); };
+  } catch (err) { LIVE.err = String(err); paintHeader(); }
 }
 
 function onLive(d) {
   if (d.cars) LIVE.cars = d.cars;
   if (d.pps != null) LIVE.pps = d.pps;
   if (d.receiving != null) LIVE.receiving = d.receiving;
+  if (d.mode && d.mode.suggest) MODE = d.mode;
   // no frames yet (game at a menu since we connected): fall back to the last car the session saw
   if (!CUR && LIVE.cars.length) {
-    const last = LIVE.cars[LIVE.cars.length - 1];
+    const real = LIVE.cars.filter((c) => c && c.id && !String(c.id).startsWith("0|"));
+    const last = real[real.length - 1];
     if (last && last.id) identify(carOf(last.id), "session");
   }
-  paintBar();
+  paintHeader();
 }
 
 function carOf(cid) {
@@ -103,9 +93,20 @@ function onFrame(f) {
   const inMenu = !f.on;
   const was = LIVE.inMenu;
   LIVE.inMenu = inMenu;
-  LIVE_PI = f.pi;
+  // A menu frame reports PI 0 and car 0. Zero is "no car", not a PI; letting it through made the
+  // drift test read every menu as "the hardware changed", and the status went red in every menu.
+  if (f.pi) LIVE_PI = f.pi;
+  if (f.px != null && f.pz != null) {
+    const moved = !LIVEPOS || Math.abs(LIVEPOS[0] - f.px) + Math.abs(LIVEPOS[1] - f.pz) > 4;
+    LIVEPOS = [f.px, f.pz];
+    if (moved) { const b = $("#leftBody"); if (b) addLiveDot(b); locateCourse(); }
+  }
 
-  if (f.cid && (!CUR || CUR.cid !== f.cid)) { identify(carOf(f.cid), "frame"); return; }
+  // IN A MENU THE FRAME CARRIES CAR 0. That is the game saying "no car", not a car whose ordinal
+  // is zero; identifying it produced a header reading "ordinal 0". Keep the last real car through
+  // menus -- the menu itself is when its build is most likely to change, and we are watching it.
+  const menuFrame = !f.car || String(f.cid || "").startsWith("0|");
+  if (!menuFrame && f.cid && (!CUR || CUR.cid !== f.cid)) { identify(carOf(f.cid), "frame"); return; }
 
   if (inMenu && !was) MENU_SINCE = Date.now();
   const now = Date.now();
@@ -114,13 +115,13 @@ function onFrame(f) {
   const leftMenu = !inMenu && was;
   // A live PI that no longer matches the build we matched means the car changed under us and the
   // change has not been saved yet — the strongest signal we get without a new save file.
-  const piDrift = MATCH && MATCH.build && LIVE_PI != null && MATCH.build.pi != null
+  const piDrift = MATCH && MATCH.build && LIVE_PI && MATCH.build.pi != null
     && LIVE_PI !== MATCH.build.pi;
   if (CUR && (dueInMenu || leftMenu || (piDrift && now - LAST_REREAD > 2500))) {
     LAST_REREAD = now;
     reread();
   }
-  paintBar();
+  paintPanel();
 }
 
 async function identify(car, why) {
@@ -128,15 +129,20 @@ async function identify(car, why) {
   CUR = { cid: car.id, ordinal, name: car.name, cls: car.class, pi: car.pi,
           dt: car.drivetrain, cyl: car.cyl, build_id: car.build_id, live_s: car.live_s, why };
   MATCH = null; CHANGE = null; LAST_REREAD = Date.now();
-  paintBar(); paintStages();
+  paintPanel();
 
-  // the SAVE is what identifies a build; telemetry only says which car is in front of us
+  // The SAVE identifies a build, but a car has MANY saves and the game never says which one is
+  // fitted. The daemon picks one and reports how sure it is; ignoring that turned a guess among
+  // six candidates into a green tick. PIN is the user's own answer, and it wins.
   let dt = null;
+  const pin = pinnedTs(ordinal);
   try {
-    const r = await fetch(DAEMON + "/disk-tune?ordinal=" + ordinal);
+    const r = await fetch(DAEMON + "/disk-tune?ordinal=" + ordinal + (pin ? "&ts=" + pin : ""));
     if (r.ok) dt = await r.json();
   } catch (e) { /* daemon down: the car stage still stands on its own */ }
   CUR.disk = dt && dt.available ? dt : null;
+  CUR.match = (dt && dt.match) || null;
+  CUR.pinned = pin;
 
   try {
     const lv = await fetch(DAEMON + "/liveries?ordinal=" + ordinal);
@@ -144,7 +150,21 @@ async function identify(car, why) {
   } catch (e) { /* liveries are a nicety, not a gate */ }
 
   fingerprint(ordinal);
-  paintBar(); paintStages();
+  paintPanel();
+}
+
+function rimFree(pkey) {
+  const slots = IDENT.slots;
+  return pkey.split(",").map((p, i) => (slots[i] === "rim_style" || slots[i] === "rear_rim_style") ? "R" : p).join(",");
+}
+function sameLevels(a, b) { return !!(a && b) && String(a[0]) === String(b[0]) && String(a[1]) === String(b[1]); }
+let RIM_LEVEL = null;   // wheel id -> mass level, from identity.json's own rows
+function rimLevelsOf(parts) {
+  if (!RIM_LEVEL) { RIM_LEVEL = {};
+    IDENT.builds.forEach((b) => { const ids = b.pkey.split(","); const s = IDENT.slots;
+      const f = ids[s.indexOf("rim_style")], r = ids[s.indexOf("rear_rim_style")];
+      if (b.rim_ml) { if (f !== "-") RIM_LEVEL[f] = b.rim_ml[0]; if (r !== "-") RIM_LEVEL[r] = b.rim_ml[1]; } }); }
+  return [RIM_LEVEL[String(parts.rim_style)], RIM_LEVEL[String(parts.rear_rim_style)]];
 }
 
 // One place decides what the save says, so a re-read and a first read can never disagree.
@@ -153,7 +173,11 @@ function fingerprint(ordinal) {
   const pk = pkeyOf(CUR.disk.tune.parts || {}, IDENT.slots);
   const sk = skeyOf(CUR.disk.tune.sliders || {}, IDENT.sliders);
   const sameCar = IDENT.builds.filter((b) => b.o === ordinal);
-  const hw = sameCar.filter((b) => b.pkey === pk);
+  // THE RIM RULE. Two builds are the same hardware when every slot agrees except the two rim
+  // slots, provided the rims share a mass level. Rims differ only by weight class; the game's own
+  // wheel table proves the rest is cosmetic. So the fingerprint compares 48 slots plus two levels.
+  const liveRims = rimLevelsOf(CUR.disk.tune.parts || {});
+  const hw = sameCar.filter((b) => b.pkey === pk || (rimFree(b.pkey) === rimFree(pk) && sameLevels(b.rim_ml, liveRims)));
   const exact = hw.filter((b) => b.skey === sk);
   const prev = MATCH;
   MATCH = { pk, sk, hw, exact, build: (exact[0] || hw[0] || null) };
@@ -182,16 +206,20 @@ async function reread() {
     CUR.disk = j;
     fingerprint(CUR.ordinal);
     if (changedFile) CHANGE = CHANGE || { kind: "saved", at: Date.now() };
-    paintBar(); paintStages();
+    paintPanel();
   } catch (e) { /* daemon busy; the next beat will pick it up */ }
 }
 
 async function loadBuild(hw) {
+  // The sheet feeds the floating BUILD SHEET and the header's mass/gear chips; there are no
+  // hardware/tuning panes on the panel any more, so nothing here paints into them.
   try {
     const b = await get("build/" + hw + ".json");
-    MATCH.sheet = b;
-    paintHardware(b); paintTune(b);
-  } catch (e) { $("#hwBody").innerHTML = `<div class="why">could not load build ${esc(hw)}</div>`; }
+    if (MATCH) MATCH.sheet = b;
+    paintPanel();
+    const sh = document.getElementById("fhSheet");
+    if (sh && sh.style.display !== "none" && typeof openSheet === "function") openSheet();
+  } catch (e) { if (MATCH) MATCH.sheet = null; }
 }
 
 /* ------------------------------------------------------------------ bar */
@@ -250,7 +278,7 @@ function changeBanner() {
 
 function wireBanner() {
   document.querySelectorAll("#alerts [data-act]").forEach((b) => b.onclick = () => {
-    if (b.dataset.act === "dismiss") { CHANGE = null; paintStages(); }
+    if (b.dataset.act === "dismiss") { CHANGE = null; paintPanel(); }
     else if (b.dataset.act === "ab") abOverlay();
   });
 }
@@ -295,8 +323,76 @@ function diffCount(a, b) {
   return n + " of " + x.length;
 }
 
+/* ------------------------------------------------- which save is fitted */
+// The live packet carries only ordinal | drivetrain | cylinders | PI. Two builds that agree on
+// all four are INDISTINGUISHABLE from telemetry standing still — which is exactly the Exocet
+// case: six saved builds, every one of them 4-cylinder. The daemon breaks such ties by watching
+// the gearbox (the builds have 6, 8, 9 and 10 gears), but that needs you to drive through them.
+// Until then the honest answer is "one of these", not a green tick, and the user can just say.
+function pinnedTs(ordinal) {
+  try { return JSON.parse(localStorage.getItem("fh6pin") || "{}")[String(ordinal)] || null; }
+  catch (e) { return null; }
+}
+function setPin(ordinal, ts) {
+  let m = {};
+  try { m = JSON.parse(localStorage.getItem("fh6pin") || "{}"); } catch (e) { m = {}; }
+  if (ts) m[String(ordinal)] = String(ts); else delete m[String(ordinal)];
+  try { localStorage.setItem("fh6pin", JSON.stringify(m)); } catch (e) { /* private mode */ }
+}
+
+// How much the daemon's pick can be trusted, in the daemon's own words.
+function matchQuality(m) {
+  if (!m) return { level: "none", why: "no save read" };
+  const ties = m.n_signature_ties || 0, n = m.n_saves || 0;
+  const agree = (m.live_cyl == null || m.chosen_cyl == null || m.live_cyl === m.chosen_cyl)
+             && (m.live_pi == null || m.chosen_pi == null || m.live_pi === m.chosen_pi);
+  if (!agree) return { level: "conflict", why: "the live car reports " + m.live_cyl + " cyl / PI "
+    + m.live_pi + " but the chosen save is " + m.chosen_cyl + " cyl / PI " + m.chosen_pi };
+  if (n > 1 && (ties > 0 || m.held || m.live_recent === false)) {
+    return { level: "ambiguous", why: n + " saved builds for this car"
+      + (ties ? ", " + ties + " still tied on signature" : "")
+      + (m.held ? ", identity HELD from earlier rather than freshly seen" : "")
+      + (m.live_recent === false ? ", live data is not recent" : "")
+      + (m.gear_disambig ? " — drive through the gears to break it" : "") };
+  }
+  return { level: "ok", why: (m.how || "matched") + (n > 1 ? " among " + n + " saves" : "") };
+}
+
+// The picker: every distinct build the daemon can see, what separates it from the others, and a
+// click to say which one is actually on the car.
+function savePicker() {
+  const m = CUR && CUR.match;
+  if (!m || !(m.builds || []).length) return "";
+  const chosen = (CUR.disk && CUR.disk.ts) || "";
+  const rows = (m.builds || []).map((b) => {
+    const ts = (b.saves || [])[0] || "";
+    const on = String(ts) === String(chosen);
+    const pinned = CUR.pinned && String(CUR.pinned) === String(ts);
+    const diffs = (b.diff_vs_A || []);
+    return `<button class="pick ${on ? "on" : ""} ${pinned ? "pin" : ""}" data-pin="${esc(ts)}">
+      <b>${esc(b.label || "?")}</b>
+      <span class="pm">${b.cyl != null ? b.cyl + " cyl" : ""}${b.pi ? " · PI " + b.pi : ""}${b.gears ? " · " + b.gears + " gears" : ""}</span>
+      <span class="pd">${diffs.length ? esc(diffs.slice(0, 2).join(", ")) + (diffs.length > 2 ? " +" + (diffs.length - 2) : "") : "the reference build"}</span>
+      ${pinned ? '<span class="chip on">pinned</span>' : on ? '<span class="chip">daemon\'s pick</span>' : ""}</button>`;
+  }).join("");
+  return `<div class="picker"><div class="why">Which build is on the car? The live packet cannot tell
+    these apart — it carries only cylinders, drivetrain and PI. Pick one and it stays picked.
+    ${CUR.pinned ? '<button class="mini" data-pin="">clear the pin</button>' : ""}</div>
+    <div class="picks">${rows}</div></div>`;
+}
+
+function wirePicker() {
+  document.querySelectorAll("#alerts [data-pin], #stages [data-pin]").forEach((b) =>
+    b.onclick = () => {
+      setPin(CUR.ordinal, b.dataset.pin || null);
+      const car = { id: CUR.cid, ordinal: CUR.ordinal, name: CUR.name, class: CUR.cls,
+                    pi: CUR.pi, drivetrain: CUR.dt, cyl: CUR.cyl };
+      identify(car, "pinned");
+    });
+}
+
 /* --------------------------------------------------------------- stages */
-function paintStages() {
+function paintStages_legacy() {
   const s = $("#stages"); if (!s) return;
   const carOk = !!CUR;
   const hwOk = !!(MATCH && MATCH.hw && MATCH.hw.length);
@@ -311,6 +407,11 @@ function paintStages() {
     stage(carOk, 1, "Car identified", carOk
       ? esc(CUR.name || CUR.ordinal) + (CUR.liveries && CUR.liveries.length ? ` · ${CUR.liveries.length} liveries on file` : "")
       : "waiting for the game") +
+    (() => { const q = matchQuality(CUR && CUR.match);
+      if (!CUR || !CUR.disk) return "";
+      const ok = q.level === "ok";
+      return stage(ok ? true : false, "?", ok ? "Save matched" : "Which save?",
+        (CUR.pinned ? "pinned by you — " : "") + esc(q.why)); })() +
     stage(hwOk ? true : (d ? false : null), 2, "Hardware profile", hwOk
       ? `matches ${MATCH.hw.length} saved build${MATCH.hw.length > 1 ? "s" : ""} — ${esc(MATCH.hw[0].name || "unnamed")}`
       : d ? "the save on disk matches no build we hold" : "reading the save…") +
@@ -326,7 +427,12 @@ function paintStages() {
   const btn = $("#goClone");
   if (btn && green) btn.onclick = () => cloneWindow();
   const al = $("#alerts");
-  if (al) { al.innerHTML = changeBanner(); wireBanner(); }
+  if (al) {
+    const q = matchQuality(CUR && CUR.match);
+    const needPick = CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict");
+    al.innerHTML = changeBanner() + (needPick ? savePicker() : "");
+    wireBanner(); wirePicker();
+  }
 }
 
 /* --------------------------------------------------------- clone sheet */
@@ -356,8 +462,8 @@ function cloneOverlay(b) {
   document.getElementById("cloneOv")?.remove();
   const ov = document.createElement("div");
   ov.id = "cloneOv"; ov.className = "cloneov";
-  ov.innerHTML = `<style>${CLONE_CSS}</style>
-    <div class="ovbox">${cloneHTML(b)}
+  ov.innerHTML = `<style>${scopedCloneCss()}</style>
+    <div class="ovbox fhcl">${cloneHTML(b)}
       <button class="ovx" id="ovx" title="close">✕</button></div>`;
   document.body.appendChild(ov);
   // the overlay borrows the popup's own document API surface
@@ -368,29 +474,82 @@ function cloneOverlay(b) {
   });
 }
 
-function cloneHTML(b) {
-  const t = (b.tunes || []).slice(-1)[0] || {};
-  const areas = shopAreas(b);
-  return `<div class="hd"><div><b>${esc(t.name || "clone")}</b>
-      <span class="sub">${esc(b.car || "")}</span></div>
-    <div class="tabs"><button class="tb on" data-screen="shop">Upgrade Shop</button>
-      <button class="tb" data-screen="tune">Tuning</button></div>
-    <div class="prog"><span id="pdone">0</span>/<span id="ptot">0</span> installed</div></div>
-
-  <section class="screen on" id="shop">
-    <nav class="cats">${areas.map((g, i) =>
-      `<button class="cat ${i ? "" : "on"}" data-cat="${i}">${esc(g.a)}
-        <span class="cn">${g.rows.filter((p) => !p.stock && p.pid != null).length}</span></button>`).join("")}</nav>
-    <div class="pane">${areas.map((g, i) => `<div class="catbody ${i ? "" : "on"}" data-body="${i}">
-      ${g.rows.map((p) => shopRow(p)).join("")}</div>`).join("")}</div>
-  </section>
-
-  <section class="screen" id="tune">
-    <nav class="cats" id="tcats"></nav>
-    <div class="pane" id="tbody"></div>
-  </section>`;
+/* ------------------------------------------------------------- build sheet
+   Two in-game screens. The ROWS carry the v1 "TAKE TO GAME" identity — menus in the game's own
+   order, named levels with Street/Sport/Race pips, PI chips, engine sub-lines; tuning tabs with
+   sections, absolute values + units, a slider track with knob and pole labels — fed by the
+   daemon's deliverable, which the panel already fetches with the disk tune. The database adds
+   the two things that surface never had: the tile's position in the shop grid, and the
+   checklist. With no save on disk there is no deliverable, and the sheet falls back to the
+   database's slot walk so it is never blank. */
+const areaKey = (s) => String(s || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z]/g, "");
+function sameArea(a, b) {
+  a = areaKey(a); b = areaKey(b);
+  return !!a && !!b && (a === b || a.startsWith(b) || b.startsWith(a) || a.endsWith(b) || b.endsWith(a));
 }
-
+const FI_SLOTS = ["single_turbo", "twin_turbo", "quad_turbo", "centrifugal_supercharger", "pos_supercharger"];
+// the database part a deliverable row names: same slot name, or one of the two renamed rows.
+// The database keeps the installed blower in its own slot and leaves `aspiration` empty, which is
+// why the old sheet drew a blank aspiration row while the turbo sat under Engine.
+function partFor(b, item) {
+  const parts = (b && b.parts) || [];
+  if (item === "powertrain") return parts.find((p) => p.slot === "engine") || null;
+  if (item === "aspiration") return parts.find((p) => FI_SLOTS.includes(p.slot) && p.pid != null && !p.stock)
+    || parts.find((p) => p.slot === "aspiration") || null;
+  return parts.find((p) => p.slot === item) || null;
+}
+function pips(up) {
+  const l = /^Race/.test(up || "") ? 3 : /^Sport/.test(up || "") ? 2 : /^Street/.test(up || "") ? 1 : 0;
+  return l ? `<span class="pips">${[0, 1, 2].map((i) => `<i class="${i < l ? "on" : ""}"></i>`).join("")}</span>` : "<span></span>";
+}
+// The tile strip is the database's contribution: the game does not name the tile you need, it
+// puts it in a grid, so the row shows the grid with the one you must land on lit.
+function tileStrip(p) {
+  const n = (p && p.tiles) || 0, t = (p && p.tile) || 0;
+  if (!n || n > 16) return `<span></span><span class="tile"></span>`;
+  return `<span class="strip" title="tile ${t} of ${n} in the game's grid">${Array.from({ length: n }, (_, i) =>
+      `<i class="${i + 1 === t ? "hit" : ""}"></i>`).join("")}</span>
+    <span class="tile">${t ? `${t}<span class="of">/${n}</span>` : ""}</span>`;
+}
+function partRow(it, p) {
+  const stock = !!it.stock;
+  const cls = stock ? "stock" : it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named";
+  const pi = it.pi != null ? `<span class="pi" title="PI cost against stock">${it.pi > 0 ? "+" : ""}${it.pi}</span>` : "";
+  const sub = it.engine_type ? `<div class="sub${it.engine_type_conf === "measured" ? " meas" : ""}">${it.engine_type_conf === "measured" ? "📡 " : ""}${esc(it.engine_type)}</div>` : "";
+  const note = it.note ? `<div class="sub">ℹ ${esc(it.note)}</div>` : "";
+  const swap = (it.item === "powertrain" && !stock && it.engine_family != null)
+    ? `<div class="sub hint">Engine Swap menu → match this tile${it.engine_catalog && it.engine_catalog.shared_swap ? " · shared swap engine" : ""}</div>` : "";
+  return `<label class="srow ${stock ? "stock" : ""}" data-slot="${esc(p ? p.slot : it.item)}">
+    <input type="checkbox" ${stock ? "disabled" : ""}>
+    <span class="it">${esc(it.item.replace(/_/g, " "))}${sub}${note}${swap}</span>
+    ${pips(it.upgrade || "")}
+    ${tileStrip(p)}
+    <span class="up ${cls}">${esc(it.upgrade || it.value || "")}${pi}</span></label>`;
+}
+function dbRow(p) {   // a database slot the deliverable does not carry (or the whole sheet, with no save on disk)
+  const stock = !!p.stock || p.pid == null;
+  return `<label class="srow ${stock ? "stock" : ""}" data-slot="${esc(p.slot)}">
+    <input type="checkbox" ${stock ? "disabled" : ""}>
+    <span class="it">${esc(p.slot.replace(/_/g, " "))}</span>
+    ${pips(p.name || "")}
+    ${tileStrip(p)}
+    <span class="up ${stock ? "stock" : "named"}">${esc(p.name || (stock ? "Stock" : "—"))}</span></label>`;
+}
+function shopMenus(b, dl) {
+  if (dl && (dl.menus || []).length) {
+    const used = new Set();
+    return dl.menus.map((m) => {
+      const rows = m.rows.map((it) => { const p = partFor(b, it.item); if (p) used.add(p.slot); return partRow(it, p); });
+      // installed parts the deliverable did not name (intercooler, restrictor plate…) join their menu
+      const extra = (b.parts || []).filter((p) => !used.has(p.slot) && p.pid != null && !p.stock && sameArea(p.area, m.menu));
+      extra.forEach((p) => used.add(p.slot));
+      return { name: m.menu, n: m.rows.filter((x) => !x.stock).length + extra.length, of: m.rows.length + extra.length,
+               html: rows.join("") + extra.map(dbRow).join("") };
+    });
+  }
+  return shopAreas(b).map((g) => ({ name: g.a, n: g.rows.filter((p) => !p.stock && p.pid != null).length, of: g.rows.length,
+                                     html: g.rows.map(dbRow).join("") }));
+}
 function shopAreas(b) {
   const areas = [];
   (b.parts || []).forEach((p) => {
@@ -401,23 +560,42 @@ function shopAreas(b) {
   });
   return areas;
 }
-
-// The tile strip is the whole point: the game does not name the tile you need, it puts it in a
-// grid, so the sheet shows the grid with the one you must land on lit.
-function shopRow(p) {
-  const n = p.tiles || 0, t = p.tile || 0;
-  const strip = n && n <= 16
-    ? `<span class="strip">${Array.from({ length: n }, (_, i) =>
-        `<i class="${i + 1 === t ? "hit" : ""}"></i>`).join("")}</span>`
-    : "";
-  const stock = p.stock || p.pid == null;
-  return `<label class="srow ${stock ? "stock" : ""}" data-pid="${p.pid == null ? "" : p.pid}"
-      data-slot="${esc(p.slot)}">
-    <input type="checkbox" ${stock ? "disabled" : ""}>
-    <span class="slot">${esc(p.slot.replace(/_/g, " "))}</span>
-    <span class="nm">${esc(p.name || "—")}</span>
-    ${strip}
-    <span class="tile">${t ? `${t}<span class="of">/${n}</span>` : ""}</span></label>`;
+function sliderRow(row) {
+  const rel = row.value == null;
+  const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
+  const val = rel
+    ? `<span class="slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%</span>`
+    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global band — exact on the next gear-ladder drive"' : ""}>${esc(String(row.value))}<small>${esc(row.unit || "")}</small></span>`
+      + (row.conflict ? `<span class="cflag" title="the save decodes ${esc(String(row.conflict.save))}; telemetry measures ${esc(String(row.conflict.telemetry))}">⚠ save ${esc(String(row.conflict.save))}</span>`
+        : row.agree ? `<span class="aflag" title="the save and telemetry agree">✓×2</span>` : "");
+  return `<div class="sl"><div class="slt"><span class="sll">${esc(row.label || row.field)}</span>${val}</div>
+    <div class="trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div>
+    <div class="pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
+}
+function tuneTabs(b, dl) {
+  if (dl && (dl.tabs || []).length) {
+    return dl.tabs.map((t) => {
+      const secs = [];
+      t.rows.forEach((r) => { let s = secs.find((x) => x.h === r.section); if (!s) secs.push(s = { h: r.section, rows: [] }); s.rows.push(r); });
+      return { name: t.tab, html: secs.map((s) => `<div class="sec"><div class="sech">${esc(s.h)}</div>${s.rows.map(sliderRow).join("")}</div>`).join("") };
+    });
+  }
+  const ts = tuneScreen(b);
+  return ts.tabs.map((n, i) => ({ name: n, html: ts.bodies[i] }));
+}
+function cloneHTML(b, dl, name) {
+  const t = (b.tunes || []).slice(-1)[0] || {};
+  const menus = shopMenus(b, dl), tabs = tuneTabs(b, dl);
+  const rail = (items, attr) => items.map((m, i) => `<button class="cat ${i ? "" : "on"}" data-${attr}="${i}">${esc(m.name)}${m.of != null ? `<span class="cn">${m.n}/${m.of}</span>` : ""}</button>`).join("");
+  const bodies = (items, attr) => items.map((m, i) => `<div class="catbody ${i ? "" : "on"}" data-${attr}="${i}">${m.html}</div>`).join("");
+  const src = !dl ? `<span class="lk">from the database — no save on disk</span>`
+    : dl.locked ? `<span class="lk">🔒 downloaded</span>` : `<span class="own">self-made</span>`;
+  return `<div class="hd"><div><b>${esc(name || t.name || "clone")}</b><span class="sub">${esc(b.car || "")}</span>${src}${dl && dl.gear_count ? `<span class="sub">${dl.gear_count}-speed</span>` : ""}</div>
+    <div class="tabs"><button class="tb on" data-screen="shop">Upgrade Shop</button>
+      <button class="tb" data-screen="tune">Tuning</button></div>
+    <div class="prog"><span id="pdone">0</span>/<span id="ptot">0</span> installed</div></div>
+  <section class="screen on" id="shop"><nav class="cats">${rail(menus, "cat")}</nav><div class="pane">${bodies(menus, "body")}</div></section>
+  <section class="screen" id="tune"><nav class="cats">${rail(tabs, "tcat")}</nav><div class="pane">${bodies(tabs, "tbody")}</div></section>`;
 }
 
 // The Tuning screen pairs front and rear on one row, exactly as the game lays it out.
@@ -451,9 +629,13 @@ function tuneScreen(b) {
             ${s.deflt ? '<span class="df">default</span>' : ""}</div>`;
         }).join("")}`).join("")}</div>`;
   });
-  const gears = (t.gears || []).length ? `<div class="tgrid one"><div class="th">Gearing</div><div class="th"></div><div class="th"></div>
-    ${t.gears.map((g, i) => `<div class="tl">${i === 0 ? "Final Drive" : i + (i === 1 ? "st" : i === 2 ? "nd" : i === 3 ? "rd" : "th")}</div>
-      <div class="tv"><b>${n2(g)}</b></div><div class="tv"></div>`).join("")}</div>` : "";
+  // The database holds each gear as its slider POSITION (0..1) — the ratio band is per car and is
+  // not in the save — so the fallback says so: a position, labelled by gear, never a ratio, and
+  // never index 0 dressed up as the final drive (that slider sits in the list above under its name).
+  const ord = (i) => i + (i === 1 ? "st" : i === 2 ? "nd" : i === 3 ? "rd" : "th");
+  const gears = (t.gears || []).length ? `<div class="tgrid one"><div class="th">Gearing</div><div class="th">slider position</div><div class="th"></div>
+    ${t.gears.map((g, i) => `<div class="tl">${ord(i + 1)} gear</div>
+      <div class="tv"><div class="bar"><i style="width:${(Math.max(0, Math.min(1, g)) * 100).toFixed(1)}%"></i></div><b>${(g * 100).toFixed(1)}%</b></div><div class="tv"></div>`).join("")}</div>` : "";
   if (gears) { groups.push({ g: "Gearing", rows: [] }); bodies.push(gears); }
   return { tabs: groups.map((g) => g.g), bodies };
 }
@@ -461,12 +643,6 @@ function tuneScreen(b) {
 function wireClone(w, b) {
   const d = w.document;                       // a real popup document, or the overlay element
   const byId = (id) => (d.getElementById ? d.getElementById(id) : d.querySelector("#" + id));
-  const ts = tuneScreen(b);
-  byId("tcats").innerHTML = ts.tabs.map((g, i) =>
-    `<button class="cat ${i ? "" : "on"}" data-tcat="${i}">${esc(g)}</button>`).join("");
-  byId("tbody").innerHTML = ts.bodies.map((h, i) =>
-    `<div class="catbody ${i ? "" : "on"}" data-tbody="${i}">${h}</div>`).join("");
-
   const sel = (root, s) => Array.from(root.querySelectorAll(s));
   sel(d, ".tb").forEach((btn) => btn.onclick = () => {
     sel(d, ".tb").forEach((x) => x.classList.toggle("on", x === btn));
@@ -505,6 +681,14 @@ function wireClone(w, b) {
   count();
 }
 
+// Scoped copy for in-page use: every selector prefixed so the sheet cannot restyle the panel.
+function scopedCloneCss() {
+  return CLONE_CSS.replace(/(^|\})\s*([^{}@]+)\{/g, (m, pre, sel) => pre + sel.split(",").map((x) => {
+    x = x.trim(); if (!x) return x;
+    if (x === ":root" || x === "body") return ".fhcl";
+    return ".fhcl " + x;
+  }).join(",") + "{");
+}
 const CLONE_CSS = `
 :root{--bg:#0b0f14;--pn:#121922;--pn2:#18212c;--ln:#243040;--ink:#e6edf5;--mut:#8a97a8;
  --acc:#00d27a;--acc2:#4ea3ff;--warn:#e3b341;--mono:ui-monospace,Consolas,monospace}
@@ -520,27 +704,59 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
 .prog{font:12px var(--mono);color:var(--mut);min-width:96px;text-align:right}
 .screen{display:none;grid-template-columns:210px 1fr;height:calc(100vh - 49px)}
 .screen.on{display:grid}
-.cats{background:var(--pn);border-right:1px solid var(--ln);overflow:auto;padding:6px}
+.cats{display:flex;flex-direction:column;gap:2px;margin:0;background:var(--pn);border-right:1px solid var(--ln);overflow:auto;padding:6px}
 .cat{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;
  color:var(--mut);padding:9px 11px;border-radius:6px;font:500 12.5px inherit;cursor:pointer}
 .cat:hover{background:var(--pn2);color:var(--ink)}
 .cat.on{background:var(--pn2);color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
 .cn{margin-left:auto;font:11px var(--mono);opacity:.8}
-.pane{overflow:auto;padding:10px 12px}
+.pane{overflow:auto;padding:10px 12px;background:none;border:0;border-radius:0}
 .catbody{display:none}.catbody.on{display:block}
-.srow{display:grid;grid-template-columns:20px 128px 1fr auto 52px;gap:10px;align-items:center;
- padding:7px 10px;border-bottom:1px solid var(--ln);cursor:pointer}
+.srow{display:grid;grid-template-columns:18px minmax(0,1fr) 49px auto 44px minmax(150px,38%);gap:10px;align-items:center;
+ padding:6px 10px;border-bottom:1px solid var(--ln);cursor:pointer;font-size:12.5px;text-transform:capitalize}
 .srow:hover{background:var(--pn2)}
-.srow.stock{opacity:.4;cursor:default}
+.srow.stock{opacity:.45;cursor:default}
 .srow.done{background:#0f2a1e55}
-.srow.done .nm{text-decoration:line-through;color:var(--mut)}
-.srow .slot{color:var(--mut);font-size:11px}
-.srow .nm{font-size:13px}
+.srow.done .up{text-decoration:line-through;color:var(--mut)}
+.srow .it{min-width:0}
+.srow .sub{font-size:10px;color:var(--mut);line-height:1.25;margin-top:2px;font-style:italic;text-transform:none}
+.srow .sub.meas{color:#8fd14f;font-style:normal}
+.srow .sub.hint{color:var(--acc2);font-style:normal}
+.pips{display:flex;gap:3px}
+.pips i{width:13px;height:6px;border-radius:1px;background:#26313a}
+.pips i.on{background:#a8d92a}
 .strip{display:flex;gap:3px}
-.strip i{width:13px;height:13px;border:1px solid var(--ln);border-radius:2px;background:var(--pn2)}
+.strip i{width:12px;height:12px;border:1px solid var(--ln);border-radius:2px;background:var(--pn2)}
 .strip i.hit{background:var(--acc);border-color:var(--acc);box-shadow:0 0 0 2px #00d27a33}
 .srow .tile{font:12px var(--mono);color:var(--acc);text-align:right}
 .srow .of{color:var(--mut)}
+.up{text-align:right;text-transform:none;overflow-wrap:anywhere;min-width:0}
+.up.named,.up.category{color:#c3ea4f}
+.up.stock{color:var(--mut);font-size:11px;text-transform:uppercase}
+.up.dim{color:#36c1e8}
+.up.cosmetic{color:var(--mut)}
+.pi{margin-left:6px;font-size:9.5px;letter-spacing:.04em;font-weight:700;color:#e6a63a;border:1px solid rgba(230,166,58,.4);border-radius:8px;padding:0 5px;vertical-align:middle;font-variant-numeric:tabular-nums}
+.hd .lk{color:var(--warn);font-size:11px;border:1px solid var(--warn);border-radius:9px;padding:0 7px;margin-left:8px}
+.hd .own{color:var(--acc);font-size:11px;border:1px solid var(--acc);border-radius:9px;padding:0 7px;margin-left:8px}
+.sec{margin-bottom:12px}
+.sech{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#0b0f07;background:#a8d92a;padding:2px 8px;border-radius:3px;display:inline-block;margin:0 0 7px}
+.sl{display:block;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.sl:last-child{border-bottom:none}
+.slt{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:5px}
+.sll{font-size:12px;color:var(--ink)}
+.slv{font-weight:700;font-size:16px;color:#c3ea4f;white-space:nowrap;font-variant-numeric:tabular-nums}
+.slv small{font-size:10px;color:var(--mut);margin-left:3px;font-weight:400}
+.slv.pos{color:#e6a63a;font-size:13px}
+.slv.derived{color:#8fd14f;border-bottom:1px dotted rgba(143,209,79,.55)}
+.cflag{margin-left:8px;font-size:10px;color:var(--warn)}
+.aflag{margin-left:8px;font-size:10px;color:var(--acc)}
+.trk{position:relative;height:16px}
+.trk .rail{position:absolute;top:7px;left:0;right:0;height:3px;border-radius:2px;background:#0b1013;border:1px solid var(--ln)}
+.trk .fill{position:absolute;top:7px;left:0;height:3px;border-radius:2px;background:#a8d92a}
+.trk .fill.pos{background:repeating-linear-gradient(90deg,#e6a63a,#e6a63a 4px,transparent 4px,transparent 8px)}
+.trk .knob{position:absolute;top:1px;width:4px;height:14px;border-radius:2px;background:var(--ink);transform:translateX(-50%)}
+.trk .knob.pos{background:#e6a63a}
+.pol{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-top:2px}
 .tgrid{display:grid;grid-template-columns:170px 1fr 1fr;gap:6px 14px;align-items:center;
  padding:4px 4px 16px}
 .tgrid.one{grid-template-columns:170px 130px 1fr}
@@ -552,7 +768,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
 .tv .u{color:var(--mut);font-size:11px;min-width:44px}
 .tv.dash{color:#3d4a5a}
 .tv.lk b{color:var(--mut)}
-.bar{position:relative;flex:1;height:8px;background:var(--pn2);border:1px solid var(--ln);border-radius:4px;overflow:hidden}
+.bar{display:block;margin:0;position:relative;flex:1;height:8px;background:var(--pn2);border:1px solid var(--ln);border-radius:4px;overflow:hidden}
 .bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#0b3a2a,var(--acc))}
 .tv.lk .bar i{background:var(--ln)}
 .df{color:var(--warn);font:10px inherit;border:1px solid var(--warn);border-radius:9px;padding:0 6px}

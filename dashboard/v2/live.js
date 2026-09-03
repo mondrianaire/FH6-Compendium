@@ -218,9 +218,21 @@ function fingerprint(ordinal) {
   //   sliders moved on the same hardware -> a tuning pass is under way, either following advice
   //                     or your own, and that is exactly what A/B wants to compare
   if (prev && prev.pk) {
-    if (prev.pk !== pk) CHANGE = { kind: "hardware", from: prev, to: MATCH, at: Date.now() };
-    else if (prev.sk !== sk) CHANGE = { kind: "tune", from: prev, to: MATCH, at: Date.now() };
+    // name the difference, slot by slot and slider by slider — a banner that says "hardware
+    // changed" and nothing else is the one that reads as "nothing was picked up"
+    const pa = prev.pk.split(","), pb = pk.split(",");
+    const slots = IDENT.slots.filter((_, i) => pa[i] !== pb[i]).map((s, i) => s);
+    const sa = prev.sk.split(","), sb = sk.split(",");
+    const prevS = (prev.sliders || {}), curS = CUR.disk.tune.sliders || {};
+    const sliders = IDENT.sliders.map((n, i) => ({ n, i })).filter(({ i }) => sa[i] !== sb[i]).map(({ n, i }) => {
+      const e = curS[n] || {}, pe = prevS[n] || {};
+      const val = (x, norm) => (x && x.value != null) ? (+x.value).toFixed(2) + (x.unit ? " " + x.unit : "") : (norm === "-" ? "—" : Math.round(+norm * 100) + "%");
+      return { name: n, a: val(pe, sa[i]), b: val(e, sb[i]) };
+    });
+    if (prev.pk !== pk) CHANGE = { kind: "hardware", from: prev, to: MATCH, slots, sliders, at: Date.now() };
+    else if (prev.sk !== sk) CHANGE = { kind: "tune", from: prev, to: MATCH, slots: [], sliders, at: Date.now() };
   }
+  MATCH.sliders = CUR.disk.tune.sliders || {};       // kept so the next fingerprint can print old → new
   if (MATCH.build) loadBuild(MATCH.build.hw);
 }
 
@@ -233,10 +245,20 @@ async function reread() {
     if (!r.ok) return;
     const j = await r.json();
     if (!j || !j.available) return;
+    const prevTs = CUR.disk && CUR.disk.ts;
     const changedFile = !CUR.disk || CUR.disk.ts !== j.ts;
     CUR.disk = j;
+    CUR.match = j.match || CUR.match;                 // the roster grows with every save; the picker must see it
     fingerprint(CUR.ordinal);
-    if (changedFile) CHANGE = CHANGE || { kind: "saved", at: Date.now() };
+    if (changedFile) {
+      // A NEW FILE IS A SAVE, BY DEFINITION. Whatever the fingerprint found is on disk, so the
+      // banner must never ask for a save it is looking at. A new file with nothing different is a
+      // re-save (or a downloaded tune identical to the last), and says so.
+      if (!CHANGE || CHANGE.saved) CHANGE = { kind: "same", slots: [], sliders: [], at: Date.now() };
+      CHANGE.saved = true; CHANGE.ts = j.ts; CHANGE.prevTs = prevTs || null;
+      CHANGE.locked = !!(j.deliverable && j.deliverable.locked);
+      CHANGE.held = !!(MATCH && MATCH.build);
+    }
     paintPanel();
   } catch (e) { /* daemon busy; the next beat will pick it up */ }
 }
@@ -290,9 +312,23 @@ function liveChip() {
 
 // The banner is the contextual half of the dashboard: it says what just moved and what that
 // means you have to do about it.
+const tsLocal = (ts) => { const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(String(ts || "")); if (!m) return String(ts || "");
+  const d = new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6])); return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }); };
 function changeBanner() {
   if (!CHANGE) return "";
   const k = CHANGE.kind;
+  if (CHANGE.saved) {
+    const when = `<b>New save read${CHANGE.ts ? " · " + tsLocal(CHANGE.ts) : ""}${CHANGE.locked ? " · a downloaded tune (locked)" : ""}.</b>`;
+    const slots = (CHANGE.slots || []).map((x) => x.replace(/_/g, " "));
+    const sl = (CHANGE.sliders || []);
+    const hwTxt = slots.length ? `<b>${slots.length} part${slots.length === 1 ? "" : "s"}</b> differ from the previous save: ${esc(slots.slice(0, 8).join(", "))}${slots.length > 8 ? " +" + (slots.length - 8) : ""}.` : "";
+    const slTxt = sl.length ? `<b>${sl.length} slider${sl.length === 1 ? "" : "s"}</b> moved: ${sl.slice(0, 6).map((x) => `${esc(x.name.replace(/_/g, " "))} ${esc(x.a)} → ${esc(x.b)}`).join("; ")}${sl.length > 6 ? " +" + (sl.length - 6) : ""}.` : "";
+    const hold = CHANGE.held ? "" : ` <span class="why">Not in the database yet — the import (steps below) holds it${sl.length && !slots.length ? " and makes the pair comparable" : ""}.</span>`;
+    if (k === "same") return `<div class="alert">${when} Identical to the previous save — re-saved, nothing moved.${hold}<button class="mini" data-act="dismiss">dismiss</button></div>`;
+    if (k === "hardware") return `<div class="alert warn">${when} ${hwTxt} ${slTxt} A hardware change is a new build, not a tuning pass.${hold}<button class="mini" data-act="dismiss">dismiss</button></div>`;
+    return `<div class="alert warn">${when} Same hardware. ${slTxt} An A/B pair.${hold}
+      ${CHANGE.held ? '<button class="mini go" data-act="ab">compare A/B on course</button>' : ""}<button class="mini" data-act="dismiss">dismiss</button></div>`;
+  }
   if (k === "hardware") return `<div class="alert bad"><b>Hardware changed.</b>
     The parts on this car no longer match the build we hold. The game does not write an upgrade
     change to disk until you save the setup, so <b>save the tune and give it a name</b> — until

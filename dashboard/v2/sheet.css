@@ -1,0 +1,357 @@
+/* FH6 GameSheet — a reproduction of the in-game Upgrade Shop and Tune screens.
+   Every rule is scoped under .gsheet so the sheet can never restyle the dashboard.
+   Sources: docs/fh6-ui-spec.md §0 (chrome), §2 (menu tree), §3 (tune), §4 (stats),
+   §5 (the ten must-match rules), §10 (grids proven on the NSX-R).
+   No external assets: glyphs are inline SVG, fonts are a condensed system stack. */
+
+.gsheet {
+  /* palette: the game's dark UI, the lime name bar, magenta sliders, yellow banners */
+  --gs-bg: #08090c;
+  --gs-panel: #0e1116;
+  --gs-panel2: #141922;
+  --gs-tile: #171d26;
+  --gs-tile2: #1e2632;
+  --gs-line: #262f3c;
+  --gs-line2: #35414f;
+  --gs-ink: #eef3f8;
+  --gs-mut: #93a1b2;
+  --gs-dim: #5d6b7c;
+  --gs-lime: rgb(168, 217, 42);       /* the name bar — spec §0.3 */
+  --gs-limeink: #10160a;
+  --gs-mag: #e5309b;                  /* tune sliders — spec §3 */
+  --gs-green: #2f7d4a;                /* tune panel headers */
+  --gs-badge: #35c26a;                /* INSTALLED / OWNED badges */
+  --gs-yellow: #f2c33d;               /* unlock banner */
+  --gs-red: #f0616d;
+  --gs-cond: "Bahnschrift", "DIN Alternate", "Roboto Condensed", "Arial Narrow",
+             "Segoe UI", system-ui, sans-serif;
+  --gs-mono: ui-monospace, "JetBrains Mono", Consolas, monospace;
+
+  background: var(--gs-bg);
+  color: var(--gs-ink);
+  font: 13px/1.4 var(--gs-cond);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.gsheet *, .gsheet *::before, .gsheet *::after { box-sizing: border-box; }
+.gsheet button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* ---------------------------------------------------------------- top chrome */
+.gsheet .gs-top {
+  display: flex; align-items: center; gap: 14px;
+  padding: 7px 12px; background: #000; border-bottom: 1px solid var(--gs-line);
+  flex: 0 0 auto;
+}
+.gsheet .gs-car { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.gsheet .gs-pi {
+  font: 700 12px/1 var(--gs-mono); letter-spacing: .06em;
+  background: var(--gs-ink); color: #000; padding: 4px 7px; border-radius: 3px;
+}
+.gsheet .gs-carname { font-weight: 600; letter-spacing: .02em; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+.gsheet .gs-tunename { color: var(--gs-mut); font-size: 12px; }
+.gsheet .gs-screens { margin-left: auto; display: flex; gap: 2px; }
+.gsheet .gs-screens button {
+  text-transform: uppercase; letter-spacing: .1em; font-size: 11.5px; font-weight: 600;
+  color: var(--gs-dim); padding: 5px 12px; border: 1px solid transparent; border-radius: 3px;
+}
+.gsheet .gs-screens button:hover { color: var(--gs-ink); background: var(--gs-panel2); }
+.gsheet .gs-screens button.on { color: var(--gs-limeink); background: var(--gs-lime); }
+.gsheet .gs-lockchip {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--gs-yellow);
+  border: 1px solid #5a4a12; background: #221c07; padding: 3px 7px; border-radius: 3px;
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: 0 0 auto;
+}
+.gsheet .gs-lockchip svg { width: 11px; height: 13px; fill: var(--gs-yellow); }
+
+.gsheet .gs-body { flex: 1 1 auto; min-height: 0; display: none; }
+.gsheet .gs-body.on { display: block; }
+
+/* ================================================================ UPGRADE SHOP
+   Spec §0: a narrow left-hand panel, the car to the right. Panel anatomy, top to
+   bottom: black title bar · tile grid · lime name bar · stats-or-description ·
+   footer chips · button prompts. */
+.gsheet .gs-shop { display: grid; grid-template-columns: 430px minmax(0, 1fr);
+  gap: 16px; padding: 12px; height: 100%; min-height: 0; }
+/* Narrow: one column that scrolls as a page, rather than three panes each with its own
+   scrollbar (the game is 16:9, so this is the sheet's own concession, not the game's). */
+@media (max-width: 900px) {
+  .gsheet .gs-shop { grid-template-columns: 1fr; height: auto; overflow-y: auto; }
+  .gsheet .gs-grid { max-height: none; }
+  .gsheet .gs-side { overflow: visible; }
+}
+
+.gsheet .gs-panel {
+  display: flex; flex-direction: column; min-height: 0;
+  background: linear-gradient(180deg, #0d1015 0%, #0a0d11 100%);
+  border: 1px solid var(--gs-line);
+}
+.gsheet .gs-title {
+  background: #000; padding: 8px 11px; display: flex; align-items: center; gap: 9px;
+  border-bottom: 1px solid var(--gs-line);
+}
+.gsheet .gs-back {
+  border: 1px solid var(--gs-line2); border-radius: 3px; padding: 2px 7px;
+  font-size: 11px; color: var(--gs-mut); white-space: nowrap; flex: 0 0 auto;
+}
+.gsheet .gs-back:hover { color: var(--gs-ink); border-color: var(--gs-lime); }
+.gsheet .gs-title h3 {
+  margin: 0; min-width: 0; font: 600 15px/1.1 var(--gs-cond); letter-spacing: .04em;
+  text-transform: none;
+}
+.gsheet .gs-crumb { margin-left: auto; font-size: 10.5px; color: var(--gs-dim);
+  letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 55%; }
+
+/* tile grid — 3 across (spec §0.2), scrollbar when the list is longer */
+.gsheet .gs-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 9px;
+  overflow-y: auto; flex: 0 1 auto; min-height: 0; max-height: 38vh;
+}
+.gsheet .gs-grid.rows2 { max-height: none; overflow: visible; }
+.gsheet .gs-tile {
+  position: relative; text-align: left; background: var(--gs-tile);
+  border: 1px solid var(--gs-line); border-radius: 2px; padding: 22px 8px 8px;
+  min-height: 84px; display: flex; flex-direction: column; justify-content: flex-end;
+  gap: 5px; transition: background .08s, border-color .08s;
+}
+.gsheet .gs-tile:hover { background: var(--gs-tile2); border-color: var(--gs-line2); }
+.gsheet .gs-tile.hi { border-color: var(--gs-lime); background: var(--gs-tile2);
+  box-shadow: inset 0 0 0 1px var(--gs-lime); }
+.gsheet .gs-tile .gs-tname {
+  font-size: 11.5px; line-height: 1.25; letter-spacing: .02em; color: var(--gs-ink);
+  overflow-wrap: anywhere;
+}
+.gsheet .gs-tile.unk .gs-tname { color: var(--gs-dim); font-style: italic; letter-spacing: .1em; }
+.gsheet .gs-tile .gs-tpos {
+  position: absolute; right: 5px; bottom: 4px; font: 10px var(--gs-mono); color: var(--gs-dim);
+}
+.gsheet .gs-badge {
+  position: absolute; top: 4px; left: 5px; font: 700 9px/1 var(--gs-cond);
+  letter-spacing: .12em; padding: 3px 5px; border-radius: 2px; text-transform: uppercase;
+}
+.gsheet .gs-badge.inst { background: var(--gs-badge); color: #04160b; }
+.gsheet .gs-badge.own  { background: #17482c; color: var(--gs-badge);
+  border: 1px solid var(--gs-badge); }
+.gsheet .gs-badge.tgt  { background: var(--gs-lime); color: var(--gs-limeink); }
+.gsheet .gs-basket {                     /* small basket glyph, spec §0 tile badges */
+  position: absolute; top: 4px; right: 5px; width: 13px; height: 13px; fill: var(--gs-badge);
+}
+/* §0 sub-labels are verbatim strings — `POWER +6 hp`, `Weight -4 lb`, `EFFICIENCY +33%`.
+   No text-transform here: the game's own casing is part of the string (§5.1). */
+.gsheet .gs-sublabel {
+  display: inline-block; font: 700 9.5px/1 var(--gs-cond); letter-spacing: .08em;
+  padding: 3px 5px; border-radius: 2px; align-self: flex-start;
+}
+.gsheet .gs-sublabel.good { background: #12351f; color: #4fd483; border: 1px solid #23643c; }
+.gsheet .gs-sublabel.bad  { background: #3a1418; color: #ff8a92; border: 1px solid #75242c; }
+
+/* lime name bar — highlighted item's name, price right-aligned (spec §0.3, §5.6) */
+.gsheet .gs-namebar {
+  display: flex; align-items: center; gap: 10px; background: var(--gs-lime);
+  color: var(--gs-limeink); padding: 7px 11px; font-weight: 700; letter-spacing: .02em;
+  flex: 0 0 auto;
+}
+.gsheet .gs-namebar .n { min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; font-size: 14px; }
+.gsheet .gs-namebar .p { margin-left: auto; font: 700 13.5px var(--gs-mono);
+  white-space: nowrap; }
+.gsheet .gs-namebar.unk .n { font-style: italic; opacity: .72; }
+
+/* description block (category screens) / stats panel (part screens) — never both */
+.gsheet .gs-desc {
+  padding: 10px 11px; color: var(--gs-mut); font-size: 12px; line-height: 1.5;
+  overflow-y: auto; flex: 1 1 auto; min-height: 60px; border-top: 1px solid var(--gs-line);
+}
+.gsheet .gs-desc .unk { color: var(--gs-dim); font-style: italic; }
+.gsheet .gs-stats {
+  border-top: 1px solid var(--gs-line); padding: 8px 11px 10px; flex: 1 1 auto;
+  min-height: 0; overflow-y: auto;
+}
+.gsheet .gs-stats .h {
+  display: flex; align-items: center; gap: 8px; font-size: 10.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gs-dim); margin-bottom: 6px;
+}
+.gsheet .gs-stats .h .y {
+  margin-left: auto; border: 1px solid var(--gs-line2); border-radius: 3px;
+  padding: 2px 7px; font-size: 10.5px; letter-spacing: .08em; color: var(--gs-mut);
+}
+.gsheet .gs-stats .h .y:hover { color: var(--gs-lime); border-color: var(--gs-lime); }
+.gsheet .gs-srow {
+  display: flex; align-items: baseline; gap: 10px; padding: 3px 0;
+  border-bottom: 1px solid #161c25; font-size: 12px;
+}
+.gsheet .gs-srow .l { color: var(--gs-mut); }
+.gsheet .gs-srow .v { margin-left: auto; font: 12.5px var(--gs-mono);
+  font-variant-numeric: tabular-nums; }
+.gsheet .gs-srow .v.na { color: var(--gs-dim); font-style: italic; }
+
+/* footer chips + button prompts (spec §0.5, §0.6) */
+.gsheet .gs-foot {
+  display: flex; align-items: center; gap: 8px; padding: 7px 11px;
+  border-top: 1px solid var(--gs-line); background: #000; flex: 0 0 auto;
+}
+.gsheet .gs-chip {
+  display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--gs-line2);
+  border-radius: 3px; padding: 3px 8px; font: 12px var(--gs-mono); color: var(--gs-ink);
+  background: var(--gs-panel2);
+}
+.gsheet .gs-chip svg { width: 12px; height: 12px; fill: var(--gs-mut); }
+.gsheet .gs-chip .cnt { color: var(--gs-lime); font-weight: 700; }
+.gsheet .gs-prompts {
+  display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 7px 11px 9px;
+  font-size: 11px; color: var(--gs-mut); flex: 0 0 auto;
+}
+.gsheet .gs-prompts span { display: inline-flex; align-items: center; gap: 5px; }
+.gsheet .gs-prompts b {
+  display: inline-grid; place-items: center; min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: 9px; background: var(--gs-line2); color: var(--gs-ink);
+  font: 700 10px var(--gs-mono);
+}
+
+/* right-hand column — the yellow unlock banner sits right of the tile grid (§0) */
+.gsheet .gs-side { display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  overflow-y: auto; }
+.gsheet .gs-unlock {
+  display: flex; align-items: flex-start; gap: 8px; padding: 9px 11px;
+  border: 1px solid #5a4a12; border-left: 3px solid var(--gs-yellow); background: #1c1707;
+  color: var(--gs-yellow); font: 700 12px/1.35 var(--gs-cond); letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.gsheet .gs-unlock svg { width: 13px; height: 15px; fill: var(--gs-yellow); flex: 0 0 auto;
+  margin-top: 1px; }
+.gsheet .gs-brandcard {
+  border: 1px solid var(--gs-line); background: var(--gs-panel); padding: 12px 14px;
+}
+.gsheet .gs-brandcard .b { font: 700 20px/1.1 var(--gs-cond); letter-spacing: .1em;
+  text-transform: uppercase; }
+.gsheet .gs-brandcard .s { color: var(--gs-mut); font-size: 11.5px; letter-spacing: .16em;
+  text-transform: uppercase; margin-top: 4px; }
+.gsheet .gs-note {
+  border: 1px solid var(--gs-line); background: var(--gs-panel); padding: 10px 12px;
+  color: var(--gs-mut); font-size: 11.5px; line-height: 1.5;
+}
+.gsheet .gs-note h4 { margin: 0 0 6px; font: 600 11px var(--gs-cond); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gs-dim); }
+.gsheet .gs-note ul { margin: 0; padding-left: 16px; }
+.gsheet .gs-note code { font: 11px var(--gs-mono); color: var(--gs-ink); }
+.gsheet .gs-pager { display: flex; align-items: center; gap: 8px; padding: 6px 9px;
+  border-top: 1px solid var(--gs-line); font-size: 11.5px; color: var(--gs-mut); }
+.gsheet .gs-pager button {
+  border: 1px solid var(--gs-line2); border-radius: 3px; padding: 2px 9px; color: var(--gs-mut);
+}
+.gsheet .gs-pager button:hover:not(:disabled) { color: var(--gs-lime); border-color: var(--gs-lime); }
+.gsheet .gs-pager button:disabled { opacity: .3; cursor: default; }
+.gsheet .gs-pager .sp { margin-left: auto; font: 11px var(--gs-mono); }
+
+/* ======================================================================= TUNE
+   Spec §3: title `Tune`, the nine-tab strip with LB/RB ends, a three-column body. */
+.gsheet .gs-tune { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.gsheet .gs-tunehd { background: #000; padding: 8px 12px 0; flex: 0 0 auto; }
+.gsheet .gs-tunehd h3 { margin: 0 0 7px; font: 600 16px var(--gs-cond); letter-spacing: .05em; }
+.gsheet .gs-tabs { display: flex; align-items: stretch; gap: 0; overflow-x: auto; }
+.gsheet .gs-tabs .bump {
+  display: grid; place-items: center; padding: 0 9px; color: var(--gs-dim);
+  font: 700 11px var(--gs-mono); letter-spacing: .06em; flex: 0 0 auto;
+}
+.gsheet .gs-tabs button.tab {
+  padding: 7px 13px 8px; font: 600 11.5px var(--gs-cond); letter-spacing: .11em;
+  text-transform: uppercase; color: var(--gs-dim); white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.gsheet .gs-tabs button.tab:hover { color: var(--gs-ink); }
+.gsheet .gs-tabs button.tab.on { color: var(--gs-lime); border-bottom-color: var(--gs-lime); }
+
+.gsheet .gs-3col {
+  display: grid; grid-template-columns: 250px minmax(0, 1fr) 260px; gap: 12px;
+  padding: 12px; flex: 1 1 auto; min-height: 0;
+}
+@media (max-width: 1000px) {
+  .gsheet .gs-3col { grid-template-columns: 1fr; overflow-y: auto; }
+  .gsheet .gs-col { overflow: visible; }
+}
+.gsheet .gs-col { min-height: 0; overflow-y: auto; }
+.gsheet .gs-colh {
+  font: 600 11px var(--gs-cond); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gs-dim); padding: 0 0 6px;
+}
+
+/* left: Performance — four fixed groups (spec §4.2) */
+.gsheet .gs-perf { border: 1px solid var(--gs-line); background: var(--gs-panel); }
+.gsheet .gs-perfg { border-bottom: 1px solid var(--gs-line); padding: 7px 10px 8px; }
+.gsheet .gs-perfg:last-child { border-bottom: 0; }
+.gsheet .gs-perfg .g {
+  font: 600 10.5px var(--gs-cond); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gs-lime); margin-bottom: 4px;
+}
+.gsheet .gs-perfg .r { display: flex; align-items: baseline; gap: 8px; padding: 2px 0;
+  font-size: 12px; }
+.gsheet .gs-perfg .r .l { color: var(--gs-mut); }
+.gsheet .gs-perfg .r .v { margin-left: auto; font: 12.5px var(--gs-mono);
+  font-variant-numeric: tabular-nums; }
+.gsheet .gs-perfg .r .v.sim { color: var(--gs-dim); letter-spacing: .1em; font-size: 11px; }
+
+/* centre: the tab's panels */
+.gsheet .gs-tp { border: 1px solid var(--gs-line); background: var(--gs-panel);
+  margin-bottom: 10px; }
+.gsheet .gs-tph {
+  display: flex; align-items: center; gap: 10px; background: var(--gs-green);
+  padding: 6px 10px; color: #eafff0;
+}
+.gsheet .gs-tph .pn { font: 700 12px var(--gs-cond); letter-spacing: .08em; }
+.gsheet .gs-tph .lo, .gsheet .gs-tph .hi {
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .85;
+}
+.gsheet .gs-tph .lo { margin-left: 14px; }
+.gsheet .gs-tph .hi { margin-left: auto; }
+.gsheet .gs-tph .unit {
+  margin-left: 10px; background: rgba(0, 0, 0, .35); border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 3px; padding: 2px 7px; font: 700 10.5px var(--gs-mono); letter-spacing: .08em;
+}
+.gsheet .gs-tph .unit.none { display: none; }
+.gsheet .gs-trow {
+  display: grid; grid-template-columns: 128px minmax(0, 1fr) 96px; gap: 12px;
+  align-items: center; padding: 8px 10px; border-bottom: 1px solid #161c25;
+  width: 100%; text-align: left;
+}
+.gsheet .gs-trow:last-child { border-bottom: 0; }
+.gsheet .gs-trow:hover { background: var(--gs-panel2); }
+.gsheet .gs-trow.hi { background: var(--gs-panel2); box-shadow: inset 3px 0 0 var(--gs-lime); }
+.gsheet .gs-trow .rl { font-size: 12.5px; color: var(--gs-ink); }
+.gsheet .gs-trow .rv {
+  text-align: right; font: 700 15px var(--gs-mono); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.gsheet .gs-trow .rv .u { font-size: 12px; font-weight: 400; }
+.gsheet .gs-trow.lk .rl, .gsheet .gs-trow.lk .rv { color: var(--gs-dim); }
+.gsheet .gs-trow .rv.na { color: var(--gs-dim); font-size: 12px; font-weight: 400;
+  font-style: italic; }
+.gsheet .gs-trk { position: relative; height: 8px; border-radius: 4px;
+  background: #222a35; overflow: visible; }
+.gsheet .gs-trk .f { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px;
+  background: var(--gs-mag); }
+.gsheet .gs-trk .k {
+  position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gs-mag); border: 2px solid #12060d; transform: translate(-50%, -50%);
+}
+.gsheet .gs-trow.lk .gs-trk { background: #1b212a; }
+.gsheet .gs-trow.lk .gs-trk .f, .gsheet .gs-trow.lk .gs-trk .k { display: none; }
+.gsheet .gs-trow .lockglyph { width: 11px; height: 13px; fill: var(--gs-dim); }
+
+/* right: Description */
+.gsheet .gs-descpanel { border: 1px solid var(--gs-line); background: var(--gs-panel);
+  padding: 10px 12px; }
+.gsheet .gs-descpanel .t { font: 600 12.5px var(--gs-cond); letter-spacing: .04em;
+  margin-bottom: 6px; }
+.gsheet .gs-descpanel .b { color: var(--gs-mut); font-size: 12px; line-height: 1.5; }
+.gsheet .gs-descpanel .b.unk { color: var(--gs-dim); font-style: italic; }
+.gsheet .gs-descpanel .yellow {
+  margin-top: 9px; color: var(--gs-yellow); font: 700 11.5px var(--gs-cond);
+  letter-spacing: .09em; text-transform: uppercase; line-height: 1.4;
+}
+.gsheet .gs-empty { color: var(--gs-dim); padding: 24px 12px; font-size: 12.5px;
+  font-style: italic; }

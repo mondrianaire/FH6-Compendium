@@ -95,6 +95,9 @@ function buildStatus() {
   const hwOk = !!(MATCH && MATCH.hw && MATCH.hw.length);
   const tuneOk = !!(MATCH && MATCH.exact && MATCH.exact.length);
   const ambiguous = q.level !== "ok";
+  if (CUR.diskErr) return { key: "offline", label: "save not read", tone: "dim",
+    why: "the daemon could not be reached, so nothing is known about the save — absence of signal is not evidence",
+    steps: ["start the daemon from the worktree: python scripts/telemetry/fh6_live_daemon.py", "then REREAD BUILD"] };
   if (!hwOk) return { key: "unknown", label: locked ? "downloaded, not yet held" : "new build on disk", tone: "warn",
     why: (RB.state === "running" || RB.pending) ? "a save the database does not hold yet — importing it now"
        : locked ? "a downloaded tune installed since the last import — the import runs by itself"
@@ -102,7 +105,7 @@ function buildStatus() {
     steps: ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
   if (locked) return { key: "downloaded", label: "downloaded / locked", tone: "warn",
     why: "someone else's build; sliders are hidden by the lock",
-    steps: ["clone it onto a second copy of the car (BUILD SHEET)", "save the clone with a name — only then can it be tuned or compared"], ambiguous };
+    steps: ["clone it onto a second copy of the car (BUILD SHEET)", "save the clone with a name — the clone is your own build; the downloaded original cannot be saved, only re-applied"], ambiguous };
   if (!tuneOk) {
     const base = MATCH.hw[0];
     return { key: "variation", label: "variation", tone: "blue",
@@ -306,12 +309,13 @@ function courseTrace(c) {
     return `<span class="fdim"><span class="why">${lab}</span>${chip(null, "all")}${vals.map((v) => chip(v, dimLab(d, v))).join("")}</span>`;
   }).filter(Boolean).join("");
   const stage2 = stage1.filter((t) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
-  // 3. the chips: each lap, a click to hide
+  // 3. the chips: each lap, a click to hide. Sort FIRST: `best` and `cur` are taken from this
+  // list by position, and an unsorted list crowned whichever lap the JSON happened to list first.
+  stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
   const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${match.length} of ${all.length} lap${all.length === 1 ? "" : "s"} on record${MODE.game === "event" ? " · timed event" : ""}</span>
     <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${Object.keys(tf).length || sel.hidden.size ? `<button class="mini" data-tfilt="*|">clear</button>` : ""}<span class="tspacer"></span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
-  stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
   stage2.forEach((t) => { t._cov = t.cov != null ? t.cov : (L ? t.pts[t.pts.length - 1][0] / L : 1); });
   const best = match.find((t) => !notTimed(t)) || null;
@@ -430,13 +434,13 @@ function paintDock() {
 function dockTiles(f) {
   if (!f) return `<span class="why">waiting for telemetry…</span>`;
   const g = f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear;
-  const t = [[f.mph.toFixed(0), "mph"], [g, "gear"], [f.rpm, "rpm" + (f.maxrpm ? " / " + f.maxrpm : "")],
-             [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"],
-             [f.hp, "hp"], [f.tq, "ft·lb"], [f.boost.toFixed(1), "boost psi"]];
+  const t = [[fx(f.mph, 0), "mph"], [g, "gear"], [Number.isFinite(+f.rpm) ? f.rpm : "—", "rpm" + (f.maxrpm ? " / " + f.maxrpm : "")],
+             [fx(f.lat, 2), "lat g"], [fx(f.lon, 2), "long g"], [fx(f.yaw, 0), "yaw °/s"],
+             [Number.isFinite(+f.hp) ? f.hp : "—", "hp"], [Number.isFinite(+f.tq) ? f.tq : "—", "ft·lb"], [fx(f.boost, 1), "boost psi"]];
   const bars = [["thr", f.thr / 255, "var(--acc)"], ["brk", f.brk / 255, "var(--bad)"], ["str", (f.steer + 127) / 254, "var(--acc2)"]];
   const susp = (f.susp || []).map((v, i) => `<div title="${["FL", "FR", "RL", "RR"][i]} suspension travel ${(v * 100).toFixed(0)}%"><i style="height:${Math.max(0, Math.min(100, v * 100)).toFixed(0)}%;background:${v > 0.95 ? "var(--bad)" : "var(--mag)"}"></i><span>${["FL", "FR", "RL", "RR"][i]}</span></div>`).join("");
   const mode = f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "menu";
-  const sub = f.on ? `${(f.dist / 1000).toFixed(2)} km${f.lapt ? " · " + f.lapt.toFixed(1) + " s" : ""}` : "not driving";
+  const sub = f.on ? `${fx(f.dist / 1000, 2)} km${f.lapt ? " · " + fx(f.lapt, 1) + " s" : ""}` : "not driving";
   return t.map(([v, l]) => `<div class="dt"><b>${v}</b><span>${l}</span></div>`).join("")
     + `<div class="dt bars">${bars.map(([l, p, c]) => `<div><span>${l}</span><i style="width:${Math.max(0, Math.min(100, p * 100)).toFixed(0)}%;background:${c}"></i></div>`).join("")}</div>`
     + `<div class="dt susp">${susp}</div>`
@@ -520,7 +524,7 @@ function paintHeader() {
       <div class="hart">${art}<span class="artcap">${esc(artCap)}</span></div>
       <div class="hid">
         <div class="hname"><b>${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b>
-          ${clsBadge(CUR.cls)}${CUR.pi ? `<span class="chip">PI ${CUR.pi}</span>` : ""}
+          ${piBadge(CUR.cls, CUR.pi)}
           ${CUR.dt ? `<span class="chip">${esc(CUR.dt)}</span>` : ""}${CUR.cyl ? `<span class="chip">${CUR.cyl} cyl</span>` : ""}
           <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span></div>
         <div class="hmeta">
@@ -578,7 +582,7 @@ function paintBanner() {
       ${st.rebuild ? `<button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>${RB.error ? `<span class="why" style="color:var(--bad)">${esc(RB.error)}</span>` : ""}` : ""}
       <button class="mini" data-act="dismiss">dismiss</button></div>`);
   }
-  al.innerHTML = parts.join("");
+  al.innerHTML = parts.join("") || `<div class="quiet">nothing to act on</div>`;
   wireBanner(); wirePicker();
 }
 
@@ -725,7 +729,9 @@ function cornersHTML() {
   const bound = log.map((c) => ({ c, t: turnAt(c.apex) }));
   const rows = bound.slice(-30).reverse().map(({ c, t }, i) => {
     const g = DGRIP[dGripUsi(c.usi)]; const fr = c.first_red;
-    const kind = c.mph_min < 45 ? "hairpin" : c.mph_min <= 85 ? "medium" : "fast";
+    // the map is the authority on what a turn IS; a guess from the speed carried must never sit
+    // beside the map's word. Off the map the row says so instead of inventing a kind.
+    const kind = t ? (t.kind || "unclassified turn") : "corner";
     let turn = "";
     if (t) {
       const mine = bound.filter((b) => b.t === t).map((b) => b.c);
@@ -760,10 +766,10 @@ function sinceSaveHTML() {
   const sliders = IDENT.sliders.filter((_, i) => sa[i] !== sb[i]);
   const fitted = CUR.disk && CUR.disk.ts, newer = fitted && String(b.c || "").indexOf("_" + fitted) < 0 && saves.every((x) => String(x.c || "").indexOf("_" + fitted) < 0);
   return `<div class="grp" id="sinceSave" data-a="${esc(a.c)}" data-b="${esc(b.c)}"><div class="gh">Since the previous save</div>
-    <div class="frow"><b>${esc(b.name || "unnamed")}</b> <span class="why">${esc(tsLocal(String(b.c).split("_").pop()))}</span> <span class="why">vs</span> <b>${esc(a.name || "unnamed")}</b> <span class="why">${esc(tsLocal(String(a.c).split("_").pop()))}</span>
-      ${newer ? `<span class="chip w" title="the save on the car is newer than anything the database holds — the import is running or pending">fitted save not held yet</span>` : ""}</div>
-    <div class="frow">${slots.length ? `<b>${slots.length} part${slots.length === 1 ? "" : "s"}</b> changed: <span class="ssl">${slots.map((x) => `<span data-slot="${esc(x)}">${esc(x.replace(/_/g, " "))}</span>`).join(", ")}</span>` : "same hardware"}${b.kg && a.kg ? ` <span class="why">· ${(b.kg - a.kg) >= 0 ? "+" : ""}${n0(b.kg - a.kg)} kg</span>` : ""}${b.gears !== a.gears ? ` <span class="why">· ${a.gears}→${b.gears} gears</span>` : ""}</div>
-    <div class="frow">${sliders.length ? `<b>${sliders.length} slider${sliders.length === 1 ? "" : "s"}</b> moved: <span class="ssl">${sliders.map((x) => `<span data-slider="${esc(x)}">${esc(x.replace(/_/g, " "))}</span>`).join("; ")}</span>` : "sliders unchanged"}</div></div>`;
+    <div class="pair"><b title="${esc(b.name || "unnamed")}">${esc(b.name || "unnamed")}</b><span class="mono">${esc(tsLocal(String(b.c).split("_").pop()))}</span><span class="vs">vs</span><b title="${esc(a.name || "unnamed")}">${esc(a.name || "unnamed")}</b><span class="mono">${esc(tsLocal(String(a.c).split("_").pop()))}</span></div>
+    ${newer ? `<div class="frow"><span class="chip w" title="the save on the car is newer than anything the database holds — the import is running or pending">fitted save not held yet</span></div>` : ""}
+    <div class="frow diffs">${slots.length ? `<b>${slots.length} part${slots.length === 1 ? "" : "s"}</b> changed: <span class="ssl">${slots.map((x) => `<span data-slot="${esc(x)}">${esc(x.replace(/_/g, " "))}</span>`).join(", ")}</span>` : "same hardware"}${b.kg && a.kg ? ` <span class="why">· ${(b.kg - a.kg) >= 0 ? "+" : ""}${n0(b.kg - a.kg)} kg</span>` : ""}${b.gears !== a.gears ? ` <span class="why">· ${a.gears}→${b.gears} gears</span>` : ""}</div>
+    <div class="frow diffs">${sliders.length ? `<b>${sliders.length} slider${sliders.length === 1 ? "" : "s"}</b> moved: <span class="ssl">${sliders.map((x) => `<span data-slider="${esc(x)}">${esc(x.replace(/_/g, " "))}</span>`).join("; ")}</span>` : "sliders unchanged"}</div></div>`;
 }
 // fills the physical old → new values once both build files are in (memoised through get())
 async function fillSinceSave(body) {

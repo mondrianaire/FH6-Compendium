@@ -100,6 +100,7 @@ function carOf(cid) {
 let MENU_SINCE = 0, LAST_REREAD = 0, LIVE_PI = null, LIVE_PI_HELD = false;
 let IDENT_SEQ = 0;               // a reload fires two identifies ~50 ms apart; only the last one may write
 
+const fx = (v, d) => (Number.isFinite(+v) ? (+v).toFixed(d) : "—");   // an em dash for anything non-finite off the wire
 let LAST_PANEL = 0;
 function onFrame(f) {
   LIVE.receiving = true;
@@ -186,8 +187,9 @@ async function identify(car, why) {
   try {
     const r = await fetch(DAEMON + "/disk-tune?ordinal=" + ordinal + (pin ? "&ts=" + pin : ""));
     if (r.ok) dt = await r.json();
-  } catch (e) { /* daemon down: the car stage still stands on its own */ }
+  } catch (e) { CUR.diskErr = String(e && e.message || e); }
   if (seq !== IDENT_SEQ) return;              // a later identify owns the page now
+  if (dt) CUR.diskErr = null;
   CUR.disk = dt && dt.available ? dt : null;
   CUR.match = (dt && dt.match) || null;
   CUR.pinned = pin;
@@ -376,7 +378,9 @@ async function reread() {
     const r = await fetch(DAEMON + "/disk-tune?ordinal=" + CUR.ordinal + "&_=" + Date.now());
     if (!r.ok) return;
     const j = await r.json();
-    if (!j || !j.available || seq !== IDENT_SEQ || !CUR) return;
+    if (seq !== IDENT_SEQ || !CUR) return;
+    CUR.diskErr = null;
+    if (!j || !j.available) return;
     const prevTs = CUR.disk && CUR.disk.ts;
     const changedFile = !CUR.disk || CUR.disk.ts !== j.ts;
     CUR.disk = j;
@@ -395,7 +399,7 @@ async function reread() {
     }
     ensureHeld();
     paintPanel();
-  } catch (e) { /* daemon busy; the next beat will pick it up */ }
+  } catch (e) { if (CUR) { CUR.diskErr = String(e && e.message || e); paintHeader(); paintBanner(); } }
 }
 
 async function loadBuild(hw) {
@@ -454,9 +458,16 @@ function liveChip0() {
 // means you have to do about it.
 const tsLocal = (ts) => { const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(String(ts || "")); if (!m) return String(ts || "");
   const d = new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6])); return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }); };
+// ONE wording for "get this onto disk", by lock state: your own build is SAVED in the tuning
+// menu; a downloaded (locked) tune only re-writes on RE-APPLY from Find Tuning Setups.
+function captureCopy(locked) {
+  return locked ? "re-apply the tune from <b>Find Tuning Setups</b> — a downloaded tune only writes to disk when applied"
+                : "<b>save the tune and give it a name</b> in the tuning menu";
+}
 function changeBanner() {
   if (!CHANGE) return "";
   const k = CHANGE.kind;
+  const lockedNow = !!(CUR && CUR.disk && CUR.disk.deliverable && CUR.disk.deliverable.locked);
   if (CHANGE.saved) {
     const when = `<b>New save read${CHANGE.ts ? " · " + tsLocal(CHANGE.ts) : ""}${CHANGE.locked ? " · a downloaded tune (locked)" : ""}.</b>`;
     const slots = (CHANGE.slots || []).map((x) => x.replace(/_/g, " "));
@@ -470,9 +481,8 @@ function changeBanner() {
       ${CHANGE.held ? '<button class="mini go" data-act="ab">compare A/B on course</button>' : ""}<button class="mini" data-act="dismiss">dismiss</button></div>`;
   }
   if (k === "hardware") return `<div class="alert bad"><b>Hardware changed.</b>
-    The parts on this car no longer match the build we hold. The game does not write an upgrade
-    change to disk until you save the setup, so <b>save the tune and give it a name</b> — until
-    then this car cannot be cloned or compared.
+    The parts on this car no longer match the build we hold. The game writes nothing to disk until
+    you ${captureCopy(lockedNow)} — until then this car cannot be cloned or compared.
     <button class="mini" data-act="dismiss">dismiss</button></div>`;
   if (k === "tune") return `<div class="alert warn"><b>Sliders changed, same hardware.</b>
     A tuning pass on the same package: the two setups are directly comparable, because only the
@@ -809,19 +819,22 @@ function sliderRow(row) {
 // The daemon reports a slider "by %" when it has no per-car range for it; the database has every
 // range from the game's own physics rows, so those six read as absolute values here — in the
 // game's display units — and are tagged as coming from the database.
-const DB_UNITS = { "N/mm": ["lb/in", 5.71015], "m": ["in", 39.3701], "kgf": ["lb", 2.20462], "psi": ["psi", 1], "deg": ["deg", 1], "%": ["%", 1] };
+const DB_UNITS = { "N/mm": ["lb/in", 5.71015], "m": ["in", 39.3701], "kgf": ["lb", 2.20462], "psi": ["psi", 1], "deg": ["deg", 1], "%": ["%", 1],
+                   "ratio": ["ratio", 1], ":1": [":1", 1], "scale": ["scale", 1], "% front": ["% front", 1], "% rear": ["% rear", 1] };
 function dbTuneFor(b) {
   const ts = CUR && CUR.disk && CUR.disk.ts;
   const tunes = (b && b.tunes) || [];
-  return tunes.find((t) => ts && String(t.container || "").endsWith("_" + ts)) || tunes[tunes.length - 1] || null;
+  // ONLY the save that is on the car. Falling back to "the last tune held" stamped another setup's
+  // absolute numbers as this save's slider positions; with no match the honest percentage stands.
+  return tunes.find((t) => ts && String(t.container || "").endsWith("_" + ts)) || null;
 }
 function fillFromDb(row, tune) {
-  if (!tune || row.value != null) return row;
+  if (!tune || (row.value != null && !row.derived)) return row;   // exact beats derived; derived is replaced, not kept
   const s = (tune.sliders || []).find((x) => x.slider === row.field);
   if (!s || s.v == null) return row;
   const [unit, k] = DB_UNITS[s.unit] || [s.unit, 1];
   const v = s.v * k;
-  return Object.assign({}, row, { value: (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2)), unit, src: "db", norm: s.norm });
+  return Object.assign({}, row, { value: (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2)), unit, src: "db", norm: s.norm, derived: false });
 }
 function tuneTabs(b, dl) {
   if (dl && (dl.tabs || []).length) {

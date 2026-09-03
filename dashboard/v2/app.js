@@ -25,7 +25,18 @@ const n0 = (v) => v == null ? "—" : Math.round(v).toLocaleString();
 const n1 = (v) => v == null ? "—" : (+v).toFixed(1);
 const n2 = (v) => v == null ? "—" : (+v).toFixed(2);
 const secs = (v) => v == null ? "—" : (+v).toFixed(2) + " s";
-const clsBadge = (c) => c ? `<span class="cls ${esc(c)}">${esc(c)}</span>` : "";
+// ONE class design language (v1 ecea4cd): the in-game PI badge — the class tile art with the PI
+// number in the black cell beside it — on every surface. The letter alone is the same badge
+// without the number; nothing else may draw a class.
+const PI_CLASSES = { D: 1, C: 1, B: 1, A: 1, S1: 1, S2: 1, R: 1, X: 1 };
+function piBadge(cls, pi, sm) {
+  const u = cls ? String(cls).toUpperCase().trim() : null;
+  const cell = pi != null && pi !== "" ? `<i>${esc(String(pi))}</i>` : "";
+  const wrap = `pib${sm ? " pib--sm" : ""}`;
+  if (!u || !PI_CLASSES[u]) return (cell || u) ? `<span class="${wrap}"><b style="background:var(--panel2)">${esc(u || "?")}</b>${cell}</span>` : "";
+  return `<span class="${wrap} pib-${u.toLowerCase()}" title="class ${esc(u)}${pi != null ? " · PI " + esc(String(pi)) : ""}"><img class="pib-img" src="../assets/badges/class-${u.toLowerCase()}.png" alt="${esc(u)}" onerror="this.outerHTML='<b>${esc(u)}</b>'">${cell}</span>`;
+}
+const clsBadge = (c) => piBadge(c, null, true);
 const KG_LB = 2.2046226;
 
 /* ---------------------------------------------------------------- views */

@@ -61,6 +61,13 @@ panel fetches with the disk tune, and the database adds only what that surface n
 tile's position in the shop grid, and the checklist. With no save on disk it falls back to the
 database's slot walk and says so.
 
+### Concrete cells
+Every region has a fixed size and fixed columns: header 196 px ([art 300] [identity 1fr, five
+fixed rows] [actions 340, a 2×2 button grid + chips]), trace 240 px, alerts 96 px (says "nothing
+to act on" when empty), dock 216 px, footer 34 px; the two panes take what is left. Values
+populate the cells and are clipped with an ellipsis when they overflow. A region never resizes
+with its content.
+
 ### Blocks, not pills
 Status and chips are square-cornered solid blocks in heavy uppercase type, the game's own badge
 language; rounded pills did not carry emphasis. Sliders the daemon knows only by position read as

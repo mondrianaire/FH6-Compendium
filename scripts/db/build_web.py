@@ -28,6 +28,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)
 
 import fh6db                                            # noqa: E402
+import export_options                                   # noqa: E402
 
 OUT = os.path.join(ROOT, "dashboard", "v2", "api")
 
@@ -186,23 +187,31 @@ def main(argv=None):
                    ROUND(coverage, 3) AS cov, is_partial AS partial, void, impacts,
                    class, pi, drivetrain AS dt, build_id AS bid, session_id AS sid, solo
             FROM lap WHERE route_key = ? ORDER BY (void OR is_partial), lap_s""", key)
-        # traces: the fastest clean lap per car, plus any lap the user may want to compare.
-        # A full trace is ~350 points; capping keeps a course file in the tens of KB.
-        keep, seen_cid = [], set()
+        # traces: NEVER CAP THE DATA FOR ONE CONSUMER'S BENEFIT (v1 lesson). The old cap kept one
+        # lap per cid and dropped every void or partial lap, so an A/B pair on one car at one PI
+        # collapsed to a single trace and the header's "N of N laps on record" reported the cap as
+        # the truth. Now: the fastest CLEAN lap per SAVE (cid + container) first, then every other
+        # lap (void and partial included — they are flagged in laps[], and their corners are
+        # real), up to a generous ceiling, with the lap's own ordering preserved. Elevation rides
+        # along as the sixth field for the trace's elevation paint.
+        keep, seen = [], set()
         for l in laps:
             if l["void"] or l["partial"]:
                 continue
-            if l["cid"] in seen_cid:
+            k = (l["cid"], l["container"])
+            if k in seen:
                 continue
-            seen_cid.add(l["cid"])
-            keep.append(l["id"])
-            if len(keep) >= 8:
+            seen.add(k); keep.append(l["id"])
+        for l in laps:
+            if l["id"] not in keep:
+                keep.append(l["id"])
+            if len(keep) >= 40:
                 break
         traces = {}
         for lid in keep:
-            traces[lid] = [[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"]]
+            traces[lid] = [[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"], r["elev_m"]]
                            for r in cx.execute(
-                               "SELECT arc_m, mph, grip, x, z FROM lap_point WHERE lap_id=? ORDER BY i",
+                               "SELECT arc_m, mph, grip, x, z, elev_m FROM lap_point WHERE lap_id=? ORDER BY i",
                                (lid,))]
         turns = rows(cx, """
             SELECT turn_id AS id, seq, arc_m AS s, apex_x AS x, apex_z AS z, radius_m AS r,
@@ -320,7 +329,15 @@ def main(argv=None):
     }
     total += write(os.path.join(out, "index.json"), idx)
 
-    print("wrote %d files under %s" % (3 + n_build + n_course + 2, out))
+    # ---- the Upgrade Shop, per car -----------------------------------------
+    # One api/options/<ordinal>.json per car that has a save: the whole shop tree, the game's own
+    # order and strings. Cheap (well under a second for the whole set) and the whole api/ tree is
+    # rebuilt from scratch above, so there is nothing to cache against.
+    n_opt = export_options.export(cx, os.path.join(out, "options"))
+    for fn in os.listdir(os.path.join(out, "options")):
+        total += os.path.getsize(os.path.join(out, "options", fn))
+
+    print("wrote %d files under %s" % (3 + n_build + n_course + 2 + n_opt, out))
     print("  cars %d   packages %d (%d build files)   courses %d (%d files)   evidence %d"
           % (len(cars), len(packages), n_build, len(courses), n_course, len(ev)))
     print("  total %.1f MB  (the old dashboard/db.js is 12.6 MB)" % (total / 1048576.0))

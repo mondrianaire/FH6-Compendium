@@ -649,7 +649,10 @@ function addLiveDot(body) {
   const x0 = +svg.dataset.x0, z0 = +svg.dataset.z0, s = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
   if (!isFinite(s)) return;
   const cx = pad + (LIVEPOS[0] - x0) * s, cy = H - pad - (LIVEPOS[1] - z0) * s;
-  g.innerHTML = `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="#e3b341" stroke="#000" stroke-width="1"/>`;
+  const held = !!LIVE.posHeld;      // no driving frame right now: the last real position, dimmed and hollow
+  g.innerHTML = held
+    ? `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="none" stroke="#e3b341" stroke-width="1.5" opacity=".7"><title>last known position — held through the menu / loading screen</title></circle>`
+    : `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="#e3b341" stroke="#000" stroke-width="1"/>`;
 }
 
 // which learned course is the live car on? nearest course whose path passes within 60 m

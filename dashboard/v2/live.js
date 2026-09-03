@@ -110,11 +110,19 @@ function onFrame(f) {
   // A menu frame reports PI 0 and car 0. Zero is "no car", not a PI; letting it through made the
   // drift test read every menu as "the hardware changed", and the status went red in every menu.
   if (f.pi) { if (LIVE_PI !== f.pi && CUR) { vcar(CUR.ordinal).livePI = { pi: f.pi, at: Date.now() }; viewSave(); } LIVE_PI = f.pi; LIVE_PI_HELD = false; }
-  if (f.px != null && f.pz != null) {
-    const moved = !LIVEPOS || Math.abs(LIVEPOS[0] - f.px) + Math.abs(LIVEPOS[1] - f.pz) > 4;
-    LIVEPOS = [f.px, f.pz];
-    if (moved) { const b = $("#leftBody"); if (b) addLiveDot(b); locateCourse(); }
-  }
+  // A POSITION IS ONLY A POSITION WHILE DRIVING. Loading screens and menus report 0,0 — the exact
+  // centre of the world — so the dot used to jump to mid-map and flicker through every transition.
+  // Only a driving frame off the origin moves the dot; the last real position is HELD through
+  // transitions (drawn dimmed), and a jump of kilometres in one frame is a teleport, not motion:
+  // it moves the dot but never relocates the course by itself.
+  const menuFrame0 = !f.car || String(f.cid || "").startsWith("0|");
+  const realPos = f.on && !menuFrame0 && f.px != null && f.pz != null && !(Math.abs(f.px) < 0.5 && Math.abs(f.pz) < 0.5);
+  if (realPos) {
+    const jump = LIVEPOS ? Math.hypot(LIVEPOS[0] - f.px, LIVEPOS[1] - f.pz) : 0;
+    const moved = !LIVEPOS || jump > 4;
+    LIVEPOS = [f.px, f.pz]; LIVE.posHeld = false;
+    if (moved) { const b = $("#leftBody"); if (b) addLiveDot(b); if (jump < 2000) locateCourse(); else LIVE.teleportAt = Date.now(); }
+  } else if (LIVEPOS && !LIVE.posHeld) { LIVE.posHeld = true; const b = $("#leftBody"); if (b) addLiveDot(b); }
 
   // IN A MENU THE FRAME CARRIES CAR 0. That is the game saying "no car", not a car whose ordinal
   // is zero; identifying it produced a header reading "ordinal 0". Keep the last real car through
@@ -122,6 +130,7 @@ function onFrame(f) {
   const menuFrame = !f.car || String(f.cid || "").startsWith("0|");
   if (!menuFrame && f.cid && (!CUR || CUR.cid !== f.cid)) { identify(carOf(f.cid), "frame"); return; }
 
+  if (LIVE.teleportAt && realPos && Date.now() - LIVE.teleportAt > 1500) { LIVE.teleportAt = 0; locateCourse(); }
   if (inMenu && !was) MENU_SINCE = Date.now();
   const now = Date.now();
   // While a menu is open, re-read the save on a slow beat; the instant it closes, read once more.

@@ -368,7 +368,8 @@ function paintHeader() {
   // Rebuild only when the identity or status changed; a frame beat repaints the chips alone.
   // Rebuilding on every frame re-created the livery <img> and re-fetched it 40 times a second.
   const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label,
-    MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned]);
+    MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
+    RR.busy, RB.state === "running" || RB.pending]);
   if (key === HDR_KEY && h.querySelector(".hcar")) { paintChips(); return; }
   HDR_KEY = key;
   if (!CUR) {
@@ -395,14 +396,21 @@ function paintHeader() {
           ${st.ambiguous ? '<span class="chip w">one of several saves</span>' : ""}</div>
       </div>
     </div>
-    <div class="hact">
-      <button class="big" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>BUILD SHEET ▸</button>
-      ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">
-          ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ TESTING BASELINE" : "SET TESTING BASELINE"}</button>` : ""}
-    </div>
-    <div class="hchips">${liveChip()}</div>`;
+    <div class="hright">
+      <div class="hact">
+        <button class="big" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>BUILD SHEET ▸</button>
+        ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">
+            ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ TESTING BASELINE" : "SET TESTING BASELINE"}</button>` : ""}
+        <span class="hsep"></span>
+        <button class="big sis" id="btnReread" ${RR.busy ? "disabled" : ""} title="re-identify the car from the live frame and re-read its save from disk: roster, match, parts, sliders">${RR.busy ? "READING…" : "⟳ REREAD BUILD"}</button>
+        <button class="big sis" id="btnRecount" ${RB.state === "running" || RB.pending ? "disabled" : ""} title="import every save on disk and regenerate the dashboard data (~4–10 s)">${RB.state === "running" || RB.pending ? "COUNTING…" : "⟳ RECOUNT DATABASE"}</button>
+      </div>
+      <div class="hchips">${liveChip()}</div>
+    </div>`;
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bb = $("#btnBase"); if (bb) bb.onclick = () => setBaseline(st.twin);
+  const br = $("#btnReread"); if (br) br.onclick = () => rereadBuild();
+  const bc = $("#btnRecount"); if (bc) bc.onclick = () => requestRebuild("recount");
 }
 
 function setBaseline(twin) {

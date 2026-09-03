@@ -289,12 +289,28 @@ function ensureHeld() {
   const locked = !!(CUR.disk.deliverable && CUR.disk.deliverable.locked);
   requestRebuild((locked ? "downloaded tune " : "new save ") + CUR.disk.ts);
 }
+// REREAD BUILD: the strongest re-read there is — identify the car again from the live frame
+// (roster, match, save, liveries), or, with no live frame, re-read the save of the car held.
+let RR = { busy: false, at: null };
+async function rereadBuild() {
+  if (RR.busy) return;
+  RR.busy = true; paintHeader();
+  try {
+    const f = LIVE.frame;
+    const liveCid = f && f.car && !String(f.cid || "").startsWith("0|") ? f.cid : null;
+    if (liveCid) await identify(carOf(liveCid), "reread");
+    else if (CUR) await reread();
+    RR.at = Date.now();
+  } finally { RR.busy = false; }
+  paintPanel();
+}
 function rebuildChip() {
-  if (RB.pending) return `<span class="chip w">importing…</span>`;
-  if (RB.state === "running") return `<span class="chip w">importing · ${Math.round((Date.now() - RB.startedAt) / 1000)} s</span>`;
-  if (RB.error) return `<span class="chip r" title="${esc(RB.error)}">import failed</span>`;
-  if (RB.last && RB.last.finished) return `<span class="chip on" title="import + regenerate took ${RB.last.wall_s} s">db · ${new Date(RB.last.finished * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
-  return "";
+  const rr = RR.at ? `<span class="chip" title="last REREAD BUILD">read ${new Date(RR.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>` : "";
+  if (RB.pending) return rr + `<span class="chip w">importing…</span>`;
+  if (RB.state === "running") return rr + `<span class="chip w">importing · ${Math.round((Date.now() - RB.startedAt) / 1000)} s</span>`;
+  if (RB.error) return rr + `<span class="chip r" title="${esc(RB.error)}">import failed</span>`;
+  if (RB.last && RB.last.finished) return rr + `<span class="chip on" title="import + regenerate took ${RB.last.wall_s} s">db · ${new Date(RB.last.finished * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
+  return rr;
 }
 
 // Re-read the save for the car we are on and re-fingerprint it. Cache-busted on purpose: the

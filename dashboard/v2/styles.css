@@ -388,3 +388,11 @@ button.lchip{background:none;cursor:pointer;font-family:inherit;white-space:nowr
 button.lchip.hid{opacity:.35;text-decoration:line-through}
 .hname .pill{font-size:11px;padding:3px 10px}
 @media (orientation: portrait){ .trace{height:240px} }
+
+/* the header's right column: the action row (sheet · baseline | reread · recount) above the chips */
+.hright{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:0 0 auto}
+.hact{display:flex;align-items:center;gap:6px}
+.hsep{width:1px;height:22px;background:var(--line2);margin:0 4px}
+.big.sis{border-color:var(--line2);color:var(--ink);background:var(--panel2)}
+.big.sis:hover{border-color:var(--acc2);color:var(--acc2)}
+.big.sis:disabled{opacity:.6;cursor:progress}

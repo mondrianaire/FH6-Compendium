@@ -33,8 +33,12 @@ function piBadge(cls, pi, sm) {
   const u = cls ? String(cls).toUpperCase().trim() : null;
   const cell = pi != null && pi !== "" ? `<i>${esc(String(pi))}</i>` : "";
   const wrap = `pib${sm ? " pib--sm" : ""}`;
-  if (!u || !PI_CLASSES[u]) return (cell || u) ? `<span class="${wrap}"><b style="background:var(--panel2)">${esc(u || "?")}</b>${cell}</span>` : "";
-  return `<span class="${wrap} pib-${u.toLowerCase()}" title="class ${esc(u)}${pi != null ? " · PI " + esc(String(pi)) : ""}"><img class="pib-img" src="../assets/badges/class-${u.toLowerCase()}.png" alt="${esc(u)}" onerror="this.outerHTML='<b>${esc(u)}</b>'">${cell}</span>`;
+  // DRAWN, NOT CROPPED. The badge is two cells in one rounded block — the class letter on its own
+  // colour, the PI on near-black — exactly as the game draws it. A vector is sharp at any size;
+  // the 42px PNG crops it replaces went soft above about 40px and could not carry a two-character
+  // class (S1, S2) without stretching.
+  const k = (u || "").toLowerCase();
+  return `<span class="${wrap}${PI_CLASSES[u] ? " pib-" + k : ""}" title="class ${esc(u || "?")}${pi != null ? " · PI " + esc(String(pi)) : ""}"><b>${esc(u || "?")}</b>${cell}</span>`;
 }
 const clsBadge = (c) => piBadge(c, null, true);
 const KG_LB = 2.2046226;

@@ -226,10 +226,22 @@ function fitRows(host, noun, keepFirst) {
     used += h; shown++;
   }
 }
+// THE PAUSED LANGUAGE — one vocabulary for "the source is paused, so this is too", used
+// everywhere that applies: the anchored line (below) and any pane that freezes with it
+// (paintHeld, called from paintPanel). Amber/⏸, matching the held live-dot's own colour
+// (addLiveDot's dimmed ring is already #e3b341) rather than inventing a second "paused" colour.
+function heldSince() {
+  return MENU_SINCE ? "since " + new Date(MENU_SINCE).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
+}
+function paintHeld() {
+  const held = !!LIVE.inMenu;
+  [$("#trace"), $("#dock")].forEach((el) => { if (el) el.classList.toggle("held", held); });
+}
 function lastAction() {
   const el = document.getElementById("lastact"); if (!el) return;
   let tone = "dim", txt = "", when = "";
-  if (RB.state === "running" || RB.pending) { tone = "warn"; txt = "importing the save into the database"; }
+  if (LIVE.inMenu) { tone = "warn"; txt = "⏸ paused — in a menu " + heldSince(); }
+  else if (RB.state === "running" || RB.pending) { tone = "warn"; txt = "importing the save into the database"; }
   else if (RR.busy) { tone = "warn"; txt = "re-reading the save from disk"; }
   else if (CHANGE) {
     const n = (CHANGE.sliders || []).length, p = (CHANGE.slots || []).length;
@@ -261,6 +273,7 @@ function lastAction() {
 function paintPanel() {
   lastAction();
   paintHeader(); paintTrace(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
+  paintHeld();
 }
 
 /* -------------------------------------------------------------- trace */

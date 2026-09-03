@@ -493,7 +493,7 @@ function liveChip0() {
   const drift = MATCH && MATCH.build && LIVE_PI != null && MATCH.build.pi != null
     && LIVE_PI !== MATCH.build.pi;
   return `<span class="chip ${LIVE.receiving ? "on" : "r"}">${LIVE.receiving ? "telemetry live" : "no packets"}</span>
-    ${LIVE.inMenu ? `<span class="chip w">in a menu since ${new Date(MENU_SINCE).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })} — display paused</span>` : ""}
+    ${LIVE.inMenu ? `<span class="chip w">⏸ paused — in a menu ${heldSince()}</span>` : ""}
     ${drift ? `<span class="chip r" title="${LIVE_PI_HELD ? "last seen before the reload; a fresh frame confirms or clears it" : "read from the live frame"}">live PI ${LIVE_PI} ≠ saved ${MATCH.build.pi}${LIVE_PI_HELD ? " · held" : ""}</span>` : ""}
     <span class="chip mono">${n1(LIVE.pps)} pps</span>
     <span class="chip ${CUR && CUR.disk ? "on" : "w"}">${CUR && CUR.disk ? "save read" : "no save"}</span>`;

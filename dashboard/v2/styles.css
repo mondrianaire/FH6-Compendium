@@ -734,3 +734,15 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .mapdrawer.open .mdpanel{display:flex;flex-direction:column;gap:8px}
 .mapdrawer .legend{margin:0}
 .mapdrawer .fdim{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+/* ============ THE PAUSED LANGUAGE ============
+   One vocabulary, applied wherever a pane freezes because the data source itself is paused (a
+   menu, a loading screen): amber, the same #e3b341 the held live-dot already uses, a ⏸ glyph,
+   dimmed content so the frozen values read as "not current" without hiding them, and a corner
+   label naming what's true right here, not just at the top of the page (2026-09-03). */
+.held{position:relative}
+.held>*{opacity:.6;transition:opacity .2s}
+.held::after{content:"⏸ held";position:absolute;top:6px;right:8px;z-index:6;
+  font:700 9.5px var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--warn);
+  background:rgba(0,0,0,.55);border:1px solid rgba(227,179,65,.4);border-radius:3px;padding:2px 7px;
+  pointer-events:none}

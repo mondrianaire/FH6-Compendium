@@ -24,6 +24,10 @@ for which panes exist and what fills them in every reachable state.
 │         your driven line,     │         THIS course's turns with the fix attached│
 │         turns lit             │                                                  │
 ├───────────────────────────────┴──────────────────────────────────────────────────┤
+│ DOCK     LIVE · value tiles (mph gear rpm lat/long g yaw hp tq boost · inputs ·   │
+│          suspension travel · mode) · time trace: grip state per second, speed     │
+│          line, every identified corner ▲ coloured by balance · 2/10/30 min spans  │
+├──────────────────────────────────────────────────────────────────────────────────┤
 │ FOOTER   mode (free / course / decode) · why · baseline: <name or none> ·         │
 │          data coverage meter: samples held vs samples required for this mode      │
 └──────────────────────────────────────────────────────────────────────────────────┘
@@ -60,10 +64,19 @@ pane to the clone verify view.
 
 | | FREE | COURSE |
 |---|---|---|
-| left pane | world map: every route centre-line, driven laps painted, live car dot | course map: centre-line + driven line + lit turns + live dot |
+| left pane | world map fitted to the island: every reachable route centre-line, driven laps painted, live car dot; the two off-map circuits (Route102/103, cut content outside the nav mesh) only behind a toggle | course map: centre-line + driven line + lit turns + live dot |
 | right pane | general statistics only | toggle: general statistics / conclusions |
 | sample threshold | high — free driving is not race pace | low — every turn encounter is relevant |
 | recommendations | world-wide, from `v_diag_by_setup` filtered to atomically-equal builds | course-specific, from `v_diag_by_turn` for this route |
+
+### The right pane follows the context
+| context | default tab | why |
+|---|---|---|
+| in a menu, or no frames yet | **Build data** (course mode: statistics) | a menu is where the build changes: the save's exact values, the union's asks, the steps to ratification |
+| driving, free roam | **Live corners** | every corner as taken: in→apex→out, lat g, braking point, balance verdict, first axle over the limit |
+| on a course with a baseline set | **Conclusions** | this course's turns, ranked, with the change attached |
+A click on a tab pins it until the context class changes. Tabs in free mode: Live corners ·
+General statistics · Build data; in course mode: Live corners · General statistics · Conclusions.
 
 ## 3. Build status — the inflection point
 

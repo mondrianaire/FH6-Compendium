@@ -18,7 +18,7 @@
 "use strict";
 
 const DAEMON = "http://127.0.0.1:8765";
-let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0 }, ES = null;
+let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null }, ES = null;
 let CUR = null;          // { ordinal, cid, name, ... }
 let MATCH = null;        // { build, hw, tune } after identification
 let CHANGE = null;       // what moved since the last read: hardware | tune | saved
@@ -54,6 +54,10 @@ function connect() {
     // drive time identifies whatever you drove longest and never changes when you switch cars.
     // The frame carries the live cid, so that is what drives identification.
     ES.addEventListener("frame", (e) => onFrame(JSON.parse(e.data)));
+    // The dock's time trace and the corner log: one per-second entry, one per corner, and 30
+    // minutes of both with the snapshot so a fresh page starts with history, not a blank.
+    ES.addEventListener("strip", (e) => { LIVE.strip.push(JSON.parse(e.data)); if (LIVE.strip.length > 1800) LIVE.strip.splice(0, LIVE.strip.length - 1800); paintDockTrace(); });
+    ES.addEventListener("corner", (e) => { LIVE.corners.push(JSON.parse(e.data)); if (LIVE.corners.length > 240) LIVE.corners.splice(0, LIVE.corners.length - 240); paintDockTrace(); paintRight(); });
     ES.addEventListener("mode", (e) => { const d = JSON.parse(e.data); MODE = d; paintLeft(); paintRight(); paintFooter(); });
     ES.addEventListener("snapshot", (e) => onLive(JSON.parse(e.data)));
     ES.addEventListener("status", (e) => onLive(JSON.parse(e.data)));
@@ -63,6 +67,8 @@ function connect() {
 
 function onLive(d) {
   if (d.cars) LIVE.cars = d.cars;
+  if (Array.isArray(d.strip)) { LIVE.strip = d.strip.slice(-1800); paintDockTrace(); }
+  if (Array.isArray(d.corners)) { LIVE.corners = d.corners.slice(-240); }
   if (d.pps != null) LIVE.pps = d.pps;
   if (d.receiving != null) LIVE.receiving = d.receiving;
   if (d.mode && d.mode.suggest) MODE = d.mode;
@@ -88,8 +94,10 @@ function carOf(cid) {
 // can stop being true, and the moment to re-read the save.
 let MENU_SINCE = 0, LAST_REREAD = 0, LIVE_PI = null;
 
+let LAST_PANEL = 0;
 function onFrame(f) {
   LIVE.receiving = true;
+  LIVE.frame = f;
   const inMenu = !f.on;
   const was = LIVE.inMenu;
   LIVE.inMenu = inMenu;
@@ -121,7 +129,10 @@ function onFrame(f) {
     LAST_REREAD = now;
     reread();
   }
-  paintPanel();
+  // The tiles follow every frame; the panel follows the context — a menu opening or closing
+  // changes what the right pane should show — and otherwise a slow heartbeat, not the packet rate.
+  paintDockTiles();
+  if (inMenu !== was || now - LAST_PANEL > 2000) { LAST_PANEL = now; paintPanel(); }
 }
 
 async function identify(car, why) {
@@ -341,6 +352,11 @@ function setPin(ordinal, ts) {
 }
 
 // How much the daemon's pick can be trusted, in the daemon's own words.
+// The daemon's own standard (_verified_identity): identity is settled when at most one save ties on
+// signature, OR the gearbox has broken the tie — the live packet carries only cylinders, drivetrain
+// and PI, but the car cannot use a gear it does not have, and one pull through the box yields a
+// ratio ladder that the database can check against every build's stored ladder. "held" means the
+// identity is carried from an earlier sighting rather than seen now: trusted, but said.
 function matchQuality(m) {
   if (!m) return { level: "none", why: "no save read" };
   const ties = m.n_signature_ties || 0, n = m.n_saves || 0;
@@ -348,37 +364,55 @@ function matchQuality(m) {
              && (m.live_pi == null || m.chosen_pi == null || m.live_pi === m.chosen_pi);
   if (!agree) return { level: "conflict", why: "the live car reports " + m.live_cyl + " cyl / PI "
     + m.live_pi + " but the chosen save is " + m.chosen_cyl + " cyl / PI " + m.chosen_pi };
-  if (n > 1 && (ties > 0 || m.held || m.live_recent === false)) {
-    return { level: "ambiguous", why: n + " saved builds for this car"
-      + (ties ? ", " + ties + " still tied on signature" : "")
-      + (m.held ? ", identity HELD from earlier rather than freshly seen" : "")
-      + (m.live_recent === false ? ", live data is not recent" : "")
-      + (m.gear_disambig ? " — drive through the gears to break it" : "") };
+  const settled = ties <= 1 || !!m.gear_disambig || !!m.picked_ok;
+  if (n > 1 && !settled) {
+    return { level: "ambiguous", why: ties + " of " + n + " saved builds tie on cylinders, drivetrain and PI"
+      + (m.max_gear_seen ? "; top gear seen so far " + m.max_gear_seen : "; no gear evidence yet")
+      + (m.ladder_tied ? "; the ratio ladder is still tied" : "")
+      + " — one full pull through the gears settles it" };
   }
-  return { level: "ok", why: (m.how || "matched") + (n > 1 ? " among " + n + " saves" : "") };
+  const how = m.gear_disambig ? "settled by the gearbox" + (m.max_gear_seen ? " (top gear seen " + m.max_gear_seen + ")" : "")
+            : m.picked_ok ? "your pick, and the live car agrees with it"
+            : (m.how || "matched");
+  return { level: "ok", why: how + (n > 1 ? " among " + n + " saves" : "")
+    + (m.held ? " — identity held from an earlier sighting, not seen fresh" : "")
+    + (m.live_recent === false ? " — live data is not recent" : "") };
 }
 
-// The picker: every distinct build the daemon can see, what separates it from the others, and a
-// click to say which one is actually on the car.
-function savePicker() {
-  const m = CUR && CUR.match;
+// The picker: every distinct build the daemon can see, what the gearbox has already ruled out, what
+// separates the rest, and a click to say which one is on the car. Pure so it can be tested.
+function pickerHTML(m, chosen, pinned, q) {
   if (!m || !(m.builds || []).length) return "";
-  const chosen = (CUR.disk && CUR.disk.ts) || "";
+  q = q || matchQuality(m);
+  const top = +m.max_gear_seen || 0;
   const rows = (m.builds || []).map((b) => {
     const ts = (b.saves || [])[0] || "";
     const on = String(ts) === String(chosen);
-    const pinned = CUR.pinned && String(CUR.pinned) === String(ts);
+    const isPin = pinned && String(pinned) === String(ts);
     const diffs = (b.diff_vs_A || []);
-    return `<button class="pick ${on ? "on" : ""} ${pinned ? "pin" : ""}" data-pin="${esc(ts)}">
+    const out = top && b.gears && +b.gears < top;         // a box cannot use a gear it does not have
+    return `<button class="pick ${on ? "on" : ""} ${isPin ? "pin" : ""} ${out ? "out" : ""}" data-pin="${esc(ts)}"
+      ${out ? `title="ruled out: a ${b.gears}-speed cannot reach gear ${top}"` : ""}>
       <b>${esc(b.label || "?")}</b>
-      <span class="pm">${b.cyl != null ? b.cyl + " cyl" : ""}${b.pi ? " · PI " + b.pi : ""}${b.gears ? " · " + b.gears + " gears" : ""}</span>
-      <span class="pd">${diffs.length ? esc(diffs.slice(0, 2).join(", ")) + (diffs.length > 2 ? " +" + (diffs.length - 2) : "") : "the reference build"}</span>
-      ${pinned ? '<span class="chip on">pinned</span>' : on ? '<span class="chip">daemon\'s pick</span>' : ""}</button>`;
+      <span class="pm">${b.cyl != null ? b.cyl + " cyl" : ""}${b.pi ? " · PI " + b.pi : ""}${b.gears ? " · " + b.gears + "-speed" : ""}</span>
+      <span class="pd">${out ? "ruled out by the gearbox" : diffs.length ? esc(diffs.slice(0, 2).join(", ")) + (diffs.length > 2 ? " +" + (diffs.length - 2) : "") : "the reference build"}</span>
+      ${isPin ? '<span class="chip on">pinned</span>' : on ? '<span class="chip">daemon\'s pick</span>' : ""}</button>`;
   }).join("");
-  return `<div class="picker"><div class="why">Which build is on the car? The live packet cannot tell
-    these apart — it carries only cylinders, drivetrain and PI. Pick one and it stays picked.
-    ${CUR.pinned ? '<button class="mini" data-pin="">clear the pin</button>' : ""}</div>
+  const alive = (m.builds || []).filter((b) => !(top && b.gears && +b.gears < top));
+  const boxes = [...new Set(alive.map((b) => +b.gears || 0).filter(Boolean))].sort((x, y) => x - y);
+  const twins = boxes.filter((g) => alive.filter((b) => +b.gears === g).length > 1);
+  const lead = q.level === "conflict"
+    ? `The live car reports <b>${m.live_cyl} cyl / PI ${m.live_pi}</b>; the save on file decodes as <b>${m.chosen_cyl} cyl / PI ${m.chosen_pi}</b>. Either the build changed since that save, or its engine decode is wrong. <b>Save the tune in-game</b> and it is read exactly; or pick a save to keep anyway.`
+    : `${m.n_signature_ties || alive.length} builds share this car's cylinders, drivetrain and PI.`
+    + (top ? ` Top gear seen so far: <b>${top}</b>${alive.length < (m.builds || []).length ? ` — ${(m.builds || []).length - alive.length} ruled out.` : "."}` : " No gear evidence yet.")
+    + (twins.length ? ` ${twins.map((g) => alive.filter((b) => +b.gears === g).map((b) => b.label).join("·")).join(" and ")} share a box, so the count alone cannot separate them; the ratio ladder held in the database can.` : "")
+    + ` <b>One full pull through the gears settles it</b>, or pick below and it stays picked.`;
+  return `<div class="picker"><div class="why">${lead}
+    ${pinned ? '<button class="mini" data-pin="">clear the pin</button>' : ""}</div>
     <div class="picks">${rows}</div></div>`;
+}
+function savePicker() {
+  return pickerHTML(CUR && CUR.match, (CUR && CUR.disk && CUR.disk.ts) || "", CUR && CUR.pinned);
 }
 
 function wirePicker() {

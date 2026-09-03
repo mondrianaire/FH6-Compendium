@@ -290,3 +290,50 @@ button.stage.act.go:active{transform:translateY(1px)}
   .fsheet{right:auto;left:3vw;top:56px;width:94vw;height:min(1500px,74vh)}
   #alerts{max-height:18vh}
 }
+
+.pick.out{opacity:.4}
+.pick.out .pd{color:var(--bad)}
+
+/* ---- the dock: value tiles + time trace, between the panes and the footer ---- */
+.dock{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px 8px;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"hd hd" "tiles trace";gap:4px 12px;align-items:start}
+.dock .dhd{grid-area:hd;display:flex;align-items:center;gap:10px;min-height:20px}
+.livetag{font:700 10px var(--mono);letter-spacing:.16em;color:var(--bad);display:inline-flex;align-items:center;gap:5px}
+.livetag i{width:7px;height:7px;border-radius:50%;background:var(--bad);box-shadow:0 0 6px rgba(240,97,109,.7)}
+.livetag.off{color:var(--mut)}.livetag.off i{background:var(--mut);box-shadow:none}
+.livetag .mono{color:var(--mut);letter-spacing:0;font-weight:400}
+.dock .spans{display:flex;gap:3px;margin-left:auto}
+.dock .spans button{background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:4px;font:11px var(--sans);padding:1px 8px;cursor:pointer}
+.dock .spans button.on{color:var(--acc);border-color:var(--acc)}
+.dtiles{grid-area:tiles;display:flex;flex-wrap:wrap;gap:5px;max-width:520px;align-content:start}
+.dt{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:52px;padding:3px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--line)}
+.dt b{font:800 16px/1.05 var(--sans);color:var(--ink);font-variant-numeric:tabular-nums}
+.dt span{font-size:8.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;margin-top:1px}
+.dt.wide{align-items:flex-start;min-width:120px}.dt.wide b{font-size:12px}
+.dt.bars{align-items:stretch;min-width:96px;gap:2px;padding:4px 7px}
+.dt.bars div{display:grid;grid-template-columns:22px 1fr;align-items:center;gap:4px;height:9px}
+.dt.bars div span{margin:0;font-size:8px}.dt.bars i{display:block;height:6px;border-radius:2px;background:var(--acc)}
+.dt.susp{flex-direction:row;align-items:flex-end;gap:5px;min-width:auto;padding:3px 6px}
+.dt.susp div{display:flex;flex-direction:column;align-items:center;gap:1px}
+.dt.susp i{display:block;width:8px;height:22px;background:var(--mag);border-radius:2px;align-self:flex-end;opacity:.9}
+.dt.susp div{height:36px;justify-content:flex-end}
+.dtrace{grid-area:trace;min-width:0}
+.dtrace svg.trace{width:100%;height:auto;display:block;max-height:110px}
+.dtrace .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:9.5px;color:var(--mut);margin-top:2px}
+.dtrace .legend i{display:inline-block;width:10px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.dtrace .legend i.ln{height:2px;background:var(--ink)}
+@media (orientation: portrait){
+  .dock{grid-template-columns:1fr;grid-template-areas:"hd" "tiles" "trace"}
+  .dtiles{max-width:none}
+}
+/* ---- right pane: corner log and build data ---- */
+.crow{display:grid;grid-template-columns:26px 44px 84px 110px 46px 52px 96px 1fr;gap:6px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--line);font-size:11.5px}
+.crow.hd{color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.crow .mono{font-family:var(--mono);font-size:11px}
+.frow.head{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gh{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:8px 6px 4px}
+.ask{display:grid;grid-template-columns:12px 1fr auto;gap:8px;padding:4px 6px;border-bottom:1px solid var(--line);font-size:12px}
+.ask .gain{color:var(--acc);font-size:11px;white-space:nowrap}
+.chip.bad{border-color:var(--bad);color:var(--bad)}
+
+.legend .mini{margin-left:auto}
+.legend .mini.on{color:var(--mag);border-color:var(--mag)}

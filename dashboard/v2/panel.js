@@ -10,7 +10,8 @@
 
 let MODE = { suggest: "free", reason: "no signal yet", kind: null, game: null };
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
-let RIGHT_TAB = "stats";
+let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
+let RIGHT_CTX = null;
 let BASELINE = null;
 let LIVEPOS = null;
 
@@ -61,6 +62,7 @@ function panelSkeleton(host) {
       <section class="pane" id="pLeft"><header id="leftHd">Map</header><div class="body map" id="leftBody"></div></section>
       <section class="pane" id="pRight"><header id="rightHd">Statistics</header><div class="body" id="rightBody"></div></section>
     </div>
+    <div class="dock" id="dock"></div>
     <div class="ftr" id="ftr"></div>`;
 }
 
@@ -71,7 +73,84 @@ async function panelBoot() {
 }
 
 function paintPanel() {
-  paintHeader(); paintBanner(); paintLeft(); paintRight(); paintFooter();
+  paintHeader(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
+}
+
+/* --------------------------------------------------------------- dock */
+// The live dock — the v1 Lab's bottom strip, ported: value tiles from the frame, and the time
+// trace from the daemon's per-second strip (grip state as colour, speed as a line, every
+// identified corner marked ▲ and coloured by its balance). One palette, the analyzer's own.
+const DGRIP = {
+  calm:   { col: "#2a313c", word: "within grip" },
+  front:  { col: "#2f81f7", word: "understeer" },
+  rear:   { col: "#e5414e", word: "oversteer" },
+  both:   { col: "#a371f7", word: "drift / overdriven" },
+  impact: { col: "#e3b341", word: "impact / jolt" },
+  off:    { col: "#0b0e12", word: "not driving" },
+};
+const dGripUsi = (u) => (u > 0.15 ? "front" : u < -0.05 ? "rear" : "calm");
+let DOCK_SPAN = 600;               // seconds of trace on screen
+let DOCK_TILE_T = 0;
+
+function paintDock() {
+  const d = $("#dock"); if (!d) return;
+  if (!d.querySelector(".dtiles")) {
+    d.innerHTML = `<div class="dhd"><span class="livetag" id="dockLive"></span>
+        <span class="spans">${[120, 600, 1800].map((x) => `<button class="${DOCK_SPAN === x ? "on" : ""}" data-span="${x}">${x / 60} min</button>`).join("")}</span>
+        <span class="why" id="dockNote"></span></div>
+      <div class="dtiles" id="dockTiles"></div>
+      <div class="dtrace" id="dockTrace"></div>`;
+    d.querySelectorAll("[data-span]").forEach((b) => b.onclick = () => {
+      DOCK_SPAN = +b.dataset.span; d.querySelectorAll("[data-span]").forEach((x) => x.classList.toggle("on", x === b)); paintDockTrace(); });
+  }
+  const lv = $("#dockLive");
+  if (lv) { lv.className = "livetag " + (LIVE.receiving ? "" : "off"); lv.innerHTML = `<i></i>${LIVE.receiving ? "LIVE" : "OFFLINE"}${LIVE.pps ? ` <span class="mono">${Math.round(LIVE.pps)} pps</span>` : ""}`; }
+  paintDockTiles(true); paintDockTrace();
+}
+
+function dockTiles(f) {
+  if (!f) return `<span class="why">waiting for telemetry…</span>`;
+  const g = f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear;
+  const t = [[f.mph.toFixed(0), "mph"], [g, "gear"], [f.rpm, "rpm" + (f.maxrpm ? " / " + f.maxrpm : "")],
+             [f.lat.toFixed(2), "lat g"], [f.lon.toFixed(2), "long g"], [f.yaw.toFixed(0), "yaw °/s"],
+             [f.hp, "hp"], [f.tq, "ft·lb"], [f.boost.toFixed(1), "boost psi"]];
+  const bars = [["thr", f.thr / 255, "var(--acc)"], ["brk", f.brk / 255, "var(--bad)"], ["str", (f.steer + 127) / 254, "var(--acc2)"]];
+  const susp = (f.susp || []).map((v, i) => `<div title="${["FL", "FR", "RL", "RR"][i]} suspension travel ${(v * 100).toFixed(0)}%"><i style="height:${Math.max(0, Math.min(100, v * 100)).toFixed(0)}%;background:${v > 0.95 ? "var(--bad)" : "var(--mag)"}"></i><span>${["FL", "FR", "RL", "RR"][i]}</span></div>`).join("");
+  const mode = f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "menu";
+  const sub = f.on ? `${(f.dist / 1000).toFixed(2)} km${f.lapt ? " · " + f.lapt.toFixed(1) + " s" : ""}` : "not driving";
+  return t.map(([v, l]) => `<div class="dt"><b>${v}</b><span>${l}</span></div>`).join("")
+    + `<div class="dt bars">${bars.map(([l, p, c]) => `<div><span>${l}</span><i style="width:${Math.max(0, Math.min(100, p * 100)).toFixed(0)}%;background:${c}"></i></div>`).join("")}</div>`
+    + `<div class="dt susp">${susp}</div>`
+    + `<div class="dt wide"><b>${esc(mode)}</b><span>${esc(sub)}</span></div>`;
+}
+function paintDockTiles(force) {
+  const el = $("#dockTiles"); if (!el) return;
+  const now = performance.now(); if (!force && now - DOCK_TILE_T < 100) return;   // 10 Hz is plenty for eyes
+  DOCK_TILE_T = now;
+  el.innerHTML = dockTiles(LIVE.frame);
+}
+
+function stripSVG(strip, corners, span) {
+  const s = (strip || []).slice(-span); const n = s.length;
+  if (!n) return `<div class="why">waiting for the first second of telemetry…</div>`;
+  const W = 900, H = 84, cw = W / n, t0 = s[0].t, t1 = s[n - 1].t;
+  const idx = (t) => Math.max(0, Math.min(n - 1, Math.round((t - t0) / Math.max(1, t1 - t0) * (n - 1))));
+  const vmax = Math.max(60, ...s.map((x) => x.mph || 0));
+  const bars = s.map((x, i) => { const g = DGRIP[x.state] || DGRIP.calm;
+    return `<rect x="${(i * cw).toFixed(2)}" y="16" width="${Math.max(cw - 0.3, 0.6).toFixed(2)}" height="40" fill="${g.col}" opacity="${x.state === "off" ? 1 : x.state === "calm" ? .6 : .95}"><title>${x.t}s — ${g.word}${x.mph != null ? ` · ${x.mph} mph · F ${x.f} R ${x.r} · ${x.g} g` : ""}</title></rect>`; }).join("");
+  const line = "M" + s.map((x, i) => `${(i * cw + cw / 2).toFixed(1)} ${(56 - 40 * ((x.mph || 0) / vmax)).toFixed(1)}`).join(" L");
+  const ticks = s.map((x, i) => x.t % 60 === 0 ? `<text x="${(i * cw).toFixed(1)}" y="78" fill="var(--mut)" font-size="9">${Math.floor(x.t / 60)}:00</text>` : "").join("");
+  const marks = (corners || []).filter((c) => !c.drift && c.t0 >= t0 && c.t0 <= t1).map((c) => {
+    const x = idx(c.t0) * cw + cw / 2; const g = DGRIP[dGripUsi(c.usi)];
+    return `<g><line x1="${x.toFixed(1)}" y1="14" x2="${x.toFixed(1)}" y2="58" stroke="${g.col}" opacity=".45"/>
+      <path d="M${(x - 3.2).toFixed(1)} 4 L${(x + 3.2).toFixed(1)} 4 L${x.toFixed(1)} 12 Z" fill="${g.col}"><title>${c.dir === "L" ? "left" : "right"} · ${c.mph_in}→${c.mph_min}→${c.mph_out} mph · ${c.lat_g_peak} g · ${g.word}</title></path></g>`; }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="trace" role="img" aria-label="time trace">${bars}<path d="${line}" fill="none" stroke="#dfe7ef" stroke-width="1.1" opacity=".85"/>${marks}${ticks}</svg>
+    <div class="legend">${Object.entries(DGRIP).map(([k, g]) => `<span><i style="background:${g.col}"></i>${g.word}</span>`).join("")}<span><i class="ln"></i>speed</span><span>▲ corner, coloured by balance</span></div>`;
+}
+function paintDockTrace() {
+  const el = $("#dockTrace"); if (!el) return;
+  el.innerHTML = stripSVG(LIVE.strip, LIVE.corners, DOCK_SPAN);
+  const note = $("#dockNote"); if (note) note.textContent = LIVE.strip.length ? `${Math.round(LIVE.strip.length / 60)} min of history · ${(LIVE.corners || []).length} corners this session` : "";
 }
 
 /* ------------------------------------------------------------ header */
@@ -150,31 +229,63 @@ function paintBanner() {
 }
 
 /* ------------------------------------------------------------- left */
+let LEFT_KEY = null;
 function paintLeft() {
   const hd = $("#leftHd"), body = $("#leftBody"); if (!body) return;
-  if (MODE.suggest === "course" && COURSE) {
+  const course = MODE.suggest === "course" && COURSE;
+  // 169 polylines are not free: rebuild the map only when what it shows changes, and let the
+  // live dot ride on the map that is already there.
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest]);
+  if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
+  LEFT_KEY = key;
+  if (course) {
     hd.innerHTML = `Course · <span class="why">${esc(COURSE.name || COURSE.key)} · ${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns</span>`;
     body.innerHTML = ""; body.append(courseMap(COURSE)); addLiveDot(body);
   } else {
-    hd.innerHTML = `World · <span class="why">${WORLD ? Object.keys(WORLD.routes).length + " routes" : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
+    const n = WORLD ? Object.keys(WORLD.routes).length : 0;
+    const off = WORLD ? routeSplit().off.length : 0;
+    hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
     body.innerHTML = worldMapHTML(); addLiveDot(body);
+    const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; paintLeft(); };
   }
 }
 
+// Two of the game's 169 routes (102 and 103) are complete circuits parked 8–11 km beyond the north
+// coast, outside the nav mesh, with road-class 0 in every record — cut or developer circuits, not
+// a destination (research 2026-09-03). Fitting the map to them squashed the island into a third
+// of the pane. They are drawn only on request, and never enter a road-class or route aggregate.
+let SHOW_OFFMAP = false;
+function routeSplit() {
+  const rs = Object.entries(WORLD.routes).map(([id, r]) => {
+    const n = r.pts.length; const cx = r.pts.reduce((m, p) => m + p[0], 0) / n, cz = r.pts.reduce((m, p) => m + p[1], 0) / n;
+    return { id, r, cx, cz }; });
+  const med = (a) => { const b = a.slice().sort((x, y) => x - y); return b[b.length >> 1]; };
+  const mx = med(rs.map((x) => x.cx)), mz = med(rs.map((x) => x.cz));
+  const on = [], off = [];
+  rs.forEach((x) => ((Math.hypot(x.cx - mx, x.cz - mz) > 12000) ? off : on).push(x));
+  return { on, off };
+}
 function worldMapHTML() {
   if (!WORLD || !WORLD.bbox) return `<div class="why">no world data — run build_web.py</div>`;
-  const [x0, x1, z0, z1] = WORLD.bbox;
+  const { on, off } = routeSplit();
+  const shown = SHOW_OFFMAP ? on.concat(off) : on;
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  shown.forEach(({ r }) => r.pts.forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
+  Object.values(WORLD.courses || {}).forEach((c) => (c.path || []).forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
+  if (!isFinite(x0)) [x0, x1, z0, z1] = WORLD.bbox;
   const W = 900, H = 640, pad = 12;
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
   const px = (x) => pad + (x - x0) * s, pz = (z) => H - pad - (z - z0) * s;
   const line = (pts, col, w, op) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${pts.map(([x, z]) => px(x).toFixed(0) + "," + pz(z).toFixed(0)).join(" ")}"/>`;
-  const routes = Object.values(WORLD.routes).map((r) => line(r.pts, "#3b4a5c", 1.2, 0.9)).join("");
+  const routes = on.map(({ r }) => line(r.pts, "#3b4a5c", 1.2, 0.9)).join("")
+    + (SHOW_OFFMAP ? off.map(({ id, r }) => `<g><title>Route${id} — off-map circuit, outside the nav mesh, unreachable</title>${line(r.pts, "#c678dd", 1.4, 0.9)}</g>`).join("") : "");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
     .map((c) => line(c.path, "#00d27a", 1.6, 0.85)).join("");
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-pad="${pad}"
       style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}<g id="liveDot"></g></svg>
     <div class="legend"><span><i style="background:#3b4a5c"></i>every game route</span>
-      <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span></div>`;
+      <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
+      ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}</div>`;
 }
 
 function addLiveDot(body) {
@@ -205,15 +316,75 @@ async function locateCourse() {
 }
 
 /* ------------------------------------------------------------ right */
+// Which pane the context calls for. In a menu the build is what can change, so its data asks and
+// ratification steps lead; on the road the corners you are taking lead; on a course with a
+// baseline set, the conclusions lead. A click pins a tab until the context class changes.
+const RT_LABEL = { corners: "Live corners", stats: "General statistics", concl: "Conclusions", build: "Build data" };
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "stats", "concl"] : ["corners", "stats", "build"]; }
+function rightContext() {
+  const course = MODE.suggest === "course" && COURSE;
+  if (LIVE.inMenu || !LIVE.frame) return course ? "stats" : "build";
+  if (course && BASELINE) return "concl";
+  return "corners";
+}
 function paintRight() {
   const hd = $("#rightHd"), body = $("#rightBody"); if (!body) return;
-  const course = MODE.suggest === "course" && COURSE;
-  hd.innerHTML = course
-    ? `<span class="tabs2"><button class="${RIGHT_TAB === "stats" ? "on" : ""}" data-rt="stats">General statistics</button>
-        <button class="${RIGHT_TAB === "concl" ? "on" : ""}" data-rt="concl">Conclusions</button></span>`
-    : `General statistics <span class="why">world-wide · ranked by frequency × impact · free roam needs more samples</span>`;
+  const ctx = rightContext();
+  if (ctx !== RIGHT_CTX) { RIGHT_CTX = ctx; RIGHT_TAB = null; }
+  const tabs = rightTabs();
+  const cur = tabs.includes(RIGHT_TAB) ? RIGHT_TAB : ctx;
+  const why = { corners: "every corner as you take it · newest first", stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
+                concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide" }[cur];
+  hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; paintRight(); });
-  body.innerHTML = (course && RIGHT_TAB === "concl") ? conclusionsHTML() : statsHTML();
+  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : statsHTML();
+}
+
+// The corner log: the daemon's live corner events for the car you are in, newest first.
+function cornersHTML() {
+  const cid = CUR && CUR.cid;
+  const log = (LIVE.corners || []).filter((c) => !cid || c.car === cid);
+  const f = LIVE.frame || {};
+  const inCorner = f.on && Math.abs(f.lat || 0) > 0.4;
+  const head = `<div class="frow head"><b>${log.length} corner${log.length === 1 ? "" : "s"} this session</b>
+    ${inCorner ? `<span class="chip on">● in a corner now — ${f.lat > 0 ? "right" : "left"}, ${Math.abs(f.lat).toFixed(2)} g</span>` : ""}</div>`;
+  if (!log.length) return head + `<div class="why">start driving — each corner appears here the moment you complete it, with its balance verdict</div>`;
+  const rows = log.slice(-30).reverse().map((c, i) => {
+    const g = DGRIP[dGripUsi(c.usi)]; const fr = c.first_red;
+    const kind = c.mph_min < 45 ? "hairpin" : c.mph_min <= 85 ? "medium" : "fast";
+    return `<div class="crow"><span class="mono">${log.length - i}</span><span>${c.lapn != null ? "lap " + c.lapn : c.ev ? "" : "free"}</span>
+      <b>${c.dir === "L" ? "⬅" : "➡"} ${kind}</b>
+      <span class="mono">${c.mph_in}→<b>${c.mph_min}</b>→${c.mph_out ?? "—"}</span>
+      <span class="mono">${c.lat_g_peak} g</span>
+      <span class="mono">${c.brake_on_m != null ? c.brake_on_m + " m" : "—"}</span>
+      <span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${g.word}</span>
+      <span class="why">${fr ? `${fr.axle} first · ph ${fr.phase}` : "clean"}${c.hb ? " · handbrake" : ""}${c.drift ? " · drift" : ""}${c.brake_max > 200 ? " · hard brake" : ""}</span></div>`;
+  }).join("");
+  return head + `<div class="crow hd"><span>#</span><span>lap</span><b>turn</b><span>in→apex→out</span><span>lat g</span><span>brake</span><span>balance</span><span>first red</span></div>` + rows;
+}
+
+// Build data: what the save on disk gives exactly, what the union still has to measure, and the
+// steps to ratification — the menu-time pane, because a menu is where the build changes.
+function buildDataHTML() {
+  const st = buildStatus();
+  const dl = CUR && CUR.disk && CUR.disk.deliverable;
+  const parts = [];
+  if (!CUR) return `<div class="why">${esc(MODE.reason || "waiting for a car")}</div>`;
+  if (!dl) parts.push(`<div class="frow"><b>${esc(st.label)}</b> <span class="why">${esc(st.why)}</span></div>`);
+  else {
+    const sm = dl.summary || {}, u = dl.union || {};
+    const chip = (t, cls) => `<span class="chip ${cls}">${t}</span>`;
+    parts.push(`<div class="frow head"><b>${esc(CUR.disk.name || "")}</b>${dl.locked ? chip("🔒 downloaded", "w") : chip("self-made", "on")}${dl.gear_count ? chip(dl.gear_count + "-speed", "") : ""}
+      ${sm.parts_installed != null ? chip(sm.parts_installed + " parts exact", "on") : ""}
+      ${sm.sliders_exact != null ? chip(sm.sliders_exact + " sliders exact" + (sm.sliders_derived ? " · " + sm.sliders_derived + " derived" : "") + (sm.sliders_relative ? " · " + sm.sliders_relative + " by %" : ""), sm.sliders_relative ? "w" : "on") : ""}
+      ${u.n_agree ? chip("✓ " + u.n_agree + " corroborated", "on") : ""}${u.n_conflict ? chip("⚠ " + u.n_conflict + " conflict" + (u.n_conflict > 1 ? "s" : ""), "bad") : ""}${u.n_await ? chip("○ " + u.n_await + " awaiting telemetry", "w") : ""}</div>`);
+    const asks = u.asks || [];
+    if (asks.length) parts.push(`<div class="grp"><div class="gh">Drive to raise confidence</div>${asks.map((a) => `<div class="ask"><span>▸</span><span>${esc(a.text)}</span><span class="gain">${esc(a.gain || "")}</span></div>`).join("")}</div>`);
+    else parts.push(`<div class="why">every measurable is captured — the analysis runs on complete data for this build</div>`);
+  }
+  if (st.steps && st.steps.length) parts.push(`<div class="grp"><div class="gh">To ratification</div><span class="steps">${st.steps.map((x, i) => `<span class="step"><i>${i + 1}</i>${esc(x)}</span>`).join("")}</span></div>`);
+  else if (st.key === "ratified") parts.push(`<div class="frow normal"><b>ratified</b> <span class="why">this build carries the history of every atomically-similar build</span></div>`);
+  return parts.join("");
 }
 
 // What this build keeps doing wrong, wherever it happens. Filtered to atomically-similar builds:

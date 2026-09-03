@@ -867,9 +867,10 @@ function worldMapHTML() {
     + (SHOW_OFFMAP ? off.map(({ id, r }) => `<g><title>Route${id} — off-map circuit, outside the nav mesh, unreachable</title>${line(r.pts, "#c678dd", 1.4, 0.9)}</g>`).join("") : "");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
     .map((c) => line(c.path, "#00d27a", 1.6, 0.85)).join("");
+  // no follow toggle here: following is course-only (see followSpan()) -- offering it on the
+  // world map invited turning on a satnav zoom that could only ever collapse the island view.
   const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>
       <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
-      ${followBtn()}
       ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}`;
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
       style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}<g id="liveDot"></g></svg>
@@ -890,6 +891,13 @@ function worldMapHTML() {
 // whole point. The mechanism stays, off by default, opt-in from the legend until that mode exists.
 const FOLLOW = { on: false, span: null, cx: null, cz: null, raf: 0, full: null };
 function followSpan() {
+  // COURSE VIEW ONLY, per the design above — the whole point of the WORLD map is seeing your
+  // position on the island, so a satnav zoom there defeats it. Bug (2026-09-03): this never
+  // checked context, so slowing down or braking anywhere in free roam collapsed the world map to
+  // a ~180 m window with no route in view — indistinguishable from "no live position" to the
+  // person looking at it. FOLLOW.on can still be true (persisted from the course map's own
+  // toggle); it just does nothing outside a course now.
+  if (!(MODE.suggest === "course" && COURSE)) return null;
   const f = LIVE.frame;
   if (!f || !f.on || !LIVEPOS) return null;                  // parked or in a menu: the overview
   const mph = f.mph || 0, lat = Math.abs(f.lat || 0);

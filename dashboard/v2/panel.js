@@ -314,6 +314,9 @@ function paintTrace() {
   TRACE_KEY = key;
   const r = course ? courseTrace(COURSE) : liveRun();
   // shell first, so the chart can be drawn at the pixels the shell leaves it
+  // A REGION EARNS ITS HEIGHT. With nothing to draw the trace is a 34px strip, not 240px of
+  // empty chart; the pixels go to the panes, which is where the data is.
+  el.classList.toggle("empty", !r.hasData);
   el.innerHTML = `<div class="thd">${r.head}</div><div class="tbody"></div><div class="tfoot">${r.foot}</div>`;
   fitChips(el.querySelector(".lchips"), TRACE_FIT);
   const host = el.querySelector(".tbody");
@@ -398,7 +401,7 @@ function courseTrace(c) {
     const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
     return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${ticks}${lines}${imp}${cursorSvg(H)}</svg>`;
   };
-  return { head, foot, svg };
+  return { head, foot, svg, hasData: match.length > 0 };
 }
 
 function liveRun() {
@@ -412,7 +415,7 @@ function liveRun() {
     const km = [...Array(Math.floor(smax / 500)).keys()].map((i) => (i + 1) * 500).map((d) => `<line x1="${ch.px(d).toFixed(1)}" y1="6" x2="${ch.px(d).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(d).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${d / 1000} km</text>`).join("");
     return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts.map((q) => [q[0], q[1], q[2], q[3], q[4]])))}">${axisSvg(ch, vmax)}${km}${paintedLine(pts, ch, 2.2, TRACE_MODE)}${cursorSvg(H)}</svg>`;
   };
-  return { head, foot, svg };
+  return { head, foot, svg, hasData: pts.length >= 3 };
 }
 
 function markMapAt(x, z, col) {
@@ -475,6 +478,7 @@ let DOCK_TILE_T = 0;
 
 function paintDock() {
   const d = $("#dock"); if (!d) return;
+  d.classList.toggle("idle", !(LIVE.frame && LIVE.frame.on));
   if (!d.querySelector(".dtiles")) {
     d.innerHTML = `<div class="dhd"><span class="livetag" id="dockLive"></span>
         <span class="spans">${[120, 600, 1800].map((x) => `<button class="${DOCK_SPAN === x ? "on" : ""}" data-span="${x}">${x / 60} min</button>`).join("")}</span>
@@ -535,103 +539,164 @@ function paintDockTrace() {
 }
 
 /* ------------------------------------------------------------ header */
+// THE BAND IS ALLOCATED BY DIFFICULTY, NOT BY DATA (audit 2026-09-03). One skeleton in every
+// state; only the CONTENT and the tone change. The state's own answer takes the largest type in
+// the band, exactly one step and one control are offered, and a field earns a slot only in the
+// states where it changes what you do next. Everything the game already prints on its own
+// screens — mass, drivetrain, cylinders, gear count, displacement — lives in the BUILD SHEET,
+// which is one always-present button away.
 let HDR_KEY = null;
 function paintChips() {
   const c = $("#ftr .fchips"); if (c) c.innerHTML = liveChip();
 }
+
+// what the header SAYS, per state — pure, so it can be read and tested on its own
+function headerCopy(st, q) {
+  const m = MATCH && MATCH.build;
+  const mm = (CUR && CUR.match) || {};
+  const tune = (m && m.name) || (CUR && CUR.disk && CUR.disk.name) || "";
+  const nSaves = mm.n_saves || 0;
+  const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
+  const car = (CUR && CUR.name) || (CUR ? "ordinal " + CUR.ordinal : "");
+  const byline = [m && m.creator ? "by " + m.creator : "", m && m.created ? when(m.created) : "", car].filter(Boolean).join(" · ");
+  const base = { tone: "dim", lead: "", sub: "", tune, byline, why: st.why || "", step: (st.steps || [])[0] || "",
+                 rest: (st.steps || []).slice(1), primary: null, noBtn: "", caption: "", evidence: "" };
+
+  // AMBIGUITY OVERRIDES EVERY STATUS: which build is on the car outranks what kind of build it is
+  if (q && (q.level === "ambiguous" || q.level === "conflict")) {
+    const ties = mm.n_signature_ties || 0, top = mm.max_gear_seen || 0;
+    return Object.assign(base, { tone: "warn",
+      lead: q.level === "conflict" ? "IDENTITY CONTRADICTED" : "ONE OF " + (nSaves || "?") + " — IDENTITY NOT SETTLED",
+      sub: q.why, why: "the live packet carries only cylinders, drivetrain and PI" + (top ? "; top gear seen " + top : ""),
+      step: ties > 1 ? "one full pull through the gears settles it, or pick the save below" : "pick the save that is on the car",
+      rest: [], primary: { label: "PICK THE SAVE ▸", act: "pick" }, caption: "identity unsettled",
+      evidence: (mm.how || "") + (nSaves ? " · " + nSaves + " saves" : "") });
+  }
+  if (st.key === "offline") return Object.assign(base, { tone: "dim", lead: "DAEMON DOWN — NOTHING HERE IS LIVE",
+    sub: "everything below is the last thing seen", step: "python scripts/telemetry/fh6_live_daemon.py",
+    rest: [], primary: { label: "COPY COMMAND", act: "copycmd" }, caption: "not live" });
+  if (st.key === "downloaded") {
+    const froz = frozenOf();
+    return Object.assign(base, { tone: "warn",
+      lead: froz ? "LOCKED — FROZEN AS YOUR TARGET" : "LOCKED — SOMEONE ELSE'S BUILD",
+      sub: (m && m.desc) || "the sliders are hidden by the lock",
+      why: froz ? "build this car back to the frozen sheet, then save it with a name" : "someone else's build; it cannot be tuned or compared until it is yours",
+      step: froz ? "build back to the sheet, then save it with a name" : "clone it onto a second copy of the car, or keep this sheet as your target",
+      primary: { label: froz ? "OPEN THE TARGET ▸" : "CLONE PLAN ▸", act: "sheet" },
+      caption: "as downloaded", evidence: nSaves > 1 ? nSaves + " saves on this car" : "" });
+  }
+  if (st.key === "unknown" && !(CUR && CUR.disk && CUR.disk.deliverable && CUR.disk.deliverable.locked)) {
+    const importing = RB.state === "running" || RB.pending;
+    if (importing) return Object.assign(base, { tone: "dim", lead: "IMPORTING THIS SAVE",
+      sub: "about 10 s · " + Math.max(0, Math.round((Date.now() - (RB.startedAt || Date.now())) / 1000)) + " s elapsed",
+      why: "a save the database does not hold yet", step: "nothing to do — this runs by itself",
+      rest: [], noBtn: "IMPORTING…", caption: "as saved" });
+    return Object.assign(base, { tone: "warn", lead: "NEW SAVE — NOT YET HELD",
+      sub: "the database has not imported it", why: st.why, step: st.steps && st.steps[0] ? st.steps[0] : "import it",
+      primary: { label: "IMPORT NOW", act: "rebuild" }, caption: "as saved" });
+  }
+  if (st.key === "unknown") {                    // hardware changed and unsaved (PI drift)
+    const ch = CHANGE || {};
+    return Object.assign(base, { tone: "bad", lead: "NOT SAVED — NOTHING CAN BE COMPARED",
+      sub: (ch.sliders && ch.sliders.length ? ch.sliders.length + " sliders moved" : "") + (ch.slots && ch.slots.length ? (ch.sliders && ch.sliders.length ? " · " : "") + ch.slots.length + " parts changed" : "") || "the car no longer matches any save",
+      why: "the game writes nothing to disk until you save", step: "save the tune in-game and give it a name",
+      rest: [], noBtn: "NO BUTTON — SAVE IT IN THE GAME", caption: "not saved" });
+  }
+  if (st.key === "clone") return Object.assign(base, { tone: "blue", lead: "CLONE — NOT YET SAVED",
+    sub: st.base ? "identical to '" + (st.base.name || "a locked build") + "'" : "identical to a locked build, unlocked",
+    why: "a clone is only comparable once it is saved", step: "save it with a name in the tuning menu",
+    rest: [], noBtn: "NO BUTTON — SAVE IT IN THE GAME", caption: "as cloned" });
+  if (st.key === "variation") {
+    const ch = CHANGE || {}, n = (ch.sliders || []).length;
+    const two = (ch.sliders || []).slice(0, 2).map((x) => x.name.replace(/_/g, " ") + " " + x.a + " → " + x.b).join(" · ");
+    return Object.assign(base, { tone: "blue",
+      lead: "VARIATION" + (st.base && st.base.name ? " OF " + st.base.name.toUpperCase() : "") + (n ? " — " + n + " SLIDERS MOVED" : ""),
+      sub: two || "same hardware, different sliders", why: "the hardware is identical, so the tuning is what is under test",
+      step: "drive both on one course, then compare", primary: { label: "COMPARE A/B ▸", act: "ab" },
+      caption: "as saved", evidence: st.base && st.base.name ? "base: " + st.base.name : "" });
+  }
+  if (st.key === "ratified") {
+    const twins = atomicTwins(), laps = (m && m.laps) || 0, courses = (m && m.courses) || 0;
+    const isBase = BASELINE && BASELINE.container === (st.twin && st.twin.c);
+    return Object.assign(base, { tone: "ok",
+      lead: laps ? "RATIFIED · " + laps + " LAPS" + (courses ? " ON " + courses + " COURSE" + (courses === 1 ? "" : "S") : "") : "RATIFIED — YOUR OWN BUILD",
+      sub: (twins.length > 1 ? twins.length + " identical saves under the rim rule" : "one save") + (isBase ? " · this is the testing baseline" : " · baseline not set"),
+      why: "your own saved, unlocked build; it carries the history of every atomically similar build",
+      step: isBase ? "drive it — laps accrue against this baseline" : "set it as the testing baseline to measure against",
+      rest: [], primary: { label: isBase ? "✓ BASELINE — CLEAR" : "SET TESTING BASELINE", act: "base" },
+      caption: "as saved", evidence: twins.length > 1 ? twins.length + " atomic twins" : "" });
+  }
+  return Object.assign(base, { lead: st.label ? st.label.toUpperCase() : "", caption: "as saved" });
+}
+
 function paintHeader() {
   const h = $("#hdr"); if (!h) return;
   const st = buildStatus();
-  // Rebuild only when the identity or status changed; a frame beat repaints the chips alone.
-  // Rebuilding on every frame re-created the livery <img> and re-fetched it 40 times a second.
-  const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label,
+  const q = matchQuality(CUR && CUR.match);
+  const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label, q.level,
     MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
-    RR.busy, RB.state === "running" || RB.pending, !!frozenOf(), CUR && CUR.liveries && CUR.liveries.length,
-    CUR && CUR.match && CUR.match.n_saves, !!(CUR && CUR.disk && CUR.disk.deliverable), !!(MATCH && MATCH.sheet)]);
-  if (key === HDR_KEY && h.querySelector(".hcar")) { paintChips(); return; }
+    RR.busy, RB.state === "running" || RB.pending, !!frozenOf(), !!(MATCH && MATCH.sheet),
+    CUR && CUR.liveries && CUR.liveries.length, CHANGE && CHANGE.at]);
+  if (key === HDR_KEY && h.querySelector(".hlead")) { paintChips(); return; }
   HDR_KEY = key;
-  if (!CUR) {
-    h.innerHTML = `<div class="hcar"><div class="hart"><div class="art none">—</div><span class="artcap">no car</span></div>
-      <div class="hid"><div class="hname"><b>waiting for a car</b></div>
-        <div class="hchips2"><span class="chip w">${esc(MODE.reason || "no signal yet")}</span></div>
-        <div class="hengine"></div><div class="htune"></div><div class="tdesc"></div>
-        <div class="hstat dim"><span class="why">get in a car in the game — the header fills the moment a frame names it</span></div></div></div>
-      <div class="hright"><div class="hact"><button class="big prim" disabled>BUILD SHEET ▸</button>
-        <button class="icobtn" id="btnRefresh" title="re-read the save from disk">⟳</button></div></div>`;
-    const bx0 = $("#btnRefresh"); if (bx0) bx0.onclick = () => rereadBuild();
-    return;
-  }
+
   const m = MATCH && MATCH.build;
-  const liv = (CUR.liveries || []).find((l) => l.thumb) || (CUR.liveries || [])[0] || null;
-  // THE RENDER LEADS. Every save carries the game's own render of that exact tuned car (WebP for
-  // your saves, a BC7 texture for downloaded tunes, both exported as api/thumb/<container>.webp);
-  // it is the most recognisable thing about a car, so it is the first thing in the header, large.
-  // The livery's own thumbnail sits with the livery's name; the ordinal box is the last resort.
-  const art = m && m.thumb ? `<img class="art" alt="" src="${API}${m.thumb}">`
-            : liv && liv.thumb ? `<img class="art" alt="" src="${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}">`
-            : `<div class="art none">${esc(String(CUR.ordinal))}</div>`;
-  const artCap = m && m.thumb ? (m.locked ? "as downloaded" : "as saved") : liv && liv.thumb ? "livery" : "no render";
-  // the engine in common names, from the deliverable's Conversions rows
-  const conv = ((CUR.disk && CUR.disk.deliverable && CUR.disk.deliverable.menus) || []).find((x) => x.menu === "Conversions");
-  const pw = conv && conv.rows.find((r) => r.item === "powertrain"), asp = conv && conv.rows.find((r) => r.item === "aspiration");
-  // the engine: the database's game-name for the fitted part leads; the daemon's measured read follows
-  const engPart = MATCH && MATCH.sheet && (MATCH.sheet.parts || []).find((x) => x.slot === "engine" && x.pid != null);
-  const measured = pw && pw.engine_type ? pw.engine_type.replace(/^Swapped · /, "") : "";
-  // the engine as short facts, not a sentence: the name, then only what a tuner reads off it
-  const engBits = [];
-  if (engPart && engPart.name) engBits.push(engPart.name + (pw && !pw.stock ? " (swap)" : ""));
-  else if (pw) engBits.push(pw.stock ? "stock engine" : (pw.upgrade || ""));
-  const mHp = /(\d[\d,]*)\s*hp/.exec(measured || ""), mRpm = /(\d[\d,]*)\s*rpm/.exec(measured || "");
-  if (mHp) engBits.push(mHp[1] + " hp");
-  if (mRpm) engBits.push(mRpm[1] + " rpm");
-  const aspTxt = asp && !asp.stock && asp.upgrade ? asp.upgrade : "";
-  if (aspTxt) engBits.push(aspTxt);
-  const engine = engBits.filter(Boolean).join(" · ");
-  const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
-  const tuneName = (m && m.name) || (CUR.disk ? "unnamed save" : "");
-  const nSaves = CUR.match && CUR.match.n_saves;
-  // THE HEADER, as six honest lines rather than a scramble of fragments. Each line owns one
-  // question: which car · what state · what engine · which tune · what the author said · what to
-  // do next. Nothing shares a row with something that can push it out, the car's name never
-  // yields to a chip, and the live chips live in the footer with the other live state.
+  const c = CUR ? headerCopy(st, q) : { tone: "dim", lead: "WAITING FOR A CAR", sub: MODE.reason || "no signal yet",
+    tune: "", byline: "", why: "get in a car in the game", step: "the header fills the moment a frame names it",
+    rest: [], primary: null, noBtn: "", caption: "no car", evidence: "" };
+  const liv = CUR && (CUR.liveries || []).find((l) => l.thumb);
+  const img = m && m.thumb ? `${API}${m.thumb}` : liv ? `${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}` : null;
+
+  h.dataset.tone = c.tone;
   h.innerHTML = `
-    <div class="hcar">
-      <div class="hart">${art}<span class="artcap">${esc(artCap)}</span></div>
-      <div class="hid">
-        <div class="hname">${piBadge(CUR.cls, CUR.pi)}<b title="${esc(CUR.name || "")}">${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b></div>
-        <div class="hchips2">
-          <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span>
-          ${CUR.dt ? `<span class="chip">${esc(CUR.dt)}</span>` : ""}${CUR.cyl ? `<span class="chip">${CUR.cyl} cyl</span>` : ""}
-          ${m && m.gears ? `<span class="chip">${m.gears}-speed</span>` : ""}
-          ${m && m.kg ? `<span class="chip">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
-          ${liv ? `<span class="chip m liv">${liv.thumb ? `<img class="lthumb" alt="" src="${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}">` : ""}${esc(liv.name || "livery")}</span>` : ""}
-        </div>
-        <div class="hengine" title="${esc(engine)}">${engine ? esc(engine) : ""}</div>
-        <div class="htune">
-          <span class="ttl" title="${esc((m && m.c) || "")}">${esc(tuneName)}</span>
-          <span class="tby">${m && m.creator ? `by <b>${esc(m.creator)}</b>` : ""}${m ? ` · ${m.locked ? "downloaded" : "your own"}` : ""}${m && m.created ? ` · ${when(m.created)}` : ""}${nSaves > 1 ? ` · one of ${nSaves}` : ""}${st.ambiguous ? ` · <span class="w">which one is not certain</span>` : ""}</span>
-        </div>
-        <div class="tdesc" title="${esc((m && m.desc) || "")}">${m && m.desc ? esc(m.desc) : ""}</div>
-        <div class="hstat ${st.tone}" title="${esc(st.why)}${st.steps && st.steps.length ? " — " + esc(st.steps.map((x, i) => (i + 1) + ". " + x).join("  ")) : ""}">
-          <span class="why">${esc(st.why)}</span>
-          ${st.steps && st.steps.length ? `<span class="steps">${st.steps.map((x, i) => `<span class="step"><i>${i + 1}</i>${esc(x)}</span>`).join("")}</span>` : ""}
-          ${st.rebuild ? `<button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>` : ""}
-        </div>
+    <div class="hart">
+      ${img ? `<img class="art" alt="" src="${img}">` : `<div class="art none t-l">${esc(CUR ? (c.step || "no render") : "no car")}</div>`}
+      ${CUR ? `<span class="artpi">${piBadge(CUR.cls, CUR.pi)}</span>` : ""}
+      <span class="artcap t-l">${esc(c.caption)}</span>
+    </div>
+    <div class="hid">
+      <div class="hlead t-d">${esc(c.lead)}</div>
+      <div class="hsub t-b">${esc(c.sub)}</div>
+      <div class="hsp"></div>
+      <div class="htitle t-t">${c.tune ? esc(c.tune) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
+      <div class="hby t-l">${esc(c.byline)}</div>
+      <div class="hsp"></div>
+      <div class="hdec">
+        <div class="hwhy t-a">${esc(c.why)}</div>
+        ${c.step ? `<div class="hstep t-b"><i>1</i><span>${esc(c.step)}</span></div>` : ""}
       </div>
     </div>
-    <div class="hright">
-      <div class="hact">
-        <button class="big prim" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ SHEET · TARGET" : "BUILD SHEET ▸"}</button>
-        ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ BASELINE" : "SET BASELINE"}</button>` : ""}
+    <div class="hact">
+      ${c.primary ? `<button class="prim" id="btnPrim" data-act="${esc(c.primary.act)}">${esc(c.primary.label)}</button>`
+        : `<div class="prim none t-l">${esc(c.noBtn || "nothing to do here")}</div>`}
+      <button class="second" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ BUILD SHEET · TARGET" : "BUILD SHEET ▸"}</button>
+      <div class="hev">
+        <div class="t-l">evidence</div>
+        <div class="t-b">${esc(c.evidence || (q.level === "ok" ? q.why : "") || "—")}</div>
         <button class="icobtn" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
           title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
       </div>
     </div>`;
-  const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
-  const bb = $("#btnBase"); if (bb) bb.onclick = () => setBaseline(st.twin);
-  const bx = $("#btnRefresh"); if (bx) bx.onclick = async () => { await rereadBuild(); if (CUR && CUR.disk && !(MATCH && MATCH.build)) ensureHeld(); };
-  h.querySelectorAll('.hstat [data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
 
+  const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
+  const bx = $("#btnRefresh"); if (bx) bx.onclick = async () => { await rereadBuild(); if (CUR && CUR.disk && !(MATCH && MATCH.build)) ensureHeld(); };
+  const bp = $("#btnPrim");
+  if (bp) bp.onclick = () => {
+    const act = bp.dataset.act;
+    if (act === "sheet") openSheet();
+    else if (act === "base") setBaseline(st.twin);
+    else if (act === "rebuild") requestRebuild("manual");
+    else if (act === "ab") abOverlay();
+    else if (act === "pick") { const el = document.querySelector("#alerts .picker"); if (el) el.scrollIntoView({ block: "nearest" }); }
+    else if (act === "copycmd") { try { navigator.clipboard.writeText("python scripts/telemetry/fh6_live_daemon.py"); bp.textContent = "COPIED"; } catch (e) { /* no clipboard */ } }
+  };
+  // THE NO-CLIP RULE, asserted rather than hoped for: any line that would be cut steps down one
+  // size until it fits, and the console names it — an ellipsis in this band is a bug, not a style.
+  h.querySelectorAll(".hlead, .htitle, .hsub, .hby, .hwhy").forEach((el) => {
+    let px = parseFloat(getComputedStyle(el).fontSize);
+    for (let i = 0; i < 6 && el.scrollWidth > el.clientWidth + 1 && px > 9; i++) { px -= 1; el.style.fontSize = px + "px"; }
+    if (el.scrollWidth > el.clientWidth + 1) console.warn("[header] still clipped:", el.className, el.textContent.slice(0, 40));
+  });
 }
 
 function setBaseline(twin) {
@@ -651,8 +716,12 @@ function paintBanner() {
   const parts = [];
   if (CHANGE) parts.push(changeBanner());
   if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) parts.push(savePicker());
-  // the status, its reason and its steps live in the header's status row now; this strip is
-  // for what just happened (a change) and what must be decided (the picker)
+  // the header carries step 1; the strip carries the rest of the ladder for this state
+  const rest = (st.steps || []).slice(1);
+  if (rest.length && !CHANGE) {
+    parts.push(`<div class="alert ${st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : ""}">
+      <span class="steps">${rest.map((x, i) => `<span class="step"><i>${i + 2}</i>${esc(x)}</span>`).join("")}</span></div>`);
+  }
   if (false) {
     parts.push(`<div class="alert ${st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : ""}">
       <b>${esc(st.label)}.</b> ${esc(st.why)}.
@@ -712,7 +781,10 @@ function worldMapHTML() {
   shown.forEach(({ r }) => r.pts.forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   Object.values(WORLD.courses || {}).forEach((c) => (c.path || []).forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   if (!isFinite(x0)) [x0, x1, z0, z1] = WORLD.bbox;
-  const W = 900, H = 640, pad = 12;
+  // the viewBox takes the ISLAND's own aspect, so the map fills the pane instead of sitting as a
+  // small shape inside a letterbox — the pane's height is the scarce thing, not the map's
+  const pad = 12, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
+  const H = 640, W = Math.max(320, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
   const px = (x) => pad + (x - x0) * s, pz = (z) => H - pad - (z - z0) * s;
   const line = (pts, col, w, op) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${pts.map(([x, z]) => px(x).toFixed(0) + "," + pz(z).toFixed(0)).join(" ")}"/>`;

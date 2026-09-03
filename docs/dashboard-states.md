@@ -76,6 +76,13 @@ the status banner and the Build data tab). The trigger is a new save file, never
 The work runs in `scripts/rebuild_service.py` on port 8001, started from the worktree like the
 daemon; the header chip reads "importing · N s", then "db · HH:MM".
 
+### Live reload: the backend tells the page
+The rebuild service also serves `GET /watch` (Server-Sent Events). It polls the dashboard's own
+files once a second and pushes `code` when any changes (the `?v=` bump in index.html is how a
+code change is announced) and `data` the moment a rebuild finishes or `api/identity.json` is
+rewritten by anyone. The page reloads on `code` and re-reads identity, world, diagnosis and the
+car on `data`. Nothing in the browser polls; nothing on ports 8000 or 8765 is involved.
+
 ## 2. Modes
 
 Mode comes from the daemon's `mode` event (`suggest`: free | course | decode, with `reason`),

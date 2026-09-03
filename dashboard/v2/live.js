@@ -43,6 +43,7 @@ async function viewLive(host) {
   await panelBoot();
   paintPanel();
   connect();
+  connectWatch();
 }
 
 function connect() {
@@ -288,6 +289,25 @@ function ensureHeld() {
   if (RB.state === "running" || RB.pending || RB.done_ts === CUR.disk.ts) return;
   const locked = !!(CUR.disk.deliverable && CUR.disk.deliverable.locked);
   requestRebuild((locked ? "downloaded tune " : "new save ") + CUR.disk.ts);
+}
+// LIVE RELOAD: the rebuild service watches the dashboard's own files and its data, and tells
+// the page. `code` -> reload (the ?v= bump is how a code change is announced); `data` -> drop
+// the api cache and re-read identity, world, diagnosis and the car. Nothing here polls.
+let WS = null, DATA_AT = 0;
+function connectWatch() {
+  if (WS) return;
+  try {
+    WS = new EventSource(REBUILD + "/watch");
+    WS.addEventListener("code", (e) => { let f = []; try { f = JSON.parse(e.data).files || []; } catch (x) {}
+      console.info("[watch] code changed:", f.join(", "), "— reloading"); setTimeout(() => location.reload(), 300); });
+    WS.addEventListener("data", async (e) => {
+      if (Date.now() - DATA_AT < 2000) return;         // a finished run and its file write announce once
+      DATA_AT = Date.now();
+      try { const j = JSON.parse(e.data); if (j.rc != null) RB.last = { finished: Date.now() / 1000, wall_s: j.wall_s, rc: j.rc, tail: [] }; } catch (x) {}
+      await afterRebuild();                            // a run started anywhere (a save, the button, a shell) lands here
+    });
+    WS.onerror = () => { /* the service is down; reconnects by itself */ };
+  } catch (e) { WS = null; }
 }
 // REREAD BUILD: the strongest re-read there is — identify the car again from the live frame
 // (roster, match, save, liveries), or, with no live frame, re-read the save of the car held.

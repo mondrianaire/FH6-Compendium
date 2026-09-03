@@ -8,7 +8,10 @@ for which panes exist and what fills them in every reachable state.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────┐
-│ HEADER   [livery thumb] Car · class PI · drive · cyl · STATUS (car metadata) │ tune│
+│ HEADER   [THE RENDER 300px] Car · class PI · drive · cyl · STATUS            │acts │
+│          engine (common names) · mass · gears · livery [thumb] by creator     │chips│
+│          TUNE TITLE · by creator · own/downloaded · created/saved · one of N  │     │
+│          description, when the author wrote one                              │     │
 │          [ BUILD SHEET ▸ ]  [ SET TESTING BASELINE ]  (baseline only when ratified)│
 │                                                          live · menu · save chips │
 ├──────────────────────────────────────────────────────────────────────────────────┤
@@ -97,6 +100,14 @@ pane to the clone verify view.
 | right pane | general statistics only | toggle: general statistics / conclusions |
 | sample threshold | high — free driving is not race pace | low — every turn encounter is relevant |
 | recommendations | world-wide, from `v_diag_by_setup` filtered to atomically-equal builds | course-specific, from `v_diag_by_turn` for this route |
+
+### The header carries the save's own metadata
+Every save folder holds `header` (title, description, creator gamertag and XUID, creation
+time) and `Thumb.png` — the game's render of that exact tuned car (WebP for your saves, a BC7
+texture for downloaded tunes). The importer reads the whole header record; `build_web.py`
+exports the renders as `api/thumb/<container>.webp`; the header leads with the render and shows
+the tune's title, author, source, date and description. Common names everywhere: the engine
+line comes from the deliverable's Conversions rows.
 
 ### The right pane follows the context
 | context | default tab | why |

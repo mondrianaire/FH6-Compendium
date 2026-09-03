@@ -703,9 +703,15 @@ function tileStrip(p) {
       `<i class="${i + 1 === t ? "hit" : ""}"></i>`).join("")}</span>
     <span class="tile">${t ? `${t}<span class="of">/${n}</span>` : ""}</span>`;
 }
+// PROVEN NAMES FIRST (v1, 5c0a37c). The database holds the game's own name for the exact part id
+// in the save — "Racing 7.2L V8" — while the daemon's text is a catalog guess built from telemetry
+// ("1993 Porsche 911 Turbo S engine swap · 8-cyl"). The database name leads; the daemon's measured
+// line (cylinders, hp @ rpm) stays as the sub-line, because that part IS measured.
 function partRow(it, p) {
   const stock = !!it.stock;
-  const cls = stock ? "stock" : it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named";
+  const proven = !!(p && p.pid != null && p.name && !stock);
+  const cls = stock ? "stock" : proven ? "named" : it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named";
+  const label = proven ? p.name : (it.upgrade || it.value || "");
   const pi = it.pi != null ? `<span class="pi" title="PI cost against stock">${it.pi > 0 ? "+" : ""}${it.pi}</span>` : "";
   const sub = it.engine_type ? `<div class="sub${it.engine_type_conf === "measured" ? " meas" : ""}">${it.engine_type_conf === "measured" ? "📡 " : ""}${esc(it.engine_type)}</div>` : "";
   const note = it.note ? `<div class="sub">ℹ ${esc(it.note)}</div>` : "";
@@ -716,7 +722,7 @@ function partRow(it, p) {
     <span class="it">${esc(it.item.replace(/_/g, " "))}${sub}${note}${swap}</span>
     ${pips(it.upgrade || "")}
     ${tileStrip(p)}
-    <span class="up ${cls}">${esc(it.upgrade || it.value || "")}${pi}</span></label>`;
+    <span class="up ${cls}" ${proven && it.upgrade && it.upgrade !== p.name ? `title="daemon read: ${esc(it.upgrade)}"` : ""}>${esc(label)}${pi}</span></label>`;
 }
 function dbRow(p) {   // a database slot the deliverable does not carry (or the whole sheet, with no save on disk)
   const stock = !!p.stock || p.pid == null;

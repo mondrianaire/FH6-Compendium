@@ -49,15 +49,41 @@ def container_utc(stamp):
                                    stamp[8:10], stamp[10:12], stamp[12:14])
 
 
-def tune_name(container_dir):
-    """The display name from the sibling `header`: u32 char count at 0x04, UTF-16LE at 0x08."""
+def tune_header(container_dir):
+    """THE WHOLE `header` RECORD, not just the title. Layout (version 7, decoded 2026-09-03):
+         u32 version(7) · u32 nTitle · UTF-16LE title · u32 nDesc · UTF-16LE description ·
+         SYSTEMTIME created (year, month, dow, day, hour, min, sec, ms — UTC; your own saves carry the
+         save moment, downloaded tunes the creator's original creation) · u32 flag · u64 creator XUID ·
+         u32 nCreator · UTF-16LE creator gamertag · trailer.
+       Returns {name, desc, created_utc, creator, xuid} with None where a field is absent."""
+    out = {"name": None, "desc": None, "created_utc": None, "creator": None, "xuid": None}
     try:
         with open(os.path.join(container_dir, "header"), "rb") as fh:
             h = fh.read()
-        n = struct.unpack_from("<I", h, 4)[0]
-        return h[8:8 + 2 * n].decode("utf-16-le").rstrip("\x00") if 0 < n < 512 else None
+        o = 4
+        def u32():
+            nonlocal o
+            v = struct.unpack_from("<I", h, o)[0]; o += 4; return v
+        def utf16(n):
+            nonlocal o
+            v = h[o:o + 2 * n].decode("utf-16-le", errors="replace").rstrip("\x00"); o += 2 * n; return v or None
+        n = u32(); out["name"] = utf16(n) if 0 < n < 512 else None
+        n = u32(); out["desc"] = utf16(n) if 0 < n < 4096 else None
+        if o + 16 <= len(h):
+            y, mo, _dow, d, hh, mi, ss, _ms = struct.unpack_from("<8H", h, o); o += 16
+            if 2000 <= y <= 2100 and 1 <= mo <= 12 and 1 <= d <= 31:
+                out["created_utc"] = "%04d-%02d-%02dT%02d:%02d:%02dZ" % (y, mo, d, hh, mi, ss)
+        if o + 12 <= len(h):
+            _flag = u32(); out["xuid"] = struct.unpack_from("<Q", h, o)[0]; o += 8
+        if o + 4 <= len(h):
+            n = u32(); out["creator"] = utf16(n) if 0 < n < 128 else None
     except Exception:                                    # noqa: BLE001
-        return None
+        pass
+    return out
+
+
+def tune_name(container_dir):
+    return tune_header(container_dir)["name"]
 
 
 def find_containers(root=None):
@@ -179,15 +205,17 @@ def run(cx, root=None, limit=None, verbose=False):
         n_parts = sum(1 for v in parts.values() if v is not None)
         gears = t.get("gears_norm") or []
 
+        hdr = tune_header(cdir)
         crows.append((
-            cname, ordinal, container_utc(stamp), tune_name(cdir), 1 if t["locked"] else 0,
+            cname, ordinal, container_utc(stamp), hdr["name"], 1 if t["locked"] else 0,
             "downloaded" if t["locked"] else "self",
             td.hw_hash(data_path), td.setup_hash(data_path), td.tune_hash(data_path),
             None, engine_id, drivetrain_id, carbody_id, motor_id, variant,
             None, car.get("class"), n_parts, len(gears),
             round(mass, 2) if mass is not None else None,
             round(dist * 100, 2) if dist is not None else None,
-            data_path, os.path.getmtime(data_path), now))
+            data_path, os.path.getmtime(data_path), now,
+            hdr["desc"], hdr["creator"], hdr["xuid"], hdr["created_utc"]))
 
         # --- parts ----------------------------------------------------------
         for i, slot in enumerate(td.PARTS):
@@ -238,6 +266,11 @@ def run(cx, root=None, limit=None, verbose=False):
         for gi, g in enumerate(gears):
             grows.append((cname, gi, g))
 
+    # the header's extra fields (added 2026-09-03): present on any database built before them
+    have = {r[1] for r in cx.execute("PRAGMA table_info(tune_container)")}
+    for col, typ in (("description", "TEXT"), ("creator", "TEXT"), ("creator_xuid", "INTEGER"), ("created_utc", "TEXT")):
+        if col not in have:
+            cx.execute("ALTER TABLE tune_container ADD COLUMN %s %s" % (col, typ))
     with cx:
         cx.execute("PRAGMA defer_foreign_keys=ON")
         for tbl in ("tune_gear", "tune_slider", "tune_part", "tune_container",
@@ -247,7 +280,8 @@ def run(cx, root=None, limit=None, verbose=False):
             "container", "ordinal", "saved_utc", "tune_name", "locked", "source", "hw_hash",
             "setup_hash", "tune_hash", "parts_hash", "engine_id", "drivetrain_id", "carbody_id",
             "motor_id", "body_variant", "pi", "class", "n_parts", "gear_count", "mass_kg",
-            "front_pct", "file_path", "file_mtime", "imported_at"], crows)
+            "front_pct", "file_path", "file_mtime", "imported_at",
+            "description", "creator", "creator_xuid", "created_utc"], crows)
         n_p = fh6db.upsert_many(cx, "tune_part", [
             "container", "slot_index", "slot", "part_id", "name", "level", "tile", "tile_count",
             "menu_path", "is_stock", "price", "mass_diff_kg", "confidence"], prows, chunk=5000)

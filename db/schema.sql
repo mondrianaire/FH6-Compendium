@@ -315,6 +315,10 @@ CREATE TABLE IF NOT EXISTS tune_container (
   ordinal       INTEGER NOT NULL REFERENCES ref_car(ordinal),
   saved_utc     TEXT NOT NULL,           -- parsed from the folder stamp (UTC)
   tune_name     TEXT,                    -- the UTF-16 name in the header sibling
+    description     TEXT,               -- the header's description, when the author wrote one
+    creator         TEXT,               -- the author's gamertag (you, for your own saves)
+    creator_xuid    INTEGER,
+    created_utc     TEXT,               -- own saves: the save moment; downloaded: the author's creation
   locked        INTEGER NOT NULL DEFAULT 0,
   source        TEXT NOT NULL,           -- downloaded | self
   hw_hash       TEXT NOT NULL,           -- ordinal + 100 part slots

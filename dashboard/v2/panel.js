@@ -369,7 +369,8 @@ function paintHeader() {
   // Rebuilding on every frame re-created the livery <img> and re-fetched it 40 times a second.
   const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label,
     MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
-    RR.busy, RB.state === "running" || RB.pending]);
+    RR.busy, RB.state === "running" || RB.pending, CUR && CUR.liveries && CUR.liveries.length,
+    CUR && CUR.match && CUR.match.n_saves, !!(CUR && CUR.disk && CUR.disk.deliverable), !!(MATCH && MATCH.sheet)]);
   if (key === HDR_KEY && h.querySelector(".hcar")) { paintChips(); return; }
   HDR_KEY = key;
   if (!CUR) {
@@ -378,22 +379,46 @@ function paintHeader() {
     return;
   }
   const m = MATCH && MATCH.build;
-  const liv = (CUR.liveries || []).find((l) => l.thumb) || null;
-  const thumb = liv ? `<img class="thumb" alt="" src="${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}">`
-                    : `<div class="thumb none">${esc(String(CUR.ordinal))}</div>`;
-  const tune = (CUR.disk && CUR.disk.deliverable && CUR.disk.deliverable.name) || (m && m.name) || (CUR.disk ? "unnamed save" : "");
+  const liv = (CUR.liveries || []).find((l) => l.thumb) || (CUR.liveries || [])[0] || null;
+  // THE RENDER LEADS. Every save carries the game's own render of that exact tuned car (WebP for
+  // your saves, a BC7 texture for downloaded tunes, both exported as api/thumb/<container>.webp);
+  // it is the most recognisable thing about a car, so it is the first thing in the header, large.
+  // The livery's own thumbnail sits with the livery's name; the ordinal box is the last resort.
+  const art = m && m.thumb ? `<img class="art" alt="" src="${API}${m.thumb}">`
+            : liv && liv.thumb ? `<img class="art" alt="" src="${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}">`
+            : `<div class="art none">${esc(String(CUR.ordinal))}</div>`;
+  const artCap = m && m.thumb ? (m.locked ? "as downloaded" : "as saved") : liv && liv.thumb ? "livery" : "no render";
+  // the engine in common names, from the deliverable's Conversions rows
+  const conv = ((CUR.disk && CUR.disk.deliverable && CUR.disk.deliverable.menus) || []).find((x) => x.menu === "Conversions");
+  const pw = conv && conv.rows.find((r) => r.item === "powertrain"), asp = conv && conv.rows.find((r) => r.item === "aspiration");
+  // the engine: the database's game-name for the fitted part leads; the daemon's measured read follows
+  const engPart = MATCH && MATCH.sheet && (MATCH.sheet.parts || []).find((x) => x.slot === "engine" && x.pid != null);
+  const measured = pw && pw.engine_type ? pw.engine_type.replace(/^Swapped · /, "") : "";
+  const engine = engPart && engPart.name ? engPart.name + (pw && !pw.stock ? " · swap" : "") + (measured ? " · " + measured : "")
+               : pw ? (pw.engine_type || (pw.stock ? "stock engine" : pw.upgrade || "")) : "";
+  const aspTxt = asp && !asp.stock && asp.upgrade ? asp.upgrade : "";
+  const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
+  const tuneName = (m && m.name) || (CUR.disk ? "unnamed save" : "");
+  const nSaves = CUR.match && CUR.match.n_saves;
   h.innerHTML = `
-    <div class="hcar">${thumb}
-      <div>
+    <div class="hcar">
+      <div class="hart">${art}<span class="artcap">${esc(artCap)}</span></div>
+      <div class="hid">
         <div class="hname"><b>${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b>
           ${clsBadge(CUR.cls)}${CUR.pi ? `<span class="chip">PI ${CUR.pi}</span>` : ""}
           ${CUR.dt ? `<span class="chip">${esc(CUR.dt)}</span>` : ""}${CUR.cyl ? `<span class="chip">${CUR.cyl} cyl</span>` : ""}
-          <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span>
-          ${liv ? `<span class="chip m">${esc(liv.name)}</span>` : ""}</div>
-        <div class="htune">${tune ? `<span class="tn">${esc(tune)}</span>` : ""}
-          ${m && m.kg ? `<span class="chip">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
-          ${m && m.gears ? `<span class="chip">${m.gears}-speed</span>` : ""}
-          ${st.ambiguous ? '<span class="chip w">one of several saves</span>' : ""}</div>
+          <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span></div>
+        <div class="hmeta">
+          ${engine ? `<span class="mv" title="from the save's Conversions rows">${esc(engine)}${aspTxt ? " · " + esc(aspTxt) : ""}</span>` : ""}
+          ${m && m.kg ? `<span class="mv">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
+          ${m && m.gears ? `<span class="mv">${m.gears}-speed</span>` : ""}
+          ${liv ? `<span class="mv liv">${liv.thumb ? `<img class="lthumb" alt="" src="${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}">` : ""}${esc(liv.name || "livery")}${liv.creator ? ` <span class="why">by ${esc(liv.creator)}</span>` : ""}</span>` : ""}
+        </div>
+        <div class="htune">
+          <span class="ttl" title="${esc(m && m.c || "")}">${esc(tuneName)}</span>
+          <span class="tby">${m && m.creator ? `by <b>${esc(m.creator)}</b>` : ""}${m ? ` · ${m.locked ? "downloaded" : "your own"}` : ""}${m && m.created ? ` · ${m.locked ? "created" : "saved"} ${when(m.created)}` : ""}${nSaves > 1 ? ` · one of ${nSaves} saves` : ""}${st.ambiguous ? ` · <span class="w">which one is not yet certain</span>` : ""}</span>
+          ${m && m.desc ? `<div class="tdesc">${esc(m.desc)}</div>` : ""}
+        </div>
       </div>
     </div>
     <div class="hright">

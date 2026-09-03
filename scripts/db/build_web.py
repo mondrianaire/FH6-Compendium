@@ -32,6 +32,48 @@ import fh6db                                            # noqa: E402
 OUT = os.path.join(ROOT, "dashboard", "v2", "api")
 
 
+# ---- the tune's own render: every save folder carries Thumb.png — a WebP for your own saves and a
+# ForzaTech texture (burG/TXCB, BC7, 670x376) for downloaded tunes. Both become api/thumb/<container>.webp,
+# written once and only when the source is newer, so a rebuild costs nothing after the first pass.
+def export_thumbs(cx, out):
+    import struct, shutil
+    tdir = os.path.join(out, "thumb"); os.makedirs(tdir, exist_ok=True)
+    try:
+        from PIL import Image                                          # noqa: WPS433
+    except Exception:                                                  # noqa: BLE001
+        Image = None
+    done, n_new, n_skip = {}, 0, 0
+    for r in cx.execute("SELECT container, file_path FROM tune_container"):
+        src = os.path.join(os.path.dirname(r["file_path"] or ""), "Thumb.png")
+        if not os.path.exists(src):
+            continue
+        dst = os.path.join(tdir, r["container"] + ".webp")
+        if os.path.exists(dst) and os.path.getmtime(dst) >= os.path.getmtime(src):
+            done[r["container"]] = "thumb/" + r["container"] + ".webp"; n_skip += 1; continue
+        try:
+            with open(src, "rb") as fh: b = fh.read()
+            if b[:4] == b"RIFF" and b[8:12] == b"WEBP":
+                shutil.copyfile(src, dst)
+            elif b[:4] == b"burG" and Image is not None:
+                hlen = struct.unpack_from("<I", b, 8)[0]
+                W, H = struct.unpack_from("<II", b, 76)                # 670, 376 in every file seen
+                px = b[hlen:]
+                flags = 0x1 | 0x2 | 0x4 | 0x1000 | 0x80000
+                pf = struct.pack("<II4sIIIII", 32, 0x4, b"DX10", 0, 0, 0, 0, 0)
+                hdr = (b"DDS " + struct.pack("<IIIIIII", 124, flags, H, W, len(px), 0, 0) + b"\x00" * 44 + pf
+                       + struct.pack("<IIIII", 0x1000, 0, 0, 0, 0) + struct.pack("<IIIII", 98, 3, 0, 1, 0))   # BC7_UNORM
+                import io as _io
+                im = Image.open(_io.BytesIO(hdr + px)); im.load()
+                im.convert("RGBA").save(dst, "WEBP", quality=88, method=4)
+            else:
+                continue
+            done[r["container"]] = "thumb/" + r["container"] + ".webp"; n_new += 1
+        except Exception as e:                                         # noqa: BLE001
+            print("  thumb %s: %s" % (r["container"], e))
+    print("  thumbs: %d written, %d kept, %d without" % (n_new, n_skip, cx.execute("SELECT COUNT(*) FROM tune_container").fetchone()[0] - n_new - n_skip))
+    return done
+
+
 def write(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
@@ -229,8 +271,10 @@ def main(argv=None):
     sliders_order = [r["slider"] for r in cx.execute(
         "SELECT slider FROM ref_slider ORDER BY slot_index")]
     ident = []
+    thumbs = export_thumbs(cx, out)
     for t in cx.execute("""SELECT container, ordinal, hw_hash, setup_hash, tune_name, locked,
-                                  source, pi, class, mass_kg, front_pct, gear_count, saved_utc
+                                  source, pi, class, mass_kg, front_pct, gear_count, saved_utc,
+                                  description, creator, created_utc
                            FROM tune_container ORDER BY ordinal, saved_utc"""):
         pk = {r["slot"]: r["part_id"] for r in cx.execute(
             "SELECT slot, part_id FROM tune_part WHERE container=?", (t["container"],))}
@@ -246,6 +290,8 @@ def main(argv=None):
             "name": t["tune_name"], "locked": t["locked"], "src": t["source"], "pi": t["pi"],
             "cls": t["class"], "kg": t["mass_kg"], "front": t["front_pct"],
             "gears": t["gear_count"], "saved": t["saved_utc"],
+            "desc": t["description"], "creator": t["creator"], "created": t["created_utc"],
+            "thumb": thumbs.get(t["container"]),
             "pkey": ",".join("-" if pk.get(s) is None else str(pk[s]) for s in slots),
             "skey": ",".join(("%.4f" % sk[s]) if sk.get(s) is not None else "-"
                              for s in sliders_order),

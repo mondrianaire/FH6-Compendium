@@ -396,3 +396,22 @@ button.lchip.hid{opacity:.35;text-decoration:line-through}
 .big.sis{border-color:var(--line2);color:var(--ink);background:var(--panel2)}
 .big.sis:hover{border-color:var(--acc2);color:var(--acc2)}
 .big.sis:disabled{opacity:.6;cursor:progress}
+
+/* ---- the car header: the render leads ---- */
+.hdr{align-items:stretch;gap:14px;padding:8px 12px}
+.hcar{align-items:stretch;gap:14px;flex:1 1 auto;min-width:0}
+.hart{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px}
+.hart .art{width:300px;height:168px;object-fit:contain;background:radial-gradient(ellipse at 50% 70%,#1b2430 0%,var(--panel2) 60%,var(--panel) 100%);border:1px solid var(--line2);border-radius:3px}
+.hart .art.none{display:grid;place-items:center;color:var(--dim);font:14px var(--mono)}
+.hart .artcap{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.hid{display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0}
+.hname b{font-size:19px;letter-spacing:.01em}
+.hmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:12px;color:var(--ink)}
+.hmeta .mv{white-space:nowrap}
+.hmeta .liv{display:inline-flex;align-items:center;gap:6px}
+.hmeta .lthumb{width:44px;height:25px;object-fit:cover;border-radius:2px;border:1px solid var(--line2)}
+.htune{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding-top:4px;border-top:1px solid var(--line)}
+.htune .ttl{font:800 17px var(--sans);color:var(--acc);letter-spacing:.01em}
+.htune .tby{font-size:11.5px;color:var(--mut)}.htune .tby b{color:var(--ink)}.htune .tby .w{color:var(--warn)}
+.htune .tdesc{flex-basis:100%;font-size:12px;color:var(--ink);opacity:.9;max-height:2.9em;overflow:hidden;line-height:1.45}
+@media (orientation: portrait){ .hart .art{width:260px;height:146px} }

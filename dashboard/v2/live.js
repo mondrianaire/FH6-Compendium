@@ -181,6 +181,7 @@ async function identify(car, why) {
   } catch (e) { /* liveries are a nicety, not a gate */ }
 
   fingerprint(ordinal);
+  ensureHeld();
   paintPanel();
 }
 
@@ -277,6 +278,17 @@ async function afterRebuild() {
   if (CUR) { RB.done_ts = CUR.disk && CUR.disk.ts; fingerprint(CUR.ordinal); }
   paintPanel();
 }
+// THE RULE: a save the database does not hold can only exist because it was written after the
+// last import — a downloaded tune installed, or your own build saved. Either way the answer is
+// the same, and it is automatic: import, once per save stamp, at identification and on every
+// re-read. done_ts stops a save the import cannot hold from asking again forever.
+function ensureHeld() {
+  if (!CUR || !CUR.disk || !CUR.disk.ts) return;
+  if (MATCH && MATCH.build) return;
+  if (RB.state === "running" || RB.pending || RB.done_ts === CUR.disk.ts) return;
+  const locked = !!(CUR.disk.deliverable && CUR.disk.deliverable.locked);
+  requestRebuild((locked ? "downloaded tune " : "new save ") + CUR.disk.ts);
+}
 function rebuildChip() {
   if (RB.pending) return `<span class="chip w">importing…</span>`;
   if (RB.state === "running") return `<span class="chip w">importing · ${Math.round((Date.now() - RB.startedAt) / 1000)} s</span>`;
@@ -307,8 +319,8 @@ async function reread() {
       CHANGE.saved = true; CHANGE.ts = j.ts; CHANGE.prevTs = prevTs || null;
       CHANGE.locked = !!(j.deliverable && j.deliverable.locked);
       CHANGE.held = !!(MATCH && MATCH.build);
-      if (!CHANGE.held && RB.state !== "running" && !RB.pending && RB.done_ts !== j.ts) requestRebuild("new save " + j.ts);
     }
+    ensureHeld();
     paintPanel();
   } catch (e) { /* daemon busy; the next beat will pick it up */ }
 }

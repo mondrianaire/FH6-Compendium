@@ -32,7 +32,9 @@ function buildStatus() {
   const tuneOk = !!(MATCH && MATCH.exact && MATCH.exact.length);
   const ambiguous = q.level !== "ok";
   if (!hwOk) return { key: "unknown", label: locked ? "downloaded, not yet held" : "new build on disk", tone: "warn",
-    why: "a save exists but our database has not imported it",
+    why: (RB.state === "running" || RB.pending) ? "a save the database does not hold yet — importing it now"
+       : locked ? "a downloaded tune installed since the last import — the import runs by itself"
+       : "a save written since the last import — the import runs by itself",
     steps: ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
   if (locked) return { key: "downloaded", label: "downloaded / locked", tone: "warn",
     why: "someone else's build; sliders are hidden by the lock",

@@ -94,6 +94,19 @@ OWN NAME with a RIVALS or EVENT badge before any measurement. The right pane is 
 analysis. They sit side by side in both orientations; that arrangement is the original plan and
 the one the eye expects.
 
+### The map drawer: legend and filters, floated off the map
+The map pane's job is the shape of the road, and a permanent colour key plus a row of filter
+buttons were costing it real pixels — on a course, the map's svg was also sitting inside a boxed
+`.panel` wrapper sized to a fixed 2:1 viewBox regardless of the course's own shape, so in the
+tall portrait layout it filled barely half the pane. Both are fixed together: the svg is unwrapped
+to a direct child of the pane body (so `width:100%;height:100%` actually applies) and its viewBox
+now takes the course's own bounding-box aspect, the way the world map already sized itself to the
+island. What used to be the inline legend — colour key, the `follow` toggle, the off-map toggle —
+now lives in one `☰ legend & filters` drawer, closed by default and remembered per browser. On a
+course, the same drawer also carries the trace's own preset chips (all · this class · this car ·
+this build · same hardware · this tune) and dimension filters, reading and writing the identical
+per-course `vc` view-store object the trace pane uses — filter from either pane and both redraw.
+
 ### No scrollbars, ever
 **Hard rule (Jett, 2026-09-03): the dashboard has zero scrollbars.** All real estate is planned
 and every relevant field is respected. A list that cannot fit its cell does not scroll: it shows

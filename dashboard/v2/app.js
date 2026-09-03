@@ -285,7 +285,8 @@ function courseMap(c, opts) {
   const theirs = (c.route && c.route.path) || [];
   if (!ours.length && !theirs.length) return el(`<div class="panel why">no geometry for this course</div>`);
   const [x0, x1, z0, z1] = bounds([ours, theirs].concat(paths).filter((p) => p.length));
-  const W = 760, H = 380, pad = 18;
+  const pad = 18, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
+  const H = 380, W = Math.max(320, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const sx = (x1 - x0) || 1, sz = (z1 - z0) || 1, s = Math.min((W - 2 * pad) / sx, (H - 2 * pad) / sz);
   const px = (x) => pad + (x - x0) * s, py = (z) => H - pad - (z - z0) * s;
   const line = (p, col, w, op) => p.length ? `<polyline fill="none" stroke="${col}" stroke-width="${w}"

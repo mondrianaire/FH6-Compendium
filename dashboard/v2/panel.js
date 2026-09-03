@@ -389,7 +389,9 @@ function modeControls() {
 const axisSvg = (ch, vmax) => [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10; return `<text x="2" y="${(ch.py(v) + 3).toFixed(1)}" font-size="8" fill="var(--dim)">${v}</text>`; }).join("");
 const cursorSvg = (H) => `<g class="cur" style="display:none"><line y1="6" y2="${H - 16}" stroke="var(--ink)" opacity=".6"/><circle r="3.5" fill="var(--ink)"/></g>`;
 
-function courseTrace(c) {
+// the preset + dimension chips, shared by the trace pane and the map's own filter drawer — one
+// `vc` (per-course view store) backs both, so a click in either pane keeps them in lockstep.
+function traceFilterState(c) {
   const byId = {}; (c.laps || []).forEach((l) => (byId[String(l.id)] = l));
   const all = Object.keys(c.traces).map((id) => Object.assign({ id, pts: c.traces[id] }, byId[id] || {})).filter((t) => t.pts && t.pts.length > 2);
   const sel = traceSel(c), tf = sel.filters;
@@ -405,12 +407,22 @@ function courseTrace(c) {
     return `<span class="fdim"><span class="why">${lab}</span>${chip(null, "all")}${vals.map((v) => chip(v, dimLab(d, v))).join("")}</span>`;
   }).filter(Boolean).join("");
   const stage2 = stage1.filter((t) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
+  const clearBtn = Object.keys(tf).length || sel.hidden.size ? `<button class="mini" data-tfilt="*|">clear</button>` : "";
+  return { all, sel, tf, presets, stage1, filt, stage2, clearBtn };
+}
+// the compact bar for the map's filter drawer: same chips, none of the trace's own furniture
+function mapFilterBar(c) {
+  const { presets, filt, clearBtn } = traceFilterState(c);
+  return `<div class="fdim"><span class="why">show</span>${presets}</div>${filt}${clearBtn}`;
+}
+function courseTrace(c) {
+  const { all, sel, tf, presets, filt, stage2, clearBtn } = traceFilterState(c);
   // 3. the chips: each lap, a click to hide. Sort FIRST: `best` and `cur` are taken from this
   // list by position, and an unsorted list crowned whichever lap the JSON happened to list first.
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
   const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${match.length} of ${all.length} lap${all.length === 1 ? "" : "s"} on record${MODE.game === "event" ? " · timed event" : ""}</span>
-    <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${Object.keys(tf).length || sel.hidden.size ? `<button class="mini" data-tfilt="*|">clear</button>` : ""}<span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
+    <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${clearBtn}<span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
   stage2.forEach((t) => { t._cov = t.cov != null ? t.cov : (L ? t.pts[t.pts.length - 1][0] / L : 1); });
@@ -797,15 +809,24 @@ function paintLeft() {
       <span class="why">${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns · ${nSel} of ${(COURSE.laps || []).length} laps drawn</span>`;
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
     body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore }));
-    body.insertAdjacentHTML("beforeend", '<div class="legend">' + followBtn() + "</div>");
-    wireFollow(body); addLiveDot(body);
+    // courseMap() draws its own inline legend (shared with the v1 course page) — lift it into
+    // the floating drawer instead of leaving it inline, and unwrap the panel box around the svg
+    // so the map itself gets the space both were holding.
+    const legendNode = body.querySelector(".legend");
+    const legendHTML = legendNode ? legendNode.innerHTML : "";
+    if (legendNode) legendNode.remove();
+    const svgWrap = body.querySelector(".panel");
+    const mapSvg = body.querySelector("svg");
+    if (svgWrap && mapSvg && svgWrap !== body) { body.appendChild(mapSvg); svgWrap.remove(); }
+    body.insertAdjacentHTML("beforeend", mapDrawerHTML(`<div class="legend">${legendHTML}${followBtn()}</div>${mapFilterBar(COURSE)}`));
+    wireTrace(body); wireFollow(body); wireMapDrawer(body); addLiveDot(body);
   } else {
     const n = WORLD ? Object.keys(WORLD.routes).length : 0;
     const off = WORLD ? routeSplit().off.length : 0;
     hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
     body.innerHTML = worldMapHTML(); addLiveDot(body);
     const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; VIEW.global.showOffmap = SHOW_OFFMAP; viewSave(); paintLeft(); };
-    wireFollow(body);
+    wireFollow(body); wireMapDrawer(body);
   }
 }
 
@@ -843,12 +864,13 @@ function worldMapHTML() {
     + (SHOW_OFFMAP ? off.map(({ id, r }) => `<g><title>Route${id} — off-map circuit, outside the nav mesh, unreachable</title>${line(r.pts, "#c678dd", 1.4, 0.9)}</g>`).join("") : "");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
     .map((c) => line(c.path, "#00d27a", 1.6, 0.85)).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
-      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}<g id="liveDot"></g></svg>
-    <div class="legend"><span><i style="background:#3b4a5c"></i>every game route</span>
+  const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>
       <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
       ${followBtn()}
-      ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}</div>`;
+      ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}`;
+  return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
+      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}<g id="liveDot"></g></svg>
+    ${mapDrawerHTML(`<div class="legend">${legend}</div>`)}`;
 }
 
 /* ------------------------------------------------- the map that follows you
@@ -909,6 +931,22 @@ function followMap() {
   if (Math.abs(wantW - FOLLOW.span) > 1 || Math.abs(cxT - FOLLOW.cx) > 1) queueFollow();
 }
 function queueFollow() { if (!FOLLOW.raf) FOLLOW.raf = requestAnimationFrame(followMap); }
+// THE MAP DRAWER — the colour key and (on a course) the trace's own filter chips, folded into
+// one floating panel instead of a permanent inline block. The map pane's whole job is the shape
+// of the road; a legend and a row of filter buttons were costing it real pixels for furniture
+// that is read once and then ignored. Closed by default, remembered per browser.
+let MAPDRAWER_OPEN = (() => { try { return localStorage.getItem("fh6MapDrawer") === "1"; } catch (e) { return false; } })();
+function mapDrawerHTML(bodyHTML) {
+  return `<div class="mapdrawer ${MAPDRAWER_OPEN ? "open" : ""}">
+    <button class="mdtoggle" data-mapdrawer title="legend and filters">${MAPDRAWER_OPEN ? "✕ close" : "☰ legend & filters"}</button>
+    <div class="mdpanel">${bodyHTML}</div></div>`;
+}
+function wireMapDrawer(body) {
+  const t = body.querySelector("[data-mapdrawer]"); if (!t) return;
+  t.onclick = () => { MAPDRAWER_OPEN = !MAPDRAWER_OPEN;
+    try { localStorage.setItem("fh6MapDrawer", MAPDRAWER_OPEN ? "1" : "0"); } catch (e) {}
+    LEFT_KEY = null; paintLeft(); };
+}
 const followBtn = () => '<span class="mapscale"><button class="mini ' + (FOLLOW.on ? "on" : "") +
   '" data-follow title="COURSE OPTIMISATION preview: closes in when you slow, load the tyres or approach a turn, and pulls back on the straights. Off by default — it belongs to the skill-and-timing mode, not to building a car.">follow (preview)</button><span id="mapScale" class="why"></span></span>';
 function wireFollow(body) {

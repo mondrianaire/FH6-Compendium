@@ -147,7 +147,7 @@ function panelSkeleton(host) {
 const courseFile = (key) => "course/" + String(key).replace(/[^A-Za-z0-9_\-]/g, "_") + ".json";
 async function panelBoot() {
   // the page's own chrome, from the view store, before anything paints
-  DOCK_SPAN = vg("dockSpan", 600); SHOW_OFFMAP = !!vg("showOffmap", false); FOLLOW.on = vg("follow", true) !== false;
+  DOCK_SPAN = vg("dockSpan", 600); SHOW_OFFMAP = !!vg("showOffmap", false); FOLLOW.on = vg("follow", false) === true;
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
   WORLD = w; DIAG = d; COURSES = c;
@@ -855,7 +855,12 @@ function worldMapHTML() {
    the distance to the next mapped turn. Slow, loaded, or a corner coming: a ~180 m window with
    the turn ids legible. Fast and straight: the whole course. The view is eased so it glides, and
    the bands overlap so it cannot flap between them. */
-const FOLLOW = { on: true, span: null, cx: null, cz: null, raf: 0, full: null };
+// DEFERRED, deliberately. Adaptive zoom is the right idea in the wrong context: while you are
+// building and testing a car the map's job is orientation, and a window that keeps changing
+// scale costs more than it gives. It belongs to COURSE OPTIMIZATION mode — an established track,
+// the car already settled, the driver working on line and timing — where the close view is the
+// whole point. The mechanism stays, off by default, opt-in from the legend until that mode exists.
+const FOLLOW = { on: false, span: null, cx: null, cz: null, raf: 0, full: null };
 function followSpan() {
   const f = LIVE.frame;
   if (!f || !f.on || !LIVEPOS) return null;                  // parked or in a menu: the overview
@@ -902,7 +907,7 @@ function followMap() {
 }
 function queueFollow() { if (!FOLLOW.raf) FOLLOW.raf = requestAnimationFrame(followMap); }
 const followBtn = () => '<span class="mapscale"><button class="mini ' + (FOLLOW.on ? "on" : "") +
-  '" data-follow title="closes in when you slow, load the tyres or approach a turn; pulls back on the straights — the way a satnav does">follow</button><span id="mapScale" class="why"></span></span>';
+  '" data-follow title="COURSE OPTIMISATION preview: closes in when you slow, load the tyres or approach a turn, and pulls back on the straights. Off by default — it belongs to the skill-and-timing mode, not to building a car.">follow (preview)</button><span id="mapScale" class="why"></span></span>';
 function wireFollow(body) {
   const b = body.querySelector("[data-follow]"); if (!b) return;
   b.onclick = () => { FOLLOW.on = !FOLLOW.on; VIEW.global.follow = FOLLOW.on; viewSave();

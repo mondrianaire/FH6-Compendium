@@ -73,7 +73,14 @@ carrying what the lab last did: importing, re-reading, a new save read with its 
 counts, or "database up to date" with the time. It never grows or wraps. The alerts strip below
 keeps only what needs a decision (the which-save picker, the remaining ratification steps).
 
-### The map follows, like a satnav
+### The map follows, like a satnav — DEFERRED to course optimisation
+**Status: built, off by default, opt-in from the legend.** Adaptive zoom is right for a driver
+working on line and timing on a track they already know, and wrong while a car is being built and
+tested, where the map's job is orientation and a window that keeps changing scale costs more than
+it gives. It is therefore reserved for a future COURSE OPTIMISATION mode — an established track,
+the car settled, the session about the driver rather than the build. The mechanism below stays in
+place for that mode.
+
 One scale cannot serve a hairpin and a motorway. The map eases its window from what the frame
 already says: lateral g over 0.55, under 45 mph, or within 90 m of a mapped turn gives a ~180 m
 window with the turn ids legible; the middle band gives ~420 m; a straight pulls back to 900 m,

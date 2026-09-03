@@ -107,7 +107,7 @@ function buildStatus() {
     why: frozenOf() ? "someone else's build, frozen as your target — install your own tune on this car and build back to it"
                     : "someone else's build; sliders are hidden by the lock",
     steps: frozenOf() ? ["build this car back to the frozen sheet", "save it with a name — then it is yours, unlocked and comparable"]
-                      : ["clone it onto a second copy of the car (BUILD SHEET)", "or, with one copy: FREEZE SHEET, then install your own tune on this car and build back to it"], ambiguous };
+                      : ["clone it onto a second copy of the car — open BUILD SHEET", "with only one copy: keep the sheet as your target, install your own tune on this car, build back to it"], ambiguous };
   if (!tuneOk) {
     const base = MATCH.hw[0];
     return { key: "variation", label: "variation", tone: "blue",
@@ -551,8 +551,14 @@ function paintHeader() {
   if (key === HDR_KEY && h.querySelector(".hcar")) { paintChips(); return; }
   HDR_KEY = key;
   if (!CUR) {
-    h.innerHTML = `<div class="hcar"><div class="thumb none"></div><div><b>waiting for a car</b>
-      <div class="why">${esc(MODE.reason)}</div></div></div><div class="hchips">${liveChip()}</div>`;
+    h.innerHTML = `<div class="hcar"><div class="hart"><div class="art none">—</div><span class="artcap">no car</span></div>
+      <div class="hid"><div class="hname"><b>waiting for a car</b></div>
+        <div class="hchips2"><span class="chip w">${esc(MODE.reason || "no signal yet")}</span></div>
+        <div class="hengine"></div><div class="htune"></div><div class="tdesc"></div>
+        <div class="hstat dim"><span class="why">get in a car in the game — the header fills the moment a frame names it</span></div></div></div>
+      <div class="hright"><div class="hact"><button class="big prim" disabled>BUILD SHEET ▸</button>
+        <button class="big sis wide" id="btnRefresh">⟳ REFRESH</button></div></div>`;
+    const bx0 = $("#btnRefresh"); if (bx0) bx0.onclick = () => rereadBuild();
     return;
   }
   const m = MATCH && MATCH.build;
@@ -571,9 +577,16 @@ function paintHeader() {
   // the engine: the database's game-name for the fitted part leads; the daemon's measured read follows
   const engPart = MATCH && MATCH.sheet && (MATCH.sheet.parts || []).find((x) => x.slot === "engine" && x.pid != null);
   const measured = pw && pw.engine_type ? pw.engine_type.replace(/^Swapped · /, "") : "";
-  const engine = engPart && engPart.name ? engPart.name + (pw && !pw.stock ? " · swap" : "") + (measured ? " · " + measured : "")
-               : pw ? (pw.engine_type || (pw.stock ? "stock engine" : pw.upgrade || "")) : "";
+  // the engine as short facts, not a sentence: the name, then only what a tuner reads off it
+  const engBits = [];
+  if (engPart && engPart.name) engBits.push(engPart.name + (pw && !pw.stock ? " (swap)" : ""));
+  else if (pw) engBits.push(pw.stock ? "stock engine" : (pw.upgrade || ""));
+  const mHp = /(\d[\d,]*)\s*hp/.exec(measured || ""), mRpm = /(\d[\d,]*)\s*rpm/.exec(measured || "");
+  if (mHp) engBits.push(mHp[1] + " hp");
+  if (mRpm) engBits.push(mRpm[1] + " rpm");
   const aspTxt = asp && !asp.stock && asp.upgrade ? asp.upgrade : "";
+  if (aspTxt) engBits.push(aspTxt);
+  const engine = engBits.filter(Boolean).join(" · ");
   const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
   const tuneName = (m && m.name) || (CUR.disk ? "unnamed save" : "");
   const nSaves = CUR.match && CUR.match.n_saves;
@@ -608,19 +621,17 @@ function paintHeader() {
     </div>
     <div class="hright">
       <div class="hact">
-        <button class="big" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>BUILD SHEET ▸</button>
-        <button class="big sis" id="btnReread" ${RR.busy ? "disabled" : ""} title="re-identify the car from the live frame and re-read its save from disk">${RR.busy ? "READING…" : "⟳ REREAD"}</button>
-        ${(st.key === "downloaded" || frozenOf()) ? `<button class="big ${frozenOf() ? "go on" : ""}" id="btnFreeze" title="${frozenOf() ? "a frozen target is held for this car — click to open it" : "keep this build sheet as the target, then install your own unlocked tune on this same car and build back to it"}">${frozenOf() ? "◆ TARGET HELD" : "◆ FREEZE"}</button>`
-          : st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ BASELINE" : "SET BASELINE"}</button>` : `<span></span>`}
-        <button class="big sis" id="btnRecount" ${RB.state === "running" || RB.pending ? "disabled" : ""} title="import every save on disk and regenerate the dashboard data">${RB.state === "running" || RB.pending ? "COUNTING…" : "⟳ RECOUNT"}</button>
+        <button class="big prim" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ BUILD SHEET · TARGET HELD" : "BUILD SHEET ▸"}</button>
+        ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ TESTING BASELINE" : "SET TESTING BASELINE"}</button>` : ""}
+        <button class="big sis wide" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
+          title="re-read this car's save from disk, and import it if the database does not hold it yet. Both happen by themselves — on leaving a menu, and whenever a save appears that is not held; this is the manual override.">${RR.busy ? "READING…" : (RB.state === "running" || RB.pending) ? "IMPORTING…" : "⟳ REFRESH"}</button>
       </div>
     </div>`;
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bb = $("#btnBase"); if (bb) bb.onclick = () => setBaseline(st.twin);
-  const bf = $("#btnFreeze"); if (bf) bf.onclick = () => (frozenOf() ? openSheet() : freezeTarget());
+  const bx = $("#btnRefresh"); if (bx) bx.onclick = async () => { await rereadBuild(); if (CUR && CUR.disk && !(MATCH && MATCH.build)) ensureHeld(); };
   h.querySelectorAll('.hstat [data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
-  const br = $("#btnReread"); if (br) br.onclick = () => rereadBuild();
-  const bc = $("#btnRecount"); if (bc) bc.onclick = () => requestRebuild("recount");
+
 }
 
 function setBaseline(twin) {
@@ -1008,14 +1019,14 @@ function openSheet() {
   el.classList.toggle("min", !!st.min);
   el.innerHTML = `<div class="fbar" id="fbar"><span class="ttl">${fz ? "FROZEN TARGET" : "BUILD SHEET"}</span>
       <span class="nm">${esc(MATCH.sheet.car || "")}${name ? " · " + esc(name) : ""}${fz ? ` <span class="froz">frozen ${esc(new Date(fz.at).toLocaleString())}${fz.creator ? " · by " + esc(fz.creator) : ""} — build back to this</span>` : ""}</span>
-      ${fz ? `<button data-f="thaw" title="stop building to this target">unfreeze</button>` : ""}
+      <button data-f="pin" class="${fz ? "on" : ""}" title="${fz ? "this sheet is your frozen target — click to release it" : "keep this sheet as your target: change the car freely and this stays as what to build back to"}">${fz ? "◆ TARGET" : "◇ keep as target"}</button>
       <button data-f="min" title="${st.min ? "expand" : "minimise"}">${st.min ? "▢" : "—"}</button>
       <button data-f="close" title="close">✕</button></div>
     <div class="fbody fhcl"><style>${scopedCloneCss()}</style>${cloneHTML(MATCH.sheet, dl, name)}</div>`;
   el.style.display = "block";
   wireClone({ document: el, localStorage: window.localStorage }, MATCH.sheet);
   el.querySelector('[data-f="close"]').onclick = () => { el.style.display = "none"; st.open = false; save(); };
-  const th = el.querySelector('[data-f="thaw"]'); if (th) th.onclick = () => thawTarget();
+  const th = el.querySelector('[data-f="pin"]'); if (th) th.onclick = () => (frozenOf() ? thawTarget() : freezeTarget());
   el.querySelector('[data-f="min"]').onclick = () => { st.min = !st.min; el.classList.toggle("min", st.min); save();
     const bt = el.querySelector('[data-f="min"]'); bt.textContent = st.min ? "▢" : "—"; bt.title = st.min ? "expand" : "minimise"; };
   const save = () => { VIEW.global.sheet = st; viewSave(); };

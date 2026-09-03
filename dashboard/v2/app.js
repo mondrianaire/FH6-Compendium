@@ -266,11 +266,21 @@ function bounds(paths) {
   return [x0, x1, z0, z1];
 }
 
-function courseMap(c) {
+// THE MAP AND THE TRACE MUST COUNT THE SAME LAPS. The map drew ONE aggregate path — the course
+// model's own centre-line of where you have driven — while the trace drew every lap on record, so
+// Edamame read "40 laps" above a map showing one. The map now draws the SAME set the trace has
+// selected (opts.laps: the ids the trace kept after its preset and filters), each lap faint, the
+// foregrounded lap solid, and says how many it drew.
+function courseMap(c, opts) {
+  opts = opts || {};
+  const ids = opts.laps && opts.laps.length ? opts.laps : Object.keys(c.traces || {});
+  const paths = ids.map((id) => (c.traces || {})[id]).filter((t) => t && t.length > 2)
+                   .map((t) => t.map((q) => [q[3], q[4]]).filter((q) => q[0] != null));
+  const foreIx = opts.fore != null ? ids.indexOf(String(opts.fore)) : -1;
   const ours = c.path || [];
   const theirs = (c.route && c.route.path) || [];
   if (!ours.length && !theirs.length) return el(`<div class="panel why">no geometry for this course</div>`);
-  const [x0, x1, z0, z1] = bounds([ours, theirs].filter((p) => p.length));
+  const [x0, x1, z0, z1] = bounds([ours, theirs].concat(paths).filter((p) => p.length));
   const W = 760, H = 380, pad = 18;
   const sx = (x1 - x0) || 1, sz = (z1 - z0) || 1, s = Math.min((W - 2 * pad) / sx, (H - 2 * pad) / sz);
   const px = (x) => pad + (x - x0) * s, py = (z) => H - pad - (z - z0) * s;
@@ -283,12 +293,14 @@ function courseMap(c) {
     <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-pad="${pad}">
       ${line(theirs, "#3d4a5a", 9, 0.55)}
       ${line(theirs, "#8fa0b3", 1.4, 0.9)}
-      ${line(ours, "#00d27a", 2, 0.95)}
+      ${paths.map((p, i) => (i === foreIx ? "" : line(p, "#00d27a", 1, 0.28))).join("")}
+      ${foreIx >= 0 ? line(paths[foreIx], "#4ea3ff", 2.2, 0.95) : line(ours, "#00d27a", 2, 0.95)}
       ${turns}<g id="traceMark"></g>
     </svg>
     <div class="legend">
       <span><i style="background:#7d8b9c"></i>the game's centre-line for this route</span>
-      <span><i style="background:#00d27a"></i>where you actually drove</span>
+      <span><i style="background:#00d27a"></i>${paths.length ? paths.length + (paths.length === 1 ? " lap drawn" : " laps drawn") : "where you actually drove"}</span>
+      ${foreIx >= 0 ? `<span><i style="background:#4ea3ff"></i>the lap the trace foregrounds</span>` : ""}
       <span><i style="background:#4ea3ff"></i>a turn the analyzer established</span></div></div>`);
 }
 

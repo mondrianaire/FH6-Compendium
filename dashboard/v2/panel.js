@@ -218,6 +218,7 @@ const PRESETS = [["all", "all"], ["class", "this class"], ["car", "this car"], [
 let TRACE_MODE = (() => { try { return localStorage.getItem("fh6SegMode") || "grip"; } catch (e) { return "grip"; } })();
 let TRACE_ALL = (() => { try { return localStorage.getItem("fh6PaintAll") === "1"; } catch (e) { return false; } })();
 let TRACE_KEY = null;
+let TRACE_PICK = null;             // {key, ids[], fore} — what the trace drew, so the map draws it too
 const lapTime = (t) => (t == null ? "—" : (t >= 60 ? Math.floor(t / 60) + ":" + (t % 60).toFixed(2).padStart(5, "0") : t.toFixed(2) + " s"));
 const tuneLabel = (c) => { const m = /_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})\d{2}$/.exec(String(c || "")); return m ? `${m[3]}/${m[2]} ${m[4]}:${m[5]}` : String(c || "").slice(-6); };
 const dimVal = (l, d) => (d === "solo" ? (l.solo == null ? null : (l.solo ? "clean" : "contact")) : (l[d] == null ? null : String(l[d])));
@@ -331,6 +332,9 @@ function courseTrace(c) {
     const what = t === cur ? "you" : t === best ? "fastest" : "";
     return `<button class="lchip ${hid ? "hid" : ""}" data-thide="${esc(String(t.id))}" style="border-color:${col}" title="${esc((hid ? "hidden — click to show" : "click to hide") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">${nt ? `<s>${lapTime(t.t)}</s>` : `<b>${lapTime(t.t)}</b>`}${t.partial || t._cov < 0.9 ? ` ${Math.round(t._cov * 100)}%` : ""}${t.class ? " · " + esc(t.class) : ""}${t.dt ? " " + esc(t.dt) : ""}${what ? ` · <b>${what}</b>` : ""}${off ? ` · ${off}` : ""}</button>`; }).join("");
   const foot = `<span class="tread why">hover the trace — it marks that spot on the course map</span><span class="lchips">${leg}</span>`;
+  // publish the selection so the LEFT PANE draws the same laps and the two panes agree
+  const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
+  if (JSON.stringify(sel2) !== JSON.stringify(TRACE_PICK)) { TRACE_PICK = sel2; LEFT_KEY = null; setTimeout(paintLeft, 0); }
   const svg = (W, H) => {
     if (!match.length) return `<div class="why tempty">every matching lap is hidden — click a chip to show it</div>`;
     const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
@@ -604,12 +608,14 @@ function paintLeft() {
   const course = MODE.suggest === "course" && COURSE;
   // 169 polylines are not free: rebuild the map only when what it shows changes, and let the
   // live dot ride on the map that is already there.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest]);
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key;
   if (course) {
-    hd.innerHTML = `Course · <span class="why">${esc(COURSE.name || COURSE.key)} · ${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns</span>`;
-    body.innerHTML = ""; body.append(courseMap(COURSE)); addLiveDot(body);
+    const nSel = (TRACE_PICK && TRACE_PICK.key === COURSE.key && TRACE_PICK.ids) ? TRACE_PICK.ids.length : Object.keys(COURSE.traces || {}).length;
+    hd.innerHTML = `Course · <span class="why">${esc(COURSE.name || COURSE.key)} · ${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns · ${nSel} lap${nSel === 1 ? "" : "s"} drawn of ${(COURSE.laps || []).length} on record</span>`;
+    const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
+    body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore })); addLiveDot(body);
   } else {
     const n = WORLD ? Object.keys(WORLD.routes).length : 0;
     const off = WORLD ? routeSplit().off.length : 0;

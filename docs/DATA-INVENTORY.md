@@ -4,6 +4,66 @@ Generated 2026-09-03 from the live tree. **Rule: before saying a thing is not kn
 Nothing in this project is ever "not available" until this file says so. When a store is added,
 add it here in the same commit.
 
+## 0. SOURCES AND COVERAGE — what exists, and how much of it we have imported
+
+This section exists because the project repeatedly *rediscovered* data it already had. The cause
+was structural: imports were written **demand-driven** (import what the next feature needs) and
+the inventory listed what we HOLD, so anything unimported was invisible — never a row, never a
+gap. These tables make the unimported visible.
+
+### The decrypted game database (205 tables)
+
+| state | tables | note |
+|---|---|---|
+| imported via `ref_slot.source_table` (the 50 upgrade slot tables) | 50 | **complete**: 87,655 rows in the game, 87,655 in `ref_part` — exact |
+| imported by name (cars, engines, wheels, compounds, strings, classes…) | 33 | see `scripts/db/import_gamedb.py` |
+| **untouched** | 114 non-empty + 16 empty | listed below |
+
+The largest untouched tables, and whether they matter:
+
+| table | rows | worth importing? |
+|---|---|---|
+| `Livery_DecalsSortOrder` | 19,649 | livery editor data — not relevant |
+| `CarPartPositions` | 2,413 | part positions on the model |
+| `List_TorqueCurve` | 1,725 | per-engine torque curves — would give a real dyno for any build, not just driven ones |
+| `PlayerNames` | 1,709 | name filter list — not relevant |
+| `Livery_VinylsDecals` | 1,442 | livery editor data — not relevant |
+| `CarRarities` | 767 | rarity per car |
+| `List_TireFrictionCurve` | 738 | the tyre friction model behind every compound |
+| `Livery_Decals` | 708 | livery editor data — not relevant |
+| `Data_Car_Buckets` | 644 | car bucketing (class/PI banding inputs) |
+| `CameraOverrides` | 641 | camera data — not relevant |
+| `OnDiscContent` | 621 | packaging manifest — not relevant |
+| `List_PartAttribute` | 546 | per-part attributes; may carry the stat deltas the PI question needs |
+| `CarExceptions` | 511 | per-car exceptions to upgrade rules — gating we currently infer |
+| `UpgradePresetPackages` | 448 | the game's own preset builds (complete part lists per ordinal) |
+| `List_TireFrictionMultiCurve` | 369 | not yet assessed |
+| `AIDrivingBehaviorObservationDefaults` | 209 | not yet assessed |
+
+### The game's UI texture archives (`media/ui/textures/data_bound`, 82 archives)
+
+6 of 82 are read by the lab: `HUD.zip`, `Promo.zip`, `Rivals.zip`, `Telemetry.zip`, `Upgrade_Class.zip`, `Upgrade_Parts.zip`.
+`Upgrade_Parts.zip` (902 entries) is the upgrade tile art — decoded 2026-09-03 by
+`scripts/db/export_icons.py` into `dashboard/v2/assets/upgrade/` with a manifest at
+`api/icons.json`: 79 icon families (38 with Street/Sport/Race tiers) and 528 rim renders, 505 of
+which join `ref_wheel.media_name` exactly. The other 76 archives are catalogued but unused; the
+ones plausibly worth a look are `Upgrade_Class.zip` (class badges), `WheelIcons.zip`,
+`Drivetrain_Icons.zip`, `RaceType.zip`, `Badges.zip` and `UI_Symbols.zip`.
+
+### Everything else
+
+| source | state |
+|---|---|
+| `EN.zip` string tables | **complete** — 287 of 288 entries imported, 58,722 strings |
+| `aitracks/Route*.owt` + `.nav` | **complete** — all 169 routes, points, width, banking, road class |
+| `freeroam/Brio_00.nav` | imported (road class); surface MATERIAL still unsolved |
+| save folders `Tuning_*` | **complete since 2026-09-03** — `Data`, `header` and `Thumb.png` all read (the header and render sat unread for weeks) |
+| `Downloadsorza raw data files\*.csv` | ~70 exported CSVs; used for cross-checks, not systematically imported |
+| telemetry sessions | 221 recordings, 107 imported as sessions |
+
+**The rule this section enforces:** an import is not "done" because a feature works. A source is
+done when every one of its tables or entries is either imported or has a row here saying why not.
+
 ## 1. The central database — `data/fh6.db` (107 MB)
 
 | table | rows | what it is |

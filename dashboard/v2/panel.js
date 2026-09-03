@@ -104,8 +104,10 @@ function buildStatus() {
        : "a save written since the last import — the import runs by itself",
     steps: ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
   if (locked) return { key: "downloaded", label: "downloaded / locked", tone: "warn",
-    why: "someone else's build; sliders are hidden by the lock",
-    steps: ["clone it onto a second copy of the car (BUILD SHEET)", "save the clone with a name — the clone is your own build; the downloaded original cannot be saved, only re-applied"], ambiguous };
+    why: frozenOf() ? "someone else's build, frozen as your target — install your own tune on this car and build back to it"
+                    : "someone else's build; sliders are hidden by the lock",
+    steps: frozenOf() ? ["build this car back to the frozen sheet", "save it with a name — then it is yours, unlocked and comparable"]
+                      : ["clone it onto a second copy of the car (BUILD SHEET)", "or, with one copy: FREEZE SHEET, then install your own tune on this car and build back to it"], ambiguous };
   if (!tuneOk) {
     const base = MATCH.hw[0];
     return { key: "variation", label: "variation", tone: "blue",
@@ -488,7 +490,7 @@ function paintHeader() {
   // Rebuilding on every frame re-created the livery <img> and re-fetched it 40 times a second.
   const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label,
     MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
-    RR.busy, RB.state === "running" || RB.pending, CUR && CUR.liveries && CUR.liveries.length,
+    RR.busy, RB.state === "running" || RB.pending, !!frozenOf(), CUR && CUR.liveries && CUR.liveries.length,
     CUR && CUR.match && CUR.match.n_saves, !!(CUR && CUR.disk && CUR.disk.deliverable), !!(MATCH && MATCH.sheet)]);
   if (key === HDR_KEY && h.querySelector(".hcar")) { paintChips(); return; }
   HDR_KEY = key;
@@ -550,6 +552,7 @@ function paintHeader() {
         <button class="big" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>BUILD SHEET ▸</button>
         ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">
             ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ TESTING BASELINE" : "SET TESTING BASELINE"}</button>` : ""}
+        ${(st.key === "downloaded" || frozenOf()) ? `<button class="big ${frozenOf() ? "go on" : ""}" id="btnFreeze" title="${frozenOf() ? "a frozen target is held for this car — click to open it" : "keep this build sheet as the target, then install your own unlocked tune on this same car and build back to it"}">${frozenOf() ? "◆ TARGET HELD" : "◆ FREEZE SHEET"}</button>` : ""}
         <span class="hsep"></span>
         <button class="big sis" id="btnReread" ${RR.busy ? "disabled" : ""} title="re-identify the car from the live frame and re-read its save from disk: roster, match, parts, sliders">${RR.busy ? "READING…" : "⟳ REREAD BUILD"}</button>
         <button class="big sis" id="btnRecount" ${RB.state === "running" || RB.pending ? "disabled" : ""} title="import every save on disk and regenerate the dashboard data (~4–10 s)">${RB.state === "running" || RB.pending ? "COUNTING…" : "⟳ RECOUNT DATABASE"}</button>
@@ -558,6 +561,7 @@ function paintHeader() {
     </div>`;
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bb = $("#btnBase"); if (bb) bb.onclick = () => setBaseline(st.twin);
+  const bf = $("#btnFreeze"); if (bf) bf.onclick = () => (frozenOf() ? openSheet() : freezeTarget());
   h.querySelectorAll('.hstat [data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
   const br = $("#btnReread"); if (br) br.onclick = () => rereadBuild();
   const bc = $("#btnRecount"); if (bc) bc.onclick = () => requestRebuild("recount");
@@ -904,6 +908,26 @@ function rimFreeKey(pkey, rimMl) {
 /* ------------------------------------------------- the floating sheet */
 // The v1 decode float pattern: an in-page panel, draggable by its bar, pin / minimise / close,
 // position remembered. Never window.open — the game's overlay and the browser both block it.
+// FREEZE. A downloaded tune is locked: you cannot tune or compare it, and the only way forward
+// is to rebuild it as your own. With a second copy of the car you clone onto that; with ONE copy
+// you freeze the sheet, install your own unlocked tune on the same car and livery, and the frozen
+// sheet is what you build back to. Frozen per car in the view store, so it survives the save being
+// replaced, the page reloading and the car being put away.
+function freezeTarget() {
+  if (!CUR || !MATCH || !MATCH.sheet || !CUR.disk) return;
+  vcar(CUR.ordinal).frozen = {
+    hw: MATCH.sheet.hw, container: (MATCH.build && MATCH.build.c) || null,
+    name: (MATCH.build && MATCH.build.name) || (CUR.disk && CUR.disk.name) || "frozen build",
+    creator: (MATCH.build && MATCH.build.creator) || null,
+    locked: !!(CUR.disk.deliverable && CUR.disk.deliverable.locked),
+    ts: CUR.disk.ts, at: Date.now(),
+    deliverable: CUR.disk.deliverable || null,
+  };
+  viewSave(); paintPanel(); openSheet();
+}
+function frozenOf() { return CUR ? (vcar(CUR.ordinal).frozen || null) : null; }
+function thawTarget() { if (CUR) { delete vcar(CUR.ordinal).frozen; viewSave(); paintPanel(); openSheet(); } }
+
 function openSheet() {
   if (!MATCH || !MATCH.sheet) return;
   let el = document.getElementById("fhSheet");
@@ -911,23 +935,26 @@ function openSheet() {
     el = document.createElement("div"); el.id = "fhSheet"; el.className = "fsheet";
     document.body.appendChild(el);
   }
-  const dl = (CUR && CUR.disk && CUR.disk.deliverable) || null;
-  const name = (MATCH.build && MATCH.build.name) || (CUR && CUR.disk && CUR.disk.name) || "";
-  const key = (MATCH.sheet.hw || "") + "|" + ((CUR && CUR.disk && CUR.disk.ts) || "") + "|" + (dl ? 1 : 0);
+  const fz = frozenOf();
+  const dl = (fz && fz.deliverable) || (CUR && CUR.disk && CUR.disk.deliverable) || null;
+  const name = (fz && fz.name) || (MATCH.build && MATCH.build.name) || (CUR && CUR.disk && CUR.disk.name) || "";
+  const key = (MATCH.sheet.hw || "") + "|" + ((fz && fz.ts) || (CUR && CUR.disk && CUR.disk.ts) || "") + "|" + (dl ? 1 : 0) + "|" + (fz ? "F" : "");
   if (el.dataset.k === key && el.querySelector(".fbody")) { el.style.display = "block"; return; }   // same build, same save: just show it
   el.dataset.k = key;
   const st = vg("sheet", {});
   st.open = true; viewSave();
   if (st.x != null) { el.style.left = st.x + "px"; el.style.top = st.y + "px"; }
   el.classList.toggle("min", !!st.min);
-  el.innerHTML = `<div class="fbar" id="fbar"><span class="ttl">BUILD SHEET</span>
-      <span class="nm">${esc(MATCH.sheet.car || "")}${name ? " · " + esc(name) : ""}</span>
+  el.innerHTML = `<div class="fbar" id="fbar"><span class="ttl">${fz ? "FROZEN TARGET" : "BUILD SHEET"}</span>
+      <span class="nm">${esc(MATCH.sheet.car || "")}${name ? " · " + esc(name) : ""}${fz ? ` <span class="froz">frozen ${esc(new Date(fz.at).toLocaleString())}${fz.creator ? " · by " + esc(fz.creator) : ""} — build back to this</span>` : ""}</span>
+      ${fz ? `<button data-f="thaw" title="stop building to this target">unfreeze</button>` : ""}
       <button data-f="min" title="${st.min ? "expand" : "minimise"}">${st.min ? "▢" : "—"}</button>
       <button data-f="close" title="close">✕</button></div>
     <div class="fbody fhcl"><style>${scopedCloneCss()}</style>${cloneHTML(MATCH.sheet, dl, name)}</div>`;
   el.style.display = "block";
   wireClone({ document: el, localStorage: window.localStorage }, MATCH.sheet);
   el.querySelector('[data-f="close"]').onclick = () => { el.style.display = "none"; st.open = false; save(); };
+  const th = el.querySelector('[data-f="thaw"]'); if (th) th.onclick = () => thawTarget();
   el.querySelector('[data-f="min"]').onclick = () => { st.min = !st.min; el.classList.toggle("min", st.min); save();
     const bt = el.querySelector('[data-f="min"]'); bt.textContent = st.min ? "▢" : "—"; bt.title = st.min ? "expand" : "minimise"; };
   const save = () => { VIEW.global.sheet = st; viewSave(); };

@@ -513,3 +513,6 @@ button.lchip.hid{opacity:.35;text-decoration:line-through}
   .dtiles{max-height:44px}
   .dtrace svg.trace{max-height:70px}
 }
+
+.fsheet .fbar .froz{color:var(--mag);font-size:10.5px;margin-left:8px}
+.big.go.on{background:var(--acc);color:#04140c}

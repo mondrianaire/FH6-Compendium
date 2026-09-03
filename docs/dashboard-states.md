@@ -68,6 +68,14 @@ The dashboard's home is a 4K portrait monitor at 200%: a **1080 × 1920 CSS-px**
 portrait the two panes stack (map above, statistics below) and the build sheet takes the width;
 landscape keeps them side by side. Verify layout at 1080 × 1920, not at a landscape frame.
 
+### The database follows the saves
+The database is a snapshot; a new save leaves it behind. Import + regeneration take ~10 s
+(7.8 s + 1.75 s on 578 containers, measured 2026-09-03), so they run **by themselves when a
+re-read finds a save the database does not hold**, and on demand from IMPORT + REGENERATE (in
+the status banner and the Build data tab). The trigger is a new save file, never a menu return.
+The work runs in `scripts/rebuild_service.py` on port 8001, started from the worktree like the
+daemon; the header chip reads "importing · N s", then "db · HH:MM".
+
 ## 2. Modes
 
 Mode comes from the daemon's `mode` event (`suggest`: free | course | decode, with `reason`),

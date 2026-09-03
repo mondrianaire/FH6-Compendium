@@ -33,7 +33,7 @@ function buildStatus() {
   const ambiguous = q.level !== "ok";
   if (!hwOk) return { key: "unknown", label: locked ? "downloaded, not yet held" : "new build on disk", tone: "warn",
     why: "a save exists but our database has not imported it",
-    steps: ["run the import (python scripts/db/rebuild.py --only containers)", "then regenerate the dashboard data"] };
+    steps: ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
   if (locked) return { key: "downloaded", label: "downloaded / locked", tone: "warn",
     why: "someone else's build; sliders are hidden by the lock",
     steps: ["clone it onto a second copy of the car (BUILD SHEET)", "save the clone with a name — only then can it be tuned or compared"], ambiguous };
@@ -424,6 +424,7 @@ function paintBanner() {
     parts.push(`<div class="alert ${st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : ""}">
       <b>${esc(st.label)}.</b> ${esc(st.why)}.
       <span class="steps">${st.steps.map((s, i) => `<span class="step"><i>${i + 1}</i>${esc(s)}</span>`).join("")}</span>
+      ${st.rebuild ? `<button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>${RB.error ? `<span class="why" style="color:var(--bad)">${esc(RB.error)}</span>` : ""}` : ""}
       <button class="mini" data-act="dismiss">dismiss</button></div>`);
   }
   al.innerHTML = parts.join("");
@@ -540,6 +541,7 @@ function paintRight() {
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; paintRight(); });
   body.innerHTML = cur === "corners" ? cornersHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : statsHTML();
+  body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
 }
 
 // The corner log: the daemon's live corner events for the car you are in, newest first.
@@ -586,6 +588,8 @@ function buildDataHTML() {
   }
   if (st.steps && st.steps.length) parts.push(`<div class="grp"><div class="gh">To ratification</div><span class="steps">${st.steps.map((x, i) => `<span class="step"><i>${i + 1}</i>${esc(x)}</span>`).join("")}</span></div>`);
   else if (st.key === "ratified") parts.push(`<div class="frow normal"><b>ratified</b> <span class="why">this build carries the history of every atomically-similar build</span></div>`);
+  parts.push(`<div class="grp"><div class="gh">Database</div><div class="frow"><button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>
+    <span class="why">${RB.last && RB.last.finished ? `last import ${new Date(RB.last.finished * 1000).toLocaleTimeString()} · ${RB.last.wall_s} s` : "imports every save on disk and rewrites the dashboard data (~10 s); runs by itself when a new save is not yet held"}</span>${RB.error ? `<span class="why" style="color:var(--bad)">${esc(RB.error)}</span>` : ""}</div></div>`);
   return parts.join("");
 }
 

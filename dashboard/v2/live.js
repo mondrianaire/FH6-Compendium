@@ -236,6 +236,55 @@ function fingerprint(ordinal) {
   if (MATCH.build) loadBuild(MATCH.build.hw);
 }
 
+/* ------------------------------------------------------- import + regenerate */
+// The database is a snapshot; a new save leaves it behind. The import and the regeneration
+// together take ~10 s (measured: 7.8 s + 1.75 s on 578 containers), so they run AUTOMATICALLY
+// when a re-read finds a save the database does not hold, and on demand from the button. The
+// trigger is a new save file, never a menu return: menus open many times a minute, saves do not.
+// The work runs in scripts/rebuild_service.py on its own port so nothing running is restarted.
+const REBUILD = "http://127.0.0.1:8001";
+let RB = { state: "unknown", why: null, startedAt: 0, last: null, error: null, pending: false, done_ts: null };
+let RB_TIMER = null;
+async function requestRebuild(why) {
+  RB.pending = true; RB.why = why; RB.error = null; paintChips();
+  try {
+    const r = await fetch(REBUILD + "/rebuild", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ why }) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    RB.state = "running"; RB.startedAt = Date.now(); RB.pending = false; RB.runsAtStart = j.runs;
+    if (!RB_TIMER) RB_TIMER = setInterval(pollRebuild, 1000);
+  } catch (e) {
+    RB.pending = false; RB.state = "down";
+    RB.error = "the import service is not running — start it from the worktree: python scripts/rebuild_service.py 8001";
+  }
+  paintChips(); paintBanner();
+}
+async function pollRebuild() {
+  try {
+    const j = await fetch(REBUILD + "/status").then((r) => r.json());
+    if (j.state === "running" || j.queued || (RB.runsAtStart != null && j.runs <= RB.runsAtStart)) { RB.state = "running"; paintChips(); return; }
+    clearInterval(RB_TIMER); RB_TIMER = null;
+    RB.state = "idle"; RB.last = j; RB.runsAtStart = null;
+    if (j.rc !== 0) { RB.error = "import failed: " + (j.tail || []).slice(-3).join(" · "); paintChips(); paintBanner(); return; }
+    await afterRebuild();
+  } catch (e) { clearInterval(RB_TIMER); RB_TIMER = null; RB.state = "down"; RB.error = "lost the import service"; paintChips(); }
+}
+// the database moved under us: forget every cached api file, re-read identity, re-fingerprint
+async function afterRebuild() {
+  cache.clear();
+  try { IDENT = await get("identity.json"); } catch (e) { /* the next boot reads it */ }
+  try { await panelBoot(); } catch (e) { /* world/diag/courses are optional here */ }
+  if (CUR) { RB.done_ts = CUR.disk && CUR.disk.ts; fingerprint(CUR.ordinal); }
+  paintPanel();
+}
+function rebuildChip() {
+  if (RB.pending) return `<span class="chip w">importing…</span>`;
+  if (RB.state === "running") return `<span class="chip w">importing · ${Math.round((Date.now() - RB.startedAt) / 1000)} s</span>`;
+  if (RB.error) return `<span class="chip r" title="${esc(RB.error)}">import failed</span>`;
+  if (RB.last && RB.last.finished) return `<span class="chip on" title="import + regenerate took ${RB.last.wall_s} s">db · ${new Date(RB.last.finished * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
+  return "";
+}
+
 // Re-read the save for the car we are on and re-fingerprint it. Cache-busted on purpose: the
 // point of a re-read is to see a file that just changed.
 async function reread() {
@@ -258,6 +307,7 @@ async function reread() {
       CHANGE.saved = true; CHANGE.ts = j.ts; CHANGE.prevTs = prevTs || null;
       CHANGE.locked = !!(j.deliverable && j.deliverable.locked);
       CHANGE.held = !!(MATCH && MATCH.build);
+      if (!CHANGE.held && RB.state !== "running" && !RB.pending && RB.done_ts !== j.ts) requestRebuild("new save " + j.ts);
     }
     paintPanel();
   } catch (e) { /* daemon busy; the next beat will pick it up */ }
@@ -301,6 +351,9 @@ function paintBar() {
     <div class="idnums">${liveChip()}</div>`;
 }
 function liveChip() {
+  return rebuildChip() + liveChip0();
+}
+function liveChip0() {
   const drift = MATCH && MATCH.build && LIVE_PI != null && MATCH.build.pi != null
     && LIVE_PI !== MATCH.build.pi;
   return `<span class="chip ${LIVE.receiving ? "on" : "r"}">${LIVE.receiving ? "telemetry live" : "no packets"}</span>
@@ -347,6 +400,7 @@ function wireBanner() {
   document.querySelectorAll("#alerts [data-act]").forEach((b) => b.onclick = () => {
     if (b.dataset.act === "dismiss") { CHANGE = null; paintPanel(); }
     else if (b.dataset.act === "ab") abOverlay();
+    else if (b.dataset.act === "rebuild") requestRebuild("manual");
   });
 }
 

@@ -94,6 +94,19 @@ OWN NAME with a RIVALS or EVENT badge before any measurement. The right pane is 
 analysis. They sit side by side in both orientations; that arrangement is the original plan and
 the one the eye expects.
 
+### Live updates pause for a menu, and resume the instant you're back
+A menu frame (`IsRaceOn=0` — any menu, including a fast-travel loading screen) carries nothing
+worth watching: CarOrdinal, CarPI and position all degrade to 0 on that same frame. Treating menu
+dwell as an active data window (the dashboard used to re-poll the save every 4 s while one was
+open) was itself the bug — the actual rigorous signal is the daemon's own re-read on the way OUT
+of a menu (Jett, 2026-09-03: see `fh6-menu-frames-are-dead-time` memory). So `onFrame` now debounces
+the on/off edge (350 ms — a loading-screen cut can blip for a frame or two) and, once a menu is
+committed, PAUSES: the dock tiles and the live speed trace hold at their last on-track state
+instead of repainting from the menu frame's zeroed values, and no reread polls run during the
+dwell. Entry and exit are still the meaningful events they are — one repaint lands on each
+committed edge (the tiles snap to an honest "menu / not driving" render on entry, and a single
+rigorous save re-read fires on exit) — the thing that stops is the churn in between.
+
 ### The map drawer: legend and filters, floated off the map
 The map pane's job is the shape of the road, and a permanent colour key plus a row of filter
 buttons were costing it real pixels — on a course, the map's svg was also sitting inside a boxed

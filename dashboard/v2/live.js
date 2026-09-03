@@ -97,10 +97,15 @@ function carOf(cid) {
            drivetrain: meta.drivetrain, cyl: meta.cyl != null ? meta.cyl : parseInt(bits[2], 10) };
 }
 
-// The game reports IsRaceOn = 0 whenever you are in a menu, which is exactly when upgrades and
-// sliders get changed. So a menu is not dead time: it is the window in which the build we hold
-// can stop being true, and the moment to re-read the save.
-let MENU_SINCE = 0, LAST_REREAD = 0, LIVE_PI = null, LIVE_PI_HELD = false;
+// The game reports IsRaceOn = 0 whenever you are in a menu — including a fast-travel loading
+// screen — and CarOrdinal / CarPI / position all degrade to 0 on that same frame (the menu-frame
+// guards below). A menu carries no live data worth watching, so the dashboard PAUSES its
+// moment-to-moment repainting for as long as it lasts and holds the display at its last on-track
+// state (Jett, 2026-09-03: don't lean on watching menu frames — lean on one rigorous re-read on
+// the way out, which is the moment a menu-made change, saved or not, becomes true of the car).
+const MENU_SETTLE_MS = 350;      // a loading-screen transition can blip on/off for a frame or two;
+                                  // a flip only commits once the new state has held this long
+let MENU_SINCE = 0, MENU_PENDING = null, MENU_PENDING_T = 0, LAST_REREAD = 0, LIVE_PI = null, LIVE_PI_HELD = false;
 let IDENT_SEQ = 0;               // a reload fires two identifies ~50 ms apart; only the last one may write
 
 const fx = (v, d) => (Number.isFinite(+v) ? (+v).toFixed(d) : "—");   // an em dash for anything non-finite off the wire
@@ -108,9 +113,21 @@ let LAST_PANEL = 0;
 function onFrame(f) {
   LIVE.receiving = true;
   LIVE.frame = f;
-  const inMenu = !f.on;
+  const now = Date.now();
+  // THE MENU EDGE, DEBOUNCED. Commit to a new on/off state only once it has held for
+  // MENU_SETTLE_MS — a dropped packet, or a frame or two of stale state right at a loading-screen
+  // cut, must not toggle the pause on and off. was/entered/left describe the COMMITTED edge, the
+  // one thing every consumer below reacts to; the raw per-frame f.on keeps driving the guards
+  // that were already instant and idempotent (PI hold, position hold, identity hold).
+  const raw = !f.on;
+  if (raw !== LIVE.inMenu) { if (MENU_PENDING !== raw) { MENU_PENDING = raw; MENU_PENDING_T = now; } }
+  else MENU_PENDING = null;
   const was = LIVE.inMenu;
-  LIVE.inMenu = inMenu;
+  if (MENU_PENDING !== null && now - MENU_PENDING_T >= MENU_SETTLE_MS) {
+    LIVE.inMenu = MENU_PENDING; MENU_PENDING = null;
+    if (LIVE.inMenu) MENU_SINCE = now;
+  }
+  const inMenu = LIVE.inMenu, entered = inMenu && !was, left = !inMenu && was;
   // A menu frame reports PI 0 and car 0. Zero is "no car", not a PI; letting it through made the
   // drift test read every menu as "the hardware changed", and the status went red in every menu.
   if (f.pi) { if (LIVE_PI !== f.pi && CUR) { vcar(CUR.ordinal).livePI = { pi: f.pi, at: Date.now() }; viewSave(); } LIVE_PI = f.pi; LIVE_PI_HELD = false; }
@@ -130,36 +147,35 @@ function onFrame(f) {
 
   // IN A MENU THE FRAME CARRIES CAR 0. That is the game saying "no car", not a car whose ordinal
   // is zero; identifying it produced a header reading "ordinal 0". Keep the last real car through
-  // menus -- the menu itself is when its build is most likely to change, and we are watching it.
+  // menus — identity is settled by the SAVE, not the live frame, and re-identifying off a zeroed
+  // frame is exactly the kind of menu-time churn this function now holds steady instead.
   const menuFrame = !f.car || String(f.cid || "").startsWith("0|");
   if (!menuFrame && f.cid && (!CUR || CUR.cid !== f.cid)) { identify(carOf(f.cid), "frame"); return; }
 
-  if (LIVE.teleportAt && realPos && Date.now() - LIVE.teleportAt > 1500) { LIVE.teleportAt = 0; locateCourse(); }
-  if (inMenu && !was) MENU_SINCE = Date.now();
-  const now = Date.now();
-  // While a menu is open, re-read the save on a slow beat; the instant it closes, read once more.
-  const dueInMenu = inMenu && now - LAST_REREAD > 4000;
-  const leftMenu = !inMenu && was;
-  // A live PI that no longer matches the build we matched means the car changed under us and the
-  // change has not been saved yet — the strongest signal we get without a new save file.
-  const piDrift = MATCH && MATCH.build && LIVE_PI && MATCH.build.pi != null
+  if (LIVE.teleportAt && realPos && now - LIVE.teleportAt > 1500) { LIVE.teleportAt = 0; locateCourse(); }
+  // ONE rigorous re-read on the way OUT of a menu — the moment a menu-made change (saved or not)
+  // becomes true of the car about to be driven. Nothing polls DURING the dwell any more: a menu
+  // frame has nothing in it worth polling for (see the note above onFrame).
+  const piDrift = f.on && MATCH && MATCH.build && LIVE_PI && MATCH.build.pi != null
     && LIVE_PI !== MATCH.build.pi;
-  if (CUR && (dueInMenu || leftMenu || (piDrift && now - LAST_REREAD > 2500))) {
+  if (CUR && (left || (piDrift && now - LAST_REREAD > 2500))) {
     LAST_REREAD = now;
     reread();
   }
-  // The tiles follow every frame; the panel follows the context — a menu opening or closing
-  // changes what the right pane should show — and otherwise a slow heartbeat, not the packet rate.
-  paintDockTiles();
+  // LIVE UPDATES PAUSE FOR THE DURATION OF A MENU. The tiles and trace repaint only from a real
+  // on-track frame, or exactly once on each committed edge — so the display holds steady through
+  // the dwell instead of flickering to the menu frame's zeroed values ten times a second, and
+  // snaps back the instant the car is back on track.
+  if (f.on || entered || left) paintDockTiles(entered || left);
   runSample(f, now);
-  if (inMenu !== was || now - LAST_PANEL > 2000) { LAST_PANEL = now; paintPanel(); }
+  if (entered || left || (!inMenu && now - LAST_PANEL > 2000)) { LAST_PANEL = now; paintPanel(); }
 }
 
 // THE LIVE RUN: speed against distance for the drive you are on, painted by grip, sampled at
 // 10 Hz — the trace region's content whenever no known course is under the car. A run starts
 // when the car sets off (or the odometer restarts) and keeps the last 90 seconds.
 function runSample(f, now) {
-  if (!f.on) { if (LIVE.run.length) { LIVE.run = []; paintTrace(); } return; }
+  if (!f.on) return;   // hold the trace through the menu — the same run picks back up on return
   if (now - LIVE.runT < 100) return;
   LIVE.runT = now;
   const last = LIVE.run[LIVE.run.length - 1];
@@ -477,7 +493,7 @@ function liveChip0() {
   const drift = MATCH && MATCH.build && LIVE_PI != null && MATCH.build.pi != null
     && LIVE_PI !== MATCH.build.pi;
   return `<span class="chip ${LIVE.receiving ? "on" : "r"}">${LIVE.receiving ? "telemetry live" : "no packets"}</span>
-    ${LIVE.inMenu ? '<span class="chip w">in a menu — watching for changes</span>' : ""}
+    ${LIVE.inMenu ? `<span class="chip w">in a menu since ${new Date(MENU_SINCE).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })} — display paused</span>` : ""}
     ${drift ? `<span class="chip r" title="${LIVE_PI_HELD ? "last seen before the reload; a fresh frame confirms or clears it" : "read from the live frame"}">live PI ${LIVE_PI} ≠ saved ${MATCH.build.pi}${LIVE_PI_HELD ? " · held" : ""}</span>` : ""}
     <span class="chip mono">${n1(LIVE.pps)} pps</span>
     <span class="chip ${CUR && CUR.disk ? "on" : "w"}">${CUR && CUR.disk ? "save read" : "no save"}</span>`;

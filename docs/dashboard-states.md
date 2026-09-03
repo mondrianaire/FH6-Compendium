@@ -61,6 +61,18 @@ panel fetches with the disk tune, and the database adds only what that surface n
 tile's position in the shop grid, and the checklist. With no save on disk it falls back to the
 database's slot walk and says so.
 
+### The last-action line
+One accent-coloured rule, 20px, flush to the very top of the viewport with nothing above it,
+carrying what the lab last did: importing, re-reading, a new save read with its part and slider
+counts, or "database up to date" with the time. It never grows or wraps. The alerts strip below
+keeps only what needs a decision (the which-save picker, the remaining ratification steps).
+
+### The panes: map left, analysis right
+The left pane is the map — the world, or the identified course, whose header carries the TRACK'S
+OWN NAME with a RIVALS or EVENT badge before any measurement. The right pane is the corner
+analysis. They sit side by side in both orientations; that arrangement is the original plan and
+the one the eye expects.
+
 ### No scrollbars, ever
 **Hard rule (Jett, 2026-09-03): the dashboard has zero scrollbars.** All real estate is planned
 and every relevant field is respected. A list that cannot fit its cell does not scroll: it shows

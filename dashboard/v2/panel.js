@@ -126,6 +126,12 @@ function buildStatus() {
 
 /* ------------------------------------------------------------ layout */
 function panelSkeleton(host) {
+  // THE LAST-ACTION LINE. One accent-coloured rule across the whole viewport, flush to the very
+  // top with nothing above it, carrying what the lab last did. It is a status line, not a card:
+  // it never grows, never wraps, and is the only thing outside the panel's own grid.
+  if (!document.getElementById("lastact")) {
+    const la = document.createElement("div"); la.id = "lastact"; document.body.appendChild(la);
+  }
   host.innerHTML = `
     <div class="hdr" id="hdr"></div>
     <div class="trace" id="trace"></div>
@@ -220,7 +226,38 @@ function fitRows(host, noun, keepFirst) {
     used += h; shown++;
   }
 }
+function lastAction() {
+  const el = document.getElementById("lastact"); if (!el) return;
+  let tone = "dim", txt = "", when = "";
+  if (RB.state === "running" || RB.pending) { tone = "warn"; txt = "importing the save into the database"; }
+  else if (RR.busy) { tone = "warn"; txt = "re-reading the save from disk"; }
+  else if (CHANGE) {
+    const n = (CHANGE.sliders || []).length, p = (CHANGE.slots || []).length;
+    tone = CHANGE.kind === "hardware" ? "warn" : CHANGE.kind === "tune" ? "blue" : "ok";
+    txt = (CHANGE.saved ? "new save read" : CHANGE.kind === "hardware" ? "hardware changed, not saved" : "sliders moved, not saved")
+        + (CHANGE.locked ? " · downloaded tune" : "")
+        + (p ? " · " + p + " part" + (p === 1 ? "" : "s") : "") + (n ? " · " + n + " slider" + (n === 1 ? "" : "s") : "");
+    when = CHANGE.ts ? tsLocal(CHANGE.ts) : (CHANGE.at ? new Date(CHANGE.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "");
+  } else if (RB.last && RB.last.finished) { tone = "ok"; txt = "database up to date"; when = new Date(RB.last.finished * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
+  else if (CUR && CUR.disk) { tone = "dim"; txt = "save read · nothing has changed since"; }
+  else { tone = "dim"; txt = MODE.reason || "waiting for the daemon"; }
+  // the connection and the background services live here too: one anchored line carries what the
+  // lab last DID on the left and whether it is still connected on the right. A dot per service,
+  // so the state is legible without reading a word.
+  const dot = (ok, label, title) => `<i class="sdot ${ok === null ? "warnd" : ok ? "okd" : "badd"}" title="${esc(title)}"></i>${esc(label)}`;
+  const dbAt = RB.last && RB.last.finished ? new Date(RB.last.finished * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null;
+  const svc = `<span class="svcs">
+    ${dot(!!LIVE.receiving, LIVE.receiving ? n1(LIVE.pps) + " pps" : "no telemetry", LIVE.receiving ? "the daemon is receiving the game's packets" : "no packets from the game — is the daemon running, and Data Out on?")}
+    ${dot(CUR && CUR.disk ? true : (CUR && CUR.diskErr ? false : null), CUR && CUR.disk ? "save read" : "no save", CUR && CUR.diskErr ? "the daemon could not be reached" : "the tune file on disk for this car")}
+    ${dot(RB.state === "down" ? false : (RB.state === "running" || RB.pending ? null : true), dbAt ? "db " + dbAt : "db", RB.state === "down" ? "the import service is not running: python scripts/rebuild_service.py 8001" : "the database import service")}
+    ${dot(!!WATCH_OK, "live", WATCH_OK ? "this page reloads itself when the code or the data changes" : "the reload channel is down; the page checks the server every minute instead")}
+  </span>`;
+  el.dataset.tone = tone;
+  el.innerHTML = `<b>${esc(txt)}</b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}`;
+}
+
 function paintPanel() {
+  lastAction();
   paintHeader(); paintTrace(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
 }
 
@@ -316,7 +353,7 @@ function paintTrace() {
   // shell first, so the chart can be drawn at the pixels the shell leaves it
   // A REGION EARNS ITS HEIGHT. With nothing to draw the trace is a 34px strip, not 240px of
   // empty chart; the pixels go to the panes, which is where the data is.
-  el.classList.toggle("empty", !r.hasData);
+  el.classList.toggle("quiet", !r.hasData);   // the band never changes size; only its content does
   el.innerHTML = `<div class="thd">${r.head}</div><div class="tbody"></div><div class="tfoot">${r.foot}</div>`;
   fitChips(el.querySelector(".lchips"), TRACE_FIT);
   const host = el.querySelector(".tbody");
@@ -549,9 +586,7 @@ function paintDockTrace() {
 // screens — mass, drivetrain, cylinders, gear count, displacement — lives in the BUILD SHEET,
 // which is one always-present button away.
 let HDR_KEY = null;
-function paintChips() {
-  const c = $("#ftr .fchips"); if (c) c.innerHTML = liveChip();
-}
+function paintChips() { lastAction(); }   // the connection state lives in the anchored top line
 
 // what the header SAYS, per state — pure, so it can be read and tested on its own
 function headerCopy(st, q) {
@@ -749,7 +784,12 @@ function paintLeft() {
   LEFT_KEY = key;
   if (course) {
     const nSel = (TRACE_PICK && TRACE_PICK.key === COURSE.key && TRACE_PICK.ids) ? TRACE_PICK.ids.length : Object.keys(COURSE.traces || {}).length;
-    hd.innerHTML = `Course · <span class="why">${esc(COURSE.name || COURSE.key)} · ${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns · ${nSel} lap${nSel === 1 ? "" : "s"} drawn of ${(COURSE.laps || []).length} on record</span>`;
+    // the track OWNS this pane's title once it is identified: its name, its badge, then the facts
+    const named = !!COURSE.name;
+    const kind = COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null;
+    hd.innerHTML = `<b class="trackname">${esc(named ? COURSE.name : "unnamed course " + COURSE.key)}</b>
+      ${kind ? `<span class="chip w">${kind}</span>` : ""}
+      <span class="why">${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns · ${nSel} of ${(COURSE.laps || []).length} laps drawn</span>`;
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
     body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore })); addLiveDot(body);
   } else {
@@ -1030,7 +1070,7 @@ function paintFooter() {
     cov = `<span class="cov"><span class="why">coverage</span><span class="bar"><i style="width:${pct}%"></i></span>
       <span class="mono">${laps}/${need} laps</span>${laps < need ? '<span class="chip w">not yet outlier-proof</span>' : '<span class="chip on">baseline ready</span>'}</span>`;
   }
-  f.innerHTML = `<span class="fchips">${liveChip()}${WATCH_OK ? "" : '<span class="chip r" title="the page is not receiving live-reload events; it checks the server every minute instead">reload channel down</span>'}</span>
+  f.innerHTML = `
     <span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${MODE.known ? esc(MODE.suggest) + (MODE.held ? " (held)" : "") : "—, waiting"}</span>
     <span class="why">${esc(MODE.reason || "")}</span>
     <span class="chip">baseline · ${BASELINE ? esc(BASELINE.name || BASELINE.container) : "none"}</span>

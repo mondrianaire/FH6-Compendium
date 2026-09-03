@@ -593,3 +593,36 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 .fsheet .fbar{flex-wrap:nowrap;white-space:nowrap}
 .fsheet .fbar button{flex:0 0 auto;white-space:nowrap;height:22px;padding:0 8px;font-size:10.5px}
 .fsheet .fbar .nm{flex:1 1 auto;min-width:0}
+
+/* ---------- the last-action line: flush to the top, nothing above it ---------- */
+#lastact{position:fixed;left:0;right:0;top:0;height:20px;z-index:80;display:flex;align-items:center;gap:10px;
+  padding:0 12px;font:700 10.5px/20px var(--sans);letter-spacing:.08em;text-transform:uppercase;
+  background:var(--lat,var(--mut));color:#0b0d10;overflow:hidden;white-space:nowrap}
+#lastact[data-tone="ok"]{--lat:var(--acc)} #lastact[data-tone="warn"]{--lat:var(--warn)}
+#lastact[data-tone="bad"]{--lat:var(--bad)} #lastact[data-tone="blue"]{--lat:var(--acc2)}
+#lastact[data-tone="dim"]{--lat:#2b3644;color:var(--mut)}
+#lastact span{margin-left:auto;font-weight:400;opacity:.75;font-family:var(--mono);letter-spacing:0}
+body.fixed{padding-top:20px}
+body.fixed main{height:calc(100vh - 46px - 20px)}
+
+/* ---------- map left, corner analysis right — the original arrangement ---------- */
+.panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+@media (orientation: portrait){
+  .panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+}
+#leftHd .trackname{font:800 13px var(--sans);letter-spacing:.01em;color:var(--ink)}
+
+/* ---------- the trace holds its band whether or not it has a line to draw ---------- */
+.trace{height:240px}
+.trace.quiet .tbody{display:grid;place-items:center}
+.trace.quiet .tbody::after{content:"";}
+
+/* the anchored line's right half: one dot per service */
+#lastact .when{margin-left:10px;margin-right:auto;font-weight:400;opacity:.7;font-family:var(--mono);letter-spacing:0;text-transform:none}
+#lastact b{flex:0 0 auto}
+#lastact .svcs{margin-left:auto;display:flex;align-items:center;gap:14px;font-weight:600;letter-spacing:.04em;opacity:.9}
+#lastact .sdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+#lastact .okd{background:#0b3a22;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#lastact .badd{background:#f0616d;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#lastact .warnd{background:#7a5c12;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#lastact[data-tone="dim"] .okd{background:var(--acc)} #lastact[data-tone="dim"] .warnd{background:var(--warn)}

@@ -492,3 +492,24 @@ button.lchip.hid{opacity:.35;text-decoration:line-through}
 .pib-dash { color: var(--muted); margin: 0 3px; font-weight: 700; }
 .hname .pib{flex:0 0 auto}
 .pib{border-radius:2px}
+
+/* the identity cell: name · meta · tune title + by-line · description · STATUS ROW */
+.hid{grid-template-rows:26px 20px 22px minmax(0,1fr) 22px}
+.htune{grid-template-columns:minmax(0,52%) minmax(0,1fr);grid-template-rows:22px;gap:0 10px;padding-top:3px}
+.hid>.tdesc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11.5px;color:var(--ink);opacity:.9;line-height:1.35;min-height:0}
+.hstat{display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;min-width:0;height:22px;border-top:1px solid var(--line);padding-top:2px;font-size:11.5px}
+.hstat .why{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.hstat .steps{flex:0 1 auto;min-width:0;overflow:hidden;gap:6px;flex-wrap:nowrap}
+.hstat .step{white-space:nowrap;font-size:11px}
+.hstat .mini{flex:0 0 auto;padding:0 7px;height:18px;font-size:10px}
+.hstat.warn{color:var(--warn)}.hstat.bad{color:var(--bad)}.hstat.ok{color:var(--acc)}.hstat.blue{color:var(--acc2)}.hstat.dim{color:var(--mut)}
+.hstat.warn .why,.hstat.bad .why,.hstat.ok .why,.hstat.blue .why{color:inherit}
+
+/* a short landscape window: the cells stay concrete but smaller, so the panes keep a share */
+@media (orientation: landscape) and (max-height: 1000px){
+  .trace{height:180px}
+  #alerts{flex-basis:56px;height:56px;max-height:56px}
+  .dock{height:150px}
+  .dtiles{max-height:44px}
+  .dtrace svg.trace{max-height:70px}
+}

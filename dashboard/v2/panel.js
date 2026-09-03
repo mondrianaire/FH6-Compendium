@@ -536,7 +536,12 @@ function paintHeader() {
         <div class="htune">
           <span class="ttl" title="${esc(m && m.c || "")}">${esc(tuneName)}</span>
           <span class="tby">${m && m.creator ? `by <b>${esc(m.creator)}</b>` : ""}${m ? ` · ${m.locked ? "downloaded" : "your own"}` : ""}${m && m.created ? ` · ${m.locked ? "created" : "saved"} ${when(m.created)}` : ""}${nSaves > 1 ? ` · one of ${nSaves} saves` : ""}${st.ambiguous ? ` · <span class="w">which one is not yet certain</span>` : ""}</span>
-          ${m && m.desc ? `<div class="tdesc">${esc(m.desc)}</div>` : ""}
+        </div>
+        <div class="tdesc" title="${esc(m && m.desc || "")}">${m && m.desc ? esc(m.desc) : ""}</div>
+        <div class="hstat ${st.tone}" title="${esc(st.why)}${st.steps && st.steps.length ? " — " + esc(st.steps.map((x, i) => (i + 1) + ". " + x).join("  ")) : ""}">
+          <span class="why">${esc(st.why)}</span>
+          ${st.steps && st.steps.length ? `<span class="steps">${st.steps.map((x, i) => `<span class="step"><i>${i + 1}</i>${esc(x)}</span>`).join("")}</span>` : ""}
+          ${st.rebuild ? `<button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>` : ""}
         </div>
       </div>
     </div>
@@ -553,6 +558,7 @@ function paintHeader() {
     </div>`;
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bb = $("#btnBase"); if (bb) bb.onclick = () => setBaseline(st.twin);
+  h.querySelectorAll('.hstat [data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
   const br = $("#btnReread"); if (br) br.onclick = () => rereadBuild();
   const bc = $("#btnRecount"); if (bc) bc.onclick = () => requestRebuild("recount");
 }
@@ -574,8 +580,9 @@ function paintBanner() {
   const parts = [];
   if (CHANGE) parts.push(changeBanner());
   if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) parts.push(savePicker());
-  const dismissedStatus = CUR && (vcar(CUR.ordinal).dismissed || {}).status === st.key + "|" + ((CUR.disk && CUR.disk.ts) || "");
-  if (st.steps && st.steps.length && !CHANGE && !dismissedStatus) {
+  // the status, its reason and its steps live in the header's status row now; this strip is
+  // for what just happened (a change) and what must be decided (the picker)
+  if (false) {
     parts.push(`<div class="alert ${st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : ""}">
       <b>${esc(st.label)}.</b> ${esc(st.why)}.
       <span class="steps">${st.steps.map((s, i) => `<span class="step"><i>${i + 1}</i>${esc(s)}</span>`).join("")}</span>

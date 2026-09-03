@@ -632,13 +632,16 @@ function headerCopy(st, q) {
 
   // AMBIGUITY OVERRIDES EVERY STATUS: which build is on the car outranks what kind of build it is
   if (q && (q.level === "ambiguous" || q.level === "conflict")) {
-    const ties = mm.n_signature_ties || 0, top = mm.max_gear_seen || 0;
+    const ties = mm.n_signature_ties || 0;
+    // 2026-09-03 (Jett flagged this reading "wild"): the headline used to say "ONE OF 8" right
+    // above a sub-line saying "7 of 8 tie" — two different numbers about the same 8 saves, never
+    // reconciled. Dropped the count from the headline entirely; sub (q.why) is the one place the
+    // count is stated now. `why` used to restate sub in different words ("the live packet carries
+    // only cylinders...") -- same three facts, twice, in two boxes on one card. Replaced with what
+    // sub does NOT say: what happens next.
     return Object.assign(base, { tone: "warn",
-      lead: q.level === "conflict" ? "IDENTITY CONTRADICTED" : "ONE OF " + (nSaves || "?") + " — IDENTITY NOT SETTLED",
-      sub: q.why, why: "the live packet carries only cylinders, drivetrain and PI" + (top ? "; top gear seen " + top : ""),
-      // Jett, 2026-09-03: "one full pull settles it" was a promise the ladder can't reliably keep — the daemon
-      // already runs that comparison passively on every frame, with no drill to ask for. The pick is the one
-      // thing that actually resolves this NOW; driving may also settle it on its own, but that's a bonus, not a step.
+      lead: q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED",
+      sub: q.why, why: "the live telemetry alone can't separate them — cylinders, drivetrain and PI are all it carries",
       step: ties > 1 ? "pick the save below — it may also settle on its own as you keep driving" : "pick the save that is on the car",
       rest: [], primary: { label: "PICK THE SAVE ▸", act: "pick" }, caption: "identity unsettled",
       evidence: (mm.how || "") + (nSaves ? " · " + nSaves + " saves" : "") });

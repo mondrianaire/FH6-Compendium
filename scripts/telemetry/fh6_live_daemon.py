@@ -1172,7 +1172,7 @@ def _stamp_state(match, ordn=None):
     if match.get("how") == "picked":
         return False, "the live car contradicts the save you pinned (engine or gearbox disagree), or it isn't on track right now — the PI stamp needs the pin to match what you're driving"
     if match.get("held"):
-        return False, "identity is HELD from your earlier verified run, not verified right now — a remembered identity is not evidence that this PI belongs to this build. Drive up through the gears again, or pick the equipped save in the 🪪 drawer"
+        return False, "identity is HELD from your earlier verified run, not verified right now — a remembered identity is not evidence that this PI belongs to this build. Pick the equipped save in the 🪪 drawer to confirm it now, or it may re-verify on its own as you keep driving"
     # SAY WHAT IS ACTUALLY AMBIGUOUS. The tie filter (see `ties`) is CYLINDERS plus "gearbox not yet ruled out
     # by a gear you have used" — PI is not in it. Claiming the builds "share this engine + PI" sent the user
     # hunting for a matching build that does not exist: the live car read PI 805, a number no save has ever
@@ -1188,7 +1188,7 @@ def _stamp_state(match, ordn=None):
                 f"(saves have {sorted({int(x) for x in _pis})}) — this build has not been stamped before. ")
     else:
         _why = f"{_n} saved builds share this engine and PI. "
-    return False, _why + "Drive up through the gears, or pick the equipped save in the 🪪 drawer — a pick the live car does not contradict is accepted."
+    return False, _why + "Pick the equipped save in the 🪪 drawer — a pick the live car does not contradict is accepted immediately; it may also settle on its own as you keep driving."
 
 
 def _enrich_engine_desc(deliverable, ordn, verified=False):
@@ -1408,15 +1408,15 @@ def _build_union(deliverable, ordn, match=None):
                     note = f"{g_conf} gear{'s' if g_conf > 1 else ''} disagree with the save — competing values shown on the rows"
                 fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "conflict", note)
             elif g_meas:
-                fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "agree" if g_meas >= g_tot else "tele-fill",
-                    None if g_meas >= g_tot else f"{g_tot - g_meas} gear{'s' if g_tot - g_meas > 1 else ''} not yet driven at full throttle")
+                fld("Gear ratios", f"{g_tot} gears (verified band)", f"{g_meas} measured", "agree",
+                    None if g_meas >= g_tot else f"{g_tot - g_meas} gear{'s' if g_tot - g_meas > 1 else ''} not yet telemetry-confirmed, but already exact from the save")
             else:
-                fld("Gear ratios", f"{g_tot} gears (band-derived ~85%)", None, "await", "a WOT run up through the gears measures every ratio exactly")
-            if g_meas < g_tot:
-                # NOT an identity claim (2026-09-03: that promise was false — see _pick_meta, which needs ~3
-                # clean gears, not every gear, and already runs without being asked). This ask is only about
-                # precision: turning the band-derived ratios into telemetry-measured ones.
-                ask("gear-ladder", "full-throttle up through every gear — measures exact ratios", "gearing exact", 1)
+                # 2026-09-03 (Jett, final): the [0.48, 6.00] global band is VERIFIED — reproduces the
+                # game's own GEARING tab to 0.01 on every gear of a 9-speed, from the save alone, no
+                # driving. This used to say "~85%" and ask for a WOT run "to measure exact ratios";
+                # both were wrong, since data/global-slider-ranges.json has carried the verified band
+                # since 2026-09-01. No ask() here any more — there is nothing left to ask for.
+                fld("Gear ratios", f"{g_tot} gears (verified band)", None, "agree", None)
         # -- peak hp (feeds the engine descriptor)
         if not sig.get("hp_peak"):
             ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)

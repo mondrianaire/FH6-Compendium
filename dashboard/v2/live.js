@@ -615,10 +615,13 @@ function matchQuality(m) {
     + m.live_pi + " but the chosen save is " + m.chosen_cyl + " cyl / PI " + m.chosen_pi };
   const settled = ties <= 1 || !!m.gear_disambig || !!m.picked_ok;
   if (n > 1 && !settled) {
+    // 2026-09-03: this was the THIRD independent copy of "one full pull settles it" found in one
+    // sweep (after panel.js's headline and this file's own picker lead below) -- three files each
+    // wrote their own version of a promise the ladder can't reliably keep. Fixed together; see
+    // [[fh6-gear-ladder-identity-solved]]. Picking is the one sure answer; driving may also do it.
     return { level: "ambiguous", why: ties + " of " + n + " saved builds tie on cylinders, drivetrain and PI"
       + (m.max_gear_seen ? "; top gear seen so far " + m.max_gear_seen : "; no gear evidence yet")
-      + (m.ladder_tied ? "; the ratio ladder is still tied" : "")
-      + " — one full pull through the gears settles it" };
+      + (m.ladder_tied ? "; the ratio ladder is still tied" : "") };
   }
   const how = m.gear_disambig ? "settled by the gearbox" + (m.max_gear_seen ? " (top gear seen " + m.max_gear_seen + ")" : "")
             : m.picked_ok ? "your pick, and the live car agrees with it"
@@ -655,7 +658,7 @@ function pickerHTML(m, chosen, pinned, q) {
     : `${m.n_signature_ties || alive.length} builds share this car's cylinders, drivetrain and PI.`
     + (top ? ` Top gear seen so far: <b>${top}</b>${alive.length < (m.builds || []).length ? ` — ${(m.builds || []).length - alive.length} ruled out.` : "."}` : " No gear evidence yet.")
     + (twins.length ? ` ${twins.map((g) => alive.filter((b) => +b.gears === g).map((b) => b.label).join("·")).join(" and ")} share a box, so the count alone cannot separate them; the ratio ladder held in the database can.` : "")
-    + ` <b>One full pull through the gears settles it</b>, or pick below and it stays picked.`;
+    + ` <b>Pick below and it stays picked</b> — that settles it now; a few more gears while you drive may also settle it on their own.`;
   return `<div class="picker"><div class="why">${lead}
     ${pinned ? '<button class="mini" data-pin="">clear the pin</button>' : ""}</div>
     <div class="picks">${rows}</div></div>`;
@@ -858,7 +861,12 @@ function sliderRow(row) {
   const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
   const val = rel
     ? `<span class="slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%</span>`
-    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global band — exact on the next gear-ladder drive"' : row.src === "db" ? ' title="absolute value from the database: the save\'s slider position on the game\'s own range for this car"' : ""}>${esc(String(row.value))}<small>${esc(row.unit || "")}</small>${row.src === "db" ? '<em class="src">db</em>' : ""}</span>`
+    // 2026-09-03: "exact on the next gear-ladder drive" was wrong for every field it could apply to
+    // -- gears/final drive are already exact from the verified global band (no drive needed at
+    // all), and every OTHER derived field becomes exact via the 🎯 calibration card (a typed
+    // in-game reading), never by driving. Say what's actually true: a shared band, not this car's
+    // own measured range.
+    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="from a global band shared across cars, not this car\'s own measured range"' : row.src === "db" ? ' title="absolute value from the database: the save\'s slider position on the game\'s own range for this car"' : ""}>${esc(String(row.value))}<small>${esc(row.unit || "")}</small>${row.src === "db" ? '<em class="src">db</em>' : ""}</span>`
       + (row.conflict ? `<span class="cflag" title="the save decodes ${esc(String(row.conflict.save))}; telemetry measures ${esc(String(row.conflict.telemetry))}">⚠ save ${esc(String(row.conflict.save))}</span>`
         : row.agree ? `<span class="aflag" title="the save and telemetry agree">✓×2</span>` : "");
   return `<div class="sl"><div class="slt"><span class="sll">${esc(row.label || row.field)}</span>${val}</div>

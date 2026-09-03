@@ -626,3 +626,51 @@ body.fixed main{height:calc(100vh - 46px - 20px)}
 #lastact .badd{background:#f0616d;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
 #lastact .warnd{background:#7a5c12;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
 #lastact[data-tone="dim"] .okd{background:var(--acc)} #lastact[data-tone="dim"] .warnd{background:var(--warn)}
+
+/* ================== ONE INSTRUMENT, NOT SIX CARDS ==================
+   The dashboard is a single dense surface: no rounded corners, no gaps between regions, no
+   floating panels. Regions are separated by a 1px rule and nothing else — the way an instrument
+   panel or a terminal reads, and the way a screen that claims to use every available byte should
+   look. Every pixel between two facts is a pixel not spent on a fact. */
+body.fixed main{padding:0;gap:0;border-top:0}
+.hdr,.trace,#alerts,.dock,.ftr,.pane,.panes,.pane>.body,.pane>header,
+.alert,.hart,.hart .art,.hev,.hact .prim,.hact .second,.icobtn,.chip,.pill,.mini,.big,
+.dt,.lchip,.srowb,.fsheet,.fsheet .fbar,.tabs2 button,.dock .spans button,
+.hdec,.trace .tbody,.dtrace svg.trace,.pib,.thumb,.art{border-radius:0}
+/* every band is separated by a rule, never by a gap */
+.hdr{border:0;border-bottom:1px solid var(--line)}
+.trace{border:0;border-bottom:1px solid var(--line);padding:4px 10px}
+#alerts{border:0;border-bottom:1px solid var(--line);padding:0}
+#alerts .alert{border-left-width:3px;border-top:0;border-right:0;border-bottom:1px solid var(--line);margin:0}
+.panes{gap:0;border-bottom:1px solid var(--line)}
+.pane{border:0;border-right:1px solid var(--line)}
+.panes > .pane:last-child{border-right:0}
+.dock{border:0;border-bottom:1px solid var(--line);padding:4px 10px}
+.ftr{border:0;border-top:0}
+/* the header's own cells butt up against each other, divided by rules */
+#hdr{column-gap:0;padding:0}
+#hdr > .hart{border-right:1px solid var(--line)}
+#hdr > .hid{padding:8px 12px;border-right:1px solid var(--line)}
+#hdr > .hact{padding:8px 10px;gap:6px}
+.hact .prim,.hact .second{width:100%}
+.hev{border:1px solid var(--line);border-left:0;border-right:0}
+.hdec{border-left-width:3px;margin:0 -12px -8px;padding:6px 12px}
+/* the trace and dock lose their inner frames too */
+.trace .tbody{background:var(--bg)}
+.dtrace svg.trace{background:var(--bg)}
+.dt{border:0;border-right:1px solid var(--line);border-radius:0}
+.dtiles{gap:0}
+.dt:last-child{border-right:0}
+
+/* the service strip owns its own dark ground, so its states read on any accent colour */
+#lastact .svcs{margin-left:auto;height:20px;display:flex;align-items:center;gap:0;background:#07090c;
+  padding:0;font:700 10px var(--sans);letter-spacing:.06em;text-transform:uppercase}
+#lastact .svc{display:flex;align-items:center;gap:6px;height:20px;padding:0 11px;border-left:1px solid #1b2330;color:#9fb0c4}
+#lastact .svc em{font-style:normal;opacity:.75}
+#lastact .svc b{font-family:var(--mono);letter-spacing:0;text-transform:none;color:#e6edf5;font-weight:700}
+#lastact .sdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 auto}
+#lastact .svc.ok .sdot{background:#00d27a;box-shadow:0 0 6px rgba(0,210,122,.6)}
+#lastact .svc.w .sdot{background:#e3b341;box-shadow:0 0 6px rgba(227,179,65,.6)}
+#lastact .svc.bad .sdot{background:#f0616d;box-shadow:0 0 6px rgba(240,97,109,.6)}
+#lastact .svc.bad{color:#f0616d}
+#lastact .svc.bad b{color:#f0616d}

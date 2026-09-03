@@ -244,13 +244,15 @@ function lastAction() {
   // the connection and the background services live here too: one anchored line carries what the
   // lab last DID on the left and whether it is still connected on the right. A dot per service,
   // so the state is legible without reading a word.
-  const dot = (ok, label, title) => `<i class="sdot ${ok === null ? "warnd" : ok ? "okd" : "badd"}" title="${esc(title)}"></i>${esc(label)}`;
+  // each service names ITSELF and its state: a coloured dot alone was unreadable on a coloured band
+  const dot = (ok, name, val, title) => `<span class="svc ${ok === null ? "w" : ok ? "ok" : "bad"}" title="${esc(title)}">
+    <i class="sdot"></i><em>${esc(name)}</em>${val ? `<b>${esc(val)}</b>` : ""}</span>`;
   const dbAt = RB.last && RB.last.finished ? new Date(RB.last.finished * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null;
   const svc = `<span class="svcs">
-    ${dot(!!LIVE.receiving, LIVE.receiving ? n1(LIVE.pps) + " pps" : "no telemetry", LIVE.receiving ? "the daemon is receiving the game's packets" : "no packets from the game — is the daemon running, and Data Out on?")}
-    ${dot(CUR && CUR.disk ? true : (CUR && CUR.diskErr ? false : null), CUR && CUR.disk ? "save read" : "no save", CUR && CUR.diskErr ? "the daemon could not be reached" : "the tune file on disk for this car")}
-    ${dot(RB.state === "down" ? false : (RB.state === "running" || RB.pending ? null : true), dbAt ? "db " + dbAt : "db", RB.state === "down" ? "the import service is not running: python scripts/rebuild_service.py 8001" : "the database import service")}
-    ${dot(!!WATCH_OK, "live", WATCH_OK ? "this page reloads itself when the code or the data changes" : "the reload channel is down; the page checks the server every minute instead")}
+    ${dot(!!LIVE.receiving, "telemetry", LIVE.receiving ? n1(LIVE.pps) + " pps" : "none", LIVE.receiving ? "the daemon is receiving the game's packets" : "no packets from the game — is the daemon running, and Data Out on?")}
+    ${dot(CUR && CUR.disk ? true : (CUR && CUR.diskErr ? false : null), "save", CUR && CUR.disk ? "read" : (CUR && CUR.diskErr ? "unreachable" : "none"), CUR && CUR.diskErr ? "the daemon could not be reached" : "the tune file on disk for this car")}
+    ${dot(RB.state === "down" ? false : (RB.state === "running" || RB.pending ? null : true), "database", RB.state === "down" ? "service down" : (RB.state === "running" || RB.pending ? "importing" : (dbAt || "idle")), RB.state === "down" ? "the import service is not running: python scripts/rebuild_service.py 8001" : "the database import service")}
+    ${dot(!!WATCH_OK, "auto-reload", WATCH_OK ? "on" : "off", WATCH_OK ? "this page reloads itself when the code or the data changes" : "the reload channel is down; the page checks the server every minute instead")}
   </span>`;
   el.dataset.tone = tone;
   el.innerHTML = `<b>${esc(txt)}</b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}`;

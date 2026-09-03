@@ -61,6 +61,12 @@ panel fetches with the disk tune, and the database adds only what that surface n
 tile's position in the shop grid, and the checklist. With no save on disk it falls back to the
 database's slot walk and says so.
 
+### One instrument, not six cards
+No rounded corners, no gaps between regions, no floating panels. Bands are divided by a single
+1px rule and butt against each other, edge to edge; the header's three cells do the same. The
+surface should read as an instrument panel that spends every pixel on a fact — which is what the
+project claims to be.
+
 ### The last-action line
 One accent-coloured rule, 20px, flush to the very top of the viewport with nothing above it,
 carrying what the lab last did: importing, re-reading, a new save read with its part and slider

@@ -557,7 +557,7 @@ function paintHeader() {
         <div class="hengine"></div><div class="htune"></div><div class="tdesc"></div>
         <div class="hstat dim"><span class="why">get in a car in the game — the header fills the moment a frame names it</span></div></div></div>
       <div class="hright"><div class="hact"><button class="big prim" disabled>BUILD SHEET ▸</button>
-        <button class="big sis wide" id="btnRefresh">⟳ REFRESH</button></div></div>`;
+        <button class="icobtn" id="btnRefresh" title="re-read the save from disk">⟳</button></div></div>`;
     const bx0 = $("#btnRefresh"); if (bx0) bx0.onclick = () => rereadBuild();
     return;
   }
@@ -621,10 +621,10 @@ function paintHeader() {
     </div>
     <div class="hright">
       <div class="hact">
-        <button class="big prim" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ BUILD SHEET · TARGET HELD" : "BUILD SHEET ▸"}</button>
-        ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ TESTING BASELINE" : "SET TESTING BASELINE"}</button>` : ""}
-        <button class="big sis wide" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
-          title="re-read this car's save from disk, and import it if the database does not hold it yet. Both happen by themselves — on leaving a menu, and whenever a save appears that is not held; this is the manual override.">${RR.busy ? "READING…" : (RB.state === "running" || RB.pending) ? "IMPORTING…" : "⟳ REFRESH"}</button>
+        <button class="big prim" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ SHEET · TARGET" : "BUILD SHEET ▸"}</button>
+        ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ BASELINE" : "SET BASELINE"}</button>` : ""}
+        <button class="icobtn" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
+          title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
       </div>
     </div>`;
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
@@ -955,7 +955,7 @@ function paintFooter() {
     cov = `<span class="cov"><span class="why">coverage</span><span class="bar"><i style="width:${pct}%"></i></span>
       <span class="mono">${laps}/${need} laps</span>${laps < need ? '<span class="chip w">not yet outlier-proof</span>' : '<span class="chip on">baseline ready</span>'}</span>`;
   }
-  f.innerHTML = `<span class="fchips">${liveChip()}</span>
+  f.innerHTML = `<span class="fchips">${liveChip()}${WATCH_OK ? "" : '<span class="chip r" title="the page is not receiving live-reload events; it checks the server every minute instead">reload channel down</span>'}</span>
     <span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${MODE.known ? esc(MODE.suggest) + (MODE.held ? " (held)" : "") : "—, waiting"}</span>
     <span class="why">${esc(MODE.reason || "")}</span>
     <span class="chip">baseline · ${BASELINE ? esc(BASELINE.name || BASELINE.container) : "none"}</span>

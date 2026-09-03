@@ -590,3 +590,15 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
   .hact{grid-template-columns:1fr 1fr}
 }
 .fsheet .fbar button.on{color:var(--mag);border-color:var(--mag)}
+
+/* the actions are ONE row at the top of the band, not a column that eats it */
+.hdr{grid-template-columns:240px minmax(340px,1fr) auto}
+.hright{width:auto;display:block}
+.hact{display:flex;align-items:flex-start;gap:6px;height:auto}
+.hact .big{height:32px;width:auto;padding:0 12px;font-size:11.5px;white-space:nowrap}
+.hact .big.prim{height:32px;font-size:12px}
+.icobtn{height:32px;width:32px;flex:0 0 auto;background:var(--panel2);border:1px solid var(--line2);color:var(--mut);
+  border-radius:2px;font-size:14px;line-height:1;cursor:pointer}
+.icobtn:hover{color:var(--acc2);border-color:var(--acc2)}
+.icobtn:disabled{opacity:.5;cursor:progress}
+@media (max-width:1000px){ .hact{flex-wrap:wrap} }

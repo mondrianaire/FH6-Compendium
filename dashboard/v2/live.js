@@ -41,10 +41,13 @@ async function viewLive(host) {
   panelSkeleton(host);
   viewLoad();
   if (!IDENT) IDENT = await get("identity.json");
-  await panelBoot();
-  paintPanel();
+  try { await panelBoot(); } catch (e) { console.error("[boot] panelBoot", e); }
+  // A THROW HERE USED TO COST THE LIVE CHANNELS. paintPanel ran before connect(), so one bad
+  // render left the page with no telemetry and no live-reload — frozen on that build for good.
+  try { paintPanel(); } catch (e) { console.error("[boot] first paint", e); }
   connect();
   connectWatch();
+  watchVersion();
   // no frame within 1.5 s (a menu, or a parked car): identify the car the previous page held, as held
   setTimeout(() => { if (!CUR && !LIVE.frame && ctxFresh(30 * 60e3) && CTX.cid && !String(CTX.cid).startsWith("0|")) identify(carOf(CTX.cid), "held"); }, 1500);
 }
@@ -320,7 +323,7 @@ function ensureHeld() {
 // LIVE RELOAD: the rebuild service watches the dashboard's own files and its data, and tells
 // the page. `code` -> reload (the ?v= bump is how a code change is announced); `data` -> drop
 // the api cache and re-read identity, world, diagnosis and the car. Nothing here polls.
-let WS = null, DATA_AT = 0;
+let WS = null, DATA_AT = 0, WATCH_OK = false;
 async function seedRebuild() {
   try {
     const j = await fetch(REBUILD + "/status").then((r) => r.json());
@@ -329,6 +332,31 @@ async function seedRebuild() {
     paintChips();
   } catch (e) { RB.state = "down"; }
 }
+// THE BACKSTOP. The reload channel can die in ways the page cannot feel: the service restarts,
+// a laptop sleeps, a background tab drops its EventSource, an exception happened before the
+// listener was attached. So on every return to the tab — and once a minute while it is visible —
+// the page asks the server which asset version index.html is serving now, and reloads if it is
+// not the one it is running. Cheap (one no-store fetch of a 2 kB document) and it cannot miss.
+// read at CALL time, not at load time: live.js is parsed before panel.js is in the DOM, so
+// reading the tag here at module scope produced null and silently disabled the whole backstop.
+const myVersion = () => { const t = (document.querySelector('script[src*="live.js"]') || {}).src || ""; const m = /v=([0-9]+)/.exec(t); return m ? m[1] : null; };
+let VER_T = 0;
+async function watchVersion(force) {
+  const mine = myVersion();
+  if (!mine) return;
+  const now = Date.now();
+  if (!force && now - VER_T < 30000) return;
+  VER_T = now;
+  try {
+    const html = await fetch("index.html", { cache: "no-store" }).then((r) => r.text());
+    const m = /panel\.js\?v=([0-9]+)/.exec(html);
+    if (m && m[1] !== mine) { console.info("[watch] server is on v" + m[1] + ", this page is v" + mine + " — reloading"); location.reload(); }
+  } catch (e) { /* server down: nothing to do */ }
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) watchVersion(true); });
+window.addEventListener("focus", () => watchVersion(true));
+setInterval(() => { if (!document.hidden) watchVersion(); }, 60000);
+
 function connectWatch() {
   if (WS) return;
   seedRebuild();
@@ -342,7 +370,8 @@ function connectWatch() {
       try { const j = JSON.parse(e.data); if (j.rc != null) RB.last = { finished: Date.now() / 1000, wall_s: j.wall_s, rc: j.rc, tail: [] }; } catch (x) {}
       await afterRebuild();                            // a run started anywhere (a save, the button, a shell) lands here
     });
-    WS.onerror = () => { /* the service is down; reconnects by itself */ };
+    WS.onerror = () => { WATCH_OK = false; paintFooter(); setTimeout(() => watchVersion(true), 2000); };
+    WS.onopen = () => { WATCH_OK = true; paintFooter(); watchVersion(true); };
   } catch (e) { WS = null; }
 }
 // REREAD BUILD: the strongest re-read there is — identify the car again from the live frame

@@ -1,0 +1,398 @@
+/* FH6 Lab v2 — every number on screen is a COLUMN read from data/fh6.db.
+ *
+ * The old dashboard parsed a 13 MB bundle on every load and re-derived part names, slider units
+ * and lap coverage in the browser. This one fetches only the view it is showing and renders what
+ * the database already decided. If a value looks wrong here, it is wrong in the database, and
+ * that is the point: one place to fix it.
+ */
+"use strict";
+
+const API = "api/";
+const cache = new Map();
+async function get(path) {
+  if (cache.has(path)) return cache.get(path);
+  const r = await fetch(API + path);
+  if (!r.ok) throw new Error(path + ": " + r.status);
+  const j = await r.json();
+  cache.set(path, j);
+  return j;
+}
+
+const $ = (s, r) => (r || document).querySelector(s);
+const el = (h) => { const d = document.createElement("div"); d.innerHTML = h.trim(); return d.firstChild; };
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const n0 = (v) => v == null ? "—" : Math.round(v).toLocaleString();
+const n1 = (v) => v == null ? "—" : (+v).toFixed(1);
+const n2 = (v) => v == null ? "—" : (+v).toFixed(2);
+const secs = (v) => v == null ? "—" : (+v).toFixed(2) + " s";
+// ONE class design language (v1 ecea4cd): the in-game PI badge — the class tile art with the PI
+// number in the black cell beside it — on every surface. The letter alone is the same badge
+// without the number; nothing else may draw a class.
+const PI_CLASSES = { D: 1, C: 1, B: 1, A: 1, S1: 1, S2: 1, R: 1, X: 1 };
+function piBadge(cls, pi, sm) {
+  const u = cls ? String(cls).toUpperCase().trim() : null;
+  const cell = pi != null && pi !== "" ? `<i>${esc(String(pi))}</i>` : "";
+  const wrap = `pib${sm ? " pib--sm" : ""}`;
+  if (!u || !PI_CLASSES[u]) return (cell || u) ? `<span class="${wrap}"><b style="background:var(--panel2)">${esc(u || "?")}</b>${cell}</span>` : "";
+  return `<span class="${wrap} pib-${u.toLowerCase()}" title="class ${esc(u)}${pi != null ? " · PI " + esc(String(pi)) : ""}"><img class="pib-img" src="../assets/badges/class-${u.toLowerCase()}.png" alt="${esc(u)}" onerror="this.outerHTML='<b>${esc(u)}</b>'">${cell}</span>`;
+}
+const clsBadge = (c) => piBadge(c, null, true);
+const KG_LB = 2.2046226;
+
+/* ---------------------------------------------------------------- views */
+const VIEWS = [
+  { k: "live", lbl: "Dashboard", f: (h) => viewLive(h) },
+  { k: "overview", lbl: "Overview", f: viewOverview },
+  { k: "cars", lbl: "Cars", f: viewCars },
+  { k: "builds", lbl: "Builds", f: viewBuilds },
+  { k: "courses", lbl: "Courses", f: viewCourses },
+  { k: "evidence", lbl: "Evidence", f: viewEvidence },
+];
+
+/* ============================================================ OVERVIEW */
+async function viewOverview(host) {
+  const ix = await get("index.json");
+  const t = ix.totals;
+  const cards = [
+    ["cars", t.cars, "cars in the game's own table", ""],
+    ["parts", t.parts_named, "parts named of " + n0(t.parts), ""],
+    ["builds", t.containers, "saved tunes, in " + n0(t.packages) + " hardware packages", "b"],
+    ["ready", t.ready, "of " + n0(t.containers) + " clone-ready", ""],
+    ["courses", t.courses, "courses learned from telemetry", "b"],
+    ["laps", t.laps, "laps, " + n0(t.trace_points) + " trace samples", "b"],
+  ];
+  host.append(el(`<div class="grid cards">${cards.map(([, v, l, c]) =>
+    `<div class="stat"><div class="n ${c}">${n0(v)}</div><div class="l">${esc(l)}</div></div>`).join("")}</div>`));
+
+  host.append(el(`<h3>where each layer came from</h3>`));
+  const rows = ix.runs.map((r) => `<tr><td class="mono">${esc(r.kind)}</td>
+      <td class="num">${n0(r.n_rows)}</td><td class="dim mono">${esc(r.finished_utc || "")}</td></tr>`).join("");
+  host.append(el(`<div class="panel tight"><table><thead><tr><th>import</th>
+    <th class="right">rows</th><th>last run</th></tr></thead><tbody>${rows}</tbody></table></div>`));
+
+  host.append(el(`<h3>table sizes</h3>`));
+  const groups = { "ref_": "the game's truth", "tune_": "saves", "hw_": "packages", "lap": "telemetry", "course": "telemetry", "session": "telemetry", "obs_": "our observations", "plan_": "materialized" };
+  const items = Object.entries(ix.counts).filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1]).slice(0, 24);
+  host.append(el(`<div class="panel"><div class="chips">${items.map(([k, v]) =>
+    `<span class="chip">${esc(k)} <b class="mono">${n0(v)}</b></span>`).join("")}</div></div>`));
+}
+
+/* ================================================================ CARS */
+async function viewCars(host) {
+  const cars = await get("cars.json");
+  const bar = el(`<div class="bar">
+    <input type="search" id="q" placeholder="search 660 cars…" style="width:230px">
+    <select id="cls"><option value="">every class</option>${["D", "C", "B", "A", "S1", "S2", "R", "X"]
+      .map((c) => `<option>${c}</option>`).join("")}</select>
+    <select id="dt"><option value="">any drivetrain</option><option>FWD</option><option>RWD</option><option>AWD</option></select>
+    <label class="chip"><input type="checkbox" id="mine"> only cars I have driven or built</label>
+    <span class="why" id="count"></span></div>`);
+  host.append(bar);
+  const wrap = el(`<div class="panel tight scroll"><table><thead><tr>
+    <th>car</th><th>class</th><th class="right">PI</th><th class="right">kg</th>
+    <th>drive</th><th>engine</th><th class="right">builds</th><th class="right">laps</th>
+    <th class="right">cost</th></tr></thead><tbody id="tb"></tbody></table></div>`);
+  host.append(wrap);
+
+  function draw() {
+    const q = $("#q").value.trim().toLowerCase(), c = $("#cls").value, d = $("#dt").value,
+      mine = $("#mine").checked;
+    const rows = cars.filter((x) =>
+      (!q || (x.name || "").toLowerCase().includes(q)) &&
+      (!c || x.class === c) && (!d || x.dt === d) &&
+      (!mine || x.builds > 0 || x.laps > 0));
+    $("#count").textContent = rows.length + " of " + cars.length;
+    $("#tb").innerHTML = rows.slice(0, 400).map((x) => `<tr>
+      <td>${esc(x.name)}</td><td>${clsBadge(x.class)}</td>
+      <td class="num">${n0(x.pi)}</td><td class="num">${n0(x.kg)}</td>
+      <td class="dim">${esc(x.dt || "")}</td>
+      <td class="dim">${x.cyl ? esc(x.cyl) + "cyl " : ""}${x.cc ? (x.cc / 1000).toFixed(1) + "L " : ""}${esc(x.asp || "")}</td>
+      <td class="num">${x.builds ? `<span class="chip on">${x.builds}</span>` : ""}</td>
+      <td class="num">${x.laps ? `<span class="chip b">${x.laps}</span>` : ""}</td>
+      <td class="num dim">${x.cost ? n0(x.cost) : ""}</td></tr>`).join("");
+  }
+  ["#q", "#cls", "#dt", "#mine"].forEach((s) => $(s).addEventListener("input", draw));
+  draw();
+}
+
+/* ============================================================== BUILDS */
+async function viewBuilds(host) {
+  const pk = await get("packages.json");
+  const split = el(`<div class="grid split">
+    <div><div class="bar"><input type="search" id="q" placeholder="search builds…" style="width:100%"></div>
+      <div class="panel tight scroll" style="max-height:78vh"><table><thead><tr><th>build</th>
+      <th class="right">parts</th></tr></thead><tbody id="lst"></tbody></table></div></div>
+    <div id="detail"><div class="panel why">pick a build to see the parts it is made of and every
+      tune saved on it.</div></div></div>`);
+  host.append(split);
+
+  function list() {
+    const q = $("#q").value.trim().toLowerCase();
+    const rows = pk.filter((p) => !q || (p.car + " " + (p.label || "")).toLowerCase().includes(q));
+    $("#lst").innerHTML = rows.slice(0, 300).map((p) => `<tr class="click" data-hw="${esc(p.hw)}">
+      <td><div>${esc(p.label || "(unnamed)")}</div>
+        <div class="why">${esc(p.car)}${p.locked ? ' <span class="chip w">downloaded</span>' : ""}
+        ${p.n > 1 ? `<span class="chip">${p.n} tunes</span>` : ""}</div></td>
+      <td class="num">${p.n_parts}</td></tr>`).join("");
+    $("#lst").querySelectorAll("tr").forEach((tr) =>
+      tr.addEventListener("click", () => { $("#lst").querySelectorAll("tr").forEach((x) => x.classList.remove("sel")); tr.classList.add("sel"); showBuild(tr.dataset.hw); }));
+  }
+  $("#q").addEventListener("input", list);
+  list();
+}
+
+async function showBuild(hw) {
+  const host = $("#detail");
+  host.innerHTML = `<div class="panel why">loading…</div>`;
+  const b = await get("build/" + hw + ".json");
+  const t0 = b.tunes[b.tunes.length - 1] || {};
+  host.innerHTML = "";
+  host.append(el(`<div class="panel"><div class="chips">
+    <b>${esc(t0.name || "(unnamed)")}</b> <span class="chip b">${esc(b.car)}</span>
+    ${t0.kg ? `<span class="chip">${n0(t0.kg)} kg · ${n0(t0.kg * KG_LB)} lb</span>` : ""}
+    ${t0.locked ? '<span class="chip w">downloaded, locked</span>' : '<span class="chip">own save</span>'}
+    <span class="chip mono">${esc(hw.slice(0, 8))}</span></div></div>`));
+
+  // parts, grouped by the menu area you would walk in the shop
+  const byArea = {};
+  b.parts.filter((p) => p.pid != null).forEach((p) => (byArea[p.area || "—"] = byArea[p.area || "—"] || []).push(p));
+  const areas = Object.entries(byArea).map(([area, ps]) => `<h3>${esc(area)}</h3>
+    <div class="panel tight"><table><tbody>${ps.map((p) => `<tr>
+      <td class="dim" style="width:150px">${esc(p.slot.replace(/_/g, " "))}</td>
+      <td>${esc(p.name || "—")}${p.tile ? ` <span class="chip">tile ${p.tile}${p.tiles ? " of " + p.tiles : ""}</span>` : ""}
+        ${p.shop ? "" : '<span class="chip m">Paint and Customize</span>'}</td>
+      <td class="num dim">${p.pid}</td></tr>`).join("")}</tbody></table></div>`).join("");
+  host.append(el(`<div>${areas}</div>`));
+
+  // every tune saved on this hardware
+  b.tunes.slice().reverse().forEach((t) => host.append(tuneSheet(t)));
+}
+
+function tuneSheet(t) {
+  const groups = {};
+  (t.sliders || []).forEach((s) => (groups[s.grp] = groups[s.grp] || []).push(s));
+  const body = Object.entries(groups).map(([g, ss]) => `<h3>${esc(g)}</h3>` + ss.map((s) => {
+    const pct = (s.lo != null && s.hi != null && s.hi > s.lo) ? (s.norm * 100) : (s.locked ? 100 : s.norm * 100);
+    const dv = s.deflt ? "" : "";
+    return `<div class="sl ${s.locked ? "locked" : ""}">
+      <div class="lb">${esc(s.label || s.slider)}</div>
+      <div class="track"><div class="fill" style="width:${Math.max(0, Math.min(100, pct)).toFixed(1)}%"></div>
+        ${s.deflt ? '<div class="tick" style="left:' + Math.max(0, Math.min(99, pct)).toFixed(1) + '%"></div>' : ""}</div>
+      <div class="val">${s.v == null ? "—" : n2(s.v)} <span class="dim">${esc(s.unit || "")}</span></div></div>`;
+  }).join("")).join("");
+  const gears = (t.gears || []).length
+    ? `<h3>gearing</h3><div class="chips">${t.gears.map((g, i) =>
+      `<span class="chip${i === 0 ? " b" : ""}">${i === 0 ? "final" : i}<b class="mono"> ${n2(g)}</b></span>`).join("")}</div>` : "";
+  return el(`<div class="panel" style="margin-top:12px">
+    <div class="chips" style="margin-bottom:8px"><b>${esc(t.name || "(unnamed)")}</b>
+      <span class="chip mono">${esc((t.saved || "").replace("T", " ").replace("Z", ""))}</span>
+      ${t.locked ? '<span class="chip w">locked</span>' : ""}</div>
+    ${body}${gears}
+    <div class="legend"><span><i style="background:var(--acc)"></i>value in its band</span>
+      <span><i style="background:var(--warn)"></i>still the install default</span>
+      <span><i style="background:var(--line2)"></i>locked: this part gives no adjustment</span></div></div>`);
+}
+
+/* ============================================================= COURSES */
+async function viewCourses(host) {
+  const cs = await get("courses.json");
+  const split = el(`<div class="grid split">
+    <div><div class="bar"><input type="search" id="q" placeholder="search courses…" style="width:100%"></div>
+      <div class="panel tight scroll" style="max-height:78vh"><table><thead><tr><th>course</th>
+      <th class="right">best</th></tr></thead><tbody id="lst"></tbody></table></div></div>
+    <div id="cdetail"><div class="panel why">pick a course. The grey line is the game's own
+      centre-line for the route; the green line is where you actually drove.</div></div></div>`);
+  host.append(split);
+  function list() {
+    const q = $("#q").value.trim().toLowerCase();
+    const rows = cs.filter((c) => !q || ((c.name || "") + c.key).toLowerCase().includes(q));
+    $("#lst").innerHTML = rows.map((c) => `<tr class="click" data-k="${esc(c.key)}">
+      <td><div>${esc(c.name || c.key)}</div><div class="why">
+        ${n0(c.len)} m · ${c.turns || 0} turns · ${c.lap_rows || 0} laps
+        ${c.rivals ? '<span class="chip w">Rivals</span>' : ""}
+        ${c.route_id ? `<span class="chip ${c.match === "verified" || c.match === "probable" ? "on" : ""}">Route ${esc(c.route_id)}</span>` : ""}
+      </div></td><td class="num">${c.best ? secs(c.best) : ""}</td></tr>`).join("");
+    $("#lst").querySelectorAll("tr").forEach((tr) => tr.addEventListener("click", () => {
+      $("#lst").querySelectorAll("tr").forEach((x) => x.classList.remove("sel"));
+      tr.classList.add("sel"); showCourse(tr.dataset.k);
+    }));
+  }
+  $("#q").addEventListener("input", list);
+  list();
+}
+
+async function showCourse(key) {
+  const host = $("#cdetail");
+  host.innerHTML = `<div class="panel why">loading…</div>`;
+  const c = await get("course/" + key.replace(/\//g, "_") + ".json");
+  host.innerHTML = "";
+  const r = c.route;
+  host.append(el(`<div class="panel"><div class="chips">
+    <b>${esc(c.name || c.key)}</b>
+    <span class="chip">${n0(c.len)} m</span>
+    <span class="chip">${(c.turns || []).length} turns</span>
+    <span class="chip b">${(c.laps || []).length} laps</span>
+    ${c.rivals ? '<span class="chip w">Rivals</span>' : ""}
+    ${r && r.route_id ? `<span class="chip ${r.match_kind === "verified" ? "on" : r.match_kind === "probable" ? "b" : "w"}">
+       game Route ${esc(r.route_id)} · ${esc(r.match_kind)}</span>` : '<span class="chip r">no game route identified</span>'}
+    ${r && r.mean_dev_m != null ? `<span class="chip">${n1(r.mean_dev_m)} m off the centre-line</span>` : ""}
+    ${r && r.covered != null ? `<span class="chip">${Math.round(r.covered * 100)}% of the route driven</span>` : ""}
+  </div></div>`));
+
+  host.append(courseMap(c));
+
+  const laps = (c.laps || []);
+  const clean = laps.filter((l) => !l.void && !l.partial);
+  if (clean.length) host.append(speedTrace(c, clean));
+
+  host.append(el(`<h3>laps</h3><div class="panel tight scroll" style="max-height:40vh">
+    <table><thead><tr><th>car</th><th class="right">time</th><th class="right">arc</th>
+    <th class="right">cover</th><th>state</th><th>session</th></tr></thead><tbody>
+    ${laps.map((l) => `<tr><td class="mono dim">${esc(l.cid || "")}</td>
+      <td class="num">${l.t ? secs(l.t) : "—"}</td><td class="num dim">${n0(l.arc)}</td>
+      <td class="num dim">${l.cov != null ? Math.round(l.cov * 100) + "%" : ""}</td>
+      <td>${l.void ? '<span class="chip r">void</span>' : ""}${l.partial ? '<span class="chip w">partial</span>' : ""}
+          ${l.impacts ? `<span class="chip">${l.impacts} hits</span>` : ""}${l.solo ? '<span class="chip on">clean run</span>' : ""}</td>
+      <td class="dim mono" style="font-size:10.5px">${esc(l.sid || "")}</td></tr>`).join("")}
+    </tbody></table></div>`));
+}
+
+function bounds(paths) {
+  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+  paths.forEach((p) => p.forEach(([x, z]) => {
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z;
+  }));
+  return [x0, x1, z0, z1];
+}
+
+// THE MAP AND THE TRACE MUST COUNT THE SAME LAPS. The map drew ONE aggregate path — the course
+// model's own centre-line of where you have driven — while the trace drew every lap on record, so
+// Edamame read "40 laps" above a map showing one. The map now draws the SAME set the trace has
+// selected (opts.laps: the ids the trace kept after its preset and filters), each lap faint, the
+// foregrounded lap solid, and says how many it drew.
+function courseMap(c, opts) {
+  opts = opts || {};
+  const ids = opts.laps && opts.laps.length ? opts.laps : Object.keys(c.traces || {});
+  const paths = ids.map((id) => (c.traces || {})[id]).filter((t) => t && t.length > 2)
+                   .map((t) => t.map((q) => [q[3], q[4]]).filter((q) => q[0] != null));
+  const foreIx = opts.fore != null ? ids.indexOf(String(opts.fore)) : -1;
+  const ours = c.path || [];
+  const theirs = (c.route && c.route.path) || [];
+  if (!ours.length && !theirs.length) return el(`<div class="panel why">no geometry for this course</div>`);
+  const [x0, x1, z0, z1] = bounds([ours, theirs].concat(paths).filter((p) => p.length));
+  const W = 760, H = 380, pad = 18;
+  const sx = (x1 - x0) || 1, sz = (z1 - z0) || 1, s = Math.min((W - 2 * pad) / sx, (H - 2 * pad) / sz);
+  const px = (x) => pad + (x - x0) * s, py = (z) => H - pad - (z - z0) * s;
+  const line = (p, col, w, op) => p.length ? `<polyline fill="none" stroke="${col}" stroke-width="${w}"
+      opacity="${op}" stroke-linejoin="round" points="${p.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>` : "";
+  const turns = (c.turns || []).filter((t) => t.x != null).map((t) =>
+    `<g><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="3.5" fill="var(--acc2)" opacity=".9"><title>${esc(t.id)} · ${n0(t.r)} m radius</title></circle>
+     <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="9" fill="var(--mut)">${esc(t.id)}</text></g>`).join("");
+  return el(`<div class="panel" style="margin-top:12px">
+    <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-pad="${pad}">
+      ${line(theirs, "#3d4a5a", 9, 0.55)}
+      ${line(theirs, "#8fa0b3", 1.4, 0.9)}
+      ${paths.map((p, i) => (i === foreIx ? "" : line(p, "#00d27a", 1, 0.28))).join("")}
+      ${foreIx >= 0 ? line(paths[foreIx], "#4ea3ff", 2.2, 0.95) : line(ours, "#00d27a", 2, 0.95)}
+      ${turns}<g id="traceMark"></g>
+    </svg>
+    <div class="legend">
+      <span><i style="background:#7d8b9c"></i>the game's centre-line for this route</span>
+      <span><i style="background:#00d27a"></i>${paths.length ? paths.length + (paths.length === 1 ? " lap drawn" : " laps drawn") : "where you actually drove"}</span>
+      ${foreIx >= 0 ? `<span><i style="background:#4ea3ff"></i>the lap the trace foregrounds</span>` : ""}
+      <span><i style="background:#4ea3ff"></i>a turn the analyzer established</span></div></div>`);
+}
+
+const GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];
+function speedTrace(c, laps) {
+  const ids = Object.keys(c.traces || {});
+  if (!ids.length) return el(`<div class="panel why">no speed trace stored for this course</div>`);
+  const W = 760, H = 190, padL = 30, padB = 18;
+  let smax = 0, vmax = 0;
+  ids.forEach((id) => c.traces[id].forEach((p) => { if (p[0] > smax) smax = p[0]; if (p[1] > vmax) vmax = p[1]; }));
+  vmax *= 1.06;
+  const px = (s) => padL + (s / smax) * (W - padL - 8), py = (v) => (H - padB) - (v / vmax) * (H - padB - 10);
+  const byId = {}; laps.forEach((l) => (byId[l.id] = l));
+  const best = ids.map((id) => byId[id]).filter(Boolean).sort((a, b) => a.t - b.t)[0];
+  const paths = ids.map((id) => {
+    const l = byId[id]; const pts = c.traces[id];
+    const isBest = best && l && l.id === best.id;
+    // grip-paint the fastest lap, leave the rest as context
+    if (!isBest) return `<polyline fill="none" stroke="var(--dim)" stroke-width="1" opacity=".5"
+        points="${pts.map((p) => px(p[0]).toFixed(1) + "," + py(p[1]).toFixed(1)).join(" ")}"/>`;
+    const segs = []; let run = [pts[0]], st = pts[0][2] | 0;
+    for (let i = 1; i < pts.length; i++) {
+      const k = pts[i][2] | 0;
+      if (k !== st) { run.push(pts[i]); segs.push([st, run]); run = [pts[i]]; st = k; } else run.push(pts[i]);
+    }
+    segs.push([st, run]);
+    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${GRIP[k] || GRIP[0]}" stroke-width="2"
+        stroke-linecap="round" points="${pp.map((p) => px(p[0]).toFixed(1) + "," + py(p[1]).toFixed(1)).join(" ")}"/>`).join("");
+  }).join("");
+  const ticks = (c.turns || []).filter((t) => t.s != null).map((t) =>
+    `<line x1="${px(t.s).toFixed(1)}" y1="8" x2="${px(t.s).toFixed(1)}" y2="${H - padB}" stroke="var(--line2)" opacity=".7"/>
+     <text x="${px(t.s).toFixed(1)}" y="${H - 5}" font-size="8" fill="var(--dim)" text-anchor="middle">${esc(t.id)}</text>`).join("");
+  const axis = [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10;
+    return `<text x="2" y="${(py(v) + 3).toFixed(1)}" font-size="9" fill="var(--dim)">${v}</text>`; }).join("");
+  return el(`<div class="panel" style="margin-top:12px">
+    <div class="chips" style="margin-bottom:6px"><b>speed</b>
+      <span class="why">mph against distance · ${ids.length} laps · the fastest is painted by grip state</span></div>
+    <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px">${axis}${ticks}${paths}</svg>
+    <div class="legend"><span><i style="background:#00d27a"></i>within grip</span>
+      <span><i style="background:#4ea3ff"></i>front slipping</span>
+      <span><i style="background:#f0616d"></i>rear slipping</span>
+      <span><i style="background:#c678dd"></i>all four</span>
+      <span><i style="background:#e3b341"></i>impact</span>
+      <span><i style="background:#576372"></i>other laps</span></div></div>`);
+}
+
+/* ============================================================ EVIDENCE */
+async function viewEvidence(host) {
+  const d = await get("evidence.json");
+  host.append(el(`<div class="bar"><input type="search" id="q" placeholder="search claims…" style="width:280px">
+    <select id="cf"><option value="">any confidence</option>${["verified", "read", "derived", "proven", "unknown"]
+      .map((c) => `<option>${c}</option>`).join("")}</select>
+    <span class="why">Every claim we hold, and where it came from. A claim is only as good as its source.</span></div>`));
+  const box = el(`<div id="ev"></div>`); host.append(box);
+  function draw() {
+    const q = $("#q").value.trim().toLowerCase(), cf = $("#cf").value;
+    box.innerHTML = d.evidence.filter((e) =>
+      (!q || (e.subject + " " + e.claim).toLowerCase().includes(q)) && (!cf || e.conf === cf))
+      .map((e) => `<div class="rule ${esc(e.conf)}">
+        <div><b class="mono">${esc(e.subject)}</b> <span class="chip">${esc(e.conf)}</span></div>
+        <div>${esc(e.claim)}</div>
+        <div class="src">${esc(e.source || "")}</div></div>`).join("");
+  }
+  ["#q", "#cf"].forEach((s) => $(s).addEventListener("input", draw));
+  draw();
+}
+
+/* ================================================================ boot */
+async function route() {
+  const k = (location.hash || "#live").slice(1).split("/")[0];
+  const v = VIEWS.find((x) => x.k === k) || VIEWS[0];
+  document.querySelectorAll("#nav button").forEach((b) => b.classList.toggle("on", b.dataset.k === v.k));
+  const host = $("#view"); host.innerHTML = "";
+  // the Dashboard is a fixed-height instrument panel, every other view is a document
+  document.body.classList.toggle("fixed", v.k === "live");
+  host.classList.toggle("live", v.k === "live");
+  try { await v.f(host); }
+  catch (e) { host.innerHTML = `<div class="panel"><b>could not render ${esc(v.k)}</b>
+    <div class="why">${esc(e.message)}</div>
+    <div class="why">Run <span class="mono">python scripts/db/build_web.py</span> to regenerate the data files.</div></div>`; }
+}
+
+(async function boot() {
+  $("#nav").innerHTML = VIEWS.map((v) =>
+    `<button data-k="${v.k}" onclick="location.hash='${v.k}'">${v.lbl}</button>`).join("");
+  window.addEventListener("hashchange", route);
+  try {
+    const ix = await get("index.json");
+    // SAY WHICH CODE IS ON SCREEN. Two people looked at two different renders and argued about
+    // the same layout; the document never said which build it was. The asset tag settles it.
+    const v = ((document.querySelector('script[src*="panel.js"]') || {}).src || "").split("v=")[1] || "?";
+    $("#stamp").innerHTML = `<span title="the dashboard code on screen">ui v${esc(v)}</span> · built ${esc((ix.built || "").replace("T", " ").replace("Z", ""))}`;
+  } catch (e) { $("#stamp").textContent = "no data — run build_web.py"; }
+  route();
+})();

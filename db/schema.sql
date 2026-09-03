@@ -661,10 +661,17 @@ CREATE TABLE IF NOT EXISTS ref_route (
   -- surface is 'paved' / 'loose' when one class holds >= 80% of the points and 'mixed'
   -- otherwise, because a route that is 60% dirt is not a dirt route, it is a mixed one and the
   -- tune has to survive both halves.
-  surface       TEXT,                  -- paved | loose | mixed | NULL
+  -- NOT A MATERIAL. This is the route's position in the free-roam ROAD NETWORK, collapsed
+  -- to on-network (paved) vs off-network (loose). Two adversarial passes confirmed the
+  -- layer is spatially sound -- 0.17% contradiction across 49,734 cells shared by two or
+  -- more routes -- and refuted the claim that it names a surface. The game's own
+  -- vocabulary (media/physics/NatalSurfaceTypes.xml) has 58 named surfaces including
+  -- gravel, sand, snow and cobblestone; nothing here distinguishes them. Use it to pick
+  -- road versus offroad tyres, never to claim a car is on asphalt.
+  road_class    TEXT,                  -- paved | loose | mixed | NULL
   pct_loose     REAL,                  -- fraction of classified points that are dirt or trail
-  surface_known REAL,                  -- fraction of points that got any class at all
-  surface_mix   TEXT                   -- JSON {road_type: fraction}, ordered by size
+  road_class_known REAL,                  -- fraction of points that got any class at all
+  road_class_mix   TEXT                   -- JSON {road_type: fraction}, ordered by size
 );
 
 CREATE TABLE IF NOT EXISTS ref_route_point (
@@ -721,7 +728,7 @@ CREATE TABLE IF NOT EXISTS ref_route_turn (
   -- what the road AT this turn is made of. Read at the turn's own apex point, which is one of
   -- the .owt centre-line points the turn was derived from, so there is no spatial guess in the
   -- along-route direction. See the ROAD SURFACE block below.
-  surface       TEXT,                    -- paved | loose | NULL
+  road_class    TEXT,                    -- paved | loose | NULL
   road_type     TEXT,                    -- a | b | freeway | dirt | trail | hidden | shortcut
   road_profile  TEXT,                    -- authored material, e.g. a_gravel, ld_overpass_tarmac
   offroad       INTEGER,                 -- 0 | 1, NatalSurfaceTypes OffRoadness of the class
@@ -774,7 +781,7 @@ CREATE INDEX IF NOT EXISTS ix_route_turn ON ref_route_turn(route_id, seq);
 CREATE TABLE IF NOT EXISTS ref_route_surface (
   route_id     TEXT NOT NULL REFERENCES ref_route(route_id) ON DELETE CASCADE,
   i            INTEGER NOT NULL,
-  surface      TEXT,                    -- paved | loose | NULL
+  road_class   TEXT,                    -- paved | loose | NULL
   road_type    TEXT,                    -- the game's own word: a|b|freeway|dirt|trail|...
   road_profile TEXT,                    -- spline_profile, the authored material; NULL on 44%
   offroad      INTEGER,                 -- NatalSurfaceTypes OffRoadness of the class

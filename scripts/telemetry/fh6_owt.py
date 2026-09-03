@@ -46,28 +46,71 @@ def parse(path, full=False):
         b = fh.read()
     if b[:4] != MAGIC:
         raise ValueError("%s: not an .owt (magic %r)" % (path, b[:4]))
-    n = struct.unpack_from("<I", b, COUNT_OFF)[0]
+    # THE HEADER COUNT IS NOT AUTHORITATIVE. The file is a ForzaTech chunk:
+    #   [4cc 'FTWO'][u32 version][u32 hash][u32 payload_size] payload [16-byte footer copy]
+    # and payload_size at 0x0C is what actually bounds the record array. Six routes hold MORE
+    # records than the u32 at 0x24 claims -- Route281 (our Highway Circuit), Route351, Route1281
+    # and Route8008 each hold 2 extra and open with 2 non-finite sentinel records, so trusting
+    # the header count silently dropped the last two real points of the polyline.
+    n_hdr = struct.unpack_from("<I", b, COUNT_OFF)[0]
+    payload = struct.unpack_from("<I", b, 0x0C)[0]
+    span = 0x10 + payload - HDR                  # bytes of record array the chunk declares
+    # Trust the payload ONLY when it divides into whole records and does not run past the file.
+    # A fractional fit means the payload carries something after the array that is not a record;
+    # believing it there pulled garbage in and produced NaN route lengths on two files, which is
+    # a worse failure than the two dropped points it was meant to fix.
+    exact = (span > 0 and span % STRIDE == 0)
+    n_fit = span // STRIDE if exact else None
+    n = n_fit if (n_fit is not None and 0 < n_fit <= (len(b) - HDR) // STRIDE) else n_hdr
     need = HDR + n * STRIDE
     if need > len(b):
         raise ValueError("%s: %d points need %d bytes, file is %d" % (path, n, need, len(b)))
     # 14 floats per record: 0-2 position, 3-5 the lateral half-width vector (perpendicular to
     # travel on 98% of steps), 6-8 the unit surface normal (banking), 9-13 sparse link data.
     # full=True keeps all of them; the matcher only needs position and 3 floats is far cheaper.
+    #
+    # RECORD BYTES 44..51 ARE NOT FLOATS.  Slots [11] and [12] are four u16 -- that is why they
+    # read as 65537 (0x00010001) and 131074 (0x00020002): two equal u16 side by side. All four
+    # copies carry the same value on 486,424 of 568,336 points (85.59%), and the value is a
+    # world-space road-class code: 0x0110/0x0111 land on nav road_type 'dirt' with 0.993/0.997
+    # purity, 0x0020 on 'trail' with 0.998, 0x0000/0x0001 on paved 'a'/'b'/'freeway'. Bit 15 is
+    # a separate flag (22,984 points); mask it off before comparing codes. The code is exposed
+    # as 'codes' so a surface can be attached per point with no spatial matching at all -- see
+    # scripts/db/import_surface.py, which uses it to reach the points the free-roam nav graph
+    # does not cover.
     fmt = "<14f" if full else "<3f"
-    raw = [struct.unpack_from(fmt, b, HDR + i * STRIDE) for i in range(n)]
+    raw, codes = [], []
+    for i in range(n):
+        o = HDR + i * STRIDE
+        raw.append(struct.unpack_from(fmt, b, o))
+        codes.append(struct.unpack_from("<H", b, o + 44)[0])
     # A few routes carry non-finite points (unfinished or stitched geometry). Drop them rather
     # than the whole file: the surviving polyline is still the route's real centre-line.
-    pts = [p for p in raw if all(math.isfinite(v) for v in p[:3])]
+    keep = [i for i, p in enumerate(raw) if all(math.isfinite(v) for v in p[:3])]
+    pts = [raw[i] for i in keep]
+    codes = [codes[i] for i in keep]
     n_bad = len(raw) - len(pts)
     if len(pts) < 2:
         raise ValueError("%s: only %d finite points of %d" % (path, len(pts), n))
-    L = sum(math.dist(pts[i][::2], pts[i + 1][::2]) for i in range(len(pts) - 1))
-    closed = math.dist(pts[0][::2], pts[-1][::2]) if len(pts) > 1 else 0.0
+    # x and z NAMED, not strided. `p[::2]` happens to be (x, z) on a 3-float point and becomes
+    # seven dimensions once full=True keeps all 14 -- including the unexplained slots, whose
+    # garbage made two routes report a NaN length. A stride is not an index.
+    xz = lambda p: (p[0], p[2])
+    L = sum(math.dist(xz(pts[i]), xz(pts[i + 1])) for i in range(len(pts) - 1))
+    closed = math.dist(xz(pts[0]), xz(pts[-1])) if len(pts) > 1 else 0.0
     xs = [p[0] for p in pts]
     zs = [p[2] for p in pts]
     rid = os.path.splitext(os.path.basename(path))[0]
+    # The u32 at 0x24 is not always the record count: on Route281/351/8008 the file fits
+    # exactly two more 56-byte records than it claims, and on Route132/1181/1281 it fits a
+    # non-integral number, so their tails are not the usual 24 bytes. The header count is
+    # kept because every stored point index (ref_route_point.i) is defined by it; n_fit
+    # records the discrepancy so it stays visible instead of being rediscovered.
+    n_fit = (len(b) - HDR - 24) / float(STRIDE)
     return {"route_id": rid[5:] if rid.lower().startswith("route") else rid,
             "file": os.path.basename(path), "n": len(pts), "n_dropped": n_bad, "points": pts,
+            "codes": codes,
+            "n_hdr": n, "n_fit": round(n_fit, 2),
             "length_m": round(L, 1), "gap_m": round(closed, 1),
             "is_loop": closed < 60.0,
             "bbox": [round(min(xs)), round(max(xs)), round(min(zs)), round(max(zs))]}

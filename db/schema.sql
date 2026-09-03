@@ -656,7 +656,15 @@ CREATE TABLE IF NOT EXISTS ref_route (
   n_points    INTEGER,
   is_loop     INTEGER,
   bbox_x0     REAL, bbox_x1 REAL, bbox_z0 REAL, bbox_z1 REAL,
-  source      TEXT
+  source      TEXT,
+  -- road surface rolled up over the whole centre-line; see ROAD SURFACE below for the source.
+  -- surface is 'paved' / 'loose' when one class holds >= 80% of the points and 'mixed'
+  -- otherwise, because a route that is 60% dirt is not a dirt route, it is a mixed one and the
+  -- tune has to survive both halves.
+  surface       TEXT,                  -- paved | loose | mixed | NULL
+  pct_loose     REAL,                  -- fraction of classified points that are dirt or trail
+  surface_known REAL,                  -- fraction of points that got any class at all
+  surface_mix   TEXT                   -- JSON {road_type: fraction}, ordered by size
 );
 
 CREATE TABLE IF NOT EXISTS ref_route_point (
@@ -710,6 +718,142 @@ CREATE TABLE IF NOT EXISTS ref_route_turn (
   length_m      REAL,
   width_m       REAL,                    -- road width at the apex
   bank_deg      REAL,                    -- surface tilt off horizontal at the apex
+  -- what the road AT this turn is made of. Read at the turn's own apex point, which is one of
+  -- the .owt centre-line points the turn was derived from, so there is no spatial guess in the
+  -- along-route direction. See the ROAD SURFACE block below.
+  surface       TEXT,                    -- paved | loose | NULL
+  road_type     TEXT,                    -- a | b | freeway | dirt | trail | hidden | shortcut
+  road_profile  TEXT,                    -- authored material, e.g. a_gravel, ld_overpass_tarmac
+  offroad       INTEGER,                 -- 0 | 1, NatalSurfaceTypes OffRoadness of the class
+  surface_src   TEXT,                    -- nav (named string) | owt_code (per-point code)
+  surface_m     REAL,                    -- metres from the apex to the nav node it was read at
   PRIMARY KEY (route_id, turn_id)
 ) WITHOUT ROWID;
 CREATE INDEX IF NOT EXISTS ix_route_turn ON ref_route_turn(route_id, seq);
+
+-- ============================================================================
+-- ROAD SURFACE  (added 2026-09-02)
+--
+-- Radius, width and banking said what a corner is SHAPED like. This says what it is MADE of,
+-- and that is the input that decides which tyre compound is legal and whether a grip-side
+-- slider recommendation applies at all: NatalSurfaceTypes.xml gives every surface an
+-- OffRoadness of 0 or 1, and all 41 rows of List_TireCompound carry a separate friction bank
+-- for each. Advice given without it is advice for a road we have not checked is a road.
+--
+-- SOURCE (primary), granularity PER SPLINE, i.e. per road segment, ~20 m between nodes:
+--   media/openworld/brio/freeroam/Brio_00.nav -- the free-roam road graph, 38,473 nodes over
+--   1,532 splines. Every spline carries a `road_type` attribute whose VALUE IS A STRING IN THE
+--   FILE'S OWN BLOB: a, b, freeway, dirt, trail, hidden, shortcut, evolving_world. Nothing is
+--   inferred to read it. `spline_profile` adds the authored material on 864 splines
+--   (a_gravel, ld_a_dirt_road, ld_overpass_tarmac, urban_*, skislope_a1/b1/c1, dragstrip_*).
+--   'evolving_world' is a road that changes with the world's weekly state, not a surface; its
+--   6 splines carry the real class in evolving_world_road_type and the reader follows that.
+--
+-- SOURCE (secondary), granularity PER POINT, exact, no spatial match:
+--   Route<id>.owt record bytes 44..51 -- four u16, previously logged as unexplained floats
+--   [11] and [12]. The low u16 is a world-space road-class code. Cross-tabbed against the nav
+--   road_type over 56,838 sampled centre-line points it agrees at 0.993 (0x0110 dirt), 0.997
+--   (0x0111 dirt), 0.998 (0x0020 trail), 0.981 (0x00E2 evolving_world), and 0x0000/0x0001 are
+--   96%/98% paved. It is used where the free-roam graph does not reach -- closed circuits,
+--   airfields, interiors -- which is 389 of 3,811 turns.
+--
+-- surface is the tuning-decisive two-way split, and it is not a vocabulary judgement: the
+-- classes were ordered by three independent measurements that all agree. Median centre-line
+-- roughness |y[i-1]-2y[i]+y[i+1]| runs freeway 0.13 mm < shortcut 0.46 < a 1.22 < hidden 1.40
+-- < b 1.85 << trail 3.14 < dirt 4.52; median node width runs freeway 14 m > a 12 > b 10 >
+-- dirt 9 > trail 5; and the authored profile names say tarmac on the first group and
+-- gravel/dirt/skislope on the second.
+--   surface  'paved' (a, b, freeway, hidden, shortcut) | 'loose' (dirt, trail) | NULL unknown
+--   offroad  0 | 1, the NatalSurfaceTypes OffRoadness of that class, so it joins the
+--            compound tables without a lookup
+-- ============================================================================
+
+-- Per centre-line point, on exactly the index set of ref_route_point (even i), so the two
+-- join 1:1. Consecutive rows are usually identical -- surface comes in long runs -- which is
+-- the point: this table is where a route's dirt SECTION becomes queryable.
+CREATE TABLE IF NOT EXISTS ref_route_surface (
+  route_id     TEXT NOT NULL REFERENCES ref_route(route_id) ON DELETE CASCADE,
+  i            INTEGER NOT NULL,
+  surface      TEXT,                    -- paved | loose | NULL
+  road_type    TEXT,                    -- the game's own word: a|b|freeway|dirt|trail|...
+  road_profile TEXT,                    -- spline_profile, the authored material; NULL on 44%
+  offroad      INTEGER,                 -- NatalSurfaceTypes OffRoadness of the class
+  code         INTEGER,                 -- .owt bytes 44..45, bit 15 masked off
+  nav_m        REAL,                    -- distance to the nav node this was read from
+  src          TEXT NOT NULL,           -- nav | owt_code
+  PRIMARY KEY (route_id, i)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS ix_route_surface ON ref_route_surface(route_id, surface);
+
+-- ============================================================================
+-- DIAGNOSIS  (added 2026-09-02)
+--
+-- The failure catalogue and the detectors both already existed; nothing here is new science.
+-- The v1 tuning tab carries a symptom -> fix matrix, and the analyzer already emits bottoming,
+-- brake deficits and lock, launch slip, yaw pulses, crests and per-sample grip state. This joins
+-- them: each detected occurrence is placed on the turn it happened at, so the question stops
+-- being "does this car understeer" and becomes "it pushes at T5 and T15, on 9 of 11 laps".
+--
+-- An occurrence is evidence, not a verdict. Counting them per turn and per setup is what turns
+-- a one-lap impression into a statistic, and what lets an A/B say which failures a change fixed.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS ref_symptom (
+  symptom       TEXT PRIMARY KEY,
+  phase         TEXT,                    -- entry | mid | exit | braking | straight | kerbs | any
+  primary_fix   TEXT,
+  secondary_fix TEXT,
+  tertiary_fix  TEXT,
+  verify_test   TEXT,
+  detector      TEXT,                    -- how this project detects it, in words
+  source        TEXT                     -- where the fix came from; provenance is not optional
+);
+
+CREATE TABLE IF NOT EXISTS diag_event (
+  event_id    INTEGER PRIMARY KEY,
+  symptom     TEXT NOT NULL REFERENCES ref_symptom(symptom),
+  session_id  TEXT,
+  cid         TEXT,
+  lap_id      INTEGER REFERENCES lap(lap_id) ON DELETE CASCADE,
+  container   TEXT,                      -- the setup that was driving, when known
+  hw_hash     TEXT,
+  route_key   TEXT,
+  turn_id     TEXT,                      -- NULL means it happened away from any turn
+  phase       TEXT,
+  t           REAL,
+  mph         REAL,
+  severity    REAL,                      -- 0..1, comparable within one symptom only
+  detail      TEXT,
+  source      TEXT NOT NULL              -- bottoming | braking | crest | pulse | grip
+);
+CREATE INDEX IF NOT EXISTS ix_diag_turn ON diag_event(route_key, turn_id, symptom);
+CREATE INDEX IF NOT EXISTS ix_diag_setup ON diag_event(container, symptom);
+
+-- Which corners cost you the most, and how often -- the rollup the tuning view reads.
+CREATE VIEW IF NOT EXISTS v_diag_by_turn AS
+SELECT d.route_key, c.name AS course, d.turn_id, g.kind, g.radius_m, g.width_m, g.bank_deg,
+       d.symptom, s.phase, s.primary_fix,
+       COUNT(*) AS occurrences,
+       COUNT(DISTINCT d.lap_id) AS laps_affected,
+       COUNT(DISTINCT d.container) AS setups_affected,
+       ROUND(AVG(d.severity), 3) AS mean_severity
+FROM diag_event d
+JOIN ref_symptom s ON s.symptom = d.symptom
+LEFT JOIN course c ON c.route_key = d.route_key
+LEFT JOIN course_route cr ON cr.route_key = d.route_key
+LEFT JOIN ref_route_turn g ON g.route_id = cr.route_id AND g.turn_id = d.turn_id
+WHERE d.turn_id IS NOT NULL
+GROUP BY d.route_key, d.turn_id, d.symptom;
+
+-- What a given setup keeps doing wrong, wherever it happens.
+CREATE VIEW IF NOT EXISTS v_diag_by_setup AS
+SELECT d.container, t.tune_name, t.ordinal, r.full_name AS car, d.symptom, s.phase,
+       s.primary_fix, s.secondary_fix,
+       COUNT(*) AS occurrences, COUNT(DISTINCT d.lap_id) AS laps_affected,
+       COUNT(DISTINCT d.turn_id) AS turns_affected, ROUND(AVG(d.severity), 3) AS mean_severity
+FROM diag_event d
+JOIN ref_symptom s ON s.symptom = d.symptom
+LEFT JOIN tune_container t ON t.container = d.container
+LEFT JOIN ref_car r ON r.ordinal = t.ordinal
+WHERE d.container IS NOT NULL
+GROUP BY d.container, d.symptom;

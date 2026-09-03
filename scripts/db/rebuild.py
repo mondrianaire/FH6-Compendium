@@ -30,6 +30,7 @@ STAGES = [
     ("routes", "import_routes.py", "the game's route centre-lines and how our courses map on"),
     ("corners", "import_corners.py", "what every lap did at every road-derived turn"),
     ("observations", "import_observations.py", "human evidence, name grading, clone readiness"),
+    ("diagnosis", "import_diagnosis.py", "failure catalogue x detectors, placed on turns"),
 ]
 
 

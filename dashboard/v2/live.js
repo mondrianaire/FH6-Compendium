@@ -828,11 +828,15 @@ function shopMenus(b, dl) {
   if (dl && (dl.menus || []).length) {
     const used = new Set();
     return dl.menus.map((m) => {
-      const rows = m.rows.map((it) => { const p = partFor(b, it.item); if (p) used.add(p.slot); return partRow(it, p); });
+      // derived_level rows (the "engine" build-level readout) are NOT a shop tile -- the daemon
+      // already excludes them from PI cost for exactly that reason (fh6_tune_decode.py). Showing
+      // one here as an ordinary clickable row sent people hunting for a part that doesn't exist.
+      const rows = m.rows.filter((it) => !it.derived_level).map((it) => { const p = partFor(b, it.item); if (p) used.add(p.slot); return partRow(it, p); });
       // installed parts the deliverable did not name (intercooler, restrictor plate…) join their menu
       const extra = (b.parts || []).filter((p) => !used.has(p.slot) && p.pid != null && !p.stock && sameArea(p.area, m.menu));
       extra.forEach((p) => used.add(p.slot));
-      return { name: m.menu, n: m.rows.filter((x) => !x.stock).length + extra.length, of: m.rows.length + extra.length,
+      const real = m.rows.filter((x) => !x.derived_level);   // the "n/of installed" badge must count what's actually shown
+      return { name: m.menu, n: real.filter((x) => !x.stock).length + extra.length, of: real.length + extra.length,
                html: rows.join("") + extra.map(dbRow).join("") };
     });
   }

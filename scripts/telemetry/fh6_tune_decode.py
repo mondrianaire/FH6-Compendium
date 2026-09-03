@@ -332,16 +332,29 @@ def parse_tune(path, ordinal_hint=None):
         gband = load_global_ranges().get(name)
         # SINGLE-POINT ANCHOR: one user-entered exact value makes this slider exact AT ITS CURRENT POSITION right away
         # (no waiting for the 2-point range solve). Beats the global band — the user's read arbitrates a band error.
+        # But an adjustable slider cannot report the SAME real value at two meaningfully different positions — that
+        # is not a locked slider, it is a bad capture (Jett caught this live, 2026-09-03: ordinal 2866's
+        # front_ride_height had norm 1.0, 0.0 and 0.0511 all anchored to "4.1 in", and the dashboard confidently
+        # drew the handle at the max end while reporting the value Jett was reading at the min end). The 2-point
+        # solver already refuses a contradictory pair via its own plausibility gate below; the anchor path shares
+        # no such check, so it is added here — skip anchoring from a field whose recorded points disagree with
+        # each other, and fall through to reporting position-toward-pole like any other under-calibrated slider.
         anchor = None
         if per_car and not rng and ordinal is not None:
-            for p in _pts_doc.get(f"{int(ordinal)}|{name}", []):
-                try:
-                    # float-rounding slack ONLY (norm round-trips at 4 decimals): a looser tolerance spans real slider
-                    # notches on fine sliders, so a nudged slider would keep reporting the stale typed value as exact
-                    if abs(float(p[0]) - norm) <= 0.0005:
-                        anchor = float(p[1]); break
-                except Exception:
-                    continue
+            pts_for_field = _pts_doc.get(f"{int(ordinal)}|{name}", [])
+            contaminated = any(
+                abs(float(pa[0]) - float(pb[0])) > 0.03 and abs(float(pa[1]) - float(pb[1])) < 0.05
+                for i, pa in enumerate(pts_for_field) for pb in pts_for_field[i + 1:]
+            )
+            if not contaminated:
+                for p in pts_for_field:
+                    try:
+                        # float-rounding slack ONLY (norm round-trips at 4 decimals): a looser tolerance spans real
+                        # slider notches on fine sliders, so a nudged slider would keep reporting the stale typed value
+                        if abs(float(p[0]) - norm) <= 0.0005:
+                            anchor = float(p[1]); break
+                    except Exception:
+                        continue
         if per_car and rng:
             lo2, hi2 = rng
             entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
@@ -465,9 +478,18 @@ def scan_tunes(containers_root=None, newest_only=True):
 # Shop menus, in the order the decode section presents them. Each entry lists
 # the part-slot keys that live under it.
 SHOP_MENUS = [
+    # The aspirator's own tier (Stock/Street/Sport/Race Turbo or Supercharger) is a real tile
+    # INSIDE the Engine menu once that conversion is fitted -- docs/fh6-ui-spec.md:326 documents
+    # the actual in-game grid: "...Pistons, Centrifugal Supercharger, Intercooler, Oil and
+    # Cooling, Flywheel" -- twelve tiles, the supercharger sitting right before Intercooler. Only
+    # `intercooler` was ever in this list (2026-09-03 fix, Jett: "the aspirator... IS a required
+    # selection in the engine and power menu and is NOWHERE TO BE SEEN"). All five slots are
+    # listed; only the one actually installed on a given save ever produces a row (the other four
+    # are simply absent from that car's parts, same as any other slot with no id).
     ("Engine & Power", ["engine","motor_parts","camshaft","valves","displacement",
         "pistons","fuel_system","ignition","exhaust","intake","flywheel","manifold",
-        "restrictor_plate","oil_cooling","intercooler"]),
+        "restrictor_plate","oil_cooling","single_turbo","twin_turbo","quad_turbo",
+        "centrifugal_supercharger","pos_supercharger","intercooler"]),
     ("Platform & Handling", ["brakes","springs_dampers","front_arb","rear_arb",
         "weight_reduction","roll_cage"]),
     ("Drivetrain", ["clutch","transmission","driveline","differential"]),

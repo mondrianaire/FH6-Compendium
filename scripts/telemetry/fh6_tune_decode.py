@@ -730,7 +730,14 @@ def compose_engine_type(asp_short=None, displacement_l=None, cyl=None, peak_hp=N
                         disp_from_build=False):
     """Build the engine-type descriptor string from whatever signals exist. The telemetry path passes
     cyl/peak_hp/redline (measured); the save-only path passes just asp_short/displacement/build_level.
-    Never fabricates a donor name for a swap (only flags that it IS swapped)."""
+    Never fabricates a donor name for a swap (only flags that it IS swapped).
+
+    asp_short is accepted and still stored on the row (engine_bits/engine_catalog) for callers that
+    need it, but NOT folded into this string: the Conversions tab always carries a dedicated
+    Aspiration row one line below Powertrain (2026-09-03, Jett: "the centrifugal supercharger
+    should never show up in the powertrain category because it is almost immediately used [again,
+    right below it]"). Repeating the same aspiration word in three places on one screen is noise,
+    not information."""
     if electric:
         desc = "Electric powertrain"
         if peak_hp:
@@ -739,8 +746,6 @@ def compose_engine_type(asp_short=None, displacement_l=None, cyl=None, peak_hp=N
         head = []
         if displacement_l:
             head.append(f"{displacement_l}L")
-        if asp_short:
-            head.append(asp_short)
         if cyl:
             head.append(f"{int(cyl)}-cyl")
         elif not peak_hp and build_level:          # save-only, unknown cylinders: fall back to build level
@@ -1046,7 +1051,11 @@ def _conversion_rows(tune, ordinal):
         donor = cat.get("donor_name") if cat else None
         swap = bool(cat and (cat.get("shared_swap") or donor))   # confident swap: shared across cars, or a known donor engine
         if swap:
-            nm = cat.get("label") or (f"{donor} engine swap" if donor else f"engine swap (family {efam})")
+            # NOT cat.get("label") verbatim -- the catalog's own label bakes the aspiration word in
+            # ("Honda Centrifugal-Supercharged engine (family 733)"), and the Conversions tab always
+            # carries a dedicated Aspiration row right below this one. Built fresh here without it.
+            brand = cat.get("brand_guess") if cat else None
+            nm = (f"{donor} engine swap" if donor else f"{brand} engine (family {efam})" if brand else f"engine swap (family {efam})")
             er = row("powertrain", "Engine", f"Engine SWAP · {nm}", "named" if donor else "category", build_tier, False, engine)
         else:
             # family seen only on this car (or no catalog entry) — the car's own engine; do NOT assert a swap

@@ -192,6 +192,34 @@ function onCarChange() {
   ctxSave({ cid: CUR.cid, ordinal: CUR.ordinal });
 }
 
+/* ------------------------------------------------------------ the fitter */
+// HARD RULE: the dashboard has NO SCROLLBARS. Every region is a planned cell, and a list that
+// cannot fit its cell does not scroll — it shows what fits and says how many it could not show.
+// fitRows() runs after a paint: it measures the real box, hides the children past the fold, and
+// appends one honest line. Called by every pane that renders a list.
+function fitRows(host, noun, keepFirst) {
+  if (!host) return;
+  const kids = Array.from(host.children).filter((k) => !k.classList.contains("fitmore"));
+  host.querySelectorAll(".fitmore").forEach((x) => x.remove());
+  kids.forEach((k) => (k.hidden = false));
+  const box = host.clientHeight;
+  if (!box) return;
+  const more = document.createElement("div");
+  more.className = "fitmore";
+  const head = keepFirst || 0;
+  let used = 0, shown = 0;
+  for (let i = 0; i < kids.length; i++) {
+    const h = kids[i].offsetHeight;
+    // the last slot is reserved for the "+N" line, so it can never be the thing that overflows
+    if (i >= head && used + h > box - 18 && i < kids.length - 1) {
+      for (let j = i; j < kids.length; j++) kids[j].hidden = true;
+      more.textContent = "+" + (kids.length - shown) + " more " + (noun || "rows") + " — not shown, the cell is full";
+      host.appendChild(more);
+      return;
+    }
+    used += h; shown++;
+  }
+}
 function paintPanel() {
   paintHeader(); paintTrace(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
 }
@@ -218,7 +246,29 @@ const PRESETS = [["all", "all"], ["class", "this class"], ["car", "this car"], [
 let TRACE_MODE = (() => { try { return localStorage.getItem("fh6SegMode") || "grip"; } catch (e) { return "grip"; } })();
 let TRACE_ALL = (() => { try { return localStorage.getItem("fh6PaintAll") === "1"; } catch (e) { return false; } })();
 let TRACE_KEY = null;
-let TRACE_PICK = null;             // {key, ids[], fore} — what the trace drew, so the map draws it too
+let TRACE_PICK = null;
+let TRACE_FIT = 0;
+// the chip row never scrolls sideways: keep the chips that fit, count the rest
+function fitChips(row, total) {
+  if (!row) return;
+  const kids = Array.from(row.children).filter((k) => !k.classList.contains("fitmore"));
+  row.querySelectorAll(".fitmore").forEach((x) => x.remove());
+  kids.forEach((k) => (k.hidden = false));
+  const w = row.clientWidth;
+  let used = 0, shown = 0;
+  for (const k of kids) {
+    const kw = k.offsetWidth + 4;
+    if (used + kw > w - 56) { k.hidden = true; continue; }
+    used += kw; shown++;
+  }
+  const hid = (total || kids.length) - shown;
+  if (hid > 0) {
+    const m = document.createElement("span");
+    m.className = "fitmore chipmore"; m.textContent = "+" + hid;
+    m.title = hid + " more laps match — narrow the filters to see them";
+    row.appendChild(m);
+  }
+}             // {key, ids[], fore} — what the trace drew, so the map draws it too
 const lapTime = (t) => (t == null ? "—" : (t >= 60 ? Math.floor(t / 60) + ":" + (t % 60).toFixed(2).padStart(5, "0") : t.toFixed(2) + " s"));
 const tuneLabel = (c) => { const m = /_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})\d{2}$/.exec(String(c || "")); return m ? `${m[3]}/${m[2]} ${m[4]}:${m[5]}` : String(c || "").slice(-6); };
 const dimVal = (l, d) => (d === "solo" ? (l.solo == null ? null : (l.solo ? "clean" : "contact")) : (l[d] == null ? null : String(l[d])));
@@ -265,6 +315,7 @@ function paintTrace() {
   const r = course ? courseTrace(COURSE) : liveRun();
   // shell first, so the chart can be drawn at the pixels the shell leaves it
   el.innerHTML = `<div class="thd">${r.head}</div><div class="tbody"></div><div class="tfoot">${r.foot}</div>`;
+  fitChips(el.querySelector(".lchips"), TRACE_FIT);
   const host = el.querySelector(".tbody");
   const W = Math.max(300, host.clientWidth), H = Math.max(80, host.clientHeight);
   host.innerHTML = r.svg(W, H);
@@ -332,6 +383,7 @@ function courseTrace(c) {
     const what = t === cur ? "you" : t === best ? "fastest" : "";
     return `<button class="lchip ${hid ? "hid" : ""}" data-thide="${esc(String(t.id))}" style="border-color:${col}" title="${esc((hid ? "hidden — click to show" : "click to hide") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">${nt ? `<s>${lapTime(t.t)}</s>` : `<b>${lapTime(t.t)}</b>`}${t.partial || t._cov < 0.9 ? ` ${Math.round(t._cov * 100)}%` : ""}${t.class ? " · " + esc(t.class) : ""}${t.dt ? " " + esc(t.dt) : ""}${what ? ` · <b>${what}</b>` : ""}${off ? ` · ${off}` : ""}</button>`; }).join("");
   const foot = `<span class="tread why">hover the trace — it marks that spot on the course map</span><span class="lchips">${leg}</span>`;
+  TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
   if (JSON.stringify(sel2) !== JSON.stringify(TRACE_PICK)) { TRACE_PICK = sel2; LEFT_KEY = null; setTimeout(paintLeft, 0); }
@@ -485,7 +537,7 @@ function paintDockTrace() {
 /* ------------------------------------------------------------ header */
 let HDR_KEY = null;
 function paintChips() {
-  const c = $("#hdr .hchips"); if (c) c.innerHTML = liveChip();
+  const c = $("#ftr .fchips"); if (c) c.innerHTML = liveChip();
 }
 function paintHeader() {
   const h = $("#hdr"); if (!h) return;
@@ -525,25 +577,28 @@ function paintHeader() {
   const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
   const tuneName = (m && m.name) || (CUR.disk ? "unnamed save" : "");
   const nSaves = CUR.match && CUR.match.n_saves;
+  // THE HEADER, as six honest lines rather than a scramble of fragments. Each line owns one
+  // question: which car · what state · what engine · which tune · what the author said · what to
+  // do next. Nothing shares a row with something that can push it out, the car's name never
+  // yields to a chip, and the live chips live in the footer with the other live state.
   h.innerHTML = `
     <div class="hcar">
       <div class="hart">${art}<span class="artcap">${esc(artCap)}</span></div>
       <div class="hid">
-        <div class="hname"><b>${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b>
-          ${piBadge(CUR.cls, CUR.pi)}
+        <div class="hname">${piBadge(CUR.cls, CUR.pi)}<b title="${esc(CUR.name || "")}">${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b></div>
+        <div class="hchips2">
+          <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span>
           ${CUR.dt ? `<span class="chip">${esc(CUR.dt)}</span>` : ""}${CUR.cyl ? `<span class="chip">${CUR.cyl} cyl</span>` : ""}
-          <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span></div>
-        <div class="hmeta">
-          ${engine ? `<span class="mv" title="from the save's Conversions rows">${esc(engine)}${aspTxt ? " · " + esc(aspTxt) : ""}</span>` : ""}
-          ${m && m.kg ? `<span class="mv">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
-          ${m && m.gears ? `<span class="mv">${m.gears}-speed</span>` : ""}
-          ${liv ? `<span class="mv liv">${liv.thumb ? `<img class="lthumb" alt="" src="${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}">` : ""}${esc(liv.name || "livery")}${liv.creator ? ` <span class="why">by ${esc(liv.creator)}</span>` : ""}</span>` : ""}
+          ${m && m.gears ? `<span class="chip">${m.gears}-speed</span>` : ""}
+          ${m && m.kg ? `<span class="chip">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
+          ${liv ? `<span class="chip m liv">${liv.thumb ? `<img class="lthumb" alt="" src="${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}">` : ""}${esc(liv.name || "livery")}</span>` : ""}
         </div>
+        <div class="hengine" title="${esc(engine)}">${engine ? esc(engine) : ""}</div>
         <div class="htune">
-          <span class="ttl" title="${esc(m && m.c || "")}">${esc(tuneName)}</span>
-          <span class="tby">${m && m.creator ? `by <b>${esc(m.creator)}</b>` : ""}${m ? ` · ${m.locked ? "downloaded" : "your own"}` : ""}${m && m.created ? ` · ${m.locked ? "created" : "saved"} ${when(m.created)}` : ""}${nSaves > 1 ? ` · one of ${nSaves} saves` : ""}${st.ambiguous ? ` · <span class="w">which one is not yet certain</span>` : ""}</span>
+          <span class="ttl" title="${esc((m && m.c) || "")}">${esc(tuneName)}</span>
+          <span class="tby">${m && m.creator ? `by <b>${esc(m.creator)}</b>` : ""}${m ? ` · ${m.locked ? "downloaded" : "your own"}` : ""}${m && m.created ? ` · ${when(m.created)}` : ""}${nSaves > 1 ? ` · one of ${nSaves}` : ""}${st.ambiguous ? ` · <span class="w">which one is not certain</span>` : ""}</span>
         </div>
-        <div class="tdesc" title="${esc(m && m.desc || "")}">${m && m.desc ? esc(m.desc) : ""}</div>
+        <div class="tdesc" title="${esc((m && m.desc) || "")}">${m && m.desc ? esc(m.desc) : ""}</div>
         <div class="hstat ${st.tone}" title="${esc(st.why)}${st.steps && st.steps.length ? " — " + esc(st.steps.map((x, i) => (i + 1) + ". " + x).join("  ")) : ""}">
           <span class="why">${esc(st.why)}</span>
           ${st.steps && st.steps.length ? `<span class="steps">${st.steps.map((x, i) => `<span class="step"><i>${i + 1}</i>${esc(x)}</span>`).join("")}</span>` : ""}
@@ -554,14 +609,11 @@ function paintHeader() {
     <div class="hright">
       <div class="hact">
         <button class="big" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>BUILD SHEET ▸</button>
-        ${st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">
-            ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ TESTING BASELINE" : "SET TESTING BASELINE"}</button>` : ""}
-        ${(st.key === "downloaded" || frozenOf()) ? `<button class="big ${frozenOf() ? "go on" : ""}" id="btnFreeze" title="${frozenOf() ? "a frozen target is held for this car — click to open it" : "keep this build sheet as the target, then install your own unlocked tune on this same car and build back to it"}">${frozenOf() ? "◆ TARGET HELD" : "◆ FREEZE SHEET"}</button>` : ""}
-        <span class="hsep"></span>
-        <button class="big sis" id="btnReread" ${RR.busy ? "disabled" : ""} title="re-identify the car from the live frame and re-read its save from disk: roster, match, parts, sliders">${RR.busy ? "READING…" : "⟳ REREAD BUILD"}</button>
-        <button class="big sis" id="btnRecount" ${RB.state === "running" || RB.pending ? "disabled" : ""} title="import every save on disk and regenerate the dashboard data (~4–10 s)">${RB.state === "running" || RB.pending ? "COUNTING…" : "⟳ RECOUNT DATABASE"}</button>
+        <button class="big sis" id="btnReread" ${RR.busy ? "disabled" : ""} title="re-identify the car from the live frame and re-read its save from disk">${RR.busy ? "READING…" : "⟳ REREAD"}</button>
+        ${(st.key === "downloaded" || frozenOf()) ? `<button class="big ${frozenOf() ? "go on" : ""}" id="btnFreeze" title="${frozenOf() ? "a frozen target is held for this car — click to open it" : "keep this build sheet as the target, then install your own unlocked tune on this same car and build back to it"}">${frozenOf() ? "◆ TARGET HELD" : "◆ FREEZE"}</button>`
+          : st.key === "ratified" ? `<button class="big go ${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "on" : ""}" id="btnBase">${BASELINE && BASELINE.container === (st.twin && st.twin.c) ? "✓ BASELINE" : "SET BASELINE"}</button>` : `<span></span>`}
+        <button class="big sis" id="btnRecount" ${RB.state === "running" || RB.pending ? "disabled" : ""} title="import every save on disk and regenerate the dashboard data">${RB.state === "running" || RB.pending ? "COUNTING…" : "⟳ RECOUNT"}</button>
       </div>
-      <div class="hchips">${liveChip()}</div>
     </div>`;
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bb = $("#btnBase"); if (bb) bb.onclick = () => setBaseline(st.twin);
@@ -599,6 +651,7 @@ function paintBanner() {
   }
   al.innerHTML = parts.join("") || `<div class="quiet">nothing to act on</div>`;
   wireBanner(); wirePicker();
+  fitRows(al, "alerts", 0);
 }
 
 /* ------------------------------------------------------------- left */
@@ -723,6 +776,7 @@ function paintRight() {
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
   body.innerHTML = cur === "corners" ? cornersHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
+  fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
     setPin(CUR.ordinal, b.dataset.pickts); if (COURSE) { vcourse(COURSE.key).filters.container = b.dataset.cont; viewSave(); }
     identify(carOf(CUR.cid), "pinned"); });
@@ -757,14 +811,14 @@ function cornersHTML() {
       turn = `<span class="why tturn" title="${esc(t.id)} · ${esc(t.kind || "")} · ${t.r != null ? Math.round(t.r) + " m radius" : ""} · ${t.n != null ? t.n + " passes on record" : ""}"><b>${esc(t.id)}</b> ${esc(t.kind || "")}${t.r != null ? " · " + Math.round(t.r) + " m" : ""}${t.n != null ? " · " + t.n + " on record" : ""}${mine.length > 1 ? ` · your ${mine.length} passes: best ${best} — this ${here}` : ""}</span>`;
     }
     return `<div class="crow"><span class="mono">${log.length - i}</span><span>${c.lapn != null ? "lap " + c.lapn : c.ev ? "" : "free"}</span>
-      <b>${c.dir === "L" ? "⬅" : "➡"} ${kind}${turn ? " " : ""}</b>${turn}
+      <b>${c.dir === "L" ? "⬅" : "➡"} ${kind}</b>${turn || "<span></span>"}
       <span class="mono">${c.mph_in}→<b>${c.mph_min}</b>→${c.mph_out ?? "—"}</span>
       <span class="mono">${c.lat_g_peak} g</span>
       <span class="mono">${c.brake_on_m != null ? c.brake_on_m + " m" : "—"}</span>
       <span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${g.word}</span>
       <span class="why">${fr ? `${fr.axle} first · ph ${fr.phase}` : "clean"}${c.hb ? " · handbrake" : ""}${c.drift ? " · drift" : ""}${c.brake_max > 200 ? " · hard brake" : ""}</span></div>`;
   }).join("");
-  return head + `<div class="crow hd"><span>#</span><span>lap</span><b>turn</b><span>in→apex→out</span><span>lat g</span><span>brake</span><span>balance</span><span>first red</span></div>` + rows;
+  return head + `<div class="crow hd"><span>#</span><span>lap</span><b>kind</b><span>turn</span><span>in→apex→out</span><span>lat g</span><span>brake</span><span>balance</span><span>first red</span></div>` + rows;
 }
 
 // Build data: what the save on disk gives exactly, what the union still has to measure, and the
@@ -890,7 +944,8 @@ function paintFooter() {
     cov = `<span class="cov"><span class="why">coverage</span><span class="bar"><i style="width:${pct}%"></i></span>
       <span class="mono">${laps}/${need} laps</span>${laps < need ? '<span class="chip w">not yet outlier-proof</span>' : '<span class="chip on">baseline ready</span>'}</span>`;
   }
-  f.innerHTML = `<span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${MODE.known ? esc(MODE.suggest) + (MODE.held ? " (held)" : "") : "—, waiting"}</span>
+  f.innerHTML = `<span class="fchips">${liveChip()}</span>
+    <span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${MODE.known ? esc(MODE.suggest) + (MODE.held ? " (held)" : "") : "—, waiting"}</span>
     <span class="why">${esc(MODE.reason || "")}</span>
     <span class="chip">baseline · ${BASELINE ? esc(BASELINE.name || BASELINE.container) : "none"}</span>
     ${cov}

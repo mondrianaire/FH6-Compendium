@@ -61,6 +61,13 @@ panel fetches with the disk tune, and the database adds only what that surface n
 tile's position in the shop grid, and the checklist. With no save on disk it falls back to the
 database's slot walk and says so.
 
+### No scrollbars, ever
+**Hard rule (Jett, 2026-09-03): the dashboard has zero scrollbars.** All real estate is planned
+and every relevant field is respected. A list that cannot fit its cell does not scroll: it shows
+what fits and says "+N more — not shown, the cell is full" (`fitRows`), and the trace's lap chips
+do the same sideways (`fitChips`). Regions clip; they never scroll. The floating BUILD SHEET is a
+separate surface reproducing the game's own screens and keeps the game's scrolling.
+
 ### Concrete cells
 Every region has a fixed size and fixed columns: header 196 px ([art 300] [identity 1fr, five
 fixed rows] [actions 340, a 2×2 button grid + chips]), trace 240 px, alerts 96 px (says "nothing

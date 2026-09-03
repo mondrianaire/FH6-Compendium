@@ -78,18 +78,24 @@ function paintPanel() {
 }
 
 /* -------------------------------------------------------------- trace */
-// THE SPEED TRACE — the v1 card, ported whole. Speed against distance for every lap on record on
-// the course under the car; filters built from the traces ON SCREEN (a filter that cannot exclude
-// anything is noise, so a dimension with one value does not appear); your fastest lap painted by
-// grip state (or by speed, on its own range), the field's fastest in green, the rest faint;
-// partial and void laps dashed and their times struck through; the turns ticked with their own
-// ids; impacts marked where they happened; hover reads the point and marks it on the course map.
-// With no course under the car the region shows the live run instead, so it is never blank.
+// THE SPEED TRACE — the v1 card, ported whole, in a FIXED block: the region is 240 px tall and
+// the chart is drawn at its measured pixel size, so nothing in it scales with the window or
+// jumps when the content changes. Speed against distance for every lap on record on the course
+// under the car. WHICH laps: a preset against the car you are in (all · this class · this car ·
+// this build · same hardware under the rim rule · this tune), then the dimension filters built
+// from what is on screen, then the lap chips themselves, each a click to hide. When a timed
+// event starts on a known course, the class preset selects itself: every trace in the class you
+// are racing. Your lap is painted by grip state (or by speed on its own range), the field's
+// fastest is green, the rest faint; partial and void laps dashed and struck; turns ticked by
+// their own ids; impacts marked; hover reads the point and marks it on the course map. Off a
+// known course the block shows the live run, so it is never blank.
 const TRACE_GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];
 const TRACE_WORD = ["within grip", "front slipping", "rear slipping", "all four", "impact"];
 const GRAD = ["#2f81f7", "#3fb6c8", "#6fd08c", "#d7d264", "#e8a13c", "#e5414e"];
 const TRACE_DIMS = [["class", "class"], ["dt", "drive"], ["container", "tune"], ["solo", "traffic"], ["bid", "build"]];
+const PRESETS = [["all", "all"], ["class", "this class"], ["car", "this car"], ["build", "this build"], ["hw", "same hardware"], ["tune", "this tune"]];
 let TRACE_F = {};                     // per course: {dim: value}
+let TRACE_SEL = {};                   // per course: {preset, hidden: Set, ctx}
 let TRACE_MODE = (() => { try { return localStorage.getItem("fh6SegMode") || "grip"; } catch (e) { return "grip"; } })();
 let TRACE_ALL = (() => { try { return localStorage.getItem("fh6PaintAll") === "1"; } catch (e) { return false; } })();
 let TRACE_KEY = null;
@@ -98,21 +104,55 @@ const tuneLabel = (c) => { const m = /_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})\d{2}$
 const dimVal = (l, d) => (d === "solo" ? (l.solo == null ? null : (l.solo ? "clean" : "contact")) : (l[d] == null ? null : String(l[d])));
 const dimLab = (d, v) => (d === "container" ? tuneLabel(v) : d === "bid" ? String(v).slice(0, 6) : String(v));
 const notTimed = (l) => !!(l.void || l.partial || (l.cov != null && l.cov < 0.9));
+const lapBuild = (l) => (IDENT && l.container ? IDENT.builds.find((x) => x.c === l.container) : null) || null;
+const liveClass = () => (LIVE.frame && LIVE.frame.on && LIVE.frame.cls) || (CUR && CUR.cls) || null;
+const curContainer = () => (CUR && CUR.disk && CUR.disk.ts ? "Tuning_" + String(CUR.ordinal).padStart(4, "0") + "_" + CUR.disk.ts : null);
+
+// the preset's test, against the car you are in
+function presetTest(k) {
+  const cls = liveClass(), ord = CUR && CUR.ordinal, mb = MATCH && MATCH.build, cont = curContainer();
+  const twins = new Set(atomicTwins().map((x) => x.c));
+  return {
+    all: () => true,
+    class: (l) => !!cls && l.class === cls,
+    car: (l) => ord != null && parseInt(String(l.cid || "").split("|")[0], 10) === ord,
+    build: (l) => !!mb && !!mb.hw && (lapBuild(l) || {}).hw === mb.hw,
+    hw: (l) => twins.size > 0 && twins.has(l.container),
+    tune: (l) => !!cont && l.container === cont,
+  }[k] || (() => true);
+}
+// the selection for this course, created on first sight with the context's own default: a timed
+// event on a known course starts with the class you are racing selected, free roam with all
+function traceSel(c) {
+  const ctx = MODE.game === "event" ? "event" : "free";
+  let sel = TRACE_SEL[c.key];
+  if (!sel || sel.ctx !== ctx) {
+    const cls = liveClass();
+    sel = TRACE_SEL[c.key] = { preset: (ctx === "event" && cls) ? "class" : "all", hidden: new Set(), ctx };
+  }
+  return sel;
+}
 
 function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
-  const key = course ? JSON.stringify(["c", COURSE.key, TRACE_F[COURSE.key], TRACE_MODE, TRACE_ALL, CUR && CUR.cid]) : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid]);
+  const key = course ? JSON.stringify(["c", COURSE.key, TRACE_F[COURSE.key], traceSel(COURSE), [...traceSel(COURSE).hidden], TRACE_MODE, TRACE_ALL, CUR && CUR.cid, liveClass(), el.clientWidth])
+                     : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
-  el.innerHTML = course ? courseTraceHTML(COURSE) : liveRunHTML();
+  const r = course ? courseTrace(COURSE) : liveRun();
+  // shell first, so the chart can be drawn at the pixels the shell leaves it
+  el.innerHTML = `<div class="thd">${r.head}</div><div class="tbody"></div><div class="tfoot">${r.foot}</div>`;
+  const host = el.querySelector(".tbody");
+  const W = Math.max(300, host.clientWidth), H = Math.max(80, host.clientHeight);
+  host.innerHTML = r.svg(W, H);
   wireTrace(el);
 }
+window.addEventListener("resize", () => { TRACE_KEY = null; paintTrace(); });
 
 function chart(W, H, padL, padB, smax, vmax) {
   return { px: (x) => padL + (x / (smax || 1)) * (W - padL - 8), py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
 }
-// the grip-painted line: one polyline per run of one state, so the colour change IS the shape
 function paintedLine(pts, ch, w, mode) {
   if (!pts.length) return "";
   let sc = null;
@@ -131,55 +171,70 @@ function modeControls() {
     `<button class="mini ${TRACE_MODE === k ? "on" : ""}" data-tmode="${k}" title="${tip}">${l}</button>`).join("")}
     <button class="mini ${TRACE_ALL ? "on" : ""}" data-tall title="paint every run, not only the foregrounded lap">every run</button></span>`;
 }
+const axisSvg = (ch, vmax) => [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10; return `<text x="2" y="${(ch.py(v) + 3).toFixed(1)}" font-size="8" fill="var(--dim)">${v}</text>`; }).join("");
+const cursorSvg = (H) => `<g class="cur" style="display:none"><line y1="6" y2="${H - 16}" stroke="var(--ink)" opacity=".6"/><circle r="3.5" fill="var(--ink)"/></g>`;
 
-function courseTraceHTML(c) {
+function courseTrace(c) {
   const byId = {}; (c.laps || []).forEach((l) => (byId[String(l.id)] = l));
   const all = Object.keys(c.traces).map((id) => Object.assign({ id, pts: c.traces[id] }, byId[id] || {})).filter((t) => t.pts && t.pts.length > 2);
-  const tf = TRACE_F[c.key] || {};
-  // filters from what is on screen
+  const sel = traceSel(c), tf = TRACE_F[c.key] || {};
+  // 1. the preset against the car you are in — every chip carries its count, an empty one is dim
+  const presets = PRESETS.map(([k, lab]) => { const n = all.filter(presetTest(k)).length;
+    return `<button class="mini ${sel.preset === k ? "on" : ""} ${n ? "" : "dim"}" data-tpre="${k}" ${n ? "" : "disabled"} title="${k === "hw" ? "every build whose 48 non-rim slots match and whose rims share a mass level" : k === "build" ? "this exact hardware hash" : k === "tune" ? "this save file" : k === "class" ? "the class you are in now" : k === "car" ? "this car, any build" : "every lap on record"}">${lab}<span class="cn">${n}</span></button>`; }).join("");
+  const stage1 = all.filter(presetTest(sel.preset));
+  // 2. the dimension filters, from what stage 1 leaves on screen
   const filt = TRACE_DIMS.map(([d, lab]) => {
-    const vals = [...new Set(all.map((t) => dimVal(t, d)).filter((v) => v != null))].sort();
+    const vals = [...new Set(stage1.map((t) => dimVal(t, d)).filter((v) => v != null))].sort();
     if (vals.length < 2) return "";
     const chip = (v, text) => `<button class="mini ${(tf[d] || "") === (v == null ? "" : v) ? "on" : ""}" data-tfilt="${esc(d)}|${esc(v == null ? "" : v)}">${esc(text)}</button>`;
     return `<span class="fdim"><span class="why">${lab}</span>${chip(null, "all")}${vals.map((v) => chip(v, dimLab(d, v))).join("")}</span>`;
   }).filter(Boolean).join("");
-  const match = all.filter((t) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
-  const head = (n) => `<div class="thd"><b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${n} of ${all.length} lap${all.length === 1 ? "" : "s"} on record</span>${filt}${Object.keys(tf).length ? `<button class="mini" data-tfilt="*|">clear filters</button>` : ""}<span class="tspacer"></span>${modeControls()}</div>`;
-  if (!match.length) return head(0) + `<div class="why">no lap matches these filters — clear one</div>`;
-  match.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
-  const L = Math.max(c.len || 0, ...match.map((t) => t.pts[t.pts.length - 1][0]));
-  match.forEach((t) => { t._cov = t.cov != null ? t.cov : (L ? t.pts[t.pts.length - 1][0] / L : 1); });
+  const stage2 = stage1.filter((t) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
+  // 3. the chips: each lap, a click to hide
+  const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
+  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${match.length} of ${all.length} lap${all.length === 1 ? "" : "s"} on record${MODE.game === "event" ? " · timed event" : ""}</span>
+    <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${Object.keys(tf).length || sel.hidden.size ? `<button class="mini" data-tfilt="*|">clear</button>` : ""}<span class="tspacer"></span>${modeControls()}`;
+  if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
+  stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
+  const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
+  stage2.forEach((t) => { t._cov = t.cov != null ? t.cov : (L ? t.pts[t.pts.length - 1][0] / L : 1); });
   const best = match.find((t) => !notTimed(t)) || null;
   const mine = match.filter((t) => CUR && t.cid === CUR.cid);
   const cur = mine.find((t) => !notTimed(t)) || mine[0] || null;
-  const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
-  const W = 900, H = 150, ch = chart(W, H, 28, 16, smax, vmax);
-  const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE) : plainLine(t.pts, ch, t === best ? "#00d27a" : "var(--dim)", t === best ? 1.8 : 1, t === best ? 0.9 : 0.45, notTimed(t)))).join("")
-    + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE) : "");
-  const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(t.id)}</text>`).join("");
-  const axis = [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10; return `<text x="2" y="${(ch.py(v) + 3).toFixed(1)}" font-size="8" fill="var(--dim)">${v}</text>`; }).join("");
-  const fore = cur || best || match[0];
-  const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
-  const leg = match.slice(0, 10).map((t) => {
+  const fore = cur || best || match[0] || null;
+  const leg = stage2.slice(0, 12).map((t) => {
+    const hid = sel.hidden.has(String(t.id));
     const nt = notTimed(t); const off = best && !nt && t !== best && t.t ? ((t.t / best.t - 1) * 100).toFixed(1) + "% off" : "";
     const col = t.void ? "#e3b341" : (t.partial || t._cov < 0.9) ? "var(--warn)" : t === cur ? "var(--acc2)" : t === best ? "#00d27a" : "var(--line2)";
     const what = t === cur ? "you" : t === best ? "fastest" : "";
-    return `<span class="lchip" style="border-color:${col}" title="${esc((t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">${nt ? `<s>${lapTime(t.t)}</s>` : `<b>${lapTime(t.t)}</b>`}${t.partial || t._cov < 0.9 ? ` ${Math.round(t._cov * 100)}%` : ""}${t.class ? " · " + esc(t.class) : ""}${t.dt ? " " + esc(t.dt) : ""}${what ? ` · <b>${what}</b>` : ""}${off ? ` · ${off}` : ""}</span>`; }).join("");
-  const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
-  return head(match.length) + `<svg class="tsvg" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axis}${ticks}${lines}${imp}<g class="cur" style="display:none"><line y1="6" y2="${H - 16}" stroke="var(--ink)" opacity=".6"/><circle r="3.5" fill="var(--ink)"/></g></svg>
-    <div class="tfoot"><span class="tread why">hover the trace — it marks that spot on the course map</span><span class="lchips">${leg}</span></div>`;
+    return `<button class="lchip ${hid ? "hid" : ""}" data-thide="${esc(String(t.id))}" style="border-color:${col}" title="${esc((hid ? "hidden — click to show" : "click to hide") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">${nt ? `<s>${lapTime(t.t)}</s>` : `<b>${lapTime(t.t)}</b>`}${t.partial || t._cov < 0.9 ? ` ${Math.round(t._cov * 100)}%` : ""}${t.class ? " · " + esc(t.class) : ""}${t.dt ? " " + esc(t.dt) : ""}${what ? ` · <b>${what}</b>` : ""}${off ? ` · ${off}` : ""}</button>`; }).join("");
+  const foot = `<span class="tread why">hover the trace — it marks that spot on the course map</span><span class="lchips">${leg}</span>`;
+  const svg = (W, H) => {
+    if (!match.length) return `<div class="why tempty">every matching lap is hidden — click a chip to show it</div>`;
+    const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
+    const ch = chart(W, H, 28, 16, smax, vmax);
+    const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE) : plainLine(t.pts, ch, t === best ? "#00d27a" : "var(--dim)", t === best ? 1.8 : 1, t === best ? 0.9 : 0.45, notTimed(t)))).join("")
+      + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE) : "");
+    const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(t.id)}</text>`).join("");
+    const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
+    const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${ticks}${lines}${imp}${cursorSvg(H)}</svg>`;
+  };
+  return { head, foot, svg };
 }
 
-function liveRunHTML() {
+function liveRun() {
   const pts = LIVE.run;
-  const head = `<div class="thd"><b>Speed trace</b><span class="why">live run · the last ${pts.length ? Math.round(pts.length / 10) : 0} s${MODE.suggest === "course" ? " · course laps appear here once the course is located" : " · laps on record appear here on a known course"}</span><span class="tspacer"></span>${modeControls()}</div>`;
-  if (pts.length < 3) return head + `<div class="why">drive — speed against distance draws here as you go, painted by what the tyres are doing</div>`;
-  const smax = pts[pts.length - 1][0] || 1, vmax = Math.max(60, ...pts.map((q) => q[1])) * 1.06;
-  const W = 900, H = 150, ch = chart(W, H, 28, 16, smax, vmax);
-  const axis = [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10; return `<text x="2" y="${(ch.py(v) + 3).toFixed(1)}" font-size="8" fill="var(--dim)">${v}</text>`; }).join("");
-  const km = [...Array(Math.floor(smax / 500)).keys()].map((i) => (i + 1) * 500).map((d) => `<line x1="${ch.px(d).toFixed(1)}" y1="6" x2="${ch.px(d).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(d).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${d / 1000} km</text>`).join("");
-  return head + `<svg class="tsvg" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts.map((q) => [q[0], q[1], q[2], q[3], q[4]])))}">${axis}${km}${paintedLine(pts, ch, 2.2, TRACE_MODE)}<g class="cur" style="display:none"><line y1="6" y2="${H - 16}" stroke="var(--ink)" opacity=".6"/><circle r="3.5" fill="var(--ink)"/></g></svg>
-    <div class="tfoot"><span class="tread why">hover the trace — it marks that spot on the map</span><span class="lchips">${TRACE_GRIP.map((c, i) => `<span class="lchip" style="border-color:${c}">${TRACE_WORD[i]}</span>`).join("")}</span></div>`;
+  const head = `<b>Speed trace</b><span class="why">live run · the last ${pts.length ? Math.round(pts.length / 10) : 0} s${MODE.suggest === "course" && COURSE ? ` · no lap on record for ${esc(COURSE.name || COURSE.key)} yet — your first full lap becomes one` : MODE.suggest === "course" ? " · course laps appear here once the course is located" : " · laps on record appear here on a known course"}</span><span class="tspacer"></span>${modeControls()}`;
+  const foot = `<span class="tread why">hover the trace — it marks that spot on the map</span><span class="lchips">${TRACE_GRIP.map((c, i) => `<span class="lchip" style="border-color:${c}">${TRACE_WORD[i]}</span>`).join("")}</span>`;
+  const svg = (W, H) => {
+    if (pts.length < 3) return `<div class="why tempty">drive — speed against distance draws here as you go, painted by what the tyres are doing</div>`;
+    const smax = pts[pts.length - 1][0] || 1, vmax = Math.max(60, ...pts.map((q) => q[1])) * 1.06;
+    const ch = chart(W, H, 28, 16, smax, vmax);
+    const km = [...Array(Math.floor(smax / 500)).keys()].map((i) => (i + 1) * 500).map((d) => `<line x1="${ch.px(d).toFixed(1)}" y1="6" x2="${ch.px(d).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(d).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${d / 1000} km</text>`).join("");
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts.map((q) => [q[0], q[1], q[2], q[3], q[4]])))}">${axisSvg(ch, vmax)}${km}${paintedLine(pts, ch, 2.2, TRACE_MODE)}${cursorSvg(H)}</svg>`;
+  };
+  return { head, foot, svg };
 }
 
 function markMapAt(x, z, col) {
@@ -197,8 +252,11 @@ function clearMapMark() { const g = document.querySelector("#leftBody svg #trace
 function wireTrace(el) {
   el.querySelectorAll("[data-tfilt]").forEach((b) => b.onclick = () => {
     const [d, v] = b.dataset.tfilt.split("|"); const k = COURSE && COURSE.key; if (!k) return;
-    if (d === "*") TRACE_F[k] = {}; else { const f = TRACE_F[k] = TRACE_F[k] || {}; if (v) f[d] = v; else delete f[d]; }
+    if (d === "*") { TRACE_F[k] = {}; traceSel(COURSE).hidden = new Set(); }
+    else { const f = TRACE_F[k] = TRACE_F[k] || {}; if (v) f[d] = v; else delete f[d]; }
     paintTrace(); });
+  el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; traceSel(COURSE).preset = b.dataset.tpre; paintTrace(); });
+  el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); paintTrace(); });
   el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
   const sv = el.querySelector("svg.tsvg[data-pts]"); if (!sv) return;
@@ -327,9 +385,9 @@ function paintHeader() {
         <div class="hname"><b>${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b>
           ${clsBadge(CUR.cls)}${CUR.pi ? `<span class="chip">PI ${CUR.pi}</span>` : ""}
           ${CUR.dt ? `<span class="chip">${esc(CUR.dt)}</span>` : ""}${CUR.cyl ? `<span class="chip">${CUR.cyl} cyl</span>` : ""}
+          <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span>
           ${liv ? `<span class="chip m">${esc(liv.name)}</span>` : ""}</div>
         <div class="htune">${tune ? `<span class="tn">${esc(tune)}</span>` : ""}
-          <span class="pill ${st.tone}" title="${esc(st.why)}">${esc(st.label)}</span>
           ${m && m.kg ? `<span class="chip">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
           ${m && m.gears ? `<span class="chip">${m.gears}-speed</span>` : ""}
           ${st.ambiguous ? '<span class="chip w">one of several saves</span>' : ""}</div>

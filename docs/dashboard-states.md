@@ -8,15 +8,18 @@ for which panes exist and what fills them in every reachable state.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────┐
-│ HEADER   [livery thumb] Car · class PI · drive · cyl │ tune name │ STATUS PILL      │
+│ HEADER   [livery thumb] Car · class PI · drive · cyl · STATUS (car metadata) │ tune│
 │          [ BUILD SHEET ▸ ]  [ SET TESTING BASELINE ]  (baseline only when ratified)│
 │                                                          live · menu · save chips │
 ├──────────────────────────────────────────────────────────────────────────────────┤
-│ TRACE    the speed trace (v1 card, whole): on a known course every lap on record, │
-│          filters built from what is on screen (class · drive · tune · traffic ·   │
-│          build), your lap painted by grip or speed, the fastest green, partial /  │
-│          void dashed and struck, turns ticked by id, impacts marked, hover marks  │
-│          the spot on the map. Off a course: the live run, painted by grip.        │
+│ TRACE    FIXED 240-px block, chart drawn at its own pixels. On a known course every│
+│          lap on record; WHICH laps = preset vs the car you are in (all · this     │
+│          class · this car · this build · same hardware [rim rule] · this tune),   │
+│          then dimension filters from what is on screen, then lap chips (click to │
+│          hide). A timed event on a known course selects "this class" by itself.  │
+│          Your lap painted by grip/speed, fastest green, partial/void dashed and   │
+│          struck, turns ticked by id, impacts marked, hover marks the map.         │
+│          Off a course: the live run, painted by grip.                            │
 ├──────────────────────────────────────────────────────────────────────────────────┤
 │ BANNER   one contextual strip: save prompt / ratify steps / which-save picker /   │
 │          hardware-changed / sliders-changed → A/B offer.  Empty when nothing due.  │

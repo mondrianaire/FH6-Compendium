@@ -372,3 +372,19 @@ button.stage.act.go:active{transform:translateY(1px)}
 .dock .spans button,.dt{border-radius:2px}
 .step i{border-radius:2px}
 .fsheet{border-radius:3px}
+
+/* the trace is a fixed block: 240 px, chart drawn at its own pixels, never scaled */
+.trace{height:240px;display:flex;flex-direction:column;overflow:hidden;padding:5px 10px}
+.trace .thd{flex:0 0 auto;margin-bottom:3px;row-gap:3px}
+.trace .tbody{flex:1 1 auto;min-height:0;background:var(--bg);border-radius:3px;overflow:hidden;position:relative}
+.trace .tbody svg.tsvg{display:block;max-height:none;height:100%;width:100%}
+.trace .tempty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:0 20px}
+.trace .tfoot{flex:0 0 auto;margin-top:3px;flex-wrap:nowrap;overflow:hidden}
+.trace .lchips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+.trace .thd .mini{padding:1px 7px;font-size:10.5px}
+.trace .thd .mini .cn{margin-left:5px;font:10px var(--mono);opacity:.75}
+.trace .thd .mini.dim{opacity:.35}
+button.lchip{background:none;cursor:pointer;font-family:inherit;white-space:nowrap}
+button.lchip.hid{opacity:.35;text-decoration:line-through}
+.hname .pill{font-size:11px;padding:3px 10px}
+@media (orientation: portrait){ .trace{height:240px} }

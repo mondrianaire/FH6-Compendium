@@ -18,7 +18,7 @@
 "use strict";
 
 const DAEMON = "http://127.0.0.1:8765";
-let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null }, ES = null;
+let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0 }, ES = null;
 let CUR = null;          // { ordinal, cid, name, ... }
 let MATCH = null;        // { build, hw, tune } after identification
 let CHANGE = null;       // what moved since the last read: hardware | tune | saved
@@ -132,7 +132,27 @@ function onFrame(f) {
   // The tiles follow every frame; the panel follows the context — a menu opening or closing
   // changes what the right pane should show — and otherwise a slow heartbeat, not the packet rate.
   paintDockTiles();
+  runSample(f, now);
   if (inMenu !== was || now - LAST_PANEL > 2000) { LAST_PANEL = now; paintPanel(); }
+}
+
+// THE LIVE RUN: speed against distance for the drive you are on, painted by grip, sampled at
+// 10 Hz — the trace region's content whenever no known course is under the car. A run starts
+// when the car sets off (or the odometer restarts) and keeps the last 90 seconds.
+function runSample(f, now) {
+  if (!f.on) { if (LIVE.run.length) { LIVE.run = []; paintTrace(); } return; }
+  if (now - LIVE.runT < 100) return;
+  LIVE.runT = now;
+  const last = LIVE.run[LIVE.run.length - 1];
+  if (last && f.dist < last[5]) LIVE.run = [];          // odometer restarted: a new event, a new run
+  const sl = f.slip || {};
+  const fr = Math.max(Math.abs((sl.FL || [0, 0, 0])[2]), Math.abs((sl.FR || [0, 0, 0])[2]));
+  const rr = Math.max(Math.abs((sl.RL || [0, 0, 0])[2]), Math.abs((sl.RR || [0, 0, 0])[2]));
+  const g = (Math.abs(f.lat) > 3 || f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
+  const d0 = LIVE.run.length ? LIVE.run[0][5] : f.dist;
+  LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist]);
+  if (LIVE.run.length > 900) { LIVE.run.splice(0, LIVE.run.length - 900); const b = LIVE.run[0][5]; LIVE.run.forEach((q) => { q[0] = q[5] - b; }); }
+  if (now - (LIVE.runPaint || 0) > 500) { LIVE.runPaint = now; paintTrace(); }
 }
 
 async function identify(car, why) {
@@ -599,18 +619,36 @@ function sliderRow(row) {
   const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
   const val = rel
     ? `<span class="slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%</span>`
-    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global band — exact on the next gear-ladder drive"' : ""}>${esc(String(row.value))}<small>${esc(row.unit || "")}</small></span>`
+    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global band — exact on the next gear-ladder drive"' : row.src === "db" ? ' title="absolute value from the database: the save\'s slider position on the game\'s own range for this car"' : ""}>${esc(String(row.value))}<small>${esc(row.unit || "")}</small>${row.src === "db" ? '<em class="src">db</em>' : ""}</span>`
       + (row.conflict ? `<span class="cflag" title="the save decodes ${esc(String(row.conflict.save))}; telemetry measures ${esc(String(row.conflict.telemetry))}">⚠ save ${esc(String(row.conflict.save))}</span>`
         : row.agree ? `<span class="aflag" title="the save and telemetry agree">✓×2</span>` : "");
   return `<div class="sl"><div class="slt"><span class="sll">${esc(row.label || row.field)}</span>${val}</div>
     <div class="trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div>
     <div class="pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
 }
+// The daemon reports a slider "by %" when it has no per-car range for it; the database has every
+// range from the game's own physics rows, so those six read as absolute values here — in the
+// game's display units — and are tagged as coming from the database.
+const DB_UNITS = { "N/mm": ["lb/in", 5.71015], "m": ["in", 39.3701], "kgf": ["lb", 2.20462], "psi": ["psi", 1], "deg": ["deg", 1], "%": ["%", 1] };
+function dbTuneFor(b) {
+  const ts = CUR && CUR.disk && CUR.disk.ts;
+  const tunes = (b && b.tunes) || [];
+  return tunes.find((t) => ts && String(t.container || "").endsWith("_" + ts)) || tunes[tunes.length - 1] || null;
+}
+function fillFromDb(row, tune) {
+  if (!tune || row.value != null) return row;
+  const s = (tune.sliders || []).find((x) => x.slider === row.field);
+  if (!s || s.v == null) return row;
+  const [unit, k] = DB_UNITS[s.unit] || [s.unit, 1];
+  const v = s.v * k;
+  return Object.assign({}, row, { value: (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2)), unit, src: "db", norm: s.norm });
+}
 function tuneTabs(b, dl) {
   if (dl && (dl.tabs || []).length) {
+    const tune = dbTuneFor(b);
     return dl.tabs.map((t) => {
       const secs = [];
-      t.rows.forEach((r) => { let s = secs.find((x) => x.h === r.section); if (!s) secs.push(s = { h: r.section, rows: [] }); s.rows.push(r); });
+      t.rows.forEach((r0) => { const r = fillFromDb(r0, tune); let s = secs.find((x) => x.h === r.section); if (!s) secs.push(s = { h: r.section, rows: [] }); s.rows.push(r); });
       return { name: t.tab, html: secs.map((s) => `<div class="sec"><div class="sech">${esc(s.h)}</div>${s.rows.map(sliderRow).join("")}</div>`).join("") };
     });
   }

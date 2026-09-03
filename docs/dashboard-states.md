@@ -12,6 +12,12 @@ for which panes exist and what fills them in every reachable state.
 │          [ BUILD SHEET ▸ ]  [ SET TESTING BASELINE ]  (baseline only when ratified)│
 │                                                          live · menu · save chips │
 ├──────────────────────────────────────────────────────────────────────────────────┤
+│ TRACE    the speed trace (v1 card, whole): on a known course every lap on record, │
+│          filters built from what is on screen (class · drive · tune · traffic ·   │
+│          build), your lap painted by grip or speed, the fastest green, partial /  │
+│          void dashed and struck, turns ticked by id, impacts marked, hover marks  │
+│          the spot on the map. Off a course: the live run, painted by grip.        │
+├──────────────────────────────────────────────────────────────────────────────────┤
 │ BANNER   one contextual strip: save prompt / ratify steps / which-save picker /   │
 │          hardware-changed / sliders-changed → A/B offer.  Empty when nothing due.  │
 ├───────────────────────────────┬──────────────────────────────────────────────────┤
@@ -48,6 +54,11 @@ slider positions as if they were ratios. The sheet is now fed by the same `deliv
 panel fetches with the disk tune, and the database adds only what that surface never had — the
 tile's position in the shop grid, and the checklist. With no save on disk it falls back to the
 database's slot walk and says so.
+
+### Blocks, not pills
+Status and chips are square-cornered solid blocks in heavy uppercase type, the game's own badge
+language; rounded pills did not carry emphasis. Sliders the daemon knows only by position read as
+absolute values from the database's ranges, tagged `db`.
 
 ### The screen is portrait
 The dashboard's home is a 4K portrait monitor at 200%: a **1080 × 1920 CSS-px** viewport. In

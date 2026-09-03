@@ -337,3 +337,38 @@ button.stage.act.go:active{transform:translateY(1px)}
 
 .legend .mini{margin-left:auto}
 .legend .mini.on{color:var(--mag);border-color:var(--mag)}
+
+/* ---- the trace region, directly under the header ---- */
+.trace{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 10px 6px}
+.trace .thd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;font-size:12px}
+.trace .thd .fdim{display:inline-flex;align-items:center;gap:3px}
+.trace .thd .fdim .why{margin-right:2px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.trace .tspacer{flex:1 1 auto}
+.trace .segctl{display:inline-flex;align-items:center;gap:3px}
+.trace .segctl .why{font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
+.trace svg.tsvg{display:block;width:100%;height:auto;max-height:200px;background:var(--bg);border-radius:3px}
+.trace .tfoot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:4px;font-size:11px}
+.trace .tread{min-width:220px}
+.trace .lchips{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
+.lchip{display:inline-block;border:1px solid var(--line2);border-radius:2px;padding:0 6px;font-size:10.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+.lchip b{color:var(--ink)}.lchip s{opacity:.7}
+.slv .src{font:600 8.5px var(--mono);color:var(--acc2);border:1px solid var(--acc2);border-radius:2px;padding:0 3px;margin-left:5px;vertical-align:middle;font-style:normal}
+
+/* ---- emphasis: blocks, not pills. Square corners, solid fills, heavier type — the game's own badge language ---- */
+.pill{font:800 12px var(--sans);letter-spacing:.09em;text-transform:uppercase;padding:4px 12px;border-radius:2px;border:1px solid transparent}
+.pill.ok{background:var(--acc);border-color:var(--acc);color:#04140c}
+.pill.warn{background:var(--warn);border-color:var(--warn);color:#1a1400}
+.pill.bad{background:var(--bad);border-color:var(--bad);color:#1a0608}
+.pill.blue{background:var(--acc2);border-color:var(--acc2);color:#04101c}
+.pill.dim{opacity:.7}
+.chip{border-radius:2px;padding:1px 7px;font-weight:600;letter-spacing:.02em}
+.chip.on{background:#0f2a1e}.chip.w{background:#2a220f}.chip.r,.chip.bad{background:#2a1416}.chip.b{background:#0f1f2e}.chip.m{background:#1f1426}
+.big{border-radius:2px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.mini{border-radius:2px}
+.tabs2 button{border-radius:2px;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.tabs2 button.on{background:#0f2a1e}
+.thumb{border-radius:2px}
+.hdr,.pane,.ftr,.dock,.alert{border-radius:3px}
+.dock .spans button,.dt{border-radius:2px}
+.step i{border-radius:2px}
+.fsheet{border-radius:3px}

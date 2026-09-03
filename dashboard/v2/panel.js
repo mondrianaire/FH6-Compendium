@@ -8,7 +8,71 @@
  */
 "use strict";
 
-let MODE = { suggest: "free", reason: "no signal yet", kind: null, game: null };
+/* --------------------------------------------------------- the view store */
+// A RELOAD IS A RE-QUERY, NOT A RESET. Every value on screen is either re-derived from the stores
+// it came from (api/*.json, the daemon's snapshot) or, when it is the user's own choice, read back
+// from ONE view store keyed by the context that owns it: the car (ordinal), the course (key), the
+// build (hardware hash), or the page. Nothing derivable is persisted; nothing persisted is shown
+// as live — a restored course, position or PI is labelled held until a fresh frame confirms it.
+let VIEW = { v: 1, global: {}, car: {}, course: {}, build: {} };
+let CTX = {};                    // the volatile live-context seed: sessionStorage, expires with the tab
+let VIEW_T = null;
+function viewLoad() {
+  let v = null;
+  try { v = JSON.parse(localStorage.getItem("fh6view") || "null"); } catch (e) { v = null; }
+  if (!v || v.v !== 1) v = viewMigrate();
+  VIEW = Object.assign({ v: 1, global: {}, car: {}, course: {}, build: {} }, v || {});
+  VIEW.global = VIEW.global || {}; VIEW.car = VIEW.car || {}; VIEW.course = VIEW.course || {}; VIEW.build = VIEW.build || {};
+  try { CTX = JSON.parse(sessionStorage.getItem("fh6ctx") || "{}") || {}; } catch (e) { CTX = {}; }
+}
+// the five legacy keys become the one store, once
+function viewMigrate() {
+  const v = { v: 1, global: {}, car: {}, course: {}, build: {} };
+  const rd = (k) => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
+  const pins = rd("fh6pin") || {};
+  Object.keys(pins).forEach((o) => { (v.car[o] = v.car[o] || {}).pin = pins[o]; });
+  const bl = rd("fh6baseline"); if (bl && bl.ordinal != null) (v.car[String(bl.ordinal)] = v.car[String(bl.ordinal)] || {}).baseline = bl;
+  const sh = rd("fh6sheet"); if (sh) v.global.sheet = sh;
+  try { const m = localStorage.getItem("fh6SegMode"); if (m) v.global.traceMode = m; v.global.traceAll = localStorage.getItem("fh6PaintAll") === "1"; } catch (e) {}
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("fh6clone:")) { const d = rd(k); if (d) v.build[k.slice(9)] = { done: d }; } } } catch (e) {}
+  try { localStorage.setItem("fh6view", JSON.stringify(v)); } catch (e) {}
+  return v;
+}
+function viewSave() {
+  clearTimeout(VIEW_T);
+  VIEW_T = setTimeout(() => {
+    try {
+      const keys = Object.keys(VIEW.course);
+      if (keys.length > 40) keys.sort((a, b) => (VIEW.course[b].touched || 0) - (VIEW.course[a].touched || 0)).slice(40).forEach((k) => delete VIEW.course[k]);
+      localStorage.setItem("fh6view", JSON.stringify(VIEW, (k, val) => (val instanceof Set ? [...val] : val)));
+    } catch (e) { /* private mode, or quota: the page still works, it just forgets */ }
+  }, 400);
+}
+function ctxSave(patch) { Object.assign(CTX, patch, { at: Date.now() }); try { sessionStorage.setItem("fh6ctx", JSON.stringify(CTX)); } catch (e) {} }
+const ctxFresh = (ms) => !!(CTX && CTX.at && Date.now() - CTX.at < ms);
+function vg(k, d) { if (VIEW.global[k] === undefined) VIEW.global[k] = d; return VIEW.global[k]; }
+function vcar(o) { const k = String(o); return VIEW.car[k] || (VIEW.car[k] = {}); }
+function vcourse(key) {
+  const c = VIEW.course[key] || (VIEW.course[key] = {});
+  c.filters = c.filters || {}; c.rightTab = c.rightTab || {};
+  if (!(c.hidden instanceof Set)) c.hidden = new Set(c.hidden || []);
+  c.touched = Date.now();
+  return c;
+}
+
+// MODE has three states, not two: unknown until the daemon's first mode event, then free | course |
+// decode. Asserting "free" before the daemon spoke was how a reload painted the world map over a
+// course you were standing on. `held` = seeded from the previous page, not yet confirmed.
+let MODE = { suggest: null, reason: "waiting for the daemon", kind: null, game: null, known: false, held: false };
+const liveKnown = () => LIVE.frame != null || LIVE.receiving === false;
+function adoptMode(m) {
+  if (!m) return;
+  const prev = { suggest: MODE.suggest, game: MODE.game };
+  if (m.game !== undefined) MODE.game = m.game;
+  if (m.kind !== undefined) MODE.kind = m.kind;
+  if (m.suggest) { MODE.suggest = m.suggest; MODE.reason = m.reason || MODE.reason; MODE.known = true; MODE.held = false; }
+  if (prev.suggest !== MODE.suggest || prev.game !== MODE.game) onModeChange(prev, MODE);
+}
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
@@ -69,10 +133,58 @@ function panelSkeleton(host) {
     <div class="ftr" id="ftr"></div>`;
 }
 
+const courseFile = (key) => "course/" + String(key).replace(/[^A-Za-z0-9_\-]/g, "_") + ".json";
 async function panelBoot() {
-  try { BASELINE = JSON.parse(localStorage.getItem("fh6baseline") || "null"); } catch (e) { BASELINE = null; }
+  // the page's own chrome, from the view store, before anything paints
+  DOCK_SPAN = vg("dockSpan", 600); SHOW_OFFMAP = !!vg("showOffmap", false);
+  TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
   WORLD = w; DIAG = d; COURSES = c;
+  // the live-context seed: where the car was, on which course, in which mode — held, not live
+  if (!LIVE.frame && ctxFresh(10 * 60e3)) {
+    if (CTX.livePos && LIVEPOS == null) LIVEPOS = CTX.livePos;
+    if (CTX.mode && CTX.mode.suggest && !MODE.known) { MODE.suggest = CTX.mode.suggest; MODE.game = CTX.mode.game || null; MODE.reason = "held from the previous page"; MODE.known = true; MODE.held = true; }
+    if (CTX.courseKey && !COURSE) {
+      try { COURSE = await get(courseFile(CTX.courseKey)); COURSE_KEY = CTX.courseKey; restoreCourseView(COURSE_KEY); } catch (e) { COURSE = null; COURSE_KEY = null; }
+    }
+  }
+}
+
+/* ------------------------------------------------------- the context hooks */
+// Three moments when the context changes hands; each restores what the new context owns.
+function restoreCourseView(key) {
+  if (!key) return;
+  const vc = vcourse(key);
+  if (RIGHT_CTX && vc.rightTab[RIGHT_CTX]) RIGHT_TAB = vc.rightTab[RIGHT_CTX];
+  TRACE_KEY = null; LEFT_KEY = null;
+}
+async function onCourseChange(prevKey, key, opts) {
+  opts = opts || {};
+  if (key && (opts.force || key !== prevKey)) {
+    let c = null;
+    try { c = await get(courseFile(key)); } catch (e) { c = null; }
+    if (!c) return;                         // never latch a key whose file will not load
+    COURSE = c; COURSE_KEY = key;
+  }
+  if (COURSE_KEY) restoreCourseView(COURSE_KEY);
+  ctxSave({ courseKey: COURSE_KEY, livePos: LIVEPOS });
+  paintLeft(); paintTrace(); paintRight(); paintFooter();
+}
+function onModeChange(prev, cur) {
+  if (COURSE && COURSE.key) { const vc = VIEW.course[COURSE.key]; if (vc && vc.auto !== false) delete vc.preset; }   // the context chose it; let it choose again
+  TRACE_KEY = null;
+  ctxSave({ mode: { suggest: cur.suggest, game: cur.game } });
+  paintLeft(); paintTrace(); paintRight(); paintFooter();
+}
+function onCarChange() {
+  if (!CUR) return;
+  const cv = vcar(CUR.ordinal);
+  BASELINE = cv.baseline || null;         // a baseline belongs to a car; another car's is not shown here
+  if (RIGHT_CTX) RIGHT_TAB = rightTabStore()[RIGHT_CTX] || null;
+  if (cv.livePI && LIVE_PI == null && Date.now() - cv.livePI.at < 30 * 60e3) { LIVE_PI = cv.livePI.pi; LIVE_PI_HELD = true; }
+  if (!CHANGE && cv.change && !(cv.dismissed && cv.dismissed.change === cv.change.ts) && CUR.disk
+      && (cv.change.saved ? cv.change.ts === CUR.disk.ts : (cv.prevFp && cv.prevFp.ts === CUR.disk.ts))) CHANGE = cv.change;
+  ctxSave({ cid: CUR.cid, ordinal: CUR.ordinal });
 }
 
 function paintPanel() {
@@ -96,8 +208,8 @@ const TRACE_WORD = ["within grip", "front slipping", "rear slipping", "all four"
 const GRAD = ["#2f81f7", "#3fb6c8", "#6fd08c", "#d7d264", "#e8a13c", "#e5414e"];
 const TRACE_DIMS = [["class", "class"], ["dt", "drive"], ["container", "tune"], ["solo", "traffic"], ["bid", "build"]];
 const PRESETS = [["all", "all"], ["class", "this class"], ["car", "this car"], ["build", "this build"], ["hw", "same hardware"], ["tune", "this tune"]];
-let TRACE_F = {};                     // per course: {dim: value}
-let TRACE_SEL = {};                   // per course: {preset, hidden: Set, ctx}
+// the selection and the filters live in the view store per course (vcourse); these two are the
+// page-wide paint choices, mirrored to the legacy keys the v1 dashboard still reads
 let TRACE_MODE = (() => { try { return localStorage.getItem("fh6SegMode") || "grip"; } catch (e) { return "grip"; } })();
 let TRACE_ALL = (() => { try { return localStorage.getItem("fh6PaintAll") === "1"; } catch (e) { return false; } })();
 let TRACE_KEY = null;
@@ -127,18 +239,20 @@ function presetTest(k) {
 // event on a known course starts with the class you are racing selected, free roam with all
 function traceSel(c) {
   const ctx = MODE.game === "event" ? "event" : "free";
-  let sel = TRACE_SEL[c.key];
-  if (!sel || sel.ctx !== ctx) {
+  const vc = vcourse(c.key);
+  if (!vc.preset || (vc.ctx !== ctx && vc.auto !== false)) {
     const cls = liveClass();
-    sel = TRACE_SEL[c.key] = { preset: (ctx === "event" && cls) ? "class" : "all", hidden: new Set(), ctx };
+    vc.preset = (ctx === "event" && cls) ? "class" : "all"; vc.auto = true;
   }
-  return sel;
+  if (vc.ctx !== ctx) { vc.ctx = ctx; viewSave(); }
+  return vc;
 }
 
 function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
-  const key = course ? JSON.stringify(["c", COURSE.key, TRACE_F[COURSE.key], traceSel(COURSE), [...traceSel(COURSE).hidden], TRACE_MODE, TRACE_ALL, CUR && CUR.cid, liveClass(), el.clientWidth])
+  const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -179,7 +293,7 @@ const cursorSvg = (H) => `<g class="cur" style="display:none"><line y1="6" y2="$
 function courseTrace(c) {
   const byId = {}; (c.laps || []).forEach((l) => (byId[String(l.id)] = l));
   const all = Object.keys(c.traces).map((id) => Object.assign({ id, pts: c.traces[id] }, byId[id] || {})).filter((t) => t.pts && t.pts.length > 2);
-  const sel = traceSel(c), tf = TRACE_F[c.key] || {};
+  const sel = traceSel(c), tf = sel.filters;
   // 1. the preset against the car you are in — every chip carries its count, an empty one is dim
   const presets = PRESETS.map(([k, lab]) => { const n = all.filter(presetTest(k)).length;
     return `<button class="mini ${sel.preset === k ? "on" : ""} ${n ? "" : "dim"}" data-tpre="${k}" ${n ? "" : "disabled"} title="${k === "hw" ? "every build whose 48 non-rim slots match and whose rims share a mass level" : k === "build" ? "this exact hardware hash" : k === "tune" ? "this save file" : k === "class" ? "the class you are in now" : k === "car" ? "this car, any build" : "every lap on record"}">${lab}<span class="cn">${n}</span></button>`; }).join("");
@@ -254,13 +368,14 @@ function clearMapMark() { const g = document.querySelector("#leftBody svg #trace
 function wireTrace(el) {
   el.querySelectorAll("[data-tfilt]").forEach((b) => b.onclick = () => {
     const [d, v] = b.dataset.tfilt.split("|"); const k = COURSE && COURSE.key; if (!k) return;
-    if (d === "*") { TRACE_F[k] = {}; traceSel(COURSE).hidden = new Set(); }
-    else { const f = TRACE_F[k] = TRACE_F[k] || {}; if (v) f[d] = v; else delete f[d]; }
-    paintTrace(); });
-  el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; traceSel(COURSE).preset = b.dataset.tpre; paintTrace(); });
-  el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); paintTrace(); });
-  el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
-  const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
+    const vc = traceSel(COURSE);
+    if (d === "*") { vc.filters = {}; vc.hidden = new Set(); }
+    else { if (v) vc.filters[d] = v; else delete vc.filters[d]; }
+    viewSave(); paintTrace(); });
+  el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); paintTrace(); });
+  el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); viewSave(); paintTrace(); });
+  el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
+  const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
   const sv = el.querySelector("svg.tsvg[data-pts]"); if (!sv) return;
   let P = []; try { P = JSON.parse(sv.dataset.pts || "[]"); } catch (e) { P = []; }
   if (!P.length) return;
@@ -305,7 +420,7 @@ function paintDock() {
       <div class="dtiles" id="dockTiles"></div>
       <div class="dtrace" id="dockTrace"></div>`;
     d.querySelectorAll("[data-span]").forEach((b) => b.onclick = () => {
-      DOCK_SPAN = +b.dataset.span; d.querySelectorAll("[data-span]").forEach((x) => x.classList.toggle("on", x === b)); paintDockTrace(); });
+      DOCK_SPAN = +b.dataset.span; VIEW.global.dockSpan = DOCK_SPAN; viewSave(); d.querySelectorAll("[data-span]").forEach((x) => x.classList.toggle("on", x === b)); paintDockTrace(); });
   }
   const lv = $("#dockLive");
   if (lv) { lv.className = "livetag " + (LIVE.receiving ? "" : "off"); lv.innerHTML = `<i></i>${LIVE.receiving ? "LIVE" : "OFFLINE"}${LIVE.pps ? ` <span class="mono">${Math.round(LIVE.pps)} pps</span>` : ""}`; }
@@ -442,7 +557,7 @@ function setBaseline(twin) {
   if (!twin) return;
   if (BASELINE && BASELINE.container === twin.c) BASELINE = null;
   else BASELINE = { container: twin.c, hw: twin.hw, su: twin.su, name: twin.name, ordinal: twin.o, set_utc: new Date().toISOString() };
-  try { localStorage.setItem("fh6baseline", JSON.stringify(BASELINE)); } catch (e) { /* private */ }
+  vcar(twin.o).baseline = BASELINE; viewSave();   // a baseline belongs to its car
   if (BASELINE) setPin(twin.o, (twin.c || "").split("_").pop());
   paintPanel();
 }
@@ -455,7 +570,8 @@ function paintBanner() {
   const parts = [];
   if (CHANGE) parts.push(changeBanner());
   if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) parts.push(savePicker());
-  if (st.steps && st.steps.length && !CHANGE) {
+  const dismissedStatus = CUR && (vcar(CUR.ordinal).dismissed || {}).status === st.key + "|" + ((CUR.disk && CUR.disk.ts) || "");
+  if (st.steps && st.steps.length && !CHANGE && !dismissedStatus) {
     parts.push(`<div class="alert ${st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : ""}">
       <b>${esc(st.label)}.</b> ${esc(st.why)}.
       <span class="steps">${st.steps.map((s, i) => `<span class="step"><i>${i + 1}</i>${esc(s)}</span>`).join("")}</span>
@@ -484,7 +600,7 @@ function paintLeft() {
     const off = WORLD ? routeSplit().off.length : 0;
     hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
     body.innerHTML = worldMapHTML(); addLiveDot(body);
-    const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; paintLeft(); };
+    const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; VIEW.global.showOffmap = SHOW_OFFMAP; viewSave(); paintLeft(); };
   }
 }
 
@@ -537,20 +653,20 @@ function addLiveDot(body) {
 }
 
 // which learned course is the live car on? nearest course whose path passes within 60 m
+// Learned courses share road (17 pairs in world.json overlap within 60 m), so the incumbent keeps
+// the car while it is within 90 m unless a challenger is nearer by 25 m: a flip a second after a
+// reload would orphan the per-course view state that was just restored.
 async function locateCourse() {
   if (!LIVEPOS || !WORLD || !WORLD.courses) return;
-  let best = null, bd = 60 * 60;
-  for (const [key, c] of Object.entries(WORLD.courses)) {
-    for (const [x, z] of (c.path || [])) {
-      const d = (x - LIVEPOS[0]) ** 2 + (z - LIVEPOS[1]) ** 2;
-      if (d < bd) { bd = d; best = key; }
-    }
+  const near = (c) => { let bd = Infinity; for (const [x, z] of (c.path || [])) { const d = (x - LIVEPOS[0]) ** 2 + (z - LIVEPOS[1]) ** 2; if (d < bd) bd = d; } return Math.sqrt(bd); };
+  let best = null, bd = 60;
+  for (const [key, c] of Object.entries(WORLD.courses)) { const d = near(c); if (d < bd) { bd = d; best = key; } }
+  if (COURSE_KEY && WORLD.courses[COURSE_KEY]) {
+    const dInc = near(WORLD.courses[COURSE_KEY]);
+    if (dInc <= 90 && (best == null || bd >= dInc - 25)) best = COURSE_KEY;
   }
-  if (best && best !== COURSE_KEY) {
-    COURSE_KEY = best;
-    try { COURSE = await get("course/" + best.replace(/\//g, "_") + ".json"); } catch (e) { COURSE = null; }
-    paintLeft(); paintRight(); paintFooter();
-  }
+  ctxSave({ livePos: LIVEPOS });
+  if (best && best !== COURSE_KEY) await onCourseChange(COURSE_KEY, best);
 }
 
 /* ------------------------------------------------------------ right */
@@ -565,18 +681,28 @@ function rightContext() {
   if (course && BASELINE) return "concl";
   return "corners";
 }
+function rightTabStore() { return (MODE.suggest === "course" && COURSE) ? vcourse(COURSE.key).rightTab : vg("rightTab", {}); }
 function paintRight() {
   const hd = $("#rightHd"), body = $("#rightBody"); if (!body) return;
+  if (!liveKnown() && !LIVE.frame) {      // before the first frame the context is not known; do not latch it
+    hd.innerHTML = `<span class="tabs2">${rightTabs().map((t) => `<button disabled>${RT_LABEL[t]}</button>`).join("")}</span><span class="why">waiting for telemetry</span>`;
+    body.innerHTML = `<div class="why">waiting for the first frame — the pane follows the context once it is known</div>`;
+    return;
+  }
   const ctx = rightContext();
-  if (ctx !== RIGHT_CTX) { RIGHT_CTX = ctx; RIGHT_TAB = null; }
+  if (ctx !== RIGHT_CTX) { RIGHT_CTX = ctx; RIGHT_TAB = rightTabStore()[ctx] || null; }
   const tabs = rightTabs();
   const cur = tabs.includes(RIGHT_TAB) ? RIGHT_TAB : ctx;
   const why = { corners: "every corner as you take it · newest first", stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
-  hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; paintRight(); });
+  hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
   body.innerHTML = cur === "corners" ? cornersHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
+  body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
+    setPin(CUR.ordinal, b.dataset.pickts); if (COURSE) { vcourse(COURSE.key).filters.container = b.dataset.cont; viewSave(); }
+    identify(carOf(CUR.cid), "pinned"); });
+  if (cur === "build") fillSinceSave(body);
 }
 
 // The corner log: the daemon's live corner events for the car you are in, newest first.
@@ -588,11 +714,24 @@ function cornersHTML() {
   const head = `<div class="frow head"><b>${log.length} corner${log.length === 1 ? "" : "s"} this session</b>
     ${inCorner ? `<span class="chip on">● in a corner now — ${f.lat > 0 ? "right" : "left"}, ${Math.abs(f.lat).toFixed(2)} g</span>` : ""}</div>`;
   if (!log.length) return head + `<div class="why">start driving — each corner appears here the moment you complete it, with its balance verdict</div>`;
-  const rows = log.slice(-30).reverse().map((c, i) => {
+  // bound to the course's own turns GEOMETRICALLY (nearest turn to the apex within 40 m), never by
+  // id: course turns and diagnosis turns are two id namespaces. Your passes of the same turn this
+  // session rank this one against them; laps on record are the turn's `n`.
+  const turnAt = (apex) => { if (!apex || apex[0] == null || !COURSE || !(COURSE.turns || []).length) return null;
+    let best = null, bd = 40 * 40; for (const t of COURSE.turns) { if (t.x == null) continue; const d = (t.x - apex[0]) ** 2 + (t.z - apex[1]) ** 2; if (d < bd) { bd = d; best = t; } } return best; };
+  const bound = log.map((c) => ({ c, t: turnAt(c.apex) }));
+  const rows = bound.slice(-30).reverse().map(({ c, t }, i) => {
     const g = DGRIP[dGripUsi(c.usi)]; const fr = c.first_red;
     const kind = c.mph_min < 45 ? "hairpin" : c.mph_min <= 85 ? "medium" : "fast";
+    let turn = "";
+    if (t) {
+      const mine = bound.filter((b) => b.t === t).map((b) => b.c);
+      const apexes = mine.map((x) => x.mph_apex != null ? x.mph_apex : x.mph_min).filter((v) => v != null);
+      const best = apexes.length ? Math.max(...apexes) : null, here = c.mph_apex != null ? c.mph_apex : c.mph_min;
+      turn = `<span class="why tturn" title="${esc(t.id)} · ${esc(t.kind || "")} · ${t.r != null ? Math.round(t.r) + " m radius" : ""} · ${t.n != null ? t.n + " passes on record" : ""}"><b>${esc(t.id)}</b> ${esc(t.kind || "")}${t.r != null ? " · " + Math.round(t.r) + " m" : ""}${t.n != null ? " · " + t.n + " on record" : ""}${mine.length > 1 ? ` · your ${mine.length} passes: best ${best} — this ${here}` : ""}</span>`;
+    }
     return `<div class="crow"><span class="mono">${log.length - i}</span><span>${c.lapn != null ? "lap " + c.lapn : c.ev ? "" : "free"}</span>
-      <b>${c.dir === "L" ? "⬅" : "➡"} ${kind}</b>
+      <b>${c.dir === "L" ? "⬅" : "➡"} ${kind}${turn ? " " : ""}</b>${turn}
       <span class="mono">${c.mph_in}→<b>${c.mph_min}</b>→${c.mph_out ?? "—"}</span>
       <span class="mono">${c.lat_g_peak} g</span>
       <span class="mono">${c.brake_on_m != null ? c.brake_on_m + " m" : "—"}</span>
@@ -604,11 +743,61 @@ function cornersHTML() {
 
 // Build data: what the save on disk gives exactly, what the union still has to measure, and the
 // steps to ratification — the menu-time pane, because a menu is where the build changes.
+// SINCE THE PREVIOUS SAVE — derived from the database's own saves, never from page memory, so a
+// reload draws the same block. The pair is the two newest saves of this car in identity.json;
+// the physical values come from build/<hw>.json (both, when the pair crosses hardware). Never
+// /disk-tune?ts= here: that stores a two-hour pick as a side effect.
+const savesOfCar = (o) => (IDENT ? IDENT.builds.filter((b) => b.o === o) : []).slice().sort((a, b) => String(b.saved || "").localeCompare(String(a.saved || "")));
+function sinceSaveHTML() {
+  const saves = savesOfCar(CUR.ordinal);
+  if (saves.length < 2) return saves.length ? `<div class="grp"><div class="gh">Since the previous save</div><div class="why">only one save of this car is held — the next one makes a pair</div></div>` : "";
+  const [b, a] = saves;                    // b = newest, a = the one before
+  const pa = a.pkey.split(","), pb = b.pkey.split(","), sa = a.skey.split(","), sb = b.skey.split(",");
+  const slots = IDENT.slots.filter((_, i) => pa[i] !== pb[i]);
+  const sliders = IDENT.sliders.filter((_, i) => sa[i] !== sb[i]);
+  const fitted = CUR.disk && CUR.disk.ts, newer = fitted && String(b.c || "").indexOf("_" + fitted) < 0 && saves.every((x) => String(x.c || "").indexOf("_" + fitted) < 0);
+  return `<div class="grp" id="sinceSave" data-a="${esc(a.c)}" data-b="${esc(b.c)}"><div class="gh">Since the previous save</div>
+    <div class="frow"><b>${esc(b.name || "unnamed")}</b> <span class="why">${esc(tsLocal(String(b.c).split("_").pop()))}</span> <span class="why">vs</span> <b>${esc(a.name || "unnamed")}</b> <span class="why">${esc(tsLocal(String(a.c).split("_").pop()))}</span>
+      ${newer ? `<span class="chip w" title="the save on the car is newer than anything the database holds — the import is running or pending">fitted save not held yet</span>` : ""}</div>
+    <div class="frow">${slots.length ? `<b>${slots.length} part${slots.length === 1 ? "" : "s"}</b> changed: <span class="ssl">${slots.map((x) => `<span data-slot="${esc(x)}">${esc(x.replace(/_/g, " "))}</span>`).join(", ")}</span>` : "same hardware"}${b.kg && a.kg ? ` <span class="why">· ${(b.kg - a.kg) >= 0 ? "+" : ""}${n0(b.kg - a.kg)} kg</span>` : ""}${b.gears !== a.gears ? ` <span class="why">· ${a.gears}→${b.gears} gears</span>` : ""}</div>
+    <div class="frow">${sliders.length ? `<b>${sliders.length} slider${sliders.length === 1 ? "" : "s"}</b> moved: <span class="ssl">${sliders.map((x) => `<span data-slider="${esc(x)}">${esc(x.replace(/_/g, " "))}</span>`).join("; ")}</span>` : "sliders unchanged"}</div></div>`;
+}
+// fills the physical old → new values once both build files are in (memoised through get())
+async function fillSinceSave(body) {
+  const el = body.querySelector("#sinceSave"); if (!el || !IDENT) return;
+  const a = IDENT.builds.find((x) => x.c === el.dataset.a), b = IDENT.builds.find((x) => x.c === el.dataset.b); if (!a || !b) return;
+  let ba = null, bb = null;
+  try { ba = await get("build/" + a.hw + ".json"); bb = a.hw === b.hw ? ba : await get("build/" + b.hw + ".json"); } catch (e) { return; }
+  if (!el.isConnected) return;
+  const tune = (bj, c) => (bj.tunes || []).find((t) => t.container === c) || null;
+  const ta = tune(ba, a.c), tb = tune(bb, b.c);
+  const fmt = (s) => s && s.v != null ? (Math.abs(s.v) >= 100 ? s.v.toFixed(0) : s.v.toFixed(2)) + (s.unit ? " " + s.unit : "") : "—";
+  el.querySelectorAll("[data-slider]").forEach((sp) => { const n = sp.dataset.slider;
+    const va = ta && (ta.sliders || []).find((x) => x.slider === n), vb = tb && (tb.sliders || []).find((x) => x.slider === n);
+    if (va || vb) sp.innerHTML = `${esc(n.replace(/_/g, " "))} <span class="mono">${esc(fmt(va))} → ${esc(fmt(vb))}</span>`; });
+  el.querySelectorAll("[data-slot]").forEach((sp) => { const n = sp.dataset.slot;
+    const pa = (ba.parts || []).find((x) => x.slot === n), pb = (bb.parts || []).find((x) => x.slot === n);
+    if (pa || pb) sp.innerHTML = `${esc(n.replace(/_/g, " "))} <span class="mono">${esc((pa && pa.name) || "stock")} → ${esc((pb && pb.name) || "stock")}</span>`; });
+}
+// the car's saves, newest first, repeat saves of one setup collapsed; a click pins that save
+function saveHistoryHTML() {
+  const saves = savesOfCar(CUR.ordinal); if (!saves.length) return "";
+  const fitted = CUR.disk && CUR.disk.ts;
+  const groups = []; saves.forEach((sv) => { const g = groups.find((x) => x.su === sv.su && x.hw === sv.hw); if (g) { g.n++; return; } groups.push({ su: sv.su, hw: sv.hw, n: 1, sv }); });
+  const twins = new Set(atomicTwins().map((x) => x.c));
+  return `<div class="grp"><div class="gh">Saves of this car · ${saves.length}</div>${groups.slice(0, 14).map(({ sv, n }) => {
+    const ts = String(sv.c).split("_").pop(); const on = fitted && ts === fitted;
+    return `<button class="srowb ${on ? "on" : ""}" data-pickts="${esc(ts)}" data-cont="${esc(sv.c)}" title="${esc(sv.c)} · click to pin this save and foreground it on the trace">
+      <span class="mono">${esc(tsLocal(ts))}</span><b>${esc(sv.name || "unnamed")}</b><span class="why">${sv.locked ? "downloaded" : "own"}${sv.creator ? " · " + esc(sv.creator) : ""}</span>
+      <span class="why">${sv.pi ? "PI " + sv.pi : ""}${sv.kg ? " · " + n0(sv.kg) + " kg" : ""}${sv.gears ? " · " + sv.gears + "-sp" : ""}</span>
+      <span class="why">${n > 1 ? "saved " + n + "×" : ""}${on ? " · fitted" : ""}${BASELINE && BASELINE.container === sv.c ? " · baseline" : ""}${twins.has(sv.c) && !on ? " · same hardware" : ""}</span></button>`; }).join("")}</div>`;
+}
 function buildDataHTML() {
   const st = buildStatus();
   const dl = CUR && CUR.disk && CUR.disk.deliverable;
   const parts = [];
   if (!CUR) return `<div class="why">${esc(MODE.reason || "waiting for a car")}</div>`;
+  parts.push(sinceSaveHTML());
   if (!dl) parts.push(`<div class="frow"><b>${esc(st.label)}</b> <span class="why">${esc(st.why)}</span></div>`);
   else {
     const sm = dl.summary || {}, u = dl.union || {};
@@ -623,6 +812,7 @@ function buildDataHTML() {
   }
   if (st.steps && st.steps.length) parts.push(`<div class="grp"><div class="gh">To ratification</div><span class="steps">${st.steps.map((x, i) => `<span class="step"><i>${i + 1}</i>${esc(x)}</span>`).join("")}</span></div>`);
   else if (st.key === "ratified") parts.push(`<div class="frow normal"><b>ratified</b> <span class="why">this build carries the history of every atomically-similar build</span></div>`);
+  parts.push(saveHistoryHTML());
   parts.push(`<div class="grp"><div class="gh">Database</div><div class="frow"><button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>
     <span class="why">${RB.last && RB.last.finished ? `last import ${new Date(RB.last.finished * 1000).toLocaleTimeString()} · ${RB.last.wall_s} s` : "imports every save on disk and rewrites the dashboard data (~10 s); runs by itself when a new save is not yet held"}</span>${RB.error ? `<span class="why" style="color:var(--bad)">${esc(RB.error)}</span>` : ""}</div></div>`);
   return parts.join("");
@@ -674,7 +864,7 @@ function paintFooter() {
     cov = `<span class="cov"><span class="why">coverage</span><span class="bar"><i style="width:${pct}%"></i></span>
       <span class="mono">${laps}/${need} laps</span>${laps < need ? '<span class="chip w">not yet outlier-proof</span>' : '<span class="chip on">baseline ready</span>'}</span>`;
   }
-  f.innerHTML = `<span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${esc(MODE.suggest)}</span>
+  f.innerHTML = `<span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${MODE.known ? esc(MODE.suggest) + (MODE.held ? " (held)" : "") : "—, waiting"}</span>
     <span class="why">${esc(MODE.reason || "")}</span>
     <span class="chip">baseline · ${BASELINE ? esc(BASELINE.name || BASELINE.container) : "none"}</span>
     ${cov}
@@ -710,7 +900,8 @@ function openSheet() {
   const key = (MATCH.sheet.hw || "") + "|" + ((CUR && CUR.disk && CUR.disk.ts) || "") + "|" + (dl ? 1 : 0);
   if (el.dataset.k === key && el.querySelector(".fbody")) { el.style.display = "block"; return; }   // same build, same save: just show it
   el.dataset.k = key;
-  const st = (() => { try { return JSON.parse(localStorage.getItem("fh6sheet") || "{}"); } catch (e) { return {}; } })();
+  const st = vg("sheet", {});
+  st.open = true; viewSave();
   if (st.x != null) { el.style.left = st.x + "px"; el.style.top = st.y + "px"; }
   el.classList.toggle("min", !!st.min);
   el.innerHTML = `<div class="fbar" id="fbar"><span class="ttl">BUILD SHEET</span>
@@ -720,10 +911,10 @@ function openSheet() {
     <div class="fbody fhcl"><style>${scopedCloneCss()}</style>${cloneHTML(MATCH.sheet, dl, name)}</div>`;
   el.style.display = "block";
   wireClone({ document: el, localStorage: window.localStorage }, MATCH.sheet);
-  el.querySelector('[data-f="close"]').onclick = () => { el.style.display = "none"; };
+  el.querySelector('[data-f="close"]').onclick = () => { el.style.display = "none"; st.open = false; save(); };
   el.querySelector('[data-f="min"]').onclick = () => { st.min = !st.min; el.classList.toggle("min", st.min); save();
     const bt = el.querySelector('[data-f="min"]'); bt.textContent = st.min ? "▢" : "—"; bt.title = st.min ? "expand" : "minimise"; };
-  const save = () => { try { localStorage.setItem("fh6sheet", JSON.stringify(st)); } catch (e) { /* private */ } };
+  const save = () => { VIEW.global.sheet = st; viewSave(); };
   // drag by the bar
   const bar = el.querySelector("#fbar");
   bar.onpointerdown = (e) => {

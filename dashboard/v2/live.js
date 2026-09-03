@@ -39,11 +39,14 @@ async function viewLive(host) {
   document.body.classList.add("fixed");
   host.classList.add("live");
   panelSkeleton(host);
+  viewLoad();
   if (!IDENT) IDENT = await get("identity.json");
   await panelBoot();
   paintPanel();
   connect();
   connectWatch();
+  // no frame within 1.5 s (a menu, or a parked car): identify the car the previous page held, as held
+  setTimeout(() => { if (!CUR && !LIVE.frame && ctxFresh(30 * 60e3) && CTX.cid && !String(CTX.cid).startsWith("0|")) identify(carOf(CTX.cid), "held"); }, 1500);
 }
 
 function connect() {
@@ -59,7 +62,7 @@ function connect() {
     // minutes of both with the snapshot so a fresh page starts with history, not a blank.
     ES.addEventListener("strip", (e) => { LIVE.strip.push(JSON.parse(e.data)); if (LIVE.strip.length > 1800) LIVE.strip.splice(0, LIVE.strip.length - 1800); paintDockTrace(); });
     ES.addEventListener("corner", (e) => { LIVE.corners.push(JSON.parse(e.data)); if (LIVE.corners.length > 240) LIVE.corners.splice(0, LIVE.corners.length - 240); paintDockTrace(); paintRight(); });
-    ES.addEventListener("mode", (e) => { const d = JSON.parse(e.data); MODE = d; paintLeft(); paintRight(); paintFooter(); });
+    ES.addEventListener("mode", (e) => adoptMode(JSON.parse(e.data)));
     ES.addEventListener("snapshot", (e) => onLive(JSON.parse(e.data)));
     ES.addEventListener("status", (e) => onLive(JSON.parse(e.data)));
     ES.onerror = () => { LIVE.receiving = false; paintHeader(); };
@@ -72,7 +75,8 @@ function onLive(d) {
   if (Array.isArray(d.corners)) { LIVE.corners = d.corners.slice(-240); }
   if (d.pps != null) LIVE.pps = d.pps;
   if (d.receiving != null) LIVE.receiving = d.receiving;
-  if (d.mode && d.mode.suggest) MODE = d.mode;
+  if (d.mode) adoptMode(d.mode);
+  if (!LIVE.frame && LIVEPOS && WORLD) locateCourse();     // a parked car still locates, from the seed
   // no frames yet (game at a menu since we connected): fall back to the last car the session saw
   if (!CUR && LIVE.cars.length) {
     const real = LIVE.cars.filter((c) => c && c.id && !String(c.id).startsWith("0|"));
@@ -93,7 +97,8 @@ function carOf(cid) {
 // The game reports IsRaceOn = 0 whenever you are in a menu, which is exactly when upgrades and
 // sliders get changed. So a menu is not dead time: it is the window in which the build we hold
 // can stop being true, and the moment to re-read the save.
-let MENU_SINCE = 0, LAST_REREAD = 0, LIVE_PI = null;
+let MENU_SINCE = 0, LAST_REREAD = 0, LIVE_PI = null, LIVE_PI_HELD = false;
+let IDENT_SEQ = 0;               // a reload fires two identifies ~50 ms apart; only the last one may write
 
 let LAST_PANEL = 0;
 function onFrame(f) {
@@ -104,7 +109,7 @@ function onFrame(f) {
   LIVE.inMenu = inMenu;
   // A menu frame reports PI 0 and car 0. Zero is "no car", not a PI; letting it through made the
   // drift test read every menu as "the hardware changed", and the status went red in every menu.
-  if (f.pi) LIVE_PI = f.pi;
+  if (f.pi) { if (LIVE_PI !== f.pi && CUR) { vcar(CUR.ordinal).livePI = { pi: f.pi, at: Date.now() }; viewSave(); } LIVE_PI = f.pi; LIVE_PI_HELD = false; }
   if (f.px != null && f.pz != null) {
     const moved = !LIVEPOS || Math.abs(LIVEPOS[0] - f.px) + Math.abs(LIVEPOS[1] - f.pz) > 4;
     LIVEPOS = [f.px, f.pz];
@@ -157,6 +162,7 @@ function runSample(f, now) {
 }
 
 async function identify(car, why) {
+  const seq = ++IDENT_SEQ;
   const ordinal = car.ordinal != null ? car.ordinal : parseInt(String(car.id).split("|")[0], 10);
   CUR = { cid: car.id, ordinal, name: car.name, cls: car.class, pi: car.pi,
           dt: car.drivetrain, cyl: car.cyl, build_id: car.build_id, live_s: car.live_s, why };
@@ -172,6 +178,7 @@ async function identify(car, why) {
     const r = await fetch(DAEMON + "/disk-tune?ordinal=" + ordinal + (pin ? "&ts=" + pin : ""));
     if (r.ok) dt = await r.json();
   } catch (e) { /* daemon down: the car stage still stands on its own */ }
+  if (seq !== IDENT_SEQ) return;              // a later identify owns the page now
   CUR.disk = dt && dt.available ? dt : null;
   CUR.match = (dt && dt.match) || null;
   CUR.pinned = pin;
@@ -180,8 +187,10 @@ async function identify(car, why) {
     const lv = await fetch(DAEMON + "/liveries?ordinal=" + ordinal);
     if (lv.ok) { const j = await lv.json(); CUR.liveries = (j.liveries || j.designs || []).slice(0, 6); }
   } catch (e) { /* liveries are a nicety, not a gate */ }
+  if (seq !== IDENT_SEQ) return;
 
   fingerprint(ordinal);
+  onCarChange();
   ensureHeld();
   paintPanel();
 }
@@ -212,7 +221,7 @@ function fingerprint(ordinal) {
   const liveRims = rimLevelsOf(CUR.disk.tune.parts || {});
   const hw = sameCar.filter((b) => b.pkey === pk || (rimFree(b.pkey) === rimFree(pk) && sameLevels(b.rim_ml, liveRims)));
   const exact = hw.filter((b) => b.skey === sk);
-  const prev = MATCH;
+  const prev = MATCH || (vcar(ordinal).prevFp || null);      // after a reload the store remembers the previous read
   MATCH = { pk, sk, hw, exact, build: (exact[0] || hw[0] || null) };
   // WHAT CHANGED decides what happens next, and the two cases are not the same thing:
   //   hardware moved -> the game will not have written it yet; it needs a NEW SAVE, with a name,
@@ -235,6 +244,10 @@ function fingerprint(ordinal) {
     else if (prev.sk !== sk) CHANGE = { kind: "tune", from: prev, to: MATCH, slots: [], sliders, at: Date.now() };
   }
   MATCH.sliders = CUR.disk.tune.sliders || {};       // kept so the next fingerprint can print old → new
+  const cv = vcar(ordinal);
+  cv.prevFp = { pk, sk, ts: CUR.disk.ts, sliders: MATCH.sliders };
+  if (CHANGE) cv.change = CHANGE;
+  viewSave();
   if (MATCH.build) loadBuild(MATCH.build.hw);
 }
 
@@ -276,7 +289,9 @@ async function afterRebuild() {
   cache.clear();
   try { IDENT = await get("identity.json"); } catch (e) { /* the next boot reads it */ }
   try { await panelBoot(); } catch (e) { /* world/diag/courses are optional here */ }
-  if (CUR) { RB.done_ts = CUR.disk && CUR.disk.ts; fingerprint(CUR.ordinal); }
+  if (COURSE_KEY) { try { await onCourseChange(COURSE_KEY, COURSE_KEY, { force: true }); } catch (e) {} }   // the lap just driven is what the rebuild added
+  HDR_KEY = null; LEFT_KEY = null; TRACE_KEY = null;
+  if (CUR) { RB.done_ts = CUR.disk && CUR.disk.ts; vg("rbDoneTs", {})[String(CUR.ordinal)] = RB.done_ts; viewSave(); fingerprint(CUR.ordinal); }
   paintPanel();
 }
 // THE RULE: a save the database does not hold can only exist because it was written after the
@@ -287,6 +302,7 @@ function ensureHeld() {
   if (!CUR || !CUR.disk || !CUR.disk.ts) return;
   if (MATCH && MATCH.build) return;
   if (RB.state === "running" || RB.pending || RB.done_ts === CUR.disk.ts) return;
+  if (vg("rbDoneTs", {})[String(CUR.ordinal)] === CUR.disk.ts) return;   // asked once for this save already, across reloads
   const locked = !!(CUR.disk.deliverable && CUR.disk.deliverable.locked);
   requestRebuild((locked ? "downloaded tune " : "new save ") + CUR.disk.ts);
 }
@@ -294,8 +310,17 @@ function ensureHeld() {
 // the page. `code` -> reload (the ?v= bump is how a code change is announced); `data` -> drop
 // the api cache and re-read identity, world, diagnosis and the car. Nothing here polls.
 let WS = null, DATA_AT = 0;
+async function seedRebuild() {
+  try {
+    const j = await fetch(REBUILD + "/status").then((r) => r.json());
+    if (j.state === "running" || j.queued) { RB.state = "running"; RB.startedAt = (j.started ? j.started * 1000 : Date.now()); RB.runsAtStart = j.runs - (j.state === "running" ? 0 : 0); if (!RB_TIMER) RB_TIMER = setInterval(pollRebuild, 1000); }
+    else { RB.state = "idle"; if (j.finished) RB.last = j; }
+    paintChips();
+  } catch (e) { RB.state = "down"; }
+}
 function connectWatch() {
   if (WS) return;
+  seedRebuild();
   try {
     WS = new EventSource(REBUILD + "/watch");
     WS.addEventListener("code", (e) => { let f = []; try { f = JSON.parse(e.data).files || []; } catch (x) {}
@@ -337,11 +362,12 @@ function rebuildChip() {
 // point of a re-read is to see a file that just changed.
 async function reread() {
   if (!CUR) return;
+  const seq = IDENT_SEQ;
   try {
     const r = await fetch(DAEMON + "/disk-tune?ordinal=" + CUR.ordinal + "&_=" + Date.now());
     if (!r.ok) return;
     const j = await r.json();
-    if (!j || !j.available) return;
+    if (!j || !j.available || seq !== IDENT_SEQ || !CUR) return;
     const prevTs = CUR.disk && CUR.disk.ts;
     const changedFile = !CUR.disk || CUR.disk.ts !== j.ts;
     CUR.disk = j;
@@ -355,6 +381,8 @@ async function reread() {
       CHANGE.saved = true; CHANGE.ts = j.ts; CHANGE.prevTs = prevTs || null;
       CHANGE.locked = !!(j.deliverable && j.deliverable.locked);
       CHANGE.held = !!(MATCH && MATCH.build);
+      vcar(CUR.ordinal).change = CHANGE; viewSave();
+      onCarChange();
     }
     ensureHeld();
     paintPanel();
@@ -364,12 +392,14 @@ async function reread() {
 async function loadBuild(hw) {
   // The sheet feeds the floating BUILD SHEET and the header's mass/gear chips; there are no
   // hardware/tuning panes on the panel any more, so nothing here paints into them.
+  const seq = IDENT_SEQ;
   try {
     const b = await get("build/" + hw + ".json");
-    if (MATCH) MATCH.sheet = b;
+    if (seq !== IDENT_SEQ || !MATCH) return;
+    MATCH.sheet = b;
     paintPanel();
     const sh = document.getElementById("fhSheet");
-    if (sh && sh.style.display !== "none" && typeof openSheet === "function") openSheet();
+    if ((sh && sh.style.display !== "none") || (vg("sheet", {}).open)) { if (typeof openSheet === "function") openSheet(); }
   } catch (e) { if (MATCH) MATCH.sheet = null; }
 }
 
@@ -406,7 +436,7 @@ function liveChip0() {
     && LIVE_PI !== MATCH.build.pi;
   return `<span class="chip ${LIVE.receiving ? "on" : "r"}">${LIVE.receiving ? "telemetry live" : "no packets"}</span>
     ${LIVE.inMenu ? '<span class="chip w">in a menu — watching for changes</span>' : ""}
-    ${drift ? `<span class="chip r">live PI ${LIVE_PI} ≠ saved ${MATCH.build.pi}</span>` : ""}
+    ${drift ? `<span class="chip r" title="${LIVE_PI_HELD ? "last seen before the reload; a fresh frame confirms or clears it" : "read from the live frame"}">live PI ${LIVE_PI} ≠ saved ${MATCH.build.pi}${LIVE_PI_HELD ? " · held" : ""}</span>` : ""}
     <span class="chip mono">${n1(LIVE.pps)} pps</span>
     <span class="chip ${CUR && CUR.disk ? "on" : "w"}">${CUR && CUR.disk ? "save read" : "no save"}</span>`;
 }
@@ -446,7 +476,12 @@ function changeBanner() {
 
 function wireBanner() {
   document.querySelectorAll("#alerts [data-act]").forEach((b) => b.onclick = () => {
-    if (b.dataset.act === "dismiss") { CHANGE = null; paintPanel(); }
+    if (b.dataset.act === "dismiss") {
+      if (CUR) { const cv = vcar(CUR.ordinal); cv.dismissed = cv.dismissed || {};
+        if (CHANGE) cv.dismissed.change = CHANGE.ts || ((cv.prevFp || {}).ts) || null;
+        else cv.dismissed.status = buildStatus().key + "|" + ((CUR.disk && CUR.disk.ts) || "");
+        viewSave(); }
+      CHANGE = null; paintPanel(); }
     else if (b.dataset.act === "ab") abOverlay();
     else if (b.dataset.act === "rebuild") requestRebuild("manual");
   });
@@ -498,16 +533,8 @@ function diffCount(a, b) {
 // case: six saved builds, every one of them 4-cylinder. The daemon breaks such ties by watching
 // the gearbox (the builds have 6, 8, 9 and 10 gears), but that needs you to drive through them.
 // Until then the honest answer is "one of these", not a green tick, and the user can just say.
-function pinnedTs(ordinal) {
-  try { return JSON.parse(localStorage.getItem("fh6pin") || "{}")[String(ordinal)] || null; }
-  catch (e) { return null; }
-}
-function setPin(ordinal, ts) {
-  let m = {};
-  try { m = JSON.parse(localStorage.getItem("fh6pin") || "{}"); } catch (e) { m = {}; }
-  if (ts) m[String(ordinal)] = String(ts); else delete m[String(ordinal)];
-  try { localStorage.setItem("fh6pin", JSON.stringify(m)); } catch (e) { /* private mode */ }
-}
+function pinnedTs(ordinal) { return (vcar(ordinal).pin) || null; }
+function setPin(ordinal, ts) { const cv = vcar(ordinal); if (ts) cv.pin = String(ts); else delete cv.pin; viewSave(); }
 
 // How much the daemon's pick can be trusted, in the daemon's own words.
 // The daemon's own standard (_verified_identity): identity is settled when at most one save ties on
@@ -873,10 +900,8 @@ function wireClone(w, b) {
   pick("data-cat", "data-body"); pick("data-tcat", "data-tbody");
 
   // the checklist remembers itself per build, so closing the window does not lose your place
-  const key = "fh6clone:" + (b.hw || "x");
-  let done = {};
-  const LS = (w && w.localStorage) || window.localStorage;
-  try { done = JSON.parse(LS.getItem(key) || "{}"); } catch (e) { done = {}; }
+  const bk = b.hw || "x";
+  const done = (VIEW.build[bk] = VIEW.build[bk] || { done: {} }).done;
   const boxes = sel(d, ".srow input");
   const tot = boxes.filter((x) => !x.disabled).length;
   byId("ptot").textContent = tot;
@@ -889,8 +914,7 @@ function wireClone(w, b) {
     if (done[id]) { x.checked = true; row.classList.add("done"); }
     x.onchange = () => {
       row.classList.toggle("done", x.checked);
-      done[id] = x.checked;
-      try { LS.setItem(key, JSON.stringify(done)); } catch (e) { /* private mode */ }
+      done[id] = x.checked; viewSave();
       count();
     };
   });

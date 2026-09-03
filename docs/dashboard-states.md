@@ -109,6 +109,21 @@ exports the renders as `api/thumb/<container>.webp`; the header leads with the r
 the tune's title, author, source, date and description. Common names everywhere: the engine
 line comes from the deliverable's Conversions rows.
 
+### A reload is a re-query, not a reset
+Every value on screen is either re-derived from the stores it came from (api/*.json, the
+daemon's snapshot) or, when it is the user's own choice, read back from ONE view store
+(`localStorage.fh6view`, versioned) keyed by the context that owns it: the car (ordinal: pin,
+baseline, dismissals, last live PI, the previous fingerprint and the change it produced), the
+course (key: trace preset with an `auto` flag, filters, hidden laps, pinned right tab), the
+build (hardware hash: the sheet checklist) or the page (dock span, off-map toggle, paint mode,
+sheet position and open state). `sessionStorage.fh6ctx` seeds the live context (position,
+course key, car, mode) with a freshness gate and is shown as **held** until a frame confirms it.
+MODE has a third state — unknown until the daemon speaks — so a reload never asserts free roam.
+Context hooks `onCarChange`, `onCourseChange` (with course hysteresis) and `onModeChange`
+restore what the new context owns. The Build data pane derives **Since the previous save** from
+the two newest held saves and lists the car's saves (click to pin); the corners tab binds each
+corner to the course's own turn geometrically and ranks your passes this session.
+
 ### The right pane follows the context
 | context | default tab | why |
 |---|---|---|

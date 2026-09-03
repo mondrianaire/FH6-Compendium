@@ -147,7 +147,7 @@ function panelSkeleton(host) {
 const courseFile = (key) => "course/" + String(key).replace(/[^A-Za-z0-9_\-]/g, "_") + ".json";
 async function panelBoot() {
   // the page's own chrome, from the view store, before anything paints
-  DOCK_SPAN = vg("dockSpan", 600); SHOW_OFFMAP = !!vg("showOffmap", false);
+  DOCK_SPAN = vg("dockSpan", 600); SHOW_OFFMAP = !!vg("showOffmap", false); FOLLOW.on = vg("follow", true) !== false;
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
   WORLD = w; DIAG = d; COURSES = c;
@@ -783,7 +783,7 @@ function paintLeft() {
   // live dot ride on the map that is already there.
   const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
-  LEFT_KEY = key;
+  LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
     const nSel = (TRACE_PICK && TRACE_PICK.key === COURSE.key && TRACE_PICK.ids) ? TRACE_PICK.ids.length : Object.keys(COURSE.traces || {}).length;
     // the track OWNS this pane's title once it is identified: its name, its badge, then the facts
@@ -793,13 +793,16 @@ function paintLeft() {
       ${kind ? `<span class="chip w">${kind}</span>` : ""}
       <span class="why">${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns · ${nSel} of ${(COURSE.laps || []).length} laps drawn</span>`;
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
-    body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore })); addLiveDot(body);
+    body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore }));
+    body.insertAdjacentHTML("beforeend", '<div class="legend">' + followBtn() + "</div>");
+    wireFollow(body); addLiveDot(body);
   } else {
     const n = WORLD ? Object.keys(WORLD.routes).length : 0;
     const off = WORLD ? routeSplit().off.length : 0;
     hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
     body.innerHTML = worldMapHTML(); addLiveDot(body);
     const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; VIEW.global.showOffmap = SHOW_OFFMAP; viewSave(); paintLeft(); };
+    wireFollow(body);
   }
 }
 
@@ -837,11 +840,73 @@ function worldMapHTML() {
     + (SHOW_OFFMAP ? off.map(({ id, r }) => `<g><title>Route${id} — off-map circuit, outside the nav mesh, unreachable</title>${line(r.pts, "#c678dd", 1.4, 0.9)}</g>`).join("") : "");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
     .map((c) => line(c.path, "#00d27a", 1.6, 0.85)).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-pad="${pad}"
+  return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
       style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}<g id="liveDot"></g></svg>
     <div class="legend"><span><i style="background:#3b4a5c"></i>every game route</span>
       <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
+      ${followBtn()}
       ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}</div>`;
+}
+
+/* ------------------------------------------------- the map that follows you
+   A satnav does not hold one scale: it closes in when you slow for a junction, because that is
+   when detail earns its pixels, and pulls back on a motorway where the shape of the road is all
+   that matters. Same logic here, from data we already have every frame — speed, lateral g, and
+   the distance to the next mapped turn. Slow, loaded, or a corner coming: a ~180 m window with
+   the turn ids legible. Fast and straight: the whole course. The view is eased so it glides, and
+   the bands overlap so it cannot flap between them. */
+const FOLLOW = { on: true, span: null, cx: null, cz: null, raf: 0, full: null };
+function followSpan() {
+  const f = LIVE.frame;
+  if (!f || !f.on || !LIVEPOS) return null;                  // parked or in a menu: the overview
+  const mph = f.mph || 0, lat = Math.abs(f.lat || 0);
+  let toTurn = Infinity;
+  if (COURSE && (COURSE.turns || []).length) {
+    for (const t of COURSE.turns) {
+      if (t.x == null) continue;
+      const d = Math.hypot(t.x - LIVEPOS[0], t.z - LIVEPOS[1]);
+      if (d < toTurn) toTurn = d;
+    }
+  }
+  if (lat > 0.55 || mph < 45 || toTurn < 90) return 180;      // in it, or about to be
+  if (lat > 0.25 || mph < 90 || toTurn < 260) return 420;     // approaching, or a quick sequence
+  return mph > 130 ? 1600 : 900;                              // a straight: shape, not detail
+}
+function followMap() {
+  FOLLOW.raf = 0;
+  const body = $("#leftBody"), svg = body && body.querySelector("svg");
+  if (!svg || svg.dataset.x0 == null) return;
+  const sc = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
+  const W = +svg.dataset.w || svg.viewBox.baseVal.width || 900;
+  if (!FOLLOW.full) FOLLOW.full = { w: W, h: H };
+  const want = FOLLOW.on ? followSpan() : null;
+  const wantW = want ? Math.min(FOLLOW.full.w, want * sc) : FOLLOW.full.w;
+  const cxT = want && LIVEPOS ? pad + (LIVEPOS[0] - +svg.dataset.x0) * sc : FOLLOW.full.w / 2;
+  const czT = want && LIVEPOS ? H - pad - (LIVEPOS[1] - +svg.dataset.z0) * sc : FOLLOW.full.h / 2;
+  if (FOLLOW.span == null) { FOLLOW.span = FOLLOW.full.w; FOLLOW.cx = FOLLOW.full.w / 2; FOLLOW.cz = FOLLOW.full.h / 2; }
+  const k = 0.14;                                             // ~1 s to settle
+  FOLLOW.span += (wantW - FOLLOW.span) * k;
+  FOLLOW.cx += (cxT - FOLLOW.cx) * k;
+  FOLLOW.cz += (czT - FOLLOW.cz) * k;
+  const vw = FOLLOW.span, vh = vw * (FOLLOW.full.h / FOLLOW.full.w);
+  const vx = Math.max(0, Math.min(FOLLOW.full.w - vw, FOLLOW.cx - vw / 2));
+  const vy = Math.max(0, Math.min(FOLLOW.full.h - vh, FOLLOW.cz - vh / 2));
+  svg.setAttribute("viewBox", vx.toFixed(1) + " " + vy.toFixed(1) + " " + vw.toFixed(1) + " " + vh.toFixed(1));
+  const across = Math.round(vw / sc);
+  svg.classList.toggle("close", across < 600);                // detail follows the scale
+  const dot = svg.querySelector("#liveDot circle");
+  if (dot) dot.setAttribute("r", across < 300 ? 7 : across < 700 ? 5 : 4);
+  const note = document.getElementById("mapScale");
+  if (note) note.textContent = FOLLOW.on ? (across >= 3000 ? "whole island" : across + " m across") : "fixed";
+  if (Math.abs(wantW - FOLLOW.span) > 1 || Math.abs(cxT - FOLLOW.cx) > 1) queueFollow();
+}
+function queueFollow() { if (!FOLLOW.raf) FOLLOW.raf = requestAnimationFrame(followMap); }
+const followBtn = () => '<span class="mapscale"><button class="mini ' + (FOLLOW.on ? "on" : "") +
+  '" data-follow title="closes in when you slow, load the tyres or approach a turn; pulls back on the straights — the way a satnav does">follow</button><span id="mapScale" class="why"></span></span>';
+function wireFollow(body) {
+  const b = body.querySelector("[data-follow]"); if (!b) return;
+  b.onclick = () => { FOLLOW.on = !FOLLOW.on; VIEW.global.follow = FOLLOW.on; viewSave();
+    b.classList.toggle("on", FOLLOW.on); queueFollow(); };
 }
 
 function addLiveDot(body) {
@@ -852,6 +917,7 @@ function addLiveDot(body) {
   if (!isFinite(s)) return;
   const cx = pad + (LIVEPOS[0] - x0) * s, cy = H - pad - (LIVEPOS[1] - z0) * s;
   const held = !!LIVE.posHeld;      // no driving frame right now: the last real position, dimmed and hollow
+  queueFollow();
   g.innerHTML = held
     ? `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="none" stroke="#e3b341" stroke-width="1.5" opacity=".7"><title>last known position — held through the menu / loading screen</title></circle>`
     : `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="#e3b341" stroke="#000" stroke-width="1"/>`;

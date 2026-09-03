@@ -290,7 +290,7 @@ function courseMap(c, opts) {
     `<g><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="3.5" fill="var(--acc2)" opacity=".9"><title>${esc(t.id)} · ${n0(t.r)} m radius</title></circle>
      <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="9" fill="var(--mut)">${esc(t.id)}</text></g>`).join("");
   return el(`<div class="panel" style="margin-top:12px">
-    <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-pad="${pad}">
+    <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${line(theirs, "#3d4a5a", 9, 0.55)}
       ${line(theirs, "#8fa0b3", 1.4, 0.9)}
       ${paths.map((p, i) => (i === foreIx ? "" : line(p, "#00d27a", 1, 0.28))).join("")}

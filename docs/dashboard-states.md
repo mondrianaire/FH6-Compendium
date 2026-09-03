@@ -73,6 +73,14 @@ carrying what the lab last did: importing, re-reading, a new save read with its 
 counts, or "database up to date" with the time. It never grows or wraps. The alerts strip below
 keeps only what needs a decision (the which-save picker, the remaining ratification steps).
 
+### The map follows, like a satnav
+One scale cannot serve a hairpin and a motorway. The map eases its window from what the frame
+already says: lateral g over 0.55, under 45 mph, or within 90 m of a mapped turn gives a ~180 m
+window with the turn ids legible; the middle band gives ~420 m; a straight pulls back to 900 m,
+or 1600 m over 130 mph. Parked or in a menu it returns to the whole course. The bands overlap so
+it cannot flap, the view is eased over about a second, and a `follow` toggle in the legend pins
+it if you would rather it held still.
+
 ### The panes: map left, analysis right
 The left pane is the map — the world, or the identified course, whose header carries the TRACK'S
 OWN NAME with a RIVALS or EVENT badge before any measurement. The right pane is the corner

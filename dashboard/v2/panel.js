@@ -623,7 +623,10 @@ function headerCopy(st, q) {
     return Object.assign(base, { tone: "warn",
       lead: q.level === "conflict" ? "IDENTITY CONTRADICTED" : "ONE OF " + (nSaves || "?") + " — IDENTITY NOT SETTLED",
       sub: q.why, why: "the live packet carries only cylinders, drivetrain and PI" + (top ? "; top gear seen " + top : ""),
-      step: ties > 1 ? "one full pull through the gears settles it, or pick the save below" : "pick the save that is on the car",
+      // Jett, 2026-09-03: "one full pull settles it" was a promise the ladder can't reliably keep — the daemon
+      // already runs that comparison passively on every frame, with no drill to ask for. The pick is the one
+      // thing that actually resolves this NOW; driving may also settle it on its own, but that's a bonus, not a step.
+      step: ties > 1 ? "pick the save below — it may also settle on its own as you keep driving" : "pick the save that is on the car",
       rest: [], primary: { label: "PICK THE SAVE ▸", act: "pick" }, caption: "identity unsettled",
       evidence: (mm.how || "") + (nSaves ? " · " + nSaves + " saves" : "") });
   }

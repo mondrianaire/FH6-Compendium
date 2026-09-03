@@ -1330,8 +1330,11 @@ def _build_union(deliverable, ordn, match=None):
         # -- build identity (from the matcher) is the foundation every other confidence stands on
         if match and match.get("how") == "no-match":
             ask("identity", "capture this build's file — no save matches your live engine, so every decoded value may be another build's: change any part/slider and SAVE (if yours), or apply this build's tune from Find Tunes (if it's already active, apply a different tune first — re-applying the active tune writes nothing)", "unblocks everything", 0)
-        elif match and (match.get("n_signature_ties") or 1) >= 2 and not match.get("gear_disambig"):
-            ask("identity", f"drive up through the gears — {match['n_signature_ties']} builds share this engine + PI; the gear ladder identifies the equipped one", "build identity", 0)
+        # A tied identity resolves itself, silently, the moment enough clean WOT gears accumulate — _pick_meta
+        # already runs that comparison on every frame; there is nothing to ask the user to go and DO. Telling them
+        # to "drive up through the gears" implied a drill that either already ran (and the tie survived it — see
+        # ladder_tied) or needs nothing more than normal driving. The one thing that actually resolves it now is
+        # the pick, which the dashboard's identity card already offers (Jett, 2026-09-03: eliminate this ask).
         # -- engine cylinders: save-side catalog vs live NumCylinders
         cat_cyl = _deliverable_cyl(deliverable); live_cyl = (car or {}).get("cyl")
         if cat_cyl and live_cyl:
@@ -1410,7 +1413,10 @@ def _build_union(deliverable, ordn, match=None):
             else:
                 fld("Gear ratios", f"{g_tot} gears (band-derived ~85%)", None, "await", "a WOT run up through the gears measures every ratio exactly")
             if g_meas < g_tot:
-                ask("gear-ladder", "full-throttle up through every gear — measures exact ratios (and identifies the build among same-PI clones)", "gearing exact", 1)
+                # NOT an identity claim (2026-09-03: that promise was false — see _pick_meta, which needs ~3
+                # clean gears, not every gear, and already runs without being asked). This ask is only about
+                # precision: turning the band-derived ratios into telemetry-measured ones.
+                ask("gear-ladder", "full-throttle up through every gear — measures exact ratios", "gearing exact", 1)
         # -- peak hp (feeds the engine descriptor)
         if not sig.get("hp_peak"):
             ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)

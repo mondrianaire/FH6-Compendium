@@ -586,3 +586,10 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 #hdr > .hart{grid-column:1;grid-row:1}
 #hdr > .hid{grid-column:2;grid-row:1}
 #hdr > .hact{grid-column:3;grid-row:1}
+
+/* the minimised sheet is a corner pill, not a full-width bar lying across the dashboard */
+.fsheet.min{width:auto;max-width:460px;left:auto!important;right:16px;top:auto!important;bottom:16px;height:auto}
+.fsheet.min .fbar{border-radius:3px}
+.fsheet .fbar{flex-wrap:nowrap;white-space:nowrap}
+.fsheet .fbar button{flex:0 0 auto;white-space:nowrap;height:22px;padding:0 8px;font-size:10.5px}
+.fsheet .fbar .nm{flex:1 1 auto;min-width:0}

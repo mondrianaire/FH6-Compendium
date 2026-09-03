@@ -406,7 +406,7 @@ function courseTrace(c) {
 
 function liveRun() {
   const pts = LIVE.run;
-  const head = `<b>Speed trace</b><span class="why">live run · the last ${pts.length ? Math.round(pts.length / 10) : 0} s${MODE.suggest === "course" && COURSE ? ` · no lap on record for ${esc(COURSE.name || COURSE.key)} yet — your first full lap becomes one` : MODE.suggest === "course" ? " · course laps appear here once the course is located" : " · laps on record appear here on a known course"}</span><span class="tspacer"></span>${modeControls()}`;
+  const head = `<b>Speed trace</b><span class="why">${pts.length && (pts[pts.length - 1][0] || 0) <= 50 ? "parked — the trace draws once the car moves" : "live run · the last " + (pts.length ? Math.round(pts.length / 10) : 0) + " s"}${MODE.suggest === "course" && COURSE ? ` · no lap on record for ${esc(COURSE.name || COURSE.key)} yet` : ""}</span><span class="tspacer"></span>${modeControls()}`;
   const foot = `<span class="tread why">hover the trace — it marks that spot on the map</span><span class="lchips">${TRACE_GRIP.map((c, i) => `<span class="lchip" style="border-color:${c}">${TRACE_WORD[i]}</span>`).join("")}</span>`;
   const svg = (W, H) => {
     if (pts.length < 3) return `<div class="why tempty">drive — speed against distance draws here as you go, painted by what the tyres are doing</div>`;
@@ -415,7 +415,10 @@ function liveRun() {
     const km = [...Array(Math.floor(smax / 500)).keys()].map((i) => (i + 1) * 500).map((d) => `<line x1="${ch.px(d).toFixed(1)}" y1="6" x2="${ch.px(d).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(d).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${d / 1000} km</text>`).join("");
     return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts.map((q) => [q[0], q[1], q[2], q[3], q[4]])))}">${axisSvg(ch, vmax)}${km}${paintedLine(pts, ch, 2.2, TRACE_MODE)}${cursorSvg(H)}</svg>`;
   };
-  return { head, foot, svg, hasData: pts.length >= 3 };
+  // points are not a trace: a parked car accrues samples at one spot. The band is only worth
+  // 240px when there is real distance under the line.
+  const span = pts.length ? pts[pts.length - 1][0] : 0;
+  return { head, foot, svg, hasData: pts.length >= 3 && span > 50 };
 }
 
 function markMapAt(x, z, col) {

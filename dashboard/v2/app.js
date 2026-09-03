@@ -389,7 +389,10 @@ async function route() {
   window.addEventListener("hashchange", route);
   try {
     const ix = await get("index.json");
-    $("#stamp").textContent = "built " + (ix.built || "").replace("T", " ").replace("Z", "");
+    // SAY WHICH CODE IS ON SCREEN. Two people looked at two different renders and argued about
+    // the same layout; the document never said which build it was. The asset tag settles it.
+    const v = ((document.querySelector('script[src*="panel.js"]') || {}).src || "").split("v=")[1] || "?";
+    $("#stamp").innerHTML = `<span title="the dashboard code on screen">ui v${esc(v)}</span> · built ${esc((ix.built || "").replace("T", " ").replace("Z", ""))}`;
   } catch (e) { $("#stamp").textContent = "no data — run build_web.py"; }
   route();
 })();

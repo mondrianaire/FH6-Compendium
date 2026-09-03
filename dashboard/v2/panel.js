@@ -296,8 +296,8 @@ function fitChips(row, total) {
   const w = row.clientWidth;
   let used = 0, shown = 0;
   for (const k of kids) {
-    const kw = k.offsetWidth + 4;
-    if (used + kw > w - 56) { k.hidden = true; continue; }
+    const kw = k.offsetWidth;
+    if (used + kw > w - 76) { k.hidden = true; continue; }   // the "+N" cell is reserved, never squeezed
     used += kw; shown++;
   }
   const hid = (total || kids.length) - shown;
@@ -410,7 +410,7 @@ function courseTrace(c) {
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
   const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${match.length} of ${all.length} lap${all.length === 1 ? "" : "s"} on record${MODE.game === "event" ? " · timed event" : ""}</span>
-    <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${Object.keys(tf).length || sel.hidden.size ? `<button class="mini" data-tfilt="*|">clear</button>` : ""}<span class="tspacer"></span>${modeControls()}`;
+    <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${Object.keys(tf).length || sel.hidden.size ? `<button class="mini" data-tfilt="*|">clear</button>` : ""}<span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
   stage2.forEach((t) => { t._cov = t.cov != null ? t.cov : (L ? t.pts[t.pts.length - 1][0] / L : 1); });
@@ -423,8 +423,11 @@ function courseTrace(c) {
     const nt = notTimed(t); const off = best && !nt && t !== best && t.t ? ((t.t / best.t - 1) * 100).toFixed(1) + "% off" : "";
     const col = t.void ? "#e3b341" : (t.partial || t._cov < 0.9) ? "var(--warn)" : t === cur ? "var(--acc2)" : t === best ? "#00d27a" : "var(--line2)";
     const what = t === cur ? "you" : t === best ? "fastest" : "";
-    return `<button class="lchip ${hid ? "hid" : ""}" data-thide="${esc(String(t.id))}" style="border-color:${col}" title="${esc((hid ? "hidden — click to show" : "click to hide") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">${nt ? `<s>${lapTime(t.t)}</s>` : `<b>${lapTime(t.t)}</b>`}${t.partial || t._cov < 0.9 ? ` ${Math.round(t._cov * 100)}%` : ""}${t.class ? " · " + esc(t.class) : ""}${t.dt ? " " + esc(t.dt) : ""}${what ? ` · <b>${what}</b>` : ""}${off ? ` · ${off}` : ""}</button>`; }).join("");
-  const foot = `<span class="tread why">hover the trace — it marks that spot on the course map</span><span class="lchips">${leg}</span>`;
+    return `<button class="lchip ${hid ? "hid" : ""} ${t === cur ? "you" : t === best ? "best" : ""}" data-thide="${esc(String(t.id))}"
+      style="--lc:${col}" title="${esc((hid ? "hidden — click to draw it" : "drawn — click to hide it") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">
+      <i class="lcd"></i><span class="lct">${nt ? `<s>${lapTime(t.t)}</s>` : lapTime(t.t)}</span>
+      <span class="lcm">${what || off || (t.class ? esc(t.class) : "")}</span></button>`; }).join("");
+  const foot = `<span class="lchips">${leg}</span>`;
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
@@ -446,7 +449,7 @@ function courseTrace(c) {
 function liveRun() {
   const pts = LIVE.run;
   const head = `<b>Speed trace</b><span class="why">${pts.length && (pts[pts.length - 1][0] || 0) <= 50 ? "parked — the trace draws once the car moves" : "live run · the last " + (pts.length ? Math.round(pts.length / 10) : 0) + " s"}${MODE.suggest === "course" && COURSE ? ` · no lap on record for ${esc(COURSE.name || COURSE.key)} yet` : ""}</span><span class="tspacer"></span>${modeControls()}`;
-  const foot = `<span class="tread why">hover the trace — it marks that spot on the map</span><span class="lchips">${TRACE_GRIP.map((c, i) => `<span class="lchip" style="border-color:${c}">${TRACE_WORD[i]}</span>`).join("")}</span>`;
+  const foot = `<span class="lchips grip">${TRACE_GRIP.map((c, i) => `<span class="lchip key" style="border-color:${c}"><i style="background:${c}"></i>${TRACE_WORD[i]}</span>`).join("")}</span>`;
   const svg = (W, H) => {
     if (pts.length < 3) return `<div class="why tempty">drive — speed against distance draws here as you go, painted by what the tyres are doing</div>`;
     const smax = pts[pts.length - 1][0] || 1, vmax = Math.max(60, ...pts.map((q) => q[1])) * 1.06;

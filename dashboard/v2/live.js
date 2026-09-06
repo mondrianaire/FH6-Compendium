@@ -281,7 +281,13 @@ function fingerprint(ordinal) {
   //                     before we can hold it at all
   //   sliders moved on the same hardware -> a tuning pass is under way, either following advice
   //                     or your own, and that is exactly what A/B wants to compare
-  if (prev && prev.pk) {
+  // DON'T CRY CHANGE ON AN IDENTITY FLIP (Jett 2026-09-06: "the hardware changed icon comes up way too
+  // much when I'm not changing anything"). identify() runs on every car change, park, menu and re-read,
+  // and the daemon's identity flip-flops between a car's held builds — each flip gives a different save's
+  // parts, so prev.pk !== pk fires "hardware changed" though nothing was touched. A REAL change is a save
+  // the database does not hold yet (exact match empty): a new build, or a slider variation mid-A/B. When
+  // the identified save is already held (exact non-empty), it is just a re-pick — say nothing.
+  if (prev && prev.pk && exact.length === 0) {
     // name the difference, slot by slot and slider by slider — a banner that says "hardware
     // changed" and nothing else is the one that reads as "nothing was picked up"
     const pa = prev.pk.split(","), pb = pk.split(",");

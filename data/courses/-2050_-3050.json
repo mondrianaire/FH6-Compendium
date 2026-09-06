@@ -1,0 +1,94 @@
+{
+ "route_key": "-2050_-3050",
+ "name": null,
+ "turns": [],
+ "laps": 1,
+ "sessions": [
+  "fh6_20260822_035921"
+ ],
+ "updated": "fh6_20260822_035921",
+ "best_laps": {},
+ "visits": [
+  {
+   "session": "fh6_20260822_035921",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "2517|1|8|660"
+   ],
+   "best_lap": null,
+   "best_car": null
+  }
+ ],
+ "cars": {
+  "2517|1|8|660": {
+   "name": "2014 Ford F-150 Trophy Truck",
+   "class": "A",
+   "pi": 660,
+   "drivetrain": "RWD"
+  }
+ },
+ "speed_traces": {},
+ "geo_turns": {},
+ "turn_count_delta": null,
+ "turn_count": 0,
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.394,
+    "band": "heavy"
+   },
+   "mid_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "fast_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "braking": {
+    "frac": 0.087,
+    "band": "light"
+   },
+   "straight": {
+    "frac": 0.022,
+    "band": "light"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "absent",
+    "range_m": 5.1
+   },
+   "launch": {
+    "frac": null,
+    "band": "absent"
+   }
+  },
+  "heavy": [
+   "low-speed corners"
+  ],
+  "absent": [
+   "medium corners",
+   "fast sweepers",
+   "elevation (crests)"
+  ],
+  "gears_used": [
+   1,
+   2
+  ],
+  "top_gear_used": 2,
+  "max_gear": 5,
+  "top_speed": 58,
+  "elevation_range_m": 5.1,
+  "notes": [
+   "no real straight (top speed only 58 mph, gears used [1, 2]/5) — top-end gearing & drag are irrelevant here; tune the gears you use",
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course",
+   "no fast corners — understeer here is mechanical, not aero"
+  ],
+  "priority": [
+   "low-speed corners"
+  ]
+ },
+ "profile_laps": 1,
+ "profile_session": "fh6_20260822_035921"
+}

@@ -87,8 +87,8 @@
     "cars": [
      "1591|2|4|600"
     ],
-    "laps_track": 1,
-    "presence": 1.0
+    "laps_track": 2,
+    "presence": 0.5
    },
    "deg": 32,
    "s": 296,
@@ -197,8 +197,8 @@
     "cars": [
      "1591|2|4|600"
     ],
-    "laps_track": 1,
-    "presence": 1.0
+    "laps_track": 2,
+    "presence": 0.5
    },
    "deg": 63,
    "s": 500,
@@ -278,7 +278,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 1,
+    "laps_track": 2,
     "presence": 0.0
    },
    "deg": 44,
@@ -330,7 +330,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 1,
+    "laps_track": 2,
     "presence": 0.0
    },
    "deg": 37,
@@ -382,7 +382,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 1,
+    "laps_track": 2,
     "presence": 0.0
    },
    "deg": 21,
@@ -434,7 +434,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 1,
+    "laps_track": 2,
     "presence": 0.0
    },
    "deg": 25,
@@ -545,8 +545,8 @@
     "cars": [
      "1591|2|4|600"
     ],
-    "laps_track": 1,
-    "presence": 1.0
+    "laps_track": 2,
+    "presence": 0.5
    },
    "established": false,
    "est_by": null
@@ -577,7 +577,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 1,
+    "laps_track": 2,
     "presence": 0.0
    },
    "deg": 49,
@@ -688,20 +688,31 @@
     "cars": [
      "1591|2|4|600"
     ],
-    "laps_track": 1,
-    "presence": 1.0
+    "laps_track": 2,
+    "presence": 0.5
    },
    "established": false,
    "est_by": null
   }
  ],
- "laps": 1,
+ "laps": 2,
  "sessions": [
+  "fh6_20260822_212747",
   "fh6_20260831_172011"
  ],
- "updated": "fh6_20260831_172011",
+ "updated": "fh6_20260822_212747",
  "best_laps": {},
  "visits": [
+  {
+   "session": "fh6_20260822_212747",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "3852|2|4|700"
+   ],
+   "best_lap": null,
+   "best_car": null
+  },
   {
    "session": "fh6_20260831_172011",
    "laps": 1,
@@ -718,6 +729,12 @@
    "name": "1984 Peugeot 205 T16",
    "class": "B",
    "pi": 600,
+   "drivetrain": "AWD"
+  },
+  "3852|2|4|700": {
+   "name": "1991 Honda Beat",
+   "class": "A",
+   "pi": 700,
    "drivetrain": "AWD"
   }
  },

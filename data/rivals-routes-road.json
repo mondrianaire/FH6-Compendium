@@ -3,7 +3,7 @@
  "created": "2026-09-01",
  "discipline": "Road Racing",
  "source": "Horizon Rivals > Routes screen, scrolled end to end; forzahorizon6_iuv0War65N.mp4 at 1 fps (49 frames), two readers + reconciler; names verified verbatim against data/game-strings/RivalsEventData.json",
- "note": "RivalsEventData carries each route name under SEVEN IDS_Name guids (one per event variant) and the description under seven disjoint IDS_Description guids, so name->guid is one-to-many. Length is the in-game Route Length in miles; use it with data/laps.db geometry.length_m to match our start/finish-keyed courses.",
+ "note": "RivalsEventData carries each route name under SEVEN IDS_Name guids (one per event variant) and the description under seven disjoint IDS_Description guids, so name->guid is one-to-many. Length is the in-game Route Length in miles, imported by stage events into ref_event.length_m; stage route_names matches it against fh6.db's course.length_m to name a course only when the map identity and the catalogue length agree.",
  "routes": [
   {
    "order": 1,

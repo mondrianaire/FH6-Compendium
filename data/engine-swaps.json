@@ -266,8 +266,8 @@
    },
    "cyl": 6,
    "displacement_l": null,
-   "redline": 9000,
-   "sample_hp": null,
+   "redline": 9500,
+   "sample_hp": 453,
    "resulting_drivetrain": "RWD",
    "sample_pi": 700,
    "source": "save-mined+telemetry"
@@ -595,13 +595,13 @@
    "cars_seen": {
     "1253": "2010 Noble M600"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
+   "redline": 9000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 800,
+   "source": "save-mined+telemetry"
   },
   "720": {
    "engine_family": 720,
@@ -645,7 +645,7 @@
    "cyl": 4,
    "displacement_l": 1.6,
    "redline": 10000,
-   "sample_hp": 340,
+   "sample_hp": 395,
    "resulting_drivetrain": "AWD",
    "sample_pi": 841,
    "source": "save-mined+telemetry"
@@ -968,7 +968,7 @@
    },
    "cyl": 3,
    "displacement_l": null,
-   "redline": 11000,
+   "redline": 10000,
    "sample_hp": 634,
    "resulting_drivetrain": "RWD",
    "sample_pi": 700,
@@ -1006,13 +1006,13 @@
    "cars_seen": {
     "2142": "2014 Volkswagen Golf R"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 415,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 600,
+   "source": "save-mined+telemetry"
   },
   "2275": {
    "engine_family": 2275,
@@ -1307,13 +1307,13 @@
     "3767": "2022 Acura NSX Type S",
     "4175": "2020 Ford F-450 DRW (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9000,
+   "sample_hp": 850,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 800,
+   "source": "save-mined+telemetry"
   },
   "2838": {
    "engine_family": 2838,
@@ -1333,7 +1333,7 @@
    "cyl": 4,
    "displacement_l": null,
    "redline": 10000,
-   "sample_hp": null,
+   "sample_hp": 362,
    "resulting_drivetrain": "RWD",
    "sample_pi": 505,
    "source": "save-mined+telemetry"
@@ -1817,13 +1817,13 @@
     "2142": "2014 Volkswagen Golf R",
     "3413": "2019 Volkswagen Golf R"
    },
-   "cyl": null,
+   "cyl": 5,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 832,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 768,
+   "source": "save-mined+telemetry"
   },
   "3614": {
    "engine_family": 3614,
@@ -1958,13 +1958,13 @@
    "cars_seen": {
     "3600": "2021 Hennessey Venom F5"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
+   "redline": 9000,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "RWD",
+   "sample_pi": 870,
+   "source": "save-mined+telemetry"
   },
   "3746": {
    "engine_family": 3746,
@@ -2263,13 +2263,13 @@
    "cars_seen": {
     "3852": "1991 Honda Beat"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 303,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "4002": {
    "engine_family": 4002,

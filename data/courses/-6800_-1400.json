@@ -28,7 +28,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 16,
@@ -122,8 +122,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
@@ -213,8 +213,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
@@ -304,8 +304,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
@@ -412,8 +412,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.14
+    "laps_track": 20,
+    "presence": 0.1
    },
    "established": false,
    "est_by": null
@@ -421,137 +421,46 @@
   {
    "id": "T6",
    "pos": [
-    -3553,
-    394
+    -3434,
+    435
    ],
    "dir": "L",
    "type": "fast",
-   "radius_m": 840,
-   "n": 3,
+   "radius_m": 215,
+   "n": 53,
    "best": {
-    "mph_in": 195,
-    "mph_min": 195,
-    "mph_out": 204,
+    "mph_in": 158,
+    "mph_min": 158,
+    "mph_out": 166,
     "brake_on_m": null,
-    "throttle_on_m": -9,
-    "lat_g": 0.99,
-    "apex": [
-     -3553,
-     394
-    ],
-    "t0": 28377.4,
-    "stint": 216,
-    "first_red": null,
-    "session": "fh6_20260831_172011"
-   },
-   "sessions": 1,
-   "best_by_car": {
-    "4160|1|6|800": {
-     "mph_in": 195,
-     "mph_min": 195,
-     "mph_out": 204,
-     "brake_on_m": null,
-     "throttle_on_m": -9,
-     "lat_g": 0.99,
-     "apex": [
-      -3553,
-      394
-     ],
-     "t0": 28377.4,
-     "stint": 216,
-     "first_red": null,
-     "session": "fh6_20260831_172011"
-    }
-   },
-   "cars": [
-    "4160|1|6|800"
-   ],
-   "status": "possible",
-   "by_session": {
-    "fh6_20260831_172011": {
-     "n": 1,
-     "laps_seen": 1,
-     "laps": 4,
-     "fr": {
-      "front": 0,
-      "rear": 0,
-      "none": 1
-     },
-     "lim": "clean",
-     "multi": 0.0,
-     "mph_min": 195,
-     "usi": -0.045,
-     "cars": [
-      "4160|1|6|800"
-     ]
-    }
-   },
-   "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
-    "fr": {
-     "front": 0,
-     "rear": 0,
-     "none": 1
-    },
-    "lim": {
-     "clean": 1
-    },
-    "dominant": "none",
-    "consistency": 1.0,
-    "cars": [
-     "4160|1|6|800"
-    ],
-    "laps_track": 14,
-    "presence": 0.07
-   },
-   "established": false,
-   "est_by": null
-  },
-  {
-   "id": "T7",
-   "pos": [
-    -3440,
-    432
-   ],
-   "dir": "L",
-   "type": "medium",
-   "radius_m": 45,
-   "n": 52,
-   "best": {
-    "mph_in": 48,
-    "mph_min": 48,
-    "mph_out": 60,
-    "brake_on_m": null,
-    "throttle_on_m": 0,
-    "lat_g": 1.08,
+    "throttle_on_m": -4,
+    "lat_g": 2.46,
     "apex": [
      -3434,
-     437
+     435
     ],
-    "t0": 1979.0,
-    "stint": 14,
+    "t0": 2812.3,
+    "stint": 29,
     "first_red": "front ph1",
-    "session": "fh6_20260829_023235"
+    "session": "fh6_20260822_180405"
    },
-   "sessions": 1,
+   "sessions": 2,
    "best_by_car": {
     "4160|1|6|800": {
-     "mph_in": 48,
-     "mph_min": 48,
-     "mph_out": 60,
+     "mph_in": 158,
+     "mph_min": 158,
+     "mph_out": 166,
      "brake_on_m": null,
-     "throttle_on_m": 0,
-     "lat_g": 1.08,
+     "throttle_on_m": -4,
+     "lat_g": 2.46,
      "apex": [
       -3434,
-      437
+      435
      ],
-     "t0": 1979.0,
-     "stint": 14,
+     "t0": 2812.3,
+     "stint": 29,
      "first_red": "front ph1",
-     "session": "fh6_20260829_023235"
+     "session": "fh6_20260822_180405"
     }
    },
    "cars": [
@@ -575,27 +484,44 @@
      "cars": [
       "4160|1|6|800"
      ]
+    },
+    "fh6_20260822_180405": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 5,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 158,
+     "usi": -0.278,
+     "cars": [
+      "4160|1|6|800"
+     ]
     }
    },
    "track": {
-    "passes": 2,
-    "laps_seen": 1,
-    "sessions": 1,
+    "passes": 3,
+    "laps_seen": 2,
+    "sessions": 2,
     "fr": {
-     "front": 2,
+     "front": 3,
      "rear": 0,
      "none": 0
     },
     "lim": {
-     "tune": 1
+     "tune": 2
     },
     "dominant": "front",
     "consistency": 1.0,
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.1
    },
    "deg": 18,
    "established": false,
@@ -603,32 +529,32 @@
    "s": 383
   },
   {
-   "id": "T8",
+   "id": "T7",
    "pos": [
-    -3290,
-    491
+    -3307,
+    483
    ],
    "dir": "L",
    "type": "fast",
-   "radius_m": 153,
-   "n": 1,
+   "radius_m": 231,
+   "n": 2,
    "best": {
-    "mph_in": 118,
-    "mph_min": 118,
-    "mph_out": 126,
+    "mph_in": 140,
+    "mph_min": 140,
+    "mph_out": 153,
     "brake_on_m": null,
-    "throttle_on_m": 4,
-    "lat_g": 1.99,
+    "throttle_on_m": 6,
+    "lat_g": 1.9,
     "apex": [
-     -3290,
-     491
+     -3307,
+     483
     ],
-    "t0": 26915.2,
-    "stint": 171,
-    "first_red": "rear ph3",
-    "session": "fh6_20260831_172011"
+    "t0": 2774.8,
+    "stint": 29,
+    "first_red": "rear ph2",
+    "session": "fh6_20260822_180405"
    },
-   "sessions": 1,
+   "sessions": 2,
    "by_session": {
     "fh6_20260831_172011": {
      "n": 1,
@@ -646,27 +572,44 @@
      "cars": [
       "4160|1|6|800"
      ]
+    },
+    "fh6_20260822_180405": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 5,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 140,
+     "usi": 0.003,
+     "cars": [
+      "4160|1|6|800"
+     ]
     }
    },
    "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
+    "passes": 2,
+    "laps_seen": 2,
+    "sessions": 2,
     "fr": {
      "front": 0,
-     "rear": 1,
+     "rear": 2,
      "none": 0
     },
     "lim": {
-     "tune": 1
+     "tune": 2
     },
     "dominant": "rear",
     "consistency": 1.0,
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.1
    },
    "deg": 16,
    "established": false,
@@ -675,20 +618,20 @@
    "s": 516,
    "best_by_car": {
     "4160|1|6|800": {
-     "mph_in": 118,
-     "mph_min": 118,
-     "mph_out": 126,
+     "mph_in": 140,
+     "mph_min": 140,
+     "mph_out": 153,
      "brake_on_m": null,
-     "throttle_on_m": 4,
-     "lat_g": 1.99,
+     "throttle_on_m": 6,
+     "lat_g": 1.9,
      "apex": [
-      -3290,
-      491
+      -3307,
+      483
      ],
-     "t0": 26915.2,
-     "stint": 171,
-     "first_red": "rear ph3",
-     "session": "fh6_20260831_172011"
+     "t0": 2774.8,
+     "stint": 29,
+     "first_red": "rear ph2",
+     "session": "fh6_20260822_180405"
     }
    },
    "cars": [
@@ -696,7 +639,7 @@
    ]
   },
   {
-   "id": "T9",
+   "id": "T8",
    "pos": [
     -3258,
     512
@@ -780,14 +723,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T10",
+   "id": "T9",
    "pos": [
     -3173,
     558
@@ -812,7 +755,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 24,
@@ -848,48 +791,48 @@
    }
   },
   {
-   "id": "T11",
+   "id": "T10",
    "pos": [
-    -3220,
-    543
+    -3234,
+    532
    ],
    "dir": "L",
    "type": "fast",
-   "radius_m": 132,
-   "n": 7,
+   "radius_m": 181,
+   "n": 8,
    "best": {
-    "mph_in": 131,
-    "mph_min": 124,
-    "mph_out": 135,
-    "brake_on_m": null,
-    "throttle_on_m": -9,
-    "lat_g": 2.68,
+    "mph_in": 143,
+    "mph_min": 134,
+    "mph_out": 134,
+    "brake_on_m": 0,
+    "throttle_on_m": null,
+    "lat_g": 2.52,
     "apex": [
-     -3220,
-     543
+     -3234,
+     532
     ],
-    "t0": 26916.8,
-    "stint": 171,
-    "first_red": "rear ph1",
-    "session": "fh6_20260831_172011"
+    "t0": 1963.1,
+    "stint": 22,
+    "first_red": "rear ph2",
+    "session": "fh6_20260822_114844"
    },
-   "sessions": 2,
+   "sessions": 3,
    "best_by_car": {
     "4160|1|6|800": {
-     "mph_in": 131,
-     "mph_min": 124,
-     "mph_out": 135,
-     "brake_on_m": null,
-     "throttle_on_m": -9,
-     "lat_g": 2.68,
+     "mph_in": 143,
+     "mph_min": 134,
+     "mph_out": 134,
+     "brake_on_m": 0,
+     "throttle_on_m": null,
+     "lat_g": 2.52,
      "apex": [
-      -3220,
-      543
+      -3234,
+      532
      ],
-     "t0": 26916.8,
-     "stint": 171,
-     "first_red": "rear ph1",
-     "session": "fh6_20260831_172011"
+     "t0": 1963.1,
+     "stint": 22,
+     "first_red": "rear ph2",
+     "session": "fh6_20260822_114844"
     }
    },
    "cars": [
@@ -930,43 +873,52 @@
      "cars": [
       "4160|1|6|800"
      ]
+    },
+    "fh6_20260822_114844": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 134,
+     "usi": 0.032,
+     "cars": [
+      "4160|1|6|800"
+     ]
     }
    },
    "track": {
-    "passes": 3,
-    "laps_seen": 2,
-    "sessions": 2,
+    "passes": 4,
+    "laps_seen": 3,
+    "sessions": 3,
     "fr": {
      "front": 2,
-     "rear": 1,
+     "rear": 2,
      "none": 0
     },
     "lim": {
-     "tune": 2
+     "tune": 3
     },
     "dominant": "front",
-    "consistency": 0.67,
+    "consistency": 0.5,
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.14
+    "laps_track": 20,
+    "presence": 0.15
    },
    "established": false,
    "est_by": null,
    "deg": 51,
-   "s": 688,
-   "traced": {
-    "n_passes": 0,
-    "n_laps_traced": 10,
-    "half_m": 8.0,
-    "med_samples": 0,
-    "reached": true,
-    "verdict": "driven past, but no window resolves it"
-   }
+   "s": 688
   },
   {
-   "id": "T12",
+   "id": "T11",
    "pos": [
     -3198,
     570
@@ -996,6 +948,107 @@
    }
   },
   {
+   "id": "T12",
+   "pos": [
+    -3181,
+    583
+   ],
+   "dir": "L",
+   "type": "medium",
+   "radius_m": 79,
+   "n": 1,
+   "best": {
+    "mph_in": 94,
+    "mph_min": 69,
+    "mph_out": 69,
+    "brake_on_m": -12,
+    "throttle_on_m": null,
+    "lat_g": 1.65,
+    "apex": [
+     -3181,
+     583
+    ],
+    "t0": 1965.0,
+    "stint": 22,
+    "first_red": "front ph1",
+    "session": "fh6_20260822_114844"
+   },
+   "sessions": 1,
+   "by_session": {
+    "fh6_20260822_114844": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 69,
+     "usi": -0.228,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 20,
+    "presence": 0.05
+   },
+   "deg": 64,
+   "s": 704,
+   "established": false,
+   "est_by": null,
+   "status": "possible",
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 94,
+     "mph_min": 69,
+     "mph_out": 69,
+     "brake_on_m": -12,
+     "throttle_on_m": null,
+     "lat_g": 1.65,
+     "apex": [
+      -3181,
+      583
+     ],
+     "t0": 1965.0,
+     "stint": 22,
+     "first_red": "front ph1",
+     "session": "fh6_20260822_114844"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "traced": {
+    "n_passes": 0,
+    "n_laps_traced": 10,
+    "half_m": 8.0,
+    "med_samples": 0,
+    "reached": true,
+    "verdict": "driven past, but no window resolves it"
+   }
+  },
+  {
    "id": "T13",
    "pos": [
     -3194,
@@ -1008,29 +1061,14 @@
    "best": null,
    "sessions": 0,
    "by_session": {},
-   "track": {
-    "passes": 0,
-    "laps_seen": 0,
-    "sessions": 0,
-    "fr": {
-     "front": 0,
-     "rear": 0,
-     "none": 0
-    },
-    "lim": {},
-    "dominant": null,
-    "consistency": null,
-    "cars": [],
-    "laps_track": 14,
-    "presence": 0.0
-   },
+   "track": {},
+   "geo_sessions": 2,
+   "geo_mapped": true,
    "deg": 64,
    "s": 704,
    "established": true,
    "est_by": "geometry",
    "status": "turn",
-   "geo_sessions": 1,
-   "geo_mapped": true,
    "traced": {
     "n_passes": 0,
     "n_laps_traced": 10,
@@ -1103,8 +1141,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "deg": 10,
    "s": 745,
@@ -1136,13 +1174,13 @@
   {
    "id": "T15",
    "pos": [
-    -3163,
-    772
+    -3176,
+    758
    ],
    "dir": "R",
-   "type": "fast",
-   "radius_m": 772,
-   "n": 10,
+   "type": "hairpin",
+   "radius_m": 54,
+   "n": 11,
    "best": {
     "mph_in": 185,
     "mph_min": 185,
@@ -1159,7 +1197,7 @@
     "first_red": "rear ph1",
     "session": "fh6_20260829_023235"
    },
-   "sessions": 1,
+   "sessions": 2,
    "best_by_car": {
     "4160|1|6|800": {
      "mph_in": 185,
@@ -1199,27 +1237,44 @@
      "cars": [
       "4160|1|6|800"
      ]
+    },
+    "fh6_20260822_180405": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 5,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 0,
+     "usi": 0.135,
+     "cars": [
+      "4160|1|6|800"
+     ]
     }
    },
    "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
+    "passes": 2,
+    "laps_seen": 2,
+    "sessions": 2,
     "fr": {
-     "front": 0,
+     "front": 1,
      "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 1
+     "tune": 2
     },
-    "dominant": "rear",
-    "consistency": 1.0,
+    "dominant": "front",
+    "consistency": 0.5,
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.1
    },
    "established": false,
    "est_by": null
@@ -1287,8 +1342,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.14
+    "laps_track": 20,
+    "presence": 0.1
    },
    "deg": 194,
    "s": 1148,
@@ -1321,45 +1376,45 @@
    "id": "T17",
    "pos": [
     -3090,
-    1055
+    1030
    ],
    "dir": "L",
-   "type": "medium",
-   "radius_m": 99,
-   "n": 21,
+   "type": "fast",
+   "radius_m": 137,
+   "n": 23,
    "best": {
-    "mph_in": 65,
-    "mph_min": 65,
-    "mph_out": 74,
+    "mph_in": 111,
+    "mph_min": 111,
+    "mph_out": 135,
     "brake_on_m": null,
-    "throttle_on_m": -2,
-    "lat_g": 0.98,
+    "throttle_on_m": -8,
+    "lat_g": 2.3,
     "apex": [
-     -3095,
+     -3099,
      1039
     ],
-    "t0": 135.8,
-    "stint": 4,
+    "t0": 2252.6,
+    "stint": 19,
     "first_red": "rear ph1",
-    "session": "fh6_20260831_142941"
+    "session": "fh6_20260822_180405"
    },
-   "sessions": 3,
+   "sessions": 4,
    "best_by_car": {
     "4160|1|6|800": {
-     "mph_in": 65,
-     "mph_min": 65,
-     "mph_out": 74,
+     "mph_in": 111,
+     "mph_min": 111,
+     "mph_out": 135,
      "brake_on_m": null,
-     "throttle_on_m": -2,
-     "lat_g": 0.98,
+     "throttle_on_m": -8,
+     "lat_g": 2.3,
      "apex": [
-      -3095,
+      -3099,
       1039
      ],
-     "t0": 135.8,
-     "stint": 4,
+     "t0": 2252.6,
+     "stint": 19,
      "first_red": "rear ph1",
-     "session": "fh6_20260831_142941"
+     "session": "fh6_20260822_180405"
     }
    },
    "cars": [
@@ -1417,28 +1472,45 @@
      "cars": [
       "4160|1|6|800"
      ]
+    },
+    "fh6_20260822_180405": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 5,
+     "fr": {
+      "front": 0,
+      "rear": 2,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 111,
+     "usi": -0.255,
+     "cars": [
+      "4160|1|6|800"
+     ]
     }
    },
    "track": {
-    "passes": 4,
-    "laps_seen": 3,
-    "sessions": 3,
+    "passes": 6,
+    "laps_seen": 5,
+    "sessions": 4,
     "fr": {
      "front": 3,
-     "rear": 1,
+     "rear": 3,
      "none": 0
     },
     "lim": {
-     "tune": 2,
+     "tune": 3,
      "driver": 1
     },
     "dominant": "front",
-    "consistency": 0.75,
+    "consistency": 0.5,
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.21
+    "laps_track": 20,
+    "presence": 0.25
    },
    "deg": 194,
    "established": false,
@@ -1447,39 +1519,95 @@
   {
    "id": "T18",
    "pos": [
-    -3036,
-    1103
+    -3023,
+    1114
    ],
-   "dir": "R",
-   "type": null,
-   "radius_m": 208,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
+   "dir": "L",
+   "type": "fast",
+   "radius_m": 153,
+   "n": 1,
+   "best": {
+    "mph_in": 88,
+    "mph_min": 88,
+    "mph_out": 101,
+    "brake_on_m": null,
+    "throttle_on_m": -2,
+    "lat_g": 1.17,
+    "apex": [
+     -3023,
+     1114
+    ],
+    "t0": 2251.2,
+    "stint": 19,
+    "first_red": "rear ph1",
+    "session": "fh6_20260822_180405"
+   },
+   "sessions": 1,
+   "by_session": {
+    "fh6_20260822_180405": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 5,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 88,
+     "usi": -0.251,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
    "track": {
-    "passes": 0,
-    "laps_seen": 0,
-    "sessions": 0,
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
     "fr": {
      "front": 0,
-     "rear": 0,
+     "rear": 1,
      "none": 0
     },
-    "lim": {},
-    "dominant": null,
-    "consistency": null,
-    "cars": [],
-    "laps_track": 14,
-    "presence": 0.0
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "rear",
+    "consistency": 1.0,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 20,
+    "presence": 0.05
    },
    "deg": 47,
    "s": 1264,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn",
-   "geo_sessions": 1,
-   "geo_mapped": true,
+   "established": false,
+   "est_by": null,
+   "status": "possible",
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 88,
+     "mph_min": 88,
+     "mph_out": 101,
+     "brake_on_m": null,
+     "throttle_on_m": -2,
+     "lat_g": 1.17,
+     "apex": [
+      -3023,
+      1114
+     ],
+     "t0": 2251.2,
+     "stint": 19,
+     "first_red": "rear ph1",
+     "session": "fh6_20260822_180405"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
    "traced": {
     "n_passes": 2,
     "n_laps_traced": 10,
@@ -1498,6 +1626,43 @@
   },
   {
    "id": "T19",
+   "pos": [
+    -3036,
+    1103
+   ],
+   "dir": "R",
+   "type": null,
+   "radius_m": 208,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 1,
+   "geo_mapped": true,
+   "deg": 47,
+   "s": 1264,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "traced": {
+    "n_passes": 2,
+    "n_laps_traced": 10,
+    "n_builds": 2,
+    "half_m": 124.0,
+    "med_samples": 31.5,
+    "med_step_m": 5.9,
+    "min_mph": 72,
+    "ratio": 0.28,
+    "a_long_min": -4.82,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T20",
    "pos": [
     -2821,
     1212
@@ -1581,8 +1746,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "deg": 190,
    "s": 1517,
@@ -1607,7 +1772,7 @@
    }
   },
   {
-   "id": "T20",
+   "id": "T21",
    "pos": [
     2633,
     1582
@@ -1691,14 +1856,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T21",
+   "id": "T22",
    "pos": [
     2594,
     1722
@@ -1782,14 +1947,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T22",
+   "id": "T23",
    "pos": [
     -1318,
     1509
@@ -1873,14 +2038,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T23",
+   "id": "T24",
    "pos": [
     -1997,
     1077
@@ -1964,14 +2129,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T24",
+   "id": "T25",
    "pos": [
     4239,
     -1548
@@ -2055,14 +2220,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T25",
+   "id": "T26",
    "pos": [
     4545,
     -1284
@@ -2146,14 +2311,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T26",
+   "id": "T27",
    "pos": [
     4844,
     -853
@@ -2237,14 +2402,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T27",
+   "id": "T28",
    "pos": [
     3910,
     -2018
@@ -2328,14 +2493,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T28",
+   "id": "T29",
    "pos": [
     -2950,
     1158
@@ -2419,14 +2584,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T29",
+   "id": "T30",
    "pos": [
     -3046,
     1064
@@ -2510,8 +2675,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null,
@@ -2532,7 +2697,7 @@
    }
   },
   {
-   "id": "T30",
+   "id": "T31",
    "pos": [
     -3128,
     938
@@ -2634,8 +2799,8 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.29
+    "laps_track": 20,
+    "presence": 0.2
    },
    "established": false,
    "est_by": null,
@@ -2658,7 +2823,7 @@
    }
   },
   {
-   "id": "T31",
+   "id": "T32",
    "pos": [
     -3111,
     922
@@ -2695,7 +2860,7 @@
    }
   },
   {
-   "id": "T32",
+   "id": "T33",
    "pos": [
     -3145,
     730
@@ -2779,14 +2944,122 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T33",
+   "id": "T34",
+   "pos": [
+    -3151,
+    658
+   ],
+   "dir": "R",
+   "type": "fast",
+   "radius_m": 206,
+   "n": 3,
+   "best": {
+    "mph_in": 135,
+    "mph_min": 135,
+    "mph_out": 155,
+    "brake_on_m": null,
+    "throttle_on_m": -10,
+    "lat_g": 2.15,
+    "apex": [
+     -3151,
+     658
+    ],
+    "t0": 2806.3,
+    "stint": 29,
+    "first_red": "rear ph1",
+    "session": "fh6_20260822_180405"
+   },
+   "sessions": 2,
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 135,
+     "mph_min": 135,
+     "mph_out": 155,
+     "brake_on_m": null,
+     "throttle_on_m": -10,
+     "lat_g": 2.15,
+     "apex": [
+      -3151,
+      658
+     ],
+     "t0": 2806.3,
+     "stint": 29,
+     "first_red": "rear ph1",
+     "session": "fh6_20260822_180405"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260822_114844": {
+     "n": 2,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 1.0,
+     "mph_min": 36,
+     "usi": 0.712,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    },
+    "fh6_20260822_180405": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 5,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 135,
+     "usi": -0.019,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 3,
+    "laps_seen": 2,
+    "sessions": 2,
+    "fr": {
+     "front": 2,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 2
+    },
+    "dominant": "front",
+    "consistency": 0.67,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 20,
+    "presence": 0.1
+   },
+   "established": false,
+   "est_by": null
+  },
+  {
+   "id": "T35",
    "pos": [
     2034,
     -2438
@@ -2870,14 +3143,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T34",
+   "id": "T36",
    "pos": [
     703,
     -3800
@@ -2961,14 +3234,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T35",
+   "id": "T37",
    "pos": [
     614,
     -3820
@@ -3052,14 +3325,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T36",
+   "id": "T38",
    "pos": [
     -22,
     -4106
@@ -3143,14 +3416,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T37",
+   "id": "T39",
    "pos": [
     187,
     -4633
@@ -3234,14 +3507,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T38",
+   "id": "T40",
    "pos": [
     146,
     -4610
@@ -3325,14 +3598,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T39",
+   "id": "T41",
    "pos": [
     -141,
     -4178
@@ -3416,14 +3689,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T40",
+   "id": "T42",
    "pos": [
     -276,
     -4214
@@ -3507,14 +3780,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T41",
+   "id": "T43",
    "pos": [
     232,
     -5284
@@ -3598,14 +3871,123 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T42",
+   "id": "T44",
+   "pos": [
+    -3543,
+    400
+   ],
+   "dir": "R",
+   "type": "medium",
+   "radius_m": 150,
+   "n": 5,
+   "best": {
+    "mph_in": 195,
+    "mph_min": 195,
+    "mph_out": 204,
+    "brake_on_m": null,
+    "throttle_on_m": -9,
+    "lat_g": 0.99,
+    "apex": [
+     -3553,
+     394
+    ],
+    "t0": 28377.4,
+    "stint": 216,
+    "first_red": null,
+    "session": "fh6_20260831_172011"
+   },
+   "sessions": 2,
+   "best_by_car": {
+    "4160|1|6|800": {
+     "mph_in": 195,
+     "mph_min": 195,
+     "mph_out": 204,
+     "brake_on_m": null,
+     "throttle_on_m": -9,
+     "lat_g": 0.99,
+     "apex": [
+      -3553,
+      394
+     ],
+     "t0": 28377.4,
+     "stint": 216,
+     "first_red": null,
+     "session": "fh6_20260831_172011"
+    }
+   },
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260831_172011": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 4,
+     "fr": {
+      "front": 0,
+      "rear": 0,
+      "none": 1
+     },
+     "lim": "clean",
+     "multi": 0.0,
+     "mph_min": 195,
+     "usi": -0.045,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    },
+    "fh6_20260822_180405": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 5,
+     "fr": {
+      "front": 1,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "driver",
+     "multi": 0.0,
+     "mph_min": 71,
+     "usi": -0.118,
+     "cars": [
+      "4160|1|6|800"
+     ]
+    }
+   },
+   "track": {
+    "passes": 3,
+    "laps_seen": 3,
+    "sessions": 2,
+    "fr": {
+     "front": 1,
+     "rear": 1,
+     "none": 1
+    },
+    "lim": {
+     "clean": 1,
+     "driver": 1
+    },
+    "dominant": "front",
+    "consistency": 0.33,
+    "cars": [
+     "4160|1|6|800"
+    ],
+    "laps_track": 20,
+    "presence": 0.15
+   },
+   "established": false,
+   "est_by": null
+  },
+  {
+   "id": "T45",
    "pos": [
     -2194,
     -5403
@@ -3689,14 +4071,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T43",
+   "id": "T46",
    "pos": [
     -2322,
     -5221
@@ -3780,14 +4162,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T44",
+   "id": "T47",
    "pos": [
     -4356,
     87
@@ -3871,14 +4253,14 @@
     "cars": [
      "4160|1|6|800"
     ],
-    "laps_track": 14,
-    "presence": 0.07
+    "laps_track": 20,
+    "presence": 0.05
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T45",
+   "id": "T48",
    "pos": [
     -4904,
     30
@@ -3903,7 +4285,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 31,
@@ -3912,7 +4294,7 @@
    "status": "possible"
   },
   {
-   "id": "T46",
+   "id": "T49",
    "pos": [
     -5082,
     -49
@@ -3937,7 +4319,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 33,
@@ -3964,7 +4346,7 @@
    }
   },
   {
-   "id": "T47",
+   "id": "T50",
    "pos": [
     -6792,
     -1054
@@ -3989,7 +4371,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 57,
@@ -3999,7 +4381,7 @@
    "s": 5699
   },
   {
-   "id": "T48",
+   "id": "T51",
    "pos": [
     -6534,
     -789
@@ -4024,7 +4406,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 42,
@@ -4051,7 +4433,7 @@
    }
   },
   {
-   "id": "T49",
+   "id": "T52",
    "pos": [
     -6642,
     -841
@@ -4076,7 +4458,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 33,
@@ -4085,7 +4467,7 @@
    "status": "possible"
   },
   {
-   "id": "T50",
+   "id": "T53",
    "pos": [
     -6812,
     -1106
@@ -4110,7 +4492,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 14,
+    "laps_track": 20,
     "presence": 0.0
    },
    "deg": 30,
@@ -4137,15 +4519,17 @@
    }
   }
  ],
- "laps": 14,
+ "laps": 20,
  "sessions": [
+  "fh6_20260822_114844",
+  "fh6_20260822_180405",
   "fh6_20260828_213928",
   "fh6_20260829_023235",
   "fh6_20260829_051952",
   "fh6_20260831_142941",
   "fh6_20260831_172011"
  ],
- "updated": "fh6_20260831_172011",
+ "updated": "fh6_20260822_180405",
  "best_laps": {
   "4160|1|6|800": {
    "best_lap": 370.646,
@@ -4160,6 +4544,26 @@
   }
  },
  "visits": [
+  {
+   "session": "fh6_20260822_114844",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "best_lap": null,
+   "best_car": null
+  },
+  {
+   "session": "fh6_20260822_180405",
+   "laps": 5,
+   "attempts": 1,
+   "cars": [
+    "4160|1|6|800"
+   ],
+   "best_lap": null,
+   "best_car": null
+  },
   {
    "session": "fh6_20260828_213928",
    "laps": 1,
@@ -8022,7 +8426,8 @@
    "radius_m": 153,
    "deg": 64,
    "sessions": [
-    "fh6_20260831_172011"
+    "fh6_20260831_172011",
+    "fh6_20260822_180405"
    ],
    "model_map": true
   },
@@ -8134,25 +8539,25 @@
     "band": "light"
    },
    "mid_corner": {
-    "frac": 0.023,
+    "frac": 0.073,
     "band": "light"
    },
    "fast_corner": {
-    "frac": 0.34,
+    "frac": 0.245,
     "band": "heavy"
    },
    "braking": {
-    "frac": 0.135,
+    "frac": 0.182,
     "band": "moderate"
    },
    "straight": {
-    "frac": 0.281,
-    "band": "heavy"
+    "frac": 0.208,
+    "band": "moderate"
    },
    "elevation": {
     "frac": null,
     "band": "moderate",
-    "range_m": 72.0
+    "range_m": 50.9
    },
    "launch": {
     "frac": null,
@@ -8160,8 +8565,7 @@
    }
   },
   "heavy": [
-   "fast sweepers",
-   "straights / top-end"
+   "fast sweepers"
   ],
   "absent": [],
   "gears_used": [
@@ -8170,12 +8574,13 @@
    3,
    4,
    5,
-   6
+   6,
+   11
   ],
-  "top_gear_used": 6,
+  "top_gear_used": 11,
   "max_gear": 6,
-  "top_speed": 275,
-  "elevation_range_m": 72.0,
+  "top_speed": 230,
+  "elevation_range_m": 50.9,
   "notes": [],
   "priority": [
    "fast sweepers",
@@ -8183,11 +8588,11 @@
    "heavy braking",
    "elevation (crests)"
   ],
-  "rough_frac": 0.06,
-  "rough_n": 15
+  "rough_frac": 0.14,
+  "rough_n": 12
  },
- "profile_laps": 4,
- "profile_session": "fh6_20260831_172011",
+ "profile_laps": 5,
+ "profile_session": "fh6_20260822_180405",
  "geometry": {
   "length_m": 6464,
   "path": [
@@ -11706,6 +12111,868 @@
   "session": "fh6_20260831_172011",
   "lap_paths": [
    {
+    "session": "fh6_20260822_114844",
+    "ev": 0,
+    "lap": 1,
+    "pts": [
+     [
+      -3761,
+      314
+     ],
+     [
+      -3753,
+      317
+     ],
+     [
+      -3746,
+      320
+     ],
+     [
+      -3739,
+      323
+     ],
+     [
+      -3732,
+      327
+     ],
+     [
+      -3724,
+      327
+     ],
+     [
+      -3719,
+      323
+     ],
+     [
+      -3720,
+      329
+     ],
+     [
+      -3721,
+      329
+     ],
+     [
+      -3714,
+      331
+     ],
+     [
+      -3706,
+      334
+     ],
+     [
+      -3698,
+      336
+     ],
+     [
+      -3691,
+      339
+     ],
+     [
+      -3683,
+      342
+     ],
+     [
+      -3676,
+      344
+     ],
+     [
+      -3668,
+      347
+     ],
+     [
+      -3661,
+      350
+     ],
+     [
+      -3653,
+      353
+     ],
+     [
+      -3646,
+      356
+     ],
+     [
+      -3638,
+      358
+     ],
+     [
+      -3631,
+      361
+     ],
+     [
+      -3623,
+      364
+     ],
+     [
+      -3616,
+      367
+     ],
+     [
+      -3609,
+      370
+     ],
+     [
+      -3601,
+      373
+     ],
+     [
+      -3594,
+      376
+     ],
+     [
+      -3586,
+      379
+     ],
+     [
+      -3579,
+      382
+     ],
+     [
+      -3571,
+      385
+     ],
+     [
+      -3564,
+      387
+     ],
+     [
+      -3556,
+      389
+     ],
+     [
+      -3549,
+      393
+     ],
+     [
+      -3542,
+      397
+     ],
+     [
+      -3534,
+      399
+     ],
+     [
+      -3527,
+      402
+     ],
+     [
+      -3519,
+      404
+     ],
+     [
+      -3512,
+      407
+     ],
+     [
+      -3504,
+      410
+     ],
+     [
+      -3496,
+      412
+     ],
+     [
+      -3489,
+      415
+     ],
+     [
+      -3482,
+      418
+     ],
+     [
+      -3474,
+      421
+     ],
+     [
+      -3467,
+      424
+     ],
+     [
+      -3459,
+      426
+     ],
+     [
+      -3452,
+      429
+     ],
+     [
+      -3444,
+      432
+     ],
+     [
+      -3436,
+      435
+     ],
+     [
+      -3429,
+      437
+     ],
+     [
+      -3421,
+      440
+     ],
+     [
+      -3414,
+      443
+     ],
+     [
+      -3407,
+      446
+     ],
+     [
+      -3399,
+      449
+     ],
+     [
+      -3392,
+      452
+     ],
+     [
+      -3385,
+      455
+     ],
+     [
+      -3377,
+      459
+     ],
+     [
+      -3370,
+      462
+     ],
+     [
+      -3362,
+      465
+     ],
+     [
+      -3355,
+      468
+     ],
+     [
+      -3348,
+      471
+     ],
+     [
+      -3340,
+      474
+     ],
+     [
+      -3333,
+      477
+     ],
+     [
+      -3326,
+      481
+     ],
+     [
+      -3319,
+      484
+     ],
+     [
+      -3311,
+      488
+     ],
+     [
+      -3304,
+      491
+     ],
+     [
+      -3297,
+      495
+     ],
+     [
+      -3290,
+      499
+     ],
+     [
+      -3283,
+      502
+     ],
+     [
+      -3276,
+      506
+     ],
+     [
+      -3269,
+      509
+     ],
+     [
+      -3262,
+      513
+     ],
+     [
+      -3255,
+      517
+     ],
+     [
+      -3248,
+      522
+     ],
+     [
+      -3241,
+      526
+     ],
+     [
+      -3235,
+      531
+     ],
+     [
+      -3229,
+      536
+     ],
+     [
+      -3223,
+      541
+     ],
+     [
+      -3217,
+      547
+     ],
+     [
+      -3211,
+      552
+     ],
+     [
+      -3205,
+      558
+     ],
+     [
+      -3199,
+      563
+     ],
+     [
+      -3194,
+      569
+     ],
+     [
+      -3188,
+      575
+     ],
+     [
+      -3183,
+      581
+     ],
+     [
+      -3178,
+      587
+     ],
+     [
+      -3174,
+      594
+     ],
+     [
+      -3169,
+      600
+     ],
+     [
+      -3165,
+      607
+     ],
+     [
+      -3162,
+      615
+     ],
+     [
+      -3161,
+      622
+     ],
+     [
+      -3163,
+      630
+     ],
+     [
+      -3161,
+      638
+     ],
+     [
+      -3156,
+      643
+     ],
+     [
+      -3152,
+      637
+     ],
+     [
+      -3151,
+      630
+     ],
+     [
+      -3153,
+      622
+     ],
+     [
+      -3155,
+      614
+     ],
+     [
+      -3157,
+      606
+     ],
+     [
+      -3159,
+      599
+     ],
+     [
+      -3162,
+      591
+     ],
+     [
+      -3164,
+      583
+     ],
+     [
+      -3166,
+      576
+     ],
+     [
+      -3170,
+      569
+     ],
+     [
+      -3173,
+      561
+     ],
+     [
+      -3176,
+      554
+     ],
+     [
+      -3179,
+      546
+     ],
+     [
+      -3183,
+      540
+     ],
+     [
+      -3188,
+      533
+     ],
+     [
+      -3194,
+      528
+     ]
+    ]
+   },
+   {
+    "session": "fh6_20260822_180405",
+    "ev": 0,
+    "lap": 3,
+    "pts": [
+     [
+      -3761,
+      314
+     ],
+     [
+      -3753,
+      317
+     ],
+     [
+      -3746,
+      319
+     ],
+     [
+      -3738,
+      322
+     ],
+     [
+      -3731,
+      325
+     ],
+     [
+      -3723,
+      328
+     ],
+     [
+      -3716,
+      331
+     ],
+     [
+      -3708,
+      333
+     ],
+     [
+      -3701,
+      336
+     ],
+     [
+      -3693,
+      339
+     ],
+     [
+      -3686,
+      342
+     ],
+     [
+      -3678,
+      345
+     ],
+     [
+      -3671,
+      347
+     ],
+     [
+      -3663,
+      350
+     ],
+     [
+      -3656,
+      353
+     ],
+     [
+      -3648,
+      356
+     ],
+     [
+      -3641,
+      359
+     ],
+     [
+      -3633,
+      361
+     ],
+     [
+      -3626,
+      364
+     ],
+     [
+      -3618,
+      367
+     ],
+     [
+      -3611,
+      370
+     ],
+     [
+      -3604,
+      373
+     ],
+     [
+      -3596,
+      376
+     ],
+     [
+      -3589,
+      379
+     ],
+     [
+      -3581,
+      381
+     ],
+     [
+      -3573,
+      383
+     ],
+     [
+      -3566,
+      386
+     ],
+     [
+      -3559,
+      389
+     ],
+     [
+      -3552,
+      394
+     ],
+     [
+      -3545,
+      398
+     ],
+     [
+      -3538,
+      401
+     ],
+     [
+      -3530,
+      404
+     ],
+     [
+      -3523,
+      406
+     ],
+     [
+      -3515,
+      409
+     ],
+     [
+      -3508,
+      412
+     ],
+     [
+      -3500,
+      415
+     ],
+     [
+      -3493,
+      418
+     ],
+     [
+      -3485,
+      421
+     ],
+     [
+      -3478,
+      423
+     ],
+     [
+      -3470,
+      426
+     ],
+     [
+      -3463,
+      429
+     ],
+     [
+      -3455,
+      432
+     ],
+     [
+      -3448,
+      434
+     ],
+     [
+      -3440,
+      437
+     ],
+     [
+      -3432,
+      439
+     ],
+     [
+      -3425,
+      441
+     ],
+     [
+      -3417,
+      443
+     ],
+     [
+      -3409,
+      445
+     ],
+     [
+      -3402,
+      447
+     ],
+     [
+      -3394,
+      450
+     ],
+     [
+      -3386,
+      452
+     ],
+     [
+      -3379,
+      455
+     ],
+     [
+      -3371,
+      458
+     ],
+     [
+      -3364,
+      460
+     ],
+     [
+      -3356,
+      463
+     ],
+     [
+      -3349,
+      466
+     ],
+     [
+      -3341,
+      468
+     ],
+     [
+      -3334,
+      471
+     ],
+     [
+      -3326,
+      474
+     ],
+     [
+      -3319,
+      477
+     ],
+     [
+      -3311,
+      479
+     ],
+     [
+      -3304,
+      482
+     ],
+     [
+      -3296,
+      485
+     ],
+     [
+      -3289,
+      489
+     ],
+     [
+      -3282,
+      493
+     ],
+     [
+      -3275,
+      497
+     ],
+     [
+      -3268,
+      501
+     ],
+     [
+      -3262,
+      505
+     ],
+     [
+      -3255,
+      510
+     ],
+     [
+      -3249,
+      515
+     ],
+     [
+      -3243,
+      520
+     ],
+     [
+      -3237,
+      525
+     ],
+     [
+      -3231,
+      531
+     ],
+     [
+      -3226,
+      537
+     ],
+     [
+      -3220,
+      543
+     ],
+     [
+      -3215,
+      549
+     ],
+     [
+      -3210,
+      555
+     ],
+     [
+      -3205,
+      561
+     ],
+     [
+      -3200,
+      568
+     ],
+     [
+      -3196,
+      575
+     ],
+     [
+      -3193,
+      582
+     ],
+     [
+      -3189,
+      589
+     ],
+     [
+      -3186,
+      597
+     ],
+     [
+      -3184,
+      604
+     ],
+     [
+      -3181,
+      612
+     ],
+     [
+      -3180,
+      620
+     ],
+     [
+      -3178,
+      627
+     ],
+     [
+      -3177,
+      635
+     ],
+     [
+      -3176,
+      643
+     ],
+     [
+      -3175,
+      651
+     ],
+     [
+      -3174,
+      659
+     ],
+     [
+      -3174,
+      667
+     ],
+     [
+      -3174,
+      675
+     ],
+     [
+      -3174,
+      683
+     ],
+     [
+      -3175,
+      691
+     ],
+     [
+      -3176,
+      699
+     ],
+     [
+      -3177,
+      707
+     ],
+     [
+      -3178,
+      715
+     ],
+     [
+      -3179,
+      723
+     ],
+     [
+      -3180,
+      731
+     ],
+     [
+      -3181,
+      739
+     ],
+     [
+      -3180,
+      747
+     ],
+     [
+      -3178,
+      754
+     ]
+    ]
+   },
+   {
     "session": "fh6_20260829_023235",
     "ev": 0,
     "lap": 1,
@@ -12587,332 +13854,332 @@
   "det": "geo7-tol-from-map",
   "lat_acc": {
    "0": [
-    244.431,
-    46380
+    248.802,
+    47138
    ],
    "1": [
-    201.857,
-    1239
+    207.286,
+    1439
    ],
    "2": [
-    53.158,
-    874
+    75.634,
+    1067
    ],
    "3": [
-    22.977,
-    730
+    78.325,
+    894
    ],
    "4": [
-    16.485,
-    644
+    109.161,
+    825
    ],
    "5": [
-    6.931,
-    541
+    133.135,
+    741
    ],
    "6": [
-    5.674,
-    478
+    164.738,
+    1016
    ],
    "7": [
-    24.453,
-    432
+    87.788,
+    976
    ],
    "8": [
-    15.187,
-    419
+    43.839,
+    674
    ],
    "9": [
-    14.189,
-    387
+    27.225,
+    522
    ],
    "10": [
-    16.354,
-    366
+    39.979,
+    476
    ],
    "11": [
-    22.301,
-    356
+    23.23,
+    451
    ],
    "12": [
-    16.946,
-    336
+    17.949,
+    422
    ],
    "13": [
-    23.273,
-    334
+    34.654,
+    412
    ],
    "14": [
-    17.979,
-    328
+    21.074,
+    401
    ],
    "15": [
-    6.509,
-    329
+    26.931,
+    397
    ],
    "16": [
-    46.631,
-    324
+    56.75,
+    389
    ],
    "17": [
-    25.842,
-    333
+    27.141,
+    394
    ],
    "18": [
-    161.222,
-    334
+    161.744,
+    392
    ],
    "19": [
-    182.147,
-    345
+    187.962,
+    410
    ],
    "20": [
-    244.376,
-    373
+    262.061,
+    446
    ],
    "21": [
-    223.984,
-    383
+    232.425,
+    457
    ],
    "22": [
-    106.087,
-    385
+    132.193,
+    460
    ],
    "23": [
-    150.288,
-    374
+    187.967,
+    449
    ],
    "24": [
-    100.234,
-    368
+    140.094,
+    446
    ],
    "25": [
-    82.756,
-    365
+    146.483,
+    447
    ],
    "26": [
-    91.465,
-    362
+    164.853,
+    449
    ],
    "27": [
-    104.101,
-    365
+    184.553,
+    454
    ],
    "28": [
-    96.226,
-    351
+    174.8,
+    439
    ],
    "29": [
-    102.021,
-    343
+    211.498,
+    435
    ],
    "30": [
-    45.279,
-    343
+    173.445,
+    445
    ],
    "31": [
-    31.626,
-    333
+    66.12,
+    432
    ],
    "32": [
-    29.359,
-    326
+    101.119,
+    420
    ],
    "33": [
-    44.348,
-    322
+    60.909,
+    411
    ],
    "34": [
-    23.875,
-    313
+    32.579,
+    396
    ],
    "35": [
-    151.853,
-    304
+    178.569,
+    382
    ],
    "36": [
-    177.925,
-    319
+    195.716,
+    393
    ],
    "37": [
-    290.133,
-    351
+    309.493,
+    423
    ],
    "38": [
-    252.677,
-    354
+    279.875,
+    422
    ],
    "39": [
-    171.16,
-    361
+    187.604,
+    427
    ],
    "40": [
-    154.967,
-    361
+    172.607,
+    424
    ],
    "41": [
-    211.889,
-    360
+    233.105,
+    421
    ],
    "42": [
-    277.325,
-    354
+    293.188,
+    412
    ],
    "43": [
-    67.892,
-    334
+    77.861,
+    392
    ],
    "44": [
-    142.34,
-    311
+    147.966,
+    366
    ],
    "45": [
-    82.308,
-    301
+    85.63,
+    355
    ],
    "46": [
-    66.901,
-    280
+    67.473,
+    332
    ],
    "47": [
-    30.548,
-    277
+    42.916,
+    329
    ],
    "48": [
-    9.301,
-    269
+    35.68,
+    320
    ],
    "49": [
-    49.6,
-    259
+    77.79,
+    306
    ],
    "50": [
-    56.143,
-    263
+    72.882,
+    311
    ],
    "51": [
-    39.964,
-    241
+    50.587,
+    289
    ],
    "52": [
-    79.598,
-    241
+    85.17,
+    286
    ],
    "53": [
-    83.135,
-    233
+    85.134,
+    278
    ],
    "54": [
-    60.902,
-    235
+    61.511,
+    279
    ],
    "55": [
-    45.225,
-    234
+    45.689,
+    278
    ],
    "56": [
-    11.611,
-    229
+    12.119,
+    272
    ],
    "57": [
-    41.629,
-    214
+    42.215,
+    256
    ],
    "58": [
-    46.358,
-    220
+    49.368,
+    262
    ],
    "59": [
-    62.288,
-    214
+    78.908,
+    254
    ],
    "60": [
-    90.697,
-    222
+    127.219,
+    262
    ],
    "61": [
-    67.08,
-    208
-   ],
-   "62": [
-    77.67,
-    214
-   ],
-   "63": [
-    103.036,
-    208
-   ],
-   "64": [
-    139.132,
-    207
-   ],
-   "65": [
-    94.914,
-    217
-   ],
-   "66": [
-    70.544,
-    227
-   ],
-   "67": [
-    101.145,
-    228
-   ],
-   "68": [
-    171.028,
+    106.754,
     247
    ],
-   "69": [
-    150.805,
-    259
+   "62": [
+    120.006,
+    253
    ],
-   "70": [
-    150.552,
+   "63": [
+    145.257,
+    247
+   ],
+   "64": [
+    181.675,
+    246
+   ],
+   "65": [
+    133.353,
+    255
+   ],
+   "66": [
+    102.414,
+    264
+   ],
+   "67": [
+    135.778,
+    265
+   ],
+   "68": [
+    225.219,
     285
    ],
+   "69": [
+    179.745,
+    296
+   ],
+   "70": [
+    200.507,
+    322
+   ],
    "71": [
-    65.138,
-    298
+    140.415,
+    335
    ],
    "72": [
-    82.207,
-    327
+    152.567,
+    363
    ],
    "73": [
-    174.626,
-    385
+    236.539,
+    422
    ],
    "74": [
-    167.731,
-    504
+    231.539,
+    540
    ],
    "75": [
-    272.922,
-    631
+    345.771,
+    668
    ],
    "76": [
-    219.97,
-    635
+    285.561,
+    672
    ],
    "77": [
-    252.441,
-    652
+    307.331,
+    690
    ],
    "78": [
-    273.645,
-    710
+    341.494,
+    749
    ],
    "79": [
-    278.924,
-    751
+    345.285,
+    790
    ],
    "80": [
-    287.56,
-    860
+    346.872,
+    903
    ],
    "81": [
-    383.24,
-    2906
+    436.913,
+    2951
    ],
    "345": [
     1.162,
@@ -12995,112 +14262,112 @@
     14
    ],
    "82": [
-    50.656,
-    22
+    127.914,
+    71
    ],
    "83": [
-    44.757,
-    23
+    139.409,
+    74
    ],
    "84": [
-    48.328,
-    22
+    118.065,
+    76
    ],
    "85": [
-    36.889,
-    22
+    87.135,
+    79
    ],
    "86": [
-    43.675,
-    23
+    99.373,
+    85
    ],
    "87": [
-    50.783,
-    22
+    144.176,
+    93
    ],
    "88": [
-    49.884,
-    20
+    177.256,
+    103
    ],
    "89": [
-    33.621,
-    22
+    127.95,
+    116
    ],
    "90": [
-    28.566,
-    22
+    142.458,
+    120
    ],
    "91": [
-    35.034,
-    20
+    191.3,
+    149
    ],
    "92": [
-    39.97,
-    22
+    229.186,
+    276
    ],
    "93": [
-    29.735,
-    21
+    103.293,
+    477
    ],
    "94": [
-    40.134,
-    20
+    171.589,
+    6645
    ],
    "95": [
-    20.922,
-    22
+    87.956,
+    188
    ],
    "96": [
-    8.917,
-    20
+    64.711,
+    165
    ],
    "97": [
-    10.492,
-    21
+    83.783,
+    157
    ],
    "98": [
-    21.161,
-    20
+    121.244,
+    151
    ],
    "99": [
-    29.05,
-    22
+    114.396,
+    158
    ],
    "100": [
-    28.084,
-    20
+    248.976,
+    207
    ],
    "101": [
-    13.194,
-    19
+    115.688,
+    393
    ],
    "102": [
-    5.599,
-    20
+    24.499,
+    313
    ],
    "103": [
-    3.082,
-    20
+    7.403,
+    253
    ],
    "104": [
-    2.054,
-    20
+    7.378,
+    291
    ],
    "105": [
-    1.798,
-    21
+    30.409,
+    297
    ],
    "106": [
-    3.162,
-    18
+    4.102,
+    168
    ],
    "107": [
-    1.865,
-    20
+    23.082,
+    195
    ],
    "108": [
-    4.648,
-    20
+    7.08,
+    277
    ],
    "109": [
     2.608,

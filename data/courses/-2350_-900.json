@@ -1,0 +1,374 @@
+{
+ "route_key": "-2350_-900",
+ "name": null,
+ "turns": [
+  {
+   "id": "T1",
+   "pos": [
+    -2351,
+    -872
+   ],
+   "dir": "R",
+   "type": "hairpin",
+   "radius_m": 45,
+   "n": 1,
+   "best": {
+    "mph_in": 42,
+    "mph_min": 42,
+    "mph_out": 58,
+    "brake_on_m": null,
+    "throttle_on_m": 0,
+    "lat_g": 1.31,
+    "apex": [
+     -2351,
+     -872
+    ],
+    "t0": 13492.6,
+    "stint": 129,
+    "first_red": "front ph1",
+    "session": "fh6_20260822_035921"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "3859|0|4|487": {
+     "mph_in": 42,
+     "mph_min": 42,
+     "mph_out": 58,
+     "brake_on_m": null,
+     "throttle_on_m": 0,
+     "lat_g": 1.31,
+     "apex": [
+      -2351,
+      -872
+     ],
+     "t0": 13492.6,
+     "stint": 129,
+     "first_red": "front ph1",
+     "session": "fh6_20260822_035921"
+    }
+   },
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260822_035921": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 42,
+     "usi": 0.155,
+     "cars": [
+      "3859|0|4|487"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "3859|0|4|487"
+    ],
+    "laps_track": 1,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  },
+  {
+   "id": "T2",
+   "pos": [
+    -2347,
+    -915
+   ],
+   "dir": "R",
+   "type": "medium",
+   "radius_m": 148,
+   "n": 1,
+   "best": {
+    "mph_in": 62,
+    "mph_min": 62,
+    "mph_out": 68,
+    "brake_on_m": null,
+    "throttle_on_m": 0,
+    "lat_g": 0.58,
+    "apex": [
+     -2347,
+     -915
+    ],
+    "t0": 13495.5,
+    "stint": 129,
+    "first_red": "front ph1",
+    "session": "fh6_20260822_035921"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "3859|0|4|487": {
+     "mph_in": 62,
+     "mph_min": 62,
+     "mph_out": 68,
+     "brake_on_m": null,
+     "throttle_on_m": 0,
+     "lat_g": 0.58,
+     "apex": [
+      -2347,
+      -915
+     ],
+     "t0": 13495.5,
+     "stint": 129,
+     "first_red": "front ph1",
+     "session": "fh6_20260822_035921"
+    }
+   },
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260822_035921": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 62,
+     "usi": 0.047,
+     "cars": [
+      "3859|0|4|487"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "3859|0|4|487"
+    ],
+    "laps_track": 1,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  },
+  {
+   "id": "T3",
+   "pos": [
+    -2352,
+    -970
+   ],
+   "dir": "R",
+   "type": "medium",
+   "radius_m": 89,
+   "n": 1,
+   "best": {
+    "mph_in": 69,
+    "mph_min": 66,
+    "mph_out": 66,
+    "brake_on_m": 9,
+    "throttle_on_m": null,
+    "lat_g": 1.11,
+    "apex": [
+     -2352,
+     -970
+    ],
+    "t0": 13496.7,
+    "stint": 129,
+    "first_red": "rear ph3",
+    "session": "fh6_20260822_035921"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "3859|0|4|487": {
+     "mph_in": 69,
+     "mph_min": 66,
+     "mph_out": 66,
+     "brake_on_m": 9,
+     "throttle_on_m": null,
+     "lat_g": 1.11,
+     "apex": [
+      -2352,
+      -970
+     ],
+     "t0": 13496.7,
+     "stint": 129,
+     "first_red": "rear ph3",
+     "session": "fh6_20260822_035921"
+    }
+   },
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260822_035921": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 66,
+     "usi": 0.157,
+     "cars": [
+      "3859|0|4|487"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 0,
+     "rear": 1,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "rear",
+    "consistency": 1.0,
+    "cars": [
+     "3859|0|4|487"
+    ],
+    "laps_track": 1,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  }
+ ],
+ "laps": 1,
+ "sessions": [
+  "fh6_20260822_035921"
+ ],
+ "updated": "fh6_20260822_035921",
+ "best_laps": {},
+ "visits": [
+  {
+   "session": "fh6_20260822_035921",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "best_lap": null,
+   "best_car": null
+  }
+ ],
+ "cars": {
+  "3859|0|4|487": {
+   "name": "1984 Honda City",
+   "class": "C",
+   "pi": 487,
+   "drivetrain": "FWD"
+  }
+ },
+ "speed_traces": {},
+ "geo_turns": {},
+ "turn_count_delta": null,
+ "turn_count": 3,
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.147,
+    "band": "moderate"
+   },
+   "mid_corner": {
+    "frac": 0.265,
+    "band": "heavy"
+   },
+   "fast_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "braking": {
+    "frac": 0.101,
+    "band": "moderate"
+   },
+   "straight": {
+    "frac": 0.057,
+    "band": "light"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "absent",
+    "range_m": 0.5
+   },
+   "launch": {
+    "frac": null,
+    "band": "moderate"
+   }
+  },
+  "heavy": [
+   "medium corners"
+  ],
+  "absent": [
+   "fast sweepers",
+   "elevation (crests)"
+  ],
+  "gears_used": [
+   1,
+   2,
+   3,
+   4,
+   11
+  ],
+  "top_gear_used": 11,
+  "max_gear": 6,
+  "top_speed": 72,
+  "elevation_range_m": 0.5,
+  "notes": [
+   "no real straight (top speed only 72 mph, gears used [1, 2, 3, 4, 11]/6) — top-end gearing & drag are irrelevant here; tune the gears you use",
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course",
+   "no fast corners — understeer here is mechanical, not aero"
+  ],
+  "priority": [
+   "medium corners",
+   "low-speed corners",
+   "heavy braking"
+  ],
+  "rough_frac": 0.0,
+  "rough_n": 3
+ },
+ "profile_laps": 1,
+ "profile_session": "fh6_20260822_035921"
+}

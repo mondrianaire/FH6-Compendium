@@ -25,8 +25,12 @@ in route 5041's sphere.
 
 1. **Build Sheet overflow** — 5,289 px of content in an 819 px pane, no scrollbars. Jett's oldest
    open ask this week.
-2. **A/B slider diff for the `variation` status** — plan exists (`diffSliderRows`, `vdot`, threaded
-   through `sliderRow` / `tuneTabs` / `abOverlay` in `dashboard/v2/live.js`); nothing built.
+2. **A/B testing regimen.** The slider-value diff for the `variation` status IS built (commit
+   `dd78f9b`: `diffSliderRows`/`vdot` in `live.js`, `applyVariationDiff` in `panel.js`) — the 09-06
+   audit corrected this line — but its read probes call `/disk-tune?ts=<older save>`, which the
+   daemon persists as a user pick for two hours, so opening a Build Sheet on a variation build can
+   repoint identity to the stale save. Fix that before trusting the feature. The primary goal Jett
+   set is telemetry comparison between build A and build B (`docs/dashboard-states.md` §6).
 3. **Routes 2041 / 2071 section parse** and the `-4750_-1550` anchor disagreement.
 4. **`ref_car_restriction` on the tuning side** — every event's class, PI, power, weight and year
    bounds are now rows; nothing reads them yet.

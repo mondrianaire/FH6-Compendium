@@ -1308,7 +1308,7 @@ def main():
         _keep = {id(r) for r in live}
         rows = [r for r in rows if r["IsRaceOn"] != 1 or id(r) in _keep]
     _markers = sorted(_rewinds + pause_markers(live), key=lambda m: m["t"])
-    sid = os.path.splitext(os.path.basename(path))[0]; dur = rows[-1]["t"]
+    sid = re.sub(r"\.csv(\.gz)?$", "", os.path.basename(path)); dur = rows[-1]["t"]   # strip BOTH extensions: splitext left ".csv" on a ".csv.gz", writing fh6_*.csv.json instead of overwriting fh6_*.json
     # ---- stints (runs): a new stint starts when driving resumes after >= 2 s off, or the configuration changes ----
     tags = {}; starts = {}
     tpath = os.path.join(ROOT, "data", "sessions", sid + ".tags.json")
@@ -1811,7 +1811,7 @@ def main():
         best = None
         for key, name, cx0, cz0, length_m, is_race, conf in _catalogue_starts():
             d0 = math.hypot(sx - cx0, sz - cz0)
-            if d0 > 250: continue                        # only routes whose S/F line is near this crossing are candidates
+            if d0 > 500: continue                        # candidate prefilter only: a rolling start crosses the line up to ~460 m from the catalogued start (measured: Goliath 40 m, Festival Sprint 457 m); ov + direction below do the real deciding
             cp = _catalogue_path(key)
             if not cp: continue
             cells = {}

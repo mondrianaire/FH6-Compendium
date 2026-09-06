@@ -843,3 +843,14 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .bb.riv{border-color:var(--acc);color:var(--acc)}
 .bb.car{border-color:#7fb2ff;color:#7fb2ff}
 .bb.dsc{border-color:var(--line2);color:var(--dim)}
+.tdata{color:var(--acc);font-weight:600}
+.tdata.none{color:var(--dim);font-weight:400}
+/* miniature performance-class pills (one per class a Rivals course is offered in) — the established piBadge, shrunk */
+.tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
+.tcls .pib{font-size:8px;border-radius:3px}
+.tcls .pib b{padding:1px 3.5px;text-shadow:none}
+/* the Course Browser scrolls (the tile grid can exceed the pane); chips stay pinned as it scrolls.
+   Scoped to the RIGHT info pane when it holds the browser (:has(.tiles)) so it overrides the global
+   no-scroll rule `body.fixed .pane>.body{overflow:hidden}` here and NOWHERE else. */
+.tiles{padding-bottom:4px}
+body.fixed #pRight > .body:has(.tiles){overflow-y:auto}

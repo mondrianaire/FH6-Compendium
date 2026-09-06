@@ -308,6 +308,15 @@ def main(argv=None):
     for _rid, _kind, _d in cx.execute("SELECT route_id, kind, discipline FROM ref_event WHERE route_id IS NOT NULL"):
         if _kind: _mode[_rid].add(_kind)
         if _d: _disc[_rid][_d] += 1
+    # data amount we hold per route (our own driven corpus) and the performance CLASSES the route is offered
+    # in (a Rivals course runs one leaderboard per class -- D..R -- so a route "contains" several class variants).
+    _CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R", "X"]
+    _clsname = {c: n for c, n in cx.execute("SELECT class_id, name FROM ref_class")}
+    _data = {rk: (nl or 0, ns or 0) for rk, nl, ns in cx.execute("SELECT route_key, n_laps, n_sessions FROM course")}
+    _name_cls = _cl.defaultdict(set)
+    for _nm, _cid in cx.execute("SELECT name, class_id FROM ref_rivals_event WHERE class_id IS NOT NULL"):
+        _c = _clsname.get(_cid)
+        if _c: _name_cls[_nm].add(_c)
     _spawn = {}
     try:
         import sys as _sys
@@ -326,11 +335,14 @@ def main(argv=None):
             continue
         rid = r["route_id"]
         _dc = _disc.get(rid)
+        _laps, _sess = _data.get("route:%s" % rid, (0, 0))
+        _classes = sorted(_name_cls.get(r["name"], ()), key=lambda c: _CLASS_ORDER.index(c) if c in _CLASS_ORDER else 99)
         world["routes"][rid] = {"len": r["length_m"], "loop": r["is_loop"],
                                 "name": r["name"], "name_confidence": r["name_confidence"],
                                 "is_race": bool(r["is_race"]), "modes": sorted(_mode.get(rid, ())),
                                 "disc": (_dc.most_common(1)[0][0] if _dc else None),
-                                "spawn": _spawn.get(str(rid)), "pts": pts}
+                                "spawn": _spawn.get(str(rid)), "laps": _laps, "sessions": _sess,
+                                "classes": _classes, "pts": pts}
         xs += [p[0] for p in pts]; zs += [p[1] for p in pts]
     if xs:
         world["bbox"] = [min(xs), max(xs), min(zs), max(zs)]

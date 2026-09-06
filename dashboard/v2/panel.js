@@ -1203,6 +1203,11 @@ function browserHTML() {
     .sort((a, b) => (a.r.name ? 0 : 1) - (b.r.name ? 0 : 1) || (a.r.name || "").localeCompare(b.r.name || "") || (a.id - b.id));
   const tiles = sel.map(({ id, r }) => {
     const nm = r.name || ("Route " + id);
+    const laps = r.laps || 0, sess = r.sessions || 0;
+    const data = laps ? `<span class="tdata">${laps} lap${laps === 1 ? "" : "s"} · ${sess} run${sess === 1 ? "" : "s"}</span>`
+                      : `<span class="tdata none">no data yet</span>`;
+    // performance-class pills: a Rivals course runs one leaderboard per class, so show every class it is offered in
+    const cls = (r.classes || []).length ? `<div class="tcls">${r.classes.map((c) => clsBadge(c)).join("")}</div>` : "";
     const badges = [r.is_race ? `<span class="bb race">race</span>` : "",
                     (r.modes || []).includes("rivals") ? `<span class="bb riv">rivals</span>` : "",
                     (r.modes || []).includes("career") ? `<span class="bb car">career</span>` : "",
@@ -1210,7 +1215,8 @@ function browserHTML() {
     return `<button class="tile ${BROWSE_PICK === id ? "on" : ""}" data-bpick="${id}" title="${esc(nm)}">
       ${tileSvg(r, BROWSE_PICK === id)}
       <div class="tnm">${esc(nm)}</div>
-      <div class="tmeta">${n0(r.len)} m${r.loop ? " · loop" : " · P2P"}</div>
+      <div class="tmeta">${n0(r.len)} m${r.loop ? " · loop" : " · P2P"} · ${data}</div>
+      ${cls}
       <div class="tbadges">${badges}</div></button>`;
   }).join("");
   return `<div class="bchips">${chips}</div>

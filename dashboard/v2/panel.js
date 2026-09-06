@@ -74,6 +74,7 @@ function adoptMode(m) {
   if (prev.suggest !== MODE.suggest || prev.game !== MODE.game) onModeChange(prev, MODE);
 }
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
+let ROUTE = null;   // in a timed event with no learned course: the catalogued route the car is on (locateRouteInEvent)
 let COURSE_MATCH = null;           // { dist, secondKey, secondDist } from the last locateCourse() — how sure the current course is
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
@@ -983,7 +984,7 @@ function paintLeft() {
   const course = MODE.suggest === "course" && COURSE;
   // 169 polylines are not free: rebuild the map only when what it shows changes, and let the
   // live dot ride on the map that is already there.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore]);
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
@@ -1011,7 +1012,14 @@ function paintLeft() {
   } else {
     const n = WORLD ? Object.keys(WORLD.routes).length : 0;
     const off = WORLD ? routeSplit().off.length : 0;
-    hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
+    if (ROUTE) {
+      // the map IS identified in an event, from the catalogued route — even with no laps recorded here yet
+      hd.innerHTML = `<b class="trackname">${esc(ROUTE.name)}</b>
+        <span class="chip w">${MODE.game === "event" ? "EVENT · CATALOGUED" : "ROUTE"}</span>
+        <span class="why">${n0(ROUTE.len)} m${ROUTE.loop ? " · loop" : ""} · the game's route, no laps recorded here yet${ROUTE.alsoName ? ` · shares road with ${esc(ROUTE.alsoName)}` : ""}</span>`;
+    } else {
+      hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
+    }
     body.innerHTML = worldMapHTML(); addLiveDot(body);
     const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; VIEW.global.showOffmap = SHOW_OFFMAP; viewSave(); paintLeft(); };
     wireFollow(body); wireMapDrawer(body);
@@ -1052,13 +1060,16 @@ function worldMapHTML() {
     + (SHOW_OFFMAP ? off.map(({ id, r }) => `<g><title>Route${id} — off-map circuit, outside the nav mesh, unreachable</title>${line(r.pts, "#c678dd", 1.4, 0.9)}</g>`).join("") : "");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
     .map((c) => line(c.path, "#00d27a", 1.6, 0.85)).join("");
+  // in an event, the catalogued route the car is on, drawn bright over the rest so the map is legible
+  const hi = (ROUTE && WORLD.routes[ROUTE.id] && (WORLD.routes[ROUTE.id].pts || []).length > 1)
+    ? line(WORLD.routes[ROUTE.id].pts, "#e3b341", 2.8, 1) : "";
   // no follow toggle here: following is course-only (see followSpan()) -- offering it on the
   // world map invited turning on a satnav zoom that could only ever collapse the island view.
   const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>
       <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
       ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}`;
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
-      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}<g id="liveDot"></g></svg>
+      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}<g id="liveDot"></g></svg>
     ${mapDrawerHTML(`<div class="legend">${legend}</div>`)}`;
 }
 
@@ -1223,6 +1234,50 @@ async function locateCourse() {
   COURSE_MATCH = { dist: bd, secondKey: second, secondDist: sd };
   ctxSave({ livePos: LIVEPOS });
   if (best && best !== COURSE_KEY) await onCourseChange(COURSE_KEY, best);
+  locateRouteInEvent(!!best);
+}
+
+// IN A TIMED EVENT THE MAP IS KNOWN (Jett 2026-09-06: "if it identifies that we are in rivals there is
+// no reason that the map should not be identified"). A Rivals / race run is always on one of the game's
+// catalogued routes, and the client holds every route's DENSE centre-line (WORLD.routes, ~8 m spacing).
+// So when we're in an event but no LEARNED course is located (a route never driven, or one whose learned
+// path is too sparse), match the car to the catalogued route and name the map from that. Routes share
+// roads, so the pick is honest about a near runner-up.
+function locateRouteInEvent(haveCourse) {
+  if (MODE.game !== "event" || haveCourse || !LIVEPOS || !WORLD || !WORLD.routes) {
+    if (ROUTE) { ROUTE = null; paintLeft(); }
+    return;
+  }
+  const segNear = (pts) => {
+    let bd = Infinity;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const ax = pts[i][0], az = pts[i][1], dx = pts[i + 1][0] - ax, dz = pts[i + 1][1] - az, l2 = dx * dx + dz * dz;
+      let t = l2 ? ((LIVEPOS[0] - ax) * dx + (LIVEPOS[1] - az) * dz) / l2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
+      const d = Math.hypot(LIVEPOS[0] - (ax + t * dx), LIVEPOS[1] - (az + t * dz)); if (d < bd) bd = d;
+    }
+    return bd;
+  };
+  const hits = [];                                              // named routes only — all 88 Rivals routes are named
+  for (const [id, r] of Object.entries(WORLD.routes)) {
+    if (!r.name || !(r.pts || []).length) continue;
+    const d = segNear(r.pts);
+    if (d < 45) hits.push({ id, name: r.name, len: r.len || 0, loop: r.loop, dist: d });
+  }
+  hits.sort((a, b) => a.dist - b.dist);
+  let best = null;
+  if (hits.length) {
+    const nearD = hits[0].dist;
+    // routes share roads, so several can be equally near. A Rivals run is the route you LOADED, which
+    // on a shared stretch is the through-route, not a sub-segment of it — break the near-tie toward the
+    // LONGER route (the Goliath over a sprint that reuses its start), then name the runner-up as shared.
+    const tied = hits.filter((h) => h.dist <= nearD + 15);
+    best = tied.reduce((m, h) => (h.len > m.len ? h : m), tied[0]);
+    const other = hits.find((h) => h.id !== best.id && h.dist <= best.dist + 25);
+    best.alsoName = other ? other.name : null;
+  }
+  const changed = (best && best.id) !== (ROUTE && ROUTE.id);
+  ROUTE = best;
+  if (changed) { if (COURSE_KEY) { COURSE = null; COURSE_KEY = null; } paintLeft(); }
 }
 
 // A learned course's path can pass within the match radius of a different learned course (same

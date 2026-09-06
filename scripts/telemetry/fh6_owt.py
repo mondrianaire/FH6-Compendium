@@ -6,13 +6,32 @@ The game ships one ``Route<id>.owt`` per defined route under
 SAME metre frame the telemetry reports, so a learned course and a game route can be compared
 directly with no transform.
 
-Layout (little-endian; verified against 169 files):
+Layout (little-endian; verified byte-for-byte against all 169 files, 2026-09-06):
 
     0x00  char[4] 'FTWO'
     0x04  u16     version (2)
-    0x24  u32     point count N
-    0x60  N x 56  per-point record; the first three floats are x, y (elevation), z
-    tail  24 bytes
+    0x0C  u32     payload size = file size - 32 (everything after this word, up to the trailer)
+    0x20  u32     S, the section count: 1 on 163 files; 4, 5 or 6 on Route132/281/351/1181/1281/8008
+    0x24  u32     N, point records in the file, summed over every section
+    0x50  u32     section 0's point count;  0x54  u32  its flags
+    0x58  (S-1) x 40  one entry per further section, in index order:
+                  u32 start index, u32 0, 3 x (i32 link: the section a car may enter next, i32 0;
+                  -1,-1 = unused), u32 point count, u32 flags
+    align 16
+          N x 56  per-point record; the first three floats are x, y (elevation), z
+    align 16
+    tail  16 bytes, a copy of the first 16 header bytes
+
+    flags: low byte = number of outgoing links; high byte = line variant, 1 the primary line,
+    2 or 4 an alternate line over the same stretch of road (same start and end as a primary
+    section, never entered by the primary chain).
+
+A route is therefore a small GRAPH of sections, not one array, and the point array does not
+start at 0x60 unless S is 1. The Colossus (Route132) is six sections: a primary chain
+0 -> 1 -> 2 -> 3 -> back to 0 of 37.7 km, plus two alternate lines that re-run sections 0 and 2.
+Reading it as one array from 0x60 -- 192 bytes early, which is not a whole number of records --
+gave 3.1 km and a zero bounding box; concatenating all six sections gives 69 km with a 2.7 km
+gap. `parse` returns the primary chain as the polyline and exposes every section beside it.
 
 Why this matters: the game knows exactly where a track is, and we know exactly how fast it was
 driven. Neither half is useful alone. This module supplies the first half so a course row can
@@ -35,36 +54,119 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 AITRACKS = r"C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\aitracks"
 
 MAGIC = b"FTWO"
-HDR = 0x60
+HDR = 0x60              # where the point array starts when the file holds ONE section
 STRIDE = 56
 COUNT_OFF = 0x24
+NSEC_OFF = 0x20
+SEC0_OFF = 0x50         # section 0's (count, flags); the other sections' entries follow at 0x58
+SEC_ENTRY = 40
+TRAILER = 16            # copy of the first 16 header bytes, after the array is padded to 16
+JOIN_M = 12.0           # a section begins where its predecessor ends: points are ~2 m apart
+LOOP_GAP_M = 60.0       # first and last point closer than this = a circuit
+
+
+def _align16(o):
+    return (o + 15) // 16 * 16
+
+
+def _xz_dist(a, b):
+    """Planar distance between two records, inf when either is not finite."""
+    if not all(math.isfinite(v) for v in (a[0], a[2], b[0], b[2])):
+        return float("inf")
+    return math.dist((a[0], a[2]), (b[0], b[2]))
+
+
+def _layout(b, path):
+    """Decode the chunk layout -> (N, sections, array offset).
+
+    Every byte must be accounted for: [header][section table][pad][N records][pad][trailer] has
+    to equal the file, and the section counts have to sum to N with cumulative starts. Anything
+    else is refused rather than read from a guessed offset -- reading records from where they
+    were assumed to be is exactly the defect this decode replaced (Route132: 3.1 km, bbox 0;
+    Route1181: every x = 0), and the old size heuristic could not see it because a wrong offset
+    and a wrong pad can cancel.
+    """
+    u32 = lambda o: struct.unpack_from("<I", b, o)[0]
+    nsec, n_all, payload = u32(NSEC_OFF), u32(COUNT_OFF), u32(0x0C)
+    if nsec < 1 or nsec > 64:
+        raise ValueError("%s: %d sections is not a route" % (path, nsec))
+    c0, f0 = struct.unpack_from("<2I", b, SEC0_OFF)
+    secs = [{"i": 0, "start": 0, "count": c0, "flags": f0, "links": None}]
+    o = SEC0_OFF + 8
+    for k in range(1, nsec):
+        st, _z, l0, _a, l1, _b, l2, _c, cnt, fl = struct.unpack_from("<2I6i2I", b, o)
+        secs.append({"i": k, "start": st, "count": cnt, "flags": fl,
+                     "links": [l for l in (l0, l1, l2) if l >= 0]})
+        o += SEC_ENTRY
+    for s in secs:
+        s["variant"] = s["flags"] >> 8
+        s["n_links"] = s["flags"] & 0xFF
+    arr = _align16(o)
+    if _align16(arr + n_all * STRIDE) + TRAILER != len(b) or 0x10 + payload + TRAILER != len(b):
+        raise ValueError("%s: %d sections + %d records do not lay out to %d bytes (payload %d)"
+                         % (path, nsec, n_all, len(b), payload))
+    run = 0
+    for s in secs:
+        if s["start"] != run:
+            raise ValueError("%s: section %d starts at %d, expected %d" % (path, s["i"], s["start"], run))
+        run += s["count"]
+    if run != n_all:
+        raise ValueError("%s: sections hold %d records, header says %d" % (path, run, n_all))
+    return n_all, secs, arr
+
+
+def _chain(secs, raw):
+    """The primary line through the section graph, as section indices in driving order.
+
+    Section 0 is the start. Each later section names up to three sections a car may enter when
+    it ends; where more than one is offered, the primary variant (flags high byte 1) is the
+    route and the rest are alternate lines over the same road. Section 0 carries no entry of
+    its own, so its successor is the section that begins where it ends. The walk stops when it
+    would re-enter a section already used (a circuit) or reaches one with nowhere to go
+    (point-to-point). Never a guess about which section is which: the table and the road agree
+    on all six multi-section files, and on the 163 single-section files the chain is [0].
+    """
+    def first(k):
+        return raw[secs[k]["start"]]
+
+    def last(k):
+        s = secs[k]
+        return raw[s["start"] + s["count"] - 1]
+
+    order = [0]
+    while True:
+        cur = order[-1]
+        links = secs[cur]["links"]
+        if links is None:
+            cands = [k for k in range(len(secs)) if k != cur and _xz_dist(first(k), last(cur)) <= JOIN_M]
+        else:
+            cands = [k for k in links if 0 <= k < len(secs)]
+        if not cands:
+            break
+        cands.sort(key=lambda k: (secs[k]["variant"] != 1, _xz_dist(first(k), last(cur)), k))
+        if cands[0] in order:
+            break
+        order.append(cands[0])
+    return order
+
+
+def _length(pts):
+    return sum(_xz_dist(pts[i], pts[i + 1]) for i in range(len(pts) - 1)) if len(pts) > 1 else 0.0
 
 
 def parse(path, full=False):
-    """-> {'route_id', 'n', 'points': [(x, y, z)], 'length_m', 'is_loop', 'bbox'}"""
+    """-> {'route_id', 'n', 'points': [(x, y, z)], 'length_m', 'is_loop', 'bbox', 'sections', 'chain'}
+
+    `points` is the primary chain of sections in driving order (the whole array on a
+    single-section file). `sections` lists every section with its start/count/flags/links/
+    length, and `chain` the section indices `points` was built from, so the alternate lines
+    stay reachable without being mistaken for the route.
+    """
     with open(path, "rb") as fh:
         b = fh.read()
     if b[:4] != MAGIC:
         raise ValueError("%s: not an .owt (magic %r)" % (path, b[:4]))
-    # THE HEADER COUNT IS NOT AUTHORITATIVE. The file is a ForzaTech chunk:
-    #   [4cc 'FTWO'][u32 version][u32 hash][u32 payload_size] payload [16-byte footer copy]
-    # and payload_size at 0x0C is what actually bounds the record array. Six routes hold MORE
-    # records than the u32 at 0x24 claims -- Route281 (our Highway Circuit), Route351, Route1281
-    # and Route8008 each hold 2 extra and open with 2 non-finite sentinel records, so trusting
-    # the header count silently dropped the last two real points of the polyline.
-    n_hdr = struct.unpack_from("<I", b, COUNT_OFF)[0]
-    payload = struct.unpack_from("<I", b, 0x0C)[0]
-    span = 0x10 + payload - HDR                  # bytes of record array the chunk declares
-    # Trust the payload ONLY when it divides into whole records and does not run past the file.
-    # A fractional fit means the payload carries something after the array that is not a record;
-    # believing it there pulled garbage in and produced NaN route lengths on two files, which is
-    # a worse failure than the two dropped points it was meant to fix.
-    exact = (span > 0 and span % STRIDE == 0)
-    n_fit = span // STRIDE if exact else None
-    n = n_fit if (n_fit is not None and 0 < n_fit <= (len(b) - HDR) // STRIDE) else n_hdr
-    need = HDR + n * STRIDE
-    if need > len(b):
-        raise ValueError("%s: %d points need %d bytes, file is %d" % (path, n, need, len(b)))
+    n_all, secs, arr = _layout(b, path)
     # 14 floats per record: 0-2 position, 3-5 the lateral half-width vector (perpendicular to
     # travel on 98% of steps), 6-8 the unit surface normal (banking), 9-13 sparse link data.
     # full=True keeps all of them; the matcher only needs position and 3 floats is far cheaper.
@@ -79,40 +181,38 @@ def parse(path, full=False):
     # scripts/db/import_surface.py, which uses it to reach the points the free-roam nav graph
     # does not cover.
     fmt = "<14f" if full else "<3f"
-    raw, codes = [], []
-    for i in range(n):
-        o = HDR + i * STRIDE
+    raw, all_codes = [], []
+    for i in range(n_all):
+        o = arr + i * STRIDE
         raw.append(struct.unpack_from(fmt, b, o))
-        codes.append(struct.unpack_from("<H", b, o + 44)[0])
-    # A few routes carry non-finite points (unfinished or stitched geometry). Drop them rather
-    # than the whole file: the surviving polyline is still the route's real centre-line.
-    keep = [i for i, p in enumerate(raw) if all(math.isfinite(v) for v in p[:3])]
+        all_codes.append(struct.unpack_from("<H", b, o + 44)[0])
+    for s in secs:
+        s["length_m"] = round(_length(raw[s["start"]:s["start"] + s["count"]]), 1)
+    chain = _chain(secs, raw)
+    idx = [i for k in chain for i in range(secs[k]["start"], secs[k]["start"] + secs[k]["count"])]
+    # Non-finite points are dropped rather than the whole file. With the array read from its true
+    # offset no shipped file has any (the "sentinel records" seen before were the section table
+    # read as points); the guard stays so a damaged file still yields its surviving centre-line.
+    keep = [i for i in idx if all(math.isfinite(v) for v in raw[i][:3])]
     pts = [raw[i] for i in keep]
-    codes = [codes[i] for i in keep]
-    n_bad = len(raw) - len(pts)
+    codes = [all_codes[i] for i in keep]
+    n_bad = len(idx) - len(pts)
     if len(pts) < 2:
-        raise ValueError("%s: only %d finite points of %d" % (path, len(pts), n))
+        raise ValueError("%s: only %d finite points of %d" % (path, len(pts), len(idx)))
     # x and z NAMED, not strided. `p[::2]` happens to be (x, z) on a 3-float point and becomes
     # seven dimensions once full=True keeps all 14 -- including the unexplained slots, whose
     # garbage made two routes report a NaN length. A stride is not an index.
-    xz = lambda p: (p[0], p[2])
-    L = sum(math.dist(xz(pts[i]), xz(pts[i + 1])) for i in range(len(pts) - 1))
-    closed = math.dist(xz(pts[0]), xz(pts[-1])) if len(pts) > 1 else 0.0
+    L = _length(pts)
+    closed = _xz_dist(pts[0], pts[-1])
     xs = [p[0] for p in pts]
     zs = [p[2] for p in pts]
     rid = os.path.splitext(os.path.basename(path))[0]
-    # The u32 at 0x24 is not always the record count: on Route281/351/8008 the file fits
-    # exactly two more 56-byte records than it claims, and on Route132/1181/1281 it fits a
-    # non-integral number, so their tails are not the usual 24 bytes. The header count is
-    # kept because every stored point index (ref_route_point.i) is defined by it; n_fit
-    # records the discrepancy so it stays visible instead of being rediscovered.
-    n_fit = (len(b) - HDR - 24) / float(STRIDE)
     return {"route_id": rid[5:] if rid.lower().startswith("route") else rid,
             "file": os.path.basename(path), "n": len(pts), "n_dropped": n_bad, "points": pts,
             "codes": codes,
-            "n_hdr": n, "n_fit": round(n_fit, 2),
+            "n_hdr": n_all, "n_sections": len(secs), "chain": chain, "sections": secs,
             "length_m": round(L, 1), "gap_m": round(closed, 1),
-            "is_loop": closed < 60.0,
+            "is_loop": closed < LOOP_GAP_M,
             "bbox": [round(min(xs)), round(max(xs)), round(min(zs)), round(max(zs))]}
 
 

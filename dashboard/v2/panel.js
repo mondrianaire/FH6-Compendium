@@ -1190,7 +1190,25 @@ function addLiveDot(body) {
 // reload would orphan the per-course view state that was just restored.
 async function locateCourse() {
   if (!LIVEPOS || !WORLD || !WORLD.courses) return;
-  const near = (c) => { let bd = Infinity; for (const [x, z] of (c.path || [])) { const d = (x - LIVEPOS[0]) ** 2 + (z - LIVEPOS[1]) ** 2; if (d < bd) bd = d; } return Math.sqrt(bd); };
+  // Distance from the live car to a course's LINE, not its vertices. The world path is a decimated
+  // centre-line — on a long course like The Goliath it sits ~415 m between points, so the nearest
+  // VERTEX can be 87 m away mid-course (over the 60 m radius) even while the car is dead on the road,
+  // 2 m from the line. Point-to-vertex then failed to locate the Goliath at all, and the view stayed
+  // stuck on whatever course was shown last (the Sekibe Scramble report). Point-to-SEGMENT locates it.
+  const near = (c) => {
+    const p = c.path || [];
+    if (p.length < 2) return p.length ? Math.hypot(p[0][0] - LIVEPOS[0], p[0][1] - LIVEPOS[1]) : Infinity;
+    let bd = Infinity;
+    for (let i = 0; i < p.length - 1; i++) {
+      const ax = p[i][0], az = p[i][1], dx = p[i + 1][0] - ax, dz = p[i + 1][1] - az;
+      const l2 = dx * dx + dz * dz;
+      let t = l2 ? ((LIVEPOS[0] - ax) * dx + (LIVEPOS[1] - az) * dz) / l2 : 0;
+      t = t < 0 ? 0 : t > 1 ? 1 : t;
+      const d = Math.hypot(LIVEPOS[0] - (ax + t * dx), LIVEPOS[1] - (az + t * dz));
+      if (d < bd) bd = d;
+    }
+    return bd;
+  };
   let best = null, bd = 60, second = null, sd = Infinity;
   for (const [key, c] of Object.entries(WORLD.courses)) {
     const d = near(c);

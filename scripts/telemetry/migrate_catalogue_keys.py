@@ -25,9 +25,14 @@ def _near(x, z, cells):
                 if (px - x) ** 2 + (pz - z) ** 2 <= 900: return True
     return False
 def _overlap(sample, cp):
+    """(ov, cov): share of the drive's points on the catalogued road, and share of the road the drive covered."""
     cells = {}
     for x, z in cp: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
-    return sum(1 for x, z in sample if _near(x, z, cells)) / len(sample)
+    ov = sum(1 for x, z in sample if _near(x, z, cells)) / len(sample)
+    scells = {}
+    for x, z in sample: scells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+    cov = sum(1 for x, z in cp if _near(x, z, scells)) / max(1, len(cp))
+    return ov, cov
 def _dir_ok(sample, pts):
     if not pts or len(sample) < 6: return True
     n = len(pts); idx = []
@@ -43,20 +48,27 @@ def _dir_ok(sample, pts):
     return fwd >= 1.5 * back
 
 def match_course(path):
-    """Same rule as analyze_session._catalogue_key, applied to a course's stored geometry path."""
+    """Same two-tier rule as analyze_session._catalogue_key, applied to a course's stored geometry path:
+    START-ANCHORED (start within 500 m + ov >= 0.6) preferred, else PATH-DOMINANT (ov >= 0.7 AND cov >= 0.6,
+    any start) so an offset-start loop like The Colossus (catalogued start 5.8 km from the drive) still resolves,
+    while a segment that merely shares tarmac (low cov) does not."""
     if not path or len(path) < 8: return None
     sx, sz = path[0]
-    best = None
-    for key, name, cx0, cz0, length_m, is_race, conf in A._catalogue_starts():
-        d0 = math.hypot(sx - cx0, sz - cz0)
-        if d0 > 500: continue   # match analyze_session._catalogue_key's prefilter; ov + direction decide
+    best_start = best_path = None
+    for key, name, cx0, cz0, length_m, is_race, conf, bb in A._catalogue_starts():
+        if bb and not (bb[0] - 250 <= sx <= bb[2] + 250 and bb[1] - 250 <= sz <= bb[3] + 250): continue
         cp = A._catalogue_path(key)
         if not cp: continue
-        if _overlap(path, cp) < 0.6: continue
+        ov, cov = _overlap(path, cp)
         if not _dir_ok(path, cp): continue
-        cand = (-round(_overlap(path, cp), 2), round(d0), key, name)
-        if best is None or cand < best: best = cand
-    return (best[2], best[3]) if best else None
+        d0 = math.hypot(sx - cx0, sz - cz0)
+        cand = (-round(ov, 2), -round(cov, 2), round(d0), key, name)
+        if d0 <= 500 and ov >= 0.6:
+            if best_start is None or cand < best_start: best_start = cand
+        elif ov >= 0.7 and cov >= 0.6:
+            if best_path is None or cand < best_path: best_path = cand
+    best = best_start or best_path
+    return (best[3], best[4]) if best else None
 
 def course_path(key):
     p = os.path.join(ROOT, "data", "courses", re.sub(r"[^A-Za-z0-9_.-]+", "_", key) + ".json")
@@ -154,17 +166,39 @@ def main():
         for e in d.get("events") or []:
             rk = e.get("route_key")
             if rk: referenced.add(san(rk))
-    prune = []
+    def route_file(rk): return os.path.join(ROOT, "data", "courses", san(rk) + ".json")
+    def final_target(key):
+        hit = remap.get(key)
+        if not hit: return None, None
+        rk, nm = hit
+        return (canon.get(rk, rk), nm)
+    prune = []; rename = []
     for cf in glob.glob(os.path.join(ROOT, "data", "courses", "*.json")):
         key = os.path.splitext(os.path.basename(cf))[0]
-        if key not in referenced: prune.append(cf)
-    print("\n=== prune: %d course files referenced by no session ===" % len(prune))
+        if key in referenced: continue                       # still a live course under its own key
+        tgt, nm = final_target(key)
+        # RENAME, don't drop, when this course's events were re-keyed to a route that has no course file of its own
+        # (an entirely capture-less course the re-replay never minted): the grid file holds the ONLY geometry.
+        if tgt and san(tgt) in referenced and not os.path.exists(route_file(tgt)):
+            rename.append((cf, tgt, nm))
+        else:
+            prune.append(cf)
+    print("\n=== rename %d (preserve geometry for capture-less recoveries) + prune %d unreferenced ===" % (len(rename), len(prune)))
+    for cf, tgt, nm in sorted(rename): print("  mv %-22s -> %s" % (os.path.basename(cf), san(tgt) + ".json"))
     for cf in sorted(prune): print("  rm", os.path.basename(cf))
     if APPLY:
+        for cf, tgt, nm in rename:
+            try:
+                with open(cf, encoding="utf-8") as f: d = json.load(f)
+            except Exception: continue
+            d["route_key"] = tgt
+            if nm: d["name"] = nm
+            with open(route_file(tgt), "w", encoding="utf-8") as f: json.dump(d, f, separators=(",", ":"))
+            os.remove(cf)
         for cf in prune: os.remove(cf)
-        print("\npruned %d files." % len(prune))
+        print("\nrenamed %d, pruned %d." % (len(rename), len(prune)))
     else:
-        print("\n(dry run — rerun with --apply to rewrite sessions and prune)")
+        print("\n(dry run — rerun with --apply to rewrite sessions, rename and prune)")
 
 if __name__ == "__main__":
     main()

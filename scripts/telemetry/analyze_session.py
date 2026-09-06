@@ -53,8 +53,8 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.pat
 _CAT_STARTS = None
 _CAT_PATH = {}
 def _catalogue_starts():
-    """[(key, name, start_x, start_z, length_m, is_race, conf)] for every named route, key = 'route:<id>'.
-    Read once (i=0 point per route); a lab without fh6.db gets an empty list, never an error."""
+    """[(key, name, start_x, start_z, length_m, is_race, conf, bbox)] for every named route, key = 'route:<id>',
+    bbox = (x0, z0, x1, z1) or None. Read once (i=0 point per route); a lab without fh6.db gets an empty list."""
     global _CAT_STARTS
     if _CAT_STARTS is None:
         _CAT_STARTS = []
@@ -62,11 +62,13 @@ def _catalogue_starts():
             import sqlite3
             cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
             firsts = {rid: (x, z) for rid, x, z in cx.execute("SELECT route_id, x, z FROM ref_route_point WHERE i = 0")}
-            for rid, name, length_m, is_race, conf in cx.execute(
-                    "SELECT route_id, name, length_m, is_race, name_confidence FROM ref_route WHERE name IS NOT NULL"):
+            for rid, name, length_m, is_race, conf, x0, z0, x1, z1 in cx.execute(
+                    "SELECT route_id, name, length_m, is_race, name_confidence, bbox_x0, bbox_z0, bbox_x1, bbox_z1 "
+                    "FROM ref_route WHERE name IS NOT NULL"):
                 p = firsts.get(rid)
                 if p:
-                    _CAT_STARTS.append(("route:%s" % rid, name, p[0], p[1], round(length_m or 0), bool(is_race), conf))
+                    bb = (x0, z0, x1, z1) if None not in (x0, z0, x1, z1) else None
+                    _CAT_STARTS.append(("route:%s" % rid, name, p[0], p[1], round(length_m or 0), bool(is_race), conf, bb))
             cx.close()
         except Exception:                                # noqa: BLE001
             _CAT_STARTS = []
@@ -1806,21 +1808,37 @@ def main():
         A start alone is not enough: 34 of 102 routes share a start plaza, and a rolling start crosses the line
         anywhere within ~120 m, so The Goliath's crossing can land nearer a Legend Island start than its own. LYING ON
         THE ROAD decides it: a Goliath run (however partial) lies wholly on the Goliath path (ov high) and only clips
-        the plaza of a route it diverges from, so the co-located neighbours never reach the ov gate. Returns the key,
-        or None to fall through to learned-route attribution and the grid."""
-        best = None
-        for key, name, cx0, cz0, length_m, is_race, conf in _catalogue_starts():
-            d0 = math.hypot(sx - cx0, sz - cz0)
-            if d0 > 500: continue                        # candidate prefilter only: a rolling start crosses the line up to ~460 m from the catalogued start (measured: Goliath 40 m, Festival Sprint 457 m); ov + direction below do the real deciding
+        the plaza of a route it diverges from, so the co-located neighbours never reach the ov gate.
+
+        TWO TIERS, because the catalogued start is not always the line you drive from.
+        - START-ANCHORED: the drive begins within 500 m of the catalogued start and lies on the road (ov >= 0.6).
+          This is every race event -- their catalogued i=0 sits on the S/F line (measured 40-460 m from the crossing).
+        - PATH-DOMINANT (fallback): a non-race loop files its geometry from an arbitrary point, so the catalogued
+          start can be kilometres from where anyone drives -- The Colossus opens at (-101,-4165) but every lap starts
+          5,788 m away at (-3775,308). There is no start to anchor on, so the drive is that route iff it lies almost
+          wholly on it (ov >= 0.7) AND covers most of it (cov >= 0.6). Coverage is the guard against a SEGMENT: a 4 km
+          drive that shares the Colossus's tarmac lies on it (ov ~1.0) but covers ~2% of it (cov ~0.02), and must NOT
+          become the Colossus -- measured, the real whole-loop drives cover 0.68-1.00 and every segment covers <= 0.14,
+          a clean gap. Prefer a start-anchored match; only fall back to path-dominant when no start fits.
+        Returns the key, or None to fall through to learned-route attribution and the grid."""
+        best_start = best_path = None
+        for key, name, cx0, cz0, length_m, is_race, conf, bb in _catalogue_starts():
+            # cheap bbox prefilter: the drive's anchor must sit inside this route's footprint (+250 m) to be on it
+            if bb and not (bb[0] - 250 <= sx <= bb[2] + 250 and bb[1] - 250 <= sz <= bb[3] + 250): continue
             cp = _catalogue_path(key)
             if not cp: continue
             cells = {}
             for x, z in cp: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
             ov, cov = overlap(sample, (cells, cp))
-            if ov is None or ov < 0.6: continue          # the drive must LIE ON this road to be this route
+            if ov is None: continue
             if not direction_agree(sample, cp): continue # a course driven the other way is a different course
-            cand = (-round(ov, 2), -round(cov, 2), round(d0), key, name, length_m, is_race)
-            if best is None or cand < best: best = cand
+            d0 = math.hypot(sx - cx0, sz - cz0)
+            cand = (-round(ov, 2), -round(cov or 0, 2), round(d0), key, name, length_m, is_race)
+            if d0 <= 500 and ov >= 0.6:                  # start-anchored: near the catalogued line and lying on the road
+                if best_start is None or cand < best_start: best_start = cand
+            elif ov >= 0.7 and (cov or 0) >= 0.6:        # path-dominant: IS this whole road, wherever it starts (offset-start loops)
+                if best_path is None or cand < best_path: best_path = cand
+        best = best_start or best_path
         if best is None: return None
         _ov, _cov, _d0, key, name, length_m, is_race = best
         R = routes.get(key) or {}

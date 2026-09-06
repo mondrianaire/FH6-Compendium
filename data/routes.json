@@ -140,9 +140,9 @@
     -0.631
    ],
    "length_m": 6276,
-   "events": 579,
+   "events": 572,
    "first_seen": "fh6_20260827_213049",
-   "last_seen": "fh6_20260906_073009"
+   "last_seen": "fh6_20260905_210813"
   },
   "-400_-1150": {
    "start": [
@@ -154,9 +154,9 @@
     0.993
    ],
    "length_m": 5953,
-   "events": 207,
+   "events": 202,
    "first_seen": "fh6_20260827_213049",
-   "last_seen": "fh6_20260905_201758"
+   "last_seen": "fh6_20260828_001105"
   },
   "-4750_-1550": {
    "start": [
@@ -262,7 +262,7 @@
     -0.368
    ],
    "length_m": 52526,
-   "events": 539,
+   "events": 533,
    "first_seen": "fh6_20260829_023235",
    "last_seen": "fh6_20260831_172011"
   },
@@ -276,7 +276,7 @@
     0.96
    ],
    "length_m": 3683,
-   "events": 130,
+   "events": 128,
    "first_seen": "fh6_20260831_142941",
    "last_seen": "fh6_20260906_051145"
   },
@@ -448,7 +448,7 @@
     0.504
    ],
    "length_m": 7855,
-   "events": 136,
+   "events": 135,
    "first_seen": "fh6_20260831_172011",
    "last_seen": "fh6_20260901_042403"
   },
@@ -661,9 +661,9 @@
     -0.991
    ],
    "length_m": 9238,
-   "events": 64,
+   "events": 63,
    "first_seen": "fh6_20260901_042403",
-   "last_seen": "fh6_20260901_042403"
+   "last_seen": "fh6_20260901_042403.csv"
   },
   "3600_6850": {
    "start": [
@@ -703,9 +703,9 @@
     -0.215
    ],
    "length_m": 5331,
-   "events": 44,
+   "events": 43,
    "first_seen": "fh6_20260901_042403",
-   "last_seen": "fh6_20260901_042403"
+   "last_seen": "fh6_20260901_042403.csv"
   },
   "-7100_-1850": {
    "start": [
@@ -717,9 +717,9 @@
     0.999
    ],
    "length_m": 3932,
-   "events": 35,
+   "events": 34,
    "first_seen": "fh6_20260901_042403",
-   "last_seen": "fh6_20260906_035542"
+   "last_seen": "fh6_20260901_042403"
   },
   "3250_7300": {
    "start": [
@@ -744,10 +744,10 @@
     0.274,
     -0.962
    ],
-   "length_m": 6971,
-   "events": 135,
+   "length_m": 6955,
+   "events": 124,
    "first_seen": "fh6_20260901_042403",
-   "last_seen": "fh6_20260906_125949"
+   "last_seen": "fh6_20260828_001105"
   },
   "-600_-5350": {
    "start": [
@@ -759,9 +759,9 @@
     -0.835
    ],
    "length_m": 4422,
-   "events": 395,
+   "events": 388,
    "first_seen": "fh6_20260901_042403",
-   "last_seen": "fh6_20260906_073009"
+   "last_seen": "fh6_20260901_140726"
   },
   "-1150_-5100": {
    "start": [
@@ -1081,9 +1081,9 @@
     0.564
    ],
    "length_m": 3064,
-   "events": 121,
+   "events": 118,
    "first_seen": "fh6_20260905_220248",
-   "last_seen": "fh6_20260905_222810"
+   "last_seen": "fh6_20260905_220248"
   },
   "5750_1550": {
    "start": [
@@ -1221,7 +1221,7 @@
     0.077
    ],
    "length_m": 3727,
-   "events": 17,
+   "events": 16,
    "first_seen": "fh6_20260906_051145",
    "last_seen": "fh6_20260906_051145"
   },
@@ -1408,7 +1408,7 @@
    "first_seen": "fh6_20260823_032213",
    "name": "Coastline Sprint"
   },
-  "route:30006": {
+  "route:6001": {
    "start": [
     -7354,
     -2127
@@ -1419,8 +1419,8 @@
    ],
    "length_m": 2092,
    "catalogue": true,
-   "is_race": false,
-   "events": 54,
+   "is_race": true,
+   "events": 60,
    "last_seen": "fh6_20260906_115521",
    "first_seen": "fh6_20260823_032213",
    "name": "Edamame Circuit"
@@ -1437,27 +1437,61 @@
    "length_m": 1453,
    "catalogue": true,
    "is_race": true,
-   "events": 8,
+   "events": 6,
    "last_seen": "fh6_20260828_120421",
    "first_seen": "fh6_20260823_101233",
    "name": "Shimanoyama Circuit"
   },
-  "route:6001": {
+  "route:5041": {
    "start": [
-    -7349,
-    -2108
+    -49,
+    7144
    ],
    "heading": [
-    0.221,
-    0.975
+    -0.782,
+    -0.623
    ],
-   "length_m": 1063,
+   "length_m": 7814,
    "catalogue": true,
    "is_race": true,
-   "events": 6,
-   "last_seen": "fh6_20260903_070118",
-   "first_seen": "fh6_20260827_181613",
-   "name": "Edamame Circuit"
+   "events": 7,
+   "last_seen": "fh6_20260906_073009",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Norikura Skyline"
+  },
+  "route:5201": {
+   "start": [
+    -378,
+    -1150
+   ],
+   "heading": [
+    -0.129,
+    0.992
+   ],
+   "length_m": 6919,
+   "catalogue": true,
+   "is_race": true,
+   "events": 5,
+   "last_seen": "fh6_20260905_201758",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Arashiyama Takao"
+  },
+  "route:5031": {
+   "start": [
+    3554,
+    6075
+   ],
+   "heading": [
+    0.303,
+    -0.953
+   ],
+   "length_m": 8741,
+   "catalogue": true,
+   "is_race": true,
+   "events": 11,
+   "last_seen": "fh6_20260906_125949",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Mt. Haruna"
   },
   "route:5191": {
    "start": [
@@ -1527,6 +1561,23 @@
    "first_seen": "fh6_20260827_224507",
    "name": "Cedar Run"
   },
+  "route:30000": {
+   "start": [
+    -2047,
+    1596
+   ],
+   "heading": [
+    -0.105,
+    0.995
+   ],
+   "length_m": 1107,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260828_120421",
+   "first_seen": "fh6_20260828_120421",
+   "name": "Shimanoyama Circuit"
+  },
   "route:352": {
    "start": [
     -112,
@@ -1544,7 +1595,7 @@
    "first_seen": "fh6_20260828_122408",
    "name": "Daikoku Circuit"
   },
-  "route:30004": {
+  "route:311": {
    "start": [
     4246,
     -5179
@@ -1555,11 +1606,45 @@
    ],
    "length_m": 5038,
    "catalogue": true,
-   "is_race": false,
-   "events": 20,
+   "is_race": true,
+   "events": 21,
    "last_seen": "fh6_20260906_125949",
    "first_seen": "fh6_20260828_122408",
    "name": "Legend Island Circuit"
+  },
+  "route:132": {
+   "start": [
+    -6796,
+    -1260
+   ],
+   "heading": [
+    0.875,
+    0.485
+   ],
+   "length_m": 52526,
+   "catalogue": true,
+   "is_race": false,
+   "events": 6,
+   "last_seen": "fh6_20260831_172011",
+   "first_seen": "fh6_20260828_213928",
+   "name": "The Colossus"
+  },
+  "route:271": {
+   "start": [
+    -4114,
+    -4826
+   ],
+   "heading": [
+    0.281,
+    0.96
+   ],
+   "length_m": 3683,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260906_051145",
+   "first_seen": "fh6_20260831_142941",
+   "name": "Taiyaki Scramble"
   },
   "route:341": {
    "start": [
@@ -1646,6 +1731,23 @@
    "first_seen": "fh6_20260901_042403",
    "name": "Irokawa Circuit"
   },
+  "route:2241": {
+   "start": [
+    4353,
+    -2330
+   ],
+   "heading": [
+    -0.132,
+    -0.991
+   ],
+   "length_m": 11109,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Ito Sprint"
+  },
   "route:2031": {
    "start": [
     3581,
@@ -1680,6 +1782,40 @@
    "first_seen": "fh6_20260901_042403",
    "name": "Narai-Juku Circuit"
   },
+  "route:4102": {
+   "start": [
+    1700,
+    2103
+   ],
+   "heading": [
+    0.977,
+    -0.215
+   ],
+   "length_m": 6913,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Sunflower Charge"
+  },
+  "route:2201": {
+   "start": [
+    -2134,
+    -2404
+   ],
+   "heading": [
+    0.872,
+    0.49
+   ],
+   "length_m": 9321,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Festival Sprint"
+  },
   "route:4031": {
    "start": [
     3263,
@@ -1696,6 +1832,23 @@
    "last_seen": "fh6_20260901_042403",
    "first_seen": "fh6_20260901_042403",
    "name": "Norikura Descent"
+  },
+  "route:351": {
+   "start": [
+    -605,
+    -5316
+   ],
+   "heading": [
+    0.551,
+    -0.835
+   ],
+   "length_m": 4422,
+   "catalogue": true,
+   "is_race": true,
+   "events": 7,
+   "last_seen": "fh6_20260906_073009",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Electric Town Circuit"
   },
   "route:2311": {
    "start": [
@@ -1799,22 +1952,56 @@
    "first_seen": "fh6_20260903_171358",
    "name": "Daikoku Chase"
   },
-  "route:311": {
+  "route:121": {
    "start": [
-    4275,
-    -5293
+    5910,
+    1825
    ],
    "heading": [
-    -0.076,
-    -0.997
+    0.818,
+    0.575
    ],
-   "length_m": 4732,
+   "length_m": 3071,
    "catalogue": true,
    "is_race": true,
+   "events": 3,
+   "last_seen": "fh6_20260905_222810",
+   "first_seen": "fh6_20260905_220248",
+   "name": "Ine Scramble"
+  },
+  "route:181": {
+   "start": [
+    -7102,
+    -1883
+   ],
+   "heading": [
+    -0.008,
+    1.0
+   ],
+   "length_m": 3932,
+   "catalogue": true,
+   "is_race": false,
    "events": 1,
-   "last_seen": "fh6_20260905_232556",
-   "first_seen": "fh6_20260905_232556",
-   "name": "Legend Island Circuit"
+   "last_seen": "fh6_20260906_035542",
+   "first_seen": "fh6_20260906_035542",
+   "name": "Horizon Stadium Scramble"
+  },
+  "route:1311": {
+   "start": [
+    4708,
+    -5291
+   ],
+   "heading": [
+    0.997,
+    0.077
+   ],
+   "length_m": 4925,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260906_051145",
+   "first_seen": "fh6_20260906_051145",
+   "name": "Legend Island Cross Country Circuit"
   },
   "route:1023": {
    "start": [
@@ -1867,7 +2054,7 @@
    "first_seen": "fh6_20260906_061412",
    "name": "Hokubu Circuit"
   },
-  "route:301": {
+  "route:30003": {
    "start": [
     2493,
     -5046
@@ -1878,7 +2065,7 @@
    ],
    "length_m": 2134,
    "catalogue": true,
-   "is_race": true,
+   "is_race": false,
    "events": 2,
    "last_seen": "fh6_20260906_061412",
    "first_seen": "fh6_20260906_061412",
@@ -1918,7 +2105,7 @@
    "first_seen": "fh6_20260906_083124",
    "name": "Airfield Trail"
   },
-  "-300_6400": {
+  "route:2041": {
    "start": [
     -283,
     6385
@@ -1927,10 +2114,13 @@
     0.272,
     0.962
    ],
-   "length_m": 6101,
+   "length_m": 9021,
+   "catalogue": true,
+   "is_race": false,
    "events": 1,
+   "last_seen": "fh6_20260906_125949",
    "first_seen": "fh6_20260906_125949",
-   "last_seen": "fh6_20260906_125949"
+   "name": "Tateyama Kurobe Sprint"
   }
  }
 }

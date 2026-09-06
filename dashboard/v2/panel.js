@@ -1036,7 +1036,9 @@ function paintLeft() {
   const course = MODE.suggest === "course" && COURSE;
   // 169 polylines are not free: rebuild the map only when what it shows changes, and let the
   // live dot ride on the map that is already there.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game, BROWSE_PICK]);
+  // BROWSE_PICK is deliberately NOT in this key: a browser pick must NOT rebuild the map (that would kill the
+  // viewBox animation) — browsePick() updates the highlight + eases the frame on the SVG that is already there.
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
@@ -1062,26 +1064,24 @@ function paintLeft() {
     body.insertAdjacentHTML("beforeend", mapDrawerHTML(`<div class="legend">${legendHTML}${followBtn()}</div>${mapFilterBar(COURSE)}`));
     wireTrace(body); wireFollow(body); wireMapDrawer(body); addLiveDot(body);
   } else {
-    const n = WORLD ? Object.keys(WORLD.routes).length : 0;
-    const off = WORLD ? routeSplit().off.length : 0;
-    const bp = BROWSE_PICK && WORLD && WORLD.routes[BROWSE_PICK];
-    if (bp) {
-      // Course Browser drove this: the map is zoomed to the picked course's location + shape
-      hd.innerHTML = `<b class="trackname">${esc(bp.name || "Route " + BROWSE_PICK)}</b>
-        <span class="chip w">BROWSING</span>
-        <span class="why">${n0(bp.len)} m${bp.loop ? " · loop" : " · P2P"}${bp.is_race ? " · race event" : ""}${(bp.modes || []).length ? " · " + bp.modes.join(", ") : ""} · click the tile again to clear</span>`;
-    } else if (ROUTE) {
-      // the map IS identified in an event, from the catalogued route — even with no laps recorded here yet
-      hd.innerHTML = `<b class="trackname">${esc(ROUTE.name)}</b>
-        <span class="chip w">${MODE.game === "event" ? "EVENT · CATALOGUED" : "ROUTE"}</span>
-        <span class="why">${n0(ROUTE.len)} m${ROUTE.loop ? " · loop" : ""} · the game's route, no laps recorded here yet${ROUTE.alsoName ? ` · shares road with ${esc(ROUTE.alsoName)}` : ""}</span>`;
-    } else {
-      hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
-    }
-    body.innerHTML = worldMapHTML(); addLiveDot(body);
+    paintLeftHeader();
+    body.innerHTML = worldMapHTML();
+    const mapSvg = body.querySelector("svg[data-x0]");
+    if (mapSvg) { mapAttach(mapSvg); const g = mapSvg.querySelector("#browseHi"); if (g && BROWSE_PICK) g.innerHTML = browseHiSVG(mapSvg, BROWSE_PICK); }
+    addLiveDot(body);
     const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; VIEW.global.showOffmap = SHOW_OFFMAP; viewSave(); paintLeft(); };
     wireFollow(body); wireMapDrawer(body);
   }
+}
+// Just the left pane's TITLE (free-mode: browsing a course / on a route / the world) — updated on a browser pick
+// without rebuilding the map, so the viewBox animation is never interrupted. Course mode owns its own title.
+function paintLeftHeader() {
+  const hd = $("#leftHd"); if (!hd || (MODE.suggest === "course" && COURSE)) return;
+  const n = WORLD ? Object.keys(WORLD.routes).length : 0, off = WORLD ? routeSplit().off.length : 0;
+  const bp = BROWSE_PICK && WORLD && WORLD.routes[BROWSE_PICK];
+  if (bp) hd.innerHTML = `<b class="trackname">${esc(bp.name || "Route " + BROWSE_PICK)}</b> <span class="chip w">BROWSING</span> <span class="why">${n0(bp.len)} m${bp.loop ? " · loop" : " · P2P"}${bp.is_race ? " · race event" : ""}${(bp.modes || []).length ? " · " + bp.modes.join(", ") : ""} · click the tile again to clear</span>`;
+  else if (ROUTE) hd.innerHTML = `<b class="trackname">${esc(ROUTE.name)}</b> <span class="chip w">${MODE.game === "event" ? "EVENT · CATALOGUED" : "ROUTE"}</span> <span class="why">${n0(ROUTE.len)} m${ROUTE.loop ? " · loop" : ""} · the game's route, no laps recorded here yet${ROUTE.alsoName ? ` · shares road with ${esc(ROUTE.alsoName)}` : ""}</span>`;
+  else hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
 }
 
 // Two of the game's 169 routes (102 and 103) are complete circuits parked 8–11 km beyond the north
@@ -1121,13 +1121,9 @@ function worldMapHTML() {
   shown.forEach(({ r }) => r.pts.forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   Object.values(WORLD.courses || {}).forEach((c) => (c.path || []).forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   if (!isFinite(x0)) [x0, x1, z0, z1] = WORLD.bbox;
-  const bpr = BROWSE_PICK && WORLD.routes[BROWSE_PICK];       // Course Browser pick: zoom the map to this route's location + shape
-  if (bpr && bpr.pts && bpr.pts.length > 1) {
-    let a = Infinity, b = -Infinity, c = Infinity, d = -Infinity;
-    bpr.pts.concat(bpr.spawn ? [bpr.spawn] : []).forEach(([x, z]) => { if (x < a) a = x; if (x > b) b = x; if (z < c) c = z; if (z > d) d = z; });
-    const mx = ((b - a) || 200) * 0.35 + 140, mz = ((d - c) || 200) * 0.35 + 140;   // margin keeps some island context around the course
-    x0 = a - mx; x1 = b + mx; z0 = c - mz; z1 = d + mz;
-  }
+  // The content is ALWAYS drawn full-island; zooming to a picked course is done by animating the SVG viewBox
+  // (mapView below), not by reframing here — so a pick glides in, deselect glides back, and mouse drag/wheel
+  // can rubber-band before easing back to the current target.
   // the viewBox takes the ISLAND's own aspect, so the map fills the pane instead of sitting as a
   // small shape inside a letterbox — the pane's height is the scarce thing, not the map's
   const pad = 12, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
@@ -1142,20 +1138,99 @@ function worldMapHTML() {
   // in an event, the catalogued route the car is on, drawn bright over the rest so the map is legible
   const hi = (ROUTE && WORLD.routes[ROUTE.id] && (WORLD.routes[ROUTE.id].pts || []).length > 1)
     ? line(WORLD.routes[ROUTE.id].pts, "#e3b341", 2.8, 1) : "";
-  // Course Browser pick, drawn brightest with start ● finish ● and spawn ○ so its location + shape read at a glance
-  const bhi = (bpr && bpr.pts && bpr.pts.length > 1) ? line(bpr.pts, "#ffcf4d", 3, 1) : "";
-  const bmk = (bpr && bpr.pts && bpr.pts.length > 1) ? (
-    (bpr.spawn ? `<circle cx="${px(bpr.spawn[0]).toFixed(0)}" cy="${pz(bpr.spawn[1]).toFixed(0)}" r="6" fill="none" stroke="#c792ea" stroke-width="2.2"/>` : "")
-    + `<circle cx="${px(bpr.pts[bpr.pts.length - 1][0]).toFixed(0)}" cy="${pz(bpr.pts[bpr.pts.length - 1][1]).toFixed(0)}" r="5" fill="#ff5d7d" stroke="#0f1720" stroke-width="1.5"/>`
-    + `<circle cx="${px(bpr.pts[0][0]).toFixed(0)}" cy="${pz(bpr.pts[0][1]).toFixed(0)}" r="5" fill="#33d17a" stroke="#0f1720" stroke-width="1.5"/>`) : "";
   // no follow toggle here: following is course-only (see followSpan()) -- offering it on the
   // world map invited turning on a satnav zoom that could only ever collapse the island view.
   const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>
       <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
       ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}`;
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
-      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}${bhi}${bmk}<g id="liveDot"></g></svg>
+      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}<g id="browseHi"></g><g id="liveDot"></g></svg>
     ${mapDrawerHTML(`<div class="legend">${legend}</div>`)}`;
+}
+
+/* ------------------------------------------------- the world map as a live, framed view
+   The SVG content is drawn once (full island). The DISPLAYED window is the SVG viewBox, eased every
+   frame toward a TARGET rectangle: the whole island by default, a picked course's bounding box when the
+   Course Browser has a selection. Mouse wheel zooms and drag pans the live window, but ~0.9 s after you
+   let go it glides back to the target -- "manipulable, but always returns to its current state". */
+const MAPVIEW = { svg: null, tx: 0, ty: 0, tw: 0, th: 0, cx: 0, cy: 0, cw: 0, ch: 0,
+                  W: 0, H: 0, raf: 0, holdUntil: 0, drag: null, wired: null };
+function mapProj(svg) {
+  return { x0: +svg.dataset.x0, z0: +svg.dataset.z0, s: +svg.dataset.s, pad: +svg.dataset.pad, H: +svg.dataset.h,
+           px(x) { return this.pad + (x - this.x0) * this.s; }, pz(z) { return this.H - this.pad - (z - this.z0) * this.s; } };
+}
+function routePxBox(svg, id) {
+  const r = WORLD.routes[id]; if (!r || !r.pts || r.pts.length < 2) return null;
+  const p = mapProj(svg); let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  r.pts.concat(r.spawn ? [r.spawn] : []).forEach(([x, z]) => { const X = p.px(x), Y = p.pz(z);
+    if (X < x0) x0 = X; if (X > x1) x1 = X; if (Y < y0) y0 = Y; if (Y > y1) y1 = Y; });
+  const mx = ((x1 - x0) || 40) * 0.28 + 26, my = ((y1 - y0) || 40) * 0.28 + 26;   // margin: keep some island context around it
+  return { x: x0 - mx, y: y0 - my, w: (x1 - x0) + 2 * mx, h: (y1 - y0) + 2 * my };
+}
+function browseHiSVG(svg, id) {
+  const r = WORLD.routes[id]; if (!r || !r.pts || r.pts.length < 2) return "";
+  const p = mapProj(svg), P = r.pts;
+  const poly = splitTP(P).map((run) => `<polyline fill="none" stroke="#ffcf4d" stroke-width="3" opacity="1" stroke-linejoin="round" points="${run.map(([x, z]) => p.px(x).toFixed(0) + "," + p.pz(z).toFixed(0)).join(" ")}"/>`).join("");
+  const mk = (r.spawn ? `<circle cx="${p.px(r.spawn[0]).toFixed(0)}" cy="${p.pz(r.spawn[1]).toFixed(0)}" r="6" fill="none" stroke="#c792ea" stroke-width="2.2"/>` : "")
+    + `<circle cx="${p.px(P[P.length - 1][0]).toFixed(0)}" cy="${p.pz(P[P.length - 1][1]).toFixed(0)}" r="5" fill="#ff5d7d" stroke="#0f1720" stroke-width="1.5"/>`
+    + `<circle cx="${p.px(P[0][0]).toFixed(0)}" cy="${p.pz(P[0][1]).toFixed(0)}" r="5" fill="#33d17a" stroke="#0f1720" stroke-width="1.5"/>`;
+  return poly + mk;
+}
+function mapTargetFor(svg) {   // the rectangle the view wants to sit at, from the current selection
+  const box = BROWSE_PICK && routePxBox(svg, BROWSE_PICK);
+  return box || { x: 0, y: 0, w: MAPVIEW.W, h: MAPVIEW.H };
+}
+function mapApply() { const m = MAPVIEW; if (m.svg) m.svg.setAttribute("viewBox", `${m.cx.toFixed(1)} ${m.cy.toFixed(1)} ${m.cw.toFixed(1)} ${m.ch.toFixed(1)}`); }
+function mapTick() {
+  const m = MAPVIEW; if (!m.svg || !m.svg.isConnected) { m.raf = 0; return; }
+  const held = Date.now() < m.holdUntil;
+  if (!held) {   // ease the live window toward the target
+    const k = 0.16;
+    m.cx += (m.tx - m.cx) * k; m.cy += (m.ty - m.cy) * k; m.cw += (m.tw - m.cw) * k; m.ch += (m.th - m.ch) * k;
+    mapApply();
+    const near = Math.abs(m.tx - m.cx) + Math.abs(m.ty - m.cy) + Math.abs(m.tw - m.cw) + Math.abs(m.th - m.ch) < 0.6;
+    if (near) { m.cx = m.tx; m.cy = m.ty; m.cw = m.tw; m.ch = m.th; mapApply(); m.raf = 0; return; }
+  }
+  m.raf = requestAnimationFrame(mapTick);
+}
+function mapKick() { if (!MAPVIEW.raf) MAPVIEW.raf = requestAnimationFrame(mapTick); }
+function mapRetarget(animate) {
+  const m = MAPVIEW; if (!m.svg) return;
+  const t = mapTargetFor(m.svg); m.tx = t.x; m.ty = t.y; m.tw = t.w; m.th = t.h;
+  if (!animate) { m.cx = t.x; m.cy = t.y; m.cw = t.w; m.ch = t.h; mapApply(); }
+  else { m.holdUntil = 0; mapKick(); }
+}
+function mapAttach(svg) {
+  const m = MAPVIEW; m.svg = svg; m.W = +svg.dataset.w; m.H = +svg.dataset.h;
+  const t = mapTargetFor(svg);            // snap to the current target on a fresh render (no zoom flash on unrelated repaints)
+  m.tx = m.cx = t.x; m.ty = m.cy = t.y; m.tw = m.cw = t.w; m.th = m.ch = t.h; mapApply();
+  if (m.wired === svg) return; m.wired = svg;
+  const clientToVB = (e) => { const rc = svg.getBoundingClientRect();
+    return { x: m.cx + ((e.clientX - rc.left) / rc.width) * m.cw, y: m.cy + ((e.clientY - rc.top) / rc.height) * m.ch, fx: (e.clientX - rc.left) / rc.width, fy: (e.clientY - rc.top) / rc.height }; };
+  svg.addEventListener("wheel", (e) => {
+    e.preventDefault(); const at = clientToVB(e);
+    const f = Math.exp(e.deltaY * 0.0016);                       // wheel up = zoom in
+    let nw = Math.min(m.W * 1.15, Math.max(m.W * 0.04, m.cw * f)); const r = nw / m.cw; let nh = m.ch * r;
+    m.cx = at.x - at.fx * nw; m.cy = at.y - at.fy * nh; m.cw = nw; m.ch = nh;
+    mapApply(); m.holdUntil = Date.now() + 900; mapKick();
+  }, { passive: false });
+  svg.addEventListener("pointerdown", (e) => { if (e.button !== 0) return; m.drag = { x: e.clientX, y: e.clientY }; svg.setPointerCapture(e.pointerId); svg.style.cursor = "grabbing"; m.holdUntil = Date.now() + 1e9; });
+  svg.addEventListener("pointermove", (e) => { if (!m.drag) return; const rc = svg.getBoundingClientRect();
+    m.cx -= ((e.clientX - m.drag.x) / rc.width) * m.cw; m.cy -= ((e.clientY - m.drag.y) / rc.height) * m.ch;
+    m.drag.x = e.clientX; m.drag.y = e.clientY; mapApply(); });
+  const endDrag = (e) => { if (!m.drag) return; m.drag = null; svg.style.cursor = ""; try { svg.releasePointerCapture(e.pointerId); } catch (_) {} m.holdUntil = Date.now() + 900; mapKick(); };
+  svg.addEventListener("pointerup", endDrag); svg.addEventListener("pointercancel", endDrag);
+  svg.style.cursor = "grab";
+}
+// pick a course from the browser: highlight it + glide the map to it; pick again (BROWSE_PICK null) glides back
+function browsePick(id) {
+  BROWSE_PICK = (BROWSE_PICK === id) ? null : id;
+  VIEW.global.browsePick = BROWSE_PICK; viewSave();
+  const svg = MAPVIEW.svg;
+  if (svg) { const g = svg.querySelector("#browseHi"); if (g) g.innerHTML = BROWSE_PICK ? browseHiSVG(svg, BROWSE_PICK) : ""; }
+  mapRetarget(true);
+  paintLeftHeader();                 // just the title — not a full re-render, so the animation is never interrupted
+  paintRight();                      // reflect the selected tile
 }
 
 /* ------------------------------------------------- Course Browser (free-mode right tab)
@@ -1230,9 +1305,7 @@ function browserHTML() {
 function wireBrowser(body) {
   body.querySelectorAll("[data-bfilter]").forEach((b) => b.onclick = () => {
     BROWSE_FILTER = b.dataset.bfilter; VIEW.global.browseFilter = BROWSE_FILTER; viewSave(); paintRight(); });
-  body.querySelectorAll("[data-bpick]").forEach((b) => b.onclick = () => {
-    BROWSE_PICK = (BROWSE_PICK === b.dataset.bpick) ? null : b.dataset.bpick;   // click again to clear
-    VIEW.global.browsePick = BROWSE_PICK; viewSave(); paintLeft(); paintRight(); });
+  body.querySelectorAll("[data-bpick]").forEach((b) => b.onclick = () => browsePick(b.dataset.bpick));
 }
 
 /* ------------------------------------------------- the map that follows you

@@ -252,6 +252,35 @@ def _nearest(g, x, z, cell=40.0):
 ON_ROUTE_M = 15.0          # within this of the centre-line counts as "on the route"
 
 
+def _resample_xz(pts, step):
+    """Walk the polyline and drop a point every `step` metres, so a SPARSE course path reads as the
+    continuous line it traces rather than a scatter of vertices. Needed because `covered` asks how many
+    of a route's dense points sit near one of OURS: a course centre-line decimated to 500 points
+    (analyze_session.down) sits at ~170 m spacing on an 80 km course, so most route points are far from
+    any bare vertex and coverage collapses to ~0.17 for a road we drove end to end. Interpolating along
+    the segments restores the line; it cannot invent corner detail the coarse vertices already cut, so a
+    genuinely long-and-coarse course still tops out below a densely-sampled one -- verdict() accounts for
+    that with its length-corroborated branch."""
+    if len(pts) < 2:
+        return list(pts)
+    out = [pts[0]]
+    acc = 0.0
+    ax, az = pts[0]
+    for bx, bz in pts[1:]:
+        seg = math.hypot(bx - ax, bz - az)
+        if seg < 1e-9:
+            continue
+        while acc + seg >= step:
+            t = (step - acc) / seg
+            ax, az = ax + (bx - ax) * t, az + (bz - az) * t
+            out.append((ax, az))
+            seg = math.hypot(bx - ax, bz - az)
+            acc = 0.0
+        acc += seg
+        ax, az = bx, bz
+    return out
+
+
 def compare(ours, theirs):
     """Compare a learned path with a game centre-line in BOTH directions.
 
@@ -271,7 +300,7 @@ def compare(ours, theirs):
         ds.append(d if d is not None else 9999.0)
     if not ds:
         return None
-    g_ours = _grid(list(ours))
+    g_ours = _grid(_resample_xz(list(ours), ON_ROUTE_M / 2.0))   # the line, not its bare vertices — see _resample_xz
     hit = 0
     for x, z in them:
         d = _nearest(g_ours, x, z)
@@ -361,9 +390,19 @@ def verdict(r):
     clear = (ru is None) or (r["score"] is not None and ru > r["score"] + 8)
     close = m <= 8.0
     whole = cov >= 0.85 and 0.85 <= lr <= 1.18
+    # LENGTH-CORROBORATED WHOLE MATCH. A long course whose stored centre-line is coarse (analyze_session.down
+    # caps every path at 500 points, so an 80 km circuit sits at ~170 m spacing) cannot reach cov 0.85 however
+    # completely it was driven -- the coarse vertices chord across every corner, so ~a quarter of the route's
+    # dense points fall outside ON_ROUTE_M of the line even after resampling. When the drive is ON the road
+    # (close), ONE route clearly wins, and the DRIVEN length matches the route's own length tightly (0.90-1.12,
+    # which a part-lap cannot fake -- driving only part of a route makes the course shorter and drops len_ratio),
+    # that is a whole-course match on length + shape + margin. Example: The Goliath (course 4200_-5450 vs route
+    # 5555) -- 82.5 km driven vs 85.3 km catalogued, mean 3.3 m, runner-up at 16% coverage, but cov only ~0.76
+    # because the 491-point path is 168 m coarse. Bounded by cov >= 0.60 so a genuine part-lap stays 'partial'.
+    length_locked = close and clear and (0.90 <= lr <= 1.12) and cov >= 0.60
     if close and whole and clear:
         return "verified"
-    if close and whole:
+    if (close and whole) or length_locked:
         return "probable"
     if close and cov >= 0.25:
         return "partial"

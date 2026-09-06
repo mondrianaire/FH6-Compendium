@@ -690,17 +690,15 @@ let CHG_OPEN = false;    // the slim header CHANGE chip is expanded into the ful
 function carUpgradeGroups() {
   if (!(IDENT && CUR)) return [];
   // SHARED CLASS ONLY (Jett 2026-09-06): hardware sets the PI, so different engine builds land in
-  // different classes — you almost never tune across a class boundary. An A-class car shows only its
-  // A-class upgrades and tunes. Class comes from the live car, else the identified build.
-  // CAVEAT: today tune_container stores the CAR'S STOCK class on every build (import_containers) and PI
-  // is null, so the per-build class field is uniform and cannot discriminate. Guard on it actually
-  // varying across this car's builds, so the filter stays inert on stock-class data (and does not hide a
-  // car built off its stock class) yet engages for FREE the moment accurate per-build class is computed
-  // from parts (data/parts-pi + stock_pi -> PI -> class), which is the real fix.
-  const cls = (CUR.cls && CUR.cls !== "?") ? CUR.cls : (MATCH && MATCH.build && MATCH.build.cls) || null;
+  // different classes — you almost never tune across a class boundary. Filter on the DRIVEN class `dcls`
+  // (what the game reported when the build was driven, joined in build_web from pi-observations) — the
+  // stored `cls` is only the car's stock class and cannot separate builds. Reference class = the equipped
+  // build's own driven class (exact and stable even in a menu, where the live read goes stale), else the
+  // live on-track read. Drop only builds CONFIRMED to be a different class; unclassed builds (never driven)
+  // are kept and never dropped, and the classing self-fills as more builds are driven.
+  const cls = (MATCH && MATCH.build && MATCH.build.dcls) || ((CUR.cls && CUR.cls !== "?") ? CUR.cls : null);
   const same0 = IDENT.builds.filter((b) => b.o === CUR.ordinal);
-  const discriminates = new Set(same0.map((b) => b.cls)).size > 1;
-  const same = (cls && discriminates) ? same0.filter((b) => b.cls === cls) : same0;
+  const same = cls ? same0.filter((b) => !b.dcls || b.dcls === cls) : same0;
   const groups = new Map();                         // hardware key -> its builds (the tunes under it)
   same.forEach((b) => {
     const k = rimFree(b.pkey);

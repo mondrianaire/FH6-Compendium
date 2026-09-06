@@ -29,6 +29,8 @@ sys.path.insert(0, HERE)
 
 import fh6db                                            # noqa: E402
 import export_options                                   # noqa: E402
+sys.path.insert(0, os.path.join(ROOT, "scripts", "telemetry"))
+import fh6_tune_decode as _tune                         # noqa: E402  — parts_hash, to attach each build's DRIVEN class
 
 OUT = os.path.join(ROOT, "dashboard", "v2", "api")
 
@@ -311,6 +313,26 @@ def main(argv=None):
         "SELECT slider FROM ref_slider ORDER BY slot_index")]
     ident = []
     thumbs = export_thumbs(cx, out)
+    # THE DRIVEN CLASS per build (Jett 2026-09-06). tune_container stores the car's STOCK class on every
+    # build and PI is null, so its class field cannot separate an A build from an S1 build of the same car.
+    # The one exact per-build class is what the game reported the moment the build was DRIVEN, recorded in
+    # pi-observations by (ordinal, parts_hash). Join it here so the header's similar-upgrades / tunes lists
+    # can drop a build confirmed to be a DIFFERENT class. Undriven builds stay unclassed (dcls null) and are
+    # never dropped; it self-fills as more builds are driven. ~14% of builds carry a driven class today.
+    _obs = {}
+    try:
+        _doc = json.load(open(os.path.join(ROOT, "data", "pi-observations.json"), encoding="utf-8"))
+        for _o in (_doc.get("observations") or []):
+            _obs[(int(_o["ordinal"]), _o.get("parts_hash"))] = (_o.get("car_pi"), _o.get("car_class"))
+    except Exception:
+        _obs = {}
+
+    def _driven(ordinal, parts):
+        try:
+            v = _obs.get((int(ordinal), _tune.parts_hash(ordinal, parts)))
+        except Exception:
+            v = None
+        return (v[0], v[1]) if v else (None, None)
     for t in cx.execute("""SELECT container, ordinal, hw_hash, setup_hash, tune_name, locked,
                                   source, pi, class, mass_kg, front_pct, gear_count, saved_utc,
                                   description, creator, created_utc
@@ -327,7 +349,8 @@ def main(argv=None):
             "c": t["container"], "o": t["ordinal"], "hw": t["hw_hash"], "su": t["setup_hash"],
             "rim_ml": [rims.get("rim_style"), rims.get("rear_rim_style")],
             "name": t["tune_name"], "locked": t["locked"], "src": t["source"], "pi": t["pi"],
-            "cls": t["class"], "kg": t["mass_kg"], "front": t["front_pct"],
+            "cls": t["class"], "dpi": _driven(t["ordinal"], pk)[0], "dcls": _driven(t["ordinal"], pk)[1],
+            "kg": t["mass_kg"], "front": t["front_pct"],
             "gears": t["gear_count"], "saved": t["saved_utc"],
             "desc": t["description"], "creator": t["creator"], "created": t["created_utc"],
             "thumb": thumbs.get(t["container"]),

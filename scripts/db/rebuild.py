@@ -193,11 +193,18 @@ def check_invariants(cx):
     if "route_names" in ran:
         n_named = _one(cx, "SELECT COUNT(*) FROM course WHERE name IS NOT NULL AND route_key NOT LIKE 'loop:%'")
         n_course = _one(cx, "SELECT COUNT(*) FROM course WHERE route_key NOT LIKE 'loop:%'")
+        # An empty name set is not a defect by itself: the rule refuses to guess, and a database
+        # with no verified map identity and no closed loop has nothing to name. Named-but-unprovenanced
+        # (I5) is the failure; zero names is reported so it is seen.
         if n_course and not n_named:
-            fail("I4-names", "route_names ran but no course is named")
+            warn("I4-names", "route_names ran but no course is named (no map identity or closed loop matched the catalogue)")
         n_route_named = _one(cx, "SELECT COUNT(*) FROM ref_route WHERE name IS NOT NULL")
         if n_course and _one(cx, "SELECT COUNT(*) FROM ref_route") and not n_route_named:
-            fail("I4-names", "route_names ran but no ref_route is named")
+            warn("I4-names", "route_names ran but no ref_route is named")
+        n_orphan_chosen = _one(cx, """SELECT COUNT(*) FROM course_event ce JOIN course c USING(route_key)
+                                      WHERE ce.chosen=1 AND (c.name IS NULL OR c.event_id IS NULL)""")
+        if n_orphan_chosen:
+            fail("I4-names", "%d course_event rows are chosen=1 for a course with no name/event_id" % n_orphan_chosen)
         n_noprov = _one(cx, "SELECT COUNT(*) FROM course WHERE name IS NOT NULL AND (name_source IS NULL OR name_confidence IS NULL)")
         if n_noprov:
             fail("I5-provenance", "%d named courses without name_source/name_confidence (telemetry ran after route_names?)" % n_noprov)

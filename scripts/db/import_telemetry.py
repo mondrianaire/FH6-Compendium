@@ -217,6 +217,7 @@ def run(cx, verbose=False, data_dir=None):
 
     # ---- write -------------------------------------------------------------
     with cx:
+        cx.execute("BEGIN")                  # a PRAGMA outside a transaction autocommits and resets itself
         cx.execute("PRAGMA defer_foreign_keys=ON")
         # `course` is a foreign-key PARENT (course_route, course_event cascade off it). It is MERGED, not
         # wiped: DELETE FROM course and INSERT OR REPLACE both fire ON DELETE CASCADE immediately --

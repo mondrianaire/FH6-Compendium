@@ -117,20 +117,26 @@ def run(cx, verbose=False):
         esrows += es
 
     with cx:
+        cx.execute("BEGIN")                  # a PRAGMA outside a transaction autocommits and resets itself
         cx.execute("PRAGMA defer_foreign_keys=ON")
-        # Neither course.event_id nor ref_route.event_id cascades off ref_event (only
-        # ref_event_string and course_event do) -- null the derived links by hand before the
-        # rivals rows they point at disappear, or the delete below violates the FK.
-        cx.execute("UPDATE course SET event_id=NULL"
-                   " WHERE event_id IN (SELECT event_id FROM ref_event WHERE kind='rivals')")
+        # ref_event is a foreign-key PARENT (course_event and ref_event_string cascade off it), so it
+        # is MERGED, not wiped: a wipe-and-reinsert -- and INSERT OR REPLACE, which deletes first --
+        # would empty course_event on every rerun. Only events that vanished from the catalogue are
+        # deleted, after their non-cascading links (course.event_id, ref_route.*) are nulled.
+        new_ids = {r[0] for r in erows}
+        cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep_ev(event_id TEXT PRIMARY KEY)")
+        cx.execute("DELETE FROM _keep_ev")
+        cx.executemany("INSERT INTO _keep_ev(event_id) VALUES(?)", [(e,) for e in new_ids])
+        retired = "SELECT event_id FROM ref_event WHERE kind='rivals' AND event_id NOT IN (SELECT event_id FROM _keep_ev)"
+        cx.execute("UPDATE course SET event_id=NULL WHERE event_id IN (%s)" % retired)
         cx.execute("UPDATE ref_route SET name=NULL, event_id=NULL, name_source=NULL, name_confidence=NULL"
-                   " WHERE event_id IN (SELECT event_id FROM ref_event WHERE kind='rivals')")
-        cx.execute("DELETE FROM course_event"
-                   " WHERE event_id IN (SELECT event_id FROM ref_event WHERE kind='rivals')")
-        cx.execute("DELETE FROM ref_event WHERE kind='rivals'")
-        n_ev = fh6db.upsert_many(cx, "ref_event", [
+                   " WHERE event_id IN (%s)" % retired)
+        cx.execute("DELETE FROM ref_event WHERE event_id IN (%s)" % retired)   # course_event/ref_event_string cascade
+        n_ev = fh6db.merge_many(cx, "ref_event", [
             "event_id", "kind", "name", "track_id", "route_id", "class_limit", "pi_limit",
-            "region", "data", "discipline", "length_m", "is_loop", "source"], erows)
+            "region", "data", "discipline", "length_m", "is_loop", "source"], erows, key=("event_id",))
+        # ref_event_string is a leaf: refresh it per event
+        cx.execute("DELETE FROM ref_event_string WHERE event_id IN (SELECT event_id FROM _keep_ev)")
         n_es = fh6db.upsert_many(cx, "ref_event_string", [
             "event_id", "table_name", "key_hash", "key_name", "role"], esrows)
 

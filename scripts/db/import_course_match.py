@@ -91,6 +91,7 @@ def run(cx, verbose=False):
     matched_keys = [m["route_key"] for m in matched]
 
     with cx:
+        cx.execute("BEGIN")                  # a PRAGMA outside a transaction autocommits and resets itself
         cx.execute("PRAGMA defer_foreign_keys=ON")
         cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep(route_key TEXT PRIMARY KEY)")
         cx.execute("DELETE FROM _keep")

@@ -64,6 +64,9 @@ def run(cx, aitracks, verbose=False):
     # vanished .owt id is nulled first so the commit cannot fail on it.
     new_ids = {r[0] for r in rrows}
     with cx:
+        # BEGIN first: Python's sqlite3 does not open a transaction for a PRAGMA, so a bare
+        # defer_foreign_keys=ON autocommits and is OFF again by the first DELETE (review, 2026-09-05).
+        cx.execute("BEGIN")
         cx.execute("PRAGMA defer_foreign_keys=ON")
         for stale in [r[0] for r in cx.execute("SELECT route_id FROM ref_route") if r[0] not in new_ids]:
             cx.execute("UPDATE course_route SET route_id=NULL, match_kind='none' WHERE route_id=?", (stale,))

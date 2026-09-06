@@ -15,8 +15,11 @@ THREE TIERS, in precedence order map > declared > length:
            is bijective: no other length-tier course claims the same event. Never names ref_route
            -- a length match is evidence about the course, not proof of which physical route it is.
   declared what data/routes.json (or the course model) said a person typed. Read confidence, not
-           derived: it is not cross-checked against the map, only recorded and, when it disagrees
-           with an already-chosen name, either overridden (map wins) or overriding (beats length).
+           derived: it is not cross-checked against the map, only recorded. THE TYPED WORD IS THE
+           FINAL WORD: when it disagrees with a map- or length-derived name, the typed name is what
+           course.name shows and the derivation stays a chosen=0 course_event row, reported in the
+           run notes as declared_overrides. The map keeps its authority over WHERE (course_route),
+           never over what a person called the place.
 
 Every candidate considered becomes a course_event row, chosen=1 marking whichever one actually
 named the course -- an ambiguity or a conflict is a row, never a silent guess.
@@ -208,11 +211,12 @@ def run(cx, verbose=False):
             if chosen is None:
                 final[rk] = (ev_d, D, "declared", "read")
             elif chosen[1] != D:
-                if chosen[2].startswith("derived:map"):
-                    overridden.append(rk)
-                    final[rk] = chosen
-                else:                       # length tier: declared wins, length row stays chosen=0
-                    final[rk] = (ev_d, D, "declared", "read")
+                # The typed word is the final word (schema COURSE NAMES block): a map or length
+                # derivation that disagrees is kept as its course_event row, chosen=0, and reported --
+                # never written over what a person typed. The map keeps its WHERE authority
+                # (course_route, course.event_id stays the declared event), not the NAME.
+                overridden.append({"route_key": rk, "declared": D, "derived": chosen[1], "via": chosen[2]})
+                final[rk] = (ev_d, D, "declared", "read")
             else:
                 final[rk] = chosen         # names already agree (the '+declared' tiers)
         else:
@@ -288,11 +292,12 @@ def run(cx, verbose=False):
         "declared": by_conf.get("read", 0),
         "ties": len(ambiguous), "conflicts": len(conflicts),
         "ambiguous_route_keys": ambiguous, "conflicting_routes": conflicts,
-        "declared_overridden": sorted(overridden),
+        "declared_overrides": sorted(overridden, key=lambda o: o["route_key"]),
     }
     if verbose:
-        for rk in overridden:
-            print("  declared_overridden: %s kept its derived:map name over declared_name" % rk)
+        for o in overridden:
+            print("  declared_overrides: %s keeps typed '%s' over %s '%s' (stored as a candidate, chosen=0)"
+                  % (o["route_key"], o["declared"], o["via"], o["derived"]))
         for cf in conflicts:
             print("  conflict: ref_route %s named differently by %s (%s)"
                   % (cf["route_id"], cf["route_keys"], cf["names"]))

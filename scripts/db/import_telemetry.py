@@ -155,7 +155,7 @@ def run(cx, verbose=False, data_dir=None):
                           e.get("route_key"), e.get("start_is_line")))
 
     # ---- laps: the history store first, then any saved trace it lacks ------
-    lrows, prows = [], []
+    lrows, prows, mrows = [], [], []
     seen = set()
     lap_id = 0
     lengths = {r[0]: r[1] for r in
@@ -187,7 +187,9 @@ def run(cx, verbose=False, data_dir=None):
                       1 if (cov is not None and cov < PARTIAL_BELOW) else 0,
                       meta.get("build_id"), meta.get("class"), meta.get("pi"),
                       meta.get("drivetrain"), meta.get("tune_hash"),
-                      meta.get("solo") or 0, meta.get("impacts") or 0, meta.get("void") or 0))
+                      meta.get("solo") or 0, meta.get("impacts") or 0, meta.get("void") or 0,
+                      meta.get("lap_dist_m"), meta.get("rewinds") or 0, meta.get("pauses") or 0,
+                      meta.get("pause_s") or 0.0, meta.get("stitched") or 0))
         for i, p in enumerate(pts):
             prows.append((lap_id, i,
                           p[0] if len(p) > 0 else None,
@@ -195,7 +197,21 @@ def run(cx, verbose=False, data_dir=None):
                           p[2] if len(p) > 2 else None,
                           p[3] if len(p) > 3 else None,
                           p[4] if len(p) > 4 else None,
-                          p[5] if len(p) > 5 else None))
+                          p[5] if len(p) > 5 else None,
+                          p[6] if len(p) > 6 else None))
+        mk = meta.get("markers")
+        if isinstance(mk, str):
+            try:
+                mk = json.loads(mk)
+            except Exception:                            # noqa: BLE001
+                mk = None
+        for i, m in enumerate(mk or []):
+            mrows.append((lap_id, i, m.get("kind"), m.get("t"),
+                          m.get("dur_s") if m.get("kind") != "rewind" else m.get("undone_s"),
+                          m.get("race_s") if m.get("kind") != "rewind" else m.get("race_s_from"),
+                          m.get("dist_m") if m.get("kind") != "rewind" else m.get("dist_from"),
+                          (1 if m.get("over_line") else 0) if m.get("kind") == "rewind" else None,
+                          json.dumps(m, separators=(",", ":"))))
 
     lp = os.path.join(data_dir, "laps.db")
     if os.path.exists(lp):
@@ -233,7 +249,7 @@ def run(cx, verbose=False, data_dir=None):
         # wiped: DELETE FROM course and INSERT OR REPLACE both fire ON DELETE CASCADE immediately --
         # defer_foreign_keys defers the checks, not the actions -- which is how course_route sat at 0 rows
         # from 2026-09-03 to 2026-09-05. Only courses that vanished from disk are deleted (intended cascade).
-        for tbl in ("corner_obs", "lap_point", "lap", "course_turn", "session_event", "session_car", "session"):
+        for tbl in ("corner_obs", "lap_marker", "lap_point", "lap", "course_turn", "session_event", "session_car", "session"):
             cx.execute("DELETE FROM %s" % tbl)
         keys = [r[0] for r in crows]
         cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep(route_key TEXT PRIMARY KEY)")
@@ -260,9 +276,12 @@ def run(cx, verbose=False, data_dir=None):
         counts["lap"] = fh6db.upsert_many(cx, "lap", [
             "lap_id", "route_key", "session_id", "cid", "container", "hw_hash", "t0", "lap_s",
             "arc_m", "coverage", "is_partial", "build_id", "class", "pi", "drivetrain",
-            "tune_hash", "solo", "impacts", "void"], lrows, chunk=2000)
+            "tune_hash", "solo", "impacts", "void", "lap_dist_m", "rewinds", "pauses", "pause_s",
+            "stitched"], lrows, chunk=2000)
         counts["lap_point"] = fh6db.upsert_many(cx, "lap_point", [
-            "lap_id", "i", "arc_m", "mph", "grip", "x", "z", "elev_m"], prows, chunk=10000)
+            "lap_id", "i", "arc_m", "mph", "grip", "x", "z", "elev_m", "dist_m"], prows, chunk=10000)
+        counts["lap_marker"] = fh6db.upsert_many(cx, "lap_marker", [
+            "lap_id", "i", "kind", "t", "dur_s", "race_s", "dist_m", "over_line", "detail"], mrows, chunk=2000)
 
         # bind laps to the setup that drove them, where the tune hash identifies one
         cx.execute("""UPDATE lap SET container = (

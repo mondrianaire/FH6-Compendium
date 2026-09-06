@@ -637,8 +637,29 @@ CREATE TABLE IF NOT EXISTS lap (
   solo        INTEGER DEFAULT 0,
   impacts     INTEGER DEFAULT 0,
   void        INTEGER DEFAULT 0,
+  -- THE GAME'S LAP METADATA IS CANON (2026-09-06): a lap is what the game timed. Rows a rewind revoked
+  -- are gone from the trace; a menu pause is a marker, not a break; a lap the 192 MB roll cut is stitched.
+  lap_dist_m  REAL,                      -- the game's odometer over the lap, beside the point arc
+  rewinds     INTEGER DEFAULT 0,
+  pauses      INTEGER DEFAULT 0,
+  pause_s     REAL DEFAULT 0,
+  stitched    INTEGER DEFAULT 0,
   UNIQUE (route_key, session_id, cid, t0)
 );
+
+-- what happened inside a lap that the trace no longer shows: a rewind (rows revoked), a pause (clock stopped)
+CREATE TABLE IF NOT EXISTS lap_marker (
+  lap_id   INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
+  i        INTEGER NOT NULL,
+  kind     TEXT NOT NULL,                -- rewind | pause | gap
+  t        REAL,                         -- seconds from the lap's start (wall clock)
+  dur_s    REAL,                         -- pause: how long the clock stood still; rewind: race seconds undone
+  race_s   REAL,                         -- the race clock at the marker
+  dist_m   REAL,                         -- the odometer at the marker
+  over_line INTEGER,                     -- rewind: 1 when it went back across the start/finish line
+  detail   TEXT,                         -- JSON: the marker as the analyzer wrote it
+  PRIMARY KEY (lap_id, i)
+) WITHOUT ROWID;
 CREATE INDEX IF NOT EXISTS ix_lap_course ON lap(route_key, class, void, is_partial, lap_s);
 
 -- One row per sample. Storing the trace as rows (not a JSON blob) is what lets the
@@ -648,6 +669,7 @@ CREATE TABLE IF NOT EXISTS lap_point (
   i        INTEGER NOT NULL,
   arc_m    REAL NOT NULL,
   mph      REAL,
+  dist_m   REAL,                         -- the game's odometer from the lap's first point (2026-09-06)
   grip     INTEGER,                      -- 0 calm, 1 front, 2 rear, 3 both, 4 impact
   x        REAL, z REAL,
   elev_m   REAL,

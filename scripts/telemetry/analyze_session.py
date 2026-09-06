@@ -17,7 +17,7 @@ both sit on one base -- parsing both as local put every save ~4 h late and NULLe
 (fixed 2026-09-02; scripts/telemetry/check_tune_clock.py asserts it against the containers on disk).
 """
 import re
-import calendar, csv, hashlib, json, math, os, sqlite3, statistics, sys, time
+import calendar, csv, gzip, hashlib, json, math, os, sqlite3, statistics, sys, time
 import lap_store
 import fh6_tune_decode as TUNE   # tune_hash: which slider revision a lap was driven on
 import fh6_anchors               # the game's race-activation spheres: route id at a world position
@@ -152,7 +152,8 @@ def cid(r): return f'{r["CarOrdinal"]}|{r["DrivetrainType"]}|{r["NumCylinders"]}
 
 def load(path):
     rows = []
-    with open(path, newline="") as f:
+    _op = gzip.open if path.endswith(".gz") else open
+    with _op(path, "rt", newline="") as f:
         for r in csv.DictReader(f):
             try: rows.append({k: (int(float(v)) if k in INTS else float(v)) for k, v in r.items()})
             except Exception: continue
@@ -187,6 +188,204 @@ def _arc_of(path):
     cut = max(150.0, med * 20.0) if med > 0 else float("inf")
     return sum(d for d in segs if d <= cut)
 
+
+
+# ═══ THE GAME'S LAP METADATA IS CANON (Jett, 2026-09-06) ═══════════════════════════════════════════
+# "there are multiple reasons to rewind ... often I will rewind multiple times OVER THE START/FINISH
+# line to retry the first couple of turns. THIS CREATES A NEW LAP TIME EVERY TIME. We need to rely on
+# the current lap metadata such as lap time as canon." A lap is what the game timed: it starts where
+# CurrentLap starts running and ends where the game publishes it (LapNumber increments, or LastLap
+# appears). A rewind is the game revoking rows -- CurrentRaceTime goes backwards without a silence --
+# and the re-driven rows replace them. Measured on 2026-09-05's captures: 8 rewinds (5 mid-lap, one
+# corner three times in 40 s), 8 menu pauses mid-lap of 1.8-190 s, and 3 of 5 capture files opening
+# mid-lap because the 192 MB roll cut the lap. Each of those had been a "partial".
+REWIND_MIN_S = 0.25        # the lap clock must go back by at least this much (same LapNumber)
+RESTART_DIST_M = 50.0      # a landing with the odometer under this is a start / restart / new event, never a rewind
+PAUSE_MIN_S = 1.5          # a silence in the on-rows at least this long is a menu / pause
+JUMP_M = 50.0              # the car moved this far across one silence with the lap running: a teleport / respawn
+JUMP_MAX_MPS = 120.0       # ... unless the lap clock's advance across the silence could carry it that far at this speed
+REWIND_LAND_M = 20.0       # the landing row is "on the driven line" when the cut row is within this
+# Measured on fh6_20260905_232556 (2026-09-06): the rewind scrub itself sends NO frames -- every rewind is a
+# silence of 2-20 s (one of 2,205 s, a menu first) and the last frame before it carries CurrentLap as a
+# large NEGATIVE sentinel (-5014.9); the first frame after it is where the driver landed, lap clock,
+# LapNumber and odometer wound back, LastLap revoked when the line was re-crossed (93.03 -> 0.00).
+#
+# THE LAP CLOCK IS THE AXIS. On that capture's six rewinds the landing row's (LapNumber, CurrentLap) named
+# a kept row EXACTLY -- same lap clock, same odometer, 0-1 m away on the road -- every time, over the line
+# (lap 1 / 5.40 s back to lap 0 / 90.59 s) and mid-lap alike. The race clock did not: on the first rewind
+# it dropped 15.68 s for 7.84 s of undone driving (the kept row at the landing point read 92.62, the landing
+# 84.78), and once it dropped 3.43 s across a menu pause with the lap clock, odometer and position all
+# continuous -- a false rewind that would have split a lap. So a rewind is the game's lap metadata going
+# backwards (LapNumber down, or CurrentLap down on the same lap), the cut is the last kept row at or before
+# the landing lap clock, and the road corroborates (pos_gap_m, on_line). Where the lap clock is idle (free
+# roam) nothing is timed and nothing is revoked: rewinds there do not matter. A landing at the start
+# (odometer under RESTART_DIST_M -- every observed event opens with a stationary ~2 s countdown at 0 m)
+# is a restart / a new event, never a rewind: the aborted attempt keeps its rows and its laps. A landing
+# with the lap clock idle (0.0, LapNumber 0) is an exit to free roam, never a rewind -- the game hands the
+# car back to the spot the event was launched from, which is on the driven line. The cut never crosses a
+# car change: a landing before this stint's first kept row revokes the stint and says so (cut: "stint").
+
+
+def _lap_key(r):
+    return (r.get("LapNumber") or 0, r.get("CurrentLap") or 0.0)
+
+
+def _pos_gap(a, b):
+    return math.hypot((a.get("PosX") or 0.0) - (b.get("PosX") or 0.0), (a.get("PosZ") or 0.0) - (b.get("PosZ") or 0.0))
+
+
+def final_timeline(rows):
+    """The driver's FINAL line: the rows the game kept. -> (kept_rows, markers).
+
+    Walk the on-rows in order. A rewind is the game's lap metadata going backwards between one kept row
+    and the next: LapNumber drops (a rewind over the start/finish line -- the game revokes LastLap and
+    LapNumber itself and re-times the lap), or CurrentLap drops by >= REWIND_MIN_S on the same lap. Every
+    kept row whose (LapNumber, CurrentLap) lies beyond the landing row's is revoked. The road corroborates:
+    pos_gap_m is the distance from the landing row to the row the line was cut at (0-1 m on every measured
+    rewind) and on_line says it was within REWIND_LAND_M; a landing that is NOT on the driven line is
+    marked and nothing is revoked. A lap clock clearing (> 3 s to < 1 s) is a lap boundary or an event
+    tear-down, never a rewind; a landing at the start is a restart; an idle lap clock (free roam) is
+    never a rewind.
+    """
+    kept, markers = [], []
+    prev = None
+    for r in rows:
+        if (r.get("CurrentLap") or 0.0) < -1.0:
+            continue                                       # the rewind-hold sentinel frame: not driving
+        rt = r.get("CurrentRaceTime")
+        dist = r.get("DistanceTraveled")
+        if prev is not None and rt is not None and dist is not None and prev.get("CurrentRaceTime") is not None and cid(r) == cid(prev):
+            la, lb = prev.get("CurrentLap") or 0.0, r.get("CurrentLap") or 0.0
+            na, nb = prev.get("LapNumber") or 0, r.get("LapNumber") or 0
+            start = dist < RESTART_DIST_M                  # at the start: a restart / a new event
+            exit_ = lb == 0.0 and nb == 0                  # lap clock idle: back to free roam
+            clear = la > 3.0 and lb < 1.0                  # a lap boundary or an event tear-down
+            if not start and not exit_ and (nb < na or (nb == na and la - lb >= REWIND_MIN_S and not clear)):
+                key = _lap_key(r)
+                cut = len(kept) - 1
+                while cut >= 0 and cid(kept[cut]) == cid(r) and _lap_key(kept[cut]) > key:
+                    cut -= 1
+                stint = cut < 0 or cid(kept[cut]) != cid(r)   # the landing lies before this stint's first kept row
+                land = None if stint else kept[cut]
+                pos_gap = _pos_gap(land, r) if land is not None else None
+                on_line = None if stint else pos_gap <= REWIND_LAND_M
+                n = len(kept) - (cut + 1)
+                rebase = round(rt - (land.get("CurrentRaceTime") or 0.0), 2) if land is not None else None
+                if on_line or stint:
+                    del kept[cut + 1:]                     # everything this car drove beyond the landing lap clock
+                    r["_splice"] = True                    # the kept line jumps here: cut row -> landing row
+                else:
+                    n = 0                                  # not the driven line: flag it, revoke nothing
+                if markers and markers[-1]["kind"] == "rewind" and markers[-1]["_t_last"] == prev["t"]:
+                    m = markers[-1]                          # the same rewind, one more animation frame
+                    m["race_s_to"] = round(rt, 2); m["dist_to"] = round(dist)
+                    m["lap_to"] = r.get("LapNumber"); m["lap_s_to"] = round(lb, 2); m["rows"] += n; m["_t_last"] = r["t"]
+                    m["pos_gap_m"] = round(pos_gap) if pos_gap is not None else None; m["on_line"] = on_line; m["race_rebase_s"] = rebase
+                    m["cut"] = "stint" if stint else "line"
+                    m["over_line"] = bool(m["over_line"] or (r.get("LapNumber") is not None and r["LapNumber"] < m["lap_from"]))
+                else:
+                    markers.append({"kind": "rewind", "t": round(prev["t"], 2), "silence_s": round(r["t"] - prev["t"], 1),
+                                    "pos_gap_m": round(pos_gap) if pos_gap is not None else None, "on_line": on_line,
+                                    "cut": "stint" if stint else "line",   # "stint": no kept row at the landing, the whole stint so far went
+                                    "race_rebase_s": rebase,               # landing race clock minus the cut row's: -7.84 once, 0 otherwise
+                                    "race_s_from": round(prev["CurrentRaceTime"], 2), "race_s_to": round(rt, 2),
+                                    "dist_from": round(prev.get("DistanceTraveled") or 0), "dist_to": round(dist),
+                                    "lap_from": prev.get("LapNumber"), "lap_to": r.get("LapNumber"),
+                                    "lap_s_from": round(la, 2), "lap_s_to": round(lb, 2), "last_from": round(prev.get("LastLap") or 0.0, 3),
+                                    "over_line": bool(r.get("LapNumber") is not None and prev.get("LapNumber") is not None and r["LapNumber"] < prev["LapNumber"]),
+                                    "rows": n, "_t_last": r["t"]})
+        kept.append(r); prev = r
+    for m in markers:
+        if m["lap_from"] == m["lap_to"]:
+            m["undone_s"] = round(m["lap_s_from"] - m["lap_s_to"], 2)
+        elif m["lap_from"] is not None and m["lap_to"] is not None and m["lap_from"] - m["lap_to"] == 1 and m["last_from"] > 0:
+            m["undone_s"] = round(m["lap_s_from"] + m["last_from"] - m["lap_s_to"], 2)   # the revoked lap's own time closes the gap
+        else:
+            m["undone_s"] = None
+        m.pop("_t_last", None)
+    return kept, markers
+
+
+def pause_markers(rows, min_gap=PAUSE_MIN_S):
+    """Silences in the on-rows where the GAME clock stood still while a lap was running: the menu, the
+    pause screen. The daemon writes no row while IsRaceOn is 0, so a pause is a gap, never a row. A gap
+    where the race clock advanced with the wall clock is a telemetry dropout ('gap'); a gap that resets
+    the lap is an event boundary and is not a marker at all. A silence -- or a single frame -- across
+    which the lap clock ran on but the car moved JUMP_M or more is a 'jump' (a checkpoint respawn / a
+    teleport): the lap is intact, the trace is not continuous there. The race clock is NOT trusted across a
+    pause: it has been seen 3.43 s lower on the far side of a menu with the lap clock continuous
+    (race_rebase_s records that). Run on the FINAL line (after final_timeline): a rewind's splice --
+    cut row followed by landing row -- is skipped here, its silence lives on the rewind marker."""
+    out = []
+    for a, b in zip(rows, rows[1:]):
+        if (a.get("CurrentLap") or 0) < -1.0 or (b.get("CurrentLap") or 0) < -1.0 or b.get("_splice"):
+            continue                                       # a rewind's splice is the rewind marker's, not a pause
+        g = b["t"] - a["t"]
+        la, lb = a.get("CurrentLap") or 0, b.get("CurrentLap") or 0
+        cont = la > 0 and lb >= la - 0.5 and a.get("LapNumber") == b.get("LapNumber")
+        if not cont:
+            continue                                       # the lap did not continue across it
+        jump = _pos_gap(a, b)
+        if jump >= JUMP_M and la > 3.0 and jump > (lb - la) * JUMP_MAX_MPS + JUMP_M:   # further than the lap clock allows: a teleport, not a dropout at speed
+            out.append({"kind": "jump", "t": round(a["t"], 2), "dur_s": round(g, 1), "jump_m": round(jump),
+                        "race_s": round(a.get("CurrentRaceTime") or 0, 2), "dist_m": round(a.get("DistanceTraveled") or 0),
+                        "lap_s": round(la, 1), "lap": a.get("LapNumber")})
+            continue
+        if g < min_gap:
+            continue
+        adv = (b.get("CurrentRaceTime") or 0) - (a.get("CurrentRaceTime") or 0)
+        m = {"kind": "pause" if adv < 0.5 * g else "gap", "t": round(a["t"], 2), "dur_s": round(g, 1),
+             "race_s": round(a.get("CurrentRaceTime") or 0, 2), "dist_m": round(a.get("DistanceTraveled") or 0),
+             "lap_s": round(la, 1), "lap": a.get("LapNumber")}
+        if adv <= -REWIND_MIN_S:
+            m["race_rebase_s"] = round(adv, 2)
+        out.append(m)
+    return out
+
+
+def stitch_previous_capture(path, rows):
+    """A capture that rolled mid-lap left the lap's opening in the previous file. If this file's first
+    on-row is already inside a timed lap and the previous capture's tail continues it (same car, same
+    LapNumber, odometer and lap clock continuous), prepend that tail from the lap's own start.
+    -> (rows, note | None). The daemon no longer rolls mid-lap; this repairs what it already did.
+    The previous file is read through final_timeline first, so a rewind near its end neither truncates
+    the recovered opening at the hold sentinel nor smuggles the sentinel row in."""
+    live0 = next((r for r in rows if r.get("IsRaceOn") == 1), None)
+    if not live0 or (live0.get("CurrentLap") or 0) <= 3.0 or "t_wall" not in live0:
+        return rows, None
+    d, base = os.path.dirname(os.path.abspath(path)), os.path.basename(path)
+    key = base.replace(".csv.gz", "").replace(".csv", "")
+    cands = sorted(f for f in os.listdir(d) if f.startswith("fh6_") and (f.endswith(".csv") or f.endswith(".csv.gz"))
+                   and f.replace(".csv.gz", "").replace(".csv", "") < key)
+    if not cands:
+        return rows, None
+    prev_path = os.path.join(d, cands[-1])
+    try:
+        prev = load(prev_path)
+    except Exception:                                      # noqa: BLE001
+        return rows, None
+    on = [r for r in prev if r.get("IsRaceOn") == 1]
+    for r in on:
+        r.setdefault("t", r.get("t_mono") or 0.0)          # final_timeline stamps markers by "t"; main() re-derives it after the join
+    on, _ = final_timeline(on)                             # its final line: sentinels out, revoked rows out
+    if not on:
+        return rows, None
+    last = on[-1]
+    if (cid(last) != cid(live0) or last.get("LapNumber") != live0.get("LapNumber")
+            or not (-50 <= (live0.get("DistanceTraveled") or 0) - (last.get("DistanceTraveled") or 0) <= 150)
+            or (live0.get("CurrentLap") or 0) < (last.get("CurrentLap") or 0) - 0.5
+            or (live0.get("t_wall") or 0) - (last.get("t_wall") or 0) > 600):
+        return rows, None
+    i = len(on) - 1
+    while i > 0 and (on[i].get("CurrentLap") or 0) > 0 and (on[i - 1].get("CurrentLap") or 0) <= (on[i].get("CurrentLap") or 0) + 0.5 \
+            and on[i - 1].get("LapNumber") == on[i].get("LapNumber"):
+        i -= 1
+    tail = on[i:]
+    for r in tail:                                         # one clock: place the tail by wall time before this file's first row
+        r["t_mono"] = live0["t_mono"] - (live0["t_wall"] - r["t_wall"])
+    note = {"from": os.path.basename(prev_path), "rows": len(tail), "lap_s_at_join": round(live0.get("CurrentLap") or 0, 1),
+            "lap": live0.get("LapNumber")}
+    return tail + rows, note
 
 
 def _is_lap_boundary(prev_row, row):
@@ -1051,9 +1250,17 @@ def main():
     rows = load(path)
     if until is not None: rows = [r for r in rows if r["t_mono"] - rows[0]["t_mono"] <= until]
     if not rows: print("no rows"); return
+    rows, _stitch = stitch_previous_capture(path, rows)
     t0 = rows[0]["t_mono"]
     for r in rows: r["t"] = r["t_mono"] - t0
     live = [r for r in rows if r["IsRaceOn"] == 1]
+    # THE GAME'S LAP METADATA IS CANON: rows a rewind revoked are not part of any lap, corner or trace.
+    _n_live = len(live)
+    live, _rewinds = final_timeline(live)
+    if len(live) != _n_live:
+        _keep = {id(r) for r in live}
+        rows = [r for r in rows if r["IsRaceOn"] != 1 or id(r) in _keep]
+    _markers = sorted(_rewinds + pause_markers(live), key=lambda m: m["t"])
     sid = os.path.splitext(os.path.basename(path))[0]; dur = rows[-1]["t"]
     # ---- stints (runs): a new stint starts when driving resumes after >= 2 s off, or the configuration changes ----
     tags = {}; starts = {}
@@ -1079,7 +1286,8 @@ def main():
             elif prev_cfg is None or (zero_since is not None and r["t"] - zero_since >= 2.0) or k != prev_cfg: stint_n += 1
             zero_since = None; prev_cfg = k; r["stint"] = stint_n; stint_rows[stint_n].append(r)
         elif zero_since is None: zero_since = r["t"]
-    sess = {"id": sid, "source": path, "frames": len(rows), "duration_s": round(dur, 1), "rate_pps": round(len(rows) / max(dur, 1e-9), 1), "live_frames": len(live)}
+    sess = {"id": sid, "source": path, "frames": len(rows), "duration_s": round(dur, 1), "rate_pps": round(len(rows) / max(dur, 1e-9), 1), "live_frames": len(live),
+            "markers": _markers, "revoked_frames": _n_live - len(live), "stitched": _stitch}
     NAMES = names_map()
     # BUILD RECORDS (data/builds/*.json): individual components read from the donor car's shop / pane / tune tabs — matched to a session car by cid
     BUILDS = []; bdir = os.path.join(ROOT, "data", "builds")
@@ -1761,6 +1969,10 @@ def main():
                            "start": [round(rs[0]["PosX"]), round(rs[0]["PosZ"])], "end": [round(rs[-1]["PosX"]), round(rs[-1]["PosZ"])],
                            "route_key": "loop:" + lname, "route": lname, "anchor": _anchor_at(rs[0]["PosX"], rs[0]["PosZ"]),
                            "start_is_line": 0})
+    for _e in ev_out:                                   # what the game revoked or froze inside each event
+        _ms = [m for m in _markers if _e["t0"] - 0.05 <= m["t"] <= _e["t1"] + 0.05]
+        _e["markers"] = _ms; _e["rewinds"] = sum(1 for m in _ms if m["kind"] == "rewind")
+        _e["pauses"] = sum(1 for m in _ms if m["kind"] == "pause"); _e["pause_s"] = round(sum(m["dur_s"] for m in _ms if m["kind"] == "pause"), 1)
     sess["events"] = ev_out
     # ---- crests, top-speed pull, warm tires, temps medians, coverage + advice per config ----
     crests = []; top_pull = defaultdict(float); warm_n = defaultdict(int); temps_acc = defaultdict(lambda: {w: [] for w in W})
@@ -1941,7 +2153,9 @@ def main():
             # 4th column rides through resample un-interpolated (a state is categorical); the 5th is ELEVATION,
             # which is continuous and interpolates like speed. PosY was in every capture and reached nothing —
             # a whole channel of the road (climbs, crests, compressions) that the lab could not draw.
-            if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r), r.get("PosY", 0.0)) for r in rows_]
+            # 6th column: the game's own odometer (DistanceTraveled), continuous like elevation -- the LAP DISTANCE
+            # axis Jett asked for, monotonic once the final timeline has revoked the rewound rows
+            if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r), r.get("PosY", 0.0), r.get("DistanceTraveled", 0.0)) for r in rows_]
             return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in rows_]
         def resample(pts, step=4.0):   # -> list of PIECES; a jump > 150 m between consecutive rows (respawn / rewind / teleport) starts a new piece
             pieces = []; cur = [pts[0]] if pts else []
@@ -1963,7 +2177,8 @@ def main():
                     _base = (pc[j][0] + (pc[j + 1][0] - pc[j][0]) * f, pc[j][1] + (pc[j + 1][1] - pc[j][1]) * f, s_, pc[j][2] + (pc[j + 1][2] - pc[j][2]) * f)
                     _cat = (max(pc[j][3], pc[j + 1][3]),) if len(pc[j]) > 3 and len(pc[j + 1]) > 3 else ()   # categorical: carry the WORSE of the bracketing states, never a blend
                     _ele = ((pc[j][4] + (pc[j + 1][4] - pc[j][4]) * f,) if len(pc[j]) > 4 and len(pc[j + 1]) > 4 else ())   # continuous: interpolate like speed
-                    P_.append(_base + _cat + _ele)
+                    _dst = ((pc[j][5] + (pc[j + 1][5] - pc[j][5]) * f,) if len(pc[j]) > 5 and len(pc[j + 1]) > 5 else ())   # the odometer, likewise
+                    P_.append(_base + _cat + _ele + _dst)
                     s_ += step
                 out.append(P_)
             return out
@@ -2341,6 +2556,13 @@ def main():
             it struck out five of the six fastest laps on record, moving the reference best 29.7 -> 30.4 s and
             heading for 34.0 s once every session re-analysed. Only a smashable hit is unambiguous."""
             return sum(1 for r in loop_rows if w_["t0"] <= r["t"] <= w_["t1"] and (r.get("SmashableVelDiff") or 0) > 0)
+        def _pts_out(pts_, all_):
+            """[arc_m, mph, grip, x, z, elev_m, lap_dist_m] -- lap_dist from the game's odometer, zeroed at the
+            lap's first point; None on traces resampled without it. Older 5/6-column rows still read."""
+            d0 = all_[0][6] if all_ and len(all_[0]) > 6 else None
+            return [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]),
+                     round(p[5], 1) if len(p) > 5 else None,
+                     (round(p[6] - d0) if (d0 is not None and len(p) > 6) else None)] for p in pts_]
         def _thin(pts_, n):
             # Thin to ~n points but NEVER drop an impact: the map/trace draw their impact markers from these very
             # points, so a thinned-out hit would vanish from the map while the stored `impacts` count still claimed it.
@@ -2399,7 +2621,13 @@ def main():
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,
                                   "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,
                                   "tune_hash": _th,
-                                  "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]), round(p[5], 1) if len(p) > 5 else None] for p in _thin(pts_w, 300)]})
+                                  "pts": _pts_out(_thin(pts_w, 300), pts_w),
+                                  "lap_dist_m": round(pts_w[-1][6] - pts_w[0][6]) if len(pts_w[0]) > 6 else None,
+                                  "rewinds": sum(1 for m in _markers if m["kind"] == "rewind" and w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05),
+                                  "pauses": sum(1 for m in _markers if m["kind"] == "pause" and w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05),
+                                  "pause_s": round(sum(m["dur_s"] for m in _markers if m["kind"] == "pause" and w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05), 1),
+                                  "markers": [dict(m, t=round(m["t"] - w["t0"], 2)) for m in _markers if w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05],
+                                  "stitched": 1 if (_stitch and w["t0"] <= 0.5) else 0})
             # A PARTIAL LAP IS NOT THIS BUILD'S BEST LAP. `valid` only requires 70% of the session's own
             # reference arc, so on a course driven in fragments the shortest window wins on wall-clock and
             # becomes the stored trace -- the backfill surfaced five courses whose trace covered under half the
@@ -2418,7 +2646,7 @@ def main():
             # point at the exact spot on the course map (no arc-to-path alignment guesswork). Older 2-column
             # traces still render: every consumer treats columns 3-5 as optional.
             speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"),
-                                      "pts": [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]), round(p[5], 1) if len(p) > 5 else None] for p in _thin(pts_all, 300)]}
+                                      "pts": _pts_out(_thin(pts_all, 300), pts_all)}
         # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}
@@ -2555,7 +2783,7 @@ def main():
                 if not cur_ or e["best_lap"] < cur_["best_lap"] or cur_.get("session") == sid and e["best_lap"] <= cur_["best_lap"]:
                     model["best_laps"][e["car"]] = {"best_lap": e["best_lap"], "session": sid, "name": cinfo.get("name"), "class": cinfo.get("class"), "pi": cinfo.get("pi"), "drivetrain": cinfo.get("drivetrain"),
                                                     "build_id": cinfo.get("build_id"), "hp": (cinfo.get("sig") or {}).get("hp_peak"), "gears": (cinfo.get("sig") or {}).get("gear_count")}   # the BEST BUILD that set the record
-        if _lap_rows:
+        if _lap_rows and write_side:                       # a replay analysis (--out .../_replay_analysis) writes no history
             try: lap_store.put_laps(ROOT, _lap_rows)     # EVERY covering lap — append-only, idempotent per (course, session, cid, t0)
             except Exception as _e: print(f"[laps] store write failed: {_e!r}")
         trm = model.setdefault("speed_traces", {})   # per-tune traces: a cid's saved trace only improves (faster lap replaces slower); the 10 fastest tunes kept

@@ -67,7 +67,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "4"   # 2 = COURSE NAMES; 3 = ANCHORS (route_anchor, session_event, ref_route.is_race, course_route.anchor_*); 4 = the game's EVENT CATALOGUE (ref_track_info, ref_race_collection, ref_career_race, ref_rivals_event, ref_car_restriction, v_rivals_route) -- all 2026-09-05, applied by migrate()
+SCHEMA_VERSION = "5"   # 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -426,6 +426,22 @@ V2_VIEWS = {
     JOIN ref_track_info ti ON ti.track_key = cr.track_key""",
 }
 V2_COLUMNS["session_event"] = [("start_is_line", "INTEGER")]
+# schema 5 -- LAPS AS THE GAME TIMED THEM
+V2_COLUMNS["lap"] = [("lap_dist_m", "REAL"), ("rewinds", "INTEGER DEFAULT 0"), ("pauses", "INTEGER DEFAULT 0"),
+                     ("pause_s", "REAL DEFAULT 0"), ("stitched", "INTEGER DEFAULT 0")]
+V2_COLUMNS["lap_point"] = [("dist_m", "REAL")]
+V2_TABLES["lap_marker"] = """CREATE TABLE IF NOT EXISTS lap_marker (
+  lap_id   INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
+  i        INTEGER NOT NULL,
+  kind     TEXT NOT NULL,
+  t        REAL,
+  dur_s    REAL,
+  race_s   REAL,
+  dist_m   REAL,
+  over_line INTEGER,
+  detail   TEXT,
+  PRIMARY KEY (lap_id, i)
+) WITHOUT ROWID"""
 
 
 def ensure_columns(cx, table, cols):

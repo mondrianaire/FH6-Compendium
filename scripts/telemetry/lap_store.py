@@ -52,6 +52,12 @@ def connect(root):
         pts TEXT NOT NULL,                          -- [[arc_m, mph, grip, x, z], ...]
         impacts INTEGER DEFAULT 0,                  -- grip-code-4 points in this lap: contact / jolt
         void INTEGER DEFAULT 0,                     -- 1 = time invalidated by contact (timed run only)
+        lap_dist_m REAL,                            -- the game's odometer over the lap (final timeline)
+        rewinds INTEGER DEFAULT 0,                  -- rewinds the game revoked inside this lap
+        pauses INTEGER DEFAULT 0,                   -- menu / pause silences inside this lap
+        pause_s REAL DEFAULT 0,                     -- seconds the game clock stood still inside it
+        markers TEXT,                               -- JSON: the rewind / pause markers, t relative to lap start
+        stitched INTEGER DEFAULT 0,                 -- 1 = the opening came from the previous capture file
         UNIQUE (route_key, session, cid, t0))""")
     cx.execute("CREATE INDEX IF NOT EXISTS ix_lap_route ON lap_traces(route_key, cid, lap_s)")
     _migrate(cx)
@@ -66,7 +72,10 @@ def _migrate(cx):
     ALTER TABLE ADD COLUMN with a constant DEFAULT is metadata-only in SQLite — no row rewrite, no data touched."""
     have = {r[1] for r in cx.execute("PRAGMA table_info(lap_traces)")}
     for col, ddl in (("impacts", "impacts INTEGER DEFAULT 0"), ("void", "void INTEGER DEFAULT 0"),
-                     ("tune_hash", "tune_hash TEXT")):
+                     ("tune_hash", "tune_hash TEXT"), ("lap_dist_m", "lap_dist_m REAL"),
+                     ("rewinds", "rewinds INTEGER DEFAULT 0"), ("pauses", "pauses INTEGER DEFAULT 0"),
+                     ("pause_s", "pause_s REAL DEFAULT 0"), ("markers", "markers TEXT"),
+                     ("stitched", "stitched INTEGER DEFAULT 0")):
         if col not in have:
             cx.execute("ALTER TABLE lap_traces ADD COLUMN " + ddl)
             cx.commit()
@@ -87,17 +96,25 @@ def put_laps(root, rows):
         cx = connect(root)
         try:
             cx.executemany(
-                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts, impacts, void, tune_hash)
-                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:pts,:impacts,:void,:tune_hash)
+                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts, impacts, void, tune_hash,
+                                        lap_dist_m, rewinds, pauses, pause_s, markers, stitched)
+                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:pts,:impacts,:void,:tune_hash,
+                           :lap_dist_m,:rewinds,:pauses,:pause_s,:markers,:stitched)
                    ON CONFLICT(route_key, session, cid, t0) DO UPDATE SET
                      lap_s=excluded.lap_s, arc_m=excluded.arc_m, pts=excluded.pts, solo=excluded.solo,
                      build_id=excluded.build_id, class=excluded.class, pi=excluded.pi, drivetrain=excluded.drivetrain,
-                     impacts=excluded.impacts, void=excluded.void, tune_hash=excluded.tune_hash""",
+                     impacts=excluded.impacts, void=excluded.void, tune_hash=excluded.tune_hash,
+                     lap_dist_m=excluded.lap_dist_m, rewinds=excluded.rewinds, pauses=excluded.pauses,
+                     pause_s=excluded.pause_s, markers=excluded.markers, stitched=excluded.stitched""",
                 # re-analysis runs every 20-90 s: a lap re-scored as clean must be able to un-void itself, so
                 # impacts/void are overwritten on conflict like every other re-derived field.
                 [dict(r, pts=json.dumps(r["pts"], separators=(",", ":")),
                       impacts=int(r.get("impacts") or 0), void=1 if r.get("void") else 0,
-                      tune_hash=r.get("tune_hash")) for r in rows])
+                      tune_hash=r.get("tune_hash"), lap_dist_m=r.get("lap_dist_m"),
+                      rewinds=int(r.get("rewinds") or 0), pauses=int(r.get("pauses") or 0),
+                      pause_s=float(r.get("pause_s") or 0.0),
+                      markers=json.dumps(r["markers"], separators=(",", ":")) if r.get("markers") else None,
+                      stitched=1 if r.get("stitched") else 0) for r in rows])
             cx.commit()
             return len(rows)
         finally:

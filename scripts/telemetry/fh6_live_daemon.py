@@ -390,7 +390,7 @@ def ingest(p, t_mono):
         row = [time.time(), t_mono, p["Speed"] * 2.23694, p["AccelX"] / G, p["AccelZ"] / G, math.degrees(p["AngVelY"])]
         row += [(p["TireTempF" + w] - 32.0) * 5.0 / 9.0 for w in W] + [p[k] for k in FIELDS]
         ST.csv_writer.writerow(row)
-        _roll_capture_if_big()
+        _roll_capture_if_big(c)
     with ST.lock:
         ST.latest = c; ST.frames += 1; ST.last_pkt = time.monotonic()
         ST.pps_win.append(ST.last_pkt); ST.pps_win = [x for x in ST.pps_win if ST.last_pkt - x < 2.0]
@@ -2040,7 +2040,7 @@ class H(BaseHTTPRequestHandler):
 CAPTURE_ROLL_MB = 192          # one analyze_session pass over this much capture costs ~15 s
 
 
-def _roll_capture_if_big():
+def _roll_capture_if_big(c=None):
     """Start a fresh capture file once this one is large. Jett's call, and it is the better fix.
 
     THE COST OF ANALYSIS IS THE SIZE OF THE CAPTURE. Every pass re-reads the whole file, so on a session that
@@ -2062,6 +2062,18 @@ def _roll_capture_if_big():
             return
         if ST.csv_file.tell() < CAPTURE_ROLL_MB * 1024 * 1024:
             return
+        # NEVER MID-LAP (2026-09-06). Three of the five captures of 2026-09-05 opened inside a timed lap
+        # because this roll fired on size alone, and every lap it cut became two fragments. Once the file
+        # is big, wait for the game's own lap boundary (CurrentLap reset) or the end of the timed event;
+        # a lap that outlasts twice the budget is cut anyway so a marathon cannot grow the file forever.
+        c = c if c is not None else (ST.latest or {})   # the frame whose row was just written
+        in_lap = bool(c.get("ev")) and (c.get("lapt") or 0.0) >= 1.0
+        if in_lap and ST.csv_file.tell() < 2 * CAPTURE_ROLL_MB * 1024 * 1024:
+            if not getattr(ST, "_roll_deferred", False):
+                ST._roll_deferred = True
+                print(f"[roll] capture reached {CAPTURE_ROLL_MB} MB mid-lap -> rolling at the next lap boundary")
+            return
+        ST._roll_deferred = False
         old = ST.csv_path
         try: ST.csv_file.close()
         except Exception: pass

@@ -235,18 +235,43 @@ def _save_tags():
     os.makedirs(os.path.dirname(tp), exist_ok=True)
     with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags, "stint_starts": ST.stint_starts}, f, indent=2, ensure_ascii=False)
 
+_ROUTE_STARTS = None    # [(name, start_x, start_z, is_race)] from the CATALOGUE — the S/F-line lookup for the live name
+
+
+def _route_starts():
+    """Every named route's start point, from the game's catalogue in fh6.db (ref_route + its first geometry
+    point, which is the start/finish for a loop and the grid for a P2P). This REPLACES the stale
+    data/routes.json (95 routes, pre-objectmodel — it never held The Goliath or 74 other catalogued routes,
+    so the S/F match returned 'Rivals course' for them). Cached for the daemon's life; a restart re-reads."""
+    global _ROUTE_STARTS
+    if _ROUTE_STARTS is None:
+        _ROUTE_STARTS = []
+        try:
+            import sqlite3
+            cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
+            firsts = {}
+            for rid, x, z in cx.execute("SELECT route_id, x, z FROM ref_route_point WHERE i = 0"):
+                firsts[rid] = (x, z)
+            for rid, name, is_race in cx.execute("SELECT route_id, name, is_race FROM ref_route WHERE name IS NOT NULL"):
+                p = firsts.get(rid)
+                if p:
+                    _ROUTE_STARTS.append((name, p[0], p[1], bool(is_race)))
+            cx.close()
+        except Exception:
+            _ROUTE_STARTS = []
+    return _ROUTE_STARTS
+
+
 def _match_route_name(sf):
-    """Best-effort LIVE course name: the nearest known route start within ~120 m. The analyzer does the rigorous
-    attribution (start + heading + length); this is only for the live 'auto-tracking X' label."""
+    """Best-effort LIVE course name: the nearest catalogued route START within ~120 m of the S/F crossing.
+    The analyzer does the rigorous attribution (start + heading + length); this is the live 'auto-tracking X'
+    label. Race routes win a tie with a free-roam ribbon that merely shares the coordinate."""
     try:
-        with open(os.path.join(ROOT, "data", "routes.json"), encoding="utf-8") as f:
-            routes = json.load(f).get("routes", {})
-        best, bd = None, 120.0
-        for key, r in routes.items():
-            rs = r.get("start")
-            if rs and len(rs) >= 2:
-                d = math.hypot(sf[0] - rs[0], sf[1] - rs[1])
-                if d < bd: bd, best = d, (r.get("name") or key)
+        best, bd, best_race = None, 120.0, False
+        for name, sx, sz, is_race in _route_starts():
+            d = math.hypot(sf[0] - sx, sf[1] - sz)
+            if d < bd or (d < bd + 15 and is_race and not best_race):
+                bd, best, best_race = d, name, is_race
         return best
     except Exception:
         return None

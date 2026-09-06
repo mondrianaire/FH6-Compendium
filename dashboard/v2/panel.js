@@ -75,6 +75,7 @@ function adoptMode(m) {
 }
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
 let ROUTE = null;   // in a timed event with no learned course: the catalogued route the car is on (locateRouteInEvent)
+let LOOP = null;    // the daemon's S/F-crossing identity {name,start} — authoritative in an event, matched to a route START (adoptLoop)
 let COURSE_MATCH = null;           // { dist, secondKey, secondDist } from the last locateCourse() — how sure the current course is
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
@@ -1199,7 +1200,33 @@ function addLiveDot(body) {
 // Learned courses share road (17 pairs in world.json overlap within 60 m), so the incumbent keeps
 // the car while it is within 90 m unless a challenger is nearer by 25 m: a flip a second after a
 // reload would orphan the per-course view state that was just restored.
+// THE START/FINISH LINE NAMES THE MAP (Jett 2026-09-06). The daemon crosses the S/F at event start and
+// matches that point to a route START (fh6_live_daemon._match_route_name) — one route per start, so it is
+// UNAMBIGUOUS, unlike the whole-path position match. It arrives as the `loop` SSE event; adopt it as the
+// authoritative identity for the event, resolving to a learned course (with laps) by name when we have one,
+// else the catalogued route (map + name). Position matching (locateCourse / locateRouteInEvent) is then only
+// the fallback for free roam and roads with no S/F crossing.
+async function adoptLoop(loop) {
+  const nm = loop && loop.name && loop.name !== "Rivals course" ? loop.name : null;
+  LOOP = nm ? { name: nm, start: loop.start || null } : null;
+  if (!LOOP) { if (ROUTE) { ROUTE = null; paintLeft(); } return; }   // loop ended -> let position take over
+  const learned = WORLD && Object.entries(WORLD.courses).find(([, c]) => c.name && c.name === nm);
+  if (learned) {
+    ROUTE = null;
+    if (learned[0] !== COURSE_KEY) await onCourseChange(COURSE_KEY, learned[0]);
+    else paintLeft();
+    return;
+  }
+  const cat = WORLD && Object.entries(WORLD.routes).find(([, r]) => r.name === nm);
+  if (cat) {
+    if (COURSE_KEY) { COURSE = null; COURSE_KEY = null; }
+    ROUTE = { id: cat[0], name: nm, len: cat[1].len, loop: cat[1].loop, alsoName: null };
+  }
+  paintLeft();
+}
+
 async function locateCourse() {
+  if (LOOP) return;                                   // the S/F crossing already named the route — authoritative
   if (!LIVEPOS || !WORLD || !WORLD.courses) return;
   // Distance from the live car to a course's LINE, not its vertices. The world path is a decimated
   // centre-line — on a long course like The Goliath it sits ~415 m between points, so the nearest

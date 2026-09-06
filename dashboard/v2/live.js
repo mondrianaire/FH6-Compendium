@@ -66,6 +66,7 @@ function connect() {
     ES.addEventListener("strip", (e) => { LIVE.strip.push(JSON.parse(e.data)); if (LIVE.strip.length > 1800) LIVE.strip.splice(0, LIVE.strip.length - 1800); paintDockTrace(); });
     ES.addEventListener("corner", (e) => { LIVE.corners.push(JSON.parse(e.data)); if (LIVE.corners.length > 240) LIVE.corners.splice(0, LIVE.corners.length - 240); paintDockTrace(); paintRight(); });
     ES.addEventListener("mode", (e) => adoptMode(JSON.parse(e.data)));
+    ES.addEventListener("loop", (e) => adoptLoop(JSON.parse(e.data)));   // the daemon's S/F-crossing route name — authoritative map identity in an event
     ES.addEventListener("snapshot", (e) => onLive(JSON.parse(e.data)));
     ES.addEventListener("status", (e) => onLive(JSON.parse(e.data)));
     // BUG (2026-09-03, Jett caught it live: "?700" badge, "ordinal 3840" instead of the car's name):

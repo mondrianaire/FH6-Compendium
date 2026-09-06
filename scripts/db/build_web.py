@@ -300,16 +300,37 @@ def main(argv=None):
 
     # ---- world map: every game route, decimated, for the FREE-mode left pane ------------
     # ~8 m spacing keeps 169 routes under a megabyte and is still finer than the map can draw.
+    # Per-route MODE tags + discipline + spawn zone feed the free-mode Course Browser: modes come from
+    # ref_event.kind (a route is used by rivals and/or career events), is_race is the world activation sphere,
+    # disc is the route's dominant discipline, spawn is the activation-sphere centre (race routes only).
+    import collections as _cl
+    _mode = _cl.defaultdict(set); _disc = _cl.defaultdict(_cl.Counter)
+    for _rid, _kind, _d in cx.execute("SELECT route_id, kind, discipline FROM ref_event WHERE route_id IS NOT NULL"):
+        if _kind: _mode[_rid].add(_kind)
+        if _d: _disc[_rid][_d] += 1
+    _spawn = {}
+    try:
+        import sys as _sys
+        _sys.path.insert(0, os.path.join(ROOT, "scripts", "telemetry"))
+        import fh6_anchors as _fa
+        for _a in _fa.load():
+            _spawn[str(_a["route_id"])] = [round(_a["x"]), round(_a["z"])]   # key by str: ref_route.route_id comes back as text
+    except Exception:                                    # noqa: BLE001  — no game install / no anchors: race tiles just omit the spawn dot
+        pass
     world = {"routes": {}, "bbox": None}
     xs, zs = [], []
-    for r in cx.execute("SELECT route_id, length_m, is_loop, name, name_confidence FROM ref_route"):
+    for r in cx.execute("SELECT route_id, length_m, is_loop, name, name_confidence, is_race FROM ref_route"):
         pts = [[round(p["x"]), round(p["z"])] for p in cx.execute(
             "SELECT x, z FROM ref_route_point WHERE route_id=? AND (i % 4)=0 ORDER BY i", (r["route_id"],))]
         if len(pts) < 3:
             continue
-        world["routes"][r["route_id"]] = {"len": r["length_m"], "loop": r["is_loop"],
-                                           "name": r["name"], "name_confidence": r["name_confidence"],
-                                           "pts": pts}
+        rid = r["route_id"]
+        _dc = _disc.get(rid)
+        world["routes"][rid] = {"len": r["length_m"], "loop": r["is_loop"],
+                                "name": r["name"], "name_confidence": r["name_confidence"],
+                                "is_race": bool(r["is_race"]), "modes": sorted(_mode.get(rid, ())),
+                                "disc": (_dc.most_common(1)[0][0] if _dc else None),
+                                "spawn": _spawn.get(str(rid)), "pts": pts}
         xs += [p[0] for p in pts]; zs += [p[1] for p in pts]
     if xs:
         world["bbox"] = [min(xs), max(xs), min(zs), max(zs)]

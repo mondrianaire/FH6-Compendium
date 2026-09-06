@@ -76,6 +76,8 @@ function adoptMode(m) {
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
 let ROUTE = null;   // in a timed event with no learned course: the catalogued route the car is on (locateRouteInEvent)
 let LOOP = null;    // the daemon's S/F-crossing identity {name,start} — authoritative in an event, matched to a route START (adoptLoop)
+let BROWSE_PICK = null;            // Course Browser: the route id whose location+shape the left world map is zoomed to
+let BROWSE_FILTER = "all";         // Course Browser mode chip: all | rivals | race | career | free
 let COURSE_MATCH = null;           // { dist, secondKey, secondDist } from the last locateCourse() — how sure the current course is
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
@@ -89,6 +91,14 @@ function buildStatus() {
   if (!CUR) return { key: "none", label: "no car", tone: "dim", why: "waiting for the game" };
   const disk = CUR.disk, q = matchQuality(CUR.match);
   const drift = !!(CUR.match && LIVE_PI && CUR.match.chosen_pi != null && LIVE_PI !== CUR.match.chosen_pi);
+  // TRANSPORT BEFORE BUILD. A failed /disk-tune fetch sets diskErr AND leaves CUR.disk null (live.js:233),
+  // so while this test sat below `!disk` it could never fire: an unreachable daemon reported "no save on
+  // disk for this car" — a claim about the save file, made when nothing about the save file was known.
+  // "offline" is a precondition like "no car", not one of the build statuses in docs/dashboard-states.md
+  // §3, so it belongs here with them and not among the rows of that table.
+  if (CUR.diskErr) return { key: "offline", label: "save not read", tone: "dim",
+    why: "the daemon could not be reached, so nothing is known about the save — absence of signal is not evidence",
+    steps: ["start the daemon from the worktree: python scripts/telemetry/fh6_live_daemon.py", "then REREAD BUILD"] };
   if (!disk) return { key: "unknown", label: "unknown / unsaved", tone: "bad",
     why: "no save on disk for this car", steps: ["save the setup in-game with a name", "the save is read the moment a menu closes"] };
   if (drift) return { key: "unknown", label: "unknown / unsaved", tone: "bad",
@@ -98,9 +108,6 @@ function buildStatus() {
   const hwOk = !!(MATCH && MATCH.hw && MATCH.hw.length);
   const tuneOk = !!(MATCH && MATCH.exact && MATCH.exact.length);
   const ambiguous = q.level !== "ok";
-  if (CUR.diskErr) return { key: "offline", label: "save not read", tone: "dim",
-    why: "the daemon could not be reached, so nothing is known about the save — absence of signal is not evidence",
-    steps: ["start the daemon from the worktree: python scripts/telemetry/fh6_live_daemon.py", "then REREAD BUILD"] };
   if (!hwOk) return { key: "unknown", label: locked ? "identified · importing for history" : "new build on disk", tone: "warn",
     // The save IS the equipped build by construction and its parts/sliders are already decoded in the
     // deliverable — the build sheet renders now. What lags is only the DATABASE holding it for history/A-B,
@@ -159,6 +166,7 @@ const courseFile = (key) => "course/" + String(key).replace(/[^A-Za-z0-9_\-]/g, 
 async function panelBoot() {
   // the page's own chrome, from the view store, before anything paints
   DOCK_SPAN = vg("dockSpan", 600); SHOW_OFFMAP = !!vg("showOffmap", false); FOLLOW.on = vg("follow", false) === true;
+  BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null);
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
   WORLD = w; DIAG = d; COURSES = c;
@@ -1028,7 +1036,7 @@ function paintLeft() {
   const course = MODE.suggest === "course" && COURSE;
   // 169 polylines are not free: rebuild the map only when what it shows changes, and let the
   // live dot ride on the map that is already there.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game]);
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game, BROWSE_PICK]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
@@ -1056,7 +1064,13 @@ function paintLeft() {
   } else {
     const n = WORLD ? Object.keys(WORLD.routes).length : 0;
     const off = WORLD ? routeSplit().off.length : 0;
-    if (ROUTE) {
+    const bp = BROWSE_PICK && WORLD && WORLD.routes[BROWSE_PICK];
+    if (bp) {
+      // Course Browser drove this: the map is zoomed to the picked course's location + shape
+      hd.innerHTML = `<b class="trackname">${esc(bp.name || "Route " + BROWSE_PICK)}</b>
+        <span class="chip w">BROWSING</span>
+        <span class="why">${n0(bp.len)} m${bp.loop ? " · loop" : " · P2P"}${bp.is_race ? " · race event" : ""}${(bp.modes || []).length ? " · " + bp.modes.join(", ") : ""} · click the tile again to clear</span>`;
+    } else if (ROUTE) {
       // the map IS identified in an event, from the catalogued route — even with no laps recorded here yet
       hd.innerHTML = `<b class="trackname">${esc(ROUTE.name)}</b>
         <span class="chip w">${MODE.game === "event" ? "EVENT · CATALOGUED" : "ROUTE"}</span>
@@ -1093,6 +1107,13 @@ function worldMapHTML() {
   shown.forEach(({ r }) => r.pts.forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   Object.values(WORLD.courses || {}).forEach((c) => (c.path || []).forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   if (!isFinite(x0)) [x0, x1, z0, z1] = WORLD.bbox;
+  const bpr = BROWSE_PICK && WORLD.routes[BROWSE_PICK];       // Course Browser pick: zoom the map to this route's location + shape
+  if (bpr && bpr.pts && bpr.pts.length > 1) {
+    let a = Infinity, b = -Infinity, c = Infinity, d = -Infinity;
+    bpr.pts.concat(bpr.spawn ? [bpr.spawn] : []).forEach(([x, z]) => { if (x < a) a = x; if (x > b) b = x; if (z < c) c = z; if (z > d) d = z; });
+    const mx = ((b - a) || 200) * 0.35 + 140, mz = ((d - c) || 200) * 0.35 + 140;   // margin keeps some island context around the course
+    x0 = a - mx; x1 = b + mx; z0 = c - mz; z1 = d + mz;
+  }
   // the viewBox takes the ISLAND's own aspect, so the map fills the pane instead of sitting as a
   // small shape inside a letterbox — the pane's height is the scarce thing, not the map's
   const pad = 12, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
@@ -1107,14 +1128,85 @@ function worldMapHTML() {
   // in an event, the catalogued route the car is on, drawn bright over the rest so the map is legible
   const hi = (ROUTE && WORLD.routes[ROUTE.id] && (WORLD.routes[ROUTE.id].pts || []).length > 1)
     ? line(WORLD.routes[ROUTE.id].pts, "#e3b341", 2.8, 1) : "";
+  // Course Browser pick, drawn brightest with start ● finish ● and spawn ○ so its location + shape read at a glance
+  const bhi = (bpr && bpr.pts && bpr.pts.length > 1) ? line(bpr.pts, "#ffcf4d", 3, 1) : "";
+  const bmk = (bpr && bpr.pts && bpr.pts.length > 1) ? (
+    (bpr.spawn ? `<circle cx="${px(bpr.spawn[0]).toFixed(0)}" cy="${pz(bpr.spawn[1]).toFixed(0)}" r="6" fill="none" stroke="#c792ea" stroke-width="2.2"/>` : "")
+    + `<circle cx="${px(bpr.pts[bpr.pts.length - 1][0]).toFixed(0)}" cy="${pz(bpr.pts[bpr.pts.length - 1][1]).toFixed(0)}" r="5" fill="#ff5d7d" stroke="#0f1720" stroke-width="1.5"/>`
+    + `<circle cx="${px(bpr.pts[0][0]).toFixed(0)}" cy="${pz(bpr.pts[0][1]).toFixed(0)}" r="5" fill="#33d17a" stroke="#0f1720" stroke-width="1.5"/>`) : "";
   // no follow toggle here: following is course-only (see followSpan()) -- offering it on the
   // world map invited turning on a satnav zoom that could only ever collapse the island view.
   const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>
       <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
       ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}`;
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
-      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}<g id="liveDot"></g></svg>
+      style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}${bhi}${bmk}<g id="liveDot"></g></svg>
     ${mapDrawerHTML(`<div class="legend">${legend}</div>`)}`;
+}
+
+/* ------------------------------------------------- Course Browser (free-mode right tab)
+   Every known route as a shape tile; pick one and the left world map zooms to its location.
+   Filter chips separate the modes we identified (a route is used by rivals AND/OR career events;
+   `race` is the ones with a world activation sphere) without double-listing, since most courses
+   support several modes at once. */
+const BROWSE_CHIPS = [["all", "All"], ["rivals", "Rivals"], ["race", "Race"], ["career", "Career"], ["free", "Free-roam"]];
+function browseMatch(r, f) {
+  const m = r.modes || [];
+  if (f === "all") return true;
+  if (f === "rivals") return m.includes("rivals");
+  if (f === "race") return !!r.is_race;
+  if (f === "career") return m.includes("career");
+  if (f === "free") return !r.is_race && !m.includes("rivals") && !m.includes("career");
+  return true;
+}
+function tileSvg(r, sel) {
+  const pts = r.pts || []; if (pts.length < 2) return "";
+  const step = Math.max(1, Math.ceil(pts.length / 60));       // tiny tile: ~60 points is plenty
+  const P = pts.filter((_, i) => i % step === 0 || i === pts.length - 1);
+  const all = r.spawn ? P.concat([r.spawn]) : P;
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  all.forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; });
+  const W = 108, H = 74, pad = 7, sx = (x1 - x0) || 1, sz = (z1 - z0) || 1;
+  const s = Math.min((W - 2 * pad) / sx, (H - 2 * pad) / sz);
+  const ox = pad + (W - 2 * pad - sx * s) / 2, oy = pad + (H - 2 * pad - sz * s) / 2;
+  const X = (x) => ox + (x - x0) * s, Y = (z) => H - oy - (z - z0) * s;
+  const line = P.map(([x, z]) => X(x).toFixed(1) + "," + Y(z).toFixed(1)).join(" ");
+  const col = r.is_race ? "var(--race,#ff8a3d)" : "var(--free,#7fb2ff)";
+  const dot = (p, c, rad) => p ? `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${rad}" fill="${c}"/>` : "";
+  const spawn = r.spawn ? `<circle cx="${X(r.spawn[0]).toFixed(1)}" cy="${Y(r.spawn[1]).toFixed(1)}" r="3" fill="none" stroke="#c792ea" stroke-width="1.4"/>` : "";
+  return `<svg viewBox="0 0 ${W} ${H}" class="tsvg${sel ? " on" : ""}" preserveAspectRatio="xMidYMid meet">
+    <polyline fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round" points="${line}"/>
+    ${spawn}${dot(P[P.length - 1], "#ff5d7d", 2.4)}${dot(P[0], "#33d17a", 2.4)}</svg>`;
+}
+function browserHTML() {
+  if (!WORLD || !WORLD.routes) return `<div class="why">no world data — run build_web.py</div>`;
+  const rows = Object.entries(WORLD.routes).map(([id, r]) => ({ id, r }));
+  const count = (f) => rows.filter(({ r }) => browseMatch(r, f)).length;
+  const chips = BROWSE_CHIPS.map(([f, lbl]) =>
+    `<button class="bchip ${BROWSE_FILTER === f ? "on" : ""}" data-bfilter="${f}">${lbl} <em>${count(f)}</em></button>`).join("");
+  const sel = rows.filter(({ r }) => browseMatch(r, BROWSE_FILTER))
+    .sort((a, b) => (a.r.name ? 0 : 1) - (b.r.name ? 0 : 1) || (a.r.name || "").localeCompare(b.r.name || "") || (a.id - b.id));
+  const tiles = sel.map(({ id, r }) => {
+    const nm = r.name || ("Route " + id);
+    const badges = [r.is_race ? `<span class="bb race">race</span>` : "",
+                    (r.modes || []).includes("rivals") ? `<span class="bb riv">rivals</span>` : "",
+                    (r.modes || []).includes("career") ? `<span class="bb car">career</span>` : "",
+                    r.disc ? `<span class="bb dsc">${esc(r.disc)}</span>` : ""].join("");
+    return `<button class="tile ${BROWSE_PICK === id ? "on" : ""}" data-bpick="${id}" title="${esc(nm)}">
+      ${tileSvg(r, BROWSE_PICK === id)}
+      <div class="tnm">${esc(nm)}</div>
+      <div class="tmeta">${n0(r.len)} m${r.loop ? " · loop" : " · P2P"}</div>
+      <div class="tbadges">${badges}</div></button>`;
+  }).join("");
+  return `<div class="bchips">${chips}</div>
+    <div class="tiles">${tiles || `<div class="why">no courses in this filter</div>`}</div>`;
+}
+function wireBrowser(body) {
+  body.querySelectorAll("[data-bfilter]").forEach((b) => b.onclick = () => {
+    BROWSE_FILTER = b.dataset.bfilter; VIEW.global.browseFilter = BROWSE_FILTER; viewSave(); paintRight(); });
+  body.querySelectorAll("[data-bpick]").forEach((b) => b.onclick = () => {
+    BROWSE_PICK = (BROWSE_PICK === b.dataset.bpick) ? null : b.dataset.bpick;   // click again to clear
+    VIEW.global.browsePick = BROWSE_PICK; viewSave(); paintLeft(); paintRight(); });
 }
 
 /* ------------------------------------------------- the map that follows you
@@ -1364,11 +1456,11 @@ function courseConfidenceBadge() {
 // Which pane the context calls for. In a menu the build is what can change, so its data asks and
 // ratification steps lead; on the road the corners you are taking lead; on a course with a
 // baseline set, the conclusions lead. A click pins a tab until the context class changes.
-const RT_LABEL = { corners: "Live corners", matrix: "Turn matrix", stats: "General statistics", concl: "Conclusions", build: "Build data" };
+const RT_LABEL = { corners: "Live corners", matrix: "Turn matrix", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser" };
 // "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
 // to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
 // list this function returns. Add "build" back to the free-mode array below to re-enable it.
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl"] : ["corners", "stats"]; }
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl"] : ["corners", "stats", "browser"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
@@ -1389,12 +1481,14 @@ function paintRight() {
   const cur = tabs.includes(RIGHT_TAB) ? RIGHT_TAB : ctx;
   const why = { corners: "every corner as you take it · newest first", matrix: "one row per course turn · this session",
                 stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
-                concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide" }[cur];
+                concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide",
+                browser: "every known course · pick one to locate it on the map" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
-  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : statsHTML();
+  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
-  if (cur !== "matrix") fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
+  if (cur === "browser") wireBrowser(body);
+  if (cur !== "matrix" && cur !== "browser") fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
     setPin(CUR.ordinal, b.dataset.pickts); if (COURSE) { vcourse(COURSE.key).filters.container = b.dataset.cont; viewSave(); }
     identify(carOf(CUR.cid), "pinned"); });

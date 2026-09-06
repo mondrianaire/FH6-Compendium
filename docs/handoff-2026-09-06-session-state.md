@@ -24,14 +24,17 @@ in route 5041's sphere.
 
 ## Open, in priority order
 
-0. **Lap canon: finish the rollout (needs the game OFF — heavy jobs hurt frame pacing).** Code and
-   tests are done and verified on `captures/fh6_20260905_232556.csv` (Beat 93.03 s over 4,733 m
-   against the catalogue's 4,732 m for Legend Island Circuit; Centenario 78.933 ×4 and 82.548). Still
-   to run, in order: (a) re-replay `captures/fh6_20260905_002546 … 063559` and `232556` — a killed
-   intermediate replay rewrote their `data/sessions/*.json` and the `laps.db` rows for 232556 with an
-   over-revoking analyzer; (b) `rebuild.py --only telemetry` (applies schema 5), `--check`, build_web;
-   (c) restart the daemon for the never-mid-lap capture roll (ask Jett first); (d) run
-   `measure_gaps_all.py` over all 198 captures for the corpus totals (was killed at 52/198).
+0. **Lap canon: rollout status.** Code shipped (commit a9cbcd1, 78 tests). Re-replay of all 25
+   captures from 2026-09-05 to `data/sessions` DONE 2026-09-06 (each ~8 s; the killed intermediate
+   replay's over-revoked JSONs and the 232556 `laps.db` rows are corrected). `rebuild.py --only
+   telemetry` + `--check` PASSED and `build_web` ran — `lap_marker` populated (14 rows), `lap`
+   carries lap_dist_m/rewinds/pauses/pause_s/stitched, `lap_point.dist_m` filled for the re-replayed
+   sessions. Verified: 232556 = Beat 93.03 s / Legend Island Circuit 4,732 m + Centenario 78.933 ×4
+   and 82.548. STILL OPEN: (a) `fh6.db` now MIXES lap-canon laps (09-05) with old-analyzer laps
+   (everything before 09-05) — a full-corpus re-replay (~198 files, ~30 min now the game is off) would
+   make it uniform; `lap_point.dist_m` is null on the old sessions until then. (b) daemon NOT yet
+   restarted for the never-mid-lap capture roll (ask Jett). (c) `measure_gaps_all.py` corpus census
+   not yet run.
 1. **Build Sheet overflow** — 5,289 px of content in an 819 px pane, no scrollbars. Jett's oldest
    open ask this week.
 2. **A/B testing regimen.** The slider-value diff for the `variation` status IS built (commit

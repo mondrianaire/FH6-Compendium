@@ -6,6 +6,8 @@ __pycache__/
 *.pyc
 data/_backup_courses_*/
 data/laps.db*
+data/fh6.db*
+data/logs/
 
 # atomic-write scratch files: analyze_session and the daemon write X.tmp then os.replace it
 *.tmp

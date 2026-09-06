@@ -57,21 +57,19 @@ def run(cx, aitracks, verbose=False):
                           t["peak_radius_m"], t["angle_deg"], t["dir"], t["kind"],
                           t["length_m"], t["width_m"], t["bank_deg"]))
 
-    matches = fh6_owt.match_courses(routes)
-    known = {r[0] for r in cx.execute("SELECT route_key FROM course")}
-    now = fh6db.utcnow()
-    mrows = []
-    for m in matches:
-        if m["route_key"] not in known:
-            continue
-        v = fh6_owt.verdict(m)
-        mrows.append((m["route_key"], m["route_id"] if v != "none" else None, v,
-                      m["mean_dev_m"], m["p95_dev_m"], m["covered"], m["len_ratio"],
-                      m["runner_up"], now))
-
+    # The course <-> route MATCH is no longer computed here (2026-09-05): stage course_match
+    # (scripts/db/import_course_match.py) does it from the DB alone, after telemetry AND routes, so a
+    # telemetry rerun cannot leave course_route empty. course_route is therefore NOT deleted below:
+    # its route_id has no cascade, the same ids are re-inserted before the deferred check, and a
+    # vanished .owt id is nulled first so the commit cannot fail on it.
+    new_ids = {r[0] for r in rrows}
     with cx:
         cx.execute("PRAGMA defer_foreign_keys=ON")
-        for t in ("course_route", "ref_route_turn", "ref_route_point", "ref_route"):
+        for stale in [r[0] for r in cx.execute("SELECT route_id FROM ref_route") if r[0] not in new_ids]:
+            cx.execute("UPDATE course_route SET route_id=NULL, match_kind='none' WHERE route_id=?", (stale,))
+            if fh6db.has_table(cx, "course_event"):
+                cx.execute("UPDATE course_event SET route_id=NULL WHERE route_id=?", (stale,))
+        for t in ("ref_route_turn", "ref_route_point", "ref_route"):
             cx.execute("DELETE FROM %s" % t)
         n_r = fh6db.upsert_many(cx, "ref_route", [
             "route_id", "name", "length_m", "n_points", "is_loop",
@@ -82,20 +80,8 @@ def run(cx, aitracks, verbose=False):
             "route_id", "turn_id", "seq", "arc_m", "apex_arc_m", "apex_x", "apex_y", "apex_z",
             "radius_m", "peak_radius_m", "angle_deg", "dir", "kind", "length_m", "width_m",
             "bank_deg"], trows, chunk=2000)
-        n_m = fh6db.upsert_many(cx, "course_route", [
-            "route_key", "route_id", "match_kind", "mean_dev_m", "p95_dev_m", "covered",
-            "len_ratio", "runner_up", "computed_utc"], mrows)
-        # a course that matches a whole game route inherits the route's identity
-        cx.execute("""UPDATE course SET length_m = COALESCE(length_m, (
-              SELECT r.length_m FROM course_route cr JOIN ref_route r ON r.route_id = cr.route_id
-               WHERE cr.route_key = course.route_key AND cr.match_kind IN ('verified','probable')))
-            WHERE length_m IS NULL""")
 
-    kinds = {}
-    for m in mrows:
-        kinds[m[2]] = kinds.get(m[2], 0) + 1
-    return {"ref_route": n_r, "ref_route_point": n_p, "ref_route_turn": n_t,
-            "course_route": n_m}, kinds
+    return {"ref_route": n_r, "ref_route_point": n_p, "ref_route_turn": n_t}, {}
 
 
 def main(argv=None):
@@ -115,7 +101,7 @@ def main(argv=None):
     fh6db.run_end(cx, rid, sum(counts.values()), 1, json.dumps({"counts": counts, "kinds": kinds}))
     for k in sorted(counts):
         print("  %-18s %8d" % (k, counts[k]))
-    print("  matches: %s" % ", ".join("%d %s" % (v, k) for k, v in sorted(kinds.items(), key=lambda t: -t[1])))
+    print("  (course <-> route matches are computed by stage course_match)")
     return 0
 
 

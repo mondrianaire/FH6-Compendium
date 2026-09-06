@@ -113,6 +113,18 @@ class Ref:
                             "mass_diff_kg, weight_dist_diff, tile, tile_count, confidence "
                             "FROM ref_part"):
             self.part[(r["slot"], r["part_id"])] = dict(r)
+        # The component id a part carries. For the engine / drivetrain / car_body / motor slots
+        # ref_part.key_id is the car's Ordinal (the game keys those tables by car), so the id
+        # the rest of the row needs -- EngineID, DrivetrainID, CarBodyID, MotorID -- lives in the
+        # part's data blob. Loaded for those four slots only.
+        self.component = {}
+        for r in cx.execute("SELECT slot, part_id, data FROM ref_part "
+                            "WHERE slot IN ('engine','drivetrain','car_body','motor') "
+                            "AND data IS NOT NULL"):
+            try:
+                self.component[(r["slot"], r["part_id"])] = json.loads(r["data"])
+            except (TypeError, ValueError):
+                pass
         self.bands = {}
         for r in cx.execute("SELECT slot, part_id, slider, def_value, min_value, max_value, "
                             "def_norm, locked FROM ref_part_slider"):
@@ -162,9 +174,15 @@ def run(cx, root=None, limit=None, verbose=False):
 
         # --- the component ids the rest of the row keys off -----------------
         def comp(slot, col):
+            # the part's own <col> (EngineID, DrivetrainID, CarBodyID, MotorID) -- NOT key_id,
+            # which for these slots is the car's Ordinal (see Ref.component)
             pid = parts.get(slot)
-            p = ref.part.get((slot, pid)) if pid is not None else None
-            return p["key_id"] if p else None
+            d = ref.component.get((slot, pid)) if pid is not None else None
+            v = d.get(col) if d else None
+            try:
+                return int(v) if v is not None else None
+            except (TypeError, ValueError):
+                return None
 
         engine_id = comp("engine", "EngineID")
         drivetrain_id = comp("drivetrain", "DrivetrainID")

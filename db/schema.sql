@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS schema_meta (
 
 CREATE TABLE IF NOT EXISTS import_run (
   run_id       INTEGER PRIMARY KEY,
-  kind         TEXT NOT NULL,           -- gamedb | strings | containers | sessions | courses | derive
+  kind         TEXT NOT NULL,           -- one of scripts/db/rebuild.py STAGES: gamedb | events | curves | parts_extra | containers | telemetry | routes | surface | course_match | route_names | corners | observations | diagnosis | field_catalog ('road_class' = surface before 2026-09-05)
   source       TEXT,                    -- path or description of what was read
   started_utc  TEXT NOT NULL,
   finished_utc TEXT,
@@ -276,6 +276,100 @@ CREATE TABLE IF NOT EXISTS ref_compound (
   data            TEXT
 );
 
+-- ---------------------------------------------------------------------------
+-- The three "part facts" tables, imported 2026-09-03 by scripts/db/import_parts_extra.py.
+-- Each one was expected to answer a question the lab had been solving empirically. Read the
+-- comments before reaching for them: two of the three answer a DIFFERENT question than the
+-- one their name suggests, and that is the whole value of importing them.
+-- ---------------------------------------------------------------------------
+
+-- List_PartAttribute, verbatim. 546 rows, PartAttributeID dense 1..546.
+--
+-- It does NOT carry per-part PI. Its only measures are Price, Mass, DragScale and
+-- WindInstabilityScale; there is no PI column here or anywhere else per part (the game DB
+-- names PI in exactly three places, all whole-car: Data_Car.PerformanceIndex, Data_Car.PI and
+-- CarClasses.Max*PerformanceIndex). DragScale and WindInstabilityScale are 1.0 in all 546 rows,
+-- so they carry no information at all, and Price takes only two values, 0 and 5000.
+--
+-- It also cannot be keyed to ref_part: NO column in any of the game DB's 205 tables references
+-- PartAttributeID (a full scan for an integer column with >=300 distinct values inside 1..546
+-- returns nothing), and the PartAttributeID-ordered ManufacturerID sequence does not appear as a
+-- sub-sequence of any manufacturer column in the database. slot/part_id are therefore always
+-- NULL and join_status is always 'orphan'; the columns exist so a future key can be filled in
+-- place rather than by a migration.
+--
+-- What it looks like, on evidence: an engine table. Its column set is List_UpgradeEngine's
+-- (ManufacturerID, Price, MassDiff, DragScale, WindInstabilityScale) with the mass made
+-- ABSOLUTE, and 438 of its 546 masses equal some Data_Engine.[EngineMass-kg] exactly (control:
+-- 1 of 546 against List_UpgradeCarBodyWeight.Mass). Its ManufacturerID is a dense 1..53 enum
+-- that is NOT List_PartManufacturer (739 rows, sparse, range 1..835) -- 7 of its 52 values do
+-- not exist there at all -- so it is a legacy id space. Treat this table as superseded data.
+CREATE TABLE IF NOT EXISTS ref_part_attribute (
+  attribute_id    INTEGER PRIMARY KEY,   -- List_PartAttribute.PartAttributeID
+  manufacturer_id INTEGER,               -- dense 1..53 legacy enum, NOT List_PartManufacturer
+  price           INTEGER,               -- 0 or 5000, nothing else
+  mass_kg         REAL,                  -- ABSOLUTE mass, not a diff
+  drag_scale      REAL,                  -- 1.0 in every row
+  wind_scale      REAL,                  -- 1.0 in every row
+  mass_is_engine  INTEGER DEFAULT 0,     -- mass_kg equals some Data_Engine.[EngineMass-kg]
+  slot            TEXT,                  -- always NULL: nothing references PartAttributeID
+  part_id         INTEGER,               -- always NULL
+  join_status     TEXT NOT NULL DEFAULT 'orphan',
+  FOREIGN KEY (slot, part_id) REFERENCES ref_part(slot, part_id)
+);
+
+-- UpgradePresetPackages: the game's OWN finished builds, one row per preset.
+-- 448 presets over 258 cars, every Ordinal joining ref_car. Each carries a complete 49-slot
+-- part list (ref_preset_part) and a 46-float tuning blob = the 36 ref_slider values in
+-- slot_index order followed by 10 gear-ratio slots, -1.0 where the gear does not exist.
+-- This is the lab's only source of author-intended reference builds to compare a user build to.
+CREATE TABLE IF NOT EXISTS ref_preset (
+  preset_id     INTEGER PRIMARY KEY,     -- UpgradePresetPackages.Id
+  ordinal       INTEGER REFERENCES ref_car(ordinal),
+  title         TEXT,                    -- resolved through ref_string
+  description   TEXT,
+  kind          TEXT,                    -- forza | offroad | race | drift … read off the thumbnail
+  thumbnail     TEXT,
+  purchasable   INTEGER,
+  release_order INTEGER,
+  n_parts       INTEGER,                 -- non-zero slot values on this preset
+  n_parts_joined INTEGER,                -- of those, how many hit ref_part
+  n_gears       INTEGER,                 -- gear slots that are not -1.0
+  tuning_hex    TEXT,                    -- the raw Tuning blob, unmodified
+  tuning        TEXT                     -- JSON {"sliders":{name:norm}, "gears":[…]}
+);
+CREATE INDEX IF NOT EXISTS ix_preset_ordinal ON ref_preset(ordinal);
+
+CREATE TABLE IF NOT EXISTS ref_preset_part (
+  preset_id  INTEGER NOT NULL REFERENCES ref_preset(preset_id),
+  slot       TEXT NOT NULL REFERENCES ref_slot(slot),
+  part_id    INTEGER NOT NULL,
+  name       TEXT,                       -- ref_part.name when the pair joins
+  joined     INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (preset_id, slot)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS ix_preset_part ON ref_preset_part(slot, part_id);
+
+-- CarExceptions, verbatim. 511 cars, every CarID joining ref_car.
+--
+-- NAME WARNING: these are not upgrade-rule exceptions. All eight flags are LIVERY and GRAPHICS
+-- exceptions -- whether a car has mirrors or windows to paint, and whether the stock or
+-- aftermarket hood and wing accept paint or decals. NONE of the gating the lab infers is stated
+-- here: there is no aspiration->engine-tier gate (ui-spec 9.1) and no body-kit->front-bumper
+-- removal (ui-spec 10.7) in this table, nor any column that could express one.
+CREATE TABLE IF NOT EXISTS ref_car_exception (
+  ordinal                       INTEGER PRIMARY KEY REFERENCES ref_car(ordinal),
+  no_mirrors                    INTEGER,
+  no_windows                    INTEGER,
+  no_hood_stock                 INTEGER,
+  no_hood_aftermarket           INTEGER,
+  no_paintable_wing_stock       INTEGER,
+  no_paintable_wing_aftermarket INTEGER,
+  no_decals_wing_stock          INTEGER,
+  no_decals_wing_aftermarket    INTEGER,
+  n_flags                       INTEGER  -- how many of the eight are set
+);
+
 CREATE TABLE IF NOT EXISTS ref_track (
   track_id      INTEGER PRIMARY KEY,
   name          TEXT,
@@ -286,18 +380,41 @@ CREATE TABLE IF NOT EXISTS ref_track (
   data          TEXT
 );
 
+-- The game's events AS DISPLAYED. Filled by stage `events` (scripts/db/import_events.py) from
+-- data/rivals-routes-*.json -- the Rivals > Routes screen transcribed: verbatim name, the screen's
+-- "Route Length" (one decimal, miles) and the IDS_Name guids the name sits under. The event
+-- definitions themselves (route id, class/PI limit) are NOT in the 205-table game DB (audit
+-- 2026-09-03), so route_id/class_limit/pi_limit stay NULL until an event dataset is decoded.
+-- length_m is the naming KEY: see the COURSE NAMES block below.
 CREATE TABLE IF NOT EXISTS ref_event (
-  event_id      TEXT PRIMARY KEY,        -- guid or synthetic key
+  event_id      TEXT PRIMARY KEY,        -- 'rivals:<slug>' (slug = lowercase name, non-alnum -> '-'); a guid once the event datasets decode
   kind          TEXT,                    -- rivals | career | drift_zone | speed_trap | danger_sign | trailblazer …
-  name          TEXT,
+  name          TEXT,                    -- verbatim game string; CHECKED against ref_string through ref_event_string, never typed
   track_id      INTEGER REFERENCES ref_track(track_id),
-  route_id      TEXT,
+  route_id      TEXT,                    -- the game's own route id, only when an event dataset says so; the DERIVED link lives on ref_route.event_id
   class_limit   TEXT,
   pi_limit      INTEGER,
   region        TEXT,
-  data          TEXT
+  data          TEXT,                    -- JSON {order, length_mi, description, frames}
+  discipline    TEXT,                    -- 'road' for data/rivals-routes-road.json; NULL = not asserted (never inferred from the name)
+  length_m      REAL,                    -- length_mi * 1609.344; precision +/-80 m BY CONSTRUCTION (one decimal on screen); one lap for circuits (4 anchors, not stated by the game)
+  is_loop       INTEGER,                 -- 1 '* Circuit' / The Colossus / The Goliath, 0 '* Sprint', NULL otherwise -- the only topology the screen gives
+  source        TEXT                     -- 'data/rivals-routes-road.json#<order>'
 );
 CREATE INDEX IF NOT EXISTS ix_event_kind ON ref_event(kind, name);
+
+-- The 7 IDS_Name guids per Rivals route, as a checked join to the game's own string rows -- the
+-- JSON note "names verified verbatim against RivalsEventData" becomes a foreign key re-proven on
+-- every rebuild (stage `events` FAILS when a guid is absent or its content differs from name).
+CREATE TABLE IF NOT EXISTS ref_event_string (
+  event_id    TEXT NOT NULL REFERENCES ref_event(event_id) ON DELETE CASCADE,
+  table_name  TEXT NOT NULL,             -- 'RivalsEventData'
+  key_hash    INTEGER NOT NULL,          -- ref_string.key_hash of 'IDS_Name_<guid32>'
+  key_name    TEXT NOT NULL,             -- 'IDS_Name_367ed32633194085b6c2ed2abb264c71'
+  role        TEXT NOT NULL,             -- name | description
+  PRIMARY KEY (event_id, table_name, key_hash),
+  FOREIGN KEY (table_name, key_hash) REFERENCES ref_string(table_name, key_hash)
+) WITHOUT ROWID;
 
 CREATE TABLE IF NOT EXISTS ref_region (
   region_id     INTEGER PRIMARY KEY,
@@ -453,10 +570,15 @@ CREATE TABLE IF NOT EXISTS session_car (
 
 CREATE TABLE IF NOT EXISTS course (
   route_key    TEXT PRIMARY KEY,         -- '-1700_-4450' — the start-cell key
-  name         TEXT,                     -- 'Highway Circuit'
-  is_rivals    INTEGER DEFAULT 0,
-  event_id     TEXT REFERENCES ref_event(event_id),   -- when matched to a game event
+  name         TEXT,                     -- RESOLVED by stage route_names (declared wins; else the derived event's name); see COURSE NAMES below. Never written from a JSON file except as a placeholder by telemetry.
+  is_rivals    INTEGER DEFAULT 0,        -- the player's DECLARED game mode (routes.json 'rivals'), not the route's identity
+  event_id     TEXT REFERENCES ref_event(event_id),   -- written by route_names; NULL while unresolved or on conflict
   length_m     REAL,
+  -- COURSE NAMES (added 2026-09-05): the INPUT a person typed, kept apart from the OUTPUT the rule derives
+  declared_name    TEXT,                 -- what data/routes.json (first) or the course model says; written by telemetry; never derived
+  declared_source  TEXT,                 -- routes.json 'source' ('dashboard 2026-09-02') | 'course model'
+  name_source      TEXT,                 -- declared | derived:map | derived:map+declared | derived:length | derived:length+declared
+  name_confidence  TEXT,                 -- verified | derived | read   (the schema's confidence vocabulary)
   turn_count   INTEGER,
   n_laps       INTEGER,
   n_sessions   INTEGER,
@@ -655,7 +777,10 @@ WHERE l.void = 0 AND l.is_partial = 0 AND l.lap_s IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS ref_route (
   route_id    TEXT PRIMARY KEY,        -- '281' from Route281.owt
-  name        TEXT,                    -- filled once the event datasets are decoded
+  name        TEXT,                    -- filled by stage route_names when a DRIVEN course identifies this route (course_route verified/probable) AND the Rivals catalogue length agrees within the screen's rounding; import_routes.py writes NULL and never anything else
+  event_id         TEXT REFERENCES ref_event(event_id),   -- COURSE NAMES (2026-09-05): which catalogue row named this centre-line
+  name_source      TEXT,                                  -- derived:map | derived:map+declared
+  name_confidence  TEXT,                                  -- verified | derived
   length_m    REAL,
   n_points    INTEGER,
   is_loop     INTEGER,
@@ -691,6 +816,11 @@ CREATE TABLE IF NOT EXISTS ref_route_point (
 -- match_kind: verified (whole route, clearly best) | probable | partial (on it, drove some of
 -- it) | none. 'partial' is a real answer: it says the lap records belong to a stretch of that
 -- route, not to the route.
+-- Written by stage course_match (DB-only, no game files) after telemetry and routes. It SURVIVES
+-- a telemetry rerun because import_telemetry merges course rows (INSERT ... ON CONFLICT DO
+-- UPDATE) and deletes only retired route_keys: DELETE FROM course and INSERT OR REPLACE both
+-- fire ON DELETE CASCADE immediately (PRAGMA defer_foreign_keys defers checks, not actions) --
+-- that is how this table sat at 0 rows from 2026-09-03 23:41 to 2026-09-05.
 CREATE TABLE IF NOT EXISTS course_route (
   route_key    TEXT PRIMARY KEY REFERENCES course(route_key) ON DELETE CASCADE,
   route_id     TEXT REFERENCES ref_route(route_id),
@@ -702,6 +832,42 @@ CREATE TABLE IF NOT EXISTS course_route (
   runner_up    TEXT,
   computed_utc TEXT
 );
+
+-- ============================================================================
+-- COURSE NAMES (added 2026-09-05) -- how a course and a centre-line get a NAME, with evidence
+-- ============================================================================
+-- The game never says which Rivals route a start cell is. Three sources exist and none is
+-- sufficient alone:
+--   * data/rivals-routes-road.json -- the Rivals > Routes screen (23 Road Racing routes): the
+--     verbatim name and "Route Length" to one decimal in miles -> ref_event.length_m. The
+--     screen ROUNDS, so the true length is within +/-0.05 mi (80.47 m) BY CONSTRUCTION. Three
+--     pairs share a rounded length (Soni/Irokawa 1.2, Shimanoyama/Edamame 0.7, Venus/Coastline
+--     5.0) and 22 of 23 lengths fit several .owt routes, so LENGTH ALONE NEVER NAMES ANYTHING.
+--   * course_route -- the map identity (the map is the authority for WHERE).
+--   * routes.json -- what a person typed (the final word; shown verbatim, never overwritten).
+-- Stage route_names (scripts/db/import_route_names.py) derives a name only where the map
+-- identity AND the catalogue length AND our measured lap length agree; a tie is broken only by
+-- the typed name; sprints (point-to-point) are never named by length; every candidate it
+-- considered is a course_event row, so an ambiguity is a fact, not a silence. Constants:
+--   BAND_M      = 0.05 mi = 80.47 m  (half a display step -- the screen rounds: 23.379 -> 23.4)
+--   LOOP_GAP_M  = 60                 (fh6_owt's own is_loop rule, reused)
+-- Every candidate the rule considered, with its evidence. chosen=1 on the row that named the
+-- course. Two chosen=0 rows of one tier IS a tie; a map-tier row and a length-tier row for
+-- different events IS a conflict. Nothing is resolved by guess.
+CREATE TABLE IF NOT EXISTS course_event (
+  route_key    TEXT NOT NULL REFERENCES course(route_key) ON DELETE CASCADE,
+  event_id     TEXT NOT NULL REFERENCES ref_event(event_id) ON DELETE CASCADE,
+  tier         TEXT NOT NULL,             -- map | length | declared
+  route_id     TEXT REFERENCES ref_route(route_id),  -- the course_route identity used (tier map)
+  d_route_m    REAL,                      -- ref_route.length_m - ref_event.length_m
+  d_course_m   REAL,                      -- course.length_m   - ref_event.length_m
+  loop_ok      INTEGER,                   -- event.is_loop agrees with ref_route.is_loop (map) / our path closure (length); NULL unknown
+  road_ok      INTEGER,                   -- ref_route.road_class <> 'loose'; NULL when road_class is NULL
+  declared_ok  INTEGER,                   -- course.declared_name == ref_event.name
+  chosen       INTEGER NOT NULL DEFAULT 0,
+  computed_utc TEXT NOT NULL,
+  PRIMARY KEY (route_key, event_id)
+) WITHOUT ROWID;
 
 -- Turns derived from the game's centre-line curvature, not from driven laps (added 2026-09-02).
 --
@@ -794,7 +960,7 @@ CREATE TABLE IF NOT EXISTS ref_route_surface (
   src          TEXT NOT NULL,           -- nav | owt_code
   PRIMARY KEY (route_id, i)
 ) WITHOUT ROWID;
-CREATE INDEX IF NOT EXISTS ix_route_surface ON ref_route_surface(route_id, surface);
+CREATE INDEX IF NOT EXISTS ix_route_surface ON ref_route_surface(route_id, road_class);
 
 -- ============================================================================
 -- DIAGNOSIS  (added 2026-09-02)
@@ -868,3 +1034,185 @@ LEFT JOIN tune_container t ON t.container = d.container
 LEFT JOIN ref_car r ON r.ordinal = t.ordinal
 WHERE d.container IS NOT NULL
 GROUP BY d.container, d.symptom;
+
+-- ============================================================================
+-- THE CURVES  (added 2026-09-03)
+--
+-- Two lookup tables the game ships and the lab had never read: the torque curve behind every
+-- engine, and the friction curve behind every tyre compound. Both are sampled curves stored one
+-- value per column (v0..v245 / v0..v99), which is why they read as noise until the sampling rule
+-- is known. Both rules are exact, not fitted.
+--
+-- TORQUE.  List_TorqueCurve, 1,725 rows, and the ownership is a bijection:
+--   1,706 rows of List_UpgradeEngineCamshaft + 19 rows of Data_Motor = 1,725, no id used twice
+--   and none left over. So a torque curve is not "an engine's" -- it is a CAMSHAFT PART's (or an
+--   electric motor's), which is exactly right: fitting Race Cams is what changes the curve. The
+--   engine's own curve is the row with IsStock=1.
+--   * sampling: uniform, 100 rpm per step, from 0 rpm. TorqueCurveMaxRPM == 100*(N-1) on all
+--     1,706 camshafts, and NumRPMEntriesArray == NumTorqueValues on all of them.
+--   * values: normalised, peak == 1.0 (1,718 of 1,725 curves; the other 7 peak at 0.99999).
+--     torque_Nm = v * TorqueScale, so TorqueScale IS the peak torque in Nm.
+--   * the LAST sample is not a dyno point. It is the past-the-top-of-the-table value and is
+--     negative on 1,720 of 1,725 curves (-2.63 typical, down to -25.05): closed-throttle drag
+--     beyond the table. v_torque_point flags it limiter=1 rather than dropping it silently.
+--   * power: hp = Nm * rpm / 7120.54  (== lb-ft * rpm / 5252). Checked against the game's own
+--     Data_Car.SimPeakPower, which is watts/100: on the naturally aspirated cars it comes out at
+--     150.0, 300.0, 375.0 hp -- exact, not close.
+--   * the boost multiplier the project already used holds: Data_Car.SimPeakTorque*100 equals the
+--     stock camshaft curve's TorqueScale on 313 of the 314 naturally aspirated cars, and the
+--     ratio on the forced-induction ones runs 1.03..2.87 (turbo median 1.46, twin turbo 1.55,
+--     DSC 1.32, CSC 1.36).
+--   NOT modelled here: the multipliers the other engine parts apply on top. They are already in
+--   ref_part.data -- a CSC row, for instance, carries ZeroRPMScale/RedlineRPMScale (0.88 -> 1.37
+--   across the rev range) and TorqueDropOffRPM0/1. This table is the FULL-THROTTLE BASE the game
+--   then scales: a dyno for the engine, not yet one for the finished build.
+--
+-- FRICTION.  List_TireFrictionCurve, 738 rows, and the ownership is a bijection again:
+--   List_TireCompound carries 9 FrictionMultiCurve*ID columns (lateral / longitudinal-accel /
+--   longitudinal-brake, each for asphalt, offroad and snow). 41 compounds x 9 = 369, which is
+--   exactly the row count of List_TireFrictionMultiCurve, with no id shared between two
+--   compounds. Each multicurve names two friction curves, 369 x 2 = 738, again all distinct. So
+--   every friction curve belongs to exactly one (compound, channel, surface, load band) and the
+--   whole chain flattens onto the curve without losing anything:
+--     ref_compound.compound_id -> ref_friction_curve.compound_id     (join, no indirection)
+--   * a multicurve is a LOAD BLEND, not a shape: curve 0 is authored at 10.1972 kgf (== 100 N
+--     exactly) and curve 1 at 1000 kgf, and load is clamped at 3500 kgf (10000 on one compound).
+--     That is the load sensitivity -- grip per newton falls as the tyre is loaded.
+--   * sampling: uniform over slip, slip = index/(N-1) * MaxSlip, with N = 100 on every row.
+--     MaxSlip is 49.5 degrees on the lateral channels and 1.1 (slip ratio) on the longitudinal.
+--   * values: normalised, peak == 1.0, so mu = v * FrictionScale and FrictionScale IS peak mu.
+--   * ref_compound's lat/long/brake peaks are NOT derived from this table, and are not
+--     contradicted by it. Both come from the same authoring row, List_TyreCurveDB: the peaks are
+--     its Asph_LatSlipPeak0/1 etc., and this table is those parameters baked onto a 100-point
+--     grid. Recovering the peak from the grid (argmax) reproduces the authored value to within
+--     one grid step on 682 of 738 curves and within three on all but two -- the curve is flat at
+--     the top, so argmax on a 0.5-degree grid cannot do better. The authored value is carried
+--     here as authored_peak_slip so the two can be compared without a second table.
+--     One unit note, from that same check: List_TyreCurveDB states ALL peaks on a common 0..49.5
+--     authoring scale. On the lateral channels that scale is already degrees; on the longitudinal
+--     ones the slip ratio is peak/45 (a stated 5.5 is a 0.122 slip ratio, not 5.5%).
+-- ============================================================================
+
+-- One row per List_TorqueCurve row, with its owner flattened on.
+CREATE TABLE IF NOT EXISTS ref_torque_curve (
+  curve_id        INTEGER PRIMARY KEY,   -- List_TorqueCurve.TorqueCurveID
+  source          TEXT NOT NULL,         -- 'camshaft' | 'motor'
+  engine_id       INTEGER,               -- List_UpgradeEngineCamshaft.EngineID (NULL for motors)
+  motor_id        INTEGER,               -- Data_Motor.MotorID (NULL for camshafts)
+  part_id         INTEGER,               -- the camshaft part: ref_part(slot='camshaft', part_id)
+  level           INTEGER,               -- catalogue level of that camshaft
+  is_stock        INTEGER,               -- 1 = the engine's own curve
+  n_samples       INTEGER NOT NULL,      -- NumTorqueValues; the last is the limiter, not a point
+  rpm_step        REAL NOT NULL,         -- 100.0, always
+  max_rpm         REAL,                  -- 100*(n_samples-1) == TorqueCurveMaxRPM
+  redline_rpm     REAL,                  -- the camshaft's own redline (below max_rpm)
+  stall_rpm       REAL,
+  torque_scale    REAL NOT NULL,         -- Nm at v == 1.0, i.e. peak torque
+  zero_throttle_scale REAL,              -- closed-throttle (engine braking) scale
+  limiter_value   REAL,                  -- the final sample, kept out of the dyno
+  peak_torque_nm  REAL, peak_torque_rpm REAL,
+  peak_power_hp   REAL, peak_power_rpm  REAL,
+  samples         TEXT NOT NULL          -- JSON array of the n_samples normalised values
+);
+CREATE INDEX IF NOT EXISTS ix_torque_engine ON ref_torque_curve(engine_id, is_stock, level);
+
+-- One row per List_TireFrictionCurve row, with compound / channel / surface / load flattened on.
+CREATE TABLE IF NOT EXISTS ref_friction_curve (
+  curve_id        INTEGER PRIMARY KEY,   -- List_TireFrictionCurve.FrictionCurveID
+  compound_id     INTEGER REFERENCES ref_compound(compound_id),
+  multicurve_id   INTEGER,               -- List_TireFrictionMultiCurve.FrictionMultiCurveID
+  channel         TEXT,                  -- 'lat' | 'accel' | 'brake'
+  surface         TEXT,                  -- 'asphalt' | 'offroad' | 'snow'
+  load_band       INTEGER,               -- 0 = the light curve, 1 = the heavy curve
+  load_kgf        REAL,                  -- the load this curve is authored at (10.1972 / 1000)
+  load_clamp_kgf  REAL,                  -- load above this stops changing the blend
+  max_slip        REAL,                  -- full-scale slip: 49.5 deg lateral, 1.1 ratio long
+  slip_unit       TEXT,                  -- 'deg' | 'ratio'
+  n_samples       INTEGER NOT NULL,      -- 100 on every row
+  friction_scale  REAL,                  -- peak mu (the samples peak at 1.0)
+  peak_slip       REAL,                  -- slip at the curve's own argmax, in slip_unit
+  authored_peak_slip REAL,               -- List_TyreCurveDB's peak, converted to slip_unit
+  authored_peak_raw  REAL,               -- ... as stored, on the game's 0..49.5 scale
+  samples         TEXT NOT NULL          -- JSON array of the 100 normalised values
+);
+CREATE INDEX IF NOT EXISTS ix_friction_compound
+  ON ref_friction_curve(compound_id, surface, channel, load_band);
+
+-- The dyno. One row per rpm step; filter limiter=0 for the drivable part of the curve.
+--   SELECT rpm, torque_nm, power_hp FROM v_torque_point
+--    WHERE engine_id=733 AND is_stock=1 AND limiter=0 ORDER BY rpm;
+CREATE VIEW IF NOT EXISTS v_torque_point AS
+SELECT c.curve_id, c.source, c.engine_id, c.motor_id, c.part_id, c.level, c.is_stock,
+       j.key                                                          AS idx,
+       j.key * c.rpm_step                                             AS rpm,
+       j.value                                                        AS torque_norm,
+       j.value * c.torque_scale                                       AS torque_nm,
+       j.value * c.torque_scale * 0.73756215                          AS torque_lbft,
+       j.value * c.torque_scale * (j.key * c.rpm_step) / 7120.54      AS power_hp,
+       CASE WHEN j.key = c.n_samples - 1 THEN 1 ELSE 0 END            AS limiter,
+       CASE WHEN c.redline_rpm IS NOT NULL AND j.key * c.rpm_step > c.redline_rpm
+            THEN 1 ELSE 0 END                                         AS past_redline
+FROM ref_torque_curve c, json_each(c.samples) j;
+
+-- The friction curve, one row per slip step.
+--   SELECT slip, mu FROM v_friction_point
+--    WHERE compound_id=13 AND surface='asphalt' AND channel='lat' AND load_band=0 ORDER BY slip;
+CREATE VIEW IF NOT EXISTS v_friction_point AS
+SELECT f.curve_id, f.compound_id, f.channel, f.surface, f.load_band, f.load_kgf, f.slip_unit,
+       j.key                                          AS idx,
+       j.key * f.max_slip / (f.n_samples - 1.0)       AS slip,
+       j.value                                        AS mu_norm,
+       j.value * f.friction_scale                     AS mu
+FROM ref_friction_curve f, json_each(f.samples) j;
+
+-- ============================================================================
+-- FIELD-LEVEL KNOWLEDGE CATALOGUE (2026-09-03). Every field this project has profiled, what
+-- gates what, and how much a decoded value can actually be trusted -- as DATA, not as tribal
+-- knowledge scattered across code comments, one person's external memory, and a markdown doc no
+-- query can reach. Source: docs/data-field-catalog-2026-09-03.md (86 stores) + findings from the
+-- 2026-09-03 session (see memory fh6-slider-value-reliability-hierarchy, fh6-catalog-structure-not-hoard).
+-- Populated by scripts/db/import_field_catalog.py. Read-and-derived, never hand-edited in place --
+-- correct the source (the doc, or this session's findings) and re-run the stage.
+-- ============================================================================
+
+-- One row per (store, field) this project has profiled. A "store" is a fh6.db table name or a
+-- data/*.json file path; a "field" is one column/key inside it.
+CREATE TABLE IF NOT EXISTS ref_field (
+  store         TEXT NOT NULL,           -- 'tune_slider', 'data/car-mass.json', etc.
+  field         TEXT NOT NULL,           -- the field/column/key's own name in that store
+  domain        TEXT,                    -- 'car' | 'world' | 'player_meta' | 'project'
+  storage_type  TEXT,                    -- 'int' | 'float' | 'string' | 'enum' | 'json' | 'bool'
+  enum_source   TEXT,                    -- where the value set comes from, when storage_type='enum'
+  join_target   TEXT,                    -- 'store.field' this value can be looked up against, if any
+  notes         TEXT,                    -- confidence caveats, format quirks, anything else worth keeping
+  PRIMARY KEY (store, field)
+);
+
+-- The dependency graph a comment used to be the only record of: which field, when it changes,
+-- changes what ANOTHER field's value even means or whether it's offered at all. Verified 2026-09-03:
+-- car_body/Body Kit renumbers weight_reduction and roll_cage's dense-in-variant tiers and removes
+-- front_bumper; the engine and aspiration slots change the whole Engine & Power menu's contents.
+CREATE TABLE IF NOT EXISTS ref_field_gate (
+  gating_store  TEXT NOT NULL,           -- the field whose value determines the gate
+  gating_field  TEXT NOT NULL,
+  gated_store   TEXT NOT NULL,           -- the field whose meaning or availability the gate controls
+  gated_field   TEXT NOT NULL,
+  mechanism     TEXT NOT NULL,           -- 'removes tile' | 'changes tier names' | 'changes tile count' | 'changes menu contents'
+  evidence      TEXT,                    -- a doc citation or session finding this was verified against
+  PRIMARY KEY (gating_store, gating_field, gated_store, gated_field)
+);
+
+-- The reliability hierarchy (memory fh6-slider-value-reliability-hierarchy) AS DATA: for a given
+-- field, every tier of evidence that CAN produce a value for it, ranked. Tier 0 is ground truth
+-- (the game's own physics table); tier 5 is an honest "no absolute value, position only" -- which
+-- outranks a confident wrong number from any tier above it, not a gap in the data.
+CREATE TABLE IF NOT EXISTS ref_field_reliability (
+  store         TEXT NOT NULL,
+  field         TEXT NOT NULL,
+  tier          INTEGER NOT NULL,        -- 0 database .. 1 two-point solve .. 2 global band (field-proven only)
+                                          -- .. 3 mass-derived formula .. 4 single anchor .. 5 position-only
+  tier_name     TEXT NOT NULL,
+  why           TEXT,                    -- why this field can reach this tier, and what makes the tier itself trustworthy or not
+  source_fn     TEXT,                    -- the function/branch that actually produces a value at this tier
+  PRIMARY KEY (store, field, tier)
+);

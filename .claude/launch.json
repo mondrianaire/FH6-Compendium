@@ -2,28 +2,28 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dashboard (python)",
+      "name": "dashboard (8000)",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8000", "--directory", "dashboard"],
+      "runtimeArgs": ["scripts/serve_dashboard.py", "8000"],
       "port": 8000
     },
     {
-      "name": "dashboard (python 8642)",
+      "name": "daemon (8765)",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8642", "--directory", "dashboard"],
+      "runtimeArgs": ["scripts/telemetry/fh6_live_daemon.py"],
+      "port": 8765
+    },
+    {
+      "name": "rebuild service (8001)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["scripts/rebuild_service.py", "8001"],
+      "port": 8001
+    },
+    {
+      "name": "dashboard (8642, second port)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["scripts/serve_dashboard.py", "8642"],
       "port": 8642
-    },
-    {
-      "name": "dashboard (main checkout 8643)",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8643", "--directory", "C:/Users/mondr/Documents/Claude/Projects/forza-horizon-6-tuning/dashboard"],
-      "port": 8643
-    },
-    {
-      "name": "dashboard (node/serve)",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["-y", "serve", "dashboard", "-l", "3000"],
-      "port": 3000
     }
   ]
 }

@@ -122,7 +122,7 @@ def ensure_columns(cx):
     default is metadata-only in SQLite, so this rewrites nothing."""
     cx.execute(SURFACE_TABLE)
     cx.execute("CREATE INDEX IF NOT EXISTS ix_route_surface "
-               "ON ref_route_surface(route_id, surface)")
+               "ON ref_route_surface(route_id, road_class)")
     added = 0
     for table, cols in (("ref_route", NEW_ROUTE_COLS), ("ref_route_turn", NEW_TURN_COLS)):
         have = {r[1] for r in cx.execute("PRAGMA table_info(%s)" % table)}
@@ -320,14 +320,14 @@ def run(cx, aitracks, nav_path, verbose=False):
                        [v + (k,) for k, v in per_route.items()])
 
     labelled = cx.execute(
-        "SELECT COUNT(*) FROM ref_route_turn WHERE surface IS NOT NULL").fetchone()[0]
+        "SELECT COUNT(*) FROM ref_route_turn WHERE road_class IS NOT NULL").fetchone()[0]
     by_src = dict(cx.execute("SELECT COALESCE(surface_src,'none'), COUNT(*) "
                              "FROM ref_route_turn GROUP BY 1").fetchall())
-    by_surf = dict(cx.execute("SELECT COALESCE(surface,'unknown'), COUNT(*) "
+    by_surf = dict(cx.execute("SELECT COALESCE(road_class,'unknown'), COUNT(*) "
                               "FROM ref_route_turn GROUP BY 1").fetchall())
     by_rt = dict(cx.execute("SELECT COALESCE(road_type,'unknown'), COUNT(*) "
                             "FROM ref_route_turn GROUP BY 1").fetchall())
-    by_route = dict(cx.execute("SELECT COALESCE(surface,'unknown'), COUNT(*) "
+    by_route = dict(cx.execute("SELECT COALESCE(road_class,'unknown'), COUNT(*) "
                                "FROM ref_route GROUP BY 1").fetchall())
     snap.sort()
     counts = {"ref_route_surface": n_s, "ref_route_turn": labelled,
@@ -359,7 +359,7 @@ def main(argv=None):
     ap.add_argument("-v", "--verbose", action="store_true")
     a = ap.parse_args(argv)
     cx = fh6db.connect(a.db)
-    rid = fh6db.run_begin(cx, "road_class", "%s + %s" % (os.path.basename(a.nav), a.dir))
+    rid = fh6db.run_begin(cx, "surface", "%s + %s" % (os.path.basename(a.nav), a.dir))   # the STAGES name ('road_class' before 2026-09-05)
     try:
         counts, detail = run(cx, a.dir, a.nav, a.verbose)
     except Exception as e:                               # noqa: BLE001

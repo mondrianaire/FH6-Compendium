@@ -45,6 +45,9 @@ class H(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from lab_root import require_lab_root
+    require_lab_root(os.path.dirname(ROOT), "dashboard")
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
     print("dashboard on http://127.0.0.1:%d  (html revalidates, ?v= assets immutable)" % port, flush=True)
     ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()

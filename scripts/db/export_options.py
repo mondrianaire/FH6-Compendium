@@ -25,8 +25,9 @@ WHERE EVERY FIELD COMES FROM (no field here is a guess dressed as a fact):
   menu order                ref_slot.menu_order == UpgradeTypes.DisplayOrder.
   area order                ref_slot.menu_area_order == UpgradeAreas.id; sorted, that IS the 3x2 grid.
   tiles                     ref_part rows for (slot, key), where the key is derived from the parts
-                            the car's newest save actually carries (tune_part), never from
-                            tune_container.engine_id (which is a copy of the ordinal).
+                            the car's newest save actually carries (tune_part). (Until 2026-09-03
+                            tune_container.engine_id was a copy of the ordinal; it is now the real
+                            EngineID, but the parts-derived key is kept as the shop's authority.)
   tile order                ref_part.tile, with the STOCK row pulled to tile 1. import_gamedb ranks
                             by Upgrades.SortOrder of the row's own Level, and a stock row whose Level
                             is not 0 (the 2102 Stock Diff is Level 5) sorts into the middle: the
@@ -182,8 +183,9 @@ def load_effects(cx):
 def context_for(cx, ordinal, container):
     """The keys the shop is drawn with, derived from the parts the save actually carries.
 
-    tune_container.engine_id / drivetrain_id / carbody_id are copies of the ordinal on every row in
-    this database, so they are deliberately not used. The engine's identity is the partset shared by
+    tune_container.engine_id / drivetrain_id / carbody_id WERE copies of the ordinal until 2026-09-03
+    (import_containers.comp() now reads the part's own id); the parts-derived keys below are kept
+    because they are what the shop draws from. The engine's identity is the partset shared by
     its internals; the drivetrain's is the set shared by clutch/transmission/driveline/differential;
     the body's is the fitted car_body part id, which IS List_UpgradeCarBody.CarBodyID.
     """

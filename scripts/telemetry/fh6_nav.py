@@ -406,7 +406,7 @@ class SurfaceIndex(object):
         rt = self.rt.get(ni)
         surf = SURFACE_OF.get(rt)
         return {'node': ni, 'road_type': rt, 'road_profile': self.profile.get(ni),
-                'road_level': self.level.get(ni), 'surface': surf,
+                'road_level': self.level.get(ni), 'surface': surf, 'road_class': surf,
                 'offroad': OFFROAD_OF.get(surf), 'width_m': self.nodes[ni].width,
                 'nav_m': round(d, 2)}
 

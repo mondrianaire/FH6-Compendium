@@ -182,15 +182,25 @@ def compare(ours, theirs):
             "max": ds_sorted[-1], "covered": hit / float(len(them))}
 
 
-def match_courses(routes, course_dir=None, verbose=False):
-    course_dir = course_dir or os.path.join(ROOT, "data", "courses")
+def match_courses(routes, course_dir=None, verbose=False, courses=None):
+    """Match every course against `routes`.
+
+    `courses` (a list of dicts shaped like a course model: route_key, name, geometry{path,
+    length_m}) lets a caller supply already-loaded rows -- scripts/db/import_course_match.py
+    reads them from the `course` table. When omitted, the on-disk data/courses/*.json models
+    are globbed as before, so the CLI (--match) is unchanged.
+    """
+    if courses is None:
+        course_dir = course_dir or os.path.join(ROOT, "data", "courses")
+        courses = []
+        for path in sorted(glob.glob(os.path.join(course_dir, "*.json"))):
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    courses.append(json.load(fh))
+            except Exception:                            # noqa: BLE001
+                continue
     results = []
-    for path in sorted(glob.glob(os.path.join(course_dir, "*.json"))):
-        try:
-            with open(path, encoding="utf-8") as fh:
-                m = json.load(fh)
-        except Exception:                                # noqa: BLE001
-            continue
+    for m in courses:
         key = m.get("route_key")
         ours = (m.get("geometry") or {}).get("path") or []
         if not key or len(ours) < 12:

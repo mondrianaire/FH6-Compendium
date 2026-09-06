@@ -52,19 +52,22 @@ def iso_from_session_id(sid):
         return None
 
 
-def run(cx, verbose=False):
+def run(cx, verbose=False, data_dir=None):
+    """data_dir overrides DATA (routes.json, courses/, sessions/, laps.db) -- tests point it at a
+    scratch directory so a run never reads or writes the real data/ tree."""
     counts = {}
+    data_dir = data_dir or DATA
 
     # ---- courses -----------------------------------------------------------
     routes = {}
-    rp = os.path.join(DATA, "routes.json")
+    rp = os.path.join(data_dir, "routes.json")
     if os.path.exists(rp):
         doc = jload(rp)
         routes = doc.get("routes") or doc if isinstance(doc, dict) else {}
 
     crows, trows = [], []
     models = {}
-    for path in sorted(glob.glob(os.path.join(DATA, "courses", "*.json"))):
+    for path in sorted(glob.glob(os.path.join(data_dir, "courses", "*.json"))):
         if path.endswith(".tmp"):
             continue
         try:
@@ -88,7 +91,16 @@ def run(cx, verbose=False):
             turns = raw.get("canonical") or []
         else:
             turns = [t for t in (raw or []) if t.get("established") or t.get("status") == "turn"]
-        crows.append((rk, m.get("name") or rinfo.get("name"),
+        # COURSE NAMES (2026-09-05): what a person typed is recorded as declared_name with its source
+        # (routes.json first -- the store the dashboard writes; the model's copy second). `name` is only a
+        # placeholder here: stage route_names resolves it (declared wins) and sets name_source/confidence.
+        if rinfo.get("name"):
+            declared, declared_src = rinfo.get("name"), (rinfo.get("source") or "routes.json")
+        elif m.get("name"):
+            declared, declared_src = m.get("name"), "course model"
+        else:
+            declared, declared_src = None, None
+        crows.append((rk, declared, declared, declared_src,
                       1 if (rinfo.get("rivals") or m.get("rivals")) else 0,
                       None, geo.get("length_m"), len(turns) or m.get("turn_count"),
                       m.get("laps"), len(m.get("sessions") or []) or m.get("sessions"),
@@ -106,7 +118,7 @@ def run(cx, verbose=False):
 
     # ---- sessions ----------------------------------------------------------
     srows, scrows = [], []
-    for path in sorted(glob.glob(os.path.join(DATA, "sessions", "*.json"))):
+    for path in sorted(glob.glob(os.path.join(data_dir, "sessions", "*.json"))):
         if path.endswith(".tags.json"):
             continue
         try:
@@ -175,7 +187,7 @@ def run(cx, verbose=False):
                           p[4] if len(p) > 4 else None,
                           p[5] if len(p) > 5 else None))
 
-    lp = os.path.join(DATA, "laps.db")
+    lp = os.path.join(data_dir, "laps.db")
     if os.path.exists(lp):
         lx = sqlite3.connect("file:%s?mode=ro" % lp.replace("\\", "/"), uri=True)
         lx.row_factory = sqlite3.Row
@@ -206,12 +218,22 @@ def run(cx, verbose=False):
     # ---- write -------------------------------------------------------------
     with cx:
         cx.execute("PRAGMA defer_foreign_keys=ON")
-        for tbl in ("corner_obs", "lap_point", "lap", "course_turn", "course",
-                    "session_car", "session"):
+        # `course` is a foreign-key PARENT (course_route, course_event cascade off it). It is MERGED, not
+        # wiped: DELETE FROM course and INSERT OR REPLACE both fire ON DELETE CASCADE immediately --
+        # defer_foreign_keys defers the checks, not the actions -- which is how course_route sat at 0 rows
+        # from 2026-09-03 to 2026-09-05. Only courses that vanished from disk are deleted (intended cascade).
+        for tbl in ("corner_obs", "lap_point", "lap", "course_turn", "session_car", "session"):
             cx.execute("DELETE FROM %s" % tbl)
-        counts["course"] = fh6db.upsert_many(cx, "course", [
-            "route_key", "name", "is_rivals", "event_id", "length_m", "turn_count", "n_laps",
-            "n_sessions", "confidence", "updated_utc", "geometry", "profile"], crows)
+        keys = [r[0] for r in crows]
+        cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep(route_key TEXT PRIMARY KEY)")
+        cx.execute("DELETE FROM _keep")
+        cx.executemany("INSERT INTO _keep(route_key) VALUES(?)", [(k,) for k in keys])
+        counts["_retired_courses"] = cx.execute(
+            "DELETE FROM course WHERE route_key NOT IN (SELECT route_key FROM _keep)").rowcount or 0
+        counts["course"] = fh6db.merge_many(cx, "course", [
+            "route_key", "name", "declared_name", "declared_source", "is_rivals", "event_id", "length_m",
+            "turn_count", "n_laps", "n_sessions", "confidence", "updated_utc", "geometry", "profile"],
+            crows, key=("route_key",), coalesce=("name", "event_id", "length_m"))
         counts["course_turn"] = fh6db.upsert_many(cx, "course_turn", [
             "route_key", "turn_id", "seq", "arc_m", "apex_x", "apex_z", "radius_m", "angle_deg",
             "kind", "n_obs"], trows)
@@ -236,6 +258,14 @@ def run(cx, verbose=False):
         cx.execute("""UPDATE lap SET hw_hash = (
               SELECT c.hw_hash FROM tune_container c WHERE c.container = lap.container)
             WHERE container IS NOT NULL AND hw_hash IS NULL""")
+        # and the session-car row to the package its laps identified: the session file
+        # never carries a hash, so before this the column was NULL on every row
+        cx.execute("""UPDATE session_car SET hw_hash = (
+              SELECT l.hw_hash FROM lap l
+              WHERE l.session_id = session_car.session_id AND l.cid = session_car.cid
+                AND l.hw_hash IS NOT NULL
+              GROUP BY l.hw_hash ORDER BY COUNT(*) DESC LIMIT 1)
+            WHERE hw_hash IS NULL""")
     if verbose:
         if orphan_route:
             print("  laps on routes with no model: %d rows across %d routes %s"

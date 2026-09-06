@@ -1230,7 +1230,7 @@ def main():
                 rough_frac = round(sum(1 for x in sr if x > 0.1) / len(sr), 2) if sr else 0.0
                 surface = "rough" if rough_frac > 0.35 else "smooth"
                 corners.append({"t0": round(seg[0]["t"], 1), "t1": round(seg[-1]["t"], 1), "car": cid(seg[0]), "dir": "R" if sign > 0 else "L", "surface": surface, "rough_frac": rough_frac,
-                                "ev": 1 if apx["CurrentLap"] > 0 else 0,   # J14: honest event flag (lap timer running) — free-roam corners must not steer course baselines
+                                "ev": 1 if sum(1 for r in seg if r["CurrentLap"] > 0) > len(seg) / 2 else 0,   # J14: honest event flag (lap timer running) — free-roam corners must not steer course baselines. Majority vote across the corner's own rows, not one apex frame, to match the live daemon's identical hardening
                                 "apex": [round(apx["PosX"]), round(apx["PosZ"])], "dist": round(apx["DistanceTraveled"]), "mph_apex": round(apx["speed_mph"]),
                                 "mph_in": round(v_in), "mph_min": round(v_min), "mph_out": round(seg[-1]["speed_mph"]), "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
                                 "entry": [round(seg[0]["PosX"]), round(seg[0]["PosZ"])], "exit": [round(seg[-1]["PosX"]), round(seg[-1]["PosZ"])],

@@ -13,6 +13,7 @@ Endpoints:  GET /events  (SSE: status / frame ~20 Hz / strip per second / corner
 Dashboard: Telemetry Lab -> Live (EventSource on http://localhost:8765/events)
 """
 import argparse, csv, glob, json, math, os, socket, struct, subprocess, sys, threading, time
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -380,8 +381,12 @@ def ingest(p, t_mono):
                 ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s}); maybe_lap_analysis(t_mono, "loop lap")
                 ST._loop_away = 0.0; ST._loop_t0 = t_mono
     if c["on"]: ST._loop_prev = (p["PosX"], p["PosZ"])   # menu frames report (0,0) — tracking them would add phantom kilometres to _loop_away across a pause (J7)
-    # CSV row (same layout as capture tool)
-    if ST.csv_writer:
+    # CSV row (same layout as capture tool). MENU FRAMES ARE NOT WRITTEN (2026-09-03): every field
+    # in one is zeroed -- Speed, AccelX/Z, position, the lot -- so a menu dwell used to add nothing
+    # but dead rows to the capture, for however long the dwell lasted. Same reasoning as _loop_prev
+    # right above (J7): a pause is not data, and recording it as if it were bloats the file and pulls
+    # _roll_capture_if_big's 192 MB roll in sooner for no signal at all.
+    if ST.csv_writer and c["on"]:
         row = [time.time(), t_mono, p["Speed"] * 2.23694, p["AccelX"] / G, p["AccelZ"] / G, math.degrees(p["AngVelY"])]
         row += [(p["TireTempF" + w] - 32.0) * 5.0 / 9.0 for w in W] + [p[k] for k in FIELDS]
         ST.csv_writer.writerow(row)
@@ -389,9 +394,20 @@ def ingest(p, t_mono):
     with ST.lock:
         ST.latest = c; ST.frames += 1; ST.last_pkt = time.monotonic()
         ST.pps_win.append(ST.last_pkt); ST.pps_win = [x for x in ST.pps_win if ST.last_pkt - x < 2.0]
-        if c["on"] and c["cid"] not in ST.cars:
+        existing = ST.cars.get(c["cid"])
+        # BUG (2026-09-03): this record used to be write-once ("cid not in ST.cars") -- whatever
+        # class/pi/cyl the FIRST frame for a cid carried was permanent for the rest of the process,
+        # even if that first frame was a transitional one (e.g. right at car-load or right after a
+        # daemon restart) whose CarClass byte didn't land in CLASS's table and fell back to "?". A
+        # later, perfectly good frame for the SAME cid (proven moments later by a pi-observations.json
+        # entry correctly reading class "A" for this exact car+PI) could never overwrite the stuck "?"
+        # -- one bad sample outlived every good one after it. Now: still write-once for a resolved
+        # class, but self-heal the one unresolved case the moment a real reading arrives.
+        if c["on"] and (existing is None or existing.get("class") == "?"):
             nm = (names_load().get("cars", {}).get(str(c["car"])) or {}).get("name")
-            ST.cars[c["cid"]] = {"id": c["cid"], "ordinal": c["car"], "pi": c["pi"], "class": c["cls"], "drivetrain": c["drv"], "cyl": p["NumCylinders"], "max_rpm": c["maxrpm"], "idle_rpm": round(p["EngineIdleRpm"]), "car_group": p["CarGroup"], "name": nm, "gears": [], "dyno": [], "live_s": 0}
+            prior = dict(existing) if existing else {}
+            ST.cars[c["cid"]] = {"id": c["cid"], "ordinal": c["car"], "pi": c["pi"], "class": c["cls"], "drivetrain": c["drv"], "cyl": p["NumCylinders"], "max_rpm": c["maxrpm"], "idle_rpm": round(p["EngineIdleRpm"]), "car_group": p["CarGroup"], "name": nm,
+                                  "gears": prior.get("gears", []), "dyno": prior.get("dyno", []), "live_s": prior.get("live_s", 0)}
             new_cfg = dict(ST.cars[c["cid"]])
         else: new_cfg = None
     if new_cfg: ST.emit("config", new_cfg)
@@ -445,7 +461,7 @@ def ingest(p, t_mono):
                 brk_r = next((r for r in co["pre"] + rows[:ipk + 1] if r["brk"] > 40), None); imin = min(range(len(rows)), key=lambda i: rows[i]["mph"]); thr_r = next((r for r in rows[imin:] if r["thr"] > 100), None)
                 cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint,
                       "lapn": (((apx.get("lapn") or 0) + 1) if apx.get("ev") else None),   # J11: 1-based in events, None outside — telemetry's 0-based lap read as falsy everywhere downstream
-                      "ev": 1 if apx.get("ev") else 0,   # J14: on-course truth stamped at the source — free-roam corners must never share a canonical-turn key with course corners
+                      "ev": 1 if sum(1 for r in rows if r.get("ev")) > len(rows) / 2 else 0,   # J14: on-course truth stamped at the source — free-roam corners must never share a canonical-turn key with course corners. Majority vote across the corner's own rows, not one apex frame: a single-frame read left one theoretical false-negative window (CurrentLap transiently reading 0 right at the apex frame) that a turn-matrix silently reads as "not driven" rather than "excluded"
                       "dir": "R" if sign > 0 else "L",
                       "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min), "mph_out": round(rows[-1]["mph"]), "mph_apex": round(apx["mph"]), "apex": [apx.get("px"), apx.get("pz")], "loop_lap": (ST.loop_lap if ST.loop else None),
                       "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3), "drift": drift, "kink": v_min > 85 and peak < 0.9,
@@ -499,6 +515,33 @@ def maybe_lap_analysis(t_mono, why):
     threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
 
 
+def _notify_telemetry_rebuild(why):
+    """Ping the rebuild service to import this session's new laps/corners into fh6.db (2026-09-03).
+    Fired ONLY on a genuine session-close boundary (final=True in run_analysis -- driving stopped for
+    5 s after >= 15 s of driving), never per-lap and never on the periodic mid-session passes: that is
+    the exact cadence this file already fought hard to keep off the game's frame pacing (see the cost
+    notes on _roll_capture_if_big and maybe_lap_analysis's backoff). scope=telemetry costs ~3 s
+    (measured), a session close happens at most a few times an hour, so this never competes with the
+    game the way a per-lap or fixed-timer trigger would.
+
+    Before this existed, NOTHING ever triggered a telemetry import automatically -- the live daemon
+    never called the rebuild service at all, and the dashboard's own auto-trigger only ever ran
+    scope=containers on a new save. corner_obs/lap/session silently fell behind for hours at a time.
+    See memory fh6-telemetry-rebuild-scope-gap.
+
+    Best-effort and fire-and-forget: the rebuild service may not be running, and that must never
+    affect the daemon or block this thread."""
+    def _go():
+        try:
+            req = urllib.request.Request("http://127.0.0.1:8001/rebuild",
+                data=json.dumps({"why": why, "scope": "telemetry"}).encode(),
+                headers={"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=3).read()
+        except Exception:
+            pass   # the rebuild service being down (or not yet started) must never affect the daemon
+    threading.Thread(target=_go, daemon=True).start()
+
+
 def run_analysis(until=None, final=True):
     ST.analyzing = True
     _t_start = time.monotonic()
@@ -519,7 +562,9 @@ def run_analysis(until=None, final=True):
                   "stints": [{k: st.get(k) for k in ("n", "id", "label", "role", "t0", "t1")} for st in js.get("stints", [])][-20:]}
             with ST.lock: ST.session_json = js; ST.session_path = path; ST.analysis = an
             ST.emit("analysis", an)
-            if final: ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})
+            if final:
+                ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})
+                _notify_telemetry_rebuild("session closed " + js["id"])
             print(f"[analysis{' final' if final else ''}] {js['id']} -> {js['summary']}")
         else:
             print("[analysis] failed:", r.stdout[-300:], r.stderr[-300:])
@@ -1676,7 +1721,7 @@ class H(BaseHTTPRequestHandler):
             body = json.dumps(_laps_payload(rk, cls, lim, competitive_only=(q.get("all") or ["0"])[0] not in ("1", "true"))).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/health"):
-            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None)), "clone_lock": ST.clone_lock}).encode()   # the lock GATES stamping/accrual — an invisible lock silently blocked both after a reload
+            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None)), "clone_lock": ST.clone_lock, "lab": getattr(ST, "lab", None)}).encode()   # the lock GATES stamping/accrual — an invisible lock silently blocked both after a reload; `lab` = which checkout this daemon writes to
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/shots"):   # recent in-game screenshots from the watched folder(s), newest first
             import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query); n = int((q.get("n") or ["24"])[0])
@@ -1716,7 +1761,14 @@ class H(BaseHTTPRequestHandler):
             import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
             ordn = q.get("ordinal", [None])[0]
             if ordn is None:
-                fr = ST.latest; ordn = fr and fr.get("car")   # fall back to the live/active car
+                # fall back to the live/active car, then the LAST DRIVEN car if we're in a menu right
+                # now -- CarOrdinal drops to 0 there (same fact disk_watcher already builds on, J3,
+                # ~line 2224: "the FIRST save happens IN the tune menu"). Before this fix a client
+                # asking "who's on the car" with no ordinal -- e.g. a fresh tab opened while the game
+                # is in a menu, with no cached car of its own to hold -- got nothing back and had no
+                # way to show anything at all, not even the paused/held state. 2026-09-03.
+                fr = ST.latest
+                ordn = (fr and fr.get("car")) or getattr(ST, "last_car", None)
             payload = {"available": False}
             if TUNE is not None and ordn is not None:
                 try:
@@ -2292,6 +2344,9 @@ def main():
     ap.add_argument("--no-csv", action="store_true")
     ap.add_argument("--shots-dir", action="append", help="folder(s) of in-game screenshots to serve to the dashboard (repeatable); defaults to Pictures/Screenshots + Videos/Captures")
     a = ap.parse_args()
+    sys.path.insert(0, os.path.join(HERE, ".."))
+    from lab_root import require_lab_root
+    ST.lab = require_lab_root(ROOT, "daemon")   # never again from master: 2026-09-05 a second session did, and half an hour of telemetry landed in the stale mirror
     # screenshot folders for the dashboard's shop-capture panel — default to the common Windows capture locations
     home = os.path.expanduser("~")
     defaults = [os.path.join(home, "Pictures", "Screenshots"), os.path.join(home, "Videos", "Captures"), os.path.join(home, "Documents", "ShareX", "Screenshots")]

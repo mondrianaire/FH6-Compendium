@@ -359,9 +359,30 @@ def parse_tune(path, ordinal_hint=None):
             lo2, hi2 = rng
             entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
             entry["range"] = rng
+            entry["derived"] = True   # RANKED HIERARCHY (2026-09-03, final): the database's own
+            # per-installed-part physics band (ref_part_slider, via fillFromDb in live.js) is more
+            # authoritative than ANY save-derived inference, including this one. A 2-point back-solve
+            # is strong evidence -- its two source points cross-check each other -- but it is still
+            # keyed by car ordinal only (data/car-tune-ranges.json), the exact scoping gap that let a
+            # different build's mass stand in for this one's spring rate. Every non-database source in
+            # this function now sets derived=True for that reason, in true reliability order: database
+            # (game's own physics table, per exact fitted part) > 2-point back-solve > global band
+            # (exact ONLY for fields proven game-fixed, e.g. gear/final_drive) > mass-derived formula
+            # (compounds an assumed frequency band with a possibly stale capture) > single anchor (one
+            # point, no cross-check) > position-only (an honest "unknown", ranks above a wrong guess).
+            # See memory fh6-slider-value-reliability-hierarchy. Do not add a new per-car value source
+            # without deciding where it sits in this order and setting derived accordingly.
         elif per_car and anchor is not None:
             entry["value"] = round(anchor, 2)
             entry["anchored"] = True   # exact at this position (user-read); range still wants a 2nd position
+            entry["derived"] = True    # BUG (2026-09-03): a single hand-typed reading, not the 2-point solve
+            # above -- it was never marked derived, so the dashboard's fillFromDb() (live.js:888, which exists
+            # exactly to let the game's own verified physics-table range from the database supersede a weaker
+            # guess) treated it as already-final and never got the chance to override it. Confirmed live: this
+            # left a stale/unconverted anchor (front_downforce "190.0") standing over the database's correct,
+            # unit-converted value (184 kgf -> 405.7 lb) for ordinal 2866. A single point is weaker evidence
+            # than either the 2-point back-solve above or a database row from the game's own physics table --
+            # it must yield to both, the same way the mass-derived spring value below already does.
         elif per_car and gband:
             lo2, hi2 = gband
             entry["value"] = round(lo2 + norm * (hi2 - lo2), 2)
@@ -478,37 +499,74 @@ def scan_tunes(containers_root=None, newest_only=True):
 # Shop menus, in the order the decode section presents them. Each entry lists
 # the part-slot keys that live under it.
 SHOP_MENUS = [
-    # The aspirator's own tier (Stock/Street/Sport/Race Turbo or Supercharger) is a real tile
-    # INSIDE the Engine menu once that conversion is fitted -- docs/fh6-ui-spec.md:326 documents
-    # the actual in-game grid: "...Pistons, Centrifugal Supercharger, Intercooler, Oil and
-    # Cooling, Flywheel" -- twelve tiles, the supercharger sitting right before Intercooler. Only
-    # `intercooler` was ever in this list (2026-09-03 fix, Jett: "the aspirator... IS a required
-    # selection in the engine and power menu and is NOWHERE TO BE SEEN"). All five slots are
-    # listed; only the one actually installed on a given save ever produces a row (the other four
-    # are simply absent from that car's parts, same as any other slot with no id).
-    ("Engine & Power", ["engine","motor_parts","camshaft","valves","displacement",
-        "pistons","fuel_system","ignition","exhaust","intake","flywheel","manifold",
-        "restrictor_plate","oil_cooling","single_turbo","twin_turbo","quad_turbo",
-        "centrifugal_supercharger","pos_supercharger","intercooler"]),
-    ("Platform & Handling", ["brakes","springs_dampers","front_arb","rear_arb",
-        "weight_reduction","roll_cage"]),
-    ("Drivetrain", ["clutch","transmission","driveline","differential"]),
-    ("Tires & Rims", ["tire_compound","front_tire_width","rear_tire_width","front_rim_size",
-        "rear_rim_size","rim_style","rear_rim_style","front_tire_profile","rear_tire_profile",
-        "front_track_width","rear_track_width"]),
-    ("Aero & Appearance", ["car_body","front_bumper","rear_bumper","hood","side_skirts","rear_wing"]),
+    # ROW order within each category now follows the real in-game grid, top-left to bottom-right
+    # (docs/fh6-ui-spec.md section 2), not an arbitrary/hand-picked order -- 2026-09-04 (Jett: "the
+    # parts... always seem to be in the same order unless there is a specific reason not to. we need
+    # to rearrange the entries to mimic the actual menu entries"). Every slot whose tile position is
+    # NOT confirmed by a capture is flagged below; it is NOT asserted as the true grid position.
+    #
+    # Engine: spec 2.1 (11-tile V8-swap grid, the most complete capture) gives 1 Intake, 2 manifold,
+    # 3 fuel_system, 4 Ignition, 5 exhaust, 6 aspiration(turbo/blower icon), 7 Valves, 8 Displacement,
+    # 9 pistons, 10 Oil/Cooling, 11 Flywheel. Spec 2.1's own "Disagreement" note: a DIFFERENT capture
+    # (stock powertrain, 12 tiles) reads Intake, fuel_system, Ignition, exhaust, aspiration, camshaft,
+    # engine block, pistons, drum(?), intercooler, Oil/Cooling, Flywheel -- aspiration sits earlier
+    # there too, but intercooler sits right after it, not at the very end. The spec is explicit that
+    # "the Engine list is engine-specific" and NEITHER capture can be asserted as universal, so this
+    # follows the 11-tile capture's positions for the 8 slots it names and places camshaft, intercooler
+    # and restrictor_plate (never confirmed in either capture) beside the internals they belong to.
+    # "engine" (the block's own row, category "Engine Block") is not one of the spec's 11/12 numbered
+    # tiles at all -- it duplicates the swap identity the Conversions section already shows as
+    # "Powertrain" -- so its position here is a convenience summary, not a claimed grid tile; kept
+    # first rather than dropped.
+    ("Engine & Power", ["engine", "motor_parts", "intake", "manifold", "fuel_system", "ignition",
+        "exhaust", "single_turbo", "twin_turbo", "quad_turbo", "centrifugal_supercharger",
+        "pos_supercharger", "intercooler", "camshaft", "valves", "displacement", "pistons",
+        "restrictor_plate", "oil_cooling", "flywheel"]),
+    # Platform and Handling: spec 2.2, all 6 tiles confirmed -- Brakes, Spring and Dampers, Front
+    # Anti-roll Bars, Rear Anti-roll Bars, Chassis Reinforcement/Roll Cage, Weight Reduction. The
+    # prior order had weight_reduction BEFORE roll_cage; the spec's tile 5/6 are the other way round.
+    ("Platform & Handling", ["brakes", "springs_dampers", "front_arb", "rear_arb",
+        "roll_cage", "weight_reduction"]),
+    # Drivetrain: spec 2.3, 3 tiles confirmed -- Transmission, Driveline, Differential. Clutch is not
+    # a tile on every car (spec 10.3: absent on the NSX-R) and its position relative to these three,
+    # on a car that DOES sell it, has never been captured -- kept first as a placeholder, not a claim.
+    ("Drivetrain", ["clutch", "transmission", "driveline", "differential"]),
+    # Tires and Rims: spec 2.4, 8-tile grid -- 1 Tire Compound, 2 Front Tire Width, 3 Rear Tire Width,
+    # 4 UNKNOWN, 5 Rim Style (screen title; tile reads "Front Rim Style"), 6 UNKNOWN, 7 Front Rim Size,
+    # 8 UNKNOWN (Rear Rim Size is reachable from it). The prior order put both rim SIZES before rim
+    # STYLE; the spec has style (tile 5) ahead of size (tile 7). Tire/rim PROFILE and TRACK WIDTH are
+    # not in this 8-tile capture at all -- spec notes some grids grow additional tiles after a
+    # widebody/rim change -- so they stay last, unconfirmed rather than guessed into a position.
+    ("Tires & Rims", ["tire_compound", "front_tire_width", "rear_tire_width",
+        "rim_style", "rear_rim_style", "front_rim_size", "rear_rim_size",
+        "front_tire_profile", "rear_tire_profile", "front_track_width", "rear_track_width"]),
+    # Aero and Appearance: spec 2.5 is a 2-tile menu, 1 Front Bumper, 2 Rear Wing (Front Bumper drops
+    # out once a widebody kit is fitted). hood/side_skirts/rear_bumper are NOT Upgrade Shop tiles at
+    # all -- they live under Paint and Customize (clone_parts.py CUSTOMIZE_SLOTS/CUSTOMIZE_MENU,
+    # established 2026-09-03) -- the prior list filed all five under this one menu, which both
+    # mislabelled three of them and buried Rear Wing behind them instead of tile 2.
+    ("Aero & Appearance", ["front_bumper", "rear_wing"]),
+    # Paint and Customize: real purchases, but not Upgrade Shop tiles -- the menu path to them has
+    # never been captured (clone_parts.py CUSTOMIZE_MENU), so this order is grouping only, not a
+    # claimed tile sequence.
+    ("Paint and Customize", ["hood", "side_skirts", "rear_bumper"]),
 ]
-# Tune tabs, mapping the decode UI tabs to the slider keys that belong to each.
+# Tune tabs, mapping the decode UI tabs to the slider keys that belong to each. ORDER (2026-09-03,
+# Jett: "the old deliverable was far better... it is impossible to see all the information"):
+# docs/fh6-ui-spec.md:124 gives the real tab strip verbatim -- TIRES, GEARING, ALIGNMENT, ANTIROLL
+# BARS, SPRINGS, DAMPING, AERO, BRAKE, DIFFERENTIAL. This list had Gearing last instead of 2nd and
+# Springs 2nd instead of 5th. Damping's own field order was also backwards -- spec line 138 reads
+# "Rebound Stiffness then Bump Stiffness", this list had bump first.
 TUNE_TABS = [
     ("Tires",       ["front_tire_pressure","rear_tire_pressure"]),
-    ("Springs",     ["front_spring","rear_spring","front_ride_height","rear_ride_height"]),
+    ("Gearing",     ["final_drive"]),   # individual gears appended dynamically
     ("Alignment",   ["front_camber","rear_camber","front_toe","rear_toe","front_caster"]),
     ("Anti-roll bars",["front_arb","rear_arb"]),
-    ("Damping",     ["front_bump","rear_bump","front_rebound","rear_rebound"]),
+    ("Springs",     ["front_spring","rear_spring","front_ride_height","rear_ride_height"]),
+    ("Damping",     ["front_rebound","rear_rebound","front_bump","rear_bump"]),
     ("Aero",        ["front_downforce","rear_downforce"]),
     ("Brakes",      ["brake_balance","brake_pressure"]),
     ("Differential",["front_diff_accel","front_diff_decel","rear_diff_accel","rear_diff_decel","center_diff"]),
-    ("Gearing",     ["final_drive"]),   # individual gears appended dynamically
 ]
 
 # In-game category name for each part slot (what the upgrade shop calls it).
@@ -1012,6 +1070,15 @@ def _part_view(cat, val, ordinal, gear_count=None):
     # standard Stock/Street/Sport/Race ladder (brakes, ARB, springs, clutch, driveline, engine internals, weight, aero, …)
     if idx == 0:
         return out("Stock", "named", stock=True)
+    if cat in ("roll_cage", "weight_reduction"):
+        # DENSE-IN-VARIANT (2026-09-03 fix): idx here is variant*100+tile, and the tier WORD depends on
+        # this car's own menu length (VARIANT_LADDERS), which the plain ladder below can't know. The
+        # dedicated resolver for these two slots (clone_parts._pick_variant_dense) already refuses to
+        # guess a tier word without a proven per-car name or manifest count; this generic branch was
+        # skipping that and inventing e.g. "Street Weight Reduction" with false "named" confidence on
+        # cars where no such tile is proven to exist. Bug: a car showed a Weight Reduction tier that
+        # was never actually equipped.
+        return out(f"{disp} · tile {idx % 100 + 1} (tier name unverified for this car)", "category")
     conf = "named" if idx <= 3 else "category"   # a race-variant index we cap at "Race" is slightly less certain
     return out(f"{_tier_word(idx)} {disp}", conf)
 
@@ -1092,6 +1159,17 @@ def _conversion_rows(tune, ordinal):
                              "electric": False, "build_level": bl, "disp_from_build": bool(disp_l),
                              "engine_family": efam, "cat_label": (cat.get("label") if cat else None), "cat_cyl": cyl0}
     conv.append(er)
+    # ORDER (2026-09-03 fix): docs/fh6-ui-spec.md:107 gives the real "Body Kits and Conversions"
+    # tile order as Engine Swap, Drivetrain Swap, Aspiration, Body Kit -- Drivetrain now comes before
+    # Aspiration to match, and Body Kit is a new fourth row instead of being absent.
+    # Drivetrain — stock vs swapped (the slot isn't a Street/Sport/Race tier). The save can't know the RESULTING
+    # layout, so resulting_drivetrain starts null; the daemon fills it from live DrivetrainType (FWD/RWD/AWD).
+    dv = P.get("drivetrain")
+    if dv is not None:
+        t = dv % 1000
+        dr = row("drivetrain", "Drivetrain", "Stock layout" if t == 0 else "Converted / swapped", "named", t, t == 0, dv)
+        dr["resulting_drivetrain"] = None
+        conv.append(dr)
     # ASPIRATION — from the populated forced-induction slot (electric = none)
     if motor is not None:
         conv.append(row("aspiration", "Aspiration", "Electric (no aspiration)", "named", 0, True, None))
@@ -1102,14 +1180,12 @@ def _conversion_rows(tune, ordinal):
             conv.append(row("aspiration", "Aspiration", (f"{_tier_word(t)} " if t else "") + ASPIRATION_TYPE[asp], "named", t, False, av))
         else:
             conv.append(row("aspiration", "Aspiration", "Naturally Aspirated", "named", 0, True, None))
-    # Drivetrain — stock vs swapped (the slot isn't a Street/Sport/Race tier). The save can't know the RESULTING
-    # layout, so resulting_drivetrain starts null; the daemon fills it from live DrivetrainType (FWD/RWD/AWD).
-    dv = P.get("drivetrain")
-    if dv is not None:
-        t = dv % 1000
-        dr = row("drivetrain", "Drivetrain", "Stock layout" if t == 0 else "Converted / swapped", "named", t, t == 0, dv)
-        dr["resulting_drivetrain"] = None
-        conv.append(dr)
+    # BODY KIT — tile 4 of the real menu; moved here from Aero & Appearance (was tile-buried and
+    # unmarked as a gate). Reuses _part_view's existing car_body decode rather than re-deriving it.
+    bk = P.get("car_body")
+    if bk is not None:
+        pv = _part_view("car_body", bk, own)
+        conv.append(row("car_body", "Body Kit", pv["label"], pv["conf"], pv["tier"], pv["stock"], bk))
     return conv
 
 def tune_to_deliverable(tune, car_name=None):
@@ -1136,7 +1212,14 @@ def tune_to_deliverable(tune, car_name=None):
             rows.append(row_d)
         if rows:
             menus.append({"menu": menu_name, "rows": rows})
-    menus.insert(0, {"menu": "Conversions", "rows": _conversion_rows(tune, ordn)})   # gates every other option — engine swap, aspiration, drivetrain
+    # 2026-09-03 (Jett: "the categories arent even in the same order"): a prior fix corrected the
+    # ROWS within Conversions to match docs/fh6-ui-spec.md:107's real tile order but left the whole
+    # CATEGORY pinned to position 0 -- the actual in-game tab order (spec line 53-58) is Engine,
+    # Platform and Handling, Drivetrain, Tires and Rims, Aero and Appearance, Body Kits and
+    # Conversions LAST. Conversions gating everything else is a real fact about BUILD SEQUENCE, but
+    # this deliverable mirrors the game's own screens (dashboard-states.md: "laid out as the two
+    # in-game screens"), and the game puts this tab last. Append, don't insert.
+    menus.append({"menu": "Conversions", "rows": _conversion_rows(tune, ordn)})
     # tune tabs
     tabs = []
     for tab_name, keys in TUNE_TABS:

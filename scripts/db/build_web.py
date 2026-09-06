@@ -86,6 +86,23 @@ def rows(cx, sql, *a):
     return [dict(r) for r in cx.execute(sql, a)]
 
 
+# ---- naming candidates: every event course_event considered for a route_key, closest match
+# first (map beats length beats declared; then by how far off the length was) -- the chosen=1
+# row IS the course's name when one exists, and the others are what else it could have been.
+def course_candidates(cx):
+    out = {}
+    for r in cx.execute("""
+        SELECT ce.route_key, ce.event_id, e.name, ce.tier, ce.chosen, ce.d_course_m, ce.d_route_m
+        FROM course_event ce JOIN ref_event e ON e.event_id = ce.event_id
+        ORDER BY ce.route_key, ce.chosen DESC,
+                 CASE ce.tier WHEN 'map' THEN 0 WHEN 'length' THEN 1 WHEN 'declared' THEN 2 ELSE 9 END,
+                 ABS(COALESCE(ce.d_course_m, 1e9))"""):
+        out.setdefault(r["route_key"], []).append({
+            "event_id": r["event_id"], "name": r["name"], "tier": r["tier"],
+            "chosen": r["chosen"], "d_course_m": r["d_course_m"], "d_route_m": r["d_route_m"]})
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--db", default=None)
@@ -170,11 +187,15 @@ def main(argv=None):
         SELECT c.route_key AS key, c.name, c.is_rivals AS rivals, c.length_m AS len,
                c.turn_count AS turns, c.n_laps AS laps, c.n_sessions AS sessions,
                c.confidence AS conf,
+               c.name_source, c.name_confidence, c.declared_name, c.declared_source, c.event_id,
                (SELECT COUNT(*) FROM lap l WHERE l.route_key = c.route_key) AS lap_rows,
                (SELECT MIN(l.lap_s) FROM lap l WHERE l.route_key = c.route_key
                   AND l.void = 0 AND l.is_partial = 0) AS best,
                cr.route_id, cr.match_kind AS match, cr.covered
         FROM course c LEFT JOIN course_route cr ON cr.route_key = c.route_key ORDER BY (c.name IS NULL), c.name, c.route_key""")
+    cand_by_key = course_candidates(cx)
+    for c in courses:
+        c["candidates"] = cand_by_key.get(c["key"], [])
     total += write(os.path.join(out, "courses.json"), courses)
 
     n_course = 0
@@ -231,10 +252,15 @@ def main(argv=None):
             if rr:
                 route["length_m"] = rr["length_m"]
                 route["is_loop"] = rr["is_loop"]
+        naming = {
+            "name_source": c["name_source"], "name_confidence": c["name_confidence"],
+            "declared_name": c["declared_name"], "declared_source": c["declared_source"],
+            "event_id": c["event_id"], "candidates": cand_by_key.get(key, []),
+        }
         total += write(os.path.join(out, "course", key.replace("/", "_") + ".json"),
                        {"key": key, "name": c["name"], "len": c["len"], "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
-                        "traces": traces, "route": route})
+                        "traces": traces, "route": route, "naming": naming})
         n_course += 1
 
     # ---- evidence -----------------------------------------------------------
@@ -250,12 +276,14 @@ def main(argv=None):
     # ~8 m spacing keeps 169 routes under a megabyte and is still finer than the map can draw.
     world = {"routes": {}, "bbox": None}
     xs, zs = [], []
-    for r in cx.execute("SELECT route_id, length_m, is_loop FROM ref_route"):
+    for r in cx.execute("SELECT route_id, length_m, is_loop, name, name_confidence FROM ref_route"):
         pts = [[round(p["x"]), round(p["z"])] for p in cx.execute(
             "SELECT x, z FROM ref_route_point WHERE route_id=? AND (i % 4)=0 ORDER BY i", (r["route_id"],))]
         if len(pts) < 3:
             continue
-        world["routes"][r["route_id"]] = {"len": r["length_m"], "loop": r["is_loop"], "pts": pts}
+        world["routes"][r["route_id"]] = {"len": r["length_m"], "loop": r["is_loop"],
+                                           "name": r["name"], "name_confidence": r["name_confidence"],
+                                           "pts": pts}
         xs += [p[0] for p in pts]; zs += [p[1] for p in pts]
     if xs:
         world["bbox"] = [min(xs), max(xs), min(zs), max(zs)]

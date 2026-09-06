@@ -43,6 +43,21 @@ function piBadge(cls, pi, sm) {
 const clsBadge = (c) => piBadge(c, null, true);
 const KG_LB = 2.2046226;
 
+// COURSE NAMES (2026-09-05): the chip beside a course's title says where the NAME came from, read
+// straight off course.name_confidence -- never re-derived here. 'typed' is a person's own word,
+// recorded but not cross-checked (confidence 'read'); the other two are the route_names rule's own
+// tiers. Read-only: an unnamed course with candidates shows what it MIGHT be, dashed like the
+// dashboard's other "not the real thing yet" chip, never a picker.
+function nameChip(naming) {
+  if (!naming) return "";
+  if (naming.name_confidence === "verified") return '<span class="chip on">auto · verified</span>';
+  if (naming.name_confidence === "derived") return '<span class="chip b">auto · derived</span>';
+  if (naming.name_confidence === "read") return '<span class="chip">typed</span>';
+  const cand = (naming.candidates || []).filter((c) => !c.chosen);
+  if (cand.length) return `<span class="chipmore">${cand.slice(0, 2).map((c) => esc(c.name)).join(" / ")} ?</span>`;
+  return "";
+}
+
 /* ---------------------------------------------------------------- views */
 const VIEWS = [
   { k: "live", lbl: "Dashboard", f: (h) => viewLive(h) },
@@ -234,6 +249,7 @@ async function showCourse(key) {
   const r = c.route;
   host.append(el(`<div class="panel"><div class="chips">
     <b>${esc(c.name || c.key)}</b>
+    ${nameChip(c.naming)}
     <span class="chip">${n0(c.len)} m</span>
     <span class="chip">${(c.turns || []).length} turns</span>
     <span class="chip b">${(c.laps || []).length} laps</span>

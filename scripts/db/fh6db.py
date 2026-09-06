@@ -67,7 +67,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"   # 2 = COURSE NAMES columns/tables (2026-09-05), applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -248,6 +248,121 @@ def replace_all(cx, table, cols, rows, chunk=1000):
     """
     cx.execute("DELETE FROM %s" % table)
     return upsert_many(cx, table, cols, rows, chunk=chunk)
+
+
+def merge_many(cx, table, cols, rows, key, coalesce=(), chunk=1000):
+    """Chunked INSERT ... ON CONFLICT(key) DO UPDATE -- an upsert that keeps the parent row.
+
+    upsert_many is INSERT OR REPLACE, which DELETES the existing row first and so fires every
+    ON DELETE CASCADE hanging off it (proven 2026-09-05: it emptied course_route on every
+    telemetry run). Use this for any table that is a foreign-key parent (course). Columns in
+    `coalesce` keep their stored value when the incoming one is NULL. Does NOT commit.
+    """
+    cols = list(cols)
+    key = tuple(key)
+    upd = ", ".join(
+        ("%s=COALESCE(excluded.%s, %s.%s)" % (c, c, table, c)) if c in coalesce else ("%s=excluded.%s" % (c, c))
+        for c in cols if c not in key)
+    sql = "INSERT INTO %s (%s) VALUES (%s) ON CONFLICT(%s) DO UPDATE SET %s" % (
+        table, ",".join(cols), ",".join("?" * len(cols)), ",".join(key), upd)
+    n = 0
+    buf = []
+    for r in rows:
+        if isinstance(r, dict):
+            r = tuple(r.get(c) for c in cols)
+        else:
+            r = tuple(r)
+        if len(r) != len(cols):
+            raise ValueError("%s: row has %d values for %d columns: %r" % (table, len(r), len(cols), r))
+        buf.append(r)
+        if len(buf) >= chunk:
+            cx.executemany(sql, buf)
+            n += len(buf)
+            buf = []
+    if buf:
+        cx.executemany(sql, buf)
+        n += len(buf)
+    return n
+
+
+# ---------------------------------------------------------------------------
+# 4b. Migration -- schema.sql only runs on a FRESH database (ensure_schema), so every addition
+#     is applied here too, ALTER-when-missing. ADD COLUMN with no default is metadata-only.
+# ---------------------------------------------------------------------------
+
+#: COURSE NAMES (2026-09-05). Keep in step with db/schema.sql by hand; rebuild --check I11 asserts the
+#: live DB has them, and the tests build a fresh DB from schema.sql, so drift fails one or the other.
+V2_COLUMNS = {
+    "course": [("declared_name", "TEXT"), ("declared_source", "TEXT"),
+               ("name_source", "TEXT"), ("name_confidence", "TEXT")],
+    "ref_route": [("event_id", "TEXT REFERENCES ref_event(event_id)"),
+                  ("name_source", "TEXT"), ("name_confidence", "TEXT")],
+    "ref_event": [("discipline", "TEXT"), ("length_m", "REAL"), ("is_loop", "INTEGER"), ("source", "TEXT")],
+}
+V2_TABLES = {
+    "ref_event_string": """CREATE TABLE IF NOT EXISTS ref_event_string (
+  event_id    TEXT NOT NULL REFERENCES ref_event(event_id) ON DELETE CASCADE,
+  table_name  TEXT NOT NULL,
+  key_hash    INTEGER NOT NULL,
+  key_name    TEXT NOT NULL,
+  role        TEXT NOT NULL,
+  PRIMARY KEY (event_id, table_name, key_hash),
+  FOREIGN KEY (table_name, key_hash) REFERENCES ref_string(table_name, key_hash)
+) WITHOUT ROWID""",
+    "course_event": """CREATE TABLE IF NOT EXISTS course_event (
+  route_key    TEXT NOT NULL REFERENCES course(route_key) ON DELETE CASCADE,
+  event_id     TEXT NOT NULL REFERENCES ref_event(event_id) ON DELETE CASCADE,
+  tier         TEXT NOT NULL,
+  route_id     TEXT REFERENCES ref_route(route_id),
+  d_route_m    REAL,
+  d_course_m   REAL,
+  loop_ok      INTEGER,
+  road_ok      INTEGER,
+  declared_ok  INTEGER,
+  chosen       INTEGER NOT NULL DEFAULT 0,
+  computed_utc TEXT NOT NULL,
+  PRIMARY KEY (route_key, event_id)
+) WITHOUT ROWID""",
+}
+
+
+def ensure_columns(cx, table, cols):
+    """ALTER TABLE ADD COLUMN for each (name, decl) the table lacks. Returns how many were added."""
+    have = {r[1] for r in cx.execute("PRAGMA table_info(%s)" % table)}
+    added = 0
+    for name, decl in cols:
+        if name not in have:
+            cx.execute("ALTER TABLE %s ADD COLUMN %s %s" % (table, name, decl))
+            added += 1
+    return added
+
+
+def migrate(cx):
+    """Bring a live database up to SCHEMA_VERSION. Idempotent; commits. Returns (columns, tables) added."""
+    n_cols = 0
+    for table, cols in V2_COLUMNS.items():
+        if has_table(cx, table):
+            n_cols += ensure_columns(cx, table, cols)
+    n_tabs = 0
+    for name, ddl in V2_TABLES.items():
+        if not has_table(cx, name):
+            cx.execute(ddl)
+            n_tabs += 1
+    if meta_get(cx, "schema_version") != SCHEMA_VERSION:
+        meta_set(cx, "schema_version", SCHEMA_VERSION)
+    cx.commit()
+    return n_cols, n_tabs
+
+
+def missing_v2(cx):
+    """What migrate() still has to add -- [] when the live DB matches SCHEMA_VERSION 2."""
+    out = []
+    for table, cols in V2_COLUMNS.items():
+        if has_table(cx, table):
+            have = {r[1] for r in cx.execute("PRAGMA table_info(%s)" % table)}
+            out += ["%s.%s" % (table, c) for c, _ in cols if c not in have]
+    out += [t for t in V2_TABLES if not has_table(cx, t)]
+    return out
 
 
 def table_counts(cx):

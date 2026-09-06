@@ -74,6 +74,7 @@ function adoptMode(m) {
   if (prev.suggest !== MODE.suggest || prev.game !== MODE.game) onModeChange(prev, MODE);
 }
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
+let COURSE_MATCH = null;           // { dist, secondKey, secondDist } from the last locateCourse() — how sure the current course is
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
 let BASELINE = null;
@@ -105,7 +106,12 @@ function buildStatus() {
     steps: ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
   if (locked) return { key: "downloaded", label: "downloaded / locked", tone: "warn",
     why: frozenOf() ? "someone else's build, frozen as your target — install your own tune on this car and build back to it"
-                    : "someone else's build; sliders are hidden by the lock",
+                    // 2026-09-03 (Jett flagged this as "crazy" -- flatly contradicted by the Clone Plan
+                    // feature two lines below, which only works because this is false): the LOCK blocks
+                    // editing a slider in-game; it never blocked reading one. Every slider decodes from
+                    // the save file's own bytes regardless of lock status -- that's how a locked/downloaded
+                    // build gets cloned at all.
+                    : "someone else's build — every part and slider decodes cleanly from the save; only editing it in-game is locked",
     steps: frozenOf() ? ["build this car back to the frozen sheet", "save it with a name — then it is yours, unlocked and comparable"]
                       : ["clone it onto a second copy of the car — open BUILD SHEET", "with only one copy: keep the sheet as your target, install your own tune on this car, build back to it"], ambiguous };
   if (!tuneOk) {
@@ -158,6 +164,21 @@ async function panelBoot() {
     if (CTX.courseKey && !COURSE) {
       try { COURSE = await get(courseFile(CTX.courseKey)); COURSE_KEY = CTX.courseKey; restoreCourseView(COURSE_KEY); } catch (e) { COURSE = null; COURSE_KEY = null; }
     }
+  }
+  // THE MISSING THIRD HOLD (2026-09-03). Mode and course were already restored above from the
+  // persisted context; the car never was -- CUR is set ONLY by a live SSE frame naming a car
+  // (identify(), below), so a fresh tab opened while the game sits in a menu (no car in the frame
+  // at all) showed a genuinely blank page: no header, no map, nothing to hold, even though the
+  // daemon's own /disk-tune already knows the last driven car (it just didn't fall back to it
+  // either, until the same day's fix). One request, reusing identify() rather than duplicating what
+  // it does with a disk-tune payload.
+  if (!CUR) {
+    try {
+      const dt = await fetch(DAEMON + "/disk-tune").then((r) => r.json());
+      if (dt && dt.available && dt.ordinal != null) {
+        await identify({ id: String(dt.ordinal), ordinal: dt.ordinal, name: dt.name }, "held from the previous page");
+      }
+    } catch (e) { /* no daemon yet, or genuinely no car ever seen -- the existing "waiting for a car" state stands */ }
   }
 }
 
@@ -265,6 +286,10 @@ function lastAction() {
     ${dot(CUR && CUR.disk ? true : (CUR && CUR.diskErr ? false : null), "save", CUR && CUR.disk ? "read" : (CUR && CUR.diskErr ? "unreachable" : "none"), CUR && CUR.diskErr ? "the daemon could not be reached" : "the tune file on disk for this car")}
     ${dot(RB.state === "down" ? false : (RB.state === "running" || RB.pending ? null : true), "database", RB.state === "down" ? "service down" : (RB.state === "running" || RB.pending ? "importing" : (dbAt || "idle")), RB.state === "down" ? "the import service is not running: python scripts/rebuild_service.py 8001" : "the database import service")}
     ${dot(!!WATCH_OK, "auto-reload", WATCH_OK ? "on" : "off", WATCH_OK ? "this page reloads itself when the code or the data changes" : "the reload channel is down; the page checks the server every minute instead")}
+    ${(() => { const sp = RB.last && RB.last.sessions_pending;
+      return sp == null ? "" : dot(sp === 0, "sessions", sp === 0 ? "caught up" : sp + " unimported",
+        sp === 0 ? "every driving session on disk is imported into the database"
+                 : sp + " session" + (sp === 1 ? "" : "s") + " on disk have not been imported yet — corners/laps from them are not queryable until they are"); })()}
   </span>`;
   el.dataset.tone = tone;
   el.innerHTML = `<b>${esc(txt)}</b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}`;
@@ -474,7 +499,10 @@ function courseTrace(c) {
 function liveRun() {
   const pts = LIVE.run;
   const head = `<b>Speed trace</b><span class="why">${pts.length && (pts[pts.length - 1][0] || 0) <= 50 ? "parked — the trace draws once the car moves" : "live run · the last " + (pts.length ? Math.round(pts.length / 10) : 0) + " s"}${MODE.suggest === "course" && COURSE ? ` · no lap on record for ${esc(COURSE.name || COURSE.key)} yet` : ""}</span><span class="tspacer"></span>${modeControls()}`;
-  const foot = `<span class="lchips grip">${TRACE_GRIP.map((c, i) => `<span class="lchip key" style="border-color:${c}"><i style="background:${c}"></i>${TRACE_WORD[i]}</span>`).join("")}</span>`;
+  // 2026-09-03 (Jett): the legend named every grip state but never said which one you're IN right
+  // now -- LIVE.run's own last point already carries it (runSample() pushes [dist,mph,g,...]).
+  const curG = pts.length ? pts[pts.length - 1][2] : null;
+  const foot = `<span class="lchips grip">${TRACE_GRIP.map((c, i) => `<span class="lchip key${curG === i ? " on" : ""}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${TRACE_WORD[i]}</span>`).join("")}</span>`;
   const svg = (W, H) => {
     if (pts.length < 3) return `<div class="why tempty">drive — speed against distance draws here as you go, painted by what the tyres are doing</div>`;
     const smax = pts[pts.length - 1][0] || 1, vmax = Math.max(60, ...pts.map((q) => q[1])) * 1.06;
@@ -608,6 +636,37 @@ function paintDockTrace() {
   const note = $("#dockNote"); if (note) note.textContent = LIVE.strip.length ? `${Math.round(LIVE.strip.length / 60)} min of history · ${(LIVE.corners || []).length} corners this session` : "";
 }
 
+// THE STATUS SPECTRUM (Jett, 2026-09-03): a build's status is a JOURNEY, not a fact — most people
+// glancing at a text label ("downloaded / locked") have no sense that there even ARE other states,
+// let alone that moving through them is the point. A full-width bar, bad-to-good left-to-right,
+// with the current stage as a marker that SLIDES when status changes (not a value that just gets
+// replaced) makes the existence of the ladder and your progress along it legible at a glance.
+// Order is the ratification ladder itself (docs/dashboard-states.md §3): more steps remaining =
+// further left. "variation" and "clone" (buildStatus()'s two mid-journey keys, both tone "blue")
+// share one stop -- both mean "hardware known, not yet a finished ratified save."
+const STATUS_SPECTRUM = [
+  { key: "unknown", label: "unknown", col: "#e5414e" },
+  { key: "downloaded", label: "downloaded", col: "#e3b341" },
+  { key: "clone", label: "clone / variation", col: "#2f81f7" },
+  { key: "ratified", label: "ratified", col: "#3fb950" },
+];
+function spectrumIdx(key) {
+  if (key === "unknown") return 0;
+  if (key === "downloaded") return 1;
+  if (key === "variation" || key === "clone") return 2;
+  if (key === "ratified") return 3;
+  return null;   // none / offline / no car: no position on the ladder to show
+}
+function statusSpectrumHTML(st, c) {
+  const idx = spectrumIdx(st.key);
+  const n = STATUS_SPECTRUM.length;
+  const pctOf = (i) => (i / (n - 1)) * 100;
+  const ticks = STATUS_SPECTRUM.map((s, i) => `<span class="hspec-tick${idx === i ? " on" : ""}" style="left:${pctOf(i)}%"></span>`).join("");
+  const marker = idx != null ? `<span class="hspec-marker" style="left:${pctOf(idx)}%;background:${STATUS_SPECTRUM[idx].col};box-shadow:0 0 0 3px ${STATUS_SPECTRUM[idx].col}33" title="${esc(c.status || STATUS_SPECTRUM[idx].label)}"></span>` : "";
+  const labels = STATUS_SPECTRUM.map((s, i) => `<span${idx === i ? ` class="on" style="color:${s.col}"` : ""}>${esc(s.label)}</span>`).join("");
+  return `<div class="hspectrum"><div class="hspec-track">${ticks}${marker}</div><div class="hspec-labels">${labels}</div></div>`;
+}
+
 /* ------------------------------------------------------------ header */
 // THE BAND IS ALLOCATED BY DIFFICULTY, NOT BY DATA (audit 2026-09-03). One skeleton in every
 // state; only the CONTENT and the tone change. The state's own answer takes the largest type in
@@ -626,8 +685,16 @@ function headerCopy(st, q) {
   const nSaves = mm.n_saves || 0;
   const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
   const car = (CUR && CUR.name) || (CUR ? "ordinal " + CUR.ordinal : "");
-  const byline = [m && m.creator ? "by " + m.creator : "", m && m.created ? when(m.created) : "", car].filter(Boolean).join(" · ");
-  const base = { tone: "dim", lead: "", sub: "", tune, byline, why: st.why || "", step: (st.steps || [])[0] || "",
+  // 2026-09-03 (Jett, final spec for this panel): exactly four fields, in this order -- (1) car
+  // make/model/year, (2) the tune's name as identified in the save, (3) the CURRENT STATUS of the
+  // selected tune (the short canonical label -- downloaded/unknown/variation/clone/ratified, per
+  // buildStatus()'s own docstring at the top of this file -- not the long descriptive headline that
+  // used to occupy this slot), (4) the next step to raise that status. `car` used to be the LAST,
+  // smallest thing in the header, after the state headline, the tune's custom name, and the creator
+  // credit; it's now first and biggest. `status` is new: distinct from `lead`, which stays as the
+  // longer state-specific headline available for a state that still needs one (ambiguous identity).
+  const byline = [m && m.creator ? "by " + m.creator : "", m && m.created ? when(m.created) : ""].filter(Boolean).join(" · ");
+  const base = { tone: "dim", lead: "", sub: "", tune, car, status: st.label || "", byline, why: st.why || "", step: (st.steps || [])[0] || "",
                  rest: (st.steps || []).slice(1), primary: null, noBtn: "", caption: "", evidence: "" };
 
   // AMBIGUITY OVERRIDES EVERY STATUS: which build is on the car outranks what kind of build it is
@@ -650,13 +717,19 @@ function headerCopy(st, q) {
     sub: "everything below is the last thing seen", step: "python scripts/telemetry/fh6_live_daemon.py",
     rest: [], primary: { label: "COPY COMMAND", act: "copycmd" }, caption: "not live" });
   if (st.key === "downloaded") {
+    // ONE BUTTON (2026-09-03, Jett): CLONE PLAN / OPEN THE TARGET used to sit here as their own
+    // primary button, both with act:"sheet" -- the identical destination BUILD SHEET already opens
+    // one slot over. Opening the sheet is never really "just a peek" here; it's step one of cloning
+    // either way, so a second, differently-labelled button to the same place added a choice with no
+    // real difference behind it. Removed; the why/step text below still carries the clone framing,
+    // build sheet is the one door.
     const froz = frozenOf();
     return Object.assign(base, { tone: "warn",
       lead: froz ? "LOCKED — FROZEN AS YOUR TARGET" : "LOCKED — SOMEONE ELSE'S BUILD",
-      sub: (m && m.desc) || "the sliders are hidden by the lock",
-      why: froz ? "build this car back to the frozen sheet, then save it with a name" : "someone else's build; it cannot be tuned or compared until it is yours",
+      sub: (m && m.desc) || "every part and slider decodes from the save — only editing it in-game is locked",
+      why: froz ? "build this car back to the frozen sheet, then save it with a name" : "someone else's build; it reads and clones cleanly — it just can't be tuned until it is yours",
       step: froz ? "build back to the sheet, then save it with a name" : "clone it onto a second copy of the car, or keep this sheet as your target",
-      primary: { label: froz ? "OPEN THE TARGET ▸" : "CLONE PLAN ▸", act: "sheet" },
+      noBtn: froz ? "NO BUTTON — BUILD SHEET ABOVE IS YOUR TARGET" : "NO BUTTON — USE BUILD SHEET ABOVE TO CLONE IT",
       caption: "as downloaded", evidence: nSaves > 1 ? nSaves + " saves on this car" : "" });
   }
   if (st.key === "unknown" && !(CUR && CUR.disk && CUR.disk.deliverable && CUR.disk.deliverable.locked)) {
@@ -711,17 +784,25 @@ function paintHeader() {
     MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
     RR.busy, RB.state === "running" || RB.pending, !!frozenOf(), !!(MATCH && MATCH.sheet),
     CUR && CUR.liveries && CUR.liveries.length, CHANGE && CHANGE.at]);
-  if (key === HDR_KEY && h.querySelector(".hlead")) { paintChips(); return; }
+  if (key === HDR_KEY && h.querySelector(".hcar")) { paintChips(); return; }
   HDR_KEY = key;
 
   const m = MATCH && MATCH.build;
   const c = CUR ? headerCopy(st, q) : { tone: "dim", lead: "WAITING FOR A CAR", sub: MODE.reason || "no signal yet",
-    tune: "", byline: "", why: "get in a car in the game", step: "the header fills the moment a frame names it",
+    tune: "", car: "no car", status: "—", byline: "", why: "get in a car in the game", step: "the header fills the moment a frame names it",
     rest: [], primary: null, noBtn: "", caption: "no car", evidence: "" };
   const liv = CUR && (CUR.liveries || []).find((l) => l.thumb);
   const img = m && m.thumb ? `${API}${m.thumb}` : liv ? `${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}` : null;
 
   h.dataset.tone = c.tone;
+  // The marker's own "left: X%" is baked into the fresh markup below (h.innerHTML replaces the
+  // whole header on every repaint), so a plain CSS transition has no "from" state to animate --
+  // the new element just appears already at its final spot. Capture the OLD marker's position
+  // before it's destroyed; after the swap, snap the new one back to that old spot with transitions
+  // off, force a reflow, then let it ease to its real target -- the fly-in that makes "the marker
+  // moved" (Jett's spec) literally true instead of a dot that teleports.
+  const oldMarker = h.querySelector(".hspec-marker");
+  const oldMarkerLeft = oldMarker ? oldMarker.style.left : null;
   h.innerHTML = `
     <div class="hart">
       ${img ? `<img class="art" alt="" src="${img}">` : `<div class="art none t-l">${esc(CUR ? (c.step || "no render") : "no car")}</div>`}
@@ -729,28 +810,34 @@ function paintHeader() {
       <span class="artcap t-l">${esc(c.caption)}</span>
     </div>
     <div class="hid">
-      <div class="hlead t-d">${esc(c.lead)}</div>
-      <div class="hsub t-b">${esc(c.sub)}</div>
-      <div class="hsp"></div>
-      <div class="htitle t-t">${c.tune ? esc(c.tune) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
-      <div class="hby t-l">${esc(c.byline)}</div>
-      <div class="hsp"></div>
+      <div class="hidtop">
+        <button class="icobtn hreload" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
+          title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
+        <div class="hcar t-d" title="${esc(c.byline)}">${esc(c.car)}</div>
+        <div class="htitle t-t">${c.tune ? esc(c.tune) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
+        ${statusSpectrumHTML(st, c)}
+      </div>
       <div class="hdec">
-        <div class="hwhy t-a">${esc(c.why)}</div>
         ${c.step ? `<div class="hstep t-b"><i>1</i><span>${esc(c.step)}</span></div>` : ""}
       </div>
     </div>
     <div class="hact">
+      <button class="second" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ BUILD SHEET · TARGET" : "BUILD SHEET ▸"}</button>
       ${c.primary ? `<button class="prim" id="btnPrim" data-act="${esc(c.primary.act)}">${esc(c.primary.label)}</button>`
         : `<div class="prim none t-l">${esc(c.noBtn || "nothing to do here")}</div>`}
-      <button class="second" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ BUILD SHEET · TARGET" : "BUILD SHEET ▸"}</button>
       <div class="hev">
         <div class="t-l">evidence</div>
         <div class="t-b">${esc(c.evidence || (q.level === "ok" ? q.why : "") || "—")}</div>
-        <button class="icobtn" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
-          title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
       </div>
     </div>`;
+
+  const newMarker = h.querySelector(".hspec-marker");
+  if (newMarker && oldMarkerLeft && oldMarkerLeft !== newMarker.style.left) {
+    const target = newMarker.style.left;
+    newMarker.style.transition = "none"; newMarker.style.left = oldMarkerLeft;
+    void newMarker.offsetWidth;   // force the browser to commit the old position before re-enabling the transition
+    newMarker.style.transition = ""; newMarker.style.left = target;
+  }
 
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bx = $("#btnRefresh"); if (bx) bx.onclick = async () => { await rereadBuild(); if (CUR && CUR.disk && !(MATCH && MATCH.build)) ensureHeld(); };
@@ -766,7 +853,7 @@ function paintHeader() {
   };
   // THE NO-CLIP RULE, asserted rather than hoped for: any line that would be cut steps down one
   // size until it fits, and the console names it — an ellipsis in this band is a bug, not a style.
-  h.querySelectorAll(".hlead, .htitle, .hsub, .hby, .hwhy").forEach((el) => {
+  h.querySelectorAll(".hcar, .htitle, .hstatus-val").forEach((el) => {
     let px = parseFloat(getComputedStyle(el).fontSize);
     for (let i = 0; i < 6 && el.scrollWidth > el.clientWidth + 1 && px > 9; i++) { px -= 1; el.style.fontSize = px + "px"; }
     if (el.scrollWidth > el.clientWidth + 1) console.warn("[header] still clipped:", el.className, el.textContent.slice(0, 40));
@@ -824,6 +911,7 @@ function paintLeft() {
     const named = !!COURSE.name;
     const kind = COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null;
     hd.innerHTML = `<b class="trackname">${esc(named ? COURSE.name : "unnamed course " + COURSE.key)}</b>
+      ${nameChip(COURSE.naming)}
       ${kind ? `<span class="chip w">${kind}</span>` : ""}
       <span class="why">${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns · ${nSel} of ${(COURSE.laps || []).length} laps drawn</span>`;
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
@@ -985,15 +1073,34 @@ function wireFollow(body) {
 function addLiveDot(body) {
   const svg = body.querySelector("svg"); if (!svg || !LIVEPOS) return;
   let g = svg.querySelector("#liveDot");
-  if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.id = "liveDot"; svg.appendChild(g); }
+  // v1-style (2026-09-03): the dot element is created ONCE and MOVED via a transform on every
+  // update, never rebuilt -- rewriting innerHTML every frame (the old approach) replaces the
+  // circle with a brand-new element each time, which is exactly why a CSS transition could never
+  // have worked before even if one had been added: there was never the same element around long
+  // enough to transition. Two pre-built circles (solid / held) are toggled by display instead of
+  // being re-created, matching app.js's updCarDot (~line 3283-3298).
+  if (!g) {
+    g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.id = "liveDot";
+    g.innerHTML = `<circle class="ld-solid" r="5" fill="#e3b341" stroke="#000" stroke-width="1"/>` +
+      `<circle class="ld-held" r="5" fill="none" stroke="#e3b341" stroke-width="1.5" opacity=".7" style="display:none">` +
+      `<title>last known position — held through the menu / loading screen</title></circle>`;
+    svg.appendChild(g);
+  }
   const x0 = +svg.dataset.x0, z0 = +svg.dataset.z0, s = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
   if (!isFinite(s)) return;
   const cx = pad + (LIVEPOS[0] - x0) * s, cy = H - pad - (LIVEPOS[1] - z0) * s;
   const held = !!LIVE.posHeld;      // no driving frame right now: the last real position, dimmed and hollow
   queueFollow();
-  g.innerHTML = held
-    ? `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="none" stroke="#e3b341" stroke-width="1.5" opacity=".7"><title>last known position — held through the menu / loading screen</title></circle>`
-    : `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="#e3b341" stroke="#000" stroke-width="1"/>`;
+  // POSITION BEFORE FIRST PAINT (matches app.js:3290-3297): a freshly-created/rebuilt map's dot
+  // has no transform attribute yet, so this placement has nothing to transition FROM -- flushing
+  // layout here (once, only on first placement) commits it instantly instead of letting the
+  // transition animate in from the SVG's origin corner.
+  const firstPlace = !g.hasAttribute("transform");
+  g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
+  if (firstPlace) void g.getBoundingClientRect();
+  const solid = g.querySelector(".ld-solid"), heldC = g.querySelector(".ld-held");
+  if (solid) solid.style.display = held ? "none" : "";
+  if (heldC) heldC.style.display = held ? "" : "none";
 }
 
 // which learned course is the live car on? nearest course whose path passes within 60 m
@@ -1003,25 +1110,44 @@ function addLiveDot(body) {
 async function locateCourse() {
   if (!LIVEPOS || !WORLD || !WORLD.courses) return;
   const near = (c) => { let bd = Infinity; for (const [x, z] of (c.path || [])) { const d = (x - LIVEPOS[0]) ** 2 + (z - LIVEPOS[1]) ** 2; if (d < bd) bd = d; } return Math.sqrt(bd); };
-  let best = null, bd = 60;
-  for (const [key, c] of Object.entries(WORLD.courses)) { const d = near(c); if (d < bd) { bd = d; best = key; } }
+  let best = null, bd = 60, second = null, sd = Infinity;
+  for (const [key, c] of Object.entries(WORLD.courses)) {
+    const d = near(c);
+    if (d < bd) { second = best; sd = bd; best = key; bd = d; }
+    else if (d < sd) { second = key; sd = d; }
+  }
   if (COURSE_KEY && WORLD.courses[COURSE_KEY]) {
     const dInc = near(WORLD.courses[COURSE_KEY]);
-    if (dInc <= 90 && (best == null || bd >= dInc - 25)) best = COURSE_KEY;
+    if (dInc <= 90 && (best == null || bd >= dInc - 25)) { best = COURSE_KEY; bd = dInc; }
   }
+  // how sure this is: some learned courses share road within the match radius (see courseConfidenceBadge)
+  COURSE_MATCH = { dist: bd, secondKey: second, secondDist: sd };
   ctxSave({ livePos: LIVEPOS });
   if (best && best !== COURSE_KEY) await onCourseChange(COURSE_KEY, best);
+}
+
+// A learned course's path can pass within the match radius of a different learned course (same
+// road, two names) — when the runner-up is nearly as close as the pick, say so rather than let a
+// per-turn view present wrong turn labels with the same confidence as a clean pick.
+function courseConfidenceBadge() {
+  if (!COURSE_MATCH || !COURSE_MATCH.secondKey || !isFinite(COURSE_MATCH.secondDist)) return "";
+  if (COURSE_MATCH.secondDist > COURSE_MATCH.dist * 2) return "";
+  const other = (WORLD.courses[COURSE_MATCH.secondKey] || {}).name || COURSE_MATCH.secondKey;
+  return ` <span class="chip w" title="this course's path passes within ${Math.round(COURSE_MATCH.secondDist)} m of another learned course here — turns could be attributed to the wrong course if identification flips">⚠ could also be ${esc(other)}</span>`;
 }
 
 /* ------------------------------------------------------------ right */
 // Which pane the context calls for. In a menu the build is what can change, so its data asks and
 // ratification steps lead; on the road the corners you are taking lead; on a course with a
 // baseline set, the conclusions lead. A click pins a tab until the context class changes.
-const RT_LABEL = { corners: "Live corners", stats: "General statistics", concl: "Conclusions", build: "Build data" };
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "stats", "concl"] : ["corners", "stats", "build"]; }
+const RT_LABEL = { corners: "Live corners", matrix: "Turn matrix", stats: "General statistics", concl: "Conclusions", build: "Build data" };
+// "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
+// to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
+// list this function returns. Add "build" back to the free-mode array below to re-enable it.
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl"] : ["corners", "stats"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
-  if (LIVE.inMenu || !LIVE.frame) return course ? "stats" : "build";
+  if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
   if (course && BASELINE) return "concl";
   return "corners";
 }
@@ -1037,13 +1163,14 @@ function paintRight() {
   if (ctx !== RIGHT_CTX) { RIGHT_CTX = ctx; RIGHT_TAB = rightTabStore()[ctx] || null; }
   const tabs = rightTabs();
   const cur = tabs.includes(RIGHT_TAB) ? RIGHT_TAB : ctx;
-  const why = { corners: "every corner as you take it · newest first", stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
+  const why = { corners: "every corner as you take it · newest first", matrix: "one row per course turn · this session",
+                stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
-  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : statsHTML();
+  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
-  fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
+  if (cur !== "matrix") fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
     setPin(CUR.ordinal, b.dataset.pickts); if (COURSE) { vcourse(COURSE.key).filters.container = b.dataset.cont; viewSave(); }
     identify(carOf(CUR.cid), "pinned"); });
@@ -1085,7 +1212,123 @@ function cornersHTML() {
       <span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${g.word}</span>
       <span class="why">${fr ? `${fr.axle} first · ph ${fr.phase}` : "clean"}${c.hb ? " · handbrake" : ""}${c.drift ? " · drift" : ""}${c.brake_max > 200 ? " · hard brake" : ""}</span></div>`;
   }).join("");
-  return head + `<div class="crow hd"><span>#</span><span>lap</span><b>kind</b><span>turn</span><span>in→apex→out</span><span>lat g</span><span>brake</span><span>balance</span><span>first red</span></div>` + rows;
+  // SESSION BALANCE (2026-09-03, Jett: a short corner log left the whole pane a slab of empty black
+  // below it -- the map beside it fills the same height naturally, the corner list can't once the
+  // count runs out. Real content, not padding: the same per-corner verdict every row already shows,
+  // tallied. Grows into the space a short session leaves instead of leaving it bare.
+  const tally = { calm: 0, front: 0, rear: 0 };
+  log.forEach((c) => tally[dGripUsi(c.usi)]++);
+  const order = ["calm", "front", "rear"].filter((k) => tally[k]);
+  const balance = log.length ? `<div class="grp"><div class="gh">Session balance — ${log.length} corner${log.length === 1 ? "" : "s"}</div>
+    <div class="balbar">${order.map((k) => `<span style="flex:${tally[k]} 0 0;background:${DGRIP[k].col}" title="${DGRIP[k].word}: ${tally[k]}"></span>`).join("")}</div>
+    <div class="ballegend">${order.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word} · ${tally[k]} (${Math.round(tally[k] / log.length * 100)}%)</span>`).join("")}</div>
+  </div>` : "";
+  return head + `<div class="crow hd"><span>#</span><span>lap</span><b>kind</b><span>turn</span><span>in→apex→out</span><span>lat g</span><span>brake</span><span>balance</span><span>first red</span></div>` + rows + balance;
+}
+
+// One row per course turn, this session — cornersHTML()'s log pivoted by turn instead of time.
+// Turn identity is resolved geometrically, fresh, every render, against whatever COURSE currently
+// holds — never by the turn_id string. course_turn ids are positionally renumbered by the analyzer
+// on every rebuild (confirmed: a two-day diff of the same route showed 100% id churn, including an
+// id landing on a different physical corner), so a persisted/cached turn_id join would silently
+// merge or split one corner's history under a relabeled id. This view intentionally never touches
+// corner_obs/DIAG.by_turn (a different, ref_route_turn-keyed namespace) for the same reason — it is
+// session-scoped from LIVE.corners only. A future "historical best per turn" pass must join those
+// spatially (nearest apex, like turnAt() below), never by turn_id equality.
+//
+// turnAt()'s plain nearest-XZ match (above) has no tie-break: real course data has turn pairs as
+// close as 2.8 m against its 40 m radius (~19% of consecutive turn pairs under 80 m apart), so a
+// noisy apex position can silently bind to the wrong neighbor. This adds a runner-up check and
+// breaks a close tie by route continuity (the turn after wherever this session's matrix last
+// bound), falling back to a visible ambiguity flag rather than a silent guess.
+function turnAtMatrix(apex, lastSeq) {
+  if (!apex || apex[0] == null || !COURSE || !(COURSE.turns || []).length) return { t: null, ambiguous: false };
+  let best = null, bd = 40 * 40, second = null, sd = 40 * 40;
+  for (const t of COURSE.turns) {
+    if (t.x == null) continue;
+    const d = (t.x - apex[0]) ** 2 + (t.z - apex[1]) ** 2;
+    if (d < bd) { second = best; sd = bd; best = t; bd = d; }
+    else if (d < sd) { second = t; sd = d; }
+  }
+  if (!best) return { t: null, ambiguous: false };
+  const close = second && sd < bd * 2.25;   // runner-up within 1.5x the winner's distance (bd/sd are squared)
+  if (!close) return { t: best, ambiguous: false };
+  if (lastSeq != null) {
+    const wantSeq = (lastSeq + 1) % COURSE.turns.length;
+    if (best.seq === wantSeq) return { t: best, ambiguous: false };
+    if (second.seq === wantSeq) return { t: second, ambiguous: false };
+  }
+  return { t: best, ambiguous: true };      // no session context to disambiguate — nearest as a best guess, flagged
+}
+
+// the daemon's live corner detector always emits exactly 4 phases (a fixed tuple); the offline
+// analyzer's 5th "Straight/crest" phase never appears on the live SSE stream this reads from.
+const PH_SHORT = ["Braking", "Turn-in", "Mid-corner", "Exit"];
+function phaseBars(ph) {
+  return `<span style="display:inline-flex;gap:2px">${(ph || []).map((p) => {
+    // a fully-zeroed phase (front:0,rear:0,red:"none",dur:0 — mostly phase 1, ~0.2% of real phase-slots
+    // when the corner opened right after the per-second sample buffer reset) renders as an empty bar,
+    // correctly — it is a real zero-slip reading, not a missing one, so it is never skipped.
+    const fr = Math.min(1, (p.front || 0) / 1.5), rr = Math.min(1, (p.rear || 0) / 1.5);
+    const col = p.red === "front" ? "#2f81f7" : p.red === "rear" ? "#e5414e" : p.red === "both" ? "#a371f7" : "#3a4250";
+    return `<span title="phase ${p.phase} (${PH_SHORT[p.phase - 1] || ""}): front ${p.front} · rear ${p.rear}"
+      style="display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid ${col};position:relative;background:var(--bg)">
+      <i style="position:absolute;left:0;bottom:0;width:50%;height:${Math.round(fr * 100)}%;background:#2f81f7;opacity:${p.front > 1 ? 1 : .4}"></i>
+      <i style="position:absolute;right:0;bottom:0;width:50%;height:${Math.round(rr * 100)}%;background:#e5414e;opacity:${p.rear > 1 ? 1 : .4}"></i></span>`;
+  }).join("")}</span>`;
+}
+
+function matrixHTML() {
+  const cid = CUR && CUR.cid;
+  const log = (LIVE.corners || []).filter((c) => !cid || c.car === cid);
+  if (!COURSE || !(COURSE.turns || []).length) return `<div class="why">no turn map for this course yet</div>`;
+  if (!log.length) return `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`;
+
+  // ev===0 (free-roam) corners are excluded from turn rows, the same gate v1's matrix used — the
+  // live ev stamp trusts a single apex-frame read today; see the daemon-side majority-vote hardening.
+  const bySeq = {}; let lastSeq = null;
+  log.filter((c) => c.ev !== 0).forEach((c) => {
+    const { t, ambiguous } = turnAtMatrix(c.apex, lastSeq);
+    if (!t) return;
+    lastSeq = t.seq;
+    (bySeq[t.seq] = bySeq[t.seq] || []).push({ c, ambiguous });
+  });
+
+  const med = (a) => { a = a.filter((v) => v != null).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  const rows = COURSE.turns.slice().sort((a, b) => a.seq - b.seq).map((t) => {
+    const arr = bySeq[t.seq] || [];
+    const last = arr.length ? arr[arr.length - 1].c : null;
+    const anyAmbiguous = arr.some((b) => b.ambiguous);
+    const fr = { front: 0, rear: 0, none: 0 };
+    arr.forEach((b) => fr[(b.c.first_red || {}).axle || "none"]++);   // first_red is legitimately null ~10% of the time (a clean corner) — bucketed, not skipped
+    const dom = arr.length ? Object.keys(fr).sort((x, y) => fr[y] - fr[x])[0] : null;
+    return {
+      t, taken: arr.length, anyAmbiguous, dom, fr, last,
+      mph: med(arr.map((b) => b.c.mph_apex != null ? b.c.mph_apex : b.c.mph_min)),
+      lat: med(arr.map((b) => b.c.lat_g_peak)),
+      usi: med(arr.map((b) => b.c.usi)),          // usi can legitimately be exactly 0 — check `!= null`, never truthiness
+    };
+  });
+
+  const badge = courseConfidenceBadge();
+  const head = `<div class="frow head"><b>${rows.filter((r) => r.taken).length}/${rows.length} turns taken this session</b>${badge}</div>`;
+  const table = `<div style="overflow:auto"><table style="font-size:11px;border-collapse:collapse;width:100%"><thead><tr>
+    <th style="text-align:left">turn</th><th>taken</th><th>apex mph</th><th>lat g</th><th>USI</th><th>first red</th><th>last pass</th></tr></thead><tbody>
+    ${rows.map((r) => {
+      const g = r.usi != null ? DGRIP[dGripUsi(r.usi)] : null;
+      const dcol = r.dom === "front" ? "#2f81f7" : r.dom === "rear" ? "#e5414e" : "var(--muted)";
+      return `<tr style="${r.taken ? "" : "opacity:.4"}${r.anyAmbiguous ? ";outline:1px dashed var(--w)" : ""}">
+        <td><b>${esc(r.t.id)}</b>${r.t.kind ? " " + esc(r.t.kind) : ""}${r.anyAmbiguous ? ` <span title="nearest of 2 turns within range — some passes here could belong to a neighboring turn">⚠</span>` : ""}</td>
+        <td class="mono" style="text-align:center">${r.taken || "—"}</td>
+        <td class="mono" style="text-align:center">${r.mph ?? "—"}</td>
+        <td class="mono" style="text-align:center">${r.lat ?? "—"}</td>
+        <td style="text-align:center">${r.usi != null ? `<span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${r.usi > 0 ? "+" : ""}${r.usi.toFixed(2)}</span>` : "—"}</td>
+        <td style="text-align:center">${r.taken ? `<span style="color:${dcol};font-weight:700">${r.dom || "clean"}</span> <span class="why">${r.fr.front}/${r.fr.rear}/${r.fr.none}</span>` : "—"}</td>
+        <td class="mono">${r.last ? `${r.last.mph_in}→<b>${r.last.mph_min}</b>→${r.last.mph_out ?? "—"} ${phaseBars(r.last.phases)}` : "—"}</td>
+      </tr>`;
+    }).join("")}
+  </tbody></table></div>`;
+  return head + table;
 }
 
 // Build data: what the save on disk gives exactly, what the union still has to measure, and the
@@ -1250,6 +1493,17 @@ function freezeTarget() {
     locked: !!(CUR.disk.deliverable && CUR.disk.deliverable.locked),
     ts: CUR.disk.ts, at: Date.now(),
     deliverable: CUR.disk.deliverable || null,
+    cls: CUR.cls, pi: CUR.pi,   // for the sheet's own PI badge -- CUR.pi drifts with the live car same as MATCH.sheet did, freeze it too
+    // BUG FIX (2026-09-03, Jett: "i go to restore the car to default upgrades... and the build
+    // sheet changes????"). The parts/hardware list rendered by openSheet() was ALWAYS built from
+    // the live MATCH.sheet, even when frozen -- only the deliverable (tuning tab) and the name
+    // were actually pulled from this object. The instant the car's own parts changed (restoring
+    // to stock to start the clone), fingerprint() reassigned MATCH to match the NEW state, and
+    // MATCH.sheet followed it -- so the "FROZEN TARGET" badge kept showing, but the parts list
+    // underneath silently tracked the live car instead of staying put. A true snapshot, not a
+    // live reference: MATCH.sheet gets REASSIGNED (not mutated) by loadBuild(), so a reference
+    // alone wouldn't survive that -- JSON round-trip to guarantee independence.
+    sheet: JSON.parse(JSON.stringify(MATCH.sheet)),
   };
   viewSave(); paintPanel(); openSheet();
 }
@@ -1257,30 +1511,59 @@ function frozenOf() { return CUR ? (vcar(CUR.ordinal).frozen || null) : null; }
 function thawTarget() { if (CUR) { delete vcar(CUR.ordinal).frozen; viewSave(); paintPanel(); openSheet(); } }
 
 function openSheet() {
-  if (!MATCH || !MATCH.sheet) return;
+  const fz = frozenOf();
+  // BUG FIX (2026-09-03): `sheet` now prefers the frozen SNAPSHOT over the live MATCH.sheet
+  // whenever one exists -- every reference below reads from this local, not from MATCH.sheet
+  // directly, so the parts list actually stays frozen instead of just the badge saying so.
+  const sheet = (fz && fz.sheet) || (MATCH && MATCH.sheet);
+  if (!sheet) return;
   let el = document.getElementById("fhSheet");
   if (!el) {
     el = document.createElement("div"); el.id = "fhSheet"; el.className = "fsheet";
     document.body.appendChild(el);
   }
-  const fz = frozenOf();
   const dl = (fz && fz.deliverable) || (CUR && CUR.disk && CUR.disk.deliverable) || null;
   const name = (fz && fz.name) || (MATCH.build && MATCH.build.name) || (CUR && CUR.disk && CUR.disk.name) || "";
-  const key = (MATCH.sheet.hw || "") + "|" + ((fz && fz.ts) || (CUR && CUR.disk && CUR.disk.ts) || "") + "|" + (dl ? 1 : 0) + "|" + (fz ? "F" : "");
+  // PI badge, matching the car header (2026-09-03, Jett: "design consistent"). cls/pi come from the
+  // frozen snapshot when frozen (CUR.cls/.pi drift with the live car exactly like MATCH.sheet did),
+  // else the live car -- never MATCH.build, which is reassigned by fingerprint() on every disk
+  // re-read the same way MATCH.sheet was, and would silently drift while frozen the same way.
+  const cls = (fz && fz.cls) || (CUR && CUR.cls);
+  const pi = (fz && fz.pi != null ? fz.pi : null) ?? (dl && dl.summary && dl.summary.pi_total) ?? (CUR && CUR.pi);
+  // 2026-09-03: when identity is unsettled, MATCH.build is just the first of N tied candidates
+  // (fingerprint()'s `exact[0] || hw[0]`, live.js) -- a real, correctly-decoded build, but not
+  // confirmed as the one actually on the car. This sheet used to open silently on that guess with
+  // no indication it might be the wrong one of several; the header card already says so, this
+  // drawer didn't.
+  const q = !fz && typeof matchQuality === "function" ? matchQuality(CUR && CUR.match) : null;
+  const unconfirmed = q && (q.level === "ambiguous" || q.level === "conflict");
+  const key = (sheet.hw || "") + "|" + ((fz && fz.ts) || (CUR && CUR.disk && CUR.disk.ts) || "") + "|" + (dl ? 1 : 0) + "|" + (fz ? "F" : "");
   if (el.dataset.k === key && el.querySelector(".fbody")) { el.style.display = "block"; return; }   // same build, same save: just show it
   el.dataset.k = key;
   const st = vg("sheet", {});
   st.open = true; viewSave();
   if (st.x != null) { el.style.left = st.x + "px"; el.style.top = st.y + "px"; }
   el.classList.toggle("min", !!st.min);
-  el.innerHTML = `<div class="fbar" id="fbar"><span class="ttl">${fz ? "FROZEN TARGET" : "BUILD SHEET"}</span>
-      <span class="nm">${esc(MATCH.sheet.car || "")}${name ? " · " + esc(name) : ""}${fz ? ` <span class="froz">frozen ${esc(new Date(fz.at).toLocaleString())}${fz.creator ? " · by " + esc(fz.creator) : ""} — build back to this</span>` : ""}</span>
+  el.innerHTML = `<div class="fbar" id="fbar">${pi != null || cls ? piBadge(cls, pi, true) : ""}<span class="ttl">${fz ? "FROZEN TARGET" : "BUILD SHEET"}</span>
+      <span class="nm">${esc(sheet.car || "")}${name ? " · " + esc(name) : ""}${fz ? ` <span class="froz">frozen ${esc(new Date(fz.at).toLocaleString())}${fz.creator ? " · by " + esc(fz.creator) : ""} — build back to this</span>` : ""}${unconfirmed ? ` <span class="chip w" title="identity isn't settled -- this shows one of ${(CUR && CUR.match && CUR.match.n_signature_ties) || "several"} equally-plausible saves, not a confirmed pick">⚠ unconfirmed pick</span>` : ""}</span>
       <button data-f="pin" class="${fz ? "on" : ""}" title="${fz ? "this sheet is your frozen target — click to release it" : "keep this sheet as your target: change the car freely and this stays as what to build back to"}">${fz ? "◆ TARGET" : "◇ keep as target"}</button>
       <button data-f="min" title="${st.min ? "expand" : "minimise"}">${st.min ? "▢" : "—"}</button>
       <button data-f="close" title="close">✕</button></div>
-    <div class="fbody fhcl"><style>${scopedCloneCss()}</style>${cloneHTML(MATCH.sheet, dl, name)}</div>`;
+    <div class="fbody fhcl"><style>${scopedCloneCss()}</style>${flowDocHTML(sheet, dl, name)}</div>`;
+  // 2026-09-03 (Jett: A/B between your OWN saved slider variations of the same hardware): when
+  // this build is "variation" status, the base to diff against is already known -- buildStatus()
+  // resolves it as MATCH.hw[0] with no pin step needed (see fh6-slider... plan). The diff needs
+  // an async fetch, so it patches in as a second pass once ready; the synchronous render above
+  // (no dots) is what shows immediately and what every other status keeps forever.
+  if (!fz) {
+    const bstat = buildStatus();
+    if (bstat.key === "variation" && MATCH.hw && MATCH.hw.length) {
+      const base = MATCH.hw[0];
+      const baseTs = String(base.c || "").split("_").pop();
+      if (baseTs) applyVariationDiff(el, key, base.o, baseTs, name);
+    }
+  }
   el.style.display = "block";
-  wireClone({ document: el, localStorage: window.localStorage }, MATCH.sheet);
   el.querySelector('[data-f="close"]').onclick = () => { el.style.display = "none"; st.open = false; save(); };
   const th = el.querySelector('[data-f="pin"]'); if (th) th.onclick = () => (frozenOf() ? thawTarget() : freezeTarget());
   el.querySelector('[data-f="min"]').onclick = () => { st.min = !st.min; el.classList.toggle("min", st.min); save();
@@ -1296,4 +1579,26 @@ function openSheet() {
       st.x = el.offsetLeft; st.y = el.offsetTop; save(); };
     window.addEventListener("pointermove", mv); window.addEventListener("pointerup", up);
   };
+}
+
+// The A/B diff needs a fetch (the base build's own deliverable), so it patches in as a second
+// pass after openSheet()'s synchronous render. Guards on `key` (unchanged since DAEMON var,
+// live.js) so a fast car-switch or re-open before this resolves can't stamp a stale diff onto
+// the wrong sheet -- same staleness discipline as identify()'s IDENT_SEQ.
+async function applyVariationDiff(el, key, baseOrdinal, baseTs, name) {
+  let baseDl;
+  try {
+    const r = await fetch(DAEMON + "/disk-tune?ordinal=" + baseOrdinal + "&ts=" + baseTs);
+    if (!r.ok) return;
+    const j = await r.json();
+    if (!j || !j.available || !j.deliverable) return;
+    baseDl = j.deliverable;
+  } catch (e) { return; }
+  if (el.dataset.k !== key || !MATCH || !MATCH.sheet) return;   // sheet moved on while we were fetching
+  const dl = (frozenOf() && frozenOf().deliverable) || (CUR && CUR.disk && CUR.disk.deliverable) || null;
+  if (!dl) return;
+  const diff = diffSliderRows(baseDl.tabs, dl.tabs);
+  const body = el.querySelector(".fbody");
+  if (!body) return;
+  body.innerHTML = `<style>${scopedCloneCss()}</style>${flowDocHTML(MATCH.sheet, dl, name, diff)}`;
 }

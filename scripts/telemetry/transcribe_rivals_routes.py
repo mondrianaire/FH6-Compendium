@@ -136,7 +136,10 @@ def transcribe(video, discipline, expect=None, verbose=False, keep_frames=None):
         m = LEN_RE.search(r["length"])
         length = float(m.group(1).replace(",", ".")) if m else None
         if name is None:
-            unresolved.append({"frame": r["frame"], "ocr_name": raw, "ocr_length": r["length"]})
+            # A Routes-screen frame always carries a "Route Length:" line; one without it is the menu
+            # on the way in (Journal, the Rivals hub), not a route nobody could read.
+            if m:
+                unresolved.append({"frame": r["frame"], "ocr_name": raw, "ocr_length": r["length"]})
             continue
         if name not in routes:
             order += 1

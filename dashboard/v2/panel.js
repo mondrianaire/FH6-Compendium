@@ -680,6 +680,64 @@ function statusSpectrumHTML(st, c) {
 let HDR_KEY = null;
 function paintChips() { lastAction(); }   // the connection state lives in the anchored top line
 
+// THE TWO TIERS, in the header (Jett 2026-09-06). hw_hash (upgrades) -> tune_hash (sliders): this car's
+// builds group by HARDWARE (the rim rule, rimFree), and under a matched upgrade its tunes list by common
+// name. Picking a tune identifies it (the same setPin+identify the save picker uses). This is the reverse
+// direction — distinguish/compare by the two hashes, never the gear ladder (see memory two-directions).
+let UPG_SEL = null;      // hardware-group key whose tunes the right column shows (null = the matched/current one)
+let CHG_OPEN = false;    // the slim header CHANGE chip is expanded into the full banner below
+
+function carUpgradeGroups() {
+  if (!(IDENT && CUR)) return [];
+  const same = IDENT.builds.filter((b) => b.o === CUR.ordinal);
+  const groups = new Map();                         // hardware key -> its builds (the tunes under it)
+  same.forEach((b) => {
+    const k = rimFree(b.pkey);
+    let g = groups.get(k); if (!g) groups.set(k, g = { key: k, builds: [] });
+    g.builds.push(b);
+  });
+  return [...groups.values()];
+}
+
+function similarGroupsHTML() {
+  const groups = carUpgradeGroups();
+  if (groups.length < 1) return "";
+  const curHw = MATCH ? rimFree(MATCH.pk) : null;
+  const curSk = MATCH ? MATCH.sk : null;
+  const sel = groups.find((g) => g.key === (UPG_SEL || curHw)) || groups[0];
+  const matched = sel.key === curHw;                // "if upgrade matched": only then are its tunes the equipped set
+  const seen = new Set(), tunes = [];               // one chip per distinct tune (skey), by common name
+  sel.builds.forEach((b) => { if (!seen.has(b.skey)) { seen.add(b.skey); tunes.push(b); } });
+  const upgChip = (g) => {
+    const gears = (g.builds[0] || {}).gears;
+    return `<button class="hg-chip${g.key === sel.key ? " on" : ""}${g.key === curHw ? " match" : ""}" data-act="upg" data-hw="${esc(g.key)}"
+      title="${g.builds.length} tune${g.builds.length > 1 ? "s" : ""} on this hardware${g.key === curHw ? " · the car's current hardware" : ""}">${gears ? gears + "-spd" : "hw"}<i>${g.builds.length}</i></button>`;
+  };
+  const tsOf = (b) => (b.saves || [])[0] || (b.c || "").split("_").pop() || "";   // the container carries the save stamp (Tuning_<ord>_<stamp>)
+  const tuneChip = (b) => `<button class="hg-chip${(b.skey === curSk && matched) ? " on" : ""}" data-act="tune" data-ts="${esc(tsOf(b))}"
+      title="identify this tune">${esc(b.name || b.label || "unnamed")}</button>`;
+  return `<div class="hgroups">
+    <div class="hgcol">
+      <div class="hgh">similar upgrades <i>${groups.length}</i></div>
+      <div class="hgbody">${groups.map(upgChip).join("")}</div>
+    </div>
+    <div class="hgcol">
+      <div class="hgh">tunes under it${matched ? "" : " · unmatched"} <i>${tunes.length}</i></div>
+      <div class="hgbody">${tunes.length ? tunes.map(tuneChip).join("") : `<span class="hg-empty t-l">no tunes on this hardware</span>`}</div>
+    </div>
+  </div>`;
+}
+
+function changeSlim() {
+  if (!CHANGE) return "";
+  const k = CHANGE.kind;
+  const label = CHANGE.saved ? "new save read" : k === "hardware" ? "hardware changed"
+    : k === "tune" ? ((CHANGE.sliders || []).length + " slider" + ((CHANGE.sliders || []).length === 1 ? "" : "s") + " moved")
+    : k === "same" ? "re-saved" : "changed";
+  const tone = CHANGE.saved ? "on" : k === "hardware" ? "r" : "b";
+  return `<button class="hchg ${tone}${CHG_OPEN ? " open" : ""}" data-act="chg" title="${CHG_OPEN ? "hide" : "show"} the details below">● ${esc(label)}</button>`;
+}
+
 // what the header SAYS, per state — pure, so it can be read and tested on its own
 function headerCopy(st, q) {
   const m = MATCH && MATCH.build;
@@ -786,7 +844,8 @@ function paintHeader() {
   const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label, q.level,
     MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
     RR.busy, RB.state === "running" || RB.pending, !!frozenOf(), !!(MATCH && MATCH.sheet),
-    CUR && CUR.liveries && CUR.liveries.length, CHANGE && CHANGE.at]);
+    CUR && CUR.liveries && CUR.liveries.length, CHANGE && CHANGE.at, UPG_SEL, CHG_OPEN,
+    IDENT && CUR && IDENT.builds.filter((b) => b.o === CUR.ordinal).length]);
   if (key === HDR_KEY && h.querySelector(".hcar")) { paintChips(); return; }
   HDR_KEY = key;
 
@@ -816,12 +875,13 @@ function paintHeader() {
       <div class="hidtop">
         <button class="icobtn hreload" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
           title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
-        <div class="hcar t-d" title="${esc(c.byline)}">${esc(c.car)}</div>
+        <div class="hcar t-d" title="${esc(c.byline)}">${esc(c.car)}${changeSlim()}</div>
         <div class="htitle t-t">${c.tune ? esc(c.tune) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
         ${statusSpectrumHTML(st, c)}
       </div>
       <div class="hdec">
         ${c.step ? `<div class="hstep t-b"><i>1</i><span>${esc(c.step)}</span></div>` : ""}
+        ${similarGroupsHTML()}
       </div>
     </div>
     <div class="hact">
@@ -842,6 +902,15 @@ function paintHeader() {
     newMarker.style.transition = ""; newMarker.style.left = target;
   }
 
+  // the two-tier group: pick an upgrade (shows its tunes), or pick a tune (identifies it — reverse
+  // direction, keyed on the file's hashes, not the gear ladder)
+  h.querySelectorAll('.hg-chip[data-act="upg"]').forEach((b) => b.onclick = () => { UPG_SEL = b.dataset.hw; HDR_KEY = null; paintHeader(); });
+  h.querySelectorAll('.hg-chip[data-act="tune"]').forEach((b) => b.onclick = () => {
+    const ts = b.dataset.ts; if (!ts || !CUR) return;
+    setPin(CUR.ordinal, ts);
+    identify({ id: CUR.cid, ordinal: CUR.ordinal, name: CUR.name, class: CUR.cls, pi: CUR.pi, drivetrain: CUR.dt, cyl: CUR.cyl }, "pinned");
+  });
+  const hc = h.querySelector('.hchg[data-act="chg"]'); if (hc) hc.onclick = () => { CHG_OPEN = !CHG_OPEN; HDR_KEY = null; paintHeader(); paintBanner(); };
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bx = $("#btnRefresh"); if (bx) bx.onclick = async () => { await rereadBuild(); if (CUR && CUR.disk && !(MATCH && MATCH.build)) ensureHeld(); };
   const bp = $("#btnPrim");
@@ -878,7 +947,7 @@ function paintBanner() {
   const st = buildStatus();
   const q = matchQuality(CUR && CUR.match);
   const parts = [];
-  if (CHANGE) parts.push(changeBanner());
+  if (CHANGE && CHG_OPEN) parts.push(changeBanner());   // the header carries a slim summary; the full notice opens on click (Jett 2026-09-06)
   if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) parts.push(savePicker());
   // the header carries step 1; the strip carries the rest of the ladder for this state
   const rest = (st.steps || []).slice(1);

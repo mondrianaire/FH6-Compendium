@@ -560,7 +560,31 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
   background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:8px 34px 8px 10px}
 .hcar,.htitle{display:block;white-space:nowrap;text-overflow:clip;overflow:hidden;line-height:1.15}
 .hdec{border-top:1px solid var(--line);background:var(--panel2);border-left:3px solid var(--tone,var(--line2));
-  padding:6px 8px;display:grid;grid-template-rows:1fr;gap:4px;white-space:normal;overflow:hidden}
+  padding:6px 8px;display:flex;align-items:stretch;gap:10px;white-space:normal;overflow:hidden}
+/* TWO TIERS beside the step (Jett 2026-09-06): similar upgrades (hw_hash) | tunes under it (tune_hash). */
+.hdec .hstep{flex:0 1 44%;min-width:0}
+.hgroups{flex:1 1 auto;display:flex;gap:8px;min-width:0;border-left:1px solid var(--line);padding-left:9px}
+.hgcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.hgh{font:700 8.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);flex:0 0 auto;
+  display:flex;align-items:center;gap:5px}
+.hgh i{font:700 8.5px var(--mono);font-style:normal;color:var(--dim)}
+.hgbody{display:flex;flex-wrap:wrap;gap:3px;overflow-y:auto;align-content:flex-start;min-height:0}
+.hg-chip{background:var(--panel);border:1px solid var(--line2);color:var(--mut);border-radius:2px;
+  padding:1px 6px;font:600 10.5px var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:4px;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hg-chip:hover{border-color:var(--acc2);color:var(--acc2)}
+.hg-chip.on{border-color:var(--acc);color:var(--acc);background:#0f2a1e}
+.hg-chip.match{box-shadow:inset 0 0 0 1px var(--acc2)}
+.hg-chip i{font:700 9px var(--mono);font-style:normal;color:var(--dim)}
+.hg-empty{font-size:10.5px}
+/* slim CHANGE summary, inline in the car name; the full notice opens below on click */
+.hchg{background:none;border:1px solid var(--line2);border-radius:10px;padding:0 8px;margin-left:9px;
+  font:700 9.5px var(--sans);letter-spacing:.03em;text-transform:uppercase;cursor:pointer;vertical-align:middle}
+.hchg:hover{filter:brightness(1.15)}
+.hchg.on{border-color:var(--acc);color:var(--acc)}
+.hchg.r{border-color:var(--bad);color:var(--bad)}
+.hchg.b{border-color:var(--acc2);color:var(--acc2)}
+.hchg.open{background:var(--panel2)}
 /* THE STATUS SPECTRUM: inside .hidtop now, under the two titles -- scoped to column 2's own width,
    not the whole header (2026-09-03 amendment: it used to span the full band, which overstated its
    own importance relative to the actual next step). Bad-left to good-right, a marker that slides

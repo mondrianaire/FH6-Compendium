@@ -50,6 +50,25 @@ def _dist(p0, p1):
     return math.hypot(p1[0] - p0[0], p1[1] - p0[1])
 
 
+# SURFACE IS A KEY, NOT A FILTER. ref_route.road_class is the route's place in the free-roam road
+# network (paved = on it, loose = off it, mixed = both), never a material. A Road/Street/Drag event
+# runs on the network; a Dirt/Cross Country event leaves it. Loading the Dirt catalogue (2026-09-05)
+# put Chiheisen Scramble and Hokubu Circuit, both 1.6 mi, on the same courses -- the route's
+# class was already the answer: 101 is paved, 201 is half off-network.
+_ON_NETWORK = {"road", "street", "drag"}
+_OFF_NETWORK = {"dirt", "cross-country"}
+
+
+def _surface_ok(discipline, road_class):
+    if road_class is None or discipline is None:
+        return True
+    if discipline in _ON_NETWORK:
+        return road_class == "paved"
+    if discipline in _OFF_NETWORK:
+        return road_class in ("mixed", "loose")
+    return True
+
+
 def _closure_gap(geometry_json):
     """Distance between the first and last geometry.path point; None on < 2 points."""
     if not geometry_json:
@@ -79,7 +98,7 @@ def run(cx, verbose=False):
 
     # ---- inputs, loaded once -------------------------------------------------
     events = [dict(r) for r in cx.execute(
-        "SELECT event_id, name, length_m, is_loop FROM ref_event "
+        "SELECT event_id, name, length_m, is_loop, discipline FROM ref_event "
         "WHERE kind='rivals' AND length_m IS NOT NULL")]
     events_by_id = {e["event_id"]: e for e in events}
 
@@ -123,7 +142,7 @@ def run(cx, verbose=False):
             for e in events:
                 in_A = (Rlen is not None and abs(Rlen - e["length_m"]) <= BAND_M
                         and (e["is_loop"] is None or e["is_loop"] == Rloop)
-                        and (Rroad is None or Rroad != "loose"))
+                        and _surface_ok(e["discipline"], Rroad))
                 in_B = (L_c is not None and abs(L_c - e["length_m"]) <= BAND_M)
                 if in_A:
                     A_ids.add(e["event_id"])
@@ -136,7 +155,7 @@ def run(cx, verbose=False):
                 d_course_m = (L_c - e["length_m"]) if L_c is not None else None
                 loop_ok = (None if (e["is_loop"] is None or Rloop is None)
                            else (1 if e["is_loop"] == Rloop else 0))
-                road_ok = None if Rroad is None else (0 if Rroad == "loose" else 1)
+                road_ok = None if Rroad is None else (1 if _surface_ok(e["discipline"], Rroad) else 0)
                 declared_ok = None if D is None else (1 if D == e["name"] else 0)
                 rows_map.append((rk, eid, "map", route_id, d_route_m, d_course_m,
                                   loop_ok, road_ok, declared_ok, 0, now))

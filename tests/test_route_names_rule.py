@@ -25,17 +25,19 @@ class RouteNamesRuleTest(unittest.TestCase):
         self.cx, self.db_path = H.new_db()
         cx = self.cx
 
-        # ---- ref_event: 5 rows -- two share a length (E1/E2), one is a Sprint (E3) -------------
+        # ---- ref_event: 7 rows -- two share a length (E1/E2), one is a Sprint (E3), two dirt ----
         events = [
-            ("rivals:alpha", "Event Alpha", 1000.0, 1),
-            ("rivals:beta", "Event Beta", 1000.0, 1),
-            ("rivals:gamma-sprint", "Gamma Sprint", 2000.0, 0),
-            ("rivals:delta", "Event Delta", 3000.0, 1),
-            ("rivals:epsilon", "Event Epsilon", 4000.0, 1),
+            ("rivals:alpha", "Event Alpha", 1000.0, 1, "road"),
+            ("rivals:beta", "Event Beta", 1000.0, 1, "road"),
+            ("rivals:gamma-sprint", "Gamma Sprint", 2000.0, 0, "road"),
+            ("rivals:delta", "Event Delta", 3000.0, 1, "road"),
+            ("rivals:epsilon", "Event Epsilon", 4000.0, 1, "road"),
+            ("rivals:zeta-scramble", "Zeta Scramble", 5000.0, 1, "dirt"),   # loose loop -> named
+            ("rivals:eta-scramble", "Eta Scramble", 6000.0, 1, "dirt"),     # paved loop -> excluded
         ]
-        for eid, name, length_m, is_loop in events:
-            H.insert(cx, "ref_event", ["event_id", "kind", "name", "length_m", "is_loop"],
-                     (eid, "rivals", name, length_m, is_loop))
+        for eid, name, length_m, is_loop, discipline in events:
+            H.insert(cx, "ref_event", ["event_id", "kind", "name", "length_m", "is_loop", "discipline"],
+                     (eid, "rivals", name, length_m, is_loop, discipline))
 
         # ---- ref_route: loops, a p2p route, one 'loose' -----------------------------------------
         routes = [
@@ -44,6 +46,8 @@ class RouteNamesRuleTest(unittest.TestCase):
             ("RT3", 3000.0, 1, "paved"),      # loop -- used for the map/course disagreement
             ("RT4", 2000.0, 0, "loose"),      # p2p AND loose -- must be excluded from map naming
             ("RT5", 9999.0, 0, "paved"),      # a plain p2p route, unused by any course
+            ("RT6", 5000.0, 1, "loose"),      # loose loop -- the dirt event's home
+            ("RT7", 6000.0, 1, "paved"),      # paved loop -- a dirt event must not land here
         ]
         for rid, length_m, is_loop, road_class in routes:
             H.insert(cx, "ref_route", ["route_id", "length_m", "is_loop", "road_class"],
@@ -61,6 +65,8 @@ class RouteNamesRuleTest(unittest.TestCase):
             ("c7", 3000.0, None, OPEN),            # open path -> no name, never even a candidate
             ("c8", 500.0, "Some Made Up Name Nobody Uses", OPEN),  # declared, non-catalogue -> read
             ("c9", 2000.0, None, CLOSED),          # 'loose' route excluded despite length agreement
+            ("c10", 5000.0, None, CLOSED),         # dirt event on a loose route -> verified
+            ("c11", 6000.0, None, CLOSED),         # dirt event on a paved route -> excluded
         ]
         for rk, length_m, declared, geometry in courses:
             H.insert(cx, "course", [
@@ -73,13 +79,15 @@ class RouteNamesRuleTest(unittest.TestCase):
             ("c2", "RT2", "probable"),
             ("c3", "RT3", "verified"),
             ("c9", "RT4", "verified"),
+            ("c10", "RT6", "verified"),
+            ("c11", "RT7", "verified"),
         ]
         for rk, rid, kind in matches:
             H.insert(cx, "course_route", ["route_key", "route_id", "match_kind", "computed_utc"],
                      (rk, rid, kind, "2026-09-05T00:00:00Z"))
 
         cx.commit()
-        self.events_by_name = {name: eid for eid, name, _, _ in events}
+        self.events_by_name = {name: eid for eid, name, _, _, _ in events}
 
     def tearDown(self):
         H.close_db(self.cx, self.db_path)
@@ -165,6 +173,25 @@ class RouteNamesRuleTest(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         eid, tier, road_ok, chosen = rows[0]
         self.assertEqual(eid, "rivals:gamma-sprint")
+        self.assertEqual(road_ok, 0)
+        self.assertEqual(chosen, 0)
+
+    def test_dirt_event_on_loose_route_is_verified(self):
+        rn.run(self.cx)
+        name, source, confidence, event_id = self._course("c10")
+        self.assertEqual(name, "Zeta Scramble")
+        self.assertEqual(source, "derived:map")
+        self.assertEqual(confidence, "verified")
+        self.assertEqual(event_id, "rivals:zeta-scramble")
+
+    def test_dirt_event_on_paved_route_is_excluded(self):
+        rn.run(self.cx)
+        name, source, confidence, event_id = self._course("c11")
+        self.assertIsNone(name)
+        rows = self._course_events("c11")
+        self.assertEqual(len(rows), 1)
+        eid, tier, road_ok, chosen = rows[0]
+        self.assertEqual(eid, "rivals:eta-scramble")
         self.assertEqual(road_ok, 0)
         self.assertEqual(chosen, 0)
 

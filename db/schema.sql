@@ -851,6 +851,10 @@ CREATE TABLE IF NOT EXISTS course_route (
 -- considered is a course_event row, so an ambiguity is a fact, not a silence. Constants:
 --   BAND_M      = 0.05 mi = 80.47 m  (half a display step -- the screen rounds: 23.379 -> 23.4)
 --   LOOP_GAP_M  = 60                 (fh6_owt's own is_loop rule, reused)
+-- Surface is a key too: a Road/Street/Drag event needs a route whose road_class is paved, a
+-- Dirt/Cross Country event one that is mixed or loose (the class is network membership, not a
+-- material). One event is one place: an event claimed by courses on non-overlapping routes is a
+-- tie unless the typed name settles it (event_claims in the route_names run notes).
 -- Every candidate the rule considered, with its evidence. chosen=1 on the row that named the
 -- course. Two chosen=0 rows of one tier IS a tie; a map-tier row and a length-tier row for
 -- different events IS a conflict. Nothing is resolved by guess.

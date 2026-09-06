@@ -17,3 +17,4 @@ NUL
 
 # decoded from the game install by scripts/db/export_icons.py (20 MB, reproducible)
 dashboard/v2/assets/upgrade/
+data/_snapshots/

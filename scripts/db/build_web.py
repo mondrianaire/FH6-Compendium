@@ -308,15 +308,24 @@ def main(argv=None):
     for _rid, _kind, _d in cx.execute("SELECT route_id, kind, discipline FROM ref_event WHERE route_id IS NOT NULL"):
         if _kind: _mode[_rid].add(_kind)
         if _d: _disc[_rid][_d] += 1
-    # data amount we hold per route (our own driven corpus) and the performance CLASSES the route is offered
-    # in (a Rivals course runs one leaderboard per class -- D..R -- so a route "contains" several class variants).
-    _CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R", "X"]
-    _clsname = {c: n for c, n in cx.execute("SELECT class_id, name FROM ref_class")}
+    # data amount we hold per route (our own driven corpus), the performance CLASSES the route is OFFERED in
+    # (a Rivals course runs one leaderboard per class), and the classes we actually have DATA for. Both use the
+    # game telemetry taxonomy (class_id 6 is the top class, reported as X in a lap's CarClass -- ref_class names
+    # it "R", but the driven data never carries R, so normalise offered to X to make offered vs data comparable).
+    _CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "X"]
+    _CLS_ID = {0: "D", 1: "C", 2: "B", 3: "A", 4: "S1", 5: "S2", 6: "X"}
+    _clsorder = {c: i for i, c in enumerate(_CLASS_ORDER)}
     _data = {rk: (nl or 0, ns or 0) for rk, nl, ns in cx.execute("SELECT route_key, n_laps, n_sessions FROM course")}
     _name_cls = _cl.defaultdict(set)
     for _nm, _cid in cx.execute("SELECT name, class_id FROM ref_rivals_event WHERE class_id IS NOT NULL"):
-        _c = _clsname.get(_cid)
+        _c = _CLS_ID.get(_cid)
         if _c: _name_cls[_nm].add(_c)
+    _driven = _cl.defaultdict(set)   # route_key -> {classes we have laps in}, from the driven car's reported class
+    for _rk, _c in cx.execute(
+            "SELECT se.route_key, sc.class FROM session_event se "
+            "JOIN session_car sc ON sc.session_id = se.session_id AND sc.cid = se.cid "
+            "WHERE se.route_key LIKE 'route:%' AND sc.class IS NOT NULL AND sc.class != '?'"):
+        _driven[_rk].add(_c)
     _spawn = {}
     try:
         import sys as _sys
@@ -336,13 +345,15 @@ def main(argv=None):
         rid = r["route_id"]
         _dc = _disc.get(rid)
         _laps, _sess = _data.get("route:%s" % rid, (0, 0))
-        _classes = sorted(_name_cls.get(r["name"], ()), key=lambda c: _CLASS_ORDER.index(c) if c in _CLASS_ORDER else 99)
+        _rk = "route:%s" % rid
+        _classes = sorted(_name_cls.get(r["name"], ()), key=lambda c: _clsorder.get(c, 99))
+        _cdata = sorted(_driven.get(_rk, ()), key=lambda c: _clsorder.get(c, 99))
         world["routes"][rid] = {"len": r["length_m"], "loop": r["is_loop"],
                                 "name": r["name"], "name_confidence": r["name_confidence"],
                                 "is_race": bool(r["is_race"]), "modes": sorted(_mode.get(rid, ())),
                                 "disc": (_dc.most_common(1)[0][0] if _dc else None),
                                 "spawn": _spawn.get(str(rid)), "laps": _laps, "sessions": _sess,
-                                "classes": _classes, "pts": pts}
+                                "classes": _classes, "class_data": _cdata, "pts": pts}
         xs += [p[0] for p in pts]; zs += [p[1] for p in pts]
     if xs:
         world["bbox"] = [min(xs), max(xs), min(zs), max(zs)]

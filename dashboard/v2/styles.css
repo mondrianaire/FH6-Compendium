@@ -849,6 +849,17 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
 .tcls .pib{font-size:8px;border-radius:3px}
 .tcls .pib b{padding:1px 3.5px;text-shadow:none}
+/* NEGATIVE class pill: offered but no data yet — black fill, class-colour outline + letter (vs the solid pill
+   for classes we hold data for). Same colours as the solid .pib-<class> badges, inverted. */
+.pib--neg b{background:#0b0d10;box-shadow:inset 0 0 0 1px currentColor;text-shadow:none}
+.pib--neg.pib-d b{color:#45c8f1}
+.pib--neg.pib-c b{color:#f0c530}
+.pib--neg.pib-b b{color:#f0862d}
+.pib--neg.pib-a b{color:#e5414e}
+.pib--neg.pib-s1 b{color:#a468e8}
+.pib--neg.pib-s2 b{color:#2f62e0}
+.pib--neg.pib-r b{color:#e83c9e}
+.pib--neg.pib-x b{color:#2fd05f}
 /* the Course Browser scrolls (the tile grid can exceed the pane); chips stay pinned as it scrolls.
    Scoped to the RIGHT info pane when it holds the browser (:has(.tiles)) so it overrides the global
    no-scroll rule `body.fixed .pane>.body{overflow:hidden}` here and NOWHERE else. */

@@ -1206,8 +1206,13 @@ function browserHTML() {
     const laps = r.laps || 0, sess = r.sessions || 0;
     const data = laps ? `<span class="tdata">${laps} lap${laps === 1 ? "" : "s"} · ${sess} run${sess === 1 ? "" : "s"}</span>`
                       : `<span class="tdata none">no data yet</span>`;
-    // performance-class pills: a Rivals course runs one leaderboard per class, so show every class it is offered in
-    const cls = (r.classes || []).length ? `<div class="tcls">${r.classes.map((c) => clsBadge(c)).join("")}</div>` : "";
+    // performance-class pills: every class the Rivals course is offered in. SOLID = we hold data for that class,
+    // NEGATIVE (hollow: black fill, class-colour outline + letter) = offered but no laps yet -- so the classes we
+    // still need to drive read at a glance. Same established piBadge design (.pib pib--sm pib-<class>), + .pib--neg.
+    const dataSet = new Set(r.class_data || []);
+    const pill = (c) => { const has = dataSet.has(c);
+      return `<span class="pib pib--sm pib-${c.toLowerCase()}${has ? "" : " pib--neg"}" title="class ${c}${has ? " · has data" : " · no data yet"}"><b>${esc(c)}</b></span>`; };
+    const cls = (r.classes || []).length ? `<div class="tcls">${r.classes.map(pill).join("")}</div>` : "";
     const badges = [r.is_race ? `<span class="bb race">race</span>` : "",
                     (r.modes || []).includes("rivals") ? `<span class="bb riv">rivals</span>` : "",
                     (r.modes || []).includes("career") ? `<span class="bb car">career</span>` : "",

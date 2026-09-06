@@ -99,9 +99,12 @@ function buildStatus() {
   if (CUR.diskErr) return { key: "offline", label: "save not read", tone: "dim",
     why: "the daemon could not be reached, so nothing is known about the save — absence of signal is not evidence",
     steps: ["start the daemon from the worktree: python scripts/telemetry/fh6_live_daemon.py", "then REREAD BUILD"] };
-  if (!hwOk) return { key: "unknown", label: locked ? "downloaded, not yet held" : "new build on disk", tone: "warn",
-    why: (RB.state === "running" || RB.pending) ? "a save the database does not hold yet — importing it now"
-       : locked ? "a downloaded tune installed since the last import — the import runs by itself"
+  if (!hwOk) return { key: "unknown", label: locked ? "identified · importing for history" : "new build on disk", tone: "warn",
+    // The save IS the equipped build by construction and its parts/sliders are already decoded in the
+    // deliverable — the build sheet renders now. What lags is only the DATABASE holding it for history/A-B,
+    // and the daemon now fires that import itself on the save. So a downloaded tune is identified, not "not held".
+    why: (RB.state === "running" || RB.pending) ? "identified from the save; the database is catching up — importing it now"
+       : locked ? "identified from the save — the history import runs by itself (the daemon fires it on the save)"
        : "a save written since the last import — the import runs by itself",
     steps: ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
   if (locked) return { key: "downloaded", label: "downloaded / locked", tone: "warn",

@@ -433,6 +433,13 @@ def find_containers_root(base=r"C:\XboxGames\GameSave\pgs"):
     env = os.environ.get("FH6_SAVE_ROOT")
     if env and os.path.isdir(env):
         return env
+    # PREFER THE 'current' JUNCTION — the save root is generational (110 -> 111 -> …) and the game points a
+    # `current` junction at the live generation. That is an explicit authority; picking by max(mtime) instead
+    # lets a backup or AV that touches an OLD generation's mtime silently repoint the daemon at a stale tree.
+    # Fall back to newest-by-mtime only when no `current` resolves to a ContainersRoot.
+    cur = [p for p in glob.glob(os.path.join(base, "u_*", "current", "ContainersRoot")) if os.path.isdir(p)]
+    if cur:
+        return max(cur, key=lambda p: os.path.getmtime(p))
     hits = glob.glob(os.path.join(base, "u_*", "*", "ContainersRoot"))
     if not hits:
         return None

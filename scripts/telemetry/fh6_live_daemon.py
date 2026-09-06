@@ -515,6 +515,21 @@ def maybe_lap_analysis(t_mono, why):
     threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
 
 
+def _notify_rebuild(scope, why):
+    """Best-effort, fire-and-forget ping to the rebuild service (port 8001) to run one import scope.
+    The service coalesces per scope, so repeated pings cost at most one extra run; it being down (or not
+    yet started) must never affect the daemon or block the caller. Shared by both triggers below."""
+    def _go():
+        try:
+            req = urllib.request.Request("http://127.0.0.1:8001/rebuild",
+                data=json.dumps({"why": why, "scope": scope}).encode(),
+                headers={"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=3).read()
+        except Exception:
+            pass   # the rebuild service being down (or not yet started) must never affect the daemon
+    threading.Thread(target=_go, daemon=True).start()
+
+
 def _notify_telemetry_rebuild(why):
     """Ping the rebuild service to import this session's new laps/corners into fh6.db (2026-09-03).
     Fired ONLY on a genuine session-close boundary (final=True in run_analysis -- driving stopped for
@@ -531,15 +546,7 @@ def _notify_telemetry_rebuild(why):
 
     Best-effort and fire-and-forget: the rebuild service may not be running, and that must never
     affect the daemon or block this thread."""
-    def _go():
-        try:
-            req = urllib.request.Request("http://127.0.0.1:8001/rebuild",
-                data=json.dumps({"why": why, "scope": "telemetry"}).encode(),
-                headers={"Content-Type": "application/json"})
-            urllib.request.urlopen(req, timeout=3).read()
-        except Exception:
-            pass   # the rebuild service being down (or not yet started) must never affect the daemon
-    threading.Thread(target=_go, daemon=True).start()
+    _notify_rebuild("telemetry", why)
 
 
 def run_analysis(until=None, final=True):
@@ -2305,6 +2312,12 @@ def disk_watcher():
                 ST.gear_id[str(ordn)] = {"ts": str(metas[0]["ts"]), "t": time.time()}
                 ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)   # the fresh save IS the equipped build — it supersedes an older declaration, which may now name a build the user has moved off
                 _gear_log(ordn, metas[0]["ts"]); _auto_assoc_livery(ordn)
+                # IMPORT THE JUST-WRITTEN BUILD without waiting for a dashboard to notice it. Before this, only the
+                # dashboard triggered scope=containers (client identify -> /disk-tune -> fingerprint fails ->
+                # ensureHeld posts /rebuild), so a tune downloaded and applied with no dashboard open sat unimported
+                # until one was next opened. new_save is edge-triggered (fires once per new file, see `key`/`last`
+                # above) and the service coalesces per scope, so a burst of applied tunes costs at most one run.
+                _notify_rebuild("containers", "new save " + str(metas[0]["ts"]))
             nm = names_load().get("cars", {}).get(str(ordn)) or {}
             nm = nm.get("name") if isinstance(nm, dict) else nm
             diff = None

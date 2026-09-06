@@ -51,7 +51,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 SCOPES = {
     "containers": [["scripts/db/rebuild.py", "--only", "containers"], ["scripts/db/build_web.py"]],
-    "telemetry": [["scripts/db/rebuild.py", "--only", "telemetry"], ["scripts/db/build_web.py"]],
+    # build_web is NOT in the telemetry scope: it rewrites all ~776 api files over ~20 s, and a session
+    # close fires every few minutes while the game sits in menus -- the live page re-read the api
+    # mid-write and flickered continuously (2026-09-05 20:30). The api refreshes on the containers
+    # scope (a save) as before; courses.json provenance follows on the next save.
+    "telemetry": [["scripts/db/rebuild.py", "--only", "telemetry"]],
 }
 DEFAULT_SCOPE = "containers"
 

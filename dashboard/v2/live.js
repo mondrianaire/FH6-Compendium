@@ -388,7 +388,10 @@ async function watchVersion(force) {
   VER_T = now;
   try {
     const html = await fetch("index.html", { cache: "no-store" }).then((r) => r.text());
-    const m = /panel\.js\?v=([0-9]+)/.exec(html);
+    // Compare live.js with live.js: `mine` is read off THIS file's tag, so the served tag it is held
+    // against must be the same file's. Reading panel.js here made a 87-vs-88 tag mismatch between
+    // two files reload the page forever (2026-09-05, "flickers and reloads constantly").
+    const m = /live\.js\?v=([0-9]+)/.exec(html);
     if (m && m[1] !== mine) {
       console.info("[watch] server is on v" + m[1] + ", this page is v" + mine + " —", LIVE.inMenu ? "deferring reload until the menu closes" : "reloading");
       if (LIVE.inMenu) PENDING_RELOAD = true; else location.reload();

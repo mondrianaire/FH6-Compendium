@@ -12,7 +12,9 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $root
 
 function Listening($port) {
-    return [bool](netstat -ano | Select-String -Pattern ("TCP\s+127\.0\.0\.1:{0}\s" -f $port) -Quiet)
+    # LISTENING only: a just-killed service leaves TIME_WAIT lines on its port for a minute, and those
+    # must not read as "already up" (they did, 2026-09-05, and the restart silently did nothing).
+    return [bool](netstat -ano | Select-String -Pattern ("TCP\s+127\.0\.0\.1:{0}\s.*LISTENING" -f $port) -Quiet)
 }
 
 $jobs = @(

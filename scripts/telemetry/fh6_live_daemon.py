@@ -53,6 +53,7 @@ class State:
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
         self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None; self._auto_loop = False; self._auto_suspend = None   # _auto_loop: the current loop was auto-started by a timed event (Rivals), not a manual mark; _auto_suspend: odometer/lap-timer snapshot taken at a mid-event pause (J7)
+        self.ev_path = []; self._ev_named = False; self._ev_match_next = 16   # the current event's driven path (25 m samples), and the LIVE catalogue-naming state: has a positive path match renamed the loop yet, and the next path length to retry the match at
         self.last_t = 0.0; self.game = "menu"; self.game_kind = None; self._noev_since = None; self.ev_maxpos = 0; self.mode_suggest = None; self.mode_reason = None   # lab-mode auto-detection
         self.lab_mode = None; self._force_split = False; self._ev_edge = False; self.stint_starts = {}; self.last_drive_game = None   # effective lab mode (pushed by the dashboard), manual split request, event edge pending, run boundaries (t_mono)
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
@@ -276,6 +277,53 @@ def _match_route_name(sf):
     except Exception:
         return None
 
+_AN = None
+def _catalogue_match(sx, sz, sample):
+    """CONFIDENT live course id from the accumulated event path -- the same two-tier catalogue match the analyzer
+    uses (start-anchored when the drive begins within 500 m of the catalogued start, else path-dominant), gated
+    so we only claim a name when we are POSITIVE: the drive lies almost wholly on the road (ov >= 0.70) and, for
+    an offset start (PvP/Rivals whose S/F is far from the catalogued point, e.g. Mt. Haruna 622 m), covers most
+    of it (cov >= 0.60). Returns (name, 'route:<id>') or None. Reuses analyze_session's cached catalogue; never
+    downgrades -- callers stop once named."""
+    global _AN
+    if len(sample) < 8: return None
+    try:
+        if _AN is None:
+            import analyze_session as _mod
+            _AN = _mod
+        starts = _AN._catalogue_starts()
+    except Exception:
+        return None
+    def near(x, z, cells):
+        cx0, cz0 = int(x // 30), int(z // 30)
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                for px, pz in cells.get((cx0 + dx, cz0 + dz), ()):
+                    if (px - x) ** 2 + (pz - z) ** 2 <= 900: return True
+        return False
+    best_start = best_path = None
+    for key, name, cx0, cz0, length_m, is_race, conf, bb in starts:
+        if bb and not (bb[0] - 250 <= sx <= bb[2] + 250 and bb[1] - 250 <= sz <= bb[3] + 250): continue
+        cp = _AN._catalogue_path(key)
+        if not cp: continue
+        cells = {}
+        for x, z in cp: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+        ov = sum(1 for x, z in sample if near(x, z, cells)) / len(sample)
+        if ov < 0.70: continue                       # the drive must LIE ON this road to be it
+        d0 = math.hypot(sx - cx0, sz - cz0)
+        if d0 <= 500:
+            cand = (-round(ov, 2), round(d0), name, "route:%s" % key.split(":", 1)[-1])
+            if best_start is None or cand < best_start: best_start = cand
+        else:                                        # offset start: needs coverage as the guard against a shared-tarmac sliver
+            scells = {}
+            for x, z in sample: scells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+            cov = sum(1 for x, z in cp if near(x, z, scells)) / max(1, len(cp))
+            if cov < 0.60: continue
+            cand = (-round(ov, 2), round(d0), name, "route:%s" % key.split(":", 1)[-1])
+            if best_path is None or cand < best_path: best_path = cand
+    best = best_start or best_path
+    return (best[2], best[3]) if best else None
+
 def _end_auto_course(t_mono, p, c):
     """A timed event ended (finish, crash, or restart). Complete the OPEN pass so nothing is wasted: this is a
     point-to-point sprint's only pass, a circuit's final lap, OR a partial/crashed practice run — all of which carry
@@ -392,6 +440,7 @@ def ingest(p, t_mono):
         with ST.lock:
             ST.loop = {"name": nm, "start": sf, "radius": 60, "min_dist": 250, "auto": True, "topology": "unknown", "sf_fixed": False}
             ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = t_mono; ST.loop_last_s = None; ST._auto_loop = True
+            ST.ev_path = []; ST._ev_named = False; ST._ev_match_next = 16   # fresh driven path for LIVE catalogue naming
         ST.emit("loop", {"name": nm, "start": sf, "lap": 0, "auto": True})
     # reference-loop live lap counting: each return through the start (after leaving by min_dist) = one lap
     if ST.loop and c["on"]:
@@ -406,6 +455,22 @@ def ingest(p, t_mono):
                 ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s}); maybe_lap_analysis(t_mono, "loop lap")
                 ST._loop_away = 0.0; ST._loop_t0 = t_mono
     if c["on"]: ST._loop_prev = (p["PosX"], p["PosZ"])   # menu frames report (0,0) — tracking them would add phantom kilometres to _loop_away across a pause (J7)
+    # LIVE catalogue naming (the daemon half): _match_route_name only knows a course whose catalogued start is
+    # within 120 m of the S/F crossing, so an OFFSET-START event (PvP / Rivals whose line is far from the start,
+    # e.g. Mt. Haruna 622 m) stays "Rivals course" live even though the analyzer names it at the lap boundary.
+    # Build the driven path and, once enough is down, PATH-match it and rename the loop the moment we are POSITIVE.
+    if ST.loop and ST._auto_loop and ST.game == "event" and c["on"] and not ST._ev_named and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1):
+        if not ST.ev_path or math.hypot(p["PosX"] - ST.ev_path[-1][0], p["PosZ"] - ST.ev_path[-1][1]) >= 25:
+            ST.ev_path.append((p["PosX"], p["PosZ"]))
+        if len(ST.ev_path) >= ST._ev_match_next:
+            ST._ev_match_next = len(ST.ev_path) + 20               # retry every ~500 m as coverage rises
+            m = _catalogue_match(ST.loop["start"][0], ST.loop["start"][1], ST.ev_path)
+            if m and m[0] and m[0] != ST.loop["name"]:
+                with ST.lock:
+                    ST.loop["name"] = m[0]; ST.loop["route_key"] = m[1]; ST._ev_named = True
+                ST.emit("loop", {"name": m[0], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "route_key": m[1]})
+            elif len(ST.ev_path) > 600:
+                ST._ev_named = True                                # ~15 km driven with no positive match — stop retrying (not a catalogued course / a fragment)
     # CSV row (same layout as capture tool). MENU FRAMES ARE NOT WRITTEN (2026-09-03): every field
     # in one is zeroed -- Speed, AccelX/Z, position, the lot -- so a menu dwell used to add nothing
     # but dead rows to the capture, for however long the dwell lasted. Same reasoning as _loop_prev

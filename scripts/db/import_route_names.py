@@ -92,7 +92,7 @@ def run(cx, verbose=False):
             name_index[e["name"]].append(eid)
 
     routes = {r["route_id"]: dict(r) for r in cx.execute(
-        "SELECT route_id, length_m, is_loop, road_class FROM ref_route")}
+        "SELECT route_id, length_m, is_loop, road_class, bbox_x0, bbox_x1, bbox_z0, bbox_z1 FROM ref_route")}
     course_routes = {r["route_key"]: dict(r) for r in cx.execute(
         "SELECT route_key, route_id, match_kind FROM course_route")}
     courses = [dict(r) for r in cx.execute(
@@ -166,6 +166,47 @@ def run(cx, verbose=False):
                 used_pairs[rk].add(e["event_id"])
             if len(B2) == 1:
                 candidate_len[rk] = B2[0]["event_id"]
+
+    # ---- pass 1.25: ONE EVENT, ONE PLACE (map tier, global) --------------------
+    # Hokubu Circuit (1.6 mi) fits route 201 and route 101 by length, and a course on each fit it
+    # by lap length too -- so both came out 'verified' 5 km apart (2026-09-05). A Rivals route is
+    # one stretch of road: an event claimed by courses on routes whose boxes do not overlap is a
+    # tie, settled only by the typed name, otherwise left as chosen=0 rows for the picker.
+    def _overlap(a, b):
+        A, B = routes[a], routes[b]
+        if None in (A["bbox_x0"], B["bbox_x0"]):
+            return False
+        return not (A["bbox_x1"] < B["bbox_x0"] - 300 or B["bbox_x1"] < A["bbox_x0"] - 300
+                    or A["bbox_z1"] < B["bbox_z0"] - 300 or B["bbox_z1"] < A["bbox_z0"] - 300)
+    claims = defaultdict(list)             # event_id -> [route_key]
+    for rk, (eid, _n, _s, _c) in chosen_map.items():
+        claims[eid].append(rk)
+    event_claims = []
+    for eid, rks in claims.items():
+        rids = sorted({map_route_id[rk] for rk in rks})
+        if len(rids) < 2:
+            continue
+        # cluster the routes by box overlap; twins (30001~101) are one place
+        clusters = []
+        for rid in rids:
+            for cl in clusters:
+                if any(_overlap(rid, o) for o in cl):
+                    cl.append(rid); break
+            else:
+                clusters.append([rid])
+        if len(clusters) < 2:
+            continue
+        keep = [rk for rk in rks if D_of[rk] is not None and D_of[rk] == events_by_id[eid]["name"]]
+        if len(keep) == 1:
+            for rk in rks:
+                if rk != keep[0]:
+                    chosen_map.pop(rk, None)
+            chosen_map[keep[0]] = (eid, events_by_id[eid]["name"], "derived:map+declared", "derived")
+        else:
+            for rk in rks:
+                chosen_map.pop(rk, None)
+        event_claims.append({"event_id": eid, "route_keys": sorted(rks), "route_ids": rids,
+                             "settled_by_declared": keep[0] if len(keep) == 1 else None})
 
     # ---- pass 1.5: length tier bijection (global across all courses) --------
     counts = Counter(candidate_len.values())
@@ -293,6 +334,7 @@ def run(cx, verbose=False):
         "ties": len(ambiguous), "conflicts": len(conflicts),
         "ambiguous_route_keys": ambiguous, "conflicting_routes": conflicts,
         "declared_overrides": sorted(overridden, key=lambda o: o["route_key"]),
+        "event_claims": sorted(event_claims, key=lambda o: o["event_id"]),
     }
     if verbose:
         for o in overridden:

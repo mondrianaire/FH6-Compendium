@@ -599,6 +599,15 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 .hspec-labels{display:flex;justify-content:space-between;margin-top:6px;font:700 8.5px var(--sans);
   letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
 .hspec-labels span.on{font-weight:800}
+/* RESOLUTION STATE — replaces the journey spectrum: where the cid -> hw-hash -> tune-hash resolution stands */
+.hrez{display:flex;flex-direction:column;justify-content:center;gap:3px;padding-top:2px;min-width:0}
+.rez-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}
+.rez-pill{font:800 8.5px var(--sans);letter-spacing:.07em;padding:2px 7px;border-radius:2px;border:1px solid var(--line2);color:var(--mut);opacity:.45;flex:0 0 auto}
+.rez-pill.on{opacity:1;border-color:transparent}
+.rez-tree{font:700 10px var(--mono);color:var(--acc2);white-space:nowrap}
+.rez-clone{font:700 9px var(--sans);letter-spacing:.04em;text-transform:uppercase;flex:0 0 auto;white-space:nowrap;margin-left:auto}
+.rez-clone.ok{color:var(--acc)} .rez-clone.no{color:var(--bad)}
+.rez-why{font-size:10.5px;line-height:14px;white-space:normal;max-height:28px;overflow:hidden;color:var(--mut)}
 .hstep{display:flex;align-items:flex-start;gap:6px;font-weight:700;white-space:normal;line-height:16px;max-height:32px;overflow:hidden}
 .hstep i{flex:0 0 auto;width:16px;height:16px;display:grid;place-items:center;background:var(--tone,var(--line2));
   color:#0b0d10;font:700 10px var(--mono);font-style:normal;border-radius:2px}

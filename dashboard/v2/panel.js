@@ -672,6 +672,49 @@ function statusSpectrumHTML(st, c) {
   return `<div class="hspectrum"><div class="hspec-track">${ticks}${marker}</div><div class="hspec-labels">${labels}</div></div>`;
 }
 
+// RESOLUTION, NOT A JOURNEY (Jett 2026-09-06). Identity is a tree: the live cid narrows to a few HARDWARE
+// hashes, each holding known SLIDER hashes; a saved (hw_hash, tune_hash) is a complete, clone-able build,
+// and an unsaved one is cid-only and incomplete. So the header's status is where we are in that resolution
+// — RESOLVED / AMBIGUOUS / UNSAVED — not the old UNKNOWN→RATIFIED spectrum. Reuses buildStatus()'s signals.
+function resolutionState() {
+  const st = buildStatus();
+  const mm = (CUR && CUR.match) || {};
+  const q = matchQuality(CUR && CUR.match);
+  const ambiguous = q.level === "ambiguous" || q.level === "conflict";
+  const locked = st.key === "downloaded" || !!(CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked);
+  const hwN = MATCH && MATCH.hw ? new Set(MATCH.hw.map((b) => rimFree(b.pkey))).size : 0;   // distinct hardware hashes the cid matches
+  const tunes = MATCH && MATCH.hw ? MATCH.hw.length : 0;                                     // slider hashes under them
+  let key, label, tone, clonable, hint;
+  if (st.key === "none") return { key: "none", label: "no car", tone: "dim", hint: "waiting for a car", hwN: 0, tunes: 0 };
+  if (ambiguous) {
+    key = "ambiguous"; tone = "warn"; clonable = false; label = "ambiguous";
+    hint = `cid matches ${mm.n_signature_ties || tunes || "several"} saved builds — pick the tune below, or drive the gears to separate them`;
+  } else if (st.key === "ratified" || st.key === "downloaded") {
+    key = "resolved"; tone = "ok"; clonable = true; label = "resolved";
+    hint = locked ? "downloaded / locked — reads and clones cleanly; only editing it in-game is locked" : "one saved build · hardware hash + slider hash both known";
+  } else if (st.key === "clone") {
+    key = "resolved"; tone = "blue"; clonable = true; label = "clone · unnamed";
+    hint = "an unlocked clone of a known build — save it under a name to ratify it";
+  } else if (st.key === "variation") {
+    key = "unsaved"; tone = "blue"; clonable = false; label = "variation";
+    hint = "same hardware as a held build, sliders moved — save to capture this slider hash, or A/B it against the base";
+  } else {   // unknown: no hardware match, or hardware changed and not saved
+    key = "unsaved"; tone = "bad"; clonable = false; label = locked ? "downloaded · importing" : "unsaved";
+    hint = locked ? "identified from the save; the history import is catching up" : "the live car matches no saved build — save it in-game to capture the hardware + slider hashes";
+  }
+  return { key, label, tone, clonable, locked, hwN, tunes, hint };
+}
+
+function resolutionHTML(rs) {
+  const STAGES = [["unsaved", "UNSAVED"], ["ambiguous", "AMBIGUOUS"], ["resolved", "RESOLVED"]];
+  const COL = { unsaved: "#f0616d", ambiguous: "#e3b341", resolved: "#3fb950" };
+  const pills = STAGES.map(([k, l]) =>
+    `<span class="rez-pill${rs.key === k ? " on" : ""}"${rs.key === k ? ` style="background:${COL[k]};color:#0b0d10;box-shadow:0 0 0 2px ${COL[k]}44"` : ""}>${l}</span>`).join("");
+  const tree = rs.hwN ? `<b class="rez-tree" title="the cid resolves to this many hardware hashes, holding this many saved slider hashes">${rs.hwN} hw · ${rs.tunes} tune${rs.tunes === 1 ? "" : "s"}</b> — ` : "";
+  const clone = rs.key === "none" ? "" : `<span class="rez-clone ${rs.clonable ? "ok" : "no"}">${rs.clonable ? "✓ clone-able" : "✗ incomplete"}</span>`;
+  return `<div class="hrez"><div class="rez-row">${pills}${clone}</div><div class="rez-why t-l">${tree}${esc(rs.hint || "")}</div></div>`;
+}
+
 /* ------------------------------------------------------------ header */
 // THE BAND IS ALLOCATED BY DIFFICULTY, NOT BY DATA (audit 2026-09-03). One skeleton in every
 // state; only the CONTENT and the tone change. The state's own answer takes the largest type in
@@ -888,7 +931,7 @@ function paintHeader() {
           title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
         <div class="hcar t-d" title="${esc(c.byline)}">${esc(c.car)}${changeSlim()}</div>
         <div class="htitle t-t">${c.tune ? esc(c.tune) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
-        ${statusSpectrumHTML(st, c)}
+        ${resolutionHTML(resolutionState())}
       </div>
       <div class="hdec">
         ${c.step ? `<div class="hstep t-b"><i>1</i><span>${esc(c.step)}</span></div>` : ""}

@@ -92,6 +92,42 @@ def _catalogue_path(key):
         except Exception:                                # noqa: BLE001
             _CAT_PATH[key] = None
     return _CAT_PATH[key]
+
+# ---- CORROBORATION: the game's activation spheres (race_triggers.tz -> route_anchor, 36 spheres, r~100 m keyed by
+#      route id). A spawn falling inside a route's own sphere is a 99%-precision CONFIRM of that route (measured: of
+#      488 learned S/F crossings, 94 land inside a sphere and 93 of those are the OWN route's, uniquely). It is a
+#      CONFIRM, never a namer and never a veto: only 35% of routes have a sphere, so absence says nothing. Geometry
+#      still proposes and decides; the sphere breaks near-ties and rescues an ambiguous plaza-shared start.
+_ROUTE_SPHERES = None
+def _route_spheres():
+    """[(key, x, z, radius_m)] for every activation sphere. Read once; a lab without the anchor stage gets []."""
+    global _ROUTE_SPHERES
+    if _ROUTE_SPHERES is None:
+        _ROUTE_SPHERES = []
+        try:
+            import sqlite3
+            cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
+            for rid, x, z, rad in cx.execute("SELECT route_id, x, z, radius_m FROM route_anchor WHERE x IS NOT NULL"):
+                _ROUTE_SPHERES.append(("route:%s" % rid, x, z, rad or 100.0))
+            cx.close()
+        except Exception:                                # noqa: BLE001
+            _ROUTE_SPHERES = []
+    return _ROUTE_SPHERES
+def _sphere_confirm(sx, sz, key):
+    """Tri-state for one candidate route: True = spawn is inside THIS route's sphere (confirm), False = this route
+    has a sphere and the spawn is outside it (weak counter-signal), None = this route has no sphere (says nothing)."""
+    got = None
+    for k, x, z, rad in _route_spheres():
+        if k == key:
+            return math.hypot(sx - x, sz - z) <= rad
+    return got
+def _sphere_for(sx, sz):
+    """The single route whose sphere uniquely contains the spawn, or None (no sphere, or >1 -> ambiguous, geometry
+    decides). Used at load-in to disambiguate a plaza-shared start without driving."""
+    inside = [(math.hypot(sx - x, sz - z), k) for k, x, z, rad in _route_spheres() if math.hypot(sx - x, sz - z) <= rad]
+    if len(inside) == 1:
+        return inside[0][1]
+    return None
 # Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
 # course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
 # reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
@@ -1798,7 +1834,7 @@ def main():
                 return True
         return False
 
-    def _catalogue_key(sx, sz, sample):
+    def _catalogue_key(sx, sz, sample, solo=None):
         """Identify a drive off the game's route catalogue: the S/F crossing (sx, sz) proposes every catalogued route
         whose start line is near it, and the PATH the drive lies on decides between them. This is what the game knows
         the moment you load in -- the start/finish line's location is catalogued, so a Rivals/PvP course is named the
@@ -1833,18 +1869,24 @@ def main():
             if ov is None: continue
             if not direction_agree(sample, cp): continue # a course driven the other way is a different course
             d0 = math.hypot(sx - cx0, sz - cz0)
-            cand = (-round(ov, 2), -round(cov or 0, 2), round(d0), key, name, length_m, is_race)
+            sc = _sphere_confirm(sx, sz, key)            # spawn inside this route's activation sphere? True/False/None
+            srank = 0 if sc is True else (1 if sc is None else 2)   # confirm beats unknown beats sphere-miss, but only as a tie-break
+            # MODE tie-break: a race event (solo False) prefers the is_race variant of a shared tarmac, a Rivals/timed
+            # event (solo True) the non-race one -- resolves a plaza pair like Chiheisen (race) vs Temple (solo). Reward
+            # a match only; never punish, since a route may be is_race yet driven solo in free-roam (corroborate, don't name).
+            mrank = 0 if (solo is not None and bool(is_race) == (not solo)) else 1
+            cand = (-round(ov, 2), -round(cov or 0, 2), srank, mrank, round(d0), key, name, length_m, is_race, bool(sc))
             if d0 <= 500 and ov >= 0.6:                  # start-anchored: near the catalogued line and lying on the road
                 if best_start is None or cand < best_start: best_start = cand
             elif ov >= 0.7 and (cov or 0) >= 0.6:        # path-dominant: IS this whole road, wherever it starts (offset-start loops)
                 if best_path is None or cand < best_path: best_path = cand
         best = best_start or best_path
         if best is None: return None
-        _ov, _cov, _d0, key, name, length_m, is_race = best
+        _ov, _cov, _sr, _mr, _d0, key, name, length_m, is_race, anchored = best
         R = routes.get(key) or {}
         routes[key] = dict(R, name=name, start=R.get("start") or [round(sx), round(sz)], heading=R.get("heading"),
                            length_m=max(R.get("length_m") or 0, length_m or 0), catalogue=True, is_race=is_race,
-                           events=R.get("events", 0))
+                           anchor_ok=anchored or R.get("anchor_ok", False), events=R.get("events", 0))
         return key
 
     ev_out = []
@@ -1981,7 +2023,7 @@ def main():
         # (collapsing the running-start, mid-lap-join and partial variants that grid-cell keying used to split), and
         # a Rivals/PvP route is never left unidentified once it has crossed its line. Learned attribution and the grid
         # remain the fallback for drives with no catalogued line nearby (custom routes, free-roam segments).
-        key = _catalogue_key(sx, sz, sample)
+        key = _catalogue_key(sx, sz, sample, solo=solo)
         if key is None:
             key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_resets > 0))
         if key is None and _is_rollup(sx, sz, sample):

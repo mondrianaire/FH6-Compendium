@@ -278,6 +278,17 @@ def _match_route_name(sf):
         return None
 
 _AN = None
+def _an():
+    """The analyze_session module, imported once and cached -- the shared home of the route catalogue, path match
+    and activation spheres, so the daemon and the analyzer corroborate identity the same way. None if unavailable."""
+    global _AN
+    if _AN is None:
+        try:
+            import analyze_session as _mod
+            _AN = _mod
+        except Exception:                                # noqa: BLE001
+            _AN = False
+    return _AN or None
 def _catalogue_match(sx, sz, sample):
     """CONFIDENT live course id from the accumulated event path -- the same two-tier catalogue match the analyzer
     uses (start-anchored when the drive begins within 500 m of the catalogued start, else path-dominant), gated
@@ -285,13 +296,11 @@ def _catalogue_match(sx, sz, sample):
     an offset start (PvP/Rivals whose S/F is far from the catalogued point, e.g. Mt. Haruna 622 m), covers most
     of it (cov >= 0.60). Returns (name, 'route:<id>') or None. Reuses analyze_session's cached catalogue; never
     downgrades -- callers stop once named."""
-    global _AN
     if len(sample) < 8: return None
     try:
-        if _AN is None:
-            import analyze_session as _mod
-            _AN = _mod
-        starts = _AN._catalogue_starts()
+        _mod = _an()
+        if _mod is None: return None
+        starts = _mod._catalogue_starts()
     except Exception:
         return None
     def near(x, z, cells):
@@ -304,7 +313,7 @@ def _catalogue_match(sx, sz, sample):
     best_start = best_path = None
     for key, name, cx0, cz0, length_m, is_race, conf, bb in starts:
         if bb and not (bb[0] - 250 <= sx <= bb[2] + 250 and bb[1] - 250 <= sz <= bb[3] + 250): continue
-        cp = _AN._catalogue_path(key)
+        cp = _mod._catalogue_path(key)
         if not cp: continue
         cells = {}
         for x, z in cp: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
@@ -335,26 +344,50 @@ def _learned_starts():
         try:
             import sqlite3
             cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
-            names = {str(rid): nm for rid, nm in cx.execute("SELECT route_id, name FROM ref_route WHERE name IS NOT NULL")}
+            meta = {str(rid): (nm, bool(isr)) for rid, nm, isr in cx.execute("SELECT route_id, name, is_race FROM ref_route WHERE name IS NOT NULL")}
             for rk, sx, sz in cx.execute("SELECT route_key, start_x, start_z FROM session_event WHERE route_key LIKE 'route:%' AND start_x IS NOT NULL"):
-                nm = names.get(rk.split(":", 1)[1])
-                if nm: _LEARNED.append((nm, rk, sx, sz))
+                m = meta.get(rk.split(":", 1)[1])
+                if m: _LEARNED.append((m[0], rk, sx, sz, m[1]))
             cx.close()
         except Exception:                                # noqa: BLE001
             _LEARNED = []
     return _LEARNED
 
-def _match_learned_start(sf, thresh=60.0):
+def _match_learned_start(sf, thresh=60.0, rpos=None):
     """Nearest route whose DRIVEN S/F crossing is within thresh m of sf. Returns (name, key, unambiguous) or None;
-    unambiguous means no OTHER route's learned S/F is within thresh*2, so we can name it at load-in without
-    driving to confirm. Where two courses share a start plaza, unambiguous is False and the path-match confirms."""
+    unambiguous means we can name it at load-in without driving to confirm. Three independent routes to unambiguous
+    for a plaza-shared start (two courses spawn at the same line):
+    (1) no OTHER route's learned S/F is within thresh*2 (a lone start), OR
+    (2) RacePosition > 1 -> a CERTAIN race (the packet has no mode field; RacePosition is the only signal, and >1 is
+        positive proof of a field), so among the plaza-mates keep only the is_race variant -- resolves e.g. Chiheisen
+        (race) vs Temple Cross Country (solo), Naruo Circuit (race) vs Airfield Trail (solo), at spawn with no motion, OR
+    (3) the spawn falls inside exactly one candidate route's ACTIVATION SPHERE (race_triggers.tz) -- but the sphere is
+        the free-roam trigger, sited 136-778 m from the spawn line on every measured plaza pair, so it rescues an
+        event ACTIVATED from free-roam, essentially never a Rivals/PvP load-in. Kept as a safe last resort.
+    Every route CONFIRMS a start already proposed here (corroborate geometry, never name). session_event stores no
+    start_y, so elevation cannot disambiguate a learned start; surface (paved/loose) needs motion and the path-match
+    covers it once driving. rpos is the live RacePosition at spawn; None disables the mode gate."""
     byroute = {}
-    for nm, rk, sx, sz in _learned_starts():
+    for nm, rk, sx, sz, isr in _learned_starts():
         d = math.hypot(sf[0] - sx, sf[1] - sz)
-        if rk not in byroute or d < byroute[rk][0]: byroute[rk] = (d, nm)
-    near = sorted(((d, rk, nm) for rk, (d, nm) in byroute.items()), key=lambda x: x[0])
+        if rk not in byroute or d < byroute[rk][0]: byroute[rk] = (d, nm, isr)
+    near = sorted(((d, rk, nm, isr) for rk, (d, nm, isr) in byroute.items()), key=lambda x: x[0])
     if not near or near[0][0] > thresh: return None
-    unamb = len(near) < 2 or near[1][0] > thresh * 2
+    ambiguous = len(near) >= 2 and near[1][0] <= thresh * 2
+    if ambiguous and rpos is not None and rpos > 1:      # certain race -> keep only the race variant of the plaza
+        racers = [c for c in near if c[3] and c[0] <= thresh * 2]
+        if len(racers) == 1: return (racers[0][2], racers[0][1], True)
+        if racers: near = sorted(racers, key=lambda x: x[0]); ambiguous = len(near) >= 2 and near[1][0] <= thresh * 2
+    if ambiguous:                                        # still tied -> let the activation sphere break it (rare at a spawn)
+        try:
+            an = _an()
+            sph = an._sphere_for(sf[0], sf[1]) if an else None        # the one route whose sphere uniquely contains the spawn
+            if sph:
+                cand = next((c for c in near if c[1] == sph and c[0] <= thresh * 2), None)
+                if cand: return (cand[2], cand[1], True)
+        except Exception:                                # noqa: BLE001
+            pass
+    unamb = not ambiguous
     return (near[0][2], near[0][1], unamb)
 
 def _end_auto_course(t_mono, p, c):
@@ -473,7 +506,7 @@ def ingest(p, t_mono):
         # (learned from past laps) and name it instantly -- no driving. Fall back to the catalogued start, then to
         # generic + the path-match. A learned match that is unambiguous is trusted; an ambiguous one (shared plaza)
         # is provisional and the path-match confirms it.
-        learned = _match_learned_start(sf)
+        learned = _match_learned_start(sf, rpos=p.get("RacePosition"))
         rk = learned[1] if learned else None
         nm = (learned[0] if learned else _match_route_name(sf)) or "Rivals course"
         with ST.lock:

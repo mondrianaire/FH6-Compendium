@@ -24,17 +24,19 @@ in route 5041's sphere.
 
 ## Open, in priority order
 
-0. **Lap canon: rollout status.** Code shipped (commit a9cbcd1, 78 tests). Re-replay of all 25
-   captures from 2026-09-05 to `data/sessions` DONE 2026-09-06 (each ~8 s; the killed intermediate
-   replay's over-revoked JSONs and the 232556 `laps.db` rows are corrected). `rebuild.py --only
-   telemetry` + `--check` PASSED and `build_web` ran — `lap_marker` populated (14 rows), `lap`
-   carries lap_dist_m/rewinds/pauses/pause_s/stitched, `lap_point.dist_m` filled for the re-replayed
-   sessions. Verified: 232556 = Beat 93.03 s / Legend Island Circuit 4,732 m + Centenario 78.933 ×4
-   and 82.548. STILL OPEN: (a) `fh6.db` now MIXES lap-canon laps (09-05) with old-analyzer laps
-   (everything before 09-05) — a full-corpus re-replay (~198 files, ~30 min now the game is off) would
-   make it uniform; `lap_point.dist_m` is null on the old sessions until then. (b) daemon NOT yet
-   restarted for the never-mid-lap capture roll (ask Jett). (c) `measure_gaps_all.py` corpus census
-   not yet run.
+0. **Lap canon: rolled out corpus-wide (2026-09-06).** Code shipped (commit a9cbcd1, 78 tests).
+   ALL 198 captures (2026-08-23 .. 2026-09-05, plus a 09-06 straggler) were re-replayed with the
+   lap-canon analyzer to `data/sessions` (each ~1-8 s; 3 empty "no rows" menu captures wrote nothing;
+   the 21 old sessions whose captures are gone keep their old-analyzer JSONs and their preserved
+   `laps.db` rows). `rebuild.py --only telemetry` + `--check` PASSED and `build_web` ran (788 files,
+   31.7 MB). Corpus now carries: lap 461, lap_marker 166 (rewind 66 — 29 over the start/finish line,
+   pause 90, gap 5, jump 5), 28 laps with rewinds, 71 with pauses, 10 stitched across a capture roll;
+   `lap_point.dist_m` filled for 87,035 points (the capture-backed sessions). Verified 232556 = Beat
+   93.03 s / Legend Island Circuit 4,732 m + Centenario 78.933 ×4 and 82.548. laps.db backed up under
+   the scratchpad before the run. STILL OPEN: (a) daemon NOT yet restarted for the never-mid-lap
+   capture roll (ask Jett); (b) `measure_gaps_all.py` corpus census not yet run (the rebuild's own
+   totals above largely cover it). No lap-canon regression found: the long free-roam "laps" (e.g.
+   220248's 46 km) predate this and have rewinds=0.
 1. **Build Sheet overflow** — 5,289 px of content in an 819 px pane, no scrollbars. Jett's oldest
    open ask this week.
 2. **A/B testing regimen.** The slider-value diff for the `variation` status IS built (commit

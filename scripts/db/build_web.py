@@ -77,11 +77,28 @@ def export_thumbs(cx, out):
     return done
 
 
+_WRITTEN = set()   # every api json path this run produced, for the stale-prune (see main's write-in-place note)
+
+
 def write(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fh:
-        json.dump(obj, fh, separators=(",", ":"), ensure_ascii=False)
-    return os.path.getsize(path)
+    data = json.dumps(obj, separators=(",", ":"), ensure_ascii=False)
+    tmp = path + ".tmp"
+    try:
+        with open(tmp, "w", encoding="utf-8") as fh:
+            fh.write(data)
+        os.replace(tmp, path)                          # ATOMIC: a reader gets the old file or the new one, never a half-written one
+    except OSError:
+        # a key holding a char Windows forbids in a filename (a colon, e.g. "loop:test loop") can't take
+        # the tmp+rename dance; fall back to a direct write, exactly as before. Such keys are edge cases and
+        # were never atomically served anyway.
+        try: os.remove(tmp)
+        except OSError: pass
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(data)
+    _WRITTEN.add(os.path.abspath(path))
+    try: return os.path.getsize(path)
+    except OSError: return len(data.encode("utf-8"))
 
 
 def rows(cx, sql, *a):
@@ -112,9 +129,14 @@ def main(argv=None):
     a = ap.parse_args(argv)
     cx = fh6db.connect(a.db, ro=True)
     out = a.out
-    if os.path.isdir(out):
-        shutil.rmtree(out)
+    # WRITE IN PLACE, never wipe (2026-09-06). This used to shutil.rmtree(out) first, which left every
+    # api file GONE for the several seconds of a rebuild — and both rebuild scopes end with build_web and
+    # fire on every save / session close, so a course page open during a rebuild loaded nothing and broke
+    # (the Sekibe Scramble report). Each write() is atomic (tmp + os.replace), so a reader always gets a
+    # complete file, old or new; stale files (a deleted course) are pruned at the end against what this run
+    # wrote, so nothing is ever missing mid-rebuild.
     os.makedirs(out, exist_ok=True)
+    _WRITTEN.clear()
     total = 0
 
     # ---- cars ---------------------------------------------------------------
@@ -390,7 +412,23 @@ def main(argv=None):
     for fn in os.listdir(os.path.join(out, "options")):
         total += os.path.getsize(os.path.join(out, "options", fn))
 
-    print("wrote %d files under %s" % (3 + n_build + n_course + 2 + n_opt, out))
+    # STALE PRUNE, now that nothing is wiped up front. Remove only the per-key json this run did NOT
+    # produce (a course or build that no longer exists), in the two dirs write() fully owns; thumb/ and
+    # options/ manage their own files, and the top-level *.json are a fixed overwritten set. Done last so
+    # the tree is only ever complete-old -> complete-new, never empty.
+    n_pruned = 0
+    for sub in ("course", "build"):
+        d = os.path.join(out, sub)
+        if not os.path.isdir(d):
+            continue
+        for fn in os.listdir(d):
+            p = os.path.join(d, fn)
+            if fn.endswith(".json") and os.path.abspath(p) not in _WRITTEN:
+                try: os.remove(p); n_pruned += 1
+                except OSError: pass
+
+    print("wrote %d files under %s%s" % (3 + n_build + n_course + 2 + n_opt, out,
+                                         (" (pruned %d stale)" % n_pruned) if n_pruned else ""))
     print("  cars %d   packages %d (%d build files)   courses %d (%d files)   evidence %d"
           % (len(cars), len(packages), n_build, len(courses), n_course, len(ev)))
     print("  total %.1f MB  (the old dashboard/db.js is 12.6 MB)" % (total / 1048576.0))

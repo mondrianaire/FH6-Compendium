@@ -1,0 +1,192 @@
+{
+ "route_key": "5750_1550",
+ "name": null,
+ "turns": [
+  {
+   "id": "T1",
+   "pos": [
+    5762,
+    1601
+   ],
+   "dir": "L",
+   "type": "fast",
+   "radius_m": 202,
+   "n": 1,
+   "best": {
+    "mph_in": 119,
+    "mph_min": 118,
+    "mph_out": 118,
+    "brake_on_m": null,
+    "throttle_on_m": null,
+    "lat_g": 1.56,
+    "apex": [
+     5762,
+     1601
+    ],
+    "t0": 0.0,
+    "stint": 1,
+    "first_red": null,
+    "session": "fh6_20260905_222810"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "3852|2|4|700": {
+     "mph_in": 119,
+     "mph_min": 118,
+     "mph_out": 118,
+     "brake_on_m": null,
+     "throttle_on_m": null,
+     "lat_g": 1.56,
+     "apex": [
+      5762,
+      1601
+     ],
+     "t0": 0.0,
+     "stint": 1,
+     "first_red": null,
+     "session": "fh6_20260905_222810"
+    }
+   },
+   "cars": [
+    "3852|2|4|700"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260905_222810": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 0,
+      "rear": 0,
+      "none": 1
+     },
+     "lim": "clean",
+     "multi": 0.0,
+     "mph_min": 118,
+     "usi": -0.061,
+     "cars": [
+      "3852|2|4|700"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 0,
+     "rear": 0,
+     "none": 1
+    },
+    "lim": {
+     "clean": 1
+    },
+    "dominant": "none",
+    "consistency": 1.0,
+    "cars": [
+     "3852|2|4|700"
+    ],
+    "laps_track": 1,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  }
+ ],
+ "laps": 1,
+ "sessions": [
+  "fh6_20260905_222810"
+ ],
+ "updated": "fh6_20260905_222810",
+ "best_laps": {},
+ "visits": [
+  {
+   "session": "fh6_20260905_222810",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "3852|2|4|700"
+   ],
+   "best_lap": null,
+   "best_car": null
+  }
+ ],
+ "cars": {
+  "3852|2|4|700": {
+   "name": "1991 Honda Beat",
+   "class": "A",
+   "pi": 700,
+   "drivetrain": "AWD"
+  }
+ },
+ "speed_traces": {},
+ "geo_turns": {},
+ "turn_count_delta": null,
+ "turn_count": 1,
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "mid_corner": {
+    "frac": 0.188,
+    "band": "moderate"
+   },
+   "fast_corner": {
+    "frac": 0.213,
+    "band": "moderate"
+   },
+   "braking": {
+    "frac": 0.157,
+    "band": "moderate"
+   },
+   "straight": {
+    "frac": 0.295,
+    "band": "heavy"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "absent",
+    "range_m": 0.4
+   },
+   "launch": {
+    "frac": null,
+    "band": "absent"
+   }
+  },
+  "heavy": [
+   "straights / top-end"
+  ],
+  "absent": [
+   "low-speed corners",
+   "elevation (crests)"
+  ],
+  "gears_used": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   11
+  ],
+  "top_gear_used": 11,
+  "max_gear": 7,
+  "top_speed": 125,
+  "elevation_range_m": 0.4,
+  "notes": [
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course"
+  ],
+  "priority": [
+   "straights / top-end",
+   "fast sweepers",
+   "medium corners",
+   "heavy braking"
+  ],
+  "rough_frac": 0.0,
+  "rough_n": 1
+ },
+ "profile_laps": 1,
+ "profile_session": "fh6_20260905_222810"
+}

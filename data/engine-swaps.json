@@ -575,13 +575,13 @@
    "cars_seen": {
     "1335": "1991 Mazda #55 Mazda 787B"
    },
-   "cyl": null,
+   "cyl": 3,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 627,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 900,
+   "source": "save-mined+telemetry"
   },
   "713": {
    "engine_family": 713,
@@ -1333,7 +1333,7 @@
    "cyl": 4,
    "displacement_l": null,
    "redline": 10000,
-   "sample_hp": 362,
+   "sample_hp": 370,
    "resulting_drivetrain": "RWD",
    "sample_pi": 505,
    "source": "save-mined+telemetry"
@@ -2061,7 +2061,7 @@
    "cyl": 1,
    "displacement_l": null,
    "redline": 10000,
-   "sample_hp": 127,
+   "sample_hp": 134,
    "resulting_drivetrain": "AWD",
    "sample_pi": 600,
    "source": "save-mined+telemetry"
@@ -2689,13 +2689,13 @@
     "2987": "1962 Peel P50",
     "3852": "1991 Honda Beat"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 386,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "4366": {
    "engine_family": 4366,

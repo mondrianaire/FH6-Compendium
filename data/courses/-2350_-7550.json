@@ -5,13 +5,13 @@
   {
    "id": "T1",
    "pos": [
-    -2350,
-    -7673
+    -2348,
+    -7678
    ],
    "dir": "L",
-   "type": "fast",
-   "radius_m": 98,
-   "n": 311,
+   "type": "medium",
+   "radius_m": 187,
+   "n": 336,
    "best": {
     "mph_in": 90,
     "mph_min": 90,
@@ -28,7 +28,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260903_003230"
    },
-   "sessions": 11,
+   "sessions": 12,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 72,
@@ -47,20 +47,20 @@
      "session": "fh6_20260827_213049"
     },
     "3665|2|1|600": {
-     "mph_in": 58,
-     "mph_min": 58,
-     "mph_out": 72,
+     "mph_in": 78,
+     "mph_min": 78,
+     "mph_out": 92,
      "brake_on_m": null,
-     "throttle_on_m": -54,
-     "lat_g": 1.39,
+     "throttle_on_m": -125,
+     "lat_g": 0.89,
      "apex": [
-      -2355,
-      -7662
+      -2340,
+      -7690
      ],
-     "t0": 9037.5,
-     "stint": 15,
-     "first_red": "front ph2",
-     "session": "fh6_20260828_001105"
+     "t0": 2667.9,
+     "stint": 26,
+     "first_red": null,
+     "session": "fh6_20260905_201758"
     },
     "3854|1|2|800": {
      "mph_in": 69,
@@ -359,24 +359,41 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 0,
+      "rear": 0,
+      "none": 2
+     },
+     "lim": "clean",
+     "multi": 0.0,
+     "mph_min": 78,
+     "usi": 0.081,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 21,
-    "laps_seen": 21,
-    "sessions": 11,
+    "passes": 23,
+    "laps_seen": 23,
+    "sessions": 12,
     "fr": {
      "front": 14,
      "rear": 2,
-     "none": 5
+     "none": 7
     },
     "lim": {
      "tune": 8,
-     "clean": 2,
+     "clean": 3,
      "driver": 1
     },
     "dominant": "front",
-    "consistency": 0.67,
+    "consistency": 0.61,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
@@ -387,8 +404,8 @@
      "3854|1|3|600",
      "3854|1|3|700"
     ],
-    "laps_track": 23,
-    "presence": 0.91
+    "laps_track": 25,
+    "presence": 0.92
    },
    "established": false,
    "est_by": null
@@ -396,13 +413,13 @@
   {
    "id": "T2",
    "pos": [
-    -2318,
-    -7762
+    -2320,
+    -7744
    ],
    "dir": "R",
    "type": "fast",
-   "radius_m": 80,
-   "n": 241,
+   "radius_m": 111,
+   "n": 266,
    "best": {
     "mph_in": 107,
     "mph_min": 107,
@@ -419,23 +436,23 @@
     "first_red": "front ph2",
     "session": "fh6_20260828_081447"
    },
-   "sessions": 10,
+   "sessions": 11,
    "best_by_car": {
     "3665|2|1|600": {
-     "mph_in": 84,
-     "mph_min": 76,
-     "mph_out": 77,
+     "mph_in": 93,
+     "mph_min": 93,
+     "mph_out": 103,
      "brake_on_m": null,
-     "throttle_on_m": 51,
-     "lat_g": 1.9,
+     "throttle_on_m": -88,
+     "lat_g": 1.7,
      "apex": [
       -2320,
-      -7743
+      -7744
      ],
-     "t0": 9040.1,
-     "stint": 15,
+     "t0": 2669.8,
+     "stint": 26,
      "first_red": "front ph2",
-     "session": "fh6_20260828_001105"
+     "session": "fh6_20260905_201758"
     },
     "3854|2|4|899": {
      "mph_in": 95,
@@ -717,23 +734,40 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 93,
+     "usi": 0.416,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 18,
-    "laps_seen": 18,
-    "sessions": 10,
+    "passes": 20,
+    "laps_seen": 20,
+    "sessions": 11,
     "fr": {
-     "front": 16,
+     "front": 18,
      "rear": 0,
      "none": 2
     },
     "lim": {
-     "tune": 8,
+     "tune": 9,
      "clean": 2
     },
     "dominant": "front",
-    "consistency": 0.89,
+    "consistency": 0.9,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
@@ -743,25 +777,25 @@
      "3854|1|3|600",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.78
+    "laps_track": 25,
+    "presence": 0.8
    },
    "established": false,
    "deg": 33,
    "est_by": null,
    "s": 200,
    "traced": {
-    "n_passes": 20,
-    "n_laps_traced": 24,
-    "n_builds": 14,
+    "n_passes": 21,
+    "n_laps_traced": 25,
+    "n_builds": 15,
     "half_m": 42.0,
-    "med_samples": 11.0,
+    "med_samples": 11,
     "med_step_m": 7.9,
-    "min_mph": 90,
-    "ratio": 0.89,
-    "a_long_min": -0.38,
-    "n_flat": 5,
-    "agreement": 0.25,
+    "min_mph": 95,
+    "ratio": 0.9,
+    "a_long_min": -0.31,
+    "n_flat": 6,
+    "agreement": 0.286,
     "reading": null,
     "verdict": "measured"
    }
@@ -788,17 +822,17 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 20,
-    "n_laps_traced": 24,
-    "n_builds": 14,
+    "n_passes": 21,
+    "n_laps_traced": 25,
+    "n_builds": 15,
     "half_m": 42.0,
-    "med_samples": 11.0,
+    "med_samples": 11,
     "med_step_m": 7.9,
-    "min_mph": 90,
-    "ratio": 0.89,
-    "a_long_min": -0.38,
-    "n_flat": 5,
-    "agreement": 0.25,
+    "min_mph": 95,
+    "ratio": 0.9,
+    "a_long_min": -0.31,
+    "n_flat": 6,
+    "agreement": 0.286,
     "reading": null,
     "verdict": "measured"
    }
@@ -888,23 +922,23 @@
     "cars": [
      "2866|2|4|800"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.04
    },
    "established": false,
    "est_by": null,
    "traced": {
-    "n_passes": 20,
-    "n_laps_traced": 24,
-    "n_builds": 14,
+    "n_passes": 21,
+    "n_laps_traced": 25,
+    "n_builds": 15,
     "half_m": 42.0,
-    "med_samples": 11.0,
+    "med_samples": 11,
     "med_step_m": 7.9,
-    "min_mph": 90,
-    "ratio": 0.89,
-    "a_long_min": -0.38,
-    "n_flat": 5,
-    "agreement": 0.25,
+    "min_mph": 95,
+    "ratio": 0.9,
+    "a_long_min": -0.31,
+    "n_flat": 6,
+    "agreement": 0.286,
     "reading": null,
     "verdict": "measured"
    }
@@ -935,7 +969,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.0
    },
    "deg": 26,
@@ -946,15 +980,15 @@
    "geo_sessions": 1,
    "geo_mapped": true,
    "traced": {
-    "n_passes": 10,
-    "n_laps_traced": 24,
-    "n_builds": 9,
+    "n_passes": 11,
+    "n_laps_traced": 25,
+    "n_builds": 10,
     "half_m": 18.0,
-    "med_samples": 8.5,
-    "med_step_m": 3.9,
-    "min_mph": 80,
-    "ratio": 0.77,
-    "a_long_min": -2.3,
+    "med_samples": 9,
+    "med_step_m": 4.0,
+    "min_mph": 77,
+    "ratio": 0.76,
+    "a_long_min": -2.4,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -964,30 +998,30 @@
   {
    "id": "T6",
    "pos": [
-    -2345,
-    -7907
+    -2349,
+    -7910
    ],
    "dir": "R",
    "type": "hairpin",
-   "radius_m": 23,
-   "n": 272,
+   "radius_m": 17,
+   "n": 316,
    "best": {
-    "mph_in": 79,
-    "mph_min": 37,
-    "mph_out": 46,
-    "brake_on_m": 110,
-    "throttle_on_m": 67,
-    "lat_g": 2.57,
+    "mph_in": 56,
+    "mph_min": 39,
+    "mph_out": 39,
+    "brake_on_m": 90,
+    "throttle_on_m": null,
+    "lat_g": 1.98,
     "apex": [
-     -2351,
-     -7913
+     -2345,
+     -7907
     ],
-    "t0": 7890.8,
-    "stint": 50,
+    "t0": 1599.3,
+    "stint": 20,
     "first_red": "front ph1",
-    "session": "fh6_20260828_081447"
+    "session": "fh6_20260905_201758"
    },
-   "sessions": 7,
+   "sessions": 8,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 53,
@@ -1007,19 +1041,19 @@
     },
     "3665|2|1|600": {
      "mph_in": 56,
-     "mph_min": 20,
-     "mph_out": 20,
+     "mph_min": 39,
+     "mph_out": 39,
      "brake_on_m": 90,
      "throttle_on_m": null,
-     "lat_g": 1.53,
+     "lat_g": 1.98,
      "apex": [
-      -2350,
-      -7911
+      -2345,
+      -7907
      ],
-     "t0": 9045.2,
-     "stint": 15,
+     "t0": 1599.3,
+     "stint": 20,
      "first_red": "front ph1",
-     "session": "fh6_20260828_001105"
+     "session": "fh6_20260905_201758"
     },
     "3854|2|4|899": {
      "mph_in": 63,
@@ -1216,22 +1250,39 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 3,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 3,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.5,
+     "mph_min": 35,
+     "usi": 0.072,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 18,
-    "laps_seen": 12,
-    "sessions": 7,
+    "passes": 21,
+    "laps_seen": 14,
+    "sessions": 8,
     "fr": {
-     "front": 17,
+     "front": 20,
      "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 7
+     "tune": 8
     },
     "dominant": "front",
-    "consistency": 0.94,
+    "consistency": 0.95,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
@@ -1241,8 +1292,8 @@
      "3854|1|3|700",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.52
+    "laps_track": 25,
+    "presence": 0.56
    },
    "established": true,
    "deg": 22,
@@ -1251,15 +1302,15 @@
    "geo_sessions": 1,
    "geo_mapped": true,
    "traced": {
-    "n_passes": 12,
-    "n_laps_traced": 24,
-    "n_builds": 9,
+    "n_passes": 13,
+    "n_laps_traced": 25,
+    "n_builds": 10,
     "half_m": 18.0,
-    "med_samples": 6.5,
-    "med_step_m": 4.6,
-    "min_mph": 45,
-    "ratio": 0.44,
-    "a_long_min": -2.92,
+    "med_samples": 8,
+    "med_step_m": 4.0,
+    "min_mph": 44,
+    "ratio": 0.42,
+    "a_long_min": -2.97,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -1280,7 +1331,7 @@
    "sessions": 0,
    "by_session": {},
    "track": {},
-   "geo_sessions": 7,
+   "geo_sessions": 8,
    "geo_mapped": true,
    "deg": 177,
    "s": 408,
@@ -1288,15 +1339,15 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 7,
-    "n_laps_traced": 24,
-    "n_builds": 6,
+    "n_passes": 8,
+    "n_laps_traced": 25,
+    "n_builds": 7,
     "half_m": 20.0,
-    "med_samples": 8,
-    "med_step_m": 4.6,
+    "med_samples": 8.0,
+    "med_step_m": 5.1,
     "min_mph": 31,
     "ratio": 0.27,
-    "a_long_min": -0.74,
+    "a_long_min": -0.73,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -1527,23 +1578,23 @@
      "3854|1|3|700",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.43
+    "laps_track": 25,
+    "presence": 0.4
    },
    "established": false,
    "deg": 43,
    "est_by": null,
    "s": 472,
    "traced": {
-    "n_passes": 10,
-    "n_laps_traced": 24,
-    "n_builds": 9,
+    "n_passes": 11,
+    "n_laps_traced": 25,
+    "n_builds": 10,
     "half_m": 18.0,
-    "med_samples": 8.5,
-    "med_step_m": 3.9,
-    "min_mph": 80,
-    "ratio": 0.77,
-    "a_long_min": -2.3,
+    "med_samples": 9,
+    "med_step_m": 4.0,
+    "min_mph": 77,
+    "ratio": 0.76,
+    "a_long_min": -2.4,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -1553,13 +1604,13 @@
   {
    "id": "T9",
    "pos": [
-    -2369,
-    -7779
+    -2368,
+    -7778
    ],
    "dir": "L",
    "type": "hairpin",
-   "radius_m": 14,
-   "n": 171,
+   "radius_m": 19,
+   "n": 196,
    "best": {
     "mph_in": 44,
     "mph_min": 44,
@@ -1576,7 +1627,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260822_035921"
    },
-   "sessions": 10,
+   "sessions": 11,
    "best_by_car": {
     "3854|2|4|899": {
      "mph_in": 58,
@@ -1673,6 +1724,22 @@
      "stint": 94,
      "first_red": "front ph1",
      "session": "fh6_20260822_035921"
+    },
+    "3665|2|1|600": {
+     "mph_in": 70,
+     "mph_min": 38,
+     "mph_out": 49,
+     "brake_on_m": 96,
+     "throttle_on_m": 69,
+     "lat_g": 2.13,
+     "apex": [
+      -2370,
+      -7778
+     ],
+     "t0": 1606.7,
+     "stint": 20,
+     "first_red": "front ph2",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -1681,7 +1748,8 @@
     "2866|2|4|800",
     "3854|1|3|700",
     "3665|2|1|500",
-    "3650|2|6|892"
+    "3650|2|6|892",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -1857,19 +1925,36 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 38,
+     "usi": 0.765,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 19,
-    "laps_seen": 16,
-    "sessions": 10,
+    "passes": 21,
+    "laps_seen": 18,
+    "sessions": 11,
     "fr": {
-     "front": 18,
+     "front": 20,
      "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 10
+     "tune": 11
     },
     "dominant": "front",
     "consistency": 0.95,
@@ -1883,22 +1968,22 @@
      "3854|1|3|700",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.7
+    "laps_track": 25,
+    "presence": 0.72
    },
    "established": false,
    "deg": 191,
    "est_by": null,
    "traced": {
-    "n_passes": 19,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 20,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 70.0,
-    "med_samples": 17,
+    "med_samples": 17.5,
     "med_step_m": 8.0,
     "min_mph": 38,
-    "ratio": 0.34,
-    "a_long_min": -2.39,
+    "ratio": 0.35,
+    "a_long_min": -2.37,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -1919,7 +2004,7 @@
    "sessions": 0,
    "by_session": {},
    "track": {},
-   "geo_sessions": 7,
+   "geo_sessions": 8,
    "geo_mapped": true,
    "deg": 196,
    "s": 588,
@@ -1927,15 +2012,15 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 19,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 20,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 70.0,
-    "med_samples": 17,
+    "med_samples": 17.5,
     "med_step_m": 8.0,
     "min_mph": 38,
-    "ratio": 0.34,
-    "a_long_min": -2.39,
+    "ratio": 0.35,
+    "a_long_min": -2.37,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -2029,21 +2114,21 @@
      "2866|2|4|800",
      "3854|1|3|600"
     ],
-    "laps_track": 23,
-    "presence": 0.09
+    "laps_track": 25,
+    "presence": 0.08
    },
    "established": false,
    "est_by": null,
    "traced": {
-    "n_passes": 19,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 20,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 70.0,
-    "med_samples": 17,
+    "med_samples": 17.5,
     "med_step_m": 8.0,
     "min_mph": 38,
-    "ratio": 0.34,
-    "a_long_min": -2.39,
+    "ratio": 0.35,
+    "a_long_min": -2.37,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -2076,7 +2161,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260903_115454"
    },
-   "sessions": 6,
+   "sessions": 7,
    "by_session": {
     "fh6_20260903_003230": {
      "n": 2,
@@ -2179,29 +2264,47 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 2,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 1.0,
+     "mph_min": 51,
+     "usi": 0.051,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 8,
-    "laps_seen": 7,
-    "sessions": 6,
+    "passes": 10,
+    "laps_seen": 8,
+    "sessions": 7,
     "fr": {
-     "front": 6,
+     "front": 8,
      "rear": 2,
      "none": 0
     },
     "lim": {
      "driver": 2,
-     "tune": 4
+     "tune": 5
     },
     "dominant": "front",
-    "consistency": 0.75,
+    "consistency": 0.8,
     "cars": [
      "2866|2|4|700",
-     "2866|2|4|800"
+     "2866|2|4|800",
+     "3665|2|1|600"
     ],
-    "laps_track": 23,
-    "presence": 0.3
+    "laps_track": 25,
+    "presence": 0.32
    },
    "deg": 189,
    "s": 724,
@@ -2247,15 +2350,15 @@
     "2866|2|4|700"
    ],
    "traced": {
-    "n_passes": 19,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 20,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 46.0,
-    "med_samples": 12,
+    "med_samples": 12.0,
     "med_step_m": 7.5,
     "min_mph": 29,
     "ratio": 0.27,
-    "a_long_min": -1.28,
+    "a_long_min": -1.26,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -2276,7 +2379,7 @@
    "sessions": 0,
    "by_session": {},
    "track": {},
-   "geo_sessions": 3,
+   "geo_sessions": 4,
    "geo_mapped": true,
    "deg": 189,
    "s": 732,
@@ -2284,15 +2387,15 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 19,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 20,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 46.0,
-    "med_samples": 12,
+    "med_samples": 12.0,
     "med_step_m": 7.5,
     "min_mph": 29,
     "ratio": 0.27,
-    "a_long_min": -1.28,
+    "a_long_min": -1.26,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -2303,12 +2406,12 @@
    "id": "T14",
    "pos": [
     -2649,
-    -7936
+    -7958
    ],
    "dir": "R",
    "type": "medium",
-   "radius_m": 29,
-   "n": 96,
+   "radius_m": 22,
+   "n": 101,
    "best": {
     "mph_in": 87,
     "mph_min": 48,
@@ -2325,7 +2428,7 @@
     "first_red": "front ph2",
     "session": "fh6_20260903_133758"
    },
-   "sessions": 6,
+   "sessions": 7,
    "best_by_car": {
     "3854|1|2|800": {
      "mph_in": 34,
@@ -2406,6 +2509,22 @@
      "stint": 5,
      "first_red": "front ph2",
      "session": "fh6_20260903_133758"
+    },
+    "3665|2|1|600": {
+     "mph_in": 73,
+     "mph_min": 45,
+     "mph_out": 73,
+     "brake_on_m": 102,
+     "throttle_on_m": 9,
+     "lat_g": 2.09,
+     "apex": [
+      -2649,
+      -7958
+     ],
+     "t0": 2722.6,
+     "stint": 26,
+     "first_red": "front ph1",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -2413,7 +2532,8 @@
     "2866|2|4|800",
     "3854|2|4|899",
     "3665|2|1|500",
-    "2866|2|4|700"
+    "2866|2|4|700",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -2519,46 +2639,64 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 45,
+     "usi": 0.636,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 10,
-    "laps_seen": 9,
-    "sessions": 6,
+    "passes": 11,
+    "laps_seen": 10,
+    "sessions": 7,
     "fr": {
-     "front": 9,
+     "front": 10,
      "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 6
+     "tune": 7
     },
     "dominant": "front",
-    "consistency": 0.9,
+    "consistency": 0.91,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
      "3665|2|1|500",
+     "3665|2|1|600",
      "3854|1|2|800",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.39
+    "laps_track": 25,
+    "presence": 0.4
    },
    "established": false,
    "deg": 166,
    "est_by": null,
    "s": 766,
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
-    "half_m": 52.0,
-    "med_samples": 13.0,
-    "med_step_m": 7.9,
-    "min_mph": 31,
-    "ratio": 0.28,
-    "a_long_min": -1.37,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
+    "half_m": 62.0,
+    "med_samples": 15,
+    "med_step_m": 8.0,
+    "min_mph": 44,
+    "ratio": 0.41,
+    "a_long_min": -1.13,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -2568,13 +2706,13 @@
   {
    "id": "T15",
    "pos": [
-    -2446,
-    -7766
+    -2450,
+    -7764
    ],
    "dir": "L",
-   "type": "medium",
-   "radius_m": 21,
-   "n": 222,
+   "type": "hairpin",
+   "radius_m": 30,
+   "n": 245,
    "best": {
     "mph_in": 69,
     "mph_min": 51,
@@ -2591,7 +2729,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260903_115454"
    },
-   "sessions": 12,
+   "sessions": 13,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 75,
@@ -2688,6 +2826,22 @@
      "stint": 94,
      "first_red": "front ph1",
      "session": "fh6_20260822_035921"
+    },
+    "3665|2|1|600": {
+     "mph_in": 74,
+     "mph_min": 38,
+     "mph_out": 73,
+     "brake_on_m": 64,
+     "throttle_on_m": 65,
+     "lat_g": 2.18,
+     "apex": [
+      -2444,
+      -7767
+     ],
+     "t0": 2692.7,
+     "stint": 26,
+     "first_red": "front ph1",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -2696,7 +2850,8 @@
     "2866|2|4|800",
     "3665|2|1|500",
     "2866|2|4|700",
-    "3650|2|6|892"
+    "3650|2|6|892",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -2905,19 +3060,36 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 38,
+     "usi": 0.329,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 23,
-    "laps_seen": 18,
-    "sessions": 12,
+    "passes": 25,
+    "laps_seen": 20,
+    "sessions": 13,
     "fr": {
-     "front": 22,
+     "front": 24,
      "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 12
+     "tune": 13
     },
     "dominant": "front",
     "consistency": 0.96,
@@ -2930,23 +3102,23 @@
      "3854|1|2|800",
      "3854|1|3|700"
     ],
-    "laps_track": 23,
-    "presence": 0.78
+    "laps_track": 25,
+    "presence": 0.8
    },
    "established": false,
-   "deg": 42,
+   "deg": 186,
    "est_by": null,
-   "s": 824,
+   "s": 876,
    "traced": {
-    "n_passes": 20,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 21,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 72.0,
-    "med_samples": 18.0,
+    "med_samples": 18,
     "med_step_m": 7.8,
     "min_mph": 41,
-    "ratio": 0.37,
-    "a_long_min": -2.07,
+    "ratio": 0.38,
+    "a_long_min": -2.04,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -2967,7 +3139,7 @@
    "sessions": 0,
    "by_session": {},
    "track": {},
-   "geo_sessions": 2,
+   "geo_sessions": 3,
    "geo_mapped": true,
    "deg": 186,
    "s": 876,
@@ -2975,15 +3147,15 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 20,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 21,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 72.0,
-    "med_samples": 18.0,
+    "med_samples": 18,
     "med_step_m": 7.8,
     "min_mph": 41,
-    "ratio": 0.37,
-    "a_long_min": -2.07,
+    "ratio": 0.38,
+    "a_long_min": -2.04,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -3127,8 +3299,8 @@
      "2866|2|4|800",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.13
+    "laps_track": 25,
+    "presence": 0.12
    },
    "established": false,
    "est_by": null
@@ -3136,13 +3308,13 @@
   {
    "id": "T18",
    "pos": [
-    -2493,
+    -2494,
     -7900
    ],
    "dir": "R",
    "type": "hairpin",
-   "radius_m": 24,
-   "n": 194,
+   "radius_m": 18,
+   "n": 217,
    "best": {
     "mph_in": 51,
     "mph_min": 43,
@@ -3159,7 +3331,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260828_081447"
    },
-   "sessions": 7,
+   "sessions": 8,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 70,
@@ -3288,6 +3460,22 @@
      "stint": 94,
      "first_red": "front ph1",
      "session": "fh6_20260822_035921"
+    },
+    "3665|2|1|600": {
+     "mph_in": 65,
+     "mph_min": 42,
+     "mph_out": 51,
+     "brake_on_m": 91,
+     "throttle_on_m": 109,
+     "lat_g": 2.71,
+     "apex": [
+      -2495,
+      -7899
+     ],
+     "t0": 1627.0,
+     "stint": 20,
+     "first_red": "front ph1",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -3298,7 +3486,8 @@
     "2866|2|4|800",
     "3665|2|1|500",
     "2866|2|4|700",
-    "3650|2|6|892"
+    "3650|2|6|892",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -3423,22 +3612,39 @@
      "cars": [
       "2866|2|4|700"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 42,
+     "usi": 0.594,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 14,
-    "laps_seen": 11,
-    "sessions": 7,
+    "passes": 16,
+    "laps_seen": 13,
+    "sessions": 8,
     "fr": {
-     "front": 13,
+     "front": 15,
      "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 7
+     "tune": 8
     },
     "dominant": "front",
-    "consistency": 0.93,
+    "consistency": 0.94,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
@@ -3450,23 +3656,23 @@
      "3854|1|3|700",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.48
+    "laps_track": 25,
+    "presence": 0.52
    },
    "established": false,
    "deg": 55,
    "est_by": null,
    "s": 988,
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 48.0,
-    "med_samples": 12.0,
+    "med_samples": 12,
     "med_step_m": 8.1,
     "min_mph": 39,
     "ratio": 0.39,
-    "a_long_min": -0.56,
+    "a_long_min": -0.59,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -3553,8 +3759,8 @@
     "cars": [
      "2866|2|4|800"
     ],
-    "laps_track": 23,
-    "presence": 0.09
+    "laps_track": 25,
+    "presence": 0.08
    },
    "deg": 196,
    "s": 1064,
@@ -3582,18 +3788,18 @@
    "cars": [
     "2866|2|4|800"
    ],
-   "geo_sessions": 2,
+   "geo_sessions": 3,
    "geo_mapped": true,
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 48.0,
-    "med_samples": 12.0,
+    "med_samples": 12,
     "med_step_m": 8.1,
     "min_mph": 39,
     "ratio": 0.39,
-    "a_long_min": -0.56,
+    "a_long_min": -0.59,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -3626,7 +3832,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260828_081447"
    },
-   "sessions": 7,
+   "sessions": 8,
    "best_by_car": {
     "3854|1|2|800": {
      "mph_in": 40,
@@ -3874,22 +4080,39 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 36,
+     "usi": -0.225,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 14,
-    "laps_seen": 12,
-    "sessions": 7,
+    "passes": 15,
+    "laps_seen": 13,
+    "sessions": 8,
     "fr": {
-     "front": 12,
+     "front": 13,
      "rear": 2,
      "none": 0
     },
     "lim": {
-     "tune": 7
+     "tune": 8
     },
     "dominant": "front",
-    "consistency": 0.86,
+    "consistency": 0.87,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
@@ -3900,7 +4123,7 @@
      "3854|1|3|600",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.52
    },
    "established": false,
@@ -3908,15 +4131,15 @@
    "est_by": null,
    "s": 1104,
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 48.0,
-    "med_samples": 13.5,
-    "med_step_m": 7.2,
+    "med_samples": 14,
+    "med_step_m": 7.1,
     "min_mph": 36,
     "ratio": 0.33,
-    "a_long_min": -1.73,
+    "a_long_min": -1.74,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -3937,7 +4160,7 @@
    "sessions": 0,
    "by_session": {},
    "track": {},
-   "geo_sessions": 8,
+   "geo_sessions": 9,
    "geo_mapped": true,
    "deg": 176,
    "s": 1160,
@@ -3945,15 +4168,15 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 48.0,
-    "med_samples": 13.5,
-    "med_step_m": 7.2,
+    "med_samples": 14,
+    "med_step_m": 7.1,
     "min_mph": 36,
     "ratio": 0.33,
-    "a_long_min": -1.73,
+    "a_long_min": -1.74,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -3964,12 +4187,12 @@
    "id": "T22",
    "pos": [
     -2592,
-    -7910
+    -7911
    ],
    "dir": "R",
    "type": "hairpin",
-   "radius_m": 20,
-   "n": 169,
+   "radius_m": 19,
+   "n": 192,
    "best": {
     "mph_in": 71,
     "mph_min": 46,
@@ -3986,7 +4209,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260822_035921"
    },
-   "sessions": 7,
+   "sessions": 8,
    "best_by_car": {
     "3854|1|2|800": {
      "mph_in": 48,
@@ -4083,6 +4306,22 @@
      "stint": 94,
      "first_red": "front ph1",
      "session": "fh6_20260822_035921"
+    },
+    "3665|2|1|600": {
+     "mph_in": 61,
+     "mph_min": 34,
+     "mph_out": 54,
+     "brake_on_m": 74,
+     "throttle_on_m": 66,
+     "lat_g": 2.12,
+     "apex": [
+      -2591,
+      -7912
+     ],
+     "t0": 2710.3,
+     "stint": 26,
+     "first_red": "front ph1",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -4091,7 +4330,8 @@
     "2866|2|4|800",
     "3665|2|1|500",
     "2866|2|4|700",
-    "3650|2|6|892"
+    "3650|2|6|892",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -4215,22 +4455,39 @@
      "cars": [
       "2866|2|4|700"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 2,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 2,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 34,
+     "usi": 0.659,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 15,
-    "laps_seen": 12,
-    "sessions": 7,
+    "passes": 17,
+    "laps_seen": 14,
+    "sessions": 8,
     "fr": {
-     "front": 14,
+     "front": 16,
      "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 7
+     "tune": 8
     },
     "dominant": "front",
-    "consistency": 0.93,
+    "consistency": 0.94,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
@@ -4240,22 +4497,22 @@
      "3854|1|2|800",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.52
+    "laps_track": 25,
+    "presence": 0.56
    },
    "established": false,
    "deg": 149,
    "est_by": null,
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 52.0,
-    "med_samples": 13.0,
+    "med_samples": 13,
     "med_step_m": 7.9,
-    "min_mph": 31,
+    "min_mph": 32,
     "ratio": 0.28,
-    "a_long_min": -1.37,
+    "a_long_min": -1.32,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -4288,7 +4545,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.0
    },
    "deg": 124,
@@ -4297,15 +4554,15 @@
    "est_by": null,
    "status": "possible",
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 52.0,
-    "med_samples": 13.0,
+    "med_samples": 13,
     "med_step_m": 7.9,
-    "min_mph": 31,
+    "min_mph": 32,
     "ratio": 0.28,
-    "a_long_min": -1.37,
+    "a_long_min": -1.32,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -4326,7 +4583,7 @@
    "sessions": 0,
    "by_session": {},
    "track": {},
-   "geo_sessions": 2,
+   "geo_sessions": 3,
    "geo_mapped": true,
    "deg": 157,
    "s": 1288,
@@ -4334,15 +4591,15 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 52.0,
-    "med_samples": 13.0,
+    "med_samples": 13,
     "med_step_m": 7.9,
-    "min_mph": 31,
+    "min_mph": 32,
     "ratio": 0.28,
-    "a_long_min": -1.37,
+    "a_long_min": -1.32,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -4352,13 +4609,13 @@
   {
    "id": "T25",
    "pos": [
-    -2650,
-    -7822
+    -2655,
+    -7831
    ],
    "dir": "L",
    "type": "hairpin",
-   "radius_m": 31,
-   "n": 271,
+   "radius_m": 29,
+   "n": 311,
    "best": {
     "mph_in": 72,
     "mph_min": 54,
@@ -4375,7 +4632,7 @@
     "first_red": "front ph2",
     "session": "fh6_20260903_115454"
    },
-   "sessions": 8,
+   "sessions": 11,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 68,
@@ -4490,20 +4747,20 @@
      "session": "fh6_20260903_115454"
     },
     "3665|2|1|600": {
-     "mph_in": 51,
-     "mph_min": 37,
-     "mph_out": 46,
-     "brake_on_m": 57,
-     "throttle_on_m": 49,
-     "lat_g": 1.82,
+     "mph_in": 42,
+     "mph_min": 42,
+     "mph_out": 60,
+     "brake_on_m": null,
+     "throttle_on_m": -25,
+     "lat_g": 1.72,
      "apex": [
-      -2658,
-      -7816
+      -2679,
+      -7838
      ],
-     "t0": 9247.7,
-     "stint": 91,
-     "first_red": "rear ph2",
-     "session": "fh6_20260822_035921"
+     "t0": 1647.2,
+     "stint": 20,
+     "first_red": "rear ph1",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -4656,84 +4913,24 @@
       "2866|2|4|800",
       "3665|2|1|600"
      ]
-    }
-   },
-   "track": {
-    "passes": 17,
-    "laps_seen": 14,
-    "sessions": 8,
-    "fr": {
-     "front": 13,
-     "rear": 4,
-     "none": 0
     },
-    "lim": {
-     "tune": 6,
-     "driver": 2
+    "fh6_20260905_201758": {
+     "n": 3,
+     "laps_seen": 2,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 2,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.5,
+     "mph_min": 37,
+     "usi": 0.229,
+     "cars": [
+      "3665|2|1|600"
+     ]
     },
-    "dominant": "front",
-    "consistency": 0.76,
-    "cars": [
-     "2866|2|4|700",
-     "2866|2|4|800",
-     "3665|2|1|500",
-     "3665|2|1|600",
-     "3854|1|2|800",
-     "3854|1|3|600",
-     "3854|1|3|700",
-     "3854|2|4|899"
-    ],
-    "laps_track": 23,
-    "presence": 0.61
-   },
-   "established": false,
-   "deg": 55,
-   "est_by": null,
-   "s": 1364,
-   "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
-    "half_m": 70.0,
-    "med_samples": 17.0,
-    "med_step_m": 8.0,
-    "min_mph": 35,
-    "ratio": 0.32,
-    "a_long_min": -1.98,
-    "n_flat": 0,
-    "agreement": 0.0,
-    "reading": null,
-    "verdict": "measured"
-   }
-  },
-  {
-   "id": "T26",
-   "pos": [
-    -2683,
-    -7837
-   ],
-   "dir": "L",
-   "type": "hairpin",
-   "radius_m": 20,
-   "n": 2,
-   "best": {
-    "mph_in": 71,
-    "mph_min": 38,
-    "mph_out": 70,
-    "brake_on_m": 179,
-    "throttle_on_m": -72,
-    "lat_g": 2.24,
-    "apex": [
-     -2683,
-     -7837
-    ],
-    "t0": 6042.3,
-    "stint": 13,
-    "first_red": "front ph1",
-    "session": "fh6_20260822_212747"
-   },
-   "sessions": 2,
-   "by_session": {
     "fh6_20260822_114844": {
      "n": 1,
      "laps_seen": 1,
@@ -4770,63 +4967,84 @@
     }
    },
    "track": {
-    "passes": 2,
-    "laps_seen": 2,
-    "sessions": 2,
+    "passes": 22,
+    "laps_seen": 18,
+    "sessions": 11,
     "fr": {
-     "front": 2,
-     "rear": 0,
+     "front": 16,
+     "rear": 6,
      "none": 0
     },
     "lim": {
-     "tune": 2
+     "tune": 9,
+     "driver": 2
     },
     "dominant": "front",
-    "consistency": 1.0,
+    "consistency": 0.73,
     "cars": [
-     "2866|2|4|800"
+     "2866|2|4|700",
+     "2866|2|4|800",
+     "3665|2|1|500",
+     "3665|2|1|600",
+     "3854|1|2|800",
+     "3854|1|3|600",
+     "3854|1|3|700",
+     "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.09
+    "laps_track": 25,
+    "presence": 0.72
    },
+   "established": false,
+   "deg": 55,
+   "est_by": null,
+   "s": 1364,
+   "traced": {
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
+    "half_m": 70.0,
+    "med_samples": 17,
+    "med_step_m": 8.0,
+    "min_mph": 36,
+    "ratio": 0.32,
+    "a_long_min": -2.01,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T26",
+   "pos": [
+    -2685,
+    -7824
+   ],
+   "dir": "L",
+   "type": null,
+   "radius_m": 18,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 7,
+   "geo_mapped": true,
    "deg": 191,
    "s": 1428,
    "established": true,
    "est_by": "geometry",
    "status": "turn",
-   "best_by_car": {
-    "2866|2|4|800": {
-     "mph_in": 71,
-     "mph_min": 38,
-     "mph_out": 70,
-     "brake_on_m": 179,
-     "throttle_on_m": -72,
-     "lat_g": 2.24,
-     "apex": [
-      -2683,
-      -7837
-     ],
-     "t0": 6042.3,
-     "stint": 13,
-     "first_red": "front ph1",
-     "session": "fh6_20260822_212747"
-    }
-   },
-   "cars": [
-    "2866|2|4|800"
-   ],
-   "geo_sessions": 6,
-   "geo_mapped": true,
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 70.0,
-    "med_samples": 17.0,
+    "med_samples": 17,
     "med_step_m": 8.0,
-    "min_mph": 35,
+    "min_mph": 36,
     "ratio": 0.32,
-    "a_long_min": -1.98,
+    "a_long_min": -2.01,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -4835,6 +5053,97 @@
   },
   {
    "id": "T27",
+   "pos": [
+    -2672,
+    -7880
+   ],
+   "dir": "L",
+   "type": "medium",
+   "radius_m": 108,
+   "n": 17,
+   "best": {
+    "mph_in": 62,
+    "mph_min": 62,
+    "mph_out": 77,
+    "brake_on_m": null,
+    "throttle_on_m": -48,
+    "lat_g": 0.97,
+    "apex": [
+     -2672,
+     -7880
+    ],
+    "t0": 1648.5,
+    "stint": 20,
+    "first_red": "front ph1",
+    "session": "fh6_20260905_201758"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "3665|2|1|600": {
+     "mph_in": 62,
+     "mph_min": 62,
+     "mph_out": 77,
+     "brake_on_m": null,
+     "throttle_on_m": -48,
+     "lat_g": 0.97,
+     "apex": [
+      -2672,
+      -7880
+     ],
+     "t0": 1648.5,
+     "stint": 20,
+     "first_red": "front ph1",
+     "session": "fh6_20260905_201758"
+    }
+   },
+   "cars": [
+    "3665|2|1|600"
+   ],
+   "status": "possible",
+   "by_session": {
+    "fh6_20260905_201758": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 62,
+     "usi": 0.014,
+     "cars": [
+      "3665|2|1|600"
+     ]
+    }
+   },
+   "track": {
+    "passes": 1,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 1,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "3665|2|1|600"
+    ],
+    "laps_track": 25,
+    "presence": 0.04
+   },
+   "established": false,
+   "est_by": null
+  },
+  {
+   "id": "T28",
    "pos": [
     -2690,
     -7966
@@ -4859,7 +5168,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.0
    },
    "deg": 176,
@@ -4867,18 +5176,18 @@
    "established": true,
    "est_by": "geometry",
    "status": "turn",
-   "geo_sessions": 2,
+   "geo_sessions": 3,
    "geo_mapped": true,
    "traced": {
-    "n_passes": 18,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 19,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 62.0,
-    "med_samples": 15.0,
+    "med_samples": 15,
     "med_step_m": 8.0,
-    "min_mph": 43,
+    "min_mph": 44,
     "ratio": 0.41,
-    "a_long_min": -1.1,
+    "a_long_min": -1.13,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -4886,7 +5195,7 @@
    }
   },
   {
-   "id": "T28",
+   "id": "T29",
    "pos": [
     -2724,
     -7895
@@ -4911,7 +5220,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.0
    },
    "deg": 19,
@@ -4921,7 +5230,7 @@
    "status": "possible"
   },
   {
-   "id": "T29",
+   "id": "T30",
    "pos": [
     -2728,
     -7906
@@ -5005,14 +5314,14 @@
     "cars": [
      "2866|2|4|800"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.04
    },
    "established": false,
    "est_by": null
   },
   {
-   "id": "T30",
+   "id": "T31",
    "pos": [
     -2749,
     -7854
@@ -5037,7 +5346,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.0
    },
    "deg": 25,
@@ -5047,32 +5356,32 @@
    "status": "possible"
   },
   {
-   "id": "T31",
+   "id": "T32",
    "pos": [
-    -2780,
-    -7834
+    -2790,
+    -7828
    ],
    "dir": "L",
    "type": "medium",
-   "radius_m": 52,
-   "n": 82,
+   "radius_m": 38,
+   "n": 99,
    "best": {
-    "mph_in": 87,
-    "mph_min": 53,
-    "mph_out": 60,
-    "brake_on_m": 79,
-    "throttle_on_m": 60,
-    "lat_g": 2.91,
+    "mph_in": 89,
+    "mph_min": 67,
+    "mph_out": 67,
+    "brake_on_m": 165,
+    "throttle_on_m": null,
+    "lat_g": 2.74,
     "apex": [
-     -2776,
+     -2790,
      -7828
     ],
-    "t0": 7312.7,
-    "stint": 44,
+    "t0": 1657.4,
+    "stint": 20,
     "first_red": "front ph2",
-    "session": "fh6_20260828_081447"
+    "session": "fh6_20260905_201758"
    },
-   "sessions": 5,
+   "sessions": 6,
    "best_by_car": {
     "3854|1|2|800": {
      "mph_in": 60,
@@ -5137,12 +5446,29 @@
      "stint": 61,
      "first_red": "front ph2",
      "session": "fh6_20260901_042403"
+    },
+    "3665|2|1|600": {
+     "mph_in": 89,
+     "mph_min": 67,
+     "mph_out": 67,
+     "brake_on_m": 165,
+     "throttle_on_m": null,
+     "lat_g": 2.74,
+     "apex": [
+      -2790,
+      -7828
+     ],
+     "t0": 1657.4,
+     "stint": 20,
+     "first_red": "front ph2",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
     "3854|1|2|800",
     "2866|2|4|800",
-    "3854|2|4|899"
+    "3854|2|4|899",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -5232,23 +5558,40 @@
      "cars": [
       "3665|2|1|600"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 67,
+     "usi": 0.679,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 9,
-    "laps_seen": 8,
-    "sessions": 5,
+    "passes": 10,
+    "laps_seen": 9,
+    "sessions": 6,
     "fr": {
-     "front": 8,
+     "front": 9,
      "rear": 1,
      "none": 0
     },
     "lim": {
      "driver": 1,
-     "tune": 4
+     "tune": 5
     },
     "dominant": "front",
-    "consistency": 0.89,
+    "consistency": 0.9,
     "cars": [
      "2866|2|4|800",
      "3665|2|1|500",
@@ -5257,15 +5600,15 @@
      "3854|1|3|600",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.35
+    "laps_track": 25,
+    "presence": 0.36
    },
    "established": false,
    "deg": 195,
    "est_by": null
   },
   {
-   "id": "T32",
+   "id": "T33",
    "pos": [
     -2841,
     -7868
@@ -5437,21 +5780,21 @@
      "3854|1|3|600",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.26
+    "laps_track": 25,
+    "presence": 0.24
    },
    "established": false,
    "est_by": null,
    "traced": {
-    "n_passes": 19,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 20,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 84.0,
-    "med_samples": 21,
+    "med_samples": 21.0,
     "med_step_m": 7.9,
-    "min_mph": 56,
+    "min_mph": 57,
     "ratio": 0.57,
-    "a_long_min": -0.91,
+    "a_long_min": -0.99,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -5459,7 +5802,7 @@
    }
   },
   {
-   "id": "T33",
+   "id": "T34",
    "pos": [
     -2841,
     -7897
@@ -5480,15 +5823,15 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 19,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 20,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 84.0,
-    "med_samples": 21,
+    "med_samples": 21.0,
     "med_step_m": 7.9,
-    "min_mph": 56,
+    "min_mph": 57,
     "ratio": 0.57,
-    "a_long_min": -0.91,
+    "a_long_min": -0.99,
     "n_flat": 0,
     "agreement": 0.0,
     "reading": null,
@@ -5496,7 +5839,7 @@
    }
   },
   {
-   "id": "T34",
+   "id": "T35",
    "pos": [
     -2793,
     -7953
@@ -5558,7 +5901,7 @@
     "cars": [
      "2866|2|4|700"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.04
    },
    "deg": 19,
@@ -5588,15 +5931,15 @@
    ]
   },
   {
-   "id": "T35",
+   "id": "T36",
    "pos": [
     -2765,
-    -8011
+    -8021
    ],
    "dir": "R",
    "type": "hairpin",
-   "radius_m": 18,
-   "n": 137,
+   "radius_m": 17,
+   "n": 142,
    "best": {
     "mph_in": 79,
     "mph_min": 46,
@@ -5613,7 +5956,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260828_081447"
    },
-   "sessions": 10,
+   "sessions": 11,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 59,
@@ -5710,6 +6053,22 @@
      "stint": 94,
      "first_red": "front ph1",
      "session": "fh6_20260822_035921"
+    },
+    "3665|2|1|600": {
+     "mph_in": 71,
+     "mph_min": 41,
+     "mph_out": 53,
+     "brake_on_m": 134,
+     "throttle_on_m": 62,
+     "lat_g": 2.13,
+     "apex": [
+      -2765,
+      -8021
+     ],
+     "t0": 2738.4,
+     "stint": 26,
+     "first_red": "front ph1",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -5718,7 +6077,8 @@
     "2866|2|4|800",
     "3665|2|1|500",
     "2866|2|4|700",
-    "3650|2|6|892"
+    "3650|2|6|892",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -5891,19 +6251,36 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 41,
+     "usi": 0.511,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 12,
-    "laps_seen": 11,
-    "sessions": 10,
+    "passes": 13,
+    "laps_seen": 12,
+    "sessions": 11,
     "fr": {
-     "front": 12,
+     "front": 13,
      "rear": 0,
      "none": 0
     },
     "lim": {
-     "tune": 10
+     "tune": 11
     },
     "dominant": "front",
     "consistency": 1.0,
@@ -5912,23 +6289,24 @@
      "2866|2|4|800",
      "3650|2|6|892",
      "3665|2|1|500",
+     "3665|2|1|600",
      "3854|1|2|800",
      "3854|1|3|700"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.48
    },
    "established": false,
    "deg": 88,
    "est_by": null,
    "traced": {
-    "n_passes": 21,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 22,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 84.0,
-    "med_samples": 22,
+    "med_samples": 22.0,
     "med_step_m": 7.7,
-    "min_mph": 38,
+    "min_mph": 39,
     "ratio": 0.36,
     "a_long_min": -2.42,
     "n_flat": 0,
@@ -5938,7 +6316,7 @@
    }
   },
   {
-   "id": "T36",
+   "id": "T37",
    "pos": [
     -2784,
     -8025
@@ -5951,7 +6329,7 @@
    "sessions": 0,
    "by_session": {},
    "track": {},
-   "geo_sessions": 3,
+   "geo_sessions": 4,
    "geo_mapped": true,
    "deg": 201,
    "s": 2068,
@@ -5959,13 +6337,13 @@
    "est_by": "geometry",
    "status": "turn",
    "traced": {
-    "n_passes": 21,
-    "n_laps_traced": 24,
-    "n_builds": 13,
+    "n_passes": 22,
+    "n_laps_traced": 25,
+    "n_builds": 14,
     "half_m": 84.0,
-    "med_samples": 22,
+    "med_samples": 22.0,
     "med_step_m": 7.7,
-    "min_mph": 38,
+    "min_mph": 39,
     "ratio": 0.36,
     "a_long_min": -2.42,
     "n_flat": 0,
@@ -5975,7 +6353,7 @@
    }
   },
   {
-   "id": "T37",
+   "id": "T38",
    "pos": [
     -2818,
     -7989
@@ -6037,7 +6415,7 @@
     "cars": [
      "2866|2|4|700"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.04
    },
    "deg": 24,
@@ -6083,7 +6461,7 @@
    ],
    "traced": {
     "n_passes": 1,
-    "n_laps_traced": 24,
+    "n_laps_traced": 25,
     "n_builds": 1,
     "half_m": 50.0,
     "med_samples": 13,
@@ -6098,7 +6476,7 @@
    }
   },
   {
-   "id": "T38",
+   "id": "T39",
    "pos": [
     -2807,
     -8009
@@ -6123,7 +6501,7 @@
     "dominant": null,
     "consistency": null,
     "cars": [],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.0
    },
    "deg": 365,
@@ -6135,7 +6513,7 @@
    "geo_mapped": true,
    "traced": {
     "n_passes": 1,
-    "n_laps_traced": 24,
+    "n_laps_traced": 25,
     "n_builds": 1,
     "half_m": 50.0,
     "med_samples": 13,
@@ -6150,15 +6528,15 @@
    }
   },
   {
-   "id": "T39",
+   "id": "T40",
    "pos": [
-    -2809,
-    -8076
+    -2810,
+    -8077
    ],
    "dir": "R",
    "type": "medium",
-   "radius_m": 54,
-   "n": 165,
+   "radius_m": 47,
+   "n": 169,
    "best": {
     "mph_in": 74,
     "mph_min": 74,
@@ -6175,7 +6553,7 @@
     "first_red": "front ph2",
     "session": "fh6_20260903_133758"
    },
-   "sessions": 4,
+   "sessions": 5,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 71,
@@ -6240,13 +6618,30 @@
      "stint": 5,
      "first_red": "front ph2",
      "session": "fh6_20260903_133758"
+    },
+    "3665|2|1|600": {
+     "mph_in": 77,
+     "mph_min": 70,
+     "mph_out": 82,
+     "brake_on_m": 113,
+     "throttle_on_m": 69,
+     "lat_g": 2.27,
+     "apex": [
+      -2810,
+      -8077
+     ],
+     "t0": 2750.2,
+     "stint": 26,
+     "first_red": "rear ph2",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
     "3854|1|3|700",
     "3854|1|3|600",
     "2866|2|4|800",
-    "2866|2|4|700"
+    "2866|2|4|700",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -6318,30 +6713,48 @@
      "cars": [
       "2866|2|4|700"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 0,
+      "rear": 1,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 70,
+     "usi": 0.55,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 5,
-    "laps_seen": 5,
-    "sessions": 4,
+    "passes": 6,
+    "laps_seen": 6,
+    "sessions": 5,
     "fr": {
      "front": 5,
-     "rear": 0,
+     "rear": 1,
      "none": 0
     },
     "lim": {
-     "tune": 4
+     "tune": 5
     },
     "dominant": "front",
-    "consistency": 1.0,
+    "consistency": 0.83,
     "cars": [
      "2866|2|4|700",
      "2866|2|4|800",
+     "3665|2|1|600",
      "3854|1|3|600",
      "3854|1|3|700"
     ],
-    "laps_track": 23,
-    "presence": 0.22
+    "laps_track": 25,
+    "presence": 0.24
    },
    "established": false,
    "deg": 129,
@@ -6349,7 +6762,7 @@
    "s": 2324
   },
   {
-   "id": "T40",
+   "id": "T41",
    "pos": [
     -2886,
     -8135
@@ -6411,7 +6824,7 @@
     "cars": [
      "2866|2|4|800"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.04
    },
    "deg": 39,
@@ -6442,15 +6855,15 @@
    ]
   },
   {
-   "id": "T41",
+   "id": "T42",
    "pos": [
-    -2849,
-    -7948
+    -2848,
+    -7947
    ],
    "dir": "L",
    "type": "hairpin",
-   "radius_m": 12,
-   "n": 322,
+   "radius_m": 13,
+   "n": 327,
    "best": {
     "mph_in": 73,
     "mph_min": 38,
@@ -6467,7 +6880,7 @@
     "first_red": "front ph2",
     "session": "fh6_20260828_081447"
    },
-   "sessions": 9,
+   "sessions": 10,
    "best_by_car": {
     "3854|1|3|700": {
      "mph_in": 49,
@@ -6580,6 +6993,22 @@
      "stint": 94,
      "first_red": "front ph1",
      "session": "fh6_20260822_035921"
+    },
+    "3665|2|1|600": {
+     "mph_in": 50,
+     "mph_min": 32,
+     "mph_out": 47,
+     "brake_on_m": 80,
+     "throttle_on_m": 17,
+     "lat_g": 2.01,
+     "apex": [
+      -2848,
+      -7947
+     ],
+     "t0": 2745.0,
+     "stint": 26,
+     "first_red": "front ph1",
+     "session": "fh6_20260905_201758"
     }
    },
    "cars": [
@@ -6589,7 +7018,8 @@
     "3854|2|4|899",
     "3665|2|1|500",
     "2866|2|4|700",
-    "3650|2|6|892"
+    "3650|2|6|892",
+    "3665|2|1|600"
    ],
    "status": "possible",
    "by_session": {
@@ -6748,19 +7178,36 @@
      "cars": [
       "2866|2|4|800"
      ]
+    },
+    "fh6_20260905_201758": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 2,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 32,
+     "usi": 0.83,
+     "cars": [
+      "3665|2|1|600"
+     ]
     }
    },
    "track": {
-    "passes": 18,
-    "laps_seen": 16,
-    "sessions": 9,
+    "passes": 19,
+    "laps_seen": 17,
+    "sessions": 10,
     "fr": {
-     "front": 18,
+     "front": 19,
      "rear": 0,
      "none": 0
     },
     "lim": {
-     "tune": 9
+     "tune": 10
     },
     "dominant": "front",
     "consistency": 1.0,
@@ -6774,8 +7221,8 @@
      "3854|1|3|700",
      "3854|2|4|899"
     ],
-    "laps_track": 23,
-    "presence": 0.7
+    "laps_track": 25,
+    "presence": 0.68
    },
    "established": false,
    "deg": 187,
@@ -6783,44 +7230,7 @@
    "s": 2392,
    "traced": {
     "n_passes": 1,
-    "n_laps_traced": 24,
-    "n_builds": 1,
-    "half_m": 50.0,
-    "med_samples": 13,
-    "med_step_m": 8.1,
-    "min_mph": 28,
-    "ratio": 0.27,
-    "a_long_min": -1.15,
-    "n_flat": 0,
-    "agreement": 0.0,
-    "reading": null,
-    "verdict": "measured"
-   }
-  },
-  {
-   "id": "T42",
-   "pos": [
-    -2864,
-    -7962
-   ],
-   "dir": "L",
-   "type": null,
-   "radius_m": 15,
-   "n": 0,
-   "best": null,
-   "sessions": 0,
-   "by_session": {},
-   "track": {},
-   "geo_sessions": 6,
-   "geo_mapped": true,
-   "deg": 187,
-   "s": 2392,
-   "established": true,
-   "est_by": "geometry",
-   "status": "turn",
-   "traced": {
-    "n_passes": 1,
-    "n_laps_traced": 24,
+    "n_laps_traced": 25,
     "n_builds": 1,
     "half_m": 50.0,
     "med_samples": 13,
@@ -6836,6 +7246,43 @@
   },
   {
    "id": "T43",
+   "pos": [
+    -2864,
+    -7962
+   ],
+   "dir": "L",
+   "type": null,
+   "radius_m": 15,
+   "n": 0,
+   "best": null,
+   "sessions": 0,
+   "by_session": {},
+   "track": {},
+   "geo_sessions": 7,
+   "geo_mapped": true,
+   "deg": 187,
+   "s": 2392,
+   "established": true,
+   "est_by": "geometry",
+   "status": "turn",
+   "traced": {
+    "n_passes": 1,
+    "n_laps_traced": 25,
+    "n_builds": 1,
+    "half_m": 50.0,
+    "med_samples": 13,
+    "med_step_m": 8.1,
+    "min_mph": 28,
+    "ratio": 0.27,
+    "a_long_min": -1.15,
+    "n_flat": 0,
+    "agreement": 0.0,
+    "reading": null,
+    "verdict": "measured"
+   }
+  },
+  {
+   "id": "T44",
    "pos": [
     -2825,
     -8036
@@ -6919,14 +7366,14 @@
     "cars": [
      "3854|1|3|600"
     ],
-    "laps_track": 23,
+    "laps_track": 25,
     "presence": 0.04
    },
    "established": false,
    "est_by": null,
    "traced": {
     "n_passes": 1,
-    "n_laps_traced": 24,
+    "n_laps_traced": 25,
     "n_builds": 1,
     "half_m": 50.0,
     "med_samples": 13,
@@ -6941,7 +7388,7 @@
    }
   },
   {
-   "id": "T44",
+   "id": "T45",
    "pos": [
     -2832,
     -8116
@@ -7042,8 +7489,8 @@
      "3665|2|1|500",
      "3665|2|1|600"
     ],
-    "laps_track": 23,
-    "presence": 0.22
+    "laps_track": 25,
+    "presence": 0.2
    },
    "deg": 125,
    "established": true,
@@ -7125,7 +7572,7 @@
    "geo_mapped": true,
    "traced": {
     "n_passes": 1,
-    "n_laps_traced": 24,
+    "n_laps_traced": 25,
     "n_builds": 1,
     "half_m": 92.0,
     "med_samples": 23,
@@ -7140,7 +7587,7 @@
    }
   },
   {
-   "id": "T45",
+   "id": "T46",
    "pos": [
     -2939,
     -8133
@@ -7294,14 +7741,14 @@
      "3650|2|6|892",
      "3854|1|3|700"
     ],
-    "laps_track": 23,
-    "presence": 0.13
+    "laps_track": 25,
+    "presence": 0.12
    },
    "established": false,
    "est_by": null
   }
  ],
- "laps": 23,
+ "laps": 25,
  "sessions": [
   "fh6_20260822_035921",
   "fh6_20260822_114844",
@@ -7314,9 +7761,10 @@
   "fh6_20260901_042403",
   "fh6_20260903_003230",
   "fh6_20260903_115454",
-  "fh6_20260903_133758"
+  "fh6_20260903_133758",
+  "fh6_20260905_201758"
  ],
- "updated": "fh6_20260822_212747",
+ "updated": "fh6_20260905_201758",
  "best_laps": {},
  "visits": [
   {
@@ -7439,6 +7887,16 @@
    "attempts": 1,
    "cars": [
     "2866|2|4|700"
+   ],
+   "best_lap": null,
+   "best_car": null
+  },
+  {
+   "session": "fh6_20260905_201758",
+   "laps": 2,
+   "attempts": 2,
+   "cars": [
+    "3665|2|1|600"
    ],
    "best_lap": null,
    "best_car": null
@@ -10426,13 +10884,13 @@
     "speed_ref_lap": 93,
     "lines": {
      "v": 1,
-     "n_laps": 19,
+     "n_laps": 20,
      "n_rejected": 5,
      "cut_s": 4.59,
      "s_in": 204,
      "s_out": 292,
      "best_s": 1.57,
-     "median_s": 1.83,
+     "median_s": 1.84,
      "available_s": 0.26,
      "fast": [
       {
@@ -10490,7 +10948,7 @@
     "speed_ref_lap": 54,
     "lines": {
      "v": 1,
-     "n_laps": 18,
+     "n_laps": 19,
      "n_rejected": 6,
      "cut_s": 2.33,
      "s_in": 312,
@@ -10554,14 +11012,14 @@
     "speed_ref_lap": 24,
     "lines": {
      "v": 1,
-     "n_laps": 7,
+     "n_laps": 8,
      "n_rejected": 17,
-     "cut_s": 4.08,
+     "cut_s": 4.14,
      "s_in": 348,
      "s_out": 388,
      "best_s": 1.36,
-     "median_s": 1.63,
-     "available_s": 0.27,
+     "median_s": 1.65,
+     "available_s": 0.3,
      "fast": [
       {
        "t_s": 1.36,
@@ -10618,7 +11076,7 @@
     "speed_ref_lap": 34,
     "lines": {
      "v": 1,
-     "n_laps": 5,
+     "n_laps": 6,
      "n_rejected": 18,
      "cut_s": 12.52,
      "s_in": 362,
@@ -10648,14 +11106,14 @@
        "pts": "-2343,-7899,1,-2346,-7906,4,-2352,-7912,3,-2358,-7916,3,-2366,-7917,1,-2373,-7913,1,-2376,-7906,3,-2378,-7898,3,-2377,-7890,2,-2377,-7882,0,-2376,-7874,0,-2375,-7866,0"
       },
       {
-       "t_s": 5.01,
-       "mph_min": 23,
-       "cid": "3854|1|2|800",
-       "build_id": "11d4bca5",
-       "class": "S1",
-       "session": "fh6_20260828_001105",
+       "t_s": 4.17,
+       "mph_min": 35,
+       "cid": "3665|2|1|600",
+       "build_id": "68c75f20",
+       "class": "B",
+       "session": "fh6_20260905_201758",
        "void": false,
-       "pts": "-2342,-7895,0,-2345,-7903,2,-2349,-7909,3,-2356,-7914,3,-2363,-7916,3,-2370,-7913,3,-2373,-7905,2,-2373,-7897,0,-2372,-7890,2,-2371,-7882,2,-2372,-7874,2,-2373,-7866,2"
+       "pts": "-2340,-7900,2,-2343,-7908,3,-2349,-7913,3,-2356,-7916,3,-2364,-7915,3,-2370,-7910,3,-2373,-7903,3,-2374,-7895,0,-2374,-7887,0,-2374,-7879,0,-2373,-7871,0,-2372,-7863,0"
       }
      ]
     }
@@ -10682,14 +11140,14 @@
     "speed_ref_lap": 38,
     "lines": {
      "v": 1,
-     "n_laps": 19,
+     "n_laps": 20,
      "n_rejected": 1,
-     "cut_s": 14.29,
+     "cut_s": 14.32,
      "s_in": 518,
      "s_out": 658,
      "best_s": 5.14,
-     "median_s": 5.72,
-     "available_s": 0.58,
+     "median_s": 5.73,
+     "available_s": 0.59,
      "fast": [
       {
        "t_s": 5.14,
@@ -10746,7 +11204,7 @@
     "speed_ref_lap": 35,
     "lines": {
      "v": 1,
-     "n_laps": 19,
+     "n_laps": 20,
      "n_rejected": 1,
      "cut_s": 10.45,
      "s_in": 686,
@@ -10810,14 +11268,14 @@
     "speed_ref_lap": 48,
     "lines": {
      "v": 1,
-     "n_laps": 17,
+     "n_laps": 18,
      "n_rejected": 3,
-     "cut_s": 17.37,
+     "cut_s": 17.75,
      "s_in": 776,
      "s_out": 976,
      "best_s": 6.48,
-     "median_s": 6.95,
-     "available_s": 0.46,
+     "median_s": 7.1,
+     "available_s": 0.62,
      "fast": [
       {
        "t_s": 6.48,
@@ -10874,14 +11332,14 @@
     "speed_ref_lap": 38,
     "lines": {
      "v": 1,
-     "n_laps": 17,
+     "n_laps": 18,
      "n_rejected": 1,
-     "cut_s": 11.93,
+     "cut_s": 12.1,
      "s_in": 1004,
      "s_out": 1124,
      "best_s": 4.47,
-     "median_s": 4.77,
-     "available_s": 0.3,
+     "median_s": 4.84,
+     "available_s": 0.37,
      "fast": [
       {
        "t_s": 4.47,
@@ -10938,14 +11396,14 @@
     "speed_ref_lap": 35,
     "lines": {
      "v": 1,
-     "n_laps": 4,
+     "n_laps": 5,
      "n_rejected": 14,
-     "cut_s": 14.23,
+     "cut_s": 14.02,
      "s_in": 1106,
      "s_out": 1214,
      "best_s": 4.1,
-     "median_s": 5.69,
-     "available_s": 1.59,
+     "median_s": 5.61,
+     "available_s": 1.51,
      "fast": [
       {
        "t_s": 4.1,
@@ -10958,6 +11416,16 @@
        "pts": "-2538,-7818,4,-2540,-7815,3,-2548,-7812,1,-2562,-7819,3,-2566,-7825,2,-2569,-7833,2,-2571,-7840,0,-2572,-7848,0,-2574,-7856,0,-2577,-7872,0,-2579,-7879,0,-2581,-7887,1"
       },
       {
+       "t_s": 4.85,
+       "mph_min": 33,
+       "cid": "3665|2|1|600",
+       "build_id": "68c75f20",
+       "class": "B",
+       "session": "fh6_20260905_201758",
+       "void": false,
+       "pts": "-2529,-7828,2,-2531,-7820,3,-2540,-7812,3,-2548,-7812,3,-2555,-7815,3,-2562,-7825,3,-2564,-7832,0,-2566,-7844,0,-2567,-7852,0,-2569,-7860,0,-2572,-7872,0,-2574,-7879,0"
+      },
+      {
        "t_s": 5.61,
        "mph_min": 31,
        "cid": "3854|1|3|600",
@@ -10966,16 +11434,6 @@
        "session": "fh6_20260828_081447",
        "void": false,
        "pts": "-2532,-7838,1,-2533,-7830,3,-2536,-7819,1,-2542,-7813,1,-2549,-7810,1,-2561,-7812,1,-2567,-7817,1,-2570,-7829,0,-2572,-7837,0,-2573,-7844,0,-2575,-7856,0,-2577,-7864,0"
-      },
-      {
-       "t_s": 5.69,
-       "mph_min": 10,
-       "cid": "2866|2|4|800",
-       "build_id": "444f53f2",
-       "class": "S1",
-       "session": "fh6_20260828_110556",
-       "void": true,
-       "pts": "-2527,-7829,3,-2528,-7821,3,-2535,-7811,3,-2541,-7806,3,-2549,-7807,3,-2557,-7815,1,-2562,-7821,0,-2568,-7832,0,-2570,-7840,1,-2572,-7847,0,-2575,-7859,0,-2577,-7867,0"
       }
      ]
     }
@@ -11002,14 +11460,14 @@
     "speed_ref_lap": 32,
     "lines": {
      "v": 1,
-     "n_laps": 17,
+     "n_laps": 18,
      "n_rejected": 1,
-     "cut_s": 11.7,
+     "cut_s": 11.71,
      "s_in": 1236,
      "s_out": 1340,
      "best_s": 3.64,
-     "median_s": 4.68,
-     "available_s": 1.04,
+     "median_s": 4.69,
+     "available_s": 1.05,
      "fast": [
       {
        "t_s": 3.64,
@@ -11066,14 +11524,14 @@
     "speed_ref_lap": 33,
     "lines": {
      "v": 1,
-     "n_laps": 17,
+     "n_laps": 18,
      "n_rejected": 1,
-     "cut_s": 14.33,
+     "cut_s": 14.45,
      "s_in": 1356,
      "s_out": 1500,
      "best_s": 4.83,
-     "median_s": 5.73,
-     "available_s": 0.9,
+     "median_s": 5.78,
+     "available_s": 0.95,
      "fast": [
       {
        "t_s": 4.83,
@@ -11130,14 +11588,14 @@
     "speed_ref_lap": 44,
     "lines": {
      "v": 1,
-     "n_laps": 17,
+     "n_laps": 18,
      "n_rejected": 1,
-     "cut_s": 11.38,
+     "cut_s": 11.46,
      "s_in": 1550,
      "s_out": 1674,
      "best_s": 3.56,
-     "median_s": 4.55,
-     "available_s": 0.99,
+     "median_s": 4.58,
+     "available_s": 1.02,
      "fast": [
       {
        "t_s": 3.56,
@@ -11194,14 +11652,14 @@
     "speed_ref_lap": 63,
     "lines": {
      "v": 1,
-     "n_laps": 17,
+     "n_laps": 18,
      "n_rejected": 1,
-     "cut_s": 18.25,
+     "cut_s": 18.58,
      "s_in": 1780,
      "s_out": 2020,
      "best_s": 6.39,
-     "median_s": 7.3,
-     "available_s": 0.91,
+     "median_s": 7.43,
+     "available_s": 1.04,
      "fast": [
       {
        "t_s": 6.39,
@@ -11258,14 +11716,14 @@
     "speed_ref_lap": 37,
     "lines": {
      "v": 1,
-     "n_laps": 16,
+     "n_laps": 17,
      "n_rejected": 1,
-     "cut_s": 17.63,
+     "cut_s": 17.24,
      "s_in": 1982,
      "s_out": 2154,
      "best_s": 6.06,
-     "median_s": 7.05,
-     "available_s": 0.99,
+     "median_s": 6.9,
+     "available_s": 0.83,
      "fast": [
       {
        "t_s": 6.06,
@@ -11323,7 +11781,7 @@
     "lines": {
      "v": 1,
      "n_laps": 10,
-     "n_rejected": 5,
+     "n_rejected": 6,
      "cut_s": 12.24,
      "s_in": 2204,
      "s_out": 2380,
@@ -21216,1121 +21674,1564 @@
       -8121
      ]
     ]
+   },
+   {
+    "session": "fh6_20260905_201758",
+    "ev": 0,
+    "lap": 1,
+    "pts": [
+     [
+      -2365,
+      -7545
+     ],
+     [
+      -2364,
+      -7561
+     ],
+     [
+      -2363,
+      -7577
+     ],
+     [
+      -2361,
+      -7593
+     ],
+     [
+      -2360,
+      -7609
+     ],
+     [
+      -2359,
+      -7625
+     ],
+     [
+      -2357,
+      -7641
+     ],
+     [
+      -2356,
+      -7657
+     ],
+     [
+      -2353,
+      -7672
+     ],
+     [
+      -2347,
+      -7687
+     ],
+     [
+      -2339,
+      -7701
+     ],
+     [
+      -2331,
+      -7715
+     ],
+     [
+      -2324,
+      -7729
+     ],
+     [
+      -2320,
+      -7745
+     ],
+     [
+      -2319,
+      -7761
+     ],
+     [
+      -2320,
+      -7777
+     ],
+     [
+      -2319,
+      -7793
+     ],
+     [
+      -2322,
+      -7808
+     ],
+     [
+      -2325,
+      -7824
+     ],
+     [
+      -2327,
+      -7840
+     ],
+     [
+      -2329,
+      -7856
+     ],
+     [
+      -2333,
+      -7871
+     ],
+     [
+      -2337,
+      -7887
+     ],
+     [
+      -2342,
+      -7902
+     ],
+     [
+      -2353,
+      -7913
+     ],
+     [
+      -2367,
+      -7912
+     ],
+     [
+      -2373,
+      -7897
+     ],
+     [
+      -2373,
+      -7881
+     ],
+     [
+      -2372,
+      -7865
+     ],
+     [
+      -2369,
+      -7849
+     ],
+     [
+      -2366,
+      -7834
+     ],
+     [
+      -2363,
+      -7818
+     ],
+     [
+      -2362,
+      -7802
+     ],
+     [
+      -2365,
+      -7786
+     ],
+     [
+      -2375,
+      -7774
+     ],
+     [
+      -2390,
+      -7774
+     ],
+     [
+      -2401,
+      -7785
+     ],
+     [
+      -2404,
+      -7801
+     ],
+     [
+      -2404,
+      -7817
+     ],
+     [
+      -2404,
+      -7833
+     ],
+     [
+      -2403,
+      -7849
+     ],
+     [
+      -2403,
+      -7865
+     ],
+     [
+      -2409,
+      -7879
+     ],
+     [
+      -2424,
+      -7878
+     ],
+     [
+      -2430,
+      -7864
+     ],
+     [
+      -2433,
+      -7848
+     ],
+     [
+      -2435,
+      -7832
+     ],
+     [
+      -2436,
+      -7816
+     ],
+     [
+      -2437,
+      -7800
+     ],
+     [
+      -2439,
+      -7784
+     ],
+     [
+      -2444,
+      -7770
+     ],
+     [
+      -2457,
+      -7760
+     ],
+     [
+      -2473,
+      -7761
+     ],
+     [
+      -2483,
+      -7773
+     ],
+     [
+      -2486,
+      -7788
+     ],
+     [
+      -2489,
+      -7804
+     ],
+     [
+      -2490,
+      -7820
+     ],
+     [
+      -2490,
+      -7836
+     ],
+     [
+      -2489,
+      -7852
+     ],
+     [
+      -2489,
+      -7868
+     ],
+     [
+      -2489,
+      -7884
+     ],
+     [
+      -2495,
+      -7898
+     ],
+     [
+      -2509,
+      -7905
+     ],
+     [
+      -2524,
+      -7900
+     ],
+     [
+      -2532,
+      -7887
+     ],
+     [
+      -2531,
+      -7871
+     ],
+     [
+      -2530,
+      -7855
+     ],
+     [
+      -2529,
+      -7839
+     ],
+     [
+      -2533,
+      -7823
+     ],
+     [
+      -2545,
+      -7813
+     ],
+     [
+      -2559,
+      -7817
+     ],
+     [
+      -2569,
+      -7829
+     ],
+     [
+      -2572,
+      -7844
+     ],
+     [
+      -2575,
+      -7860
+     ],
+     [
+      -2578,
+      -7876
+     ],
+     [
+      -2582,
+      -7891
+     ],
+     [
+      -2589,
+      -7906
+     ],
+     [
+      -2602,
+      -7914
+     ],
+     [
+      -2616,
+      -7909
+     ],
+     [
+      -2623,
+      -7894
+     ],
+     [
+      -2627,
+      -7879
+     ],
+     [
+      -2631,
+      -7863
+     ],
+     [
+      -2636,
+      -7848
+     ],
+     [
+      -2641,
+      -7833
+     ],
+     [
+      -2651,
+      -7820
+     ],
+     [
+      -2666,
+      -7816
+     ],
+     [
+      -2676,
+      -7828
+     ],
+     [
+      -2680,
+      -7843
+     ],
+     [
+      -2677,
+      -7859
+     ],
+     [
+      -2674,
+      -7875
+     ],
+     [
+      -2668,
+      -7890
+     ],
+     [
+      -2662,
+      -7904
+     ],
+     [
+      -2656,
+      -7919
+     ],
+     [
+      -2650,
+      -7934
+     ],
+     [
+      -2649,
+      -7950
+     ],
+     [
+      -2658,
+      -7963
+     ],
+     [
+      -2672,
+      -7969
+     ],
+     [
+      -2688,
+      -7966
+     ],
+     [
+      -2699,
+      -7955
+     ],
+     [
+      -2706,
+      -7941
+     ],
+     [
+      -2713,
+      -7926
+     ],
+     [
+      -2720,
+      -7912
+     ],
+     [
+      -2726,
+      -7897
+     ],
+     [
+      -2733,
+      -7883
+     ],
+     [
+      -2740,
+      -7868
+     ],
+     [
+      -2749,
+      -7855
+     ],
+     [
+      -2760,
+      -7843
+     ],
+     [
+      -2773,
+      -7834
+     ],
+     [
+      -2788,
+      -7828
+     ]
+    ]
    }
   ],
   "det": "geo7-tol-from-map",
   "lat_acc": {
    "0": [
-    223.818,
-    12182
+    248.651,
+    14249
    ],
    "1": [
-    136.269,
-    5445
+    144.685,
+    6178
    ],
    "2": [
-    112.066,
-    4221
+    118.714,
+    4791
    ],
    "3": [
-    717.056,
-    3807
+    724.412,
+    4309
    ],
    "4": [
-    260.084,
-    3284
+    283.86,
+    4136
    ],
    "5": [
-    576.54,
-    2929
+    601.18,
+    4079
    ],
    "6": [
-    315.387,
-    2736
+    347.068,
+    3736
    ],
    "7": [
-    125.458,
-    2621
+    148.438,
+    3583
    ],
    "8": [
-    178.567,
-    2496
+    211.233,
+    3472
    ],
    "9": [
-    373.573,
-    2391
+    426.413,
+    3363
    ],
    "10": [
-    367.262,
-    2322
+    392.42,
+    3312
    ],
    "11": [
-    1117.365,
-    2263
+    1153.295,
+    3196
    ],
    "12": [
-    1428.857,
-    2236
+    1475.532,
+    3115
    ],
    "13": [
-    1321.896,
-    2148
+    1377.951,
+    3041
    ],
    "14": [
-    2031.218,
-    2107
+    2425.292,
+    2965
    ],
    "15": [
-    2099.495,
-    2029
-   ],
-   "16": [
-    1967.914,
-    1818
-   ],
-   "17": [
-    1499.452,
-    1931
-   ],
-   "18": [
-    977.358,
-    1899
-   ],
-   "19": [
-    586.722,
-    1889
-   ],
-   "20": [
-    663.774,
-    1837
-   ],
-   "21": [
-    1531.125,
-    1854
-   ],
-   "22": [
-    2065.229,
-    1828
-   ],
-   "23": [
-    2347.267,
-    1848
-   ],
-   "24": [
-    2403.632,
-    1770
-   ],
-   "25": [
-    2434.787,
-    1666
-   ],
-   "26": [
-    2015.489,
-    1574
-   ],
-   "27": [
-    2769.842,
-    1673
-   ],
-   "28": [
-    2346.334,
-    1754
-   ],
-   "29": [
-    1814.819,
-    1704
-   ],
-   "30": [
-    1545.92,
-    1710
-   ],
-   "31": [
-    1643.94,
-    1726
-   ],
-   "32": [
-    1487.532,
-    1673
-   ],
-   "33": [
-    1080.685,
-    1674
-   ],
-   "34": [
-    775.47,
-    1614
-   ],
-   "35": [
-    689.008,
-    1472
-   ],
-   "36": [
-    972.71,
-    1545
-   ],
-   "37": [
-    916.354,
-    1600
-   ],
-   "38": [
-    682.806,
-    1591
-   ],
-   "39": [
-    593.077,
-    1621
-   ],
-   "40": [
-    339.412,
-    1619
-   ],
-   "41": [
-    595.363,
-    1755
-   ],
-   "42": [
-    725.81,
-    1826
-   ],
-   "43": [
-    810.732,
-    1913
-   ],
-   "44": [
-    2709.985,
-    2324
-   ],
-   "45": [
-    4453.904,
-    2598
-   ],
-   "46": [
-    6063.842,
-    2980
-   ],
-   "47": [
-    6867.22,
-    3474
-   ],
-   "48": [
-    6548.532,
-    4013
-   ],
-   "49": [
-    8440.738,
-    4675
-   ],
-   "50": [
-    8649.783,
-    4688
-   ],
-   "51": [
-    8097.847,
-    4372
-   ],
-   "52": [
-    5657.01,
-    3967
-   ],
-   "53": [
-    2006.514,
-    3353
-   ],
-   "54": [
-    1473.921,
-    3013
-   ],
-   "55": [
-    1087.929,
-    2952
-   ],
-   "56": [
-    1199.233,
-    2740
-   ],
-   "57": [
-    532.997,
-    2564
-   ],
-   "58": [
-    656.823,
-    2446
-   ],
-   "59": [
-    1453.185,
-    2357
-   ],
-   "60": [
-    990.686,
-    2264
-   ],
-   "61": [
-    1273.413,
-    2169
-   ],
-   "62": [
-    783.803,
-    2119
-   ],
-   "63": [
-    353.29,
-    2196
-   ],
-   "64": [
-    1988.97,
-    2442
-   ],
-   "65": [
-    4859.071,
-    2751
-   ],
-   "66": [
-    5590.724,
-    2985
-   ],
-   "67": [
-    5933.396,
-    3174
-   ],
-   "68": [
-    7580.974,
-    3446
-   ],
-   "69": [
-    8074.115,
-    3620
-   ],
-   "70": [
-    7190.644,
-    3587
-   ],
-   "71": [
-    6741.419,
-    3569
-   ],
-   "72": [
-    7080.081,
-    3578
-   ],
-   "73": [
-    6912.351,
-    3669
-   ],
-   "74": [
-    6190.58,
-    3546
-   ],
-   "75": [
-    4359.54,
-    3229
-   ],
-   "76": [
-    2346.825,
-    2978
-   ],
-   "77": [
-    1594.312,
-    2774
-   ],
-   "78": [
-    1092.661,
-    2587
-   ],
-   "79": [
-    904.826,
-    2473
-   ],
-   "80": [
-    1321.11,
-    2415
-   ],
-   "81": [
-    1535.068,
-    2385
-   ],
-   "82": [
-    1981.562,
-    2485
-   ],
-   "83": [
-    3524.237,
-    2863
-   ],
-   "84": [
-    5976.175,
-    3251
-   ],
-   "85": [
-    6593.757,
-    3653
-   ],
-   "86": [
-    7264.322,
-    4093
-   ],
-   "87": [
-    7440.607,
-    4026
-   ],
-   "88": [
-    7738.479,
-    4332
-   ],
-   "89": [
-    6754.16,
-    4126
-   ],
-   "90": [
-    5345.595,
-    3842
-   ],
-   "91": [
-    3593.627,
-    3546
-   ],
-   "92": [
-    1983.049,
-    3153
-   ],
-   "93": [
-    381.908,
-    2888
-   ],
-   "94": [
-    917.341,
-    2688
-   ],
-   "95": [
-    789.63,
-    2515
-   ],
-   "96": [
-    1355.846,
-    2393
-   ],
-   "97": [
-    1090.606,
-    2321
-   ],
-   "98": [
-    558.327,
-    2308
-   ],
-   "99": [
-    963.8,
-    2289
-   ],
-   "100": [
-    1545.094,
-    2413
-   ],
-   "101": [
-    3495.71,
-    2725
-   ],
-   "102": [
-    5098.379,
-    2991
-   ],
-   "103": [
-    5373.202,
-    3151
-   ],
-   "104": [
-    6767.325,
-    3429
-   ],
-   "105": [
-    7051.355,
-    3444
-   ],
-   "106": [
-    6151.509,
-    3381
-   ],
-   "107": [
-    5027.748,
-    3239
-   ],
-   "108": [
-    5491.474,
-    3090
-   ],
-   "109": [
-    6386.103,
-    3127
-   ],
-   "110": [
-    4260.361,
-    2891
-   ],
-   "111": [
-    3454.151,
-    2718
-   ],
-   "112": [
-    2290.416,
-    2493
-   ],
-   "113": [
-    2441.958,
-    2262
-   ],
-   "114": [
-    1350.449,
-    2149
-   ],
-   "115": [
-    1200.645,
-    2237
-   ],
-   "116": [
-    1197.069,
-    2157
-   ],
-   "117": [
-    456.844,
-    2074
-   ],
-   "118": [
-    614.006,
-    2042
-   ],
-   "119": [
-    314.759,
-    2012
-   ],
-   "120": [
-    525.091,
-    2035
-   ],
-   "121": [
-    1048.804,
-    2184
-   ],
-   "122": [
-    3071.556,
-    2449
-   ],
-   "123": [
-    4877.448,
-    2709
-   ],
-   "124": [
-    5544.584,
+    3108.132,
     2883
    ],
-   "125": [
-    6001.789,
-    3070
+   "16": [
+    2846.61,
+    2652
    ],
-   "126": [
-    6775.694,
-    3212
+   "17": [
+    1933.932,
+    2729
    ],
-   "127": [
-    6805.001,
-    3137
+   "18": [
+    1661.561,
+    2678
    ],
-   "128": [
-    6949.461,
-    3399
+   "19": [
+    992.768,
+    2651
    ],
-   "129": [
-    5453.537,
-    2655
+   "20": [
+    718.68,
+    2559
    ],
-   "130": [
-    5253.452,
-    2785
+   "21": [
+    1815.483,
+    2542
    ],
-   "131": [
-    5758.941,
-    2991
+   "22": [
+    2521.976,
+    2513
    ],
-   "132": [
-    5738.447,
-    3079
+   "23": [
+    3116.538,
+    2516
    ],
-   "133": [
-    3272.457,
-    2924
+   "24": [
+    3381.646,
+    2439
    ],
-   "134": [
-    2761.321,
-    2688
+   "25": [
+    3635.885,
+    2352
    ],
-   "135": [
-    1857.63,
-    2497
+   "26": [
+    3081.45,
+    2215
    ],
-   "136": [
-    1923.871,
-    2332
+   "27": [
+    3371.961,
+    2265
    ],
-   "137": [
-    2679.105,
-    2237
+   "28": [
+    2706.192,
+    2439
    ],
-   "138": [
-    2588.567,
-    2335
+   "29": [
+    2134.854,
+    2389
    ],
-   "139": [
-    4551.758,
-    2521
+   "30": [
+    2045.294,
+    2392
    ],
-   "140": [
-    5967.994,
-    2620
+   "31": [
+    2288.504,
+    2410
    ],
-   "141": [
-    6553.217,
-    2655
+   "32": [
+    2635.208,
+    2355
    ],
-   "142": [
-    6629.794,
-    2782
+   "33": [
+    1642.383,
+    2357
    ],
-   "143": [
-    6062.026,
-    2915
+   "34": [
+    1023.471,
+    2312
    ],
-   "144": [
-    5638.633,
-    3128
+   "35": [
+    997.838,
+    2167
    ],
-   "145": [
-    6338.864,
-    3453
+   "36": [
+    1493.271,
+    2208
    ],
-   "146": [
-    4746.148,
-    3327
+   "37": [
+    1279.017,
+    2300
    ],
-   "147": [
-    2339.802,
-    2950
+   "38": [
+    1044.126,
+    2271
    ],
-   "148": [
-    1236.723,
-    2650
+   "39": [
+    1038.115,
+    2285
    ],
-   "149": [
-    559.94,
-    2446
+   "40": [
+    668.576,
+    2288
    ],
-   "150": [
-    878.467,
-    2327
+   "41": [
+    1401.893,
+    2392
    ],
-   "151": [
-    882.125,
-    2223
-   ],
-   "152": [
-    1490.249,
-    2150
-   ],
-   "153": [
-    1120.85,
-    2087
-   ],
-   "154": [
-    1098.235,
-    2188
-   ],
-   "155": [
-    2052.553,
-    2472
-   ],
-   "156": [
-    4300.932,
-    2754
-   ],
-   "157": [
-    6016.696,
-    3066
-   ],
-   "158": [
-    5997.568,
-    3100
-   ],
-   "159": [
-    5314.826,
-    3324
-   ],
-   "160": [
-    4839.123,
-    3741
-   ],
-   "161": [
-    5268.363,
-    4029
-   ],
-   "162": [
-    3829.39,
-    3672
-   ],
-   "163": [
-    1557.139,
-    3059
-   ],
-   "164": [
-    928.026,
-    2665
-   ],
-   "165": [
-    194.734,
-    2450
-   ],
-   "166": [
-    555.807,
-    2259
-   ],
-   "167": [
-    859.904,
-    2046
-   ],
-   "168": [
-    1202.641,
-    2030
-   ],
-   "169": [
-    1886.432,
-    1997
-   ],
-   "170": [
-    3532.781,
-    2044
-   ],
-   "171": [
-    3506.606,
-    2280
-   ],
-   "172": [
-    3515.131,
-    2486
-   ],
-   "173": [
-    4071.845,
-    2886
-   ],
-   "174": [
-    5631.502,
-    3124
-   ],
-   "175": [
-    6205.832,
-    3311
-   ],
-   "176": [
-    6136.941,
-    3380
-   ],
-   "177": [
-    5526.859,
-    3319
-   ],
-   "178": [
-    5246.449,
-    3075
-   ],
-   "179": [
-    4684.984,
-    2855
-   ],
-   "180": [
-    2569.23,
+   "42": [
+    1049.278,
     2538
    ],
-   "181": [
-    2355.449,
-    2408
+   "43": [
+    959.896,
+    2609
    ],
-   "182": [
-    1173.424,
-    2237
+   "44": [
+    2906.969,
+    3217
    ],
-   "183": [
-    528.558,
-    2068
+   "45": [
+    5072.481,
+    3645
    ],
-   "184": [
-    174.064,
-    1981
+   "46": [
+    8099.301,
+    4214
    ],
-   "185": [
-    111.016,
-    1959
+   "47": [
+    8445.892,
+    4743
    ],
-   "186": [
-    447.936,
-    1852
+   "48": [
+    8658.453,
+    5548
    ],
-   "187": [
-    455.025,
-    1812
+   "49": [
+    11626.38,
+    6858
    ],
-   "188": [
-    1149.286,
-    1763
+   "50": [
+    9835.379,
+    6912
    ],
-   "189": [
-    858.812,
-    1755
+   "51": [
+    9033.791,
+    6185
    ],
-   "190": [
-    1240.141,
-    1752
+   "52": [
+    6361.293,
+    5606
    ],
-   "191": [
-    2451.555,
-    1857
+   "53": [
+    2532.171,
+    4814
    ],
-   "192": [
-    2766.351,
-    2082
+   "54": [
+    1697.5,
+    4401
    ],
-   "193": [
-    4480.857,
-    2305
+   "55": [
+    1434.429,
+    4188
    ],
-   "194": [
-    4982.218,
-    2392
+   "56": [
+    1491.567,
+    3794
    ],
-   "195": [
-    5410.56,
-    2551
+   "57": [
+    655.448,
+    3521
    ],
-   "196": [
-    6046.651,
-    2867
+   "58": [
+    800.837,
+    3311
    ],
-   "197": [
-    5731.494,
-    2926
+   "59": [
+    1502.686,
+    3166
    ],
-   "198": [
-    5042.709,
+   "60": [
+    1159.084,
+    3050
+   ],
+   "61": [
+    1760.811,
+    2902
+   ],
+   "62": [
+    1255.664,
+    2849
+   ],
+   "63": [
+    825.549,
+    3014
+   ],
+   "64": [
+    2743.11,
+    3412
+   ],
+   "65": [
+    5981.687,
+    3914
+   ],
+   "66": [
+    7266.515,
+    4148
+   ],
+   "67": [
+    8417.059,
+    4406
+   ],
+   "68": [
+    10005.709,
+    4739
+   ],
+   "69": [
+    10406.211,
+    4972
+   ],
+   "70": [
+    9429.987,
+    4953
+   ],
+   "71": [
+    8872.706,
+    4885
+   ],
+   "72": [
+    8531.721,
+    4817
+   ],
+   "73": [
+    7320.047,
+    4761
+   ],
+   "74": [
+    6846.976,
+    4517
+   ],
+   "75": [
+    4832.917,
+    4137
+   ],
+   "76": [
+    2631.344,
+    3820
+   ],
+   "77": [
+    1876.249,
+    3576
+   ],
+   "78": [
+    1147.164,
+    3348
+   ],
+   "79": [
+    938.815,
+    3247
+   ],
+   "80": [
+    1377.587,
+    3324
+   ],
+   "81": [
+    1642.977,
+    3358
+   ],
+   "82": [
+    3151.406,
+    3675
+   ],
+   "83": [
+    5912.894,
+    4381
+   ],
+   "84": [
+    8591.691,
+    4827
+   ],
+   "85": [
+    9529.865,
+    5334
+   ],
+   "86": [
+    9716.058,
+    5682
+   ],
+   "87": [
+    8378.732,
+    5269
+   ],
+   "88": [
+    8120.38,
+    5357
+   ],
+   "89": [
+    7067.584,
+    5033
+   ],
+   "90": [
+    5611.878,
+    4652
+   ],
+   "91": [
+    3889.722,
+    4314
+   ],
+   "92": [
+    2209.626,
+    3880
+   ],
+   "93": [
+    560.187,
+    3578
+   ],
+   "94": [
+    1050.176,
+    3308
+   ],
+   "95": [
+    943.099,
+    3150
+   ],
+   "96": [
+    1424.73,
+    3037
+   ],
+   "97": [
+    1167.557,
+    3094
+   ],
+   "98": [
+    1373.781,
+    3226
+   ],
+   "99": [
+    2533.719,
+    3248
+   ],
+   "100": [
+    3229.092,
+    3368
+   ],
+   "101": [
+    5292.697,
+    3669
+   ],
+   "102": [
+    7064.999,
+    3988
+   ],
+   "103": [
+    7309.335,
+    4184
+   ],
+   "104": [
+    8856.759,
+    4595
+   ],
+   "105": [
+    9187.573,
+    4685
+   ],
+   "106": [
+    7219.532,
+    4579
+   ],
+   "107": [
+    5478.623,
+    4407
+   ],
+   "108": [
+    6146.978,
+    4122
+   ],
+   "109": [
+    7195.329,
+    4006
+   ],
+   "110": [
+    4484.648,
+    3714
+   ],
+   "111": [
+    4136.297,
+    3495
+   ],
+   "112": [
+    2670.882,
+    3233
+   ],
+   "113": [
+    2624.198,
+    2953
+   ],
+   "114": [
+    1531.958,
     2819
    ],
+   "115": [
+    1441.44,
+    2887
+   ],
+   "116": [
+    1295.708,
+    2790
+   ],
+   "117": [
+    494.172,
+    2672
+   ],
+   "118": [
+    670.844,
+    2685
+   ],
+   "119": [
+    662.158,
+    2750
+   ],
+   "120": [
+    1700.845,
+    2887
+   ],
+   "121": [
+    2987.696,
+    3076
+   ],
+   "122": [
+    5457.895,
+    3430
+   ],
+   "123": [
+    7095.017,
+    3763
+   ],
+   "124": [
+    7551.488,
+    3960
+   ],
+   "125": [
+    7869.546,
+    4121
+   ],
+   "126": [
+    8719.697,
+    4331
+   ],
+   "127": [
+    8765.022,
+    4257
+   ],
+   "128": [
+    8449.655,
+    4474
+   ],
+   "129": [
+    6041.198,
+    3657
+   ],
+   "130": [
+    5663.176,
+    3712
+   ],
+   "131": [
+    6123.72,
+    3833
+   ],
+   "132": [
+    6157.459,
+    3859
+   ],
+   "133": [
+    3732.419,
+    3645
+   ],
+   "134": [
+    3856.805,
+    3448
+   ],
+   "135": [
+    3201.029,
+    3316
+   ],
+   "136": [
+    3878.468,
+    3242
+   ],
+   "137": [
+    4999.363,
+    3360
+   ],
+   "138": [
+    4918.296,
+    3949
+   ],
+   "139": [
+    5840.18,
+    4448
+   ],
+   "140": [
+    6813.902,
+    3969
+   ],
+   "141": [
+    8528.318,
+    3971
+   ],
+   "142": [
+    7854.469,
+    3984
+   ],
+   "143": [
+    6312.355,
+    3940
+   ],
+   "144": [
+    6127.361,
+    4046
+   ],
+   "145": [
+    6526.379,
+    4304
+   ],
+   "146": [
+    4856.342,
+    4104
+   ],
+   "147": [
+    2486.927,
+    3682
+   ],
+   "148": [
+    1462.565,
+    3346
+   ],
+   "149": [
+    887.132,
+    3217
+   ],
+   "150": [
+    1708.119,
+    3189
+   ],
+   "151": [
+    1875.999,
+    3148
+   ],
+   "152": [
+    2945.078,
+    3252
+   ],
+   "153": [
+    2989.373,
+    3280
+   ],
+   "154": [
+    2945.096,
+    3470
+   ],
+   "155": [
+    4238.808,
+    3909
+   ],
+   "156": [
+    6067.42,
+    4045
+   ],
+   "157": [
+    6592.704,
+    4172
+   ],
+   "158": [
+    6408.811,
+    4098
+   ],
+   "159": [
+    5717.3,
+    4234
+   ],
+   "160": [
+    5081.224,
+    4582
+   ],
+   "161": [
+    5437.4,
+    4733
+   ],
+   "162": [
+    3964.74,
+    4379
+   ],
+   "163": [
+    1954.344,
+    3741
+   ],
+   "164": [
+    1317.819,
+    3307
+   ],
+   "165": [
+    715.643,
+    3099
+   ],
+   "166": [
+    1786.937,
+    3022
+   ],
+   "167": [
+    2365.067,
+    2981
+   ],
+   "168": [
+    2940.018,
+    3123
+   ],
+   "169": [
+    4080.233,
+    3336
+   ],
+   "170": [
+    5645.63,
+    3557
+   ],
+   "171": [
+    4816.969,
+    3663
+   ],
+   "172": [
+    4251.194,
+    3617
+   ],
+   "173": [
+    5623.945,
+    3855
+   ],
+   "174": [
+    6706.48,
+    4022
+   ],
+   "175": [
+    6691.916,
+    4129
+   ],
+   "176": [
+    6546.622,
+    4126
+   ],
+   "177": [
+    5870.289,
+    4031
+   ],
+   "178": [
+    5868.675,
+    3772
+   ],
+   "179": [
+    5195.942,
+    3516
+   ],
+   "180": [
+    2761.222,
+    3157
+   ],
+   "181": [
+    2418.98,
+    3020
+   ],
+   "182": [
+    1280.566,
+    2812
+   ],
+   "183": [
+    600.262,
+    2642
+   ],
+   "184": [
+    295.128,
+    2625
+   ],
+   "185": [
+    453.342,
+    2661
+   ],
+   "186": [
+    1573.663,
+    2655
+   ],
+   "187": [
+    1897.454,
+    2719
+   ],
+   "188": [
+    2660.91,
+    2668
+   ],
+   "189": [
+    2404.169,
+    2664
+   ],
+   "190": [
+    2612.448,
+    2668
+   ],
+   "191": [
+    3703.955,
+    2781
+   ],
+   "192": [
+    4070.557,
+    3034
+   ],
+   "193": [
+    5980.979,
+    3277
+   ],
+   "194": [
+    6662.393,
+    3365
+   ],
+   "195": [
+    6639.174,
+    3497
+   ],
+   "196": [
+    6653.181,
+    3719
+   ],
+   "197": [
+    6055.253,
+    3719
+   ],
+   "198": [
+    5418.123,
+    3555
+   ],
    "199": [
-    4635.535,
-    2695
+    4957.124,
+    3390
    ],
    "200": [
-    4836.58,
-    2594
+    5055.031,
+    3275
    ],
    "201": [
-    4406.584,
-    2459
+    4624.641,
+    3106
    ],
    "202": [
-    3415.774,
-    2296
+    3681.411,
+    2918
    ],
    "203": [
-    1795.503,
-    2189
+    1919.919,
+    2757
    ],
    "204": [
-    1609.811,
-    2053
+    1890.555,
+    2600
    ],
    "205": [
-    714.256,
-    1959
+    828.181,
+    2517
    ],
    "206": [
-    1313.067,
-    2081
+    1382.615,
+    2619
    ],
    "207": [
-    650.51,
-    2097
+    1055.688,
+    2618
    ],
    "208": [
-    1230.413,
-    1964
+    1656.828,
+    2512
    ],
    "209": [
-    513.411,
-    1861
+    925.418,
+    2436
    ],
    "210": [
-    231.172,
-    1800
+    896.003,
+    2370
    ],
    "211": [
-    223.799,
-    1748
+    1115.557,
+    2336
    ],
    "212": [
-    1073.804,
-    1992
+    2139.815,
+    2593
    ],
    "213": [
-    1498.901,
-    1613
+    2354.44,
+    2153
    ],
    "214": [
-    848.249,
-    1528
+    1676.902,
+    2147
    ],
    "215": [
-    1055.736,
-    1498
+    1942.31,
+    2120
    ],
    "216": [
-    1176.291,
-    1532
+    2542.014,
+    2111
    ],
    "217": [
-    1182.699,
-    1567
+    1275.249,
+    1639
    ],
    "218": [
-    1708.417,
-    1696
+    1813.493,
+    1770
    ],
    "219": [
-    2808.515,
-    1796
+    2929.201,
+    1870
    ],
    "220": [
-    3898.767,
-    1920
+    4022.689,
+    1994
    ],
    "221": [
-    3902.817,
-    1940
+    4028.109,
+    2018
    ],
    "222": [
-    4485.35,
-    2009
+    4639.754,
+    2086
    ],
    "223": [
-    4936.736,
-    2063
+    5066.041,
+    2121
    ],
    "224": [
-    4502.998,
-    2062
+    4592.544,
+    2104
    ],
    "225": [
-    3238.759,
-    2015
+    3307.036,
+    2056
    ],
    "226": [
-    2714.575,
-    1953
+    2763.219,
+    1992
    ],
    "227": [
-    2912.831,
-    1872
+    2936.727,
+    1910
    ],
    "228": [
-    2950.204,
-    1851
+    2997.722,
+    1887
    ],
    "229": [
-    2970.852,
-    1861
+    3040.476,
+    1899
    ],
    "230": [
-    3697.326,
-    1826
+    3768.145,
+    1864
    ],
    "231": [
-    4181.232,
-    1882
+    4266.586,
+    1921
    ],
    "232": [
-    4526.115,
-    1909
+    4620.169,
+    1950
    ],
    "233": [
-    4696.394,
-    1951
+    4783.108,
+    1995
    ],
    "234": [
-    4211.912,
-    1977
+    4293.561,
+    2023
    ],
    "235": [
-    3788.744,
-    1959
+    3852.713,
+    2004
    ],
    "236": [
-    3099.195,
-    1920
+    3192.233,
+    1964
    ],
    "237": [
-    2519.798,
-    1853
+    2551.817,
+    1896
    ],
    "238": [
-    2357.577,
-    1829
+    2360.942,
+    1870
    ],
    "239": [
-    1399.123,
-    1726
+    1400.235,
+    1764
    ],
    "240": [
-    497.082,
-    1693
+    498.391,
+    1730
    ],
    "241": [
-    437.04,
-    1650
+    438.366,
+    1685
    ],
    "242": [
-    889.725,
-    1542
+    890.614,
+    1576
    ],
    "243": [
-    856.712,
-    1516
+    857.583,
+    1548
    ],
    "244": [
-    704.856,
-    1561
+    705.884,
+    1594
    ],
    "245": [
-    633.72,
-    1503
+    640.486,
+    1534
    ],
    "246": [
-    564.812,
-    1504
+    574.113,
+    1535
    ],
    "247": [
-    1185.944,
-    1517
+    1193.055,
+    1547
    ],
    "248": [
-    1134.613,
-    1563
+    1139.309,
+    1595
    ],
    "249": [
-    1565.002,
-    1757
+    1574.505,
+    1794
    ],
    "250": [
-    1795.186,
-    1841
+    1837.699,
+    1881
    ],
    "251": [
-    2942.455,
-    2067
+    3019.117,
+    2112
    ],
    "252": [
-    4414.623,
-    2291
+    4506.468,
+    2342
    ],
    "253": [
-    5217.614,
-    2495
+    5330.098,
+    2551
    ],
    "254": [
-    5974.724,
-    2687
+    6092.442,
+    2745
    ],
    "255": [
-    5668.255,
-    2629
+    5779.899,
+    2690
    ],
    "256": [
-    5524.993,
-    2857
+    5636.725,
+    2920
    ],
    "257": [
-    5077.036,
-    2851
+    5174.247,
+    2913
    ],
    "258": [
-    4993.039,
-    2821
+    5104.037,
+    2885
    ],
    "259": [
-    4069.81,
-    2620
+    4158.949,
+    2680
    ],
    "260": [
-    2872.886,
-    2392
+    2931.058,
+    2450
    ],
    "261": [
-    2463.424,
-    2231
+    2475.49,
+    2281
    ],
    "262": [
-    2716.382,
-    2096
+    2719.816,
+    2142
    ],
    "263": [
-    2115.213,
-    2067
+    2116.508,
+    2109
    ],
    "264": [
-    1794.792,
-    1982
+    1797.943,
+    2021
    ],
    "265": [
-    1376.177,
-    1848
+    1387.219,
+    1884
    ],
    "266": [
-    1825.672,
-    1954
+    1840.413,
+    1991
    ],
    "267": [
-    1432.686,
-    2205
+    1438.101,
+    2243
    ],
    "268": [
-    2683.829,
-    2463
+    2685.346,
+    2509
    ],
    "269": [
-    3824.908,
-    2791
+    3858.028,
+    2846
    ],
    "270": [
-    5704.586,
-    3230
+    5817.335,
+    3299
    ],
    "271": [
-    6113.373,
-    3620
+    6267.158,
+    3699
    ],
    "272": [
-    6003.466,
-    3357
+    6136.742,
+    3435
    ],
    "273": [
-    5488.885,
-    3102
+    5613.155,
+    3176
    ],
    "274": [
-    5865.466,
-    3239
+    5990.379,
+    3309
    ],
    "275": [
-    4122.457,
-    2997
+    4208.839,
+    3061
    ],
    "276": [
-    1725.839,
-    2701
+    1737.597,
+    2755
    ],
    "277": [
-    1725.183,
-    2436
+    1737.175,
+    2470
    ],
    "278": [
     968.423,
@@ -45898,7 +46799,8 @@
     "fh6_20260903_133758",
     "fh6_20260822_035921",
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -45913,7 +46815,8 @@
     "fh6_20260903_133758",
     "fh6_20260822_035921",
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "dir": "L",
    "radius_m": 18,
@@ -45937,7 +46840,8 @@
     "fh6_20260903_133758",
     "fh6_20260822_035921",
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -45957,7 +46861,8 @@
     "fh6_20260903_133758",
     "fh6_20260822_035921",
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -45976,7 +46881,8 @@
     "fh6_20260903_133758",
     "fh6_20260822_035921",
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -46009,7 +46915,8 @@
    "sessions": [
     "fh6_20260822_035921",
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -46024,7 +46931,8 @@
    "deg": 196,
    "sessions": [
     "fh6_20260822_035921",
-    "fh6_20260822_180405"
+    "fh6_20260822_180405",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -46040,7 +46948,8 @@
    "sessions": [
     "fh6_20260822_035921",
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -46084,7 +46993,8 @@
    "deg": 186,
    "sessions": [
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -46099,7 +47009,8 @@
    "deg": 176,
    "sessions": [
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   },
@@ -46156,7 +47067,8 @@
    "deg": 157,
    "sessions": [
     "fh6_20260822_180405",
-    "fh6_20260822_212747"
+    "fh6_20260822_212747",
+    "fh6_20260905_201758"
    ],
    "model_map": true
   }

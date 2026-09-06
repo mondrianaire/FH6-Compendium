@@ -301,6 +301,7 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 
 | doc | what it settles |
 |---|---|
+| `docs/course-identity-and-names.md` | THE workflow for course id → geometry → common name (settled 2026-09-05): the three ids, the chain, the stages, the verification queries, the never-again list. Read before naming anything or asking for a capture. |
 | `docs/fh6-ui-spec.md` | the in-game Upgrade & Tune UI, transcribed from 758 frames: names, order, units, precision, unlock chains, contextual gating. THE contract for any mimic. |
 | `docs/v1-lessons-audit.md` | 40 ranked regressions from v1 → v2 with fixes and status. |
 | `docs/dashboard-states.md` | the panel's regions, modes and status machine. |

@@ -67,7 +67,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "3"   # 2 = COURSE NAMES columns/tables; 3 = ANCHORS (route_anchor, session_event, ref_route.is_race, course_route.anchor_*) -- all 2026-09-05, applied by migrate()
+SCHEMA_VERSION = "4"   # 2 = COURSE NAMES; 3 = ANCHORS (route_anchor, session_event, ref_route.is_race, course_route.anchor_*); 4 = the game's EVENT CATALOGUE (ref_track_info, ref_race_collection, ref_career_race, ref_rivals_event, ref_car_restriction, v_rivals_route) -- all 2026-09-05, applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -353,6 +353,77 @@ V2_TABLES = {
   start_is_line INTEGER,
   PRIMARY KEY (session_id, i)
 ) WITHOUT ROWID""",
+    # schema 4 -- THE GAME'S EVENT CATALOGUE (ObjectModelGame.zip)
+    "ref_track_info": """CREATE TABLE IF NOT EXISTS ref_track_info (
+  track_key       INTEGER PRIMARY KEY,
+  route_id        TEXT,
+  custom_route_id TEXT,
+  ribbon          TEXT,
+  display_name    TEXT NOT NULL,
+  short_name      TEXT,
+  description     TEXT,
+  name_key        TEXT NOT NULL,
+  use_cross_country_ai INTEGER,
+  blueprint_only  INTEGER,
+  activation_zone TEXT,
+  media_track     TEXT,
+  pi_sort         INTEGER
+)""",
+    "ref_race_collection": """CREATE TABLE IF NOT EXISTS ref_race_collection (
+  collection_key  INTEGER PRIMARY KEY,
+  name            TEXT NOT NULL,
+  description     TEXT,
+  collection_type TEXT,
+  restriction_id  TEXT,
+  forced_restriction_id TEXT,
+  solo INTEGER, coop INTEGER, pvp INTEGER,
+  recommended_cars TEXT
+)""",
+    "ref_career_race": """CREATE TABLE IF NOT EXISTS ref_career_race (
+  race_key        INTEGER PRIMARY KEY,
+  name            TEXT NOT NULL,
+  event_type      TEXT,
+  track_key       INTEGER NOT NULL REFERENCES ref_track_info(track_key),
+  collection_key  INTEGER NOT NULL REFERENCES ref_race_collection(collection_key),
+  race_mode       TEXT,
+  discipline      TEXT,
+  num_laps        INTEGER,
+  n_ai            INTEGER,
+  is_timed INTEGER, has_traffic INTEGER, rivals_enabled INTEGER, teams INTEGER,
+  ui_theme        TEXT,
+  entity_name     TEXT,
+  progression_thread TEXT
+)""",
+    "ref_rivals_event": """CREATE TABLE IF NOT EXISTS ref_rivals_event (
+  rivals_key      INTEGER PRIMARY KEY,
+  name            TEXT NOT NULL,
+  description     TEXT,
+  leaderboard_id  TEXT,
+  collection_key  INTEGER NOT NULL REFERENCES ref_race_collection(collection_key),
+  restriction_id  TEXT,
+  class_id        INTEGER,
+  is_class_based  INTEGER,
+  sort_index      INTEGER,
+  name_key        TEXT NOT NULL,
+  forced_car      TEXT,
+  weather_preset  TEXT
+)""",
+    "ref_car_restriction": """CREATE TABLE IF NOT EXISTS ref_car_restriction (
+  restriction_id  TEXT PRIMARY KEY,
+  car_class_id INTEGER, car_bucket_id INTEGER,
+  pi_min INTEGER, pi_max INTEGER, power_min INTEGER, power_max INTEGER,
+  weight_min INTEGER, weight_max INTEGER, year_min INTEGER, year_max INTEGER,
+  tagline TEXT, description TEXT,
+  data            TEXT
+)""",
+}
+V2_VIEWS = {
+    "v_rivals_route": """CREATE VIEW IF NOT EXISTS v_rivals_route AS
+  SELECT DISTINCT rv.rivals_key, rv.name, rv.class_id, rv.leaderboard_id, cr.race_key, cr.race_mode,
+         cr.discipline, cr.num_laps, ti.track_key, ti.route_id, ti.ribbon, ti.display_name
+    FROM ref_rivals_event rv
+    JOIN ref_career_race cr ON cr.collection_key = rv.collection_key
+    JOIN ref_track_info ti ON ti.track_key = cr.track_key""",
 }
 V2_COLUMNS["session_event"] = [("start_is_line", "INTEGER")]
 
@@ -379,6 +450,10 @@ def migrate(cx):
         if not has_table(cx, name):
             cx.execute(ddl)
             n_tabs += 1
+    for name, ddl in V2_VIEWS.items():
+        if not cx.execute("SELECT 1 FROM sqlite_master WHERE type='view' AND name=?", (name,)).fetchone():
+            cx.execute(ddl)
+            n_tabs += 1
     if meta_get(cx, "schema_version") != SCHEMA_VERSION:
         meta_set(cx, "schema_version", SCHEMA_VERSION)
     cx.commit()
@@ -393,6 +468,8 @@ def missing_v2(cx):
             have = {r[1] for r in cx.execute("PRAGMA table_info(%s)" % table)}
             out += ["%s.%s" % (table, c) for c, _ in cols if c not in have]
     out += [t for t in V2_TABLES if not has_table(cx, t)]
+    out += [v for v in V2_VIEWS if not cx.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='view' AND name=?", (v,)).fetchone()]
     return out
 
 

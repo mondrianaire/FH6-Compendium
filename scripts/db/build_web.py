@@ -95,7 +95,7 @@ def course_candidates(cx):
         SELECT ce.route_key, ce.event_id, e.name, ce.tier, ce.chosen, ce.d_course_m, ce.d_route_m
         FROM course_event ce JOIN ref_event e ON e.event_id = ce.event_id
         ORDER BY ce.route_key, ce.chosen DESC,
-                 CASE ce.tier WHEN 'map' THEN 0 WHEN 'length' THEN 1 WHEN 'declared' THEN 2 ELSE 9 END,
+                 CASE ce.tier WHEN 'game' THEN 0 WHEN 'map' THEN 1 WHEN 'length' THEN 2 WHEN 'declared' THEN 3 ELSE 9 END,
                  ABS(COALESCE(ce.d_course_m, 1e9))"""):
         out.setdefault(r["route_key"], []).append({
             "event_id": r["event_id"], "name": r["name"], "tier": r["tier"],

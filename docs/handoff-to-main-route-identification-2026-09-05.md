@@ -234,3 +234,39 @@ promote only with a strict majority of ALL the course's events (≥ 2 and more t
 22 none, 0 anchored — the spheres corroborated six courses and changed no verdict.
 `4200_-5450` has 6 of its 16 events in route 5031's sphere, the other 10 start elsewhere, so it
 stays `none` with the evidence recorded; `-4750_-1550` is the one I12 WARN.
+
+
+## 8. The join existed all along: `media/ObjectModelGame.zip` (2026-09-05, later the same night)
+
+Section 3's conclusion ("the event definition layer is not present in the install in any
+decodable form") was wrong by one archive. `ObjectModelGame.zip` is plain Deflate and was listed in
+the first sweep as "6,981 entries, 0 matching names" because every entry is
+`source/ScribbleData/<numeric id>.om.xml` — BXML (Forza binary XML) despite the extension, so no
+filename and no ASCII string ever matched. The manifest maps ids to TypeIds; five of them are the
+catalogue:
+
+| TypeId | rows | carries |
+|---|---:|---|
+| `TrackInfoDataSet` | 112 | track key → **`RouteId`**, ribbon, the `CareerTrackInfo` name/description GUIDs |
+| `RaceCollectionDataSet` | 158 | the collection a Rivals event belongs to, its car restriction |
+| `CareerRaceDataSet` | 255 | every career race → track key, collection, race mode, laps |
+| `RivalsEventDataMap` | 604 | 88 names × 7 classes → collection key, leaderboard id |
+| `CarRestrictionMap` | 541 | class / PI / power / weight limits |
+
+Rivals event → collection → career race → track → route resolves **88 of 88** names to exactly one
+route. Checked against the names the geometry had derived: 10 of 12 agree; Edamame Circuit sits on
+the uncatalogued twin 30006 where the game says 6001, and The Colossus is route 132, whose `.owt`
+we had mis-parsed as 3.1 km. Two length-tier candidates were wrong (`3600_6850` is Venus Sprint,
+not Festival Sprint; `-3250_-7850` is Coastline Sprint, not Satta Sprint), and both former ties
+(Soni/Irokawa, Sotoyama/Sunflower) are settled by the game.
+
+Built: `scripts/telemetry/fh6_bxml.py` (reader, from Nenkai's MIT reference), stage `objectmodel`
+→ `ref_track_info`, `ref_race_collection`, `ref_career_race`, `ref_rivals_event`,
+`ref_car_restriction`, `v_rivals_route`; stage `events` binds `ref_event.route_id` for every Rivals
+row and adds the 255 career races; stage `route_names` gains tier **game** (declared > game > map >
+length): `ref_route.name` for all 100 catalogued routes we have files for (`game:trackinfo`),
+`course.name` for every identified course (`derived:game`), the map/length derivations kept as the
+cross-check and reported when they disagree (I13). First live run: 18 courses named (16 by the
+game), 100 routes named, 0 ties, 0 disagreements. The decrypted `GameTunableSettings.zip` (path A of
+the decrypt research) held no catalogue — `EventNames.xml` is engine event names and `AI/AITimes.xml`
+is 53 AI time tables, 39 of them for route ids that are not in this game.

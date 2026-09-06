@@ -50,6 +50,9 @@ const KG_LB = 2.2046226;
 // dashboard's other "not the real thing yet" chip, never a picker.
 function nameChip(naming) {
   if (!naming) return "";
+  // 'derived:game' (2026-09-05): the game's own catalogue names the identified route -- the name is
+  // the game's word for that road, not a derivation; the map only said WHICH road.
+  if (naming.name_source === "derived:game") return '<span class="chip on">game · verified</span>';
   if (naming.name_confidence === "verified") return '<span class="chip on">auto · verified</span>';
   if (naming.name_confidence === "derived") return '<span class="chip b">auto · derived</span>';
   if (naming.name_confidence === "read") return '<span class="chip">typed</span>';

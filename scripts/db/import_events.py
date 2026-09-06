@@ -14,9 +14,14 @@ the same way -- event_id is derived FROM the name, so a collision there is silen
 waiting to happen.
 
 Length is the only topology the screen gives: is_loop follows the name's own suffix (' Circuit'
-/ ' Sprint' / the two lap-around specials), never a guess from the route id, because the route id
-does not exist here at all (route_id/class_limit/pi_limit stay NULL until an event dataset
-decodes them).
+/ ' Sprint' / the two lap-around specials) -- until the game's own catalogue says otherwise.
+
+THE GAME'S CATALOGUE (2026-09-05): stage objectmodel (media/ObjectModelGame.zip) holds the chain
+Rivals event -> race collection -> career race -> track -> route id (v_rivals_route). When it has
+run, every Rivals row here gets route_id, track_id, is_loop (Circuit/P2P ribbon) and a discipline
+from the game, and every career race becomes a kind='career' row (event_id 'career:<key>', no
+length -- the map/length tiers never see those; they exist so a typed name is a checked join to
+the whole event list). The screen files remain the source of the DISPLAYED length.
 
 Run:  python scripts/db/import_events.py [--db PATH] [-v]
 """
@@ -144,6 +149,48 @@ def run(cx, verbose=False):
         n_name_only += 1
     disciplines["name-only"] = n_name_only
 
+    # ---- the game's own catalogue, when stage objectmodel has run ---------------------------
+    n_bound = 0
+    if fh6db.has_table(cx, "ref_track_info") and cx.execute("SELECT COUNT(*) FROM ref_track_info").fetchone()[0]:
+        game = {}                               # rivals name -> {route_id, track_key, ribbon, discipline}
+        for r in cx.execute("SELECT name, route_id, track_key, ribbon, discipline FROM v_rivals_route"):
+            g = game.setdefault(r["name"], {"route_id": set(), "track_key": set(), "ribbon": set(), "discipline": set()})
+            for k in g:
+                if r[k] is not None:
+                    g[k].add(r[k])
+        bound = []
+        for row in erows:
+            g = game.get(row[2])
+            if not g or len(g["route_id"]) != 1:
+                bound.append(row)
+                continue
+            row = list(row)
+            row[4] = next(iter(g["route_id"]))                              # route_id
+            # track_id stays NULL: it references ref_track (the Tracks table, 58 world/test rows),
+            # not the TrackInfo key space. The track key rides in `data`; join ref_track_info by route_id.
+            d = json.loads(row[8]) if row[8] else {}
+            d["track_key"] = next(iter(g["track_key"])) if len(g["track_key"]) == 1 else sorted(g["track_key"])
+            row[8] = json.dumps(d)
+            if len(g["ribbon"]) == 1:
+                rb = next(iter(g["ribbon"]))
+                row[11] = 1 if rb == "Circuit" else (0 if rb == "P2P" else row[11])
+            if row[9] is None and len(g["discipline"]) == 1:
+                row[9] = next(iter(g["discipline"]))
+            bound.append(tuple(row))
+            n_bound += 1
+        erows = bound
+        for r in cx.execute("""SELECT cr.race_key, cr.name, cr.discipline, cr.race_mode, cr.num_laps, cr.event_type,
+                                      ti.route_id, ti.track_key, ti.ribbon
+                                 FROM ref_career_race cr JOIN ref_track_info ti USING(track_key)"""):
+            erows.append(("career:%d" % r["race_key"], "career", r["name"], None, r["route_id"],
+                          None, None, None,
+                          json.dumps({"race_mode": r["race_mode"], "num_laps": r["num_laps"], "event_type": r["event_type"],
+                                      "track_key": r["track_key"]}),
+                          r["discipline"], None,
+                          1 if r["ribbon"] == "Circuit" else (0 if r["ribbon"] == "P2P" else None),
+                          "objectmodel:CareerRaceDataSet"))
+    disciplines["game-bound"] = n_bound
+
     with cx:
         cx.execute("BEGIN")                  # a PRAGMA outside a transaction autocommits and resets itself
         cx.execute("PRAGMA defer_foreign_keys=ON")
@@ -155,7 +202,7 @@ def run(cx, verbose=False):
         cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep_ev(event_id TEXT PRIMARY KEY)")
         cx.execute("DELETE FROM _keep_ev")
         cx.executemany("INSERT INTO _keep_ev(event_id) VALUES(?)", [(e,) for e in new_ids])
-        retired = "SELECT event_id FROM ref_event WHERE kind='rivals' AND event_id NOT IN (SELECT event_id FROM _keep_ev)"
+        retired = "SELECT event_id FROM ref_event WHERE kind IN ('rivals', 'career') AND event_id NOT IN (SELECT event_id FROM _keep_ev)"
         cx.execute("UPDATE course SET event_id=NULL WHERE event_id IN (%s)" % retired)
         cx.execute("UPDATE ref_route SET name=NULL, event_id=NULL, name_source=NULL, name_confidence=NULL"
                    " WHERE event_id IN (%s)" % retired)

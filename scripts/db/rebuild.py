@@ -33,6 +33,7 @@ import fh6db                                            # noqa: E402
 
 STAGES = [
     ("gamedb", "import_gamedb.py", "the game's own catalogue, strings, physics and cars"),
+    ("objectmodel", "import_objectmodel.py", "the game's event catalogue: tracks, races, collections, Rivals events -> route ids"),
     ("events", "import_events.py", "the Rivals catalogue as displayed: names, lengths, guids -> ref_event"),
     ("curves", "import_curves.py", "torque curves per camshaft, friction curves per compound"),
     ("parts_extra", "import_parts_extra.py",
@@ -55,7 +56,8 @@ STAGE_NAMES = [s[0] for s in STAGES]
 #: is taken by expand_only. `containers` deliberately has none: it runs on every save and the laps
 #: it could re-bind are re-bound by the next session close anyway.
 DOWNSTREAM = {
-    "gamedb": ["events"],
+    "gamedb": ["objectmodel", "events"],
+    "objectmodel": ["events", "route_names"],
     "events": ["route_names"],
     "telemetry": ["course_match", "route_names", "corners", "diagnosis"],
     "routes": ["anchors", "surface", "course_match", "route_names", "corners", "diagnosis"],
@@ -169,7 +171,7 @@ def check_invariants(cx):
         for d in downs:
             if d in ran and ran[d] < ran[up]:
                 fail("I2-stale", "%s last ran %s, before %s (%s): rerun it" % (d, ran[d], up, ran[up]))
-            elif d not in ran and up in ("telemetry", "routes", "events", "anchors"):
+            elif d not in ran and up in ("telemetry", "routes", "events", "anchors", "objectmodel"):
                 fail("I2-stale", "%s has never run although %s has" % (d, up))
 
     # I3 the Rivals catalogue and its guid join
@@ -210,10 +212,16 @@ def check_invariants(cx):
         n_noprov = _one(cx, "SELECT COUNT(*) FROM course WHERE name IS NOT NULL AND (name_source IS NULL OR name_confidence IS NULL)")
         if n_noprov:
             fail("I5-provenance", "%d named courses without name_source/name_confidence (telemetry ran after route_names?)" % n_noprov)
-        n_noev = _one(cx, "SELECT COUNT(*) FROM course WHERE name_source LIKE 'derived:%' AND event_id IS NULL")
+        # 'derived:game' may carry no event: a catalogued route no Rivals or career event reaches
+        # (IE Drive sections, cut content) still names the course; a map/length derivation may not
+        n_noev = _one(cx, "SELECT COUNT(*) FROM course WHERE name_source LIKE 'derived:%' "
+                          "AND name_source <> 'derived:game' AND event_id IS NULL")
         if n_noev:
             fail("I5-provenance", "%d derived course names without event_id" % n_noev)
-        n_rr = _one(cx, "SELECT COUNT(*) FROM ref_route WHERE name IS NOT NULL AND (event_id IS NULL OR name_source IS NULL)")
+        # a route the game's catalogue names may have no event at all (IE Drive sections, cut content):
+        # name_source 'game:trackinfo' with event_id NULL is provenanced; a DERIVED name without its event is not
+        n_rr = _one(cx, """SELECT COUNT(*) FROM ref_route WHERE name IS NOT NULL
+                           AND (name_source IS NULL OR (event_id IS NULL AND name_source NOT LIKE 'game:%'))""")
         if n_rr:
             fail("I5-provenance", "%d named ref_route rows without event_id/name_source" % n_rr)
         for rk, dn, ev in cx.execute("""SELECT route_key, declared_name, event_id FROM course
@@ -239,6 +247,37 @@ def check_invariants(cx):
             fail("I7-surface", "ref_route_surface is empty (routes ran after surface?)")
         elif not _one(cx, "SELECT COUNT(*) FROM ref_route WHERE road_class IS NOT NULL"):
             fail("I7-surface", "ref_route.road_class is NULL everywhere")
+
+    # I13 the game's catalogue: loaded, every Rivals name bound to one route, ref_route named by it
+    if "objectmodel" in ran and "ref_track_info" in tabs:
+        n_ti = _one(cx, "SELECT COUNT(*) FROM ref_track_info")
+        if n_ti < 100:
+            fail("I13-catalogue", "ref_track_info holds %d rows (expected ~112)" % n_ti)
+        n_multi = _one(cx, """SELECT COUNT(*) FROM (SELECT name FROM v_rivals_route GROUP BY name
+                              HAVING COUNT(DISTINCT route_id) > 1)""")
+        if n_multi:
+            fail("I13-catalogue", "%d Rivals names resolve to more than one route" % n_multi)
+        if "events" in ran:
+            n_unbound = _one(cx, """SELECT COUNT(*) FROM ref_event e WHERE e.kind='rivals' AND e.route_id IS NULL
+                                    AND e.name IN (SELECT name FROM v_rivals_route)""")
+            if n_unbound:
+                fail("I13-catalogue", "%d Rivals events have no route_id although the catalogue binds them (events ran before objectmodel?)" % n_unbound)
+        if "route_names" in ran:
+            n_unnamed = _one(cx, """SELECT COUNT(*) FROM ref_route r WHERE r.name IS NULL
+                                    AND r.route_id IN (SELECT route_id FROM ref_track_info)""")
+            if n_unnamed:
+                fail("I13-catalogue", "%d catalogued routes carry no name after route_names" % n_unnamed)
+            last = cx.execute("SELECT notes FROM import_run WHERE kind='route_names' AND ok=1 ORDER BY started_utc DESC LIMIT 1").fetchone()
+            try:
+                gvm = (json.loads(last[0]) if last and last[0] else {}).get("game_vs_map") or []
+            except Exception:                            # noqa: BLE001
+                gvm = []
+            for x in gvm:
+                if "ratio" in x:
+                    warn("I13-catalogue", "catalogued route %s (%s) is %.2fx its event's length (%d m vs %d m): sections/lead-in in the .owt?"
+                         % (x["route_id"], x["game"], x["ratio"], x["route_len_m"], x["event_len_m"]))
+                else:
+                    warn("I13-catalogue", "derived name disagrees with the game's: %s" % json.dumps(x))
 
     # I12 anchors: the spheres are loaded, and what they say about course_route is visible
     if "anchors" in ran and "route_anchor" in tabs:

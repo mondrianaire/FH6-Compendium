@@ -31,7 +31,8 @@ class ExpandOnlyTest(unittest.TestCase):
         self.assertEqual(got, sorted(got, key=rebuild.STAGE_NAMES.index))
 
     def test_no_cascade_case_is_the_bare_list(self):
-        self.assertEqual(rebuild.expand_only(["gamedb"]), ["gamedb", "events", "route_names"])
+        self.assertEqual(rebuild.expand_only(["gamedb"]), ["gamedb", "objectmodel", "events", "route_names"])
+        self.assertEqual(rebuild.expand_only(["objectmodel"]), ["objectmodel", "events", "route_names"])
 
 
 class StageNameLiteralsTest(unittest.TestCase):

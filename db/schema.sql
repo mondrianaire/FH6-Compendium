@@ -597,7 +597,7 @@ CREATE TABLE IF NOT EXISTS course (
   -- COURSE NAMES (added 2026-09-05): the INPUT a person typed, kept apart from the OUTPUT the rule derives
   declared_name    TEXT,                 -- what data/routes.json (first) or the course model says; written by telemetry; never derived
   declared_source  TEXT,                 -- routes.json 'source' ('dashboard 2026-09-02') | 'course model'
-  name_source      TEXT,                 -- declared | derived:map | derived:map+declared | derived:length | derived:length+declared
+  name_source      TEXT,                 -- declared | derived:game (the catalogue named the identified route, 2026-09-05) | derived:map | derived:map+declared | derived:length | derived:length+declared
   name_confidence  TEXT,                 -- verified | derived | read   (the schema's confidence vocabulary)
   turn_count   INTEGER,
   n_laps       INTEGER,
@@ -799,7 +799,7 @@ CREATE TABLE IF NOT EXISTS ref_route (
   route_id    TEXT PRIMARY KEY,        -- '281' from Route281.owt
   name        TEXT,                    -- filled by stage route_names when a DRIVEN course identifies this route (course_route verified/probable) AND the Rivals catalogue length agrees within the screen's rounding; import_routes.py writes NULL and never anything else
   event_id         TEXT REFERENCES ref_event(event_id),   -- COURSE NAMES (2026-09-05): which catalogue row named this centre-line
-  name_source      TEXT,                                  -- derived:map | derived:map+declared
+  name_source      TEXT,                                  -- game:trackinfo (every catalogued route, driven or not) | derived:map | derived:map+declared
   name_confidence  TEXT,                                  -- verified | derived
   length_m    REAL,
   n_points    INTEGER,
@@ -834,6 +834,94 @@ CREATE TABLE IF NOT EXISTS ref_route_point (
   z           REAL NOT NULL,
   PRIMARY KEY (route_id, i)
 ) WITHOUT ROWID;
+
+
+-- ============================================================================
+-- THE GAME'S EVENT CATALOGUE (added 2026-09-05) -- where a NAME meets a ROUTE ID.
+-- Source: media/ObjectModelGame.zip, five BXML documents (stage objectmodel, scripts/db/
+-- import_objectmodel.py, reader scripts/telemetry/fh6_bxml.py). The string tables only ever
+-- carried GUID -> text; these rows carry GUID -> route. Chain for a Rivals name:
+--   ref_rivals_event.collection_key -> ref_career_race.collection_key -> ref_career_race.track_key
+--   -> ref_track_info.route_id (= Route<id>.owt = ref_route.route_id)      -- 88/88 unique
+-- ref_route.name is set from ref_track_info.display_name by stage route_names (tier game,
+-- name_source 'game:trackinfo', confidence verified); the map/length derivations stay as the
+-- cross-check that the driven course really is that road.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS ref_track_info (
+  track_key       INTEGER PRIMARY KEY,     -- TrackInfoDataSet key; CareerRace.Track.Key
+  route_id        TEXT,                    -- Route<id>.owt id; not an FK: 11 rows name playground/cut ids we have no file for
+  custom_route_id TEXT,
+  ribbon          TEXT,                    -- Circuit | P2P | Playground
+  display_name    TEXT NOT NULL,           -- CareerTrackInfo.IDS_DisplayName_<guid>, resolved
+  short_name      TEXT,
+  description     TEXT,
+  name_key        TEXT NOT NULL,           -- the IDS_DisplayName key it resolved through (checked join)
+  use_cross_country_ai INTEGER,
+  blueprint_only  INTEGER,
+  activation_zone TEXT,
+  media_track     TEXT,                    -- Brio
+  pi_sort         INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS ref_race_collection (
+  collection_key  INTEGER PRIMARY KEY,
+  name            TEXT NOT NULL,           -- CareerRaceCollection.IDS_Name_<guid>, resolved
+  description     TEXT,
+  collection_type TEXT,                    -- Exhibition | Championship | TeamInfected | TeamKing | FlagRush
+  restriction_id  TEXT,                    -- ref_car_restriction
+  forced_restriction_id TEXT,
+  solo INTEGER, coop INTEGER, pvp INTEGER,
+  recommended_cars TEXT                    -- JSON list of ordinals
+);
+
+CREATE TABLE IF NOT EXISTS ref_career_race (
+  race_key        INTEGER PRIMARY KEY,
+  name            TEXT NOT NULL,           -- CareerRace.IDS_Name_<guid>, resolved
+  event_type      TEXT,                    -- Campaign | Showcase | Street
+  track_key       INTEGER NOT NULL REFERENCES ref_track_info(track_key),
+  collection_key  INTEGER NOT NULL REFERENCES ref_race_collection(collection_key),
+  race_mode       TEXT,                    -- LapsRace | P2P | StreetRace | Scramble | TrailRace | CrossCountry | ... | Drag | Touge
+  discipline      TEXT,                    -- road | street | drag | dirt | cross-country | showcase | rush | playground
+  num_laps        INTEGER,
+  n_ai            INTEGER,
+  is_timed INTEGER, has_traffic INTEGER, rivals_enabled INTEGER, teams INTEGER,
+  ui_theme        TEXT,
+  entity_name     TEXT,
+  progression_thread TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ref_rivals_event (
+  rivals_key      INTEGER PRIMARY KEY,     -- RivalsEventDataMap key
+  name            TEXT NOT NULL,           -- RivalsEventData.IDS_Name_<guid>, resolved: 88 names x 7 classes
+  description     TEXT,
+  leaderboard_id  TEXT,
+  collection_key  INTEGER NOT NULL REFERENCES ref_race_collection(collection_key),
+  restriction_id  TEXT,                    -- ref_car_restriction: the class bucket of this variant
+  class_id        INTEGER,                 -- ref_class.class_id, from the restriction
+  is_class_based  INTEGER,
+  sort_index      INTEGER,
+  name_key        TEXT NOT NULL,
+  forced_car      TEXT,
+  weather_preset  TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ref_car_restriction (
+  restriction_id  TEXT PRIMARY KEY,        -- CarRestrictionMap key (guid)
+  car_class_id INTEGER, car_bucket_id INTEGER,
+  pi_min INTEGER, pi_max INTEGER, power_min INTEGER, power_max INTEGER,
+  weight_min INTEGER, weight_max INTEGER, year_min INTEGER, year_max INTEGER,
+  tagline TEXT, description TEXT,
+  data            TEXT                     -- JSON: every other comparator/id field
+);
+
+-- one row per Rivals variant with the route it resolves to (the chain above, flattened)
+CREATE VIEW IF NOT EXISTS v_rivals_route AS
+  SELECT DISTINCT rv.rivals_key, rv.name, rv.class_id, rv.leaderboard_id, cr.race_key, cr.race_mode,
+         cr.discipline, cr.num_laps, ti.track_key, ti.route_id, ti.ribbon, ti.display_name
+    FROM ref_rivals_event rv
+    JOIN ref_career_race cr ON cr.collection_key = rv.collection_key
+    JOIN ref_track_info ti ON ti.track_key = cr.track_key;
 
 -- ANCHORS (2026-09-05): the game's race-activation spheres, from
 -- media/tracks/brio/triggerzones/tz_race_activations/race_triggers.tz (plaintext XML, shipped).
@@ -885,7 +973,9 @@ CREATE TABLE IF NOT EXISTS course_route (
 );
 
 -- ============================================================================
--- COURSE NAMES (added 2026-09-05) -- how a course and a centre-line get a NAME, with evidence
+-- COURSE NAMES (added 2026-09-05) -- how a course and a centre-line get a NAME, with evidence.
+-- Precedence since the catalogue landed the same night: declared > game > map > length (tier 'game'
+-- rows carry the identified route and the catalogue's event; see THE GAME'S EVENT CATALOGUE above).
 -- ============================================================================
 -- The game never says which Rivals route a start cell is. Three sources exist and none is
 -- sufficient alone:

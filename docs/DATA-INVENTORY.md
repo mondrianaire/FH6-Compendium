@@ -111,7 +111,7 @@ done when every one of its tables or entries is either imported or has a row her
 |---|---|---|
 | `corner_obs` | 0 | per-corner history per lap — UNEXPORTED, the missing per-turn record; empty pending `course_match`+`corners` rerunning past the 2026-09-05 schema change (see rebuild.py's I6 check). |
 | `course` | 70 | columns: route_key, name, is_rivals, event_id, length_m, turn_count… |
-| `course_event` | 0 | every course × candidate-event pairing `route_names` weighed — tier (map/length/declared) plus its evidence columns, `chosen`=1 on the winner. Filled by stage `route_names`; awaits the 2026-09-05 schema migration on this DB. |
+| `course_event` | 60+ | every course × candidate-event pairing `route_names` weighed — tier (game/map/length/declared) plus its evidence columns, `chosen`=1 on the winner. Filled by stage `route_names`. |
 | `course_route` | 68 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… + `anchor_route_id`, `anchor_events`, `anchor_agree` (2026-09-05) — the sphere most of the course's events started in and whether it is the geometry's route. match_kind gained `anchored` (route_id stays NULL, identity in `anchor_route_id` only): a sphere holding a strict majority of the course's events, shape unverified, never reaches corners, the centre-line overlay or naming. Recomputed wholesale by stage `course_match`; one row per course with ≥12 geometry points. |
 | `course_turn` | 891 | the course's own turns (the namespace the map and the trace use). |
 | `diag_event` | 8686 | every detected failure incident, placed on a turn. |
@@ -132,7 +132,13 @@ done when every one of its tables or entries is either imported or has a row her
 | `ref_compound` | 41 | all 41 tyre compounds with slip peaks and friction scales — the global grip ladder. |
 | `ref_drivetrain` | 662 | columns: drivetrain_id, drivetype, shift_system, is_swap_set, n_cars, data |
 | `ref_engine` | 670 | columns: engine_id, name, media_name, config, cylinders, displacement_cc… |
-| `ref_event` | 88 | the Rivals catalogue as displayed — name, length_m (a screen read, ±80 m), is_loop; filled by stage `events`: 23 Road routes with a length from `data/rivals-routes-road.json` + 65 name-only rows (length NULL, never matched by length) from the `RivalsEventData` strings, so a typed course name is a checked join, not an unknown string. |
+| `ref_track_info` | 112 | the game's own track table (ObjectModelGame.zip `TrackInfoDataSet`): track key -> `route_id` (= Route<id>.owt), ribbon Circuit/P2P/Playground, the CareerTrackInfo display name and description resolved through `ref_string`. THE name<->route binding (2026-09-05). Stage `objectmodel`. |
+| `ref_race_collection` | 158 | championships/exhibitions (`RaceCollectionDataSet`): name, type, the car-restriction it imposes, recommended cars. Stage `objectmodel`. |
+| `ref_career_race` | 255 | every career race (`CareerRaceDataSet`): name, track key, collection, race mode -> discipline, laps, AI count, flags. Stage `objectmodel`. |
+| `ref_rivals_event` | 604 | the 88 Rivals names x 7 car classes (`RivalsEventDataMap`): leaderboard id, collection, restriction -> `class_id`. Stage `objectmodel`. |
+| `ref_car_restriction` | 541 | every event car restriction (`CarRestrictionMap`): class, bucket, PI/power/weight/year bounds, tagline. Stage `objectmodel`. |
+| `v_rivals_route` | view | Rivals name -> race -> track -> route id, flattened; 88/88 names resolve to exactly one route. |
+| `ref_event` | 343 | the Rivals catalogue as displayed — name, length_m (a screen read, ±80 m), is_loop; filled by stage `events`: 23 Road routes with a length from `data/rivals-routes-road.json` + 65 name-only rows (length NULL, never matched by length) from the `RivalsEventData` strings, so a typed course name is a checked join, not an unknown string. |
 | `ref_event_string` | 604+ | every `RivalsEventData` IDS_Name guid (604 across 88 names, 7 per route) plus the IDS_Description guids that match a Road route's description verbatim, joined live against `ref_string` so a name can never drift from the game's own string. Filled by stage `events`. |
 | `ref_friction_curve` | 738 | the friction curve behind every compound: 41 compounds × 3 channels × 3 surfaces × 2 load bands. Explode it with `v_friction_point` (slip, μ). |
 | `ref_motor` | 19 | columns: motor_id, name, media_name, mass_kg, battery_kwh, redline_rpm… |
@@ -256,6 +262,7 @@ service (8001) adds `POST /rebuild`, `GET /status` and `GET /watch` (code + data
 |---|---|
 | `C:\XboxGames\GameSave\pgs\…\ContainersRoot\Tuning_<ordinal>_<stamp>\` | READ-ONLY. `Data` (598 B: parts, sliders, gears), `header` (title, description, creator, XUID, created), `Thumb.png` (the render: WebP own / BC7 `burG` downloaded). |
 | `C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\aitracks\Route*.owt/.nav` | 169 route centre-lines with lane width, banking, road class. A file is a graph of 1-6 sections (primary chain + alternate lines); `ref_route` holds the primary chain, `fh6_owt.parse()['sections']` keeps the rest. |
+| `…\media\ObjectModelGame.zip` | 30 MB, plain Deflate, READABLE: ~7,000 BXML documents (`source/ScribbleData/<id>.om.xml`, manifest by TypeId) — the game's object-model data. Five are the event catalogue (`TrackInfoDataSet`, `RaceCollectionDataSet`, `CareerRaceDataSet`, `RivalsEventDataMap`, `CarRestrictionMap`) that binds every route name to its route id; read by `scripts/telemetry/fh6_bxml.py` -> stage `objectmodel`. Was never encrypted; found 2026-09-05 after the string tables, route files and the decrypted `GameTunableSettings.zip` all proved to carry no such join. |
 | `…\brio\freeroam\Brio_00.nav` | the world nav mesh (38,473 nodes) — what is drivable. |
 | `…\media\stripped\stringtables\EN.zip` | the string tables. |
 | `C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite` | the decrypted game DB, 205 tables. Tables in use: CarClasses, Data_Car, Data_Motor, Environments, List_AeroPhysics, List_AntiSwayPhysics, List_Aspiration, List_CarMake, List_Cylinders, List_DriveType, List_EnginePlacement, List_PartManufacturer, List_SpringDamperPhysics, List_TireCompound, List_TireFrictionCurve, List_TireFrictionMultiCurve, List_TorqueCurve, List_TyreCurveDB, List_UpgradeCarBody, List_UpgradeDrivetrain, List_UpgradeEngine, List_UpgradeTireCompound, List_Wheels, Tracks, Upgrades. NEVER run the .exe/.msi files in that folder. |
@@ -308,6 +315,7 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/db/fh6db.py` | 660 lines |  |
 | `scripts/db/import_containers.py` | 355 lines |  |
 | `scripts/db/import_anchors.py` | 70 lines | the race-activation spheres → `route_anchor`, `ref_route.is_race`. |
+| `scripts/db/import_objectmodel.py` | 260 lines | the game's event catalogue out of ObjectModelGame.zip -> `ref_track_info`, `ref_race_collection`, `ref_career_race`, `ref_rivals_event`, `ref_car_restriction`. |
 | `scripts/db/import_course_match.py` | 220 lines | how our courses map onto the game's routes — from the DB, no game files; corroborated and tie-broken by the spheres. |
 | `scripts/db/import_diagnosis.py` | 325 lines |  |
 | `scripts/db/import_events.py` | 165 lines | the Rivals catalogue as displayed: names, lengths, guids → ref_event. |
@@ -325,6 +333,7 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/telemetry/fh6_manifest.py` | 263 lines | Manifest.xml option lists. |
 | `scripts/telemetry/fh6_nav.py` | 430 lines | the nav mesh parser. |
 | `scripts/telemetry/fh6_anchors.py` | 90 lines | the `race_triggers.tz` reader: parse / load / nearest / inside. |
+| `scripts/telemetry/fh6_bxml.py` | 160 lines | Forza binary XML (BXML) <-> ElementTree, from Nenkai's MIT reference; `python scripts/telemetry/fh6_bxml.py <file.om.xml> [out.xml]`. |
 | `scripts/telemetry/fh6_owt.py` | 306 lines | the route file parser. |
 | `scripts/telemetry/fh6_pi_solve.py` | 299 lines | the per-part PI solver. |
 | `scripts/telemetry/fh6_swatchbin.py` | 655 lines |  |
@@ -337,7 +346,7 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/telemetry/verify_workflow.py` | 476 lines | the assertion harness. |
 | `scripts/rebuild_service.py` | 200 lines | the import + regenerate service and the live-reload channel (8001). |
 
-`tests/` — the pipeline's test suite (`python -m unittest discover -s tests -t .`): the naming rule, the events import, the cascade, course_route surviving telemetry, the anchors layer. 34 tests as of 2026-09-05.
+`tests/` — the pipeline's test suite (`python -m unittest discover -s tests -t .`): the naming rule and its game tier, the events import, the object-model import, the cascade, course_route surviving telemetry, the anchors layer. 47 tests as of 2026-09-05.
 
 ## 8. Two rules this file exists to enforce
 

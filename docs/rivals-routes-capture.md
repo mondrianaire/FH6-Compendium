@@ -4,8 +4,11 @@
 → stage `route_names`. The Route Length on this screen is the only length key the game gives for a
 Rivals route; without it a course on that road can only ever carry a typed name.
 
-**Status:** Road Racing done (2026-09-01, 23 routes). Not yet recorded: **Dirt Racing, Cross
-Country, Street Scene, Drag Racing** (65 routes between them, all already in `ref_event` name-only).
+**Status (2026-09-05, revised):** Road Racing and Dirt Racing recorded. **No further recording is
+needed for names**: the game's own catalogue in `media/ObjectModelGame.zip` (stage `objectmodel`)
+binds all 88 Rivals names to their route ids, so every identified course is named by the game.
+A recording still adds the DISPLAYED Route Length for Cross Country / Street Scene / Drag Racing
+(`ref_event.length_m`), which only the length tier and the dashboard use — optional now.
 
 ## In game (about 3 minutes per discipline)
 

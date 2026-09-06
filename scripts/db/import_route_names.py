@@ -5,8 +5,15 @@ DB-only: no game files, no course models. Every input is already a column (cours
 ref_route, ref_event); this stage is pure recomputation over them, so it resets its own outputs
 first and rebuilds them from scratch every run -- idempotent, deterministic.
 
-THREE TIERS, in precedence order map > declared > length:
+FOUR TIERS, in precedence order declared > game > map > length:
 
+  game     (2026-09-05) cr.match_kind IN ('verified','probable') identifies a game route R, and the
+           game's own catalogue (ref_track_info, stage objectmodel) names R -- the name is the
+           game's, not derived: course.name_source 'derived:game', confidence verified, and
+           ref_route.name for EVERY route the catalogue names ('game:trackinfo'), driven or not.
+           A 'probable' whose runner_up is the catalogued twin of an uncatalogued route_id (6001
+           vs its mirror 30006) takes the catalogued one. No length test: the catalogue is the
+           authority on WHICH name, the map on WHERE; a length disagreement is reported, not vetoed.
   map      cr.match_kind IN ('verified','probable') identifies a game route R. R and a Rivals
            catalogue event agree in length (both against R's own length AND the driven course's
            length) -> the map itself names the course, and the route too (ref_route.name).
@@ -105,25 +112,90 @@ def run(cx, verbose=False):
     # the declared tier searches ANY kind, ANY length -- a wider net than the map/length tiers
     all_events = {r["event_id"]: dict(r) for r in cx.execute(
         "SELECT event_id, name, length_m, is_loop FROM ref_event")}
+    # a name that both a Rivals event and a career race carry resolves to the Rivals one; career
+    # races that share a name with each other (47 names do) all stay listed, so the declared tier's
+    # "exactly one event" test still sees the ambiguity (review, 2026-09-05)
     name_index = defaultdict(list)
-    for eid, e in all_events.items():
-        if e["name"] is not None:
-            name_index[e["name"]].append(eid)
+    for eid, e in sorted(all_events.items(), key=lambda t: (0 if t[0].startswith("rivals:") else 1, t[0])):
+        if e["name"] is None:
+            continue
+        if eid.startswith("career:") and any(x.startswith("rivals:") for x in name_index[e["name"]]):
+            continue
+        name_index[e["name"]].append(eid)
 
     routes = {r["route_id"]: dict(r) for r in cx.execute(
         "SELECT route_id, length_m, is_loop, road_class, bbox_x0, bbox_x1, bbox_z0, bbox_z1 FROM ref_route")}
     course_routes = {r["route_key"]: dict(r) for r in cx.execute(
-        "SELECT route_key, route_id, match_kind FROM course_route")}
+        "SELECT route_key, route_id, match_kind, runner_up FROM course_route")}
+
+    # ---- the game's catalogue: route_id -> (name, event_id) ------------------------------
+    # One TrackInfo row per route, chosen when the game lists two for one id (2091 carries both
+    # 'Shikisai Sprint' and the carried-over 'Panoramica Sprint'): the row a Rivals event reaches,
+    # else the row a career race reaches, else the lowest key.
+    game_routes = {}
+    if fh6db.has_table(cx, "ref_track_info"):
+        rivals_of = {}
+        for r in cx.execute("SELECT name, track_key FROM v_rivals_route"):
+            rivals_of.setdefault(r["track_key"], set()).add(r["name"])
+        raced = {r[0] for r in cx.execute("SELECT DISTINCT track_key FROM ref_career_race")}
+        ev_by_name = defaultdict(list)
+        for r in cx.execute("SELECT event_id, name, kind FROM ref_event WHERE route_id IS NOT NULL"):
+            ev_by_name[r["name"]].append((0 if r["kind"] == "rivals" else 1, r["event_id"]))
+        cand = defaultdict(list)
+        for r in cx.execute("SELECT track_key, route_id, display_name FROM ref_track_info WHERE route_id IS NOT NULL"):
+            rank = (0 if r["track_key"] in rivals_of else (1 if r["track_key"] in raced else 2), r["track_key"])
+            cand[r["route_id"]].append((rank, r["display_name"], r["track_key"]))
+        for rid, lst in cand.items():
+            lst.sort()
+            _rank, name, tk = lst[0]
+            evs = sorted(ev_by_name.get(name, []))
+            game_routes[rid] = {"name": name, "track_key": tk, "event_id": evs[0][1] if evs else None,
+                                "alternates": [x[1] for x in lst[1:]]}
     courses = [dict(r) for r in cx.execute(
         "SELECT route_key, length_m, declared_name, geometry FROM course "
         "WHERE route_key NOT LIKE 'loop:%'")]
+
+    used_pairs = defaultdict(set)          # route_key -> {event_id} already given a course_event row
+
+    # ---- pass 0: game tier -- the catalogue names the identified route -----------------
+    rows_game = []
+    chosen_game = {}                       # route_key -> (event_id, name, source, confidence)
+    game_route_of = {}                     # route_key -> the route_id the game name came from
+    for c in courses:
+        rk = c["route_key"]
+        cr = course_routes.get(rk)
+        if not (cr and cr["match_kind"] in ("verified", "probable")):
+            continue
+        pick = None
+        if cr["route_id"] in game_routes:
+            pick = cr["route_id"]
+        elif cr["match_kind"] == "probable" and cr.get("runner_up") in game_routes:
+            pick = cr["runner_up"]           # the catalogued twin of an uncatalogued mirror
+        if pick is None:
+            continue
+        g = game_routes[pick]
+        R = routes.get(pick) or {}
+        ev = all_events.get(g["event_id"]) if g["event_id"] else None
+        L_c = c["length_m"]
+        d_route_m = (R.get("length_m") - ev["length_m"]) if (ev and ev["length_m"] is not None and R.get("length_m") is not None) else None
+        d_course_m = (L_c - ev["length_m"]) if (ev and ev["length_m"] is not None and L_c is not None) else None
+        D = c["declared_name"]
+        declared_ok = None if D is None else (1 if D == g["name"] else 0)
+        if g["event_id"]:
+            rows_game.append((rk, g["event_id"], "game", pick, d_route_m, d_course_m, None, None,
+                              declared_ok, 0, now))
+            used_pairs[rk].add(g["event_id"])
+        # A catalogued route no event reaches (IE Drive sections, cut content) still names the
+        # course -- the game's word for that road is the point -- with event_id NULL and, since
+        # course_event is keyed by event, no evidence row; --check I5 allows 'derived:game' that way.
+        chosen_game[rk] = (g["event_id"], g["name"], "derived:game", "verified")
+        game_route_of[rk] = pick
 
     # ---- pass 1: map tier (full) + length tier candidates --------------------
     rows_map, rows_length = [], []
     chosen_map = {}                        # route_key -> (event_id, name, source, confidence)
     map_route_id = {}                      # route_key -> route_id, for ref_route naming later
     candidate_len = {}                     # route_key -> single B2 event_id (bijection pending)
-    used_pairs = defaultdict(set)          # route_key -> {event_id} already inserted
     L_c_of, D_of, cr_of = {}, {}, {}
 
     for c in courses:
@@ -151,6 +223,8 @@ def run(cx, verbose=False):
                 if in_A or in_B:
                     candidates[e["event_id"]] = e
             for eid, e in candidates.items():
+                if eid in used_pairs[rk]:
+                    continue               # the game tier already holds this pair's row (PK is route_key, event_id)
                 d_route_m = (Rlen - e["length_m"]) if Rlen is not None else None
                 d_course_m = (L_c - e["length_m"]) if L_c is not None else None
                 loop_ok = (None if (e["is_loop"] is None or Rloop is None)
@@ -178,6 +252,8 @@ def run(cx, verbose=False):
             B2 = [e for e in events
                   if L_c is not None and abs(L_c - e["length_m"]) <= BAND_M and e["is_loop"] == 1]
             for e in B2:
+                if e["event_id"] in used_pairs[rk]:
+                    continue
                 d_course_m = (L_c - e["length_m"]) if L_c is not None else None
                 declared_ok = None if D is None else (1 if D == e["name"] else 0)
                 rows_length.append((rk, e["event_id"], "length", None, None, d_course_m,
@@ -237,6 +313,13 @@ def run(cx, verbose=False):
                 else "derived:length"
             chosen_length[rk] = (eid, e["name"], src, "derived")
 
+    # ---- pass 1.75: game over map -- and record where the derivation disagreed --------------
+    game_vs_map = []
+    for rk, g in chosen_game.items():
+        m = chosen_map.get(rk) or chosen_length.get(rk)
+        if m and m[1] != g[1]:
+            game_vs_map.append({"route_key": rk, "game": g[1], "derived": m[1], "via": m[2]})
+
     # ---- pass 2: declared tier + final precedence ----------------------------
     rows_declared = []
     final = {}                             # route_key -> (event_id, name, source, confidence) | None
@@ -245,7 +328,7 @@ def run(cx, verbose=False):
     for c in courses:
         rk = c["route_key"]
         D = D_of[rk]
-        chosen = chosen_map.get(rk) or chosen_length.get(rk)
+        chosen = chosen_game.get(rk) or chosen_map.get(rk) or chosen_length.get(rk)
 
         if D is not None:
             m = name_index.get(D, [])
@@ -285,7 +368,7 @@ def run(cx, verbose=False):
     # ---- write ----------------------------------------------------------------
     with cx:
         n_ce = 0
-        for rows in (rows_map, rows_length, rows_declared):
+        for rows in (rows_game, rows_map, rows_length, rows_declared):
             if rows:
                 cx.executemany(
                     "INSERT INTO course_event (route_key, event_id, tier, route_id, d_route_m, "
@@ -312,17 +395,60 @@ def run(cx, verbose=False):
                        "event_id=NULL WHERE route_key=?", (r["declared_name"], r["route_key"]))
             n_loop += 1
 
-        # ref_route naming: only from courses whose FINAL name came from the map tier.
-        # Two courses proposing different names for the same route_id is a conflict, not a guess.
+        # ref_route naming, tier game first: every route the catalogue names, driven or not.
+        n_route_game = 0
+        for rid, g in game_routes.items():
+            if rid in routes:
+                cx.execute("UPDATE ref_route SET name=?, event_id=?, name_source='game:trackinfo', "
+                           "name_confidence='verified' WHERE route_id=?", (g["name"], g["event_id"], rid))
+                n_route_game += 1
+                # the catalogue names the route; its own length against the event's is the one
+                # cross-check that needs no driven course (circuits carry a grid lead-in, sprints
+                # up to ~0.9 km of it, so only a gross disagreement is worth a line)
+                ev = all_events.get(g["event_id"]) if g["event_id"] else None
+                Rlen = routes[rid]["length_m"]
+                if ev and ev["length_m"] and Rlen:
+                    ratio = Rlen / ev["length_m"]
+                    if not (0.8 <= ratio <= 1.35):
+                        game_vs_map.append({"route_id": rid, "game": g["name"], "route_len_m": round(Rlen),
+                                            "event_len_m": round(ev["length_m"]), "ratio": round(ratio, 3)})
+        # the road the course actually drove, when the game name came through its catalogued twin
+        # (probable + runner_up): the uncatalogued mirror carries the same name, 'derived:game', so
+        # the world map does not show the driven line nameless beside its named twin. Two courses
+        # proposing different names for one mirror is a conflict, reported, not a guess.
+        conflicts = []
+        twin_props = defaultdict(set)
+        for rk, (eid, name, _src, _conf) in chosen_game.items():
+            cr = course_routes.get(rk)
+            rid = cr["route_id"] if cr else None
+            if rid and rid in routes and rid not in game_routes and rid != game_route_of.get(rk):
+                twin_props[rid].add((name, eid))
+        for rid, props in twin_props.items():
+            if len({p[0] for p in props}) == 1:
+                name, eid = sorted(props)[0]
+                cx.execute("UPDATE ref_route SET name=?, event_id=?, name_source='derived:game', "
+                           "name_confidence='verified' WHERE route_id=?", (name, eid, rid))
+                n_route_game += 1
+            else:
+                conflicts.append({"route_id": rid, "names": sorted(p[0] for p in props), "via": "twin"})
+
+        # then the derived proposals: only from courses whose FINAL name came from the map tier.
+        # Two courses proposing different names for the same route_id is a conflict, not a guess;
+        # a proposal for a route the game already names is a cross-check, recorded when it differs.
         proposals = defaultdict(list)
         for rk, info in final.items():
             if info is not None and info[2].startswith("derived:map"):
                 proposals[map_route_id[rk]].append((info[1], info[2], info[3], rk, info[0]))
 
-        conflicts = []
         n_route_named = 0
         for route_id, props in proposals.items():
             names = {p[0] for p in props}
+            if route_id in game_routes:
+                gname = game_routes[route_id]["name"]
+                if names != {gname}:
+                    game_vs_map.append({"route_id": route_id, "game": gname, "derived": sorted(names),
+                                        "route_keys": sorted(p[3] for p in props)})
+                continue
             if len(names) == 1:
                 name, source, confidence, rk, eid = sorted(
                     props, key=lambda p: (CONF_RANK.get(p[2], 9), p[3]))[0]
@@ -354,6 +480,8 @@ def run(cx, verbose=False):
         "ambiguous_route_keys": ambiguous, "conflicting_routes": conflicts,
         "declared_overrides": sorted(overridden, key=lambda o: o["route_key"]),
         "event_claims": sorted(event_claims, key=lambda o: o["event_id"]),
+        "game": len(chosen_game), "ref_route_game_named": n_route_game,
+        "game_vs_map": game_vs_map,
     }
     if verbose:
         for o in overridden:
@@ -380,10 +508,11 @@ def main(argv=None):
         fh6db.run_end(cx, rid, 0, 0, "%s: %s" % (type(e).__name__, e))
         raise
     fh6db.run_end(cx, rid, c["course_event"], 1, json.dumps(c))
-    print("names: course %d/%d (verified %d, derived %d, declared %d)  ref_route %d/%d  "
-          "ties %d  conflicts %d"
-          % (c["course_named"], c["course_total"], c["verified"], c["derived"], c["declared"],
-             c["ref_route_named"], c["ref_route_total"], c["ties"], c["conflicts"]))
+    print("names: course %d/%d (game %d, verified %d, derived %d, declared %d)  ref_route %d/%d "
+          "(game %d, derived %d)  ties %d  conflicts %d  game_vs_map %d"
+          % (c["course_named"], c["course_total"], c["game"], c["verified"], c["derived"], c["declared"],
+             c["ref_route_game_named"] + c["ref_route_named"], c["ref_route_total"],
+             c["ref_route_game_named"], c["ref_route_named"], c["ties"], c["conflicts"], len(c["game_vs_map"])))
     return 0
 
 

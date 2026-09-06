@@ -324,6 +324,39 @@ def _catalogue_match(sx, sz, sample):
     best = best_start or best_path
     return (best[2], best[3]) if best else None
 
+_LEARNED = None
+def _learned_starts():
+    """Per-route S/F CROSSINGS we have actually driven (session_event.start on a route:<id> key) -- the REAL
+    finish-line location, unlike the catalogued i=0 which sits far from it on many courses. Lets an event be named
+    at LOAD-IN from where the game spawns you (the S/F line), with no driving at all. Cached; a restart re-reads."""
+    global _LEARNED
+    if _LEARNED is None:
+        _LEARNED = []
+        try:
+            import sqlite3
+            cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
+            names = {str(rid): nm for rid, nm in cx.execute("SELECT route_id, name FROM ref_route WHERE name IS NOT NULL")}
+            for rk, sx, sz in cx.execute("SELECT route_key, start_x, start_z FROM session_event WHERE route_key LIKE 'route:%' AND start_x IS NOT NULL"):
+                nm = names.get(rk.split(":", 1)[1])
+                if nm: _LEARNED.append((nm, rk, sx, sz))
+            cx.close()
+        except Exception:                                # noqa: BLE001
+            _LEARNED = []
+    return _LEARNED
+
+def _match_learned_start(sf, thresh=60.0):
+    """Nearest route whose DRIVEN S/F crossing is within thresh m of sf. Returns (name, key, unambiguous) or None;
+    unambiguous means no OTHER route's learned S/F is within thresh*2, so we can name it at load-in without
+    driving to confirm. Where two courses share a start plaza, unambiguous is False and the path-match confirms."""
+    byroute = {}
+    for nm, rk, sx, sz in _learned_starts():
+        d = math.hypot(sf[0] - sx, sf[1] - sz)
+        if rk not in byroute or d < byroute[rk][0]: byroute[rk] = (d, nm)
+    near = sorted(((d, rk, nm) for rk, (d, nm) in byroute.items()), key=lambda x: x[0])
+    if not near or near[0][0] > thresh: return None
+    unamb = len(near) < 2 or near[1][0] > thresh * 2
+    return (near[0][2], near[0][1], unamb)
+
 def _end_auto_course(t_mono, p, c):
     """A timed event ended (finish, crash, or restart). Complete the OPEN pass so nothing is wasted: this is a
     point-to-point sprint's only pass, a circuit's final lap, OR a partial/crashed practice run — all of which carry
@@ -436,12 +469,18 @@ def ingest(p, t_mono):
     # practice run complete at event end (_end_auto_course). Never overrides a manually-marked loop.
     if c["on"] and ST.game == "event" and ST.loop is None and ST.last_pos is not None:
         sf = [round(ST.last_pos[0]), round(ST.last_pos[1])]
-        nm = _match_route_name(sf) or "Rivals course"
+        # LOAD-IN identification: the game spawns you ON the S/F line, so match that spawn to a route's DRIVEN S/F
+        # (learned from past laps) and name it instantly -- no driving. Fall back to the catalogued start, then to
+        # generic + the path-match. A learned match that is unambiguous is trusted; an ambiguous one (shared plaza)
+        # is provisional and the path-match confirms it.
+        learned = _match_learned_start(sf)
+        rk = learned[1] if learned else None
+        nm = (learned[0] if learned else _match_route_name(sf)) or "Rivals course"
         with ST.lock:
-            ST.loop = {"name": nm, "start": sf, "radius": 60, "min_dist": 250, "auto": True, "topology": "unknown", "sf_fixed": False}
+            ST.loop = {"name": nm, "start": sf, "radius": 60, "min_dist": 250, "auto": True, "topology": "unknown", "sf_fixed": False, "route_key": rk}
             ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = t_mono; ST.loop_last_s = None; ST._auto_loop = True
-            ST.ev_path = []; ST._ev_named = False; ST._ev_match_next = 16   # fresh driven path for LIVE catalogue naming
-        ST.emit("loop", {"name": nm, "start": sf, "lap": 0, "auto": True})
+            ST.ev_path = []; ST._ev_named = bool(learned and learned[2]); ST._ev_match_next = 16   # unambiguous learned S/F = done; else the path-match confirms/upgrades
+        ST.emit("loop", {"name": nm, "start": sf, "lap": 0, "auto": True, "route_key": rk})
     # reference-loop live lap counting: each return through the start (after leaving by min_dist) = one lap
     if ST.loop and c["on"]:
         lx, lz = ST.loop["start"]; R = ST.loop.get("radius", 60); MIND = ST.loop.get("min_dist", 250)
@@ -465,10 +504,11 @@ def ingest(p, t_mono):
         if len(ST.ev_path) >= ST._ev_match_next:
             ST._ev_match_next = len(ST.ev_path) + 20               # retry every ~500 m as coverage rises
             m = _catalogue_match(ST.loop["start"][0], ST.loop["start"][1], ST.ev_path)
-            if m and m[0] and m[0] != ST.loop["name"]:
-                with ST.lock:
-                    ST.loop["name"] = m[0]; ST.loop["route_key"] = m[1]; ST._ev_named = True
-                ST.emit("loop", {"name": m[0], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "route_key": m[1]})
+            if m and m[0]:
+                if m[0] != ST.loop["name"]:                        # corrects a wrong/provisional load-in name
+                    with ST.lock: ST.loop["name"] = m[0]; ST.loop["route_key"] = m[1]
+                    ST.emit("loop", {"name": m[0], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "route_key": m[1]})
+                ST._ev_named = True                                # positively confirmed (or corrected) — stop matching
             elif len(ST.ev_path) > 600:
                 ST._ev_named = True                                # ~15 km driven with no positive match — stop retrying (not a catalogued course / a fragment)
     # CSV row (same layout as capture tool). MENU FRAMES ARE NOT WRITTEN (2026-09-03): every field

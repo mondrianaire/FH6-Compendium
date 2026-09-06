@@ -17,7 +17,9 @@ gap. These tables make the unimported visible.
 |---|---|---|
 | imported via `ref_slot.source_table` (the 50 upgrade slot tables) | 50 | **complete**: 87,655 rows in the game, 87,655 in `ref_part` — exact |
 | imported by name (cars, engines, wheels, compounds, strings, classes…) | 33 | see `scripts/db/import_gamedb.py` |
-| **untouched** | 114 non-empty + 16 empty | listed below |
+| imported by `scripts/db/import_parts_extra.py` (2026-09-03) | 3 | `UpgradePresetPackages`, `CarExceptions`, `List_PartAttribute` — **read the next table before using them** |
+| imported by `scripts/db/import_curves.py` (2026-09-03) | 3 | `List_TorqueCurve`, `List_TireFrictionCurve`, `List_TireFrictionMultiCurve` — the two sampled curves and the load blend that binds the second to a compound |
+| **untouched** | 108 non-empty + 16 empty | listed below |
 
 The largest untouched tables, and whether they matter:
 
@@ -25,20 +27,55 @@ The largest untouched tables, and whether they matter:
 |---|---|---|
 | `Livery_DecalsSortOrder` | 19,649 | livery editor data — not relevant |
 | `CarPartPositions` | 2,413 | part positions on the model |
-| `List_TorqueCurve` | 1,725 | per-engine torque curves — would give a real dyno for any build, not just driven ones |
 | `PlayerNames` | 1,709 | name filter list — not relevant |
 | `Livery_VinylsDecals` | 1,442 | livery editor data — not relevant |
 | `CarRarities` | 767 | rarity per car |
-| `List_TireFrictionCurve` | 738 | the tyre friction model behind every compound |
 | `Livery_Decals` | 708 | livery editor data — not relevant |
 | `Data_Car_Buckets` | 644 | car bucketing (class/PI banding inputs) |
 | `CameraOverrides` | 641 | camera data — not relevant |
 | `OnDiscContent` | 621 | packaging manifest — not relevant |
-| `List_PartAttribute` | 546 | per-part attributes; may carry the stat deltas the PI question needs |
-| `CarExceptions` | 511 | per-car exceptions to upgrade rules — gating we currently infer |
-| `UpgradePresetPackages` | 448 | the game's own preset builds (complete part lists per ordinal) |
-| `List_TireFrictionMultiCurve` | 369 | not yet assessed |
 | `AIDrivingBehaviorObservationDefaults` | 209 | not yet assessed |
+
+#### The two curve tables — imported 2026-09-03, and how they are keyed
+
+Both are sampled curves stored one value per column (`v0..v245`, `v0..v99`), which is why they
+read as noise until the sampling rule is known. Both rules are exact. Full derivation, with the
+agreement figures, is in the `THE CURVES` header block of `db/schema.sql`.
+
+| table | rows | lab table | keyed by | what it actually holds |
+|---|---|---|---|---|
+| `List_TorqueCurve` | 1,725 | `ref_torque_curve` (1,725) + view `v_torque_point` | **a camshaft part, not an engine**: 1,706 `List_UpgradeEngineCamshaft` rows + 19 `Data_Motor` rows = 1,725, no id shared, none orphaned | A real dyno for every engine at every camshaft level, driven or not. Sampling is uniform at **100 rpm** from 0 (`TorqueCurveMaxRPM == 100*(N-1)` on all 1,706); values are normalised with peak 1.0, so `torque_Nm = v * TorqueScale` and **`TorqueScale` IS peak torque**; `hp = Nm*rpm/7120.54`, which returns 150.0 / 300.0 / 375.0 hp exactly against the game's own `Data_Car.SimPeakPower` (that column is watts/100). The **last sample is not a dyno point** — it is negative on 1,720 of 1,725 curves (−2.63 typical), closed-throttle drag past the end of the table; kept as `limiter_value`, flagged `limiter=1` in the view. The project's boost rule survives: `SimPeakTorque*100` == the stock curve's `TorqueScale` on **313 of 314** naturally aspirated cars, and the ratio on forced-induction ones runs 1.03–2.87 (turbo median 1.46, twin 1.55, DSC 1.32, CSC 1.36). This is the **full-throttle base curve**; the per-part multipliers that scale it (e.g. a CSC's `ZeroRPMScale`/`RedlineRPMScale`) are already in `ref_part.data`. |
+| `List_TireFrictionCurve` | 738 | `ref_friction_curve` (738) + view `v_friction_point` | **a (compound, channel, surface, load band)**: 41 compounds × 9 channel columns = 369 = the whole of `List_TireFrictionMultiCurve`, × 2 curves each = 738, all distinct — so `ref_friction_curve.compound_id` joins `ref_compound` with no indirection | The curve either side of the peak, which is what says how sharply a tyre lets go — `ref_compound` only ever carried the peak. Slip axis is uniform: `slip = i/(N−1) * MaxSlip`, N = 100, `MaxSlip` = 49.5 deg lateral / 1.1 slip ratio longitudinal. Values are normalised with peak 1.0, so **`FrictionScale` IS peak μ**. `ref_compound`'s peaks are **not** derived from this table and are not contradicted by it: both come from `List_TyreCurveDB`, and this is that row baked onto a 100-point grid (argmax recovers the authored peak within one grid step on 682 of 738 curves). |
+| `List_TireFrictionMultiCurve` | 369 | flattened into `ref_friction_curve` | one row per (compound, channel) | Not a shape — a **load blend**. Its two curves are the same channel at two loads, `MinLoadCurve` = 10.1972 kgf (100 N exactly) and `MaxLoadCurve` = 1000 kgf, blended by the tyre's normal load and clamped at `LoadClamp` (3500 kgf; 10000 on one compound). That is the load sensitivity, and it is why one compound needs two curves per channel. |
+
+**A unit correction this import forced**, worth knowing before reading `ref_compound`:
+`List_TyreCurveDB` states *all* peaks on one 0–49.5 authoring scale. On the lateral channels that
+scale is already degrees, so `ref_compound.lat_slip_peak` is a slip angle and reads correctly. On
+the longitudinal ones it is **not** a percentage: `ref_compound.long_slip_peak` / `brake_slip_peak`
+must be divided by 45 to become a slip ratio. The Slick Race compound's stored 3.25 is a **7.2%**
+slip ratio, not 3.25%.
+
+#### The three "part facts" tables — imported 2026-09-03, and what they turned out to be
+
+Two of the three do **not** hold what their name suggests. Recorded here so the question is not
+re-opened: the answers below are re-measured by `scripts/db/import_parts_extra.py` on every
+rebuild and written into `import_run.notes`.
+
+| table | rows | lab table | joins | what it actually holds |
+|---|---|---|---|---|
+| `UpgradePresetPackages` | 448 | `ref_preset` (448) + `ref_preset_part` (17,617) | ordinal → `ref_car` **448/448**; parts → `ref_part` **17,617/17,617** | Exactly what the name says, and the useful one. 448 complete builds over 268 cars: a 49-slot part list plus a 46-float tuning blob = the 36 `ref_slider` values in `slot_index` order then 10 gear-ratio slots (`-1.0` where the gear does not exist). The 36\|10 boundary is proven, not assumed: the `-1.0` tail starts at exactly `36 + (fitted transmission NumGears − 1)` on **320 of 321** presets that fit a transmission. Titles and descriptions resolve 448/448 through `ref_string`. |
+| `CarExceptions` | 511 | `ref_car_exception` (511) | CarID → `ref_car` **511/511** | **Not upgrade gating — livery gating.** All eight flags are paint/graphics exceptions: `NoMirrors` (245), `NoWindows` (40), `NoHoodStock` (16), `NoHoodAftermarket` (70), `NoPaintableWingStock` (292), `NoPaintableWingAftermarket` (170), `NoDecalsWingStock` (253), `NoDecalsWingAftermarket` (227). Of the two upgrade gates the lab infers — aspiration conversion gating the engine tiers (ui-spec 9.1), body kit removing the Front Bumper tile (ui-spec 10.7) — this table states **0 of 2**, and has no column that could. Both stay inferred from the menus. |
+| `List_PartAttribute` | 546 | `ref_part_attribute` (546) | **joins nothing** — `slot`/`part_id` NULL, `join_status` `orphan` | **Does not answer the per-part PI question and cannot be keyed to a part.** Its only measures are `Price` (0 or 5000, nothing else), `Mass`, `DragScale` and `WindInstabilityScale` — the last two are `1.0` in all 546 rows, so they carry no information. No column anywhere in the 205 tables is named `*PartAttribute*`, in a schema that names every other key after its target. On evidence it is legacy engine data: the column set is `List_UpgradeEngine`'s with the mass made absolute instead of a diff, 438/546 masses equal a `Data_Engine.[EngineMass-kg]` exactly (control against `List_UpgradeCarBodyWeight.Mass`: 1/546), and its `ManufacturerID` is a dense 1..53 enum that is not the sparse 739-row `List_PartManufacturer` (7 of its 52 values are absent there). |
+
+**The PI question is closed on the game-data side.** `PerformanceIndex`/`PI` appears in exactly
+three places in the whole game database, all whole-car: `Data_Car.PerformanceIndex`,
+`Data_Car.PI` and `CarClasses.Max*PerformanceIndex`. There is no per-part PI row to find. PI is
+computed by the game from simulated performance, so `data/parts-pi.json` and `obs_pi` — the
+observation-driven route — are not a stopgap for a table we had failed to locate; they are the
+only route the data allows. The presets are the new lever there: 448 fully-specified builds on
+268 known cars are the largest block of complete, self-consistent part combinations the project
+has, and the natural next input to the regression that is currently underdetermined (71
+observations, 297 parameters).
 
 ### The game's UI texture archives (`media/ui/textures/data_bound`, 82 archives)
 
@@ -55,11 +92,12 @@ ones plausibly worth a look are `Upgrade_Class.zip` (class badges), `WheelIcons.
 | source | state |
 |---|---|
 | `EN.zip` string tables | **complete** — 287 of 288 entries imported, 58,722 strings |
-| `aitracks/Route*.owt` + `.nav` | **complete** — all 169 routes, points, width, banking, road class |
+| Horizon Rivals > Routes screen | **Road Racing only** — 23 of 88 Rivals routes captured (`data/rivals-routes-road.json`); the other 65 show no Route Length on their own screens, so they carry no `ref_event.length_m` and can never be named by length |
+| `aitracks/Route*.owt` + `.nav` | **complete** — all 169 routes, points, width, banking, road class. Road class was EMPTY in the live DB from the 2026-09-02 rename until 2026-09-03 (KeyError on every rebuild, logged in `import_run` as ok=0); verify with `SELECT road_class, COUNT(*) FROM ref_route_turn GROUP BY 1`, not with this line |
 | `freeroam/Brio_00.nav` | imported (road class); surface MATERIAL still unsolved |
 | save folders `Tuning_*` | **complete since 2026-09-03** — `Data`, `header` and `Thumb.png` all read (the header and render sat unread for weeks) |
 | `Downloadsorza raw data files\*.csv` | ~70 exported CSVs; used for cross-checks, not systematically imported |
-| telemetry sessions | 221 recordings, 107 imported as sessions |
+| telemetry sessions | 125 recordings on disk, 125 imported as sessions (2026-09-03; earlier figure of 221/107 was stale) |
 
 **The rule this section enforces:** an import is not "done" because a feature works. A source is
 done when every one of its tables or entries is either imported or has a row here saying why not.
@@ -68,15 +106,16 @@ done when every one of its tables or entries is either imported or has a row her
 
 | table | rows | what it is |
 |---|---|---|
-| `corner_obs` | 2546 | per-corner history per lap (2,546 rows) — UNEXPORTED, the missing per-turn record. |
-| `course` | 60 | columns: route_key, name, is_rivals, event_id, length_m, turn_count… |
-| `course_route` | 55 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… |
+| `corner_obs` | 0 | per-corner history per lap — UNEXPORTED, the missing per-turn record; empty pending `course_match`+`corners` rerunning past the 2026-09-05 schema change (see rebuild.py's I6 check). |
+| `course` | 70 | columns: route_key, name, is_rivals, event_id, length_m, turn_count… |
+| `course_event` | 0 | every course × candidate-event pairing `route_names` weighed — tier (map/length/declared) plus its evidence columns, `chosen`=1 on the winner. Filled by stage `route_names`; awaits the 2026-09-05 schema migration on this DB. |
+| `course_route` | 0 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… — recomputed wholesale by stage `course_match` now (split off `import_routes.py` 2026-09-05); target is 65 (one per course with ≥12 geometry points, `n_geo` on this DB), 0 until that stage's next run. |
 | `course_turn` | 891 | the course's own turns (the namespace the map and the trace use). |
 | `diag_event` | 8686 | every detected failure incident, placed on a turn. |
 | `hw_package` | 505 | columns: hw_hash, ordinal, label, pi, class, engine_id… |
 | `hw_package_part` | 25250 | columns: hw_hash, slot_index, slot, part_id, name |
 | `import_run` | 44 | columns: run_id, kind, source, started_utc, finished_utc, n_rows… |
-| `lap` | 319 | columns: lap_id, route_key, session_id, cid, container, hw_hash… |
+| `lap` | 354 | columns: lap_id, route_key, session_id, cid, container, hw_hash… |
 | `lap_point` | 120471 | every lap's trace: arc, mph, grip state, x/z AND elev_m. |
 | `obs_evidence` | 133 | columns: obs_id, subject, claim, confidence, source, observed_utc… |
 | `obs_menu` | 92 | observed shop tiles (92 rows) — menu positions proven in game. |
@@ -90,7 +129,9 @@ done when every one of its tables or entries is either imported or has a row her
 | `ref_compound` | 41 | all 41 tyre compounds with slip peaks and friction scales — the global grip ladder. |
 | `ref_drivetrain` | 662 | columns: drivetrain_id, drivetype, shift_system, is_swap_set, n_cars, data |
 | `ref_engine` | 670 | columns: engine_id, name, media_name, config, cylinders, displacement_cc… |
-| `ref_event` | 0 | EMPTY. |
+| `ref_event` | 0 | the Rivals catalogue as displayed — name, length_m (a screen read, ±80 m), is_loop; filled by stage `events` from `data/rivals-routes-road.json`. EMPTY until that stage runs on this DB. |
+| `ref_event_string` | 0 | the 7 IDS_Name + 7 IDS_Description guids per Rivals route, joined live against `ref_string` so a name can never drift from the game's own string. Filled by stage `events`; table awaits the 2026-09-05 schema migration on this DB. |
+| `ref_friction_curve` | 738 | the friction curve behind every compound: 41 compounds × 3 channels × 3 surfaces × 2 load bands. Explode it with `v_friction_point` (slip, μ). |
 | `ref_motor` | 19 | columns: motor_id, name, media_name, mass_kg, battery_kwh, redline_rpm… |
 | `ref_part` | 87655 | every option of every slot, with tile / tile_count / price / mass / requires_aspiration — the shop grid. |
 | `ref_part_slider` | 65864 | per-part slider bands: what installing a part writes and what range it unlocks. The transmission/diff/spring rewrites live here. |
@@ -104,6 +145,7 @@ done when every one of its tables or entries is either imported or has a row her
 | `ref_string` | 58722 | the game's string tables (58,722 rows) — the ID → name layer. |
 | `ref_string_table` | 287 | columns: table_name, name_hash, n_entries, has_csv |
 | `ref_symptom` | 11 | the failure catalogue: primary/secondary/tertiary fix, verify_test, detector. |
+| `ref_torque_curve` | 1725 | a dyno per camshaft part (1,706) and electric motor (19): peak torque/power precomputed, samples every 100 rpm. Explode it with `v_torque_point` (rpm, Nm, lb-ft, hp). |
 | `ref_track` | 58 | columns: track_id, name, media_name, length_m, is_reverse, is_real_world… |
 | `ref_wheel` | 1248 | every rim with mass and mass_level (rims are a weight class). |
 | `ref_wheel_category` | 5 | columns: category_id, name, display_order |
@@ -135,6 +177,7 @@ Views: `v_build_sheet`, `v_course_best`, `v_diag_by_setup`, `v_diag_by_turn`, `v
 | `engine-swaps.json` | 72kB | engine swap catalogue. |
 | `formulas.json` | 19kB | the derived formulas (spring rates, PI, display). |
 | `game-assets.json` | 4kB |  |
+| `game-strings/` | 433kB | 23 files decoded from `EN.zip` by `scripts/telemetry/fh6_strings.py` (2026-09-01); `RivalsEventData.json` alone carries 604 IDS_Name + 604 IDS_Description guids resolving to 88 distinct route names. |
 | `global-slider-ranges.json` | 3kB | the solved slider ranges. |
 | `identity-evidence.json` | 2kB | ACCUMULATED gear sets per car + declared picks — what makes "no gear above N" evidence. |
 | `meta-cars.json` | 124kB | per-car meta / discipline data. |
@@ -149,7 +192,7 @@ Views: `v_build_sheet`, `v_course_best`, `v_diag_by_setup`, `v_diag_by_turn`, `v
 | `reference-loops.json` | 0kB |  |
 | `rim-id-matches.json` | 66kB |  |
 | `rim-menu-order.json` | 13kB | the Rim Style paged grid order. |
-| `rivals-routes-road.json` | 13kB |  |
+| `rivals-routes-road.json` | 13kB | the Rivals > Routes screen: name, Route Length (mi, 1 dp), description, 7 IDS_Name guids; read by `scripts/db/import_events.py`; the length is the naming key via stage `route_names`. |
 | `rivals-tracks.json` | 69kB |  |
 | `routes.json` | 13kB |  |
 | `slider-baselines.json` | 2kB |  |
@@ -210,7 +253,7 @@ service (8001) adds `POST /rebuild`, `GET /status` and `GET /watch` (code + data
 | `C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\aitracks\Route*.owt/.nav` | 169 route centre-lines with lane width, banking, road class. |
 | `…\brio\freeroam\Brio_00.nav` | the world nav mesh (38,473 nodes) — what is drivable. |
 | `…\media\stripped\stringtables\EN.zip` | the string tables. |
-| `C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite` | the decrypted game DB, 205 tables. Tables in use: CarClasses, Data_Car, Environments, List_AeroPhysics, List_AntiSwayPhysics, List_Aspiration, List_CarMake, List_Cylinders, List_DriveType, List_EnginePlacement, List_PartManufacturer, List_SpringDamperPhysics, List_TireCompound, List_TyreCurveDB, List_UpgradeCarBody, List_UpgradeDrivetrain, List_UpgradeEngine, List_UpgradeTireCompound, List_Wheels, Tracks, Upgrades. NEVER run the .exe/.msi files in that folder. |
+| `C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite` | the decrypted game DB, 205 tables. Tables in use: CarClasses, Data_Car, Data_Motor, Environments, List_AeroPhysics, List_AntiSwayPhysics, List_Aspiration, List_CarMake, List_Cylinders, List_DriveType, List_EnginePlacement, List_PartManufacturer, List_SpringDamperPhysics, List_TireCompound, List_TireFrictionCurve, List_TireFrictionMultiCurve, List_TorqueCurve, List_TyreCurveDB, List_UpgradeCarBody, List_UpgradeDrivetrain, List_UpgradeEngine, List_UpgradeTireCompound, List_Wheels, Tracks, Upgrades. NEVER run the .exe/.msi files in that folder. |
 
 ## 5b. THE DRIVING INSTRUCTIONS — `data/tuning-test-battery.json`
 
@@ -259,9 +302,12 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/db/export_options.py` | 678 lines | per-car option lists → api/options/<ordinal>.json. |
 | `scripts/db/fh6db.py` | 660 lines |  |
 | `scripts/db/import_containers.py` | 355 lines |  |
+| `scripts/db/import_course_match.py` | 160 lines | how our courses map onto the game's routes — from the DB, no game files. |
 | `scripts/db/import_diagnosis.py` | 325 lines |  |
+| `scripts/db/import_events.py` | 165 lines | the Rivals catalogue as displayed: names, lengths, guids → ref_event. |
 | `scripts/db/import_gamedb.py` | 716 lines |  |
 | `scripts/db/import_observations.py` | 275 lines |  |
+| `scripts/db/import_route_names.py` | 325 lines | derive course and route names from map identity + catalogue length; evidence in course_event. |
 | `scripts/db/import_surface.py` | 383 lines |  |
 | `scripts/db/import_telemetry.py` | 270 lines |  |
 | `scripts/db/rebuild.py` | 101 lines | the whole import, stage by stage. |
@@ -283,6 +329,8 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/telemetry/turn_stats.py` | 398 lines |  |
 | `scripts/telemetry/verify_workflow.py` | 476 lines | the assertion harness. |
 | `scripts/rebuild_service.py` | 200 lines | the import + regenerate service and the live-reload channel (8001). |
+
+`tests/` is reserved for the pipeline's test suite — not created in this tree yet.
 
 ## 8. Two rules this file exists to enforce
 

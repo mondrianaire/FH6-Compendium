@@ -44,20 +44,31 @@ The order is forced by foreign keys and by what each layer resolves *against*:
 2. strings     ref_string_table, ref_string    288 .str tables -> 58,722 entries
 3. gamedb      ref_class, ref_car, ref_engine, ref_drivetrain, ref_car_body, ref_motor,
                ref_slot, ref_part, ref_part_slider, ref_slider, ref_wheel*, ref_compound,
-               ref_track, ref_event, ref_region
+               ref_track, ref_region
                  ^ needs (2): every name is a '_&<u64>' ref resolved through a string table
-4. containers  tune_container, tune_part, tune_slider, tune_gear, hw_package*, setup
+4. events      ref_event, ref_event_string
+                 ^ needs (3) for ref_track/ref_region; (2) to check the IDS_Name/IDS_Description guids
+5. containers  tune_container, tune_part, tune_slider, tune_gear, hw_package*, setup
                  ^ needs (3): part names come from ref_part, slider bands from ref_part_slider
-5. telemetry   session*, course*, lap, lap_point, corner_obs
-                 ^ needs (3) for ref_event/ref_compound, (4) to bind a lap to a container
-6. derive      obs_*, plan_clone, plan_clone_step, plan_readiness
+6. telemetry   session*, course*, lap, lap_point, corner_obs
+                 ^ needs (3) for ref_compound, (4) for ref_event, (5) to bind a lap to a container
+7. derive      obs_*, plan_clone, plan_clone_step, plan_readiness
                  ^ needs everything above
 ```
 
-Steps 2–6 are the four sibling importer modules in this directory. Each is **idempotent and
+`ref_event` is filled by stage `events` (`import_events.py`), never by `gamedb` — the Rivals
+catalogue (route names, screen-read lengths, IDS_Name/IDS_Description guids) is not part of
+the 205-table game DB at all; it comes from `data/rivals-routes-*.json`, a transcription of
+the Rivals > Routes screen.
+
+Steps 2–7 are the five sibling importer modules in this directory. Each is **idempotent and
 re-runnable**: it wraps its work in a transaction, `DELETE`/`INSERT` or upserts *its own*
 tables, and writes one `import_run` row. Running any of them twice must leave identical row
 counts — `--selftest` proves this for the accessor and each importer proves it for itself.
+
+This directory now holds more stages than the seven above (`routes`, `surface`, `course_match`,
+`route_names`, `corners`, `observations`, `diagnosis`, `field_catalog` — see `rebuild.py`'s
+`STAGES` for the authoritative, current order); the layer picture above is unchanged by them.
 
 ### Rebuild everything
 
@@ -66,12 +77,23 @@ cd "C:/Users/mondr/Documents/Claude/Projects/forza-horizon-6-tuning/.claude/work
 && PYTHONIOENCODING=utf-8 python scripts/db/rebuild.py --all
 ```
 
-`rebuild.py` runs steps 1–6 in the order above and stops at the first failure. To drive a
-single layer, run the module directly (`python scripts/db/import_gamedb.py`), and afterwards:
+`rebuild.py` runs every stage in order and stops at the first failure. To drive a single
+layer, run the module directly (`python scripts/db/import_gamedb.py`), and afterwards:
 
 ```sh
 PYTHONIOENCODING=utf-8 python scripts/db/fh6db.py --info --check
 ```
+
+### Running one stage — `--only` and its cascade
+
+`--only NAME` does not run just `NAME`: `rebuild.py` also reruns every stage its own
+`DOWNSTREAM` map says depends on `NAME`'s tables, transitively, in `STAGES` order — printed
+as `cascade: +stage1 +stage2 …` before anything runs. `--only events`, for instance, also
+reruns `route_names`, because `route_names` joins on `ref_event`. This exists because a stage
+that rewrites a table another stage joins on and is *not* followed by that stage leaves the
+join dark — `course_route` sitting at 0 rows from 2026-09-03 to 2026-09-05 was exactly this,
+and `--check` (I2-stale) now fails on it. Pass `--no-cascade` to run exactly the named
+stage(s) with no dependents — only when you already know nothing downstream needs the rerun.
 
 ---
 

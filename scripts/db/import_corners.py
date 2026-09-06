@@ -38,11 +38,13 @@ def window_m(turn):
 
 
 def run(cx, verbose=False):
-    # only courses whose game route we identified can carry road-derived turns
+    # only courses whose game route we identified BY SHAPE can carry road-derived turns: an
+    # 'anchored' course (start sphere only, route_id NULL) never reaches here, and the kind is
+    # named so a future kind cannot slip in on route_id alone (review, 2026-09-05)
     courses = cx.execute("""
         SELECT c.route_key, c.name, cr.route_id, cr.match_kind
         FROM course c JOIN course_route cr ON cr.route_key = c.route_key
-        WHERE cr.route_id IS NOT NULL""").fetchall()
+        WHERE cr.route_id IS NOT NULL AND cr.match_kind IN ('verified', 'probable', 'partial')""").fetchall()
     rows, skipped = [], 0
     for co in courses:
         turns = [dict(t) for t in cx.execute("""

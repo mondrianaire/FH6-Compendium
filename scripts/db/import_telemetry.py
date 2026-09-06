@@ -117,7 +117,7 @@ def run(cx, verbose=False, data_dir=None):
                           t.get("type") or t.get("kind"), t.get("n") or t.get("n_obs")))
 
     # ---- sessions ----------------------------------------------------------
-    srows, scrows = [], []
+    srows, scrows, erows = [], [], []
     for path in sorted(glob.glob(os.path.join(data_dir, "sessions", "*.json"))):
         if path.endswith(".tags.json"):
             continue
@@ -143,6 +143,16 @@ def run(cx, verbose=False, data_dir=None):
             scrows.append((sid, str(cid), ordn, c.get("build_id"), None, c.get("name"),
                            c.get("class"), c.get("pi"), c.get("drivetrain"), c.get("cyl"),
                            c.get("live_s")))
+        # ANCHORS (2026-09-05): every event with WHERE it started -- what course_match tests against
+        # the game's race-activation spheres. The analyzer keys `start` on the start LINE when a lap
+        # completed, else on the capture-window start; both are kept, the sphere test tolerates 100 m.
+        for i, e in enumerate(s.get("events") or []):
+            st, en = e.get("start") or [None, None], e.get("end") or [None, None]
+            solo = e.get("solo")
+            erows.append((sid, i, e.get("t0"), e.get("t1"), e.get("car"), e.get("mode"),
+                          None if solo is None else (1 if solo else 0), e.get("laps"),
+                          e.get("distance_m"), e.get("duration_s"), st[0], st[1], en[0], en[1],
+                          e.get("route_key"), e.get("start_is_line")))
 
     # ---- laps: the history store first, then any saved trace it lacks ------
     lrows, prows = [], []
@@ -223,7 +233,7 @@ def run(cx, verbose=False, data_dir=None):
         # wiped: DELETE FROM course and INSERT OR REPLACE both fire ON DELETE CASCADE immediately --
         # defer_foreign_keys defers the checks, not the actions -- which is how course_route sat at 0 rows
         # from 2026-09-03 to 2026-09-05. Only courses that vanished from disk are deleted (intended cascade).
-        for tbl in ("corner_obs", "lap_point", "lap", "course_turn", "session_car", "session"):
+        for tbl in ("corner_obs", "lap_point", "lap", "course_turn", "session_event", "session_car", "session"):
             cx.execute("DELETE FROM %s" % tbl)
         keys = [r[0] for r in crows]
         cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep(route_key TEXT PRIMARY KEY)")
@@ -244,6 +254,9 @@ def run(cx, verbose=False, data_dir=None):
         counts["session_car"] = fh6db.upsert_many(cx, "session_car", [
             "session_id", "cid", "ordinal", "build_id", "hw_hash", "name", "class", "pi",
             "drivetrain", "cyl", "live_s"], scrows)
+        counts["session_event"] = fh6db.upsert_many(cx, "session_event", [
+            "session_id", "i", "t0", "t1", "cid", "mode", "solo", "laps", "distance_m",
+            "duration_s", "start_x", "start_z", "end_x", "end_z", "route_key", "start_is_line"], erows, chunk=2000)
         counts["lap"] = fh6db.upsert_many(cx, "lap", [
             "lap_id", "route_key", "session_id", "cid", "container", "hw_hash", "t0", "lap_s",
             "arc_m", "coverage", "is_partial", "build_id", "class", "pi", "drivetrain",

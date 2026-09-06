@@ -191,7 +191,8 @@ def main(argv=None):
                (SELECT COUNT(*) FROM lap l WHERE l.route_key = c.route_key) AS lap_rows,
                (SELECT MIN(l.lap_s) FROM lap l WHERE l.route_key = c.route_key
                   AND l.void = 0 AND l.is_partial = 0) AS best,
-               cr.route_id, cr.match_kind AS match, cr.covered
+               cr.route_id, cr.match_kind AS match, cr.covered,
+               cr.anchor_route_id, cr.anchor_events, cr.anchor_agree
         FROM course c LEFT JOIN course_route cr ON cr.route_key = c.route_key ORDER BY (c.name IS NULL), c.name, c.route_key""")
     cand_by_key = course_candidates(cx)
     for c in courses:
@@ -240,10 +241,11 @@ def main(argv=None):
             FROM course_turn WHERE route_key = ? ORDER BY seq""", key)
         # The game's own centre-line for this course, when we could identify it. This is the
         # half our telemetry cannot supply: exactly where the track is, to the metre.
-        cr = cx.execute("""SELECT route_id, match_kind, mean_dev_m, covered, len_ratio
+        cr = cx.execute("""SELECT route_id, match_kind, mean_dev_m, covered, len_ratio,
+                                  anchor_route_id, anchor_events, anchor_agree
                            FROM course_route WHERE route_key=?""", (key,)).fetchone()
         route = dict(cr) if cr else None
-        if route and route["route_id"]:
+        if route and route["route_id"] and route["match_kind"] in ("verified", "probable", "partial"):
             route["path"] = [[r["x"], r["z"]] for r in cx.execute(
                 "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i",
                 (route["route_id"],))]

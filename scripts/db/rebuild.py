@@ -40,6 +40,7 @@ STAGES = [
     ("containers", "import_containers.py", "save containers -> parts, sliders, gears, packages"),
     ("telemetry", "import_telemetry.py", "sessions, courses, laps and per-sample trace rows"),
     ("routes", "import_routes.py", "the game's route centre-lines"),
+    ("anchors", "import_anchors.py", "the game's race-activation spheres: a route id at a world position"),
     ("surface", "import_surface.py", "what the road at every turn is made of, from the nav graph"),
     ("course_match", "import_course_match.py", "how our courses map onto the game's routes -- from the DB, no game files"),
     ("route_names", "import_route_names.py", "derive course and route names from map identity + catalogue length; evidence in course_event"),
@@ -57,7 +58,8 @@ DOWNSTREAM = {
     "gamedb": ["events"],
     "events": ["route_names"],
     "telemetry": ["course_match", "route_names", "corners", "diagnosis"],
-    "routes": ["surface", "course_match", "route_names", "corners", "diagnosis"],
+    "routes": ["anchors", "surface", "course_match", "route_names", "corners", "diagnosis"],
+    "anchors": ["course_match", "route_names", "corners", "diagnosis"],
     "surface": ["route_names"],
     "course_match": ["route_names", "corners", "diagnosis"],
     "corners": ["diagnosis"],
@@ -167,7 +169,7 @@ def check_invariants(cx):
         for d in downs:
             if d in ran and ran[d] < ran[up]:
                 fail("I2-stale", "%s last ran %s, before %s (%s): rerun it" % (d, ran[d], up, ran[up]))
-            elif d not in ran and up in ("telemetry", "routes", "events"):
+            elif d not in ran and up in ("telemetry", "routes", "events", "anchors"):
                 fail("I2-stale", "%s has never run although %s has" % (d, up))
 
     # I3 the Rivals catalogue and its guid join
@@ -237,6 +239,25 @@ def check_invariants(cx):
             fail("I7-surface", "ref_route_surface is empty (routes ran after surface?)")
         elif not _one(cx, "SELECT COUNT(*) FROM ref_route WHERE road_class IS NOT NULL"):
             fail("I7-surface", "ref_route.road_class is NULL everywhere")
+
+    # I12 anchors: the spheres are loaded, and what they say about course_route is visible
+    if "anchors" in ran and "route_anchor" in tabs:
+        n_a = _one(cx, "SELECT COUNT(*) FROM route_anchor")
+        if not n_a:
+            fail("I12-anchors", "anchors ran but route_anchor is empty")
+        if _one(cx, "SELECT COUNT(*) FROM ref_route WHERE is_race=1") != n_a:
+            fail("I12-anchors", "ref_route.is_race count differs from route_anchor rows")
+        if "course_match" in ran:
+            n_bad = _one(cx, "SELECT COUNT(*) FROM course_route WHERE match_kind='anchored' AND anchor_route_id IS NULL")
+            if n_bad:
+                fail("I12-anchors", "%d course_route rows are 'anchored' without an anchor_route_id" % n_bad)
+            n_leak = _one(cx, "SELECT COUNT(*) FROM course_route WHERE match_kind='anchored' AND route_id IS NOT NULL")
+            if n_leak:
+                fail("I12-anchors", "%d 'anchored' course_route rows carry a route_id (shape-unverified identity leaking to corners/naming)" % n_leak)
+            for rk, rid, kind, aid, n in cx.execute("""SELECT route_key, route_id, match_kind, anchor_route_id, anchor_events
+                                                       FROM course_route WHERE anchor_agree=0"""):
+                warn("I12-anchors", "%s: geometry says route %s (%s) but %d event start(s) lie in route %s's sphere"
+                     % (rk, rid, kind, n or 0, aid))
 
     # I8 every run kind is a stage
     for (kind,) in cx.execute("SELECT DISTINCT kind FROM import_run"):

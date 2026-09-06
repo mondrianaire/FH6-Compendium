@@ -11,6 +11,27 @@ either of those stages happened to run.
 which is true and useful, without claiming the lap times are times for the route. See
 scripts/telemetry/fh6_owt.py (compare/verdict) for the matching rule itself.
 
+ANCHORS (2026-09-05). After the geometry verdict, the game's race-activation spheres
+(route_anchor, from race_triggers.tz) are consulted: for each course, the sphere most of its
+session events STARTED in (session_event.start_x/z). The sphere is an observation -- "this run
+began where route N's race begins" -- so it corroborates and tie-breaks geometry, and never
+replaces a verdict geometry has evidence against:
+
+  verified   anchor_agree = (anchor == route_id); the verdict stands either way (WARN on 0 in --check)
+  probable   anchor in {route_id, runner_up} -> route_id = anchor, 'verified' (the sphere broke the tie)
+  partial    anchor_agree recorded; the verdict stands (we still have not driven the whole route)
+  none       'anchored', route_id stays NULL, the identity lives in anchor_route_id only: the course
+             is identified by where its races start, its shape is unverified, and every consumer
+             that gates on route_id (corners, the dashboard's centre-line, naming) must keep
+             treating it as unidentified (33 of 36 spheres have another route's centre-line
+             within 100 m -- see fh6_anchors.py).
+
+A sphere may PROMOTE (probable -> verified, none -> anchored) only when it holds a strict majority
+of ALL the course's events (at least 2, and more than half): a route_key can bundle drives that
+began in different places, and an event whose start is the capture-window start rather than a
+detected start line (session_event.start_is_line = 0) may lie anywhere on the road. Below the
+majority the evidence is still recorded in anchor_route_id / anchor_events, nothing moves.
+
 Run:  python scripts/db/import_course_match.py [--db PATH] [-v]
       python scripts/db/import_course_match.py --selftest
 """
@@ -27,6 +48,7 @@ sys.path.insert(0, os.path.join(ROOT, "scripts", "telemetry"))
 
 import fh6db                                            # noqa: E402
 import fh6_owt                                          # noqa: E402
+import fh6_anchors                                      # noqa: E402
 
 #: the kinds histogram a read-only reproduction gave on 2026-09-05, over 65 courses
 EXPECTED_KINDS = {"partial": 34, "verified": 8, "none": 21, "probable": 2}
@@ -79,15 +101,57 @@ def match(cx):
     return matched, kinds
 
 
+def anchor_evidence(cx):
+    """({route_key: {anchor route_id: n events that started inside its sphere}},
+        {route_key: n events with a start position at all}) from session_event x route_anchor.
+    A course's events are the ones the analyzer attributed to its route_key; the second dict is
+    the denominator of the majority rule."""
+    anchors = [dict(r) for r in cx.execute("SELECT route_id, x, z, radius_m FROM route_anchor")]
+    hits, totals = {}, {}
+    if not anchors:
+        return hits, totals
+    for e in cx.execute("SELECT route_key, start_x, start_z FROM session_event "
+                        "WHERE route_key IS NOT NULL AND start_x IS NOT NULL AND start_z IS NOT NULL"):
+        totals[e["route_key"]] = totals.get(e["route_key"], 0) + 1
+        a = fh6_anchors.inside(anchors, e["start_x"], e["start_z"])
+        if a is not None:
+            d = hits.setdefault(e["route_key"], {})
+            d[a["route_id"]] = d.get(a["route_id"], 0) + 1
+    return hits, totals
+
+
+def apply_anchors(route_key, route_id, kind, runner_up, hits, total=0):
+    """(route_id, kind, anchor_route_id, anchor_events, anchor_agree) -- the rule in the docstring.
+    `hits` is {anchor route_id: n events}, `total` the course's event count. An even split between
+    two spheres is no anchor; a sphere promotes only with a strict majority of `total` (>= 2)."""
+    if not hits:
+        return route_id, kind, None, None, None
+    best = sorted(hits.items(), key=lambda t: (-t[1], t[0]))
+    if len(best) > 1 and best[0][1] == best[1][1]:
+        return route_id, kind, None, sum(hits.values()), None
+    aid, n = best[0]
+    majority = n >= 2 and n * 2 > max(total, sum(hits.values()))
+    if kind == "none":
+        return None, ("anchored" if majority else "none"), aid, n, None
+    if kind == "probable" and majority and aid in (route_id, runner_up):
+        return aid, "verified", aid, n, 1
+    return route_id, kind, aid, n, 1 if aid == route_id else 0
+
+
 def run(cx, verbose=False):
     matched, kinds = match(cx)
+    evidence, totals = anchor_evidence(cx) if fh6db.has_table(cx, "route_anchor") else ({}, {})
     now = fh6db.utcnow()
-    mrows = []
+    mrows, kinds = [], {}
     for m in matched:
         v = fh6_owt.verdict(m)
-        mrows.append((m["route_key"], m["route_id"] if v != "none" else None, v,
+        rid, v, aid, n_ev, agree = apply_anchors(
+            m["route_key"], m["route_id"] if v != "none" else None, v, m["runner_up"],
+            evidence.get(m["route_key"]), totals.get(m["route_key"], 0))
+        kinds[v] = kinds.get(v, 0) + 1
+        mrows.append((m["route_key"], rid, v,
                       m["mean_dev_m"], m["p95_dev_m"], m["covered"], m["len_ratio"],
-                      m["runner_up"], now))
+                      m["runner_up"], now, aid, n_ev, agree))
     matched_keys = [m["route_key"] for m in matched]
 
     with cx:
@@ -100,7 +164,8 @@ def run(cx, verbose=False):
             "DELETE FROM course_route WHERE route_key NOT IN (SELECT route_key FROM _keep)").rowcount or 0
         n_m = fh6db.upsert_many(cx, "course_route", [
             "route_key", "route_id", "match_kind", "mean_dev_m", "p95_dev_m", "covered",
-            "len_ratio", "runner_up", "computed_utc"], mrows)
+            "len_ratio", "runner_up", "computed_utc", "anchor_route_id", "anchor_events",
+            "anchor_agree"], mrows)
         # a course that matches a whole game route inherits the route's identity
         cx.execute("""UPDATE course SET length_m = COALESCE(length_m, (
               SELECT r.length_m FROM course_route cr JOIN ref_route r ON r.route_id = cr.route_id
@@ -109,6 +174,9 @@ def run(cx, verbose=False):
 
     if verbose:
         print("  %d stale course_route row(s) removed" % n_del)
+        n_anch = sum(1 for r in mrows if r[9] is not None)
+        print("  %d course(s) with anchor evidence; %d anchored, %d disagree with geometry"
+              % (n_anch, sum(1 for r in mrows if r[2] == "anchored"), sum(1 for r in mrows if r[11] == 0)))
     return {"course_route": n_m}, kinds
 
 

@@ -20,6 +20,22 @@ import re
 import calendar, csv, hashlib, json, math, os, sqlite3, statistics, sys, time
 import lap_store
 import fh6_tune_decode as TUNE   # tune_hash: which slider revision a lap was driven on
+import fh6_anchors               # the game's race-activation spheres: route id at a world position
+
+_ANCHORS = None
+
+
+def _anchor_at(x, z):
+    """{'route_id', 'd_m'} of the race-activation sphere containing (x, z), else None. The file is
+    read once per analysis; a lab without the game install gets None everywhere, never an error."""
+    global _ANCHORS
+    if _ANCHORS is None:
+        try:
+            _ANCHORS = fh6_anchors.load()
+        except Exception:                                # noqa: BLE001
+            _ANCHORS = []
+    a, d = fh6_anchors.nearest(_ANCHORS, x, z)
+    return {"route_id": a["route_id"], "d_m": round(d, 1)} if a is not None and d <= a["radius_m"] else None
 from collections import defaultdict
 
 G = 9.80665
@@ -1666,7 +1682,13 @@ def main():
                        "best_lap": round(min((q["BestLap"] for q in rs if q["BestLap"] > 0), default=0), 3) or None,
                        "last_lap": round(next((q["LastLap"] for q in reversed(rs) if q["LastLap"] > 0), 0), 3) or None,
                        "distance_m": round(dist), "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": pos[-1] if pos else None,
-                       "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "route": (routes.get(key) or {}).get("name")})
+                       "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "route": (routes.get(key) or {}).get("name"),
+                       # ANCHORS (2026-09-05): the game's race-activation sphere this event STARTED in, if any --
+                       # a route id read off the world, not inferred from shape. See fh6_anchors.py for what it proves.
+                       "anchor": _anchor_at(sx, sz),
+                       # 1 when `start` is a detected lap-boundary crossing (the line), 0 when it is only where the
+                       # capture window opened -- which may be anywhere on the road (review, 2026-09-05)
+                       "start_is_line": 1 if _resets else 0})
     # persist the route registry (names on disk win — the dashboard / daemon may have named a route while this analysis ran)
     if write_side:
         try:
@@ -1737,7 +1759,8 @@ def main():
                            "distance_m": round(sum(math.hypot(rs[j]["PosX"] - rs[j - 1]["PosX"], rs[j]["PosZ"] - rs[j - 1]["PosZ"]) for j in range(1, len(rs)))),
                            "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": None,
                            "start": [round(rs[0]["PosX"]), round(rs[0]["PosZ"])], "end": [round(rs[-1]["PosX"]), round(rs[-1]["PosZ"])],
-                           "route_key": "loop:" + lname, "route": lname})
+                           "route_key": "loop:" + lname, "route": lname, "anchor": _anchor_at(rs[0]["PosX"], rs[0]["PosZ"]),
+                           "start_is_line": 0})
     sess["events"] = ev_out
     # ---- crests, top-speed pull, warm tires, temps medians, coverage + advice per config ----
     crests = []; top_pull = defaultdict(float); warm_n = defaultdict(int); temps_acc = defaultdict(lambda: {w: [] for w in W})

@@ -61,7 +61,8 @@ def run(cx, aitracks, verbose=False):
     # (scripts/db/import_course_match.py) does it from the DB alone, after telemetry AND routes, so a
     # telemetry rerun cannot leave course_route empty. course_route is therefore NOT deleted below:
     # its route_id has no cascade, the same ids are re-inserted before the deferred check, and a
-    # vanished .owt id is nulled first so the commit cannot fail on it.
+    # vanished .owt id is nulled first so the commit cannot fail on it. route_anchor cascades off
+    # ref_route and is rebuilt by stage anchors, which DOWNSTREAM runs right after this one.
     new_ids = {r[0] for r in rrows}
     with cx:
         # BEGIN first: Python's sqlite3 does not open a transaction for a PRAGMA, so a bare
@@ -70,6 +71,7 @@ def run(cx, aitracks, verbose=False):
         cx.execute("PRAGMA defer_foreign_keys=ON")
         for stale in [r[0] for r in cx.execute("SELECT route_id FROM ref_route") if r[0] not in new_ids]:
             cx.execute("UPDATE course_route SET route_id=NULL, match_kind='none' WHERE route_id=?", (stale,))
+            cx.execute("UPDATE course_route SET anchor_route_id=NULL, anchor_agree=NULL WHERE anchor_route_id=?", (stale,))
             if fh6db.has_table(cx, "course_event"):
                 cx.execute("UPDATE course_event SET route_id=NULL WHERE route_id=?", (stale,))
         for t in ("ref_route_turn", "ref_route_point", "ref_route"):

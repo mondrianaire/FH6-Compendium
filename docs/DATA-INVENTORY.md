@@ -95,6 +95,9 @@ ones plausibly worth a look are `Upgrade_Class.zip` (class badges), `WheelIcons.
 | Horizon Rivals > Routes screen | **Road Racing only** — 23 of 88 Rivals routes captured with a length (`data/rivals-routes-road.json`); the other 65 are in `ref_event` name-only (from the game strings) so typed names check against them, but carry no `ref_event.length_m` and can never be named by length until their Routes screens are transcribed |
 | `aitracks/Route*.owt` + `.nav` | **complete** — all 169 routes, points, width, banking, road class. Road class was EMPTY in the live DB from the 2026-09-02 rename until 2026-09-03 (KeyError on every rebuild, logged in `import_run` as ok=0); verify with `SELECT road_class, COUNT(*) FROM ref_route_turn GROUP BY 1`, not with this line |
 | `freeroam/Brio_00.nav` | imported (road class); surface MATERIAL still unsolved |
+| `…\media	racksrio	riggerzones	z_race_activations
+ace_triggers.tz` | 14 KB plaintext XML: 36 spheres `race_trigger_zone_rt<route_id>`, radius 100 m, telemetry metre frame. Found by the 2026-09-05 data-audit session; read by `scripts/telemetry/fh6_anchors.py` → stage `anchors`. The sibling `tz_races/*.tz` are cutscene boxes; `tz_playground_games/*.tz` and `trackroutes/route*.nt` use ids that are not routes. |
+| `…\media\sfsdata` (75 MB), `…\media\GameTunableSettings.zip` (`EventNames.xml`, `track_properties.xml`, `DataManager/TrackMetrics.xml`) | ENCRYPTED (method 22 / TransformIT). The only places left that can hold the event catalogue's route-id column: `CareerTrackInfo` is the per-route record set (112 display names = 88 Rivals + 24 others) and `CareerRace` carries placeholder names `CareerRaceRoute2091`, so the table exists. DVS-code/Forza-Crypto-Tool (GitHub) decrypts FH6 `.slt` and method-22 zips with server-side keys — Jett's call, never run from here. |
 | save folders `Tuning_*` | **complete since 2026-09-03** — `Data`, `header` and `Thumb.png` all read (the header and render sat unread for weeks) |
 | `Downloadsorza raw data files\*.csv` | ~70 exported CSVs; used for cross-checks, not systematically imported |
 | telemetry sessions | 125 recordings on disk, 125 imported as sessions (2026-09-03; earlier figure of 221/107 was stale) |
@@ -109,7 +112,7 @@ done when every one of its tables or entries is either imported or has a row her
 | `corner_obs` | 0 | per-corner history per lap — UNEXPORTED, the missing per-turn record; empty pending `course_match`+`corners` rerunning past the 2026-09-05 schema change (see rebuild.py's I6 check). |
 | `course` | 70 | columns: route_key, name, is_rivals, event_id, length_m, turn_count… |
 | `course_event` | 0 | every course × candidate-event pairing `route_names` weighed — tier (map/length/declared) plus its evidence columns, `chosen`=1 on the winner. Filled by stage `route_names`; awaits the 2026-09-05 schema migration on this DB. |
-| `course_route` | 0 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… — recomputed wholesale by stage `course_match` now (split off `import_routes.py` 2026-09-05); target is 65 (one per course with ≥12 geometry points, `n_geo` on this DB), 0 until that stage's next run. |
+| `course_route` | 68 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… + `anchor_route_id`, `anchor_events`, `anchor_agree` (2026-09-05) — the sphere most of the course's events started in and whether it is the geometry's route. match_kind gained `anchored` (route_id stays NULL, identity in `anchor_route_id` only): a sphere holding a strict majority of the course's events, shape unverified, never reaches corners, the centre-line overlay or naming. Recomputed wholesale by stage `course_match`; one row per course with ≥12 geometry points. |
 | `course_turn` | 891 | the course's own turns (the namespace the map and the trace use). |
 | `diag_event` | 8686 | every detected failure incident, placed on a turn. |
 | `hw_package` | 505 | columns: hw_hash, ordinal, label, pi, class, engine_id… |
@@ -136,7 +139,9 @@ done when every one of its tables or entries is either imported or has a row her
 | `ref_part` | 87655 | every option of every slot, with tile / tile_count / price / mass / requires_aspiration — the shop grid. |
 | `ref_part_slider` | 65864 | per-part slider bands: what installing a part writes and what range it unlocks. The transmission/diff/spring rewrites live here. |
 | `ref_region` | 91 | columns: region_id, name, map_x, map_y |
-| `ref_route` | 169 | columns: route_id, name, length_m, n_points, is_loop, bbox_x0… |
+| `ref_route` | 169 | columns: route_id, name, length_m, n_points, is_loop, bbox_x0… `is_race` = 1 on the 36 routes the game ships a race-activation sphere for (stage `anchors`). |
+| `route_anchor` | 36 | the game's race-activation spheres from `race_triggers.tz`: route_id + world position + 100 m radius — the ONLY populated route-id field in the shipped data. A session event that starts inside one began where that route's race begins. Corroborates and tie-breaks `course_route`; never names. Stage `anchors`. |
+| `session_event` | 495+ | every analyzer event (race / timed run / reference-loop pass) per session with mode, laps, distance, its START and END position and `start_is_line` (1 = a detected lap-boundary crossing, 0 = only where the capture window opened, NULL = older session file) — what `course_match` tests against `route_anchor`. Stage `telemetry`. |
 | `ref_route_point` | 284207 | columns: route_id, i, x, y, z |
 | `ref_route_surface` | 284207 | columns: route_id, i, road_class, road_type, road_profile, offroad… |
 | `ref_route_turn` | 3811 | the MAP's turns with width_m and bank_deg (a DIFFERENT id namespace from course_turn — never join by id). |
@@ -302,7 +307,8 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/db/export_options.py` | 678 lines | per-car option lists → api/options/<ordinal>.json. |
 | `scripts/db/fh6db.py` | 660 lines |  |
 | `scripts/db/import_containers.py` | 355 lines |  |
-| `scripts/db/import_course_match.py` | 160 lines | how our courses map onto the game's routes — from the DB, no game files. |
+| `scripts/db/import_anchors.py` | 70 lines | the race-activation spheres → `route_anchor`, `ref_route.is_race`. |
+| `scripts/db/import_course_match.py` | 220 lines | how our courses map onto the game's routes — from the DB, no game files; corroborated and tie-broken by the spheres. |
 | `scripts/db/import_diagnosis.py` | 325 lines |  |
 | `scripts/db/import_events.py` | 165 lines | the Rivals catalogue as displayed: names, lengths, guids → ref_event. |
 | `scripts/db/import_gamedb.py` | 716 lines |  |
@@ -318,6 +324,7 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/telemetry/fh6_live_daemon.py` | 2317 lines | the live daemon: telemetry, identity, deliverable, the ladder matcher. |
 | `scripts/telemetry/fh6_manifest.py` | 263 lines | Manifest.xml option lists. |
 | `scripts/telemetry/fh6_nav.py` | 430 lines | the nav mesh parser. |
+| `scripts/telemetry/fh6_anchors.py` | 90 lines | the `race_triggers.tz` reader: parse / load / nearest / inside. |
 | `scripts/telemetry/fh6_owt.py` | 306 lines | the route file parser. |
 | `scripts/telemetry/fh6_pi_solve.py` | 299 lines | the per-part PI solver. |
 | `scripts/telemetry/fh6_swatchbin.py` | 655 lines |  |
@@ -330,7 +337,7 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `scripts/telemetry/verify_workflow.py` | 476 lines | the assertion harness. |
 | `scripts/rebuild_service.py` | 200 lines | the import + regenerate service and the live-reload channel (8001). |
 
-`tests/` is reserved for the pipeline's test suite — not created in this tree yet.
+`tests/` — the pipeline's test suite (`python -m unittest discover -s tests -t .`): the naming rule, the events import, the cascade, course_route surviving telemetry, the anchors layer. 34 tests as of 2026-09-05.
 
 ## 8. Two rules this file exists to enforce
 

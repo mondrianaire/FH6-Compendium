@@ -568,6 +568,26 @@ CREATE TABLE IF NOT EXISTS session_car (
   PRIMARY KEY (session_id, cid)
 ) WITHOUT ROWID;
 
+-- ANCHORS (2026-09-05): the analyzer's per-session event list (data/sessions/*.json `events`),
+-- one row per race / timed run / reference-loop pass, with WHERE it started and ended. The start
+-- position is what stage course_match tests against route_anchor. Written by stage telemetry.
+CREATE TABLE IF NOT EXISTS session_event (
+  session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
+  i           INTEGER NOT NULL,         -- position in the session's events list
+  t0          REAL, t1 REAL,
+  cid         TEXT,                     -- ordinal|drivetrain|cyl|PI
+  mode        TEXT,                     -- race | timed solo (Rivals / time trial) | reference loop ...
+  solo        INTEGER,
+  laps        INTEGER,
+  distance_m  REAL,
+  duration_s  REAL,
+  start_x     REAL, start_z REAL,       -- the start LINE where a lap completed, else the window start (analyzer rule)
+  end_x       REAL, end_z REAL,
+  route_key   TEXT,                     -- the course the analyzer attributed the event to (not an FK: courses are keyed later)
+  start_is_line INTEGER,                -- 1 = start is a detected lap-boundary crossing; 0 = only where the capture window opened; NULL = older session file
+  PRIMARY KEY (session_id, i)
+) WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS course (
   route_key    TEXT PRIMARY KEY,         -- '-1700_-4450' — the start-cell key
   name         TEXT,                     -- RESOLVED by stage route_names (declared wins; else the derived event's name); see COURSE NAMES below. Never written from a JSON file except as a placeholder by telemetry.
@@ -800,7 +820,10 @@ CREATE TABLE IF NOT EXISTS ref_route (
   road_class    TEXT,                  -- paved | loose | mixed | NULL
   pct_loose     REAL,                  -- fraction of classified points that are dirt or trail
   road_class_known REAL,                  -- fraction of points that got any class at all
-  road_class_mix   TEXT                   -- JSON {road_type: fraction}, ordered by size
+  road_class_mix   TEXT,                  -- JSON {road_type: fraction}, ordered by size
+  -- ANCHORS (2026-09-05): 1 when the game ships a race-activation sphere for this id (36 of 169);
+  -- the other 133 are free-roam ribbons no race starts on. Written by stage anchors.
+  is_race       INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS ref_route_point (
@@ -811,6 +834,23 @@ CREATE TABLE IF NOT EXISTS ref_route_point (
   z           REAL NOT NULL,
   PRIMARY KEY (route_id, i)
 ) WITHOUT ROWID;
+
+-- ANCHORS (2026-09-05): the game's race-activation spheres, from
+-- media/tracks/brio/triggerzones/tz_race_activations/race_triggers.tz (plaintext XML, shipped).
+-- One sphere per race route, named race_trigger_zone_rt<route_id>, radius 100 m, in the telemetry
+-- metre frame. The ONLY populated route-id field in the game data. A session event that STARTS
+-- inside a sphere began where that route's race begins -- an observation, not a shape match. It
+-- corroborates course_route and breaks its ties (stage course_match); it never names a route.
+-- Written by stage anchors (scripts/db/import_anchors.py), read by course_match and the analyzer.
+CREATE TABLE IF NOT EXISTS route_anchor (
+  route_id    TEXT PRIMARY KEY REFERENCES ref_route(route_id) ON DELETE CASCADE,
+  x           REAL NOT NULL,
+  y           REAL,
+  z           REAL NOT NULL,
+  radius_m    REAL NOT NULL,
+  name        TEXT,                    -- race_trigger_zone_rt<N>
+  source      TEXT                     -- race_triggers.tz
+);
 
 -- How a learned course maps onto a game route, WITH the evidence for the claim.
 -- match_kind: verified (whole route, clearly best) | probable | partial (on it, drove some of
@@ -830,7 +870,18 @@ CREATE TABLE IF NOT EXISTS course_route (
   covered      REAL,                   -- fraction of the game route we have driven
   len_ratio    REAL,
   runner_up    TEXT,
-  computed_utc TEXT
+  computed_utc TEXT,
+  -- ANCHORS (2026-09-05): what the race-activation spheres say about this course, beside the
+  -- geometry verdict. anchor_route_id = the sphere most of the course's session events started
+  -- in; anchor_events = how many; anchor_agree = 1/0 whether it is the geometry's route (NULL when
+  -- geometry had no verdict). A sphere promotes only with a strict majority of the course's events
+  -- (>= 2 and more than half): a 'probable' whose anchor is its route or its runner_up becomes
+  -- 'verified' with the anchor's route (the sphere broke the tie); a 'none' becomes 'anchored'
+  -- with route_id STILL NULL -- the identity lives in anchor_route_id only, so corners, the
+  -- dashboard's centre-line and naming, which all gate on route_id, keep treating it as unidentified.
+  anchor_route_id TEXT REFERENCES ref_route(route_id),
+  anchor_events   INTEGER,
+  anchor_agree    INTEGER
 );
 
 -- ============================================================================

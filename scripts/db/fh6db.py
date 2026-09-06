@@ -67,7 +67,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "2"   # 2 = COURSE NAMES columns/tables (2026-09-05), applied by migrate()
+SCHEMA_VERSION = "3"   # 2 = COURSE NAMES columns/tables; 3 = ANCHORS (route_anchor, session_event, ref_route.is_race, course_route.anchor_*) -- all 2026-09-05, applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -298,7 +298,11 @@ V2_COLUMNS = {
     "ref_route": [("event_id", "TEXT REFERENCES ref_event(event_id)"),
                   ("name_source", "TEXT"), ("name_confidence", "TEXT")],
     "ref_event": [("discipline", "TEXT"), ("length_m", "REAL"), ("is_loop", "INTEGER"), ("source", "TEXT")],
+    # schema 3 -- ANCHORS
+    "course_route": [("anchor_route_id", "TEXT REFERENCES ref_route(route_id)"),
+                     ("anchor_events", "INTEGER"), ("anchor_agree", "INTEGER")],
 }
+V2_COLUMNS["ref_route"].append(("is_race", "INTEGER"))
 V2_TABLES = {
     "ref_event_string": """CREATE TABLE IF NOT EXISTS ref_event_string (
   event_id    TEXT NOT NULL REFERENCES ref_event(event_id) ON DELETE CASCADE,
@@ -323,7 +327,34 @@ V2_TABLES = {
   computed_utc TEXT NOT NULL,
   PRIMARY KEY (route_key, event_id)
 ) WITHOUT ROWID""",
+    # schema 3 -- ANCHORS
+    "route_anchor": """CREATE TABLE IF NOT EXISTS route_anchor (
+  route_id    TEXT PRIMARY KEY REFERENCES ref_route(route_id) ON DELETE CASCADE,
+  x           REAL NOT NULL,
+  y           REAL,
+  z           REAL NOT NULL,
+  radius_m    REAL NOT NULL,
+  name        TEXT,
+  source      TEXT
+)""",
+    "session_event": """CREATE TABLE IF NOT EXISTS session_event (
+  session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
+  i           INTEGER NOT NULL,
+  t0          REAL, t1 REAL,
+  cid         TEXT,
+  mode        TEXT,
+  solo        INTEGER,
+  laps        INTEGER,
+  distance_m  REAL,
+  duration_s  REAL,
+  start_x     REAL, start_z REAL,
+  end_x       REAL, end_z REAL,
+  route_key   TEXT,
+  start_is_line INTEGER,
+  PRIMARY KEY (session_id, i)
+) WITHOUT ROWID""",
 }
+V2_COLUMNS["session_event"] = [("start_is_line", "INTEGER")]
 
 
 def ensure_columns(cx, table, cols):

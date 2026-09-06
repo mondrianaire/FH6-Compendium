@@ -1099,6 +1099,20 @@ function routeSplit() {
   rs.forEach((x) => ((Math.hypot(x.cx - mx, x.cz - mz) > 12000) ? off : on).push(x));
   return { on, off };
 }
+// Break a POSITION polyline into runs wherever the car teleported (a respawn / checkpoint reset jumps
+// the position by far more than any real step), so a map never draws a straight line across the island.
+// Catalogue geometry has no such gaps, so it comes back as one run — harmless to pass through. Global on
+// purpose: app.js's courseMap() uses it too. Only for x/z position paths, never speed-vs-distance traces.
+function splitTP(pts, cap) {
+  cap = cap || 150;
+  if (!pts || pts.length < 2) return pts && pts.length ? [pts] : [];
+  const runs = [[pts[0]]];
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i];
+    if (Math.hypot(b[0] - a[0], b[1] - a[1]) > cap) runs.push([b]); else runs[runs.length - 1].push(b);
+  }
+  return runs.filter((r) => r.length > 1);
+}
 function worldMapHTML() {
   if (!WORLD || !WORLD.bbox) return `<div class="why">no world data — run build_web.py</div>`;
   const { on, off } = routeSplit();
@@ -1120,7 +1134,7 @@ function worldMapHTML() {
   const H = 640, W = Math.max(320, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
   const px = (x) => pad + (x - x0) * s, pz = (z) => H - pad - (z - z0) * s;
-  const line = (pts, col, w, op) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${pts.map(([x, z]) => px(x).toFixed(0) + "," + pz(z).toFixed(0)).join(" ")}"/>`;
+  const line = (pts, col, w, op) => splitTP(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(0) + "," + pz(z).toFixed(0)).join(" ")}"/>`).join("");
   const routes = on.map(({ r }) => line(r.pts, "#3b4a5c", 1.2, 0.9)).join("")
     + (SHOW_OFFMAP ? off.map(({ id, r }) => `<g><title>Route${id} — off-map circuit, outside the nav mesh, unreachable</title>${line(r.pts, "#c678dd", 1.4, 0.9)}</g>`).join("") : "");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
@@ -1170,13 +1184,14 @@ function tileSvg(r, sel) {
   const s = Math.min((W - 2 * pad) / sx, (H - 2 * pad) / sz);
   const ox = pad + (W - 2 * pad - sx * s) / 2, oy = pad + (H - 2 * pad - sz * s) / 2;
   const X = (x) => ox + (x - x0) * s, Y = (z) => H - oy - (z - z0) * s;
-  const line = P.map(([x, z]) => X(x).toFixed(1) + "," + Y(z).toFixed(1)).join(" ");
   const col = r.is_race ? "var(--race,#ff8a3d)" : "var(--free,#7fb2ff)";
+  // tiles draw the CATALOGUE geometry, which is clean (max point gap 24 m), so no teleport split is needed
+  // here — and the ~60-point subsample would make a 150 m cap misfire anyway. One polyline over the shape.
+  const poly = `<polyline fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round" points="${P.map(([x, z]) => X(x).toFixed(1) + "," + Y(z).toFixed(1)).join(" ")}"/>`;
   const dot = (p, c, rad) => p ? `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${rad}" fill="${c}"/>` : "";
   const spawn = r.spawn ? `<circle cx="${X(r.spawn[0]).toFixed(1)}" cy="${Y(r.spawn[1]).toFixed(1)}" r="3" fill="none" stroke="#c792ea" stroke-width="1.4"/>` : "";
   return `<svg viewBox="0 0 ${W} ${H}" class="tsvg${sel ? " on" : ""}" preserveAspectRatio="xMidYMid meet">
-    <polyline fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round" points="${line}"/>
-    ${spawn}${dot(P[P.length - 1], "#ff5d7d", 2.4)}${dot(P[0], "#33d17a", 2.4)}</svg>`;
+    ${poly}${spawn}${dot(P[P.length - 1], "#ff5d7d", 2.4)}${dot(P[0], "#33d17a", 2.4)}</svg>`;
 }
 function browserHTML() {
   if (!WORLD || !WORLD.routes) return `<div class="why">no world data — run build_web.py</div>`;

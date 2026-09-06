@@ -308,8 +308,11 @@ function courseMap(c, opts) {
   const H = 380, W = Math.max(320, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const sx = (x1 - x0) || 1, sz = (z1 - z0) || 1, s = Math.min((W - 2 * pad) / sx, (H - 2 * pad) / sz);
   const px = (x) => pad + (x - x0) * s, py = (z) => H - pad - (z - z0) * s;
-  const line = (p, col, w, op) => p.length ? `<polyline fill="none" stroke="${col}" stroke-width="${w}"
-      opacity="${op}" stroke-linejoin="round" points="${p.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>` : "";
+  // split at teleports (respawns) so a lap or a drive never draws a straight line across the map;
+  // splitTP is defined in panel.js (loaded first) and falls back to a single run for clean catalogue geometry
+  const _split = (typeof splitTP === "function") ? splitTP : (p) => (p && p.length ? [p] : []);
+  const line = (p, col, w, op) => (p && p.length) ? _split(p).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}"
+      opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
   const turns = (c.turns || []).filter((t) => t.x != null).map((t) =>
     `<g><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="3.5" fill="var(--acc2)" opacity=".9"><title>${esc(t.id)} · ${n0(t.r)} m radius</title></circle>
      <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="9" fill="var(--mut)">${esc(t.id)}</text></g>`).join("");

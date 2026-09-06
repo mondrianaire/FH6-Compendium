@@ -61,8 +61,8 @@
    },
    "cyl": 4,
    "displacement_l": null,
-   "redline": 9000,
-   "sample_hp": 340,
+   "redline": 8000,
+   "sample_hp": 571,
    "resulting_drivetrain": "AWD",
    "sample_pi": 700,
    "source": "save-mined+telemetry"
@@ -513,13 +513,13 @@
     "383": "2005 BMW M3 E46",
     "4197": "1994 Mazda MX-5 Miata (Forza Edition)"
    },
-   "cyl": null,
+   "cyl": 10,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9500,
+   "sample_hp": 700,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "579": {
    "engine_family": 579,
@@ -555,13 +555,13 @@
    "cars_seen": {
     "1155": "1965 Shelby Cobra Daytona"
    },
-   "cyl": null,
+   "cyl": 8,
    "displacement_l": null,
-   "redline": null,
+   "redline": 8500,
    "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "688": {
    "engine_family": 688,
@@ -863,7 +863,7 @@
    "cyl": 10,
    "displacement_l": null,
    "redline": 8000,
-   "sample_hp": 833,
+   "sample_hp": 953,
    "resulting_drivetrain": "AWD",
    "sample_pi": 700,
    "source": "save-mined+telemetry"
@@ -1310,7 +1310,7 @@
    "cyl": 8,
    "displacement_l": null,
    "redline": 9000,
-   "sample_hp": 850,
+   "sample_hp": 1294,
    "resulting_drivetrain": "AWD",
    "sample_pi": 800,
    "source": "save-mined+telemetry"
@@ -2018,13 +2018,13 @@
    "cars_seen": {
     "3650": "2021 Merceds-AMG One"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 12000,
+   "sample_hp": 1086,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 900,
+   "source": "save-mined+telemetry"
   },
   "3792": {
    "engine_family": 3792,
@@ -2078,13 +2078,13 @@
    "cars_seen": {
     "3672": "2021 Lamborghini Huracan STO"
    },
-   "cyl": null,
+   "cyl": 10,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 10000,
+   "sample_hp": 661,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 797,
+   "source": "save-mined+telemetry"
   },
   "3871": {
    "engine_family": 3871,
@@ -2199,13 +2199,13 @@
     "3773": "2023 Honda Civic Type R",
     "3852": "1991 Honda Beat"
    },
-   "cyl": null,
+   "cyl": 6,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 9500,
+   "sample_hp": 244,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 700,
+   "source": "save-mined+telemetry"
   },
   "3919": {
    "engine_family": 3919,
@@ -2266,7 +2266,7 @@
    "cyl": 4,
    "displacement_l": null,
    "redline": 10000,
-   "sample_hp": 303,
+   "sample_hp": 364,
    "resulting_drivetrain": "AWD",
    "sample_pi": 700,
    "source": "save-mined+telemetry"
@@ -2283,13 +2283,13 @@
    "cars_seen": {
     "3859": "1984 Honda City"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 8000,
+   "sample_hp": 74,
+   "resulting_drivetrain": "FWD",
+   "sample_pi": 203,
+   "source": "save-mined+telemetry"
   },
   "4008": {
    "engine_family": 4008,
@@ -2547,7 +2547,7 @@
    "cyl": 6,
    "displacement_l": null,
    "redline": 8000,
-   "sample_hp": 2787,
+   "sample_hp": 2790,
    "resulting_drivetrain": "RWD",
    "sample_pi": 850,
    "source": "save-mined+telemetry"
@@ -2644,13 +2644,13 @@
    "cars_seen": {
     "4210": "2018 Lotus Scura Motorsports Exige WTAC"
    },
-   "cyl": null,
+   "cyl": 4,
    "displacement_l": null,
-   "redline": null,
-   "sample_hp": null,
-   "resulting_drivetrain": null,
-   "sample_pi": null,
-   "source": "save-mined"
+   "redline": 11000,
+   "sample_hp": 1249,
+   "resulting_drivetrain": "AWD",
+   "sample_pi": 992,
+   "source": "save-mined+telemetry"
   },
   "4364": {
    "engine_family": 4364,
@@ -2669,7 +2669,7 @@
    },
    "cyl": 4,
    "displacement_l": null,
-   "redline": 16500,
+   "redline": 8500,
    "sample_hp": 773,
    "resulting_drivetrain": "AWD",
    "sample_pi": 930,

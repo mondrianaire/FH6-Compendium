@@ -11,7 +11,7 @@
    "dir": "R",
    "type": "medium",
    "radius_m": 50,
-   "n": 32,
+   "n": 34,
    "best": {
     "mph_in": 49,
     "mph_min": 49,
@@ -28,7 +28,7 @@
     "first_red": "front ph1",
     "session": "fh6_20260831_172011"
    },
-   "sessions": 1,
+   "sessions": 2,
    "best_by_car": {
     "3859|0|4|487": {
      "mph_in": 49,
@@ -68,41 +68,69 @@
      "cars": [
       "3859|0|4|487"
      ]
+    },
+    "fh6_20260831_172011.csv": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 49,
+     "usi": 0.122,
+     "cars": [
+      "3859|0|4|487"
+     ]
     }
    },
    "track": {
-    "passes": 1,
-    "laps_seen": 1,
-    "sessions": 1,
+    "passes": 2,
+    "laps_seen": 2,
+    "sessions": 2,
     "fr": {
-     "front": 1,
+     "front": 2,
      "rear": 0,
      "none": 0
     },
     "lim": {
-     "tune": 1
+     "tune": 2
     },
     "dominant": "front",
     "consistency": 1.0,
     "cars": [
      "3859|0|4|487"
     ],
-    "laps_track": 1,
+    "laps_track": 2,
     "presence": 1.0
    },
    "established": true,
    "est_by": "behaviour"
   }
  ],
- "laps": 1,
+ "laps": 2,
  "sessions": [
-  "fh6_20260831_172011"
+  "fh6_20260831_172011",
+  "fh6_20260831_172011.csv"
  ],
  "updated": "fh6_20260831_172011",
  "best_laps": {},
  "visits": [
   {
    "session": "fh6_20260831_172011",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "best_lap": null,
+   "best_car": null
+  },
+  {
+   "session": "fh6_20260831_172011.csv",
    "laps": 1,
    "attempts": 1,
    "cars": [

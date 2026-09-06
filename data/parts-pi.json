@@ -1,6 +1,6 @@
 {
  "schema_version": "1.0.0",
- "generated": "2026-09-05 23:26:53",
+ "generated": "2026-09-06 13:52:40",
  "method": "single-part isolation from decoded-config<->CarPI observations (median per edge, anchored to stock); pure-Python least-squares regression fallback (tagged 'regression') for the rest",
  "parts_pi": {
   "centrifugal_supercharger": {
@@ -18,13 +18,51 @@
    }
   },
   "rim_style": {
+   "651": {
+    "pi_vs_stock": null,
+    "ref_tier": "158",
+    "samples": 1,
+    "confidence": "unresolved",
+    "edges": {
+     "657->651": {
+      "median_delta": 0,
+      "samples": 1
+     }
+    }
+   },
    "657": {
+    "pi_vs_stock": null,
+    "ref_tier": "158",
+    "samples": 1,
+    "confidence": "unresolved",
+    "edges": {
+     "651->657": {
+      "median_delta": 0,
+      "samples": 1
+     }
+    }
+   },
+   "669": {
     "pi_vs_stock": 0,
-    "ref_tier": "651",
+    "ref_tier": "158",
     "samples": 1,
     "confidence": "measured-direct",
     "edges": {
-     "651->657": {
+     "158->669": {
+      "median_delta": 0,
+      "samples": 1
+     }
+    }
+   }
+  },
+  "differential": {
+   "6": {
+    "pi_vs_stock": 0,
+    "ref_tier": "0",
+    "samples": 1,
+    "confidence": "measured-direct",
+    "edges": {
+     "0->6": {
       "median_delta": 0,
       "samples": 1
      }
@@ -33,15 +71,16 @@
   }
  },
  "coverage": {
-  "slots_with_estimates": 2,
-  "part_tiers_seen": 2,
-  "part_tiers_resolved": 2,
+  "slots_with_estimates": 3,
+  "part_tiers_seen": 5,
+  "part_tiers_resolved": 3,
   "by_confidence": {
-   "measured-direct": 2
+   "measured-direct": 3,
+   "unresolved": 2
   },
-  "regression": "underdetermined (96 obs, 336 params)",
-  "observations": 96,
-  "ordinals": 46,
-  "single_part_pairs": 3
+  "regression": "underdetermined (117 obs, 377 params)",
+  "observations": 117,
+  "ordinals": 57,
+  "single_part_pairs": 5
  }
 }

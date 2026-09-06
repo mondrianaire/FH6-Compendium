@@ -43,6 +43,53 @@ CLASS = {0: "D", 1: "C", 2: "B", 3: "A", 4: "S1", 5: "S2", 6: "X", 7: "X"}
 DRIVE = {0: "FWD", 1: "RWD", 2: "AWD"}
 W = ["FL", "FR", "RL", "RR"]
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+
+# ---- THE GAME'S ROUTE CATALOGUE (fh6.db ref_route + ref_route_point): every named course's start/finish LINE
+#      and full geometry. This SEEDS route attribution so a Rivals/PvP course is identified off its start line the
+#      FIRST time it is driven -- no learned history, no completed lap needed -- and every fragment of one physical
+#      course (running start, mid-lap join, a partial) collapses to one key. A start alone is NOT unique: 34 of 102
+#      routes share a start plaza (The Goliath with three Legend Island routes, Electric Town with The Opening Act),
+#      so the start PROPOSES the candidates and the PATH the drive lies on decides between them.
+_CAT_STARTS = None
+_CAT_PATH = {}
+def _catalogue_starts():
+    """[(key, name, start_x, start_z, length_m, is_race, conf)] for every named route, key = 'route:<id>'.
+    Read once (i=0 point per route); a lab without fh6.db gets an empty list, never an error."""
+    global _CAT_STARTS
+    if _CAT_STARTS is None:
+        _CAT_STARTS = []
+        try:
+            import sqlite3
+            cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
+            firsts = {rid: (x, z) for rid, x, z in cx.execute("SELECT route_id, x, z FROM ref_route_point WHERE i = 0")}
+            for rid, name, length_m, is_race, conf in cx.execute(
+                    "SELECT route_id, name, length_m, is_race, name_confidence FROM ref_route WHERE name IS NOT NULL"):
+                p = firsts.get(rid)
+                if p:
+                    _CAT_STARTS.append(("route:%s" % rid, name, p[0], p[1], round(length_m or 0), bool(is_race), conf))
+            cx.close()
+        except Exception:                                # noqa: BLE001
+            _CAT_STARTS = []
+    return _CAT_STARTS
+def _catalogue_path(key):
+    """The catalogued route's full geometry, subsampled to ~20 m (Goliath ships 21,334 points). Loaded lazily —
+    only routes whose start is near a drive's crossing are ever fetched — and cached. None if unavailable."""
+    if key not in _CAT_PATH:
+        _CAT_PATH[key] = None
+        try:
+            import sqlite3
+            rid = int(key.split(":", 1)[1])
+            cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
+            P = [(x, z) for x, z in cx.execute("SELECT x, z FROM ref_route_point WHERE route_id = ? ORDER BY i", (rid,))]
+            cx.close()
+            if P:
+                samp = [P[0]]
+                for x, z in P[1:]:
+                    if math.hypot(x - samp[-1][0], z - samp[-1][1]) >= 20.0: samp.append((x, z))
+                _CAT_PATH[key] = samp
+        except Exception:                                # noqa: BLE001
+            _CAT_PATH[key] = None
+    return _CAT_PATH[key]
 # Turn-detector generation. Persisted geometry is only replaced by a LONGER path, so without this stamp a
 # course keeps serving turns computed by whatever detector first mapped it — an improved detector would never
 # reach an already-mapped course. Bump this whenever detect_turns changes shape. (turn_lab.py scores candidates.)
@@ -1606,6 +1653,9 @@ def main():
             if os.path.exists(p):
                 with open(p, encoding="utf-8") as f: pts = ((json.load(f).get("geometry") or {}).get("path")) or None
         except Exception: pts = None
+        # A catalogued route (key 'route:<id>') that has not been driven yet has no course file — serve its geometry
+        # straight from the game catalogue so attribute_route can path-match it on the very first drive.
+        if pts is None and k.startswith("route:"): pts = _catalogue_path(k)
         if pts:
             cells = {}
             for x, z in pts: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
@@ -1746,6 +1796,39 @@ def main():
                 return True
         return False
 
+    def _catalogue_key(sx, sz, sample):
+        """Identify a drive off the game's route catalogue: the S/F crossing (sx, sz) proposes every catalogued route
+        whose start line is near it, and the PATH the drive lies on decides between them. This is what the game knows
+        the moment you load in -- the start/finish line's location is catalogued, so a Rivals/PvP course is named the
+        first time it is driven, with no learned history and no completed lap, and every fragment (running start,
+        mid-lap join, partial) of one physical course resolves to the one 'route:<id>' key.
+
+        A start alone is not enough: 34 of 102 routes share a start plaza, and a rolling start crosses the line
+        anywhere within ~120 m, so The Goliath's crossing can land nearer a Legend Island start than its own. LYING ON
+        THE ROAD decides it: a Goliath run (however partial) lies wholly on the Goliath path (ov high) and only clips
+        the plaza of a route it diverges from, so the co-located neighbours never reach the ov gate. Returns the key,
+        or None to fall through to learned-route attribution and the grid."""
+        best = None
+        for key, name, cx0, cz0, length_m, is_race, conf in _catalogue_starts():
+            d0 = math.hypot(sx - cx0, sz - cz0)
+            if d0 > 250: continue                        # only routes whose S/F line is near this crossing are candidates
+            cp = _catalogue_path(key)
+            if not cp: continue
+            cells = {}
+            for x, z in cp: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+            ov, cov = overlap(sample, (cells, cp))
+            if ov is None or ov < 0.6: continue          # the drive must LIE ON this road to be this route
+            if not direction_agree(sample, cp): continue # a course driven the other way is a different course
+            cand = (-round(ov, 2), -round(cov, 2), round(d0), key, name, length_m, is_race)
+            if best is None or cand < best: best = cand
+        if best is None: return None
+        _ov, _cov, _d0, key, name, length_m, is_race = best
+        R = routes.get(key) or {}
+        routes[key] = dict(R, name=name, start=R.get("start") or [round(sx), round(sz)], heading=R.get("heading"),
+                           length_m=max(R.get("length_m") or 0, length_m or 0), catalogue=True, is_race=is_race,
+                           events=R.get("events", 0))
+        return key
+
     ev_out = []
     for ev in events:
         rs = ev["rows"]
@@ -1874,7 +1957,15 @@ def main():
                 sample.append(_pt)
             if len(sample) >= 4000:      # a hard ceiling so a pathological event cannot make matching quadratic
                 break
-        key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_resets > 0))
+        # THE CATALOGUE IS THE FIRST AUTHORITY. The game already knows where every start/finish line is, so a course
+        # is identified off its line the first time it is driven -- no learned history, no completed lap. This runs
+        # before learned attribution so every fragment of one physical course resolves to the same catalogued key
+        # (collapsing the running-start, mid-lap-join and partial variants that grid-cell keying used to split), and
+        # a Rivals/PvP route is never left unidentified once it has crossed its line. Learned attribution and the grid
+        # remain the fallback for drives with no catalogued line nearby (custom routes, free-roam segments).
+        key = _catalogue_key(sx, sz, sample)
+        if key is None:
+            key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_resets > 0))
         if key is None and _is_rollup(sx, sz, sample):
             continue
         if key is None:
@@ -1882,6 +1973,7 @@ def main():
             if key in routes and routes[key].get("start"): key = f"{key}_{len(routes)}"   # a genuinely different route that rounds to an occupied cell
             routes[key] = dict(routes.get(key) or {}, start=[round(sx), round(sz)], heading=hdg, length_m=round(dist), events=0, first_seen=sid)
         R = routes[key]; R["events"] = R.get("events", 0) + 1; R["length_m"] = max(R.get("length_m") or 0, round(dist)); R["last_seen"] = sid
+        if not R.get("first_seen"): R["first_seen"] = sid   # a catalogued route seen for the first time keeps its debut session
         if not R.get("heading") and hdg: R["heading"] = hdg
         ev_out.append({"t0": round(rs[0]["t"], 1), "t1": round(rs[-1]["t"], 1), "car": cid(rs[0]), "stint": rs[0].get("stint"), "mode": mode, "solo": solo, "solo_conf": solo_conf, "laps": laps,
                        # BestLap is BEST-SO-FAR (0, then non-increasing): max() returned the FIRST lap's time and the

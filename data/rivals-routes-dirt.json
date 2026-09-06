@@ -1,0 +1,404 @@
+{
+  "schema_version": "1.0.0",
+  "created": "2026-09-05",
+  "discipline": "Dirt Racing",
+  "source": "Horizon Rivals > Routes screen, scrolled end to end; forzahorizon6_4zBUE8naO8.mp4 at 1 fps (35 frames); scripts/telemetry/transcribe_rivals_routes.py (EasyOCR), every name and description resolved to the game's own RivalsEventData string in ref_string",
+  "note": "Length is the in-game Route Length in miles (one decimal, so +/-0.05 mi by construction); stage events loads this file into ref_event, stage route_names matches courses to it by map identity + length. A route name repeats under 7 IDS_Name guids (one per event variant).",
+  "routes": [
+    {
+      "order": 1,
+      "name": "Chiheisen Scramble",
+      "length_mi": 1.6,
+      "description": "A fast lap at the Horizon Festival Site mixing grippy asphalt and loose gravel sections.",
+      "ids_name_guids": [
+        "1d68ded819e447c9a3618b99f2bdd4a0",
+        "246a78dc77cd42e4ba3187f8a6fbca48",
+        "2a722dee467a448c9de8bf53a1d1a7ec",
+        "531b1354474c47e29aef12ebb18accdc",
+        "b36892fccb50405594ca0a2013d97be3",
+        "cce47022dabc432685e94bf353c1b693",
+        "f8b567867efc4d74b5789d4c94f99444"
+      ],
+      "frames": [
+        "r_003",
+        "r_004"
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Sotoyama Scramble",
+      "length_mi": 1.8,
+      "description": "Race on the asphalt and a loose surfaces around the Sotoyama Ski Resort.",
+      "ids_name_guids": [
+        "1a120b2d8156479a93d0c52348d4f3b7",
+        "6504576adbd7430ebd163b0a2ff77579",
+        "9d2bf7f376b346489d8383465b89676e",
+        "a9e52822cb5448268b73e5f3c8594e64",
+        "c2b1a424d04f435cb92b0301a318f5cc",
+        "e84179602f7040fc8ab1d78f6ae47e74",
+        "f4af38d4f3ae42e994a63f66718b9df4"
+      ],
+      "frames": [
+        "r_005"
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Hirosaki Scramble",
+      "length_mi": 1.7,
+      "description": "Launching into a lap on the asphalt before heading around the outside of Hirosaki Castle on the gravel roads.",
+      "ids_name_guids": [
+        "17cfd3a93b744e7c88e44b4656c400a4",
+        "6aa5c6385e984ebca198a313bf07c28a",
+        "7c2c377f8e174c369485f5e38a166fee",
+        "99c94762b13c44ea986ecec5c1c51ec5",
+        "9c7d313372174c76aff54b922d831d2e",
+        "c2e4611c55b049a49aea8be4bd5dab3a",
+        "e7d9d264ba0a47f1806e3144ed0a4f99"
+      ],
+      "frames": [
+        "r_006"
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Sunflower Scramble",
+      "length_mi": 1.8,
+      "description": "Breathtaking flat out sections, technically demanding turns, and mixed surface transitions put you to the test in this wild scramble.",
+      "ids_name_guids": [
+        "21ec49f33e2543b99dde07234995e2ce",
+        "25923a7f790542dba9f4e530d9b09c57",
+        "34d2c3bd98b24eb68e2b7e040faf7b91",
+        "479ed545d8cc43b1bcf4416a24f2340c",
+        "7e885c851f6b4b04ad6522faea30394a",
+        "e90452e4b454460c9fff70b1ac330fa3",
+        "fedb7c2f82e940eb9062672a7345d88d"
+      ],
+      "frames": [
+        "r_007",
+        "r_008"
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Bamboo Forest Scramble",
+      "length_mi": 3.1,
+      "description": "Take on high speed sections and tricky corners in this lap that passes through the Ito Regions stunning bamboo groves.",
+      "ids_name_guids": [
+        "05647929b3b14dfc8ec1eaafabffb9f0",
+        "4acf299d2c694876a1d996a3d4a4ee4c",
+        "5475440c0e4747809e9fd2630bcdc872",
+        "98a35f57885a48aea5ade3c8210991fd",
+        "c116e200f26e46a6a6787587d26364c3",
+        "c4f7c09086af43a7aeaa3a4d4c91f18d",
+        "e73ea539ea4b491da0a193a3145e6076"
+      ],
+      "frames": [
+        "r_009"
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Ine Scramble",
+      "length_mi": 1.9,
+      "description": "Starting and ending the lap on the asphalt, this quickly becomes a test of cornering on the rougher terrain.",
+      "ids_name_guids": [
+        "3c1801af5bbf4a7da74e3b8a829f7339",
+        "6dac3987bcf0427480a1619aacc4352b",
+        "a0272924c1414d05812ee70ff18a4172",
+        "cedd6d99528f437b9151c33be8477aae",
+        "d62b7354035542f1b6b32e005b3f81a0",
+        "fdc510cbade84935ba0957b4cd37c9eb",
+        "fecc8f850b544267b547356a67c3a6e8"
+      ],
+      "frames": [
+        "r_010"
+      ]
+    },
+    {
+      "order": 7,
+      "name": "Horizon Stadium Scramble",
+      "length_mi": 2.4,
+      "description": "A mixed surface loop around the Horizon Stadium's perimeter. Watch your braking point into these deceptive turns.",
+      "ids_name_guids": [
+        "042c88cc2cb9433d80fad77e2a88d101",
+        "2cf773f1398d46f9b21f974e86a96535",
+        "2d623fe75f8047d28185a0e5b1fefb19",
+        "2ead6403d76a42ab9482bfe01eaf2ed3",
+        "438422aca0ea4d27902a5e47ebe03962",
+        "ae9f884e530f4cd4b0c5da3353cb6889",
+        "f57ea61fb1c14b208df00230d5b0ecbf"
+      ],
+      "frames": [
+        "r_011",
+        "r_012"
+      ]
+    },
+    {
+      "order": 8,
+      "name": "Taiyaki Scramble",
+      "length_mi": 2.2,
+      "description": "Elevation changes and fast corner sequences make up this unique fish shaped scramble.",
+      "ids_name_guids": [
+        "1b34e940303c4e159eb7aee9682b131d",
+        "20fc00918d9540c7893ed817f90b1dd0",
+        "3663f79dfc904a9bac860c57d7e74f8e",
+        "3b0969fff44e4875a4584b9e5dc1d630",
+        "4b8efdb205684c64861699e69092e577",
+        "9a80c3972dce451f8b38935bd1b8a1f3",
+        "ffbc29166d37468085ac29eee0650cb6"
+      ],
+      "frames": [
+        "r_013"
+      ]
+    },
+    {
+      "order": 9,
+      "name": "Kawazu Nanadaru Scramble",
+      "length_mi": 2.6,
+      "description": "Head up the iconic Kawazu Nanadaru Loop Bridge and then full throttle back down the gravel roads.",
+      "ids_name_guids": [
+        "3c380649b29f4b6baf23e290cc68bc4a",
+        "551b01eaa97c4474ad62718c1f102b80",
+        "5e442d7299604459a607898daef0c511",
+        "6d1a8189124940dfb6a742ba56eeb97d",
+        "81324c89f7014a8685b34c3442b3bd0b",
+        "9c17c5c96ecf40b18197a57b9d852fc3",
+        "e807da1d7d5543509a49cb947dff296d"
+      ],
+      "frames": [
+        "r_014",
+        "r_015"
+      ]
+    },
+    {
+      "order": 10,
+      "name": "Sekibe Scramble",
+      "length_mi": 1.3,
+      "description": "Rough terrain awaits you on this slalom-like scramble.",
+      "ids_name_guids": [
+        "1598881b9122459ca036204c740c1370",
+        "1cc4c39747cf4d1ba1f56153d2e631d6",
+        "23741ff91d1d455088d903d1bcd36390",
+        "55066a3a7aa547b08bc91955c144f059",
+        "55b203e6816c473ab8ffdc16b85e95c4",
+        "8df1d11e4e94452990a1b839b4b17b71",
+        "962921764e644ff1a33bb4a26322969d"
+      ],
+      "frames": [
+        "r_016"
+      ]
+    },
+    {
+      "order": 11,
+      "name": "Nukabira Trail",
+      "length_mi": 5.0,
+      "description": "A hill climb leads high up into the Sotoyama Region before a breathless downhill charge on the back half of the Trail.",
+      "ids_name_guids": [
+        "045b7445414c4dd89315451da2e9c724",
+        "0f488a942ef943b3acb0176555d39203",
+        "7b197fdb2eaa43e1882383730c6be31f",
+        "8d5453105ad445ed946f529edf0ebb9e",
+        "a4a81b9a15dc424d9221e5a71d2ba8de",
+        "d47e280bffe6495eba9035bd50cc82c7",
+        "dec6a5c3d58245769ee9264368358cd8"
+      ],
+      "frames": [
+        "r_017"
+      ]
+    },
+    {
+      "order": 12,
+      "name": "Waterfall Trail",
+      "length_mi": 3.6,
+      "description": "Charting upwards towards the Sotoyama Region, this twisting trail has multiple water sections that cut across the loose gravel roads.",
+      "ids_name_guids": [
+        "1fc230ef06694ea39d4965b99fc56906",
+        "371f1e29f8b44b15ba1955cb6d44acf2",
+        "9022fc8081fe4945997210467c1bd5fc",
+        "bfd9dd91bbb84b8d87d8cb5633dcd23e",
+        "c028bdbde616440781138e79f3ecbe8e",
+        "c73231f5b4974d9c813519be36213cf6",
+        "e6b19738ac1147508cfb0b56b94c051a"
+      ],
+      "frames": [
+        "r_018",
+        "r_019"
+      ]
+    },
+    {
+      "order": 13,
+      "name": "Hokubu Trail",
+      "length_mi": 3.6,
+      "description": "A full tilt forest run with fast corners and thrilling downhill sections on this bumpy trail.",
+      "ids_name_guids": [
+        "08c743798dba45e7ae8c6421c384bd86",
+        "41bc2b7d7bb448cf872fa23ebc2c5947",
+        "7a1cfa1c7bc64278a5ab0526a9de5f62",
+        "8c0cd5bc075c4d1386b1836419cb252b",
+        "8e504dead76a4ba49dcf26f75e66bfe2",
+        "bd60a1a2f5d04118837dd43962e0934a",
+        "bfb37443162441608ee166ef6322ddd6"
+      ],
+      "frames": [
+        "r_020"
+      ]
+    },
+    {
+      "order": 14,
+      "name": "Ito Trail",
+      "length_mi": 4.4,
+      "description": "Taking you through the top of the Ito Region, this trail offers challenging corners before descending towards the coastline.",
+      "ids_name_guids": [
+        "28b7980f64f74c0a9c7608d88a249f75",
+        "60c37eebfcf647dfbc78ff72047e03e9",
+        "9e3501d3de4140ada0b1cc1c4250e482",
+        "c368c479cde84e4ca7611a66081900a3",
+        "d2ddfb279fe84ae6bbd818c9d4b067a1",
+        "d8dc70e87be14909a52e88e0a6c05065",
+        "e4ad352972ed4bd5983c5588da07dedc"
+      ],
+      "frames": [
+        "r_021",
+        "r_022"
+      ]
+    },
+    {
+      "order": 15,
+      "name": "Airfield Trail",
+      "length_mi": 4.2,
+      "description": "Navigate the uneven loose surfaces as you head near the airfield for a high speed push on the asphalt roads to the finish.",
+      "ids_name_guids": [
+        "0210c87dfba345dcb810cd747af8a33e",
+        "0f3ad654389847ccba1b7bf595d98f8c",
+        "56641d42af224912a8e2cba203051113",
+        "710b1ce87e814a94a2a62f89c0444331",
+        "b0cc1eb3f3584ef1927dc38b016850c3",
+        "b54b563b2f0d406e96a9cb9db8d1364e",
+        "b6f6a822f9534850b8379dbf5d85173b"
+      ],
+      "frames": [
+        "r_023",
+        "r_024"
+      ]
+    },
+    {
+      "order": 16,
+      "name": "Cherry Field Trail",
+      "length_mi": 4.5,
+      "description": "A breathtaking downhill charge into some tricky corners will test your ability to brake as late as you dare to gain an advantage.",
+      "ids_name_guids": [
+        "1e06125c10a448eaad2e0c855af394a1",
+        "40cff3f8f49942caa47f08f45cd75d2e",
+        "4f455358b358453fb1e7ebdd759163e3",
+        "ccf0ec3a27a44c78a88b83191222bdad",
+        "db6d5d07fb07461d91353037adc146f9",
+        "dc842406de0a4ab0b5a3c96e79bbe035",
+        "e5960f5f05524aa3904b13a7cfbe127c"
+      ],
+      "frames": [
+        "r_025",
+        "r_026"
+      ]
+    },
+    {
+      "order": 17,
+      "name": "Kinkaku-ji Trail",
+      "length_mi": 3.4,
+      "description": "This trail leads through a valley of trees and past Kinkaku-ji Temple, before entering into an asphalt sprint to the finish.",
+      "ids_name_guids": [
+        "1be01fb130b443b98d9885c4f9929843",
+        "1c76589fe0e2478c81f88184f38c4302",
+        "a240cb5abe6141549e886079d97e3b7b",
+        "cfcbd7ad9c544ea8a911aa4f582c12dd",
+        "dbacdc7ef8354cca8c96013716c1e5cb",
+        "e1edb6a4e9b746fabc1217e49f9afd1b",
+        "f5528f1fa8474bdbafe9df76ccde25c2"
+      ],
+      "frames": [
+        "r_027"
+      ]
+    },
+    {
+      "order": 18,
+      "name": "Legend Island Trail",
+      "length_mi": 3.3,
+      "description": "This trail will take you across Legend Island as you battle for position on these tricky mixed surface roads. Stay sharp.",
+      "ids_name_guids": [
+        "04d0d817a02f4dc9b80e98c17d4a09f5",
+        "4d1cd2e8330644448793a7624817bf6b",
+        "ab574917740b4b77ba24bf27fa197ece",
+        "afe0a38046c645e885ee1078fb07a19f",
+        "c1e93e3751d642c49e0db4dee94f731d",
+        "da2d4101d63c43949e7cb8d94daa62a6",
+        "f01a919b15aa462e9c48d186465ed1a2"
+      ],
+      "frames": [
+        "r_028"
+      ]
+    },
+    {
+      "order": 19,
+      "name": "Oyashirazu Trail",
+      "length_mi": 3.2,
+      "description": "A challenging trail that mixes flat-out speed sections with sudden technical corner sequences.",
+      "ids_name_guids": [
+        "05620d11ecd947849d4eb529a91ff4b4",
+        "152a07acbf7c4c37acfe3948df5c8e3e",
+        "156efee8513943f7bae5242977ba1ded",
+        "3ab97acb21f04a0ba90ae26c6d81ecbb",
+        "79aad8f0dff7455ca94a2ca10bea08e1",
+        "a93104c016834091bbb46999f5905fd4",
+        "c34d6c6f8c27486abd102aa732297890"
+      ],
+      "frames": [
+        "r_029",
+        "r_030"
+      ]
+    },
+    {
+      "order": 20,
+      "name": "Takashiro Trail",
+      "length_mi": 3.6,
+      "description": "With bumps, jumps, twists, and turns this trail is a rollercoaster ride from the Takashiro Region to the Hokubu Region.",
+      "ids_name_guids": [
+        "3bd8b61535fe47c7b1ae7e891c9b455d",
+        "511b8a99ff434104bbba022850296b4d",
+        "8e1cdb29ae824c19ab0c8e38abf7d0aa",
+        "92a61916445d4875ab4514147d7423a6",
+        "a8eab7df3d0e48eeb97d7066b5088a20",
+        "b21ec4f1ded34ad79556fb2e48c66755",
+        "e0fdf0d7424640c99a6c5747e1745f7c"
+      ],
+      "frames": [
+        "r_031",
+        "r_032"
+      ]
+    },
+    {
+      "order": 21,
+      "name": "The Gauntlet",
+      "length_mi": 18.7,
+      "description": "A trail that stretches across the horizon, endurance is your friend here.",
+      "ids_name_guids": [
+        "32f51f5bf93a407da523e8a431173df8",
+        "6ec823017a3d424f9949e51e8a7fb778",
+        "8e950fd6b71b43a38de6695a1730b043",
+        "9d5f673ca67b40109b8276d415da210d",
+        "bc0facb3431c4d72a0e01ee9a1580afd",
+        "d2a7d5acd78e4970b34baca24107d6a7",
+        "e022af9611ea45bebce889c8c65ac1d9"
+      ],
+      "frames": [
+        "r_033",
+        "r_034",
+        "r_035"
+      ]
+    }
+  ],
+  "transcription": {
+    "corrections": [],
+    "unresolved": [],
+    "missing_length": []
+  }
+}

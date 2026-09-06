@@ -116,6 +116,34 @@ def run(cx, verbose=False):
         erows += er
         esrows += es
 
+    # THE WHOLE LIST, NOT JUST THE MEASURED PART. RivalsEventData names 88 routes; the Routes-screen
+    # files give lengths for the 23 Road ones. The other 65 are imported name-only (length NULL, so
+    # the map/length tiers never see them) so that a typed name is a checked join to the game's own
+    # list instead of an unknown string -- 'Hakone Nanamagari' read as "not a game event name" until
+    # this (2026-09-05). A later rivals-routes-<discipline>.json file simply takes over its rows.
+    have = {r[2] for r in erows}
+    have_ids = {r[0] for r in erows}
+    by_name = {}
+    for kh, kn, content in cx.execute(
+            "SELECT key_hash, key_name, content FROM ref_string"
+            " WHERE table_name='RivalsEventData' AND key_name LIKE 'IDS_Name_%' ORDER BY key_name"):
+        by_name.setdefault(content, []).append((kh, kn))
+    n_name_only = 0
+    for name in sorted(by_name):
+        if name in have:
+            continue
+        event_id = "rivals:" + slug(name)
+        if event_id in have_ids:
+            raise ValueError("name-only event '%s' collides with %s on slug" % (name, event_id))
+        have_ids.add(event_id)
+        erows.append((event_id, "rivals", name, None, None, None, None, None,
+                      json.dumps({"guids": len(by_name[name])}), None, None, is_loop_of(name),
+                      "ref_string:RivalsEventData"))
+        for kh, kn in by_name[name]:
+            esrows.append((event_id, "RivalsEventData", kh, kn, "name"))
+        n_name_only += 1
+    disciplines["name-only"] = n_name_only
+
     with cx:
         cx.execute("BEGIN")                  # a PRAGMA outside a transaction autocommits and resets itself
         cx.execute("PRAGMA defer_foreign_keys=ON")

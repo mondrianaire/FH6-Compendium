@@ -92,7 +92,7 @@ ones plausibly worth a look are `Upgrade_Class.zip` (class badges), `WheelIcons.
 | source | state |
 |---|---|
 | `EN.zip` string tables | **complete** — 287 of 288 entries imported, 58,722 strings |
-| Horizon Rivals > Routes screen | **Road Racing only** — 23 of 88 Rivals routes captured (`data/rivals-routes-road.json`); the other 65 show no Route Length on their own screens, so they carry no `ref_event.length_m` and can never be named by length |
+| Horizon Rivals > Routes screen | **Road Racing only** — 23 of 88 Rivals routes captured with a length (`data/rivals-routes-road.json`); the other 65 are in `ref_event` name-only (from the game strings) so typed names check against them, but carry no `ref_event.length_m` and can never be named by length until their Routes screens are transcribed |
 | `aitracks/Route*.owt` + `.nav` | **complete** — all 169 routes, points, width, banking, road class. Road class was EMPTY in the live DB from the 2026-09-02 rename until 2026-09-03 (KeyError on every rebuild, logged in `import_run` as ok=0); verify with `SELECT road_class, COUNT(*) FROM ref_route_turn GROUP BY 1`, not with this line |
 | `freeroam/Brio_00.nav` | imported (road class); surface MATERIAL still unsolved |
 | save folders `Tuning_*` | **complete since 2026-09-03** — `Data`, `header` and `Thumb.png` all read (the header and render sat unread for weeks) |
@@ -129,8 +129,8 @@ done when every one of its tables or entries is either imported or has a row her
 | `ref_compound` | 41 | all 41 tyre compounds with slip peaks and friction scales — the global grip ladder. |
 | `ref_drivetrain` | 662 | columns: drivetrain_id, drivetype, shift_system, is_swap_set, n_cars, data |
 | `ref_engine` | 670 | columns: engine_id, name, media_name, config, cylinders, displacement_cc… |
-| `ref_event` | 0 | the Rivals catalogue as displayed — name, length_m (a screen read, ±80 m), is_loop; filled by stage `events` from `data/rivals-routes-road.json`. EMPTY until that stage runs on this DB. |
-| `ref_event_string` | 0 | the 7 IDS_Name + 7 IDS_Description guids per Rivals route, joined live against `ref_string` so a name can never drift from the game's own string. Filled by stage `events`; table awaits the 2026-09-05 schema migration on this DB. |
+| `ref_event` | 88 | the Rivals catalogue as displayed — name, length_m (a screen read, ±80 m), is_loop; filled by stage `events`: 23 Road routes with a length from `data/rivals-routes-road.json` + 65 name-only rows (length NULL, never matched by length) from the `RivalsEventData` strings, so a typed course name is a checked join, not an unknown string. |
+| `ref_event_string` | 604+ | every `RivalsEventData` IDS_Name guid (604 across 88 names, 7 per route) plus the IDS_Description guids that match a Road route's description verbatim, joined live against `ref_string` so a name can never drift from the game's own string. Filled by stage `events`. |
 | `ref_friction_curve` | 738 | the friction curve behind every compound: 41 compounds × 3 channels × 3 surfaces × 2 load bands. Explode it with `v_friction_point` (slip, μ). |
 | `ref_motor` | 19 | columns: motor_id, name, media_name, mass_kg, battery_kwh, redline_rpm… |
 | `ref_part` | 87655 | every option of every slot, with tile / tile_count / price / mass / requires_aspiration — the shop grid. |

@@ -984,7 +984,19 @@ def _pick_meta(metas, ordn, ts_want=None):
             # contradicts the held build, drop the hold and let the scoring/ladder re-disambiguate NOW.
             if held is not None and live:
                 _lr = fr.get("maxrpm") if fr else None
-                if (held.get("cyl") and live_cyl and int(held["cyl"]) != int(live_cyl)) or (held.get("red") and _lr and abs(int(held["red"]) - int(_lr)) > 700):
+                _engine_contra = ((held.get("cyl") and live_cyl and int(held["cyl"]) != int(live_cyl))
+                                  or (held.get("red") and _lr and abs(int(held["red"]) - int(_lr)) > 700))
+                # A TUNE SWAP the disk cannot see. Loading a DIFFERENT saved setup writes no Tuning_* file (the game
+                # writes only on SAVE), so new_save never fires and the hold is the only voice — but the live CarPI
+                # is telemetry-exact. When the held build's own PI is known and the live read is a DIFFERENT
+                # same-engine save's PI, the equipped build changed under the hold: yield so scoring (which boosts
+                # the save whose PI matches the live read) re-picks it. A live PI matching NO save is an in-shop
+                # edit of the held build instead — handled by `stale` below, not a swap, so the hold stays.
+                _swap = bool(live_pi and held.get("pi") and int(held["pi"]) != int(live_pi)
+                             and any(r is not held and r.get("pi") and int(r["pi"]) == int(live_pi)
+                                     and (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))
+                                     for r in roster))
+                if _engine_contra or _swap:
                     held = None
                     try: del ST.gear_id[str(ordn)]   # the verified identity belonged to the OTHER build — it no longer describes what's equipped
                     except Exception: pass

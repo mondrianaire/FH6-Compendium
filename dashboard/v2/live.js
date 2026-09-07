@@ -1023,7 +1023,7 @@ function sliderRow(row, status) {
     // all), and every OTHER derived field becomes exact via the 🎯 calibration card (a typed
     // in-game reading), never by driving. Say what's actually true: a shared band, not this car's
     // own measured range.
-    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="from a global band shared across cars, not this car\'s own measured range"' : row.src === "db" ? ' title="absolute value from the database: the save\'s slider position on the game\'s own range for this car"' : ""}>${esc(String(row.value))}<small>${esc(row.unit || "")}</small>${row.src === "db" ? '<em class="src">db</em>' : ""}</span>`
+    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="from a global band shared across cars, not this car\'s own measured range"' : row.src === "db" ? ' title="absolute value from the database: the save\'s slider position on the game\'s own range for this car"' : ""}>${esc(String(snapSliderVal(row.field, row.value, row.min, row.max)))}<small>${esc(row.unit || "")}</small>${row.src === "db" ? '<em class="src">db</em>' : ""}</span>`
       + (row.conflict ? `<span class="cflag" title="the save decodes ${esc(String(row.conflict.save))}; telemetry measures ${esc(String(row.conflict.telemetry))}">⚠ save ${esc(String(row.conflict.save))}</span>`
         : row.agree ? `<span class="aflag" title="the save and telemetry agree">✓×2</span>` : "");
   // status: A/B diff against the base build, variation status only -- see diffSliderRows()
@@ -1036,6 +1036,51 @@ function sliderRow(row, status) {
 // game's display units — and are tagged as coming from the database.
 const DB_UNITS = { "N/mm": ["lb/in", 5.71015], "m": ["in", 39.3701], "kgf": ["lb", 2.20462], "psi": ["psi", 1], "deg": ["deg", 1], "%": ["%", 1],
                    "ratio": ["ratio", 1], ":1": [":1", 1], "scale": ["scale", 1], "% front": ["% front", 1], "% rear": ["% rear", 1] };
+// IN-GAME INPUT GRANULARITY (Jett, 2026-09-07, dictated live from the tuning screens). The save
+// stores a slider FINER than the game lets you dial it, so the raw decoded value is one the tune
+// menu can't actually be set to -- the sheet was showing a "closest match". These are the real
+// steps the menu accepts; snapSlider() rounds the stored value to the nearest one so the sheet
+// prints exactly what you type. `dp` is the decimals the game shows at that step.
+//   SPRINGS are the one offset grid: step is 0.5 lb/in but anchored at the slider's OWN minimum,
+// so valid values carry the min's fractional offset (land on e.g. .3/.8, never .0/.5). Snapping
+// must be relative to min, not zero -- every other slider's min sits on its own step grid, so
+// min-anchoring is a no-op for them and only springs need `anchor:"min"`.
+const SLIDER_STEP = {
+  front_tire_pressure: { step: 0.5, dp: 1 }, rear_tire_pressure: { step: 0.5, dp: 1 },
+  front_camber: { step: 0.1, dp: 1 }, rear_camber: { step: 0.1, dp: 1 },
+  front_toe: { step: 0.1, dp: 1 }, rear_toe: { step: 0.1, dp: 1 },
+  front_caster: { step: 0.1, dp: 1 }, rear_caster: { step: 0.1, dp: 1 },
+  front_arb: { step: 0.1, dp: 1 }, rear_arb: { step: 0.1, dp: 1 },
+  front_spring: { step: 0.5, dp: 1, anchor: "min" }, rear_spring: { step: 0.5, dp: 1, anchor: "min" },
+  front_ride_height: { step: 0.1, dp: 1 }, rear_ride_height: { step: 0.1, dp: 1 },
+  front_rebound: { step: 0.1, dp: 1 }, rear_rebound: { step: 0.1, dp: 1 },
+  front_bump: { step: 0.1, dp: 1 }, rear_bump: { step: 0.1, dp: 1 },
+  front_downforce: { step: 1, dp: 0 }, rear_downforce: { step: 1, dp: 0 },
+  brake_balance: { step: 1, dp: 0 }, brake_pressure: { step: 1, dp: 0 },
+  front_diff_accel: { step: 1, dp: 0 }, front_diff_decel: { step: 1, dp: 0 },
+  rear_diff_accel: { step: 1, dp: 0 }, rear_diff_decel: { step: 1, dp: 0 }, center_diff: { step: 1, dp: 0 },
+  final_drive: { step: 0.01, dp: 2 },
+};
+function sliderStepFor(field) {
+  if (!field) return null;
+  if (SLIDER_STEP[field]) return SLIDER_STEP[field];
+  if (/^gear_\d+$/.test(field)) return { step: 0.01, dp: 2 };   // forward gears share final drive's 0.01 grid
+  return null;
+}
+// Snap a stored value to the nearest value the game's slider will actually accept, then format it
+// to that slider's displayed precision. min/max are in DISPLAY units (same as `value`). Returns a
+// STRING ready to print, or the raw value untouched when the field has no known step.
+function snapSliderVal(field, value, min, max) {
+  const g = sliderStepFor(field);
+  const v = parseFloat(value);
+  if (!g || value == null || !Number.isFinite(v)) return value == null ? value : String(value);
+  const hasMin = min != null && Number.isFinite(+min), hasMax = max != null && Number.isFinite(+max);
+  const anchor = (g.anchor === "min" && hasMin) ? +min : 0;
+  let sn = anchor + Math.round((v - anchor) / g.step) * g.step;
+  if (hasMin) sn = Math.max(+min, sn);
+  if (hasMax) sn = Math.min(+max, sn);
+  return sn.toFixed(g.dp);   // toFixed rounds off the floating-point dust from anchor + k*step
+}
 function dbTuneFor(b) {
   const ts = CUR && CUR.disk && CUR.disk.ts;
   const tunes = (b && b.tunes) || [];
@@ -1044,12 +1089,20 @@ function dbTuneFor(b) {
   return tunes.find((t) => ts && String(t.container || "").endsWith("_" + ts)) || null;
 }
 function fillFromDb(row, tune) {
-  if (!tune || (row.value != null && !row.derived)) return row;   // exact beats derived; derived is replaced, not kept
+  if (!tune) return row;
   const s = (tune.sliders || []).find((x) => x.slider === row.field);
   if (!s || s.v == null) return row;
   const [unit, k] = DB_UNITS[s.unit] || [s.unit, 1];
+  // Carry the slider's own min/max into the row (display units) so snapSliderVal() can anchor the
+  // spring grid at the true minimum. Attach it even when we keep the row's existing exact value.
+  const mn = (s.lo != null) ? s.lo * k : (row.min != null ? row.min : undefined);
+  const mx = (s.hi != null) ? s.hi * k : (row.max != null ? row.max : undefined);
+  if (row.value != null && !row.derived) return Object.assign({}, row, { min: mn, max: mx });   // exact beats derived; just gain the range
   const v = s.v * k;
-  return Object.assign({}, row, { value: (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2)), unit, src: "db", norm: s.norm, derived: false });
+  // Keep full precision for a snappable field (render snaps + formats); the old ≥100→0dp rounding
+  // would have destroyed a spring's fractional offset before it could be snapped to the right grid.
+  const disp = sliderStepFor(row.field) ? String(v) : (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2));
+  return Object.assign({}, row, { value: disp, unit, src: "db", norm: s.norm, derived: false, min: mn, max: mx });
 }
 function tuneTabs(b, dl, diff) {
   if (dl && (dl.tabs || []).length) {
@@ -1073,7 +1126,7 @@ function sliderRowFlow(row, status, prevPoles) {
   const pct = Math.max(0, Math.min(100, Math.round((row.fill || 0) * 100)));
   const valTxt = rel
     ? `${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%`
-    : `${esc(String(row.value))}${esc(row.unit || "")}`;
+    : `${esc(String(snapSliderVal(row.field, row.value, row.min, row.max)))}${esc(row.unit || "")}`;
   const src = row.src === "db" ? `<span class="src" title="absolute value from the database">D</span>`
     : row.derived ? `<span class="src" title="from a global band shared across cars, not this car's own measured range">~</span>` : `<span class="src"></span>`;
   const flag = row.conflict ? `<span class="cflag" title="the save decodes ${esc(String(row.conflict.save))}; telemetry measures ${esc(String(row.conflict.telemetry))}">⚠</span>`
@@ -1095,7 +1148,11 @@ function tuneTabsFlow(b, dl, diff) {
       return { name: t.tab, html: secs.map((s) => {
         let prevPoles = null;
         const rows = s.rows.map((r) => { const out = sliderRowFlow(r, diff && diff[r.field], prevPoles); prevPoles = out.poles; return out.html; });
-        return `<div class="sec"><div class="sech">${esc(s.h)}</div>${rows.join("")}</div>`;
+        // The block's own <h3> already names a single-section tab (e.g. Tires); the sub-header is
+        // pure duplication there, so drop it and keep it only where a tab really splits (Alignment,
+        // Differential, Damping) -- reclaims a line per category, per Jett's "gain vertical real estate".
+        const head = secs.length > 1 ? `<div class="sech">${esc(s.h)}</div>` : "";
+        return `<div class="sec">${head}${rows.join("")}</div>`;
       }).join("") };
     });
   }
@@ -1155,14 +1212,15 @@ function flowSheetHTML(b, dl, diff) {
   const ci = shop.findIndex((m) => m.name === "Conversions");
   if (ci > 0) shop.unshift(shop.splice(ci, 1)[0]);
   const tune = tuneTabsFlow(b, dl, diff);
-  const sections = shop.map((m) => ({ name: m.name, html: m.html, count: m.of != null ? `${m.n}/${m.of}` : null }))
-    .concat(tune.map((t) => ({ name: t.name, html: t.html, count: null })));
-  // a plain-text section legend, not links -- the flowing columns give up jump-nav on purpose (short
-  // and long categories interleave unpredictably across columns, exactly like the reference sheet's
-  // own topics do), this just tells a reader what's in the document without a single click-target.
-  const legend = sections.map((s) => esc(s.name)).join(" · ");
-  const body = sections.map((s) => `<div class="blk"><h3>${esc(s.name)}${s.count ? `<span class="n">${esc(s.count)}</span>` : ""}</h3>${s.html || `<div class="why">nothing in this category</div>`}</div>`).join("");
-  return `<div class="legend">${legend}</div><div class="fdoc">${body}</div>`;
+  const blk = (name, html, count) => `<div class="blk"><h3>${esc(name)}${count ? `<span class="n">${esc(count)}</span>` : ""}</h3>${html || `<div class="why">nothing in this category</div>`}</div>`;
+  // TWO FIXED COLUMNS (Jett, 2026-09-07): every hardware upgrade on the LEFT, every tuning slider on
+  // the RIGHT -- never interleaved. The old newspaper-column flow mixed shop and tune blocks across
+  // as many columns as fit; splitting by KIND means a reader always knows which lane to read, and it
+  // fits the whole build on one screen. The dot-separated section legend that used to sit on top is
+  // gone: the two lanes' own block headings already say what's in each.
+  const left = shop.map((m) => blk(m.name, m.html, m.of != null ? `${m.n}/${m.of}` : null)).join("");
+  const right = tune.map((t) => blk(t.name, t.html, null)).join("");
+  return `<div class="fdoc"><div class="fcol fcol-hw">${left}</div><div class="fcol fcol-tune">${right}</div></div>`;
 }
 function flowDocHTML(b, dl, name, diff) {
   const t = (b.tunes || []).slice(-1)[0] || {};
@@ -1327,7 +1385,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
 .hd .lk{color:var(--warn);font-size:11px;border:1px solid var(--warn);border-radius:9px;padding:0 7px;margin-left:8px}
 .hd .own{color:var(--acc);font-size:11px;border:1px solid var(--acc);border-radius:9px;padding:0 7px;margin-left:8px}
 .sec{margin-bottom:12px}
-.sech{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#0b0f07;background:#a8d92a;padding:2px 8px;border-radius:3px;display:inline-block;margin:0 0 7px}
+.sech{font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);background:none;padding:0;border-radius:0;display:block;margin:5px 0 0}
 .sl{display:block;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 /* A/B diff dot, variation status only -- same colours as v1's original (dashboard/app.js:3891) */
 .fhm-vdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--mut)}
@@ -1365,12 +1423,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
 .bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#0b3a2a,var(--acc))}
 .tv.lk .bar i{background:var(--ln)}
 .df{color:var(--warn);font:10px inherit;border:1px solid var(--warn);border-radius:9px;padding:0 6px}
-/* STATIC DOCUMENT (2026-09-03): the whole Build Sheet, one flowing multi-column page -- no tabs,
-   no rail, no checkboxes. .legend replaces jump-nav with plain text (the columns interleave short
-   and long categories unpredictably, on purpose, same as the printed reference sheet this copies). */
-.legend{padding:8px 14px 4px;font:11px var(--mono);color:var(--mut);border-bottom:1px solid var(--ln)}
-.fdoc{column-width:230px;column-gap:16px;column-rule:1px solid var(--ln);
+/* STATIC DOCUMENT (2026-09-03; two fixed lanes 2026-09-07): the whole Build Sheet on one page --
+   no tabs, no rail, no checkboxes. Two columns, hardware left / tuning right, so a reader always
+   knows which lane to look in and the whole build fits one screen. */
+.fdoc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;
  font:11px/1.4 "Inter","Segoe UI",system-ui,sans-serif;padding:10px 14px 30px}
+.fcol{min-width:0}
+.fcol-hw{border-right:1px solid var(--ln);padding-right:16px}
 .blk{break-inside:auto;margin-bottom:8px}
 .blk h3{break-after:avoid-column;display:flex;justify-content:space-between;gap:8px;font:800 9.5px/1.2 var(--mono);
  text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin:9px 0 3px;border-bottom:1px solid var(--ln);padding-bottom:2px}
@@ -1385,14 +1444,18 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
    it never reads as "just very stock" at a glance) */
 .prow.gated{opacity:.3;font-style:italic}
 .prow.gated b{color:var(--mut)}
-.slrow{break-inside:avoid;display:grid;grid-template-columns:1fr 54px 60px 14px auto;gap:6px;
+/* Rebalanced for the two-lane sheet (2026-09-07): the value (now snapped to the game's real input,
+   the point of this row) and the label must never truncate, so value gets a fixed width that fits
+   the widest "546.9lb/in", the decorative fill bar shrinks, and the directional pole hint takes
+   the slack and ellipsizes rather than starving the label. */
+.slrow{break-inside:avoid;display:grid;grid-template-columns:minmax(0,1fr) 66px 24px 10px minmax(0,auto);gap:5px;
  align-items:baseline;font-size:11px;padding:1px 0}
 .slrow .sll{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.slrow .slv{font-variant-numeric:tabular-nums;color:#c3ea4f;white-space:nowrap}
+.slrow .slv{font-variant-numeric:tabular-nums;color:#c3ea4f;white-space:nowrap;text-align:right}
 .slrow .slv.derived{color:#8fd14f}
 .slrow .bar{height:7px}
 .slrow .src{color:var(--mut);font:10px var(--mono);text-align:center}
-.slrow .pol{color:var(--mut);font-size:9px;letter-spacing:.03em;white-space:nowrap}
+.slrow .pol{color:var(--mut);font-size:9px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 `;
 
 /* ------------------------------------------------------------- hardware */

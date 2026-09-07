@@ -1239,6 +1239,8 @@ def tune_to_deliverable(tune, car_name=None):
             base = {"field": k, "label": label, "section": sec, "poles": list(poles), "fill": round(e["norm"], 4)}
             if e["value"] is not None:
                 vr = {**base, "value": e["value"], "unit": e["unit"], "display": f"{e['value']} {e['unit']}".strip()}
+                if e.get("range"):   # min/max (display units) -> the dashboard snaps the stored value to the game's real input step (springs anchor their 0.5 grid at this min)
+                    vr["min"], vr["max"] = e["range"][0], e["range"][1]
                 if e.get("anchored"):
                     vr.update({"anchored": True, "status": "measured-anchored", "confidence": 0.95})   # user-read exact at this position
                 elif e.get("derived"):

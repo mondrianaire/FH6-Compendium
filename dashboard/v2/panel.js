@@ -1220,13 +1220,22 @@ function paintLeft() {
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
     const nSel = (TRACE_PICK && TRACE_PICK.key === COURSE.key && TRACE_PICK.ids) ? TRACE_PICK.ids.length : Object.keys(COURSE.traces || {}).length;
-    // the track OWNS this pane's title once it is identified: its name, its badge, then the facts
-    const named = !!COURSE.name;
-    const kind = COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null;
-    hd.innerHTML = `<b class="trackname">${esc(named ? COURSE.name : "unnamed course " + COURSE.key)}</b>
-      ${nameChip(COURSE.naming)}
-      ${kind ? `<span class="chip w">${kind}</span>` : ""}
-      <span class="why">${n0(COURSE.len)} m · ${(COURSE.turns || []).length} turns · ${nSel} of ${(COURSE.laps || []).length} laps drawn</span>`;
+    // the track OWNS this pane's title once it is identified — as the same COURSE INFORMATION PILL the world
+    // map header uses (Jett 2026-09-07), fed from the learned COURSE plus the catalogued route it matched
+    // (classes/modes/shape come from the route; name/length/turns/laps are the course's own driven facts).
+    const _cr = COURSE.route || {};
+    const _wr = (_cr.route_id && WORLD && WORLD.routes && WORLD.routes[_cr.route_id]) || null;
+    hd.innerHTML = courseInfoPill({
+      id: _cr.route_id, name: COURSE.name || ("unnamed course " + COURSE.key),
+      pts: (_wr && _wr.pts) || COURSE.path || null,
+      len: COURSE.len, loop: _wr ? _wr.loop : _cr.is_loop,
+      is_race: _wr ? _wr.is_race : !!COURSE.rivals,
+      modes: (_wr && _wr.modes) || (COURSE.rivals ? ["rivals"] : []),
+      disc: _wr && _wr.disc, classes: (_wr && _wr.classes) || [], class_data: (_wr && _wr.class_data) || [],
+      laps: (COURSE.laps || []).length, lapsDrawn: nSel, turns: (COURSE.turns || []).length,
+      kindLabel: COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null,
+      nameChip: nameChip(COURSE.naming),
+    }, "course");
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
     body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore }));
     // courseMap() draws its own inline legend (shared with the v1 course page) — lift it into
@@ -1269,18 +1278,25 @@ function paintLeftHeader() {
     rid = top && top.id;
   }
   const r = rid && WORLD.routes[rid];
-  hd.innerHTML = r ? courseInfoPill(rid, r, state)
+  hd.innerHTML = r ? courseInfoPill(Object.assign({ id: rid }, r), state)
                    : `World · <span class="why">${routeSplit().on.length} routes on the island · free roam</span>`;
 }
-// The pill body: a horizontal, header-sized version of a Course Browser row. `state` picks the status chip.
-function courseInfoPill(id, r, state) {
-  const nm = r.name || ("Route " + id);
-  const kind = r.is_race ? "RACE" : (r.modes || []).includes("rivals") ? "RIVALS"
+// The pill body: a horizontal, header-sized version of a Course Browser row, from a NORMALISED descriptor so
+// both the free-roam world routes and an identified learned COURSE feed the same renderer. `state` picks the
+// status chip. Optional fields: turns, lapsDrawn (shows "N of M laps drawn"), nameChip (HTML), kindLabel.
+function courseInfoPill(r, state) {
+  const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));
+  const kind = ("kindLabel" in r) ? r.kindLabel
+             : r.is_race ? "RACE" : (r.modes || []).includes("rivals") ? "RIVALS"
              : (r.modes || []).includes("career") ? "CAREER" : null;
   const laps = r.laps || 0, sess = r.sessions || 0;
-  const meta = [n0(r.len) + " m", r.loop ? "loop" : "P2P"]
-    .concat(laps ? [laps + " lap" + (laps === 1 ? "" : "s"), sess + " run" + (sess === 1 ? "" : "s")] : ["no data yet"])
-    .concat(state === "route" && r.alsoName ? ["shares road with " + r.alsoName] : []).join(" · ");
+  const meta = [n0(r.len) + " m", r.loop ? "loop" : "P2P"];
+  if (r.turns != null) meta.push(r.turns + " turn" + (r.turns === 1 ? "" : "s"));
+  if (r.lapsDrawn != null) meta.push(r.lapsDrawn + " of " + laps + " lap" + (laps === 1 ? "" : "s") + " drawn");
+  else if (laps) { meta.push(laps + " lap" + (laps === 1 ? "" : "s")); if (sess) meta.push(sess + " run" + (sess === 1 ? "" : "s")); }
+  else meta.push("no data yet");
+  if (r.alsoName) meta.push("shares road with " + r.alsoName);
+  const metaS = meta.join(" · ");
   const dataSet = new Set(r.class_data || []);   // solid = we hold laps in that class, hollow = offered only
   const pills = (r.classes || []).map((cl) =>
     `<span class="pib pib--sm pib-${cl.toLowerCase()}${dataSet.has(cl) ? "" : " pib--neg"}" title="class ${cl}${dataSet.has(cl) ? " · has data" : " · no data yet"}"><b>${esc(cl)}</b></span>`).join("");
@@ -1289,12 +1305,13 @@ function courseInfoPill(id, r, state) {
                   r.disc ? `<span class="bb dsc">${esc(r.disc)}</span>` : ""].join("");
   const stChip = state === "browsing" ? `<span class="chip w">BROWSING</span>`
                : state === "route" ? `<span class="chip w">${MODE.game === "event" ? "ON EVENT ROUTE" : "ON ROUTE"}</span>`
+               : state === "course" ? `<span class="chip on">ON COURSE</span>`
                : `<span class="chip dim">top of list</span>`;
   return `<div class="cpill" data-state="${esc(state)}">
     <span class="cpill-glyph">${tileSvg(r, false)}</span>
     <span class="cpill-txt">
-      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${kind ? `<span class="chip w">${kind}</span>` : ""}${stChip}</span>
-      <span class="why cpill-l2" title="${esc(meta)}">${esc(meta)}</span>
+      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${r.nameChip || ""}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${stChip}</span>
+      <span class="why cpill-l2" title="${esc(metaS)}">${esc(metaS)}</span>
     </span>
     <span class="cpill-badges">${pills}${badges}</span>
   </div>`;

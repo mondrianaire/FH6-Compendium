@@ -159,7 +159,7 @@ body.fixed main{height:calc(100vh - 48px);padding:10px;display:flex;flex-directi
 .pane{background:var(--panel);border:1px solid var(--line);border-radius:8px;
   display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .pane>header{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid var(--line);
-  font-weight:600;font-size:12.5px;flex:0 0 auto}
+  font-weight:600;font-size:12.5px;flex:0 0 auto;height:48px}    /* both pane headers one height so their tops align (the left one holds the course pill) */
 .pane>header .why{font-weight:400}
 .popbtn{margin-left:auto;background:var(--panel2);border:1px solid var(--line2);color:var(--mut);
   border-radius:5px;padding:3px 9px;font:11px var(--sans);cursor:pointer}
@@ -847,10 +847,11 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .tdata.none{color:var(--dim);font-weight:400}
 /* COURSE INFORMATION PILL in the world-map pane header (#leftHd) — a header-sized browser row: shape glyph,
    name + status chips, a meta line, and the offered-class + mode chips. Mirrors the car pill's design. The
-   generic `header{height:24px}` is too short for it, so this header grows to the pill (map body takes the rest). */
-#leftHd{height:auto;padding-top:6px;padding-bottom:6px;align-items:center}
+   pane header is a fixed 48px (both panes, so their tops align); this one uses tight vertical padding so the
+   two-line pill sits centred within it. */
+#leftHd{padding-top:4px;padding-bottom:4px;align-items:center}
 #leftHd .cpill{display:flex;align-items:center;gap:10px;min-width:0;width:100%}
-#leftHd .cpill-glyph{flex:0 0 auto;width:44px;height:28px;background:var(--bg);border-radius:4px;overflow:hidden}
+#leftHd .cpill-glyph{flex:0 0 auto;width:42px;height:26px;background:var(--bg);border-radius:4px;overflow:hidden}
 #leftHd .cpill-glyph .tsvg{width:100%;height:100%;display:block;border-radius:4px}
 #leftHd .cpill-txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1 1 auto}
 #leftHd .cpill-l1{display:flex;align-items:center;gap:6px;min-width:0}

@@ -1898,7 +1898,16 @@ def main():
             for x, z in cp: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
             ov, cov = overlap(sample, (cells, cp))
             if ov is None: continue
-            if not direction_agree(sample, cp): continue # a course driven the other way is a different course
+            _rev = not direction_agree(sample, cp)
+            if _rev:
+                # RECOGNISE A REVERSE LAP AS THE SAME COURSE (Jett 2026-09-07: a course driven backwards keeps
+                # its identity, it does not flip to a plaza neighbour or mint a fragment key). But ONLY a genuine
+                # reverse LAP of a CLOSED LOOP that covers the road -- never a reverse roll-up/segment, which stays
+                # a different course so the anti-rollup guard (_is_rollup, attribute_route:1807) still holds. The
+                # loop test is the catalogued path's own closure; coverage is what separates a lap from a roll-up
+                # (a lap covers the whole loop, a roll-up backs a sliver off the line and turns around).
+                _is_loop = len(cp) > 3 and math.hypot(cp[0][0] - cp[-1][0], cp[0][1] - cp[-1][1]) <= 120
+                if not (_is_loop and (cov or 0) >= 0.6): continue
             d0 = math.hypot(sx - cx0, sz - cz0)
             sc = _sphere_confirm(sx, sz, key)            # spawn inside this route's activation sphere? True/False/None
             srank = 0 if sc is True else (1 if sc is None else 2)   # confirm beats unknown beats sphere-miss, but only as a tie-break
@@ -1906,19 +1915,19 @@ def main():
             # event (solo True) the non-race one -- resolves a plaza pair like Chiheisen (race) vs Temple (solo). Reward
             # a match only; never punish, since a route may be is_race yet driven solo in free-roam (corroborate, don't name).
             mrank = 0 if (solo is not None and bool(is_race) == (not solo)) else 1
-            cand = (-round(ov, 2), -round(cov or 0, 2), srank, mrank, round(d0), key, name, length_m, is_race, bool(sc))
+            cand = (-round(ov, 2), -round(cov or 0, 2), srank, mrank, round(d0), key, name, length_m, is_race, bool(sc), _rev)
             if d0 <= 500 and ov >= 0.6:                  # start-anchored: near the catalogued line and lying on the road
                 if best_start is None or cand < best_start: best_start = cand
             elif ov >= 0.7 and (cov or 0) >= 0.6:        # path-dominant: IS this whole road, wherever it starts (offset-start loops)
                 if best_path is None or cand < best_path: best_path = cand
         best = best_start or best_path
         if best is None: return None
-        _ov, _cov, _sr, _mr, _d0, key, name, length_m, is_race, anchored = best
+        _ov, _cov, _sr, _mr, _d0, key, name, length_m, is_race, anchored, reversed_drive = best
         R = routes.get(key) or {}
         routes[key] = dict(R, name=name, start=R.get("start") or [round(sx), round(sz)], heading=R.get("heading"),
                            length_m=max(R.get("length_m") or 0, length_m or 0), catalogue=True, is_race=is_race,
                            anchor_ok=anchored or R.get("anchor_ok", False), events=R.get("events", 0))
-        return key
+        return key, reversed_drive
 
     ev_out = []
     for ev in events:
@@ -2054,7 +2063,8 @@ def main():
         # (collapsing the running-start, mid-lap-join and partial variants that grid-cell keying used to split), and
         # a Rivals/PvP route is never left unidentified once it has crossed its line. Learned attribution and the grid
         # remain the fallback for drives with no catalogued line nearby (custom routes, free-roam segments).
-        key = _catalogue_key(sx, sz, sample, solo=solo)
+        _ck = _catalogue_key(sx, sz, sample, solo=solo)
+        key, key_reverse = _ck if _ck else (None, False)   # key_reverse: this drive is the course run BACKWARDS (a reverse lap of a loop)
         if key is None:
             key = attribute_route(sx, sz, hdg, dist, sample, has_line=(_resets > 0))
         if key is None and _is_rollup(sx, sz, sample):
@@ -2073,7 +2083,7 @@ def main():
                        "best_lap": round(min((q["BestLap"] for q in rs if q["BestLap"] > 0), default=0), 3) or None,
                        "last_lap": round(next((q["LastLap"] for q in reversed(rs) if q["LastLap"] > 0), 0), 3) or None,
                        "distance_m": round(dist), "duration_s": round(rs[-1]["t"] - rs[0]["t"], 1), "pos_final": pos[-1] if pos else None,
-                       "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "route": (routes.get(key) or {}).get("name"),
+                       "start": [round(sx), round(sz)], "end": [round(ex), round(ez)], "route_key": key, "reverse": key_reverse, "route": (routes.get(key) or {}).get("name"),
                        # ANCHORS (2026-09-05): the game's race-activation sphere this event STARTED in, if any --
                        # a route id read off the world, not inferred from shape. See fh6_anchors.py for what it proves.
                        "anchor": _anchor_at(sx, sz),
@@ -2194,13 +2204,19 @@ def main():
         # VOID verdict on every stored lap) read them off THIS dict, not off ev_out. Dropping them here made both
         # read None — every lap stored solo=0, and `rivals` could only ever be True by explicit declaration.
         # .get(): a synthetic reference-loop event (~:1049) has no solo at all, and unknown must stay unknown.
-        co["events"].append({"t0": e["t0"], "t1": e["t1"], "car": e["car"], "stint": e.get("stint"), "label": lab, "laps": e["laps"], "best_lap": e["best_lap"], "last_lap": e["last_lap"], "duration_s": e["duration_s"], "distance_m": e["distance_m"], "mode": e["mode"], "solo": e.get("solo"), "solo_conf": e.get("solo_conf"), "pos_final": e["pos_final"]})
+        co["events"].append({"t0": e["t0"], "t1": e["t1"], "car": e["car"], "stint": e.get("stint"), "label": lab, "laps": e["laps"], "best_lap": e["best_lap"], "last_lap": e["last_lap"], "duration_s": e["duration_s"], "distance_m": e["distance_m"], "mode": e["mode"], "solo": e.get("solo"), "solo_conf": e.get("solo_conf"), "pos_final": e["pos_final"], "reverse": e.get("reverse")})
         if e["car"] not in co["cars"]: co["cars"].append(e["car"])
     def inwin(t, evs): return any(ev["t0"] <= t <= ev["t1"] for ev in evs)
     course_out = []
     for key, co in courses.items():
         evs = co["events"]; nev = len(evs)
-        cc = [c for c in corners if inwin(c["t0"], evs) and not c["drift"]]; ll = [l for l in launches if inwin(l["t"], evs)]; bb = [b for b in braking if inwin(b["t"], evs)]; cr = [x for x in crests if inwin(x["t"], evs)]
+        # REVERSE LAPS keep the course's identity/laps but must NOT feed its FORWARD corner model -- a corner
+        # taken backwards has different entry/exit/braking, so mixing the two directions corrupts every per-turn
+        # stat (Jett 2026-09-07, "recognise reverse as the same course"). Scope the behavioural corners to the
+        # forward laps only; fall back to all events if a course has ONLY reverse laps so it is not left blank.
+        # (The drawn geometry/turn POSITIONS below are direction-agnostic and still use all laps.)
+        fevs = [ev for ev in evs if not ev.get("reverse")] or evs
+        cc = [c for c in corners if inwin(c["t0"], fevs) and not c["drift"]]; ll = [l for l in launches if inwin(l["t"], fevs)]; bb = [b for b in braking if inwin(b["t"], fevs)]; cr = [x for x in crests if inwin(x["t"], fevs)]
         counts = {"hairpin": sum(1 for c in cc if c["mph_min"] < 45), "medium": sum(1 for c in cc if 45 <= c["mph_min"] <= 85), "fast": sum(1 for c in cc if c["mph_min"] > 85),
                   "flick": sum(1 for a, b in zip(cc, cc[1:]) if a["dir"] != b["dir"] and 0 <= b["t0"] - a["t1"] <= 2.5), "launch": len(ll), "brake": sum(1 for b in bb if b["mph_start"] >= 80), "crest": len(cr)}
         probes = []; num = den = 0.0
@@ -2223,7 +2239,7 @@ def main():
                 gl[r["Gear"]] += 1; rpm_bins.add(int(r["CurrentEngineRpm"] // 250) * 250)
                 if car0.get("gears") and r["Gear"] == max((g["gear"] for g in car0["gears"]), default=99) and prevt is not None: top_s += max(0.0, min(0.2, r["t"] - prevt))
             prevt = r["t"]
-        pulses_here = [p for p in pulses if inwin(p["t"], evs) and p["car"] in co["cars"]]; wig = len(pulses_here)
+        pulses_here = [p for p in pulses if inwin(p["t"], fevs) and p["car"] in co["cars"]]; wig = len(pulses_here)
         mx = max((g["gear"] for g in (car0.get("gears") or [])), default=0)
         dbins = dyno_band(car0)
         DB_TESTS = [
@@ -2250,7 +2266,7 @@ def main():
         advice_by_car = {}
         for cid_ in co["cars"]:
             cov_stub = {"overall": round(num / den, 2) if den else 0.0, "probes": probes}
-            advice_by_car[cid_] = advice_for(cid_, cars, cc, ll, bb, [x for x in bott if inwin(x["t"], evs)], cov_stub, temps_med, profile)
+            advice_by_car[cid_] = advice_for(cid_, cars, cc, ll, bb, [x for x in bott if inwin(x["t"], fevs)], cov_stub, temps_med, profile)
         # ---- lap bookkeeping: a LAP = one pass of the course. Loop passes / sprints = the event itself; lapped events split on LapNumber changes ----
         lap_windows = []
         for ei, ev in enumerate(evs):

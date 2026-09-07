@@ -36,6 +36,12 @@ import fh6_owt                                           # noqa: E402
 STEP_M = 2.0          # resample step; the files are already ~2 m
 HEAD_WIN_M = 8.0      # heading is measured across this much road, to ride over surveying noise
 SMOOTH_M = 10.0       # curvature smoothing window
+# PINNED TURN-IDENTITY CONSTANTS (2026-09-07). turns_for() is the SINGLE source of a route's turn set
+# and its arc-anchored ids, so these three fix the identity: do NOT tune them and do NOT derive them
+# dynamically (e.g. per road-class). K_MIN is load-bearing -- a +/-50% change swings a highway route's
+# turn count up to 3.6x, silently re-versioning every turn id on that route (GAP_M is safe, MIN_DEG
+# intermediate). Changing any of them is a deliberate catalogue-wide re-derivation, not a tweak.
+# See docs/turn-consistency-research-2026-09-07.md.
 K_MIN = 1.0 / 260.0   # anything straighter than a 260 m radius is not a turn
 MIN_DEG = 11.0        # and a turn must actually sweep this far
 GAP_M = 18.0          # two runs of the same sign closer than this are one turn
@@ -188,10 +194,30 @@ def turns_for(route, step=STEP_M):
             "bank_deg": round(p[4], 2) if p[4] is not None else None,
         })
     out.sort(key=lambda t: t["apex_arc_m"])
+    taken = set()
     for i, t in enumerate(out, 1):
-        t["seq"] = i
-        t["turn_id"] = "T%d" % i
+        t["seq"] = i                                        # route order, for DISPLAY (T1..Tn); recomputed each pass
+        t["turn_id"] = stable_turn_id(t["apex_arc_m"], t.get("dir"), taken)   # arc-anchored KEY: pass-invariant
     return out
+
+
+def stable_turn_id(apex_arc_m, direction, taken):
+    """Arc-anchored, pass-invariant turn id: T<round(apex_arc_m)>. Unlike a positional T1..Tn rank, it does
+    NOT change when a turn is inserted or removed elsewhere on the route -- the whole point of the identity.
+    A same-metre collision (never seen across the 169-route game catalogue) takes a direction letter, then a
+    numeric suffix, so the id stays unique and deterministic. Shared by the geometry detector and the learned
+    -course model (analyze_session) so both are stable WITHIN their own arc domain. See
+    docs/turn-consistency-research-2026-09-07.md."""
+    base = "T%d" % round(apex_arc_m)
+    tid = base
+    if tid in taken:
+        tid = base + (direction or "")
+        k = 2
+        while tid in taken:
+            tid = "%s_%d" % (base, k)
+            k += 1
+    taken.add(tid)
+    return tid
 
 
 def main(argv=None):

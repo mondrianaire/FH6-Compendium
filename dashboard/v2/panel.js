@@ -343,6 +343,16 @@ function piColor(cls) { return PI_COLORS[String(cls || "").toUpperCase()] || "va
 // LETTER from a PI so a badge is never an impossible pair like "S1 800" (800 is A). R is a category,
 // not a PI band, so it is never derived here -- it only appears when it comes from stored data.
 function classForPi(p) { return p == null ? null : p <= 500 ? "D" : p <= 600 ? "C" : p <= 700 ? "B" : p <= 800 ? "A" : p <= 900 ? "S1" : p <= 998 ? "S2" : "X"; }
+// A turn's DISPLAY label is its clean route-order number (T1..Tn from `seq`), NOT its stable id
+// (T<round(arc)>, e.g. T654) -- that arc-anchored id is the internal key that survives re-derivation
+// (fh6_turns.stable_turn_id); the user only ever sees the tidy running number. Falls back to the raw
+// id/turn_id for any pre-seq data. See docs/turn-consistency-research-2026-09-07.md.
+function turnLabel(t) {
+  if (!t) return "T?";
+  if (t.seq != null) return "T" + t.seq;
+  const raw = t.id != null ? t.id : t.turn_id;
+  return raw != null ? String(raw) : "T?";
+}
 const TRACE_WORD = ["within grip", "front slipping", "rear slipping", "all four", "impact"];
 const GRAD = ["#2f81f7", "#3fb6c8", "#6fd08c", "#d7d264", "#e8a13c", "#e5414e"];
 const TRACE_DIMS = [["class", "class"], ["dt", "drive"], ["container", "tune"], ["solo", "traffic"], ["bid", "build"]];
@@ -547,7 +557,7 @@ function courseTrace(c) {
     // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity
     const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE, piColor(t.class)) : plainLine(t.pts, ch, piColor(t.class), t === best ? 1.8 : 1, t === best ? 0.95 : 0.5, notTimed(t)))).join("")
       + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE, piColor(cur.class)) : "");
-    const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(t.id)}</text>`).join("");
+    const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(turnLabel(t))}</text>`).join("");
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
     const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
     // THE ACTIVE LAP, on top and unmistakable: a soft accent glow under the grip-painted line, thicker than
@@ -1799,7 +1809,7 @@ function cornersHTML() {
       const mine = bound.filter((b) => b.t === t).map((b) => b.c);
       const apexes = mine.map((x) => x.mph_apex != null ? x.mph_apex : x.mph_min).filter((v) => v != null);
       const best = apexes.length ? Math.max(...apexes) : null, here = c.mph_apex != null ? c.mph_apex : c.mph_min;
-      turn = `<span class="why tturn" title="${esc(t.id)} · ${esc(t.kind || "")} · ${t.r != null ? Math.round(t.r) + " m radius" : ""} · ${t.n != null ? t.n + " passes on record" : ""}"><b>${esc(t.id)}</b> ${esc(t.kind || "")}${t.r != null ? " · " + Math.round(t.r) + " m" : ""}${t.n != null ? " · " + t.n + " on record" : ""}${mine.length > 1 ? ` · your ${mine.length} passes: best ${best} — this ${here}` : ""}</span>`;
+      turn = `<span class="why tturn" title="${esc(turnLabel(t))} · ${esc(t.kind || "")} · ${t.r != null ? Math.round(t.r) + " m radius" : ""} · ${t.n != null ? t.n + " passes on record" : ""}"><b>${esc(turnLabel(t))}</b> ${esc(t.kind || "")}${t.r != null ? " · " + Math.round(t.r) + " m" : ""}${t.n != null ? " · " + t.n + " on record" : ""}${mine.length > 1 ? ` · your ${mine.length} passes: best ${best} — this ${here}` : ""}</span>`;
     }
     return `<div class="crow"><span class="mono">${log.length - i}</span><span>${c.lapn != null ? "lap " + c.lapn : c.ev ? "" : "free"}</span>
       <b>${c.dir === "L" ? "⬅" : "➡"} ${kind}</b>${turn || "<span></span>"}
@@ -1915,7 +1925,7 @@ function matrixHTML() {
       const g = r.usi != null ? DGRIP[dGripUsi(r.usi)] : null;
       const dcol = r.dom === "front" ? "#2f81f7" : r.dom === "rear" ? "#e5414e" : "var(--muted)";
       return `<tr style="${r.taken ? "" : "opacity:.4"}${r.anyAmbiguous ? ";outline:1px dashed var(--w)" : ""}">
-        <td><b>${esc(r.t.id)}</b>${r.t.kind ? " " + esc(r.t.kind) : ""}${r.anyAmbiguous ? ` <span title="nearest of 2 turns within range — some passes here could belong to a neighboring turn">⚠</span>` : ""}</td>
+        <td><b>${esc(turnLabel(r.t))}</b>${r.t.kind ? " " + esc(r.t.kind) : ""}${r.anyAmbiguous ? ` <span title="nearest of 2 turns within range — some passes here could belong to a neighboring turn">⚠</span>` : ""}</td>
         <td class="mono" style="text-align:center">${r.taken || "—"}</td>
         <td class="mono" style="text-align:center">${r.mph ?? "—"}</td>
         <td class="mono" style="text-align:center">${r.lat ?? "—"}</td>
@@ -2032,7 +2042,7 @@ function conclusionsHTML() {
   const rows = DIAG.by_turn.filter((r) => r.route_key === COURSE.key).sort((a, b) => b.occurrences - a.occurrences).slice(0, 14);
   if (!rows.length) return `<div class="why">no failures placed on this course's turns yet</div>`;
   return `<div class="grp">${rows.map((r) => `<div class="frow">
-    <div class="fl"><b>${esc(r.turn_id)} <span class="dim">${esc(r.kind || "")}</span></b>
+    <div class="fl"><b>${esc(turnLabel(r))} <span class="dim">${esc(r.kind || "")}</span></b>
       <span class="why">${r.radius_m ? n0(r.radius_m) + " m radius" : ""}${r.width_m ? " · " + n1(r.width_m) + " m wide" : ""}${r.bank_deg != null ? " · " + n1(r.bank_deg) + "° bank" : ""}</span>
       <span class="why">${esc(r.symptom)} · ${r.occurrences} on ${r.laps_affected} laps</span></div>
     <div class="fr"><span class="chip b">${esc(r.primary_fix || "")}</span></div></div>`).join("")}</div>`;

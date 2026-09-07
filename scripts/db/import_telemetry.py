@@ -107,9 +107,9 @@ def run(cx, verbose=False, data_dir=None):
                       (m.get("profile") or {}).get("confidence"),
                       m.get("updated"),
                       json.dumps(geo), json.dumps(m.get("profile") or {})))
-        for seq, t in enumerate(sorted(turns, key=lambda x: (x.get("s") is None, x.get("s") or 0))):
+        for seq, t in enumerate(sorted(turns, key=lambda x: (x.get("s") is None, x.get("s") or 0)), 1):   # 1-based: seq is the DISPLAY number T1..Tn (matches fh6_turns / ref_route_turn)
             pos = t.get("pos") or [None, None]
-            trows.append((rk, t.get("id") or ("T%d" % (seq + 1)), seq,
+            trows.append((rk, t.get("id") or ("T%d" % round((t.get("s") if t.get("s") is not None else t.get("arc_m")) or 0)), seq,   # arc-anchored fallback id (2026-09-07)
                           t.get("s") if t.get("s") is not None else t.get("arc_m"),
                           pos[0], pos[1],
                           t.get("radius_m") or t.get("radius"),

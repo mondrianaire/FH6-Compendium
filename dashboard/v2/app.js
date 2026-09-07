@@ -334,8 +334,8 @@ function courseMap(c, opts) {
   const line = (p, col, w, op) => (p && p.length) ? _split(p).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}"
       opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
   const turns = (c.turns || []).filter((t) => t.x != null).map((t) =>
-    `<g><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="3.5" fill="var(--acc2)" opacity=".9"><title>${esc(t.id)} · ${n0(t.r)} m radius</title></circle>
-     <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="9" fill="var(--mut)">${esc(t.id)}</text></g>`).join("");
+    `<g><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="3.5" fill="var(--acc2)" opacity=".9"><title>${esc(turnLabel(t))} · ${n0(t.r)} m radius</title></circle>
+     <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="9" fill="var(--mut)">${esc(turnLabel(t))}</text></g>`).join("");
   return el(`<div class="panel" style="margin-top:12px">
     <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${line(theirs, "#3d4a5a", 9, 0.55)}
@@ -379,7 +379,7 @@ function speedTrace(c, laps) {
   }).join("");
   const ticks = (c.turns || []).filter((t) => t.s != null).map((t) =>
     `<line x1="${px(t.s).toFixed(1)}" y1="8" x2="${px(t.s).toFixed(1)}" y2="${H - padB}" stroke="var(--line2)" opacity=".7"/>
-     <text x="${px(t.s).toFixed(1)}" y="${H - 5}" font-size="8" fill="var(--dim)" text-anchor="middle">${esc(t.id)}</text>`).join("");
+     <text x="${px(t.s).toFixed(1)}" y="${H - 5}" font-size="8" fill="var(--dim)" text-anchor="middle">${esc(turnLabel(t))}</text>`).join("");
   const axis = [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10;
     return `<text x="2" y="${(py(v) + 3).toFixed(1)}" font-size="9" fill="var(--dim)">${v}</text>`; }).join("");
   return el(`<div class="panel" style="margin-top:12px">

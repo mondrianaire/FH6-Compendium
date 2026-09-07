@@ -3189,7 +3189,22 @@ def main():
         # simply never copied onto the turn (the same omission rebind_map_turns had). Where a turn knows its own
         # arc that decides; route_s remains the fallback for a turn the map has no record of.
         merged_turns.sort(key=lambda t: (t["s"] if t.get("s") is not None else route_s(t["pos"])))
-        for i, t in enumerate(merged_turns, 1): t["id"] = f"T{i}"
+        # ARC-ANCHORED, PASS-INVARIANT id (2026-09-07): T<round(arc)>, so establishing/merging a corner
+        # elsewhere on the course never renumbers this one (the old "T%d"%i rank relabeled everything
+        # downstream on every capture). `seq` keeps the route-order DISPLAY index. Same scheme as
+        # fh6_turns.stable_turn_id, in the learned-course arc domain. See docs/turn-consistency-research-2026-09-07.md.
+        _taken = set()
+        for i, t in enumerate(merged_turns, 1):
+            t["seq"] = i
+            _arc = t["s"] if t.get("s") is not None else route_s(t["pos"])
+            _base = "T%d" % round(_arc or 0)
+            _tid = _base
+            if _tid in _taken:
+                _tid = _base + (t.get("dir") or ""); _k = 2
+                while _tid in _taken:
+                    _tid = "%s_%d" % (_base, _k); _k += 1
+            _taken.add(_tid)
+            t["id"] = _tid
         _has_map = bool(((model.get("geometry") or {}).get("turns")) or ((geo or {}).get("turns")))
         def _established(t):
             # GEOMETRY first: a curve confirmed by the road on 2+ visits IS a turn, however gently you take it.

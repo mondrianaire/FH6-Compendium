@@ -222,7 +222,8 @@ def main(argv=None):
     cand_by_key = course_candidates(cx)
     for c in courses:
         c["candidates"] = cand_by_key.get(c["key"], [])
-    total += write(os.path.join(out, "courses.json"), courses)
+    # courses.json is written AFTER the course-detail loop below: Path B may replace a course's turn set with
+    # the geometry set, and the loop rewrites c["turns"] to the displayed count, so the card matches the detail.
 
     n_course = 0
     for c in courses:
@@ -320,6 +321,53 @@ def main(argv=None):
                          if any((pt[0] - tx) ** 2 + (pt[1] - tz) ** 2 <= 3600 for tx, tz in _tp)]
                 if 2 <= len(_kept) < len(route["path"]):
                     route["path"] = _kept
+        # ── PATH B (2026-09-07): the DISPLAYED turn identity is the game's OWN centre-line set (ref_route_turn --
+        # deterministic, pass-invariant, whole-road, carrying width + banking), which DEMOTES the driven-path
+        # course_turn to the measure-only behavioural record. Available only when the course is bound to a
+        # catalogued route. Each geometry apex is projected onto the driven track for two things the route arc
+        # can't give directly: `s`, the COURSE arc (the speed-trace x-axis), from the nearest driven lap point;
+        # and a COVERED test -- an apex near no driven point is on an un-driven part of the route, so a fragment
+        # shows only its driven turns and a reverse lap gets them re-sequenced in driven order. The pass count is
+        # carried over from the nearest course_turn row (identity from geometry, behaviour from telemetry). No
+        # route binding -> keep the driven-path set exactly as before. (Projection uses the single longest lap for
+        # speed; a course driven as different fragments per lap would show that lap's fragment -- rare, and every
+        # turn shown is still geometry-true.) See docs/turn-consistency-research-2026-09-07.md.
+        _rid = route and route.get("route_id")
+        if _rid and traces:
+            grows = rows(cx, """SELECT turn_id AS id, turn_id, seq, apex_x AS x, apex_z AS z, radius_m AS r,
+                                       angle_deg AS deg, kind, dir, width_m AS width, bank_deg AS bank
+                                FROM ref_route_turn WHERE route_id=? ORDER BY apex_arc_m""", _rid)
+            _pl = max(traces.values(), key=len)                       # longest lap = the projection reference
+            _lp = [(p[0], p[3], p[4]) for p in _pl if len(p) > 4 and p[3] is not None]
+            if grows and len(_lp) >= 2:
+                _drv = turns                                          # the driven-path course_turn rows, for behaviour
+                _geo = []
+                for g in grows:
+                    if g["x"] is None:
+                        continue
+                    _ba, _bd = None, 1e18
+                    for a, x, z in _lp:                               # nearest driven lap point -> course arc
+                        d = (x - g["x"]) ** 2 + (z - g["z"]) ** 2
+                        if d < _bd:
+                            _bd, _ba = d, a
+                    if _ba is None or _bd > 40 ** 2:                  # apex not on the driven track -> un-driven turn
+                        continue
+                    g["s"] = round(_ba, 1)
+                    _bt, _btd = None, 35 ** 2                         # nearest driven course_turn -> its pass count
+                    for t in _drv:
+                        if t.get("x") is None:
+                            continue
+                        d = (t["x"] - g["x"]) ** 2 + (t["z"] - g["z"]) ** 2
+                        if d < _btd:
+                            _btd, _bt = d, t
+                    g["n"] = _bt["n"] if _bt else None
+                    _geo.append(g)
+                if _geo:
+                    _geo.sort(key=lambda t: t["s"])                   # driven order (handles reverse + fragments)
+                    for i, t in enumerate(_geo, 1):
+                        t["seq"] = i                                  # display index; turn_id stays the stable key
+                    turns = _geo
+        c["turns"] = len(turns)                                       # course-card count == what the detail view draws
         naming = {
             "name_source": c["name_source"], "name_confidence": c["name_confidence"],
             "declared_name": c["declared_name"], "declared_source": c["declared_source"],
@@ -335,6 +383,8 @@ def main(argv=None):
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
                         "traces": traces, "route": route, "naming": naming})
         n_course += 1
+
+    total += write(os.path.join(out, "courses.json"), courses)   # after the loop: card counts == Path B displayed turns
 
     # ---- evidence -----------------------------------------------------------
     ev = rows(cx, """SELECT subject, claim, confidence AS conf, source, observed_utc AS seen

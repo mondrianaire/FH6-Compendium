@@ -640,8 +640,16 @@ function stripSVG(strip, corners, span) {
     const x = idx(c.t0) * cw + cw / 2; const g = DGRIP[dGripUsi(c.usi)];
     return `<g><line x1="${x.toFixed(1)}" y1="14" x2="${x.toFixed(1)}" y2="58" stroke="${g.col}" opacity=".45"/>
       <path d="M${(x - 3.2).toFixed(1)} 4 L${(x + 3.2).toFixed(1)} 4 L${x.toFixed(1)} 12 Z" fill="${g.col}"><title>${c.dir === "L" ? "left" : "right"} · ${c.mph_in}→${c.mph_min}→${c.mph_out} mph · ${c.lat_g_peak} g · ${g.word}</title></path></g>`; }).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" class="trace" role="img" aria-label="time trace">${bars}<path d="${line}" fill="none" stroke="#dfe7ef" stroke-width="1.1" opacity=".85"/>${marks}${ticks}</svg>
-    <div class="legend">${Object.entries(DGRIP).map(([k, g]) => `<span><i style="background:${g.col}"></i>${g.word}</span>`).join("")}<span><i class="ln"></i>speed</span><span>▲ corner, coloured by balance</span></div>`;
+  // bottoming (🔧) and wall-impact (💥) markers, detected live off the frame stream (live.js detectLiveEvents)
+  const ev = (LIVE.events || []).filter((e) => e.t >= t0 && e.t <= t1).map((e) => {
+    const x = idx(e.t) * cw + cw / 2, wall = e.kind === "wall";
+    const ic = wall ? "💥" : "🔧", col = wall ? "#e5414e" : "#e3b341";
+    const lab = wall ? `wall / barrier impact · lost ${e.drop} mph at ${e.mph} mph${e.hard ? " · HARD" : ""}`
+                     : `bottoming ${e.wheel}${e.hard ? " · HARD" : ""} · ${e.mph} mph`;
+    return `<g><line x1="${x.toFixed(1)}" y1="16" x2="${x.toFixed(1)}" y2="60" stroke="${col}" stroke-width="${e.hard ? 1.6 : 0.9}" opacity=".6"/>
+      <text x="${x.toFixed(1)}" y="73" font-size="${e.hard ? 15 : 12}" text-anchor="middle">${ic}<title>${e.t.toFixed(1)}s — ${lab}</title></text></g>`; }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="trace" role="img" aria-label="time trace">${bars}<path d="${line}" fill="none" stroke="#dfe7ef" stroke-width="1.1" opacity=".85"/>${marks}${ev}${ticks}</svg>
+    <div class="legend">${Object.entries(DGRIP).map(([k, g]) => `<span><i style="background:${g.col}"></i>${g.word}</span>`).join("")}<span><i class="ln"></i>speed</span><span>▲ corner, coloured by balance</span><span>🔧 bottoming</span><span>💥 wall impact</span></div>`;
 }
 function paintDockTrace() {
   const el = $("#dockTrace"); if (!el) return;

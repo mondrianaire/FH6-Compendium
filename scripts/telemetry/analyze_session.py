@@ -290,6 +290,11 @@ PAUSE_MIN_S = 1.5          # a silence in the on-rows at least this long is a me
 JUMP_M = 50.0              # the car moved this far across one silence with the lap running: a teleport / respawn
 JUMP_MAX_MPS = 120.0       # ... unless the lap clock's advance across the silence could carry it that far at this speed
 REWIND_LAND_M = 20.0       # the landing row is "on the driven line" when the cut row is within this
+# ---- suspension bottoming & wall-impact detector gates (evidence handoff 2026-09-06) ----
+BOTTOM_GATE = 0.98         # max-NormSusp has an ~86x population cliff here AND median |AccelY| steps 3-4x; 0.95 cut mid-distribution and overflowed the 200 cap in ~half of sessions
+BOTTOM_HARD = 0.999        # at or past nominal travel -- a severity flag on the event, never the gate
+WALL_DROP = -6.0           # mph lost in ONE ~16 ms frame; no surface, drag or driver input removes speed that fast -- only a collision does
+WALL_HARD = -20.0          # a hard strike -- severity flag (12 of 44 corpus events lost >= 20 mph in one frame)
 # Measured on fh6_20260905_232556 (2026-09-06): the rewind scrub itself sends NO frames -- every rewind is a
 # silence of 2-20 s (one of 2,205 s, a menu first) and the last frame before it carries CurrentLap as a
 # large NEGATIVE sentinel (-5014.9); the first frame after it is where the driver landed, lap clock,
@@ -789,7 +794,7 @@ def advice_for(cid_, cars, corners, launches, braking, bott, cov, temps_med, pro
         if fmed - rmed > 15: add("front-hot", "Fronts run 15 F+ hotter than rears: the understeer thermal signature — check pressures/camber on the HUD (Tires Misc + Heat).", 1, 0.7, f"median F {fmed:.0f} F vs R {rmed:.0f} F")
         if max(tm.values()) > 300: add("tires-cooking", "Tire temps past 300 F: pressures likely high and/or sustained wheelspin — HUD pressure check.", 1, 0.6, f"max median {max(tm.values()):.0f} F")
     nb = sum(1 for x in bott if x["car"] == cid_ and x["mph"] > 40)
-    if nb >= 8: add("bottoming", "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).", 1, min(1, nb / 20), f"{nb} bottoming frames above 40 mph (detector still coarse)")
+    if nb >= 2: add("bottoming", "Suspension hits full compression at speed: ride height up a notch or springs stiffer (verify on the HUD Suspension page).", 1, min(1, nb / 6), f"{nb} bottoming events above 40 mph (gate 0.98)")
     if cov and cov["overall"] < 0.35: add("more-data", "Low coverage: verdicts are provisional — see the probe bars for what to drive next.", 1, 1.0, f"coverage {cov['overall']:.0%}")
     if profile:
         BW = {"heavy": 1.0, "moderate": 0.85, "light": 0.5, "absent": 0.15}; dims = profile["dims"]
@@ -1601,12 +1606,38 @@ def main():
     sess["braking"] = braking
 
     # ---- bottoming / pulses ----
+    # Gate at BOTTOM_GATE (0.98), not 0.95 -- the population cliff and the |AccelY| step both sit there, and
+    # 0.95 overflowed the 200 cap in ~half of all sessions that bottom (silent data loss). `hard` flags a
+    # strike at or past nominal travel; position is recorded so the event can be placed on the trace and map.
     bott = []
     for r in live:
         for w in W:
-            if r["NormSusp" + w] > 0.95 and (not bott or r["t"] - bott[-1]["t"] > 1.0 or bott[-1]["wheel"] != w):
-                bott.append({"t": round(r["t"], 1), "car": cid(r), "wheel": w, "travel": round(r["NormSusp" + w], 3), "mph": round(r["speed_mph"])})
+            if r["NormSusp" + w] >= BOTTOM_GATE and (not bott or r["t"] - bott[-1]["t"] > 1.0 or bott[-1]["wheel"] != w):
+                bott.append({"t": round(r["t"], 1), "car": cid(r), "wheel": w, "travel": round(r["NormSusp" + w], 3),
+                             "mph": round(r["speed_mph"]), "x": round(r["PosX"]), "z": round(r["PosZ"]),
+                             "hard": r["NormSusp" + w] >= BOTTOM_HARD})
     sess["bottoming"] = bott[:200]
+
+    # ---- wall / barrier / terrain impact: peak single-frame speed loss ----
+    # lap.impacts (lat_g>3 or SmashableVelDiff>0) is not this -- SmashableVelDiff fires only for breakable
+    # props, so real wall/barrier/terrain contact was invisible. A one-frame speed loss steeper than WALL_DROP
+    # is a collision (nothing else removes speed that fast). Excludes a bottoming jolt, a prop hit (its own
+    # certain class), and rewinds: `live` is already rewind-cleaned but its splice fabricates a huge one-frame
+    # delta, so any candidate within 0.5 s of a marker is dropped. Surfaced as a count + severity, never a void.
+    _mk_t = [m["t"] for m in _markers]
+    wall = []
+    for i in range(1, n):
+        a, r = live[i - 1], live[i]
+        if r["t"] - a["t"] > 0.1: continue                        # not consecutive frames -> the delta is not one frame
+        d1 = r["speed_mph"] - a["speed_mph"]
+        if d1 > WALL_DROP: continue                               # WALL_DROP is negative; a loss steeper than it
+        if r["Brake"] != 0 or r["SmashableVelDiff"] > 0: continue  # braking is not a strike; a prop hit has its own path
+        if max(r["NormSusp" + w] for w in W) >= BOTTOM_GATE: continue   # a bottoming jolt, not a wall
+        if any(abs(r["t"] - mt) <= 0.5 for mt in _mk_t): continue      # a rewind/pause splice fabricates the delta
+        if wall and r["t"] - wall[-1]["t"] < 0.5: continue             # one event per contact, not every frame of it
+        wall.append({"t": round(r["t"], 1), "car": cid(r), "mph": round(r["speed_mph"]), "drop": round(-d1, 1),
+                     "x": round(r["PosX"]), "z": round(r["PosZ"]), "hard": d1 <= WALL_HARD})
+    sess["wall"] = wall[:200]
     pulses = []; i = 0
     while i < n - 50:
         r = live[i]
@@ -3375,7 +3406,7 @@ def main():
                            "coverage": {"overall": round(num / den, 2) if den else 0.0, "probes": probes}, "events": evs, "advice_by_car": advice_by_car, "last_t": max(e["t1"] for e in evs)})
     course_out.sort(key=lambda c: -c["last_t"])
     sess["courses"] = course_out
-    sess["summary"] = {"cars": len(cars), "configs": len(segments), "stints": len(stints), "events": len(ev_out), "courses": len(course_out), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "pulses": len(pulses), "impacts": len(impacts),
+    sess["summary"] = {"cars": len(cars), "configs": len(segments), "stints": len(stints), "events": len(ev_out), "courses": len(course_out), "corners": len(corners), "launches": len(launches), "braking": len(braking), "bottoming": len(bott), "wall": len(wall), "pulses": len(pulses), "impacts": len(impacts),
                        "front_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "front" and not c["drift"]),
                        "rear_limited_corners": sum(1 for c in corners if c["first_red"] and c["first_red"]["axle"] == "rear" and not c["drift"]),
                        "drift_corners": sum(1 for c in corners if c["drift"])}

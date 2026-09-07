@@ -18,7 +18,7 @@
 "use strict";
 
 const DAEMON = "http://127.0.0.1:8765";
-let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0 }, ES = null;
+let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0, events: [], _det: {} }, ES = null;
 let CUR = null;          // { ordinal, cid, name, ... }
 let MATCH = null;        // { build, hw, tune } after identification
 let CHANGE = null;       // what moved since the last read: hardware | tune | saved
@@ -122,6 +122,42 @@ let IDENT_SEQ = 0;               // a reload fires two identifies ~50 ms apart; 
 
 const fx = (v, d) => (Number.isFinite(+v) ? (+v).toFixed(d) : "—");   // an em dash for anything non-finite off the wire
 let LAST_PANEL = 0;
+// LIVE bottoming + wall-impact detection off the frame stream (~20 Hz), mirroring analyze_session's gates
+// (BOTTOM_GATE 0.98, WALL_DROP -6 mph in one frame). The analyzer stays authoritative for the recorded
+// session; this is the real-time view of the SAME two signals so they can be marked on the live trace with
+// no daemon change. State lives in LIVE._det: last per-wheel bottoming time, last wall time, previous mph/t.
+const BOTTOM_GATE_L = 0.98, BOTTOM_HARD_L = 0.999, WALL_DROP_L = -6, WALL_HARD_L = -20;
+const WHEELS_L = ["FL", "FR", "RL", "RR"];
+function pushLiveEvent(e) {
+  LIVE.events.push(e);
+  if (LIVE.events.length > 400) LIVE.events.splice(0, LIVE.events.length - 400);
+  paintDockTrace();
+}
+function detectLiveEvents(f) {
+  if (!f || !f.on || f.px == null) return;
+  const d = LIVE._det, t = f.t, susp = f.susp || [];
+  const maxS = susp.length ? Math.max(...susp) : 0;
+  // bottoming: the deepest wheel at/over the gate, with the analyzer's 1 s per-wheel dedup
+  let bw = -1, bv = 0;
+  for (let i = 0; i < susp.length; i++) if (susp[i] >= BOTTOM_GATE_L && susp[i] > bv) { bv = susp[i]; bw = i; }
+  if (bw >= 0 && (d.bt == null || t - d.bt > 1.0 || d.bw !== bw)) {
+    d.bt = t; d.bw = bw;
+    pushLiveEvent({ kind: "bott", t, mph: Math.round(f.mph || 0), wheel: WHEELS_L[bw], hard: bv >= BOTTOM_HARD_L, x: f.px, z: f.pz });
+  }
+  // wall: a one-frame speed loss steeper than the gate -- not braking, not a bottoming jolt, not a prop hit,
+  // not a teleport/respawn (which also drops mph to ~0). Requires consecutive frames (< 0.1 s apart).
+  if (d.mph != null && d.mt != null && t - d.mt <= 0.1) {
+    const d1 = (f.mph || 0) - d.mph;
+    const teleport = LIVE.teleportAt && (Date.now() - LIVE.teleportAt < 1500);
+    if (d1 <= WALL_DROP_L && (f.brk | 0) === 0 && maxS < BOTTOM_GATE_L && (f.smash || 0) <= 0 && !teleport
+        && (d.wt == null || t - d.wt > 0.5)) {
+      d.wt = t;
+      pushLiveEvent({ kind: "wall", t, mph: Math.round(f.mph || 0), drop: Math.round(-d1 * 10) / 10, hard: d1 <= WALL_HARD_L, x: f.px, z: f.pz });
+    }
+  }
+  d.mph = f.mph || 0; d.mt = t;
+}
+
 function onFrame(f) {
   LIVE.receiving = true;
   LIVE.frame = f;
@@ -163,6 +199,8 @@ function onFrame(f) {
     const b = $("#leftBody"); if (b) addLiveDot(b);
     if (jump > 4) { if (jump < 2000) locateCourse(); else LIVE.teleportAt = Date.now(); }
   } else if (LIVEPOS && !LIVE.posHeld) { LIVE.posHeld = true; const b = $("#leftBody"); if (b) addLiveDot(b); }
+
+  detectLiveEvents(f);   // bottoming / wall-impact off the frame stream -> LIVE.events, marked on the trace
 
   // IN A MENU THE FRAME CARRIES CAR 0. That is the game saying "no car", not a car whose ordinal
   // is zero; identifying it produced a header reading "ordinal 0". Keep the last real car through

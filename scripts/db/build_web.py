@@ -20,6 +20,7 @@ Run:  python scripts/db/build_web.py [--db PATH] [--out DIR]
 import argparse
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -283,7 +284,12 @@ def main(argv=None):
             "declared_name": c["declared_name"], "declared_source": c["declared_source"],
             "event_id": c["event_id"], "candidates": cand_by_key.get(key, []),
         }
-        total += write(os.path.join(out, "course", key.replace("/", "_") + ".json"),
+        # Filename MUST match the dashboard's courseFile() sanitisation: String(key).replace(/[^A-Za-z0-9_-]/g,"_").
+        # A route:<id> key kept its colon here (only "/" was replaced), and a colon is an illegal Windows filename
+        # char -- so every "route:311.json" write collapsed onto an alternate data stream of a base file "route"
+        # (0 bytes, unfetchable), 404ing the dashboard, which then fell back to a leftover grid-keyed course and
+        # showed it as "unnamed". Sanitise the same way both sides do so course/route_311.json exists and loads.
+        total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),
                        {"key": key, "name": c["name"], "len": c["len"], "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
                         "traces": traces, "route": route, "naming": naming})

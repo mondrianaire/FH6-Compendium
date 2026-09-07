@@ -115,7 +115,12 @@ function buildStatus() {
     why: (RB.state === "running" || RB.pending) ? "identified from the save; the database is catching up — importing it now"
        : locked ? "identified from the save — the history import runs by itself (the daemon fires it on the save)"
        : "a save written since the last import — the import runs by itself",
-    steps: ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
+    // A LOCKED (downloaded) save imports itself — the daemon fires the history import on the save, so there
+    // is no manual "import" step; an empty step list keeps the ticker (panel.js:1162) and the ratification
+    // block (panel.js:2026) from telling the user to click a button that does not apply. A local unheld
+    // save still offers the one-button import. rebuild:true stays for both — it only gates the two locked-
+    // aware gate branches (panel.js:982 !locked, panel.js:992 locked), never a bare IMPORT button.
+    steps: locked ? [] : ["import the save and regenerate the dashboard data — one button, about 10 s"], rebuild: true };
   if (locked) return { key: "downloaded", label: "downloaded / locked", tone: "warn",
     why: frozenOf() ? "someone else's build, frozen as your target — install your own tune on this car and build back to it"
                     // 2026-09-03 (Jett flagged this as "crazy" -- flatly contradicted by the Clone Plan
@@ -988,6 +993,22 @@ function headerCopy(st, q) {
     return Object.assign(base, { tone: "warn", lead: "NEW SAVE — NOT YET HELD",
       sub: "the database has not imported it", why: st.why, step: st.steps && st.steps[0] ? st.steps[0] : "import it",
       primary: { label: "IMPORT NOW", act: "rebuild" }, caption: "as saved" });
+  }
+  if (st.key === "unknown" && st.rebuild && CUR && CUR.disk && CUR.disk.deliverable && CUR.disk.deliverable.locked) {
+    // A DOWNLOADED (locked) tune whose hardware the DB does not HOLD yet is buildStatus 'unknown' + locked
+    // (line 111, the ONLY unknown branch that sets rebuild:true). It is already on disk and fully decoded
+    // from the save -- the history import runs by itself -- so it must NEVER read as "save the tune in-game
+    // and give it a name" (Jett 2026-09-07: "even though the tune was just downloaded and is on disk"). Show
+    // downloaded/importing instead. The st.rebuild guard keeps genuine PI-DRIFT (line 104 -- hardware changed
+    // in-game and unsaved, which can still carry a locked prior deliverable) on the correct "save it" path.
+    const importing = RB.state === "running" || RB.pending;
+    return Object.assign(base, { tone: importing ? "dim" : "warn",
+      lead: importing ? "DOWNLOADED — IMPORTING FOR HISTORY" : "DOWNLOADED — HISTORY IMPORT PENDING",
+      sub: importing ? "about 10 s · " + Math.max(0, Math.round((Date.now() - (RB.startedAt || Date.now())) / 1000)) + " s elapsed"
+                     : "identified from the save; the history import runs by itself",
+      why: "a downloaded tune is already on disk and fully decoded — only the database history is catching up; there is nothing to save",
+      step: "nothing to do — the import runs by itself; clone it from the BUILD SHEET to make it yours",
+      rest: [], noBtn: importing ? "IMPORTING…" : "NO BUTTON — IT IMPORTS ITSELF", caption: "as downloaded" });
   }
   if (st.key === "unknown") {                    // hardware changed and unsaved (PI drift)
     const ch = CHANGE || {};

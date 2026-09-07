@@ -1081,29 +1081,57 @@ function setBaseline(twin) {
 }
 
 /* ------------------------------------------------------------ banner */
+// THE ALERTS TICKER (Jett 2026-09-07): all the alert data streams across the news-ticker row below the nav.
+// Each alert / context fact is one item [tone,label,text]; the label hue of the most urgent one colours the
+// ticker's fixed left tag. The track is rendered twice so a translateX of -50% loops seamlessly, and the
+// duration scales with the content length so the pace stays readable. A key guards the render so a repaint
+// that changes nothing does not restart the scroll mid-stream.
+let TICKER_KEY = null;
+function paintTicker() {
+  const el = $("#ticker"); if (!el) return;
+  const st = buildStatus(), q = matchQuality(CUR && CUR.match), ch = CHANGE || {};
+  const items = [];
+  // --- alerts (urgent first) ---
+  if (CHANGE) {
+    const ns = (ch.sliders || []).length, np = (ch.slots || []).length;
+    if (ch.saved) items.push(["ok", "SAVED", "new save read from disk"]);
+    else if (ch.kind === "hardware") items.push(["bad", "HARDWARE CHANGED", `${np} part${np === 1 ? "" : "s"} · ${ns} slider${ns === 1 ? "" : "s"} — not saved`]);
+    else if (ch.kind === "tune") items.push(["warn", "SLIDERS MOVED", `${ns} slider${ns === 1 ? "" : "s"} changed, same hardware`]);
+  }
+  if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) {
+    const ties = ((CUR && CUR.match) || {}).n_signature_ties || 0;
+    items.push(["warn", q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED", `${ties || "several"} saves tie — pick the save in the header`]);
+  }
+  (st.steps || []).forEach((s, i) => items.push([st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : "", `STEP ${i + 1}`, s]));
+  // --- ambient context (always-on) ---
+  if (CUR) items.push(["", "CAR", (CUR.name || ("ordinal " + CUR.ordinal)) + (CUR.cls && CUR.cls !== "?" ? " · " + CUR.cls + " " + CUR.pi : "")]);
+  if (MODE.suggest === "course" && COURSE) items.push(["blue", "COURSE", (COURSE.name || COURSE.key) + ((COURSE.laps || []).length ? ` · ${(COURSE.laps || []).length} laps on record` : "")]);
+  else if (typeof ROUTE !== "undefined" && ROUTE) items.push(["blue", "ROUTE", ROUTE.name]);
+  if (RB.last && RB.last.finished) items.push(["ok", "DATABASE", "up to date"]);
+  if (!items.length) items.push(["", "FH6 LAB", "no action to take — telemetry live"]);
+  const key = JSON.stringify(items);
+  if (key === TICKER_KEY && el.querySelector(".tick-track")) return;   // unchanged -> do not restart the scroll
+  TICKER_KEY = key;
+  const rank = { bad: 3, warn: 2, blue: 1, ok: 0, "": 0 };
+  const top = items.reduce((m, x) => rank[x[0]] > rank[m] ? x[0] : m, "");
+  el.dataset.top = (top === "bad" || top === "warn") ? top : "";
+  const one = items.map(([tone, label, text]) => `<span class="tick-item ${tone}"><b>${esc(label)}</b>${esc(text)}</span>`).join("");
+  const chars = items.reduce((n, x) => n + x[1].length + x[2].length + 8, 0);
+  const dur = Math.max(24, Math.round(chars / 5.5));   // readable pace, scales with content
+  el.innerHTML = `<span class="tick-label"><i></i>${(top === "bad" || top === "warn") ? "ALERT" : "LAB"}</span>` +
+    `<div class="tick-win"><div class="tick-track" style="animation-duration:${dur}s">${one}${one}</div></div>`;
+}
+
+// #alerts now holds ONLY the one interactive alert -- the save picker for an ambiguous identity, which the
+// header's PICK THE SAVE scrolls to and cannot be a scrolling marquee. Everything else is in the ticker.
 function paintBanner() {
+  paintTicker();
   const al = $("#alerts"); if (!al) return;
-  const st = buildStatus();
   const q = matchQuality(CUR && CUR.match);
-  const parts = [];
-  if (CHANGE && CHG_OPEN) parts.push(changeBanner());   // the header carries a slim summary; the full notice opens on click (Jett 2026-09-06)
-  if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) parts.push(savePicker());
-  // the header carries step 1; the strip carries the rest of the ladder for this state
-  const rest = (st.steps || []).slice(1);
-  if (rest.length && !CHANGE) {
-    parts.push(`<div class="alert ${st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : ""}">
-      <span class="steps">${rest.map((x, i) => `<span class="step"><i>${i + 2}</i>${esc(x)}</span>`).join("")}</span></div>`);
-  }
-  if (false) {
-    parts.push(`<div class="alert ${st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : ""}">
-      <b>${esc(st.label)}.</b> ${esc(st.why)}.
-      <span class="steps">${st.steps.map((s, i) => `<span class="step"><i>${i + 1}</i>${esc(s)}</span>`).join("")}</span>
-      ${st.rebuild ? `<button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>${RB.error ? `<span class="why" style="color:var(--bad)">${esc(RB.error)}</span>` : ""}` : ""}
-      <button class="mini" data-act="dismiss">dismiss</button></div>`);
-  }
-  al.innerHTML = parts.join("") || `<div class="quiet">nothing to act on</div>`;
-  wireBanner(); wirePicker();
-  fitRows(al, "alerts", 0);
+  const show = CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict");
+  al.innerHTML = show ? savePicker() : "";
+  al.classList.toggle("empty", !show);
+  if (show) wirePicker();
 }
 
 /* ------------------------------------------------------------- left */

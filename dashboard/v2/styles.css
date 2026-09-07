@@ -25,6 +25,29 @@ nav button:hover{background:var(--panel2);color:var(--ink)}
 nav button.on{background:var(--panel2);color:var(--acc);box-shadow:inset 0 -2px 0 var(--acc)}
 .stamp{margin-left:auto;font:10px var(--mono);color:var(--dim)}
 
+/* THE ALERTS TICKER — a news-ticker row directly below the nav, the same 24px height. All the alert data
+   streams across it: a fixed label anchors the left (its hue = the most urgent item), the track scrolls
+   right-to-left and loops seamlessly (the content is duplicated, so it translates by exactly -50%). */
+.ticker{position:relative;z-index:18;display:flex;align-items:stretch;height:24px;
+  background:var(--panel2);border-bottom:1px solid var(--line);overflow:hidden}
+.ticker .tick-label{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:0 12px;font:700 10px var(--mono);
+  letter-spacing:.14em;text-transform:uppercase;color:#04140c;background:var(--acc);white-space:nowrap}
+.ticker .tick-label i{width:6px;height:6px;border-radius:50%;background:#04140c;animation:tickblink 1.2s steps(1,end) infinite}
+@keyframes tickblink{50%{opacity:.2}}
+.ticker[data-top="bad"] .tick-label{background:var(--bad);color:#fff} .ticker[data-top="bad"] .tick-label i{background:#fff}
+.ticker[data-top="warn"] .tick-label{background:var(--warn);color:#231a00} .ticker[data-top="warn"] .tick-label i{background:#231a00}
+.ticker .tick-win{flex:1 1 auto;position:relative;overflow:hidden;min-width:0}
+.ticker .tick-track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;white-space:nowrap;
+  will-change:transform;animation:tickscroll linear infinite}
+.ticker:hover .tick-track{animation-play-state:paused}
+@keyframes tickscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker .tick-item{display:inline-flex;align-items:center;padding:0 4px;font:500 11.5px/1 var(--mono);letter-spacing:.02em;color:var(--mut)}
+.ticker .tick-item::before{content:"◆";color:var(--line2);font-size:7px;margin:0 16px 0 2px}
+.ticker .tick-item b{color:var(--ink);font-weight:600;margin-right:7px;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.ticker .tick-item.bad b{color:var(--bad)} .ticker .tick-item.warn b{color:var(--warn)} .ticker .tick-item.ok b{color:var(--acc)} .ticker .tick-item.blue b{color:var(--acc2)}
+@media (prefers-reduced-motion:reduce){ .ticker .tick-track{animation:none;position:static;padding-left:8px} }
+#alerts.empty{display:none}   /* the alert stream moved to the ticker; #alerts holds only the save picker when ambiguous */
+
 main{padding:16px;max-width:1500px;margin:0 auto}
 .loading{color:var(--mut);padding:40px;text-align:center}
 h2{font-size:15px;margin:0 0 10px;font-weight:600}
@@ -110,7 +133,7 @@ svg{display:block;max-width:100%}
    A fixed instrument panel, not a document: the page itself never scrolls, each pane
    fills its cell and scrolls inside. What is on screen IS the current stage. */
 body.fixed{overflow:hidden;height:100vh}
-body.fixed main{height:calc(100vh - 24px);padding:10px;display:flex;flex-direction:column;gap:9px;
+body.fixed main{height:calc(100vh - 48px);padding:10px;display:flex;flex-direction:column;gap:9px;
   max-width:none;overflow:hidden}
 .live{min-height:0;display:flex;flex-direction:column;gap:9px}
 
@@ -606,7 +629,9 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 #hdr .hth-morerow{padding:4px 0 0;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hdr .hev-ev{display:flex;flex-direction:column;gap:1px;flex:0 0 auto;border-top:1px solid var(--line);padding-top:5px}
 #hdr .hev-ev .t-b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
-@media (max-width:1000px){ #hdr{grid-template-columns:1fr} #hdr .hev{display:none} }
+/* keep BOTH halves (identity+gate | hash table) down to ~800px; only collapse when a two-column band
+   genuinely cannot fit — the tune table was vanishing at ~1000px (a 4K-portrait/200% CSS width) before. */
+@media (max-width:800px){ #hdr{grid-template-columns:1fr} #hdr .hev{display:none} }
 
 .trace{height:240px;transition:height .12s ease}
 .trace.empty{height:34px}
@@ -641,7 +666,7 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 #lastact[data-tone="dim"]{--lat:#2b3644;color:var(--mut)}
 #lastact span{margin-left:auto;font-weight:400;opacity:.75;font-family:var(--mono);letter-spacing:0}
 body.fixed{padding-top:20px}
-body.fixed main{height:calc(100vh - 24px - 20px)}
+body.fixed main{height:calc(100vh - 24px - 20px - 24px)}
 
 /* ---------- map left, corner analysis right — the original arrangement ---------- */
 .panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}

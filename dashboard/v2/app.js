@@ -284,8 +284,26 @@ async function showCourse(key) {
 function bounds(paths) {
   let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
   paths.forEach((p) => p.forEach(([x, z]) => {
+    if (!Number.isFinite(x) || !Number.isFinite(z)) return;   // a null/NaN coord used to poison the whole box -> a collapsed map
     if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z;
   }));
+  return [x0, x1, z0, z1];
+}
+// Scale the course map to the BULK of the geometry, not to a lone stray point. A single outlier
+// sample -- a respawn at the map origin, a teleport, a point from a mis-joined reverse lap -- used
+// to stretch one axis so far that the real loop collapsed into a hairline (the "broken map": a thin
+// near-vertical sliver). Clip the box to the 2nd..98th percentile per axis; points past the clip
+// still DRAW (the SVG viewBox just crops them), they no longer get to set the scale. Returns null
+// when there are fewer than two finite points to scale from.
+function robustBounds(paths) {
+  const xs = [], zs = [];
+  paths.forEach((p) => p.forEach(([x, z]) => { if (Number.isFinite(x) && Number.isFinite(z)) { xs.push(x); zs.push(z); } }));
+  if (xs.length < 2) return null;
+  xs.sort((a, b) => a - b); zs.sort((a, b) => a - b);
+  const q = (arr, f) => arr[Math.min(arr.length - 1, Math.max(0, Math.round(f * (arr.length - 1))))];
+  let x0 = q(xs, 0.02), x1 = q(xs, 0.98), z0 = q(zs, 0.02), z1 = q(zs, 0.98);
+  if (x1 - x0 < 1) { x0 = xs[0]; x1 = xs[xs.length - 1]; }   // clip erased the span (few points) -> use the true extent
+  if (z1 - z0 < 1) { z0 = zs[0]; z1 = zs[zs.length - 1]; }
   return [x0, x1, z0, z1];
 }
 
@@ -303,7 +321,9 @@ function courseMap(c, opts) {
   const ours = c.path || [];
   const theirs = (c.route && c.route.path) || [];
   if (!ours.length && !theirs.length) return el(`<div class="panel why">no geometry for this course</div>`);
-  const [x0, x1, z0, z1] = bounds([ours, theirs].concat(paths).filter((p) => p.length));
+  const rb = robustBounds([ours, theirs].concat(paths).filter((p) => p.length));
+  if (!rb) return el(`<div class="panel why">no geometry for this course</div>`);   // nothing finite to scale from
+  const [x0, x1, z0, z1] = rb;
   const pad = 18, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
   const H = 380, W = Math.max(320, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const sx = (x1 - x0) || 1, sz = (z1 - z0) || 1, s = Math.min((W - 2 * pad) / sx, (H - 2 * pad) / sz);

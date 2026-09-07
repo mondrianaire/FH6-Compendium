@@ -175,6 +175,16 @@ async function panelBoot() {
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
   WORLD = w; DIAG = d; COURSES = c;
+  // LEVEL OF DETAIL (2026-09-07, Jett: "point-to-point data ... paths should scale up gracefully on all
+  // zoom"). world.json now ships the FULL native centre-line (~4 m, 0.1 m precision). But animating the SVG
+  // viewBox re-rasterises EVERY drawn point each frame, and 275 k points measured ~20 fps at 4K -- so we can't
+  // draw all of it dense. The road you actually zoom INTO is one route, though: draw the faint background
+  // (all routes grey, driven courses green) and do all per-frame matching from a strided ~16 m copy (r._lo /
+  // c._lo -- imperceptible at island scale, and point-to-segment already locates at ~16 m), and draw only the
+  // FOCUS route (the picked highlight / the event route) from the dense r.pts -- ~1 k points, trivial to
+  // raster. Fidelity goes where the eye is; the animation stays cheap. Derived ONCE here.
+  if (WORLD && WORLD.routes) for (const r of Object.values(WORLD.routes)) r._lo = strideLo(r.pts, 4);
+  if (WORLD && WORLD.courses) for (const c of Object.values(WORLD.courses)) c._lo = strideLo(c.path, 4);
   // the live-context seed: where the car was, on which course, in which mode — held, not live
   if (!LIVE.frame && ctxFresh(10 * 60e3)) {
     if (CTX.livePos && LIVEPOS == null) LIVEPOS = CTX.livePos;
@@ -1270,6 +1280,18 @@ function routeSplit() {
 // the position by far more than any real step), so a map never draws a straight line across the island.
 // Catalogue geometry has no such gaps, so it comes back as one run — harmless to pass through. Global on
 // purpose: app.js's courseMap() uses it too. Only for x/z position paths, never speed-vs-distance traces.
+// Keep every `step`-th point plus the last: the ~16 m copy used both for the per-frame route matchers and for
+// the faint BACKGROUND polylines (the focus route is drawn dense instead). Point-to-segment location needs
+// only ~16 m segments (4 x 4 m), and 16 m is sub-pixel at island scale, so both uses look and match as they
+// did before the paths went full-resolution. Keeping the final point guarantees a route's end is never lost.
+function strideLo(pts, step) {
+  if (!pts || pts.length <= 2 || step <= 1) return pts || [];
+  const out = [];
+  for (let i = 0; i < pts.length; i += step) out.push(pts[i]);
+  const last = pts[pts.length - 1];
+  if (out[out.length - 1] !== last) out.push(last);
+  return out;
+}
 function splitTP(pts, cap) {
   cap = cap || 150;
   if (!pts || pts.length < 2) return pts && pts.length ? [pts] : [];
@@ -1297,11 +1319,17 @@ function worldMapHTML() {
   const H = 640, W = Math.max(320, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
   const px = (x) => pad + (x - x0) * s, pz = (z) => H - pad - (z - z0) * s;
-  const line = (pts, col, w, op) => splitTP(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(0) + "," + pz(z).toFixed(0)).join(" ")}"/>`).join("");
-  const routes = on.map(({ r }) => line(r.pts, "#3b4a5c", 1.2, 0.9)).join("");
+  // toFixed(2), not (0): the SVG is drawn ONCE at full-island fit (~20 m per SVG unit) and then the viewBox
+  // magnifies it 30-100x on a course pick. Integer SVG units pre-snapped every path point to a ~20 m grid,
+  // so zoom just enlarged the stair-steps -- the "low resolution on zoom" (Jett 2026-09-07). Centi-unit
+  // precision (~0.2 m at island scale) survives the deepest zoom the map reaches.
+  const line = (pts, col, w, op) => splitTP(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(2) + "," + pz(z).toFixed(2)).join(" ")}"/>`).join("");
+  // BACKGROUND at strided ~16 m (._lo) so the viewBox animation stays cheap; the FOCUS route below is dense.
+  const routes = on.map(({ r }) => line(r._lo || r.pts, "#3b4a5c", 1.2, 0.9)).join("");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
-    .map((c) => line(c.path, "#00d27a", 1.6, 0.85)).join("");
-  // in an event, the catalogued route the car is on, drawn bright over the rest so the map is legible
+    .map((c) => line(c._lo || c.path, "#00d27a", 1.6, 0.85)).join("");
+  // in an event, the catalogued route the car is on, drawn bright over the rest so the map is legible -- this
+  // is a FOCUS route (the viewBox zooms to it), so draw it DENSE (r.pts) for a smooth line at deep zoom.
   const hi = (ROUTE && WORLD.routes[ROUTE.id] && (WORLD.routes[ROUTE.id].pts || []).length > 1)
     ? line(WORLD.routes[ROUTE.id].pts, "#e3b341", 2.8, 1) : "";
   // no follow toggle here: following is course-only (see followSpan()) -- offering it on the
@@ -1335,10 +1363,12 @@ function routePxBox(svg, id) {
 function browseHiSVG(svg, id) {
   const r = WORLD.routes[id]; if (!r || !r.pts || r.pts.length < 2) return "";
   const p = mapProj(svg), P = r.pts;
-  const poly = splitTP(P).map((run) => `<polyline fill="none" stroke="#ffcf4d" stroke-width="3" opacity="1" stroke-linejoin="round" points="${run.map(([x, z]) => p.px(x).toFixed(0) + "," + p.pz(z).toFixed(0)).join(" ")}"/>`).join("");
-  const mk = (r.spawn ? `<circle cx="${p.px(r.spawn[0]).toFixed(0)}" cy="${p.pz(r.spawn[1]).toFixed(0)}" r="6" fill="none" stroke="#c792ea" stroke-width="2.2"/>` : "")
-    + `<circle cx="${p.px(P[P.length - 1][0]).toFixed(0)}" cy="${p.pz(P[P.length - 1][1]).toFixed(0)}" r="5" fill="#ff5d7d" stroke="#0f1720" stroke-width="1.5"/>`
-    + `<circle cx="${p.px(P[0][0]).toFixed(0)}" cy="${p.pz(P[0][1]).toFixed(0)}" r="5" fill="#33d17a" stroke="#0f1720" stroke-width="1.5"/>`;
+  // centi-unit precision (see line()): this bright highlight is the route you zoom INTO, so it is the one
+  // the pre-rounding blockiness showed on most.
+  const poly = splitTP(P).map((run) => `<polyline fill="none" stroke="#ffcf4d" stroke-width="3" opacity="1" stroke-linejoin="round" points="${run.map(([x, z]) => p.px(x).toFixed(2) + "," + p.pz(z).toFixed(2)).join(" ")}"/>`).join("");
+  const mk = (r.spawn ? `<circle cx="${p.px(r.spawn[0]).toFixed(2)}" cy="${p.pz(r.spawn[1]).toFixed(2)}" r="6" fill="none" stroke="#c792ea" stroke-width="2.2"/>` : "")
+    + `<circle cx="${p.px(P[P.length - 1][0]).toFixed(2)}" cy="${p.pz(P[P.length - 1][1]).toFixed(2)}" r="5" fill="#ff5d7d" stroke="#0f1720" stroke-width="1.5"/>`
+    + `<circle cx="${p.px(P[0][0]).toFixed(2)}" cy="${p.pz(P[0][1]).toFixed(2)}" r="5" fill="#33d17a" stroke="#0f1720" stroke-width="1.5"/>`;
   return poly + mk;
 }
 function mapTargetFor(svg) {   // the rectangle the view wants to sit at, from the current selection
@@ -1727,7 +1757,7 @@ function locateRouteInEvent(haveCourse) {
   const hits = [];                                              // named routes only — all 88 Rivals routes are named
   for (const [id, r] of Object.entries(WORLD.routes)) {
     if (!r.name || !(r.pts || []).length) continue;
-    const d = segNear(r.pts);
+    const d = segNear(r._lo || r.pts);   // strided ~16 m copy: full-density r.pts is for DRAWING the focus route, not per-frame matching
     if (d < 45) hits.push({ id, name: r.name, len: r.len || 0, loop: r.loop, dist: d });
   }
   hits.sort((a, b) => a.dist - b.dist);

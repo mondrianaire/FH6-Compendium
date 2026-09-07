@@ -345,8 +345,13 @@ def main(argv=None):
 
 
 
-    # ---- world map: every game route, decimated, for the FREE-mode left pane ------------
-    # ~8 m spacing keeps 169 routes under a megabyte and is still finer than the map can draw.
+    # ---- world map: every game route at FULL native density, for the FREE-mode left pane -----------
+    # The .owt-derived centre-line is ~4 m point-to-point; ship ALL of it at 0.1 m precision so the SVG
+    # paths stay smooth at any zoom. The old export kept every 4th point (~16 m) and rounded to a 1 m grid
+    # -- "point-to-point data, no reason the paths should be low resolution; they should scale up gracefully
+    # on all zoom" (Jett 2026-09-07). The dashboard derives a strided ~16 m copy ONCE at load for its
+    # per-frame route matchers (loadWorld/strideLo), so the density costs drawing fidelity only, never match
+    # time. ~275 k points over 169 routes -- a few MB of world.json, nothing on localhost.
     # Per-route MODE tags + discipline + spawn zone feed the free-mode Course Browser: modes come from
     # ref_event.kind (a route is used by rivals and/or career events), is_race is the world activation sphere,
     # disc is the route's dominant discipline, spawn is the activation-sphere centre (race routes only).
@@ -391,8 +396,8 @@ def main(argv=None):
     _course_names = {row["route_key"]: row["name"] for row in
                      cx.execute("SELECT route_key, name FROM course WHERE name IS NOT NULL AND name != ''")}
     for r in cx.execute("SELECT route_id, length_m, is_loop, name, name_confidence, is_race FROM ref_route"):
-        pts = [[round(p["x"]), round(p["z"])] for p in cx.execute(
-            "SELECT x, z FROM ref_route_point WHERE route_id=? AND (i % 4)=0 ORDER BY i", (r["route_id"],))]
+        pts = [[round(p["x"], 1), round(p["z"], 1)] for p in cx.execute(
+            "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i", (r["route_id"],))]
         if len(pts) < 3:
             continue
         rid = r["route_id"]
@@ -411,7 +416,9 @@ def main(argv=None):
     if xs:
         world["bbox"] = [min(xs), max(xs), min(zs), max(zs)]
     # our own learned courses on the same map, so driven roads light up
-    world["courses"] = {c["route_key"]: {"name": c["name"], "path": (json.loads(c["geometry"] or "{}").get("path") or [])[::3]}
+    # full driven path (was [::3]) so the green "roads you have driven" overlay is as smooth on zoom as the
+    # grey route layer; ~30-40 driven courses, so no decimation is needed to keep the payload or the match sane.
+    world["courses"] = {c["route_key"]: {"name": c["name"], "path": (json.loads(c["geometry"] or "{}").get("path") or [])}
                         for c in cx.execute("SELECT route_key, name, geometry FROM course")}
     total += write(os.path.join(out, "world.json"), world)
 

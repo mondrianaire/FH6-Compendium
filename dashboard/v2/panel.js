@@ -208,12 +208,19 @@ async function onCourseChange(prevKey, key, opts) {
   if (key && (opts.force || key !== prevKey)) {
     let c = null;
     try { c = await get(courseFile(key)); } catch (e) { c = null; }
-    if (!c) return;                         // never latch a key whose file will not load
+    if (!c) {
+      // The new course's file is not built yet (a course driven since the last rebuild). Do NOT keep showing
+      // the OLD course -- that is how a new PvP course read as the previous one. Drop the stale course and
+      // return false so the caller can fall back to the catalogued route (its map still draws from world.json).
+      if (COURSE_KEY && COURSE_KEY !== key) { COURSE = null; COURSE_KEY = null; paintLeft(); paintTrace(); paintRight(); paintFooter(); }
+      return false;
+    }
     COURSE = c; COURSE_KEY = key;
   }
   if (COURSE_KEY) restoreCourseView(COURSE_KEY);
   ctxSave({ courseKey: COURSE_KEY, livePos: LIVEPOS });
   paintLeft(); paintTrace(); paintRight(); paintFooter();
+  return true;
 }
 function onModeChange(prev, cur) {
   if (COURSE && COURSE.key) { const vc = VIEW.course[COURSE.key]; if (vc && vc.auto !== false) delete vc.preset; }   // the context chose it; let it choose again
@@ -1513,10 +1520,10 @@ async function adoptLoop(loop) {
   if (!LOOP) { if (ROUTE) { ROUTE = null; paintLeft(); } return; }   // loop ended -> let position take over
   const learned = WORLD && Object.entries(WORLD.courses).find(([, c]) => c.name && c.name === nm);
   if (learned) {
-    ROUTE = null;
-    if (learned[0] !== COURSE_KEY) await onCourseChange(COURSE_KEY, learned[0]);
-    else paintLeft();
-    return;
+    if (learned[0] === COURSE_KEY) { ROUTE = null; paintLeft(); return; }
+    const ok = await onCourseChange(COURSE_KEY, learned[0]);
+    if (ok) { ROUTE = null; return; }
+    // the learned course's file is not built yet -> fall through to the catalogued route (map from world.json)
   }
   const cat = WORLD && Object.entries(WORLD.routes).find(([, r]) => r.name === nm);
   if (cat) {

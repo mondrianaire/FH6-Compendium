@@ -54,6 +54,7 @@ class State:
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
         self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None; self._auto_loop = False; self._auto_suspend = None   # _auto_loop: the current loop was auto-started by a timed event (Rivals), not a manual mark; _auto_suspend: odometer/lap-timer snapshot taken at a mid-event pause (J7)
         self.ev_path = []; self._ev_named = False; self._ev_match_next = 16   # the current event's driven path (25 m samples), and the LIVE catalogue-naming state: has a positive path match renamed the loop yet, and the next path length to retry the match at
+        self._ev_dist = None   # DistanceTraveled last seen in an event; a large DROP = a new race began (PvP Horizon Open runs races back-to-back), so the auto-loop must re-identify the new course rather than stay named from the previous one
         self.last_t = 0.0; self.game = "menu"; self.game_kind = None; self._noev_since = None; self.ev_maxpos = 0; self.mode_suggest = None; self.mode_reason = None   # lab-mode auto-detection
         self.lab_mode = None; self._force_split = False; self._ev_edge = False; self.stint_starts = {}; self.last_drive_game = None   # effective lab mode (pushed by the dashboard), manual split request, event edge pending, run boundaries (t_mono)
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
@@ -497,6 +498,15 @@ def ingest(p, t_mono):
             except Exception:
                 pass
     if c["on"] and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1): ST.last_pos = (p["PosX"], p["PosZ"])   # only real ON-TRACK positions — a menu / pre-race frame reports [0,0] and must NEVER become a loop start (the bug that put every marked loop at the origin)
+    # COURSE CHANGE inside a continuous event stream: a new race RESETS DistanceTraveled while laps only add to it,
+    # so a large drop while an auto-loop is active means the course changed. PvP Horizon Open runs races back-to-back,
+    # and the 1.5 s event-exit hysteresis can mask the freeroam blip between them -- the loop then stayed named from
+    # the first race (Hokubu Ascent shown as the previous Goliath) because _ev_named blocked re-matching. Close the
+    # loop so the block below re-identifies the new course; laps never trip this (the event odometer only grows).
+    if c["on"] and ST.game == "event" and ST.loop is not None and ST._auto_loop \
+            and ST._ev_dist is not None and c["dist"] < ST._ev_dist - 500:
+        _end_auto_course(t_mono, p, c)
+    ST._ev_dist = c["dist"] if (c["on"] and ST.game == "event") else None
     # AUTO-COURSE: a timed event (Rivals / race) auto-starts course recording at the S/F line — no manual mark needed.
     # Reuses the loop machinery below for circuit laps; a point-to-point sprint's single pass and any partial/crashed
     # practice run complete at event end (_end_auto_course). Never overrides a manually-marked loop.

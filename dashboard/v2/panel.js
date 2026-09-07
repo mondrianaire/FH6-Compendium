@@ -152,8 +152,8 @@ function panelSkeleton(host) {
   }
   host.innerHTML = `
     <div class="hdr" id="hdr"></div>
-    <div class="trace" id="trace"></div>
     <div id="alerts"></div>
+    <div class="trace" id="trace"></div>
     <div class="panes">
       <section class="pane" id="pLeft"><header id="leftHd">Map</header><div class="body map" id="leftBody"></div></section>
       <section class="pane" id="pRight"><header id="rightHd">Statistics</header><div class="body" id="rightBody"></div></section>
@@ -1069,8 +1069,10 @@ function paintLeft() {
     const svgWrap = body.querySelector(".panel");
     const mapSvg = body.querySelector("svg");
     if (svgWrap && mapSvg && svgWrap !== body) { body.appendChild(mapSvg); svgWrap.remove(); }
-    body.insertAdjacentHTML("beforeend", mapDrawerHTML(`<div class="legend">${legendHTML}${followBtn()}</div>${mapFilterBar(COURSE)}`));
-    wireTrace(body); wireFollow(body); wireMapDrawer(body); addLiveDot(body);
+    // COURSE VIEW IS STATIC: no follow-preview zoom here (Jett 2026-09-06). courseMap() fits the whole course
+    // to the pane; the adaptive zoom stays a free-view-only tool, so a course reads as one stable shape.
+    body.insertAdjacentHTML("beforeend", mapDrawerHTML(`<div class="legend">${legendHTML}</div>${mapFilterBar(COURSE)}`));
+    wireTrace(body); wireMapDrawer(body); addLiveDot(body);
   } else {
     paintLeftHeader();
     body.innerHTML = worldMapHTML();
@@ -1371,7 +1373,10 @@ function followMap() {
   const sc = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
   const W = +svg.dataset.w || svg.viewBox.baseVal.width || 900;
   if (!FOLLOW.full) FOLLOW.full = { w: W, h: H };
-  if (!FOLLOW.on) {          // MAPVIEW owns the viewBox here; only present the scale, never write viewBox (the flicker fix)
+  // Present-only (never write viewBox) when the user has not opted into follow (MAPVIEW owns it -- the flicker
+  // fix) OR when this is the live COURSE view, which is deliberately static: courseMap fits the whole course and
+  // the follow-preview zoom is a free-view-only tool now, so a persisted FOLLOW.on cannot zoom a course map.
+  if (!FOLLOW.on || (MODE.suggest === "course" && COURSE)) {
     presentScale(svg, (typeof MAPVIEW !== "undefined" && MAPVIEW.cw) || svg.viewBox.baseVal.width || W, sc);
     return;
   }

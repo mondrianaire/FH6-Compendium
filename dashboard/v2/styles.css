@@ -11,17 +11,19 @@ html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--sans)}
 a{color:var(--acc2);text-decoration:none}
 
-header{display:flex;align-items:center;gap:18px;padding:0 16px;height:46px;
+/* nav collapsed to the status-strip's vertical footprint (was 46px) — a thin toolbar, so the
+   panes get the height back. Buttons stay clickable at 24px with compact padding. */
+header{display:flex;align-items:center;gap:12px;padding:0 12px;height:24px;
   background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
-.brand{display:flex;align-items:center;gap:7px;font-weight:700}
-.mark{background:var(--acc);color:#04140c;border-radius:4px;padding:2px 6px;font:700 12px var(--mono)}
-.who{color:var(--mut);font-weight:500;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
-nav{display:flex;gap:2px;margin-left:8px}
-nav button{background:none;border:0;color:var(--mut);font:500 12.5px var(--sans);
-  padding:6px 11px;border-radius:5px;cursor:pointer}
+.brand{display:flex;align-items:center;gap:5px;font-weight:700}
+.mark{background:var(--acc);color:#04140c;border-radius:3px;padding:1px 5px;font:700 10.5px var(--mono)}
+.who{color:var(--mut);font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-size:10px}
+nav{display:flex;gap:2px;margin-left:6px}
+nav button{background:none;border:0;color:var(--mut);font:500 11.5px var(--sans);
+  padding:2px 9px;border-radius:4px;cursor:pointer;line-height:1}
 nav button:hover{background:var(--panel2);color:var(--ink)}
 nav button.on{background:var(--panel2);color:var(--acc);box-shadow:inset 0 -2px 0 var(--acc)}
-.stamp{margin-left:auto;font:11px var(--mono);color:var(--dim)}
+.stamp{margin-left:auto;font:10px var(--mono);color:var(--dim)}
 
 main{padding:16px;max-width:1500px;margin:0 auto}
 .loading{color:var(--mut);padding:40px;text-align:center}
@@ -108,7 +110,7 @@ svg{display:block;max-width:100%}
    A fixed instrument panel, not a document: the page itself never scrolls, each pane
    fills its cell and scrolls inside. What is on screen IS the current stage. */
 body.fixed{overflow:hidden;height:100vh}
-body.fixed main{height:calc(100vh - 46px);padding:10px;display:flex;flex-direction:column;gap:9px;
+body.fixed main{height:calc(100vh - 24px);padding:10px;display:flex;flex-direction:column;gap:9px;
   max-width:none;overflow:hidden}
 .live{min-height:0;display:flex;flex-direction:column;gap:9px}
 
@@ -669,7 +671,7 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 #lastact[data-tone="dim"]{--lat:#2b3644;color:var(--mut)}
 #lastact span{margin-left:auto;font-weight:400;opacity:.75;font-family:var(--mono);letter-spacing:0}
 body.fixed{padding-top:20px}
-body.fixed main{height:calc(100vh - 46px - 20px)}
+body.fixed main{height:calc(100vh - 24px - 20px)}
 
 /* ---------- map left, corner analysis right — the original arrangement ---------- */
 .panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}

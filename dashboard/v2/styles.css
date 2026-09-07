@@ -286,7 +286,10 @@ button.stage.act.go:active{transform:translateY(1px)}
 .cov .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
 
 /* the floating build sheet — the v1 decode float pattern, in-page and draggable */
-.fsheet{position:fixed;right:24px;top:70px;width:min(980px,90vw);height:min(860px,88vh);z-index:70;
+/* MAX VERTICAL while active (Jett 2026-09-07): the build sheet takes almost the whole viewport
+   height so the two lanes have the most room, and the body scrolls (exception granted) when the
+   content runs past it -- see .fbody overflow below. */
+.fsheet{position:fixed;right:24px;top:8px;width:min(980px,90vw);height:calc(100vh - 16px);z-index:70;
   background:#0b0f14;border:1px solid var(--line2);border-radius:10px;box-shadow:0 18px 50px #000c;
   display:flex;flex-direction:column;overflow:hidden}
 .fsheet .fbar{display:flex;align-items:center;gap:10px;padding:7px 11px;background:var(--panel);
@@ -297,7 +300,7 @@ button.stage.act.go:active{transform:translateY(1px)}
 .fsheet .fbar button{background:var(--panel2);border:1px solid var(--line2);color:var(--mut);border-radius:4px;
   width:24px;height:22px;cursor:pointer;font:12px inherit}
 .fsheet .fbar button:hover{color:var(--ink);border-color:var(--acc2)}
-.fsheet .fbody{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.fsheet .fbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
 .fsheet .fbody .screen{height:auto;flex:1 1 auto;min-height:0}
 .fsheet.min{height:auto}
 .fsheet.min .fbody{display:none}
@@ -317,7 +320,7 @@ button.stage.act.go:active{transform:translateY(1px)}
    two panes stack (a 530-px-wide map is no map) and the build sheet takes the width. */
 @media (orientation: portrait){
   .panes{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
-  .fsheet{right:auto;left:3vw;top:56px;width:94vw;height:min(1500px,74vh)}
+  .fsheet{right:auto;left:3vw;top:8px;width:94vw;height:calc(100vh - 16px)}
   #alerts{max-height:18vh}
 }
 

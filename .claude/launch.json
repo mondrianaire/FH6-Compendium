@@ -3,8 +3,7 @@
   "configurations": [
     {
       "name": "dashboard (8000)",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["scripts/serve_dashboard.py", "8000"],
+      "url": "http://localhost:8000",
       "port": 8000
     },
     {

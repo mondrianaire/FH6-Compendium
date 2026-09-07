@@ -1280,7 +1280,11 @@ function tileSvg(r, sel) {
 }
 function browserHTML() {
   if (!WORLD || !WORLD.routes) return `<div class="why">no world data — run build_web.py</div>`;
-  const rows = Object.entries(WORLD.routes).map(([id, r]) => ({ id, r }));
+  // A BROWSABLE COURSE IS A NAMED CATALOGUE ROUTE (or one we hold data on). The .owt geometry import carries all
+  // 169 routes, but 66 are geometry-only with no catalogue name -- cut/dev/alternate-line content (ids 11000+,
+  // 20000+, 30100+, and the off-map 102/103) that is not a player course. They rendered as "Route <id> · no data
+  // yet" and swamped the browser; drop them unless we have actually driven one (then it earns a tile on its data).
+  const rows = Object.entries(WORLD.routes).map(([id, r]) => ({ id, r })).filter(({ r }) => r.name || r.laps);
   const count = (f) => rows.filter(({ r }) => browseMatch(r, f)).length;
   const chips = BROWSE_CHIPS.map(([f, lbl]) =>
     `<button class="bchip ${BROWSE_FILTER === f ? "on" : ""}" data-bfilter="${f}">${lbl} <em>${count(f)}</em></button>`).join("");

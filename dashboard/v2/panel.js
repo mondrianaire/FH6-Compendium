@@ -339,6 +339,10 @@ const TRACE_GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];
 // glance across laps from different-class builds (Jett 2026-09-07). Unknown class falls back to --dim.
 const PI_COLORS = { D: "#45c8f1", C: "#f0c530", B: "#f0862d", A: "#e5414e", S1: "#a468e8", S2: "#2f62e0", R: "#e83c9e", X: "#2fd05f" };
 function piColor(cls) { return PI_COLORS[String(cls || "").toUpperCase()] || "var(--dim)"; }
+// FH PI class bands (D<=500, C<=600, B<=700, A<=800, S1<=900, S2<=998, X>=999). Derives the class
+// LETTER from a PI so a badge is never an impossible pair like "S1 800" (800 is A). R is a category,
+// not a PI band, so it is never derived here -- it only appears when it comes from stored data.
+function classForPi(p) { return p == null ? null : p <= 500 ? "D" : p <= 600 ? "C" : p <= 700 ? "B" : p <= 800 ? "A" : p <= 900 ? "S1" : p <= 998 ? "S2" : "X"; }
 const TRACE_WORD = ["within grip", "front slipping", "rear slipping", "all four", "impact"];
 const GRAD = ["#2f81f7", "#3fb6c8", "#6fd08c", "#d7d264", "#e8a13c", "#e5414e"];
 const TRACE_DIMS = [["class", "class"], ["dt", "drive"], ["container", "tune"], ["solo", "traffic"], ["bid", "build"]];
@@ -2097,12 +2101,14 @@ function openSheet() {
   }
   const dl = (fz && fz.deliverable) || (CUR && CUR.disk && CUR.disk.deliverable) || null;
   const name = (fz && fz.name) || (MATCH.build && MATCH.build.name) || (CUR && CUR.disk && CUR.disk.name) || "";
-  // PI badge, matching the car header (2026-09-03, Jett: "design consistent"). cls/pi come from the
-  // frozen snapshot when frozen (CUR.cls/.pi drift with the live car exactly like MATCH.sheet did),
-  // else the live car -- never MATCH.build, which is reassigned by fingerprint() on every disk
-  // re-read the same way MATCH.sheet was, and would silently drift while frozen the same way.
-  const cls = (fz && fz.cls) || (CUR && CUR.cls);
-  const pi = (fz && fz.pi != null ? fz.pi : null) ?? (dl && dl.summary && dl.summary.pi_total) ?? (CUR && CUR.pi);
+  // BADGE = the TUNE this sheet shows, as ONE consistent (class, pi) pair -- never the live car's class
+  // stapled to the tune's PI (Jett 2026-09-07: an A-class tune, whose own PI a locked download never
+  // captured, read "S1 800" because the class came from CUR and the 800 from the tune/live). PI comes
+  // from the frozen snapshot, else the tune's own observed CarPI (dl.summary.pi_total); the class is
+  // DERIVED from that PI so the pair can never contradict. When neither is known the tune's PI is
+  // genuinely unknown -- no badge (the live car's PI lives in the car header, not on the tune's sheet).
+  const pi = (fz && fz.pi != null) ? fz.pi : (!fz && dl && dl.summary && dl.summary.pi_total != null ? dl.summary.pi_total : null);
+  const cls = pi != null ? classForPi(pi) : (fz ? fz.cls : null);
   // 2026-09-03: when identity is unsettled, MATCH.build is just the first of N tied candidates
   // (fingerprint()'s `exact[0] || hw[0]`, live.js) -- a real, correctly-decoded build, but not
   // confirmed as the one actually on the car. This sheet used to open silently on that guess with

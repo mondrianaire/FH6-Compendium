@@ -809,6 +809,22 @@ function changeSlim() {
 }
 
 // what the header SAYS, per state — pure, so it can be read and tested on its own
+// CONTENT SHEDS TOKENS; TYPE NEVER SHEDS PIXELS (header handoff §3). The old runtime shrinker measured
+// scrollWidth and stepped font-size down in a loop on EVERY header rebuild -- a read/write reflow thrash
+// that, when the identified car flipped (a lobby, a re-read), made the band strobe and spammed
+// "[header] still clipped". This sheds the string deterministically instead (no DOM measurement, so the
+// result is stable across rebuilds and cannot flicker): drop a parenthetical, then a leading year, then
+// truncate. The full text stays in the element's title. Budgets are generous, so short names are untouched.
+function shedName(text, max) {
+  if (!text) return text || "";
+  let s = String(text).trim();
+  if (s.length <= max) return s;
+  s = s.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();   // drop parentheticals
+  if (s.length <= max) return s;
+  s = s.replace(/^(19|20)\d\d\s+/, "").trim();                          // drop a leading model year
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1).trimEnd() + "…";                      // last resort — a real ellipsis
+}
 function headerCopy(st, q) {
   const m = MATCH && MATCH.build;
   const mm = (CUR && CUR.match) || {};
@@ -945,8 +961,8 @@ function paintHeader() {
       <div class="hidtop">
         <button class="icobtn hreload" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
           title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
-        <div class="hcar t-d" title="${esc(c.byline)}">${esc(c.car)}${changeSlim()}</div>
-        <div class="htitle t-t">${c.tune ? esc(c.tune) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
+        <div class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}${changeSlim()}</div>
+        <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? esc(shedName(c.tune, 42)) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
         ${resolutionHTML(resolutionState())}
       </div>
       <div class="hdec">
@@ -993,13 +1009,10 @@ function paintHeader() {
     else if (act === "pick") { const el = document.querySelector("#alerts .picker"); if (el) el.scrollIntoView({ block: "nearest" }); }
     else if (act === "copycmd") { try { navigator.clipboard.writeText("python scripts/telemetry/fh6_live_daemon.py"); bp.textContent = "COPIED"; } catch (e) { /* no clipboard */ } }
   };
-  // THE NO-CLIP RULE, asserted rather than hoped for: any line that would be cut steps down one
-  // size until it fits, and the console names it — an ellipsis in this band is a bug, not a style.
-  h.querySelectorAll(".hcar, .htitle, .hstatus-val").forEach((el) => {
-    let px = parseFloat(getComputedStyle(el).fontSize);
-    for (let i = 0; i < 6 && el.scrollWidth > el.clientWidth + 1 && px > 9; i++) { px -= 1; el.style.fontSize = px + "px"; }
-    if (el.scrollWidth > el.clientWidth + 1) console.warn("[header] still clipped:", el.className, el.textContent.slice(0, 40));
-  });
+  // (The runtime font-size shrinker that lived here is gone -- it measured scrollWidth and stepped the
+  // font down every rebuild, a reflow thrash that strobed the band when the identified car flipped.
+  // shedName() now sheds CONTENT at render time instead, deterministically, so nothing here touches
+  // layout after paint. See the note above headerCopy().)
 }
 
 function setBaseline(twin) {

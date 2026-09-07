@@ -1588,7 +1588,7 @@ function courseConfidenceBadge() {
 // Which pane the context calls for. In a menu the build is what can change, so its data asks and
 // ratification steps lead; on the road the corners you are taking lead; on a course with a
 // baseline set, the conclusions lead. A click pins a tab until the context class changes.
-const RT_LABEL = { corners: "Live corners", matrix: "Turn matrix", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser" };
+const RT_LABEL = { corners: "Live corners", matrix: "Turn analysis", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser" };
 // "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
 // to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
 // list this function returns. Add "build" back to the free-mode array below to re-enable it.
@@ -1597,6 +1597,7 @@ function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
   if (course && BASELINE) return "concl";
+  if (course) return "matrix";      // course mode leads with Turn analysis (Jett 2026-09-06); a baseline still leads with conclusions
   return "corners";
 }
 function rightTabStore() { return (MODE.suggest === "course" && COURSE) ? vcourse(COURSE.key).rightTab : vg("rightTab", {}); }

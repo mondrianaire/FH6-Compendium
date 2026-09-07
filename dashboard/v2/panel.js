@@ -1588,6 +1588,20 @@ async function adoptLoop(loop) {
 async function locateCourse() {
   if (LOOP) return;                                   // the S/F crossing already named the route — authoritative
   if (!LIVEPOS || !WORLD || !WORLD.courses) return;
+  // IN AN EVENT WITH NO DAEMON-NAMED LOOP, DON'T FLAP AMONG LEARNED COURSES (Jett 2026-09-07: driving
+  // the Goliath, "the map was CONSTANTLY switching between maps that wasn't the goliath"). An offset-
+  // start / long route (the Goliath's S/F didn't resolve to a start, so the daemon says "Rivals course"
+  // and LOOP is null) threads through many short learned courses' roads; point-to-segment then finds a
+  // DIFFERENT one momentarily nearest almost every frame and the incumbent's 25 m hysteresis can't hold
+  // against a course dead-on the shared tarmac. So skip the learned-course proximity match here and let
+  // locateRouteInEvent name the stable CATALOGUED route (its longest-route-wins tie-break keeps the
+  // Goliath over the sprints that reuse its road). Learned-course location still runs in free roam.
+  if (MODE.game === "event") {
+    if (COURSE_KEY) { COURSE = null; COURSE_KEY = null; }   // drop whatever short course last flapped in
+    COURSE_MATCH = null;
+    locateRouteInEvent(false);
+    return;
+  }
   // Distance from the live car to a course's LINE, not its vertices. The world path is a decimated
   // centre-line — on a long course like The Goliath it sits ~415 m between points, so the nearest
   // VERTEX can be 87 m away mid-course (over the 60 m radius) even while the car is dead on the road,

@@ -334,6 +334,11 @@ function paintPanel() {
 // their own ids; impacts marked; hover reads the point and marks it on the course map. Off a
 // known course the block shows the live run, so it is never blank.
 const TRACE_GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];
+// PI-class colours, matching the .pib-<class> badges (styles.css). A context (non-foregrounded)
+// speed-trace line is painted by the PI CLASS of the build that drove it, so PI-vs-speed reads at a
+// glance across laps from different-class builds (Jett 2026-09-07). Unknown class falls back to --dim.
+const PI_COLORS = { D: "#45c8f1", C: "#f0c530", B: "#f0862d", A: "#e5414e", S1: "#a468e8", S2: "#2f62e0", R: "#e83c9e", X: "#2fd05f" };
+function piColor(cls) { return PI_COLORS[String(cls || "").toUpperCase()] || "var(--dim)"; }
 const TRACE_WORD = ["within grip", "front slipping", "rear slipping", "all four", "impact"];
 const GRAD = ["#2f81f7", "#3fb6c8", "#6fd08c", "#d7d264", "#e8a13c", "#e5414e"];
 const TRACE_DIMS = [["class", "class"], ["dt", "drive"], ["container", "tune"], ["solo", "traffic"], ["bid", "build"]];
@@ -518,7 +523,10 @@ function courseTrace(c) {
       style="--lc:${col}" title="${esc((hid ? "hidden — click to draw it" : "drawn — click to hide it") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">
       <i class="lcd"></i><span class="lct">${nt ? `<s>${lapTime(t.t)}</s>` : lapTime(t.t)}</span>
       <span class="lcm">${what || off || (t.class ? esc(t.class) : "")}</span></button>`; }).join("");
-  const foot = `<span class="lchips">${live ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : ""}${leg}</span>`;
+  // in default mode the context lines are coloured by PI class -- show which classes are on the chart
+  const clsPresent = [...new Set(match.map((t) => t.class).filter(Boolean))];
+  const piLeg = (!TRACE_ALL && clsPresent.length) ? `<span class="lchips pileg" title="context lines are coloured by the PI class of the build that drove each lap">${clsPresent.map((k) => `<span class="lchip key" style="border-color:${piColor(k)};background:${piColor(k)}22"><i style="background:${piColor(k)}"></i>${esc(k)}</span>`).join("")}</span>` : "";
+  const foot = `${piLeg}<span class="lchips">${live ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : ""}${leg}</span>`;
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
@@ -527,7 +535,8 @@ function courseTrace(c) {
     if (!match.length) return `<div class="why tempty">every matching lap is hidden — click a chip to show it</div>`;
     const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
     const ch = chart(W, H, 28, 16, smax, vmax);
-    const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE) : plainLine(t.pts, ch, t === best ? "#00d27a" : "var(--dim)", t === best ? 1.8 : 1, t === best ? 0.9 : 0.45, notTimed(t)))).join("")
+    // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity
+    const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE) : plainLine(t.pts, ch, piColor(t.class), t === best ? 1.8 : 1, t === best ? 0.95 : 0.5, notTimed(t)))).join("")
       + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE) : "");
     const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(t.id)}</text>`).join("");
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");

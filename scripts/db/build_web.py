@@ -266,7 +266,7 @@ def main(argv=None):
             FROM course_turn WHERE route_key = ? ORDER BY seq""", key)
         # The game's own centre-line for this course, when we could identify it. This is the
         # half our telemetry cannot supply: exactly where the track is, to the metre.
-        cr = cx.execute("""SELECT route_id, match_kind, mean_dev_m, covered, len_ratio,
+        cr = cx.execute("""SELECT route_id, match_kind, mean_dev_m, p95_dev_m, covered, len_ratio,
                                   anchor_route_id, anchor_events, anchor_agree
                            FROM course_route WHERE route_key=?""", (key,)).fetchone()
         route = dict(cr) if cr else None
@@ -287,9 +287,16 @@ def main(argv=None):
         # REFERENCE the moment we know which route it is. So when the match bound no path, fall back to the key's
         # own id when that route exists. Reference geometry only (reference_only=True); lap attribution still
         # rides the owt verdict (import_corners etc. keep gating on verified/probable/partial).
+        # ...but ONLY when the drive demonstrably LIES ON that ref -- the owt "close" test (mean_dev <= 8 m)
+        # with no gross local divergence (p95 <= 20 m). The Gauntlet fits tight (3.2 / 6.3) and only lacked
+        # coverage, so it qualifies. Naruo (route:1211) fits at 8.07 / 24.85 -- its ref centre-line carries a
+        # ~680 m straight lead-in the laps never touch -- so it does NOT, and binding it drew a spurious
+        # straight chord across the map (Jett 2026-09-07: "could we have glitched on the actual line" -- yes).
+        # A poor-fit ref is worse than none; the recorded laps still draw the real shape.
+        _fit = bool(route and route["mean_dev_m"] is not None and route["mean_dev_m"] <= 8 and (route["p95_dev_m"] or 0) <= 20)
         if not (route and route.get("path")):
             _m = re.match(r"route:(\w+)$", key)
-            if _m:
+            if _m and _fit:
                 _rid = _m.group(1)
                 _pts = [[r["x"], r["z"]] for r in cx.execute(
                     "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i", (_rid,))]
@@ -299,6 +306,20 @@ def main(argv=None):
                                  match_kind=(route or {}).get("match_kind") or "id",
                                  length_m=(_rr["length_m"] if _rr else None),
                                  is_loop=(_rr["is_loop"] if _rr else None))
+        # TRIM REF ARTIFACTS against the driven track. When a course is well-covered (>= 50 %), the recorded
+        # laps ARE its real shape, so any ref centre-line point that strays far (> 60 m) from every lap point
+        # is a bad segment in the game data -- e.g. Naruo's (route:1211) ~680 m straight lead-in the laps never
+        # touch, which drew a straight chord across the map (Jett 2026-09-07). Drop those points; the gap they
+        # leave is split by the dashboard's teleport-splitter, so no line is drawn across it. Under-covered
+        # courses (the Gauntlet, 7.5 %) are left whole -- most of their ref is legitimately un-driven, not an
+        # artifact -- and a clean ref (Goliath) loses nothing because none of it strays.
+        if route and route.get("path") and (route.get("covered") or 0) >= 0.5 and traces:
+            _tp = [(p[3], p[4]) for tr in traces.values() for p in tr if len(p) > 4]
+            if _tp:
+                _kept = [pt for pt in route["path"]
+                         if any((pt[0] - tx) ** 2 + (pt[1] - tz) ** 2 <= 3600 for tx, tz in _tp)]
+                if 2 <= len(_kept) < len(route["path"]):
+                    route["path"] = _kept
         naming = {
             "name_source": c["name_source"], "name_confidence": c["name_confidence"],
             "declared_name": c["declared_name"], "declared_source": c["declared_source"],

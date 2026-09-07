@@ -1696,7 +1696,10 @@ function locateRouteInEvent(haveCourse) {
     // LONGER route (the Goliath over a sprint that reuses its start), then name the runner-up as shared.
     const tied = hits.filter((h) => h.dist <= nearD + 15);
     best = tied.reduce((m, h) => (h.len > m.len ? h : m), tied[0]);
-    const other = hits.find((h) => h.id !== best.id && h.dist <= best.dist + 25);
+    // "shares road with X" only when X is a COMPARABLE-length route (>= half the through-route). A tiny
+    // course the through-route merely spawns beside -- Sekibe Scramble (~2 km) next to a 25-min route --
+    // is a plaza coincidence at the start line, not a shared road, and must not be named (Jett 2026-09-07).
+    const other = hits.find((h) => h.id !== best.id && h.dist <= best.dist + 25 && (h.len || 0) >= (best.len || 0) * 0.5);
     best.alsoName = other ? other.name : null;
   }
   const changed = (best && best.id) !== (ROUTE && ROUTE.id);

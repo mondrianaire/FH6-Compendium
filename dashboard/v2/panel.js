@@ -1650,6 +1650,10 @@ async function locateCourse() {
     const dInc = near(WORLD.courses[COURSE_KEY]);
     if (dInc <= 90 && (best == null || bd >= dInc - 25)) { best = COURSE_KEY; bd = dInc; }
   }
+  // a course is never its own backup: the incumbent promotion above can make `best` the same key the
+  // loop had parked in `second`, which then rendered "could also be <the course you're on>" (Jett
+  // 2026-09-07). Drop the runner-up when it collapses onto the pick.
+  if (second === best) { second = null; sd = Infinity; }
   // how sure this is: some learned courses share road within the match radius (see courseConfidenceBadge)
   COURSE_MATCH = { dist: bd, secondKey: second, secondDist: sd };
   ctxSave({ livePos: LIVEPOS });
@@ -1705,6 +1709,7 @@ function locateRouteInEvent(haveCourse) {
 // per-turn view present wrong turn labels with the same confidence as a clean pick.
 function courseConfidenceBadge() {
   if (!COURSE_MATCH || !COURSE_MATCH.secondKey || !isFinite(COURSE_MATCH.secondDist)) return "";
+  if (COURSE_MATCH.secondKey === COURSE_KEY) return "";   // never "could also be <the course you're on>"
   if (COURSE_MATCH.secondDist > COURSE_MATCH.dist * 2) return "";
   const other = (WORLD.courses[COURSE_MATCH.secondKey] || {}).name || COURSE_MATCH.secondKey;
   return ` <span class="chip w" title="this course's path passes within ${Math.round(COURSE_MATCH.secondDist)} m of another learned course here — turns could be attributed to the wrong course if identification flips">⚠ could also be ${esc(other)}</span>`;

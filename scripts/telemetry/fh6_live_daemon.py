@@ -498,15 +498,19 @@ def ingest(p, t_mono):
             except Exception:
                 pass
     if c["on"] and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1): ST.last_pos = (p["PosX"], p["PosZ"])   # only real ON-TRACK positions — a menu / pre-race frame reports [0,0] and must NEVER become a loop start (the bug that put every marked loop at the origin)
-    # COURSE CHANGE inside a continuous event stream: a new race RESETS DistanceTraveled while laps only add to it,
-    # so a large drop while an auto-loop is active means the course changed. PvP Horizon Open runs races back-to-back,
-    # and the 1.5 s event-exit hysteresis can mask the freeroam blip between them -- the loop then stayed named from
-    # the first race (Hokubu Ascent shown as the previous Goliath) because _ev_named blocked re-matching. Close the
-    # loop so the block below re-identifies the new course; laps never trip this (the event odometer only grows).
-    if c["on"] and ST.game == "event" and ST.loop is not None and ST._auto_loop \
-            and ST._ev_dist is not None and c["dist"] < ST._ev_dist - 500:
-        _end_auto_course(t_mono, p, c)
-    ST._ev_dist = c["dist"] if (c["on"] and ST.game == "event") else None
+    # COURSE CHANGE inside a continuous event stream: a new race RESETS DistanceTraveled to 0 while laps only add to
+    # it (measured across an 8-race PvP session: every race reset the odometer at a distinct start, drops of 5,952+;
+    # laps never dropped it). PvP Horizon Open runs races back-to-back, and the 1.5 s event-exit hysteresis can mask
+    # the freeroam blip between them -- the loop then stayed named from the first race (Hokubu Ascent shown as the
+    # previous Goliath) because _ev_named blocked re-matching. TRACK the odometer across the whole on-track stream (the
+    # reset frame sits at CurrentLap 0, which may read freeroam), and on a drop close the active auto-loop so the block
+    # below re-identifies the new course. A menu clears the tracker; the next event starts fresh.
+    if c["on"]:
+        if ST._ev_dist is not None and c["dist"] < ST._ev_dist - 500 and ST.loop is not None and ST._auto_loop:
+            _end_auto_course(t_mono, p, c)
+        ST._ev_dist = c["dist"]
+    else:
+        ST._ev_dist = None
     # AUTO-COURSE: a timed event (Rivals / race) auto-starts course recording at the S/F line — no manual mark needed.
     # Reuses the loop machinery below for circuit laps; a point-to-point sprint's single pass and any partial/crashed
     # practice run complete at event end (_end_auto_course). Never overrides a manually-marked loop.

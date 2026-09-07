@@ -560,43 +560,8 @@ async function loadBuild(hw) {
   } catch (e) { if (MATCH) MATCH.sheet = null; }
 }
 
-/* ------------------------------------------------------------------ bar */
-function paintBar() {
-  const b = $("#idbar"); if (!b) return;
-  if (!CUR) {
-    b.innerHTML = `<div class="idcar"><b>waiting for a car</b>
-      <span class="why">start driving, or open a car in the game — the daemon reports it here</span></div>
-      <div class="idnums">${liveChip()}</div>`;
-    return;
-  }
-  const m = MATCH && MATCH.build;
-  b.innerHTML = `
-    <div class="idcar">
-      <b>${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b>
-      <span class="chips">
-        ${clsBadge(CUR.cls)}${CUR.pi ? `<span class="chip">PI ${CUR.pi}</span>` : ""}
-        ${CUR.dt ? `<span class="chip">${esc(CUR.dt)}</span>` : ""}
-        ${CUR.cyl ? `<span class="chip">${CUR.cyl} cyl</span>` : ""}
-        <span class="chip mono">${esc(CUR.cid || "")}</span>
-        ${m && m.kg ? `<span class="chip">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
-        ${m && m.front ? `<span class="chip">${n1(m.front)}% front</span>` : ""}
-        ${m && m.gears ? `<span class="chip">${m.gears}-speed</span>` : ""}
-      </span>
-    </div>
-    <div class="idnums">${liveChip()}</div>`;
-}
-function liveChip() {
-  return rebuildChip() + liveChip0();
-}
-function liveChip0() {
-  const drift = MATCH && MATCH.build && LIVE_PI != null && MATCH.build.pi != null
-    && LIVE_PI !== MATCH.build.pi;
-  return `<span class="chip ${LIVE.receiving ? "on" : "r"}">${LIVE.receiving ? "telemetry live" : "no packets"}</span>
-    ${LIVE.inMenu ? `<span class="chip w">⏸ paused — in a menu ${heldSince()}</span>` : ""}
-    ${drift ? `<span class="chip r" title="${LIVE_PI_HELD ? "last seen before the reload; a fresh frame confirms or clears it" : "read from the live frame"}">live PI ${LIVE_PI} ≠ saved ${MATCH.build.pi}${LIVE_PI_HELD ? " · held" : ""}</span>` : ""}
-    <span class="chip mono">${n1(LIVE.pps)} pps</span>
-    <span class="chip ${CUR && CUR.disk ? "on" : "w"}">${CUR && CUR.disk ? "save read" : "no save"}</span>`;
-}
+// (paintBar()/liveChip()/liveChip0() were retired 2026-09-07 — paintBar was defined once and called
+// never, #idbar exists in no markup, and the band + #lastact now carry identity and connection state.)
 
 // The banner is the contextual half of the dashboard: it says what just moved and what that
 // means you have to do about it.

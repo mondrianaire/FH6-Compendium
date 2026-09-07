@@ -657,36 +657,9 @@ function paintDockTrace() {
   const note = $("#dockNote"); if (note) note.textContent = LIVE.strip.length ? `${Math.round(LIVE.strip.length / 60)} min of history · ${(LIVE.corners || []).length} corners this session` : "";
 }
 
-// THE STATUS SPECTRUM (Jett, 2026-09-03): a build's status is a JOURNEY, not a fact — most people
-// glancing at a text label ("downloaded / locked") have no sense that there even ARE other states,
-// let alone that moving through them is the point. A full-width bar, bad-to-good left-to-right,
-// with the current stage as a marker that SLIDES when status changes (not a value that just gets
-// replaced) makes the existence of the ladder and your progress along it legible at a glance.
-// Order is the ratification ladder itself (docs/dashboard-states.md §3): more steps remaining =
-// further left. "variation" and "clone" (buildStatus()'s two mid-journey keys, both tone "blue")
-// share one stop -- both mean "hardware known, not yet a finished ratified save."
-const STATUS_SPECTRUM = [
-  { key: "unknown", label: "unknown", col: "#e5414e" },
-  { key: "downloaded", label: "downloaded", col: "#e3b341" },
-  { key: "clone", label: "clone / variation", col: "#2f81f7" },
-  { key: "ratified", label: "ratified", col: "#3fb950" },
-];
-function spectrumIdx(key) {
-  if (key === "unknown") return 0;
-  if (key === "downloaded") return 1;
-  if (key === "variation" || key === "clone") return 2;
-  if (key === "ratified") return 3;
-  return null;   // none / offline / no car: no position on the ladder to show
-}
-function statusSpectrumHTML(st, c) {
-  const idx = spectrumIdx(st.key);
-  const n = STATUS_SPECTRUM.length;
-  const pctOf = (i) => (i / (n - 1)) * 100;
-  const ticks = STATUS_SPECTRUM.map((s, i) => `<span class="hspec-tick${idx === i ? " on" : ""}" style="left:${pctOf(i)}%"></span>`).join("");
-  const marker = idx != null ? `<span class="hspec-marker" style="left:${pctOf(idx)}%;background:${STATUS_SPECTRUM[idx].col};box-shadow:0 0 0 3px ${STATUS_SPECTRUM[idx].col}33" title="${esc(c.status || STATUS_SPECTRUM[idx].label)}"></span>` : "";
-  const labels = STATUS_SPECTRUM.map((s, i) => `<span${idx === i ? ` class="on" style="color:${s.col}"` : ""}>${esc(s.label)}</span>`).join("");
-  return `<div class="hspectrum"><div class="hspec-track">${ticks}${marker}</div><div class="hspec-labels">${labels}</div></div>`;
-}
+// (The status-spectrum ladder — STATUS_SPECTRUM / spectrumIdx() / statusSpectrumHTML() and the marker
+// fly-in — was retired 2026-09-07 by the gate strip in the band. resolutionState() below survives; it
+// feeds gateStrip().)
 
 // RESOLUTION, NOT A JOURNEY (Jett 2026-09-06). Identity is a tree: the live cid narrows to a few HARDWARE
 // hashes, each holding known SLIDER hashes; a saved (hw_hash, tune_hash) is a complete, clone-able build,
@@ -721,14 +694,65 @@ function resolutionState() {
   return { key, label, tone, clonable, locked, hwN, tunes, hint };
 }
 
-function resolutionHTML(rs) {
-  const STAGES = [["unsaved", "UNSAVED"], ["ambiguous", "AMBIGUOUS"], ["resolved", "RESOLVED"]];
-  const COL = { unsaved: "#f0616d", ambiguous: "#e3b341", resolved: "#3fb950" };
-  const pills = STAGES.map(([k, l]) =>
-    `<span class="rez-pill${rs.key === k ? " on" : ""}"${rs.key === k ? ` style="background:${COL[k]};color:#0b0d10;box-shadow:0 0 0 2px ${COL[k]}44"` : ""}>${l}</span>`).join("");
-  const tree = rs.hwN ? `<b class="rez-tree" title="the cid resolves to this many hardware hashes, holding this many saved slider hashes">${rs.hwN} hw · ${rs.tunes} tune${rs.tunes === 1 ? "" : "s"}</b> — ` : "";
-  const clone = rs.key === "none" ? "" : `<span class="rez-clone ${rs.clonable ? "ok" : "no"}">${rs.clonable ? "✓ clone-able" : "✗ incomplete"}</span>`;
-  return `<div class="hrez"><div class="rez-row">${pills}${clone}</div><div class="rez-why t-l">${tree}${esc(rs.hint || "")}</div></div>`;
+// THE GATE STRIP (header handoff §4): one strip that pairs the identity we HAVE with the one thing
+// this state affords. Returns {tone, ident, detail, sheet, sheetSub, verdict}. `sheet` grades the
+// trailing Build Sheet cell -- "filled" (it IS the primary, downloaded), "outline" (reachable, open
+// shackle), "dead" (refused, shut shackle). `verdict` is set only for the two severe states that
+// promote a finding to a 21px line. The middle action cell is c.primary / c.noBtn from headerCopy().
+function gateStrip(st, rs) {
+  const ch = CHANGE || {}, nSl = (ch.sliders || []).length, nPa = (ch.slots || []).length;
+  if (!CUR || rs.key === "none") return { tone: "dim", ident: "—", detail: "waiting for a car", sheet: "dead", sheetSub: "no car" };
+  if (st.key === "offline") return { tone: "dim", ident: "◌ NOT LIVE", detail: "last thing seen", sheet: "dead", sheetSub: "daemon down" };
+  if (rs.key === "ambiguous") {
+    const mm = (CUR && CUR.match) || {}; const ties = mm.n_signature_ties || rs.tunes || 0;
+    return { tone: "warn", ident: "! NOT IDENTIFIED", detail: ties ? ties + " saves tie" : "several saves tie",
+      sheet: "dead", sheetSub: "needs one save", verdict: (CUR.match && matchQuality(CUR.match).level === "conflict") ? "IDENTITY CONTRADICTED" : "" };
+  }
+  if (st.key === "variation") return { tone: "acc", ident: "✓ IDENTIFIED", detail: "base + " + nSl + " slider" + (nSl === 1 ? "" : "s"), sheet: "outline" };
+  if (st.key === "clone") return { tone: "acc", ident: "✓ IDENTIFIED", detail: "identical, unlocked", sheet: "outline" };
+  if (rs.key === "unsaved") {   // truly unsaved: hardware changed / no match, nothing on disk
+    if (rs.locked) return { tone: "warn", ident: "◷ IMPORTING", detail: "history catching up", sheet: "dead", sheetSub: "importing" };
+    const d = [nSl ? nSl + " slider" + (nSl === 1 ? "" : "s") + " moved" : "", nPa ? nPa + " part" + (nPa === 1 ? "" : "s") + " changed" : ""].filter(Boolean).join(" · ") || "no save on disk";
+    return { tone: "bad", ident: "✗ NOTHING ON DISK", detail: d, sheet: "dead", sheetSub: "needs a save", verdict: "NOT SAVED — NOTHING CAN BE COMPARED" };
+  }
+  // resolved
+  const tree = (rs.hwN || 1) + " hw · " + (rs.tunes || 1) + " tune" + ((rs.tunes || 1) === 1 ? "" : "s");
+  if (st.key === "ratified") {
+    const m = MATCH && MATCH.build, laps = (m && m.laps) || 0, courses = (m && m.courses) || 0;
+    return { tone: "acc", ident: "✓ IDENTIFIED", detail: laps ? laps + " lap" + (laps === 1 ? "" : "s") + (courses ? " · " + courses + " course" + (courses === 1 ? "" : "s") : "") : tree, sheet: "outline" };
+  }
+  return { tone: "acc", ident: "✓ IDENTIFIED", detail: tree, sheet: "filled" };   // downloaded / locked
+}
+
+// THE HASH TABLE (header handoff §5): the two tiers as a table, not chip columns. Each row is one
+// hardware hash (its gear ladder + tune count) with the slider hashes (tunes) under it. --acc on the
+// car's CURRENT hardware row and on the IDENTIFIED tune. Rows keep the data-act="upg"/"tune" handlers.
+function hashTableHTML() {
+  const groups = carUpgradeGroups();
+  if (groups.length < 1) return `<div class="hth-empty t-l">no saved build on this car yet</div>`;
+  const curHw = MATCH ? rimFree(MATCH.pk) : null, curSk = MATCH ? MATCH.sk : null;
+  const selKey = UPG_SEL || curHw;
+  const tsOf = (b) => (b.saves || [])[0] || (b.c || "").split("_").pop() || "";
+  // FITS THE BAND (handoff §1/§7): the band shows at most CAP hardware rows -- the current one first,
+  // then the rest -- and sheds the overflow to a "+N more" line rather than clipping or scrolling.
+  const CAP = 3;
+  const ordered = groups.slice().sort((a, b) => (a.key === curHw ? -1 : 0) - (b.key === curHw ? -1 : 0));
+  const shown = ordered.slice(0, CAP), moreN = ordered.length - shown.length;
+  const rows = shown.map((g) => {
+    const gears = (g.builds[0] || {}).gears, isCur = g.key === curHw, isSel = g.key === selKey;
+    const seen = new Set(), tunes = [];
+    g.builds.forEach((b) => { if (!seen.has(b.skey)) { seen.add(b.skey); tunes.push(b); } });
+    const tuneCells = tunes.map((b) => {
+      const on = b.skey === curSk && isCur;
+      return `<button class="hth-tune${on ? " on" : ""}" data-act="tune" data-ts="${esc(tsOf(b))}" title="identify this tune">${esc(shedName(b.name || b.label || "unnamed", 26))}</button>`;
+    }).join("");
+    return `<div class="hth-row${isSel ? " sel" : ""}${isCur ? " cur" : ""}">
+      <button class="hth-hw" data-act="upg" data-hw="${esc(g.key)}" title="${g.builds.length} tune${g.builds.length > 1 ? "s" : ""} on this hardware${isCur ? " · the car's current hardware" : ""}">${gears ? gears + "-spd" : "hw"}<i>${g.builds.length}</i></button>
+      <div class="hth-tunes">${tuneCells || `<span class="t-l">no tune</span>`}</div>
+    </div>`;
+  }).join("");
+  const more = moreN > 0 ? `<div class="hth-morerow t-l">+${moreN} more hardware — pick one below to see its tunes</div>` : "";
+  return `<div class="hth"><div class="hth-head"><span class="t-l">upgrade</span><span class="t-l">slider hash</span></div>${rows}${more}</div>`;
 }
 
 /* ------------------------------------------------------------ header */
@@ -943,55 +967,52 @@ function paintHeader() {
   const img = m && m.thumb ? `${API}${m.thumb}` : liv ? `${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}` : null;
 
   h.dataset.tone = c.tone;
-  // The marker's own "left: X%" is baked into the fresh markup below (h.innerHTML replaces the
-  // whole header on every repaint), so a plain CSS transition has no "from" state to animate --
-  // the new element just appears already at its final spot. Capture the OLD marker's position
-  // before it's destroyed; after the swap, snap the new one back to that old spot with transitions
-  // off, force a reflow, then let it ease to its real target -- the fly-in that makes "the marker
-  // moved" (Jett's spec) literally true instead of a dot that teleports.
-  const oldMarker = h.querySelector(".hspec-marker");
-  const oldMarkerLeft = oldMarker ? oldMarker.style.left : null;
+  // THE BAND (header handoff §2–§4): render washed across the whole band behind a scrim; identity on
+  // the left (470), the hardware→tune hash table on the right (1fr), and one gate strip pairing the
+  // identity we have with the single action this state affords. The spectrum/marker fly-in is retired.
+  const rs = resolutionState();
+  const g = gateStrip(st, rs);
+  const FILL = { pick: "acc2", sheet: "warn", ab: "acc2", base: "acc", rebuild: "acc2", copycmd: "line2" };
+  const fill = c.primary ? (FILL[c.primary.act] || "acc") : null;
+  const reach = !!(MATCH && MATCH.build);
+  const resolved = rs.key === "resolved";
+  const busy = RR.busy || RB.state === "running" || RB.pending;
   h.innerHTML = `
-    <div class="hart">
-      ${img ? `<img class="art" alt="" src="${img}">` : `<div class="art none t-l">${esc(CUR ? (c.step || "no render") : "no car")}</div>`}
-      ${CUR ? `<span class="artpi">${piBadge(CUR.cls, CUR.pi)}</span>` : ""}
-      <span class="artcap t-l">${esc(c.caption)}</span>
+    ${img ? `<div class="hwash" style="background-image:url('${img}')"></div>` : ""}
+    <div class="hscrim"></div>
+    <button class="icobtn hreload" id="btnRefresh" ${busy ? "disabled" : ""}
+      title="re-read this car's save from disk, and import it if the database does not hold it — both happen by themselves; this is the manual override.">${busy ? "…" : "⟳"}</button>
+    <div class="hident">
+      <div class="hident-hd">
+        ${CUR ? `<span class="hpi">${piBadge(CUR.cls, CUR.pi)}</span>` : ""}
+        ${rs.locked ? `<span class="hlock t-l">🔒 ${esc(c.caption || "locked")}</span>` : (c.caption ? `<span class="hcap t-l">${esc(c.caption)}</span>` : "")}
+        ${changeSlim()}
+      </div>
+      <div class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}</div>
+      <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">no save on disk for this car</span>`}</div>
+      ${g.verdict ? `<div class="hverdict">${esc(g.verdict)}</div>` : ""}
+      <div class="hgate">
+        <div class="gcell gstate" data-tone="${g.tone}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span></div>
+        <span class="garrow" data-w="${(g.tone === "bad" || g.tone === "warn" || g.sheet === "dead") ? "weak" : "strong"}"></span>
+        ${g.sheet === "filled" ? "" : (c.primary
+          ? `<button class="gprim" id="btnPrim" data-act="${esc(c.primary.act)}" data-fill="${fill}">${esc(c.primary.label)}</button>`
+          : `<div class="ginstr t-b">${esc(c.step || c.noBtn || "")}</div>`)}
+        ${g.sheet === "filled"
+          ? `<button class="gsheet filled" id="btnSheet">🔓 BUILD SHEET ▸<em>unlocks this build</em></button>`
+          : g.sheet === "outline" && reach
+            ? `<button class="gsheet outline" id="btnSheet">🔓 BUILD SHEET ▸<em>the full sheet</em></button>`
+            : `<div class="gsheet dead">🔒 BUILD SHEET<em>${esc(g.sheetSub || "needs a save")}</em></div>`}
+      </div>
     </div>
-    <div class="hid">
-      <div class="hidtop">
-        <button class="icobtn hreload" id="btnRefresh" ${(RR.busy || RB.state === "running" || RB.pending) ? "disabled" : ""}
-          title="re-read this car's save from disk, and import it if the database does not hold it. Both happen by themselves; this is the manual override.">${(RR.busy || RB.state === "running" || RB.pending) ? "…" : "⟳"}</button>
-        <div class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}${changeSlim()}</div>
-        <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? esc(shedName(c.tune, 42)) : `<span class="t-l empty">no save on disk for this car</span>`}</div>
-        ${resolutionHTML(resolutionState())}
-      </div>
-      <div class="hdec">
-        ${c.step ? `<div class="hstep t-b"><i>1</i><span>${esc(c.step)}</span></div>` : ""}
-        ${similarGroupsHTML()}
-      </div>
-    </div>
-    <div class="hact">
-      <button class="second" id="btnSheet" ${MATCH && MATCH.build ? "" : "disabled"}>${frozenOf() ? "◆ BUILD SHEET · TARGET" : "BUILD SHEET ▸"}</button>
-      ${c.primary ? `<button class="prim" id="btnPrim" data-act="${esc(c.primary.act)}">${esc(c.primary.label)}</button>`
-        : `<div class="prim none t-l">${esc(c.noBtn || "nothing to do here")}</div>`}
-      <div class="hev">
-        <div class="t-l">evidence</div>
-        <div class="t-b">${esc(c.evidence || (q.level === "ok" ? q.why : "") || "—")}</div>
-      </div>
+    <div class="hev">
+      ${hashTableHTML()}
+      <div class="hev-ev"><span class="t-l">evidence</span><span class="t-b">${esc(c.evidence || (q.level === "ok" ? q.why : "") || "—")}</span></div>
     </div>`;
-
-  const newMarker = h.querySelector(".hspec-marker");
-  if (newMarker && oldMarkerLeft && oldMarkerLeft !== newMarker.style.left) {
-    const target = newMarker.style.left;
-    newMarker.style.transition = "none"; newMarker.style.left = oldMarkerLeft;
-    void newMarker.offsetWidth;   // force the browser to commit the old position before re-enabling the transition
-    newMarker.style.transition = ""; newMarker.style.left = target;
-  }
 
   // the two-tier group: pick an upgrade (shows its tunes), or pick a tune (identifies it — reverse
   // direction, keyed on the file's hashes, not the gear ladder)
-  h.querySelectorAll('.hg-chip[data-act="upg"]').forEach((b) => b.onclick = () => { UPG_SEL = b.dataset.hw; HDR_KEY = null; paintHeader(); });
-  h.querySelectorAll('.hg-chip[data-act="tune"]').forEach((b) => b.onclick = () => {
+  h.querySelectorAll('.hth-hw[data-act="upg"]').forEach((b) => b.onclick = () => { UPG_SEL = b.dataset.hw; HDR_KEY = null; paintHeader(); });
+  h.querySelectorAll('.hth-tune[data-act="tune"]').forEach((b) => b.onclick = () => {
     const ts = b.dataset.ts; if (!ts || !CUR) return;
     setPin(CUR.ordinal, ts);
     identify({ id: CUR.cid, ordinal: CUR.ordinal, name: CUR.name, class: CUR.cls, pi: CUR.pi, drivetrain: CUR.dt, cyl: CUR.cyl }, "pinned");

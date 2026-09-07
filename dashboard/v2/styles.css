@@ -523,120 +523,86 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 
 
 
-/* ==================== THE HEADER — one skeleton, allocated by difficulty ====================
-   Columns 300 / 480 / 224 with 16px gaps = 1036 = the band's content width at 1080. Five type
-   steps, one hairline, one tone per state. Nothing in this band clips or scrolls. */
-#hdr{display:grid;grid-template-columns:300px minmax(0,480px) 224px;column-gap:16px;height:224px;
-  padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden;align-items:stretch;position:relative}
-/* 2026-09-03 (Jett: "visual flicker and reset" when a save changes -- factory-reset changes the
-   most fields of any single action: thumbnail, badge, status, part count, all replaced by one hard
-   innerHTML swap with nothing to soften it). h.innerHTML = ... makes .hart/.hid brand-new elements
-   on every repaint, so a plain CSS animation on them replays automatically -- a real update now
-   reads as an update, not a flash back to a blank state. */
-@keyframes hdrIn{from{opacity:.35}to{opacity:1}}
-#hdr .hart,#hdr .hid{animation:hdrIn .22s ease}
+/* ==================== THE CAR-INFO BAND (header handoff §2–§4) ====================
+   Two halves: identity + gate strip on the left (470), the hardware→tune hash table on the right
+   (1fr). The car render is washed across the whole band behind a scrim, dying out by 66% so mono
+   figures never cross the fade. Three voices — Record (mono), Verdict (Inter 700 caps), Instruction
+   (Inter 400). Content sheds tokens; type never sheds pixels. Nothing here clips or scrolls. */
+#hdr{position:relative;display:grid;grid-template-columns:470px minmax(0,1fr);column-gap:0;height:224px;
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+@keyframes hdrIn{from{opacity:.4}to{opacity:1}}
+#hdr .hident,#hdr .hev{animation:hdrIn .2s ease}
 #hdr[data-tone="warn"]{--tone:var(--warn)} #hdr[data-tone="bad"]{--tone:var(--bad)}
 #hdr[data-tone="blue"]{--tone:var(--acc2)} #hdr[data-tone="ok"]{--tone:var(--acc)} #hdr[data-tone="dim"]{--tone:var(--mut)}
-/* five type steps — the only sizes in the band */
-#hdr .t-d{font:700 22px/26px var(--sans);letter-spacing:-.01em;color:var(--tone,var(--ink))}
-#hdr .t-t{font:800 17px/22px var(--sans);letter-spacing:.01em;color:var(--acc)}
-#hdr .t-b{font:400 12.5px/17px var(--sans);color:var(--ink);opacity:.92}
-#hdr .t-a{font:600 12px/16px var(--sans);color:var(--tone,var(--mut))}
-#hdr .t-l{font:700 10.5px/14px var(--sans);letter-spacing:.10em;text-transform:uppercase;color:var(--mut)}
+/* the wash + scrim, both behind the content */
+#hdr .hwash{position:absolute;inset:0;background-size:47% auto;background-position:left 46%;background-repeat:no-repeat;opacity:.17;pointer-events:none;z-index:0}
+#hdr .hscrim{position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:linear-gradient(90deg,rgba(20,26,34,.30) 0%,rgba(20,26,34,.72) 46%,var(--panel) 66%)}
+#hdr .hreload{position:absolute;top:8px;right:8px;height:22px;width:22px;font-size:12px;z-index:4}
+/* THE THREE VOICES — the only type in the band */
+#hdr .t-d{font:500 21px/26px var(--mono);letter-spacing:-.01em;color:var(--ink)}          /* Record — car name */
+#hdr .t-t{font:500 15px/20px var(--mono);color:var(--ink)}                                  /* Record — tune name */
+#hdr .t-b{font:400 13px/18px var(--sans);color:var(--ink)}                                  /* Instruction */
+#hdr .t-l{font:500 10px/13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}  /* Record label */
 #hdr .empty{color:#576372}
-/* col 1 — the render, edge to edge, with the game's own badge on it */
-.hart{position:relative;width:300px;height:176px;overflow:hidden;background:radial-gradient(ellipse at 50% 70%,#1b2430,var(--panel2) 60%,var(--panel))}
-.hart .art{width:300px;height:176px;object-fit:cover;display:block;border:0;border-radius:0}
-.hart .art.none{display:grid;place-items:center;text-align:center;padding:0 22px;color:var(--mut)}
-.artpi{position:absolute;left:8px;top:8px}
-.artcap{position:absolute;left:0;right:0;bottom:0;height:22px;display:flex;align-items:center;padding:0 8px;
-  background:rgba(11,13,16,.72);color:var(--tone,var(--mut))}
-/* col 2 — identity and decision, on one rail */
-/* 2026-09-03 amendment: car name, tune name and the status spectrum are one bordered group
-   (.hidtop) now, not three loose fields with uneven gaps between them -- the spacing that read as
-   "uneven and unsettling" was each one centred in its own row instead of stacked tight as a unit.
-   The reload button moved from the evidence card into this group's own top-right corner. */
-.hid{display:grid;grid-template-rows:104px 64px;row-gap:8px;min-width:0;height:176px}
-.hid > *{min-width:0;overflow:hidden}
-.hidtop{position:relative;display:flex;flex-direction:column;justify-content:center;gap:3px;
-  background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:8px 34px 8px 10px}
-.hcar,.htitle{display:block;white-space:nowrap;text-overflow:clip;overflow:hidden;line-height:1.15}
-.hdec{border-top:1px solid var(--line);background:var(--panel2);border-left:3px solid var(--tone,var(--line2));
-  padding:6px 8px;display:flex;align-items:stretch;gap:10px;white-space:normal;overflow:hidden}
-/* TWO TIERS beside the step (Jett 2026-09-06): similar upgrades (hw_hash) | tunes under it (tune_hash). */
-.hdec .hstep{flex:0 1 44%;min-width:0}
-.hgroups{flex:1 1 auto;display:flex;gap:8px;min-width:0;border-left:1px solid var(--line);padding-left:9px}
-.hgcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden}
-.hgh{font:700 8.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);flex:0 0 auto;
-  display:flex;align-items:center;gap:5px}
-.hgh i{font:700 8.5px var(--mono);font-style:normal;color:var(--dim)}
-.hgbody{display:flex;flex-wrap:wrap;gap:3px;overflow-y:auto;align-content:flex-start;min-height:0}
-.hg-chip{background:var(--panel);border:1px solid var(--line2);color:var(--mut);border-radius:2px;
-  padding:1px 6px;font:600 10.5px var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:4px;
-  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hg-chip:hover{border-color:var(--acc2);color:var(--acc2)}
-.hg-chip.on{border-color:var(--acc);color:var(--acc);background:#0f2a1e}
-.hg-chip.match{box-shadow:inset 0 0 0 1px var(--acc2)}
-.hg-chip i{font:700 9px var(--mono);font-style:normal;color:var(--dim)}
-.hg-empty{font-size:10.5px}
-/* slim CHANGE summary, inline in the car name; the full notice opens below on click */
-.hchg{background:none;border:1px solid var(--line2);border-radius:10px;padding:0 8px;margin-left:9px;
-  font:700 9.5px var(--sans);letter-spacing:.03em;text-transform:uppercase;cursor:pointer;vertical-align:middle}
-.hchg:hover{filter:brightness(1.15)}
-.hchg.on{border-color:var(--acc);color:var(--acc)}
-.hchg.r{border-color:var(--bad);color:var(--bad)}
-.hchg.b{border-color:var(--acc2);color:var(--acc2)}
-.hchg.open{background:var(--panel2)}
-/* THE STATUS SPECTRUM: inside .hidtop now, under the two titles -- scoped to column 2's own width,
-   not the whole header (2026-09-03 amendment: it used to span the full band, which overstated its
-   own importance relative to the actual next step). Bad-left to good-right, a marker that slides
-   between named stages instead of a text field that gets replaced. */
-.hspectrum{display:flex;flex-direction:column;justify-content:center;padding-top:2px}
-.hspec-track{position:relative;height:5px;margin-top:2px;border-radius:3px;
-  background:linear-gradient(90deg,#e5414e,#e3b341,#2f81f7,#3fb950)}
-.hspec-tick{position:absolute;top:-3px;width:2px;height:11px;background:#0b0d10;border-radius:1px;transform:translateX(-1px);opacity:.55}
-.hspec-tick.on{opacity:0}
-.hspec-marker{position:absolute;top:-5px;width:15px;height:15px;border-radius:50%;background:#fff;
-  border:2px solid #0b0d10;transform:translateX(-7.5px);transition:left .5s cubic-bezier(.2,.8,.2,1);cursor:default}
-.hspec-labels{display:flex;justify-content:space-between;margin-top:6px;font:700 8.5px var(--sans);
-  letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-.hspec-labels span.on{font-weight:800}
-/* RESOLUTION STATE — replaces the journey spectrum: where the cid -> hw-hash -> tune-hash resolution stands */
-.hrez{display:flex;flex-direction:column;justify-content:center;gap:3px;padding-top:2px;min-width:0}
-.rez-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}
-.rez-pill{font:800 8.5px var(--sans);letter-spacing:.07em;padding:2px 7px;border-radius:2px;border:1px solid var(--line2);color:var(--mut);opacity:.45;flex:0 0 auto}
-.rez-pill.on{opacity:1;border-color:transparent}
-.rez-tree{font:700 10px var(--mono);color:var(--acc2);white-space:nowrap}
-.rez-clone{font:700 9px var(--sans);letter-spacing:.04em;text-transform:uppercase;flex:0 0 auto;white-space:nowrap;margin-left:auto}
-.rez-clone.ok{color:var(--acc)} .rez-clone.no{color:var(--bad)}
-.rez-why{font-size:10.5px;line-height:14px;white-space:normal;max-height:28px;overflow:hidden;color:var(--mut)}
-.hstep{display:flex;align-items:flex-start;gap:6px;font-weight:700;white-space:normal;line-height:16px;max-height:32px;overflow:hidden}
-.hstep i{flex:0 0 auto;width:16px;height:16px;display:grid;place-items:center;background:var(--tone,var(--line2));
-  color:#0b0d10;font:700 10px var(--mono);font-style:normal;border-radius:2px}
-/* col 3 — the sheet (top, aligned with .hidtop's reload button), the action, the evidence.
-   grid-template-columns:1fr pinned explicitly (2026-09-03 bugfix): an unrelated .hact rule
-   elsewhere in this file sets grid-template-columns:1fr 1fr for a different component, and because
-   this rule never declared its own columns, that 2-column layout leaked in via the cascade -- split
-   the sheet/action buttons into two side-by-side cells instead of three stacked rows, which is what
-   was clipping "PICK THE SAVE" and pushing the evidence card to overlap it. */
-.hact{display:grid;grid-template-columns:1fr;grid-template-rows:34px 52px 74px;gap:8px;width:224px;height:176px}
-.hact .prim{width:224px;height:52px;background:var(--tone,var(--line2));color:#0b0d10;border:0;border-radius:2px;
-  font:800 13px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;overflow:hidden}
-.hact .prim:hover{filter:brightness(1.08)}
-.hact .prim.none{background:none;border:1px dashed var(--line2);color:var(--mut);display:grid;place-items:center;
-  text-align:center;padding:0 8px;cursor:default;white-space:normal;line-height:13px}
-.hact .second{width:224px;height:34px;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
-  border-radius:2px;font:800 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
-.hact .second:hover{border-color:var(--acc2);color:var(--acc2)}
-.hact .second:disabled{opacity:.4;cursor:not-allowed}
-.hev{position:relative;height:74px;border:1px solid var(--line);border-radius:2px;padding:6px 8px;display:grid;
-  grid-template-rows:14px 1fr;gap:2px;overflow:hidden}
-.hev .t-b{white-space:normal;line-height:15px;overflow:hidden}
-.hidtop .hreload{position:absolute;top:6px;right:6px;height:24px;width:24px;font-size:12px}
-@media (max-width:1000px){
-  #hdr{grid-template-columns:200px minmax(0,1fr) 200px}
-  .hart,.hart .art{width:200px}.hact,.hact .prim,.hact .second{width:200px}
-}
+/* LEFT — identity + gate strip */
+#hdr .hident{position:relative;z-index:2;padding:12px 14px;display:flex;flex-direction:column;gap:5px;min-width:0;overflow:hidden}
+#hdr .hident-hd{display:flex;align-items:center;gap:8px;min-width:0;height:20px}
+#hdr .hlock{color:var(--warn)}
+#hdr .hcar{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#hdr .htitle{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#hdr .htitle .tick{color:var(--acc);font-weight:700}
+#hdr .hverdict{font:700 21px/24px var(--sans);letter-spacing:.02em;text-transform:uppercase;color:var(--tone,var(--bad));margin:1px 0}
+/* THE GATE STRIP — [state] ┈▸ [action | instruction] [build sheet]. Exactly one filled cell. */
+#hdr .hgate{margin-top:auto;display:flex;align-items:stretch;gap:0;min-height:44px}
+#hdr .gcell{display:flex;flex-direction:column;justify-content:center;min-width:0}
+#hdr .gstate{flex:0 0 auto;padding-right:10px}
+#hdr .gstate b{display:block;font:500 10px/14px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--gh,var(--mut))}
+#hdr .gstate span{font:500 10px/13px var(--mono);letter-spacing:.03em;color:var(--mut);white-space:nowrap}
+#hdr .gstate[data-tone="bad"]{--gh:var(--bad)} #hdr .gstate[data-tone="warn"]{--gh:var(--warn)}
+#hdr .gstate[data-tone="acc"]{--gh:var(--acc)} #hdr .gstate[data-tone="dim"]{--gh:var(--mut)}
+#hdr .garrow{flex:1 1 auto;align-self:center;height:0;border-top:1.5px dashed var(--line2);position:relative;margin:0 6px;min-width:16px}
+#hdr .garrow::after{content:"";position:absolute;right:-2px;top:-4px;border:4px solid transparent;border-left-color:var(--line2)}
+#hdr .garrow[data-w="strong"]{border-top-color:var(--warn)} #hdr .garrow[data-w="strong"]::after{border-left-color:var(--warn)}
+#hdr .gprim{flex:0 0 auto;align-self:center;border:0;border-radius:3px;padding:0 14px;height:34px;cursor:pointer;
+  font:700 13px/16px var(--sans);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+#hdr .gprim[data-fill="acc2"]{background:var(--acc2);color:#04101c} #hdr .gprim[data-fill="warn"]{background:var(--warn);color:#231a00} #hdr .gprim[data-fill="acc"]{background:var(--acc);color:#04140c}
+#hdr .gprim:hover{filter:brightness(1.08)}
+#hdr .ginstr{flex:1 1 auto;align-self:center;color:var(--ink);white-space:normal;padding-right:8px}
+#hdr .gsheet{flex:0 0 auto;align-self:center;margin-left:8px;border-radius:3px;padding:5px 11px;display:flex;flex-direction:column;
+  font:700 11px/14px var(--sans);letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;text-align:left}
+#hdr .gsheet em{font:500 9px/12px var(--mono);font-style:normal;letter-spacing:.03em;text-transform:none}
+#hdr .gsheet.filled{background:var(--warn);color:#231a00;border:0} #hdr .gsheet.filled em{color:#231a00;opacity:.75}
+#hdr .gsheet.outline{background:none;border:1px solid var(--warn);color:var(--warn)} #hdr .gsheet.outline em{color:var(--mut)}
+#hdr .gsheet.dead{background:var(--panel2);border:1px solid var(--line);color:var(--mut);cursor:default} #hdr .gsheet.dead em{color:var(--mut)}
+#hdr .gsheet.filled:hover,#hdr .gsheet.outline:hover{filter:brightness(1.1)}
+/* the CHANGE token, one chip in the identity line */
+#hdr .hchg{background:none;border:1px solid var(--line2);border-radius:10px;padding:0 8px;font:700 9.5px var(--sans);
+  letter-spacing:.03em;text-transform:uppercase;cursor:pointer;color:var(--mut)}
+#hdr .hchg:hover{filter:brightness(1.15)} #hdr .hchg.on{border-color:var(--acc);color:var(--acc)}
+#hdr .hchg.r{border-color:var(--bad);color:var(--bad)} #hdr .hchg.b{border-color:var(--acc2);color:var(--acc2)} #hdr .hchg.open{background:var(--panel2)}
+/* RIGHT — the hardware→tune hash table, then the evidence line, on flat --panel past the fade */
+#hdr .hev{position:relative;z-index:2;padding:10px 14px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;overflow:hidden;background:var(--panel)}
+#hdr .hth{display:flex;flex-direction:column;min-width:0;overflow:hidden;flex:1 1 auto}
+#hdr .hth-head{display:grid;grid-template-columns:70px 1fr;gap:12px;padding-bottom:3px;border-bottom:1px solid var(--line)}
+#hdr .hth-row{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line);min-width:0}
+#hdr .hth-row:last-child{border-bottom:0}
+#hdr .hth-hw{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:2px;padding:1px 7px;
+  font:500 11px/16px var(--mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;justify-self:start;flex:0 0 auto}
+#hdr .hth-hw i{font:500 9px var(--mono);font-style:normal;color:var(--dim)}
+#hdr .hth-hw:hover{border-color:var(--acc2);color:var(--acc2)}
+#hdr .hth-row.cur .hth-hw{color:var(--acc);border-color:var(--acc)}
+#hdr .hth-tunes{display:flex;flex-wrap:nowrap;gap:4px;min-width:0;overflow:hidden}
+#hdr .hth-tune{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:2px;padding:0 7px;
+  font:500 12px/17px var(--mono);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+#hdr .hth-tune:hover{border-color:var(--acc2);color:var(--acc2)}
+#hdr .hth-tune.on{color:var(--acc);border-color:var(--acc);background:#0f2a1e}
+#hdr .hth-more{font:500 10px var(--mono);color:var(--dim);align-self:center;white-space:nowrap;flex:0 0 auto}
+#hdr .hth-empty{padding:8px 0}
+#hdr .hth-morerow{padding:4px 0 0;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hdr .hev-ev{display:flex;flex-direction:column;gap:1px;flex:0 0 auto;border-top:1px solid var(--line);padding-top:5px}
+#hdr .hev-ev .t-b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
+@media (max-width:1000px){ #hdr{grid-template-columns:1fr} #hdr .hev{display:none} }
 
 .trace{height:240px;transition:height .12s ease}
 .trace.empty{height:34px}

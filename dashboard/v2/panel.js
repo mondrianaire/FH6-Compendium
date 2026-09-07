@@ -405,7 +405,7 @@ function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
-  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth])
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -478,6 +478,20 @@ function mapFilterBar(c) {
   const { presets, filt, clearBtn } = traceFilterState(c);
   return `<div class="fdim"><span class="why">show</span>${presets}</div>${filt}${clearBtn}`;
 }
+// THE LIVE LAP, aligned to the course. LIVE.run's own x is the fake event odometer, which does NOT line up
+// with the recorded laps' real arc-along-lap -- so map each live point's (px,pz) to the nearest point on a
+// recorded reference lap and take ITS arc. Return the CURRENT lap only (points since the arc last wrapped
+// past the S/F on a circuit), grip-coded like the recorded laps: [arc, mph, grip, px, pz]. null if too short.
+function alignLiveToCourse(run, ref, c) {
+  if (!ref || !(ref.pts || []).length || !(run || []).length) return null;
+  const R = ref.pts, L = (c && c.len) || R[R.length - 1][0] || 1;
+  const arcOf = (px, pz) => { let bd = Infinity, ba = 0; for (let i = 0; i < R.length; i++) { const dx = R[i][3] - px, dz = R[i][4] - pz, d = dx * dx + dz * dz; if (d < bd) { bd = d; ba = R[i][0]; } } return ba; };
+  const mapped = run.map((q) => [arcOf(q[3], q[4]), q[1], q[2] | 0, q[3], q[4]]);
+  let start = 0;                                   // the last S/F wrap: the arc drops by most of a lap
+  for (let i = 1; i < mapped.length; i++) if (mapped[i][0] < mapped[i - 1][0] - L * 0.4) start = i;
+  const lap = mapped.slice(start);
+  return lap.length >= 3 ? lap : null;
+}
 function courseTrace(c) {
   const { all, sel, tf, presets, filt, stage2, clearBtn } = traceFilterState(c);
   // 3. the chips: each lap, a click to hide. Sort FIRST: `best` and `cur` are taken from this
@@ -493,6 +507,8 @@ function courseTrace(c) {
   const mine = match.filter((t) => CUR && t.cid === CUR.cid);
   const cur = mine.find((t) => !notTimed(t)) || mine[0] || null;
   const fore = cur || best || match[0] || null;
+  // THE ACTIVE (LIVE, in-progress) LAP: drawn on top, grip-painted, updating in real time as you drive it.
+  const live = (MODE.game === "event") ? alignLiveToCourse(LIVE.run, fore, c) : null;
   const leg = stage2.slice(0, 12).map((t) => {
     const hid = sel.hidden.has(String(t.id));
     const nt = notTimed(t); const off = best && !nt && t !== best && t.t ? ((t.t / best.t - 1) * 100).toFixed(1) + "% off" : "";
@@ -502,7 +518,7 @@ function courseTrace(c) {
       style="--lc:${col}" title="${esc((hid ? "hidden — click to draw it" : "drawn — click to hide it") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">
       <i class="lcd"></i><span class="lct">${nt ? `<s>${lapTime(t.t)}</s>` : lapTime(t.t)}</span>
       <span class="lcm">${what || off || (t.class ? esc(t.class) : "")}</span></button>`; }).join("");
-  const foot = `<span class="lchips">${leg}</span>`;
+  const foot = `<span class="lchips">${live ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : ""}${leg}</span>`;
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
@@ -516,7 +532,14 @@ function courseTrace(c) {
     const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(t.id)}</text>`).join("");
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
     const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${ticks}${lines}${imp}${cursorSvg(H)}</svg>`;
+    // THE ACTIVE LAP, on top and unmistakable: a soft accent glow under the grip-painted line, thicker than
+    // any recorded lap, with a pulsing dot at the car's current position -- so the live one reads as live.
+    const lp = live && live[live.length - 1];
+    const liveSvg = live ? `<g class="livelap">
+      <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity=".22" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
+      ${paintedLine(live, ch, 3.2, TRACE_MODE)}
+      <circle cx="${ch.px(lp[0]).toFixed(1)}" cy="${ch.py(lp[1]).toFixed(1)}" r="4.5" fill="var(--acc2)" stroke="#04101c" stroke-width="1.4"><animate attributeName="r" values="4.5;6.8;4.5" dur="1.1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.5;1" dur="1.1s" repeatCount="indefinite"/></circle></g>` : "";
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
   };
   return { head, foot, svg, hasData: match.length > 0 };
 }

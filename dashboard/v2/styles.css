@@ -359,6 +359,10 @@ button.stage.act.go:active{transform:translateY(1px)}
 .trace .lchips{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
 .lchip{display:inline-block;border:1px solid var(--line2);border-radius:2px;padding:0 6px;font-size:10.5px;color:var(--mut);font-variant-numeric:tabular-nums}
 .lchip b{color:var(--ink)}.lchip s{opacity:.7}
+/* the ACTIVE (live, in-progress) lap chip — the trace draws it on top with an accent glow + pulsing dot */
+.lchip.livenow{color:var(--acc2);border-color:var(--acc2);font-weight:700;letter-spacing:.02em}
+.lchip.livenow i{background:var(--acc2)}
+body.fixed .trace .lchip.livenow{box-shadow:inset 0 0 0 1px var(--acc2)}
 .slv .src{font:600 8.5px var(--mono);color:var(--acc2);border:1px solid var(--acc2);border-radius:2px;padding:0 3px;margin-left:5px;vertical-align:middle;font-style:normal}
 
 /* ---- emphasis: blocks, not pills. Square corners, solid fills, heavier type — the game's own badge language ---- */

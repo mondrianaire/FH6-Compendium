@@ -62,6 +62,7 @@ class State:
         self.clone_lock = None      # ordinal the user pinned as a CLONE TARGET — while set, PI/catalog accrual for it is paused (building the replica must not poison the target)
         self.gears_seen = {}        # ordinal -> set of forward gears USED at speed this session — hard identity evidence (you cannot use gear 8 in a 6-speed box)
         self.picked_id = {}         # ordinal -> {ts, t}: the save the user PICKED in the 🪪 drawer — seeded from data/identity-evidence.json at startup so a restart does not re-ask
+        self._eng_bootstrapped = {}  # ordinal -> container ts already used to bootstrap that download's engine family cyl from the live frame (learn once per fresh download; see _equipped_fresh_download / _enrich_engine_desc)
         self.live_fdg = {}          # ordinal -> {gear: [rpm/mph samples]} measured DAEMON-LOCAL at clean WOT — the ladder must not wait for (or die with) the analyzer
     def emit(self, name, payload):
         with self.lock:
@@ -1432,7 +1433,34 @@ def _stamp_state(match, ordn=None):
     return False, _why + "Pick the equipped save in the 🪪 drawer — a pick the live car does not contradict is accepted immediately; it may also settle on its own as you keep driving."
 
 
-def _enrich_engine_desc(deliverable, ordn, verified=False):
+def _equipped_fresh_download(deliverable, ordn, meta):
+    """THE TUNING-MODIFICATION CHECK (Jett 2026-09-07): a fresh DOWNLOADED tune you just equipped can't be
+    identified from the save alone -- FH6 saves store no cylinder count, so a never-driven swap's engine family
+    is unknown to the catalog and the live (e.g.) 12-cyl car matches no save -> IDENTITY CONTRADICTED. But the
+    newest Tuning container's directory-name timestamp IS the install datetime, the tune is `locked` (downloaded),
+    and the live frame is authoritatively reporting cyl/PI for the car you are sitting in. So when the picked/newest
+    LOCKED container's ts has ADVANCED since we last learned this ordinal AND its engine family is still catalog-
+    unknown (the contradiction case only), let _enrich_engine_desc bootstrap the family's cyl from the live frame
+    right here -- identity settles the instant you install, no drive required. Cheap enough to run on EVERY menu
+    exit: a _match_car + a dict check; the 598-byte decode already happened. Learn-once per container ts.
+    Fires when the family is UNKNOWN (bootstrap) OR its cached cyl CONFLICTS with the car you're in (the family
+    468=10 vs live-12 case): a fresh equipped download is the 100%-confidence signal to correct it."""
+    try:
+        if not (deliverable.get("locked") and meta and meta.get("ts")):
+            return False
+        if str(meta["ts"]) == ST._eng_bootstrapped.get(str(ordn)):
+            return False                                   # already learned from this exact container
+        car = _match_car(ordn, _deliverable_cyl(deliverable))
+        live_cyl = (car or {}).get("cyl")
+        if not live_cyl:
+            return False                                   # no live frame for this car yet -> retry on the next menu exit
+        cat = _deliverable_cyl(deliverable)
+        return cat is None or int(cat) != int(live_cyl)    # engine family UNKNOWN, or its cached cyl disagrees with the equipped car
+    except Exception:
+        return False
+
+
+def _enrich_engine_desc(deliverable, ordn, verified=False, equipped_fresh=False):
     """Feature A: turn the Conversions 'Engine' row into a specific engine TYPE using live telemetry. The save
     holds no engine specs; this joins the active car's cylinders / redline (ST.cars, keyed by cid whose prefix is
     the ordinal) and peak dyno hp (ST.session_json, the analyzer's measured curve — ST.cars.dyno stays empty).
@@ -1495,7 +1523,13 @@ def _enrich_engine_desc(deliverable, ordn, verified=False):
                 # for every car sharing it. Learn only when the save's decoded cyl is KNOWN and matches the live car;
                 # an unknown-cyl family learns nothing from an unverifiable pairing.
                 _want_c = _deliverable_cyl(deliverable)
-                _ok_learn = bool(_want_c and cyl and int(_want_c) == int(cyl)) or bool(verified and cyl and not _want_c)   # unknown-cyl families BOOTSTRAP only on a verified identity (ok_stamp standard)
+                # unknown-cyl families BOOTSTRAP only on a verified identity (ok_stamp standard) -- OR when a fresh
+                # downloaded tune was just equipped (equipped_fresh): the newest locked container's timestamp is the
+                # 100%-confidence signal that the live frame's cyl IS this tune's engine, so we can learn it without
+                # a drive. Same identity guard otherwise: only ever writes the LIVE car's measured cyl.
+                _ok_learn = (bool(_want_c and cyl and int(_want_c) == int(cyl))
+                             or bool((verified or equipped_fresh) and cyl and not _want_c)
+                             or bool(equipped_fresh and cyl and _want_c and int(_want_c) != int(cyl)))   # a fresh equipped download CORRECTS a conflicting family cyl (cyl is verified-overwrite; the live frame is authoritative for the car you're in)
                 if not electric and ST.clone_lock != ordn and _ok_learn:
                     _learn_engine_catalog(bits.get("engine_family"), cyl=cyl, redline=redline, peak_hp=peak_hp,
                                           drivetrain=(car.get("drivetrain") if car else None),
@@ -1993,7 +2027,10 @@ class H(BaseHTTPRequestHandler):
                             _ident_remember("picked", ordn, ts_want)   # a declaration outlives the process that heard it
                         tune = TUNE.parse_tune(meta["path"], ordinal_hint=ordn)
                         deliverable = TUNE.tune_to_deliverable(tune, nm)
-                        _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match))
+                        _ef = _equipped_fresh_download(deliverable, ordn, meta)   # same check on an on-demand /disk-tune read
+                        _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match), equipped_fresh=_ef)
+                        if _ef:
+                            ST._eng_bootstrapped[str(ordn)] = str(meta["ts"]); ST._disk_dirty = True
                         _enrich_drivetrain(deliverable, ordn)
                         _enrich_gears(deliverable, ordn)
                         _build_union(deliverable, ordn, match=match)   # reconcile save vs telemetry: agreements, conflicts, ranked drive-asks
@@ -2522,7 +2559,10 @@ def disk_watcher():
             meta_m, match_m = _pick_meta(metas, ordn)
             tune = TUNE.parse_tune(meta_m["path"], ordinal_hint=ordn)
             deliverable = TUNE.tune_to_deliverable(tune, nm)
-            _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match_m)); _enrich_drivetrain(deliverable, ordn); _enrich_gears(deliverable, ordn)
+            _ef = _equipped_fresh_download(deliverable, ordn, meta_m)   # tuning-modification check, every menu exit
+            _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match_m), equipped_fresh=_ef); _enrich_drivetrain(deliverable, ordn); _enrich_gears(deliverable, ordn)
+            if _ef:   # learned/corrected this family's cyl from the live frame -> record (learn-once) and re-emit so the now-settled identity shows immediately
+                ST._eng_bootstrapped[str(ordn)] = str(meta_m["ts"]); ST._disk_dirty = True
             _build_union(deliverable, ordn, match=match_m)
             ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": meta_m["ts"], "available": True,
                              "deliverable": deliverable, "match": match_m, "diff": diff, "new_save": new_save})

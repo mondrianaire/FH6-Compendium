@@ -384,6 +384,12 @@ def main(argv=None):
         pass
     world = {"routes": {}, "bbox": None}
     xs, zs = [], []
+    # A game route the catalogue never names (an .owt route id with no ref_route.name) still deserves a
+    # name in the browser when OUR learned course keyed route:<id> is named -- otherwise it shows as a bare
+    # number (e.g. 30003 with laps but no name reads as "30003" instead of "Sekibe Scramble"). Fall back to
+    # the course name for that key. (2026-09-07: fixes route numbers reappearing in the course browser.)
+    _course_names = {row["route_key"]: row["name"] for row in
+                     cx.execute("SELECT route_key, name FROM course WHERE name IS NOT NULL AND name != ''")}
     for r in cx.execute("SELECT route_id, length_m, is_loop, name, name_confidence, is_race FROM ref_route"):
         pts = [[round(p["x"]), round(p["z"])] for p in cx.execute(
             "SELECT x, z FROM ref_route_point WHERE route_id=? AND (i % 4)=0 ORDER BY i", (r["route_id"],))]
@@ -396,7 +402,7 @@ def main(argv=None):
         _classes = sorted(_name_cls.get(r["name"], ()), key=lambda c: _clsorder.get(c, 99))
         _cdata = sorted(_driven.get(_rk, ()), key=lambda c: _clsorder.get(c, 99))
         world["routes"][rid] = {"len": r["length_m"], "loop": r["is_loop"],
-                                "name": r["name"], "name_confidence": r["name_confidence"],
+                                "name": r["name"] or _course_names.get(_rk), "name_confidence": r["name_confidence"],
                                 "is_race": bool(r["is_race"]), "modes": sorted(_mode.get(rid, ())),
                                 "disc": (_dc.most_common(1)[0][0] if _dc else None),
                                 "spawn": _spawn.get(str(rid)), "laps": _laps, "sessions": _sess,

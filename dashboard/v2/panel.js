@@ -165,7 +165,7 @@ function panelSkeleton(host) {
 const courseFile = (key) => "course/" + String(key).replace(/[^A-Za-z0-9_\-]/g, "_") + ".json";
 async function panelBoot() {
   // the page's own chrome, from the view store, before anything paints
-  DOCK_SPAN = vg("dockSpan", 600); SHOW_OFFMAP = !!vg("showOffmap", false); FOLLOW.on = vg("follow", false) === true;
+  DOCK_SPAN = vg("dockSpan", 600); FOLLOW.on = vg("follow", false) === true;
   BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null);
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
@@ -1143,7 +1143,7 @@ function paintLeft() {
   // live dot ride on the map that is already there.
   // BROWSE_PICK is deliberately NOT in this key: a browser pick must NOT rebuild the map (that would kill the
   // viewBox animation) — browsePick() updates the highlight + eases the frame on the SVG that is already there.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, SHOW_OFFMAP, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game]);
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
@@ -1176,7 +1176,6 @@ function paintLeft() {
     const mapSvg = body.querySelector("svg[data-x0]");
     if (mapSvg) { mapAttach(mapSvg); const g = mapSvg.querySelector("#browseHi"); if (g && BROWSE_PICK) g.innerHTML = browseHiSVG(mapSvg, BROWSE_PICK); }
     addLiveDot(body);
-    const t = body.querySelector("[data-offmap]"); if (t) t.onclick = () => { SHOW_OFFMAP = !SHOW_OFFMAP; VIEW.global.showOffmap = SHOW_OFFMAP; viewSave(); paintLeft(); };
     wireFollow(body); wireMapDrawer(body);
   }
 }
@@ -1184,18 +1183,17 @@ function paintLeft() {
 // without rebuilding the map, so the viewBox animation is never interrupted. Course mode owns its own title.
 function paintLeftHeader() {
   const hd = $("#leftHd"); if (!hd || (MODE.suggest === "course" && COURSE)) return;
-  const n = WORLD ? Object.keys(WORLD.routes).length : 0, off = WORLD ? routeSplit().off.length : 0;
+  const onN = WORLD ? routeSplit().on.length : 0;   // on-island routes; the two off-map test circuits are ignored
   const bp = BROWSE_PICK && WORLD && WORLD.routes[BROWSE_PICK];
   if (bp) hd.innerHTML = `<b class="trackname">${esc(bp.name || "Route " + BROWSE_PICK)}</b> <span class="chip w">BROWSING</span> <span class="why">${n0(bp.len)} m${bp.loop ? " · loop" : " · P2P"}${bp.is_race ? " · race event" : ""}${(bp.modes || []).length ? " · " + bp.modes.join(", ") : ""} · click the tile again to clear</span>`;
   else if (ROUTE) hd.innerHTML = `<b class="trackname">${esc(ROUTE.name)}</b> <span class="chip w">${MODE.game === "event" ? "EVENT · CATALOGUED" : "ROUTE"}</span> <span class="why">${n0(ROUTE.len)} m${ROUTE.loop ? " · loop" : ""} · the game's route, no laps recorded here yet${ROUTE.alsoName ? ` · shares road with ${esc(ROUTE.alsoName)}` : ""}</span>`;
-  else hd.innerHTML = `World · <span class="why">${WORLD ? (n - off) + " routes on the island" + (off ? " · " + off + " off-map" : "") : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
+  else hd.innerHTML = `World · <span class="why">${WORLD ? onN + " routes on the island" : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
 }
 
 // Two of the game's 169 routes (102 and 103) are complete circuits parked 8–11 km beyond the north
-// coast, outside the nav mesh, with road-class 0 in every record — cut or developer circuits, not
-// a destination (research 2026-09-03). Fitting the map to them squashed the island into a third
-// of the pane. They are drawn only on request, and never enter a road-class or route aggregate.
-let SHOW_OFFMAP = false;
+// coast, outside the nav mesh, with road-class 0 in every record — cut or developer test circuits,
+// not a destination (research 2026-09-03). They are IGNORED entirely (Jett 2026-09-07): routeSplit
+// separates them out so nothing draws them, fits the map to them, or counts them — no toggle.
 function routeSplit() {
   const rs = Object.entries(WORLD.routes).map(([id, r]) => {
     const n = r.pts.length; const cx = r.pts.reduce((m, p) => m + p[0], 0) / n, cz = r.pts.reduce((m, p) => m + p[1], 0) / n;
@@ -1222,8 +1220,8 @@ function splitTP(pts, cap) {
 }
 function worldMapHTML() {
   if (!WORLD || !WORLD.bbox) return `<div class="why">no world data — run build_web.py</div>`;
-  const { on, off } = routeSplit();
-  const shown = SHOW_OFFMAP ? on.concat(off) : on;
+  const { on } = routeSplit();   // the two off-map routes (102/103) are cut/dev test circuits -- ignored entirely
+  const shown = on;
   let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
   shown.forEach(({ r }) => r.pts.forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   Object.values(WORLD.courses || {}).forEach((c) => (c.path || []).forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
@@ -1238,8 +1236,7 @@ function worldMapHTML() {
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
   const px = (x) => pad + (x - x0) * s, pz = (z) => H - pad - (z - z0) * s;
   const line = (pts, col, w, op) => splitTP(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(0) + "," + pz(z).toFixed(0)).join(" ")}"/>`).join("");
-  const routes = on.map(({ r }) => line(r.pts, "#3b4a5c", 1.2, 0.9)).join("")
-    + (SHOW_OFFMAP ? off.map(({ id, r }) => `<g><title>Route${id} — off-map circuit, outside the nav mesh, unreachable</title>${line(r.pts, "#c678dd", 1.4, 0.9)}</g>`).join("") : "");
+  const routes = on.map(({ r }) => line(r.pts, "#3b4a5c", 1.2, 0.9)).join("");
   const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
     .map((c) => line(c.path, "#00d27a", 1.6, 0.85)).join("");
   // in an event, the catalogued route the car is on, drawn bright over the rest so the map is legible
@@ -1248,8 +1245,7 @@ function worldMapHTML() {
   // no follow toggle here: following is course-only (see followSpan()) -- offering it on the
   // world map invited turning on a satnav zoom that could only ever collapse the island view.
   const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>
-      <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>
-      ${off.length ? `<button class="mini ${SHOW_OFFMAP ? "on" : ""}" data-offmap title="Routes ${off.map((x) => x.id).join(", ")}: complete circuits parked beyond the north coast, outside the nav mesh — cut or developer content, unreachable">${SHOW_OFFMAP ? "hide" : "show"} off-map (${off.length})</button>` : ""}`;
+      <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>`;
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
       style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}<g id="browseHi"></g><g id="liveDot"></g></svg>
     ${mapDrawerHTML(`<div class="legend">${legend}</div>`)}`;

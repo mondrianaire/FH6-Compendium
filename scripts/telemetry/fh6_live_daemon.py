@@ -2615,7 +2615,17 @@ def main():
         print(f"[csv] {ST.csv_path}")
     elif a.replay:
         ST.csv_path = os.path.abspath(a.replay); ST.replay = True   # analysis runs on the replayed file, capped at replay time
-    srv = ThreadingHTTPServer(("127.0.0.1", a.http), H); srv.daemon_threads = True
+    class _QuietTCP(ThreadingHTTPServer):
+        # A client that reloads the dashboard, reconnects SSE, or cancels a fetch drops the socket while the daemon
+        # is mid-response; Python's http.server then prints a full ConnectionAborted/Reset/BrokenPipe traceback per
+        # hang-up (WinError 10053). That is the client's normal behaviour, not a server fault -- swallow it so the
+        # log stays readable. Any other error still surfaces.
+        daemon_threads = True
+        def handle_error(self, request, client_address):
+            if issubclass(sys.exc_info()[0] or Exception, (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+                return
+            super().handle_error(request, client_address)
+    srv = _QuietTCP(("127.0.0.1", a.http), H)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     if TUNE is not None:
         threading.Thread(target=disk_watcher, daemon=True).start()   # push on-disk tune decode on save / car change

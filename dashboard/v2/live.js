@@ -247,7 +247,7 @@ function runSample(f, now) {
   const rr = Math.max(Math.abs((sl.RL || [0, 0, 0])[2]), Math.abs((sl.RR || [0, 0, 0])[2]));
   const g = (Math.abs(f.lat) > 3 || f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
   const d0 = LIVE.run.length ? LIVE.run[0][5] : f.dist;
-  LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist]);
+  LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist, now]);   // [6]=timestamp: free-mode trace plots vs TIME (Jett 2026-09-07)
   if (LIVE.run.length > 900) { LIVE.run.splice(0, LIVE.run.length - 900); const b = LIVE.run[0][5]; LIVE.run.forEach((q) => { q[0] = q[5] - b; }); }
   if (now - (LIVE.runPaint || 0) > 500) { LIVE.runPaint = now; paintTrace(); }
 }

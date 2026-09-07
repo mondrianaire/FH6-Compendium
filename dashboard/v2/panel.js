@@ -564,18 +564,30 @@ function courseTrace(c) {
 
 function liveRun() {
   const pts = LIVE.run;
-  const head = `<b>Speed trace</b><span class="why">${pts.length && (pts[pts.length - 1][0] || 0) <= 50 ? "parked — the trace draws once the car moves" : "live run · the last " + (pts.length ? Math.round(pts.length / 10) : 0) + " s"}${MODE.suggest === "course" && COURSE ? ` · no lap on record for ${esc(COURSE.name || COURSE.key)} yet` : ""}</span><span class="tspacer"></span>${modeControls()}`;
+  const head = `<b>Speed trace</b><span class="why">${pts.length && (pts[pts.length - 1][0] || 0) <= 50 ? "parked — the trace draws once the car moves" : "live run · the last " + (pts.length && pts[0][6] != null ? Math.round((pts[pts.length - 1][6] - pts[0][6]) / 1000) : (pts.length ? Math.round(pts.length / 10) : 0)) + " s"}${MODE.suggest === "course" && COURSE ? ` · no lap on record for ${esc(COURSE.name || COURSE.key)} yet` : ""}</span><span class="tspacer"></span>${modeControls()}`;
   // 2026-09-03 (Jett): the legend named every grip state but never said which one you're IN right
   // now -- LIVE.run's own last point already carries it (runSample() pushes [dist,mph,g,...]).
   const curG = pts.length ? pts[pts.length - 1][2] : null;
   const pc = piColor(CUR && CUR.cls); const g0 = (pc && pc !== "var(--dim)") ? pc : TRACE_GRIP[0];   // the within-grip swatch shows the PI colour it now paints
   const foot = `<span class="lchips grip">${TRACE_GRIP.map((c0, i) => { const c = i === 0 ? g0 : c0; return `<span class="lchip key${curG === i ? " on" : ""}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${TRACE_WORD[i]}</span>`; }).join("")}</span>`;
   const svg = (W, H) => {
-    if (pts.length < 3) return `<div class="why tempty">drive — speed against distance draws here as you go, painted by what the tyres are doing</div>`;
-    const smax = pts[pts.length - 1][0] || 1, vmax = Math.max(60, ...pts.map((q) => q[1])) * 1.06;
+    if (pts.length < 3) return `<div class="why tempty">drive — speed against time draws here as you go, painted by what the tyres are doing</div>`;
+    // FREE MODE PLOTS vs TIME, not distance (Jett 2026-09-07): a free-roam run has no course to measure
+    // along, so the x-axis is seconds since the run began. [6] is the sample timestamp; fall back to the
+    // distance axis for any stale point that predates it.
+    const hasT = pts[0][6] != null, t0 = hasT ? pts[0][6] : 0;
+    const P = pts.map((q) => [hasT ? (q[6] - t0) / 1000 : q[0], q[1], q[2], q[3], q[4]]);
+    const smax = P[P.length - 1][0] || 1, vmax = Math.max(60, ...P.map((q) => q[1])) * 1.06;
     const ch = chart(W, H, 28, 16, smax, vmax);
-    const km = [...Array(Math.floor(smax / 500)).keys()].map((i) => (i + 1) * 500).map((d) => `<line x1="${ch.px(d).toFixed(1)}" y1="6" x2="${ch.px(d).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(d).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${d / 1000} km</text>`).join("");
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts.map((q) => [q[0], q[1], q[2], q[3], q[4]])))}">${axisSvg(ch, vmax)}${km}${paintedLine(pts, ch, 2.2, TRACE_MODE, piColor(CUR && CUR.cls))}${cursorSvg(H)}</svg>`;
+    // split at a pause: a menu dwell holds the run but leaves a >1.5 s gap in the timestamps, and drawing
+    // straight across it would be a flat line over dead time.
+    const runs = []; let run = [P[0]];
+    for (let i = 1; i < P.length; i++) { if (hasT && P[i][0] - P[i - 1][0] > 1.5) { runs.push(run); run = []; } run.push(P[i]); }
+    runs.push(run);
+    const body = runs.filter((r) => r.length > 1).map((r) => paintedLine(r, ch, 2.2, TRACE_MODE, piColor(CUR && CUR.cls))).join("");
+    const step = smax <= 20 ? 5 : smax <= 60 ? 10 : smax <= 150 ? 30 : 60;   // second ticks scaled to the window
+    const ticks = hasT ? [...Array(Math.floor(smax / step)).keys()].map((i) => (i + 1) * step).map((s) => `<line x1="${ch.px(s).toFixed(1)}" y1="6" x2="${ch.px(s).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${s}s</text>`).join("") : "";
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(P))}">${axisSvg(ch, vmax)}${ticks}${body}${cursorSvg(H)}</svg>`;
   };
   // points are not a trace: a parked car accrues samples at one spot. The band is only worth
   // 240px when there is real distance under the line.

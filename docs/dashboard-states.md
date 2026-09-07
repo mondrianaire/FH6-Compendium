@@ -277,7 +277,7 @@ the A/B overlay can chart the variable and not the label. The audit fills this t
 
 | symptom | chartable variables | threshold for "normal" |
 |---|---|---|
-| Bottoming out | suspension travel per wheel, rate per minute | a few per 10 min is normal operation |
+| Bottoming out | suspension travel per wheel (gate 0.98), rate per minute | build-level, not a fixed "normal": measured 0–98 events/session across 9 captures (~13/10 min mean); a smooth build logs zero. Rate should vary — do not anchor a threshold here |
 | Understeer entry / mid / exit | front slip angle, lateral g, speed at apex | — |
 | Oversteer entry / exit | rear slip, yaw rate, throttle at the moment | — |
 | Unstable under braking | rear deficit, lock flag, decel g | — |

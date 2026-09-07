@@ -41,7 +41,7 @@ DATA = os.path.join(ROOT, "data")
 
 # Detector thresholds. Stated here rather than buried, because every one of them is a judgement
 # and a reader deserves to argue with it.
-BOTTOM_TRAVEL = 0.95      # normalised suspension travel at or past this is on the stop
+BOTTOM_TRAVEL = 0.98      # on the stop: the max-NormSusp population cliff and the |AccelY| step both sit here (was 0.95, mid-distribution). Matches analyze_session.BOTTOM_GATE, so the severity scale and the evidence string derive from the real gate
 GRIP_RUN = 3              # samples of one slip state in a row before it counts as a symptom
 CREST_AIR_G = -0.35       # g at a crest below this means the car went light
 PULSE_YAW = 28.0          # deg/s of yaw peak that counts as a wobble

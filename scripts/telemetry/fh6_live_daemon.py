@@ -1327,9 +1327,22 @@ def _pick_meta(metas, ordn, ts_want=None):
     # the PI stamp accepts as a substitute for the ladder (audit T1); identity scoring is untouched.
     picked_ok = bool(ts_want and str(best["ts"]) == str(ts_want) and any(r is best for r in ties)
                      and (live or live_recent) and live_cyl and best.get("cyl") and int(best["cyl"]) == int(live_cyl))
+    # FRESH DOWNLOAD SETTLES A SIGNATURE TIE (Jett 2026-09-07): a LOCKED container written in the last ~20 min that
+    # the matcher already picked is the tune you just downloaded and equipped -- the container timestamp is the
+    # 100%-confidence signal. Other saves that merely SHARE its cyl/PI/gear signature are not real ambiguity; you
+    # are demonstrably in THIS one, so report it settled (n_signature_ties -> 1) instead of asking you to pick.
+    # Only the freshly-written locked save triggers it; older downloads keep their genuine tie.
+    fresh_dl = False
+    try:
+        _bmt = float((best.get("_meta") or {}).get("mtime") or 0)
+        if n_ties > 1 and best.get("locked") and _bmt and (time.time() - _bmt) < 1200 and (live or live_recent):
+            fresh_dl = True; n_ties = 1
+    except Exception:
+        pass
     return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
+                           "fresh_download": fresh_dl,
                            # the box the car has actually demonstrated, so the UI can name a drive you CAN do
                            # instead of a gear you do not have
                            "max_gear_seen": _mxT or None, "box_exercised": _boxT,

@@ -279,6 +279,26 @@ def main(argv=None):
             if rr:
                 route["length_m"] = rr["length_m"]
                 route["is_loop"] = rr["is_loop"]
+        # DEFINITIONAL FALLBACK: a course keyed route:<id> IS game route <id> -- the catalogue matcher assigned
+        # that key off the start/finish line + path, so the identity is already settled by the key. The owt
+        # geometric re-match (course_route) gates its verdict on COVERAGE so it will not attach lap RECORDS to a
+        # route we only part-drove -- e.g. The Gauntlet (route:2052), driven in ~2 km fragments, covers 7.5% of
+        # its 30.7 km and scores 'none'. But the centre-line is the game's own track shape, and it is useful as
+        # REFERENCE the moment we know which route it is. So when the match bound no path, fall back to the key's
+        # own id when that route exists. Reference geometry only (reference_only=True); lap attribution still
+        # rides the owt verdict (import_corners etc. keep gating on verified/probable/partial).
+        if not (route and route.get("path")):
+            _m = re.match(r"route:(\w+)$", key)
+            if _m:
+                _rid = _m.group(1)
+                _pts = [[r["x"], r["z"]] for r in cx.execute(
+                    "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i", (_rid,))]
+                if _pts:
+                    _rr = cx.execute("SELECT length_m, is_loop FROM ref_route WHERE route_id=?", (_rid,)).fetchone()
+                    route = dict(route or {}, route_id=_rid, path=_pts, reference_only=True,
+                                 match_kind=(route or {}).get("match_kind") or "id",
+                                 length_m=(_rr["length_m"] if _rr else None),
+                                 is_loop=(_rr["is_loop"] if _rr else None))
         naming = {
             "name_source": c["name_source"], "name_confidence": c["name_confidence"],
             "declared_name": c["declared_name"], "declared_source": c["declared_source"],

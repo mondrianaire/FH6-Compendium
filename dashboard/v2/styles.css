@@ -845,6 +845,23 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .bb.dsc{border-color:var(--line2);color:var(--dim)}
 .tdata{color:var(--acc);font-weight:600}
 .tdata.none{color:var(--dim);font-weight:400}
+/* COURSE INFORMATION PILL in the world-map pane header (#leftHd) — a header-sized browser row: shape glyph,
+   name + status chips, a meta line, and the offered-class + mode chips. Mirrors the car pill's design. The
+   generic `header{height:24px}` is too short for it, so this header grows to the pill (map body takes the rest). */
+#leftHd{height:auto;padding-top:6px;padding-bottom:6px;align-items:center}
+#leftHd .cpill{display:flex;align-items:center;gap:10px;min-width:0;width:100%}
+#leftHd .cpill-glyph{flex:0 0 auto;width:44px;height:28px;background:var(--bg);border-radius:4px;overflow:hidden}
+#leftHd .cpill-glyph .tsvg{width:100%;height:100%;display:block;border-radius:4px}
+#leftHd .cpill-txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1 1 auto}
+#leftHd .cpill-l1{display:flex;align-items:center;gap:6px;min-width:0}
+#leftHd .cpill-l1 .trackname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto}
+#leftHd .cpill-l1 .chip{flex:0 0 auto}
+#leftHd .cpill-l2{font-size:10.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#leftHd .cpill-badges{flex:0 0 auto;display:flex;align-items:center;gap:3px;flex-wrap:nowrap;overflow:hidden;justify-content:flex-end;max-width:44%}
+#leftHd .cpill-badges .pib{font-size:9px;border-radius:3px;flex:0 0 auto}
+#leftHd .cpill-badges .pib b{padding:1px 4px;text-shadow:none}
+#leftHd .cpill-badges .bb{flex:0 0 auto}
+.chip.dim{border-color:var(--line2);color:var(--dim)}
 /* miniature performance-class pills (one per class a Rivals course is offered in) — the established piBadge, shrunk */
 .tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
 .tcls .pib{font-size:8px;border-radius:3px}

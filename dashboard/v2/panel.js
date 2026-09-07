@@ -1255,11 +1255,49 @@ function paintLeft() {
 // without rebuilding the map, so the viewBox animation is never interrupted. Course mode owns its own title.
 function paintLeftHeader() {
   const hd = $("#leftHd"); if (!hd || (MODE.suggest === "course" && COURSE)) return;
-  const onN = WORLD ? routeSplit().on.length : 0;   // on-island routes; the two off-map test circuits are ignored
-  const bp = BROWSE_PICK && WORLD && WORLD.routes[BROWSE_PICK];
-  if (bp) hd.innerHTML = `<b class="trackname">${esc(bp.name || "Route " + BROWSE_PICK)}</b> <span class="chip w">BROWSING</span> <span class="why">${n0(bp.len)} m${bp.loop ? " · loop" : " · P2P"}${bp.is_race ? " · race event" : ""}${(bp.modes || []).length ? " · " + bp.modes.join(", ") : ""} · click the tile again to clear</span>`;
-  else if (ROUTE) hd.innerHTML = `<b class="trackname">${esc(ROUTE.name)}</b> <span class="chip w">${MODE.game === "event" ? "EVENT · CATALOGUED" : "ROUTE"}</span> <span class="why">${n0(ROUTE.len)} m${ROUTE.loop ? " · loop" : ""} · the game's route, no laps recorded here yet${ROUTE.alsoName ? ` · shares road with ${esc(ROUTE.alsoName)}` : ""}</span>`;
-  else hd.innerHTML = `World · <span class="why">${WORLD ? onN + " routes on the island" : "loading"} · free roam${MODE.suggest === "course" ? " (course not located)" : ""}</span>`;
+  if (!WORLD || !WORLD.routes) { hd.innerHTML = `World · <span class="why">loading</span>`; return; }
+  // COURSE INFORMATION PILL (Jett 2026-09-07): the map pane's header carries a course pill in the car-pill's
+  // design language -- a shape glyph, the name, its length/turns/laps, the classes it is offered in, and its
+  // modes -- for the ACTIVE course: an explicit browse pick, else the route located under the car, else the
+  // browser's TOP ROW for the current filter so the pill is never empty. Same data + chips as a browser tile.
+  let rid = BROWSE_PICK || (ROUTE && ROUTE.id) || null;
+  const state = BROWSE_PICK ? "browsing" : (ROUTE ? "route" : "default");
+  if (!rid) {
+    const top = Object.entries(WORLD.routes).map(([id, r]) => ({ id, r })).filter(({ r }) => r.name || r.laps)
+      .filter(({ r }) => browseMatch(r, BROWSE_FILTER))
+      .sort((a, b) => (a.r.name ? 0 : 1) - (b.r.name ? 0 : 1) || (a.r.name || "").localeCompare(b.r.name || "") || (a.id - b.id))[0];
+    rid = top && top.id;
+  }
+  const r = rid && WORLD.routes[rid];
+  hd.innerHTML = r ? courseInfoPill(rid, r, state)
+                   : `World · <span class="why">${routeSplit().on.length} routes on the island · free roam</span>`;
+}
+// The pill body: a horizontal, header-sized version of a Course Browser row. `state` picks the status chip.
+function courseInfoPill(id, r, state) {
+  const nm = r.name || ("Route " + id);
+  const kind = r.is_race ? "RACE" : (r.modes || []).includes("rivals") ? "RIVALS"
+             : (r.modes || []).includes("career") ? "CAREER" : null;
+  const laps = r.laps || 0, sess = r.sessions || 0;
+  const meta = [n0(r.len) + " m", r.loop ? "loop" : "P2P"]
+    .concat(laps ? [laps + " lap" + (laps === 1 ? "" : "s"), sess + " run" + (sess === 1 ? "" : "s")] : ["no data yet"])
+    .concat(state === "route" && r.alsoName ? ["shares road with " + r.alsoName] : []).join(" · ");
+  const dataSet = new Set(r.class_data || []);   // solid = we hold laps in that class, hollow = offered only
+  const pills = (r.classes || []).map((cl) =>
+    `<span class="pib pib--sm pib-${cl.toLowerCase()}${dataSet.has(cl) ? "" : " pib--neg"}" title="class ${cl}${dataSet.has(cl) ? " · has data" : " · no data yet"}"><b>${esc(cl)}</b></span>`).join("");
+  const badges = [(r.modes || []).includes("rivals") ? `<span class="bb riv">rivals</span>` : "",
+                  (r.modes || []).includes("career") ? `<span class="bb car">career</span>` : "",
+                  r.disc ? `<span class="bb dsc">${esc(r.disc)}</span>` : ""].join("");
+  const stChip = state === "browsing" ? `<span class="chip w">BROWSING</span>`
+               : state === "route" ? `<span class="chip w">${MODE.game === "event" ? "ON EVENT ROUTE" : "ON ROUTE"}</span>`
+               : `<span class="chip dim">top of list</span>`;
+  return `<div class="cpill" data-state="${esc(state)}">
+    <span class="cpill-glyph">${tileSvg(r, false)}</span>
+    <span class="cpill-txt">
+      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${kind ? `<span class="chip w">${kind}</span>` : ""}${stChip}</span>
+      <span class="why cpill-l2" title="${esc(meta)}">${esc(meta)}</span>
+    </span>
+    <span class="cpill-badges">${pills}${badges}</span>
+  </div>`;
 }
 
 // Two of the game's 169 routes (102 and 103) are complete circuits parked 8–11 km beyond the north
@@ -1425,7 +1463,18 @@ function browsePick(id) {
   if (svg) { const g = svg.querySelector("#browseHi"); if (g) g.innerHTML = BROWSE_PICK ? browseHiSVG(svg, BROWSE_PICK) : ""; }
   mapRetarget(true);
   paintLeftHeader();                 // just the title — not a full re-render, so the animation is never interrupted
-  paintRight();                      // reflect the selected tile
+  browseSyncTiles();                 // toggle the .on tile in place — a full paintRight() rebuilt every tile SVG and FLICKERED (Jett 2026-09-07)
+}
+// Reflect the current BROWSE_PICK by toggling the selected tile's class, WITHOUT rebuilding the grid.
+// paintRight() rewrites #rightBody.innerHTML, so calling it on every pick destroyed and recreated all ~100
+// tile <svg>s each click -- the flicker. Only two tiles ever change state, so touch only those.
+function browseSyncTiles() {
+  const body = $("#rightBody"); if (!body) return;
+  body.querySelectorAll(".tile[data-bpick]").forEach((t) => {
+    const on = t.dataset.bpick === BROWSE_PICK;
+    t.classList.toggle("on", on);
+    const sv = t.querySelector(".tsvg"); if (sv) sv.classList.toggle("on", on);
+  });
 }
 
 /* ------------------------------------------------- Course Browser (free-mode right tab)
@@ -1503,7 +1552,7 @@ function browserHTML() {
 }
 function wireBrowser(body) {
   body.querySelectorAll("[data-bfilter]").forEach((b) => b.onclick = () => {
-    BROWSE_FILTER = b.dataset.bfilter; VIEW.global.browseFilter = BROWSE_FILTER; viewSave(); paintRight(); });
+    BROWSE_FILTER = b.dataset.bfilter; VIEW.global.browseFilter = BROWSE_FILTER; viewSave(); paintRight(); paintLeftHeader(); });
   body.querySelectorAll("[data-bpick]").forEach((b) => b.onclick = () => browsePick(b.dataset.bpick));
 }
 

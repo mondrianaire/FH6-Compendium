@@ -431,12 +431,17 @@ window.addEventListener("resize", () => { TRACE_KEY = null; paintTrace(); });
 function chart(W, H, padL, padB, smax, vmax) {
   return { px: (x) => padL + (x / (smax || 1)) * (W - padL - 8), py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
 }
-function paintedLine(pts, ch, w, mode) {
+function paintedLine(pts, ch, w, mode, baseCol) {
   if (!pts.length) return "";
   let sc = null;
   if (mode === "speed") { const vs = pts.map((q) => q[1]); sc = { lo: Math.min(...vs), hi: Math.max(...vs) }; if (sc.hi - sc.lo < 1e-6) sc = null; }
   const keyOf = (q) => (mode === "speed" && sc) ? Math.max(0, Math.min(GRAD.length - 1, Math.floor(((q[1] - sc.lo) / (sc.hi - sc.lo)) * GRAD.length))) : (q[2] | 0);
-  const colOf = (k) => (mode === "speed" && sc) ? GRAD[k] : (TRACE_GRIP[k] || TRACE_GRIP[0]);
+  // "NO PROBLEMS" IS THE DEFAULT COLOUR (Jett 2026-09-07): in grip paint the within-grip segments
+  // (k===0, nothing wrong) carry the build's PI class colour when one is given, so PI stays readable
+  // even on a painted line -- the problem states (slip/impact) keep their diagnostic colours, and the
+  // speed gradient is untouched (it has no no-problem baseline).
+  const base0 = (baseCol && baseCol !== "var(--dim)") ? baseCol : TRACE_GRIP[0];   // unknown class -> keep the green within-grip
+  const colOf = (k) => (mode === "speed" && sc) ? GRAD[k] : (k === 0 ? base0 : (TRACE_GRIP[k] || TRACE_GRIP[0]));
   const segs = []; let run = [pts[0]], st = keyOf(pts[0]);
   for (let i = 1; i < pts.length; i++) { const k = keyOf(pts[i]); if (k !== st) { run.push(pts[i]); segs.push([st, run]); run = [pts[i]]; st = k; } else run.push(pts[i]); }
   segs.push([st, run]);
@@ -536,8 +541,8 @@ function courseTrace(c) {
     const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
     const ch = chart(W, H, 28, 16, smax, vmax);
     // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity
-    const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE) : plainLine(t.pts, ch, piColor(t.class), t === best ? 1.8 : 1, t === best ? 0.95 : 0.5, notTimed(t)))).join("")
-      + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE) : "");
+    const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE, piColor(t.class)) : plainLine(t.pts, ch, piColor(t.class), t === best ? 1.8 : 1, t === best ? 0.95 : 0.5, notTimed(t)))).join("")
+      + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE, piColor(cur.class)) : "");
     const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(t.id)}</text>`).join("");
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
     const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
@@ -546,7 +551,7 @@ function courseTrace(c) {
     const lp = live && live[live.length - 1];
     const liveSvg = live ? `<g class="livelap">
       <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity=".22" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
-      ${paintedLine(live, ch, 3.2, TRACE_MODE)}
+      ${paintedLine(live, ch, 3.2, TRACE_MODE, piColor(CUR && CUR.cls))}
       <circle cx="${ch.px(lp[0]).toFixed(1)}" cy="${ch.py(lp[1]).toFixed(1)}" r="4.5" fill="var(--acc2)" stroke="#04101c" stroke-width="1.4"><animate attributeName="r" values="4.5;6.8;4.5" dur="1.1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.5;1" dur="1.1s" repeatCount="indefinite"/></circle></g>` : "";
     return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
   };
@@ -559,13 +564,14 @@ function liveRun() {
   // 2026-09-03 (Jett): the legend named every grip state but never said which one you're IN right
   // now -- LIVE.run's own last point already carries it (runSample() pushes [dist,mph,g,...]).
   const curG = pts.length ? pts[pts.length - 1][2] : null;
-  const foot = `<span class="lchips grip">${TRACE_GRIP.map((c, i) => `<span class="lchip key${curG === i ? " on" : ""}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${TRACE_WORD[i]}</span>`).join("")}</span>`;
+  const pc = piColor(CUR && CUR.cls); const g0 = (pc && pc !== "var(--dim)") ? pc : TRACE_GRIP[0];   // the within-grip swatch shows the PI colour it now paints
+  const foot = `<span class="lchips grip">${TRACE_GRIP.map((c0, i) => { const c = i === 0 ? g0 : c0; return `<span class="lchip key${curG === i ? " on" : ""}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${TRACE_WORD[i]}</span>`; }).join("")}</span>`;
   const svg = (W, H) => {
     if (pts.length < 3) return `<div class="why tempty">drive — speed against distance draws here as you go, painted by what the tyres are doing</div>`;
     const smax = pts[pts.length - 1][0] || 1, vmax = Math.max(60, ...pts.map((q) => q[1])) * 1.06;
     const ch = chart(W, H, 28, 16, smax, vmax);
     const km = [...Array(Math.floor(smax / 500)).keys()].map((i) => (i + 1) * 500).map((d) => `<line x1="${ch.px(d).toFixed(1)}" y1="6" x2="${ch.px(d).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(d).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${d / 1000} km</text>`).join("");
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts.map((q) => [q[0], q[1], q[2], q[3], q[4]])))}">${axisSvg(ch, vmax)}${km}${paintedLine(pts, ch, 2.2, TRACE_MODE)}${cursorSvg(H)}</svg>`;
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts.map((q) => [q[0], q[1], q[2], q[3], q[4]])))}">${axisSvg(ch, vmax)}${km}${paintedLine(pts, ch, 2.2, TRACE_MODE, piColor(CUR && CUR.cls))}${cursorSvg(H)}</svg>`;
   };
   // points are not a trace: a parked car accrues samples at one spot. The band is only worth
   // 240px when there is real distance under the line.

@@ -1352,6 +1352,18 @@ function followSpan() {
   if (lat > 0.25 || mph < 90 || toTurn < 260) return 420;     // approaching, or a quick sequence
   return mph > 130 ? 1600 : 900;                              // a straight: shape, not detail
 }
+// The close-detail class, the live-dot radius and the #mapScale note, from the CURRENT viewBox width.
+// Shared so that when MAPVIEW owns the viewBox (course-browser framing / the live overview) followMap can
+// present the scale WITHOUT also writing the viewBox -- writing it was the two-writer conflict that made the
+// map flick island<->zoom every telemetry frame (follow slammed to the island, mapTick eased back to the box).
+function presentScale(svg, vw, sc) {
+  const across = Math.round((vw || 0) / sc);
+  svg.classList.toggle("close", across < 600);
+  const dot = svg.querySelector("#liveDot circle");
+  if (dot) dot.setAttribute("r", across < 300 ? 7 : across < 700 ? 5 : 4);
+  const note = document.getElementById("mapScale");
+  if (note) note.textContent = across >= 3000 ? "whole island" : across + " m across";
+}
 function followMap() {
   FOLLOW.raf = 0;
   const body = $("#leftBody"), svg = body && body.querySelector("svg");
@@ -1359,6 +1371,10 @@ function followMap() {
   const sc = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
   const W = +svg.dataset.w || svg.viewBox.baseVal.width || 900;
   if (!FOLLOW.full) FOLLOW.full = { w: W, h: H };
+  if (!FOLLOW.on) {          // MAPVIEW owns the viewBox here; only present the scale, never write viewBox (the flicker fix)
+    presentScale(svg, (typeof MAPVIEW !== "undefined" && MAPVIEW.cw) || svg.viewBox.baseVal.width || W, sc);
+    return;
+  }
   const want = FOLLOW.on ? followSpan() : null;
   const wantW = want ? Math.min(FOLLOW.full.w, want * sc) : FOLLOW.full.w;
   const cxT = want && LIVEPOS ? pad + (LIVEPOS[0] - +svg.dataset.x0) * sc : FOLLOW.full.w / 2;

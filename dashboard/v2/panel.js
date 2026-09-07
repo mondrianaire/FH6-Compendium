@@ -453,6 +453,11 @@ function traceFilterState(c) {
   const byId = {}; (c.laps || []).forEach((l) => (byId[String(l.id)] = l));
   const all = Object.keys(c.traces).map((id) => Object.assign({ id, pts: c.traces[id] }, byId[id] || {})).filter((t) => t.pts && t.pts.length > 2);
   const sel = traceSel(c), tf = sel.filters;
+  // NEVER BLANK THE TRACE WHILE LAPS EXIST. traceSel() auto-defaults to "this class" on an event, but if you
+  // are in a class you have never driven this course in, that preset is empty and the trace read "nothing to
+  // draw" over N real recorded laps. When an AUTO-chosen preset hides every lap, fall back to "all" (a
+  // deliberate user pick, sel.auto === false, is respected -- their empty filter stands with the widen hint).
+  if (all.length && sel.auto !== false && sel.preset !== "all" && !all.some(presetTest(sel.preset))) sel.preset = "all";
   // 1. the preset against the car you are in — every chip carries its count, an empty one is dim
   const presets = PRESETS.map(([k, lab]) => { const n = all.filter(presetTest(k)).length;
     return `<button class="mini ${sel.preset === k ? "on" : ""} ${n ? "" : "dim"}" data-tpre="${k}" ${n ? "" : "disabled"} title="${k === "hw" ? "every build whose 48 non-rim slots match and whose rims share a mass level" : k === "build" ? "this exact hardware hash" : k === "tune" ? "this save file" : k === "class" ? "the class you are in now" : k === "car" ? "this car, any build" : "every lap on record"}">${lab}<span class="cn">${n}</span></button>`; }).join("");

@@ -293,6 +293,27 @@ function paintHeld() {
   const held = !!LIVE.inMenu;
   [$("#trace"), $("#dock")].forEach((el) => { if (el) el.classList.toggle("held", held); });
 }
+// STATUS HISTORY (Jett 2026-09-07): a rolling, persisted record of the status line's changes, so the "database
+// up to date" indicator carries WHEN each state happened and what it was. Enumerated in a hover dropdown on the
+// status display. Deduped on the label (the line only logs on a real transition) and capped; survives reloads.
+let STATUS_LOG = (() => { try { return JSON.parse(localStorage.getItem("fh6StatusLog")) || []; } catch (e) { return []; } })();
+function logStatus(label, tone) {
+  if (!label) return;
+  if (STATUS_LOG.length && STATUS_LOG[0].label === label) return;   // no change -> nothing to record
+  STATUS_LOG.unshift({ t: Date.now(), label, tone: tone || "dim" });
+  STATUS_LOG = STATUS_LOG.slice(0, 50);
+  try { localStorage.setItem("fh6StatusLog", JSON.stringify(STATUS_LOG)); } catch (e) {}
+}
+function statusLogHTML() {
+  if (!STATUS_LOG.length) return "";
+  const rows = STATUS_LOG.map((e) => {
+    const d = new Date(e.t);
+    const when = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const day = d.toLocaleDateString([], { month: "short", day: "numeric" });
+    return `<div class="sle sle-${esc(e.tone)}"><span class="slt">${day} ${when}</span><span class="sll">${esc(e.label)}</span></div>`;
+  }).join("");
+  return `<div class="statlog"><div class="statlog-h">recent status · newest first</div>${rows}</div>`;
+}
 function lastAction() {
   const el = document.getElementById("lastact"); if (!el) return;
   let tone = "dim", txt = "", when = "";
@@ -302,7 +323,8 @@ function lastAction() {
   else if (CHANGE) {
     const n = (CHANGE.sliders || []).length, p = (CHANGE.slots || []).length;
     tone = CHANGE.kind === "hardware" ? "warn" : CHANGE.kind === "tune" ? "blue" : "ok";
-    txt = (CHANGE.saved ? "new save read" : CHANGE.kind === "hardware" ? "hardware changed, not saved" : "sliders moved, not saved")
+    const tnm = (CUR && CUR.disk && CUR.disk.tune_name) || "";
+    txt = (CHANGE.saved ? "new save read" + (tnm ? " · “" + tnm + "”" : "") : CHANGE.kind === "hardware" ? "hardware changed, not saved" : "sliders moved, not saved")
         + (CHANGE.locked ? " · downloaded tune" : "")
         + (p ? " · " + p + " part" + (p === 1 ? "" : "s") : "") + (n ? " · " + n + " slider" + (n === 1 ? "" : "s") : "");
     when = CHANGE.ts ? tsLocal(CHANGE.ts) : (CHANGE.at ? new Date(CHANGE.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "");
@@ -326,8 +348,9 @@ function lastAction() {
         sp === 0 ? "every driving session on disk is imported into the database"
                  : sp + " session" + (sp === 1 ? "" : "s") + " on disk have not been imported yet — corners/laps from them are not queryable until they are"); })()}
   </span>`;
+  if (!LIVE.inMenu) logStatus(txt, tone);   // record the transition (skip the transient in-menu pause, which ticks a duration)
   el.dataset.tone = tone;
-  el.innerHTML = `<b>${esc(txt)}</b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}`;
+  el.innerHTML = `<b>${esc(txt)}<i class="statcaret" aria-hidden="true">▾</i></b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}${statusLogHTML()}`;
 }
 
 function paintPanel() {
@@ -947,7 +970,12 @@ function shedName(text, max) {
 function headerCopy(st, q) {
   const m = MATCH && MATCH.build;
   const mm = (CUR && CUR.match) || {};
-  const tune = (m && m.name) || (CUR && CUR.disk && CUR.disk.name) || "";
+  // THE TUNE'S OWN NAME (Jett 2026-09-08: "we need to implement the tune common name predominantly").
+  // `CUR.disk.name` is the CAR's name -- /disk-tune builds it from names.json keyed by ordinal -- so
+  // this used to fall back to the car name whenever the database did not yet hold the build, and the
+  // header printed "1987 Nissan Be-1" in both the car slot and the tune slot. The save carries its own
+  // name in the container header; the daemon now returns it as `tune_name`.
+  const tune = (m && m.name) || (CUR && CUR.disk && CUR.disk.tune_name) || "";
   const nSaves = mm.n_saves || 0;
   const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
   const car = (CUR && CUR.name) || (CUR ? "ordinal " + CUR.ordinal : "");
@@ -959,7 +987,8 @@ function headerCopy(st, q) {
   // smallest thing in the header, after the state headline, the tune's custom name, and the creator
   // credit; it's now first and biggest. `status` is new: distinct from `lead`, which stays as the
   // longer state-specific headline available for a state that still needs one (ambiguous identity).
-  const byline = [m && m.creator ? "by " + m.creator : "", m && m.created ? when(m.created) : ""].filter(Boolean).join(" · ");
+  const creator = (m && m.creator) || (CUR && CUR.disk && CUR.disk.creator) || "";
+  const byline = [creator ? "by " + creator : "", m && m.created ? when(m.created) : ""].filter(Boolean).join(" · ");
   const base = { tone: "dim", lead: "", sub: "", tune, car, status: st.label || "", byline, why: st.why || "", step: (st.steps || [])[0] || "",
                  rest: (st.steps || []).slice(1), primary: null, noBtn: "", caption: "", evidence: "" };
 
@@ -1100,7 +1129,7 @@ function paintHeader() {
         ${changeSlim()}
       </div>
       <div class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}</div>
-      <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">no save on disk for this car</span>`}</div>
+      <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
       ${g.verdict ? `<div class="hverdict">${esc(g.verdict)}</div>` : ""}
       <div class="hgate">
         <div class="gcell gstate" data-tone="${g.tone}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span></div>
@@ -1171,7 +1200,7 @@ function paintTicker() {
   if (CHANGE) {
     const ns = (ch.sliders || []).length, np = (ch.slots || []).length;
     const _locked = !!(CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked);   // downloaded tune -> not a change you made (matches changeSlim)
-    if (ch.saved) items.push(["ok", "SAVED", "new save read from disk"]);
+    if (ch.saved) items.push(["ok", "SAVED", "new save read from disk" + ((CUR && CUR.disk && CUR.disk.tune_name) ? " — “" + CUR.disk.tune_name + "”" : "")]);
     else if (!_locked && ch.kind === "hardware") items.push(["bad", "HARDWARE CHANGED", `${np} part${np === 1 ? "" : "s"} · ${ns} slider${ns === 1 ? "" : "s"} — not saved`]);
     else if (!_locked && ch.kind === "tune") items.push(["warn", "SLIDERS MOVED", `${ns} slider${ns === 1 ? "" : "s"} changed, same hardware`]);
   }

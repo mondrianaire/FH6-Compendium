@@ -740,6 +740,20 @@ body.fixed main{padding:0;gap:0;border-top:0}
 #lastact .svc.bad .sdot{background:#f0616d;box-shadow:0 0 6px rgba(240,97,109,.6)}
 #lastact .svc.bad{color:#f0616d}
 #lastact .svc.bad b{color:#f0616d}
+/* STATUS HISTORY dropdown: hover the top status strip to see recent status changes with datetime. The strip is
+   position:fixed with overflow:hidden, so the panel is ALSO fixed (escapes the clip) and drops just below it. */
+#lastact{cursor:default}
+.statcaret{margin-left:5px;font-size:9px;opacity:.55;text-transform:none}
+.statlog{position:fixed;top:20px;left:8px;z-index:200;display:none;min-width:340px;max-width:560px;max-height:62vh;overflow-y:auto;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:0 0 7px 7px;box-shadow:0 8px 26px rgba(0,0,0,.55);
+  text-transform:none;letter-spacing:0;font-weight:400}
+#lastact:hover .statlog{display:block}
+.statlog-h{position:sticky;top:0;background:var(--panel);font:600 9.5px var(--mono);letter-spacing:.05em;color:var(--dim);text-transform:uppercase;padding:6px 12px;border-bottom:1px solid var(--line2)}
+.sle{display:flex;gap:10px;align-items:baseline;padding:4px 12px;font-size:11.5px;border-bottom:1px solid var(--line)}
+.sle:last-child{border-bottom:0}
+.slt{flex:0 0 auto;min-width:112px;font:600 10px var(--mono);color:var(--mut)}
+.sll{color:var(--ink)}
+.sle-ok .sll{color:var(--acc)} .sle-warn .sll{color:var(--warn)} .sle-bad .sll{color:#f0616d} .sle-blue .sll{color:var(--acc2)}
 
 /* the following map: labels earn their ink only when the window is close enough to read them */
 .pane > .body.map svg text{opacity:0;transition:opacity .18s}

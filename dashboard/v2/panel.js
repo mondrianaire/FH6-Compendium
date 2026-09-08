@@ -1754,7 +1754,14 @@ function followMap() {
   if (!svg || svg.dataset.x0 == null) return;
   const sc = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
   const W = +svg.dataset.w || svg.viewBox.baseVal.width || 900;
-  if (!FOLLOW.full) FOLLOW.full = { w: W, h: H };
+  // Self-invalidating extent cache: re-capture whenever the SVG is rebuilt at a new size. The
+  // LEFT_KEY reset covers view/course switches, but a same-key redraw (a world-extent recompute
+  // or a pane resize that changes dataset.w/h) would otherwise leave the cached full extent stale
+  // and mis-frame follow mode. Guard on finite dims so a missing dataset.h can't thrash the reset.
+  if (!FOLLOW.full || (Number.isFinite(W) && Number.isFinite(H) && (FOLLOW.full.w !== W || FOLLOW.full.h !== H))) {
+    FOLLOW.full = { w: W, h: H };
+    FOLLOW.span = null;                                       // re-seed the animation against the new box
+  }
   // Present-only (never write viewBox) when the user has not opted into follow (MAPVIEW owns it -- the flicker
   // fix) OR when this is the live COURSE view, which is deliberately static: courseMap fits the whole course and
   // the follow-preview zoom is a free-view-only tool now, so a persisted FOLLOW.on cannot zoom a course map.

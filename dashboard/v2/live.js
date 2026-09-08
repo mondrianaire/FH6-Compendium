@@ -197,7 +197,14 @@ function onFrame(f) {
     const jump = LIVEPOS ? Math.hypot(LIVEPOS[0] - f.px, LIVEPOS[1] - f.pz) : 0;
     LIVEPOS = [f.px, f.pz]; LIVE.posHeld = false;
     const b = $("#leftBody"); if (b) addLiveDot(b);
-    if (jump > 4) { if (jump < 2000) locateCourse(); else LIVE.teleportAt = Date.now(); }
+    if (jump > 4) {
+      if (jump < 2000) locateCourse(); else LIVE.teleportAt = Date.now();
+      // DRIVING CANCELS A STALE COURSE-BROWSER PICK (Jett 2026-09-07: "in free mode the map is identifying as
+      // Daikoku"). A browse pick zooms the world map to a course you clicked; once you actually drive, the map
+      // must follow YOU, not stay parked on a course you were browsing. Clearing it once on real movement returns
+      // the pill/map to the world (or the course you're genuinely on). browsePick() toggles the current pick off.
+      if (MODE.suggest !== "course" && typeof BROWSE_PICK !== "undefined" && BROWSE_PICK) browsePick(BROWSE_PICK);
+    }
   } else if (LIVEPOS && !LIVE.posHeld) { LIVE.posHeld = true; const b = $("#leftBody"); if (b) addLiveDot(b); }
 
   detectLiveEvents(f);   // bottoming / wall-impact off the frame stream -> LIVE.events, marked on the trace
@@ -326,7 +333,13 @@ function fingerprint(ordinal) {
   // parts, so prev.pk !== pk fires "hardware changed" though nothing was touched. A REAL change is a save
   // the database does not hold yet (exact match empty): a new build, or a slider variation mid-A/B. When
   // the identified save is already held (exact non-empty), it is just a re-pick — say nothing.
-  if (prev && prev.pk && exact.length === 0) {
+  // A DOWNLOADED (locked) TUNE IS NOT A CHANGE YOU MADE (Jett 2026-09-07: "hardware changed seems permanent and
+  // isn't meaningful"). "hardware changed" means "the DB does not hold this exact build" (exact empty) -- which
+  // is persistently true for a downloaded tune until it is imported, so it sticks and reads as if you altered the
+  // car. You didn't; you downloaded a build. Its "downloaded" state is what the status already says. So never cry
+  // hardware/tune-change on a locked tune, and clear a stale one left over from before it was identified.
+  const locked = !!(CUR.disk.tune && CUR.disk.tune.locked);
+  if (prev && prev.pk && exact.length === 0 && !locked) {
     // name the difference, slot by slot and slider by slider — a banner that says "hardware
     // changed" and nothing else is the one that reads as "nothing was picked up"
     const pa = prev.pk.split(","), pb = pk.split(",");
@@ -340,6 +353,8 @@ function fingerprint(ordinal) {
     });
     if (prev.pk !== pk) CHANGE = { kind: "hardware", from: prev, to: MATCH, slots, sliders, at: Date.now() };
     else if (prev.sk !== sk) CHANGE = { kind: "tune", from: prev, to: MATCH, slots: [], sliders, at: Date.now() };
+  } else if (locked && CHANGE && (CHANGE.kind === "hardware" || CHANGE.kind === "tune") && !CHANGE.saved) {
+    CHANGE = null;   // clear a stale change-banner left over from before this downloaded tune was identified
   }
   MATCH.sliders = CUR.disk.tune.sliders || {};       // kept so the next fingerprint can print old → new
   const cv = vcar(ordinal);

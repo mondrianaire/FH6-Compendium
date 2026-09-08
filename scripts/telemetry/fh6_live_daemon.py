@@ -1803,6 +1803,33 @@ def _livery_strings(path, max_strings=3):
     return out
 
 
+def _tune_header_strings(data_path):
+    """THE TUNE'S OWN NAME — the thing the player actually calls this setup, and the creator it came
+    from. It lives in the container's `header` as length-prefixed UTF-16LE, the SAME layout liveries
+    use, so `_livery_strings` reads it unmodified (that function is misnamed: it is a generic
+    container-header string scanner).
+
+    Measured over the whole corpus, 2026-09-08: all 663 `Tuning_*` containers yield at least one
+    string, and 662 (99.8%) yield a usable name + creator. The scanner also picks up a single glyph
+    of binary noise sitting between the strings — always one non-ASCII character — which is dropped
+    here. Two strings mean [name, creator]; three mean [name, description, creator]. The single
+    one-string container is treated as a name.
+
+    Until this existed, /disk-tune reported `name` = the CAR's name from names.json, so the header's
+    tune slot fell back to the car name and printed it twice on any car the database did not yet
+    hold. READ-ONLY; never raises."""
+    try:
+        ss = [x for x in _livery_strings(os.path.join(os.path.dirname(data_path), "header"), max_strings=4)
+              if not (len(x) == 1 and ord(x) > 127)]
+    except Exception:
+        return {}
+    if not ss:
+        return {}
+    if len(ss) == 1:
+        return {"tune_name": ss[0], "tune_desc": None, "creator": None}
+    return {"tune_name": ss[0], "tune_desc": ss[1] if len(ss) >= 3 else None, "creator": ss[-1]}
+
+
 def _lap_class_counts(route_key):
     """How many laps this route holds per class — ALWAYS every class, even when the caller filtered to one,
     because the UI can only offer a class switch if it knows which other classes exist. A separate GROUP BY
@@ -2051,6 +2078,7 @@ class H(BaseHTTPRequestHandler):
                         _build_union(deliverable, ordn, match=match)   # reconcile save vs telemetry: agreements, conflicts, ranked drive-asks
                         payload = {"available": True, "ordinal": ordn, "name": nm, "ts": meta["ts"],
                                    "tune": tune, "deliverable": deliverable, "match": match}
+                        payload.update(_tune_header_strings(meta["path"]))   # the tune's own name/creator — `name` above stays the CAR
                     else:
                         payload = {"available": False, "ordinal": ordn, "reason": "no on-disk tune for this car"}
                 except Exception as e:
@@ -2579,8 +2607,10 @@ def disk_watcher():
             if _ef:   # learned/corrected this family's cyl from the live frame -> record (learn-once) and re-emit so the now-settled identity shows immediately
                 ST._eng_bootstrapped[str(ordn)] = str(meta_m["ts"]); ST._disk_dirty = True
             _build_union(deliverable, ordn, match=match_m)
-            ST.emit("disk", {"ordinal": ordn, "name": nm, "ts": meta_m["ts"], "available": True,
-                             "deliverable": deliverable, "match": match_m, "diff": diff, "new_save": new_save})
+            _hs = _tune_header_strings(meta_m["path"])
+            ST.emit("disk", dict({"ordinal": ordn, "name": nm, "ts": meta_m["ts"], "available": True,
+                                  "deliverable": deliverable, "match": match_m, "diff": diff,
+                                  "new_save": new_save}, **_hs))
         except Exception:
             pass
 

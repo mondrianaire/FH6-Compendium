@@ -898,3 +898,20 @@ body.fixed main{padding:0;gap:0;border-top:0}
    no-scroll rule `body.fixed .pane>.body{overflow:hidden}` here and NOWHERE else. */
 .tiles{padding-bottom:4px}
 body.fixed #pRight > .body:has(.tiles){overflow-y:auto}
+
+/* ---- world map: course-type traces, and the hover link to the Course Browser (2026-09-08) ----
+   Hover is a PREVIEW on both surfaces: it brightens, it never selects. `.tile.on` (a committed pick)
+   keeps the accent border; `.tile.hi` is deliberately a different, softer signal so the two never
+   read as the same state. */
+.wcourse .wc-ink{stroke-width:1.6px;transition:stroke-width .12s ease,opacity .12s ease}
+.wcourse.hi .wc-ink{stroke-width:3.4px;opacity:1}
+.wcourse.hi{filter:drop-shadow(0 0 3px rgba(255,255,255,.45))}
+.tile.hi{border-color:var(--acc2);background:var(--panel)}
+.tile.hi .tnm{color:var(--acc2)}
+
+/* ---- background services (2026-09-08) ---- */
+.svcrow{align-items:center;gap:8px}
+.svcdot{width:8px;height:8px;border-radius:50%;background:var(--bad);flex:0 0 auto}
+.svcdot[data-up="1"]{background:var(--ok)}
+.svcbtns{margin-left:auto;display:flex;gap:4px}
+.mini.svcb{min-width:62px}

@@ -182,6 +182,148 @@ def _worker(why, scope):
         _run_once("queued after " + why, nxt)
 
 
+# ---------------------------------------------------------------- service supervisor
+# THE LAB IS THREE PROCESSES AND THE DASHBOARD COULD NEITHER SEE NOR TOUCH THEM
+# (Jett 2026-09-08: "add buttons to start/stop/restart all project critical background processes").
+# The controls live HERE because this is the process that is neither the daemon nor the page server:
+# it can restart either without cutting the branch it sits on.
+# The definitions mirror scripts/lab_up.ps1 exactly -- same interpreter, args, working directory and
+# log files -- so a service started from the dashboard is indistinguishable from one the launcher
+# started. There is deliberately no third way to start these.
+SERVICES = {
+    "daemon":    {"port": 8765, "args": ["scripts/telemetry/fh6_live_daemon.py"], "what": "telemetry daemon (UDP 9876 -> 8765)"},
+    "dashboard": {"port": 8000, "args": ["scripts/serve_dashboard.py", "8000"],   "what": "dashboard server (serves this page)"},
+    "rebuild":   {"port": 8001, "args": ["scripts/rebuild_service.py", "8001"],   "what": "import + regenerate service (this one)"},
+}
+SELF = "rebuild"
+
+
+def _listening(port):
+    """LISTENING only. A just-killed service leaves TIME_WAIT lines on its port for about a minute, and
+    those must not read as "already up" -- the trap lab_up.ps1 records from 2026-09-05."""
+    import socket
+    sk = socket.socket()
+    sk.settimeout(0.35)
+    try:
+        return sk.connect_ex(("127.0.0.1", port)) == 0
+    finally:
+        sk.close()
+
+
+def _pid_on(port):
+    try:
+        out = subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True, timeout=8).stdout
+    except Exception:                                          # noqa: BLE001
+        return None
+    for ln in out.splitlines():
+        f = ln.split()
+        if len(f) >= 5 and f[0] == "TCP" and f[1].endswith(":" + str(port)) and f[3] == "LISTENING":
+            try:
+                return int(f[4])
+            except ValueError:
+                return None
+    return None
+
+
+def _svc_state(name):
+    d = SERVICES[name]
+    up = _listening(d["port"])
+    return {"name": name, "port": d["port"], "what": d["what"], "up": up,
+            "pid": _pid_on(d["port"]) if up else None, "self": name == SELF}
+
+
+def _svc_start(name):
+    d = SERVICES[name]
+    if _listening(d["port"]):
+        return False, "already listening on " + str(d["port"])
+    logs = os.path.join(ROOT, "data", "logs")
+    os.makedirs(logs, exist_ok=True)
+    out = open(os.path.join(logs, name + ".log"), "ab")
+    err = open(os.path.join(logs, name + ".err"), "ab")
+    flags = 0
+    if os.name == "nt":            # detach: the child must outlive both this request and this process
+        flags = subprocess.CREATE_NEW_PROCESS_GROUP | getattr(subprocess, "DETACHED_PROCESS", 0x00000008)
+    subprocess.Popen([sys.executable] + d["args"], cwd=ROOT, stdout=out, stderr=err,
+                     stdin=subprocess.DEVNULL, creationflags=flags, close_fds=True)
+    for _ in range(50):                                        # lab_up waits 15 s for the bind; match it
+        time.sleep(0.3)
+        if _listening(d["port"]):
+            return True, "up on " + str(d["port"])
+    return False, "did not bind %d in 15 s -- see data/logs/%s.err" % (d["port"], name)
+
+
+def _svc_stop(name):
+    port = SERVICES[name]["port"]
+    pid = _pid_on(port)
+    if not pid:
+        return False, "not running"
+    try:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True, timeout=15)
+        else:
+            os.kill(pid, 15)
+    except Exception as e:                                     # noqa: BLE001
+        return False, "kill failed: " + str(e)
+    for _ in range(40):                       # the PORT must free, not merely the process exit
+        if not _listening(port):
+            return True, "stopped (pid %d)" % pid
+        time.sleep(0.25)
+    return False, "pid %d killed but %d still listening" % (pid, port)
+
+
+_RELAUNCH = (
+    "import subprocess,sys,time,socket\n"
+    "def lis():\n"
+    "    s=socket.socket(); s.settimeout(0.3)\n"
+    "    try: return s.connect_ex(('127.0.0.1',8001))==0\n"
+    "    finally: s.close()\n"
+    "t=time.time()\n"
+    "while lis() and time.time()-t<20: time.sleep(0.3)\n"
+    "o=open(LOG,'ab'); e=open(ERR,'ab')\n"
+    "subprocess.Popen([sys.executable,'scripts/rebuild_service.py','8001'],cwd=ROOT,"
+    "stdout=o,stderr=e,stdin=subprocess.DEVNULL,close_fds=True)\n")
+
+
+def _svc_restart_self():
+    """Restarting the supervisor cannot happen in-process: whoever kills it has to still be alive to start
+    it again. Hand that to a detached child that waits for 8001 to free, relaunches, and exits."""
+    logs = os.path.join(ROOT, "data", "logs")
+    os.makedirs(logs, exist_ok=True)
+    code = ("LOG=%r\nERR=%r\nROOT=%r\n" % (os.path.join(logs, "rebuild.log"),
+                                            os.path.join(logs, "rebuild.err"), ROOT)) + _RELAUNCH
+    flags = 0
+    if os.name == "nt":
+        flags = subprocess.CREATE_NEW_PROCESS_GROUP | getattr(subprocess, "DETACHED_PROCESS", 0x00000008)
+    subprocess.Popen([sys.executable, "-c", code], cwd=ROOT, stdin=subprocess.DEVNULL,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     creationflags=flags, close_fds=True)
+    threading.Thread(target=lambda: (time.sleep(0.6), os._exit(0)), daemon=True).start()
+    return True, "relauncher spawned -- this service exits in ~0.6 s and returns on 8001"
+
+
+def svc_action(name, action):
+    if name not in SERVICES:
+        return 404, {"error": "unknown service " + repr(name), "services": sorted(SERVICES)}
+    if name == SELF and action == "stop":
+        # Refused on purpose: these buttons are served BY this process, so stopping it removes the only
+        # way to start anything again. scripts/lab_up.ps1 is the way back from a full stop.
+        return 409, {"ok": False, "service": name, "action": action,
+                     "note": "the rebuild service hosts these controls -- stopping it would leave nothing "
+                             "to start them again. Use restart, or scripts/lab_up.ps1."}
+    if name == SELF and action == "restart":
+        ok, note = _svc_restart_self()
+    elif action == "start":
+        ok, note = _svc_start(name)
+    elif action == "stop":
+        ok, note = _svc_stop(name)
+    elif action == "restart":
+        _svc_stop(name)
+        ok, note = _svc_start(name)
+    else:
+        return 400, {"error": "action must be start, stop or restart"}
+    return 200, {"ok": ok, "note": note, "service": name, "action": action}
+
+
 def request(why, scope=DEFAULT_SCOPE):
     with LOCK:
         if S["state"] == "running":
@@ -233,6 +375,8 @@ class H(BaseHTTPRequestHandler):
                 with WATCH["lock"]:
                     if q in WATCH["subs"]: WATCH["subs"].remove(q)
             return
+        if self.path.startswith("/services"):
+            return self._send(200, {"services": [_svc_state(n) for n in SERVICES]})
         if self.path.startswith("/status"):
             # sessions_pending is a live gauge, not a log entry -- recomputed on every poll (idle
             # only; a run in progress already knows it's behind) so the dashboard can show a
@@ -243,9 +387,17 @@ class H(BaseHTTPRequestHandler):
                     S["sessions_pending"] = _sessions_pending()
                 self._send(200, dict(S, now=time.time()))
         else:
-            self._send(404, {"error": "GET /status or POST /rebuild"})
+            self._send(404, {"error": "GET /status, GET /services or POST /rebuild, POST /service"})
 
     def do_POST(self):
+        if self.path.startswith("/service"):
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                body = json.loads(self.rfile.read(n) or b"{}")
+            except Exception:                                  # noqa: BLE001
+                body = {}
+            code, out = svc_action(str(body.get("name", "")), str(body.get("action", "")))
+            return self._send(code, out)
         if self.path.startswith("/rebuild"):
             n = int(self.headers.get("Content-Length") or 0)
             why, scope = "manual", DEFAULT_SCOPE

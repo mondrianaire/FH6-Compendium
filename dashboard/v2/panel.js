@@ -78,6 +78,7 @@ let ROUTE = null;   // in a timed event with no learned course: the catalogued r
 let LOOP = null;    // the daemon's S/F-crossing identity {name,start} — authoritative in an event, matched to a route START (adoptLoop)
 let BROWSE_PICK = null;            // Course Browser: the route id whose location+shape the left world map is zoomed to
 let BROWSE_FILTER = "all";         // Course Browser mode chip: all | rivals | race | career | free
+let BROWSE_DEV = false;            // Course Browser: show the IE/dev and number-only routes too (off by default)
 let COURSE_MATCH = null;           // { dist, secondKey, secondDist } from the last locateCourse() — how sure the current course is
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
@@ -171,7 +172,7 @@ const courseFile = (key) => "course/" + String(key).replace(/[^A-Za-z0-9_\-]/g, 
 async function panelBoot() {
   // the page's own chrome, from the view store, before anything paints
   DOCK_SPAN = vg("dockSpan", 600); FOLLOW.on = vg("follow", false) === true;
-  BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null);
+  BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null); BROWSE_DEV = vg("browseDev", false);
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
   WORLD = w; DIAG = d; COURSES = c;
@@ -1289,7 +1290,7 @@ function paintLeft() {
     paintLeftHeader();
     body.innerHTML = worldMapHTML();
     const mapSvg = body.querySelector("svg[data-x0]");
-    if (mapSvg) { mapAttach(mapSvg); const g = mapSvg.querySelector("#browseHi"); if (g && BROWSE_PICK) g.innerHTML = browseHiSVG(mapSvg, BROWSE_PICK); }
+    if (mapSvg) { mapAttach(mapSvg); wireWorldCourses(mapSvg); const g = mapSvg.querySelector("#browseHi"); if (g && BROWSE_PICK) g.innerHTML = browseHiSVG(mapSvg, BROWSE_PICK); }
     addLiveDot(body);
     wireFollow(body); wireMapDrawer(body);
   }
@@ -1391,6 +1392,14 @@ function splitTP(pts, cap) {
   }
   return runs.filter((r) => r.length > 1);
 }
+// COURSE-TYPE PALETTE. Keys are ref_event.discipline as build_web writes it into world.json (`disc`,
+// the route's dominant discipline over its events). `_unverified` is for a learned course with no route
+// link — deliberately colourless, because the colour asserts an identified type.
+const DISC_COL = { road: "#58a6ff", street: "#bc8cff", dirt: "#d29922", "cross-country": "#3fb950",
+                   playground: "#f778ba", drag: "#ff7b72", showcase: "#79c0ff", rush: "#ffa657",
+                   _other: "#00d27a", _unverified: "#54606f" };
+let MAP_HOVER = null;              // route id the pointer is over on the world map (highlight only, never a pick)
+
 function worldMapHTML() {
   if (!WORLD || !WORLD.bbox) return `<div class="why">no world data — run build_web.py</div>`;
   const { on } = routeSplit();   // the two off-map routes (102/103) are cut/dev test circuits -- ignored entirely
@@ -1412,19 +1421,39 @@ function worldMapHTML() {
   // magnifies it 30-100x on a course pick. Integer SVG units pre-snapped every path point to a ~20 m grid,
   // so zoom just enlarged the stair-steps -- the "low resolution on zoom" (Jett 2026-09-07). Centi-unit
   // precision (~0.2 m at island scale) survives the deepest zoom the map reaches.
-  const line = (pts, col, w, op) => splitTP(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(2) + "," + pz(z).toFixed(2)).join(" ")}"/>`).join("");
+  const ptsStr = (run) => run.map(([x, z]) => px(x).toFixed(2) + "," + pz(z).toFixed(2)).join(" ");
+  const line = (pts, col, w, op) => splitTP(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}" stroke-linejoin="round" points="${ptsStr(run)}"/>`).join("");
   // BACKGROUND at strided ~16 m (._lo) so the viewBox animation stays cheap; the FOCUS route below is dense.
   const routes = on.map(({ r }) => line(r._lo || r.pts, "#3b4a5c", 1.2, 0.9)).join("");
-  const mine = Object.values(WORLD.courses || {}).filter((c) => c.path && c.path.length > 3)
-    .map((c) => line(c._lo || c.path, "#00d27a", 1.6, 0.85)).join("");
+  // COLOUR BY COURSE TYPE (Jett 2026-09-08). A course we have VERIFIED — its key is `route:<id>`, so it
+  // reconciled to a catalogued route — takes that route's discipline colour. One we have not (an `<x>_<z>`
+  // learned leftover, no route link) stays a dim neutral: the colour is a claim about identity, so an
+  // unidentified trace must not make one. Each course is its own <g> carrying a transparent fat hit-line,
+  // so it can be hovered at island zoom where the visible stroke is barely a pixel wide.
+  const mine = Object.entries(WORLD.courses || {}).filter(([, c]) => c.path && c.path.length > 3)
+    .map(([key, c]) => {
+      const rm = /^route:(.+)$/.exec(key);
+      const rt = rm && WORLD.routes[rm[1]];
+      const disc = rt ? (rt.disc || null) : null;
+      const col = disc ? (DISC_COL[disc] || DISC_COL._other) : DISC_COL._unverified;
+      const runs = splitTP(c._lo || c.path);
+      const hit = runs.map((run) => `<polyline class="wc-hit" fill="none" stroke="transparent" stroke-width="10" stroke-linecap="round" points="${ptsStr(run)}"/>`).join("");
+      const vis = runs.map((run) => `<polyline class="wc-ink" fill="none" stroke="${col}" stroke-width="1.6" opacity="${disc ? 0.9 : 0.4}" stroke-linejoin="round" points="${ptsStr(run)}"/>`).join("");
+      const nm = (rt && rt.name) || c.name || key;
+      return `<g class="wcourse" data-key="${esc(key)}"${rm ? ` data-rid="${esc(rm[1])}"` : ""} data-disc="${esc(disc || "")}"><title>${esc(nm)}${disc ? " · " + esc(disc) : " · unverified"}</title>${hit}${vis}</g>`;
+    }).join("");
   // in an event, the catalogued route the car is on, drawn bright over the rest so the map is legible -- this
   // is a FOCUS route (the viewBox zooms to it), so draw it DENSE (r.pts) for a smooth line at deep zoom.
   const hi = (ROUTE && WORLD.routes[ROUTE.id] && (WORLD.routes[ROUTE.id].pts || []).length > 1)
     ? line(WORLD.routes[ROUTE.id].pts, "#e3b341", 2.8, 1) : "";
   // no follow toggle here: following is course-only (see followSpan()) -- offering it on the
   // world map invited turning on a satnav zoom that could only ever collapse the island view.
-  const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>
-      <span><i style="background:#00d27a"></i>roads you have driven</span><span><i style="background:#e3b341"></i>you, now</span>`;
+  const seen = [...new Set(Object.keys(WORLD.courses || {}).map((k) => {
+    const m = /^route:(.+)$/.exec(k); const r = m && WORLD.routes[m[1]]; return (r && r.disc) || null; }))];
+  const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>`
+    + seen.filter(Boolean).sort().map((d) => `<span><i style="background:${DISC_COL[d] || DISC_COL._other}"></i>${esc(d)}</span>`).join("")
+    + (seen.includes(null) ? `<span><i style="background:${DISC_COL._unverified}"></i>unverified</span>` : "")
+    + `<span><i style="background:#e3b341"></i>you, now</span>`;
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
       style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}<g id="browseHi"></g><g id="liveDot"></g></svg>
     ${mapDrawerHTML(`<div class="legend">${legend}</div>`)}`;
@@ -1506,6 +1535,44 @@ function mapAttach(svg) {
   svg.addEventListener("pointerup", endDrag); svg.addEventListener("pointercancel", endDrag);
   svg.style.cursor = "grab";
 }
+// HOVER THE MAP, HIGHLIGHT THE BROWSER (Jett 2026-09-08: "mousing over an established course should
+// highlight (but not select unless clicked on) the associated course in the course browser"). Hover is a
+// PREVIEW: it never writes BROWSE_PICK, never touches the view store, and never moves the map's target —
+// so letting go leaves the view exactly as it was. Only the click commits, through browsePick().
+function hoverCourse(rid) {
+  if (MAP_HOVER === rid) return;
+  MAP_HOVER = rid;
+  document.querySelectorAll(".wcourse.hi").forEach((g) => g.classList.remove("hi"));
+  document.querySelectorAll(".tile.hi").forEach((t) => t.classList.remove("hi"));
+  if (!rid) return;
+  document.querySelectorAll(`.wcourse[data-rid="${CSS.escape(rid)}"]`).forEach((g) => g.classList.add("hi"));
+  const tile = document.querySelector(`.tile[data-bpick="${CSS.escape(rid)}"]`);
+  if (tile) {
+    tile.classList.add("hi");
+    // bring it into view only when it is actually off-screen, so a hover never yanks a list the user is reading
+    const box = tile.getBoundingClientRect(), host = tile.closest(".tiles");
+    if (host) { const hb = host.getBoundingClientRect();
+      if (box.top < hb.top || box.bottom > hb.bottom) tile.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+  }
+}
+function wireWorldCourses(svg) {
+  if (svg.dataset.wcWired === "1") return;      // paintLeft can re-enter; the SVG itself is drawn once
+  svg.dataset.wcWired = "1";
+  // A REDRAW WIPES THE HIGHLIGHT BUT NOT THE VARIABLE. worldMapHTML() replaces the whole SVG, so every
+  // `.hi` class goes with it while MAP_HOVER still names the last course — and hoverCourse()'s
+  // "same course, nothing to do" guard then swallowed the next real hover over that same course, for
+  // the life of the page. Clearing it here ties the memory to the DOM it describes.
+  MAP_HOVER = null;
+  svg.querySelectorAll(".wcourse").forEach((g) => {
+    const rid = g.dataset.rid || null;
+    g.style.cursor = rid ? "pointer" : "default";
+    g.addEventListener("mouseenter", () => hoverCourse(rid));
+    g.addEventListener("mouseleave", () => hoverCourse(null));
+    if (rid) g.addEventListener("click", (e) => { e.stopPropagation(); browsePick(rid); });
+  });
+  svg.addEventListener("mouseleave", () => hoverCourse(null));
+}
+
 // pick a course from the browser: highlight it + glide the map to it; pick again (BROWSE_PICK null) glides back
 function browsePick(id) {
   BROWSE_PICK = (BROWSE_PICK === id) ? null : id;
@@ -1534,6 +1601,19 @@ function browseSyncTiles() {
    `race` is the ones with a world activation sphere) without double-listing, since most courses
    support several modes at once. */
 const BROWSE_CHIPS = [["all", "All"], ["rivals", "Rivals"], ["race", "Race"], ["career", "Career"], ["free", "Free-roam"]];
+// NOT EVERY CATALOGUED ROUTE IS A PLACE (Jett 2026-09-08: "there are superfluous courses that are either
+// dev courses or left over and these are taking up valuable real estate"). Two kinds, both from the game's
+// own data rather than a hand-written list:
+//   * the "IE ..." drive sections -- ref_track_info names five of them (IE Drive Section One/2/Three/Four,
+//     IE City Tour), all flagged use_cross_country_ai, and they are intro-experience/dev content;
+//   * a route we only know by NUMBER -- no catalogue name at all, on the tile purely because we drove over
+//     its geometry once.
+// HIDDEN, NEVER DROPPED: the toggle below shows them again, because "superfluous" is a judgement about
+// screen space, not about the data.
+function browseJunk(r) {
+  if (/^IE /.test(r.name || "")) return true;
+  return !r.name;
+}
 function browseMatch(r, f) {
   const m = r.modes || [];
   if (f === "all") return true;
@@ -1569,10 +1649,14 @@ function browserHTML() {
   // 169 routes, but 66 are geometry-only with no catalogue name -- cut/dev/alternate-line content (ids 11000+,
   // 20000+, 30100+, and the off-map 102/103) that is not a player course. They rendered as "Route <id> · no data
   // yet" and swamped the browser; drop them unless we have actually driven one (then it earns a tile on its data).
-  const rows = Object.entries(WORLD.routes).map(([id, r]) => ({ id, r })).filter(({ r }) => r.name || r.laps);
+  const all = Object.entries(WORLD.routes).map(([id, r]) => ({ id, r })).filter(({ r }) => r.name || r.laps);
+  const nJunk = all.filter(({ r }) => browseJunk(r)).length;
+  const rows = BROWSE_DEV ? all : all.filter(({ r }) => !browseJunk(r));
   const count = (f) => rows.filter(({ r }) => browseMatch(r, f)).length;
   const chips = BROWSE_CHIPS.map(([f, lbl]) =>
-    `<button class="bchip ${BROWSE_FILTER === f ? "on" : ""}" data-bfilter="${f}">${lbl} <em>${count(f)}</em></button>`).join("");
+    `<button class="bchip ${BROWSE_FILTER === f ? "on" : ""}" data-bfilter="${f}">${lbl} <em>${count(f)}</em></button>`).join("")
+    + (nJunk ? `<button class="bchip bchip--dev ${BROWSE_DEV ? "on" : ""}" data-bdev="1"
+        title="${BROWSE_DEV ? "hide" : "show"} the game's IE drive sections and number-only routes — dev and leftover geometry, not destinations">${BROWSE_DEV ? "hide" : "show"} dev <em>${nJunk}</em></button>` : "");
   const sel = rows.filter(({ r }) => browseMatch(r, BROWSE_FILTER))
     .sort((a, b) => (a.r.name ? 0 : 1) - (b.r.name ? 0 : 1) || (a.r.name || "").localeCompare(b.r.name || "") || (a.id - b.id));
   const tiles = sel.map(({ id, r }) => {
@@ -1606,7 +1690,14 @@ function browserHTML() {
 function wireBrowser(body) {
   body.querySelectorAll("[data-bfilter]").forEach((b) => b.onclick = () => {
     BROWSE_FILTER = b.dataset.bfilter; VIEW.global.browseFilter = BROWSE_FILTER; viewSave(); paintRight(); paintLeftHeader(); });
-  body.querySelectorAll("[data-bpick]").forEach((b) => b.onclick = () => browsePick(b.dataset.bpick));
+  body.querySelectorAll("[data-bdev]").forEach((b) => b.onclick = () => {
+    BROWSE_DEV = !BROWSE_DEV; VIEW.global.browseDev = BROWSE_DEV; viewSave(); paintRight(); paintLeftHeader(); });
+  body.querySelectorAll("[data-bpick]").forEach((b) => {
+    b.onclick = () => browsePick(b.dataset.bpick);
+    // the same preview in reverse — hovering a tile lights its trace on the map, without picking it
+    b.onmouseenter = () => hoverCourse(b.dataset.bpick);
+    b.onmouseleave = () => hoverCourse(null);
+  });
 }
 
 /* ------------------------------------------------- the map that follows you
@@ -1897,11 +1988,11 @@ function courseConfidenceBadge() {
 // Which pane the context calls for. In a menu the build is what can change, so its data asks and
 // ratification steps lead; on the road the corners you are taking lead; on a course with a
 // baseline set, the conclusions lead. A click pins a tab until the context class changes.
-const RT_LABEL = { corners: "Live corners", matrix: "Turn analysis", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser" };
+const RT_LABEL = { corners: "Live corners", matrix: "Turn analysis", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser", services: "Services" };
 // "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
 // to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
 // list this function returns. Add "build" back to the free-mode array below to re-enable it.
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl"] : ["corners", "stats", "browser"]; }
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl", "services"] : ["corners", "stats", "browser", "services"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
@@ -1924,11 +2015,15 @@ function paintRight() {
   const why = { corners: "every corner as you take it · newest first", matrix: "one row per course turn · this session",
                 stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide",
-                browser: "every known course · pick one to locate it on the map" }[cur];
+                browser: "every known course · pick one to locate it on the map",
+                services: "the three processes the lab runs · start, stop or restart each one" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
-  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : statsHTML();
+  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
+  body.querySelectorAll("[data-svcact]").forEach((b) => b.onclick = () => svcAct(b.dataset.svc, b.dataset.svcact));
+  body.querySelectorAll("[data-svcrefresh]").forEach((b) => b.onclick = () => svcRefresh());
+  if (!SVC.list.length && !SVC.err && body.querySelector(".svcrow, [data-svcrefresh]")) svcRefresh();
   if (cur === "browser") wireBrowser(body);
   if (cur !== "matrix" && cur !== "browser") fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
@@ -2166,6 +2261,58 @@ function buildDataHTML() {
   parts.push(`<div class="grp"><div class="gh">Database</div><div class="frow"><button class="mini go" data-act="rebuild" ${RB.state === "running" || RB.pending ? "disabled" : ""}>${RB.state === "running" || RB.pending ? "importing…" : "IMPORT + REGENERATE"}</button>
     <span class="why">${RB.last && RB.last.finished ? `last import ${new Date(RB.last.finished * 1000).toLocaleTimeString()} · ${RB.last.wall_s} s` : "imports every save on disk and rewrites the dashboard data (~10 s); runs by itself when a new save is not yet held"}</span>${RB.error ? `<span class="why" style="color:var(--bad)">${esc(RB.error)}</span>` : ""}</div></div>`);
   return parts.join("");
+}
+
+// THE THREE PROCESSES THE LAB IS (Jett 2026-09-08). Served by the rebuild service on 8001, because that is
+// the one that is neither the daemon nor the page server and can therefore restart either. State is polled
+// on open and after every action -- never on a timer: netstat costs ~100 ms and nothing here changes on its
+// own. STOPPING THE DASHBOARD KILLS THIS PAGE, so that one button asks first; the rebuild service refuses
+// to stop itself at the server (409) and the button is not offered.
+const SVC = { list: [], busy: null, note: "", err: "" };
+async function svcRefresh() {
+  try {
+    const r = await fetch(REBUILD + "/services");
+    SVC.list = (await r.json()).services || []; SVC.err = "";
+  } catch (e) { SVC.list = []; SVC.err = "the rebuild service on 8001 is not answering — start the lab with scripts/lab_up.ps1"; }
+  paintRight();
+}
+async function svcAct(name, action) {
+  if (name === "dashboard" && (action === "stop" || action === "restart")
+      && !confirm("The dashboard server on 8000 serves THIS PAGE.\n\n"
+                  + (action === "stop" ? "Stopping it will make this page stop loading — you would restart it with scripts/lab_up.ps1."
+                                       : "Restarting it will drop this page for a few seconds; reload after it comes back.")
+                  + "\n\nContinue?")) return;
+  SVC.busy = name + ":" + action; SVC.note = ""; SVC.err = ""; paintRight();
+  try {
+    const r = await fetch(REBUILD + "/service", { method: "POST", headers: { "Content-Type": "application/json" },
+                                                  body: JSON.stringify({ name, action }) });
+    const j = await r.json();
+    SVC.note = (j.note || j.error || "") + "";
+    if (!r.ok && !j.note) SVC.err = j.error || ("HTTP " + r.status);
+  } catch (e) { SVC.err = String((e && e.message) || e); }
+  SVC.busy = null;
+  // a restarted service needs a moment to bind before its state is worth reading
+  setTimeout(svcRefresh, action === "stop" ? 400 : 1600);
+  paintRight();
+}
+function servicesHTML() {
+  const rows = SVC.list.map((v) => {
+    const busy = (a) => SVC.busy === v.name + ":" + a;
+    const anyBusy = !!SVC.busy;
+    const btn = (a, lbl) => `<button class="mini svcb" data-svc="${esc(v.name)}" data-svcact="${a}"
+        ${anyBusy || (a === "start" && v.up) || (a !== "start" && !v.up) ? "disabled" : ""}>${busy(a) ? "…" : lbl}</button>`;
+    return `<div class="frow svcrow">
+      <span class="svcdot" data-up="${v.up ? "1" : "0"}"></span>
+      <b>${esc(v.name)}</b>
+      <span class="why">${esc(v.what)} · ${v.up ? "up on " + v.port + (v.pid ? " · pid " + v.pid : "") : "down (" + v.port + ")"}</span>
+      <span class="svcbtns">${btn("start", "START")}${v.self ? "" : btn("stop", "STOP")}${btn("restart", "RESTART")}</span>
+    </div>`;
+  }).join("");
+  return `<div class="grp"><div class="gh">Background services</div>
+    ${SVC.err ? `<div class="frow"><span class="why" style="color:var(--bad)">${esc(SVC.err)}</span></div>` : ""}
+    ${rows || `<div class="frow"><span class="why">nothing read yet</span><button class="mini" data-svcrefresh="1">READ STATE</button></div>`}
+    ${rows ? `<div class="frow"><button class="mini" data-svcrefresh="1">REFRESH</button><span class="why">${esc(SVC.note || "the rebuild service cannot stop itself — it hosts these controls")}</span></div>` : ""}
+  </div>`;
 }
 
 // What this build keeps doing wrong, wherever it happens. Filtered to atomically-similar builds:

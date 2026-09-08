@@ -105,7 +105,7 @@ def run(cx, verbose=False):
 
     # ---- inputs, loaded once -------------------------------------------------
     events = [dict(r) for r in cx.execute(
-        "SELECT event_id, name, length_m, is_loop, discipline FROM ref_event "
+        "SELECT event_id, name, length_m, is_loop, discipline, route_id FROM ref_event "
         "WHERE kind='rivals' AND length_m IS NOT NULL")]
     events_by_id = {e["event_id"]: e for e in events}
 
@@ -191,6 +191,16 @@ def run(cx, verbose=False):
         chosen_game[rk] = (g["event_id"], g["name"], "derived:game", "verified")
         game_route_of[rk] = pick
 
+    # two routes' bounding boxes touch (300 m slack): they are the same stretch of road -- a
+    # catalogued twin/mirror, not two places. Used to keep the map tier from borrowing a name
+    # off a same-length event that lives elsewhere on the island.
+    def _overlap(a, b):
+        A, B = routes[a], routes[b]
+        if None in (A["bbox_x0"], B["bbox_x0"]):
+            return False
+        return not (A["bbox_x1"] < B["bbox_x0"] - 300 or B["bbox_x1"] < A["bbox_x0"] - 300
+                    or A["bbox_z1"] < B["bbox_z0"] - 300 or B["bbox_z1"] < A["bbox_z0"] - 300)
+
     # ---- pass 1: map tier (full) + length tier candidates --------------------
     rows_map, rows_length = [], []
     chosen_map = {}                        # route_key -> (event_id, name, source, confidence)
@@ -212,6 +222,13 @@ def run(cx, verbose=False):
             candidates = {}
             A_ids, B_ids = set(), set()
             for e in events:
+                # route_id guard: the events are route-bound, so a length match to an event whose
+                # own route lies elsewhere (route 162 Bamboo Forest Scramble, ~4.99 km, 5.5 km from
+                # route 1311 Legend Island XC, ~4.92 km) is a same-length coincidence, not this
+                # course's name. Borrow a name only from this route or a twin sharing its ground.
+                er = e["route_id"]
+                if er is not None and er != route_id and er in routes and not _overlap(er, route_id):
+                    continue
                 in_A = (Rlen is not None and abs(Rlen - e["length_m"]) <= BAND_M
                         and (e["is_loop"] is None or e["is_loop"] == Rloop)
                         and _surface_ok(e["discipline"], Rroad))
@@ -267,12 +284,7 @@ def run(cx, verbose=False):
     # by lap length too -- so both came out 'verified' 5 km apart (2026-09-05). A Rivals route is
     # one stretch of road: an event claimed by courses on routes whose boxes do not overlap is a
     # tie, settled only by the typed name, otherwise left as chosen=0 rows for the picker.
-    def _overlap(a, b):
-        A, B = routes[a], routes[b]
-        if None in (A["bbox_x0"], B["bbox_x0"]):
-            return False
-        return not (A["bbox_x1"] < B["bbox_x0"] - 300 or B["bbox_x1"] < A["bbox_x0"] - 300
-                    or A["bbox_z1"] < B["bbox_z0"] - 300 or B["bbox_z1"] < A["bbox_z0"] - 300)
+    # (_overlap is defined above pass 1, where the map tier's route_id guard first uses it.)
     claims = defaultdict(list)             # event_id -> [route_key]
     for rk, (eid, _n, _s, _c) in chosen_map.items():
         claims[eid].append(rk)

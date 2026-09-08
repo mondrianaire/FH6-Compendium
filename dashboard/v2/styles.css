@@ -845,6 +845,7 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .bb.dsc{border-color:var(--line2);color:var(--dim)}
 .tdata{color:var(--acc);font-weight:600}
 .tdata.none{color:var(--dim);font-weight:400}
+.truns{color:var(--dim);font-weight:400}   /* runs = play sessions, muted; laps (tdata) are the usable samples */
 /* COURSE INFORMATION PILL in the world-map pane header (#leftHd) — a header-sized browser row: shape glyph,
    name + status chips, a meta line, and the offered-class + mode chips. Mirrors the car pill's design. The
    pane header is a fixed 48px (both panes, so their tops align); this one uses tight vertical padding so the

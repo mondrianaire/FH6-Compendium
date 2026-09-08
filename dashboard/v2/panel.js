@@ -915,6 +915,10 @@ function similarGroupsHTML() {
 
 function changeSlim() {
   if (!CHANGE) return "";
+  // A DOWNLOADED (locked) tune is not a change you made -- never render "hardware changed" / "sliders moved" for
+  // it, however the CHANGE got here: the live fingerprint (guarded in live.js) OR a STALE one restored from the
+  // view store (a fresh session doesn't have it, which is why the preview looked clean while the banner stuck).
+  if (CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked && !CHANGE.saved && (CHANGE.kind === "hardware" || CHANGE.kind === "tune")) return "";
   const k = CHANGE.kind;
   const label = CHANGE.saved ? "new save read" : k === "hardware" ? "hardware changed"
     : k === "tune" ? ((CHANGE.sliders || []).length + " slider" + ((CHANGE.sliders || []).length === 1 ? "" : "s") + " moved")
@@ -1166,9 +1170,10 @@ function paintTicker() {
   // --- alerts (urgent first) ---
   if (CHANGE) {
     const ns = (ch.sliders || []).length, np = (ch.slots || []).length;
+    const _locked = !!(CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked);   // downloaded tune -> not a change you made (matches changeSlim)
     if (ch.saved) items.push(["ok", "SAVED", "new save read from disk"]);
-    else if (ch.kind === "hardware") items.push(["bad", "HARDWARE CHANGED", `${np} part${np === 1 ? "" : "s"} · ${ns} slider${ns === 1 ? "" : "s"} — not saved`]);
-    else if (ch.kind === "tune") items.push(["warn", "SLIDERS MOVED", `${ns} slider${ns === 1 ? "" : "s"} changed, same hardware`]);
+    else if (!_locked && ch.kind === "hardware") items.push(["bad", "HARDWARE CHANGED", `${np} part${np === 1 ? "" : "s"} · ${ns} slider${ns === 1 ? "" : "s"} — not saved`]);
+    else if (!_locked && ch.kind === "tune") items.push(["warn", "SLIDERS MOVED", `${ns} slider${ns === 1 ? "" : "s"} changed, same hardware`]);
   }
   if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) {
     const ties = ((CUR && CUR.match) || {}).n_signature_ties || 0;
@@ -1293,7 +1298,7 @@ function courseInfoPill(r, state) {
   const meta = [n0(r.len) + " m", r.loop ? "loop" : "P2P"];
   if (r.turns != null) meta.push(r.turns + " turn" + (r.turns === 1 ? "" : "s"));
   if (r.lapsDrawn != null) meta.push(r.lapsDrawn + " of " + laps + " lap" + (laps === 1 ? "" : "s") + " drawn");
-  else if (laps) { meta.push(laps + " lap" + (laps === 1 ? "" : "s")); if (sess) meta.push(sess + " run" + (sess === 1 ? "" : "s")); }
+  else if (laps) { meta.push(laps + " lap" + (laps === 1 ? "" : "s")); }   // laps are the usable samples; runs (play sessions) demoted off the pill
   else meta.push("no data yet");
   if (r.alsoName) meta.push("shares road with " + r.alsoName);
   const metaS = meta.join(" · ");
@@ -1544,7 +1549,9 @@ function browserHTML() {
   const tiles = sel.map(({ id, r }) => {
     const nm = r.name || ("Route " + id);
     const laps = r.laps || 0, sess = r.sessions || 0;
-    const data = laps ? `<span class="tdata">${laps} lap${laps === 1 ? "" : "s"} · ${sess} run${sess === 1 ? "" : "s"}</span>`
+    // LAPS lead -- they are the usable data samples; RUNS (independent play sessions) are demoted to muted
+    // context (Jett 2026-09-07: "the number of laps ... represents actual usable data samples").
+    const data = laps ? `<span class="tdata">${laps} lap${laps === 1 ? "" : "s"}</span><span class="truns"> · ${sess} run${sess === 1 ? "" : "s"}</span>`
                       : `<span class="tdata none">no data yet</span>`;
     // performance-class pills: every class the Rivals course is offered in. SOLID = we hold data for that class,
     // NEGATIVE (hollow: black fill, class-colour outline + letter) = offered but no laps yet -- so the classes we

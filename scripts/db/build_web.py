@@ -428,6 +428,23 @@ def main(argv=None):
             "JOIN session_car sc ON sc.session_id = se.session_id AND sc.cid = se.cid "
             "WHERE se.route_key LIKE 'route:%' AND sc.class IS NOT NULL AND sc.class != '?'"):
         _driven[_rk].add(_c)
+    # QUICK COURSE-PANEL STATS (2026-09-09): real per-class and per-car LAP COUNTS for the world-map info
+    # pill. Counts are of recorded laps (void=0). lap.class is denormalised on the row; the car comes from
+    # the cid ordinal. The full course panel later cross-tabs car x class and adds per-turn analysis -- this
+    # is the at-a-glance version, and it also gives an HONEST live lap total (course.n_laps is a stale cache).
+    _carname = {}
+    for _o, _mk, _md in cx.execute("SELECT ordinal, make, model FROM ref_car"):
+        _carname[str(_o)] = (("%s %s" % (_mk or "", _md or "")).strip()) or ("car %s" % _o)
+    _lap_cls = _cl.defaultdict(_cl.Counter)   # route_key -> Counter(class -> laps)
+    _lap_car = _cl.defaultdict(_cl.Counter)   # route_key -> Counter("Make Model" -> laps)
+    _lap_tot = _cl.Counter()                  # route_key -> live lap count (void=0)
+    for _rk2, _lc2, _cid2 in cx.execute("SELECT route_key, class, cid FROM lap WHERE route_key LIKE 'route:%' AND void=0"):
+        _lap_tot[_rk2] += 1
+        if _lc2 and _lc2 != "?":
+            _lap_cls[_rk2][_lc2] += 1
+        _o2 = _cid2.split("|", 1)[0] if _cid2 else None
+        if _o2:
+            _lap_car[_rk2][_carname.get(_o2, "car %s" % _o2)] += 1
     _spawn = {}
     try:
         import sys as _sys
@@ -456,12 +473,16 @@ def main(argv=None):
         _rk = "route:%s" % rid
         _classes = sorted(_name_cls.get(r["name"], ()), key=lambda c: _clsorder.get(c, 99))
         _cdata = sorted(_driven.get(_rk, ()), key=lambda c: _clsorder.get(c, 99))
+        _lc = _lap_cls.get(_rk) or {}        # per-class lap counts, ladder order then any off-ladder class
+        _lap_by_cls = [[c, _lc[c]] for c in _CLASS_ORDER if c in _lc] + [[c, _lc[c]] for c in _lc if c not in _clsorder]
+        _lap_by_car = _lap_car[_rk].most_common() if _rk in _lap_car else []
         world["routes"][rid] = {"len": r["length_m"], "loop": r["is_loop"],
                                 "name": r["name"] or _course_names.get(_rk), "name_confidence": r["name_confidence"],
                                 "is_race": bool(r["is_race"]), "modes": sorted(_mode.get(rid, ())),
                                 "disc": (_dc.most_common(1)[0][0] if _dc else None),
-                                "spawn": _spawn.get(str(rid)), "laps": _laps, "sessions": _sess,
-                                "classes": _classes, "class_data": _cdata, "pts": pts}
+                                "spawn": _spawn.get(str(rid)), "laps": _lap_tot.get(_rk, 0), "sessions": _sess,
+                                "classes": _classes, "class_data": _cdata,
+                                "lap_class": _lap_by_cls, "lap_car": _lap_by_car, "pts": pts}
         xs += [p[0] for p in pts]; zs += [p[1] for p in pts]
     if xs:
         world["bbox"] = [min(xs), max(xs), min(zs), max(zs)]

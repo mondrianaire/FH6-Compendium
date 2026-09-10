@@ -877,7 +877,30 @@ body.fixed main{padding:0;gap:0;border-top:0}
 #leftHd .cpill-badges .pib{font-size:9px;border-radius:3px;flex:0 0 auto}
 #leftHd .cpill-badges .pib b{padding:1px 4px;text-shadow:none}
 #leftHd .cpill-badges .bb{flex:0 0 auto}
+#leftHd .cpill-badges .pib-n{display:none}   /* the inline count crowds the tight badge row; it lives in the drawer */
 .chip.dim{border-color:var(--line2);color:var(--dim)}
+/* QUICK STATS DRAWER (Jett 2026-09-09): the course pill expands on hover into laps-by-class and laps-by-car
+   counts — the at-a-glance course panel (the full one, car x class + per-turn analysis, comes later). */
+#leftHd .cpill{position:relative}
+.cps-caret{font-style:normal;font-size:9px;color:var(--dim);flex:0 0 auto;cursor:default}
+.cpill.has-stats:hover .cps-caret{color:var(--ink)}
+.cpstats{position:absolute;top:100%;left:44px;margin-top:6px;z-index:210;display:none;min-width:330px;max-width:540px;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.cpill.has-stats:hover .cpstats{display:block}
+.cps-h{font:700 9.5px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--dim);
+  display:flex;align-items:center;gap:7px;margin:0 0 6px}
+.cps-h:not(:first-child){margin-top:12px}
+.cps-h i{font-style:normal;font-weight:700;color:var(--ink);font-family:var(--sans);font-size:11px;
+  background:var(--bg);border-radius:999px;padding:0 7px;line-height:16px}
+.cps-row{display:flex;flex-wrap:wrap;gap:7px}
+.cps-c{display:inline-flex;align-items:center;gap:4px}
+.cps-c i{font-style:normal;font-size:11.5px;font-weight:700;color:var(--ink)}
+.cps-cars{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px}
+.cps-car{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;min-width:0;padding:1px 0}
+.cps-cn{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cps-car i{font-style:normal;font-weight:700;color:var(--mut);flex:0 0 auto}
+.cps-more{grid-column:1/-1;font-size:10px;color:var(--dim);margin-top:3px}
 /* miniature performance-class pills (one per class a Rivals course is offered in) — the established piBadge, shrunk */
 .tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
 .tcls .pib{font-size:8px;border-radius:3px}

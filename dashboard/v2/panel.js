@@ -1267,6 +1267,7 @@ function paintLeft() {
       is_race: _wr ? _wr.is_race : !!COURSE.rivals,
       modes: (_wr && _wr.modes) || (COURSE.rivals ? ["rivals"] : []),
       disc: _wr && _wr.disc, classes: (_wr && _wr.classes) || [], class_data: (_wr && _wr.class_data) || [],
+      lap_class: (_wr && _wr.lap_class) || [], lap_car: (_wr && _wr.lap_car) || [],
       laps: (COURSE.laps || []).length, lapsDrawn: nSel, turns: (COURSE.turns || []).length,
       kindLabel: COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null,
       nameChip: nameChip(COURSE.naming),
@@ -1333,8 +1334,12 @@ function courseInfoPill(r, state) {
   if (r.alsoName) meta.push("shares road with " + r.alsoName);
   const metaS = meta.join(" · ");
   const dataSet = new Set(r.class_data || []);   // solid = we hold laps in that class, hollow = offered only
-  const pills = (r.classes || []).map((cl) =>
-    `<span class="pib pib--sm pib-${cl.toLowerCase()}${dataSet.has(cl) ? "" : " pib--neg"}" title="class ${cl}${dataSet.has(cl) ? " · has data" : " · no data yet"}"><b>${esc(cl)}</b></span>`).join("");
+  const lapCls = r.lap_class || [], lapCar = r.lap_car || [];   // real per-class / per-car lap counts (void=0)
+  const clsN = {}; lapCls.forEach(([c, n]) => { clsN[c] = n; });
+  const pills = (r.classes || []).map((cl) => {
+    const n = clsN[cl], has = dataSet.has(cl) || n;
+    return `<span class="pib pib--sm pib-${cl.toLowerCase()}${has ? "" : " pib--neg"}" title="class ${cl}${n ? " · " + n + " lap" + (n === 1 ? "" : "s") : has ? " · has data" : " · no data yet"}"><b>${esc(cl)}</b>${n ? `<i class="pib-n">${n}</i>` : ""}</span>`;
+  }).join("");
   const badges = [(r.modes || []).includes("rivals") ? `<span class="bb riv">rivals</span>` : "",
                   (r.modes || []).includes("career") ? `<span class="bb car">career</span>` : "",
                   r.disc ? `<span class="bb dsc">${esc(r.disc)}</span>` : ""].join("");
@@ -1342,13 +1347,31 @@ function courseInfoPill(r, state) {
                : state === "route" ? `<span class="chip w">${MODE.game === "event" ? "ON EVENT ROUTE" : "ON ROUTE"}</span>`
                : state === "course" ? `<span class="chip on">ON COURSE</span>`
                : `<span class="chip dim">top of list</span>`;
-  return `<div class="cpill" data-state="${esc(state)}">
+  // QUICK STATS DRAWER (Jett 2026-09-09): the pill expands on hover into laps-by-class and laps-by-car
+  // counts. This is the at-a-glance panel; the full course panel (car x class, per-turn analysis) is later.
+  const totLaps = lapCls.reduce((a, kv) => a + kv[1], 0);
+  const CAR_CAP = 10;
+  const clsRow = lapCls.length ? lapCls.map(([c, n]) =>
+      `<span class="cps-c"><span class="pib pib--sm pib-${c.toLowerCase()}"><b>${esc(c)}</b></span><i>${n}</i></span>`).join("")
+      : `<span class="why">no laps yet</span>`;
+  const carRows = lapCar.slice(0, CAR_CAP).map(([lbl, n]) =>
+      `<div class="cps-car"><span class="cps-cn" title="${esc(lbl)}">${esc(lbl)}</span><i>${n}</i></div>`).join("")
+      + (lapCar.length > CAR_CAP ? `<div class="cps-more">+${lapCar.length - CAR_CAP} more car${lapCar.length - CAR_CAP === 1 ? "" : "s"}</div>` : "");
+  const hasStats = lapCls.length || lapCar.length;
+  const stats = hasStats ? `<div class="cpstats">
+      <div class="cps-h">laps by class<i>${totLaps}</i></div>
+      <div class="cps-row">${clsRow}</div>
+      <div class="cps-h">laps by car<i>${lapCar.length}</i></div>
+      <div class="cps-cars">${carRows}</div>
+    </div>` : "";
+  return `<div class="cpill${hasStats ? " has-stats" : ""}" data-state="${esc(state)}">
     <span class="cpill-glyph">${tileSvg(r, false)}</span>
     <span class="cpill-txt">
-      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${r.nameChip || ""}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${stChip}</span>
+      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${r.nameChip || ""}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${stChip}${hasStats ? `<i class="cps-caret" title="lap breakdown by class and car">▾</i>` : ""}</span>
       <span class="why cpill-l2" title="${esc(metaS)}">${esc(metaS)}</span>
     </span>
     <span class="cpill-badges">${pills}${badges}</span>
+    ${stats}
   </div>`;
 }
 

@@ -65,8 +65,28 @@ function vcourse(key) {
 // course you were standing on. `held` = seeded from the previous page, not yet confirmed.
 let MODE = { suggest: null, reason: "waiting for the daemon", kind: null, game: null, known: false, held: false };
 const liveKnown = () => LIVE.frame != null || LIVE.receiving === false;
+let PENDING_FREE = null, FREE_TIMER = 0;
 function adoptMode(m) {
   if (!m) return;
+  // COURSE MODE IS STICKY ACROSS A PAUSE (Jett 2026-09-10): a menu is not free roam, and on resume the game
+  // briefly reads free-roam before the event/loop re-registers. So a drop from "course" to "free" is DEFERRED
+  // and only applied if it PERSISTS past a settle window -- a resume transient is held on the course, but a
+  // genuine move to free roam (free still suggested after the window, not in a menu) switches as before.
+  if (m.suggest === "free" && MODE.suggest === "course" && COURSE) {
+    PENDING_FREE = m;
+    if (m.game !== undefined) MODE.game = m.game;
+    clearTimeout(FREE_TIMER);
+    FREE_TIMER = setTimeout(() => {
+      if (!PENDING_FREE || LIVE.inMenu || MODE.suggest !== "course") { PENDING_FREE = null; return; }
+      const mm = PENDING_FREE; PENDING_FREE = null;
+      const prev = { suggest: MODE.suggest, game: MODE.game };
+      MODE.suggest = "free"; MODE.reason = mm.reason || MODE.reason; MODE.known = true; MODE.held = false;
+      if (mm.game !== undefined) MODE.game = mm.game;
+      onModeChange(prev, MODE);
+    }, 6000);
+    return;
+  }
+  PENDING_FREE = null; clearTimeout(FREE_TIMER);   // a real course/event/decode suggestion supersedes a pending free
   const prev = { suggest: MODE.suggest, game: MODE.game };
   if (m.game !== undefined) MODE.game = m.game;
   if (m.kind !== undefined) MODE.kind = m.kind;

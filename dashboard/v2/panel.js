@@ -807,7 +807,7 @@ function wireTrace(el) {
   el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
-  const rc = el.querySelector("[data-racing]"); if (rc) rc.onclick = () => { RACING_ONLY = !RACING_ONLY; VIEW.global.racingOnly = RACING_ONLY; viewSave(); try { localStorage.setItem("fh6RacingOnly", RACING_ONLY ? "1" : "0"); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); };
+  const rc = el.querySelector("[data-racing]"); if (rc) rc.onclick = () => { RACING_ONLY = !RACING_ONLY; VIEW.global.racingOnly = RACING_ONLY; viewSave(); try { localStorage.setItem("fh6RacingOnly", RACING_ONLY ? "1" : "0"); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); if (MODE.suggest === "course" && COURSE) paintRight(); };
   const sv = el.querySelector("svg.tsvg[data-pts]"); if (!sv) return;
   let P = []; try { P = JSON.parse(sv.dataset.pts || "[]"); } catch (e) { P = []; }
   if (!P.length) return;
@@ -2378,10 +2378,18 @@ function phaseCells(obs, lapSet) {
 // the lap set the trace preset (all / this class / this car / this build / same hardware / this tune)
 // is showing -- so the corner strip and turn stats separate by class / build / tune with the SAME
 // filter as the map traces. Aggregation uses the FULL lap list, not the drawn traces (capped at 400).
+// RACING-ONLY (default) also gates it, matching the speed trace: cruise/drift/rewound laps drop out of
+// the corner medians too. Falls back to the ungated preset set if racing would blank it.
 function activeLapSet() {
   const preset = traceSel(COURSE).preset;
-  return { set: new Set((COURSE.laps || []).filter(presetTest(preset)).map((l) => String(l.id))),
-           label: (PRESETS.find((p) => p[0] === preset) || ["", "all laps"])[1] };
+  let ids = (COURSE.laps || []).filter(presetTest(preset)).map((l) => String(l.id));
+  let label = (PRESETS.find((p) => p[0] === preset) || ["", "all laps"])[1];
+  if (RACING_ONLY) {
+    const race = racingIds(COURSE.laps || []);
+    const gated = ids.filter((id) => race.has(id));
+    if (gated.length) { ids = gated; label += " · racing"; }
+  }
+  return { set: new Set(ids), label };
 }
 function cornerStripHTML(ls, sel) {
   const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);

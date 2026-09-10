@@ -26,6 +26,11 @@ import re
 import shutil
 import sys
 
+try:
+    import numpy as _np                                   # trace arc re-anchoring (nearest-point projection)
+except Exception:                                         # noqa: BLE001
+    _np = None
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)
@@ -309,6 +314,47 @@ def main(argv=None):
                            for r in cx.execute(
                                "SELECT arc_m, mph, grip, x, z, elev_m FROM lap_point WHERE lap_id=? ORDER BY i",
                                (lid,))]
+        # RE-ANCHOR TRACE ARC TO ONE COMMON FRAME (Jett 2026-09-10). Each lap's stored arc starts wherever
+        # its recording began, so on a LOOP a free-roam lap sits half a lap off the Rivals laps and the
+        # speed-trace overlay is incoherent (Irokawa: the S1 free-roam laps were ~900 m out of phase). A lap
+        # ALREADY has a correct, monotonic internal arc -- only its ORIGIN differs -- so we find one circular
+        # OFFSET to the longest lap (the same reference the turn ticks project onto) and shift the whole lap
+        # by it. The offset is the MODAL per-point delta (ref_arc - own_arc) mod L, which is immune to the
+        # nearest-point mis-projections that plague a loop where the road passes near itself. Then rotate each
+        # lap to begin at the frame origin so its arc runs monotonically 0..L. Spatial; the turn/corner joins
+        # never used trace arc, so they are unaffected.
+        if _np is not None and traces:
+            _ref = max(traces.values(), key=len)
+            _rp = [(p[0], p[3], p[4]) for p in _ref if p[3] is not None and p[4] is not None and p[0] is not None]
+            _L = _rp[-1][0] if _rp else 0
+            if len(_rp) >= 8 and _L > 1:
+                _RA = _np.array([q[0] for q in _rp], float)
+                _RX = _np.array([q[1] for q in _rp], float)
+                _RZ = _np.array([q[2] for q in _rp], float)
+                for lid, tr in traces.items():
+                    ix = [k for k, p in enumerate(tr) if p[3] is not None and p[4] is not None and p[0] is not None]
+                    if len(ix) < 12:
+                        continue
+                    PX = _np.array([tr[k][3] for k in ix], float)
+                    PZ = _np.array([tr[k][4] for k in ix], float)
+                    OWN = _np.array([tr[k][0] for k in ix], float)
+                    nn = ((_RX[None, :] - PX[:, None]) ** 2 + (_RZ[None, :] - PZ[:, None]) ** 2).argmin(axis=1)
+                    deltas = _np.mod(_RA[nn] - OWN, _L)                  # per-point origin offset (mod loop)
+                    # modal offset: the delta with the most neighbours within a 60 m circular window,
+                    # then the circular mean of that cluster -- robust to self-approach mis-projections
+                    dl = deltas.tolist()
+                    best_d, best_c = dl[0], -1
+                    for d in dl:
+                        cc = int(_np.sum(_np.mod(deltas - d, _L) < 60.0))
+                        if cc > best_c:
+                            best_c, best_d = cc, d
+                    rel = _np.mod(deltas - best_d, _L)
+                    off = (best_d + float(rel[rel < 60.0].mean())) % _L
+                    for k in ix:
+                        tr[k][0] = round(float((tr[k][0] + off) % _L), 1)
+                    mi = min(ix, key=lambda k: tr[k][0])
+                    if mi > 0:
+                        traces[lid] = tr[mi:] + tr[:mi]
         turns = rows(cx, """
             SELECT turn_id AS id, seq, arc_m AS s, apex_x AS x, apex_z AS z, radius_m AS r,
                    angle_deg AS deg, kind, n_obs AS n

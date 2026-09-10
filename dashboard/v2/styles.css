@@ -911,6 +911,25 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .pc-empty{background:var(--line2);box-shadow:inset 0 0 0 1px var(--line)}
 .pstrip-h{margin-bottom:3px}
 .pstrip-h .pcells span{flex:1 1 0;text-align:center;font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.03em}
+/* a strip row is a turn selector: hover lifts it, the picked turn stays lit (its phases paint on the map) */
+.pstrip--pick{cursor:pointer;border-radius:3px;padding:1px 4px;margin:0 -4px;transition:background .1s}
+.pstrip--pick:hover{background:var(--line)}
+.pstrip--pick.sel{background:var(--sel,rgba(120,160,255,.16));box-shadow:inset 0 0 0 1px var(--acc2)}
+.pstrip--pick.sel .ptn{color:var(--acc2)}
+/* FULL TURN STATISTICS card — geometry chips over a per-phase behaviour table */
+.tstat{border:1px solid var(--acc2);border-radius:6px;padding:4px 8px 8px;margin-bottom:10px;background:var(--panel2,rgba(120,160,255,.05))}
+.tstat-h{display:flex;align-items:center;gap:2px}
+.tstat-h b{font:700 13px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink)}
+.tstat-h [data-turnclear]{margin-left:auto}
+.tstat-geo{display:flex;flex-wrap:wrap;gap:5px 7px;margin:5px 0 7px}
+.tstat-geo span{font:600 11px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
+.tstat-geo em{font-style:normal;color:var(--dim);text-transform:uppercase;font-size:8.5px;letter-spacing:.06em;margin-right:5px}
+.tstat-ph{width:100%;border-collapse:collapse;font-size:11px}
+.tstat-ph th{font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em;padding:2px 4px;text-align:center}
+.tstat-ph th:first-child{text-align:left}
+.tstat-ph td{padding:3px 4px;border-top:1px solid var(--line)}
+.tstat-ph tr.off{opacity:.4}
+.pdot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 /* miniature performance-class pills (one per class a Rivals course is offered in) — the established piBadge, shrunk */
 .tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
 .tcls .pib{font-size:8px;border-radius:3px}

@@ -20,6 +20,7 @@ Run:  python scripts/db/build_web.py [--db PATH] [--out DIR]
 import argparse
 import collections as _cl
 import json
+import math
 import os
 import re
 import shutil
@@ -105,6 +106,52 @@ def write(path, obj):
 
 def rows(cx, sql, *a):
     return [dict(r) for r in cx.execute(sql, a)]
+
+
+def _route_arc(rpts):
+    """Cumulative ROUTE arc (metres) at each ordered centre-line point. The segment spans in
+    ref_route_turn are measured along this same arc, so this is the frame that maps a phase span
+    back to world x/z for the map overlay."""
+    arc = [0.0]
+    for i in range(1, len(rpts)):
+        arc.append(arc[-1] + math.hypot(rpts[i][0] - rpts[i - 1][0], rpts[i][1] - rpts[i - 1][1]))
+    return arc
+
+
+def _phase_geom(rpts, arc, seg_json):
+    """Per-phase world polyline along the route centre-line, sliced from the turn's ROUTE-arc
+    segment spans {phase:[a,b]}. Adjacent phases SHARE a boundary point (turn-in starts where
+    braking ends) so the coloured overlay reads as one continuous corner; a span that wraps the
+    start/finish (a>b, loop routes) is stitched across the seam. Coordinates only -- the raw arc
+    spans never reach the client (the map draws in world x/z)."""
+    try:
+        segs = json.loads(seg_json)
+    except Exception:                                     # noqa: BLE001
+        return None
+    n = len(rpts)
+    if n < 2:
+        return None
+
+    def nearest(x):                                       # index of the point whose arc is closest to x
+        lo, hi = 0, n - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if arc[mid] < x:
+                lo = mid + 1
+            else:
+                hi = mid
+        if lo > 0 and abs(arc[lo - 1] - x) <= abs(arc[lo] - x):
+            return lo - 1
+        return lo
+
+    out = {}
+    for name, ab in segs.items():
+        a, b = ab[0], ab[1]
+        i0, i1 = nearest(a), nearest(b)
+        idx = list(range(i0, i1 + 1)) if a <= b else list(range(i0, n)) + list(range(0, i1 + 1))
+        if len(idx) >= 2:
+            out[name] = [[round(rpts[i][0], 1), round(rpts[i][1], 1)] for i in idx]
+    return out or None
 
 
 # ---- naming candidates: every event course_event considered for a route_key, closest match
@@ -336,7 +383,7 @@ def main(argv=None):
         _rid = route and route.get("route_id")
         if _rid and traces:
             grows = rows(cx, """SELECT turn_id AS id, turn_id, seq, apex_x AS x, apex_z AS z, radius_m AS r,
-                                       angle_deg AS deg, kind, dir, width_m AS width, bank_deg AS bank
+                                       angle_deg AS deg, kind, dir, width_m AS width, bank_deg AS bank, segments
                                 FROM ref_route_turn WHERE route_id=? ORDER BY apex_arc_m""", _rid)
             _pl = max(traces.values(), key=len)                       # longest lap = the projection reference
             _lp = [(p[0], p[3], p[4]) for p in _pl if len(p) > 4 and p[3] is not None]
@@ -367,6 +414,19 @@ def main(argv=None):
                     _geo.sort(key=lambda t: t["s"])                   # driven order (handles reverse + fragments)
                     for i, t in enumerate(_geo, 1):
                         t["seq"] = i                                  # display index; turn_id stays the stable key
+                    # PER-TURN PHASE GEOMETRY (2026-09-10): slice the route centre-line by each turn's
+                    # stored ROUTE-arc segment spans into world polylines, so the Turn-analysis map can
+                    # paint the 5 phases of a selected turn. Computed from the FULL centre-line (never the
+                    # covered-trimmed route["path"]), since the spans are measured along the full route arc.
+                    _fp = [(r["x"], r["z"]) for r in cx.execute(
+                        "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i", (_rid,))]
+                    _fa = _route_arc(_fp) if len(_fp) >= 2 else None
+                    for t in _geo:
+                        sj = t.pop("segments", None)
+                        if _fa and sj:
+                            sg = _phase_geom(_fp, _fa, sj)
+                            if sg:
+                                t["seg"] = sg
                     turns = _geo
         c["turns"] = len(turns)                                       # course-card count == what the detail view draws
         # PER-PHASE CORNER STRIP (2026-09-10): raw per-lap corner_segment observations per displayed turn,

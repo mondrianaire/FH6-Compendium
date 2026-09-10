@@ -333,22 +333,45 @@ function courseMap(c, opts) {
   const _split = (typeof splitTP === "function") ? splitTP : (p) => (p && p.length ? [p] : []);
   const line = (p, col, w, op) => (p && p.length) ? _split(p).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}"
       opacity="${op}" stroke-linejoin="round" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
-  const turns = (c.turns || []).filter((t) => t.x != null).map((t) =>
-    `<g><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="3.5" fill="var(--acc2)" opacity=".9"><title>${esc(turnLabel(t))} · ${n0(t.r)} m radius</title></circle>
-     <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="9" fill="var(--mut)">${esc(turnLabel(t))}</text></g>`).join("");
+  // TURN-ANALYSIS SELECTION (Jett 2026-09-10): a picked turn paints its 5 phases along the route
+  // centre-line (braking→turn-in→mid→exit→straight) and lifts its own marker; the rest dim back so
+  // the selected corner reads alone. Palette + phase geometry (t.seg) come from panel.js / build_web.
+  const tp = opts.turnPick != null ? +opts.turnPick : null;
+  const selT = tp != null ? (c.turns || []).find((t) => t.seq === tp) : null;
+  const SC = (typeof SEG_COL !== "undefined") ? SEG_COL : {};
+  const SO = (typeof SEG_ORDER !== "undefined") ? SEG_ORDER : ["braking", "turn_in", "mid", "exit", "straight"];
+  const SL = (typeof SEG_LABEL !== "undefined") ? SEG_LABEL : {};
+  const phaseOv = (selT && selT.seg) ? SO.map((name) => {
+    const pp = selT.seg[name]; if (!pp || pp.length < 2) return "";
+    return `<polyline fill="none" stroke="${SC[name] || "#888"}" stroke-width="6" stroke-linecap="round"
+        stroke-linejoin="round" opacity=".95" points="${pp.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}">
+        <title>${esc(turnLabel(selT))} · ${esc(SL[name] || name)}</title></polyline>`;
+  }).join("") : "";
+  const turns = (c.turns || []).filter((t) => t.x != null).map((t) => {
+    const on = tp != null && t.seq === tp;
+    const dim = tp != null && !on;
+    return `<g data-turn="${t.seq}" style="cursor:pointer">
+      <circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="${on ? 6 : 3.5}" fill="${on ? "#fff" : "var(--acc2)"}"
+        stroke="${on ? "#111" : "none"}" stroke-width="${on ? 1.6 : 0}" opacity="${dim ? 0.35 : 0.9}"><title>${esc(turnLabel(t))} · ${n0(t.r)} m radius</title></circle>
+      <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="${on ? 11 : 9}"
+        font-weight="${on ? 700 : 400}" fill="${on ? "var(--ink)" : "var(--mut)"}" opacity="${dim ? 0.4 : 1}">${esc(turnLabel(t))}</text></g>`;
+  }).join("");
+  const phaseKey = (selT && selT.seg) ? SO.filter((n) => selT.seg[n]).map((n) =>
+    `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("") : "";
   return el(`<div class="panel" style="margin-top:12px">
     <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${line(theirs, "#3d4a5a", 9, 0.55)}
       ${line(theirs, "#8fa0b3", 1.4, 0.9)}
-      ${paths.map((p, i) => (i === foreIx ? "" : line(p, "#00d27a", 1, 0.28))).join("")}
-      ${foreIx >= 0 ? line(paths[foreIx], "#4ea3ff", 2.2, 0.95) : line(ours, "#00d27a", 2, 0.95)}
-      ${turns}<g id="traceMark"></g>
+      ${paths.map((p, i) => (i === foreIx ? "" : line(p, "#00d27a", 1, tp != null ? 0.14 : 0.28))).join("")}
+      ${foreIx >= 0 ? line(paths[foreIx], "#4ea3ff", 2.2, 0.95) : line(ours, "#00d27a", 2, tp != null ? 0.45 : 0.95)}
+      ${phaseOv}${turns}<g id="traceMark"></g>
     </svg>
     <div class="legend">
       <span><i style="background:#7d8b9c"></i>the game's centre-line for this route</span>
       <span><i style="background:#00d27a"></i>${paths.length ? paths.length + (paths.length === 1 ? " lap drawn" : " laps drawn") : "where you actually drove"}</span>
       ${foreIx >= 0 ? `<span><i style="background:#4ea3ff"></i>the lap the trace foregrounds</span>` : ""}
-      <span><i style="background:#4ea3ff"></i>a turn the analyzer established</span></div></div>`);
+      <span><i style="background:#4ea3ff"></i>a turn the analyzer established</span>
+      ${phaseKey}</div></div>`);
 }
 
 const GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];

@@ -423,6 +423,22 @@ let TRACE_ALL = (() => { try { return localStorage.getItem("fh6PaintAll") === "1
 let TRACE_KEY = null;
 let TRACE_PICK = null;
 let TRACE_FIT = 0;
+// THE 5-PHASE TURN LANGUAGE (Jett 2026-09-10) — the WHERE axis of a corner, coloured the same on
+// the map overlay and in the turn-detail card. Matches the offline analyzer's turn-phases render
+// (gen_segments.py): braking and straight/crest are the connectors, turn-in→mid→exit the corner.
+const SEG_ORDER = ["braking", "turn_in", "mid", "exit", "straight"];
+const SEG_COL = { braking: "#6c8cf0", turn_in: "#45c8b0", mid: "#f0b429", exit: "#63d19e", straight: "#8a95a5" };
+const SEG_LABEL = { braking: "Braking", turn_in: "Turn-in", mid: "Mid-corner", exit: "Exit", straight: "Straight / crest" };
+// which course turn (by display seq) is selected for the map highlight + right-pane stats; scoped to
+// a course key so a stale pick from another course is simply ignored, never mis-applied.
+let TURN_PICK = null;
+function turnPickSeq() { return (TURN_PICK && COURSE && TURN_PICK.key === COURSE.key) ? TURN_PICK.seq : null; }
+function pickTurn(seq) {
+  const s = seq == null ? null : +seq;
+  const cur = turnPickSeq();
+  TURN_PICK = (s == null || s === cur) ? null : { key: COURSE && COURSE.key, seq: s };   // click the same turn to clear
+  LEFT_KEY = null; paintLeft(); paintRight();
+}
 // the chip row never scrolls sideways: keep the chips that fit, count the rest
 function fitChips(row, total) {
   if (!row) return;
@@ -1271,7 +1287,7 @@ function paintLeft() {
   // live dot ride on the map that is already there.
   // BROWSE_PICK is deliberately NOT in this key: a browser pick must NOT rebuild the map (that would kill the
   // viewBox animation) — browsePick() updates the highlight + eases the frame on the SVG that is already there.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game]);
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, MODE.game, turnPickSeq()]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
@@ -1294,7 +1310,7 @@ function paintLeft() {
       nameChip: nameChip(COURSE.naming),
     }, "course");
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
-    body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore }));
+    body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq() }));
     // courseMap() draws its own inline legend (shared with the v1 course page) — lift it into
     // the floating drawer instead of leaving it inline, and unwrap the panel box around the svg
     // so the map itself gets the space both were holding.
@@ -1308,6 +1324,9 @@ function paintLeft() {
     // to the pane; the adaptive zoom stays a free-view-only tool, so a course reads as one stable shape.
     body.insertAdjacentHTML("beforeend", mapDrawerHTML(`<div class="legend">${legendHTML}</div>${mapFilterBar(COURSE)}`));
     wireTrace(body); wireMapDrawer(body); addLiveDot(body);
+    // a turn marker selects that turn (highlight its phases here, full stats on the right); the SVG
+    // is rebuilt on select, so re-bind every paint. Clicking the selected marker again clears it.
+    body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
   } else {
     paintLeftHeader();
     body.innerHTML = worldMapHTML();
@@ -2076,6 +2095,10 @@ function paintRight() {
   body.querySelectorAll("[data-svcrefresh]").forEach((b) => b.onclick = () => svcRefresh());
   if (!SVC.list.length && !SVC.err && body.querySelector(".svcrow, [data-svcrefresh]")) svcRefresh();
   if (cur === "browser") wireBrowser(body);
+  if (cur === "matrix") {
+    body.querySelectorAll("[data-turn]").forEach((r) => r.onclick = () => pickTurn(r.dataset.turn));
+    const cl = body.querySelector("[data-turnclear]"); if (cl) cl.onclick = () => pickTurn(null);
+  }
   if (cur !== "matrix" && cur !== "browser") fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
     setPin(CUR.ordinal, b.dataset.pickts); if (COURSE) { vcourse(COURSE.key).filters.container = b.dataset.cont; viewSave(); }
@@ -2207,27 +2230,64 @@ function phaseCells(obs, lapSet) {
     return `<span class="pcell" style="background:${g.col}" title="${name.replace("_", "-")} · ${p.n} lap${p.n === 1 ? "" : "s"} · entry ${p.entry ?? "—"} → min ${p.min ?? "—"} → exit ${p.exit ?? "—"} mph · ${g.word}">${lbl}</span>`;
   }).join("");
 }
-function cornerStripHTML() {
+// the lap set the trace preset (all / this class / this car / this build / same hardware / this tune)
+// is showing -- so the corner strip and turn stats separate by class / build / tune with the SAME
+// filter as the map traces. Aggregation uses the FULL lap list, not the drawn traces (capped at 400).
+function activeLapSet() {
+  const preset = traceSel(COURSE).preset;
+  return { set: new Set((COURSE.laps || []).filter(presetTest(preset)).map((l) => String(l.id))),
+           label: (PRESETS.find((p) => p[0] === preset) || ["", "all laps"])[1] };
+}
+function cornerStripHTML(ls, sel) {
   const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);
   if (!turns.length) return "";
-  // aggregate over ALL laps matching the active preset (from the full lap list), NOT the drawn traces --
-  // those are capped at 40 for legibility, but the phase rollup uses every clean lap that has corner data.
-  const preset = traceSel(COURSE).preset;
-  const lapSet = new Set((COURSE.laps || []).filter(presetTest(preset)).map((l) => String(l.id)));
-  const plabel = (PRESETS.find((p) => p[0] === preset) || ["", "all laps"])[1];
   const withData = new Set();
-  turns.forEach((t) => Object.values(t.phaseObs).forEach((rows) => rows.forEach((r) => { if (lapSet.has(String(r[0]))) withData.add(r[0]); })));
+  turns.forEach((t) => Object.values(t.phaseObs).forEach((rows) => rows.forEach((r) => { if (ls.set.has(String(r[0]))) withData.add(r[0]); })));
   const nLaps = withData.size;
-  return `<div class="grp"><div class="gh">Corner phases <span class="why">· ${esc(plabel)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · coloured by grip</span></div>
+  return `<div class="grp"><div class="gh">Corner phases <span class="why">· ${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · click a turn for its phases &amp; stats</span></div>
     <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>turn-in</span><span>mid</span><span>exit</span><span>straight</span></span></div>
-    ${turns.map((t) => `<div class="pstrip"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phaseObs, lapSet)}</span></div>`).join("")}</div>`;
+    ${turns.map((t) => `<div class="pstrip pstrip--pick${sel === t.seq ? " sel" : ""}" data-turn="${t.seq}"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phaseObs, ls.set)}</span></div>`).join("")}</div>`;
+}
+// FULL TURN STATISTICS (Jett 2026-09-10): the selected turn's geometry (from ref_route_turn) beside its
+// per-phase behaviour, aggregated over the active preset's laps. The map paints the same 5 phases.
+function turnStatsHTML(t, ls) {
+  const geo = [
+    t.kind ? ["kind", t.kind] : null,
+    t.r != null ? ["radius", Math.round(t.r) + " m"] : null,
+    t.deg != null ? ["angle", Math.round(t.deg) + "°"] : null,
+    t.dir ? ["direction", t.dir === "L" ? "left" : "right"] : null,
+    t.width != null ? ["road width", (+t.width).toFixed(1) + " m"] : null,
+    t.bank != null ? ["banking", (+t.bank).toFixed(1) + "°"] : null,
+    t.n != null ? ["passes on record", t.n] : null,
+  ].filter(Boolean);
+  const obs = t.phaseObs || {};
+  const phaseRows = SEG_ORDER.map((name) => {
+    const p = obs[name] && phaseAgg(obs[name], ls.set);
+    const g = p ? DGRIP[GSTATE[p.grip] || "calm"] : null;
+    return `<tr class="${p ? "" : "off"}">
+      <td><span class="pdot" style="background:${SEG_COL[name]}"></span>${esc(SEG_LABEL[name])}</td>
+      <td class="mono" style="text-align:center">${p && p.entry != null ? p.entry : "—"}</td>
+      <td class="mono" style="text-align:center">${p && p.min != null ? "<b>" + p.min + "</b>" : "—"}</td>
+      <td class="mono" style="text-align:center">${p && p.exit != null ? p.exit : "—"}</td>
+      <td style="text-align:center">${p ? `<span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${g.word}</span>` : "—"}</td>
+      <td class="mono" style="text-align:right">${p ? p.n : "—"}</td></tr>`;
+  }).join("");
+  return `<div class="grp tstat">
+    <div class="gh tstat-h"><b>${esc(turnLabel(t))}</b>${t.kind ? " · " + esc(t.kind) : ""}<span class="why"> · full turn statistics · ${esc(ls.label)}</span><button class="mini" data-turnclear>✕ clear</button></div>
+    <div class="tstat-geo">${geo.map(([k, v]) => `<span><em>${esc(k)}</em>${esc(String(v))}</span>`).join("")}</div>
+    <table class="tstat-ph"><thead><tr><th>phase</th><th>entry</th><th>min</th><th>exit</th><th>grip</th><th>laps</th></tr></thead>
+      <tbody>${phaseRows}</tbody></table></div>`;
 }
 function matrixHTML() {
   if (!COURSE || !(COURSE.turns || []).length) return `<div class="why">no turn map for this course yet</div>`;
-  const strip = cornerStripHTML();
+  const ls = activeLapSet();
+  const sel = turnPickSeq();
+  const selT = sel != null ? (COURSE.turns || []).find((t) => t.seq === sel) : null;
+  const detail = selT ? turnStatsHTML(selT, ls) : "";
+  const strip = cornerStripHTML(ls, sel);
   const cid = CUR && CUR.cid;
   const log = (LIVE.corners || []).filter((c) => !cid || c.car === cid);
-  if (!log.length) return strip || `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`;
+  if (!log.length) return detail + (strip || `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`);
 
   // ev===0 (free-roam) corners are excluded from turn rows, the same gate v1's matrix used — the
   // live ev stamp trusts a single apex-frame read today; see the daemon-side majority-vote hardening.
@@ -2273,7 +2333,7 @@ function matrixHTML() {
       </tr>`;
     }).join("")}
   </tbody></table></div>`;
-  return strip + head + table;
+  return detail + strip + head + table;
 }
 
 // Build data: what the save on disk gives exactly, what the union still has to measure, and the

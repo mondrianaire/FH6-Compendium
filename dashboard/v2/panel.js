@@ -2378,7 +2378,7 @@ function turnMap(c, t, ls) {
   const _split = (typeof splitTP === "function") ? splitTP : (p) => (p && p.length ? [p] : []);
   const ctx = road.length ? _split(road).map((run) => `<polyline fill="none" stroke="#3a4453" stroke-width="2" opacity=".4" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
   const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
-  const apex = t.x != null ? `<circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="8" fill="none" stroke="#fff" stroke-width="2"/><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="2.6" fill="#fff"><title>apex</title></circle>` : "";
+  const apex = t.x != null ? `<circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="8" fill="none" stroke="#fff" stroke-width="2"/><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="2.6" fill="#fff"><title>apex</title></circle><text x="${(px(t.x) + 11).toFixed(1)}" y="${(py(t.z) - 8).toFixed(1)}" font-size="14" font-weight="700" paint-order="stroke" stroke="#0b0e12" stroke-width="3.2" stroke-linejoin="round" fill="#fff">${esc(turnLabel(t))}</text>` : "";
   let chev = "";
   const lastP = phases.length ? segs[phases[phases.length - 1]] : null;
   if (lastP && lastP.length >= 2) {

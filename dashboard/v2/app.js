@@ -347,14 +347,20 @@ function courseMap(c, opts) {
         stroke-linejoin="round" opacity=".95" points="${pp.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}">
         <title>${esc(turnLabel(selT))} · ${esc(SL[name] || name)}</title></polyline>`;
   }).join("") : "";
+  // TURN NUMBERS ARE PRIMARY (Jett 2026-09-10): the map is how you pick a turn, so its number must read at
+  // a glance -- a legible, bold label with a dark halo (paint-order:stroke) so it stays sharp over the
+  // trace lines and the road, never a faint 9px tick. Clustered turns still separate because each number
+  // carries its own halo.
   const turns = (c.turns || []).filter((t) => t.x != null).map((t) => {
     const on = tp != null && t.seq === tp;
     const dim = tp != null && !on;
+    const lx = (px(t.x) + 7).toFixed(1), ly = (py(t.z) - 6).toFixed(1);
     return `<g data-turn="${t.seq}" style="cursor:pointer">
-      <circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="${on ? 6 : 3.5}" fill="${on ? "#fff" : "var(--acc2)"}"
-        stroke="${on ? "#111" : "none"}" stroke-width="${on ? 1.6 : 0}" opacity="${dim ? 0.35 : 0.9}"><title>${esc(turnLabel(t))} · ${n0(t.r)} m radius</title></circle>
-      <text x="${(px(t.x) + 6).toFixed(1)}" y="${(py(t.z) - 5).toFixed(1)}" font-size="${on ? 11 : 9}"
-        font-weight="${on ? 700 : 400}" fill="${on ? "var(--ink)" : "var(--mut)"}" opacity="${dim ? 0.4 : 1}">${esc(turnLabel(t))}</text></g>`;
+      <circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="${on ? 6 : 4}" fill="${on ? "#fff" : "var(--acc2)"}"
+        stroke="#0b0e12" stroke-width="${on ? 1.6 : 1}" opacity="${dim ? 0.4 : 1}"><title>${esc(turnLabel(t))} · ${n0(t.r)} m radius</title></circle>
+      <text x="${lx}" y="${ly}" font-size="${on ? 13 : 11}" font-weight="700" paint-order="stroke"
+        stroke="#0b0e12" stroke-width="3" stroke-linejoin="round" fill="${on ? "#fff" : "#e8edf3"}"
+        opacity="${dim ? 0.45 : 1}">${esc(turnLabel(t))}</text></g>`;
   }).join("");
   const phaseKey = (selT && selT.seg) ? SO.filter((n) => selT.seg[n]).map((n) =>
     `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("") : "";

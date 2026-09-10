@@ -55,7 +55,7 @@ def run(cx, aitracks, verbose=False):
             trows.append((r["route_id"], t["turn_id"], t["seq"], t["arc_m"], t["apex_arc_m"],
                           t["apex_x"], t["apex_y"], t["apex_z"], t["radius_m"],
                           t["peak_radius_m"], t["angle_deg"], t["dir"], t["kind"],
-                          t["length_m"], t["width_m"], t["bank_deg"]))
+                          t["length_m"], t["width_m"], t["bank_deg"], json.dumps(t["segments"])))
 
     # The course <-> route MATCH is no longer computed here (2026-09-05): stage course_match
     # (scripts/db/import_course_match.py) does it from the DB alone, after telemetry AND routes, so a
@@ -84,7 +84,7 @@ def run(cx, aitracks, verbose=False):
         n_t = fh6db.upsert_many(cx, "ref_route_turn", [
             "route_id", "turn_id", "seq", "arc_m", "apex_arc_m", "apex_x", "apex_y", "apex_z",
             "radius_m", "peak_radius_m", "angle_deg", "dir", "kind", "length_m", "width_m",
-            "bank_deg"], trows, chunk=2000)
+            "bank_deg", "segments"], trows, chunk=2000)
 
     return {"ref_route": n_r, "ref_route_point": n_p, "ref_route_turn": n_t}, {}
 

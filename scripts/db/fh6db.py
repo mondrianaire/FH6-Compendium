@@ -303,6 +303,7 @@ V2_COLUMNS = {
                      ("anchor_events", "INTEGER"), ("anchor_agree", "INTEGER")],
 }
 V2_COLUMNS["ref_route"].append(("is_race", "INTEGER"))
+V2_COLUMNS["ref_route_turn"] = [("segments", "TEXT")]   # the 5 turn-phase spans as JSON (2026-09-10)
 V2_TABLES = {
     "ref_event_string": """CREATE TABLE IF NOT EXISTS ref_event_string (
   event_id    TEXT NOT NULL REFERENCES ref_event(event_id) ON DELETE CASCADE,

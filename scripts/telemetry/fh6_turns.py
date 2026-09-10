@@ -45,6 +45,13 @@ SMOOTH_M = 10.0       # curvature smoothing window
 K_MIN = 1.0 / 260.0   # anything straighter than a 260 m radius is not a turn
 MIN_DEG = 11.0        # and a turn must actually sweep this far
 GAP_M = 18.0          # two runs of the same sign closer than this are one turn
+# STRAIGHTEN-AWARE SPLIT (2026-09-10): GAP_M bridges a sub-K_MIN dip so a genuine COMPOUND corner (the
+# road keeps curving) stays whole, but where the road actually STRAIGHTENS between two same-sign bends
+# they are two turns, not one. Cut a run at an interior stretch that falls below SPLIT_FLOOR x K_MIN
+# (near-straight) for at least SPLIT_GAP_M; MIN_DEG then drops any sliver. Fixes ~28% merged compounds
+# (Hakone T13 = two 90-deg lefts over a 12 m straight, and the 200-730-deg cross-country monsters).
+SPLIT_FLOOR = 0.5     # "straight" = |curvature| below half the turn threshold
+SPLIT_GAP_M = 8.0     # ... held that straight for at least this far
 
 
 def _finite(pts):
@@ -161,6 +168,25 @@ def turns_for(route, step=STEP_M, k_min=K_MIN, min_deg=MIN_DEG, gap_m=GAP_M):
         runs[0]["a"] = runs[-1]["a"] - n
         runs.pop()
 
+    # split each run wherever the road straightens (see SPLIT_FLOOR/SPLIT_GAP_M) -- a real straight
+    # between two same-sign bends means two turns, not one merged compound
+    floor = SPLIT_FLOOR * k_min
+    split = []
+    for rr in runs:
+        seg_start, in_s, s_len, s_from = rr["a"], False, 0.0, None
+        for j in range(rr["a"], rr["b"] + 1):
+            if abs(k[j % n]) < floor:
+                if not in_s:
+                    in_s, s_from, s_len = True, j, 0.0
+                s_len += step
+            else:
+                if in_s and s_len >= SPLIT_GAP_M and s_from > seg_start:
+                    split.append({"s": rr["s"], "a": seg_start, "b": s_from - 1})
+                    seg_start = j
+                in_s = False
+        split.append({"s": rr["s"], "a": seg_start, "b": rr["b"]})
+    runs = split
+
     out = []
     for r in runs:
         idx = [i % n for i in range(r["a"], r["b"] + 1)]
@@ -181,11 +207,25 @@ def turns_for(route, step=STEP_M, k_min=K_MIN, min_deg=MIN_DEG, gap_m=GAP_M):
         # which is stable against a single noisy sample. Peak curvature still locates the apex.
         arc_len = len(idx) * step
         radius = arc_len / sweep if sweep > 1e-6 else 1.0 / kap
-        p = rs[ai]
+        # GEOMETRIC APEX (2026-09-10): the marker/id sit at the VERTEX of the bend -- the run point
+        # farthest from the chord joining entry and exit -- not the max-curvature point (ai), which
+        # drifts off the visible apex on asymmetric and long corners. ai still gives dir + peak radius.
+        _p0, _p1 = rs[idx[0]], rs[idx[-1]]
+        _dx, _dz = _p1[0] - _p0[0], _p1[2] - _p0[2]
+        _cl = math.hypot(_dx, _dz) or 1.0
+        gi = max(idx, key=lambda i: abs((rs[i][0] - _p0[0]) * _dz - (rs[i][2] - _p0[2]) * _dx) / _cl)
+        p = rs[gi]
+        # 5-SEGMENT PHASES (WHERE, 2026-09-10): turn-in / mid / exit split by 80% of PEAK curvature --
+        # the geometry analogue of the daemon's 80%-of-peak-lat-g phases (memory fh6-turn-design-language).
+        # Mid = the >=80% window around the apex; braking (before) + straight/crest (after) fill in the
+        # post-pass once neighbours are known.
+        _thr = 0.8 * kap
+        _mid = [q for q, i in enumerate(idx) if abs(k[i]) >= _thr] or [idx.index(ai)]
+        _aarc = lambda i: round(arcs[i] if i < len(arcs) else arcs[-1], 1)
         out.append({
             "seq": 0,
             "arc_m": round(arcs[idx[0] % len(arcs)] if idx[0] < len(arcs) else 0.0, 1),
-            "apex_arc_m": round(arcs[ai] if ai < len(arcs) else 0.0, 1),
+            "apex_arc_m": round(arcs[gi] if gi < len(arcs) else 0.0, 1),
             "apex_x": round(p[0], 1), "apex_y": round(p[1], 1), "apex_z": round(p[2], 1),
             "radius_m": round(radius, 1),
             "peak_radius_m": round(1.0 / kap, 1),
@@ -195,12 +235,31 @@ def turns_for(route, step=STEP_M, k_min=K_MIN, min_deg=MIN_DEG, gap_m=GAP_M):
             "length_m": round(arc_len, 1),
             "width_m": round(p[3] * 2.0, 1) if p[3] else None,
             "bank_deg": round(p[4], 2) if p[4] is not None else None,
+            "_ti": _aarc(idx[0]), "_m0": _aarc(idx[_mid[0]]), "_m1": _aarc(idx[_mid[-1]]), "_ex": _aarc(idx[-1]),
         })
     out.sort(key=lambda t: t["apex_arc_m"])
     taken = set()
     for i, t in enumerate(out, 1):
         t["seq"] = i                                        # route order, for DISPLAY (T1..Tn); recomputed each pass
         t["turn_id"] = stable_turn_id(t["apex_arc_m"], t.get("dir"), taken)   # arc-anchored KEY: pass-invariant
+    # BRAKING (before turn-in) + STRAIGHT/CREST (after exit): the connectors, each capped so it never
+    # reaches into the neighbouring corner. Every turn then carries all five WHERE-segments as arc spans.
+    total = arcs[-1] or 1.0
+    BRAKE_M = RUNOUT_M = 45.0
+    m = len(out)
+    for i, t in enumerate(out):
+        prev = out[i - 1] if i > 0 else (out[-1] if (loop and m > 1) else None)
+        nxt = out[i + 1] if i + 1 < m else (out[0] if (loop and m > 1) else None)
+        b0 = (t["_ti"] - min(BRAKE_M, (t["_ti"] - prev["_ex"]) % total)) % total if prev \
+            else max(0.0, t["_ti"] - BRAKE_M)
+        s1 = (t["_ex"] + min(RUNOUT_M, (nxt["_ti"] - t["_ex"]) % total)) % total if nxt \
+            else min(total, t["_ex"] + RUNOUT_M)
+        t["segments"] = {"braking": [round(b0, 1), t["_ti"]], "turn_in": [t["_ti"], t["_m0"]],
+                         "mid": [t["_m0"], t["_m1"]], "exit": [t["_m1"], t["_ex"]],
+                         "straight": [t["_ex"], round(s1, 1)]}
+    for t in out:                                           # drop the temp boundaries after all neighbours are read
+        for kk in ("_ti", "_m0", "_m1", "_ex"):
+            t.pop(kk, None)
     return out
 
 

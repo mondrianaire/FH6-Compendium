@@ -199,7 +199,7 @@ async function panelBoot() {
   // the page's own chrome, from the view store, before anything paints
   DOCK_SPAN = vg("dockSpan", 600); FOLLOW.on = vg("follow", false) === true;
   BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null); BROWSE_DEV = vg("browseDev", false);
-  TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL);
+  TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL); RACING_ONLY = vg("racingOnly", RACING_ONLY) !== false;
   const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
   WORLD = w; DIAG = d; COURSES = c;
   // LEVEL OF DETAIL (2026-09-07, Jett: "point-to-point data ... paths should scale up gracefully on all
@@ -426,6 +426,10 @@ const PRESETS = [["all", "all"], ["class", "this class"], ["car", "this car"], [
 // page-wide paint choices, mirrored to the legacy keys the v1 dashboard still reads
 let TRACE_MODE = (() => { try { return localStorage.getItem("fh6SegMode") || "grip"; } catch (e) { return "grip"; } })();
 let TRACE_ALL = (() => { try { return localStorage.getItem("fh6PaintAll") === "1"; } catch (e) { return false; } })();
+// RACING-ONLY (Jett 2026-09-10): default ON. Hide non-competitive laps -- cruise/drift runs far off the
+// class pace, rewound laps (invalid clock), and over/under-covered laps -- so the speed trace compares
+// like with like. There is no stored race flag; "racing" is inferred from pace vs the class's own best.
+let RACING_ONLY = (() => { try { return localStorage.getItem("fh6RacingOnly") !== "0"; } catch (e) { return true; } })();
 let TRACE_KEY = null;
 let TRACE_PICK = null;
 let TRACE_FIT = 0;
@@ -528,7 +532,7 @@ function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
-  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0])
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -584,16 +588,34 @@ function impactMarks(pts) { const out = []; for (const q of pts) { if ((q[2] | 0
 function modeControls() {
   return `<span class="segctl"><span class="why">paint</span>${[["grip", "grip", "what the tyres did — the axle that let go, and where"], ["speed", "speed", "how fast, coloured across the lap's own range"]].map(([k, l, tip]) =>
     `<button class="mini ${TRACE_MODE === k ? "on" : ""}" data-tmode="${k}" title="${tip}">${l}</button>`).join("")}
-    <button class="mini ${TRACE_ALL ? "on" : ""}" data-tall title="paint every run, not only the foregrounded lap">every run</button></span>`;
+    <button class="mini ${TRACE_ALL ? "on" : ""}" data-tall title="paint every run, not only the foregrounded lap">every run</button>
+    <button class="mini ${RACING_ONLY ? "on" : ""}" data-racing title="show only competitive laps — hide cruise/drift runs far off the class pace, rewound laps, and over/under-covered laps. Off = every lap on record.">racing only</button></span>`;
 }
 const axisSvg = (ch, vmax) => [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10; return `<text x="2" y="${(ch.py(v) + 3).toFixed(1)}" font-size="8" fill="var(--dim)">${v}</text>`; }).join("");
 const cursorSvg = (H) => `<g class="cur" style="display:none"><line y1="6" y2="${H - 16}" stroke="var(--ink)" opacity=".6"/><circle r="3.5" fill="var(--ink)"/></g>`;
 
+// a "racing lap" -- inferred, since nothing stores the flag: clean (no void / partial / rewind), a
+// full single loop (coverage ~0.85-1.15), and within 30% of its OWN CLASS's best time. That keeps
+// every competitive B/S1/X lap and drops cruise/drift runs (Irokawa's were ~+100% off) and overruns.
+function racingIds(all) {
+  const best = {};
+  all.forEach((t) => { if (!t.void && !t.partial && !t.rewinds && t.t != null && (best[t.class] == null || t.t < best[t.class])) best[t.class] = t.t; });
+  return new Set(all.filter((t) => {
+    if (t.void || t.partial || t.rewinds) return false;
+    if (t.cov != null && (t.cov < 0.85 || t.cov > 1.15)) return false;
+    const b = best[t.class];
+    if (b != null && t.t != null && t.t > b * 1.30) return false;
+    return true;
+  }).map((t) => String(t.id)));
+}
 // the preset + dimension chips, shared by the trace pane and the map's own filter drawer — one
 // `vc` (per-course view store) backs both, so a click in either pane keeps them in lockstep.
 function traceFilterState(c) {
   const byId = {}; (c.laps || []).forEach((l) => (byId[String(l.id)] = l));
-  const all = Object.keys(c.traces).map((id) => Object.assign({ id, pts: c.traces[id] }, byId[id] || {})).filter((t) => t.pts && t.pts.length > 2);
+  const allRaw = Object.keys(c.traces).map((id) => Object.assign({ id, pts: c.traces[id] }, byId[id] || {})).filter((t) => t.pts && t.pts.length > 2);
+  // RACING-ONLY gate (default on) -- drop non-competitive laps unless it would blank the pane
+  const _race = racingIds(allRaw);
+  const all = (RACING_ONLY && _race.size) ? allRaw.filter((t) => _race.has(String(t.id))) : allRaw;
   const sel = traceSel(c), tf = sel.filters;
   // NEVER BLANK THE TRACE WHILE LAPS EXIST. traceSel() auto-defaults to "this class" on an event, but if you
   // are in a class you have never driven this course in, that preset is empty and the trace read "nothing to
@@ -659,7 +681,7 @@ function courseTrace(c) {
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
   const onRec = (c.laps || []).length;
-  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? " (traces capped)" : ""}${MODE.game === "event" ? " · timed event" : ""}</span>
+  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""}</span>
     <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${clearBtn}<span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
@@ -785,6 +807,7 @@ function wireTrace(el) {
   el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
+  const rc = el.querySelector("[data-racing]"); if (rc) rc.onclick = () => { RACING_ONLY = !RACING_ONLY; VIEW.global.racingOnly = RACING_ONLY; viewSave(); try { localStorage.setItem("fh6RacingOnly", RACING_ONLY ? "1" : "0"); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); };
   const sv = el.querySelector("svg.tsvg[data-pts]"); if (!sv) return;
   let P = []; try { P = JSON.parse(sv.dataset.pts || "[]"); } catch (e) { P = []; }
   if (!P.length) return;

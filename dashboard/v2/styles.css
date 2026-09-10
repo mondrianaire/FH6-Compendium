@@ -447,6 +447,12 @@ body.fixed .trace .lchip.livenow{box-shadow:inset 0 0 0 1px var(--acc2)}
 .trace .thd .mini.dim{opacity:.35}
 button.lchip{background:none;cursor:pointer;font-family:inherit;white-space:nowrap}
 button.lchip.hid{opacity:.35;text-decoration:line-through}
+/* clickable PI-class swatch in the speed-trace legend — click to spotlight that class's laps. The
+   `.trace .lchip` LAP-chip grid (150px swatch|time|meta) does not fit a class swatch, so override it
+   here (higher specificity) back to a compact content-width chip. */
+.trace .lchip.clshi,.lchip.clshi{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;width:auto;height:auto;padding:1px 7px;cursor:pointer;transition:box-shadow .1s,background .1s}
+.lchip.clshi:hover{box-shadow:0 0 0 1px var(--pc,var(--acc2)) inset}
+.lchip.clshi.on{font-weight:700;box-shadow:0 0 0 1.5px var(--pc,var(--acc2))}
 .hname .pill{font-size:11px;padding:3px 10px}
 @media (orientation: portrait){ .trace{height:240px} }
 

@@ -429,6 +429,7 @@ let TRACE_ALL = (() => { try { return localStorage.getItem("fh6PaintAll") === "1
 let TRACE_KEY = null;
 let TRACE_PICK = null;
 let TRACE_FIT = 0;
+let TRACE_CLS_HI = null;   // click a PI-class swatch in the speed-trace legend to spotlight that class's laps
 // THE 5-PHASE TURN LANGUAGE (Jett 2026-09-10) — the WHERE axis of a corner, coloured the same on
 // the map overlay and in the turn-detail card. Matches the offline analyzer's turn-phases render
 // (gen_segments.py): braking and straight/crest are the connectors, turn-in→mid→exit the corner.
@@ -527,7 +528,7 @@ function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
-  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0])
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -666,7 +667,11 @@ function courseTrace(c) {
       <span class="lcm">${what || off || (t.class ? esc(t.class) : "")}</span></button>`; }).join("");
   // in default mode the context lines are coloured by PI class -- show which classes are on the chart
   const clsPresent = [...new Set(match.map((t) => t.class).filter(Boolean))];
-  const piLeg = (!TRACE_ALL && clsPresent.length) ? `<span class="lchips pileg" title="context lines are coloured by the PI class of the build that drove each lap">${clsPresent.map((k) => `<span class="lchip key" style="border-color:${piColor(k)};background:${piColor(k)}22"><i style="background:${piColor(k)}"></i>${esc(k)}</span>`).join("")}</span>` : "";
+  if (TRACE_CLS_HI && !clsPresent.includes(TRACE_CLS_HI)) TRACE_CLS_HI = null;   // spotlight class fell out of view
+  // CLICK A CLASS SWATCH TO SPOTLIGHT IT (Jett 2026-09-10): clicking a class in the legend lifts that class's
+  // laps and dims the rest in the chart -- a highlight, not a filter (every lap stays on screen). Click again
+  // (or its ✕) to clear. The chips carry an `on` state so the current spotlight is obvious.
+  const piLeg = (!TRACE_ALL && clsPresent.length) ? `<span class="lchips pileg" title="click a class to spotlight its laps in the chart; the lines are coloured by the PI class that drove each lap">${clsPresent.map((k) => `<button class="lchip key clshi${TRACE_CLS_HI === k ? " on" : ""}" data-clshi="${esc(k)}" style="--pc:${piColor(k)};border-color:${piColor(k)};background:${piColor(k)}${TRACE_CLS_HI === k ? "44" : "22"}"><i style="background:${piColor(k)}"></i>${esc(k)}${TRACE_CLS_HI === k ? " ✕" : ""}</button>`).join("")}</span>` : "";
   const foot = `${piLeg}<span class="lchips">${live ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : ""}${leg}</span>`;
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
@@ -676,8 +681,17 @@ function courseTrace(c) {
     if (!match.length) return `<div class="why tempty">every matching lap is hidden — click a chip to show it</div>`;
     const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
     const ch = chart(W, H, 28, 16, smax, vmax);
-    // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity
-    const lines = match.map((t) => t === cur ? "" : (TRACE_ALL ? paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE, piColor(t.class)) : plainLine(t.pts, ch, piColor(t.class), t === best ? 1.8 : 1, t === best ? 0.95 : 0.5, notTimed(t)))).join("")
+    // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity.
+    // A class spotlight (TRACE_CLS_HI) lifts that class's laps and fades the rest -- highlight, not filter.
+    const hi = TRACE_CLS_HI;
+    const lines = match.map((t) => {
+      if (t === cur) return "";
+      if (TRACE_ALL) return paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE, piColor(t.class));
+      const other = hi && t.class !== hi, lit = hi && t.class === hi;
+      const w = lit ? Math.max(t === best ? 1.8 : 1, 1.7) : other ? 0.9 : (t === best ? 1.8 : 1);
+      const op = lit ? 0.98 : other ? 0.1 : (t === best ? 0.95 : 0.5);
+      return plainLine(t.pts, ch, piColor(t.class), w, op, notTimed(t));
+    }).join("")
       + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE, piColor(cur.class)) : "");
     const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(turnLabel(t))}</text>`).join("");
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
@@ -755,6 +769,7 @@ function wireTrace(el) {
   el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); paintTrace(); });
   el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); viewSave(); paintTrace(); });
   el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
+  el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
   const sv = el.querySelector("svg.tsvg[data-pts]"); if (!sv) return;
   let P = []; try { P = JSON.parse(sv.dataset.pts || "[]"); } catch (e) { P = []; }

@@ -127,7 +127,10 @@ def kind_of(radius_m):
     return "sweeper"
 
 
-def turns_for(route, step=STEP_M):
+def turns_for(route, step=STEP_M, k_min=K_MIN, min_deg=MIN_DEG, gap_m=GAP_M):
+    # k_min/min_deg/gap_m default to the PINNED identity constants, so every caller is unchanged.
+    # They are parameters ONLY so turn_lab's Path-B gate can perturb them and measure how fragile a
+    # route's turn identity is -- never to derive a different production turn set.
     pts = _finite(route["points"])
     if len(pts) < 30:
         return []
@@ -141,20 +144,20 @@ def turns_for(route, step=STEP_M):
     # runs of sustained curvature of one sign
     runs, cur = [], None
     for i in range(n):
-        s = 0 if abs(k[i]) < K_MIN else (1 if k[i] > 0 else -1)
+        s = 0 if abs(k[i]) < k_min else (1 if k[i] > 0 else -1)
         if s and cur and cur["s"] == s:
             cur["b"] = i
         elif s:
             if cur:
                 runs.append(cur)
             cur = {"s": s, "a": i, "b": i}
-        elif cur and (i - cur["b"]) * step > GAP_M:
+        elif cur and (i - cur["b"]) * step > gap_m:
             runs.append(cur); cur = None
     if cur:
         runs.append(cur)
     # a loop's last run can be the same corner as its first
     if loop and len(runs) > 1 and runs[0]["s"] == runs[-1]["s"] and \
-            (runs[0]["a"] + (n - runs[-1]["b"])) * step < GAP_M:
+            (runs[0]["a"] + (n - runs[-1]["b"])) * step < gap_m:
         runs[0]["a"] = runs[-1]["a"] - n
         runs.pop()
 
@@ -165,7 +168,7 @@ def turns_for(route, step=STEP_M):
             continue
         sweep = sum(abs(k[i]) for i in idx) * step
         deg = math.degrees(sweep)
-        if deg < MIN_DEG:
+        if deg < min_deg:
             continue
         ai = max(idx, key=lambda i: abs(k[i]))
         kap = abs(k[ai])

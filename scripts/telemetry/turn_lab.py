@@ -254,7 +254,69 @@ def score(det, laps):
             "agreement": len(recurring) / max(1, len(clusters))}
 
 
+def pathb_gate(strict=False):
+    """PATH-B QA GATE — how stable is a route's DISPLAYED turn identity under a threshold nudge?
+
+    Path B sets a course's shown turns from fh6_turns.turns_for() on the game centre-line, using three
+    PINNED constants (K_MIN, MIN_DEG, GAP_M). If a route's turn set sits on a knife-edge of one of those,
+    a tiny re-derivation would silently re-version its turn ids (K_MIN can swing a highway count up to 3.6x
+    at +/-50%). This gate perturbs each threshold by +/-10% and +/-20%, one at a time, and reports per route
+    how much the turn set moves -- so a fragile identity is trusted (or re-examined) knowingly, not blindly.
+
+        python scripts/telemetry/turn_lab.py --pathb-gate            # report; PASS/WARN
+        python scripts/telemetry/turn_lab.py --pathb-gate --strict   # exit 1 if any route is fragile at +/-10%
+    """
+    import fh6_turns, fh6_owt                                          # noqa: E402  (game files, heavy; lazy)
+    routes = fh6_owt.load_all(fh6_owt.AITRACKS, full=True)
+    base_p = {"k_min": fh6_turns.K_MIN, "min_deg": fh6_turns.MIN_DEG, "gap_m": fh6_turns.GAP_M}
+    perts = []                                                         # one threshold nudged at a time
+    for label, key in (("K_MIN", "k_min"), ("MIN_DEG", "min_deg"), ("GAP_M", "gap_m")):
+        for pc in (-0.20, -0.10, 0.10, 0.20):
+            p = dict(base_p); p[key] = base_p[key] * (1 + pc)
+            perts.append((f"{label}{pc:+.0%}", pc, p))
+    TOL = 20.0                                                         # a base apex >TOL m from every perturbed apex = a LOST turn
+    rows = []
+    for r in routes:
+        base = fh6_turns.turns_for(r)
+        if not base:
+            continue
+        base_arcs = [t["apex_arc_m"] for t in base]
+        w10 = {"d": 0, "lost": 0, "label": ""}
+        w20d = 0
+        for label, pc, p in perts:
+            pert = fh6_turns.turns_for(r, k_min=p["k_min"], min_deg=p["min_deg"], gap_m=p["gap_m"])
+            pa = [t["apex_arc_m"] for t in pert]
+            d = len(pert) - len(base)
+            lost = sum(1 for a in base_arcs if not any(abs(a - b) <= TOL for b in pa))
+            if abs(pc) <= 0.10 + 1e-9 and (abs(d) > abs(w10["d"]) or lost > w10["lost"]):
+                w10 = {"d": d, "lost": lost, "label": label}
+            if abs(d) > abs(w20d):
+                w20d = d
+        rows.append({"rid": r["route_id"], "n": len(base), "w10": w10, "w20d": w20d})
+    rows.sort(key=lambda x: (x["w10"]["lost"], abs(x["w10"]["d"]), abs(x["w20d"])), reverse=True)
+    solid10 = [x for x in rows if x["w10"]["lost"] == 0 and x["w10"]["d"] == 0]
+    fragile = [x for x in rows if x["w10"]["lost"] or x["w10"]["d"]]
+    print(f"PATH-B TURN-IDENTITY GATE — {len(rows)} routes · K_MIN={base_p['k_min']:.5f} "
+          f"MIN_DEG={base_p['min_deg']:.0f} GAP_M={base_p['gap_m']:.0f}")
+    print(f"  each threshold nudged +/-10% and +/-20% (one at a time); base apex >{TOL:.0f} m from every "
+          f"perturbed apex = a LOST turn\n")
+    print(f"  {'route':>7} {'turns':>5} {'d10':>5} {'lost10':>6} {'d20':>5}   worst +/-10% nudge")
+    for x in rows:
+        if not (x["w10"]["lost"] or x["w10"]["d"] or x["w20d"]):
+            continue                                                   # rock solid under every nudge -- omit
+        print(f"  {x['rid']:>7} {x['n']:>5} {x['w10']['d']:>+5} {x['w10']['lost']:>6} {x['w20d']:>+5}   {x['w10']['label']}")
+    print(f"\n  {len(solid10)}/{len(rows)} routes rock-solid at +/-10% (no turn added, dropped, or moved >{TOL:.0f} m)")
+    print(f"  {len(fragile)} fragile at +/-10% -- displayed turn identity shifts on a small threshold nudge")
+    if strict and fragile:
+        print(f"\nGATE: FAIL ({len(fragile)} fragile routes)")
+        return 1
+    print(f"\nGATE: {'PASS' if not fragile else 'WARN — ' + str(len(fragile)) + ' fragile (non-blocking)'}")
+    return 0
+
+
 def main():
+    if "--pathb-gate" in sys.argv:
+        sys.exit(pathb_gate(strict="--strict" in sys.argv))
     only = None
     if "--course" in sys.argv:
         only = sys.argv[sys.argv.index("--course") + 1]

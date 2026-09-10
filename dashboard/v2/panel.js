@@ -1354,11 +1354,13 @@ function paintLeft() {
   // live dot ride on the map that is already there.
   // BROWSE_PICK is deliberately NOT in this key: a browser pick must NOT rebuild the map (that would kill the
   // viewBox animation) — browsePick() updates the highlight + eases the frame on the SVG that is already there.
-  // MODE.game is keyed ONLY in course mode. In free roam the LEFT pane is the world map, whose drawing
-  // does not depend on game -- but MODE.game flips freeroam<->menu on every menu blip, and keying it there
-  // rebuilt the whole SVG each blip, replacing the node mid-animation: the click zoom snapped and the map
-  // flickered while a pick could never settle (Jett 2026-09-10). Gating it stabilises the free-mode key.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, course ? MODE.game : null, turnPickSeq()]);
+  // MODE.game is NOT keyed at all (Jett 2026-09-10). Neither the world map nor the course map depends on
+  // game -- the live dot (addLiveDot) and the speed trace update on their own paths -- yet MODE.game flips
+  // menu<->freeroam<->event on every pause/resume, and keying it rebuilt the whole SVG each flip (replacing
+  // the node mid-animation in free roam, and repainting every trace polyline on a course event-start pause).
+  // Confirmed by a LEFT_KEY field-diff capture: an event->menu blip flipped ONLY `game` and forced a rebuild
+  // with an otherwise-identical map. The course pill's EVENT/RIVALS label rides the next real rebuild.
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, turnPickSeq()]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {

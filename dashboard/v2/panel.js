@@ -581,7 +581,8 @@ function courseTrace(c) {
   // list by position, and an unsorted list crowned whichever lap the JSON happened to list first.
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
-  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${match.length} of ${all.length} lap${all.length === 1 ? "" : "s"} on record${MODE.game === "event" ? " · timed event" : ""}</span>
+  const onRec = (c.laps || []).length;
+  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? " (traces capped)" : ""}${MODE.game === "event" ? " · timed event" : ""}</span>
     <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${clearBtn}<span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
@@ -2209,10 +2210,14 @@ function phaseCells(obs, lapSet) {
 function cornerStripHTML() {
   const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);
   if (!turns.length) return "";
-  const lapSet = (TRACE_PICK && TRACE_PICK.key === COURSE.key && TRACE_PICK.ids) ? new Set(TRACE_PICK.ids) : null;
+  // aggregate over ALL laps matching the active preset (from the full lap list), NOT the drawn traces --
+  // those are capped at 40 for legibility, but the phase rollup uses every clean lap that has corner data.
   const preset = traceSel(COURSE).preset;
+  const lapSet = new Set((COURSE.laps || []).filter(presetTest(preset)).map((l) => String(l.id)));
   const plabel = (PRESETS.find((p) => p[0] === preset) || ["", "all laps"])[1];
-  const nLaps = lapSet ? lapSet.size : new Set(turns.flatMap((t) => Object.values(t.phaseObs).flat().map((r) => r[0]))).size;
+  const withData = new Set();
+  turns.forEach((t) => Object.values(t.phaseObs).forEach((rows) => rows.forEach((r) => { if (lapSet.has(String(r[0]))) withData.add(r[0]); })));
+  const nLaps = withData.size;
   return `<div class="grp"><div class="gh">Corner phases <span class="why">· ${esc(plabel)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · coloured by grip</span></div>
     <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>turn-in</span><span>mid</span><span>exit</span><span>straight</span></span></div>
     ${turns.map((t) => `<div class="pstrip"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phaseObs, lapSet)}</span></div>`).join("")}</div>`;

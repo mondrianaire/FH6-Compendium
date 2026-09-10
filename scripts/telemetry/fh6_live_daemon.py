@@ -732,8 +732,17 @@ def run_analysis(until=None, final=True):
     _t_start = time.monotonic()
     try:
         if ST.csv_file: ST.csv_file.flush()
-        # replay analyses go to a scratch dir so they never overwrite the canonical session JSON
-        outdir = os.path.join(ROOT, "data", "sessions") if not ST.replay else os.path.join(ROOT, "captures", "_replay_analysis")
+        # replay analyses go to a scratch dir so they never overwrite the canonical session JSON. Interim
+        # live analyses (final=False -- fired every lap and menu-exit) also go to a gitignored scratch dir, so
+        # the IDE watching the worktree does not re-diff data/sessions on every write (the CMD-popup fix). Only
+        # the session-close analysis (final=True) publishes the canonical, importable data/sessions/<sid>.json;
+        # an interim state lost to an abrupt kill is recoverable by re-analysing the CSV in captures/.
+        if ST.replay:
+            outdir = os.path.join(ROOT, "captures", "_replay_analysis")
+        elif final:
+            outdir = os.path.join(ROOT, "data", "sessions")
+        else:
+            outdir = os.path.join(ROOT, "captures", "_analysis")
         os.makedirs(outdir, exist_ok=True)
         cmd = [sys.executable, os.path.join(HERE, "analyze_session.py"), ST.csv_path, "--out", outdir]
         if ST.replay and until is not None: cmd += ["--until", str(until)]

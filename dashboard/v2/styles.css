@@ -376,6 +376,30 @@ button.stage.act.go:active{transform:translateY(1px)}
 .trace .thd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;font-size:12px}
 .trace .thd .fdim{display:inline-flex;align-items:center;gap:3px}
 .trace .thd .fdim .why{margin-right:2px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+/* ACTIVE TRACE FILTER = a filled accent chip, so the current preset + filters read at a glance
+   (Jett 2026-09-10: the config "does not highlight which are currently active"). Applies in both
+   the dock (.trace .thd) and the map drawer (.mdpanel). */
+.fdim .mini.on,.mdpanel .fdim .mini.on{background:var(--acc);border-color:var(--acc);color:#04140c;font-weight:700}
+.fdim .mini.on .cn{color:#04140c;opacity:.7}
+/* the "all" default of a dimension is neutral -- a quiet accent outline, not a solid fill, so a real
+   value filter is the only thing that pops solid green */
+.fdim .mini.on.neutral{background:transparent;color:var(--acc);border-color:var(--acc);font-weight:600}
+.fdim .mini.on.neutral .cn{color:var(--acc)}
+/* the build / tune dumps collapse to a labelled dropdown -- one entry instead of 18 unreadable chips */
+.fseldim{display:inline-flex;align-items:center;gap:4px}
+.fseldim .why{font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.fsel{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:5px;
+  padding:2px 7px;font:11px inherit;cursor:pointer;max-width:150px}
+.fsel:hover{border-color:var(--acc2)}
+.fseldim.on .fsel{background:var(--acc);border-color:var(--acc);color:#04140c;font-weight:700}
+.fseldim.on .why{color:var(--acc)}
+.mini.clearf{color:var(--mut);border-style:dashed}
+.mini.clearf:hover{color:var(--bad);border-color:var(--bad)}
+/* the map drawer's filter block: presets on their own line, the readable dims wrap below, a result
+   summary makes the active selection explicit */
+.mdpanel .ffilters{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:5px}
+.mdpanel .fsummary{margin-top:6px;font-size:11px}
+.mdpanel .fsummary b{color:var(--ink)}
 .trace .tspacer{flex:1 1 auto}
 .trace .segctl{display:inline-flex;align-items:center;gap:3px}
 .trace .segctl .why{font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}

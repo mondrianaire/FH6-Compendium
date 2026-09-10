@@ -583,21 +583,39 @@ function traceFilterState(c) {
   const presets = PRESETS.map(([k, lab]) => { const n = all.filter(presetTest(k)).length;
     return `<button class="mini ${sel.preset === k ? "on" : ""} ${n ? "" : "dim"}" data-tpre="${k}" ${n ? "" : "disabled"} title="${k === "hw" ? "every build whose 48 non-rim slots match and whose rims share a mass level" : k === "build" ? "this exact hardware hash" : k === "tune" ? "this save file" : k === "class" ? "the class you are in now" : k === "car" ? "this car, any build" : "every lap on record"}">${lab}<span class="cn">${n}</span></button>`; }).join("");
   const stage1 = all.filter(presetTest(sel.preset));
-  // 2. the dimension filters, from what stage 1 leaves on screen
+  // 2. the dimension filters, from what stage 1 leaves on screen. A dim with more than CHIP_MAX
+  // distinct values (the build-hash / tune-timestamp dumps, which used to spill 18 + 8 unreadable
+  // chips) COLLAPSES to a single dropdown -- same reach, one entry instead of dozens (Jett 2026-09-10).
+  const CHIP_MAX = 4;
   const filt = TRACE_DIMS.map(([d, lab]) => {
     const vals = [...new Set(stage1.map((t) => dimVal(t, d)).filter((v) => v != null))].sort();
     if (vals.length < 2) return "";
-    const chip = (v, text) => `<button class="mini ${(tf[d] || "") === (v == null ? "" : v) ? "on" : ""}" data-tfilt="${esc(d)}|${esc(v == null ? "" : v)}">${esc(text)}</button>`;
+    const active = tf[d] != null ? String(tf[d]) : "";
+    if (vals.length > CHIP_MAX) {
+      const opts = [`<option value=""${active === "" ? " selected" : ""}>all (${vals.length})</option>`]
+        .concat(vals.map((v) => `<option value="${esc(String(v))}"${active === String(v) ? " selected" : ""}>${esc(dimLab(d, v))}</option>`)).join("");
+      return `<label class="fdim fseldim${active ? " on" : ""}"><span class="why">${lab}</span><select class="fsel" data-tfiltsel="${esc(d)}">${opts}</select></label>`;
+    }
+    // the "all" chip is the NEUTRAL default (no filter on this dim) -- a quiet outline when active,
+    // so only a specific value chosen (a real filter) fills solid and pops.
+    const chip = (v, text) => `<button class="mini ${active === (v == null ? "" : String(v)) ? "on" : ""}${v == null ? " neutral" : ""}" data-tfilt="${esc(d)}|${esc(v == null ? "" : v)}">${esc(text)}</button>`;
     return `<span class="fdim"><span class="why">${lab}</span>${chip(null, "all")}${vals.map((v) => chip(v, dimLab(d, v))).join("")}</span>`;
   }).filter(Boolean).join("");
   const stage2 = stage1.filter((t) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
-  const clearBtn = Object.keys(tf).length || sel.hidden.size ? `<button class="mini" data-tfilt="*|">clear</button>` : "";
+  const clearBtn = Object.keys(tf).length || sel.hidden.size ? `<button class="mini clearf" data-tfilt="*|">✕ clear filters</button>` : "";
   return { all, sel, tf, presets, stage1, filt, stage2, clearBtn };
 }
-// the compact bar for the map's filter drawer: same chips, none of the trace's own furniture
+// the compact bar for the map's filter drawer: same chips, none of the trace's own furniture.
+// PRESET row on top (the primary "how wide a net" selector), the readable dimension filters below,
+// and a plain "showing N of M" summary so the active selection is never ambiguous.
 function mapFilterBar(c) {
-  const { presets, filt, clearBtn } = traceFilterState(c);
-  return `<div class="fdim"><span class="why">show</span>${presets}</div>${filt}${clearBtn}`;
+  const { presets, filt, clearBtn, sel, all, stage2 } = traceFilterState(c);
+  const shown = stage2.filter((t) => !sel.hidden.has(String(t.id))).length;
+  const plabel = (PRESETS.find((p) => p[0] === sel.preset) || ["", "all"])[1];
+  const nFilt = Object.keys(sel.filters || {}).length;
+  return `<div class="fdim"><span class="why">show</span>${presets}</div>`
+    + (filt ? `<div class="ffilters">${filt}${clearBtn}</div>` : (clearBtn ? `<div class="ffilters">${clearBtn}</div>` : ""))
+    + `<div class="fsummary why">drawing <b>${shown}</b> of ${all.length} laps · <b>${esc(plabel)}</b>${nFilt ? ` · ${nFilt} filter${nFilt === 1 ? "" : "s"} on` : ""}</div>`;
 }
 // THE LIVE LAP, aligned to the course. LIVE.run's own x is the fake event odometer, which does NOT line up
 // with the recorded laps' real arc-along-lap -- so map each live point's (px,pz) to the nearest point on a
@@ -721,6 +739,12 @@ function wireTrace(el) {
     const vc = traceSel(COURSE);
     if (d === "*") { vc.filters = {}; vc.hidden = new Set(); }
     else { if (v) vc.filters[d] = v; else delete vc.filters[d]; }
+    viewSave(); paintTrace(); });
+  // high-cardinality dims (build / tune) render as a dropdown instead of a chip row
+  el.querySelectorAll("[data-tfiltsel]").forEach((s) => s.onchange = () => {
+    const d = s.dataset.tfiltsel; if (!COURSE) return;
+    const vc = traceSel(COURSE);
+    if (s.value) vc.filters[d] = s.value; else delete vc.filters[d];
     viewSave(); paintTrace(); });
   el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); paintTrace(); });
   el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); viewSave(); paintTrace(); });

@@ -369,34 +369,21 @@ def main(argv=None):
                         t["seq"] = i                                  # display index; turn_id stays the stable key
                     turns = _geo
         c["turns"] = len(turns)                                       # course-card count == what the detail view draws
-        # PER-PHASE CORNER STRIP (2026-09-10): accumulate corner_segment over the course's CLEAN laps into
-        # each displayed turn -> phases {braking,turn_in,mid,exit,straight}: median speeds + time, the modal
-        # grip state, and lap count. The course-mode Turn-analysis tab draws this even with no live driving.
-        _seg = _cl.defaultdict(list)
+        # PER-PHASE CORNER STRIP (2026-09-10): raw per-lap corner_segment observations per displayed turn,
+        # phase -> [[lap_id, entry, min, exit, grip]...] over the course's CLEAN laps. The client aggregates
+        # over whatever lap set the trace preset (all / this class / this car / this build / this tune) is
+        # showing -- so the strip separates by class, build and tune with the SAME filter as the map traces.
+        _seg = _cl.defaultdict(lambda: _cl.defaultdict(list))
         for sr in cx.execute("""SELECT cs.turn_id, cs.segment, cs.entry_mph, cs.min_mph, cs.exit_mph,
-                                       cs.grip_state, cs.time_s, cs.lap_id
+                                       cs.grip_state, cs.lap_id
                                 FROM corner_segment cs JOIN lap l ON l.lap_id = cs.lap_id
                                 WHERE cs.route_key = ? AND l.void = 0 AND l.is_partial = 0 AND l.rewinds = 0""", (key,)):
-            _seg[sr["turn_id"]].append(sr)
-
-        def _med(vals):
-            v = sorted(x for x in vals if x is not None)
-            return round(v[len(v) // 2], 1) if v else None
+            _seg[sr["turn_id"]][sr["segment"]].append(
+                [sr["lap_id"], sr["entry_mph"], sr["min_mph"], sr["exit_mph"], sr["grip_state"]])
         for t in turns:
-            byseg = {}
-            for name in ("braking", "turn_in", "mid", "exit", "straight"):
-                ss = [x for x in _seg.get(t.get("id"), ()) if x["segment"] == name]
-                if not ss:
-                    continue
-                gc = _cl.Counter(x["grip_state"] for x in ss if x["grip_state"] is not None)
-                byseg[name] = {"n": len({x["lap_id"] for x in ss}),
-                               "entry": _med([x["entry_mph"] for x in ss]),
-                               "min": _med([x["min_mph"] for x in ss]),
-                               "exit": _med([x["exit_mph"] for x in ss]),
-                               "grip": (gc.most_common(1)[0][0] if gc else 0),
-                               "time": _med([x["time_s"] for x in ss])}
-            if byseg:
-                t["phases"] = byseg
+            po = _seg.get(t.get("id"))
+            if po:
+                t["phaseObs"] = {seg: v for seg, v in po.items()}
         naming = {
             "name_source": c["name_source"], "name_confidence": c["name_confidence"],
             "declared_name": c["declared_name"], "declared_source": c["declared_source"],

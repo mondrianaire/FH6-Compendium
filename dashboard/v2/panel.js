@@ -588,7 +588,7 @@ function courseTrace(c) {
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
-  if (JSON.stringify(sel2) !== JSON.stringify(TRACE_PICK)) { TRACE_PICK = sel2; LEFT_KEY = null; setTimeout(paintLeft, 0); }
+  if (JSON.stringify(sel2) !== JSON.stringify(TRACE_PICK)) { TRACE_PICK = sel2; LEFT_KEY = null; setTimeout(() => { paintLeft(); if (MODE.suggest === "course" && COURSE) paintRight(); }, 0); }   // the corner-phase strip re-scopes to the filtered laps too
   const svg = (W, H) => {
     if (!match.length) return `<div class="why tempty">every matching lap is hidden — click a chip to show it</div>`;
     const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
@@ -2167,21 +2167,35 @@ function phaseBars(ph) {
 // by the modal grip state, accumulated over the course's clean laps (COURSE.turns[].phases from build_web).
 // Always available in course mode -- it does not wait on this session's live corners.
 const GSTATE = ["calm", "front", "rear", "both", "impact"];   // grip_state 0-4 -> DGRIP key
-function phaseCells(ph) {
+// aggregate the per-lap phase rows [[lap_id, entry, min, exit, grip]...] over the ACTIVE lap set (the
+// trace preset's selection), so the strip separates by class / build / tune exactly as the map traces do.
+function phaseAgg(rows, lapSet) {
+  const f = lapSet ? rows.filter((r) => lapSet.has(String(r[0]))) : rows;
+  if (!f.length) return null;
+  const med = (i) => { const v = f.map((r) => r[i]).filter((x) => x != null).sort((a, b) => a - b); return v.length ? Math.round(v[v.length >> 1] * 10) / 10 : null; };
+  const gc = {}; f.forEach((r) => { if (r[4] != null) gc[r[4]] = (gc[r[4]] || 0) + 1; });
+  const grip = Object.keys(gc).length ? +Object.keys(gc).sort((a, b) => gc[b] - gc[a])[0] : 0;
+  return { n: new Set(f.map((r) => r[0])).size, entry: med(1), min: med(2), exit: med(3), grip };
+}
+function phaseCells(obs, lapSet) {
   return ["braking", "turn_in", "mid", "exit", "straight"].map((name) => {
-    const p = ph[name];
+    const p = obs[name] && phaseAgg(obs[name], lapSet);
     if (!p) return `<span class="pcell pc-empty"></span>`;
     const g = DGRIP[GSTATE[p.grip] || "calm"];
     const lbl = name === "mid" ? `<b>${p.min ?? ""}</b>` : "";
-    return `<span class="pcell" style="background:${g.col}" title="${name.replace("_", "-")} · ${p.n} lap${p.n === 1 ? "" : "s"} · entry ${p.entry ?? "—"} → min ${p.min ?? "—"} → exit ${p.exit ?? "—"} mph · ${g.word}${p.time != null ? " · " + p.time + "s" : ""}">${lbl}</span>`;
+    return `<span class="pcell" style="background:${g.col}" title="${name.replace("_", "-")} · ${p.n} lap${p.n === 1 ? "" : "s"} · entry ${p.entry ?? "—"} → min ${p.min ?? "—"} → exit ${p.exit ?? "—"} mph · ${g.word}">${lbl}</span>`;
   }).join("");
 }
 function cornerStripHTML() {
-  const turns = (COURSE.turns || []).filter((t) => t.phases).slice().sort((a, b) => a.seq - b.seq);
+  const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);
   if (!turns.length) return "";
-  return `<div class="grp"><div class="gh">Corner phases <span class="why">· median over clean laps · coloured by grip</span></div>
+  const lapSet = (TRACE_PICK && TRACE_PICK.key === COURSE.key && TRACE_PICK.ids) ? new Set(TRACE_PICK.ids) : null;
+  const preset = traceSel(COURSE).preset;
+  const plabel = (PRESETS.find((p) => p[0] === preset) || ["", "all laps"])[1];
+  const nLaps = lapSet ? lapSet.size : new Set(turns.flatMap((t) => Object.values(t.phaseObs).flat().map((r) => r[0]))).size;
+  return `<div class="grp"><div class="gh">Corner phases <span class="why">· ${esc(plabel)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · coloured by grip</span></div>
     <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>turn-in</span><span>mid</span><span>exit</span><span>straight</span></span></div>
-    ${turns.map((t) => `<div class="pstrip"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phases)}</span></div>`).join("")}</div>`;
+    ${turns.map((t) => `<div class="pstrip"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phaseObs, lapSet)}</span></div>`).join("")}</div>`;
 }
 function matrixHTML() {
   if (!COURSE || !(COURSE.turns || []).length) return `<div class="why">no turn map for this course yet</div>`;

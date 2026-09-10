@@ -549,6 +549,18 @@ window.addEventListener("resize", () => { TRACE_KEY = null; paintTrace(); });
 function chart(W, H, padL, padB, smax, vmax) {
   return { px: (x) => padL + (x / (smax || 1)) * (W - padL - 8), py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
 }
+// After the build re-anchors trace arc to a common origin, a lap longer than the frame wraps once at
+// the start/finish seam -- split the line there so it never draws a backward streak across the chart.
+// 30 m guards against sample jitter triggering a false split (a real wrap jumps most of the lap).
+function arcRuns(pts) {
+  if (pts.length < 2) return pts.length ? [pts] : [];
+  const runs = []; let run = [pts[0]];
+  for (let i = 1; i < pts.length; i++) {
+    if (pts[i][0] != null && pts[i - 1][0] != null && pts[i][0] < pts[i - 1][0] - 30) { runs.push(run); run = [pts[i]]; }
+    else run.push(pts[i]);
+  }
+  runs.push(run); return runs;
+}
 function paintedLine(pts, ch, w, mode, baseCol) {
   if (!pts.length) return "";
   let sc = null;
@@ -560,12 +572,14 @@ function paintedLine(pts, ch, w, mode, baseCol) {
   // speed gradient is untouched (it has no no-problem baseline).
   const base0 = (baseCol && baseCol !== "var(--dim)") ? baseCol : TRACE_GRIP[0];   // unknown class -> keep the green within-grip
   const colOf = (k) => (mode === "speed" && sc) ? GRAD[k] : (k === 0 ? base0 : (TRACE_GRIP[k] || TRACE_GRIP[0]));
-  const segs = []; let run = [pts[0]], st = keyOf(pts[0]);
-  for (let i = 1; i < pts.length; i++) { const k = keyOf(pts[i]); if (k !== st) { run.push(pts[i]); segs.push([st, run]); run = [pts[i]]; st = k; } else run.push(pts[i]); }
-  segs.push([st, run]);
-  return segs.map(([k, pp]) => `<polyline fill="none" stroke="${colOf(k)}" stroke-width="${(mode === "speed" || k) ? w + 0.6 : w}" stroke-linecap="round" points="${pp.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"><title>${mode === "speed" ? "speed" : TRACE_WORD[k] || ""}</title></polyline>`).join("");
+  return arcRuns(pts).map((rp) => {
+    const segs = []; let run = [rp[0]], st = keyOf(rp[0]);
+    for (let i = 1; i < rp.length; i++) { const k = keyOf(rp[i]); if (k !== st) { run.push(rp[i]); segs.push([st, run]); run = [rp[i]]; st = k; } else run.push(rp[i]); }
+    segs.push([st, run]);
+    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${colOf(k)}" stroke-width="${(mode === "speed" || k) ? w + 0.6 : w}" stroke-linecap="round" points="${pp.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"><title>${mode === "speed" ? "speed" : TRACE_WORD[k] || ""}</title></polyline>`).join("");
+  }).join("");
 }
-const plainLine = (pts, ch, col, w, op, dashed) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}"${dashed ? ' stroke-dasharray="3 3"' : ""} points="${pts.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>`;
+const plainLine = (pts, ch, col, w, op, dashed) => arcRuns(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}"${dashed ? ' stroke-dasharray="3 3"' : ""} points="${run.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>`).join("");
 function impactMarks(pts) { const out = []; for (const q of pts) { if ((q[2] | 0) !== 4 || q.length < 5) continue; const l = out[out.length - 1]; if (l && (l[3] - q[3]) ** 2 + (l[4] - q[4]) ** 2 <= 144) continue; out.push(q); } return out; }
 function modeControls() {
   return `<span class="segctl"><span class="why">paint</span>${[["grip", "grip", "what the tyres did — the axle that let go, and where"], ["speed", "speed", "how fast, coloured across the lap's own range"]].map(([k, l, tip]) =>

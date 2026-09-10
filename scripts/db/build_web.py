@@ -323,8 +323,21 @@ def main(argv=None):
         # nearest-point mis-projections that plague a loop where the road passes near itself. Then rotate each
         # lap to begin at the frame origin so its arc runs monotonically 0..L. Spatial; the turn/corner joins
         # never used trace arc, so they are unaffected.
-        if _np is not None and traces:
-            _ref = max(traces.values(), key=len)
+        # ONE shared reference lap for arc alignment AND the Path-B turn-tick projection: the FASTEST CLEAN
+        # FULL lap present in the traces, so the frame is a real racing loop, not a long or dirty out-lap
+        # (which pushed a few Irokawa laps past the course length). `laps` is ordered clean-first then by
+        # lap_s, so the first clean, full-coverage lap that has a trace is the fastest. Fall back to the
+        # longest-by-points lap when none qualifies.
+        _ref_id = None
+        for _l in laps:
+            if _l["id"] in traces and not _l["void"] and not _l["partial"] and not _l["rewinds"] \
+                    and _l["t"] and (_l["cov"] or 0) >= 0.9:
+                _ref_id = _l["id"]
+                break
+        if _ref_id is None and traces:
+            _ref_id = max(traces, key=lambda k: len(traces[k]))
+        if _np is not None and traces and _ref_id is not None:
+            _ref = traces[_ref_id]
             _rp = [(p[0], p[3], p[4]) for p in _ref if p[3] is not None and p[4] is not None and p[0] is not None]
             _L = _rp[-1][0] if _rp else 0
             if len(_rp) >= 8 and _L > 1:
@@ -431,7 +444,7 @@ def main(argv=None):
             grows = rows(cx, """SELECT turn_id AS id, turn_id, seq, apex_x AS x, apex_z AS z, radius_m AS r,
                                        angle_deg AS deg, kind, dir, width_m AS width, bank_deg AS bank, segments
                                 FROM ref_route_turn WHERE route_id=? ORDER BY apex_arc_m""", _rid)
-            _pl = max(traces.values(), key=len)                       # longest lap = the projection reference
+            _pl = traces[_ref_id] if _ref_id in traces else max(traces.values(), key=len)   # SAME reference as the arc re-anchor (fastest clean lap), so ticks and traces share one frame
             _lp = [(p[0], p[3], p[4]) for p in _pl if len(p) > 4 and p[3] is not None]
             if grows and len(_lp) >= 2:
                 _drv = turns                                          # the driven-path course_turn rows, for behaviour

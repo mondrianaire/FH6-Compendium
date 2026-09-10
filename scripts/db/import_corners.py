@@ -156,10 +156,22 @@ def run(cx, verbose=False):
                         sspan = (max(sarc) - min(sarc)) if len(sarc) > 1 else 0.0
                         savg = sum(smphs) / len(smphs)
                         ssecs = (sspan / (savg * 0.44704)) if savg > 1 else None
-                        sgr = [s["grip"] for s in ss if s["grip"] is not None]
+                        sgr = [int(s["grip"]) for s in ss if s["grip"] is not None]
+                        # the phase's TYPICAL grip, not its worst moment (Jett 2026-09-10): a single
+                        # at-the-limit sample used to promote the whole phase to "drift". Store the full
+                        # 5-state sample histogram, and let grip_state be the MODAL (most-of-the-phase)
+                        # state -- calm-leaning on a tie (max() returns the lowest index).
+                        ghist = gstate = None
+                        if sgr:
+                            hist = [0, 0, 0, 0, 0]
+                            for g in sgr:
+                                if 0 <= g <= 4:
+                                    hist[g] += 1
+                            gstate = max(range(5), key=lambda k: hist[k])
+                            ghist = json.dumps(hist)
                         seg_rows.append((lp["lap_id"], stid, co["route_key"], sname, len(ss),
                                          smphs[0], smphs[-1], min(smphs), round(savg, 1),
-                                         max(sgr) if sgr else None, round(ssecs, 3) if ssecs else None))
+                                         gstate, ghist, round(ssecs, 3) if ssecs else None))
     with cx:
         cx.execute("DELETE FROM corner_obs")
         n = fh6db.upsert_many(cx, "corner_obs", [
@@ -170,7 +182,7 @@ def run(cx, verbose=False):
             cx.execute("DELETE FROM corner_segment")
             m = fh6db.upsert_many(cx, "corner_segment", [
                 "lap_id", "turn_id", "route_key", "segment", "n_samples", "entry_mph", "exit_mph",
-                "min_mph", "mean_mph", "grip_state", "time_s"], seg_rows, chunk=5000)
+                "min_mph", "mean_mph", "grip_state", "grip_hist", "time_s"], seg_rows, chunk=5000)
     return {"corner_obs": n, "corner_segment": m, "_laps_skipped": skipped}
 
 

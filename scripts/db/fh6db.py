@@ -431,6 +431,9 @@ V2_COLUMNS["session_event"] = [("start_is_line", "INTEGER")]
 V2_COLUMNS["lap"] = [("lap_dist_m", "REAL"), ("rewinds", "INTEGER DEFAULT 0"), ("pauses", "INTEGER DEFAULT 0"),
                      ("pause_s", "REAL DEFAULT 0"), ("stitched", "INTEGER DEFAULT 0")]
 V2_COLUMNS["lap_point"] = [("dist_m", "REAL")]
+# the per-phase grip MIX (2026-09-10): sample counts across the 5 grip states, so a turn shows its
+# TYPICAL grip, not the single worst moment. grip_state also switches meaning here to the modal state.
+V2_COLUMNS["corner_segment"] = [("grip_hist", "TEXT")]
 V2_TABLES["lap_marker"] = """CREATE TABLE IF NOT EXISTS lap_marker (
   lap_id   INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
   i        INTEGER NOT NULL,
@@ -452,6 +455,7 @@ V2_TABLES["corner_segment"] = """CREATE TABLE IF NOT EXISTS corner_segment (
   n_samples  INTEGER,
   entry_mph  REAL, exit_mph REAL, min_mph REAL, mean_mph REAL,
   grip_state INTEGER,
+  grip_hist  TEXT,
   time_s     REAL,
   PRIMARY KEY (lap_id, turn_id, segment)
 ) WITHOUT ROWID"""

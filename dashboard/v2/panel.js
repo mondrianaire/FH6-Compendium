@@ -439,6 +439,28 @@ function pickTurn(seq) {
   TURN_PICK = (s == null || s === cur) ? null : { key: COURSE && COURSE.key, seq: s };   // click the same turn to clear
   LEFT_KEY = null; paintLeft(); paintRight();
 }
+// cross-highlight one phase across the left map + rail and the right table (shared data-phase spine):
+// emphasise the matching part, dim the rest; null clears.
+function hiPhase(name) {
+  const lb = $("#leftBody");
+  if (lb) lb.querySelectorAll("[data-phase]").forEach((e) => {
+    const on = name == null || e.dataset.phase === name;
+    e.style.opacity = on ? "" : "0.2";
+    if (e.tagName.toLowerCase() === "polyline") e.style.strokeWidth = (name && e.dataset.phase === name) ? "13" : "";
+  });
+  const rb = $("#rightBody");
+  if (rb) rb.querySelectorAll("tr[data-phase]").forEach((r) => r.classList.toggle("hi", name != null && r.dataset.phase === name));
+}
+// step to the previous / next turn by display seq (wraps), for the ‹ › walkthrough
+function stepTurn(dir) {
+  const seqs = (COURSE && COURSE.turns || []).map((t) => t.seq).filter((s) => s != null).sort((a, b) => a - b);
+  if (!seqs.length) return;
+  const cur = turnPickSeq();
+  const i = cur == null ? -1 : seqs.indexOf(cur);
+  const nxt = i < 0 ? seqs[0] : seqs[(i + (dir < 0 ? -1 : 1) + seqs.length) % seqs.length];
+  TURN_PICK = { key: COURSE && COURSE.key, seq: nxt };
+  LEFT_KEY = null; paintLeft(); paintRight();
+}
 // the chip row never scrolls sideways: keep the chips that fit, count the rest
 function fitChips(row, total) {
   if (!row) return;
@@ -1309,6 +1331,18 @@ function paintLeft() {
       kindLabel: COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null,
       nameChip: nameChip(COURSE.naming),
     }, "course");
+    // A SELECTED TURN reframes the LEFT pane into that turn's full 5-part analysis (turnMap); nothing
+    // picked -> the whole-course map with clickable turn markers.
+    const _selT = turnPickSeq() != null ? (COURSE.turns || []).find((t) => t.seq === turnPickSeq() && t.seg) : null;
+    if (_selT) {
+      body.innerHTML = ""; body.append(turnMap(COURSE, _selT, activeLapSet()));
+      const bk = body.querySelector("[data-turnback]"); if (bk) bk.onclick = () => pickTurn(null);
+      body.querySelectorAll("[data-phase]").forEach((e) => {
+        e.addEventListener("mouseenter", () => hiPhase(e.dataset.phase));
+        e.addEventListener("mouseleave", () => hiPhase(null));
+      });
+      return;
+    }
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
     body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq() }));
     // courseMap() draws its own inline legend (shared with the v1 course page) — lift it into
@@ -1409,8 +1443,8 @@ function courseInfoPill(r, state) {
     <span class="cpill-txt">
       <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${r.nameChip || ""}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${stChip}${hasStats ? `<i class="cps-caret" title="lap breakdown by class and car">▾</i>` : ""}</span>
       <span class="why cpill-l2" title="${esc(metaS)}">${esc(metaS)}</span>
+      <span class="cpill-badges">${pills}${badges}</span>
     </span>
-    <span class="cpill-badges">${pills}${badges}</span>
     ${stats}
   </div>`;
 }
@@ -2098,6 +2132,11 @@ function paintRight() {
   if (cur === "matrix") {
     body.querySelectorAll("[data-turn]").forEach((r) => r.onclick = () => pickTurn(r.dataset.turn));
     const cl = body.querySelector("[data-turnclear]"); if (cl) cl.onclick = () => pickTurn(null);
+    body.querySelectorAll("[data-turnstep]").forEach((b) => b.onclick = () => stepTurn(b.dataset.turnstep === "prev" ? -1 : 1));
+    // hover a phase row -> light the matching part on the left map, and vice-versa
+    body.querySelectorAll("[data-phase]").forEach((r) => {
+      r.onmouseenter = () => hiPhase(r.dataset.phase); r.onmouseleave = () => hiPhase(null);
+    });
   }
   if (cur !== "matrix" && cur !== "browser") fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
@@ -2213,13 +2252,31 @@ function phaseBars(ph) {
 const GSTATE = ["calm", "front", "rear", "both", "impact"];   // grip_state 0-4 -> DGRIP key
 // aggregate the per-lap phase rows [[lap_id, entry, min, exit, grip]...] over the ACTIVE lap set (the
 // trace preset's selection), so the strip separates by class / build / tune exactly as the map traces do.
+// row = [lap_id, entry, min, exit, grip_state, time_s, grip_hist[5], mean]. The grip a phase reports is
+// its TYPICAL state, NOT the single worst moment (the old max() painted every hard phase "drift"). `mix`
+// is the 5-state fraction, averaged EQUAL-WEIGHT PER LAP (each lap's own grip_hist normalised to 1, then
+// meaned over the preset) so one long or messy lap cannot dominate the mix; `grip` is its argmax; `time`
+// the median seconds in the phase. Falls back to the per-lap modal grip_state for pre-histogram exports.
 function phaseAgg(rows, lapSet) {
+  if (!rows || !rows.length) return null;
   const f = lapSet ? rows.filter((r) => lapSet.has(String(r[0]))) : rows;
   if (!f.length) return null;
   const med = (i) => { const v = f.map((r) => r[i]).filter((x) => x != null).sort((a, b) => a - b); return v.length ? Math.round(v[v.length >> 1] * 10) / 10 : null; };
-  const gc = {}; f.forEach((r) => { if (r[4] != null) gc[r[4]] = (gc[r[4]] || 0) + 1; });
-  const grip = Object.keys(gc).length ? +Object.keys(gc).sort((a, b) => gc[b] - gc[a])[0] : 0;
-  return { n: new Set(f.map((r) => r[0])).size, entry: med(1), min: med(2), exit: med(3), grip };
+  const acc = [0, 0, 0, 0, 0]; let nHist = 0;
+  f.forEach((r) => {
+    const h = r[6]; if (!Array.isArray(h)) return;
+    const s = h.reduce((a, b) => a + (b || 0), 0); if (!s) return;
+    for (let i = 0; i < 5; i++) acc[i] += (h[i] || 0) / s;              // this lap's own fraction, weight 1
+    nHist++;
+  });
+  let grip, mix = null;
+  if (nHist) { mix = acc.map((v) => v / nHist); grip = mix.indexOf(Math.max(...mix)); }
+  else {                                                                // old export: modal of per-lap grip_state
+    const gc = {}; f.forEach((r) => { if (r[4] != null) gc[r[4]] = (gc[r[4]] || 0) + 1; });
+    grip = Object.keys(gc).length ? +Object.keys(gc).sort((a, b) => gc[b] - gc[a])[0] : 0;
+  }
+  return { n: new Set(f.map((r) => r[0])).size, entry: med(1), min: med(2), exit: med(3), mean: med(7),
+           time: med(5), grip, mix, mixLaps: nHist };
 }
 function phaseCells(obs, lapSet) {
   return ["braking", "turn_in", "mid", "exit", "straight"].map((name) => {
@@ -2248,46 +2305,176 @@ function cornerStripHTML(ls, sel) {
     <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>turn-in</span><span>mid</span><span>exit</span><span>straight</span></span></div>
     ${turns.map((t) => `<div class="pstrip pstrip--pick${sel === t.seq ? " sel" : ""}" data-turn="${t.seq}"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phaseObs, ls.set)}</span></div>`).join("")}</div>`;
 }
-// FULL TURN STATISTICS (Jett 2026-09-10): the selected turn's geometry (from ref_route_turn) beside its
-// per-phase behaviour, aggregated over the active preset's laps. The map paints the same 5 phases.
+// GRIP AS A DISTRIBUTION, never a single lossy swatch (Jett 2026-09-10). mix = [calm,front,rear,both,
+// impact] fractions (equal-weight per lap over the preset). This is the honest "how the grip splits" that
+// answers "i cant figure out what drift means": a phase reads e.g. 62% within grip / 26% oversteer.
+function gripBar(mix, cls) {
+  if (!mix) return `<span class="gbar gbar--empty" title="no grip samples"></span>`;
+  const seg = GSTATE.map((k, i) => {
+    const f = mix[i] || 0; if (f < 0.006) return "";
+    return `<span style="flex:${Math.round(f * 1000)} 0 0;background:${DGRIP[k].col}" title="${DGRIP[k].word} · ${Math.round(f * 100)}%"></span>`;
+  }).join("");
+  return `<span class="gbar ${cls || ""}">${seg}</span>`;
+}
+function gripRead(mix) {
+  if (!mix) return "no grip data";
+  const calm = Math.round((mix[0] || 0) * 100);
+  let bi = 1, bv = -1; for (let i = 1; i < 5; i++) { if ((mix[i] || 0) > bv) { bv = mix[i] || 0; bi = i; } }
+  if ((mix[0] || 0) >= 0.8 || bv < 0.1) return `mostly within grip (${calm}% of samples)`;
+  return `${calm}% within grip · ${DGRIP[GSTATE[bi]].word} ${Math.round(bv * 100)}%`;
+}
+// LEFT PANE — the selected turn's FULL 5-PART ANALYSIS, zoomed to fill the pane. The 5 parts are drawn in
+// the WHERE palette (SEG_COL) ONLY -- colour here is structure, never grip -- with the apex ringed, a travel
+// chevron, entry/apex/exit speeds pinned, and a phase-time rail whose cell widths ARE the median seconds in
+// each part, filled with that part's grip distribution. "‹ course" returns to the whole-course map.
+function turnMap(c, t, ls) {
+  const segs = t.seg || {};
+  const phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  phases.forEach((n) => segs[n].forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
+  if (t.x != null) { x0 = Math.min(x0, t.x); x1 = Math.max(x1, t.x); z0 = Math.min(z0, t.z); z1 = Math.max(z1, t.z); }
+  if (!isFinite(x0)) return el(`<div class="turnview"><div class="tv-hd"><button class="mini" data-turnback>‹ course</button><b>${esc(turnLabel(t))}</b></div><div class="why" style="padding:14px">no phase geometry for this turn</div></div>`);
+  const dx = (x1 - x0) || 40, dz = (z1 - z0) || 40, pf = 0.3;
+  x0 -= dx * pf; x1 += dx * pf; z0 -= dz * pf; z1 += dz * pf;
+  const pad = 16, H = 300, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
+  const W = Math.max(300, Math.round((H - 2 * pad) * AR)) + 2 * pad;
+  const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
+  const px = (x) => pad + (x - x0) * s, py = (z) => H - pad - (z - z0) * s;
+  const road = (c.route && c.route.path) || c.path || [];
+  const _split = (typeof splitTP === "function") ? splitTP : (p) => (p && p.length ? [p] : []);
+  const ctx = road.length ? _split(road).map((run) => `<polyline fill="none" stroke="#3a4453" stroke-width="2" opacity=".4" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
+  const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
+  const apex = t.x != null ? `<circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="8" fill="none" stroke="#fff" stroke-width="2"/><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="2.6" fill="#fff"><title>apex</title></circle>` : "";
+  let chev = "";
+  const lastP = phases.length ? segs[phases[phases.length - 1]] : null;
+  if (lastP && lastP.length >= 2) {
+    const a = lastP[lastP.length - 2], b = lastP[lastP.length - 1];
+    const ang = Math.atan2(py(b[1]) - py(a[1]), px(b[0]) - px(a[0])) * 180 / Math.PI;
+    chev = `<g transform="translate(${px(b[0]).toFixed(1)},${py(b[1]).toFixed(1)}) rotate(${ang.toFixed(1)})"><path d="M-6,-4 L3,0 L-6,4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+  }
+  const ag = (n) => phaseAgg(t.phaseObs && t.phaseObs[n], ls.set);
+  const pillAt = (pt, val, bold) => pt ? `<g transform="translate(${px(pt[0]).toFixed(1)},${py(pt[1]).toFixed(1)})"><rect x="-19" y="-9" width="38" height="18" rx="4" fill="#0b0e12" opacity=".85"/><text x="0" y="4" text-anchor="middle" font-size="${bold ? 11 : 9.5}" font-weight="${bold ? 700 : 600}" fill="#fff">${val}</text></g>` : "";
+  const midOf = (n) => { const a = segs[n]; return a && a.length ? a[a.length >> 1] : null; };
+  const brP = ag("braking"), mdP = ag("mid"), exP = ag("exit");
+  const pills = [
+    brP && brP.entry != null && segs.braking ? pillAt(segs.braking[0], brP.entry) : "",
+    mdP && mdP.min != null ? pillAt(midOf("mid"), mdP.min, true) : "",
+    exP && exP.exit != null && segs.exit ? pillAt(segs.exit[segs.exit.length - 1], exP.exit) : "",
+  ].join("");
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg);border-radius:6px;width:100%;max-height:52vh">${ctx}${ph}${apex}${chev}${pills}</svg>`;
+  const aggs = SEG_ORDER.map((n) => ({ n, p: ag(n) }));
+  const maxT = Math.max(0.1, ...aggs.map((a) => (a.p && a.p.time) || 0));
+  const rail = aggs.map(({ n, p }) => {
+    const w = p && p.time ? Math.max(7, (p.time / maxT) * 100) : 7;
+    const inner = p && p.mix ? gripBar(p.mix) : `<span class="gbar gbar--empty"></span>`;
+    return `<div class="trail-c" style="flex:${w} 1 0" data-phase="${n}" title="${esc(SEG_LABEL[n])} · ${p && p.time != null ? p.time + " s · " + gripRead(p.mix) : "no data"}">
+      <span class="trail-lbl" style="color:${SEG_COL[n]}">${esc(SEG_LABEL[n].split(/[ /]/)[0].toLowerCase())}</span>
+      <span class="trail-t">${p && p.time != null ? p.time.toFixed(1) + "s" : "—"}</span>${inner}</div>`;
+  }).join("");
+  const legend = `<div class="legend tv-lg"><span class="why">the 5 parts (where you are in the corner) — colour is structure, not grip:</span>${phases.map((n) => `<span><i style="background:${SEG_COL[n]}"></i>${esc(SEG_LABEL[n])}</span>`).join("")}</div>`;
+  return el(`<div class="turnview">
+    <div class="tv-hd"><button class="mini" data-turnback title="back to the whole course">‹ course</button><b>${esc(turnLabel(t))}</b><span class="why">${t.kind ? esc(t.kind) + " · " : ""}${esc(ls.label)}</span></div>
+    ${svg}
+    <div class="trail" title="each part's width = median seconds spent in it · fill = its grip mix">${rail}</div>
+    ${legend}</div>`);
+}
+// RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active
+// preset's laps and carries its lap count; grip is always the distribution, never a lone word.
 function turnStatsHTML(t, ls) {
+  const obs = t.phaseObs || {};
+  const inSet = (r) => ls.set.has(String(r[0]));
+  const lapIds = new Set(), perLapT = {};
+  SEG_ORDER.forEach((n) => (obs[n] || []).forEach((r) => { if (!inSet(r)) return; lapIds.add(r[0]); if (r[5] != null) perLapT[r[0]] = (perLapT[r[0]] || 0) + r[5]; }));
+  const nLaps = lapIds.size;
+  const lapT = {}; (COURSE.laps || []).forEach((l) => { if (l.t != null) lapT[l.id] = l.t; });
+  const med = (arr) => { const v = arr.filter((x) => x != null).sort((a, b) => a - b); return v.length ? v[v.length >> 1] : null; };
+  const medTurnT = med(Object.values(perLapT));
+  const medLapT = med([...lapIds].map((id) => lapT[id]));
+  let bestId = null, bestT = Infinity; lapIds.forEach((id) => { if (lapT[id] != null && lapT[id] < bestT) { bestT = lapT[id]; bestId = id; } });
+  const bestPhaseT = {}; if (bestId != null) SEG_ORDER.forEach((n) => { const r = (obs[n] || []).find((x) => x[0] === bestId); if (r && r[5] != null) bestPhaseT[n] = r[5]; });
+  const aggs = SEG_ORDER.map((n) => ({ n, p: phaseAgg(obs[n], ls.set) }));
+  const twMix = [0, 0, 0, 0, 0]; let twW = 0;
+  aggs.forEach(({ p }) => { if (p && p.mix) { const w = p.time || 1; for (let i = 0; i < 5; i++) twMix[i] += p.mix[i] * w; twW += w; } });
+  const turnMix = twW ? twMix.map((v) => v / twW) : null;
+
+  // ---- header
+  const dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
+  const header = `<div class="gh tstat-h"><b>${esc(turnLabel(t))}</b><span class="why">${t.kind ? esc(t.kind) + (dirW ? " " + dirW : "") + " · " : ""}${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"}</span>
+    <span class="tstat-nav"><button class="mini" data-turnstep="prev" title="previous turn">‹</button><button class="mini" data-turnstep="next" title="next turn">›</button><button class="mini" data-turnclear title="clear selection">✕</button></span></div>`;
+
+  // ---- geometry / information
   const geo = [
     t.kind ? ["kind", t.kind] : null,
     t.r != null ? ["radius", Math.round(t.r) + " m"] : null,
     t.deg != null ? ["angle", Math.round(t.deg) + "°"] : null,
-    t.dir ? ["direction", t.dir === "L" ? "left" : "right"] : null,
+    dirW ? ["direction", dirW] : null,
     t.width != null ? ["road width", (+t.width).toFixed(1) + " m"] : null,
     t.bank != null ? ["banking", (+t.bank).toFixed(1) + "°"] : null,
     t.n != null ? ["passes on record", t.n] : null,
   ].filter(Boolean);
-  const obs = t.phaseObs || {};
-  const phaseRows = SEG_ORDER.map((name) => {
-    const p = obs[name] && phaseAgg(obs[name], ls.set);
-    const g = p ? DGRIP[GSTATE[p.grip] || "calm"] : null;
-    return `<tr class="${p ? "" : "off"}">
-      <td><span class="pdot" style="background:${SEG_COL[name]}"></span>${esc(SEG_LABEL[name])}</td>
-      <td class="mono" style="text-align:center">${p && p.entry != null ? p.entry : "—"}</td>
-      <td class="mono" style="text-align:center">${p && p.min != null ? "<b>" + p.min + "</b>" : "—"}</td>
-      <td class="mono" style="text-align:center">${p && p.exit != null ? p.exit : "—"}</td>
-      <td style="text-align:center">${p ? `<span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${g.word}</span>` : "—"}</td>
-      <td class="mono" style="text-align:right">${p ? p.n : "—"}</td></tr>`;
-  }).join("");
-  return `<div class="grp tstat">
-    <div class="gh tstat-h"><b>${esc(turnLabel(t))}</b>${t.kind ? " · " + esc(t.kind) : ""}<span class="why"> · full turn statistics · ${esc(ls.label)}</span><button class="mini" data-turnclear>✕ clear</button></div>
+  const bankW = t.bank == null ? "" : Math.abs(t.bank) < 1.5 ? ", flat" : ", banked " + Math.abs(Math.round(t.bank)) + "°";
+  const cap = `${t.kind ? cap1(t.kind) : "Turn"}${t.r != null ? " · " + Math.round(t.r) + " m radius" : ""}${t.deg != null ? " · " + Math.round(t.deg) + "° " + (dirW || "") : ""}${t.width != null ? " · " + (+t.width).toFixed(1) + " m wide" + bankW : ""}`;
+  const geoCard = `<div class="grp"><div class="gh">Information</div>
     <div class="tstat-geo">${geo.map(([k, v]) => `<span><em>${esc(k)}</em>${esc(String(v))}</span>`).join("")}</div>
-    <table class="tstat-ph"><thead><tr><th>phase</th><th>entry</th><th>min</th><th>exit</th><th>grip</th><th>laps</th></tr></thead>
-      <tbody>${phaseRows}</tbody></table></div>`;
+    <div class="why tstat-cap">${esc(cap)}</div></div>`;
+
+  // ---- timing
+  const budMax = Math.max(...aggs.map((a) => (a.p && a.p.time) || 0), 0.1);
+  const budget = aggs.map(({ n, p }) => p && p.time ? `<span class="tb-seg" style="flex:${Math.round(p.time * 100)} 0 0;background:${SEG_COL[n]}" title="${esc(SEG_LABEL[n])} · ${p.time.toFixed(2)} s"><i>${p.time >= 0.4 ? p.time.toFixed(1) : ""}</i></span>` : "").join("");
+  // best-vs-typical rows, biggest gap flagged
+  const cmp = aggs.map(({ n, p }) => ({ n, typ: p && p.time, best: bestPhaseT[n] })).filter((r) => r.typ != null);
+  let worst = null; cmp.forEach((r) => { if (r.best != null) { const d = r.typ - r.best; if (!worst || d > worst.d) worst = { n: r.n, d }; } });
+  const cmpRows = cmp.map((r) => {
+    const d = r.best != null ? r.typ - r.best : null;
+    const flag = worst && worst.n === r.n && worst.d > 0.05;
+    return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>
+      <td class="mono" style="text-align:right">${r.typ.toFixed(2)}</td>
+      <td class="mono" style="text-align:right">${r.best != null ? r.best.toFixed(2) : "—"}</td>
+      <td class="mono" style="text-align:right">${d != null ? (d > 0 ? "+" : "") + d.toFixed(2) : "—"}</td></tr>`;
+  }).join("");
+  const timeCard = medTurnT != null ? `<div class="grp"><div class="gh">Timing</div>
+    <div class="tstat-big"><b>${medTurnT.toFixed(1)} s</b> in the turn${medLapT ? ` <span class="why">≈ ${Math.round(medTurnT / medLapT * 100)}% of the ${medLapT.toFixed(1)} s lap</span>` : ""}</div>
+    <div class="tbar" title="where the seconds go — median time per part">${budget}</div>
+    ${cmp.some((r) => r.best != null) ? `<div class="why tstat-sub">typical vs your best lap (${bestT.toFixed(1)} s)${worst && worst.d > 0.05 ? ` — most to find in <b style="color:var(--warn)">${esc(SEG_LABEL[worst.n])}</b> (+${worst.d.toFixed(2)} s)` : ""}</div>
+    <table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best</th><th>Δ s</th></tr></thead><tbody>${cmpRows}</tbody></table>` : ""}</div>`
+    : `<div class="grp"><div class="gh">Timing</div><div class="why" style="padding:2px 6px">no timed laps for this turn in ${esc(ls.label)}</div></div>`;
+
+  // ---- per-phase statistics
+  const rows = aggs.map(({ n, p }) => `<tr class="${p ? "" : "off"}" data-phase="${n}">
+    <td><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SEG_LABEL[n])}</td>
+    <td class="mono" style="text-align:center">${p && p.entry != null ? p.entry : "—"}</td>
+    <td class="mono" style="text-align:center">${p && p.min != null ? "<b>" + p.min + "</b>" : "—"}</td>
+    <td class="mono" style="text-align:center">${p && p.exit != null ? p.exit : "—"}</td>
+    <td class="mono" style="text-align:center">${p && p.mean != null ? p.mean : "—"}</td>
+    <td class="mono" style="text-align:center">${p && p.time != null ? p.time.toFixed(2) : "—"}</td>
+    <td>${gripBar(p && p.mix)}</td>
+    <td class="mono" style="text-align:right">${p ? p.n : "—"}</td></tr>`).join("");
+  const statCard = `<div class="grp"><div class="gh">Per-phase statistics <span class="why">· mph medians</span></div>
+    <table class="tstat-ph"><thead><tr><th>phase</th><th>entry</th><th>apex</th><th>exit</th><th>mean</th><th>s</th><th>grip mix</th><th>laps</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="tstat-tot"><td>whole turn</td><td colspan="4"></td><td class="mono" style="text-align:center">${medTurnT != null ? medTurnT.toFixed(2) : "—"}</td><td>${gripBar(turnMix)}</td><td class="mono" style="text-align:right">${nLaps}</td></tr></tfoot></table></div>`;
+
+  // ---- grip read + legend
+  const legRow = GSTATE.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}</span>`).join("");
+  const gripCard = `<div class="grp"><div class="gh">Grip <span class="why">· share of samples, ${esc(ls.label)}</span></div>
+    <div class="tstat-gread">${gripBar(turnMix, "gbar--lg")}<span class="tstat-gword">${esc(gripRead(turnMix))}</span></div>
+    <div class="ballegend gleg">${legRow}</div></div>`;
+
+  return `<div class="tstat">${header}${timeCard}${geoCard}${statCard}${gripCard}</div>`;
 }
+function cap1(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function matrixHTML() {
   if (!COURSE || !(COURSE.turns || []).length) return `<div class="why">no turn map for this course yet</div>`;
   const ls = activeLapSet();
   const sel = turnPickSeq();
   const selT = sel != null ? (COURSE.turns || []).find((t) => t.seq === sel) : null;
-  const detail = selT ? turnStatsHTML(selT, ls) : "";
+  // a turn is selected -> the pane IS its full statistics (timing + per-phase + grip); its own ‹ › ✕ nav
+  // steps between turns and clears. The overview strip + live session matrix return when nothing is picked.
+  if (selT) return turnStatsHTML(selT, ls);
   const strip = cornerStripHTML(ls, sel);
   const cid = CUR && CUR.cid;
   const log = (LIVE.corners || []).filter((c) => !cid || c.car === cid);
-  if (!log.length) return detail + (strip || `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`);
+  if (!log.length) return strip || `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`;
 
   // ev===0 (free-roam) corners are excluded from turn rows, the same gate v1's matrix used — the
   // live ev stamp trusts a single apex-frame read today; see the daemon-side majority-vote hardening.
@@ -2333,7 +2520,7 @@ function matrixHTML() {
       </tr>`;
     }).join("")}
   </tbody></table></div>`;
-  return detail + strip + head + table;
+  return strip + head + table;
 }
 
 // Build data: what the save on disk gives exactly, what the union still has to measure, and the

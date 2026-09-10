@@ -676,7 +676,7 @@ body.fixed main{height:calc(100vh - 24px - 20px - 24px)}
 @media (orientation: portrait){
   .panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
 }
-#leftHd .trackname{font:800 13px var(--sans);letter-spacing:.01em;color:var(--ink)}
+#leftHd .trackname{font:800 17px var(--sans);letter-spacing:.01em;color:var(--ink)}
 
 /* ---------- the trace holds its band whether or not it has a line to draw ---------- */
 .trace{height:240px}
@@ -864,15 +864,20 @@ body.fixed main{padding:0;gap:0;border-top:0}
    name + status chips, a meta line, and the offered-class + mode chips. Mirrors the car pill's design. The
    pane header is a fixed 48px (both panes, so their tops align); this one uses tight vertical padding so the
    two-line pill sits centred within it. */
-#leftHd{padding-top:4px;padding-bottom:4px;align-items:center}
-#leftHd .cpill{display:flex;align-items:center;gap:10px;min-width:0;width:100%}
-#leftHd .cpill-glyph{flex:0 0 auto;width:42px;height:26px;background:var(--bg);border-radius:4px;overflow:hidden}
-#leftHd .cpill-glyph .tsvg{width:100%;height:100%;display:block;border-radius:4px}
-#leftHd .cpill-txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1 1 auto}
-#leftHd .cpill-l1{display:flex;align-items:center;gap:6px;min-width:0}
+#leftHd{padding-top:7px;padding-bottom:7px;align-items:center}
+#leftHd .cpill{display:flex;align-items:center;gap:13px;min-width:0;width:100%}
+#leftHd .cpill-glyph{flex:0 0 auto;width:88px;height:54px;background:var(--bg);border-radius:5px;overflow:hidden}
+#leftHd .cpill-glyph .tsvg{width:100%;height:100%;display:block;border-radius:5px}
+#leftHd .cpill-txt{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 auto}
+#leftHd .cpill-l1{display:flex;align-items:center;gap:7px;min-width:0}
 #leftHd .cpill-l1 .trackname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto}
 #leftHd .cpill-l1 .chip{flex:0 0 auto}
-#leftHd .cpill-l2{font-size:10.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#leftHd .cpill-l2{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the class pills earn a row of their own under the meta now the pill is header-sized, instead of being
+   crushed into the right-hand badge strip -- the classes a course is offered in read at a glance */
+#leftHd .cpill-badges{max-width:100%;flex-wrap:wrap;justify-content:flex-start;margin-top:1px}
+#leftHd .cpill-badges .pib{font-size:10px}
+#leftHd .cpill-badges .pib-n{display:inline}
 #leftHd .cpill-badges{flex:0 0 auto;display:flex;align-items:center;gap:3px;flex-wrap:nowrap;overflow:hidden;justify-content:flex-end;max-width:44%}
 #leftHd .cpill-badges .pib{font-size:9px;border-radius:3px;flex:0 0 auto}
 #leftHd .cpill-badges .pib b{padding:1px 4px;text-shadow:none}
@@ -916,20 +921,55 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .pstrip--pick:hover{background:var(--line)}
 .pstrip--pick.sel{background:var(--sel,rgba(120,160,255,.16));box-shadow:inset 0 0 0 1px var(--acc2)}
 .pstrip--pick.sel .ptn{color:var(--acc2)}
-/* FULL TURN STATISTICS card — geometry chips over a per-phase behaviour table */
-.tstat{border:1px solid var(--acc2);border-radius:6px;padding:4px 8px 8px;margin-bottom:10px;background:var(--panel2,rgba(120,160,255,.05))}
-.tstat-h{display:flex;align-items:center;gap:2px}
-.tstat-h b{font:700 13px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink)}
-.tstat-h [data-turnclear]{margin-left:auto}
-.tstat-geo{display:flex;flex-wrap:wrap;gap:5px 7px;margin:5px 0 7px}
+/* ===== TURN ANALYSIS — left 5-part view + right timing/statistics (Jett 2026-09-10) ===== */
+/* RIGHT header + the cards column */
+.tstat-h{display:flex;align-items:center;gap:6px}
+.tstat-h b{font:700 14px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink)}
+.tstat-nav{margin-left:auto;display:flex;gap:3px}
+.tstat-geo{display:flex;flex-wrap:wrap;gap:5px 7px;margin:5px 0 6px}
 .tstat-geo span{font:600 11px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
 .tstat-geo em{font-style:normal;color:var(--dim);text-transform:uppercase;font-size:8.5px;letter-spacing:.06em;margin-right:5px}
-.tstat-ph{width:100%;border-collapse:collapse;font-size:11px}
+.tstat-cap{margin:0 2px}
+/* timing card */
+.tstat-big{font-size:12px;color:var(--mut);margin:3px 2px 6px}
+.tstat-big b{font:800 20px var(--sans);color:var(--ink);margin-right:4px}
+.tbar{display:flex;height:20px;border-radius:4px;overflow:hidden;margin:2px 0 4px;background:var(--bg)}
+.tbar .tb-seg{display:flex;align-items:center;justify-content:center;min-width:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.tbar .tb-seg i{font:700 9px var(--mono);color:#0b0e12;font-style:normal;opacity:.85}
+.tstat-sub{margin:5px 2px 3px}
+.tstat-cmp,.tstat-ph{width:100%;border-collapse:collapse;font-size:11px}
+.tstat-cmp th{font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em;padding:2px 4px;text-align:right}
+.tstat-cmp th:first-child{text-align:left}
+.tstat-cmp td{padding:2px 4px;border-top:1px solid var(--line)}
+.tstat-cmp tr.tb-flag{background:rgba(224,164,50,.09)}
+/* per-phase statistics table */
 .tstat-ph th{font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em;padding:2px 4px;text-align:center}
 .tstat-ph th:first-child{text-align:left}
-.tstat-ph td{padding:3px 4px;border-top:1px solid var(--line)}
-.tstat-ph tr.off{opacity:.4}
+.tstat-ph td{padding:3px 4px;border-top:1px solid var(--line);vertical-align:middle}
+.tstat-ph tr.off{opacity:.45}
+.tstat-ph tr[data-phase]{transition:background .1s}
+.tstat-ph tr[data-phase].hi{background:var(--sel,rgba(120,160,255,.16))}
+.tstat-ph tfoot .tstat-tot td{border-top:2px solid var(--line2);font-weight:700;color:var(--ink)}
 .pdot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+/* the grip DISTRIBUTION bar — the honest "how the grip splits", replacing a single lossy swatch */
+.gbar{display:flex;height:13px;width:100%;min-width:54px;border-radius:2px;overflow:hidden;background:var(--line2);box-shadow:inset 0 0 0 1px rgba(0,0,0,.3)}
+.gbar span{min-width:1px}
+.gbar--empty{background:var(--line2)}
+.gbar--lg{height:20px;border-radius:3px}
+.tstat-gread{display:flex;align-items:center;gap:9px;margin:3px 2px 6px}
+.tstat-gword{font:600 12px var(--sans);color:var(--ink);white-space:nowrap}
+.gleg{margin:2px 0 0}
+/* LEFT per-turn view */
+.turnview{display:flex;flex-direction:column;gap:6px;padding:2px}
+.tv-hd{display:flex;align-items:center;gap:8px}
+.tv-hd b{font:800 16px var(--sans);color:var(--ink)}
+.tv-lg{margin-top:2px}
+.trail{display:flex;gap:3px;align-items:stretch;height:46px}
+.trail-c{display:flex;flex-direction:column;gap:2px;justify-content:flex-end;min-width:0;padding:2px 3px;border-radius:3px;background:var(--bg);cursor:default}
+.trail-c:hover{background:var(--line)}
+.trail-lbl{font:700 9px var(--mono);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trail-t{font:700 10px var(--mono);color:var(--ink)}
+.trail-c .gbar{height:9px;min-width:0}
 /* miniature performance-class pills (one per class a Rivals course is offered in) — the established piBadge, shrunk */
 .tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
 .tcls .pib{font-size:8px;border-radius:3px}

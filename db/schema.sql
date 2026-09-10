@@ -699,7 +699,8 @@ CREATE TABLE IF NOT EXISTS corner_segment (
   segment    TEXT NOT NULL,           -- braking | turn_in | mid | exit | straight
   n_samples  INTEGER,
   entry_mph  REAL, exit_mph REAL, min_mph REAL, mean_mph REAL,
-  grip_state INTEGER,                 -- worst grip state seen in the phase
+  grip_state INTEGER,                 -- TYPICAL (modal) grip state over the phase's samples, not the worst
+  grip_hist  TEXT,                    -- JSON [calm,front,rear,both,impact] sample counts -> the true grip mix
   time_s     REAL,
   PRIMARY KEY (lap_id, turn_id, segment)
 ) WITHOUT ROWID;

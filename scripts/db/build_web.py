@@ -433,13 +433,22 @@ def main(argv=None):
         # phase -> [[lap_id, entry, min, exit, grip]...] over the course's CLEAN laps. The client aggregates
         # over whatever lap set the trace preset (all / this class / this car / this build / this tune) is
         # showing -- so the strip separates by class, build and tune with the SAME filter as the map traces.
+        # each phase row: [lap_id, entry, min, exit, grip_state, time_s, grip_hist, mean] -- time_s powers
+        # the right-pane timing, grip_hist (5-state sample counts) the TRUE grip mix the client sums over
+        # the active preset so a turn reads by its typical grip, not its single worst moment, mean the
+        # phase's average speed. mean sits LAST so the existing [0..6] indices never shift.
         _seg = _cl.defaultdict(lambda: _cl.defaultdict(list))
         for sr in cx.execute("""SELECT cs.turn_id, cs.segment, cs.entry_mph, cs.min_mph, cs.exit_mph,
-                                       cs.grip_state, cs.lap_id
+                                       cs.grip_state, cs.time_s, cs.grip_hist, cs.mean_mph, cs.lap_id
                                 FROM corner_segment cs JOIN lap l ON l.lap_id = cs.lap_id
                                 WHERE cs.route_key = ? AND l.void = 0 AND l.is_partial = 0 AND l.rewinds = 0""", (key,)):
+            try:
+                _gh = json.loads(sr["grip_hist"]) if sr["grip_hist"] else None
+            except Exception:                                 # noqa: BLE001
+                _gh = None
             _seg[sr["turn_id"]][sr["segment"]].append(
-                [sr["lap_id"], sr["entry_mph"], sr["min_mph"], sr["exit_mph"], sr["grip_state"]])
+                [sr["lap_id"], sr["entry_mph"], sr["min_mph"], sr["exit_mph"], sr["grip_state"],
+                 sr["time_s"], _gh, sr["mean_mph"]])
         for t in turns:
             po = _seg.get(t.get("id"))
             if po:

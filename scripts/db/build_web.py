@@ -254,7 +254,7 @@ def main(argv=None):
         for l in laps:
             if l["id"] not in keep:
                 keep.append(l["id"])
-            if len(keep) >= 40:
+            if len(keep) >= 400:                          # draw all available (Jett 2026-09-10); ceiling only bounds a runaway
                 break
         traces = {}
         for lid in keep:

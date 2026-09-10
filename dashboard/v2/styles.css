@@ -901,6 +901,16 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .cps-cn{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .cps-car i{font-style:normal;font-weight:700;color:var(--mut);flex:0 0 auto}
 .cps-more{grid-column:1/-1;font-size:10px;color:var(--dim);margin-top:3px}
+/* PER-PHASE CORNER STRIP (course-mode Turn analysis): one row per turn, its 5 WHERE-phases as grip-coloured cells */
+.pstrip{display:flex;align-items:center;gap:8px;padding:1px 0}
+.pstrip .ptn{flex:0 0 88px;font:600 10.5px var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pstrip .pcells{display:flex;gap:2px;flex:1 1 auto;min-width:0}
+.pcell{flex:1 1 0;min-width:0;height:16px;border-radius:2px;display:flex;align-items:center;justify-content:center;
+  font:600 9px var(--mono);color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.pcell b{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.pc-empty{background:var(--line2);box-shadow:inset 0 0 0 1px var(--line)}
+.pstrip-h{margin-bottom:3px}
+.pstrip-h .pcells span{flex:1 1 0;text-align:center;font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.03em}
 /* miniature performance-class pills (one per class a Rivals course is offered in) — the established piBadge, shrunk */
 .tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
 .tcls .pib{font-size:8px;border-radius:3px}

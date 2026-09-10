@@ -2163,11 +2163,32 @@ function phaseBars(ph) {
   }).join("")}</span>`;
 }
 
+// PER-PHASE CORNER STRIP (Jett 2026-09-10): for each course turn, its 5 WHERE-phases as cells coloured
+// by the modal grip state, accumulated over the course's clean laps (COURSE.turns[].phases from build_web).
+// Always available in course mode -- it does not wait on this session's live corners.
+const GSTATE = ["calm", "front", "rear", "both", "impact"];   // grip_state 0-4 -> DGRIP key
+function phaseCells(ph) {
+  return ["braking", "turn_in", "mid", "exit", "straight"].map((name) => {
+    const p = ph[name];
+    if (!p) return `<span class="pcell pc-empty"></span>`;
+    const g = DGRIP[GSTATE[p.grip] || "calm"];
+    const lbl = name === "mid" ? `<b>${p.min ?? ""}</b>` : "";
+    return `<span class="pcell" style="background:${g.col}" title="${name.replace("_", "-")} · ${p.n} lap${p.n === 1 ? "" : "s"} · entry ${p.entry ?? "—"} → min ${p.min ?? "—"} → exit ${p.exit ?? "—"} mph · ${g.word}${p.time != null ? " · " + p.time + "s" : ""}">${lbl}</span>`;
+  }).join("");
+}
+function cornerStripHTML() {
+  const turns = (COURSE.turns || []).filter((t) => t.phases).slice().sort((a, b) => a.seq - b.seq);
+  if (!turns.length) return "";
+  return `<div class="grp"><div class="gh">Corner phases <span class="why">· median over clean laps · coloured by grip</span></div>
+    <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>turn-in</span><span>mid</span><span>exit</span><span>straight</span></span></div>
+    ${turns.map((t) => `<div class="pstrip"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phases)}</span></div>`).join("")}</div>`;
+}
 function matrixHTML() {
+  if (!COURSE || !(COURSE.turns || []).length) return `<div class="why">no turn map for this course yet</div>`;
+  const strip = cornerStripHTML();
   const cid = CUR && CUR.cid;
   const log = (LIVE.corners || []).filter((c) => !cid || c.car === cid);
-  if (!COURSE || !(COURSE.turns || []).length) return `<div class="why">no turn map for this course yet</div>`;
-  if (!log.length) return `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`;
+  if (!log.length) return strip || `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`;
 
   // ev===0 (free-roam) corners are excluded from turn rows, the same gate v1's matrix used — the
   // live ev stamp trusts a single apex-frame read today; see the daemon-side majority-vote hardening.
@@ -2213,7 +2234,7 @@ function matrixHTML() {
       </tr>`;
     }).join("")}
   </tbody></table></div>`;
-  return head + table;
+  return strip + head + table;
 }
 
 // Build data: what the save on disk gives exactly, what the union still has to measure, and the

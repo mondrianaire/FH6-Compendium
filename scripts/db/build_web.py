@@ -215,7 +215,7 @@ def main(argv=None):
                c.name_source, c.name_confidence, c.declared_name, c.declared_source, c.event_id,
                (SELECT COUNT(*) FROM lap l WHERE l.route_key = c.route_key) AS lap_rows,
                (SELECT MIN(l.lap_s) FROM lap l WHERE l.route_key = c.route_key
-                  AND l.void = 0 AND l.is_partial = 0) AS best,
+                  AND l.void = 0 AND l.is_partial = 0 AND l.rewinds = 0) AS best,   -- a rewound lap's clock is invalid (lap-canon): never the course record
                cr.route_id, cr.match_kind AS match, cr.covered,
                cr.anchor_route_id, cr.anchor_events, cr.anchor_agree
         FROM course c LEFT JOIN course_route cr ON cr.route_key = c.route_key ORDER BY (c.name IS NULL), c.name, c.route_key""")
@@ -232,9 +232,9 @@ def main(argv=None):
         geo = json.loads(geo["geometry"] or "{}") if geo else {}
         laps = rows(cx, """
             SELECT lap_id AS id, cid, container, lap_s AS t, arc_m AS arc,
-                   ROUND(coverage, 3) AS cov, is_partial AS partial, void, impacts,
+                   ROUND(coverage, 3) AS cov, is_partial AS partial, void, impacts, rewinds,
                    class, pi, drivetrain AS dt, build_id AS bid, session_id AS sid, solo
-            FROM lap WHERE route_key = ? ORDER BY (void OR is_partial), lap_s""", key)
+            FROM lap WHERE route_key = ? ORDER BY (void OR is_partial OR rewinds > 0), lap_s""", key)
         # traces: NEVER CAP THE DATA FOR ONE CONSUMER'S BENEFIT (v1 lesson). The old cap kept one
         # lap per cid and dropped every void or partial lap, so an A/B pair on one car at one PI
         # collapsed to a single trace and the header's "N of N laps on record" reported the cap as
@@ -244,7 +244,7 @@ def main(argv=None):
         # along as the sixth field for the trace's elevation paint.
         keep, seen = [], set()
         for l in laps:
-            if l["void"] or l["partial"]:
+            if l["void"] or l["partial"] or l["rewinds"]:      # a rewound lap's clock is invalid (lap-canon); kept & flagged below, never crowned the save's fastest
                 continue
             k = (l["cid"], l["container"])
             if k in seen:

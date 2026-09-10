@@ -158,8 +158,9 @@ def run(cx, verbose=False, data_dir=None):
     lrows, prows, mrows = [], [], []
     seen = set()
     lap_id = 0
-    lengths = {r[0]: r[1] for r in
-               [(c[0], c[4]) for c in crows]}
+    # course length by route_key -- crows index 6 is geo length_m (index 4 is is_rivals, which is why
+    # coverage/is_partial silently never populated: L was 0/1, so cov=arc/L was junk or a div-by-zero None).
+    lengths = {c[0]: c[6] for c in crows}
 
     known_routes = {c[0] for c in crows}
     known_sessions = {s[0] for s in srows}

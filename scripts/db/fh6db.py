@@ -444,6 +444,18 @@ V2_TABLES["lap_marker"] = """CREATE TABLE IF NOT EXISTS lap_marker (
   PRIMARY KEY (lap_id, i)
 ) WITHOUT ROWID"""
 
+V2_TABLES["corner_segment"] = """CREATE TABLE IF NOT EXISTS corner_segment (
+  lap_id     INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
+  turn_id    TEXT NOT NULL,
+  route_key  TEXT NOT NULL,
+  segment    TEXT NOT NULL,
+  n_samples  INTEGER,
+  entry_mph  REAL, exit_mph REAL, min_mph REAL, mean_mph REAL,
+  grip_state INTEGER,
+  time_s     REAL,
+  PRIMARY KEY (lap_id, turn_id, segment)
+) WITHOUT ROWID"""
+
 
 def ensure_columns(cx, table, cols):
     """ALTER TABLE ADD COLUMN for each (name, decl) the table lacks. Returns how many were added."""

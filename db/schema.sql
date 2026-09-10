@@ -689,6 +689,22 @@ CREATE TABLE IF NOT EXISTS corner_obs (
 ) WITHOUT ROWID;
 CREATE INDEX IF NOT EXISTS ix_corner_turn ON corner_obs(route_key, turn_id, apex_mph);
 
+-- corner_obs cut finer: what each lap did in each of the 5 WHERE-phases of a turn (braking, turn-in,
+-- mid, exit, straight), samples bucketed by projecting each onto the route's segment spans. This is
+-- the "where in the corner did it happen" join -- e.g. time lost in braking vs a slow apex.
+CREATE TABLE IF NOT EXISTS corner_segment (
+  lap_id     INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
+  turn_id    TEXT NOT NULL,
+  route_key  TEXT NOT NULL,
+  segment    TEXT NOT NULL,           -- braking | turn_in | mid | exit | straight
+  n_samples  INTEGER,
+  entry_mph  REAL, exit_mph REAL, min_mph REAL, mean_mph REAL,
+  grip_state INTEGER,                 -- worst grip state seen in the phase
+  time_s     REAL,
+  PRIMARY KEY (lap_id, turn_id, segment)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS ix_corner_segment ON corner_segment(route_key, turn_id, segment);
+
 -- ============================================================================
 -- OBSERVATION LAYER — what a person saw. Every row names its source.
 -- ============================================================================

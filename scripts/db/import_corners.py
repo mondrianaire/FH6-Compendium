@@ -37,6 +37,43 @@ def window_m(turn):
     return max(18.0, min(70.0, 0.5 * w + 0.25 * r))
 
 
+try:
+    import numpy as _np                                   # spatial nearest-route-point for the segment map
+except Exception:                                         # noqa: BLE001
+    _np = None
+
+# a route point in two phases' spans (a straight is the previous turn's straight AND the next turn's
+# braking) goes to the higher-priority one -- the corner phases win over the connectors.
+_SEG_PRI = {"mid": 3, "turn_in": 2, "exit": 2, "braking": 1, "straight": 0}
+
+
+def _route_segment_map(rp, seg_turns):
+    """Per route point, the (turn_id, phase) it belongs to, plus the point coords as arrays -- so a lap
+    sample's nearest route point names the 5-segment phase it was driven in (association stays spatial)."""
+    rx = [p["x"] for p in rp]
+    rz = [p["z"] for p in rp]
+    arc = [0.0]
+    for i in range(1, len(rp)):
+        arc.append(arc[-1] + math.hypot(rx[i] - rx[i - 1], rz[i] - rz[i - 1]))
+    ivs = []
+    for t in seg_turns:
+        try:
+            segs = json.loads(t["segments"])
+        except Exception:                                 # noqa: BLE001
+            continue
+        for name, ab in segs.items():
+            ivs.append((ab[0], ab[1], t["turn_id"], name, _SEG_PRI.get(name, 0)))
+
+    def seg_at(x):
+        best = (-1, (None, None))
+        for a, b, tid, name, pri in ivs:
+            inside = (a <= x <= b) if a <= b else (x >= a or x <= b)   # a>b spans the start/finish (loops)
+            if inside and pri > best[0]:
+                best = (pri, (tid, name))
+        return best[1]
+    return [seg_at(arc[i]) for i in range(len(rp))], _np.array(rx, float), _np.array(rz, float)
+
+
 def run(cx, verbose=False):
     # only courses whose game route we identified BY SHAPE can carry road-derived turns: an
     # 'anchored' course (start sphere only, route_id NULL) never reaches here, and the kind is
@@ -45,7 +82,7 @@ def run(cx, verbose=False):
         SELECT c.route_key, c.name, cr.route_id, cr.match_kind
         FROM course c JOIN course_route cr ON cr.route_key = c.route_key
         WHERE cr.route_id IS NOT NULL AND cr.match_kind IN ('verified', 'probable', 'partial')""").fetchall()
-    rows, skipped = [], 0
+    rows, seg_rows, skipped = [], [], 0
     for co in courses:
         turns = [dict(t) for t in cx.execute("""
             SELECT turn_id, seq, apex_x, apex_z, radius_m, width_m, bank_deg, kind, angle_deg
@@ -54,6 +91,13 @@ def run(cx, verbose=False):
             continue
         for t in turns:
             t["_w2"] = window_m(t) ** 2
+        # the 5-segment lap map for this route: every route point's phase, when segments are stored
+        rpt_seg = RX = RZ = None
+        if _np is not None:
+            rp = cx.execute("SELECT x,z FROM ref_route_point WHERE route_id=? ORDER BY i", (co["route_id"],)).fetchall()
+            st = cx.execute("SELECT turn_id, segments FROM ref_route_turn WHERE route_id=? AND segments IS NOT NULL", (co["route_id"],)).fetchall()
+            if rp and st:
+                rpt_seg, RX, RZ = _route_segment_map(rp, st)
         laps = cx.execute("SELECT lap_id FROM lap WHERE route_key=?", (co["route_key"],)).fetchall()
         for lp in laps:
             pts = cx.execute("""SELECT i, arc_m, mph, grip, x, z FROM lap_point
@@ -91,12 +135,43 @@ def run(cx, verbose=False):
                              mphs[0], apex["mph"], mphs[-1], min(mphs),
                              max(grips) if grips else None,
                              round(secs, 3) if secs else None, None))
+            # 5-SEGMENT PASS: each sample -> its nearest route point -> that point's phase, then per
+            # (turn, phase) the same speeds/grip/time as corner_obs but cut per WHERE-segment.
+            if rpt_seg is not None:
+                sp = [p for p in pts if p["x"] is not None and p["z"] is not None]
+                if len(sp) >= 8:
+                    PX = _np.array([p["x"] for p in sp], float)
+                    PZ = _np.array([p["z"] for p in sp], float)
+                    nn = ((RX[None, :] - PX[:, None]) ** 2 + (RZ[None, :] - PZ[:, None]) ** 2).argmin(axis=1)
+                    sb = {}
+                    for kk, p in enumerate(sp):
+                        ts = rpt_seg[int(nn[kk])]
+                        if ts[0] is not None:
+                            sb.setdefault(ts, []).append(p)
+                    for (stid, sname), ss in sb.items():
+                        smphs = [s["mph"] for s in ss if s["mph"] is not None]
+                        if len(ss) < 2 or not smphs:
+                            continue
+                        sarc = [s["arc_m"] for s in ss if s["arc_m"] is not None]
+                        sspan = (max(sarc) - min(sarc)) if len(sarc) > 1 else 0.0
+                        savg = sum(smphs) / len(smphs)
+                        ssecs = (sspan / (savg * 0.44704)) if savg > 1 else None
+                        sgr = [s["grip"] for s in ss if s["grip"] is not None]
+                        seg_rows.append((lp["lap_id"], stid, co["route_key"], sname, len(ss),
+                                         smphs[0], smphs[-1], min(smphs), round(savg, 1),
+                                         max(sgr) if sgr else None, round(ssecs, 3) if ssecs else None))
     with cx:
         cx.execute("DELETE FROM corner_obs")
         n = fh6db.upsert_many(cx, "corner_obs", [
             "lap_id", "turn_id", "route_key", "entry_mph", "apex_mph", "exit_mph", "min_mph",
             "grip_state", "time_s", "score"], rows, chunk=5000)
-    return {"corner_obs": n, "_laps_skipped": skipped}
+        m = 0
+        if fh6db.has_table(cx, "corner_segment"):
+            cx.execute("DELETE FROM corner_segment")
+            m = fh6db.upsert_many(cx, "corner_segment", [
+                "lap_id", "turn_id", "route_key", "segment", "n_samples", "entry_mph", "exit_mph",
+                "min_mph", "mean_mph", "grip_state", "time_s"], seg_rows, chunk=5000)
+    return {"corner_obs": n, "corner_segment": m, "_laps_skipped": skipped}
 
 
 def main(argv=None):

@@ -553,14 +553,16 @@ window.addEventListener("resize", () => { TRACE_KEY = null; paintTrace(); });
 function chart(W, H, padL, padB, smax, vmax) {
   return { px: (x) => padL + (x / (smax || 1)) * (W - padL - 8), py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
 }
-// After the build re-anchors trace arc to a common origin, a lap longer than the frame wraps once at
-// the start/finish seam -- split the line there so it never draws a backward streak across the chart.
-// 30 m guards against sample jitter triggering a false split (a real wrap jumps most of the lap).
+// Split a trace wherever consecutive points don't sit next to each other in arc, so the line never
+// draws a straight streak across the gap: a BACKWARD step (< -30 m) is the start/finish seam a re-anchored
+// loop wraps at; a big FORWARD step (> 60 m) is a coverage gap (a section the lap didn't record). Normal
+// samples are a few metres apart, so neither threshold trips on a continuous lap.
 function arcRuns(pts) {
   if (pts.length < 2) return pts.length ? [pts] : [];
   const runs = []; let run = [pts[0]];
   for (let i = 1; i < pts.length; i++) {
-    if (pts[i][0] != null && pts[i - 1][0] != null && pts[i][0] < pts[i - 1][0] - 30) { runs.push(run); run = [pts[i]]; }
+    const a = pts[i - 1][0], b = pts[i][0];
+    if (a != null && b != null && (b < a - 30 || b > a + 60)) { runs.push(run); run = [pts[i]]; }
     else run.push(pts[i]);
   }
   runs.push(run); return runs;

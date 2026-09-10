@@ -336,7 +336,14 @@ def main(argv=None):
                 break
         if _ref_id is None and traces:
             _ref_id = max(traces, key=lambda k: len(traces[k]))
-        if _np is not None and traces and _ref_id is not None:
+        # LOOPS ONLY. The offset-mod-L + rotate model re-phases laps around a start/finish seam -- it is
+        # meaningless on a POINT-TO-POINT course, where every lap already shares the one start line and the
+        # modulus would wrap an aligned 0..L lap into a scrambled order (Hakone, is_loop=0: 22/35 traces got
+        # a ~full-length forward jump that drew a straight line across the chart). P2P laps keep their own
+        # arc, which is already start-anchored. `route` isn't built until later, so read is_loop here.
+        _lr = cx.execute("SELECT rr.is_loop FROM course_route cr JOIN ref_route rr ON rr.route_id = cr.route_id WHERE cr.route_key = ?", (key,)).fetchone()
+        _is_loop = bool(_lr and _lr["is_loop"])
+        if _np is not None and traces and _ref_id is not None and _is_loop:
             _ref = traces[_ref_id]
             _rp = [(p[0], p[3], p[4]) for p in _ref if p[3] is not None and p[4] is not None and p[0] is not None]
             _L = _rp[-1][0] if _rp else 0

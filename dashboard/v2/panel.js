@@ -73,8 +73,14 @@ function adoptMode(m) {
   // and only applied if it PERSISTS past a settle window -- a resume transient is held on the course, but a
   // genuine move to free roam (free still suggested after the window, not in a menu) switches as before.
   if (m.suggest === "free" && MODE.suggest === "course" && COURSE) {
-    PENDING_FREE = m;
     if (m.game !== undefined) MODE.game = m.game;
+    // DON'T RESTART THE SETTLE TIMER ON EVERY STREAMED "free" (bug 2026-09-10): the periodic status
+    // event calls adoptMode(d.mode) continuously, so free roam streams "free" every second. Re-arming
+    // the 6 s timer each time meant it never elapsed and the dashboard stayed stuck in course mode. Arm
+    // it ONCE per free episode; a genuine course/event suggestion (the else branch) clears it, after
+    // which the next "free" arms a fresh window.
+    if (PENDING_FREE) return;
+    PENDING_FREE = m;
     clearTimeout(FREE_TIMER);
     FREE_TIMER = setTimeout(() => {
       if (!PENDING_FREE || LIVE.inMenu || MODE.suggest !== "course") { PENDING_FREE = null; return; }

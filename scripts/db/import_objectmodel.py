@@ -127,9 +127,16 @@ def run(cx, zip_path=ZIP_PATH, verbose=False):
     strings = {(r[0], r[1]): r[2] for r in cx.execute(
         "SELECT table_name, key_name, content FROM ref_string WHERE table_name IN "
         "('CareerTrackInfo', 'CareerRace', 'CareerRaceCollection', 'RivalsEventData', 'OMCarRestrictions')")}
+    # gamedb populates ref_string; if it is empty here gamedb has not run and every name would be null --
+    # that is a real failure. But a handful of INDIVIDUAL name-strings missing (a new event/collection not
+    # yet in the string catalogue) must NOT abort the whole stage -- collect them and leave those entries
+    # unnamed, so route naming and course export downstream still run.
+    if not strings:
+        raise ValueError("ref_string has no catalogue name rows — run stage gamedb first")
+    misses = []
 
     def res(ref, required):
-        """'Table.IDS_x' -> text. A required reference that does not resolve fails the stage."""
+        """'Table.IDS_x' -> text. A required ref that does not resolve is recorded and left unnamed."""
         if not ref:
             return None, None
         if "." not in ref:
@@ -137,7 +144,8 @@ def run(cx, zip_path=ZIP_PATH, verbose=False):
         t, k = ref.split(".", 1)
         txt = strings.get((t, k))
         if txt is None and required:
-            raise ValueError("%s is not in ref_string (run stage gamedb first?)" % ref)
+            misses.append(ref)   # new/unknown catalogue string — empty name (NOT NULL columns), unnamed downstream
+            return "", k
         return txt, k
 
     ti_rows = []
@@ -201,6 +209,11 @@ def run(cx, zip_path=ZIP_PATH, verbose=False):
                         _i(p.get("PIMax")), _i(p.get("PowerMin")), _i(p.get("PowerMax")),
                         _i(p.get("WeightMin")), _i(p.get("WeightMax")), _i(p.get("YearMin")),
                         _i(p.get("YearMax")), tag, desc, json.dumps(rest, sort_keys=True)))
+
+    if misses:
+        uniq = sorted(set(misses))
+        print("  ! %d catalogue name-string(s) not in ref_string — left unnamed (likely new content): %s%s"
+              % (len(uniq), ", ".join(uniq[:3]), " …" if len(uniq) > 3 else ""))
 
     with cx:
         cx.execute("BEGIN")                  # a PRAGMA outside a transaction autocommits and resets itself

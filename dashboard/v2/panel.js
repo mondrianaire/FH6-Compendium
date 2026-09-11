@@ -2844,7 +2844,10 @@ const RT_LABEL = { lap: "Current lap", corners: "Live corners", matrix: "Turn an
 // "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
 // to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
 // list this function returns. Add "build" back to the free-mode array below to re-enable it.
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "corners", "matrix", "stats", "concl"] : ["corners", "stats", "browser"]; }
+// "concl" (Conclusions) dropped from the tab list 2026-09-11 (Jett) — same pattern as "build": RT_LABEL.concl
+// and conclusionsHTML()'s render path below are UNTOUCHED, just not offered as a tab, so it comes back for the
+// tuning-suggestions pass by adding "concl" back to the course array here.
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "corners", "matrix", "stats"] : ["corners", "stats", "browser"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)

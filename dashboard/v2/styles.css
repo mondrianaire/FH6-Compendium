@@ -308,6 +308,22 @@ button.stage.act.go:active{transform:translateY(1px)}
 .cov{display:inline-flex;align-items:center;gap:8px}
 .cov .bar{width:140px;height:8px;background:var(--panel2);border:1px solid var(--line2);border-radius:4px;overflow:hidden;position:relative}
 .cov .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
+/* the inline car-identity bar (course mode only): a slim strip above the speed trace */
+.idbar{display:flex;align-items:center;gap:9px;height:34px;padding:0 12px;background:var(--panel);
+  border:1px solid var(--line);border-top:0;border-radius:0 0 3px 3px;font-size:12px;overflow:hidden;white-space:nowrap;flex:0 0 auto}
+.idbar .idb-pi{flex:0 0 auto;display:inline-flex}
+.idbar .idb-car{font:500 13px var(--mono);color:var(--ink);flex:0 0 auto}
+.idbar .idb-sep{color:var(--line2);flex:0 0 auto}
+.idbar .idb-build{font:500 12.5px var(--mono);color:var(--ink);flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
+.idbar .idb-build .tick{color:var(--acc)}
+.idbar .idb-build.empty{color:var(--mut)}
+.idbar .idb-chip{flex:0 0 auto;text-transform:uppercase;letter-spacing:.06em;font:600 10px var(--mono)}
+.idbar .idb-hint{flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;color:var(--mut)}
+.idbar .idb-sheet{margin-left:auto;flex:0 0 auto;background:none;border:1px solid var(--warn);color:var(--warn);
+  border-radius:2px;padding:3px 11px;font:700 11px var(--sans);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.idbar .idb-sheet.outline{border-color:var(--acc);color:var(--acc)}
+.idbar .idb-sheet.dead{border-color:var(--line2);color:var(--dim);cursor:default}
+.idbar .idb-sheet:not(.dead):hover{background:var(--panel2)}
 
 /* the floating build sheet — the v1 decode float pattern, in-page and draggable */
 /* MAX VERTICAL while active (Jett 2026-09-07): the build sheet takes almost the whole viewport

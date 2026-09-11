@@ -189,6 +189,7 @@ function panelSkeleton(host) {
   host.innerHTML = `
     <div class="hdr" id="hdr"></div>
     <div id="alerts"></div>
+    <div class="idbar" id="idbar" hidden></div>
     <div class="trace" id="trace"></div>
     <div class="coursefilter" id="coursefilter" hidden></div>
     <div class="panes">
@@ -397,8 +398,37 @@ function lastAction() {
 
 function paintPanel() {
   lastAction();
-  paintHeader(); paintTrace(); paintCourseFilter(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
+  paintHeader(); paintIdBar(); paintTrace(); paintCourseFilter(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
   paintHeld();
+}
+// THE INLINE CAR-IDENTITY BAR (redesign spec lines 112-120): a slim full-width strip shown ONLY in course
+// mode, directly above the speed trace — the PI badge fused with the number, the car, a divider, the matched
+// build+tune, an "identified" pill, the plain-English match note, and a right-aligned Build Sheet button.
+// It reuses piBadge()/classPill() and the resolutionState()/gateStrip() data the header already computes, so
+// identity is stated the same way in both places (no second source of truth).
+function paintIdBar() {
+  const el = $("#idbar"); if (!el) return;
+  const on = MODE.suggest === "course" && COURSE && CUR;
+  el.hidden = !on;
+  if (!on) { el.innerHTML = ""; return; }
+  const st = buildStatus(), rs = resolutionState(), g = gateStrip(st, rs);
+  const m = MATCH && MATCH.build;
+  const carNm = carName(CUR.cid) || (CUR.disk && CUR.disk.car) || "unknown car";
+  const tune = m ? (m.name || m.tune_name || "") : (CUR.disk && CUR.disk.tune_name) || "";
+  const reach = !!m;
+  const tone = g.tone;   // acc = identified, warn = ambiguous/importing, bad = nothing on disk
+  el.dataset.tone = tone;
+  el.innerHTML = `
+    <span class="idb-pi">${piBadge(CUR.cls, CUR.pi)}</span>
+    <span class="idb-car" title="${esc(carNm)}">${esc(carNm)}</span>
+    <span class="idb-sep">│</span>
+    ${tune ? `<span class="idb-build" title="${esc(tune)}">${rs.key === "resolved" ? `<b class="tick">✓</b> ` : ""}${esc(shedName(tune, 32))}</span>` : `<span class="idb-build empty">${CUR.disk ? "unnamed save" : "no save on disk"}</span>`}
+    <span class="idb-chip chip ${tone === "acc" ? "on" : tone === "bad" ? "b" : "w"}">${esc((g.ident || "").replace(/^[^A-Za-z]+/, ""))}</span>
+    <span class="idb-hint why" title="${esc(rs.hint || "")}">${esc(rs.hint || g.detail || "")}</span>
+    ${g.sheet === "filled" ? `<button class="idb-sheet" data-act="sheet">🔓 Build sheet ▸</button>`
+      : (g.sheet === "outline" && reach) ? `<button class="idb-sheet outline" data-act="sheet">🔓 Build sheet ▸</button>`
+      : `<span class="idb-sheet dead">🔒 Build sheet</span>`}`;
+  const btn = el.querySelector("[data-act=sheet]"); if (btn) btn.onclick = () => { const b = $("#btnSheet"); if (b) b.click(); };
 }
 
 /* -------------------------------------------------------------- trace */

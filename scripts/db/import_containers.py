@@ -294,6 +294,22 @@ def run(cx, root=None, limit=None, verbose=False):
         for tbl in ("tune_gear", "tune_slider", "tune_part", "tune_container",
                     "hw_package_part", "setup", "hw_package"):
             cx.execute("DELETE FROM %s" % tbl)
+        # STUB UNCATALOGUED CARS (Jett 2026-09-11): a save/downloaded tune for a brand-new car whose ordinal is
+        # not yet in ref_car (the game-DB snapshot predates it) fails tune_container.ordinal's FK and aborts the
+        # WHOLE import — which freezes the dashboard on stale data (it shows "ordinal N", can't take the new
+        # tune). Insert a minimal ref_car row (ordinal + a placeholder name + pi/class from the save) for any
+        # missing ordinal so the tune imports; the real year/make/model arrives when the game DB catches up.
+        have_cars = {r[0] for r in cx.execute("SELECT ordinal FROM ref_car")}
+        stubs = {}
+        for r in crows:
+            o = r[1]
+            if o is not None and o not in have_cars and o not in stubs:
+                stubs[o] = (o, "ordinal " + str(o), "ordinal " + str(o), r[15], r[16])   # ordinal, display_name, full_name, pi, class
+        if stubs:
+            cx.executemany("INSERT OR IGNORE INTO ref_car(ordinal, display_name, full_name, pi, class, is_drivable) "
+                           "VALUES (?,?,?,?,?,1)", list(stubs.values()))
+            print("  + %d uncatalogued car(s) stubbed in ref_car (named by ordinal until the game DB catches up): %s"
+                  % (len(stubs), ", ".join("ord " + str(o) for o in list(stubs)[:5])))
         n_c = fh6db.upsert_many(cx, "tune_container", [
             "container", "ordinal", "saved_utc", "tune_name", "locked", "source", "hw_hash",
             "setup_hash", "tune_hash", "parts_hash", "engine_id", "drivetrain_id", "carbody_id",

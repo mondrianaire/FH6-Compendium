@@ -292,7 +292,7 @@ let LAP_SEQ = 0;
 function lapSample(f, now) {
   const cur = LIVE.lap;
   if (!(f.on && f.ev)) {
-    if (cur && cur.live) { cur.live = false; liveLapChanged(); }
+    if (cur && cur.live) { cur.live = false; lapSave(); liveLapChanged(); }
     return;
   }
   if (now - (LIVE.lapT || 0) < 100) return;
@@ -312,8 +312,27 @@ function lapSample(f, now) {
   lap.pts.push([f.dist - d0, f.mph, gripCode(f), f.px, f.pz, f.dist, now, t]);
   if (lap.pts.length > LAP_CAP) { lap.pts.splice(0, 1000); lap.n0 += 1000; }
   const was = lap.live; lap.live = true;
+  if (now - (LIVE.lapSaveT || 0) > 2000) lapSave();
   if (!was) liveLapChanged(); else liveLapPaint();
 }
+// A RELOAD MID-LAP KEEPS THE LAP (2026-09-11). The code-edit auto-reload or an F5 used to wipe the trail. The
+// buffer goes to sessionStorage (it dies with the tab) every 2 s while live and on each live -> held edge, and
+// comes back HELD (live = false, "last run") if under 10 min old. The next driving frame carries on the same
+// lap when LapNumber still matches -- the rules above decide, exactly as if the page had never gone.
+const LAP_STORE = "fh6lap";
+function lapSave() {
+  LIVE.lapSaveT = Date.now();
+  try { sessionStorage.setItem(LAP_STORE, JSON.stringify({ at: LIVE.lapSaveT, lap: LIVE.lap, prev: LIVE.lapPrev })); } catch (e) {}
+}
+(function lapRestore() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem(LAP_STORE) || "null");
+    if (!s || !s.lap || !Array.isArray(s.lap.pts) || Date.now() - s.at > 10 * 60e3) return;
+    LIVE.lap = Object.assign(s.lap, { live: false });
+    LIVE.lapPrev = s.prev && Array.isArray(s.prev.pts) ? Object.assign(s.prev, { live: false }) : null;
+    LAP_SEQ = Math.max(LIVE.lap.seq || 0, (LIVE.lapPrev && LIVE.lapPrev.seq) || 0);
+  } catch (e) {}
+})();
 
 async function identify(car, why) {
   const seq = ++IDENT_SEQ;

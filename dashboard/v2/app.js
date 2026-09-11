@@ -419,6 +419,8 @@ function courseMap(c, opts) {
         <button class="cleg-toggle" data-legtoggle title="${legOpen ? "hide the map key" : "show the map key"}">key ${legOpen ? "▾" : "▸"}</button>
       </div>
       <div class="cleg-key"${legOpen ? "" : " hidden"}>
+        ${typeof TRACE_MODE !== "undefined" ? `<span class="leg-trail" title="what the live trail's colour means — the same choice as the speed trace's paint"><em>live trail</em>${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-trailpaint="${m}" title="${tip}">${m}</button>`).join("")}</span>` : ""}
+        ${typeof GRAD !== "undefined" && typeof courseSpeedRange === "function" && courseSpeedRange(c) ? `<span class="leg-spd"><em>${Math.round(courseSpeedRange(c).lo)}</em><i class="grad" style="background:linear-gradient(90deg,${GRAD.join(",")})"></i><em>${Math.round(courseSpeedRange(c).hi)} mph</em></span>` : ""}
         ${typeof DGRIP !== "undefined" ? `<span class="leg-grip">${GSTATE.map((k, i) => `<span title="${esc(DGRIP[k].tip)}"><i style="background:${i ? DGRIP[k].ink : "var(--live-calm," + DGRIP.calm.ink + ")"}"></i>${i === 4 ? "✸ " : ""}${esc(DGRIP[k].word)}</span>`).join("")}</span>` : ""}
         <span><i style="background:#7d8b9c"></i>centre-line</span>
         ${showPhases ? allPhaseKey : gradKey}

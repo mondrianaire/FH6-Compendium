@@ -1020,6 +1020,16 @@ body.fixed main{padding:0;gap:0;border-top:0}
 @keyframes llpulse{50%{opacity:.2}}
 .cmap-legend .leg-grip{display:none}
 .cmap.live-on .leg-grip,.cmap.live-last .leg-grip{display:contents}
+/* the live trail's paint (grip | speed) -- a setting in the key panel; the key shows whichever it paints */
+.cmap-legend .leg-trail{display:inline-flex;align-items:center;gap:3px}
+.cmap-legend .leg-trail em{font-style:normal;color:var(--mut);margin-right:2px}
+.cmap-legend .leg-trail .mini{margin-left:0;padding:1px 7px;font-size:10.5px}
+.cmap-legend .leg-trail .mini.on{color:var(--acc2);border-color:var(--acc2);background:rgba(78,163,255,.12)}
+.cmap-legend .leg-spd{display:none}
+.cmap-legend .leg-spd em{font-style:normal;color:var(--mut)}
+.cmap-legend .leg-spd i.grad{display:inline-block;width:64px;height:7px;border-radius:2px}
+.cmap.trail-speed.live-on .leg-grip,.cmap.trail-speed.live-last .leg-grip{display:none}
+.cmap.trail-speed.live-on .leg-spd,.cmap.trail-speed.live-last .leg-spd{display:inline-flex;align-items:center;gap:4px}
 .lchip.livenow.last{color:var(--mut);border-color:var(--line2);font-weight:600}
 .lchip.livenow.last i{background:var(--mut)}
 body.fixed .trace .lchip.livenow.last{box-shadow:none}

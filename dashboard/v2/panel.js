@@ -703,12 +703,43 @@ function arcRuns(pts) {
 function gripInk(k, baseCol) {
   const g = gripOf(k);
   if (g !== DGRIP.calm) return g.ink;
-  return (baseCol && baseCol !== "var(--dim)") ? baseCol : DGRIP.calm.ink;
+  return (baseCol && baseCol !== "var(--dim)" && !inkClashes(baseCol)) ? baseCol : DGRIP.calm.ink;
 }
-function paintedLine(pts, ch, w, mode, baseCol) {
+// A CLASS COLOUR THAT READS AS A GRIP STATE CANNOT MEAN "WITHIN GRIP" (2026-09-11). Measured CIE76 ΔE to the
+// nearest grip ink: A 0.0 (it IS oversteer red), S1 5.1 (drift violet), C 13.9 and B 29.8 (impact amber),
+// S2 15.0 (understeer blue); R 45.7, D 57.0, X 72.2 stay clear. Under 30 the line would be misread as a
+// problem state, so calm falls back to its grey ink for those classes.
+const INK_CLASH_DE = 30, _inkClash = {};
+function inkClashes(col) {
+  if (col in _inkClash) return _inkClash[col];
+  const p = colLab(col);
+  return (_inkClash[col] = !!p && GSTATE.slice(1).some((k) => { const q = colLab(DGRIP[k].ink); return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]) < INK_CLASH_DE; }));
+}
+function colLab(c) {
+  c = String(c).trim(); let rgb = null;
+  const m = /^#([0-9a-f]{6})$/i.exec(c);
+  if (m) rgb = [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16));
+  else { const r = /^rgba?\(([^)]+)\)/i.exec(c); if (r) rgb = r[1].split(",").slice(0, 3).map(Number); }
+  if (!rgb || rgb.some((v) => !isFinite(v))) return null;
+  const [R, G, B] = rgb.map((v) => { v /= 255; return v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92; });
+  const f = (t) => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  const x = f((R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047), y = f(R * 0.2126 + G * 0.7152 + B * 0.0722), z = f((R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+}
+// one speed scale per course (every recorded lap's slowest..fastest), so the live trail on the map and the
+// live line on the trace paint the same mph the same colour
+function courseSpeedRange(c) {
+  if (!c) return null;
+  if (c._spd !== undefined) return c._spd;
+  let lo = Infinity, hi = -Infinity;
+  Object.values(c.traces || {}).forEach((pts) => pts.forEach((q) => { if (q[1] < lo) lo = q[1]; if (q[1] > hi) hi = q[1]; }));
+  return (c._spd = (isFinite(lo) && hi - lo > 1e-6) ? { lo, hi } : null);
+}
+function paintedLine(pts, ch, w, mode, baseCol, range) {
   if (!pts.length) return "";
   let sc = null;
-  if (mode === "speed") { const vs = pts.map((q) => q[1]); sc = { lo: Math.min(...vs), hi: Math.max(...vs) }; if (sc.hi - sc.lo < 1e-6) sc = null; }
+  if (mode === "speed" && range) sc = range;   // a fixed scale (the course's), so two views of one lap agree
+  else if (mode === "speed") { const vs = pts.map((q) => q[1]); sc = { lo: Math.min(...vs), hi: Math.max(...vs) }; if (sc.hi - sc.lo < 1e-6) sc = null; }
   const keyOf = (q) => (mode === "speed" && sc) ? Math.max(0, Math.min(GRAD.length - 1, Math.floor(((q[1] - sc.lo) / (sc.hi - sc.lo)) * GRAD.length))) : (q[2] | 0);
   // "NO PROBLEMS" IS THE DEFAULT COLOUR (Jett 2026-09-07): in grip paint the within-grip segments
   // (k===0, nothing wrong) carry the build's PI class colour when one is given, so PI stays readable
@@ -929,7 +960,7 @@ function courseTrace(c) {
     const lp = live && live[live.length - 1];
     const liveSvg = live ? `<g class="livelap">
       <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity="${liveNow ? ".22" : ".1"}" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
-      ${paintedLine(live, ch, 3.2, TRACE_MODE, piColor(CUR && CUR.cls))}
+      ${paintedLine(live, ch, 3.2, TRACE_MODE, piColor(CUR && CUR.cls), courseSpeedRange(c))}
       ${youMarkSvg(ch.px(lp[0]), ch.py(lp[1]), liveNow)}</g>` : "";
     return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${band}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
   };
@@ -997,7 +1028,8 @@ function wireTrace(el) {
     viewSave(); repaintFiltered(); });
   el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); repaintFiltered(); });
   el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); viewSave(); paintTrace(); });
-  el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
+  el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace();
+    if (MODE.suggest === "course" && COURSE) { LEFT_KEY = null; paintLeft(); } });   // one paint state: the map's trail + key follow
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
   const rc = el.querySelector("[data-racing]"); if (rc) rc.onclick = () => { RACING_ONLY = !RACING_ONLY; VIEW.global.racingOnly = RACING_ONLY; viewSave(); try { localStorage.setItem("fh6RacingOnly", RACING_ONLY ? "1" : "0"); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); if (MODE.suggest === "course" && COURSE) paintRight(); };
@@ -1666,6 +1698,9 @@ function paintLeft() {
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
     body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
+    // WHAT THE LIVE TRAIL'S COLOUR MEANS (Jett 2026-09-11: selectable in the map legend's settings) -- the same
+    // state as the speed trace's paint toggle, so the two views of the live lap can never disagree
+    body.querySelectorAll("[data-trailpaint]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.trailpaint; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); });
     body.querySelectorAll("[data-tcx]").forEach((b) => b.onclick = () => exitTempCourse());   // leave the temporary course-browser view
     // the legend key toggles IN PLACE (no map rebuild → no re-animation): flip the pill's open state + the key rows
     body.querySelectorAll("[data-legtoggle]").forEach((b) => b.onclick = () => {
@@ -2505,17 +2540,19 @@ function liveLapPaint() {
   const wrap = svg.parentNode;
   const lap = (MODE.suggest === "course" && COURSE) ? liveLapFor(COURSE) : null;
   const now = !!(lap && LIVE.lap && LIVE.lap.live);
+  const mode = TRACE_MODE === "speed" ? "speed" : "grip", sc = mode === "speed" ? courseSpeedRange(COURSE) : null;
   wrap.classList.toggle("live-on", now);
   wrap.classList.toggle("live-last", !!lap && !now);
+  wrap.classList.toggle("trail-speed", mode === "speed");
   if (!lap) { if (g._seq != null) { g.textContent = ""; g._seq = null; } return; }
   const ds = svg.dataset, x0 = +ds.x0, z0 = +ds.z0, s = +ds.s, H = +ds.h, pad = +ds.pad;
   if (!isFinite(s)) return;
   const base = piColor(CUR && CUR.cls);
   // a different lap, a rewind cut (new seq), a changed class colour or a cap trim: redraw this layer once
-  if (g._seq !== lap.seq || g._lap !== lap || g._base !== base || g._abs < lap.n0) {
+  if (g._seq !== lap.seq || g._lap !== lap || g._base !== base || g._mode !== mode || g._abs < lap.n0) {
     g.innerHTML = `<g class="ll-glow"></g><g class="ll-grip"></g><g class="ll-imp"></g>`;
     const ctm = svg.getScreenCTM();
-    Object.assign(g, { _seq: lap.seq, _lap: lap, _base: base, _abs: lap.n0, _last: null, _glow: null, _line: null, _k: -1, _imp: null, _u: ctm && ctm.a ? 1 / ctm.a : 1 });
+    Object.assign(g, { _seq: lap.seq, _lap: lap, _base: base, _mode: mode, _abs: lap.n0, _last: null, _glow: null, _line: null, _k: -1, _imp: null, _u: ctm && ctm.a ? 1 / ctm.a : 1 });
     wrap.style.setProperty("--live-calm", gripInk(0, base));
   }
   const NS = "http://www.w3.org/2000/svg", [gGlow, gGrip, gImp] = g.children;
@@ -2533,14 +2570,15 @@ function liveLapPaint() {
     const L = g._last, jump = !!L && Math.hypot(q[3] - L[3], q[4] - L[4]) > 60;   // a respawn never draws a streak
     if (!g._glow || jump) { g._glow = poly(gGlow, "var(--acc2)", 8, 0.3); g._line = null; }
     add(g._glow, X, Y);
-    const k = q[2] | 0;
+    // the colour key: grip state, or the speed band on the course's own scale (impacts still burst either way)
+    const k = (mode === "speed" && sc) ? Math.max(0, Math.min(GRAD.length - 1, Math.floor(((q[1] - sc.lo) / (sc.hi - sc.lo)) * GRAD.length))) : q[2] | 0;
     if (!g._line || k !== g._k) {
-      const nl = poly(gGrip, gripInk(k, base), k ? 4 : 3.4);
+      const nl = poly(gGrip, mode === "speed" && sc ? GRAD[k] : gripInk(k, base), (mode === "speed" || k) ? 4 : 3.4);
       if (g._line) add(nl, g._lx, g._ly);                 // butt onto the previous state's last point: no gaps
       g._line = nl; g._k = k;
     }
     add(g._line, X, Y);
-    if (k === 4 && (!g._imp || Math.hypot(q[3] - g._imp[0], q[4] - g._imp[1]) > 12)) {   // v1's 12 m impact dedup
+    if ((q[2] | 0) === 4 && (!g._imp || Math.hypot(q[3] - g._imp[0], q[4] - g._imp[1]) > 12)) {   // v1's 12 m impact dedup
       const b = document.createElementNS(NS, "path");
       b.setAttribute("d", IMPACT_BURST); b.setAttribute("transform", `translate(${X.toFixed(1)},${Y.toFixed(1)}) scale(${(g._u * 1.7).toPrecision(3)})`);
       b.setAttribute("fill", DGRIP.impact.col); b.setAttribute("stroke", "#0d1117"); b.setAttribute("stroke-width", "1.2"); b.setAttribute("vector-effect", "non-scaling-stroke");

@@ -1439,8 +1439,9 @@ function headerCopy(st, q) {
     return Object.assign(base, { tone: "warn",
       lead: q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED",
       sub: q.why, why: "the live telemetry alone can't separate them — cylinders, drivetrain and PI are all it carries",
-      step: ties > 1 ? "pick the save below — it may also settle on its own as you keep driving" : "pick the save that is on the car",
-      rest: [], primary: { label: "PICK THE SAVE ▸", act: "pick" }, caption: "identity unsettled", guarantee: TUNE_ID_GUARANTEE,
+      // the build picker is retired (Jett 2026-09-11): the one way to settle it is the save-tune method
+      step: "equip the build, then save the tune in-game — the new save is read exactly",
+      rest: [], primary: null, caption: "identity unsettled", guarantee: TUNE_ID_GUARANTEE,
       evidence: (mm.how || "") + (nSaves ? " · " + nSaves + " saves" : "") });
   }
   if (st.key === "offline") return Object.assign(base, { tone: "dim", lead: "DAEMON DOWN — NOTHING HERE IS LIVE",
@@ -1645,7 +1646,7 @@ function paintTicker() {   // RETIRED 2026-09-11: the #ticker element was remove
     if (pinnedTs(CUR.ordinal) && !_mm.picked_ok && !_mm.live_cyl && q.level !== "conflict")
       items.push(["warn", "PICK PENDING", "pick noted — drive out of the menu for a few seconds to confirm it"]);
     else
-      items.push(["warn", q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED", `${ties || "several"} saves tie — pick the save in the header`]);
+      items.push(["warn", q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED", `${ties || "several"} saves tie — equip the build and save the tune in-game`]);
   }
   (st.steps || []).forEach((s, i) => items.push([st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : "", `STEP ${i + 1}`, s]));
   // --- ambient context (always-on) ---
@@ -1672,12 +1673,12 @@ function paintTicker() {   // RETIRED 2026-09-11: the #ticker element was remove
 function paintBanner() {
   // the scrolling alerts ticker was retired (Jett 2026-09-11) to give the car header + panes its 24px row —
   // every ticker item already lives in the #lastact status bar (+ its log), the #hdr gate strip, and the id bar.
+  // THE BUILD PICKER IS RETIRED (Jett 2026-09-11): builds are not picked from a list of signature ties -- the
+  // tune is identified only by the save-tune method (equip the build, save the tune in-game, the save is read).
+  // pickerHTML()/wirePicker() in live.js are left unrendered; #alerts stays empty.
   const al = $("#alerts"); if (!al) return;
-  const q = matchQuality(CUR && CUR.match);
-  const show = CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict");
-  al.innerHTML = show ? savePicker() : "";
-  al.classList.toggle("empty", !show);
-  if (show) wirePicker();
+  al.innerHTML = "";
+  al.classList.add("empty");
 }
 
 /* ------------------------------------------------------------- left */
@@ -2835,6 +2836,11 @@ function paintRight() {
     body.querySelectorAll("[data-cmtrace]").forEach((b) => b.onclick = () => { CM_TRACE_MODE = b.dataset.cmtrace; try { localStorage.setItem("fh6CmTrace", CM_TRACE_MODE); } catch (e) {} paintRight(); });
     applyLapPick();
   }
+  if (cur === "lap") {
+    // a nav button or a table row picks the window's turn (held until the next turn is taken); heads sort the table
+    body.querySelectorAll("[data-lapwin]").forEach((b) => b.onclick = () => { LAP_WIN = { key: COURSE && COURSE.key, seq: +b.dataset.lapwin, n: LAP_N }; paintRight(); });
+    body.querySelectorAll("[data-lapsort]").forEach((b) => b.onclick = () => { LAP_SORT = b.dataset.lapsort; try { localStorage.setItem("fh6LapSort", LAP_SORT); } catch (e) {} paintRight(); });
+  }
   if (cur === "stats") body.querySelectorAll("[data-clsfocus]").forEach((b) => b.onclick = () => {
     if (!COURSE) return; const cls = b.dataset.clsfocus, vc = traceSel(COURSE);
     if (vc.filters.class === cls) delete vc.filters.class; else vc.filters.class = cls;   // toggle the class focus (= the filter bar's class pick)
@@ -2904,7 +2910,8 @@ function lapHTML() {
   const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
   const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · rated on minimum speed against ${scopeTok(ls)} · grip across the corner's phases</span></div>`;
   if (!taken.length) return `<div class="lapview">${head}${abandoned}<div class="why" style="padding:10px 6px">No turns yet this lap — the first one appears the instant you finish it.</div></div>`;
-  let lastSeq = null, rows = "", worstRow = null, gripHits = 0, rankable = 0, first = 0, thinFirst = 0, unranked = 0;
+  let lastSeq = null, worstRow = null, gripHits = 0, rankable = 0, first = 0, thinFirst = 0, unranked = 0;
+  const passes = [];
   taken.forEach((c) => {
     const b = turnAtMatrix(c.apex, lastSeq), t = b && b.t; if (!t) return; lastSeq = t.seq;
     // THE RATED NUMBER IS THE SHOWN NUMBER (handoff §1): the pass is rated on its MINIMUM speed, the same
@@ -2926,17 +2933,151 @@ function lapHTML() {
     if (gr.lost) gripHits++;
     if (v.d != null && v.d < 0 && (!worstRow || v.d < worstRow.d)) worstRow = { t, d: v.d };
     const peak = c.mph_apex != null && c.mph_min != null ? ` title="minimum ${Math.round(c.mph_min)} mph (rated) · at peak lateral g ${Math.round(c.mph_apex)} mph"` : "";
-    rows += `<div class="lap-row">
-      <span class="lap-turn">${esc(turnLabel(t))}<em>${esc(cap1(t.kind || ""))}</em></span>
-      <span class="lap-spd mono"${peak}>${Math.round(c.mph_in)}<i>→</i><b>${Math.round(apex)}</b><i>→</i>${Math.round(c.mph_out)}<em> mph</em></span>
-      <span class="lap-rank mono lap-v-${v.kind}${v.thin ? " thin" : ""}" style="color:${tone}"><b>${v.text}${v.d != null && !v.isBest ? ` · ${mphD(v.d)}` : ""}</b><em>${esc(v.basis)}</em></span>
-      ${gr.cell}</div>`;
+    passes.push({ c, t, apex, v, tone, gr, peak, hist: histByLap });
   });
+  LAP_N = passes.length;
+  const win = lapWinPick(passes);
+  // THE RANK TABLE (handoff §5.2): every turn taken this lap, 4 rows visible and scrolling, sortable by the
+  // turn, by rank within its pool, or by the gap to the pool's best; a row picks that turn for the window.
+  const rk = (q) => (q.v.kind === "best" || q.v.kind === "ranked") ? (q.v.rank - 1) / Math.max(1, q.v.of - 1) : 2;
+  const sorted = passes.slice();
+  if (LAP_SORT === "rank") sorted.sort((a, b) => rk(a) - rk(b));
+  else if (LAP_SORT === "delta") sorted.sort((a, b) => (a.v.d == null ? 1e9 : a.v.d) - (b.v.d == null ? 1e9 : b.v.d));
+  const rows = sorted.map((q) => `<div class="lap-row${q === win ? " on" : ""}" data-lapwin="${q.t.seq}" title="show ${esc(turnLabel(q.t))} in the window">
+      <span class="lap-turn">${esc(turnLabel(q.t))}<em>${esc(cap1(q.t.kind || ""))}</em></span>
+      <span class="lap-spd mono"${q.peak}>${Math.round(q.c.mph_in)}<i>→</i><b>${Math.round(q.apex)}</b><i>→</i>${Math.round(q.c.mph_out)}<em> mph</em></span>
+      <span class="lap-rank mono lap-v-${q.v.kind}${q.v.thin ? " thin" : ""}" style="color:${q.tone}"><b>${q.v.text}${q.v.d != null && !q.v.isBest ? ` · ${mphD(q.v.d)}` : ""}</b><em>${esc(q.v.basis)}</em></span>
+      ${q.gr.cell}</div>`).join("");
+  const sortH = (k, lbl) => `<button class="${LAP_SORT === k ? "on" : ""}" data-lapsort="${k}" title="sort by ${lbl}">${lbl}${LAP_SORT === k ? " ▾" : " ⇅"}</button>`;
   // the summary counts only turns that COULD be ranked: an only-lap or level pool is excluded, never a win
   const firstTxt = rankable ? `<b style="color:${first ? "var(--acc)" : "var(--ink)"}">${first + thinFirst} of ${rankable}</b> rankable turn${rankable === 1 ? "" : "s"} come first${thinFirst ? ` <span class="why">(${thinFirst === first + thinFirst ? "all" : thinFirst} on a pool under 5 laps — a weak claim)</span>` : ""}`
     : `nothing can be ranked in ${scopeTok(ls)} — ${unranked} turn${unranked === 1 ? "" : "s"} with no other lap, a lap compared with itself`;
   const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${unranked && rankable ? unranked + " unranked · " : ""}${gripHits} of ${taken.length} turns lost grip</span></div>`;
-  return `<div class="lapview">${head}${abandoned}<div class="lap-hd"><span>turn</span><span>in→min→out</span><span>rank · pool</span><span>grip</span></div>${rows}${sum}</div>`;
+  return `<div class="lapview">${head}${abandoned}${win ? lapWindowHTML(win, passes, ls) : ""}`
+    + `<div class="lap-hd">${sortH("drive", "turn")}<span>in→min→out</span>${sortH("rank", "rank of pool")}${sortH("delta", "against the pool's best")}</div>`
+    + `<div class="lap-rows">${rows}</div>${sum}</div>`;
+}
+// THE TURN WINDOW (course mode v2 step 3, handoff §5.1). The Current lap tab is majority graphical: one turn at a
+// time, redrawn on every turn taken -- the corner as a 5-phase ribbon with the shown lap's line painted by grip,
+// the speed through that span against every lap in scope, and two ladders (speed, grip) whose ranks carry their
+// pool and scope. It follows the turn just taken; a nav button or a table row picks another, and the pick holds
+// until the next turn is taken.
+let LAP_WIN = null, LAP_N = 0;
+let LAP_SORT = (() => { try { return localStorage.getItem("fh6LapSort") || "drive"; } catch (e) { return "drive"; } })();
+function lapWinPick(passes) {
+  if (!passes.length) return null;
+  if (LAP_WIN && COURSE && LAP_WIN.key === COURSE.key && LAP_WIN.n === passes.length) {
+    const p = passes.find((x) => x.t.seq === LAP_WIN.seq); if (p) return p;
+  }
+  LAP_WIN = null;
+  return passes[passes.length - 1];
+}
+// the lap the window draws: the live lap (or the held last run) on this course, else the trace's foregrounded lap
+function lapShown() {
+  const L = COURSE && liveLapFor(COURSE);
+  if (L) return { pts: L.pts, label: LIVE.lap && LIVE.lap.live ? "live lap" : "last run" };
+  const id = TRACE_PICK && COURSE && TRACE_PICK.key === COURSE.key ? TRACE_PICK.fore : null, tr = id && COURSE.traces[id];
+  return tr ? { pts: tr, label: "foregrounded lap" } : null;
+}
+// a lap's stretch through a turn: nearest point (within 40 m) to the braking start, then to the exit end after it
+function turnSlice(pts, a, b) {
+  if (!pts || pts.length < 3) return null;
+  const near = (x, z, from) => { let bi = -1, bd = 1600; for (let i = from; i < pts.length; i++) { const q = pts[i]; if (q[3] == null) continue; const d = (q[3] - x) ** 2 + (q[4] - z) ** 2; if (d < bd) { bd = d; bi = i; } } return bi; };
+  const i0 = near(a[0], a[1], 0); if (i0 < 0) return null;
+  const i1 = near(b[0], b[1], i0 + 1); if (i1 < 0 || i1 - i0 < 2) return null;
+  const sl = pts.slice(i0, i1 + 1), s0 = sl[0][0], L = (sl[sl.length - 1][0] - s0) || 1;
+  return sl.map((q) => [(q[0] - s0) / L, q[1], q[2] | 0, q[3], q[4]]);   // [fraction through the turn, mph, grip, x, z]
+}
+function lapWindowHTML(p, passes, ls) {
+  const t = p.t, i = passes.indexOf(p), prev = passes[i - 1], next = passes[i + 1];
+  const nTurns = (COURSE.turns || []).length, dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
+  const nav = (q, side) => q
+    ? `<button class="lw-nav ${side}" data-lapwin="${q.t.seq}" title="${side === "prev" ? "the turn before" : "the turn after"} this one on this lap"><em>${side === "prev" ? "last" : "next"}</em><b>${side === "prev" ? "‹ " : ""}${esc(turnLabel(q.t))}${side === "next" ? " ›" : ""}</b></button>`
+    : `<span class="lw-nav ${side} off"><em>${side === "prev" ? "last" : "next"}</em><b>${side === "prev" ? "—" : "not yet"}</b></span>`;
+  const follow = !LAP_WIN;
+  const top = `<div class="lw-top">${nav(prev, "prev")}<div class="lw-title"><b>${esc(turnLabel(t))}</b>`
+    + `<span>turn ${t.seq} of ${nTurns}${t.kind ? " · " + esc(t.kind) + (dirW ? " " + dirW : "") : ""}</span>`
+    + `<i class="${follow ? "lw-pulse" : "lw-pin"}">${follow ? "the turn just taken · redraws at the next" : "picked · follows again at the next turn"}</i></div>${nav(next, "next")}</div>`;
+  const segs = t.seg || {}, phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
+  const shown = lapShown(), base = piColor(CUR && CUR.cls);
+  const gripRuns = (pts, draw) => { if (pts.length < 2) return ""; let out = "", seg = [pts[0]], k = pts[0][2] | 0;
+    const flush = () => { if (seg.length > 1) out += draw(seg, k); };
+    for (let j = 1; j < pts.length; j++) { const kk = pts[j][2] | 0; seg.push(pts[j]); if (kk !== k) { flush(); seg = [pts[j]]; k = kk; } }
+    flush(); return out; };
+  let map = `<div class="why lw-empty">no phase geometry for ${esc(turnLabel(t))} yet</div>`, rib = "";
+  if (phases.length) {
+    // ---- the corner: casing, 5 butt-cut phase bands with a divider per cut, the shown lap's line by grip
+    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+    phases.forEach((n) => segs[n].forEach(([x, z]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }));
+    const dx = (x1 - x0) || 40, dz = (z1 - z0) || 40; x0 -= dx * 0.2; x1 += dx * 0.2; z0 -= dz * 0.2; z1 += dz * 0.2;
+    const W = 560, H = 190, pad = 14, s = Math.min((W - 2 * pad) / (x1 - x0), (H - 2 * pad) / (z1 - z0));
+    const ox = (W - (x1 - x0) * s) / 2, oy = (H - (z1 - z0) * s) / 2;
+    const X = (x) => ox + (x - x0) * s, Y = (z) => H - oy - (z - z0) * s, P = (x, z) => X(x).toFixed(1) + "," + Y(z).toFixed(1);
+    const NS = ' vector-effect="non-scaling-stroke"';
+    const inBox = (x, z) => x > x0 - dx * 0.4 && x < x1 + dx * 0.4 && z > z0 - dz * 0.4 && z < z1 + dz * 0.4;
+    const boxRuns = (pts, xz) => { const out = []; let run = []; pts.forEach((q) => { const g = xz(q); if (g && inBox(g[0], g[1])) run.push(q); else { if (run.length > 1) out.push(run); run = []; } }); if (run.length > 1) out.push(run); return out; };
+    const road = boxRuns((COURSE.route && COURSE.route.path) || COURSE.path || [], (q) => q)
+      .map((r) => `<polyline fill="none" stroke="#3a4453" stroke-width="2" opacity=".5"${NS} points="${r.map(([x, z]) => P(x, z)).join(" ")}"/>`).join("");
+    const whole = [].concat(...phases.map((n) => segs[n]));
+    const casing = `<polyline fill="none" stroke="#05080c" stroke-width="26" stroke-linejoin="round"${NS} points="${whole.map(([x, z]) => P(x, z)).join(" ")}"/>`;
+    const bands = phases.map((n) => `<polyline data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="20" stroke-linejoin="round" opacity=".38"${NS} points="${segs[n].map(([x, z]) => P(x, z)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
+    const cuts = phases.slice(1).map((n) => { const a = segs[n][0], b = segs[n][1];
+      const ux = X(b[0]) - X(a[0]), uy = Y(b[1]) - Y(a[1]), L = Math.hypot(ux, uy) || 1, nx = -uy / L * 13, ny = ux / L * 13, cx = X(a[0]), cy = Y(a[1]);
+      return `<line x1="${(cx + nx).toFixed(1)}" y1="${(cy + ny).toFixed(1)}" x2="${(cx - nx).toFixed(1)}" y2="${(cy - ny).toFixed(1)}" stroke="#0d1117" stroke-width="2"/>`; }).join("");
+    const drive = shown ? boxRuns(shown.pts, (q) => (q[3] != null ? [q[3], q[4]] : null)).map((r) => gripRuns(r, (sg, k) =>
+      `<polyline fill="none" stroke="${gripInk(k, base)}" stroke-width="${k ? 4 : 3.4}" stroke-linecap="round" stroke-linejoin="round"${NS} points="${sg.map((q) => P(q[3], q[4])).join(" ")}"/>`)).join("") : "";
+    const apex = t.x != null ? `<circle cx="${X(t.x).toFixed(1)}" cy="${Y(t.z).toFixed(1)}" r="4" fill="#fff" stroke="#05080c" stroke-width="1.5"/><text x="${(X(t.x) + 8).toFixed(1)}" y="${(Y(t.z) + 4).toFixed(1)}" font-size="13" font-weight="700" paint-order="stroke" stroke="#05080c" stroke-width="3" stroke-linejoin="round" fill="#fff">${esc(turnLabel(t))}</text>` : "";
+    map = `<div class="lw-map"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${road}${casing}${bands}${cuts}${drive}${apex}</svg>`
+      + `<div class="lw-cap">${shown ? "showing the " + esc(shown.label) : "no lap line to show"}<span>thick line = what the tyres did · pale band = which part of the corner</span></div></div>`;
+    // ---- the speed through the same span: phase bands behind, every lap in scope faint, the shown lap by grip
+    const lastSeg = segs[phases[phases.length - 1]], a = segs[phases[0]][0], b = lastSeg[lastSeg.length - 1];
+    const pool = Object.keys(COURSE.traces || {}).filter((id) => ls.set.has(String(id))).map((id) => turnSlice(COURSE.traces[id], a, b)).filter(Boolean);
+    const mineS = shown ? turnSlice(shown.pts, a, b) : null, ref = mineS || pool[0];
+    const vals = [].concat(...pool.map((r) => r.map((q) => q[1])), mineS ? mineS.map((q) => q[1]) : []).filter((v) => v != null);
+    if (ref && vals.length) {
+      const RW = 560, RH = 86, rt = 13, rb = 4, lo = Math.min(...vals), hi = Math.max(...vals), sp = (hi - lo) || 1;
+      const rx = (f) => 26 + f * (RW - 60), ry = (v) => rt + (1 - (v - lo) / sp) * (RH - rt - rb);
+      const starts = phases.map((n) => { let bi = 0, bd = Infinity; ref.forEach((q, j) => { const d = (q[3] - segs[n][0][0]) ** 2 + (q[4] - segs[n][0][1]) ** 2; if (d < bd) { bd = d; bi = j; } }); return ref[bi][0]; });
+      const bandsR = phases.map((n, j) => { const f0 = j ? starts[j] : 0, f1 = j < phases.length - 1 ? starts[j + 1] : 1;
+        return `<rect x="${rx(f0).toFixed(1)}" y="${rt}" width="${Math.max(0, rx(f1) - rx(f0)).toFixed(1)}" height="${RH - rt - rb}" fill="${SEG_COL[n]}" opacity=".13"/>`
+          + `<text x="${((rx(f0) + rx(f1)) / 2).toFixed(1)}" y="10" text-anchor="middle" font-size="8.5" fill="${SEG_COL[n]}">${esc(String(SEG_LABEL[n] || n).split(/[ /]/)[0].toLowerCase())}</text>`; }).join("");
+      const pl = (r) => r.map((q) => rx(q[0]).toFixed(1) + "," + ry(q[1]).toFixed(1)).join(" ");
+      const poolSvg = pool.map((r) => `<polyline fill="none" stroke="#4a5563" stroke-width="1" opacity=".55" points="${pl(r)}"/>`).join("");
+      let mineSvg = "", reads = "";
+      if (mineS) {
+        mineSvg = gripRuns(mineS, (sg, k) => `<polyline fill="none" stroke="${gripInk(k, base)}" stroke-width="${k ? 3 : 2.6}" stroke-linecap="round" points="${pl(sg)}"/>`);
+        const mn = mineS.reduce((m, q) => (q[1] < m[1] ? q : m), mineS[0]), e0 = mineS[0], e1 = mineS[mineS.length - 1];
+        const cy = (y) => Math.max(10, Math.min(RH - 2, y));
+        const lab = (q, txt, anchor, dy) => `<text x="${Math.max(2, Math.min(RW - 2, rx(q[0]))).toFixed(1)}" y="${cy(ry(q[1]) + dy).toFixed(1)}" text-anchor="${anchor}" font-size="10" font-weight="700" fill="#dfe7ef" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">${txt}</text>`;
+        reads = lab(e0, Math.round(e0[1]), "start", -5) + lab(mn, Math.round(mn[1]) + " min", "middle", 13) + lab(e1, Math.round(e1[1]), "end", -5);
+      }
+      const axis = `<text x="2" y="${(ry(hi) + 4).toFixed(1)}" font-size="8" fill="#576372">${Math.round(hi)}</text><text x="2" y="${(ry(lo)).toFixed(1)}" font-size="8" fill="#576372">${Math.round(lo)}</text>`;
+      rib = `<div class="lw-rib"><div class="why">the speed through ${esc(turnLabel(t))} · mph · ${pool.length} lap${pool.length === 1 ? "" : "s"} in ${scopeTok(ls)} faint${mineS ? " · the " + esc(shown.label) + " painted by grip" : ""}</div>`
+        + `<svg viewBox="0 0 ${RW} ${RH}" preserveAspectRatio="xMidYMid meet">${bandsR}${axis}${poolSvg}${mineSvg}${reads}</svg></div>`;
+    }
+  }
+  // ---- two ladders: every lap in scope as a dot, this pass as the square, its rank with pool and scope beside it
+  const lapsGrip = {};
+  SEG_ORDER.forEach((n) => ((t.phaseObs || {})[n] || []).forEach((r) => { if (!ls.set.has(String(r[0])) || r[4] == null) return;
+    const g = lapsGrip[r[0]] = lapsGrip[r[0]] || [0, 0]; g[1]++; if ((r[4] | 0) === 0) g[0]++; }));
+  const ph = Array.isArray(p.c.phases) ? p.c.phases : [], offGrip = { front: 1, rear: 1, both: 1, impact: 1 };
+  const calmN = ph.filter((q) => !offGrip[q.red]).length, grMine = ph.length ? calmN / ph.length : null;
+  const gv = rankVerdict(Object.values(lapsGrip).map(([k, n]) => k / n), grMine, ls, 0.01);
+  const board = (name, metric, vals, mine, v, fmt, loW, hiW, mineTxt) => {
+    const all = vals.concat(mine != null ? [mine] : []), lo = all.length ? Math.min(...all) : 0, hi = all.length ? Math.max(...all) : 1, sp = (hi - lo) || 1;
+    const at = (x) => (((x - lo) / sp) * 100).toFixed(1);
+    const tone = v.isBest && !v.thin ? "var(--acc)" : v.kind === "ranked" || v.isBest ? "var(--ink)" : "var(--mut)";
+    return `<div class="lw-board"><div class="lw-bh"><b>${name}</b><em>${metric}</em></div>`
+      + `<div class="lw-lad"><div class="lw-track">${vals.map((x) => `<i style="left:${at(x)}%"></i>`).join("")}${mine != null ? `<b style="left:${at(mine)}%;background:${v.isBest && !v.thin ? "var(--acc)" : "var(--acc2)"}" title="this pass · ${esc(mineTxt)}"></b>` : ""}</div>`
+      + `<div class="lw-ends"><span>${esc(fmt(lo))} · ${loW}</span><span>${hiW} · ${esc(fmt(hi))}</span></div></div>`
+      + `<div class="lw-bv"><b style="color:${tone}">${v.text}</b><em>${esc(mineTxt)} · ${esc(v.basis)}</em></div></div>`;
+  };
+  const boards = `<div class="lw-boards">`
+    + board("SPEED", "minimum through the turn, mph", Object.values(p.hist), p.apex, p.v, (x) => Math.round(x), "slowest", "fastest", Math.round(p.apex) + " mph")
+    + board("GRIP", "share of phases within grip", Object.values(lapsGrip).map(([k, n]) => k / n), grMine, gv, (x) => Math.round(x * 100) + "%", "least", "most",
+        ph.length ? `${calmN} of ${ph.length} phases within grip` : "no phase data")
+    + `</div>`;
+  return `<div class="lapwin">${top}${map}${rib}${boards}</div>`;
 }
 // The corner log: the daemon's live corner events for the car you are in, newest first.
 function cornersHTML() {
@@ -3116,13 +3257,13 @@ const scopeTok = (ls) => `<span class="scopetok mono" title="${esc(ls.label)} ·
 //   no pool          -> "only lap" (a lap compared with itself), no star, no delta
 //   every value level (within 0.5) -> "level · n", no star
 //   fewer than 5 in all -> a thin claim: a hollow ☆ when first, never the gold ★
-function rankVerdict(pool, mine, ls) {
+function rankVerdict(pool, mine, ls, eps) {   // eps: the gap that still counts as level (0.5 mph by default)
   const vals = (pool || []).filter((v) => v != null && isFinite(v)), tok = ls ? ls.token : "";
   const n = vals.length, of = n + 1, laps = `${n} lap${n === 1 ? "" : "s"} in ${tok}`;
   if (mine == null || !isFinite(mine)) return { kind: "nolap", text: "no lap", basis: n ? laps : `none in ${tok}`, star: "", d: null };
   if (!n) return { kind: "only", rank: 1, of: 1, text: "only lap", basis: `none in ${tok} to compare with`, star: "", d: null };
   const best = Math.max(...vals), all = vals.concat([mine]);
-  if (Math.max(...all) - Math.min(...all) < 0.5) return { kind: "level", rank: null, of, text: `level · ${of}`, basis: `${laps} · all level`, star: "", best, d: null };
+  if (Math.max(...all) - Math.min(...all) < (eps != null ? eps : 0.5)) return { kind: "level", rank: null, of, text: `level · ${of}`, basis: `${laps} · all level`, star: "", best, d: null };
   const rank = vals.filter((v) => v > mine).length + 1, isBest = rank === 1, thin = of < 5;
   // one decimal under 1 mph, so a pass 0.3 mph short of the best never reads "2 of 34 · 0 mph"
   const dd = mine - best, d = Math.abs(dd) < 1 ? Math.round(dd * 10) / 10 : Math.round(dd);

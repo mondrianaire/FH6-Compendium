@@ -914,11 +914,9 @@ function paintStages_legacy() {
     // CHANGE-BANNER CARDS RETIRED (Jett 2026-09-11): hardware/slider/save changes read in the #lastact status
     // bar + the header's changeSlim, and A/B compare is the header's own "COMPARE A/B ▸" button — so the banner
     // duplicated all of it. #alerts now holds ONLY the interactive save picker, shown when identity is ambiguous.
-    const q = matchQuality(CUR && CUR.match);
-    const needPick = CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict");
-    al.innerHTML = needPick ? savePicker() : "";
-    al.classList.toggle("empty", !needPick);
-    if (needPick) wirePicker();
+    // the build picker is retired (Jett 2026-09-11): identity comes only from the save-tune method
+    al.innerHTML = "";
+    al.classList.add("empty");
   }
 }
 

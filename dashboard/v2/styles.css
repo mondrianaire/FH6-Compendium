@@ -1260,6 +1260,45 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .lap-rank.lap-v-only b,.lap-rank.lap-v-level b,.lap-rank.lap-v-nolap b{font-weight:600;color:var(--mut)}
 .lap-abandon{display:flex;align-items:center;gap:10px;padding:5px 8px;background:#11161d;border-bottom:1px solid var(--line2);font-size:11px;color:var(--mut)}
 .lap-abandon .mono{margin-left:auto}
+/* the rank table under the turn window: 4 rows visible, the rest scroll; a row picks the window's turn */
+.lap-rows{max-height:168px;overflow-y:auto}
+.lap-row{cursor:pointer}
+.lap-row.on{background:rgba(78,163,255,.12);box-shadow:inset 3px 0 0 var(--acc2)}
+.lap-hd button{background:none;border:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;text-align:left;cursor:pointer}
+.lap-hd button:hover,.lap-hd button.on{color:var(--acc2)}
+/* THE TURN WINDOW (course mode v2 step 3) */
+.lapwin{display:flex;flex-direction:column;gap:5px;padding:4px 6px 7px;border-bottom:1px solid var(--line)}
+.lw-top{display:grid;grid-template-columns:96px minmax(0,1fr) 96px;gap:8px;align-items:stretch}
+.lw-nav{display:flex;flex-direction:column;justify-content:center;height:55px;box-sizing:border-box;padding:0 9px;border:1px solid var(--acc2);border-radius:3px;background:rgba(78,163,255,.08);color:var(--ink);cursor:pointer}
+.lw-nav:hover{background:rgba(78,163,255,.18)}
+.lw-nav.prev{align-items:flex-start} .lw-nav.next{align-items:flex-end}
+.lw-nav em{font:700 9px var(--mono);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--acc2)}
+.lw-nav b{font:800 18px var(--mono);white-space:nowrap}
+.lw-nav.off{border-color:var(--line2);background:none;color:var(--dim);cursor:default}
+.lw-nav.off em{color:var(--dim)} .lw-nav.off b{font-size:12px}
+.lw-title{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;text-align:center}
+.lw-title b{font:800 22px var(--mono);line-height:1;color:var(--ink)}
+.lw-title span{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.lw-title i{display:inline-flex;align-items:center;gap:5px;font:500 9.5px var(--mono);font-style:normal;color:var(--dim)}
+.lw-pulse::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--acc2);animation:llpulse 1.6s ease-in-out infinite}
+.lw-map{position:relative}
+.lw-map svg{display:block;width:100%;height:auto;max-height:190px;background:var(--bg);border-radius:4px}
+.lw-cap{position:absolute;left:6px;top:5px;max-width:62%;padding:3px 7px;border-radius:3px;background:rgba(13,17,23,.8);font:700 10px var(--mono);color:var(--ink);pointer-events:none}
+.lw-cap span{display:block;font-weight:500;font-size:9px;color:var(--mut)}
+.lw-empty{padding:18px 6px;text-align:center}
+.lw-rib .why{font-size:9.5px;padding:0 2px 1px}
+.lw-rib svg{display:block;width:100%;height:auto;max-height:92px}
+.lw-boards{display:flex;flex-direction:column;gap:3px}
+.lw-board{display:grid;grid-template-columns:132px minmax(0,1fr) 188px;gap:12px;align-items:center;height:48px;padding:0 8px;background:var(--bg);border-radius:3px}
+.lw-bh b{display:block;font:800 11px var(--mono);letter-spacing:.12em;color:var(--ink)}
+.lw-bh em{font:500 9.5px var(--sans);font-style:normal;color:var(--mut)}
+.lw-track{position:relative;height:14px;border-bottom:1px solid var(--line2)}
+.lw-track i{position:absolute;top:4px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#576372;opacity:.85}
+.lw-track b{position:absolute;top:1px;width:11px;height:11px;margin-left:-6px;border:1.5px solid #fff;border-radius:1px;box-sizing:border-box}
+.lw-ends{display:flex;justify-content:space-between;margin-top:2px;font:500 9px var(--mono);color:var(--dim)}
+.lw-bv{display:flex;flex-direction:column;align-items:flex-end;text-align:right;min-width:0}
+.lw-bv b{font:800 13px var(--mono);white-space:nowrap}
+.lw-bv em{font:500 9.5px var(--mono);font-style:normal;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* the scope token (handoff §2): what a count is measured against, riding beside it */
 .scopetok{display:inline-block;font:700 9.5px var(--mono);letter-spacing:.02em;color:var(--ink);border:1px solid var(--line2);border-radius:2px;padding:0 4px;line-height:14px;vertical-align:1px;text-transform:none}
 .lap-grip{font:600 11px var(--mono);display:flex;flex-direction:column;gap:3px;min-width:0}

@@ -1272,6 +1272,15 @@ function shedName(text, max) {
   if (s.length <= max) return s;
   return s.slice(0, max - 1).trimEnd() + "…";                      // last resort — a real ellipsis
 }
+// THE GUARANTEED TUNE-ID WORKFLOW (Jett 2026-09-11): auto-identifying WHICH saved tune is on the car was
+// never 100% from telemetry alone; equipping through the game's own tune list is. This is the reliable path,
+// shown persistently in the header whenever the current tune is unsettled. In My Tuning Setup the tile whose
+// PI badge is a GREY MINUS ( – ) is the tune on the car (the red ▼ tiles are not). See the memory
+// fh6-tune-identification-equip-workflow. `short` sits in the band; `title` carries the full steps on hover.
+const TUNE_ID_GUARANTEE = {
+  short: "Sure-fire fix: re-equip it — in My Tuning Setup the grey-minus ( – ) tile is the tune on the car",
+  title: "Guaranteed tune identification: Find build → equip build → Start → Buy used & new cars → travel to the festival site → Cars → Upgrades and Tuning → My Tuning Setup → the tile whose PI badge shows a grey minus ( – ) is the tune currently on the car (the red ▼ tiles are others). Equipping it this way lets the daemon fully decode it.",
+};
 function headerCopy(st, q) {
   const m = MATCH && MATCH.build;
   const mm = (CUR && CUR.match) || {};
@@ -1295,7 +1304,7 @@ function headerCopy(st, q) {
   const creator = (m && m.creator) || (CUR && CUR.disk && CUR.disk.creator) || "";
   const byline = [creator ? "by " + creator : "", m && m.created ? when(m.created) : ""].filter(Boolean).join(" · ");
   const base = { tone: "dim", lead: "", sub: "", tune, car, status: st.label || "", byline, why: st.why || "", step: (st.steps || [])[0] || "",
-                 rest: (st.steps || []).slice(1), primary: null, noBtn: "", caption: "", evidence: "" };
+                 rest: (st.steps || []).slice(1), primary: null, noBtn: "", caption: "", evidence: "", guarantee: "" };
 
   // AMBIGUITY OVERRIDES EVERY STATUS: which build is on the car outranks what kind of build it is
   if (q && (q.level === "ambiguous" || q.level === "conflict")) {
@@ -1313,7 +1322,7 @@ function headerCopy(st, q) {
         sub: q.why,
         why: "the save you picked is held, but the daemon only accepts it once the live engine confirms it — idle in a menu its cylinders can't be read, so it isn't settled yet",
         step: "drive out of the menu for a few seconds — the gear ladder usually settles it on its own, and confirms the pick either way",
-        rest: [], primary: null, caption: "pick pending",
+        rest: [], primary: null, caption: "pick pending", guarantee: TUNE_ID_GUARANTEE,
         evidence: (mm.how || "") + (nSaves ? " · " + nSaves + " saves" : "") });
     }
     // 2026-09-03 (Jett flagged this reading "wild"): the headline used to say "ONE OF 8" right
@@ -1326,7 +1335,7 @@ function headerCopy(st, q) {
       lead: q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED",
       sub: q.why, why: "the live telemetry alone can't separate them — cylinders, drivetrain and PI are all it carries",
       step: ties > 1 ? "pick the save below — it may also settle on its own as you keep driving" : "pick the save that is on the car",
-      rest: [], primary: { label: "PICK THE SAVE ▸", act: "pick" }, caption: "identity unsettled",
+      rest: [], primary: { label: "PICK THE SAVE ▸", act: "pick" }, caption: "identity unsettled", guarantee: TUNE_ID_GUARANTEE,
       evidence: (mm.how || "") + (nSaves ? " · " + nSaves + " saves" : "") });
   }
   if (st.key === "offline") return Object.assign(base, { tone: "dim", lead: "DAEMON DOWN — NOTHING HERE IS LIVE",
@@ -1464,6 +1473,7 @@ function paintHeader() {
             ? `<button class="gsheet outline" id="btnSheet">🔓 BUILD SHEET ▸<em>the full sheet</em></button>`
             : `<div class="gsheet dead">🔒 BUILD SHEET<em>${esc(g.sheetSub || "needs a save")}</em></div>`}
       </div>
+      ${c.guarantee ? `<div class="hguar t-b" title="${esc(c.guarantee.title)}"><b>✔ sure-fire</b> ${esc(c.guarantee.short)}</div>` : ""}
     </div>
     <div class="hev">
       ${hashTableHTML()}

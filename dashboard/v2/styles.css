@@ -1167,6 +1167,10 @@ body.fixed main{padding:0;gap:0;border-top:0}
 /* right-pane "the corner, phase by phase" — the per-turn line trace + phase-time rail (moved from the left pane) */
 .tstat-corner{display:flex;flex-direction:column;gap:6px}
 .tstat-cornersvg{display:block}
+.cm-splegend{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mut)}
+.cm-splegend .why{margin-right:2px}
+.cm-splegend em{font-style:normal;font:600 10px var(--mono);color:var(--mut)}
+.cm-splegend .cm-grad{display:inline-block;width:64px;height:7px;border-radius:2px;background:linear-gradient(90deg,#f0616d,#e3b341,#00d27a)}
 /* single-verdict diagnosis card */
 .dxcard{border-left:3px solid var(--warn);background:var(--bg);padding:8px 10px;border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:3px}
 .dxcard--ok{border-left-color:var(--acc)}

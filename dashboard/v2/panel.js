@@ -2720,6 +2720,13 @@ function gripRead(mix) {
 // seconds in each part, each cell carrying its representative mph and filled with that part's grip
 // distribution. Returns an HTML STRING (a labelled .grp section) so turnStatsHTML can compose it inline; the
 // course map stays on the LEFT at all times (Jett 2026-09-11 — the per-turn map belongs beside its stats).
+// speed -> colour for the driven-line gradient: slow = red, through amber, to green = fast
+function spdColor(v, vmin, vmax) {
+  let f = (vmax <= vmin) ? 1 : (v - vmin) / (vmax - vmin); f = Math.max(0, Math.min(1, f));
+  const lp = (a, b, k) => Math.round(a + (b - a) * k);
+  const s = f < 0.5 ? [[240, 97, 109], [227, 179, 65], f / 0.5] : [[227, 179, 65], [0, 210, 122], (f - 0.5) / 0.5];
+  return `rgb(${lp(s[0][0], s[1][0], s[2])},${lp(s[0][1], s[1][1], s[2])},${lp(s[0][2], s[1][2], s[2])})`;
+}
 function cornerMapHTML(c, t, ls) {
   const segs = t.seg || {};
   const phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
@@ -2749,7 +2756,30 @@ function cornerMapHTML(c, t, ls) {
   const road = (c.route && c.route.path) || c.path || [];
   const _split = (typeof splitTP === "function") ? splitTP : (p) => (p && p.length ? [p] : []);
   const ctx = road.length ? _split(road).map((run) => `<polyline fill="none" stroke="#3a4453" stroke-width="2" opacity=".4" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
-  const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
+  // the 5 phases as a TRANSLUCENT UNDERLAY band (structure), so the speed-coloured driven lines read on top
+  const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" opacity=".26" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
+  // DRIVEN SPEED LINES: every lap's racing line through this corner (active preset only), each coloured
+  // point-by-point by speed (red slow -> green fast), so the map itself shows where the car is slow/quick.
+  const winV = [], runs = [];
+  Object.keys(c.traces || {}).forEach((id) => {
+    if (ls.set && !ls.set.has(String(id))) return;
+    const tr = c.traces[id]; if (!tr || tr.length < 3) return;
+    let run = [];
+    for (const p of tr) {
+      const X = p[3], Z = p[4], V = p[1];
+      if (X == null || Z == null || X < x0 || X > x1 || Z < z0 || Z > z1) { if (run.length > 1) runs.push(run); run = []; continue; }
+      run.push([X, Z, V]); if (V != null) winV.push(V);
+    }
+    if (run.length > 1) runs.push(run);
+  });
+  const vmin = winV.length ? Math.min(...winV) : 0, vmax = winV.length ? Math.max(...winV) : 1;
+  const speedLines = runs.map((run) => {
+    let r = run; if (r.length > 40) { const stp = r.length / 40; r = Array.from({ length: 40 }, (_, i) => run[Math.floor(i * stp)]); }
+    let out = "";
+    for (let i = 1; i < r.length; i++) { const a = r[i - 1], b = r[i], v = ((a[2] || 0) + (b[2] || 0)) / 2;
+      out += `<line x1="${px(a[0]).toFixed(1)}" y1="${py(a[1]).toFixed(1)}" x2="${px(b[0]).toFixed(1)}" y2="${py(b[1]).toFixed(1)}" stroke="${spdColor(v, vmin, vmax)}" stroke-width="1.3" opacity=".5" stroke-linecap="round"/>`; }
+    return out;
+  }).join("");
   const apex = t.x != null ? `<circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="8" fill="none" stroke="#fff" stroke-width="2"/><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="2.6" fill="#fff"><title>apex</title></circle><text x="${(px(t.x) + 11).toFixed(1)}" y="${(py(t.z) - 8).toFixed(1)}" font-size="14" font-weight="700" paint-order="stroke" stroke="#0b0e12" stroke-width="3.2" stroke-linejoin="round" fill="#fff">${esc(turnLabel(t))}</text>` : "";
   let chev = "";
   const lastP = phases.length ? segs[phases[phases.length - 1]] : null;
@@ -2766,8 +2796,9 @@ function cornerMapHTML(c, t, ls) {
     mdP && mdP.min != null ? pillAt(midOf("mid"), mdP.min, true) : "",
     exP && exP.exit != null && segs.exit ? pillAt(segs.exit[segs.exit.length - 1], exP.exit) : "",
   ].join("");
-  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${apex}${chev}${pills}</svg>`;
-  return `<div class="grp tstat-corner">${ghd}${svg}${trailBox}</div>`;
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${speedLines}${apex}${chev}${pills}</svg>`;
+  const spdLeg = winV.length ? `<div class="cm-splegend"><span class="why">line colour = speed</span><em>${Math.round(vmin)}</em><i class="cm-grad"></i><em>${Math.round(vmax)} mph</em></div>` : "";
+  return `<div class="grp tstat-corner">${ghd}${svg}${spdLeg}${trailBox}</div>`;
 }
 // RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active
 // preset's laps and carries its lap count; grip is always the distribution, never a lone word.

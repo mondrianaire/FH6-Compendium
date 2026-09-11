@@ -1477,7 +1477,7 @@ function setBaseline(twin) {
 // duration scales with the content length so the pace stays readable. A key guards the render so a repaint
 // that changes nothing does not restart the scroll mid-stream.
 let TICKER_KEY = null;
-function paintTicker() {
+function paintTicker() {   // RETIRED 2026-09-11: the #ticker element was removed; this is now an inert no-op (kept only so any stray caller is harmless)
   const el = $("#ticker"); if (!el) return;
   const st = buildStatus(), q = matchQuality(CUR && CUR.match), ch = CHANGE || {};
   const items = [];
@@ -1519,7 +1519,8 @@ function paintTicker() {
 // #alerts now holds ONLY the one interactive alert -- the save picker for an ambiguous identity, which the
 // header's PICK THE SAVE scrolls to and cannot be a scrolling marquee. Everything else is in the ticker.
 function paintBanner() {
-  paintTicker();
+  // the scrolling alerts ticker was retired (Jett 2026-09-11) to give the car header + panes its 24px row —
+  // every ticker item already lives in the #lastact status bar (+ its log), the #hdr gate strip, and the id bar.
   const al = $("#alerts"); if (!al) return;
   const q = matchQuality(CUR && CUR.match);
   const show = CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict");

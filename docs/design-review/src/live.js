@@ -18,7 +18,7 @@
 "use strict";
 
 const DAEMON = "http://127.0.0.1:8765";
-let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0 }, ES = null;
+let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0, events: [], _det: {} }, ES = null;
 let CUR = null;          // { ordinal, cid, name, ... }
 let MATCH = null;        // { build, hw, tune } after identification
 let CHANGE = null;       // what moved since the last read: hardware | tune | saved
@@ -66,8 +66,20 @@ function connect() {
     ES.addEventListener("strip", (e) => { LIVE.strip.push(JSON.parse(e.data)); if (LIVE.strip.length > 1800) LIVE.strip.splice(0, LIVE.strip.length - 1800); paintDockTrace(); });
     ES.addEventListener("corner", (e) => { LIVE.corners.push(JSON.parse(e.data)); if (LIVE.corners.length > 240) LIVE.corners.splice(0, LIVE.corners.length - 240); paintDockTrace(); paintRight(); });
     ES.addEventListener("mode", (e) => adoptMode(JSON.parse(e.data)));
+    ES.addEventListener("loop", (e) => adoptLoop(JSON.parse(e.data)));   // the daemon's S/F-crossing route name — authoritative map identity in an event
     ES.addEventListener("snapshot", (e) => onLive(JSON.parse(e.data)));
     ES.addEventListener("status", (e) => onLive(JSON.parse(e.data)));
+    // BUG (2026-09-03, Jett caught it live: "?700" badge, "ordinal 3840" instead of the car's name):
+    // the daemon announces every newly-resolved or self-healed car record on its own "config" event
+    // (fh6_live_daemon.py:409) -- including the exact fix that makes a car's class stop reading "?"
+    // -- but nothing here ever listened for it. LIVE.cars only ever got refreshed by the next full
+    // "snapshot"/"status" push, which could be a long wait or might not name this car again at all.
+    // The server-side self-heal was real; the browser just never heard about it.
+    ES.addEventListener("config", (e) => {
+      const car = JSON.parse(e.data);
+      LIVE.cars = (LIVE.cars || []).filter((c) => c.id !== car.id).concat([car]);
+      if (CUR && CUR.cid === car.id) identify(carOf(car.id), "config");
+    });
     ES.onerror = () => { LIVE.receiving = false; paintHeader(); };
   } catch (err) { LIVE.err = String(err); paintHeader(); }
 }
@@ -79,6 +91,18 @@ function onLive(d) {
   if (d.pps != null) LIVE.pps = d.pps;
   if (d.receiving != null) LIVE.receiving = d.receiving;
   if (d.mode) adoptMode(d.mode);
+  // AUTHORITATIVE LOOP IDENTITY ON (RE)CONNECT (Jett 2026-09-11). The snapshot AND the once-a-second status
+  // both carry the daemon's current S/F loop, but adoptLoop only ever ran on the live "loop" EVENT — which
+  // fires at a load-in / path-correction, never on a reconnect. So refreshing the page mid-event ignored the
+  // daemon's correct loop and left the STALE course restored from CTX showing: a Legend Island Rivals run read
+  // "Edamame Circuit" after a reload, and the live speed trace then drew against that wrong map (looked like it
+  // was "creating a new route"). Adopt the loop here too, only on a NAME change so a settled map is not
+  // repainted every second. WORLD is loaded by panelBoot before connect(), so it is ready at the first snapshot;
+  // a null loop (free roam / loop ended) clears LOOP and lets position-based location take back over.
+  if ("loop" in d && WORLD) {
+    const lnm = d.loop && d.loop.name && d.loop.name !== "Rivals course" ? d.loop.name : null;
+    if (lnm !== (LOOP ? LOOP.name : null)) adoptLoop(d.loop || { name: null });
+  }
   if (!LIVE.frame && LIVEPOS && WORLD) locateCourse();     // a parked car still locates, from the seed
   // no frames yet (game at a menu since we connected): fall back to the last car the session saw
   if (!CUR && LIVE.cars.length) {
@@ -97,20 +121,73 @@ function carOf(cid) {
            drivetrain: meta.drivetrain, cyl: meta.cyl != null ? meta.cyl : parseInt(bits[2], 10) };
 }
 
-// The game reports IsRaceOn = 0 whenever you are in a menu, which is exactly when upgrades and
-// sliders get changed. So a menu is not dead time: it is the window in which the build we hold
-// can stop being true, and the moment to re-read the save.
-let MENU_SINCE = 0, LAST_REREAD = 0, LIVE_PI = null, LIVE_PI_HELD = false;
+// The game reports IsRaceOn = 0 whenever you are in a menu — including a fast-travel loading
+// screen — and CarOrdinal / CarPI / position all degrade to 0 on that same frame (the menu-frame
+// guards below). A menu carries no live data worth watching, so the dashboard PAUSES its
+// moment-to-moment repainting for as long as it lasts and holds the display at its last on-track
+// state (Jett, 2026-09-03: don't lean on watching menu frames — lean on one rigorous re-read on
+// the way out, which is the moment a menu-made change, saved or not, becomes true of the car).
+const MENU_SETTLE_MS = 350;      // a loading-screen transition can blip on/off for a frame or two;
+                                  // a flip only commits once the new state has held this long
+let MENU_SINCE = 0, MENU_PENDING = null, MENU_PENDING_T = 0, LAST_REREAD = 0, LIVE_PI = null, LIVE_PI_HELD = false;
 let IDENT_SEQ = 0;               // a reload fires two identifies ~50 ms apart; only the last one may write
 
 const fx = (v, d) => (Number.isFinite(+v) ? (+v).toFixed(d) : "—");   // an em dash for anything non-finite off the wire
 let LAST_PANEL = 0;
+// LIVE bottoming + wall-impact detection off the frame stream (~20 Hz), mirroring analyze_session's gates
+// (BOTTOM_GATE 0.98, WALL_DROP -6 mph in one frame). The analyzer stays authoritative for the recorded
+// session; this is the real-time view of the SAME two signals so they can be marked on the live trace with
+// no daemon change. State lives in LIVE._det: last per-wheel bottoming time, last wall time, previous mph/t.
+const BOTTOM_GATE_L = 0.98, BOTTOM_HARD_L = 0.999, WALL_DROP_L = -6, WALL_HARD_L = -20;
+const WHEELS_L = ["FL", "FR", "RL", "RR"];
+function pushLiveEvent(e) {
+  LIVE.events.push(e);
+  if (LIVE.events.length > 400) LIVE.events.splice(0, LIVE.events.length - 400);
+  paintDockTrace();
+}
+function detectLiveEvents(f) {
+  if (!f || !f.on || f.px == null) return;
+  const d = LIVE._det, t = f.t, susp = f.susp || [];
+  const maxS = susp.length ? Math.max(...susp) : 0;
+  // bottoming: the deepest wheel at/over the gate, with the analyzer's 1 s per-wheel dedup
+  let bw = -1, bv = 0;
+  for (let i = 0; i < susp.length; i++) if (susp[i] >= BOTTOM_GATE_L && susp[i] > bv) { bv = susp[i]; bw = i; }
+  if (bw >= 0 && (d.bt == null || t - d.bt > 1.0 || d.bw !== bw)) {
+    d.bt = t; d.bw = bw;
+    pushLiveEvent({ kind: "bott", t, mph: Math.round(f.mph || 0), wheel: WHEELS_L[bw], hard: bv >= BOTTOM_HARD_L, x: f.px, z: f.pz });
+  }
+  // wall: a one-frame speed loss steeper than the gate -- not braking, not a bottoming jolt, not a prop hit,
+  // not a teleport/respawn (which also drops mph to ~0). Requires consecutive frames (< 0.1 s apart).
+  if (d.mph != null && d.mt != null && t - d.mt <= 0.1) {
+    const d1 = (f.mph || 0) - d.mph;
+    const teleport = LIVE.teleportAt && (Date.now() - LIVE.teleportAt < 1500);
+    if (d1 <= WALL_DROP_L && (f.brk | 0) === 0 && maxS < BOTTOM_GATE_L && (f.smash || 0) <= 0 && !teleport
+        && (d.wt == null || t - d.wt > 0.5)) {
+      d.wt = t;
+      pushLiveEvent({ kind: "wall", t, mph: Math.round(f.mph || 0), drop: Math.round(-d1 * 10) / 10, hard: d1 <= WALL_HARD_L, x: f.px, z: f.pz });
+    }
+  }
+  d.mph = f.mph || 0; d.mt = t;
+}
+
 function onFrame(f) {
   LIVE.receiving = true;
   LIVE.frame = f;
-  const inMenu = !f.on;
+  const now = Date.now();
+  // THE MENU EDGE, DEBOUNCED. Commit to a new on/off state only once it has held for
+  // MENU_SETTLE_MS — a dropped packet, or a frame or two of stale state right at a loading-screen
+  // cut, must not toggle the pause on and off. was/entered/left describe the COMMITTED edge, the
+  // one thing every consumer below reacts to; the raw per-frame f.on keeps driving the guards
+  // that were already instant and idempotent (PI hold, position hold, identity hold).
+  const raw = !f.on;
+  if (raw !== LIVE.inMenu) { if (MENU_PENDING !== raw) { MENU_PENDING = raw; MENU_PENDING_T = now; } }
+  else MENU_PENDING = null;
   const was = LIVE.inMenu;
-  LIVE.inMenu = inMenu;
+  if (MENU_PENDING !== null && now - MENU_PENDING_T >= MENU_SETTLE_MS) {
+    LIVE.inMenu = MENU_PENDING; MENU_PENDING = null;
+    if (LIVE.inMenu) MENU_SINCE = now;
+  }
+  const inMenu = LIVE.inMenu, entered = inMenu && !was, left = !inMenu && was;
   // A menu frame reports PI 0 and car 0. Zero is "no car", not a PI; letting it through made the
   // drift test read every menu as "the hardware changed", and the status went red in every menu.
   if (f.pi) { if (LIVE_PI !== f.pi && CUR) { vcar(CUR.ordinal).livePI = { pi: f.pi, at: Date.now() }; viewSave(); } LIVE_PI = f.pi; LIVE_PI_HELD = false; }
@@ -122,44 +199,64 @@ function onFrame(f) {
   const menuFrame0 = !f.car || String(f.cid || "").startsWith("0|");
   const realPos = f.on && !menuFrame0 && f.px != null && f.pz != null && !(Math.abs(f.px) < 0.5 && Math.abs(f.pz) < 0.5);
   if (realPos) {
+    // v1-style (2026-09-03): update the dot on every real-position frame, not once per 4 m of
+    // travel. A fixed DISTANCE gate makes the TIME between visual updates scale with speed --
+    // long, uneven gaps at low/varying speed, which is what measured as the choppiness (61-247ms
+    // irregular gaps live, confirmed against app.js's updCarDot, which has no distance gate at
+    // all and relies on a CSS transition, not update frequency, for smoothness -- see .liveDot's
+    // transition in styles.css). locateCourse() still only needs to run when the car has actually
+    // moved meaningfully, so that check keeps its own (looser) distance test.
     const jump = LIVEPOS ? Math.hypot(LIVEPOS[0] - f.px, LIVEPOS[1] - f.pz) : 0;
-    const moved = !LIVEPOS || jump > 4;
     LIVEPOS = [f.px, f.pz]; LIVE.posHeld = false;
-    if (moved) { const b = $("#leftBody"); if (b) addLiveDot(b); if (jump < 2000) locateCourse(); else LIVE.teleportAt = Date.now(); }
+    const b = $("#leftBody"); if (b) addLiveDot(b);
+    if (jump > 4) {
+      if (jump < 2000) locateCourse(); else LIVE.teleportAt = Date.now();
+      // DRIVING CANCELS A STALE COURSE-BROWSER PICK (Jett 2026-09-07: "in free mode the map is identifying as
+      // Daikoku"). A browse pick zooms the world map to a course you clicked; once you actually drive, the map
+      // must follow YOU, not stay parked on a course you were browsing. Clearing it once on real movement returns
+      // the pill/map to the world (or the course you're genuinely on). browsePick() toggles the current pick off.
+      if (MODE.suggest !== "course" && typeof BROWSE_PICK !== "undefined" && BROWSE_PICK) browsePick(BROWSE_PICK);
+    }
   } else if (LIVEPOS && !LIVE.posHeld) { LIVE.posHeld = true; const b = $("#leftBody"); if (b) addLiveDot(b); }
+
+  detectLiveEvents(f);   // bottoming / wall-impact off the frame stream -> LIVE.events, marked on the trace
 
   // IN A MENU THE FRAME CARRIES CAR 0. That is the game saying "no car", not a car whose ordinal
   // is zero; identifying it produced a header reading "ordinal 0". Keep the last real car through
-  // menus -- the menu itself is when its build is most likely to change, and we are watching it.
+  // menus — identity is settled by the SAVE, not the live frame, and re-identifying off a zeroed
+  // frame is exactly the kind of menu-time churn this function now holds steady instead.
   const menuFrame = !f.car || String(f.cid || "").startsWith("0|");
   if (!menuFrame && f.cid && (!CUR || CUR.cid !== f.cid)) { identify(carOf(f.cid), "frame"); return; }
 
-  if (LIVE.teleportAt && realPos && Date.now() - LIVE.teleportAt > 1500) { LIVE.teleportAt = 0; locateCourse(); }
-  if (inMenu && !was) MENU_SINCE = Date.now();
-  const now = Date.now();
-  // While a menu is open, re-read the save on a slow beat; the instant it closes, read once more.
-  const dueInMenu = inMenu && now - LAST_REREAD > 4000;
-  const leftMenu = !inMenu && was;
-  // A live PI that no longer matches the build we matched means the car changed under us and the
-  // change has not been saved yet — the strongest signal we get without a new save file.
-  const piDrift = MATCH && MATCH.build && LIVE_PI && MATCH.build.pi != null
+  if (LIVE.teleportAt && realPos && now - LIVE.teleportAt > 1500) { LIVE.teleportAt = 0; locateCourse(); }
+  // ONE rigorous re-read on the way OUT of a menu — the moment a menu-made change (saved or not)
+  // becomes true of the car about to be driven. Nothing polls DURING the dwell any more: a menu
+  // frame has nothing in it worth polling for (see the note above onFrame).
+  const piDrift = f.on && MATCH && MATCH.build && LIVE_PI && MATCH.build.pi != null
     && LIVE_PI !== MATCH.build.pi;
-  if (CUR && (dueInMenu || leftMenu || (piDrift && now - LAST_REREAD > 2500))) {
+  if (CUR && (left || (piDrift && now - LAST_REREAD > 2500))) {
     LAST_REREAD = now;
     reread();
   }
-  // The tiles follow every frame; the panel follows the context — a menu opening or closing
-  // changes what the right pane should show — and otherwise a slow heartbeat, not the packet rate.
-  paintDockTiles();
+  // Anything an outside trigger (a code edit, a finished rebuild) queued up while the menu held --
+  // apply it now, on the same edge every other menu-made change waits for. A reload wins outright
+  // (the page is about to be replaced anyway); a queued repaint only matters if one wasn't.
+  if (left && PENDING_RELOAD) { PENDING_RELOAD = false; location.reload(); return; }
+  if (left && PENDING_AFTER_REBUILD) { PENDING_AFTER_REBUILD = false; afterRebuild(); }
+  // LIVE UPDATES PAUSE FOR THE DURATION OF A MENU. The tiles and trace repaint only from a real
+  // on-track frame, or exactly once on each committed edge — so the display holds steady through
+  // the dwell instead of flickering to the menu frame's zeroed values ten times a second, and
+  // snaps back the instant the car is back on track.
+  if (f.on || entered || left) paintDockTiles(entered || left);
   runSample(f, now);
-  if (inMenu !== was || now - LAST_PANEL > 2000) { LAST_PANEL = now; paintPanel(); }
+  if (entered || left || (!inMenu && now - LAST_PANEL > 2000)) { LAST_PANEL = now; paintPanel(); }
 }
 
 // THE LIVE RUN: speed against distance for the drive you are on, painted by grip, sampled at
 // 10 Hz — the trace region's content whenever no known course is under the car. A run starts
 // when the car sets off (or the odometer restarts) and keeps the last 90 seconds.
 function runSample(f, now) {
-  if (!f.on) { if (LIVE.run.length) { LIVE.run = []; paintTrace(); } return; }
+  if (!f.on) return;   // hold the trace through the menu — the same run picks back up on return
   if (now - LIVE.runT < 100) return;
   LIVE.runT = now;
   const last = LIVE.run[LIVE.run.length - 1];
@@ -169,7 +266,7 @@ function runSample(f, now) {
   const rr = Math.max(Math.abs((sl.RL || [0, 0, 0])[2]), Math.abs((sl.RR || [0, 0, 0])[2]));
   const g = (Math.abs(f.lat) > 3 || f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
   const d0 = LIVE.run.length ? LIVE.run[0][5] : f.dist;
-  LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist]);
+  LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist, now]);   // [6]=timestamp: free-mode trace plots vs TIME (Jett 2026-09-07)
   if (LIVE.run.length > 900) { LIVE.run.splice(0, LIVE.run.length - 900); const b = LIVE.run[0][5]; LIVE.run.forEach((q) => { q[0] = q[5] - b; }); }
   if (now - (LIVE.runPaint || 0) > 500) { LIVE.runPaint = now; paintTrace(); }
 }
@@ -242,7 +339,19 @@ function fingerprint(ordinal) {
   //                     before we can hold it at all
   //   sliders moved on the same hardware -> a tuning pass is under way, either following advice
   //                     or your own, and that is exactly what A/B wants to compare
-  if (prev && prev.pk) {
+  // DON'T CRY CHANGE ON AN IDENTITY FLIP (Jett 2026-09-06: "the hardware changed icon comes up way too
+  // much when I'm not changing anything"). identify() runs on every car change, park, menu and re-read,
+  // and the daemon's identity flip-flops between a car's held builds — each flip gives a different save's
+  // parts, so prev.pk !== pk fires "hardware changed" though nothing was touched. A REAL change is a save
+  // the database does not hold yet (exact match empty): a new build, or a slider variation mid-A/B. When
+  // the identified save is already held (exact non-empty), it is just a re-pick — say nothing.
+  // A DOWNLOADED (locked) TUNE IS NOT A CHANGE YOU MADE (Jett 2026-09-07: "hardware changed seems permanent and
+  // isn't meaningful"). "hardware changed" means "the DB does not hold this exact build" (exact empty) -- which
+  // is persistently true for a downloaded tune until it is imported, so it sticks and reads as if you altered the
+  // car. You didn't; you downloaded a build. Its "downloaded" state is what the status already says. So never cry
+  // hardware/tune-change on a locked tune, and clear a stale one left over from before it was identified.
+  const locked = !!(CUR.disk.tune && CUR.disk.tune.locked);
+  if (prev && prev.pk && exact.length === 0 && !locked) {
     // name the difference, slot by slot and slider by slider — a banner that says "hardware
     // changed" and nothing else is the one that reads as "nothing was picked up"
     const pa = prev.pk.split(","), pb = pk.split(",");
@@ -256,6 +365,8 @@ function fingerprint(ordinal) {
     });
     if (prev.pk !== pk) CHANGE = { kind: "hardware", from: prev, to: MATCH, slots, sliders, at: Date.now() };
     else if (prev.sk !== sk) CHANGE = { kind: "tune", from: prev, to: MATCH, slots: [], sliders, at: Date.now() };
+  } else if (locked && CHANGE && (CHANGE.kind === "hardware" || CHANGE.kind === "tune") && !CHANGE.saved) {
+    CHANGE = null;   // clear a stale change-banner left over from before this downloaded tune was identified
   }
   MATCH.sliders = CUR.disk.tune.sliders || {};       // kept so the next fingerprint can print old → new
   const cv = vcar(ordinal);
@@ -349,25 +460,56 @@ async function watchVersion(force) {
   VER_T = now;
   try {
     const html = await fetch("index.html", { cache: "no-store" }).then((r) => r.text());
-    const m = /panel\.js\?v=([0-9]+)/.exec(html);
-    if (m && m[1] !== mine) { console.info("[watch] server is on v" + m[1] + ", this page is v" + mine + " — reloading"); location.reload(); }
+    // Compare live.js with live.js: `mine` is read off THIS file's tag, so the served tag it is held
+    // against must be the same file's. Reading panel.js here made a 87-vs-88 tag mismatch between
+    // two files reload the page forever (2026-09-05, "flickers and reloads constantly").
+    const m = /live\.js\?v=([0-9]+)/.exec(html);
+    if (m && m[1] !== mine) {
+      console.info("[watch] server is on v" + m[1] + ", this page is v" + mine + " —", LIVE.inMenu ? "deferring reload until the menu closes" : "reloading");
+      if (LIVE.inMenu) PENDING_RELOAD = true; else location.reload();
+    }
   } catch (e) { /* server down: nothing to do */ }
 }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) watchVersion(true); });
 window.addEventListener("focus", () => watchVersion(true));
 setInterval(() => { if (!document.hidden) watchVersion(); }, 60000);
 
+// 2026-09-03 (Jett: "other means of input that would break the 4th [wall]"): reloading the page or
+// repainting from a finished rebuild is driven by CODE ON DISK or the DATABASE changing -- neither
+// has anything to do with what the live game is doing. Firing either mid-menu contradicts the whole
+// point of the paused state: the screen is supposed to hold exactly still while you're in a menu,
+// and it doesn't get to make an exception just because the trigger came from outside the game. Both
+// now defer to the same menu-exit edge everything else already waits for (onFrame's `left`, below).
+let PENDING_RELOAD = false, PENDING_AFTER_REBUILD = false;
+// PROACTIVE, NOT JUST AUTOMATIC (2026-09-03): scope=telemetry catches up on its own now, but a
+// silent auto-trigger reintroduces the same blind spot with lower odds instead of removing it --
+// if the rebuild service is down, or a trigger fails, telemetry falls behind with nothing to show
+// for it until someone happens to query the database. This chip is the standing signal: it polls
+// only /status (a few bytes, no subprocess), independent of whether a rebuild is running, so a gap
+// is always visible, not just less likely.
+function refreshSessionsPending() {
+  fetch(REBUILD + "/status").then((r) => r.json()).then((j) => {
+    if (!RB.last) RB.last = {};
+    RB.last.sessions_pending = j.sessions_pending || 0;
+    paintChips();
+  }).catch(() => {});
+}
 function connectWatch() {
   if (WS) return;
   seedRebuild();
+  refreshSessionsPending();
+  setInterval(refreshSessionsPending, 60000);
   try {
     WS = new EventSource(REBUILD + "/watch");
     WS.addEventListener("code", (e) => { let f = []; try { f = JSON.parse(e.data).files || []; } catch (x) {}
-      console.info("[watch] code changed:", f.join(", "), "— reloading"); setTimeout(() => location.reload(), 300); });
+      console.info("[watch] code changed:", f.join(", "), "—", LIVE.inMenu ? "deferring reload until the menu closes" : "reloading");
+      if (LIVE.inMenu) { PENDING_RELOAD = true; return; }
+      setTimeout(() => location.reload(), 300); });
     WS.addEventListener("data", async (e) => {
       if (Date.now() - DATA_AT < 2000) return;         // a finished run and its file write announce once
       DATA_AT = Date.now();
       try { const j = JSON.parse(e.data); if (j.rc != null) RB.last = { finished: Date.now() / 1000, wall_s: j.wall_s, rc: j.rc, tail: [] }; } catch (x) {}
+      if (LIVE.inMenu) { PENDING_AFTER_REBUILD = true; return; }
       await afterRebuild();                            // a run started anywhere (a save, the button, a shell) lands here
     });
     WS.onerror = () => { WATCH_OK = false; paintFooter(); setTimeout(() => watchVersion(true), 2000); };
@@ -445,43 +587,8 @@ async function loadBuild(hw) {
   } catch (e) { if (MATCH) MATCH.sheet = null; }
 }
 
-/* ------------------------------------------------------------------ bar */
-function paintBar() {
-  const b = $("#idbar"); if (!b) return;
-  if (!CUR) {
-    b.innerHTML = `<div class="idcar"><b>waiting for a car</b>
-      <span class="why">start driving, or open a car in the game — the daemon reports it here</span></div>
-      <div class="idnums">${liveChip()}</div>`;
-    return;
-  }
-  const m = MATCH && MATCH.build;
-  b.innerHTML = `
-    <div class="idcar">
-      <b>${esc(CUR.name || ("ordinal " + CUR.ordinal))}</b>
-      <span class="chips">
-        ${clsBadge(CUR.cls)}${CUR.pi ? `<span class="chip">PI ${CUR.pi}</span>` : ""}
-        ${CUR.dt ? `<span class="chip">${esc(CUR.dt)}</span>` : ""}
-        ${CUR.cyl ? `<span class="chip">${CUR.cyl} cyl</span>` : ""}
-        <span class="chip mono">${esc(CUR.cid || "")}</span>
-        ${m && m.kg ? `<span class="chip">${n0(m.kg)} kg · ${n0(m.kg * KG_LB)} lb</span>` : ""}
-        ${m && m.front ? `<span class="chip">${n1(m.front)}% front</span>` : ""}
-        ${m && m.gears ? `<span class="chip">${m.gears}-speed</span>` : ""}
-      </span>
-    </div>
-    <div class="idnums">${liveChip()}</div>`;
-}
-function liveChip() {
-  return rebuildChip() + liveChip0();
-}
-function liveChip0() {
-  const drift = MATCH && MATCH.build && LIVE_PI != null && MATCH.build.pi != null
-    && LIVE_PI !== MATCH.build.pi;
-  return `<span class="chip ${LIVE.receiving ? "on" : "r"}">${LIVE.receiving ? "telemetry live" : "no packets"}</span>
-    ${LIVE.inMenu ? '<span class="chip w">in a menu — watching for changes</span>' : ""}
-    ${drift ? `<span class="chip r" title="${LIVE_PI_HELD ? "last seen before the reload; a fresh frame confirms or clears it" : "read from the live frame"}">live PI ${LIVE_PI} ≠ saved ${MATCH.build.pi}${LIVE_PI_HELD ? " · held" : ""}</span>` : ""}
-    <span class="chip mono">${n1(LIVE.pps)} pps</span>
-    <span class="chip ${CUR && CUR.disk ? "on" : "w"}">${CUR && CUR.disk ? "save read" : "no save"}</span>`;
-}
+// (paintBar()/liveChip()/liveChip0() were retired 2026-09-07 — paintBar was defined once and called
+// never, #idbar exists in no markup, and the band + #lastact now carry identity and connection state.)
 
 // The banner is the contextual half of the dashboard: it says what just moved and what that
 // means you have to do about it.
@@ -555,17 +662,60 @@ async function abOverlay() {
   try {
     const cs = await get("courses.json");
     const live = cs.filter((c) => c.lap_rows).slice(0, 40);
+    // 2026-09-03 (Jett): the bare diffCount() only ever said HOW MANY sliders differ, never which
+    // ones or by how much -- fetch both saves' real deliverables and name them, same comparison
+    // diffSliderRows() already does for the Full Sheet's per-row dots.
+    let diffRows = "";
+    if (a && b && a.o != null && b.o != null && a.c && b.c) {
+      const [ra, rb] = await Promise.all([
+        fetch(DAEMON + "/disk-tune?ordinal=" + a.o + "&ts=" + String(a.c).split("_").pop()).then((r) => r.json()),
+        fetch(DAEMON + "/disk-tune?ordinal=" + b.o + "&ts=" + String(b.c).split("_").pop()).then((r) => r.json()),
+      ]);
+      if (ra && ra.available && rb && rb.available) {
+        const diff = diffSliderRows(ra.deliverable.tabs, rb.deliverable.tabs);
+        const av = {}; (ra.deliverable.tabs || []).forEach((t) => t.rows.forEach((r) => { av[r.field] = r; }));
+        const bv = {}; (rb.deliverable.tabs || []).forEach((t) => t.rows.forEach((r) => { bv[r.field] = r; }));
+        const off = Object.keys(diff).filter((f) => diff[f] !== "ok");
+        diffRows = off.length ? `<div class="abtab" style="margin-top:8px">${off.map((f) => `<div class="abr">${vdot(diff[f])}<b>${esc((av[f] && av[f].label) || f)}</b>
+            <span class="mono">${esc(String((av[f] && av[f].value) ?? "—"))}${esc((av[f] && av[f].unit) || "")}</span>
+            <span class="mono">→ ${esc(String((bv[f] && bv[f].value) ?? "—"))}${esc((bv[f] && bv[f].unit) || "")}</span></div>`).join("")}</div>`
+          : `<div class="why" style="margin-top:8px">every slider matches</div>`;
+      }
+    }
     rows = `<div class="abtab"><div class="abr hd"><span>setup</span><span>saved</span>
         <span>sliders differing</span></div>
       ${[["A", a], ["B", b]].map(([k, s]) => `<div class="abr"><span><b>${k}</b>
         ${esc((s && s.name) || "unnamed")}</span>
         <span class="mono">${esc(((s && s.saved) || "").replace("T", " ").replace("Z", ""))}</span>
         <span class="mono">${s ? diffCount(a, b) : "—"}</span></div>`).join("")}</div>
+      ${diffRows}
       <div class="why" style="margin-top:10px">Drive a lap on each. Laps are stored against the
       setup that drove them, so the course view can rank them without you tagging anything.</div>`;
   } catch (e) { rows = `<div class="why">${esc(e.message)}</div>`; }
   ov.querySelector("#abcols").innerHTML = rows;
 }
+
+// Named, valued slider diff (2026-09-03, Jett: A/B between your OWN saved slider variations of
+// the same hardware -- ported from v1's verifyBuild() slider half, dashboard/app.js:4809-4815).
+// Unlike v1's clone-verify, the comparison target here needs no "pin" step: variation status
+// already means "same hardware as a held build" (buildStatus() panel.js), so the base build is
+// already known the moment the state is entered. Only sliders are compared -- parts are
+// identical by definition of hw_match=true, that's what makes it "variation" and not a
+// hardware change.
+function diffSliderRows(baseTabs, curTabs) {
+  const cur = {}; (curTabs || []).forEach((t) => t.rows.forEach((r) => { cur[r.field] = r; }));
+  const out = {};
+  (baseTabs || []).forEach((t) => t.rows.forEach((b) => {
+    const c = cur[b.field];
+    if (!c) { out[b.field] = "off"; return; }
+    const d = (b.value != null && c.value != null) ? Math.abs(c.value - b.value) / (Math.abs(b.value) || 1)
+      : Math.abs((c.fill || 0) - (b.fill || 0));
+    out[b.field] = d < 0.02 ? "ok" : d < 0.06 ? "near" : "off";
+  }));
+  return out;
+}
+const VDOT_TITLE = { ok: "matches the base build", near: "close — double-check", off: "differs from the base build" };
+function vdot(st) { return st ? `<span class="fhm-vdot ${st}" title="${VDOT_TITLE[st] || ""}"></span>` : ""; }
 
 function diffCount(a, b) {
   if (!a || !b || !a.skey || !b.skey) return "—";
@@ -599,10 +749,13 @@ function matchQuality(m) {
     + m.live_pi + " but the chosen save is " + m.chosen_cyl + " cyl / PI " + m.chosen_pi };
   const settled = ties <= 1 || !!m.gear_disambig || !!m.picked_ok;
   if (n > 1 && !settled) {
+    // 2026-09-03: this was the THIRD independent copy of "one full pull settles it" found in one
+    // sweep (after panel.js's headline and this file's own picker lead below) -- three files each
+    // wrote their own version of a promise the ladder can't reliably keep. Fixed together; see
+    // [[fh6-gear-ladder-identity-solved]]. Picking is the one sure answer; driving may also do it.
     return { level: "ambiguous", why: ties + " of " + n + " saved builds tie on cylinders, drivetrain and PI"
       + (m.max_gear_seen ? "; top gear seen so far " + m.max_gear_seen : "; no gear evidence yet")
-      + (m.ladder_tied ? "; the ratio ladder is still tied" : "")
-      + " — one full pull through the gears settles it" };
+      + (m.ladder_tied ? "; the ratio ladder is still tied" : "") };
   }
   const how = m.gear_disambig ? "settled by the gearbox" + (m.max_gear_seen ? " (top gear seen " + m.max_gear_seen + ")" : "")
             : m.picked_ok ? "your pick, and the live car agrees with it"
@@ -639,7 +792,7 @@ function pickerHTML(m, chosen, pinned, q) {
     : `${m.n_signature_ties || alive.length} builds share this car's cylinders, drivetrain and PI.`
     + (top ? ` Top gear seen so far: <b>${top}</b>${alive.length < (m.builds || []).length ? ` — ${(m.builds || []).length - alive.length} ruled out.` : "."}` : " No gear evidence yet.")
     + (twins.length ? ` ${twins.map((g) => alive.filter((b) => +b.gears === g).map((b) => b.label).join("·")).join(" and ")} share a box, so the count alone cannot separate them; the ratio ladder held in the database can.` : "")
-    + ` <b>One full pull through the gears settles it</b>, or pick below and it stays picked.`;
+    + ` <b>Pick below and it stays picked</b> — that settles it now; a few more gears while you drive may also settle it on their own.`;
   return `<div class="picker"><div class="why">${lead}
     ${pinned ? '<button class="mini" data-pin="">clear the pin</button>' : ""}</div>
     <div class="picks">${rows}</div></div>`;
@@ -695,10 +848,14 @@ function paintStages_legacy() {
   if (btn && green) btn.onclick = () => cloneWindow();
   const al = $("#alerts");
   if (al) {
+    // CHANGE-BANNER CARDS RETIRED (Jett 2026-09-11): hardware/slider/save changes read in the #lastact status
+    // bar + the header's changeSlim, and A/B compare is the header's own "COMPARE A/B ▸" button — so the banner
+    // duplicated all of it. #alerts now holds ONLY the interactive save picker, shown when identity is ambiguous.
     const q = matchQuality(CUR && CUR.match);
     const needPick = CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict");
-    al.innerHTML = changeBanner() + (needPick ? savePicker() : "");
-    wireBanner(); wirePicker();
+    al.innerHTML = needPick ? savePicker() : "";
+    al.classList.toggle("empty", !needPick);
+    if (needPick) wirePicker();
   }
 }
 
@@ -716,8 +873,7 @@ function cloneWindow() {
     POP = POP || {}; POP.clone = w;
     const d = w.document;
     d.head.innerHTML = `<title>Clone — ${esc(b.car || "")}</title><style>${CLONE_CSS}</style>`;
-    d.body.innerHTML = cloneHTML(b);
-    wireClone(w, b);
+    d.body.innerHTML = flowDocHTML(b);
     return;
   }
   // Popup blocked. The sheet is the point, not the window it lives in: show it as a full-screen
@@ -730,11 +886,9 @@ function cloneOverlay(b) {
   const ov = document.createElement("div");
   ov.id = "cloneOv"; ov.className = "cloneov";
   ov.innerHTML = `<style>${scopedCloneCss()}</style>
-    <div class="ovbox fhcl">${cloneHTML(b)}
+    <div class="ovbox fhcl">${flowDocHTML(b)}
       <button class="ovx" id="ovx" title="close">✕</button></div>`;
   document.body.appendChild(ov);
-  // the overlay borrows the popup's own document API surface
-  wireClone({ document: ov, localStorage: window.localStorage }, b);
   ov.querySelector("#ovx").onclick = () => ov.remove();
   document.addEventListener("keydown", function esc2(e) {
     if (e.key === "Escape") { ov.remove(); document.removeEventListener("keydown", esc2); }
@@ -808,20 +962,77 @@ function dbRow(p) {   // a database slot the deliverable does not carry (or the 
     ${tileStrip(p)}
     <span class="up ${stock ? "stock" : "named"}">${esc(p.name || (stock ? "Stock" : "—"))}</span></label>`;
 }
-function shopMenus(b, dl) {
+// STATIC-DOCUMENT siblings of partRow()/dbRow() (2026-09-03) -- one flowed text line each instead
+// of a clickable <label>+checkbox, for the non-interactive Build Sheet (flowSheetHTML() below).
+// Same label-resolution/PI/tile/engine-swap-hint data as the interactive rows; no checkbox to check.
+function partRowFlow(it, p) {
+  const stock = !!it.stock;
+  const proven = !!(p && p.pid != null && p.name && !stock);
+  const cls = stock ? "stock" : proven ? "named" : it.conf === "dim" ? "dim" : it.conf === "cosmetic" ? "cosmetic" : it.conf === "category" ? "category" : "named";
+  const label = proven ? p.name : (it.upgrade || it.value || "");
+  const pi = it.pi != null ? ` (${it.pi > 0 ? "+" : ""}${it.pi} PI)` : "";
+  const tile = p && p.tiles ? ` · tile ${p.tile || 0}/${p.tiles}` : "";
+  const meas = it.engine_type ? ` · ${it.engine_type_conf === "measured" ? "📡 " : ""}${esc(it.engine_type)}` : "";
+  const swap = (it.item === "powertrain" && !stock && it.engine_family != null)
+    ? ` — Engine Swap menu → match this tile${it.engine_catalog && it.engine_catalog.shared_swap ? " · shared swap engine" : ""}` : "";
+  const note = it.note ? ` · ℹ ${esc(it.note)}` : "";
+  return `<div class="prow ${cls}" data-slot="${esc(p ? p.slot : it.item)}"><b>${esc(it.item.replace(/_/g, " "))}</b> — ${esc(label)}${pi}${meas}${tile}${swap}${note}</div>`;
+}
+// NOT APPLICABLE, as its own state (2026-09-04, Jett: separate "left stock" from "was never even
+// offered"). ref_field_gate in the DB holds 6 hand-verified gate relationships, but only the
+// aspirator family's trigger condition is precise enough to assert with confidence today: FI_SLOTS
+// mutual exclusivity is a structural fact about the save format itself (partFor() already trusts it
+// -- at most one of the 5 is ever populated), and aspiration->intercooler's unlock condition is
+// docs/fh6-ui-spec.md 9.1/10.6 ("8 Engine sub-menus with no forced-induction conversion, 12 once
+// one is fitted"). The other 5 ref_field_gate rows (car_body->weight_reduction/roll_cage/
+// front_bumper, engine->camshaft, drivetrain->differential) are real gates but their exact trigger
+// VALUE (which body kit, which engine swap) isn't pinned down -- asserting "not applicable" there
+// without that precision would be a guess dressed as fact, so those slots stay ordinary stock rows
+// until that follow-up research lands. Extend this function, don't invent a rule elsewhere, once
+// more gates get that same precision.
+function gatedReason(b, p) {
+  if (!p) return null;
+  const parts = b.parts || [];
+  const fitted = FI_SLOTS.find((s) => parts.some((x) => x.slot === s && x.pid != null && !x.stock));
+  if (FI_SLOTS.includes(p.slot)) return fitted && fitted !== p.slot ? "a different forced-induction type is fitted" : null;
+  if (p.slot === "intercooler") return fitted ? null : "requires forced induction";
+  return null;
+}
+function dbRowFlow(p, reason) {
+  const stock = !!p.stock || p.pid == null;
+  const tile = p.tiles ? ` · tile ${p.tile || 0}/${p.tiles}` : "";
+  if (reason) return `<div class="prow gated" data-slot="${esc(p.slot)}"><b>${esc(p.slot.replace(/_/g, " "))}</b> — ∅ not applicable: ${esc(reason)}</div>`;
+  return `<div class="prow ${stock ? "stock" : "named"}" data-slot="${esc(p.slot)}"><b>${esc(p.slot.replace(/_/g, " "))}</b> — ${esc(p.name || (stock ? "Stock" : "—"))}${tile}</div>`;
+}
+function shopMenus(b, dl, rowFn = partRow, dbFn = dbRow) {
   if (dl && (dl.menus || []).length) {
     const used = new Set();
     return dl.menus.map((m) => {
-      const rows = m.rows.map((it) => { const p = partFor(b, it.item); if (p) used.add(p.slot); return partRow(it, p); });
+      // derived_level rows (the "engine" build-level readout) are NOT a shop tile -- the daemon
+      // already excludes them from PI cost for exactly that reason (fh6_tune_decode.py). Showing
+      // one here as an ordinary clickable row sent people hunting for a part that doesn't exist.
+      const rows = m.rows.filter((it) => !it.derived_level).map((it) => { const p = partFor(b, it.item); if (p) used.add(p.slot); return rowFn(it, p); });
       // installed parts the deliverable did not name (intercooler, restrictor plate…) join their menu
       const extra = (b.parts || []).filter((p) => !used.has(p.slot) && p.pid != null && !p.stock && sameArea(p.area, m.menu));
       extra.forEach((p) => used.add(p.slot));
-      return { name: m.menu, n: m.rows.filter((x) => !x.stock).length + extra.length, of: m.rows.length + extra.length,
-               html: rows.join("") + extra.map(dbRow).join("") };
+      // every OTHER database-known slot for this area, stock or never installed -- the deliverable
+      // (fh6_tune_decode.py) omits an empty slot from its own rows entirely (an uninstalled
+      // intercooler produces no row at all, same as any other never-touched slot), so without this
+      // pass a whole category of slots would just be missing rather than shown as stock. Conversions
+      // is exempt: it's a curated 4-row synthesis (Powertrain/Drivetrain/Aspiration/Body Kit), not a
+      // literal shop-tile list -- partFor() resolves "powertrain"/"aspiration" to whichever raw slot
+      // is actually populated (engine vs motor, the fitted turbo/supercharger vs the always-empty
+      // literal "aspiration" slot), so the raw slot that ISN'T picked never lands in `used` and would
+      // surface here as a confusing duplicate ("Aspiration: STOCK" under an already-named aspiration).
+      const stock = m.menu === "Conversions" ? [] : (b.parts || []).filter((p) => !used.has(p.slot) && sameArea(p.area, m.menu));
+      stock.forEach((p) => used.add(p.slot));
+      const real = m.rows.filter((x) => !x.derived_level);   // the "n/of installed" badge must count what's actually shown
+      return { name: m.menu, n: real.filter((x) => !x.stock).length + extra.length, of: real.length + extra.length + stock.length,
+               html: rows.join("") + extra.map((p) => dbFn(p, gatedReason(b, p))).join("") + stock.map((p) => dbFn(p, gatedReason(b, p))).join("") };
     });
   }
   return shopAreas(b).map((g) => ({ name: g.a, n: g.rows.filter((p) => !p.stock && p.pid != null).length, of: g.rows.length,
-                                     html: g.rows.map(dbRow).join("") }));
+                                     html: g.rows.map((p) => dbFn(p, gatedReason(b, p))).join("") }));
 }
 function shopAreas(b) {
   const areas = [];
@@ -833,15 +1044,21 @@ function shopAreas(b) {
   });
   return areas;
 }
-function sliderRow(row) {
+function sliderRow(row, status) {
   const rel = row.value == null;
   const pct = Math.max(2, Math.min(98, (row.fill || 0) * 100));
   const val = rel
     ? `<span class="slv pos">${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%</span>`
-    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="derived from the global band — exact on the next gear-ladder drive"' : row.src === "db" ? ' title="absolute value from the database: the save\'s slider position on the game\'s own range for this car"' : ""}>${esc(String(row.value))}<small>${esc(row.unit || "")}</small>${row.src === "db" ? '<em class="src">db</em>' : ""}</span>`
+    // 2026-09-03: "exact on the next gear-ladder drive" was wrong for every field it could apply to
+    // -- gears/final drive are already exact from the verified global band (no drive needed at
+    // all), and every OTHER derived field becomes exact via the 🎯 calibration card (a typed
+    // in-game reading), never by driving. Say what's actually true: a shared band, not this car's
+    // own measured range.
+    : `<span class="slv${row.derived ? " derived" : ""}"${row.derived ? ' title="from a global band shared across cars, not this car\'s own measured range"' : row.src === "db" ? ' title="absolute value from the database: the save\'s slider position on the game\'s own range for this car"' : ""}>${esc(String(snapSliderVal(row.field, row.value, row.min, row.max)))}<small>${esc(row.unit || "")}</small>${row.src === "db" ? '<em class="src">db</em>' : ""}</span>`
       + (row.conflict ? `<span class="cflag" title="the save decodes ${esc(String(row.conflict.save))}; telemetry measures ${esc(String(row.conflict.telemetry))}">⚠ save ${esc(String(row.conflict.save))}</span>`
         : row.agree ? `<span class="aflag" title="the save and telemetry agree">✓×2</span>` : "");
-  return `<div class="sl"><div class="slt"><span class="sll">${esc(row.label || row.field)}</span>${val}</div>
+  // status: A/B diff against the base build, variation status only -- see diffSliderRows()
+  return `<div class="sl"><div class="slt"><span class="sll">${vdot(status)}${esc(row.label || row.field)}</span>${val}</div>
     <div class="trk"><span class="rail"></span><span class="fill ${rel ? "pos" : ""}" style="width:${pct}%"></span><span class="knob ${rel ? "pos" : ""}" style="left:${pct}%"></span></div>
     <div class="pol"><span>◄ ${esc((row.poles || [])[0] || "")}</span><span>${esc((row.poles || [])[1] || "")} ►</span></div></div>`;
 }
@@ -850,6 +1067,51 @@ function sliderRow(row) {
 // game's display units — and are tagged as coming from the database.
 const DB_UNITS = { "N/mm": ["lb/in", 5.71015], "m": ["in", 39.3701], "kgf": ["lb", 2.20462], "psi": ["psi", 1], "deg": ["deg", 1], "%": ["%", 1],
                    "ratio": ["ratio", 1], ":1": [":1", 1], "scale": ["scale", 1], "% front": ["% front", 1], "% rear": ["% rear", 1] };
+// IN-GAME INPUT GRANULARITY (Jett, 2026-09-07, dictated live from the tuning screens). The save
+// stores a slider FINER than the game lets you dial it, so the raw decoded value is one the tune
+// menu can't actually be set to -- the sheet was showing a "closest match". These are the real
+// steps the menu accepts; snapSlider() rounds the stored value to the nearest one so the sheet
+// prints exactly what you type. `dp` is the decimals the game shows at that step.
+//   SPRINGS are the one offset grid: step is 0.5 lb/in but anchored at the slider's OWN minimum,
+// so valid values carry the min's fractional offset (land on e.g. .3/.8, never .0/.5). Snapping
+// must be relative to min, not zero -- every other slider's min sits on its own step grid, so
+// min-anchoring is a no-op for them and only springs need `anchor:"min"`.
+const SLIDER_STEP = {
+  front_tire_pressure: { step: 0.5, dp: 1 }, rear_tire_pressure: { step: 0.5, dp: 1 },
+  front_camber: { step: 0.1, dp: 1 }, rear_camber: { step: 0.1, dp: 1 },
+  front_toe: { step: 0.1, dp: 1 }, rear_toe: { step: 0.1, dp: 1 },
+  front_caster: { step: 0.1, dp: 1 }, rear_caster: { step: 0.1, dp: 1 },
+  front_arb: { step: 0.1, dp: 1 }, rear_arb: { step: 0.1, dp: 1 },
+  front_spring: { step: 0.5, dp: 1, anchor: "min" }, rear_spring: { step: 0.5, dp: 1, anchor: "min" },
+  front_ride_height: { step: 0.1, dp: 1 }, rear_ride_height: { step: 0.1, dp: 1 },
+  front_rebound: { step: 0.1, dp: 1 }, rear_rebound: { step: 0.1, dp: 1 },
+  front_bump: { step: 0.1, dp: 1 }, rear_bump: { step: 0.1, dp: 1 },
+  front_downforce: { step: 1, dp: 0 }, rear_downforce: { step: 1, dp: 0 },
+  brake_balance: { step: 1, dp: 0 }, brake_pressure: { step: 1, dp: 0 },
+  front_diff_accel: { step: 1, dp: 0 }, front_diff_decel: { step: 1, dp: 0 },
+  rear_diff_accel: { step: 1, dp: 0 }, rear_diff_decel: { step: 1, dp: 0 }, center_diff: { step: 1, dp: 0 },
+  final_drive: { step: 0.01, dp: 2 },
+};
+function sliderStepFor(field) {
+  if (!field) return null;
+  if (SLIDER_STEP[field]) return SLIDER_STEP[field];
+  if (/^gear_\d+$/.test(field)) return { step: 0.01, dp: 2 };   // forward gears share final drive's 0.01 grid
+  return null;
+}
+// Snap a stored value to the nearest value the game's slider will actually accept, then format it
+// to that slider's displayed precision. min/max are in DISPLAY units (same as `value`). Returns a
+// STRING ready to print, or the raw value untouched when the field has no known step.
+function snapSliderVal(field, value, min, max) {
+  const g = sliderStepFor(field);
+  const v = parseFloat(value);
+  if (!g || value == null || !Number.isFinite(v)) return value == null ? value : String(value);
+  const hasMin = min != null && Number.isFinite(+min), hasMax = max != null && Number.isFinite(+max);
+  const anchor = (g.anchor === "min" && hasMin) ? +min : 0;
+  let sn = anchor + Math.round((v - anchor) / g.step) * g.step;
+  if (hasMin) sn = Math.max(+min, sn);
+  if (hasMax) sn = Math.min(+max, sn);
+  return sn.toFixed(g.dp);   // toFixed rounds off the floating-point dust from anchor + k*step
+}
 function dbTuneFor(b) {
   const ts = CUR && CUR.disk && CUR.disk.ts;
   const tunes = (b && b.tunes) || [];
@@ -858,38 +1120,145 @@ function dbTuneFor(b) {
   return tunes.find((t) => ts && String(t.container || "").endsWith("_" + ts)) || null;
 }
 function fillFromDb(row, tune) {
-  if (!tune || (row.value != null && !row.derived)) return row;   // exact beats derived; derived is replaced, not kept
+  if (!tune) return row;
   const s = (tune.sliders || []).find((x) => x.slider === row.field);
   if (!s || s.v == null) return row;
   const [unit, k] = DB_UNITS[s.unit] || [s.unit, 1];
+  // Carry the slider's own min/max into the row (display units) so snapSliderVal() can anchor the
+  // spring grid at the true minimum. Attach it even when we keep the row's existing exact value.
+  const mn = (s.lo != null) ? s.lo * k : (row.min != null ? row.min : undefined);
+  const mx = (s.hi != null) ? s.hi * k : (row.max != null ? row.max : undefined);
+  if (row.value != null && !row.derived) return Object.assign({}, row, { min: mn, max: mx });   // exact beats derived; just gain the range
   const v = s.v * k;
-  return Object.assign({}, row, { value: (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2)), unit, src: "db", norm: s.norm, derived: false });
+  // Keep full precision for a snappable field (render snaps + formats); the old ≥100→0dp rounding
+  // would have destroyed a spring's fractional offset before it could be snapped to the right grid.
+  const disp = sliderStepFor(row.field) ? String(v) : (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2));
+  return Object.assign({}, row, { value: disp, unit, src: "db", norm: s.norm, derived: false, min: mn, max: mx });
 }
-function tuneTabs(b, dl) {
+function tuneTabs(b, dl, diff) {
   if (dl && (dl.tabs || []).length) {
     const tune = dbTuneFor(b);
     return dl.tabs.map((t) => {
       const secs = [];
       t.rows.forEach((r0) => { const r = fillFromDb(r0, tune); let s = secs.find((x) => x.h === r.section); if (!s) secs.push(s = { h: r.section, rows: [] }); s.rows.push(r); });
-      return { name: t.tab, html: secs.map((s) => `<div class="sec"><div class="sech">${esc(s.h)}</div>${s.rows.map(sliderRow).join("")}</div>`).join("") };
+      return { name: t.tab, html: secs.map((s) => `<div class="sec"><div class="sech">${esc(s.h)}</div>${s.rows.map((r) => sliderRow(r, diff && diff[r.field])).join("")}</div>`).join("") };
     });
   }
   const ts = tuneScreen(b);
   return ts.tabs.map((n, i) => ({ name: n, html: ts.bodies[i] }));
 }
-function cloneHTML(b, dl, name) {
+// STATIC-DOCUMENT sibling of sliderRow() (2026-09-03): one flowed 5-column line (label+dot / value+
+// unit / fill bar / db-vs-derived-vs-conflict glyph / pole labels) instead of the interactive
+// label+track+knob+pole-row stack. Pole labels are DEDUPED against the row above in the same
+// section -- "Soft / Stiff" is constant across most of a section, so it prints once and stays
+// implied, never omitted before a reader has actually seen it.
+function sliderRowFlow(row, status, prevPoles) {
+  const rel = row.value == null;
+  const pct = Math.max(0, Math.min(100, Math.round((row.fill || 0) * 100)));
+  const valTxt = rel
+    ? `${row.norm != null ? Math.round(row.norm * 1000) / 10 : Math.round((row.fill || 0) * 1000) / 10}%`
+    : `${esc(String(snapSliderVal(row.field, row.value, row.min, row.max)))}${esc(row.unit || "")}`;
+  const src = row.src === "db" ? `<span class="src" title="absolute value from the database">D</span>`
+    : row.derived ? `<span class="src" title="from a global band shared across cars, not this car's own measured range">~</span>` : `<span class="src"></span>`;
+  const flag = row.conflict ? `<span class="cflag" title="the save decodes ${esc(String(row.conflict.save))}; telemetry measures ${esc(String(row.conflict.telemetry))}">⚠</span>`
+    : row.agree ? `<span class="aflag" title="the save and telemetry agree">✓×2</span>` : "";
+  const poles = row.poles || [];
+  const samePoles = prevPoles && prevPoles[0] === poles[0] && prevPoles[1] === poles[1];
+  const poleTxt = samePoles || (!poles[0] && !poles[1]) ? "" : `◄${esc(poles[0] || "")}/${esc(poles[1] || "")}►`;
+  const html = `<div class="slrow"><span class="sll">${vdot(status)}${esc(row.label || row.field)}</span>` +
+    `<span class="slv${row.derived ? " derived" : ""}">${valTxt}</span>` +
+    `<span class="bar"><i style="width:${pct}%"></i></span>${src}${flag}<span class="pol">${poleTxt}</span></div>`;
+  return { html, poles };
+}
+function tuneTabsFlow(b, dl, diff) {
+  if (dl && (dl.tabs || []).length) {
+    const tune = dbTuneFor(b);
+    return dl.tabs.map((t) => {
+      const secs = [];
+      t.rows.forEach((r0) => { const r = fillFromDb(r0, tune); let s = secs.find((x) => x.h === r.section); if (!s) secs.push(s = { h: r.section, rows: [] }); s.rows.push(r); });
+      return { name: t.tab, html: secs.map((s) => {
+        let prevPoles = null;
+        const rows = s.rows.map((r) => { const out = sliderRowFlow(r, diff && diff[r.field], prevPoles); prevPoles = out.poles; return out.html; });
+        // The block's own <h3> already names a single-section tab (e.g. Tires); the sub-header is
+        // pure duplication there, so drop it and keep it only where a tab really splits (Alignment,
+        // Differential, Damping) -- reclaims a line per category, per Jett's "gain vertical real estate".
+        const head = secs.length > 1 ? `<div class="sech">${esc(s.h)}</div>` : "";
+        return `<div class="sec">${head}${rows.join("")}</div>`;
+      }).join("") };
+    });
+  }
+  const ts = tuneScreen(b);   // no save on disk is rare and stays on the old grouped view, unrewritten
+  return ts.tabs.map((n, i) => ({ name: n, html: ts.bodies[i] }));
+}
+// ONE SHEET (Jett, 2026-09-03, "possibly the most important aspect of this"): every category on
+// one continuous document instead of separate tabs. The shop's own tab order mirrors the game's
+// screens (Conversions last, fixed 2026-09-03) -- right
+// for looking something up while IN that menu. This view answers a different question, "what do
+// I do, in what order", so it re-sorts to the BUILD SEQUENCE instead: Conversions first, because
+// installing an engine/drivetrain swap or aspiration is what GATES which other tiles even exist
+// (dashboard-states.md's own ratification-ladder ordering). Numbered sections double as "buy this
+// first" -- the number IS the priority, not a separate hint bolted on.
+function fullSheetHTML(b, dl, diff) {
+  const shop = shopMenus(b, dl).slice();
+  const ci = shop.findIndex((m) => m.name === "Conversions");
+  if (ci > 0) shop.unshift(shop.splice(ci, 1)[0]);
+  const tune = tuneTabs(b, dl, diff);
+  const sections = shop.map((m) => ({ name: m.name, html: m.html, count: m.of != null ? `${m.n}/${m.of}` : null }))
+    .concat(tune.map((t) => ({ name: t.name, html: t.html, count: null })));
+  const nav = sections.map((s, i) => `<a href="#fs-${i}" class="fsnav-item"><i>${i + 1}</i>${esc(s.name)}</a>`).join("");
+  const body = sections.map((s, i) => `<div class="fssec" id="fs-${i}">
+      <div class="fssech"><i>${i + 1}</i><b>${esc(s.name)}</b>${s.count ? `<span class="cn">${esc(s.count)}</span>` : ""}</div>
+      <div class="fsbody">${s.html || `<div class="why">nothing in this category</div>`}</div>
+    </div>`).join("");
+  return `<nav class="fsnav">${nav}</nav><div class="fspane">${body}</div>`;
+}
+function cloneHTML(b, dl, name, diff) {
   const t = (b.tunes || []).slice(-1)[0] || {};
-  const menus = shopMenus(b, dl), tabs = tuneTabs(b, dl);
+  const menus = shopMenus(b, dl), tabs = tuneTabs(b, dl, diff);
   const rail = (items, attr) => items.map((m, i) => `<button class="cat ${i ? "" : "on"}" data-${attr}="${i}">${esc(m.name)}${m.of != null ? `<span class="cn">${m.n}/${m.of}</span>` : ""}</button>`).join("");
   const bodies = (items, attr) => items.map((m, i) => `<div class="catbody ${i ? "" : "on"}" data-${attr}="${i}">${m.html}</div>`).join("");
   const src = !dl ? `<span class="lk">from the database — no save on disk</span>`
     : dl.locked ? `<span class="lk">🔒 downloaded</span>` : `<span class="own">self-made</span>`;
   return `<div class="hd"><div><b>${esc(name || t.name || "clone")}</b><span class="sub">${esc(b.car || "")}</span>${src}${dl && dl.gear_count ? `<span class="sub">${dl.gear_count}-speed</span>` : ""}</div>
-    <div class="tabs"><button class="tb on" data-screen="shop">Upgrade Shop</button>
+    <div class="tabs"><button class="tb on" data-screen="full">Full Sheet</button>
+      <button class="tb" data-screen="shop">Upgrade Shop</button>
       <button class="tb" data-screen="tune">Tuning</button></div>
     <div class="prog"><span id="pdone">0</span>/<span id="ptot">0</span> installed</div></div>
-  <section class="screen on" id="shop"><nav class="cats">${rail(menus, "cat")}</nav><div class="pane">${bodies(menus, "body")}</div></section>
+  <section class="screen on" id="full">${fullSheetHTML(b, dl, diff)}</section>
+  <section class="screen" id="shop"><nav class="cats">${rail(menus, "cat")}</nav><div class="pane">${bodies(menus, "body")}</div></section>
   <section class="screen" id="tune"><nav class="cats">${rail(tabs, "tcat")}</nav><div class="pane">${bodies(tabs, "tbody")}</div></section>`;
+}
+// STATIC DOCUMENT (2026-09-03, Jett, re-quoting the actual ask verbatim: "we have used the entire
+// pop-up real estate to provide a little data... what I am requesting is more of a 'pdf'... once
+// the document is created there is no interactivity and the document itself must be able to
+// communicate all necessary information" -- modeled on a dense printed exam aid-sheet he shared as
+// the reference). THE Build Sheet render path now, replacing cloneHTML()/fullSheetHTML()'s tabs +
+// left nav rail + checkboxes entirely: every category and every tuning tab poured into one
+// continuous CSS multi-column flow, nothing behind a click. cloneHTML()/fullSheetHTML()/partRow()/
+// dbRow()/sliderRow()/wireClone() are left in place, unreferenced by this surface -- a deliberate
+// choice (see the design synthesis this replaced them from) to verify the new path against the real
+// game before a separate cleanup pass deletes the now-dead interactive code.
+function flowSheetHTML(b, dl, diff) {
+  const shop = shopMenus(b, dl, partRowFlow, dbRowFlow).slice();
+  const ci = shop.findIndex((m) => m.name === "Conversions");
+  if (ci > 0) shop.unshift(shop.splice(ci, 1)[0]);
+  const tune = tuneTabsFlow(b, dl, diff);
+  const blk = (name, html, count) => `<div class="blk"><h3>${esc(name)}${count ? `<span class="n">${esc(count)}</span>` : ""}</h3>${html || `<div class="why">nothing in this category</div>`}</div>`;
+  // TWO FIXED COLUMNS (Jett, 2026-09-07): every hardware upgrade on the LEFT, every tuning slider on
+  // the RIGHT -- never interleaved. The old newspaper-column flow mixed shop and tune blocks across
+  // as many columns as fit; splitting by KIND means a reader always knows which lane to read, and it
+  // fits the whole build on one screen. The dot-separated section legend that used to sit on top is
+  // gone: the two lanes' own block headings already say what's in each.
+  const left = shop.map((m) => blk(m.name, m.html, m.of != null ? `${m.n}/${m.of}` : null)).join("");
+  const right = tune.map((t) => blk(t.name, t.html, null)).join("");
+  return `<div class="fdoc"><div class="fcol fcol-hw">${left}</div><div class="fcol fcol-tune">${right}</div></div>`;
+}
+function flowDocHTML(b, dl, name, diff) {
+  const t = (b.tunes || []).slice(-1)[0] || {};
+  const src = !dl ? `<span class="lk">from the database — no save on disk</span>`
+    : dl.locked ? `<span class="lk">🔒 downloaded</span>` : `<span class="own">self-made</span>`;
+  return `<div class="hd"><div><b>${esc(name || t.name || "clone")}</b><span class="sub">${esc(b.car || "")}</span>${src}${dl && dl.gear_count ? `<span class="sub">${dl.gear_count}-speed</span>` : ""}</div></div>
+  ${flowSheetHTML(b, dl, diff)}`;
 }
 
 // The Tuning screen pairs front and rear on one row, exactly as the game lays it out.
@@ -1003,6 +1372,23 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
 .cn{margin-left:auto;font:11px var(--mono);opacity:.8}
 .pane{overflow:auto;padding:10px 12px;background:none;border:0;border-radius:0}
 .catbody{display:none}.catbody.on{display:block}
+/* Full Sheet (2026-09-03): everything, one document, a jump-nav instead of tabs -- these were
+   missing entirely, which is why the nav rendered as an unstyled run-together wall of text. */
+.fsnav{display:flex;flex-direction:column;gap:1px;margin:0;background:var(--pn);border-right:1px solid var(--ln);
+ overflow:auto;padding:6px;position:sticky;top:0;align-self:start;height:100%}
+.fsnav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;color:var(--mut);
+ text-decoration:none;font:500 12px inherit;white-space:nowrap}
+.fsnav-item:hover{background:var(--pn2);color:var(--ink)}
+.fsnav-item i{flex:0 0 auto;width:16px;height:16px;display:grid;place-items:center;background:var(--pn2);
+ color:var(--mut);font:700 10px var(--mono);font-style:normal;border-radius:2px}
+.fspane{overflow:auto;padding:10px 12px 40px;background:none}
+.fssec{margin-bottom:16px;scroll-margin-top:8px}
+.fssech{display:flex;align-items:center;gap:9px;padding:8px 4px;border-bottom:2px solid var(--acc);
+ font:700 13px inherit;letter-spacing:.03em;margin-bottom:4px;position:sticky;top:0;background:var(--bg);z-index:2}
+.fssech i{flex:0 0 auto;width:20px;height:20px;display:grid;place-items:center;background:var(--acc);
+ color:#04140c;font:800 11px var(--mono);font-style:normal;border-radius:3px}
+.fssech .cn{margin-left:auto}
+.fsbody .catbody{display:block}
 .srow{display:grid;grid-template-columns:18px minmax(0,1fr) 49px auto 44px minmax(150px,38%);gap:10px;align-items:center;
  padding:6px 10px;border-bottom:1px solid var(--ln);cursor:pointer;font-size:12.5px;text-transform:capitalize}
 .srow:hover{background:var(--pn2)}
@@ -1030,8 +1416,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
 .hd .lk{color:var(--warn);font-size:11px;border:1px solid var(--warn);border-radius:9px;padding:0 7px;margin-left:8px}
 .hd .own{color:var(--acc);font-size:11px;border:1px solid var(--acc);border-radius:9px;padding:0 7px;margin-left:8px}
 .sec{margin-bottom:12px}
-.sech{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#0b0f07;background:#a8d92a;padding:2px 8px;border-radius:3px;display:inline-block;margin:0 0 7px}
+.sech{font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);background:none;padding:0;border-radius:0;display:block;margin:5px 0 0}
 .sl{display:block;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+/* A/B diff dot, variation status only -- same colours as v1's original (dashboard/app.js:3891) */
+.fhm-vdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--mut)}
+.fhm-vdot.ok{background:var(--acc);box-shadow:0 0 5px rgba(0,210,122,.6)}
+.fhm-vdot.near{background:var(--warn)}
+.fhm-vdot.off{background:#e5414e;box-shadow:0 0 5px rgba(229,65,78,.5)}
 .sl:last-child{border-bottom:none}
 .slt{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:5px}
 .sll{font-size:12px;color:var(--ink)}
@@ -1063,6 +1454,39 @@ body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Inter","Sego
 .bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#0b3a2a,var(--acc))}
 .tv.lk .bar i{background:var(--ln)}
 .df{color:var(--warn);font:10px inherit;border:1px solid var(--warn);border-radius:9px;padding:0 6px}
+/* STATIC DOCUMENT (2026-09-03; two fixed lanes 2026-09-07): the whole Build Sheet on one page --
+   no tabs, no rail, no checkboxes. Two columns, hardware left / tuning right, so a reader always
+   knows which lane to look in and the whole build fits one screen. */
+.fdoc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;
+ font:11px/1.4 "Inter","Segoe UI",system-ui,sans-serif;padding:10px 14px 30px}
+.fcol{min-width:0}
+.fcol-hw{border-right:1px solid var(--ln);padding-right:16px}
+.blk{break-inside:auto;margin-bottom:8px}
+.blk h3{break-after:avoid-column;display:flex;justify-content:space-between;gap:8px;font:800 9.5px/1.2 var(--mono);
+ text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin:9px 0 3px;border-bottom:1px solid var(--ln);padding-bottom:2px}
+.blk h3 .n{color:var(--mut);font-weight:600}
+.prow{break-inside:avoid;display:block;padding:1px 0;font-size:11px;line-height:1.38}
+.prow b{font-weight:600;text-transform:capitalize;color:var(--mut)}
+.prow.stock{opacity:.45}
+.prow.dim{color:#36c1e8}
+.prow.cosmetic{color:var(--mut)}
+/* three-state part identity (2026-09-04): changed (default ink, no override needed) / left stock
+   (.stock, dimmed) / never offered for this build (.gated, dimmer still + italic + the ∅ glyph, so
+   it never reads as "just very stock" at a glance) */
+.prow.gated{opacity:.3;font-style:italic}
+.prow.gated b{color:var(--mut)}
+/* Rebalanced for the two-lane sheet (2026-09-07): the value (now snapped to the game's real input,
+   the point of this row) and the label must never truncate, so value gets a fixed width that fits
+   the widest "546.9lb/in", the decorative fill bar shrinks, and the directional pole hint takes
+   the slack and ellipsizes rather than starving the label. */
+.slrow{break-inside:avoid;display:grid;grid-template-columns:minmax(0,1fr) 66px 24px 10px minmax(0,auto);gap:5px;
+ align-items:baseline;font-size:11px;padding:1px 0}
+.slrow .sll{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slrow .slv{font-variant-numeric:tabular-nums;color:#c3ea4f;white-space:nowrap;text-align:right}
+.slrow .slv.derived{color:#8fd14f}
+.slrow .bar{height:7px}
+.slrow .src{color:var(--mut);font:10px var(--mono);text-align:center}
+.slrow .pol{color:var(--mut);font-size:9px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 `;
 
 /* ------------------------------------------------------------- hardware */

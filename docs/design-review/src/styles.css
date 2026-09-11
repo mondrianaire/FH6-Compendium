@@ -11,17 +11,23 @@ html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--sans)}
 a{color:var(--acc2);text-decoration:none}
 
-header{display:flex;align-items:center;gap:18px;padding:0 16px;height:46px;
+/* nav collapsed to the status-strip's vertical footprint (was 46px) — a thin toolbar, so the
+   panes get the height back. Buttons stay clickable at 24px with compact padding. */
+header{display:flex;align-items:center;gap:12px;padding:0 12px;height:24px;
   background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
-.brand{display:flex;align-items:center;gap:7px;font-weight:700}
-.mark{background:var(--acc);color:#04140c;border-radius:4px;padding:2px 6px;font:700 12px var(--mono)}
-.who{color:var(--mut);font-weight:500;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
-nav{display:flex;gap:2px;margin-left:8px}
-nav button{background:none;border:0;color:var(--mut);font:500 12.5px var(--sans);
-  padding:6px 11px;border-radius:5px;cursor:pointer}
+.brand{display:flex;align-items:center;gap:5px;font-weight:700}
+.mark{background:var(--acc);color:#04140c;border-radius:3px;padding:1px 5px;font:700 10.5px var(--mono)}
+.who{color:var(--mut);font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-size:10px}
+nav{display:flex;gap:2px;margin-left:6px}
+nav button{background:none;border:0;color:var(--mut);font:500 11.5px var(--sans);
+  padding:2px 9px;border-radius:4px;cursor:pointer;line-height:1}
 nav button:hover{background:var(--panel2);color:var(--ink)}
 nav button.on{background:var(--panel2);color:var(--acc);box-shadow:inset 0 -2px 0 var(--acc)}
-.stamp{margin-left:auto;font:11px var(--mono);color:var(--dim)}
+.stamp{margin-left:auto;font:10px var(--mono);color:var(--dim)}
+
+/* The alerts ticker was retired (Jett 2026-09-11): its 24px row went to the car header + panes, and every
+   item it scrolled already shows in the #lastact status bar (+ its log), the #hdr gate strip, and the id bar. */
+#alerts.empty{display:none}   /* #alerts holds only the save picker, shown when identity is ambiguous */
 
 main{padding:16px;max-width:1500px;margin:0 auto}
 .loading{color:var(--mut);padding:40px;text-align:center}
@@ -66,10 +72,8 @@ tbody tr.click{cursor:pointer}
 .chip.r{border-color:var(--bad);color:var(--bad)}
 .chip.m{border-color:var(--mag);color:var(--mag)}
 .chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-.cls{font:700 10.5px var(--mono);padding:1px 5px;border-radius:3px;color:#000}
-.cls.D{background:#6ea8fe}.cls.C{background:#ffd35c}.cls.B{background:#ff9d5c}
-.cls.A{background:#f0616d;color:#fff}.cls.S1{background:#c678dd;color:#fff}
-.cls.S2{background:#4ea3ff;color:#fff}.cls.R{background:#00d27a}.cls.X{background:#dfe7ef}
+/* the orphan `.cls` class-badge palette was removed (Jett 2026-09-11): it disagreed with the canonical
+   PI_COLORS/.pib-<class> set and nothing emitted it. The ONE class badge is classPill()/.pib / piBadge(). */
 
 /* filter bar */
 .bar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
@@ -92,6 +96,32 @@ input[type=search]:focus,select:focus{border-color:var(--acc2)}
 svg{display:block;max-width:100%}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--mut);margin-top:6px}
 .legend i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+/* course map: the SVG fills the pane; the legend floats always-visible at bottom-left over it.
+   min-height keeps the map from collapsing when the (scrollable) turn list below is long. */
+.cmap{position:relative;flex:1 1 auto;min-height:210px;display:flex}
+.cmap>svg{flex:1 1 auto;min-height:0;width:100%;border-radius:6px}
+/* the turn list under the map may scroll (Jett: info panes break the no-scroll rule) so the map keeps its space */
+.pane>.body.map>.grp{flex:0 1 auto;min-height:104px;display:flex;flex-direction:column;overflow:hidden}
+.pane>.body.map>.grp .tt-wrap{overflow-y:auto;flex:1 1 auto;min-height:0}
+/* the map legend is a COMPACT FLOATING PILL: bottom row = view toggle + a "key" expander; the colour key
+   is hidden until expanded, so the pill stays small and never covers the turn numbers. */
+.cmap-legend{position:absolute;left:8px;bottom:8px;z-index:4;display:flex;flex-direction:column;gap:5px;
+  background:rgba(13,17,23,.85);padding:4px 6px;border-radius:6px;max-width:calc(100% - 16px);
+  box-shadow:0 1px 6px rgba(0,0,0,.45);font-size:11px;color:var(--mut)}
+.cleg-bar{display:flex;align-items:center;gap:6px}
+.cmap-legend .leg-views{display:inline-flex;align-items:center;gap:3px}
+.cmap-legend .leg-views .mini{margin-left:0;padding:1px 7px;font-size:10.5px}
+.cmap-legend .leg-views .mini.on{color:var(--acc);border-color:var(--acc);background:rgba(0,210,122,.12)}
+.cleg-toggle{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:3px;padding:1px 7px;font:600 10px var(--mono);cursor:pointer;white-space:nowrap}
+.cleg-toggle:hover{color:var(--acc);border-color:var(--acc)}
+.cleg-key{display:flex;flex-wrap:wrap;gap:3px 12px;align-items:center;max-width:340px}
+.cleg-key>span{display:inline-flex;align-items:center}
+.cleg-key i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+.leg-grad{display:inline-flex;align-items:center;gap:5px}
+.leg-grad em{font-style:normal;font:600 10px var(--mono);color:var(--mut)}
+.leg-grad b{font:700 10.5px var(--mono);color:var(--ink);margin-left:2px}
+.leg-grad .grad{display:inline-block;width:54px;height:7px;border-radius:2px;margin:0;
+  background:linear-gradient(90deg,#00d27a 0%,#e3b341 50%,#f0616d 100%)}
 
 /* rule card: one claim + its evidence */
 .rule{background:var(--panel2);border-left:3px solid var(--acc2);border-radius:0 6px 6px 0;
@@ -108,7 +138,7 @@ svg{display:block;max-width:100%}
    A fixed instrument panel, not a document: the page itself never scrolls, each pane
    fills its cell and scrolls inside. What is on screen IS the current stage. */
 body.fixed{overflow:hidden;height:100vh}
-body.fixed main{height:calc(100vh - 46px);padding:10px;display:flex;flex-direction:column;gap:9px;
+body.fixed main{height:calc(100vh - 48px);padding:10px;display:flex;flex-direction:column;gap:9px;
   max-width:none;overflow:hidden}
 .live{min-height:0;display:flex;flex-direction:column;gap:9px}
 
@@ -133,8 +163,8 @@ body.fixed main{height:calc(100vh - 46px);padding:10px;display:flex;flex-directi
 .panes{display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1 1 auto;min-height:0}
 .pane{background:var(--panel);border:1px solid var(--line);border-radius:8px;
   display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.pane>header{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid var(--line);
-  font-weight:600;font-size:12.5px;flex:0 0 auto}
+.pane>header{display:flex;align-items:center;gap:9px;padding:7px 12px;border-bottom:1px solid var(--line);
+  font-weight:600;font-size:12.5px;flex:0 0 auto;height:70px}    /* both pane headers one height so their tops align (the left one holds the course pill, which needs 3 rows) */
 .pane>header .why{font-weight:400}
 .popbtn{margin-left:auto;background:var(--panel2);border:1px solid var(--line2);color:var(--mut);
   border-radius:5px;padding:3px 9px;font:11px var(--sans);cursor:pointer}
@@ -142,6 +172,10 @@ body.fixed main{height:calc(100vh - 46px);padding:10px;display:flex;flex-directi
 .pane>.body{overflow:auto;padding:6px 4px 10px;min-height:0}
 
 .grp{margin:2px 0 9px}
+.balbar{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:4px 6px;background:var(--panel2)}
+.ballegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 6px 2px;font:400 11.5px var(--sans);color:var(--ink);opacity:.92}
+.ballegend span{display:flex;align-items:center;gap:5px}
+.ballegend i{width:8px;height:8px;border-radius:2px;display:inline-block}
 .grp h4{margin:7px 10px 4px;font:600 10.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;
   color:var(--mut)}
 .row{display:grid;grid-template-columns:132px 1fr 62px 62px;gap:8px;align-items:center;
@@ -252,22 +286,50 @@ button.stage.act.go:active{transform:translateY(1px)}
 
 .ftr{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;
   padding:6px 12px;flex:0 0 auto;font-size:12px}
+.ftr-live{font:700 10px var(--mono);letter-spacing:.16em;color:var(--bad);display:inline-flex;align-items:center;gap:5px}
+.ftr-live i{width:7px;height:7px;border-radius:50%;background:var(--bad);box-shadow:0 0 6px rgba(240,97,109,.7);animation:ftrpulse 1.3s ease-in-out infinite}
+.ftr-live.off{color:var(--mut)} .ftr-live.off i{background:var(--mut);box-shadow:none;animation:none}
+@keyframes ftrpulse{0%,100%{opacity:1}50%{opacity:.45}}
+.ftr-tel{color:var(--ink);letter-spacing:0}
+.ftr-next{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ftr-right{margin-left:auto;display:inline-flex;align-items:center;gap:10px;flex:0 0 auto}
 .cov{display:inline-flex;align-items:center;gap:8px}
 .cov .bar{width:140px;height:8px;background:var(--panel2);border:1px solid var(--line2);border-radius:4px;overflow:hidden;position:relative}
 .cov .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
+/* the inline car-identity bar (course mode only): a slim strip above the speed trace */
+.idbar{display:flex;align-items:center;gap:9px;height:34px;padding:0 12px;background:var(--panel);
+  border:1px solid var(--line);border-top:0;border-radius:0 0 3px 3px;font-size:12px;overflow:hidden;white-space:nowrap;flex:0 0 auto}
+.idbar .idb-pi{flex:0 0 auto;display:inline-flex}
+.idbar .idb-car{font:500 13px var(--mono);color:var(--ink);flex:0 0 auto}
+.idbar .idb-sep{color:var(--line2);flex:0 0 auto}
+.idbar .idb-build{font:500 12.5px var(--mono);color:var(--ink);flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
+.idbar .idb-build .tick{color:var(--acc)}
+.idbar .idb-build.empty{color:var(--mut)}
+.idbar .idb-chip{flex:0 0 auto;text-transform:uppercase;letter-spacing:.06em;font:600 10px var(--mono)}
+.idbar .idb-chip.spec{border-color:var(--acc2);color:var(--acc2);background:rgba(78,163,255,.12)}
+.idbar .idb-hint{flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;color:var(--mut)}
+.idbar .idb-sheet{margin-left:auto;flex:0 0 auto;background:none;border:1px solid var(--warn);color:var(--warn);
+  border-radius:2px;padding:3px 11px;font:700 11px var(--sans);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.idbar .idb-sheet.outline{border-color:var(--acc);color:var(--acc)}
+.idbar .idb-sheet.dead{border-color:var(--line2);color:var(--dim);cursor:default}
+.idbar .idb-sheet:not(.dead):hover{background:var(--panel2)}
 
 /* the floating build sheet — the v1 decode float pattern, in-page and draggable */
-.fsheet{position:fixed;right:24px;top:70px;width:min(980px,90vw);height:min(860px,88vh);z-index:70;
+/* MAX VERTICAL while active (Jett 2026-09-07): the build sheet takes almost the whole viewport
+   height so the two lanes have the most room, and the body scrolls (exception granted) when the
+   content runs past it -- see .fbody overflow below. */
+.fsheet{position:fixed;right:24px;top:8px;width:min(980px,90vw);height:calc(100vh - 16px);z-index:70;
   background:#0b0f14;border:1px solid var(--line2);border-radius:10px;box-shadow:0 18px 50px #000c;
   display:flex;flex-direction:column;overflow:hidden}
 .fsheet .fbar{display:flex;align-items:center;gap:10px;padding:7px 11px;background:var(--panel);
   border-bottom:1px solid var(--line2);cursor:grab;user-select:none;flex:0 0 auto}
 .fsheet .fbar .ttl{font:700 11px var(--mono);letter-spacing:.1em;color:var(--acc)}
 .fsheet .fbar .nm{color:var(--mut);font-size:12px;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsheet .fbody{animation:hdrIn .22s ease}   /* same hard-swap-into-a-flash fix as #hdr, for the sheet Jett is watching mid-reset */
 .fsheet .fbar button{background:var(--panel2);border:1px solid var(--line2);color:var(--mut);border-radius:4px;
   width:24px;height:22px;cursor:pointer;font:12px inherit}
 .fsheet .fbar button:hover{color:var(--ink);border-color:var(--acc2)}
-.fsheet .fbody{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.fsheet .fbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
 .fsheet .fbody .screen{height:auto;flex:1 1 auto;min-height:0}
 .fsheet.min{height:auto}
 .fsheet.min .fbody{display:none}
@@ -287,7 +349,7 @@ button.stage.act.go:active{transform:translateY(1px)}
    two panes stack (a 530-px-wide map is no map) and the build sheet takes the width. */
 @media (orientation: portrait){
   .panes{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
-  .fsheet{right:auto;left:3vw;top:56px;width:94vw;height:min(1500px,74vh)}
+  .fsheet{right:auto;left:3vw;top:8px;width:94vw;height:calc(100vh - 16px)}
   #alerts{max-height:18vh}
 }
 
@@ -343,6 +405,146 @@ button.stage.act.go:active{transform:translateY(1px)}
 .trace .thd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;font-size:12px}
 .trace .thd .fdim{display:inline-flex;align-items:center;gap:3px}
 .trace .thd .fdim .why{margin-right:2px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+/* ACTIVE TRACE FILTER = a filled accent chip, so the current preset + filters read at a glance
+   (Jett 2026-09-10: the config "does not highlight which are currently active"). Applies in both
+   the dock (.trace .thd) and the map drawer (.mdpanel). */
+.fdim .mini.on,.mdpanel .fdim .mini.on{background:var(--acc);border-color:var(--acc);color:#04140c;font-weight:700}
+.fdim .mini.on .cn{color:#04140c;opacity:.7}
+/* the "all" default of a dimension is neutral -- a quiet accent outline, not a solid fill, so a real
+   value filter is the only thing that pops solid green */
+.fdim .mini.on.neutral{background:transparent;color:var(--acc);border-color:var(--acc);font-weight:600}
+.fdim .mini.on.neutral .cn{color:var(--acc)}
+/* the build / tune dumps collapse to a labelled dropdown -- one entry instead of 18 unreadable chips */
+.fseldim{display:inline-flex;align-items:center;gap:4px}
+.fseldim .why{font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.fsel{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:5px;
+  padding:2px 7px;font:11px inherit;cursor:pointer;max-width:150px}
+.fsel:hover{border-color:var(--acc2)}
+.fseldim.on .fsel{background:var(--acc);border-color:var(--acc);color:#04140c;font-weight:700}
+.fseldim.on .why{color:var(--acc)}
+.mini.clearf{color:var(--mut);border-style:dashed}
+.mini.clearf:hover{color:var(--bad);border-color:var(--bad)}
+/* class filter chips carry the PI-class colour -- the same vocabulary as the trace legend and the
+   .pib badges, so a class reads identically everywhere. Active = a solid class-coloured fill (this
+   rule follows .fdim .mini.on, so at equal specificity it wins for class chips). */
+.fdim .clschip{border-color:var(--pc);color:var(--ink)}
+.fdim .clschip.on{background:var(--pc);border-color:var(--pc);color:#04140c;font-weight:700}
+.fdim .clschip.on .cn{color:#04140c;opacity:.7}
+/* ---- the course-mode filter bar: one home for the historical-data filters, between the trace and
+   the panes; it scopes EVERY pane below (trace, map, turns, stats), so the resulting lap set is
+   spelled out on the right as explicit feedback for what is selected. ---- */
+.coursefilter{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:5px 10px;font-size:12px}
+.coursefilter .cf-h{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc2);font-weight:700}
+.coursefilter .fdim{display:inline-flex;align-items:center;gap:3px}
+.coursefilter .fdim .why{margin-right:2px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.coursefilter .cf-sum{margin-left:auto;display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--mut);padding:2px 9px;border:1px solid var(--line2);border-radius:20px}
+.coursefilter .cf-sum b{color:var(--ink);font-variant-numeric:tabular-nums}
+.coursefilter .cf-dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 5px var(--acc)}
+/* ---- General statistics (course mode): course totals + a focusable per-class section each ---- */
+.cls-pill{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 7px;
+  border-radius:20px;border:1px solid var(--pc);color:var(--pc);font-size:11px;font-weight:700;letter-spacing:.02em}
+.cstat-tot{display:flex;flex-wrap:wrap;gap:6px 22px;padding:3px 4px 1px}
+.cstat-tot span{display:flex;flex-direction:column}
+.cstat-tot b{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
+.cstat-tot em{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-style:normal}
+.cstat-focus{padding:3px 6px;display:flex;align-items:center;gap:6px}
+.cstat-sec.on{outline:1px solid var(--pc,var(--acc));outline-offset:-1px}
+.cstat-cls.collapsed{display:flex;width:100%;align-items:center;gap:8px;padding:4px 8px;background:none;
+  border:0;border-top:1px solid var(--line);color:var(--ink);cursor:pointer;font:inherit;text-align:left}
+.cstat-cls.collapsed:hover{background:var(--panel2)}
+.cstat-cls.collapsed .cstat-bt{margin-left:auto;color:var(--mut)}
+.cstat-clsh{display:flex;width:100%;align-items:center;gap:8px;padding:2px 2px 5px;background:none;border:0;
+  color:var(--ink);cursor:pointer;font:inherit;text-align:left}
+.cstat-clsh b{font-size:13px;font-weight:500}
+.cstat-clsh:hover .cls-pill{background:var(--pc);color:#04140c}
+.cstat-hero{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;font-variant-numeric:tabular-nums;
+  font-size:16px;font-weight:500;color:var(--acc)}
+.cstat-hero em{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-style:normal}
+.cstat-x{margin-left:8px;font-size:11px;color:var(--mut)}
+.cstat-sub{padding:0 4px 4px}
+.cstat-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.cstat-tbl th{text-align:left;color:var(--mut);font-weight:400;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-bottom:1px solid var(--line)}
+.cstat-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+.cstat-tbl tr.cstat-fast td{color:var(--acc);font-weight:500}
+/* ---- the course hero (redesign phase A): measured facts at a glance, above the map ---- */
+.chero{padding:6px 8px 8px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+.ch-stats{display:flex;flex-wrap:wrap;gap:4px 18px}
+.ch-s{display:flex;flex-direction:column;line-height:1.15}
+.ch-s b{font-size:17px;font-weight:500;font-variant-numeric:tabular-nums}
+.ch-s em{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-style:normal}
+.ch-cls{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.ch-conf{font-size:11px;color:var(--mut);display:flex;align-items:center;flex-wrap:wrap;gap:3px}
+.ch-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:2px}
+.ch-dot.ok{background:var(--acc)} .ch-dot.w{background:var(--warn)} .ch-dot.x{background:var(--mut)}
+.ch-browse{display:flex;align-self:stretch;align-items:center;gap:8px;background:rgba(78,163,255,.12);border:1px solid var(--acc2);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--ink)}
+.ch-browse b{font:800 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--acc2)}
+.ch-browse em{font-style:normal;color:var(--mut)}
+.ch-browse .mini{margin-left:auto}
+.ch-live{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;background:var(--warn);color:#231a00;border-radius:3px;padding:2px 8px;font:800 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.ch-live i{width:7px;height:7px;border-radius:50%;background:#231a00;box-shadow:0 0 5px rgba(0,0,0,.4)}
+.ch-live em{font:600 9px var(--mono);font-style:normal;text-transform:none;letter-spacing:0;opacity:.8}
+.ch-note{font:500 9.5px var(--mono);color:var(--dim)}
+.ch-glyph{display:flex;align-items:center;gap:10px}
+.ch-glyphsvg{width:132px;height:58px;flex:0 0 auto;background:var(--bg);border-radius:5px}
+.ch-gleg{display:flex;flex-wrap:wrap;align-items:center;gap:3px 12px;font-size:11px;color:var(--mut)}
+.ch-gleg span{display:inline-flex;align-items:center;gap:5px}
+.ch-gleg i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.ch-gleg i.s{background:#33d17a} .ch-gleg i.f{background:#ff5d7d}
+.cpill-rid{font-size:10px;color:var(--dim);letter-spacing:.02em;white-space:nowrap;flex:0 0 auto}
+/* ---- the turn list (redesign phase B): sortable enumeration on the left ---- */
+.ttsort{margin-left:auto;display:inline-flex;align-items:center;gap:4px}
+.ttsort .why{font-size:10px}
+.tt-wrap{overflow-x:auto}
+.tt{width:100%;border-collapse:collapse;font-size:11px}
+.tt th{color:var(--mut);font-weight:400;font-size:10px;padding:3px 5px;border-bottom:1px solid var(--line);text-align:center}
+.tt th:first-child{text-align:left}
+.tt td{padding:3px 5px;border-bottom:1px solid var(--line2);text-align:center;font-variant-numeric:tabular-nums}
+.tt td.tt-lbl{text-align:left;white-space:nowrap}
+.tt tbody tr{cursor:pointer}
+.tt tbody tr:hover{background:var(--panel2)}
+.tt tbody tr.on,.tt tr.ttr.on{background:rgba(0,210,122,.12);outline:1px solid var(--acc);outline-offset:-1px}
+.tt-find{color:var(--warn);font-weight:600}
+.tt tfoot td{padding:3px 5px;color:var(--mut);border-top:1px solid var(--line);font-size:10px;text-align:left}
+.tt tfoot td.tt-find{text-align:center}
+.tt .pdot{display:inline-block;width:7px;height:7px;border-radius:50%}
+/* turn-list enrichments (redesign): active-sort colour, geometry line, phase mix cells, to-find bar */
+.ttsort .mini.on{background:rgba(0,210,122,.12);border-color:var(--acc);color:var(--acc)}
+.tt-phh{white-space:nowrap}
+.tt-phh .pdot{width:6px;height:6px;margin-right:4px}
+.tt td.tt-lbl{padding-top:4px;padding-bottom:4px}
+.tt-lname{display:flex;align-items:baseline;gap:5px;white-space:nowrap}
+.tt-geo{font-size:9.5px;color:var(--dim);white-space:nowrap;margin-top:1px}
+.tt td.tt-ph{padding:3px 3px;vertical-align:bottom}
+.tt-ph .tt-phv{display:block;font-size:11px;line-height:13px;color:var(--ink)}
+.tt-ph .gbar{min-width:0;height:7px;margin-top:2px}
+.tt-ph .tt-phu{display:block;height:3px;border-radius:1px;margin-top:2px}
+.tt td.tt-in{font-weight:700}
+.tt td.tt-find2{text-align:right;white-space:nowrap;min-width:64px}
+.tt-find2 b{display:block;font-weight:700}
+.tt-findbar{display:block;width:100%;max-width:60px;height:4px;margin:2px 0 0 auto;background:var(--line2);border-radius:2px;overflow:hidden}
+.tt-findbar i{display:block;height:4px}
+/* ---- single-turn view: the fastest-passes speed leaderboard (apex mph per phase, grip-coloured) ---- */
+.tstat-sum{font-size:13px;padding:3px 6px 6px}
+.tstat-sum b{font-weight:500}
+.tlb-wrap{overflow-x:auto}
+.tlb{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+.tlb th{color:var(--mut);font-weight:400;font-size:10px;text-transform:uppercase;letter-spacing:.03em;
+  padding:2px 5px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tlb th:nth-child(-n+3){text-align:left}
+.tlb td{padding:3px 5px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.tlb .tlb-rank{color:var(--mut);text-align:center;width:1.4em}
+.tlb .tlb-tt{font-weight:500;border-right:1px solid var(--line);padding-right:8px}
+.tlb tr.tlb-best td{background:rgba(0,210,122,.12)}
+.tlb tr.tlb-best .tlb-rank{color:var(--acc);font-weight:700}
+.tlb td.off{color:var(--line2);text-align:center}
+.tlb .pdot{width:6px;height:6px;margin-right:3px}
+/* the map drawer's filter block: presets on their own line, the readable dims wrap below, a result
+   summary makes the active selection explicit */
+.mdpanel .ffilters{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:5px}
+.mdpanel .fsummary{margin-top:6px;font-size:11px}
+.mdpanel .fsummary b{color:var(--ink)}
 .trace .tspacer{flex:1 1 auto}
 .trace .segctl{display:inline-flex;align-items:center;gap:3px}
 .trace .segctl .why{font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
@@ -352,6 +554,10 @@ button.stage.act.go:active{transform:translateY(1px)}
 .trace .lchips{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
 .lchip{display:inline-block;border:1px solid var(--line2);border-radius:2px;padding:0 6px;font-size:10.5px;color:var(--mut);font-variant-numeric:tabular-nums}
 .lchip b{color:var(--ink)}.lchip s{opacity:.7}
+/* the ACTIVE (live, in-progress) lap chip — the trace draws it on top with an accent glow + pulsing dot */
+.lchip.livenow{color:var(--acc2);border-color:var(--acc2);font-weight:700;letter-spacing:.02em}
+.lchip.livenow i{background:var(--acc2)}
+body.fixed .trace .lchip.livenow{box-shadow:inset 0 0 0 1px var(--acc2)}
 .slv .src{font:600 8.5px var(--mono);color:var(--acc2);border:1px solid var(--acc2);border-radius:2px;padding:0 3px;margin-left:5px;vertical-align:middle;font-style:normal}
 
 /* ---- emphasis: blocks, not pills. Square corners, solid fills, heavier type — the game's own badge language ---- */
@@ -386,6 +592,12 @@ button.stage.act.go:active{transform:translateY(1px)}
 .trace .thd .mini.dim{opacity:.35}
 button.lchip{background:none;cursor:pointer;font-family:inherit;white-space:nowrap}
 button.lchip.hid{opacity:.35;text-decoration:line-through}
+/* clickable PI-class swatch in the speed-trace legend — click to spotlight that class's laps. The
+   `.trace .lchip` LAP-chip grid (150px swatch|time|meta) does not fit a class swatch, so override it
+   here (higher specificity) back to a compact content-width chip. */
+.trace .lchip.clshi,.lchip.clshi{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;width:auto;height:auto;padding:1px 7px;cursor:pointer;transition:box-shadow .1s,background .1s}
+.lchip.clshi:hover{box-shadow:0 0 0 1px var(--pc,var(--acc2)) inset}
+.lchip.clshi.on{font-weight:700;box-shadow:0 0 0 1.5px var(--pc,var(--acc2))}
 .hname .pill{font-size:11px;padding:3px 10px}
 @media (orientation: portrait){ .trace{height:240px} }
 
@@ -431,9 +643,10 @@ button.lchip.hid{opacity:.35;text-decoration:line-through}
 .hact .hsep{display:none}
 .hchips{grid-row:3;display:flex;flex-wrap:wrap;gap:4px;align-content:start;overflow:hidden;max-height:52px}
 
-/* the alerts strip: one fixed cell */
-#alerts{flex:0 0 96px;height:96px;max-height:96px;overflow:auto;display:flex;flex-direction:column;gap:6px}
-#alerts:empty{display:flex}
+/* #alerts holds ONLY the (rare) save picker now — size it to its content and COLLAPSE when empty, so it
+   never leaves a blank band where the retired change-banner used to sit. */
+#alerts{flex:0 0 auto;max-height:40vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+#alerts:empty,#alerts.empty{display:none}
 #alerts .quiet{color:var(--dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px}
 .alert{flex:0 0 auto}
 
@@ -516,59 +729,88 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 
 
 
-/* ==================== THE HEADER — one skeleton, allocated by difficulty ====================
-   Columns 300 / 480 / 224 with 16px gaps = 1036 = the band's content width at 1080. Five type
-   steps, one hairline, one tone per state. Nothing in this band clips or scrolls. */
-#hdr{display:grid;grid-template-columns:300px minmax(0,480px) 224px;column-gap:16px;height:196px;
-  padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden;align-items:stretch}
+/* ==================== THE CAR-INFO BAND (header handoff §2–§4) ====================
+   Two halves: identity + gate strip on the left (470), the hardware→tune hash table on the right
+   (1fr). The car render is washed across the whole band behind a scrim, dying out by 66% so mono
+   figures never cross the fade. Three voices — Record (mono), Verdict (Inter 700 caps), Instruction
+   (Inter 400). Content sheds tokens; type never sheds pixels. Nothing here clips or scrolls. */
+#hdr{position:relative;display:grid;grid-template-columns:470px minmax(0,1fr);column-gap:0;height:224px;
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+@keyframes hdrIn{from{opacity:.4}to{opacity:1}}
+#hdr .hident,#hdr .hev{animation:hdrIn .2s ease}
 #hdr[data-tone="warn"]{--tone:var(--warn)} #hdr[data-tone="bad"]{--tone:var(--bad)}
 #hdr[data-tone="blue"]{--tone:var(--acc2)} #hdr[data-tone="ok"]{--tone:var(--acc)} #hdr[data-tone="dim"]{--tone:var(--mut)}
-/* five type steps — the only sizes in the band */
-#hdr .t-d{font:700 22px/26px var(--sans);letter-spacing:-.01em;color:var(--tone,var(--ink))}
-#hdr .t-t{font:800 17px/22px var(--sans);letter-spacing:.01em;color:var(--acc)}
-#hdr .t-b{font:400 12.5px/17px var(--sans);color:var(--ink);opacity:.92}
-#hdr .t-a{font:600 12px/16px var(--sans);color:var(--tone,var(--mut))}
-#hdr .t-l{font:700 10.5px/14px var(--sans);letter-spacing:.10em;text-transform:uppercase;color:var(--mut)}
+/* the wash + scrim, both behind the content */
+#hdr .hwash{position:absolute;inset:0;background-size:47% auto;background-position:left 46%;background-repeat:no-repeat;opacity:.17;pointer-events:none;z-index:0}
+#hdr .hscrim{position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:linear-gradient(90deg,rgba(20,26,34,.30) 0%,rgba(20,26,34,.72) 46%,var(--panel) 66%)}
+#hdr .hreload{position:absolute;top:8px;right:8px;height:22px;width:22px;font-size:12px;z-index:4}
+/* THE THREE VOICES — the only type in the band */
+#hdr .t-d{font:500 21px/26px var(--mono);letter-spacing:-.01em;color:var(--ink)}          /* Record — car name */
+#hdr .t-t{font:500 15px/20px var(--mono);color:var(--ink)}                                  /* Record — tune name */
+#hdr .t-b{font:400 13px/18px var(--sans);color:var(--ink)}                                  /* Instruction */
+#hdr .t-l{font:500 10px/13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}  /* Record label */
 #hdr .empty{color:#576372}
-/* col 1 — the render, edge to edge, with the game's own badge on it */
-.hart{position:relative;width:300px;height:176px;overflow:hidden;background:radial-gradient(ellipse at 50% 70%,#1b2430,var(--panel2) 60%,var(--panel))}
-.hart .art{width:300px;height:176px;object-fit:cover;display:block;border:0;border-radius:0}
-.hart .art.none{display:grid;place-items:center;text-align:center;padding:0 22px;color:var(--mut)}
-.artpi{position:absolute;left:8px;top:8px}
-.artcap{position:absolute;left:0;right:0;bottom:0;height:22px;display:flex;align-items:center;padding:0 8px;
-  background:rgba(11,13,16,.72);color:var(--tone,var(--mut))}
-/* col 2 — identity and decision, seven rows on one rail */
-.hid{display:grid;grid-template-rows:40px 20px 6px 24px 16px 6px 64px;row-gap:0;min-width:0;height:176px}
-.hid > *{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:clip}
-.hlead{display:flex;align-items:center}
-.hsub,.hby{display:flex;align-items:center}
-.htitle{display:flex;align-items:center}
-.hsp{height:6px}
-.hdec{border-top:1px solid var(--line);background:var(--panel2);border-left:3px solid var(--tone,var(--line2));
-  padding:6px 8px;display:grid;grid-template-rows:16px 1fr;gap:4px;white-space:normal;overflow:hidden}
-.hwhy{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hstep{display:flex;align-items:flex-start;gap:6px;font-weight:700;white-space:normal;line-height:16px;max-height:32px;overflow:hidden}
-.hstep i{flex:0 0 auto;width:16px;height:16px;display:grid;place-items:center;background:var(--tone,var(--line2));
-  color:#0b0d10;font:700 10px var(--mono);font-style:normal;border-radius:2px}
-/* col 3 — one action, one sheet, the evidence */
-.hact{display:grid;grid-template-rows:52px 34px 74px;gap:8px;width:224px;height:176px}
-.hact .prim{width:224px;height:52px;background:var(--tone,var(--line2));color:#0b0d10;border:0;border-radius:2px;
-  font:800 13px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;overflow:hidden}
-.hact .prim:hover{filter:brightness(1.08)}
-.hact .prim.none{background:none;border:1px dashed var(--line2);color:var(--mut);display:grid;place-items:center;
-  text-align:center;padding:0 8px;cursor:default;white-space:normal;line-height:13px}
-.hact .second{width:224px;height:34px;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
-  border-radius:2px;font:800 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
-.hact .second:hover{border-color:var(--acc2);color:var(--acc2)}
-.hact .second:disabled{opacity:.4;cursor:not-allowed}
-.hev{position:relative;height:74px;border:1px solid var(--line);border-radius:2px;padding:6px 8px;display:grid;
-  grid-template-rows:14px 1fr;gap:2px;overflow:hidden}
-.hev .t-b{white-space:normal;line-height:15px;overflow:hidden}
-.hev .icobtn{position:absolute;right:6px;bottom:6px;height:24px;width:24px;font-size:12px}
-@media (max-width:1000px){
-  #hdr{grid-template-columns:200px minmax(0,1fr) 200px}
-  .hart,.hart .art{width:200px}.hact,.hact .prim,.hact .second{width:200px}
-}
+/* LEFT — identity + gate strip */
+#hdr .hident{position:relative;z-index:2;padding:12px 14px;display:flex;flex-direction:column;gap:5px;min-width:0;overflow:hidden}
+#hdr .hident-hd{display:flex;align-items:center;gap:8px;min-width:0;height:20px}
+#hdr .hlock{color:var(--warn)}
+#hdr .hcar{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#hdr .htitle{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#hdr .htitle .tick{color:var(--acc);font-weight:700}
+#hdr .hverdict{font:700 21px/24px var(--sans);letter-spacing:.02em;text-transform:uppercase;color:var(--tone,var(--bad));margin:1px 0}
+/* THE GATE STRIP — [state] ┈▸ [action | instruction] [build sheet]. Exactly one filled cell. */
+#hdr .hgate{margin-top:auto;display:flex;align-items:stretch;gap:0;min-height:44px}
+#hdr .gcell{display:flex;flex-direction:column;justify-content:center;min-width:0}
+#hdr .gstate{flex:0 0 auto;padding-right:10px}
+#hdr .gstate b{display:block;font:500 10px/14px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--gh,var(--mut))}
+#hdr .gstate span{font:500 10px/13px var(--mono);letter-spacing:.03em;color:var(--mut);white-space:nowrap}
+#hdr .gstate[data-tone="bad"]{--gh:var(--bad)} #hdr .gstate[data-tone="warn"]{--gh:var(--warn)}
+#hdr .gstate[data-tone="acc"]{--gh:var(--acc)} #hdr .gstate[data-tone="dim"]{--gh:var(--mut)}
+#hdr .garrow{flex:1 1 auto;align-self:center;height:0;border-top:1.5px dashed var(--line2);position:relative;margin:0 6px;min-width:16px}
+#hdr .garrow::after{content:"";position:absolute;right:-2px;top:-4px;border:4px solid transparent;border-left-color:var(--line2)}
+#hdr .garrow[data-w="strong"]{border-top-color:var(--warn)} #hdr .garrow[data-w="strong"]::after{border-left-color:var(--warn)}
+#hdr .gprim{flex:0 0 auto;align-self:center;border:0;border-radius:3px;padding:0 14px;height:34px;cursor:pointer;
+  font:700 13px/16px var(--sans);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+#hdr .gprim[data-fill="acc2"]{background:var(--acc2);color:#04101c} #hdr .gprim[data-fill="warn"]{background:var(--warn);color:#231a00} #hdr .gprim[data-fill="acc"]{background:var(--acc);color:#04140c}
+#hdr .gprim:hover{filter:brightness(1.08)}
+#hdr .ginstr{flex:1 1 auto;align-self:center;color:var(--ink);white-space:normal;padding-right:8px}
+#hdr .gsheet{flex:0 0 auto;align-self:center;margin-left:8px;border-radius:3px;padding:5px 11px;display:flex;flex-direction:column;
+  font:700 11px/14px var(--sans);letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;text-align:left}
+#hdr .gsheet em{font:500 9px/12px var(--mono);font-style:normal;letter-spacing:.03em;text-transform:none}
+#hdr .gsheet.filled{background:var(--warn);color:#231a00;border:0} #hdr .gsheet.filled em{color:#231a00;opacity:.75}
+#hdr .gsheet.outline{background:none;border:1px solid var(--warn);color:var(--warn)} #hdr .gsheet.outline em{color:var(--mut)}
+#hdr .gsheet.dead{background:var(--panel2);border:1px solid var(--line);color:var(--mut);cursor:default} #hdr .gsheet.dead em{color:var(--mut)}
+#hdr .gsheet.filled:hover,#hdr .gsheet.outline:hover{filter:brightness(1.1)}
+/* the CHANGE token, one chip in the identity line */
+#hdr .hchg{background:none;border:1px solid var(--line2);border-radius:10px;padding:0 8px;font:700 9.5px var(--sans);
+  letter-spacing:.03em;text-transform:uppercase;cursor:pointer;color:var(--mut)}
+#hdr .hchg:hover{filter:brightness(1.15)} #hdr .hchg.on{border-color:var(--acc);color:var(--acc)}
+#hdr .hchg.r{border-color:var(--bad);color:var(--bad)} #hdr .hchg.b{border-color:var(--acc2);color:var(--acc2)} #hdr .hchg.open{background:var(--panel2)}
+/* RIGHT — the hardware→tune hash table, then the evidence line, on flat --panel past the fade */
+#hdr .hev{position:relative;z-index:2;padding:10px 14px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;overflow:hidden;background:var(--panel)}
+#hdr .hth{display:flex;flex-direction:column;min-width:0;overflow:hidden;flex:1 1 auto}
+#hdr .hth-head{display:grid;grid-template-columns:70px 1fr;gap:12px;padding-bottom:3px;border-bottom:1px solid var(--line)}
+#hdr .hth-row{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line);min-width:0}
+#hdr .hth-row:last-child{border-bottom:0}
+#hdr .hth-hw{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:2px;padding:1px 7px;
+  font:500 11px/16px var(--mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;justify-self:start;flex:0 0 auto}
+#hdr .hth-hw i{font:500 9px var(--mono);font-style:normal;color:var(--dim)}
+#hdr .hth-hw:hover{border-color:var(--acc2);color:var(--acc2)}
+#hdr .hth-row.cur .hth-hw{color:var(--acc);border-color:var(--acc)}
+#hdr .hth-tunes{display:flex;flex-wrap:nowrap;gap:4px;min-width:0;overflow:hidden}
+#hdr .hth-tune{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:2px;padding:0 7px;
+  font:500 12px/17px var(--mono);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+#hdr .hth-tune:hover{border-color:var(--acc2);color:var(--acc2)}
+#hdr .hth-tune.on{color:var(--acc);border-color:var(--acc);background:#0f2a1e}
+#hdr .hth-more{font:500 10px var(--mono);color:var(--dim);align-self:center;white-space:nowrap;flex:0 0 auto}
+#hdr .hth-empty{padding:8px 0}
+#hdr .hth-morerow{padding:4px 0 0;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hdr .hev-ev{display:flex;flex-direction:column;gap:1px;flex:0 0 auto;border-top:1px solid var(--line);padding-top:5px}
+#hdr .hev-ev .t-b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
+/* keep BOTH halves (identity+gate | hash table) down to ~800px; only collapse when a two-column band
+   genuinely cannot fit — the tune table was vanishing at ~1000px (a 4K-portrait/200% CSS width) before. */
+@media (max-width:800px){ #hdr{grid-template-columns:1fr} #hdr .hev{display:none} }
 
 .trace{height:240px;transition:height .12s ease}
 .trace.empty{height:34px}
@@ -593,3 +835,455 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 .fsheet .fbar{flex-wrap:nowrap;white-space:nowrap}
 .fsheet .fbar button{flex:0 0 auto;white-space:nowrap;height:22px;padding:0 8px;font-size:10.5px}
 .fsheet .fbar .nm{flex:1 1 auto;min-width:0}
+
+/* ---------- the last-action line: flush to the top, nothing above it ---------- */
+#lastact{position:fixed;left:0;right:0;top:0;height:20px;z-index:80;display:flex;align-items:center;gap:10px;
+  padding:0 12px;font:700 10.5px/20px var(--sans);letter-spacing:.08em;text-transform:uppercase;
+  background:var(--lat,var(--mut));color:#0b0d10;overflow:hidden;white-space:nowrap}
+#lastact[data-tone="ok"]{--lat:var(--acc)} #lastact[data-tone="warn"]{--lat:var(--warn)}
+#lastact[data-tone="bad"]{--lat:var(--bad)} #lastact[data-tone="blue"]{--lat:var(--acc2)}
+#lastact[data-tone="dim"]{--lat:#2b3644;color:var(--mut)}
+#lastact span{margin-left:auto;font-weight:400;opacity:.75;font-family:var(--mono);letter-spacing:0}
+body.fixed{padding-top:20px}
+body.fixed main{height:calc(100vh - 24px - 20px - 24px)}
+
+/* ---------- map left, corner analysis right — the original arrangement ---------- */
+.panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+@media (orientation: portrait){
+  .panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+}
+#leftHd .trackname{font:800 16px var(--sans);letter-spacing:.01em;color:var(--ink)}
+
+/* ---------- the trace holds its band whether or not it has a line to draw ---------- */
+.trace{height:240px}
+.trace.quiet .tbody{display:grid;place-items:center}
+.trace.quiet .tbody::after{content:"";}
+
+/* the anchored line's right half: one dot per service */
+#lastact .when{margin-left:10px;margin-right:auto;font-weight:400;opacity:.7;font-family:var(--mono);letter-spacing:0;text-transform:none}
+#lastact b{flex:0 0 auto}
+#lastact .svcs{margin-left:auto;display:flex;align-items:center;gap:14px;font-weight:600;letter-spacing:.04em;opacity:.9}
+#lastact .sdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+#lastact .okd{background:#0b3a22;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#lastact .badd{background:#f0616d;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#lastact .warnd{background:#7a5c12;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#lastact[data-tone="dim"] .okd{background:var(--acc)} #lastact[data-tone="dim"] .warnd{background:var(--warn)}
+
+/* ================== ONE INSTRUMENT, NOT SIX CARDS ==================
+   The dashboard is a single dense surface: no rounded corners, no gaps between regions, no
+   floating panels. Regions are separated by a 1px rule and nothing else — the way an instrument
+   panel or a terminal reads, and the way a screen that claims to use every available byte should
+   look. Every pixel between two facts is a pixel not spent on a fact. */
+body.fixed main{padding:0;gap:0;border-top:0}
+.hdr,.trace,#alerts,.dock,.ftr,.pane,.panes,.pane>.body,.pane>header,
+.alert,.hart,.hart .art,.hev,.hact .prim,.hact .second,.icobtn,.chip,.pill,.mini,.big,
+.dt,.lchip,.srowb,.fsheet,.fsheet .fbar,.tabs2 button,.dock .spans button,
+.hdec,.trace .tbody,.dtrace svg.trace,.pib,.thumb,.art{border-radius:0}
+/* every band is separated by a rule, never by a gap */
+.hdr{border:0;border-bottom:1px solid var(--line)}
+.trace{border:0;border-bottom:1px solid var(--line);padding:4px 10px}
+#alerts{border:0;border-bottom:1px solid var(--line);padding:0}
+#alerts .alert{border-left-width:3px;border-top:0;border-right:0;border-bottom:1px solid var(--line);margin:0}
+.panes{gap:0;border-bottom:1px solid var(--line)}
+.pane{border:0;border-right:1px solid var(--line)}
+.panes > .pane:last-child{border-right:0}
+.dock{border:0;border-bottom:1px solid var(--line);padding:4px 10px}
+.ftr{border:0;border-top:0}
+/* the header's own cells butt up against each other, divided by rules */
+#hdr{column-gap:0;padding:0}
+#hdr > .hart{border-right:1px solid var(--line)}
+#hdr > .hid{padding:8px 12px;border-right:1px solid var(--line)}
+#hdr > .hact{padding:8px 10px;gap:6px}
+.hact .prim,.hact .second{width:100%}
+.hev{border:1px solid var(--line);border-left:0;border-right:0}
+.hdec{border-left-width:3px;margin:0 -12px -8px;padding:6px 12px}
+/* the trace and dock lose their inner frames too */
+.trace .tbody{background:var(--bg)}
+.dtrace svg.trace{background:var(--bg)}
+.dt{border:0;border-right:1px solid var(--line);border-radius:0}
+.dtiles{gap:0}
+.dt:last-child{border-right:0}
+
+/* the service strip owns its own dark ground, so its states read on any accent colour */
+#lastact .svcs{margin-left:auto;height:20px;display:flex;align-items:center;gap:0;background:#07090c;
+  padding:0;font:700 10px var(--sans);letter-spacing:.06em;text-transform:uppercase}
+#lastact .svc{display:flex;align-items:center;gap:6px;height:20px;padding:0 11px;border-left:1px solid #1b2330;color:#9fb0c4}
+#lastact .svc em{font-style:normal;opacity:.75}
+#lastact .svc b{font-family:var(--mono);letter-spacing:0;text-transform:none;color:#e6edf5;font-weight:700}
+#lastact .sdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 auto}
+#lastact .svc.ok .sdot{background:#00d27a;box-shadow:0 0 6px rgba(0,210,122,.6)}
+#lastact .svc.w .sdot{background:#e3b341;box-shadow:0 0 6px rgba(227,179,65,.6)}
+#lastact .svc.bad .sdot{background:#f0616d;box-shadow:0 0 6px rgba(240,97,109,.6)}
+#lastact .svc.bad{color:#f0616d}
+#lastact .svc.bad b{color:#f0616d}
+/* lab-services controls, moved into the top bar: a hover dropdown off the services strip */
+#lastact .svccaret{display:flex;align-items:center;height:20px;padding:0 10px;border-left:1px solid #1b2330;color:#9fb0c4;cursor:default;font-size:12px}
+#lastact .svcs{position:relative}
+.svcpop{position:fixed;top:20px;right:8px;z-index:200;display:none;min-width:320px;max-width:460px;max-height:70vh;overflow-y:auto;
+  background:var(--panel);border:1px solid var(--line2);border-radius:0 0 7px 7px;box-shadow:0 10px 28px rgba(0,0,0,.55);text-transform:none;letter-spacing:0}
+#lastact .svcs:hover .svcpop{display:block}
+.svcpop-h{position:sticky;top:0;background:var(--panel);font:600 9.5px var(--mono);letter-spacing:.05em;color:var(--dim);text-transform:uppercase;padding:7px 12px;border-bottom:1px solid var(--line2)}
+.svcpop .grp{padding:2px 10px 8px}
+.svcpop .gh{display:none}
+.svcpop .frow{font-weight:400;opacity:1}
+.svcpop .svcbtns{margin-left:auto;display:flex;gap:4px}
+.svcdot[data-up="1"]{background:var(--acc)}
+/* STATUS HISTORY dropdown: hover the top status strip to see recent status changes with datetime. The strip is
+   position:fixed with overflow:hidden, so the panel is ALSO fixed (escapes the clip) and drops just below it. */
+#lastact{cursor:default}
+.statcaret{margin-left:5px;font-size:9px;opacity:.55;text-transform:none}
+.statlog{position:fixed;top:20px;left:8px;z-index:200;display:none;min-width:340px;max-width:560px;max-height:62vh;overflow-y:auto;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:0 0 7px 7px;box-shadow:0 8px 26px rgba(0,0,0,.55);
+  text-transform:none;letter-spacing:0;font-weight:400}
+#lastact:hover .statlog{display:block}
+.statlog-h{position:sticky;top:0;background:var(--panel);font:600 9.5px var(--mono);letter-spacing:.05em;color:var(--dim);text-transform:uppercase;padding:6px 12px;border-bottom:1px solid var(--line2)}
+.sle{display:flex;gap:10px;align-items:baseline;padding:4px 12px;font-size:11.5px;border-bottom:1px solid var(--line)}
+.sle:last-child{border-bottom:0}
+.slt{flex:0 0 auto;min-width:112px;font:600 10px var(--mono);color:var(--mut)}
+.sll{color:var(--ink)}
+.sle-ok .sll{color:var(--acc)} .sle-warn .sll{color:var(--warn)} .sle-bad .sll{color:#f0616d} .sle-blue .sll{color:var(--acc2)}
+
+/* the following map: labels earn their ink only when the window is close enough to read them */
+.pane > .body.map svg text{opacity:0;transition:opacity .18s}
+.pane > .body.map svg.close text{opacity:1}
+.mapscale{display:inline-flex;align-items:center;gap:6px;margin-left:auto}
+.mapscale .why{font-family:var(--mono);font-size:10px;min-width:76px;text-align:right}
+
+/* ============ THE IN-GAME PI BADGE, drawn ============
+   Measured from a high-resolution capture (B 557): one rounded block, the class letter on its
+   own colour at ~41% of the width, the PI on near-black, both in heavy white. Vector, so it is
+   sharp at 14px in a table row and at 40px in the header, and S1/S2 need no stretching. */
+.pib{display:inline-flex;align-items:stretch;height:22px;border-radius:3px;overflow:hidden;
+  font:800 13px/1 var(--sans);letter-spacing:.01em;vertical-align:middle;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}
+.pib b{display:grid;place-items:center;min-width:1.55em;padding:0 .38em;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.45);background:var(--panel2);font-style:normal}
+.pib i{display:grid;place-items:center;padding:0 .45em;background:#0d0d0d;color:#fff;
+  font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.pib--sm{height:16px;font-size:10px;border-radius:2px}
+.pib--lg{height:34px;font-size:20px;border-radius:4px}
+.pib-d b{background:#45c8f1;color:#04222c} .pib-c b{background:#f0c530;color:#231a00}
+.pib-b b{background:#f0862d;color:#2a1400} .pib-a b{background:#e5414e}
+.pib-s1 b{background:#a468e8} .pib-s2 b{background:#2f62e0}
+.pib-r b{background:#e83c9e}  .pib-x b{background:#2fd05f;color:#04220f}
+.pib-img{display:none}
+/* the header wears the large one, on the render */
+.artpi .pib{height:28px;font-size:16px}
+
+/* the lap selector: one row, uniform cells, state legible at a glance, the rest counted */
+.trace .tfoot{display:block;padding:0}
+.trace .lchips{display:flex;flex-wrap:nowrap;gap:0;width:100%;overflow:hidden;height:26px;align-items:stretch}
+.trace .lchip{display:grid;grid-template-columns:8px 1fr auto;align-items:center;gap:6px;width:150px;flex:0 0 150px;
+  height:26px;padding:0 8px;border:0;border-right:1px solid var(--line);background:none;color:var(--mut);
+  font:600 11px var(--sans);cursor:pointer;text-align:left;overflow:hidden;white-space:nowrap}
+.trace .lchip:hover{background:var(--panel2)}
+.trace .lchip .lcd{width:8px;height:8px;background:var(--lc,var(--line2))}
+.trace .lchip .lct{font-family:var(--mono);color:var(--ink);overflow:hidden;text-overflow:ellipsis}
+.trace .lchip .lcm{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.trace .lchip.best .lct{color:var(--acc)} .trace .lchip.you .lct{color:var(--acc2)}
+.trace .lchip.hid{opacity:.32} .trace .lchip.hid .lcd{background:none;box-shadow:inset 0 0 0 1px var(--lc,var(--line2))}
+.trace .lchip.hid .lct{text-decoration:line-through}
+.trace .lchips.grip .lchip{width:auto;flex:0 0 auto;cursor:default;grid-template-columns:8px auto}
+.trace .lchips .fitmore{align-self:center;padding:0 10px;border-left:1px solid var(--line)}
+.trace .thd .tread{font-size:10px;opacity:.7;margin-right:10px}
+
+/* ---------- the live position dot: v1-style smoothing (app.js:4052 is the exact source) ----------
+   app.js's updCarDot has NO distance gate at all -- it updates on every telemetry frame and relies
+   entirely on this transition for smoothness, not on update frequency. Ported 2026-09-03 after
+   measuring the choppiness live: v2's old 4-metre distance gate made the TIME between visual
+   updates scale with speed (61-247ms, irregular), and the dot was rebuilt via innerHTML every call
+   with no transition possible on a brand-new element each time. #liveDot now stays the same
+   element across updates (panel.js addLiveDot) and only its transform changes, so this can ease it. */
+#liveDot{transition:transform .18s linear}
+/* ---------- the map drawer: legend + filters, floated off the map instead of inline ---------- */
+.pane > .body.map{position:relative}
+.mapdrawer{position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;
+  align-items:flex-end;gap:6px;max-width:calc(100% - 16px);pointer-events:none}
+.mapdrawer .mdtoggle{pointer-events:auto;background:var(--panel);border:1px solid var(--line2);
+  color:var(--mut);border-radius:5px;padding:4px 10px;font:600 10.5px var(--sans);cursor:pointer;
+  white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,.45)}
+.mapdrawer .mdtoggle:hover{color:var(--acc);border-color:var(--acc)}
+.mapdrawer.open .mdtoggle{color:var(--acc);border-color:var(--acc)}
+.mapdrawer .mdpanel{display:none;pointer-events:auto;background:var(--panel);border:1px solid var(--line2);
+  border-radius:6px;padding:9px 11px;max-width:min(440px,100%);max-height:min(64vh,440px);overflow:auto;
+  box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.mapdrawer.open .mdpanel{display:flex;flex-direction:column;gap:8px}
+.mapdrawer .legend{margin:0}
+.mapdrawer .fdim{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+/* ============ THE PAUSED LANGUAGE ============
+   One vocabulary, applied wherever a pane freezes because the data source itself is paused (a
+   menu, a loading screen): amber, the same #e3b341 the held live-dot already uses, a ⏸ glyph,
+   dimmed content so the frozen values read as "not current" without hiding them, and a corner
+   label naming what's true right here, not just at the top of the page (2026-09-03). */
+.held{position:relative}
+.held>*{opacity:.6;transition:opacity .2s}
+.held::after{content:"⏸ held";position:absolute;top:6px;right:8px;z-index:6;
+  font:700 9.5px var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--warn);
+  background:rgba(0,0,0,.55);border:1px solid rgba(227,179,65,.4);border-radius:3px;padding:2px 7px;
+  pointer-events:none}
+
+/* ---- Course Browser (free-mode right tab): mode chips + shape tiles ---- */
+.bchips{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px;position:sticky;top:0;background:var(--panel);padding-bottom:6px;z-index:2}
+.bchip{background:var(--panel2);border:1px solid var(--line2);color:var(--mut);border-radius:12px;
+  padding:3px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center}
+.bchip:hover{color:var(--ink)}
+.bchip.on{border-color:var(--acc);color:var(--acc);background:var(--panel)}
+.bchip em{font-style:normal;color:var(--dim);font-size:10px}
+.bchip.on em{color:var(--acc)}
+.bsort{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:-2px 0 8px}
+.bsort .why{font-size:10px;margin-right:2px}
+.bsort .mini.on{background:rgba(0,210,122,.12);border-color:var(--acc);color:var(--acc)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;align-content:start}
+.tile{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 6px 7px;
+  cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:3px;color:var(--ink);overflow:hidden}
+.tile:hover{border-color:var(--line2);background:var(--panel)}
+.tile.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.tsvg{width:100%;height:70px;background:var(--bg);border-radius:5px;display:block}
+.tnm{font-size:11.5px;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tmeta{font-size:10px;color:var(--mut)}
+.tbadges{display:flex;flex-wrap:wrap;gap:3px;margin-top:1px}
+.bb{font-size:9px;line-height:1.6;padding:0 5px;border-radius:8px;border:1px solid var(--line2);color:var(--mut)}
+.bb.race{border-color:#ff8a3d;color:#ff8a3d}
+.bb.riv{border-color:var(--acc);color:var(--acc)}
+.bb.car{border-color:#7fb2ff;color:#7fb2ff}
+.bb.dsc{border-color:var(--line2);color:var(--dim)}
+.tdata{color:var(--acc);font-weight:600}
+.tdata.none{color:var(--dim);font-weight:400}
+.truns{color:var(--dim);font-weight:400}   /* runs = play sessions, muted; laps (tdata) are the usable samples */
+/* COURSE INFORMATION PILL in the world-map pane header (#leftHd) — a header-sized browser row: shape glyph,
+   name + status chips, a meta line, and the offered-class + mode chips. Mirrors the car pill's design. The
+   pane header is a fixed 48px (both panes, so their tops align); this one uses tight vertical padding so the
+   two-line pill sits centred within it. */
+#leftHd{padding-top:0;padding-bottom:0;align-items:center}
+#leftHd .cpill{display:flex;align-items:center;gap:12px;min-width:0;width:100%}
+#leftHd .cpill-glyph{flex:0 0 auto;width:78px;height:48px;background:var(--bg);border-radius:5px;overflow:hidden}
+#leftHd .cpill-glyph .tsvg{width:100%;height:100%;display:block;border-radius:5px}
+#leftHd .cpill-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
+#leftHd .cpill-l1{display:flex;align-items:center;gap:7px;min-width:0}
+#leftHd .cpill-l1 .trackname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto}
+#leftHd .cpill-l1 .chip{flex:0 0 auto}
+#leftHd .cpill-l2{font-size:11.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the class pills earn a row of their own under the meta now the pill is header-sized, instead of being
+   crushed into the right-hand badge strip -- the classes a course is offered in read at a glance */
+/* ONE deterministic row -- clip a trailing badge on a very narrow pane rather than wrap and grow the
+   pill back out of its (fixed-height) header. Class pills are leftmost, so they survive; the mode
+   badges (which the ON-ROUTE/RIVALS chip on line 1 already conveys) clip last. */
+#leftHd .cpill-badges{max-width:100%;flex-wrap:nowrap;overflow:hidden;justify-content:flex-start;margin-top:0}
+#leftHd .cpill-badges .pib{font-size:9.5px}
+#leftHd .cpill-badges .pib-n{display:inline}
+#leftHd .cpill-badges{flex:0 0 auto;display:flex;align-items:center;gap:3px;flex-wrap:nowrap;overflow:hidden;justify-content:flex-end;max-width:44%}
+#leftHd .cpill-badges .pib{font-size:9px;border-radius:3px;flex:0 0 auto}
+#leftHd .cpill-badges .pib b{padding:1px 4px;text-shadow:none}
+#leftHd .cpill-badges .bb{flex:0 0 auto}
+#leftHd .cpill-badges .pib-n{display:none}   /* the inline count crowds the tight badge row; it lives in the drawer */
+.chip.dim{border-color:var(--line2);color:var(--dim)}
+/* QUICK STATS DRAWER (Jett 2026-09-09): the course pill expands on hover into laps-by-class and laps-by-car
+   counts — the at-a-glance course panel (the full one, car x class + per-turn analysis, comes later). */
+#leftHd .cpill{position:relative}
+.cps-caret{font-style:normal;font-size:9px;color:var(--dim);flex:0 0 auto;cursor:default}
+.cpill.has-stats:hover .cps-caret{color:var(--ink)}
+.cpstats{position:absolute;top:100%;left:44px;margin-top:6px;z-index:210;display:none;min-width:330px;max-width:540px;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.cpill.has-stats:hover .cpstats{display:block}
+.cps-h{font:700 9.5px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--dim);
+  display:flex;align-items:center;gap:7px;margin:0 0 6px}
+.cps-h:not(:first-child){margin-top:12px}
+.cps-h i{font-style:normal;font-weight:700;color:var(--ink);font-family:var(--sans);font-size:11px;
+  background:var(--bg);border-radius:999px;padding:0 7px;line-height:16px}
+.cps-row{display:flex;flex-wrap:wrap;gap:7px}
+.cps-c{display:inline-flex;align-items:center;gap:4px}
+.cps-c i{font-style:normal;font-size:11.5px;font-weight:700;color:var(--ink)}
+.cps-cars{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px}
+.cps-car{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;min-width:0;padding:1px 0}
+.cps-cn{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cps-car i{font-style:normal;font-weight:700;color:var(--mut);flex:0 0 auto}
+.cps-more{grid-column:1/-1;font-size:10px;color:var(--dim);margin-top:3px}
+/* PER-PHASE CORNER STRIP (course-mode Turn analysis): one row per turn, its 5 WHERE-phases as grip-coloured cells */
+.pstrip{display:flex;align-items:center;gap:8px;padding:1px 0}
+.pstrip .ptn{flex:0 0 88px;font:600 10.5px var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pstrip .pcells{display:flex;gap:2px;flex:1 1 auto;min-width:0}
+.pcell{flex:1 1 0;min-width:0;height:16px;border-radius:2px;display:flex;align-items:center;justify-content:center;
+  font:600 9px var(--mono);color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.pcell b{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.pc-empty{background:var(--line2);box-shadow:inset 0 0 0 1px var(--line)}
+.pstrip-h{margin-bottom:3px}
+.pstrip-h .pcells span{flex:1 1 0;text-align:center;font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.03em}
+/* a strip row is a turn selector: hover lifts it, the picked turn stays lit (its phases paint on the map) */
+.pstrip--pick{cursor:pointer;border-radius:3px;padding:1px 4px;margin:0 -4px;transition:background .1s}
+.pstrip--pick:hover{background:var(--line)}
+.pstrip--pick.sel{background:var(--sel,rgba(120,160,255,.16));box-shadow:inset 0 0 0 1px var(--acc2)}
+.pstrip--pick.sel .ptn{color:var(--acc2)}
+/* ===== TURN ANALYSIS — left 5-part view + right timing/statistics (Jett 2026-09-10) ===== */
+/* RIGHT header + the cards column */
+.tstat-h{display:flex;align-items:center;gap:6px}
+.tstat-h b{font:700 14px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink)}
+.tstat-nav{margin-left:auto;display:flex;gap:3px}
+.tstat-geo{display:flex;flex-wrap:wrap;gap:5px 7px;margin:5px 0 6px}
+.tstat-geo span{font:600 11px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
+.tstat-geo em{font-style:normal;color:var(--dim);text-transform:uppercase;font-size:8.5px;letter-spacing:.06em;margin-right:5px}
+.tstat-cap{margin:0 2px}
+/* timing card */
+.tstat-big{font-size:12px;color:var(--mut);margin:3px 2px 6px}
+.tstat-big b{font:800 20px var(--sans);color:var(--ink);margin-right:4px}
+.tbar{display:flex;height:20px;border-radius:4px;overflow:hidden;margin:2px 0 4px;background:var(--bg)}
+.tbar .tb-seg{display:flex;align-items:center;justify-content:center;min-width:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.tbar .tb-seg i{font:700 9px var(--mono);color:#0b0e12;font-style:normal;opacity:.85}
+.tstat-sub{margin:5px 2px 3px}
+.tstat-cmp,.tstat-ph{width:100%;border-collapse:collapse;font-size:11px}
+.tstat-cmp th{font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em;padding:2px 4px;text-align:right}
+.tstat-cmp th:first-child{text-align:left}
+.tstat-cmp td{padding:2px 4px;border-top:1px solid var(--line)}
+.tstat-cmp tr.tb-flag{background:rgba(224,164,50,.09)}
+/* per-phase statistics table */
+.tstat-ph th{font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em;padding:2px 4px;text-align:center}
+.tstat-ph th:first-child{text-align:left}
+.tstat-ph td{padding:3px 4px;border-top:1px solid var(--line);vertical-align:middle}
+.tstat-ph tr.off{opacity:.45}
+.tstat-ph tr[data-phase]{transition:background .1s}
+.tstat-ph tr[data-phase].hi{background:var(--sel,rgba(120,160,255,.16))}
+.tstat-ph tfoot .tstat-tot td{border-top:2px solid var(--line2);font-weight:700;color:var(--ink)}
+.pdot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+/* the grip DISTRIBUTION bar — the honest "how the grip splits", replacing a single lossy swatch */
+.gbar{display:flex;height:13px;width:100%;min-width:54px;border-radius:2px;overflow:hidden;background:var(--line2);box-shadow:inset 0 0 0 1px rgba(0,0,0,.3)}
+.gbar span{min-width:1px}
+.gbar--empty{background:var(--line2)}
+.gbar--lg{height:20px;border-radius:3px}
+.tstat-gread{display:flex;align-items:center;gap:9px;margin:3px 2px 6px}
+.tstat-gword{font:600 12px var(--sans);color:var(--ink);white-space:nowrap}
+.gleg{margin:2px 0 0}
+/* LEFT per-turn view */
+.turnview{display:flex;flex-direction:column;gap:6px;padding:2px}
+.tv-hd{display:flex;align-items:center;gap:8px}
+.tv-hd b{font:800 16px var(--sans);color:var(--ink)}
+.tv-lg{margin-top:2px}
+.trail{display:flex;gap:3px;align-items:stretch;height:46px}
+.trail-c{display:flex;flex-direction:column;gap:2px;justify-content:flex-end;min-width:0;padding:2px 3px;border-radius:3px;background:var(--bg);cursor:default}
+.trail-c:hover{background:var(--line)}
+.trail-lbl{font:700 9px var(--mono);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trail-t{display:flex;align-items:baseline;gap:4px;font:700 10px var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden}
+.trail-mph{font:500 9px var(--mono);font-style:normal;color:var(--mut);overflow:hidden;text-overflow:ellipsis}
+.trail-c .gbar{height:9px;min-width:0}
+/* right-pane "the corner, phase by phase" — the per-turn line trace + phase-time rail (moved from the left pane) */
+.tstat-corner{display:flex;flex-direction:column;gap:6px}
+.tstat-cornersvg{display:block}
+/* select a lap in the leaderboard -> isolate its trace on the corner map (dim the rest, lift the picked one) */
+.tstat-cornersvg .cm-lap{opacity:.5;transition:opacity .1s}
+.tstat-cornersvg.has-sel .cm-lap{opacity:.08}
+.tstat-cornersvg.has-sel .cm-lap.sel{opacity:1}
+.tstat-cornersvg.has-sel .cm-lap.sel line{stroke-width:2.6}
+/* the same pick mirrored onto the whole-course map: dim every lap trace, lift the picked one. The map's
+   polylines carry an inline `opacity` PRESENTATION ATTRIBUTE which — unlike stroke-width — this engine does
+   not let a plain CSS opacity property override, so the override is forced with !important (measured). */
+.cmap svg.has-lapsel .cmap-lap polyline{opacity:.1!important;transition:opacity .1s}
+.cmap svg.has-lapsel .cmap-lap.sel polyline{opacity:1!important;stroke-width:3}
+.tlb-row{cursor:pointer}
+.tlb-row:hover{background:var(--panel2)}
+.tlb-row.lbsel{background:rgba(78,163,255,.16);box-shadow:inset 2px 0 0 var(--acc2)}
+/* the Current-lap live tab: one row per turn as you finish it, rated vs your own history */
+.lapview{display:flex;flex-direction:column}
+.lap-liveflag{display:inline-flex;align-items:center;gap:5px;font:700 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--bad);margin-left:6px}
+.lap-liveflag i{width:6px;height:6px;border-radius:50%;background:var(--bad);box-shadow:0 0 6px rgba(240,97,109,.7);animation:ftrpulse 1.3s ease-in-out infinite}
+.lap-hd,.lap-row{display:grid;grid-template-columns:1.2fr 1.3fr 1fr 1.1fr;gap:8px;align-items:center;padding:5px 8px}
+.lap-hd{font:600 8.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
+.lap-row{border-bottom:1px solid var(--line2);font-size:12px}
+.lap-row:hover{background:var(--panel2)}
+.lap-turn{display:flex;flex-direction:column;line-height:1.15;font-weight:700;color:var(--ink)}
+.lap-turn em{font-style:normal;font-size:10px;font-weight:400;color:var(--mut)}
+.lap-spd b{color:var(--ink)} .lap-spd i{font-style:normal;color:var(--dim);margin:0 1px} .lap-spd em{font-style:normal;color:var(--dim);font-size:9.5px}
+.lap-rank{font-weight:700;font-size:11.5px}
+.lap-grip{font:600 11px var(--mono)}
+.lap-sum{padding:8px;font-size:11.5px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;border-top:1px solid var(--line)}
+.lap-sum .why{margin-left:auto}
+.cm-splegend{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mut)}
+.cm-splegend .why{margin-right:2px}
+.cm-splegend em{font-style:normal;font:600 10px var(--mono);color:var(--mut)}
+.cm-splegend .cm-grad{display:inline-block;width:64px;height:7px;border-radius:2px;background:linear-gradient(90deg,#f0616d,#e3b341,#00d27a)}
+/* position (rank) gradient reads best→slowest left→right: P1 green, worst red */
+.cm-splegend .cm-grad--rank{background:linear-gradient(90deg,#00d27a,#e3b341,#f0616d)}
+.cm-splegend .cm-views{margin-left:auto;display:inline-flex;gap:3px}
+.cm-splegend .cm-views .mini{padding:1px 7px;font-size:10.5px}
+.cm-splegend .cm-views .mini.on{color:var(--acc);border-color:var(--acc);background:rgba(0,210,122,.12)}
+/* single-verdict diagnosis card */
+.dxcard{border-left:3px solid var(--warn);background:var(--bg);padding:8px 10px;border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:3px}
+.dxcard--ok{border-left-color:var(--acc)}
+.dx-top{display:flex;align-items:center;gap:7px}
+.dx-lbl{font:600 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.dx-rule{border:1px solid;border-radius:3px;padding:0 6px;font:600 9px var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.dx-conf{margin-left:auto;border:1px solid;border-radius:3px;padding:0 6px;font:600 9px var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.dx-conf.ok{border-color:var(--acc);color:var(--acc)}
+.dx-conf.weak{border-color:var(--warn);color:var(--warn)}
+.dx-head{font:700 14px/1.3 var(--sans)}
+.dx-fix{font:400 12px/1.4 var(--sans);color:var(--ink)}
+.dx-ev{font:500 10px var(--mono);color:var(--dim)}
+/* detected-error cards: phase + grip type, frequency/severity/impact metrics, tuning or driving cue */
+.terr{border-left:3px solid var(--sev);background:var(--bg);border-radius:0 6px 6px 0;padding:8px 10px;margin:6px 0;display:flex;flex-direction:column;gap:6px}
+.terr-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.terr-ph{display:inline-flex;align-items:center;gap:5px;font:700 10px var(--mono);letter-spacing:.03em;text-transform:uppercase;padding:1px 8px;border:1px solid;border-radius:20px}
+.terr-ph i{width:7px;height:7px;border-radius:50%}
+.terr-grip{font:600 10.5px var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.terr-sev{margin-left:auto;display:inline-flex;align-items:baseline;gap:5px}
+.terr-sev b{font:800 16px var(--mono)}
+.terr-sev em{font-style:normal;font:700 9px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.terr-head{font:700 13.5px var(--sans);color:var(--ink)}
+.terr-m{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.terr-m span{display:flex;flex-direction:column;gap:1px}
+.terr-m em{font-style:normal;font:600 8.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--dim)}
+.terr-m b{font:800 16px var(--sans);font-variant-numeric:tabular-nums}
+.terr-m i{font-style:normal;font-size:10px;color:var(--mut)}
+.terr-tune{display:flex;gap:8px;align-items:flex-start;background:rgba(0,210,122,.07);border:1px solid rgba(0,210,122,.28);border-radius:6px;padding:7px 9px}
+.terr-tune .wr{font:700 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--acc);padding-top:2px;flex:0 0 auto}
+.terr-tune .tx{font-size:12px;color:var(--ink)}
+.terr-tune .src{font:600 8.5px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-left:6px}
+/* where the time goes: headline figure, verdict, time-budget bar, comparison table's 5th "where it goes" column */
+.wtg-figs{display:flex;align-items:baseline;gap:7px;margin:2px 2px 3px;flex-wrap:wrap}
+.wtg-big{font:800 28px/1 var(--sans);color:var(--ink)}
+.wtg-big span{font-size:14px;font-weight:600}
+.wtg-avail{margin-left:auto;font:800 16px var(--mono);color:var(--warn)}
+.wtg-verdict{font:400 12px var(--sans);color:var(--ink);margin:0 2px 6px}
+.budget{display:flex;height:22px;overflow:hidden;background:var(--bg);margin:0 0 6px;border-radius:3px}
+.bud-seg{display:flex;align-items:center;justify-content:center;min-width:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.bud-seg i{font:700 9.5px var(--mono);font-style:normal;color:#0b0e12;opacity:.85}
+.tstat-cmp td .wig,.wig{display:block;width:100%;height:6px;background:var(--bg);border-radius:2px;overflow:hidden}
+.wig i{display:block;height:6px}
+.tstat-cmp td:last-child{width:32%}
+.tstat-foot{font:500 10px/1.4 var(--mono);color:var(--dim);margin:6px 2px 2px}
+/* miniature performance-class pills (one per class a Rivals course is offered in) — the established piBadge, shrunk */
+.tcls{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
+.tcls .pib{font-size:8px;border-radius:3px}
+.tcls .pib b{padding:1px 3.5px;text-shadow:none}
+/* NEGATIVE class pill: offered but no data yet — black fill, class-colour outline + letter (vs the solid pill
+   for classes we hold data for). Same colours as the solid .pib-<class> badges, inverted. */
+.pib--neg b{background:#0b0d10;box-shadow:inset 0 0 0 1px currentColor;text-shadow:none}
+.pib--neg.pib-d b{color:#45c8f1}
+.pib--neg.pib-c b{color:#f0c530}
+.pib--neg.pib-b b{color:#f0862d}
+.pib--neg.pib-a b{color:#e5414e}
+.pib--neg.pib-s1 b{color:#a468e8}
+.pib--neg.pib-s2 b{color:#2f62e0}
+.pib--neg.pib-r b{color:#e83c9e}
+.pib--neg.pib-x b{color:#2fd05f}
+/* Info panes may scroll (Jett: break the no-scroll rule for these): the Course Browser tile grid, and the
+   turn-analysis pane (.tstat) whose corner map + leaderboard + errors run past the pane. Scoped to the RIGHT
+   pane so it overrides the global no-scroll `body.fixed .pane>.body{overflow:hidden}` only where wanted. */
+.tiles{padding-bottom:4px}
+body.fixed #pRight > .body:has(.tiles),
+body.fixed #pRight > .body:has(.tstat){overflow-y:auto}
+
+/* ---- world map: course-type traces, and the hover link to the Course Browser (2026-09-08) ----
+   Hover is a PREVIEW on both surfaces: it brightens, it never selects. `.tile.on` (a committed pick)
+   keeps the accent border; `.tile.hi` is deliberately a different, softer signal so the two never
+   read as the same state. */
+.wcourse .wc-ink{stroke-width:1.6px;transition:stroke-width .12s ease,opacity .12s ease}
+.wcourse.hi .wc-ink{stroke-width:3.4px;opacity:1}
+.wcourse.hi{filter:drop-shadow(0 0 3px rgba(255,255,255,.45))}
+.tile.hi{border-color:var(--acc2);background:var(--panel)}
+.tile.hi .tnm{color:var(--acc2)}
+
+/* ---- background services (2026-09-08) ---- */
+.svcrow{align-items:center;gap:8px}
+.svcdot{width:8px;height:8px;border-radius:50%;background:var(--bad);flex:0 0 auto}
+.svcdot[data-up="1"]{background:var(--ok)}
+.svcbtns{margin-left:auto;display:flex;gap:4px}
+.mini.svcb{min-width:62px}

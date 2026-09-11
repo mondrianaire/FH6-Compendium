@@ -29,6 +29,7 @@ Everything a designer needs to judge the FH6 lab dashboard without running it.
 
 | File | What it is |
 |---|---|
+| `upgrades-2026-09-11.md` | **START HERE for a re-review** — what changed since the v52 packet (course-mode two-pane, single-turn drill-down, new colour languages, full-data corner analysis) and the calls we want a second opinion on |
 | `screens/` | full-page captures at 1080×1751, and the header alone, per state |
 | `dashboard-states.md` | the contract: regions, modes, the six build states, what each must show |
 | `fh6-ui-spec.md` | the in-game Upgrade & Tune UI transcribed from 758 frames — the design language's source |

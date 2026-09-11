@@ -1200,6 +1200,11 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .cm-splegend .why{margin-right:2px}
 .cm-splegend em{font-style:normal;font:600 10px var(--mono);color:var(--mut)}
 .cm-splegend .cm-grad{display:inline-block;width:64px;height:7px;border-radius:2px;background:linear-gradient(90deg,#f0616d,#e3b341,#00d27a)}
+/* position (rank) gradient reads best→slowest left→right: P1 green, worst red */
+.cm-splegend .cm-grad--rank{background:linear-gradient(90deg,#00d27a,#e3b341,#f0616d)}
+.cm-splegend .cm-views{margin-left:auto;display:inline-flex;gap:3px}
+.cm-splegend .cm-views .mini{padding:1px 7px;font-size:10.5px}
+.cm-splegend .cm-views .mini.on{color:var(--acc);border-color:var(--acc);background:rgba(0,210,122,.12)}
 /* single-verdict diagnosis card */
 .dxcard{border-left:3px solid var(--warn);background:var(--bg);padding:8px 10px;border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:3px}
 .dxcard--ok{border-left-color:var(--acc)}

@@ -1754,6 +1754,11 @@ let TURN_SORT = (() => { try { return localStorage.getItem("fh6TurnSort") || "fi
 // MAP_VIEW: how the left course map colours its traces — "laptime" (each lap by its recorded time, a gradient)
 // or "phases" (the whole road painted by the 5-phase turn model). Toggled from the map's floating legend.
 let MAP_VIEW = (() => { try { return localStorage.getItem("fh6MapView") || "laptime"; } catch (e) { return "laptime"; } })();
+// CM_TRACE_MODE: how the single-corner map colours each lap's driven line. "rank" (default) paints each
+// trace ONE solid colour by its leaderboard position for this turn — green fastest → red slowest, so the
+// map reads at a glance which lines belong to quick laps; "speed" keeps the point-by-point speed gradient
+// (slow red → fast green within the corner) as a togglable filter. Persisted; a corner-map legend toggles it.
+let CM_TRACE_MODE = (() => { try { return localStorage.getItem("fh6CmTrace") || "rank"; } catch (e) { return "rank"; } })();
 // MAP_LEG_OPEN: whether the course map's floating legend pill is expanded to show the colour key. Collapsed
 // by default so the pill stays small and never covers the turn numbers.
 let MAP_LEG_OPEN = (() => { try { return localStorage.getItem("fh6MapLeg") === "1"; } catch (e) { return false; } })();
@@ -2586,6 +2591,8 @@ function paintRight() {
     });
     // click a leaderboard lap -> isolate its trace on the corner map (dim the rest); re-apply after a repaint
     body.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.onclick = () => pickLap(r.dataset.lap));
+    // corner-map trace colouring: position (solid by leaderboard rank, default) vs speed (per-point gradient)
+    body.querySelectorAll("[data-cmtrace]").forEach((b) => b.onclick = () => { CM_TRACE_MODE = b.dataset.cmtrace; try { localStorage.setItem("fh6CmTrace", CM_TRACE_MODE); } catch (e) {} paintRight(); });
     applyLapPick();
   }
   if (cur === "stats") body.querySelectorAll("[data-clsfocus]").forEach((b) => b.onclick = () => {
@@ -2845,6 +2852,15 @@ function spdColor(v, vmin, vmax) {
   const s = f < 0.5 ? [[240, 97, 109], [227, 179, 65], f / 0.5] : [[227, 179, 65], [0, 210, 122], (f - 0.5) / 0.5];
   return `rgb(${lp(s[0][0], s[1][0], s[2])},${lp(s[0][1], s[1][1], s[2])},${lp(s[0][2], s[1][2], s[2])})`;
 }
+// leaderboard POSITION -> a single solid colour for a lap's whole trace: rank 0 (fastest) = green, through
+// amber, to the slowest = red — the same green→amber→red the course map's lap-time gradient uses, so "quick"
+// reads the same on both maps. i is the 0-based leaderboard index; n the number of ranked passes.
+function rankColor(i, n) {
+  let f = (n <= 1 || i == null) ? 0 : i / (n - 1); f = Math.max(0, Math.min(1, f));
+  const lp = (a, b, k) => Math.round(a + (b - a) * k);
+  const s = f < 0.5 ? [[0, 210, 122], [227, 179, 65], f / 0.5] : [[227, 179, 65], [240, 97, 109], (f - 0.5) / 0.5];
+  return `rgb(${lp(s[0][0], s[1][0], s[2])},${lp(s[0][1], s[1][1], s[2])},${lp(s[0][2], s[1][2], s[2])})`;
+}
 function cornerMapHTML(c, t, ls) {
   const segs = t.seg || {};
   const phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
@@ -2876,29 +2892,45 @@ function cornerMapHTML(c, t, ls) {
   const ctx = road.length ? _split(road).map((run) => `<polyline fill="none" stroke="#3a4453" stroke-width="2" opacity=".4" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
   // the 5 phases as a TRANSLUCENT UNDERLAY band (structure), so the speed-coloured driven lines read on top
   const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" opacity=".26" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
-  // DRIVEN SPEED LINES: every lap's racing line through this corner (active preset only), each coloured
-  // point-by-point by speed (red slow -> green fast). Each lap's segments are wrapped in a <g data-lap> so
-  // selecting a lap in the leaderboard can dim the rest and lift that one (see paintRight's matrix wiring).
-  const winV = [], runsByLap = {};
+  // DRIVEN SPEED LINES: every lap's racing line through this corner (active preset only). DEFAULT ("rank"):
+  // each lap's line is ONE solid colour = its leaderboard position for this turn (green fastest → red slowest).
+  // FILTER ("speed"): coloured point-by-point by speed (red slow → green fast) within the corner. Each lap's
+  // segments are wrapped in a <g data-lap> so selecting a lap in the leaderboard can dim the rest and lift it.
+  const winV = [], runsByLap = {}, paceByLap = {};
   Object.keys(c.traces || {}).forEach((id) => {
     if (ls.set && !ls.set.has(String(id))) return;
     const tr = c.traces[id]; if (!tr || tr.length < 3) return;
-    const lapRuns = []; let run = [];
+    const lapRuns = []; let run = [], sumV = 0, nV = 0;
     for (const p of tr) {
       const X = p[3], Z = p[4], V = p[1];
       if (X == null || Z == null || X < x0 || X > x1 || Z < z0 || Z > z1) { if (run.length > 1) lapRuns.push(run); run = []; continue; }
-      run.push([X, Z, V]); if (V != null) winV.push(V);
+      run.push([X, Z, V]); if (V != null) { winV.push(V); sumV += V; nV++; }
     }
     if (run.length > 1) lapRuns.push(run);
-    if (lapRuns.length) runsByLap[id] = lapRuns;
+    if (lapRuns.length) { runsByLap[id] = lapRuns; paceByLap[id] = nV ? sumV / nV : 0; }
   });
   const vmin = winV.length ? Math.min(...winV) : 0, vmax = winV.length ? Math.max(...winV) : 1;
+  // PACE RANK (default colouring): order every DRAWN trace by its mean speed through this corner — fastest
+  // first — so each trace gets a leaderboard position and one solid colour (green quickest → red slowest).
+  // Ranking the drawn traces themselves (not the phaseObs timing table, which is one representative lap per
+  // turn) means every line is coloured, and pace reads at a glance. The timing leaderboard you click to
+  // isolate a lap is also speed-ordered, so a quick lap there is a green line here.
+  const paceOrder = Object.keys(runsByLap).sort((a, b) => paceByLap[b] - paceByLap[a]);
+  const rankOf = {}; paceOrder.forEach((id, i) => { rankOf[id] = i; });
+  const nDrawn = paceOrder.length;
+  const byRank = CM_TRACE_MODE === "rank" && nDrawn > 0;   // default: solid colour by pace position
   const speedLines = Object.entries(runsByLap).map(([id, lapRuns]) => {
+    // rank view: one solid colour for the whole lap by its pace position; speed view: per-segment gradient.
+    // sw thickens the fastest lap a touch so P1 stands out.
+    const ri = rankOf[id];
+    const solid = byRank ? rankColor(ri, nDrawn) : null;
+    const sw = byRank && ri === 0 ? 2 : 1.3;
     const seg2 = lapRuns.map((run) => {
       let r = run; if (r.length > 40) { const stp = r.length / 40; r = Array.from({ length: 40 }, (_, i) => run[Math.floor(i * stp)]); }
       let out = "";
       for (let i = 1; i < r.length; i++) { const a = r[i - 1], b = r[i], v = ((a[2] || 0) + (b[2] || 0)) / 2;
-        out += `<line x1="${px(a[0]).toFixed(1)}" y1="${py(a[1]).toFixed(1)}" x2="${px(b[0]).toFixed(1)}" y2="${py(b[1]).toFixed(1)}" stroke="${spdColor(v, vmin, vmax)}" stroke-width="1.3" stroke-linecap="round"/>`; }
+        const col = byRank ? solid : spdColor(v, vmin, vmax);
+        out += `<line x1="${px(a[0]).toFixed(1)}" y1="${py(a[1]).toFixed(1)}" x2="${px(b[0]).toFixed(1)}" y2="${py(b[1]).toFixed(1)}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`; }
       return out;
     }).join("");
     return `<g class="cm-lap" data-lap="${esc(String(id))}">${seg2}</g>`;
@@ -2920,7 +2952,12 @@ function cornerMapHTML(c, t, ls) {
     exP && exP.exit != null && segs.exit ? pillAt(segs.exit[segs.exit.length - 1], exP.exit) : "",
   ].join("");
   const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${speedLines}${apex}${chev}${pills}</svg>`;
-  const spdLeg = winV.length ? `<div class="cm-splegend"><span class="why">line colour = speed</span><em>${Math.round(vmin)}</em><i class="cm-grad"></i><em>${Math.round(vmax)} mph</em></div>` : "";
+  // legend reflects the active colouring; the toggle switches it (position = default, speed = filter)
+  const modeLeg = byRank
+    ? `<span class="why">line colour = position (fastest → slowest)</span><em>P1</em><i class="cm-grad cm-grad--rank"></i><em>P${nDrawn}</em>`
+    : (winV.length ? `<span class="why">line colour = speed</span><em>${Math.round(vmin)}</em><i class="cm-grad"></i><em>${Math.round(vmax)} mph</em>` : `<span class="why">line colour = speed</span>`);
+  const cmToggle = `<span class="cm-views">${[["rank", "position", "each trace one solid colour by its leaderboard position"], ["speed", "speed", "colour each trace point-by-point by speed"]].map(([k, l, tip]) => `<button class="mini ${CM_TRACE_MODE === k ? "on" : ""}" data-cmtrace="${k}" title="${tip}">${l}</button>`).join("")}</span>`;
+  const spdLeg = `<div class="cm-splegend">${modeLeg}${cmToggle}</div>`;
   return `<div class="grp tstat-corner">${ghd}${svg}${spdLeg}${trailBox}</div>`;
 }
 // RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active

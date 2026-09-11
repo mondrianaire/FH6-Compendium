@@ -2479,24 +2479,55 @@ function presentScale(svg, vw, sc) {
   const note = document.getElementById("mapScale");
   if (note) note.textContent = across >= 3000 ? "whole island" : across + " m across";
 }
+// COURSE FOLLOW CAMERA (Jett 2026-09-11, Q1): the whole-course map zooms in to follow the car ONLY while a lap
+// is live, and eases back to the full-course fit on the live→held edge (a pause, the end-of-event menu and
+// browsing all keep the static fit). Reads LIVE.lap.live + LIVEPOS + LIVE_HEAD (heading, for the look-ahead).
+// The window is a ~180 m span centred 0.55 on the car / 0.45 on where it is heading, so the road ahead leads.
+function courseFollow(svg, sc, H, pad) {
+  const full = FOLLOW.full;
+  const live = !!(LIVE.lap && LIVE.lap.live) && Array.isArray(LIVEPOS);
+  if (live && !FOLLOW.wasLive) FOLLOW.span = null;            // snap in on the held→live edge
+  FOLLOW.wasLive = live;
+  let cxT, czT, wantW;
+  if (live) {
+    const carX = pad + (LIVEPOS[0] - +svg.dataset.x0) * sc, carY = H - pad - (LIVEPOS[1] - +svg.dataset.z0) * sc;
+    wantW = Math.min(full.w, 180 * sc * 1.3);
+    let laX = carX, laY = carY;
+    if (LIVE_HEAD.a != null) { const r = LIVE_HEAD.a * Math.PI / 180, look = wantW * 0.28; laX = carX + Math.sin(r) * look; laY = carY - Math.cos(r) * look; }
+    cxT = carX * 0.55 + laX * 0.45; czT = carY * 0.55 + laY * 0.45;
+  } else { wantW = full.w; cxT = full.w / 2; czT = full.h / 2; }
+  if (FOLLOW.span == null) {
+    if (!live) { svg.setAttribute("viewBox", `0 0 ${full.w} ${full.h}`); return; }   // idle: already the full fit
+    FOLLOW.span = wantW; FOLLOW.cx = cxT; FOLLOW.cz = czT;                            // live edge: snap the window in
+  }
+  const k = 0.12;
+  FOLLOW.span += (wantW - FOLLOW.span) * k; FOLLOW.cx += (cxT - FOLLOW.cx) * k; FOLLOW.cz += (czT - FOLLOW.cz) * k;
+  const vw = FOLLOW.span, vh = vw * (full.h / full.w);
+  const vx = Math.max(0, Math.min(full.w - vw, FOLLOW.cx - vw / 2)), vy = Math.max(0, Math.min(full.h - vh, FOLLOW.cz - vh / 2));
+  svg.setAttribute("viewBox", vx.toFixed(1) + " " + vy.toFixed(1) + " " + vw.toFixed(1) + " " + vh.toFixed(1));
+  svg.classList.toggle("close", Math.round(vw / sc) < 600);
+  if (live || Math.abs(FOLLOW.span - full.w) >= 2) queueFollow();                     // keep following, or keep easing back
+  else { svg.setAttribute("viewBox", `0 0 ${full.w} ${full.h}`); FOLLOW.span = null; }  // settled to full → stop
+}
 function followMap() {
   FOLLOW.raf = 0;
-  const body = $("#leftBody"), svg = body && body.querySelector("svg");
+  const body = $("#leftBody");
+  const courseMode = MODE.suggest === "course" && !!COURSE;
+  // in course view the FIRST svg in the pane is the hero glyph; the map is .cmap svg[data-x0]
+  const svg = courseMode ? (body && body.querySelector(".cmap svg[data-x0]")) : (body && body.querySelector("svg"));
   if (!svg || svg.dataset.x0 == null) return;
   const sc = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
   const W = +svg.dataset.w || svg.viewBox.baseVal.width || 900;
-  // Self-invalidating extent cache: re-capture whenever the SVG is rebuilt at a new size. The
-  // LEFT_KEY reset covers view/course switches, but a same-key redraw (a world-extent recompute
-  // or a pane resize that changes dataset.w/h) would otherwise leave the cached full extent stale
-  // and mis-frame follow mode. Guard on finite dims so a missing dataset.h can't thrash the reset.
-  if (!FOLLOW.full || (Number.isFinite(W) && Number.isFinite(H) && (FOLLOW.full.w !== W || FOLLOW.full.h !== H))) {
-    FOLLOW.full = { w: W, h: H };
-    FOLLOW.span = null;                                       // re-seed the animation against the new box
+  // Self-invalidating extent cache: re-capture whenever the SVG is rebuilt at a new size OR the context
+  // (course vs world) changes, so the eased box is always seeded against the box actually on screen.
+  const ctx = courseMode ? "course" : "world";
+  if (!FOLLOW.full || FOLLOW.ctx !== ctx || (Number.isFinite(W) && Number.isFinite(H) && (FOLLOW.full.w !== W || FOLLOW.full.h !== H))) {
+    FOLLOW.full = { w: W, h: H }; FOLLOW.ctx = ctx; FOLLOW.span = null;
   }
-  // Present-only (never write viewBox) when the user has not opted into follow (MAPVIEW owns it -- the flicker
-  // fix) OR when this is the live COURSE view, which is deliberately static: courseMap fits the whole course and
-  // the follow-preview zoom is a free-view-only tool now, so a persisted FOLLOW.on cannot zoom a course map.
-  if (!FOLLOW.on || (MODE.suggest === "course" && COURSE)) {
+  if (courseMode) { courseFollow(svg, sc, H, pad); return; }
+  // free roam: present-only (never write viewBox) unless the user opted into the follow preview — MAPVIEW owns
+  // the viewBox otherwise (the flicker fix).
+  if (!FOLLOW.on) {
     presentScale(svg, (typeof MAPVIEW !== "undefined" && MAPVIEW.cw) || svg.viewBox.baseVal.width || W, sc);
     return;
   }

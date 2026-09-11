@@ -438,8 +438,8 @@ function paintIdBar() {
     <span class="idb-pi">${piBadge(CUR.cls, CUR.pi)}</span>
     <span class="idb-car" title="${esc(carNm)}">${esc(carNm)}</span>
     <span class="idb-sep">│</span>
-    ${tune ? `<span class="idb-build" title="${esc(tune)}">${rs.key === "resolved" ? `<b class="tick">✓</b> ` : ""}${esc(shedName(tune, 32))}</span>` : `<span class="idb-build empty">${CUR.disk ? "unnamed save" : "no save on disk"}</span>`}
-    <span class="idb-chip chip ${tone === "acc" ? "on" : tone === "bad" ? "b" : "w"}">${esc((g.ident || "").replace(/^[^A-Za-z]+/, ""))}</span>
+    ${tune ? `<span class="idb-build" title="${esc(tune)}">${rs.key === "resolved" ? `<b class="tick">✓</b> ` : ""}${esc(shedName(tune, 32))}</span>` : `<span class="idb-build empty">${g.spec ? "event spec tune — temporary" : CUR.disk ? "unnamed save" : "no save on disk"}</span>`}
+    <span class="idb-chip chip ${tone === "acc" ? "on" : g.spec ? "spec" : tone === "bad" ? "b" : "w"}">${esc((g.ident || "").replace(/^[^A-Za-z]+/, ""))}</span>
     <span class="idb-hint why" title="${esc(rs.hint || "")}">${esc(rs.hint || g.detail || "")}</span>
     ${g.sheet === "filled" ? `<button class="idb-sheet" data-act="sheet">🔓 Build sheet ▸</button>`
       : (g.sheet === "outline" && reach) ? `<button class="idb-sheet outline" data-act="sheet">🔓 Build sheet ▸</button>`
@@ -1034,8 +1034,21 @@ function paintDockTrace() {
 // hashes, each holding known SLIDER hashes; a saved (hw_hash, tune_hash) is a complete, clone-able build,
 // and an unsaved one is cid-only and incomplete. So the header's status is where we are in that resolution
 // — RESOLVED / AMBIGUOUS / UNSAVED — not the old UNKNOWN→RATIFIED spectrum. Reuses buildStatus()'s signals.
+// SPEC / TEMPORARY-CAR EVENT (Jett 2026-09-11): some Rivals give a FIXED car + tune that you do not own and
+// that vanish after the event (spec racing). "No save on disk" is then EXPECTED, not a fault, and no tuning
+// applies — the analysis is driving-only. Heuristic: in an event, the live car has no disk save AND its
+// ordinal is not in the car catalogue (a provided car the garage never held).
+function isSpecEvent() {
+  if (!CUR || CUR.disk) return false;
+  const inEvent = MODE.game === "event" || (MODE.suggest === "course" && COURSE && COURSE.rivals);
+  if (!inEvent) return false;
+  const ord = CUR.ordinal != null ? CUR.ordinal : (CUR.cid ? parseInt(String(CUR.cid).split("|")[0], 10) : null);
+  return ord != null && !CARMAP[ord];   // uncatalogued + no save + in an event = provided spec car
+}
 function resolutionState() {
   const st = buildStatus();
+  if (isSpecEvent()) return { key: "spec", label: "spec car", tone: "blue", clonable: false, locked: false, hwN: 0, tunes: 0,
+    hint: "spec car provided by the event — fixed car + tune, temporary; nothing to save or compare, so any advice here is about driving, not tuning" };
   const mm = (CUR && CUR.match) || {};
   const q = matchQuality(CUR && CUR.match);
   const ambiguous = q.level === "ambiguous" || q.level === "conflict";
@@ -1072,6 +1085,7 @@ function gateStrip(st, rs) {
   const ch = CHANGE || {}, nSl = (ch.sliders || []).length, nPa = (ch.slots || []).length;
   if (!CUR || rs.key === "none") return { tone: "dim", ident: "—", detail: "waiting for a car", sheet: "dead", sheetSub: "no car" };
   if (st.key === "offline") return { tone: "dim", ident: "◌ NOT LIVE", detail: "last thing seen", sheet: "dead", sheetSub: "daemon down" };
+  if (rs.key === "spec") return { tone: "blue", ident: "◈ SPEC CAR", detail: "provided by the event · temporary", sheet: "dead", sheetSub: "spec — nothing to save", spec: true };
   if (rs.key === "ambiguous") {
     const mm = (CUR && CUR.match) || {}; const ties = mm.n_signature_ties || rs.tunes || 0;
     return { tone: "warn", ident: "! NOT IDENTIFIED", detail: ties ? ties + " saves tie" : "several saves tie",
@@ -2808,6 +2822,58 @@ function cornerMapHTML(c, t, ls) {
 // chips AND a sentence, the grip in a column AND a card. Now geometry is one header line, timing is
 // one summary line (the detail is the leaderboard's own turn-s column), the per-phase speed+grip is
 // the leaderboard, and grip is one whole-turn bar -- each fact in exactly one place.
+// ---- ERROR ANALYSIS (Jett 2026-09-11): a per-phase error is a phase whose dominant off-grip state recurs
+// in >=30% of the samples. Each carries a FREQUENCY (share of same-kind corners that show the same phase
+// error), a SEVERITY 0-100 (systemic lap-time impact x error type x amount), and TUNING (the analyzer's own
+// detector fix where one fired on this turn, else the phase+axle rule) -- or, in a spec event, a DRIVING cue.
+const ERR_TYPE_W = { front: 1.0, rear: 1.4, both: 1.55, impact: 1.3 };
+const ERR_RULES = {
+  "braking|front": "Fronts saturate under braking before turn-in — brake pressure down toward the knee, then balance 2–3% rearward.",
+  "turn_in|front": "Trail-brake understeer — finish more of the braking before you steer; caster +0.5 for camber-in-turn.",
+  "mid|front": "Mid-corner understeer — front ARB −2 or softer front springs; if only the fast corners, aero balance forward.",
+  "exit|front": "Understeer off the exit — front ARB −2 / softer front springs so the nose bites earlier on power.",
+  "turn_in|rear": "Turn-in oversteer — rear ARB/springs softer, or a touch more rear toe-in; ease the trail-braking.",
+  "mid|rear": "Mid-corner oversteer — rear ARB/springs softer; add rear downforce if it's the fast corners.",
+  "exit|rear": "Power-down oversteer on exit — accel diff lock −10%, or soften the rear / add rear toe-in.",
+};
+function errRule(ph, state) {
+  if (state === "both") return "All four beyond grip — an overdriven line, not a balance fault. Drive it within grip for 3 more laps to separate line from tune.";
+  if (state === "impact") return "Impacts / jolts through the corner — ride height up a notch or springs stiffer (verify on the HUD Suspension page).";
+  return ERR_RULES[ph + "|" + state] || ERR_RULES["mid|" + state] || "Rear-limited — rear ARB/springs softer; on throttle, accel diff lock −10%.";
+}
+function drivingCue(ph, state) {
+  if (state === "rear") return ph === "exit" ? "Squeeze the throttle later and smoother on exit — the rear steps out when you pick it up too early." : "Ease the trail-braking and be gentler with mid-corner throttle so the rear stays planted.";
+  if (state === "front") return "Brake a touch earlier and slow your hands — you're asking the front for more grip than it has, so it washes wide.";
+  if (state === "both") return "You're over the limit everywhere here — carry less entry speed and settle the car before you ask for power.";
+  if (state === "impact") return "Pick a smoother line over the bumps/kerb through here so the suspension isn't bottoming.";
+  return "Smooth the inputs through this phase.";
+}
+function turnPhaseDom(t, ls) {
+  const out = {};
+  SEG_ORDER.forEach((n) => { const p = phaseAgg((t.phaseObs || {})[n], ls.set);
+    if (!p || !p.mix) { out[n] = { dom: "calm", share: 0, time: p && p.time }; return; }
+    let bi = 0, bv = 0; for (let i = 1; i < 5; i++) { if (p.mix[i] > bv) { bv = p.mix[i]; bi = i; } }
+    out[n] = bi > 0 ? { dom: GSTATE[bi], share: bv, time: p.time } : { dom: "calm", share: 0, time: p.time };
+  });
+  return out;
+}
+function courseLapMed() { const ts = (COURSE && COURSE.laps || []).map((l) => l.t).filter((v) => v != null).sort((a, b) => a - b); return ts.length ? ts[ts.length >> 1] : null; }
+function turnErrors(t, ls, cmp) {
+  const lapMed = courseLapMed() || 1, sims = (COURSE.turns || []).filter((x) => x.kind === t.kind), dom = turnPhaseDom(t, ls), errs = [];
+  const cache = new Map(), domOf = (x) => { if (!cache.has(x)) cache.set(x, turnPhaseDom(x, ls)); return cache.get(x); };
+  SEG_ORDER.forEach((n) => { const d = dom[n]; if (!d || d.dom === "calm" || d.share < 0.30) return;
+    const cr = cmp.find((c) => c.n === n), tl = (cr && cr.typ != null && cr.best != null) ? Math.max(0, cr.typ - cr.best) : 0;
+    let hit = 0; sims.forEach((s) => { const sd = domOf(s)[n]; if (sd && sd.dom === d.dom && sd.share >= 0.30) hit++; });
+    const freq = sims.length ? hit / sims.length : 0, systemic = tl * Math.max(1, hit), sysPct = systemic / lapMed * 100;
+    const sev = Math.min(100, Math.round(sysPct * 20 * (ERR_TYPE_W[d.dom] / 1.2) * (0.75 + 0.25 * d.share)));
+    const sevLab = sev >= 75 ? "critical" : sev >= 50 ? "major" : sev >= 25 ? "moderate" : "minor";
+    let tuning = null, src = "rule";
+    (DIAG && DIAG.by_turn ? DIAG.by_turn : []).some((r) => { if (r.route_key === COURSE.key && (r.turn_id === t.turn_id || r.turn_id === t.id) && r.phase === n && r.primary_fix) { tuning = r.symptom + " → " + r.primary_fix; src = "detector"; return true; } return false; });
+    if (!tuning) tuning = errRule(n, d.dom);
+    errs.push({ phase: n, state: d.dom, share: d.share, freq, hit, nsim: sims.length, timeLost: tl, systemic, sysPct, sev, sevLab, tuning, src });
+  });
+  errs.sort((a, b) => b.sev - a.sev); return errs;
+}
 function turnStatsHTML(t, ls) {
   const obs = t.phaseObs || {};
   const inSet = (r) => ls.set.has(String(r[0]));
@@ -2849,23 +2915,30 @@ function turnStatsHTML(t, ls) {
 
   // ---- DIAGNOSIS: ONE verdict card (the worst detector row on THIS turn), tone-coloured; a green
   // "nothing to change" card when nothing fired. route_key + turn_id match against the detector output.
-  const dxRows = (DIAG && DIAG.by_turn ? DIAG.by_turn : [])
-    .filter((r) => r.route_key === COURSE.key && (r.turn_id === t.turn_id || r.turn_id === t.id))
-    .sort((a, b) => (b.occurrences * (b.mean_severity || 0.5)) - (a.occurrences * (a.mean_severity || 0.5)));
-  const diag = (() => {
-    if (!dxRows.length) return `<div class="grp"><div class="dxcard dxcard--ok">
-      <div class="dx-top"><span class="dx-lbl">diagnosis</span><span class="dx-conf ok">measured · ${nLaps} lap${nLaps === 1 ? "" : "s"}</span></div>
-      <div class="dx-head" style="color:var(--acc)">Nothing to change here</div>
-      <div class="dx-fix">Every phase reads within grip across the drawn laps — the corner isn't costing the tune anything.</div>
-      <div class="dx-ev">${esc(gripRead(turnMix))}</div></div></div>`;
-    const r = dxRows[0], sev = r.mean_severity || 0.5, tone = sev >= 0.6 ? "#f0616d" : "#e3b341", enough = r.laps_affected >= 5;
-    return `<div class="grp"><div class="dxcard" style="border-left-color:${tone}">
-      <div class="dx-top"><span class="dx-lbl">diagnosis</span>${r.phase ? `<span class="dx-rule" style="border-color:${tone};color:${tone}">${esc(r.phase)}</span>` : ""}
-        <span class="dx-conf ${enough ? "ok" : "weak"}">${enough ? "measured · " + r.laps_affected + " laps" : "need more · " + r.laps_affected + " of 5 laps"}</span></div>
-      <div class="dx-head" style="color:${tone}">${esc(r.symptom)}</div>
-      ${r.primary_fix ? `<div class="dx-fix">${esc(r.primary_fix)}</div>` : ""}
-      <div class="dx-ev">${r.occurrences} occurrence${r.occurrences === 1 ? "" : "s"} on ${r.laps_affected} lap${r.laps_affected === 1 ? "" : "s"}${dxRows.length > 1 ? " · +" + (dxRows.length - 1) + " more flagged" : ""}</div></div></div>`;
-  })();
+  // ---- DETECTED ERRORS: each phase's dominant off-grip fault, with frequency in similar corners, a severity
+  // (systemic lap impact x type x amount), and tuning — or a DRIVING cue when the car is a spec/temporary one.
+  const errs = turnErrors(t, ls, cmp);
+  const SEVCOL = { minor: "var(--mut)", moderate: "var(--warn)", major: "#f0862d", critical: "var(--bad)" };
+  const spec = isSpecEvent();
+  const errHead = (e) => { const P = SEG_LABEL[e.phase];
+    return e.state === "both" ? P + ": an overdriven line — all four past grip" : e.state === "front" ? P + ": understeer — the front washes out"
+      : e.state === "rear" ? P + ": oversteer — the rear steps out" : e.state === "impact" ? P + ": the suspension is bottoming" : P; };
+  const diag = errs.length ? `<div class="grp"><div class="gh">Detected errors <span class="why">· 5-phase · how often in similar corners · severity · ${spec ? "driving" : "tuning"}</span></div>
+    ${errs.map((e) => { const sc = SEVCOL[e.sevLab], gg = DGRIP[e.state] || DGRIP.calm;
+      const tx = spec ? drivingCue(e.phase, e.state) : e.tuning, wr = spec ? "drive" : "tune", src = spec ? "spec car" : e.src;
+      return `<div class="terr" style="--sev:${sc}"><div class="terr-top">
+        <span class="terr-ph" style="border-color:${SEG_COL[e.phase]}"><i style="background:${SEG_COL[e.phase]}"></i>${esc(SEG_LABEL[e.phase])}</span>
+        <span class="terr-grip" style="color:${gg.col}">${esc(gg.word)}</span>
+        <span class="terr-sev"><b style="color:${sc}">${e.sev}</b><em style="color:${sc}">${e.sevLab}</em></span></div>
+        <div class="terr-head">${esc(errHead(e))}</div>
+        <div class="terr-m">
+          <span><em>freq · similar</em><b>${Math.round(e.freq * 100)}%</b><i>${e.hit}/${e.nsim} ${esc(t.kind)}</i></span>
+          <span><em>lap impact</em><b>+${e.timeLost.toFixed(2)}s</b><i>${e.systemic.toFixed(2)}s · ${e.sysPct.toFixed(1)}% systemic</i></span>
+          <span><em>amount</em><b>${Math.round(e.share * 100)}%</b><i>of samples</i></span></div>
+        <div class="terr-tune"><span class="wr">${wr}</span><span class="tx">${esc(tx)}<span class="src">${esc(src)}</span></span></div></div>`;
+    }).join("")}</div>`
+    : `<div class="grp"><div class="dxcard dxcard--ok"><div class="dx-top"><span class="dx-lbl">diagnosis</span><span class="dx-conf ok">measured · ${nLaps} lap${nLaps === 1 ? "" : "s"}</span></div>
+      <div class="dx-head" style="color:var(--acc)">Nothing to change here</div><div class="dx-fix">Every phase reads within grip across the drawn laps.</div><div class="dx-ev">${esc(gripRead(turnMix))}</div></div></div>`;
 
   // ---- WHERE THE TIME GOES: the headline turn-time figure + available, the fastest/most-time verdict, a
   // per-phase time-budget bar, and the typical-vs-best table (5th column visualises each phase's gap).

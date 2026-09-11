@@ -314,6 +314,9 @@ function robustBounds(paths) {
 // foregrounded lap solid, and says how many it drew.
 function courseMap(c, opts) {
   opts = opts || {};
+  // LAYER VISIBILITY (redesign map legend): centre = road / centre-line, laps = the lap bundle, phases =
+  // the selected turn's 5-phase overlay. Toggled from the legend (panel.js MAP_LAYERS; loaded first).
+  const LY = (typeof MAP_LAYERS !== "undefined") ? MAP_LAYERS : { centre: true, laps: true, phases: true };
   const ids = opts.laps && opts.laps.length ? opts.laps.map(String) : Object.keys(c.traces || {});
   const lapT = {}; (c.laps || []).forEach((l) => { if (l.t != null) lapT[String(l.id)] = l.t; });
   // keep each driven path with its lap id: it lets a path be coloured by its own lap time, and fixes a
@@ -418,16 +421,20 @@ function courseMap(c, opts) {
   // A "key" button expands the colour key on demand. The DATA filter is NOT here — it lives in the shared
   // #coursefilter bar between the trace and the info pane.
   const legOpen = !!opts.legOpen;
+  // LAYER TOGGLES on the legend bar (redesign): show/hide each layer independently of the colour view.
+  const lyBtn = (k, lbl, extra) => `<button class="cleg-ly ${LY[k] ? "on" : "off"}" data-maplayer="${k}" title="${LY[k] ? "hide" : "show"} the ${lbl} layer">${lbl}${extra != null && extra !== "" ? `<b>${extra}</b>` : ""}<i>${LY[k] ? "on" : "off"}</i></button>`;
+  const layerRow = `<span class="cleg-layers">${lyBtn("centre", "centre")}${lyBtn(showPhases ? "phases" : "laps", showPhases ? "phases" : "laps", showPhases ? "" : pathRows.length)}${selT ? lyBtn("phases", "phases", esc(turnLabel(selT))) : ""}</span>`;
   return el(`<div class="cmap">
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg)" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
-      ${line(theirs, "#3d4a5a", 9, 0.55)}
-      ${line(theirs, "#8fa0b3", 1.4, showPhases ? 0.45 : 0.9)}
-      <g class="cmap-hist">${laps}</g>
-      ${phaseOv}<g id="liveLap" pointer-events="none"></g>${turns}<g id="traceMark"></g>
+      ${LY.centre ? line(theirs, "#3d4a5a", 9, 0.55) : ""}
+      <g class="cmap-hist">${(showPhases ? LY.phases : LY.laps) ? laps : ""}</g>
+      ${LY.centre ? line(theirs, "#8fa0b3", 2.2, showPhases ? 0.5 : 0.92) : ""}
+      ${LY.phases ? phaseOv : ""}<g id="liveLap" pointer-events="none"></g>${turns}<g id="traceMark"></g>
     </svg>
     <div class="cmap-legend${legOpen ? " open" : ""}">
       <div class="cleg-bar">
         <button class="cleg-toggle" data-legtoggle title="${legOpen ? "collapse the map legend" : "expand the map legend"}">legend ${legOpen ? "▾" : "▸"}</button>
+        ${layerRow}
         <span class="leg-live" title="the lap being driven, painted on the map by grip; held as the last run through a pause or the end-of-event menu"><i></i><b class="ll-now">LIVE lap</b><b class="ll-last">last run</b></span>
       </div>
       <div class="cleg-body"${legOpen ? "" : " hidden"}>

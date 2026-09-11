@@ -1771,6 +1771,7 @@ function paintLeft() {
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
     body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-maplayer]").forEach((b) => b.onclick = () => { const k = b.dataset.maplayer; MAP_LAYERS[k] = !MAP_LAYERS[k]; try { localStorage.setItem("fh6MapLayers", JSON.stringify(MAP_LAYERS)); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     // WHAT THE LIVE TRAIL'S COLOUR MEANS (Jett 2026-09-11: selectable in the map legend's settings) -- the same
     // state as the speed trace's paint toggle, so the two views of the live lap can never disagree
     body.querySelectorAll("[data-trailpaint]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.trailpaint; saveTraceMode(); TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); paintCourseFilter(); });
@@ -1939,6 +1940,12 @@ let CM_TRACE_MODE = (() => { try { return localStorage.getItem("fh6CmTrace") || 
 // MAP_LEG_OPEN: whether the course map's floating legend pill is expanded to show the colour key. Collapsed
 // by default so the pill stays small and never covers the turn numbers.
 let MAP_LEG_OPEN = (() => { try { return localStorage.getItem("fh6MapLeg") === "1"; } catch (e) { return false; } })();
+// MAP LAYER VISIBILITY (redesign · map legend): the course map's layers toggle independently of the colour
+// VIEW (MAP_VIEW) — centre = the road / centre-line reference, laps = the lap bundle, phases = the selected
+// turn's 5-phase overlay. The live-lap layer is drawn whenever a lap is live. Persisted; toggled from the
+// legend. courseMap (app.js) reads this global (panel.js loads first).
+let MAP_LAYERS = (() => { const d = { centre: true, laps: true, phases: true };
+  try { return Object.assign(d, JSON.parse(localStorage.getItem("fh6MapLayers") || "{}")); } catch (e) { return d; } })();
 // THE TURN LIST (redesign · phase B): every measured turn enumerated on the LEFT, sortable by route
 // order or by TIME TO FIND (biggest opportunity first — the default). Each row: turn + kind, the five
 // phase apex-mph medians, the median time in the turn, and the seconds available vs your best line.

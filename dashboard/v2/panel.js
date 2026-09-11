@@ -367,6 +367,11 @@ function statusLogHTML() {
   }).join("");
   return `<div class="statlog"><div class="statlog-h">recent status · newest first</div>${rows}</div>`;
 }
+// the lab-services controls (start/stop/restart the daemon, dashboard, rebuild) now live in the TOP status
+// bar as a hover dropdown off the services strip (Jett 2026-09-11) — no longer a right-pane tab.
+function servicesPop() {
+  return `<div class="svcpop"><div class="svcpop-h">lab services · start · stop · restart</div>${servicesHTML()}</div>`;
+}
 function lastAction() {
   const el = document.getElementById("lastact"); if (!el) return;
   let tone = "dim", txt = "", when = "";
@@ -400,6 +405,7 @@ function lastAction() {
       return sp == null ? "" : dot(sp === 0, "sessions", sp === 0 ? "caught up" : sp + " unimported",
         sp === 0 ? "every driving session on disk is imported into the database"
                  : sp + " session" + (sp === 1 ? "" : "s") + " on disk have not been imported yet — corners/laps from them are not queryable until they are"); })()}
+    <span class="svccaret" title="lab services — start · stop · restart">⚙</span>${servicesPop()}
   </span>`;
   if (!LIVE.inMenu) logStatus(txt, tone);   // record the transition (skip the transient in-menu pause, which ticks a duration)
   // DISPLAY prefix (not logged): where the drive is + the lap, so the top bar reads "on course · lap 3 · <freeze>"
@@ -410,6 +416,12 @@ function lastAction() {
   const dispTxt = (loc ? loc + (lapn != null ? " · lap " + lapn : "") + " · " : "") + txt;
   el.dataset.tone = tone;
   el.innerHTML = `<b>${esc(dispTxt)}<i class="statcaret" aria-hidden="true">▾</i></b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}${statusLogHTML()}`;
+  // the services dropdown's controls (moved here from the right-pane tab): wire start/stop/restart, and read
+  // the process state the first time the strip is hovered (so it isn't fetched until someone opens it).
+  el.querySelectorAll("[data-svcact]").forEach((b) => b.onclick = (e) => { e.stopPropagation(); svcAct(b.dataset.svc, b.dataset.svcact); });
+  el.querySelectorAll("[data-svcrefresh]").forEach((b) => b.onclick = (e) => { e.stopPropagation(); svcRefresh(); });
+  const svcs = el.querySelector(".svcs");
+  if (svcs) svcs.addEventListener("mouseenter", () => { if (!SVC.list.length && !SVC.busy && !SVC.err) svcRefresh(); });
 }
 
 function paintPanel() {
@@ -2482,7 +2494,7 @@ const RT_LABEL = { corners: "Live corners", matrix: "Turn analysis", stats: "Gen
 // "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
 // to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
 // list this function returns. Add "build" back to the free-mode array below to re-enable it.
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl", "services"] : ["corners", "stats", "browser", "services"]; }
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl"] : ["corners", "stats", "browser"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
@@ -3132,7 +3144,7 @@ async function svcRefresh() {
     const r = await fetch(REBUILD + "/services");
     SVC.list = (await r.json()).services || []; SVC.err = "";
   } catch (e) { SVC.list = []; SVC.err = "the rebuild service on 8001 is not answering — start the lab with scripts/lab_up.ps1"; }
-  paintRight();
+  lastAction();   // the services controls live in the top bar now
 }
 async function svcAct(name, action) {
   if (name === "dashboard" && (action === "stop" || action === "restart")
@@ -3140,7 +3152,7 @@ async function svcAct(name, action) {
                   + (action === "stop" ? "Stopping it will make this page stop loading — you would restart it with scripts/lab_up.ps1."
                                        : "Restarting it will drop this page for a few seconds; reload after it comes back.")
                   + "\n\nContinue?")) return;
-  SVC.busy = name + ":" + action; SVC.note = ""; SVC.err = ""; paintRight();
+  SVC.busy = name + ":" + action; SVC.note = ""; SVC.err = ""; lastAction();
   try {
     const r = await fetch(REBUILD + "/service", { method: "POST", headers: { "Content-Type": "application/json" },
                                                   body: JSON.stringify({ name, action }) });
@@ -3151,7 +3163,7 @@ async function svcAct(name, action) {
   SVC.busy = null;
   // a restarted service needs a moment to bind before its state is worth reading
   setTimeout(svcRefresh, action === "stop" ? 400 : 1600);
-  paintRight();
+  lastAction();   // repaint the top-bar services dropdown, not the (removed) right-pane tab
 }
 function servicesHTML() {
   const rows = SVC.list.map((v) => {

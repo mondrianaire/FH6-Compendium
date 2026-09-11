@@ -3026,13 +3026,22 @@ function turnStatsHTML(t, ls) {
   const meta = {}; (COURSE.laps || []).forEach((l) => meta[l.id] = l);
   const lapT = {}; (COURSE.laps || []).forEach((l) => { if (l.t != null) lapT[l.id] = l.t; });
   const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
-  // gather each phase's obs row per lap, then rank the passes by their total time through the turn
+  // gather each phase's obs row per lap, then rank the passes by their time through the turn.
   const byLap = {};
   SEG_ORDER.forEach((n) => (obs[n] || []).forEach((r) => { if (!inSet(r)) return; (byLap[r[0]] = byLap[r[0]] || {})[n] = r; }));
-  const passes = Object.keys(byLap).map((id) => {
-    let tt = 0, any = false;
-    SEG_ORDER.forEach((n) => { const r = byLap[id][n]; if (r && r[5] != null) { tt += r[5]; any = true; } });
-    return { id: +id, ph: byLap[id], turnT: any ? tt : null, lapT: lapT[id], meta: meta[id] || {} };
+  const lapIds = Object.keys(byLap);
+  // TYPICAL PHASE SET (Jett 2026-09-11): every driven pass is now exported (build_web no longer keeps only
+  // whole clean laps), but which phases a pass is sampled in is noisy — sum the raw per-phase times and a
+  // pass caught in fewer phases posts a smaller turnT and would falsely rank fastest. So rank on the phase
+  // set the turn ACTUALLY shows: phases present in >= half its passes. turnT sums exactly that set (extra
+  // phases ignored) so every ranked pass is timed over the SAME phases; a pass missing a typical phase has
+  // no comparable time and is left out of the ranking (its grip still counts in the mix + on the map).
+  const nSeen = lapIds.length;
+  const typical = SEG_ORDER.filter((n) => lapIds.reduce((c, id) => c + ((byLap[id][n] && byLap[id][n][5] != null) ? 1 : 0), 0) >= nSeen / 2);
+  const passes = lapIds.map((id) => {
+    const covers = typical.length > 0 && typical.every((n) => byLap[id][n] && byLap[id][n][5] != null);
+    let tt = 0; if (covers) typical.forEach((n) => { tt += byLap[id][n][5]; });
+    return { id: +id, ph: byLap[id], turnT: covers ? tt : null, lapT: lapT[id], meta: meta[id] || {} };
   }).filter((p) => p.turnT != null).sort((a, b) => a.turnT - b.turnT);
   const nLaps = passes.length, best = passes[0] || null;
   const medTurnT = med(passes.map((p) => p.turnT)), medLapT = med(passes.map((p) => p.lapT));

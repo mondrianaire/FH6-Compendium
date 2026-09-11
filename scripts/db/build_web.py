@@ -496,18 +496,29 @@ def main(argv=None):
                     turns = _geo
         c["turns"] = len(turns)                                       # course-card count == what the detail view draws
         # PER-PHASE CORNER STRIP (2026-09-10): raw per-lap corner_segment observations per displayed turn,
-        # phase -> [[lap_id, entry, min, exit, grip]...] over the course's CLEAN laps. The client aggregates
-        # over whatever lap set the trace preset (all / this class / this car / this build / this tune) is
-        # showing -- so the strip separates by class, build and tune with the SAME filter as the map traces.
+        # phase -> [[lap_id, entry, min, exit, grip]...]. The client aggregates over whatever lap set the trace
+        # preset (all / this class / this car / this build / this tune) is showing -- so the strip separates by
+        # class, build and tune with the SAME filter as the map traces.
         # each phase row: [lap_id, entry, min, exit, grip_state, time_s, grip_hist, mean] -- time_s powers
         # the right-pane timing, grip_hist (5-state sample counts) the TRUE grip mix the client sums over
         # the active preset so a turn reads by its typical grip, not its single worst moment, mean the
         # phase's average speed. mean sits LAST so the existing [0..6] indices never shift.
+        #
+        # EVERY DRIVEN PASS, not only whole clean laps (Jett 2026-09-11): the old gate here was per-LAP
+        # (void=0 AND is_partial=0 AND rewinds=0), which on a course driven mostly in practice starved the
+        # analysis to almost nothing -- route:311 kept 1 of 33 laps, so the leaderboard, grip mix and error
+        # stats all ran on a single lap while the DB held 26-32 laps per turn. But corner validity is PER
+        # CORNER, not per lap: corner_segment's speeds/grip are direct telemetry and its time_s is SPATIAL
+        # (arc span / mean speed, import_corners.py), so a partial lap's corners, a rewound lap's corners
+        # (lap_point is already canon-cut at the rewind) and even a contact lap's non-crash corners are all
+        # real. So take every corner observation the course has; the client guards the fastest-pass TIMING by
+        # requiring a pass to cover the turn's full phase set (a pass sampled in fewer phases sums a smaller
+        # turnT and must not be crowned fastest), and a crash corner reads as impact grip + a slow, low rank.
         _seg = _cl.defaultdict(lambda: _cl.defaultdict(list))
         for sr in cx.execute("""SELECT cs.turn_id, cs.segment, cs.entry_mph, cs.min_mph, cs.exit_mph,
                                        cs.grip_state, cs.time_s, cs.grip_hist, cs.mean_mph, cs.lap_id
-                                FROM corner_segment cs JOIN lap l ON l.lap_id = cs.lap_id
-                                WHERE cs.route_key = ? AND l.void = 0 AND l.is_partial = 0 AND l.rewinds = 0""", (key,)):
+                                FROM corner_segment cs
+                                WHERE cs.route_key = ?""", (key,)):
             try:
                 _gh = json.loads(sr["grip_hist"]) if sr["grip_hist"] else None
             except Exception:                                 # noqa: BLE001

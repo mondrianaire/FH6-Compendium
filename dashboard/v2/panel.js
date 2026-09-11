@@ -516,14 +516,29 @@ const SEG_LABEL = { braking: "Braking", turn_in: "Turn-in", mid: "Mid-corner", e
 // which course turn (by display seq) is selected for the map highlight + right-pane stats; scoped to
 // a course key so a stale pick from another course is simply ignored, never mis-applied.
 let TURN_PICK = null;
+let LB_PICK = null;   // the leaderboard-selected lap id (a trace to isolate on the corner map), reset per turn
 function turnPickSeq() { return (TURN_PICK && COURSE && TURN_PICK.key === COURSE.key) ? TURN_PICK.seq : null; }
 function pickTurn(seq) {
   const s = seq == null ? null : +seq;
   const cur = turnPickSeq();
   TURN_PICK = (s == null || s === cur) ? null : { key: COURSE && COURSE.key, seq: s };   // click the same turn to clear
+  LB_PICK = null;   // a new turn -> drop any isolated-lap selection
   // selecting a turn is a request to SEE it: bring the right pane to Turn analysis (its full stats).
   if (TURN_PICK && MODE.suggest === "course" && COURSE) { RIGHT_TAB = "matrix"; try { rightTabStore()[rightContext()] = "matrix"; } catch (e) {} }
   LEFT_KEY = null; TRACE_KEY = null; paintLeft(); paintTrace(); paintRight();   // trace repaints too: the selected turn's span band + tick highlight
+}
+// LAP ISOLATION: clicking a leaderboard row picks a lap; its trace on the corner map is lifted and every other
+// lap's trace is dimmed. Click the same row again to clear. Toggled in place (no repaint) + re-applied after one.
+function pickLap(id) {
+  LB_PICK = (LB_PICK === id || id == null) ? null : String(id);
+  applyLapPick();
+}
+function applyLapPick() {
+  const rb = $("#rightBody"); if (!rb) return;
+  const svg = rb.querySelector(".tstat-cornersvg");
+  if (svg) { svg.classList.toggle("has-sel", LB_PICK != null);
+    svg.querySelectorAll(".cm-lap").forEach((g) => g.classList.toggle("sel", LB_PICK != null && g.dataset.lap === LB_PICK)); }
+  rb.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.classList.toggle("lbsel", LB_PICK != null && r.dataset.lap === LB_PICK));
 }
 // cross-highlight one phase across the left map + rail and the right table (shared data-phase spine):
 // emphasise the matching part, dim the rest; null clears.
@@ -545,6 +560,7 @@ function stepTurn(dir) {
   const i = cur == null ? -1 : seqs.indexOf(cur);
   const nxt = i < 0 ? seqs[0] : seqs[(i + (dir < 0 ? -1 : 1) + seqs.length) % seqs.length];
   TURN_PICK = { key: COURSE && COURSE.key, seq: nxt };
+  LB_PICK = null;
   LEFT_KEY = null; TRACE_KEY = null; paintLeft(); paintTrace(); paintRight();
 }
 // the chip row never scrolls sideways: keep the chips that fit, count the rest
@@ -2535,6 +2551,9 @@ function paintRight() {
     body.querySelectorAll("[data-phase]").forEach((r) => {
       r.onmouseenter = () => hiPhase(r.dataset.phase); r.onmouseleave = () => hiPhase(null);
     });
+    // click a leaderboard lap -> isolate its trace on the corner map (dim the rest); re-apply after a repaint
+    body.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.onclick = () => pickLap(r.dataset.lap));
+    applyLapPick();
   }
   if (cur === "stats") body.querySelectorAll("[data-clsfocus]").forEach((b) => b.onclick = () => {
     if (!COURSE) return; const cls = b.dataset.clsfocus, vc = traceSel(COURSE);
@@ -2786,26 +2805,31 @@ function cornerMapHTML(c, t, ls) {
   // the 5 phases as a TRANSLUCENT UNDERLAY band (structure), so the speed-coloured driven lines read on top
   const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" opacity=".26" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
   // DRIVEN SPEED LINES: every lap's racing line through this corner (active preset only), each coloured
-  // point-by-point by speed (red slow -> green fast), so the map itself shows where the car is slow/quick.
-  const winV = [], runs = [];
+  // point-by-point by speed (red slow -> green fast). Each lap's segments are wrapped in a <g data-lap> so
+  // selecting a lap in the leaderboard can dim the rest and lift that one (see paintRight's matrix wiring).
+  const winV = [], runsByLap = {};
   Object.keys(c.traces || {}).forEach((id) => {
     if (ls.set && !ls.set.has(String(id))) return;
     const tr = c.traces[id]; if (!tr || tr.length < 3) return;
-    let run = [];
+    const lapRuns = []; let run = [];
     for (const p of tr) {
       const X = p[3], Z = p[4], V = p[1];
-      if (X == null || Z == null || X < x0 || X > x1 || Z < z0 || Z > z1) { if (run.length > 1) runs.push(run); run = []; continue; }
+      if (X == null || Z == null || X < x0 || X > x1 || Z < z0 || Z > z1) { if (run.length > 1) lapRuns.push(run); run = []; continue; }
       run.push([X, Z, V]); if (V != null) winV.push(V);
     }
-    if (run.length > 1) runs.push(run);
+    if (run.length > 1) lapRuns.push(run);
+    if (lapRuns.length) runsByLap[id] = lapRuns;
   });
   const vmin = winV.length ? Math.min(...winV) : 0, vmax = winV.length ? Math.max(...winV) : 1;
-  const speedLines = runs.map((run) => {
-    let r = run; if (r.length > 40) { const stp = r.length / 40; r = Array.from({ length: 40 }, (_, i) => run[Math.floor(i * stp)]); }
-    let out = "";
-    for (let i = 1; i < r.length; i++) { const a = r[i - 1], b = r[i], v = ((a[2] || 0) + (b[2] || 0)) / 2;
-      out += `<line x1="${px(a[0]).toFixed(1)}" y1="${py(a[1]).toFixed(1)}" x2="${px(b[0]).toFixed(1)}" y2="${py(b[1]).toFixed(1)}" stroke="${spdColor(v, vmin, vmax)}" stroke-width="1.3" opacity=".5" stroke-linecap="round"/>`; }
-    return out;
+  const speedLines = Object.entries(runsByLap).map(([id, lapRuns]) => {
+    const seg2 = lapRuns.map((run) => {
+      let r = run; if (r.length > 40) { const stp = r.length / 40; r = Array.from({ length: 40 }, (_, i) => run[Math.floor(i * stp)]); }
+      let out = "";
+      for (let i = 1; i < r.length; i++) { const a = r[i - 1], b = r[i], v = ((a[2] || 0) + (b[2] || 0)) / 2;
+        out += `<line x1="${px(a[0]).toFixed(1)}" y1="${py(a[1]).toFixed(1)}" x2="${px(b[0]).toFixed(1)}" y2="${py(b[1]).toFixed(1)}" stroke="${spdColor(v, vmin, vmax)}" stroke-width="1.3" stroke-linecap="round"/>`; }
+      return out;
+    }).join("");
+    return `<g class="cm-lap" data-lap="${esc(String(id))}">${seg2}</g>`;
   }).join("");
   const apex = t.x != null ? `<circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="8" fill="none" stroke="#fff" stroke-width="2"/><circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="2.6" fill="#fff"><title>apex</title></circle><text x="${(px(t.x) + 11).toFixed(1)}" y="${(py(t.z) - 8).toFixed(1)}" font-size="14" font-weight="700" paint-order="stroke" stroke="#0b0e12" stroke-width="3.2" stroke-linejoin="round" fill="#fff">${esc(turnLabel(t))}</text>` : "";
   let chev = "";
@@ -2977,7 +3001,7 @@ function turnStatsHTML(t, ls) {
   const phHead = SEG_ORDER.map((n) => `<th title="${esc(SEG_LABEL[n])}"><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SHORT[n])}</th>`).join("");
   const cell = (r) => { if (!r || r[2] == null) return `<td class="mono off">·</td>`; const gk = GSTATE[r[4]] || "calm"; const g = DGRIP[gk];
     return `<td class="mono" style="color:${gk === "calm" ? "var(--ink)" : g.col}" title="apex ${Math.round(r[2])} mph · ${esc(g.word)}${r[5] != null ? " · " + r[5].toFixed(2) + " s" : ""}">${Math.round(r[2])}</td>`; };
-  const rows = passes.map((p, i) => `<tr class="${i === 0 ? "tlb-best" : ""}">
+  const rows = passes.map((p, i) => `<tr class="tlb-row${i === 0 ? " tlb-best" : ""}" data-lap="${esc(String(p.id))}" title="click to isolate this lap's trace on the corner map">
       <td class="tlb-rank">${i + 1}</td><td class="mono">${p.lapT != null ? lapTime(p.lapT) : "—"}</td>
       <td class="tlb-car" title="${esc(carName(p.meta.cid))}${p.meta.pi ? " · " + p.meta.pi + " PI" : ""}">${classPill(p.meta.class)}<span class="tlb-carn">${esc(carShort(p.meta.cid))}</span></td>
       <td class="mono tlb-tt">${p.turnT.toFixed(2)}</td>${SEG_ORDER.map((n) => cell(p.ph[n])).join("")}</tr>`).join("");

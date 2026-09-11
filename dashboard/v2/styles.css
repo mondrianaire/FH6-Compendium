@@ -1162,6 +1162,14 @@ body.fixed main{padding:0;gap:0;border-top:0}
 /* right-pane "the corner, phase by phase" — the per-turn line trace + phase-time rail (moved from the left pane) */
 .tstat-corner{display:flex;flex-direction:column;gap:6px}
 .tstat-cornersvg{display:block}
+/* select a lap in the leaderboard -> isolate its trace on the corner map (dim the rest, lift the picked one) */
+.tstat-cornersvg .cm-lap{opacity:.5;transition:opacity .1s}
+.tstat-cornersvg.has-sel .cm-lap{opacity:.08}
+.tstat-cornersvg.has-sel .cm-lap.sel{opacity:1}
+.tstat-cornersvg.has-sel .cm-lap.sel line{stroke-width:2.6}
+.tlb-row{cursor:pointer}
+.tlb-row:hover{background:var(--panel2)}
+.tlb-row.lbsel{background:rgba(78,163,255,.16);box-shadow:inset 2px 0 0 var(--acc2)}
 .cm-splegend{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mut)}
 .cm-splegend .why{margin-right:2px}
 .cm-splegend em{font-style:normal;font:600 10px var(--mono);color:var(--mut)}

@@ -186,6 +186,7 @@ function panelSkeleton(host) {
     <div class="hdr" id="hdr"></div>
     <div id="alerts"></div>
     <div class="trace" id="trace"></div>
+    <div class="coursefilter" id="coursefilter" hidden></div>
     <div class="panes">
       <section class="pane" id="pLeft"><header id="leftHd">Map</header><div class="body map" id="leftBody"></div></section>
       <section class="pane" id="pRight"><header id="rightHd">Statistics</header><div class="body" id="rightBody"></div></section>
@@ -382,7 +383,7 @@ function lastAction() {
 
 function paintPanel() {
   lastAction();
-  paintHeader(); paintTrace(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
+  paintHeader(); paintTrace(); paintCourseFilter(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
   paintHeld();
 }
 
@@ -593,6 +594,34 @@ function modeControls() {
     <button class="mini ${TRACE_ALL ? "on" : ""}" data-tall title="paint every run, not only the foregrounded lap">every run</button>
     <button class="mini ${RACING_ONLY ? "on" : ""}" data-racing title="show only competitive laps — hide cruise/drift runs far off the class pace, rewound laps, and over/under-covered laps. Off = every lap on record.">racing only</button></span>`;
 }
+
+// THE COURSE-MODE FILTER BAR (Jett 2026-09-11). The historical-data filters (show-preset + the
+// class/drive/tune/traffic/build dimensions) are not a trace toy -- they scope EVERY course-mode
+// pane: the speed trace, the turn analysis, the info, and the general statistics all read the same
+// activeLapSet(). So the filters live here, in one bar between the trace and the course panes,
+// with the resulting lap set spelled out (strong feedback for what is currently selected). Reuses
+// traceFilterState()'s chips and wireTrace()'s handlers so one `vc` store still backs every surface.
+function paintCourseFilter() {
+  const el = $("#coursefilter"); if (!el) return;
+  const course = MODE.suggest === "course" && COURSE;
+  el.hidden = !course;
+  if (!course) { el.innerHTML = ""; return; }
+  const { presets, filt, clearBtn } = traceFilterState(COURSE);
+  const ls = activeLapSet();
+  el.innerHTML = `<span class="cf-h">analyze</span>`
+    + `<span class="fdim"><span class="why">show</span>${presets}</span>${filt}${clearBtn}`
+    + `<span class="cf-sum" title="the lap set every pane below is scoped to right now">`
+    + `<i class="cf-dot"></i><b>${ls.set.size}</b>&nbsp;lap${ls.set.size === 1 ? "" : "s"} · ${esc(ls.label)}</span>`;
+  wireTrace(el);   // data-tpre / data-tfilt / data-tfiltsel handlers (they now repaint every pane)
+}
+// One filter change re-scopes the trace, the bar's own summary, and (in course mode) the map/turns
+// and stats. The left/right rebuild is course-only — in free roam it would needlessly re-raster the
+// world map and interrupt its viewBox animation.
+function repaintFiltered() {
+  TRACE_KEY = null;
+  paintTrace(); paintCourseFilter();
+  if (MODE.suggest === "course" && COURSE) { LEFT_KEY = null; paintLeft(); paintRight(); }
+}
 const axisSvg = (ch, vmax) => [0.5, 1].map((f) => { const v = Math.round(vmax * f / 10) * 10; return `<text x="2" y="${(ch.py(v) + 3).toFixed(1)}" font-size="8" fill="var(--dim)">${v}</text>`; }).join("");
 const cursorSvg = (H) => `<g class="cur" style="display:none"><line y1="6" y2="${H - 16}" stroke="var(--ink)" opacity=".6"/><circle r="3.5" fill="var(--ink)"/></g>`;
 
@@ -636,14 +665,22 @@ function traceFilterState(c) {
     const vals = [...new Set(stage1.map((t) => dimVal(t, d)).filter((v) => v != null))].sort();
     if (vals.length < 2) return "";
     const active = tf[d] != null ? String(tf[d]) : "";
-    if (vals.length > CHIP_MAX) {
+    // CLASS is always pills, never a dropdown: it is a small bounded, colour-coded vocabulary
+    // (D/C/B/A/S1/S2/X) the user reads at a glance -- only the high-cardinality build/tune dumps collapse.
+    if (vals.length > CHIP_MAX && d !== "class") {
       const opts = [`<option value=""${active === "" ? " selected" : ""}>all (${vals.length})</option>`]
         .concat(vals.map((v) => `<option value="${esc(String(v))}"${active === String(v) ? " selected" : ""}>${esc(dimLab(d, v))}</option>`)).join("");
       return `<label class="fdim fseldim${active ? " on" : ""}"><span class="why">${lab}</span><select class="fsel" data-tfiltsel="${esc(d)}">${opts}</select></label>`;
     }
     // the "all" chip is the NEUTRAL default (no filter on this dim) -- a quiet outline when active,
     // so only a specific value chosen (a real filter) fills solid and pops.
-    const chip = (v, text) => `<button class="mini ${active === (v == null ? "" : String(v)) ? "on" : ""}${v == null ? " neutral" : ""}" data-tfilt="${esc(d)}|${esc(v == null ? "" : v)}">${esc(text)}</button>`;
+    const chip = (v, text) => {
+      const on = active === (v == null ? "" : String(v));
+      // class chips carry the PI-class colour, the same vocabulary the trace legend and .pib badges
+      // use, so a class reads the same everywhere; a specific pick fills solid, "all" stays neutral.
+      const pc = (d === "class" && v != null) ? piColor(v) : null;
+      return `<button class="mini ${on ? "on" : ""}${v == null ? " neutral" : ""}${pc ? " clschip" : ""}" data-tfilt="${esc(d)}|${esc(v == null ? "" : v)}"${pc ? ` style="--pc:${pc}"` : ""}>${esc(text)}</button>`;
+    };
     return `<span class="fdim"><span class="why">${lab}</span>${chip(null, "all")}${vals.map((v) => chip(v, dimLab(d, v))).join("")}</span>`;
   }).filter(Boolean).join("");
   const stage2 = stage1.filter((t) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
@@ -684,7 +721,7 @@ function courseTrace(c) {
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
   const onRec = (c.laps || []).length;
   const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""}</span>
-    <span class="fdim"><span class="why">show</span>${presets}</span>${filt}${clearBtn}<span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
+    <span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
   stage2.forEach((t) => { t._cov = t.cov != null ? t.cov : (L ? t.pts[t.pts.length - 1][0] / L : 1); });
@@ -797,14 +834,14 @@ function wireTrace(el) {
     const vc = traceSel(COURSE);
     if (d === "*") { vc.filters = {}; vc.hidden = new Set(); }
     else { if (v) vc.filters[d] = v; else delete vc.filters[d]; }
-    viewSave(); paintTrace(); });
+    viewSave(); repaintFiltered(); });
   // high-cardinality dims (build / tune) render as a dropdown instead of a chip row
   el.querySelectorAll("[data-tfiltsel]").forEach((s) => s.onchange = () => {
     const d = s.dataset.tfiltsel; if (!COURSE) return;
     const vc = traceSel(COURSE);
     if (s.value) vc.filters[d] = s.value; else delete vc.filters[d];
-    viewSave(); paintTrace(); });
-  el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); paintTrace(); });
+    viewSave(); repaintFiltered(); });
+  el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); repaintFiltered(); });
   el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); viewSave(); paintTrace(); });
   el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace(); });
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
@@ -2402,9 +2439,16 @@ function phaseCells(obs, lapSet) {
 // RACING-ONLY (default) also gates it, matching the speed trace: cruise/drift/rewound laps drop out of
 // the corner medians too. Falls back to the ungated preset set if racing would blank it.
 function activeLapSet() {
-  const preset = traceSel(COURSE).preset;
-  let ids = (COURSE.laps || []).filter(presetTest(preset)).map((l) => String(l.id));
-  let label = (PRESETS.find((p) => p[0] === preset) || ["", "all laps"])[1];
+  // THE lap set every course-mode pane is scoped to. Applies the SAME filters as the speed trace --
+  // the show-preset AND the class/drive/tune/traffic/build dimensions -- so a class or build picked
+  // in the filter bar re-scopes the turn analysis and general statistics, not only the trace.
+  const sel = traceSel(COURSE), tf = sel.filters || {};
+  let ids = (COURSE.laps || []).filter(presetTest(sel.preset))
+    .filter((l) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(l, d) === String(tf[d])))
+    .map((l) => String(l.id));
+  let label = (PRESETS.find((p) => p[0] === sel.preset) || ["", "all laps"])[1];
+  const dims = TRACE_DIMS.filter(([d]) => tf[d]).map(([d]) => dimLab(d, tf[d]));
+  if (dims.length) label += " · " + dims.join(" · ");
   if (RACING_ONLY) {
     const race = racingIds(COURSE.laps || []);
     const gated = ids.filter((id) => race.has(id));

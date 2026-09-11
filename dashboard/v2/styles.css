@@ -395,6 +395,24 @@ button.stage.act.go:active{transform:translateY(1px)}
 .fseldim.on .why{color:var(--acc)}
 .mini.clearf{color:var(--mut);border-style:dashed}
 .mini.clearf:hover{color:var(--bad);border-color:var(--bad)}
+/* class filter chips carry the PI-class colour -- the same vocabulary as the trace legend and the
+   .pib badges, so a class reads identically everywhere. Active = a solid class-coloured fill (this
+   rule follows .fdim .mini.on, so at equal specificity it wins for class chips). */
+.fdim .clschip{border-color:var(--pc);color:var(--ink)}
+.fdim .clschip.on{background:var(--pc);border-color:var(--pc);color:#04140c;font-weight:700}
+.fdim .clschip.on .cn{color:#04140c;opacity:.7}
+/* ---- the course-mode filter bar: one home for the historical-data filters, between the trace and
+   the panes; it scopes EVERY pane below (trace, map, turns, stats), so the resulting lap set is
+   spelled out on the right as explicit feedback for what is selected. ---- */
+.coursefilter{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:5px 10px;font-size:12px}
+.coursefilter .cf-h{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc2);font-weight:700}
+.coursefilter .fdim{display:inline-flex;align-items:center;gap:3px}
+.coursefilter .fdim .why{margin-right:2px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.coursefilter .cf-sum{margin-left:auto;display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--mut);padding:2px 9px;border:1px solid var(--line2);border-radius:20px}
+.coursefilter .cf-sum b{color:var(--ink);font-variant-numeric:tabular-nums}
+.coursefilter .cf-dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 5px var(--acc)}
 /* the map drawer's filter block: presets on their own line, the readable dims wrap below, a result
    summary makes the active selection explicit */
 .mdpanel .ffilters{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:5px}

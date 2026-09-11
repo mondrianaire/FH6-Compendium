@@ -528,7 +528,9 @@ let TRACE_CLS_HI = null;   // click a PI-class swatch in the speed-trace legend 
 // (gen_segments.py): braking and straight/crest are the connectors, turn-in→mid→exit the corner.
 const SEG_ORDER = ["braking", "turn_in", "mid", "exit", "straight"];
 const SEG_COL = { braking: "#6c8cf0", turn_in: "#45c8b0", mid: "#f0b429", exit: "#63d19e", straight: "#8a95a5" };
-const SEG_LABEL = { braking: "Braking", turn_in: "Turn-in", mid: "Mid-corner", exit: "Exit", straight: "Straight / crest" };
+// "Entry", not "Turn-in" (Jett 2026-09-11, design-language.md D6): one word for the segment the diagnosis
+// symptoms already call "entry". Display only -- the data key stays turn_in everywhere.
+const SEG_LABEL = { braking: "Braking", turn_in: "Entry", mid: "Mid-corner", exit: "Exit", straight: "Straight / crest" };
 // which course turn (by display seq) is selected for the map highlight + right-pane stats; scoped to
 // a course key so a stale pick from another course is simply ignored, never mis-applied.
 let TURN_PICK = null;
@@ -1800,7 +1802,7 @@ function turnTableHTML(c, ls) {
   const sel = turnPickSeq();
   const totFind = aggs.reduce((s, a) => s + (a.avail || 0), 0);
   const maxFind = Math.max(0.01, ...aggs.map((a) => a.avail || 0));
-  const SHORT = { braking: "brake", turn_in: "turn-in", mid: "mid", exit: "exit", straight: "straight" };
+  const SHORT = { braking: "brake", turn_in: "entry", mid: "mid", exit: "exit", straight: "straight" };
   const findInk = (v) => v == null ? "var(--dim)" : v > 0.6 ? "#f0616d" : v > 0.35 ? "#e3b341" : "var(--mut)";
   // each phase cell: apex-mph value, a grip-mix mini-bar, and a 3px phase-colour underline (SEG_COL = WHERE)
   const ph = (a, n) => { const p = a.phases.find((x) => x.n === n).p;
@@ -2795,7 +2797,7 @@ function turnAtMatrix(apex, lastSeq) {
 
 // the daemon's live corner detector always emits exactly 4 phases (a fixed tuple); the offline
 // analyzer's 5th "Straight/crest" phase never appears on the live SSE stream this reads from.
-const PH_SHORT = ["Braking", "Turn-in", "Mid-corner", "Exit"];
+const PH_SHORT = ["Braking", "Entry", "Mid-corner", "Exit"];
 function phaseBars(ph) {
   return `<span style="display:inline-flex;gap:2px">${(ph || []).map((p) => {
     // a fully-zeroed phase (front:0,rear:0,red:"none",dur:0 — mostly phase 1, ~0.2% of real phase-slots
@@ -2848,7 +2850,7 @@ function phaseCells(obs, lapSet) {
     if (!p) return `<span class="pcell pc-empty"></span>`;
     const g = DGRIP[GSTATE[p.grip] || "calm"];
     const lbl = name === "mid" ? `<b>${p.min ?? ""}</b>` : "";
-    return `<span class="pcell" style="background:${g.col}" title="${name.replace("_", "-")} · ${p.n} lap${p.n === 1 ? "" : "s"} · entry ${p.entry ?? "—"} → min ${p.min ?? "—"} → exit ${p.exit ?? "—"} mph · ${g.word}">${lbl}</span>`;
+    return `<span class="pcell" style="background:${g.col}" title="${esc((SEG_LABEL[name] || name).toLowerCase())} · ${p.n} lap${p.n === 1 ? "" : "s"} · entry ${p.entry ?? "—"} → min ${p.min ?? "—"} → exit ${p.exit ?? "—"} mph · ${g.word}">${lbl}</span>`;
   }).join("");
 }
 // the lap set the trace preset (all / this class / this car / this build / same hardware / this tune)
@@ -2881,7 +2883,7 @@ function cornerStripHTML(ls, sel) {
   turns.forEach((t) => Object.values(t.phaseObs).forEach((rows) => rows.forEach((r) => { if (ls.set.has(String(r[0]))) withData.add(r[0]); })));
   const nLaps = withData.size;
   return `<div class="grp"><div class="gh">Corner phases <span class="why">· ${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · click a turn for its phases &amp; stats</span></div>
-    <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>turn-in</span><span>mid</span><span>exit</span><span>straight</span></span></div>
+    <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>entry</span><span>mid</span><span>exit</span><span>straight</span></span></div>
     ${turns.map((t) => `<div class="pstrip pstrip--pick${sel === t.seq ? " sel" : ""}" data-turn="${t.seq}"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phaseObs, ls.set)}</span></div>`).join("")}</div>`;
 }
 // GRIP AS A DISTRIBUTION, never a single lossy swatch (Jett 2026-09-10). mix = [calm,front,rear,both,
@@ -3041,7 +3043,7 @@ const ERR_RULES = {
   "turn_in|front": "Trail-brake understeer — finish more of the braking before you steer; caster +0.5 for camber-in-turn.",
   "mid|front": "Mid-corner understeer — front ARB −2 or softer front springs; if only the fast corners, aero balance forward.",
   "exit|front": "Understeer off the exit — front ARB −2 / softer front springs so the nose bites earlier on power.",
-  "turn_in|rear": "Turn-in oversteer — rear ARB/springs softer, or a touch more rear toe-in; ease the trail-braking.",
+  "turn_in|rear": "Entry oversteer — rear ARB/springs softer, or a touch more rear toe-in; ease the trail-braking.",
   "mid|rear": "Mid-corner oversteer — rear ARB/springs softer; add rear downforce if it's the fast corners.",
   "exit|rear": "Power-down oversteer on exit — accel diff lock −10%, or soften the rear / add rear toe-in.",
 };
@@ -3178,7 +3180,7 @@ function turnStatsHTML(t, ls) {
     ${figs}${verdict}${budgetSegs ? `<div class="budget" title="each segment = median seconds in that phase">${budgetSegs}</div>` : ""}${cmpTable}</div>`;
 
   // ---- THE LEADERBOARD: passes fastest-first; each phase cell = apex mph, coloured by grip
-  const SHORT = { braking: "brake", turn_in: "turn-in", mid: "mid", exit: "exit", straight: "straight" };
+  const SHORT = { braking: "brake", turn_in: "entry", mid: "mid", exit: "exit", straight: "straight" };
   const phHead = SEG_ORDER.map((n) => `<th title="${esc(SEG_LABEL[n])}"><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SHORT[n])}</th>`).join("");
   const cell = (r) => { if (!r || r[2] == null) return `<td class="mono off">·</td>`; const gk = GSTATE[r[4]] || "calm"; const g = DGRIP[gk];
     return `<td class="mono" style="color:${gk === "calm" ? "var(--ink)" : g.col}" title="apex ${Math.round(r[2])} mph · ${esc(g.word)}${r[5] != null ? " · " + r[5].toFixed(2) + " s" : ""}">${Math.round(r[2])}</td>`; };

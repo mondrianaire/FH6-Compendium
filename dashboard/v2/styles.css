@@ -1026,6 +1026,9 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .bchip.on{border-color:var(--acc);color:var(--acc);background:var(--panel)}
 .bchip em{font-style:normal;color:var(--dim);font-size:10px}
 .bchip.on em{color:var(--acc)}
+.bsort{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:-2px 0 8px}
+.bsort .why{font-size:10px;margin-right:2px}
+.bsort .mini.on{background:rgba(0,210,122,.12);border-color:var(--acc);color:var(--acc)}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;align-content:start}
 .tile{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 6px 7px;
   cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:3px;color:var(--ink);overflow:hidden}

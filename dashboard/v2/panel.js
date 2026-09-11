@@ -109,6 +109,8 @@ let LOOP = null;    // the daemon's S/F-crossing identity {name,start} — autho
 let BROWSE_PICK = null;            // Course Browser: the route id whose location+shape the left world map is zoomed to
 let BROWSE_FILTER = "all";         // Course Browser mode chip: all | rivals | race | career | free
 let BROWSE_DEV = false;            // Course Browser: show the IE/dev and number-only routes too (off by default)
+let BROWSE_SORT = "name";          // Course Browser sort key: name | laps | length | type
+let BROWSE_SORT_REV = false;       // reverse the sort (click the active sort button again)
 let COURSE_MATCH = null;           // { dist, secondKey, secondDist } from the last locateCourse() — how sure the current course is
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
@@ -205,6 +207,7 @@ async function panelBoot() {
   // the page's own chrome, from the view store, before anything paints
   DOCK_SPAN = vg("dockSpan", 600); FOLLOW.on = vg("follow", false) === true;
   BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null); BROWSE_DEV = vg("browseDev", false);
+  BROWSE_SORT = vg("browseSort", "name"); BROWSE_SORT_REV = vg("browseSortRev", false) === true;
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL); RACING_ONLY = vg("racingOnly", RACING_ONLY) !== false;
   const [w, d, c, cars] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json"), get("cars.json").catch(() => null)]);
   WORLD = w; DIAG = d; COURSES = c;
@@ -2061,8 +2064,22 @@ function browserHTML() {
     `<button class="bchip ${BROWSE_FILTER === f ? "on" : ""}" data-bfilter="${f}">${lbl} <em>${count(f)}</em></button>`).join("")
     + (nJunk ? `<button class="bchip bchip--dev ${BROWSE_DEV ? "on" : ""}" data-bdev="1"
         title="${BROWSE_DEV ? "hide" : "show"} the game's IE drive sections and number-only routes — dev and leftover geometry, not destinations">${BROWSE_DEV ? "hide" : "show"} dev <em>${nJunk}</em></button>` : "");
-  const sel = rows.filter(({ r }) => browseMatch(r, BROWSE_FILTER))
-    .sort((a, b) => (a.r.name ? 0 : 1) - (b.r.name ? 0 : 1) || (a.r.name || "").localeCompare(b.r.name || "") || (a.id - b.id));
+  // SORTING (Jett 2026-09-11): the filter chips narrow WHICH courses show; these order them. Each key has a
+  // sensible natural direction (name A–Z, most laps first, longest first, grouped by kind); clicking the active
+  // sort reverses it. Every key falls back to name so ties are stable.
+  const nameCmp = (a, b) => (a.r.name ? 0 : 1) - (b.r.name ? 0 : 1) || (a.r.name || "").localeCompare(b.r.name || "") || (a.id - b.id);
+  const kindKey = (r) => (r.disc || "~") + "|" + (r.is_race ? "0" : (r.modes || []).includes("rivals") ? "1" : (r.modes || []).includes("career") ? "2" : "3");
+  const CMP = {
+    name: nameCmp,
+    laps: (a, b) => (b.r.laps || 0) - (a.r.laps || 0) || nameCmp(a, b),
+    length: (a, b) => (b.r.len || 0) - (a.r.len || 0) || nameCmp(a, b),
+    type: (a, b) => kindKey(a.r).localeCompare(kindKey(b.r)) || nameCmp(a, b),
+  };
+  const cmp = CMP[BROWSE_SORT] || nameCmp;
+  const sel = rows.filter(({ r }) => browseMatch(r, BROWSE_FILTER)).sort((a, b) => BROWSE_SORT_REV ? -cmp(a, b) : cmp(a, b));
+  const SORTS = [["name", "name"], ["laps", "laps"], ["length", "length"], ["type", "kind"]];
+  const sortRow = `<div class="bsort"><span class="why">sort</span>${SORTS.map(([k, lbl]) =>
+    `<button class="mini${BROWSE_SORT === k ? " on" : ""}" data-bsort="${k}" title="sort by ${lbl}${BROWSE_SORT === k ? " · click again to reverse" : ""}">${lbl}${BROWSE_SORT === k ? (BROWSE_SORT_REV ? " ↑" : " ↓") : ""}</button>`).join("")}</div>`;
   const tiles = sel.map(({ id, r }) => {
     const nm = r.name || ("Route " + id);
     const laps = r.laps || 0, sess = r.sessions || 0;
@@ -2089,6 +2106,7 @@ function browserHTML() {
       <div class="tbadges">${badges}</div></button>`;
   }).join("");
   return `<div class="bchips">${chips}</div>
+    ${sortRow}
     <div class="tiles">${tiles || `<div class="why">no courses in this filter</div>`}</div>`;
 }
 function wireBrowser(body) {
@@ -2096,6 +2114,10 @@ function wireBrowser(body) {
     BROWSE_FILTER = b.dataset.bfilter; VIEW.global.browseFilter = BROWSE_FILTER; viewSave(); paintRight(); paintLeftHeader(); });
   body.querySelectorAll("[data-bdev]").forEach((b) => b.onclick = () => {
     BROWSE_DEV = !BROWSE_DEV; VIEW.global.browseDev = BROWSE_DEV; viewSave(); paintRight(); paintLeftHeader(); });
+  body.querySelectorAll("[data-bsort]").forEach((b) => b.onclick = () => {
+    const k = b.dataset.bsort;
+    if (BROWSE_SORT === k) BROWSE_SORT_REV = !BROWSE_SORT_REV; else { BROWSE_SORT = k; BROWSE_SORT_REV = false; }
+    VIEW.global.browseSort = BROWSE_SORT; VIEW.global.browseSortRev = BROWSE_SORT_REV; viewSave(); paintRight(); });
   body.querySelectorAll("[data-bpick]").forEach((b) => {
     b.onclick = () => browsePick(b.dataset.bpick);
     // the same preview in reverse — hovering a tile lights its trace on the map, without picking it

@@ -1692,10 +1692,29 @@ function courseHeroHTML(c, ls) {
   const unmeasured = catalogued != null ? Math.max(0, catalogued - measured) : null;
   const stat = (v, lab) => `<span class="ch-s"><b>${v}</b><em>${lab}</em></span>`;
   const liveLap = (MODE.game === "event" && LIVE.frame && LIVE.frame.lapn != null) ? LIVE.frame.lapn : null;
+  // route glyph + start/finish/direction legend (spec's hero left column): the course's shape with a green
+  // start dot and a pink finish dot, captioned loop / point-to-point.
+  const path = (c.route && c.route.path) || c.path || [];
+  const loop = !!(c.route && c.route.is_loop) || !!(c.route && c.route.loop);
+  let glyph = "";
+  if (path.length > 2) {
+    let gx0 = Infinity, gx1 = -Infinity, gz0 = Infinity, gz1 = -Infinity;
+    path.forEach(([x, z]) => { if (x < gx0) gx0 = x; if (x > gx1) gx1 = x; if (z < gz0) gz0 = z; if (z > gz1) gz1 = z; });
+    const GW = 132, GH = 58, gpd = 7, gs = Math.min((GW - 2 * gpd) / ((gx1 - gx0) || 1), (GH - 2 * gpd) / ((gz1 - gz0) || 1));
+    const gox = gpd + (GW - 2 * gpd - (gx1 - gx0) * gs) / 2, goy = gpd + (GH - 2 * gpd - (gz1 - gz0) * gs) / 2;
+    const GX = (x) => gox + (x - gx0) * gs, GY = (z) => GH - goy - (z - gz0) * gs;
+    const a = path[0], b = path[path.length - 1];
+    glyph = `<svg class="ch-glyphsvg" viewBox="0 0 ${GW} ${GH}" preserveAspectRatio="xMidYMid meet">
+      <polyline fill="none" stroke="#8fa0b3" stroke-width="1.6" stroke-linejoin="round" points="${path.map(([x, z]) => GX(x).toFixed(1) + "," + GY(z).toFixed(1)).join(" ")}"/>
+      <circle cx="${GX(a[0]).toFixed(1)}" cy="${GY(a[1]).toFixed(1)}" r="3" fill="#33d17a"/>
+      <circle cx="${GX(b[0]).toFixed(1)}" cy="${GY(b[1]).toFixed(1)}" r="3" fill="#ff5d7d"/></svg>`;
+  }
   return `<div class="chero">
     ${TEMP_COURSE ? `<div class="ch-browse"><b>browsing course data</b><em>not live · double-click the map to switch, or</em><button class="mini" data-tcx>exit ✕</button></div>` : ""}
     ${liveLap != null ? `<div class="ch-live"><i></i>event · lap ${liveLap}<em>turn-by-turn live</em></div>` : ""}
+    ${glyph ? `<div class="ch-glyph">${glyph}<span class="ch-gleg"><span><i class="s"></i>start</span><span><i class="f"></i>finish</span><span class="why">${loop ? "loop" : "point-to-point"}</span></span></div>` : ""}
     <div class="ch-stats">
+      ${stat(n0(c.len) + " m", "length")}
       ${stat(medLap != null ? lapTime(medLap) : "—", "median")}
       ${stat(bestLap ? lapTime(bestLap.t) : "—", bestLap ? "best · " + esc(carShort(bestLap.cid)) : "best")}
       ${stat(climb != null ? climb + " m" : "—", "climb")}
@@ -2506,14 +2525,15 @@ function courseConfidenceBadge() {
 // Which pane the context calls for. In a menu the build is what can change, so its data asks and
 // ratification steps lead; on the road the corners you are taking lead; on a course with a
 // baseline set, the conclusions lead. A click pins a tab until the context class changes.
-const RT_LABEL = { corners: "Live corners", matrix: "Turn analysis", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser", services: "Services" };
+const RT_LABEL = { lap: "Current lap", corners: "Live corners", matrix: "Turn analysis", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser", services: "Services" };
 // "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
 // to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
 // list this function returns. Add "build" back to the free-mode array below to re-enable it.
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["corners", "matrix", "stats", "concl"] : ["corners", "stats", "browser"]; }
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "corners", "matrix", "stats", "concl"] : ["corners", "stats", "browser"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
+  if (course && LIVE.frame.on && LIVE.frame.ev) return "lap";   // actively driving a course lap -> the live current-lap tab leads
   if (course && BASELINE) return "concl";
   if (course) return "matrix";      // course mode leads with Turn analysis (Jett 2026-09-06); a baseline still leads with conclusions
   return "corners";
@@ -2530,14 +2550,15 @@ function paintRight() {
   if (ctx !== RIGHT_CTX) { RIGHT_CTX = ctx; RIGHT_TAB = rightTabStore()[ctx] || null; }
   const tabs = rightTabs();
   const cur = tabs.includes(RIGHT_TAB) ? RIGHT_TAB : ctx;
-  const why = { corners: "every corner as you take it · newest first", matrix: "one row per course turn · this session",
+  const why = { lap: "each turn rated the moment you finish it · apex speed vs your own history + where grip let go",
+                corners: "every corner as you take it · newest first", matrix: "one row per course turn · this session",
                 stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide",
                 browser: "every known course · pick one to locate it on the map",
                 services: "the three processes the lab runs · start, stop or restart each one" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
-  body.innerHTML = cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
+  body.innerHTML = cur === "lap" ? lapHTML() : cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
   body.querySelectorAll("[data-svcact]").forEach((b) => b.onclick = () => svcAct(b.dataset.svc, b.dataset.svcact));
   body.querySelectorAll("[data-svcrefresh]").forEach((b) => b.onclick = () => svcRefresh());
@@ -2567,6 +2588,45 @@ function paintRight() {
   if (cur === "build") fillSinceSave(body);
 }
 
+// THE CURRENT-LAP LIVE TAB: as each turn is completed (its corner event arrives) it is rated against YOUR OWN
+// history for that turn — a per-turn leaderboard position on apex speed + the delta off your best apex — and
+// its grip loss is read from the live corner (first-red axle/phase, else the understeer index). Course mode
+// only; repaints on every corner event because the SSE "corner" handler calls paintRight().
+const LIVE_PH = ["braking", "turn_in", "mid", "exit"];   // live corner phase index (1-4) -> SEG name
+function lapHTML() {
+  if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to rate each turn the moment you take it.</div>`;
+  const cid = CUR && CUR.cid, ls = activeLapSet();
+  const mine = (LIVE.corners || []).filter((c) => (!cid || c.car === cid) && c.ev !== 0 && c.lapn != null);
+  const curLap = (LIVE.frame && LIVE.frame.lapn != null) ? LIVE.frame.lapn : (mine.length ? Math.max(...mine.map((c) => c.lapn)) : null);
+  const taken = mine.filter((c) => c.lapn === curLap).sort((a, b) => a.t0 - b.t0);
+  const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
+  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · apex speed vs your own history</span></div>`;
+  if (!taken.length) return `<div class="lapview">${head}<div class="why" style="padding:10px 6px">No turns yet this lap — the first one appears the instant you finish it.</div></div>`;
+  let lastSeq = null, rows = "", worstRow = null, anyBest = false, gripHits = 0;
+  taken.forEach((c) => {
+    const b = turnAtMatrix(c.apex, lastSeq), t = b && b.t; if (!t) return; lastSeq = t.seq;
+    const apex = c.mph_apex != null ? c.mph_apex : c.mph_min;
+    const hist = ((t.phaseObs && t.phaseObs.mid) || []).filter((r) => ls.set.has(String(r[0])) && r[2] != null).map((r) => r[2]);
+    const n = hist.length, bestMph = n ? Math.max(...hist) : null;
+    const pos = (n ? hist.filter((v) => v > apex).length : 0) + 1, N = n + 1;   // pos 1 = your fastest ever apex here
+    const isBest = n === 0 || apex >= bestMph, dMph = bestMph != null ? Math.round(apex - bestMph) : null;
+    if (isBest && n) anyBest = true;
+    const rankLbl = !n ? "first pass here" : isBest ? "★ best yet" : `${pos} of ${N}`;
+    const rankTone = isBest ? "var(--acc)" : dMph != null && dMph <= -4 ? "var(--bad)" : "var(--mut)";
+    const gstate = c.first_red ? (c.first_red.axle === "front" ? "front" : "rear") : dGripUsi(c.usi);
+    const g = DGRIP[gstate] || DGRIP.calm;
+    const gripLbl = c.first_red ? `${g.word} · ${esc(SEG_LABEL[LIVE_PH[c.first_red.phase - 1]] || "phase " + c.first_red.phase)}` : (gstate === "calm" ? "clean" : g.word);
+    if (gstate !== "calm") gripHits++;
+    if (dMph != null && dMph < 0 && (!worstRow || dMph < worstRow.d)) worstRow = { t, d: dMph };
+    rows += `<div class="lap-row">
+      <span class="lap-turn">${esc(turnLabel(t))}<em>${esc(cap1(t.kind || ""))}</em></span>
+      <span class="lap-spd mono">${Math.round(c.mph_in)}<i>→</i><b>${Math.round(apex)}</b><i>→</i>${Math.round(c.mph_out)}<em> mph</em></span>
+      <span class="lap-rank mono" style="color:${rankTone}">${rankLbl}${dMph != null && !isBest ? ` · ${dMph} mph` : ""}</span>
+      <span class="lap-grip" style="color:${g.col}">${gripLbl}</span></div>`;
+  });
+  const sum = `<div class="lap-sum">${worstRow ? `most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> · ${worstRow.d} mph off your best there` : (anyBest ? `<b style="color:var(--acc)">personal-best pace so far</b>` : "on your usual pace")}<span class="why">${gripHits} of ${taken.length} turns lost grip</span></div>`;
+  return `<div class="lapview">${head}<div class="lap-hd"><span>turn</span><span>in→apex→out</span><span>vs history</span><span>grip</span></div>${rows}${sum}</div>`;
+}
 // The corner log: the daemon's live corner events for the car you are in, newest first.
 function cornersHTML() {
   const cid = CUR && CUR.cid;

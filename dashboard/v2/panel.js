@@ -3769,18 +3769,20 @@ function turnStatsHTML(t, ls) {
   const maxD = Math.max(0.01, ...cmp.map((r) => r.best != null ? Math.max(0, r.typ - r.best) : 0));
   const budgetSegs = aggs.filter((a) => a.p && a.p.time).map(({ n, p }) =>
     `<span class="bud-seg" style="flex:${Math.round(p.time * 100)} 0 0;background:${SEG_COL[n]}" title="${esc(SEG_LABEL[n])} · ${p.time.toFixed(2)} s">${p.time >= 0.5 ? `<i>${p.time.toFixed(1)}</i>` : ""}</span>`).join("");
-  const figs = `<div class="wtg-figs"><b class="wtg-big">${medTurnT.toFixed(1)}<span>s</span></b>
-    <span class="why">typical${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of the ${lapTime(medLapT)} lap` : ""}</span>
-    ${hasBest && findTotal > 0.02 ? `<b class="wtg-avail">+${findTotal.toFixed(2)} s</b><span class="why">available</span>` : ""}</div>`;
-  const verdict = `<div class="wtg-verdict">${best ? `fastest pass <b style="color:var(--acc)">${best.turnT.toFixed(2)} s</b>` : ""}${biggest ? ` · most time in <b style="color:${SEG_COL[biggest.n]}">${esc(SEG_LABEL[biggest.n])}</b>` : ""}</div>`;
+  // THE COMPACT TIME SUMMARY (Jett 2026-09-11): the headline the bottom "where the time goes" panel carried —
+  // typical turn-time + share of lap, time available, the fastest pass, and which phase eats the most — folds
+  // UP into the title bar so the identity and the summary read as one bar, above the map.
+  const sumRow = `<div class="tsum"><b class="tsum-typ">${medTurnT.toFixed(1)}s</b> typical${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of lap` : ""}${hasBest && findTotal > 0.02 ? ` · <b class="tsum-avail">+${findTotal.toFixed(2)}s</b> available` : ""}${best ? ` · fastest pass <b class="tsum-fast">${best.turnT.toFixed(2)}s</b>` : ""}${biggest ? ` · most time in <b class="tsum-most" style="color:${SEG_COL[biggest.n]}"><i style="background:${SEG_COL[biggest.n]}"></i>${esc(SEG_LABEL[biggest.n])}</b>` : ""}</div>`;
+  // ONE compacted title info bar: identity + geometry (header) ∪ the time summary ∪ the 5-phase corner model
+  // (the per-phase time-budget bar). The detailed per-phase typical-vs-best TABLE stays below the map.
+  const titleBar = `<div class="grp tstat-title">${header}${sumRow}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;
   const cmpTable = hasBest ? `<table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best lap</th><th>Δ s</th><th>where it goes</th></tr></thead><tbody>
     ${cmp.map((r) => { const d = r.best != null ? r.typ - r.best : null; const flag = worst && worst.n === r.n && worst.d > 0.03; const pct = d != null && d > 0 ? Math.round(d / maxD * 100) : 0;
       return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>
         <td class="mono">${r.typ.toFixed(2)}</td><td class="mono dim">${r.best != null ? r.best.toFixed(2) : "—"}</td>
         <td class="mono" style="color:${d != null && d > 0.05 ? "#e3b341" : "var(--mut)"};font-weight:700">${d != null ? (d > 0 ? "+" : "") + d.toFixed(2) : "—"}</td>
         <td><span class="wig"><i style="width:${pct}%;background:${SEG_COL[r.n]}"></i></span></td></tr>`; }).join("")}</tbody></table>` : "";
-  const wtg = `<div class="grp tstat-wtg"><div class="gh">Where the time goes${hasBest && best ? ` <span class="why">· typical vs your best lap (${lapTime(best.lapT)})</span>` : ""}</div>
-    ${figs}${verdict}${budgetSegs ? `<div class="budget" title="each segment = median seconds in that phase">${budgetSegs}</div>` : ""}${cmpTable}</div>`;
+  const wtg = hasBest ? `<div class="grp tstat-wtg"><div class="gh">Where the time goes <span class="why">· per phase · typical vs your best lap (${lapTime(best.lapT)})</span></div>${cmpTable}</div>` : "";
 
   // ---- THE LEADERBOARD: passes fastest-first; each phase cell = apex mph, coloured by grip
   const SHORT = { braking: "brake", turn_in: "entry", mid: "mid", exit: "exit", straight: "straight" };
@@ -3809,7 +3811,7 @@ function turnStatsHTML(t, ls) {
   // out of this section. The machinery above (turnErrors + `diag`) is left intact so restoring is a one-token
   // change — put ${diag} back between ${cornerMap} and ${wtg} when we bring it back.
   void diag;
-  return `<div class="tstat">${header}${cornerMap}${wtg}${board}${gripCard}</div>`;
+  return `<div class="tstat">${titleBar}${cornerMap}${wtg}${board}${gripCard}</div>`;
 }
 function cap1(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function matrixHTML() {

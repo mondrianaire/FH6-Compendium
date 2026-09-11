@@ -1437,6 +1437,15 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .budget{display:flex;height:22px;overflow:hidden;background:var(--bg);margin:0 0 6px;border-radius:3px}
 .bud-seg{display:flex;align-items:center;justify-content:center;min-width:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
 .bud-seg i{font:700 9.5px var(--mono);font-style:normal;color:#0b0e12;opacity:.85}
+/* THE MERGED TURN TITLE BAR (Jett 2026-09-11): identity + geometry ∪ the time summary ∪ the 5-phase budget */
+.tstat-title{margin:0 0 7px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.tstat-title .tstat-h{margin-bottom:3px}
+.tsum{font:400 12px/1.5 var(--sans);color:var(--ink);margin:1px 2px 5px;letter-spacing:.01em}
+.tsum b{font-weight:700}
+.tsum-typ{font-size:15px}
+.tsum-avail{color:var(--warn)} .tsum-fast{color:var(--acc)}
+.tsum-most i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:3px}
+.budget--title{height:18px;margin:0 2px}
 .tstat-cmp td .wig,.wig{display:block;width:100%;height:6px;background:var(--bg);border-radius:2px;overflow:hidden}
 .wig i{display:block;height:6px}
 .tstat-cmp td:last-child{width:32%}

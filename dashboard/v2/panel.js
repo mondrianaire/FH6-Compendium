@@ -457,6 +457,8 @@ function pickTurn(seq) {
   const s = seq == null ? null : +seq;
   const cur = turnPickSeq();
   TURN_PICK = (s == null || s === cur) ? null : { key: COURSE && COURSE.key, seq: s };   // click the same turn to clear
+  // selecting a turn is a request to SEE it: bring the right pane to Turn analysis (its full stats).
+  if (TURN_PICK && MODE.suggest === "course" && COURSE) { RIGHT_TAB = "matrix"; try { rightTabStore()[rightContext()] = "matrix"; } catch (e) {} }
   LEFT_KEY = null; paintLeft(); paintRight();
 }
 // cross-highlight one phase across the left map + rail and the right table (shared data-phase spine):
@@ -2681,9 +2683,31 @@ function turnStatsHTML(t, ls) {
     <span class="tstat-nav"><button class="mini" data-turnstep="prev" title="previous turn">‹</button><button class="mini" data-turnstep="next" title="next turn">›</button><button class="mini" data-turnclear title="clear selection">✕</button></span></div>`;
   if (!nLaps) return `<div class="tstat">${header}<div class="why" style="padding:8px 6px">no timed laps through this turn in ${esc(ls.label)} — widen the filter or drive it</div></div>`;
 
-  // ---- TIMING: one summary line
+  // ---- per-phase best times (from the single fastest pass), for the where-the-time-goes table
+  const bestPh = {}; if (best) SEG_ORDER.forEach((n) => { const r = best.ph[n]; if (r && r[5] != null) bestPh[n] = r[5]; });
+  const cmp = aggs.map(({ n, p }) => ({ n, typ: p && p.time, best: bestPh[n] })).filter((r) => r.typ != null);
+  let worst = null; cmp.forEach((r) => { if (r.best != null) { const d = r.typ - r.best; if (!worst || d > worst.d) worst = { n: r.n, d }; } });
+  const findTotal = cmp.reduce((s, r) => s + (r.best != null ? Math.max(0, r.typ - r.best) : 0), 0);
+
+  // ---- TIMING: one summary line (the where-the-time-goes card owns the "to find" breakdown below)
   const timing = `<div class="tstat-sum"><b>${medTurnT.toFixed(2)} s</b> typical${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of the lap` : ""}` +
-    `${best ? ` · fastest <b style="color:var(--acc)">${best.turnT.toFixed(2)} s</b>` : ""}${biggest ? ` · most time in <span style="color:${SEG_COL[biggest.n]};font-weight:600">${esc(SEG_LABEL[biggest.n])}</span>` : ""}</div>`;
+    `${best ? ` · fastest <b style="color:var(--acc)">${best.turnT.toFixed(2)} s</b>` : ""}${findTotal > 0.02 ? ` · <b class="tt-find">+${findTotal.toFixed(2)} s to find</b>` : ""}</div>`;
+
+  // ---- DIAGNOSIS: what the detectors flagged on THIS turn, worst first (route_key + turn_id match)
+  const dxRows = (DIAG && DIAG.by_turn ? DIAG.by_turn : [])
+    .filter((r) => r.route_key === COURSE.key && (r.turn_id === t.turn_id || r.turn_id === t.id))
+    .sort((a, b) => (b.occurrences * (b.mean_severity || 0.5)) - (a.occurrences * (a.mean_severity || 0.5)));
+  const diag = dxRows.length ? `<div class="grp"><div class="gh">Diagnosis <span class="why">· what goes wrong here</span></div>
+    ${dxRows.slice(0, 3).map((r) => `<div class="frow"><div class="fl"><b>${esc(r.symptom)}</b><span class="why">${esc(r.phase || "")} · ${r.occurrences} on ${r.laps_affected} lap${r.laps_affected === 1 ? "" : "s"}</span></div>
+      <div class="fr">${r.primary_fix ? `<span class="chip b">${esc(r.primary_fix)}</span>` : ""}</div></div>`).join("")}</div>` : "";
+
+  // ---- WHERE THE TIME GOES: per-phase typical vs your best line, biggest gap flagged (the "to find")
+  const wtg = cmp.some((r) => r.best != null) ? `<div class="grp"><div class="gh">Where the time goes <span class="why">· typical vs your best line</span></div>
+    <table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best</th><th>Δ s</th></tr></thead><tbody>
+    ${cmp.map((r) => { const d = r.best != null ? r.typ - r.best : null; const flag = worst && worst.n === r.n && worst.d > 0.03;
+      return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>
+        <td class="mono">${r.typ.toFixed(2)}</td><td class="mono">${r.best != null ? r.best.toFixed(2) : "—"}</td>
+        <td class="mono tt-find">${d != null ? (d > 0 ? "+" : "") + d.toFixed(2) : "—"}</td></tr>`; }).join("")}</tbody></table></div>` : "";
 
   // ---- THE LEADERBOARD: passes fastest-first; each phase cell = apex mph, coloured by grip
   const SHORT = { braking: "brake", turn_in: "turn-in", mid: "mid", exit: "exit", straight: "straight" };
@@ -2692,7 +2716,7 @@ function turnStatsHTML(t, ls) {
     return `<td class="mono" style="color:${gk === "calm" ? "var(--ink)" : g.col}" title="apex ${Math.round(r[2])} mph · ${esc(g.word)}${r[5] != null ? " · " + r[5].toFixed(2) + " s" : ""}">${Math.round(r[2])}</td>`; };
   const rows = passes.map((p, i) => `<tr class="${i === 0 ? "tlb-best" : ""}">
       <td class="tlb-rank">${i + 1}</td><td class="mono">${p.lapT != null ? lapTime(p.lapT) : "—"}</td>
-      <td class="tlb-car" title="${esc(carName(p.meta.cid))}${p.meta.pi ? " · " + p.meta.pi + " PI" : ""}">${p.meta.class ? `<span class="cls-pill" style="--pc:${piColor(p.meta.class)}">${esc(p.meta.class)}</span>` : ""}<span class="tlb-carn">${esc(carShort(p.meta.cid))}</span></td>
+      <td class="tlb-car" title="${esc(carName(p.meta.cid))}${p.meta.pi ? " · " + p.meta.pi + " PI" : ""}">${classPill(p.meta.class)}<span class="tlb-carn">${esc(carShort(p.meta.cid))}</span></td>
       <td class="mono tlb-tt">${p.turnT.toFixed(2)}</td>${SEG_ORDER.map((n) => cell(p.ph[n])).join("")}</tr>`).join("");
   // NO row cap: the info panes may scroll (Jett 2026-09-11) -- .pane>.body already scrolls, so every
   // pass is listed and the list scrolls, rather than being clipped to a "top N".
@@ -2704,7 +2728,7 @@ function turnStatsHTML(t, ls) {
     <div class="tstat-gread">${gripBar(turnMix, "gbar--lg")}<span class="tstat-gword">${esc(gripRead(turnMix))}</span></div>
     <div class="ballegend gleg">${GSTATE.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}</span>`).join("")}</div></div>`;
 
-  return `<div class="tstat">${header}${timing}${board}${gripCard}</div>`;
+  return `<div class="tstat">${header}${timing}${diag}${wtg}${board}${gripCard}</div>`;
 }
 function cap1(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function matrixHTML() {
@@ -2910,7 +2934,7 @@ function courseStatsHTML() {
   const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
   const classes = [...new Set(laps.map((l) => l.class).filter(Boolean))]
     .sort((a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
-  const clsPill = (cls) => `<span class="cls-pill" style="--pc:${piColor(cls)}">${esc(cls)}</span>`;
+  const clsPill = (cls) => classPill(cls);   // the established .pib badge, everywhere a class is shown
   const totals = `<div class="grp"><div class="gh">${esc(COURSE.name || COURSE.key)}</div>
     <div class="cstat-tot"><span><b>${(COURSE.turns || []).length}</b><em>turns</em></span>
       <span><b>${fmtLen(COURSE.len)}</b><em>length</em></span>

@@ -461,7 +461,7 @@ button.stage.act.go:active{transform:translateY(1px)}
 .tt tbody tr{cursor:pointer}
 .tt tbody tr:hover{background:var(--panel2)}
 .tt tbody tr.on,.tt tr.ttr.on{background:rgba(0,210,122,.12);outline:1px solid var(--acc);outline-offset:-1px}
-.tt .tt-find{color:var(--warn);font-weight:600}
+.tt-find{color:var(--warn);font-weight:600}
 .tt tfoot td{padding:3px 5px;color:var(--mut);border-top:1px solid var(--line);font-size:10px;text-align:left}
 .tt tfoot td.tt-find{text-align:center}
 .tt .pdot{display:inline-block;width:7px;height:7px;border-radius:50%}

@@ -406,6 +406,18 @@ def verdict(r):
         return "probable"
     if close and cov >= 0.25:
         return "partial"
+    # ROBUST WHOLE MATCH. A drive can sit dead on ONE route yet have a couple of vertices briefly
+    # off it -- a kerb clip, a rewind landing, a lane split -- that read as 9999 m (no centre-line
+    # within a grid cell) and drag the MEAN past 8 while the 95th percentile stays on the road.
+    # Judge those by the p95 the two stray points cannot move: when the bulk of the line is on-route
+    # (p95 tight), it covers the route, the length matches and the runner-up is far, that is the
+    # route. A candidate that genuinely DIVERGES fails here -- its divergence is a run of points, not
+    # a pair, so p95 is high (this is why capping the mean was wrong: it hid real divergence, e.g.
+    # Hakane's parallel 11001). Additive by construction: reached only after the mean-based tests
+    # returned nothing, so it can promote a 'none' but never demote a match they already made.
+    p95 = r["p95_dev_m"]
+    if p95 is not None and p95 <= 8.0 and clear and cov >= 0.60 and 0.85 <= lr <= 1.18:
+        return "probable"
     return "none"
 
 

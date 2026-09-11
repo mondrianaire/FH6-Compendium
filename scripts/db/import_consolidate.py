@@ -102,6 +102,15 @@ def run(cx, verbose=False):
     for road, (survivor, losers) in sorted(merges.items()):
         merged_rows.append((road, survivor, losers))
 
+    # empty artifacts: a course a session_event opened but nothing was driven on and no path was
+    # captured -- 0 laps AND no geometry. (A 0-lap course that DOES have a centre-line, e.g. its
+    # only laps were voided, keeps its identity and is left alone.)
+    empties = [r["route_key"] for r in cx.execute(
+        "SELECT c.route_key FROM course c WHERE "
+        "(SELECT COUNT(*) FROM lap l WHERE l.route_key=c.route_key)=0 AND "
+        "(json_array_length(json_extract(c.geometry,'$.path')) IS NULL OR "
+        " json_array_length(json_extract(c.geometry,'$.path'))=0)")]
+
     n_dedup = n_repoint_laps = n_relabel = 0
     with cx:
         cx.execute("BEGIN")
@@ -144,13 +153,19 @@ def run(cx, verbose=False):
             cx.execute("UPDATE course SET n_laps=(SELECT COUNT(*) FROM lap WHERE lap.route_key=course.route_key) "
                        "WHERE route_key=?", (survivor,))
 
+        # 4. drop the empty artifacts (course_turn / course_route cascade; no laps to lose)
+        for k in empties:
+            cx.execute("DELETE FROM course WHERE route_key=?", (k,))
+
     if verbose:
         for _road, survivor, losers in merged_rows:
             n = cx.execute("SELECT n_laps FROM course WHERE route_key=?", (survivor,)).fetchone()
             print("  %-16s <- %-32s  now %s laps" % (survivor, " + ".join(losers), n[0] if n else "?"))
+        if empties:
+            print("  pruned %d empty course(s): %s" % (len(empties), ", ".join(empties)))
     return {"merged_courses": sum(len(l) for _r, _s, l in merged_rows),
             "duplicate_laps_dropped": n_dedup, "laps_repointed": n_repoint_laps,
-            "relabelled": n_relabel}, merged_rows
+            "relabelled": n_relabel, "empties_pruned": len(empties)}, merged_rows
 
 
 def main(argv=None):
@@ -169,7 +184,7 @@ def main(argv=None):
         fh6db.run_end(cx, rid, 0, 0, "%s: %s" % (type(e).__name__, e))
         raise
     fh6db.run_end(cx, rid, counts["merged_courses"], 1, json.dumps({"counts": counts}))
-    for k in ("merged_courses", "duplicate_laps_dropped", "laps_repointed", "relabelled"):
+    for k in ("merged_courses", "duplicate_laps_dropped", "laps_repointed", "relabelled", "empties_pruned"):
         print("  %-22s %8d" % (k, counts[k]))
     return 0
 

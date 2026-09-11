@@ -2616,7 +2616,13 @@ function lapHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to rate each turn the moment you take it.</div>`;
   const cid = CUR && CUR.cid, ls = activeLapSet();
   const mine = (LIVE.corners || []).filter((c) => (!cid || c.car === cid) && c.ev !== 0 && c.lapn != null);
-  const curLap = (LIVE.frame && LIVE.frame.lapn != null) ? LIVE.frame.lapn : (mine.length ? Math.max(...mine.map((c) => c.lapn)) : null);
+  // LAP-NUMBER CONVENTIONS DIFFER (Jett 2026-09-11): a corner event stores lapn 1-based (daemon adds +1 to
+  // the telemetry LapNumber), but the live FRAME reports lapn = raw LapNumber (0-based). Comparing the two
+  // raw was off by one, so `taken` never matched and the tab sat empty. Convert the frame lap to the corner
+  // convention (+1), and only trust it while actually in an event; otherwise take the latest corner's lap.
+  const inEv = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
+  const frameLap = inEv && LIVE.frame.lapn != null ? LIVE.frame.lapn + 1 : null;
+  const curLap = frameLap != null ? frameLap : (mine.length ? Math.max(...mine.map((c) => c.lapn)) : null);
   const taken = mine.filter((c) => c.lapn === curLap).sort((a, b) => a.t0 - b.t0);
   const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
   const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · apex speed vs your own history</span></div>`;

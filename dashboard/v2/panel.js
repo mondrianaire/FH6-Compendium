@@ -520,6 +520,10 @@ function pedalSwatches() {
   return [["coast"], ["thr1", "thr2", "thr3"], ["brk1", "brk2", "brk3"], ["both"]].map((ks) =>
     `<span class="ped-sw" title="${esc(ks.map((k) => PEDAL[k].word).join(" · "))}">${ks.map((k) => `<i style="background:${PEDAL[k].col}"></i>`).join("")}${esc(PEDAL[ks[0]].group || PEDAL[ks[0]].word)}</span>`).join("");
 }
+// the grip key for a legend: the 5 DGRIP states, each swatch the INK the grip lines actually paint (calm = grey)
+function gripSwatches() {
+  return GSTATE.map((k) => `<span class="ped-sw" title="${esc(DGRIP[k].tip)}"><i style="background:${DGRIP[k].ink}"></i>${esc(DGRIP[k].word)}</span>`).join("");
+}
 // the legacy key the v1 dashboard also reads knows only its own modes; pedals persists in the v2 view store alone
 function saveTraceMode() { VIEW.global.traceMode = TRACE_MODE; viewSave(); if (TRACE_MODE !== "pedals") { try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} } }
 // PI-class colours, matching the .pib-<class> badges (styles.css). A context (non-foregrounded)
@@ -3569,7 +3573,7 @@ function cornerMapHTML(c, t, ls) {
     for (const p of tr) {
       const X = p[3], Z = p[4], V = p[1];
       if (X == null || Z == null || X < x0 || X > x1 || Z < z0 || Z > z1) { if (run.length > 1) lapRuns.push(run); run = []; continue; }
-      run.push([X, Z, V, p[6], p[7]]); if (V != null) { winV.push(V); sumV += V; nV++; }   // [3]/[4] = throttle / brake % for the pedal paint
+      run.push([X, Z, V, p[6], p[7], p[2]]); if (V != null) { winV.push(V); sumV += V; nV++; }   // run pt = [x,z,v,thr%,brk%,gripCode] — [3]/[4] pedal paint, [5] grip paint
     }
     if (run.length > 1) lapRuns.push(run);
     if (lapRuns.length) { runsByLap[id] = lapRuns; paceByLap[id] = nV ? sumV / nV : 0; }
@@ -3594,7 +3598,8 @@ function cornerMapHTML(c, t, ls) {
       let r = run; if (r.length > 40) { const stp = r.length / 40; r = Array.from({ length: 40 }, (_, i) => run[Math.floor(i * stp)]); }
       let out = "";
       for (let i = 1; i < r.length; i++) { const a = r[i - 1], b = r[i], v = ((a[2] || 0) + (b[2] || 0)) / 2;
-        const col = byRank ? solid : CM_TRACE_MODE === "pedals" ? pedalCol(pedalKey(b[3], b[4])) : spdColor(v, vmin, vmax);
+        // grip: paint each point by its grip state (grey = within grip, so the breaks pop). pedals: throttle/brake.
+        const col = byRank ? solid : CM_TRACE_MODE === "grip" ? gripInk(b[5], null) : CM_TRACE_MODE === "pedals" ? pedalCol(pedalKey(b[3], b[4])) : spdColor(v, vmin, vmax);
         out += `<line x1="${px(a[0]).toFixed(1)}" y1="${py(a[1]).toFixed(1)}" x2="${px(b[0]).toFixed(1)}" y2="${py(b[1]).toFixed(1)}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`; }
       return out;
     }).join("");
@@ -3617,11 +3622,12 @@ function cornerMapHTML(c, t, ls) {
     exP && exP.exit != null && segs.exit ? pillAt(segs.exit[segs.exit.length - 1], exP.exit) : "",
   ].join("");
   const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${speedLines}${strips}${apex}${chev}${pills}</svg>`;
-  // legend reflects the active colouring; the toggle switches it (position = default, speed = filter)
-  const modeLeg = CM_TRACE_MODE === "pedals" ? `<span class="why">line colour = pedals</span>${pedalSwatches()}` : byRank
+  // legend reflects the active colouring; the toggle switches it (position = default, speed / pedals / grip = filters)
+  const modeLeg = CM_TRACE_MODE === "grip" ? `<span class="why">line colour = grip</span>${gripSwatches()}`
+    : CM_TRACE_MODE === "pedals" ? `<span class="why">line colour = pedals</span>${pedalSwatches()}` : byRank
     ? `<span class="why">line colour = position (fastest → slowest)</span><em>P1</em><i class="cm-grad cm-grad--rank"></i><em>P${nDrawn}</em>`
     : (winV.length ? `<span class="why">line colour = speed</span><em>${Math.round(vmin)}</em><i class="cm-grad"></i><em>${Math.round(vmax)} mph</em>` : `<span class="why">line colour = speed</span>`);
-  const cmToggle = `<span class="cm-views">${[["rank", "position", "each trace one solid colour by its leaderboard position"], ["speed", "speed", "colour each trace point-by-point by speed"], ["pedals", "pedals", "colour each trace point-by-point by throttle and brake"]].map(([k, l, tip]) => `<button class="mini ${CM_TRACE_MODE === k ? "on" : ""}" data-cmtrace="${k}" title="${tip}">${l}</button>`).join("")}</span>`;
+  const cmToggle = `<span class="cm-views">${[["rank", "position", "each trace one solid colour by its leaderboard position"], ["speed", "speed", "colour each trace point-by-point by speed"], ["grip", "grip", "colour each trace point-by-point by grip state — grey within grip, so where the tyres let go stands out"], ["pedals", "pedals", "colour each trace point-by-point by throttle and brake"]].map(([k, l, tip]) => `<button class="mini ${CM_TRACE_MODE === k ? "on" : ""}" data-cmtrace="${k}" title="${tip}">${l}</button>`).join("")}</span>`;
   // THE CORNER'S LEGEND (Jett 2026-09-11: "the corner detail view needs a legend"): every mark on the map named --
   // the phase strips, what the lines' colour means (with its switch), and the marks.
   const legend = `<div class="cm-legend">

@@ -1268,25 +1268,31 @@ function gateStrip(st, rs) {
   if (!CUR || rs.key === "none") return { tone: "dim", ident: "—", detail: "waiting for a car", sheet: "dead", sheetSub: "no car" };
   if (st.key === "offline") return { tone: "dim", ident: "◌ NOT LIVE", detail: "last thing seen", sheet: "dead", sheetSub: "daemon down" };
   if (rs.key === "spec") return { tone: "blue", ident: "◈ SPEC CAR", detail: "provided by the event · temporary", sheet: "dead", sheetSub: "spec — nothing to save", spec: true };
+  // IDENTITY = "LAST BUILD REMEMBERED" (Jett 2026-09-11): the confidence is simply whether we hold THIS exact
+  // car + build on record ("remembered"), separate from whether the TUNING is exact. Tuning is only guaranteed
+  // when the build was captured through the game's own save (equip → My Tuning Setup → the grey-minus tile → the
+  // save fully decodes); a downloaded tune's sliders are locked, so it is remembered but its tune is not readable
+  // until you equip + save it. See memory fh6-tune-identification-equip-workflow.
   if (rs.key === "ambiguous") {
     const mm = (CUR && CUR.match) || {}; const ties = mm.n_signature_ties || rs.tunes || 0;
-    return { tone: "warn", ident: "! NOT IDENTIFIED", detail: ties ? ties + " saves tie" : "several saves tie",
+    return { tone: "warn", ident: "◌ NOT YET REMEMBERED", detail: (ties ? ties + " saves tie" : "several saves tie") + " · equip + save the tune to pin it",
       sheet: "dead", sheetSub: "needs one save", verdict: (CUR.match && matchQuality(CUR.match).level === "conflict") ? "IDENTITY CONTRADICTED" : "" };
   }
-  if (st.key === "variation") return { tone: "acc", ident: "✓ IDENTIFIED", detail: "base + " + nSl + " slider" + (nSl === 1 ? "" : "s"), sheet: "outline" };
-  if (st.key === "clone") return { tone: "acc", ident: "✓ IDENTIFIED", detail: "identical, unlocked", sheet: "outline" };
+  if (st.key === "variation") return { tone: "acc", ident: "✓ REMEMBERED", detail: nSl + " slider" + (nSl === 1 ? "" : "s") + " off a saved build · tuning guaranteed", sheet: "outline" };
+  if (st.key === "clone") return { tone: "acc", ident: "✓ REMEMBERED", detail: "clone · unlocked · save it to keep", sheet: "outline" };
   if (rs.key === "unsaved") {   // truly unsaved: hardware changed / no match, nothing on disk
     if (rs.locked) return { tone: "warn", ident: "◷ IMPORTING", detail: "history catching up", sheet: "dead", sheetSub: "importing" };
-    const d = [nSl ? nSl + " slider" + (nSl === 1 ? "" : "s") + " moved" : "", nPa ? nPa + " part" + (nPa === 1 ? "" : "s") + " changed" : ""].filter(Boolean).join(" · ") || "no save on disk";
-    return { tone: "bad", ident: "✗ NOTHING ON DISK", detail: d, sheet: "dead", sheetSub: "needs a save", verdict: "NOT SAVED — NOTHING CAN BE COMPARED" };
+    const d = [nSl ? nSl + " slider" + (nSl === 1 ? "" : "s") + " moved" : "", nPa ? nPa + " part" + (nPa === 1 ? "" : "s") + " changed" : ""].filter(Boolean).join(" · ");
+    return { tone: "bad", ident: "◌ NEW BUILD", detail: (d ? d + " · " : "") + "equip + save to remember it", sheet: "dead", sheetSub: "needs a save", verdict: "NEW BUILD — SAVE IT IN THE GAME TO REMEMBER IT" };
   }
-  // resolved
+  // resolved (remembered)
   const tree = (rs.hwN || 1) + " hw · " + (rs.tunes || 1) + " tune" + ((rs.tunes || 1) === 1 ? "" : "s");
   if (st.key === "ratified") {
     const m = MATCH && MATCH.build, laps = (m && m.laps) || 0, courses = (m && m.courses) || 0;
-    return { tone: "acc", ident: "✓ IDENTIFIED", detail: laps ? laps + " lap" + (laps === 1 ? "" : "s") + (courses ? " · " + courses + " course" + (courses === 1 ? "" : "s") : "") : tree, sheet: "outline" };
+    const hist = laps ? laps + " lap" + (laps === 1 ? "" : "s") + (courses ? " · " + courses + " course" + (courses === 1 ? "" : "s") : "") : "your build";
+    return { tone: "acc", ident: "✓ REMEMBERED", detail: hist + " · tuning guaranteed", sheet: "outline" };
   }
-  return { tone: "acc", ident: "✓ IDENTIFIED", detail: tree, sheet: "filled" };   // downloaded / locked
+  return { tone: "acc", ident: "✓ REMEMBERED", detail: "downloaded · equip + save to read the tune", sheet: "filled" };   // downloaded / locked
 }
 
 // THE HASH TABLE (header handoff §5): the two tiers as a table, not chip columns. Each row is one

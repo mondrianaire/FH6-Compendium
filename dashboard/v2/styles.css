@@ -439,22 +439,43 @@ button.stage.act.go:active{transform:translateY(1px)}
 /* ---- the course-mode filter bar: one home for the historical-data filters, between the trace and
    the panes; it scopes EVERY pane below (trace, map, turns, stats), so the resulting lap set is
    spelled out on the right as explicit feedback for what is selected. ---- */
-.coursefilter{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;
-  background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:5px 10px;font-size:12px}
+/* the SCOPE band (v2 step 2): its edge carries the state -- open (no class narrows it), match (green), mismatch
+   (amber: the filter's class is not the car under you) */
+.coursefilter{flex:0 0 auto;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:0;font-size:12px;
+  --cf-edge:var(--line2);box-shadow:inset 3px 0 0 var(--cf-edge)}
+.coursefilter[data-state="match"]{--cf-edge:var(--acc)}
+.coursefilter[data-state="mismatch"]{--cf-edge:var(--warn);border-color:var(--warn)}
+.coursefilter .cf-main{display:flex;flex-direction:column;gap:3px;padding:5px 10px 5px 13px;min-width:0}
+.coursefilter .cf-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px}
 .coursefilter .cf-h{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc2);font-weight:700}
 .coursefilter .fdim{display:inline-flex;align-items:center;gap:3px}
 .coursefilter .fdim .why{margin-right:2px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
-.coursefilter .cf-sum{margin-left:auto;display:inline-flex;align-items:center;gap:5px;
-  font-size:11px;color:var(--mut);padding:2px 9px;border:1px solid var(--line2);border-radius:20px}
-.coursefilter .cf-sum b{color:var(--ink);font-variant-numeric:tabular-nums}
-.coursefilter .cf-dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 5px var(--acc)}
+.coursefilter .cf-clss{display:inline-flex;align-items:center;gap:2px}
+.coursefilter .cf-cls{display:inline-flex;align-items:center;gap:3px;background:none;border:1px solid transparent;border-radius:3px;padding:1px 3px;cursor:pointer;color:var(--mut);position:relative}
+.coursefilter .cf-cls:hover{border-color:var(--line2)}
+.coursefilter .cf-cls.on{border-color:var(--cf-edge);background:var(--panel2)}
+.coursefilter[data-state="open"] .cf-cls.on,.coursefilter[data-state="nocar"] .cf-cls.on{border-color:var(--acc2)}
+.coursefilter .cf-cls.car::after{content:"";position:absolute;right:-1px;top:-1px;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px var(--panel)}
+.coursefilter .cf-all{font:700 10.5px var(--mono);color:var(--ink);padding:0 2px}
+.coursefilter .cf-n{font:600 10px var(--mono);font-style:normal;color:var(--mut)}
+.coursefilter .cf-read{font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coursefilter .cf-read b{color:var(--ink);font-variant-numeric:tabular-nums}
+.coursefilter .cf-read .cf-warn{color:var(--warn);font-weight:600}
+.coursefilter .cf-cta{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:176px;padding:4px 12px;border:0;border-left:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;text-align:left}
+.coursefilter .cf-cta:hover{background:var(--panel2)}
+.coursefilter .cf-cta b{font:700 10.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--acc2)}
+.coursefilter .cf-cta em{font-style:normal;font-size:10.5px;color:var(--mut)}
+.coursefilter[data-state="match"] .cf-cta b{color:var(--acc)}
+.coursefilter[data-state="mismatch"] .cf-cta{background:rgba(227,179,65,.14)}
+.coursefilter[data-state="mismatch"] .cf-cta b{color:var(--warn)}
 /* ---- General statistics (course mode): course totals + a focusable per-class section each ---- */
 .cls-pill{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 7px;
   border-radius:20px;border:1px solid var(--pc);color:var(--pc);font-size:11px;font-weight:700;letter-spacing:.02em}
 .cstat-tot{display:flex;flex-wrap:wrap;gap:6px 22px;padding:3px 4px 1px}
 .cstat-tot span{display:flex;flex-direction:column}
 .cstat-tot b{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
-.cstat-tot em{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-style:normal}
+.cstat-tot em{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-style:normal;white-space:nowrap}
 .cstat-focus{padding:3px 6px;display:flex;align-items:center;gap:6px}
 .cstat-sec.on{outline:1px solid var(--pc,var(--acc));outline-offset:-1px}
 .cstat-cls.collapsed{display:flex;width:100%;align-items:center;gap:8px;padding:4px 8px;background:none;

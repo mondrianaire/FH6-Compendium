@@ -772,18 +772,50 @@ function modeControls() {
 // activeLapSet(). So the filters live here, in one bar between the trace and the course panes,
 // with the resulting lap set spelled out (strong feedback for what is currently selected). Reuses
 // traceFilterState()'s chips and wireTrace()'s handlers so one `vc` store still backs every surface.
+// THE SCOPE BAND (course mode v2 step 2, handoff §2) grew out of it: the single source of truth for what every
+// count below is measured against. Class options are the game's class badge + the laps choosing it would scope
+// to; a reading line states what the filter costs; MISMATCH IS A STATE -- when the filter's class is not the car
+// under you, the band's edge and its button turn amber and one tap scopes to your car. The trail's paint lives
+// here too, bound to the one TRACE_MODE the trace header and the map key already share.
 function paintCourseFilter() {
   const el = $("#coursefilter"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE;
   el.hidden = !course;
-  if (!course) { el.innerHTML = ""; return; }
-  const { presets, filt, clearBtn } = traceFilterState(COURSE);
-  const ls = activeLapSet();
-  el.innerHTML = `<span class="cf-h">analyze</span>`
-    + `<span class="fdim"><span class="why">show</span>${presets}</span>${filt}${clearBtn}`
-    + `<span class="cf-sum" title="the lap set every pane below is scoped to right now">`
-    + `<i class="cf-dot"></i><b>${ls.set.size}</b>&nbsp;lap${ls.set.size === 1 ? "" : "s"} · ${esc(ls.label)}</span>`;
-  wireTrace(el);   // data-tpre / data-tfilt / data-tfiltsel handlers (they now repaint every pane)
+  if (!course) { el.innerHTML = ""; delete el.dataset.state; return; }
+  const { presets, filt, clearBtn, sel } = traceFilterState(COURSE, ["class"]);
+  const ls = activeLapSet(), tf = sel.filters || {};
+  // per-class counts under the SAME preset, other dims and racing gate activeLapSet applies, so the number on a
+  // class button is the token that button produces
+  const base = (COURSE.laps || []).filter(presetTest(sel.preset === "class" ? "all" : sel.preset))
+    .filter((l) => TRACE_DIMS.every(([d]) => d === "class" || !tf[d] || dimVal(l, d) === String(tf[d])));
+  const race = RACING_ONLY ? racingIds(COURSE.laps || []) : null;
+  const cnt = (ids) => { if (!race) return ids.length; const g = ids.filter((id) => race.has(id)); return g.length || ids.length; };
+  const byCls = {}; base.forEach((l) => { if (l.class) (byCls[l.class] = byCls[l.class] || []).push(String(l.id)); });
+  const classes = Object.keys(byCls).sort((a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
+  const carCls = liveClass(), carN = carCls ? cnt(byCls[carCls] || []) : 0;
+  const state = !carCls ? "nocar" : !ls.cls ? "open" : ls.cls === carCls ? "match" : "mismatch";
+  const clsBtn = (k) => {
+    const on = k == null ? !ls.cls : ls.cls === k, n = k == null ? cnt(base.map((l) => String(l.id))) : cnt(byCls[k]);
+    return `<button class="cf-cls${on ? " on" : ""}${k && k === carCls ? " car" : ""}" data-cfcls="${k == null ? "" : esc(k)}" title="${k == null ? "every class" : "class " + esc(k)} · ${n} lap${n === 1 ? "" : "s"}${k && k === carCls ? " · the car under you" : ""}">${k == null ? `<b class="cf-all">all</b><em class="cf-n">${n}</em>` : classPill(k, n)}</button>`;
+  };
+  const paint = `<span class="fdim cf-paint"><span class="why">paint the trail</span>${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-tmode="${m}" title="${tip}">${m}</button>`).join("")}</span>`;
+  const carTxt = !carCls ? "no live car to check the scope against"
+    : `the car under you is class ${esc(carCls)} (${carN} lap${carN === 1 ? "" : "s"})`
+      + (state === "mismatch" ? ` — <b class="cf-warn">every count below is measured against class ${esc(ls.cls)}</b>` : state === "match" ? " — the filter matches it" : "");
+  const read = `<b>${ls.n}</b> lap${ls.n === 1 ? "" : "s"} in this filter ${scopeTok(ls)} · ${ls.total} on the course · ${carTxt}`;
+  const cta = state === "nocar" ? "" : `<button class="cf-cta" data-cfmatch="${state === "match" ? "" : esc(carCls)}" title="${state === "match" ? "tap to widen back to every class" : "scope every pane to the class of the car under you"}">
+      <b>${state === "match" ? "✓ scope matches" : state === "mismatch" ? "⚠ filter ≠ your car" : "match my car"}</b>
+      <em>${state === "match" ? `class ${esc(carCls)} · ${carN} lap${carN === 1 ? "" : "s"}` : `tap to match my car — class ${esc(carCls)}`}</em></button>`;
+  el.dataset.state = state;
+  el.innerHTML = `<div class="cf-main"><div class="cf-row"><span class="cf-h">scope</span><span class="cf-clss">${[null].concat(classes).map(clsBtn).join("")}</span>`
+    + `<span class="fdim"><span class="why">show</span>${presets}</span>${filt}${paint}${clearBtn}</div>`
+    + `<div class="cf-read">${read}</div></div>${cta}`;
+  wireTrace(el);   // data-tpre / data-tfilt / data-tfiltsel / data-tmode handlers (they repaint every pane)
+  // a class pick is explicit: it drops the "this class" preset (which follows the car) so the pick stands
+  const setClass = (k) => { const vc = traceSel(COURSE); if (k) vc.filters.class = k; else delete vc.filters.class;
+    if (vc.preset === "class") vc.preset = "all"; vc.auto = false; viewSave(); repaintFiltered(); };
+  el.querySelectorAll("[data-cfcls]").forEach((b) => b.onclick = () => setClass(b.dataset.cfcls || null));
+  const m = el.querySelector("[data-cfmatch]"); if (m) m.onclick = () => setClass(m.dataset.cfmatch || null);
 }
 // One filter change re-scopes the trace, the bar's own summary, and (in course mode) the map/turns
 // and stats. The left/right rebuild is course-only — in free roam it would needlessly re-raster the
@@ -812,7 +844,7 @@ function racingIds(all) {
 }
 // the preset + dimension chips, shared by the trace pane and the map's own filter drawer — one
 // `vc` (per-course view store) backs both, so a click in either pane keeps them in lockstep.
-function traceFilterState(c) {
+function traceFilterState(c, skip) {   // skip: dims a caller renders itself (the scope band draws class)
   const byId = {}; (c.laps || []).forEach((l) => (byId[String(l.id)] = l));
   const allRaw = Object.keys(c.traces).map((id) => Object.assign({ id, pts: c.traces[id] }, byId[id] || {})).filter((t) => t.pts && t.pts.length > 2);
   // RACING-ONLY gate (default on) -- drop non-competitive laps unless it would blank the pane
@@ -832,7 +864,7 @@ function traceFilterState(c) {
   // distinct values (the build-hash / tune-timestamp dumps, which used to spill 18 + 8 unreadable
   // chips) COLLAPSES to a single dropdown -- same reach, one entry instead of dozens (Jett 2026-09-10).
   const CHIP_MAX = 4;
-  const filt = TRACE_DIMS.map(([d, lab]) => {
+  const filt = TRACE_DIMS.filter(([d]) => !(skip || []).includes(d)).map(([d, lab]) => {
     const vals = [...new Set(stage1.map((t) => dimVal(t, d)).filter((v) => v != null))].sort();
     if (vals.length < 2) return "";
     const active = tf[d] != null ? String(tf[d]) : "";

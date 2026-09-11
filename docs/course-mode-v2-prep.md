@@ -142,10 +142,19 @@ tabs and the build-guard / held / mismatch states are props on it, not separate 
 
 ## 4. Build order
 
-1. **Foundations (no visual change):** `scopeToken(ls)`; `courseStatsHTML` onto `activeLapSet()`;
-   `lapNo()`; `rankVerdict(values, mine, ls)` returning `{rank, of, scopeTok, conf: strong|thin|only|level|empty}`;
-   rate live turns on `mph_min`; `build_web.py` `built_at` + sid set; verify stint id on live corners.
-2. **SCOPE band** replacing `#coursefilter` content; PAINT control moves in; mismatch state.
+1. **Foundations — DONE 2026-09-11.** `activeLapSet()` → `{set, label, token, cls, n, total}` + `scopeTok(ls)`;
+   `rankVerdict(pool, mine, ls)` → `{kind: best|ranked|only|level|nolap, rank, of, thin, star, text, basis, d}`;
+   `mphD()`; `lapNo(frame)` on hero / status / dock / Current lap; Current lap rated on `mph_min`; abandoned
+   attempts grouped by the corner event's `stint`; `courseStatsHTML` on `activeLapSet()`; hero three-state
+   confidence + freshness from `built_at` (build_web.py) and `RB.last.sessions_pending`. Verified in the
+   Browser pane with synthetic corners on route 5411, ALL·33 and D·1 scopes.
+2. **SCOPE band — DONE 2026-09-11.** `paintCourseFilter()`: class badges with the laps each would scope to,
+   `all`, a white dot on the car's class; reading line `N laps in this filter · M on the course · the car
+   under you is class B (k laps)`; states on `data-state` — `open` / `match` (green edge) / `mismatch` (amber
+   edge + "⚠ filter ≠ your car") / `nocar`; one-tap match and back to all; `paint the trail` bound to
+   `TRACE_MODE`. `traceFilterState(c, skip)` so class isn't drawn twice. **Deviation:** the band is ~108 px
+   (design 78 px) because the kept `show` presets and the drive / tune / traffic / build filters wrap to a second
+   row. Page still fits at 1080 × 1751; compacting them (presets into a menu) is a later call.
 3. **Current lap view:** turn window + 4-row rank table + abandoned-attempt rows.
 4. **General statistics view:** header basis, two headline answers, scatter, car table.
 5. **Shared chrome:** map layer order + legend bar; hero freshness + class bars; build panel faces.

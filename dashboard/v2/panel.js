@@ -3174,7 +3174,11 @@ function turnStatsHTML(t, ls) {
   const cornerMap = cornerMapHTML(COURSE, t, ls);   // the per-turn line trace + phase-time rail, now in THIS (right) pane
   // the corner map (historical line trace) is one of the two most important things in the single-turn view,
   // so it leads — right under the header — with the leaderboard, errors, where-the-time-goes and grip below.
-  return `<div class="tstat">${header}${cornerMap}${diag}${wtg}${board}${gripCard}</div>`;
+  // ERRORS PULLED FROM TURN ANALYSIS FOR NOW (Jett 2026-09-11): the detected-error cards (`diag`) are held
+  // out of this section. The machinery above (turnErrors + `diag`) is left intact so restoring is a one-token
+  // change — put ${diag} back between ${cornerMap} and ${wtg} when we bring it back.
+  void diag;
+  return `<div class="tstat">${header}${cornerMap}${wtg}${board}${gripCard}</div>`;
 }
 function cap1(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function matrixHTML() {

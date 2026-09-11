@@ -2612,6 +2612,31 @@ function paintRight() {
 // its grip loss is read from the live corner (first-red axle/phase, else the understeer index). Course mode
 // only; repaints on every corner event because the SSE "corner" handler calls paintRight().
 const LIVE_PH = ["braking", "turn_in", "mid", "exit"];   // live corner phase index (1-4) -> SEG name
+// GRIP RATED ACROSS THE 5-PHASE TURN (Jett 2026-09-11): grip is its OWN rating (speed is rated separately,
+// left), and it reads PER PHASE -- each driving phase (braking / turn-in / mid / exit) coloured by what the
+// tyres did there, its width the time spent in it, the worst phase captioned. The daemon already resolves
+// each phase's state (c.phases[].red) and duration; the tab used to collapse all of it to a single
+// first-red word. Falls back to that single read only when an event carries no per-phase breakdown.
+const GRIP_SEV = { both: 4, impact: 4, rear: 3, front: 2, calm: 0 };
+function phaseGrip(c) {
+  const phs = Array.isArray(c.phases) ? c.phases : [];
+  if (phs.length) {
+    let worst = null;
+    const cells = phs.map((p) => {
+      const st = DGRIP[p.red] ? p.red : "calm", g = DGRIP[st];
+      const nm = SEG_LABEL[LIVE_PH[p.phase - 1]] || ("phase " + p.phase);
+      if (st !== "calm" && (!worst || GRIP_SEV[st] > GRIP_SEV[worst.st] || (GRIP_SEV[st] === GRIP_SEV[worst.st] && (p.dur || 0) > worst.dur)))
+        worst = { st, ph: LIVE_PH[p.phase - 1], dur: p.dur || 0 };
+      return `<span class="lap-gcell" style="flex:${Math.max(3, Math.round((p.dur || 0.3) * 40))} 0 0;background:${g.col}" title="${esc(nm)} · ${esc(g.word)}${p.dur != null ? " · " + p.dur.toFixed(2) + " s" : ""}"></span>`;
+    }).join("");
+    const wg = worst ? DGRIP[worst.st] : DGRIP.calm;
+    const cap = worst ? `${esc(wg.word.split(/[ /]/)[0])} · ${esc(SEG_LABEL[worst.ph].split(/[ /]/)[0].toLowerCase())}` : "clean";
+    return { cell: `<span class="lap-grip"><em class="lap-gword" style="color:${wg.col}">${cap}</em><span class="lap-gbar">${cells}</span></span>`, lost: !!worst };
+  }
+  const gstate = c.first_red ? (c.first_red.axle === "front" ? "front" : "rear") : dGripUsi(c.usi), g = DGRIP[gstate] || DGRIP.calm;
+  const gl = c.first_red ? `${g.word} · ${esc(SEG_LABEL[LIVE_PH[c.first_red.phase - 1]] || "phase " + c.first_red.phase)}` : (gstate === "calm" ? "clean" : g.word);
+  return { cell: `<span class="lap-grip" style="color:${g.col}">${gl}</span>`, lost: gstate !== "calm" };
+}
 function lapHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to rate each turn the moment you take it.</div>`;
   const cid = CUR && CUR.cid, ls = activeLapSet();
@@ -2625,29 +2650,35 @@ function lapHTML() {
   const curLap = frameLap != null ? frameLap : (mine.length ? Math.max(...mine.map((c) => c.lapn)) : null);
   const taken = mine.filter((c) => c.lapn === curLap).sort((a, b) => a.t0 - b.t0);
   const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
-  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · apex speed vs your own history</span></div>`;
+  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · speed rated vs your history · grip across the corner's phases</span></div>`;
   if (!taken.length) return `<div class="lapview">${head}<div class="why" style="padding:10px 6px">No turns yet this lap — the first one appears the instant you finish it.</div></div>`;
   let lastSeq = null, rows = "", worstRow = null, anyBest = false, gripHits = 0;
   taken.forEach((c) => {
     const b = turnAtMatrix(c.apex, lastSeq), t = b && b.t; if (!t) return; lastSeq = t.seq;
     const apex = c.mph_apex != null ? c.mph_apex : c.mph_min;
-    const hist = ((t.phaseObs && t.phaseObs.mid) || []).filter((r) => ls.set.has(String(r[0])) && r[2] != null).map((r) => r[2]);
+    // apex speed per PAST lap for this turn = the slowest point across WHATEVER phases that lap recorded here,
+    // not only the 'mid' phase. A fast turn is often detected with no mid phase, so reading mid alone showed
+    // "first pass here" while its neighbours had 18-19 (Jett 2026-09-11). Take each lap's min across its phases.
+    const histByLap = {};
+    SEG_ORDER.forEach((seg) => ((t.phaseObs && t.phaseObs[seg]) || []).forEach((r) => {
+      if (!ls.set.has(String(r[0])) || r[2] == null) return;
+      if (histByLap[r[0]] == null || r[2] < histByLap[r[0]]) histByLap[r[0]] = r[2];
+    }));
+    const hist = Object.values(histByLap);
     const n = hist.length, bestMph = n ? Math.max(...hist) : null;
     const pos = (n ? hist.filter((v) => v > apex).length : 0) + 1, N = n + 1;   // pos 1 = your fastest ever apex here
     const isBest = n === 0 || apex >= bestMph, dMph = bestMph != null ? Math.round(apex - bestMph) : null;
     if (isBest && n) anyBest = true;
     const rankLbl = !n ? "first pass here" : isBest ? "★ best yet" : `${pos} of ${N}`;
     const rankTone = isBest ? "var(--acc)" : dMph != null && dMph <= -4 ? "var(--bad)" : "var(--mut)";
-    const gstate = c.first_red ? (c.first_red.axle === "front" ? "front" : "rear") : dGripUsi(c.usi);
-    const g = DGRIP[gstate] || DGRIP.calm;
-    const gripLbl = c.first_red ? `${g.word} · ${esc(SEG_LABEL[LIVE_PH[c.first_red.phase - 1]] || "phase " + c.first_red.phase)}` : (gstate === "calm" ? "clean" : g.word);
-    if (gstate !== "calm") gripHits++;
+    const gr = phaseGrip(c);   // grip rated per phase, separate from the speed rank above
+    if (gr.lost) gripHits++;
     if (dMph != null && dMph < 0 && (!worstRow || dMph < worstRow.d)) worstRow = { t, d: dMph };
     rows += `<div class="lap-row">
       <span class="lap-turn">${esc(turnLabel(t))}<em>${esc(cap1(t.kind || ""))}</em></span>
       <span class="lap-spd mono">${Math.round(c.mph_in)}<i>→</i><b>${Math.round(apex)}</b><i>→</i>${Math.round(c.mph_out)}<em> mph</em></span>
       <span class="lap-rank mono" style="color:${rankTone}">${rankLbl}${dMph != null && !isBest ? ` · ${dMph} mph` : ""}</span>
-      <span class="lap-grip" style="color:${g.col}">${gripLbl}</span></div>`;
+      ${gr.cell}</div>`;
   });
   const sum = `<div class="lap-sum">${worstRow ? `most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> · ${worstRow.d} mph off your best there` : (anyBest ? `<b style="color:var(--acc)">personal-best pace so far</b>` : "on your usual pace")}<span class="why">${gripHits} of ${taken.length} turns lost grip</span></div>`;
   return `<div class="lapview">${head}<div class="lap-hd"><span>turn</span><span>in→apex→out</span><span>vs history</span><span>grip</span></div>${rows}${sum}</div>`;

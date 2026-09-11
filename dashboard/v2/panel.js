@@ -475,8 +475,20 @@ const TRACE_GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];
 // PI-class colours, matching the .pib-<class> badges (styles.css). A context (non-foregrounded)
 // speed-trace line is painted by the PI CLASS of the build that drove it, so PI-vs-speed reads at a
 // glance across laps from different-class builds (Jett 2026-09-07). Unknown class falls back to --dim.
-const PI_COLORS = { D: "#45c8f1", C: "#f0c530", B: "#f0862d", A: "#e5414e", S1: "#a468e8", S2: "#2f62e0", R: "#e83c9e", X: "#2fd05f" };
-function piColor(cls) { return PI_COLORS[String(cls || "").toUpperCase()] || "var(--dim)"; }
+// ONE SOURCE (docs/design-language.md, decision D5, 2026-09-11): the class colours live ONLY as CSS custom
+// properties (--pc-d ... --pc-x in styles.css :root). This map is READ from them -- never a second copy. It
+// resolves to real colour strings, not var() references, because the traces paint SVG stroke attributes and
+// var() does not resolve there. Read lazily, and cached only once all eight have resolved.
+const PI_CLASS_KEYS = ["D", "C", "B", "A", "S1", "S2", "R", "X"];
+let PI_COLORS = null;
+function piColors() {
+  if (PI_COLORS) return PI_COLORS;
+  const cs = getComputedStyle(document.documentElement), m = {};
+  PI_CLASS_KEYS.forEach((k) => { const v = cs.getPropertyValue("--pc-" + k.toLowerCase()).trim(); if (v) m[k] = v; });
+  if (Object.keys(m).length === PI_CLASS_KEYS.length) PI_COLORS = m;
+  return m;
+}
+function piColor(cls) { return piColors()[String(cls || "").toUpperCase()] || "var(--dim)"; }
 // FH PI class bands (D<=500, C<=600, B<=700, A<=800, S1<=900, S2<=998, X>=999). Derives the class
 // LETTER from a PI so a badge is never an impossible pair like "S1 800" (800 is A). R is a category,
 // not a PI band, so it is never derived here -- it only appears when it comes from stored data.

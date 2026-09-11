@@ -3,6 +3,12 @@
   --bg:#0d1117; --panel:#141a22; --panel2:#1a222c; --line:#232d39; --line2:#2e3a48;
   --ink:#dfe7ef; --mut:#7d8b9c; --dim:#576372;
   --acc:#00d27a; --acc2:#4ea3ff; --warn:#e3b341; --bad:#f0616d; --mag:#c678dd;
+  /* PERFORMANCE CLASS COLOURS -- the ONE source (docs/design-language.md, decision D5, 2026-09-11).
+     The .pib fills, the negative pill and PI_COLORS (panel.js, read at runtime) all take these. */
+  --pc-d:#45c8f1; --pc-c:#f0c530; --pc-b:#f0862d; --pc-a:#e5414e;
+  --pc-s1:#a468e8; --pc-s2:#2f62e0; --pc-r:#e83c9e; --pc-x:#2fd05f;
+  /* letter ink for the light fills; the other four letters are white */
+  --pc-d-ink:#04222c; --pc-c-ink:#231a00; --pc-b-ink:#2a1400; --pc-x-ink:#04220f;
   --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
   --sans:"Inter","Segoe UI",system-ui,sans-serif;
 }
@@ -676,14 +682,6 @@ button.lchip.hid{opacity:.35;text-decoration:line-through}
 .pib--sm { font-size: 10px; }
 .pib--sm .pib-img { height: 14px; }
 .pib--sm b, .pib--sm i { padding: 2px 4px; }
-.pib-d b { background: #45c8f1; }
-.pib-c b { background: #f0c530; }
-.pib-b b { background: #f0862d; }
-.pib-a b { background: #e5414e; }
-.pib-s1 b { background: #a468e8; }
-.pib-s2 b { background: #2f62e0; }
-.pib-r b { background: #e83c9e; }
-.pib-x b { background: #2fd05f; }
 .pib-dash { color: var(--muted); margin: 0 3px; font-weight: 700; }
 .hname .pib{flex:0 0 auto}
 .pib{border-radius:2px}
@@ -966,10 +964,10 @@ body.fixed main{padding:0;gap:0;border-top:0}
   font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em}
 .pib--sm{height:16px;font-size:10px;border-radius:2px}
 .pib--lg{height:34px;font-size:20px;border-radius:4px}
-.pib-d b{background:#45c8f1;color:#04222c} .pib-c b{background:#f0c530;color:#231a00}
-.pib-b b{background:#f0862d;color:#2a1400} .pib-a b{background:#e5414e}
-.pib-s1 b{background:#a468e8} .pib-s2 b{background:#2f62e0}
-.pib-r b{background:#e83c9e}  .pib-x b{background:#2fd05f;color:#04220f}
+.pib-d b{background:var(--pc-d);color:var(--pc-d-ink)} .pib-c b{background:var(--pc-c);color:var(--pc-c-ink)}
+.pib-b b{background:var(--pc-b);color:var(--pc-b-ink)} .pib-a b{background:var(--pc-a)}
+.pib-s1 b{background:var(--pc-s1)} .pib-s2 b{background:var(--pc-s2)}
+.pib-r b{background:var(--pc-r)}  .pib-x b{background:var(--pc-x);color:var(--pc-x-ink)}
 .pib-img{display:none}
 /* the header wears the large one, on the render */
 .artpi .pib{height:28px;font-size:16px}
@@ -1263,14 +1261,14 @@ body.fixed main{padding:0;gap:0;border-top:0}
 /* NEGATIVE class pill: offered but no data yet — black fill, class-colour outline + letter (vs the solid pill
    for classes we hold data for). Same colours as the solid .pib-<class> badges, inverted. */
 .pib--neg b{background:#0b0d10;box-shadow:inset 0 0 0 1px currentColor;text-shadow:none}
-.pib--neg.pib-d b{color:#45c8f1}
-.pib--neg.pib-c b{color:#f0c530}
-.pib--neg.pib-b b{color:#f0862d}
-.pib--neg.pib-a b{color:#e5414e}
-.pib--neg.pib-s1 b{color:#a468e8}
-.pib--neg.pib-s2 b{color:#2f62e0}
-.pib--neg.pib-r b{color:#e83c9e}
-.pib--neg.pib-x b{color:#2fd05f}
+.pib--neg.pib-d b{color:var(--pc-d)}
+.pib--neg.pib-c b{color:var(--pc-c)}
+.pib--neg.pib-b b{color:var(--pc-b)}
+.pib--neg.pib-a b{color:var(--pc-a)}
+.pib--neg.pib-s1 b{color:var(--pc-s1)}
+.pib--neg.pib-s2 b{color:var(--pc-s2)}
+.pib--neg.pib-r b{color:var(--pc-r)}
+.pib--neg.pib-x b{color:var(--pc-x)}
 /* Info panes may scroll (Jett: break the no-scroll rule for these): the Course Browser tile grid, and the
    turn-analysis pane (.tstat) whose corner map + leaderboard + errors run past the pane. Scoped to the RIGHT
    pane so it overrides the global no-scroll `body.fixed .pane>.body{overflow:hidden}` only where wanted. */

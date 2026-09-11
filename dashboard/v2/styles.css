@@ -200,8 +200,11 @@ body.fixed main{height:calc(100vh - 48px);padding:10px;display:flex;flex-directi
 .panes{display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1 1 auto;min-height:0}
 .pane{background:var(--panel);border:1px solid var(--line);border-radius:8px;
   display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.pane>header{display:flex;align-items:center;gap:9px;padding:7px 12px;border-bottom:1px solid var(--line);
-  font-weight:600;font-size:12.5px;flex:0 0 auto;height:70px}    /* both pane headers one height so their tops align (the left one holds the course pill, which needs 3 rows) */
+.pane>header{display:flex;align-items:center;gap:9px;padding:5px 12px;border-bottom:1px solid var(--line);
+  font-weight:600;font-size:12.5px;flex:0 0 auto;height:38px}    /* both pane headers one collapsed height so their tops align (course-info collapse 2026-09-11: the course pill is one identity row now; facts moved to a line above the map) */
+/* free-roam world-map header keeps the taller pill (name + meta + class/mode badges, three rows) — the
+   collapse is a course-mode concern, and shrinking this one would clip the world-browser's own facts. */
+#leftHd:not(:has(.cpill[data-state="course"])){height:70px}
 .pane>header .why{font-weight:400}
 .popbtn{margin-left:auto;background:var(--panel2);border:1px solid var(--line2);color:var(--mut);
   border-radius:5px;padding:3px 9px;font:11px var(--sans);cursor:pointer}
@@ -581,6 +584,19 @@ button.stage.act.go:active{transform:translateY(1px)}
 .ch-gleg i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .ch-gleg i.s{background:#33d17a} .ch-gleg i.f{background:#ff5d7d}
 .cpill-rid{font-size:10px;color:var(--dim);letter-spacing:.02em;white-space:nowrap;flex:0 0 auto}
+/* ---- the compact course-facts line (course-info collapse 2026-09-11): replaces the tall .chero as the
+   first child above the map — one row of flattened LABEL:value stats + a click-to-scope class rail ---- */
+.cfacts{border-bottom:1px solid var(--line);padding:5px 8px;display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
+.cfacts-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px 14px}
+.cfact-stats{display:flex;flex-wrap:wrap;gap:3px 14px;align-items:baseline;min-width:0}
+.cfact{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
+.cfact em{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-style:normal}
+.cfact b{font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)}
+.cfact-rail{margin-left:auto;gap:4px}
+.ccls{background:none;border:0;padding:1px 3px;border-radius:3px;cursor:pointer;line-height:1;display:inline-flex}
+.ccls:hover{background:var(--panel2)}
+.ccls.on{background:var(--panel2);box-shadow:inset 2px 0 0 var(--acc)}   /* scoped class, same inset grammar as .ch-bar.on */
+.cps-also{font-size:11.5px;color:var(--ink)}
 /* ---- the turn list (redesign phase B): sortable enumeration on the left ---- */
 .ttsort{margin-left:auto;display:inline-flex;align-items:center;gap:4px}
 .ttsort .why{font-size:10px}
@@ -1165,11 +1181,15 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 #leftHd{padding-top:0;padding-bottom:0;align-items:center}
 #leftHd .cpill{display:flex;align-items:center;gap:12px;min-width:0;width:100%}
 #leftHd .cpill-glyph{flex:0 0 auto;width:78px;height:48px;background:var(--bg);border-radius:5px;overflow:hidden}
+#leftHd .cpill[data-state="course"] .cpill-glyph{width:32px;height:32px;cursor:help}   /* collapse: the one small silhouette, its legend now on the tooltip */
 #leftHd .cpill-glyph .tsvg{width:100%;height:100%;display:block;border-radius:5px}
 #leftHd .cpill-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
-#leftHd .cpill-l1{display:flex;align-items:center;gap:7px;min-width:0}
-#leftHd .cpill-l1 .trackname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto}
-#leftHd .cpill-l1 .chip{flex:0 0 auto}
+#leftHd .cpill-l1{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:nowrap;overflow:hidden}
+/* the name + status chip are tier-1 (what you read while driving) and never shrink; the low-value
+   provenance group (route id, naming source) is the one shrinkable cell, so it clips first on a tight pane */
+#leftHd .cpill-l1 .trackname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 0 auto;max-width:210px}
+#leftHd .cpill-l1 .chip,#leftHd .cpill-l1 .bb,#leftHd .cpill-l1 .cps-caret{flex:0 0 auto}
+#leftHd .cpill-l1 .cpill-prov{flex:0 1 auto;min-width:0;overflow:hidden;display:inline-flex;align-items:center;gap:6px}
 #leftHd .cpill-l2{font-size:11.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* the class pills earn a row of their own under the meta now the pill is header-sized, instead of being
    crushed into the right-hand badge strip -- the classes a course is offered in read at a glance */

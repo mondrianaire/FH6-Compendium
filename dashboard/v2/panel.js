@@ -1776,6 +1776,9 @@ function paintLeft() {
     // (classes/modes/shape come from the route; name/length/turns/laps are the course's own driven facts).
     const _cr = COURSE.route || {};
     const _wr = (_cr.route_id && WORLD && WORLD.routes && WORLD.routes[_cr.route_id]) || null;
+    // the demoted hero detail (shape glyph, laps-by-class bars, confidence, freshness) rides IN the pill's
+    // drawer now; the compact facts line goes above the map (see courseHeroParts / the collapse).
+    const heroParts = courseHeroParts(COURSE, activeLapSet(), nSel);
     hd.innerHTML = courseInfoPill({
       id: _cr.route_id, name: COURSE.name || ("unnamed course " + COURSE.key),
       pts: (_wr && _wr.pts) || COURSE.path || null,
@@ -1786,14 +1789,17 @@ function paintLeft() {
       lap_class: (_wr && _wr.lap_class) || [], lap_car: (_wr && _wr.lap_car) || [],
       laps: (COURSE.laps || []).length, lapsDrawn: nSel, turns: (COURSE.turns || []).length,
       kindLabel: COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null,
-      nameChip: nameChip(COURSE.naming),
+      nameChip: nameChip(COURSE.naming), drawerExtra: heroParts.drawer,
     }, "course");
+    // the pill's drawer lives in #leftHd, so its click-to-scope class bars aren't caught by the #leftBody
+    // wiring below — bind them here (the rail in #leftBody is bound with the rest at data-clsbar).
+    hd.querySelectorAll("[data-clsbar]").forEach((b) => b.onclick = () => { const cur = activeLapSet().cls; setScopeClass(cur === b.dataset.clsbar ? null : b.dataset.clsbar); });
     // The LEFT pane ALWAYS shows the whole-course map + hero + turn list (Jett 2026-09-11). Selecting a turn
     // only HIGHLIGHTS its marker + paints its phases on this map (courseMap's turnPick arg); the per-turn line
     // trace + phase rail now live in the RIGHT pane beside that turn's stats (cornerMapHTML in turnStatsHTML).
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
     body.innerHTML = "";
-    body.insertAdjacentHTML("beforeend", courseHeroHTML(COURSE, activeLapSet()));   // redesign phase A: the course hero above the map
+    body.insertAdjacentHTML("beforeend", heroParts.facts);   // the compact course-facts line above the map (was .chero)
     // COURSE VIEW IS STATIC: no follow-preview zoom here (Jett 2026-09-06). courseMap() fits the whole course
     // to the pane and carries its own always-visible bottom-left legend (which houses the map-view toggle);
     // the DATA filter is in the shared #coursefilter bar, not here.
@@ -1869,10 +1875,13 @@ function turnLapCount(t, ls) {
   Object.values(t.phaseObs || {}).forEach((rows) => rows.forEach((r) => { if (ls.set.has(String(r[0]))) s.add(r[0]); }));
   return s.size;
 }
-// THE COURSE HERO (redesign · phase A): the course's measured facts at a glance, scoped to the active
-// lap set -- median/best lap, elevation climb (from the trace's own elev), laps-by-class, and how much
-// of the catalogued turn set we have actually driven (confidence).
-function courseHeroHTML(c, ls) {
+// THE COURSE FACTS (2026-09-11 course-info collapse): the tall `.chero` hero is split so the map can
+// dominate the pane. Returns { facts, drawer }: `facts` is ONE compact line (flattened inline stats +
+// a click-to-scope class rail) that replaces `.chero` as #leftBody's first child; `drawer` is the
+// demoted detail (annotated shape glyph, the laps-by-class bar chart, the confidence split, the
+// freshness note) handed to the course pill's hover/caret drawer so nothing is dropped — only made one
+// interaction away. See docs/pane-audit-framework.md for the tiers this follows.
+function courseHeroParts(c, ls, lapsDrawn) {
   const laps = (c.laps || []).filter((l) => ls.set.has(String(l.id)));
   const clean = (l) => !l.void && !l.partial && !l.rewinds && l.t != null;
   const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
@@ -1903,7 +1912,6 @@ function courseHeroHTML(c, ls) {
   const fresh = `${(c.laps || []).length} laps counted in history${builtAt && !isNaN(builtAt) ? " · history built " + hhmm(builtAt) : ""}`
     + (sp ? ` · <b class="ch-pend">${sp} session${sp === 1 ? "" : "s"} not yet counted</b>` : sp === 0 ? " · every session counted" : "")
     + " · turn geometry from the game's own centre-line";
-  const stat = (v, lab) => `<span class="ch-s"><b>${v}</b><em>${lab}</em></span>`;
   // LAPS BY CLASS as a bar chart (redesign): each class a proportional bar, the SCOPED class lifted (it is
   // what every count on this screen is measured against), and a click scopes every pane to it — one path
   // with the SCOPE band (setScopeClass). Over EVERY lap on the course (not the filtered set) so every class
@@ -1933,21 +1941,37 @@ function courseHeroHTML(c, ls) {
       <circle cx="${GX(a[0]).toFixed(1)}" cy="${GY(a[1]).toFixed(1)}" r="3" fill="#33d17a"/>
       <circle cx="${GX(b[0]).toFixed(1)}" cy="${GY(b[1]).toFixed(1)}" r="3" fill="#ff5d7d"/></svg>`;
   }
-  return `<div class="chero">
+  const confHTML = `${scopeTok(ls)}<span class="ch-dot ok"></span>${strong} turn${strong === 1 ? "" : "s"} on 13+ laps · <span class="ch-dot w"></span>${weak} timed on fewer${noneIn ? ` · <span class="ch-dot n"></span>${noneIn} with no lap in scope` : ""}${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} catalogued, never timed` : ""}`;
+  // ROW 2 — the one always-visible facts line: flattened inline stats, then a click-to-scope class rail.
+  // Every stacked value/caption pair from the old hero is a `LABEL value` pair on one baseline now.
+  const cfact = (v, lab, title) => `<span class="cfact"${title ? ` title="${esc(title)}"` : ""}><em>${esc(lab)}</em><b>${v}</b></span>`;
+  const totLaps = (c.laps || []).length;
+  const factCells = [
+    cfact(n0(c.len) + " m · " + (loop ? "loop" : "P2P"), "length"),
+    cfact(medLap != null ? lapTime(medLap) : "—", "median"),
+    cfact(bestLap ? lapTime(bestLap.t) : "—", bestLap ? "best · " + esc(carShort(bestLap.cid)) : "best"),
+    cfact(climb != null ? climb + " m" : "—", "climb"),
+    cfact(measured + (catalogued != null ? " / " + catalogued : ""), "turns"),
+    cfact((lapsDrawn != null ? lapsDrawn + " / " : "") + totLaps, "laps", nCarsAll + " car" + (nCarsAll === 1 ? "" : "s") + " · " + totLaps + " lap" + (totLaps === 1 ? "" : "s") + " in history"),
+  ].join("");
+  // the class rail: the ONLY always-visible per-class breakdown now (the bar chart moved to the drawer),
+  // so it carries its count; the scoped class is inset-lifted; a click scopes every pane (shared with the
+  // bar chart's own data-clsbar handler and the SCOPE band's setScopeClass).
+  const rail = classesAll.length ? `<div class="ch-cls cfact-rail">${classesAll.map((cl) => { const n = byClsAll[cl], on = ls.cls === cl;
+    return `<button class="ccls${on ? " on" : ""}" data-clsbar="${esc(cl)}" title="class ${esc(cl)} · ${n} lap${n === 1 ? "" : "s"} · ${on ? "scoped — click to widen back to all" : "click to scope every count on this screen to it"}">${classPill(cl, n)}</button>`;
+  }).join("")}</div>` : "";
+  const facts = `<div class="cfacts">
     ${TEMP_COURSE ? `<div class="ch-browse"><b>browsing course data</b><em>not live · double-click the map to switch, or</em><button class="mini" data-tcx>exit ✕</button></div>` : ""}
     ${liveLap != null ? `<div class="ch-live"><i></i>event · lap ${liveLap}<em>turn-by-turn live</em></div>` : ""}
-    ${glyph ? `<div class="ch-glyph">${glyph}<span class="ch-gleg"><span><i class="s"></i>start</span><span><i class="f"></i>finish</span><span class="why">${loop ? "loop" : "point-to-point"}</span></span></div>` : ""}
-    <div class="ch-stats">
-      ${stat(n0(c.len) + " m", "length")}
-      ${stat(medLap != null ? lapTime(medLap) : "—", "median")}
-      ${stat(bestLap ? lapTime(bestLap.t) : "—", bestLap ? "best · " + esc(carShort(bestLap.cid)) : "best")}
-      ${stat(climb != null ? climb + " m" : "—", "climb")}
-      ${stat(measured + (catalogued != null ? " / " + catalogued : ""), "turns measured")}
-    </div>
-    ${classesAll.length ? `<div class="ch-bars"><div class="ch-bh"><span class="why">laps by class</span><em>${(c.laps || []).length} on the course · ${nCarsAll} car${nCarsAll === 1 ? "" : "s"}</em></div>${clsBars}<div class="ch-bnote why">${ls.cls ? "the highlighted row is what every count on this screen is measured against" : "click a class to scope every count to it"}</div></div>` : ""}
-    <div class="ch-conf">${scopeTok(ls)}<span class="ch-dot ok"></span>${strong} turn${strong === 1 ? "" : "s"} on 13+ laps · <span class="ch-dot w"></span>${weak} timed on fewer${noneIn ? ` · <span class="ch-dot n"></span>${noneIn} with no lap in scope` : ""}${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} catalogued, never timed` : ""}</div>
-    <div class="ch-note">${fresh}</div>
+    <div class="cfacts-row"><div class="cfact-stats">${factCells}</div>${rail}</div>
   </div>`;
+  // DRAWER — the demoted detail, one interaction away (the pill's hover/caret drawer, see courseInfoPill)
+  const drawer =
+      (glyph ? `<div class="cps-h">course shape</div><div class="ch-glyph cps-glyph">${glyph}<span class="ch-gleg"><span><i class="s"></i>start</span><span><i class="f"></i>finish</span><span class="why">${loop ? "loop" : "point-to-point"}</span></span></div>` : "")
+    + (classesAll.length ? `<div class="cps-h">laps by class<i>${totLaps}</i></div><div class="ch-bars">${clsBars}<div class="ch-bnote why">${ls.cls ? "the highlighted row is what every count on this screen is measured against" : "click a class to scope every count to it"}</div></div>` : "")
+    + `<div class="cps-h">confidence</div><div class="ch-conf">${confHTML}</div>`
+    + `<div class="cps-h">freshness</div><div class="ch-note">${fresh}</div>`;
+  return { facts, drawer };
 }
 // SHARED per-turn aggregate over the active lap set — the "statistics infrastructure" the turn table,
 // the leaderboard and the selected-turn pane all read: n laps, per-phase agg, median turn time, best
@@ -2043,8 +2067,20 @@ function courseInfoPill(r, state) {
                : state === "route" ? `<span class="chip w">${MODE.game === "event" ? "ON EVENT ROUTE" : "ON ROUTE"}</span>`
                : state === "course" ? `<span class="chip on">ON COURSE</span>`
                : `<span class="chip dim">top of list</span>`;
-  // QUICK STATS DRAWER (Jett 2026-09-09): the pill expands on hover into laps-by-class and laps-by-car
-  // counts. This is the at-a-glance panel; the full course panel (car x class, per-turn analysis) is later.
+  // COURSE-MODE COLLAPSE (2026-09-11): in course mode the pill is Row 1 (identity) only — the meta line and
+  // the class/mode badge row move to the compact facts line above the map (courseHeroParts), so both are
+  // omitted here and the mode tags the badge row carried merge into Row 1 beside the kind chip. Free-roam
+  // (browsing/route/default) keeps the fuller two-line pill unchanged, since its header still has the room.
+  const course = state === "course";
+  const modeTags = course
+    ? (r.modes || []).filter((m) => (m || "").toUpperCase() !== (kind || "")).map((m) =>
+        `<span class="bb ${m === "rivals" ? "riv" : m === "career" ? "car" : "dsc"}">${esc(m)}</span>`).join("")
+    : "";
+  // the small glyph is the ONLY route silhouette now (the hero's big one moved to the drawer) — give it the
+  // start/finish/loop legend + the meta facts as a tooltip so nothing the caption used to say is dropped.
+  const glyphTip = `green = start · pink = finish · ${r.loop ? "loop" : "point-to-point"} · ${metaS}`;
+  // QUICK STATS DRAWER (Jett 2026-09-09; superset since the collapse): laps-by-car, plus in course mode the
+  // demoted hero detail (shape, laps-by-class bars, confidence, freshness) handed in as r.drawerExtra.
   const totLaps = lapCls.reduce((a, kv) => a + kv[1], 0);
   const CAR_CAP = 10;
   const clsRow = lapCls.length ? lapCls.map(([c, n]) =>
@@ -2053,19 +2089,23 @@ function courseInfoPill(r, state) {
   const carRows = lapCar.slice(0, CAR_CAP).map(([lbl, n]) =>
       `<div class="cps-car"><span class="cps-cn" title="${esc(lbl)}">${esc(lbl)}</span><i>${n}</i></div>`).join("")
       + (lapCar.length > CAR_CAP ? `<div class="cps-more">+${lapCar.length - CAR_CAP} more car${lapCar.length - CAR_CAP === 1 ? "" : "s"}</div>` : "");
-  const hasStats = lapCls.length || lapCar.length;
-  const stats = hasStats ? `<div class="cpstats">
-      <div class="cps-h">laps by class<i>${totLaps}</i></div>
-      <div class="cps-row">${clsRow}</div>
-      <div class="cps-h">laps by car<i>${lapCar.length}</i></div>
-      <div class="cps-cars">${carRows}</div>
-    </div>` : "";
+  const carSection = lapCar.length ? `<div class="cps-h">laps by car<i>${lapCar.length}</i></div><div class="cps-cars">${carRows}</div>` : "";
+  const alsoSection = r.alsoName ? `<div class="cps-h">shares road</div><div class="cps-also why">${esc(r.alsoName)}</div>` : "";
+  // course mode: the drawer is the hero detail + laps-by-car (the plain-text laps-by-class row is dropped —
+  // the Row-2 rail carries counts and the drawer's bar chart carries the detail). Free-roam: as before.
+  const drawerBody = course
+    ? (r.drawerExtra || "") + carSection + alsoSection
+    : (lapCls.length || lapCar.length
+        ? `<div class="cps-h">laps by class<i>${totLaps}</i></div><div class="cps-row">${clsRow}</div>${carSection}`
+        : "");
+  const hasStats = !!drawerBody;
+  const stats = hasStats ? `<div class="cpstats">${drawerBody}</div>` : "";
   return `<div class="cpill${hasStats ? " has-stats" : ""}" data-state="${esc(state)}">
-    <span class="cpill-glyph">${tileSvg(r, false)}</span>
+    <span class="cpill-glyph" title="${esc(glyphTip)}">${tileSvg(r, false)}</span>
     <span class="cpill-txt">
-      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${r.id != null ? `<span class="cpill-rid mono" title="catalogued route id">route ${esc(String(r.id))}${r.disc ? " · " + esc(r.disc) : ""}</span>` : ""}${r.nameChip || ""}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${stChip}${hasStats ? `<i class="cps-caret" title="lap breakdown by class and car">▾</i>` : ""}</span>
-      <span class="why cpill-l2" title="${esc(metaS)}">${esc(metaS)}</span>
-      <span class="cpill-badges">${pills}${badges}</span>
+      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${stChip}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${modeTags}<span class="cpill-prov">${r.id != null ? `<span class="cpill-rid mono" title="catalogued route id">route ${esc(String(r.id))}${r.disc ? " · " + esc(r.disc) : ""}</span>` : ""}${r.nameChip || ""}</span>${hasStats ? `<i class="cps-caret" title="lap breakdown, shape and freshness">▾</i>` : ""}</span>
+      ${course ? "" : `<span class="why cpill-l2" title="${esc(metaS)}">${esc(metaS)}</span>
+      <span class="cpill-badges">${pills}${badges}</span>`}
     </span>
     ${stats}
   </div>`;
@@ -2612,8 +2652,8 @@ function wireFollow(body) {
 }
 
 function addLiveDot(body) {
-  // svg[data-x0], not the first svg: in course view the first svg in the pane is the course hero's shape glyph
-  // (courseHeroHTML sits above the map), and the dot had been landing in the glyph's corner, not on the map.
+  // svg[data-x0], not the first svg: only the course map carries data-x0. Other SVGs can share the pane
+  // (the shape glyph, now in the pill's drawer; a trace), and the dot must land on the map, not on them.
   const svg = body.querySelector("svg[data-x0]"); if (!svg || !LIVEPOS || !isFinite(+svg.dataset.s)) return;
   let g = svg.querySelector("#liveDot");
   // v1-style (2026-09-03): the dot element is created ONCE and MOVED via a transform on every

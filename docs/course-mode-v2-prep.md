@@ -165,11 +165,12 @@ tabs and the build-guard / held / mismatch states are props on it, not separate 
    **Same day, Jett's map feedback (`86cc2c7`):** Turn analysis corner map framed on the whole turn, phase model
    moved to strips on the road edges so lap bundles can't bury it, a legend on the corner map, and the course-map
    legend made collapsible with audited entries (memory `fh6-turn-map-readability`).
-4. **General statistics view — STILL OPEN:** header basis, two headline answers, scatter, car table.
-   `courseStatsHTML()` is still the pre-redesign per-**build** grouping (`byBuild[l.bid||l.container]`) over all
-   laps; the redesign wants per-**car** (ordinal from `cid`), most-used + quickest, a laps×best scatter, a 4-row
-   car table, and a basis header that never totals rows summing to less. Route 5411: 45 laps / 11 cars, tune
-   (container) only on 25 — "laps per tune" must say `20 laps name no tune`, never drop them.
+4. **General statistics view — DONE 2026-09-11 `7216ac2`.** `courseStatsHTML()` rebuilt per **car** (grouped by
+   ordinal from `cid`) within the active scope: a basis header (laps in scope / on the course / cars / length +
+   a "N laps name no tune" callout so it never implies a total over laps it dropped), two headlines (most driven
+   + quickest), a pace-vs-practice scatter (dot per car, x = laps, y = best, fastest at top, class-coloured,
+   quickest ringed), and a fastest-first car table (car + class pill, PI, laps, best, median). Follows the SCOPE
+   band. The old per-build class-focus sections are gone. Verified on route 5411 (8 cars in scope).
 5. **Shared chrome — mostly DONE 2026-09-11.** Map layer order + legend toggles **DONE `9e5895a`** (centre / laps /
    phases show-hide; centre-line drawn last, on top of the bundle). Hero laps-by-class **bar chart** with
    click-to-scope **DONE `669d02a`** (over every course lap; scoped class lifted; one path with the SCOPE band via
@@ -183,8 +184,9 @@ tabs and the build-guard / held / mismatch states are props on it, not separate 
    centred 0.55 car / 0.45 heading look-ahead; driven by the existing `onFrame → addLiveDot → queueFollow` path;
    free-roam world follow unchanged. Verified with synthetic state (234 m window live; resets to `0 0 W H` held).
 
-**Remaining after this pass:** step 4 (General statistics redesign), the build-panel three faces (step 5), and
-the standing data/correctness gaps — P2P trace arc-registration (§8.3) and D3 (live grip typical, not worst).
+**Remaining after this pass:** the build-panel three faces (step 5, deferred by Jett), and the standing
+data/correctness gaps — P2P trace arc-registration (§8.3) and D3 (live grip typical, not worst). Steps 1-6 of
+the course-mode-v2 build order are otherwise complete.
 
 Each step ends with the spec's §9 checks that apply to it, verified in the Browser pane at 1080 × 1751
 with synthetic frames on route 5411 (the harness used for the live-lap map: close the tab's `ES`, stub

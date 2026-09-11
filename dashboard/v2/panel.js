@@ -3519,7 +3519,9 @@ function turnFrame(c, t) {
 function cornerMapHTML(c, t, ls) {
   const segs = t.seg || {};
   const phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
-  const ghd = `<div class="gh">The corner, phase by phase <span class="why">· the whole turn, approach to exit · strips on the road's edges = which part of the turn · lines = every lap in scope</span></div>`;
+  // NO PROSE CAPTION (Jett 2026-09-11): the old "the corner, phase by phase · strips = which part · lines =
+  // every lap in scope" header just narrated the map's own legend below (phases / lines / marks rows) and the
+  // title bar above already names the turn — pure real-estate waste. The map speaks through its legend now.
   const [x0, x1, z0, z1] = turnFrame(c, t) || [Infinity, -Infinity, Infinity, -Infinity];
   const ag = (n) => phaseAgg(t.phaseObs && t.phaseObs[n], ls.set);
   const aggs = SEG_ORDER.map((n) => ({ n, p: ag(n) }));
@@ -3533,7 +3535,7 @@ function cornerMapHTML(c, t, ls) {
       <span class="trail-t"><b>${p && p.time != null ? p.time.toFixed(1) + "s" : "—"}</b>${mph}</span>${inner}</div>`;
   }).join("");
   const trailBox = `<div class="trail" title="each part's width = median seconds spent in it · fill = its grip mix">${rail}</div>`;
-  if (!isFinite(x0)) return `<div class="grp tstat-corner">${ghd}<div class="why" style="padding:10px 6px">no phase geometry for this turn yet</div>${trailBox}</div>`;
+  if (!isFinite(x0)) return `<div class="grp tstat-corner"><div class="why" style="padding:10px 6px">no phase geometry for this turn yet</div>${trailBox}</div>`;
   const pad = 16, H = 260, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
   const W = Math.max(300, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
@@ -3626,7 +3628,7 @@ function cornerMapHTML(c, t, ls) {
     <div class="cm-lrow"><em>phases</em>${phases.map((n) => `<span><i class="cm-sw" style="background:${SEG_COL[n]}"></i>${esc(SEG_LABEL[n])}</span>`).join("")}</div>
     <div class="cm-lrow"><em>lines</em><span class="why">${nDrawn} lap${nDrawn === 1 ? "" : "s"} in ${scopeTok(ls)}</span>${modeLeg}${cmToggle}</div>
     <div class="cm-lrow"><em>marks</em><span><b class="cm-ring"></b>apex</span><span><b class="cm-pill">mph</b>median entry · slowest · exit</span><span><b class="cm-chev">›</b>direction of travel</span></div></div>`;
-  return `<div class="grp tstat-corner">${ghd}${svg}${legend}${trailBox}</div>`;
+  return `<div class="grp tstat-corner">${svg}${legend}${trailBox}</div>`;
 }
 // RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active
 // preset's laps and carries its lap count; grip is always the distribution, never a lone word.
@@ -3722,10 +3724,12 @@ function turnStatsHTML(t, ls) {
 
   // ---- HEADER: the turn and its whole geometry on ONE line
   const dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
-  const geo = [t.kind && cap1(t.kind) + (dirW ? " " + dirW : ""), t.r != null && Math.round(t.r) + " m radius",
-    t.deg != null && Math.round(t.deg) + "°", t.width != null && (+t.width).toFixed(1) + " m wide",
-    t.bank != null && (Math.abs(t.bank) < 1.5 ? "flat" : "banked " + Math.abs(Math.round(t.bank)) + "°"),
-    t.s != null && "apex " + Math.round(t.s) + " m", nLaps ? nLaps + " lap" + (nLaps === 1 ? "" : "s") : "not timed yet"].filter(Boolean).join(" · ");
+  // geometry only, compacted (the lap COUNT moved to the summary/leaderboard where the timing lives, and the
+  // unit words are trimmed): "Tight left · R34m · 99° · 14.7m wide · 2° bank · apex 268m".
+  const geo = [t.kind && cap1(t.kind) + (dirW ? " " + dirW : ""), t.r != null && "R" + Math.round(t.r) + "m",
+    t.deg != null && Math.round(t.deg) + "°", t.width != null && (+t.width).toFixed(1) + "m wide",
+    t.bank != null && (Math.abs(t.bank) < 1.5 ? "flat" : Math.abs(Math.round(t.bank)) + "° bank"),
+    t.s != null && "apex " + Math.round(t.s) + "m", nLaps ? "" : "not timed yet"].filter(Boolean).join(" · ");
   const header = `<div class="gh tstat-h"><b>${esc(turnLabel(t))}</b><span class="why">${esc(geo)}</span>
     <span class="tstat-nav"><button class="mini" data-turnstep="prev" title="previous turn">‹</button><button class="mini" data-turnstep="next" title="next turn">›</button><button class="mini" data-turnclear title="clear selection">✕</button></span></div>`;
   if (!nLaps) return `<div class="tstat">${header}<div class="why" style="padding:8px 6px">no timed laps through this turn in ${esc(ls.label)} — widen the filter or drive it</div></div>`;
@@ -3772,7 +3776,7 @@ function turnStatsHTML(t, ls) {
   // THE COMPACT TIME SUMMARY (Jett 2026-09-11): the headline the bottom "where the time goes" panel carried —
   // typical turn-time + share of lap, time available, the fastest pass, and which phase eats the most — folds
   // UP into the title bar so the identity and the summary read as one bar, above the map.
-  const sumRow = `<div class="tsum"><b class="tsum-typ">${medTurnT.toFixed(1)}s</b> typical${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of lap` : ""}${hasBest && findTotal > 0.02 ? ` · <b class="tsum-avail">+${findTotal.toFixed(2)}s</b> available` : ""}${best ? ` · fastest pass <b class="tsum-fast">${best.turnT.toFixed(2)}s</b>` : ""}${biggest ? ` · most time in <b class="tsum-most" style="color:${SEG_COL[biggest.n]}"><i style="background:${SEG_COL[biggest.n]}"></i>${esc(SEG_LABEL[biggest.n])}</b>` : ""}</div>`;
+  const sumRow = `<div class="tsum"><b class="tsum-typ">${medTurnT.toFixed(1)}s</b> typical${nLaps ? ` · ${nLaps} laps` : ""}${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of lap` : ""}${hasBest && findTotal > 0.02 ? ` · <b class="tsum-avail">+${findTotal.toFixed(2)}s</b> to find` : ""}${best ? ` · fastest <b class="tsum-fast">${best.turnT.toFixed(2)}s</b>` : ""}${biggest ? ` · most time <b class="tsum-most" style="color:${SEG_COL[biggest.n]}"><i style="background:${SEG_COL[biggest.n]}"></i>${esc(SEG_LABEL[biggest.n])}</b>` : ""}</div>`;
   // ONE compacted title info bar: identity + geometry (header) ∪ the time summary ∪ the 5-phase corner model
   // (the per-phase time-budget bar). The detailed per-phase typical-vs-best TABLE stays below the map.
   const titleBar = `<div class="grp tstat-title">${header}${sumRow}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;

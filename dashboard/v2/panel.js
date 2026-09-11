@@ -489,10 +489,14 @@ function piColors() {
   return m;
 }
 function piColor(cls) { return piColors()[String(cls || "").toUpperCase()] || "var(--dim)"; }
-// FH PI class bands (D<=500, C<=600, B<=700, A<=800, S1<=900, S2<=998, X>=999). Derives the class
-// LETTER from a PI so a badge is never an impossible pair like "S1 800" (800 is A). R is a category,
-// not a PI band, so it is never derived here -- it only appears when it comes from stored data.
-function classForPi(p) { return p == null ? null : p <= 500 ? "D" : p <= 600 ? "C" : p <= 700 ? "B" : p <= 800 ? "A" : p <= 900 ? "S1" : p <= 998 ? "S2" : "X"; }
+// FH6 PI class bands -- the game's own ref_class table, confirmed by telemetry (CarClass and CarPI are
+// reported independently): D <=400, C <=500, B <=600, A <=700, S1 <=800, S2 <=900. The bands this replaced
+// were FH5's (D<=500 ... S2<=998), one class high: a PI 700 build sheet read "B" (design-language.md
+// 2026-09-11). Derives the class LETTER from a PI so a badge is never an impossible pair like "S1 700".
+// TOP BAND, deliberately unresolved (decision D4): the game has R = 901-998 and X = 999, but the lab's
+// class maps (analyze_session, fh6_live_daemon, build_web) still label class 6 as X, so above 900 this
+// keeps returning "X" to agree with the stored data until the R/X research settles it.
+function classForPi(p) { return p == null ? null : p <= 400 ? "D" : p <= 500 ? "C" : p <= 600 ? "B" : p <= 700 ? "A" : p <= 800 ? "S1" : p <= 900 ? "S2" : "X"; }
 // A turn's DISPLAY label is its clean route-order number (T1..Tn from `seq`), NOT its stable id
 // (T<round(arc)>, e.g. T654) -- that arc-anchored id is the internal key that survives re-derivation
 // (fh6_turns.stable_turn_id); the user only ever sees the tidy running number. Falls back to the raw

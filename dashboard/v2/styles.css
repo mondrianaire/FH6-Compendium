@@ -997,6 +997,32 @@ body.fixed main{padding:0;gap:0;border-top:0}
    with no transition possible on a brand-new element each time. #liveDot now stays the same
    element across updates (panel.js addLiveDot) and only its transform changes, so this can ease it. */
 #liveDot{transition:transform .18s linear}
+/* the car marker's states (panel.js addLiveDot): held swaps the solid arrow for the hollow grey one; before
+   the car has moved there is no heading, so a disc stands in for the arrow */
+#liveDot .ld-held,#liveDot.held .ld-solid,#liveDot .ld-disc{display:none}
+#liveDot.held .ld-held{display:inline}
+#liveDot.nohead .ld-disc{display:inline} #liveDot.nohead .ld-arrow{display:none}
+/* THE LIVE LAP ON THE COURSE MAP (panel.js liveLapPaint): while a lap is live the history recedes so the
+   grip trail wins; held as "last run" it recedes less. A deliberate leaderboard lap pick still lifts its lap. */
+.cmap .cmap-hist{transition:opacity .35s}
+.cmap.live-on .cmap-hist{opacity:.3}
+.cmap.live-last .cmap-hist{opacity:.55}
+.cmap.live-on svg.has-lapsel .cmap-hist,.cmap.live-last svg.has-lapsel .cmap-hist{opacity:1}
+.cmap.live-last #liveLap .ll-glow{opacity:.35}
+.cmap-legend .leg-live{display:none;align-items:center;gap:5px;font:700 10.5px var(--sans);letter-spacing:.02em;
+  color:var(--acc2);border:1px solid var(--acc2);border-radius:3px;padding:1px 7px;background:rgba(78,163,255,.12)}
+.cmap-legend .leg-live i{width:7px;height:7px;border-radius:50%;background:var(--acc2);animation:llpulse 1.1s infinite}
+.cmap.live-on .leg-live,.cmap.live-last .leg-live{display:inline-flex}
+.cmap .leg-live .ll-last,.cmap.live-last .leg-live .ll-now{display:none}
+.cmap.live-last .leg-live .ll-last{display:inline}
+.cmap.live-last .leg-live{color:var(--mut);border-color:var(--line2);background:none}
+.cmap.live-last .leg-live i{background:var(--mut);animation:none}
+@keyframes llpulse{50%{opacity:.2}}
+.cmap-legend .leg-grip{display:none}
+.cmap.live-on .leg-grip,.cmap.live-last .leg-grip{display:contents}
+.lchip.livenow.last{color:var(--mut);border-color:var(--line2);font-weight:600}
+.lchip.livenow.last i{background:var(--mut)}
+body.fixed .trace .lchip.livenow.last{box-shadow:none}
 /* ---------- the map drawer: legend + filters, floated off the map instead of inline ---------- */
 .pane > .body.map{position:relative}
 .mapdrawer{position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;

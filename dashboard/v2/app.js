@@ -409,15 +409,17 @@ function courseMap(c, opts) {
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg)" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${line(theirs, "#3d4a5a", 9, 0.55)}
       ${line(theirs, "#8fa0b3", 1.4, showPhases ? 0.45 : 0.9)}
-      ${laps}
-      ${phaseOv}${turns}<g id="traceMark"></g>
+      <g class="cmap-hist">${laps}</g>
+      ${phaseOv}<g id="liveLap" pointer-events="none"></g>${turns}<g id="traceMark"></g>
     </svg>
     <div class="cmap-legend${legOpen ? " open" : ""}">
       <div class="cleg-bar">
         <span class="leg-views">${vbtn("laptime", "lap time")}${vbtn("phases", "turn phases")}</span>
+        <span class="leg-live" title="the lap being driven, painted on the map by grip; held as the last run through a pause or the end-of-event menu"><i></i><b class="ll-now">LIVE lap</b><b class="ll-last">last run</b></span>
         <button class="cleg-toggle" data-legtoggle title="${legOpen ? "hide the map key" : "show the map key"}">key ${legOpen ? "▾" : "▸"}</button>
       </div>
       <div class="cleg-key"${legOpen ? "" : " hidden"}>
+        ${typeof TRACE_GRIP !== "undefined" ? `<span class="leg-grip">${TRACE_GRIP.map((col, k) => `<span><i style="background:${k ? col : "var(--live-calm," + col + ")"}"></i>${k === 4 ? "✸ " : ""}${esc(TRACE_WORD[k])}</span>`).join("")}</span>` : ""}
         <span><i style="background:#7d8b9c"></i>centre-line</span>
         ${showPhases ? allPhaseKey : gradKey}
         <span><i style="background:var(--acc2)"></i>turn</span>

@@ -18,7 +18,7 @@
 "use strict";
 
 const DAEMON = "http://127.0.0.1:8765";
-let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0, events: [], _det: {} }, ES = null;
+let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0, lap: null, lapPrev: null, lapT: 0, events: [], _det: {} }, ES = null;
 let CUR = null;          // { ordinal, cid, name, ... }
 let MATCH = null;        // { build, hw, tune } after identification
 let CHANGE = null;       // what moved since the last read: hardware | tune | saved
@@ -248,6 +248,7 @@ function onFrame(f) {
   // the dwell instead of flickering to the menu frame's zeroed values ten times a second, and
   // snaps back the instant the car is back on track.
   if (f.on || entered || left) paintDockTiles(entered || left);
+  lapSample(f, now);
   runSample(f, now);
   if (entered || left || (!inMenu && now - LAST_PANEL > 2000)) { LAST_PANEL = now; paintPanel(); }
 }
@@ -261,14 +262,57 @@ function runSample(f, now) {
   LIVE.runT = now;
   const last = LIVE.run[LIVE.run.length - 1];
   if (last && f.dist < last[5]) LIVE.run = [];          // odometer restarted: a new event, a new run
-  const sl = f.slip || {};
-  const fr = Math.max(Math.abs((sl.FL || [0, 0, 0])[2]), Math.abs((sl.FR || [0, 0, 0])[2]));
-  const rr = Math.max(Math.abs((sl.RL || [0, 0, 0])[2]), Math.abs((sl.RR || [0, 0, 0])[2]));
-  const g = (Math.abs(f.lat) > 3 || f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
+  const g = gripCode(f);
   const d0 = LIVE.run.length ? LIVE.run[0][5] : f.dist;
   LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist, now]);   // [6]=timestamp: free-mode trace plots vs TIME (Jett 2026-09-07)
   if (LIVE.run.length > 900) { LIVE.run.splice(0, LIVE.run.length - 900); const b = LIVE.run[0][5]; LIVE.run.forEach((q) => { q[0] = q[5] - b; }); }
   if (now - (LIVE.runPaint || 0) > 500) { LIVE.runPaint = now; paintTrace(); }
+}
+// the 5-state grip code the analyzer uses: impact if |lat| > 3 g or smash, both if front > 1 and rear > 1,
+// front, rear, calm -- front/rear = the axle's max |CombinedSlip|.
+function gripCode(f) {
+  const sl = f.slip || {};
+  const fr = Math.max(Math.abs((sl.FL || [0, 0, 0])[2]), Math.abs((sl.FR || [0, 0, 0])[2]));
+  const rr = Math.max(Math.abs((sl.RL || [0, 0, 0])[2]), Math.abs((sl.RR || [0, 0, 0])[2]));
+  return (Math.abs(f.lat) > 3 || f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
+}
+
+// THE LIVE LAP (Jett 2026-09-11): the WHOLE lap being driven, for the course map's grip trail and the speed
+// trace's live line. LIVE.run keeps only the last 90 s, shorter than a 1:39 Nanamagari lap, so the lap has its
+// own buffer bounded by the game's lap clock rather than by time. The lap metadata is canon (fh6-lap-canon-rule):
+//   - LapNumber changes -> a new lap; the finished one is kept as LIVE.lapPrev
+//   - LapNumber drops back to lapPrev's -> a rewind over the line: that lap is current again, cut at the landing clock
+//   - CurrentLap drops >= 0.25 s on the same lap -> a rewind: cut every sample later than the landing clock
+//   - CurrentLap clears (> 3 s -> < 1 s) on the same LapNumber -> a restart (the game keeps the number)
+// Recorded only while the lap timer runs (f.ev); a menu, a pause or the end of the event leaves the buffer
+// standing with live = false, so the map and trace hold it as "last run" until the next lap starts.
+// [dist, mph, grip, px, pz, odometer, timestamp, lap clock] -- LIVE.run's shape plus the lap clock.
+const LAP_CAP = 12000;   // 20 min at 10 Hz: longer than any lap; only a runaway point-to-point ever trims
+let LAP_SEQ = 0;
+function lapSample(f, now) {
+  const cur = LIVE.lap;
+  if (!(f.on && f.ev)) {
+    if (cur && cur.live) { cur.live = false; liveLapChanged(); }
+    return;
+  }
+  if (now - (LIVE.lapT || 0) < 100) return;
+  LIVE.lapT = now;
+  const n = f.lapn | 0, t = +f.lapt || 0;
+  const last = cur && cur.pts[cur.pts.length - 1];
+  const cutAt = (lap, clock) => { let i = lap.pts.length; while (i > 0 && lap.pts[i - 1][7] > clock) i--; lap.pts.length = i; lap.seq = ++LAP_SEQ; };
+  const prev = LIVE.lapPrev;
+  let lap = cur;
+  if (cur && n < cur.lapn && prev && prev.lapn === n) { cutAt(prev, t); lap = LIVE.lap = prev; LIVE.lapPrev = null; }
+  else if (!cur || n !== cur.lapn || (last && last[7] > 3 && t < 1)) {
+    if (cur && cur.pts.length) LIVE.lapPrev = cur;
+    lap = LIVE.lap = { seq: ++LAP_SEQ, lapn: n, pts: [], n0: 0, key: null, live: true };
+  } else if (last && t < last[7] - 0.25) cutAt(cur, t);
+  if (MODE.suggest === "course" && COURSE) lap.key = COURSE.key;
+  const d0 = lap.pts.length ? lap.pts[0][5] : f.dist;
+  lap.pts.push([f.dist - d0, f.mph, gripCode(f), f.px, f.pz, f.dist, now, t]);
+  if (lap.pts.length > LAP_CAP) { lap.pts.splice(0, 1000); lap.n0 += 1000; }
+  const was = lap.live; lap.live = true;
+  if (!was) liveLapChanged(); else liveLapPaint();
 }
 
 async function identify(car, why) {

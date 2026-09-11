@@ -337,8 +337,9 @@ function fitRows(host, noun, keepFirst) {
 }
 // THE PAUSED LANGUAGE — one vocabulary for "the source is paused, so this is too", used
 // everywhere that applies: the anchored line (below) and any pane that freezes with it
-// (paintHeld, called from paintPanel). Amber/⏸, matching the held live-dot's own colour
-// (addLiveDot's dimmed ring is already #e3b341) rather than inventing a second "paused" colour.
+// (paintHeld, called from paintPanel). Amber/⏸. The held MAP MARKER is the exception: it is grey
+// (addLiveDot), because a marker that means "you" may not share a colour with a grip state, and
+// amber is impact (Jett 2026-09-11).
 function heldSince() {
   return MENU_SINCE ? "since " + new Date(MENU_SINCE).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
 }
@@ -649,7 +650,7 @@ function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
-  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0, turnPickSeq()])
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, liveLapSig(), turnPickSeq()])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -684,6 +685,12 @@ function arcRuns(pts) {
   }
   runs.push(run); return runs;
 }
+// one grip ink for every live surface (trace line, map trail, map key): within grip wears the PI class colour
+// when known (unknown class -> the green within-grip), the problem states keep their diagnostic colours
+function gripInk(k, baseCol) {
+  if (k) return TRACE_GRIP[k] || TRACE_GRIP[0];
+  return (baseCol && baseCol !== "var(--dim)") ? baseCol : TRACE_GRIP[0];
+}
 function paintedLine(pts, ch, w, mode, baseCol) {
   if (!pts.length) return "";
   let sc = null;
@@ -693,8 +700,7 @@ function paintedLine(pts, ch, w, mode, baseCol) {
   // (k===0, nothing wrong) carry the build's PI class colour when one is given, so PI stays readable
   // even on a painted line -- the problem states (slip/impact) keep their diagnostic colours, and the
   // speed gradient is untouched (it has no no-problem baseline).
-  const base0 = (baseCol && baseCol !== "var(--dim)") ? baseCol : TRACE_GRIP[0];   // unknown class -> keep the green within-grip
-  const colOf = (k) => (mode === "speed" && sc) ? GRAD[k] : (k === 0 ? base0 : (TRACE_GRIP[k] || TRACE_GRIP[0]));
+  const colOf = (k) => (mode === "speed" && sc) ? GRAD[k] : gripInk(k, baseCol);
   return arcRuns(pts).map((rp) => {
     const segs = []; let run = [rp[0]], st = keyOf(rp[0]);
     for (let i = 1; i < rp.length; i++) { const k = keyOf(rp[i]); if (k !== st) { run.push(rp[i]); segs.push([st, run]); run = [rp[i]]; st = k; } else run.push(rp[i]); }
@@ -845,8 +851,12 @@ function courseTrace(c) {
   const mine = match.filter((t) => CUR && t.cid === CUR.cid);
   const cur = mine.find((t) => !notTimed(t)) || mine[0] || null;
   const fore = cur || best || match[0] || null;
-  // THE ACTIVE (LIVE, in-progress) LAP: drawn on top, grip-painted, updating in real time as you drive it.
-  const live = (MODE.game === "event") ? alignLiveToCourse(LIVE.run, fore, c) : null;
+  // THE ACTIVE (LIVE, in-progress) LAP: drawn on top, grip-painted, updating in real time as you drive it. It is
+  // the whole lap (LIVE.lap, not the 90 s LIVE.run), and a pause or the end-of-event menu HOLDS it as "last run"
+  // until the next lap starts -- the moment a driver stops to read it is not the moment it may vanish (handoff §4).
+  const shownLap = liveLapFor(c);
+  const live = shownLap ? alignLiveToCourse(shownLap.pts, fore, c) : null;
+  const liveNow = !!(live && LIVE.lap && LIVE.lap.live);
   const leg = stage2.slice(0, 12).map((t) => {
     const hid = sel.hidden.has(String(t.id));
     const nt = notTimed(t); const off = best && !nt && t !== best && t.t ? ((t.t / best.t - 1) * 100).toFixed(1) + "%" : "";
@@ -865,7 +875,7 @@ function courseTrace(c) {
   // laps and dims the rest in the chart -- a highlight, not a filter (every lap stays on screen). Click again
   // (or its ✕) to clear. The chips carry an `on` state so the current spotlight is obvious.
   const piLeg = (!TRACE_ALL && clsPresent.length) ? `<span class="lchips pileg" title="click a class to spotlight its laps in the chart; the lines are coloured by the PI class that drove each lap">${clsPresent.map((k) => `<button class="lchip key clshi${TRACE_CLS_HI === k ? " on" : ""}" data-clshi="${esc(k)}" style="--pc:${piColor(k)};border-color:${piColor(k)};background:${piColor(k)}${TRACE_CLS_HI === k ? "44" : "22"}"><i style="background:${piColor(k)}"></i>${esc(k)}${TRACE_CLS_HI === k ? " ✕" : ""}</button>`).join("")}</span>` : "";
-  const foot = `${piLeg}<span class="lchips">${live ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : ""}${leg}</span>`;
+  const foot = `${piLeg}<span class="lchips">${live ? (liveNow ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : `<span class="lchip livenow last" title="the last lap driven, held through the pause / menu until the next lap starts"><i></i>last run</span>`) : ""}${leg}</span>`;
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
@@ -900,12 +910,13 @@ function courseTrace(c) {
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
     const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
     // THE ACTIVE LAP, on top and unmistakable: a soft accent glow under the grip-painted line, thicker than
-    // any recorded lap, with a pulsing dot at the car's current position -- so the live one reads as live.
+    // any recorded lap, with the car's marker at its current position -- the same "you" the course map draws
+    // (white core, accent pulse; a hollow grey ring when held), never a grip colour. "Last run" drops the pulse.
     const lp = live && live[live.length - 1];
     const liveSvg = live ? `<g class="livelap">
-      <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity=".22" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
+      <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity="${liveNow ? ".22" : ".1"}" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
       ${paintedLine(live, ch, 3.2, TRACE_MODE, piColor(CUR && CUR.cls))}
-      <circle cx="${ch.px(lp[0]).toFixed(1)}" cy="${ch.py(lp[1]).toFixed(1)}" r="4.5" fill="var(--acc2)" stroke="#04101c" stroke-width="1.4"><animate attributeName="r" values="4.5;6.8;4.5" dur="1.1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.5;1" dur="1.1s" repeatCount="indefinite"/></circle></g>` : "";
+      ${youMarkSvg(ch.px(lp[0]), ch.py(lp[1]), liveNow)}</g>` : "";
     return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${band}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
   };
   return { head, foot, svg, hasData: match.length > 0 };
@@ -945,7 +956,7 @@ function liveRun() {
 }
 
 function markMapAt(x, z, col) {
-  const sv = document.querySelector("#leftBody svg"); if (!sv || x == null) return;
+  const sv = document.querySelector("#leftBody svg[data-x0]"); if (!sv || x == null) return;   // the map, not the hero glyph
   const ds = sv.dataset; if (ds.s == null) return;
   const s = +ds.s, H = +ds.h, pad = +ds.pad;
   const cx = pad + (x - +ds.x0) * s, cy = H - pad - (z - +ds.z0) * s;
@@ -1641,7 +1652,7 @@ function paintLeft() {
     // the DATA filter is in the shared #coursefilter bar, not here.
     body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq(), view: MAP_VIEW, legOpen: MAP_LEG_OPEN }));
     body.insertAdjacentHTML("beforeend", turnTableHTML(COURSE, activeLapSet()));   // redesign phase B: the sortable turn list
-    wireTrace(body); addLiveDot(body);
+    wireTrace(body); addLiveDot(body); liveLapPaint();   // a rebuilt map redraws the live lap once, then appends
     // a turn marker OR a turn-list row selects that turn (highlight its phases here, full stats on the
     // right); the SVG/list is rebuilt on select, so re-bind every paint. Clicking the selected one clears.
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
@@ -1982,7 +1993,7 @@ function worldMapHTML() {
   const legend = `<span><i style="background:#3b4a5c"></i>every game route</span>`
     + seen.filter(Boolean).sort().map((d) => `<span><i style="background:${DISC_COL[d] || DISC_COL._other}"></i>${esc(d)}</span>`).join("")
     + (seen.includes(null) ? `<span><i style="background:${DISC_COL._unverified}"></i>unverified</span>` : "")
-    + `<span><i style="background:#e3b341"></i>you, now</span>`;
+    + `<span><i style="background:#fff"></i>you, now</span>`;
   return `<svg viewBox="0 0 ${W} ${H}" data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}"
       style="background:var(--bg);border-radius:6px;width:100%;height:100%">${routes}${mine}${hi}<g id="browseHi"></g><g id="liveDot"></g></svg>
     ${mapDrawerHTML(`<div class="legend">${legend}</div>`)}`;
@@ -2391,7 +2402,9 @@ function wireFollow(body) {
 }
 
 function addLiveDot(body) {
-  const svg = body.querySelector("svg"); if (!svg || !LIVEPOS) return;
+  // svg[data-x0], not the first svg: in course view the first svg in the pane is the course hero's shape glyph
+  // (courseHeroHTML sits above the map), and the dot had been landing in the glyph's corner, not on the map.
+  const svg = body.querySelector("svg[data-x0]"); if (!svg || !LIVEPOS || !isFinite(+svg.dataset.s)) return;
   let g = svg.querySelector("#liveDot");
   // v1-style (2026-09-03): the dot element is created ONCE and MOVED via a transform on every
   // update, never rebuilt -- rewriting innerHTML every frame (the old approach) replaces the
@@ -2399,18 +2412,37 @@ function addLiveDot(body) {
   // have worked before even if one had been added: there was never the same element around long
   // enough to transition. Two pre-built circles (solid / held) are toggled by display instead of
   // being re-created, matching app.js's updCarDot (~line 3283-3298).
-  if (!g) {
-    g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.id = "liveDot";
-    g.innerHTML = `<circle class="ld-solid" r="5" fill="#e3b341" stroke="#000" stroke-width="1"/>` +
-      `<circle class="ld-held" r="5" fill="none" stroke="#e3b341" stroke-width="1.5" opacity=".7" style="display:none">` +
-      `<title>last known position — held through the menu / loading screen</title></circle>`;
-    svg.appendChild(g);
+  // THE CAR MARKER (Jett 2026-09-11): a white arrow pointing where the car is going, in an accent pulse ring --
+  // the same "you" the speed trace draws. Never amber (#e3b341 is IMPACT) and never a grip colour. Held (menu /
+  // loading) = the same shape hollow and grey, no pulse. Sized in SCREEN pixels (.ld-s counter-scales the
+  // viewBox), so it reads the same on the static course map and at any world-map zoom.
+  if (!g || !g.firstChild) {
+    if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.id = "liveDot"; svg.appendChild(g); }
+    const arrow = `d="M0,-8 L6.2,6.5 L0,3.2 L-6.2,6.5 Z" stroke-linejoin="round" vector-effect="non-scaling-stroke"`;
+    g.setAttribute("pointer-events", "none");
+    g.innerHTML = `<g class="ld-s"><g class="ld-rot">`
+      + `<g class="ld-solid"><title>you, now</title><circle r="7" fill="none" stroke="var(--acc2)" stroke-width="2" vector-effect="non-scaling-stroke">`
+      + `<animate attributeName="r" values="7;15;7" dur="1.1s" repeatCount="indefinite"/><animate attributeName="opacity" values=".95;.1;.95" dur="1.1s" repeatCount="indefinite"/></circle>`
+      + `<path class="ld-arrow" ${arrow} fill="#fff" stroke="#04101c" stroke-width="1.6"/>`
+      + `<circle class="ld-disc" r="5" fill="#fff" stroke="#04101c" stroke-width="1.6" vector-effect="non-scaling-stroke"/></g>`
+      + `<g class="ld-held"><title>last known position — held through the menu / loading screen</title>`
+      + `<path class="ld-arrow" ${arrow} fill="#0d1117" fill-opacity=".6" stroke="#8b97a7" stroke-width="1.6" stroke-dasharray="2.5 2"/>`
+      + `<circle class="ld-disc" r="5" fill="none" stroke="#8b97a7" stroke-width="1.6" stroke-dasharray="2.5 2" vector-effect="non-scaling-stroke"/></g>`
+      + `</g></g>`;
   }
   const x0 = +svg.dataset.x0, z0 = +svg.dataset.z0, s = +svg.dataset.s, H = +svg.dataset.h, pad = +svg.dataset.pad;
   if (!isFinite(s)) return;
   const cx = pad + (LIVEPOS[0] - x0) * s, cy = H - pad - (LIVEPOS[1] - z0) * s;
-  const held = !!LIVE.posHeld;      // no driving frame right now: the last real position, dimmed and hollow
+  const held = !!LIVE.posHeld;      // no driving frame right now: the last real position, hollow and grey
   queueFollow();
+  // HEADING FROM MOTION: the frame has no yaw angle (its `yaw` is a rate), so the arrow points along the last
+  // >= 2 m of travel. A jump of hundreds of metres is a teleport, not a direction. Until the car has moved the
+  // marker is a disc -- an arrow pointing nowhere in particular would be a claim the data cannot make.
+  const hp = LIVE_HEAD.p, dx = hp ? LIVEPOS[0] - hp[0] : 0, dz = hp ? LIVEPOS[1] - hp[1] : 0, d2 = dx * dx + dz * dz;
+  if (!hp || d2 > 4) {
+    if (hp && d2 < 250000) LIVE_HEAD.a = Math.atan2(dx, dz) * 180 / Math.PI;   // screen y is -z, so clockwise from up
+    LIVE_HEAD.p = LIVEPOS.slice();
+  }
   // POSITION BEFORE FIRST PAINT (matches app.js:3290-3297): a freshly-created/rebuilt map's dot
   // has no transform attribute yet, so this placement has nothing to transition FROM -- flushing
   // layout here (once, only on first placement) commits it instantly instead of letting the
@@ -2418,9 +2450,97 @@ function addLiveDot(body) {
   const firstPlace = !g.hasAttribute("transform");
   g.setAttribute("transform", `translate(${cx.toFixed(1)},${cy.toFixed(1)})`);
   if (firstPlace) void g.getBoundingClientRect();
-  const solid = g.querySelector(".ld-solid"), heldC = g.querySelector(".ld-held");
-  if (solid) solid.style.display = held ? "none" : "";
-  if (heldC) heldC.style.display = held ? "" : "none";
+  const ctm = svg.getScreenCTM(), u = ctm && ctm.a ? 1 / ctm.a : 1;
+  const sg = g.querySelector(".ld-s");
+  if (sg && (!g._u || Math.abs(u / g._u - 1) > 0.03)) { g._u = u; sg.setAttribute("transform", `scale(${u.toPrecision(4)})`); }
+  const rg = g.querySelector(".ld-rot");
+  if (rg && LIVE_HEAD.a != null) rg.setAttribute("transform", `rotate(${LIVE_HEAD.a.toFixed(0)})`);
+  g.classList.toggle("held", held);
+  g.classList.toggle("nohead", LIVE_HEAD.a == null);
+}
+const LIVE_HEAD = { p: null, a: null };
+// the same marker on the speed trace, at the live lap's last point (live: pulsing; last run: hollow grey)
+function youMarkSvg(x, y, now) {
+  const X = x.toFixed(1), Y = y.toFixed(1);
+  return now
+    ? `<circle cx="${X}" cy="${Y}" r="4.5" fill="none" stroke="var(--acc2)" stroke-width="2"><animate attributeName="r" values="4.5;9;4.5" dur="1.1s" repeatCount="indefinite"/><animate attributeName="opacity" values=".95;.1;.95" dur="1.1s" repeatCount="indefinite"/></circle><circle cx="${X}" cy="${Y}" r="3.8" fill="#fff" stroke="#04101c" stroke-width="1.4"><title>you, now</title></circle>`
+    : `<circle cx="${X}" cy="${Y}" r="3.8" fill="#0d1117" stroke="#8b97a7" stroke-width="1.5" stroke-dasharray="2.5 2"><title>where the last run stopped</title></circle>`;
+}
+
+// THE LIVE LAP ON THE COURSE MAP (Jett 2026-09-11): the lap being driven, written onto the static course map as
+// the car goes -- the speed trace's live language (accent glow under a grip-painted line, thicker than any
+// history lap) plus an impact starburst wherever the lap recorded grip 4. LIVE.lap (live.js) is the source.
+// Built ONCE per map and APPENDED to (points pushed onto the open polyline; a new polyline only when the grip
+// state changes or the car teleports) -- never an innerHTML repaint per sample. History recedes by a class on
+// .cmap (styles.css), so nothing in the map's own SVG is touched.
+// The lap to show: the current one, except in its first 3 s, when the lap just finished stays up -- a lap-number
+// tick at the finish line (or the post-race roll-out) must not wipe the lap the driver wants to read.
+function liveLapShown() {
+  const c = LIVE.lap, p = LIVE.lapPrev;
+  if (!c) return null;
+  return (c.pts.length < 30 && p && p.pts.length >= 30) ? p : c;
+}
+function liveLapFor(c) {
+  const l = liveLapShown();
+  return (l && c && l.key === c.key && l.pts.length > 1) ? l : null;
+}
+function liveLapSig() {
+  const l = MODE.suggest === "course" && COURSE ? liveLapFor(COURSE) : null;
+  return l ? [l.seq, l.pts.length, !!LIVE.lap.live] : 0;
+}
+// live <-> held edges: the map's classes and the trace's chip both change, so both repaint (once per edge)
+function liveLapChanged() { liveLapPaint(); paintTrace(); }
+const IMPACT_BURST = "M 0 -5.5 L 1.5 -1.5 L 5.5 0 L 1.5 1.5 L 0 5.5 L -1.5 1.5 L -5.5 0 L -1.5 -1.5 Z";   // v1's impact glyph
+function liveLapPaint() {
+  const body = $("#leftBody"), svg = body && body.querySelector(".cmap > svg"), g = svg && svg.querySelector("#liveLap");
+  if (!g) return;
+  const wrap = svg.parentNode;
+  const lap = (MODE.suggest === "course" && COURSE) ? liveLapFor(COURSE) : null;
+  const now = !!(lap && LIVE.lap && LIVE.lap.live);
+  wrap.classList.toggle("live-on", now);
+  wrap.classList.toggle("live-last", !!lap && !now);
+  if (!lap) { if (g._seq != null) { g.textContent = ""; g._seq = null; } return; }
+  const ds = svg.dataset, x0 = +ds.x0, z0 = +ds.z0, s = +ds.s, H = +ds.h, pad = +ds.pad;
+  if (!isFinite(s)) return;
+  const base = piColor(CUR && CUR.cls);
+  // a different lap, a rewind cut (new seq), a changed class colour or a cap trim: redraw this layer once
+  if (g._seq !== lap.seq || g._lap !== lap || g._base !== base || g._abs < lap.n0) {
+    g.innerHTML = `<g class="ll-glow"></g><g class="ll-grip"></g><g class="ll-imp"></g>`;
+    const ctm = svg.getScreenCTM();
+    Object.assign(g, { _seq: lap.seq, _lap: lap, _base: base, _abs: lap.n0, _last: null, _glow: null, _line: null, _k: -1, _imp: null, _u: ctm && ctm.a ? 1 / ctm.a : 1 });
+    wrap.style.setProperty("--live-calm", gripInk(0, base));
+  }
+  const NS = "http://www.w3.org/2000/svg", [gGlow, gGrip, gImp] = g.children;
+  const poly = (host, col, w, op) => {
+    const p = document.createElementNS(NS, "polyline");
+    p.setAttribute("fill", "none"); p.setAttribute("stroke", col); p.setAttribute("stroke-width", w);
+    p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round");
+    p.setAttribute("vector-effect", "non-scaling-stroke"); if (op != null) p.setAttribute("opacity", op);
+    host.appendChild(p); return p;
+  };
+  const add = (p, x, y) => { const q = svg.createSVGPoint(); q.x = x; q.y = y; p.points.appendItem(q); };
+  for (let i = g._abs - lap.n0; i < lap.pts.length; i++) {
+    const q = lap.pts[i], X = pad + (q[3] - x0) * s, Y = H - pad - (q[4] - z0) * s;
+    if (!isFinite(X) || !isFinite(Y)) continue;
+    const L = g._last, jump = !!L && Math.hypot(q[3] - L[3], q[4] - L[4]) > 60;   // a respawn never draws a streak
+    if (!g._glow || jump) { g._glow = poly(gGlow, "var(--acc2)", 8, 0.3); g._line = null; }
+    add(g._glow, X, Y);
+    const k = q[2] | 0;
+    if (!g._line || k !== g._k) {
+      const nl = poly(gGrip, gripInk(k, base), k ? 4 : 3.4);
+      if (g._line) add(nl, g._lx, g._ly);                 // butt onto the previous state's last point: no gaps
+      g._line = nl; g._k = k;
+    }
+    add(g._line, X, Y);
+    if (k === 4 && (!g._imp || Math.hypot(q[3] - g._imp[0], q[4] - g._imp[1]) > 12)) {   // v1's 12 m impact dedup
+      const b = document.createElementNS(NS, "path");
+      b.setAttribute("d", IMPACT_BURST); b.setAttribute("transform", `translate(${X.toFixed(1)},${Y.toFixed(1)}) scale(${(g._u * 1.7).toPrecision(3)})`);
+      b.setAttribute("fill", TRACE_GRIP[4]); b.setAttribute("stroke", "#0d1117"); b.setAttribute("stroke-width", "1.2"); b.setAttribute("vector-effect", "non-scaling-stroke");
+      gImp.appendChild(b); g._imp = [q[3], q[4]];
+    }
+    g._last = q; g._lx = X; g._ly = Y;
+  }
+  g._abs = lap.n0 + lap.pts.length;
 }
 
 // which learned course is the live car on? nearest course whose path passes within 60 m

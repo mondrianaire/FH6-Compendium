@@ -449,6 +449,22 @@ button.stage.act.go:active{transform:translateY(1px)}
 .ch-conf{font-size:11px;color:var(--mut);display:flex;align-items:center;flex-wrap:wrap;gap:3px}
 .ch-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:2px}
 .ch-dot.ok{background:var(--acc)} .ch-dot.w{background:var(--warn)} .ch-dot.x{background:var(--mut)}
+/* ---- the turn list (redesign phase B): sortable enumeration on the left ---- */
+.ttsort{margin-left:auto;display:inline-flex;align-items:center;gap:4px}
+.ttsort .why{font-size:10px}
+.tt-wrap{overflow-x:auto}
+.tt{width:100%;border-collapse:collapse;font-size:11px}
+.tt th{color:var(--mut);font-weight:400;font-size:10px;padding:3px 5px;border-bottom:1px solid var(--line);text-align:center}
+.tt th:first-child{text-align:left}
+.tt td{padding:3px 5px;border-bottom:1px solid var(--line2);text-align:center;font-variant-numeric:tabular-nums}
+.tt td.tt-lbl{text-align:left;white-space:nowrap}
+.tt tbody tr{cursor:pointer}
+.tt tbody tr:hover{background:var(--panel2)}
+.tt tbody tr.on,.tt tr.ttr.on{background:rgba(0,210,122,.12);outline:1px solid var(--acc);outline-offset:-1px}
+.tt .tt-find{color:var(--warn);font-weight:600}
+.tt tfoot td{padding:3px 5px;color:var(--mut);border-top:1px solid var(--line);font-size:10px;text-align:left}
+.tt tfoot td.tt-find{text-align:center}
+.tt .pdot{display:inline-block;width:7px;height:7px;border-radius:50%}
 /* ---- single-turn view: the fastest-passes speed leaderboard (apex mph per phase, grip-coloured) ---- */
 .tstat-sum{font-size:13px;padding:3px 6px 6px}
 .tstat-sum b{font-weight:500}

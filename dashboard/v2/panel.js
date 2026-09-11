@@ -1463,7 +1463,7 @@ function paintLeft() {
   // the node mid-animation in free roam, and repainting every trace polyline on a course event-start pause).
   // Confirmed by a LEFT_KEY field-diff capture: an event->menu blip flipped ONLY `game` and forced a rebuild
   // with an otherwise-identical map. The course pill's EVENT/RIVALS label rides the next real rebuild.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, turnPickSeq()]);
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, turnPickSeq(), TURN_SORT]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
@@ -1513,10 +1513,12 @@ function paintLeft() {
     // COURSE VIEW IS STATIC: no follow-preview zoom here (Jett 2026-09-06). courseMap() fits the whole course
     // to the pane; the adaptive zoom stays a free-view-only tool, so a course reads as one stable shape.
     body.insertAdjacentHTML("beforeend", mapDrawerHTML(`<div class="legend">${legendHTML}</div>${mapFilterBar(COURSE)}`));
+    body.insertAdjacentHTML("beforeend", turnTableHTML(COURSE, activeLapSet()));   // redesign phase B: the sortable turn list
     wireTrace(body); wireMapDrawer(body); addLiveDot(body);
-    // a turn marker selects that turn (highlight its phases here, full stats on the right); the SVG
-    // is rebuilt on select, so re-bind every paint. Clicking the selected marker again clears it.
+    // a turn marker OR a turn-list row selects that turn (highlight its phases here, full stats on the
+    // right); the SVG/list is rebuilt on select, so re-bind every paint. Clicking the selected one clears.
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
+    body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} LEFT_KEY = null; paintLeft(); });
   } else {
     paintLeftHeader();
     body.innerHTML = worldMapHTML();
@@ -1595,6 +1597,45 @@ function courseHeroHTML(c, ls) {
     ${classes.length ? `<div class="ch-cls"><span class="why">laps by class</span>${classes.map((cl) => classPill(cl, byCls[cl])).join("")}<span class="why">· ${laps.length} lap${laps.length === 1 ? "" : "s"} · ${nCars} car${nCars === 1 ? "" : "s"}</span></div>` : ""}
     <div class="ch-conf"><span class="ch-dot ok"></span>${strong} on 13+ laps · <span class="ch-dot w"></span>${weak} need${weak === 1 ? "s" : ""} more${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} never driven` : ""}</div>
   </div>`;
+}
+// SHARED per-turn aggregate over the active lap set — the "statistics infrastructure" the turn table,
+// the leaderboard and the selected-turn pane all read: n laps, per-phase agg, median turn time, best
+// turn time, and avail = median-best = the seconds to FIND vs your own best line through this turn.
+function turnAgg(t, ls) {
+  const phases = SEG_ORDER.map((n) => ({ n, p: phaseAgg((t.phaseObs || {})[n], ls.set) }));
+  const byLap = {};
+  SEG_ORDER.forEach((n) => ((t.phaseObs || {})[n] || []).forEach((r) => { if (ls.set.has(String(r[0]))) (byLap[r[0]] = byLap[r[0]] || {})[n] = r; }));
+  const tts = [];
+  Object.values(byLap).forEach((ph) => { let tt = 0, any = false; SEG_ORDER.forEach((n) => { const r = ph[n]; if (r && r[5] != null) { tt += r[5]; any = true; } }); if (any) tts.push(tt); });
+  tts.sort((a, b) => a - b);
+  const med = tts.length ? tts[tts.length >> 1] : null, best = tts.length ? tts[0] : null;
+  return { t, n: Object.keys(byLap).length, phases, turnT: med, bestT: best, avail: (med != null && best != null) ? med - best : null };
+}
+let TURN_SORT = (() => { try { return localStorage.getItem("fh6TurnSort") || "find"; } catch (e) { return "find"; } })();
+// THE TURN LIST (redesign · phase B): every measured turn enumerated on the LEFT, sortable by route
+// order or by TIME TO FIND (biggest opportunity first — the default). Each row: turn + kind, the five
+// phase apex-mph medians, the median time in the turn, and the seconds available vs your best line.
+// Clicking a row selects the turn (drives the right-pane analysis + the map highlight).
+function turnTableHTML(c, ls) {
+  const aggs = (c.turns || []).filter((t) => t.phaseObs).map((t) => turnAgg(t, ls)).filter((a) => a.n > 0);
+  if (!aggs.length) return "";
+  if (TURN_SORT === "find") aggs.sort((a, b) => (b.avail || 0) - (a.avail || 0) || (a.t.seq || 0) - (b.t.seq || 0));
+  else aggs.sort((a, b) => (a.t.seq || 0) - (b.t.seq || 0));
+  const sel = turnPickSeq();
+  const totFind = aggs.reduce((s, a) => s + (a.avail || 0), 0);
+  const ph = (a, n) => { const p = a.phases.find((x) => x.n === n).p; return `<td class="mono" title="${esc(SEG_LABEL[n])} apex mph">${p && p.min != null ? p.min : "·"}</td>`; };
+  const rows = aggs.map((a) => `<tr class="ttr${sel === a.t.seq ? " on" : ""}" data-turn="${a.t.seq}" title="${a.n} lap${a.n === 1 ? "" : "s"}">
+    <td class="tt-lbl"><b>${esc(turnLabel(a.t))}</b> <span class="why">${esc(a.t.kind || "")}${a.t.dir ? " " + (a.t.dir === "L" ? "L" : "R") : ""}</span></td>
+    ${SEG_ORDER.map((n) => ph(a, n)).join("")}
+    <td class="mono">${a.turnT != null ? a.turnT.toFixed(2) : "—"}</td>
+    <td class="mono tt-find">${a.avail ? "+" + a.avail.toFixed(2) : "—"}</td></tr>`).join("");
+  const sortBtn = (k, lbl) => `<button class="mini${TURN_SORT === k ? " on" : ""}" data-tsort="${k}">${lbl}</button>`;
+  return `<div class="grp"><div class="gh">Turns <span class="why">· ${esc(ls.label)} · click a turn</span>
+      <span class="ttsort"><span class="why">sort</span>${sortBtn("route", "route order")}${sortBtn("find", "time to find")}</span></div>
+    <div class="tt-wrap"><table class="tt"><thead><tr><th>turn</th>
+      ${SEG_ORDER.map((n) => `<th title="${esc(SEG_LABEL[n])} apex mph"><span class="pdot" style="background:${SEG_COL[n]}"></span></th>`).join("")}
+      <th title="median time through the turn">in</th><th title="seconds to find vs your best line">find</th></tr></thead>
+      <tbody>${rows}</tbody>${totFind > 0.05 ? `<tfoot><tr><td colspan="6">total time to find</td><td></td><td class="mono tt-find">+${totFind.toFixed(2)}</td></tr></tfoot>` : ""}</table></div></div>`;
 }
 function courseInfoPill(r, state) {
   const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));

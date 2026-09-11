@@ -1276,10 +1276,13 @@ function resolutionState() {
 }
 
 // THE GATE STRIP (header handoff §4): one strip that pairs the identity we HAVE with the one thing
-// this state affords. Returns {tone, ident, detail, sheet, sheetSub, verdict}. `sheet` grades the
+// this state affords. Returns {tone, ident, detail, sheet, sheetSub}. `sheet` grades the
 // trailing Build Sheet cell -- "filled" (it IS the primary, downloaded), "outline" (reachable, open
-// shackle), "dead" (refused, shut shackle). `verdict` is set only for the two severe states that
-// promote a finding to a 21px line. The middle action cell is c.primary / c.noBtn from headerCopy().
+// shackle), "dead" (refused, shut shackle). The middle action cell is c.primary / c.noBtn from headerCopy().
+// VERDICT FOLDED IN (2026-09-11 header collapse): the old separate `verdict` field drew a 21px headline row
+// that just restated this ident/detail -- same fact twice, and a state-conditional row is exactly what made
+// the band's height jitter. The severe states now carry their verdict IN `ident` (a contradiction reads
+// "◌ IDENTITY CONTRADICTED" at tone bad; a new build already reads "◌ NEW BUILD"), so nothing gets an extra row.
 function gateStrip(st, rs) {
   const ch = CHANGE || {}, nSl = (ch.sliders || []).length, nPa = (ch.slots || []).length;
   if (!CUR || rs.key === "none") return { tone: "dim", ident: "—", detail: "waiting for a car", sheet: "dead", sheetSub: "no car" };
@@ -1292,15 +1295,17 @@ function gateStrip(st, rs) {
   // until you equip + save it. See memory fh6-tune-identification-equip-workflow.
   if (rs.key === "ambiguous") {
     const mm = (CUR && CUR.match) || {}; const ties = mm.n_signature_ties || rs.tunes || 0;
-    return { tone: "warn", ident: "◌ NOT YET REMEMBERED", detail: (ties ? ties + " saves tie" : "several saves tie") + " · equip + save the tune to pin it",
-      sheet: "dead", sheetSub: "needs one save", verdict: (CUR.match && matchQuality(CUR.match).level === "conflict") ? "IDENTITY CONTRADICTED" : "" };
+    const conflict = CUR.match && matchQuality(CUR.match).level === "conflict";
+    return { tone: conflict ? "bad" : "warn", ident: conflict ? "◌ IDENTITY CONTRADICTED" : "◌ NOT YET REMEMBERED",
+      detail: (ties ? ties + " saves tie" : "several saves tie") + " · equip + save the tune to pin it",
+      sheet: "dead", sheetSub: "needs one save" };
   }
   if (st.key === "variation") return { tone: "acc", ident: "✓ REMEMBERED", detail: nSl + " slider" + (nSl === 1 ? "" : "s") + " off a saved build · tuning guaranteed", sheet: "outline" };
   if (st.key === "clone") return { tone: "acc", ident: "✓ REMEMBERED", detail: "clone · unlocked · save it to keep", sheet: "outline" };
   if (rs.key === "unsaved") {   // truly unsaved: hardware changed / no match, nothing on disk
     if (rs.locked) return { tone: "warn", ident: "◷ IMPORTING", detail: "history catching up", sheet: "dead", sheetSub: "importing" };
     const d = [nSl ? nSl + " slider" + (nSl === 1 ? "" : "s") + " moved" : "", nPa ? nPa + " part" + (nPa === 1 ? "" : "s") + " changed" : ""].filter(Boolean).join(" · ");
-    return { tone: "bad", ident: "◌ NEW BUILD", detail: (d ? d + " · " : "") + "equip + save to remember it", sheet: "dead", sheetSub: "needs a save", verdict: "NEW BUILD — SAVE IT IN THE GAME TO REMEMBER IT" };
+    return { tone: "bad", ident: "◌ NEW BUILD", detail: (d ? d + " · " : "") + "equip + save to remember it", sheet: "dead", sheetSub: "needs a save" };
   }
   // resolved (remembered)
   const tree = (rs.hwN || 1) + " hw · " + (rs.tunes || 1) + " tune" + ((rs.tunes || 1) === 1 ? "" : "s");
@@ -1607,9 +1612,13 @@ function paintHeader() {
   const img = m && m.thumb ? `${API}${m.thumb}` : liv ? `${DAEMON}/livery-thumb?ordinal=${CUR.ordinal}&d=${encodeURIComponent(liv.dir)}` : null;
 
   h.dataset.tone = c.tone;
-  // THE BAND (header handoff §2–§4): render washed across the whole band behind a scrim; identity on
-  // the left (470), the hardware→tune hash table on the right (1fr), and one gate strip pairing the
-  // identity we have with the single action this state affords. The spectrum/marker fly-in is retired.
+  // THE BAND (2026-09-11 header collapse): a flat 120px, two columns — the identity text on the left
+  // (1fr) and the car's livery as a hero tile on the right (240px), NOT washed behind the text. Row A
+  // merges the PI badge + save/lock chip + CHANGE chip + car name onto one line (the 28px badge governs
+  // its height); Row B is the tune name; Row C is the one gate strip pairing the identity we have with
+  // the single action this state affords. The old evidence column folds into the gate's state cell; the
+  // guarantee walkthrough folds into an ⓘ tooltip; the verdict folds into the state ident (see gateStrip).
+  // Height is fixed in every state on purpose: a state-conditional row would jitter the course view below.
   const rs = resolutionState();
   const g = gateStrip(st, rs);
   const FILL = { pick: "acc2", sheet: "warn", ab: "acc2", base: "acc", rebuild: "acc2", copycmd: "line2" };
@@ -1617,36 +1626,38 @@ function paintHeader() {
   const reach = !!(MATCH && MATCH.build);
   const resolved = rs.key === "resolved";
   const busy = RR.busy || RB.state === "running" || RB.pending;
+  const ev = c.evidence || (q.level === "ok" ? q.why : "") || "";
+  // THE LIVERY HERO TILE: an image-only 240×120 frame. With a thumb, an <img object-fit:cover> (sharper
+  // than a stretched background at this size, and the source PNG is a clean alpha cutout). With a car but
+  // no thumb, a class-tinted glow plate (the same --pc-* token the PI badge wears). With no car at all,
+  // a flat plate — no class exists yet to tint by.
+  const livGlow = CUR ? piColor(CUR.cls) : "";
   h.innerHTML = `
-    ${img ? `<div class="hwash" style="background-image:url('${img}')"></div>` : ""}
-    <div class="hscrim"></div>
+    <div class="hlivery"${!CUR ? ' data-fill="empty"' : (!img ? ' data-fill="glow"' : "")}${livGlow ? ` style="--liv:${livGlow}"` : ""}>
+      ${img ? `<img src="${img}" alt="">` : ""}
+    </div>
     <button class="icobtn hreload" id="btnRefresh" ${busy ? "disabled" : ""}
       title="re-read this car's save from disk, and import it if the database does not hold it — both happen by themselves; this is the manual override.">${busy ? "…" : "⟳"}</button>
     <div class="hident">
-      <div class="hident-hd">
-        ${CUR ? `<span class="hpi">${piBadge(CUR.cls, CUR.pi)}</span>` : ""}
+      <div class="hrowa">
+        ${CUR ? `<span class="hpi artpi">${piBadge(CUR.cls, CUR.pi)}</span>` : ""}
         ${rs.locked ? `<span class="hlock t-l">🔒 ${esc(c.caption || "locked")}</span>` : (c.caption ? `<span class="hcap t-l">${esc(c.caption)}</span>` : "")}
         ${changeSlim()}
+        <span class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}</span>
       </div>
-      <div class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}</div>
       <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
-      ${g.verdict ? `<div class="hverdict">${esc(g.verdict)}</div>` : ""}
       <div class="hgate">
-        <div class="gcell gstate" data-tone="${g.tone}" title="${esc(rs.hint || g.detail || "")}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span></div>
+        <div class="gcell gstate" data-tone="${g.tone}" title="${esc(rs.hint || g.detail || "")}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span>${ev ? `<span class="gev" title="${esc(ev)}">${esc(ev)}</span>` : ""}</div>
         <span class="garrow" data-w="${(g.tone === "bad" || g.tone === "warn" || g.sheet === "dead") ? "weak" : "strong"}"></span>
         ${g.sheet === "filled" ? "" : (c.primary
           ? `<button class="gprim" id="btnPrim" data-act="${esc(c.primary.act)}" data-fill="${fill}">${esc(c.primary.label)}</button>`
-          : `<div class="ginstr t-b">${esc(c.step || c.noBtn || "")}</div>`)}
+          : `<div class="ginstr t-b">${esc(c.step || c.noBtn || "")}${c.guarantee ? ` <span class="hinfo" tabindex="0" title="${esc(c.guarantee.short + " — " + c.guarantee.title)}">ⓘ</span>` : ""}</div>`)}
         ${g.sheet === "filled"
           ? `<button class="gsheet filled" id="btnSheet">🔓 BUILD SHEET ▸<em>unlocks this build</em></button>`
           : g.sheet === "outline" && reach
             ? `<button class="gsheet outline" id="btnSheet">🔓 BUILD SHEET ▸<em>the full sheet</em></button>`
             : `<div class="gsheet dead">🔒 BUILD SHEET<em>${esc(g.sheetSub || "needs a save")}</em></div>`}
       </div>
-      ${c.guarantee ? `<div class="hguar t-b" title="${esc(c.guarantee.title)}"><b>✔ sure-fire</b> ${esc(c.guarantee.short)}</div>` : ""}
-    </div>
-    <div class="hev">
-      <div class="hev-ev"><span class="t-l">evidence</span><span class="t-b">${esc(c.evidence || (q.level === "ok" ? q.why : "") || "—")}</span></div>
     </div>`;
 
   // HASH TABLE RETIRED (Jett 2026-09-11): the upgrade/slider-hash table was less useful than hoped, so the

@@ -816,37 +816,45 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
    (1fr). The car render is washed across the whole band behind a scrim, dying out by 66% so mono
    figures never cross the fade. Three voices — Record (mono), Verdict (Inter 700 caps), Instruction
    (Inter 400). Content sheds tokens; type never sheds pixels. Nothing here clips or scrolls. */
-#hdr{position:relative;display:grid;grid-template-columns:470px minmax(0,1fr);column-gap:0;height:224px;
+#hdr{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 240px;grid-template-rows:100%;column-gap:0;height:120px;
   background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden}
 @keyframes hdrIn{from{opacity:.4}to{opacity:1}}
-#hdr .hident,#hdr .hev{animation:hdrIn .2s ease}
+#hdr .hident,#hdr .hlivery{animation:hdrIn .2s ease}
 #hdr[data-tone="warn"]{--tone:var(--warn)} #hdr[data-tone="bad"]{--tone:var(--bad)}
 #hdr[data-tone="blue"]{--tone:var(--acc2)} #hdr[data-tone="ok"]{--tone:var(--acc)} #hdr[data-tone="dim"]{--tone:var(--mut)}
-/* the wash + scrim, both behind the content */
-#hdr .hwash{position:absolute;inset:0;background-size:47% auto;background-position:left 46%;background-repeat:no-repeat;opacity:.17;pointer-events:none;z-index:0}
-#hdr .hscrim{position:absolute;inset:0;pointer-events:none;z-index:1;
-  background:linear-gradient(90deg,rgba(20,26,34,.30) 0%,rgba(20,26,34,.72) 46%,var(--panel) 66%)}
-#hdr .hreload{position:absolute;top:8px;right:8px;height:22px;width:22px;font-size:12px;z-index:4}
+/* RIGHT — the livery hero tile: image-only, full band height, no scrim. A hard border-left seam with a
+   short interior fade beside it, so nothing bleeds into the text column. */
+#hdr .hlivery{grid-column:2;grid-row:1;position:relative;height:100%;overflow:hidden;border-left:1px solid var(--line);
+  background:radial-gradient(120% 100% at 70% 42%, color-mix(in srgb, var(--liv,var(--acc2)) 14%, transparent) 0%, transparent 62%)}
+#hdr .hlivery[data-fill="glow"]{background:radial-gradient(120% 100% at 70% 42%, color-mix(in srgb, var(--liv,var(--acc2)) 22%, transparent) 0%, transparent 66%)}
+#hdr .hlivery[data-fill="empty"]{background:var(--panel2)}
+#hdr .hlivery::before{content:"";position:absolute;inset:0 auto 0 0;width:48px;z-index:1;pointer-events:none;
+  background:linear-gradient(to right,var(--panel) 0%,transparent 100%)}
+#hdr .hlivery img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 55%;opacity:.90}
+#hdr .hreload{position:absolute;top:8px;right:8px;height:22px;width:22px;font-size:12px;z-index:4;
+  background:rgba(13,17,23,.55);border-radius:2px}
 /* THE THREE VOICES — the only type in the band */
-#hdr .t-d{font:500 21px/26px var(--mono);letter-spacing:-.01em;color:var(--ink)}          /* Record — car name */
-#hdr .t-t{font:500 15px/20px var(--mono);color:var(--ink)}                                  /* Record — tune name */
+#hdr .t-d{font:500 21px/24px var(--mono);letter-spacing:-.01em;color:var(--ink)}          /* Record — car name */
+#hdr .t-t{font:500 15px/17px var(--mono);color:var(--ink)}                                  /* Record — tune name */
 #hdr .t-b{font:400 13px/18px var(--sans);color:var(--ink)}                                  /* Instruction */
 #hdr .t-l{font:500 10px/13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}  /* Record label */
 #hdr .empty{color:#576372}
 /* LEFT — identity + gate strip */
-#hdr .hident{position:relative;z-index:2;padding:12px 14px;display:flex;flex-direction:column;gap:5px;min-width:0;overflow:hidden}
-#hdr .hident-hd{display:flex;align-items:center;gap:8px;min-width:0;height:20px}
-#hdr .hlock{color:var(--warn)}
-#hdr .hcar{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#hdr .hident{grid-column:1;grid-row:1;position:relative;z-index:2;padding:10px 14px;display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
+/* Row A — badge · save/lock chip · CHANGE chip · car name, one line; the 28px badge governs the height */
+#hdr .hrowa{display:flex;align-items:center;gap:8px;min-width:0;height:28px}
+#hdr .hlock{color:var(--warn);flex:0 0 auto} #hdr .hcap{flex:0 0 auto}
+#hdr .hrowa .hpi{flex:0 0 auto}
+#hdr .hcar{flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 #hdr .htitle{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 #hdr .htitle .tick{color:var(--acc);font-weight:700}
-#hdr .hverdict{font:700 21px/24px var(--sans);letter-spacing:.02em;text-transform:uppercase;color:var(--tone,var(--bad));margin:1px 0}
 /* THE GATE STRIP — [state] ┈▸ [action | instruction] [build sheet]. Exactly one filled cell. */
 #hdr .hgate{margin-top:auto;display:flex;align-items:stretch;gap:0;min-height:44px}
 #hdr .gcell{display:flex;flex-direction:column;justify-content:center;min-width:0}
-#hdr .gstate{flex:0 0 auto;padding-right:10px}
-#hdr .gstate b{display:block;font:500 10px/14px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--gh,var(--mut))}
-#hdr .gstate span{font:500 10px/13px var(--mono);letter-spacing:.03em;color:var(--mut);white-space:nowrap}
+#hdr .gstate{flex:0 1 auto;padding-right:10px;max-width:52%}
+#hdr .gstate b{display:block;font:500 10px/14px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--gh,var(--mut));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hdr .gstate span{font:500 10px/13px var(--mono);letter-spacing:.03em;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hdr .gstate .gev{font:400 10px/13px var(--sans);letter-spacing:0;color:var(--dim);text-transform:none}
 #hdr .gstate[data-tone="bad"]{--gh:var(--bad)} #hdr .gstate[data-tone="warn"]{--gh:var(--warn)}
 #hdr .gstate[data-tone="acc"]{--gh:var(--acc)} #hdr .gstate[data-tone="dim"]{--gh:var(--mut)}
 #hdr .garrow{flex:1 1 auto;align-self:center;height:0;border-top:1.5px dashed var(--line2);position:relative;margin:0 6px;min-width:16px}
@@ -864,39 +872,16 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 #hdr .gsheet.outline{background:none;border:1px solid var(--warn);color:var(--warn)} #hdr .gsheet.outline em{color:var(--mut)}
 #hdr .gsheet.dead{background:var(--panel2);border:1px solid var(--line);color:var(--mut);cursor:default} #hdr .gsheet.dead em{color:var(--mut)}
 #hdr .gsheet.filled:hover,#hdr .gsheet.outline:hover{filter:brightness(1.1)}
-/* GUARANTEED tune-ID path — a persistent line under the gate when which tune is on the car is unsettled */
-#hdr .hguar{margin-top:6px;font:500 10.5px/14px var(--mono);letter-spacing:.02em;color:var(--mut);
-  border-top:1px dashed var(--line2);padding-top:6px;display:flex;gap:6px;align-items:baseline}
-#hdr .hguar b{flex:0 0 auto;color:var(--acc);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-/* the CHANGE token, one chip in the identity line */
-#hdr .hchg{background:none;border:1px solid var(--line2);border-radius:10px;padding:0 8px;font:700 9.5px var(--sans);
+/* GUARANTEED tune-ID path — folded into an ⓘ glyph after the gate instruction (full walkthrough in its title) */
+#hdr .hinfo{color:var(--acc);cursor:help;font-size:12px;margin-left:4px;vertical-align:baseline}
+#hdr .hinfo:hover,#hdr .hinfo:focus{filter:brightness(1.2);outline:none}
+/* the CHANGE token, one chip in the identity line (squared to match the band — the PI badge is the one rounded element) */
+#hdr .hchg{flex:0 0 auto;background:none;border:1px solid var(--line2);border-radius:2px;padding:0 8px;font:700 9.5px/18px var(--sans);
   letter-spacing:.03em;text-transform:uppercase;cursor:pointer;color:var(--mut)}
 #hdr .hchg:hover{filter:brightness(1.15)} #hdr .hchg.on{border-color:var(--acc);color:var(--acc)}
 #hdr .hchg.r{border-color:var(--bad);color:var(--bad)} #hdr .hchg.b{border-color:var(--acc2);color:var(--acc2)} #hdr .hchg.open{background:var(--panel2)}
-/* RIGHT — the hardware→tune hash table, then the evidence line, on flat --panel past the fade */
-#hdr .hev{position:relative;z-index:2;padding:10px 14px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;overflow:hidden;background:var(--panel)}
-#hdr .hth{display:flex;flex-direction:column;min-width:0;overflow:hidden;flex:1 1 auto}
-#hdr .hth-head{display:grid;grid-template-columns:70px 1fr;gap:12px;padding-bottom:3px;border-bottom:1px solid var(--line)}
-#hdr .hth-row{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line);min-width:0}
-#hdr .hth-row:last-child{border-bottom:0}
-#hdr .hth-hw{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:2px;padding:1px 7px;
-  font:500 11px/16px var(--mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;justify-self:start;flex:0 0 auto}
-#hdr .hth-hw i{font:500 9px var(--mono);font-style:normal;color:var(--dim)}
-#hdr .hth-hw:hover{border-color:var(--acc2);color:var(--acc2)}
-#hdr .hth-row.cur .hth-hw{color:var(--acc);border-color:var(--acc)}
-#hdr .hth-tunes{display:flex;flex-wrap:nowrap;gap:4px;min-width:0;overflow:hidden}
-#hdr .hth-tune{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:2px;padding:0 7px;
-  font:500 12px/17px var(--mono);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
-#hdr .hth-tune:hover{border-color:var(--acc2);color:var(--acc2)}
-#hdr .hth-tune.on{color:var(--acc);border-color:var(--acc);background:#0f2a1e}
-#hdr .hth-more{font:500 10px var(--mono);color:var(--dim);align-self:center;white-space:nowrap;flex:0 0 auto}
-#hdr .hth-empty{padding:8px 0}
-#hdr .hth-morerow{padding:4px 0 0;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#hdr .hev-ev{display:flex;flex-direction:column;gap:1px;flex:0 0 auto;border-top:1px solid var(--line);padding-top:5px}
-#hdr .hev-ev .t-b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
-/* keep BOTH halves (identity+gate | hash table) down to ~800px; only collapse when a two-column band
-   genuinely cannot fit — the tune table was vanishing at ~1000px (a 4K-portrait/200% CSS width) before. */
-@media (max-width:800px){ #hdr{grid-template-columns:1fr} #hdr .hev{display:none} }
+/* keep the livery tile down to ~800px rather than dropping it — the render is a hard constraint, not optional */
+@media (max-width:800px){ #hdr{grid-template-columns:minmax(0,1fr) 96px} }
 
 .trace{height:240px;transition:height .12s ease}
 .trace.empty{height:34px}

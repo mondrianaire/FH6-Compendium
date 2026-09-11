@@ -385,8 +385,14 @@ function lastAction() {
                  : sp + " session" + (sp === 1 ? "" : "s") + " on disk have not been imported yet — corners/laps from them are not queryable until they are"); })()}
   </span>`;
   if (!LIVE.inMenu) logStatus(txt, tone);   // record the transition (skip the transient in-menu pause, which ticks a duration)
+  // DISPLAY prefix (not logged): where the drive is + the lap, so the top bar reads "on course · lap 3 · <freeze>"
+  // (spec line 24). Only in a steady drive state — not while paused/importing, which own the whole line.
+  const loc = LIVE.inMenu ? null : (RB.state === "running" || RB.pending || RR.busy) ? null
+    : MODE.suggest === "course" ? "on course" : MODE.suggest === "free" ? "free roam" : null;
+  const lapn = LIVE.frame && LIVE.frame.lapn != null ? LIVE.frame.lapn : null;
+  const dispTxt = (loc ? loc + (lapn != null ? " · lap " + lapn : "") + " · " : "") + txt;
   el.dataset.tone = tone;
-  el.innerHTML = `<b>${esc(txt)}<i class="statcaret" aria-hidden="true">▾</i></b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}${statusLogHTML()}`;
+  el.innerHTML = `<b>${esc(dispTxt)}<i class="statcaret" aria-hidden="true">▾</i></b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}${statusLogHTML()}`;
 }
 
 function paintPanel() {
@@ -459,7 +465,7 @@ function pickTurn(seq) {
   TURN_PICK = (s == null || s === cur) ? null : { key: COURSE && COURSE.key, seq: s };   // click the same turn to clear
   // selecting a turn is a request to SEE it: bring the right pane to Turn analysis (its full stats).
   if (TURN_PICK && MODE.suggest === "course" && COURSE) { RIGHT_TAB = "matrix"; try { rightTabStore()[rightContext()] = "matrix"; } catch (e) {} }
-  LEFT_KEY = null; paintLeft(); paintRight();
+  LEFT_KEY = null; TRACE_KEY = null; paintLeft(); paintTrace(); paintRight();   // trace repaints too: the selected turn's span band + tick highlight
 }
 // cross-highlight one phase across the left map + rail and the right table (shared data-phase spine):
 // emphasise the matching part, dim the rest; null clears.
@@ -481,7 +487,7 @@ function stepTurn(dir) {
   const i = cur == null ? -1 : seqs.indexOf(cur);
   const nxt = i < 0 ? seqs[0] : seqs[(i + (dir < 0 ? -1 : 1) + seqs.length) % seqs.length];
   TURN_PICK = { key: COURSE && COURSE.key, seq: nxt };
-  LEFT_KEY = null; paintLeft(); paintRight();
+  LEFT_KEY = null; TRACE_KEY = null; paintLeft(); paintTrace(); paintRight();
 }
 // the chip row never scrolls sideways: keep the chips that fit, count the rest
 function fitChips(row, total) {
@@ -543,7 +549,7 @@ function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
-  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0])
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, MODE.game === "event" ? LIVE.run.length : 0, turnPickSeq()])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -730,7 +736,7 @@ function courseTrace(c) {
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
   const onRec = (c.laps || []).length;
-  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""}</span>
+  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""} · ticks share the turn list's T numbers</span>
     <span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
@@ -743,13 +749,15 @@ function courseTrace(c) {
   const live = (MODE.game === "event") ? alignLiveToCourse(LIVE.run, fore, c) : null;
   const leg = stage2.slice(0, 12).map((t) => {
     const hid = sel.hidden.has(String(t.id));
-    const nt = notTimed(t); const off = best && !nt && t !== best && t.t ? ((t.t / best.t - 1) * 100).toFixed(1) + "% off" : "";
-    const col = t.void ? "#e3b341" : (t.partial || t._cov < 0.9) ? "var(--warn)" : t === cur ? "var(--acc2)" : t === best ? "#00d27a" : "var(--line2)";
-    const what = t === cur ? "you" : t === best ? "fastest" : "";
+    const nt = notTimed(t); const off = best && !nt && t !== best && t.t ? ((t.t / best.t - 1) * 100).toFixed(1) + "%" : "";
+    // swatch matches the lap's own polyline colour (its PI class); best is green, current is accent (spec 545-546)
+    const col = t.void ? "#e3b341" : (t.partial || t._cov < 0.9) ? "var(--warn)" : t === cur ? "var(--acc2)" : t === best ? "#00d27a" : piColor(t.class);
+    const lead = t === cur ? "you" : t === best ? "fastest" : off;   // always suffix the lap's class (spec)
+    const metaTxt = [lead, t.class ? esc(t.class) : ""].filter(Boolean).join(" · ");
     return `<button class="lchip ${hid ? "hid" : ""} ${t === cur ? "you" : t === best ? "best" : ""}" data-thide="${esc(String(t.id))}"
       style="--lc:${col}" title="${esc((hid ? "hidden — click to draw it" : "drawn — click to hide it") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">
       <i class="lcd"></i><span class="lct">${nt ? `<s>${lapTime(t.t)}</s>` : lapTime(t.t)}</span>
-      <span class="lcm">${what || off || (t.class ? esc(t.class) : "")}</span></button>`; }).join("");
+      <span class="lcm">${metaTxt}</span></button>`; }).join("");
   // in default mode the context lines are coloured by PI class -- show which classes are on the chart
   const clsPresent = [...new Set(match.map((t) => t.class).filter(Boolean))];
   if (TRACE_CLS_HI && !clsPresent.includes(TRACE_CLS_HI)) TRACE_CLS_HI = null;   // spotlight class fell out of view
@@ -778,7 +786,17 @@ function courseTrace(c) {
       return plainLine(t.pts, ch, piColor(t.class), w, op, notTimed(t));
     }).join("")
       + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE, piColor(cur.class)) : "");
-    const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)" opacity=".7"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${esc(turnLabel(t))}</text>`).join("");
+    const tsel = turnPickSeq();
+    // the selected turn: highlight its tick (accent, bold) + wash a translucent band over its stretch of the
+    // trace (from the midpoint to the previous turn to the midpoint to the next) so its extent reads at a glance
+    let band = "";
+    if (tsel != null) { const bt = (c.turns || []).find((t) => t.seq === tsel && t.s != null);
+      if (bt) { const ss = (c.turns || []).map((t) => t.s).filter((v) => v != null).sort((a, b) => a - b);
+        const i = ss.indexOf(bt.s), prev = i > 0 ? ss[i - 1] : Math.max(0, bt.s - 70), next = i < ss.length - 1 ? ss[i + 1] : bt.s + 70;
+        const bx0 = ch.px((bt.s + prev) / 2), bx1 = ch.px((bt.s + next) / 2);
+        band = `<rect x="${Math.min(bx0, bx1).toFixed(1)}" y="6" width="${Math.abs(bx1 - bx0).toFixed(1)}" height="${H - 22}" fill="var(--acc2)" opacity=".10"><title>${esc(turnLabel(bt))} extent</title></rect>`; } }
+    const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => { const on = t.seq === tsel;
+      return `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="${on ? "var(--acc2)" : "var(--line2)"}" stroke-width="${on ? 1.6 : 1}" opacity="${on ? 0.95 : 0.7}"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" font-weight="${on ? 700 : 400}" fill="${on ? "var(--acc2)" : "var(--dim)"}">${esc(turnLabel(t))}</text>`; }).join("");
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
     const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
     // THE ACTIVE LAP, on top and unmistakable: a soft accent glow under the grip-painted line, thicker than
@@ -788,7 +806,7 @@ function courseTrace(c) {
       <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity=".22" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
       ${paintedLine(live, ch, 3.2, TRACE_MODE, piColor(CUR && CUR.cls))}
       <circle cx="${ch.px(lp[0]).toFixed(1)}" cy="${ch.py(lp[1]).toFixed(1)}" r="4.5" fill="var(--acc2)" stroke="#04101c" stroke-width="1.4"><animate attributeName="r" values="4.5;6.8;4.5" dur="1.1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.5;1" dur="1.1s" repeatCount="indefinite"/></circle></g>` : "";
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${band}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
   };
   return { head, foot, svg, hasData: match.length > 0 };
 }
@@ -1339,7 +1357,7 @@ function paintHeader() {
       <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
       ${g.verdict ? `<div class="hverdict">${esc(g.verdict)}</div>` : ""}
       <div class="hgate">
-        <div class="gcell gstate" data-tone="${g.tone}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span></div>
+        <div class="gcell gstate" data-tone="${g.tone}" title="${esc(rs.hint || g.detail || "")}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span></div>
         <span class="garrow" data-w="${(g.tone === "bad" || g.tone === "warn" || g.sheet === "dead") ? "weak" : "strong"}"></span>
         ${g.sheet === "filled" ? "" : (c.primary
           ? `<button class="gprim" id="btnPrim" data-act="${esc(c.primary.act)}" data-fill="${fill}">${esc(c.primary.label)}</button>`
@@ -1465,7 +1483,7 @@ function paintLeft() {
   // the node mid-animation in free roam, and repainting every trace polyline on a course event-start pause).
   // Confirmed by a LEFT_KEY field-diff capture: an event->menu blip flipped ONLY `game` and forced a rebuild
   // with an otherwise-identical map. The course pill's EVENT/RIVALS label rides the next real rebuild.
-  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, turnPickSeq(), TURN_SORT]);
+  const key = JSON.stringify([!!course, course && COURSE.key, WORLD && Object.keys(WORLD.routes).length, MODE.suggest, TRACE_PICK && TRACE_PICK.ids && TRACE_PICK.ids.length, TRACE_PICK && TRACE_PICK.fore, ROUTE && ROUTE.id, turnPickSeq(), TURN_SORT, MAP_VIEW]);
   if (key === LEFT_KEY && body.querySelector("svg")) { addLiveDot(body); return; }
   LEFT_KEY = key; FOLLOW.span = null; FOLLOW.full = null;
   if (course) {
@@ -1487,40 +1505,23 @@ function paintLeft() {
       kindLabel: COURSE.rivals ? "RIVALS" : MODE.game === "event" ? "EVENT" : null,
       nameChip: nameChip(COURSE.naming),
     }, "course");
-    // A SELECTED TURN reframes the LEFT pane into that turn's full 5-part analysis (turnMap); nothing
-    // picked -> the whole-course map with clickable turn markers.
-    const _selT = turnPickSeq() != null ? (COURSE.turns || []).find((t) => t.seq === turnPickSeq() && t.seg) : null;
-    if (_selT) {
-      body.innerHTML = ""; body.append(turnMap(COURSE, _selT, activeLapSet()));
-      const bk = body.querySelector("[data-turnback]"); if (bk) bk.onclick = () => pickTurn(null);
-      body.querySelectorAll("[data-phase]").forEach((e) => {
-        e.addEventListener("mouseenter", () => hiPhase(e.dataset.phase));
-        e.addEventListener("mouseleave", () => hiPhase(null));
-      });
-      return;
-    }
+    // The LEFT pane ALWAYS shows the whole-course map + hero + turn list (Jett 2026-09-11). Selecting a turn
+    // only HIGHLIGHTS its marker + paints its phases on this map (courseMap's turnPick arg); the per-turn line
+    // trace + phase rail now live in the RIGHT pane beside that turn's stats (cornerMapHTML in turnStatsHTML).
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
     body.innerHTML = "";
     body.insertAdjacentHTML("beforeend", courseHeroHTML(COURSE, activeLapSet()));   // redesign phase A: the course hero above the map
-    body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq() }));
-    // courseMap() draws its own inline legend (shared with the v1 course page) — lift it into
-    // the floating drawer instead of leaving it inline, and unwrap the panel box around the svg
-    // so the map itself gets the space both were holding.
-    const legendNode = body.querySelector(".legend");
-    const legendHTML = legendNode ? legendNode.innerHTML : "";
-    if (legendNode) legendNode.remove();
-    const svgWrap = body.querySelector(".panel");
-    const mapSvg = body.querySelector("svg");
-    if (svgWrap && mapSvg && svgWrap !== body) { body.appendChild(mapSvg); svgWrap.remove(); }
     // COURSE VIEW IS STATIC: no follow-preview zoom here (Jett 2026-09-06). courseMap() fits the whole course
-    // to the pane; the adaptive zoom stays a free-view-only tool, so a course reads as one stable shape.
-    body.insertAdjacentHTML("beforeend", mapDrawerHTML(`<div class="legend">${legendHTML}</div>${mapFilterBar(COURSE)}`));
+    // to the pane and carries its own always-visible bottom-left legend (which houses the map-view toggle);
+    // the DATA filter is in the shared #coursefilter bar, not here.
+    body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq(), view: MAP_VIEW }));
     body.insertAdjacentHTML("beforeend", turnTableHTML(COURSE, activeLapSet()));   // redesign phase B: the sortable turn list
-    wireTrace(body); wireMapDrawer(body); addLiveDot(body);
+    wireTrace(body); addLiveDot(body);
     // a turn marker OR a turn-list row selects that turn (highlight its phases here, full stats on the
     // right); the SVG/list is rebuilt on select, so re-bind every paint. Clicking the selected one clears.
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
     body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
   } else {
     paintLeftHeader();
     body.innerHTML = worldMapHTML();
@@ -1578,7 +1579,10 @@ function courseHeroHTML(c, ls) {
   const medLap = med(timed.map((l) => l.t));
   const bestLap = timed.length ? timed.reduce((m, l) => l.t < m.t ? l : m) : null;
   let climb = null;
-  const tr = Object.values(c.traces || {}).sort((a, b) => b.length - a.length)[0];
+  // climb must respect the SAME active lap set as median/best (Jett 2026-09-11) — pick the longest trace
+  // among the filtered laps only, never across every lap on record.
+  const tr = laps.map((l) => c.traces && c.traces[l.id]).filter(Boolean).sort((a, b) => b.length - a.length)[0]
+    || Object.values(c.traces || {}).sort((a, b) => b.length - a.length)[0];
   if (tr && tr.length) { const es = tr.map((p) => p[5]).filter((v) => v != null); if (es.length) climb = Math.round(Math.max(...es) - Math.min(...es)); }
   const byCls = {}; laps.forEach((l) => { if (l.class) byCls[l.class] = (byCls[l.class] || 0) + 1; });
   const classes = Object.keys(byCls).sort((a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
@@ -1589,7 +1593,9 @@ function courseHeroHTML(c, ls) {
   const measured = turns.length, catalogued = c.n_turns_catalogued;
   const unmeasured = catalogued != null ? Math.max(0, catalogued - measured) : null;
   const stat = (v, lab) => `<span class="ch-s"><b>${v}</b><em>${lab}</em></span>`;
+  const liveLap = (MODE.game === "event" && LIVE.frame && LIVE.frame.lapn != null) ? LIVE.frame.lapn : null;
   return `<div class="chero">
+    ${liveLap != null ? `<div class="ch-live"><i></i>event · lap ${liveLap}<em>turn-by-turn live</em></div>` : ""}
     <div class="ch-stats">
       ${stat(medLap != null ? lapTime(medLap) : "—", "median")}
       ${stat(bestLap ? lapTime(bestLap.t) : "—", bestLap ? "best · " + esc(carShort(bestLap.cid)) : "best")}
@@ -1598,6 +1604,7 @@ function courseHeroHTML(c, ls) {
     </div>
     ${classes.length ? `<div class="ch-cls"><span class="why">laps by class</span>${classes.map((cl) => classPill(cl, byCls[cl])).join("")}<span class="why">· ${laps.length} lap${laps.length === 1 ? "" : "s"} · ${nCars} car${nCars === 1 ? "" : "s"}</span></div>` : ""}
     <div class="ch-conf"><span class="ch-dot ok"></span>${strong} on 13+ laps · <span class="ch-dot w"></span>${weak} need${weak === 1 ? "s" : ""} more${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} never driven` : ""}</div>
+    <div class="ch-note">turn geometry from the game's own centre-line</div>
   </div>`;
 }
 // SHARED per-turn aggregate over the active lap set — the "statistics infrastructure" the turn table,
@@ -1614,6 +1621,9 @@ function turnAgg(t, ls) {
   return { t, n: Object.keys(byLap).length, phases, turnT: med, bestT: best, avail: (med != null && best != null) ? med - best : null };
 }
 let TURN_SORT = (() => { try { return localStorage.getItem("fh6TurnSort") || "find"; } catch (e) { return "find"; } })();
+// MAP_VIEW: how the left course map colours its traces — "laptime" (each lap by its recorded time, a gradient)
+// or "phases" (the whole road painted by the 5-phase turn model). Toggled from the map's floating legend.
+let MAP_VIEW = (() => { try { return localStorage.getItem("fh6MapView") || "laptime"; } catch (e) { return "laptime"; } })();
 // THE TURN LIST (redesign · phase B): every measured turn enumerated on the LEFT, sortable by route
 // order or by TIME TO FIND (biggest opportunity first — the default). Each row: turn + kind, the five
 // phase apex-mph medians, the median time in the turn, and the seconds available vs your best line.
@@ -1625,19 +1635,30 @@ function turnTableHTML(c, ls) {
   else aggs.sort((a, b) => (a.t.seq || 0) - (b.t.seq || 0));
   const sel = turnPickSeq();
   const totFind = aggs.reduce((s, a) => s + (a.avail || 0), 0);
-  const ph = (a, n) => { const p = a.phases.find((x) => x.n === n).p; return `<td class="mono" title="${esc(SEG_LABEL[n])} apex mph">${p && p.min != null ? p.min : "·"}</td>`; };
-  const rows = aggs.map((a) => `<tr class="ttr${sel === a.t.seq ? " on" : ""}" data-turn="${a.t.seq}" title="${a.n} lap${a.n === 1 ? "" : "s"}">
-    <td class="tt-lbl"><b>${esc(turnLabel(a.t))}</b> <span class="why">${esc(a.t.kind || "")}${a.t.dir ? " " + (a.t.dir === "L" ? "L" : "R") : ""}</span></td>
+  const maxFind = Math.max(0.01, ...aggs.map((a) => a.avail || 0));
+  const SHORT = { braking: "brake", turn_in: "turn-in", mid: "mid", exit: "exit", straight: "straight" };
+  const findInk = (v) => v == null ? "var(--dim)" : v > 0.6 ? "#f0616d" : v > 0.35 ? "#e3b341" : "var(--mut)";
+  // each phase cell: apex-mph value, a grip-mix mini-bar, and a 3px phase-colour underline (SEG_COL = WHERE)
+  const ph = (a, n) => { const p = a.phases.find((x) => x.n === n).p;
+    const bar = p && p.mix ? gripBar(p.mix) : `<span class="gbar gbar--empty"></span>`;
+    return `<td class="tt-ph" title="${esc(SEG_LABEL[n])} apex mph${p && p.time != null ? " · " + p.time.toFixed(1) + " s" : ""}"><span class="tt-phv mono">${p && p.min != null ? p.min : "·"}</span>${bar}<span class="tt-phu" style="background:${SEG_COL[n]}"></span></td>`; };
+  const rows = aggs.map((a) => { const t = a.t, dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
+    const ink = findInk(a.avail), pct = Math.round((a.avail || 0) / maxFind * 100);
+    return `<tr class="ttr${sel === t.seq ? " on" : ""}" data-turn="${t.seq}" title="${a.n} lap${a.n === 1 ? "" : "s"}">
+    <td class="tt-lbl"><div class="tt-lname"><b>${esc(turnLabel(t))}</b> <span class="why">${esc(cap1(t.kind || "") + (dirW ? " " + dirW : ""))}</span></div>
+      <div class="tt-geo mono">${t.r != null ? Math.round(t.r) + " m" : ""}${t.deg != null ? " · " + Math.round(t.deg) + "°" : ""} · ${a.n} lap${a.n === 1 ? "" : "s"}</div></td>
     ${SEG_ORDER.map((n) => ph(a, n)).join("")}
-    <td class="mono">${a.turnT != null ? a.turnT.toFixed(2) : "—"}</td>
-    <td class="mono tt-find">${a.avail ? "+" + a.avail.toFixed(2) : "—"}</td></tr>`).join("");
+    <td class="mono tt-in">${a.turnT != null ? a.turnT.toFixed(1) + "s" : "—"}</td>
+    <td class="tt-find2"><b class="mono" style="color:${ink}">${a.avail ? "+" + a.avail.toFixed(2) : "—"}</b><span class="tt-findbar"><i style="width:${pct}%;background:${ink}"></i></span></td></tr>`; }).join("");
   const sortBtn = (k, lbl) => `<button class="mini${TURN_SORT === k ? " on" : ""}" data-tsort="${k}">${lbl}</button>`;
-  return `<div class="grp"><div class="gh">Turns <span class="why">· ${esc(ls.label)} · click a turn</span>
+  const measured = (c.turns || []).length, catalogued = c.n_turns_catalogued;
+  const sortWhy = TURN_SORT === "find" ? "ranked by the time available vs your best lap" : "route order · click any turn, or its number on the map";
+  return `<div class="grp"><div class="gh">${measured}${catalogued != null ? " of " + catalogued : ""} turns measured <span class="why">· ${esc(sortWhy)}</span>
       <span class="ttsort"><span class="why">sort</span>${sortBtn("route", "route order")}${sortBtn("find", "time to find")}</span></div>
     <div class="tt-wrap"><table class="tt"><thead><tr><th>turn</th>
-      ${SEG_ORDER.map((n) => `<th title="${esc(SEG_LABEL[n])} apex mph"><span class="pdot" style="background:${SEG_COL[n]}"></span></th>`).join("")}
-      <th title="median time through the turn">in</th><th title="seconds to find vs your best line">find</th></tr></thead>
-      <tbody>${rows}</tbody>${totFind > 0.05 ? `<tfoot><tr><td colspan="6">total time to find</td><td></td><td class="mono tt-find">+${totFind.toFixed(2)}</td></tr></tfoot>` : ""}</table></div></div>`;
+      ${SEG_ORDER.map((n) => `<th class="tt-phh" title="${esc(SEG_LABEL[n])} apex mph"><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SHORT[n])}</th>`).join("")}
+      <th title="median time through the turn">in turn</th><th title="seconds to find vs your best line">to find</th></tr></thead>
+      <tbody>${rows}</tbody>${totFind > 0.05 ? `<tfoot><tr><td colspan="7">total time to find</td><td class="mono tt-find">+${totFind.toFixed(2)}</td></tr></tfoot>` : ""}</table></div></div>`;
 }
 function courseInfoPill(r, state) {
   const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));
@@ -1686,7 +1707,7 @@ function courseInfoPill(r, state) {
   return `<div class="cpill${hasStats ? " has-stats" : ""}" data-state="${esc(state)}">
     <span class="cpill-glyph">${tileSvg(r, false)}</span>
     <span class="cpill-txt">
-      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${r.nameChip || ""}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${stChip}${hasStats ? `<i class="cps-caret" title="lap breakdown by class and car">▾</i>` : ""}</span>
+      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${r.id != null ? `<span class="cpill-rid mono" title="catalogued route id">route ${esc(String(r.id))}${r.disc ? " · " + esc(r.disc) : ""}</span>` : ""}${r.nameChip || ""}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${stChip}${hasStats ? `<i class="cps-caret" title="lap breakdown by class and car">▾</i>` : ""}</span>
       <span class="why cpill-l2" title="${esc(metaS)}">${esc(metaS)}</span>
       <span class="cpill-badges">${pills}${badges}</span>
     </span>
@@ -2588,20 +2609,35 @@ function gripRead(mix) {
   if ((mix[0] || 0) >= 0.8 || bv < 0.1) return `mostly within grip (${calm}% of samples)`;
   return `${calm}% within grip · ${DGRIP[GSTATE[bi]].word} ${Math.round(bv * 100)}%`;
 }
-// LEFT PANE — the selected turn's FULL 5-PART ANALYSIS, zoomed to fill the pane. The 5 parts are drawn in
-// the WHERE palette (SEG_COL) ONLY -- colour here is structure, never grip -- with the apex ringed, a travel
-// chevron, entry/apex/exit speeds pinned, and a phase-time rail whose cell widths ARE the median seconds in
-// each part, filled with that part's grip distribution. "‹ course" returns to the whole-course map.
-function turnMap(c, t, ls) {
+// RIGHT PANE — "the corner, phase by phase": the selected turn's line trace zoomed to fill the width, drawn
+// in the WHERE palette (SEG_COL) ONLY -- colour here is structure, never grip -- with the apex ringed, a
+// travel chevron, entry/apex/exit speeds pinned, and a phase-time rail whose cell widths ARE the median
+// seconds in each part, each cell carrying its representative mph and filled with that part's grip
+// distribution. Returns an HTML STRING (a labelled .grp section) so turnStatsHTML can compose it inline; the
+// course map stays on the LEFT at all times (Jett 2026-09-11 — the per-turn map belongs beside its stats).
+function cornerMapHTML(c, t, ls) {
   const segs = t.seg || {};
   const phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
+  const ghd = `<div class="gh">The corner, phase by phase <span class="why">· colour = where you are · fill = what the tyres did</span></div>`;
   let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
   phases.forEach((n) => segs[n].forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
   if (t.x != null) { x0 = Math.min(x0, t.x); x1 = Math.max(x1, t.x); z0 = Math.min(z0, t.z); z1 = Math.max(z1, t.z); }
-  if (!isFinite(x0)) return el(`<div class="turnview"><div class="tv-hd"><button class="mini" data-turnback>‹ course</button><b>${esc(turnLabel(t))}</b></div><div class="why" style="padding:14px">no phase geometry for this turn</div></div>`);
+  const ag = (n) => phaseAgg(t.phaseObs && t.phaseObs[n], ls.set);
+  const aggs = SEG_ORDER.map((n) => ({ n, p: ag(n) }));
+  const maxT = Math.max(0.1, ...aggs.map((a) => (a.p && a.p.time) || 0));
+  const rail = aggs.map(({ n, p }) => {
+    const w = p && p.time ? Math.max(7, (p.time / maxT) * 100) : 7;
+    const inner = p && p.mix ? gripBar(p.mix) : `<span class="gbar gbar--empty"></span>`;
+    const mph = p && p.min != null ? `<em class="trail-mph">${Math.round(p.min)} mph</em>` : "";
+    return `<div class="trail-c" style="flex:${w} 1 0" data-phase="${n}" title="${esc(SEG_LABEL[n])} · ${p && p.time != null ? p.time + " s · " + gripRead(p.mix) : "no data"}">
+      <span class="trail-lbl" style="color:${SEG_COL[n]}">${esc(SEG_LABEL[n].split(/[ /]/)[0].toLowerCase())}</span>
+      <span class="trail-t"><b>${p && p.time != null ? p.time.toFixed(1) + "s" : "—"}</b>${mph}</span>${inner}</div>`;
+  }).join("");
+  const trailBox = `<div class="trail" title="each part's width = median seconds spent in it · fill = its grip mix">${rail}</div>`;
+  if (!isFinite(x0)) return `<div class="grp tstat-corner">${ghd}<div class="why" style="padding:10px 6px">no phase geometry for this turn yet</div>${trailBox}</div>`;
   const dx = (x1 - x0) || 40, dz = (z1 - z0) || 40, pf = 0.3;
   x0 -= dx * pf; x1 += dx * pf; z0 -= dz * pf; z1 += dz * pf;
-  const pad = 16, H = 300, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
+  const pad = 16, H = 260, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
   const W = Math.max(300, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
   const px = (x) => pad + (x - x0) * s, py = (z) => H - pad - (z - z0) * s;
@@ -2617,7 +2653,6 @@ function turnMap(c, t, ls) {
     const ang = Math.atan2(py(b[1]) - py(a[1]), px(b[0]) - px(a[0])) * 180 / Math.PI;
     chev = `<g transform="translate(${px(b[0]).toFixed(1)},${py(b[1]).toFixed(1)}) rotate(${ang.toFixed(1)})"><path d="M-6,-4 L3,0 L-6,4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>`;
   }
-  const ag = (n) => phaseAgg(t.phaseObs && t.phaseObs[n], ls.set);
   const pillAt = (pt, val, bold) => pt ? `<g transform="translate(${px(pt[0]).toFixed(1)},${py(pt[1]).toFixed(1)})"><rect x="-19" y="-9" width="38" height="18" rx="4" fill="#0b0e12" opacity=".85"/><text x="0" y="4" text-anchor="middle" font-size="${bold ? 11 : 9.5}" font-weight="${bold ? 700 : 600}" fill="#fff">${val}</text></g>` : "";
   const midOf = (n) => { const a = segs[n]; return a && a.length ? a[a.length >> 1] : null; };
   const brP = ag("braking"), mdP = ag("mid"), exP = ag("exit");
@@ -2626,22 +2661,8 @@ function turnMap(c, t, ls) {
     mdP && mdP.min != null ? pillAt(midOf("mid"), mdP.min, true) : "",
     exP && exP.exit != null && segs.exit ? pillAt(segs.exit[segs.exit.length - 1], exP.exit) : "",
   ].join("");
-  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg);border-radius:6px;width:100%;max-height:52vh">${ctx}${ph}${apex}${chev}${pills}</svg>`;
-  const aggs = SEG_ORDER.map((n) => ({ n, p: ag(n) }));
-  const maxT = Math.max(0.1, ...aggs.map((a) => (a.p && a.p.time) || 0));
-  const rail = aggs.map(({ n, p }) => {
-    const w = p && p.time ? Math.max(7, (p.time / maxT) * 100) : 7;
-    const inner = p && p.mix ? gripBar(p.mix) : `<span class="gbar gbar--empty"></span>`;
-    return `<div class="trail-c" style="flex:${w} 1 0" data-phase="${n}" title="${esc(SEG_LABEL[n])} · ${p && p.time != null ? p.time + " s · " + gripRead(p.mix) : "no data"}">
-      <span class="trail-lbl" style="color:${SEG_COL[n]}">${esc(SEG_LABEL[n].split(/[ /]/)[0].toLowerCase())}</span>
-      <span class="trail-t">${p && p.time != null ? p.time.toFixed(1) + "s" : "—"}</span>${inner}</div>`;
-  }).join("");
-  const legend = `<div class="legend tv-lg"><span class="why">the 5 parts (where you are in the corner) — colour is structure, not grip:</span>${phases.map((n) => `<span><i style="background:${SEG_COL[n]}"></i>${esc(SEG_LABEL[n])}</span>`).join("")}</div>`;
-  return el(`<div class="turnview">
-    <div class="tv-hd"><button class="mini" data-turnback title="back to the whole course">‹ course</button><b>${esc(turnLabel(t))}</b><span class="why">${t.kind ? esc(t.kind) + " · " : ""}${esc(ls.label)}</span></div>
-    ${svg}
-    <div class="trail" title="each part's width = median seconds spent in it · fill = its grip mix">${rail}</div>
-    ${legend}</div>`);
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${apex}${chev}${pills}</svg>`;
+  return `<div class="grp tstat-corner">${ghd}${svg}${trailBox}</div>`;
 }
 // RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active
 // preset's laps and carries its lap count; grip is always the distribution, never a lone word.
@@ -2678,7 +2699,8 @@ function turnStatsHTML(t, ls) {
   const dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
   const geo = [t.kind && cap1(t.kind) + (dirW ? " " + dirW : ""), t.r != null && Math.round(t.r) + " m radius",
     t.deg != null && Math.round(t.deg) + "°", t.width != null && (+t.width).toFixed(1) + " m wide",
-    t.bank != null && (Math.abs(t.bank) < 1.5 ? "flat" : "banked " + Math.abs(Math.round(t.bank)) + "°")].filter(Boolean).join(" · ");
+    t.bank != null && (Math.abs(t.bank) < 1.5 ? "flat" : "banked " + Math.abs(Math.round(t.bank)) + "°"),
+    t.s != null && "apex " + Math.round(t.s) + " m", nLaps ? nLaps + " lap" + (nLaps === 1 ? "" : "s") : "not timed yet"].filter(Boolean).join(" · ");
   const header = `<div class="gh tstat-h"><b>${esc(turnLabel(t))}</b><span class="why">${esc(geo)}</span>
     <span class="tstat-nav"><button class="mini" data-turnstep="prev" title="previous turn">‹</button><button class="mini" data-turnstep="next" title="next turn">›</button><button class="mini" data-turnclear title="clear selection">✕</button></span></div>`;
   if (!nLaps) return `<div class="tstat">${header}<div class="why" style="padding:8px 6px">no timed laps through this turn in ${esc(ls.label)} — widen the filter or drive it</div></div>`;
@@ -2689,25 +2711,44 @@ function turnStatsHTML(t, ls) {
   let worst = null; cmp.forEach((r) => { if (r.best != null) { const d = r.typ - r.best; if (!worst || d > worst.d) worst = { n: r.n, d }; } });
   const findTotal = cmp.reduce((s, r) => s + (r.best != null ? Math.max(0, r.typ - r.best) : 0), 0);
 
-  // ---- TIMING: one summary line (the where-the-time-goes card owns the "to find" breakdown below)
-  const timing = `<div class="tstat-sum"><b>${medTurnT.toFixed(2)} s</b> typical${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of the lap` : ""}` +
-    `${best ? ` · fastest <b style="color:var(--acc)">${best.turnT.toFixed(2)} s</b>` : ""}${findTotal > 0.02 ? ` · <b class="tt-find">+${findTotal.toFixed(2)} s to find</b>` : ""}</div>`;
-
-  // ---- DIAGNOSIS: what the detectors flagged on THIS turn, worst first (route_key + turn_id match)
+  // ---- DIAGNOSIS: ONE verdict card (the worst detector row on THIS turn), tone-coloured; a green
+  // "nothing to change" card when nothing fired. route_key + turn_id match against the detector output.
   const dxRows = (DIAG && DIAG.by_turn ? DIAG.by_turn : [])
     .filter((r) => r.route_key === COURSE.key && (r.turn_id === t.turn_id || r.turn_id === t.id))
     .sort((a, b) => (b.occurrences * (b.mean_severity || 0.5)) - (a.occurrences * (a.mean_severity || 0.5)));
-  const diag = dxRows.length ? `<div class="grp"><div class="gh">Diagnosis <span class="why">· what goes wrong here</span></div>
-    ${dxRows.slice(0, 3).map((r) => `<div class="frow"><div class="fl"><b>${esc(r.symptom)}</b><span class="why">${esc(r.phase || "")} · ${r.occurrences} on ${r.laps_affected} lap${r.laps_affected === 1 ? "" : "s"}</span></div>
-      <div class="fr">${r.primary_fix ? `<span class="chip b">${esc(r.primary_fix)}</span>` : ""}</div></div>`).join("")}</div>` : "";
+  const diag = (() => {
+    if (!dxRows.length) return `<div class="grp"><div class="dxcard dxcard--ok">
+      <div class="dx-top"><span class="dx-lbl">diagnosis</span><span class="dx-conf ok">measured · ${nLaps} lap${nLaps === 1 ? "" : "s"}</span></div>
+      <div class="dx-head" style="color:var(--acc)">Nothing to change here</div>
+      <div class="dx-fix">Every phase reads within grip across the drawn laps — the corner isn't costing the tune anything.</div>
+      <div class="dx-ev">${esc(gripRead(turnMix))}</div></div></div>`;
+    const r = dxRows[0], sev = r.mean_severity || 0.5, tone = sev >= 0.6 ? "#f0616d" : "#e3b341", enough = r.laps_affected >= 5;
+    return `<div class="grp"><div class="dxcard" style="border-left-color:${tone}">
+      <div class="dx-top"><span class="dx-lbl">diagnosis</span>${r.phase ? `<span class="dx-rule" style="border-color:${tone};color:${tone}">${esc(r.phase)}</span>` : ""}
+        <span class="dx-conf ${enough ? "ok" : "weak"}">${enough ? "measured · " + r.laps_affected + " laps" : "need more · " + r.laps_affected + " of 5 laps"}</span></div>
+      <div class="dx-head" style="color:${tone}">${esc(r.symptom)}</div>
+      ${r.primary_fix ? `<div class="dx-fix">${esc(r.primary_fix)}</div>` : ""}
+      <div class="dx-ev">${r.occurrences} occurrence${r.occurrences === 1 ? "" : "s"} on ${r.laps_affected} lap${r.laps_affected === 1 ? "" : "s"}${dxRows.length > 1 ? " · +" + (dxRows.length - 1) + " more flagged" : ""}</div></div></div>`;
+  })();
 
-  // ---- WHERE THE TIME GOES: per-phase typical vs your best line, biggest gap flagged (the "to find")
-  const wtg = cmp.some((r) => r.best != null) ? `<div class="grp"><div class="gh">Where the time goes <span class="why">· typical vs your best line</span></div>
-    <table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best</th><th>Δ s</th></tr></thead><tbody>
-    ${cmp.map((r) => { const d = r.best != null ? r.typ - r.best : null; const flag = worst && worst.n === r.n && worst.d > 0.03;
+  // ---- WHERE THE TIME GOES: the headline turn-time figure + available, the fastest/most-time verdict, a
+  // per-phase time-budget bar, and the typical-vs-best table (5th column visualises each phase's gap).
+  const hasBest = cmp.some((r) => r.best != null);
+  const maxD = Math.max(0.01, ...cmp.map((r) => r.best != null ? Math.max(0, r.typ - r.best) : 0));
+  const budgetSegs = aggs.filter((a) => a.p && a.p.time).map(({ n, p }) =>
+    `<span class="bud-seg" style="flex:${Math.round(p.time * 100)} 0 0;background:${SEG_COL[n]}" title="${esc(SEG_LABEL[n])} · ${p.time.toFixed(2)} s">${p.time >= 0.5 ? `<i>${p.time.toFixed(1)}</i>` : ""}</span>`).join("");
+  const figs = `<div class="wtg-figs"><b class="wtg-big">${medTurnT.toFixed(1)}<span>s</span></b>
+    <span class="why">typical${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of the ${lapTime(medLapT)} lap` : ""}</span>
+    ${hasBest && findTotal > 0.02 ? `<b class="wtg-avail">+${findTotal.toFixed(2)} s</b><span class="why">available</span>` : ""}</div>`;
+  const verdict = `<div class="wtg-verdict">${best ? `fastest pass <b style="color:var(--acc)">${best.turnT.toFixed(2)} s</b>` : ""}${biggest ? ` · most time in <b style="color:${SEG_COL[biggest.n]}">${esc(SEG_LABEL[biggest.n])}</b>` : ""}</div>`;
+  const cmpTable = hasBest ? `<table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best lap</th><th>Δ s</th><th>where it goes</th></tr></thead><tbody>
+    ${cmp.map((r) => { const d = r.best != null ? r.typ - r.best : null; const flag = worst && worst.n === r.n && worst.d > 0.03; const pct = d != null && d > 0 ? Math.round(d / maxD * 100) : 0;
       return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>
-        <td class="mono">${r.typ.toFixed(2)}</td><td class="mono">${r.best != null ? r.best.toFixed(2) : "—"}</td>
-        <td class="mono tt-find">${d != null ? (d > 0 ? "+" : "") + d.toFixed(2) : "—"}</td></tr>`; }).join("")}</tbody></table></div>` : "";
+        <td class="mono">${r.typ.toFixed(2)}</td><td class="mono dim">${r.best != null ? r.best.toFixed(2) : "—"}</td>
+        <td class="mono" style="color:${d != null && d > 0.05 ? "#e3b341" : "var(--mut)"};font-weight:700">${d != null ? (d > 0 ? "+" : "") + d.toFixed(2) : "—"}</td>
+        <td><span class="wig"><i style="width:${pct}%;background:${SEG_COL[r.n]}"></i></span></td></tr>`; }).join("")}</tbody></table>` : "";
+  const wtg = `<div class="grp tstat-wtg"><div class="gh">Where the time goes${hasBest && best ? ` <span class="why">· typical vs your best lap (${lapTime(best.lapT)})</span>` : ""}</div>
+    ${figs}${verdict}${budgetSegs ? `<div class="budget" title="each segment = median seconds in that phase">${budgetSegs}</div>` : ""}${cmpTable}</div>`;
 
   // ---- THE LEADERBOARD: passes fastest-first; each phase cell = apex mph, coloured by grip
   const SHORT = { braking: "brake", turn_in: "turn-in", mid: "mid", exit: "exit", straight: "straight" };
@@ -2723,12 +2764,14 @@ function turnStatsHTML(t, ls) {
   const board = `<div class="grp"><div class="gh">Fastest passes <span class="why">· ${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · phase = apex mph, coloured by grip</span></div>
     <div class="tlb-wrap"><table class="tlb"><thead><tr><th></th><th>lap</th><th>car</th><th title="time through the turn">turn s</th>${phHead}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
 
-  // ---- GRIP: one whole-turn bar (per-phase grip already reads from the leaderboard cell colours)
+  // ---- GRIP: one whole-turn bar; the legend carries each state's share of samples (turnMix)
   const gripCard = `<div class="grp"><div class="gh">Grip through the turn <span class="why">· share of samples · ${esc(ls.label)}</span></div>
     <div class="tstat-gread">${gripBar(turnMix, "gbar--lg")}<span class="tstat-gword">${esc(gripRead(turnMix))}</span></div>
-    <div class="ballegend gleg">${GSTATE.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}</span>`).join("")}</div></div>`;
+    <div class="ballegend gleg">${GSTATE.map((k, i) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}${turnMix ? ` <b class="mono dim">${Math.round((turnMix[i] || 0) * 100)}%</b>` : ""}</span>`).join("")}</div>
+    <div class="tstat-foot">medians over ${nLaps} lap${nLaps === 1 ? "" : "s"} in ${esc(ls.label)} · phase spans from the game's centre-line · every figure carries its lap count</div></div>`;
 
-  return `<div class="tstat">${header}${timing}${diag}${wtg}${board}${gripCard}</div>`;
+  const cornerMap = cornerMapHTML(COURSE, t, ls);   // the per-turn line trace + phase-time rail, now in THIS (right) pane
+  return `<div class="tstat">${header}${diag}${wtg}${cornerMap}${board}${gripCard}</div>`;
 }
 function cap1(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function matrixHTML() {
@@ -3020,12 +3063,26 @@ function paintFooter() {
     cov = `<span class="cov"><span class="why">coverage</span><span class="bar"><i style="width:${pct}%"></i></span>
       <span class="mono">${laps}/${need} laps</span>${laps < need ? '<span class="chip w">not yet outlier-proof</span>' : '<span class="chip on">baseline ready</span>'}</span>`;
   }
-  f.innerHTML = `
-    <span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${MODE.known ? esc(MODE.suggest) + (MODE.held ? " (held)" : "") : "—, waiting"}</span>
-    <span class="why">${esc(MODE.reason || "")}</span>
-    <span class="chip">baseline · ${BASELINE ? esc(BASELINE.name || BASELINE.container) : "none"}</span>
-    ${cov}
-    <span class="why" style="margin-left:auto">status · ${esc(st.label)}</span>`;
+  // LEFT: the live glance — a LIVE dot, the compact mph/gear/lat-g readout, and the next-turn hint (spec 390-393)
+  const fr = LIVE.frame, liveOn = !!(LIVE.receiving && fr && fr.on);
+  const g = fr ? (fr.gear === 0 ? "N" : fr.gear === 11 ? "⇅" : fr.gear) : "—";
+  let nextUp = "";
+  if (MODE.suggest === "course" && COURSE && (COURSE.turns || []).length) {
+    const seqs = COURSE.turns.map((t) => t.seq).filter((s) => s != null).sort((a, b) => a - b);
+    if (seqs.length) { const cur = turnPickSeq(), i = cur == null ? -1 : seqs.indexOf(cur);
+      const nt = COURSE.turns.find((t) => t.seq === (i < 0 ? seqs[0] : seqs[(i + 1) % seqs.length]));
+      if (nt) { const mid = phaseAgg((nt.phaseObs || {}).mid, activeLapSet().set);
+        nextUp = `${turnLabel(nt)} next${mid && mid.min != null ? " · " + mid.min + " mph typical apex" : ""}`; } }
+  }
+  const liveRead = liveOn
+    ? `<span class="ftr-live"><i></i>LIVE</span><span class="mono ftr-tel">${fx(fr.mph, 0)} mph · ${esc(String(g))} · ${fx(fr.lat, 2)} lat g</span>${nextUp ? `<span class="why ftr-next">${esc(nextUp)}</span>` : ""}`
+    : `<span class="ftr-live off"><i></i>idle</span><span class="why">${esc(MODE.reason || "not driving")}</span>`;
+  f.innerHTML = `${liveRead}
+    <span class="ftr-right">
+      <span class="why">status · ${esc(st.label)}</span>${cov}
+      <span class="chip ${MODE.suggest === "course" ? "on" : ""}">mode · ${MODE.known ? esc(MODE.suggest) + (MODE.held ? " (held)" : "") : "—, waiting"}</span>
+      <span class="chip">baseline · ${BASELINE ? esc(BASELINE.name || BASELINE.container) : "none"}</span>
+    </span>`;
 }
 
 /* ------------------------------------------------------- the rim rule */

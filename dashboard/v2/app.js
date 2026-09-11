@@ -314,10 +314,24 @@ function robustBounds(paths) {
 // foregrounded lap solid, and says how many it drew.
 function courseMap(c, opts) {
   opts = opts || {};
-  const ids = opts.laps && opts.laps.length ? opts.laps : Object.keys(c.traces || {});
-  const paths = ids.map((id) => (c.traces || {})[id]).filter((t) => t && t.length > 2)
-                   .map((t) => t.map((q) => [q[3], q[4]]).filter((q) => q[0] != null));
-  const foreIx = opts.fore != null ? ids.indexOf(String(opts.fore)) : -1;
+  const ids = opts.laps && opts.laps.length ? opts.laps.map(String) : Object.keys(c.traces || {});
+  const lapT = {}; (c.laps || []).forEach((l) => { if (l.t != null) lapT[String(l.id)] = l.t; });
+  // keep each driven path with its lap id: it lets a path be coloured by its own lap time, and fixes a
+  // latent bug where foreIx indexed `ids` but the drawn set was a FILTERED copy (misaligned foreground).
+  const pathRows = ids.map((id) => ({ id: String(id), pts: (c.traces || {})[id] }))
+    .filter((r) => r.pts && r.pts.length > 2)
+    .map((r) => ({ id: r.id, pts: r.pts.map((q) => [q[3], q[4]]).filter((q) => q[0] != null) }));
+  const paths = pathRows.map((r) => r.pts);
+  const foreIx = opts.fore != null ? pathRows.findIndex((r) => r.id === String(opts.fore)) : -1;
+  // LAP-TIME GRADIENT (Jett 2026-09-11): each drawn lap's trace is coloured across the drawn set —
+  // green (fastest) through amber to red (slowest) — so the map reads at a glance which lines are quick.
+  const _dt = pathRows.map((r) => lapT[r.id]).filter((v) => v != null);
+  const tmin = _dt.length ? Math.min(..._dt) : 0, tmax = _dt.length ? Math.max(..._dt) : 1;
+  const _lp = (a, b, f) => Math.round(a + (b - a) * f);
+  const heat = (f) => { f = Math.max(0, Math.min(1, f));
+    const s = f < 0.5 ? [[0, 210, 122], [227, 179, 65], f / 0.5] : [[227, 179, 65], [240, 97, 109], (f - 0.5) / 0.5];
+    return `rgb(${_lp(s[0][0], s[1][0], s[2])},${_lp(s[0][1], s[1][1], s[2])},${_lp(s[0][2], s[1][2], s[2])})`; };
+  const gcol = (id) => { const t = lapT[id]; return (t == null || tmax <= tmin) ? "#00d27a" : heat((t - tmin) / (tmax - tmin)); };
   const ours = c.path || [];
   const theirs = (c.route && c.route.path) || [];
   if (!ours.length && !theirs.length) return el(`<div class="panel why">no geometry for this course</div>`);
@@ -343,7 +357,7 @@ function courseMap(c, opts) {
   const SL = (typeof SEG_LABEL !== "undefined") ? SEG_LABEL : {};
   const phaseOv = (selT && selT.seg) ? SO.map((name) => {
     const pp = selT.seg[name]; if (!pp || pp.length < 2) return "";
-    return `<polyline fill="none" stroke="${SC[name] || "#888"}" stroke-width="6" stroke-linecap="round"
+    return `<polyline data-phase="${name}" fill="none" stroke="${SC[name] || "#888"}" stroke-width="6" stroke-linecap="round"
         stroke-linejoin="round" opacity=".95" points="${pp.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}">
         <title>${esc(turnLabel(selT))} · ${esc(SL[name] || name)}</title></polyline>`;
   }).join("") : "";
@@ -364,20 +378,40 @@ function courseMap(c, opts) {
   }).join("");
   const phaseKey = (selT && selT.seg) ? SO.filter((n) => selT.seg[n]).map((n) =>
     `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("") : "";
-  return el(`<div class="panel" style="margin-top:12px">
-    <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
+  // VIEW MODES (Jett 2026-09-11): the floating legend switches how the map is coloured. `laptime`
+  // paints each lap's trace by its recorded time (gradient above); `phases` paints the whole road by
+  // the five-phase turn model — every turn's own seg geometry along the centre-line, no lap traces.
+  const view = opts.view || "laptime";
+  const showPhases = view === "phases" && !selT;
+  const allPhaseOv = SO.map((name) => (c.turns || []).map((t) => {
+    const pp = t.seg && t.seg[name]; if (!pp || pp.length < 2) return "";
+    return `<polyline fill="none" stroke="${SC[name] || "#888"}" stroke-width="5" stroke-linecap="round"
+        stroke-linejoin="round" opacity=".92" points="${pp.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`;
+  }).join("")).join("");
+  const laps = showPhases ? allPhaseOv
+    : `${pathRows.map((r, i) => (i === foreIx ? "" : line(r.pts, gcol(r.id), 1.2, tp != null ? 0.18 : 0.55))).join("")}
+       ${foreIx >= 0 ? line(pathRows[foreIx].pts, gcol(pathRows[foreIx].id), 2.6, 1) : line(ours, "#00d27a", 2, tp != null ? 0.45 : 0.95)}`;
+  const gradKey = (pathRows.length && _dt.length)
+    ? `<span class="leg-grad" title="each lap's trace is coloured by its recorded time"><em>${typeof lapTime === "function" ? lapTime(tmin) : tmin.toFixed(2)}</em><i class="grad"></i><em>${typeof lapTime === "function" ? lapTime(tmax) : tmax.toFixed(2)}</em><b>${pathRows.length} lap${pathRows.length === 1 ? "" : "s"}</b></span>`
+    : `<span><i style="background:#00d27a"></i>where you drove</span>`;
+  const allPhaseKey = SO.map((n) => `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("");
+  const vbtn = (k, lbl) => `<button class="mini ${view === k ? "on" : ""}" data-mapview="${k}">${lbl}</button>`;
+  // The map fills the pane; the legend is an ALWAYS-VISIBLE floating overlay at bottom-left (Jett 2026-09-11)
+  // housing the map-view toggle (lap-time gradient vs turn-phase view) + the key. The DATA filter is NOT here
+  // — it lives in the shared #coursefilter bar between the trace and the info pane.
+  return el(`<div class="cmap">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg)" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${line(theirs, "#3d4a5a", 9, 0.55)}
-      ${line(theirs, "#8fa0b3", 1.4, 0.9)}
-      ${paths.map((p, i) => (i === foreIx ? "" : line(p, "#00d27a", 1, tp != null ? 0.14 : 0.28))).join("")}
-      ${foreIx >= 0 ? line(paths[foreIx], "#4ea3ff", 2.2, 0.95) : line(ours, "#00d27a", 2, tp != null ? 0.45 : 0.95)}
+      ${line(theirs, "#8fa0b3", 1.4, showPhases ? 0.45 : 0.9)}
+      ${laps}
       ${phaseOv}${turns}<g id="traceMark"></g>
     </svg>
-    <div class="legend">
-      <span><i style="background:#7d8b9c"></i>the game's centre-line for this route</span>
-      <span><i style="background:#00d27a"></i>${paths.length ? paths.length + (paths.length === 1 ? " lap drawn" : " laps drawn") : "where you actually drove"}</span>
-      ${foreIx >= 0 ? `<span><i style="background:#4ea3ff"></i>the lap the trace foregrounds</span>` : ""}
-      <span><i style="background:#4ea3ff"></i>a turn the analyzer established</span>
-      ${phaseKey}</div></div>`);
+    <div class="legend cmap-legend">
+      <span class="leg-views"><em>view</em>${vbtn("laptime", "lap time")}${vbtn("phases", "turn phases")}</span>
+      <span><i style="background:#7d8b9c"></i>centre-line</span>
+      ${showPhases ? allPhaseKey : gradKey}
+      <span><i style="background:var(--acc2)"></i>turn</span>
+      ${!showPhases ? phaseKey : ""}</div></div>`);
 }
 
 const GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];

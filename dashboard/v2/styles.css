@@ -121,6 +121,20 @@ svg{display:block;max-width:100%}
 .cleg-toggle{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:3px;padding:1px 7px;font:600 10px var(--mono);cursor:pointer;white-space:nowrap}
 .cleg-toggle:hover{color:var(--acc);border-color:var(--acc)}
 .cleg-key{display:flex;flex-wrap:wrap;gap:3px 12px;align-items:center;max-width:340px}
+/* the map legend, collapsible (Jett 2026-09-11): collapsed = one "legend" button (+ the LIVE chip); expanded =
+   one labelled row per thing drawn -- view · laps · the selected turn · road · the live trail */
+.cleg-body{display:flex;flex-direction:column;gap:4px;max-width:380px;padding:1px 0}
+.cmap-legend:not(.open) .cleg-body{display:none}
+.cleg-sec{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px}
+.cleg-sec>em{font:700 9px var(--mono);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);min-width:38px}
+.cleg-sec>span{display:inline-flex;align-items:center}
+.cleg-sec i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+.cleg-sec i.lg-thick{height:5px}
+.cleg-sec i.lg-road{height:4px;background:#8fa0b3;box-shadow:0 0 0 2px #3d4a5a}
+.cleg-sec i.lg-dot{width:8px;height:8px;border-radius:50%;background:var(--acc2);box-shadow:0 0 0 1px #0b0e12}
+.cleg-sec i.lg-dot.sel{background:#fff}
+.cleg-sec i.lg-car{width:9px;height:10px;border-radius:0;background:#fff;clip-path:polygon(50% 0,100% 100%,50% 72%,0 100%)}
+.cmap.live-on .leg-idle,.cmap.live-last .leg-idle{display:none}
 .cleg-key>span{display:inline-flex;align-items:center}
 .cleg-key i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
 .leg-grad{display:inline-flex;align-items:center;gap:5px}
@@ -1282,7 +1296,23 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .lw-title i{display:inline-flex;align-items:center;gap:5px;font:500 9.5px var(--mono);font-style:normal;color:var(--dim)}
 .lw-pulse::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--acc2);animation:llpulse 1.6s ease-in-out infinite}
 .lw-map{position:relative}
-.lw-map svg{display:block;width:100%;height:auto;max-height:190px;background:var(--bg);border-radius:4px}
+.lw-map svg{display:block;width:100%;height:auto;max-height:172px;background:var(--bg);border-radius:4px}
+/* the Turn analysis corner map's legend: phases · lines · marks, one labelled row each */
+.cm-legend{display:flex;flex-direction:column;gap:3px;padding:4px 2px 2px;font-size:10.5px;color:var(--mut)}
+.cm-lrow{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px}
+.cm-lrow>em{font:700 9px var(--mono);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);min-width:46px}
+.cm-lrow>span{display:inline-flex;align-items:center;gap:4px}
+.cm-lrow .cm-sw{display:inline-block;width:14px;height:5px;border-radius:1px}
+.cm-lrow .cm-ring{display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-sizing:border-box}
+.cm-lrow .cm-pill{font:700 9px var(--mono);color:#fff;background:#0b0e12;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+.cm-lrow .cm-chev{font:800 13px var(--mono);color:#fff;line-height:1}
+.cm-lrow>em.cm-g{min-width:0;font:600 10px var(--mono);letter-spacing:0;text-transform:none;color:var(--mut)}
+.cm-legend .cm-grad{display:inline-block;width:64px;height:7px;border-radius:2px;background:linear-gradient(90deg,#f0616d,#e3b341,#00d27a)}
+.cm-legend .cm-grad--rank{background:linear-gradient(90deg,#00d27a,#e3b341,#f0616d)}
+.cm-legend .cm-views{margin-left:auto;display:inline-flex;gap:3px}
+.cm-legend .cm-views .mini{padding:1px 7px;font-size:10.5px}
+.cm-legend .cm-views .mini.on{color:var(--acc);border-color:var(--acc);background:rgba(0,210,122,.12)}
+.cm-legend em:not(.cm-lrow>em){font-style:normal;font:600 10px var(--mono);color:var(--mut)}
 .lw-cap{position:absolute;left:6px;top:5px;max-width:62%;padding:3px 7px;border-radius:3px;background:rgba(13,17,23,.8);font:700 10px var(--mono);color:var(--ink);pointer-events:none}
 .lw-cap span{display:block;font-weight:500;font-size:9px;color:var(--mut)}
 .lw-empty{padding:18px 6px;text-align:center}

@@ -1200,7 +1200,7 @@ function resolutionState() {
   if (st.key === "none") return { key: "none", label: "no car", tone: "dim", hint: "waiting for a car", hwN: 0, tunes: 0 };
   if (ambiguous) {
     key = "ambiguous"; tone = "warn"; clonable = false; label = "ambiguous";
-    hint = `cid matches ${mm.n_signature_ties || tunes || "several"} saved builds — pick the tune below, or drive the gears to separate them`;
+    hint = `cid matches ${mm.n_signature_ties || tunes || "several"} saved builds — equip the build and save the tune in-game to identify it`;
   } else if (st.key === "ratified" || st.key === "downloaded") {
     key = "resolved"; tone = "ok"; clonable = true; label = "resolved";
     hint = locked ? "downloaded / locked — reads and clones cleanly; only editing it in-game is locked" : "one saved build · hardware hash + slider hash both known";
@@ -1744,8 +1744,8 @@ function paintLeft() {
       MAP_LEG_OPEN = !MAP_LEG_OPEN; try { localStorage.setItem("fh6MapLeg", MAP_LEG_OPEN ? "1" : "0"); } catch (e) {}
       const leg = b.closest(".cmap-legend"); if (!leg) return;
       leg.classList.toggle("open", MAP_LEG_OPEN);
-      const key = leg.querySelector(".cleg-key"); if (key) key.hidden = !MAP_LEG_OPEN;
-      b.textContent = "key " + (MAP_LEG_OPEN ? "▾" : "▸"); b.title = (MAP_LEG_OPEN ? "hide" : "show") + " the map key";
+      const lb = leg.querySelector(".cleg-body"); if (lb) lb.hidden = !MAP_LEG_OPEN;   // the whole legend collapses to one button
+      b.textContent = "legend " + (MAP_LEG_OPEN ? "▾" : "▸"); b.title = (MAP_LEG_OPEN ? "collapse" : "expand") + " the map legend";
     });
     // the map is rebuilt fresh here, so an active leaderboard lap-pick must be re-applied — otherwise any
     // left re-render (resize, filter, follow) silently drops the isolation while LB_PICK still stands. The
@@ -2808,7 +2808,7 @@ function paintRight() {
   if (ctx !== RIGHT_CTX) { RIGHT_CTX = ctx; RIGHT_TAB = rightTabStore()[ctx] || null; }
   const tabs = rightTabs();
   const cur = tabs.includes(RIGHT_TAB) ? RIGHT_TAB : ctx;
-  const why = { lap: "each turn rated the moment you finish it · apex speed vs your own history + where grip let go",
+  const why = { lap: "each turn rated as you take it · minimum speed against the scope",
                 corners: "every corner as you take it · newest first", matrix: "one row per course turn · this session",
                 stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide",
@@ -3007,9 +3007,8 @@ function lapWindowHTML(p, passes, ls) {
   let map = `<div class="why lw-empty">no phase geometry for ${esc(turnLabel(t))} yet</div>`, rib = "";
   if (phases.length) {
     // ---- the corner: casing, 5 butt-cut phase bands with a divider per cut, the shown lap's line by grip
-    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
-    phases.forEach((n) => segs[n].forEach(([x, z]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }));
-    const dx = (x1 - x0) || 40, dz = (z1 - z0) || 40; x0 -= dx * 0.2; x1 += dx * 0.2; z0 -= dz * 0.2; z1 += dz * 0.2;
+    const [x0, x1, z0, z1] = turnFrame(COURSE, t);   // the whole turn, approach to exit (shared with Turn analysis)
+    const dx = (x1 - x0) || 40, dz = (z1 - z0) || 40;
     const W = 560, H = 190, pad = 14, s = Math.min((W - 2 * pad) / (x1 - x0), (H - 2 * pad) / (z1 - z0));
     const ox = (W - (x1 - x0) * s) / 2, oy = (H - (z1 - z0) * s) / 2;
     const X = (x) => ox + (x - x0) * s, Y = (z) => H - oy - (z - z0) * s, P = (x, z) => X(x).toFixed(1) + "," + Y(z).toFixed(1);
@@ -3321,13 +3320,39 @@ function rankColor(i, n) {
   const s = f < 0.5 ? [[0, 210, 122], [227, 179, 65], f / 0.5] : [[227, 179, 65], [240, 97, 109], (f - 0.5) / 0.5];
   return `rgb(${lp(s[0][0], s[1][0], s[2])},${lp(s[0][1], s[1][1], s[2])},${lp(s[0][2], s[1][2], s[2])})`;
 }
+// THE WHOLE TURN, NOT JUST ITS PHASE GEOMETRY (Jett 2026-09-11: "why is the corner detail view so zoomed in? you
+// can't see the entirety of the turn"). A long, gentle turn's phase polylines cover a few dozen metres, so a frame
+// fitted to them cropped the approach and the exit. Frame the ROAD: the centre-line walked from the apex halfway
+// back toward the previous turn and halfway on toward the next (each half 60-220 m), plus the phases and the apex,
+// padded 8% with an 80 m minimum span. Used by the Turn analysis corner map and the Current lap turn window.
+function turnFrame(c, t) {
+  const pts = [];
+  SEG_ORDER.forEach((n) => ((t.seg || {})[n] || []).forEach((p) => pts.push(p)));
+  const path = (c.route && c.route.path) || c.path || [];
+  if (t.x != null) {
+    pts.push([t.x, t.z]);
+    if (path.length > 2) {
+      let ai = 0, bd = Infinity;
+      path.forEach(([x, z], i) => { const d = (x - t.x) ** 2 + (z - t.z) ** 2; if (d < bd) { bd = d; ai = i; } });
+      const ord = (c.turns || []).filter((u) => u.x != null).sort((a, b) => a.seq - b.seq), k = ord.indexOf(t);
+      const half = (u) => (u ? Math.max(60, Math.min(220, Math.hypot(u.x - t.x, u.z - t.z) / 2)) : 120);
+      const walk = (dir, lim) => { let acc = 0;
+        for (let i = ai; i + dir >= 0 && i + dir < path.length && acc < lim; i += dir) {
+          acc += Math.hypot(path[i + dir][0] - path[i][0], path[i + dir][1] - path[i][1]); pts.push(path[i + dir]); } };
+      walk(-1, half(ord[k - 1])); walk(1, half(ord[k + 1]));
+    }
+  }
+  if (!pts.length) return null;
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  pts.forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; });
+  const gx = Math.max(80 - (x1 - x0), 0) / 2 + (x1 - x0) * 0.08, gz = Math.max(80 - (z1 - z0), 0) / 2 + (z1 - z0) * 0.08;
+  return [x0 - gx, x1 + gx, z0 - gz, z1 + gz];
+}
 function cornerMapHTML(c, t, ls) {
   const segs = t.seg || {};
   const phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
-  const ghd = `<div class="gh">The corner, phase by phase <span class="why">· colour = where you are · fill = what the tyres did</span></div>`;
-  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
-  phases.forEach((n) => segs[n].forEach(([x, z]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }));
-  if (t.x != null) { x0 = Math.min(x0, t.x); x1 = Math.max(x1, t.x); z0 = Math.min(z0, t.z); z1 = Math.max(z1, t.z); }
+  const ghd = `<div class="gh">The corner, phase by phase <span class="why">· the whole turn, approach to exit · strips on the road's edges = which part of the turn · lines = every lap in scope</span></div>`;
+  const [x0, x1, z0, z1] = turnFrame(c, t) || [Infinity, -Infinity, Infinity, -Infinity];
   const ag = (n) => phaseAgg(t.phaseObs && t.phaseObs[n], ls.set);
   const aggs = SEG_ORDER.map((n) => ({ n, p: ag(n) }));
   const maxT = Math.max(0.1, ...aggs.map((a) => (a.p && a.p.time) || 0));
@@ -3341,8 +3366,6 @@ function cornerMapHTML(c, t, ls) {
   }).join("");
   const trailBox = `<div class="trail" title="each part's width = median seconds spent in it · fill = its grip mix">${rail}</div>`;
   if (!isFinite(x0)) return `<div class="grp tstat-corner">${ghd}<div class="why" style="padding:10px 6px">no phase geometry for this turn yet</div>${trailBox}</div>`;
-  const dx = (x1 - x0) || 40, dz = (z1 - z0) || 40, pf = 0.3;
-  x0 -= dx * pf; x1 += dx * pf; z0 -= dz * pf; z1 += dz * pf;
   const pad = 16, H = 260, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
   const W = Math.max(300, Math.round((H - 2 * pad) * AR)) + 2 * pad;
   const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
@@ -3351,7 +3374,19 @@ function cornerMapHTML(c, t, ls) {
   const _split = (typeof splitTP === "function") ? splitTP : (p) => (p && p.length ? [p] : []);
   const ctx = road.length ? _split(road).map((run) => `<polyline fill="none" stroke="#3a4453" stroke-width="2" opacity=".4" points="${run.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`).join("") : "";
   // the 5 phases as a TRANSLUCENT UNDERLAY band (structure), so the speed-coloured driven lines read on top
-  const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" opacity=".26" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
+  const ph = phases.map((n) => `<polyline class="tv-ph" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" opacity=".12" points="${segs[n].map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("");
+  // THE PHASE MODEL ON THE ROAD'S EDGES (Jett 2026-09-11: "when there are multiple historical traces, it makes the
+  // 5 phase turn model overlay invisible"). Every lap's line runs inside the road, so a band under them is buried by
+  // any bundle. Each phase is now a pair of strips just outside the road edges (this turn's own width), with a
+  // divider across the road at every phase boundary -- no line can cover it; the underlay stays only as a tint.
+  const halfW = Math.max(7, ((+t.width || 10) / 2) * s + 4);
+  const offs = (pts, d) => pts.map((q, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+    const ux = px(b[0]) - px(a[0]), uy = py(b[1]) - py(a[1]), L = Math.hypot(ux, uy) || 1;
+    return (px(q[0]) - (uy / L) * d).toFixed(1) + "," + (py(q[1]) + (ux / L) * d).toFixed(1); }).join(" ");
+  const strips = phases.map((n) => [halfW, -halfW].map((d) => `<polyline class="cm-strip" data-phase="${n}" fill="none" stroke="${SEG_COL[n]}" stroke-width="5" stroke-linejoin="round" points="${offs(segs[n], d)}"><title>${esc(SEG_LABEL[n])}</title></polyline>`).join("")).join("")
+    + phases.slice(1).map((n) => { const a = segs[n][0], b = segs[n][1] || a;
+      const ux = px(b[0]) - px(a[0]), uy = py(b[1]) - py(a[1]), L = Math.hypot(ux, uy) || 1, nx = -uy / L, ny = ux / L, e = halfW + 4;
+      return `<line x1="${(px(a[0]) + nx * e).toFixed(1)}" y1="${(py(a[1]) + ny * e).toFixed(1)}" x2="${(px(a[0]) - nx * e).toFixed(1)}" y2="${(py(a[1]) - ny * e).toFixed(1)}" stroke="#dfe7ef" stroke-width="1.2" opacity=".6"/>`; }).join("");
   // DRIVEN SPEED LINES: every lap's racing line through this corner (active preset only). DEFAULT ("rank"):
   // each lap's line is ONE solid colour = its leaderboard position for this turn (green fastest → red slowest).
   // FILTER ("speed"): coloured point-by-point by speed (red slow → green fast) within the corner. Each lap's
@@ -3411,14 +3446,19 @@ function cornerMapHTML(c, t, ls) {
     mdP && mdP.min != null ? pillAt(midOf("mid"), mdP.min, true) : "",
     exP && exP.exit != null && segs.exit ? pillAt(segs.exit[segs.exit.length - 1], exP.exit) : "",
   ].join("");
-  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${speedLines}${apex}${chev}${pills}</svg>`;
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${speedLines}${strips}${apex}${chev}${pills}</svg>`;
   // legend reflects the active colouring; the toggle switches it (position = default, speed = filter)
   const modeLeg = byRank
     ? `<span class="why">line colour = position (fastest → slowest)</span><em>P1</em><i class="cm-grad cm-grad--rank"></i><em>P${nDrawn}</em>`
     : (winV.length ? `<span class="why">line colour = speed</span><em>${Math.round(vmin)}</em><i class="cm-grad"></i><em>${Math.round(vmax)} mph</em>` : `<span class="why">line colour = speed</span>`);
   const cmToggle = `<span class="cm-views">${[["rank", "position", "each trace one solid colour by its leaderboard position"], ["speed", "speed", "colour each trace point-by-point by speed"]].map(([k, l, tip]) => `<button class="mini ${CM_TRACE_MODE === k ? "on" : ""}" data-cmtrace="${k}" title="${tip}">${l}</button>`).join("")}</span>`;
-  const spdLeg = `<div class="cm-splegend">${modeLeg}${cmToggle}</div>`;
-  return `<div class="grp tstat-corner">${ghd}${svg}${spdLeg}${trailBox}</div>`;
+  // THE CORNER'S LEGEND (Jett 2026-09-11: "the corner detail view needs a legend"): every mark on the map named --
+  // the phase strips, what the lines' colour means (with its switch), and the marks.
+  const legend = `<div class="cm-legend">
+    <div class="cm-lrow"><em>phases</em>${phases.map((n) => `<span><i class="cm-sw" style="background:${SEG_COL[n]}"></i>${esc(SEG_LABEL[n])}</span>`).join("")}</div>
+    <div class="cm-lrow"><em>lines</em><span class="why">${nDrawn} lap${nDrawn === 1 ? "" : "s"} in ${scopeTok(ls)}</span>${modeLeg}${cmToggle}</div>
+    <div class="cm-lrow"><em>marks</em><span><b class="cm-ring"></b>apex</span><span><b class="cm-pill">mph</b>median entry · slowest · exit</span><span><b class="cm-chev">›</b>direction of travel</span></div></div>`;
+  return `<div class="grp tstat-corner">${ghd}${svg}${legend}${trailBox}</div>`;
 }
 // RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active
 // preset's laps and carries its lap count; grip is always the distribution, never a lone word.

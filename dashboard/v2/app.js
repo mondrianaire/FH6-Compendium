@@ -396,7 +396,7 @@ function courseMap(c, opts) {
     : `${pathRows.map((r, i) => (i === foreIx ? "" : lapg(r.id, line(r.pts, gcol(r.id), 1.2, tp != null ? 0.18 : 0.55)))).join("")}
        ${foreIx >= 0 ? lapg(pathRows[foreIx].id, line(pathRows[foreIx].pts, gcol(pathRows[foreIx].id), 2.6, 1)) : line(ours, "#00d27a", 2, tp != null ? 0.45 : 0.95)}`;
   const gradKey = (pathRows.length && _dt.length)
-    ? `<span class="leg-grad" title="each lap's trace is coloured by its recorded time"><em>${typeof lapTime === "function" ? lapTime(tmin) : tmin.toFixed(2)}</em><i class="grad"></i><em>${typeof lapTime === "function" ? lapTime(tmax) : tmax.toFixed(2)}</em><b>${pathRows.length} lap${pathRows.length === 1 ? "" : "s"}</b></span>`
+    ? `<span class="leg-grad" title="each lap's trace is coloured by its recorded time"><em>fastest ${typeof lapTime === "function" ? lapTime(tmin) : tmin.toFixed(2)}</em><i class="grad"></i><em>${typeof lapTime === "function" ? lapTime(tmax) : tmax.toFixed(2)} slowest</em><b>· ${pathRows.length} lap${pathRows.length === 1 ? "" : "s"}</b></span>`
     : `<span><i style="background:#00d27a"></i>where you drove</span>`;
   const allPhaseKey = SO.map((n) => `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("");
   const vbtn = (k, lbl) => `<button class="mini ${view === k ? "on" : ""}" data-mapview="${k}">${lbl}</button>`;
@@ -414,18 +414,18 @@ function courseMap(c, opts) {
     </svg>
     <div class="cmap-legend${legOpen ? " open" : ""}">
       <div class="cleg-bar">
-        <span class="leg-views">${vbtn("laptime", "lap time")}${vbtn("phases", "turn phases")}</span>
+        <button class="cleg-toggle" data-legtoggle title="${legOpen ? "collapse the map legend" : "expand the map legend"}">legend ${legOpen ? "▾" : "▸"}</button>
         <span class="leg-live" title="the lap being driven, painted on the map by grip; held as the last run through a pause or the end-of-event menu"><i></i><b class="ll-now">LIVE lap</b><b class="ll-last">last run</b></span>
-        <button class="cleg-toggle" data-legtoggle title="${legOpen ? "hide the map key" : "show the map key"}">key ${legOpen ? "▾" : "▸"}</button>
       </div>
-      <div class="cleg-key"${legOpen ? "" : " hidden"}>
-        ${typeof TRACE_MODE !== "undefined" ? `<span class="leg-trail" title="what the live trail's colour means — the same choice as the speed trace's paint"><em>live trail</em>${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-trailpaint="${m}" title="${tip}">${m}</button>`).join("")}</span>` : ""}
-        ${typeof GRAD !== "undefined" && typeof courseSpeedRange === "function" && courseSpeedRange(c) ? `<span class="leg-spd"><em>${Math.round(courseSpeedRange(c).lo)}</em><i class="grad" style="background:linear-gradient(90deg,${GRAD.join(",")})"></i><em>${Math.round(courseSpeedRange(c).hi)} mph</em></span>` : ""}
-        ${typeof DGRIP !== "undefined" ? `<span class="leg-grip">${GSTATE.map((k, i) => `<span title="${esc(DGRIP[k].tip)}"><i style="background:${i ? DGRIP[k].ink : "var(--live-calm," + DGRIP.calm.ink + ")"}"></i>${i === 4 ? "✸ " : ""}${esc(DGRIP[k].word)}</span>`).join("")}</span>` : ""}
-        <span><i style="background:#7d8b9c"></i>centre-line</span>
-        ${showPhases ? allPhaseKey : gradKey}
-        <span><i style="background:var(--acc2)"></i>turn</span>
-        ${!showPhases ? phaseKey : ""}
+      <div class="cleg-body"${legOpen ? "" : " hidden"}>
+        <div class="cleg-sec"><em>view</em><span class="leg-views">${vbtn("laptime", "lap time")}${vbtn("phases", "turn phases")}</span></div>
+        <div class="cleg-sec"><em>${showPhases ? "phases" : "laps"}</em>${showPhases ? allPhaseKey : gradKey}${!showPhases && foreIx >= 0 ? `<span><i class="lg-thick" style="background:${gcol(pathRows[foreIx].id)}"></i>thick = the lap the trace foregrounds</span>` : ""}</div>
+        ${!showPhases && phaseKey ? `<div class="cleg-sec"><em>${esc(turnLabel(selT))}</em>${phaseKey}</div>` : ""}
+        <div class="cleg-sec"><em>road</em><span><i class="lg-road"></i>the game's centre-line</span><span><i class="lg-dot"></i>turn · click to analyse</span>${selT ? `<span><i class="lg-dot sel"></i>selected</span>` : ""}<span><i class="lg-car"></i>you (hollow = held)</span></div>
+        ${typeof TRACE_MODE !== "undefined" ? `<div class="cleg-sec"><em>trail</em><span class="leg-trail" title="what the live trail's colour means — the same choice as the speed trace's paint">${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-trailpaint="${m}" title="${tip}">${m}</button>`).join("")}</span>`
+          + (typeof GRAD !== "undefined" && typeof courseSpeedRange === "function" && courseSpeedRange(c) ? `<span class="leg-spd"><em>${Math.round(courseSpeedRange(c).lo)}</em><i class="grad" style="background:linear-gradient(90deg,${GRAD.join(",")})"></i><em>${Math.round(courseSpeedRange(c).hi)} mph</em></span>` : "")
+          + (typeof DGRIP !== "undefined" ? `<span class="leg-grip">${GSTATE.map((k, i) => `<span title="${esc(DGRIP[k].tip)}"><i style="background:${i ? DGRIP[k].ink : "var(--live-calm," + DGRIP.calm.ink + ")"}"></i>${i === 4 ? "✸ " : ""}${esc(DGRIP[k].word)}</span>`).join("")}</span>` : "")
+          + `<span class="why leg-idle">drawn while a lap is live</span></div>` : ""}
       </div>
     </div></div>`);
 }

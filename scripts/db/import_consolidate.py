@@ -40,8 +40,13 @@ sys.path.insert(0, HERE)
 
 import fh6db                                             # noqa: E402
 import canon_routes                                      # noqa: E402
+import fh6_owt                                           # noqa: E402  (canon_routes put scripts/telemetry on the path)
 
 MERGE_KINDS = ("verified", "probable")
+#: an orphan (laps, no centre-line) rejoins a road only when its trace sits ON one route this
+#: tightly and covers at least this much of it -- so a thin fragment never pools into a fuller course
+REATTACH_MAX_MEAN = 8.0
+REATTACH_MIN_COV = 0.60
 #: tables carrying a denormalised route_key column, re-pointed in place after the lap dedup
 REPOINT_TABLES = ("session_event", "corner_obs", "corner_segment", "diag_event")
 #: tables whose (route_key, ...) primary key would collide on merge -- dropped, rebuilt downstream
@@ -93,6 +98,63 @@ def plan_merges(courses, canon_of):
     return merges
 
 
+def _representative_trace(cx, route_key, cap=300):
+    """The longest-arc lap's (x, z) trace for a course, decimated to ~cap points, or None."""
+    row = cx.execute("SELECT lap_id FROM lap WHERE route_key=? AND arc_m IS NOT NULL "
+                     "ORDER BY arc_m DESC LIMIT 1", (route_key,)).fetchone()
+    if not row:
+        return None
+    tr = [(r["x"], r["z"]) for r in cx.execute(
+        "SELECT x, z FROM lap_point WHERE lap_id=? ORDER BY i", (row["lap_id"],))]
+    if len(tr) < 12:
+        return None
+    return tr[::max(1, len(tr) // cap)]
+
+
+def plan_reattach(cx, canon_of):
+    """[(target_key, orphan_key)] -- a course with laps but NO centre-line whose laps clearly drove a
+    road another course already owns as route:<id>.
+
+    The path never aggregated: a grid-cell fallback key the catalogue only partially matched, whose
+    laps scattered across keys so the model never saw enough of them to build one. But the raw lap
+    trace still names the road -- when it sits ON one route (mean <= REATTACH_MAX_MEAN) for a
+    substantial stretch (cov >= REATTACH_MIN_COV) and a course for that road exists, the orphan's
+    laps belong with it. The coverage gate keeps a thin fragment from pooling into a fuller course.
+    Targets the canonical road's course, never a twin about to be merged away."""
+    orphans = [r["route_key"] for r in cx.execute(
+        "SELECT c.route_key FROM course c WHERE "
+        "(SELECT COUNT(*) FROM lap l WHERE l.route_key=c.route_key) > 0 AND "
+        "(json_array_length(json_extract(c.geometry,'$.path')) IS NULL OR "
+        " json_array_length(json_extract(c.geometry,'$.path'))=0)")]
+    if not orphans:
+        return []
+    geom = canon_routes.route_geometry(cx)
+    have = {r["route_key"].split(":", 1)[1] for r in cx.execute(
+        "SELECT route_key FROM course WHERE route_key LIKE 'route:%'")}
+    pairs = []
+    for k in orphans:
+        tr = _representative_trace(cx, k)
+        if not tr:
+            continue
+        oxs = [p[0] for p in tr]
+        ozs = [p[1] for p in tr]
+        best = None
+        for rid, R in geom.items():
+            bx0, bx1, bz0, bz1 = R["bbox"]
+            if max(oxs) < bx0 - 300 or min(oxs) > bx1 + 300 or max(ozs) < bz0 - 300 or min(ozs) > bz1 + 300:
+                continue
+            cc = fh6_owt.compare(tr, R["pts"])
+            if cc and cc["mean"] <= REATTACH_MAX_MEAN and cc["covered"] >= REATTACH_MIN_COV:
+                if best is None or cc["covered"] > best[1]:
+                    best = (cc["mean"], cc["covered"], rid)
+        if not best:
+            continue
+        target = "route:%s" % canon_of.get(best[2], best[2])   # the canonical road's course, not a twin
+        if target != k and target.split(":", 1)[1] in have:
+            pairs.append((target, k))
+    return pairs
+
+
 def run(cx, verbose=False):
     canon_of, cls, meta = canon_routes.canonical_map(cx)
     courses = load_courses(cx)
@@ -101,6 +163,10 @@ def run(cx, verbose=False):
     merged_rows = []
     for road, (survivor, losers) in sorted(merges.items()):
         merged_rows.append((road, survivor, losers))
+    # orphan fragments (laps, no centre-line) rejoin the road they drove -- same re-point machinery
+    reattach = plan_reattach(cx, canon_of)
+    for target, orphan in reattach:
+        merged_rows.append(("reattach:%s" % orphan, target, [orphan]))
 
     # empty artifacts: a course a session_event opened but nothing was driven on and no path was
     # captured -- 0 laps AND no geometry. (A 0-lap course that DOES have a centre-line, e.g. its
@@ -163,7 +229,8 @@ def run(cx, verbose=False):
             print("  %-16s <- %-32s  now %s laps" % (survivor, " + ".join(losers), n[0] if n else "?"))
         if empties:
             print("  pruned %d empty course(s): %s" % (len(empties), ", ".join(empties)))
-    return {"merged_courses": sum(len(l) for _r, _s, l in merged_rows),
+    return {"merged_courses": sum(len(l) for r, _s, l in merged_rows if not str(r).startswith("reattach:")),
+            "reattached": len(reattach),
             "duplicate_laps_dropped": n_dedup, "laps_repointed": n_repoint_laps,
             "relabelled": n_relabel, "empties_pruned": len(empties)}, merged_rows
 
@@ -184,7 +251,7 @@ def main(argv=None):
         fh6db.run_end(cx, rid, 0, 0, "%s: %s" % (type(e).__name__, e))
         raise
     fh6db.run_end(cx, rid, counts["merged_courses"], 1, json.dumps({"counts": counts}))
-    for k in ("merged_courses", "duplicate_laps_dropped", "laps_repointed", "relabelled", "empties_pruned"):
+    for k in ("merged_courses", "reattached", "duplicate_laps_dropped", "laps_repointed", "relabelled", "empties_pruned"):
         print("  %-22s %8d" % (k, counts[k]))
     return 0
 

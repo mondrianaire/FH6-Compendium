@@ -529,10 +529,15 @@ def main(argv=None):
         # char -- so every "route:311.json" write collapsed onto an alternate data stream of a base file "route"
         # (0 bytes, unfetchable), 404ing the dashboard, which then fell back to a leftover grid-keyed course and
         # showed it as "unnamed". Sanitise the same way both sides do so course/route_311.json exists and loads.
+        # how many turns the game catalogues for this route (ref_route_turn), so the course view can say
+        # "N of M turns measured" and count the catalogued turns never driven. Measured = len(turns) here.
+        _rid = route.get("route_id") if route else None
+        n_cat = cx.execute("SELECT COUNT(*) FROM ref_route_turn WHERE route_id=?", (_rid,)).fetchone()[0] if _rid else None
         total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),
                        {"key": key, "name": c["name"], "len": c["len"], "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
-                        "traces": traces, "route": route, "naming": naming})
+                        "traces": traces, "route": route, "naming": naming,
+                        "n_turns_catalogued": n_cat})
         n_course += 1
 
     total += write(os.path.join(out, "courses.json"), courses)   # after the loop: card counts == Path B displayed turns

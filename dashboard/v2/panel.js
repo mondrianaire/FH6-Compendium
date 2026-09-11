@@ -100,6 +100,10 @@ function adoptMode(m) {
   if (prev.suggest !== MODE.suggest || prev.game !== MODE.game) onModeChange(prev, MODE);
 }
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
+let CARMAP = {};   // ordinal -> {name, short} from cars.json, for naming the car that drove a lap
+// A lap's cid is "ordinal|..|cyl|pi"; name the car from cars.json (carOf() only resolves LIVE cars).
+function carName(cid) { const o = parseInt(String(cid).split("|")[0], 10); return (CARMAP[o] || {}).name || (o ? "ordinal " + o : "unknown car"); }
+function carShort(cid) { const o = parseInt(String(cid).split("|")[0], 10); return (CARMAP[o] || {}).short || (o ? "#" + o : "?"); }
 let ROUTE = null;   // in a timed event with no learned course: the catalogued route the car is on (locateRouteInEvent)
 let LOOP = null;    // the daemon's S/F-crossing identity {name,start} — authoritative in an event, matched to a route START (adoptLoop)
 let BROWSE_PICK = null;            // Course Browser: the route id whose location+shape the left world map is zoomed to
@@ -201,8 +205,12 @@ async function panelBoot() {
   DOCK_SPAN = vg("dockSpan", 600); FOLLOW.on = vg("follow", false) === true;
   BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null); BROWSE_DEV = vg("browseDev", false);
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL); RACING_ONLY = vg("racingOnly", RACING_ONLY) !== false;
-  const [w, d, c] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json")]);
+  const [w, d, c, cars] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json"), get("cars.json").catch(() => null)]);
   WORLD = w; DIAG = d; COURSES = c;
+  // ordinal -> car name, so a lap (its cid carries the ordinal) can be attributed to a car in the
+  // turn leaderboard and the class stats. short = model without the year, for the dense table cell.
+  const carRows = Array.isArray(cars) ? cars : (cars && cars.cars) || [];
+  carRows.forEach((cr) => { if (cr && cr.ordinal != null) CARMAP[cr.ordinal] = { name: cr.name, short: shedName(cr.model || String(cr.name || "").replace(/^(19|20)\d\d\s+/, ""), 15) }; });
   // LEVEL OF DETAIL (2026-09-07, Jett: "point-to-point data ... paths should scale up gracefully on all
   // zoom"). world.json now ships the FULL native centre-line (~4 m, 0.1 m precision). But animating the SVG
   // viewBox re-rasterises EVERY drawn point each frame, and 275 k points measured ~20 fps at 4K -- so we can't
@@ -1490,7 +1498,9 @@ function paintLeft() {
       return;
     }
     const pick = (TRACE_PICK && TRACE_PICK.key === COURSE.key) ? TRACE_PICK : {};
-    body.innerHTML = ""; body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq() }));
+    body.innerHTML = "";
+    body.insertAdjacentHTML("beforeend", courseHeroHTML(COURSE, activeLapSet()));   // redesign phase A: the course hero above the map
+    body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq() }));
     // courseMap() draws its own inline legend (shared with the v1 course page) — lift it into
     // the floating drawer instead of leaving it inline, and unwrap the panel box around the svg
     // so the map itself gets the space both were holding.
@@ -1540,6 +1550,52 @@ function paintLeftHeader() {
 // The pill body: a horizontal, header-sized version of a Course Browser row, from a NORMALISED descriptor so
 // both the free-roam world routes and an identified learned COURSE feed the same renderer. `state` picks the
 // status chip. Optional fields: turns, lapsDrawn (shows "N of M laps drawn"), nameChip (HTML), kindLabel.
+// ONE class badge for the whole app: the established .pib PI-class badge (colour = piColor === the
+// .pib-<class> palette). Everywhere a class is shown -- hero, leaderboard, stats -- renders THIS, so a
+// class reads identically wherever it appears (Jett: consistent class design language everywhere).
+function classPill(cls, n) {
+  if (!cls) return "";
+  return `<span class="pib pib--sm pib-${String(cls).toLowerCase()}" title="class ${esc(cls)}${n != null ? " · " + n + " lap" + (n === 1 ? "" : "s") : ""}"><b>${esc(cls)}</b>${n != null ? `<i class="pib-n">${n}</i>` : ""}</span>`;
+}
+// distinct laps of the active set that took this turn (its phaseObs) -- the turn's confidence sample
+function turnLapCount(t, ls) {
+  const s = new Set();
+  Object.values(t.phaseObs || {}).forEach((rows) => rows.forEach((r) => { if (ls.set.has(String(r[0]))) s.add(r[0]); }));
+  return s.size;
+}
+// THE COURSE HERO (redesign · phase A): the course's measured facts at a glance, scoped to the active
+// lap set -- median/best lap, elevation climb (from the trace's own elev), laps-by-class, and how much
+// of the catalogued turn set we have actually driven (confidence).
+function courseHeroHTML(c, ls) {
+  const laps = (c.laps || []).filter((l) => ls.set.has(String(l.id)));
+  const clean = (l) => !l.void && !l.partial && !l.rewinds && l.t != null;
+  const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
+  const timed = laps.filter(clean);
+  const medLap = med(timed.map((l) => l.t));
+  const bestLap = timed.length ? timed.reduce((m, l) => l.t < m.t ? l : m) : null;
+  let climb = null;
+  const tr = Object.values(c.traces || {}).sort((a, b) => b.length - a.length)[0];
+  if (tr && tr.length) { const es = tr.map((p) => p[5]).filter((v) => v != null); if (es.length) climb = Math.round(Math.max(...es) - Math.min(...es)); }
+  const byCls = {}; laps.forEach((l) => { if (l.class) byCls[l.class] = (byCls[l.class] || 0) + 1; });
+  const classes = Object.keys(byCls).sort((a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
+  const nCars = new Set(laps.map((l) => l.cid).filter(Boolean)).size;
+  const turns = c.turns || [];
+  let strong = 0, weak = 0;
+  turns.forEach((t) => { const n = turnLapCount(t, ls); if (n >= 13) strong++; else if (n > 0) weak++; });
+  const measured = turns.length, catalogued = c.n_turns_catalogued;
+  const unmeasured = catalogued != null ? Math.max(0, catalogued - measured) : null;
+  const stat = (v, lab) => `<span class="ch-s"><b>${v}</b><em>${lab}</em></span>`;
+  return `<div class="chero">
+    <div class="ch-stats">
+      ${stat(medLap != null ? lapTime(medLap) : "—", "median")}
+      ${stat(bestLap ? lapTime(bestLap.t) : "—", bestLap ? "best · " + esc(carShort(bestLap.cid)) : "best")}
+      ${stat(climb != null ? climb + " m" : "—", "climb")}
+      ${stat(measured + (catalogued != null ? " / " + catalogued : ""), "turns measured")}
+    </div>
+    ${classes.length ? `<div class="ch-cls"><span class="why">laps by class</span>${classes.map((cl) => classPill(cl, byCls[cl])).join("")}<span class="why">· ${laps.length} lap${laps.length === 1 ? "" : "s"} · ${nCars} car${nCars === 1 ? "" : "s"}</span></div>` : ""}
+    <div class="ch-conf"><span class="ch-dot ok"></span>${strong} on 13+ laps · <span class="ch-dot w"></span>${weak} need${weak === 1 ? "s" : ""} more${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} never driven` : ""}</div>
+  </div>`;
+}
 function courseInfoPill(r, state) {
   const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));
   const kind = ("kindLabel" in r) ? r.kindLabel
@@ -2546,87 +2602,68 @@ function turnMap(c, t, ls) {
 }
 // RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active
 // preset's laps and carries its lap count; grip is always the distribution, never a lone word.
+// THE SINGLE-TURN VIEW (Jett 2026-09-11). Two things matter: the historical line trace (the left
+// turnMap) and a SPEED LEADERBOARD for the turn -- the fastest passes ranked, each phase showing its
+// apex speed coloured by grip. The old pane repeated the phase times in two tables, the geometry as
+// chips AND a sentence, the grip in a column AND a card. Now geometry is one header line, timing is
+// one summary line (the detail is the leaderboard's own turn-s column), the per-phase speed+grip is
+// the leaderboard, and grip is one whole-turn bar -- each fact in exactly one place.
 function turnStatsHTML(t, ls) {
   const obs = t.phaseObs || {};
   const inSet = (r) => ls.set.has(String(r[0]));
-  const lapIds = new Set(), perLapT = {};
-  SEG_ORDER.forEach((n) => (obs[n] || []).forEach((r) => { if (!inSet(r)) return; lapIds.add(r[0]); if (r[5] != null) perLapT[r[0]] = (perLapT[r[0]] || 0) + r[5]; }));
-  const nLaps = lapIds.size;
+  const meta = {}; (COURSE.laps || []).forEach((l) => meta[l.id] = l);
   const lapT = {}; (COURSE.laps || []).forEach((l) => { if (l.t != null) lapT[l.id] = l.t; });
-  const med = (arr) => { const v = arr.filter((x) => x != null).sort((a, b) => a - b); return v.length ? v[v.length >> 1] : null; };
-  const medTurnT = med(Object.values(perLapT));
-  const medLapT = med([...lapIds].map((id) => lapT[id]));
-  let bestId = null, bestT = Infinity; lapIds.forEach((id) => { if (lapT[id] != null && lapT[id] < bestT) { bestT = lapT[id]; bestId = id; } });
-  const bestPhaseT = {}; if (bestId != null) SEG_ORDER.forEach((n) => { const r = (obs[n] || []).find((x) => x[0] === bestId); if (r && r[5] != null) bestPhaseT[n] = r[5]; });
+  const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
+  // gather each phase's obs row per lap, then rank the passes by their total time through the turn
+  const byLap = {};
+  SEG_ORDER.forEach((n) => (obs[n] || []).forEach((r) => { if (!inSet(r)) return; (byLap[r[0]] = byLap[r[0]] || {})[n] = r; }));
+  const passes = Object.keys(byLap).map((id) => {
+    let tt = 0, any = false;
+    SEG_ORDER.forEach((n) => { const r = byLap[id][n]; if (r && r[5] != null) { tt += r[5]; any = true; } });
+    return { id: +id, ph: byLap[id], turnT: any ? tt : null, lapT: lapT[id], meta: meta[id] || {} };
+  }).filter((p) => p.turnT != null).sort((a, b) => a.turnT - b.turnT);
+  const nLaps = passes.length, best = passes[0] || null;
+  const medTurnT = med(passes.map((p) => p.turnT)), medLapT = med(passes.map((p) => p.lapT));
+  // whole-turn grip mix (equal weight per lap) + which phase eats the most time
   const aggs = SEG_ORDER.map((n) => ({ n, p: phaseAgg(obs[n], ls.set) }));
   const twMix = [0, 0, 0, 0, 0]; let twW = 0;
   aggs.forEach(({ p }) => { if (p && p.mix) { const w = p.time || 1; for (let i = 0; i < 5; i++) twMix[i] += p.mix[i] * w; twW += w; } });
   const turnMix = twW ? twMix.map((v) => v / twW) : null;
+  const biggest = aggs.filter((a) => a.p && a.p.time).sort((a, b) => b.p.time - a.p.time)[0];
 
-  // ---- header
+  // ---- HEADER: the turn and its whole geometry on ONE line
   const dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
-  const header = `<div class="gh tstat-h"><b>${esc(turnLabel(t))}</b><span class="why">${t.kind ? esc(t.kind) + (dirW ? " " + dirW : "") + " · " : ""}${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"}</span>
+  const geo = [t.kind && cap1(t.kind) + (dirW ? " " + dirW : ""), t.r != null && Math.round(t.r) + " m radius",
+    t.deg != null && Math.round(t.deg) + "°", t.width != null && (+t.width).toFixed(1) + " m wide",
+    t.bank != null && (Math.abs(t.bank) < 1.5 ? "flat" : "banked " + Math.abs(Math.round(t.bank)) + "°")].filter(Boolean).join(" · ");
+  const header = `<div class="gh tstat-h"><b>${esc(turnLabel(t))}</b><span class="why">${esc(geo)}</span>
     <span class="tstat-nav"><button class="mini" data-turnstep="prev" title="previous turn">‹</button><button class="mini" data-turnstep="next" title="next turn">›</button><button class="mini" data-turnclear title="clear selection">✕</button></span></div>`;
+  if (!nLaps) return `<div class="tstat">${header}<div class="why" style="padding:8px 6px">no timed laps through this turn in ${esc(ls.label)} — widen the filter or drive it</div></div>`;
 
-  // ---- geometry / information
-  const geo = [
-    t.kind ? ["kind", t.kind] : null,
-    t.r != null ? ["radius", Math.round(t.r) + " m"] : null,
-    t.deg != null ? ["angle", Math.round(t.deg) + "°"] : null,
-    dirW ? ["direction", dirW] : null,
-    t.width != null ? ["road width", (+t.width).toFixed(1) + " m"] : null,
-    t.bank != null ? ["banking", (+t.bank).toFixed(1) + "°"] : null,
-    t.n != null ? ["passes on record", t.n] : null,
-  ].filter(Boolean);
-  const bankW = t.bank == null ? "" : Math.abs(t.bank) < 1.5 ? ", flat" : ", banked " + Math.abs(Math.round(t.bank)) + "°";
-  const cap = `${t.kind ? cap1(t.kind) : "Turn"}${t.r != null ? " · " + Math.round(t.r) + " m radius" : ""}${t.deg != null ? " · " + Math.round(t.deg) + "° " + (dirW || "") : ""}${t.width != null ? " · " + (+t.width).toFixed(1) + " m wide" + bankW : ""}`;
-  const geoCard = `<div class="grp"><div class="gh">Information</div>
-    <div class="tstat-geo">${geo.map(([k, v]) => `<span><em>${esc(k)}</em>${esc(String(v))}</span>`).join("")}</div>
-    <div class="why tstat-cap">${esc(cap)}</div></div>`;
+  // ---- TIMING: one summary line
+  const timing = `<div class="tstat-sum"><b>${medTurnT.toFixed(2)} s</b> typical${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of the lap` : ""}` +
+    `${best ? ` · fastest <b style="color:var(--acc)">${best.turnT.toFixed(2)} s</b>` : ""}${biggest ? ` · most time in <span style="color:${SEG_COL[biggest.n]};font-weight:600">${esc(SEG_LABEL[biggest.n])}</span>` : ""}</div>`;
 
-  // ---- timing
-  const budMax = Math.max(...aggs.map((a) => (a.p && a.p.time) || 0), 0.1);
-  const budget = aggs.map(({ n, p }) => p && p.time ? `<span class="tb-seg" style="flex:${Math.round(p.time * 100)} 0 0;background:${SEG_COL[n]}" title="${esc(SEG_LABEL[n])} · ${p.time.toFixed(2)} s"><i>${p.time >= 0.4 ? p.time.toFixed(1) : ""}</i></span>` : "").join("");
-  // best-vs-typical rows, biggest gap flagged
-  const cmp = aggs.map(({ n, p }) => ({ n, typ: p && p.time, best: bestPhaseT[n] })).filter((r) => r.typ != null);
-  let worst = null; cmp.forEach((r) => { if (r.best != null) { const d = r.typ - r.best; if (!worst || d > worst.d) worst = { n: r.n, d }; } });
-  const cmpRows = cmp.map((r) => {
-    const d = r.best != null ? r.typ - r.best : null;
-    const flag = worst && worst.n === r.n && worst.d > 0.05;
-    return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>
-      <td class="mono" style="text-align:right">${r.typ.toFixed(2)}</td>
-      <td class="mono" style="text-align:right">${r.best != null ? r.best.toFixed(2) : "—"}</td>
-      <td class="mono" style="text-align:right">${d != null ? (d > 0 ? "+" : "") + d.toFixed(2) : "—"}</td></tr>`;
-  }).join("");
-  const timeCard = medTurnT != null ? `<div class="grp"><div class="gh">Timing</div>
-    <div class="tstat-big"><b>${medTurnT.toFixed(1)} s</b> in the turn${medLapT ? ` <span class="why">≈ ${Math.round(medTurnT / medLapT * 100)}% of the ${medLapT.toFixed(1)} s lap</span>` : ""}</div>
-    <div class="tbar" title="where the seconds go — median time per part">${budget}</div>
-    ${cmp.some((r) => r.best != null) ? `<div class="why tstat-sub">typical vs your best lap (${bestT.toFixed(1)} s)${worst && worst.d > 0.05 ? ` — most to find in <b style="color:var(--warn)">${esc(SEG_LABEL[worst.n])}</b> (+${worst.d.toFixed(2)} s)` : ""}</div>
-    <table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best</th><th>Δ s</th></tr></thead><tbody>${cmpRows}</tbody></table>` : ""}</div>`
-    : `<div class="grp"><div class="gh">Timing</div><div class="why" style="padding:2px 6px">no timed laps for this turn in ${esc(ls.label)}</div></div>`;
+  // ---- THE LEADERBOARD: passes fastest-first; each phase cell = apex mph, coloured by grip
+  const SHORT = { braking: "brake", turn_in: "turn-in", mid: "mid", exit: "exit", straight: "straight" };
+  const phHead = SEG_ORDER.map((n) => `<th title="${esc(SEG_LABEL[n])}"><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SHORT[n])}</th>`).join("");
+  const cell = (r) => { if (!r || r[2] == null) return `<td class="mono off">·</td>`; const gk = GSTATE[r[4]] || "calm"; const g = DGRIP[gk];
+    return `<td class="mono" style="color:${gk === "calm" ? "var(--ink)" : g.col}" title="apex ${Math.round(r[2])} mph · ${esc(g.word)}${r[5] != null ? " · " + r[5].toFixed(2) + " s" : ""}">${Math.round(r[2])}</td>`; };
+  const rows = passes.map((p, i) => `<tr class="${i === 0 ? "tlb-best" : ""}">
+      <td class="tlb-rank">${i + 1}</td><td class="mono">${p.lapT != null ? lapTime(p.lapT) : "—"}</td>
+      <td class="tlb-car" title="${esc(carName(p.meta.cid))}${p.meta.pi ? " · " + p.meta.pi + " PI" : ""}">${p.meta.class ? `<span class="cls-pill" style="--pc:${piColor(p.meta.class)}">${esc(p.meta.class)}</span>` : ""}<span class="tlb-carn">${esc(carShort(p.meta.cid))}</span></td>
+      <td class="mono tlb-tt">${p.turnT.toFixed(2)}</td>${SEG_ORDER.map((n) => cell(p.ph[n])).join("")}</tr>`).join("");
+  // NO row cap: the info panes may scroll (Jett 2026-09-11) -- .pane>.body already scrolls, so every
+  // pass is listed and the list scrolls, rather than being clipped to a "top N".
+  const board = `<div class="grp"><div class="gh">Fastest passes <span class="why">· ${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · phase = apex mph, coloured by grip</span></div>
+    <div class="tlb-wrap"><table class="tlb"><thead><tr><th></th><th>lap</th><th>car</th><th title="time through the turn">turn s</th>${phHead}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
 
-  // ---- per-phase statistics
-  const rows = aggs.map(({ n, p }) => `<tr class="${p ? "" : "off"}" data-phase="${n}">
-    <td><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SEG_LABEL[n])}</td>
-    <td class="mono" style="text-align:center">${p && p.entry != null ? p.entry : "—"}</td>
-    <td class="mono" style="text-align:center">${p && p.min != null ? "<b>" + p.min + "</b>" : "—"}</td>
-    <td class="mono" style="text-align:center">${p && p.exit != null ? p.exit : "—"}</td>
-    <td class="mono" style="text-align:center">${p && p.mean != null ? p.mean : "—"}</td>
-    <td class="mono" style="text-align:center">${p && p.time != null ? p.time.toFixed(2) : "—"}</td>
-    <td>${gripBar(p && p.mix)}</td>
-    <td class="mono" style="text-align:right">${p ? p.n : "—"}</td></tr>`).join("");
-  const statCard = `<div class="grp"><div class="gh">Per-phase statistics <span class="why">· mph medians</span></div>
-    <table class="tstat-ph"><thead><tr><th>phase</th><th>entry</th><th>apex</th><th>exit</th><th>mean</th><th>s</th><th>grip mix</th><th>laps</th></tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr class="tstat-tot"><td>whole turn</td><td colspan="4"></td><td class="mono" style="text-align:center">${medTurnT != null ? medTurnT.toFixed(2) : "—"}</td><td>${gripBar(turnMix)}</td><td class="mono" style="text-align:right">${nLaps}</td></tr></tfoot></table></div>`;
-
-  // ---- grip read + legend
-  const legRow = GSTATE.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}</span>`).join("");
-  const gripCard = `<div class="grp"><div class="gh">Grip <span class="why">· share of samples, ${esc(ls.label)}</span></div>
+  // ---- GRIP: one whole-turn bar (per-phase grip already reads from the leaderboard cell colours)
+  const gripCard = `<div class="grp"><div class="gh">Grip through the turn <span class="why">· share of samples · ${esc(ls.label)}</span></div>
     <div class="tstat-gread">${gripBar(turnMix, "gbar--lg")}<span class="tstat-gword">${esc(gripRead(turnMix))}</span></div>
-    <div class="ballegend gleg">${legRow}</div></div>`;
+    <div class="ballegend gleg">${GSTATE.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}</span>`).join("")}</div></div>`;
 
-  return `<div class="tstat">${header}${timeCard}${geoCard}${statCard}${gripCard}</div>`;
+  return `<div class="tstat">${header}${timing}${board}${gripCard}</div>`;
 }
 function cap1(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function matrixHTML() {
@@ -2852,11 +2889,13 @@ function courseStatsHTML() {
     cl.forEach((l) => (byBuild[l.bid || l.container || "?"] = byBuild[l.bid || l.container || "?"] || []).push(l));
     const builds = Object.values(byBuild).map((ls) => {
       const bt = ls.filter(clean).sort((a, b) => a.t - b.t)[0] || null;
-      return { name: tuneLabel(ls[0].container), dt: ls[0].dt, pi: ls[0].pi, n: ls.length, best: bt ? bt.t : null };
+      const tune = tuneLabel(ls[0].container);
+      return { car: carShort(ls[0].cid), tune: tune && !/^unnamed$/i.test(tune) ? tune : null,
+               dt: ls[0].dt, pi: ls[0].pi, n: ls.length, best: bt ? bt.t : null };
     }).sort((a, b) => (a.best || 9e9) - (b.best || 9e9));
     const focused = focus === cls;
     const rows = builds.map((b) => `<tr${best && b.best === best.t ? ' class="cstat-fast"' : ""}>
-      <td>${esc(b.name || "unnamed")}${b.dt ? ` <span class="why">${esc(b.dt)}</span>` : ""}</td>
+      <td><b>${esc(b.car)}</b>${b.tune ? ` <span class="why">${esc(b.tune)}</span>` : ""}${b.dt ? ` <span class="why">${esc(b.dt)}</span>` : ""}</td>
       <td class="mono" style="text-align:center">${b.pi ?? "—"}</td>
       <td class="mono" style="text-align:center">${b.n}</td>
       <td class="mono" style="text-align:right">${b.best != null ? lapTime(b.best) : "—"}</td></tr>`).join("");

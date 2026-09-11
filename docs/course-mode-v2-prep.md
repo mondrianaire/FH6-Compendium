@@ -165,9 +165,26 @@ tabs and the build-guard / held / mismatch states are props on it, not separate 
    **Same day, Jett's map feedback (`86cc2c7`):** Turn analysis corner map framed on the whole turn, phase model
    moved to strips on the road edges so lap bundles can't bury it, a legend on the corner map, and the course-map
    legend made collapsible with audited entries (memory `fh6-turn-map-readability`).
-4. **General statistics view:** header basis, two headline answers, scatter, car table.
-5. **Shared chrome:** map layer order + legend bar; hero freshness + class bars; build panel faces.
-6. **FOLLOW camera** — active only while `LIVE.lap.live` (Q1); reads `LIVE.lap` for the trail and the car.
+4. **General statistics view — STILL OPEN:** header basis, two headline answers, scatter, car table.
+   `courseStatsHTML()` is still the pre-redesign per-**build** grouping (`byBuild[l.bid||l.container]`) over all
+   laps; the redesign wants per-**car** (ordinal from `cid`), most-used + quickest, a laps×best scatter, a 4-row
+   car table, and a basis header that never totals rows summing to less. Route 5411: 45 laps / 11 cars, tune
+   (container) only on 25 — "laps per tune" must say `20 laps name no tune`, never drop them.
+5. **Shared chrome — mostly DONE 2026-09-11.** Map layer order + legend toggles **DONE `9e5895a`** (centre / laps /
+   phases show-hide; centre-line drawn last, on top of the bundle). Hero laps-by-class **bar chart** with
+   click-to-scope **DONE `669d02a`** (over every course lap; scoped class lifted; one path with the SCOPE band via
+   `setScopeClass`), and the header's upgrade/slider hash table retired in the same commit. Confidence reframed to
+   "last build remembered" + a separate save-method tuning guarantee **DONE `05c7166`** (`gateStrip`). SCOPE band
+   compacted 108→80 px (presets/filters behind a `filters` toggle) **DONE `2310d19`**. **STILL OPEN:** the build
+   panel's three faces (downloaded / saves-tie / held) — Jett deferred it; note the tie face must NOT reintroduce
+   a pick-from-ties UI (memory `fh6-tune-identification-equip-workflow`).
+6. **FOLLOW camera — DONE 2026-09-11 `4ed315f`.** `courseFollow()`: the whole-course map zooms to follow the car
+   only while `LIVE.lap.live`, easing back to the full-course fit on the live→held edge; a ~180 m (×1.3) window
+   centred 0.55 car / 0.45 heading look-ahead; driven by the existing `onFrame → addLiveDot → queueFollow` path;
+   free-roam world follow unchanged. Verified with synthetic state (234 m window live; resets to `0 0 W H` held).
+
+**Remaining after this pass:** step 4 (General statistics redesign), the build-panel three faces (step 5), and
+the standing data/correctness gaps — P2P trace arc-registration (§8.3) and D3 (live grip typical, not worst).
 
 Each step ends with the spec's §9 checks that apply to it, verified in the Browser pane at 1080 × 1751
 with synthetic frames on route 5411 (the harness used for the live-lap map: close the tab's `ES`, stub

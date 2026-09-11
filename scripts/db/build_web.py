@@ -548,7 +548,10 @@ def main(argv=None):
                        {"key": key, "name": c["name"], "len": c["len"], "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
                         "traces": traces, "route": route, "naming": naming,
-                        "n_turns_catalogued": n_cat})
+                        "n_turns_catalogued": n_cat,
+                        # when this history was built, so the course view can stamp the comparison it feeds
+                        # ("history built 10:44") instead of leaving freshness to the status bar (handoff §3)
+                        "built_at": fh6db.utcnow()})
         n_course += 1
 
     total += write(os.path.join(out, "courses.json"), courses)   # after the loop: card counts == Path B displayed turns

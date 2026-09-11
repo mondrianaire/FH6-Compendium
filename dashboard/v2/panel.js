@@ -413,7 +413,7 @@ function lastAction() {
   // (spec line 24). Only in a steady drive state — not while paused/importing, which own the whole line.
   const loc = LIVE.inMenu ? null : (RB.state === "running" || RB.pending || RR.busy) ? null
     : MODE.suggest === "course" ? "on course" : MODE.suggest === "free" ? "free roam" : null;
-  const lapn = LIVE.frame && LIVE.frame.lapn != null ? LIVE.frame.lapn : null;
+  const lapn = lapNo(LIVE.frame);
   const dispTxt = (loc ? loc + (lapn != null ? " · lap " + lapn : "") + " · " : "") + txt;
   el.dataset.tone = tone;
   el.innerHTML = `<b>${esc(dispTxt)}<i class="statcaret" aria-hidden="true">▾</i></b>${when ? `<span class="when">${esc(when)}</span>` : ""}${svc}${statusLogHTML()}`;
@@ -631,6 +631,10 @@ const dimLab = (d, v) => (d === "container" ? tuneLabel(v) : d === "bid" ? Strin
 const notTimed = (l) => !!(l.void || l.partial || (l.cov != null && l.cov < 0.9));
 const lapBuild = (l) => (IDENT && l.container ? IDENT.builds.find((x) => x.c === l.container) : null) || null;
 const liveClass = () => (LIVE.frame && LIVE.frame.on && LIVE.frame.cls) || (CUR && CUR.cls) || null;
+// ONE LAP-NUMBER CONVENTION (handoff §5.2): 1-based, as the game shows it, on every surface. The frame's
+// LapNumber is 0-based (the hero read "EVENT · LAP 0" while the Current lap tab read "lap 1" for the same lap);
+// corner events are already 1-based (the daemon adds 1). Any lap number drawn from a frame goes through this.
+const lapNo = (f) => (f && f.ev && f.lapn != null ? (f.lapn | 0) + 1 : null);
 const curContainer = () => (CUR && CUR.disk && CUR.disk.ts ? "Tuning_" + String(CUR.ordinal).padStart(4, "0") + "_" + CUR.disk.ts : null);
 
 // the preset's test, against the car you are in
@@ -1086,7 +1090,7 @@ function dockTiles(f) {
              [Number.isFinite(+f.hp) ? f.hp : "—", "hp"], [Number.isFinite(+f.tq) ? f.tq : "—", "ft·lb"], [fx(f.boost, 1), "boost psi"]];
   const bars = [["thr", f.thr / 255, "var(--acc)"], ["brk", f.brk / 255, "var(--bad)"], ["str", (f.steer + 127) / 254, "var(--acc2)"]];
   const susp = (f.susp || []).map((v, i) => `<div title="${["FL", "FR", "RL", "RR"][i]} suspension travel ${(v * 100).toFixed(0)}%"><i style="height:${Math.max(0, Math.min(100, v * 100)).toFixed(0)}%;background:${v > 0.95 ? "var(--bad)" : "var(--mag)"}"></i><span>${["FL", "FR", "RL", "RR"][i]}</span></div>`).join("");
-  const mode = f.on ? (f.ev ? `EVENT${f.lapn ? " · lap " + f.lapn : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "menu";
+  const mode = f.on ? (f.ev ? `EVENT${lapNo(f) != null ? " · lap " + lapNo(f) : ""}${f.rpos ? " · P" + f.rpos : ""}` : "free roam") : "menu";
   const sub = f.on ? `${fx(f.dist / 1000, 2)} km${f.lapt ? " · " + fx(f.lapt, 1) + " s" : ""}` : "not driving";
   return t.map(([v, l]) => `<div class="dt"><b>${v}</b><span>${l}</span></div>`).join("")
     + `<div class="dt bars">${bars.map(([l, p, c]) => `<div><span>${l}</span><i style="width:${Math.max(0, Math.min(100, p * 100)).toFixed(0)}%;background:${c}"></i></div>`).join("")}</div>`
@@ -1784,8 +1788,18 @@ function courseHeroHTML(c, ls) {
   turns.forEach((t) => { const n = turnLapCount(t, ls); if (n >= 13) strong++; else if (n > 0) weak++; });
   const measured = turns.length, catalogued = c.n_turns_catalogued;
   const unmeasured = catalogued != null ? Math.max(0, catalogued - measured) : null;
+  // THREE CONFIDENCE STATES, plus the scope's own gap (handoff §3): a measured turn with no lap in THIS scope is
+  // neither strong nor weak and must not read as "needs more"; a catalogued turn never timed is its own state.
+  const noneIn = Math.max(0, measured - strong - weak);
+  // FRESHNESS ON THE COMPARISON, not only in the status bar (handoff §3): when this history was built and
+  // whether driving sessions are still waiting to be counted in it.
+  const hhmm = (d) => d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const builtAt = c.built_at ? new Date(c.built_at) : null, sp = RB.last ? RB.last.sessions_pending : null;
+  const fresh = `${(c.laps || []).length} laps counted in history${builtAt && !isNaN(builtAt) ? " · history built " + hhmm(builtAt) : ""}`
+    + (sp ? ` · <b class="ch-pend">${sp} session${sp === 1 ? "" : "s"} not yet counted</b>` : sp === 0 ? " · every session counted" : "")
+    + " · turn geometry from the game's own centre-line";
   const stat = (v, lab) => `<span class="ch-s"><b>${v}</b><em>${lab}</em></span>`;
-  const liveLap = (MODE.game === "event" && LIVE.frame && LIVE.frame.lapn != null) ? LIVE.frame.lapn : null;
+  const liveLap = MODE.game === "event" ? lapNo(LIVE.frame) : null;
   // route glyph + start/finish/direction legend (spec's hero left column): the course's shape with a green
   // start dot and a pink finish dot, captioned loop / point-to-point.
   const path = (c.route && c.route.path) || c.path || [];
@@ -1815,8 +1829,8 @@ function courseHeroHTML(c, ls) {
       ${stat(measured + (catalogued != null ? " / " + catalogued : ""), "turns measured")}
     </div>
     ${classes.length ? `<div class="ch-cls"><span class="why">laps by class</span>${classes.map((cl) => classPill(cl, byCls[cl])).join("")}<span class="why">· ${laps.length} lap${laps.length === 1 ? "" : "s"} · ${nCars} car${nCars === 1 ? "" : "s"}</span></div>` : ""}
-    <div class="ch-conf"><span class="ch-dot ok"></span>${strong} on 13+ laps · <span class="ch-dot w"></span>${weak} need${weak === 1 ? "s" : ""} more${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} never driven` : ""}</div>
-    <div class="ch-note">turn geometry from the game's own centre-line</div>
+    <div class="ch-conf">${scopeTok(ls)}<span class="ch-dot ok"></span>${strong} turn${strong === 1 ? "" : "s"} on 13+ laps · <span class="ch-dot w"></span>${weak} timed on fewer${noneIn ? ` · <span class="ch-dot n"></span>${noneIn} with no lap in scope` : ""}${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} catalogued, never timed` : ""}</div>
+    <div class="ch-note">${fresh}</div>
   </div>`;
 }
 // SHARED per-turn aggregate over the active lap set — the "statistics infrastructure" the turn table,
@@ -1873,7 +1887,7 @@ function turnTableHTML(c, ls) {
   const sortBtn = (k, lbl) => `<button class="mini${TURN_SORT === k ? " on" : ""}" data-tsort="${k}">${lbl}</button>`;
   const measured = (c.turns || []).length, catalogued = c.n_turns_catalogued;
   const sortWhy = TURN_SORT === "find" ? "ranked by the time available vs your best lap" : "route order · click any turn, or its number on the map";
-  return `<div class="grp"><div class="gh">${measured}${catalogued != null ? " of " + catalogued : ""} turns measured <span class="why">· ${esc(sortWhy)}</span>
+  return `<div class="grp"><div class="gh">${measured}${catalogued != null ? " of " + catalogued : ""} turns measured ${scopeTok(ls)} <span class="why">· ${aggs.length} with a lap in scope · ${esc(sortWhy)}</span>
       <span class="ttsort"><span class="why">sort</span>${sortBtn("route", "route order")}${sortBtn("find", "time to find")}</span></div>
     <div class="tt-wrap"><table class="tt"><thead><tr><th>turn</th>
       ${SEG_ORDER.map((n) => `<th class="tt-phh" title="${esc(SEG_LABEL[n])} apex mph"><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SHORT[n])}</th>`).join("")}
@@ -2840,16 +2854,31 @@ function lapHTML() {
   // raw was off by one, so `taken` never matched and the tab sat empty. Convert the frame lap to the corner
   // convention (+1), and only trust it while actually in an event; otherwise take the latest corner's lap.
   const inEv = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
-  const frameLap = inEv && LIVE.frame.lapn != null ? LIVE.frame.lapn + 1 : null;
+  const frameLap = inEv ? lapNo(LIVE.frame) : null;
   const curLap = frameLap != null ? frameLap : (mine.length ? Math.max(...mine.map((c) => c.lapn)) : null);
-  const taken = mine.filter((c) => c.lapn === curLap).sort((a, b) => a.t0 - b.t0);
+  const onLap = mine.filter((c) => c.lapn === curLap).sort((a, b) => a.t0 - b.t0);
+  // ABANDONED ATTEMPTS (handoff §5.2): a restart keeps the lap number, so one lap can hold the passes of two runs
+  // (18 turns listed on a 16-turn route). The daemon stamps every corner with its run (stint); only the newest
+  // run on this lap is rated, and each earlier run collapses to a single row -- never extra turns.
+  const stints = [...new Set(onLap.map((c) => c.stint).filter((s) => s != null))].sort((a, b) => a - b);
+  const curStint = stints.length ? stints[stints.length - 1] : null;
+  const taken = curStint == null ? onLap : onLap.filter((c) => c.stint === curStint || c.stint == null);
+  const abandoned = stints.slice(0, -1).map((s, i) => {
+    const cs = onLap.filter((c) => c.stint === s), last = cs[cs.length - 1];
+    const lt = last && turnAtMatrix(last.apex, null), stop = last && last.mph_out != null ? Math.round(last.mph_out) : null;
+    return `<div class="lap-abandon"><span>▸ attempt ${i + 1} — abandoned${lt && lt.t ? " at " + esc(turnLabel(lt.t)) : ""}</span>
+      <span class="why">${cs.length} turn${cs.length === 1 ? "" : "s"}${stop != null ? " · stopped at " + stop + " mph" : ""} · not ranked</span><span class="why mono">run ${s}</span></div>`;
+  }).join("");
   const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
-  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · speed rated vs your history · grip across the corner's phases</span></div>`;
-  if (!taken.length) return `<div class="lapview">${head}<div class="why" style="padding:10px 6px">No turns yet this lap — the first one appears the instant you finish it.</div></div>`;
-  let lastSeq = null, rows = "", worstRow = null, anyBest = false, gripHits = 0;
+  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · rated on minimum speed against ${scopeTok(ls)} · grip across the corner's phases</span></div>`;
+  if (!taken.length) return `<div class="lapview">${head}${abandoned}<div class="why" style="padding:10px 6px">No turns yet this lap — the first one appears the instant you finish it.</div></div>`;
+  let lastSeq = null, rows = "", worstRow = null, gripHits = 0, rankable = 0, first = 0, thinFirst = 0, unranked = 0;
   taken.forEach((c) => {
     const b = turnAtMatrix(c.apex, lastSeq), t = b && b.t; if (!t) return; lastSeq = t.seq;
-    const apex = c.mph_apex != null ? c.mph_apex : c.mph_min;
+    // THE RATED NUMBER IS THE SHOWN NUMBER (handoff §1): the pass is rated on its MINIMUM speed, the same
+    // quantity every past lap contributes below. It used to show and rate the peak-lateral-g speed, which sits
+    // above the minimum on 55 of 60 corners (+9.2 mph) -- so the live pass "won" by construction.
+    const apex = c.mph_min != null ? c.mph_min : c.mph_apex;
     // apex speed per PAST lap for this turn = the slowest point across WHATEVER phases that lap recorded here,
     // not only the 'mid' phase. A fast turn is often detected with no mid phase, so reading mid alone showed
     // "first pass here" while its neighbours had 18-19 (Jett 2026-09-11). Take each lap's min across its phases.
@@ -2858,24 +2887,24 @@ function lapHTML() {
       if (!ls.set.has(String(r[0])) || r[2] == null) return;
       if (histByLap[r[0]] == null || r[2] < histByLap[r[0]]) histByLap[r[0]] = r[2];
     }));
-    const hist = Object.values(histByLap);
-    const n = hist.length, bestMph = n ? Math.max(...hist) : null;
-    const pos = (n ? hist.filter((v) => v > apex).length : 0) + 1, N = n + 1;   // pos 1 = your fastest ever apex here
-    const isBest = n === 0 || apex >= bestMph, dMph = bestMph != null ? Math.round(apex - bestMph) : null;
-    if (isBest && n) anyBest = true;
-    const rankLbl = !n ? "first pass here" : isBest ? "★ best yet" : `${pos} of ${N}`;
-    const rankTone = isBest ? "var(--acc)" : dMph != null && dMph <= -4 ? "var(--bad)" : "var(--mut)";
+    const v = rankVerdict(Object.values(histByLap), apex, ls);
+    if (v.kind === "best" || v.kind === "ranked") { rankable++; if (v.isBest) { if (v.thin) thinFirst++; else first++; } } else unranked++;
+    const tone = v.isBest && !v.thin ? "var(--acc)" : v.d != null && v.d <= -4 ? "var(--bad)" : "var(--mut)";
     const gr = phaseGrip(c);   // grip rated per phase, separate from the speed rank above
     if (gr.lost) gripHits++;
-    if (dMph != null && dMph < 0 && (!worstRow || dMph < worstRow.d)) worstRow = { t, d: dMph };
+    if (v.d != null && v.d < 0 && (!worstRow || v.d < worstRow.d)) worstRow = { t, d: v.d };
+    const peak = c.mph_apex != null && c.mph_min != null ? ` title="minimum ${Math.round(c.mph_min)} mph (rated) · at peak lateral g ${Math.round(c.mph_apex)} mph"` : "";
     rows += `<div class="lap-row">
       <span class="lap-turn">${esc(turnLabel(t))}<em>${esc(cap1(t.kind || ""))}</em></span>
-      <span class="lap-spd mono">${Math.round(c.mph_in)}<i>→</i><b>${Math.round(apex)}</b><i>→</i>${Math.round(c.mph_out)}<em> mph</em></span>
-      <span class="lap-rank mono" style="color:${rankTone}">${rankLbl}${dMph != null && !isBest ? ` · ${dMph} mph` : ""}</span>
+      <span class="lap-spd mono"${peak}>${Math.round(c.mph_in)}<i>→</i><b>${Math.round(apex)}</b><i>→</i>${Math.round(c.mph_out)}<em> mph</em></span>
+      <span class="lap-rank mono lap-v-${v.kind}${v.thin ? " thin" : ""}" style="color:${tone}"><b>${v.text}${v.d != null && !v.isBest ? ` · ${mphD(v.d)}` : ""}</b><em>${esc(v.basis)}</em></span>
       ${gr.cell}</div>`;
   });
-  const sum = `<div class="lap-sum">${worstRow ? `most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> · ${worstRow.d} mph off your best there` : (anyBest ? `<b style="color:var(--acc)">personal-best pace so far</b>` : "on your usual pace")}<span class="why">${gripHits} of ${taken.length} turns lost grip</span></div>`;
-  return `<div class="lapview">${head}<div class="lap-hd"><span>turn</span><span>in→apex→out</span><span>vs history</span><span>grip</span></div>${rows}${sum}</div>`;
+  // the summary counts only turns that COULD be ranked: an only-lap or level pool is excluded, never a win
+  const firstTxt = rankable ? `<b style="color:${first ? "var(--acc)" : "var(--ink)"}">${first + thinFirst} of ${rankable}</b> rankable turn${rankable === 1 ? "" : "s"} come first${thinFirst ? ` <span class="why">(${thinFirst === first + thinFirst ? "all" : thinFirst} on a pool under 5 laps — a weak claim)</span>` : ""}`
+    : `nothing can be ranked in ${scopeTok(ls)} — ${unranked} turn${unranked === 1 ? "" : "s"} with no other lap, a lap compared with itself`;
+  const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${unranked && rankable ? unranked + " unranked · " : ""}${gripHits} of ${taken.length} turns lost grip</span></div>`;
+  return `<div class="lapview">${head}${abandoned}<div class="lap-hd"><span>turn</span><span>in→min→out</span><span>rank · pool</span><span>grip</span></div>${rows}${sum}</div>`;
 }
 // The corner log: the daemon's live corner events for the car you are in, newest first.
 function cornersHTML() {
@@ -3039,7 +3068,35 @@ function activeLapSet() {
     const gated = ids.filter((id) => race.has(id));
     if (gated.length) { ids = gated; label += " · racing"; }
   }
-  return { set: new Set(ids), label };
+  // THE SCOPE TOKEN (handoff §2): what every scoped count is measured against, small enough to ride beside it --
+  // class · laps in scope (A·7), or the preset's name when no class narrows it (ALL·45, CAR·12). The full
+  // label stays on the token's tooltip.
+  const cls = tf.class || (sel.preset === "class" ? liveClass() : null) || null;
+  const token = (cls || SCOPE_PRE[sel.preset] || "ALL") + "·" + ids.length;
+  return { set: new Set(ids), label, token, cls, n: ids.length, total: (COURSE.laps || []).length };
+}
+const SCOPE_PRE = { all: "ALL", class: "CLASS", car: "CAR", build: "BUILD", hw: "HW", tune: "TUNE" };
+const mphD = (d) => (d > 0 ? "+" : d < 0 ? "−" : "±") + Math.abs(d) + " mph";   // a signed speed gap, typographic minus
+const scopeTok = (ls) => `<span class="scopetok mono" title="${esc(ls.label)} · ${ls.n} of ${ls.total} laps on the course">${esc(ls.token)}</span>`;
+// A VERDICT CARRIES ITS BASIS (handoff §1 rule 1): rank · denominator · scope · confidence, never a bare "best yet".
+// pool = one value per lap in scope (higher is better; every lap in scope, Jett 2026-09-11 Q3), mine = the pass
+// being rated, which is not in the pool, so it ranks among pool + itself. Degenerate pools are not wins:
+//   no pool          -> "only lap" (a lap compared with itself), no star, no delta
+//   every value level (within 0.5) -> "level · n", no star
+//   fewer than 5 in all -> a thin claim: a hollow ☆ when first, never the gold ★
+function rankVerdict(pool, mine, ls) {
+  const vals = (pool || []).filter((v) => v != null && isFinite(v)), tok = ls ? ls.token : "";
+  const n = vals.length, of = n + 1, laps = `${n} lap${n === 1 ? "" : "s"} in ${tok}`;
+  if (mine == null || !isFinite(mine)) return { kind: "nolap", text: "no lap", basis: n ? laps : `none in ${tok}`, star: "", d: null };
+  if (!n) return { kind: "only", rank: 1, of: 1, text: "only lap", basis: `none in ${tok} to compare with`, star: "", d: null };
+  const best = Math.max(...vals), all = vals.concat([mine]);
+  if (Math.max(...all) - Math.min(...all) < 0.5) return { kind: "level", rank: null, of, text: `level · ${of}`, basis: `${laps} · all level`, star: "", best, d: null };
+  const rank = vals.filter((v) => v > mine).length + 1, isBest = rank === 1, thin = of < 5;
+  // one decimal under 1 mph, so a pass 0.3 mph short of the best never reads "2 of 34 · 0 mph"
+  const dd = mine - best, d = Math.abs(dd) < 1 ? Math.round(dd * 10) / 10 : Math.round(dd);
+  return { kind: isBest ? "best" : "ranked", rank, of, isBest, thin, best, d,
+           star: isBest ? (thin ? "☆" : "★") : "", text: `${isBest ? (thin ? "☆ " : "★ ") : ""}${rank} of ${of}`,
+           basis: laps + (thin ? " · thin" : "") };
 }
 function cornerStripHTML(ls, sel) {
   const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);
@@ -3571,7 +3628,10 @@ function servicesHTML() {
 // other classes collapse to a one-line summary and the chosen one expands to its build table.
 const CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R", "X"];
 function courseStatsHTML() {
-  const laps = COURSE.laps || [];
+  // SCOPE GOVERNS THIS PANE TOO (handoff §2): it used to read every lap on the course and only borrow the class
+  // focus, so its totals disagreed with every other pane under the same filter bar.
+  const ls = activeLapSet(), allLaps = COURSE.laps || [];
+  const laps = allLaps.filter((l) => ls.set.has(String(l.id)));
   const clean = (l) => !l.void && !l.partial && !l.rewinds && l.t != null;
   const fmtLen = (m) => m == null ? "—" : m >= 1000 ? (m / 1000).toFixed(2) + " km" : Math.round(m) + " m";
   const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
@@ -3581,11 +3641,10 @@ function courseStatsHTML() {
   const totals = `<div class="grp"><div class="gh">${esc(COURSE.name || COURSE.key)}</div>
     <div class="cstat-tot"><span><b>${(COURSE.turns || []).length}</b><em>turns</em></span>
       <span><b>${fmtLen(COURSE.len)}</b><em>length</em></span>
-      <span><b>${laps.length}</b><em>laps recorded</em></span>
-      <span><b>${classes.length}</b><em>class${classes.length === 1 ? "" : "es"}</em></span></div></div>`;
-  if (!classes.length) return totals + `<div class="why" style="padding:4px 6px">no laps recorded on this course yet</div>`;
-  const sel = traceSel(COURSE);
-  const focus = sel.filters.class || (sel.preset === "class" ? liveClass() : null);
+      <span><b>${laps.length}</b><em>lap${laps.length === 1 ? "" : "s"} in ${scopeTok(ls)} · ${allLaps.length} on the course</em></span>
+      <span><b>${classes.length}</b><em>class${classes.length === 1 ? "" : "es"} in scope</em></span></div></div>`;
+  if (!classes.length) return totals + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
+  const focus = ls.cls;
   const sections = classes.map((cls) => {
     const cl = laps.filter((l) => l.class === cls);
     const timed = cl.filter(clean).sort((a, b) => a.t - b.t);

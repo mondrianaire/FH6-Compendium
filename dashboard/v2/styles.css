@@ -484,6 +484,9 @@ button.stage.act.go:active{transform:translateY(1px)}
 .ch-conf{font-size:11px;color:var(--mut);display:flex;align-items:center;flex-wrap:wrap;gap:3px}
 .ch-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:2px}
 .ch-dot.ok{background:var(--acc)} .ch-dot.w{background:var(--warn)} .ch-dot.x{background:var(--mut)}
+.ch-dot.n{background:none;box-shadow:inset 0 0 0 1.5px var(--mut)}
+.ch-conf .scopetok{margin-right:6px}
+.ch-pend{color:var(--warn);font-weight:600}
 .ch-browse{display:flex;align-self:stretch;align-items:center;gap:8px;background:rgba(78,163,255,.12);border:1px solid var(--acc2);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--ink)}
 .ch-browse b{font:800 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--acc2)}
 .ch-browse em{font-style:normal;color:var(--mut)}
@@ -1223,14 +1226,21 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .lapview{display:flex;flex-direction:column}
 .lap-liveflag{display:inline-flex;align-items:center;gap:5px;font:700 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--bad);margin-left:6px}
 .lap-liveflag i{width:6px;height:6px;border-radius:50%;background:var(--bad);box-shadow:0 0 6px rgba(240,97,109,.7);animation:ftrpulse 1.3s ease-in-out infinite}
-.lap-hd,.lap-row{display:grid;grid-template-columns:1.2fr 1.3fr 1fr 1.1fr;gap:8px;align-items:center;padding:5px 8px}
+.lap-hd,.lap-row{display:grid;grid-template-columns:0.9fr 1.1fr 1.6fr 0.9fr;gap:8px;align-items:center;padding:5px 8px}
+.lap-rank b{white-space:nowrap}
 .lap-hd{font:600 8.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
 .lap-row{border-bottom:1px solid var(--line2);font-size:12px}
 .lap-row:hover{background:var(--panel2)}
 .lap-turn{display:flex;flex-direction:column;line-height:1.15;font-weight:700;color:var(--ink)}
 .lap-turn em{font-style:normal;font-size:10px;font-weight:400;color:var(--mut)}
 .lap-spd b{color:var(--ink)} .lap-spd i{font-style:normal;color:var(--dim);margin:0 1px} .lap-spd em{font-style:normal;color:var(--dim);font-size:9.5px}
-.lap-rank{font-weight:700;font-size:11.5px}
+.lap-rank{font-weight:700;font-size:11.5px;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.lap-rank em{font:500 9.5px var(--mono);font-style:normal;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lap-rank.lap-v-only b,.lap-rank.lap-v-level b,.lap-rank.lap-v-nolap b{font-weight:600;color:var(--mut)}
+.lap-abandon{display:flex;align-items:center;gap:10px;padding:5px 8px;background:#11161d;border-bottom:1px solid var(--line2);font-size:11px;color:var(--mut)}
+.lap-abandon .mono{margin-left:auto}
+/* the scope token (handoff §2): what a count is measured against, riding beside it */
+.scopetok{display:inline-block;font:700 9.5px var(--mono);letter-spacing:.02em;color:var(--ink);border:1px solid var(--line2);border-radius:2px;padding:0 4px;line-height:14px;vertical-align:1px;text-transform:none}
 .lap-grip{font:600 11px var(--mono);display:flex;flex-direction:column;gap:3px;min-width:0}
 .lap-gword{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lap-gbar{display:flex;height:5px;border-radius:2px;overflow:hidden;background:var(--line2)}

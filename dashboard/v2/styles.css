@@ -637,9 +637,10 @@ button.lchip.hid{opacity:.35;text-decoration:line-through}
 .hact .hsep{display:none}
 .hchips{grid-row:3;display:flex;flex-wrap:wrap;gap:4px;align-content:start;overflow:hidden;max-height:52px}
 
-/* the alerts strip: one fixed cell */
-#alerts{flex:0 0 96px;height:96px;max-height:96px;overflow:auto;display:flex;flex-direction:column;gap:6px}
-#alerts:empty{display:flex}
+/* #alerts holds ONLY the (rare) save picker now — size it to its content and COLLAPSE when empty, so it
+   never leaves a blank band where the retired change-banner used to sit. */
+#alerts{flex:0 0 auto;max-height:40vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+#alerts:empty,#alerts.empty{display:none}
 #alerts .quiet{color:var(--dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px}
 .alert{flex:0 0 auto}
 

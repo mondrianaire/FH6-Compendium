@@ -2284,7 +2284,12 @@ function paintRight() {
       r.onmouseenter = () => hiPhase(r.dataset.phase); r.onmouseleave = () => hiPhase(null);
     });
   }
-  if (cur !== "matrix" && cur !== "browser") fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
+  if (cur === "stats") body.querySelectorAll("[data-clsfocus]").forEach((b) => b.onclick = () => {
+    if (!COURSE) return; const cls = b.dataset.clsfocus, vc = traceSel(COURSE);
+    if (vc.filters.class === cls) delete vc.filters.class; else vc.filters.class = cls;   // toggle the class focus (= the filter bar's class pick)
+    viewSave(); repaintFiltered(); });
+  const courseStats = cur === "stats" && MODE.suggest === "course" && COURSE;   // its sections manage their own overflow; do not row-clip them
+  if (cur !== "matrix" && cur !== "browser" && !courseStats) fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
     setPin(CUR.ordinal, b.dataset.pickts); if (COURSE) { vcourse(COURSE.key).filters.container = b.dataset.cont; viewSave(); }
     identify(carOf(CUR.cid), "pinned"); });
@@ -2815,7 +2820,59 @@ function servicesHTML() {
 
 // What this build keeps doing wrong, wherever it happens. Filtered to atomically-similar builds:
 // same hardware fingerprint under the rim rule, which is what makes history transferable.
+// GENERAL STATISTICS (course mode): the course's own facts + a per-class breakdown. Each class is
+// its own comparison (an S1 lap is not an A lap), so lap times and the cars/builds that set them live
+// in a class section. Picking a class in the filter bar -- or clicking a class here -- FOCUSES it: the
+// other classes collapse to a one-line summary and the chosen one expands to its build table.
+const CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R", "X"];
+function courseStatsHTML() {
+  const laps = COURSE.laps || [];
+  const clean = (l) => !l.void && !l.partial && !l.rewinds && l.t != null;
+  const fmtLen = (m) => m == null ? "—" : m >= 1000 ? (m / 1000).toFixed(2) + " km" : Math.round(m) + " m";
+  const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
+  const classes = [...new Set(laps.map((l) => l.class).filter(Boolean))]
+    .sort((a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
+  const clsPill = (cls) => `<span class="cls-pill" style="--pc:${piColor(cls)}">${esc(cls)}</span>`;
+  const totals = `<div class="grp"><div class="gh">${esc(COURSE.name || COURSE.key)}</div>
+    <div class="cstat-tot"><span><b>${(COURSE.turns || []).length}</b><em>turns</em></span>
+      <span><b>${fmtLen(COURSE.len)}</b><em>length</em></span>
+      <span><b>${laps.length}</b><em>laps recorded</em></span>
+      <span><b>${classes.length}</b><em>class${classes.length === 1 ? "" : "es"}</em></span></div></div>`;
+  if (!classes.length) return totals + `<div class="why" style="padding:4px 6px">no laps recorded on this course yet</div>`;
+  const sel = traceSel(COURSE);
+  const focus = sel.filters.class || (sel.preset === "class" ? liveClass() : null);
+  const sections = classes.map((cls) => {
+    const cl = laps.filter((l) => l.class === cls);
+    const timed = cl.filter(clean).sort((a, b) => a.t - b.t);
+    const best = timed[0] || null;
+    if (focus && focus !== cls) return `<button class="cstat-cls collapsed" data-clsfocus="${esc(cls)}" title="focus ${esc(cls)}">
+      ${clsPill(cls)}<span class="why">${cl.length} lap${cl.length === 1 ? "" : "s"}</span>
+      <span class="mono cstat-bt">${best ? lapTime(best.t) : "—"}</span></button>`;
+    const byBuild = {};
+    cl.forEach((l) => (byBuild[l.bid || l.container || "?"] = byBuild[l.bid || l.container || "?"] || []).push(l));
+    const builds = Object.values(byBuild).map((ls) => {
+      const bt = ls.filter(clean).sort((a, b) => a.t - b.t)[0] || null;
+      return { name: tuneLabel(ls[0].container), dt: ls[0].dt, pi: ls[0].pi, n: ls.length, best: bt ? bt.t : null };
+    }).sort((a, b) => (a.best || 9e9) - (b.best || 9e9));
+    const focused = focus === cls;
+    const rows = builds.map((b) => `<tr${best && b.best === best.t ? ' class="cstat-fast"' : ""}>
+      <td>${esc(b.name || "unnamed")}${b.dt ? ` <span class="why">${esc(b.dt)}</span>` : ""}</td>
+      <td class="mono" style="text-align:center">${b.pi ?? "—"}</td>
+      <td class="mono" style="text-align:center">${b.n}</td>
+      <td class="mono" style="text-align:right">${b.best != null ? lapTime(b.best) : "—"}</td></tr>`).join("");
+    return `<div class="grp cstat-sec${focused ? " on" : ""}">
+      <button class="cstat-clsh" data-clsfocus="${esc(cls)}" title="${focused ? "clear the class focus" : "focus this class"}">
+        ${clsPill(cls)}<b>${cl.length} lap${cl.length === 1 ? "" : "s"}</b>
+        <span class="why">${timed.length} clean · ${builds.length} build${builds.length === 1 ? "" : "s"}</span>
+        <span class="cstat-hero">${best ? lapTime(best.t) : "—"}<em>best</em></span>${focused ? '<span class="cstat-x">✕</span>' : ""}</button>
+      ${best ? `<div class="cstat-sub why">fastest ${esc(tuneLabel(best.container) || "unnamed")}${best.pi ? " · " + best.pi + " PI" : ""}${med(timed.map((l) => l.t)) != null ? " · median " + lapTime(med(timed.map((l) => l.t))) : ""}</div>` : ""}
+      <table class="cstat-tbl"><thead><tr><th>car / build</th><th>PI</th><th>laps</th><th>best</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  });
+  const hint = focus ? `<div class="cstat-focus why">focused on ${clsPill(focus)} — other classes collapsed; click ✕ or clear the filter to show all</div>` : "";
+  return totals + hint + sections.join("");
+}
 function statsHTML() {
+  if (MODE.suggest === "course" && COURSE) return courseStatsHTML();
   if (!DIAG) return `<div class="why">loading</div>`;
   const conts = new Set(atomicTwins().map((b) => b.c));
   const rows = DIAG.by_setup.filter((r) => conts.has(r.container));

@@ -413,6 +413,32 @@ button.stage.act.go:active{transform:translateY(1px)}
   font-size:11px;color:var(--mut);padding:2px 9px;border:1px solid var(--line2);border-radius:20px}
 .coursefilter .cf-sum b{color:var(--ink);font-variant-numeric:tabular-nums}
 .coursefilter .cf-dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 5px var(--acc)}
+/* ---- General statistics (course mode): course totals + a focusable per-class section each ---- */
+.cls-pill{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 7px;
+  border-radius:20px;border:1px solid var(--pc);color:var(--pc);font-size:11px;font-weight:700;letter-spacing:.02em}
+.cstat-tot{display:flex;flex-wrap:wrap;gap:6px 22px;padding:3px 4px 1px}
+.cstat-tot span{display:flex;flex-direction:column}
+.cstat-tot b{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
+.cstat-tot em{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-style:normal}
+.cstat-focus{padding:3px 6px;display:flex;align-items:center;gap:6px}
+.cstat-sec.on{outline:1px solid var(--pc,var(--acc));outline-offset:-1px}
+.cstat-cls.collapsed{display:flex;width:100%;align-items:center;gap:8px;padding:4px 8px;background:none;
+  border:0;border-top:1px solid var(--line);color:var(--ink);cursor:pointer;font:inherit;text-align:left}
+.cstat-cls.collapsed:hover{background:var(--panel2)}
+.cstat-cls.collapsed .cstat-bt{margin-left:auto;color:var(--mut)}
+.cstat-clsh{display:flex;width:100%;align-items:center;gap:8px;padding:2px 2px 5px;background:none;border:0;
+  color:var(--ink);cursor:pointer;font:inherit;text-align:left}
+.cstat-clsh b{font-size:13px;font-weight:500}
+.cstat-clsh:hover .cls-pill{background:var(--pc);color:#04140c}
+.cstat-hero{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;font-variant-numeric:tabular-nums;
+  font-size:16px;font-weight:500;color:var(--acc)}
+.cstat-hero em{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-style:normal}
+.cstat-x{margin-left:8px;font-size:11px;color:var(--mut)}
+.cstat-sub{padding:0 4px 4px}
+.cstat-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.cstat-tbl th{text-align:left;color:var(--mut);font-weight:400;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-bottom:1px solid var(--line)}
+.cstat-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+.cstat-tbl tr.cstat-fast td{color:var(--acc);font-weight:500}
 /* the map drawer's filter block: presets on their own line, the readable dims wrap below, a result
    summary makes the active selection explicit */
 .mdpanel .ffilters{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:5px}

@@ -122,13 +122,20 @@ svg{display:block;max-width:100%}
 /* the turn list under the map may scroll (Jett: info panes break the no-scroll rule) so the map keeps its space */
 .pane>.body.map>.grp{flex:0 1 auto;min-height:104px;display:flex;flex-direction:column;overflow:hidden}
 .pane>.body.map>.grp .tt-wrap{overflow-y:auto;flex:1 1 auto;min-height:0}
-.cmap-legend{position:absolute;left:8px;bottom:8px;margin:0;gap:3px 12px;z-index:4;
-  background:rgba(13,17,23,.74);padding:5px 9px;border-radius:5px;max-width:calc(100% - 16px);
-  box-shadow:0 1px 6px rgba(0,0,0,.35)}
-.cmap-legend .leg-views{display:inline-flex;align-items:center;gap:4px;margin-right:2px}
-.cmap-legend .leg-views em{font-style:normal;font:600 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+/* the map legend is a COMPACT FLOATING PILL: bottom row = view toggle + a "key" expander; the colour key
+   is hidden until expanded, so the pill stays small and never covers the turn numbers. */
+.cmap-legend{position:absolute;left:8px;bottom:8px;z-index:4;display:flex;flex-direction:column;gap:5px;
+  background:rgba(13,17,23,.85);padding:4px 6px;border-radius:6px;max-width:calc(100% - 16px);
+  box-shadow:0 1px 6px rgba(0,0,0,.45);font-size:11px;color:var(--mut)}
+.cleg-bar{display:flex;align-items:center;gap:6px}
+.cmap-legend .leg-views{display:inline-flex;align-items:center;gap:3px}
 .cmap-legend .leg-views .mini{margin-left:0;padding:1px 7px;font-size:10.5px}
 .cmap-legend .leg-views .mini.on{color:var(--acc);border-color:var(--acc);background:rgba(0,210,122,.12)}
+.cleg-toggle{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:3px;padding:1px 7px;font:600 10px var(--mono);cursor:pointer;white-space:nowrap}
+.cleg-toggle:hover{color:var(--acc);border-color:var(--acc)}
+.cleg-key{display:flex;flex-wrap:wrap;gap:3px 12px;align-items:center;max-width:340px}
+.cleg-key>span{display:inline-flex;align-items:center}
+.cleg-key i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
 .leg-grad{display:inline-flex;align-items:center;gap:5px}
 .leg-grad em{font-style:normal;font:600 10px var(--mono);color:var(--mut)}
 .leg-grad b{font:700 10.5px var(--mono);color:var(--ink);margin-left:2px}

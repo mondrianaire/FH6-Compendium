@@ -396,9 +396,11 @@ function courseMap(c, opts) {
     : `<span><i style="background:#00d27a"></i>where you drove</span>`;
   const allPhaseKey = SO.map((n) => `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("");
   const vbtn = (k, lbl) => `<button class="mini ${view === k ? "on" : ""}" data-mapview="${k}">${lbl}</button>`;
-  // The map fills the pane; the legend is an ALWAYS-VISIBLE floating overlay at bottom-left (Jett 2026-09-11)
-  // housing the map-view toggle (lap-time gradient vs turn-phase view) + the key. The DATA filter is NOT here
-  // — it lives in the shared #coursefilter bar between the trace and the info pane.
+  // The map fills the pane; the legend is a COMPACT FLOATING PILL at bottom-left (Jett 2026-09-11) — by
+  // default just the view toggle (lap-time gradient vs turn-phase view), so it never covers the turn numbers.
+  // A "key" button expands the colour key on demand. The DATA filter is NOT here — it lives in the shared
+  // #coursefilter bar between the trace and the info pane.
+  const legOpen = !!opts.legOpen;
   return el(`<div class="cmap">
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg)" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${line(theirs, "#3d4a5a", 9, 0.55)}
@@ -406,12 +408,18 @@ function courseMap(c, opts) {
       ${laps}
       ${phaseOv}${turns}<g id="traceMark"></g>
     </svg>
-    <div class="legend cmap-legend">
-      <span class="leg-views"><em>view</em>${vbtn("laptime", "lap time")}${vbtn("phases", "turn phases")}</span>
-      <span><i style="background:#7d8b9c"></i>centre-line</span>
-      ${showPhases ? allPhaseKey : gradKey}
-      <span><i style="background:var(--acc2)"></i>turn</span>
-      ${!showPhases ? phaseKey : ""}</div></div>`);
+    <div class="cmap-legend${legOpen ? " open" : ""}">
+      <div class="cleg-bar">
+        <span class="leg-views">${vbtn("laptime", "lap time")}${vbtn("phases", "turn phases")}</span>
+        <button class="cleg-toggle" data-legtoggle title="${legOpen ? "hide the map key" : "show the map key"}">key ${legOpen ? "▾" : "▸"}</button>
+      </div>
+      <div class="cleg-key"${legOpen ? "" : " hidden"}>
+        <span><i style="background:#7d8b9c"></i>centre-line</span>
+        ${showPhases ? allPhaseKey : gradKey}
+        <span><i style="background:var(--acc2)"></i>turn</span>
+        ${!showPhases ? phaseKey : ""}
+      </div>
+    </div></div>`);
 }
 
 const GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];

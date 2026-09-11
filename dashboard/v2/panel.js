@@ -1544,7 +1544,7 @@ function paintLeft() {
     // COURSE VIEW IS STATIC: no follow-preview zoom here (Jett 2026-09-06). courseMap() fits the whole course
     // to the pane and carries its own always-visible bottom-left legend (which houses the map-view toggle);
     // the DATA filter is in the shared #coursefilter bar, not here.
-    body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq(), view: MAP_VIEW }));
+    body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq(), view: MAP_VIEW, legOpen: MAP_LEG_OPEN }));
     body.insertAdjacentHTML("beforeend", turnTableHTML(COURSE, activeLapSet()));   // redesign phase B: the sortable turn list
     wireTrace(body); addLiveDot(body);
     // a turn marker OR a turn-list row selects that turn (highlight its phases here, full stats on the
@@ -1552,6 +1552,14 @@ function paintLeft() {
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
     body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
+    // the legend key toggles IN PLACE (no map rebuild → no re-animation): flip the pill's open state + the key rows
+    body.querySelectorAll("[data-legtoggle]").forEach((b) => b.onclick = () => {
+      MAP_LEG_OPEN = !MAP_LEG_OPEN; try { localStorage.setItem("fh6MapLeg", MAP_LEG_OPEN ? "1" : "0"); } catch (e) {}
+      const leg = b.closest(".cmap-legend"); if (!leg) return;
+      leg.classList.toggle("open", MAP_LEG_OPEN);
+      const key = leg.querySelector(".cleg-key"); if (key) key.hidden = !MAP_LEG_OPEN;
+      b.textContent = "key " + (MAP_LEG_OPEN ? "▾" : "▸"); b.title = (MAP_LEG_OPEN ? "hide" : "show") + " the map key";
+    });
   } else {
     paintLeftHeader();
     body.innerHTML = worldMapHTML();
@@ -1654,6 +1662,9 @@ let TURN_SORT = (() => { try { return localStorage.getItem("fh6TurnSort") || "fi
 // MAP_VIEW: how the left course map colours its traces — "laptime" (each lap by its recorded time, a gradient)
 // or "phases" (the whole road painted by the 5-phase turn model). Toggled from the map's floating legend.
 let MAP_VIEW = (() => { try { return localStorage.getItem("fh6MapView") || "laptime"; } catch (e) { return "laptime"; } })();
+// MAP_LEG_OPEN: whether the course map's floating legend pill is expanded to show the colour key. Collapsed
+// by default so the pill stays small and never covers the turn numbers.
+let MAP_LEG_OPEN = (() => { try { return localStorage.getItem("fh6MapLeg") === "1"; } catch (e) { return false; } })();
 // THE TURN LIST (redesign · phase B): every measured turn enumerated on the LEFT, sortable by route
 // order or by TIME TO FIND (biggest opportunity first — the default). Each row: turn + kind, the five
 // phase apex-mph medians, the median time in the turn, and the seconds available vs your best line.

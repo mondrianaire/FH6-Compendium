@@ -2,7 +2,8 @@
 
 **Date:** 2026-09-11 · **Lab:** `forza-eliminator-tips-db-c512c3` · **Spec:** the `handoff-course-mode-v2`
 implementation handoff (Jett, 2026-09-11; design source `Course Mode - Redesign v2.dc.html`).
-**Status:** prep only. Nothing in this document is built yet except the grip palette (step 0).
+**Status:** prep only. Nothing in this document is built yet except step 0 (grip palette, live lap buffer,
+trail paint selector). All four blocking questions are answered (§1).
 
 This maps every spec section to the code that exists today, lists what the data already supplies
 (several of the spec's §8 "prototype approximations" are already real fields), names the decisions that
@@ -20,14 +21,14 @@ block a build, and fixes the build order. Line numbers drift; function names are
 
 ---
 
-## 1. Blocking decisions — need Jett before building
+## 1. Decisions (Jett, 2026-09-11 — all four answered)
 
-| # | Question | Why it blocks |
+| # | Question | Decided |
 |---|---|---|
-| Q1 | **FOLLOW camera vs the static course view.** Spec §4.4 adds a damped follow camera to the course map. Standing decision (Jett 2026-09-06, `paintLeft`: "COURSE VIEW IS STATIC: no follow-preview zoom") says the opposite. | §4.4 cannot ship without an explicit reversal. Proposal: a toggle, default static, camera only while a lap is live. |
-| Q2 | **Where is `Course Mode - Redesign v2.dc.html`?** Not on disk under the user profile, not in the artifact list. | Pixel values beyond the handoff text (spacing, type scale, exact ribbon/ladder geometry) come from it. The handoff alone is enough for structure. |
-| Q3 | **Rank pool: traced laps or every lap in scope?** Spec §8.6 assumed only traced laps have per-turn minima. They don't: `turns[].phaseObs` carries a per-lap `min_mph` for every imported lap. | Decides the denominator on every row. Recommendation: every lap in scope (the data supports it). |
-| Q4 | **Does the map trail follow PAINT?** Spec §2 says PAINT drives the camera trail and the trace band. The live-lap map trail shipped today is always grip (the 2026-09-11 requirement was grip on the map). | One-line change either way; needs the call. |
+| Q1 | FOLLOW camera vs the standing static course view (2026-09-06) | **Follow while a lap is live** (`LIVE.lap.live`). Static otherwise — a pause, the end-of-event menu, browsing and free roam keep the whole-course fit. The rig resets to the full course on the live → held edge. |
+| Q2 | Design source | `C:\Users\mondr\Downloads\Course Mode - Redesign v2.dc.html`; its engineer-facing extraction is `docs/course-mode-v2-design-extract.md`. |
+| Q3 | Rank pool | **Every lap in scope** — `turns[].phaseObs[..][2]` `min_mph` per lap, not only traced laps. |
+| Q4 | Trail paint | **Selectable in the map legend's settings (key) panel.** Built 2026-09-11 (`6d43d5c`): `live trail: grip \| speed`, one state (`TRACE_MODE`) with the speed trace's paint toggle, speed on the course's own mph scale. The SCOPE band's PAINT control (spec §2) must bind to the same state, not add a third. |
 
 ---
 
@@ -41,7 +42,7 @@ block a build, and fixes the build order. Line numbers drift; function names are
 | Scope = one source of truth | `activeLapSet()` = `presetTest(sel.preset)` + `TRACE_DIMS` filters + `RACING_ONLY`, stored per course in `vcourse()` / `traceSel()` | **`courseStatsHTML()` does not use it** — it re-filters `COURSE.laps` inline and only reads `sel.filters.class`. Second consumer `mapFilterBar()` (map drawer). |
 | Token `A·7` / `ALL·45` on every scoped count | none | New `scopeToken(ls)` helper; audit every count in hero, turn table, lap view, stats. |
 | Mismatch state + "match my car" | none (`liveClass()` exists; preset `class` auto-selects in events) | New: compare `sel.filters.class` / preset against `liveClass()`; one-tap sets `vc.filters.class`. |
-| PAINT (`grip`/`speed`) one state | `TRACE_MODE` (global, `modeControls()` in the trace header) | Already one variable; the control moves into the band, the header pair reads it. Map trail per Q4. |
+| PAINT (`grip`/`speed`) one state | `TRACE_MODE`: trace header `modeControls()` + map key `[data-trailpaint]` (both handlers repaint both panes) | Already one state across trace, map trail and map key. The band's control binds to it too (Q4). |
 
 ### 2.2 Course pane (spec §3) — `courseHeroHTML()`, `courseInfoPill()`
 
@@ -113,6 +114,32 @@ a whole-identity state are not built.
 
 ---
 
+## 3b. Reading the design source — what overrides it
+
+Full extraction: `docs/course-mode-v2-design-extract.md`. The canvas is **one** 1080 × 1751 artboard; the
+tabs and the build-guard / held / mismatch states are props on it, not separate boards.
+
+- **Band order** (flex `order`, not source order): status strip 20 · nav 24 · HELD/BUILD split ≥152 ·
+  course identity + laps by class 78 · speed trace 405 · SCOPE 78 · two-pane body (left 452 px) · footer 30.
+  Matches the handoff (car above course, SCOPE under the trace).
+- **Grip colours: D1 overrides the canvas.** The canvas still paints trace/trail/ribbon lines with the old
+  `TRACE_GRIP` (`#00d27a #4ea3ff #f0616d #c678dd`) and uses `GRIP` only for chrome. Build every grip line
+  through `gripInk()` / `DGRIP`, including the turn-window driven line and the speed ribbon.
+- **Speed paint:** the canvas's `SPEED_RAMP` (5 stops) differs from the shipped `GRAD` (6 stops) that the
+  map trail and trace use since `6d43d5c`. Keep one ramp; pick at build time and change both together.
+- **Right-pane tabs:** the canvas has three — Current lap · One turn · General statistics. Shipped has five
+  (Current lap · Live corners · Turn analysis · General statistics · Conclusions). One turn is the next
+  design pass; what happens to Live corners and Conclusions is **not decided** — keep them until it is.
+- **Prototype artefacts, not rules:** the canvas ranks a turn's *median-index* pass as "current" (to avoid
+  a best-by-construction demo); production ranks the pass actually driven. The abandoned-attempt row is
+  static markup — production templates it from live corners grouped by stint id.
+- **Camera (matches the handoff):** tick 45 ms, +0.25 sample per tick, pan k 0.12, zoom kz 0.07, centre
+  0.45 bbox + 0.55 car, span `max(dx, dz·aspect, 110) × 1.3`, subject = first turn whose straight end is
+  ahead, previous turn faded to 0.2 within 70 m. Production drives it from real frames (`LIVE.lap`), not a
+  timer, and only while the lap is live (Q1).
+- **S1 purple vs drift violet** (flagged by the extract) is already handled for lines by the ΔE guard in
+  `gripInk()`; the S1 *badge* stays its class colour.
+
 ## 4. Build order
 
 1. **Foundations (no visual change):** `scopeToken(ls)`; `courseStatsHTML` onto `activeLapSet()`;
@@ -122,7 +149,7 @@ a whole-identity state are not built.
 3. **Current lap view:** turn window + 4-row rank table + abandoned-attempt rows.
 4. **General statistics view:** header basis, two headline answers, scatter, car table.
 5. **Shared chrome:** map layer order + legend bar; hero freshness + class bars; build panel faces.
-6. **FOLLOW camera** — only after Q1.
+6. **FOLLOW camera** — active only while `LIVE.lap.live` (Q1); reads `LIVE.lap` for the trail and the car.
 
 Each step ends with the spec's §9 checks that apply to it, verified in the Browser pane at 1080 × 1751
 with synthetic frames on route 5411 (the harness used for the live-lap map: close the tab's `ES`, stub

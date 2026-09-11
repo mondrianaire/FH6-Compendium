@@ -2522,6 +2522,14 @@ def disk_watcher():
     if TUNE is None:
         return
     last = None
+    # THE NEW-SAVE EDGE IS PER CAR AND NEVER RESET BY A FORCED RE-EMIT (Jett 2026-09-11: "downloading new tunes and
+    # saving them results in identity unsettled"). new_save used to be `last[0] == ordn`, but `last` is ONE slot
+    # that every forced re-emit (_disk_dirty -- set on every menu exit, on a verdict change, on an equipped fresh
+    # download) replaces with (None, None), and that polling another car overwrites. A tune saved during a menu
+    # dwell then landed with new_save False, so the sticky identity was never re-anchored to the just-written file
+    # and a 2-hour hold kept serving an older build (seen live: ordinal 3429 held on a 13:35 save with two newer
+    # saves unconsumed). `seen` remembers each car's newest mtime on its own; `last` only decides whether to emit.
+    seen = {}
     while True:
         time.sleep(1.5)
         try:
@@ -2568,9 +2576,11 @@ def disk_watcher():
             if getattr(ST, "_disk_dirty", False):
                 ST._disk_dirty = False; last = (None, None)   # an auto-association changed the deliverable — re-emit even without a file change
             key = (ordn, round(metas[0]["mtime"], 2))
-            if key == last:
+            prev_m = seen.get(ordn)
+            new_save = prev_m is not None and key[1] > prev_m   # a newer file than this car's newest already seen = a fresh save
+            seen[ordn] = key[1] if prev_m is None else max(prev_m, key[1])
+            if key == last and not new_save:
                 continue
-            new_save = bool(last and last[0] == ordn)   # same car + newer file = a fresh save
             last = key
             if new_save:
                 # a fresh save may change gearing/identity — drop this car's measured-ladder cache + gear verdicts so

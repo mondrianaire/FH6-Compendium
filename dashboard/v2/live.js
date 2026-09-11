@@ -80,6 +80,18 @@ function connect() {
       LIVE.cars = (LIVE.cars || []).filter((c) => c.id !== car.id).concat([car]);
       if (CUR && CUR.cid === car.id) identify(carOf(car.id), "config");
     });
+    // THE SAVE RESCAN, EVENT-DRIVEN (Jett 2026-09-11: "re-scan car identification for saved files is not triggered
+    // automatically coming from the menu"). The daemon re-decodes the save and pushes a "disk" event on every menu
+    // exit and the moment a new save is written (disk_watcher) -- but nothing here listened for it, so the only
+    // re-read was reread()'s single fetch on the menu edge, which could land before the daemon had re-anchored
+    // identity to the just-saved tune and then never retried. Now every disk event for the car under you runs the
+    // same reread() (debounced: a burst of events costs one read).
+    let diskT = 0;
+    ES.addEventListener("disk", (e) => {
+      let d = null; try { d = JSON.parse(e.data); } catch (x) { return; }
+      if (!CUR || !d || Number(d.ordinal) !== Number(CUR.ordinal)) return;
+      clearTimeout(diskT); diskT = setTimeout(() => reread(), 250);
+    });
     ES.onerror = () => { LIVE.receiving = false; paintHeader(); };
   } catch (err) { LIVE.err = String(err); paintHeader(); }
 }

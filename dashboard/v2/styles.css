@@ -509,6 +509,13 @@ button.stage.act.go:active{transform:translateY(1px)}
 /* ---- General statistics (course mode): course totals + a focusable per-class section each ---- */
 .cls-pill{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 7px;
   border-radius:20px;border:1px solid var(--pc);color:var(--pc);font-size:11px;font-weight:700;letter-spacing:.02em}
+/* general statistics (per-car redesign): two headline answers + a laps×best scatter */
+.cstat-heads{display:flex;gap:10px;flex-wrap:wrap}
+.cstat-head{flex:1 1 0;min-width:120px;display:flex;flex-direction:column;gap:1px;background:var(--panel2);border-radius:5px;padding:6px 9px}
+.cstat-head em{font-style:normal;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.cstat-head b{font-size:15px;font-weight:600;line-height:1.15}
+.cstat-head .why{display:flex;align-items:center;gap:5px}
+.cstat-scatter{width:100%;height:auto;background:var(--bg);border-radius:6px}
 .cstat-tot{display:flex;flex-wrap:wrap;gap:6px 22px;padding:3px 4px 1px}
 .cstat-tot span{display:flex;flex-direction:column}
 .cstat-tot b{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}

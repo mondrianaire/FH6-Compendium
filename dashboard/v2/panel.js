@@ -3947,54 +3947,64 @@ function servicesHTML() {
 // other classes collapse to a one-line summary and the chosen one expands to its build table.
 const CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R", "X"];
 function courseStatsHTML() {
-  // SCOPE GOVERNS THIS PANE TOO (handoff §2): it used to read every lap on the course and only borrow the class
-  // focus, so its totals disagreed with every other pane under the same filter bar.
+  // GENERAL STATISTICS, PER CAR (redesign step 4): scoped to the active lap set, this answers "which car,
+  // and how does practice trade for pace" — a most-driven and a quickest headline, a laps×best scatter (one
+  // dot per car, fastest at the top), and a fastest-first car table. Cars are grouped by ordinal (the physical
+  // car), NOT by build/tune as before. The basis header states the scope and never implies a total over laps
+  // it dropped — laps that name no tune are counted and called out, not hidden.
   const ls = activeLapSet(), allLaps = COURSE.laps || [];
   const laps = allLaps.filter((l) => ls.set.has(String(l.id)));
   const clean = (l) => !l.void && !l.partial && !l.rewinds && l.t != null;
   const fmtLen = (m) => m == null ? "—" : m >= 1000 ? (m / 1000).toFixed(2) + " km" : Math.round(m) + " m";
   const med = (a) => { a = a.filter((x) => x != null).slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
-  const classes = [...new Set(laps.map((l) => l.class).filter(Boolean))]
-    .sort((a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
-  const clsPill = (cls) => classPill(cls);   // the established .pib badge, everywhere a class is shown
-  const totals = `<div class="grp"><div class="gh">${esc(COURSE.name || COURSE.key)}</div>
-    <div class="cstat-tot"><span><b>${(COURSE.turns || []).length}</b><em>turns</em></span>
+  const ordOf = (cid) => String(cid || "").split("|")[0] || "?";
+  const nCars = new Set(laps.map((l) => ordOf(l.cid)).filter((o) => o && o !== "?")).size;
+  const noTune = laps.filter((l) => !l.container).length;
+  const totals = `<div class="grp"><div class="gh">${esc(COURSE.name || COURSE.key)} <span class="why">· general statistics</span></div>
+    <div class="cstat-tot"><span><b>${laps.length}</b><em>lap${laps.length === 1 ? "" : "s"} in ${scopeTok(ls)}</em></span>
+      <span><b>${allLaps.length}</b><em>on the course</em></span>
+      <span><b>${nCars}</b><em>car${nCars === 1 ? "" : "s"}</em></span>
       <span><b>${fmtLen(COURSE.len)}</b><em>length</em></span>
-      <span><b>${laps.length}</b><em>lap${laps.length === 1 ? "" : "s"} in ${scopeTok(ls)} · ${allLaps.length} on the course</em></span>
-      <span><b>${classes.length}</b><em>class${classes.length === 1 ? "" : "es"} in scope</em></span></div></div>`;
-  if (!classes.length) return totals + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
-  const focus = ls.cls;
-  const sections = classes.map((cls) => {
-    const cl = laps.filter((l) => l.class === cls);
-    const timed = cl.filter(clean).sort((a, b) => a.t - b.t);
-    const best = timed[0] || null;
-    if (focus && focus !== cls) return `<button class="cstat-cls collapsed" data-clsfocus="${esc(cls)}" title="focus ${esc(cls)}">
-      ${clsPill(cls)}<span class="why">${cl.length} lap${cl.length === 1 ? "" : "s"}</span>
-      <span class="mono cstat-bt">${best ? lapTime(best.t) : "—"}</span></button>`;
-    const byBuild = {};
-    cl.forEach((l) => (byBuild[l.bid || l.container || "?"] = byBuild[l.bid || l.container || "?"] || []).push(l));
-    const builds = Object.values(byBuild).map((ls) => {
-      const bt = ls.filter(clean).sort((a, b) => a.t - b.t)[0] || null;
-      const tune = tuneLabel(ls[0].container);
-      return { car: carShort(ls[0].cid), tune: tune && !/^unnamed$/i.test(tune) ? tune : null,
-               dt: ls[0].dt, pi: ls[0].pi, n: ls.length, best: bt ? bt.t : null };
-    }).sort((a, b) => (a.best || 9e9) - (b.best || 9e9));
-    const focused = focus === cls;
-    const rows = builds.map((b) => `<tr${best && b.best === best.t ? ' class="cstat-fast"' : ""}>
-      <td><b>${esc(b.car)}</b>${b.tune ? ` <span class="why">${esc(b.tune)}</span>` : ""}${b.dt ? ` <span class="why">${esc(b.dt)}</span>` : ""}</td>
-      <td class="mono" style="text-align:center">${b.pi ?? "—"}</td>
-      <td class="mono" style="text-align:center">${b.n}</td>
-      <td class="mono" style="text-align:right">${b.best != null ? lapTime(b.best) : "—"}</td></tr>`).join("");
-    return `<div class="grp cstat-sec${focused ? " on" : ""}">
-      <button class="cstat-clsh" data-clsfocus="${esc(cls)}" title="${focused ? "clear the class focus" : "focus this class"}">
-        ${clsPill(cls)}<b>${cl.length} lap${cl.length === 1 ? "" : "s"}</b>
-        <span class="why">${timed.length} clean · ${builds.length} build${builds.length === 1 ? "" : "s"}</span>
-        <span class="cstat-hero">${best ? lapTime(best.t) : "—"}<em>best</em></span>${focused ? '<span class="cstat-x">✕</span>' : ""}</button>
-      ${best ? `<div class="cstat-sub why">fastest ${esc(tuneLabel(best.container) || "unnamed")}${best.pi ? " · " + best.pi + " PI" : ""}${med(timed.map((l) => l.t)) != null ? " · median " + lapTime(med(timed.map((l) => l.t))) : ""}</div>` : ""}
-      <table class="cstat-tbl"><thead><tr><th>car / build</th><th>PI</th><th>laps</th><th>best</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  });
-  const hint = focus ? `<div class="cstat-focus why">focused on ${clsPill(focus)} — other classes collapsed; click ✕ or clear the filter to show all</div>` : "";
-  return totals + hint + sections.join("");
+      ${noTune ? `<span><b>${noTune}</b><em>lap${noTune === 1 ? "" : "s"} name no tune</em></span>` : ""}</div></div>`;
+  if (!laps.length) return totals + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
+  // per-CAR aggregation (by ordinal) within scope
+  const byCar = {};
+  laps.forEach((l) => { const o = ordOf(l.cid);
+    const c = byCar[o] = byCar[o] || { ord: o, cid: l.cid, name: carShort(l.cid), cls: l.class, pi: l.pi, laps: [] };
+    c.laps.push(l); if (l.class && !c.cls) c.cls = l.class; if (l.pi && !c.pi) c.pi = l.pi; });
+  const cars = Object.values(byCar).map((c) => { const timed = c.laps.filter(clean);
+    const best = timed.length ? Math.min(...timed.map((l) => l.t)) : null;
+    return { ord: c.ord, name: c.name, cls: c.cls, pi: c.pi, n: c.laps.length, nClean: timed.length, best, med: med(timed.map((l) => l.t)) }; });
+  const mostUsed = cars.slice().sort((a, b) => b.n - a.n)[0];
+  const withBest = cars.filter((c) => c.best != null);
+  const quickest = withBest.slice().sort((a, b) => a.best - b.best)[0];
+  const headline = `<div class="grp cstat-heads">
+    ${mostUsed ? `<div class="cstat-head"><em>most driven</em><b>${esc(mostUsed.name)}</b><span class="why">${classPill(mostUsed.cls)} · ${mostUsed.n} lap${mostUsed.n === 1 ? "" : "s"}</span></div>` : ""}
+    ${quickest ? `<div class="cstat-head"><em>quickest</em><b class="mono" style="color:var(--acc)">${lapTime(quickest.best)}</b><span class="why">${classPill(quickest.cls)} · ${esc(quickest.name)}</span></div>` : ""}</div>`;
+  // SCATTER: x = laps driven, y = best lap (fastest at the TOP), one dot per car, coloured by class
+  let scatter = "";
+  if (withBest.length) {
+    const W = 520, H = 168, padL = 40, padR = 10, padT = 10, padB = 22;
+    const maxN = Math.max(1, ...cars.map((c) => c.n)), bs = withBest.map((c) => c.best), lo = Math.min(...bs), hi = Math.max(...bs), sp = (hi - lo) || 1;
+    const X = (n) => padL + (maxN <= 1 ? 0.5 : (n - 1) / (maxN - 1)) * (W - padL - padR);
+    const Y = (t) => padT + ((t - lo) / sp) * (H - padT - padB);   // fastest (lo) at the top
+    const dots = withBest.map((c) => { const on = c === quickest;
+      return `<circle cx="${X(c.n).toFixed(1)}" cy="${Y(c.best).toFixed(1)}" r="${on ? 5.5 : 4}" fill="${piColor(c.cls)}" stroke="${on ? "var(--acc)" : "#0b0e12"}" stroke-width="${on ? 2 : 1}"><title>${esc(c.name)}${c.cls ? " · " + esc(c.cls) : ""} · ${c.n} lap${c.n === 1 ? "" : "s"} · best ${lapTime(c.best)}${c.med != null ? " · median " + lapTime(c.med) : ""}</title></circle>`; }).join("");
+    const ya = [lo, hi].map((t) => `<text x="2" y="${(Y(t) + 3).toFixed(1)}" font-size="8" fill="var(--dim)">${lapTime(t)}</text>`).join("");
+    const xa = `<text x="${padL}" y="${H - 6}" font-size="8" fill="var(--dim)">1 lap</text><text x="${W - padR}" y="${H - 6}" font-size="8" fill="var(--dim)" text-anchor="end">${maxN} lap${maxN === 1 ? "" : "s"}</text>`;
+    scatter = `<div class="grp"><div class="gh">pace vs practice <span class="why">· each car: laps driven → its best lap · fastest at the top</span></div>
+      <svg class="cstat-scatter" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"><line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--line2)"/><line x1="${padL}" y1="${(H - padB).toFixed(1)}" x2="${W - padR}" y2="${(H - padB).toFixed(1)}" stroke="var(--line2)"/>${ya}${xa}${dots}</svg></div>`;
+  }
+  // CAR TABLE: fastest first; the pane scrolls (courseStats skips fitRows)
+  const rows = cars.slice().sort((a, b) => (a.best || 9e9) - (b.best || 9e9)).map((c) => `<tr${c === quickest ? ' class="cstat-fast"' : ""}>
+    <td>${classPill(c.cls)} <b>${esc(c.name)}</b></td>
+    <td class="mono" style="text-align:center">${c.pi ?? "—"}</td>
+    <td class="mono" style="text-align:center">${c.n}</td>
+    <td class="mono" style="text-align:right">${c.best != null ? lapTime(c.best) : "—"}</td>
+    <td class="mono dim" style="text-align:right">${c.med != null ? lapTime(c.med) : "—"}</td></tr>`).join("");
+  const table = `<div class="grp"><div class="gh">by car <span class="why">· ${cars.length} car${cars.length === 1 ? "" : "s"} in ${scopeTok(ls)} · fastest first</span></div>
+    <table class="cstat-tbl"><thead><tr><th>car</th><th>PI</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  return totals + headline + scatter + table;
 }
 function statsHTML() {
   if (MODE.suggest === "course" && COURSE) return courseStatsHTML();

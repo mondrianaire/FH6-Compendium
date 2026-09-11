@@ -487,6 +487,40 @@ const DGRIP = {
 };
 const GSTATE = ["calm", "front", "rear", "both", "impact"];   // grip code 0-4 -> DGRIP key
 const gripOf = (k) => DGRIP[typeof k === "number" ? GSTATE[k] : k] || DGRIP.calm;
+// THE PEDAL PAINT (Jett 2026-09-11: "indicate brake and throttle measurements throughout the run"). What the
+// driver's feet did at each point -- throttle in greens and brake in reds (the telemetry convention), each in
+// three bands by how hard, coast grey, both pedals at once pale violet. Points carry throttle / brake as 0-100 %
+// at [6] / [7] (recorded traces, schema 6) -- a lap analysed before schema 6 has none and reads "no pedal data".
+// Its own axis: grip and speed keep their palettes, and every surface's legend names which one a line wears.
+const PEDAL = {
+  none:  { col: "#2e3642", word: "no pedal data" },
+  coast: { col: "#8b97a7", word: "coast" },
+  thr1:  { col: "#2f7d5a", word: "throttle under 40%", group: "throttle, light → full" },
+  thr2:  { col: "#3fb67c", word: "throttle 40–90%" },
+  thr3:  { col: "#6af2a8", word: "throttle 90%+" },
+  brk1:  { col: "#8e3b2c", word: "brake under 40%", group: "brake, light → full" },
+  brk2:  { col: "#d9542f", word: "brake 40–90%" },
+  brk3:  { col: "#ff8a5c", word: "brake 90%+" },
+  both:  { col: "#e3c8ff", word: "both pedals" },
+};
+const PEDAL_KEYS = ["none", "coast", "thr1", "thr2", "thr3", "brk1", "brk2", "brk3", "both"];
+// throttle / brake % -> PEDAL_KEYS index; a pedal counts as pressed from 10%
+function pedalKey(thr, brk) {
+  if (thr == null && brk == null) return 0;
+  const t = +thr || 0, b = +brk || 0;
+  if (b >= 10 && t >= 10) return 8;
+  if (b >= 10) return b >= 90 ? 7 : b >= 40 ? 6 : 5;
+  if (t >= 10) return t >= 90 ? 4 : t >= 40 ? 3 : 2;
+  return 1;
+}
+const pedalCol = (k) => PEDAL[PEDAL_KEYS[k]].col;
+// the pedal key for any legend: coast · throttle ramp · brake ramp · both pedals
+function pedalSwatches() {
+  return [["coast"], ["thr1", "thr2", "thr3"], ["brk1", "brk2", "brk3"], ["both"]].map((ks) =>
+    `<span class="ped-sw" title="${esc(ks.map((k) => PEDAL[k].word).join(" · "))}">${ks.map((k) => `<i style="background:${PEDAL[k].col}"></i>`).join("")}${esc(PEDAL[ks[0]].group || PEDAL[ks[0]].word)}</span>`).join("");
+}
+// the legacy key the v1 dashboard also reads knows only its own modes; pedals persists in the v2 view store alone
+function saveTraceMode() { VIEW.global.traceMode = TRACE_MODE; viewSave(); if (TRACE_MODE !== "pedals") { try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} } }
 // PI-class colours, matching the .pib-<class> badges (styles.css). A context (non-foregrounded)
 // speed-trace line is painted by the PI CLASS of the build that drove it, so PI-vs-speed reads at a
 // glance across laps from different-class builds (Jett 2026-09-07). Unknown class falls back to --dim.
@@ -744,23 +778,23 @@ function paintedLine(pts, ch, w, mode, baseCol, range) {
   let sc = null;
   if (mode === "speed" && range) sc = range;   // a fixed scale (the course's), so two views of one lap agree
   else if (mode === "speed") { const vs = pts.map((q) => q[1]); sc = { lo: Math.min(...vs), hi: Math.max(...vs) }; if (sc.hi - sc.lo < 1e-6) sc = null; }
-  const keyOf = (q) => (mode === "speed" && sc) ? Math.max(0, Math.min(GRAD.length - 1, Math.floor(((q[1] - sc.lo) / (sc.hi - sc.lo)) * GRAD.length))) : (q[2] | 0);
+  const keyOf = (q) => mode === "pedals" ? pedalKey(q[6], q[7]) : (mode === "speed" && sc) ? Math.max(0, Math.min(GRAD.length - 1, Math.floor(((q[1] - sc.lo) / (sc.hi - sc.lo)) * GRAD.length))) : (q[2] | 0);
   // "NO PROBLEMS" IS THE DEFAULT COLOUR (Jett 2026-09-07): in grip paint the within-grip segments
   // (k===0, nothing wrong) carry the build's PI class colour when one is given, so PI stays readable
   // even on a painted line -- the problem states (slip/impact) keep their diagnostic colours, and the
   // speed gradient is untouched (it has no no-problem baseline).
-  const colOf = (k) => (mode === "speed" && sc) ? GRAD[k] : gripInk(k, baseCol);
+  const colOf = (k) => mode === "pedals" ? pedalCol(k) : (mode === "speed" && sc) ? GRAD[k] : gripInk(k, baseCol);
   return arcRuns(pts).map((rp) => {
     const segs = []; let run = [rp[0]], st = keyOf(rp[0]);
     for (let i = 1; i < rp.length; i++) { const k = keyOf(rp[i]); if (k !== st) { run.push(rp[i]); segs.push([st, run]); run = [rp[i]]; st = k; } else run.push(rp[i]); }
     segs.push([st, run]);
-    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${colOf(k)}" stroke-width="${(mode === "speed" || k) ? w + 0.6 : w}" stroke-linecap="round" points="${pp.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"><title>${mode === "speed" ? "speed" : gripOf(k).word + " — " + gripOf(k).tip}</title></polyline>`).join("");
+    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${colOf(k)}" stroke-width="${(mode === "speed" || (mode === "pedals" ? k > 1 : k)) ? w + 0.6 : w}" stroke-linecap="round" points="${pp.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"><title>${mode === "pedals" ? PEDAL[PEDAL_KEYS[k]].word : mode === "speed" ? "speed" : gripOf(k).word + " — " + gripOf(k).tip}</title></polyline>`).join("");
   }).join("");
 }
 const plainLine = (pts, ch, col, w, op, dashed) => arcRuns(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}"${dashed ? ' stroke-dasharray="3 3"' : ""} points="${run.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>`).join("");
 function impactMarks(pts) { const out = []; for (const q of pts) { if ((q[2] | 0) !== 4 || q.length < 5) continue; const l = out[out.length - 1]; if (l && (l[3] - q[3]) ** 2 + (l[4] - q[4]) ** 2 <= 144) continue; out.push(q); } return out; }
 function modeControls() {
-  return `<span class="segctl"><span class="why">paint</span>${[["grip", "grip", "what the tyres did — the axle that let go, and where"], ["speed", "speed", "how fast, coloured across the lap's own range"]].map(([k, l, tip]) =>
+  return `<span class="segctl"><span class="why">paint</span>${[["grip", "grip", "what the tyres did — the axle that let go, and where"], ["speed", "speed", "how fast, coloured across the lap's own range"], ["pedals", "pedals", "what your feet did — throttle in greens, brake in reds, by how hard"]].map(([k, l, tip]) =>
     `<button class="mini ${TRACE_MODE === k ? "on" : ""}" data-tmode="${k}" title="${tip}">${l}</button>`).join("")}
     <button class="mini ${TRACE_ALL ? "on" : ""}" data-tall title="paint every run, not only the foregrounded lap">every run</button>
     <button class="mini ${RACING_ONLY ? "on" : ""}" data-racing title="show only competitive laps — hide cruise/drift runs far off the class pace, rewound laps, and over/under-covered laps. Off = every lap on record.">racing only</button></span>`;
@@ -798,7 +832,7 @@ function paintCourseFilter() {
     const on = k == null ? !ls.cls : ls.cls === k, n = k == null ? cnt(base.map((l) => String(l.id))) : cnt(byCls[k]);
     return `<button class="cf-cls${on ? " on" : ""}${k && k === carCls ? " car" : ""}" data-cfcls="${k == null ? "" : esc(k)}" title="${k == null ? "every class" : "class " + esc(k)} · ${n} lap${n === 1 ? "" : "s"}${k && k === carCls ? " · the car under you" : ""}">${k == null ? `<b class="cf-all">all</b><em class="cf-n">${n}</em>` : classPill(k, n)}</button>`;
   };
-  const paint = `<span class="fdim cf-paint"><span class="why">paint the trail</span>${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-tmode="${m}" title="${tip}">${m}</button>`).join("")}</span>`;
+  const paint = `<span class="fdim cf-paint"><span class="why">paint the trail</span>${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"], ["pedals", "throttle and brake, by how hard"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-tmode="${m}" title="${tip}">${m}</button>`).join("")}</span>`;
   const carTxt = !carCls ? "no live car to check the scope against"
     : `the car under you is class ${esc(carCls)} (${carN} lap${carN === 1 ? "" : "s"})`
       + (state === "mismatch" ? ` — <b class="cf-warn">every count below is measured against class ${esc(ls.cls)}</b>` : state === "match" ? " — the filter matches it" : "");
@@ -910,7 +944,7 @@ function alignLiveToCourse(run, ref, c) {
   if (!ref || !(ref.pts || []).length || !(run || []).length) return null;
   const R = ref.pts, L = (c && c.len) || R[R.length - 1][0] || 1;
   const arcOf = (px, pz) => { let bd = Infinity, ba = 0; for (let i = 0; i < R.length; i++) { const dx = R[i][3] - px, dz = R[i][4] - pz, d = dx * dx + dz * dz; if (d < bd) { bd = d; ba = R[i][0]; } } return ba; };
-  const mapped = run.map((q) => [arcOf(q[3], q[4]), q[1], q[2] | 0, q[3], q[4]]);
+  const mapped = run.map((q) => [arcOf(q[3], q[4]), q[1], q[2] | 0, q[3], q[4], null, q[8] ?? null, q[9] ?? null]);   // LIVE.lap keeps pedals at [8]/[9]
   let start = 0;                                   // the last S/F wrap: the arc drops by most of a lap
   for (let i = 1; i < mapped.length; i++) if (mapped[i][0] < mapped[i - 1][0] - L * 0.4) start = i;
   const lap = mapped.slice(start);
@@ -923,7 +957,7 @@ function courseTrace(c) {
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
   const onRec = (c.laps || []).length;
-  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""} · ticks share the turn list's T numbers</span>
+  const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""}${TRACE_MODE === "pedals" ? ` · pedals recorded on ${stage2.filter((t) => t.pts.some((q) => q[6] != null)).length} of ${stage2.length} laps` : ""} · ticks share the turn list's T numbers</span>
     <span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
   if (!stage2.length) return { head, foot: `<span class="why">no lap on record matches — widen the preset or clear a filter</span>`, svg: () => `<div class="why tempty">nothing to draw</div>` };
   const L = Math.max(c.len || 0, ...stage2.map((t) => t.pts[t.pts.length - 1][0]));
@@ -956,7 +990,7 @@ function courseTrace(c) {
   // laps and dims the rest in the chart -- a highlight, not a filter (every lap stays on screen). Click again
   // (or its ✕) to clear. The chips carry an `on` state so the current spotlight is obvious.
   const piLeg = (!TRACE_ALL && clsPresent.length) ? `<span class="lchips pileg" title="click a class to spotlight its laps in the chart; the lines are coloured by the PI class that drove each lap">${clsPresent.map((k) => `<button class="lchip key clshi${TRACE_CLS_HI === k ? " on" : ""}" data-clshi="${esc(k)}" style="--pc:${piColor(k)};border-color:${piColor(k)};background:${piColor(k)}${TRACE_CLS_HI === k ? "44" : "22"}"><i style="background:${piColor(k)}"></i>${esc(k)}${TRACE_CLS_HI === k ? " ✕" : ""}</button>`).join("")}</span>` : "";
-  const foot = `${piLeg}<span class="lchips">${live ? (liveNow ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : `<span class="lchip livenow last" title="the last lap driven, held through the pause / menu until the next lap starts"><i></i>last run</span>`) : ""}${leg}</span>`;
+  const foot = `${TRACE_MODE === "pedals" ? `<span class="lchips pedleg">${pedalSwatches()}</span>` : ""}${piLeg}<span class="lchips">${live ? (liveNow ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : `<span class="lchip livenow last" title="the last lap driven, held through the pause / menu until the next lap starts"><i></i>last run</span>`) : ""}${leg}</span>`;
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
@@ -989,7 +1023,7 @@ function courseTrace(c) {
     const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => { const on = t.seq === tsel;
       return `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="${on ? "var(--acc2)" : "var(--line2)"}" stroke-width="${on ? 1.6 : 1}" opacity="${on ? 0.95 : 0.7}"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" font-weight="${on ? 700 : 400}" fill="${on ? "var(--acc2)" : "var(--dim)"}">${esc(turnLabel(t))}</text>`; }).join("");
     const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="${DGRIP.impact.ink}" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="${DGRIP.impact.col}"/></g>`).join("");
-    const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
+    const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4], null, q[6] ?? null, q[7] ?? null]);   // pedals ride for the hover readout
     // THE ACTIVE LAP, on top and unmistakable: a soft accent glow under the grip-painted line, thicker than
     // any recorded lap, with the car's marker at its current position -- the same "you" the course map draws
     // (white core, accent pulse; a hollow grey ring when held), never a grip colour. "Last run" drops the pulse.
@@ -1011,14 +1045,14 @@ function liveRun() {
   const curG = pts.length ? pts[pts.length - 1][2] : null;
   // the swatches key a LINE, so they wear each state's ink (within grip: the PI colour the line paints in)
   const pc = piColor(CUR && CUR.cls);
-  const foot = `<span class="lchips grip">${GSTATE.map((key, i) => { const c = gripInk(i, pc); return `<span class="lchip key${curG === i ? " on" : ""}" title="${esc(DGRIP[key].tip)}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${DGRIP[key].word}</span>`; }).join("")}</span>`;
+  const foot = TRACE_MODE === "pedals" ? `<span class="lchips pedleg">${pedalSwatches()}</span>` : `<span class="lchips grip">${GSTATE.map((key, i) => { const c = gripInk(i, pc); return `<span class="lchip key${curG === i ? " on" : ""}" title="${esc(DGRIP[key].tip)}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${DGRIP[key].word}</span>`; }).join("")}</span>`;
   const svg = (W, H) => {
     if (pts.length < 3) return `<div class="why tempty">drive — speed against time draws here as you go, painted by what the tyres are doing</div>`;
     // FREE MODE PLOTS vs TIME, not distance (Jett 2026-09-07): a free-roam run has no course to measure
     // along, so the x-axis is seconds since the run began. [6] is the sample timestamp; fall back to the
     // distance axis for any stale point that predates it.
     const hasT = pts[0][6] != null, t0 = hasT ? pts[0][6] : 0;
-    const P = pts.map((q) => [hasT ? (q[6] - t0) / 1000 : q[0], q[1], q[2], q[3], q[4]]);
+    const P = pts.map((q) => [hasT ? (q[6] - t0) / 1000 : q[0], q[1], q[2], q[3], q[4], null, q[7] ?? null, q[8] ?? null]);   // LIVE.run keeps pedals at [7]/[8]
     const smax = P[P.length - 1][0] || 1, vmax = Math.max(60, ...P.map((q) => q[1])) * 1.06;
     const ch = chart(W, H, 28, 16, smax, vmax);
     // split at a pause: a menu dwell holds the run but leaves a >1.5 s gap in the timestamps, and drawing
@@ -1064,7 +1098,7 @@ function wireTrace(el) {
     viewSave(); repaintFiltered(); });
   el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); repaintFiltered(); });
   el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); viewSave(); paintTrace(); });
-  el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; paintTrace();
+  el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; saveTraceMode(); TRACE_KEY = null; paintTrace(); paintCourseFilter();   // the scope band's paint buttons show the same state
     if (MODE.suggest === "course" && COURSE) { LEFT_KEY = null; paintLeft(); } });   // one paint state: the map's trail + key follow
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
@@ -1082,7 +1116,7 @@ function wireTrace(el) {
     const px = padL + (q[0] / smax) * (W - padL - 8), py = (H - padB) - (q[1] / vmax) * (H - padB - 10);
     cur.style.display = ""; const ln = cur.querySelector("line"); ln.setAttribute("x1", px); ln.setAttribute("x2", px);
     const c = cur.querySelector("circle"); c.setAttribute("cx", px); c.setAttribute("cy", py); c.setAttribute("fill", col);
-    if (read) read.innerHTML = `<b>${Math.round(q[1])} mph</b> at ${Math.round(q[0])} m · <span style="color:${col}" title="${esc(gripOf(q[2] | 0).tip)}">${gripOf(q[2] | 0).word}</span>`;
+    if (read) read.innerHTML = `<b>${Math.round(q[1])} mph</b> at ${Math.round(q[0])} m · <span style="color:${col}" title="${esc(gripOf(q[2] | 0).tip)}">${gripOf(q[2] | 0).word}</span>${q.length > 7 && (q[6] != null || q[7] != null) ? ` · throttle <b>${q[6] ?? 0}%</b> · brake <b>${q[7] ?? 0}%</b>` : ""}`;
     if (q.length > 4) markMapAt(q[3], q[4], col);
   };
   sv.onmouseleave = () => { cur.style.display = "none"; if (read) read.textContent = "hover the trace — it marks that spot on the map"; clearMapMark(); };
@@ -1737,7 +1771,7 @@ function paintLeft() {
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     // WHAT THE LIVE TRAIL'S COLOUR MEANS (Jett 2026-09-11: selectable in the map legend's settings) -- the same
     // state as the speed trace's paint toggle, so the two views of the live lap can never disagree
-    body.querySelectorAll("[data-trailpaint]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.trailpaint; VIEW.global.traceMode = TRACE_MODE; viewSave(); try { localStorage.setItem("fh6SegMode", TRACE_MODE); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); });
+    body.querySelectorAll("[data-trailpaint]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.trailpaint; saveTraceMode(); TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); paintCourseFilter(); });
     body.querySelectorAll("[data-tcx]").forEach((b) => b.onclick = () => exitTempCourse());   // leave the temporary course-browser view
     // the legend key toggles IN PLACE (no map rebuild → no re-animation): flip the pill's open state + the key rows
     body.querySelectorAll("[data-legtoggle]").forEach((b) => b.onclick = () => {
@@ -2587,10 +2621,11 @@ function liveLapPaint() {
   const wrap = svg.parentNode;
   const lap = (MODE.suggest === "course" && COURSE) ? liveLapFor(COURSE) : null;
   const now = !!(lap && LIVE.lap && LIVE.lap.live);
-  const mode = TRACE_MODE === "speed" ? "speed" : "grip", sc = mode === "speed" ? courseSpeedRange(COURSE) : null;
+  const mode = TRACE_MODE === "speed" || TRACE_MODE === "pedals" ? TRACE_MODE : "grip", sc = mode === "speed" ? courseSpeedRange(COURSE) : null;
   wrap.classList.toggle("live-on", now);
   wrap.classList.toggle("live-last", !!lap && !now);
   wrap.classList.toggle("trail-speed", mode === "speed");
+  wrap.classList.toggle("trail-pedals", mode === "pedals");
   if (!lap) { if (g._seq != null) { g.textContent = ""; g._seq = null; } return; }
   const ds = svg.dataset, x0 = +ds.x0, z0 = +ds.z0, s = +ds.s, H = +ds.h, pad = +ds.pad;
   if (!isFinite(s)) return;
@@ -2618,9 +2653,10 @@ function liveLapPaint() {
     if (!g._glow || jump) { g._glow = poly(gGlow, "var(--acc2)", 8, 0.3); g._line = null; }
     add(g._glow, X, Y);
     // the colour key: grip state, or the speed band on the course's own scale (impacts still burst either way)
-    const k = (mode === "speed" && sc) ? Math.max(0, Math.min(GRAD.length - 1, Math.floor(((q[1] - sc.lo) / (sc.hi - sc.lo)) * GRAD.length))) : q[2] | 0;
+    const k = mode === "pedals" ? pedalKey(q[8], q[9])
+      : (mode === "speed" && sc) ? Math.max(0, Math.min(GRAD.length - 1, Math.floor(((q[1] - sc.lo) / (sc.hi - sc.lo)) * GRAD.length))) : q[2] | 0;
     if (!g._line || k !== g._k) {
-      const nl = poly(gGrip, mode === "speed" && sc ? GRAD[k] : gripInk(k, base), (mode === "speed" || k) ? 4 : 3.4);
+      const nl = poly(gGrip, mode === "pedals" ? pedalCol(k) : mode === "speed" && sc ? GRAD[k] : gripInk(k, base), (mode !== "grip" || k) ? 4 : 3.4);
       if (g._line) add(nl, g._lx, g._ly);                 // butt onto the previous state's last point: no gaps
       g._line = nl; g._k = k;
     }
@@ -2975,7 +3011,8 @@ function lapWinPick(passes) {
 // the lap the window draws: the live lap (or the held last run) on this course, else the trace's foregrounded lap
 function lapShown() {
   const L = COURSE && liveLapFor(COURSE);
-  if (L) return { pts: L.pts, label: LIVE.lap && LIVE.lap.live ? "live lap" : "last run" };
+  // LIVE.lap's own shape moved into the recorded one ([arc, mph, grip, x, z, elev, thr, brk]) so one reader serves both
+  if (L) return { pts: L.pts.map((q) => [q[0], q[1], q[2], q[3], q[4], null, q[8] ?? null, q[9] ?? null]), label: LIVE.lap && LIVE.lap.live ? "live lap" : "last run" };
   const id = TRACE_PICK && COURSE && TRACE_PICK.key === COURSE.key ? TRACE_PICK.fore : null, tr = id && COURSE.traces[id];
   return tr ? { pts: tr, label: "foregrounded lap" } : null;
 }
@@ -2986,7 +3023,7 @@ function turnSlice(pts, a, b) {
   const i0 = near(a[0], a[1], 0); if (i0 < 0) return null;
   const i1 = near(b[0], b[1], i0 + 1); if (i1 < 0 || i1 - i0 < 2) return null;
   const sl = pts.slice(i0, i1 + 1), s0 = sl[0][0], L = (sl[sl.length - 1][0] - s0) || 1;
-  return sl.map((q) => [(q[0] - s0) / L, q[1], q[2] | 0, q[3], q[4]]);   // [fraction through the turn, mph, grip, x, z]
+  return sl.map((q) => [(q[0] - s0) / L, q[1], q[2] | 0, q[3], q[4], null, q[6] ?? null, q[7] ?? null]);   // [fraction through the turn, mph, grip, x, z, -, thr, brk]
 }
 function lapWindowHTML(p, passes, ls) {
   const t = p.t, i = passes.indexOf(p), prev = passes[i - 1], next = passes[i + 1];
@@ -3000,9 +3037,11 @@ function lapWindowHTML(p, passes, ls) {
     + `<i class="${follow ? "lw-pulse" : "lw-pin"}">${follow ? "the turn just taken · redraws at the next" : "picked · follows again at the next turn"}</i></div>${nav(next, "next")}</div>`;
   const segs = t.seg || {}, phases = SEG_ORDER.filter((n) => segs[n] && segs[n].length >= 2);
   const shown = lapShown(), base = piColor(CUR && CUR.cls);
-  const gripRuns = (pts, draw) => { if (pts.length < 2) return ""; let out = "", seg = [pts[0]], k = pts[0][2] | 0;
+  // the shown lap's line follows the one paint choice: pedals when picked, else what the tyres did
+  const pedals = TRACE_MODE === "pedals", runKey = (q) => (pedals ? pedalKey(q[6], q[7]) : q[2] | 0), runInk = (k) => (pedals ? pedalCol(k) : gripInk(k, base));
+  const gripRuns = (pts, draw) => { if (pts.length < 2) return ""; let out = "", seg = [pts[0]], k = runKey(pts[0]);
     const flush = () => { if (seg.length > 1) out += draw(seg, k); };
-    for (let j = 1; j < pts.length; j++) { const kk = pts[j][2] | 0; seg.push(pts[j]); if (kk !== k) { flush(); seg = [pts[j]]; k = kk; } }
+    for (let j = 1; j < pts.length; j++) { const kk = runKey(pts[j]); seg.push(pts[j]); if (kk !== k) { flush(); seg = [pts[j]]; k = kk; } }
     flush(); return out; };
   let map = `<div class="why lw-empty">no phase geometry for ${esc(turnLabel(t))} yet</div>`, rib = "";
   if (phases.length) {
@@ -3024,10 +3063,10 @@ function lapWindowHTML(p, passes, ls) {
       const ux = X(b[0]) - X(a[0]), uy = Y(b[1]) - Y(a[1]), L = Math.hypot(ux, uy) || 1, nx = -uy / L * 13, ny = ux / L * 13, cx = X(a[0]), cy = Y(a[1]);
       return `<line x1="${(cx + nx).toFixed(1)}" y1="${(cy + ny).toFixed(1)}" x2="${(cx - nx).toFixed(1)}" y2="${(cy - ny).toFixed(1)}" stroke="#0d1117" stroke-width="2"/>`; }).join("");
     const drive = shown ? boxRuns(shown.pts, (q) => (q[3] != null ? [q[3], q[4]] : null)).map((r) => gripRuns(r, (sg, k) =>
-      `<polyline fill="none" stroke="${gripInk(k, base)}" stroke-width="${k ? 4 : 3.4}" stroke-linecap="round" stroke-linejoin="round"${NS} points="${sg.map((q) => P(q[3], q[4])).join(" ")}"/>`)).join("") : "";
+      `<polyline fill="none" stroke="${runInk(k)}" stroke-width="${k ? 4 : 3.4}" stroke-linecap="round" stroke-linejoin="round"${NS} points="${sg.map((q) => P(q[3], q[4])).join(" ")}"/>`)).join("") : "";
     const apex = t.x != null ? `<circle cx="${X(t.x).toFixed(1)}" cy="${Y(t.z).toFixed(1)}" r="4" fill="#fff" stroke="#05080c" stroke-width="1.5"/><text x="${(X(t.x) + 8).toFixed(1)}" y="${(Y(t.z) + 4).toFixed(1)}" font-size="13" font-weight="700" paint-order="stroke" stroke="#05080c" stroke-width="3" stroke-linejoin="round" fill="#fff">${esc(turnLabel(t))}</text>` : "";
     map = `<div class="lw-map"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${road}${casing}${bands}${cuts}${drive}${apex}</svg>`
-      + `<div class="lw-cap">${shown ? "showing the " + esc(shown.label) : "no lap line to show"}<span>thick line = what the tyres did · pale band = which part of the corner</span></div></div>`;
+      + `<div class="lw-cap">${shown ? "showing the " + esc(shown.label) : "no lap line to show"}<span>thick line = ${pedals ? "throttle / brake" : "what the tyres did"} · pale band = which part of the corner</span></div></div>`;
     // ---- the speed through the same span: phase bands behind, every lap in scope faint, the shown lap by grip
     const lastSeg = segs[phases[phases.length - 1]], a = segs[phases[0]][0], b = lastSeg[lastSeg.length - 1];
     const pool = Object.keys(COURSE.traces || {}).filter((id) => ls.set.has(String(id))).map((id) => turnSlice(COURSE.traces[id], a, b)).filter(Boolean);
@@ -3044,14 +3083,14 @@ function lapWindowHTML(p, passes, ls) {
       const poolSvg = pool.map((r) => `<polyline fill="none" stroke="#4a5563" stroke-width="1" opacity=".55" points="${pl(r)}"/>`).join("");
       let mineSvg = "", reads = "";
       if (mineS) {
-        mineSvg = gripRuns(mineS, (sg, k) => `<polyline fill="none" stroke="${gripInk(k, base)}" stroke-width="${k ? 3 : 2.6}" stroke-linecap="round" points="${pl(sg)}"/>`);
+        mineSvg = gripRuns(mineS, (sg, k) => `<polyline fill="none" stroke="${runInk(k)}" stroke-width="${k ? 3 : 2.6}" stroke-linecap="round" points="${pl(sg)}"/>`);
         const mn = mineS.reduce((m, q) => (q[1] < m[1] ? q : m), mineS[0]), e0 = mineS[0], e1 = mineS[mineS.length - 1];
         const cy = (y) => Math.max(10, Math.min(RH - 2, y));
         const lab = (q, txt, anchor, dy) => `<text x="${Math.max(2, Math.min(RW - 2, rx(q[0]))).toFixed(1)}" y="${cy(ry(q[1]) + dy).toFixed(1)}" text-anchor="${anchor}" font-size="10" font-weight="700" fill="#dfe7ef" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">${txt}</text>`;
         reads = lab(e0, Math.round(e0[1]), "start", -5) + lab(mn, Math.round(mn[1]) + " min", "middle", 13) + lab(e1, Math.round(e1[1]), "end", -5);
       }
       const axis = `<text x="2" y="${(ry(hi) + 4).toFixed(1)}" font-size="8" fill="#576372">${Math.round(hi)}</text><text x="2" y="${(ry(lo)).toFixed(1)}" font-size="8" fill="#576372">${Math.round(lo)}</text>`;
-      rib = `<div class="lw-rib"><div class="why">the speed through ${esc(turnLabel(t))} · mph · ${pool.length} lap${pool.length === 1 ? "" : "s"} in ${scopeTok(ls)} faint${mineS ? " · the " + esc(shown.label) + " painted by grip" : ""}</div>`
+      rib = `<div class="lw-rib"><div class="why">the speed through ${esc(turnLabel(t))} · mph · ${pool.length} lap${pool.length === 1 ? "" : "s"} in ${scopeTok(ls)} faint${mineS ? " · the " + esc(shown.label) + " painted by " + (pedals ? "pedals" : "grip") : ""}</div>`
         + `<svg viewBox="0 0 ${RW} ${RH}" preserveAspectRatio="xMidYMid meet">${bandsR}${axis}${poolSvg}${mineSvg}${reads}</svg></div>`;
     }
   }
@@ -3399,7 +3438,7 @@ function cornerMapHTML(c, t, ls) {
     for (const p of tr) {
       const X = p[3], Z = p[4], V = p[1];
       if (X == null || Z == null || X < x0 || X > x1 || Z < z0 || Z > z1) { if (run.length > 1) lapRuns.push(run); run = []; continue; }
-      run.push([X, Z, V]); if (V != null) { winV.push(V); sumV += V; nV++; }
+      run.push([X, Z, V, p[6], p[7]]); if (V != null) { winV.push(V); sumV += V; nV++; }   // [3]/[4] = throttle / brake % for the pedal paint
     }
     if (run.length > 1) lapRuns.push(run);
     if (lapRuns.length) { runsByLap[id] = lapRuns; paceByLap[id] = nV ? sumV / nV : 0; }
@@ -3424,7 +3463,7 @@ function cornerMapHTML(c, t, ls) {
       let r = run; if (r.length > 40) { const stp = r.length / 40; r = Array.from({ length: 40 }, (_, i) => run[Math.floor(i * stp)]); }
       let out = "";
       for (let i = 1; i < r.length; i++) { const a = r[i - 1], b = r[i], v = ((a[2] || 0) + (b[2] || 0)) / 2;
-        const col = byRank ? solid : spdColor(v, vmin, vmax);
+        const col = byRank ? solid : CM_TRACE_MODE === "pedals" ? pedalCol(pedalKey(b[3], b[4])) : spdColor(v, vmin, vmax);
         out += `<line x1="${px(a[0]).toFixed(1)}" y1="${py(a[1]).toFixed(1)}" x2="${px(b[0]).toFixed(1)}" y2="${py(b[1]).toFixed(1)}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`; }
       return out;
     }).join("");
@@ -3448,10 +3487,10 @@ function cornerMapHTML(c, t, ls) {
   ].join("");
   const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="tstat-cornersvg" style="background:var(--bg);border-radius:6px;width:100%;max-height:34vh">${ctx}${ph}${speedLines}${strips}${apex}${chev}${pills}</svg>`;
   // legend reflects the active colouring; the toggle switches it (position = default, speed = filter)
-  const modeLeg = byRank
+  const modeLeg = CM_TRACE_MODE === "pedals" ? `<span class="why">line colour = pedals</span>${pedalSwatches()}` : byRank
     ? `<span class="why">line colour = position (fastest → slowest)</span><em>P1</em><i class="cm-grad cm-grad--rank"></i><em>P${nDrawn}</em>`
     : (winV.length ? `<span class="why">line colour = speed</span><em>${Math.round(vmin)}</em><i class="cm-grad"></i><em>${Math.round(vmax)} mph</em>` : `<span class="why">line colour = speed</span>`);
-  const cmToggle = `<span class="cm-views">${[["rank", "position", "each trace one solid colour by its leaderboard position"], ["speed", "speed", "colour each trace point-by-point by speed"]].map(([k, l, tip]) => `<button class="mini ${CM_TRACE_MODE === k ? "on" : ""}" data-cmtrace="${k}" title="${tip}">${l}</button>`).join("")}</span>`;
+  const cmToggle = `<span class="cm-views">${[["rank", "position", "each trace one solid colour by its leaderboard position"], ["speed", "speed", "colour each trace point-by-point by speed"], ["pedals", "pedals", "colour each trace point-by-point by throttle and brake"]].map(([k, l, tip]) => `<button class="mini ${CM_TRACE_MODE === k ? "on" : ""}" data-cmtrace="${k}" title="${tip}">${l}</button>`).join("")}</span>`;
   // THE CORNER'S LEGEND (Jett 2026-09-11: "the corner detail view needs a legend"): every mark on the map named --
   // the phase strips, what the lines' colour means (with its switch), and the marks.
   const legend = `<div class="cm-legend">

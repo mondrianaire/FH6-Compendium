@@ -673,6 +673,8 @@ CREATE TABLE IF NOT EXISTS lap_point (
   grip     INTEGER,                      -- 0 calm, 1 front, 2 rear, 3 both, 4 impact
   x        REAL, z REAL,
   elev_m   REAL,
+  thr      INTEGER,                      -- throttle 0-100 % at the point (schema 6, 2026-09-11)
+  brk      INTEGER,                      -- brake 0-100 % at the point
   PRIMARY KEY (lap_id, i)
 ) WITHOUT ROWID;
 

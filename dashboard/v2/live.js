@@ -276,7 +276,7 @@ function runSample(f, now) {
   if (last && f.dist < last[5]) LIVE.run = [];          // odometer restarted: a new event, a new run
   const g = gripCode(f);
   const d0 = LIVE.run.length ? LIVE.run[0][5] : f.dist;
-  LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist, now]);   // [6]=timestamp: free-mode trace plots vs TIME (Jett 2026-09-07)
+  LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist, now, pedPct(f.thr), pedPct(f.brk)]);   // [7]/[8] throttle / brake %   // [6]=timestamp: free-mode trace plots vs TIME (Jett 2026-09-07)
   if (LIVE.run.length > 900) { LIVE.run.splice(0, LIVE.run.length - 900); const b = LIVE.run[0][5]; LIVE.run.forEach((q) => { q[0] = q[5] - b; }); }
   if (now - (LIVE.runPaint || 0) > 500) { LIVE.runPaint = now; paintTrace(); }
 }
@@ -288,6 +288,8 @@ function gripCode(f) {
   const rr = Math.max(Math.abs((sl.RL || [0, 0, 0])[2]), Math.abs((sl.RR || [0, 0, 0])[2]));
   return (Math.abs(f.lat) > 3 || f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
 }
+// a pedal on the frame (Accel / Brake, 0-255) as 0-100 % -- the same unit the recorded traces carry (schema 6)
+const pedPct = (v) => (v == null ? null : Math.round((+v || 0) / 2.55));
 
 // THE LIVE LAP (Jett 2026-09-11): the WHOLE lap being driven, for the course map's grip trail and the speed
 // trace's live line. LIVE.run keeps only the last 90 s, shorter than a 1:39 Nanamagari lap, so the lap has its
@@ -321,7 +323,7 @@ function lapSample(f, now) {
   } else if (last && t < last[7] - 0.25) cutAt(cur, t);
   if (MODE.suggest === "course" && COURSE) lap.key = COURSE.key;
   const d0 = lap.pts.length ? lap.pts[0][5] : f.dist;
-  lap.pts.push([f.dist - d0, f.mph, gripCode(f), f.px, f.pz, f.dist, now, t]);
+  lap.pts.push([f.dist - d0, f.mph, gripCode(f), f.px, f.pz, f.dist, now, t, pedPct(f.thr), pedPct(f.brk)]);   // [8]/[9] throttle / brake %
   if (lap.pts.length > LAP_CAP) { lap.pts.splice(0, 1000); lap.n0 += 1000; }
   const was = lap.live; lap.live = true;
   if (now - (LIVE.lapSaveT || 0) > 2000) lapSave();

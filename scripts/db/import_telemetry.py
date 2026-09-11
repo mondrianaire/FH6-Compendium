@@ -199,7 +199,9 @@ def run(cx, verbose=False, data_dir=None):
                           p[3] if len(p) > 3 else None,
                           p[4] if len(p) > 4 else None,
                           p[5] if len(p) > 5 else None,
-                          p[6] if len(p) > 6 else None))
+                          p[6] if len(p) > 6 else None,
+                          p[7] if len(p) > 7 else None,      # throttle % (schema 6; None on laps analysed before it)
+                          p[8] if len(p) > 8 else None))     # brake %
         mk = meta.get("markers")
         if isinstance(mk, str):
             try:
@@ -279,8 +281,12 @@ def run(cx, verbose=False, data_dir=None):
             "arc_m", "coverage", "is_partial", "build_id", "class", "pi", "drivetrain",
             "tune_hash", "solo", "impacts", "void", "lap_dist_m", "rewinds", "pauses", "pause_s",
             "stitched"], lrows, chunk=2000)
+        # pedals ride along when the database has the schema-6 columns (rebuild.py migrates first); an older
+        # database gets the same rows without them rather than a failed import
+        _lp_ped = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")} >= {"thr", "brk"}
         counts["lap_point"] = fh6db.upsert_many(cx, "lap_point", [
-            "lap_id", "i", "arc_m", "mph", "grip", "x", "z", "elev_m", "dist_m"], prows, chunk=10000)
+            "lap_id", "i", "arc_m", "mph", "grip", "x", "z", "elev_m", "dist_m"] + (["thr", "brk"] if _lp_ped else []),
+            prows if _lp_ped else [r[:9] for r in prows], chunk=10000)
         counts["lap_marker"] = fh6db.upsert_many(cx, "lap_marker", [
             "lap_id", "i", "kind", "t", "dur_s", "race_s", "dist_m", "over_line", "detail"], mrows, chunk=2000)
 

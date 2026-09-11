@@ -135,6 +135,14 @@ svg{display:block;max-width:100%}
 .cleg-sec i.lg-dot.sel{background:#fff}
 .cleg-sec i.lg-car{width:9px;height:10px;border-radius:0;background:#fff;clip-path:polygon(50% 0,100% 100%,50% 72%,0 100%)}
 .cmap.live-on .leg-idle,.cmap.live-last .leg-idle{display:none}
+/* THE PEDAL PAINT's key (panel.js pedalSwatches): coast · throttle ramp · brake ramp · both pedals */
+.ped-sw{display:inline-flex;align-items:center;gap:0;white-space:nowrap;font-size:10.5px;color:var(--mut);margin-right:8px}
+.ped-sw i{display:inline-block;width:9px;height:6px;border-radius:0;margin:0}
+.ped-sw i:last-of-type{margin-right:5px}
+.lchips.pedleg{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px 0;margin-right:8px}
+.cmap-legend .leg-ped{display:none}
+.cmap.trail-pedals.live-on .leg-ped,.cmap.trail-pedals.live-last .leg-ped{display:contents}
+.cmap.trail-pedals.live-on .leg-grip,.cmap.trail-pedals.live-last .leg-grip{display:none}
 .cleg-key>span{display:inline-flex;align-items:center}
 .cleg-key i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
 .leg-grad{display:inline-flex;align-items:center;gap:5px}

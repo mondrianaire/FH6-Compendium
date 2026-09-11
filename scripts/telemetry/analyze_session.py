@@ -2354,7 +2354,11 @@ def main():
             # a whole channel of the road (climbs, crests, compressions) that the lab could not draw.
             # 6th column: the game's own odometer (DistanceTraveled), continuous like elevation -- the LAP DISTANCE
             # axis Jett asked for, monotonic once the final timeline has revoked the rewound rows
-            if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r), r.get("PosY", 0.0), r.get("DistanceTraveled", 0.0)) for r in rows_]
+            # 7th / 8th columns: the driver's PEDALS (Accel / Brake, 0-255), continuous like speed (Jett 2026-09-11:
+            # "indicate brake and throttle measurements throughout the run" -- recorded from now on, straight from
+            # the capture's own inputs; laps analysed before this carry none and read "no pedal data").
+            if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r), r.get("PosY", 0.0), r.get("DistanceTraveled", 0.0),
+                              r.get("Accel", 0) or 0, r.get("Brake", 0) or 0) for r in rows_]
             return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in rows_]
         def resample(pts, step=4.0):   # -> list of PIECES; a jump > 150 m between consecutive rows (respawn / rewind / teleport) starts a new piece
             pieces = []; cur = [pts[0]] if pts else []
@@ -2377,7 +2381,9 @@ def main():
                     _cat = (max(pc[j][3], pc[j + 1][3]),) if len(pc[j]) > 3 and len(pc[j + 1]) > 3 else ()   # categorical: carry the WORSE of the bracketing states, never a blend
                     _ele = ((pc[j][4] + (pc[j + 1][4] - pc[j][4]) * f,) if len(pc[j]) > 4 and len(pc[j + 1]) > 4 else ())   # continuous: interpolate like speed
                     _dst = ((pc[j][5] + (pc[j + 1][5] - pc[j][5]) * f,) if len(pc[j]) > 5 and len(pc[j + 1]) > 5 else ())   # the odometer, likewise
-                    P_.append(_base + _cat + _ele + _dst)
+                    _ped = ((pc[j][6] + (pc[j + 1][6] - pc[j][6]) * f, pc[j][7] + (pc[j + 1][7] - pc[j][7]) * f)
+                            if len(pc[j]) > 7 and len(pc[j + 1]) > 7 else ())   # the pedals, interpolated like speed
+                    P_.append(_base + _cat + _ele + _dst + _ped)
                     s_ += step
                 out.append(P_)
             return out
@@ -2756,12 +2762,15 @@ def main():
             heading for 34.0 s once every session re-analysed. Only a smashable hit is unambiguous."""
             return sum(1 for r in loop_rows if w_["t0"] <= r["t"] <= w_["t1"] and (r.get("SmashableVelDiff") or 0) > 0)
         def _pts_out(pts_, all_):
-            """[arc_m, mph, grip, x, z, elev_m, lap_dist_m] -- lap_dist from the game's odometer, zeroed at the
-            lap's first point; None on traces resampled without it. Older 5/6-column rows still read."""
+            """[arc_m, mph, grip, x, z, elev_m, lap_dist_m, throttle %, brake %] -- lap_dist from the game's odometer,
+            zeroed at the lap's first point; None on traces resampled without it. Pedals 0-100 % (schema 6), None
+            when the points carry none. Older 5/6/7-column rows still read."""
             d0 = all_[0][6] if all_ and len(all_[0]) > 6 else None
             return [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]),
                      round(p[5], 1) if len(p) > 5 else None,
-                     (round(p[6] - d0) if (d0 is not None and len(p) > 6) else None)] for p in pts_]
+                     (round(p[6] - d0) if (d0 is not None and len(p) > 6) else None),
+                     (round(p[7] / 2.55) if len(p) > 8 else None),
+                     (round(p[8] / 2.55) if len(p) > 8 else None)] for p in pts_]
         def _thin(pts_, n):
             # Thin to ~n points but NEVER drop an impact: the map/trace draw their impact markers from these very
             # points, so a thinned-out hit would vanish from the map while the stored `impacts` count still claimed it.

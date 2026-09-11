@@ -309,11 +309,13 @@ def main(argv=None):
             if len(keep) >= 400:                          # draw all available (Jett 2026-09-10); ceiling only bounds a runaway
                 break
         traces = {}
+        # PEDALS (schema 6, Jett 2026-09-11): throttle / brake % ride as the 7th / 8th fields for the pedal paint.
+        # Selected only when the columns exist, so a build against a not-yet-migrated database still runs.
+        _ped = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")} >= {"thr", "brk"}
+        _psel = "SELECT arc_m, mph, grip, x, z, elev_m" + (", thr, brk" if _ped else "") + " FROM lap_point WHERE lap_id=? ORDER BY i"
         for lid in keep:
-            traces[lid] = [[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"], r["elev_m"]]
-                           for r in cx.execute(
-                               "SELECT arc_m, mph, grip, x, z, elev_m FROM lap_point WHERE lap_id=? ORDER BY i",
-                               (lid,))]
+            traces[lid] = [[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"], r["elev_m"]] + ([r["thr"], r["brk"]] if _ped else [])
+                           for r in cx.execute(_psel, (lid,))]
         # RE-ANCHOR TRACE ARC TO ONE COMMON FRAME (Jett 2026-09-10). Each lap's stored arc starts wherever
         # its recording began, so on a LOOP a free-roam lap sits half a lap off the Rivals laps and the
         # speed-trace overlay is incoherent (Irokawa: the S1 free-roam laps were ~900 m out of phase). A lap

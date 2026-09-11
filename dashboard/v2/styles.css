@@ -680,6 +680,8 @@ body.fixed .trace .lchip.livenow{box-shadow:inset 0 0 0 1px var(--acc2)}
 .trace .thd .mini.dim{opacity:.35}
 button.lchip{background:none;cursor:pointer;font-family:inherit;white-space:nowrap}
 button.lchip.hid{opacity:.35;text-decoration:line-through}
+/* highlighted (3-state chip, middle state): the lap is lifted on the chart, so its chip is ringed in its own colour */
+button.lchip.lhi{box-shadow:inset 0 0 0 1.5px var(--lc,var(--acc2));background:color-mix(in srgb, var(--lc,var(--acc2)) 14%, transparent)}
 /* clickable PI-class swatch in the speed-trace legend — click to spotlight that class's laps. The
    `.trace .lchip` LAP-chip grid (150px swatch|time|meta) does not fit a class swatch, so override it
    here (higher specificity) back to a compact content-width chip. */

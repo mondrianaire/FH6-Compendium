@@ -56,6 +56,7 @@ function vcourse(key) {
   const c = VIEW.course[key] || (VIEW.course[key] = {});
   c.filters = c.filters || {}; c.rightTab = c.rightTab || {};
   if (!(c.hidden instanceof Set)) c.hidden = new Set(c.hidden || []);
+  if (!(c.hi instanceof Set)) c.hi = new Set(c.hi || []);   // laps a click has HIGHLIGHTED (3-state chip: enabled → highlighted → disabled)
   c.touched = Date.now();
   return c;
 }
@@ -701,7 +702,7 @@ function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
-  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, liveLapSig(), turnPickSeq()])
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], [...(vc0.hi || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, liveLapSig(), turnPickSeq()])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -986,14 +987,17 @@ function courseTrace(c) {
   const live = shownLap ? alignLiveToCourse(shownLap.pts, fore, c) : null;
   const liveNow = !!(live && LIVE.lap && LIVE.lap.live);
   const leg = stage2.slice(0, 12).map((t) => {
-    const hid = sel.hidden.has(String(t.id));
+    // THREE-STATE CHIP (Jett 2026-09-11): a click cycles enabled → highlighted → disabled → enabled. enabled draws
+    // the lap normally; highlighted lifts it and recedes every other enabled lap; disabled hides it (sel.hidden).
+    const id = String(t.id), hid = sel.hidden.has(id), lhi = !hid && sel.hi.has(id);
     const nt = notTimed(t); const off = best && !nt && t !== best && t.t ? ((t.t / best.t - 1) * 100).toFixed(1) + "%" : "";
     // swatch matches the lap's own polyline colour (its PI class); best is green, current is accent (spec 545-546)
     const col = t.void ? "#e3b341" : (t.partial || t._cov < 0.9) ? "var(--warn)" : t === cur ? "var(--acc2)" : t === best ? "#00d27a" : piColor(t.class);
     const lead = t === cur ? "you" : t === best ? "fastest" : off;   // always suffix the lap's class (spec)
     const metaTxt = [lead, t.class ? esc(t.class) : ""].filter(Boolean).join(" · ");
-    return `<button class="lchip ${hid ? "hid" : ""} ${t === cur ? "you" : t === best ? "best" : ""}" data-thide="${esc(String(t.id))}"
-      style="--lc:${col}" title="${esc((hid ? "hidden — click to draw it" : "drawn — click to hide it") + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">
+    const nextTip = hid ? "hidden — click to draw it" : lhi ? "highlighted — click to hide it" : "drawn — click to highlight it";
+    return `<button class="lchip ${hid ? "hid" : ""}${lhi ? " lhi" : ""} ${t === cur ? "you" : t === best ? "best" : ""}" data-tcycle="${esc(id)}"
+      style="--lc:${col}" title="${esc(nextTip + " · " + (t.sid || "") + (t.container ? " · " + t.container : "") + (t.void ? " · time void: contact" : "") + (t.partial ? " · partial lap" : ""))}">
       <i class="lcd"></i><span class="lct">${nt ? `<s>${lapTime(t.t)}</s>` : lapTime(t.t)}</span>
       <span class="lcm">${metaTxt}</span></button>`; }).join("");
   // in default mode the context lines are coloured by PI class -- show which classes are on the chart
@@ -1014,11 +1018,14 @@ function courseTrace(c) {
     const ch = chart(W, H, 28, 16, smax, vmax);
     // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity.
     // A class spotlight (TRACE_CLS_HI) lifts that class's laps and fades the rest -- highlight, not filter.
-    const hi = TRACE_CLS_HI;
+    // a lit set comes from EITHER the class spotlight (TRACE_CLS_HI) OR a per-lap highlight (sel.hi, the 3-state
+    // chip). When anything is lit, everything else recedes — highlight, not filter (every lap stays drawn).
+    const clsHi = TRACE_CLS_HI, lapHi = sel.hi, anyHi = !!clsHi || lapHi.size > 0;
     const lines = match.map((t) => {
       if (t === cur) return "";
       if (TRACE_ALL) return paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE, piColor(t.class));
-      const other = hi && t.class !== hi, lit = hi && t.class === hi;
+      const isLit = (clsHi && t.class === clsHi) || lapHi.has(String(t.id));
+      const other = anyHi && !isLit, lit = anyHi && isLit;
       const w = lit ? Math.max(t === best ? 1.8 : 1, 1.7) : other ? 0.9 : (t === best ? 1.8 : 1);
       const op = lit ? 0.98 : other ? 0.1 : (t === best ? 0.95 : 0.5);
       return plainLine(t.pts, ch, piColor(t.class), w, op, notTimed(t));
@@ -1110,7 +1117,11 @@ function wireTrace(el) {
     if (s.value) vc.filters[d] = s.value; else delete vc.filters[d];
     viewSave(); repaintFiltered(); });
   el.querySelectorAll("[data-tpre]").forEach((b) => b.onclick = () => { if (!COURSE) return; const vc = traceSel(COURSE); vc.preset = b.dataset.tpre; vc.auto = false; viewSave(); repaintFiltered(); });
-  el.querySelectorAll("[data-thide]").forEach((b) => b.onclick = () => { if (!COURSE) return; const h = traceSel(COURSE).hidden; const id = b.dataset.thide; if (h.has(id)) h.delete(id); else h.add(id); viewSave(); paintTrace(); });
+  el.querySelectorAll("[data-tcycle]").forEach((b) => b.onclick = () => { if (!COURSE) return; const s = traceSel(COURSE), id = b.dataset.tcycle;
+    if (s.hidden.has(id)) s.hidden.delete(id);              // disabled → enabled
+    else if (s.hi.has(id)) { s.hi.delete(id); s.hidden.add(id); }   // highlighted → disabled
+    else s.hi.add(id);                                     // enabled → highlighted
+    viewSave(); TRACE_KEY = null; paintTrace(); });
   el.querySelectorAll("[data-tmode]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.tmode; saveTraceMode(); TRACE_KEY = null; paintTrace(); paintCourseFilter();   // the scope band's paint buttons show the same state
     if (MODE.suggest === "course" && COURSE) { LEFT_KEY = null; paintLeft(); } });   // one paint state: the map's trail + key follow
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });

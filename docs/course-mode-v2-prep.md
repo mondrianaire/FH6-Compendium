@@ -155,7 +155,16 @@ tabs and the build-guard / held / mismatch states are props on it, not separate 
    `TRACE_MODE`. `traceFilterState(c, skip)` so class isn't drawn twice. **Deviation:** the band is ~108 px
    (design 78 px) because the kept `show` presets and the drive / tune / traffic / build filters wrap to a second
    row. Page still fits at 1080 × 1751; compacting them (presets into a menu) is a later call.
-3. **Current lap view:** turn window + 4-row rank table + abandoned-attempt rows.
+3. **Current lap view — DONE 2026-09-11 (`446f8d5`, framing fix `86cc2c7`).** `lapWindowHTML()`: nav buttons naming
+   their target, following / picked state; the corner (casing + butt-cut phase bands + dividers, the shown lap's
+   line by grip, framed on the whole turn by `turnFrame()`); the speed ribbon (`turnSlice()`, every lap in scope
+   faint, start / min / end); SPEED and GRIP ladders with `rankVerdict`. Rank table 4 rows, sortable, a row picks
+   the window's turn. Abandoned attempts from step 1. **Known gap:** the GRIP ladder's live pass uses the live
+   detector's per-phase state, which is still a worst-moment read (D3 not implemented), while the pool uses
+   typical (modal) phase states.
+   **Same day, Jett's map feedback (`86cc2c7`):** Turn analysis corner map framed on the whole turn, phase model
+   moved to strips on the road edges so lap bundles can't bury it, a legend on the corner map, and the course-map
+   legend made collapsible with audited entries (memory `fh6-turn-map-readability`).
 4. **General statistics view:** header basis, two headline answers, scatter, car table.
 5. **Shared chrome:** map layer order + legend bar; hero freshness + class bars; build panel faces.
 6. **FOLLOW camera** — active only while `LIVE.lap.live` (Q1); reads `LIVE.lap` for the trail and the car.

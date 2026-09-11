@@ -40,7 +40,45 @@ either from the command line, from `rebuild.py`, or from the daemon process.
 
 ## 2. Data flow
 
-```mermaid<br/>flowchart TD<br/>    subgraph Game["The running game"]<br/>        UDP["UDP telemetry, port 9876\n(FH6 Data Out, 324-byte packets)"]<br/>        SAVE["Tuning_<ordinal>_<stamp>\\Data (598 B) + header + Thumb.png"]<br/>        FILES["Route*.owt/.nav, ObjectModelGame.zip,\nEN.zip strings, race_triggers.tz"]<br/>    end<br/><br/>    UDP --> DAEMON["fh6_live_daemon.py\n(UDP 9876 -> HTTP 8765)"]<br/>    DAEMON -->|"while on/racing"| CSV["captures/<session_id>.csv\n(gzipped after ~3 days)"]<br/>    DAEMON -->|SSE /events| BROWSER1["dashboard: Live view"]<br/>    CSV --> ANALYZE["analyze_session.py"]<br/>    ANALYZE --> SESSJSON["data/sessions/<id>.json\n+ <id>.tags.json"]<br/>    ANALYZE --> COURSEJSON["data/courses/<route_key>.json"]<br/>    ANALYZE --> LAPSDB["data/laps.db (lap_traces)\nvia lap_store.py"]<br/><br/>    SAVE -->|disk watcher / /disk-tune| DAEMON<br/>    SAVE --> IMPORTCONT["import_containers.py\n(stage containers)"]<br/>    IMPORTCONT --> FH6DB[("data/fh6.db")]<br/><br/>    SESSJSON --> IMPORTTEL["import_telemetry.py\n(stage telemetry)"]<br/>    LAPSDB -->|"laps: the primary lap source"| IMPORTTEL<br/>    COURSEJSON -->|"course rows + saved best traces"| IMPORTTEL<br/>    IMPORTTEL --> FH6DB<br/>    FILES --> IMPORTROUTES["import_routes.py, import_objectmodel.py,\nimport_anchors.py, import_surface.py"]<br/>    IMPORTROUTES --> FH6DB<br/>    GAMEDB[("FH6_Database.sqlite\n(decrypted, read-only)")] --> IMPORTGAMEDB["import_gamedb.py, import_curves.py,\nimport_parts_extra.py"]<br/>    IMPORTGAMEDB --> FH6DB<br/><br/>    FH6DB -->|course_match, consolidate,\nroute_names, corners,\ndiagnosis, field_catalog| FH6DB<br/>    FH6DB --> BUILDWEB["build_web.py"]<br/>    BUILDWEB --> APIJSON["dashboard/v2/api/*.json\ncourse/*.json, build/*.json,\nthumb/*.webp, options/*.json"]<br/>    APIJSON --> BROWSER2["dashboard/v2 (fetch on view load)"]<br/><br/>    REBUILDSVC["rebuild_service.py (HTTP 8001)"] -->|"POST /rebuild scope=containers\n(after a save)"| IMPORTCONT<br/>    REBUILDSVC -->|"POST /rebuild scope=telemetry\n(after session close)"| IMPORTTEL<br/>    REBUILDSVC -->|"both scopes"| BUILDWEB<br/>    DAEMON -->|triggers| REBUILDSVC<br/>```
+```mermaid
+flowchart TD
+    subgraph Game["The running game"]
+        UDP["UDP telemetry, port 9876<br/>(FH6 Data Out, 324-byte packets)"]
+        SAVE["Tuning_<ordinal>_<stamp>\\Data (598 B) + header + Thumb.png"]
+        FILES["Route*.owt/.nav, ObjectModelGame.zip,<br/>EN.zip strings, race_triggers.tz"]
+    end
+
+    UDP --> DAEMON["fh6_live_daemon.py<br/>(UDP 9876 -> HTTP 8765)"]
+    DAEMON -->|"while on/racing"| CSV["captures/<session_id>.csv<br/>(gzipped after ~3 days)"]
+    DAEMON -->|SSE /events| BROWSER1["dashboard: Live view"]
+    CSV --> ANALYZE["analyze_session.py"]
+    ANALYZE --> SESSJSON["data/sessions/<id>.json<br/>+ <id>.tags.json"]
+    ANALYZE --> COURSEJSON["data/courses/<route_key>.json"]
+    ANALYZE --> LAPSDB["data/laps.db (lap_traces)<br/>via lap_store.py"]
+
+    SAVE -->|disk watcher / /disk-tune| DAEMON
+    SAVE --> IMPORTCONT["import_containers.py<br/>(stage containers)"]
+    IMPORTCONT --> FH6DB[("data/fh6.db")]
+
+    SESSJSON --> IMPORTTEL["import_telemetry.py<br/>(stage telemetry)"]
+    LAPSDB -->|"laps: the primary lap source"| IMPORTTEL
+    COURSEJSON -->|"course rows + saved best traces"| IMPORTTEL
+    IMPORTTEL --> FH6DB
+    FILES --> IMPORTROUTES["import_routes.py, import_objectmodel.py,<br/>import_anchors.py, import_surface.py"]
+    IMPORTROUTES --> FH6DB
+    GAMEDB[("FH6_Database.sqlite<br/>(decrypted, read-only)")] --> IMPORTGAMEDB["import_gamedb.py, import_curves.py,<br/>import_parts_extra.py"]
+    IMPORTGAMEDB --> FH6DB
+
+    FH6DB -->|course_match, consolidate,<br/>route_names, corners,<br/>diagnosis, field_catalog| FH6DB
+    FH6DB --> BUILDWEB["build_web.py"]
+    BUILDWEB --> APIJSON["dashboard/v2/api/*.json<br/>course/*.json, build/*.json,<br/>thumb/*.webp, options/*.json"]
+    APIJSON --> BROWSER2["dashboard/v2 (fetch on view load)"]
+
+    REBUILDSVC["rebuild_service.py (HTTP 8001)"] -->|"POST /rebuild scope=containers<br/>(after a save)"| IMPORTCONT
+    REBUILDSVC -->|"POST /rebuild scope=telemetry<br/>(after session close)"| IMPORTTEL
+    REBUILDSVC -->|"both scopes"| BUILDWEB
+    DAEMON -->|triggers| REBUILDSVC
+```
 
 Two independent pipelines feed `data/fh6.db`:
 

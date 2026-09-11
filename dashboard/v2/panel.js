@@ -811,6 +811,16 @@ function modeControls() {
 // to; a reading line states what the filter costs; MISMATCH IS A STATE -- when the filter's class is not the car
 // under you, the band's edge and its button turn amber and one tap scopes to your car. The trail's paint lives
 // here too, bound to the one TRACE_MODE the trace header and the map key already share.
+// scope every course pane to a class, or clear back to all: the SCOPE band's class badges AND the hero's
+// laps-by-class bars both call this — one source for "make class X the thing every count is measured against".
+// A class pick is explicit: it drops the "this class" preset (which follows the car) so the pick stands.
+function setScopeClass(k) {
+  if (!COURSE) return;
+  const vc = traceSel(COURSE);
+  if (k) vc.filters.class = k; else delete vc.filters.class;
+  if (vc.preset === "class") vc.preset = "all";
+  vc.auto = false; viewSave(); repaintFiltered();
+}
 function paintCourseFilter() {
   const el = $("#coursefilter"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE;
@@ -845,11 +855,8 @@ function paintCourseFilter() {
     + `<span class="fdim"><span class="why">show</span>${presets}</span>${filt}${paint}${clearBtn}</div>`
     + `<div class="cf-read">${read}</div></div>${cta}`;
   wireTrace(el);   // data-tpre / data-tfilt / data-tfiltsel / data-tmode handlers (they repaint every pane)
-  // a class pick is explicit: it drops the "this class" preset (which follows the car) so the pick stands
-  const setClass = (k) => { const vc = traceSel(COURSE); if (k) vc.filters.class = k; else delete vc.filters.class;
-    if (vc.preset === "class") vc.preset = "all"; vc.auto = false; viewSave(); repaintFiltered(); };
-  el.querySelectorAll("[data-cfcls]").forEach((b) => b.onclick = () => setClass(b.dataset.cfcls || null));
-  const m = el.querySelector("[data-cfmatch]"); if (m) m.onclick = () => setClass(m.dataset.cfmatch || null);
+  el.querySelectorAll("[data-cfcls]").forEach((b) => b.onclick = () => setScopeClass(b.dataset.cfcls || null));
+  const m = el.querySelector("[data-cfmatch]"); if (m) m.onclick = () => setScopeClass(m.dataset.cfmatch || null);
 }
 // One filter change re-scopes the trace, the bar's own summary, and (in course mode) the map/turns
 // and stats. The left/right rebuild is course-only — in free roam it would needlessly re-raster the
@@ -1616,18 +1623,13 @@ function paintHeader() {
       ${c.guarantee ? `<div class="hguar t-b" title="${esc(c.guarantee.title)}"><b>✔ sure-fire</b> ${esc(c.guarantee.short)}</div>` : ""}
     </div>
     <div class="hev">
-      ${hashTableHTML()}
       <div class="hev-ev"><span class="t-l">evidence</span><span class="t-b">${esc(c.evidence || (q.level === "ok" ? q.why : "") || "—")}</span></div>
     </div>`;
 
-  // the two-tier group: pick an upgrade (shows its tunes), or pick a tune (identifies it — reverse
-  // direction, keyed on the file's hashes, not the gear ladder)
-  h.querySelectorAll('.hth-hw[data-act="upg"]').forEach((b) => b.onclick = () => { UPG_SEL = b.dataset.hw; HDR_KEY = null; paintHeader(); });
-  h.querySelectorAll('.hth-tune[data-act="tune"]').forEach((b) => b.onclick = () => {
-    const ts = b.dataset.ts; if (!ts || !CUR) return;
-    setPin(CUR.ordinal, ts);
-    identify({ id: CUR.cid, ordinal: CUR.ordinal, name: CUR.name, class: CUR.cls, pi: CUR.pi, drivetrain: CUR.dt, cyl: CUR.cyl }, "pinned");
-  });
+  // HASH TABLE RETIRED (Jett 2026-09-11): the upgrade/slider-hash table was less useful than hoped, so the
+  // header no longer renders it (hashTableHTML kept but uncalled). Identifying a tune is the save-tune equip
+  // workflow now, not clicking a hash cell (see memory fh6-tune-identification-equip-workflow); the .hth-hw /
+  // .hth-tune wiring went with it.
   const hc = h.querySelector('.hchg[data-act="chg"]'); if (hc) hc.onclick = () => { CHG_OPEN = !CHG_OPEN; HDR_KEY = null; paintHeader(); paintBanner(); };
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bx = $("#btnRefresh"); if (bx) bx.onclick = async () => { await rereadBuild(); if (CUR && CUR.disk && !(MATCH && MATCH.build)) ensureHeld(); };
@@ -1773,6 +1775,7 @@ function paintLeft() {
     // state as the speed trace's paint toggle, so the two views of the live lap can never disagree
     body.querySelectorAll("[data-trailpaint]").forEach((b) => b.onclick = () => { TRACE_MODE = b.dataset.trailpaint; saveTraceMode(); TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); paintCourseFilter(); });
     body.querySelectorAll("[data-tcx]").forEach((b) => b.onclick = () => exitTempCourse());   // leave the temporary course-browser view
+    body.querySelectorAll("[data-clsbar]").forEach((b) => b.onclick = () => { const cur = activeLapSet().cls; setScopeClass(cur === b.dataset.clsbar ? null : b.dataset.clsbar); });   // laps-by-class bar → scope
     // the legend key toggles IN PLACE (no map rebuild → no re-animation): flip the pill's open state + the key rows
     body.querySelectorAll("[data-legtoggle]").forEach((b) => b.onclick = () => {
       MAP_LEG_OPEN = !MAP_LEG_OPEN; try { localStorage.setItem("fh6MapLeg", MAP_LEG_OPEN ? "1" : "0"); } catch (e) {}
@@ -1866,6 +1869,17 @@ function courseHeroHTML(c, ls) {
     + (sp ? ` · <b class="ch-pend">${sp} session${sp === 1 ? "" : "s"} not yet counted</b>` : sp === 0 ? " · every session counted" : "")
     + " · turn geometry from the game's own centre-line";
   const stat = (v, lab) => `<span class="ch-s"><b>${v}</b><em>${lab}</em></span>`;
+  // LAPS BY CLASS as a bar chart (redesign): each class a proportional bar, the SCOPED class lifted (it is
+  // what every count on this screen is measured against), and a click scopes every pane to it — one path
+  // with the SCOPE band (setScopeClass). Over EVERY lap on the course (not the filtered set) so every class
+  // is always there to click, no matter what is currently scoped. Replaces the flat pill row.
+  const byClsAll = {}; (c.laps || []).forEach((l) => { if (l.class) byClsAll[l.class] = (byClsAll[l.class] || 0) + 1; });
+  const classesAll = Object.keys(byClsAll).sort((a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
+  const nCarsAll = new Set((c.laps || []).map((l) => l.cid).filter(Boolean)).size;
+  const clsMax = Math.max(1, ...classesAll.map((cl) => byClsAll[cl]));
+  const clsBars = classesAll.map((cl) => { const n = byClsAll[cl], on = ls.cls === cl, w = Math.max(5, Math.round(n / clsMax * 100));
+    return `<button class="ch-bar${on ? " on" : ""}" data-clsbar="${esc(cl)}" title="class ${esc(cl)} · ${n} lap${n === 1 ? "" : "s"} · ${on ? "scoped — click to widen back to all" : "click to scope every count on this screen to it"}">${classPill(cl)}<span class="ch-bt"><i style="width:${w}%;background:${piColor(cl)}"></i></span><b class="ch-bn mono">${n}</b></button>`;
+  }).join("");
   const liveLap = MODE.game === "event" ? lapNo(LIVE.frame) : null;
   // route glyph + start/finish/direction legend (spec's hero left column): the course's shape with a green
   // start dot and a pink finish dot, captioned loop / point-to-point.
@@ -1895,7 +1909,7 @@ function courseHeroHTML(c, ls) {
       ${stat(climb != null ? climb + " m" : "—", "climb")}
       ${stat(measured + (catalogued != null ? " / " + catalogued : ""), "turns measured")}
     </div>
-    ${classes.length ? `<div class="ch-cls"><span class="why">laps by class</span>${classes.map((cl) => classPill(cl, byCls[cl])).join("")}<span class="why">· ${laps.length} lap${laps.length === 1 ? "" : "s"} · ${nCars} car${nCars === 1 ? "" : "s"}</span></div>` : ""}
+    ${classesAll.length ? `<div class="ch-bars"><div class="ch-bh"><span class="why">laps by class</span><em>${(c.laps || []).length} on the course · ${nCarsAll} car${nCarsAll === 1 ? "" : "s"}</em></div>${clsBars}<div class="ch-bnote why">${ls.cls ? "the highlighted row is what every count on this screen is measured against" : "click a class to scope every count to it"}</div></div>` : ""}
     <div class="ch-conf">${scopeTok(ls)}<span class="ch-dot ok"></span>${strong} turn${strong === 1 ? "" : "s"} on 13+ laps · <span class="ch-dot w"></span>${weak} timed on fewer${noneIn ? ` · <span class="ch-dot n"></span>${noneIn} with no lap in scope` : ""}${unmeasured ? ` · <span class="ch-dot x"></span>${unmeasured} catalogued, never timed` : ""}</div>
     <div class="ch-note">${fresh}</div>
   </div>`;

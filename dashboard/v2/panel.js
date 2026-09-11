@@ -68,6 +68,18 @@ const liveKnown = () => LIVE.frame != null || LIVE.receiving === false;
 let PENDING_FREE = null, FREE_TIMER = 0;
 function adoptMode(m) {
   if (!m) return;
+  // TEMPORARY COURSE BROWSER holds the view on a hand-picked course while you are parked in free roam. It is
+  // released BY CONTEXT: a real course/event suggestion, or actually driving (a live frame, out of the menu),
+  // ends the browse and hands control back to normal mode detection. A plain streamed "free" is ignored so the
+  // browse doesn't evaporate the moment it starts (free roam streams "free" every second).
+  if (TEMP_COURSE) {
+    const real = m.suggest === "course" || m.suggest === "event";
+    const driving = LIVE.frame && LIVE.frame.on && !LIVE.inMenu;
+    if (!real && !driving) { if (m.game !== undefined) MODE.game = m.game; return; }
+    TEMP_COURSE = false;
+    if (!real) { COURSE = null; COURSE_KEY = null; }   // drove off into free roam → drop the browsed course
+    MODE.suggest = null;                                // let the normal path below re-evaluate from scratch
+  }
   // COURSE MODE IS STICKY ACROSS A PAUSE (Jett 2026-09-10): a menu is not free roam, and on resume the game
   // briefly reads free-roam before the event/loop re-registers. So a drop from "course" to "free" is DEFERRED
   // and only applied if it PERSISTS past a settle window -- a resume transient is held on the course, but a
@@ -100,6 +112,7 @@ function adoptMode(m) {
   if (prev.suggest !== MODE.suggest || prev.game !== MODE.game) onModeChange(prev, MODE);
 }
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
+let TEMP_COURSE = false;   // free-roam course-browser overlay: a picked course's full analysis while parked, released by context
 let CARMAP = {};   // ordinal -> {name, short} from cars.json, for naming the car that drove a lap
 // A lap's cid is "ordinal|..|cyl|pi"; name the car from cars.json (carOf() only resolves LIVE cars).
 function carName(cid) { const o = parseInt(String(cid).split("|")[0], 10); return (CARMAP[o] || {}).name || (o ? "ordinal " + o : "unknown car"); }
@@ -1555,6 +1568,7 @@ function paintLeft() {
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
     body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-tcx]").forEach((b) => b.onclick = () => exitTempCourse());   // leave the temporary course-browser view
     // the legend key toggles IN PLACE (no map rebuild → no re-animation): flip the pill's open state + the key rows
     body.querySelectorAll("[data-legtoggle]").forEach((b) => b.onclick = () => {
       MAP_LEG_OPEN = !MAP_LEG_OPEN; try { localStorage.setItem("fh6MapLeg", MAP_LEG_OPEN ? "1" : "0"); } catch (e) {}
@@ -1636,6 +1650,7 @@ function courseHeroHTML(c, ls) {
   const stat = (v, lab) => `<span class="ch-s"><b>${v}</b><em>${lab}</em></span>`;
   const liveLap = (MODE.game === "event" && LIVE.frame && LIVE.frame.lapn != null) ? LIVE.frame.lapn : null;
   return `<div class="chero">
+    ${TEMP_COURSE ? `<div class="ch-browse"><b>browsing course data</b><em>not live · double-click the map to switch, or</em><button class="mini" data-tcx>exit ✕</button></div>` : ""}
     ${liveLap != null ? `<div class="ch-live"><i></i>event · lap ${liveLap}<em>turn-by-turn live</em></div>` : ""}
     <div class="ch-stats">
       ${stat(medLap != null ? lapTime(medLap) : "—", "median")}
@@ -1976,6 +1991,8 @@ function wireWorldCourses(svg) {
     g.addEventListener("mouseenter", () => hoverCourse(rid));
     g.addEventListener("mouseleave", () => hoverCourse(null));
     if (rid) g.addEventListener("click", (e) => { e.stopPropagation(); browsePick(rid); });
+    // double-click a course on the world map → open its full analysis (temporary course-browser view)
+    if (rid) g.addEventListener("dblclick", (e) => { e.stopPropagation(); e.preventDefault(); enterTempCourse(rid); });
   });
   svg.addEventListener("mouseleave", () => hoverCourse(null));
 }
@@ -2000,6 +2017,29 @@ function browseSyncTiles() {
     t.classList.toggle("on", on);
     const sv = t.querySelector(".tsvg"); if (sv) sv.classList.toggle("on", on);
   });
+}
+// TEMPORARY COURSE BROWSER (Jett 2026-09-11): double-clicking a course in free roam — a browser tile or its
+// shape on the world map — opens its FULL analysis (the course-mode map, hero, turn list, turn analysis and
+// statistics) without being on it, to study the data and make inferences. It reuses course mode wholesale by
+// loading the course and forcing MODE.suggest="course" behind TEMP_COURSE; adoptMode() releases it by context.
+async function enterTempCourse(routeId) {
+  if (!routeId) return;
+  const key = "route:" + String(routeId);
+  if (TEMP_COURSE && COURSE_KEY === key) return exitTempCourse();   // double-click the same course again → leave
+  let ok = false;
+  try { ok = await onCourseChange(COURSE_KEY, key, { force: true }); } catch (e) { ok = false; }
+  if (!ok || !COURSE || COURSE_KEY !== key) { logStatus("no course data on record for that route yet", "warn"); return; }
+  TEMP_COURSE = true;
+  MODE.suggest = "course"; MODE.known = true; MODE.held = false;
+  MODE.reason = "browsing " + (COURSE.name || key) + " · double-click again to exit";
+  BROWSE_PICK = String(routeId); VIEW.global.browsePick = BROWSE_PICK; viewSave();
+  LEFT_KEY = null; TRACE_KEY = null; paintPanel();
+}
+function exitTempCourse() {
+  if (!TEMP_COURSE) return;
+  TEMP_COURSE = false; COURSE = null; COURSE_KEY = null;
+  MODE.suggest = "free"; MODE.known = true; MODE.held = false; MODE.reason = "free roam";
+  LEFT_KEY = null; TRACE_KEY = null; paintPanel();
 }
 
 /* ------------------------------------------------- Course Browser (free-mode right tab)
@@ -2120,6 +2160,8 @@ function wireBrowser(body) {
     VIEW.global.browseSort = BROWSE_SORT; VIEW.global.browseSortRev = BROWSE_SORT_REV; viewSave(); paintRight(); });
   body.querySelectorAll("[data-bpick]").forEach((b) => {
     b.onclick = () => browsePick(b.dataset.bpick);
+    // double-click opens the course's full analysis in a temporary course-browser view (released by context)
+    b.ondblclick = (e) => { e.preventDefault(); enterTempCourse(b.dataset.bpick); };
     // the same preview in reverse — hovering a tile lights its trace on the map, without picking it
     b.onmouseenter = () => hoverCourse(b.dataset.bpick);
     b.onmouseleave = () => hoverCourse(null);

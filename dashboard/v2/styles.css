@@ -496,6 +496,10 @@ button.stage.act.go:active{transform:translateY(1px)}
 .ch-conf{font-size:11px;color:var(--mut);display:flex;align-items:center;flex-wrap:wrap;gap:3px}
 .ch-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:2px}
 .ch-dot.ok{background:var(--acc)} .ch-dot.w{background:var(--warn)} .ch-dot.x{background:var(--mut)}
+.ch-browse{display:flex;align-self:stretch;align-items:center;gap:8px;background:rgba(78,163,255,.12);border:1px solid var(--acc2);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--ink)}
+.ch-browse b{font:800 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--acc2)}
+.ch-browse em{font-style:normal;color:var(--mut)}
+.ch-browse .mini{margin-left:auto}
 .ch-live{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;background:var(--warn);color:#231a00;border-radius:3px;padding:2px 8px;font:800 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase}
 .ch-live i{width:7px;height:7px;border-radius:50%;background:#231a00;box-shadow:0 0 5px rgba(0,0,0,.4)}
 .ch-live em{font:600 9px var(--mono);font-style:normal;text-transform:none;letter-spacing:0;opacity:.8}

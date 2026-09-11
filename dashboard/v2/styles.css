@@ -1173,6 +1173,11 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .tstat-cornersvg.has-sel .cm-lap{opacity:.08}
 .tstat-cornersvg.has-sel .cm-lap.sel{opacity:1}
 .tstat-cornersvg.has-sel .cm-lap.sel line{stroke-width:2.6}
+/* the same pick mirrored onto the whole-course map: dim every lap trace, lift the picked one. The map's
+   polylines carry an inline `opacity` PRESENTATION ATTRIBUTE which — unlike stroke-width — this engine does
+   not let a plain CSS opacity property override, so the override is forced with !important (measured). */
+.cmap svg.has-lapsel .cmap-lap polyline{opacity:.1!important;transition:opacity .1s}
+.cmap svg.has-lapsel .cmap-lap.sel polyline{opacity:1!important;stroke-width:3}
 .tlb-row{cursor:pointer}
 .tlb-row:hover{background:var(--panel2)}
 .tlb-row.lbsel{background:rgba(78,163,255,.16);box-shadow:inset 2px 0 0 var(--acc2)}

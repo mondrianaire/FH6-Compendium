@@ -91,6 +91,18 @@ function onLive(d) {
   if (d.pps != null) LIVE.pps = d.pps;
   if (d.receiving != null) LIVE.receiving = d.receiving;
   if (d.mode) adoptMode(d.mode);
+  // AUTHORITATIVE LOOP IDENTITY ON (RE)CONNECT (Jett 2026-09-11). The snapshot AND the once-a-second status
+  // both carry the daemon's current S/F loop, but adoptLoop only ever ran on the live "loop" EVENT — which
+  // fires at a load-in / path-correction, never on a reconnect. So refreshing the page mid-event ignored the
+  // daemon's correct loop and left the STALE course restored from CTX showing: a Legend Island Rivals run read
+  // "Edamame Circuit" after a reload, and the live speed trace then drew against that wrong map (looked like it
+  // was "creating a new route"). Adopt the loop here too, only on a NAME change so a settled map is not
+  // repainted every second. WORLD is loaded by panelBoot before connect(), so it is ready at the first snapshot;
+  // a null loop (free roam / loop ended) clears LOOP and lets position-based location take back over.
+  if ("loop" in d && WORLD) {
+    const lnm = d.loop && d.loop.name && d.loop.name !== "Rivals course" ? d.loop.name : null;
+    if (lnm !== (LOOP ? LOOP.name : null)) adoptLoop(d.loop || { name: null });
+  }
   if (!LIVE.frame && LIVEPOS && WORLD) locateCourse();     // a parked car still locates, from the seed
   // no frames yet (game at a menu since we connected): fall back to the last car the session saw
   if (!CUR && LIVE.cars.length) {

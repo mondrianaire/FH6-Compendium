@@ -388,9 +388,13 @@ function courseMap(c, opts) {
     return `<polyline fill="none" stroke="${SC[name] || "#888"}" stroke-width="5" stroke-linecap="round"
         stroke-linejoin="round" opacity=".92" points="${pp.map(([x, z]) => px(x).toFixed(1) + "," + py(z).toFixed(1)).join(" ")}"/>`;
   }).join("")).join("");
+  // each lap's trace is wrapped in a group carrying its lap id, so a leaderboard pick can lift THIS lap's
+  // whole-course trace and dim the rest (applyLapPick, panel.js) — the same isolation the corner map does,
+  // now across both maps. The id space is the trace key (== the leaderboard's phaseObs lap id, both strings).
+  const lapg = (id, inner) => `<g class="cmap-lap" data-lap="${id}">${inner}</g>`;
   const laps = showPhases ? allPhaseOv
-    : `${pathRows.map((r, i) => (i === foreIx ? "" : line(r.pts, gcol(r.id), 1.2, tp != null ? 0.18 : 0.55))).join("")}
-       ${foreIx >= 0 ? line(pathRows[foreIx].pts, gcol(pathRows[foreIx].id), 2.6, 1) : line(ours, "#00d27a", 2, tp != null ? 0.45 : 0.95)}`;
+    : `${pathRows.map((r, i) => (i === foreIx ? "" : lapg(r.id, line(r.pts, gcol(r.id), 1.2, tp != null ? 0.18 : 0.55)))).join("")}
+       ${foreIx >= 0 ? lapg(pathRows[foreIx].id, line(pathRows[foreIx].pts, gcol(pathRows[foreIx].id), 2.6, 1)) : line(ours, "#00d27a", 2, tp != null ? 0.45 : 0.95)}`;
   const gradKey = (pathRows.length && _dt.length)
     ? `<span class="leg-grad" title="each lap's trace is coloured by its recorded time"><em>${typeof lapTime === "function" ? lapTime(tmin) : tmin.toFixed(2)}</em><i class="grad"></i><em>${typeof lapTime === "function" ? lapTime(tmax) : tmax.toFixed(2)}</em><b>${pathRows.length} lap${pathRows.length === 1 ? "" : "s"}</b></span>`
     : `<span><i style="background:#00d27a"></i>where you drove</span>`;

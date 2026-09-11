@@ -534,11 +534,19 @@ function pickLap(id) {
   applyLapPick();
 }
 function applyLapPick() {
-  const rb = $("#rightBody"); if (!rb) return;
-  const svg = rb.querySelector(".tstat-cornersvg");
-  if (svg) { svg.classList.toggle("has-sel", LB_PICK != null);
-    svg.querySelectorAll(".cm-lap").forEach((g) => g.classList.toggle("sel", LB_PICK != null && g.dataset.lap === LB_PICK)); }
-  rb.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.classList.toggle("lbsel", LB_PICK != null && r.dataset.lap === LB_PICK));
+  const rb = $("#rightBody");
+  if (rb) {
+    const svg = rb.querySelector(".tstat-cornersvg");
+    if (svg) { svg.classList.toggle("has-sel", LB_PICK != null);
+      svg.querySelectorAll(".cm-lap").forEach((g) => g.classList.toggle("sel", LB_PICK != null && g.dataset.lap === LB_PICK)); }
+    rb.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.classList.toggle("lbsel", LB_PICK != null && r.dataset.lap === LB_PICK));
+  }
+  // MIRROR THE PICK ONTO THE LEFT COURSE MAP (Jett 2026-09-11): lift the same lap's whole-course trace and
+  // dim the rest, so the isolated lap reads across BOTH the course map and the single-corner map. The left
+  // map persists across right-pane repaints, so toggling classes in place (no paintLeft) is enough.
+  const lb = $("#leftBody"), lsvg = lb && lb.querySelector(".cmap svg");
+  if (lsvg) { lsvg.classList.toggle("has-lapsel", LB_PICK != null);
+    lsvg.querySelectorAll(".cmap-lap").forEach((g) => g.classList.toggle("sel", LB_PICK != null && g.dataset.lap === LB_PICK)); }
 }
 // cross-highlight one phase across the left map + rail and the right table (shared data-phase spine):
 // emphasise the matching part, dim the rest; null clears.
@@ -1620,6 +1628,10 @@ function paintLeft() {
       const key = leg.querySelector(".cleg-key"); if (key) key.hidden = !MAP_LEG_OPEN;
       b.textContent = "key " + (MAP_LEG_OPEN ? "▾" : "▸"); b.title = (MAP_LEG_OPEN ? "hide" : "show") + " the map key";
     });
+    // the map is rebuilt fresh here, so an active leaderboard lap-pick must be re-applied — otherwise any
+    // left re-render (resize, filter, follow) silently drops the isolation while LB_PICK still stands. The
+    // right pane already re-applies in paintRight; this is its left-map counterpart.
+    applyLapPick();
   } else {
     paintLeftHeader();
     body.innerHTML = worldMapHTML();

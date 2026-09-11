@@ -811,6 +811,9 @@ function modeControls() {
 // to; a reading line states what the filter costs; MISMATCH IS A STATE -- when the filter's class is not the car
 // under you, the band's edge and its button turn amber and one tap scopes to your car. The trail's paint lives
 // here too, bound to the one TRACE_MODE the trace header and the map key already share.
+// SCOPE band: the `show` presets and the drive/tune/traffic/build filters fold behind a "filters" toggle,
+// collapsed by default, so the band is one row (~78px, the design height) instead of wrapping to ~108px.
+let SCOPE_MORE = (() => { try { return localStorage.getItem("fh6ScopeMore") === "1"; } catch (e) { return false; } })();
 // scope every course pane to a class, or clear back to all: the SCOPE band's class badges AND the hero's
 // laps-by-class bars both call this — one source for "make class X the thing every count is measured against".
 // A class pick is explicit: it drops the "this class" preset (which follows the car) so the pick stands.
@@ -851,12 +854,15 @@ function paintCourseFilter() {
       <b>${state === "match" ? "✓ scope matches" : state === "mismatch" ? "⚠ filter ≠ your car" : "match my car"}</b>
       <em>${state === "match" ? `class ${esc(carCls)} · ${carN} lap${carN === 1 ? "" : "s"}` : `tap to match my car — class ${esc(carCls)}`}</em></button>`;
   el.dataset.state = state;
+  const moreBtn = `<button class="cf-morebtn ${SCOPE_MORE ? "on" : ""}" data-cfmore title="show / hide the preset and data filters">filters ${SCOPE_MORE ? "▾" : "▸"}</button>`;
+  const moreRow = SCOPE_MORE ? `<div class="cf-morerow"><span class="fdim"><span class="why">show</span>${presets}</span>${filt}${clearBtn}</div>` : "";
   el.innerHTML = `<div class="cf-main"><div class="cf-row"><span class="cf-h">scope</span><span class="cf-clss">${[null].concat(classes).map(clsBtn).join("")}</span>`
-    + `<span class="fdim"><span class="why">show</span>${presets}</span>${filt}${paint}${clearBtn}</div>`
+    + `${paint}${moreBtn}</div>${moreRow}`
     + `<div class="cf-read">${read}</div></div>${cta}`;
   wireTrace(el);   // data-tpre / data-tfilt / data-tfiltsel / data-tmode handlers (they repaint every pane)
   el.querySelectorAll("[data-cfcls]").forEach((b) => b.onclick = () => setScopeClass(b.dataset.cfcls || null));
   const m = el.querySelector("[data-cfmatch]"); if (m) m.onclick = () => setScopeClass(m.dataset.cfmatch || null);
+  const mb = el.querySelector("[data-cfmore]"); if (mb) mb.onclick = () => { SCOPE_MORE = !SCOPE_MORE; try { localStorage.setItem("fh6ScopeMore", SCOPE_MORE ? "1" : "0"); } catch (e) {} paintCourseFilter(); };
 }
 // One filter change re-scopes the trace, the bar's own summary, and (in course mode) the map/turns
 // and stats. The left/right rebuild is course-only — in free roam it would needlessly re-raster the

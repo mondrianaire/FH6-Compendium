@@ -479,6 +479,12 @@ button.stage.act.go:active{transform:translateY(1px)}
 .coursefilter[data-state="mismatch"]{--cf-edge:var(--warn);border-color:var(--warn)}
 .coursefilter .cf-main{display:flex;flex-direction:column;gap:3px;padding:5px 10px 5px 13px;min-width:0}
 .coursefilter .cf-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px}
+/* the preset & data filters fold behind this toggle so the band stays one row by default */
+.coursefilter .cf-morebtn{margin-left:auto;background:none;border:1px solid var(--line2);color:var(--mut);border-radius:3px;
+  padding:1px 8px;font:600 10px var(--mono);cursor:pointer;white-space:nowrap}
+.coursefilter .cf-morebtn:hover{color:var(--acc2);border-color:var(--acc2)}
+.coursefilter .cf-morebtn.on{color:var(--acc2);border-color:var(--acc2)}
+.coursefilter .cf-morerow{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;padding-top:3px;margin-top:1px;border-top:1px solid var(--line)}
 .coursefilter .cf-h{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc2);font-weight:700}
 .coursefilter .fdim{display:inline-flex;align-items:center;gap:3px}
 .coursefilter .fdim .why{margin-right:2px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}

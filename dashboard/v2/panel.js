@@ -2993,7 +2993,9 @@ function turnStatsHTML(t, ls) {
     <div class="tstat-foot">medians over ${nLaps} lap${nLaps === 1 ? "" : "s"} in ${esc(ls.label)} · phase spans from the game's centre-line · every figure carries its lap count</div></div>`;
 
   const cornerMap = cornerMapHTML(COURSE, t, ls);   // the per-turn line trace + phase-time rail, now in THIS (right) pane
-  return `<div class="tstat">${header}${diag}${wtg}${cornerMap}${board}${gripCard}</div>`;
+  // the corner map (historical line trace) is one of the two most important things in the single-turn view,
+  // so it leads — right under the header — with the leaderboard, errors, where-the-time-goes and grip below.
+  return `<div class="tstat">${header}${cornerMap}${diag}${wtg}${board}${gripCard}</div>`;
 }
 function cap1(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function matrixHTML() {

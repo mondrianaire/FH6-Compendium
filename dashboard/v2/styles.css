@@ -1224,11 +1224,12 @@ body.fixed main{padding:0;gap:0;border-top:0}
 .pib--neg.pib-s2 b{color:#2f62e0}
 .pib--neg.pib-r b{color:#e83c9e}
 .pib--neg.pib-x b{color:#2fd05f}
-/* the Course Browser scrolls (the tile grid can exceed the pane); chips stay pinned as it scrolls.
-   Scoped to the RIGHT info pane when it holds the browser (:has(.tiles)) so it overrides the global
-   no-scroll rule `body.fixed .pane>.body{overflow:hidden}` here and NOWHERE else. */
+/* Info panes may scroll (Jett: break the no-scroll rule for these): the Course Browser tile grid, and the
+   turn-analysis pane (.tstat) whose corner map + leaderboard + errors run past the pane. Scoped to the RIGHT
+   pane so it overrides the global no-scroll `body.fixed .pane>.body{overflow:hidden}` only where wanted. */
 .tiles{padding-bottom:4px}
-body.fixed #pRight > .body:has(.tiles){overflow-y:auto}
+body.fixed #pRight > .body:has(.tiles),
+body.fixed #pRight > .body:has(.tstat){overflow-y:auto}
 
 /* ---- world map: course-type traces, and the hover link to the Course Browser (2026-09-08) ----
    Hover is a PREVIEW on both surfaces: it brightens, it never selects. `.tile.on` (a committed pick)

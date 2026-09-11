@@ -357,9 +357,12 @@ whether there are too many colour languages. This table is the evidence for that
 - [ ] Delete the remaining dead `.pib` base rules (the early `.pib` / `.pib b` / `.pib i` block and the
       `border-radius:0` override).
 - [ ] Give `classPill` a `neg` option; route `panel.js:1829`, `1843`, `2224` through it.
-- [ ] **D1/D2 — grip palette and words.** Collapse `TRACE_GRIP`, `GRIP` (`app.js`) and the hard-coded
-      grip hexes into `DGRIP` with `col`/`ink`; traces draw calm in the class colour, else `#8b97a7`;
-      retire `TRACE_WORD`.
+- [x] **D1/D2 — grip palette and words: applied in the lab 2026-09-11** (commit "Grip palette: one DGRIP").
+      `DGRIP` (`panel.js`, beside the trace constants) carries `col` / `ink` / `word` / `tip`, with `GSTATE`
+      and `gripOf()` / `gripInk()`. `TRACE_GRIP`, `TRACE_WORD`, `app.js GRIP` and the hard-coded grip hexes
+      (incl. the sixth calm `#3a4250`) are gone; traces, the live map trail, the map key and the trace hover
+      draw calm in the class colour, else `#8b97a7`; grip text uses `ink` (calm no longer green). One
+      judgement call: a legend swatch that keys a LINE shows the line's ink, not the fill `col`.
 - [ ] **D3 — typical grip live.** Live phases carry a sample histogram and modal state instead of the
       `axle()` max; the per-second dock strip reports the modal state.
 - [x] **Class bands D–S2: applied in the lab at `10d594c`.** `docs/patches/class-bands-fh6.patch`

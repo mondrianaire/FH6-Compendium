@@ -419,7 +419,7 @@ function courseMap(c, opts) {
         <button class="cleg-toggle" data-legtoggle title="${legOpen ? "hide the map key" : "show the map key"}">key ${legOpen ? "▾" : "▸"}</button>
       </div>
       <div class="cleg-key"${legOpen ? "" : " hidden"}>
-        ${typeof TRACE_GRIP !== "undefined" ? `<span class="leg-grip">${TRACE_GRIP.map((col, k) => `<span><i style="background:${k ? col : "var(--live-calm," + col + ")"}"></i>${k === 4 ? "✸ " : ""}${esc(TRACE_WORD[k])}</span>`).join("")}</span>` : ""}
+        ${typeof DGRIP !== "undefined" ? `<span class="leg-grip">${GSTATE.map((k, i) => `<span title="${esc(DGRIP[k].tip)}"><i style="background:${i ? DGRIP[k].ink : "var(--live-calm," + DGRIP.calm.ink + ")"}"></i>${i === 4 ? "✸ " : ""}${esc(DGRIP[k].word)}</span>`).join("")}</span>` : ""}
         <span><i style="background:#7d8b9c"></i>centre-line</span>
         ${showPhases ? allPhaseKey : gradKey}
         <span><i style="background:var(--acc2)"></i>turn</span>
@@ -428,7 +428,7 @@ function courseMap(c, opts) {
     </div></div>`);
 }
 
-const GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];
+// grip paint comes from panel.js's one palette (DGRIP, loaded first): lines wear each state's ink
 function speedTrace(c, laps) {
   const ids = Object.keys(c.traces || {});
   if (!ids.length) return el(`<div class="panel why">no speed trace stored for this course</div>`);
@@ -451,7 +451,7 @@ function speedTrace(c, laps) {
       if (k !== st) { run.push(pts[i]); segs.push([st, run]); run = [pts[i]]; st = k; } else run.push(pts[i]);
     }
     segs.push([st, run]);
-    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${GRIP[k] || GRIP[0]}" stroke-width="2"
+    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${gripInk(k)}" stroke-width="2"
         stroke-linecap="round" points="${pp.map((p) => px(p[0]).toFixed(1) + "," + py(p[1]).toFixed(1)).join(" ")}"/>`).join("");
   }).join("");
   const ticks = (c.turns || []).filter((t) => t.s != null).map((t) =>
@@ -463,11 +463,7 @@ function speedTrace(c, laps) {
     <div class="chips" style="margin-bottom:6px"><b>speed</b>
       <span class="why">mph against distance · ${ids.length} laps · the fastest is painted by grip state</span></div>
     <svg viewBox="0 0 ${W} ${H}" style="background:var(--bg);border-radius:6px">${axis}${ticks}${paths}</svg>
-    <div class="legend"><span><i style="background:#00d27a"></i>within grip</span>
-      <span><i style="background:#4ea3ff"></i>front slipping</span>
-      <span><i style="background:#f0616d"></i>rear slipping</span>
-      <span><i style="background:#c678dd"></i>all four</span>
-      <span><i style="background:#e3b341"></i>impact</span>
+    <div class="legend">${GSTATE.map((k) => `<span title="${esc(DGRIP[k].tip)}"><i style="background:${DGRIP[k].ink}"></i>${esc(DGRIP[k].word)}</span>`).join("")}
       <span><i style="background:#576372"></i>other laps</span></div></div>`);
 }
 

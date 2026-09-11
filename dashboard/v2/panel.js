@@ -472,7 +472,21 @@ function paintIdBar() {
 // fastest is green, the rest faint; partial and void laps dashed and struck; turns ticked by
 // their own ids; impacts marked; hover reads the point and marks it on the course map. Off a
 // known course the block shows the live run, so it is never blank.
-const TRACE_GRIP = ["#00d27a", "#4ea3ff", "#f0616d", "#c678dd", "#e3b341"];
+// THE ONE GRIP PALETTE (D1/D2, Jett 2026-09-11; docs/design-language.md §3.2, §4.2). Fills -- bars, cells, the
+// swatch of a fill -- use `col`; lines and text use `ink`. Calm's #2a313c fill would vanish as a line on the
+// #0d1117 page, so calm's ink is the car's class colour when known (gripInk), else #8b97a7 -- never green, which
+// means fastest / success. The words are these; v1's axle wording rides in `tip` for tooltips. This replaced
+// TRACE_GRIP / TRACE_WORD and app.js GRIP (the app's status colours standing in for grip).
+const DGRIP = {
+  calm:   { col: "#2a313c", ink: "#8b97a7", word: "within grip",        tip: "all four tyres within grip" },
+  front:  { col: "#2f81f7", ink: "#2f81f7", word: "understeer",         tip: "the fronts past the limit" },
+  rear:   { col: "#e5414e", ink: "#e5414e", word: "oversteer",          tip: "the rears past the limit" },
+  both:   { col: "#a371f7", ink: "#a371f7", word: "drift / overdriven", tip: "all four tyres past the limit" },
+  impact: { col: "#e3b341", ink: "#e3b341", word: "impact / jolt",      tip: "a hit: over 3 g lateral, or a smashable" },
+  off:    { col: "#0b0e12", ink: "#8b97a7", word: "not driving",        tip: "no driving frame" },
+};
+const GSTATE = ["calm", "front", "rear", "both", "impact"];   // grip code 0-4 -> DGRIP key
+const gripOf = (k) => DGRIP[typeof k === "number" ? GSTATE[k] : k] || DGRIP.calm;
 // PI-class colours, matching the .pib-<class> badges (styles.css). A context (non-foregrounded)
 // speed-trace line is painted by the PI CLASS of the build that drove it, so PI-vs-speed reads at a
 // glance across laps from different-class builds (Jett 2026-09-07). Unknown class falls back to --dim.
@@ -508,7 +522,6 @@ function turnLabel(t) {
   const raw = t.id != null ? t.id : t.turn_id;
   return raw != null ? String(raw) : "T?";
 }
-const TRACE_WORD = ["within grip", "front slipping", "rear slipping", "all four", "impact"];
 const GRAD = ["#2f81f7", "#3fb6c8", "#6fd08c", "#d7d264", "#e8a13c", "#e5414e"];
 const TRACE_DIMS = [["class", "class"], ["dt", "drive"], ["container", "tune"], ["solo", "traffic"], ["bid", "build"]];
 const PRESETS = [["all", "all"], ["class", "this class"], ["car", "this car"], ["build", "this build"], ["hw", "same hardware"], ["tune", "this tune"]];
@@ -685,11 +698,12 @@ function arcRuns(pts) {
   }
   runs.push(run); return runs;
 }
-// one grip ink for every live surface (trace line, map trail, map key): within grip wears the PI class colour
-// when known (unknown class -> the green within-grip), the problem states keep their diagnostic colours
+// the ink of a grip state for a LINE or TEXT (code 0-4 or DGRIP key): within grip wears the PI class colour when
+// known, else calm's grey ink; the problem states keep their diagnostic colours
 function gripInk(k, baseCol) {
-  if (k) return TRACE_GRIP[k] || TRACE_GRIP[0];
-  return (baseCol && baseCol !== "var(--dim)") ? baseCol : TRACE_GRIP[0];
+  const g = gripOf(k);
+  if (g !== DGRIP.calm) return g.ink;
+  return (baseCol && baseCol !== "var(--dim)") ? baseCol : DGRIP.calm.ink;
 }
 function paintedLine(pts, ch, w, mode, baseCol) {
   if (!pts.length) return "";
@@ -705,7 +719,7 @@ function paintedLine(pts, ch, w, mode, baseCol) {
     const segs = []; let run = [rp[0]], st = keyOf(rp[0]);
     for (let i = 1; i < rp.length; i++) { const k = keyOf(rp[i]); if (k !== st) { run.push(rp[i]); segs.push([st, run]); run = [rp[i]]; st = k; } else run.push(rp[i]); }
     segs.push([st, run]);
-    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${colOf(k)}" stroke-width="${(mode === "speed" || k) ? w + 0.6 : w}" stroke-linecap="round" points="${pp.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"><title>${mode === "speed" ? "speed" : TRACE_WORD[k] || ""}</title></polyline>`).join("");
+    return segs.map(([k, pp]) => `<polyline fill="none" stroke="${colOf(k)}" stroke-width="${(mode === "speed" || k) ? w + 0.6 : w}" stroke-linecap="round" points="${pp.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"><title>${mode === "speed" ? "speed" : gripOf(k).word + " — " + gripOf(k).tip}</title></polyline>`).join("");
   }).join("");
 }
 const plainLine = (pts, ch, col, w, op, dashed) => arcRuns(pts).map((run) => `<polyline fill="none" stroke="${col}" stroke-width="${w}" opacity="${op}"${dashed ? ' stroke-dasharray="3 3"' : ""} points="${run.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>`).join("");
@@ -907,7 +921,7 @@ function courseTrace(c) {
         band = `<rect x="${Math.min(bx0, bx1).toFixed(1)}" y="6" width="${Math.abs(bx1 - bx0).toFixed(1)}" height="${H - 22}" fill="var(--acc2)" opacity=".10"><title>${esc(turnLabel(bt))} extent</title></rect>`; } }
     const ticks = (c.turns || []).filter((t) => t.s != null).map((t) => { const on = t.seq === tsel;
       return `<line x1="${ch.px(t.s).toFixed(1)}" y1="6" x2="${ch.px(t.s).toFixed(1)}" y2="${H - 16}" stroke="${on ? "var(--acc2)" : "var(--line2)"}" stroke-width="${on ? 1.6 : 1}" opacity="${on ? 0.95 : 0.7}"/><text x="${ch.px(t.s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" font-weight="${on ? 700 : 400}" fill="${on ? "var(--acc2)" : "var(--dim)"}">${esc(turnLabel(t))}</text>`; }).join("");
-    const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="#e3b341" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="#e3b341"/></g>`).join("");
+    const imp = impactMarks(fore.pts).map((q, i) => `<g><title>impact ${i + 1} at ${Math.round(q[0])} m</title><line x1="${ch.px(q[0]).toFixed(1)}" y1="6" x2="${ch.px(q[0]).toFixed(1)}" y2="${H - 16}" stroke="${DGRIP.impact.ink}" stroke-dasharray="2 2" opacity=".6"/><circle cx="${ch.px(q[0]).toFixed(1)}" cy="${ch.py(q[1]).toFixed(1)}" r="3" fill="${DGRIP.impact.col}"/></g>`).join("");
     const pts = fore.pts.map((q) => [q[0], q[1], q[2], q[3], q[4]]);
     // THE ACTIVE LAP, on top and unmistakable: a soft accent glow under the grip-painted line, thicker than
     // any recorded lap, with the car's marker at its current position -- the same "you" the course map draws
@@ -928,8 +942,9 @@ function liveRun() {
   // 2026-09-03 (Jett): the legend named every grip state but never said which one you're IN right
   // now -- LIVE.run's own last point already carries it (runSample() pushes [dist,mph,g,...]).
   const curG = pts.length ? pts[pts.length - 1][2] : null;
-  const pc = piColor(CUR && CUR.cls); const g0 = (pc && pc !== "var(--dim)") ? pc : TRACE_GRIP[0];   // the within-grip swatch shows the PI colour it now paints
-  const foot = `<span class="lchips grip">${TRACE_GRIP.map((c0, i) => { const c = i === 0 ? g0 : c0; return `<span class="lchip key${curG === i ? " on" : ""}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${TRACE_WORD[i]}</span>`; }).join("")}</span>`;
+  // the swatches key a LINE, so they wear each state's ink (within grip: the PI colour the line paints in)
+  const pc = piColor(CUR && CUR.cls);
+  const foot = `<span class="lchips grip">${GSTATE.map((key, i) => { const c = gripInk(i, pc); return `<span class="lchip key${curG === i ? " on" : ""}" title="${esc(DGRIP[key].tip)}" style="border-color:${c}${curG === i ? `;background:${c}22` : ""}"><i style="background:${c}"></i>${DGRIP[key].word}</span>`; }).join("")}</span>`;
   const svg = (W, H) => {
     if (pts.length < 3) return `<div class="why tempty">drive — speed against time draws here as you go, painted by what the tyres are doing</div>`;
     // FREE MODE PLOTS vs TIME, not distance (Jett 2026-09-07): a free-roam run has no course to measure
@@ -995,11 +1010,11 @@ function wireTrace(el) {
     const r = sv.getBoundingClientRect(); const vx = ((ev.clientX - r.left) / r.width) * W;
     const sAt = ((vx - padL) / (W - padL - 8)) * smax;
     let bi = 0, bd = Infinity; for (let i = 0; i < P.length; i++) { const d = Math.abs(P[i][0] - sAt); if (d < bd) { bd = d; bi = i; } }
-    const q = P[bi]; const col = TRACE_GRIP[q[2] | 0] || TRACE_GRIP[0];
+    const q = P[bi]; const col = gripInk(q[2] | 0);
     const px = padL + (q[0] / smax) * (W - padL - 8), py = (H - padB) - (q[1] / vmax) * (H - padB - 10);
     cur.style.display = ""; const ln = cur.querySelector("line"); ln.setAttribute("x1", px); ln.setAttribute("x2", px);
     const c = cur.querySelector("circle"); c.setAttribute("cx", px); c.setAttribute("cy", py); c.setAttribute("fill", col);
-    if (read) read.innerHTML = `<b>${Math.round(q[1])} mph</b> at ${Math.round(q[0])} m · <span style="color:${col}">${TRACE_WORD[q[2] | 0] || ""}</span>`;
+    if (read) read.innerHTML = `<b>${Math.round(q[1])} mph</b> at ${Math.round(q[0])} m · <span style="color:${col}" title="${esc(gripOf(q[2] | 0).tip)}">${gripOf(q[2] | 0).word}</span>`;
     if (q.length > 4) markMapAt(q[3], q[4], col);
   };
   sv.onmouseleave = () => { cur.style.display = "none"; if (read) read.textContent = "hover the trace — it marks that spot on the map"; clearMapMark(); };
@@ -1009,14 +1024,7 @@ function wireTrace(el) {
 // The live dock — the v1 Lab's bottom strip, ported: value tiles from the frame, and the time
 // trace from the daemon's per-second strip (grip state as colour, speed as a line, every
 // identified corner marked ▲ and coloured by its balance). One palette, the analyzer's own.
-const DGRIP = {
-  calm:   { col: "#2a313c", word: "within grip" },
-  front:  { col: "#2f81f7", word: "understeer" },
-  rear:   { col: "#e5414e", word: "oversteer" },
-  both:   { col: "#a371f7", word: "drift / overdriven" },
-  impact: { col: "#e3b341", word: "impact / jolt" },
-  off:    { col: "#0b0e12", word: "not driving" },
-};
+// (DGRIP itself is defined once, with the trace constants above.)
 const dGripUsi = (u) => (u > 0.15 ? "front" : u < -0.05 ? "rear" : "calm");
 let DOCK_SPAN = 600;               // seconds of trace on screen
 let DOCK_TILE_T = 0;
@@ -2535,7 +2543,7 @@ function liveLapPaint() {
     if (k === 4 && (!g._imp || Math.hypot(q[3] - g._imp[0], q[4] - g._imp[1]) > 12)) {   // v1's 12 m impact dedup
       const b = document.createElementNS(NS, "path");
       b.setAttribute("d", IMPACT_BURST); b.setAttribute("transform", `translate(${X.toFixed(1)},${Y.toFixed(1)}) scale(${(g._u * 1.7).toPrecision(3)})`);
-      b.setAttribute("fill", TRACE_GRIP[4]); b.setAttribute("stroke", "#0d1117"); b.setAttribute("stroke-width", "1.2"); b.setAttribute("vector-effect", "non-scaling-stroke");
+      b.setAttribute("fill", DGRIP.impact.col); b.setAttribute("stroke", "#0d1117"); b.setAttribute("stroke-width", "1.2"); b.setAttribute("vector-effect", "non-scaling-stroke");
       gImp.appendChild(b); g._imp = [q[3], q[4]];
     }
     g._last = q; g._lx = X; g._ly = Y;
@@ -2779,11 +2787,11 @@ function phaseGrip(c) {
     }).join("");
     const wg = worst ? DGRIP[worst.st] : DGRIP.calm;
     const cap = worst ? `${esc(wg.word.split(/[ /]/)[0])} · ${esc(SEG_LABEL[worst.ph].split(/[ /]/)[0].toLowerCase())}` : "clean";
-    return { cell: `<span class="lap-grip"><em class="lap-gword" style="color:${wg.col}">${cap}</em><span class="lap-gbar">${cells}</span></span>`, lost: !!worst };
+    return { cell: `<span class="lap-grip"><em class="lap-gword" style="color:${wg.ink}">${cap}</em><span class="lap-gbar">${cells}</span></span>`, lost: !!worst };
   }
   const gstate = c.first_red ? (c.first_red.axle === "front" ? "front" : "rear") : dGripUsi(c.usi), g = DGRIP[gstate] || DGRIP.calm;
   const gl = c.first_red ? `${g.word} · ${esc(SEG_LABEL[LIVE_PH[c.first_red.phase - 1]] || "phase " + c.first_red.phase)}` : (gstate === "calm" ? "clean" : g.word);
-  return { cell: `<span class="lap-grip" style="color:${g.col}">${gl}</span>`, lost: gstate !== "calm" };
+  return { cell: `<span class="lap-grip" style="color:${g.ink}">${gl}</span>`, lost: gstate !== "calm" };
 }
 function lapHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to rate each turn the moment you take it.</div>`;
@@ -2863,7 +2871,7 @@ function cornersHTML() {
       <span class="mono">${c.mph_in}→<b>${c.mph_min}</b>→${c.mph_out ?? "—"}</span>
       <span class="mono">${c.lat_g_peak} g</span>
       <span class="mono">${c.brake_on_m != null ? c.brake_on_m + " m" : "—"}</span>
-      <span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${g.word}</span>
+      <span style="color:${g.ink}" title="${esc(g.tip)}">${g.word}</span>
       <span class="why">${fr ? `${fr.axle} first · ph ${fr.phase}` : "clean"}${c.hb ? " · handbrake" : ""}${c.drift ? " · drift" : ""}${c.brake_max > 200 ? " · hard brake" : ""}</span></div>`;
   }).join("");
   // SESSION BALANCE (2026-09-03, Jett: a short corner log left the whole pane a slab of empty black
@@ -2924,18 +2932,17 @@ function phaseBars(ph) {
     // when the corner opened right after the per-second sample buffer reset) renders as an empty bar,
     // correctly — it is a real zero-slip reading, not a missing one, so it is never skipped.
     const fr = Math.min(1, (p.front || 0) / 1.5), rr = Math.min(1, (p.rear || 0) / 1.5);
-    const col = p.red === "front" ? "#2f81f7" : p.red === "rear" ? "#e5414e" : p.red === "both" ? "#a371f7" : "#3a4250";
+    const col = (DGRIP[p.red] && p.red !== "off" ? DGRIP[p.red] : DGRIP.calm).col;
     return `<span title="phase ${p.phase} (${PH_SHORT[p.phase - 1] || ""}): front ${p.front} · rear ${p.rear}"
       style="display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid ${col};position:relative;background:var(--bg)">
-      <i style="position:absolute;left:0;bottom:0;width:50%;height:${Math.round(fr * 100)}%;background:#2f81f7;opacity:${p.front > 1 ? 1 : .4}"></i>
-      <i style="position:absolute;right:0;bottom:0;width:50%;height:${Math.round(rr * 100)}%;background:#e5414e;opacity:${p.rear > 1 ? 1 : .4}"></i></span>`;
+      <i style="position:absolute;left:0;bottom:0;width:50%;height:${Math.round(fr * 100)}%;background:${DGRIP.front.col};opacity:${p.front > 1 ? 1 : .4}"></i>
+      <i style="position:absolute;right:0;bottom:0;width:50%;height:${Math.round(rr * 100)}%;background:${DGRIP.rear.col};opacity:${p.rear > 1 ? 1 : .4}"></i></span>`;
   }).join("")}</span>`;
 }
 
 // PER-PHASE CORNER STRIP (Jett 2026-09-10): for each course turn, its 5 WHERE-phases as cells coloured
 // by the modal grip state, accumulated over the course's clean laps (COURSE.turns[].phases from build_web).
 // Always available in course mode -- it does not wait on this session's live corners.
-const GSTATE = ["calm", "front", "rear", "both", "impact"];   // grip_state 0-4 -> DGRIP key
 // aggregate the per-lap phase rows [[lap_id, entry, min, exit, grip]...] over the ACTIVE lap set (the
 // trace preset's selection), so the strip separates by class / build / tune exactly as the map traces do.
 // row = [lap_id, entry, min, exit, grip_state, time_s, grip_hist[5], mean]. The grip a phase reports is
@@ -3268,7 +3275,7 @@ function turnStatsHTML(t, ls) {
       const tx = spec ? drivingCue(e.phase, e.state) : e.tuning, wr = spec ? "drive" : "tune", src = spec ? "spec car" : e.src;
       return `<div class="terr" style="--sev:${sc}"><div class="terr-top">
         <span class="terr-ph" style="border-color:${SEG_COL[e.phase]}"><i style="background:${SEG_COL[e.phase]}"></i>${esc(SEG_LABEL[e.phase])}</span>
-        <span class="terr-grip" style="color:${gg.col}">${esc(gg.word)}</span>
+        <span class="terr-grip" style="color:${gg.ink}" title="${esc(gg.tip)}">${esc(gg.word)}</span>
         <span class="terr-sev"><b style="color:${sc}">${e.sev}</b><em style="color:${sc}">${e.sevLab}</em></span></div>
         <div class="terr-head">${esc(errHead(e))}</div>
         <div class="terr-m">
@@ -3374,13 +3381,13 @@ function matrixHTML() {
     <th style="text-align:left">turn</th><th>taken</th><th>apex mph</th><th>lat g</th><th>USI</th><th>first red</th><th>last pass</th></tr></thead><tbody>
     ${rows.map((r) => {
       const g = r.usi != null ? DGRIP[dGripUsi(r.usi)] : null;
-      const dcol = r.dom === "front" ? "#2f81f7" : r.dom === "rear" ? "#e5414e" : "var(--muted)";
+      const dcol = r.dom === "front" || r.dom === "rear" ? DGRIP[r.dom].ink : "var(--muted)";
       return `<tr style="${r.taken ? "" : "opacity:.4"}${r.anyAmbiguous ? ";outline:1px dashed var(--w)" : ""}">
         <td><b>${esc(turnLabel(r.t))}</b>${r.t.kind ? " " + esc(r.t.kind) : ""}${r.anyAmbiguous ? ` <span title="nearest of 2 turns within range — some passes here could belong to a neighboring turn">⚠</span>` : ""}</td>
         <td class="mono" style="text-align:center">${r.taken || "—"}</td>
         <td class="mono" style="text-align:center">${r.mph ?? "—"}</td>
         <td class="mono" style="text-align:center">${r.lat ?? "—"}</td>
-        <td style="text-align:center">${r.usi != null ? `<span style="color:${g.col === DGRIP.calm.col ? "var(--acc)" : g.col}">${r.usi > 0 ? "+" : ""}${r.usi.toFixed(2)}</span>` : "—"}</td>
+        <td style="text-align:center">${r.usi != null ? `<span style="color:${g.ink}" title="${esc(g.word)}">${r.usi > 0 ? "+" : ""}${r.usi.toFixed(2)}</span>` : "—"}</td>
         <td style="text-align:center">${r.taken ? `<span style="color:${dcol};font-weight:700">${r.dom || "clean"}</span> <span class="why">${r.fr.front}/${r.fr.rear}/${r.fr.none}</span>` : "—"}</td>
         <td class="mono">${r.last ? `${r.last.mph_in}→<b>${r.last.mph_min}</b>→${r.last.mph_out ?? "—"} ${phaseBars(r.last.phases)}` : "—"}</td>
       </tr>`;

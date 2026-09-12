@@ -278,25 +278,40 @@ def main(argv=None):
     # courses.json is written AFTER the course-detail loop below: Path B may replace a course's turn set with
     # the geometry set, and the loop rewrites c["turns"] to the displayed count, so the card matches the detail.
 
-    # PER-CLASS GRIP CEILING (a_max, schema 7): the tyres' sustained lateral-grip limit per PI class, as the
-    # 90th-percentile of every mid-phase peak |lat_g| in that class. It is a car+tune property, roughly class-
-    # global (not course-specific), so compute it ONCE and stamp it on every course export. n >= 20 or the class
-    # gets no rating rather than a noisy one; p10 is the spread the honesty tooltip shows. This powers the
-    # dashboard's per-turn "% of the grip limit" rating (v_max = sqrt(g * R * (a_max + tan b)/(1 - a_max tan b))).
-    _cls_g = _cl.defaultdict(list)
+    # PER-CLASS GRIP CEILING (a_max, schema 7), SPEED-BANDED (2026-09-12): the tyres' lateral-grip limit per PI
+    # class, as the 90th-percentile of mid-phase peak |lat_g|. Aero grip scales with speed, so a corner's
+    # achievable g depends on the speed it's taken at -- bucket by apex-speed band (apex = the mid phase's
+    # min_mph) so a slow corner is rated against the class's SLOW grip, not its high-downforce fast-corner grip.
+    # A per-class GLOBAL value stays as the fallback when a band is thin. n >= 20 per bucket or it isn't published.
+    # It's a car+tune property (~course-independent), so compute ONCE and stamp on every course. p10 = the spread.
+    _BANDS = [(0, 70), (70, 110), (110, 9999)]   # apex-mph bands: slow / medium / fast
+    _cls_g = _cl.defaultdict(list)                                  # class -> all peaks (global fallback)
+    _cls_band_g = _cl.defaultdict(lambda: _cl.defaultdict(list))    # class -> band index -> peaks
     if "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}:
-        for _cls, _pg in cx.execute(
-                "SELECT l.class, cs.peak_lat_g FROM corner_segment cs JOIN lap l ON l.lap_id = cs.lap_id "
+        for _cls, _pg, _mph in cx.execute(
+                "SELECT l.class, cs.peak_lat_g, cs.min_mph FROM corner_segment cs JOIN lap l ON l.lap_id = cs.lap_id "
                 "WHERE cs.segment='mid' AND cs.peak_lat_g > 0.1 AND cs.peak_lat_g <= 3.0 AND l.void=0 "   # >3 g = impact (dropped at source too); >0.1 excludes all-impact/empty phases
                 "AND l.class IS NOT NULL AND l.class != '?'"):
             _cls_g[_cls].append(_pg)
+            if _mph is not None:
+                for _bi, (_lo, _hi) in enumerate(_BANDS):
+                    if _lo <= _mph < _hi:
+                        _cls_band_g[_cls][_bi].append(_pg)
+                        break
     def _pctl(a, q):
         a = sorted(a)
         return a[int(q * (len(a) - 1))] if a else None
     class_grip = {}
     for _cls, _vals in _cls_g.items():
-        if len(_vals) >= 20:
-            class_grip[_cls] = {"aMax": round(_pctl(_vals, 0.90), 3), "p10": round(_pctl(_vals, 0.10), 3), "n": len(_vals)}
+        if len(_vals) < 20:
+            continue
+        _entry = {"aMax": round(_pctl(_vals, 0.90), 3), "p10": round(_pctl(_vals, 0.10), 3), "n": len(_vals), "bands": []}
+        for _bi, (_lo, _hi) in enumerate(_BANDS):
+            _bv = _cls_band_g[_cls].get(_bi, [])
+            if len(_bv) >= 20:
+                _entry["bands"].append({"lo": _lo, "hi": (None if _hi >= 9999 else _hi),
+                                        "aMax": round(_pctl(_bv, 0.90), 3), "p10": round(_pctl(_bv, 0.10), 3), "n": len(_bv)})
+        class_grip[_cls] = _entry
 
     n_course = 0
     for c in courses:

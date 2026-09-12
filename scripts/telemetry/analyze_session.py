@@ -1506,12 +1506,16 @@ def main():
     import bisect
     T_all = [r["t"] for r in live]
     lat = smooth([r["lat_g"] for r in live], 7); corners = []; i = 0; n = len(live)
+    _cmk = [m["t"] for m in _markers]   # rewind/pause splice times, to reject a corner window straddling one
     while i < n:
         if abs(lat[i]) > 0.35:
             j = i
             while j < n and abs(lat[j]) > 0.25: j += 1
             seg = live[i:j]; L = lat[i:j]
-            if seg[-1]["t"] - seg[0]["t"] >= 0.8 and not any(abs(r["lat_g"]) > 3.0 for r in seg):
+            if (seg[-1]["t"] - seg[0]["t"] >= 0.8
+                    and not any(abs(r["lat_g"]) > 3.0 for r in seg)
+                    and not any(r["SmashableVelDiff"] > 0 for r in seg)                 # C4: a prop-hit inside the window (lat_g may be <= 3)
+                    and not any(seg[0]["t"] < mt < seg[-1]["t"] for mt in _cmk)):        # a rewind / pause splice inside the window
                 sign = 1 if statistics.median(L) > 0 else -1
                 peak = max(abs(x) for x in L)
                 k80 = [k for k in range(len(L)) if abs(L[k]) >= 0.8 * peak]; k2, k4 = k80[0], k80[-1]
@@ -1530,6 +1534,13 @@ def main():
                         first = {"phase": ph, "axle": ("front" if (tf is not None and (tr is None or tf <= tr)) else "rear")}
                     phases.append({"phase": ph, "front": f, "rear": b, "red": who, "dur": round((rs[-1]["t"] - rs[0]["t"]) if rs else 0, 2)})
                 mid = seg[k2:k4 + 1]
+                # ROBUST peak lateral g for the corner (Path A, 2026-09-12): a p90 over the apex window, not the
+                # raw window max, so one kerb clip / rewind-splice frame can't inflate the car's measured grip. This
+                # feeds lat_g_peak -> car_grip -> the predicted-apex / driver-advice engine. `peak` (raw max) stays
+                # the k2/k4 windowing anchor and the radius/kink inputs above, unchanged.
+                _mid_abs = sorted(abs(r["lat_g"]) for r in mid)
+                peak_robust = _mid_abs[int(0.90 * (len(_mid_abs) - 1))] if _mid_abs else peak
+                n_mid = len(_mid_abs)
                 usi = statistics.mean([(abs(r["SlipAngleFL"]) + abs(r["SlipAngleFR"])) / 2 - (abs(r["SlipAngleRL"]) + abs(r["SlipAngleRR"])) / 2 for r in mid]) if mid else 0
                 drift = statistics.mean([max(abs(r["CombinedSlipRL"]), abs(r["CombinedSlipRR"])) for r in seg]) > 2.5
                 v_in = seg[0]["speed_mph"]; v_min = min(r["speed_mph"] for r in seg)
@@ -1546,7 +1557,7 @@ def main():
                 corners.append({"t0": round(seg[0]["t"], 1), "t1": round(seg[-1]["t"], 1), "car": cid(seg[0]), "dir": "R" if sign > 0 else "L", "surface": surface, "rough_frac": rough_frac,
                                 "ev": 1 if sum(1 for r in seg if r["CurrentLap"] > 0) > len(seg) / 2 else 0,   # J14: honest event flag (lap timer running) — free-roam corners must not steer course baselines. Majority vote across the corner's own rows, not one apex frame, to match the live daemon's identical hardening
                                 "apex": [round(apx["PosX"]), round(apx["PosZ"])], "dist": round(apx["DistanceTraveled"]), "mph_apex": round(apx["speed_mph"]),
-                                "mph_in": round(v_in), "mph_min": round(v_min), "mph_out": round(seg[-1]["speed_mph"]), "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
+                                "mph_in": round(v_in), "mph_min": round(v_min), "mph_out": round(seg[-1]["speed_mph"]), "lat_g_peak": round(peak_robust, 2), "lat_g_peak_n": n_mid, "lat_g_peak_raw": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3),
                                 "entry": [round(seg[0]["PosX"]), round(seg[0]["PosZ"])], "exit": [round(seg[-1]["PosX"]), round(seg[-1]["PosZ"])],
                                 "brake_on_m": (round(apx["DistanceTraveled"] - brk["DistanceTraveled"]) if brk else None), "throttle_on_m": (round(thr["DistanceTraveled"] - apx["DistanceTraveled"]) if thr else None), "radius_m": radius,
                                 "drift": drift, "kink": v_min > 85 and peak < 0.9, "brake_max": max([r["Brake"] for r in pre + seg] or [0]), "hb": any(r["HandBrake"] > 0 for r in seg)})
@@ -2358,7 +2369,8 @@ def main():
             # "indicate brake and throttle measurements throughout the run" -- recorded from now on, straight from
             # the capture's own inputs; laps analysed before this carry none and read "no pedal data").
             if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r), r.get("PosY", 0.0), r.get("DistanceTraveled", 0.0),
-                              r.get("Accel", 0) or 0, r.get("Brake", 0) or 0) for r in rows_]
+                              r.get("Accel", 0) or 0, r.get("Brake", 0) or 0,
+                              (lambda g: g if g <= 3.0 else 0.0)(abs(r.get("lat_g") or 0.0))) for r in rows_]   # 9th col: |lat_g| in g, >3 g dropped as an IMPACT not grip (matches the corner detector's threshold), schema 7
             return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in rows_]
         def resample(pts, step=4.0):   # -> list of PIECES; a jump > 150 m between consecutive rows (respawn / rewind / teleport) starts a new piece
             pieces = []; cur = [pts[0]] if pts else []
@@ -2383,7 +2395,8 @@ def main():
                     _dst = ((pc[j][5] + (pc[j + 1][5] - pc[j][5]) * f,) if len(pc[j]) > 5 and len(pc[j + 1]) > 5 else ())   # the odometer, likewise
                     _ped = ((pc[j][6] + (pc[j + 1][6] - pc[j][6]) * f, pc[j][7] + (pc[j + 1][7] - pc[j][7]) * f)
                             if len(pc[j]) > 7 and len(pc[j + 1]) > 7 else ())   # the pedals, interpolated like speed
-                    P_.append(_base + _cat + _ele + _dst + _ped)
+                    _lat = ((max(abs(pc[j][8]), abs(pc[j + 1][8])),) if len(pc[j]) > 8 and len(pc[j + 1]) > 8 else ())   # |lat_g|: PEAK of the bracketing pair, not blended -- a spike must survive (schema 7)
+                    P_.append(_base + _cat + _ele + _dst + _ped + _lat)
                     s_ += step
                 out.append(P_)
             return out
@@ -2762,15 +2775,16 @@ def main():
             heading for 34.0 s once every session re-analysed. Only a smashable hit is unambiguous."""
             return sum(1 for r in loop_rows if w_["t0"] <= r["t"] <= w_["t1"] and (r.get("SmashableVelDiff") or 0) > 0)
         def _pts_out(pts_, all_):
-            """[arc_m, mph, grip, x, z, elev_m, lap_dist_m, throttle %, brake %] -- lap_dist from the game's odometer,
-            zeroed at the lap's first point; None on traces resampled without it. Pedals 0-100 % (schema 6), None
-            when the points carry none. Older 5/6/7-column rows still read."""
+            """[arc_m, mph, grip, x, z, elev_m, lap_dist_m, throttle %, brake %, lat_g] -- lap_dist from the game's
+            odometer, zeroed at the lap's first point; None on traces resampled without it. Pedals 0-100 % (schema 6);
+            lat_g in g (peak |lateral g|, schema 7), None when the points carry none. Older 5-9-column rows still read."""
             d0 = all_[0][6] if all_ and len(all_[0]) > 6 else None
             return [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]),
                      round(p[5], 1) if len(p) > 5 else None,
                      (round(p[6] - d0) if (d0 is not None and len(p) > 6) else None),
                      (round(p[7] / 2.55) if len(p) > 8 else None),
-                     (round(p[8] / 2.55) if len(p) > 8 else None)] for p in pts_]
+                     (round(p[8] / 2.55) if len(p) > 8 else None),
+                     (round(p[9], 3) if len(p) > 9 else None)] for p in pts_]
         def _thin(pts_, n):
             # Thin to ~n points but NEVER drop an impact: the map/trace draw their impact markers from these very
             # points, so a thinned-out hit would vanish from the map while the stored `impacts` count still claimed it.

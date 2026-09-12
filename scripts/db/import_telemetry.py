@@ -201,7 +201,8 @@ def run(cx, verbose=False, data_dir=None):
                           p[5] if len(p) > 5 else None,
                           p[6] if len(p) > 6 else None,
                           p[7] if len(p) > 7 else None,      # throttle % (schema 6; None on laps analysed before it)
-                          p[8] if len(p) > 8 else None))     # brake %
+                          p[8] if len(p) > 8 else None,      # brake %
+                          p[9] if len(p) > 9 else None))     # peak |lat_g| in g (schema 7)
         mk = meta.get("markers")
         if isinstance(mk, str):
             try:
@@ -283,10 +284,13 @@ def run(cx, verbose=False, data_dir=None):
             "stitched"], lrows, chunk=2000)
         # pedals ride along when the database has the schema-6 columns (rebuild.py migrates first); an older
         # database gets the same rows without them rather than a failed import
-        _lp_ped = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")} >= {"thr", "brk"}
-        counts["lap_point"] = fh6db.upsert_many(cx, "lap_point", [
-            "lap_id", "i", "arc_m", "mph", "grip", "x", "z", "elev_m", "dist_m"] + (["thr", "brk"] if _lp_ped else []),
-            prows if _lp_ped else [r[:9] for r in prows], chunk=10000)
+        _lp_cols = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}
+        _lp_ped = _lp_cols >= {"thr", "brk"}
+        _lp_lat = _lp_cols >= {"thr", "brk", "lat_g"}   # schema 7: peak |lat_g| rides along too
+        _lp_names = ["lap_id", "i", "arc_m", "mph", "grip", "x", "z", "elev_m", "dist_m"] \
+            + (["thr", "brk"] if _lp_ped else []) + (["lat_g"] if _lp_lat else [])
+        _lp_rows = prows if _lp_lat else ([r[:11] for r in prows] if _lp_ped else [r[:9] for r in prows])
+        counts["lap_point"] = fh6db.upsert_many(cx, "lap_point", _lp_names, _lp_rows, chunk=10000)
         counts["lap_marker"] = fh6db.upsert_many(cx, "lap_marker", [
             "lap_id", "i", "kind", "t", "dur_s", "race_s", "dist_m", "over_line", "detail"], mrows, chunk=2000)
 

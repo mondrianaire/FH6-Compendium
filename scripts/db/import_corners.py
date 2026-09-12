@@ -83,6 +83,10 @@ def run(cx, verbose=False):
         FROM course c JOIN course_route cr ON cr.route_key = c.route_key
         WHERE cr.route_id IS NOT NULL AND cr.match_kind IN ('verified', 'probable', 'partial')""").fetchall()
     rows, seg_rows, skipped = [], [], 0
+    # schema 7: carry peak |lat_g| per phase when the columns exist. Gate on PRAGMA (not just SCHEMA_VERSION)
+    # so a `--only corners` run against a not-yet-migrated DB degrades to no-column rather than crashing.
+    _has_lat = "lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}
+    _seg_has_lat = "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}
     for co in courses:
         turns = [dict(t) for t in cx.execute("""
             SELECT turn_id, seq, apex_x, apex_z, radius_m, width_m, bank_deg, kind, angle_deg
@@ -100,8 +104,8 @@ def run(cx, verbose=False):
                 rpt_seg, RX, RZ = _route_segment_map(rp, st)
         laps = cx.execute("SELECT lap_id FROM lap WHERE route_key=?", (co["route_key"],)).fetchall()
         for lp in laps:
-            pts = cx.execute("""SELECT i, arc_m, mph, grip, x, z FROM lap_point
-                                WHERE lap_id=? ORDER BY i""", (lp["lap_id"],)).fetchall()
+            pts = cx.execute("SELECT i, arc_m, mph, grip, x, z" + (", lat_g" if _has_lat else "")
+                             + " FROM lap_point WHERE lap_id=? ORDER BY i", (lp["lap_id"],)).fetchall()
             if len(pts) < 8:
                 skipped += 1
                 continue
@@ -169,9 +173,16 @@ def run(cx, verbose=False):
                                     hist[g] += 1
                             gstate = max(range(5), key=lambda k: hist[k])
                             ghist = json.dumps(hist)
+                        # peak |lat_g| in this phase for this lap (schema 7). MAX is fine at this granularity
+                        # (n is small); the robust cross-lap reduction to a_max is a p90, done later in build_web.
+                        speak = None
+                        if _has_lat:
+                            slat = [s["lat_g"] for s in ss if s["lat_g"] is not None]
+                            if slat:
+                                speak = round(max(slat), 3)
                         seg_rows.append((lp["lap_id"], stid, co["route_key"], sname, len(ss),
                                          smphs[0], smphs[-1], min(smphs), round(savg, 1),
-                                         gstate, ghist, round(ssecs, 3) if ssecs else None))
+                                         gstate, ghist, round(ssecs, 3) if ssecs else None, speak))
     with cx:
         cx.execute("DELETE FROM corner_obs")
         n = fh6db.upsert_many(cx, "corner_obs", [
@@ -180,9 +191,10 @@ def run(cx, verbose=False):
         m = 0
         if fh6db.has_table(cx, "corner_segment"):
             cx.execute("DELETE FROM corner_segment")
-            m = fh6db.upsert_many(cx, "corner_segment", [
-                "lap_id", "turn_id", "route_key", "segment", "n_samples", "entry_mph", "exit_mph",
-                "min_mph", "mean_mph", "grip_state", "grip_hist", "time_s"], seg_rows, chunk=5000)
+            _cs_cols = ["lap_id", "turn_id", "route_key", "segment", "n_samples", "entry_mph", "exit_mph",
+                        "min_mph", "mean_mph", "grip_state", "grip_hist", "time_s"] + (["peak_lat_g"] if _seg_has_lat else [])
+            _cs_rows = seg_rows if _seg_has_lat else [r[:12] for r in seg_rows]
+            m = fh6db.upsert_many(cx, "corner_segment", _cs_cols, _cs_rows, chunk=5000)
     return {"corner_obs": n, "corner_segment": m, "_laps_skipped": skipped}
 
 

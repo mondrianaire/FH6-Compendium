@@ -67,7 +67,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "6"   # 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
+SCHEMA_VERSION = "7"   # 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -431,10 +431,12 @@ V2_COLUMNS["session_event"] = [("start_is_line", "INTEGER")]
 V2_COLUMNS["lap"] = [("lap_dist_m", "REAL"), ("rewinds", "INTEGER DEFAULT 0"), ("pauses", "INTEGER DEFAULT 0"),
                      ("pause_s", "REAL DEFAULT 0"), ("stitched", "INTEGER DEFAULT 0")]
 V2_COLUMNS["lap_point"] = [("dist_m", "REAL"),
-                           ("thr", "INTEGER"), ("brk", "INTEGER")]   # schema 6: throttle / brake 0-100 % at the point (Jett 2026-09-11)
+                           ("thr", "INTEGER"), ("brk", "INTEGER"),   # schema 6: throttle / brake 0-100 % at the point (Jett 2026-09-11)
+                           ("lat_g", "REAL")]                        # schema 7: peak |lat_g| surviving the 4 m resample step (2026-09-12)
 # the per-phase grip MIX (2026-09-10): sample counts across the 5 grip states, so a turn shows its
 # TYPICAL grip, not the single worst moment. grip_state also switches meaning here to the modal state.
-V2_COLUMNS["corner_segment"] = [("grip_hist", "TEXT")]
+# peak_lat_g (schema 7, 2026-09-12): the peak |lat_g| in that phase for that lap -> the grip-ceiling rating.
+V2_COLUMNS["corner_segment"] = [("grip_hist", "TEXT"), ("peak_lat_g", "REAL")]
 V2_TABLES["lap_marker"] = """CREATE TABLE IF NOT EXISTS lap_marker (
   lap_id   INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
   i        INTEGER NOT NULL,

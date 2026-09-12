@@ -278,6 +278,26 @@ def main(argv=None):
     # courses.json is written AFTER the course-detail loop below: Path B may replace a course's turn set with
     # the geometry set, and the loop rewrites c["turns"] to the displayed count, so the card matches the detail.
 
+    # PER-CLASS GRIP CEILING (a_max, schema 7): the tyres' sustained lateral-grip limit per PI class, as the
+    # 90th-percentile of every mid-phase peak |lat_g| in that class. It is a car+tune property, roughly class-
+    # global (not course-specific), so compute it ONCE and stamp it on every course export. n >= 20 or the class
+    # gets no rating rather than a noisy one; p10 is the spread the honesty tooltip shows. This powers the
+    # dashboard's per-turn "% of the grip limit" rating (v_max = sqrt(g * R * (a_max + tan b)/(1 - a_max tan b))).
+    _cls_g = _cl.defaultdict(list)
+    if "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}:
+        for _cls, _pg in cx.execute(
+                "SELECT l.class, cs.peak_lat_g FROM corner_segment cs JOIN lap l ON l.lap_id = cs.lap_id "
+                "WHERE cs.segment='mid' AND cs.peak_lat_g > 0.1 AND cs.peak_lat_g <= 3.0 AND l.void=0 "   # >3 g = impact (dropped at source too); >0.1 excludes all-impact/empty phases
+                "AND l.class IS NOT NULL AND l.class != '?'"):
+            _cls_g[_cls].append(_pg)
+    def _pctl(a, q):
+        a = sorted(a)
+        return a[int(q * (len(a) - 1))] if a else None
+    class_grip = {}
+    for _cls, _vals in _cls_g.items():
+        if len(_vals) >= 20:
+            class_grip[_cls] = {"aMax": round(_pctl(_vals, 0.90), 3), "p10": round(_pctl(_vals, 0.10), 3), "n": len(_vals)}
+
     n_course = 0
     for c in courses:
         key = c["key"]
@@ -501,10 +521,11 @@ def main(argv=None):
         # phase -> [[lap_id, entry, min, exit, grip]...]. The client aggregates over whatever lap set the trace
         # preset (all / this class / this car / this build / this tune) is showing -- so the strip separates by
         # class, build and tune with the SAME filter as the map traces.
-        # each phase row: [lap_id, entry, min, exit, grip_state, time_s, grip_hist, mean] -- time_s powers
-        # the right-pane timing, grip_hist (5-state sample counts) the TRUE grip mix the client sums over
-        # the active preset so a turn reads by its typical grip, not its single worst moment, mean the
-        # phase's average speed. mean sits LAST so the existing [0..6] indices never shift.
+        # each phase row: [lap_id, entry, min, exit, grip_state, time_s, grip_hist, mean, peak_lat_g] -- time_s
+        # powers the right-pane timing, grip_hist (5-state sample counts) the TRUE grip mix the client sums over
+        # the active preset so a turn reads by its typical grip, not its single worst moment, mean the phase's
+        # average speed, peak_lat_g (schema 7) the peak |lat_g| that lap in that phase -> the grip-ceiling rating.
+        # New fields are APPEND-ONLY (mean at 7, peak_lat_g at 8) so the existing [0..6] indices never shift.
         #
         # EVERY DRIVEN PASS, not only whole clean laps (Jett 2026-09-11): the old gate here was per-LAP
         # (void=0 AND is_partial=0 AND rewinds=0), which on a course driven mostly in practice starved the
@@ -517,17 +538,18 @@ def main(argv=None):
         # requiring a pass to cover the turn's full phase set (a pass sampled in fewer phases sums a smaller
         # turnT and must not be crowned fastest), and a crash corner reads as impact grip + a slow, low rank.
         _seg = _cl.defaultdict(lambda: _cl.defaultdict(list))
-        for sr in cx.execute("""SELECT cs.turn_id, cs.segment, cs.entry_mph, cs.min_mph, cs.exit_mph,
-                                       cs.grip_state, cs.time_s, cs.grip_hist, cs.mean_mph, cs.lap_id
-                                FROM corner_segment cs
-                                WHERE cs.route_key = ?""", (key,)):
+        _cs_peakg = "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}   # schema 7
+        _pg = ", cs.peak_lat_g" if _cs_peakg else ""
+        for sr in cx.execute("SELECT cs.turn_id, cs.segment, cs.entry_mph, cs.min_mph, cs.exit_mph, "
+                             "cs.grip_state, cs.time_s, cs.grip_hist, cs.mean_mph, cs.lap_id" + _pg +
+                             " FROM corner_segment cs WHERE cs.route_key = ?", (key,)):
             try:
                 _gh = json.loads(sr["grip_hist"]) if sr["grip_hist"] else None
             except Exception:                                 # noqa: BLE001
                 _gh = None
             _seg[sr["turn_id"]][sr["segment"]].append(
                 [sr["lap_id"], sr["entry_mph"], sr["min_mph"], sr["exit_mph"], sr["grip_state"],
-                 sr["time_s"], _gh, sr["mean_mph"]])
+                 sr["time_s"], _gh, sr["mean_mph"], (sr["peak_lat_g"] if _cs_peakg else None)])
         for t in turns:
             po = _seg.get(t.get("id"))
             if po:
@@ -550,7 +572,7 @@ def main(argv=None):
                        {"key": key, "name": c["name"], "len": c["len"], "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
                         "traces": traces, "route": route, "naming": naming,
-                        "n_turns_catalogued": n_cat,
+                        "n_turns_catalogued": n_cat, "classGrip": class_grip,
                         # when this history was built, so the course view can stamp the comparison it feeds
                         # ("history built 10:44") instead of leaving freshness to the status bar (handoff §3)
                         "built_at": fh6db.utcnow()})

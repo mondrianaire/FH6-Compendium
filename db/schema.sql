@@ -675,6 +675,7 @@ CREATE TABLE IF NOT EXISTS lap_point (
   elev_m   REAL,
   thr      INTEGER,                      -- throttle 0-100 % at the point (schema 6, 2026-09-11)
   brk      INTEGER,                      -- brake 0-100 % at the point
+  lat_g    REAL,                         -- peak |lateral g| surviving the 4 m resample (schema 7, 2026-09-12)
   PRIMARY KEY (lap_id, i)
 ) WITHOUT ROWID;
 
@@ -704,6 +705,7 @@ CREATE TABLE IF NOT EXISTS corner_segment (
   grip_state INTEGER,                 -- TYPICAL (modal) grip state over the phase's samples, not the worst
   grip_hist  TEXT,                    -- JSON [calm,front,rear,both,impact] sample counts -> the true grip mix
   time_s     REAL,
+  peak_lat_g REAL,                    -- peak |lateral g| in this phase for this lap (schema 7, 2026-09-12) -> grip-ceiling rating
   PRIMARY KEY (lap_id, turn_id, segment)
 ) WITHOUT ROWID;
 CREATE INDEX IF NOT EXISTS ix_corner_segment ON corner_segment(route_key, turn_id, segment);

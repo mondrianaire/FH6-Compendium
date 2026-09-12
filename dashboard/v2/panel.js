@@ -407,7 +407,7 @@ function lastAction() {
       return sp == null ? "" : dot(sp === 0, "sessions", sp === 0 ? "caught up" : sp + " unimported",
         sp === 0 ? "every driving session on disk is imported into the database"
                  : sp + " session" + (sp === 1 ? "" : "s") + " on disk have not been imported yet — corners/laps from them are not queryable until they are"); })()}
-    <span class="svccaret" title="lab services — start · stop · restart">⚙</span>${servicesPop()}
+    <button type="button" class="svccaret" aria-label="lab services — start, stop, restart" title="lab services — start · stop · restart">⚙</button>${servicesPop()}
   </span>`;
   if (!LIVE.inMenu) logStatus(txt, tone);   // record the transition (skip the transient in-menu pause, which ticks a duration)
   // DISPLAY prefix (not logged): where the drive is + the lap, so the top bar reads "on course · lap 3 · <freeze>"
@@ -939,7 +939,7 @@ function traceFilterState(c, skip) {   // skip: dims a caller renders itself (th
     return `<span class="fdim"><span class="why">${lab}</span>${chip(null, "all")}${vals.map((v) => chip(v, dimLab(d, v))).join("")}</span>`;
   }).filter(Boolean).join("");
   const stage2 = stage1.filter((t) => TRACE_DIMS.every(([d]) => !tf[d] || dimVal(t, d) === tf[d]));
-  const clearBtn = Object.keys(tf).length || sel.hidden.size ? `<button class="mini clearf" data-tfilt="*|">✕ clear filters</button>` : "";
+  const clearBtn = Object.keys(tf).length || sel.hidden.size || sel.hi.size ? `<button class="mini clearf" data-tfilt="*|">✕ clear filters</button>` : "";
   return { all, sel, tf, presets, stage1, filt, stage2, clearBtn };
 }
 // the compact bar for the map's filter drawer: same chips, none of the trace's own furniture.
@@ -1011,7 +1011,11 @@ function courseTrace(c) {
   // laps and dims the rest in the chart -- a highlight, not a filter (every lap stays on screen). Click again
   // (or its ✕) to clear. The chips carry an `on` state so the current spotlight is obvious.
   const piLeg = (!TRACE_ALL && clsPresent.length) ? `<span class="lchips pileg" title="click a class to spotlight its laps in the chart; the lines are coloured by the PI class that drove each lap">${clsPresent.map((k) => `<button class="lchip key clshi${TRACE_CLS_HI === k ? " on" : ""}" data-clshi="${esc(k)}" style="--pc:${piColor(k)};border-color:${piColor(k)};background:${piColor(k)}${TRACE_CLS_HI === k ? "44" : "22"}"><i style="background:${piColor(k)}"></i>${esc(k)}${TRACE_CLS_HI === k ? " ✕" : ""}</button>`).join("")}</span>` : "";
-  const foot = `${TRACE_MODE === "pedals" ? `<span class="lchips pedleg">${pedalSwatches()}</span>` : ""}${piLeg}<span class="lchips">${live ? (liveNow ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : `<span class="lchip livenow last" title="the last lap driven, held through the pause / menu until the next lap starts"><i></i>last run</span>`) : ""}${leg}</span>`;
+  // the mode legend: grip and pedals colour every point, so each needs its key here (grip was missing — the
+  // course-mode trace paints by grip by default, yet only pedals ever showed a legend). speed uses the gradient bar.
+  const modeLeg = TRACE_MODE === "grip" ? `<span class="lchips pedleg">${gripSwatches()}</span>`
+    : TRACE_MODE === "pedals" ? `<span class="lchips pedleg">${pedalSwatches()}</span>` : "";
+  const foot = `${modeLeg}${piLeg}<span class="lchips">${live ? (liveNow ? `<span class="lchip livenow" title="the lap you are driving now — painted live by grip"><i></i>● LIVE lap</span>` : `<span class="lchip livenow last" title="the last lap driven, held through the pause / menu until the next lap starts"><i></i>last run</span>`) : ""}${leg}</span>`;
   TRACE_FIT = stage2.length;
   // publish the selection so the LEFT PANE draws the same laps and the two panes agree
   const sel2 = { key: c.key, ids: match.map((t) => String(t.id)), fore: fore ? String(fore.id) : null };
@@ -1111,7 +1115,7 @@ function wireTrace(el) {
   el.querySelectorAll("[data-tfilt]").forEach((b) => b.onclick = () => {
     const [d, v] = b.dataset.tfilt.split("|"); const k = COURSE && COURSE.key; if (!k) return;
     const vc = traceSel(COURSE);
-    if (d === "*") { vc.filters = {}; vc.hidden = new Set(); }
+    if (d === "*") { vc.filters = {}; vc.hidden = new Set(); vc.hi = new Set(); }   // also drop per-lap highlights, so a highlight whose chip scrolled out of the legend can't get stuck
     else { if (v) vc.filters[d] = v; else delete vc.filters[d]; }
     viewSave(); repaintFiltered(); });
   // high-cardinality dims (build / tune) render as a dropdown instead of a chip row
@@ -1430,7 +1434,9 @@ function changeSlim() {
     : k === "tune" ? ((CHANGE.sliders || []).length + " slider" + ((CHANGE.sliders || []).length === 1 ? "" : "s") + " moved")
     : k === "same" ? "re-saved" : "changed";
   const tone = CHANGE.saved ? "on" : k === "hardware" ? "r" : "b";
-  return `<button class="hchg ${tone}${CHG_OPEN ? " open" : ""}" data-act="chg" title="${CHG_OPEN ? "hide" : "show"} the details below">● ${esc(label)}</button>`;
+  // a STATUS pill, not a control (2026-09-12): it used to be a button whose "show the details below" toggle
+  // drove #alerts, but #alerts is emptied unconditionally now, so the click revealed nothing. Just states the change.
+  return `<span class="hchg ${tone}" title="what changed on the car since the last save the daemon read">● ${esc(label)}</span>`;
 }
 
 // what the header SAYS, per state — pure, so it can be read and tested on its own
@@ -1668,7 +1674,6 @@ function paintHeader() {
   // header no longer renders it (hashTableHTML kept but uncalled). Identifying a tune is the save-tune equip
   // workflow now, not clicking a hash cell (see memory fh6-tune-identification-equip-workflow); the .hth-hw /
   // .hth-tune wiring went with it.
-  const hc = h.querySelector('.hchg[data-act="chg"]'); if (hc) hc.onclick = () => { CHG_OPEN = !CHG_OPEN; HDR_KEY = null; paintHeader(); paintBanner(); };
   const bs = $("#btnSheet"); if (bs) bs.onclick = () => openSheet();
   const bx = $("#btnRefresh"); if (bx) bx.onclick = async () => { await rereadBuild(); if (CUR && CUR.disk && !(MATCH && MATCH.build)) ensureHeld(); };
   const bp = $("#btnPrim");
@@ -1953,7 +1958,7 @@ function courseHeroParts(c, ls, lapsDrawn) {
   const factCells = [
     cfact(n0(c.len) + " m · " + (loop ? "loop" : "P2P"), "length"),
     cfact(medLap != null ? lapTime(medLap) : "—", "median"),
-    cfact(bestLap ? lapTime(bestLap.t) : "—", bestLap ? "best · " + esc(carShort(bestLap.cid)) : "best"),
+    cfact(bestLap ? lapTime(bestLap.t) : "—", "best", bestLap ? "best lap · " + carShort(bestLap.cid) : ""),
     cfact(climb != null ? climb + " m" : "—", "climb"),
     cfact(measured + (catalogued != null ? " / " + catalogued : ""), "turns"),
     cfact((lapsDrawn != null ? lapsDrawn + " / " : "") + totLaps, "laps", nCarsAll + " car" + (nCarsAll === 1 ? "" : "s") + " · " + totLaps + " lap" + (totLaps === 1 ? "" : "s") + " in history"),
@@ -2107,7 +2112,7 @@ function courseInfoPill(r, state) {
   return `<div class="cpill${hasStats ? " has-stats" : ""}" data-state="${esc(state)}">
     <span class="cpill-glyph" title="${esc(glyphTip)}">${tileSvg(r, false)}</span>
     <span class="cpill-txt">
-      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${stChip}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${modeTags}<span class="cpill-prov">${r.id != null ? `<span class="cpill-rid mono" title="catalogued route id">route ${esc(String(r.id))}${r.disc ? " · " + esc(r.disc) : ""}</span>` : ""}${r.nameChip || ""}</span>${hasStats ? `<i class="cps-caret" title="lap breakdown, shape and freshness">▾</i>` : ""}</span>
+      <span class="cpill-l1"><b class="trackname" title="${esc(nm)}">${esc(nm)}</b>${stChip}${kind ? `<span class="chip w">${esc(kind)}</span>` : ""}${modeTags}<span class="cpill-prov">${r.id != null ? `<span class="cpill-rid mono" title="catalogued route id">route ${esc(String(r.id))}${r.disc ? " · " + esc(r.disc) : ""}</span>` : ""}${r.nameChip || ""}</span>${hasStats ? `<button type="button" class="cps-caret" aria-label="lap breakdown, shape and freshness" title="lap breakdown, shape and freshness">▾</button>` : ""}</span>
       ${course ? "" : `<span class="why cpill-l2" title="${esc(metaS)}">${esc(metaS)}</span>
       <span class="cpill-badges">${pills}${badges}</span>`}
     </span>
@@ -4071,13 +4076,12 @@ function courseStatsHTML() {
   }
   // CAR TABLE: fastest first; the pane scrolls (courseStats skips fitRows)
   const rows = cars.slice().sort((a, b) => (a.best || 9e9) - (b.best || 9e9)).map((c) => `<tr${c === quickest ? ' class="cstat-fast"' : ""}>
-    <td>${classPill(c.cls)} <b>${esc(c.name)}</b></td>
-    <td class="mono" style="text-align:center">${c.pi ?? "—"}</td>
+    <td>${piBadge(c.cls, c.pi, true)} <b>${esc(c.name)}</b></td>
     <td class="mono" style="text-align:center">${c.n}</td>
     <td class="mono" style="text-align:right">${c.best != null ? lapTime(c.best) : "—"}</td>
     <td class="mono dim" style="text-align:right">${c.med != null ? lapTime(c.med) : "—"}</td></tr>`).join("");
   const table = `<div class="grp"><div class="gh">by car <span class="why">· ${cars.length} car${cars.length === 1 ? "" : "s"} in ${scopeTok(ls)} · fastest first</span></div>
-    <table class="cstat-tbl"><thead><tr><th>car</th><th>PI</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    <table class="cstat-tbl"><thead><tr><th>car</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   return totals + headline + scatter + table;
 }
 function statsHTML() {

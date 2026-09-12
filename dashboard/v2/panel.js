@@ -1995,6 +1995,41 @@ function turnAgg(t, ls) {
   const med = tts.length ? tts[tts.length >> 1] : null, best = tts.length ? tts[0] : null;
   return { t, n: Object.keys(byLap).length, phases, turnT: med, bestT: best, avail: (med != null && best != null) ? med - best : null };
 }
+// the single PI class in scope, or null when it spans more than one -- apex GRIP and apex SPEED are both
+// car-dependent, so a grip-ceiling rating is only honest within one class.
+function scopeOneClass(ls) {
+  if (ls.cls) return ls.cls;
+  const cs = new Set();
+  (COURSE.laps || []).forEach((l) => { if (ls.set.has(String(l.id)) && l.class) cs.add(l.class); });
+  return cs.size === 1 ? [...cs][0] : null;
+}
+// GRIP CEILING (2026-09-12): how close the best pass got to the tyres' MEASURED limit through this turn.
+// a_max = the class's grip ceiling (course.classGrip, a p90 of mid-phase peak |lat_g|, n>=20). Each lap
+// carries its own mid-phase peak |lat_g| (phaseObs.mid r[8], schema 7). grip used = best pass's g / a_max.
+// The SPEED headroom follows from v proportional to sqrt(lateral a) AT A FIXED LINE: v_max/v = sqrt(a_max/g),
+// so we never need the corner's radius (which is derived from g -> circular) or an aero model. Honest by
+// construction: returns a reason (not a number) when the scope mixes classes or a_max / g is missing.
+function turnGripCeiling(c, t, ls) {
+  const cls = scopeOneClass(ls);
+  if (!cls) return { reason: "mixed" };
+  const cg = (c.classGrip || {})[cls];
+  if (!cg || cg.aMax == null) return { cls, reason: "no-amax" };
+  const mid = (t.phaseObs || {}).mid || [];
+  let bestG = null, bestApex = null, gAtApex = null;
+  mid.forEach((r) => {
+    if (!ls.set.has(String(r[0]))) return;
+    const g = r.length > 8 && r[8] != null && r[8] > 0.1 ? r[8] : null, apex = r[2];
+    if (g != null && (bestG == null || g > bestG)) bestG = g;
+    if (apex != null && (bestApex == null || apex > bestApex)) { bestApex = apex; gAtApex = g != null ? g : gAtApex; }
+  });
+  if (bestG == null) return { cls, cg, reason: "no-g" };
+  const util = Math.min(100, Math.round(bestG / cg.aMax * 100));
+  let avail = null;                                    // speed available on the fastest pass's OWN line
+  if (bestApex != null && gAtApex != null && cg.aMax > gAtApex) {
+    avail = Math.max(0, Math.round(bestApex * (Math.sqrt(cg.aMax / gAtApex) - 1)));
+  }
+  return { cls, cg, bestG: Math.round(bestG * 100) / 100, util, apex: bestApex, avail };
+}
 let TURN_SORT = (() => { try { return localStorage.getItem("fh6TurnSort") || "find"; } catch (e) { return "find"; } })();
 // MAP_VIEW: how the left course map colours its traces — "laptime" (each lap by its recorded time, a gradient)
 // or "phases" (the whole road painted by the 5-phase turn model). Toggled from the map's floating legend.
@@ -2020,7 +2055,10 @@ let MAP_LAYERS = (() => { const d = { centre: true, laps: true, phases: true };
 function turnTableHTML(c, ls) {
   const aggs = (c.turns || []).filter((t) => t.phaseObs).map((t) => turnAgg(t, ls)).filter((a) => a.n > 0);
   if (!aggs.length) return "";
+  const oneCls = scopeOneClass(ls);
+  const gp = (t) => { const g = turnGripCeiling(c, t, ls); return g.util != null ? g.util : null; };   // grip used % (one class + a_max only)
   if (TURN_SORT === "find") aggs.sort((a, b) => (b.avail || 0) - (a.avail || 0) || (a.t.seq || 0) - (b.t.seq || 0));
+  else if (TURN_SORT === "grip") aggs.sort((a, b) => { const ga = gp(a.t), gb = gp(b.t); return (ga == null ? 101 : ga) - (gb == null ? 101 : gb) || (a.t.seq || 0) - (b.t.seq || 0); });   // least grip used first = the most left on the table
   else aggs.sort((a, b) => (a.t.seq || 0) - (b.t.seq || 0));
   const sel = turnPickSeq();
   const totFind = aggs.reduce((s, a) => s + (a.avail || 0), 0);
@@ -2038,16 +2076,19 @@ function turnTableHTML(c, ls) {
       <div class="tt-geo mono">${t.r != null ? Math.round(t.r) + " m" : ""}${t.deg != null ? " · " + Math.round(t.deg) + "°" : ""} · ${a.n} lap${a.n === 1 ? "" : "s"}</div></td>
     ${SEG_ORDER.map((n) => ph(a, n)).join("")}
     <td class="mono tt-in">${a.turnT != null ? a.turnT.toFixed(1) + "s" : "—"}</td>
-    <td class="tt-find2"><b class="mono" style="color:${ink}">${a.avail ? "+" + a.avail.toFixed(2) : "—"}</b><span class="tt-findbar"><i style="width:${pct}%;background:${ink}"></i></span></td></tr>`; }).join("");
+    <td class="tt-find2"><b class="mono" style="color:${ink}">${a.avail ? "+" + a.avail.toFixed(2) : "—"}</b><span class="tt-findbar"><i style="width:${pct}%;background:${ink}"></i></span></td>
+    <td class="tt-grip">${(() => { const g = gp(t); return g != null ? `<b class="mono">${g}%</b><span class="tt-gbar"><i style="width:${g}%"></i></span>` : `<span class="mono off">·</span>`; })()}</td></tr>`; }).join("");
   const sortBtn = (k, lbl) => `<button class="mini${TURN_SORT === k ? " on" : ""}" data-tsort="${k}">${lbl}</button>`;
   const measured = (c.turns || []).length, catalogued = c.n_turns_catalogued;
-  const sortWhy = TURN_SORT === "find" ? "ranked by the time available vs your best lap" : "route order · click any turn, or its number on the map";
+  const sortWhy = TURN_SORT === "find" ? "ranked by the time available vs your best lap"
+    : TURN_SORT === "grip" ? "ranked by grip use — the least-used corners (most grip left) first" + (oneCls ? "" : " · scope to one class to fill it")
+    : "route order · click any turn, or its number on the map";
   return `<div class="grp"><div class="gh">${measured}${catalogued != null ? " of " + catalogued : ""} turns measured ${scopeTok(ls)} <span class="why">· ${aggs.length} with a lap in scope · ${esc(sortWhy)}</span>
-      <span class="ttsort"><span class="why">sort</span>${sortBtn("route", "route order")}${sortBtn("find", "time to find")}</span></div>
+      <span class="ttsort"><span class="why">sort</span>${sortBtn("route", "route order")}${sortBtn("find", "time to find")}${sortBtn("grip", "grip use")}</span></div>
     <div class="tt-wrap"><table class="tt"><thead><tr><th>turn</th>
       ${SEG_ORDER.map((n) => `<th class="tt-phh" title="${esc(SEG_LABEL[n])} apex mph"><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SHORT[n])}</th>`).join("")}
-      <th title="median time through the turn">in turn</th><th title="seconds to find vs your best line">to find</th></tr></thead>
-      <tbody>${rows}</tbody>${totFind > 0.05 ? `<tfoot><tr><td colspan="7">total time to find</td><td class="mono tt-find">+${totFind.toFixed(2)}</td></tr></tfoot>` : ""}</table></div></div>`;
+      <th title="median time through the turn">in turn</th><th title="seconds to find vs your best line">to find</th><th title="best pass's peak lateral g vs the class grip ceiling (a_max) — 100% = at the limit; low = grip left (one class only)">grip use</th></tr></thead>
+      <tbody>${rows}</tbody>${totFind > 0.05 ? `<tfoot><tr><td colspan="7">total time to find</td><td class="mono tt-find">+${totFind.toFixed(2)}</td><td></td></tr></tfoot>` : ""}</table></div></div>`;
 }
 function courseInfoPill(r, state) {
   const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));
@@ -3788,9 +3829,20 @@ function turnStatsHTML(t, ls) {
   // typical turn-time + share of lap, time available, the fastest pass, and which phase eats the most — folds
   // UP into the title bar so the identity and the summary read as one bar, above the map.
   const sumRow = `<div class="tsum"><b class="tsum-typ">${medTurnT.toFixed(1)}s</b> typical${nLaps ? ` · ${nLaps} laps` : ""}${medLapT ? ` · ${Math.round(medTurnT / medLapT * 100)}% of lap` : ""}${hasBest && findTotal > 0.02 ? ` · <b class="tsum-avail">+${findTotal.toFixed(2)}s</b> to find` : ""}${best ? ` · fastest <b class="tsum-fast">${best.turnT.toFixed(2)}s</b>` : ""}${biggest ? ` · most time <b class="tsum-most" style="color:${SEG_COL[biggest.n]}"><i style="background:${SEG_COL[biggest.n]}"></i>${esc(SEG_LABEL[biggest.n])}</b>` : ""}</div>`;
-  // ONE compacted title info bar: identity + geometry (header) ∪ the time summary ∪ the 5-phase corner model
-  // (the per-phase time-budget bar). The detailed per-phase typical-vs-best TABLE stays below the map.
-  const titleBar = `<div class="grp tstat-title">${header}${sumRow}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;
+  // THE GRIP-CEILING LINE (2026-09-12): how close the best pass got to the tyres' measured limit here, from
+  // the class a_max (schema-7 peak lat_g). Honest by outcome: a % only within one class with a_max present;
+  // otherwise the reason, never a fabricated number. Silent when there's no grip data for this turn yet.
+  const gcx = turnGripCeiling(COURSE, t, ls);
+  let gripLine = "";
+  if (gcx.reason === "mixed") {
+    gripLine = `<div class="tsum tsum-grip"><span class="tg-lab">grip ceiling</span> <span class="why">scope to one class to read it — apex grip is car-dependent</span></div>`;
+  } else if (gcx.util != null) {
+    const atLimit = gcx.util >= 97;
+    gripLine = `<div class="tsum tsum-grip" title="best pass pulled ${gcx.bestG} g of the ${esc(gcx.cls)} grip ceiling a_max ${gcx.cg.aMax} g (p90 · n=${gcx.cg.n}) · dirt & aero not separated${gcx.avail ? ` · ~+${gcx.avail} mph at the limit on this line` : ""}"><span class="tg-lab">grip used</span> <b class="tg-pct${atLimit ? " tg-max" : ""}">${gcx.util}%</b> <span class="why">of the ${esc(gcx.cls)} grip limit${gcx.avail ? ` · <b class="tsum-avail">~+${gcx.avail} mph</b> to find` : atLimit ? " · at the limit" : ""}</span></div>`;
+  }
+  // ONE compacted title info bar: identity + geometry (header) ∪ the time summary ∪ the grip ceiling ∪ the
+  // 5-phase corner model (the per-phase time-budget bar). The detailed per-phase typical-vs-best TABLE stays below.
+  const titleBar = `<div class="grp tstat-title">${header}${sumRow}${gripLine}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;
   const cmpTable = hasBest ? `<table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best lap</th><th>Δ s</th><th>where it goes</th></tr></thead><tbody>
     ${cmp.map((r) => { const d = r.best != null ? r.typ - r.best : null; const flag = worst && worst.n === r.n && worst.d > 0.03; const pct = d != null && d > 0 ? Math.round(d / maxD * 100) : 0;
       return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>

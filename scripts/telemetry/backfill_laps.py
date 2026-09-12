@@ -116,15 +116,17 @@ def analyse(c, tmpdir):
     path, and the original must never be touched. Returns (ok, seconds, message)."""
     src = c["path"]
     tmp = None
-    if c["gz"]:
-        # Strip only the .gz: the analyzer derives the session id from the filename, so the scratch copy must
-        # keep the capture's own stem or the backfill would mint a second session id for the same driving.
-        tmp = os.path.join(tmpdir, c["name"][:-3])
-        with gzip.open(src, "rb") as f, open(tmp, "wb") as g:
-            shutil.copyfileobj(f, g, 1 << 20)
-        src = tmp
     t0 = time.perf_counter()
     try:
+        if c["gz"]:
+            # Strip only the .gz: the analyzer derives the session id from the filename, so the scratch copy must
+            # keep the capture's own stem or the backfill would mint a second session id for the same driving.
+            # Inside the try so a TRUNCATED/corrupt capture (EOFError: a recording cut mid-stream) is SKIPPED like
+            # any other failure, not left to crash the whole backfill (it did, on the last file of a 360-file run).
+            tmp = os.path.join(tmpdir, c["name"][:-3])
+            with gzip.open(src, "rb") as f, open(tmp, "wb") as g:
+                shutil.copyfileobj(f, g, 1 << 20)
+            src = tmp
         # Timeout scales with size (5x the projection) so a 1.5 GB capture is not killed for being large, while
         # a wedged analysis still cannot stall the whole backfill.
         r = subprocess.run([sys.executable, ANALYZER, src], cwd=ROOT, capture_output=True,

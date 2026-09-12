@@ -1458,6 +1458,8 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .tsum-grip .tg-lab{font:600 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
 .tsum-grip .tg-pct{font-size:15px;font-weight:700;color:var(--acc2)}
 .tsum-grip .tg-pct.tg-max{color:var(--acc)}
+.tsum-grip .tg-pct.tg-thin,.tt-grip .mono.tg-thin{opacity:.5}   /* rests on 1-2 laps — never reads as authoritative */
+.tsum-grip .tg-thinnote{color:var(--dim);font-style:italic}
 .budget--title{height:18px;margin:0 2px}
 /* grip-use column in the turn table — best pass vs a_max; a teal bar kept clear of DGRIP/phase hues */
 .tt-grip{text-align:right;white-space:nowrap}

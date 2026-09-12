@@ -2015,31 +2015,36 @@ function turnGripCeiling(c, t, ls) {
   const cg = (c.classGrip || {})[cls];
   if (!cg || cg.aMax == null) return { cls, reason: "no-amax" };
   const mid = (t.phaseObs || {}).mid || [];
-  let bestG = null, bestApex = null, gAtApex = null;
+  // ONE REFERENCE PASS (2026-09-12 fix): the in-scope lap that pulled the MOST grip here (closest to the limit).
+  // Read its OWN apex speed and g from the SAME row, so the band pick and the sqrt speed-extrapolation can never
+  // be built from two different laps (the cross-lap-mixing bug: best-g from one lap paired with a faster lap's
+  // apex fabricated a "+mph"). nLaps = how many of the driver's own in-scope laps here carry grip — the true
+  // sample size, disclosed separately from the class-band n (a max-of-few reads as a best-of, so it's labelled).
+  let ref = null, nLaps = 0;
   mid.forEach((r) => {
     if (!ls.set.has(String(r[0]))) return;
-    const g = r.length > 8 && r[8] != null && r[8] > 0.1 ? r[8] : null, apex = r[2];
-    if (g != null && (bestG == null || g > bestG)) bestG = g;
-    if (apex != null && (bestApex == null || apex > bestApex)) { bestApex = apex; gAtApex = g != null ? g : gAtApex; }
+    const g = r.length > 8 && r[8] != null && r[8] > 0.1 ? r[8] : null;
+    if (g == null) return;
+    nLaps++;
+    if (ref == null || g > ref.g) ref = { g, apex: r[2] };
   });
-  if (bestG == null) return { cls, cg, reason: "no-g" };
-  // SPEED-BANDED a_max (2026-09-12): rate against the class grip achievable at the speed this corner is actually
-  // taken (aero grip scales with speed), so a slow corner isn't judged against a fast corner's downforce grip.
-  // Fall back to the class-global a_max when the matching band is thin (coarse=true, flagged in the tooltip).
+  if (ref == null) return { cls, cg, reason: "no-g" };
+  const bestG = ref.g, bestApex = ref.apex;
+  // SPEED-BANDED a_max: rate against the class grip achievable at the speed THIS reference pass took the corner
+  // (aero grip scales with speed). Fall back to the class-global a_max when the band is thin (coarse, flagged).
   let aMax = cg.aMax, n = cg.n, coarse = true, band = null;
   if (bestApex != null && Array.isArray(cg.bands)) {
     band = cg.bands.find((b) => bestApex >= b.lo && (b.hi == null || bestApex < b.hi));
     if (band) { aMax = band.aMax; n = band.n; coarse = false; }
   }
   const util = Math.min(100, Math.round(bestG / aMax * 100));
-  // "+mph to find" ONLY near the limit: v ∝ sqrt(lateral a) holds for a SMALL perturbation of the current line,
-  // but overshoots wildly extrapolated across a big gap (56% grip does NOT mean 1.34x the speed is there). Below
-  // ~88% we show the % only, no number.
+  // "+mph to find" ONLY near the limit, from the reference pass's OWN apex + g (same row): v ∝ sqrt(lateral a)
+  // holds for a small perturbation of that line, but overshoots extrapolated across a big gap, so gate at >=88%.
   let avail = null;
-  if (util >= 88 && bestApex != null && gAtApex != null && aMax > gAtApex) {
-    avail = Math.max(0, Math.round(bestApex * (Math.sqrt(aMax / gAtApex) - 1)));
+  if (util >= 88 && bestApex != null && aMax > bestG) {
+    avail = Math.max(0, Math.round(bestApex * (Math.sqrt(aMax / bestG) - 1)));
   }
-  return { cls, cg, aMax, n, coarse, band, bestG: Math.round(bestG * 100) / 100, util, apex: bestApex, avail };
+  return { cls, cg, aMax, n, coarse, band, bestG: Math.round(bestG * 100) / 100, util, apex: bestApex, avail, nLaps };
 }
 let TURN_SORT = (() => { try { return localStorage.getItem("fh6TurnSort") || "find"; } catch (e) { return "find"; } })();
 // MAP_VIEW: how the left course map colours its traces — "laptime" (each lap by its recorded time, a gradient)
@@ -2088,7 +2093,7 @@ function turnTableHTML(c, ls) {
     ${SEG_ORDER.map((n) => ph(a, n)).join("")}
     <td class="mono tt-in">${a.turnT != null ? a.turnT.toFixed(1) + "s" : "—"}</td>
     <td class="tt-find2"><b class="mono" style="color:${ink}">${a.avail ? "+" + a.avail.toFixed(2) : "—"}</b><span class="tt-findbar"><i style="width:${pct}%;background:${ink}"></i></span></td>
-    <td class="tt-grip">${(() => { const g = gp(t); return g != null ? `<b class="mono">${g}%</b><span class="tt-gbar"><i style="width:${g}%"></i></span>` : `<span class="mono off">·</span>`; })()}</td></tr>`; }).join("");
+    <td class="tt-grip">${(() => { const g = turnGripCeiling(c, t, ls); if (g.util == null) return `<span class="mono off">·</span>`; const thin = g.nLaps < 3; return `<b class="mono${thin ? " tg-thin" : ""}" title="${g.nLaps} lap${g.nLaps === 1 ? "" : "s"} here${thin ? " — thin" : ""}">${g.util}%</b><span class="tt-gbar"><i style="width:${g.util}%"></i></span>`; })()}</td></tr>`; }).join("");
   const sortBtn = (k, lbl) => `<button class="mini${TURN_SORT === k ? " on" : ""}" data-tsort="${k}">${lbl}</button>`;
   const measured = (c.turns || []).length, catalogued = c.n_turns_catalogued;
   const sortWhy = TURN_SORT === "find" ? "ranked by the time available vs your best lap"
@@ -3849,9 +3854,10 @@ function turnStatsHTML(t, ls) {
     gripLine = `<div class="tsum tsum-grip"><span class="tg-lab">grip ceiling</span> <span class="why">scope to one class to read it — apex grip is car-dependent</span></div>`;
   } else if (gcx.util != null) {
     const atLimit = gcx.util >= 97;
+    const thin = gcx.nLaps < 3;   // rests on 1-2 of the driver's own laps here -> mark it, never authoritative
     const tail = gcx.avail ? ` · <b class="tsum-avail">~+${gcx.avail} mph</b> to find` : atLimit ? " · at the limit" : "";
     const bandTxt = gcx.coarse ? "class-wide, speed-coarse" : `${gcx.band.lo}${gcx.band.hi ? "–" + gcx.band.hi : "+"} mph band`;
-    gripLine = `<div class="tsum tsum-grip" title="best pass pulled ${gcx.bestG} g of the ${esc(gcx.cls)} grip ceiling a_max ${gcx.aMax} g (${bandTxt} · p90 · n=${gcx.n}) · a gentle corner uses less lateral g by nature, so a low % can be the corner not the driver · dirt & aero not separated${gcx.avail ? " · +mph is a near-limit estimate" : ""}"><span class="tg-lab">grip used</span> <b class="tg-pct${atLimit ? " tg-max" : ""}">${gcx.util}%</b> <span class="why">of the ${esc(gcx.cls)} grip limit${tail}</span></div>`;
+    gripLine = `<div class="tsum tsum-grip" title="your best of ${gcx.nLaps} lap${gcx.nLaps === 1 ? "" : "s"} here pulled ${gcx.bestG} g of the ${esc(gcx.cls)} grip ceiling a_max ${gcx.aMax} g (${bandTxt} · p90 of ${gcx.n} class laps)${thin ? " · THIN: only " + gcx.nLaps + " of your laps support this" : ""} · a gentle corner uses less lateral g by nature, so a low % can be the corner not the driver · dirt & aero not separated${gcx.avail ? " · +mph is a near-limit estimate" : ""}"><span class="tg-lab">grip used</span> <b class="tg-pct${atLimit ? " tg-max" : ""}${thin ? " tg-thin" : ""}">${gcx.util}%</b> <span class="why">of the ${esc(gcx.cls)} grip limit${thin ? ` · <span class="tg-thinnote">${gcx.nLaps} lap${gcx.nLaps === 1 ? "" : "s"}</span>` : ""}${tail}</span></div>`;
   }
   // ONE compacted title info bar: identity + geometry (header) ∪ the time summary ∪ the grip ceiling ∪ the
   // 5-phase corner model (the per-phase time-budget bar). The detailed per-phase typical-vs-best TABLE stays below.

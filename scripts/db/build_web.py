@@ -279,9 +279,10 @@ def main(argv=None):
     # the geometry set, and the loop rewrites c["turns"] to the displayed count, so the card matches the detail.
 
     # PER-CLASS GRIP CEILING (a_max, schema 7), SPEED-BANDED (2026-09-12): the tyres' lateral-grip limit per PI
-    # class, as the 90th-percentile of mid-phase peak |lat_g|. Aero grip scales with speed, so a corner's
-    # achievable g depends on the speed it's taken at -- bucket by apex-speed band (apex = the mid phase's
-    # min_mph) so a slow corner is rated against the class's SLOW grip, not its high-downforce fast-corner grip.
+    # class, as the 90th-percentile of mid-phase peak |lat_g|. Bucket by apex-speed band (apex = the mid phase's
+    # min_mph) as a CORNER-MIX control -- so a slow corner is rated against the class's slow-corner grip, not its
+    # fast-corner grip. (Partly aero: bands rise with speed for A/S1 but are non-monotonic for B/C -- 2026-09-12
+    # validation -- so this is a corner-type separator, not a clean aero-downforce model.)
     # A per-class GLOBAL value stays as the fallback when a band is thin. n >= 20 per bucket or it isn't published.
     # It's a car+tune property (~course-independent), so compute ONCE and stamp on every course. p10 = the spread.
     _BANDS = [(0, 70), (70, 110), (110, 9999)]   # apex-mph bands: slow / medium / fast

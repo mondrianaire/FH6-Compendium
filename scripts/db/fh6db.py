@@ -460,6 +460,7 @@ V2_TABLES["corner_segment"] = """CREATE TABLE IF NOT EXISTS corner_segment (
   grip_state INTEGER,
   grip_hist  TEXT,
   time_s     REAL,
+  peak_lat_g REAL,
   PRIMARY KEY (lap_id, turn_id, segment)
 ) WITHOUT ROWID"""
 

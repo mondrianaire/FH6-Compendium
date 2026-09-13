@@ -7,12 +7,12 @@
   "UpgradeAreas": 22,
   "UpgradePresetPackages": 896,
   "List_Aspiration": 16,
-  "List_PartManufacturer": 739,
+  "List_PartManufacturer": 740,
   "WheelCategories": 10,
   "CarClasses": 16,
   "Tuning": 131,
-  "Data_Car": 1320,
-  "List_CarMake": 180,
+  "Data_Car": 1342,
+  "List_CarMake": 184,
   "List_EngineConfig": 9,
   "List_Cylinders": 14,
   "List_DriveType": 3,
@@ -22,7 +22,7 @@
   "Landmarks": 81,
   "MapRegion": 20,
   "PointsOfInterest": 19,
-  "Rivals": 264,
+  "Rivals": 267,
   "TimeAttack": 10
  }
 }

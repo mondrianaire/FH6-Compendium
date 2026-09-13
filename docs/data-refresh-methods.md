@@ -4,6 +4,9 @@ How new files (game saves, sessions, telemetry) and code changes reach the runni
 from **the worktree** (`lab_root` guard refuses the main checkout); stores live in `data/` in the worktree,
 and `dashboard/v2/api/` is generated (git-ignored).
 
+> **Game files changed (an FH6 title update)?** That is a different routine — decrypt the game DB, re-extract
+> EN.zip, rebuild, sync names. See **`docs/game-data-refresh.md`** for every game source, its utility, and frequency.
+
 ## The three processes (`scripts/lab_up.ps1` starts all three)
 
 | Process | Port | Script | Role |

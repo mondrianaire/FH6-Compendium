@@ -23,6 +23,8 @@ worktree you are in. The tracked files (code, `docs/`, `db/`, `scripts/`, this `
 - `docs/DATA-INVENTORY.md` — the index of **every** data store. Read before concluding anything is "not available."
 - `docs/data-availability.md` — the data-availability map for onboarding agents: the provenance and value-type
   of every source, and the "sanitized branch" lens. Visual: https://app.eraser.io/workspace/Ex1bEXcuOL57kK2O5OQg
+- `docs/game-data-refresh.md` — every game-data refresh routine (decrypt the game DB, extract EN.zip, rebuild,
+  sync names): source, utility, why, and frequency. Run its checklist after every FH6 title update.
 - Recent state: `docs/handoff-2026-09-11-course-mode-live-pedals.md`, `docs/handoff-2026-09-06-session-state.md`
 - Dashboard: `docs/dashboard-states.md` (regions/modes) · `docs/fh6-ui-spec.md` (in-game UI contract) · `docs/design-language.md`
 

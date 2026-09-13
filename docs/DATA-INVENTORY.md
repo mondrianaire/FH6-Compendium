@@ -259,6 +259,9 @@ service (8001) adds `POST /rebuild`, `GET /status` and `GET /watch` (code + data
 
 ## 5. The game's own files
 
+How and when each of these is refreshed after a game update (decryption, extraction, utilities, frequency):
+**`docs/game-data-refresh.md`**.
+
 | source | what it is |
 |---|---|
 | `C:\XboxGames\GameSave\pgs\…\ContainersRoot\User_<hex>\C_ProfileData` | READ-ONLY. **The profile save** — 820 kB encrypted, 3.6 MB decrypted (ForzaCryptoTool, server-assisted, approval-gated). Header + 714 typed properties + BXML (5,548 nodes) + interned string table (the CURRENT car's equipped `Tuning_`/`Livery_` refs) + 112 binary records + an embedded **SQLite career DB**: `Career_Garage` = 815 owned-car INSTANCES × 146 columns (per-instance `Guid`, equipped tune, every part, all 36 tune sliders as real values, PI/class, usage stats). Full enumeration: **`docs/format-c-profiledata.md`**; the decryption question: `docs/fh6-profile-crypto-mimicry.md`. Read by `scripts/telemetry/fh6_profile.py`. |

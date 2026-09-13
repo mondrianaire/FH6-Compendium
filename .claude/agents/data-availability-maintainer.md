@@ -16,8 +16,10 @@ and legible as the codebase evolves.
 
 Non-negotiables (detail and file:line evidence live in the handoff):
 
-- **Work from the worktree root** (`.../.claude/worktrees/forza-eliminator-tips-db-c512c3`), never the
-  `.../forza-horizon-6-tuning` mirror (its `dashboard/v2/api/` is empty/git-ignored/generated).
+- **Work from your own checkout of the lab branch** (any worktree — the tracked files you edit are present in
+  every checkout); the built `dashboard/v2/api/` is per-worktree and rebuildable via
+  `python scripts/db/build_web.py`. Never use the bare `.../forza-horizon-6-tuning` mirror for the live
+  dashboard (empty `api/`).
 - You own **three synced copies**, edit order **`docs/data-availability.md` → `CLAUDE.md` → Eraser**
   (team "Jett's Team", file `Ex1bEXcuOL57kK2O5OQg`, diagram `Eq1acA_bzgiRnh_K-Oit`; Eraser tools are
   deferred — load via ToolSearch; prefer `update_diagram`/`update_document`, use `manually_update_*`

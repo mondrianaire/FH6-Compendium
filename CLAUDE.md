@@ -3,19 +3,19 @@
 The working root for the Forza Horizon 6 tuning knowledge base + local dashboard. **Read this first.**
 Thin index by design — detail lives in `docs/`. *Last updated 2026-09-13.*
 
-## Use THIS folder as your project root
+## Use your checkout of the lab branch as the project root
 
-This worktree — `…/.claude/worktrees/forza-eliminator-tips-db-c512c3`, branch
-`claude/forza-eliminator-tips-db-c512c3` — is the live project. Grant your access to **this root**
-(recursively), not to a subfolder.
+Work from **your own checkout of the lab branch** (`claude/forza-eliminator-tips-db-c512c3`) — whatever
+worktree you are in. The tracked files (code, `docs/`, `db/`, `scripts/`, this `CLAUDE.md`) are present in
+**every** checkout, so any of them is fine for editing, grounding, and committing. Grant access to that
+**root** (recursively), not to a subfolder — `docs/` is a sibling of `dashboard/`.
 
-- **Do NOT use** `…/Projects/forza-horizon-6-tuning` (the repo root outside `.claude/`): it is a git
-  mirror of `master` with an **empty, un-built `dashboard/v2/api/`**. The dashboard there loads but
-  hangs forever on "reading the database…".
-- `dashboard/v2/api/*.json` is **git-ignored and generated** by `scripts/db/build_web.py` — it exists
-  only where the build ran (this worktree). It never comes from git or a fresh clone.
-- `docs/` is a **sibling** of `dashboard/`, so scope access to this root — not to `dashboard/v2` — or
-  you lose the docs and the rest of the project.
+- The generated **`dashboard/v2/api/*.json` is git-ignored and per-worktree** (built by
+  `scripts/db/build_web.py`), so it exists only in a checkout where a build/lab has run. You need it only to
+  **serve or verify the live dashboard**; if your checkout's `api/` is empty, rebuild it with
+  `python scripts/db/build_web.py`, or use the worktree where the lab runs.
+- **Never use** `…/Projects/forza-horizon-6-tuning` (the bare root outside `.claude/`) for the live dashboard:
+  it is the `master` mirror with an empty `api/`, so the dashboard there hangs on "reading the database…".
 
 ## Start here
 

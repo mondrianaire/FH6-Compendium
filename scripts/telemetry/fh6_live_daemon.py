@@ -2085,7 +2085,9 @@ class H(BaseHTTPRequestHandler):
                         _enrich_drivetrain(deliverable, ordn)
                         _enrich_gears(deliverable, ordn)
                         _build_union(deliverable, ordn, match=match)   # reconcile save vs telemetry: agreements, conflicts, ranked drive-asks
-                        payload = {"available": True, "ordinal": ordn, "name": nm, "ts": meta["ts"],
+                        try: _ch = TUNE.setup_hash(meta["path"])
+                        except Exception: _ch = None
+                        payload = {"available": True, "ordinal": ordn, "name": nm, "ts": meta["ts"], "chash": _ch,
                                    "tune": tune, "deliverable": deliverable, "match": match}
                         payload.update(_tune_header_strings(meta["path"]))   # the tune's own name/creator — `name` above stays the CAR
                     else:
@@ -2575,10 +2577,21 @@ def disk_watcher():
                 pass
             if getattr(ST, "_disk_dirty", False):
                 ST._disk_dirty = False; last = (None, None)   # an auto-association changed the deliverable — re-emit even without a file change
-            key = (ordn, round(metas[0]["mtime"], 2))
-            prev_m = seen.get(ordn)
-            new_save = prev_m is not None and key[1] > prev_m   # a newer file than this car's newest already seen = a fresh save
-            seen[ordn] = key[1] if prev_m is None else max(prev_m, key[1])
+            # NEW-SAVE EDGE ON CONTENT, NOT MTIME (2026-09-13): the game rewrites the active tune's container
+            # (a fresh Tuning_<ordinal>_<ts>, new mtime) on every re-equip / event load-in, so an mtime edge
+            # fired "new save" -- re-anchoring identity + re-importing -- on byte-identical content over and over
+            # (worst for downloaded/locked tunes, which get re-applied per event). setup_hash is the raw-bytes
+            # identity of hardware+sliders+gears; it ignores title, timestamp AND the locked flag, so a same-
+            # content rewrite no longer counts as new, while a genuinely different build (even one sharing a
+            # title) still does. Falls back to mtime only when the file can't be hashed (wrong size/unreadable).
+            chash = None
+            try: chash = TUNE.setup_hash(metas[0]["path"])
+            except Exception: chash = None
+            key = (ordn, chash if chash else round(metas[0]["mtime"], 2))
+            prev_h = seen.get(ordn)
+            new_save = prev_h is not None and chash is not None and chash != prev_h   # different content for this car = a real new save
+            if chash is not None:
+                seen[ordn] = chash
             if key == last and not new_save:
                 continue
             last = key
@@ -2627,9 +2640,11 @@ def disk_watcher():
                 ST._eng_bootstrapped[str(ordn)] = str(meta_m["ts"]); ST._disk_dirty = True
             _build_union(deliverable, ordn, match=match_m)
             _hs = _tune_header_strings(meta_m["path"])
+            try: _ch_emit = TUNE.setup_hash(meta_m["path"])
+            except Exception: _ch_emit = None
             ST.emit("disk", dict({"ordinal": ordn, "name": nm, "ts": meta_m["ts"], "available": True,
                                   "deliverable": deliverable, "match": match_m, "diff": diff,
-                                  "new_save": new_save}, **_hs))
+                                  "new_save": new_save, "chash": _ch_emit}, **_hs))
         except Exception:
             pass
 

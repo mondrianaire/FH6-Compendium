@@ -493,7 +493,7 @@ async function afterRebuild() {
   try { await panelBoot(); } catch (e) { /* world/diag/courses are optional here */ }
   if (COURSE_KEY) { try { await onCourseChange(COURSE_KEY, COURSE_KEY, { force: true }); } catch (e) {} }   // the lap just driven is what the rebuild added
   HDR_KEY = null; LEFT_KEY = null; TRACE_KEY = null;
-  if (CUR) { RB.done_ts = CUR.disk && CUR.disk.ts; vg("rbDoneTs", {})[String(CUR.ordinal)] = RB.done_ts; viewSave(); fingerprint(CUR.ordinal); }
+  if (CUR) { const sig = CUR.disk && (CUR.disk.chash || CUR.disk.ts); RB.done_ts = sig; vg("rbDoneTs", {})[String(CUR.ordinal)] = sig; viewSave(); fingerprint(CUR.ordinal); }
   paintPanel();
 }
 // THE RULE: a save the database does not hold can only exist because it was written after the
@@ -503,8 +503,9 @@ async function afterRebuild() {
 function ensureHeld() {
   if (!CUR || !CUR.disk || !CUR.disk.ts) return;
   if (MATCH && MATCH.build) return;
-  if (RB.state === "running" || RB.pending || RB.done_ts === CUR.disk.ts) return;
-  if (vg("rbDoneTs", {})[String(CUR.ordinal)] === CUR.disk.ts) return;   // asked once for this save already, across reloads
+  const sig = CUR.disk.chash || CUR.disk.ts;   // dedup on CONTENT: a same-build rewrite must not re-import
+  if (RB.state === "running" || RB.pending || RB.done_ts === sig) return;
+  if (vg("rbDoneTs", {})[String(CUR.ordinal)] === sig) return;   // asked once for this content already, across reloads
   const locked = !!(CUR.disk.deliverable && CUR.disk.deliverable.locked);
   requestRebuild((locked ? "downloaded tune " : "new save ") + CUR.disk.ts);
 }
@@ -630,7 +631,13 @@ async function reread() {
     CUR.diskErr = null;
     if (!j || !j.available) return;
     const prevTs = CUR.disk && CUR.disk.ts;
-    const changedFile = !CUR.disk || CUR.disk.ts !== j.ts;
+    // A "new save" is a CONTENT change, not just a new timestamp. The game rewrites the active tune's
+    // container (new ts) on every re-equip / event load-in, so keying on ts logged "new save read" and
+    // re-imported byte-identical tunes endlessly. j.chash is the daemon's setup_hash (hardware+sliders+gears,
+    // raw bytes; title/ts/lock-independent) — so a same-title-but-different save is still seen as new, and a
+    // same-content rewrite is not. Fall back to ts only when a save can't be hashed.
+    const prevSig = CUR.disk ? (CUR.disk.chash || CUR.disk.ts) : null;
+    const changedFile = !CUR.disk || prevSig !== (j.chash || j.ts);
     CUR.disk = j;
     CUR.match = j.match || CUR.match;                 // the roster grows with every save; the picker must see it
     fingerprint(CUR.ordinal);

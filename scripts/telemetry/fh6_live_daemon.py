@@ -1044,8 +1044,16 @@ def _pick_meta(metas, ordn, ts_want=None):
         score = m["mtime"] * 1e-13                     # newest as a faint tiebreak
         if ts_want and str(m["ts"]) == str(ts_want):
             score += 1e6                               # explicit user pick wins outright
-        if (live or live_recent) and live_cyl and cyl:
-            score += 100 if int(cyl) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal — held signature keeps scoring while parked (a parked pick must not fall to file-date and then CLAIM signature)
+        # CYL-BOOTSTRAP for stub / new-car builds (2026-09-13): an uncatalogued engine (cyl == None) is the NEW-CAR
+        # case — the decoded game DB predates the car, so no catalog cyl exists (e.g. a stub ref_car "ordinal N").
+        # The live frame authoritatively reports the equipped car's cylinders, so credit that as the build's effective
+        # cyl for scoring rather than leaving it with NO cyl signal while catalogued siblings score +100 — which let a
+        # wrong-PI same-cyl sibling outrank the real, exact-PI build (ordinal 4354: build D at cyl12/PI896 beat the
+        # equipped F at cyl?/PI864). PI / redline / gears then break the resulting tie. Once such a build is chosen,
+        # the existing _equipped_fresh_download + _enrich_engine_desc persist the learned cyl into the catalog.
+        cyl_eff = cyl if cyl else (live_cyl if (live or live_recent) and live_cyl else None)
+        if (live or live_recent) and live_cyl and cyl_eff:
+            score += 100 if int(cyl_eff) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal; None cyl = an uncatalogued (new-car) engine bootstrapped from the live frame
         if (live or live_recent) and live_pi and pi:
             score += 60 if int(pi) == int(live_pi) else -min(60, abs(int(pi) - int(live_pi)) * 0.6)
         live_red = (fr.get("maxrpm") if live and fr else None)

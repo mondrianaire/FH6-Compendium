@@ -1487,8 +1487,15 @@ function headerCopy(st, q) {
   // longer state-specific headline available for a state that still needs one (ambiguous identity).
   const creator = (m && m.creator) || (CUR && CUR.disk && CUR.disk.creator) || "";
   const byline = [creator ? "by " + creator : "", m && m.created ? when(m.created) : ""].filter(Boolean).join(" · ");
+  // HONEST NEW-CAR STATE: a car added after our last game-DB decode has only a STUB ref_car row (display_name
+  // "ordinal N", no class/PI, its stock engine absent from the catalog). It can't be named or classed, so the
+  // header must say so plainly instead of implying a resolved identity. Set once here so the flag survives the
+  // state-specific Object.assign branches below. Identity for it comes from the live frame (daemon cyl-bootstrap);
+  // name/class/PI resolve only on a game-DB re-import.
+  const newcar = !!(CUR && /^ordinal\s+\d+$/i.test(String(carName(CUR.cid) || "")));   // stub ref_car (catalog name "ordinal N") = a car added since our last game-DB decode; class/PI here come from the live frame, so the NAME is the only reliable stub signal
   const base = { tone: "dim", lead: "", sub: "", tune, car, status: st.label || "", byline, why: st.why || "", step: (st.steps || [])[0] || "",
-                 rest: (st.steps || []).slice(1), primary: null, noBtn: "", caption: "", evidence: "", guarantee: "" };
+                 rest: (st.steps || []).slice(1), primary: null, noBtn: "", caption: "", evidence: "", guarantee: "",
+                 newcar, newcarNote: newcar ? "new car — not in the game database yet. Name, class and PI are pending a game-DB re-import; identity is inferred from live telemetry." : "" };
 
   // AMBIGUITY OVERRIDES EVERY STATUS: which build is on the car outranks what kind of build it is
   if (q && (q.level === "ambiguous" || q.level === "conflict")) {
@@ -1651,6 +1658,7 @@ function paintHeader() {
     <div class="hident">
       <div class="hrowa">
         ${CUR ? `<span class="hpi artpi">${piBadge(CUR.cls, CUR.pi)}</span>` : ""}
+        ${c.newcar ? `<span class="hnew t-l" tabindex="0" title="${esc(c.newcarNote)}">◈ NEW CAR</span>` : ""}
         ${rs.locked ? `<span class="hlock t-l">🔒 ${esc(c.caption || "locked")}</span>` : (c.caption ? `<span class="hcap t-l">${esc(c.caption)}</span>` : "")}
         ${changeSlim()}
         <span class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}</span>

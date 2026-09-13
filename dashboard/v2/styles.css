@@ -860,6 +860,7 @@ body.fixed *::-webkit-scrollbar{width:0;height:0}
 /* Row A — badge · save/lock chip · CHANGE chip · car name, one line; the 28px badge governs the height */
 #hdr .hrowa{display:flex;align-items:center;gap:8px;min-width:0;height:28px}
 #hdr .hlock{color:var(--warn);flex:0 0 auto} #hdr .hcap{flex:0 0 auto}
+#hdr .hnew{flex:0 0 auto;color:var(--acc2);border:1px solid var(--acc2);border-radius:3px;padding:0 5px;cursor:help}  /* stub / new car not yet in the game DB */
 #hdr .hrowa .hpi{flex:0 0 auto}
 #hdr .hcar{flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 #hdr .htitle{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}

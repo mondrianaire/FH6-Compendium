@@ -11,6 +11,22 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $root
 
+function Resolve-Python {
+    # Bare "python" on this box resolves to the WindowsApps stub (%LOCALAPPDATA%\Microsoft\WindowsApps\
+    # python.exe), which no-ops instead of binding -- that is what left duplicate stub+real processes on
+    # 2026-09-12 and would make a headless (Task Scheduler) start silently fail. Pin a REAL interpreter.
+    $cands = @(
+        "C:\Users\mondr\AppData\Local\Python\pythoncore-3.14-64\python.exe",
+        "C:\Users\mondr\AppData\Local\Python\bin\python.exe"
+    )
+    foreach ($c in $cands) { if (Test-Path $c) { return $c } }
+    $cmd = Get-Command python -ErrorAction SilentlyContinue |
+           Where-Object { $_.Source -notlike "*\WindowsApps\*" } | Select-Object -First 1
+    if ($cmd) { return $cmd.Source }
+    throw "No real Python interpreter found (only the WindowsApps stub). Install Python or fix the candidates in lab_up.ps1."
+}
+$PY = Resolve-Python
+
 function Listening($port) {
     # LISTENING only: a just-killed service leaves TIME_WAIT lines on its port for a minute, and those
     # must not read as "already up" (they did, 2026-09-05, and the restart silently did nothing).
@@ -32,7 +48,7 @@ foreach ($j in $jobs) {
     }
     $out = Join-Path $logdir ("{0}.log" -f $j.name)
     $err = Join-Path $logdir ("{0}.err" -f $j.name)
-    Start-Process -FilePath "python" -ArgumentList $j.args -WorkingDirectory $root -WindowStyle Hidden `
+    Start-Process -FilePath $PY -ArgumentList $j.args -WorkingDirectory $root -WindowStyle Hidden `
         -RedirectStandardOutput $out -RedirectStandardError $err | Out-Null
     $t0 = Get-Date
     while (-not (Listening $j.port) -and ((Get-Date) - $t0).TotalSeconds -lt 15) { Start-Sleep -Milliseconds 300 }

@@ -587,13 +587,22 @@ const SEG_LABEL = { braking: "Braking", turn_in: "Entry", mid: "Mid-corner", exi
 // which course turn (by display seq) is selected for the map highlight + right-pane stats; scoped to
 // a course key so a stale pick from another course is simply ignored, never mis-applied.
 let TURN_PICK = null;
-let LB_PICK = null;   // the leaderboard-selected lap id (a trace to isolate on the corner map), reset per turn
+let LB_SEL = new Set();   // leaderboard-selected lap ids (strings) to isolate / compare on the corner map — MULTI-select; reset per turn
+// GHOST REPLAY (course v2): animate the selected passes moving through the turn on a reconstructed real-time
+// clock. Traces are DISTANCE-parameterised (no stored per-sample time), so we rebuild dt = worldΔ / speed per
+// segment; t=0 at each pass's first in-frame sample ("from entry") so a faster pass pulls ahead on screen and
+// the gap you see IS the time lost. State is module-level so it survives paintRight's full innerHTML rebuild;
+// the rAF is self-healing — every frame it re-finds the current .tstat-cornersvg and re-creates its #cm-anim
+// marker group if a repaint (e.g. a live `corner` SSE event) removed it.
+let CM_ANIM = { on: false, playing: false, T: 0, rate: 0.5, loop: true, raf: 0, motion: null, key: null, last: 0 };
+let CM_LEG_OPEN = false;   // corner-map legend/filter overlay open? default collapsed to reclaim the map's height
+try { CM_LEG_OPEN = localStorage.getItem("fh6CmLeg") === "1"; } catch (e) {}
 function turnPickSeq() { return (TURN_PICK && COURSE && TURN_PICK.key === COURSE.key) ? TURN_PICK.seq : null; }
 function pickTurn(seq) {
   const s = seq == null ? null : +seq;
   const cur = turnPickSeq();
   TURN_PICK = (s == null || s === cur) ? null : { key: COURSE && COURSE.key, seq: s };   // click the same turn to clear
-  LB_PICK = null;   // a new turn -> drop any isolated-lap selection
+  LB_SEL.clear(); cmAnimStop();   // a new turn -> drop any isolated-lap selection and stop any running replay
   // selecting a turn is a request to SEE it: bring the right pane to Turn analysis (its full stats).
   if (TURN_PICK && MODE.suggest === "course" && COURSE) { RIGHT_TAB = "matrix"; try { rightTabStore()[rightContext()] = "matrix"; } catch (e) {} }
   LEFT_KEY = null; TRACE_KEY = null; paintLeft(); paintTrace(); paintRight();   // trace repaints too: the selected turn's span band + tick highlight
@@ -601,24 +610,167 @@ function pickTurn(seq) {
 // LAP ISOLATION: clicking a leaderboard row picks a lap; its trace on the corner map is lifted and every other
 // lap's trace is dimmed. Click the same row again to clear. Toggled in place (no repaint) + re-applied after one.
 function pickLap(id) {
-  LB_PICK = (LB_PICK === id || id == null) ? null : String(id);
+  // MULTI-select: a plain click toggles a pass in/out of the compare set (id==null clears all). The set both
+  // isolates those traces on the maps AND is what the ghost replay animates.
+  const k = id == null ? null : String(id);
+  if (k == null) LB_SEL.clear();
+  else if (LB_SEL.has(k)) LB_SEL.delete(k);
+  else LB_SEL.add(k);
+  cmAnimSync();   // selection changed -> rebuild the replay's motion if the engine is armed
   applyLapPick();
 }
 function applyLapPick() {
+  const has = LB_SEL.size > 0;
   const rb = $("#rightBody");
   if (rb) {
     const svg = rb.querySelector(".tstat-cornersvg");
-    if (svg) { svg.classList.toggle("has-sel", LB_PICK != null);
-      svg.querySelectorAll(".cm-lap").forEach((g) => g.classList.toggle("sel", LB_PICK != null && g.dataset.lap === LB_PICK)); }
-    rb.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.classList.toggle("lbsel", LB_PICK != null && r.dataset.lap === LB_PICK));
+    if (svg) { svg.classList.toggle("has-sel", has);
+      svg.querySelectorAll(".cm-lap").forEach((g) => g.classList.toggle("sel", LB_SEL.has(g.dataset.lap))); }
+    rb.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.classList.toggle("lbsel", LB_SEL.has(r.dataset.lap)));
   }
-  // MIRROR THE PICK ONTO THE LEFT COURSE MAP (Jett 2026-09-11): lift the same lap's whole-course trace and
-  // dim the rest, so the isolated lap reads across BOTH the course map and the single-corner map. The left
+  // MIRROR THE PICK ONTO THE LEFT COURSE MAP (Jett 2026-09-11): lift the same laps' whole-course traces and
+  // dim the rest, so the isolated set reads across BOTH the course map and the single-corner map. The left
   // map persists across right-pane repaints, so toggling classes in place (no paintLeft) is enough.
   const lb = $("#leftBody"), lsvg = lb && lb.querySelector(".cmap svg");
-  if (lsvg) { lsvg.classList.toggle("has-lapsel", LB_PICK != null);
-    lsvg.querySelectorAll(".cmap-lap").forEach((g) => g.classList.toggle("sel", LB_PICK != null && g.dataset.lap === LB_PICK)); }
+  if (lsvg) { lsvg.classList.toggle("has-lapsel", has);
+    lsvg.querySelectorAll(".cmap-lap").forEach((g) => g.classList.toggle("sel", LB_SEL.has(g.dataset.lap))); }
 }
+// ---- GHOST REPLAY ENGINE (course v2) ---------------------------------------------------------------------
+// One engine drives both the single animated car (no passes selected -> the fastest pass) and the multi-pass
+// ghost race (N selected). It projects each pass into the SAME svg px space cornerMapHTML uses and advances
+// every pass on one shared clock so their on-screen separation reads as time lost. See CM_ANIM above.
+function cmSelectedTurn() {
+  const seq = turnPickSeq(); if (seq == null || !COURSE) return null;
+  return (COURSE.turns || []).find((t) => t.seq === seq) || null;
+}
+function cmBoardOrder(t, ls) {
+  // the leaderboard's fastest-first lap-id order (mirrors turnStatsHTML's typical-phase-set ranking), used to
+  // colour ghosts by pace and to pick the default single pass. Returns [] when nothing is timed here.
+  const obs = (t && t.phaseObs) || {}, byLap = {};
+  SEG_ORDER.forEach((n) => (obs[n] || []).forEach((r) => { if (ls.set && !ls.set.has(String(r[0]))) return; (byLap[r[0]] = byLap[r[0]] || {})[n] = r; }));
+  const ids = Object.keys(byLap); if (!ids.length) return [];
+  const nSeen = ids.length;
+  const typ = SEG_ORDER.filter((n) => ids.reduce((c, id) => c + ((byLap[id][n] && byLap[id][n][5] != null) ? 1 : 0), 0) >= nSeen / 2);
+  return ids.map((id) => { const covers = typ.length > 0 && typ.every((n) => byLap[id][n] && byLap[id][n][5] != null);
+      let tt = 0; if (covers) typ.forEach((n) => tt += byLap[id][n][5]); return { id, tt: covers ? tt : null }; })
+    .filter((p) => p.tt != null).sort((a, b) => a.tt - b.tt).map((p) => p.id);
+}
+function cmAnimIds(t, ls) {
+  const drawn = Object.keys(COURSE.traces || {}).filter((id) => (!ls.set || ls.set.has(String(id))) && (COURSE.traces[id] || []).length > 2);
+  if (LB_SEL.size) return drawn.filter((id) => LB_SEL.has(String(id)));
+  const order = cmBoardOrder(t, ls);
+  return order.length ? [order[0]] : drawn.slice(0, 1);   // none selected -> the single fastest pass
+}
+function cmBuildMotion(t, ls) {
+  const fr = turnFrame(COURSE, t); if (!fr) return null;
+  const [x0, x1, z0, z1] = fr; if (!isFinite(x0)) return null;
+  const pad = 16, H = 260, AR = ((x1 - x0) || 1) / ((z1 - z0) || 1);
+  const W = Math.max(300, Math.round((H - 2 * pad) * AR)) + 2 * pad;
+  const s = Math.min((W - 2 * pad) / ((x1 - x0) || 1), (H - 2 * pad) / ((z1 - z0) || 1));
+  const px = (x) => pad + (x - x0) * s, py = (z) => H - pad - (z - z0) * s;
+  const ids = cmAnimIds(t, ls); if (!ids.length) return null;
+  const rank = {}; cmBoardOrder(t, ls).forEach((id, i) => rank[String(id)] = i);
+  const nR = Math.max(1, Object.keys(rank).length);
+  // colour: an EXPLICIT compare set gets distinct categorical colours (pace-rank green clusters and would make
+  // two fast passes indistinguishable); the auto single-fastest pass keeps its pace-rank colour.
+  const SELCOL = ["#00d27a", "#4ea3ff", "#e3b341", "#c77dff", "#ff8fa3", "#38d9d2", "#ffa94d", "#f0616d"];
+  const passes = [];
+  ids.forEach((id, idx) => {
+    const tr = COURSE.traces[id]; if (!tr) return;
+    // a lap can enter/leave the frame more than once; take its longest contiguous in-frame run
+    let best = [], run = [];
+    for (const p of tr) { const X = p[3], Z = p[4];
+      if (X == null || Z == null || X < x0 || X > x1 || Z < z0 || Z > z1) { if (run.length > best.length) best = run; run = []; continue; }
+      run.push([X, Z, p[1], p[2]]); }   // [worldX, worldZ, mph, gripCode]
+    if (run.length > best.length) best = run;
+    if (best.length < 2) return;
+    const pts = []; let acc = 0;
+    for (let i = 0; i < best.length; i++) {
+      if (i > 0) { const a = best[i - 1], b = best[i];
+        const d = Math.hypot(b[0] - a[0], b[1] - a[1]);   // world metres between samples
+        const mph = Math.max(3, ((a[2] || 0) + (b[2] || 0)) / 2); acc += d / (mph * 0.44704); }   // dt = Δm / (m/s)
+      pts.push({ x: px(best[i][0]), y: py(best[i][1]), mph: best[i][2] || 0, t: acc });
+    }
+    const col = LB_SEL.size ? SELCOL[idx % SELCOL.length] : rankColor(rank[String(id)] || 0, nR);
+    passes.push({ id: String(id), col, pts, dur: acc, meta: (COURSE.laps || []).find((l) => String(l.id) === String(id)) || {} });
+  });
+  if (!passes.length) return null;
+  return { W, H, passes, tMax: Math.max(...passes.map((p) => p.dur)) };
+}
+function cmPosAt(pass, T) {
+  const pts = pass.pts; if (!pts.length) return null;
+  if (T <= 0) return pts[0]; if (T >= pass.dur) return pts[pts.length - 1];
+  for (let i = 1; i < pts.length; i++) { if (pts[i].t >= T) { const a = pts[i - 1], b = pts[i], f = (T - a.t) / ((b.t - a.t) || 1);
+    return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, mph: a.mph + (b.mph - a.mph) * f }; } }
+  return pts[pts.length - 1];
+}
+function cmAnimKey(t, ls) { return (t ? t.seq : "?") + "|" + (LB_SEL.size ? [...LB_SEL].sort().join(",") : "auto") + "|" + (ls && ls.label); }
+function cmAnimEnsure() {
+  const t = cmSelectedTurn(); if (!t) return; const ls = activeLapSet();
+  if (!CM_ANIM.on || !CM_ANIM.motion || CM_ANIM.key !== cmAnimKey(t, ls)) {
+    CM_ANIM.on = true; CM_ANIM.motion = cmBuildMotion(t, ls); CM_ANIM.key = cmAnimKey(t, ls);
+    if (CM_ANIM.T > (CM_ANIM.motion ? CM_ANIM.motion.tMax : 0)) CM_ANIM.T = 0;
+  }
+}
+function cmAnimToggle() {
+  cmAnimEnsure(); if (!CM_ANIM.motion) { CM_ANIM.on = false; cmAnimBtns(); return; }
+  CM_ANIM.playing = !CM_ANIM.playing; CM_ANIM.last = 0;
+  if (CM_ANIM.playing) { if (CM_ANIM.T >= CM_ANIM.motion.tMax) CM_ANIM.T = 0; if (CM_ANIM.raf) cancelAnimationFrame(CM_ANIM.raf); CM_ANIM.raf = requestAnimationFrame(cmAnimFrame); }
+  else if (CM_ANIM.raf) { cancelAnimationFrame(CM_ANIM.raf); CM_ANIM.raf = 0; }
+  cmAnimBtns();
+}
+function cmAnimFrame(ts) {
+  if (!CM_ANIM.playing) { CM_ANIM.raf = 0; return; }
+  if (!CM_ANIM.last) CM_ANIM.last = ts;
+  const dt = Math.min(0.1, (ts - CM_ANIM.last) / 1000) * CM_ANIM.rate; CM_ANIM.last = ts;
+  CM_ANIM.T += dt;
+  const m = CM_ANIM.motion;
+  if (m && CM_ANIM.T >= m.tMax) { if (CM_ANIM.loop) { CM_ANIM.T = 0; } else { CM_ANIM.T = m.tMax; CM_ANIM.playing = false; } }
+  cmAnimDraw(); cmAnimScrub();
+  if (CM_ANIM.playing) CM_ANIM.raf = requestAnimationFrame(cmAnimFrame); else { CM_ANIM.raf = 0; cmAnimBtns(); }
+}
+function cmAnimDraw() {
+  const m = CM_ANIM.motion; if (!m) return;
+  const svg = document.querySelector(".tstat-cornersvg"); if (!svg) return;   // pane hidden/repainting — next tick retries
+  let g = svg.querySelector("#cm-anim");
+  if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.setAttribute("id", "cm-anim"); svg.appendChild(g); }
+  if (g.childElementCount !== m.passes.length) {
+    g.innerHTML = m.passes.map((p) => `<g class="cm-car"><circle r="5.5" fill="${p.col}" stroke="#0b0e12" stroke-width="1.5"/><g class="cm-cartag"><rect x="8" y="-8" width="30" height="15" rx="3"/><text x="10" y="3" fill="${p.col}">0</text></g></g>`).join("");
+  }
+  const cars = g.querySelectorAll(".cm-car");
+  m.passes.forEach((p, i) => { const pos = cmPosAt(p, CM_ANIM.T), el = cars[i]; if (!el || !pos) return;
+    const c = el.querySelector("circle"); c.setAttribute("cx", pos.x.toFixed(1)); c.setAttribute("cy", pos.y.toFixed(1));
+    el.querySelector(".cm-cartag").setAttribute("transform", `translate(${pos.x.toFixed(1)},${pos.y.toFixed(1)})`);
+    el.querySelector("text").textContent = Math.round(pos.mph); });
+}
+function cmAnimScrub() {
+  const m = CM_ANIM.motion; if (!m) return;
+  const sc = document.querySelector("#cmScrub"); if (sc && document.activeElement !== sc) sc.value = String(Math.round(CM_ANIM.T / (m.tMax || 1) * 1000));
+  const cl = document.querySelector("#cmClock"); if (cl) cl.textContent = CM_ANIM.T.toFixed(2) + "s / " + m.tMax.toFixed(2) + "s";
+}
+function cmAnimBtns() {
+  const b = document.querySelector("#cmPlay"); if (b) { b.textContent = CM_ANIM.playing ? "⏸" : "▶"; b.classList.toggle("on", CM_ANIM.playing); }
+  const lp = document.querySelector("#cmLoop"); if (lp) lp.classList.toggle("on", CM_ANIM.loop);
+  document.querySelectorAll("[data-cmrate]").forEach((x) => x.classList.toggle("on", +x.dataset.cmrate === CM_ANIM.rate));
+}
+function cmAnimSync() {
+  if (!CM_ANIM.on) return;
+  const t = cmSelectedTurn(); if (!t) { cmAnimStop(); return; } const ls = activeLapSet();
+  CM_ANIM.motion = cmBuildMotion(t, ls); CM_ANIM.key = cmAnimKey(t, ls);
+  if (!CM_ANIM.motion) { cmAnimStop(); return; }
+  if (CM_ANIM.T > CM_ANIM.motion.tMax) CM_ANIM.T = 0;
+  const svg = document.querySelector(".tstat-cornersvg"); const g = svg && svg.querySelector("#cm-anim"); if (g) g.remove();   // pass count may have changed
+  cmAnimDraw(); cmAnimScrub();
+}
+function cmAnimStop() {
+  CM_ANIM.on = false; CM_ANIM.playing = false; if (CM_ANIM.raf) cancelAnimationFrame(CM_ANIM.raf);
+  CM_ANIM.raf = 0; CM_ANIM.motion = null; CM_ANIM.key = null; CM_ANIM.T = 0;
+  const svg = document.querySelector(".tstat-cornersvg"), g = svg && svg.querySelector("#cm-anim"); if (g) g.remove();
+  cmAnimBtns();
+}
+// re-attach the replay markers after paintRight rebuilt #rightBody (paused state won't redraw itself; a
+// playing rAF is self-healing but we refresh the controls to match state).
+function cmAnimReattach() { cmAnimBtns(); if (CM_ANIM.on && CM_ANIM.motion) { cmAnimDraw(); cmAnimScrub(); } }
 // cross-highlight one phase across the left map + rail and the right table (shared data-phase spine):
 // emphasise the matching part, dim the rest; null clears.
 function hiPhase(name) {
@@ -639,7 +791,7 @@ function stepTurn(dir) {
   const i = cur == null ? -1 : seqs.indexOf(cur);
   const nxt = i < 0 ? seqs[0] : seqs[(i + (dir < 0 ? -1 : 1) + seqs.length) % seqs.length];
   TURN_PICK = { key: COURSE && COURSE.key, seq: nxt };
-  LB_PICK = null;
+  LB_SEL.clear(); cmAnimStop();
   LEFT_KEY = null; TRACE_KEY = null; paintLeft(); paintTrace(); paintRight();
 }
 // the chip row never scrolls sideways: keep the chips that fit, count the rest
@@ -3073,7 +3225,18 @@ function paintRight() {
     body.querySelectorAll(".tlb-row[data-lap]").forEach((r) => r.onclick = () => pickLap(r.dataset.lap));
     // corner-map trace colouring: position (solid by leaderboard rank, default) vs speed (per-point gradient)
     body.querySelectorAll("[data-cmtrace]").forEach((b) => b.onclick = () => { CM_TRACE_MODE = b.dataset.cmtrace; try { localStorage.setItem("fh6CmTrace", CM_TRACE_MODE); } catch (e) {} paintRight(); });
+    // legend/filter overlay toggle (collapsed by default)
+    const lgb = body.querySelector("#cmLegBtn"); if (lgb) lgb.onclick = () => { CM_LEG_OPEN = !CM_LEG_OPEN; try { localStorage.setItem("fh6CmLeg", CM_LEG_OPEN ? "1" : "0"); } catch (e) {}
+      const pop = body.querySelector(".cm-legpop"); if (pop) pop.classList.toggle("open", CM_LEG_OPEN); lgb.classList.toggle("on", CM_LEG_OPEN); lgb.innerHTML = "legend " + (CM_LEG_OPEN ? "▾" : "▸"); };
+    // ghost-replay transport
+    const pb = body.querySelector("#cmPlay"); if (pb) pb.onclick = () => cmAnimToggle();
+    const scb = body.querySelector("#cmScrub"); if (scb) scb.oninput = () => { cmAnimEnsure(); if (!CM_ANIM.motion) return;
+      CM_ANIM.playing = false; if (CM_ANIM.raf) { cancelAnimationFrame(CM_ANIM.raf); CM_ANIM.raf = 0; }
+      CM_ANIM.T = (+scb.value / 1000) * CM_ANIM.motion.tMax; cmAnimBtns(); cmAnimDraw(); cmAnimScrub(); };
+    body.querySelectorAll("[data-cmrate]").forEach((b) => b.onclick = () => { CM_ANIM.rate = +b.dataset.cmrate; cmAnimBtns(); });
+    const lpb = body.querySelector("#cmLoop"); if (lpb) lpb.onclick = () => { CM_ANIM.loop = !CM_ANIM.loop; lpb.classList.toggle("on", CM_ANIM.loop); };
     applyLapPick();
+    cmAnimReattach();   // restore replay markers/controls after the full-rebuild repaint
   }
   if (cur === "lap") {
     // a nav button or a table row picks the window's turn (held until the next turn is taken); heads sort the table
@@ -3704,7 +3867,25 @@ function cornerMapHTML(c, t, ls) {
     <div class="cm-lrow"><em>phases</em>${phases.map((n) => `<span><i class="cm-sw" style="background:${SEG_COL[n]}"></i>${esc(SEG_LABEL[n])}</span>`).join("")}</div>
     <div class="cm-lrow"><em>lines</em><span class="why">${nDrawn} lap${nDrawn === 1 ? "" : "s"} in ${scopeTok(ls)}</span>${modeLeg}${cmToggle}</div>
     <div class="cm-lrow"><em>marks</em><span><b class="cm-ring"></b>apex</span><span><b class="cm-pill">mph</b>median entry · slowest · exit</span><span><b class="cm-chev">›</b>direction of travel</span></div></div>`;
-  return `<div class="grp tstat-corner">${svg}${legend}${trailBox}</div>`;
+  // LEGEND + FILTER moved into a collapsible pop-over ON the map (Jett 2026-09-16): the 3-row legend block ate a
+  // lot of vertical real estate under a short map. It now hides behind a corner button, default collapsed.
+  const legBtn = `<button class="cm-legbtn${CM_LEG_OPEN ? " on" : ""}" id="cmLegBtn" title="legend + line-colour filter">legend ${CM_LEG_OPEN ? "▾" : "▸"}</button>`;
+  const legPop = `<div class="cm-legpop${CM_LEG_OPEN ? " open" : ""}">${legend}</div>`;
+  const stage = `<div class="cm-stage">${svg}${legBtn}${legPop}</div>`;
+  // GHOST REPLAY transport (Jett 2026-09-16): play the selected passes (or the fastest, if none) as cars moving
+  // through the turn on a shared real-time clock from entry — watch where the faster line pulls ahead. Scrub,
+  // rate and loop drive CM_ANIM; the selection hint says what's playing.
+  const nSel = LB_SEL.size;
+  const rateBtns = [[0.25, "¼×"], [0.5, "½×"], [1, "1×"]].map(([r, l]) => `<button class="mini${CM_ANIM.rate === r ? " on" : ""}" data-cmrate="${r}" title="${l} speed">${l}</button>`).join("");
+  const transport = nDrawn ? `<div class="cm-transport">
+      <button class="cm-play${CM_ANIM.playing ? " on" : ""}" id="cmPlay" title="play / pause the ghost replay">${CM_ANIM.playing ? "⏸" : "▶"}</button>
+      <input type="range" id="cmScrub" class="cm-scrub" min="0" max="1000" value="0" title="scrub the replay">
+      <span class="cm-clock mono" id="cmClock">replay</span>
+      <span class="cm-rate">${rateBtns}</span>
+      <button class="mini cm-loop${CM_ANIM.loop ? " on" : ""}" id="cmLoop" title="loop the replay">loop</button>
+      <span class="why cm-selhint">${nSel ? nSel + " pass" + (nSel > 1 ? "es" : "") + " · real time from entry" : "pick passes below to compare · none = fastest"}</span>
+    </div>` : "";
+  return `<div class="grp tstat-corner">${stage}${transport}${trailBox}</div>`;
 }
 // RIGHT PANE — TIMING, then statistics, then the grip read. Every figure is a median over the active
 // preset's laps and carries its lap count; grip is always the distribution, never a lone word.

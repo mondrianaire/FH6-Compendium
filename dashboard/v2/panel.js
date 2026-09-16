@@ -3178,7 +3178,10 @@ const RT_LABEL = { lap: "Current lap", corners: "Live corners", matrix: "Turn an
 // "concl" (Conclusions) dropped from the tab list 2026-09-11 (Jett) — same pattern as "build": RT_LABEL.concl
 // and conclusionsHTML()'s render path below are UNTOUCHED, just not offered as a tab, so it comes back for the
 // tuning-suggestions pass by adding "concl" back to the course array here.
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "corners", "matrix", "stats"] : ["corners", "stats", "browser"]; }
+// Course mode: ONE live tab (Current lap, now the whole course turn-by-turn) + two analysis tabs. The old
+// "Live corners" detection-log tab was retired (2026-09-16) — its turn coverage folded into Current lap, its
+// session balance into General statistics. Free roam keeps "corners" as its only live view (no course to key to).
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "matrix", "stats"] : ["corners", "stats", "browser"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
@@ -3242,6 +3245,8 @@ function paintRight() {
     // a nav button or a table row picks the window's turn (held until the next turn is taken); heads sort the table
     body.querySelectorAll("[data-lapwin]").forEach((b) => b.onclick = () => { LAP_WIN = { key: COURSE && COURSE.key, seq: +b.dataset.lapwin, n: LAP_N }; paintRight(); });
     body.querySelectorAll("[data-lapsort]").forEach((b) => b.onclick = () => { LAP_SORT = b.dataset.lapsort; try { localStorage.setItem("fh6LapSort", LAP_SORT); } catch (e) {} paintRight(); });
+    // a driven/awaiting spine row has no live pass to window — click it to open that turn in Turn analysis
+    body.querySelectorAll(".lap-rows [data-turn]").forEach((b) => b.onclick = () => pickTurn(+b.dataset.turn));
   }
   if (cur === "stats") body.querySelectorAll("[data-clsfocus]").forEach((b) => b.onclick = () => {
     if (!COURSE) return; const cls = b.dataset.clsfocus, vc = traceSel(COURSE);
@@ -3310,8 +3315,10 @@ function lapHTML() {
       <span class="why">${cs.length} turn${cs.length === 1 ? "" : "s"}${stop != null ? " · stopped at " + stop + " mph" : ""} · not ranked</span><span class="why mono">run ${s}</span></div>`;
   }).join("");
   const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
-  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} turn${taken.length === 1 ? "" : "s"} so far · rated on minimum speed against ${scopeTok(ls)} · grip across the corner's phases</span></div>`;
-  if (!taken.length) return `<div class="lapview">${head}${abandoned}<div class="why" style="padding:10px 6px">No turns yet this lap — the first one appears the instant you finish it.</div></div>`;
+  const courseTurns = (COURSE.turns || []).filter((t) => t.seq != null);
+  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} of ${courseTurns.length} turn${courseTurns.length === 1 ? "" : "s"} taken · rated on minimum speed against ${scopeTok(ls)} · every course turn listed</span></div>`;
+  // NO early return on an empty lap: the spine below lists all course turns as "awaiting", so the whole course
+  // shows the moment you load in — and fast turns you drive without tripping the detector show as "driven".
   let lastSeq = null, worstRow = null, gripHits = 0, rankable = 0, first = 0, thinFirst = 0, unranked = 0;
   const passes = [];
   taken.forEach((c) => {
@@ -3339,22 +3346,51 @@ function lapHTML() {
   });
   LAP_N = passes.length;
   const win = lapWinPick(passes);
-  // THE RANK TABLE (handoff §5.2): every turn taken this lap, 4 rows visible and scrolling, sortable by the
-  // turn, by rank within its pool, or by the gap to the pool's best; a row picks that turn for the window.
+  // THE COURSE SPINE (2026-09-16 consolidation): list EVERY identified turn on the course in driving order, not
+  // only the ones the g-detector caught. A turn is TAKEN (a detected pass, rated), DRIVEN (the car's own line
+  // passed its apex but the detector's 0.35 g / 0.8 s trigger never fired — a fast, gentle or very short turn),
+  // or AWAITING (not reached yet this lap). This folds in what the retired Live corners tab tried to show,
+  // keyed to the MAP (nearest apex) instead of to the detector, so nothing driven silently disappears.
+  const bySeq = {}; passes.forEach((q) => { bySeq[q.t.seq] = q; });
+  const shownLap = lapShown(), livePts = (shownLap && shownLap.pts) || [];
+  const passedOnLap = (t) => { if (t.x == null) return false;
+    for (let i = 0; i < livePts.length; i += 2) { const q = livePts[i]; if (!q || q[3] == null) continue; if ((q[3] - t.x) ** 2 + (q[4] - t.z) ** 2 < 1600) return true; } return false; };
+  const drivenMin = (t) => { const seg = t.seg || {}, phs = SEG_ORDER.filter((n) => seg[n] && seg[n].length >= 2);
+    if (!phs.length || livePts.length < 3) return null;
+    const a = seg[phs[0]][0], lastSeg = seg[phs[phs.length - 1]], b = lastSeg[lastSeg.length - 1], sl = turnSlice(livePts, a, b);
+    if (!sl) return null; const vs = sl.map((q) => q[1]).filter((v) => v != null); return vs.length ? Math.round(Math.min(...vs)) : null; };
+  let nDriven = 0, nAwait = 0;
+  const spine = courseTurns.slice().sort((a, b) => a.seq - b.seq).map((t) => {
+    const q = bySeq[t.seq]; if (q) return { t, state: "taken", q };
+    if (passedOnLap(t)) { nDriven++; return { t, state: "driven", min: drivenMin(t) }; }
+    nAwait++; return { t, state: "await" };
+  });
+  // order: driving order by default; rank/delta pull rated turns to the front, then driven, then awaiting
   const rk = (q) => (q.v.kind === "best" || q.v.kind === "ranked") ? (q.v.rank - 1) / Math.max(1, q.v.of - 1) : 2;
-  const sorted = passes.slice();
-  if (LAP_SORT === "rank") sorted.sort((a, b) => rk(a) - rk(b));
-  else if (LAP_SORT === "delta") sorted.sort((a, b) => (a.v.d == null ? 1e9 : a.v.d) - (b.v.d == null ? 1e9 : b.v.d));
-  const rows = sorted.map((q) => `<div class="lap-row${q === win ? " on" : ""}" data-lapwin="${q.t.seq}" title="show ${esc(turnLabel(q.t))} in the window">
+  let ordered = spine;
+  if (LAP_SORT === "rank" || LAP_SORT === "delta") {
+    const grp = (e) => e.state === "taken" ? 0 : e.state === "driven" ? 1 : 2;
+    ordered = spine.slice().sort((a, b) => grp(a) - grp(b)
+      || (a.state === "taken" ? (LAP_SORT === "rank" ? rk(a.q) - rk(b.q) : (a.q.v.d == null ? 1e9 : a.q.v.d) - (b.q.v.d == null ? 1e9 : b.q.v.d)) : a.t.seq - b.t.seq));
+  }
+  const takenRow = (q) => `<div class="lap-row${q === win ? " on" : ""}" data-lapwin="${q.t.seq}" title="show ${esc(turnLabel(q.t))} in the window">
       <span class="lap-turn">${esc(turnLabel(q.t))}<em>${esc(cap1(q.t.kind || ""))}</em></span>
       <span class="lap-spd mono"${q.peak}>${Math.round(q.c.mph_in)}<i>→</i><b>${Math.round(q.apex)}</b><i>→</i>${Math.round(q.c.mph_out)}<em> mph</em></span>
       <span class="lap-rank mono lap-v-${q.v.kind}${q.v.thin ? " thin" : ""}" style="color:${q.tone}"><b>${q.v.text}${q.v.d != null && !q.v.isBest ? ` · ${mphD(q.v.d)}` : ""}</b><em>${esc(q.v.basis)}</em></span>
-      ${q.gr.cell}</div>`).join("");
+      ${q.gr.cell}</div>`;
+  const covRow = (e) => `<div class="lap-row lap-${e.state}" data-turn="${e.t.seq}" title="${e.state === "driven" ? "driven under the detector — open its analysis" : "not taken yet this lap — open its analysis"}">
+      <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
+      <span class="lap-spd mono">${e.state === "driven" && e.min != null ? `min <b>${e.min}</b><em> mph</em>` : "<em>—</em>"}</span>
+      <span class="lap-rank mono"><b class="lap-cov lap-cov-${e.state}">${e.state === "driven" ? "driven" : "not yet"}</b><em>${e.state === "driven" ? "under the 0.35 g trigger" : "awaiting this lap"}</em></span>
+      <span></span></div>`;
+  const rows = ordered.map((e) => e.state === "taken" ? takenRow(e.q) : covRow(e)).join("");
   const sortH = (k, lbl) => `<button class="${LAP_SORT === k ? "on" : ""}" data-lapsort="${k}" title="sort by ${lbl}">${lbl}${LAP_SORT === k ? " ▾" : " ⇅"}</button>`;
   // the summary counts only turns that COULD be ranked: an only-lap or level pool is excluded, never a win
-  const firstTxt = rankable ? `<b style="color:${first ? "var(--acc)" : "var(--ink)"}">${first + thinFirst} of ${rankable}</b> rankable turn${rankable === 1 ? "" : "s"} come first${thinFirst ? ` <span class="why">(${thinFirst === first + thinFirst ? "all" : thinFirst} on a pool under 5 laps — a weak claim)</span>` : ""}`
+  const firstTxt = !passes.length
+    ? `<b>${nDriven}</b> turn${nDriven === 1 ? "" : "s"} driven so far · ${nAwait} to come — each turn rates the moment you complete it`
+    : rankable ? `<b style="color:${first ? "var(--acc)" : "var(--ink)"}">${first + thinFirst} of ${rankable}</b> rankable turn${rankable === 1 ? "" : "s"} come first${thinFirst ? ` <span class="why">(${thinFirst === first + thinFirst ? "all" : thinFirst} on a pool under 5 laps — a weak claim)</span>` : ""}`
     : `nothing can be ranked in ${scopeTok(ls)} — ${unranked} turn${unranked === 1 ? "" : "s"} with no other lap, a lap compared with itself`;
-  const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${unranked && rankable ? unranked + " unranked · " : ""}${gripHits} of ${taken.length} turns lost grip</span></div>`;
+  const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${passes.length ? `${gripHits} of ${taken.length} turns lost grip` : ""}${nDriven ? (passes.length ? " · " : "") + nDriven + " driven under the detector" : ""}${nAwait ? " · " + nAwait + " to come" : ""}</span></div>`;
   return `<div class="lapview">${head}${abandoned}${win ? lapWindowHTML(win, passes, ls) : ""}`
     + `<div class="lap-hd">${sortH("drive", "turn")}<span>in→min→out</span>${sortH("rank", "rank of pool")}${sortH("delta", "against the pool's best")}</div>`
     + `<div class="lap-rows">${rows}</div>${sum}</div>`;
@@ -4305,7 +4341,15 @@ function courseStatsHTML() {
       <span><b>${nCars}</b><em>car${nCars === 1 ? "" : "s"}</em></span>
       <span><b>${fmtLen(COURSE.len)}</b><em>length</em></span>
       ${noTune ? `<span><b>${noTune}</b><em>lap${noTune === 1 ? "" : "s"} name no tune</em></span>` : ""}</div></div>`;
-  if (!laps.length) return totals + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
+  // SESSION CORNER BALANCE (moved here from the retired Live corners tab, 2026-09-16): the front/rear grip-loss
+  // split over THIS session's detected corners. Session-live, not lap-set-scoped, so it is labelled as such.
+  const cid = CUR && CUR.cid, clog = (LIVE.corners || []).filter((c) => !cid || c.car === cid);
+  const bt = { calm: 0, front: 0, rear: 0 }; clog.forEach((c) => bt[dGripUsi(c.usi)]++);
+  const bord = ["calm", "front", "rear"].filter((k) => bt[k]);
+  const sbal = clog.length ? `<div class="grp"><div class="gh">Session corner balance <span class="why">· ${clog.length} detected corner${clog.length === 1 ? "" : "s"} this session · front / rear grip loss · this session, not the scope</span></div>
+    <div class="balbar">${bord.map((k) => `<span style="flex:${bt[k]} 0 0;background:${DGRIP[k].col}" title="${DGRIP[k].word}: ${bt[k]}"></span>`).join("")}</div>
+    <div class="ballegend">${bord.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word} · ${bt[k]} (${Math.round(bt[k] / clog.length * 100)}%)</span>`).join("")}</div></div>` : "";
+  if (!laps.length) return totals + sbal + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
   // per-CAR aggregation (by ordinal) within scope
   const byCar = {};
   laps.forEach((l) => { const o = ordOf(l.cid);
@@ -4342,7 +4386,7 @@ function courseStatsHTML() {
     <td class="mono dim" style="text-align:right">${c.med != null ? lapTime(c.med) : "—"}</td></tr>`).join("");
   const table = `<div class="grp"><div class="gh">by car <span class="why">· ${cars.length} car${cars.length === 1 ? "" : "s"} in ${scopeTok(ls)} · fastest first</span></div>
     <table class="cstat-tbl"><thead><tr><th>car</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  return totals + headline + scatter + table;
+  return totals + sbal + headline + scatter + table;
 }
 function statsHTML() {
   if (MODE.suggest === "course" && COURSE) return courseStatsHTML();

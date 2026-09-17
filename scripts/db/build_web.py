@@ -322,7 +322,7 @@ def main(argv=None):
         laps = rows(cx, """
             SELECT l.lap_id AS id, l.cid, l.container, l.lap_s AS t, l.arc_m AS arc,
                    ROUND(l.coverage, 3) AS cov, l.is_partial AS partial, l.void, l.impacts, l.rewinds,
-                   l.class, l.pi, l.drivetrain AS dt, l.build_id AS bid, l.session_id AS sid, l.solo,
+                   l.class, l.pi, l.drivetrain AS dt, l.build_id AS bid, l.session_id AS sid, l.solo, l.is_race,
                    l.hw_hash AS hw, t.setup_hash AS su
             FROM lap l LEFT JOIN tune_container t ON l.container = t.container
             WHERE l.route_key = ? ORDER BY (l.void OR l.is_partial OR l.rewinds > 0), l.lap_s""", key)

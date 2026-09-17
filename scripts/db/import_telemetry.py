@@ -188,7 +188,7 @@ def run(cx, verbose=False, data_dir=None):
                       1 if (cov is not None and cov < PARTIAL_BELOW) else 0,
                       meta.get("build_id"), meta.get("class"), meta.get("pi"),
                       meta.get("drivetrain"), meta.get("tune_hash"),
-                      meta.get("solo") or 0, meta.get("impacts") or 0, meta.get("void") or 0,
+                      meta.get("solo") or 0, meta.get("is_race"), meta.get("impacts") or 0, meta.get("void") or 0,
                       meta.get("lap_dist_m"), meta.get("rewinds") or 0, meta.get("pauses") or 0,
                       meta.get("pause_s") or 0.0, meta.get("stitched") or 0))
         for i, p in enumerate(pts):
@@ -280,7 +280,7 @@ def run(cx, verbose=False, data_dir=None):
         counts["lap"] = fh6db.upsert_many(cx, "lap", [
             "lap_id", "route_key", "session_id", "cid", "container", "hw_hash", "t0", "lap_s",
             "arc_m", "coverage", "is_partial", "build_id", "class", "pi", "drivetrain",
-            "tune_hash", "solo", "impacts", "void", "lap_dist_m", "rewinds", "pauses", "pause_s",
+            "tune_hash", "solo", "is_race", "impacts", "void", "lap_dist_m", "rewinds", "pauses", "pause_s",
             "stitched"], lrows, chunk=2000)
         # pedals ride along when the database has the schema-6 columns (rebuild.py migrates first); an older
         # database gets the same rows without them rather than a failed import

@@ -429,7 +429,8 @@ V2_VIEWS = {
 V2_COLUMNS["session_event"] = [("start_is_line", "INTEGER")]
 # schema 5 -- LAPS AS THE GAME TIMED THEM
 V2_COLUMNS["lap"] = [("lap_dist_m", "REAL"), ("rewinds", "INTEGER DEFAULT 0"), ("pauses", "INTEGER DEFAULT 0"),
-                     ("pause_s", "REAL DEFAULT 0"), ("stitched", "INTEGER DEFAULT 0")]
+                     ("pause_s", "REAL DEFAULT 0"), ("stitched", "INTEGER DEFAULT 0"),
+                     ("is_race", "INTEGER")]   # RAW per-event verdict (2026-09-17): 1=race, 0=solo/Rivals, NULL=unknown — the mode flag for Rivals-only filtering (not `solo`, which is guard-downgraded)
 V2_COLUMNS["lap_point"] = [("dist_m", "REAL"),
                            ("thr", "INTEGER"), ("brk", "INTEGER"),   # schema 6: throttle / brake 0-100 % at the point (Jett 2026-09-11)
                            ("lat_g", "REAL")]                        # schema 7: peak |lat_g| surviving the 4 m resample step (2026-09-12)

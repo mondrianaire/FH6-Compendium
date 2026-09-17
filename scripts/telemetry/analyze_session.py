@@ -2841,6 +2841,10 @@ def main():
                                   "lap_s": _lap_s, "arc_m": round(arc_w),
                                   "build_id": _cr.get("build_id"), "class": _cr.get("class"), "pi": _cr.get("pi"),
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,
+                                  # is_race = the RAW per-event verdict, NOT the session-adjusted `_solo` (2026-09-17): the
+                                  # event's own RacePosition said race (solo False) / solo (solo True) / unknown (None).
+                                  # This is the clean mode flag for Rivals-only filtering; `_solo` is guard-downgraded and must not group.
+                                  "is_race": (1 if _ev.get("solo") is False else (0 if _ev.get("solo") is True else None)),
                                   "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,
                                   "tune_hash": _th,
                                   "pts": _pts_out(_thin(pts_w, 300), pts_w),

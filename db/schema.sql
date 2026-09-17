@@ -634,7 +634,8 @@ CREATE TABLE IF NOT EXISTS lap (
   coverage    REAL,                      -- arc_m / course length — < 0.9 is a fragment, not a lap
   is_partial  INTEGER DEFAULT 0,
   build_id    TEXT, class TEXT, pi INTEGER, drivetrain TEXT, tune_hash TEXT,
-  solo        INTEGER DEFAULT 0,
+  solo        INTEGER DEFAULT 0,       -- session-adjusted: downgraded to 0 if the session also held a race (for voiding); DO NOT use for mode grouping
+  is_race     INTEGER,                 -- RAW per-event verdict (2026-09-17): 1 = definite race (RacePosition varied/>1), 0 = solo/timed (Rivals), NULL = unknown. THIS is the mode flag for Rivals-only filtering, not `solo`.
   impacts     INTEGER DEFAULT 0,
   void        INTEGER DEFAULT 0,
   -- THE GAME'S LAP METADATA IS CANON (2026-09-06): a lap is what the game timed. Rows a rewind revoked

@@ -1984,6 +1984,7 @@ function paintLeft() {
     body.querySelectorAll(".sesl-row[data-single]").forEach((b) => b.onclick = () => pickSessionLap(b.dataset.single));   // lap browser row -> isolate + Single lap
     // LAP BROWSER controls (preset / toggle / sort): mutate LAPB, persist, repaint the left pane
     body.querySelectorAll("[data-lbpreset]").forEach((b) => b.onclick = () => { LAPB.preset = b.dataset.lbpreset; lapbSave(); LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-lbcls]").forEach((s) => s.onchange = () => { if (!s.value) return; LAPB.preset = "class"; LAPB.cls = s.value; lapbSave(); LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-lbtog]").forEach((b) => b.onclick = () => { const k = b.dataset.lbtog; LAPB[k] = !LAPB[k]; lapbSave(); LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-lbsort]").forEach((b) => b.onclick = () => { LAPB.sort = b.dataset.lbsort; lapbSave(); LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
@@ -2016,9 +2017,16 @@ function paintLeft() {
 }
 // Just the left pane's TITLE (free-mode: browsing a course / on a route / the world) — updated on a browser pick
 // without rebuilding the map, so the viewBox animation is never interrupted. Course mode owns its own title.
-function paintLeftHeader() {
+function paintLeftHeader(hoverRid) {
   const hd = $("#leftHd"); if (!hd || (MODE.suggest === "course" && COURSE)) return;
   if (!WORLD || !WORLD.routes) { hd.innerHTML = `World · <span class="why">loading</span>`; return; }
+  // HOVER PREVIEW (Jett 2026-09-17): mousing a course on the world map (or a browser tile) shows ITS info in
+  // this mini pill without committing a pick — hoverCourse(null) on mouseleave calls back with no rid and the
+  // pill reverts to the picked / route / top course below. Pure preview: never reads or writes BROWSE_PICK.
+  if (hoverRid != null && WORLD.routes[hoverRid]) {
+    hd.innerHTML = courseInfoPill(Object.assign({ id: hoverRid }, WORLD.routes[hoverRid]), "hover");
+    return;
+  }
   // COURSE INFORMATION PILL (Jett 2026-09-07): the map pane's header carries a course pill in the car-pill's
   // design language -- a shape glyph, the name, its length/turns/laps, the classes it is offered in, and its
   // modes -- for the ACTIVE course: an explicit browse pick, else the route located under the car, else the
@@ -2242,6 +2250,7 @@ function courseInfoPill(r, state) {
                   (r.modes || []).includes("career") ? `<span class="bb car">career</span>` : "",
                   r.disc ? `<span class="bb dsc">${esc(r.disc)}</span>` : ""].join("");
   const stChip = state === "browsing" ? `<span class="chip w">BROWSING</span>`
+               : state === "hover" ? `<span class="chip w">HOVER</span>`
                : state === "route" ? `<span class="chip w">${MODE.game === "event" ? "ON EVENT ROUTE" : "ON ROUTE"}</span>`
                : state === "course" ? `<span class="chip on">ON COURSE</span>`
                : `<span class="chip dim">top of list</span>`;
@@ -2481,6 +2490,7 @@ function hoverCourse(rid) {
   MAP_HOVER = rid;
   document.querySelectorAll(".wcourse.hi").forEach((g) => g.classList.remove("hi"));
   document.querySelectorAll(".tile.hi").forEach((t) => t.classList.remove("hi"));
+  paintLeftHeader(rid || undefined);   // preview the hovered course in the left mini info pill; rid null reverts it
   if (!rid) return;
   document.querySelectorAll(`.wcourse[data-rid="${CSS.escape(rid)}"]`).forEach((g) => g.classList.add("hi"));
   const tile = document.querySelector(`.tile[data-bpick="${CSS.escape(rid)}"]`);
@@ -4417,29 +4427,53 @@ function setupLapSet() {
 // presets: Build (same car + build, any tune — the A/B scaffold), Car (same car, any build), All (every lap on the
 // course). Toggles: clean-only, Rivals-only (l.is_race — inert until the reprocess adds it). Sort: time / date / cov.
 // Row click isolates the lap on the map + opens Single-lap analysis (pickSessionLap). Replaces the old session list.
-let LAPB = { preset: "session", clean: true, rivals: false, sort: "time" };
+let LAPB = { preset: "session", cls: null, clean: true, rivals: false, sort: "time" };
 function lapbLoad() { try { Object.assign(LAPB, (VIEW.global || {}).lapb || {}); } catch (e) {} }
-function lapbSave() { try { VIEW.global.lapb = { preset: LAPB.preset, clean: LAPB.clean, rivals: LAPB.rivals, sort: LAPB.sort }; viewSave(); } catch (e) {} }
-function lapBrowserSet() {
+function lapbSave() { try { VIEW.global.lapb = { preset: LAPB.preset, cls: LAPB.cls, clean: LAPB.clean, rivals: LAPB.rivals, sort: LAPB.sort }; viewSave(); } catch (e) {} }
+// SCOPE a course's laps by a preset, BEFORE the clean/rivals toggles. `cls` is the class for the "class" preset.
+// Split out from lapBrowserSet so the rendered list AND every filter's live count share one code path — the
+// number on a chip can never drift from what clicking it actually shows.
+function lapbScope(preset, cls) {
   const laps = COURSE.laps || [], mb = MATCH && MATCH.build, cid = CUR && CUR.cid;
   const q = (typeof matchQuality === "function") ? matchQuality(CUR && CUR.match) : { level: "ok" };
   const settled = !q || q.level === "ok";
-  let scoped = [], scopeOK = true, why = "";
-  if (LAPB.preset === "session") {
-    if (mb && mb.hw && mb.su && settled) scoped = laps.filter((l) => l.hw === mb.hw && l.su === mb.su);
-    else { scopeOK = false; why = settled ? "no saved setup on the car — equip + save the tune in-game to track it" : "identity not settled — equip the build and save the tune in-game to identify it"; }
-  } else if (LAPB.preset === "build") {
-    if (mb && mb.hw) scoped = laps.filter((l) => l.hw === mb.hw);
-    else { scopeOK = false; why = "build not identified yet — equip + save the tune in-game"; }
-  } else if (LAPB.preset === "car") {
-    if (cid) scoped = laps.filter((l) => String(l.cid) === String(cid));
-    else { scopeOK = false; why = "no live car"; }
-  } else { scoped = laps.slice(); }   // "all"
+  if (preset === "session") {
+    if (mb && mb.hw && mb.su && settled) return { scoped: laps.filter((l) => l.hw === mb.hw && l.su === mb.su), scopeOK: true };
+    return { scoped: [], scopeOK: false, why: settled ? "no saved setup on the car — equip + save the tune in-game to track it" : "identity not settled — equip the build and save the tune in-game to identify it" };
+  }
+  if (preset === "build") {
+    if (mb && mb.hw) return { scoped: laps.filter((l) => l.hw === mb.hw), scopeOK: true };
+    return { scoped: [], scopeOK: false, why: "build not identified yet — equip + save the tune in-game" };
+  }
+  if (preset === "car") {
+    if (cid) return { scoped: laps.filter((l) => String(l.cid) === String(cid)), scopeOK: true };
+    return { scoped: [], scopeOK: false, why: "no live car" };
+  }
+  if (preset === "class") {
+    if (cls) return { scoped: laps.filter((l) => l.class === cls), scopeOK: true };
+    return { scoped: [], scopeOK: false, why: "pick a class from the dropdown" };
+  }
+  return { scoped: laps.slice(), scopeOK: true };   // "all"
+}
+function lapbToggle(arr, clean, rivals) {
+  if (clean) arr = arr.filter(cleanLap);
+  if (rivals) arr = arr.filter((l) => l.is_race !== 1);   // Rivals / timed-solo only (drops definite races; keeps solo + unknown)
+  return arr;
+}
+// the lap count a filter WOULD yield — the scope of `preset`/`cls` with the given toggles applied. null when
+// the scope isn't resolvable yet (session/build need an identified build; class needs a picked class).
+function lapbCount(preset, clean, rivals, cls) {
+  const s = lapbScope(preset, cls);
+  return s.scopeOK ? lapbToggle(s.scoped, clean, rivals).length : null;
+}
+function lapBrowserSet() {
+  const laps = COURSE.laps || [];
+  const s = lapbScope(LAPB.preset, LAPB.cls);
+  let scoped = s.scoped, scopeOK = s.scopeOK, why = s.why || "";
   if (scopeOK) {
-    if (LAPB.clean) scoped = scoped.filter(cleanLap);
-    if (LAPB.rivals) scoped = scoped.filter((l) => l.is_race !== 1);   // Rivals / timed-solo only (drops definite races; keeps solo + unknown) — needs is_race, inert until reprocess
-    const s = LAPB.sort;
-    scoped = scoped.slice().sort((a, b) => s === "date" ? String(b.sid || "").localeCompare(String(a.sid || "")) : s === "cov" ? (b.cov || 0) - (a.cov || 0) : (a.t || 1e9) - (b.t || 1e9));
+    scoped = lapbToggle(scoped, LAPB.clean, LAPB.rivals);
+    const so = LAPB.sort;
+    scoped = scoped.slice().sort((a, b) => so === "date" ? String(b.sid || "").localeCompare(String(a.sid || "")) : so === "cov" ? (b.cov || 0) - (a.cov || 0) : (a.t || 1e9) - (b.t || 1e9));
   }
   const ct = scoped.filter(cleanLap).map((l) => l.t).filter((t) => t);
   return { laps: scoped, scopeOK, why, total: laps.length, best: ct.length ? Math.min(...ct) : null };
@@ -4451,12 +4485,34 @@ function lapCtx(l) {   // per-lap context column: session date for the Session p
 function lapBrowserHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return "";
   lapbLoad();
+  const laps0 = COURSE.laps || [];
+  // classes actually present on this course, ordered — the dropdown's options
+  const classesPresent = [...new Set(laps0.map((l) => l.class).filter((c) => c && c !== "?"))]
+    .sort((a, b) => ((CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99)) || String(a).localeCompare(String(b)));
+  // keep the class preset coherent: default the pick to the live class (else the first present), and fall back
+  // to "all" if this course has no classed laps at all so the dropdown never claims a scope it can't show
+  if (LAPB.preset === "class") {
+    if (!classesPresent.length) LAPB.preset = "all";
+    else if (!LAPB.cls || !classesPresent.includes(LAPB.cls)) {
+      const lc = (typeof liveClass === "function") ? liveClass() : null;
+      LAPB.cls = classesPresent.includes(lc) ? lc : classesPresent[0];
+    }
+  }
   const ls = lapBrowserSet();
-  const pre = (k, lbl, tip) => `<button class="lb-pre${LAPB.preset === k ? " on" : ""}" data-lbpreset="${k}" title="${esc(tip)}">${lbl}</button>`;
-  const tog = (k, lbl, on, tip) => `<button class="lb-tog${on ? " on" : ""}" data-lbtog="${k}" title="${esc(tip)}">${lbl}</button>`;
+  const cnt = (k, cls) => lapbCount(k, LAPB.clean, LAPB.rivals, cls);   // count UNDER the current toggles
+  const nspan = (n) => n == null ? "" : `<span class="lb-n">${n}</span>`;
+  const pre = (k, lbl, tip) => { const n = cnt(k); return `<button class="lb-pre${LAPB.preset === k ? " on" : ""}${n === 0 ? " lb-empty" : ""}" data-lbpreset="${k}" title="${esc(tip)}">${lbl}${nspan(n)}</button>`; };
+  // CLASS DROPDOWN (Jett 2026-09-17): between Car and All, a <select> that scopes to one class. Each option
+  // carries its own lap count under the current toggles; the leading placeholder shows only when class isn't active.
+  const clsOpts = classesPresent.map((c) => `<option value="${esc(c)}"${LAPB.preset === "class" && LAPB.cls === c ? " selected" : ""}>${esc(c)} (${cnt("class", c) ?? 0})</option>`).join("");
+  const clsSel = classesPresent.length
+    ? `<select class="lb-cls${LAPB.preset === "class" ? " on" : ""}" data-lbcls title="scope the laps to one class on this course">${LAPB.preset === "class" ? "" : `<option value="">class ▾</option>`}${clsOpts}</select>`
+    : "";
+  const tog = (k, lbl, on, tip) => { const n = k === "clean" ? lapbCount(LAPB.preset, true, LAPB.rivals, LAPB.cls) : lapbCount(LAPB.preset, LAPB.clean, true, LAPB.cls);
+    return `<button class="lb-tog${on ? " on" : ""}" data-lbtog="${k}" title="${esc(tip)}">${lbl}${nspan(n)}</button>`; };
   const srt = (k, lbl) => `<button class="lb-s${LAPB.sort === k ? " on" : ""}" data-lbsort="${k}">${lbl}</button>`;
-  const head = `<div class="sesl-h lb-h"><b>Laps</b><span class="lb-pres">${pre("session", "Session", "this exact car + build + tune (most restrictive)")}${pre("build", "Build", "this car + build, any tune — A/B scaffold")}${pre("car", "Car", "this car, any build")}${pre("all", "All", "every lap on this course")}</span></div>`
-    + `<div class="lb-filters">${tog("clean", "clean", LAPB.clean, "clean laps only — hide void / partial / rewound")}${tog("rivals", "rivals", LAPB.rivals, "Rivals / timed-solo only — hide race & free-roam (activates after the is_race reprocess)")}<span class="lb-sort">sort ${srt("time", "time")}${srt("date", "date")}${srt("cov", "cov")}</span></div>`;
+  const head = `<div class="sesl-h lb-h"><b>Laps</b><span class="lb-pres">${pre("session", "Session", "this exact car + build + tune (most restrictive)")}${pre("build", "Build", "this car + build, any tune — A/B scaffold")}${pre("car", "Car", "this car, any build")}${clsSel}${pre("all", "All", "every lap on this course")}</span></div>`
+    + `<div class="lb-filters">${tog("clean", "clean", LAPB.clean, "clean laps only — hide void / partial / rewound")}${tog("rivals", "rivals", LAPB.rivals, "Rivals / timed-solo only — hide race & free-roam")}<span class="lb-sort">sort ${srt("time", "time")}${srt("date", "date")}${srt("cov", "cov")}</span></div>`;
   if (!ls.scopeOK) return `<div class="sesl">${head}<div class="why sesl-note">${esc(ls.why)}</div></div>`;
   if (!ls.laps.length) return `<div class="sesl">${head}<div class="why sesl-note">no lap matches this filter yet — drive it, or loosen the filter (try a wider preset)</div></div>`;
   const best = ls.best;

@@ -677,6 +677,12 @@ def ingest(p, t_mono):
             if (t_mono - ST._beat_still_t0) > 1.2 and not getattr(ST, "_beat_flagged", False):
                 ST._beat_flagged = True
                 ST.emit("rival_beat", {"last": getattr(ST, "_beat_lap_time", _last), "best": c.get("best"), "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
+                # IMPORT ON THE WINNER SCREEN (2026-09-16): the car is stationary here, so a full analysis + telemetry
+                # import costs no frame pacing — and it lets the just-completed laps populate the dashboard's session /
+                # single-lap / leaderboard views BEFORE you continue to a new rival (otherwise they wait for a stop).
+                if not ST.analyzing and ST.csv_path:
+                    ST.drive_since_periodic = 0.0
+                    threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
         elif (c.get("mph") or 0) > 5:
             ST._beat_still_t0 = 0; ST._beat_flagged = False   # moving again -> winner screen dismissed / new rival begun
     else:

@@ -2496,10 +2496,12 @@ function hoverCourse(rid) {
   const tile = document.querySelector(`.tile[data-bpick="${CSS.escape(rid)}"]`);
   if (tile) {
     tile.classList.add("hi");
-    // bring it into view only when it is actually off-screen, so a hover never yanks a list the user is reading
-    const box = tile.getBoundingClientRect(), host = tile.closest(".tiles");
-    if (host) { const hb = host.getBoundingClientRect();
-      if (box.top < hb.top || box.bottom > hb.bottom) tile.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+    // Scroll the course browser to the hovered course. The scroll container is the right pane (#rightBody),
+    // NOT `.tiles` — `.tiles` is overflow:visible and as tall as all its content, so the old off-screen check
+    // against its rect could never be true and the list never scrolled. scrollIntoView drives the real
+    // scrollable ancestor, and block:"nearest" is a no-op when the tile is already fully visible, so a hover
+    // still never yanks a list the user is reading.
+    tile.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 }
 function wireWorldCourses(svg) {

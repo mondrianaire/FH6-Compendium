@@ -1981,7 +1981,11 @@ function paintLeft() {
     // a turn marker OR a turn-list row selects that turn (highlight its phases here, full stats on the
     // right); the SVG/list is rebuilt on select, so re-bind every paint. Clicking the selected one clears.
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));   // the map's own turn markers
-    body.querySelectorAll(".sesl-row[data-single]").forEach((b) => b.onclick = () => pickSessionLap(b.dataset.single));   // session list -> isolate + Single lap
+    body.querySelectorAll(".sesl-row[data-single]").forEach((b) => b.onclick = () => pickSessionLap(b.dataset.single));   // lap browser row -> isolate + Single lap
+    // LAP BROWSER controls (preset / toggle / sort): mutate LAPB, persist, repaint the left pane
+    body.querySelectorAll("[data-lbpreset]").forEach((b) => b.onclick = () => { LAPB.preset = b.dataset.lbpreset; lapbSave(); LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-lbtog]").forEach((b) => b.onclick = () => { const k = b.dataset.lbtog; LAPB[k] = !LAPB[k]; lapbSave(); LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-lbsort]").forEach((b) => b.onclick = () => { LAPB.sort = b.dataset.lbsort; lapbSave(); LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-maplayer]").forEach((b) => b.onclick = () => { const k = b.dataset.maplayer; MAP_LAYERS[k] = !MAP_LAYERS[k]; try { localStorage.setItem("fh6MapLayers", JSON.stringify(MAP_LAYERS)); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     // WHAT THE LIVE TRAIL'S COLOUR MEANS (Jett 2026-09-11: selectable in the map legend's settings) -- the same
@@ -4394,57 +4398,75 @@ function fh6Toast(kind, d) {
 
 // "THIS SESSION" = the current build's CONTENT identity (route+car+build+tune = hw_hash+setup_hash), independent
 // of the SCOPE band. Same (hw,su) is the same build from a driving perspective, so re-saves collapse together.
+// setupLapSet — the EXACT "this session" scope: same car + build + tune (hw + su), settled identity only. It is the
+// Lap Browser's Session preset and Single-lap's default pool. Looser scopes (this build / this car / all) are
+// explicit Lap Browser PRESETS, never an auto-fallback here (Jett 2026-09-17: Session is the most restrictive).
 function setupLapSet() {
-  const mb = MATCH && MATCH.build;
-  // GATE ON SETTLED IDENTITY (2026-09-16): the live cid = ordinal|drive|cyl|PI carries NO hw/tune hash, so
-  // several saved builds can tie on it and MATCH.build is just exact[0] — the FIRST tied candidate (a real,
-  // correctly-decoded build, but NOT confirmed as the one on the car; e.g. an unsaved/downloaded A build reads
-  // as a sibling A save). Scoping "this setup" to that guess would silently track the WRONG tune. Require the
-  // daemon's identity to be settled (matchQuality "ok" — ≤1 tie, or gearbox/pick disambiguated).
+  const mb = MATCH && MATCH.build, laps = COURSE.laps || [];
   const q = (typeof matchQuality === "function") ? matchQuality(CUR && CUR.match) : { level: "ok" };
   const settled = !q || q.level === "ok";
-  const laps = COURSE.laps || [];
-  // LOCKED / DOWNLOADED builds (2026-09-17): a locked tune can't be equip+saved to pin it, so the exact (hw + su)
-  // scope drops laps driven under a sibling slider-variant, and — when the matcher flips between same-cid hardware
-  // siblings (two downloaded A700 builds of one car, the "Goliath vs Highway" case) — blanks the list entirely.
-  // Widen the scope so a locked build's laps stay put: by HARDWARE (hw_hash — every slider-variant of this build);
-  // and if the hardware itself can't be pinned (identity not settled, or hw matches nothing), by the live CID (this
-  // car at this class·PI·cyl·drive), the one key stable across the flip. Unlocked/saved builds keep exact hw+su.
-  const locked = !!(CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked);
-  let ids = [], scope = null;
-  if (locked && mb && mb.hw) {
-    if (settled) { ids = laps.filter((l) => l.hw === mb.hw).map((l) => String(l.id)); scope = "hw"; }
-    if (!ids.length && CUR && CUR.cid) { ids = laps.filter((l) => String(l.cid) === String(CUR.cid)).map((l) => String(l.id)); scope = "cid"; }
-  } else if (mb && mb.hw && mb.su && settled) {
-    ids = laps.filter((l) => l.hw === mb.hw && l.su === mb.su).map((l) => String(l.id)); scope = "exact";
-  }
-  const idOK = scope != null;
+  const idOK = !!(mb && mb.hw && mb.su && settled);
+  let ids = idOK ? laps.filter((l) => l.hw === mb.hw && l.su === mb.su).map((l) => String(l.id)) : [];
   if (RACING_ONLY && ids.length) { const race = racingIds(laps); const g = ids.filter((id) => race.has(id)); if (g.length) ids = g; }
-  return { set: new Set(ids), n: ids.length, idOK, settled, scope, locked, setup: mb || null, whyUnsettled: settled ? null : (q && q.why) || "identity not settled",
-           label: (idOK && mb && mb.name) ? "this setup · " + mb.name : "this setup",
-           token: "SET·" + ids.length, cls: null, total: laps.length };
+  return { set: new Set(ids), n: ids.length, idOK, settled, setup: mb || null,
+           whyUnsettled: settled ? null : (q && q.why) || "identity not settled",
+           label: (idOK && mb && mb.name) ? "this setup · " + mb.name : "this setup", total: laps.length };
 }
-// THE SESSION LAP LIST — lives in the LEFT pane UNDER the map (2026-09-16 restructure): the current setup's
-// laps, fastest first, always visible while you drive. Clicking a lap isolates its line on the map AND opens
-// Single-lap analysis on the right. Replaces the retired under-map turn table (its data now in Turn analysis).
-function sessionListHTML() {
+// ---- LAP BROWSER (2026-09-17): the left pane under the map is a per-course lap DATABASE — sortable + filterable by
+// the identified attributes, with "Session" (same car + build + tune, most restrictive) as the default preset. Looser
+// presets: Build (same car + build, any tune — the A/B scaffold), Car (same car, any build), All (every lap on the
+// course). Toggles: clean-only, Rivals-only (l.is_race — inert until the reprocess adds it). Sort: time / date / cov.
+// Row click isolates the lap on the map + opens Single-lap analysis (pickSessionLap). Replaces the old session list.
+let LAPB = { preset: "session", clean: true, rivals: false, sort: "time" };
+function lapbLoad() { try { Object.assign(LAPB, (VIEW.global || {}).lapb || {}); } catch (e) {} }
+function lapbSave() { try { VIEW.global.lapb = { preset: LAPB.preset, clean: LAPB.clean, rivals: LAPB.rivals, sort: LAPB.sort }; viewSave(); } catch (e) {} }
+function lapBrowserSet() {
+  const laps = COURSE.laps || [], mb = MATCH && MATCH.build, cid = CUR && CUR.cid;
+  const q = (typeof matchQuality === "function") ? matchQuality(CUR && CUR.match) : { level: "ok" };
+  const settled = !q || q.level === "ok";
+  let scoped = [], scopeOK = true, why = "";
+  if (LAPB.preset === "session") {
+    if (mb && mb.hw && mb.su && settled) scoped = laps.filter((l) => l.hw === mb.hw && l.su === mb.su);
+    else { scopeOK = false; why = settled ? "no saved setup on the car — equip + save the tune in-game to track it" : "identity not settled — equip the build and save the tune in-game to identify it"; }
+  } else if (LAPB.preset === "build") {
+    if (mb && mb.hw) scoped = laps.filter((l) => l.hw === mb.hw);
+    else { scopeOK = false; why = "build not identified yet — equip + save the tune in-game"; }
+  } else if (LAPB.preset === "car") {
+    if (cid) scoped = laps.filter((l) => String(l.cid) === String(cid));
+    else { scopeOK = false; why = "no live car"; }
+  } else { scoped = laps.slice(); }   // "all"
+  if (scopeOK) {
+    if (LAPB.clean) scoped = scoped.filter(cleanLap);
+    if (LAPB.rivals) scoped = scoped.filter((l) => l.is_race !== 1);   // Rivals / timed-solo only (drops definite races; keeps solo + unknown) — needs is_race, inert until reprocess
+    const s = LAPB.sort;
+    scoped = scoped.slice().sort((a, b) => s === "date" ? String(b.sid || "").localeCompare(String(a.sid || "")) : s === "cov" ? (b.cov || 0) - (a.cov || 0) : (a.t || 1e9) - (b.t || 1e9));
+  }
+  const ct = scoped.filter(cleanLap).map((l) => l.t).filter((t) => t);
+  return { laps: scoped, scopeOK, why, total: laps.length, best: ct.length ? Math.min(...ct) : null };
+}
+function lapCtx(l) {   // per-lap context column: session date for the Session preset; class·PI (to tell builds apart) otherwise
+  if (LAPB.preset === "session") return l.sid ? String(l.sid).slice(4, 8) : "";
+  return ((l.class && l.class !== "?") ? l.class + (l.pi || "") : (carShort(l.cid) || ""));
+}
+function lapBrowserHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return "";
-  const ls = setupLapSet(), meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
-  const nm = ls.idOK && ls.scope !== "cid" && ls.setup && ls.setup.name ? ls.setup.name : null;
-  // widened-scope labels for LOCKED builds (setupLapSet): "hw" = every slider-variant of this build; "cid" = every
-  // lap for this car at this class·PI·cyl·drive, because a locked tune can't be pinned to one specific save.
-  const scopeNote = ls.scope === "hw" ? " · locked build · any sliders" : ls.scope === "cid" ? " · locked · exact tune not pinned" : "";
-  const titleFor = (n) => (ls.scope === "cid" ? (carName(CUR && CUR.cid) || "this car") + (liveClass() ? " · " + liveClass() : "") : (n || "this setup"));
-  const hdr = (sub) => `<div class="sesl-h"><b>Session</b><span class="why">${esc(sub)}</span></div>`;
-  if (!ls.idOK) return `<div class="sesl">${hdr(ls.setup && ls.setup.hw && !ls.settled ? "identity not settled" : "no saved setup")}<div class="why sesl-note">${ls.setup && ls.setup.hw && !ls.settled ? "build identity isn't settled — equip the build and save the tune in-game to identify it" : "downloaded / unsaved — equip + save the tune in-game to track this session's laps"}</div></div>`;
-  const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
-  if (!laps.length) return `<div class="sesl">${hdr(titleFor(nm) + scopeNote)}<div class="why sesl-note">${ls.scope === "exact" ? "no clean lap on this exact setup here yet" : "no clean lap for this build on this course yet"} — drive it and each lap appears, fastest first</div></div>`;
-  const best = laps[0].t, al = buildAliases(ls.setup);
-  const alTxt = al.length ? " · aka " + al.slice(0, 2).join(", ") + (al.length > 2 ? " +" + (al.length - 2) : "") : "";
-  const rows = laps.map((l, i) => `<div class="sesl-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}" data-single="${esc(String(l.id))}" title="isolate this lap on the map + break it down in Single lap">
-      <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${i === 0 ? " best" : ""}">${lapTime(l.t)}</span><span class="mono sesl-d">${i === 0 ? "—" : "+" + (l.t - best).toFixed(2)}</span></div>`).join("");
-  return `<div class="sesl">${hdr(titleFor(nm) + (ls.scope === "cid" ? "" : alTxt) + scopeNote + " · " + laps.length + " lap" + (laps.length === 1 ? "" : "s") + " · best " + lapTime(best))}<div class="sesl-rows">${rows}</div></div>`;
+  lapbLoad();
+  const ls = lapBrowserSet();
+  const pre = (k, lbl, tip) => `<button class="lb-pre${LAPB.preset === k ? " on" : ""}" data-lbpreset="${k}" title="${esc(tip)}">${lbl}</button>`;
+  const tog = (k, lbl, on, tip) => `<button class="lb-tog${on ? " on" : ""}" data-lbtog="${k}" title="${esc(tip)}">${lbl}</button>`;
+  const srt = (k, lbl) => `<button class="lb-s${LAPB.sort === k ? " on" : ""}" data-lbsort="${k}">${lbl}</button>`;
+  const head = `<div class="sesl-h lb-h"><b>Laps</b><span class="lb-pres">${pre("session", "Session", "this exact car + build + tune (most restrictive)")}${pre("build", "Build", "this car + build, any tune — A/B scaffold")}${pre("car", "Car", "this car, any build")}${pre("all", "All", "every lap on this course")}</span></div>`
+    + `<div class="lb-filters">${tog("clean", "clean", LAPB.clean, "clean laps only — hide void / partial / rewound")}${tog("rivals", "rivals", LAPB.rivals, "Rivals / timed-solo only — hide race & free-roam (activates after the is_race reprocess)")}<span class="lb-sort">sort ${srt("time", "time")}${srt("date", "date")}${srt("cov", "cov")}</span></div>`;
+  if (!ls.scopeOK) return `<div class="sesl">${head}<div class="why sesl-note">${esc(ls.why)}</div></div>`;
+  if (!ls.laps.length) return `<div class="sesl">${head}<div class="why sesl-note">no lap matches this filter yet — drive it, or loosen the filter (try a wider preset)</div></div>`;
+  const best = ls.best;
+  const rows = ls.laps.map((l, i) => `<div class="sesl-row lb-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}${cleanLap(l) ? "" : " lb-dirty"}" data-single="${esc(String(l.id))}" title="isolate on the map + break down in Single lap${cleanLap(l) ? "" : " · not a clean lap (void / partial / rewind)"}">
+      <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${l.t === best ? " best" : ""}">${lapTime(l.t)}</span><span class="mono lb-ctx" title="${esc(l.sid || "")}">${esc(lapCtx(l))}</span><span class="mono sesl-d">${best && l.t ? (l.t === best ? "—" : "+" + (l.t - best).toFixed(2)) : ""}</span></div>`).join("");
+  const sub = `${ls.laps.length} lap${ls.laps.length === 1 ? "" : "s"}${best ? " · best " + lapTime(best) : ""} · ${ls.total} on course`;
+  return `<div class="sesl">${head}<div class="why lb-sub">${sub}</div><div class="sesl-rows lb-rows">${rows}</div></div>`;
 }
+// back-compat alias: the left-pane render + Single-lap still call sessionListHTML()
+function sessionListHTML() { return lapBrowserHTML(); }
 // select a session lap from the left list: isolate its line on the course map + open Single-lap on the right
 function pickSessionLap(id) {
   SINGLE_LAP = String(id);

@@ -1801,7 +1801,7 @@ function paintHeader() {
   // HEADER HONESTY (2026-09-16): when the live cid (ordinal|drive|cyl|PI) ties across several saves, MATCH.build
   // is just exact[0] — the FIRST tied candidate. Printing its name (e.g. an unsaved A build reading as sibling
   // "S1 Circuit Meta") reads as a confirmed identity. When identity is ambiguous/conflict, suppress the specific
-  // name and say so — the gate strip below already carries the resolve step (equip+save / drive a gear / pick).
+  // name and say so — the gate strip below already carries the resolve step (equip the build + save the tune in-game).
   const unconf = q.level === "ambiguous" || q.level === "conflict";
   const nTies = (CUR && CUR.match && CUR.match.n_signature_ties) || 0;
   // when settled, the same (hw,su) build may be saved under several names — surface them beside the tune name.
@@ -1828,7 +1828,7 @@ function paintHeader() {
         ${changeSlim()}
         <span class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}</span>
       </div>
-      <div class="htitle t-t" title="${esc(unconf ? "identity unsettled — one of " + (nTies || "several") + " saved builds ties on cylinders / drivetrain / PI, so the specific tune is NOT confirmed. Equip + save the tune, drive a gear the ladder can tell apart, or pick the save to resolve it." : (c.tune || ""))}">${unconf
+      <div class="htitle t-t" title="${esc(unconf ? "identity unsettled — one of " + (nTies || "several") + " saved builds ties on cylinders / drivetrain / PI, so the specific tune is NOT confirmed. Equip the build and save the tune in-game to confirm which one it is." : (c.tune || ""))}">${unconf
         ? `<span class="t-l hunconf">⚠ unidentified tune${nTies > 1 ? ` · ${nTies} candidates` : ""}</span>`
         : c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}${aliasStr ? ` <span class="halias" title="same hardware + sliders = the same build — it's saved under these names too">${esc(aliasStr)}</span>` : ""}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
       <div class="hgate">
@@ -4433,7 +4433,7 @@ function sessionListHTML() {
   const ls = setupLapSet(), meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
   const nm = ls.idOK && ls.setup && ls.setup.name ? ls.setup.name : null;
   const hdr = (sub) => `<div class="sesl-h"><b>Session</b><span class="why">${esc(sub)}</span></div>`;
-  if (!ls.idOK) return `<div class="sesl">${hdr(ls.setup && ls.setup.hw && !ls.settled ? "identity not settled" : "no saved setup")}<div class="why sesl-note">${ls.setup && ls.setup.hw && !ls.settled ? "build identity isn't settled — equip + save, or drive a gear the ladder can tell apart, to identify this build" : "downloaded / unsaved — equip + save the tune in-game to track this session's laps"}</div></div>`;
+  if (!ls.idOK) return `<div class="sesl">${hdr(ls.setup && ls.setup.hw && !ls.settled ? "identity not settled" : "no saved setup")}<div class="why sesl-note">${ls.setup && ls.setup.hw && !ls.settled ? "build identity isn't settled — equip the build and save the tune in-game to identify it" : "downloaded / unsaved — equip + save the tune in-game to track this session's laps"}</div></div>`;
   const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
   if (!laps.length) return `<div class="sesl">${hdr((nm ? nm + " · " : "") + "this setup")}<div class="why sesl-note">no clean lap on this exact setup here yet — drive it and each lap appears, fastest first</div></div>`;
   const best = laps[0].t, al = buildAliases(ls.setup);

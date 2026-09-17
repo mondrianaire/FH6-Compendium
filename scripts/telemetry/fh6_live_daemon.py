@@ -1538,7 +1538,7 @@ def _stamp_state(match, ordn=None):
     if match.get("how") == "picked":
         return False, "the live car contradicts the save you pinned (engine or gearbox disagree), or it isn't on track right now — the PI stamp needs the pin to match what you're driving"
     if match.get("held"):
-        return False, "identity is HELD from your earlier verified run, not verified right now — a remembered identity is not evidence that this PI belongs to this build. Pick the equipped save in the 🪪 drawer to confirm it now, or it may re-verify on its own as you keep driving"
+        return False, "identity is HELD from your earlier verified run, not verified right now — a remembered identity is not evidence that this PI belongs to this build. Equip the build and save the tune in-game to confirm it."
     # SAY WHAT IS ACTUALLY AMBIGUOUS. The tie filter (see `ties`) is CYLINDERS plus "gearbox not yet ruled out
     # by a gear you have used" — PI is not in it. Claiming the builds "share this engine + PI" sent the user
     # hunting for a matching build that does not exist: the live car read PI 805, a number no save has ever
@@ -1554,7 +1554,7 @@ def _stamp_state(match, ordn=None):
                 f"(saves have {sorted({int(x) for x in _pis})}) — this build has not been stamped before. ")
     else:
         _why = f"{_n} saved builds share this engine and PI. "
-    return False, _why + "Pick the equipped save in the 🪪 drawer — a pick the live car does not contradict is accepted immediately; it may also settle on its own as you keep driving."
+    return False, _why + "Equip the build and save the tune in-game — the fresh save is read exactly and pins the identity."
 
 
 def _equipped_fresh_download(deliverable, ordn, meta):
@@ -1802,7 +1802,7 @@ def _build_union(deliverable, ordn, match=None):
                             f"Type your exact in-game final drive in the 🎯 calibration card — that arbitrates & fixes every gear at once")
                 elif gd.get("kind") == "scattered":
                     note = (f"gear disagreements are SCATTERED (not one factor) — likely decoding a different save than the build you drove, "
-                            f"or the drive predates your last gearing change. Re-save the tune, drive the gears again, or check the build picker")
+                            f"or the drive predates your last gearing change. Equip the build and save the tune in-game — the fresh save is read exactly.")
                 else:
                     note = f"{g_conf} gear{'s' if g_conf > 1 else ''} disagree with the save — competing values shown on the rows"
                 fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "conflict", note)
@@ -1871,13 +1871,13 @@ def _build_union(deliverable, ordn, match=None):
                 except Exception:
                     _alt = None
                 if _alt is not None and ev == ["Transmission"]:
-                    ask("identity", f"{match.get('n_signature_ties') or 'several'} saved builds tie on signature and the measured gearbox contradicts the current pick — keep driving up through the gears (Build {_alt.get('build') or '?'} matches the {_alt.get('gears')}-speed box you're using; the ladder confirms it, no re-apply needed)", "auto-resolves", 0)
+                    ask("identity", f"{match.get('n_signature_ties') or 'several'} saved builds tie on signature and the measured gearbox contradicts the current pick (Build {_alt.get('build') or '?'} matches the {_alt.get('gears')}-speed box you're using) — equip the build and save the tune in-game to confirm which one it is", "equip + save", 0)
                     u["asks"].sort(key=lambda a: a["rank"])
                 elif ev == ["Aspiration"] and (match.get("n_signature_ties") or 1) >= 2:
                     # same roster-first doctrine as the Transmission guard: with tied builds, a measured-aspiration
                     # contradiction against the CHOSEN save more likely means the tie-pick is wrong than that the
                     # build is unsaved — 'contradicts every save' may only be claimed after checking every save.
-                    ask("identity", f"{match.get('n_signature_ties')} saved builds tie and the measured aspiration contradicts the current pick — likely a wrong tie-pick, not an unsaved build: keep driving (the gear ladder separates them) or pick the equipped save in the 🪪 drawer", "auto-resolves", 0)
+                    ask("identity", f"{match.get('n_signature_ties')} saved builds tie and the measured aspiration contradicts the current pick — likely a wrong tie-pick, not an unsaved build: equip the build and save the tune in-game to confirm which one it is", "equip + save", 0)
                     u["asks"].sort(key=lambda a: a["rank"])
                 else:
                     match["prev_how"] = match.get("how"); match["how"] = "unsaved-build"; match["evidence"] = ev

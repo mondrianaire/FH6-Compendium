@@ -121,36 +121,6 @@ def _ident_save(doc):
     except Exception:
         pass
 
-def _box_exercised(ordn, mxg):
-    """Has this car's gearbox been driven to its top, so that "no gear above N" is EVIDENCE and not just silence?
-
-    The gear filter was one-sided: a save whose box is SMALLER than a gear you have used is impossible and gets
-    eliminated, but a save whose box is BIGGER was never eliminated, because not having reached 8th does not prove
-    8th does not exist. That is right for one session and wrong after many. It is why six Exocet builds
-    (6·6·8·9·10·10 speeds) stayed permanently tied while the driver had done full WOT pulls across 16 sessions:
-    every candidate had gear_count >= 6, so nothing could ever be ruled out, and the UI kept asking for a 7th gear
-    that build does not have.
-
-    The evidence used is the ACCUMULATED gear set in data/identity-evidence.json, which only ever grows across
-    sessions and restarts. A contiguous 1..N with N >= 5 means every gear up to N has actually been engaged — you
-    have shifted up through the whole box. Contiguity matters: {1,2,6} is a car that was somewhere in its range,
-    {1,2,3,4,5,6} is a car that was walked to the top.
-
-    SELF-CORRECTING BY CONSTRUCTION, which is what makes it safe to act on. If the inference is wrong — a 10-speed
-    that has genuinely never been taken past 6th — then the first time 7th is engaged the set gains 7, mxg becomes
-    7, and the verdict inverts on its own: the 6-speeds take the -500 impossible-box penalty and the taller boxes
-    return. A wrong reading here costs one upshift to undo, and cannot latch.
-    """
-    try:
-        if not mxg or int(mxg) < 5:
-            return False
-        _rec = (_ident_load().get("gears") or {}).get(str(ordn))
-        g = sorted(int(x) for x in ((_rec.get("g") if isinstance(_rec, dict) else _rec) or []))
-        return bool(g) and g == list(range(1, int(mxg) + 1))
-    except Exception:
-        return False
-
-
 # CALLED HERE, not beside its definition: _ident_restore needs _ident_load, and being defined earlier in the file
 # than the thing it calls is the whole reason the evidence never came back.
 _ident_restore()
@@ -1083,12 +1053,6 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
     live_recent = bool(not live and seen and time.time() - seen["t"] < 7200)
     live_cyl = fr.get("cyl") if live else (seen.get("cyl") if live_recent else None)
     live_pi = fr.get("pi") if live else (seen.get("pi") if live_recent else None)
-    # Gear evidence, computed BEFORE the scoring loop so the pin below can tell a gear-CONSISTENT held pick from a
-    # gear-impossible one -- the SAME accumulated set the 'ties' filter uses, so "pinned build survives into ties"
-    # and "the pin is honoured" are the identical test.
-    _gsT = getattr(ST, "gears_seen", {}).get(str(ordn)) or set(); _mxT = max(_gsT) if _gsT else 0
-    _boxT = _box_exercised(ordn, _mxT)
-    _pin_denied = False; _pin_hard = False   # stored-hold pin: denied (don't name it) / hard-contradicted (forget it)
     roster = []
     for m in metas:
         try:
@@ -1100,77 +1064,33 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
         pi = TUNE.observed_car_pi(ordn, t["parts"])   # exact PI if this exact config was ever driven & recorded
         red = (cat.get(str(efam)) or {}).get("redline")   # the family's MEASURED redline — the engine's live fingerprint
         score = m["mtime"] * 1e-13                     # newest as a faint tiebreak
-        if ts_want and str(m["ts"]) == str(ts_want):
-            # THE PIN. An EXPLICIT browse (ts_explicit -- a ts in the URL, "show me THIS saved tune") wins outright,
-            # right or wrong for what's being driven. A STORED HOLD instead YIELDS to hard live evidence: pin it only
-            # while its build passes the SAME gear+cyl test that admits a save into 'ties' below. Denying the pin (so
-            # the build is never named as best) uses the full test; DELETING the pick from disk is restricted to a
-            # HARD contradiction (wrong cylinders, or a gearbox too small for the gears actually driven) -- the
-            # box-too-big case is the self-correcting _box_exercised heuristic, which a legitimate pick must survive.
-            _gc0 = t.get("gear_count")
-            _cyl_bad = bool(live_cyl and cyl and int(cyl) != int(live_cyl))
-            _box_small = bool(_mxT and _gc0 and int(_gc0) < int(_mxT))
-            _box_big = bool(_boxT and _gc0 and int(_gc0) > int(_mxT))
-            if ts_explicit or not (_cyl_bad or _box_small or _box_big):
-                score += 1e6                           # explicit browse, or a held pick the live car does NOT contradict
-            else:
-                _pin_denied = True                     # a stored hold the gears/cyl rule out -- do not name it
-                if _cyl_bad or _box_small: _pin_hard = True   # forget it from disk ONLY on hard (physical) contradiction
+        if ts_want and ts_explicit and str(m["ts"]) == str(ts_want):
+            score += 1e6   # ONLY an EXPLICIT URL browse pins (for VIEWING). A stored pick NEVER pins identity: it is inert here and yields to the instant signals scored below.
         # CYL-BOOTSTRAP for stub / new-car builds (2026-09-13): an uncatalogued engine (cyl == None) is the NEW-CAR
-        # case — the decoded game DB predates the car, so no catalog cyl exists (e.g. a stub ref_car "ordinal N").
-        # The live frame authoritatively reports the equipped car's cylinders, so credit that as the build's effective
-        # cyl for scoring rather than leaving it with NO cyl signal while catalogued siblings score +100 — which let a
-        # wrong-PI same-cyl sibling outrank the real, exact-PI build (ordinal 4354: build D at cyl12/PI896 beat the
-        # equipped F at cyl?/PI864). PI / redline / gears then break the resulting tie. Once such a build is chosen,
-        # the existing _equipped_fresh_download + _enrich_engine_desc persist the learned cyl into the catalog.
+        # case — the decoded game DB predates the car, so no catalog cyl exists. The live frame authoritatively
+        # reports the equipped car's cylinders, so credit that as the build's effective cyl for scoring.
         cyl_eff = cyl if cyl else (live_cyl if (live or live_recent) and live_cyl else None)
         if (live or live_recent) and live_cyl and cyl_eff:
-            score += 100 if int(cyl_eff) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong signal; None cyl = an uncatalogued (new-car) engine bootstrapped from the live frame
+            score += 100 if int(cyl_eff) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong INSTANT signal
         if (live or live_recent) and live_pi and pi:
             score += 60 if int(pi) == int(live_pi) else -min(60, abs(int(pi) - int(live_pi)) * 0.6)
         live_red = (fr.get("maxrpm") if live and fr else None)
-        if live_red and red:                           # two same-cyl same-PI builds with DIFFERENT ENGINES separate here: redline is telemetry-exact
+        if live_red and red:                           # two same-cyl same-PI builds with DIFFERENT ENGINES separate here: redline is telemetry-exact (INSTANT)
             score += 50 if abs(int(red) - int(live_red)) <= 400 else -min(50, abs(int(red) - int(live_red)) * 0.02)
-        gseen = getattr(ST, "gears_seen", {}).get(str(ordn)) or set()
-        mxg = max(gseen) if gseen else 0
-        gc0 = t.get("gear_count")
-        if live and mxg and gc0:                       # gears USED are hard evidence: gear 8 in a 6-speed box is impossible; reaching the box's exact top is strong
-            if int(gc0) < mxg: score -= 500
-            elif int(gc0) == mxg and mxg >= 5: score += 45
-            elif int(gc0) > mxg and _box_exercised(ordn, mxg): score -= 300   # see _box_exercised: a bigger box you have never once shifted into
+        # NO GEARBOX IN IDENTITY (Jett 2026-09-17, HARD RULE [[fh6-identity-two-directions]]): score is instant signals
+        # ONLY (cyl / PI / redline) + the mtime tiebreak + the explicit-browse pin. Same-signature saves stay tied; the
+        # save-tune method (equip + save) resolves them, never a gear ladder / WOT pull.
         roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "red": red, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
-    # A STORED-HOLD PICK the live car contradicts was denied its pin above. Null ts_want so 'how' / picked_ok / the
-    # sticky-identity fallback all re-disambiguate on real evidence instead of labelling a yielded pin 'picked'; and
-    # forget it from disk (same idiom as the fresh-save handler and the sticky gear_id hold) ONLY on a hard
-    # contradiction. _pin_denied is only ever set for a non-explicit pin, so an explicit URL browse is never touched.
-    if _pin_denied:
-        ts_want = None
-        if _pin_hard:
-            try: ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)
-            except Exception: pass
-    elif not ts_explicit:
-        # AGED-OUT pick: one older than the 2 h use-window is never supplied as ts_want, so the branch above never
-        # sees it -- but if the persisted gear/cyl evidence HARD-contradicts its build it should not linger on disk.
-        # Forget it (idempotent), hard evidence only, decoupled from the use-window.
-        _sp = (getattr(ST, "picked_id", {}) or {}).get(str(ordn))
-        if _sp and _sp.get("ts"):
-            _pr = next((r for r in roster if str(r["ts"]) == str(_sp["ts"])), None)
-            if _pr is not None:
-                _pgc = (_pr["_tune"] or {}).get("gear_count")
-                if (live_cyl and _pr.get("cyl") and int(_pr["cyl"]) != int(live_cyl)) or (_mxT and _pgc and int(_pgc) < int(_mxT)):
-                    try: ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)
-                    except Exception: pass
+    # A stored pick no longer denies / forces anything here: the tie-picker is retired and identity uses NO gearbox,
+    # so a stored pick is INERT unless it is an EXPLICIT URL browse. A fresh in-game save is what supersedes / clears
+    # a stale pick (disk_watcher new_save).
     if not roster:
         return metas[0], {"how": "newest", "live": live, "saves": []}
     roster.sort(key=lambda r: -r["_score"])
-    # DISAMBIGUATE same-signature saves. A clone makes several builds share cyl + PI (sliders don't move PI), so the
-    # cyl/PI score alone ties them and we'd fall back to 'newest'. When the leaders tie, use the LIVE-measured gear
-    # ladder (telemetry-exact, wheelspin-immune) to pick the build actually EQUIPPED: gearing is part of the tune, so
-    # two builds that differ in gears/final-drive separate cleanly here, while genuinely identical builds stay tied.
-    # J2: fingerprint the PARTS of every save FIRST — identity ambiguity exists between distinct BUILDS, not between
-    # slider iterations of one build. Two same-fingerprint saves (save → tweak sliders → save again, the natural first
-    # hour with a car) are ONE build: no gear-ladder separation is possible or needed, newest wins, and treating them
-    # as 'ties' hard-blocked the gate with a physically unsatisfiable 'drive the gears' instruction.
+    # SAME-SIGNATURE SAVES stay tied — identity uses NO gearbox (Jett 2026-09-17, [[fh6-identity-two-directions]]).
+    # Fingerprint each save's PARTS (byte-exact) so slider-iterations of ONE build collapse to a single signature and
+    # DISTINCT builds each count. There is no gear-ladder step: same-signature saves are resolved only by the
+    # save-tune method (equip + save), never by driving.
     try:
         import hashlib as _hl0
         for r in roster:
@@ -1178,118 +1098,14 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
             r["_bsig"] = _hl0.sha1(repr(items0).encode()).hexdigest()[:8]
     except Exception:
         pass
-    gear_used = False; ladder_tied = False
-    # candidates = every same-cylinder save NOT eliminated by hard evidence (gears actually used). NOT the score-tie
-    # window: the PI-observation bonus is self-reinforcing. Counted UNCONDITIONALLY (live_cyl holds across parking via
-    # live_recent) so the displayed tie count no longer flaps 6<->1 with driving/parked — and the STAMP GUARD, which
-    # reads this count, no longer refuses to stamp while driving because parked-vs-live changed the arithmetic.
-    # _gsT / _mxT / _boxT are computed once before the scoring loop above (the pin needs them); reuse them here.
-    ties = [r for r in roster if (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))
-            and (not _mxT or not (r["_tune"] or {}).get("gear_count") or int((r["_tune"] or {}).get("gear_count")) >= _mxT)
-            # ...and, once the box has demonstrably been exercised to its top, drop the boxes that are TOO BIG too.
-            # The filter used to be one-sided: it eliminated a box you had out-shifted, but never one you had never
-            # shifted into, on the reasoning "you might not have reached 7th yet". True for one session; after a
-            # contiguous 1..N ladder accumulated across many sessions of full pulls it is the wrong reading, and it
-            # is why six Exocet builds stayed tied while the driver had done the pull repeatedly.
-            and not (_boxT and (r["_tune"] or {}).get("gear_count") and int((r["_tune"] or {}).get("gear_count")) > _mxT)]
+    # candidates = every same-cylinder save (the INSTANT signal). Two same-signature saves are indistinguishable
+    # standing still, and a locked download cannot be told from its twins at all — NO gearbox filter (that was the
+    # WOT-pull path the directive removed). n_signature_ties counts DISTINCT build fingerprints (_bsig) among these.
+    ties = [r for r in roster if (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))]
     n_ties = len({r.get("_bsig") for r in ties}) if ties and all(r.get("_bsig") for r in ties) else max(1, len(ties))
-    if live and len(roster) >= 2:
-        if n_ties >= 2:
-            # measured ladder: the analyzer's fd_gear when available (exact), else the DAEMON-LOCAL rpm/mph ladder —
-            # comparison is UNIT-FREE (each ladder normalized by its first common gear), so either source works and
-            # a WOT pull verifies within seconds instead of waiting for the next analysis.
-            live_gl = None
-            with ST.lock: sj = ST.session_json
-            _sc2 = _session_car_for(sj, ordn)   # the EQUIPPED car's ladder (live cid first) — a stale sibling build's ladder used to win disambiguation and pin the wrong 2h hold
-            if _sc2 is not None:
-                gl = {int(g["gear"]): g["fd_gear"] for g in (_sc2.get("gears") or []) if g.get("fd_gear")}
-                if len(gl) >= 3: live_gl = gl   # need a gear-ladder pass (several gears measured) to fingerprint
-            gl_abs = True   # analyzer fd_gear is in save units — absolute compare keeps FINAL-DRIVE discrimination
-            if not live_gl:
-                lf = getattr(ST, "live_fdg", {}).get(str(ordn)) or {}
-                gl2 = {g: sorted(v)[len(v) // 2] for g, v in lf.items() if len(v) >= 8}
-                if len(gl2) >= 3: live_gl = gl2; gl_abs = False   # rpm/mph carries an unknown constant — compare gear STEPS (unit-free)
-            if live_gl:
-                import re as _re
-                _dls = {}
-                def _dl_of(r):
-                    k = id(r)
-                    if k not in _dls: _dls[k] = TUNE.tune_to_deliverable(r["_tune"], "")   # one decode per candidate, shared by the derived-fd probe and the error metric
-                    return _dls[k]
-                # THE ABSOLUTE COMPARE NEEDS REAL FINAL DRIVES. fd is band-DERIVED in 511/513 saves (a linear guess
-                # from the slider %), so `fd x ratio` compares a measured ladder against a guess: no candidate can
-                # clear the 6% gate however well the user drives, and producing a ladder REMOVED the working
-                # discriminator (audit T4 — "more driving makes disambiguation worse"). When any candidate's fd is
-                # derived, fall back to the unit-free STEP compare: the fd cancels on both sides, so what remains is
-                # ladder SHAPE — the part telemetry can actually measure. Cost: two builds differing ONLY in final
-                # drive stay tied, which is honest — that difference was never measured, only guessed.
-                def _fd_derived(r):
-                    for tab in _dl_of(r).get("tabs", []):
-                        for row in tab.get("rows", []):
-                            if row.get("field") == "final_drive":
-                                return bool(row.get("derived"))
-                    return False
-                if gl_abs and any(_fd_derived(r) for r in ties):
-                    gl_abs = False
-                def _gear_err(r):
-                    dl = _dl_of(r)
-                    fd = None; ratios = {}
-                    for tab in dl.get("tabs", []):
-                        for row in tab.get("rows", []):
-                            if row.get("field") == "final_drive" and row.get("value"): fd = row["value"]
-                            mm = _re.match(r"gear_(\d+)$", str(row.get("field", "")))
-                            if mm and row.get("value"): ratios[int(mm.group(1))] = row["value"]
-                    common = sorted(g for g in ratios if g in live_gl) if fd else []
-                    if gl_abs:
-                        if not common: return 9.9
-                        return sum(abs(fd * ratios[g] - live_gl[g]) / live_gl[g] for g in common) / len(common)
-                    if len(common) < 2: return 9.9
-                    g0 = common[0]
-                    if not ratios[g0] or not live_gl[g0]: return 9.9
-                    return sum(abs((ratios[g] / ratios[g0]) - (live_gl[g] / live_gl[g0])) / max(1e-6, live_gl[g] / live_gl[g0]) for g in common[1:]) / (len(common) - 1)   # unit-free: gear STEPS (rpm/mph source)
-                errs = sorted(((_gear_err(r), i, r) for i, r in enumerate(ties)), key=lambda x: (x[0], x[1]))
-                # accept only a CLEAR winner: good absolute match AND clearly ahead of the runner-up (else stay ambiguous)
-                if errs[0][0] < 0.06 and (len(errs) < 2 or errs[1][0] - errs[0][0] > 0.02):
-                    winner = errs[0][2]; roster = [winner] + [r for r in roster if r is not winner]; gear_used = True
-                    if not hasattr(ST, "gear_id"):
-                        ST.gear_id = {}
-                    ST.gear_id[str(ordn)] = {"ts": str(winner["ts"]), "t": time.time()}   # PERSIST the verified identity — it must survive a pause
-                    _gear_log(ordn, winner["ts"]); _auto_assoc_livery(ordn)   # timeline entry + attribute any livery saved during a verified interval
-                elif errs and errs[0][0] < 9.0:
-                    ladder_tied = True   # the ladder RAN and could not separate (identical gearing) — 'drive the gears' is then a dead-end ask; the client must offer the manual pick as THE escape
-    # STICKY IDENTITY: when the ladder can't run RIGHT NOW (menus drop the live frame; a short window lacks gears),
-    # reuse the last gear-VERIFIED identity instead of reverting to 'newest' — the user's WOT run must not evaporate
-    # the moment they pause to read the dashboard. Held for 2h; a new in-game save re-anchors it (below); an explicit
-    # pick still overrides.
-    held_id = False
-    if not gear_used and not ts_want:
-        gid = getattr(ST, "gear_id", {}).get(str(ordn))
-        if gid and time.time() - gid["t"] < 7200:
-            held = next((r for r in roster if str(r["ts"]) == str(gid["ts"])), None)
-            # the hold must YIELD to contradicting live evidence: switching garage instances writes NO save file,
-            # so a stale hold was the only voice — but the live engine (cyl, redline) is telemetry-exact. When it
-            # contradicts the held build, drop the hold and let the scoring/ladder re-disambiguate NOW.
-            if held is not None and live:
-                _lr = fr.get("maxrpm") if fr else None
-                _engine_contra = ((held.get("cyl") and live_cyl and int(held["cyl"]) != int(live_cyl))
-                                  or (held.get("red") and _lr and abs(int(held["red"]) - int(_lr)) > 700))
-                # A TUNE SWAP the disk cannot see. Loading a DIFFERENT saved setup writes no Tuning_* file (the game
-                # writes only on SAVE), so new_save never fires and the hold is the only voice — but the live CarPI
-                # is telemetry-exact. When the held build's own PI is known and the live read is a DIFFERENT
-                # same-engine save's PI, the equipped build changed under the hold: yield so scoring (which boosts
-                # the save whose PI matches the live read) re-picks it. A live PI matching NO save is an in-shop
-                # edit of the held build instead — handled by `stale` below, not a swap, so the hold stays.
-                _swap = bool(live_pi and held.get("pi") and int(held["pi"]) != int(live_pi)
-                             and any(r is not held and r.get("pi") and int(r["pi"]) == int(live_pi)
-                                     and (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))
-                                     for r in roster))
-                if _engine_contra or _swap:
-                    held = None
-                    try: del ST.gear_id[str(ordn)]   # the verified identity belonged to the OTHER build — it no longer describes what's equipped
-                    except Exception: pass
-            if held is not None:
-                roster = [held] + [r for r in roster if r is not held]
-                gear_used = True; held_id = True
+    # best = the top INSTANT-signal score. No ratio-ladder disambiguation and no sticky gear-verified hold exist any
+    # more (Jett 2026-09-17): same-signature saves stay tied and are resolved only by the save-tune method. The
+    # instant 2 h hold across a pause is already covered by live_seen -> live_recent (how == "signature").
     best = roster[0]
     # BUILD CATEGORIZATION: group saves by their exact PARTS fingerprint (byte-exact in every save file). Saves
     # sharing a fingerprint are slider iterations of ONE build; different fingerprints are DIFFERENT builds — and at a
@@ -1395,12 +1211,12 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
         builds = []
     saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count"),
                   build=next((b["label"] for b in builds if r.get("_bsig") == b["build"]), None)) for r in roster]
-    how = "picked" if ts_want else ("signature" if (live or live_recent) and (live_cyl or live_pi) else "newest")   # J20: a 2h-recent signature still identifies
+    how = "picked" if (ts_want and ts_explicit) else ("signature" if (live or live_recent) and (live_cyl or live_pi) else "newest")   # only an EXPLICIT URL browse is a 'picked' view; a stored pick is inert and reads as signature/newest
     # 'no save matches your engine' must mean NO save: when ANY roster save matches the live cylinders, a chosen-save
     # mismatch is a wrong tie-pick (scoring interplay), not a missing file — universality checked against the whole set.
     mism = bool((live or live_recent) and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl)
                 and not any(r.get("cyl") and int(r["cyl"]) == int(live_cyl) for r in roster if r is not best))
-    final_how = how if ts_want else ("no-match" if mism else ("gear-matched" if gear_used else how))
+    final_how = how if (ts_want and ts_explicit) else ("no-match" if mism else how)
     # LIVE TRUTH OVERRIDE: while the equipped build is strongly identified and on track, the frame's CarPI IS this
     # build's PI — a stored stamp that disagrees is stale or misattributed and must never outrank the live read
     # (the "identifies as A700 while driving it at S1 800" bug).
@@ -1411,7 +1227,7 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
     # NO save on file is proof one happened, and swallowing it is how the decode came to show a month-old
     # snapshot of ordinal 4167 while the user was changing its wheels (PI 850 -> 851 in the shop; no save has 851).
     stale = None
-    if live_pi and (live or live_recent) and final_how in ("gear-matched", "picked"):
+    if live_pi and (live or live_recent) and (final_how == "picked" or (final_how == "signature" and (n_ties or 1) <= 1)):
         try:
             _lp = int(live_pi)
             _known = {int(s2["pi"]) for s2 in saves if s2.get("pi") is not None}
@@ -1434,15 +1250,14 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
     # but a picked save that survives the hard-evidence filters (same cylinders as the live engine, gearbox big
     # enough for the gears actually used) is a declaration the car does not contradict. That, and only that, is what
     # the PI stamp accepts as a substitute for the ladder (audit T1); identity scoring is untouched.
-    picked_ok = bool(ts_want and str(best["ts"]) == str(ts_want) and any(r is best for r in ties)
+    picked_ok = bool(ts_want and ts_explicit and str(best["ts"]) == str(ts_want) and any(r is best for r in ties)
                      and (live or live_recent) and live_cyl and best.get("cyl") and int(best["cyl"]) == int(live_cyl))
     # FRESH DOWNLOAD SETTLES A SIGNATURE TIE (Jett 2026-09-07): a LOCKED container written in the last ~30 min that
     # the matcher already picked is the tune you just downloaded and equipped -- the container timestamp is the
     # 100%-confidence signal. Other saves that merely SHARE its cyl/PI/gear signature are not real ambiguity; you
     # are demonstrably in THIS one, so report it settled (n_signature_ties -> 1) instead of asking you to pick.
     # Needs a live frame for the car (live/live_recent) -- with no equipped car there is nothing to confirm against.
-    # Only the freshly-written locked save triggers it; older downloads keep their genuine tie, and a drive still
-    # disambiguates permanently via the gear ladder.
+    # Only the freshly-written locked save triggers it; older downloads keep their genuine tie until equip + save.
     fresh_dl = False
     try:
         _bmt = float((best.get("_meta") or {}).get("mtime") or 0)
@@ -1452,12 +1267,9 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
         pass
     return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
-                           "n_saves": len(roster), "n_signature_ties": n_ties, "gear_disambig": gear_used,
+                           "n_saves": len(roster), "n_signature_ties": n_ties,
                            "fresh_download": fresh_dl,
-                           # the box the car has actually demonstrated, so the UI can name a drive you CAN do
-                           # instead of a gear you do not have
-                           "max_gear_seen": _mxT or None, "box_exercised": _boxT,
-                           "held": held_id and not stale, "ladder_tied": ladder_tied, "picked_ok": picked_ok, "stale": stale,
+                           "picked_ok": picked_ok, "stale": stale,
                            "builds": builds, "saves": saves}
 
 
@@ -1496,8 +1308,7 @@ def _match_car(ordn, want_cyl=None):
 def _verified_identity(match):
     """The ok_stamp standard, reusable: identity strong enough to WRITE with (stores are shared/cross-car)."""
     if not match or match.get("how") in ("no-match", "unsaved-build"): return False
-    if match.get("held"): return False
-    return (match.get("n_signature_ties") or 1) <= 1 or bool(match.get("gear_disambig"))
+    return (match.get("n_signature_ties") or 1) <= 1   # gearless: a single instant-signature tie settles it (a fresh save/download forces n_signature_ties -> 1)
 
 
 def _stamp_identity(match):
@@ -1510,12 +1321,11 @@ def _stamp_identity(match):
     but only when the live car does not contradict it (`picked_ok`). Without this, the manual pick the dashboard
     itself offers as THE escape from a signature tie unblocked tuning advice and nothing else, and parts-pi.json
     stayed starved of the one datum that exists nowhere on disk (audit T1)."""
-    if match and match.get("how") == "picked" and not match.get("gear_disambig"):
-        # A PICK IS ONLY AS GOOD AS THE LIVE CAR SAYS. Never fall through to _verified_identity here: a pick forces
-        # final_how='picked', which BYPASSES the no-match test, and when the live engine matches no save at all the
-        # candidate set is empty and n_signature_ties reports 1 — so a flatly contradicted pick would read as
-        # "unambiguous". picked_ok is the corroboration (same cylinders as the live engine, gearbox consistent with
-        # the gears actually used); the ladder, when it ran, still outranks the declaration.
+    if match and match.get("how") == "picked":
+        # how=='picked' now only ever arises from an EXPLICIT URL browse (gearless identity). A pick forces
+        # final_how='picked', which BYPASSES the no-match test, so a flatly contradicted pick would read as
+        # "unambiguous"; picked_ok is the corroboration (same cylinders as the live engine). Never fall through
+        # to _verified_identity here.
         return bool(match.get("picked_ok"))
     return _verified_identity(match)
 
@@ -1537,10 +1347,8 @@ def _stamp_state(match, ordn=None):
         return True, ""
     if match.get("how") == "picked":
         return False, "the live car contradicts the save you pinned (engine or gearbox disagree), or it isn't on track right now — the PI stamp needs the pin to match what you're driving"
-    if match.get("held"):
-        return False, "identity is HELD from your earlier verified run, not verified right now — a remembered identity is not evidence that this PI belongs to this build. Equip the build and save the tune in-game to confirm it."
-    # SAY WHAT IS ACTUALLY AMBIGUOUS. The tie filter (see `ties`) is CYLINDERS plus "gearbox not yet ruled out
-    # by a gear you have used" — PI is not in it. Claiming the builds "share this engine + PI" sent the user
+    # SAY WHAT IS ACTUALLY AMBIGUOUS. The tie filter (see `ties`) is CYLINDERS only (the instant signal) — PI is
+    # not in it. Claiming the builds "share this engine + PI" sent the user
     # hunting for a matching build that does not exist: the live car read PI 805, a number no save has ever
     # carried, while all six saves had pi=None. A PI nothing shares cannot be what makes them ambiguous.
     _n = match.get('n_signature_ties') or 2
@@ -1849,41 +1657,12 @@ def _build_union(deliverable, ordn, match=None):
         _s_ok, _s_why = _stamp_state(match, ordn)
         u["stamp"] = {"ok": _s_ok, "why": _s_why}   # the PI-stamp guard's verdict, structurally — the ledger's 'PI stamped' row can say WHY instead of an unexplained red (T13)
         deliverable["union"] = u
-        # AUTO-IDENTIFY A DISTINCT UNSAVED BUILD: aspiration and transmission are PART-level measurements — they can
-        # only disagree with the save if different PARTS are equipped (sliders can't change them). When the matcher
-        # said "matched by cyl+PI" but a part-level measurement contradicts the save, the truth is: you're driving a
-        # build that exists in the garage but NOT on disk (same cyl, same capped PI, different upgrades). Flip the
-        # match to 'unsaved-build' so the client warns, blocks auto-fill, and offers the save-in-game path.
-        if match and match.get("how") in ("signature", "gear-matched", "newest"):
-            ev = [f["name"] for f in u["fields"] if f["status"] == "conflict" and f["name"] in ("Aspiration", "Transmission")]
-            if ev:
-                # "contradicts every save" must actually mean EVERY save — a Transmission conflict against the
-                # CHOSEN save while ANOTHER roster save matches the gears being used means the tie-pick was wrong,
-                # not that the build is unsaved. (Re-applying an already-applied tune writes NO file, so the old
-                # advice could never resolve this state — the loop the user reported.)
-                _alt = None
-                try:
-                    _ordk = str(int((deliverable or {}).get("ordinal") or 0))
-                    _gs = getattr(ST, "gears_seen", {}).get(_ordk) or set()
-                    _mx = max(_gs) if _gs else 0
-                    if "Transmission" in ev and _mx:
-                        _alt = next((s for s in (match.get("saves") or []) if s.get("gears") and int(s["gears"]) >= _mx and str(s.get("ts")) != str((match.get("saves") or [{}])[0].get("ts"))), None)
-                except Exception:
-                    _alt = None
-                if _alt is not None and ev == ["Transmission"]:
-                    ask("identity", f"{match.get('n_signature_ties') or 'several'} saved builds tie on signature and the measured gearbox contradicts the current pick (Build {_alt.get('build') or '?'} matches the {_alt.get('gears')}-speed box you're using) — equip the build and save the tune in-game to confirm which one it is", "equip + save", 0)
-                    u["asks"].sort(key=lambda a: a["rank"])
-                elif ev == ["Aspiration"] and (match.get("n_signature_ties") or 1) >= 2:
-                    # same roster-first doctrine as the Transmission guard: with tied builds, a measured-aspiration
-                    # contradiction against the CHOSEN save more likely means the tie-pick is wrong than that the
-                    # build is unsaved — 'contradicts every save' may only be claimed after checking every save.
-                    ask("identity", f"{match.get('n_signature_ties')} saved builds tie and the measured aspiration contradicts the current pick — likely a wrong tie-pick, not an unsaved build: equip the build and save the tune in-game to confirm which one it is", "equip + save", 0)
-                    u["asks"].sort(key=lambda a: a["rank"])
-                else:
-                    match["prev_how"] = match.get("how"); match["how"] = "unsaved-build"; match["evidence"] = ev
-                    ask("identity", "capture this build's file — measured " + " + ".join(e.lower() for e in ev)
-                        + " contradicts every save on disk: you're driving a distinct build that isn't captured. Change any part (or slider) and SAVE if it's yours, or apply a different tune then re-apply this one — re-applying an already-active tune writes nothing", "unblocks everything", 0)
-                    u["asks"].sort(key=lambda a: a["rank"])
+        # NO WOT-PULL IDENTITY FLIP (Jett 2026-09-17, [[fh6-identity-two-directions]]): aspiration and transmission
+        # are MEASURED signals (boost, the gear ladder) — WOT-pull evidence the directive bars from IDENTITY. A build
+        # that matches no save on its INSTANT signature is already flagged 'no-match' in _pick_meta, and a
+        # same-signature tie already reads "equip + save the tune in-game". The measured Aspiration/Transmission
+        # decode conflicts still SHOW on the build sheet (the fld() rows above) as a DISPLAY cross-check only — they
+        # no longer flip match.how to 'unsaved-build' or suggest a build by its gearbox.
     except Exception:
         pass
 
@@ -2707,12 +2486,9 @@ def disk_watcher():
                     for k in [k for k in ST.gear_verdicts if k.startswith(f"{ordn}|")]:
                         ST.gear_verdicts.pop(k, None)
                 ST.gears_seen.pop(str(ordn), None); ST.live_fdg.pop(str(ordn), None); _ident_forget_gears(ordn)   # the new tune may have a SMALLER box — the old top gear must not veto the fresh save (permanent false Transmission conflict)
-                # an in-game save is a POSITIVE identity signal — it comes from the car you're sitting in, so the
-                # just-written file IS the equipped build. Re-anchor the sticky identity to it.
-                if not hasattr(ST, "gear_id"):
-                    ST.gear_id = {}
-                ST.gear_id[str(ordn)] = {"ts": str(metas[0]["ts"]), "t": time.time()}
-                ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)   # the fresh save IS the equipped build — it supersedes an older declaration, which may now name a build the user has moved off
+                # an in-game save is a POSITIVE identity signal — the just-written file IS the equipped build. It
+                # supersedes an older declaration; no sticky gear-identity is anchored (that mechanism is retired).
+                ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)
                 _gear_log(ordn, metas[0]["ts"]); _auto_assoc_livery(ordn)
                 # IMPORT THE JUST-WRITTEN BUILD without waiting for a dashboard to notice it. Before this, only the
                 # dashboard triggered scope=containers (client identify -> /disk-tune -> fingerprint fails ->

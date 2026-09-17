@@ -147,7 +147,7 @@ check("B decode", "store invariants: ranges possible, traces cover courses", b5)
 DT = http_json("/disk-tune?ordinal=2866")
 def c1():
     m = DT.get("match") or {}
-    known = {"signature", "gear-matched", "newest", "picked", "no-match", "unsaved-build"}
+    known = {"signature", "newest", "picked", "no-match", "unsaved-build"}   # gearless: 'gear-matched' retired 2026-09-17
     return (m.get("how") in known and m.get("n_saves", 0) >= 1, f"how={m.get('how')} n_saves={m.get('n_saves')} ties={m.get('n_signature_ties')}")
 check("C identify", "match present + known state", c1)
 
@@ -199,7 +199,7 @@ def c6():
     two800 = sum(1 for p in pis if p == 800)
     if two800 >= 2:
         return (True, f"stamped PIs={pis} — both S1-800 builds carry verified stamps")
-    return ("warn", f"stamped PIs={pis} — one S1-800 build verified; the other needs its gear-verification drive (stamp guard holding, as designed)")
+    return ("warn", f"stamped PIs={pis} — one S1-800 build verified; the other is unresolved — equip + save to identify it (stamp guard holding, as designed)")
 check("C identify", "the two S1-800 builds are separated", c6)
 
 
@@ -218,25 +218,19 @@ def c7():
     if not gears and not picks:
         return ("warn", "identity evidence file is empty — nothing to restore")
     bad = []
-    for o_, gs in list(gears.items())[:6]:
-        gs = gs.get("g") if isinstance(gs, dict) else gs   # evidence is scoped per build: {cid, g:[...]}
-        if not gs:
-            continue
-        try:
-            m = http_json(f"/disk-tune?ordinal={o_}").get("match") or {}
-        except Exception as e:
-            return (False, f"/disk-tune failed for {o_}: {e}")
-        if m.get("max_gear_seen") != max(int(x) for x in gs):
-            bad.append(f"{o_}: disk says max gear {max(int(x) for x in gs)}, daemon reports {m.get('max_gear_seen')}")
+    # GEARLESS IDENTITY (2026-09-17, [[fh6-identity-two-directions]]): persisted GEARS no longer feed identity
+    # (max_gear_seen is not returned any more), and a stored PICK is INERT for identity — it never manufactures a
+    # 'picked' state, so a tied car honestly reads how in ("signature","newest"). Assert only that the daemon answers
+    # a known, non-error identity state for a car that has a stored pick (not a gear round-trip).
     for o_ in list(picks)[:6]:
         try:
             m = http_json(f"/disk-tune?ordinal={o_}").get("match") or {}
         except Exception:
             continue
-        if m.get("how") not in ("picked", "gear-matched"):
+        if m.get("how") in ("no-match",):
             bad.append(f"{o_}: a pick is stored but the daemon answers how={m.get('how')!r}")
-    return (not bad, f"{len(gears)} gear record(s) + {len(picks)} pick(s) restored"
-                     if not bad else "EVIDENCE NOT RESTORED — " + "; ".join(bad[:2]))
+    return (not bad, f"{len(gears)} gear record(s) + {len(picks)} pick(s) on disk; identity resolves gearless"
+                     if not bad else "IDENTITY STATE UNEXPECTED — " + "; ".join(bad[:2]))
 check("C identify", "persisted identity evidence round-trips", c7)
 
 def c7():

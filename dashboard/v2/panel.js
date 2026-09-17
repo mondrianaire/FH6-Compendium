@@ -1656,22 +1656,10 @@ function headerCopy(st, q) {
   // AMBIGUITY OVERRIDES EVERY STATUS: which build is on the car outranks what kind of build it is
   if (q && (q.level === "ambiguous" || q.level === "conflict")) {
     const ties = mm.n_signature_ties || 0;
-    // A PICK WAITING ON THE LIVE CAR. The daemon only stores a manual pick the running engine
-    // corroborates -- the picked save's cylinders must match the live cylinders (fh6_live_daemon.py:1337),
-    // and a pick it cannot verify is not stored at all (:2076). Paused in a menu there is no live cylinder
-    // reading (live_cyl 0), so the pick evaporated and this card snapped straight back to "pick the save"
-    // as if the click did nothing -- the defect Jett hit. When a pick IS pinned, the car does not
-    // contradict it (ambiguous, not conflict), and it simply has no live engine yet (live_cyl falsy), say
-    // so: the pick is held, it only needs a moment of driving to confirm (and the ladder usually settles
-    // it anyway). live_cyl being read but WRONG stays the contradiction path below.
-    if (CUR && pinnedTs(CUR.ordinal) && !mm.picked_ok && !mm.live_cyl && q.level !== "conflict") {
-      return Object.assign(base, { tone: "warn", lead: "PICK NOTED — DRIVE TO CONFIRM",
-        sub: q.why,
-        why: "the save you picked is held, but the daemon only accepts it once the live engine confirms it — idle in a menu its cylinders can't be read, so it isn't settled yet",
-        step: "drive out of the menu for a few seconds — the gear ladder usually settles it on its own, and confirms the pick either way",
-        rest: [], primary: null, caption: "pick pending", guarantee: TUNE_ID_GUARANTEE,
-        evidence: (mm.how || "") + (nSaves ? " · " + nSaves + " saves" : "") });
-    }
+    // 2026-09-17 (Jett hard directive [[fh6-identity-two-directions]]): the "pick noted — drive to confirm" state
+    // is retired along with every gearbox path. A stored pick never manufactures a confident identity and driving
+    // the gears never settles it, so a pinned-but-unconfirmed save is simply UNSETTLED and falls through to the
+    // equip-and-save resolution below.
     // 2026-09-03 (Jett flagged this reading "wild"): the headline used to say "ONE OF 8" right
     // above a sub-line saying "7 of 8 tie" — two different numbers about the same 8 saves, never
     // reconciled. Dropped the count from the headline entirely; sub (q.why) is the one place the
@@ -1897,10 +1885,7 @@ function paintTicker() {   // RETIRED 2026-09-11: the #ticker element was remove
   }
   if (CUR && CUR.disk && (q.level === "ambiguous" || q.level === "conflict")) {
     const _mm = (CUR && CUR.match) || {}, ties = _mm.n_signature_ties || 0;
-    if (pinnedTs(CUR.ordinal) && !_mm.picked_ok && !_mm.live_cyl && q.level !== "conflict")
-      items.push(["warn", "PICK PENDING", "pick noted — drive out of the menu for a few seconds to confirm it"]);
-    else
-      items.push(["warn", q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED", `${ties || "several"} saves tie — equip the build and save the tune in-game`]);
+    items.push(["warn", q.level === "conflict" ? "IDENTITY CONTRADICTED" : "IDENTITY NOT SETTLED", `${ties || "several"} saves tie — equip the build and save the tune in-game`]);
   }
   (st.steps || []).forEach((s, i) => items.push([st.tone === "bad" ? "bad" : st.tone === "warn" ? "warn" : "", `STEP ${i + 1}`, s]));
   // --- ambient context (always-on) ---

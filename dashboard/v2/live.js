@@ -835,32 +835,20 @@ function matchQuality(m) {
              && (m.live_pi == null || m.chosen_pi == null || m.live_pi === m.chosen_pi);
   if (!agree) return { level: "conflict", why: "the live car reports " + m.live_cyl + " cyl / PI "
     + m.live_pi + " but the chosen save is " + m.chosen_cyl + " cyl / PI " + m.chosen_pi };
-  // 2026-09-16 (belt-and-suspenders for the stale-pick bug): a "picked" identity NAMES the picked save (the
-  // daemon's `best`), but n_signature_ties counts the gear/cyl-CONSISTENT set -- which EXCLUDES a pick that hard
-  // evidence has ruled out. The Exocet case: the stored pick is an 8-speed build, the live box reached 9-10 gears,
-  // so that build is gear-impossible and sits OUTSIDE the tie-set, yet it was still the decoded+named build AND
-  // n_signature_ties came back 1 -- so the bare `ties<=1` shortcut marked it settled. Force unsettled when a pick is
-  // unverified (how==="picked" && !picked_ok), the gearbox has NOT separately settled it (!gear_disambig, so a
-  // ladder-disambiguated result that merely carries how=="picked" still wins), and the live engine is actually being
-  // read (live_cyl present -- the driving case, not the idle-menu "pick pending, drive to confirm" wait where
-  // live_cyl is absent and n_signature_ties>=2 already reads ambiguous). The daemon now also clears such stale picks;
-  // this is the client-side backstop, and it only governs header confidence -- the pinned save still decodes/shows.
-  const pickContradicted = m.how === "picked" && !m.picked_ok && !m.gear_disambig && !!m.live_cyl;
-  const settled = (ties <= 1 || !!m.gear_disambig || !!m.picked_ok) && !pickContradicted;
+  // GEARLESS IDENTITY (2026-09-17, Jett hard directive [[fh6-identity-two-directions]]): identity is settled ONLY by
+  // instant signals + the save-tune / explicit-pick paths, never the gearbox. A stored pick is inert (the daemon
+  // gates it on ts_explicit), so picked_ok — the live car agreeing with an EXPLICIT browse — is the only pick that
+  // counts. fresh_download = a freshly-written locked save (time-based, instant), read exactly from disk. Several
+  // same-signature locked saves are honestly UNSETTLED until the build is equipped and saved.
+  const settled = ties <= 1 || !!m.picked_ok || !!m.fresh_download;
   if (n > 1 && !settled) {
-    // 2026-09-03: this was the THIRD independent copy of "one full pull settles it" found in one
-    // sweep (after panel.js's headline and this file's own picker lead below) -- three files each
-    // wrote their own version of a promise the ladder can't reliably keep. Fixed together; see
-    // [[fh6-gear-ladder-identity-solved]]. Picking is the one sure answer; driving may also do it.
-    return { level: "ambiguous", why: ties + " of " + n + " saved builds tie on cylinders, drivetrain and PI"
-      + (m.max_gear_seen ? "; top gear seen so far " + m.max_gear_seen : "; no gear evidence yet")
-      + (m.ladder_tied ? "; the ratio ladder is still tied" : "") };
+    return { level: "ambiguous", why: ties + " of " + n
+      + " saved builds tie on cylinders, drivetrain and PI — equip the build and save the tune in-game to identify it" };
   }
-  const how = m.gear_disambig ? "settled by the gearbox" + (m.max_gear_seen ? " (top gear seen " + m.max_gear_seen + ")" : "")
-            : m.picked_ok ? "your pick, and the live car agrees with it"
+  const how = m.picked_ok ? "your pick, and the live car agrees with it"
+            : m.fresh_download ? "a freshly-saved tune, read exactly from disk"
             : (m.how || "matched");
   return { level: "ok", why: how + (n > 1 ? " among " + n + " saves" : "")
-    + (m.held ? " — identity held from an earlier sighting, not seen fresh" : "")
     + (m.live_recent === false ? " — live data is not recent" : "") };
 }
 

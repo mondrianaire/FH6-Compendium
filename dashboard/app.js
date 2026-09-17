@@ -3454,11 +3454,10 @@
       const n = m.n_saves || (m.saves || []).length || 1, ties = m.n_signature_ties || 1;
       if (m.how === "unsaved-build") { R.hardBlock = true; R.matchLbl = "distinct build"; R.need.push(`its file isn't on disk — capture it: change any part or slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the already-active tune writes nothing`); }
       else if (m.how === "no-match") { R.hardBlock = true; R.matchLbl = "no match"; R.need.push(`no save matches your ${m.live_cyl}-cyl engine — capture it: change any part or slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the already-active tune writes nothing`); }
-      else if (m.how === "gear-matched") { R.matchLbl = "gear-matched"; R.why.push(`identified the equipped build by its live gear ladder (${ties} share this engine + PI)`); }
-      else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(m.ladder_tied ? `these ${ties} builds share IDENTICAL gearing — the ladder cannot separate them: pick the equipped save in the 🪪 drawer (one click resolves it)` : `drive up through the gears — the ladder identifies which of ${ties} builds you're on`); }   // when the ladder RAN and tied, 'drive the gears' is a dead-end ask — the manual pick is THE escape
+      else if (m.how === "signature" && ties >= 2) { R.hardBlock = true; R.matchLbl = "ambiguous"; R.need.push(`these ${ties} builds share the same signature (cylinders, drivetrain, PI) — equip the build and save the tune in-game to identify it`); }   // gearless (2026-09-17): no gear ladder / WOT pull — the save-tune method resolves ties
       else if (m.how === "signature") { R.matchLbl = "signature"; R.why.push(m.live ? "matched to the car you're driving (cylinders + PI)" : "matched to the car you last drove (cylinders + PI) — held while parked"); }   // J20
       else if (m.how === "picked") { R.matchLbl = "pinned"; R.why.push("pinned to a specific saved tune"); }
-      else if (n > 1) { R.hardBlock = true; R.matchLbl = "unmatched"; R.need.push(`drive so I can match the equipped build (${n} saved tunes exist), or pick it in the decode panel`); }
+      else if (n > 1) { R.hardBlock = true; R.matchLbl = "unmatched"; R.need.push(`equip the build and save the tune in-game to identify it (${n} saved tunes exist)`); }
       else if (m.live) { R.matchLbl = "single save"; R.why.push("single saved tune for this car — unambiguous, and the live car checks out"); }
       else if (m.live_recent) { R.matchLbl = "single save"; R.why.push("verified on your last run — held while parked"); }   // J20: parking must not demand a re-drive the gate already had
       else { R.matchLbl = "single save"; R.softNoLive = true; R.need.push("drive once — verifies the save matches the car you're in"); }
@@ -3542,8 +3541,8 @@
       const curB = (m.builds || []).find((b) => (b.saves || []).some((ts) => String(ts) === String(cached.ts)));
       const lv = curB && curB.livery;
       const thumb = lv && lv.thumb ? `<img class="tl-blvy" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(lv.dir)}" alt="">` : lv ? `<span class="tl-blvy-chip" title="paint-only — no thumbnail exists on disk">🎨 ${esc(lv.name || "base paint")}${lv.source === "guess" ? " ≈" : ""}</span>` : "";
-      const verdict = m.how === "gear-matched" ? `<span style="color:#00d27a;font-weight:700">⚙ verified${m.held ? " · held" : ""}</span>`
-        : (m.how === "unsaved-build" || m.how === "no-match") ? `<span style="color:#e5414e;font-weight:700">🚧 build file missing</span>`
+      const verdict = (m.how === "unsaved-build" || m.how === "no-match") ? `<span style="color:#e5414e;font-weight:700">🚧 build file missing</span>`
+        : (m.picked_ok || m.fresh_download || (m.n_signature_ties || 1) <= 1) ? `<span style="color:#00d27a;font-weight:700">✓ identified</span>`
         : `<span class="why">${esc(m.how || "unverified")}</span>`;
       return `<div class="idm-ribbon" style="border-color:var(--line);margin-bottom:8px">${thumb}<b>${esc(cached.name || "#" + ord)}</b>${curB ? `<span class="why">Build ${esc(curB.label)}${curB.pi != null ? " " + piBadge(null, curB.pi, true) : ""}</span>` : ""}${verdict}${isBuildConfirmed(cid) ? `<span style="color:#00d27a;font-size:11px">✓ confirmed</span>` : ""}<span class="why" style="margin-left:auto;font-size:10px">details → 🧬 Decode</span></div>`;
     };
@@ -4216,10 +4215,9 @@
       const ties = m.n_signature_ties || 1;
       if (m.how === "unsaved-build") status = `<div class="dm-warn"><b>🚧 Distinct build — its file is not on disk.</b> Change any part/slider and SAVE (if yours), or apply a DIFFERENT tune then re-apply this one — re-applying the active tune writes nothing. <span class="dm-info" title="Measured ${esc((m.evidence || []).join(" + ").toLowerCase() || "telemetry")} contradicts every saved tune. Same cylinders${m.live_pi ? ` and PI ${m.live_pi}` : ""} — at a class cap different part combos converge to one PI, so only part-level measurements can tell builds apart. A downloaded tune writes its file when applied.">ⓘ why</span></div>`;
       else if (m.how === "no-match") status = `<div class="dm-warn"><b>⚠ No saved tune matches this car.</b> Apply its tune (or a different one first if it's already active — a re-apply of the active tune writes nothing), or save it if yours. <span class="dm-info" title="You're in a ${m.live_cyl}-cyl car${m.live_pi ? ` at PI ${m.live_pi}` : ""}; the closest save is ${m.chosen_cyl}-cyl — a different engine, so its parts and sliders are not this build's. Downloaded tunes write their file when applied.">ⓘ why</span></div>`;
-      else if (m.how === "gear-matched") status = `<div class="dm-ok">✓ identified the <b>equipped build</b> by its gear ladder ⚙${m.held ? ` <span class="why" style="font-weight:400">— held from your last verified run (a menu car-swap is invisible to telemetry; WOT the gears again if you switched cars)</span>` : ties > 1 ? ` <span class="why" style="font-weight:400">(${ties} builds share this engine + PI)</span>` : ""}</div>`;
-      else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you${m.live ? "'re driving" : " last drove (held while parked)"} — ${m.live_cyl}-cyl${m.live_pi ? ` ${piBadge(null, m.live_pi, true)}` : ""}${ties >= 2 ? ` <span class="why" style="font-weight:400">· ${ties} builds share this signature — drive up through the gears to pin the exact one, or pick below</span>` : ""}</div>`;
+      else if (m.how === "signature") status = `<div class="dm-ok">✓ matched to the car you${m.live ? "'re driving" : " last drove (held while parked)"} — ${m.live_cyl}-cyl${m.live_pi ? ` ${piBadge(null, m.live_pi, true)}` : ""}${ties >= 2 ? ` <span class="why" style="font-weight:400">· ${ties} builds share this signature — equip the build and save the tune in-game to identify it</span>` : ""}</div>`;
       else if (m.how === "picked") status = `<div class="dm-ok">📌 pinned to this saved tune${saves.length > 1 ? " — auto-match off" : ""}</div>`;
-      else if (saves.length > 1) status = `<div class="dm-why">showing the newest of ${saves.length} saved tunes — drive one to auto-match, or pick it:</div>`;
+      else if (saves.length > 1) status = `<div class="dm-why">showing the newest of ${saves.length} saved tunes — equip the build and save the tune in-game to identify the exact one:</div>`;
       const picker = (saves.length > 1 || pick) ? `<div class="dm-picker">${saves.map((s) => {
         const on = String(s.ts) === cur;
         return `<button class="dm-chip${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded" : "self-made"} · saved ${_tsFmt(s.ts)}">${(() => { try { const bb = ((m.builds || []).find((b2) => (b2.saves || []).some((ts) => String(ts) === String(s.ts)))); return bb && bb.livery && bb.livery.thumb ? `<img class="tl-blvy blvy-sm" src="${liveUrl}/livery-thumb?d=${encodeURIComponent(bb.livery.dir)}" loading="lazy" alt=""> ` : ""; } catch (e) { return ""; } })()}${s.pi != null ? piBadge(null, s.pi, true) : "PI ?"}${s.cyl != null ? ` · ${s.cyl}cyl` : ""} <span class="dm-date">${_tsFmt(s.ts)}</span></button>`;
@@ -4270,7 +4268,7 @@
     const tuneLibraryCard = (r, ordinal) => {
       const m = r.match; const saves = (m && m.saves) || [];
       if (saves.length < 2 && (m && m.how) !== "unsaved-build") return "";   // a detected unsaved build shows the library even with one save — that's the whole point
-      const cur = String(r.ts); const eqLive = m.how === "signature" || m.how === "gear-matched"; const pinnedPick = m.how === "picked";
+      const cur = String(r.ts); const eqLive = m.how === "signature"; const pinnedPick = m.how === "picked";
       const saveBtn = (s) => { const on = String(s.ts) === cur;
         const flag = on && eqLive ? "🎮 " : on && pinnedPick ? "📌 " : "";   // 🎮 = live-verified equipped; 📌 = manually pinned (no live verification)
         return `<button class="tl-save${on ? " on" : ""}" data-diskpick="${ordinal}|${s.ts}" title="${s.locked ? "downloaded / locked" : "self-made"} · saved ${_tsFmt(s.ts)} · click to decode this build${on && pinnedPick ? " · pinned manually — not live-verified" : ""}">${flag}${_tsFmt(s.ts)}${s.gears ? ` · ${s.gears}-sp` : ""}${s.locked ? " 🔒" : ""}</button>`; };
@@ -4471,27 +4469,12 @@
           const tip = grp.map((b) => `Build ${b.label}${b.n_diffs ? ` — ${b.n_diffs} parts differ from ${b.diff_base || "A"}` : " — base build"}`).join("\n");
           return `<span class="tl-diff" title="${esc(tip)}">${g ? g + "-sp" : "gears ?"} <b>${esc(labs)}</b></span>`;
         }).join("");
-        // NAME A DRIVE THE DRIVER CAN ACTUALLY DO. This used to pick the SMALLEST box and say "reach N+1 and it is
-        // ruled out". On a roster of 6·6·8·9·10·10 that renders as "reach 7th" — which is impossible in the very
-        // build you are most likely sitting in, and whose whole purpose is to eliminate it. It named the one drive
-        // the driver cannot perform, and it is where "reach 7th in the Exocet" came from as standing advice.
-        //
-        // The ladder is the real instrument and it is ALWAYS available: one WOT pull through your own box yields a
-        // unit-free ratio ladder that separates every candidate, including same-box twins, and reaching your box's
-        // exact top is itself scored as strong evidence. So that is the instruction. Exceeding a box only ever
-        // appears as a CONDITIONAL bonus — "if it reaches 7th, these are out" — never as the thing to go and do.
-        const topSeen = +(mm0.max_gear_seen || 0);
-        const small = gs.find((g) => g > 0);
-        const bigger = gs.some((g) => g > small);
-        const ownTop = topSeen || small;   // best guess at the equipped box until a pull proves otherwise
-        const doomed = small && bigger ? byG.get(small).map((b) => b.label).join("·") : null;
-        const act = `<b>One full WOT pull through the gears</b> identifies it — the ratio ladder is unit-free, so it separates every candidate here${ownTop ? `, and reaching <b>${ownTop}${ordSuf(ownTop)}</b> confirms the box size` : ""}.`
-          + (doomed ? ` <span class="why">If it pulls past <b>${small}${ordSuf(small)}</b> into ${small + 1}${ordSuf(small + 1)}, ${esc(doomed)} ${byG.get(small).length > 1 ? "are" : "is"} ruled out too — but a ${small}-speed cannot, so do not chase it.</span>` : "");
-        const twins = gs.filter((g) => byG.get(g).length > 1).map((g) => byG.get(g).map((b) => b.label).join("·"));
-        const twinNote = twins.length
-          ? ` <span class="why">${twins.join(" and ")} share a box — separating those needs the ratio ladder.</span>`
-          : "";
-        return `<div class="idm-cand"><span class="why" style="font-size:9.5px">${bs.length} candidate builds — what separates them:</span> ${chips}<div class="idm-cand-act">${act}${twinNote}</div></div>`;
+        // GEARLESS IDENTITY (Jett 2026-09-17, [[fh6-identity-two-directions]]): these candidates share the live
+        // signature and cannot be told apart standing still — NO WOT pull, NO ratio ladder. The chips above group
+        // them by gearbox purely as INFORMATION. The save-tune method resolves which one is on the car: equip it and
+        // save the tune in-game, and the freshly-written save IS the equipped build.
+        const act = `<b>Equip the build and save the tune in-game</b> to identify it — the freshly-written save is read exactly and pins which of these you're on. (Locked downloads that share a signature can't be told apart without saving.)`;
+        return `<div class="idm-cand"><span class="why" style="font-size:9.5px">${bs.length} candidate builds — what separates them:</span> ${chips}<div class="idm-cand-act">${act}</div></div>`;
       })();
       // MODIFIED SINCE ITS LAST SAVE outranks every other verdict. The game writes a tune file only when you
       // SAVE, so shop changes and slider drags are invisible on disk — but a live CarPI matching no save proves
@@ -4499,10 +4482,11 @@
       // wrong answer confidently delivered; this says what is actually known and what would settle it.
       const verdictChip = mm0.stale
         ? `<span class="idm-flag warn" title="${esc(mm0.stale.why || "")}">⚠ modified since its last save — showing the save${mm0.stale.save_ts ? " of " + esc(String(mm0.stale.save_ts).slice(0, 8)) : ""}</span>`
-        : mm0.how === "gear-matched" ? `<span style="color:#00d27a;font-weight:700">⚙ verified${mm0.held ? " · held" : ""}</span>`
+        : mm0.picked_ok ? `<span style="color:#00d27a;font-weight:700">✓ your pick, live-confirmed</span>`
+        : mm0.fresh_download ? `<span style="color:#00d27a;font-weight:700">✓ freshly saved</span>`
         : mm0.how === "picked" ? `<span style="color:#a371f7;font-weight:700">📌 pinned</span>`
         : (mm0.how === "no-match" || mm0.how === "unsaved-build") ? `<span class="idm-flag">build file missing</span>`
-        : (mm0.n_signature_ties || 1) >= 2 ? `<span class="idm-flag warn" title="one wide-open-throttle pull through your own box: the ratio ladder separates every candidate">${mm0.n_signature_ties} candidates — one WOT pull settles it</span>`
+        : (mm0.n_signature_ties || 1) >= 2 ? `<span class="idm-flag warn" title="equip the build and save the tune in-game to identify it">${mm0.n_signature_ties} candidates — equip + save to identify</span>`
         : `<span class="why">${esc(mm0.how || "")}</span>`;
       const flags = `${u2.n_conflict ? `<span class="idm-flag" title="save × telemetry disagree — 🔗 drawer">⚠ ${u2.n_conflict}</span>` : ""}${sanE ? `<span class="idm-flag" title="sanity errors — 🩺 drawer">⛔ ${sanE}</span>` : sanW ? `<span class="idm-flag warn" title="sanity warnings — 🩺 drawer">🩺 ${sanW}</span>` : ""}${relN ? `<span class="idm-flag warn" title="%-sliders to calibrate — 🎯 drawer">🎯 ${relN}</span>` : ""}`;
       // ---- RATIFICATION VERDICT: the ONE answer this card must give — is the tune FINISHED, and if not, exactly
@@ -4530,7 +4514,7 @@
       const piOk = !!(led.pi && led.pi.v != null);
       if (!ledFrozen) { try { localStorage.setItem(ledKey, JSON.stringify(led)); } catch (e) {} }
       const REQS = [
-        { k: "identity", ok: idOk, lbl: "build identity verified", act: (bcR.need || [])[0] || "drive up through the gears — the ladder identifies the equipped build", note: idOk && !idNowOk ? "held from your last verified run" : idOk ? (led.identity.note || "") : "" },
+        { k: "identity", ok: idOk, lbl: "build identity verified", act: (bcR.need || [])[0] || "equip the build and save the tune in-game to identify it", note: idOk && !idNowOk ? "held from your last verified run" : idOk ? (led.identity.note || "") : "" },
         { k: "conflicts", ok: !u2.n_conflict, lbl: "save × telemetry agree", act: (dl.gear_diag || {}).kind === "fd" ? `gear conflict is a SYSTEMATIC offset (final-drive band) — re-saving cannot change a band-derived value: calibrate the final drive in the 🎯 drawer instead` : `resolve ${u2.n_conflict || 0} conflict${(u2.n_conflict || 0) > 1 ? "s" : ""} — re-save (own) or apply a different tune then re-apply (downloaded), then drive once · 🔗 drawer` },
         { k: "sanity", ok: !sanE, soft: true, lbl: "tuning sanity clean", act: `${sanE} finding${sanE > 1 ? "s" : ""} — 🩺 drawer (advisory: does not block ratification)` },
         { k: "calib", ok: !relN, lbl: "every slider value exact", act: dl.locked ? `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — a locked tune hides its sliders, so calibrate via ANY editable tune on this car (calibration is per-car and transfers): save your own tune once, do the 🎯 two-point read there, then re-apply this one` : `calibrate ${relN} %-slider${relN > 1 ? "s" : ""} — 🎯 drawer, two-point read` },

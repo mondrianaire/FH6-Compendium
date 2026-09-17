@@ -1804,6 +1804,9 @@ function paintHeader() {
   // name and say so — the gate strip below already carries the resolve step (equip+save / drive a gear / pick).
   const unconf = q.level === "ambiguous" || q.level === "conflict";
   const nTies = (CUR && CUR.match && CUR.match.n_signature_ties) || 0;
+  // when settled, the same (hw,su) build may be saved under several names — surface them beside the tune name.
+  const aliases = unconf ? [] : buildAliases(m);
+  const aliasStr = aliases.length ? `also saved as ${aliases.slice(0, 3).join(", ")}${aliases.length > 3 ? " +" + (aliases.length - 3) + " more" : ""}` : "";
   const busy = RR.busy || RB.state === "running" || RB.pending;
   const ev = c.evidence || (q.level === "ok" ? q.why : "") || "";
   // THE LIVERY HERO TILE: an image-only 240×120 frame. With a thumb, an <img object-fit:cover> (sharper
@@ -1827,7 +1830,7 @@ function paintHeader() {
       </div>
       <div class="htitle t-t" title="${esc(unconf ? "identity unsettled — one of " + (nTies || "several") + " saved builds ties on cylinders / drivetrain / PI, so the specific tune is NOT confirmed. Equip + save the tune, drive a gear the ladder can tell apart, or pick the save to resolve it." : (c.tune || ""))}">${unconf
         ? `<span class="t-l hunconf">⚠ unidentified tune${nTies > 1 ? ` · ${nTies} candidates` : ""}</span>`
-        : c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
+        : c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}${aliasStr ? ` <span class="halias" title="same hardware + sliders = the same build — it's saved under these names too">${esc(aliasStr)}</span>` : ""}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
       <div class="hgate">
         <div class="gcell gstate" data-tone="${g.tone}" title="${esc(rs.hint || g.detail || "")}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span>${ev ? `<span class="gev" title="${esc(ev)}">${esc(ev)}</span>` : ""}</div>
         <span class="garrow" data-w="${(g.tone === "bad" || g.tone === "warn" || g.sheet === "dead") ? "weak" : "strong"}"></span>
@@ -4437,6 +4440,13 @@ let SINGLE_LAP = null;   // lap id selected in the Single-lap tab
 let DELTA_REF = (() => { try { return localStorage.getItem("fh6DeltaRef") || "sbest"; } catch (e) { return "sbest"; } })();   // sbest | obest | median
 const lapOrd = (cid) => String(cid || "").split("|")[0] || "?";
 const cleanLap = (l) => l && l.t != null && !l.void && !l.partial && !l.rewinds;
+// ALIASES (2026-09-16): same (hw_hash, setup_hash) = the same build. If it's been saved under several names,
+// return the OTHER names so the UI can surface them ("also saved as X, Y") instead of silently showing only the
+// newest — self-answering the "why does it call my build that" question. Excludes m's own name; deduped.
+function buildAliases(m) {
+  if (!(m && m.hw && m.su && typeof IDENT !== "undefined" && IDENT && Array.isArray(IDENT.builds))) return [];
+  return [...new Set(IDENT.builds.filter((b) => b.hw === m.hw && b.su === m.su && b.name && b.name !== (m.name || "")).map((b) => b.name))];
+}
 
 // "THIS SESSION" = the current build's CONTENT identity (route+car+build+tune = hw_hash+setup_hash), independent
 // of the SCOPE band. Same (hw,su) is the same build from a driving perspective, so re-saves collapse together.
@@ -4467,10 +4477,11 @@ function sessionListHTML() {
   if (!ls.idOK) return `<div class="sesl">${hdr(ls.setup && ls.setup.hw && !ls.settled ? "identity not settled" : "no saved setup")}<div class="why sesl-note">${ls.setup && ls.setup.hw && !ls.settled ? "build identity isn't settled — equip + save, or drive a gear the ladder can tell apart, to identify this build" : "downloaded / unsaved — equip + save the tune in-game to track this session's laps"}</div></div>`;
   const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
   if (!laps.length) return `<div class="sesl">${hdr((nm ? nm + " · " : "") + "this setup")}<div class="why sesl-note">no clean lap on this exact setup here yet — drive it and each lap appears, fastest first</div></div>`;
-  const best = laps[0].t;
+  const best = laps[0].t, al = buildAliases(ls.setup);
+  const alTxt = al.length ? " · aka " + al.slice(0, 2).join(", ") + (al.length > 2 ? " +" + (al.length - 2) : "") : "";
   const rows = laps.map((l, i) => `<div class="sesl-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}" data-single="${esc(String(l.id))}" title="isolate this lap on the map + break it down in Single lap">
       <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${i === 0 ? " best" : ""}">${lapTime(l.t)}</span><span class="mono sesl-d">${i === 0 ? "—" : "+" + (l.t - best).toFixed(2)}</span></div>`).join("");
-  return `<div class="sesl">${hdr((nm ? nm + " · " : "") + laps.length + " lap" + (laps.length === 1 ? "" : "s") + " · best " + lapTime(best))}<div class="sesl-rows">${rows}</div></div>`;
+  return `<div class="sesl">${hdr((nm ? nm : "this setup") + alTxt + " · " + laps.length + " lap" + (laps.length === 1 ? "" : "s") + " · best " + lapTime(best))}<div class="sesl-rows">${rows}</div></div>`;
 }
 // select a session lap from the left list: isolate its line on the course map + open Single-lap on the right
 function pickSessionLap(id) {

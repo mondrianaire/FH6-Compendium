@@ -1395,6 +1395,8 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .sesl-rk{color:var(--dim)} .sesl-t{font-weight:700} .sesl-t.best{color:var(--acc)} .sesl-d{color:var(--mut);text-align:right}
 /* header honesty: the tune-name row when build identity is unconfirmed (ambiguous cid) */
 .htitle .hunconf{color:var(--warn);font-weight:600}
+/* aliases: same (hw,su) build saved under other names, shown beside the tune name */
+.htitle .halias{font:500 10px var(--mono);color:var(--dim)}
 .lap-hd button{background:none;border:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;text-align:left;cursor:pointer}
 .lap-hd button:hover,.lap-hd button.on{color:var(--acc2)}
 /* THE TURN WINDOW (course mode v2 step 3) */

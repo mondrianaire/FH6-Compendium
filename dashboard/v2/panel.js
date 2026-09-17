@@ -3333,7 +3333,11 @@ function lapHTML() {
   }).join("");
   const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
   const courseTurns = (COURSE.turns || []).filter((t) => t.seq != null);
-  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}<span class="why">· ${taken.length} of ${courseTurns.length} turn${courseTurns.length === 1 ? "" : "s"} taken · rated on minimum speed against ${scopeTok(ls)} · every course turn listed</span></div>`;
+  // "IN A CORNER NOW" live chip (2026-09-16): restored from the retired Live-corners tab (audit LOST list) —
+  // the live lateral-g state readout while you're loaded on the corner. From the live frame, not a detection.
+  const _f = LIVE.frame || {}, inCorner = !!(_f.on && Math.abs(_f.lat || 0) > 0.4);
+  const inChip = inCorner ? `<span class="lap-incorner">● in a corner — ${_f.lat > 0 ? "right" : "left"} ${Math.abs(_f.lat).toFixed(2)} g</span>` : "";
+  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}${inChip}<span class="why">· ${taken.length} of ${courseTurns.length} turn${courseTurns.length === 1 ? "" : "s"} taken · rated on minimum speed against ${scopeTok(ls)} · every course turn listed</span></div>`;
   // NO early return on an empty lap: the spine below lists all course turns as "awaiting", so the whole course
   // shows the moment you load in — and fast turns you drive without tripping the detector show as "driven".
   let lastSeq = null, worstRow = null, gripHits = 0, rankable = 0, first = 0, thinFirst = 0, unranked = 0;
@@ -3390,11 +3394,21 @@ function lapHTML() {
     ordered = spine.slice().sort((a, b) => grp(a) - grp(b)
       || (a.state === "taken" ? (LAP_SORT === "rank" ? rk(a.q) - rk(b.q) : (a.q.v.d == null ? 1e9 : a.q.v.d) - (b.q.v.d == null ? 1e9 : b.q.v.d)) : a.t.seq - b.t.seq));
   }
+  // PER-CORNER DETECTION DETAIL (2026-09-16): restored from the retired Live-corners tab (audit LOST list) —
+  // brake distance, throttle-on distance, peak lat-g, first-red axle/phase, and the handbrake/drift/hard-brake
+  // flags, from this lap's live detection (q.c). A full-width sub-line under the row, shown only when non-empty.
+  const cornerDetail = (c) => { if (!c) return ""; const b = [];
+    if (c.brake_on_m != null) b.push(`brake ${c.brake_on_m} m`);
+    if (c.throttle_on_m != null) b.push(`throttle +${c.throttle_on_m} m`);
+    if (c.lat_g_peak != null) b.push(`${c.lat_g_peak} g peak`);
+    if (c.first_red) b.push(`${esc(c.first_red.axle)} first · ph ${c.first_red.phase}`);
+    if (c.hb) b.push(`⚑ handbrake`); if (c.drift) b.push(`⚑ drift`); if (c.brake_max > 200) b.push(`hard brake`);
+    return b.length ? `<span class="lap-cdet why">${b.join(" · ")}</span>` : ""; };
   const takenRow = (q) => `<div class="lap-row${q === win ? " on" : ""}" data-lapwin="${q.t.seq}" title="show ${esc(turnLabel(q.t))} in the window">
       <span class="lap-turn">${esc(turnLabel(q.t))}<em>${esc(cap1(q.t.kind || ""))}</em></span>
       <span class="lap-spd mono"${q.peak}>${Math.round(q.c.mph_in)}<i>→</i><b>${Math.round(q.apex)}</b><i>→</i>${Math.round(q.c.mph_out)}<em> mph</em></span>
       <span class="lap-rank mono lap-v-${q.v.kind}${q.v.thin ? " thin" : ""}" style="color:${q.tone}"><b>${q.v.text}${q.v.d != null && !q.v.isBest ? ` · ${mphD(q.v.d)}` : ""}</b><em>${esc(q.v.basis)}</em></span>
-      ${q.gr.cell}</div>`;
+      ${q.gr.cell}${cornerDetail(q.c)}</div>`;
   const covRow = (e) => `<div class="lap-row lap-${e.state}" data-turn="${e.t.seq}" title="${e.state === "driven" ? "driven under the detector — open its analysis" : "not taken yet this lap — open its analysis"}">
       <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
       <span class="lap-spd mono">${e.state === "driven" && e.min != null ? `min <b>${e.min}</b><em> mph</em>` : "<em>—</em>"}</span>
@@ -4101,9 +4115,16 @@ function turnStatsHTML(t, ls) {
     const bandTxt = gcx.coarse ? "class-wide, speed-coarse" : `${gcx.band.lo}${gcx.band.hi ? "–" + gcx.band.hi : "+"} mph band`;
     gripLine = `<div class="tsum tsum-grip" title="your best of ${gcx.nLaps} lap${gcx.nLaps === 1 ? "" : "s"} here pulled ${gcx.bestG} g of the ${esc(gcx.cls)} grip ceiling a_max ${gcx.aMax} g (${bandTxt} · p90 of ${gcx.n} class laps)${thin ? " · THIN: only " + gcx.nLaps + " of your laps support this" : ""} · a gentle corner uses less lateral g by nature, so a low % can be the corner not the driver · dirt & aero not separated${gcx.avail ? " · +mph is a near-limit estimate" : ""}"><span class="tg-lab">grip used</span> <b class="tg-pct${atLimit ? " tg-max" : ""}${thin ? " tg-thin" : ""}">${gcx.util}%</b> <span class="why">of the ${esc(gcx.cls)} grip limit${thin ? ` · <span class="tg-thinnote">${gcx.nLaps} lap${gcx.nLaps === 1 ? "" : "s"}</span>` : ""}${tail}</span></div>`;
   }
+  // PER-PHASE APEX-MPH MEDIANS (2026-09-16): the five phase min-speed medians, restored here from the retired
+  // left-pane turn table (audit: this compact 5-phase view existed ONLY in that table). One chip per phase,
+  // coloured to the phase legend; the wtg table below still carries the per-phase time detail.
+  const phaseSpeeds = `<div class="tsum tsum-ph"><span class="tg-lab">apex mph</span>${aggs.map(({ n, p }) => p && p.min != null
+    ? `<span class="tph" title="${esc(SEG_LABEL[n])} · median min ${p.min} mph${p.time != null ? " · " + p.time.toFixed(1) + " s" : ""} · ${p.n} lap${p.n === 1 ? "" : "s"}"><i style="background:${SEG_COL[n]}"></i>${esc(String(SEG_LABEL[n] || n).split(/[ /]/)[0].toLowerCase())} <b>${p.min}</b></span>`
+    : "").join("")}</div>`;
   // ONE compacted title info bar: identity + geometry (header) ∪ the time summary ∪ the grip ceiling ∪ the
-  // 5-phase corner model (the per-phase time-budget bar). The detailed per-phase typical-vs-best TABLE stays below.
-  const titleBar = `<div class="grp tstat-title">${header}${sumRow}${gripLine}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;
+  // per-phase apex-mph medians ∪ the 5-phase corner model (the per-phase time-budget bar). Detailed per-phase
+  // typical-vs-best TABLE stays below.
+  const titleBar = `<div class="grp tstat-title">${header}${sumRow}${gripLine}${phaseSpeeds}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;
   const cmpTable = hasBest ? `<table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best lap</th><th>Δ s</th><th>where it goes</th></tr></thead><tbody>
     ${cmp.map((r) => { const d = r.best != null ? r.typ - r.best : null; const flag = worst && worst.n === r.n && worst.d > 0.03; const pct = d != null && d > 0 ? Math.round(d / maxD * 100) : 0;
       return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>

@@ -678,9 +678,15 @@ def ingest(p, t_mono):
                 ST._beat_flagged = True
                 ST.emit("rival_beat", {"last": getattr(ST, "_beat_lap_time", _last), "best": c.get("best"), "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
                 # IMPORT ON THE WINNER SCREEN (2026-09-16): the car is stationary here, so a full analysis + telemetry
-                # import costs no frame pacing — and it lets the just-completed laps populate the dashboard's session /
-                # single-lap / leaderboard views BEFORE you continue to a new rival (otherwise they wait for a stop).
-                if not ST.analyzing and ST.csv_path:
+                # import lets the just-completed laps populate the dashboard's session / single-lap / leaderboard views
+                # BEFORE you continue to a new rival (otherwise they wait for a stop). GATED on cost: the analysis runs
+                # async, so on a big capture it would still be running when you continue and hitch the next rival's
+                # out-lap (the exact thing session-close-only avoids). Fire only when it will finish within the winner
+                # dwell — last-analysis cost <= 8 s the true signal; before the first analysis fall back to capture size.
+                _cost = getattr(ST, "_last_analysis_secs", 0.0) or 0.0
+                try: _sz = os.path.getsize(ST.csv_path) if ST.csv_path and not ST.replay else 0
+                except Exception: _sz = 0
+                if not ST.analyzing and ST.csv_path and ((_cost and _cost <= 8.0) or (not _cost and _sz < 150e6)):
                     ST.drive_since_periodic = 0.0
                     threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
         elif (c.get("mph") or 0) > 5:

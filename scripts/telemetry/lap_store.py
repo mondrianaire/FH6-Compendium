@@ -48,6 +48,7 @@ def connect(root):
         t0 REAL NOT NULL, lap_s REAL, arc_m REAL,
         build_id TEXT, class TEXT, pi INTEGER, drivetrain TEXT,
         solo INTEGER DEFAULT 0,                     -- a Rivals/time-trial lap: no traffic, no contact
+        is_race INTEGER,                            -- RAW per-event mode: 1=race, 0=Rivals/solo, NULL=unknown (un-guarded, unlike `solo`)
         tune_hash TEXT,                             -- which TUNE REVISION was equipped; NULL when unverifiable
         pts TEXT NOT NULL,                          -- [[arc_m, mph, grip, x, z], ...]
         impacts INTEGER DEFAULT 0,                  -- grip-code-4 points in this lap: contact / jolt
@@ -75,7 +76,7 @@ def _migrate(cx):
                      ("tune_hash", "tune_hash TEXT"), ("lap_dist_m", "lap_dist_m REAL"),
                      ("rewinds", "rewinds INTEGER DEFAULT 0"), ("pauses", "pauses INTEGER DEFAULT 0"),
                      ("pause_s", "pause_s REAL DEFAULT 0"), ("markers", "markers TEXT"),
-                     ("stitched", "stitched INTEGER DEFAULT 0")):
+                     ("stitched", "stitched INTEGER DEFAULT 0"), ("is_race", "is_race INTEGER")):
         if col not in have:
             cx.execute("ALTER TABLE lap_traces ADD COLUMN " + ddl)
             cx.commit()
@@ -96,12 +97,12 @@ def put_laps(root, rows):
         cx = connect(root)
         try:
             cx.executemany(
-                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, pts, impacts, void, tune_hash,
+                """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, is_race, pts, impacts, void, tune_hash,
                                         lap_dist_m, rewinds, pauses, pause_s, markers, stitched)
-                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:pts,:impacts,:void,:tune_hash,
+                   VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:is_race,:pts,:impacts,:void,:tune_hash,
                            :lap_dist_m,:rewinds,:pauses,:pause_s,:markers,:stitched)
                    ON CONFLICT(route_key, session, cid, t0) DO UPDATE SET
-                     lap_s=excluded.lap_s, arc_m=excluded.arc_m, pts=excluded.pts, solo=excluded.solo,
+                     lap_s=excluded.lap_s, arc_m=excluded.arc_m, pts=excluded.pts, solo=excluded.solo, is_race=excluded.is_race,
                      build_id=excluded.build_id, class=excluded.class, pi=excluded.pi, drivetrain=excluded.drivetrain,
                      impacts=excluded.impacts, void=excluded.void, tune_hash=excluded.tune_hash,
                      lap_dist_m=excluded.lap_dist_m, rewinds=excluded.rewinds, pauses=excluded.pauses,
@@ -109,6 +110,7 @@ def put_laps(root, rows):
                 # re-analysis runs every 20-90 s: a lap re-scored as clean must be able to un-void itself, so
                 # impacts/void are overwritten on conflict like every other re-derived field.
                 [dict(r, pts=json.dumps(r["pts"], separators=(",", ":")),
+                      is_race=r.get("is_race"),
                       impacts=int(r.get("impacts") or 0), void=1 if r.get("void") else 0,
                       tune_hash=r.get("tune_hash"), lap_dist_m=r.get("lap_dist_m"),
                       rewinds=int(r.get("rewinds") or 0), pauses=int(r.get("pauses") or 0),

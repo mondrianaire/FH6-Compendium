@@ -51,11 +51,17 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 SCOPES = {
     "containers": [["scripts/db/rebuild.py", "--only", "containers"], ["scripts/db/build_web.py"]],
-    # build_web is NOT in the telemetry scope: it rewrites all ~776 api files over ~20 s, and a session
-    # close fires every few minutes while the game sits in menus -- the live page re-read the api
-    # mid-write and flickered continuously (2026-09-05 20:30). The api refreshes on the containers
-    # scope (a save) as before; courses.json provenance follows on the next save.
-    "telemetry": [["scripts/db/rebuild.py", "--only", "telemetry"]],
+    # build_web IS in the telemetry scope again (2026-09-16). It was pulled on 2026-09-05 because the live
+    # page re-read the api MID-WRITE and flickered -- but build_web switched to ATOMIC writes (tmp + os.replace,
+    # build_web.py:186-191) the very next day, so a reader now always gets a complete file, old or new; that
+    # reason is obsolete. And the trigger changed: the telemetry import no longer fires "every few minutes in
+    # menus" -- it fires on a STOP (the daemon's stopped-on-course / winner-screen import), where the car is
+    # parked, so the ~20 s rewrite no longer competes with active racing. Without this, laps imported to fh6.db
+    # by --only telemetry never reached the dashboard's course/session/leaderboard views until the next SAVE
+    # (scope=containers) -- which is exactly "new laps around this circuit are not updating". (If the full
+    # rewrite ever proves too heavy at this cadence, the follow-up is an incremental build_web scoped to the
+    # session's touched courses.)
+    "telemetry": [["scripts/db/rebuild.py", "--only", "telemetry"], ["scripts/db/build_web.py"]],
 }
 DEFAULT_SCOPE = "containers"
 

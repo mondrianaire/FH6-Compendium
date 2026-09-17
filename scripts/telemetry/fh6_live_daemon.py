@@ -77,7 +77,12 @@ def _ident_restore():
     try:
         d = _ident_load()
         for o, v in (d.get("picked") or {}).items():
-            if v.get("ts"): ST.picked_id[str(o)] = {"ts": str(v["ts"]), "t": time.time()}
+            # CARRY THE PICK'S AGE -- don't reset it. _ident_remember stamps 'at' when the pick was MADE; seeding 't'
+            # to now() here re-timestamped a stale declaration as "fresh", so a pick made days ago survived every
+            # restart and the 2 h freshness window that gates it everywhere (/disk-tune, PI-recording) never expired
+            # it. Restore 't' from the stored 'at' so an old pick ages out on its own; fall back to now() only for a
+            # legacy record written before 'at' existed.
+            if v.get("ts"): ST.picked_id[str(o)] = {"ts": str(v["ts"]), "t": float(v.get("at") or time.time())}
         for o, gs in (d.get("gears") or {}).items():
             g = gs.get("g") if isinstance(gs, dict) else gs
             if g: ST.gears_seen[str(o)] = set(int(x) for x in g)
@@ -650,49 +655,59 @@ def ingest(p, t_mono):
                       "brake_max": max([r["brk"] for r in co["pre"] + rows] or [0]), "hb": any(r["hb"] > 0 for r in rows)}
                 with ST.lock: ST.corners.append(cc)
                 ST.emit("corner", cc)
-    # LAP-COMPLETION trigger: a finished lap adds a fresh pass of every turn, so the cross-lap read can update NOW
-    if c["on"] and c["ev"]:
+    # LAP COMPLETION via LastLap CHANGE (robust, 2026-09-17): the winner-screen FREEZE injects a transition frame
+    # right at the S/F crossing (measured live: mph 117->0, CurrentLap->0.00, LapNumber steps, all in one frame; plus
+    # a brief on/ev drop the CAPTURE doesn't record, since only on==1 frames are written). Gating the lap on the
+    # LapNumber INCREMENT then missed it -- last_lapnum was nulled by that dropped frame, so `_ln > last_lapnum` was
+    # False: no _beat_lap_t was stamped (rival_beat never fired) and the winner lap got no PB (only the FIRST lap did,
+    # the one where the car kept moving). LastLap is the honest signal: it steps to the just-finished lap time and
+    # HOLDS, so its CHANGE marks a completed lap exactly once, immune to on/ev/LapNumber blips. Stamp the beat window
+    # + live PB + interim analysis on that. The LapNumber increment is kept ONLY for the loop S/F pin (needs POSITION).
+    if c["on"]:
         _ln = c.get("lapn", 0); _last = c.get("last")
+        if _last and _last != getattr(ST, "_prev_last", None):   # a fresh LastLap = a lap just completed (blip-proof)
+            ST._prev_last = _last
+            ST._beat_lap_t = t_mono; ST._beat_lap_time = _last; ST._beat_lap_n = _ln
+            # LIVE PB (no OCR): the game's own BestLap dropping = a new personal best; a new-rival BestLap reset can't
+            # be < the prior best, so it never false-flags. Tracked per daemon run.
+            _best = c.get("best"); _pb_prev = getattr(ST, "_prev_best", None)
+            if _best is not None and (_pb_prev is None or _best < _pb_prev - 0.001):
+                ST._prev_best = _best
+                ST.emit("pb", {"last": _last, "best": _best, "prev": _pb_prev, "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
+            maybe_lap_analysis(t_mono, "lap done")
         if ST.last_lapnum is not None and _ln > ST.last_lapnum:
             if ST._auto_loop and ST.loop and not ST.loop.get("sf_fixed"):   # the first LapNumber increment IS the exact S/F crossing (a real on-track position) — pin the loop there, and a lap counter proves it's a circuit
                 with ST.lock:
                     ST.loop["start"] = [round(p["PosX"]), round(p["PosZ"])]; ST.loop["sf_fixed"] = True; ST.loop["topology"] = "circuit"
                     ST._loop_state = "in"; ST._loop_away = 0.0; ST._loop_t0 = t_mono
                 ST.emit("loop", {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "topology": "circuit"})
-            # LIVE PB (2026-09-16, no OCR): the game's own BestLap dropping = a new personal best just set. Uses the
-            # sanitised packet BestLap (authoritative), tracked per daemon run; a new-rival BestLap reset (goes high or
-            # invalid) simply won't be < the prior best, so it never false-flags. Also stamp the winner-screen timer.
-            if _last: ST._beat_lap_t = t_mono; ST._beat_lap_time = _last
-            _best = c.get("best"); _pb_prev = getattr(ST, "_prev_best", None)
-            if _best is not None and (_pb_prev is None or _best < _pb_prev - 0.001):
-                ST._prev_best = _best
-                ST.emit("pb", {"last": _last, "best": _best, "prev": _pb_prev, "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
-            maybe_lap_analysis(t_mono, "event lap")
         ST.last_lapnum = _ln
-        # RIVAL-BEAT / "winner screen": in Rivals you only get a menu when you BEAT the target, and it is NOT a real
-        # menu — IsRaceOn stays 1 and telemetry flows, but the car sits STATIONARY after crossing the line. So
-        # on-event + stopped (~0 mph) sustained just after a completed lap = the "you beat it, continue?" state.
-        if (c.get("mph") or 0) < 2 and _ln and getattr(ST, "_beat_lap_t", 0) and (t_mono - ST._beat_lap_t) < 12:
-            if not getattr(ST, "_beat_still_t0", 0): ST._beat_still_t0 = t_mono
-            if (t_mono - ST._beat_still_t0) > 1.2 and not getattr(ST, "_beat_flagged", False):
-                ST._beat_flagged = True
-                ST.emit("rival_beat", {"last": getattr(ST, "_beat_lap_time", _last), "best": c.get("best"), "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
-                # IMPORT ON THE WINNER SCREEN (2026-09-16): the car is stationary here, so a full analysis + telemetry
-                # import lets the just-completed laps populate the dashboard's session / single-lap / leaderboard views
-                # BEFORE you continue to a new rival (otherwise they wait for a stop). GATED on cost: the analysis runs
-                # async, so on a big capture it would still be running when you continue and hitch the next rival's
-                # out-lap (the exact thing session-close-only avoids). Fire only when it will finish within the winner
-                # dwell — last-analysis cost <= 8 s the true signal; before the first analysis fall back to capture size.
-                _cost = getattr(ST, "_last_analysis_secs", 0.0) or 0.0
-                try: _sz = os.path.getsize(ST.csv_path) if ST.csv_path and not ST.replay else 0
-                except Exception: _sz = 0
-                if not ST.analyzing and ST.csv_path and ((_cost and _cost <= 8.0) or (not _cost and _sz < 150e6)):
-                    ST.drive_since_periodic = 0.0
-                    threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
-        elif (c.get("mph") or 0) > 5:
-            ST._beat_still_t0 = 0; ST._beat_flagged = False   # moving again -> winner screen dismissed / new rival begun
     else:
-        ST.last_lapnum = None; ST._beat_flagged = False; ST._beat_still_t0 = 0
+        ST.last_lapnum = None
+    # STOPPED ON COURSE (2026-09-16): the car is on-track (IsRaceOn=1) but STATIONARY — the Rivals winner / "continue?"
+    # screen (which can RESET CurrentLap, so ev may be 0 here — this is deliberately NOT gated on ev), or just parked
+    # after some laps. Two things fire while stopped (the car isn't moving, so a background analysis costs no frame pacing):
+    #   (a) RIVAL-BEAT: a Rivals lap (ev==1) just completed (_beat_lap_t stamped) and we're now stopped -> the winner
+    #       screen; emit rival_beat for the toast.
+    #   (b) IMPORT: stopped after >=15 s of driving -> a full analysis + telemetry import so the dashboard's session /
+    #       single-lap / leaderboard views catch up WITHOUT waiting for a MENU (session-close needs on==0, which never
+    #       happens while you sit on-course — that is why laps stalled). Gated on cost (a big capture's analysis would
+    #       outlast the stop) and fired once per stop (re-armed when the car moves).
+    if c["on"] and (c.get("mph") or 0) < 2:
+        if not getattr(ST, "_stop_t0", 0): ST._stop_t0 = t_mono
+        _stopped = t_mono - ST._stop_t0
+        if _stopped > 1.2 and getattr(ST, "_beat_lap_t", 0) and (t_mono - ST._beat_lap_t) < 12 and not getattr(ST, "_beat_flagged", False):
+            ST._beat_flagged = True
+            ST.emit("rival_beat", {"last": getattr(ST, "_beat_lap_time", None), "best": c.get("best"), "lap": getattr(ST, "_beat_lap_n", None), "loop": ST.loop and ST.loop.get("name")})
+        if _stopped > 1.5 and ST.live_since_analysis > 15 and not getattr(ST, "_stop_imported", False) and not ST.analyzing and ST.csv_path:
+            _cost = getattr(ST, "_last_analysis_secs", 0.0) or 0.0
+            try: _sz = os.path.getsize(ST.csv_path) if not ST.replay else 0
+            except Exception: _sz = 0
+            if (_cost and _cost <= 8.0) or (not _cost and _sz < 150e6):
+                ST._stop_imported = True; ST.live_since_analysis = 0; ST.drive_since_periodic = 0.0
+                threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
+    elif (c.get("mph") or 0) > 5:
+        ST._stop_t0 = 0; ST._beat_flagged = False; ST._stop_imported = False   # moving again -> re-arm for the next stop
     # auto-analysis triggers: (a) every ~20 s of driving (live suggestions), (b) driving stopped > 5 s after >= 15 s of driving (session close)
     if c["on"]:
         ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0; ST.drive_since_periodic += 1 / 100.0
@@ -1044,11 +1059,15 @@ def _auto_assoc_livery(ordn, window_s=14400):
         pass
 
 
-def _pick_meta(metas, ordn, ts_want=None):
+def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
     """A car can have MANY saved tunes on disk (different engines / PIs). Picking the newest file shows the WRONG
     build when you switch around. Instead match each save's decoded signature (cylinders from the engine-family
     catalog, exact PI from recorded observations) to the LIVE car you're in. Returns (meta, match_info). ts_want
-    forces a specific save (manual override). Also builds the roster of all saves so the dashboard can offer a picker."""
+    forces a specific save; ts_explicit says that force came from an EXPLICIT URL browse ("show me THIS save") and so
+    pins unconditionally. A STORED HOLD (ts_explicit False -- e.g. a pick restored from identity-evidence.json) only
+    pins while its build stays consistent with the live gear/cyl evidence (it would survive into 'ties'); a
+    gear-impossible / wrong-cyl held pick is dropped, and forgotten from disk on a HARD contradiction. Also builds the
+    roster of all saves so the dashboard can offer a picker."""
     if TUNE is None or not metas:
         return (metas[0] if metas else None), {"how": "newest", "live": False, "saves": []}
     cat = TUNE.load_engine_catalog()
@@ -1064,6 +1083,12 @@ def _pick_meta(metas, ordn, ts_want=None):
     live_recent = bool(not live and seen and time.time() - seen["t"] < 7200)
     live_cyl = fr.get("cyl") if live else (seen.get("cyl") if live_recent else None)
     live_pi = fr.get("pi") if live else (seen.get("pi") if live_recent else None)
+    # Gear evidence, computed BEFORE the scoring loop so the pin below can tell a gear-CONSISTENT held pick from a
+    # gear-impossible one -- the SAME accumulated set the 'ties' filter uses, so "pinned build survives into ties"
+    # and "the pin is honoured" are the identical test.
+    _gsT = getattr(ST, "gears_seen", {}).get(str(ordn)) or set(); _mxT = max(_gsT) if _gsT else 0
+    _boxT = _box_exercised(ordn, _mxT)
+    _pin_denied = False; _pin_hard = False   # stored-hold pin: denied (don't name it) / hard-contradicted (forget it)
     roster = []
     for m in metas:
         try:
@@ -1076,7 +1101,21 @@ def _pick_meta(metas, ordn, ts_want=None):
         red = (cat.get(str(efam)) or {}).get("redline")   # the family's MEASURED redline — the engine's live fingerprint
         score = m["mtime"] * 1e-13                     # newest as a faint tiebreak
         if ts_want and str(m["ts"]) == str(ts_want):
-            score += 1e6                               # explicit user pick wins outright
+            # THE PIN. An EXPLICIT browse (ts_explicit -- a ts in the URL, "show me THIS saved tune") wins outright,
+            # right or wrong for what's being driven. A STORED HOLD instead YIELDS to hard live evidence: pin it only
+            # while its build passes the SAME gear+cyl test that admits a save into 'ties' below. Denying the pin (so
+            # the build is never named as best) uses the full test; DELETING the pick from disk is restricted to a
+            # HARD contradiction (wrong cylinders, or a gearbox too small for the gears actually driven) -- the
+            # box-too-big case is the self-correcting _box_exercised heuristic, which a legitimate pick must survive.
+            _gc0 = t.get("gear_count")
+            _cyl_bad = bool(live_cyl and cyl and int(cyl) != int(live_cyl))
+            _box_small = bool(_mxT and _gc0 and int(_gc0) < int(_mxT))
+            _box_big = bool(_boxT and _gc0 and int(_gc0) > int(_mxT))
+            if ts_explicit or not (_cyl_bad or _box_small or _box_big):
+                score += 1e6                           # explicit browse, or a held pick the live car does NOT contradict
+            else:
+                _pin_denied = True                     # a stored hold the gears/cyl rule out -- do not name it
+                if _cyl_bad or _box_small: _pin_hard = True   # forget it from disk ONLY on hard (physical) contradiction
         # CYL-BOOTSTRAP for stub / new-car builds (2026-09-13): an uncatalogued engine (cyl == None) is the NEW-CAR
         # case — the decoded game DB predates the car, so no catalog cyl exists (e.g. a stub ref_car "ordinal N").
         # The live frame authoritatively reports the equipped car's cylinders, so credit that as the build's effective
@@ -1100,6 +1139,27 @@ def _pick_meta(metas, ordn, ts_want=None):
             elif int(gc0) == mxg and mxg >= 5: score += 45
             elif int(gc0) > mxg and _box_exercised(ordn, mxg): score -= 300   # see _box_exercised: a bigger box you have never once shifted into
         roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "red": red, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
+    # A STORED-HOLD PICK the live car contradicts was denied its pin above. Null ts_want so 'how' / picked_ok / the
+    # sticky-identity fallback all re-disambiguate on real evidence instead of labelling a yielded pin 'picked'; and
+    # forget it from disk (same idiom as the fresh-save handler and the sticky gear_id hold) ONLY on a hard
+    # contradiction. _pin_denied is only ever set for a non-explicit pin, so an explicit URL browse is never touched.
+    if _pin_denied:
+        ts_want = None
+        if _pin_hard:
+            try: ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)
+            except Exception: pass
+    elif not ts_explicit:
+        # AGED-OUT pick: one older than the 2 h use-window is never supplied as ts_want, so the branch above never
+        # sees it -- but if the persisted gear/cyl evidence HARD-contradicts its build it should not linger on disk.
+        # Forget it (idempotent), hard evidence only, decoupled from the use-window.
+        _sp = (getattr(ST, "picked_id", {}) or {}).get(str(ordn))
+        if _sp and _sp.get("ts"):
+            _pr = next((r for r in roster if str(r["ts"]) == str(_sp["ts"])), None)
+            if _pr is not None:
+                _pgc = (_pr["_tune"] or {}).get("gear_count")
+                if (live_cyl and _pr.get("cyl") and int(_pr["cyl"]) != int(live_cyl)) or (_mxT and _pgc and int(_pgc) < int(_mxT)):
+                    try: ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)
+                    except Exception: pass
     if not roster:
         return metas[0], {"how": "newest", "live": live, "saves": []}
     roster.sort(key=lambda r: -r["_score"])
@@ -1123,8 +1183,7 @@ def _pick_meta(metas, ordn, ts_want=None):
     # window: the PI-observation bonus is self-reinforcing. Counted UNCONDITIONALLY (live_cyl holds across parking via
     # live_recent) so the displayed tie count no longer flaps 6<->1 with driving/parked — and the STAMP GUARD, which
     # reads this count, no longer refuses to stamp while driving because parked-vs-live changed the arithmetic.
-    _gsT = getattr(ST, "gears_seen", {}).get(str(ordn)) or set(); _mxT = max(_gsT) if _gsT else 0
-    _boxT = _box_exercised(ordn, _mxT)
+    # _gsT / _mxT / _boxT are computed once before the scoring loop above (the pin needs them); reuse them here.
     ties = [r for r in roster if (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))
             and (not _mxT or not (r["_tune"] or {}).get("gear_count") or int((r["_tune"] or {}).get("gear_count")) >= _mxT)
             # ...and, once the box has demonstrably been exercised to its top, drop the boxes that are TOO BIG too.
@@ -2098,6 +2157,7 @@ class H(BaseHTTPRequestHandler):
                     if metas:
                         names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
                         ts_want = q.get("ts", [None])[0]   # optional manual pick — decode a specific saved tune
+                        ts_explicit = bool(ts_want)        # a ts in the URL is an EXPLICIT browse — pin it unconditionally
                         # A STORED PICK IS STILL A PICK. This read the query string ONLY, so a declaration the user
                         # made in the drawer — persisted to identity-evidence.json and faithfully restored into
                         # ST.picked_id at startup — was never consulted when answering. The PI-recording path below
@@ -2108,7 +2168,7 @@ class H(BaseHTTPRequestHandler):
                             _spk = (getattr(ST, "picked_id", {}) or {}).get(str(ordn))
                             if _spk and time.time() - _spk.get("t", 0) < 7200:
                                 ts_want = _spk["ts"]
-                        meta, match = _pick_meta(metas, ordn, ts_want=ts_want)   # match the save to the car you're in, not just the newest
+                        meta, match = _pick_meta(metas, ordn, ts_want=ts_want, ts_explicit=ts_explicit)   # match the save to the car you're in, not just the newest; a stored-hold ts (not ts_explicit) yields if the live car now contradicts it
                         # REMEMBER A CORROBORATED PICK. The disk watcher re-picks on its own clock and never sees the
                         # query string, so the pick the dashboard calls "THE escape" from a signature tie reached the
                         # decode panel and nothing else. Held for 2h like the gear-verified identity, and only when

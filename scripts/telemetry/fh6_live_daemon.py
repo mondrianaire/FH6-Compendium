@@ -208,6 +208,9 @@ def compact(p, t_mono):
         "t": round(t_mono, 2), "on": p["IsRaceOn"], "car": p["CarOrdinal"], "cid": cid(p), "pi": p["CarPI"], "cls": CLASS.get(p["CarClass"], "?"), "drv": DRIVE.get(p["DrivetrainType"], "?"), "cyl": p["NumCylinders"],
         "gear": p["Gear"], "mph": round(p["Speed"] * 2.23694, 1), "rpm": round(p["CurrentEngineRpm"]), "maxrpm": round(p["EngineMaxRpm"]),
         "ev": 1 if p["CurrentLap"] > 0 else 0, "lapn": p["LapNumber"], "rpos": p["RacePosition"], "lapt": round(p["CurrentLap"], 2), "dist": round(p["DistanceTraveled"]), "px": round(p["PosX"], 1), "pz": round(p["PosZ"], 1),   # ev = lap timer running (RacePosition lingers after an event ends)
+        # game-REPORTED completed / best lap times (float seconds), sanitised against the known LastLap-latch garbage
+        # (seen stuck at 43840s / 231307s). Forwarded live so the dashboard can flash a PB / rival-beat without OCR.
+        "last": (round(p["LastLap"], 3) if 3 <= p["LastLap"] <= 1800 else None), "best": (round(p["BestLap"], 3) if 3 <= p["BestLap"] <= 1800 else None),
         "lat": round(p["AccelX"] / G, 2), "lon": round(p["AccelZ"] / G, 2), "yaw": round(math.degrees(p["AngVelY"]), 1),
         "steer": p["Steer"], "thr": p["Accel"], "brk": p["Brake"], "hb": p["HandBrake"], "boost": round(p["Boost"], 1),
         "hp": round(p["Power"] / 745.7), "tq": round(p["Torque"] * 0.7376),
@@ -649,17 +652,35 @@ def ingest(p, t_mono):
                 ST.emit("corner", cc)
     # LAP-COMPLETION trigger: a finished lap adds a fresh pass of every turn, so the cross-lap read can update NOW
     if c["on"] and c["ev"]:
-        _ln = c.get("lapn", 0)
+        _ln = c.get("lapn", 0); _last = c.get("last")
         if ST.last_lapnum is not None and _ln > ST.last_lapnum:
             if ST._auto_loop and ST.loop and not ST.loop.get("sf_fixed"):   # the first LapNumber increment IS the exact S/F crossing (a real on-track position) — pin the loop there, and a lap counter proves it's a circuit
                 with ST.lock:
                     ST.loop["start"] = [round(p["PosX"]), round(p["PosZ"])]; ST.loop["sf_fixed"] = True; ST.loop["topology"] = "circuit"
                     ST._loop_state = "in"; ST._loop_away = 0.0; ST._loop_t0 = t_mono
                 ST.emit("loop", {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "topology": "circuit"})
+            # LIVE PB (2026-09-16, no OCR): the game's own BestLap dropping = a new personal best just set. Uses the
+            # sanitised packet BestLap (authoritative), tracked per daemon run; a new-rival BestLap reset (goes high or
+            # invalid) simply won't be < the prior best, so it never false-flags. Also stamp the winner-screen timer.
+            if _last: ST._beat_lap_t = t_mono; ST._beat_lap_time = _last
+            _best = c.get("best"); _pb_prev = getattr(ST, "_prev_best", None)
+            if _best is not None and (_pb_prev is None or _best < _pb_prev - 0.001):
+                ST._prev_best = _best
+                ST.emit("pb", {"last": _last, "best": _best, "prev": _pb_prev, "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
             maybe_lap_analysis(t_mono, "event lap")
         ST.last_lapnum = _ln
+        # RIVAL-BEAT / "winner screen": in Rivals you only get a menu when you BEAT the target, and it is NOT a real
+        # menu — IsRaceOn stays 1 and telemetry flows, but the car sits STATIONARY after crossing the line. So
+        # on-event + stopped (~0 mph) sustained just after a completed lap = the "you beat it, continue?" state.
+        if (c.get("mph") or 0) < 2 and _ln and getattr(ST, "_beat_lap_t", 0) and (t_mono - ST._beat_lap_t) < 12:
+            if not getattr(ST, "_beat_still_t0", 0): ST._beat_still_t0 = t_mono
+            if (t_mono - ST._beat_still_t0) > 1.2 and not getattr(ST, "_beat_flagged", False):
+                ST._beat_flagged = True
+                ST.emit("rival_beat", {"last": getattr(ST, "_beat_lap_time", _last), "best": c.get("best"), "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
+        elif (c.get("mph") or 0) > 5:
+            ST._beat_still_t0 = 0; ST._beat_flagged = False   # moving again -> winner screen dismissed / new rival begun
     else:
-        ST.last_lapnum = None
+        ST.last_lapnum = None; ST._beat_flagged = False; ST._beat_still_t0 = 0
     # auto-analysis triggers: (a) every ~20 s of driving (live suggestions), (b) driving stopped > 5 s after >= 15 s of driving (session close)
     if c["on"]:
         ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0; ST.drive_since_periodic += 1 / 100.0

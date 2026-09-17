@@ -65,6 +65,10 @@ function connect() {
     // minutes of both with the snapshot so a fresh page starts with history, not a blank.
     ES.addEventListener("strip", (e) => { LIVE.strip.push(JSON.parse(e.data)); if (LIVE.strip.length > 1800) LIVE.strip.splice(0, LIVE.strip.length - 1800); paintDockTrace(); });
     ES.addEventListener("corner", (e) => { LIVE.corners.push(JSON.parse(e.data)); if (LIVE.corners.length > 240) LIVE.corners.splice(0, LIVE.corners.length - 240); paintDockTrace(); paintRight(); });
+    // LIVE PB + RIVAL-BEAT (2026-09-16, no OCR): the daemon flags a new personal best (game BestLap dropped) and
+    // the Rivals winner/"continue?" screen (on-course + stationary after a completed lap). Flash a transient toast.
+    ES.addEventListener("pb", (e) => { try { const d = JSON.parse(e.data); LIVE.pb = Object.assign(d, { at: Date.now() }); if (typeof fh6Toast === "function") fh6Toast("pb", d); } catch (x) {} });
+    ES.addEventListener("rival_beat", (e) => { try { const d = JSON.parse(e.data); LIVE.beat = Object.assign(d, { at: Date.now() }); if (typeof fh6Toast === "function") fh6Toast("beat", d); } catch (x) {} });
     ES.addEventListener("mode", (e) => adoptMode(JSON.parse(e.data)));
     ES.addEventListener("loop", (e) => adoptLoop(JSON.parse(e.data)));   // the daemon's S/F-crossing route name — authoritative map identity in an event
     ES.addEventListener("snapshot", (e) => onLive(JSON.parse(e.data)));

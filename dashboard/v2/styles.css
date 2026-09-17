@@ -1397,6 +1397,14 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .htitle .hunconf{color:var(--warn);font-weight:600}
 /* aliases: same (hw,su) build saved under other names, shown beside the tune name */
 .htitle .halias{font:500 10px var(--mono);color:var(--dim)}
+/* live PB / rival-beat toast (winner screen) */
+#fh6toast{position:fixed;top:54px;left:50%;transform:translateX(-50%) translateY(-14px);z-index:60;display:flex;align-items:center;gap:10px;padding:9px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#fh6toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#fh6toast b{font:700 14px var(--mono);letter-spacing:.06em}
+#fh6toast .tst-t{font:800 18px var(--mono)}
+#fh6toast .tst-sub{font:500 11px var(--mono);opacity:.85}
+.tst-pb{background:linear-gradient(180deg,#0f2a1c,#0b1f16);border:1px solid var(--acc);color:var(--acc)}
+.tst-beat{background:linear-gradient(180deg,#2a2410,#1f1c0b);border:1px solid #e3b341;color:#e3b341}
 .lap-hd button{background:none;border:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;text-align:left;cursor:pointer}
 .lap-hd button:hover,.lap-hd button.on{color:var(--acc2)}
 /* THE TURN WINDOW (course mode v2 step 3) */

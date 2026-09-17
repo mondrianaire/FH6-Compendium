@@ -4447,6 +4447,20 @@ function buildAliases(m) {
   if (!(m && m.hw && m.su && typeof IDENT !== "undefined" && IDENT && Array.isArray(IDENT.builds))) return [];
   return [...new Set(IDENT.builds.filter((b) => b.hw === m.hw && b.su === m.su && b.name && b.name !== (m.name || "")).map((b) => b.name))];
 }
+// LIVE EVENT TOAST (2026-09-16): a transient banner for a new PB or a rival-beat (the winner screen). Fired from
+// the daemon's "pb" / "rival_beat" SSE events (live.js). Auto-dismisses; no OCR, all from the reported LastLap.
+let TOAST_T = 0;
+function fh6Toast(kind, d) {
+  let el = document.getElementById("fh6toast");
+  if (!el) { el = document.createElement("div"); el.id = "fh6toast"; document.body.appendChild(el); }
+  const t = d && d.last != null ? lapTime(d.last) : (d && d.best != null ? lapTime(d.best) : "");
+  el.className = "tst tst-" + (kind === "beat" ? "beat" : "pb");
+  el.innerHTML = kind === "beat"
+    ? `<b>★ RIVAL BEATEN</b>${t ? `<span class="tst-t mono">${esc(t)}</span>` : ""}<span class="tst-sub">continue with a new rival →</span>`
+    : `<b>⚡ NEW PB</b>${t ? `<span class="tst-t mono">${esc(t)}</span>` : ""}${d && d.prev != null ? `<span class="tst-sub">was ${esc(lapTime(d.prev))}</span>` : ""}`;
+  el.classList.add("show");
+  clearTimeout(TOAST_T); TOAST_T = setTimeout(() => el.classList.remove("show"), kind === "beat" ? 8000 : 5000);
+}
 
 // "THIS SESSION" = the current build's CONTENT identity (route+car+build+tune = hw_hash+setup_hash), independent
 // of the SCOPE band. Same (hw,su) is the same build from a driving perspective, so re-saves collapse together.

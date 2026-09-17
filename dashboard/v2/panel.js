@@ -1984,7 +1984,7 @@ function paintLeft() {
     body.querySelectorAll(".sesl-row[data-single]").forEach((b) => b.onclick = () => pickSessionLap(b.dataset.single));   // lap browser row -> isolate + Single lap
     // LAP BROWSER controls (preset / toggle / sort): mutate LAPB, persist, repaint the left pane
     body.querySelectorAll("[data-lbpreset]").forEach((b) => b.onclick = () => { LAPB.preset = b.dataset.lbpreset; lapbSave(); LEFT_KEY = null; paintLeft(); });
-    body.querySelectorAll("[data-lbcls]").forEach((s) => s.onchange = () => { if (!s.value) return; LAPB.preset = "class"; LAPB.cls = s.value; lapbSave(); LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-lbcls]").forEach((b) => b.onclick = () => { LAPB.preset = "class"; LAPB.cls = b.dataset.lbcls; lapbSave(); LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-lbtog]").forEach((b) => b.onclick = () => { const k = b.dataset.lbtog; LAPB[k] = !LAPB[k]; lapbSave(); LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-lbsort]").forEach((b) => b.onclick = () => { LAPB.sort = b.dataset.lbsort; lapbSave(); LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
@@ -4504,12 +4504,16 @@ function lapBrowserHTML() {
   const cnt = (k, cls) => lapbCount(k, LAPB.clean, LAPB.rivals, cls);   // count UNDER the current toggles
   const nspan = (n) => n == null ? "" : `<span class="lb-n">${n}</span>`;
   const pre = (k, lbl, tip) => { const n = cnt(k); return `<button class="lb-pre${LAPB.preset === k ? " on" : ""}${n === 0 ? " lb-empty" : ""}" data-lbpreset="${k}" title="${esc(tip)}">${lbl}${nspan(n)}</button>`; };
-  // CLASS DROPDOWN (Jett 2026-09-17): between Car and All, a <select> that scopes to one class. Each option
-  // carries its own lap count under the current toggles; the leading placeholder shows only when class isn't active.
-  const clsOpts = classesPresent.map((c) => `<option value="${esc(c)}"${LAPB.preset === "class" && LAPB.cls === c ? " selected" : ""}>${esc(c)} (${cnt("class", c) ?? 0})</option>`).join("");
-  const clsSel = classesPresent.length
-    ? `<select class="lb-cls${LAPB.preset === "class" ? " on" : ""}" data-lbcls title="scope the laps to one class on this course">${LAPB.preset === "class" ? "" : `<option value="">class ▾</option>`}${clsOpts}</select>`
-    : "";
+  // CLASS SELECTOR as the app's PI-class badges (Jett 2026-09-17): class is a bounded, colour-coded vocabulary
+  // read at a glance, so it is ALWAYS the established .pib badge — the same class identity used in the hero,
+  // leaderboard and stats — NEVER a plain grey dropdown. Sits between Car and All; each badge carries its lap
+  // count under the current toggles; the picked class is ringed. classPill() draws the identity, the button
+  // carries the selection state + click target.
+  const clsChips = classesPresent.map((c) => {
+    const n = cnt("class", c), on = LAPB.preset === "class" && LAPB.cls === c;
+    return `<button class="lb-clsp${on ? " on" : ""}${n === 0 ? " lb-empty" : ""}" data-lbcls="${esc(c)}" title="only ${esc(c)}-class laps on this course${n === 0 ? " — none match the current toggles" : ""}">${classPill(c, n)}</button>`;
+  }).join("");
+  const clsSel = classesPresent.length ? `<span class="lb-clsrow">${clsChips}</span>` : "";
   const tog = (k, lbl, on, tip) => { const n = k === "clean" ? lapbCount(LAPB.preset, true, LAPB.rivals, LAPB.cls) : lapbCount(LAPB.preset, LAPB.clean, true, LAPB.cls);
     return `<button class="lb-tog${on ? " on" : ""}" data-lbtog="${k}" title="${esc(tip)}">${lbl}${nspan(n)}</button>`; };
   const srt = (k, lbl) => `<button class="lb-s${LAPB.sort === k ? " on" : ""}" data-lbsort="${k}">${lbl}</button>`;

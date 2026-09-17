@@ -1344,6 +1344,38 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .lap-cov{font-weight:700;font-size:10.5px}
 .lap-cov-driven{color:var(--acc2)}
 .lap-cov-await{color:var(--dim)}
+/* Session laps + Single-lap analysis tabs (course v2, 2026-09-16) */
+.sess,.slap{display:flex;flex-direction:column;gap:8px}
+.sess-sum{display:flex;gap:18px;padding:4px 8px}
+.sess-sum span{display:flex;flex-direction:column;line-height:1.1}
+.sess-sum b{font:800 16px var(--mono)} .sess-sum em{font-style:normal;font-size:9.5px;color:var(--mut)}
+.sess-hd,.sess-row{display:grid;grid-template-columns:32px 1fr 1fr 1.4fr;gap:8px;align-items:center;padding:5px 8px}
+.sess-hd{font:600 8.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
+.sess-rows{max-height:220px;overflow-y:auto}
+.sess-row{border-bottom:1px solid var(--line2);cursor:pointer;font-size:12.5px}
+.sess-row:hover{background:var(--panel2)}
+.sess-t{font-weight:700} .sess-t.best{color:var(--acc)}
+.sess-d{color:var(--mut)} .sess-rank{color:var(--dim)}
+.sess-when{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl-pick{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:2px 6px}
+.sl-pick .why{margin-right:2px} .sl-pick .mini{padding:1px 7px;font-size:11px}
+.sl-hd,.sl-row{display:grid;grid-template-columns:1.5fr 0.7fr 2.2fr;gap:8px;align-items:center;padding:5px 8px}
+.sl-hd{font:600 8.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
+.sl-badges{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.sl-badges em,.sl-hd .sl-badges em{font-style:normal;text-align:center;font-size:8.5px}
+.sl-row{border-bottom:1px solid var(--line2);cursor:pointer;font-size:12.5px}
+.sl-row:hover{background:var(--panel2)}
+.sl-turn b{color:var(--ink)} .sl-min{color:var(--ink)} .sl-min em{font-style:normal;color:var(--dim);font-size:9px}
+.sl-b{font:700 10.5px var(--mono);text-align:center;padding:2px 0;border-radius:3px;border:1px solid var(--line2);color:var(--mut)}
+.sl-b1{background:rgba(0,210,122,.18);border-color:var(--acc);color:var(--acc)}
+.sl-b1t{background:none;border-color:var(--acc2);color:var(--acc2)}
+.sl-bmid{color:var(--ink)}
+.sl-blo{background:rgba(240,97,109,.14);border-color:#f0616d;color:#f0616d}
+.sl-na{color:var(--dim);border-style:dashed}
+.sl-ref{margin-left:auto;display:inline-flex;gap:3px} .sl-ref .mini{padding:1px 6px;font-size:10px}
+.sl-deltawrap{padding:2px 6px}
+.sl-delta{display:block;width:100%;height:auto;max-height:110px;background:var(--bg);border-radius:4px}
+.sl-dv{padding:2px 8px;font-weight:700;font-size:13px}
 .lap-hd button{background:none;border:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;text-align:left;cursor:pointer}
 .lap-hd button:hover,.lap-hd button.on{color:var(--acc2)}
 /* THE TURN WINDOW (course mode v2 step 3) */

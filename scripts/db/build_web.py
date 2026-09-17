@@ -320,10 +320,18 @@ def main(argv=None):
         geo = cx.execute("SELECT geometry FROM course WHERE route_key=?", (key,)).fetchone()
         geo = json.loads(geo["geometry"] or "{}") if geo else {}
         laps = rows(cx, """
-            SELECT lap_id AS id, cid, container, lap_s AS t, arc_m AS arc,
-                   ROUND(coverage, 3) AS cov, is_partial AS partial, void, impacts, rewinds,
-                   class, pi, drivetrain AS dt, build_id AS bid, session_id AS sid, solo
-            FROM lap WHERE route_key = ? ORDER BY (void OR is_partial OR rewinds > 0), lap_s""", key)
+            SELECT l.lap_id AS id, l.cid, l.container, l.lap_s AS t, l.arc_m AS arc,
+                   ROUND(l.coverage, 3) AS cov, l.is_partial AS partial, l.void, l.impacts, l.rewinds,
+                   l.class, l.pi, l.drivetrain AS dt, l.build_id AS bid, l.session_id AS sid, l.solo,
+                   l.hw_hash AS hw, t.setup_hash AS su
+            FROM lap l LEFT JOIN tune_container t ON l.container = t.container
+            WHERE l.route_key = ? ORDER BY (l.void OR l.is_partial OR l.rewinds > 0), l.lap_s""", key)
+        # THE DRIVING IDENTITY = hw_hash (upgrades) + setup_hash (sliders). Both ride along so the dashboard
+        # can scope "this setup" (route+car+build+tune) and score a turn against the same-tune pool. setup_hash
+        # (from tune_container) is CONTENT-based, so re-saves of identical sliders collapse to one identity —
+        # unlike lap.tune_hash, which is 1:1 with the save. Two builds with the same (hw,su) are the SAME build
+        # from a driving perspective (Jett 2026-09-16). NULL su for unsaved/downloaded laps (no container) —
+        # those fall out of the identity pool honestly. hw_hash is shared across lap/tune_container spaces.
         # traces: NEVER CAP THE DATA FOR ONE CONSUMER'S BENEFIT (v1 lesson). The old cap kept one
         # lap per cid and dropped every void or partial lap, so an A/B pair on one car at one PI
         # collapsed to a single trace and the header's "N of N laps on record" reported the cap as

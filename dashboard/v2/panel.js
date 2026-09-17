@@ -838,7 +838,11 @@ function presetTest(k) {
     car: (l) => ord != null && parseInt(String(l.cid || "").split("|")[0], 10) === ord,
     build: (l) => !!mb && !!mb.hw && (lapBuild(l) || {}).hw === mb.hw,
     hw: (l) => twins.size > 0 && twins.has(l.container),
-    tune: (l) => !!cont && l.container === cont,
+    // "this setup" = the CONTENT driving identity = hw_hash (upgrades) + setup_hash (sliders). setup_hash is
+    // content-based, so re-saves of identical sliders collapse to ONE build (Jett 2026-09-16: same hw+sliders =
+    // the same build, nothing separates them from driving). The build sheet carries both on MATCH.build, so no
+    // container bridge; laps export l.su = tune_container.setup_hash (NULL for unsaved/downloaded → excluded).
+    tune: (l) => !!(mb && mb.hw && mb.su) && l.hw === mb.hw && l.su === mb.su,
   }[k] || (() => true);
 }
 // the selection for this course, created on first sight with the context's own default: a timed
@@ -1973,12 +1977,12 @@ function paintLeft() {
     // to the pane and carries its own always-visible bottom-left legend (which houses the map-view toggle);
     // the DATA filter is in the shared #coursefilter bar, not here.
     body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq(), view: MAP_VIEW, legOpen: MAP_LEG_OPEN }));
-    body.insertAdjacentHTML("beforeend", turnTableHTML(COURSE, activeLapSet()));   // redesign phase B: the sortable turn list
+    // the sortable turn list moved OUT of the left map into the Session-laps tab (2026-09-16) so the map owns
+    // the pane; it renders there via turnTableHTML scoped to "this setup". The map keeps only its own markers.
     wireTrace(body); addLiveDot(body); liveLapPaint();   // a rebuilt map redraws the live lap once, then appends
     // a turn marker OR a turn-list row selects that turn (highlight its phases here, full stats on the
     // right); the SVG/list is rebuilt on select, so re-bind every paint. Clicking the selected one clears.
-    body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));
-    body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} LEFT_KEY = null; paintLeft(); });
+    body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));   // the map's own turn markers
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-maplayer]").forEach((b) => b.onclick = () => { const k = b.dataset.maplayer; MAP_LAYERS[k] = !MAP_LAYERS[k]; try { localStorage.setItem("fh6MapLayers", JSON.stringify(MAP_LAYERS)); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     // WHAT THE LIVE TRAIL'S COLOUR MEANS (Jett 2026-09-11: selectable in the map legend's settings) -- the same
@@ -3171,7 +3175,7 @@ function courseConfidenceBadge() {
 // Which pane the context calls for. In a menu the build is what can change, so its data asks and
 // ratification steps lead; on the road the corners you are taking lead; on a course with a
 // baseline set, the conclusions lead. A click pins a tab until the context class changes.
-const RT_LABEL = { lap: "Current lap", corners: "Live corners", matrix: "Turn analysis", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser", services: "Services" };
+const RT_LABEL = { lap: "Current lap", session: "Session laps", single: "Single lap", corners: "Live corners", matrix: "Turn analysis", stats: "General statistics", concl: "Conclusions", build: "Build data", browser: "Course Browser", services: "Services" };
 // "build" (Build Data) disabled for free mode 2026-09-03 (Jett: "does not seem immediately useful
 // to me") -- NOT deleted, RT_LABEL.build and its render path are untouched, just dropped from the
 // list this function returns. Add "build" back to the free-mode array below to re-enable it.
@@ -3181,7 +3185,7 @@ const RT_LABEL = { lap: "Current lap", corners: "Live corners", matrix: "Turn an
 // Course mode: ONE live tab (Current lap, now the whole course turn-by-turn) + two analysis tabs. The old
 // "Live corners" detection-log tab was retired (2026-09-16) — its turn coverage folded into Current lap, its
 // session balance into General statistics. Free roam keeps "corners" as its only live view (no course to key to).
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "matrix", "stats"] : ["corners", "stats", "browser"]; }
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "session", "single", "matrix", "stats"] : ["corners", "stats", "browser"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
@@ -3203,6 +3207,8 @@ function paintRight() {
   const tabs = rightTabs();
   const cur = tabs.includes(RIGHT_TAB) ? RIGHT_TAB : ctx;
   const why = { lap: "each turn rated as you take it · minimum speed against the scope",
+                session: "every lap on this exact setup · pick one to break it down",
+                single: "one lap, turn by turn · scored in each pool · where the time went",
                 corners: "every corner as you take it · newest first", matrix: "one row per course turn · this session",
                 stats: "world-wide · ranked by frequency × impact · free roam needs more samples",
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide",
@@ -3210,7 +3216,7 @@ function paintRight() {
                 services: "the three processes the lab runs · start, stop or restart each one" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
-  body.innerHTML = cur === "lap" ? lapHTML() : cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
+  body.innerHTML = cur === "lap" ? lapHTML() : cur === "session" ? sessionHTML() : cur === "single" ? singleLapHTML() : cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
   body.querySelectorAll("[data-svcact]").forEach((b) => b.onclick = () => svcAct(b.dataset.svc, b.dataset.svcact));
   body.querySelectorAll("[data-svcrefresh]").forEach((b) => b.onclick = () => svcRefresh());
@@ -3247,6 +3253,17 @@ function paintRight() {
     body.querySelectorAll("[data-lapsort]").forEach((b) => b.onclick = () => { LAP_SORT = b.dataset.lapsort; try { localStorage.setItem("fh6LapSort", LAP_SORT); } catch (e) {} paintRight(); });
     // a driven/awaiting spine row has no live pass to window — click it to open that turn in Turn analysis
     body.querySelectorAll(".lap-rows [data-turn]").forEach((b) => b.onclick = () => pickTurn(+b.dataset.turn));
+  }
+  if (cur === "session") {
+    // click a lap -> open it in Single-lap analysis; a turn in the table -> Turn analysis; sort the table
+    body.querySelectorAll("[data-single]").forEach((b) => b.onclick = () => { SINGLE_LAP = b.dataset.single; RIGHT_TAB = "single"; rightTabStore()[ctx] = "single"; viewSave(); paintRight(); });
+    body.querySelectorAll("[data-turn]").forEach((r) => r.onclick = () => pickTurn(r.dataset.turn));
+    body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} paintRight(); });
+  }
+  if (cur === "single") {
+    body.querySelectorAll("[data-single]").forEach((b) => b.onclick = () => { SINGLE_LAP = b.dataset.single; paintRight(); });
+    body.querySelectorAll(".sl-row[data-turn]").forEach((r) => r.onclick = () => pickTurn(r.dataset.turn));
+    body.querySelectorAll("[data-deltaref]").forEach((b) => b.onclick = () => { DELTA_REF = b.dataset.deltaref; try { localStorage.setItem("fh6DeltaRef", DELTA_REF); } catch (e) {} paintRight(); });
   }
   if (cur === "stats") body.querySelectorAll("[data-clsfocus]").forEach((b) => b.onclick = () => {
     if (!COURSE) return; const cls = b.dataset.clsfocus, vc = traceSel(COURSE);
@@ -4387,6 +4404,116 @@ function courseStatsHTML() {
   const table = `<div class="grp"><div class="gh">by car <span class="why">· ${cars.length} car${cars.length === 1 ? "" : "s"} in ${scopeTok(ls)} · fastest first</span></div>
     <table class="cstat-tbl"><thead><tr><th>car</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   return totals + sbal + headline + scatter + table;
+}
+
+// ============ SESSION LAPS + SINGLE-LAP ANALYSIS (course v2, 2026-09-16) ============
+let SINGLE_LAP = null;   // lap id selected in the Single-lap tab
+let DELTA_REF = (() => { try { return localStorage.getItem("fh6DeltaRef") || "sbest"; } catch (e) { return "sbest"; } })();   // sbest | obest | median
+const lapOrd = (cid) => String(cid || "").split("|")[0] || "?";
+const cleanLap = (l) => l && l.t != null && !l.void && !l.partial && !l.rewinds;
+
+// "THIS SESSION" = the current build's CONTENT identity (route+car+build+tune = hw_hash+setup_hash), independent
+// of the SCOPE band. Same (hw,su) is the same build from a driving perspective, so re-saves collapse together.
+function setupLapSet() {
+  const mb = MATCH && MATCH.build, idOK = !!(mb && mb.hw && mb.su);
+  let ids = idOK ? (COURSE.laps || []).filter((l) => l.hw === mb.hw && l.su === mb.su).map((l) => String(l.id)) : [];
+  if (RACING_ONLY && ids.length) { const race = racingIds(COURSE.laps || []); const g = ids.filter((id) => race.has(id)); if (g.length) ids = g; }
+  return { set: new Set(ids), n: ids.length, idOK, setup: mb || null,
+           label: (mb && mb.name) ? "this setup · " + mb.name : "this setup",
+           token: "SET·" + ids.length, cls: null, total: (COURSE.laps || []).length };
+}
+// per-lap MIN speed through a turn (the slowest point) — the metric the pool scores rank on (higher = better).
+function turnMinByLap(t) {
+  const m = {}; SEG_ORDER.forEach((n) => ((t.phaseObs || {})[n] || []).forEach((r) => {
+    if (r[2] == null) return; const id = String(r[0]); if (m[id] == null || r[2] < m[id]) m[id] = r[2]; }));
+  return m;
+}
+function sessionHTML() {
+  if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to see this session's laps.</div>`;
+  const ls = setupLapSet(), meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
+  const head = `<div class="gh">Session laps <span class="why">· ${esc(ls.label)} · this car · build · tune, every lap that matches</span></div>`;
+  if (!ls.idOK) return `<div class="sess">${head}<div class="why" style="padding:10px 6px">No saved build identity yet — the current car reads as downloaded / unsaved. Equip + save the tune in-game and its laps collect here.</div></div>`;
+  const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
+  if (!laps.length) return `<div class="sess">${head}<div class="why" style="padding:10px 6px">No clean timed lap yet on this course with this exact setup — drive it and every lap on this build appears here, fastest first.</div></div>`;
+  const best = laps[0].t, med = laps[laps.length >> 1].t;
+  const summ = `<div class="sess-sum"><span><b class="mono" style="color:var(--acc)">${lapTime(best)}</b><em>best</em></span><span><b class="mono">${lapTime(med)}</b><em>median</em></span><span><b>${laps.length}</b><em>clean lap${laps.length === 1 ? "" : "s"}</em></span></div>`;
+  const rows = laps.map((l, i) => `<div class="sess-row" data-single="${esc(String(l.id))}" title="break this lap down turn by turn">
+      <span class="sess-rank mono">${i + 1}</span><span class="mono sess-t${i === 0 ? " best" : ""}">${lapTime(l.t)}</span>
+      <span class="sess-d mono">${i === 0 ? "—" : "+" + (l.t - best).toFixed(2)}</span>
+      <span class="why sess-when">${esc((l.sid || "").replace(/^fh6_/, "").replace(/_/, " ") || "—")}</span></div>`).join("");
+  const list = `<div class="grp"><div class="gh">laps <span class="why">· fastest first · click one to break it down</span></div>
+    <div class="sess-hd"><span>#</span><span>time</span><span>+best</span><span>session</span></div><div class="sess-rows">${rows}</div></div>`;
+  return `<div class="sess">${head}${summ}${list}${turnTableHTML(COURSE, ls)}</div>`;
+}
+// cumulative elapsed time vs % PROGRESS through the lap (0..1). Arc wraps on a loop, so the axis is the
+// monotonic cumulative DISTANCE (from world x/z), normalised 0..1 — "how far through the lap" = exactly the
+// meta-score Jett asked for. Time is reconstructed (world-distance / speed); traces carry no per-sample clock.
+function cumByProgress(trace) {
+  if (!trace || trace.length < 3) return null;
+  const cum = []; let acc = 0, dist = 0;
+  for (let i = 0; i < trace.length; i++) { if (i > 0) { const a = trace[i - 1], b = trace[i];
+    const d = Math.hypot(b[3] - a[3], b[4] - a[4]), mph = Math.max(3, ((a[1] || 0) + (b[1] || 0)) / 2); acc += d / (mph * 0.44704); dist += d; }
+    cum.push([dist, acc, trace[i][3], trace[i][4]]); }
+  const total = dist || 1;
+  return { pts: cum.map((c) => [c[0] / total, c[1], c[2], c[3]]), total, dur: acc };   // [frac, elapsed, x, z]
+}
+function interpFrac(pts, f) {
+  if (!pts || !pts.length) return null;
+  if (f <= pts[0][0]) return pts[0][1]; if (f >= pts[pts.length - 1][0]) return pts[pts.length - 1][1];
+  for (let i = 1; i < pts.length; i++) if (pts[i][0] >= f) { const a = pts[i - 1], b = pts[i], t = (f - a[0]) / ((b[0] - a[0]) || 1); return a[1] + (b[1] - a[1]) * t; }
+  return pts[pts.length - 1][1];
+}
+function nearestFrac(pts, x, z) {   // progress fraction of the trace point nearest a turn's apex (x,z) — for markers
+  let bi = 0, bd = Infinity; for (let i = 0; i < pts.length; i++) { const d = (pts[i][2] - x) ** 2 + (pts[i][3] - z) ** 2; if (d < bd) { bd = d; bi = i; } } return pts[bi][0];
+}
+function progressDeltaHTML(me, pool) {
+  const traces = COURSE.traces || {}, tr = (id) => traces[id] || traces[String(id)];
+  const myTr = tr(me.id); if (!myTr) return "";
+  const others = pool.filter((l) => String(l.id) !== String(me.id) && tr(l.id));
+  let refLap = null;
+  if (DELTA_REF === "obest") refLap = (COURSE.laps || []).filter((l) => cleanLap(l) && tr(l.id)).sort((a, b) => a.t - b.t)[0];
+  else if (DELTA_REF === "median") { const s = others.slice().sort((a, b) => a.t - b.t); refLap = s[s.length >> 1]; }
+  else refLap = others.slice().sort((a, b) => a.t - b.t)[0];   // sbest (fastest OTHER lap in scope)
+  const refPick = `<span class="sl-ref">${[["sbest", "session best"], ["obest", "overall best"], ["median", "median"]].map(([k, l]) => `<button class="mini${DELTA_REF === k ? " on" : ""}" data-deltaref="${k}">${l}</button>`).join("")}</span>`;
+  const head = `<div class="gh">Where the time went <span class="why">· this lap vs ${refLap ? esc(lapTime(refLap.t)) : "—"} · % through the lap · below the line = ahead, above = behind</span>${refPick}</div>`;
+  const refTr = refLap && tr(refLap.id);
+  if (!refTr) return `<div class="grp">${head}<div class="why" style="padding:8px 6px">no reference lap with a trace — pick another reference or drive more on this setup</div></div>`;
+  const my = cumByProgress(myTr), ref = cumByProgress(refTr);
+  if (!my || !ref) return `<div class="grp">${head}<div class="why" style="padding:8px 6px">not enough trace to build the delta</div></div>`;
+  const N = 120, pD = []; let dmax = 0.05;
+  for (let i = 0; i <= N; i++) { const f = i / N, d = interpFrac(my.pts, f) - interpFrac(ref.pts, f); pD.push([f, d]); dmax = Math.max(dmax, Math.abs(d)); }
+  const finalD = pD[pD.length - 1][1], W = 560, H = 96, pad = 14;
+  const X = (f) => pad + f * (W - 2 * pad), Y = (d) => H / 2 - (d / dmax) * (H / 2 - 10);
+  const line = pD.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" ");
+  const marks = (COURSE.turns || []).filter((t) => t.x != null).map((t) => { const f = nearestFrac(ref.pts, t.x, t.z);
+    return `<line x1="${X(f).toFixed(1)}" y1="8" x2="${X(f).toFixed(1)}" y2="${H - 10}" stroke="var(--line2)" stroke-width="1"/><text x="${X(f).toFixed(1)}" y="${H - 1}" font-size="8" text-anchor="middle" fill="var(--dim)">${esc(turnLabel(t))}</text>`; }).join("");
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="sl-delta">${marks}<line x1="${pad}" y1="${(H / 2).toFixed(1)}" x2="${W - pad}" y2="${(H / 2).toFixed(1)}" stroke="var(--line2)" stroke-dasharray="3 3"/><path d="${line}" fill="none" stroke="${finalD <= 0 ? "var(--acc)" : "var(--bad)"}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+  const verdict = `<div class="sl-dv mono" style="color:${finalD <= 0 ? "var(--acc)" : "var(--bad)"}">${finalD <= 0 ? "−" : "+"}${Math.abs(finalD).toFixed(2)} s ${finalD <= 0 ? "ahead" : "behind"} at the line · ${dmax.toFixed(2)} s peak swing</div>`;
+  return `<div class="grp">${head}<div class="sl-deltawrap">${svg}</div>${verdict}<div class="tstat-foot">reconstructed time (world-distance ÷ speed) — traces carry no per-sample clock; the shape reads true, the absolute seconds approximate</div></div>`;
+}
+function singleLapHTML() {
+  if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to analyse a single lap.</div>`;
+  const meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
+  const ls = setupLapSet();
+  let pool = [...ls.set].map((id) => meta[id]).filter(cleanLap);
+  if (!pool.length) pool = (COURSE.laps || []).filter(cleanLap);
+  pool.sort((a, b) => a.t - b.t);
+  if (!pool.length) return `<div class="why" style="padding:8px 6px">No clean timed lap to analyse yet.</div>`;
+  const me = (SINGLE_LAP && meta[String(SINGLE_LAP)] && cleanLap(meta[String(SINGLE_LAP)])) ? meta[String(SINGLE_LAP)] : pool[0];
+  const L = String(me.id);
+  const picker = `<div class="sl-pick"><span class="why">lap</span>${pool.slice(0, 14).map((l) => `<button class="mini${String(l.id) === L ? " on" : ""}" data-single="${esc(String(l.id))}" title="${esc(l.sid || "")}">${lapTime(l.t)}</button>`).join("")}</div>`;
+  const head = `<div class="gh">Single lap <span class="why">· ${lapTime(me.t)} · ${esc(carShort(me.cid))} · ${esc(me.class || "?")} · ${me.hw && me.su ? "identified setup" : "no setup id"}</span></div>`;
+  const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);
+  const pools = [["all", "all", () => true], ["cls", "class", (l) => me.class && l.class === me.class], ["car", "car", (l) => lapOrd(l.cid) === lapOrd(me.cid)], ["set", "setup", (l) => me.hw && me.su && l.hw === me.hw && l.su === me.su]];
+  const badge = (v) => { if (v.kind === "nolap" || v.kind === "only") return `<span class="sl-b sl-na" title="${esc(v.basis)}">—</span>`;
+    const c = v.isBest ? (v.thin ? "sl-b1t" : "sl-b1") : (v.d != null && v.d < -2 ? "sl-blo" : "sl-bmid");
+    return `<span class="sl-b ${c}" title="${esc(v.basis)}${v.d != null && !v.isBest ? " · " + mphD(v.d) : ""}">${v.star || ""}${v.rank != null ? v.rank + "/" + v.of : "lvl"}</span>`; };
+  const turnRows = turns.map((t) => { const mins = turnMinByLap(t), myMin = mins[L]; if (myMin == null) return "";
+    const cells = pools.map(([k, lbl, pred]) => { const pv = Object.keys(mins).filter((id) => id !== L && meta[id] && pred(meta[id])).map((id) => mins[id]); return badge(rankVerdict(pv, myMin, { token: lbl }, 0.5)); }).join("");
+    return `<div class="sl-row" data-turn="${t.seq}" title="open ${esc(turnLabel(t))} in Turn analysis"><span class="sl-turn"><b>${esc(turnLabel(t))}</b> <span class="why">${esc(cap1(t.kind || ""))}</span></span><span class="sl-min mono">${Math.round(myMin)}<em> mph</em></span><span class="sl-badges">${cells}</span></div>`; }).join("");
+  const poolHd = `<div class="sl-hd"><span>turn</span><span>min</span><span class="sl-badges">${pools.map(([k, lbl]) => `<em>${lbl}</em>`).join("")}</span></div>`;
+  const scores = `<div class="grp"><div class="gh">Turn by turn <span class="why">· min-speed rank in each pool · ★ pool best · ☆ thin (&lt;5) · click a turn</span></div>${poolHd}<div class="sl-rows">${turnRows || `<div class="why" style="padding:8px 6px">this lap has no per-turn samples</div>`}</div></div>`;
+  return `<div class="slap">${head}${picker}${progressDeltaHTML(me, pool)}${scores}</div>`;
 }
 function statsHTML() {
   if (MODE.suggest === "course" && COURSE) return courseStatsHTML();

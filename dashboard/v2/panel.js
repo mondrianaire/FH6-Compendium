@@ -4415,11 +4415,19 @@ const cleanLap = (l) => l && l.t != null && !l.void && !l.partial && !l.rewinds;
 // "THIS SESSION" = the current build's CONTENT identity (route+car+build+tune = hw_hash+setup_hash), independent
 // of the SCOPE band. Same (hw,su) is the same build from a driving perspective, so re-saves collapse together.
 function setupLapSet() {
-  const mb = MATCH && MATCH.build, idOK = !!(mb && mb.hw && mb.su);
+  const mb = MATCH && MATCH.build;
+  // GATE ON SETTLED IDENTITY (2026-09-16): the live cid = ordinal|drive|cyl|PI carries NO hw/tune hash, so
+  // several saved builds can tie on it and MATCH.build is just exact[0] — the FIRST tied candidate (a real,
+  // correctly-decoded build, but NOT confirmed as the one on the car; e.g. an unsaved/downloaded A build reads
+  // as a sibling A save). Scoping "this setup" to that guess would silently track the WRONG tune. Require the
+  // daemon's identity to be settled (matchQuality "ok" — ≤1 tie, or gearbox/pick disambiguated).
+  const q = (typeof matchQuality === "function") ? matchQuality(CUR && CUR.match) : { level: "ok" };
+  const settled = !q || q.level === "ok";
+  const idOK = !!(mb && mb.hw && mb.su && settled);
   let ids = idOK ? (COURSE.laps || []).filter((l) => l.hw === mb.hw && l.su === mb.su).map((l) => String(l.id)) : [];
   if (RACING_ONLY && ids.length) { const race = racingIds(COURSE.laps || []); const g = ids.filter((id) => race.has(id)); if (g.length) ids = g; }
-  return { set: new Set(ids), n: ids.length, idOK, setup: mb || null,
-           label: (mb && mb.name) ? "this setup · " + mb.name : "this setup",
+  return { set: new Set(ids), n: ids.length, idOK, settled, setup: mb || null, whyUnsettled: settled ? null : (q && q.why) || "identity not settled",
+           label: (idOK && mb.name) ? "this setup · " + mb.name : "this setup",
            token: "SET·" + ids.length, cls: null, total: (COURSE.laps || []).length };
 }
 // per-lap MIN speed through a turn (the slowest point) — the metric the pool scores rank on (higher = better).
@@ -4432,7 +4440,9 @@ function sessionHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to see this session's laps.</div>`;
   const ls = setupLapSet(), meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
   const head = `<div class="gh">Session laps <span class="why">· ${esc(ls.label)} · this car · build · tune, every lap that matches</span></div>`;
-  if (!ls.idOK) return `<div class="sess">${head}<div class="why" style="padding:10px 6px">No saved build identity yet — the current car reads as downloaded / unsaved. Equip + save the tune in-game and its laps collect here.</div></div>`;
+  if (!ls.idOK) return `<div class="sess">${head}<div class="why" style="padding:10px 6px">${ls.setup && ls.setup.hw && !ls.settled
+    ? "Build identity isn't settled — " + esc(ls.whyUnsettled || "several saves tie on cylinders, drivetrain and PI") + ". Equip + save the tune in-game, drive a gear the ladder can tell apart, or pick the save, then this setup's laps collect here (until then the shown name is an unconfirmed guess, not this build)."
+    : "No saved build identity yet — the current car reads as downloaded / unsaved. Equip + save the tune in-game and its laps collect here."}</div></div>`;
   const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
   if (!laps.length) return `<div class="sess">${head}<div class="why" style="padding:10px 6px">No clean timed lap yet on this course with this exact setup — drive it and every lap on this build appears here, fastest first.</div></div>`;
   const best = laps[0].t, med = laps[laps.length >> 1].t;

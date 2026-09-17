@@ -4418,12 +4418,26 @@ function setupLapSet() {
   // daemon's identity to be settled (matchQuality "ok" — ≤1 tie, or gearbox/pick disambiguated).
   const q = (typeof matchQuality === "function") ? matchQuality(CUR && CUR.match) : { level: "ok" };
   const settled = !q || q.level === "ok";
-  const idOK = !!(mb && mb.hw && mb.su && settled);
-  let ids = idOK ? (COURSE.laps || []).filter((l) => l.hw === mb.hw && l.su === mb.su).map((l) => String(l.id)) : [];
-  if (RACING_ONLY && ids.length) { const race = racingIds(COURSE.laps || []); const g = ids.filter((id) => race.has(id)); if (g.length) ids = g; }
-  return { set: new Set(ids), n: ids.length, idOK, settled, setup: mb || null, whyUnsettled: settled ? null : (q && q.why) || "identity not settled",
-           label: (idOK && mb.name) ? "this setup · " + mb.name : "this setup",
-           token: "SET·" + ids.length, cls: null, total: (COURSE.laps || []).length };
+  const laps = COURSE.laps || [];
+  // LOCKED / DOWNLOADED builds (2026-09-17): a locked tune can't be equip+saved to pin it, so the exact (hw + su)
+  // scope drops laps driven under a sibling slider-variant, and — when the matcher flips between same-cid hardware
+  // siblings (two downloaded A700 builds of one car, the "Goliath vs Highway" case) — blanks the list entirely.
+  // Widen the scope so a locked build's laps stay put: by HARDWARE (hw_hash — every slider-variant of this build);
+  // and if the hardware itself can't be pinned (identity not settled, or hw matches nothing), by the live CID (this
+  // car at this class·PI·cyl·drive), the one key stable across the flip. Unlocked/saved builds keep exact hw+su.
+  const locked = !!(CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked);
+  let ids = [], scope = null;
+  if (locked && mb && mb.hw) {
+    if (settled) { ids = laps.filter((l) => l.hw === mb.hw).map((l) => String(l.id)); scope = "hw"; }
+    if (!ids.length && CUR && CUR.cid) { ids = laps.filter((l) => String(l.cid) === String(CUR.cid)).map((l) => String(l.id)); scope = "cid"; }
+  } else if (mb && mb.hw && mb.su && settled) {
+    ids = laps.filter((l) => l.hw === mb.hw && l.su === mb.su).map((l) => String(l.id)); scope = "exact";
+  }
+  const idOK = scope != null;
+  if (RACING_ONLY && ids.length) { const race = racingIds(laps); const g = ids.filter((id) => race.has(id)); if (g.length) ids = g; }
+  return { set: new Set(ids), n: ids.length, idOK, settled, scope, locked, setup: mb || null, whyUnsettled: settled ? null : (q && q.why) || "identity not settled",
+           label: (idOK && mb && mb.name) ? "this setup · " + mb.name : "this setup",
+           token: "SET·" + ids.length, cls: null, total: laps.length };
 }
 // THE SESSION LAP LIST — lives in the LEFT pane UNDER the map (2026-09-16 restructure): the current setup's
 // laps, fastest first, always visible while you drive. Clicking a lap isolates its line on the map AND opens
@@ -4431,16 +4445,20 @@ function setupLapSet() {
 function sessionListHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return "";
   const ls = setupLapSet(), meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
-  const nm = ls.idOK && ls.setup && ls.setup.name ? ls.setup.name : null;
+  const nm = ls.idOK && ls.scope !== "cid" && ls.setup && ls.setup.name ? ls.setup.name : null;
+  // widened-scope labels for LOCKED builds (setupLapSet): "hw" = every slider-variant of this build; "cid" = every
+  // lap for this car at this class·PI·cyl·drive, because a locked tune can't be pinned to one specific save.
+  const scopeNote = ls.scope === "hw" ? " · locked build · any sliders" : ls.scope === "cid" ? " · locked · exact tune not pinned" : "";
+  const titleFor = (n) => (ls.scope === "cid" ? (carName(CUR && CUR.cid) || "this car") + (liveClass() ? " · " + liveClass() : "") : (n || "this setup"));
   const hdr = (sub) => `<div class="sesl-h"><b>Session</b><span class="why">${esc(sub)}</span></div>`;
   if (!ls.idOK) return `<div class="sesl">${hdr(ls.setup && ls.setup.hw && !ls.settled ? "identity not settled" : "no saved setup")}<div class="why sesl-note">${ls.setup && ls.setup.hw && !ls.settled ? "build identity isn't settled — equip the build and save the tune in-game to identify it" : "downloaded / unsaved — equip + save the tune in-game to track this session's laps"}</div></div>`;
   const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
-  if (!laps.length) return `<div class="sesl">${hdr((nm ? nm + " · " : "") + "this setup")}<div class="why sesl-note">no clean lap on this exact setup here yet — drive it and each lap appears, fastest first</div></div>`;
+  if (!laps.length) return `<div class="sesl">${hdr(titleFor(nm) + scopeNote)}<div class="why sesl-note">${ls.scope === "exact" ? "no clean lap on this exact setup here yet" : "no clean lap for this build on this course yet"} — drive it and each lap appears, fastest first</div></div>`;
   const best = laps[0].t, al = buildAliases(ls.setup);
   const alTxt = al.length ? " · aka " + al.slice(0, 2).join(", ") + (al.length > 2 ? " +" + (al.length - 2) : "") : "";
   const rows = laps.map((l, i) => `<div class="sesl-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}" data-single="${esc(String(l.id))}" title="isolate this lap on the map + break it down in Single lap">
       <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${i === 0 ? " best" : ""}">${lapTime(l.t)}</span><span class="mono sesl-d">${i === 0 ? "—" : "+" + (l.t - best).toFixed(2)}</span></div>`).join("");
-  return `<div class="sesl">${hdr((nm ? nm : "this setup") + alTxt + " · " + laps.length + " lap" + (laps.length === 1 ? "" : "s") + " · best " + lapTime(best))}<div class="sesl-rows">${rows}</div></div>`;
+  return `<div class="sesl">${hdr(titleFor(nm) + (ls.scope === "cid" ? "" : alTxt) + scopeNote + " · " + laps.length + " lap" + (laps.length === 1 ? "" : "s") + " · best " + lapTime(best))}<div class="sesl-rows">${rows}</div></div>`;
 }
 // select a session lap from the left list: isolate its line on the course map + open Single-lap on the right
 function pickSessionLap(id) {

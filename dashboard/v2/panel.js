@@ -2160,19 +2160,6 @@ function courseHeroParts(c, ls, lapsDrawn) {
     + `<div class="cps-h">freshness</div><div class="ch-note">${fresh}</div>`;
   return { facts, drawer };
 }
-// SHARED per-turn aggregate over the active lap set — the "statistics infrastructure" the turn table,
-// the leaderboard and the selected-turn pane all read: n laps, per-phase agg, median turn time, best
-// turn time, and avail = median-best = the seconds to FIND vs your own best line through this turn.
-function turnAgg(t, ls) {
-  const phases = SEG_ORDER.map((n) => ({ n, p: phaseAgg((t.phaseObs || {})[n], ls.set) }));
-  const byLap = {};
-  SEG_ORDER.forEach((n) => ((t.phaseObs || {})[n] || []).forEach((r) => { if (ls.set.has(String(r[0]))) (byLap[r[0]] = byLap[r[0]] || {})[n] = r; }));
-  const tts = [];
-  Object.values(byLap).forEach((ph) => { let tt = 0, any = false; SEG_ORDER.forEach((n) => { const r = ph[n]; if (r && r[5] != null) { tt += r[5]; any = true; } }); if (any) tts.push(tt); });
-  tts.sort((a, b) => a - b);
-  const med = tts.length ? tts[tts.length >> 1] : null, best = tts.length ? tts[0] : null;
-  return { t, n: Object.keys(byLap).length, phases, turnT: med, bestT: best, avail: (med != null && best != null) ? med - best : null };
-}
 // the single PI class in scope, or null when it spans more than one -- apex GRIP and apex SPEED are both
 // car-dependent, so a grip-ceiling rating is only honest within one class.
 function scopeOneClass(ls) {
@@ -2242,48 +2229,6 @@ let MAP_LEG_OPEN = (() => { try { return localStorage.getItem("fh6MapLeg") === "
 // legend. courseMap (app.js) reads this global (panel.js loads first).
 let MAP_LAYERS = (() => { const d = { centre: true, laps: true, phases: true };
   try { return Object.assign(d, JSON.parse(localStorage.getItem("fh6MapLayers") || "{}")); } catch (e) { return d; } })();
-// THE TURN LIST (redesign · phase B): every measured turn enumerated on the LEFT, sortable by route
-// order or by TIME TO FIND (biggest opportunity first — the default). Each row: turn + kind, the five
-// phase apex-mph medians, the median time in the turn, and the seconds available vs your best line.
-// Clicking a row selects the turn (drives the right-pane analysis + the map highlight).
-function turnTableHTML(c, ls) {
-  const aggs = (c.turns || []).filter((t) => t.phaseObs).map((t) => turnAgg(t, ls)).filter((a) => a.n > 0);
-  if (!aggs.length) return "";
-  const oneCls = scopeOneClass(ls);
-  const gp = (t) => { const g = turnGripCeiling(c, t, ls); return g.util != null ? g.util : null; };   // grip used % (one class + a_max only)
-  if (TURN_SORT === "find") aggs.sort((a, b) => (b.avail || 0) - (a.avail || 0) || (a.t.seq || 0) - (b.t.seq || 0));
-  else if (TURN_SORT === "grip") aggs.sort((a, b) => { const ga = gp(a.t), gb = gp(b.t); return (ga == null ? 101 : ga) - (gb == null ? 101 : gb) || (a.t.seq || 0) - (b.t.seq || 0); });   // least grip used first = the most left on the table
-  else aggs.sort((a, b) => (a.t.seq || 0) - (b.t.seq || 0));
-  const sel = turnPickSeq();
-  const totFind = aggs.reduce((s, a) => s + (a.avail || 0), 0);
-  const maxFind = Math.max(0.01, ...aggs.map((a) => a.avail || 0));
-  const SHORT = { braking: "brake", turn_in: "entry", mid: "mid", exit: "exit", straight: "straight" };
-  const findInk = (v) => v == null ? "var(--dim)" : v > 0.6 ? "#f0616d" : v > 0.35 ? "#e3b341" : "var(--mut)";
-  // each phase cell: apex-mph value, a grip-mix mini-bar, and a 3px phase-colour underline (SEG_COL = WHERE)
-  const ph = (a, n) => { const p = a.phases.find((x) => x.n === n).p;
-    const bar = p && p.mix ? gripBar(p.mix) : `<span class="gbar gbar--empty"></span>`;
-    return `<td class="tt-ph" title="${esc(SEG_LABEL[n])} apex mph${p && p.time != null ? " · " + p.time.toFixed(1) + " s" : ""}"><span class="tt-phv mono">${p && p.min != null ? p.min : "·"}</span>${bar}<span class="tt-phu" style="background:${SEG_COL[n]}"></span></td>`; };
-  const rows = aggs.map((a) => { const t = a.t, dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
-    const ink = findInk(a.avail), pct = Math.round((a.avail || 0) / maxFind * 100);
-    return `<tr class="ttr${sel === t.seq ? " on" : ""}" data-turn="${t.seq}" title="${a.n} lap${a.n === 1 ? "" : "s"}">
-    <td class="tt-lbl"><div class="tt-lname"><b>${esc(turnLabel(t))}</b> <span class="why">${esc(cap1(t.kind || "") + (dirW ? " " + dirW : ""))}</span></div>
-      <div class="tt-geo mono">${t.r != null ? Math.round(t.r) + " m" : ""}${t.deg != null ? " · " + Math.round(t.deg) + "°" : ""} · ${a.n} lap${a.n === 1 ? "" : "s"}</div></td>
-    ${SEG_ORDER.map((n) => ph(a, n)).join("")}
-    <td class="mono tt-in">${a.turnT != null ? a.turnT.toFixed(1) + "s" : "—"}</td>
-    <td class="tt-find2"><b class="mono" style="color:${ink}">${a.avail ? "+" + a.avail.toFixed(2) : "—"}</b><span class="tt-findbar"><i style="width:${pct}%;background:${ink}"></i></span></td>
-    <td class="tt-grip">${(() => { const g = turnGripCeiling(c, t, ls); if (g.util == null) return `<span class="mono off">·</span>`; const thin = g.nLaps < 3; return `<b class="mono${thin ? " tg-thin" : ""}" title="${g.nLaps} lap${g.nLaps === 1 ? "" : "s"} here${thin ? " — thin" : ""}">${g.util}%</b><span class="tt-gbar"><i style="width:${g.util}%"></i></span>`; })()}</td></tr>`; }).join("");
-  const sortBtn = (k, lbl) => `<button class="mini${TURN_SORT === k ? " on" : ""}" data-tsort="${k}">${lbl}</button>`;
-  const measured = (c.turns || []).length, catalogued = c.n_turns_catalogued;
-  const sortWhy = TURN_SORT === "find" ? "ranked by the time available vs your best lap"
-    : TURN_SORT === "grip" ? "ranked by grip use — the least-used corners (most grip left) first" + (oneCls ? "" : " · scope to one class to fill it")
-    : "route order · click any turn, or its number on the map";
-  return `<div class="grp"><div class="gh">${measured}${catalogued != null ? " of " + catalogued : ""} turns measured ${scopeTok(ls)} <span class="why">· ${aggs.length} with a lap in scope · ${esc(sortWhy)}</span>
-      <span class="ttsort"><span class="why">sort</span>${sortBtn("route", "route order")}${sortBtn("find", "time to find")}${sortBtn("grip", "grip use")}</span></div>
-    <div class="tt-wrap"><table class="tt"><thead><tr><th>turn</th>
-      ${SEG_ORDER.map((n) => `<th class="tt-phh" title="${esc(SEG_LABEL[n])} apex mph"><span class="pdot" style="background:${SEG_COL[n]}"></span>${esc(SHORT[n])}</th>`).join("")}
-      <th title="median time through the turn">in turn</th><th title="seconds to find vs your best line">to find</th><th title="best pass's peak lateral g vs the class grip ceiling (a_max) — 100% = at the limit; low = grip left (one class only)">grip use</th></tr></thead>
-      <tbody>${rows}</tbody>${totFind > 0.05 ? `<tfoot><tr><td colspan="7">total time to find</td><td class="mono tt-find">+${totFind.toFixed(2)}</td><td></td></tr></tfoot>` : ""}</table></div></div>`;
-}
 function courseInfoPill(r, state) {
   const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));
   const kind = ("kindLabel" in r) ? r.kindLabel
@@ -4509,25 +4454,6 @@ function turnMinByLap(t) {
   const m = {}; SEG_ORDER.forEach((n) => ((t.phaseObs || {})[n] || []).forEach((r) => {
     if (r[2] == null) return; const id = String(r[0]); if (m[id] == null || r[2] < m[id]) m[id] = r[2]; }));
   return m;
-}
-function sessionHTML() {
-  if (!(MODE.suggest === "course" && COURSE)) return `<div class="why" style="padding:8px 6px">Drive a course to see this session's laps.</div>`;
-  const ls = setupLapSet(), meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
-  const head = `<div class="gh">Session laps <span class="why">· ${esc(ls.label)} · this car · build · tune, every lap that matches</span></div>`;
-  if (!ls.idOK) return `<div class="sess">${head}<div class="why" style="padding:10px 6px">${ls.setup && ls.setup.hw && !ls.settled
-    ? "Build identity isn't settled — " + esc(ls.whyUnsettled || "several saves tie on cylinders, drivetrain and PI") + ". Equip + save the tune in-game, drive a gear the ladder can tell apart, or pick the save, then this setup's laps collect here (until then the shown name is an unconfirmed guess, not this build)."
-    : "No saved build identity yet — the current car reads as downloaded / unsaved. Equip + save the tune in-game and its laps collect here."}</div></div>`;
-  const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
-  if (!laps.length) return `<div class="sess">${head}<div class="why" style="padding:10px 6px">No clean timed lap yet on this course with this exact setup — drive it and every lap on this build appears here, fastest first.</div></div>`;
-  const best = laps[0].t, med = laps[laps.length >> 1].t;
-  const summ = `<div class="sess-sum"><span><b class="mono" style="color:var(--acc)">${lapTime(best)}</b><em>best</em></span><span><b class="mono">${lapTime(med)}</b><em>median</em></span><span><b>${laps.length}</b><em>clean lap${laps.length === 1 ? "" : "s"}</em></span></div>`;
-  const rows = laps.map((l, i) => `<div class="sess-row" data-single="${esc(String(l.id))}" title="break this lap down turn by turn">
-      <span class="sess-rank mono">${i + 1}</span><span class="mono sess-t${i === 0 ? " best" : ""}">${lapTime(l.t)}</span>
-      <span class="sess-d mono">${i === 0 ? "—" : "+" + (l.t - best).toFixed(2)}</span>
-      <span class="why sess-when">${esc((l.sid || "").replace(/^fh6_/, "").replace(/_/, " ") || "—")}</span></div>`).join("");
-  const list = `<div class="grp"><div class="gh">laps <span class="why">· fastest first · click one to break it down</span></div>
-    <div class="sess-hd"><span>#</span><span>time</span><span>+best</span><span>session</span></div><div class="sess-rows">${rows}</div></div>`;
-  return `<div class="sess">${head}${summ}${list}${turnTableHTML(COURSE, ls)}</div>`;
 }
 // cumulative elapsed time vs % PROGRESS through the lap (0..1). Arc wraps on a loop, so the axis is the
 // monotonic cumulative DISTANCE (from world x/z), normalised 0..1 — "how far through the lap" = exactly the

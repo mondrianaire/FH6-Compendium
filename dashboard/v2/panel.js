@@ -1977,12 +1977,15 @@ function paintLeft() {
     // to the pane and carries its own always-visible bottom-left legend (which houses the map-view toggle);
     // the DATA filter is in the shared #coursefilter bar, not here.
     body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq(), view: MAP_VIEW, legOpen: MAP_LEG_OPEN }));
-    // the sortable turn list moved OUT of the left map into the Session-laps tab (2026-09-16) so the map owns
-    // the pane; it renders there via turnTableHTML scoped to "this setup". The map keeps only its own markers.
+    // THE SESSION LAP LIST lives here now, under the map (2026-09-16): the current setup's laps, fastest first,
+    // always visible while driving; click one to isolate its line on the map + open Single-lap on the right. The
+    // old under-map turn table is retired — its per-phase / grip data is in Turn analysis.
+    body.insertAdjacentHTML("beforeend", sessionListHTML());
     wireTrace(body); addLiveDot(body); liveLapPaint();   // a rebuilt map redraws the live lap once, then appends
     // a turn marker OR a turn-list row selects that turn (highlight its phases here, full stats on the
     // right); the SVG/list is rebuilt on select, so re-bind every paint. Clicking the selected one clears.
     body.querySelectorAll("[data-turn]").forEach((g) => g.onclick = () => pickTurn(g.dataset.turn));   // the map's own turn markers
+    body.querySelectorAll(".sesl-row[data-single]").forEach((b) => b.onclick = () => pickSessionLap(b.dataset.single));   // session list -> isolate + Single lap
     body.querySelectorAll("[data-mapview]").forEach((b) => b.onclick = () => { MAP_VIEW = b.dataset.mapview; try { localStorage.setItem("fh6MapView", MAP_VIEW); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     body.querySelectorAll("[data-maplayer]").forEach((b) => b.onclick = () => { const k = b.dataset.maplayer; MAP_LAYERS[k] = !MAP_LAYERS[k]; try { localStorage.setItem("fh6MapLayers", JSON.stringify(MAP_LAYERS)); } catch (e) {} LEFT_KEY = null; paintLeft(); });
     // WHAT THE LIVE TRAIL'S COLOUR MEANS (Jett 2026-09-11: selectable in the map legend's settings) -- the same
@@ -3185,7 +3188,7 @@ const RT_LABEL = { lap: "Current lap", session: "Session laps", single: "Single 
 // Course mode: ONE live tab (Current lap, now the whole course turn-by-turn) + two analysis tabs. The old
 // "Live corners" detection-log tab was retired (2026-09-16) — its turn coverage folded into Current lap, its
 // session balance into General statistics. Free roam keeps "corners" as its only live view (no course to key to).
-function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "session", "single", "matrix", "stats"] : ["corners", "stats", "browser"]; }
+function rightTabs() { return (MODE.suggest === "course" && COURSE) ? ["lap", "single", "matrix", "stats"] : ["corners", "stats", "browser"]; }
 function rightContext() {
   const course = MODE.suggest === "course" && COURSE;
   if (LIVE.inMenu || !LIVE.frame) return "stats";   // "build" was the free-mode fallback here; disabled alongside the tab (2026-09-03)
@@ -3216,7 +3219,7 @@ function paintRight() {
                 services: "the three processes the lab runs · start, stop or restart each one" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
-  body.innerHTML = cur === "lap" ? lapHTML() : cur === "session" ? sessionHTML() : cur === "single" ? singleLapHTML() : cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
+  body.innerHTML = cur === "lap" ? lapHTML() : cur === "single" ? singleLapHTML() : cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
   body.querySelectorAll("[data-svcact]").forEach((b) => b.onclick = () => svcAct(b.dataset.svc, b.dataset.svcact));
   body.querySelectorAll("[data-svcrefresh]").forEach((b) => b.onclick = () => svcRefresh());
@@ -3253,12 +3256,6 @@ function paintRight() {
     body.querySelectorAll("[data-lapsort]").forEach((b) => b.onclick = () => { LAP_SORT = b.dataset.lapsort; try { localStorage.setItem("fh6LapSort", LAP_SORT); } catch (e) {} paintRight(); });
     // a driven/awaiting spine row has no live pass to window — click it to open that turn in Turn analysis
     body.querySelectorAll(".lap-rows [data-turn]").forEach((b) => b.onclick = () => pickTurn(+b.dataset.turn));
-  }
-  if (cur === "session") {
-    // click a lap -> open it in Single-lap analysis; a turn in the table -> Turn analysis; sort the table
-    body.querySelectorAll("[data-single]").forEach((b) => b.onclick = () => { SINGLE_LAP = b.dataset.single; RIGHT_TAB = "single"; rightTabStore()[ctx] = "single"; viewSave(); paintRight(); });
-    body.querySelectorAll("[data-turn]").forEach((r) => r.onclick = () => pickTurn(r.dataset.turn));
-    body.querySelectorAll("[data-tsort]").forEach((b) => b.onclick = () => { TURN_SORT = b.dataset.tsort; try { localStorage.setItem("fh6TurnSort", TURN_SORT); } catch (e) {} paintRight(); });
   }
   if (cur === "single") {
     body.querySelectorAll("[data-single]").forEach((b) => b.onclick = () => { SINGLE_LAP = b.dataset.single; paintRight(); });
@@ -4450,6 +4447,29 @@ function setupLapSet() {
   return { set: new Set(ids), n: ids.length, idOK, settled, setup: mb || null, whyUnsettled: settled ? null : (q && q.why) || "identity not settled",
            label: (idOK && mb.name) ? "this setup · " + mb.name : "this setup",
            token: "SET·" + ids.length, cls: null, total: (COURSE.laps || []).length };
+}
+// THE SESSION LAP LIST — lives in the LEFT pane UNDER the map (2026-09-16 restructure): the current setup's
+// laps, fastest first, always visible while you drive. Clicking a lap isolates its line on the map AND opens
+// Single-lap analysis on the right. Replaces the retired under-map turn table (its data now in Turn analysis).
+function sessionListHTML() {
+  if (!(MODE.suggest === "course" && COURSE)) return "";
+  const ls = setupLapSet(), meta = {}; (COURSE.laps || []).forEach((l) => meta[String(l.id)] = l);
+  const nm = ls.idOK && ls.setup && ls.setup.name ? ls.setup.name : null;
+  const hdr = (sub) => `<div class="sesl-h"><b>Session</b><span class="why">${esc(sub)}</span></div>`;
+  if (!ls.idOK) return `<div class="sesl">${hdr(ls.setup && ls.setup.hw && !ls.settled ? "identity not settled" : "no saved setup")}<div class="why sesl-note">${ls.setup && ls.setup.hw && !ls.settled ? "build identity isn't settled — equip + save, or drive a gear the ladder can tell apart, to identify this build" : "downloaded / unsaved — equip + save the tune in-game to track this session's laps"}</div></div>`;
+  const laps = [...ls.set].map((id) => meta[id]).filter(cleanLap).sort((a, b) => a.t - b.t);
+  if (!laps.length) return `<div class="sesl">${hdr((nm ? nm + " · " : "") + "this setup")}<div class="why sesl-note">no clean lap on this exact setup here yet — drive it and each lap appears, fastest first</div></div>`;
+  const best = laps[0].t;
+  const rows = laps.map((l, i) => `<div class="sesl-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}" data-single="${esc(String(l.id))}" title="isolate this lap on the map + break it down in Single lap">
+      <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${i === 0 ? " best" : ""}">${lapTime(l.t)}</span><span class="mono sesl-d">${i === 0 ? "—" : "+" + (l.t - best).toFixed(2)}</span></div>`).join("");
+  return `<div class="sesl">${hdr((nm ? nm + " · " : "") + laps.length + " lap" + (laps.length === 1 ? "" : "s") + " · best " + lapTime(best))}<div class="sesl-rows">${rows}</div></div>`;
+}
+// select a session lap from the left list: isolate its line on the course map + open Single-lap on the right
+function pickSessionLap(id) {
+  SINGLE_LAP = String(id);
+  LB_SEL = new Set([String(id)]); applyLapPick();   // lift this lap's line on the course map, dim the rest
+  RIGHT_TAB = "single"; try { rightTabStore()[rightContext()] = "single"; } catch (e) {}
+  viewSave(); paintRight();
 }
 // per-lap MIN speed through a turn (the slowest point) — the metric the pool scores rank on (higher = better).
 function turnMinByLap(t) {

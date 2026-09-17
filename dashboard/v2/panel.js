@@ -1798,6 +1798,12 @@ function paintHeader() {
   const fill = c.primary ? (FILL[c.primary.act] || "acc") : null;
   const reach = !!(MATCH && MATCH.build);
   const resolved = rs.key === "resolved";
+  // HEADER HONESTY (2026-09-16): when the live cid (ordinal|drive|cyl|PI) ties across several saves, MATCH.build
+  // is just exact[0] — the FIRST tied candidate. Printing its name (e.g. an unsaved A build reading as sibling
+  // "S1 Circuit Meta") reads as a confirmed identity. When identity is ambiguous/conflict, suppress the specific
+  // name and say so — the gate strip below already carries the resolve step (equip+save / drive a gear / pick).
+  const unconf = q.level === "ambiguous" || q.level === "conflict";
+  const nTies = (CUR && CUR.match && CUR.match.n_signature_ties) || 0;
   const busy = RR.busy || RB.state === "running" || RB.pending;
   const ev = c.evidence || (q.level === "ok" ? q.why : "") || "";
   // THE LIVERY HERO TILE: an image-only 240×120 frame. With a thumb, an <img object-fit:cover> (sharper
@@ -1819,7 +1825,9 @@ function paintHeader() {
         ${changeSlim()}
         <span class="hcar t-d" title="${esc(c.car)}${c.byline ? " — " + esc(c.byline) : ""}">${esc(shedName(c.car, 30))}</span>
       </div>
-      <div class="htitle t-t" title="${esc(c.tune || "")}">${c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
+      <div class="htitle t-t" title="${esc(unconf ? "identity unsettled — one of " + (nTies || "several") + " saved builds ties on cylinders / drivetrain / PI, so the specific tune is NOT confirmed. Equip + save the tune, drive a gear the ladder can tell apart, or pick the save to resolve it." : (c.tune || ""))}">${unconf
+        ? `<span class="t-l hunconf">⚠ unidentified tune${nTies > 1 ? ` · ${nTies} candidates` : ""}</span>`
+        : c.tune ? `${resolved ? `<b class="tick">✓</b> ` : ""}${esc(shedName(c.tune, 40))}` : `<span class="t-l empty">${CUR && CUR.disk ? "unnamed save" : "no save on disk for this car"}</span>`}</div>
       <div class="hgate">
         <div class="gcell gstate" data-tone="${g.tone}" title="${esc(rs.hint || g.detail || "")}"><b>${esc(g.ident)}</b><span>${esc(g.detail)}</span>${ev ? `<span class="gev" title="${esc(ev)}">${esc(ev)}</span>` : ""}</div>
         <span class="garrow" data-w="${(g.tone === "bad" || g.tone === "warn" || g.sheet === "dead") ? "weak" : "strong"}"></span>

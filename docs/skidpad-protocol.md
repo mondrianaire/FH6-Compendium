@@ -36,7 +36,9 @@ Requirements, in priority order:
 - **Flat.** A camber adds or removes lateral g and would be recorded as grip. This is the one that will
   quietly ruin a run.
 - **Paved**, and the same surface for both builds so they're comparable.
-- **Open**, with room for a circle roughly **80–100 m across** and space to run wide when it lets go.
+- **Open**, with room for a circle of **40–50 m RADIUS** — that is 80–100 m across, roughly a football
+  pitch's width — plus space to run wide when it lets go. Size matters more than anything except flatness:
+  a tight circle cannot be driven at the grip limit, only drifted (see *When it goes wrong*).
 - No traffic, no scenery to clip.
 
 An airfield apron or a large car park is the classic choice — the Airfield area is the obvious candidate,
@@ -54,20 +56,28 @@ being averaged away.
    **➕ new run** to split the stint, and type `skidpad` into the tag box and click the tag button. The
    detector doesn't need this — it finds the runs on its own — it just makes them easy to locate later.
 
-2. **Get rolling at about 30 mph** and settle into a circle. Pick a steering lock and *hold it* — the circle
-   should stay the same size throughout. Resist the urge to steer more as it gets faster; that's the most
-   common way a skidpad turns into "a corner" and gets rejected.
+2. **Get rolling at about 30 mph** and settle into a big circle. Pick a steering lock and *hold it* — the
+   circle should stay the same size throughout. Resist the urge to steer more as it gets faster; that's the
+   most common way a skidpad turns into "a corner" and gets rejected.
 
 3. **Feed the speed up gradually**, a couple of mph at a time, holding the same steering. Steady throttle —
-   no stabs, no lifts. **Never touch the brake.**
+   no stabs, no lifts. **Never touch the brake.** *The climb is part of the measurement, not just the
+   preamble* — the curve needs samples from well below the limit as well as at it, so take ten or fifteen
+   seconds getting there rather than arriving immediately.
 
-4. **Find the limit and sit there.** You'll know: the car stops tightening and starts running wide (or the
-   back steps out). Hold it right there — **ten seconds or more** of riding the limit. *That plateau is the
-   measurement.* Everything before it is just getting there.
+4. **Use the least throttle that holds the speed.** This is a grip test, not a drift. If the back steps out
+   and you're catching it with opposite lock, you are past the peak and measuring sliding friction instead
+   of grip — ease off until it hooks up again and hold just below that.
 
-5. **Come off gently**, turn around, and repeat in the other direction.
+5. **Find the limit and sit there.** The car stops tightening and starts running gently wide. Hold it right
+   there — **ten seconds or more**. *That plateau is the measurement.*
 
-6. **Second build:** swap car, same spot, same two circles.
+   **Sanity check while you drive:** on a 40–50 m circle a grippy build should be doing **60–80 mph** at its
+   limit. If you are at 30-something, the circle is too small or the car is sideways.
+
+6. **Come off gently**, turn around, and repeat in the other direction.
+
+7. **Second build:** swap car, same spot, same two circles.
 
 ---
 
@@ -87,6 +97,30 @@ the radius steady to within 25%:
 
 So the things that will silently cost you a run: **braking**, **winding on more steering as it speeds up**,
 and **big throttle changes**. Slow, steady, boring is correct.
+
+---
+
+## When it goes wrong — how to recognise it
+
+The first attempt (2026-09-18) came back as two clean, well-detected runs that measured the wrong thing, so
+these are worth knowing:
+
+| symptom | what happened |
+|---|---|
+| top speed around 30 mph | circle far too small — 13 m radius instead of 45 |
+| measured ceiling way below what the car shows while racing | sliding friction, not grip |
+| the curve is **flat** rather than rising to a peak | the tyres were past the limit the whole time |
+| no samples below `CombinedSlip` 1.0 | never approached the limit from underneath, so there is no peak to find |
+
+A good run's curve **rises, peaks around `CombinedSlip` 1.0–1.1, and falls away after** — like this, from
+ordinary racing frames:
+
+```
+CombinedSlip  0.5  0.6  0.7  0.8  0.9  1.0  [1.1]  1.2  1.3  1.4
+   |lat_g|   1.67 1.99 2.40 2.73 2.87 3.04 [3.08] 2.85 2.74 2.69
+```
+
+If the printed peak sits at slip 1.5 or higher, it was a drift and the number is meaningless.
 
 ---
 

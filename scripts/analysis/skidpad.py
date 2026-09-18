@@ -59,6 +59,8 @@ WHAT IT REPORTS, per run and per axle: the peak of the curve (a_max), the slip i
 speed held, and which axle peaked LOWER -- that axle is the one that gives up first, which is the balance
 answer the a-priori model was only 77% right about, measured directly here.
 
+The driving instructions live in docs/skidpad-protocol.md; this docstring is the reference.
+
 Read-only over capture CSVs. Writes nothing unless --out is given.
 """
 from __future__ import annotations

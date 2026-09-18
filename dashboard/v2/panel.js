@@ -200,6 +200,41 @@ function buildStatus() {
     twin: twins.find((b) => !b.locked) || twins[0], ambiguous };
 }
 
+// THE THREE IDENTITY STATES (Jett 2026-09-18): the app now presents exactly three. buildStatus()'s finer keys
+// stay for the detail copy, but stateOf() is the single source of truth for WHICH of the three we are in — and
+// A/B testing is gated on state 3.
+//   unknown  — the car+build is NOT known. With offline auto-decrypt + identify-on-equip landed, this should
+//              only happen on an ERROR: the daemon is offline, nothing is on disk, the live PI drifted from every
+//              save, OR a signature tie the identify routine failed to settle (a lingering tie is now an error).
+//   known    — KNOWN but NOT cloned: a downloaded / locked build is in use (a downloaded tune is never editable),
+//              including an unsaved clone of one. To progress you clone it to a held editable build.
+//   editable — KNOWN and an EDITABLE (self-made, or cloned + saved) build exists. REQUIRED to enter A/B testing.
+// `waiting` (no car yet) and `spec` (a fixed temporary event car — nothing to clone or compare) are preconditions,
+// not one of the three.
+const STATE3 = {
+  unknown:  { label: "UNKNOWN", tone: "bad" },
+  known:    { label: "KNOWN · NOT CLONED", tone: "warn" },
+  editable: { label: "KNOWN · EDITABLE", tone: "ok" },
+  waiting:  { label: "waiting", tone: "dim" },
+  spec:     { label: "SPEC EVENT", tone: "dim" },
+};
+function stateOf(st, q) {
+  st = st || buildStatus();
+  q = q || matchQuality(CUR && CUR.match);
+  const locked = !!(CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked);
+  let s;
+  if (st.key === "none") s = "waiting";
+  else if (typeof isSpecEvent === "function" && isSpecEvent()) s = "spec";                 // fixed temporary event car — N/A
+  else if (q && (q.level === "ambiguous" || q.level === "conflict")) s = "unknown";        // a tie identify-on-equip didn't settle = error
+  else if (st.key === "offline") s = "unknown";                                            // daemon down = can't know
+  else if (st.key === "unknown") s = st.rebuild ? (locked ? "known" : "editable") : "unknown";  // importing = fully decoded/known (2 locked / 3 self-made); else no-save/drift = error
+  else if (st.key === "downloaded" || st.key === "clone") s = "known";                     // downloaded/locked or an unsaved clone of one — not yet a held editable build
+  else if (st.key === "variation" || st.key === "ratified") s = "editable";                // editing an editable build / a saved unlocked build
+  else s = "unknown";
+  const m = STATE3[s];
+  return { state: s, label: m.label, tone: m.tone, importing: !!st.rebuild, canAB: s === "editable", detail: st };
+}
+
 /* ------------------------------------------------------------ layout */
 function panelSkeleton(host) {
   // THE LAST-ACTION LINE. One accent-coloured rule across the whole viewport, flush to the very

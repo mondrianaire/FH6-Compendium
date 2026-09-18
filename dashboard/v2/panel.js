@@ -1158,12 +1158,17 @@ const cursorSvg = (H) => `<g class="cur" style="display:none"><line y1="6" y2="$
 // every competitive B/S1/X lap and drops cruise/drift runs (Irokawa's were ~+100% off) and overruns.
 function racingIds(all) {
   const best = {};
-  all.forEach((t) => { if (!t.void && !t.partial && !t.rewinds && t.t != null && (best[t.class] == null || t.t < best[t.class])) best[t.class] = t.t; });
+  // VALIDITY honours `official` (Jett 2026-09-18), same as cleanLap: a lap the GAME timed counts even if it was
+  // rewound or oddly covered (the rewind corrupts our race-clock span, never the game's own number). Only a lap
+  // with no official time must be a whole, un-rewound, well-covered loop. Without this, official Rivals laps that
+  // were rewound (rewinds>0, official=1) were dropped from every "racing only" view and never reached the Laps list.
+  const ok = (t) => !t.void && !t.partial && t.t != null
+    && (t.official || (!t.rewinds && (t.cov == null || (t.cov >= 0.85 && t.cov <= 1.15))));
+  all.forEach((t) => { if (ok(t) && (best[t.class] == null || t.t < best[t.class])) best[t.class] = t.t; });
   return new Set(all.filter((t) => {
-    if (t.void || t.partial || t.rewinds) return false;
-    if (t.cov != null && (t.cov < 0.85 || t.cov > 1.15)) return false;
+    if (!ok(t)) return false;
     const b = best[t.class];
-    if (b != null && t.t != null && t.t > b * 1.30) return false;
+    if (b != null && t.t != null && t.t > b * 1.30) return false;   // still drop cruise/drift runs far off class pace
     return true;
   }).map((t) => String(t.id)));
 }

@@ -268,7 +268,12 @@ def main(argv=None):
                c.name_source, c.name_confidence, c.declared_name, c.declared_source, c.event_id,
                (SELECT COUNT(*) FROM lap l WHERE l.route_key = c.route_key) AS lap_rows,
                (SELECT MIN(l.lap_s) FROM lap l WHERE l.route_key = c.route_key
-                  AND l.void = 0 AND l.is_partial = 0 AND l.rewinds = 0) AS best,   -- a rewound lap's clock is invalid (lap-canon): never the course record
+                  AND l.void = 0 AND l.is_partial = 0 AND l.rewinds = 0
+                  AND COALESCE(l.coverage, 1) >= 0.97) AS best,   -- a rewound lap's clock is invalid (lap-canon): never the course record.
+               -- COVERAGE FLOOR (2026-09-18): is_partial only trips below 0.90, which is far too loose to
+               -- protect a RECORD. A lap at cov 0.919 is missing ~84 m of a 1.1 km course -- about 2 s at
+               -- speed -- and it crowned Shimanoyama at 27.66 s while the game's own best for that session
+               -- was 30.40. A record has to be a whole lap: full laps here measure 0.98-1.00.
                cr.route_id, cr.match_kind AS match, cr.covered,
                cr.anchor_route_id, cr.anchor_events, cr.anchor_agree
         FROM course c LEFT JOIN course_route cr ON cr.route_key = c.route_key ORDER BY (c.name IS NULL), c.name, c.route_key""")
@@ -341,7 +346,7 @@ def main(argv=None):
         # along as the sixth field for the trace's elevation paint.
         keep, seen = [], set()
         for l in laps:
-            if l["void"] or l["partial"] or l["rewinds"]:      # a rewound lap's clock is invalid (lap-canon); kept & flagged below, never crowned the save's fastest
+            if l["void"] or l["partial"] or l["rewinds"] or (l["cov"] or 1) < 0.97:   # a rewound OR SHORT lap's clock is invalid (lap-canon); kept & flagged below, never crowned the save's fastest
                 continue
             k = (l["cid"], l["container"])
             if k in seen:

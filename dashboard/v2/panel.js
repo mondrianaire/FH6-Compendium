@@ -1248,14 +1248,21 @@ function courseTrace(c) {
     // a lit set comes from EITHER the class spotlight (TRACE_CLS_HI) OR a per-lap highlight (sel.hi, the 3-state
     // chip). When anything is lit, everything else recedes — highlight, not filter (every lap stays drawn).
     const clsHi = TRACE_CLS_HI, lapHi = sel.hi, anyHi = !!clsHi || lapHi.size > 0 || !!picked;
+    // CLASS GLOW (Jett 2026-09-18): with more than one PI class on the chart, the line colour alone is a thin
+    // cue — a soft outer halo in the lap's own class colour makes each group read as a group, so "which lines
+    // am I chasing" is answerable at a glance. One class on the chart needs no halo, and in 'every run' mode
+    // the lines are grip-painted, so the halo becomes the ONLY class cue there — it is drawn in both paths.
+    const multiCls = new Set(match.map((t) => t.class).filter(Boolean)).size > 1;
+    const clsGlow = (t, w, op) => multiCls ? arcRuns(t.pts).map((run) =>
+      `<polyline class="tclsglow" fill="none" stroke="${piColor(t.class)}" stroke-width="${(w + 4.5).toFixed(1)}" stroke-linejoin="round" stroke-linecap="round" opacity="${Math.min(0.3, op * 0.32).toFixed(3)}" points="${run.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>`).join("") : "";
     const lines = match.map((t) => {
       if (t === cur || t === picked) return "";   // both are drawn last, on top (below)
-      if (TRACE_ALL) return paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE, piColor(t.class));
+      if (TRACE_ALL) { const w = t === best ? 1.4 : 0.9; return clsGlow(t, w, 0.85) + paintedLine(t.pts, ch, w, TRACE_MODE, piColor(t.class)); }
       const isLit = (clsHi && t.class === clsHi) || lapHi.has(String(t.id));
       const other = anyHi && !isLit, lit = anyHi && isLit;
       const w = lit ? Math.max(t === best ? 1.8 : 1, 1.7) : other ? 0.9 : (t === best ? 1.8 : 1);
       const op = lit ? 0.98 : other ? 0.1 : (t === best ? 0.95 : 0.5);
-      return plainLine(t.pts, ch, piColor(t.class), w, op, notTimed(t));
+      return clsGlow(t, w, op) + plainLine(t.pts, ch, piColor(t.class), w, op, notTimed(t));
     }).join("")
       // the PICKED lap on top: an accent glow under its grip-painted line, thicker than any context lap —
       // the same "this is the subject" idiom the course map uses for the isolated trace.
@@ -4603,7 +4610,12 @@ function courseStatsHTML() {
 let SINGLE_LAP = null;   // lap id selected in the Single-lap tab
 let DELTA_REF = (() => { try { return localStorage.getItem("fh6DeltaRef") || "sbest"; } catch (e) { return "sbest"; } })();   // sbest | obest | median
 const lapOrd = (cid) => String(cid || "").split("|")[0] || "?";
-const cleanLap = (l) => l && l.t != null && !l.void && !l.partial && !l.rewinds;
+// CLEAN = COMPARABLE. void / partial / rewound were always excluded; the COVERAGE FLOOR (2026-09-18) is the
+// missing one: is_partial only trips below 0.90, so a lap missing 8% of the course still counted as clean and
+// crowned Shimanoyama at 27.66 s -- 2.7 s faster than the game's own best for that session, because ~84 m of
+// the lap was never driven. A comparable lap is a whole lap; full laps measure 0.98-1.00.
+const LAP_COV_MIN = 0.97;
+const cleanLap = (l) => l && l.t != null && !l.void && !l.partial && !l.rewinds && (l.cov == null || l.cov >= LAP_COV_MIN);
 // ALIASES (2026-09-16): same (hw_hash, setup_hash) = the same build. If it's been saved under several names,
 // return the OTHER names so the UI can surface them ("also saved as X, Y") instead of silently showing only the
 // newest — self-answering the "why does it call my build that" question. Excludes m's own name; deduped.

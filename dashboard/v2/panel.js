@@ -2555,14 +2555,36 @@ function wireWorldCourses(svg) {
   // "same course, nothing to do" guard then swallowed the next real hover over that same course, for
   // the life of the page. Clearing it here ties the memory to the DOM it describes.
   MAP_HOVER = null;
+  // Wire click/dblclick per course, and CACHE each course's hit points (SVG user coords) for nearest-path hover.
+  const cache = [];
   svg.querySelectorAll(".wcourse").forEach((g) => {
     const rid = g.dataset.rid || null;
     g.style.cursor = rid ? "pointer" : "default";
-    g.addEventListener("mouseenter", () => hoverCourse(rid));
-    g.addEventListener("mouseleave", () => hoverCourse(null));
     if (rid) g.addEventListener("click", (e) => { e.stopPropagation(); browsePick(rid); });
     // double-click a course on the world map → open its full analysis (temporary course-browser view)
     if (rid) g.addEventListener("dblclick", (e) => { e.stopPropagation(); e.preventDefault(); enterTempCourse(rid); });
+    if (!rid) return;
+    const hit = g.querySelector(".wc-hit");
+    const pts = hit ? (hit.getAttribute("points") || "").trim().split(/\s+/).map((p) => p.split(",").map(Number)) : [];
+    if (pts.length > 1) cache.push({ rid, pts });
+  });
+  // NEAREST-PATH HOVER (Jett 2026-09-18): the island packs ~125 overlapping course lines, so per-element mouseenter
+  // highlighted only the TOPMOST hit — a course was hoverable only where it happened to sit on top ("only the
+  // centre"). Instead, on each mousemove pick the course whose path is NEAREST the cursor (within ~12 screen px,
+  // scaled to the current zoom), so the WHOLE length of every course is hoverable regardless of what overlaps it.
+  const segD = (px, pz, a, b) => { const dx = b[0] - a[0], dz = b[1] - a[1], l2 = dx * dx + dz * dz;
+    let t = l2 ? ((px - a[0]) * dx + (pz - a[1]) * dz) / l2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
+    return Math.hypot(px - (a[0] + t * dx), pz - (a[1] + t * dz)); };
+  svg.addEventListener("mousemove", (e) => {
+    if (MAPVIEW.drag) return;                                   // a pan is not a hover
+    const ctm = svg.getScreenCTM(); if (!ctm) return;
+    const m = ctm.inverse(), p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    const u = p.matrixTransform(m);
+    const thresh = 12 * (Math.hypot(m.a, m.b) || 1);           // ~12 screen px, expressed in SVG user units at this zoom
+    let best = null, bd = thresh;
+    for (const c of cache) { const P = c.pts;
+      for (let i = 0; i < P.length - 1; i++) { const d = segD(u.x, u.y, P[i], P[i + 1]); if (d < bd) { bd = d; best = c.rid; } } }
+    hoverCourse(best);
   });
   svg.addEventListener("mouseleave", () => hoverCourse(null));
 }

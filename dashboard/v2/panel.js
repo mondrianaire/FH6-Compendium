@@ -3754,7 +3754,6 @@ function lapHTML() {
   // the live lateral-g state readout while you're loaded on the corner. From the live frame, not a detection.
   const _f = LIVE.frame || {}, inCorner = !!(_f.on && Math.abs(_f.lat || 0) > 0.4);
   const inChip = inCorner ? `<span class="lap-incorner">● in a corner — ${_f.lat > 0 ? "right" : "left"} ${Math.abs(_f.lat).toFixed(2)} g</span>` : "";
-  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}${inChip}<span class="why">· ${taken.length} of ${courseTurns.length} turn${courseTurns.length === 1 ? "" : "s"} taken · rated on minimum speed against ${scopeTok(ls)} · every course turn listed</span></div>`;
   // NO early return on an empty lap: the spine below lists all course turns as "awaiting", so the whole course
   // shows the moment you load in — and fast turns you drive without tripping the detector show as "driven".
   let lastSeq = null, worstRow = null, gripHits = 0, rankable = 0, first = 0, thinFirst = 0, unranked = 0;
@@ -3791,18 +3790,24 @@ function lapHTML() {
   // keyed to the MAP (nearest apex) instead of to the detector, so nothing driven silently disappears.
   const bySeq = {}; passes.forEach((q) => { bySeq[q.t.seq] = q; });
   const shownLap = lapShown(), livePts = (shownLap && shownLap.pts) || [];
-  const passedOnLap = (t) => { if (t.x == null) return false;
-    for (let i = 0; i < livePts.length; i += 2) { const q = livePts[i]; if (!q || q[3] == null) continue; if ((q[3] - t.x) ** 2 + (q[4] - t.z) ** 2 < 1600) return true; } return false; };
-  const drivenMin = (t) => { const seg = t.seg || {}, phs = SEG_ORDER.filter((n) => seg[n] && seg[n].length >= 2);
-    if (!phs.length || livePts.length < 3) return null;
-    const a = seg[phs[0]][0], lastSeg = seg[phs[phs.length - 1]], b = lastSeg[lastSeg.length - 1], sl = turnSlice(livePts, a, b);
-    if (!sl) return null; const vs = sl.map((q) => q[1]).filter((v) => v != null); return vs.length ? Math.round(Math.min(...vs)) : null; };
+  // STATION-CROSSING IS THE AUTHORITY FOR "DRIVEN" (Jett 2026-09-18): see lapCrossedStation(). A fast, gentle or
+  // very short turn is driven flat-out under the 0.35 g trigger, yet the arc-along-course proves the car passed it.
+  const arcSpan = lapArcSpan(livePts);
+  const passedOnLap = (t) => lapCrossedStation(arcSpan, livePts, t);
+  const drivenMin = (t) => lapTurnMin(livePts, t);
+  // a DRIVEN turn is rated on the SAME quantity a taken turn is — its minimum speed through the turn against this
+  // lap set's history — so a fast turn you drove clean earns a real rank, not a "detector didn't fire" footnote.
+  const turnHist = (t) => { const h = {}; SEG_ORDER.forEach((seg) => ((t.phaseObs && t.phaseObs[seg]) || []).forEach((r) => {
+    if (!ls.set.has(String(r[0])) || r[2] == null) return; if (h[r[0]] == null || r[2] < h[r[0]]) h[r[0]] = r[2]; })); return Object.values(h); };
   let nDriven = 0, nAwait = 0;
   const spine = courseTurns.slice().sort((a, b) => a.seq - b.seq).map((t) => {
     const q = bySeq[t.seq]; if (q) return { t, state: "taken", q };
-    if (passedOnLap(t)) { nDriven++; return { t, state: "driven", min: drivenMin(t) }; }
+    if (passedOnLap(t)) { nDriven++; const min = drivenMin(t); return { t, state: "driven", min, v: min != null ? rankVerdict(turnHist(t), min, ls) : null }; }
     nAwait++; return { t, state: "await" };
   });
+  // the count leads with what the DATA says was driven (station-crossing), then how many of those a live corner rated
+  const nPassed = taken.length + nDriven;
+  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}${inChip}<span class="why">· ${nPassed} of ${courseTurns.length} turn${courseTurns.length === 1 ? "" : "s"} driven${nDriven && taken.length ? ` · ${taken.length} rated on a live corner` : ""} · rated on minimum speed against ${scopeTok(ls)} · every course turn listed</span></div>`;
   // order: driving order by default; rank/delta pull rated turns to the front, then driven, then awaiting
   const rk = (q) => (q.v.kind === "best" || q.v.kind === "ranked") ? (q.v.rank - 1) / Math.max(1, q.v.of - 1) : 2;
   let ordered = spine;
@@ -3826,11 +3831,23 @@ function lapHTML() {
       <span class="lap-spd mono"${q.peak}>${Math.round(q.c.mph_in)}<i>→</i><b>${Math.round(q.apex)}</b><i>→</i>${Math.round(q.c.mph_out)}<em> mph</em></span>
       <span class="lap-rank mono lap-v-${q.v.kind}${q.v.thin ? " thin" : ""}" style="color:${q.tone}"><b>${q.v.text}${q.v.d != null && !q.v.isBest ? ` · ${mphD(q.v.d)}` : ""}</b><em>${esc(q.v.basis)}</em></span>
       ${q.gr.cell}${cornerDetail(q.c)}</div>`;
-  const covRow = (e) => `<div class="lap-row lap-${e.state}" data-turn="${e.t.seq}" title="${e.state === "driven" ? "driven under the detector — open its analysis" : "not taken yet this lap — open its analysis"}">
+  // A DRIVEN row is now a rated pass: min speed + its rank against the pool, the same verdict a taken row shows.
+  // It carries no per-phase grip (no live corner fired), so the grip cell is left empty — speed is measured, grip
+  // is not claimed ([[fh6-grip-loss-is-priced-not-flagged]]). An AWAITING row is the turn not yet reached this lap.
+  const covRow = (e) => {
+    if (e.state === "driven") {
+      const v = e.v, tone = v && v.isBest && !v.thin ? "var(--acc)" : (v && v.d != null && v.d <= -4) ? "var(--bad)" : "var(--mut)";
+      return `<div class="lap-row lap-driven" data-turn="${e.t.seq}" title="driven — the car's line crossed this turn's station; rated on the trace's minimum speed (no live corner fired under the 0.35 g trigger)">
+        <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
+        <span class="lap-spd mono">${e.min != null ? `min <b>${e.min}</b><em> mph</em>` : "<em>—</em>"}</span>
+        <span class="lap-rank mono lap-v-${v ? v.kind : "nolap"}${v && v.thin ? " thin" : ""}" style="color:${tone}"><b>${v ? v.text : "driven"}${v && v.d != null && !v.isBest ? ` · ${mphD(v.d)}` : ""}</b><em>${v ? esc(v.basis) : "position"}</em></span>
+        <span></span></div>`;
+    }
+    return `<div class="lap-row lap-await" data-turn="${e.t.seq}" title="not taken yet this lap — open its analysis">
       <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
-      <span class="lap-spd mono">${e.state === "driven" && e.min != null ? `min <b>${e.min}</b><em> mph</em>` : "<em>—</em>"}</span>
-      <span class="lap-rank mono"><b class="lap-cov lap-cov-${e.state}">${e.state === "driven" ? "driven" : "not yet"}</b><em>${e.state === "driven" ? "under the 0.35 g trigger" : "awaiting this lap"}</em></span>
-      <span></span></div>`;
+      <span class="lap-spd mono"><em>—</em></span>
+      <span class="lap-rank mono"><b class="lap-cov lap-cov-await">not yet</b><em>awaiting this lap</em></span>
+      <span></span></div>`; };
   const rows = ordered.map((e) => e.state === "taken" ? takenRow(e.q) : covRow(e)).join("");
   const sortH = (k, lbl) => `<button class="${LAP_SORT === k ? "on" : ""}" data-lapsort="${k}" title="sort by ${lbl}">${lbl}${LAP_SORT === k ? " ▾" : " ⇅"}</button>`;
   // the summary counts only turns that COULD be ranked: an only-lap or level pool is excluded, never a win
@@ -3838,7 +3855,7 @@ function lapHTML() {
     ? `<b>${nDriven}</b> turn${nDriven === 1 ? "" : "s"} driven so far · ${nAwait} to come — each turn rates the moment you complete it`
     : rankable ? `<b style="color:${first ? "var(--acc)" : "var(--ink)"}">${first + thinFirst} of ${rankable}</b> rankable turn${rankable === 1 ? "" : "s"} come first${thinFirst ? ` <span class="why">(${thinFirst === first + thinFirst ? "all" : thinFirst} on a pool under 5 laps — a weak claim)</span>` : ""}`
     : `nothing can be ranked in ${scopeTok(ls)} — ${unranked} turn${unranked === 1 ? "" : "s"} with no other lap, a lap compared with itself`;
-  const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${passes.length ? `${gripHits} of ${taken.length} turns lost grip` : ""}${nDriven ? (passes.length ? " · " : "") + nDriven + " driven under the detector" : ""}${nAwait ? " · " + nAwait + " to come" : ""}</span></div>`;
+  const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${passes.length ? `${gripHits} of ${taken.length} turns lost grip` : ""}${passes.length && nDriven ? " · " + nDriven + " driven flat-out (no corner fired)" : ""}${passes.length && nAwait ? " · " + nAwait + " to come" : ""}</span></div>`;
   return `<div class="lapview">${head}${abandoned}${win ? lapWindowHTML(win, passes, ls) : ""}`
     + `<div class="lap-hd">${sortH("drive", "turn")}<span>in→min→out</span>${sortH("rank", "rank of pool")}${sortH("delta", "against the pool's best")}</div>`
     + `<div class="lap-rows">${rows}</div>${sum}</div>`;
@@ -3875,6 +3892,21 @@ function turnSlice(pts, a, b) {
   const sl = pts.slice(i0, i1 + 1), s0 = sl[0][0], L = (sl[sl.length - 1][0] - s0) || 1;
   return sl.map((q) => [(q[0] - s0) / L, q[1], q[2] | 0, q[3], q[4], null, q[6] ?? null, q[7] ?? null]);   // [fraction through the turn, mph, grip, x, z, -, thr, brk]
 }
+// PHYSICAL TURN-PASSING (Jett 2026-09-18): a turn is DRIVEN when the lap's line crossed its course station t.s —
+// the same stationing the map ticks and trace use — not when the 0.35 g / 0.8 s corner detector fired. This is
+// the "definitive physical + course-relative" test; the g-detector is the RATING layer on top. Shared by the
+// current-lap tab and the session matrix so both agree on what "taken" means. [[fh6-turn-source-ref-route-turn]]
+function lapArcSpan(pts) { let lo = Infinity, hi = -Infinity; for (let i = 0; i < pts.length; i++) { const a = pts[i] && pts[i][0]; if (a == null) continue; if (a < lo) lo = a; if (a > hi) hi = a; } return [lo, hi]; }
+function lapCrossedStation(span, pts, t) {
+  if (!pts || pts.length < 3) return false;
+  if (t.s != null && span[1] >= t.s && span[0] <= t.s) return true;   // the lap covered this turn's station — definitive; no apex radius to miss a wide racing line
+  if (t.x == null) return false;                                      // fallback for a lap/turn without stationing: apex proximity (40 m)
+  for (let i = 0; i < pts.length; i += 2) { const q = pts[i]; if (!q || q[3] == null) continue; if ((q[3] - t.x) ** 2 + (q[4] - t.z) ** 2 < 1600) return true; }
+  return false; }
+function lapTurnMin(pts, t) { const seg = t.seg || {}, phs = SEG_ORDER.filter((n) => seg[n] && seg[n].length >= 2);
+  if (!phs.length || !pts || pts.length < 3) return null;
+  const a = seg[phs[0]][0], lastSeg = seg[phs[phs.length - 1]], b = lastSeg[lastSeg.length - 1], sl = turnSlice(pts, a, b);
+  if (!sl) return null; const vs = sl.map((q) => q[1]).filter((v) => v != null); return vs.length ? Math.round(Math.min(...vs)) : null; }
 function lapWindowHTML(p, passes, ls) {
   const t = p.t, i = passes.indexOf(p), prev = passes[i - 1], next = passes[i + 1];
   const nTurns = (COURSE.turns || []).length, dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
@@ -4604,6 +4636,15 @@ function matrixHTML() {
   });
 
   const med = (a) => { a = a.filter((v) => v != null).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  // PHYSICAL PASSES the g-detector missed (Jett 2026-09-18): the current/last lap's line proves which turns were
+  // driven even where no 0.35 g corner fired. This is the live signal for the session's in-progress lap; the
+  // session's completed laps count through their g-corners (above) and, once imported, their own traces. A turn
+  // driven-but-not-detected reads "driven · min mph" instead of dimming to nothing.
+  // ONLY the live/last lap of THIS session (never a browsed foregrounded pick from another session) — lapShown()
+  // would fall back to that pick, mis-attributing its passes to "this session". Idle → no physical add, g-corners only.
+  const liveLp = (typeof liveLapFor === "function") ? liveLapFor(COURSE) : null;
+  const shownPts = (liveLp && liveLp.pts) || [];
+  const shownSpan = lapArcSpan(shownPts);
   const rows = COURSE.turns.slice().sort((a, b) => a.seq - b.seq).map((t) => {
     const arr = bySeq[t.seq] || [];
     const last = arr.length ? arr[arr.length - 1].c : null;
@@ -4611,8 +4652,10 @@ function matrixHTML() {
     const fr = { front: 0, rear: 0, none: 0 };
     arr.forEach((b) => fr[(b.c.first_red || {}).axle || "none"]++);   // first_red is legitimately null ~10% of the time (a clean corner) — bucketed, not skipped
     const dom = arr.length ? Object.keys(fr).sort((x, y) => fr[y] - fr[x])[0] : null;
+    const phys = !arr.length && lapCrossedStation(shownSpan, shownPts, t);   // driven on the shown lap but no corner fired
     return {
-      t, taken: arr.length, anyAmbiguous, dom, fr, last,
+      t, taken: arr.length, driven: arr.length > 0 || phys, phys, anyAmbiguous, dom, fr, last,
+      dmin: phys ? lapTurnMin(shownPts, t) : null,
       mph: med(arr.map((b) => b.c.mph_apex != null ? b.c.mph_apex : b.c.mph_min)),
       lat: med(arr.map((b) => b.c.lat_g_peak)),
       usi: med(arr.map((b) => b.c.usi)),          // usi can legitimately be exactly 0 — check `!= null`, never truthiness
@@ -4620,16 +4663,17 @@ function matrixHTML() {
   });
 
   const badge = courseConfidenceBadge();
-  const head = `<div class="frow head"><b>${rows.filter((r) => r.taken).length}/${rows.length} turns taken this session</b>${badge}</div>`;
+  const nRated = rows.filter((r) => r.taken).length, nDriven = rows.filter((r) => r.driven).length;
+  const head = `<div class="frow head"><b>${nDriven}/${rows.length} turns driven this session${nDriven > nRated ? ` · ${nRated} rated by a corner` : ""}</b>${badge}</div>`;
   const table = `<div style="overflow:auto"><table style="font-size:11px;border-collapse:collapse;width:100%"><thead><tr>
     <th style="text-align:left">turn</th><th>taken</th><th>apex mph</th><th>lat g</th><th>USI</th><th>first red</th><th>last pass</th></tr></thead><tbody>
     ${rows.map((r) => {
       const g = r.usi != null ? DGRIP[dGripUsi(r.usi)] : null;
       const dcol = r.dom === "front" || r.dom === "rear" ? DGRIP[r.dom].ink : "var(--muted)";
-      return `<tr style="${r.taken ? "" : "opacity:.4"}${r.anyAmbiguous ? ";outline:1px dashed var(--w)" : ""}">
+      return `<tr style="${r.driven ? "" : "opacity:.4"}${r.anyAmbiguous ? ";outline:1px dashed var(--w)" : ""}">
         <td><b>${esc(turnLabel(r.t))}</b>${r.t.kind ? " " + esc(r.t.kind) : ""}${r.anyAmbiguous ? ` <span title="nearest of 2 turns within range — some passes here could belong to a neighboring turn">⚠</span>` : ""}</td>
-        <td class="mono" style="text-align:center">${r.taken || "—"}</td>
-        <td class="mono" style="text-align:center">${r.mph ?? "—"}</td>
+        <td class="mono" style="text-align:center"${r.phys ? ` title="driven on the current lap — no corner fired under the 0.35 g trigger, so it is not rated"` : ""}>${r.taken || (r.phys ? "driven" : "—")}</td>
+        <td class="mono" style="text-align:center">${r.mph ?? (r.dmin != null ? "min " + r.dmin : "—")}</td>
         <td class="mono" style="text-align:center">${r.lat ?? "—"}</td>
         <td style="text-align:center">${r.usi != null ? `<span style="color:${g.ink}" title="${esc(g.word)}">${r.usi > 0 ? "+" : ""}${r.usi.toFixed(2)}</span>` : "—"}</td>
         <td style="text-align:center">${r.taken ? `<span style="color:${dcol};font-weight:700">${r.dom || "clean"}</span> <span class="why">${r.fr.front}/${r.fr.rear}/${r.fr.none}</span>` : "—"}</td>

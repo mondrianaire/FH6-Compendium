@@ -464,7 +464,7 @@ def scan_session(cx, session_id, captures_dir, db=None):
     return len(out)
 
 
-def scan_all(db=None, captures=None, force=False, verbose=False):
+def scan_all(db=None, captures=None, force=False, verbose=False, ignore_run_id=None):
     """Every session with laps, skipping those whose sidecar is already newer than its capture.
 
     Incremental because it is not cheap: 441 captures at ~150k rows each. The stage sits in the
@@ -472,6 +472,20 @@ def scan_all(db=None, captures=None, force=False, verbose=False):
     a half-hour one. After the first pass only the session just driven is rescanned.
     """
     cx = fh6db.connect(db, ro=True)
+    # NEVER SCAN ACROSS A REBUILD. A sidecar is built from the lap rows for its session, and
+    # import_consolidate repoints and deletes laps inside its run, so a scan that reads mid-rebuild
+    # bakes a partial lap set into a sidecar that then looks finished -- the sidecar carries no sign
+    # that it was built from half a table, and the next run skips it because its mtime is current.
+    # Refusing costs a rerun; not refusing costs a wrong answer that never announces itself.
+    # ignore_run_id is the CALLER'S OWN run. import_deterministic opens an import_run row before
+    # it calls this, so without the exclusion the scanner refuses on the strength of the very run
+    # that invoked it -- which is exactly what happened the first time this was run for real.
+    r = cx.execute("""SELECT kind, started_utc FROM import_run
+                      WHERE finished_utc IS NULL AND run_id IS NOT ?
+                      ORDER BY run_id DESC LIMIT 1""", (ignore_run_id,)).fetchone()
+    if r:
+        raise RuntimeError("a '%s' import started %s has not finished -- rerun once the rebuild "
+                           "settles" % (r["kind"], r["started_utc"]))
     cdir = os.path.abspath(captures or os.path.join(
         os.path.dirname(fh6db.db_path(db)), "..", "captures"))
     sids = [r["session_id"] for r in cx.execute(

@@ -37,8 +37,11 @@ def main(argv=None):
     cx = fh6db.connect(a.db)
     rid = fh6db.run_begin(cx, "deterministic", "raw captures -> per-session .det.json sidecars")
     try:
-        counts = deterministic.scan_all(a.db, a.captures, a.force, a.verbose)
-    except Exception as e:                               # noqa: BLE001
+        counts = deterministic.scan_all(a.db, a.captures, a.force, a.verbose, ignore_run_id=rid)
+    except BaseException as e:                           # noqa: BLE001
+        # BaseException, not Exception: a SystemExit here would otherwise skip run_end and leave
+        # this run open forever, and since the scanner refuses while any run is open, one aborted
+        # scan would permanently block every later one.
         fh6db.run_end(cx, rid, 0, 0, "%s: %s" % (type(e).__name__, e))
         raise
     fh6db.run_end(cx, rid, counts.get("scanned", 0), 1, json.dumps(counts))

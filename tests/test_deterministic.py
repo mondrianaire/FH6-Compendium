@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _helpers as H  # noqa: F401  (path setup)
 
 import deterministic as D
+import fh6db
 
 HZ = 60.0
 RAD = 0.25                      # wheel radius the synthetic rows are built around
@@ -165,6 +166,44 @@ class BottomingTest(unittest.TestCase):
         f = D.detect_bottoming(rows)
         self.assertEqual(len(f), 1)
         self.assertIn("rear ride height", f[0]["fix"])
+
+
+class RebuildGuardTest(unittest.TestCase):
+    """The scan refuses to read across a rebuild -- but must not refuse on the caller's own run.
+
+    Both halves are load-bearing and the second one is not hypothetical: the first real full scan
+    did nothing at all, because import_deterministic opens an import_run row before calling the
+    scanner and the scanner then saw that row and stopped. The abort also skipped run_end (SystemExit
+    is not an Exception), leaving the run open so every later attempt would have refused too.
+    """
+
+    def setUp(self):
+        self.cx, self.path = H.new_db()
+
+    def tearDown(self):
+        H.close_db(self.cx, self.path)
+
+    def _open_run(self, kind="consolidate"):
+        rid = fh6db.run_begin(self.cx, kind, "test")
+        self.cx.commit()
+        return rid
+
+    def test_refuses_while_another_import_is_in_flight(self):
+        self._open_run("consolidate")
+        with self.assertRaises(RuntimeError):
+            D.scan_all(self.path, captures=os.path.dirname(self.path))
+
+    def test_does_not_refuse_on_its_own_run(self):
+        rid = self._open_run("deterministic")
+        counts = D.scan_all(self.path, captures=os.path.dirname(self.path), ignore_run_id=rid)
+        self.assertEqual(counts["scanned"], 0)          # empty db: nothing to scan, but it RAN
+
+    def test_a_finished_run_does_not_block(self):
+        rid = self._open_run("consolidate")
+        fh6db.run_end(self.cx, rid, 0, 1, "done")
+        self.cx.commit()
+        counts = D.scan_all(self.path, captures=os.path.dirname(self.path))
+        self.assertEqual(counts["scanned"], 0)
 
 
 class GateConsistencyTest(unittest.TestCase):

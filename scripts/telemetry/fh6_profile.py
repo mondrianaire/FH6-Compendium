@@ -5,13 +5,20 @@ The game profile save is the authoritative source the lab otherwise reverse-engi
   * an embedded SQLite `Career_Garage` (every owned car INSTANCE: full decoded build + tune + stats
     + equipped tune/livery + a stable per-instance Guid)  -> the decoded build/tune corpus (scaffolded)
 
-C_ProfileData is encrypted (Arxan TransformIT white-box AES; no local FH6 keys exist). It is decrypted
-by DVS-code's ForzaCryptoTool, which UPLOADS the file to a hosted backend. Per Jett's privacy rule the
-daemon never uploads silently: `decrypt()` refuses unless the caller passes approved=True (set only on an
-explicit user click). C:\\XboxGames is read-only -- always decrypt a COPY, never the original.
+C_ProfileData is encrypted. Two decrypt paths, in this order:
 
-This module is READ-ONLY w.r.t. the game: it locates, copies, decrypts (on approval) and parses. It never
-writes into the save tree and never runs any game .exe.
+  1. LOCAL (default) -- `scripts/tools/fh6_local_decrypt`, our own implementation of the published
+     container format (AES-256-CBC + a deterministic HKDF-SHA256 IV chain + zlib). Nothing leaves the
+     machine, so it needs NO approval and can run unattended on every menu-exit. Validated byte-identical
+     against the tool below; see that project's README and docs/fh6-profile-crypto-mimicry.md.
+  2. FALLBACK -- DVS-code's ForzaCryptoTool, which UPLOADS the save to a hosted backend. Per Jett's
+     privacy rule the daemon never uploads silently, so this path still refuses unless the caller passes
+     approved=True (set only on an explicit user click).
+
+C:\\XboxGames is read-only -- always decrypt a COPY, never the original.
+
+This module is READ-ONLY w.r.t. the game: it locates, copies, decrypts and parses. It never writes into
+the save tree and never runs any game .exe.
 
 See [[fh6-equipped-tune-in-profiledata]] for the reverse-engineering behind current_equipped()/read_garage().
 """
@@ -30,6 +37,16 @@ except Exception:  # pragma: no cover - the daemon imports this the same way
 
 # DVS-code Forza Crypto Tool 3.1.0 (self-contained .NET). Server-assisted decrypt (uploads the file).
 FORZACRYPTO = os.environ.get("FORZACRYPTO_EXE", r"C:\Users\mondr\Downloads\ForzaCryptoTool.exe")
+
+# Our offline decryptor: scripts/tools/fh6_local_decrypt (decrypt-only, no upload, no approval needed).
+_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+LOCAL_DECRYPT = os.environ.get("FH6_LOCAL_DECRYPT") or os.path.join(
+    _REPO, "scripts", "tools", "fh6_local_decrypt", "bin", "Release", "net8.0", "fh6_local_decrypt.exe")
+
+
+def local_decrypt_available():
+    """True when the offline decryptor is built -- i.e. no upload is needed for a profile read."""
+    return os.path.exists(LOCAL_DECRYPT)
 
 
 # --------------------------------------------------------------------------- locate
@@ -59,27 +76,58 @@ class UploadNotApproved(Exception):
     pass
 
 
-def decrypt(src, out_path, *, approved=False, timeout=120):
-    """Decrypt a COPY of the encrypted profile via ForzaCryptoTool -> out_path.
+def decrypt(src, out_path, *, approved=False, timeout=120, prefer_local=True):
+    """Decrypt a COPY of the encrypted profile -> out_path. Returns out_path.
 
-    ForzaCryptoTool UPLOADS the file to a third-party backend. This refuses unless approved=True
-    (the daemon passes it only after an explicit user click). Returns out_path on success.
-    Raises UploadNotApproved, FileNotFoundError, or subprocess.CalledProcessError/TimeoutExpired.
+    Tries the LOCAL decryptor first (offline, no approval needed, ~0.25 s). Falls back to
+    ForzaCryptoTool only when the local tool is absent or fails -- and that path UPLOADS the save, so it
+    still requires approved=True.
+
+    Raises UploadNotApproved (local tool unavailable and no approval for the upload path),
+    FileNotFoundError, or subprocess.CalledProcessError/TimeoutExpired.
     """
-    if not approved:
-        raise UploadNotApproved("profile decrypt uploads the save to a third-party backend; needs explicit approval")
     if not os.path.exists(src):
         raise FileNotFoundError(src)
-    if not os.path.exists(FORZACRYPTO):
-        raise FileNotFoundError(FORZACRYPTO)
-    # never hand the tool the original under C:\XboxGames -- copy to a temp first
+    # never hand either tool the original under C:\XboxGames -- copy to a temp first
     tmp = os.path.join(tempfile.gettempdir(), "fh6_C_ProfileData.enc")
     shutil.copy2(src, tmp)
+
+    if prefer_local and local_decrypt_available():
+        r = subprocess.run([LOCAL_DECRYPT, tmp, "-o", out_path, "--type", "profile", "--force", "--quiet"],
+                           capture_output=True, text=True, timeout=timeout)
+        if r.returncode == 0:
+            return out_path
+        # fall through to the upload path, but say why the offline one failed
+        local_err = (r.stderr or r.stdout or "").strip()
+    else:
+        local_err = "offline decryptor not built (scripts/tools/fh6_local_decrypt)"
+
+    if not approved:
+        raise UploadNotApproved(
+            "offline decrypt unavailable (%s); the ForzaCryptoTool fallback uploads the save to a "
+            "third-party backend and needs explicit approval" % local_err)
+    if not os.path.exists(FORZACRYPTO):
+        raise FileNotFoundError(FORZACRYPTO)
     r = subprocess.run([FORZACRYPTO, "decrypt", tmp, "-o", out_path, "-y", "-f"],
                        capture_output=True, text=True, timeout=timeout)
     if r.returncode != 0:
         raise subprocess.CalledProcessError(r.returncode, r.args, r.stdout, r.stderr)
     return out_path
+
+
+def load_live(*, approved=False, containers_root=None, timeout=120):
+    """Locate, copy and decrypt the LIVE profile; return its plaintext bytes (or None if not found).
+
+    The whole daemon-side read in one call. Offline by default, so this is safe to run on every
+    menu-exit without asking anyone.
+    """
+    src = find_profile_path(containers_root)
+    if not src:
+        return None
+    out = os.path.join(tempfile.gettempdir(), "fh6_profile_dec.bin")
+    decrypt(src, out, approved=approved, timeout=timeout)
+    with open(out, "rb") as f:
+        return f.read()
 
 
 # --------------------------------------------------------------------------- interned string table
@@ -182,9 +230,20 @@ def read_garage(dec):
 # --------------------------------------------------------------------------- CLI (testing)
 def _main(argv):
     if len(argv) < 2:
-        print("usage: fh6_profile.py <decrypted_profile> [--equipped] [--garage] [--garage-ord N]")
+        print("usage: fh6_profile.py <decrypted_profile>|--live [--equipped] [--garage] [--garage-ord N]")
+        print("       --live  locate + decrypt the live save (offline when the local decryptor is built)")
         return 2
-    dec = open(argv[1], "rb").read()
+    if argv[1] == "--live":
+        print("offline decryptor:", "yes" if local_decrypt_available() else "NO (would need upload approval)")
+        src = find_profile_path()
+        print("live profile:", src)
+        dec = load_live()
+        if dec is None:
+            print("no live profile found")
+            return 1
+        print("decrypted: %d bytes" % len(dec))
+    else:
+        dec = open(argv[1], "rb").read()
     args = set(argv[2:])
     if "--equipped" in args or len(args) == 0:
         print("current_equipped:", current_equipped(dec))

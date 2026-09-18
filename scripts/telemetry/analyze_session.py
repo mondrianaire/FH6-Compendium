@@ -2766,10 +2766,10 @@ def main():
             """
             rs_ = [r for r in loop_rows if w_["t0"] <= r["t"] <= w_["t1"] and r.get("CurrentRaceTime") is not None]
             if len(rs_) < 20:
-                return None
+                return None, False
             span = rs_[-1]["CurrentRaceTime"] - rs_[0]["CurrentRaceTime"]
             if not (3.0 <= span <= 1800.0):
-                return None
+                return None, False
             if rewound is None:
                 rewound = _rewinds_in(w_) > 0
             ll = rs_[-1].get("LastLap") or 0.0

@@ -234,11 +234,19 @@ def _recall_profile_equipped(ordn):
         return None
 
 
-def _profile_decrypt_and_record():
-    """USER-APPROVED profile read (hybrid prompt): decrypt C_ProfileData (uploads to the tool's backend — only
-    reached via an explicit /profile-decrypt {approved:true}), record the current car's equipped tune per ordinal
-    so _pick_meta settles the signature tie (identify-on-equip), then force a disk re-emit + announce the result.
-    Runs in a background thread — the decrypt is server-assisted (seconds). Never uploads without the click."""
+def _profile_decrypt_and_record(allow_upload=False, auto=False):
+    """Read C_ProfileData and record the current car's equipped tune per ordinal, so _pick_meta settles the
+    signature tie (identify-on-equip), then force a disk re-emit + announce the result.
+
+    Two callers, two policies:
+      * AUTOMATIC (auto=True, allow_upload=False) — fired by the disk watcher when the profile's mtime moves
+        (an equip / a save). Offline only: fh6_profile prefers scripts/tools/fh6_local_decrypt, which keeps
+        the save on this machine, so this needs no click and costs ~0.3 s.
+      * USER-APPROVED (/profile-decrypt {approved:true}, allow_upload=True) — the fallback when the offline
+        decryptor is missing; fh6_profile may then use ForzaCryptoTool, which UPLOADS the save.
+
+    Never uploads unless the caller passed allow_upload — the automatic path cannot, by construction.
+    Runs in a background thread."""
     import tempfile
     if PROFILE is None:
         ST.emit("profile_read", {"ok": False, "err": "profile module unavailable"}); return
@@ -247,7 +255,7 @@ def _profile_decrypt_and_record():
         src = PROFILE.find_profile_path()
         if not src:
             ST.emit("profile_read", {"ok": False, "err": "C_ProfileData not found"}); return
-        PROFILE.decrypt(src, out, approved=True, timeout=120)
+        PROFILE.decrypt(src, out, approved=bool(allow_upload), timeout=120)
         dec = open(out, "rb").read()
         eq = PROFILE.current_equipped(dec)
         by_ord = {}
@@ -256,10 +264,11 @@ def _profile_decrypt_and_record():
         if by_ord:
             _remember_profile_equipped(by_ord)
             ST._disk_dirty = True   # next disk emit re-runs _pick_meta -> settles via the profile fact
-        ST.emit("profile_read", {"ok": True, "equipped": eq, "at": time.time()})
+        ST.emit("profile_read", {"ok": True, "equipped": eq, "at": time.time(), "auto": bool(auto)})
     except Exception as e:
-        ST.emit("profile_read", {"ok": False, "err": str(e)[:200]})
+        ST.emit("profile_read", {"ok": False, "err": str(e)[:200], "auto": bool(auto)})
     finally:
+        ST._profile_reading = False
         try: os.remove(out)
         except Exception: pass
 
@@ -2175,12 +2184,17 @@ class H(BaseHTTPRequestHandler):
         elif self.path.startswith("/reset"):
             reset_session(); ok = True
         elif self.path.startswith("/profile-decrypt"):
-            # HYBRID prompt: read the currently-equipped tune from C_ProfileData. This UPLOADS the save to the
-            # tool's backend, so it runs ONLY with an explicit {approved:true} from a user click — never silently.
-            if not body.get("approved"):
-                out = json.dumps({"ok": False, "err": "approval required (decrypt uploads the save)"}).encode()
+            # Manual profile read. The watcher now does this automatically and OFFLINE whenever the profile
+            # changes, so this endpoint is the on-demand / fallback path. It only needs {approved:true} when
+            # the offline decryptor is missing, because then the read would fall back to the UPLOADING tool.
+            _offline = False
+            try: _offline = PROFILE is not None and PROFILE.local_decrypt_available()
+            except Exception: _offline = False
+            if not _offline and not body.get("approved"):
+                out = json.dumps({"ok": False, "err": "approval required (offline decryptor unavailable; fallback uploads the save)"}).encode()
                 self.send_response(400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out); return
-            threading.Thread(target=_profile_decrypt_and_record, daemon=True).start()
+            threading.Thread(target=_profile_decrypt_and_record,
+                             kwargs={"allow_upload": bool(body.get("approved"))}, daemon=True).start()
             out = json.dumps({"ok": True, "started": True}).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out); return
         elif (self.path.startswith("/tag") or self.path.startswith("/role")) and ("label" in body or "role" in body):
@@ -2567,8 +2581,11 @@ def disk_watcher():
     while True:
         time.sleep(1.5)
         try:
-            # HYBRID profile trigger: when C_ProfileData's mtime moves (an equip / save), ANNOUNCE it so the
-            # dashboard can offer a one-click, user-approved decrypt. We never decrypt/upload here — only notice.
+            # PROFILE trigger: C_ProfileData's mtime moves on an equip / save (the game flushes live), which is
+            # exactly when the equipped-tune pointer changes. With the OFFLINE decryptor built we read it
+            # ourselves - nothing leaves the machine, it costs ~0.3 s, and identify-on-equip needs no click.
+            # Without it, keep the old behaviour: announce, and let the dashboard offer an approved (uploading)
+            # decrypt. Never both, and never more than one read in flight.
             if PROFILE is not None:
                 try:
                     _pmt = PROFILE.profile_mtime()
@@ -2576,7 +2593,15 @@ def disk_watcher():
                         _first = getattr(ST, "_profile_mtime", None) is None
                         ST._profile_mtime = _pmt
                         if not _first:
-                            ST.emit("profile_stale", {"ordinal": getattr(ST, "last_car", None), "mtime": _pmt})
+                            try: _offline = PROFILE.local_decrypt_available()
+                            except Exception: _offline = False
+                            if _offline and not getattr(ST, "_profile_reading", False):
+                                ST._profile_reading = True
+                                threading.Thread(target=_profile_decrypt_and_record,
+                                                 kwargs={"allow_upload": False, "auto": True},
+                                                 daemon=True).start()
+                            elif not _offline:
+                                ST.emit("profile_stale", {"ordinal": getattr(ST, "last_car", None), "mtime": _pmt})
                 except Exception:
                     pass
             fr = ST.latest; ordn = fr and fr.get("car")

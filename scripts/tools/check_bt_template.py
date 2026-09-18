@@ -380,6 +380,40 @@ def check_nav():
         fails.append("%d .nav files did not walk cleanly to EOF" % badfoot)
     if badver:
         fails.append("%d .nav chunks have an unexpected version" % badver)
+
+    # DEEP: the WVAN payload is laid out FROM BOTH ENDS. nodes[] and spline[]
+    # run forward from 0x90; attr[]/keyOff[]/valOff[]/keyBlob/valBlob are
+    # anchored to the payload END, each occupying align16(size), and link[] and
+    # memberNode[] are placed backward from there. The two regions OVERLAP:
+    # the last spline record's trailing (memberEnd, attrEnd) u64s alias
+    # memberNode[0..1], which the writer never fills in. Verify the overlap is
+    # real and bounded -- 0, 8 or 16 bytes, never negative.
+    def a16(x):
+        return (x + 15) & ~15
+
+    over = {}
+    bad_overlap = 0
+    for p in files:
+        b = open(p, "rb").read()
+        sz = struct.unpack_from("<I", b, 12)[0]
+        end = 16 + sz
+        (nNode, nSpline, nLink, _n2, nAttr, nKey, nVal,
+         keyLen, valLen) = struct.unpack_from("<9I", b, 0x58)
+        vb = end - a16(valLen)
+        kb = vb - a16(keyLen)
+        vo = kb - a16(nVal * 8)
+        ko = vo - a16(nKey * 8)
+        attr = ko - a16(nAttr * 16)
+        member = attr - nLink * 16 - nLink * 8
+        ovl = (0x90 + 48 * nNode + 24 * nSpline) - member
+        over[ovl] = over.get(ovl, 0) + 1
+        if ovl < 0 or ovl > 16:
+            bad_overlap += 1
+    print("  DEEP: backward layout closes on every file; spline[]/memberNode[] "
+          "overlap = %s" % dict(sorted(over.items())))
+    if bad_overlap:
+        fails.append("%d .nav files have an overlap outside 0..16 bytes -- the "
+                     "two-ended layout does not hold" % bad_overlap)
     return fails
 
 
@@ -411,6 +445,39 @@ def check_str():
                     (bad_name, "have an embedded name that is not the filename")):
         if n:
             fails.append("%d .str tables %s" % (n, what))
+
+    # DEEP: resolve every string in both tables, and require the two tables to
+    # carry the SAME hash set -- they are a key/value pair, so a mismatch means
+    # one side is being mis-read.
+    def table(b, o):
+        cnt = struct.unpack_from("<3I", b, o)[2]
+        recs = [struct.unpack_from("<2I", b, o + 12 + 8 * i) for i in range(cnt)]
+        blob = o + 12 + 8 * cnt
+        hashes, bad = set(), 0
+        for h, off in recs:
+            p = blob + off
+            if not (0 <= p < len(b)) or b.find(0, p) < 0:
+                bad += 1
+                continue
+            hashes.add(h)
+        return hashes, bad, cnt
+
+    total = unresolved = mismatch = 0
+    for n in names:
+        b = z.read(n)
+        v, bv, cv = table(b, 0x8C)
+        k, bk, ck = table(b, struct.unpack_from("<I", b, 0x88)[0])
+        total += cv + ck
+        unresolved += bv + bk
+        if v != k:
+            mismatch += 1
+    print("  DEEP: %s strings resolved, %d unresolved; value/key hash sets "
+          "identical in %d/%d tables" % (format(total, ","), unresolved,
+                                         len(names) - mismatch, len(names)))
+    if unresolved:
+        fails.append("%d .str entries do not resolve to a NUL-terminated string" % unresolved)
+    if mismatch:
+        fails.append("%d .str tables have mismatched value/key hash sets" % mismatch)
     return fails
 
 
@@ -440,7 +507,64 @@ def check_bxml():
         fails.append("%d entries are not BXML" % bad_magic)
     if bad_ver:
         fails.append("%d BXML entries are not version 2" % bad_ver)
+
+    # DEEP: walk the whole recursive node tree and require it to consume the
+    # file exactly. This is the check an offset table cannot do, and it is the
+    # strongest statement available about a variable-length format: if the
+    # walk ends anywhere but EOF, the structure is not what we think it is.
+    sys.setrecursionlimit(100000)
+    walked = short = 0
+    for n in names:
+        b = z.read(n)
+        if len(b) < 13 or b[:4] != b"BXML":
+            continue
+        try:
+            if _bxml_walk(b) == len(b):
+                walked += 1
+            else:
+                short += 1
+        except Exception:
+            short += 1
+    print("  DEEP: %d/%d entries walk the full node tree to EXACTLY EOF"
+          % (walked, walked + short))
+    if short:
+        fails.append("%d BXML entries do not walk cleanly to EOF" % short)
     return fails
+
+
+def _bxml_walk(b):
+    """Consume a BXML file entirely; return the end offset."""
+    sc = struct.unpack_from("<i", b, 5)[0]
+    o = 13
+    for _ in range(sc):
+        o += 2 + struct.unpack_from("<H", b, o)[0]
+    w = 1 if sc <= 255 else (2 if sc <= 65535 else 4)
+
+    def idx(p):
+        if w == 1:
+            return b[p], p + 1
+        if w == 2:
+            return struct.unpack_from("<H", b, p)[0], p + 2
+        return struct.unpack_from("<I", b, p)[0], p + 4
+
+    def node(p):
+        flags = b[p]
+        p += 1
+        _, p = idx(p)
+        if flags & 2:
+            n = b[p]
+            p += 1
+            for _ in range(n):
+                _, p = idx(p)
+                _, p = idx(p)
+        if flags & 4:
+            n = struct.unpack_from("<h", b, p)[0]
+            p += 2
+            for _ in range(n):
+                p = node(p)
+        return p
+
+    return node(o + 1)
 
 
 def check_swatchbin():

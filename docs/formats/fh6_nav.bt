@@ -31,6 +31,20 @@
 // Python reader walks; it is not modelled here, because a half-described
 // payload is worse than an honestly empty one.
 //
+// AND THE PAYLOAD CANNOT BE MODELLED SEQUENTIALLY ANYWAY. It is laid out FROM
+// BOTH ENDS:
+//   forward from 0x90        node[] (48 B each), then spline[] (24 B each)
+//   backward from payload end, each section taking align16(size):
+//                            valBlob, keyBlob, valOff[], keyOff[], attr[],
+//                            then link[] and memberNode[] below those
+// The two regions OVERLAP. The last spline record's trailing (memberEnd,
+// attrEnd) u64 pair occupies the same bytes as memberNode[0..1]; the writer
+// never fills them in and fh6_nav.py reconstructs them as nLink / nAttr.
+// MEASURED over all 171 files: the overlap is 0 bytes on 79, 8 on 89 and 16 on
+// 3 -- never negative, never more than 16. It is structural, not corruption.
+// A forward-only reading of the payload map does not close; do not attempt one.
+// See kaitai-assessment.md, which is where this was found.
+//
 // CORPUS: measured 2026-09-18 over all 170 .nav files in aitracks.
 //   every file holds exactly 2 chunks                      170/170
 //   chunk magics, in order: 'WVAN' then 'RVAN'             170/170

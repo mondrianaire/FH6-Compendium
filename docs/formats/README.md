@@ -5,7 +5,7 @@ Every binary format this project reads, documented as a **010 Editor binary temp
 
 A `.bt` is executable documentation: open the file in 010 Editor, run the template, and the bytes
 either parse or they don't. Prose describing a byte layout doesn't have to add up. A template does —
-which is why writing these found two things the prose had missed (§3).
+which is why writing these found four things the prose had missed (below).
 
 ## The templates
 
@@ -52,11 +52,22 @@ when a layout moves.
 Current state: **8/8 OK**, covering 1,526 saves, 4.36M telemetry frames, 170 routes, 171 nav files,
 290 string tables, 7,121 BXML entries and 902 textures.
 
-The check is offset-based, so it cannot validate the variable-length parts — BXML's recursive node tree,
-`.nav`'s spline payload, the `.str` string blobs. Those are covered by their Python readers, which
-round-trip real data and are a stronger test than any layout assertion.
+The offset check is joined by a **deep structural walk** for the three variable-length formats, printed
+as `DEEP:` lines:
 
-## Three things the templates found
+| Format | What the walk proves | Result |
+| --- | --- | --- |
+| BXML | the full recursive node tree consumes the file | 7,121/7,121 land **exactly** on EOF |
+| `.str` | every string in both tables resolves | 118,536 resolved, 0 unresolved; key sets match 290/290 |
+| `.nav` | the two-ended layout closes | 171/171, overlap bounded 0–16 B |
+
+A walk that lands exactly on EOF is the strongest statement available about a variable-length format.
+
+**Kaitai Struct was evaluated for these and declined** — see [`kaitai-assessment.md`](kaitai-assessment.md).
+Short version: BXML and `.str` would suit it well but no longer need it, and `.nav` *cannot* be expressed
+correctly (no half-float type, and fields that overlap and must be reconstructed).
+
+## Four things this exercise found
 
 1. **A 10-byte block at `0x04` in the tune blob** that `fh6_tune_decode.py` skips and no document named.
    Constant `00 00 01 00 00 00 01 00 00 00` in 1,526/1,526 saves — meaning unknown, value invariant.
@@ -66,6 +77,12 @@ round-trip real data and are a stronger test than any layout assertion.
 3. **Chunk size cannot be inferred from a CryptoContainer's size.** `gamedbRC.slt`'s payload divides
    evenly by *both* the 128 KB slot (121) and the 512 B slot (30,041). Only the first is right, and the
    MACs aren't verified on read, so the wrong guess yields 15 MB of silent noise.
+4. **The `.nav` payload is laid out from both ends, and its regions overlap.** `node[]`/`spline[]` run
+   forward from `0x90`; everything else is anchored to the payload end with each section taking
+   `align16(size)`. The last `spline` record's trailing `(memberEnd, attrEnd)` pair *aliases*
+   `memberNode[0..1]` and is never written — `fh6_nav.py` reconstructs it. Measured overlap across all
+   171 files: 0 B on 79, 8 B on 89, 16 B on 3. Found by failing to reproduce the layout forward-only,
+   and it is what rules Kaitai out for this format.
 
 ## House rules for writing one
 

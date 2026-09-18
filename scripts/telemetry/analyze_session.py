@@ -2385,7 +2385,7 @@ def main():
                 S = [0.0]
                 for a_, b_ in zip(pc, pc[1:]): S.append(S[-1] + math.hypot(b_[0] - a_[0], b_[1] - a_[1]))
                 if S[-1] < step * 5: continue
-                P_ = []; j = 0; s_ = 0.0
+                P_ = []; j = 0; s_ = 0.0; j_prev = 0
                 while s_ <= S[-1]:
                     while j < len(S) - 2 and S[j + 1] < s_: j += 1
                     seg_len = S[j + 1] - S[j]; f = (s_ - S[j]) / seg_len if seg_len > 0 else 0.0
@@ -2395,8 +2395,16 @@ def main():
                     _dst = ((pc[j][5] + (pc[j + 1][5] - pc[j][5]) * f,) if len(pc[j]) > 5 and len(pc[j + 1]) > 5 else ())   # the odometer, likewise
                     _ped = ((pc[j][6] + (pc[j + 1][6] - pc[j][6]) * f, pc[j][7] + (pc[j + 1][7] - pc[j][7]) * f)
                             if len(pc[j]) > 7 and len(pc[j + 1]) > 7 else ())   # the pedals, interpolated like speed
-                    _lat = ((max(abs(pc[j][8]), abs(pc[j + 1][8])),) if len(pc[j]) > 8 and len(pc[j + 1]) > 8 else ())   # |lat_g|: PEAK of the bracketing pair, not blended -- a spike must survive (schema 7)
+                    # |lat_g|: the PEAK over EVERY raw row since the previous checkpoint, not just the two
+                    # bracketing it (2026-09-18, the deferred resample bias). 4 m at 60 mph is ~0.15 s = ~9 frames
+                    # at 60 Hz, and the old pair-max could only ever see 2 of them: any spike that peaked between
+                    # the bracketing rows was dropped, biasing peak_lat_g -- and so the grip ceiling -- DOWNWARD.
+                    # Blending is still wrong (a peak must survive), so it stays a max; the window just widened
+                    # to the frames the checkpoint actually spans.
+                    _lat = ((max(abs(pc[k][8]) for k in range(min(j_prev, j), min(len(pc), j + 2))),)
+                            if len(pc[j]) > 8 and len(pc[j + 1]) > 8 else ())
                     P_.append(_base + _cat + _ele + _dst + _ped + _lat)
+                    j_prev = j
                     s_ += step
                 out.append(P_)
             return out

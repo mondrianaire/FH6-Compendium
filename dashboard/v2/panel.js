@@ -3476,6 +3476,29 @@ function rightContext() {
   return "corners";
 }
 function rightTabStore() { return (MODE.suggest === "course" && COURSE) ? vcourse(COURSE.key).rightTab : vg("rightTab", {}); }
+// THE MINI LAP INFO PANEL (Jett 2026-09-18): the lap-side mirror of the course info pill (#leftHd). Where that
+// says "what is this COURSE", this says "what is THIS ONE LAP" — the selected lap's build identity, its time and
+// gap to the course best, and its honesty flags (the SAME cleanLap vocabulary as the LAPS list). Selection is the
+// one shared SINGLE_LAP, so a LAPS-row click, a trace hover and this panel all point at the same lap. It rides in
+// #rightHd, directly across from the course pill. Empty (a prompt) until a lap is picked. See docs/plan-lap-inspection.md.
+function lapInfoHTML() {
+  if (!(MODE.suggest === "course" && COURSE)) return "";
+  const id = SINGLE_LAP ? String(SINGLE_LAP) : null;
+  const laps = COURSE.laps || [];
+  const l = id ? laps.find((x) => String(x.id) === id) : null;
+  if (!l) return `<div class="lapinfo empty"><span class="why">hover a trace or pick a lap to inspect it</span></div>`;
+  const ct = laps.filter(cleanLap).map((x) => x.t).filter((t) => t);
+  const best = ct.length ? Math.min(...ct) : null;
+  const delta = (best != null && l.t != null) ? (l.t - best) : null;
+  const clean = cleanLap(l);
+  const flags = [l.void ? "contact" : "", l.partial ? "partial" : "", l.rewinds ? l.rewinds + " rewind" + (l.rewinds === 1 ? "" : "s") : "", l.official ? "game-timed" : ""].filter(Boolean).join(" · ");
+  return `<div class="lapinfo${clean ? "" : " dirty"}" title="the lap picked on the map / trace / laps list">
+    <span class="li-id">${l.class && l.class !== "?" ? piBadge(l.class, l.pi) : ""}<span class="li-car mono" title="${esc(carName(l.cid) || "")}">${esc(carShort(l.cid) || carName(l.cid) || "")}</span></span>
+    <span class="li-t mono${l.t === best ? " best" : ""}">${l.t != null ? lapTime(l.t) : "—"}</span>
+    ${(delta != null && clean) ? `<span class="li-d mono ${delta <= 0 ? "ahead" : "behind"}">${delta === 0 ? "best" : (delta > 0 ? "+" : "") + delta.toFixed(2)}</span>` : ""}
+    <span class="li-flags why">${clean ? "clean" : "⚠ " + (flags || "not clean")}</span>
+  </div>`;
+}
 function paintRight() {
   const hd = $("#rightHd"), body = $("#rightBody"); if (!body) return;
   if (!liveKnown() && !LIVE.frame) {      // before the first frame the context is not known; do not latch it
@@ -3495,7 +3518,7 @@ function paintRight() {
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide",
                 browser: "every known course · pick one to locate it on the map",
                 services: "the three processes the lab runs · start, stop or restart each one" }[cur];
-  hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
+  hd.innerHTML = `${lapInfoHTML()}<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
   // THE COURSE BROWSER IS STATIC (Jett 2026-09-18): its tiles depend only on the browse controls, never on a live
   // frame — yet paintRight runs every ~2 s and rebuilt #rightBody, which destroyed the hover highlight ("only stays

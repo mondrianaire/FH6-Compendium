@@ -112,6 +112,17 @@ svg{display:block;max-width:100%}
    spreads the geometry while the lines stay thin and the individual routes pull apart and become distinguishable.
    Scoped to polylines, so turn markers (circles + labels) keep scaling and stay clickable/legible. */
 .cmap svg polyline,#leftBody svg[data-x0] polyline{vector-effect:non-scaling-stroke}
+/* MINI LAP INFO PANEL (Jett 2026-09-18): rides at the top of #rightHd, across from the course pill in #leftHd —
+   the selected lap's identity, time, gap to best, and honesty flags. Sibling of the course info pill. */
+.lapinfo{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:2px 2px 7px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.lapinfo.empty{opacity:.65;border-bottom-color:transparent}
+.lapinfo .li-id{display:inline-flex;align-items:center;gap:6px}
+.lapinfo .li-car{color:var(--txt);font-size:12px}
+.lapinfo .li-t{font-size:16px;font-weight:800;color:var(--txt);letter-spacing:.5px}
+.lapinfo .li-t.best{color:var(--acc)}
+.lapinfo .li-d{font-size:12px;font-weight:700}
+.lapinfo .li-d.ahead{color:var(--acc)} .lapinfo .li-d.behind{color:var(--bad)}
+.lapinfo .li-flags{font-size:11px} .lapinfo.dirty .li-flags{color:var(--warn)}
 /* the turn list under the map may scroll (Jett: info panes break the no-scroll rule) so the map keeps its space */
 .pane>.body.map>.grp{flex:0 1 auto;min-height:104px;display:flex;flex-direction:column;overflow:hidden}
 .pane>.body.map>.grp .tt-wrap{overflow-y:auto;flex:1 1 auto;min-height:0}

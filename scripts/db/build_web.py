@@ -757,16 +757,29 @@ def main(argv=None):
         # n is every lap this build drove on this course -- the passes that COULD have shown the
         # fault -- never the count that did. Falling back to laps_affected would make every fault
         # "100% of laps" the moment the denominator went missing.
-        n = lap_n.get((r["route_key"], r["container"])) or r["laps_affected"]
+        known = lap_n.get((r["route_key"], r["container"]))
+        cls = "deterministic" if r["symptom"] in _DET_SYMPTOMS else "statistical"
+        if known is None:
+            # NO DENOMINATOR, SO NO RATE. 320 of 1,975 course rows carry a NULL container -- laps
+            # that named no tune -- and for those the number of laps that COULD have shown the fault
+            # is not knowable. Falling back to laps_affected would set n = k and manufacture "100%
+            # of laps, at least 89% confident" out of thin air, which is precisely the false
+            # certainty this whole layer exists to prevent. The occurrences are still reported; the
+            # rate is not.
+            r["n_laps"] = None
+            r["denom_suspect"] = 1
+            r["evidence_class"] = cls
+            r["verdict"], r["lo"], r["hi"], r["needs_laps"] = "insufficient", 0.0, 1.0, None
+            r["why"] = ("%d occurrence(s), but the laps this build drove here cannot be counted "
+                        "(the laps name no tune), so no rate can be claimed" % r["occurrences"])
+            continue
         # The denominator must never be smaller than the numerator. It can be: diag_event.container
         # comes from the analyzer's ctx(), which files every event under the FIRST lap's container
-        # for that car in the session, so a container can be credited with laps it did not drive.
-        # Flagged rather than quietly maxed, so the mis-attribution stays visible.
-        r["denom_suspect"] = 1 if r["laps_affected"] > n else 0
-        n = max(n, r["laps_affected"])
-        a = _conf.assess(r["laps_affected"], n,
-                         evidence_class=("deterministic" if r["symptom"] in _DET_SYMPTOMS
-                                         else "statistical"),
+        # for that car in the session, so a container can be credited with laps it did not drive
+        # (25 rows). Flagged rather than quietly maxed, so the mis-attribution stays visible.
+        r["denom_suspect"] = 1 if r["laps_affected"] > known else 0
+        n = max(known, r["laps_affected"])
+        a = _conf.assess(r["laps_affected"], n, evidence_class=cls,
                          severity=r.get("peak_severity"))
         r["n_laps"] = n
         for k in ("verdict", "lo", "hi", "needs_laps", "why", "evidence_class"):

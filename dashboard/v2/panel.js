@@ -4633,7 +4633,11 @@ function courseGearingHTML() {
     : v === "not_recurrent" ? `<span class="chip on">ruled out</span>`
     : `<span class="chip w">need more laps</span>`;
   const body = rows.map((r) => {
-    const claim = r.verdict === "report"
+    // n_laps null = the denominator is unknown (the laps named no tune). Print the occurrences
+    // and say the rate is unknown; never render "x of null".
+    const claim = r.n_laps == null
+      ? `${r.occurrences} occurrence${r.occurrences === 1 ? "" : "s"}, laps here not countable`
+      : r.verdict === "report"
       ? `on at least ${Math.round((r.lo || 0) * 100)}% of laps (${r.laps_affected} of ${r.n_laps})`
       : `${r.laps_affected} of ${r.n_laps} laps so far`;
     // Only a cleared verdict is allowed to read as an instruction.

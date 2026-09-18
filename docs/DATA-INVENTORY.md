@@ -112,18 +112,18 @@ Field-level catalogue of these tables (full column lists, row counts, and what e
 
 | table | rows | what it is |
 |---|---|---|
-| `corner_obs` | 17560 | per-corner history per lap — one row per lap × turn, across 1,475 laps. (It was empty until `course_match`+`corners` were rerun past the 2026-09-05 schema change; rebuild.py's I6 check guards that.) |
+| `corner_obs` | 17885 | per-corner history per lap — one row per lap × turn, across 1,475 laps. (It was empty until `course_match`+`corners` were rerun past the 2026-09-05 schema change; rebuild.py's I6 check guards that.) |
 | `course` | 127 | columns: route_key, name, is_rivals, event_id, length_m, turn_count… |
 | `course_event` | 84 | every course × candidate-event pairing `route_names` weighed — tier (game/map/length/declared) plus its evidence columns, `chosen`=1 on the winner. Filled by stage `route_names`. |
 | `course_route` | 125 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… + `anchor_route_id`, `anchor_events`, `anchor_agree` (2026-09-05) — the sphere most of the course's events started in and whether it is the geometry's route. match_kind gained `anchored` (route_id stays NULL, identity in `anchor_route_id` only): a sphere holding a strict majority of the course's events, shape unverified, never reaches corners, the centre-line overlay or naming. Recomputed wholesale by stage `course_match`; one row per course with ≥12 geometry points. |
-| `course_turn` | 2405 | the course's own turns (the namespace the map and the trace use). |
-| `diag_event` | 38335 | every detected failure incident, placed on a turn. |
-| `hw_package` | 667 | columns: hw_hash, ordinal, label, pi, class, engine_id… |
-| `hw_package_part` | 33350 | columns: hw_hash, slot_index, slot, part_id, name |
-| `import_run` | 11818 | columns: run_id, kind, source, started_utc, finished_utc, n_rows… |
-| `lap` | 1544 | columns: lap_id, route_key, session_id, cid, container, hw_hash… + (schema 5, 2026-09-06) `lap_dist_m` (odometer over the game-timed lap), `rewinds`, `pauses`, `pause_s`, `stitched` (the lap's opening came from the previous capture file). A lap is what the GAME timed (CurrentLap start → LapNumber+1 / LastLap published); rows a rewind revoked are not in it. See `lap_marker`. + `official` (schema 8: the GAME published this lap time — 433 laps. An official lap counts even with a rewind in it; an unofficial one must clear the 0.97 coverage floor and carry no rewinds before it can be crowned). |
+| `course_turn` | 2400 | the course's own turns (the namespace the map and the trace use). |
+| `diag_event` | 48461 | every detected failure incident, placed on a turn. |
+| `hw_package` | 671 | columns: hw_hash, ordinal, label, pi, class, engine_id… |
+| `hw_package_part` | 33550 | columns: hw_hash, slot_index, slot, part_id, name |
+| `import_run` | 12114 | columns: run_id, kind, source, started_utc, finished_utc, n_rows… |
+| `lap` | 1572 | columns: lap_id, route_key, session_id, cid, container, hw_hash… + (schema 5, 2026-09-06) `lap_dist_m` (odometer over the game-timed lap), `rewinds`, `pauses`, `pause_s`, `stitched` (the lap's opening came from the previous capture file). A lap is what the GAME timed (CurrentLap start → LapNumber+1 / LastLap published); rows a rewind revoked are not in it. See `lap_marker`. + `official` (schema 8: the GAME published this lap time — 433 laps. An official lap counts even with a rewind in it; an unofficial one must clear the 0.97 coverage floor and carry no rewinds before it can be crowned). |
 | `lap_marker` | — | (schema 5) every gap in a lap's final line, placed on the lap: `kind` rewind (`dur_s` = seconds of driving undone, `over_line` when the start/finish was re-crossed and the game re-timed the lap), pause (menu; game clock frozen), gap (telemetry dropout, clock ran), jump (respawn/teleport; lap intact, trace not continuous); `t` from lap start, `race_s`, `dist_m`, `detail` JSON (silence_s, pos_gap_m, on_line, race_rebase_s…). Written by `import_telemetry.py` from the session JSON's lap rows. |
-| `lap_point` | 511998 | every lap's trace: arc, mph, grip state, x/z AND elev_m, + `dist_m` (schema 5: the odometer at the point, so a lap's points can be placed against the game's own distance, not just the resampled arc), + `thr` / `brk` (schema 6, 2026-09-11: throttle and brake 0-100 % from the capture's Accel / Brake, for the pedal paint; NULL on laps analysed before schema 6 until their capture is replayed with backfill_laps.py) + `lat_g` (schema 7) + `r_m` (schema 9, 2026-09-18: the DRIVEN radius `v/ω` from the capture's yaw rate — never the road's fitted `ref_route_turn.radius_m`; 192,995 points, and the same replay also stores `x`/`z` to one decimal instead of whole metres). |
+| `lap_point` | 523003 | every lap's trace: arc, mph, grip state, x/z AND elev_m, + `dist_m` (schema 5: the odometer at the point, so a lap's points can be placed against the game's own distance, not just the resampled arc), + `thr` / `brk` (schema 6, 2026-09-11: throttle and brake 0-100 % from the capture's Accel / Brake, for the pedal paint; NULL on laps analysed before schema 6 until their capture is replayed with backfill_laps.py) + `lat_g` (schema 7) + `r_m` (schema 9, 2026-09-18: the DRIVEN radius `v/ω` from the capture's yaw rate — never the road's fitted `ref_route_turn.radius_m`; 192,995 points, and the same replay also stores `x`/`z` to one decimal instead of whole metres). |
 | `obs_evidence` | 129 | columns: obs_id, subject, claim, confidence, source, observed_utc… |
 | `obs_menu` | 92 | observed shop tiles (92 rows) — menu positions proven in game. |
 | `obs_pi` | 223 | observed PI deltas per part (65 rows) — the empirical per-part PI store. |
@@ -159,19 +159,19 @@ Field-level catalogue of these tables (full column lists, row counts, and what e
 | `ref_slot` | 50 | THE MENU MAP: menu_area, menu_area_order, menu_order, in_upgrade_shop, category, key_column — the game's own upgrade tree. |
 | `ref_string` | 59268 | the game's string tables (58,722 rows) — the ID → name layer. |
 | `ref_string_table` | 290 | columns: table_name, name_hash, n_entries, has_csv |
-| `ref_symptom` | 11 | the failure catalogue: primary/secondary/tertiary fix, verify_test, detector. |
+| `ref_symptom` | 17 | the failure catalogue: primary/secondary/tertiary fix, verify_test, detector. |
 | `ref_torque_curve` | 1752 | a dyno per camshaft part (1,706) and electric motor (19): peak torque/power precomputed, samples every 100 rpm. Explode it with `v_torque_point` (rpm, Nm, lb-ft, hp). |
 | `ref_track` | 58 | columns: track_id, name, media_name, length_m, is_reverse, is_real_world… |
 | `ref_wheel` | 1259 | every rim with mass and mass_level (rims are a weight class). |
 | `ref_wheel_category` | 5 | columns: category_id, name, display_order |
 | `schema_meta` | 2 | columns: key, value |
-| `session` | 474 | columns: session_id, started_utc, duration_s, frames, rate_pps, source… |
-| `session_car` | 1480 | columns: session_id, cid, ordinal, build_id, hw_hash, name… |
-| `setup` | 686 | columns: setup_hash, hw_hash, ordinal, label, n_containers, first_seen_utc |
-| `tune_container` | 758 | columns: container, ordinal, saved_utc, tune_name, locked, source… |
-| `tune_gear` | 5240 | EVERY SAVE'S GEAR LADDER, exact from the save file — final drive + per-gear ratios. This is why identity rarely needs a pull. |
-| `tune_part` | 37900 | columns: container, slot_index, slot, part_id, name, level… |
-| `tune_slider` | 22740 | columns: container, slider, norm, value, unit, min_value… |
+| `session` | 644 | columns: session_id, started_utc, duration_s, frames, rate_pps, source… |
+| `session_car` | 1486 | columns: session_id, cid, ordinal, build_id, hw_hash, name… |
+| `setup` | 691 | columns: setup_hash, hw_hash, ordinal, label, n_containers, first_seen_utc |
+| `tune_container` | 763 | columns: container, ordinal, saved_utc, tune_name, locked, source… |
+| `tune_gear` | 5287 | EVERY SAVE'S GEAR LADDER, exact from the save file — final drive + per-gear ratios. This is why identity rarely needs a pull. |
+| `tune_part` | 38150 | columns: container, slot_index, slot, part_id, name, level… |
+| `tune_slider` | 22890 | columns: container, slider, norm, value, unit, min_value… |
 
 Views: `v_build_sheet`, `v_course_best`, `v_diag_by_setup`, `v_diag_by_turn`, `v_rim_equivalent`, `v_tune_sheet`.
 

@@ -25,7 +25,9 @@ which is why writing these found four things the prose had missed (below).
 - `race_triggers.tz` — **plaintext XML**, not binary (`<?xml version="1.0"` with a UTF-8 BOM). A `.bt`
   would be theatre.
 - `FH6_Database.sqlite`, `data/fh6.db`, the embedded `Career_Garage` — **relational**. Their standard is
-  [`../handoff-data-structures.md`](../handoff-data-structures.md) + the *FH6 Lab Database ERD*.
+  `db/schema.sql` (executable) + [`../handoff-data-structures.md`](../handoff-data-structures.md) + the
+  *FH6 Lab Database ERD*, proved by `scripts/tools/check_db_docs.py` the way these are proved by
+  `check_bt_template.py`.
 - `captures/*.csv.gz`, `data/**.json`, `dashboard/v2/api/` — **text**. Covered by
   [`../DATA-INVENTORY.md`](../DATA-INVENTORY.md).
 

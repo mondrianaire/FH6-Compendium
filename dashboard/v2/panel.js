@@ -479,7 +479,10 @@ function paintIdBar() {
 // identified (equip + save). Not dismissable — it mirrors an ongoing state, not a one-off event.
 function paintCourseWarn() {
   const el = $("#courseWarn"); if (!el) return;
-  const active = MODE.suggest === "course" && COURSE && CUR;
+  // Not during a TEMPORARY BROWSE (Jett 2026-09-18): double-clicking a course to study its track data is not
+  // driving/recording, so "laps aren't being recorded to a build" is irrelevant there — the browse only analyses
+  // the course, and needs no settled tune. The warning is for when you're actually on a course in a live session.
+  const active = MODE.suggest === "course" && COURSE && CUR && !TEMP_COURSE;
   const mb = MATCH && MATCH.build;
   const q = (typeof matchQuality === "function") ? matchQuality(CUR && CUR.match) : { level: "ok" };
   const settled = !q || q.level === "ok";
@@ -4564,9 +4567,24 @@ function lapbCount(preset, clean, rivals, cls) {
   const s = lapbScope(preset, cls);
   return s.scopeOK ? lapbToggle(s.scoped, clean, rivals).length : null;
 }
+const LAPB_LADDER = ["session", "build", "car", "all"];
 function lapBrowserSet() {
   const laps = COURSE.laps || [];
-  const s = lapbScope(LAPB.preset, LAPB.cls);
+  // AUTO-WIDEN so the Laps view ALWAYS shows historical laps — it never NEEDS a settled identity to display
+  // recorded data (Jett 2026-09-18). From the chosen preset, widen down session->build->car->all to the narrowest
+  // one that RESOLVES and has laps, so an unidentified build (Session/Build can't scope) falls back to Car/All
+  // instead of an empty list. The class preset is an explicit pick and is never widened. `widened`/`effPreset`
+  // let the header show which scope is live and why.
+  let preset = LAPB.preset, widened = false;
+  if (LAPB_LADDER.includes(preset)) {
+    let i = LAPB_LADDER.indexOf(preset);
+    for (; i < LAPB_LADDER.length; i++) {
+      const ss = lapbScope(LAPB_LADDER[i], LAPB.cls);
+      if (ss.scopeOK && lapbToggle(ss.scoped, LAPB.clean, LAPB.rivals).length) break;
+    }
+    if (i < LAPB_LADDER.length) { widened = LAPB_LADDER[i] !== LAPB.preset; preset = LAPB_LADDER[i]; }
+  }
+  const s = lapbScope(preset, LAPB.cls);
   let scoped = s.scoped, scopeOK = s.scopeOK, why = s.why || "";
   if (scopeOK) {
     scoped = lapbToggle(scoped, LAPB.clean, LAPB.rivals);
@@ -4574,10 +4592,10 @@ function lapBrowserSet() {
     scoped = scoped.slice().sort((a, b) => so === "date" ? String(b.sid || "").localeCompare(String(a.sid || "")) : so === "cov" ? (b.cov || 0) - (a.cov || 0) : (a.t || 1e9) - (b.t || 1e9));
   }
   const ct = scoped.filter(cleanLap).map((l) => l.t).filter((t) => t);
-  return { laps: scoped, scopeOK, why, total: laps.length, best: ct.length ? Math.min(...ct) : null };
+  return { laps: scoped, scopeOK, why, total: laps.length, best: ct.length ? Math.min(...ct) : null, effPreset: preset, widened };
 }
-function lapCtx(l) {   // per-lap context column: session date for the Session preset; class·PI (to tell builds apart) otherwise
-  if (LAPB.preset === "session") return l.sid ? String(l.sid).slice(4, 8) : "";
+function lapCtx(l, preset) {   // per-lap context column: session date for the Session preset; class·PI (to tell builds apart) otherwise
+  if ((preset || LAPB.preset) === "session") return l.sid ? String(l.sid).slice(4, 8) : "";
   return ((l.class && l.class !== "?") ? l.class + (l.pi || "") : (carShort(l.cid) || ""));
 }
 function lapBrowserHTML() {
@@ -4599,7 +4617,9 @@ function lapBrowserHTML() {
   const ls = lapBrowserSet();
   const cnt = (k, cls) => lapbCount(k, LAPB.clean, LAPB.rivals, cls);   // count UNDER the current toggles
   const nspan = (n) => n == null ? "" : `<span class="lb-n">${n}</span>`;
-  const pre = (k, lbl, tip) => { const n = cnt(k); return `<button class="lb-pre${LAPB.preset === k ? " on" : ""}${n === 0 ? " lb-empty" : ""}" data-lbpreset="${k}" title="${esc(tip)}">${lbl}${nspan(n)}</button>`; };
+  // the ACTIVE chip reflects the EFFECTIVE (auto-widened) preset, so an unidentified build shows Car/All lit — the
+  // scope actually on screen — not an empty Session chip the view isn't using.
+  const pre = (k, lbl, tip) => { const n = cnt(k); return `<button class="lb-pre${ls.effPreset === k ? " on" : ""}${n === 0 ? " lb-empty" : ""}" data-lbpreset="${k}" title="${esc(tip)}">${lbl}${nspan(n)}</button>`; };
   // CLASS SELECTOR as the app's PI-class badges (Jett 2026-09-17): class is a bounded, colour-coded vocabulary
   // read at a glance, so it is ALWAYS the established .pib badge — the same class identity used in the hero,
   // leaderboard and stats — NEVER a plain grey dropdown. Sits between Car and All; each badge carries its lap
@@ -4610,7 +4630,7 @@ function lapBrowserHTML() {
     return `<button class="lb-clsp${on ? " on" : ""}${n === 0 ? " lb-empty" : ""}" data-lbcls="${esc(c)}" title="only ${esc(c)}-class laps on this course${n === 0 ? " — none match the current toggles" : ""}">${classPill(c, n)}</button>`;
   }).join("");
   const clsSel = classesPresent.length ? `<span class="lb-clsrow">${clsChips}</span>` : "";
-  const tog = (k, lbl, on, tip) => { const n = k === "clean" ? lapbCount(LAPB.preset, true, LAPB.rivals, LAPB.cls) : lapbCount(LAPB.preset, LAPB.clean, true, LAPB.cls);
+  const tog = (k, lbl, on, tip) => { const n = k === "clean" ? lapbCount(ls.effPreset, true, LAPB.rivals, LAPB.cls) : lapbCount(ls.effPreset, LAPB.clean, true, LAPB.cls);
     return `<button class="lb-tog${on ? " on" : ""}" data-lbtog="${k}" title="${esc(tip)}">${lbl}${nspan(n)}</button>`; };
   const srt = (k, lbl) => `<button class="lb-s${LAPB.sort === k ? " on" : ""}" data-lbsort="${k}">${lbl}</button>`;
   const head = `<div class="sesl-h lb-h"><b>Laps</b><span class="lb-pres">${pre("session", "Session", "this exact car + build + tune (most restrictive)")}${pre("build", "Build", "this car + build, any tune — A/B scaffold")}${pre("car", "Car", "this car, any build")}${clsSel}${pre("all", "All", "every lap on this course")}</span></div>`
@@ -4628,8 +4648,10 @@ function lapBrowserHTML() {
   if (!ls.laps.length) return `<div class="sesl">${head}<div class="why sesl-note">no lap matches this filter yet${whereHint || " — drive it, or loosen the filter (try a wider preset)"}</div></div>`;
   const best = ls.best;
   const rows = ls.laps.map((l, i) => `<div class="sesl-row lb-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}${cleanLap(l) ? "" : " lb-dirty"}" data-single="${esc(String(l.id))}" title="isolate on the map + break down in Single lap${cleanLap(l) ? "" : " · not a clean lap (void / partial / rewind)"}">
-      <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${l.t === best ? " best" : ""}">${lapTime(l.t)}</span><span class="mono lb-ctx" title="${esc(l.sid || "")}">${esc(lapCtx(l))}</span><span class="mono sesl-d">${best && l.t ? (l.t === best ? "—" : "+" + (l.t - best).toFixed(2)) : ""}</span></div>`).join("");
-  const sub = `${ls.laps.length} lap${ls.laps.length === 1 ? "" : "s"}${best ? " · best " + lapTime(best) : ""} · ${ls.total} on course`;
+      <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${l.t === best ? " best" : ""}">${lapTime(l.t)}</span><span class="mono lb-ctx" title="${esc(l.sid || "")}">${esc(lapCtx(l, ls.effPreset))}</span><span class="mono sesl-d">${best && l.t ? (l.t === best ? "—" : "+" + (l.t - best).toFixed(2)) : ""}</span></div>`).join("");
+  const PL = { session: "Session", build: "Build", car: "Car", all: "All" };
+  const widenNote = ls.widened ? ` · <b>${PL[LAPB.preset] || LAPB.preset}</b> needs an identified build — showing <b>${PL[ls.effPreset] || ls.effPreset}</b>` : "";
+  const sub = `${ls.laps.length} lap${ls.laps.length === 1 ? "" : "s"}${best ? " · best " + lapTime(best) : ""} · ${ls.total} on course${widenNote}`;
   return `<div class="sesl">${head}<div class="why lb-sub">${sub}</div><div class="sesl-rows lb-rows">${rows}</div></div>`;
 }
 // back-compat alias: the left-pane render + Single-lap still call sessionListHTML()

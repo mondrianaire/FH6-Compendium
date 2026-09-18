@@ -4014,7 +4014,7 @@ function rankVerdict(pool, mine, ls, eps) {   // eps: the gap that still counts 
 //                  the median of the passes that stayed within grip. It is allowed to be zero or negative,
 //                  and when it is the row says "costs nothing" — because understeer is only an error when
 //                  the clock says it was one.
-const LOSS_WORD = { front: "understeer", rear: "oversteer", both: "all four loose", impact: "impact" };
+const LOSS_WORD = { front: "understeer", rear: "oversteer", both: "all four", impact: "impact" };
 const LOOSE_AT = 0.34;   // a pass counts as having run LOOSE in a phase once a third of its samples were past the limit
 const medNum = (a) => { const v = a.filter((x) => x != null && isFinite(x)).sort((x, y) => x - y);
   return v.length ? (v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2) : null; };
@@ -4091,6 +4091,7 @@ function turnGlyph(t, W, H) {
   const tip = `${t.kind || "turn"}${t.r != null ? ` · ${Math.round(t.r)} m radius` : ""}${t.deg != null ? ` · ${Math.round(t.deg)}°` : ""}${t.dir ? ` ${t.dir === "L" ? "left" : "right"}` : ""}${t.width != null ? ` · ${t.width.toFixed(0)} m wide` : ""}${t.bank ? ` · ${t.bank.toFixed(1)}° banked` : ""} — drawn to scale, entered from the left; the ring is the apex`;
   return `<svg class="tgly" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><title>${esc(tip)}</title>${paths}${arrow}${apex}</svg>`;
 }
+const TL_HEAD = { braking: "brake", turn_in: "entry", mid: "mid", exit: "exit", straight: "str" };
 let TL_SORT = (() => { try { return localStorage.getItem("fh6TlSort") || "route"; } catch (e) { return "route"; } })();
 function turnLedgerHTML(ls, sel, seen) {
   const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);
@@ -4109,6 +4110,10 @@ function turnLedgerHTML(ls, sel, seen) {
   const cell = (n, L) => {
     const p = L.ph[n];
     if (!p) return `<span class="tl-cell tl-cell--none" style="flex:6 0 0" title="${esc(SEG_LABEL[n])} — no observations of this phase on these laps"></span>`;
+    // WHERE lives on the rail, not in the sentence: the phase this turn actually loses time in is underlined
+    // in the colour of the state it loses it to, so the finding beside it never has to spell the phase out.
+    const hit = L.worst && L.worst.n === n && L.worst.p.price > 0.005;
+    const hitS = hit ? `;border-bottom:2px solid ${DGRIP[L.worst.p.loss || "front"].ink}` : "";
     const w = Math.max(5, Math.round((p.time || 0.15) * 100));
     const fill = GSTATE.map((k, i) => { const f = p.mix[i] || 0;
       return f < 0.004 ? "" : `<i style="flex:${Math.round(f * 1000)} 0 0;background:${DGRIP[k].col}"></i>`; }).join("");
@@ -4116,28 +4121,33 @@ function turnLedgerHTML(ls, sel, seen) {
     const priceTip = p.price == null
       ? `not priced — needs 3 loose and 3 clean passes, has ${p.nLoose} and ${p.nClean}`
       : `${p.nLoose} of ${p.n} passes ran loose here and took ${p.price > 0 ? "+" : ""}${p.price.toFixed(2)} s ${p.price > 0.005 ? "longer" : p.price < -0.005 ? "less" : "— the same time"} than the clean ones${p.exd != null ? ` · exit ${p.exd > 0 ? "+" : ""}${Math.round(p.exd)} mph` : ""}`;
-    return `<span class="tl-cell" style="flex:${w} 0 0" data-phase="${n}" title="${esc(SEG_LABEL[n])} · median ${(p.time || 0).toFixed(2)} s · ${p.n} passes · ${past}% of samples past the limit · ${esc(priceTip)}"><span class="tl-mix">${fill}</span></span>`;
+    return `<span class="tl-cell${hit ? " tl-cell--hit" : ""}" style="flex:${w} 0 0${hitS}" data-phase="${n}" title="${esc(SEG_LABEL[n])} · median ${(p.time || 0).toFixed(2)} s · ${p.n} passes · ${past}% of samples past the limit · ${esc(priceTip)}"><span class="tl-mix">${fill}</span></span>`;
   };
 
-  // THE FINDING, on its own line under the rail so the sentence has room to be a sentence. The meter beside
-  // it is this turn's share of the worst turn's per-lap loss -- the "which corner do I work on" glance.
+  // THE FINDING, on the SAME line as the rail (Jett 2026-09-18: consolidate the entries, they take too much
+  // vertical real estate). Terse on the page, whole sentence in the tooltip -- the row keeps its one line.
+  // The meter is this turn's share of the worst turn's per-lap loss: the "which corner do I work on" glance.
   const finding = (L) => {
     const w = L.worst;
-    const meter = `<span class="tl-meter" title="${L.cost > 0.005 ? L.cost.toFixed(2) + " s an average lap loses at this turn" : "nothing measurably lost here"}"><i style="width:${Math.round(L.cost / maxCost * 100)}%"></i></span>`;
-    if (!w) return `<span class="tl-find tl-find--un">${meter}<b>not priced</b> · ${L.nPass} pass${L.nPass === 1 ? "" : "es"}, and no loose/clean split to compare yet</span>`;
+    const meter = (tip) => `<span class="tl-meter" title="${esc(tip)}"><i style="width:${Math.round(L.cost / maxCost * 100)}%"></i></span>`;
+    if (!w) return `<span class="tl-find tl-find--un" title="${L.nPass} pass${L.nPass === 1 ? "" : "es"} here, and no loose/clean split to compare them across">${meter("nothing priced at this turn yet")}not priced</span>`;
     const word = LOSS_WORD[w.p.loss] || "going loose", where = String(SEG_LABEL[w.n]).toLowerCase();
-    const ink = DGRIP[w.p.loss || "front"].ink, often = `${w.p.nLoose} of ${w.p.n} passes`;
-    if (w.p.price <= 0.005) return `<span class="tl-find tl-find--free" style="--lc:${ink}">${meter}<b>${esc(word)} in ${esc(where)} costs nothing</b> · ${often} · ${w.p.price >= 0 ? "+" : ""}${w.p.price.toFixed(2)} s against the clean passes</span>`;
-    return `<span class="tl-find tl-find--bad" style="--lc:${ink}">${meter}<b class="mono">+${w.p.price.toFixed(2)}&nbsp;s</b> <b>${esc(word)} in ${esc(where)}</b> · ${often} · <span class="mono">${L.cost.toFixed(2)} s</span> off an average lap</span>`;
+    const ink = DGRIP[w.p.loss || "front"].ink;
+    const often = `<span class="tl-often mono">${w.p.nLoose}/${w.p.n}</span>`;
+    if (w.p.price <= 0.005) return `<span class="tl-find tl-find--free" style="--lc:${ink}" title="${esc(word)} in ${esc(where)} on ${w.p.nLoose} of ${w.p.n} passes, and it cost nothing — those passes were ${w.p.price >= 0 ? "+" : ""}${w.p.price.toFixed(2)} s against the ones that stayed within grip">${meter("nothing measurably lost here")}<em>free</em> <b>${esc(word)}</b> ${often}</span>`;
+    return `<span class="tl-find tl-find--bad" style="--lc:${ink}" title="${esc(word)} in ${esc(where)} on ${w.p.nLoose} of ${w.p.n} passes, costing +${w.p.price.toFixed(2)} s each against the passes that stayed within grip — ${L.cost.toFixed(2)} s off an average lap">${meter(L.cost.toFixed(2) + " s an average lap loses at this turn")}<b class="mono">+${w.p.price.toFixed(2)}</b> <b>${esc(word)}</b> ${often}</span>`;
   };
 
   const rows = order.map((x) => {
     const t = x.t, L = x.L, k = seen && seen[t.seq];
-    const geom = `${t.r != null ? Math.round(t.r) + " m" : "—"}${t.deg != null ? " · " + Math.round(t.deg) + "°" : ""}${t.dir ? " " + t.dir : ""}`;
-    return `<div class="tlrow${sel === t.seq ? " sel" : ""}" data-turn="${t.seq}" title="open ${esc(turnLabel(t))} — its map, its fastest passes and its full phase timing">
-      <span class="tl-gly">${turnGlyph(t)}</span>
-      <span class="tl-id"><b>${esc(turnLabel(t))}</b> <i>${esc(t.kind || "")}</i>${k ? `<span class="tl-live" title="taken ${k} time${k === 1 ? "" : "s"} this session">×${k}</span>` : ""}<em>${esc(geom)}</em></span>
-      <span class="tl-apex mono">${L.apex != null ? Math.round(L.apex) : "—"}<i>mph apex</i></span>
+    // the kind ("hairpin") and the radius are what the GLYPH already says, so they ride in the row tooltip
+    // rather than costing a second text line; the angle + hand stays visible as the shape's one-line caption.
+    const geom = `${t.deg != null ? Math.round(t.deg) + "°" : ""}${t.dir || ""}`;
+    const tip = `${esc(turnLabel(t))}${t.kind ? " · " + esc(t.kind) : ""}${t.r != null ? " · " + Math.round(t.r) + " m radius" : ""}${t.deg != null ? " · " + Math.round(t.deg) + "°" : ""}${t.dir ? (t.dir === "L" ? " left" : " right") : ""}${k ? ` · taken ${k}× this session` : ""} — click for its map, its fastest passes and its full phase timing`;
+    return `<div class="tlrow${sel === t.seq ? " sel" : ""}" data-turn="${t.seq}" title="${tip}">
+      <span class="tl-gly">${turnGlyph(t, 46, 28)}</span>
+      <span class="tl-id"><b>${esc(turnLabel(t))}</b>${k ? `<span class="tl-live">×${k}</span>` : ""}<em>${esc(geom)}</em></span>
+      <span class="tl-apex"><b>${L.apex != null ? Math.round(L.apex) : "—"}</b><i>mph</i></span>
       <span class="tl-rail">${SEG_ORDER.map((n) => cell(n, L)).join("")}</span>
       ${finding(L)}</div>`;
   }).join("");
@@ -4146,9 +4156,10 @@ function turnLedgerHTML(ls, sel, seen) {
   return `<div class="grp tled">
     <div class="gh">Every turn on this course <span class="why">· ${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"}${nSeen ? ` · ${nSeen} taken this session` : ""}</span>
       <span class="tl-sort">${sortBtn("route", "route order")}${sortBtn("cost", "costliest first")}</span>${courseConfidenceBadge()}</div>
-    <p class="tl-cap">The shape <b>is</b> the turn — drawn to scale from the road, always entered from the left. The rail is where its seconds go: each cell's <b>width</b> is the median seconds in that phase, its <b>fill</b> is how the grip actually split across every pass, so a phase that lets go one lap in five looks one-fifth loose. The price on the right is what going loose there cost on the clock — the loose passes' median phase time minus the clean ones'. <b>At or below zero it cost nothing, and that line is not a mistake.</b></p>
+    <p class="tl-cap">The shape <b>is</b> the turn, drawn to scale and always entered from the left. Each rail cell's <b>width</b> is the median seconds in that phase and its <b>fill</b> is how the grip split across every pass. The cell <b>underlined</b> in a grip colour is the one costing time, and the price beside it is what going loose there cost on the clock — <b>at or below zero it cost nothing, and that line is not a mistake.</b></p>
     <div class="tl-head"><span class="tl-gly"></span><span class="tl-id">turn</span><span class="tl-apex">apex</span>
-      <span class="tl-rail">${SEG_ORDER.map((n) => `<span style="color:${SEG_COL[n]}">${esc(String(SEG_LABEL[n]).split(/[ /-]/)[0].toLowerCase())}</span>`).join("")}</span></div>
+      <span class="tl-rail">${SEG_ORDER.map((n) => `<span style="color:${SEG_COL[n]}">${esc(TL_HEAD[n])}</span>`).join("")}</span>
+      <span class="tl-find">price · how often</span></div>
     ${rows}
     <div class="tl-foot"><span class="ballegend gleg">${GSTATE.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}</span>`).join("")}</span>
       <span class="why">${totCost > 0.005 ? `<b class="mono">${totCost.toFixed(2)} s</b> a lap is lost to grip across this course` : "nothing measurably lost to grip on this course"} · click a turn for its map, its fastest passes and its full timing</span></div></div>`;

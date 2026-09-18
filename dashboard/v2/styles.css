@@ -1277,65 +1277,64 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 /* ===== THE TURN LEDGER (course-mode Turn analysis, Jett 2026-09-18) =====
    One row per turn: its drawn shape, its time budget as a rail whose cell widths ARE the seconds, each cell
    filled with the grip DISTRIBUTION (never a solid on/off swatch), and the measured price of going loose.
-   A two-line GRID, not a table: the right pane is ~540 CSS px on the 1080x1920 portrait target, so the
-   finding gets its own line under the rail and has room to read as a sentence. .tl-head shares the grid. */
+   ONE LINE PER TURN (Jett: "consolidate the turn entries to take less vertical real estate") -- 17 turns fit
+   in the pane at once. Everything the line drops (the kind, the radius, the finding as a whole sentence)
+   rides in the row's own tooltip, not lost. .tl-head shares the grid; change the columns in one place. */
 .tled{margin-bottom:12px}
 .tled .gh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .tl-sort{margin-left:auto;display:inline-flex;gap:4px}
 .tl-sort .mini{padding:1px 7px;font-size:10px;text-transform:none;letter-spacing:0}
 .tl-sort .mini.on{color:var(--acc2);border-color:var(--acc2)}
-.tl-cap{margin:2px 6px 10px;font-size:11.5px;line-height:1.5;color:var(--mut)}
+.tl-cap{margin:2px 6px 8px;font-size:11.5px;line-height:1.45;color:var(--mut)}
 .tl-cap b{color:var(--ink);font-weight:600}
-.tl-head,.tlrow{display:grid;grid-template-columns:76px minmax(76px,auto) 46px minmax(96px,1fr);
-  align-items:center;column-gap:9px;padding:4px 6px}
-.tl-head{row-gap:0;font:600 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
-  border-bottom:1px solid var(--line);padding-bottom:5px}
+.tl-head,.tlrow{display:grid;grid-template-columns:46px 52px 34px minmax(88px,1fr) 158px;
+  align-items:center;column-gap:6px;padding:2px 5px}
+.tl-head{font:600 9px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim);
+  border-bottom:1px solid var(--line);padding-bottom:4px}
 .tl-head .tl-rail{display:flex;gap:2px}
 .tl-head .tl-rail span{flex:1 1 0;text-align:center;overflow:hidden}
-.tlrow{row-gap:3px}
-.tl-gly{grid-row:span 2;display:flex;align-items:center;justify-content:center}
-.tl-head .tl-gly{grid-row:auto}
+.tl-gly{display:flex;align-items:center;justify-content:center}
 .tgly{display:block;overflow:visible}
 .tgly--none{font:9px var(--mono);color:var(--dim)}
-.tl-id{min-width:0;line-height:1.25}
-.tl-id b{font:700 13px var(--mono);color:var(--ink)}
-.tl-id i{font-style:normal;font-size:11px;color:var(--mut)}
-.tl-id em{display:block;font-style:normal;font:10px var(--mono);color:var(--dim);white-space:nowrap}
-.tl-live{display:inline-block;margin-left:4px;padding:0 4px;border-radius:7px;font:700 9px var(--mono);
+.tl-id{min-width:0;line-height:1.15;white-space:nowrap}
+.tl-id b{font:700 12.5px var(--mono);color:var(--ink)}
+.tl-id em{display:block;font-style:normal;font:9.5px var(--mono);color:var(--dim)}
+.tl-live{display:inline-block;margin-left:3px;padding:0 3px;border-radius:6px;font:700 8.5px var(--mono);
   color:var(--acc);background:var(--panel2);border:1px solid var(--line2)}
-.tl-apex{text-align:right;font-size:15px;font-weight:700;color:var(--ink);line-height:1.1}
-.tl-apex i{display:block;font-style:normal;font:9px var(--mono);color:var(--dim);letter-spacing:.03em}
+.tl-apex{text-align:right;line-height:1.05;white-space:nowrap}
+.tl-apex b{font:700 14px var(--mono);color:var(--ink)}
+.tl-apex i{display:block;font-style:normal;font:8.5px var(--mono);color:var(--dim)}
 .tl-head .tl-apex{font:600 9px var(--mono);color:var(--dim);line-height:1}
 /* THE RAIL — cell width = median seconds in that phase; the fill inside = the grip mix over every pass,
    so nothing here is ever a solid on/off swatch: a phase loose one lap in five looks one-fifth loose. */
 .tl-rail{min-width:0;display:flex;gap:2px}
-.tl-cell{min-width:0;height:28px;border-radius:2px;overflow:hidden;background:var(--bg);
+.tl-cell{min-width:0;height:24px;border-bottom:2px solid transparent;border-radius:2px;overflow:hidden;background:var(--bg);
   box-shadow:inset 0 0 0 1px var(--line);display:flex}
 .tl-cell--none{background:repeating-linear-gradient(45deg,var(--panel2) 0 3px,transparent 3px 7px)}
 .tl-mix{display:flex;width:100%;height:100%}
 .tl-mix i{display:block;min-width:1px}
 .tlrow:hover .tl-cell{box-shadow:inset 0 0 0 1px var(--line2)}
-/* the finding: its own line under the rail — what going loose here cost, and how often it happened.
-   The meter is this turn's share of the worst turn's per-lap loss. */
-/* one flowing sentence -- NOT a flex row: as flex items each fragment wrapped onto its own line. */
-.tl-find{grid-column:2/-1;min-width:0;font-size:11.5px;line-height:1.35;color:var(--mut)}
-.tl-find b{color:var(--ink);font-weight:600;white-space:nowrap}
-.tl-meter{display:inline-block;vertical-align:middle;width:34px;margin:0 7px 2px 0;
-  height:6px;border-radius:3px;background:var(--panel2);overflow:hidden;
-  box-shadow:inset 0 0 0 1px var(--line)}
+/* the finding, terse on the line and whole in the row's tooltip: the price, where, and how often */
+.tl-find{min-width:0;font-size:11px;line-height:1.25;color:var(--mut);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.tl-find b{color:var(--ink);font-weight:600}
+.tl-find em{font-style:normal;color:var(--mut)}
+.tl-often{color:var(--dim);font-size:10px}
+.tl-meter{display:inline-block;vertical-align:middle;width:22px;margin:0 5px 2px 0;height:5px;
+  border-radius:3px;background:var(--panel2);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
 .tl-meter i{display:block;height:100%;background:linear-gradient(90deg,#e3b341,#e5414e);border-radius:3px}
-.tl-find--bad b.mono{color:var(--lc);font-size:12.5px}
-.tl-find--free{opacity:.85}
+.tl-find--bad b.mono{color:var(--lc);font-size:12px}
 .tl-find--free .tl-meter i{background:var(--line2)}
 .tl-find--un{color:var(--dim)}
 .tl-find--un .tl-meter{border-style:dashed}
+.tl-head .tl-find{color:var(--dim);white-space:nowrap}
 /* a row is a turn selector: hover lifts it, the picked turn stays lit */
-.tlrow{cursor:pointer;border-radius:4px;transition:background .1s}
+.tlrow{cursor:pointer;border-radius:3px;transition:background .1s}
 .tlrow+.tlrow{border-top:1px solid var(--line)}
 .tlrow:hover{background:var(--panel2)}
 .tlrow.sel{background:var(--sel,rgba(120,160,255,.16));box-shadow:inset 0 0 0 1px var(--acc2)}
 .tlrow.sel .tl-id b{color:var(--acc2)}
-.tl-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:9px 6px 0;padding-top:7px;
+.tl-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 6px 0;padding-top:6px;
   border-top:1px solid var(--line)}
 /* ===== TURN ANALYSIS — left 5-part view + right timing/statistics (Jett 2026-09-10) ===== */
 /* RIGHT header + the cards column */

@@ -824,10 +824,11 @@ function setPin(ordinal, ts) { const cv = vcar(ordinal); if (ts) cv.pin = String
 
 // How much the daemon's pick can be trusted, in the daemon's own words.
 // The daemon's own standard (_verified_identity): identity is settled when at most one save ties on
-// signature, OR the gearbox has broken the tie — the live packet carries only cylinders, drivetrain
-// and PI, but the car cannot use a gear it does not have, and one pull through the box yields a
-// ratio ladder that the database can check against every build's stored ladder. "held" means the
-// identity is carried from an earlier sighting rather than seen now: trusted, but said.
+// signature (cylinders / drivetrain / PI), OR a fresh equip+save reads the build exactly, OR the durable
+// last-equipped memory (Fold 1) recalls the build you last saved on this car. NO gearbox — the live packet
+// carries only cylinders, drivetrain and PI, and the save-tune method (not a ratio ladder) resolves ties
+// [[fh6-identity-two-directions]]. "live_recent" means the identity is carried from an earlier sighting
+// rather than seen right now: trusted, but said.
 function matchQuality(m) {
   if (!m) return { level: "none", why: "no save read" };
   const ties = m.n_signature_ties || 0, n = m.n_saves || 0;
@@ -840,13 +841,14 @@ function matchQuality(m) {
   // gates it on ts_explicit), so picked_ok — the live car agreeing with an EXPLICIT browse — is the only pick that
   // counts. fresh_download = a freshly-written locked save (time-based, instant), read exactly from disk. Several
   // same-signature locked saves are honestly UNSETTLED until the build is equipped and saved.
-  const settled = ties <= 1 || !!m.picked_ok || !!m.fresh_download;
+  const settled = ties <= 1 || !!m.picked_ok || !!m.fresh_download || !!m.remembered;
   if (n > 1 && !settled) {
     return { level: "ambiguous", why: ties + " of " + n
       + " saved builds tie on cylinders, drivetrain and PI — equip the build and save the tune in-game to identify it" };
   }
   const how = m.picked_ok ? "your pick, and the live car agrees with it"
             : m.fresh_download ? "a freshly-saved tune, read exactly from disk"
+            : m.remembered ? "your last-equipped build, remembered for this car"
             : (m.how || "matched");
   return { level: "ok", why: how + (n > 1 ? " among " + n + " saves" : "")
     + (m.live_recent === false ? " — live data is not recent" : "") };

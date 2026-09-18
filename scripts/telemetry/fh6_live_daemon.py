@@ -168,6 +168,41 @@ def _ident_forget_pick(ordn):
         d = _ident_load()
         if d.get("picked", {}).pop(str(ordn), None) is not None: _ident_save(d)
 
+
+def _remember_equipped(ordn, save):
+    """FOLD 1 -- DURABLE LAST-EQUIPPED MEMORY (Jett 2026-09-17). When identity settles via a fresh equip+save,
+    record that build so it stays recognized across a long session AND a daemon restart, not just the 30-min fresh
+    window. Keyed by ORDINAL: the telemetry gives no per-instance UUID (cid is CarOrdinal|Drivetrain|Cyl|PI, i.e.
+    model-level), so two identical cars collide and the last save wins. Stores the save ts + its instant signature
+    (cyl / pi / parts fingerprint) so recall can confirm the live car still matches. Idempotent -- only writes when
+    the remembered save actually changes -- and a real equip+save SUPERSEDES any stale manual pick for the car
+    (the manual pick is what caused the old mis-identification; this replaces it with a self-refreshing record)."""
+    try:
+        ts = str(save.get("ts") or "")
+        if not ts:
+            return
+        with _IDENT_LOCK:
+            d = _ident_load()
+            eq = d.setdefault("equipped", {})
+            cur = eq.get(str(ordn)) or {}
+            picked_had = (d.get("picked") or {}).pop(str(ordn), None) is not None   # a fresh save retires the stale pick
+            if str(cur.get("ts")) == ts and not picked_had:
+                return   # unchanged
+            eq[str(ordn)] = {"ts": ts, "cyl": save.get("cyl"), "pi": save.get("pi"),
+                             "bsig": save.get("_bsig"), "at": time.time()}
+            _ident_save(d)
+    except Exception:
+        pass
+
+
+def _recall_equipped(ordn):
+    """The build last equipped+saved on this car ({ts, cyl, pi, bsig, at}), or None. See _remember_equipped."""
+    try:
+        with _IDENT_LOCK:
+            return (_ident_load().get("equipped") or {}).get(str(ordn))
+    except Exception:
+        return None
+
 def cid(p): return f'{p["CarOrdinal"]}|{p["DrivetrainType"]}|{p["NumCylinders"]}|{p["CarPI"]}'
 NAMES_PATH = os.path.join(ROOT, "data", "car-ordinals.json")
 def names_load():
@@ -1277,12 +1312,33 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
         _bmt = float((best.get("_meta") or {}).get("mtime") or 0)
         if n_ties > 1 and _bmt and (time.time() - _bmt) < 1800 and (live or live_recent):
             fresh_dl = True; n_ties = 1
+            if live:
+                _remember_equipped(ordn, best)   # FOLD 1: a fresh equip+save IS the last-equipped build — record it durably
     except Exception:
         pass
-    return best["_meta"], {"how": final_how, "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
+    # FOLD 1 RECALL -- DURABLE LAST-EQUIPPED MEMORY (Jett 2026-09-17). If a fresh save did not just settle it, but we
+    # remember the build last equipped+saved on THIS car, settle to it -- PROVIDED the remembered save still exists on
+    # disk, the live car's cylinders still match it, and NO newer cyl-matching save has superseded it (a newer save
+    # would mean you equipped+saved a different build since). This extends the save-tune method past the 30-min fresh
+    # window and across a restart; because it re-writes itself on every save it cannot rot the way the old manual pick
+    # did. NO gearbox (HARD RULE [[fh6-identity-two-directions]]) -- it settles on the recorded save signature only.
+    remembered = False
+    try:
+        eq = _recall_equipped(ordn) if (not fresh_dl and n_ties > 1 and (live or live_recent)) else None
+        rem = next((r for r in roster if eq and str(r["ts"]) == str(eq["ts"])), None) if eq else None
+        if rem and (not live_cyl or (rem.get("cyl") and int(rem["cyl"]) == int(live_cyl))):
+            _rmt = float((rem.get("_meta") or {}).get("mtime") or 0)
+            _newer = any(float((r.get("_meta") or {}).get("mtime") or 0) > _rmt
+                         and (not live_cyl or (r.get("cyl") and int(r["cyl"]) == int(live_cyl)))
+                         for r in roster if r is not rem)
+            if not _newer:
+                best = rem; n_ties = 1; remembered = True
+    except Exception:
+        pass
+    return best["_meta"], {"how": ("remembered" if remembered else final_how), "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties,
-                           "fresh_download": fresh_dl,
+                           "fresh_download": fresh_dl, "remembered": remembered,
                            "picked_ok": picked_ok, "stale": stale,
                            "builds": builds, "saves": saves}
 

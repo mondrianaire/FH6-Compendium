@@ -170,7 +170,16 @@ def curve(samples, slip_key):
         sm = sum(x[1] * x[2] for x in w) / sum(x[2] for x in w)
         if best is None or sm > best[1]:
             best = (k, sm, n)
-    return {"peak": round(best[1], 3), "at_slip": best[0], "n": sum(p[2] for p in pts),
+    # A RUN CAN BE PERFECTLY DETECTED AND STILL MEASURE THE WRONG THING (2026-09-18, the first attempt: a
+    # 13 m circle at 32 mph read 1.75 g on a car that shows 3.17 g while racing). A grip measurement needs
+    # the curve to RISE to a peak near slip 1.0 and fall away; if it peaks late, or has no samples from
+    # below the limit at all, the tyres were sliding the whole time and the number is sliding friction.
+    warn = None
+    if not [k for k, _, _ in pts if k < 1.0]:
+        warn = "no samples below the limit -- never approached it from underneath, so there is no peak here"
+    elif best[0] >= 1.4:
+        warn = f"peak at slip {best[0]:.1f}, not ~1.0 -- this reads as a drift, not a grip limit"
+    return {"peak": round(best[1], 3), "at_slip": best[0], "n": sum(p[2] for p in pts), "warn": warn,
             "curve": [[k, round(a, 3), n] for k, a, n in pts]}
 
 
@@ -207,7 +216,7 @@ def main():
     print(f"{'capture':<28} {'car':>5} {'PI':>4} {'dir':>3} {'s':>5} {'radius':>7} {'mph':>5} "
           f"{'front a_max':>11} {'rear a_max':>10}  gives up first")
     def cell(c):
-        return f"{c['peak']:.2f} @{c['at_slip']:.1f}" if c else "-"
+        return (f"{c['peak']:.2f} @{c['at_slip']:.1f}" + ("!" if c.get("warn") else "")) if c else "-"
     for rec, _ in found:
         f_, r_ = rec["front"], rec["rear"]
         first = "-"
@@ -216,6 +225,16 @@ def main():
         print(f"{rec['capture']:<28} {str(rec['car']):>5} {str(rec['pi']):>4} {rec['dir']:>3} "
               f"{rec['s']:5.1f} {rec['radius_m']:7.1f} {rec['mph']:5.1f} "
               f"{cell(f_):>11} {cell(r_):>10}  {first}")
+
+    # every warning, spelled out, so a bad run is self-diagnosing rather than needing a second pair of eyes
+    warns = [(rec, ax, c["warn"]) for rec, _ in found for ax, c in (("front", rec["front"]), ("rear", rec["rear"]))
+             if c and c.get("warn")]
+    if warns:
+        print()
+        for rec, ax, w in warns:
+            print(f"  ! {rec['capture']} {rec['dir']} run, {ax}: {w}")
+        print("  A good curve rises, peaks at slip ~1.0-1.1 and falls away. See docs/skidpad-protocol.md,")
+        print("  'When it goes wrong' -- usually the circle is too small or the throttle is too big.")
 
     if args.pooled:
         print()

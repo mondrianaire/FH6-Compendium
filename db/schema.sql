@@ -601,7 +601,6 @@ CREATE TABLE IF NOT EXISTS session_hit (
   wheel       TEXT,                     -- bottoming: FL/FR/RL/RR; NULL for wall
   drop_mph    REAL                      -- wall: one-frame speed lost; NULL for bottoming
 );
-CREATE INDEX IF NOT EXISTS ix_session_hit_sid ON session_hit(session_id);
 
 CREATE TABLE IF NOT EXISTS course (
   route_key    TEXT PRIMARY KEY,         -- '-1700_-4450' — the start-cell key

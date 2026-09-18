@@ -354,6 +354,16 @@ V2_TABLES = {
   start_is_line INTEGER,
   PRIMARY KEY (session_id, i)
 ) WITHOUT ROWID""",
+    # bottoming / barrier map markers (2026-09-18) -- keep in step with db/schema.sql
+    "session_hit": """CREATE TABLE IF NOT EXISTS session_hit (
+  session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL,
+  x           REAL, z REAL,
+  mph         INTEGER,
+  hard        INTEGER,
+  wheel       TEXT,
+  drop_mph    REAL
+)""",
     # schema 4 -- THE GAME'S EVENT CATALOGUE (ObjectModelGame.zip)
     "ref_track_info": """CREATE TABLE IF NOT EXISTS ref_track_info (
   track_key       INTEGER PRIMARY KEY,

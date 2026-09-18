@@ -124,6 +124,7 @@ function carName(cid) { const o = parseInt(String(cid).split("|")[0], 10); retur
 function carShort(cid) { const o = parseInt(String(cid).split("|")[0], 10); return (CARMAP[o] || {}).short || (o ? "#" + o : "?"); }
 let ROUTE = null;   // in a timed event with no learned course: the catalogued route the car is on (locateRouteInEvent)
 let LOOP = null;    // the daemon's S/F-crossing identity {name,start} — authoritative in an event, matched to a route START (adoptLoop)
+let EVENT_ROUTE_LOCK = null;   // {id}: a Rivals run HOLDS the route you loaded for the whole event — position may not flap it (locateRouteInEvent)
 let BROWSE_PICK = null;            // Course Browser: the route id whose location+shape the left world map is zoomed to
 let BROWSE_FILTER = "all";         // Course Browser mode chip: all | rivals | race | career | free
 let BROWSE_DEV = false;            // Course Browser: show the IE/dev and number-only routes too (off by default)
@@ -3069,7 +3070,8 @@ function liveLapPaint() {
 async function adoptLoop(loop) {
   const nm = loop && loop.name && loop.name !== "Rivals course" ? loop.name : null;
   LOOP = nm ? { name: nm, start: loop.start || null } : null;
-  if (!LOOP) { if (ROUTE) { ROUTE = null; paintLeft(); } return; }   // loop ended -> let position take over
+  if (!LOOP) { EVENT_ROUTE_LOCK = null; if (ROUTE) { ROUTE = null; paintLeft(); } return; }   // loop ended -> let position take over, fresh
+  EVENT_ROUTE_LOCK = null;   // a fresh authoritative loop name supersedes any position-held lock (re-locked below for a catalogued route)
   const learned = WORLD && Object.entries(WORLD.courses).find(([, c]) => c.name && c.name === nm);
   if (learned) {
     if (learned[0] === COURSE_KEY) { ROUTE = null; paintLeft(); return; }
@@ -3081,6 +3083,7 @@ async function adoptLoop(loop) {
   if (cat) {
     if (COURSE_KEY) { COURSE = null; COURSE_KEY = null; }
     ROUTE = { id: cat[0], name: nm, len: cat[1].len, loop: cat[1].loop, alsoName: null };
+    EVENT_ROUTE_LOCK = { id: cat[0] };   // the daemon named the loop -> lock the event to it authoritatively
   }
   paintLeft();
 }
@@ -3171,6 +3174,7 @@ async function locateCourse() {
 // path is too sparse), match the car to the catalogued route and name the map from that. Routes share
 // roads, so the pick is honest about a near runner-up.
 function locateRouteInEvent(haveCourse) {
+  if (MODE.game === "freeroam") EVENT_ROUTE_LOCK = null;   // drove OUT to free roam -> the next event re-identifies fresh (a menu/pause HOLDS the lock)
   if (MODE.game !== "event" || haveCourse || !LIVEPOS || !WORLD || !WORLD.routes) {
     if (ROUTE) { ROUTE = null; paintLeft(); }
     return;
@@ -3205,6 +3209,19 @@ function locateRouteInEvent(haveCourse) {
     const other = hits.find((h) => h.id !== best.id && h.dist <= best.dist + 25 && (h.len || 0) >= (best.len || 0) * 0.5);
     best.alsoName = other ? other.name : null;
   }
+  // EVENT ROUTE LOCK (Jett 2026-09-18): a Rivals run stays on the route you LOADED for the whole event. Routes
+  // share and cross roads, so the nearest/longest pick above will otherwise hand the event to a different route
+  // whose centre-line the car merely passes near — Bandai Azuma flapped to Mech My Day at a 4 m crossing, worse on
+  // a frozen menu position. Once a route is identified, HOLD it while the car is still plausibly on its road (a
+  // generous radius that covers the decimated centre-line and a parked/menu position); only release when the locked
+  // route has clearly fallen away, i.e. a different event was loaded. The daemon's named S/F loop still wins — it
+  // returns before we reach here (locateCourse: if (LOOP) return) and adoptLoop sets the lock authoritatively.
+  if (EVENT_ROUTE_LOCK && (!best || best.id !== EVENT_ROUTE_LOCK.id)) {
+    const lr = WORLD.routes[EVENT_ROUTE_LOCK.id], lpts = lr && (lr._lo || lr.pts);
+    const ld = lpts && lpts.length > 1 ? segNear(lpts) : Infinity;
+    if (lr && ld <= 90) best = { id: EVENT_ROUTE_LOCK.id, name: lr.name, len: lr.len || 0, loop: lr.loop, dist: ld, alsoName: best ? best.name : null };
+  }
+  if (best) EVENT_ROUTE_LOCK = { id: best.id };   // (re)lock onto whatever we settled on for this event
   const changed = (best && best.id) !== (ROUTE && ROUTE.id);
   ROUTE = best;
   if (changed) { if (COURSE_KEY) { COURSE = null; COURSE_KEY = null; } paintLeft(); }

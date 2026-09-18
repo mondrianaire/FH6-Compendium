@@ -221,6 +221,19 @@ def run(cx, verbose=False, data_dir=None):
     if os.path.exists(lp):
         lx = sqlite3.connect("file:%s?mode=ro" % lp.replace("\\", "/"), uri=True)
         lx.row_factory = sqlite3.Row
+        # ROBUST COVERAGE LENGTH (Jett 2026-09-18): the course model's length_m is accumulated as the MAX measured
+        # drive (analyze_session), so ONE long outlier (an out-lap, a stitched double lap) inflates it forever and
+        # every normal full lap then reads < 0.9 coverage and is wrongly stamped 'partial' -- Shimanoyama's model
+        # length was 1404 m against a ~1084 m median lap (and a 1100 m catalogued route), so 41 real laps greyed out.
+        # Judge coverage against the MEDIAN lap arc instead -- the code's own stated rule ("the route's own median
+        # arc IS the course length") -- which is immune to a single long outlier AND to a catalogued lead-in. Needs
+        # a few laps for a stable median; a route with fewer keeps the model length.
+        _arcs = {}
+        for _r in lx.execute("SELECT route_key, arc_m FROM lap_traces WHERE arc_m IS NOT NULL AND arc_m > 0"):
+            _arcs.setdefault(_r["route_key"], []).append(_r["arc_m"])
+        for _rk, _a in _arcs.items():
+            if _rk in lengths and len(_a) >= 3:
+                _a.sort(); lengths[_rk] = _a[len(_a) // 2]   # median arc
         for r in lx.execute("SELECT * FROM lap_traces"):
             try:
                 pts = json.loads(r["pts"])

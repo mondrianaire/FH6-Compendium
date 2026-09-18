@@ -304,8 +304,182 @@ def check_cryptocontainer():
     return fails
 
 
+# --- game-install formats -----------------------------------------------------
+MEDIA = "C:/XboxGames/Forza Horizon 6/Content/media"
+
+
+def _zip_entries(pattern, suffix):
+    import zipfile
+    hits = glob.glob(pattern, recursive=True)
+    if not hits:
+        return None, []
+    z = zipfile.ZipFile(hits[0])
+    return z, [n for n in z.namelist() if n.lower().endswith(suffix)]
+
+
+def check_owt():
+    """Route<id>.owt ('FTWO') -- header words and the trailer echo."""
+    files = sorted(glob.glob(MEDIA + "/openworld/brio/aitracks/Route*.owt"))
+    fails = []
+    if not files:
+        print("  NOTE: no .owt files; skipped")
+        return fails
+    bad_magic = bad_ver = bad_pay = bad_tail = 0
+    secs = {}
+    for p in files:
+        b = open(p, "rb").read()
+        if b[:4] != b"FTWO":
+            bad_magic += 1
+            continue
+        if struct.unpack_from("<H", b, 4)[0] != 512:
+            bad_ver += 1
+        if struct.unpack_from("<I", b, 0x0C)[0] != len(b) - 32:
+            bad_pay += 1
+        if b[-16:] != b[:16]:
+            bad_tail += 1
+        secs[struct.unpack_from("<I", b, 0x20)[0]] = secs.get(
+            struct.unpack_from("<I", b, 0x20)[0], 0) + 1
+    print("  %d files: %d bad magic, %d version != 512, %d payload word wrong, "
+          "%d trailer not an echo" % (len(files), bad_magic, bad_ver, bad_pay, bad_tail))
+    print("  section counts: %s" % dict(sorted(secs.items())))
+    for n, what in ((bad_magic, "not FTWO"), (bad_ver, "version != 512"),
+                    (bad_pay, "payload word != filesize-32"),
+                    (bad_tail, "trailer does not echo the header")):
+        if n:
+            fails.append("%d .owt files %s" % (n, what))
+    return fails
+
+
+def check_nav():
+    """Route<id>.nav ('WVAN') -- walk the chunk list and verify every footer echo."""
+    files = sorted(glob.glob(MEDIA + "/**/*.nav", recursive=True))
+    fails = []
+    if not files:
+        print("  NOTE: no .nav files; skipped")
+        return fails
+    walked = badfoot = badver = 0
+    for p in files:
+        b = open(p, "rb").read()
+        o, ok = 0, True
+        while o + 16 <= len(b):
+            ver, _h, sz = struct.unpack_from("<3I", b, o + 4)
+            if ver != 0x200:
+                badver += 1
+            if b[o + 16 + sz:o + 32 + sz] != b[o:o + 16]:
+                ok = False
+                break
+            o += 32 + sz
+        if ok and o == len(b):
+            walked += 1
+        else:
+            badfoot += 1
+    print("  %d files: %d walked header->payload->footer exactly to EOF, "
+          "%d did not, %d chunks with version != 0x200"
+          % (len(files), walked, badfoot, badver))
+    if badfoot:
+        fails.append("%d .nav files did not walk cleanly to EOF" % badfoot)
+    if badver:
+        fails.append("%d .nav chunks have an unexpected version" % badver)
+    return fails
+
+
+def check_str():
+    """<name>.str in EN.zip -- header constants and the embedded-name match."""
+    z, names = _zip_entries(MEDIA + "/stripped/stringtables/EN.zip", ".str")
+    fails = []
+    if not names:
+        print("  NOTE: EN.zip not found; skipped")
+        return fails
+    bad_head = bad_ver = bad_off = bad_name = 0
+    for n in names:
+        b = z.read(n)
+        if b[0] != 0 or b[1] != 8:
+            bad_head += 1
+        if struct.unpack_from("<H", b, 0x82)[0] != 2:
+            bad_ver += 1
+        t2 = struct.unpack_from("<I", b, 0x88)[0]
+        if not (0x8C < t2 < len(b)):
+            bad_off += 1
+        tname = b[2:0x80].split(b"\x00")[0].decode("ascii", "replace")
+        if not tname or tname.lower() not in n.lower():
+            bad_name += 1
+    print("  %d .str tables (%d zip entries incl. _list.txt): %d bad 00-08 head, "
+          "%d version != 2, %d table-2 offset outside file, %d name mismatch"
+          % (len(names), len(z.namelist()), bad_head, bad_ver, bad_off, bad_name))
+    for n, what in ((bad_head, "do not start 00 08"), (bad_ver, "are not version 2"),
+                    (bad_off, "have an out-of-range table-2 offset"),
+                    (bad_name, "have an embedded name that is not the filename")):
+        if n:
+            fails.append("%d .str tables %s" % (n, what))
+    return fails
+
+
+def check_bxml():
+    """BXML entries in ObjectModelGame.zip -- magic, version, index width."""
+    z, names = _zip_entries(MEDIA + "/**/ObjectModelGame.zip", "")
+    fails = []
+    if not names:
+        print("  NOTE: ObjectModelGame.zip not found; skipped")
+        return fails
+    bad_magic = bad_ver = 0
+    widths = {1: 0, 2: 0, 4: 0}
+    for n in names:
+        b = z.read(n)
+        if len(b) < 13:
+            continue
+        if b[:4] != b"BXML":
+            bad_magic += 1
+            continue
+        if b[4] != 2:
+            bad_ver += 1
+        sc = struct.unpack_from("<i", b, 5)[0]
+        widths[1 if sc <= 255 else (2 if sc <= 65535 else 4)] += 1
+    print("  %d entries: %d not BXML, %d version != 2; index width u8=%d u16=%d u32=%d"
+          % (len(names), bad_magic, bad_ver, widths[1], widths[2], widths[4]))
+    if bad_magic:
+        fails.append("%d entries are not BXML" % bad_magic)
+    if bad_ver:
+        fails.append("%d BXML entries are not version 2" % bad_ver)
+    return fails
+
+
+def check_swatchbin():
+    """.swatchbin in Upgrade_Parts.zip -- Grub header and the BC7 payload size."""
+    z, names = _zip_entries(MEDIA + "/**/Upgrade_Parts.zip", ".swatchbin")
+    fails = []
+    if not names:
+        print("  NOTE: Upgrade_Parts.zip not found; skipped")
+        return fails
+    bad_magic = bad_hdr = bad_size = bad_pay = 0
+    dims = {}
+    for n in names:
+        b = z.read(n)
+        if b[:4] != b"burG":
+            bad_magic += 1
+            continue
+        if struct.unpack_from("<I", b, 8)[0] != 140:
+            bad_hdr += 1
+        if struct.unpack_from("<I", b, 12)[0] != len(b):
+            bad_size += 1
+        v = struct.unpack_from("<12I", b, 0x30)
+        w, h = v[7], v[8]
+        dims[(w, h)] = dims.get((w, h), 0) + 1
+        if len(b) - 140 != ((w + 3) // 4) * ((h + 3) // 4) * 16:
+            bad_pay += 1
+    print("  %d entries: %d bad magic, %d header size != 140, %d size word wrong, "
+          "%d payload != BC7 block count" % (len(names), bad_magic, bad_hdr, bad_size, bad_pay))
+    print("  dimensions: %s" % sorted(dims.items(), key=lambda kv: -kv[1])[:5])
+    for n, what in ((bad_magic, "are not 'burG'"), (bad_hdr, "have a header size != 140"),
+                    (bad_size, "have a wrong size word"),
+                    (bad_pay, "do not match a single-mip BC7 payload")):
+        if n:
+            fails.append("%d .swatchbin entries %s" % (n, what))
+    return fails
+
+
 CHECKS = {"tune": check_tune, "dataout": check_dataout,
-          "crypto": check_cryptocontainer}
+          "crypto": check_cryptocontainer, "owt": check_owt, "nav": check_nav,
+          "str": check_str, "bxml": check_bxml, "swatchbin": check_swatchbin}
 
 if __name__ == "__main__":
     want = sys.argv[1:] or sorted(CHECKS)

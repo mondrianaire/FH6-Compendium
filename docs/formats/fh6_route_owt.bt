@@ -1,0 +1,105 @@
+//------------------------------------------------
+//--- 010 Editor Binary Template
+//
+//      File: fh6_route_owt.bt
+//   Authors: FH6 Tuning Lab
+//   Version: 1.0 (2026-09-18)
+//   Purpose: Forza Horizon 6 route centre-line -- Route<id>.owt ('FTWO')
+//  Category: Game
+// File Mask: *.owt
+//
+// WHERE: <install>/Content/media/openworld/brio/aitracks/Route<id>.owt
+//        One file per defined route. 170 on this install.
+//
+// WHY IT MATTERS: the coordinates are in the SAME METRE FRAME the telemetry
+// reports, so a learned course and a game route compare directly with no
+// transform. This is the backbone of course identity -- but identity itself is
+// still route id -> ref_track_info -> name, NEVER geometry alone and never
+// length. Geometry corroborates; the catalogue names.
+//
+// Canonical reader: scripts/telemetry/fh6_owt.py
+//
+// CORPUS: measured 2026-09-18 over all 170 .owt files on this install.
+//   magic 'FTWO'                        170/170
+//   u16 at 0x04 == 512 (0x0200)         170/170
+//   payload word == filesize - 32       170/170
+//   trailing 16 bytes echo the first 16 170/170
+//   section count: 1 on 164 files, 4 on 5 files, 5 on 1 file
+//
+// CORRECTION vs the reader's docstring: it calls the 0x04 field "version (2)".
+// Measured, the u16 there reads 512 = 0x0200 on every file -- the same value
+// the .nav chunk header carries as a u32. Read it as 0x0200, not 2.
+// The docstring also says "1 section on 163 files"; the current install has
+// 164. Counts drift with title updates; the structure has not.
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct {
+    char   Magic[4]   <comment="'FTWO'">;
+    ushort Version    <comment="512 = 0x0200 on all 170 files">;
+    ushort Unknown06  <comment="UNKNOWN">;
+    uint   Unknown08  <comment="UNKNOWN">;
+    uint   PayloadSize <comment="== filesize - 32, on all 170 files">;
+    ubyte  Unknown10[16] <comment="UNKNOWN; these 16 bytes are echoed verbatim as the file trailer">;
+    uint   SectionCount <comment="S. 1 on 164 files; 4 or 5 on the six multi-line routes">;
+    uint   PointCount   <comment="N, summed over every section">;
+    ubyte  Unknown28[40] <comment="UNKNOWN; section 0's count and flags sit at the end of this run">;
+} OwtHeader <comment="0x00..0x57">;
+
+// Section 0's point count and flags live at 0x50/0x54 (inside Unknown28 above,
+// which is why that run is not split further here -- the reader indexes them
+// absolutely). Sections 1..S-1 follow at 0x58, 40 bytes each:
+typedef struct {
+    uint StartIndex;
+    uint Zero;
+    int  Link0A <comment="section a car may enter next; -1 = unused">;
+    int  Link0B;
+    int  Link1A;
+    int  Link1B;
+    int  Link2A;
+    int  Link2B;
+    uint PointCount;
+    uint Flags <comment="low byte = number of outgoing links; high byte = line variant">;
+} SectionEntry <comment="40 bytes; one per section after the first">;
+
+// Flags, high byte -- the line variant:
+//   1 = the primary line
+//   2 or 4 = an alternate line over the same stretch of road: same start and
+//            end as a primary section, and never entered by the primary chain.
+// This is what stops an alternate line being mistaken for a different route.
+
+// Per-point record. The first three floats are the ones the project uses; the
+// remaining 44 bytes are UNKNOWN and are deliberately not named here. Naming a
+// field you have not decoded is how a guess becomes a fact three documents
+// later.
+typedef struct {
+    float X;
+    float Y <comment="elevation">;
+    float Z;
+    ubyte Unknown0C[44] <comment="UNKNOWN -- 44 of the 56 bytes are undecoded">;
+} RoutePoint <comment="56 bytes">;
+
+//------------------------------------------------ file
+// Both the section table and the point array are 16-byte aligned, so this
+// template reads the header and then seeks. 010 will show the points; walking
+// the section table for the six multi-section routes is left to fh6_owt.py.
+OwtHeader header;
+
+if ( header.SectionCount > 1 )
+    SectionEntry sections[ header.SectionCount - 1 ] <optimize=false>;
+
+// align to 16, then the points
+local int64 pos = FTell();
+if ( pos % 16 ) FSeek( pos + (16 - pos % 16) );
+RoutePoint points[ header.PointCount ] <optimize=false>;
+
+local int64 after = FTell();
+if ( after % 16 ) FSeek( after + (16 - after % 16) );
+ubyte Trailer[16] <comment="verbatim copy of the first 16 bytes; 170/170">;
+
+// ---- assertions -------------------------------------------------------------
+if ( header.Magic != "FTWO" )
+    Warning( "Not an .owt: magic is not FTWO" );
+if ( header.PayloadSize != FileSize() - 32 )
+    Warning( "Payload word %u does not match filesize-32 (%Lu)", header.PayloadSize, FileSize() - 32 );

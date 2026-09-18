@@ -1054,6 +1054,16 @@ body.fixed main{padding:0;gap:0;border-top:0}
 /* the following map: labels earn their ink only when the window is close enough to read them */
 .pane > .body.map svg text{opacity:0;transition:opacity .18s}
 .pane > .body.map svg.close text{opacity:1}
+/* TURN NUMBERS ARE ALWAYS VISIBLE (Jett 2026-09-18): turn identification must read at every zoom and in the
+   static/menu/browse view, so the course map's turn-number labels opt OUT of the close-only ink gate above. */
+.pane > .body.map svg g.cturn text{opacity:1!important}
+/* FIT / RESET-VIEW button, floated on a pan/zoomable map (world + course) — appears only once the user has
+   taken manual control, and returns the view to its auto-fit. */
+.mapfit{position:absolute;bottom:8px;right:8px;z-index:7;display:none;align-items:center;gap:4px;
+  font:600 10px var(--mono);letter-spacing:.04em;color:var(--ink);background:var(--panel);
+  border:1px solid var(--line);border-radius:5px;padding:3px 7px;cursor:pointer;opacity:.92}
+.mapfit:hover{background:var(--panel2);border-color:var(--acc2)}
+.mapfit.show{display:inline-flex}
 .mapscale{display:inline-flex;align-items:center;gap:6px;margin-left:auto}
 .mapscale .why{font-family:var(--mono);font-size:10px;min-width:76px;text-align:right}
 

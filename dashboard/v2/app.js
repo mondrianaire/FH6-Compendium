@@ -372,7 +372,7 @@ function courseMap(c, opts) {
     const on = tp != null && t.seq === tp;
     const dim = tp != null && !on;
     const lx = (px(t.x) + 7).toFixed(1), ly = (py(t.z) - 6).toFixed(1);
-    return `<g data-turn="${t.seq}" style="cursor:pointer">
+    return `<g class="cturn" data-turn="${t.seq}" style="cursor:pointer">
       <circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="${on ? 6 : 4}" fill="${on ? "#fff" : "var(--acc2)"}"
         stroke="#0b0e12" stroke-width="${on ? 1.6 : 1}" opacity="${dim ? 0.4 : 1}"><title>${esc(turnLabel(t))} · ${n0(t.r)} m radius</title></circle>
       <text x="${lx}" y="${ly}" font-size="${on ? 13 : 11}" font-weight="700" paint-order="stroke"

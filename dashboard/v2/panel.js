@@ -2014,6 +2014,7 @@ function paintLeft() {
     // to the pane and carries its own always-visible bottom-left legend (which houses the map-view toggle);
     // the DATA filter is in the shared #coursefilter bar, not here.
     body.append(courseMap(COURSE, { laps: pick.ids, fore: pick.fore, turnPick: turnPickSeq(), view: MAP_VIEW, legOpen: MAP_LEG_OPEN }));
+    { const cmapSvg = body.querySelector(".cmap svg[data-x0]"); if (cmapSvg) courseMapAttach(cmapSvg); }   // wheel-zoom + drag-pan on the course map (held across rebuilds)
     // THE SESSION LAP LIST lives here now, under the map (2026-09-16): the current setup's laps, fastest first,
     // always visible while driving; click one to isolate its line on the map + open Single-lap on the right. The
     // old under-map turn table is retired — its per-phase / grip data is in Turn analysis.
@@ -2458,7 +2459,8 @@ function worldMapHTML() {
    Course Browser has a selection. Mouse wheel zooms and drag pans the live window, but ~0.9 s after you
    let go it glides back to the target -- "manipulable, but always returns to its current state". */
 const MAPVIEW = { svg: null, tx: 0, ty: 0, tw: 0, th: 0, cx: 0, cy: 0, cw: 0, ch: 0,
-                  W: 0, H: 0, raf: 0, holdUntil: 0, drag: null, wired: null };
+                  W: 0, H: 0, raf: 0, holdUntil: 0, drag: null, wired: null,
+                  manual: false, pick: undefined };   // manual: user has panned/zoomed → hold their view until an explicit reset / a new pick (Jett 2026-09-18)
 function mapProj(svg) {
   return { x0: +svg.dataset.x0, z0: +svg.dataset.z0, s: +svg.dataset.s, pad: +svg.dataset.pad, H: +svg.dataset.h,
            px(x) { return this.pad + (x - this.x0) * this.s; }, pz(z) { return this.H - this.pad - (z - this.z0) * this.s; } };
@@ -2489,6 +2491,7 @@ function mapTargetFor(svg) {   // the rectangle the view wants to sit at, from t
 function mapApply() { const m = MAPVIEW; if (m.svg) m.svg.setAttribute("viewBox", `${m.cx.toFixed(1)} ${m.cy.toFixed(1)} ${m.cw.toFixed(1)} ${m.ch.toFixed(1)}`); }
 function mapTick() {
   const m = MAPVIEW; if (!m.svg || !m.svg.isConnected) { m.raf = 0; return; }
+  if (m.manual) { m.raf = 0; return; }   // the user is in manual control — hold their pan/zoom, never ease back to the fit
   const held = Date.now() < m.holdUntil;
   if (!held) {   // ease the live window toward the target
     const k = 0.16;
@@ -2502,30 +2505,50 @@ function mapTick() {
 function mapKick() { if (!MAPVIEW.raf) MAPVIEW.raf = requestAnimationFrame(mapTick); }
 function mapRetarget(animate) {
   const m = MAPVIEW; if (!m.svg) return;
+  m.manual = false; mapFitSync();   // a deliberate retarget (a browser pick, the fit button) ends manual control
   const t = mapTargetFor(m.svg); m.tx = t.x; m.ty = t.y; m.tw = t.w; m.th = t.h;
   if (!animate) { m.cx = t.x; m.cy = t.y; m.cw = t.w; m.ch = t.h; mapApply(); }
   else { m.holdUntil = 0; mapKick(); }
 }
+// the FIT button (created lazily in the map container) shows only while the user holds a manual view
+function mapFitSync() {
+  const m = MAPVIEW, host = m.svg && m.svg.parentNode; if (!host) return;
+  let btn = host.querySelector(":scope > .mapfit");
+  if (!btn) {
+    btn = document.createElement("button"); btn.type = "button"; btn.className = "mapfit";
+    btn.textContent = "⤢ fit"; btn.title = "reset the map to the full view";
+    btn.onclick = () => mapRetarget(true);
+    host.appendChild(btn);
+  }
+  btn.classList.toggle("show", !!m.manual);
+}
 function mapAttach(svg) {
   const m = MAPVIEW; m.svg = svg; m.W = +svg.dataset.w; m.H = +svg.dataset.h;
-  const t = mapTargetFor(svg);            // snap to the current target on a fresh render (no zoom flash on unrelated repaints)
-  m.tx = m.cx = t.x; m.ty = m.cy = t.y; m.tw = m.cw = t.w; m.th = m.ch = t.h; mapApply();
+  // A browser pick is a deliberate camera move → drop manual control and snap to the pick. Any OTHER rebuild
+  // (route flicker, mode flip, turn pick, a fresh WORLD) must PRESERVE a manual view instead of snapping to the
+  // full island — that unconditional resnap was why manual pan/zoom "continually snapped to the full view".
+  if (m.pick !== BROWSE_PICK) { m.pick = BROWSE_PICK; m.manual = false; }
+  if (m.manual && isFinite(m.cw) && m.cw > 0) { mapApply(); }   // re-apply the held view onto the freshly-built node
+  else { const t = mapTargetFor(svg); m.tx = m.cx = t.x; m.ty = m.cy = t.y; m.tw = m.cw = t.w; m.th = m.ch = t.h; mapApply(); }
+  mapFitSync();
   if (m.wired === svg) return; m.wired = svg;
   const clientToVB = (e) => { const rc = svg.getBoundingClientRect();
     return { x: m.cx + ((e.clientX - rc.left) / rc.width) * m.cw, y: m.cy + ((e.clientY - rc.top) / rc.height) * m.ch, fx: (e.clientX - rc.left) / rc.width, fy: (e.clientY - rc.top) / rc.height }; };
   svg.addEventListener("wheel", (e) => {
     e.preventDefault(); const at = clientToVB(e);
+    if (!isFinite(at.x) || !isFinite(at.y) || !isFinite(at.fx) || !isFinite(at.fy)) return;   // zero-rect during layout → never NaN the viewBox
     const f = Math.exp(e.deltaY * 0.0016);                       // wheel up = zoom in
     let nw = Math.min(m.W * 1.15, Math.max(m.W * 0.04, m.cw * f)); const r = nw / m.cw; let nh = m.ch * r;
     m.cx = at.x - at.fx * nw; m.cy = at.y - at.fy * nh; m.cw = nw; m.ch = nh;
-    mapApply(); m.holdUntil = Date.now() + 900; mapKick();
+    mapApply(); m.manual = true; mapFitSync();                   // the view STAYS where the user put it (no ease-back)
   }, { passive: false });
-  svg.addEventListener("pointerdown", (e) => { if (e.button !== 0) return; m.drag = { x: e.clientX, y: e.clientY }; svg.setPointerCapture(e.pointerId); svg.style.cursor = "grabbing"; m.holdUntil = Date.now() + 1e9; });
-  svg.addEventListener("pointermove", (e) => { if (!m.drag) return; const rc = svg.getBoundingClientRect();
+  svg.addEventListener("pointerdown", (e) => { if (e.button !== 0) return; m.drag = { x: e.clientX, y: e.clientY }; svg.setPointerCapture(e.pointerId); svg.style.cursor = "grabbing"; });
+  svg.addEventListener("pointermove", (e) => { if (!m.drag) return; const rc = svg.getBoundingClientRect(); if (!rc.width || !rc.height) return;
     m.cx -= ((e.clientX - m.drag.x) / rc.width) * m.cw; m.cy -= ((e.clientY - m.drag.y) / rc.height) * m.ch;
-    m.drag.x = e.clientX; m.drag.y = e.clientY; mapApply(); });
-  const endDrag = (e) => { if (!m.drag) return; m.drag = null; svg.style.cursor = ""; try { svg.releasePointerCapture(e.pointerId); } catch (_) {} m.holdUntil = Date.now() + 900; mapKick(); };
+    m.drag.x = e.clientX; m.drag.y = e.clientY; mapApply(); m.manual = true; });
+  const endDrag = (e) => { if (!m.drag) return; m.drag = null; svg.style.cursor = ""; try { svg.releasePointerCapture(e.pointerId); } catch (_) {} mapFitSync(); };
   svg.addEventListener("pointerup", endDrag); svg.addEventListener("pointercancel", endDrag);
+  svg.addEventListener("dblclick", (e) => { if (e.target.closest(".wcourse")) return; mapRetarget(true); });   // double-click empty map → reset to fit
   svg.style.cursor = "grab";
 }
 // HOVER THE MAP, HIGHLIGHT THE BROWSER (Jett 2026-09-08: "mousing over an established course should
@@ -2812,6 +2835,49 @@ function presentScale(svg, vw, sc) {
   const note = document.getElementById("mapScale");
   if (note) note.textContent = across >= 3000 ? "whole island" : across + " m across";
 }
+// ------------------------------------------------- COURSE MAP: manual pan / zoom (Jett 2026-09-18)
+// The course map was static by design; the user wants to zoom into a corner and pan while analysing. Same
+// wheel-to-zoom-at-cursor + drag-to-pan as the world map, but keyed to the course svg and coordinated with the
+// follow camera: a manual view is HELD while not driving (courseFollow yields), and a live lap reclaims the
+// camera (follow wins during the lap). Drag capture is DEFERRED until the pointer actually moves so a tap on a
+// turn marker still fires pickTurn. Pan/zoom moves only the viewBox window — the dataset projection the live
+// dot / trail read is untouched, so nothing desyncs.
+const CMAPVIEW = { svg: null, manual: false, vb: null, drag: null, wired: null, W: 0, H: 0 };
+function cmapApply() { const m = CMAPVIEW; if (m.svg && m.vb) m.svg.setAttribute("viewBox", `${m.vb.x.toFixed(1)} ${m.vb.y.toFixed(1)} ${m.vb.w.toFixed(1)} ${m.vb.h.toFixed(1)}`); }
+function cmapFitSync() {
+  const m = CMAPVIEW, host = m.svg && m.svg.parentNode; if (!host) return;
+  let btn = host.querySelector(":scope > .mapfit");
+  if (!btn) { btn = document.createElement("button"); btn.type = "button"; btn.className = "mapfit";
+    btn.textContent = "⤢ fit"; btn.title = "reset the course map to the full-course view"; btn.onclick = () => cmapReset(); host.appendChild(btn); }
+  btn.classList.toggle("show", !!m.manual);
+}
+function cmapReset() { const m = CMAPVIEW; m.manual = false; m.vb = null; if (m.svg) m.svg.setAttribute("viewBox", `0 0 ${m.W} ${m.H}`); cmapFitSync(); queueFollow(); }
+function courseMapAttach(svg) {
+  const m = CMAPVIEW; m.svg = svg; m.W = +svg.dataset.w; m.H = +svg.dataset.h;
+  if (m.manual && m.vb) cmapApply();   // re-apply the held view onto the freshly-built node (survives paintLeft rebuilds)
+  cmapFitSync();
+  if (m.wired === svg) return; m.wired = svg;
+  const vbNow = () => m.vb || { x: 0, y: 0, w: m.W, h: m.H };
+  svg.addEventListener("wheel", (e) => {
+    e.preventDefault(); const vb = vbNow(), rc = svg.getBoundingClientRect();
+    const fx = (e.clientX - rc.left) / rc.width, fy = (e.clientY - rc.top) / rc.height;
+    const atx = vb.x + fx * vb.w, aty = vb.y + fy * vb.h, f = Math.exp(e.deltaY * 0.0016);
+    let nw = Math.min(m.W * 1.05, Math.max(m.W * 0.06, vb.w * f)); const nh = vb.h * (nw / vb.w);
+    m.vb = { x: atx - fx * nw, y: aty - fy * nh, w: nw, h: nh }; m.manual = true; cmapApply(); cmapFitSync();
+  }, { passive: false });
+  svg.addEventListener("pointerdown", (e) => { if (e.button !== 0) return; m.drag = { x: e.clientX, y: e.clientY, moved: false }; });
+  svg.addEventListener("pointermove", (e) => {
+    if (!m.drag) return; const dx = e.clientX - m.drag.x, dy = e.clientY - m.drag.y;
+    if (!m.drag.moved) { if (Math.hypot(dx, dy) < 4) return;   // DEFER capture: a tap (no move) stays a turn click
+      m.drag.moved = true; try { svg.setPointerCapture(e.pointerId); } catch (_) {} svg.style.cursor = "grabbing"; if (!m.vb) m.vb = { x: 0, y: 0, w: m.W, h: m.H }; m.manual = true; cmapFitSync(); }
+    const rc = svg.getBoundingClientRect(), vb = m.vb;
+    vb.x -= (dx / rc.width) * vb.w; vb.y -= (dy / rc.height) * vb.h; m.drag.x = e.clientX; m.drag.y = e.clientY; cmapApply();
+  });
+  const endDrag = (e) => { if (!m.drag) return; m.drag = null; svg.style.cursor = ""; try { svg.releasePointerCapture(e.pointerId); } catch (_) {} };
+  svg.addEventListener("pointerup", endDrag); svg.addEventListener("pointercancel", endDrag);
+  svg.addEventListener("dblclick", (e) => { if (e.target.closest("[data-turn]")) return; cmapReset(); });
+  svg.style.cursor = "grab";
+}
 // COURSE FOLLOW CAMERA (Jett 2026-09-11, Q1): the whole-course map zooms in to follow the car ONLY while a lap
 // is live, and eases back to the full-course fit on the live→held edge (a pause, the end-of-event menu and
 // browsing all keep the static fit). Reads LIVE.lap.live + LIVEPOS + LIVE_HEAD (heading, for the look-ahead).
@@ -2819,6 +2885,13 @@ function presentScale(svg, vw, sc) {
 function courseFollow(svg, sc, H, pad) {
   const full = FOLLOW.full;
   const live = !!(LIVE.lap && LIVE.lap.live) && Array.isArray(LIVEPOS);
+  // MANUAL VIEW YIELDS ONLY WHEN NOT DRIVING (Jett 2026-09-18): while the user is manually panning/zooming the
+  // course map and no lap is live, hold their view untouched. A live lap reclaims the camera (follow wins) and
+  // drops the manual view so the next idle state is the full fit again.
+  if (typeof CMAPVIEW !== "undefined") {
+    if (live) { if (CMAPVIEW.manual) { CMAPVIEW.manual = false; CMAPVIEW.vb = null; cmapFitSync(); } }
+    else if (CMAPVIEW.manual) return;
+  }
   if (live && !FOLLOW.wasLive) FOLLOW.span = null;            // snap in on the held→live edge
   FOLLOW.wasLive = live;
   let cxT, czT, wantW;

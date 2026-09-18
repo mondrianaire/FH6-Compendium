@@ -240,7 +240,72 @@ def check_dataout():
     return fails
 
 
-CHECKS = {"tune": check_tune, "dataout": check_dataout}
+def check_cryptocontainer():
+    """The CryptoContainer envelope vs fh6_local_decrypt/Program.cs and real files."""
+    bt = os.path.join(ROOT, "docs", "formats", "fh6_cryptocontainer.bt")
+    lay = bt_layout(bt, ["ContainerHeader"])
+    hdr = lay[-1][2] + lay[-1][3]
+    fails = []
+
+    # Constants are asserted against the C# source, which is canonical here --
+    # there is no Python implementation of the container to compare with.
+    cs = open(os.path.join(ROOT, "scripts", "tools", "fh6_local_decrypt",
+                           "Program.cs"), encoding="utf-8").read()
+    want = {}
+    for k, pat in (("header", r"ContainerHeaderSize\s*=\s*(\d+)"),
+                   ("mac", r"MacSize\s*=\s*(\d+)"),
+                   ("profile", r"ProfileChunk\s*=\s*(\d+)"),
+                   ("gamedb", r"GameDbChunk\s*=\s*(\d+)")):
+        m = re.search(pat, cs)
+        if not m:
+            fails.append("could not read %s constant from Program.cs" % k)
+        else:
+            want[k] = int(m.group(1))
+    if want.get("header") != hdr:
+        fails.append("header size: template %d, Program.cs %d" % (hdr, want.get("header")))
+    for k in ("profile", "gamedb"):
+        if str(want.get(k)) not in open(bt, encoding="utf-8").read():
+            fails.append("template never mentions the %s chunk size %s" % (k, want.get(k)))
+    print("  header %d bytes (IV0 16 + word 4 + nonce 16); chunks profile=%s gamedb=%s"
+          % (hdr, want.get("profile"), want.get("gamedb")))
+
+    # --- real containers --------------------------------------------------
+    found = []
+    for pat, chunk, label in (
+            ("C:/XboxGames/GameSave/pgs/*/*/ContainersRoot/User_*/C_ProfileData",
+             want.get("profile"), "C_ProfileData"),
+            ("C:/XboxGames/**/gamedbRC.slt", want.get("gamedb"), "gamedbRC.slt")):
+        for p in glob.glob(pat, recursive=True):
+            sz = os.path.getsize(p)
+            pay = sz - hdr
+            ok = pay > 0 and chunk and pay % (chunk + want["mac"]) == 0
+            found.append((label, sz, pay // (chunk + want["mac"]) if ok else None))
+            if not ok:
+                fails.append("%s (%d bytes) does not divide into %s-byte slots"
+                             % (label, sz, chunk))
+            if pay % 16:
+                fails.append("%s payload is not AES block-aligned" % label)
+    if not found:
+        print("  NOTE: no containers on this machine; byte checks skipped")
+        return fails
+    for label, sz, n in found:
+        print("  %-14s %12s bytes -> %s slots" % (label, format(sz, ","), n))
+
+    # The documented trap: gamedb divides by BOTH slot sizes. If that ever stops
+    # being true the warning in the template is overstated and should be edited.
+    gd = [f for f in found if f[0] == "gamedbRC.slt"]
+    if gd and want.get("profile"):
+        pay = gd[0][1] - hdr
+        both = pay % (want["profile"] + want["mac"]) == 0
+        print("  gamedb also divides by the %d-byte profile slot: %s (the documented trap)"
+              % (want["profile"] + want["mac"], both))
+        if not both:
+            fails.append("the .bt claims gamedb divides by both slot sizes; it no longer does")
+    return fails
+
+
+CHECKS = {"tune": check_tune, "dataout": check_dataout,
+          "crypto": check_cryptocontainer}
 
 if __name__ == "__main__":
     want = sys.argv[1:] or sorted(CHECKS)

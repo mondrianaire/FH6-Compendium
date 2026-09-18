@@ -1274,21 +1274,69 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .cps-cn{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .cps-car i{font-style:normal;font-weight:700;color:var(--mut);flex:0 0 auto}
 .cps-more{grid-column:1/-1;font-size:10px;color:var(--dim);margin-top:3px}
-/* PER-PHASE CORNER STRIP (course-mode Turn analysis): one row per turn, its 5 WHERE-phases as grip-coloured cells */
-.pstrip{display:flex;align-items:center;gap:8px;padding:1px 0}
-.pstrip .ptn{flex:0 0 88px;font:600 10.5px var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pstrip .pcells{display:flex;gap:2px;flex:1 1 auto;min-width:0}
-.pcell{flex:1 1 0;min-width:0;height:16px;border-radius:2px;display:flex;align-items:center;justify-content:center;
-  font:600 9px var(--mono);color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
-.pcell b{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
-.pc-empty{background:var(--line2);box-shadow:inset 0 0 0 1px var(--line)}
-.pstrip-h{margin-bottom:3px}
-.pstrip-h .pcells span{flex:1 1 0;text-align:center;font:600 8px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.03em}
-/* a strip row is a turn selector: hover lifts it, the picked turn stays lit (its phases paint on the map) */
-.pstrip--pick{cursor:pointer;border-radius:3px;padding:1px 4px;margin:0 -4px;transition:background .1s}
-.pstrip--pick:hover{background:var(--line)}
-.pstrip--pick.sel{background:var(--sel,rgba(120,160,255,.16));box-shadow:inset 0 0 0 1px var(--acc2)}
-.pstrip--pick.sel .ptn{color:var(--acc2)}
+/* ===== THE TURN LEDGER (course-mode Turn analysis, Jett 2026-09-18) =====
+   One row per turn: its drawn shape, its time budget as a rail whose cell widths ARE the seconds, each cell
+   filled with the grip DISTRIBUTION (never a solid on/off swatch), and the measured price of going loose.
+   A two-line GRID, not a table: the right pane is ~540 CSS px on the 1080x1920 portrait target, so the
+   finding gets its own line under the rail and has room to read as a sentence. .tl-head shares the grid. */
+.tled{margin-bottom:12px}
+.tled .gh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tl-sort{margin-left:auto;display:inline-flex;gap:4px}
+.tl-sort .mini{padding:1px 7px;font-size:10px;text-transform:none;letter-spacing:0}
+.tl-sort .mini.on{color:var(--acc2);border-color:var(--acc2)}
+.tl-cap{margin:2px 6px 10px;font-size:11.5px;line-height:1.5;color:var(--mut)}
+.tl-cap b{color:var(--ink);font-weight:600}
+.tl-head,.tlrow{display:grid;grid-template-columns:76px minmax(76px,auto) 46px minmax(96px,1fr);
+  align-items:center;column-gap:9px;padding:4px 6px}
+.tl-head{row-gap:0;font:600 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  border-bottom:1px solid var(--line);padding-bottom:5px}
+.tl-head .tl-rail{display:flex;gap:2px}
+.tl-head .tl-rail span{flex:1 1 0;text-align:center;overflow:hidden}
+.tlrow{row-gap:3px}
+.tl-gly{grid-row:span 2;display:flex;align-items:center;justify-content:center}
+.tl-head .tl-gly{grid-row:auto}
+.tgly{display:block;overflow:visible}
+.tgly--none{font:9px var(--mono);color:var(--dim)}
+.tl-id{min-width:0;line-height:1.25}
+.tl-id b{font:700 13px var(--mono);color:var(--ink)}
+.tl-id i{font-style:normal;font-size:11px;color:var(--mut)}
+.tl-id em{display:block;font-style:normal;font:10px var(--mono);color:var(--dim);white-space:nowrap}
+.tl-live{display:inline-block;margin-left:4px;padding:0 4px;border-radius:7px;font:700 9px var(--mono);
+  color:var(--acc);background:var(--panel2);border:1px solid var(--line2)}
+.tl-apex{text-align:right;font-size:15px;font-weight:700;color:var(--ink);line-height:1.1}
+.tl-apex i{display:block;font-style:normal;font:9px var(--mono);color:var(--dim);letter-spacing:.03em}
+.tl-head .tl-apex{font:600 9px var(--mono);color:var(--dim);line-height:1}
+/* THE RAIL — cell width = median seconds in that phase; the fill inside = the grip mix over every pass,
+   so nothing here is ever a solid on/off swatch: a phase loose one lap in five looks one-fifth loose. */
+.tl-rail{min-width:0;display:flex;gap:2px}
+.tl-cell{min-width:0;height:28px;border-radius:2px;overflow:hidden;background:var(--bg);
+  box-shadow:inset 0 0 0 1px var(--line);display:flex}
+.tl-cell--none{background:repeating-linear-gradient(45deg,var(--panel2) 0 3px,transparent 3px 7px)}
+.tl-mix{display:flex;width:100%;height:100%}
+.tl-mix i{display:block;min-width:1px}
+.tlrow:hover .tl-cell{box-shadow:inset 0 0 0 1px var(--line2)}
+/* the finding: its own line under the rail — what going loose here cost, and how often it happened.
+   The meter is this turn's share of the worst turn's per-lap loss. */
+/* one flowing sentence -- NOT a flex row: as flex items each fragment wrapped onto its own line. */
+.tl-find{grid-column:2/-1;min-width:0;font-size:11.5px;line-height:1.35;color:var(--mut)}
+.tl-find b{color:var(--ink);font-weight:600;white-space:nowrap}
+.tl-meter{display:inline-block;vertical-align:middle;width:34px;margin:0 7px 2px 0;
+  height:6px;border-radius:3px;background:var(--panel2);overflow:hidden;
+  box-shadow:inset 0 0 0 1px var(--line)}
+.tl-meter i{display:block;height:100%;background:linear-gradient(90deg,#e3b341,#e5414e);border-radius:3px}
+.tl-find--bad b.mono{color:var(--lc);font-size:12.5px}
+.tl-find--free{opacity:.85}
+.tl-find--free .tl-meter i{background:var(--line2)}
+.tl-find--un{color:var(--dim)}
+.tl-find--un .tl-meter{border-style:dashed}
+/* a row is a turn selector: hover lifts it, the picked turn stays lit */
+.tlrow{cursor:pointer;border-radius:4px;transition:background .1s}
+.tlrow+.tlrow{border-top:1px solid var(--line)}
+.tlrow:hover{background:var(--panel2)}
+.tlrow.sel{background:var(--sel,rgba(120,160,255,.16));box-shadow:inset 0 0 0 1px var(--acc2)}
+.tlrow.sel .tl-id b{color:var(--acc2)}
+.tl-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:9px 6px 0;padding-top:7px;
+  border-top:1px solid var(--line)}
 /* ===== TURN ANALYSIS — left 5-part view + right timing/statistics (Jett 2026-09-10) ===== */
 /* RIGHT header + the cards column */
 .tstat-h{display:flex;align-items:center;gap:6px}

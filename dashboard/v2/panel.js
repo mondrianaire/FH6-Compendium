@@ -3494,6 +3494,9 @@ function paintRight() {
   if (cur === "matrix") {
     body.querySelectorAll("[data-turn]").forEach((r) => r.onclick = () => pickTurn(r.dataset.turn));
     const cl = body.querySelector("[data-turnclear]"); if (cl) cl.onclick = () => pickTurn(null);
+    // the ledger's order: along the route, or the turns that actually cost the most first
+    body.querySelectorAll("[data-tlsort]").forEach((b) => b.onclick = () => {
+      TL_SORT = b.dataset.tlsort; try { localStorage.setItem("fh6TlSort", TL_SORT); } catch (e) {} paintRight(); });
     body.querySelectorAll("[data-turnstep]").forEach((b) => b.onclick = () => stepTurn(b.dataset.turnstep === "prev" ? -1 : 1));
     // hover a phase row -> light the matching part on the left map, and vice-versa
     body.querySelectorAll("[data-phase]").forEach((r) => {
@@ -3945,15 +3948,6 @@ function phaseAgg(rows, lapSet) {
   return { n: new Set(f.map((r) => r[0])).size, entry: med(1), min: med(2), exit: med(3), mean: med(7),
            time: med(5), grip, mix, mixLaps: nHist };
 }
-function phaseCells(obs, lapSet) {
-  return ["braking", "turn_in", "mid", "exit", "straight"].map((name) => {
-    const p = obs[name] && phaseAgg(obs[name], lapSet);
-    if (!p) return `<span class="pcell pc-empty"></span>`;
-    const g = DGRIP[GSTATE[p.grip] || "calm"];
-    const lbl = name === "mid" ? `<b>${p.min ?? ""}</b>` : "";
-    return `<span class="pcell" style="background:${g.col}" title="${esc((SEG_LABEL[name] || name).toLowerCase())} · ${p.n} lap${p.n === 1 ? "" : "s"} · entry ${p.entry ?? "—"} → min ${p.min ?? "—"} → exit ${p.exit ?? "—"} mph · ${g.word}">${lbl}</span>`;
-  }).join("");
-}
 // the lap set the trace preset (all / this class / this car / this build / same hardware / this tune)
 // is showing -- so the corner strip and turn stats separate by class / build / tune with the SAME
 // filter as the map traces. Aggregation uses the FULL lap list, not the drawn traces (capped at 400).
@@ -4005,15 +3999,159 @@ function rankVerdict(pool, mine, ls, eps) {   // eps: the gap that still counts 
            star: isBest ? (thin ? "☆" : "★") : "", text: `${isBest ? (thin ? "☆ " : "★ ") : ""}${rank} of ${of}`,
            basis: laps + (thin ? " · thin" : "") };
 }
-function cornerStripHTML(ls, sel) {
+// ---------------------------------------------------------------------------------------------------
+// THE TURN LEDGER (Jett 2026-09-18) — replaces the phase matrix, whose faults were named exactly: "the
+// primary design identifier is the turn shape geometry which has already been computed", "the numbers in
+// the table do not mean anything", "the coloured table backgrounds are FAR too ON/OFF, there is no middle
+// ground", "there is no way to see how often the grip loss happens or any analysis on how damaging the grip
+// loss is", "there are plenty of turns where understeer can happen and it still be the fastest method
+// through the turn". One row per turn answers four questions and nothing else:
+//   WHICH TURN   — the turn's own drawn shape (turnGlyph, from the stored phase polylines). Not "T5 hairpin".
+//   WHERE        — a rail whose cell WIDTHS are the median seconds spent in each phase: the time budget.
+//   HOW OFTEN    — every cell is filled with the grip DISTRIBUTION over its passes, so a phase that goes
+//                  loose one lap in five looks one-fifth loose. No cell is ever a solid on/off swatch.
+//   HOW DAMAGING — the PRICE (phasePrice): the median seconds the loose passes spent in that phase minus
+//                  the median of the passes that stayed within grip. It is allowed to be zero or negative,
+//                  and when it is the row says "costs nothing" — because understeer is only an error when
+//                  the clock says it was one.
+const LOSS_WORD = { front: "understeer", rear: "oversteer", both: "all four loose", impact: "impact" };
+const LOOSE_AT = 0.34;   // a pass counts as having run LOOSE in a phase once a third of its samples were past the limit
+const medNum = (a) => { const v = a.filter((x) => x != null && isFinite(x)).sort((x, y) => x - y);
+  return v.length ? (v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2) : null; };
+// ONE PASS THROUGH ONE PHASE, AS FRACTIONS — never a flag. row[6] is the 5-state sample histogram
+// [calm, front, rear, both, impact]; a pre-histogram export falls back to its single modal grip_state (row[4]).
+function passGrip(r) {
+  const h = r[6], tot = h ? h.reduce((a, b) => a + (b || 0), 0) : 0;
+  if (!tot) { const i = r[4] == null ? 0 : r[4], m = [0, 0, 0, 0, 0]; m[i] = 1;
+    return { mix: m, slip: i ? 1 : 0, loss: i > 0 && i < 4 ? GSTATE[i] : null }; }
+  const mix = h.map((v) => (v || 0) / tot);
+  let bi = 1, bv = -1; for (let i = 1; i <= 3; i++) if (mix[i] > bv) { bv = mix[i]; bi = i; }
+  return { mix, slip: 1 - mix[0], loss: bv > 0 ? GSTATE[bi] : null };
+}
+// THE PRICE OF GOING LOOSE, measured not assumed. Two buckets of the SAME phase on the SAME turn — the passes
+// that ran loose there and the passes that stayed within grip — compared on the clock. Both buckets need at
+// least 3 passes before a difference of medians means anything; under that the phase reads "not priced",
+// which is an honest answer and not a zero. `exd` is the same comparison on exit mph, for the tooltip.
+function phasePrice(rows, lapSet) {
+  const f = (lapSet ? rows.filter((r) => lapSet.has(String(r[0]))) : rows).map((r) => ({ r, g: passGrip(r) }));
+  if (!f.length) return null;
+  const loose = f.filter((x) => x.g.slip >= LOOSE_AT), clean = f.filter((x) => x.g.slip < LOOSE_AT);
+  const mix = [0, 0, 0, 0, 0];
+  f.forEach((x) => x.g.mix.forEach((v, i) => { mix[i] += v / f.length; }));
+  const tally = { front: 0, rear: 0, both: 0 };
+  loose.forEach((x) => { if (x.g.loss && tally[x.g.loss] != null) tally[x.g.loss]++; });
+  const loss = loose.length ? Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0] : null;
+  const enough = loose.length >= 3 && clean.length >= 3;
+  const num = (v) => (v != null && isFinite(v) ? v : null);
+  const price = enough ? num(medNum(loose.map((x) => x.r[5])) - medNum(clean.map((x) => x.r[5]))) : null;
+  const exd = enough ? num(medNum(loose.map((x) => x.r[3])) - medNum(clean.map((x) => x.r[3]))) : null;
+  return { n: f.length, nLoose: loose.length, nClean: clean.length, freq: loose.length / f.length,
+           loss, nLoss: loss ? tally[loss] : 0, mix, price, exd,
+           time: medNum(f.map((x) => x.r[5])), min: medNum(f.map((x) => x.r[2])) };
+}
+// the whole turn: every phase priced, the costliest one picked, and `cost` = the seconds an AVERAGE lap
+// loses here (price x how often it happens, summed over the phases where it is positive) — the sort key.
+function turnLedger(t, ls) {
+  const ph = {}; SEG_ORDER.forEach((n) => { ph[n] = t.phaseObs && t.phaseObs[n] ? phasePrice(t.phaseObs[n], ls.set) : null; });
+  let worst = null, cost = 0;
+  SEG_ORDER.forEach((n) => { const p = ph[n]; if (!p || p.price == null) return;
+    const c = p.price * p.freq; if (c > 0) cost += c;
+    if (!worst || c > worst.c) worst = { n, p, c }; });
+  const nPass = Math.max(0, ...SEG_ORDER.map((n) => (ph[n] ? ph[n].n : 0)));
+  const secs = SEG_ORDER.reduce((a, n) => a + ((ph[n] && ph[n].time) || 0), 0);
+  return { ph, worst, cost, nPass, secs, apex: ph.mid ? ph.mid.min : null };
+}
+// THE TURN'S SHAPE IS ITS NAME. Draws the stored phase polylines (t.seg — the route centre-line sliced by
+// this turn's phase spans) at UNIFORM scale, rotated so every turn is entered from the left travelling
+// right. Two hairpins therefore look alike and a kink can never be mistaken for one. Colour is the WHERE
+// palette (SEG_COL) only — structure, never grip, exactly as the single-corner map does it.
+function turnGlyph(t, W, H) {
+  W = W || 96; H = H || 56;
+  const segs = SEG_ORDER.map((n) => [n, (t.seg && t.seg[n]) || []]).filter((s) => s[1].length > 1);
+  if (!segs.length) return `<span class="tgly tgly--none" title="this turn has no stored centre-line geometry">no shape</span>`;
+  const pts = [].concat.apply([], segs.map((s) => s[1]));
+  const k = Math.max(1, Math.floor(pts.length / 5));
+  let hx = pts[k][0] - pts[0][0], hz = pts[k][1] - pts[0][1];
+  const hl = Math.hypot(hx, hz) || 1; hx /= hl; hz /= hl;
+  // rotate the heading onto +x, then FLIP z -- the course map and the corner map both draw world z as
+  // `H - (z - z0) * s`, so a glyph that took z straight down would mirror every turn: a right-hander
+  // would read as a left-hander beside the very map it is meant to identify.
+  const rot = (p) => [p[0] * hx + p[1] * hz, -(p[1] * hx - p[0] * hz)];
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  pts.forEach((p) => { const q = rot(p); if (q[0] < x0) x0 = q[0]; if (q[0] > x1) x1 = q[0]; if (q[1] < y0) y0 = q[1]; if (q[1] > y1) y1 = q[1]; });
+  const pad = 6, s = Math.min((W - pad * 2) / Math.max(1e-6, x1 - x0), (H - pad * 2) / Math.max(1e-6, y1 - y0));
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  const P = (p) => { const q = rot(p); return [(q[0] - cx) * s + W / 2, (q[1] - cy) * s + H / 2]; };
+  const paths = segs.map((sg) => `<polyline points="${sg[1].map((p) => P(p).map((v) => v.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="${SEG_COL[sg[0]]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`).join("");
+  const a0 = P(pts[0]), a1 = P(pts[Math.min(k, pts.length - 1)]);
+  const ang = Math.atan2(a1[1] - a0[1], a1[0] - a0[0]) * 180 / Math.PI;
+  const arrow = `<g transform="translate(${a0[0].toFixed(1)},${a0[1].toFixed(1)}) rotate(${ang.toFixed(1)})"><path d="M-4.5,-3.2 L2.5,0 L-4.5,3.2 Z" fill="${SEG_COL.braking}"/></g>`;
+  const ap = t.x != null ? P([t.x, t.z]) : null;
+  const apex = ap ? `<circle cx="${ap[0].toFixed(1)}" cy="${ap[1].toFixed(1)}" r="3.4" fill="none" stroke="var(--ink)" stroke-width="1.2" opacity=".85"/>` : "";
+  const tip = `${t.kind || "turn"}${t.r != null ? ` · ${Math.round(t.r)} m radius` : ""}${t.deg != null ? ` · ${Math.round(t.deg)}°` : ""}${t.dir ? ` ${t.dir === "L" ? "left" : "right"}` : ""}${t.width != null ? ` · ${t.width.toFixed(0)} m wide` : ""}${t.bank ? ` · ${t.bank.toFixed(1)}° banked` : ""} — drawn to scale, entered from the left; the ring is the apex`;
+  return `<svg class="tgly" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><title>${esc(tip)}</title>${paths}${arrow}${apex}</svg>`;
+}
+let TL_SORT = (() => { try { return localStorage.getItem("fh6TlSort") || "route"; } catch (e) { return "route"; } })();
+function turnLedgerHTML(ls, sel, seen) {
   const turns = (COURSE.turns || []).filter((t) => t.phaseObs).slice().sort((a, b) => a.seq - b.seq);
   if (!turns.length) return "";
   const withData = new Set();
   turns.forEach((t) => Object.values(t.phaseObs).forEach((rows) => rows.forEach((r) => { if (ls.set.has(String(r[0]))) withData.add(r[0]); })));
   const nLaps = withData.size;
-  return `<div class="grp"><div class="gh">Corner phases <span class="why">· ${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"} · click a turn for its phases &amp; stats</span></div>
-    <div class="pstrip pstrip-h"><span class="ptn"></span><span class="pcells"><span>brake</span><span>entry</span><span>mid</span><span>exit</span><span>straight</span></span></div>
-    ${turns.map((t) => `<div class="pstrip pstrip--pick${sel === t.seq ? " sel" : ""}" data-turn="${t.seq}"><span class="ptn">${esc(turnLabel(t))}</span><span class="pcells">${phaseCells(t.phaseObs, ls.set)}</span></div>`).join("")}</div>`;
+  const led = turns.map((t) => ({ t, L: turnLedger(t, ls) })).filter((x) => x.L.nPass);
+  if (!led.length) return "";
+  const maxCost = Math.max(0.02, ...led.map((x) => x.L.cost));
+  const maxSecs = Math.max(0.5, ...led.map((x) => x.L.secs));
+  const totCost = led.reduce((a, x) => a + x.L.cost, 0);
+  const order = TL_SORT === "cost" ? led.slice().sort((a, b) => b.L.cost - a.L.cost) : led;
+  const nSeen = Object.keys(seen || {}).length;
+
+  const cell = (n, L) => {
+    const p = L.ph[n];
+    if (!p) return `<span class="tl-cell tl-cell--none" style="flex:6 0 0" title="${esc(SEG_LABEL[n])} — no observations of this phase on these laps"></span>`;
+    const w = Math.max(5, Math.round((p.time || 0.15) * 100));
+    const fill = GSTATE.map((k, i) => { const f = p.mix[i] || 0;
+      return f < 0.004 ? "" : `<i style="flex:${Math.round(f * 1000)} 0 0;background:${DGRIP[k].col}"></i>`; }).join("");
+    const past = Math.round((1 - (p.mix[0] || 0)) * 100);
+    const priceTip = p.price == null
+      ? `not priced — needs 3 loose and 3 clean passes, has ${p.nLoose} and ${p.nClean}`
+      : `${p.nLoose} of ${p.n} passes ran loose here and took ${p.price > 0 ? "+" : ""}${p.price.toFixed(2)} s ${p.price > 0.005 ? "longer" : p.price < -0.005 ? "less" : "— the same time"} than the clean ones${p.exd != null ? ` · exit ${p.exd > 0 ? "+" : ""}${Math.round(p.exd)} mph` : ""}`;
+    return `<span class="tl-cell" style="flex:${w} 0 0" data-phase="${n}" title="${esc(SEG_LABEL[n])} · median ${(p.time || 0).toFixed(2)} s · ${p.n} passes · ${past}% of samples past the limit · ${esc(priceTip)}"><span class="tl-mix">${fill}</span></span>`;
+  };
+
+  // THE FINDING, on its own line under the rail so the sentence has room to be a sentence. The meter beside
+  // it is this turn's share of the worst turn's per-lap loss -- the "which corner do I work on" glance.
+  const finding = (L) => {
+    const w = L.worst;
+    const meter = `<span class="tl-meter" title="${L.cost > 0.005 ? L.cost.toFixed(2) + " s an average lap loses at this turn" : "nothing measurably lost here"}"><i style="width:${Math.round(L.cost / maxCost * 100)}%"></i></span>`;
+    if (!w) return `<span class="tl-find tl-find--un">${meter}<b>not priced</b> · ${L.nPass} pass${L.nPass === 1 ? "" : "es"}, and no loose/clean split to compare yet</span>`;
+    const word = LOSS_WORD[w.p.loss] || "going loose", where = String(SEG_LABEL[w.n]).toLowerCase();
+    const ink = DGRIP[w.p.loss || "front"].ink, often = `${w.p.nLoose} of ${w.p.n} passes`;
+    if (w.p.price <= 0.005) return `<span class="tl-find tl-find--free" style="--lc:${ink}">${meter}<b>${esc(word)} in ${esc(where)} costs nothing</b> · ${often} · ${w.p.price >= 0 ? "+" : ""}${w.p.price.toFixed(2)} s against the clean passes</span>`;
+    return `<span class="tl-find tl-find--bad" style="--lc:${ink}">${meter}<b class="mono">+${w.p.price.toFixed(2)}&nbsp;s</b> <b>${esc(word)} in ${esc(where)}</b> · ${often} · <span class="mono">${L.cost.toFixed(2)} s</span> off an average lap</span>`;
+  };
+
+  const rows = order.map((x) => {
+    const t = x.t, L = x.L, k = seen && seen[t.seq];
+    const geom = `${t.r != null ? Math.round(t.r) + " m" : "—"}${t.deg != null ? " · " + Math.round(t.deg) + "°" : ""}${t.dir ? " " + t.dir : ""}`;
+    return `<div class="tlrow${sel === t.seq ? " sel" : ""}" data-turn="${t.seq}" title="open ${esc(turnLabel(t))} — its map, its fastest passes and its full phase timing">
+      <span class="tl-gly">${turnGlyph(t)}</span>
+      <span class="tl-id"><b>${esc(turnLabel(t))}</b> <i>${esc(t.kind || "")}</i>${k ? `<span class="tl-live" title="taken ${k} time${k === 1 ? "" : "s"} this session">×${k}</span>` : ""}<em>${esc(geom)}</em></span>
+      <span class="tl-apex mono">${L.apex != null ? Math.round(L.apex) : "—"}<i>mph apex</i></span>
+      <span class="tl-rail">${SEG_ORDER.map((n) => cell(n, L)).join("")}</span>
+      ${finding(L)}</div>`;
+  }).join("");
+
+  const sortBtn = (k, lab) => `<button class="mini${TL_SORT === k ? " on" : ""}" data-tlsort="${k}">${lab}</button>`;
+  return `<div class="grp tled">
+    <div class="gh">Every turn on this course <span class="why">· ${esc(ls.label)} · ${nLaps} lap${nLaps === 1 ? "" : "s"}${nSeen ? ` · ${nSeen} taken this session` : ""}</span>
+      <span class="tl-sort">${sortBtn("route", "route order")}${sortBtn("cost", "costliest first")}</span>${courseConfidenceBadge()}</div>
+    <p class="tl-cap">The shape <b>is</b> the turn — drawn to scale from the road, always entered from the left. The rail is where its seconds go: each cell's <b>width</b> is the median seconds in that phase, its <b>fill</b> is how the grip actually split across every pass, so a phase that lets go one lap in five looks one-fifth loose. The price on the right is what going loose there cost on the clock — the loose passes' median phase time minus the clean ones'. <b>At or below zero it cost nothing, and that line is not a mistake.</b></p>
+    <div class="tl-head"><span class="tl-gly"></span><span class="tl-id">turn</span><span class="tl-apex">apex</span>
+      <span class="tl-rail">${SEG_ORDER.map((n) => `<span style="color:${SEG_COL[n]}">${esc(String(SEG_LABEL[n]).split(/[ /-]/)[0].toLowerCase())}</span>`).join("")}</span></div>
+    ${rows}
+    <div class="tl-foot"><span class="ballegend gleg">${GSTATE.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word}</span>`).join("")}</span>
+      <span class="why">${totCost > 0.005 ? `<b class="mono">${totCost.toFixed(2)} s</b> a lap is lost to grip across this course` : "nothing measurably lost to grip on this course"} · click a turn for its map, its fastest passes and its full timing</span></div></div>`;
 }
 // GRIP AS A DISTRIBUTION, never a single lossy swatch (Jett 2026-09-10). mix = [calm,front,rear,both,
 // impact] fractions (equal-weight per lap over the preset). This is the honest "how the grip splits" that
@@ -4432,58 +4570,21 @@ function matrixHTML() {
   const sel = turnPickSeq();
   const selT = sel != null ? (COURSE.turns || []).find((t) => t.seq === sel) : null;
   // a turn is selected -> the pane IS its full statistics (timing + per-phase + grip); its own ‹ › ✕ nav
-  // steps between turns and clears. The overview strip + live session matrix return when nothing is picked.
+  // steps between turns and clears. The turn ledger returns when nothing is picked.
   if (selT) return turnStatsHTML(selT, ls);
-  const strip = cornerStripHTML(ls, sel);
+  // THIS SESSION IS AN ANNOTATION, NOT THE SUBJECT (fh6-judge-against-the-course). The pane used to lead
+  // with "7/17 turns taken this session" over a table that was mostly em-dashes, so ten of seventeen turns
+  // said nothing at all. The session's passes now ride as a ×n chip on the turn they belong to, and the
+  // ledger underneath is the accumulated course model — which is what a tune is judged against.
+  // ev===0 (free-roam) corners are excluded, the same gate v1's matrix used.
   const cid = CUR && CUR.cid;
-  const log = (LIVE.corners || []).filter((c) => !cid || c.car === cid);
-  if (!log.length) return strip || `<div class="why">start driving — the matrix fills in one row per turn as you take it</div>`;
-
-  // ev===0 (free-roam) corners are excluded from turn rows, the same gate v1's matrix used — the
-  // live ev stamp trusts a single apex-frame read today; see the daemon-side majority-vote hardening.
-  const bySeq = {}; let lastSeq = null;
-  log.filter((c) => c.ev !== 0).forEach((c) => {
-    const { t, ambiguous } = turnAtMatrix(c.apex, lastSeq);
-    if (!t) return;
-    lastSeq = t.seq;
-    (bySeq[t.seq] = bySeq[t.seq] || []).push({ c, ambiguous });
+  const seen = {}; let lastSeq = null;
+  (LIVE.corners || []).filter((c) => (!cid || c.car === cid) && c.ev !== 0).forEach((c) => {
+    const { t } = turnAtMatrix(c.apex, lastSeq); if (!t) return;
+    lastSeq = t.seq; seen[t.seq] = (seen[t.seq] || 0) + 1;
   });
-
-  const med = (a) => { a = a.filter((v) => v != null).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
-  const rows = COURSE.turns.slice().sort((a, b) => a.seq - b.seq).map((t) => {
-    const arr = bySeq[t.seq] || [];
-    const last = arr.length ? arr[arr.length - 1].c : null;
-    const anyAmbiguous = arr.some((b) => b.ambiguous);
-    const fr = { front: 0, rear: 0, none: 0 };
-    arr.forEach((b) => fr[(b.c.first_red || {}).axle || "none"]++);   // first_red is legitimately null ~10% of the time (a clean corner) — bucketed, not skipped
-    const dom = arr.length ? Object.keys(fr).sort((x, y) => fr[y] - fr[x])[0] : null;
-    return {
-      t, taken: arr.length, anyAmbiguous, dom, fr, last,
-      mph: med(arr.map((b) => b.c.mph_apex != null ? b.c.mph_apex : b.c.mph_min)),
-      lat: med(arr.map((b) => b.c.lat_g_peak)),
-      usi: med(arr.map((b) => b.c.usi)),          // usi can legitimately be exactly 0 — check `!= null`, never truthiness
-    };
-  });
-
-  const badge = courseConfidenceBadge();
-  const head = `<div class="frow head"><b>${rows.filter((r) => r.taken).length}/${rows.length} turns taken this session</b>${badge}</div>`;
-  const table = `<div style="overflow:auto"><table style="font-size:11px;border-collapse:collapse;width:100%"><thead><tr>
-    <th style="text-align:left">turn</th><th>taken</th><th>apex mph</th><th>lat g</th><th>USI</th><th>first red</th><th>last pass</th></tr></thead><tbody>
-    ${rows.map((r) => {
-      const g = r.usi != null ? DGRIP[dGripUsi(r.usi)] : null;
-      const dcol = r.dom === "front" || r.dom === "rear" ? DGRIP[r.dom].ink : "var(--muted)";
-      return `<tr style="${r.taken ? "" : "opacity:.4"}${r.anyAmbiguous ? ";outline:1px dashed var(--w)" : ""}">
-        <td><b>${esc(turnLabel(r.t))}</b>${r.t.kind ? " " + esc(r.t.kind) : ""}${r.anyAmbiguous ? ` <span title="nearest of 2 turns within range — some passes here could belong to a neighboring turn">⚠</span>` : ""}</td>
-        <td class="mono" style="text-align:center">${r.taken || "—"}</td>
-        <td class="mono" style="text-align:center">${r.mph ?? "—"}</td>
-        <td class="mono" style="text-align:center">${r.lat ?? "—"}</td>
-        <td style="text-align:center">${r.usi != null ? `<span style="color:${g.ink}" title="${esc(g.word)}">${r.usi > 0 ? "+" : ""}${r.usi.toFixed(2)}</span>` : "—"}</td>
-        <td style="text-align:center">${r.taken ? `<span style="color:${dcol};font-weight:700">${r.dom || "clean"}</span> <span class="why">${r.fr.front}/${r.fr.rear}/${r.fr.none}</span>` : "—"}</td>
-        <td class="mono">${r.last ? `${r.last.mph_in}→<b>${r.last.mph_min}</b>→${r.last.mph_out ?? "—"} ${phaseBars(r.last.phases)}` : "—"}</td>
-      </tr>`;
-    }).join("")}
-  </tbody></table></div>`;
-  return strip + head + table;
+  return turnLedgerHTML(ls, sel, seen) ||
+    `<div class="why">no corner observations on this course yet — drive it once and the ledger fills in</div>`;
 }
 
 // Build data: what the save on disk gives exactly, what the union still has to measure, and the

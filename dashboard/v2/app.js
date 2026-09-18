@@ -379,6 +379,21 @@ function courseMap(c, opts) {
         stroke="#0b0e12" stroke-width="3" stroke-linejoin="round" fill="${on ? "#fff" : "#e8edf3"}"
         opacity="${dim ? 0.45 : 1}">${esc(turnLabel(t))}</text></g>`;
   }).join("");
+  // BOTTOMING / BARRIER MARKERS (Jett 2026-09-18): 🔧 where the car bottomed out, 💥 where it hit a barrier /
+  // terrain — clustered located spots from build_web (course.hits), sized by how often it happens across the
+  // course's sessions. Display only (a barrier scrape slows the car, it never voids the lap). Drawn under the
+  // turn numbers so a turn label always reads on top.
+  const HITCOL = { bottoming: "#e3b341", wall: "#e5414e" };
+  const hitMarks = (c.hits || []).map((h) => {
+    const cx0 = px(h.x), cy0 = py(h.z), wall = h.kind === "wall", col = HITCOL[h.kind] || "#e3b341";
+    const r = h.n >= 8 ? 5.5 : h.n >= 3 ? 4.5 : 3.5;
+    const nsess = h.sess ? ` · ${h.sess} session${h.sess === 1 ? "" : "s"}` : "";
+    const label = (wall ? "barrier / terrain contact" : "bottoming") + ` ×${h.n}${h.hard ? " · " + h.hard + " hard" : ""}${nsess}`;
+    const shape = wall
+      ? `<path d="M ${cx0.toFixed(1)} ${(cy0 - r).toFixed(1)} L ${(cx0 + r).toFixed(1)} ${cy0.toFixed(1)} L ${cx0.toFixed(1)} ${(cy0 + r).toFixed(1)} L ${(cx0 - r).toFixed(1)} ${cy0.toFixed(1)} Z" fill="${col}" stroke="#0b0e12" stroke-width="1"/>`
+      : `<circle cx="${cx0.toFixed(1)}" cy="${cy0.toFixed(1)}" r="${r}" fill="none" stroke="${col}" stroke-width="2"/><circle cx="${cx0.toFixed(1)}" cy="${cy0.toFixed(1)}" r="1.4" fill="${col}"/>`;
+    return `<g class="chit">${shape}<title>${esc(label)}</title></g>`;
+  }).join("");
   const phaseKey = (selT && selT.seg) ? SO.filter((n) => selT.seg[n]).map((n) =>
     `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("") : "";
   // VIEW MODES (Jett 2026-09-11): the floating legend switches how the map is coloured. `laptime`
@@ -423,13 +438,13 @@ function courseMap(c, opts) {
   const legOpen = !!opts.legOpen;
   // LAYER TOGGLES on the legend bar (redesign): show/hide each layer independently of the colour view.
   const lyBtn = (k, lbl, extra) => `<button class="cleg-ly ${LY[k] ? "on" : "off"}" data-maplayer="${k}" title="${LY[k] ? "hide" : "show"} the ${lbl} layer">${lbl}${extra != null && extra !== "" ? `<b>${extra}</b>` : ""}<i>${LY[k] ? "on" : "off"}</i></button>`;
-  const layerRow = `<span class="cleg-layers">${lyBtn("centre", "centre")}${lyBtn(showPhases ? "phases" : "laps", showPhases ? "phases" : "laps", showPhases ? "" : pathRows.length)}${selT ? lyBtn("phases", "phases", esc(turnLabel(selT))) : ""}</span>`;
+  const layerRow = `<span class="cleg-layers">${lyBtn("centre", "centre")}${lyBtn(showPhases ? "phases" : "laps", showPhases ? "phases" : "laps", showPhases ? "" : pathRows.length)}${selT ? lyBtn("phases", "phases", esc(turnLabel(selT))) : ""}${(c.hits || []).length ? lyBtn("hits", "hits", (c.hits || []).length) : ""}</span>`;
   return el(`<div class="cmap">
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg)" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${LY.centre ? line(theirs, "#3d4a5a", 9, 0.55) : ""}
       <g class="cmap-hist">${(showPhases ? LY.phases : LY.laps) ? laps : ""}</g>
       ${LY.centre ? line(theirs, "#8fa0b3", 2.2, showPhases ? 0.5 : 0.92) : ""}
-      ${LY.phases ? phaseOv : ""}<g id="liveLap" pointer-events="none"></g>${turns}<g id="traceMark"></g>
+      ${LY.phases ? phaseOv : ""}<g id="liveLap" pointer-events="none"></g>${LY.hits !== false ? `<g class="cmap-hits">${hitMarks}</g>` : ""}${turns}<g id="traceMark"></g>
     </svg>
     <div class="cmap-legend${legOpen ? " open" : ""}">
       <div class="cleg-bar">
@@ -443,6 +458,7 @@ function courseMap(c, opts) {
         <div class="cleg-sec"${showPedals ? ' style="display:none"' : ""}><em>${showPhases ? "phases" : "laps"}</em>${showPhases ? allPhaseKey : gradKey}${!showPhases && foreIx >= 0 ? `<span><i class="lg-thick" style="background:${gcol(pathRows[foreIx].id)}"></i>thick = the lap the trace foregrounds</span>` : ""}</div>
         ${!showPhases && phaseKey ? `<div class="cleg-sec"><em>${esc(turnLabel(selT))}</em>${phaseKey}</div>` : ""}
         <div class="cleg-sec"><em>road</em><span><i class="lg-road"></i>the game's centre-line</span><span><i class="lg-dot"></i>turn · click to analyse</span>${selT ? `<span><i class="lg-dot sel"></i>selected</span>` : ""}<span><i class="lg-car"></i>you (hollow = held)</span></div>
+        ${(c.hits || []).length ? `<div class="cleg-sec"><em>hits</em><span title="where the car bottoms out — suspension at full compression; raise ride height or stiffen springs"><i class="lg-hit-b"></i>bottoming</span><span title="where the car hit a barrier or terrain — slows the car, never voids the lap"><i class="lg-hit-w"></i>barrier</span><span class="why">located spots · bigger = more often</span></div>` : ""}
         ${typeof TRACE_MODE !== "undefined" ? `<div class="cleg-sec"><em>trail</em><span class="leg-trail" title="what the live trail's colour means — the same choice as the speed trace's paint">${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"], ["pedals", "throttle and brake, by how hard"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-trailpaint="${m}" title="${tip}">${m}</button>`).join("")}</span>`
           + (typeof pedalSwatches === "function" ? `<span class="leg-ped">${pedalSwatches()}</span>` : "")
           + (typeof GRAD !== "undefined" && typeof courseSpeedRange === "function" && courseSpeedRange(c) ? `<span class="leg-spd"><em>${Math.round(courseSpeedRange(c).lo)}</em><i class="grad" style="background:linear-gradient(90deg,${GRAD.join(",")})"></i><em>${Math.round(courseSpeedRange(c).hi)} mph</em></span>` : "")

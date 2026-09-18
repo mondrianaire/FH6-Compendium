@@ -588,6 +588,21 @@ CREATE TABLE IF NOT EXISTS session_event (
   PRIMARY KEY (session_id, i)
 ) WITHOUT ROWID;
 
+-- WHERE the car bottomed out or hit a barrier, per session, with world positions (analyze_session's
+-- `bottoming` / `wall` detectors). Display data: build_web attributes each hit to a course by proximity to
+-- its driven line and clusters them into a few located map markers (🔧 bottoming / 💥 barrier). NOT a lap
+-- validity signal — a barrier scrape slows the car but never voids the lap. Added 2026-09-18.
+CREATE TABLE IF NOT EXISTS session_hit (
+  session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL,            -- 'bottoming' (suspension at full compression) | 'wall' (barrier/terrain one-frame speed loss)
+  x           REAL, z REAL,             -- world position of the hit
+  mph         INTEGER,
+  hard        INTEGER,                  -- 1 = past the HARD gate (deep bottom / large speed loss)
+  wheel       TEXT,                     -- bottoming: FL/FR/RL/RR; NULL for wall
+  drop_mph    REAL                      -- wall: one-frame speed lost; NULL for bottoming
+);
+CREATE INDEX IF NOT EXISTS ix_session_hit_sid ON session_hit(session_id);
+
 CREATE TABLE IF NOT EXISTS course (
   route_key    TEXT PRIMARY KEY,         -- '-1700_-4450' — the start-cell key
   name         TEXT,                     -- RESOLVED by stage route_names (declared wins; else the derived event's name); see COURSE NAMES below. Never written from a JSON file except as a placeholder by telemetry.

@@ -2488,7 +2488,7 @@ let MAP_LEG_OPEN = (() => { try { return localStorage.getItem("fh6MapLeg") === "
 // VIEW (MAP_VIEW) — centre = the road / centre-line reference, laps = the lap bundle, phases = the selected
 // turn's 5-phase overlay. The live-lap layer is drawn whenever a lap is live. Persisted; toggled from the
 // legend. courseMap (app.js) reads this global (panel.js loads first).
-let MAP_LAYERS = (() => { const d = { centre: true, laps: true, phases: true };
+let MAP_LAYERS = (() => { const d = { centre: true, laps: true, phases: true, hits: true };   // hits = 🔧 bottoming / 💥 barrier markers
   try { return Object.assign(d, JSON.parse(localStorage.getItem("fh6MapLayers") || "{}")); } catch (e) { return d; } })();
 function courseInfoPill(r, state) {
   const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));

@@ -624,10 +624,45 @@ def main(argv=None):
                     _disp_len = _arcs[len(_arcs) // 2]         # median arc for a learned course with no catalogued route
         except Exception:
             pass
+        # BOTTOMING / BARRIER MARKERS (Jett 2026-09-18): where the car bottomed out (🔧) or hit a barrier (💥),
+        # from the per-session hit detectors, attributed to THIS course by proximity to its driven line and
+        # CLUSTERED (25 m) so the map shows a few located markers with a frequency, not a per-frame string.
+        # Display only — a barrier scrape slows the car but never voids the lap. n = events in the cluster,
+        # hard = how many past the deep gate, laps = distinct sessions that hit here.
+        hits = []
+        _sess_ids = sorted({l["sid"] for l in laps if l.get("sid")})
+        if _sess_ids and traces:
+            _GRID = 20.0                                              # coarse on-course grid of the driven line, O(1) membership
+            _on_cells = set()
+            for _tr in traces.values():
+                for _p in _tr:
+                    if len(_p) > 4 and _p[3] is not None:
+                        _on_cells.add((int(round(_p[3] / _GRID)), int(round(_p[4] / _GRID))))
+            def _on_course(hx, hz):
+                _cx0, _cz0 = int(round(hx / _GRID)), int(round(hz / _GRID))
+                return any((_cx0 + _dx, _cz0 + _dz) in _on_cells for _dx in (-1, 0, 1) for _dz in (-1, 0, 1))
+            _qm = ",".join("?" * len(_sess_ids))
+            _raw = cx.execute("SELECT session_id, kind, x, z, hard FROM session_hit WHERE session_id IN (%s)" % _qm,
+                              tuple(_sess_ids)).fetchall()
+            _CL = 25.0
+            _cl = {}
+            for _r in _raw:
+                _hx, _hz = _r["x"], _r["z"]
+                if _hx is None or _hz is None or not _on_course(_hx, _hz):
+                    continue
+                _ck = (_r["kind"], int(round(_hx / _CL)), int(round(_hz / _CL)))
+                _cc = _cl.get(_ck)
+                if _cc is None:
+                    _cl[_ck] = _cc = {"kind": _r["kind"], "sx": 0.0, "sz": 0.0, "n": 0, "hard": 0, "sess": set()}
+                _cc["sx"] += _hx; _cc["sz"] += _hz; _cc["n"] += 1
+                _cc["hard"] += 1 if _r["hard"] else 0; _cc["sess"].add(_r["session_id"])
+            hits = sorted(({"kind": _c2["kind"], "x": round(_c2["sx"] / _c2["n"], 1), "z": round(_c2["sz"] / _c2["n"], 1),
+                            "n": _c2["n"], "hard": _c2["hard"], "sess": len(_c2["sess"])} for _c2 in _cl.values()),
+                          key=lambda h: -h["n"])[:80]
         total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),
                        {"key": key, "name": c["name"], "len": _disp_len, "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
-                        "traces": traces, "route": route, "naming": naming,
+                        "traces": traces, "route": route, "naming": naming, "hits": hits,
                         "n_turns_catalogued": n_cat, "classGrip": class_grip,
                         # when this history was built, so the course view can stamp the comparison it feeds
                         # ("history built 10:44") instead of leaving freshness to the status bar (handoff §3)

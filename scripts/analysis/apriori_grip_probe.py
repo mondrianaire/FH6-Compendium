@@ -40,11 +40,16 @@ nothing in the dashboard renders from this.
   often, on 17 of the 22 builds that have a clear observed bias.
 
   READ IT HONESTLY
-    - 0.277 g of error against a target whose own noise is ~0.15 g: about half the signal is still missing.
     - That 0.277 was picked after sweeping 36 configurations over 25 builds, so it is an optimistic number.
-    - The TARGET is now the likely problem. lat_g p95 is a peak over each 4 m window, not a steady-state
-      cornering ceiling, and a steady-state model should be fitted to a steady-state measure -- the
-      a = v^2/R implied by the envelope's own grip-limited arm. Change that before adding more terms.
+    - THE TARGET WAS NOT THE PROBLEM, though it looked like it. Swapping the peak lat_g for a steady-state
+      a = v^2/r ceiling was tried and is WORSE on both counts -- see scripts/analysis/grip_target_noise.py:
+      the steady-state measure is noisier across courses (0.296 g vs 0.259 g) and the model scores +42%
+      against it, worse than guessing. v^2/r measures what the DRIVER did; peak lat_g measures what the CAR
+      withstood, and only the second is mostly a property of the build.
+    - So the error (0.277 g) now sits AT the target's own noise floor (0.259 g). Model form is no longer the
+      bottleneck; measurement precision is, and further terms cannot be told apart from noise on this data.
+      The way forward is a better measurement -- more laps per build, or one controlled constant-radius run
+      per build, which would hand us a clean a_max directly.
 
 Read-only. Prints the ablation; renders nothing.
 """

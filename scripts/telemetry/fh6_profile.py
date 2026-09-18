@@ -227,6 +227,49 @@ def read_garage(dec):
         con.close()
 
 
+# --------------------------------------------------------------------------- brio progression (per-route)
+# Each route the player has driven carries a `brio_<type>_event_<routeid>_core` progression record in the
+# profile. Layout (verified across all 86 records, 2026-09-18): contiguous block of
+#   [u32 name_len][name][7-byte const prefix 01 00 00 01 00 00 01][8-byte packed value][00]
+# The 8-byte value is a packed/obfuscated progression blob (not a clean float/int) that CHANGES when the
+# route is driven. We don't decode its semantics -- we hash it. A value that differs between two profile
+# reads means that route was just played, which is a self-verifying course-ID signal for Rivals (where the
+# menu offers no clean current-route pointer). See [[fh6-equipped-tune-in-profiledata]].
+_RE_BRIO = re.compile(rb"brio_([a-z_]+?)_event_(\d+)_core")
+_BRIO_PREFIX = bytes.fromhex("01000001000001")  # 7 bytes, constant
+
+
+def brio_map(dec):
+    """Return {"<type>:<routeid>": "<8-byte value hex>"} for every brio progression record, or {}.
+
+    The key is `type:routeid` (routeid is the join key to a course via ref_track_info). The value is the
+    opaque 8-byte progression blob as hex -- meaningful only by comparison: diff two maps and the routes
+    whose blob changed are the routes driven between the reads. Never name a course from this; it only says
+    *which route id* moved (identity still resolves route id -> ref_track_info -> name)."""
+    out = {}
+    for m in _RE_BRIO.finditer(dec):
+        off, name = m.start(), m.group(0)
+        ne = off + len(name)
+        # value blob sits after the constant prefix; guard the prefix so we never hash misaligned bytes
+        if dec[ne:ne + 7] != _BRIO_PREFIX:
+            continue
+        out["%s:%d" % (m.group(1).decode(), int(m.group(2)))] = dec[ne + 7:ne + 15].hex()
+    return out
+
+
+def brio_diff(prev, cur):
+    """Route ids whose brio blob changed from `prev` to `cur` (both brio_map() dicts). Returns a sorted list
+    of {"key","route","type","from","to"} -- new keys included (from=None). Empty when nothing moved."""
+    changed = []
+    for k, v in (cur or {}).items():
+        pv = (prev or {}).get(k)
+        if pv != v:
+            t, _, rid = k.partition(":")
+            changed.append({"key": k, "route": int(rid), "type": t, "from": pv, "to": v})
+    changed.sort(key=lambda d: d["route"])
+    return changed
+
+
 # --------------------------------------------------------------------------- CLI (testing)
 def _main(argv):
     if len(argv) < 2:
@@ -252,6 +295,11 @@ def _main(argv):
         print(f"Career_Garage: {len(rows)} instances")
         for r in rows[:5]:
             print("  ", {k: r[k] for k in ("Id", "CarId", "Guid", "TuneFileName", "PerformanceIndex")})
+    if "--brio" in args:
+        bm = brio_map(dec)
+        print(f"brio progression records: {len(bm)}")
+        for k in list(bm)[:8]:
+            print("  ", k, bm[k])
     for a in argv[2:]:
         if a.startswith("--garage-ord"):
             try:

@@ -234,6 +234,49 @@ def _recall_profile_equipped(ordn):
         return None
 
 
+def _recall_brio_snapshot():
+    """The last-seen brio progression map ({"<type>:<route>": "<hex>"}), or {}. Persisted in identity-evidence
+    so the diff survives a daemon restart -- the whole point is comparing THIS read against the previous one."""
+    try:
+        with _IDENT_LOCK:
+            return (_ident_load().get("brio_snapshot") or {})
+    except Exception:
+        return {}
+
+
+def _remember_brio_snapshot(bm):
+    try:
+        with _IDENT_LOCK:
+            d = _ident_load()
+            d["brio_snapshot"] = bm or {}
+            _ident_save(d)
+    except Exception:
+        pass
+
+
+def _brio_advisory(dec):
+    """ADVISORY brio-diff (no course-ID authority yet). Diff this profile read's per-route progression blobs
+    against the last snapshot; a route whose blob moved was just driven. For Rivals -- where the menu offers
+    no clean current-route pointer -- this is a self-verifying course signal. We log it and emit `brio_change`
+    so it can be watched firing correctly, then persist the new snapshot. Promotion to an actual locateCourse
+    input happens only after it's confirmed reliable. Never raises; never names a course (route id only)."""
+    if PROFILE is None or not hasattr(PROFILE, "brio_map"):
+        return
+    try:
+        cur = PROFILE.brio_map(dec)
+        if not cur:
+            return
+        prev = _recall_brio_snapshot()
+        changed = PROFILE.brio_diff(prev, cur) if prev else []
+        _remember_brio_snapshot(cur)
+        if prev and changed:
+            routes = [c["route"] for c in changed]
+            print("[brio] routes moved since last read: %s" % routes, flush=True)
+            ST.emit("brio_change", {"routes": routes, "changed": changed, "at": time.time()})
+    except Exception as e:
+        print("[brio] advisory diff failed: %s" % (str(e)[:120]), flush=True)
+
+
 def _profile_decrypt_and_record(allow_upload=False, auto=False):
     """Read C_ProfileData and record the current car's equipped tune per ordinal, so _pick_meta settles the
     signature tie (identify-on-equip), then force a disk re-emit + announce the result.
@@ -264,6 +307,7 @@ def _profile_decrypt_and_record(allow_upload=False, auto=False):
         if by_ord:
             _remember_profile_equipped(by_ord)
             ST._disk_dirty = True   # next disk emit re-runs _pick_meta -> settles via the profile fact
+        _brio_advisory(dec)         # ADVISORY: log/emit which route just moved (Rivals course-ID scaffold)
         ST.emit("profile_read", {"ok": True, "equipped": eq, "at": time.time(), "auto": bool(auto)})
     except Exception as e:
         ST.emit("profile_read", {"ok": False, "err": str(e)[:200], "auto": bool(auto)})

@@ -445,7 +445,12 @@ function paintIdBar() {
   const st = buildStatus(), rs = resolutionState(), g = gateStrip(st, rs);
   const m = MATCH && MATCH.build;
   const carNm = carName(CUR.cid) || (CUR.disk && CUR.disk.car) || "unknown car";
-  const tune = m ? (m.name || m.tune_name || "") : (CUR.disk && CUR.disk.tune_name) || "";
+  // NAME THE TUNE ON THE CAR NOW, not a same-hardware sibling from the static index (Jett 2026-09-18): a freshly
+  // downloaded/saved tune is not in IDENT.builds until the next rebuild, so the fingerprint falls to hw[0] — a
+  // DIFFERENT tune that shares this hardware — and its name ("Forza") wrongly showed for a just-installed
+  // "Shimanoyama Circuit World Record" download. The live /disk-tune read IS the equipped save the daemon settled
+  // to, so its name is authoritative for what's on the car right now; fall back to the indexed name only if unnamed.
+  const tune = (CUR.disk && CUR.disk.tune_name) || (m && (m.name || m.tune_name)) || "";
   const reach = !!m;
   const tone = g.tone;   // acc = identified, warn = ambiguous/importing, bad = nothing on disk
   el.dataset.tone = tone;
@@ -1653,8 +1658,10 @@ function headerCopy(st, q) {
   // `CUR.disk.name` is the CAR's name -- /disk-tune builds it from names.json keyed by ordinal -- so
   // this used to fall back to the car name whenever the database did not yet hold the build, and the
   // header printed "1987 Nissan Be-1" in both the car slot and the tune slot. The save carries its own
-  // name in the container header; the daemon now returns it as `tune_name`.
-  const tune = (m && m.name) || (CUR && CUR.disk && CUR.disk.tune_name) || "";
+  // name in the container header; the daemon now returns it as `tune_name`. Prefer THAT live read (the
+  // equipped save the daemon settled to) over the static IDENT.builds name, which hw-matches a same-hardware
+  // sibling for a tune not yet indexed and mis-named a fresh download (Jett 2026-09-18) — see paintIdBar.
+  const tune = (CUR && CUR.disk && CUR.disk.tune_name) || (m && m.name) || "";
   const nSaves = mm.n_saves || 0;
   const when = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }); };
   const car = (CUR && CUR.name) || (CUR ? "ordinal " + CUR.ordinal : "");

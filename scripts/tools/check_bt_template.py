@@ -30,17 +30,48 @@ SIZES = {"ubyte": 1, "byte": 1, "ushort": 2, "short": 2, "uint": 4, "int": 4,
          "float": 4, "uint64": 8, "double": 8}
 
 
+def strip_bt(src):
+    """Drop // comments and <attr=...> blocks from .bt source.
+
+    Attributes must be removed with a quote-aware scan, not a regex: a comment
+    string may legally contain '>' (e.g. "0 = gripping, >1 = spinning"), and
+    <[^>]*> truncates there and corrupts everything after it. That bug silently
+    swallowed whole field declarations the first time this ran.
+    """
+    src = re.sub(r"//.*", "", src)
+    out, depth, quoted, i = [], 0, False, 0
+    while i < len(src):
+        c = src[i]
+        if quoted:
+            if c == "\\":
+                i += 2
+                continue
+            if c == '"':
+                quoted = False
+        elif c == '"' and depth:
+            quoted = True
+        elif c == "<":
+            depth += 1
+        elif c == ">" and depth:
+            depth -= 1
+            i += 1
+            continue
+        if not depth:
+            out.append(c)
+        i += 1
+    return "".join(out)
+
+
+def bt_structs(path):
+    """{struct name: body} for every typedef struct in the file."""
+    src = strip_bt(open(path, encoding="utf-8").read())
+    return {m.group(2): m.group(1) for m in
+            re.finditer(r"typedef\s+struct\s*\{(.*?)\}\s*(\w+)\s*;", src, re.S)}
+
+
 def bt_layout(path, order):
     """[(struct, field, offset, size)] for the named structs, in file order."""
-    src = open(path, encoding="utf-8").read()
-    src = re.sub(r"<[^>]*>", "", src)          # drop <comment=...> attributes
-    src = re.sub(r"//.*", "", src)             # drop line comments
-    # Anchor each typedef on its own opening brace so a non-greedy match cannot
-    # start inside the struct above it -- the bug that made the first run of
-    # this check report 39 phantom mismatches.
-    bodies = {}
-    for m in re.finditer(r"typedef\s+struct\s*\{(.*?)\}\s*(\w+)\s*;", src, re.S):
-        bodies[m.group(2)] = m.group(1)
+    bodies = bt_structs(path)
 
     out, off = [], 0
     for name in order:
@@ -123,7 +154,93 @@ def check_tune():
     return fails
 
 
-CHECKS = {"tune": check_tune}
+def check_dataout():
+    """The 324-byte Data Out packet vs scripts/telemetry/fh6_dataout_capture.py."""
+    sys.path.insert(0, os.path.join(ROOT, "scripts", "telemetry"))
+    import fh6_dataout_capture as D
+
+    bt = os.path.join(ROOT, "docs", "formats", "fh6_dataout_packet.bt")
+    # Wheel4f/Wheel4i expand inline wherever they appear, so lay the packet out
+    # from the block structs and splice the wheel arrays in by name.
+    bodies = bt_structs(bt)
+
+    decl = re.compile(r"\b(" + "|".join(list(SIZES) + ["char", "Wheel4f", "Wheel4i"]) +
+                      r")\s+(\w+)\s*(\[\d+\])?\s*;")
+    lay, off = [], 0
+    for block in ("SledBlock", "HorizonBlock", "DashBlock", "Trailer"):
+        for ty, fld, _ in decl.findall(bodies[block]):
+            if ty.startswith("Wheel4"):
+                for w in ("FL", "FR", "RL", "RR"):
+                    lay.append((fld + w, off)); off += 4
+            else:
+                lay.append((fld, off)); off += 1 if ty == "char" else SIZES[ty]
+
+    fails = []
+    want = struct.calcsize(D.FH_FMT)
+    if off != want:
+        fails.append("total size: template %d, parser %d" % (off, want))
+    if len(lay) != len(D.FIELDS):
+        fails.append("field count: template %d, parser %d" % (len(lay), len(D.FIELDS)))
+
+    # The .bt uses the official spec's names; the parser uses short ones. Compare
+    # by POSITION -- the offsets are the contract, not the spelling.
+    poff, o = {}, 0
+    toks = re.findall(r"(\d*)([iIfHBb])", D.FH_FMT.lstrip("<"))
+    flat = []
+    for cnt, ch in toks:
+        flat += [ch] * int(cnt or 1)
+    for name, ch in zip(D.FIELDS, flat):
+        poff[name] = o
+        o += {"i": 4, "I": 4, "f": 4, "H": 2, "B": 1, "b": 1}[ch]
+    for i, (name, toff) in enumerate(lay):
+        if i < len(D.FIELDS):
+            pname = D.FIELDS[i]
+            if poff[pname] != toff:
+                fails.append("field %d (%s/%s): template %d, parser %d"
+                             % (i, name, pname, toff, poff[pname]))
+    print("  template lays out %d bytes in %d fields" % (off, len(lay)))
+    print("  blocks: sled 0x000, horizon 0x%03X, dash 0x%03X, trailer 0x%03X"
+          % (poff["CarGroup"], poff["PosX"], poff["Trailing323"]))
+
+    # --- corpus invariants the template asserts --------------------------
+    caps = sorted(glob.glob(os.path.join(ROOT, "captures", "*.csv.gz")))
+    if not caps:
+        print("  NOTE: no captures; corpus checks skipped")
+        return fails
+    import csv as _csv
+    import gzip
+    import math
+    import random
+    random.seed(7)
+    sample = random.sample(caps, min(8, len(caps)))
+    rows = trailing_nz = velbad = velN = 0
+    for p in sample:
+        with gzip.open(p, "rt", newline="") as fh:
+            for r in _csv.DictReader(fh):
+                rows += 1
+                if r.get("Trailing323") not in ("0", None):
+                    trailing_nz += 1
+                try:
+                    s = float(r["Speed"])
+                    if s > 1.0:
+                        velN += 1
+                        v = math.sqrt(float(r["VelX"]) ** 2 + float(r["VelY"]) ** 2
+                                      + float(r["VelZ"]) ** 2)
+                        if abs(v - s) > 0.5:
+                            velbad += 1
+                except (KeyError, ValueError):
+                    pass
+    pct = 100.0 * (velN - velbad) / velN if velN else 0.0
+    print("  %d capture frames: %d trailing byte non-zero, |Vel|==Speed on "
+          "%d/%d moving frames (%.3f%%)" % (rows, trailing_nz, velN - velbad, velN, pct))
+    if trailing_nz:
+        fails.append("%d frames have a non-zero trailing byte -- INVESTIGATE" % trailing_nz)
+    if velN and pct < 99.0:
+        fails.append("|Vel| vs Speed holds on only %.2f%% of frames -- layout suspect" % pct)
+    return fails
+
+
+CHECKS = {"tune": check_tune, "dataout": check_dataout}
 
 if __name__ == "__main__":
     want = sys.argv[1:] or sorted(CHECKS)

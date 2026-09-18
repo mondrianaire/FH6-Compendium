@@ -1252,6 +1252,7 @@ function courseTrace(c) {
   // list by position, and an unsorted list crowned whichever lap the JSON happened to list first.
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
+  TRACE_LAPS = match.map((t) => ({ id: String(t.id), pts: t.pts }));   // published for wireTrace's hover-to-select hit-test (part 2)
   const onRec = (c.laps || []).length;
   const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""}${TRACE_MODE === "pedals" ? ` · pedals recorded on ${stage2.filter((t) => t.pts.some((q) => q[6] != null)).length} of ${stage2.length} laps` : ""} · ticks share the turn list's T numbers</span>
     <span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
@@ -1445,8 +1446,21 @@ function wireTrace(el) {
     const c = cur.querySelector("circle"); c.setAttribute("cx", px); c.setAttribute("cy", py); c.setAttribute("fill", col);
     if (read) read.innerHTML = `<b>${Math.round(q[1])} mph</b> at ${Math.round(q[0])} m · <span style="color:${col}" title="${esc(gripOf(q[2] | 0).tip)}">${gripOf(q[2] | 0).word}</span>${q.length > 7 && (q[6] != null || q[7] != null) ? ` · throttle <b>${q[6] ?? 0}%</b> · brake <b>${q[7] ?? 0}%</b>` : ""}`;
     if (q.length > 4) markMapAt(q[3], q[4], col);
+    // HOVER-TO-SELECT A LAP (part 2, docs/plan-lap-inspection.md): find the lap whose line runs nearest the cursor
+    // at this arc and preview it in the mini lap panel; a click pins it. Course mode only (where the panel exists).
+    if (MODE.suggest === "course" && COURSE && TRACE_LAPS.length) {
+      const cx = ev.clientX - r.left, cy = ev.clientY - r.top, sx = r.width / W, sy = r.height / H;
+      let bid = null, bd2 = Infinity;
+      for (const lap of TRACE_LAPS) { const pp = lap.pts; if (!pp || !pp.length) continue;
+        let li = 0, la = Infinity; for (let i = 0; i < pp.length; i++) { const d = Math.abs(pp[i][0] - sAt); if (d < la) { la = d; li = i; } }
+        const gx = (padL + (pp[li][0] / smax) * (W - padL - 8)) * sx, gy = ((H - padB) - (pp[li][1] / vmax) * (H - padB - 10)) * sy;
+        const dd = (gx - cx) ** 2 + (gy - cy) ** 2; if (dd < bd2) { bd2 = dd; bid = lap.id; } }
+      const near = (bid && bd2 < 26 * 26) ? bid : null;
+      if (near !== HOVER_LAP) { HOVER_LAP = near; refreshLapInfo(); }
+    }
   };
-  sv.onmouseleave = () => { cur.style.display = "none"; if (read) read.textContent = "hover the trace — it marks that spot on the map"; clearMapMark(); };
+  sv.onmouseleave = () => { cur.style.display = "none"; if (read) read.textContent = "hover the trace — it marks that spot on the map"; clearMapMark(); if (HOVER_LAP) { HOVER_LAP = null; refreshLapInfo(); } };
+  sv.onclick = () => { if (HOVER_LAP && String(HOVER_LAP) !== String(SINGLE_LAP)) selectSingleLap(HOVER_LAP); };   // a click PINS the hovered lap: foregrounds it on the trace + map, keeps it in the panel after the mouse leaves
 }
 
 /* --------------------------------------------------------------- dock */
@@ -3489,7 +3503,8 @@ function rightTabStore() { return (MODE.suggest === "course" && COURSE) ? vcours
 // #rightHd, directly across from the course pill. Empty (a prompt) until a lap is picked. See docs/plan-lap-inspection.md.
 function lapInfoHTML() {
   if (!(MODE.suggest === "course" && COURSE)) return "";
-  const id = SINGLE_LAP ? String(SINGLE_LAP) : null;
+  const hovering = !!HOVER_LAP;                 // HOVER previews the lap under the cursor; a click pins it as SINGLE_LAP
+  const id = hovering ? String(HOVER_LAP) : (SINGLE_LAP ? String(SINGLE_LAP) : null);
   const laps = COURSE.laps || [];
   const l = id ? laps.find((x) => String(x.id) === id) : null;
   if (!l) return `<div class="lapinfo empty"><span class="why">hover a trace or pick a lap to inspect it</span></div>`;
@@ -3498,11 +3513,12 @@ function lapInfoHTML() {
   const delta = (best != null && l.t != null) ? (l.t - best) : null;
   const clean = cleanLap(l);
   const flags = [l.void ? "contact" : "", l.partial ? "partial" : "", l.rewinds ? l.rewinds + " rewind" + (l.rewinds === 1 ? "" : "s") : "", l.official ? "game-timed" : ""].filter(Boolean).join(" · ");
-  return `<div class="lapinfo${clean ? "" : " dirty"}" title="the lap picked on the map / trace / laps list">
+  return `<div class="lapinfo${clean ? "" : " dirty"}${hovering ? " hov" : ""}" title="the lap picked on the map / trace / laps list">
     <span class="li-id">${l.class && l.class !== "?" ? piBadge(l.class, l.pi) : ""}<span class="li-car mono" title="${esc(carName(l.cid) || "")}">${esc(carShort(l.cid) || carName(l.cid) || "")}</span></span>
     <span class="li-t mono${l.t === best ? " best" : ""}">${l.t != null ? lapTime(l.t) : "—"}</span>
     ${(delta != null && clean) ? `<span class="li-d mono ${delta <= 0 ? "ahead" : "behind"}">${delta === 0 ? "best" : (delta > 0 ? "+" : "") + delta.toFixed(2)}</span>` : ""}
     <span class="li-flags why">${clean ? "clean" : "⚠ " + (flags || "not clean")}</span>
+    ${hovering ? `<span class="li-hov why">hover · click to pin</span>` : ""}
   </div>`;
 }
 function paintRight() {
@@ -4789,6 +4805,9 @@ function courseStatsHTML() {
 
 // ============ SESSION LAPS + SINGLE-LAP ANALYSIS (course v2, 2026-09-16) ============
 let SINGLE_LAP = null;   // lap id selected in the Single-lap tab
+let HOVER_LAP = null;    // lap under the cursor on the speed trace — transient; the mini panel previews it, a click pins it as SINGLE_LAP (part 2, docs/plan-lap-inspection.md)
+let TRACE_LAPS = [];     // the laps currently drawn on the course trace [{id, pts}] — the source for the hover nearest-line hit-test
+function refreshLapInfo() { const el = document.querySelector("#rightHd .lapinfo"); if (el) el.outerHTML = lapInfoHTML() || ""; }   // light in-place re-render of just the mini panel (no full paintRight) as the hover moves
 let DELTA_REF = (() => { try { return localStorage.getItem("fh6DeltaRef") || "sbest"; } catch (e) { return "sbest"; } })();   // sbest | obest | median
 const lapOrd = (cid) => String(cid || "").split("|")[0] || "?";
 // CLEAN = COMPARABLE. void / partial / rewound were always excluded; the COVERAGE FLOOR (2026-09-18) is the

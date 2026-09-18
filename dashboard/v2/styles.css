@@ -497,9 +497,15 @@ button.stage.act.go:active{transform:translateY(1px)}
    spelled out on the right as explicit feedback for what is selected. ---- */
 /* the SCOPE band (v2 step 2): its edge carries the state -- open (no class narrows it), match (green), mismatch
    (amber: the filter's class is not the car under you) */
+/* THE SCOPE PANE IS THE FILTER AUTHORITY (Jett 2026-09-18): every course-mode view obeys it, so it reads as
+   the primary control — an accent frame + soft glow lift it above the panels it governs. */
 .coursefilter{flex:0 0 auto;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;
-  background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:0;font-size:12px;
-  --cf-edge:var(--line2);box-shadow:inset 3px 0 0 var(--cf-edge)}
+  background:linear-gradient(180deg,rgba(78,163,255,.07),var(--panel));border:1px solid var(--acc2);border-radius:5px;padding:0;font-size:12px;
+  --cf-edge:var(--acc2);box-shadow:inset 4px 0 0 var(--cf-edge),0 0 0 1px rgba(78,163,255,.12),0 2px 12px rgba(78,163,255,.12)}
+@keyframes scope-flash{0%,100%{box-shadow:inset 4px 0 0 var(--cf-edge),0 0 0 1px rgba(78,163,255,.12),0 2px 12px rgba(78,163,255,.12)}
+  35%{box-shadow:inset 4px 0 0 var(--acc2),0 0 0 3px rgba(78,163,255,.55),0 0 24px rgba(78,163,255,.5)}}
+.coursefilter.scope-flash{animation:scope-flash .8s ease-in-out 2}
+@media (prefers-reduced-motion:reduce){.coursefilter.scope-flash{animation:none;outline:2px solid var(--acc2)}}
 .coursefilter[data-state="match"]{--cf-edge:var(--acc)}
 .coursefilter[data-state="mismatch"]{--cf-edge:var(--warn);border-color:var(--warn)}
 .coursefilter .cf-main{display:flex;flex-direction:column;gap:3px;padding:5px 10px 5px 13px;min-width:0}
@@ -1442,6 +1448,11 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .lb-clsp.on{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2)}
 .lb-clsp.lb-empty{opacity:.4}
 .lb-filters{display:flex;align-items:center;gap:5px;padding:3px 4px;flex-wrap:wrap;border-bottom:1px solid var(--line2)}
+/* the Laps preset/class are now a READ-ONLY mirror of the Scope pane (Jett 2026-09-18); clean/rivals/sort stay local */
+.lb-scope{display:inline-flex;align-items:center;gap:5px;margin-left:auto}
+.lb-scope-tok{font:700 10px var(--mono);letter-spacing:.04em;color:var(--acc2);background:rgba(78,163,255,.12);border:1px solid var(--acc2);border-radius:4px;padding:1px 6px}
+.lb-goscope{font:600 9px var(--mono);letter-spacing:.03em;color:var(--acc2);background:none;border:1px dashed var(--acc2);border-radius:4px;padding:2px 7px;cursor:pointer;white-space:nowrap}
+.lb-goscope:hover{background:rgba(78,163,255,.12)}
 .lb-sort{display:flex;align-items:center;gap:3px;margin-left:auto;font:600 9px var(--mono);color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
 .lb-sub{padding:2px 6px;font-size:10px}
 .lb-rows{max-height:200px}

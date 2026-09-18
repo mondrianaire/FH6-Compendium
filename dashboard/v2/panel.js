@@ -2414,7 +2414,13 @@ function worldMapHTML() {
       const rt = rm && WORLD.routes[rm[1]];
       const disc = rt ? (rt.disc || null) : null;
       const col = disc ? (DISC_COL[disc] || DISC_COL._other) : DISC_COL._unverified;
-      const runs = splitTP(c._lo || c.path);
+      // DRAW THE ACTUAL TRACK, NOT THE DRIVEN PATH (Jett 2026-09-18). A verified course (key route:<id>) has the
+      // game's own catalogued geometry — the true layout — so use it, exactly as the pick highlight (browseHiSVG)
+      // and the browser tiles already do. The LEARNED c.path carries driving artifacts (the approach/return around
+      // a drag strip drew a sideways "tail" that isn't part of the strip). Unverified leftovers have no route, so
+      // they keep their learned path (the only geometry there is) — and stay the dim neutral colour.
+      const geo = (rt && rt.pts && rt.pts.length > 3) ? (rt._lo || rt.pts) : (c._lo || c.path);
+      const runs = splitTP(geo);
       const hit = runs.map((run) => `<polyline class="wc-hit" fill="none" stroke="transparent" stroke-width="10" stroke-linecap="round" points="${ptsStr(run)}"/>`).join("");
       const vis = runs.map((run) => `<polyline class="wc-ink" fill="none" stroke="${col}" stroke-width="1.6" opacity="${disc ? 0.9 : 0.4}" stroke-linejoin="round" points="${ptsStr(run)}"/>`).join("");
       const nm = (rt && rt.name) || c.name || key;

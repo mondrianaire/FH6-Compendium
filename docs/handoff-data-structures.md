@@ -5,8 +5,8 @@ The written companion to the **FH6 Lab Database ERD** Eraser file
 *values*: every store, every table with its full field list, and what the coded values in those fields
 actually mean.
 
-*Created 2026-09-18. Counts and enum values are measured from the live `data/fh6.db` (schema_version 7)
-and the live stores on this machine — not copied from older docs. Re-measure them the way §9 describes.*
+*Created 2026-09-18, re-measured 2026-09-18 at **schema_version 9**. Counts and enum values are measured
+from the live `data/fh6.db` and the live stores on this machine — not copied from older docs. Re-measure them the way §9 describes.*
 
 **Read alongside:**
 
@@ -16,6 +16,7 @@ and the live stores on this machine — not copied from older docs. Re-measure t
 | `docs/data-availability.md` + the *Data Availability Map* Eraser file | Where did it come from, and does a sanitized branch keep it? (provenance) |
 | `docs/game-data-refresh.md` | How and when is each game-derived input refreshed? (routines) |
 | **this doc** + the *Lab Database ERD* | What are the structures, and what do their values mean? |
+| `docs/handoff-grip-envelope.md` | What does `lap_point.r_m` mean, how far can it be trusted, and where is it biased? |
 
 ## 1. The seven places data lives
 
@@ -90,35 +91,35 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
-| `tune_container` | 754 | container | `container`, `ordinal`, `saved_utc`, `tune_name`, `locked`, `source`, `hw_hash`, `setup_hash`, `tune_hash`, `parts_hash`, `engine_id`, `drivetrain_id`, `carbody_id`, `motor_id`, `body_variant`, `pi`, `class`, `n_parts`, `gear_count`, `mass_kg`, `front_pct`, `file_path`, `file_mtime`, `imported_at`, `description`, `creator`, `creator_xuid`, `created_utc` |
-| `tune_part` | 37,700 | container, slot_index | `container`, `slot_index`, `slot`, `part_id`, `name`, `level`, `tile`, `tile_count`, `menu_path`, `is_stock`, `price`, `mass_diff_kg`, `confidence` |
-| `tune_slider` | 22,620 | container, slider | `container`, `slider`, `norm`, `value`, `unit`, `min_value`, `max_value`, `locked`, `is_install_default`, `source_slot`, `source_part_id` |
-| `tune_gear` | 5,207 | container, gear | `container`, `gear`, `ratio` |
+| `tune_container` | 758 | container | `container`, `ordinal`, `saved_utc`, `tune_name`, `locked`, `source`, `hw_hash`, `setup_hash`, `tune_hash`, `parts_hash`, `engine_id`, `drivetrain_id`, `carbody_id`, `motor_id`, `body_variant`, `pi`, `class`, `n_parts`, `gear_count`, `mass_kg`, `front_pct`, `file_path`, `file_mtime`, `imported_at`, `description`, `creator`, `creator_xuid`, `created_utc` |
+| `tune_part` | 37,900 | container, slot_index | `container`, `slot_index`, `slot`, `part_id`, `name`, `level`, `tile`, `tile_count`, `menu_path`, `is_stock`, `price`, `mass_diff_kg`, `confidence` |
+| `tune_slider` | 22,740 | container, slider | `container`, `slider`, `norm`, `value`, `unit`, `min_value`, `max_value`, `locked`, `is_install_default`, `source_slot`, `source_part_id` |
+| `tune_gear` | 5,240 | container, gear | `container`, `gear`, `ratio` |
 
 ### Hardware-package tier — Car > Hardware package > Tune (ours)
 
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
-| `hw_package` | 664 | hw_hash | `hw_hash`, `ordinal`, `label`, `pi`, `class`, `engine_id`, `drivetrain_id`, `carbody_id`, `n_containers`, `first_seen_utc`, `last_seen_utc`, `intent` |
-| `hw_package_part` | 33,200 | hw_hash, slot_index | `hw_hash`, `slot_index`, `slot`, `part_id`, `name` |
-| `setup` | 683 | setup_hash | `setup_hash`, `hw_hash`, `ordinal`, `label`, `n_containers`, `first_seen_utc` |
+| `hw_package` | 667 | hw_hash | `hw_hash`, `ordinal`, `label`, `pi`, `class`, `engine_id`, `drivetrain_id`, `carbody_id`, `n_containers`, `first_seen_utc`, `last_seen_utc`, `intent` |
+| `hw_package_part` | 33,350 | hw_hash, slot_index | `hw_hash`, `slot_index`, `slot`, `part_id`, `name` |
+| `setup` | 686 | setup_hash | `setup_hash`, `hw_hash`, `ordinal`, `label`, `n_containers`, `first_seen_utc` |
 
 ### Telemetry — sessions, courses, laps, corners (ours, from UDP captures)
 
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
-| `session` | 446 | session_id | `session_id`, `started_utc`, `duration_s`, `frames`, `rate_pps`, `source`, `file_path`, `imported_at`, `summary` |
-| `session_car` | 1,421 | session_id, cid | `session_id`, `cid`, `ordinal`, `build_id`, `hw_hash`, `name`, `class`, `pi`, `drivetrain`, `cyl`, `live_s` |
-| `session_event` | 995 | session_id, i | `session_id`, `i`, `t0`, `t1`, `cid`, `mode`, `solo`, `laps`, `distance_m`, `duration_s`, `start_x`, `start_z`, `end_x`, `end_z`, `route_key`, `start_is_line` |
+| `session` | 474 | session_id | `session_id`, `started_utc`, `duration_s`, `frames`, `rate_pps`, `source`, `file_path`, `imported_at`, `summary` |
+| `session_car` | 1,480 | session_id, cid | `session_id`, `cid`, `ordinal`, `build_id`, `hw_hash`, `name`, `class`, `pi`, `drivetrain`, `cyl`, `live_s` |
+| `session_event` | 1,024 | session_id, i | `session_id`, `i`, `t0`, `t1`, `cid`, `mode`, `solo`, `laps`, `distance_m`, `duration_s`, `start_x`, `start_z`, `end_x`, `end_z`, `route_key`, `start_is_line` |
 | `course` | 127 | route_key | `route_key`, `name`, `is_rivals`, `event_id`, `length_m`, `turn_count`, `n_laps`, `n_sessions`, `confidence`, `updated_utc`, `geometry`, `profile`, `declared_name`, `declared_source`, `name_source`, `name_confidence` |
-| `course_turn` | 2,422 | route_key, turn_id | `route_key`, `turn_id`, `seq`, `arc_m`, `apex_x`, `apex_z`, `radius_m`, `angle_deg`, `kind`, `n_obs` |
+| `course_turn` | 2,405 | route_key, turn_id | `route_key`, `turn_id`, `seq`, `arc_m`, `apex_x`, `apex_z`, `radius_m`, `angle_deg`, `kind`, `n_obs` |
 | `course_route` | 125 | route_key | `route_key`, `route_id`, `match_kind`, `mean_dev_m`, `p95_dev_m`, `covered`, `len_ratio`, `runner_up`, `computed_utc`, `anchor_route_id`, `anchor_events`, `anchor_agree` |
-| `course_event` | 85 | route_key, event_id | `route_key`, `event_id`, `tier`, `route_id`, `d_route_m`, `d_course_m`, `loop_ok`, `road_ok`, `declared_ok`, `chosen`, `computed_utc` |
-| `lap` | 1,305 | lap_id | `lap_id`, `route_key`, `session_id`, `cid`, `container`, `hw_hash`, `t0`, `lap_s`, `arc_m`, `coverage`, `is_partial`, `build_id`, `class`, `pi`, `drivetrain`, `tune_hash`, `solo`, `impacts`, `void`, `lap_dist_m`, `rewinds`, `pauses`, `pause_s`, `stitched`, `is_race` |
-| `lap_point` | 438,151 | lap_id, i | `lap_id`, `i`, `arc_m`, `mph`, `grip`, `x`, `z`, `elev_m`, `dist_m`, `thr`, `brk`, `lat_g` |
-| `lap_marker` | 691 | lap_id, i | `lap_id`, `i`, `kind`, `t`, `dur_s`, `race_s`, `dist_m`, `over_line`, `detail` |
-| `corner_obs` | 15,079 | lap_id, turn_id | `lap_id`, `turn_id`, `route_key`, `entry_mph`, `apex_mph`, `exit_mph`, `min_mph`, `grip_state`, `time_s`, `score` |
-| `corner_segment` | 57,201 | lap_id, turn_id, segment | `lap_id`, `turn_id`, `route_key`, `segment`, `n_samples`, `entry_mph`, `exit_mph`, `min_mph`, `mean_mph`, `grip_state`, `time_s`, `grip_hist`, `peak_lat_g` |
+| `course_event` | 84 | route_key, event_id | `route_key`, `event_id`, `tier`, `route_id`, `d_route_m`, `d_course_m`, `loop_ok`, `road_ok`, `declared_ok`, `chosen`, `computed_utc` |
+| `lap` | 1,544 | lap_id | `lap_id`, `route_key`, `session_id`, `cid`, `container`, `hw_hash`, `t0`, `lap_s`, `arc_m`, `coverage`, `is_partial`, `build_id`, `class`, `pi`, `drivetrain`, `tune_hash`, `solo`, `impacts`, `void`, `lap_dist_m`, `rewinds`, `pauses`, `pause_s`, `stitched`, `is_race`, `official` |
+| `lap_point` | 511,998 | lap_id, i | `lap_id`, `i`, `arc_m`, `mph`, `grip`, `x`, `z`, `elev_m`, `dist_m`, `thr`, `brk`, `lat_g`, `r_m` |
+| `lap_marker` | 743 | lap_id, i | `lap_id`, `i`, `kind`, `t`, `dur_s`, `race_s`, `dist_m`, `over_line`, `detail` |
+| `corner_obs` | 17,560 | lap_id, turn_id | `lap_id`, `turn_id`, `route_key`, `entry_mph`, `apex_mph`, `exit_mph`, `min_mph`, `grip_state`, `time_s`, `score` |
+| `corner_segment` | 66,926 | lap_id, turn_id, segment | `lap_id`, `turn_id`, `route_key`, `segment`, `n_samples`, `entry_mph`, `exit_mph`, `min_mph`, `mean_mph`, `grip_state`, `time_s`, `grip_hist`, `peak_lat_g` |
 
 ### Observation layer — human evidence, every row names its source
 
@@ -141,7 +142,7 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
 | `ref_symptom` | 11 | symptom | `symptom`, `phase`, `primary_fix`, `secondary_fix`, `tertiary_fix`, `verify_test`, `detector`, `source` |
-| `diag_event` | 35,623 | event_id | `event_id`, `symptom`, `session_id`, `cid`, `lap_id`, `container`, `hw_hash`, `route_key`, `turn_id`, `phase`, `t`, `mph`, `severity`, `detail`, `source` |
+| `diag_event` | 38,335 | event_id | `event_id`, `symptom`, `session_id`, `cid`, `lap_id`, `container`, `hw_hash`, `route_key`, `turn_id`, `phase`, `t`, `mph`, `severity`, `detail`, `source` |
 
 ### Materialized deliverables
 
@@ -156,7 +157,7 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
 | `schema_meta` | 2 | key | `key`, `value` |
-| `import_run` | 11,166 | run_id | `run_id`, `kind`, `source`, `started_utc`, `finished_utc`, `n_rows`, `ok`, `notes` |
+| `import_run` | 11,818 | run_id | `run_id`, `kind`, `source`, `started_utc`, `finished_utc`, `n_rows`, `ok`, `notes` |
 
 _Tables covered: 67 of 67 in the live database._
 ## 3. The value catalogue — what the coded values mean
@@ -170,11 +171,11 @@ The per-sample grip verdict; the same code in all three tables.
 
 | Code | Meaning | `lap_point` rows |
 | --- | --- | ---: |
-| `0` | calm — neither end sliding | 255,203 |
-| `1` | front slipping (understeer) | 60,550 |
-| `2` | rear slipping (oversteer) | 18,759 |
-| `3` | all four slipping | 83,828 |
-| `4` | impact / kerb strike | 19,811 |
+| `0` | calm — neither end sliding | 292,324 |
+| `1` | front slipping (understeer) | 73,793 |
+| `2` | rear slipping (oversteer) | 22,297 |
+| `3` | all four slipping | 100,676 |
+| `4` | impact / kerb strike | 22,908 |
 
 ### Corner phase — `corner_segment.segment`, `diag_event.phase`, `ref_symptom.phase`
 
@@ -182,13 +183,13 @@ The five-segment corner model; `corner_segment` holds one row per lap × turn ×
 
 | Value | Meaning | rows |
 | --- | --- | ---: |
-| `braking` | the braking zone before turn-in | 15,665 |
-| `turn_in` | initial steering input toward the apex | 9,351 |
-| `mid` | apex / minimum-speed phase | 12,383 |
-| `exit` | power-down out of the corner | 10,226 |
-| `straight` | the straight between turns | 9,576 |
+| `braking` | the braking zone before turn-in | 18,004 |
+| `turn_in` | initial steering input toward the apex | 11,294 |
+| `mid` | apex / minimum-speed phase | 14,682 |
+| `exit` | power-down out of the corner | 12,502 |
+| `straight` | the straight between turns | 10,444 |
 
-`diag_event.phase` uses the same words plus `any` (15,389 — the symptom is not phase-specific) and `entry`;
+`diag_event.phase` uses the same words plus `any` (15,994 — the symptom is not phase-specific) and `entry`;
 `ref_symptom.phase` adds `kerbs`.
 
 ### Course-to-route match — `course_route.match_kind`
@@ -198,8 +199,8 @@ How confidently a learned course maps onto a game route.
 | Value | Meaning | courses |
 | --- | --- | ---: |
 | `verified` | our path lies on the centre-line, we drove essentially all of it, lengths agree | 41 |
-| `probable` | strong but incomplete evidence | 12 |
-| `partial` | our laps are a *stretch* of that route — true and useful, but the lap times are not route times | 46 |
+| `probable` | strong but incomplete evidence | 11 |
+| `partial` | our laps are a *stretch* of that route — true and useful, but the lap times are not route times | 47 |
 | `none` | nothing matched | 26 |
 
 ### Course naming — `course.name_source` / `name_confidence`
@@ -208,27 +209,28 @@ Four tiers, in precedence order `declared > game > map > length`.
 
 | `name_source` | Meaning | courses | paired `name_confidence` |
 | --- | --- | ---: | --- |
-| `derived:game` | the game's own catalogue named the matched route | 52 | `verified` |
+| `derived:game` | the game's own catalogue named the matched route | 51 | `verified` |
 | `declared` | a name we declared (`routes.json` 77, course model 3) | 28 | `read` |
 | `derived:length` | identified by catalogue length alone | 1 | `derived` |
-| `NULL` | unnamed | 46 | `NULL` |
+| `NULL` | unnamed | 47 | `NULL` |
 
-`course_event.tier` records which evidence tier chose the event: `game` (52), `declared` (28), `map` (4),
+`course_event.tier` records which evidence tier chose the event: `game` (51), `declared` (28), `map` (4),
 `length` (1).
 
 ### Lap qualifiers — `lap`
 
 | Field | Values | Meaning |
 | --- | --- | --- |
-| `is_partial` | `0` (1,046) / `1` (259) | coverage below 0.9 of the course; can never be crowned fastest |
-| `void` | `0` (1,147) / `1` (158) | not comparable (rewind / pause / impact rules) |
-| `stitched` | `0` (1,289) / `1` (16) | assembled across a capture gap |
-| `is_race` | `NULL` (1,157) / `0` (104) / `1` (44) | race vs free roam; NULL = undetermined |
-| `solo` | `0` / `1` | solo run vs traffic or AI present |
+| `official` | `0` (1,111) / `1` (433) | **schema 8.** The GAME published this lap time (`LastLap`), so it is the lap's time by definition. An official lap counts even when it holds a rewind — the game re-timed it. Laps without it must clear the coverage floor (0.97) and carry no rewinds before they may be crowned. |
+| `is_partial` | `0` (1,400) / `1` (144) | coverage below 0.9 of the course; can never be crowned fastest |
+| `void` | `0` (1,448) / `1` (96) | not comparable (rewind / pause / impact rules) |
+| `stitched` | `0` (1,527) / `1` (17) | assembled across a capture gap |
+| `is_race` | `NULL` (578) / `0` (639) / `1` (327) | race vs free roam; NULL = undetermined |
+| `solo` | `0` (811) / `1` (733) | solo run vs traffic or AI present |
 
 ### Lap markers — `lap_marker.kind`
 
-What interrupted a lap: `rewind` (345), `pause` (259), `jump` (51), `gap` (36). A rewind is a lap-clock
+What interrupted a lap: `rewind` (392), `pause` (266), `jump` (50), `gap` (35). A rewind is a lap-clock
 reversal, and the lap is cut at the landing lap clock.
 
 ### Session events — `session_event.mode`
@@ -354,10 +356,18 @@ SlipRatio{FL,FR,RL,RR}, WheelRotSpeed{…}, OnRumble…` — the whole 324-byte 
 columns.
 
 **The persistence gap.** `lap_point` keeps only `arc_m`, `dist_m`, `mph`, `grip`, `lat_g`, `thr`, `brk`,
-`x`, `z` and `elev_m`. Everything else — per-wheel slip, velocity components, yaw rate, handbrake — lives
+`r_m`, `x`, `z` and `elev_m`. Everything else — per-wheel slip, velocity components, yaw rate, handbrake — lives
 **only** in these captures or in the live SSE stream. Work that needs body slip β = f(`VelX`, `VelZ`) reads
 the capture, not the trace. Throttle and brake appear on lap points only from 2026-09-11 (schema 6) onward,
-and there is no backfill.
+and there is no backfill by default — `backfill_laps.py` (optionally `--sessions FILE` for a targeted
+subset) replays captures to fill them.
+
+**`r_m` — the driven radius (schema 9, 2026-09-18).** The radius the car actually drove, `r = v/ω` from the
+capture's yaw rate, not the road's fitted centre-line radius (`ref_route_turn.radius_m`, which is a
+different thing and must never be substituted). Populated on 192,995 of 511,998 points — NULL on every lap
+not re-analysed since 2026-09-18, which is also how you tell which rows carry sub-metre `x`/`z` (schema 9
+stopped rounding coordinates to whole metres) from the older whole-metre rows. It reads systematically
+tight where the car carries body slip; the measured per-band bias is in `docs/handoff-grip-envelope.md`.
 
 The live frame the daemon serves over SSE (`:8765`) uses short names: `boost, brk, car, cid, cls, cyl,
 dist, drv, ev, gear, hb, hp, lapn, lapt, lat, lon, maxrpm, mph, on, pi, px, pz, rpm, rpos, slip, smash,

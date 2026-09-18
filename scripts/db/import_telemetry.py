@@ -235,14 +235,96 @@ def run(cx, verbose=False, data_dir=None):
         for _rk, _a in _arcs.items():
             if _rk in lengths and len(_a) >= 3:
                 _a.sort(); lengths[_rk] = _a[len(_a) // 2]   # median arc
+        # DEAD KEYS ARE HISTORY, NOT RUBBISH (2026-09-18). The lap store keeps whatever route_key a lap was
+        # filed under when it was driven. Consolidation later merges duplicate-road courses and deletes the
+        # loser course rows, and old course models get pruned -- so a store key can name a course that no
+        # longer exists. Those laps used to hit the course foreign key and vanish silently: 380 of them, 266
+        # on one course (the 2026-08-21 Edamame sessions had NOTHING in the database).
+        # Re-place them instead of dropping them, on TWO pieces of evidence that must agree:
+        #   route:<id> keys -> the canonical id for that road (canon_routes), the same map consolidation uses.
+        #   <x>_<z> start-cell keys -> the live course whose own start is nearest, accepted only when BOTH the
+        #     key's coordinates AND the lap's first trace point sit within 100 m of it.
+        # Anything that fails both tests is still dropped, and the count is reported rather than hidden.
+        import re as _re, math as _math
+        # The live set is the COURSES BEING IMPORTED THIS RUN (known_routes / models), never the table as it
+        # stands: run() deletes every course not in this model set further down, so a snapshot of the table
+        # includes courses that are about to disappear -- mapping a lap onto one of those fails the foreign
+        # key at commit, which is exactly how the first version of this broke.
+        _live = set(known_routes)
+        _starts = []
+        for _rk, _m in models.items():
+            if _rk not in _live:
+                continue
+            try:
+                _p = ((_m.get("geometry") or {}).get("path") or [])[0]
+                if _p and len(_p) >= 2:
+                    _starts.append((_rk, float(_p[0]), float(_p[1])))
+            except Exception:                            # noqa: BLE001
+                continue
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import canon_routes as _canon
+            _canon_of = _canon.canonical_map(cx)[0]
+        except Exception:                                # noqa: BLE001
+            _canon_of = {}
+        _remap, _unplaced, _idents = {}, {}, set()
+
+        def _resolve(rk, pts_):
+            """A live route_key for a store key, or None. Cached per key."""
+            if rk in _live:
+                return rk
+            if rk in _remap:
+                return _remap[rk]
+            out = None
+            if rk.startswith("route:"):
+                _cid2 = _canon_of.get(rk.split(":", 1)[1])
+                if _cid2 and ("route:%s" % _cid2) in _live:
+                    out = "route:%s" % _cid2
+            else:
+                m = _re.match(r"^(-?\d+)_(-?\d+)$", rk)
+                if m and _starts:
+                    kx, kz = float(m.group(1)), float(m.group(2))
+                    best = min(_starts, key=lambda s: _math.hypot(s[1] - kx, s[2] - kz))
+                    d_key = _math.hypot(best[1] - kx, best[2] - kz)
+                    d_lap = None
+                    try:
+                        p0 = pts_[0]
+                        d_lap = _math.hypot(best[1] - float(p0[3]), best[2] - float(p0[4]))
+                    except Exception:                    # noqa: BLE001
+                        d_lap = None
+                    if d_key <= 100 and d_lap is not None and d_lap <= 100:
+                        out = best[0]
+            _remap[rk] = out
+            return out
+
         for r in lx.execute("SELECT * FROM lap_traces"):
             try:
                 pts = json.loads(r["pts"])
             except Exception:                            # noqa: BLE001
                 continue
-            key = (r["route_key"], r["cid"], round(r["lap_s"], 3) if r["lap_s"] else None)   # thousandths: the game publishes 3 dp
+            _rk = _resolve(r["route_key"], pts)
+            if _rk is None:
+                _unplaced[r["route_key"]] = _unplaced.get(r["route_key"], 0) + 1
+                continue
+            # A REMAP CAN COLLIDE. Re-placing a dead key onto a live course can land on a lap already added
+            # under that key (the store holds 378 laps filed under two keys by the old twin glitch). `lap` is
+            # UNIQUE on (route_key, session_id, cid, t0) so the duplicate row is ignored -- but its trace
+            # points are NOT, and they orphan onto a lap_id that was never inserted: FOREIGN KEY constraint
+            # failed at commit, with lap_point -> lap as the violation. Dedupe on the real key, not on the
+            # (route, cid, lap_s) shape `seen` uses for the model-trace pass.
+            _ident = (_rk, r["session"], r["cid"], round(r["t0"], 1) if r["t0"] is not None else None)
+            if _ident in _idents:
+                continue
+            _idents.add(_ident)
+            key = (_rk, r["cid"], round(r["lap_s"], 3) if r["lap_s"] else None)   # thousandths: the game publishes 3 dp
             seen.add(key)
-            add_lap(r["route_key"], r["session"], r["cid"], r["t0"], r["lap_s"], pts, dict(r))
+            add_lap(_rk, r["session"], r["cid"], r["t0"], r["lap_s"], pts, dict(r))
+        for _old, _newk in sorted(_remap.items()):
+            if _newk and verbose:
+                print("  re-placed store key %s -> %s" % (_old, _newk))
+        if _unplaced and verbose:
+            print("  %d lap(s) under %d key(s) could not be placed: %s"
+                  % (sum(_unplaced.values()), len(_unplaced), ", ".join(sorted(_unplaced)[:6])))
         lx.close()
 
     # saved traces in the course models: keep only laps the history store does not already hold

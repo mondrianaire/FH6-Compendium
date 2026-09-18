@@ -14,6 +14,13 @@ a capture that was already analysed costs time but changes nothing.
     python scripts/telemetry/backfill_laps.py --dry-run        # what WOULD run, with sizes and a runtime estimate
     python scripts/telemetry/backfill_laps.py --limit 5        # the 5 SMALLEST captures — cheap proof it works
     python scripts/telemetry/backfill_laps.py                  # everything
+    python scripts/telemetry/backfill_laps.py --sessions ids.txt   # only the captures named in ids.txt
+
+Generating a subset list (the schema-9 radius backfill used exactly this -- the sessions that produced a lap
+the GAME timed, which is the set any lap-derived feature can actually trust):
+
+    python -c "import sqlite3;print(chr(10).join(r[0] for r in sqlite3.connect('data/fh6.db').execute(
+      'select distinct session_id from lap where official=1')))" > data/logs/backfill-official.txt
 
 Cost is real and worth stating up front: analysis is parse-bound at ~17.5 MB/s, so the 1.5 GB capture alone is
 ~86 s and the whole captures/ directory is minutes, not seconds. --dry-run prints the projection before you commit.
@@ -231,6 +238,12 @@ def main():
     ap = argparse.ArgumentParser(description="Replay captures into the lap store.")
     ap.add_argument("--dry-run", action="store_true", help="list what would run, with sizes and an ETA; write nothing")
     ap.add_argument("--limit", type=int, default=0, metavar="N", help="only the N smallest captures")
+    ap.add_argument("--sessions", metavar="FILE",
+                    help="only the captures named in FILE (one session id per line, '#' comments ignored). "
+                         "A replay costs per CAPTURE and parsing is ~80%% of it, so naming a subset is the only "
+                         "real lever on runtime: the captures that produced no lap at all are 266 of 438 and "
+                         "43 GB of parsing that no lap-derived feature can use. Ids may carry a .csv/.csv.gz "
+                         "suffix or not. An id with no capture on disk is reported, never silently skipped.")
     ap.add_argument("--tune-hash", action="store_true",
                     help="re-attribute ONLY tune_hash on stored rows (no replay); honours --dry-run")
     a = ap.parse_args()
@@ -240,6 +253,20 @@ def main():
         return
 
     caps = captures()
+    if a.sessions:
+        want, missing = set(), []
+        with io.open(a.sessions, encoding="utf-8") as fh:
+            for line in fh:
+                sid = line.split("#", 1)[0].strip()
+                if sid:
+                    want.add(sid[:-3] if sid.endswith(".gz") else sid)
+        want = {w[:-4] if w.endswith(".csv") else w for w in want}
+        have = {c["name"].replace(".csv.gz", "").replace(".csv", ""): c for c in caps}
+        caps = [have[w] for w in sorted(want) if w in have]
+        missing = sorted(w for w in want if w not in have)
+        print("--sessions %s: %d of %d named captures found on disk" % (a.sessions, len(caps), len(want)))
+        for w in missing:
+            print("  NOT ON DISK: %s" % w)
     if a.limit > 0:
         caps = caps[:a.limit]
     if not caps:

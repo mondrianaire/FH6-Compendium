@@ -4541,8 +4541,17 @@ function lapBrowserHTML() {
   const srt = (k, lbl) => `<button class="lb-s${LAPB.sort === k ? " on" : ""}" data-lbsort="${k}">${lbl}</button>`;
   const head = `<div class="sesl-h lb-h"><b>Laps</b><span class="lb-pres">${pre("session", "Session", "this exact car + build + tune (most restrictive)")}${pre("build", "Build", "this car + build, any tune — A/B scaffold")}${pre("car", "Car", "this car, any build")}${clsSel}${pre("all", "All", "every lap on this course")}</span></div>`
     + `<div class="lb-filters">${tog("clean", "clean", LAPB.clean, "clean laps only — hide void / partial / rewound")}${tog("rivals", "rivals", LAPB.rivals, "Rivals / timed-solo only — hide race & free-roam")}<span class="lb-sort">sort ${srt("time", "time")}${srt("date", "date")}${srt("cov", "cov")}</span></div>`;
-  if (!ls.scopeOK) return `<div class="sesl">${head}<div class="why sesl-note">${esc(ls.why)}</div></div>`;
-  if (!ls.laps.length) return `<div class="sesl">${head}<div class="why sesl-note">no lap matches this filter yet — drive it, or loosen the filter (try a wider preset)</div></div>`;
+  // WHERE THE LAPS ARE (Jett 2026-09-18): Session stays strict (Jett's choice), but when it can't resolve because
+  // the build isn't identified — or is simply empty — the car's laps are still on record under a wider preset. Point
+  // the driver straight at them + their count, with the tie reason, instead of a dead "no lap matches" that reads as
+  // "my laps vanished" (Jett hit this: 10 Ginetta laps on Soni, hidden behind a 7-way-tied unsettled identity).
+  const carN = cnt("car"), allN = cnt("all");
+  const wider = (carN != null && carN > 0) ? { n: carN, at: "Car / All", scope: "on this car" } : (allN > 0 ? { n: allN, at: "All", scope: "on this course" } : null);
+  const nties = CUR && CUR.match && CUR.match.n_signature_ties;
+  const tie = (nties && nties > 1) ? ` — ${nties} builds tie` : "";
+  const whereHint = wider ? ` · your ${wider.n} lap${wider.n === 1 ? "" : "s"} ${wider.scope} ${wider.n === 1 ? "is" : "are"} under <b>${wider.at}</b> (click above)` : "";
+  if (!ls.scopeOK) return `<div class="sesl">${head}<div class="why sesl-note">${esc(ls.why)}${esc(tie)}${whereHint}</div></div>`;
+  if (!ls.laps.length) return `<div class="sesl">${head}<div class="why sesl-note">no lap matches this filter yet${whereHint || " — drive it, or loosen the filter (try a wider preset)"}</div></div>`;
   const best = ls.best;
   const rows = ls.laps.map((l, i) => `<div class="sesl-row lb-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}${cleanLap(l) ? "" : " lb-dirty"}" data-single="${esc(String(l.id))}" title="isolate on the map + break down in Single lap${cleanLap(l) ? "" : " · not a clean lap (void / partial / rewind)"}">
       <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${l.t === best ? " best" : ""}">${lapTime(l.t)}</span><span class="mono lb-ctx" title="${esc(l.sid || "")}">${esc(lapCtx(l))}</span><span class="mono sesl-d">${best && l.t ? (l.t === best ? "—" : "+" + (l.t - best).toFixed(2)) : ""}</span></div>`).join("");

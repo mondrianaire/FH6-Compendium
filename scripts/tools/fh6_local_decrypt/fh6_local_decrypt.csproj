@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>fh6_local_decrypt</AssemblyName>
+    <RootNamespace>Fh6LocalDecrypt</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!--
+    The key assembly (FH6LocalCrypto.Runtime.dll) is NOT part of this repository: it is third-party,
+    unlicensed, and carries the crypto constants. Point FH6_KEY_RUNTIME at your local copy, or drop the
+    DLL beside this project. Build fails with a readable message when it is missing.
+  -->
+  <PropertyGroup>
+    <Fh6KeyRuntime Condition="'$(Fh6KeyRuntime)' == '' AND '$(FH6_KEY_RUNTIME)' != ''">$(FH6_KEY_RUNTIME)</Fh6KeyRuntime>
+    <Fh6KeyRuntime Condition="'$(Fh6KeyRuntime)' == '' AND Exists('$(MSBuildProjectDirectory)\FH6LocalCrypto.Runtime.dll')">$(MSBuildProjectDirectory)\FH6LocalCrypto.Runtime.dll</Fh6KeyRuntime>
+    <Fh6KeyRuntime Condition="'$(Fh6KeyRuntime)' == ''">$(USERPROFILE)\Downloads\FH6-Local-Crypto-Car-Editor-Tool-main\FH6-Local-Crypto-Car-Editor-Tool-main\lib\FH6LocalCrypto.Runtime.dll</Fh6KeyRuntime>
+  </PropertyGroup>
+
+  <Target Name="CheckKeyRuntime" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(Fh6KeyRuntime)')"
+           Text="FH6LocalCrypto.Runtime.dll not found at '$(Fh6KeyRuntime)'. Set FH6_KEY_RUNTIME to its path — see README.md in this folder." />
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="FH6LocalCrypto.Runtime">
+      <HintPath>$(Fh6KeyRuntime)</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -79,7 +79,36 @@ those two formats and not the locked archives.
 | **(d) Extract keys from either tool's compiled binary** | moderate | Circumventing a distributor's deliberate choice to withhold keys; DVS-code's client holds none at all, so this means attacking the other project's DLL | ❌ Out of scope |
 | **(e) DCA / BGE attacks on white-box AES** | weeks | — | ❌ Moot: this is not white-box AES (§2) |
 
-## 5. Recommendation
+## 4b. RESOLVED (2026-09-18) — we decrypt locally now
+
+The source download of the community tool ships what the GitHub tree omits: **`lib/FH6LocalCrypto.Runtime.dll`,
+a 10,752-byte managed .NET assembly** (SHA-256 `61df73c8…3219`) that holds only the constants — `Fh6Keys`
+exposing `DataKey`, `MacKey`, `TransportKey1`, `TransportKey2`, `GamedbScramblePageConst`, `MethodKey`. ✅
+It is inert: it references only `System`, `System.Collections`, `System.Diagnostics`, `System.Reflection`,
+`System.Runtime`, `System.Text`, `System.Private.CoreLib` — **no networking, no file or process access**. ✅
+
+So path (b) is taken, without extracting or republishing any key bytes: the vendor's own csproj consumes
+that DLL as a library, and so do we. **`scripts/tools/fh6_local_decrypt`** is a .NET 8 console app — our own
+implementation of the published container format, referencing the key assembly only.
+
+**Validated against the tool it replaces:** ✅
+
+- `gamedbRC.slt` → **byte-identical** to the ForzaCryptoTool output of the same file (SHA-256 `c609fe02…ec7e`).
+- `C_ProfileData` → 3,610,427 bytes, the exact size ForzaCryptoTool produces; ForzaCryptoTool's own
+  `profile-inspect`, run on *our* output, reports 714 properties, 5,548 BXML nodes, 112 binary records,
+  SQLite `ok`, `lossless read: yes`, correct XUID.
+- Deterministic across runs; profile 0.25 s, GameDB 0.21 s; refuses to write under `C:\XboxGames`.
+
+**What changes.** No upload, no backend, no `exit 4`, no approval prompt — the decrypt is a local function
+call, so the daemon can read the profile on menu-exit unattended. The tool is **decrypt-only**: no encrypt,
+no save-swap, no editor, so it cannot write a game file.
+
+**What we still depend on.** The key bytes, which we cannot derive. If a title update rotates them, this
+stops working until the constants are refreshed — untested; today's keys handle the post-09-07 build of both
+formats. The 09-07 update did *not* change them, since the same DLL decrypts today's `gamedbRC.slt`.
+🟡 Whether that holds for every patch is unproven.
+
+## 5. Recommendation (superseded by §4b for the profile and GameDB)
 
 **Do not change anything today. Keep using ForzaCryptoTool 3.1.0 with explicit approval per decrypt.**
 It works, it is the devil we know, and the only cost is that a copy of the save goes to a third-party

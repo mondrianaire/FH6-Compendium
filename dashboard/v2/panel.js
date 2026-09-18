@@ -1898,6 +1898,12 @@ function paintHeader() {
   const h = $("#hdr"); if (!h) return;
   const st = buildStatus();
   const q = matchQuality(CUR && CUR.match);
+  // COLLAPSE WHEN IDENTIFIED (Jett 2026-09-18): once the build is KNOWN — downloaded/locked OR cloned/editable —
+  // the full identity pane is redundant with its own mini bar (row A / the idbar), so collapse to that one row and
+  // give the course view the room. Animated via CSS max-height so it eases rather than jumps. It stays EXPANDED
+  // while the identity is unknown/unsettled/waiting — that is exactly when its steps and guidance matter.
+  const s3 = (typeof stateOf === "function") ? stateOf(st, q).state : null;
+  h.classList.toggle("collapsed", s3 === "known" || s3 === "editable");
   const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label, q.level,
     MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
     RR.busy, RB.state === "running" || RB.pending, !!frozenOf(), !!(MATCH && MATCH.sheet),

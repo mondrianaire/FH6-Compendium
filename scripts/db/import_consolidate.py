@@ -81,10 +81,17 @@ def plan_merges(courses, canon_of):
     """{canonical route id: (survivor_key, [loser_keys])} for every road with >1 whole-course drive."""
     groups = {}
     for key, info in courses.items():
-        if info["match_kind"] in MERGE_KINDS:
-            road = road_of(key, info, canon_of)
-            if road is not None:
-                groups.setdefault(road, []).append(key)
+        road = road_of(key, info, canon_of)
+        if road is None:
+            continue
+        # A verified/probable WHOLE-course drive is a merge member. ALSO include the course keyed route:<canonical>
+        # itself even when it is 'partial', so a probable twin pools ONTO the road's own key instead of orphaning
+        # beside it: Shimanoyama route:141 was 'partial' (85 laps) while its 100%-overlap twin route:30000 was
+        # 'probable' (7 laps), so neither pooled and the 7 laps sat under a duplicate course (Jett 2026-09-18).
+        # Records are unaffected — the per-lap is_partial flag already keeps part-laps out of the lap-time record
+        # (build_web crowns only is_partial=0 laps); this only reunites the laps under one course key.
+        if info["match_kind"] in MERGE_KINDS or key == ("route:%s" % road):
+            groups.setdefault(road, []).append(key)
     merges = {}
     for road, keys in groups.items():
         if len(keys) < 2:

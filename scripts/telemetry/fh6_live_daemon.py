@@ -1077,9 +1077,17 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
         live_red = (fr.get("maxrpm") if live and fr else None)
         if live_red and red:                           # two same-cyl same-PI builds with DIFFERENT ENGINES separate here: redline is telemetry-exact (INSTANT)
             score += 50 if abs(int(red) - int(live_red)) <= 400 else -min(50, abs(int(red) - int(live_red)) * 0.02)
-        # NO GEARBOX IN IDENTITY (Jett 2026-09-17, HARD RULE [[fh6-identity-two-directions]]): score is instant signals
-        # ONLY (cyl / PI / redline) + the mtime tiebreak + the explicit-browse pin. Same-signature saves stay tied; the
-        # save-tune method (equip + save) resolves them, never a gear ladder / WOT pull.
+        # SAVE-TUNE METHOD OUTRANKS OBSERVATION (Jett 2026-09-17): a save WRITTEN in the last ~30 min, on the car
+        # you are in and with a matching cylinder count, IS the build you just equipped and saved. A brand-new save
+        # has no observed PI yet (observed_car_pi -> None), so without this it loses the +60 PI credit to an OLDER
+        # observed save of the same car and never becomes `best` -- which is exactly why a fresh self-made save
+        # failed to settle (ordinal 2866, 2026-09-17: newest save chose an older 20260911 sibling). Give the freshest
+        # cyl-consistent save a decisive boost so it wins `best`, then fresh_dl (below) settles the signature tie to
+        # it. The mtime tiebreak already keeps the NEWEST of several equally-fresh saves. This is instant-signal +
+        # the write timestamp only -- no gearbox (HARD RULE [[fh6-identity-two-directions]]).
+        _mt = m.get("mtime") or 0
+        if (live or live_recent) and _mt and (time.time() - _mt) < 1800 and (not live_cyl or not cyl_eff or int(cyl_eff) == int(live_cyl)):
+            score += 500
         roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "red": red, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
     # A stored pick no longer denies / forces anything here: the tie-picker is retired and identity uses NO gearbox,
     # so a stored pick is INERT unless it is an EXPLICIT URL browse. A fresh in-game save is what supersedes / clears
@@ -1252,16 +1260,22 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
     # the PI stamp accepts as a substitute for the ladder (audit T1); identity scoring is untouched.
     picked_ok = bool(ts_want and ts_explicit and str(best["ts"]) == str(ts_want) and any(r is best for r in ties)
                      and (live or live_recent) and live_cyl and best.get("cyl") and int(best["cyl"]) == int(live_cyl))
-    # FRESH DOWNLOAD SETTLES A SIGNATURE TIE (Jett 2026-09-07): a LOCKED container written in the last ~30 min that
-    # the matcher already picked is the tune you just downloaded and equipped -- the container timestamp is the
-    # 100%-confidence signal. Other saves that merely SHARE its cyl/PI/gear signature are not real ambiguity; you
-    # are demonstrably in THIS one, so report it settled (n_signature_ties -> 1) instead of asking you to pick.
+    # A FRESH SAVE SETTLES A SIGNATURE TIE (Jett 2026-09-07; extended from locked-only to any fresh save 2026-09-17):
+    # a container the matcher already picked (best), written in the last ~30 min, is the tune you just equipped and
+    # saved -- the container mtime is the 100%-confidence signal of the SAVE-TUNE METHOD. Other saves that merely
+    # SHARE its cyl/PI signature are not real ambiguity; you are demonstrably in THIS one, so report it settled
+    # (n_signature_ties -> 1) instead of asking you to pick. This covers BOTH a downloaded (locked byte 1) tune AND
+    # a SELF-MADE save (locked byte 0) -- the primary "equip the build, save the tune in-game" workflow -- because
+    # either is "you just wrote this file and are sitting in the car." The `locked` gate used to exclude self-made
+    # saves, so following the on-screen "equip + save" instruction still left the identity unsettled (Jett hit this
+    # live on ordinal 2866, 2026-09-17: a fresh self-made save, 13-way signature tie, never settled).
     # Needs a live frame for the car (live/live_recent) -- with no equipped car there is nothing to confirm against.
-    # Only the freshly-written locked save triggers it; older downloads keep their genuine tie until equip + save.
+    # The recency window keeps a STALE newest-save from wrongly settling; once it expires the tie returns until the
+    # next equip + save (a durable last-equipped memory that survives a long session is the separate Fold-1 work).
     fresh_dl = False
     try:
         _bmt = float((best.get("_meta") or {}).get("mtime") or 0)
-        if n_ties > 1 and best.get("locked") and _bmt and (time.time() - _bmt) < 1800 and (live or live_recent):
+        if n_ties > 1 and _bmt and (time.time() - _bmt) < 1800 and (live or live_recent):
             fresh_dl = True; n_ties = 1
     except Exception:
         pass

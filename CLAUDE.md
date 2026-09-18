@@ -27,7 +27,9 @@ worktree you are in. The tracked files (code, `docs/`, `db/`, `scripts/`, this `
   sync names): source, utility, why, and frequency. Run its checklist after every FH6 title update.
 - `docs/handoff-data-structures.md` — every store, table and field VALUE (enums, codes, tiers) with row
   counts; written companion to the *FH6 Lab Database ERD* (https://app.eraser.io/workspace/EV5zhW3hPU6v4Z7PiZoW).
-- Recent state: `docs/handoff-2026-09-18-test-suite-repair.md` (schema.sql repair + the objectmodel
+- Recent state: `docs/handoff-2026-09-18-ab-testing-groundwork.md` (the confidence gate, the
+  deterministic detectors, the slider sweep protocol — **read before touching diagnosis or adding a
+  detector**), `docs/handoff-2026-09-18-test-suite-repair.md` (schema.sql repair + the objectmodel
   name guard), `docs/handoff-2026-09-11-course-mode-live-pedals.md`, `docs/handoff-2026-09-06-session-state.md`
 - Dashboard: `docs/dashboard-states.md` (regions/modes) · `docs/fh6-ui-spec.md` (in-game UI contract) · `docs/design-language.md`
 

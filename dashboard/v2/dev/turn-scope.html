@@ -35,6 +35,8 @@
   .note{background:var(--panel2);border-left:3px solid var(--acc2);border-radius:0 6px 6px 0;padding:9px 12px;
     font-size:12px;line-height:1.5;color:var(--mut);margin:16px 0}
   .note b{color:var(--ink)}
+  .note.vlap{border-left-color:#e3b341}
+  .note.vsel{border-left-color:#7d8b9c}
   .miss{color:#e3b341}
   @media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
 </style>
@@ -44,10 +46,11 @@
   <h1>Turn scope</h1>
   <span class="why sub">four ways to put speed · g · grip · pedals · limit-use on one picture — real data, <span id="src"></span></span>
   <span class="ctl"><label class="why">turn <select id="turn"></select></label>
-  <label class="why">highlight <select id="lap"></select></label>
+  <label class="why">subject <select id="lap"></select></label>
   <label class="why">class <select id="cls"></select></label></span>
 </header>
 <div class="wrap">
+  <div class="note" id="verdict"></div>
   <div class="note" id="dataNote"></div>
   <section class="cand" id="cA"></section>
   <section class="cand" id="cB"></section>
@@ -88,6 +91,19 @@ const quant = (a, q) => { const v = a.filter((x) => x != null && isFinite(x)).so
   return v.length ? v[Math.min(v.length - 1, Math.floor(q * v.length))] : null; };
 
 let C = null, REF = null, TURN = null, LAPS = {}, PICK = null, CLS = "";
+// lap.t is SECONDS in the course export (best 93.78 = 1:33.78), not milliseconds
+const lapTime = (t) => (t == null ? "no time" : Math.floor(t / 60) + ":" + (t % 60 < 10 ? "0" : "") + (t % 60).toFixed(2));
+// TWO VIEWS, AND THEY ARE NOT THE SAME QUESTION (Jett 2026-09-18: "we are confusing two separate views: the
+// 'selected' average view and the single turn view. While analyzing a specific lap, the single lap values
+// should be used. Not 'how often does the selection lose grip' but 'did the build lose grip on the currently
+// selected lap'"). So every candidate below reads one of two ways, and says which at the top of the plot:
+//   SELECTION  no lap picked -> the subject is the accumulated model: medians and envelopes over every pass,
+//              and grip is a DISTRIBUTION, because a population has one.
+//   THIS LAP   a lap picked  -> the subject is THAT lap's own numbers, full stop. Its speed, its g, its
+//              pedals, its limit use. Grip is a single STATE per metre, not a mix -- one sample is one
+//              state, and painting it as a fraction would be the lie in the other direction. The selection
+//              stays on the page only as a faint grey reference line, never as something to read off.
+const SUBJ = () => (PICK ? "lap" : "sel");
 
 // nearest reference-lap arc for a world point -- the turns' phase polylines are in world space, the traces
 // are parameterised by arc, and this is the one join between them.
@@ -192,6 +208,17 @@ function collect(t) {
     b.n = b.mph.length;
     b.ceil = med(passes.map((p) => aMaxFor(p.lap.class, med(b.mph) || 60)).filter(Boolean));
   }
+  // ONE LAP ON THE SAME GRID, when one is picked: the identical interpolation, so the lap's line and the
+  // selection's reference line are commensurable metre for metre.
+  const lapOn = (pass) => bins.map((b) => {
+    const mph = lerp(pass.pts, b.s, (q) => q.mph); if (mph == null) return null;
+    const aLat = lerp(pass.pts, b.s, (q) => q.aLat), aLong = lerp(pass.pts, b.s, (q) => q.aLong);
+    const aTot = (aLat != null && aLong != null) ? Math.hypot(aLat, aLong) : null;
+    const am = aMaxFor(pass.lap.class, mph);
+    return { mph, aLat, aLong, aTot, util: (aTot != null && am) ? aTot / am * 100 : null, ceil: am,
+             thr: lerp(pass.pts, b.s, (q) => q.thr), brk: lerp(pass.pts, b.s, (q) => q.brk),
+             grip: nearestGrip(pass.pts, b.s) };
+  });
   // the measured per-phase peak |lat g| that IS exported, so the derived curve has something to answer to
   const anchors = [];
   for (const sp of w.phases) {
@@ -199,8 +226,26 @@ function collect(t) {
     const vals = rows.filter((r) => (!CLS || (LAPS[r[0]] && LAPS[r[0]].class === CLS)) && r[8] != null).map((r) => r[8]);
     if (vals.length) anchors.push({ n: sp.n, s: (sp.a + sp.b) / 2 - w.a0, g: med(vals), n_obs: vals.length });
   }
-  return { w, passes, bins, anchors, BIN };
+  return { w, passes, bins, anchors, BIN, lapOn };
 }
+
+// THE ONE ACCESSOR. `sub(D,"mph")` is the subject series -- the picked lap's own values, or the selection's
+// medians when nothing is picked. `ref(D,"mph")` is the selection median, and is ONLY drawn when a lap is the
+// subject, as context. Nothing in a candidate reaches past these, so no plot can quietly mix the two views.
+function sub(D, k) { return D.lap ? D.lap.map((q) => (q ? q[k] : null)) : D.bins.map((b) => med(b[k])); }
+function ref(D, k) { return D.bins.map((b) => med(b[k])); }
+function env(D, k, lo, hi) { return [D.bins.map((b) => quant(b[k], lo)), D.bins.map((b) => quant(b[k], hi))]; }
+// the subject's grip: one STATE per metre for a lap, the 5-state mix for a selection
+function gripSubject(D, X, y, h) {
+  if (!D.lap) return gripStrip(D, X, y, h);
+  return D.bins.map((b, i) => {
+    const q = D.lap[i]; if (!q || q.grip == null) return "";
+    const x0 = X(b.s - D.BIN / 2), x1 = X(b.s + D.BIN / 2);
+    return `<rect x="${x0.toFixed(1)}" y="${y}" width="${(x1 - x0 + .6).toFixed(1)}" height="${h}" fill="${DGRIP[GSTATE[q.grip]].col}"><title>${esc(DGRIP[GSTATE[q.grip]].word)} at ${Math.round(b.s)} m</title></rect>`;
+  }).join("");
+}
+const viewTag = (D, x, y) => txt(x, y, D.lap ? "THIS LAP" : "THE SELECTION · median of every pass",
+  { fill: D.lap ? "#e3b341" : "#7d8b9c", size: 9, weight: 700 });
 
 // ---- tiny SVG helpers -------------------------------------------------------------------------------
 const P = (pts) => pts.map(([x, y]) => x.toFixed(1) + "," + y.toFixed(1)).join(" ");
@@ -261,13 +306,19 @@ function candA(D) {
   const mphHi = (hiv.length ? Math.max(...hiv) : 100) * 1.06, mphLo = (lov.length ? Math.min(...lov) : 0) * 0.9;
   const sp = lanes.speed, Y = (v) => sp.y1 - ((v - mphLo) / (mphHi - mphLo)) * sp.h;
   const bs = D.bins.map((b) => X(b.s));
-  let s = `<g>${phaseBack(D, X, 14, H - 18, true)}</g>`;
+  let s = `<g>${phaseBack(D, X, 14, H - 18, true)}</g>` + viewTag(D, x1, 11);
   // --- speed lane: the envelope of every pass, the median, and the highlighted lap coloured by grip
-  const yv = (f) => D.bins.map((b) => { const v = f(b); return v == null ? null : Y(v); });
-  s += band(bs, yv((b) => quant(b.mph, .1)), yv((b) => quant(b.mph, .9)), "#7d8b9c", ".16");
-  s += line(bs, yv((b) => med(b.mph)), 'stroke="#7d8b9c" stroke-width="1.6" opacity=".8"');
-  if (PICK) { const p = PICK.pts.filter((q) => q.mph != null);
-    for (let i = 0; i < p.length - 1; i++) s += `<line x1="${X(p[i].s).toFixed(1)}" y1="${Y(p[i].mph).toFixed(1)}" x2="${X(p[i + 1].s).toFixed(1)}" y2="${Y(p[i + 1].mph).toFixed(1)}" stroke="${DGRIP[GSTATE[p[i].grip]].ink}" stroke-width="2.6" stroke-linecap="round"/>`; }
+  const map = (a, f) => a.map((v) => (v == null || !isFinite(v) ? null : f(v)));
+  const [lo9, hi9] = env(D, "mph", .1, .9);
+  s += band(bs, map(lo9, Y), map(hi9, Y), "#7d8b9c", D.lap ? ".08" : ".16");
+  if (D.lap) s += line(bs, map(ref(D, "mph"), Y), 'stroke="#7d8b9c" stroke-width="1" stroke-dasharray="3 3" opacity=".7"');
+  else s += line(bs, map(ref(D, "mph"), Y), 'stroke="#7d8b9c" stroke-width="1.6" opacity=".85"');
+  // in lap view the subject line is painted by THAT LAP'S grip state, metre by metre -- the direct answer to
+  // "did the build lose grip on this lap, and where"
+  if (D.lap) { const ys = map(sub(D, "mph"), Y);
+    for (let i = 0; i < bs.length - 1; i++) { const q = D.lap[i];
+      if (ys[i] == null || ys[i + 1] == null) continue;
+      s += `<line x1="${bs[i].toFixed(1)}" y1="${ys[i].toFixed(1)}" x2="${bs[i + 1].toFixed(1)}" y2="${ys[i + 1].toFixed(1)}" stroke="${DGRIP[GSTATE[(q && q.grip) || 0]].ink}" stroke-width="2.8" stroke-linecap="round"/>`; } }
   s += txt(4, sp.y0 + 9, "speed", { weight: 700, fill: "var(--mut)" }) + txt(4, sp.y0 + 21, "mph") +
        txt(x0 - 4, sp.y0 + 9, Math.round(mphHi), { anchor: "end" }) + txt(x0 - 4, sp.y1, Math.round(mphLo), { anchor: "end" });
   // --- g lane: lateral as a signed area, longitudinal as a line, the class ceiling dashed
@@ -277,23 +328,27 @@ function candA(D) {
   if (amc) s += `<line x1="${x0}" y1="${GY(amc).toFixed(1)}" x2="${x1}" y2="${GY(amc).toFixed(1)}" stroke="#e3b341" stroke-width="1" stroke-dasharray="4 3" opacity=".7"/>
     <line x1="${x0}" y1="${GY(-amc).toFixed(1)}" x2="${x1}" y2="${GY(-amc).toFixed(1)}" stroke="#e3b341" stroke-width="1" stroke-dasharray="4 3" opacity=".7"/>` +
     txt(x1, GY(amc) - 3, `grip ceiling ${amc.toFixed(2)} g`, { anchor: "end", fill: "#e3b341" });
-  const gv = (f) => D.bins.map((b) => { const v = f(b); return v == null ? null : GY(v); });
-  s += band(bs, gv((b) => quant(b.aLat, .1)), gv((b) => quant(b.aLat, .9)), "#45c8b0", ".18");
-  s += line(bs, gv((b) => med(b.aLat)), 'stroke="#45c8b0" stroke-width="1.8"');
-  s += line(bs, gv((b) => med(b.aLong)), 'stroke="#c98bff" stroke-width="1.4" stroke-dasharray="3 2"');
+  const [glo, ghi] = env(D, "aLat", .1, .9);
+  s += band(bs, map(glo, GY), map(ghi, GY), "#45c8b0", D.lap ? ".08" : ".18");
+  if (D.lap) s += line(bs, map(ref(D, "aLat"), GY), 'stroke="#45c8b0" stroke-width="1" stroke-dasharray="3 3" opacity=".55"');
+  s += line(bs, map(sub(D, "aLat"), GY), 'stroke="#45c8b0" stroke-width="' + (D.lap ? 2.4 : 1.8) + '"');
+  s += line(bs, map(sub(D, "aLong"), GY), 'stroke="#c98bff" stroke-width="1.4" stroke-dasharray="3 2"');
   s += txt(4, gl.y0 + 9, "g", { weight: 700, fill: "var(--mut)" }) + txt(4, gl.y0 + 21, "lat / long") +
        txt(x0 - 4, gl.y0 + 4, "+3", { anchor: "end" }) + txt(x0 - 4, GY(0) + 3, "0", { anchor: "end" }) + txt(x0 - 4, gl.y1, "-3", { anchor: "end" });
   // --- pedals lane: throttle up, brake down, medians over every pass
   const pl = lanes.pedals, PY = (v, up) => up ? pl.y1 - (v / 100) * pl.h : pl.y0 + (v / 100) * pl.h;
-  s += area(bs, D.bins.map((b) => { const v = med(b.thr); return v == null ? null : PY(v, 1); }), pl.y1, PED.thr, ".55");
-  s += area(bs, D.bins.map((b) => { const v = med(b.brk); return v == null ? null : PY(v, 0); }), pl.y0, PED.brk, ".55");
+  s += area(bs, map(sub(D, "thr"), (v) => PY(v, 1)), pl.y1, PED.thr, ".6");
+  s += area(bs, map(sub(D, "brk"), (v) => PY(v, 0)), pl.y0, PED.brk, ".6");
+  if (D.lap) { s += line(bs, map(ref(D, "thr"), (v) => PY(v, 1)), 'stroke="#7d8b9c" stroke-width="1" stroke-dasharray="3 3" opacity=".6"');
+    s += line(bs, map(ref(D, "brk"), (v) => PY(v, 0)), 'stroke="#7d8b9c" stroke-width="1" stroke-dasharray="3 3" opacity=".6"'); }
   s += txt(4, pl.y0 + 9, "pedals", { weight: 700, fill: "var(--mut)" }) + txt(4, pl.y0 + 21, "brk / thr");
   // --- limit lane: the grip mix strip, and how much of the ceiling is being used
   const ll = lanes.limit, LY = (v) => ll.y1 - Math.min(1.1, v / 110) * (ll.h - 16);
-  s += gripStrip(D, X, ll.y0, 12);
+  s += gripSubject(D, X, ll.y0, 12);
   s += `<line x1="${x0}" y1="${LY(100).toFixed(1)}" x2="${x1}" y2="${LY(100).toFixed(1)}" stroke="#e3b341" stroke-width="1" stroke-dasharray="4 3" opacity=".7"/>`;
-  const uv = D.bins.map((b) => { const v = med(b.util); return v == null ? null : LY(v); });
-  s += area(bs, uv, ll.y1, "#e3b341", ".2") + line(bs, uv, 'stroke="#e3b341" stroke-width="1.8"');
+  const uv = map(sub(D, "util"), LY);
+  if (D.lap) s += line(bs, map(ref(D, "util"), LY), 'stroke="#7d8b9c" stroke-width="1" stroke-dasharray="3 3" opacity=".6"');
+  s += area(bs, uv, ll.y1, "#e3b341", ".2") + line(bs, uv, 'stroke="#e3b341" stroke-width="' + (D.lap ? 2.2 : 1.8) + '"');
   s += txt(4, ll.y0 + 9, "grip", { weight: 700, fill: "var(--mut)" }) + txt(4, ll.y0 + 21, "mix + use") + txt(x1, LY(100) - 3, "100% of the ceiling", { anchor: "end", fill: "#e3b341" });
   // x axis
   for (let m = 0; m <= D.w.len; m += 25) s += `<line x1="${X(m).toFixed(1)}" y1="${H - 20}" x2="${X(m).toFixed(1)}" y2="${H - 16}" stroke="var(--line2)"/>` + txt(X(m), H - 6, m + "", { anchor: "middle" });
@@ -309,26 +364,32 @@ function candB(D) {
   const bs = D.bins.map((b) => X(b.s));
   let s = `<g>${phaseBack(D, X, y0 - 10, y1, true)}</g>`;
   // the ceiling, per bin, from each pass's own class and speed -- it moves with the speed band
-  const yv = (f) => D.bins.map((b) => { const v = f(b); return v == null ? null : Y(v); });
-  const ceilY = yv((b) => b.ceil);
+  const map = (a, f) => a.map((v) => (v == null || !isFinite(v) ? null : f(v)));
+  const ceilY = map(D.lap ? D.lap.map((q) => (q ? q.ceil : null)) : D.bins.map((b) => b.ceil), Y);
   s += area(bs, ceilY, y1, "#e3b341", ".05") + line(bs, ceilY, 'stroke="#e3b341" stroke-width="1.4" stroke-dasharray="5 3"');
   // used g -- the band is every pass's 15th-to-90th percentile, the solid line the median. The gap up to the
   // dashed ceiling IS the grip still on the table; where the two touch, the corner is already limit-bound.
-  s += band(bs, yv((b) => quant(b.aTot, .15)), yv((b) => quant(b.aTot, .9)), "#45c8b0", ".14");
-  const totY = yv((b) => med(b.aTot));
-  s += area(bs, totY, y1, "#45c8b0", ".16") + line(bs, totY, 'stroke="#45c8b0" stroke-width="2.2"');
-  s += line(bs, yv((b) => { const v = med(b.aLat); return v == null ? null : Math.abs(v); }), 'stroke="#45c8b0" stroke-width="1" opacity=".55" stroke-dasharray="2 2"');
+  const [tlo, thi] = env(D, "aTot", .15, .9);
+  s += band(bs, map(tlo, Y), map(thi, Y), "#45c8b0", D.lap ? ".07" : ".14");
+  if (D.lap) s += line(bs, map(ref(D, "aTot"), Y), 'stroke="#7d8b9c" stroke-width="1.1" stroke-dasharray="3 3" opacity=".75"');
+  const totY = map(sub(D, "aTot"), Y);
+  s += area(bs, totY, y1, "#45c8b0", ".16") + line(bs, totY, 'stroke="#45c8b0" stroke-width="2.4"');
+  s += line(bs, map(sub(D, "aLat"), (v) => Y(Math.abs(v))), 'stroke="#45c8b0" stroke-width="1" opacity=".55" stroke-dasharray="2 2"');
+  // in lap view, colour the floor strip by where THIS lap was past the limit -- the answer to "did the build
+  // lose grip here", read against the ceiling directly above it
+  s += gripSubject(D, X, y1 + 4, 9);
   // the MEASURED per-phase peak lat g -- the derivation has to answer to this
   s += D.anchors.map((a) => `<g><line x1="${(X(a.s) - 5).toFixed(1)}" y1="${Y(a.g).toFixed(1)}" x2="${(X(a.s) + 5).toFixed(1)}" y2="${Y(a.g).toFixed(1)}" stroke="#dfe7ef" stroke-width="1.6"/>
     <line x1="${X(a.s).toFixed(1)}" y1="${(Y(a.g) - 5).toFixed(1)}" x2="${X(a.s).toFixed(1)}" y2="${(Y(a.g) + 5).toFixed(1)}" stroke="#dfe7ef" stroke-width="1.6"/>
     <title>${esc(SEG_LABEL[a.n])} — measured peak ${a.g.toFixed(2)} g, median over ${a.n_obs} passes (lap_point.lat_g, schema 7)</title></g>`).join("");
   // speed as a ghost on its own scale, so the g curve keeps its meaning
   const mphHi = (Math.max(...D.bins.map((b) => med(b.mph) || 0)) || 100) * 1.05;
-  s += line(bs, D.bins.map((b) => { const v = med(b.mph); return v == null ? null : y1 - (v / mphHi) * (y1 - y0) * .92; }), 'stroke="#7d8b9c" stroke-width="1.2" opacity=".5"');
+  s += viewTag(D, x1, 12);
+  s += line(bs, map(sub(D, "mph"), (v) => y1 - (v / mphHi) * (y1 - y0) * .92), 'stroke="#7d8b9c" stroke-width="1.2" opacity=".5"');
   s += txt(x1, y0 + 2, `speed ghost · 0–${Math.round(mphHi)} mph`, { anchor: "end", fill: "#7d8b9c" });
-  // pedals as a thin ribbon on the floor, grip mix under it
-  s += gripStrip(D, X, y1 + 4, 9);
-  s += D.bins.map((b, i) => { if (!b.n) return ""; const t = med(b.thr) || 0, br = med(b.brk) || 0, x = X(b.s - D.BIN / 2), w = X(b.s + D.BIN / 2) - x + .6;
+  // pedals as a thin ribbon on the floor
+  s += D.bins.map((b, i) => { if (!b.n) return ""; const q = D.lap && D.lap[i];
+    const t = (D.lap ? (q && q.thr) : med(b.thr)) || 0, br = (D.lap ? (q && q.brk) : med(b.brk)) || 0, x = X(b.s - D.BIN / 2), w = X(b.s + D.BIN / 2) - x + .6;
     return `<rect x="${x.toFixed(1)}" y="${y1 + 15}" width="${w.toFixed(1)}" height="${(t / 100 * 7).toFixed(1)}" fill="${PED.thr}"/>` +
            `<rect x="${x.toFixed(1)}" y="${y1 + 15}" width="${w.toFixed(1)}" height="${(br / 100 * 7).toFixed(1)}" fill="${PED.brk}" opacity=".85"/>`; }).join("");
   for (let g = 0; g <= 3; g++) s += `<line x1="${x0}" y1="${Y(g).toFixed(1)}" x2="${x1}" y2="${Y(g).toFixed(1)}" stroke="var(--line)" stroke-width=".7"/>` + txt(x0 - 4, Y(g) + 3, g + " g", { anchor: "end" });
@@ -346,6 +407,7 @@ function candC(D) {
   s += `<line x1="${c - R * gMax}" y1="${c}" x2="${c + R * gMax}" y2="${c}" stroke="var(--line2)"/><line x1="${c}" y1="${c - R * gMax}" x2="${c}" y2="${c + R * gMax}" stroke="var(--line2)"/>`;
   s += txt(c, 12, "braking", { anchor: "middle" }) + txt(c, S - 3, "accelerating", { anchor: "middle" }) +
        txt(4, c - 4, "left") + txt(S - 4, c - 4, "right", { anchor: "end" });
+  s += viewTag(D, S - 4, 12);
   const src = PICK ? [PICK] : D.passes;
   for (const p of src) for (const q of p.pts) {
     if (q.aLat == null || q.aLong == null) continue;
@@ -368,14 +430,14 @@ function candD(D) {
   const mphHi = Math.max(...D.bins.map((b) => med(b.mph) || 0)) || 100;
   let s = `<g>${phaseBack(D, X, y0 - 8, y1, true)}</g>`;
   for (let f = 0; f <= 1; f += .25) s += `<line x1="${x0}" y1="${Y(f).toFixed(1)}" x2="${x1}" y2="${Y(f).toFixed(1)}" stroke="var(--line)" stroke-width=".6"/>` + txt(x0 - 4, Y(f) + 3, Math.round(f * 100) + "%", { anchor: "end" });
-  const nv = (f) => D.bins.map((b) => { const v = f(b); return v == null ? null : Y(v); });
-  const spd = nv((b) => { const v = med(b.mph); return v == null ? null : v / mphHi; });
+  const map = (a, f) => a.map((v) => (v == null || !isFinite(v) ? null : f(v)));
+  const spd = map(sub(D, "mph"), (v) => Y(v / mphHi));
   s += area(bs, spd, y1, "#7d8b9c", ".14") + line(bs, spd, 'stroke="#7d8b9c" stroke-width="2"');
-  s += line(bs, nv((b) => { const v = med(b.util); return v == null ? null : Math.min(1.1, v / 100); }), 'stroke="#e3b341" stroke-width="2"');
-  s += line(bs, nv((b) => { const v = med(b.aLat); return v == null ? null : Math.abs(v) / 3; }), 'stroke="#45c8b0" stroke-width="1.6" stroke-dasharray="4 2"');
-  s += line(bs, nv((b) => { const v = med(b.thr); return v == null ? null : v / 100; }), `stroke="${PED.thr}" stroke-width="1.3"`);
-  s += line(bs, nv((b) => { const v = med(b.brk); return v == null ? null : v / 100; }), `stroke="${PED.brk}" stroke-width="1.3"`);
-  s += gripStrip(D, X, y1 + 4, 11);
+  s += line(bs, map(sub(D, "util"), (v) => Y(Math.min(1.1, v / 100))), 'stroke="#e3b341" stroke-width="2"');
+  s += line(bs, map(sub(D, "aLat"), (v) => Y(Math.abs(v) / 3)), 'stroke="#45c8b0" stroke-width="1.6" stroke-dasharray="4 2"');
+  s += line(bs, map(sub(D, "thr"), (v) => Y(v / 100)), `stroke="${PED.thr}" stroke-width="1.3"`);
+  s += line(bs, map(sub(D, "brk"), (v) => Y(v / 100)), `stroke="${PED.brk}" stroke-width="1.3"`);
+  s += gripSubject(D, X, y1 + 4, 11) + viewTag(D, x1, 12);
   for (let m = 0; m <= D.w.len; m += 25) s += txt(X(m), H - 6, m + "", { anchor: "middle" });
   return `<svg class="scope" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
@@ -391,24 +453,53 @@ function draw() {
     document.getElementById(id).innerHTML = `<h2>${esc(title)}<small>candidate ${n}</small></h2><p class="cap">${cap}</p>${body}<div class="cost">${cost}</div>`;
   };
   if (!D) { ["cA", "cB", "cC", "cD"].forEach((i) => document.getElementById(i).innerHTML = `<p class="cap">no passes through this turn in the current filter</p>`); return; }
+  // THE MODE. A picked lap is not a highlight on top of the averages -- it REPLACES them as the subject.
+  const lid = document.getElementById("lap").value;
+  PICK = lid ? D.passes.find((p) => p.id === lid) || null : null;
+  D.lap = PICK ? D.lapOn(PICK) : null;
+
   const nm = `T${t.seq} ${esc(t.kind || "")} · ${Math.round(t.r)} m · ${Math.round(t.deg)}°${t.dir || ""} · ${D.passes.length} passes · ${Math.round(D.w.len)} m of road`;
   document.getElementById("src").textContent = nm;
 
-  head("cA", "A", "Stacked lanes", `<b>The motorsport trace.</b> One shared distance axis, one lane per question: how fast, how hard, what the feet did, and how much of the grip that used. Every lane shows the <b>envelope of every pass</b> (the pale band) with the median through it, so one bad lap can never be the picture; the highlighted lap rides on top of the speed lane, coloured by its grip state moment to moment. The dashed amber lines are the class's own grip ceiling.`,
+  // the verdict line: in lap view it is about THAT lap and nothing else
+  let verdict;
+  if (D.lap) {
+    const g = {}; D.lap.forEach((q) => { if (q && q.grip != null) g[q.grip] = (g[q.grip] || 0) + 1; });
+    const n = Object.values(g).reduce((a, b) => a + b, 0) || 1;
+    const loose = Object.keys(g).filter((k) => +k > 0).sort((a, b) => g[b] - g[a]);
+    const uPk = Math.max(...D.lap.map((q) => (q && q.util != null ? q.util : 0)));
+    const L = PICK.lap;
+    verdict = loose.length
+      ? `<b>This lap</b> (${esc(L.class)} · ${esc(lapTime(L.t))}) was past the limit over <b>${Math.round(g[loose[0]] / n * 100)}% of this turn</b>, mostly <b style="color:${DGRIP[GSTATE[loose[0]]].ink}">${DGRIP[GSTATE[loose[0]]].word}</b>, and touched <b>${Math.round(uPk)}%</b> of the class grip ceiling at its hardest point.`
+      : `<b>This lap</b> (${esc(L.class)} · ${esc(lapTime(L.t))}) stayed <b>within grip the whole way through</b>, peaking at <b>${Math.round(uPk)}%</b> of the class ceiling.`;
+  } else {
+    verdict = `<b>The selection</b> — ${D.passes.length} passes${CLS ? " in class " + esc(CLS) : ""}. Every line below is a median and every band an envelope over those passes, so no single lap can be the picture. <b>Pick a lap above to switch the subject to that lap.</b>`;
+  }
+  document.getElementById("verdict").innerHTML = verdict;
+  document.getElementById("verdict").className = "note " + (D.lap ? "vlap" : "vsel");
+
+  const V = D.lap ? "this lap" : "the selection";
+  head("cA", "A", "Stacked lanes", `<b>The motorsport trace.</b> One shared distance axis, one lane per question: how fast, how hard, what the feet did, and how much of the grip that used. ` +
+    (D.lap
+      ? `Reading <b>this lap</b>: every solid line is its own, and the speed line is painted by <b>its</b> grip state metre by metre — blue where the fronts let go, red where the rears did. The selection is behind it as a faint dashed line only, so you can see where this lap differs without ever reading the average by mistake.`
+      : `Reading <b>the selection</b>: each lane is the median over every pass with the envelope behind it, and the grip strip is a distribution — because a population has one.`),
     candA(D),
-    `<b>Reads well for:</b> where in the corner it goes wrong, and whether the driver or the car did it. <b>Costs:</b> the tallest of the four (~360 px) and four y-scales to learn. <b>Needs:</b> nothing new — except real g (see the note at the top).`);
+    `<b>Reads well for:</b> where in the corner it goes wrong, and whether the driver or the car did it. <b>Costs:</b> the tallest of the four (~370 px) and four y-scales to learn. <b>Needs:</b> nothing new — except real g (see the note at the top).`);
 
-  head("cB", "B", "The grip budget", `<b>One question: how much of the tyre is left.</b> The y-axis is g. The dashed amber line is what this class can actually pull at this speed (<code>classGrip</code>, speed-banded); the filled curve is what the car <b>did</b> pull, combined lateral and longitudinal. <b>The gap between them is the lap time still on the table.</b> The white crosses are the measured per-phase peak lat g that the export already carries — the derived curve has to answer to them. Speed rides as a grey ghost, the pedals and the grip mix as strips on the floor.`,
+  head("cB", "B", "The grip budget", `<b>One question: how much of the tyre was left.</b> The y-axis is g. The dashed amber line is what this class can pull at this speed (<code>classGrip</code>, speed-banded); the filled curve is what ${V} <b>did</b> pull, lateral and longitudinal combined. <b>The gap between them is the lap time still on the table.</b> ` +
+    (D.lap ? `The strip on the floor is <b>this lap's own grip state</b>, so "was the build past the limit here" is answered directly under the point where it happened — and if the curve is nowhere near the ceiling, it was not the tyres that lost the time.`
+           : `The white crosses are the measured per-phase peak lat g the export already carries, so the derived curve has something to answer to.`),
     candB(D),
-    `<b>Reads well for:</b> "is this understeer at the limit, or am I just slow here?" — the thing the ledger's price cannot say. <b>Costs:</b> everything is in g, so speed loses its scale. <b>Needs:</b> the measured <code>lat_g</code> exported to stop deriving it.`);
+    `<b>Reads well for:</b> "was that understeer at the limit, or was I just slow here?" — the thing the ledger's price cannot say. <b>Costs:</b> everything is in g, so speed loses its scale. <b>Needs:</b> the measured <code>lat_g</code> exported to stop deriving it.`);
 
-  head("cC", "C", "The traction circle", `<b>The car's grip envelope, not the road's.</b> Each dot is one sample: lateral g across, longitudinal g up (braking) and down (power), coloured by the phase it happened in. The dashed ring is the class ceiling. A circle that is <b>filled out</b> is a car being used; a cross or an L shape is a driver braking and turning in separate steps. Pick a lap to draw only that pass, joined in order.`,
-    `<div class="two">${candC(D)}<div><p class="cap" style="margin:0">${D.passes.length} pass${D.passes.length === 1 ? "" : "es"} plotted${PICK ? ", one lap highlighted" : ""}. The phases keep their colours from every other surface, so a yellow cluster low and left means the mid-corner is being taken on the power, turning left.</p>${key(SEG_ORDER.map((n) => [SEG_COL[n], SEG_LABEL[n]]))}</div></div>`,
+  head("cC", "C", "The traction circle", `<b>The car's grip envelope, not the road's.</b> Each dot is one sample: lateral g across (right-hand turns to the right), longitudinal g up for braking and down for power, coloured by the phase it happened in. The dashed ring is the class ceiling. A circle that is <b>filled out</b> is a car being used; a cross or an L is braking and turning taken in separate steps. ` +
+    (D.lap ? `Showing <b>this lap only</b>, joined in the order it was driven.` : `Showing <b>every pass in the selection</b> — pick a lap to reduce it to one.`),
+    `<div class="two">${candC(D)}<div><p class="cap" style="margin:0">${D.lap ? "One lap" : D.passes.length + " passes"} plotted. The phases keep their colours from every other surface, so a yellow cluster low and right means the mid-corner of a right-hander is being taken on the power.</p>${key(SEG_ORDER.map((n) => [SEG_COL[n], SEG_LABEL[n]]))}</div></div>`,
     `<b>Reads well for:</b> the car's balance and the driver's technique in one glance — and it is the only one of the four that separates "at the limit" from "at the limit in the wrong direction". <b>Costs:</b> no distance axis at all, so it says nothing about <em>where</em>. Best as a companion to A or B, not a replacement.`);
 
-  head("cD", "D", "One axis, everything normalised", `<b>The literal reading of "one graph".</b> Every channel rescaled to 0–100% of its own range and drawn on one set of gridlines: speed, limit use, lateral g, throttle, brake, with the grip mix as a strip underneath. It is the most compact of the four.`,
+  head("cD", "D", "One axis, everything normalised", `<b>The literal reading of "one graph".</b> Every channel of ${V} rescaled to 0–100% of its own range on one set of gridlines: speed, limit use, lateral g, throttle, brake, with grip as a strip underneath. The most compact of the four.`,
     candD(D),
-    `<b>Reads well for:</b> nothing in particular — and that is the finding worth having. Once five lines share one axis, none of them keeps a unit, "80%" means five different things, and the crossings are coincidences of scaling rather than facts. <b>Kept here as the control</b>, so the case for A or B is made against the obvious answer rather than assumed.`);
+    `<b>Reads well for:</b> nothing in particular — and that is the finding worth having. Once five lines share one axis none of them keeps a unit, "80%" means five different things, and the crossings are coincidences of scaling rather than facts. <b>Kept as the control</b>, so the case for A or B is made against the obvious answer rather than assumed.`);
 
   document.getElementById("cA").insertAdjacentHTML("beforeend", key(GRIPKEY.concat([["#45c8b0", "lateral g", 1], ["#c98bff", "longitudinal g", 1], [PED.thr, "throttle"], [PED.brk, "brake"], ["#e3b341", "grip ceiling / limit use", 1]])));
 }
@@ -426,16 +517,9 @@ async function boot() {
   const refresh = () => {
     const ls = document.getElementById("lap");
     const avail = C.laps.filter((l) => C.traces[String(l.id)] && (!CLS || l.class === CLS));
-    ls.innerHTML = `<option value="">none — every pass</option>` + avail.map((l) => `<option value="${l.id}">${l.class} · ${l.t ? (l.t / 1000).toFixed(2) + " s" : "—"} · lap ${l.id}</option>`).join("");
+    ls.innerHTML = `<option value="">— the selection (every pass)</option>` + avail.map((l) => `<option value="${l.id}">${l.class} · ${esc(lapTime(l.t))} · lap ${l.id}</option>`).join("");
   };
-  const redraw = () => {
-    CLS = cs.value;
-    const D0 = null; void D0;
-    const lid = document.getElementById("lap").value;
-    PICK = null;
-    draw();
-    if (lid) { const D = collect(C.turns.find((x) => String(x.seq) === ts.value)); PICK = (D && D.passes.find((p) => p.id === lid)) || null; draw(); }
-  };
+  const redraw = () => { CLS = cs.value; draw(); };
   cs.onchange = () => { CLS = cs.value; refresh(); redraw(); };
   ts.onchange = redraw;
   document.getElementById("lap").onchange = redraw;

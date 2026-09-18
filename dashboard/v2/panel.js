@@ -4647,8 +4647,10 @@ function lapBrowserHTML() {
   if (!ls.scopeOK) return `<div class="sesl">${head}<div class="why sesl-note">${esc(ls.why)}${esc(tie)}${whereHint}</div></div>`;
   if (!ls.laps.length) return `<div class="sesl">${head}<div class="why sesl-note">no lap matches this filter yet${whereHint || " — drive it, or loosen the filter (try a wider preset)"}</div></div>`;
   const best = ls.best;
-  const rows = ls.laps.map((l, i) => `<div class="sesl-row lb-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}${cleanLap(l) ? "" : " lb-dirty"}" data-single="${esc(String(l.id))}" title="isolate on the map + break down in Single lap${cleanLap(l) ? "" : " · not a clean lap (void / partial / rewind)"}">
-      <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${l.t === best ? " best" : ""}">${lapTime(l.t)}</span><span class="mono lb-ctx" title="${esc(l.sid || "")}">${esc(lapCtx(l, ls.effPreset))}</span><span class="mono sesl-d">${best && l.t ? (l.t === best ? "—" : "+" + (l.t - best).toFixed(2)) : ""}</span></div>`).join("");
+  // each row carries the DESIGN-IDENTITY class badge (.pib — the same class vocabulary used everywhere) and the CAR
+  // that drove the lap, so a wider-preset list is legible across builds/cars at a glance (Jett 2026-09-18).
+  const rows = ls.laps.map((l, i) => `<div class="sesl-row lb-row${String(l.id) === String(SINGLE_LAP) ? " on" : ""}${cleanLap(l) ? "" : " lb-dirty"}" data-single="${esc(String(l.id))}" title="${esc((l.sid || "") + (l.class && l.class !== "?" ? " · class " + l.class + (l.pi ? " " + l.pi : "") : "") + " · " + (carName(l.cid) || l.cid || ""))}${cleanLap(l) ? "" : " · not a clean lap (void / partial / rewind)"} · click to isolate on the map + break down in Single lap">
+      <span class="mono sesl-rk">${i + 1}</span><span class="mono sesl-t${l.t === best ? " best" : ""}">${lapTime(l.t)}</span><span class="lb-cls">${l.class && l.class !== "?" ? classPill(l.class) : ""}</span><span class="mono lb-car" title="${esc(carName(l.cid) || "")}">${esc(carShort(l.cid))}</span><span class="mono sesl-d">${best && l.t ? (l.t === best ? "—" : "+" + (l.t - best).toFixed(2)) : ""}</span></div>`).join("");
   const PL = { session: "Session", build: "Build", car: "Car", all: "All" };
   const widenNote = ls.widened ? ` · <b>${PL[LAPB.preset] || LAPB.preset}</b> needs an identified build — showing <b>${PL[ls.effPreset] || ls.effPreset}</b>` : "";
   const sub = `${ls.laps.length} lap${ls.laps.length === 1 ? "" : "s"}${best ? " · best " + lapTime(best) : ""} · ${ls.total} on course${widenNote}`;

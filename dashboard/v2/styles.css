@@ -1327,8 +1327,10 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 /* the same pick mirrored onto the whole-course map: dim every lap trace, lift the picked one. The map's
    polylines carry an inline `opacity` PRESENTATION ATTRIBUTE which — unlike stroke-width — this engine does
    not let a plain CSS opacity property override, so the override is forced with !important (measured). */
-.cmap svg.has-lapsel .cmap-lap polyline{opacity:.1!important;transition:opacity .1s}
-.cmap svg.has-lapsel .cmap-lap.sel polyline{opacity:1!important;stroke-width:3}
+/* SELECTING A LAP makes its trace POP hard against the rest (Jett 2026-09-18): the others drop to a faint,
+   thin ghost, the picked one goes full-opacity, much thicker, and carries a white halo so it reads instantly. */
+.cmap svg.has-lapsel .cmap-lap polyline{opacity:.05!important;stroke-width:1!important;transition:opacity .12s}
+.cmap svg.has-lapsel .cmap-lap.sel polyline{opacity:1!important;stroke-width:5!important;filter:drop-shadow(0 0 4px rgba(255,255,255,.9)) drop-shadow(0 0 2px rgba(255,255,255,.95))}
 .tlb-row{cursor:pointer}
 .tlb-row:hover{background:var(--panel2)}
 .tlb-row.lbsel{background:rgba(78,163,255,.16);box-shadow:inset 2px 0 0 var(--acc2)}
@@ -1426,8 +1428,11 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .lb-sort{display:flex;align-items:center;gap:3px;margin-left:auto;font:600 9px var(--mono);color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
 .lb-sub{padding:2px 6px;font-size:10px}
 .lb-rows{max-height:200px}
-.lb-row{grid-template-columns:22px minmax(46px,auto) 1fr 44px}
-.lb-ctx{color:var(--dim);font-size:10px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-row{grid-template-columns:22px minmax(46px,auto) auto minmax(34px,1fr) 40px;align-items:center}
+.lb-cls{display:inline-flex;align-items:center}
+.lb-cls .pib{height:14px;font-size:9px;border-radius:2px}
+.lb-cls .pib b{padding:0 4px}
+.lb-car{color:var(--dim);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lb-row.lb-dirty{opacity:.55}
 .lb-row.lb-dirty .sesl-t{color:var(--mut)}
 /* header honesty: the tune-name row when build identity is unconfirmed (ambiguous cid) */

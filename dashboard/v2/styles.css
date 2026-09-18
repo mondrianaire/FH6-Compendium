@@ -106,6 +106,12 @@ svg{display:block;max-width:100%}
    min-height keeps the map from collapsing when the (scrollable) turn list below is long. */
 .cmap{position:relative;flex:1 1 auto;min-height:210px;display:flex}
 .cmap>svg{flex:1 1 auto;min-height:0;width:100%;border-radius:6px}
+/* MAP ZOOM REVEALS GRANULARITY (Jett 2026-09-18): the maps zoom by shrinking the SVG viewBox, which scales the
+   stroke WIDTH along with the geometry — so overlapping lap traces, the road and the turn phases never separate,
+   zoom just enlarges the tangle. non-scaling-stroke pins every LINE to a constant SCREEN width, so zooming
+   spreads the geometry while the lines stay thin and the individual routes pull apart and become distinguishable.
+   Scoped to polylines, so turn markers (circles + labels) keep scaling and stay clickable/legible. */
+.cmap svg polyline,#leftBody svg[data-x0] polyline{vector-effect:non-scaling-stroke}
 /* the turn list under the map may scroll (Jett: info panes break the no-scroll rule) so the map keeps its space */
 .pane>.body.map>.grp{flex:0 1 auto;min-height:104px;display:flex;flex-direction:column;overflow:hidden}
 .pane>.body.map>.grp .tt-wrap{overflow-y:auto;flex:1 1 auto;min-height:0}

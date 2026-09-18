@@ -234,6 +234,9 @@ def _recall_profile_equipped(ordn):
         return None
 
 
+_PROFILE_LOCK = threading.Lock()   # serializes every _profile_decrypt_and_record (auto + manual) — see its docstring
+
+
 def _recall_brio_snapshot():
     """The last-seen brio progression map ({"<type>:<route>": "<hex>"}), or {}. Persisted in identity-evidence
     so the diff survives a daemon restart -- the whole point is comparing THIS read against the previous one."""
@@ -267,6 +270,12 @@ def _brio_advisory(dec):
         if not cur:
             return
         prev = _recall_brio_snapshot()
+        # A SHRINKING map is almost always a partial/torn read (a route never disappears from a real profile).
+        # Persisting it would forget a route's baseline and fire a spurious change on the next good read, so
+        # skip persisting and diffing this one -- the next full read re-establishes the comparison.
+        if prev and len(cur) < len(prev):
+            print("[brio] shrunk read (%d < %d) — skipping (likely partial)" % (len(cur), len(prev)), flush=True)
+            return
         changed = PROFILE.brio_diff(prev, cur) if prev else []
         _remember_brio_snapshot(cur)
         if prev and changed:
@@ -291,9 +300,20 @@ def _profile_decrypt_and_record(allow_upload=False, auto=False):
     Never uploads unless the caller passed allow_upload — the automatic path cannot, by construction.
     Runs in a background thread."""
     import tempfile
+    # SERIALIZE every profile read (audit 2026-09-18). Both callers reach here on their own thread (the auto
+    # disk-watcher and the manual /profile-decrypt endpoint run on a ThreadingHTTPServer worker), and
+    # PROFILE.decrypt() drives an external tool over shared temp files. Two in flight at once could delete or
+    # overwrite each other's plaintext mid-read -> a torn buffer feeds current_equipped()/_brio_advisory and
+    # corrupts the persisted snapshot. A non-blocking acquire means a second read just no-ops instead of racing.
+    if not _PROFILE_LOCK.acquire(blocking=False):
+        ST.emit("profile_read", {"ok": False, "err": "a profile read is already in flight", "auto": bool(auto)})
+        return
     if PROFILE is None:
+        _PROFILE_LOCK.release()
         ST.emit("profile_read", {"ok": False, "err": "profile module unavailable"}); return
-    out = os.path.join(tempfile.gettempdir(), "fh6_C_ProfileData.dec")
+    ST._profile_reading = True   # reflect it for both callers (the manual endpoint doesn't pre-set it)
+    # per-process unique plaintext path so a stray concurrent reader (e.g. a manual CLI run) can't collide
+    out = os.path.join(tempfile.gettempdir(), "fh6_C_ProfileData.%d.dec" % os.getpid())
     try:
         src = PROFILE.find_profile_path()
         if not src:
@@ -315,6 +335,7 @@ def _profile_decrypt_and_record(allow_upload=False, auto=False):
         ST._profile_reading = False
         try: os.remove(out)
         except Exception: pass
+        _PROFILE_LOCK.release()
 
 def cid(p): return f'{p["CarOrdinal"]}|{p["DrivetrainType"]}|{p["NumCylinders"]}|{p["CarPI"]}'
 NAMES_PATH = os.path.join(ROOT, "data", "car-ordinals.json")
@@ -2635,16 +2656,24 @@ def disk_watcher():
                     _pmt = PROFILE.profile_mtime()
                     if _pmt and _pmt != getattr(ST, "_profile_mtime", None):
                         _first = getattr(ST, "_profile_mtime", None) is None
-                        ST._profile_mtime = _pmt
-                        if not _first:
+                        if _first:
+                            ST._profile_mtime = _pmt   # baseline only — never decrypt on the first observation
+                        else:
                             try: _offline = PROFILE.local_decrypt_available()
                             except Exception: _offline = False
-                            if _offline and not getattr(ST, "_profile_reading", False):
-                                ST._profile_reading = True
-                                threading.Thread(target=_profile_decrypt_and_record,
-                                                 kwargs={"allow_upload": False, "auto": True},
-                                                 daemon=True).start()
-                            elif not _offline:
+                            if _offline:
+                                if not getattr(ST, "_profile_reading", False):
+                                    # ADVANCE ONLY WHEN WE CONSUME IT (audit 2026-09-18): a save that lands while a
+                                    # previous read is in flight must NOT be marked seen, or it's dropped forever;
+                                    # leaving _profile_mtime stale lets the next poll re-trigger once the read clears.
+                                    ST._profile_mtime = _pmt
+                                    ST._profile_reading = True
+                                    threading.Thread(target=_profile_decrypt_and_record,
+                                                     kwargs={"allow_upload": False, "auto": True},
+                                                     daemon=True).start()
+                                # else: a read is in flight — leave the mtime stale and retry next poll
+                            else:
+                                ST._profile_mtime = _pmt   # nothing to read offline; announce once, don't re-spin
                                 ST.emit("profile_stale", {"ordinal": getattr(ST, "last_car", None), "mtime": _pmt})
                 except Exception:
                     pass

@@ -222,17 +222,25 @@ function stateOf(st, q) {
   st = st || buildStatus();
   q = q || matchQuality(CUR && CUR.match);
   const locked = !!(CUR && CUR.disk && CUR.disk.tune && CUR.disk.tune.locked);
+  const tie = !!(q && (q.level === "ambiguous" || q.level === "conflict"));
   let s;
   if (st.key === "none") s = "waiting";
+  else if (st.key === "offline") s = "unknown";                                            // daemon down = can't know — checked BEFORE spec: an offline error must not read as a spec precondition
   else if (typeof isSpecEvent === "function" && isSpecEvent()) s = "spec";                 // fixed temporary event car — N/A
-  else if (q && (q.level === "ambiguous" || q.level === "conflict")) s = "unknown";        // a tie identify-on-equip didn't settle = error
-  else if (st.key === "offline") s = "unknown";                                            // daemon down = can't know
+  else if (tie) s = "unknown";                                                             // a tie identify-on-equip didn't settle = error
   else if (st.key === "unknown") s = st.rebuild ? (locked ? "known" : "editable") : "unknown";  // importing = fully decoded/known (2 locked / 3 self-made); else no-save/drift = error
   else if (st.key === "downloaded" || st.key === "clone") s = "known";                     // downloaded/locked or an unsaved clone of one — not yet a held editable build
   else if (st.key === "variation" || st.key === "ratified") s = "editable";                // editing an editable build / a saved unlocked build
   else s = "unknown";
   const m = STATE3[s];
-  return { state: s, label: m.label, tone: m.tone, importing: !!st.rebuild, canAB: s === "editable", detail: st };
+  // detail.why must describe the state we RESOLVED, not buildStatus()'s pre-override key: on a tie the chip
+  // reads UNKNOWN, so its tooltip must explain the tie (q.why), not st's confident "downloaded/ratified" copy;
+  // spec gets its own line. Offline keeps st.why (the daemon-down message).
+  let why = st.why;
+  if (s === "spec") why = "event-provided car + tune — temporary; nothing to save or compare";
+  else if (s === "unknown" && tie && st.key !== "offline") why = (q && q.why) || st.why;
+  const detail = (why === st.why) ? st : Object.assign({}, st, { why: why });
+  return { state: s, label: m.label, tone: m.tone, importing: !!st.rebuild, canAB: s === "editable", detail: detail };
 }
 
 /* ------------------------------------------------------------ layout */
@@ -499,7 +507,9 @@ function paintIdBar() {
   // stateOf() — UNKNOWN / KNOWN·NOT CLONED / KNOWN·EDITABLE — the single source of truth the A/B gate reads.
   // gateStrip still supplies the tuned per-state DETAIL copy (g.detail); it no longer owns the chip label.
   const S3 = stateOf(st, matchQuality(CUR.match));
-  const s3cls = S3.tone === "ok" ? "on" : S3.tone === "bad" ? "b" : (S3.state === "spec" || g.spec) ? "spec" : S3.tone === "dim" ? "w" : "w";
+  // tone -> chip class: bad => "r" (RED alarm, not "b"/--acc2 blue — UNKNOWN must read as an error, not info);
+  // dim => the dedicated "dim" class; warn => "w"; ok => "on"; spec => its own blue chip.
+  const s3cls = S3.tone === "ok" ? "on" : S3.tone === "bad" ? "r" : (S3.state === "spec" || g.spec) ? "spec" : S3.tone === "dim" ? "dim" : "w";
   el.dataset.state = S3.state;   // hook for canAB-gated affordances (e.g. A/B entry)
   el.innerHTML = `
     <span class="idb-pi">${piBadge(CUR.cls, CUR.pi)}</span>
@@ -1967,7 +1977,14 @@ function paintHeader() {
       // The primary button is only offered in an editable state, but a stale click after the car flipped to
       // unknown/known must not open the overlay — the canAB gate is the single authority.
       if (stateOf().canAB) abOverlay();
-      else { const o = bp.textContent; bp.textContent = "NEEDS AN EDITABLE BUILD — CLONE + SAVE"; setTimeout(() => { bp.textContent = o; }, 2200); }
+      else {
+        // Don't chain restores: clear any pending timer and capture the REAL label only on the FIRST swap, so
+        // two clicks inside the window can't leave the button stuck on the error text (a second click would
+        // otherwise capture the error text as its restore target).
+        if (bp._abT) clearTimeout(bp._abT); else bp._abLabel = bp.textContent;
+        bp.textContent = "NEEDS AN EDITABLE BUILD — CLONE + SAVE";
+        bp._abT = setTimeout(() => { bp.textContent = bp._abLabel; bp._abT = null; }, 2200);
+      }
     }
     else if (act === "pick") { const el = document.querySelector("#alerts .picker"); if (el) el.scrollIntoView({ block: "nearest" }); }
     else if (act === "copycmd") { try { navigator.clipboard.writeText("python scripts/telemetry/fh6_live_daemon.py"); bp.textContent = "COPIED"; } catch (e) { /* no clipboard */ } }

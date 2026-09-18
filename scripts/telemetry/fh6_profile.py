@@ -250,23 +250,37 @@ def brio_map(dec):
     for m in _RE_BRIO.finditer(dec):
         off, name = m.start(), m.group(0)
         ne = off + len(name)
+        # bounds: a match whose value blob straddles EOF (a truncated/torn read) must be dropped, not stored
+        # as a short/wrong hex that would read as a spurious change next diff.
+        if len(dec) < ne + 15:
+            continue
         # value blob sits after the constant prefix; guard the prefix so we never hash misaligned bytes
         if dec[ne:ne + 7] != _BRIO_PREFIX:
             continue
-        out["%s:%d" % (m.group(1).decode(), int(m.group(2)))] = dec[ne + 7:ne + 15].hex()
+        out["%s:%s" % (m.group(1).decode(), m.group(2).decode())] = dec[ne + 7:ne + 15].hex()
     return out
 
 
 def brio_diff(prev, cur):
-    """Route ids whose brio blob changed from `prev` to `cur` (both brio_map() dicts). Returns a sorted list
-    of {"key","route","type","from","to"} -- new keys included (from=None). Empty when nothing moved."""
+    """Route ids whose brio blob differs between `prev` and `cur` (both brio_map() dicts). Returns a list
+    (sorted by numeric route id) of {"key","route","type","from","to"}:
+      * a changed or NEW key -> to = the new value (from = prev value or None);
+      * a key present in prev but ABSENT from cur (a route that dropped out of the read) -> to = None.
+    `route` is the decoded route-id STRING (matches the TEXT route_id space in ref_track_info/ref_route);
+    never an int, so a future join can't silently miss on 1041 != "1041". Empty when nothing moved."""
+    prev = prev or {}
+    cur = cur or {}
     changed = []
-    for k, v in (cur or {}).items():
-        pv = (prev or {}).get(k)
+    for k, v in cur.items():
+        pv = prev.get(k)
         if pv != v:
             t, _, rid = k.partition(":")
-            changed.append({"key": k, "route": int(rid), "type": t, "from": pv, "to": v})
-    changed.sort(key=lambda d: d["route"])
+            changed.append({"key": k, "route": rid, "type": t, "from": pv, "to": v})
+    for k, pv in prev.items():
+        if k not in cur:                       # a route that vanished from this read is itself a change
+            t, _, rid = k.partition(":")
+            changed.append({"key": k, "route": rid, "type": t, "from": pv, "to": None})
+    changed.sort(key=lambda d: int(d["route"]))
     return changed
 
 

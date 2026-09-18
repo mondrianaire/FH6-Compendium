@@ -763,6 +763,10 @@ function wireBanner() {
 // Two setups on one hardware package, judged on the course you are actually driving. The lap
 // records already carry which setup drove them, so the comparison is measured, not modelled.
 async function abOverlay() {
+  // Fail-closed: A/B requires an editable (state-3) build. The header gate already checks this, but centralize
+  // it here so no other or future call site (e.g. the retired change-banner button) can enter A/B on an
+  // unknown/downloaded build. stateOf lives in panel.js and is defined by call time.
+  if (typeof stateOf === "function" && !stateOf().canAB) return;
   const a = CHANGE && CHANGE.from && CHANGE.from.build;
   const b = CHANGE && CHANGE.to && CHANGE.to.build;
   document.getElementById("abOv")?.remove();

@@ -1,0 +1,118 @@
+{
+ "session": "fh6_20260828_133421",
+ "built_utc": "2026-09-18T18:25:04Z",
+ "capture": "fh6_20260828_133421.csv.gz",
+ "laps": 3,
+ "findings": [
+  {
+   "fault": "gear-limiter-bound",
+   "severity": 0.4000543666673669,
+   "detail": "1.2 s on the limiter in top gear (9130 of 9125 rpm); the ladder runs out before the course does",
+   "fix": "lengthen the final drive (lower the ratio) so top gear still pulls at the fastest point",
+   "measure": {
+    "limiter_s": 1.2,
+    "peak_rpm": 9130,
+    "redline": 9125
+   },
+   "lap_id": 663,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.407156845070034,
+   "t": 86.63,
+   "x": -7504.34033203125,
+   "z": -2113.6357421875,
+   "detail": "all four locked at full pedal, 69 samples over 0.45 s from 76 mph; worst wheel turning at 65% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.646,
+    "samples": 69,
+    "held_s": 0.451,
+    "entry_mph": 76.2
+   },
+   "shallow_excursions": 3,
+   "lap_id": 663,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.6428938661714891,
+   "t": 92.65,
+   "x": -7463.94287109375,
+   "z": -2219.568603515625,
+   "detail": "front locked at full pedal, 23 samples over 0.15 s from 53 mph; worst wheel turning at 53% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.529,
+    "samples": 23,
+    "held_s": 0.15,
+    "entry_mph": 53.5
+   },
+   "shallow_excursions": 3,
+   "lap_id": 663,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.3918795112489417,
+   "t": 96.61,
+   "x": -7504.11376953125,
+   "z": -2260.830810546875,
+   "detail": "front locked at full pedal, 25 samples over 0.16 s from 38 mph; worst wheel turning at 65% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.654,
+    "samples": 25,
+    "held_s": 0.156,
+    "entry_mph": 37.9
+   },
+   "shallow_excursions": 3,
+   "lap_id": 663,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "gear-limiter-bound",
+   "severity": 0.22999863333340423,
+   "detail": "0.7 s on the limiter in top gear (9200 of 9125 rpm); the ladder runs out before the course does",
+   "fix": "lengthen the final drive (lower the ratio) so top gear still pulls at the fastest point",
+   "measure": {
+    "limiter_s": 0.69,
+    "peak_rpm": 9200,
+    "redline": 9125
+   },
+   "lap_id": 665,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  }
+ ],
+ "calibration": {
+  "2866": {
+   "redline": 9125.123046875,
+   "declared": 9999.9951171875,
+   "radii": {
+    "FL": 0.2566366606107188,
+    "FR": 0.25634752889581813,
+    "RL": 0.2541580688587043,
+    "RR": 0.25311160935938687
+   }
+  }
+ }
+}

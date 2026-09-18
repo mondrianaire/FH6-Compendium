@@ -1,0 +1,101 @@
+{
+ "session": "fh6_20260916_215226",
+ "built_utc": "2026-09-18T18:39:33Z",
+ "capture": "fh6_20260916_215226.csv",
+ "laps": 1,
+ "findings": [
+  {
+   "fault": "bottoming",
+   "severity": 0.5474651455879216,
+   "t": 514.8,
+   "x": 4065.99560546875,
+   "z": 5722.12451171875,
+   "detail": "FR suspension on the stop (travel 0.982) at 66 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.9819,
+    "mph": 66.3
+   },
+   "lap_id": 1593,
+   "cid": "2866|2|4|700",
+   "route_key": "3550_6100",
+   "container": "Tuning_2866_20260916204312",
+   "hw_hash": "b309f89c1c29de60"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.8724147677421574,
+   "t": 522.75,
+   "x": 3790.336669921875,
+   "z": 5772.236328125,
+   "detail": "FL suspension on the stop (travel 0.995) at 86 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FL",
+    "travel": 0.9949,
+    "mph": 85.8
+   },
+   "lap_id": 1593,
+   "cid": "2866|2|4|700",
+   "route_key": "3550_6100",
+   "container": "Tuning_2866_20260916204312",
+   "hw_hash": "b309f89c1c29de60"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 1.0,
+   "t": 536.83,
+   "x": 4015.95166015625,
+   "z": 5613.353515625,
+   "detail": "FL suspension on the stop (travel 1.000) at 111 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FL",
+    "travel": 1.0,
+    "mph": 110.7
+   },
+   "lap_id": 1593,
+   "cid": "2866|2|4|700",
+   "route_key": "3550_6100",
+   "container": "Tuning_2866_20260916204312",
+   "hw_hash": "b309f89c1c29de60"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 1.0,
+   "t": 579.18,
+   "x": 4120.22412109375,
+   "z": 5097.06640625,
+   "detail": "FR suspension on the stop (travel 1.000) at 90 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 1.0,
+    "mph": 89.9
+   },
+   "lap_id": 1593,
+   "cid": "2866|2|4|700",
+   "route_key": "3550_6100",
+   "container": "Tuning_2866_20260916204312",
+   "hw_hash": "b309f89c1c29de60"
+  }
+ ],
+ "calibration": {
+  "3141": {
+   "redline": 9754.7998046875,
+   "declared": 9999.9951171875,
+   "radii": {
+    "FL": 0.3472785391537272,
+    "FR": 0.3473051678707201,
+    "RL": 0.36521045827505794,
+    "RR": 0.36614170086601716
+   }
+  },
+  "2866": {
+   "redline": 9185.916015625,
+   "declared": 9999.9951171875,
+   "radii": {}
+  }
+ }
+}

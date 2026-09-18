@@ -593,17 +593,19 @@ def main(argv=None):
         _rid = route.get("route_id") if route else None
         n_cat = cx.execute("SELECT COUNT(*) FROM ref_route_turn WHERE route_id=?", (_rid,)).fetchone()[0] if _rid else None
         # DISPLAYED LENGTH (Jett 2026-09-18): the course model's length_m is the MAX measured drive, so ONE long
-        # outlier inflates it forever (Shimanoyama read 1404 m against a ~1084 m real lap). Show the MEDIAN lap arc
-        # instead -- the same robust length the coverage verdict is judged against (import_telemetry) -- so the card,
-        # the coverage and "N of M laps" all agree. Too few laps to take a median: fall back to the catalogued route
-        # length, else the model length.
+        # outlier inflates it forever (Shimanoyama read 1404 m against a ~1100 m course). Show the CATALOGUED route
+        # length instead -- the game's own official number (ref_route.length_m), which the world-map route tiles
+        # already use, so the card and the tile agree. This is DISPLAY ONLY: the coverage / is_partial verdict is
+        # computed separately in import_telemetry against the median lap arc, and reads l.cov per lap here, so it is
+        # unaffected. A learned course with NO catalogued route falls back to the median lap arc, then the model.
         _disp_len = c["len"]
         try:
-            _arcs = sorted(r[0] for r in cx.execute("SELECT arc_m FROM lap WHERE route_key=? AND arc_m > 0", (key,)))
-            if len(_arcs) >= 3:
-                _disp_len = _arcs[len(_arcs) // 2]
-            elif route and route.get("length_m"):
-                _disp_len = route["length_m"]
+            if route and route.get("length_m"):
+                _disp_len = route["length_m"]                 # catalogued route length -- the game's official number
+            else:
+                _arcs = sorted(r[0] for r in cx.execute("SELECT arc_m FROM lap WHERE route_key=? AND arc_m > 0", (key,)))
+                if len(_arcs) >= 3:
+                    _disp_len = _arcs[len(_arcs) // 2]         # median arc for a learned course with no catalogued route
         except Exception:
             pass
         total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),

@@ -3220,6 +3220,7 @@ function courseMatchable(c) {
 }
 async function locateCourse() {
   if (LOOP) return;                                   // the S/F crossing already named the route — authoritative
+  if (LIVE.inMenu) return;                             // menu frames are dead time — HOLD the identity from the last drive, never re-identify at a menu (Jett 2026-09-18: the course changed while sitting at the rivals menu)
   if (!LIVEPOS || !WORLD || !WORLD.courses) return;
   // IN AN EVENT WITH NO DAEMON-NAMED LOOP, DON'T FLAP AMONG LEARNED COURSES (Jett 2026-09-07: driving
   // the Goliath, "the map was CONSTANTLY switching between maps that wasn't the goliath"). An offset-
@@ -3229,7 +3230,12 @@ async function locateCourse() {
   // against a course dead-on the shared tarmac. So skip the learned-course proximity match here and let
   // locateRouteInEvent name the stable CATALOGUED route (its longest-route-wins tie-break keeps the
   // Goliath over the sprints that reuse its road). Learned-course location still runs in free roam.
-  if (MODE.game === "event") {
+  // A RIVALS / TIMED context uses catalogued routes + the event lock, NEVER free-roam learned-course matching —
+  // even while paused at the event menu (game reads "menu" there, not "event") or during the event->menu blip.
+  // Jett 2026-09-18: at the Hakone Nanamagari rivals menu the course flapped to "Coastline Sprint" because a
+  // driving frame during the transition fell into the learned-course branch, where Coastline's learned path sits
+  // 0 m from the shared start line. Gating on kind keeps identity on the loaded route through the whole episode.
+  if (MODE.game === "event" || MODE.kind === "rivals / timed") {
     if (COURSE_KEY) { COURSE = null; COURSE_KEY = null; }   // drop whatever short course last flapped in
     COURSE_MATCH = null;
     locateRouteInEvent(false);
@@ -3283,8 +3289,8 @@ async function locateCourse() {
 // path is too sparse), match the car to the catalogued route and name the map from that. Routes share
 // roads, so the pick is honest about a near runner-up.
 function locateRouteInEvent(haveCourse) {
-  if (MODE.game === "freeroam") EVENT_ROUTE_LOCK = null;   // drove OUT to free roam -> the next event re-identifies fresh (a menu/pause HOLDS the lock)
-  if (MODE.game !== "event" || haveCourse || !LIVEPOS || !WORLD || !WORLD.routes) {
+  if (MODE.game === "freeroam" && MODE.kind !== "rivals / timed") EVENT_ROUTE_LOCK = null;   // drove OUT to GENUINE free roam -> next event re-identifies fresh; a menu/pause OR a transient freeroam blip during a rivals event HOLDS the lock
+  if (!(MODE.game === "event" || MODE.kind === "rivals / timed") || haveCourse || !LIVEPOS || !WORLD || !WORLD.routes) {
     if (ROUTE) { ROUTE = null; paintLeft(); }
     return;
   }

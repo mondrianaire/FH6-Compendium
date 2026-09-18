@@ -297,7 +297,16 @@ function runSample(f, now) {
   if (now - LIVE.runT < 100) return;
   LIVE.runT = now;
   const last = LIVE.run[LIVE.run.length - 1];
-  if (last && f.dist < last[5]) LIVE.run = [];          // odometer restarted: a new event, a new run
+  // THE ODOMETER GOES BACKWARDS FOR TWO REASONS (2026-09-18). A REWIND rolls it back to the landing point —
+  // measured on real captures: -175 m to -2,073 m, with 4-56 s of telemetry SILENCE across the rewind (the
+  // game sends nothing while it rewinds, IsRaceOn stays 1). That is not a new run, and wiping the whole
+  // buffer threw away a trail that is still true: only the stretch the rewind UNDID is gone. Cut back to the
+  // landing odometer and carry on from there, the way lapSample() already cuts LIVE.lap at the landing lap
+  // clock. A genuine restart (new event — the odometer back at zero) still clears the run.
+  if (last && f.dist < last[5]) {
+    if (f.dist > 5) { let i = LIVE.run.length; while (i > 0 && LIVE.run[i - 1][5] > f.dist) i--; LIVE.run.length = i; }
+    else LIVE.run = [];                                 // odometer restarted: a new event, a new run
+  }
   const g = gripCode(f);
   const d0 = LIVE.run.length ? LIVE.run[0][5] : f.dist;
   LIVE.run.push([f.dist - d0, f.mph, g, f.px, f.pz, f.dist, now, pedPct(f.thr), pedPct(f.brk)]);   // [7]/[8] throttle / brake %   // [6]=timestamp: free-mode trace plots vs TIME (Jett 2026-09-07)

@@ -354,6 +354,21 @@ button.stage.act.go:active{transform:translateY(1px)}
 .idbar .idb-sheet.dead{border-color:var(--line2);color:var(--dim);cursor:default}
 .idbar .idb-sheet:not(.dead):hover{background:var(--panel2)}
 
+/* AN ALMOST UN-IGNORABLE WARNING (Jett 2026-09-18): course mode is recording but the tune isn't identified, so
+   nothing is captured at the per-tune granularity the course view needs. Loud full-width bar with a slow pulse,
+   shown ONLY while unidentified in course mode; it clears the instant the tune is identified. */
+.coursewarn{display:flex;align-items:center;gap:11px;margin:6px 0 2px;padding:11px 15px;border-radius:7px;
+  background:linear-gradient(180deg,rgba(240,150,40,.20),rgba(240,150,40,.13));
+  border:1px solid var(--warn);border-left:5px solid var(--warn);color:var(--ink);
+  font:600 13px var(--mono);line-height:1.4;animation:cw-pulse 1.8s ease-in-out infinite}
+.coursewarn[hidden]{display:none}
+.coursewarn .cw-ic{flex:0 0 auto;font-size:22px;line-height:1;color:var(--warn);filter:drop-shadow(0 0 5px rgba(240,150,40,.7))}
+.coursewarn .cw-txt{flex:1 1 auto}
+.coursewarn .cw-txt b{color:#ffc27a}
+@keyframes cw-pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,150,40,.45),0 0 14px rgba(240,150,40,.10)}
+  50%{box-shadow:0 0 0 5px rgba(240,150,40,0),0 0 22px rgba(240,150,40,.28)}}
+@media (prefers-reduced-motion:reduce){.coursewarn{animation:none}}
+
 /* the floating build sheet — the v1 decode float pattern, in-page and draggable */
 /* MAX VERTICAL while active (Jett 2026-09-07): the build sheet takes almost the whole viewport
    height so the two lanes have the most room, and the body scrolls (exception granted) when the

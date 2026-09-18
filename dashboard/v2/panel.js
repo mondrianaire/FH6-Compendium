@@ -206,6 +206,7 @@ function panelSkeleton(host) {
     <div class="hdr" id="hdr"></div>
     <div id="alerts"></div>
     <div class="idbar" id="idbar" hidden></div>
+    <div class="coursewarn" id="courseWarn" hidden></div>
     <div class="trace" id="trace"></div>
     <div class="coursefilter" id="coursefilter" hidden></div>
     <div class="panes">
@@ -428,7 +429,7 @@ function lastAction() {
 
 function paintPanel() {
   lastAction();
-  paintHeader(); paintIdBar(); paintTrace(); paintCourseFilter(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
+  paintHeader(); paintIdBar(); paintCourseWarn(); paintTrace(); paintCourseFilter(); paintBanner(); paintLeft(); paintRight(); paintDock(); paintFooter();
   paintHeld();
 }
 // THE INLINE CAR-IDENTITY BAR (redesign spec lines 112-120): a slim full-width strip shown ONLY in course
@@ -459,6 +460,30 @@ function paintIdBar() {
       : (g.sheet === "outline" && reach) ? `<button class="idb-sheet outline" data-act="sheet">🔓 Build sheet ▸</button>`
       : `<span class="idb-sheet dead">🔒 Build sheet</span>`}`;
   const btn = el.querySelector("[data-act=sheet]"); if (btn) btn.onclick = () => { const b = $("#btnSheet"); if (b) b.click(); };
+}
+
+// AN ALMOST UN-IGNORABLE WARNING (Jett 2026-09-18): course mode records laps, but if the live build/tune is NOT
+// identified they can't be pinned to a build+tune — the per-tune (Session) granularity the whole course view and
+// its comparisons are built on. A quiet idbar chip was too easy to drive a whole session past, so this is a loud
+// full-width, pulsing bar shown ONLY in course mode with an unidentified tune; it clears the instant the tune is
+// identified (equip + save). Not dismissable — it mirrors an ongoing state, not a one-off event.
+function paintCourseWarn() {
+  const el = $("#courseWarn"); if (!el) return;
+  const active = MODE.suggest === "course" && COURSE && CUR;
+  const mb = MATCH && MATCH.build;
+  const q = (typeof matchQuality === "function") ? matchQuality(CUR && CUR.match) : { level: "ok" };
+  const settled = !q || q.level === "ok";
+  const identified = !!(mb && mb.hw && mb.su && settled);
+  if (!active || identified) { el.hidden = true; el.innerHTML = ""; return; }
+  const nties = CUR && CUR.match && CUR.match.n_signature_ties;
+  const why = (nties && nties > 1) ? `${nties} saved builds tie on this car`
+            : (mb && mb.hw) ? "this build's tune isn't saved"
+            : "no saved tune identifies the car";
+  el.hidden = false;
+  el.innerHTML = `<span class="cw-ic">⚠</span><span class="cw-txt">`
+    + `<b>Tune not identified — laps aren't being recorded to a build.</b> `
+    + `${esc(why)}, so nothing on this course can be scored per build or tune. `
+    + `<b>Equip the build and save the tune in-game</b> to record analysable data.</span>`;
 }
 
 /* -------------------------------------------------------------- trace */

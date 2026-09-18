@@ -2812,7 +2812,7 @@ def main():
             heading for 34.0 s once every session re-analysed. Only a smashable hit is unambiguous."""
             return sum(1 for r in loop_rows if w_["t0"] <= r["t"] <= w_["t1"] and (r.get("SmashableVelDiff") or 0) > 0)
         def _pts_out(pts_, all_):
-            """[arc_m, mph, grip, x, z, elev_m, lap_dist_m, throttle %, brake %, lat_g] -- lap_dist from the game's
+            """[arc_m, mph, grip, x, z, elev_m, lap_dist_m, throttle %, brake %, lat_g, r_m] -- lap_dist from the game's
             odometer, zeroed at the lap's first point; None on traces resampled without it. Pedals 0-100 % (schema 6);
             lat_g in g (peak |lateral g|, schema 7), None when the points carry none. Older 5-9-column rows still read."""
             d0 = all_[0][6] if all_ and len(all_[0]) > 6 else None

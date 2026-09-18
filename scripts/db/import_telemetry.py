@@ -388,8 +388,8 @@ def run(cx, verbose=False, data_dir=None):
         _lp_names = (["lap_id", "i", "arc_m", "mph", "grip", "x", "z", "elev_m", "dist_m"]
                      + (["thr", "brk"] if _lp_ped else []) + (["lat_g"] if _lp_lat else [])
                      + (["r_m"] if _lp_rad else []))
-        # schema 9 adds r_m as a 12th field; an older database just gets the first 11, as with every
-        # earlier column, so an un-migrated store still imports rather than failing.
+        # schema 9 adds r_m as a 13th field; a store with lat_g but not yet r_m gets the first 12 (r[:12]),
+        # as with every earlier column, so an un-migrated store still imports rather than failing.
         _lp_rows = ((prows if _lp_rad else [r[:12] for r in prows]) if _lp_lat
                     else ([r[:11] for r in prows] if _lp_ped else [r[:9] for r in prows]))
         counts["lap_point"] = fh6db.upsert_many(cx, "lap_point", _lp_names, _lp_rows, chunk=10000)

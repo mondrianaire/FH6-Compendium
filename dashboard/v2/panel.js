@@ -3017,6 +3017,27 @@ async function adoptLoop(loop) {
   paintLeft();
 }
 
+// A space-filling UNNAMED learned course is a mis-aggregated free-roam session, not a real course: e.g.
+// -750_6700 is a 46 km "loop" whose bbox (~11 x 16 km) covers most of the map, so its path sits within the
+// 60 m match radius of ALMOST ANY position and it hijacks the proximity match — this is why a completed
+// Rivals course (Hakone) flapped to the blob the moment the dashboard fell back to position matching at the
+// event menu (Jett 2026-09-17). Real long courses (The Goliath, 22 km) are NAMED — route id -> ref_track_info
+// -> name — so only UNNAMED **and** space-filling courses are excluded; named, short, and small unnamed
+// courses all still match. Memoized on the course object (WORLD is a fresh object after each rebuild).
+function courseMatchable(c) {
+  if (!c) return false;
+  if (c._matchable !== undefined) return c._matchable;
+  let ok = true;
+  if (!c.name) {
+    const p = c.path || [];
+    if (p.length >= 2) {
+      let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+      for (const q of p) { if (q[0] < x0) x0 = q[0]; if (q[0] > x1) x1 = q[0]; if (q[1] < z0) z0 = q[1]; if (q[1] > z1) z1 = q[1]; }
+      if (Math.hypot(x1 - x0, z1 - z0) > 6000) ok = false;   // unnamed + spans > 6 km diagonally = free-roam blob, never a valid live match
+    }
+  }
+  return (c._matchable = ok);
+}
 async function locateCourse() {
   if (LOOP) return;                                   // the S/F crossing already named the route — authoritative
   if (!LIVEPOS || !WORLD || !WORLD.courses) return;
@@ -3055,11 +3076,12 @@ async function locateCourse() {
   };
   let best = null, bd = 60, second = null, sd = Infinity;
   for (const [key, c] of Object.entries(WORLD.courses)) {
+    if (!courseMatchable(c)) continue;                // skip space-filling unnamed free-roam blobs (they'd win almost everywhere)
     const d = near(c);
     if (d < bd) { second = best; sd = bd; best = key; bd = d; }
     else if (d < sd) { second = key; sd = d; }
   }
-  if (COURSE_KEY && WORLD.courses[COURSE_KEY]) {
+  if (COURSE_KEY && WORLD.courses[COURSE_KEY] && courseMatchable(WORLD.courses[COURSE_KEY])) {
     const dInc = near(WORLD.courses[COURSE_KEY]);
     if (dInc <= 90 && (best == null || bd >= dInc - 25)) { best = COURSE_KEY; bd = dInc; }
   }
